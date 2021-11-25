@@ -5,15 +5,28 @@
  * 2.0.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
-import { metadataCurrentIndexPattern } from '../../../../common/endpoint/constants';
+import {
+  metadataCurrentIndexPattern,
+  METADATA_UNITED_INDEX,
+} from '../../../../common/endpoint/constants';
 import { KibanaRequest } from '../../../../../../../src/core/server';
-import { EndpointAppContext } from '../../types';
+import { EndpointAppContext, GetHostMetadataListQuery } from '../../types';
+import { buildStatusesKuery } from './support/agent_status';
+
+/**
+ * 00000000-0000-0000-0000-000000000000 is initial Elastic Agent id sent by Endpoint before policy is configured
+ * 11111111-1111-1111-1111-111111111111 is Elastic Agent id sent by Endpoint when policy does not contain an id
+ */
+const IGNORED_ELASTIC_AGENT_IDS = [
+  '00000000-0000-0000-0000-000000000000',
+  '11111111-1111-1111-1111-111111111111',
+];
 
 export interface QueryBuilderOptions {
   unenrolledAgentIds?: string[];
-  statusAgentIDs?: string[];
+  statusAgentIds?: string[];
 }
 
 // sort using either event.created, or HostDetails.event.created,
@@ -21,7 +34,7 @@ export interface QueryBuilderOptions {
 // using unmapped_type avoids errors when the given field doesn't exist, and sets to the 0-value for that type
 // effectively ignoring it
 // https://www.elastic.co/guide/en/elasticsearch/reference/current/sort-search-results.html#_ignoring_unmapped_fields
-const MetadataSortMethod: estypes.SearchSortContainer[] = [
+export const MetadataSortMethod: estypes.SearchSortContainer[] = [
   {
     'event.created': {
       order: 'desc',
@@ -49,8 +62,8 @@ export async function kibanaRequestToMetadataListESQuery(
     body: {
       query: buildQueryBody(
         request,
-        queryBuilderOptions?.unenrolledAgentIds!,
-        queryBuilderOptions?.statusAgentIDs!
+        IGNORED_ELASTIC_AGENT_IDS.concat(queryBuilderOptions?.unenrolledAgentIds ?? []),
+        queryBuilderOptions?.statusAgentIds
       ),
       track_total_hits: true,
       sort: MetadataSortMethod,
@@ -61,7 +74,7 @@ export async function kibanaRequestToMetadataListESQuery(
   };
 }
 
-async function getPagingProperties(
+export async function getPagingProperties(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   request: KibanaRequest<any, any, any>,
   endpointAppContext: EndpointAppContext
@@ -78,7 +91,7 @@ async function getPagingProperties(
   }
   return {
     pageSize: pagingProperties.page_size || config.endpointResultListDefaultPageSize,
-    pageIndex: pagingProperties.page_index || config.endpointResultListDefaultFirstPageIndex,
+    pageIndex: pagingProperties.page_index ?? config.endpointResultListDefaultFirstPageIndex,
   };
 }
 
@@ -86,7 +99,7 @@ function buildQueryBody(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   request: KibanaRequest<any, any, any>,
   unerolledAgentIds: string[] | undefined,
-  statusAgentIDs: string[] | undefined
+  statusAgentIds: string[] | undefined
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): Record<string, any> {
   // the filtered properties may be preceded by 'HostDetails' under an older index mapping
@@ -99,21 +112,22 @@ function buildQueryBody(
           ],
         }
       : null;
-  const filterStatusAgents = statusAgentIDs
-    ? {
-        filter: [
-          {
-            bool: {
-              // OR's the two together
-              should: [
-                { terms: { 'elastic.agent.id': statusAgentIDs } },
-                { terms: { 'HostDetails.elastic.agent.id': statusAgentIDs } },
-              ],
+  const filterStatusAgents =
+    statusAgentIds && statusAgentIds.length
+      ? {
+          filter: [
+            {
+              bool: {
+                // OR's the two together
+                should: [
+                  { terms: { 'elastic.agent.id': statusAgentIds } },
+                  { terms: { 'HostDetails.elastic.agent.id': statusAgentIds } },
+                ],
+              },
             },
-          },
-        ],
-      }
-    : null;
+          ],
+        }
+      : null;
 
   const idFilter = {
     bool: {
@@ -206,5 +220,83 @@ export function getESQueryHostMetadataByIDs(agentIDs: string[]) {
       sort: MetadataSortMethod,
     },
     index: metadataCurrentIndexPattern,
+  };
+}
+
+interface BuildUnitedIndexQueryResponse {
+  body: {
+    query: Record<string, unknown>;
+    track_total_hits: boolean;
+    sort: estypes.SearchSortContainer[];
+  };
+  from: number;
+  size: number;
+  index: string;
+}
+export async function buildUnitedIndexQuery(
+  { page = 1, pageSize = 10, filters = {} }: GetHostMetadataListQuery,
+  endpointPolicyIds: string[] = []
+): Promise<BuildUnitedIndexQueryResponse> {
+  const statusesToFilter = filters?.host_status ?? [];
+  const statusesKuery = buildStatusesKuery(statusesToFilter);
+
+  const filterIgnoredAgents = {
+    must_not: { terms: { 'agent.id': IGNORED_ELASTIC_AGENT_IDS } },
+  };
+  const filterEndpointPolicyAgents = {
+    filter: [
+      // must contain an endpoint policy id
+      {
+        terms: { 'united.agent.policy_id': endpointPolicyIds },
+      },
+      // doc contains both agent and metadata
+      { exists: { field: 'united.endpoint.agent.id' } },
+      { exists: { field: 'united.agent.agent.id' } },
+      // agent is enrolled
+      {
+        term: {
+          'united.agent.active': {
+            value: true,
+          },
+        },
+      },
+    ],
+  };
+
+  const idFilter = {
+    bool: {
+      ...filterIgnoredAgents,
+      ...filterEndpointPolicyAgents,
+    },
+  };
+
+  let query: BuildUnitedIndexQueryResponse['body']['query'] = idFilter;
+
+  if (statusesKuery || filters?.kql) {
+    const kqlQuery = toElasticsearchQuery(fromKueryExpression(filters.kql ?? ''));
+    const q = [];
+
+    if (filterIgnoredAgents || filterEndpointPolicyAgents) {
+      q.push(idFilter);
+    }
+
+    if (statusesKuery) {
+      q.push(toElasticsearchQuery(fromKueryExpression(statusesKuery)));
+    }
+    q.push({ ...kqlQuery });
+    query = {
+      bool: { must: q },
+    };
+  }
+
+  return {
+    body: {
+      query,
+      track_total_hits: true,
+      sort: MetadataSortMethod,
+    },
+    from: (page - 1) * pageSize,
+    size: pageSize,
+    index: METADATA_UNITED_INDEX,
   };
 }

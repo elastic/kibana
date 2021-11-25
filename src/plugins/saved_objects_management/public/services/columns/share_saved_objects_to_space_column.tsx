@@ -25,7 +25,8 @@ const Wrapper = ({ spacesApiUi, props }: WrapperProps) => {
 };
 
 export class ShareToSpaceSavedObjectsManagementColumn
-  implements SavedObjectsManagementColumn<void> {
+  implements SavedObjectsManagementColumn<void>
+{
   public id: string = 'share_saved_objects_to_space';
 
   public euiColumn = {

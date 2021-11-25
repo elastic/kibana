@@ -6,7 +6,7 @@
  */
 
 import { Feature, FeatureCollection } from 'geojson';
-import { AbstractVectorSource, BoundsFilters, GeoJsonWithMeta } from '../vector_source';
+import { AbstractVectorSource, BoundsRequestMeta, GeoJsonWithMeta } from '../vector_source';
 import { EMPTY_FEATURE_COLLECTION, FIELD_ORIGIN, SOURCE_TYPES } from '../../../../common/constants';
 import {
   InlineFieldDescriptor,
@@ -103,7 +103,7 @@ export class GeoJsonFileSource extends AbstractVectorSource {
   }
 
   async getBoundsForFilters(
-    boundsFilters: BoundsFilters,
+    boundsFilters: BoundsRequestMeta,
     registerCancelCallback: (callback: () => void) => void
   ): Promise<MapExtent | null> {
     const featureCollection = (this._descriptor as GeojsonFileSourceDescriptor).__featureCollection;

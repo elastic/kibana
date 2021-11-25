@@ -14,7 +14,11 @@ import {
 } from '../../../../../../src/core/server';
 import { ESConnectorFields } from '../../services';
 import { ConnectorTypes, CaseType } from '../../../common';
-import { transformConnectorIdToReference, transformPushConnectorIdToReference } from './utils';
+import {
+  transformConnectorIdToReference,
+  transformPushConnectorIdToReference,
+} from '../../services/user_actions/transform';
+import { CONNECTOR_ID_REFERENCE_NAME, PUSH_CONNECTOR_ID_REFERENCE_NAME } from '../../common';
 
 interface UnsanitizedCaseConnector {
   connector_id: string;
@@ -51,13 +55,12 @@ export const caseConnectorIdMigration = (
   const { connector, external_service, ...restAttributes } = doc.attributes;
 
   const { transformedConnector, references: connectorReferences } = transformConnectorIdToReference(
+    CONNECTOR_ID_REFERENCE_NAME,
     connector
   );
 
-  const {
-    transformedPushConnector,
-    references: pushConnectorReferences,
-  } = transformPushConnectorIdToReference(external_service);
+  const { transformedPushConnector, references: pushConnectorReferences } =
+    transformPushConnectorIdToReference(PUSH_CONNECTOR_ID_REFERENCE_NAME, external_service);
 
   const { references = [] } = doc;
 

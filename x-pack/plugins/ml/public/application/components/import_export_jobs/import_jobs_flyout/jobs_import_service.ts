@@ -72,9 +72,7 @@ export class JobImportService {
       }
     });
   }
-  public async readJobConfigs(
-    file: File
-  ): Promise<{
+  public async readJobConfigs(file: File): Promise<{
     jobs: ImportedAdJob[] | DataFrameAnalyticsConfig[];
     jobIds: string[];
     jobType: JobType | null;

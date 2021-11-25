@@ -14,6 +14,7 @@ import * as Tasks from './tasks';
 export interface BuildOptions {
   isRelease: boolean;
   downloadFreshNode: boolean;
+  downloadCloudDependencies: boolean;
   initialize: boolean;
   createGenericFolders: boolean;
   createPlatformFolders: boolean;
@@ -22,6 +23,7 @@ export interface BuildOptions {
   createDebPackage: boolean;
   createDockerUBI: boolean;
   createDockerCentOS: boolean;
+  createDockerCloud: boolean;
   createDockerContexts: boolean;
   versionQualifier: string | undefined;
   targetAllPlatforms: boolean;
@@ -125,6 +127,15 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
   if (options.createDockerCentOS) {
     // control w/ --docker-images or --skip-docker-centos or --skip-os-packages
     await run(Tasks.CreateDockerCentOS);
+  }
+
+  if (options.createDockerCloud) {
+    // control w/ --docker-images and --skip-docker-cloud
+    if (options.downloadCloudDependencies) {
+      // control w/ --skip-cloud-dependencies-download
+      await run(Tasks.DownloadCloudDependencies);
+    }
+    await run(Tasks.CreateDockerCloud);
   }
 
   if (options.createDockerContexts) {

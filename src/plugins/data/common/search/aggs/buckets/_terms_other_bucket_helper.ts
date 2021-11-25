@@ -7,7 +7,7 @@
  */
 
 import { isNumber, keys, values, find, each, cloneDeep, flatten } from 'lodash';
-import { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { buildExistsFilter, buildPhrasesFilter, buildQueryFromFilters } from '@kbn/es-query';
 import { AggGroupNames } from '../agg_groups';
 import { IAggConfigs } from '../agg_configs';
@@ -129,7 +129,9 @@ export const buildOtherBucketAgg = (
   aggWithOtherBucket: IBucketAggConfig,
   response: any
 ) => {
-  const bucketAggs = aggConfigs.aggs.filter((agg) => agg.type.type === AggGroupNames.Buckets);
+  const bucketAggs = aggConfigs.aggs.filter(
+    (agg) => agg.type.type === AggGroupNames.Buckets && agg.enabled
+  );
   const index = bucketAggs.findIndex((agg) => agg.id === aggWithOtherBucket.id);
   const aggs = aggConfigs.toDsl();
   const indexPattern = aggWithOtherBucket.aggConfigs.indexPattern;

@@ -7,12 +7,17 @@
 import React, { useContext } from 'react';
 import { Route, Redirect, useLocation } from 'react-router-dom';
 import { useClusters } from './hooks/use_clusters';
-import { GlobalStateContext } from './global_state_context';
+import { GlobalStateContext } from './contexts/global_state_context';
 import { getClusterFromClusters } from '../lib/get_cluster_from_clusters';
+import { isInSetupMode } from '../lib/setup_mode';
+import { LoadingPage } from './pages/loading_page';
 
+export interface ComponentProps {
+  clusters: [];
+}
 interface RouteInitProps {
   path: string;
-  component: React.ComponentType;
+  component: React.ComponentType<ComponentProps>;
   codePaths: string[];
   fetchAllClusters: boolean;
   unsetGlobalState?: boolean;
@@ -31,13 +36,12 @@ export const RouteInit: React.FC<RouteInitProps> = ({
 
   const { clusters, loaded } = useClusters(clusterUuid, undefined, codePaths);
 
-  // TODO: we will need this when setup mode is migrated
-  // const inSetupMode = isInSetupMode();
+  const inSetupMode = isInSetupMode(undefined, globalState);
 
   const cluster = getClusterFromClusters(clusters, globalState, unsetGlobalState);
 
   // TODO: check for setupMode too when the setup mode is migrated
-  if (loaded && !cluster) {
+  if (loaded && !cluster && !inSetupMode) {
     return <Redirect to="/no-data" />;
   }
 
@@ -53,12 +57,19 @@ export const RouteInit: React.FC<RouteInitProps> = ({
 
     // check if we need to redirect because of attempt at unsupported multi-cluster monitoring
     const clusterSupported = cluster.isSupported || clusters.length === 1;
-    if (location.pathname !== 'home' && !clusterSupported) {
+    if (location.pathname !== '/home' && !clusterSupported) {
       return <Redirect to="/home" />;
     }
   }
 
-  return loaded ? <Route path={path} component={component} /> : null;
+  const Component = component;
+  return loaded ? (
+    <Route path={path}>
+      <Component clusters={clusters} />
+    </Route>
+  ) : (
+    <LoadingPage staticLoadingState />
+  );
 };
 
 const isExpired = (license: any): boolean => {

@@ -148,7 +148,7 @@ export const EditTransformFlyoutForm: FC<EditTransformFlyoutFormProps> = ({
       >
         <div data-test-subj="transformEditAccordionRetentionPolicyContent">
           {
-            // If index pattern or date fields info not available
+            // If data view or date fields info not available
             // gracefully defaults to text input
             indexPatternId ? (
               <EuiFormRow

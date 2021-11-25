@@ -100,9 +100,8 @@ export function normalizeIndexShards(indices: Index[], index: Index) {
 
   const { primaryShards: primary, replicaShards: replica } = countShards(assignedShardBuckets);
 
-  const { primaryShards: unassignedPrimary, replicaShards: unassignedReplica } = countShards(
-    unassignedShardBuckets
-  );
+  const { primaryShards: unassignedPrimary, replicaShards: unassignedReplica } =
+    countShards(unassignedShardBuckets);
 
   let status = 'green';
   if (unassignedReplica > 0) {

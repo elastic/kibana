@@ -40,7 +40,8 @@ import {
 } from '../utils';
 
 import { patchRules } from '../../rules/patch_rules';
-import { getTupleDuplicateErrorsAndUniqueRules } from './utils';
+import { legacyMigrate } from '../../rules/utils';
+import { getTupleDuplicateErrorsAndUniqueRules, getInvalidConnectors } from './utils';
 import { createRulesStreamFromNdJson } from '../../rules/create_rules_stream_from_ndjson';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 import { HapiReadableStream } from '../../rules/types';
@@ -53,7 +54,8 @@ const CHUNK_PARSED_OBJECT_SIZE = 50;
 export const importRulesRoute = (
   router: SecuritySolutionPluginRouter,
   config: ConfigType,
-  ml: SetupPlugins['ml']
+  ml: SetupPlugins['ml'],
+  isRuleRegistryEnabled: boolean
 ) => {
   router.post(
     {
@@ -76,14 +78,11 @@ export const importRulesRoute = (
       const siemResponse = buildSiemResponse(response);
 
       try {
-        const rulesClient = context.alerting?.getRulesClient();
+        const rulesClient = context.alerting.getRulesClient();
+        const actionsClient = context.actions.getActionsClient();
         const esClient = context.core.elasticsearch.client;
         const savedObjectsClient = context.core.savedObjects.client;
-        const siemClient = context.securitySolution?.getAppClient();
-
-        if (!siemClient || !rulesClient) {
-          return siemResponse.error({ statusCode: 404 });
-        }
+        const siemClient = context.securitySolution.getAppClient();
 
         const mlAuthz = buildMlAuthz({
           license: context.licensing.license,
@@ -101,9 +100,10 @@ export const importRulesRoute = (
             body: `Invalid file extension ${fileExtension}`,
           });
         }
+
         const signalsIndex = siemClient.getSignalsIndex();
         const indexExists = await getIndexExists(esClient.asCurrentUser, signalsIndex);
-        if (!indexExists) {
+        if (!isRuleRegistryEnabled && !indexExists) {
           return siemResponse.error({
             statusCode: 400,
             body: `To create a rule, the index must exist first. Index ${signalsIndex} does not exist`,
@@ -116,13 +116,23 @@ export const importRulesRoute = (
           request.body.file as HapiReadableStream,
           ...readStream,
         ]);
-        const [duplicateIdErrors, uniqueParsedObjects] = getTupleDuplicateErrorsAndUniqueRules(
-          parsedObjects,
-          request.query.overwrite
+
+        const [duplicateIdErrors, parsedObjectsWithoutDuplicateErrors] =
+          getTupleDuplicateErrorsAndUniqueRules(parsedObjects, request.query.overwrite);
+
+        const [nonExistentActionErrors, uniqueParsedObjects] = await getInvalidConnectors(
+          parsedObjectsWithoutDuplicateErrors,
+          actionsClient
         );
 
         const chunkParseObjects = chunk(CHUNK_PARSED_OBJECT_SIZE, uniqueParsedObjects);
         let importRuleResponse: ImportRuleResponse[] = [];
+
+        // If we had 100% errors and no successful rule could be imported we still have to output an error.
+        // otherwise we would output we are success importing 0 rules.
+        if (chunkParseObjects.length === 0) {
+          importRuleResponse = [...nonExistentActionErrors, ...duplicateIdErrors];
+        }
 
         while (chunkParseObjects.length) {
           const batchParseObjects = chunkParseObjects.shift() ?? [];
@@ -192,6 +202,7 @@ export const importRulesRoute = (
                       throttle,
                       version,
                       exceptions_list: exceptionsList,
+                      actions,
                     } = parsedRule;
 
                     try {
@@ -205,6 +216,7 @@ export const importRulesRoute = (
                       const filters: PartialFilter[] | undefined = filtersRest as PartialFilter[];
                       throwHttpError(await mlAuthz.validateRuleType(type));
                       const rule = await readRules({
+                        isRuleRegistryEnabled,
                         rulesClient,
                         ruleId,
                         id: undefined,
@@ -212,6 +224,7 @@ export const importRulesRoute = (
 
                       if (rule == null) {
                         await createRules({
+                          isRuleRegistryEnabled,
                           rulesClient,
                           anomalyThreshold,
                           author,
@@ -261,15 +274,21 @@ export const importRulesRoute = (
                           note,
                           version,
                           exceptionsList,
-                          actions: [], // Actions are not imported nor exported at this time
+                          actions,
                         });
                         resolve({
                           rule_id: ruleId,
                           status_code: 200,
                         });
                       } else if (rule != null && request.query.overwrite) {
+                        const migratedRule = await legacyMigrate({
+                          rulesClient,
+                          savedObjectsClient,
+                          rule,
+                        });
                         await patchRules({
                           rulesClient,
+                          savedObjectsClient,
                           author,
                           buildingBlockType,
                           spaceId: context.securitySolution.getSpaceId(),
@@ -288,7 +307,7 @@ export const importRulesRoute = (
                           timelineTitle,
                           meta,
                           filters,
-                          rule,
+                          rule: migratedRule,
                           index,
                           interval,
                           maxSignals,
@@ -318,7 +337,7 @@ export const importRulesRoute = (
                           exceptionsList,
                           anomalyThreshold,
                           machineLearningJobId,
-                          actions: undefined,
+                          actions,
                         });
                         resolve({
                           rule_id: ruleId,
@@ -351,6 +370,7 @@ export const importRulesRoute = (
             }, [])
           );
           importRuleResponse = [
+            ...nonExistentActionErrors,
             ...duplicateIdErrors,
             ...importRuleResponse,
             ...newImportRuleResponse,

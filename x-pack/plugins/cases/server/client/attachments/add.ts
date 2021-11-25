@@ -106,7 +106,7 @@ async function getSubCase({
         caseId,
         subCaseId: newSubCase.id,
         fields: ['status', 'sub_case'],
-        newValue: JSON.stringify({ status: newSubCase.attributes.status }),
+        newValue: { status: newSubCase.attributes.status },
         owner: newSubCase.attributes.owner,
       }),
     ],
@@ -187,15 +187,13 @@ const addGeneratedAlerts = async (
       lensEmbeddableFactory,
     });
 
-    const {
-      comment: newComment,
-      commentableCase: updatedCase,
-    } = await commentableCase.createComment({
-      createdDate,
-      user: userDetails,
-      commentReq: query,
-      id: savedObjectID,
-    });
+    const { comment: newComment, commentableCase: updatedCase } =
+      await commentableCase.createComment({
+        createdDate,
+        user: userDetails,
+        commentReq: query,
+        id: savedObjectID,
+      });
 
     if (
       (newComment.attributes.type === CommentType.alert ||
@@ -222,7 +220,7 @@ const addGeneratedAlerts = async (
           subCaseId: updatedCase.subCaseId,
           commentId: newComment.id,
           fields: ['comment'],
-          newValue: JSON.stringify(query),
+          newValue: query,
           owner: newComment.attributes.owner,
         }),
       ],
@@ -265,7 +263,7 @@ async function getCombinedCase({
             id,
           }),
         ]
-      : [Promise.reject('case connector feature is disabled')]),
+      : [Promise.reject(new Error('case connector feature is disabled'))]),
   ]);
 
   if (subCasePromise.status === 'fulfilled') {
@@ -410,7 +408,7 @@ export const addComment = async (
           subCaseId: updatedCase.subCaseId,
           commentId: newComment.id,
           fields: ['comment'],
-          newValue: JSON.stringify(query),
+          newValue: query,
           owner: newComment.attributes.owner,
         }),
       ],

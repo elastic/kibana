@@ -68,7 +68,8 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
       });
     });
 
-    describe('Delete modal', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/116059
+    describe.skip('Delete modal', () => {
       it('should display a warning then trying to delete hidden saved objects', async () => {
         await PageObjects.savedObjects.clickCheckboxByTitle('A Pie');
         await PageObjects.savedObjects.clickCheckboxByTitle('A Dashboard');

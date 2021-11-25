@@ -145,10 +145,10 @@ export const AutocompleteFieldMatchAnyComponent: React.FC<AutocompleteFieldMatch
     [isLoading, isLoadingSuggestions, placeholder]
   );
 
-  const isLoadingState = useMemo((): boolean => isLoading || isLoadingSuggestions, [
-    isLoading,
-    isLoadingSuggestions,
-  ]);
+  const isLoadingState = useMemo(
+    (): boolean => isLoading || isLoadingSuggestions,
+    [isLoading, isLoadingSuggestions]
+  );
 
   const defaultInput = useMemo((): JSX.Element => {
     return (

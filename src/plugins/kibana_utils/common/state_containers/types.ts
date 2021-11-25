@@ -132,16 +132,14 @@ export type Reducer<State extends BaseState> = (
  * Utility type for inferring state shape from {@link StateContainer}
  * @public
  */
-export type UnboxState<
-  Container extends StateContainer<any, any>
-> = Container extends StateContainer<infer T, any> ? T : never;
+export type UnboxState<Container extends StateContainer<any, any>> =
+  Container extends StateContainer<infer T, any> ? T : never;
 /**
  * Utility type for inferring transitions type from {@link StateContainer}
  * @public
  */
-export type UnboxTransitions<
-  Container extends StateContainer<any, any>
-> = Container extends StateContainer<any, infer T> ? T : never;
+export type UnboxTransitions<Container extends StateContainer<any, any>> =
+  Container extends StateContainer<any, infer T> ? T : never;
 
 /**
  * @public

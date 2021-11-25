@@ -14,7 +14,8 @@ const imageBase64 = Buffer.from(
   'base64'
 );
 
-describe('PdfMaker', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/118484
+describe.skip('PdfMaker', () => {
   it('makes PDF using PrintLayout mode', async () => {
     const config = createMockConfig(createMockConfigSchema());
     const layout = new PrintLayout(config.get('capture'));
@@ -26,7 +27,7 @@ describe('PdfMaker', () => {
       pdf.addImage(imageBase64, { title: 'second viz', description: '❄️' }),
     ]).toEqual([undefined, undefined]);
 
-    const { _layout: testLayout, _title: testTitle } = (pdf as unknown) as {
+    const { _layout: testLayout, _title: testTitle } = pdf as unknown as {
       _layout: object;
       _title: string;
     };
@@ -56,7 +57,7 @@ describe('PdfMaker', () => {
     expect(pdf.setTitle('the finest PDF in the world')).toBe(undefined);
     expect(pdf.addImage(imageBase64, { title: 'cool times', description: '☃️' })).toBe(undefined);
 
-    const { _layout: testLayout, _title: testTitle } = (pdf as unknown) as {
+    const { _layout: testLayout, _title: testTitle } = pdf as unknown as {
       _layout: object;
       _title: string;
     };

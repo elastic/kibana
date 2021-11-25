@@ -19,8 +19,8 @@ interface EngineValues {
   dataLoading: boolean;
   engine: Partial<EngineDetails>;
   engineName: string;
-  isEngineEmpty: boolean;
-  isEngineSchemaEmpty: boolean;
+  hasNoDocuments: boolean;
+  hasEmptySchema: boolean;
   isMetaEngine: boolean;
   isSampleEngine: boolean;
   hasSchemaErrors: boolean;
@@ -94,8 +94,8 @@ export const EngineLogic = kea<MakeLogicType<EngineValues, EngineActions>>({
     ],
   },
   selectors: ({ selectors }) => ({
-    isEngineEmpty: [() => [selectors.engine], (engine) => !engine.document_count],
-    isEngineSchemaEmpty: [
+    hasNoDocuments: [() => [selectors.engine], (engine) => !engine.document_count],
+    hasEmptySchema: [
       () => [selectors.engine],
       (engine) => Object.keys(engine.schema || {}).length === 0,
     ],
@@ -132,7 +132,9 @@ export const EngineLogic = kea<MakeLogicType<EngineValues, EngineActions>>({
       const { http } = HttpLogic.values;
 
       try {
-        const response = await http.get(`/internal/app_search/engines/${engineName}`);
+        const response = await http.get<EngineDetails>(
+          `/internal/app_search/engines/${engineName}`
+        );
         actions.setEngineData(response);
       } catch (error) {
         if (error?.response?.status >= 400 && error?.response?.status < 500) {
@@ -149,7 +151,7 @@ export const EngineLogic = kea<MakeLogicType<EngineValues, EngineActions>>({
       if (values.intervalId) return; // Ensure we only have one poll at a time
 
       const id = window.setInterval(() => {
-        if (values.isEngineEmpty && values.isEngineSchemaEmpty) {
+        if (values.hasNoDocuments) {
           actions.initializeEngine(); // Re-fetch engine data when engine is empty
         } else {
           actions.stopPolling();

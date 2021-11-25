@@ -17,7 +17,7 @@ import {
   addBuildingBlockStyle,
 } from './helpers';
 
-import { euiThemeVars } from '@kbn/ui-shared-deps/theme';
+import { euiThemeVars } from '@kbn/ui-shared-deps-src/theme';
 import { mockDnsEvent } from '../../../mock';
 
 describe('helpers', () => {
@@ -353,7 +353,7 @@ describe('helpers', () => {
       expect(
         allowSorting({
           browserField: undefined, // no BrowserField metadata for this field
-          fieldName: 'signal.rule.name', //  an allow-listed field name
+          fieldName: 'kibana.alert.rule.name', //  an allow-listed field name
         })
       ).toBe(true);
     });
@@ -400,7 +400,7 @@ describe('helpers', () => {
       const mockedSetCellProps = jest.fn();
       const ecs = {
         ...mockDnsEvent,
-        ...{ signal: { rule: { building_block_type: ['default'] } } },
+        ...{ kibana: { alert: { building_block_type: ['default'] } } },
       };
 
       addBuildingBlockStyle(ecs, THEME, mockedSetCellProps);

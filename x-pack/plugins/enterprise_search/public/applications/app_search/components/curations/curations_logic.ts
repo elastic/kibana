@@ -20,13 +20,16 @@ import { updateMetaPageIndex } from '../../../shared/table_pagination';
 import { ENGINE_CURATION_PATH } from '../../routes';
 import { EngineLogic, generateEnginePath } from '../engine';
 
-import { DELETE_MESSAGE, SUCCESS_MESSAGE } from './constants';
+import { DELETE_CONFIRMATION_MESSAGE, DELETE_SUCCESS_MESSAGE } from './constants';
 import { Curation, CurationsAPIResponse } from './types';
+
+type CurationsPageTabs = 'overview' | 'settings' | 'history';
 
 interface CurationsValues {
   dataLoading: boolean;
   curations: Curation[];
   meta: Meta;
+  selectedPageTab: CurationsPageTabs;
 }
 
 interface CurationsActions {
@@ -35,6 +38,7 @@ interface CurationsActions {
   loadCurations(): void;
   deleteCuration(id: string): string;
   createCuration(queries: Curation['queries']): Curation['queries'];
+  onSelectPageTab(pageTab: CurationsPageTabs): { pageTab: CurationsPageTabs };
 }
 
 export const CurationsLogic = kea<MakeLogicType<CurationsValues, CurationsActions>>({
@@ -45,12 +49,18 @@ export const CurationsLogic = kea<MakeLogicType<CurationsValues, CurationsAction
     loadCurations: true,
     deleteCuration: (id) => id,
     createCuration: (queries) => queries,
+    onSelectPageTab: (pageTab) => ({ pageTab }),
   }),
   reducers: () => ({
+    selectedPageTab: [
+      'overview',
+      {
+        onSelectPageTab: (_, { pageTab }) => pageTab,
+      },
+    ],
     dataLoading: [
       true,
       {
-        loadCurations: () => true,
         onCurationsLoad: () => false,
       },
     ],
@@ -75,12 +85,15 @@ export const CurationsLogic = kea<MakeLogicType<CurationsValues, CurationsAction
       const { engineName } = EngineLogic.values;
 
       try {
-        const response = await http.get(`/internal/app_search/engines/${engineName}/curations`, {
-          query: {
-            'page[current]': meta.page.current,
-            'page[size]': meta.page.size,
-          },
-        });
+        const response = await http.get<CurationsAPIResponse>(
+          `/internal/app_search/engines/${engineName}/curations`,
+          {
+            query: {
+              'page[current]': meta.page.current,
+              'page[size]': meta.page.size,
+            },
+          }
+        );
         actions.onCurationsLoad(response);
       } catch (e) {
         flashAPIErrors(e);
@@ -91,11 +104,11 @@ export const CurationsLogic = kea<MakeLogicType<CurationsValues, CurationsAction
       const { engineName } = EngineLogic.values;
       clearFlashMessages();
 
-      if (window.confirm(DELETE_MESSAGE)) {
+      if (window.confirm(DELETE_CONFIRMATION_MESSAGE)) {
         try {
           await http.delete(`/internal/app_search/engines/${engineName}/curations/${id}`);
           actions.loadCurations();
-          flashSuccessToast(SUCCESS_MESSAGE);
+          flashSuccessToast(DELETE_SUCCESS_MESSAGE);
         } catch (e) {
           flashAPIErrors(e);
         }
@@ -108,13 +121,17 @@ export const CurationsLogic = kea<MakeLogicType<CurationsValues, CurationsAction
       clearFlashMessages();
 
       try {
-        const response = await http.post(`/internal/app_search/engines/${engineName}/curations`, {
-          body: JSON.stringify({ queries }),
-        });
+        const response = await http.post<{ id: string }>(
+          `/internal/app_search/engines/${engineName}/curations`,
+          { body: JSON.stringify({ queries }) }
+        );
         navigateToUrl(generateEnginePath(ENGINE_CURATION_PATH, { curationId: response.id }));
       } catch (e) {
         flashAPIErrors(e);
       }
+    },
+    onSelectPageTab: () => {
+      clearFlashMessages();
     },
   }),
 });

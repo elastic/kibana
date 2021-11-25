@@ -7,7 +7,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Dictionary } from '../../../../common/types/common';
-import { LayerDescriptor } from '../../../../../maps/common/descriptor_types';
+import { LayerDescriptor } from '../../../../../maps/common';
 import { getMLAnomaliesActualLayer, getMLAnomaliesTypicalLayer } from './map_config';
 import { MlEmbeddedMapComponent } from '../../components/ml_embedded_map';
 interface Props {

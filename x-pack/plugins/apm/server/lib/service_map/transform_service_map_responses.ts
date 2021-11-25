@@ -194,11 +194,13 @@ export function transformServiceMapResponses(response: ServiceMapResponse) {
 
   // Instead of adding connections in two directions,
   // we add a `bidirectional` flag to use in styling
-  const dedupedConnections = (sortBy(
-    Object.values(connectionsById),
-    // make sure that order is stable
-    'id'
-  ) as ConnectionWithId[]).reduce<
+  const dedupedConnections = (
+    sortBy(
+      Object.values(connectionsById),
+      // make sure that order is stable
+      'id'
+    ) as ConnectionWithId[]
+  ).reduce<
     Array<
       ConnectionWithId & { bidirectional?: boolean; isInverseEdge?: boolean }
     >

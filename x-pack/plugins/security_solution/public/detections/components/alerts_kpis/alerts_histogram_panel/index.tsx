@@ -14,7 +14,7 @@ import { isEmpty } from 'lodash/fp';
 import uuid from 'uuid';
 
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
-import { DEFAULT_NUMBER_FORMAT, APP_ID } from '../../../../../common/constants';
+import { DEFAULT_NUMBER_FORMAT, APP_UI_ID } from '../../../../../common/constants';
 import type { UpdateDateRange } from '../../../../common/components/charts/common';
 import type { LegendItem } from '../../../../common/components/charts/draggable_legend_item';
 import { escapeDataProviderId } from '../../../../common/components/drag_and_drop/helpers';
@@ -63,10 +63,12 @@ interface AlertsHistogramPanelProps {
   headerChildren?: React.ReactNode;
   /** Override all defaults, and only display this field */
   onlyField?: AlertsStackByField;
+  paddingSize?: 's' | 'm' | 'l' | 'none';
   titleSize?: EuiTitleSize;
   query?: Query;
   legendPosition?: Position;
   signalIndexName: string | null;
+  showLegend?: boolean;
   showLinkToAlerts?: boolean;
   showTotalAlertsCount?: boolean;
   showStackBy?: boolean;
@@ -85,9 +87,11 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
     filters,
     headerChildren,
     onlyField,
+    paddingSize = 'm',
     query,
     legendPosition = 'right',
     signalIndexName,
+    showLegend = true,
     showLinkToAlerts = false,
     showTotalAlertsCount = false,
     showStackBy = true,
@@ -96,7 +100,7 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
     updateDateRange,
     titleSize = 'm',
   }) => {
-    const { to, from, deleteQuery, setQuery } = useGlobalTime();
+    const { to, from, deleteQuery, setQuery } = useGlobalTime(false);
 
     // create a unique, but stable (across re-renders) query id
     const uniqueQueryId = useMemo(() => `${DETECTIONS_HISTOGRAM_ID}-${uuid.v4()}`, []);
@@ -143,7 +147,7 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
     const goToDetectionEngine = useCallback(
       (ev) => {
         ev.preventDefault();
-        navigateToApp(APP_ID, {
+        navigateToApp(APP_UI_ID, {
           deepLinkId: SecurityPageName.alerts,
           path: getDetectionEngineUrl(urlSearch),
         });
@@ -154,7 +158,7 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
 
     const legendItems: LegendItem[] = useMemo(
       () =>
-        alertsData?.aggregations?.alertsByGrouping?.buckets != null
+        showLegend && alertsData?.aggregations?.alertsByGrouping?.buckets != null
           ? alertsData.aggregations.alertsByGrouping.buckets.map((bucket, i) => ({
               color: i < defaultLegendColors.length ? defaultLegendColors[i] : undefined,
               dataProviderId: escapeDataProviderId(
@@ -165,7 +169,12 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
               value: bucket.key,
             }))
           : NO_LEGEND_DATA,
-      [alertsData, selectedStackByOption, timelineId]
+      [
+        alertsData?.aggregations?.alertsByGrouping.buckets,
+        selectedStackByOption,
+        showLegend,
+        timelineId,
+      ]
     );
 
     useEffect(() => {
@@ -247,14 +256,14 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
       }
     }, [showLinkToAlerts, goToDetectionEngine, formatUrl]);
 
-    const titleText = useMemo(() => (onlyField == null ? title : i18n.TOP(onlyField)), [
-      onlyField,
-      title,
-    ]);
+    const titleText = useMemo(
+      () => (onlyField == null ? title : i18n.TOP(onlyField)),
+      [onlyField, title]
+    );
 
     return (
       <InspectButtonContainer data-test-subj="alerts-histogram-panel" show={!isInitialLoading}>
-        <KpiPanel height={PANEL_HEIGHT} hasBorder>
+        <KpiPanel height={PANEL_HEIGHT} hasBorder paddingSize={paddingSize}>
           <HeaderSection
             id={uniqueQueryId}
             title={titleText}
@@ -288,6 +297,7 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
               legendPosition={legendPosition}
               loading={isLoadingAlerts}
               to={to}
+              showLegend={showLegend}
               updateDateRange={updateDateRange}
             />
           )}

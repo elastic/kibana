@@ -23,11 +23,12 @@ describe('ensureAuthorized', () => {
     jest
       .spyOn(actions.savedObject, 'get')
       .mockImplementation((type: string, action: string) => `mock-saved_object:${type}/${action}`);
-    const errors = ({
+    const errors = {
       decorateForbiddenError: jest.fn().mockImplementation((err) => err),
       decorateGeneralError: jest.fn().mockImplementation((err) => err),
-    } as unknown) as jest.Mocked<SavedObjectsClientContract['errors']>;
-    const checkSavedObjectsPrivilegesAsCurrentUser: jest.MockedFunction<CheckSavedObjectsPrivileges> = jest.fn();
+    } as unknown as jest.Mocked<SavedObjectsClientContract['errors']>;
+    const checkSavedObjectsPrivilegesAsCurrentUser: jest.MockedFunction<CheckSavedObjectsPrivileges> =
+      jest.fn();
     return { actions, errors, checkSavedObjectsPrivilegesAsCurrentUser };
   }
 

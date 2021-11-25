@@ -32,7 +32,8 @@ export const APP_SEARCH_PLUGIN = {
       'Leverage dashboards, analytics, and APIs for advanced application search made simple.',
   }),
   CARD_DESCRIPTION: i18n.translate('xpack.enterpriseSearch.appSearch.productCardDescription', {
-    defaultMessage: 'Design and deploy a powerful search to your websites and apps.',
+    defaultMessage:
+      'Design, deploy, and manage powerful search experiences for your websites and web/mobile apps.',
   }),
   URL: '/app/enterprise_search/app_search',
   SUPPORT_URL: 'https://discuss.elastic.co/c/enterprise-search/app-search/',
@@ -55,6 +56,7 @@ export const WORKPLACE_SEARCH_PLUGIN = {
     }
   ),
   URL: '/app/enterprise_search/workplace_search',
+  NON_ADMIN_URL: '/app/enterprise_search/workplace_search/p',
   SUPPORT_URL: 'https://discuss.elastic.co/c/enterprise-search/workplace-search/',
 };
 

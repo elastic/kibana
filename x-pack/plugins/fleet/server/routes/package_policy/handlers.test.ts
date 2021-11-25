@@ -28,51 +28,54 @@ type PackagePolicyServicePublicInterface = Omit<
 
 const packagePolicyServiceMock = packagePolicyService as jest.Mocked<PackagePolicyServiceInterface>;
 
-jest.mock('../../services/package_policy', (): {
-  packagePolicyService: jest.Mocked<PackagePolicyServicePublicInterface>;
-} => {
-  return {
-    packagePolicyService: {
-      compilePackagePolicyInputs: jest.fn((packageInfo, vars, dataInputs) =>
-        Promise.resolve(dataInputs)
-      ),
-      buildPackagePolicyFromPackage: jest.fn(),
-      bulkCreate: jest.fn(),
-      create: jest.fn((soClient, esClient, newData) =>
-        Promise.resolve({
-          ...newData,
-          inputs: newData.inputs.map((input) => ({
-            ...input,
-            streams: input.streams.map((stream) => ({
-              id: stream.data_stream.dataset,
-              ...stream,
+jest.mock(
+  '../../services/package_policy',
+  (): {
+    packagePolicyService: jest.Mocked<PackagePolicyServicePublicInterface>;
+  } => {
+    return {
+      packagePolicyService: {
+        _compilePackagePolicyInputs: jest.fn((registryPkgInfo, packageInfo, vars, dataInputs) =>
+          Promise.resolve(dataInputs)
+        ),
+        buildPackagePolicyFromPackage: jest.fn(),
+        bulkCreate: jest.fn(),
+        create: jest.fn((soClient, esClient, newData) =>
+          Promise.resolve({
+            ...newData,
+            inputs: newData.inputs.map((input) => ({
+              ...input,
+              streams: input.streams.map((stream) => ({
+                id: stream.data_stream.dataset,
+                ...stream,
+              })),
             })),
-          })),
-          id: '1',
-          revision: 1,
-          updated_at: new Date().toISOString(),
-          updated_by: 'elastic',
-          created_at: new Date().toISOString(),
-          created_by: 'elastic',
-        })
-      ),
-      delete: jest.fn(),
-      get: jest.fn(),
-      getByIDs: jest.fn(),
-      list: jest.fn(),
-      listIds: jest.fn(),
-      update: jest.fn(),
-      // @ts-ignore
-      runExternalCallbacks: jest.fn((callbackType, packagePolicy, context, request) =>
-        callbackType === 'postPackagePolicyDelete'
-          ? Promise.resolve(undefined)
-          : Promise.resolve(packagePolicy)
-      ),
-      upgrade: jest.fn(),
-      getUpgradeDryRunDiff: jest.fn(),
-    },
-  };
-});
+            id: '1',
+            revision: 1,
+            updated_at: new Date().toISOString(),
+            updated_by: 'elastic',
+            created_at: new Date().toISOString(),
+            created_by: 'elastic',
+          })
+        ),
+        delete: jest.fn(),
+        get: jest.fn(),
+        getByIDs: jest.fn(),
+        list: jest.fn(),
+        listIds: jest.fn(),
+        update: jest.fn(),
+        // @ts-ignore
+        runExternalCallbacks: jest.fn((callbackType, packagePolicy, context, request) =>
+          callbackType === 'postPackagePolicyDelete'
+            ? Promise.resolve(undefined)
+            : Promise.resolve(packagePolicy)
+        ),
+        upgrade: jest.fn(),
+        getUpgradeDryRunDiff: jest.fn(),
+      },
+    };
+  }
+);
 
 jest.mock('../../services/epm/packages', () => {
   return {

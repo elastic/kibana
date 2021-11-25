@@ -5,4 +5,14 @@ elasticsearch.username: "{{ elasticsearch_username }}"
 elasticsearch.password: "{{ elasticsearch_password }}"
 
 pid.file: /run/kibana/kibana.pid
-logging.dest: /var/log/kibana/kibana.log
+logging:
+  appenders:
+    file:
+      type: file
+      fileName: /var/log/kibana/kibana.log
+      layout:
+        type: json
+  root:
+    appenders:
+      - default
+      - file

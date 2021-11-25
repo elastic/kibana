@@ -84,10 +84,10 @@ describe('Custom link helper', () => {
   });
 
   describe('replaceTemplateVariables', () => {
-    const transaction = ({
+    const transaction = {
       service: { name: 'foo' },
       trace: { id: '123' },
-    } as unknown) as Transaction;
+    } as unknown as Transaction;
 
     it('replaces template variables', () => {
       expect(
@@ -115,7 +115,7 @@ describe('Custom link helper', () => {
       expect(
         replaceTemplateVariables(
           'https://elastic.co?service.name={{service.name}}&trace.id={{trace.id}}',
-          ({} as unknown) as Transaction
+          {} as unknown as Transaction
         )
       ).toEqual(expectedResult);
     });

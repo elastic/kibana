@@ -21,7 +21,7 @@ const options: Array<EuiButtonGroupOptionProps & { id: AlertWorkflowStatus }> = 
     label: i18n.translate('xpack.observability.alerts.workflowStatusFilter.openButtonLabel', {
       defaultMessage: 'Open',
     }),
-    'data-test-subj': 'WorkflowStatusFilter open button',
+    'data-test-subj': 'workflowStatusFilterButton-open',
   },
   {
     id: 'acknowledged',
@@ -31,14 +31,14 @@ const options: Array<EuiButtonGroupOptionProps & { id: AlertWorkflowStatus }> = 
         defaultMessage: 'Acknowledged',
       }
     ),
-    'data-test-subj': 'WorkflowStatusFilter acknowledged button',
+    'data-test-subj': 'workflowStatusFilterButton-acknowledged',
   },
   {
     id: 'closed',
     label: i18n.translate('xpack.observability.alerts.workflowStatusFilter.closedButtonLabel', {
       defaultMessage: 'Closed',
     }),
-    'data-test-subj': 'WorkflowStatusFilter closed button',
+    'data-test-subj': 'workflowStatusFilterButton-closed',
   },
 ];
 

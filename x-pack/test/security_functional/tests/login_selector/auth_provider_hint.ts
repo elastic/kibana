@@ -14,6 +14,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const security = getService('security');
   const deployment = getService('deployment');
+  const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['security', 'common']);
 
   describe('Authentication provider hint', function () {
@@ -46,6 +47,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     afterEach(async () => {
+      // NOTE: Logout needs to happen before anything else to avoid flaky behavior
       await PageObjects.security.forceLogout();
     });
 
@@ -71,6 +73,44 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('automatically login with SSO preserving original URL', async () => {
+      await PageObjects.common.navigateToUrlWithBrowserHistory(
+        'management',
+        '/security/users',
+        '?auth_provider_hint=saml1',
+        { ensureCurrentUrl: false, shouldLoginIfPrompted: false }
+      );
+
+      await PageObjects.common.waitUntilUrlIncludes('/app/management/security/users');
+
+      const currentURL = parse(await browser.getCurrentUrl());
+      expect(currentURL.pathname).to.eql('/app/management/security/users');
+      expect((await PageObjects.security.getCurrentUser())?.authentication_provider).to.eql({
+        type: 'saml',
+        name: 'saml1',
+      });
+    });
+
+    it('re-initiates SSO handshake even with unauthenticated session', async () => {
+      // 1. Try to authenticate with SAML that never completes SAML handshake. In this case we end
+      // up with the cookie pointing to the intermediate unauthenticated session.
+      await PageObjects.common.navigateToUrlWithBrowserHistory(
+        'management',
+        '/security/users',
+        '?auth_provider_hint=saml_never',
+        { ensureCurrentUrl: false, shouldLoginIfPrompted: false }
+      );
+      await testSubjects.stringExistsInCodeBlockOrFail('idp-page', 'Attempt #1');
+
+      // 2. Now navigate to the same URL again and make sure we're still automatically redirected to IDP.
+      await PageObjects.common.navigateToUrlWithBrowserHistory(
+        'management',
+        '/security/users',
+        '?auth_provider_hint=saml_never',
+        { ensureCurrentUrl: false, shouldLoginIfPrompted: false }
+      );
+      await testSubjects.stringExistsInCodeBlockOrFail('idp-page', 'Attempt #2');
+
+      // 3. Finally try another SSO provider.
       await PageObjects.common.navigateToUrlWithBrowserHistory(
         'management',
         '/security/users',

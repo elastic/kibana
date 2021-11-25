@@ -47,7 +47,7 @@ export function ServiceContents({
     (callApmApi) => {
       if (serviceName && start && end) {
         return callApmApi({
-          endpoint: 'GET /api/apm/service-map/service/{serviceName}',
+          endpoint: 'GET /internal/apm/service-map/service/{serviceName}',
           params: {
             path: { serviceName },
             query: { environment, start, end },
@@ -63,12 +63,12 @@ export function ServiceContents({
 
   const isLoading = status === FETCH_STATUS.LOADING;
 
-  const detailsUrl = apmRouter.link('/services/:serviceName', {
+  const detailsUrl = apmRouter.link('/services/{serviceName}', {
     path: { serviceName },
     query: { rangeFrom, rangeTo, environment, kuery },
   });
 
-  const focusUrl = apmRouter.link('/services/:serviceName/service-map', {
+  const focusUrl = apmRouter.link('/services/{serviceName}/service-map', {
     path: { serviceName },
     query: { rangeFrom, rangeTo, environment, kuery },
   });

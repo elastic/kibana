@@ -41,11 +41,12 @@ const ALERT_DURATION: typeof ALERT_DURATION_TYPED = ALERT_DURATION_NON_TYPED;
 const ALERT_SEVERITY: typeof ALERT_SEVERITY_TYPED = ALERT_SEVERITY_NON_TYPED;
 const ALERT_START: typeof ALERT_START_TYPED = ALERT_START_NON_TYPED;
 const ALERT_UUID: typeof ALERT_UUID_TYPED = ALERT_UUID_NON_TYPED;
-const ALERT_RULE_TYPE_ID: typeof ALERT_RULE_TYPE_ID_TYPED = ALERT_RULE_TYPE_ID_NON_TYPED;
+const ALERT_RULE_TYPE_ID: typeof ALERT_RULE_TYPE_ID_TYPED =
+  ALERT_RULE_TYPE_ID_NON_TYPED;
 const ALERT_RULE_NAME: typeof ALERT_RULE_NAME_TYPED = ALERT_RULE_NAME_NON_TYPED;
 
 type Alert = ValuesType<
-  APIReturnType<'GET /api/apm/services/{serviceName}/alerts'>['alerts']
+  APIReturnType<'GET /internal/apm/services/{serviceName}/alerts'>['alerts']
 >;
 
 function getAlertColor({
@@ -121,7 +122,13 @@ export function getAlertAnnotations({
     const end = start + parsed[ALERT_DURATION]! / 1000;
     const severityLevel = parsed[ALERT_SEVERITY];
     const color = getAlertColor({ severityLevel, theme });
-    const header = getAlertHeader({ severityLevel });
+    const experimentalLabel = i18n.translate(
+      'xpack.apm.alertAnnotationTooltipExperimentalText',
+      { defaultMessage: 'Experimental' }
+    );
+    const header = `${getAlertHeader({
+      severityLevel,
+    })} - ${experimentalLabel}`;
     const formatter = getFormatter(parsed[ALERT_RULE_TYPE_ID]!);
     const formatted = {
       link: undefined,
@@ -132,13 +139,18 @@ export function getAlertAnnotations({
       }) ?? {}),
     };
     const isSelected = uuid === selectedAlertId;
+    const moreDetails = i18n.translate(
+      'xpack.apm.alertAnnotationTooltipMoreDetailsText',
+      { defaultMessage: 'Click to see more details.' }
+    );
+    const details = `${formatted.reason}. ${moreDetails}`;
 
     return [
       <LineAnnotation
         dataValues={[
           {
             dataValue: start,
-            details: formatted.reason,
+            details,
             header,
           },
         ]}

@@ -9,9 +9,10 @@ import { Filter } from '@kbn/es-query';
 import { SavedObjectReference } from 'kibana/public';
 import { PersistableFilter } from '../../common';
 
-export function extractFilterReferences(
-  filters: Filter[]
-): { persistableFilters: PersistableFilter[]; references: SavedObjectReference[] } {
+export function extractFilterReferences(filters: Filter[]): {
+  persistableFilters: PersistableFilter[];
+  references: SavedObjectReference[];
+} {
   const references: SavedObjectReference[] = [];
   const persistableFilters = filters.map((filterRow, i) => {
     if (!filterRow.meta || !filterRow.meta.index) {

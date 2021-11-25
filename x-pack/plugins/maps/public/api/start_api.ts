@@ -6,8 +6,6 @@
  */
 
 import type { LayerDescriptor } from '../../common/descriptor_types';
-import type { SourceRegistryEntry } from '../classes/sources/source_registry';
-import type { LayerWizard } from '../classes/layers/layer_wizard_registry';
 import type { CreateLayerDescriptorParams } from '../classes/sources/es_search_source';
 import type { SampleValuesConfig, EMSTermJoinConfig } from '../ems_autosuggest';
 
@@ -22,7 +20,5 @@ export interface MapsStartApi {
       params: CreateLayerDescriptorParams
     ) => Promise<LayerDescriptor>;
   };
-  registerLayerWizard(layerWizard: LayerWizard): Promise<void>;
-  registerSource(entry: SourceRegistryEntry): Promise<void>;
   suggestEMSTermJoinConfig(config: SampleValuesConfig): Promise<EMSTermJoinConfig | null>;
 }

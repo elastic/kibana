@@ -35,12 +35,12 @@ describe('get all timelines', () => {
     server = serverMock.create();
     context = requestContextMock.createTools().context;
 
-    securitySetup = ({
+    securitySetup = {
       authc: {
         getCurrentUser: jest.fn().mockReturnValue(mockGetCurrentUser),
       },
       authz: {},
-    } as unknown) as SecurityPluginSetup;
+    } as unknown as SecurityPluginSetup;
 
     getTimelinesRoute(server.router, createMockConfig(), securitySetup);
   });

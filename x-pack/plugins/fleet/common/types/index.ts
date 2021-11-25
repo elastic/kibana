@@ -8,7 +8,11 @@
 export * from './models';
 export * from './rest_spec';
 
-import type { PreconfiguredAgentPolicy, PreconfiguredPackage } from './models/preconfiguration';
+import type {
+  PreconfiguredAgentPolicy,
+  PreconfiguredPackage,
+  PreconfiguredOutput,
+} from './models/preconfiguration';
 
 export interface FleetConfigType {
   enabled: boolean;
@@ -26,7 +30,11 @@ export interface FleetConfigType {
   };
   agentPolicies?: PreconfiguredAgentPolicy[];
   packages?: PreconfiguredPackage[];
+  outputs?: PreconfiguredOutput[];
   agentIdVerificationEnabled?: boolean;
+  developer?: {
+    disableRegistryVersionCheck?: boolean;
+  };
 }
 
 // Calling Object.entries(PackagesGroupedByStatus) gave `status: string`

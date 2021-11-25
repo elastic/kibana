@@ -8,25 +8,678 @@
 :issue: https://github.com/elastic/kibana/issues/
 :pull: https://github.com/elastic/kibana/pull/
 
-This section summarizes the changes in each release.
+Review important information about the {kib} 8.0.0 releases.
 
+* <<release-notes-8.0.0-beta1>>
+* <<release-notes-8.0.0-alpha2>>
 * <<release-notes-8.0.0-alpha1>>
 
 --
+[[release-notes-8.0.0-beta1]]
+== {kib} 8.0.0-beta1
 
+Review the {kib} 8.0.0-beta1 changes, then use the <<upgrade-assistant,Upgrade Assistant>> to complete the upgrade.
+
+[float]
+[[breaking-changes-8.0.0-beta1]]
+=== Breaking changes
+
+Breaking changes can prevent your application from optimal operation and performance. Review the following breaking changes, then mitigate the impact to your application.
+
+To review the breaking changes in previous versions, refer to the following: 
+
+<<breaking-changes-8.0.0-alpha2,8.0.0-alpha2>> | <<breaking-changes-8.0.0-alpha1,8.0.0-alpha1>>
+
+// tag::notable-breaking-changes[]
+
+[float]
+[[alerting-breaking-changes-8.0.0-beta1]]
+==== Alerting 
+      
+[discrete]
+[[breaking-114558]]
+.Removes `xpack.task_manager.index`
+[%collapsible]
+====
+*Details* +
+The `xpack.task_manager.index` setting has been removed. For more information, refer to {kibana-pull}114558[#114558].
+
+*Impact* +
+Before you upgrade to 8.0.0, remove `xpack.task_manager.index` from kibana.yml.
+====
+
+[discrete]
+[[breaking-113461]]
+.Removes ability to remove plugins
+[%collapsible]
+====
+*Details* +
+The `xpack.actions.enabled` setting has been removed. For more information, refer to {kibana-pull}113461[#113461].
+
+*Impact* +
+Before you upgrade to 8.0.0, remove `xpack.actions.enabled` from kibana.yml.
+====
+
+[float]
+[[lens-visualizations-breaking-changes-8.0.0-beta1]]
+==== Lens & visualizations
+
+[discrete]
+[[breaking-113516]]
+.Removes display options from legacy gauge
+[%collapsible]
+====
+*Details* +
+The *Display warnings* option has been removed from the aggregation-based gauge visualization. For more information, refer to {kibana-pull}113516[#113516].
+
+*Impact* +
+When you create aggregation-based gauge visualizations, the *Display warnings* option is no longer available in *Options > Labels*.
+====
+
+[discrete]
+[[breaking-112643]]
+.Removes settings from visEditors plugins
+[%collapsible]
+====
+*Details* +
+The following deprecated visEditors plugin settings have been removed:
+
+* `metric_vis.enabled`
+* `table_vis.enabled`
+* `tagcloud.enabled`
+* `metrics.enabled`
+* `metrics.chartResolution`
+* `chartResolution`
+* `metrics.minimumBucketSize`
+* `minimumBucketSize`
+* `vega.enabled`
+* `vega.enableExternalUrls`
+* `vis_type_table.legacyVisEnabled`
+* `timelion_vis.enabled`
+* `timelion.enabled`
+* `timelion.graphiteUrls`
+* `timelion.ui.enabled`
+
+For more information, refer to {kibana-pull}112643[#112643].
+
+*Impact* +
+Before you upgrade, make the following changes in kibana.yml:
+
+* Replace `metric_vis.enabled` with `vis_type_metric.enabled`
+* Replace `table_vis.enabled` with `vis_type_table.enabled`
+* Replace `tagcloud.enabled` with `vis_type_tagcloud.enabled`
+* Replace `metrics.enabled` with `vis_type_timeseries.enabled`
+* Replace `metrics.chartResolution` and `chartResolution` with `vis_type_timeseries.chartResolution`
+* Replace `metrics.minimumBucketSize` and `minimumBucketSize` with `vis_type_timeseries.minimumBucketSize`
+* Replace `vega.enabled` with `vis_type_vega.enabled`
+* Replace `vega.enableExternalUrls` with `vis_type_vega.enableExternalUrls`
+* Remove `vis_type_table.legacyVisEnabled`
+* Replace `timelion_vis.enabled` with `vis_type_timelion.enabled`
+* Replace `timelion.enabled` with `vis_type_timelion.enabled`
+* Replace `timelion.graphiteUrls` with `vis_type_timelion.graphiteUrls`
+* Remove `timelion.ui.enabled`
+
+====
+
+[discrete]
+[[breaking-111704]]
+.Removes dimming opacity setting
+[%collapsible]
+====
+*Details* +
+The *Dimming opacity* setting in *Advanced Settings* has been removed. For more information, refer to {kibana-pull}111704[#111704].
+
+*Impact* +
+When you upgrade to 8.0.0, you are no longer able to configure the dimming opactiy for visualizations. 
+====
+
+[discrete]
+[[breaking-110985]]
+.Removes Less stylesheet support
+[%collapsible]
+====
+*Details* +
+In *TSVB*, custom Less stylesheets have been removed. For more information, refer to {kibana-pull}110985[#110985].
+
+*Impact* +
+Existing less stylesheets are automatically converted to CSS stylesheets. 
+====
+
+[discrete]
+[[breaking-110571]]
+.Disables the input string mode
+[%collapsible]
+====
+*Details* +
+In *TSVB*, the *Index pattern selection mode* option has been removed. For more information, refer to {kibana-pull}110571[#110571].
+
+*Impact* +
+To use index patterns and {es} indices in *TSVB* visualizations:
+
+. Open the main menu, then click *Stack Management > Advanced Settings*.
+
+. Select *Allow string indices in TSVB*.
+
+. Click *Save changes*.
+====
+
+[float]
+[[logs-breaking-changes-8.0.0-beta1]]
+==== Logs
+
+[discrete]
+[[breaking-115974]]
+.Removes deprecated alias config entries
+[%collapsible]
+====
+*Details* +
+The deprecated `xpack.infra.sources.default.logAlias` and `xpack.infra.sources.default.logAlias` settings have been removed. For more information, refer to {kibana-pull}115974[#115974].
+
+*Impact* +
+Before you upgrade, remove the settings from kibana.yml, then configure the settings in <<logs-app,Logs>>.
+====
+
+[discrete]
+[[breaking-61302]]
+.Removes configurable fields in settings
+[%collapsible]
+====
+*Details* +
+The *Logs* and *Metrics* configurable fields settings have been removed. For more information, refer to {kibana-pull}61302[#61302].
+
+*Impact* +
+Configure the settings in https://www.elastic.co/guide/en/ecs/current/ecs-reference.html[ECS].
+====
+
+[float]
+[[machine-learning-breaking-changes-8.0.0-beta1]]
+==== Machine learning
+      
+[discrete]
+[[breaking-115444]]
+.Grants access to machine learning features when base privileges are used
+[%collapsible]
+====
+*Details* +
+Machine learning features are included as base privileges. For more information, refer to {kibana-pull}115444[#115444].
+
+*Impact* +
+If you do not want to grant users privileges to machine learning features, update <<xpack-security,*Users* and *Roles*>>.
+====
+
+[float]
+[[maps-breaking-changes-8.0.0-beta1]]
+==== Maps
+
+[discrete]
+[[breaking-116184]]
+.Removes proxyElasticMapsServiceInMaps
+[%collapsible]
+====
+*Details* +
+The `map.proxyElasticMapsServiceInMaps` setting has been removed. For more information, refer to {kibana-pull}116184[#116184].
+
+*Impact* +
+Install the on-prem version of the <<maps-connect-to-ems,Elastic Maps Service>>, which is a Docker service that resides in the Elastic Docker registry, in an accessible location on your internal network. When you complete the installation, update kibana.yml to point to the service.
+====
+
+[float]
+[[operations-breaking-changes-8.0.0-beta1]]
+==== Operations 
+
+[discrete]
+[[breaking-111535]]
+.Removes environment variables
+[%collapsible]
+====
+*Details* +
+The `CONFIG_PATH` and `DATA_PATH` environment variables have been removed. For more information, refer to {kibana-pull}111535[#111535].
+
+*Impact* +
+Replace the `CONFIG_PATH` environment variable with `KBN_PATH_CONF`, and replace `DATA_PATH` with the `path.data` setting.
+====
+
+[float]
+[[platform-breaking-changes-8.0.0-beta1]]
+==== Platform 
+      
+[discrete]
+[[breaking-114379]]
+.Removes supports for csp.rules configuration
+[%collapsible]
+====
+*Details* +
+Support for the `csp.rules` configuration property has been removed. For more information, refer to {kibana-pull}114379[#114379].
+
+*Impact* +
+Configuring the default `csp.script_src`, `csp.workers_src`, and `csp.style_src` values is not required.
+====
+
+[discrete]
+[[breaking-113653]]
+.Changes and removes deprecated core settings and deprecated settings from core plugins
+[%collapsible]
+====
+*Details* +
+The deprecation notice for `server.cors` has changed from `level:critical` to `level:warning`.
+
+The following settings have changed:
+
+* The `xpack.banners.placement` value has been renamed
+* The `newsfeed.defaultLanguage` newsfeed item retrieval method and default language has changed
+
+Support for the following configuration settings has been removed:
+
+* `newsfeed.defaultLanguage`
+* `cpu.cgroup.path.override`
+* `cpuacct.cgroup.path.override`
+* `server.xsrf.whitelist`
+* `xpack.xpack_main.xpack_api_polling_frequency_millis`
+* `KIBANA_PATH_CONF`
+
+For more information, refer to {kibana-pull}113653[#113653].
+
+*Impact* +
+* The `header` value provided to the `xpack.banners.placement` configuration has been renamed to 'top'
+* The `newsfeed.defaultLanguage` newsfeed items are retrieved based on the browser locale and default to English
+* Replace `cpu.cgroup.path.override` with `ops.cGroupOverrides.cpuPath`
+* Replace `cpuacct.cgroup.path.override` with `ops.cGroupOverrides.cpuAcctPath`
+* Replace `server.xsrf.whitelist` with `server.xsrf.allowlist`
+* Replace `xpack.xpack_main.xpack_api_polling_frequency_millis` with `xpack.licensing.api_polling_frequency`
+* Replace `KIBANA_PATH_CONF` path to the {kib} configuration file using the `KBN_PATH_CONF` environment variable
+====
+
+[discrete]
+[[breaking-113495]]
+.Removes `enabled` settings from plugins
+[%collapsible]
+====
+*Details* +
+Using `{plugin_name}.enabled` to disable plugins has been removed. Some plugins, such as `telemetry`, `newsfeed`, `reporting`, and the various `vis_type` plugins will continue to support this setting. All other {kib} plugins will not support this setting. Any new plugin will support this setting only when specified in the `configSchema`. For more information, refer to {kibana-pull}113495[#113495].
+
+The `xpack.security.enabled` setting has been removed. For more information, refer to {kibana-pull}111681[#111681].
+
+*Impact* +
+Before you upgrade to 8.0.0:
+
+* Remove `{plugin_name}.enabled` from kibana.yml. If you use the setting to control user access to {kib} applications, use <<tutorial-secure-access-to-kibana,*Features* controls>> instead.
+* Replace `xpack.security.enabled` with {ref}/security-settings.html#general-security-settings[`xpack.security.enabled`] in elasticsearch.yml.
+====
+
+[discrete]
+[[breaking-113367]]
+.Removes `--plugin-dir` cli option
+[%collapsible]
+====
+*Details* +
+The `plugins.scanDirs` setting and `--plugin-dir` cli option have been removed. For more information, refer to {kibana-pull}113367[#113367].
+
+*Impact* +
+Before you upgrade to 8.0.0, remove `plugins.scanDirs` from kibana.yml.
+====
+
+[discrete]
+[[breaking-113296]]
+.Removes support for `optimize.*` settings
+[%collapsible]
+====
+*Details* +
+The legacy `optimize.*` settings have been removed. If your configuration uses the following legacy `optimize.*` settings, {kib} fails to start:
+
+* `optimize.lazy`
+* `optimize.lazyPort`
+* `optimize.lazyHost`
+* `optimize.lazyPrebuild`
+* `optimize.lazyProxyTimeout`
+* `optimize.enabled`
+* `optimize.bundleFilter`
+* `optimize.bundleDir`
+* `optimize.viewCaching`
+* `optimize.watch`
+* `optimize.watchPort`
+* `optimize.watchHost`
+* `optimize.watchPrebuild`
+* `optimize.watchProxyTimeout`
+* `optimize.useBundleCache`
+* `optimize.sourceMaps`
+* `optimize.workers`
+* `optimize.profile`
+* `optimize.validateSyntaxOfNodeModules`
+
+For more information, refer to {kibana-pull}113296[#113296].
+
+*Impact* +
+To run the `@kbn/optimizer` separately in development, pass `--no-optimizer` to `yarn start`. For more details, refer to {kibana-pull}73154[#73154]. 
+====
+
+[discrete]
+[[breaking-113173]]
+.Removes `so/server/es` settings
+[%collapsible]
+====
+*Details* +
+Some of the `so/server/es` settings have been removed. If your configuration uses the following settings, {kib} fails to start:
+
+* `savedObjects.indexCheckTimeout`
+* `server.xsrf.token`
+* `elasticsearch.preserveHost`
+* `elasticsearch.startupTimeout`
+
+For more information, refer to {kibana-pull}113173[#113173].
+
+*Impact* +
+Before you upgrade to 8.0.0., remove these settings from kibana.yml.
+====
+
+[discrete]
+[[breaking-113068]]
+.Adds requirement for inline scripting
+[%collapsible]
+====
+*Details* +
+To start {kib}, you must enable inline scripting in {es}. For more information, refer to {kibana-pull}113068[#113068].
+
+*Impact* +
+Enable link:https://www.elastic.co/guide/en/elasticsearch/reference/master/modules-scripting-security.html[inline scripting].
+====
+
+[discrete]
+[[breaking-112773]]
+.Removes `kibana.index` settings
+[%collapsible]
+====
+*Details* +
+The `kibana.index`, `xpack.reporting.index`, and `xpack.task_manager.index` settings have been removed. For more information, refer to {kibana-pull}112773[#112773].
+
+*Impact* +
+Use spaces, cross-cluster replication, or cross-cluster search. To migrate to <<xpack-spaces,spaces>>, export your <<managing-saved-objects, saved objects>> from a tenant into the default space. For more details, refer to link:https://github.com/elastic/kibana/issues/82020[#82020].
+====
+  
+[discrete]
+[[breaking-112305]]
+.Removes legacy logging
+[%collapsible]
+====
+*Details* +
+The logging configuration and log output format has changed. For more information, refer to {kibana-pull}112305[#112305].
+
+*Impact* +
+Use the new <<logging-configuration-migration,logging system>>. 
+====
+
+[float]
+[[reporting-breaking-changes-8.0.0-beta1]]
+==== Reporting
+      
+[discrete]
+[[breaking-114216]]
+.Removes reporting settings
+[%collapsible]
+====
+*Details* +
+The following settings have been removed: 
+
+* `xpack.reporting.capture.concurrency`
+
+* `xpack.reporting.capture.settleTime`
+
+* `xpack.reporting.capture.timeout`
+
+* `xpack.reporting.kibanaApp`
+
+For more information, refer to {kibana-pull}114216[#114216].
+
+*Impact* +
+Before you upgrade to 8.0.0, remove the settings from kibana.yml.
+====
+
+[float]
+[[rest-api-breaking-changes-8.0.0-beta1]]
+==== REST API 
+
+[discrete]
+[[breaking-114730]]
+.Removes `/api/settings`
+[%collapsible]
+====
+*Details* +
+The `/api/settings` REST API has been removed. For more information, refer to {kibana-pull}114730[#114730].
+
+*Impact* +
+Use `/api/stats`.
+====
+
+[float]
+[[security-breaking-changes-8.0.0-beta1]]
+==== Security
+
+[discrete]
+[[breaking-116191]]
+.Removes legacy audit logger
+[%collapsible]
+====
+*Details* +
+The legacy audit logger has been removed. For more information, refer to {kibana-pull}116191[#116191].
+
+*Impact* +
+Audit logs will be written to the default location in the new ECS format. To change the output file, filter events, and more, use the <<audit-logging-settings, audit logging settings>>.
+====
+
+// end::notable-breaking-changes[]
+
+[float]
+[[deprecations-8.0.0-beta1]]
+=== Deprecations
+
+Deprecated functionality does not have an immediate impact on your application, but we strongly recommend you make the necessary updates after you complete the upgrade.
+
+To review the 8.0.0 depcrecations, refer to the <<deprecations-8.0.0-alpha1,8.0.0-alpha1 release notes>>. 
+  
+[float]
+[[features-8.0.0]]
+=== Features
+The 8.0.0-beta1 release adds the following new and notable features.
+
+Dashboard::
+* Dashboard Integration {kibana-pull}115991[#115991]
+Elastic Security::
+For the Elastic Security 8.0.0 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+Machine Learning::
+* Addition of new Model Management tab {kibana-pull}115772[#115772]
+Platform::
+* Changes edit view to json read-only view {kibana-pull}112034[#112034]
+
+[float]
+[[enhancement-v8.0.0-beta1]]
+=== Enhancements
+
+The 8.0.0-beta1 release includes the following enhancements.
+
+Canvas::
+* By-Value embeddables {kibana-pull}113827[#113827]
+* Toolbar UI updates {kibana-pull}113329[#113329]
+Elastic Security::
+For the Elastic Security 8.0.0 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+Lens & Visualizations::
+* Handle removal of deprecated date histogram interval in *Vega* {kibana-pull}109090[#109090]
+* Adds value labels to Heatmap in *Lens* {kibana-pull}106406[#106406]
+Logs::
+* Make Alerts page use shared Kibana time range {kibana-pull}115192[#115192]
+Machine Learning::
+* Adds support to {fleet} {integrations} for installing ML models {kibana-pull}107710[#107710]
+* Adds Index data visualizer grid embeddable as extra view within Discover {kibana-pull}107184[#107184]
+Maps::
+* Use Elastic Maps Service v8.0 {kibana-pull}116217[#116217]
+* Use desaturated map tiles instead of bright map tiles by default {kibana-pull}116179[#116179]
+* Use ES mvt {kibana-pull}114553[#114553]
+Security::
+* Register "minimal" feature privileges regardless of the current license level {kibana-pull}115992[#115992]
+Uptime::
+* Uptime index config using kibana.yml {kibana-pull}115775[#115775]
+
+[float]
+[[fixes-v8.0.0-beta1]]
+=== Bug fixes
+
+The 8.0.0-beta1 release includes the following bug fixes.
+
+Management::
+* Removes freeze action from Cold phase {kibana-pull}116160[#116160]
+* Disallow creating runtime and scripted fields with * in the name {kibana-pull}116119[#116119]
+Querying & Filtering::
+* Fixes Add filter button doesnt close popup after openning {kibana-pull}111917[#111917]
+
+[[release-notes-8.0.0-alpha2]]
+== {kib} 8.0.0-alpha2
+
+Review the {kib} 8.0.0-alpha2 changes, then use the <<upgrade-assistant,Upgrade Assistant>> to complete the upgrade.
+
+[float]
+[[breaking-changes-8.0.0-alpha2]]
+=== Breaking changes
+
+Breaking changes can prevent your application from optimal operation and performance. Review the following breaking changes, then mitigate the impact to your application.
+
+To review the breaking changes in the previous version, refer to <<breaking-changes-8.0.0-alpha1,8.0.0-alpha1>>.
+
+[discrete]
+[[breaking-110830]]
+.Changes the `GET /api/status` default behavior
+[%collapsible]
+====
+*Details* +
+`GET /api/status` reports a new and more verbose payload. For more information, refer to {kibana-pull}110830[#110830].
+
+*Impact* +
+To retrieve the {kib} status in the previous format, use `GET /api/status?v7format=true`.
+====
+      
+[discrete]
+[[breaking-110738]]
+.Removes support for legacy exports
+[%collapsible]
+====
+*Details* +
+In {kib} 8.0.0 and later, the legacy format from {kib} 6.x is unsupported. For more information, refer to {kibana-pull}110738[#110738]
+
+*Impact* +
+Using the user interface to import saved objects is restricted to `.ndjson` format imports.
+====
+      
+[discrete]
+[[breaking-109896]]
+.Removes `map.regionmap.*`
+[%collapsible]
+====
+*Details* +
+The deprecated `map.regionmap.*` setting in kibana.yml has been removed. For more information, refer to {kibana-pull}109896[#109896].
+
+*Impact* +
+If you have maps that use `map.regionmap` layers:
+
+. Remove the `map.regionmap` layer.
+
+. To recreate the choropleth layer, use <<import-geospatial-data,GeoJSON upload>> to index your static vector data into {es}. 
+
+. Create a choropleth layer from the indexed vector data. 
+====
+      
+[discrete]
+[[breaking-109798]]
+.Removes `kibana.defaultAppId`
+[%collapsible]
+====
+*Details* +
+The deprecated `kibana.defaultAppId` setting in kibana.yml, which is also available as `kibana_legacy.defaultAppId`, has been removed. For more information, refer to {kibana-pull}109798[#109798].
+
+*Impact* +
+When you upgrade, remove `kibana.defaultAppId` from your kibana.yml file. To configure the default route for users when they enter a space, use the <<defaultroute,`defaultRoute`>> in *Advanced Settings*.
+====
+      
+[discrete]
+[[breaking-109350]]
+.Removes `courier:batchSearches`
+[%collapsible]
+====
+*Details* +
+The deprecated `courier:batchSearches` setting in *Advanced Settings* has been removed. For more information, refer to {kibana-pull}109350[#109350].
+
+*Impact* +
+When you upgrade, the `courier:batchSearches` setting will no longer be available.
+====
+      
+[discrete]
+[[breaking-108111]]
+.Removes `xpack.task_manager.index`
+[%collapsible]
+====
+*Details* +
+The deprecated `xpack.task_manager.index` setting in kibana.yml has been removed. For more information, refer to {kibana-pull}108111[#108111].
+
+*Impact* +
+When you upgrade, remove `xpack.task_manager.index` from your kibana.yml file.
+====
+      
+[discrete]
+[[breaking-108103]]
+.Removes dashboard-only mode
+[%collapsible]
+====
+*Details* +
+The legacy dashboard-only mode has been removed. For more information, refer to {kibana-pull}108103[#108103].
+
+*Impact* +
+To grant users access to only dashboards, create a new role, then assign only the *Dashboard* feature privilege. For more information, refer to <<kibana-feature-privileges,{kib} privileges>>.
+====
+     
+[discrete]
+[[breaking-105979]]
+.Removes `xpack.maps.showMapVisualizationTypes`
+[%collapsible]
+====
+*Details* +
+The deprecated `xpack.maps.showMapVisualizationTypes` setting in kibana.yml has been removed. For more information, refer to {kibana-pull}105979[#105979]
+
+*Impact* +
+When you upgrade, remove `xpack.maps.showMapVisualizationTypes` from your kibana.yml file.
+====
+
+[float]
+[[deprecations-8.0.0-alpha2]]
+=== Deprecations
+
+Deprecated functionality does not have an immediate impact on your application, but we strongly recommend you make the necessary updates after you complete the upgrade.
+
+To review the 8.0.0 depcrecations, refer to the <<deprecations-8.0.0-alpha1,8.0.0-alpha1 release notes>>. 
+      
+[float]
+[[features-8.0.0-alpha2]]
+=== Features
+The 8.0.0-alpha2 release adds the following new and notable feature.
+
+Security::
+* Adds the interactive setup mode {kibana-pull}106881[#106881]
+      
+[float]
+[[enhancement-v8.0.0-alpha2]]
+=== Enhancements
+The 8.0.0-alpha2 release includes the following enhancements.
+
+Elastic Security::
+For the Elastic Security 8.0.0-alpha2 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+Security::
+* Interactive setup mode {kibana-pull}106881[#106881]
 
 [[release-notes-8.0.0-alpha1]]
 == {kib} 8.0.0-alpha1
 
-The following changes are released for the first time in {kib} 8.0.0-alpha1. Review the changes, then use the <<upgrade-assistant,Upgrade Assistant>> to complete the upgrade.
+Review the {kib} 8.0.0-alpha1 changes, then use the <<upgrade-assistant,Upgrade Assistant>> to complete the upgrade.
 
 [float]
-[[breaking-changes-8.0.0]]
+[[breaking-changes-8.0.0-alpha1]]
 === Breaking changes
 
-Breaking changes can prevent your application from optimal operation and performance. Review the breaking changes, then mitigrate the impact to your appilication. 
-
-// tag::notable-breaking-changes[]
+Breaking changes can prevent your application from optimal operation and performance. Review the breaking changes, then mitigate the impact to your application. 
 
 [float]
 [[enterprise-search-change]]
@@ -191,7 +844,7 @@ The default values for the session timeout `xpack.security.session.{lifespan|idl
 *Impact* +
 Use the following default values:
 
-* `xpack.security.session.idleTimeout: 1h`
+* `xpack.security.session.idleTimeout: 8h`
 * `xpack.security.session.lifespan: 30d`
 ====
 
@@ -231,10 +884,20 @@ The `logging.useUTC` setting has been removed. For more information, refer to {k
 The default timezone is UTC. To change the timezone, set `logging.timezone: false` in kibana.yml. Change the timezone when the system, such as a docker container, is configured for a nonlocal timezone.  
 ====  
 
-// end::notable-breaking-changes[]
+[discrete]
+[[breaking-32049]]
+.Removed environment variables `CONFIG_PATH` and `DATA_PATH`
+[%collapsible]
+====
+*Details* +
+The environment variables `CONFIG_PATH` and `DATA_PATH` have been removed.  For more information, refer to {kibana-pull}32049[#32049]
+
+*Impact* +
+Use the environment variable `KBN_PATH_CONF` instead of `CONFIG_PATH`.  Use the setting `path.data` instead of `DATA_PATH`.
+====
 
 [float]
-[[deprecations-8.0.0]]
+[[deprecations-8.0.0-alpha1]]
 === Deprecations
 
 The following functionality is deprecated in 8.0.0, and will be removed in 9.0.0. Deprecated functionality does not have an immediate impact on your application, but we strongly recommend you make the necessary updates after you complete the upgrade.
@@ -271,8 +934,3 @@ The 8.0.0-alpha1 release includes the following bug fix.
 
 Operations::
 * Moves systemd service to /usr/lib/systemd/system {kibana-pull}83571[#83571]
-
-//[[release-notes-8.0.0]]
-//== {kib} 8.0.0
-
-//coming::[8.0.0]

@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Spaces } from '../../scenarios';
 import {
   ESTestIndexTool,
@@ -97,20 +97,7 @@ export default function ({ getService }: FtrProviderContext) {
           },
         })
         .expect(204);
-
       await esTestIndexTool.waitForDocs('action:test.failing', reference, 1);
-
-      await supertest
-        .put(
-          `${getUrlPrefix(
-            Spaces.space1.id
-          )}/api/alerts_fixture/Actions-cleanup_failed_action_executions/reschedule_task`
-        )
-        .set('kbn-xsrf', 'foo')
-        .send({
-          runAt: new Date().toISOString(),
-        })
-        .expect(200);
 
       await retry.try(async () => {
         const searchResult = await es.search({
@@ -136,7 +123,80 @@ export default function ({ getService }: FtrProviderContext) {
             },
           },
         });
-        expect((searchResult.body.hits.total as estypes.SearchTotalHits).value).to.eql(0);
+        expect((searchResult.hits.total as estypes.SearchTotalHits).value).to.eql(0);
+      });
+    });
+
+    it('should never leaved a failed task, even if max attempts is reached', async () => {
+      // We have to provide the test.rate-limit the next runAt, for testing purposes
+      const retryDate = new Date(Date.now() + 1);
+      const { body: createdAction } = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          name: 'My action',
+          connector_type_id: 'test.no-attempts-rate-limit',
+          config: {},
+          secrets: {},
+        })
+        .expect(200);
+      objectRemover.add(Spaces.space1.id, createdAction.id, 'action', 'actions');
+
+      const reference = `actions-enqueue-2:${Spaces.space1.id}:${createdAction.id}`;
+      await supertest
+        .post(
+          `${getUrlPrefix(Spaces.space1.id)}/api/alerts_fixture/${createdAction.id}/enqueue_action`
+        )
+        .set('kbn-xsrf', 'foo')
+        .send({
+          params: {
+            reference,
+            index: ES_TEST_INDEX_NAME,
+            retryAt: retryDate.getTime(),
+          },
+        })
+        .expect(204);
+
+      await retry.try(async () => {
+        const runningSearchResult = await es.search({
+          index: '.kibana_task_manager',
+          body: {
+            query: {
+              bool: {
+                must: [
+                  {
+                    term: {
+                      'task.taskType': 'actions:test.no-attempts-rate-limit',
+                    },
+                  },
+                ],
+              },
+            },
+          },
+        });
+        const total = (runningSearchResult.hits.total as estypes.SearchTotalHits).value;
+        expect(total).to.eql(1);
+      });
+
+      await retry.try(async () => {
+        const runningSearchResult = await es.search({
+          index: '.kibana_task_manager',
+          body: {
+            query: {
+              bool: {
+                must: [
+                  {
+                    term: {
+                      'task.taskType': 'actions:test.no-attempts-rate-limit',
+                    },
+                  },
+                ],
+              },
+            },
+          },
+        });
+        const total = (runningSearchResult.hits.total as estypes.SearchTotalHits).value;
+        expect(total).to.eql(0);
       });
     });
   });

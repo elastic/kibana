@@ -82,8 +82,10 @@ describe('VegaVisualizations', () => {
       mockHeight.mockRestore();
     });
 
-    // SKIP: https://github.com/elastic/kibana/issues/83385
-    test.skip('should show vegalite graph and update on resize (may fail in dev env)', async () => {
+    test('should show vegalite graph and update on resize (may fail in dev env)', async () => {
+      const mockedConsoleLog = jest.spyOn(console, 'log'); // mocked console.log to avoid messages in the console when running tests
+      mockedConsoleLog.mockImplementation(() => {}); //  comment this line when console logging for debugging comment this line
+
       let vegaVis;
       try {
         vegaVis = new VegaVisualization(domNode, jest.fn());
@@ -105,7 +107,7 @@ describe('VegaVisualizations', () => {
         expect(domNode.innerHTML).toMatchSnapshot();
 
         mockedWidthValue = 256;
-        mockedHeightValue = 256;
+        mockedHeightValue = 250;
 
         await vegaVis.vegaView.resize();
 
@@ -113,10 +115,11 @@ describe('VegaVisualizations', () => {
       } finally {
         vegaVis.destroy();
       }
+      expect(console.log).toBeCalledTimes(2);
+      mockedConsoleLog.mockRestore();
     });
 
-    // SKIP: https://github.com/elastic/kibana/issues/83385
-    test.skip('should show vega graph (may fail in dev env)', async () => {
+    test('should show vega graph (may fail in dev env)', async () => {
       let vegaVis;
       try {
         vegaVis = new VegaVisualization(domNode, jest.fn());
@@ -133,7 +136,6 @@ describe('VegaVisualizations', () => {
           mockGetServiceSettings
         );
         await vegaParser.parseAsync();
-
         await vegaVis.render(vegaParser);
         expect(domNode.innerHTML).toMatchSnapshot();
       } finally {

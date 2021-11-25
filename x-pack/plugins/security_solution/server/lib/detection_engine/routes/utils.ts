@@ -100,76 +100,6 @@ export const isImportRegular = (
   return !has('error', importRuleResponse) && has('status_code', importRuleResponse);
 };
 
-export interface ImportSuccessError {
-  success: boolean;
-  success_count: number;
-  errors: BulkError[];
-}
-
-export const createSuccessObject = (
-  existingImportSuccessError: ImportSuccessError
-): ImportSuccessError => {
-  return {
-    success_count: existingImportSuccessError.success_count + 1,
-    success: existingImportSuccessError.success,
-    errors: existingImportSuccessError.errors,
-  };
-};
-
-export const createImportErrorObject = ({
-  ruleId,
-  statusCode,
-  message,
-  existingImportSuccessError,
-}: {
-  ruleId: string;
-  statusCode: number;
-  message: string;
-  existingImportSuccessError: ImportSuccessError;
-}): ImportSuccessError => {
-  return {
-    success: false,
-    errors: [
-      ...existingImportSuccessError.errors,
-      createBulkErrorObject({
-        ruleId,
-        statusCode,
-        message,
-      }),
-    ],
-    success_count: existingImportSuccessError.success_count,
-  };
-};
-
-export const transformImportError = (
-  ruleId: string,
-  err: Error & { statusCode?: number },
-  existingImportSuccessError: ImportSuccessError
-): ImportSuccessError => {
-  if (Boom.isBoom(err)) {
-    return createImportErrorObject({
-      ruleId,
-      statusCode: err.output.statusCode,
-      message: err.message,
-      existingImportSuccessError,
-    });
-  } else if (err instanceof BadRequestError) {
-    return createImportErrorObject({
-      ruleId,
-      statusCode: 400,
-      message: err.message,
-      existingImportSuccessError,
-    });
-  } else {
-    return createImportErrorObject({
-      ruleId,
-      statusCode: err.statusCode ?? 500,
-      message: err.message,
-      existingImportSuccessError,
-    });
-  }
-};
-
 export const transformBulkError = (
   ruleId: string,
   err: Error & { statusCode?: number }
@@ -200,16 +130,15 @@ interface Schema {
   validate: (input: any) => { value: any; error?: Error };
 }
 
-export const buildRouteValidation = <T>(schema: Schema): RouteValidationFunction<T> => (
-  payload: T,
-  { ok, badRequest }
-) => {
-  const { value, error } = schema.validate(payload);
-  if (error) {
-    return badRequest(error.message);
-  }
-  return ok(value);
-};
+export const buildRouteValidation =
+  <T>(schema: Schema): RouteValidationFunction<T> =>
+  (payload: T, { ok, badRequest }) => {
+    const { value, error } = schema.validate(payload);
+    if (error) {
+      return badRequest(error.message);
+    }
+    return ok(value);
+  };
 
 const statusToErrorMessage = (statusCode: number) => {
   switch (statusCode) {
@@ -328,6 +257,6 @@ export const getFailingRules = async (
     if (Boom.isBoom(exc)) {
       throw exc;
     }
-    throw new Error(`Failed to get executionStatus with RulesClient: ${exc.message}`);
+    throw new Error(`Failed to get executionStatus with RulesClient: ${(exc as Error).message}`);
   }
 };

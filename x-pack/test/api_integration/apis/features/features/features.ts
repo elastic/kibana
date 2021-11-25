@@ -102,9 +102,9 @@ export default function ({ getService }: FtrProviderContext) {
             'enterpriseSearch',
             'advancedSettings',
             'indexPatterns',
-            'timelion',
             'graph',
             'monitoring',
+            'observabilityCases',
             'savedObjectsManagement',
             'savedObjectsTagging',
             'ml',
@@ -114,10 +114,10 @@ export default function ({ getService }: FtrProviderContext) {
             'infrastructure',
             'logs',
             'maps',
-            'observabilityCases',
             'osquery',
             'uptime',
             'siem',
+            'securitySolutionCases',
             'fleet',
           ].sort()
         );

@@ -23,7 +23,7 @@ import {
   getGeoFieldNames,
 } from '../../../selectors/map_selectors';
 import { getDrawMode } from '../../../selectors/ui_selectors';
-import { DRAW_MODE } from '../../../../common';
+import { DRAW_MODE } from '../../../../common/constants';
 import { MapStoreState } from '../../../reducers/store';
 
 function mapStateToProps(state: MapStoreState) {

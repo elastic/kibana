@@ -11,7 +11,7 @@ import { LayerDescriptor } from '../descriptor_types';
 
 describe('addTypeToTermJoin', () => {
   test('Should handle missing type attribute', () => {
-    const layerListJSON = JSON.stringify(([
+    const layerListJSON = JSON.stringify([
       {
         type: LAYER_TYPE.VECTOR,
         joins: [
@@ -30,7 +30,7 @@ describe('addTypeToTermJoin', () => {
           },
         ],
       },
-    ] as unknown) as LayerDescriptor[]);
+    ] as unknown as LayerDescriptor[]);
 
     const attributes = {
       title: 'my map',

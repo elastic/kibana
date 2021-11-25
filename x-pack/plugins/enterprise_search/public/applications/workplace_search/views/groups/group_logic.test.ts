@@ -16,6 +16,7 @@ import { mockGroupValues } from './__mocks__/group_logic.mock';
 
 import { nextTick } from '@kbn/test/jest';
 
+import { itShowsServerErrorAsFlashMessage } from '../../../test_helpers';
 import { GROUPS_PATH } from '../../routes';
 
 import { GroupLogic } from './group_logic';
@@ -24,12 +25,7 @@ describe('GroupLogic', () => {
   const { mount } = new LogicMounter(GroupLogic);
   const { http } = mockHttpValues;
   const { navigateToUrl } = mockKibanaValues;
-  const {
-    clearFlashMessages,
-    flashAPIErrors,
-    flashSuccessToast,
-    setQueuedErrorMessage,
-  } = mockFlashMessageHelpers;
+  const { clearFlashMessages, flashSuccessToast, setQueuedErrorMessage } = mockFlashMessageHelpers;
 
   const group = groups[0];
   const sourceIds = ['123', '124'];
@@ -114,7 +110,7 @@ describe('GroupLogic', () => {
         GroupLogic.actions.onGroupSourcesSaved(group);
 
         expect(GroupLogic.values.group).toEqual(group);
-        expect(GroupLogic.values.sharedSourcesModalVisible).toEqual(false);
+        expect(GroupLogic.values.orgSourcesModalVisible).toEqual(false);
         expect(GroupLogic.values.selectedGroupSources).toEqual(sourceIds);
         expect(GroupLogic.values.cachedSourcePriorities).toEqual(sourcePriorities);
         expect(GroupLogic.values.activeSourcePriorities).toEqual(sourcePriorities);
@@ -130,11 +126,11 @@ describe('GroupLogic', () => {
       });
     });
 
-    describe('hideSharedSourcesModal', () => {
+    describe('hideOrgSourcesModal', () => {
       it('sets reducers', () => {
-        GroupLogic.actions.hideSharedSourcesModal(group);
+        GroupLogic.actions.hideOrgSourcesModal(group);
 
-        expect(GroupLogic.values.sharedSourcesModalVisible).toEqual(false);
+        expect(GroupLogic.values.orgSourcesModalVisible).toEqual(false);
         expect(GroupLogic.values.selectedGroupSources).toEqual(sourceIds);
       });
     });
@@ -226,13 +222,8 @@ describe('GroupLogic', () => {
         expect(flashSuccessToast).toHaveBeenCalledWith('Group "group" was successfully deleted.');
       });
 
-      it('handles error', async () => {
-        http.delete.mockReturnValue(Promise.reject('this is an error'));
-
+      itShowsServerErrorAsFlashMessage(http.delete, () => {
         GroupLogic.actions.deleteGroup();
-        await nextTick();
-
-        expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
       });
     });
 
@@ -257,13 +248,8 @@ describe('GroupLogic', () => {
         );
       });
 
-      it('handles error', async () => {
-        http.put.mockReturnValue(Promise.reject('this is an error'));
-
+      itShowsServerErrorAsFlashMessage(http.put, () => {
         GroupLogic.actions.updateGroupName();
-        await nextTick();
-
-        expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
       });
     });
 
@@ -284,17 +270,12 @@ describe('GroupLogic', () => {
         await nextTick();
         expect(onGroupSourcesSavedSpy).toHaveBeenCalledWith(group);
         expect(flashSuccessToast).toHaveBeenCalledWith(
-          'Successfully updated shared content sources.'
+          'Successfully updated organizational content sources.'
         );
       });
 
-      it('handles error', async () => {
-        http.post.mockReturnValue(Promise.reject('this is an error'));
-
+      itShowsServerErrorAsFlashMessage(http.post, () => {
         GroupLogic.actions.saveGroupSources();
-        await nextTick();
-
-        expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
       });
     });
 
@@ -321,18 +302,13 @@ describe('GroupLogic', () => {
 
         await nextTick();
         expect(flashSuccessToast).toHaveBeenCalledWith(
-          'Successfully updated shared source prioritization.'
+          'Successfully updated organizational source prioritization.'
         );
         expect(onGroupPrioritiesChangedSpy).toHaveBeenCalledWith(group);
       });
 
-      it('handles error', async () => {
-        http.put.mockReturnValue(Promise.reject('this is an error'));
-
+      itShowsServerErrorAsFlashMessage(http.put, () => {
         GroupLogic.actions.saveGroupSourcePrioritization();
-        await nextTick();
-
-        expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
       });
     });
 
@@ -345,11 +321,11 @@ describe('GroupLogic', () => {
       });
     });
 
-    describe('showSharedSourcesModal', () => {
+    describe('showOrgSourcesModal', () => {
       it('sets reducer and clears flash messages', () => {
-        GroupLogic.actions.showSharedSourcesModal();
+        GroupLogic.actions.showOrgSourcesModal();
 
-        expect(GroupLogic.values.sharedSourcesModalVisible).toEqual(true);
+        expect(GroupLogic.values.orgSourcesModalVisible).toEqual(true);
         expect(clearFlashMessages).toHaveBeenCalled();
       });
     });

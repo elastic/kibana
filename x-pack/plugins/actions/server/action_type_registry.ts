@@ -134,7 +134,8 @@ export class ActionTypeRegistry {
           // Don't retry other kinds of errors
           return false;
         },
-        createTaskRunner: (context: RunContext) => this.taskRunnerFactory.create(context),
+        createTaskRunner: (context: RunContext) =>
+          this.taskRunnerFactory.create(context, actionType.maxAttempts),
       },
     });
     // No need to notify usage on basic action types

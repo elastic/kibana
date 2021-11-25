@@ -16,7 +16,8 @@ export const createCaseCommentSavedObjectType = ({
 }): SavedObjectsType => ({
   name: CASE_COMMENT_SAVED_OBJECT,
   hidden: true,
-  namespaceType: 'single',
+  namespaceType: 'multiple-isolated',
+  convertToMultiNamespaceTypeVersion: '8.0.0',
   mappings: {
     properties: {
       associationType: {
@@ -109,5 +110,9 @@ export const createCaseCommentSavedObjectType = ({
       },
     },
   },
-  migrations: () => createCommentsMigrations(migrationDeps),
+  migrations: createCommentsMigrations(migrationDeps),
+  management: {
+    importableAndExportable: true,
+    visibleInManagement: false,
+  },
 });

@@ -5,53 +5,79 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import { PluginConfigDescriptor } from 'kibana/server';
 import { get } from 'lodash';
 import { ConfigSchema, ReportingConfigType } from './schema';
 export { buildConfig } from './config';
 export { registerUiSettings } from './ui_settings';
-export { ConfigSchema, ReportingConfigType };
+export type { ReportingConfigType };
+export { ConfigSchema };
 
 export const config: PluginConfigDescriptor<ReportingConfigType> = {
   exposeToBrowser: { poll: true, roles: true },
   schema: ConfigSchema,
   deprecations: ({ unused }) => [
-    unused('capture.browser.chromium.maxScreenshotDimension'),
-    unused('capture.concurrency'),
-    unused('capture.settleTime'),
-    unused('capture.timeout'),
-    unused('poll.jobCompletionNotifier.intervalErrorMultiplier'),
-    unused('poll.jobsRefresh.intervalErrorMultiplier'),
-    unused('kibanaApp'),
+    unused('capture.browser.chromium.maxScreenshotDimension'), // unused since 7.8
+    unused('poll.jobCompletionNotifier.intervalErrorMultiplier'), // unused since 7.10
+    unused('poll.jobsRefresh.intervalErrorMultiplier'), // unused since 7.10
+    unused('capture.viewport'), // deprecated as unused since 7.16
     (settings, fromPath, addDeprecation) => {
       const reporting = get(settings, fromPath);
-      if (reporting?.index) {
-        addDeprecation({
-          message: `"${fromPath}.index" is deprecated. Multitenancy by changing "kibana.index" will not be supported starting in 8.0. See https://ela.st/kbn-remove-legacy-multitenancy for more details`,
-          correctiveActions: {
-            manualSteps: [
-              `If you rely on this setting to achieve multitenancy you should use Spaces, cross-cluster replication, or cross-cluster search instead.`,
-              `To migrate to Spaces, we encourage using saved object management to export your saved objects from a tenant into the default tenant in a space.`,
-            ],
-          },
-        });
-      }
-
       if (reporting?.roles?.enabled !== false) {
         addDeprecation({
-          message:
-            `"${fromPath}.roles" is deprecated. Granting reporting privilege through a "reporting_user" role will not be supported ` +
-            `starting in 8.0. Please set "xpack.reporting.roles.enabled" to "false" and grant reporting privileges to users ` +
-            `using Kibana application privileges **Management > Security > Roles**.`,
+          configPath: `${fromPath}.roles.enabled`,
+          level: 'warning',
+          title: i18n.translate('xpack.reporting.deprecations.reportingRoles.title', {
+            defaultMessage: 'Setting "{fromPath}.roles" is deprecated',
+            values: { fromPath },
+          }),
+          // TODO: once scheduled reports is released, restate this to say that we have no access to scheduled reporting.
+          // https://github.com/elastic/kibana/issues/79905
+          message: i18n.translate('xpack.reporting.deprecations.reportingRoles.description', {
+            defaultMessage:
+              `Use Kibana application privileges to grant reporting privileges.` +
+              ` Using  "{fromPath}.roles.allow" to grant reporting privileges` +
+              ` is deprecated.` +
+              ` The "{fromPath}.roles.enabled" setting will default to false` +
+              ` in a future release.`,
+            values: { fromPath },
+          }),
           correctiveActions: {
             manualSteps: [
-              `Set 'xpack.reporting.roles.enabled' to 'false' in your kibana configs.`,
-              `Grant reporting privileges to users using Kibana application privileges` +
-                `under **Management > Security > Roles**.`,
+              i18n.translate('xpack.reporting.deprecations.reportingRoles.manualStepOne', {
+                defaultMessage: `Set "xpack.reporting.roles.enabled" to "false" in kibana.yml.`,
+              }),
+              i18n.translate('xpack.reporting.deprecations.reportingRoles.manualStepOnePartOne', {
+                defaultMessage: `Remove "xpack.reporting.roles.allow" to "false" in kibana.yml, if present.`,
+              }),
+              i18n.translate('xpack.reporting.deprecations.reportingRoles.manualStepTwo', {
+                defaultMessage:
+                  `Create one or more roles that grant the Kibana application` +
+                  ` privilege for reporting from **Management > Security > Roles**.`,
+              }),
+              i18n.translate('xpack.reporting.deprecations.reportingRoles.manualStepThree', {
+                defaultMessage:
+                  `Grant reporting privileges to users by assigning one of the new roles.` +
+                  ` Users assigned a reporting role specified in "xpack.reporting.roles.allow"` +
+                  ` will no longer have reporting privileges, they must be assigned an application privilege based role.`,
+              }),
             ],
           },
         });
       }
     },
   ],
+  exposeToUsage: {
+    capture: {
+      maxAttempts: true,
+      timeouts: { openUrl: true, renderComplete: true, waitForElements: true },
+      networkPolicy: false, // show as [redacted]
+      zoom: true,
+    },
+    csv: { maxSizeBytes: true, scroll: { size: true, duration: true } },
+    kibanaServer: false, // show as [redacted]
+    queue: { indexInterval: true, pollEnabled: true, timeout: true },
+    roles: { enabled: true },
+  },
 };

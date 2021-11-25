@@ -18,14 +18,14 @@ export default {
   component: LandingPage,
   decorators: [
     (Story: ComponentType) => {
-      const KibanaReactContext = createKibanaReactContext(({
+      const KibanaReactContext = createKibanaReactContext({
         application: { getUrlForApp: () => '', navigateToUrl: () => {} },
         chrome: { docTitle: { change: () => {} }, setBreadcrumbs: () => {} },
         uiSettings: { get: () => true },
         observability: { ObservabilityPageTemplate: EuiPageTemplate },
-      } as unknown) as Partial<CoreStart>);
+      } as unknown as Partial<CoreStart>);
 
-      const pluginContextValue = ({
+      const pluginContextValue = {
         appMountParameters: { setHeaderActionMenu: () => {} },
         core: {
           http: {
@@ -35,7 +35,7 @@ export default {
           },
         },
         ObservabilityPageTemplate: EuiPageTemplate,
-      } as unknown) as PluginContextValue;
+      } as unknown as PluginContextValue;
 
       return (
         <MemoryRouter>

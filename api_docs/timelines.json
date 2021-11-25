@@ -117,7 +117,7 @@
         "children": [
           {
             "parentPluginId": "timelines",
-            "id": "def-public.focusColumn.$1.colindexAttributecontainerElementariaColindexariaRowindexrowindexAttribute",
+            "id": "def-public.focusColumn.$1",
             "type": "Object",
             "tags": [],
             "label": "{\n  colindexAttribute,\n  containerElement,\n  ariaColindex,\n  ariaRowindex,\n  rowindexAttribute,\n}",
@@ -127,7 +127,7 @@
             "children": [
               {
                 "parentPluginId": "timelines",
-                "id": "def-public.focusColumn.$1.colindexAttributecontainerElementariaColindexariaRowindexrowindexAttribute.colindexAttribute",
+                "id": "def-public.focusColumn.$1.colindexAttribute",
                 "type": "string",
                 "tags": [],
                 "label": "colindexAttribute",
@@ -137,7 +137,7 @@
               },
               {
                 "parentPluginId": "timelines",
-                "id": "def-public.focusColumn.$1.colindexAttributecontainerElementariaColindexariaRowindexrowindexAttribute.containerElement",
+                "id": "def-public.focusColumn.$1.containerElement",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "containerElement",
@@ -150,7 +150,7 @@
               },
               {
                 "parentPluginId": "timelines",
-                "id": "def-public.focusColumn.$1.colindexAttributecontainerElementariaColindexariaRowindexrowindexAttribute.ariaColindex",
+                "id": "def-public.focusColumn.$1.ariaColindex",
                 "type": "number",
                 "tags": [],
                 "label": "ariaColindex",
@@ -160,7 +160,7 @@
               },
               {
                 "parentPluginId": "timelines",
-                "id": "def-public.focusColumn.$1.colindexAttributecontainerElementariaColindexariaRowindexrowindexAttribute.ariaRowindex",
+                "id": "def-public.focusColumn.$1.ariaRowindex",
                 "type": "number",
                 "tags": [],
                 "label": "ariaRowindex",
@@ -170,7 +170,7 @@
               },
               {
                 "parentPluginId": "timelines",
-                "id": "def-public.focusColumn.$1.colindexAttributecontainerElementariaColindexariaRowindexrowindexAttribute.rowindexAttribute",
+                "id": "def-public.focusColumn.$1.rowindexAttribute",
                 "type": "string",
                 "tags": [],
                 "label": "rowindexAttribute",
@@ -201,7 +201,7 @@
         "children": [
           {
             "parentPluginId": "timelines",
-            "id": "def-public.getFocusedAriaColindexCell.$1.containerElementtableClassName",
+            "id": "def-public.getFocusedAriaColindexCell.$1",
             "type": "Object",
             "tags": [],
             "label": "{\n  containerElement,\n  tableClassName,\n}",
@@ -211,7 +211,7 @@
             "children": [
               {
                 "parentPluginId": "timelines",
-                "id": "def-public.getFocusedAriaColindexCell.$1.containerElementtableClassName.containerElement",
+                "id": "def-public.getFocusedAriaColindexCell.$1.containerElement",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "containerElement",
@@ -224,7 +224,7 @@
               },
               {
                 "parentPluginId": "timelines",
-                "id": "def-public.getFocusedAriaColindexCell.$1.containerElementtableClassName.tableClassName",
+                "id": "def-public.getFocusedAriaColindexCell.$1.tableClassName",
                 "type": "string",
                 "tags": [],
                 "label": "tableClassName",
@@ -255,7 +255,7 @@
         "children": [
           {
             "parentPluginId": "timelines",
-            "id": "def-public.getFocusedDataColindexCell.$1.containerElementtableClassName",
+            "id": "def-public.getFocusedDataColindexCell.$1",
             "type": "Object",
             "tags": [],
             "label": "{\n  containerElement,\n  tableClassName,\n}",
@@ -265,7 +265,7 @@
             "children": [
               {
                 "parentPluginId": "timelines",
-                "id": "def-public.getFocusedDataColindexCell.$1.containerElementtableClassName.containerElement",
+                "id": "def-public.getFocusedDataColindexCell.$1.containerElement",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "containerElement",
@@ -278,7 +278,7 @@
               },
               {
                 "parentPluginId": "timelines",
-                "id": "def-public.getFocusedDataColindexCell.$1.containerElementtableClassName.tableClassName",
+                "id": "def-public.getFocusedDataColindexCell.$1.tableClassName",
                 "type": "string",
                 "tags": [],
                 "label": "tableClassName",
@@ -316,6 +316,53 @@
               "number"
             ],
             "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "timelines",
+        "id": "def-public.getPageRowIndex",
+        "type": "Function",
+        "tags": [],
+        "label": "getPageRowIndex",
+        "description": [
+          "\nrowIndex is bigger than `data.length` for pages with page numbers bigger than one.\nFor that reason, we must calculate `rowIndex % itemsPerPage`.\n\nEx:\nGiven `rowIndex` is `13` and `itemsPerPage` is `10`.\nIt means that the `activePage` is `2` and the `pageRowIndex` is `3`\n\n**Warning**:\nBe careful with array out of bounds. `pageRowIndex` can be bigger or equal to `data.length`\n in the scenario where the user changes the event status (Open, Acknowledged, Closed)."
+        ],
+        "signature": [
+          "(rowIndex: number, itemsPerPage: number) => number"
+        ],
+        "path": "x-pack/plugins/timelines/common/utils/pagination.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "timelines",
+            "id": "def-public.getPageRowIndex.$1",
+            "type": "number",
+            "tags": [],
+            "label": "rowIndex",
+            "description": [],
+            "signature": [
+              "number"
+            ],
+            "path": "x-pack/plugins/timelines/common/utils/pagination.ts",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "timelines",
+            "id": "def-public.getPageRowIndex.$2",
+            "type": "number",
+            "tags": [],
+            "label": "itemsPerPage",
+            "description": [],
+            "signature": [
+              "number"
+            ],
+            "path": "x-pack/plugins/timelines/common/utils/pagination.ts",
             "deprecated": false,
             "isRequired": true
           }
@@ -386,7 +433,7 @@
         "children": [
           {
             "parentPluginId": "timelines",
-            "id": "def-public.getTableSkipFocus.$1.containerElementgetFocusedCellshiftKeytableHasFocustableClassName",
+            "id": "def-public.getTableSkipFocus.$1",
             "type": "Object",
             "tags": [],
             "label": "{\n  containerElement,\n  getFocusedCell,\n  shiftKey,\n  tableHasFocus,\n  tableClassName,\n}",
@@ -396,7 +443,7 @@
             "children": [
               {
                 "parentPluginId": "timelines",
-                "id": "def-public.getTableSkipFocus.$1.containerElementgetFocusedCellshiftKeytableHasFocustableClassName.containerElement",
+                "id": "def-public.getTableSkipFocus.$1.containerElement",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "containerElement",
@@ -409,7 +456,7 @@
               },
               {
                 "parentPluginId": "timelines",
-                "id": "def-public.getTableSkipFocus.$1.containerElementgetFocusedCellshiftKeytableHasFocustableClassName.getFocusedCell",
+                "id": "def-public.getTableSkipFocus.$1.getFocusedCell",
                 "type": "Function",
                 "tags": [],
                 "label": "getFocusedCell",
@@ -423,7 +470,7 @@
                 "children": [
                   {
                     "parentPluginId": "timelines",
-                    "id": "def-public.__0",
+                    "id": "def-public.getTableSkipFocus.$1.getFocusedCell.$1",
                     "type": "Object",
                     "tags": [],
                     "label": "__0",
@@ -438,7 +485,7 @@
               },
               {
                 "parentPluginId": "timelines",
-                "id": "def-public.getTableSkipFocus.$1.containerElementgetFocusedCellshiftKeytableHasFocustableClassName.shiftKey",
+                "id": "def-public.getTableSkipFocus.$1.shiftKey",
                 "type": "boolean",
                 "tags": [],
                 "label": "shiftKey",
@@ -448,7 +495,7 @@
               },
               {
                 "parentPluginId": "timelines",
-                "id": "def-public.getTableSkipFocus.$1.containerElementgetFocusedCellshiftKeytableHasFocustableClassName.tableHasFocus",
+                "id": "def-public.getTableSkipFocus.$1.tableHasFocus",
                 "type": "Function",
                 "tags": [],
                 "label": "tableHasFocus",
@@ -461,7 +508,7 @@
                 "children": [
                   {
                     "parentPluginId": "timelines",
-                    "id": "def-public.getTableSkipFocus.$1.containerElementgetFocusedCellshiftKeytableHasFocustableClassName.tableHasFocus.$1",
+                    "id": "def-public.getTableSkipFocus.$1.tableHasFocus.$1",
                     "type": "CompoundType",
                     "tags": [],
                     "label": "containerElement",
@@ -478,7 +525,7 @@
               },
               {
                 "parentPluginId": "timelines",
-                "id": "def-public.getTableSkipFocus.$1.containerElementgetFocusedCellshiftKeytableHasFocustableClassName.tableClassName",
+                "id": "def-public.getTableSkipFocus.$1.tableClassName",
                 "type": "string",
                 "tags": [],
                 "label": "tableClassName",
@@ -548,7 +595,7 @@
         "children": [
           {
             "parentPluginId": "timelines",
-            "id": "def-public.handleSkipFocus.$1.onSkipFocusBackwardsonSkipFocusForwardskipFocus",
+            "id": "def-public.handleSkipFocus.$1",
             "type": "Object",
             "tags": [],
             "label": "{\n  onSkipFocusBackwards,\n  onSkipFocusForward,\n  skipFocus,\n}",
@@ -558,7 +605,7 @@
             "children": [
               {
                 "parentPluginId": "timelines",
-                "id": "def-public.handleSkipFocus.$1.onSkipFocusBackwardsonSkipFocusForwardskipFocus.onSkipFocusBackwards",
+                "id": "def-public.handleSkipFocus.$1.onSkipFocusBackwards",
                 "type": "Function",
                 "tags": [],
                 "label": "onSkipFocusBackwards",
@@ -573,7 +620,7 @@
               },
               {
                 "parentPluginId": "timelines",
-                "id": "def-public.handleSkipFocus.$1.onSkipFocusBackwardsonSkipFocusForwardskipFocus.onSkipFocusForward",
+                "id": "def-public.handleSkipFocus.$1.onSkipFocusForward",
                 "type": "Function",
                 "tags": [],
                 "label": "onSkipFocusForward",
@@ -588,7 +635,7 @@
               },
               {
                 "parentPluginId": "timelines",
-                "id": "def-public.handleSkipFocus.$1.onSkipFocusBackwardsonSkipFocusForwardskipFocus.skipFocus",
+                "id": "def-public.handleSkipFocus.$1.skipFocus",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "skipFocus",
@@ -795,7 +842,7 @@
         "children": [
           {
             "parentPluginId": "timelines",
-            "id": "def-public.onKeyDownFocusHandler.$1.colindexAttributecontainerElementeventmaxAriaColindexmaxAriaRowindexonColumnFocusedrowindexAttribute",
+            "id": "def-public.onKeyDownFocusHandler.$1",
             "type": "Object",
             "tags": [],
             "label": "{\n  colindexAttribute,\n  containerElement,\n  event,\n  maxAriaColindex,\n  maxAriaRowindex,\n  onColumnFocused,\n  rowindexAttribute,\n}",
@@ -805,7 +852,7 @@
             "children": [
               {
                 "parentPluginId": "timelines",
-                "id": "def-public.onKeyDownFocusHandler.$1.colindexAttributecontainerElementeventmaxAriaColindexmaxAriaRowindexonColumnFocusedrowindexAttribute.colindexAttribute",
+                "id": "def-public.onKeyDownFocusHandler.$1.colindexAttribute",
                 "type": "string",
                 "tags": [],
                 "label": "colindexAttribute",
@@ -815,7 +862,7 @@
               },
               {
                 "parentPluginId": "timelines",
-                "id": "def-public.onKeyDownFocusHandler.$1.colindexAttributecontainerElementeventmaxAriaColindexmaxAriaRowindexonColumnFocusedrowindexAttribute.containerElement",
+                "id": "def-public.onKeyDownFocusHandler.$1.containerElement",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "containerElement",
@@ -828,7 +875,7 @@
               },
               {
                 "parentPluginId": "timelines",
-                "id": "def-public.onKeyDownFocusHandler.$1.colindexAttributecontainerElementeventmaxAriaColindexmaxAriaRowindexonColumnFocusedrowindexAttribute.event",
+                "id": "def-public.onKeyDownFocusHandler.$1.event",
                 "type": "Object",
                 "tags": [],
                 "label": "event",
@@ -841,7 +888,7 @@
               },
               {
                 "parentPluginId": "timelines",
-                "id": "def-public.onKeyDownFocusHandler.$1.colindexAttributecontainerElementeventmaxAriaColindexmaxAriaRowindexonColumnFocusedrowindexAttribute.maxAriaColindex",
+                "id": "def-public.onKeyDownFocusHandler.$1.maxAriaColindex",
                 "type": "number",
                 "tags": [],
                 "label": "maxAriaColindex",
@@ -851,7 +898,7 @@
               },
               {
                 "parentPluginId": "timelines",
-                "id": "def-public.onKeyDownFocusHandler.$1.colindexAttributecontainerElementeventmaxAriaColindexmaxAriaRowindexonColumnFocusedrowindexAttribute.maxAriaRowindex",
+                "id": "def-public.onKeyDownFocusHandler.$1.maxAriaRowindex",
                 "type": "number",
                 "tags": [],
                 "label": "maxAriaRowindex",
@@ -861,7 +908,7 @@
               },
               {
                 "parentPluginId": "timelines",
-                "id": "def-public.onKeyDownFocusHandler.$1.colindexAttributecontainerElementeventmaxAriaColindexmaxAriaRowindexonColumnFocusedrowindexAttribute.onColumnFocused",
+                "id": "def-public.onKeyDownFocusHandler.$1.onColumnFocused",
                 "type": "Function",
                 "tags": [],
                 "label": "onColumnFocused",
@@ -875,7 +922,7 @@
                 "children": [
                   {
                     "parentPluginId": "timelines",
-                    "id": "def-public.__0",
+                    "id": "def-public.onKeyDownFocusHandler.$1.onColumnFocused.$1",
                     "type": "Object",
                     "tags": [],
                     "label": "__0",
@@ -890,7 +937,7 @@
               },
               {
                 "parentPluginId": "timelines",
-                "id": "def-public.onKeyDownFocusHandler.$1.colindexAttributecontainerElementeventmaxAriaColindexmaxAriaRowindexonColumnFocusedrowindexAttribute.rowindexAttribute",
+                "id": "def-public.onKeyDownFocusHandler.$1.rowindexAttribute",
                 "type": "string",
                 "tags": [],
                 "label": "rowindexAttribute",
@@ -921,7 +968,7 @@
         "children": [
           {
             "parentPluginId": "timelines",
-            "id": "def-public.skipFocusInContainerTo.$1.containerElementclassName",
+            "id": "def-public.skipFocusInContainerTo.$1",
             "type": "Object",
             "tags": [],
             "label": "{\n  containerElement,\n  className,\n}",
@@ -931,7 +978,7 @@
             "children": [
               {
                 "parentPluginId": "timelines",
-                "id": "def-public.skipFocusInContainerTo.$1.containerElementclassName.containerElement",
+                "id": "def-public.skipFocusInContainerTo.$1.containerElement",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "containerElement",
@@ -944,7 +991,7 @@
               },
               {
                 "parentPluginId": "timelines",
-                "id": "def-public.skipFocusInContainerTo.$1.containerElementclassName.className",
+                "id": "def-public.skipFocusInContainerTo.$1.className",
                 "type": "string",
                 "tags": [],
                 "label": "className",
@@ -976,7 +1023,7 @@
         "children": [
           {
             "parentPluginId": "timelines",
-            "id": "def-public.props",
+            "id": "def-public.StatefulFieldsBrowser.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "props",
@@ -1056,7 +1103,7 @@
         "children": [
           {
             "parentPluginId": "timelines",
-            "id": "def-public.state",
+            "id": "def-public.tGridReducer.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "state",
@@ -1069,7 +1116,7 @@
           },
           {
             "parentPluginId": "timelines",
-            "id": "def-public.action",
+            "id": "def-public.tGridReducer.$2",
             "type": "Object",
             "tags": [],
             "label": "action",
@@ -1091,7 +1138,7 @@
         "label": "useStatusBulkActionItems",
         "description": [],
         "signature": [
-          "({ eventIds, currentStatus, query, indexName, setEventsLoading, setEventsDeleted, onUpdateSuccess, onUpdateFailure, }: ",
+          "({ eventIds, currentStatus, query, indexName, setEventsLoading, setEventsDeleted, onUpdateSuccess, onUpdateFailure, timelineId, }: ",
           {
             "pluginId": "timelines",
             "scope": "common",
@@ -1109,7 +1156,7 @@
             "id": "def-public.useStatusBulkActionItems.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  eventIds,\n  currentStatus,\n  query,\n  indexName,\n  setEventsLoading,\n  setEventsDeleted,\n  onUpdateSuccess,\n  onUpdateFailure,\n}",
+            "label": "{\n  eventIds,\n  currentStatus,\n  query,\n  indexName,\n  setEventsLoading,\n  setEventsDeleted,\n  onUpdateSuccess,\n  onUpdateFailure,\n  timelineId,\n}",
             "description": [],
             "signature": [
               {
@@ -1546,7 +1593,7 @@
         "children": [
           {
             "parentPluginId": "timelines",
-            "id": "def-public.__0",
+            "id": "def-public.OnColumnFocused.$1",
             "type": "Object",
             "tags": [],
             "label": "__0",
@@ -1593,7 +1640,7 @@
           "EuiDataGridColumn",
           ", \"id\" | \"display\" | \"displayAsText\" | \"initialWidth\"> & Pick<",
           "EuiDataGridColumn",
-          ", \"id\" | \"display\" | \"actions\" | \"defaultSortDirection\" | \"displayAsText\" | \"initialWidth\" | \"isSortable\"> & { aggregatable?: boolean | undefined; tGridCellActions?: ",
+          ", \"id\" | \"schema\" | \"display\" | \"actions\" | \"defaultSortDirection\" | \"displayAsText\" | \"initialWidth\" | \"isSortable\"> & { aggregatable?: boolean | undefined; tGridCellActions?: ",
           {
             "pluginId": "timelines",
             "scope": "common",
@@ -1610,10 +1657,18 @@
             "text": "ColumnHeaderType"
           },
           "; description?: string | undefined; example?: string | undefined; format?: string | undefined; linkField?: string | undefined; placeholder?: string | undefined; subType?: ",
-          "IFieldSubType",
-          " | undefined; type?: string | undefined; })[]; filters?: ",
-          "Filter",
-          "[] | undefined; title: string; id: string; sort: ",
+          "IFieldSubTypeMultiOptional",
+          " | ",
+          "IFieldSubTypeNestedOptional",
+          " | undefined; type?: string | undefined; })[]; id: string; title: string; filters?: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
+          "[] | undefined; sort: ",
           {
             "pluginId": "timelines",
             "scope": "common",
@@ -1621,11 +1676,19 @@
             "section": "def-common.SortColumnTimeline",
             "text": "SortColumnTimeline"
           },
-          "[]; version: string | null; isLoading: boolean; dateRange: { start: string; end: string; }; defaultColumns: (Pick<",
+          "[]; version: string | null; isLoading: boolean; filterManager?: ",
+          {
+            "pluginId": "data",
+            "scope": "public",
+            "docId": "kibDataQueryPluginApi",
+            "section": "def-public.FilterManager",
+            "text": "FilterManager"
+          },
+          " | undefined; dateRange: { start: string; end: string; }; defaultColumns: (Pick<",
           "EuiDataGridColumn",
           ", \"id\" | \"display\" | \"displayAsText\" | \"initialWidth\"> & Pick<",
           "EuiDataGridColumn",
-          ", \"id\" | \"display\" | \"actions\" | \"defaultSortDirection\" | \"displayAsText\" | \"initialWidth\" | \"isSortable\"> & { aggregatable?: boolean | undefined; tGridCellActions?: ",
+          ", \"id\" | \"schema\" | \"display\" | \"actions\" | \"defaultSortDirection\" | \"displayAsText\" | \"initialWidth\" | \"isSortable\"> & { aggregatable?: boolean | undefined; tGridCellActions?: ",
           {
             "pluginId": "timelines",
             "scope": "common",
@@ -1642,8 +1705,10 @@
             "text": "ColumnHeaderType"
           },
           "; description?: string | undefined; example?: string | undefined; format?: string | undefined; linkField?: string | undefined; placeholder?: string | undefined; subType?: ",
-          "IFieldSubType",
-          " | undefined; type?: string | undefined; })[]; savedObjectId: string | null; dataProviders: ",
+          "IFieldSubTypeMultiOptional",
+          " | ",
+          "IFieldSubTypeNestedOptional",
+          " | undefined; type?: string | undefined; })[]; savedObjectId: string | null; unit?: ((n: number) => React.ReactNode) | undefined; dataProviders: ",
           {
             "pluginId": "timelines",
             "scope": "common",
@@ -1651,7 +1716,7 @@
             "section": "def-common.DataProvider",
             "text": "DataProvider"
           },
-          "[]; deletedEventIds: string[]; excludedRowRendererIds: ",
+          "[]; deletedEventIds: string[]; documentType: string; excludedRowRendererIds: ",
           {
             "pluginId": "timelines",
             "scope": "common",
@@ -1659,15 +1724,15 @@
             "section": "def-common.RowRendererId",
             "text": "RowRendererId"
           },
-          "[]; expandedDetail: ",
+          "[]; expandedDetail: Partial<Record<string, ",
           {
             "pluginId": "timelines",
             "scope": "common",
             "docId": "kibTimelinesPluginApi",
-            "section": "def-common.TimelineExpandedDetail",
-            "text": "TimelineExpandedDetail"
+            "section": "def-common.TimelineExpandedDetailType",
+            "text": "TimelineExpandedDetailType"
           },
-          "; graphEventId?: string | undefined; kqlQuery: { filterQuery: ",
+          ">>; footerText?: React.ReactNode; graphEventId?: string | undefined; kqlQuery: { filterQuery: ",
           {
             "pluginId": "timelines",
             "scope": "common",
@@ -1675,7 +1740,7 @@
             "section": "def-common.SerializedFilterQuery",
             "text": "SerializedFilterQuery"
           },
-          " | null; }; indexNames: string[]; isSelectAllChecked: boolean; itemsPerPage: number; itemsPerPageOptions: number[]; loadingEventIds: string[]; showCheckboxes: boolean; selectedEventIds: Record<string, ",
+          " | null; }; queryFields: string[]; indexNames: string[]; isSelectAllChecked: boolean; itemsPerPage: number; itemsPerPageOptions: number[]; loadingEventIds: string[]; loadingText?: React.ReactNode; selectAll: boolean; showCheckboxes: boolean; selectedEventIds: Record<string, ",
           {
             "pluginId": "timelines",
             "scope": "common",
@@ -1707,6 +1772,22 @@
     "objects": [
       {
         "parentPluginId": "timelines",
+        "id": "def-public.StatefulEventContext",
+        "type": "Object",
+        "tags": [],
+        "label": "StatefulEventContext",
+        "description": [],
+        "signature": [
+          "React.Context<",
+          "StatefulEventContextType",
+          " | null>"
+        ],
+        "path": "x-pack/plugins/timelines/public/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "timelines",
         "id": "def-public.tGridActions",
         "type": "Object",
         "tags": [],
@@ -1732,6 +1813,20 @@
           "x-pack/plugins/timelines/public/store/t_grid/selectors"
         ],
         "path": "x-pack/plugins/timelines/public/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "timelines",
+        "id": "def-public.TimelineContext",
+        "type": "Object",
+        "tags": [],
+        "label": "TimelineContext",
+        "description": [],
+        "signature": [
+          "React.Context<{ timelineId: string | null; }>"
+        ],
+        "path": "x-pack/plugins/timelines/public/components/t_grid/shared/index.tsx",
         "deprecated": false,
         "initialIsOpen": false
       }
@@ -2306,7 +2401,7 @@
         "children": [
           {
             "parentPluginId": "timelines",
-            "id": "def-common.focusColumn.$1.colindexAttributecontainerElementariaColindexariaRowindexrowindexAttribute",
+            "id": "def-common.focusColumn.$1",
             "type": "Object",
             "tags": [],
             "label": "{\n  colindexAttribute,\n  containerElement,\n  ariaColindex,\n  ariaRowindex,\n  rowindexAttribute,\n}",
@@ -2316,7 +2411,7 @@
             "children": [
               {
                 "parentPluginId": "timelines",
-                "id": "def-common.focusColumn.$1.colindexAttributecontainerElementariaColindexariaRowindexrowindexAttribute.colindexAttribute",
+                "id": "def-common.focusColumn.$1.colindexAttribute",
                 "type": "string",
                 "tags": [],
                 "label": "colindexAttribute",
@@ -2326,7 +2421,7 @@
               },
               {
                 "parentPluginId": "timelines",
-                "id": "def-common.focusColumn.$1.colindexAttributecontainerElementariaColindexariaRowindexrowindexAttribute.containerElement",
+                "id": "def-common.focusColumn.$1.containerElement",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "containerElement",
@@ -2339,7 +2434,7 @@
               },
               {
                 "parentPluginId": "timelines",
-                "id": "def-common.focusColumn.$1.colindexAttributecontainerElementariaColindexariaRowindexrowindexAttribute.ariaColindex",
+                "id": "def-common.focusColumn.$1.ariaColindex",
                 "type": "number",
                 "tags": [],
                 "label": "ariaColindex",
@@ -2349,7 +2444,7 @@
               },
               {
                 "parentPluginId": "timelines",
-                "id": "def-common.focusColumn.$1.colindexAttributecontainerElementariaColindexariaRowindexrowindexAttribute.ariaRowindex",
+                "id": "def-common.focusColumn.$1.ariaRowindex",
                 "type": "number",
                 "tags": [],
                 "label": "ariaRowindex",
@@ -2359,7 +2454,7 @@
               },
               {
                 "parentPluginId": "timelines",
-                "id": "def-common.focusColumn.$1.colindexAttributecontainerElementariaColindexariaRowindexrowindexAttribute.rowindexAttribute",
+                "id": "def-common.focusColumn.$1.rowindexAttribute",
                 "type": "string",
                 "tags": [],
                 "label": "rowindexAttribute",
@@ -2423,7 +2518,7 @@
         "children": [
           {
             "parentPluginId": "timelines",
-            "id": "def-common.focusedCellHasMoreFocusableChildren.$1.focusedCellshiftKey",
+            "id": "def-common.focusedCellHasMoreFocusableChildren.$1",
             "type": "Object",
             "tags": [],
             "label": "{\n  focusedCell,\n  shiftKey,\n}",
@@ -2433,7 +2528,7 @@
             "children": [
               {
                 "parentPluginId": "timelines",
-                "id": "def-common.focusedCellHasMoreFocusableChildren.$1.focusedCellshiftKey.focusedCell",
+                "id": "def-common.focusedCellHasMoreFocusableChildren.$1.focusedCell",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "focusedCell",
@@ -2446,7 +2541,7 @@
               },
               {
                 "parentPluginId": "timelines",
-                "id": "def-common.focusedCellHasMoreFocusableChildren.$1.focusedCellshiftKey.shiftKey",
+                "id": "def-common.focusedCellHasMoreFocusableChildren.$1.shiftKey",
                 "type": "boolean",
                 "tags": [],
                 "label": "shiftKey",
@@ -2510,7 +2605,7 @@
         "children": [
           {
             "parentPluginId": "timelines",
-            "id": "def-common.getColindex.$1.colindexAttributeelement",
+            "id": "def-common.getColindex.$1",
             "type": "Object",
             "tags": [],
             "label": "{\n  colindexAttribute,\n  element,\n}",
@@ -2520,7 +2615,7 @@
             "children": [
               {
                 "parentPluginId": "timelines",
-                "id": "def-common.getColindex.$1.colindexAttributeelement.colindexAttribute",
+                "id": "def-common.getColindex.$1.colindexAttribute",
                 "type": "string",
                 "tags": [],
                 "label": "colindexAttribute",
@@ -2530,7 +2625,7 @@
               },
               {
                 "parentPluginId": "timelines",
-                "id": "def-common.getColindex.$1.colindexAttributeelement.element",
+                "id": "def-common.getColindex.$1.element",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "element",
@@ -2564,7 +2659,7 @@
         "children": [
           {
             "parentPluginId": "timelines",
-            "id": "def-common.getElementWithMatchingAriaColindex.$1.ariaColindexcolindexAttributeelement",
+            "id": "def-common.getElementWithMatchingAriaColindex.$1",
             "type": "Object",
             "tags": [],
             "label": "{\n  ariaColindex,\n  colindexAttribute,\n  element,\n}",
@@ -2574,7 +2669,7 @@
             "children": [
               {
                 "parentPluginId": "timelines",
-                "id": "def-common.getElementWithMatchingAriaColindex.$1.ariaColindexcolindexAttributeelement.ariaColindex",
+                "id": "def-common.getElementWithMatchingAriaColindex.$1.ariaColindex",
                 "type": "number",
                 "tags": [],
                 "label": "ariaColindex",
@@ -2584,7 +2679,7 @@
               },
               {
                 "parentPluginId": "timelines",
-                "id": "def-common.getElementWithMatchingAriaColindex.$1.ariaColindexcolindexAttributeelement.colindexAttribute",
+                "id": "def-common.getElementWithMatchingAriaColindex.$1.colindexAttribute",
                 "type": "string",
                 "tags": [],
                 "label": "colindexAttribute",
@@ -2594,7 +2689,7 @@
               },
               {
                 "parentPluginId": "timelines",
-                "id": "def-common.getElementWithMatchingAriaColindex.$1.ariaColindexcolindexAttributeelement.element",
+                "id": "def-common.getElementWithMatchingAriaColindex.$1.element",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "element",
@@ -2626,7 +2721,7 @@
         "children": [
           {
             "parentPluginId": "timelines",
-            "id": "def-common.getFirstNonVisibleAriaRowindex.$1.focusedAriaRowindexelementeventmaxAriaRowindexrowindexAttribute",
+            "id": "def-common.getFirstNonVisibleAriaRowindex.$1",
             "type": "Object",
             "tags": [],
             "label": "{\n  focusedAriaRowindex,\n  element,\n  event,\n  maxAriaRowindex,\n  rowindexAttribute,\n}",
@@ -2636,7 +2731,7 @@
             "children": [
               {
                 "parentPluginId": "timelines",
-                "id": "def-common.getFirstNonVisibleAriaRowindex.$1.focusedAriaRowindexelementeventmaxAriaRowindexrowindexAttribute.focusedAriaRowindex",
+                "id": "def-common.getFirstNonVisibleAriaRowindex.$1.focusedAriaRowindex",
                 "type": "number",
                 "tags": [],
                 "label": "focusedAriaRowindex",
@@ -2646,7 +2741,7 @@
               },
               {
                 "parentPluginId": "timelines",
-                "id": "def-common.getFirstNonVisibleAriaRowindex.$1.focusedAriaRowindexelementeventmaxAriaRowindexrowindexAttribute.element",
+                "id": "def-common.getFirstNonVisibleAriaRowindex.$1.element",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "element",
@@ -2659,7 +2754,7 @@
               },
               {
                 "parentPluginId": "timelines",
-                "id": "def-common.getFirstNonVisibleAriaRowindex.$1.focusedAriaRowindexelementeventmaxAriaRowindexrowindexAttribute.event",
+                "id": "def-common.getFirstNonVisibleAriaRowindex.$1.event",
                 "type": "Object",
                 "tags": [],
                 "label": "event",
@@ -2672,7 +2767,7 @@
               },
               {
                 "parentPluginId": "timelines",
-                "id": "def-common.getFirstNonVisibleAriaRowindex.$1.focusedAriaRowindexelementeventmaxAriaRowindexrowindexAttribute.maxAriaRowindex",
+                "id": "def-common.getFirstNonVisibleAriaRowindex.$1.maxAriaRowindex",
                 "type": "number",
                 "tags": [],
                 "label": "maxAriaRowindex",
@@ -2682,7 +2777,7 @@
               },
               {
                 "parentPluginId": "timelines",
-                "id": "def-common.getFirstNonVisibleAriaRowindex.$1.focusedAriaRowindexelementeventmaxAriaRowindexrowindexAttribute.rowindexAttribute",
+                "id": "def-common.getFirstNonVisibleAriaRowindex.$1.rowindexAttribute",
                 "type": "string",
                 "tags": [],
                 "label": "rowindexAttribute",
@@ -2713,7 +2808,7 @@
         "children": [
           {
             "parentPluginId": "timelines",
-            "id": "def-common.getFirstOrLastAriaRowindex.$1.eventmaxAriaRowindex",
+            "id": "def-common.getFirstOrLastAriaRowindex.$1",
             "type": "Object",
             "tags": [],
             "label": "{\n  event,\n  maxAriaRowindex,\n}",
@@ -2723,7 +2818,7 @@
             "children": [
               {
                 "parentPluginId": "timelines",
-                "id": "def-common.getFirstOrLastAriaRowindex.$1.eventmaxAriaRowindex.event",
+                "id": "def-common.getFirstOrLastAriaRowindex.$1.event",
                 "type": "Object",
                 "tags": [],
                 "label": "event",
@@ -2736,7 +2831,7 @@
               },
               {
                 "parentPluginId": "timelines",
-                "id": "def-common.getFirstOrLastAriaRowindex.$1.eventmaxAriaRowindex.maxAriaRowindex",
+                "id": "def-common.getFirstOrLastAriaRowindex.$1.maxAriaRowindex",
                 "type": "number",
                 "tags": [],
                 "label": "maxAriaRowindex",
@@ -2808,7 +2903,7 @@
         "children": [
           {
             "parentPluginId": "timelines",
-            "id": "def-common.getFocusedAriaColindexCell.$1.containerElementtableClassName",
+            "id": "def-common.getFocusedAriaColindexCell.$1",
             "type": "Object",
             "tags": [],
             "label": "{\n  containerElement,\n  tableClassName,\n}",
@@ -2818,7 +2913,7 @@
             "children": [
               {
                 "parentPluginId": "timelines",
-                "id": "def-common.getFocusedAriaColindexCell.$1.containerElementtableClassName.containerElement",
+                "id": "def-common.getFocusedAriaColindexCell.$1.containerElement",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "containerElement",
@@ -2831,7 +2926,7 @@
               },
               {
                 "parentPluginId": "timelines",
-                "id": "def-common.getFocusedAriaColindexCell.$1.containerElementtableClassName.tableClassName",
+                "id": "def-common.getFocusedAriaColindexCell.$1.tableClassName",
                 "type": "string",
                 "tags": [],
                 "label": "tableClassName",
@@ -2862,7 +2957,7 @@
         "children": [
           {
             "parentPluginId": "timelines",
-            "id": "def-common.getFocusedColumn.$1.colindexAttributeelement",
+            "id": "def-common.getFocusedColumn.$1",
             "type": "Object",
             "tags": [],
             "label": "{\n  colindexAttribute,\n  element,\n}",
@@ -2872,7 +2967,7 @@
             "children": [
               {
                 "parentPluginId": "timelines",
-                "id": "def-common.getFocusedColumn.$1.colindexAttributeelement.colindexAttribute",
+                "id": "def-common.getFocusedColumn.$1.colindexAttribute",
                 "type": "string",
                 "tags": [],
                 "label": "colindexAttribute",
@@ -2882,7 +2977,7 @@
               },
               {
                 "parentPluginId": "timelines",
-                "id": "def-common.getFocusedColumn.$1.colindexAttributeelement.element",
+                "id": "def-common.getFocusedColumn.$1.element",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "element",
@@ -2916,7 +3011,7 @@
         "children": [
           {
             "parentPluginId": "timelines",
-            "id": "def-common.getFocusedDataColindexCell.$1.containerElementtableClassName",
+            "id": "def-common.getFocusedDataColindexCell.$1",
             "type": "Object",
             "tags": [],
             "label": "{\n  containerElement,\n  tableClassName,\n}",
@@ -2926,7 +3021,7 @@
             "children": [
               {
                 "parentPluginId": "timelines",
-                "id": "def-common.getFocusedDataColindexCell.$1.containerElementtableClassName.containerElement",
+                "id": "def-common.getFocusedDataColindexCell.$1.containerElement",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "containerElement",
@@ -2939,7 +3034,7 @@
               },
               {
                 "parentPluginId": "timelines",
-                "id": "def-common.getFocusedDataColindexCell.$1.containerElementtableClassName.tableClassName",
+                "id": "def-common.getFocusedDataColindexCell.$1.tableClassName",
                 "type": "string",
                 "tags": [],
                 "label": "tableClassName",
@@ -2970,7 +3065,7 @@
         "children": [
           {
             "parentPluginId": "timelines",
-            "id": "def-common.getFocusedRow.$1.rowindexAttributeelement",
+            "id": "def-common.getFocusedRow.$1",
             "type": "Object",
             "tags": [],
             "label": "{\n  rowindexAttribute,\n  element,\n}",
@@ -2980,7 +3075,7 @@
             "children": [
               {
                 "parentPluginId": "timelines",
-                "id": "def-common.getFocusedRow.$1.rowindexAttributeelement.rowindexAttribute",
+                "id": "def-common.getFocusedRow.$1.rowindexAttribute",
                 "type": "string",
                 "tags": [],
                 "label": "rowindexAttribute",
@@ -2990,7 +3085,7 @@
               },
               {
                 "parentPluginId": "timelines",
-                "id": "def-common.getFocusedRow.$1.rowindexAttributeelement.element",
+                "id": "def-common.getFocusedRow.$1.element",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "element",
@@ -3057,7 +3152,7 @@
         "children": [
           {
             "parentPluginId": "timelines",
-            "id": "def-common.getNewAriaColindex.$1.focusedAriaColindexfocusOnmaxAriaColindex",
+            "id": "def-common.getNewAriaColindex.$1",
             "type": "Object",
             "tags": [],
             "label": "{\n  focusedAriaColindex,\n  focusOn,\n  maxAriaColindex,\n}",
@@ -3067,7 +3162,7 @@
             "children": [
               {
                 "parentPluginId": "timelines",
-                "id": "def-common.getNewAriaColindex.$1.focusedAriaColindexfocusOnmaxAriaColindex.focusedAriaColindex",
+                "id": "def-common.getNewAriaColindex.$1.focusedAriaColindex",
                 "type": "number",
                 "tags": [],
                 "label": "focusedAriaColindex",
@@ -3077,7 +3172,7 @@
               },
               {
                 "parentPluginId": "timelines",
-                "id": "def-common.getNewAriaColindex.$1.focusedAriaColindexfocusOnmaxAriaColindex.focusOn",
+                "id": "def-common.getNewAriaColindex.$1.focusOn",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "focusOn",
@@ -3090,7 +3185,7 @@
               },
               {
                 "parentPluginId": "timelines",
-                "id": "def-common.getNewAriaColindex.$1.focusedAriaColindexfocusOnmaxAriaColindex.maxAriaColindex",
+                "id": "def-common.getNewAriaColindex.$1.maxAriaColindex",
                 "type": "number",
                 "tags": [],
                 "label": "maxAriaColindex",
@@ -3121,7 +3216,7 @@
         "children": [
           {
             "parentPluginId": "timelines",
-            "id": "def-common.getNewAriaRowindex.$1.focusedAriaRowindexfocusOnmaxAriaRowindex",
+            "id": "def-common.getNewAriaRowindex.$1",
             "type": "Object",
             "tags": [],
             "label": "{\n  focusedAriaRowindex,\n  focusOn,\n  maxAriaRowindex,\n}",
@@ -3131,7 +3226,7 @@
             "children": [
               {
                 "parentPluginId": "timelines",
-                "id": "def-common.getNewAriaRowindex.$1.focusedAriaRowindexfocusOnmaxAriaRowindex.focusedAriaRowindex",
+                "id": "def-common.getNewAriaRowindex.$1.focusedAriaRowindex",
                 "type": "number",
                 "tags": [],
                 "label": "focusedAriaRowindex",
@@ -3141,7 +3236,7 @@
               },
               {
                 "parentPluginId": "timelines",
-                "id": "def-common.getNewAriaRowindex.$1.focusedAriaRowindexfocusOnmaxAriaRowindex.focusOn",
+                "id": "def-common.getNewAriaRowindex.$1.focusOn",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "focusOn",
@@ -3154,7 +3249,7 @@
               },
               {
                 "parentPluginId": "timelines",
-                "id": "def-common.getNewAriaRowindex.$1.focusedAriaRowindexfocusOnmaxAriaRowindex.maxAriaRowindex",
+                "id": "def-common.getNewAriaRowindex.$1.maxAriaRowindex",
                 "type": "number",
                 "tags": [],
                 "label": "maxAriaRowindex",
@@ -3216,7 +3311,7 @@
         "children": [
           {
             "parentPluginId": "timelines",
-            "id": "def-common.getRowByAriaRowindex.$1.ariaRowindexelementrowindexAttribute",
+            "id": "def-common.getRowByAriaRowindex.$1",
             "type": "Object",
             "tags": [],
             "label": "{\n  ariaRowindex,\n  element,\n  rowindexAttribute,\n}",
@@ -3226,7 +3321,7 @@
             "children": [
               {
                 "parentPluginId": "timelines",
-                "id": "def-common.getRowByAriaRowindex.$1.ariaRowindexelementrowindexAttribute.ariaRowindex",
+                "id": "def-common.getRowByAriaRowindex.$1.ariaRowindex",
                 "type": "number",
                 "tags": [],
                 "label": "ariaRowindex",
@@ -3236,7 +3331,7 @@
               },
               {
                 "parentPluginId": "timelines",
-                "id": "def-common.getRowByAriaRowindex.$1.ariaRowindexelementrowindexAttribute.element",
+                "id": "def-common.getRowByAriaRowindex.$1.element",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "element",
@@ -3249,7 +3344,7 @@
               },
               {
                 "parentPluginId": "timelines",
-                "id": "def-common.getRowByAriaRowindex.$1.ariaRowindexelementrowindexAttribute.rowindexAttribute",
+                "id": "def-common.getRowByAriaRowindex.$1.rowindexAttribute",
                 "type": "string",
                 "tags": [],
                 "label": "rowindexAttribute",
@@ -3280,7 +3375,7 @@
         "children": [
           {
             "parentPluginId": "timelines",
-            "id": "def-common.getRowindex.$1.rowindexAttributeelement",
+            "id": "def-common.getRowindex.$1",
             "type": "Object",
             "tags": [],
             "label": "{\n  rowindexAttribute,\n  element,\n}",
@@ -3290,7 +3385,7 @@
             "children": [
               {
                 "parentPluginId": "timelines",
-                "id": "def-common.getRowindex.$1.rowindexAttributeelement.rowindexAttribute",
+                "id": "def-common.getRowindex.$1.rowindexAttribute",
                 "type": "string",
                 "tags": [],
                 "label": "rowindexAttribute",
@@ -3300,7 +3395,7 @@
               },
               {
                 "parentPluginId": "timelines",
-                "id": "def-common.getRowindex.$1.rowindexAttributeelement.element",
+                "id": "def-common.getRowindex.$1.element",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "element",
@@ -3380,7 +3475,7 @@
         "children": [
           {
             "parentPluginId": "timelines",
-            "id": "def-common.getTableSkipFocus.$1.containerElementgetFocusedCellshiftKeytableHasFocustableClassName",
+            "id": "def-common.getTableSkipFocus.$1",
             "type": "Object",
             "tags": [],
             "label": "{\n  containerElement,\n  getFocusedCell,\n  shiftKey,\n  tableHasFocus,\n  tableClassName,\n}",
@@ -3390,7 +3485,7 @@
             "children": [
               {
                 "parentPluginId": "timelines",
-                "id": "def-common.getTableSkipFocus.$1.containerElementgetFocusedCellshiftKeytableHasFocustableClassName.containerElement",
+                "id": "def-common.getTableSkipFocus.$1.containerElement",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "containerElement",
@@ -3403,7 +3498,7 @@
               },
               {
                 "parentPluginId": "timelines",
-                "id": "def-common.getTableSkipFocus.$1.containerElementgetFocusedCellshiftKeytableHasFocustableClassName.getFocusedCell",
+                "id": "def-common.getTableSkipFocus.$1.getFocusedCell",
                 "type": "Function",
                 "tags": [],
                 "label": "getFocusedCell",
@@ -3417,7 +3512,7 @@
                 "children": [
                   {
                     "parentPluginId": "timelines",
-                    "id": "def-common.__0",
+                    "id": "def-common.getTableSkipFocus.$1.getFocusedCell.$1",
                     "type": "Object",
                     "tags": [],
                     "label": "__0",
@@ -3432,7 +3527,7 @@
               },
               {
                 "parentPluginId": "timelines",
-                "id": "def-common.getTableSkipFocus.$1.containerElementgetFocusedCellshiftKeytableHasFocustableClassName.shiftKey",
+                "id": "def-common.getTableSkipFocus.$1.shiftKey",
                 "type": "boolean",
                 "tags": [],
                 "label": "shiftKey",
@@ -3442,7 +3537,7 @@
               },
               {
                 "parentPluginId": "timelines",
-                "id": "def-common.getTableSkipFocus.$1.containerElementgetFocusedCellshiftKeytableHasFocustableClassName.tableHasFocus",
+                "id": "def-common.getTableSkipFocus.$1.tableHasFocus",
                 "type": "Function",
                 "tags": [],
                 "label": "tableHasFocus",
@@ -3455,7 +3550,7 @@
                 "children": [
                   {
                     "parentPluginId": "timelines",
-                    "id": "def-common.getTableSkipFocus.$1.containerElementgetFocusedCellshiftKeytableHasFocustableClassName.tableHasFocus.$1",
+                    "id": "def-common.getTableSkipFocus.$1.tableHasFocus.$1",
                     "type": "CompoundType",
                     "tags": [],
                     "label": "containerElement",
@@ -3472,7 +3567,7 @@
               },
               {
                 "parentPluginId": "timelines",
-                "id": "def-common.getTableSkipFocus.$1.containerElementgetFocusedCellshiftKeytableHasFocustableClassName.tableClassName",
+                "id": "def-common.getTableSkipFocus.$1.tableClassName",
                 "type": "string",
                 "tags": [],
                 "label": "tableClassName",
@@ -3556,7 +3651,7 @@
         "children": [
           {
             "parentPluginId": "timelines",
-            "id": "def-common.handleSkipFocus.$1.onSkipFocusBackwardsonSkipFocusForwardskipFocus",
+            "id": "def-common.handleSkipFocus.$1",
             "type": "Object",
             "tags": [],
             "label": "{\n  onSkipFocusBackwards,\n  onSkipFocusForward,\n  skipFocus,\n}",
@@ -3566,7 +3661,7 @@
             "children": [
               {
                 "parentPluginId": "timelines",
-                "id": "def-common.handleSkipFocus.$1.onSkipFocusBackwardsonSkipFocusForwardskipFocus.onSkipFocusBackwards",
+                "id": "def-common.handleSkipFocus.$1.onSkipFocusBackwards",
                 "type": "Function",
                 "tags": [],
                 "label": "onSkipFocusBackwards",
@@ -3581,7 +3676,7 @@
               },
               {
                 "parentPluginId": "timelines",
-                "id": "def-common.handleSkipFocus.$1.onSkipFocusBackwardsonSkipFocusForwardskipFocus.onSkipFocusForward",
+                "id": "def-common.handleSkipFocus.$1.onSkipFocusForward",
                 "type": "Function",
                 "tags": [],
                 "label": "onSkipFocusForward",
@@ -3596,7 +3691,7 @@
               },
               {
                 "parentPluginId": "timelines",
-                "id": "def-common.handleSkipFocus.$1.onSkipFocusBackwardsonSkipFocusForwardskipFocus.skipFocus",
+                "id": "def-common.handleSkipFocus.$1.skipFocus",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "skipFocus",
@@ -4176,7 +4271,7 @@
         "children": [
           {
             "parentPluginId": "timelines",
-            "id": "def-common.onArrowKeyDown.$1.colindexAttributecontainerElementeventfocusedAriaColindexfocusedAriaRowindexmaxAriaColindexmaxAriaRowindexonColumnFocusedrowindexAttribute",
+            "id": "def-common.onArrowKeyDown.$1",
             "type": "Object",
             "tags": [],
             "label": "{\n  colindexAttribute,\n  containerElement,\n  event,\n  focusedAriaColindex,\n  focusedAriaRowindex,\n  maxAriaColindex,\n  maxAriaRowindex,\n  onColumnFocused,\n  rowindexAttribute,\n}",
@@ -4186,7 +4281,7 @@
             "children": [
               {
                 "parentPluginId": "timelines",
-                "id": "def-common.onArrowKeyDown.$1.colindexAttributecontainerElementeventfocusedAriaColindexfocusedAriaRowindexmaxAriaColindexmaxAriaRowindexonColumnFocusedrowindexAttribute.colindexAttribute",
+                "id": "def-common.onArrowKeyDown.$1.colindexAttribute",
                 "type": "string",
                 "tags": [],
                 "label": "colindexAttribute",
@@ -4196,7 +4291,7 @@
               },
               {
                 "parentPluginId": "timelines",
-                "id": "def-common.onArrowKeyDown.$1.colindexAttributecontainerElementeventfocusedAriaColindexfocusedAriaRowindexmaxAriaColindexmaxAriaRowindexonColumnFocusedrowindexAttribute.containerElement",
+                "id": "def-common.onArrowKeyDown.$1.containerElement",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "containerElement",
@@ -4209,7 +4304,7 @@
               },
               {
                 "parentPluginId": "timelines",
-                "id": "def-common.onArrowKeyDown.$1.colindexAttributecontainerElementeventfocusedAriaColindexfocusedAriaRowindexmaxAriaColindexmaxAriaRowindexonColumnFocusedrowindexAttribute.event",
+                "id": "def-common.onArrowKeyDown.$1.event",
                 "type": "Object",
                 "tags": [],
                 "label": "event",
@@ -4222,7 +4317,7 @@
               },
               {
                 "parentPluginId": "timelines",
-                "id": "def-common.onArrowKeyDown.$1.colindexAttributecontainerElementeventfocusedAriaColindexfocusedAriaRowindexmaxAriaColindexmaxAriaRowindexonColumnFocusedrowindexAttribute.focusedAriaColindex",
+                "id": "def-common.onArrowKeyDown.$1.focusedAriaColindex",
                 "type": "number",
                 "tags": [],
                 "label": "focusedAriaColindex",
@@ -4232,7 +4327,7 @@
               },
               {
                 "parentPluginId": "timelines",
-                "id": "def-common.onArrowKeyDown.$1.colindexAttributecontainerElementeventfocusedAriaColindexfocusedAriaRowindexmaxAriaColindexmaxAriaRowindexonColumnFocusedrowindexAttribute.focusedAriaRowindex",
+                "id": "def-common.onArrowKeyDown.$1.focusedAriaRowindex",
                 "type": "number",
                 "tags": [],
                 "label": "focusedAriaRowindex",
@@ -4242,7 +4337,7 @@
               },
               {
                 "parentPluginId": "timelines",
-                "id": "def-common.onArrowKeyDown.$1.colindexAttributecontainerElementeventfocusedAriaColindexfocusedAriaRowindexmaxAriaColindexmaxAriaRowindexonColumnFocusedrowindexAttribute.maxAriaColindex",
+                "id": "def-common.onArrowKeyDown.$1.maxAriaColindex",
                 "type": "number",
                 "tags": [],
                 "label": "maxAriaColindex",
@@ -4252,7 +4347,7 @@
               },
               {
                 "parentPluginId": "timelines",
-                "id": "def-common.onArrowKeyDown.$1.colindexAttributecontainerElementeventfocusedAriaColindexfocusedAriaRowindexmaxAriaColindexmaxAriaRowindexonColumnFocusedrowindexAttribute.maxAriaRowindex",
+                "id": "def-common.onArrowKeyDown.$1.maxAriaRowindex",
                 "type": "number",
                 "tags": [],
                 "label": "maxAriaRowindex",
@@ -4262,7 +4357,7 @@
               },
               {
                 "parentPluginId": "timelines",
-                "id": "def-common.onArrowKeyDown.$1.colindexAttributecontainerElementeventfocusedAriaColindexfocusedAriaRowindexmaxAriaColindexmaxAriaRowindexonColumnFocusedrowindexAttribute.onColumnFocused",
+                "id": "def-common.onArrowKeyDown.$1.onColumnFocused",
                 "type": "Function",
                 "tags": [],
                 "label": "onColumnFocused",
@@ -4282,7 +4377,7 @@
               },
               {
                 "parentPluginId": "timelines",
-                "id": "def-common.onArrowKeyDown.$1.colindexAttributecontainerElementeventfocusedAriaColindexfocusedAriaRowindexmaxAriaColindexmaxAriaRowindexonColumnFocusedrowindexAttribute.rowindexAttribute",
+                "id": "def-common.onArrowKeyDown.$1.rowindexAttribute",
                 "type": "string",
                 "tags": [],
                 "label": "rowindexAttribute",
@@ -4354,7 +4449,7 @@
         "children": [
           {
             "parentPluginId": "timelines",
-            "id": "def-common.onHomeEndDown.$1.colindexAttributecontainerElementeventfocusedAriaRowindexmaxAriaColindexmaxAriaRowindexonColumnFocusedrowindexAttribute",
+            "id": "def-common.onHomeEndDown.$1",
             "type": "Object",
             "tags": [],
             "label": "{\n  colindexAttribute,\n  containerElement,\n  event,\n  focusedAriaRowindex,\n  maxAriaColindex,\n  maxAriaRowindex,\n  onColumnFocused,\n  rowindexAttribute,\n}",
@@ -4364,7 +4459,7 @@
             "children": [
               {
                 "parentPluginId": "timelines",
-                "id": "def-common.onHomeEndDown.$1.colindexAttributecontainerElementeventfocusedAriaRowindexmaxAriaColindexmaxAriaRowindexonColumnFocusedrowindexAttribute.colindexAttribute",
+                "id": "def-common.onHomeEndDown.$1.colindexAttribute",
                 "type": "string",
                 "tags": [],
                 "label": "colindexAttribute",
@@ -4374,7 +4469,7 @@
               },
               {
                 "parentPluginId": "timelines",
-                "id": "def-common.onHomeEndDown.$1.colindexAttributecontainerElementeventfocusedAriaRowindexmaxAriaColindexmaxAriaRowindexonColumnFocusedrowindexAttribute.containerElement",
+                "id": "def-common.onHomeEndDown.$1.containerElement",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "containerElement",
@@ -4387,7 +4482,7 @@
               },
               {
                 "parentPluginId": "timelines",
-                "id": "def-common.onHomeEndDown.$1.colindexAttributecontainerElementeventfocusedAriaRowindexmaxAriaColindexmaxAriaRowindexonColumnFocusedrowindexAttribute.event",
+                "id": "def-common.onHomeEndDown.$1.event",
                 "type": "Object",
                 "tags": [],
                 "label": "event",
@@ -4400,7 +4495,7 @@
               },
               {
                 "parentPluginId": "timelines",
-                "id": "def-common.onHomeEndDown.$1.colindexAttributecontainerElementeventfocusedAriaRowindexmaxAriaColindexmaxAriaRowindexonColumnFocusedrowindexAttribute.focusedAriaRowindex",
+                "id": "def-common.onHomeEndDown.$1.focusedAriaRowindex",
                 "type": "number",
                 "tags": [],
                 "label": "focusedAriaRowindex",
@@ -4410,7 +4505,7 @@
               },
               {
                 "parentPluginId": "timelines",
-                "id": "def-common.onHomeEndDown.$1.colindexAttributecontainerElementeventfocusedAriaRowindexmaxAriaColindexmaxAriaRowindexonColumnFocusedrowindexAttribute.maxAriaColindex",
+                "id": "def-common.onHomeEndDown.$1.maxAriaColindex",
                 "type": "number",
                 "tags": [],
                 "label": "maxAriaColindex",
@@ -4420,7 +4515,7 @@
               },
               {
                 "parentPluginId": "timelines",
-                "id": "def-common.onHomeEndDown.$1.colindexAttributecontainerElementeventfocusedAriaRowindexmaxAriaColindexmaxAriaRowindexonColumnFocusedrowindexAttribute.maxAriaRowindex",
+                "id": "def-common.onHomeEndDown.$1.maxAriaRowindex",
                 "type": "number",
                 "tags": [],
                 "label": "maxAriaRowindex",
@@ -4430,7 +4525,7 @@
               },
               {
                 "parentPluginId": "timelines",
-                "id": "def-common.onHomeEndDown.$1.colindexAttributecontainerElementeventfocusedAriaRowindexmaxAriaColindexmaxAriaRowindexonColumnFocusedrowindexAttribute.onColumnFocused",
+                "id": "def-common.onHomeEndDown.$1.onColumnFocused",
                 "type": "Function",
                 "tags": [],
                 "label": "onColumnFocused",
@@ -4450,7 +4545,7 @@
               },
               {
                 "parentPluginId": "timelines",
-                "id": "def-common.onHomeEndDown.$1.colindexAttributecontainerElementeventfocusedAriaRowindexmaxAriaColindexmaxAriaRowindexonColumnFocusedrowindexAttribute.rowindexAttribute",
+                "id": "def-common.onHomeEndDown.$1.rowindexAttribute",
                 "type": "string",
                 "tags": [],
                 "label": "rowindexAttribute",
@@ -4489,7 +4584,7 @@
         "children": [
           {
             "parentPluginId": "timelines",
-            "id": "def-common.onKeyDownFocusHandler.$1.colindexAttributecontainerElementeventmaxAriaColindexmaxAriaRowindexonColumnFocusedrowindexAttribute",
+            "id": "def-common.onKeyDownFocusHandler.$1",
             "type": "Object",
             "tags": [],
             "label": "{\n  colindexAttribute,\n  containerElement,\n  event,\n  maxAriaColindex,\n  maxAriaRowindex,\n  onColumnFocused,\n  rowindexAttribute,\n}",
@@ -4499,7 +4594,7 @@
             "children": [
               {
                 "parentPluginId": "timelines",
-                "id": "def-common.onKeyDownFocusHandler.$1.colindexAttributecontainerElementeventmaxAriaColindexmaxAriaRowindexonColumnFocusedrowindexAttribute.colindexAttribute",
+                "id": "def-common.onKeyDownFocusHandler.$1.colindexAttribute",
                 "type": "string",
                 "tags": [],
                 "label": "colindexAttribute",
@@ -4509,7 +4604,7 @@
               },
               {
                 "parentPluginId": "timelines",
-                "id": "def-common.onKeyDownFocusHandler.$1.colindexAttributecontainerElementeventmaxAriaColindexmaxAriaRowindexonColumnFocusedrowindexAttribute.containerElement",
+                "id": "def-common.onKeyDownFocusHandler.$1.containerElement",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "containerElement",
@@ -4522,7 +4617,7 @@
               },
               {
                 "parentPluginId": "timelines",
-                "id": "def-common.onKeyDownFocusHandler.$1.colindexAttributecontainerElementeventmaxAriaColindexmaxAriaRowindexonColumnFocusedrowindexAttribute.event",
+                "id": "def-common.onKeyDownFocusHandler.$1.event",
                 "type": "Object",
                 "tags": [],
                 "label": "event",
@@ -4535,7 +4630,7 @@
               },
               {
                 "parentPluginId": "timelines",
-                "id": "def-common.onKeyDownFocusHandler.$1.colindexAttributecontainerElementeventmaxAriaColindexmaxAriaRowindexonColumnFocusedrowindexAttribute.maxAriaColindex",
+                "id": "def-common.onKeyDownFocusHandler.$1.maxAriaColindex",
                 "type": "number",
                 "tags": [],
                 "label": "maxAriaColindex",
@@ -4545,7 +4640,7 @@
               },
               {
                 "parentPluginId": "timelines",
-                "id": "def-common.onKeyDownFocusHandler.$1.colindexAttributecontainerElementeventmaxAriaColindexmaxAriaRowindexonColumnFocusedrowindexAttribute.maxAriaRowindex",
+                "id": "def-common.onKeyDownFocusHandler.$1.maxAriaRowindex",
                 "type": "number",
                 "tags": [],
                 "label": "maxAriaRowindex",
@@ -4555,7 +4650,7 @@
               },
               {
                 "parentPluginId": "timelines",
-                "id": "def-common.onKeyDownFocusHandler.$1.colindexAttributecontainerElementeventmaxAriaColindexmaxAriaRowindexonColumnFocusedrowindexAttribute.onColumnFocused",
+                "id": "def-common.onKeyDownFocusHandler.$1.onColumnFocused",
                 "type": "Function",
                 "tags": [],
                 "label": "onColumnFocused",
@@ -4569,7 +4664,7 @@
                 "children": [
                   {
                     "parentPluginId": "timelines",
-                    "id": "def-common.__0",
+                    "id": "def-common.onKeyDownFocusHandler.$1.onColumnFocused.$1",
                     "type": "Object",
                     "tags": [],
                     "label": "__0",
@@ -4584,7 +4679,7 @@
               },
               {
                 "parentPluginId": "timelines",
-                "id": "def-common.onKeyDownFocusHandler.$1.colindexAttributecontainerElementeventmaxAriaColindexmaxAriaRowindexonColumnFocusedrowindexAttribute.rowindexAttribute",
+                "id": "def-common.onKeyDownFocusHandler.$1.rowindexAttribute",
                 "type": "string",
                 "tags": [],
                 "label": "rowindexAttribute",
@@ -4623,7 +4718,7 @@
         "children": [
           {
             "parentPluginId": "timelines",
-            "id": "def-common.onPageDownOrPageUp.$1.colindexAttributecontainerElementeventfocusedAriaColindexfocusedAriaRowindexmaxAriaRowindexonColumnFocusedrowindexAttribute",
+            "id": "def-common.onPageDownOrPageUp.$1",
             "type": "Object",
             "tags": [],
             "label": "{\n  colindexAttribute,\n  containerElement,\n  event,\n  focusedAriaColindex,\n  focusedAriaRowindex,\n  maxAriaRowindex,\n  onColumnFocused,\n  rowindexAttribute,\n}",
@@ -4633,7 +4728,7 @@
             "children": [
               {
                 "parentPluginId": "timelines",
-                "id": "def-common.onPageDownOrPageUp.$1.colindexAttributecontainerElementeventfocusedAriaColindexfocusedAriaRowindexmaxAriaRowindexonColumnFocusedrowindexAttribute.colindexAttribute",
+                "id": "def-common.onPageDownOrPageUp.$1.colindexAttribute",
                 "type": "string",
                 "tags": [],
                 "label": "colindexAttribute",
@@ -4643,7 +4738,7 @@
               },
               {
                 "parentPluginId": "timelines",
-                "id": "def-common.onPageDownOrPageUp.$1.colindexAttributecontainerElementeventfocusedAriaColindexfocusedAriaRowindexmaxAriaRowindexonColumnFocusedrowindexAttribute.containerElement",
+                "id": "def-common.onPageDownOrPageUp.$1.containerElement",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "containerElement",
@@ -4656,7 +4751,7 @@
               },
               {
                 "parentPluginId": "timelines",
-                "id": "def-common.onPageDownOrPageUp.$1.colindexAttributecontainerElementeventfocusedAriaColindexfocusedAriaRowindexmaxAriaRowindexonColumnFocusedrowindexAttribute.event",
+                "id": "def-common.onPageDownOrPageUp.$1.event",
                 "type": "Object",
                 "tags": [],
                 "label": "event",
@@ -4669,7 +4764,7 @@
               },
               {
                 "parentPluginId": "timelines",
-                "id": "def-common.onPageDownOrPageUp.$1.colindexAttributecontainerElementeventfocusedAriaColindexfocusedAriaRowindexmaxAriaRowindexonColumnFocusedrowindexAttribute.focusedAriaColindex",
+                "id": "def-common.onPageDownOrPageUp.$1.focusedAriaColindex",
                 "type": "number",
                 "tags": [],
                 "label": "focusedAriaColindex",
@@ -4679,7 +4774,7 @@
               },
               {
                 "parentPluginId": "timelines",
-                "id": "def-common.onPageDownOrPageUp.$1.colindexAttributecontainerElementeventfocusedAriaColindexfocusedAriaRowindexmaxAriaRowindexonColumnFocusedrowindexAttribute.focusedAriaRowindex",
+                "id": "def-common.onPageDownOrPageUp.$1.focusedAriaRowindex",
                 "type": "number",
                 "tags": [],
                 "label": "focusedAriaRowindex",
@@ -4689,7 +4784,7 @@
               },
               {
                 "parentPluginId": "timelines",
-                "id": "def-common.onPageDownOrPageUp.$1.colindexAttributecontainerElementeventfocusedAriaColindexfocusedAriaRowindexmaxAriaRowindexonColumnFocusedrowindexAttribute.maxAriaRowindex",
+                "id": "def-common.onPageDownOrPageUp.$1.maxAriaRowindex",
                 "type": "number",
                 "tags": [],
                 "label": "maxAriaRowindex",
@@ -4699,7 +4794,7 @@
               },
               {
                 "parentPluginId": "timelines",
-                "id": "def-common.onPageDownOrPageUp.$1.colindexAttributecontainerElementeventfocusedAriaColindexfocusedAriaRowindexmaxAriaRowindexonColumnFocusedrowindexAttribute.onColumnFocused",
+                "id": "def-common.onPageDownOrPageUp.$1.onColumnFocused",
                 "type": "Function",
                 "tags": [],
                 "label": "onColumnFocused",
@@ -4719,7 +4814,7 @@
               },
               {
                 "parentPluginId": "timelines",
-                "id": "def-common.onPageDownOrPageUp.$1.colindexAttributecontainerElementeventfocusedAriaColindexfocusedAriaRowindexmaxAriaRowindexonColumnFocusedrowindexAttribute.rowindexAttribute",
+                "id": "def-common.onPageDownOrPageUp.$1.rowindexAttribute",
                 "type": "string",
                 "tags": [],
                 "label": "rowindexAttribute",
@@ -4750,7 +4845,7 @@
         "children": [
           {
             "parentPluginId": "timelines",
-            "id": "def-common.skipFocusInContainerTo.$1.containerElementclassName",
+            "id": "def-common.skipFocusInContainerTo.$1",
             "type": "Object",
             "tags": [],
             "label": "{\n  containerElement,\n  className,\n}",
@@ -4760,7 +4855,7 @@
             "children": [
               {
                 "parentPluginId": "timelines",
-                "id": "def-common.skipFocusInContainerTo.$1.containerElementclassName.containerElement",
+                "id": "def-common.skipFocusInContainerTo.$1.containerElement",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "containerElement",
@@ -4773,7 +4868,7 @@
               },
               {
                 "parentPluginId": "timelines",
-                "id": "def-common.skipFocusInContainerTo.$1.containerElementclassName.className",
+                "id": "def-common.skipFocusInContainerTo.$1.className",
                 "type": "string",
                 "tags": [],
                 "label": "className",
@@ -4834,16 +4929,6 @@
         "children": [
           {
             "parentPluginId": "timelines",
-            "id": "def-common.ActionProps.ariaRowindex",
-            "type": "number",
-            "tags": [],
-            "label": "ariaRowindex",
-            "description": [],
-            "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "timelines",
             "id": "def-common.ActionProps.action",
             "type": "CompoundType",
             "tags": [],
@@ -4897,14 +4982,21 @@
           },
           {
             "parentPluginId": "timelines",
-            "id": "def-common.ActionProps.width",
+            "id": "def-common.ActionProps.ariaRowindex",
             "type": "number",
             "tags": [],
-            "label": "width",
+            "label": "ariaRowindex",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "timelines",
+            "id": "def-common.ActionProps.checked",
+            "type": "boolean",
+            "tags": [],
+            "label": "checked",
+            "description": [],
             "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
             "deprecated": false
           },
@@ -4930,42 +5022,49 @@
           },
           {
             "parentPluginId": "timelines",
-            "id": "def-common.ActionProps.checked",
-            "type": "boolean",
+            "id": "def-common.ActionProps.data",
+            "type": "Array",
             "tags": [],
-            "label": "checked",
+            "label": "data",
             "description": [],
+            "signature": [
+              {
+                "pluginId": "timelines",
+                "scope": "common",
+                "docId": "kibTimelinesPluginApi",
+                "section": "def-common.TimelineNonEcsData",
+                "text": "TimelineNonEcsData"
+              },
+              "[]"
+            ],
             "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
             "deprecated": false
           },
           {
             "parentPluginId": "timelines",
-            "id": "def-common.ActionProps.onRowSelected",
-            "type": "Function",
+            "id": "def-common.ActionProps.disabled",
+            "type": "CompoundType",
             "tags": [],
-            "label": "onRowSelected",
+            "label": "disabled",
             "description": [],
             "signature": [
-              "({ eventIds, isSelected, }: { eventIds: string[]; isSelected: boolean; }) => void"
+              "boolean | undefined"
             ],
             "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
-            "deprecated": false,
-            "returnComment": [],
-            "children": [
-              {
-                "parentPluginId": "timelines",
-                "id": "def-common.__0",
-                "type": "Object",
-                "tags": [],
-                "label": "__0",
-                "description": [],
-                "signature": [
-                  "{ eventIds: string[]; isSelected: boolean; }"
-                ],
-                "path": "x-pack/plugins/timelines/common/types/timeline/store.ts",
-                "deprecated": false
-              }
-            ]
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "timelines",
+            "id": "def-common.ActionProps.ecsData",
+            "type": "Object",
+            "tags": [],
+            "label": "ecsData",
+            "description": [],
+            "signature": [
+              "Ecs"
+            ],
+            "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
+            "deprecated": false
           },
           {
             "parentPluginId": "timelines",
@@ -4974,6 +5073,55 @@
             "tags": [],
             "label": "eventId",
             "description": [],
+            "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "timelines",
+            "id": "def-common.ActionProps.eventIdToNoteIds",
+            "type": "Object",
+            "tags": [],
+            "label": "eventIdToNoteIds",
+            "description": [],
+            "signature": [
+              "Readonly<Record<string, string[]>> | undefined"
+            ],
+            "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "timelines",
+            "id": "def-common.ActionProps.index",
+            "type": "number",
+            "tags": [],
+            "label": "index",
+            "description": [],
+            "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "timelines",
+            "id": "def-common.ActionProps.isEventPinned",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isEventPinned",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "timelines",
+            "id": "def-common.ActionProps.isEventViewer",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isEventViewer",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
             "deprecated": false
           },
@@ -5007,115 +5155,13 @@
           },
           {
             "parentPluginId": "timelines",
-            "id": "def-common.ActionProps.showCheckboxes",
-            "type": "boolean",
-            "tags": [],
-            "label": "showCheckboxes",
-            "description": [],
-            "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "timelines",
-            "id": "def-common.ActionProps.data",
-            "type": "Array",
-            "tags": [],
-            "label": "data",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "timelines",
-                "scope": "common",
-                "docId": "kibTimelinesPluginApi",
-                "section": "def-common.TimelineNonEcsData",
-                "text": "TimelineNonEcsData"
-              },
-              "[]"
-            ],
-            "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "timelines",
-            "id": "def-common.ActionProps.ecsData",
-            "type": "Object",
-            "tags": [],
-            "label": "ecsData",
-            "description": [],
-            "signature": [
-              "Ecs"
-            ],
-            "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "timelines",
-            "id": "def-common.ActionProps.index",
-            "type": "number",
-            "tags": [],
-            "label": "index",
-            "description": [],
-            "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "timelines",
-            "id": "def-common.ActionProps.eventIdToNoteIds",
-            "type": "Object",
-            "tags": [],
-            "label": "eventIdToNoteIds",
-            "description": [],
-            "signature": [
-              "Readonly<Record<string, string[]>> | undefined"
-            ],
-            "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "timelines",
-            "id": "def-common.ActionProps.isEventPinned",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "isEventPinned",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "timelines",
-            "id": "def-common.ActionProps.isEventViewer",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "isEventViewer",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "timelines",
-            "id": "def-common.ActionProps.rowIndex",
-            "type": "number",
-            "tags": [],
-            "label": "rowIndex",
-            "description": [],
-            "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "timelines",
-            "id": "def-common.ActionProps.setEventsLoading",
+            "id": "def-common.ActionProps.onRowSelected",
             "type": "Function",
             "tags": [],
-            "label": "setEventsLoading",
+            "label": "onRowSelected",
             "description": [],
             "signature": [
-              "(params: { eventIds: string[]; isLoading: boolean; }) => void"
+              "({ eventIds, isSelected, }: { eventIds: string[]; isSelected: boolean; }) => void"
             ],
             "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
             "deprecated": false,
@@ -5123,47 +5169,33 @@
             "children": [
               {
                 "parentPluginId": "timelines",
-                "id": "def-common.params",
+                "id": "def-common.ActionProps.onRowSelected.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "params",
+                "label": "__0",
                 "description": [],
                 "signature": [
-                  "{ eventIds: string[]; isLoading: boolean; }"
+                  "{ eventIds: string[]; isSelected: boolean; }"
                 ],
-                "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
+                "path": "x-pack/plugins/timelines/common/types/timeline/store.ts",
                 "deprecated": false
               }
             ]
           },
           {
             "parentPluginId": "timelines",
-            "id": "def-common.ActionProps.setEventsDeleted",
+            "id": "def-common.ActionProps.onRuleChange",
             "type": "Function",
             "tags": [],
-            "label": "setEventsDeleted",
+            "label": "onRuleChange",
             "description": [],
             "signature": [
-              "(params: { eventIds: string[]; isDeleted: boolean; }) => void"
+              "(() => void) | undefined"
             ],
             "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
             "deprecated": false,
-            "returnComment": [],
-            "children": [
-              {
-                "parentPluginId": "timelines",
-                "id": "def-common.params",
-                "type": "Object",
-                "tags": [],
-                "label": "params",
-                "description": [],
-                "signature": [
-                  "{ eventIds: string[]; isDeleted: boolean; }"
-                ],
-                "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
-                "deprecated": false
-              }
-            ]
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "timelines",
@@ -5182,18 +5214,81 @@
           },
           {
             "parentPluginId": "timelines",
-            "id": "def-common.ActionProps.onRuleChange",
+            "id": "def-common.ActionProps.rowIndex",
+            "type": "number",
+            "tags": [],
+            "label": "rowIndex",
+            "description": [],
+            "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "timelines",
+            "id": "def-common.ActionProps.setEventsDeleted",
             "type": "Function",
             "tags": [],
-            "label": "onRuleChange",
+            "label": "setEventsDeleted",
             "description": [],
             "signature": [
-              "(() => void) | undefined"
+              "(params: { eventIds: string[]; isDeleted: boolean; }) => void"
             ],
             "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
             "deprecated": false,
-            "children": [],
-            "returnComment": []
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "timelines",
+                "id": "def-common.ActionProps.setEventsDeleted.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  "{ eventIds: string[]; isDeleted: boolean; }"
+                ],
+                "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
+                "deprecated": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "timelines",
+            "id": "def-common.ActionProps.setEventsLoading",
+            "type": "Function",
+            "tags": [],
+            "label": "setEventsLoading",
+            "description": [],
+            "signature": [
+              "(params: { eventIds: string[]; isLoading: boolean; }) => void"
+            ],
+            "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "timelines",
+                "id": "def-common.ActionProps.setEventsLoading.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  "{ eventIds: string[]; isLoading: boolean; }"
+                ],
+                "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
+                "deprecated": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "timelines",
+            "id": "def-common.ActionProps.showCheckboxes",
+            "type": "boolean",
+            "tags": [],
+            "label": "showCheckboxes",
+            "description": [],
+            "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
+            "deprecated": false
           },
           {
             "parentPluginId": "timelines",
@@ -5252,6 +5347,19 @@
             "deprecated": false,
             "children": [],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "timelines",
+            "id": "def-common.ActionProps.width",
+            "type": "number",
+            "tags": [],
+            "label": "width",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -5466,12 +5574,15 @@
           {
             "parentPluginId": "timelines",
             "id": "def-common.BrowserField.subType",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
             "label": "subType",
             "description": [],
             "signature": [
-              "{ [key: string]: unknown; nested?: { path: string; } | undefined; } | undefined"
+              "IFieldSubTypeMultiOptional",
+              " | ",
+              "IFieldSubTypeNestedOptional",
+              " | undefined"
             ],
             "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
             "deprecated": false
@@ -5982,7 +6093,7 @@
             "children": [
               {
                 "parentPluginId": "timelines",
-                "id": "def-common.ColumnRenderer.renderColumn.$1.columnNameeventIdfieldtimelineIdtruncatevalueslinkValues",
+                "id": "def-common.ColumnRenderer.renderColumn.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "{\n    columnName,\n    eventId,\n    field,\n    timelineId,\n    truncate,\n    values,\n    linkValues,\n  }",
@@ -5992,7 +6103,7 @@
                 "children": [
                   {
                     "parentPluginId": "timelines",
-                    "id": "def-common.ColumnRenderer.renderColumn.$1.columnNameeventIdfieldtimelineIdtruncatevalueslinkValues.columnName",
+                    "id": "def-common.ColumnRenderer.renderColumn.$1.columnName",
                     "type": "string",
                     "tags": [],
                     "label": "columnName",
@@ -6002,7 +6113,7 @@
                   },
                   {
                     "parentPluginId": "timelines",
-                    "id": "def-common.ColumnRenderer.renderColumn.$1.columnNameeventIdfieldtimelineIdtruncatevalueslinkValues.eventId",
+                    "id": "def-common.ColumnRenderer.renderColumn.$1.eventId",
                     "type": "string",
                     "tags": [],
                     "label": "eventId",
@@ -6012,7 +6123,7 @@
                   },
                   {
                     "parentPluginId": "timelines",
-                    "id": "def-common.ColumnRenderer.renderColumn.$1.columnNameeventIdfieldtimelineIdtruncatevalueslinkValues.field",
+                    "id": "def-common.ColumnRenderer.renderColumn.$1.field",
                     "type": "CompoundType",
                     "tags": [],
                     "label": "field",
@@ -6020,7 +6131,7 @@
                     "signature": [
                       "Pick<",
                       "EuiDataGridColumn",
-                      ", \"id\" | \"display\" | \"actions\" | \"defaultSortDirection\" | \"displayAsText\" | \"initialWidth\" | \"isSortable\"> & { aggregatable?: boolean | undefined; tGridCellActions?: ",
+                      ", \"id\" | \"schema\" | \"display\" | \"actions\" | \"defaultSortDirection\" | \"displayAsText\" | \"initialWidth\" | \"isSortable\"> & { aggregatable?: boolean | undefined; tGridCellActions?: ",
                       {
                         "pluginId": "timelines",
                         "scope": "common",
@@ -6037,7 +6148,9 @@
                         "text": "ColumnHeaderType"
                       },
                       "; description?: string | undefined; example?: string | undefined; format?: string | undefined; linkField?: string | undefined; placeholder?: string | undefined; subType?: ",
-                      "IFieldSubType",
+                      "IFieldSubTypeMultiOptional",
+                      " | ",
+                      "IFieldSubTypeNestedOptional",
                       " | undefined; type?: string | undefined; }"
                     ],
                     "path": "x-pack/plugins/timelines/common/types/timeline/columns/index.tsx",
@@ -6045,7 +6158,7 @@
                   },
                   {
                     "parentPluginId": "timelines",
-                    "id": "def-common.ColumnRenderer.renderColumn.$1.columnNameeventIdfieldtimelineIdtruncatevalueslinkValues.timelineId",
+                    "id": "def-common.ColumnRenderer.renderColumn.$1.timelineId",
                     "type": "string",
                     "tags": [],
                     "label": "timelineId",
@@ -6055,7 +6168,7 @@
                   },
                   {
                     "parentPluginId": "timelines",
-                    "id": "def-common.ColumnRenderer.renderColumn.$1.columnNameeventIdfieldtimelineIdtruncatevalueslinkValues.truncate",
+                    "id": "def-common.ColumnRenderer.renderColumn.$1.truncate",
                     "type": "CompoundType",
                     "tags": [],
                     "label": "truncate",
@@ -6068,7 +6181,7 @@
                   },
                   {
                     "parentPluginId": "timelines",
-                    "id": "def-common.ColumnRenderer.renderColumn.$1.columnNameeventIdfieldtimelineIdtruncatevalueslinkValues.values",
+                    "id": "def-common.ColumnRenderer.renderColumn.$1.values",
                     "type": "CompoundType",
                     "tags": [],
                     "label": "values",
@@ -6081,7 +6194,7 @@
                   },
                   {
                     "parentPluginId": "timelines",
-                    "id": "def-common.ColumnRenderer.renderColumn.$1.columnNameeventIdfieldtimelineIdtruncatevalueslinkValues.linkValues",
+                    "id": "def-common.ColumnRenderer.renderColumn.$1.linkValues",
                     "type": "CompoundType",
                     "tags": [],
                     "label": "linkValues",
@@ -6248,7 +6361,7 @@
                 "section": "def-common.DataProvider",
                 "text": "DataProvider"
               },
-              ", \"type\" | \"enabled\" | \"id\" | \"name\" | \"excluded\" | \"kqlQuery\" | \"queryMatch\">[]"
+              ", \"type\" | \"id\" | \"name\" | \"enabled\" | \"excluded\" | \"kqlQuery\" | \"queryMatch\">[]"
             ],
             "path": "x-pack/plugins/timelines/common/types/timeline/data_provider/index.ts",
             "deprecated": false
@@ -8055,7 +8168,7 @@
             "children": [
               {
                 "parentPluginId": "timelines",
-                "id": "def-common.HeaderActionProps.onSelectAll.$1.isSelected",
+                "id": "def-common.HeaderActionProps.onSelectAll.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "{ isSelected }",
@@ -8065,7 +8178,7 @@
                 "children": [
                   {
                     "parentPluginId": "timelines",
-                    "id": "def-common.HeaderActionProps.onSelectAll.$1.isSelected.isSelected",
+                    "id": "def-common.HeaderActionProps.onSelectAll.$1.isSelected",
                     "type": "boolean",
                     "tags": [],
                     "label": "isSelected",
@@ -8296,12 +8409,14 @@
           {
             "parentPluginId": "timelines",
             "id": "def-common.IndexField.subType",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
             "label": "subType",
             "description": [],
             "signature": [
-              "IFieldSubType",
+              "IFieldSubTypeMultiOptional",
+              " | ",
+              "IFieldSubTypeNestedOptional",
               " | undefined"
             ],
             "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
@@ -9085,7 +9200,7 @@
             "children": [
               {
                 "parentPluginId": "timelines",
-                "id": "def-common.RowRenderer.renderRow.$1.browserFieldsdataisDraggabletimelineId",
+                "id": "def-common.RowRenderer.renderRow.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "{\n    browserFields,\n    data,\n    isDraggable,\n    timelineId,\n  }",
@@ -9095,7 +9210,7 @@
                 "children": [
                   {
                     "parentPluginId": "timelines",
-                    "id": "def-common.RowRenderer.renderRow.$1.browserFieldsdataisDraggabletimelineId.browserFields",
+                    "id": "def-common.RowRenderer.renderRow.$1.browserFields",
                     "type": "Object",
                     "tags": [],
                     "label": "browserFields",
@@ -9116,7 +9231,7 @@
                   },
                   {
                     "parentPluginId": "timelines",
-                    "id": "def-common.RowRenderer.renderRow.$1.browserFieldsdataisDraggabletimelineId.data",
+                    "id": "def-common.RowRenderer.renderRow.$1.data",
                     "type": "Object",
                     "tags": [],
                     "label": "data",
@@ -9129,7 +9244,7 @@
                   },
                   {
                     "parentPluginId": "timelines",
-                    "id": "def-common.RowRenderer.renderRow.$1.browserFieldsdataisDraggabletimelineId.isDraggable",
+                    "id": "def-common.RowRenderer.renderRow.$1.isDraggable",
                     "type": "boolean",
                     "tags": [],
                     "label": "isDraggable",
@@ -9139,7 +9254,7 @@
                   },
                   {
                     "parentPluginId": "timelines",
-                    "id": "def-common.RowRenderer.renderRow.$1.browserFieldsdataisDraggabletimelineId.timelineId",
+                    "id": "def-common.RowRenderer.renderRow.$1.timelineId",
                     "type": "string",
                     "tags": [],
                     "label": "timelineId",
@@ -9585,7 +9700,7 @@
             "label": "currentStatus",
             "description": [],
             "signature": [
-              "\"open\" | \"closed\" | \"in-progress\" | \"acknowledged\" | undefined"
+              "\"open\" | \"in-progress\" | \"acknowledged\" | \"closed\" | undefined"
             ],
             "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
             "deprecated": false
@@ -9629,7 +9744,7 @@
             "children": [
               {
                 "parentPluginId": "timelines",
-                "id": "def-common.params",
+                "id": "def-common.StatusBulkActionsProps.setEventsLoading.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "params",
@@ -9658,7 +9773,7 @@
             "children": [
               {
                 "parentPluginId": "timelines",
-                "id": "def-common.params",
+                "id": "def-common.StatusBulkActionsProps.setEventsDeleted.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "params",
@@ -9707,6 +9822,19 @@
                 "text": "OnUpdateAlertStatusError"
               },
               " | undefined"
+            ],
+            "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "timelines",
+            "id": "def-common.StatusBulkActionsProps.timelineId",
+            "type": "string",
+            "tags": [],
+            "label": "timelineId",
+            "description": [],
+            "signature": [
+              "string | undefined"
             ],
             "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
             "deprecated": false
@@ -9796,7 +9924,7 @@
             "section": "def-common.TimelineEventsAllRequestOptions",
             "text": "TimelineEventsAllRequestOptions"
           },
-          ", \"id\" | \"sort\" | \"fields\" | \"timerange\" | \"language\" | \"defaultIndex\" | \"pagination\" | \"filterQuery\" | \"docValueFields\" | \"factoryQueryType\" | \"indexType\" | \"entityType\" | \"fieldRequested\" | \"excludeEcsData\" | \"authFilter\">"
+          ", \"id\" | \"sort\" | \"fields\" | \"defaultIndex\" | \"timerange\" | \"language\" | \"pagination\" | \"filterQuery\" | \"docValueFields\" | \"factoryQueryType\" | \"indexType\" | \"entityType\" | \"fieldRequested\" | \"excludeEcsData\" | \"authFilter\">"
         ],
         "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/eql/index.ts",
         "deprecated": false,
@@ -10046,7 +10174,13 @@
             "label": "authFilter",
             "description": [],
             "signature": [
-              "JsonObject",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "server",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-server.JsonObject",
+                "text": "JsonObject"
+              },
               " | undefined"
             ],
             "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
@@ -10083,6 +10217,19 @@
         "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
         "deprecated": false,
         "children": [
+          {
+            "parentPluginId": "timelines",
+            "id": "def-common.TimelineEventsAllStrategyResponse.consumers",
+            "type": "Object",
+            "tags": [],
+            "label": "consumers",
+            "description": [],
+            "signature": [
+              "{ [x: string]: number; }"
+            ],
+            "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
+            "deprecated": false
+          },
           {
             "parentPluginId": "timelines",
             "id": "def-common.TimelineEventsAllStrategyResponse.edges",
@@ -10290,7 +10437,13 @@
             "label": "authFilter",
             "description": [],
             "signature": [
-              "JsonObject",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "server",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-server.JsonObject",
+                "text": "JsonObject"
+              },
               " | undefined"
             ],
             "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/details/index.ts",
@@ -10366,6 +10519,19 @@
             ],
             "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/details/index.ts",
             "deprecated": false
+          },
+          {
+            "parentPluginId": "timelines",
+            "id": "def-common.TimelineEventsDetailsStrategyResponse.rawEventData",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "rawEventData",
+            "description": [],
+            "signature": [
+              "object | null | undefined"
+            ],
+            "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/details/index.ts",
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -10393,7 +10559,7 @@
             "section": "def-common.TimelineRequestBasicOptions",
             "text": "TimelineRequestBasicOptions"
           },
-          ", \"id\" | \"params\" | \"defaultIndex\" | \"docValueFields\" | \"factoryQueryType\" | \"indexType\" | \"entityType\">"
+          ", \"id\" | \"defaultIndex\" | \"params\" | \"docValueFields\" | \"factoryQueryType\" | \"indexType\" | \"entityType\">"
         ],
         "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/last_event_time/index.ts",
         "deprecated": false,
@@ -11107,14 +11273,15 @@
             "label": "expandedDetail",
             "description": [],
             "signature": [
+              "Partial<Record<string, ",
               {
                 "pluginId": "timelines",
                 "scope": "common",
                 "docId": "kibTimelinesPluginApi",
-                "section": "def-common.TimelineExpandedDetail",
-                "text": "TimelineExpandedDetail"
+                "section": "def-common.TimelineExpandedDetailType",
+                "text": "TimelineExpandedDetailType"
               },
-              " | undefined"
+              ">> | undefined"
             ],
             "path": "x-pack/plugins/timelines/common/types/timeline/store.ts",
             "deprecated": false
@@ -11127,7 +11294,13 @@
             "label": "filters",
             "description": [],
             "signature": [
-              "Filter",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
               "[] | undefined"
             ],
             "path": "x-pack/plugins/timelines/common/types/timeline/store.ts",
@@ -11343,7 +11516,13 @@
             "description": [],
             "signature": [
               "string | ",
-              "JsonObject",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "server",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-server.JsonObject",
+                "text": "JsonObject"
+              },
               " | ",
               "ESRangeQuery",
               " | ",
@@ -12243,7 +12422,7 @@
         "label": "AlertStatus",
         "description": [],
         "signature": [
-          "\"open\" | \"closed\" | \"in-progress\" | \"acknowledged\""
+          "\"open\" | \"in-progress\" | \"acknowledged\" | \"closed\""
         ],
         "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
         "deprecated": false,
@@ -12257,7 +12436,7 @@
         "label": "AlertWorkflowStatus",
         "description": [],
         "signature": [
-          "\"open\" | \"closed\" | \"acknowledged\""
+          "\"open\" | \"acknowledged\" | \"closed\""
         ],
         "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
         "deprecated": false,
@@ -12469,33 +12648,7 @@
         ],
         "signature": [
           "EuiDataGridCellValueElementProps",
-          " & { data: ",
-          {
-            "pluginId": "timelines",
-            "scope": "common",
-            "docId": "kibTimelinesPluginApi",
-            "section": "def-common.TimelineNonEcsData",
-            "text": "TimelineNonEcsData"
-          },
-          "[]; eventId: string; header: ",
-          {
-            "pluginId": "timelines",
-            "scope": "common",
-            "docId": "kibTimelinesPluginApi",
-            "section": "def-common.ColumnHeaderOptions",
-            "text": "ColumnHeaderOptions"
-          },
-          "; isDraggable: boolean; linkValues: string[] | undefined; timelineId: string; setFlyoutAlert?: ((data: any) => void) | undefined; ecsData?: ",
-          "Ecs",
-          " | undefined; rowRenderers?: ",
-          {
-            "pluginId": "timelines",
-            "scope": "common",
-            "docId": "kibTimelinesPluginApi",
-            "section": "def-common.RowRenderer",
-            "text": "RowRenderer"
-          },
-          "[] | undefined; browserFields?: Readonly<Record<string, Partial<",
+          " & { asPlainText?: boolean | undefined; browserFields?: Readonly<Record<string, Partial<",
           {
             "pluginId": "timelines",
             "scope": "common",
@@ -12503,7 +12656,41 @@
             "section": "def-common.BrowserField",
             "text": "BrowserField"
           },
-          ">>> | undefined; }"
+          ">>> | undefined; data: ",
+          {
+            "pluginId": "timelines",
+            "scope": "common",
+            "docId": "kibTimelinesPluginApi",
+            "section": "def-common.TimelineNonEcsData",
+            "text": "TimelineNonEcsData"
+          },
+          "[]; ecsData?: ",
+          "Ecs",
+          " | undefined; eventId: string; globalFilters?: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
+          "[] | undefined; header: ",
+          {
+            "pluginId": "timelines",
+            "scope": "common",
+            "docId": "kibTimelinesPluginApi",
+            "section": "def-common.ColumnHeaderOptions",
+            "text": "ColumnHeaderOptions"
+          },
+          "; isDraggable: boolean; linkValues: string[] | undefined; rowRenderers?: ",
+          {
+            "pluginId": "timelines",
+            "scope": "common",
+            "docId": "kibTimelinesPluginApi",
+            "section": "def-common.RowRenderer",
+            "text": "RowRenderer"
+          },
+          "[] | undefined; setFlyoutAlert?: ((data: any) => void) | undefined; timelineId: string; truncate?: boolean | undefined; }"
         ],
         "path": "x-pack/plugins/timelines/common/types/timeline/cells/index.ts",
         "deprecated": false,
@@ -12521,7 +12708,7 @@
         "signature": [
           "Pick<",
           "EuiDataGridColumn",
-          ", \"id\" | \"display\" | \"actions\" | \"defaultSortDirection\" | \"displayAsText\" | \"initialWidth\" | \"isSortable\"> & { aggregatable?: boolean | undefined; tGridCellActions?: ",
+          ", \"id\" | \"schema\" | \"display\" | \"actions\" | \"defaultSortDirection\" | \"displayAsText\" | \"initialWidth\" | \"isSortable\"> & { aggregatable?: boolean | undefined; tGridCellActions?: ",
           {
             "pluginId": "timelines",
             "scope": "common",
@@ -12538,7 +12725,9 @@
             "text": "ColumnHeaderType"
           },
           "; description?: string | undefined; example?: string | undefined; format?: string | undefined; linkField?: string | undefined; placeholder?: string | undefined; subType?: ",
-          "IFieldSubType",
+          "IFieldSubTypeMultiOptional",
+          " | ",
+          "IFieldSubTypeNestedOptional",
           " | undefined; type?: string | undefined; }"
         ],
         "path": "x-pack/plugins/timelines/common/types/timeline/columns/index.tsx",
@@ -12639,7 +12828,7 @@
             "section": "def-common.DataProviderType",
             "text": "DataProviderType"
           },
-          " | undefined; enabled: boolean; id: string; name: string; excluded: boolean; kqlQuery: string; queryMatch: ",
+          " | undefined; id: string; name: string; enabled: boolean; excluded: boolean; kqlQuery: string; queryMatch: ",
           {
             "pluginId": "timelines",
             "scope": "common",
@@ -12900,7 +13089,7 @@
         "children": [
           {
             "parentPluginId": "timelines",
-            "id": "def-common.__0",
+            "id": "def-common.GetFocusedCell.$1",
             "type": "Object",
             "tags": [],
             "label": "__0",
@@ -13101,7 +13290,7 @@
         "children": [
           {
             "parentPluginId": "timelines",
-            "id": "def-common.nextPage",
+            "id": "def-common.OnChangePage.$1",
             "type": "number",
             "tags": [],
             "label": "nextPage",
@@ -13128,7 +13317,7 @@
         "children": [
           {
             "parentPluginId": "timelines",
-            "id": "def-common.__0",
+            "id": "def-common.OnColumnFocused.$1",
             "type": "Object",
             "tags": [],
             "label": "__0",
@@ -13158,7 +13347,7 @@
         "children": [
           {
             "parentPluginId": "timelines",
-            "id": "def-common.columnId",
+            "id": "def-common.OnColumnRemoved.$1",
             "type": "string",
             "tags": [],
             "label": "columnId",
@@ -13185,7 +13374,7 @@
         "children": [
           {
             "parentPluginId": "timelines",
-            "id": "def-common.__0",
+            "id": "def-common.OnColumnResized.$1",
             "type": "Object",
             "tags": [],
             "label": "__0",
@@ -13225,7 +13414,7 @@
         "children": [
           {
             "parentPluginId": "timelines",
-            "id": "def-common.sorted",
+            "id": "def-common.OnColumnSorted.$1",
             "type": "Object",
             "tags": [],
             "label": "sorted",
@@ -13271,7 +13460,7 @@
         "children": [
           {
             "parentPluginId": "timelines",
-            "id": "def-common.sorted",
+            "id": "def-common.OnColumnsSorted.$1",
             "type": "Array",
             "tags": [],
             "label": "sorted",
@@ -13311,7 +13500,7 @@
         "children": [
           {
             "parentPluginId": "timelines",
-            "id": "def-common.eventId",
+            "id": "def-common.OnPinEvent.$1",
             "type": "string",
             "tags": [],
             "label": "eventId",
@@ -13340,7 +13529,7 @@
         "children": [
           {
             "parentPluginId": "timelines",
-            "id": "def-common.__0",
+            "id": "def-common.OnRowSelected.$1",
             "type": "Object",
             "tags": [],
             "label": "__0",
@@ -13372,7 +13561,7 @@
         "children": [
           {
             "parentPluginId": "timelines",
-            "id": "def-common.__0",
+            "id": "def-common.OnSelectAll.$1",
             "type": "Object",
             "tags": [],
             "label": "__0",
@@ -13404,7 +13593,7 @@
         "children": [
           {
             "parentPluginId": "timelines",
-            "id": "def-common.eventId",
+            "id": "def-common.OnUnPinEvent.$1",
             "type": "string",
             "tags": [],
             "label": "eventId",
@@ -13424,7 +13613,13 @@
         "description": [],
         "signature": [
           "(status: ",
-          "STATUS_VALUES",
+          {
+            "pluginId": "@kbn/rule-data-utils",
+            "scope": "server",
+            "docId": "kibKbnRuleDataUtilsPluginApi",
+            "section": "def-server.STATUS_VALUES",
+            "text": "STATUS_VALUES"
+          },
           ", error: Error) => void"
         ],
         "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
@@ -13433,20 +13628,20 @@
         "children": [
           {
             "parentPluginId": "timelines",
-            "id": "def-common.status",
+            "id": "def-common.OnUpdateAlertStatusError.$1",
             "type": "CompoundType",
             "tags": [],
             "label": "status",
             "description": [],
             "signature": [
-              "\"open\" | \"closed\" | \"in-progress\" | \"acknowledged\""
+              "\"open\" | \"in-progress\" | \"acknowledged\" | \"closed\""
             ],
             "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
             "deprecated": false
           },
           {
             "parentPluginId": "timelines",
-            "id": "def-common.error",
+            "id": "def-common.OnUpdateAlertStatusError.$2",
             "type": "Object",
             "tags": [],
             "label": "error",
@@ -13469,7 +13664,13 @@
         "description": [],
         "signature": [
           "(updated: number, conflicts: number, status: ",
-          "STATUS_VALUES",
+          {
+            "pluginId": "@kbn/rule-data-utils",
+            "scope": "server",
+            "docId": "kibKbnRuleDataUtilsPluginApi",
+            "section": "def-server.STATUS_VALUES",
+            "text": "STATUS_VALUES"
+          },
           ") => void"
         ],
         "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
@@ -13478,7 +13679,7 @@
         "children": [
           {
             "parentPluginId": "timelines",
-            "id": "def-common.updated",
+            "id": "def-common.OnUpdateAlertStatusSuccess.$1",
             "type": "number",
             "tags": [],
             "label": "updated",
@@ -13488,7 +13689,7 @@
           },
           {
             "parentPluginId": "timelines",
-            "id": "def-common.conflicts",
+            "id": "def-common.OnUpdateAlertStatusSuccess.$2",
             "type": "number",
             "tags": [],
             "label": "conflicts",
@@ -13498,13 +13699,13 @@
           },
           {
             "parentPluginId": "timelines",
-            "id": "def-common.status",
+            "id": "def-common.OnUpdateAlertStatusSuccess.$3",
             "type": "CompoundType",
             "tags": [],
             "label": "status",
             "description": [],
             "signature": [
-              "\"open\" | \"closed\" | \"in-progress\" | \"acknowledged\""
+              "\"open\" | \"in-progress\" | \"acknowledged\" | \"closed\""
             ],
             "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
             "deprecated": false
@@ -13538,7 +13739,7 @@
         "children": [
           {
             "parentPluginId": "timelines",
-            "id": "def-common.columns",
+            "id": "def-common.OnUpdateColumns.$1",
             "type": "Array",
             "tags": [],
             "label": "columns",
@@ -13847,7 +14048,7 @@
         "children": [
           {
             "parentPluginId": "timelines",
-            "id": "def-common.params",
+            "id": "def-common.SetEventsDeleted.$1",
             "type": "Object",
             "tags": [],
             "label": "params",
@@ -13877,7 +14078,7 @@
         "children": [
           {
             "parentPluginId": "timelines",
-            "id": "def-common.params",
+            "id": "def-common.SetEventsLoading.$1",
             "type": "Object",
             "tags": [],
             "label": "params",
@@ -14079,7 +14280,7 @@
           "\nA `TGridCellAction` function accepts `data`, where each row of data is\nrepresented as a `TimelineNonEcsData[]`. For example, `data[0]` would\ncontain a `TimelineNonEcsData[]` with the first row of data.\n\nA `TGridCellAction` returns a function that has access to all the\n`EuiDataGridColumnCellActionProps`, _plus_ access to `data`,\n which enables code like the following example to be written:\n\nExample:\n```\n({ data }: { data: TimelineNonEcsData[][] }) => ({ rowIndex, columnId, Component }) => {\n  const value = getMappedNonEcsValue({\n    data: data[rowIndex], // access a specific row's values\n    fieldName: columnId,\n  });\n\n  return (\n    <Component onClick={() => alert(`row ${rowIndex} col ${columnId} has value ${value}`)} iconType=\"heart\">\n      {'Love it'}\n     </Component>\n  );\n};\n```"
         ],
         "signature": [
-          "({ browserFields, data, timelineId, }: { browserFields: Readonly<Record<string, Partial<",
+          "({ browserFields, data, ecsData, header, pageSize, timelineId, }: { browserFields: Readonly<Record<string, Partial<",
           {
             "pluginId": "timelines",
             "scope": "common",
@@ -14095,7 +14296,17 @@
             "section": "def-common.TimelineNonEcsData",
             "text": "TimelineNonEcsData"
           },
-          "[][]; timelineId: string; }) => (props: ",
+          "[][]; ecsData: ",
+          "Ecs",
+          "[]; header?: ",
+          {
+            "pluginId": "timelines",
+            "scope": "common",
+            "docId": "kibTimelinesPluginApi",
+            "section": "def-common.ColumnHeaderOptions",
+            "text": "ColumnHeaderOptions"
+          },
+          " | undefined; pageSize: number; timelineId: string; }) => (props: ",
           "EuiDataGridColumnCellActionProps",
           ") => React.ReactNode"
         ],
@@ -14105,7 +14316,7 @@
         "children": [
           {
             "parentPluginId": "timelines",
-            "id": "def-common.__0",
+            "id": "def-common.TGridCellAction.$1",
             "type": "Object",
             "tags": [],
             "label": "__0",
@@ -14127,7 +14338,17 @@
                 "section": "def-common.TimelineNonEcsData",
                 "text": "TimelineNonEcsData"
               },
-              "[][]; timelineId: string; }"
+              "[][]; ecsData: ",
+              "Ecs",
+              "[]; header?: ",
+              {
+                "pluginId": "timelines",
+                "scope": "common",
+                "docId": "kibTimelinesPluginApi",
+                "section": "def-common.ColumnHeaderOptions",
+                "text": "ColumnHeaderOptions"
+              },
+              " | undefined; pageSize: number; timelineId: string; }"
             ],
             "path": "x-pack/plugins/timelines/common/types/timeline/columns/index.tsx",
             "deprecated": false
@@ -14171,7 +14392,9 @@
         "label": "TimelineExpandedDetail",
         "description": [],
         "signature": [
-          "{ query?: Record<any, never> | { panelView?: \"eventDetail\" | undefined; params?: { eventId: string; indexName: string; } | undefined; } | { panelView?: \"hostDetail\" | undefined; params?: { hostName: string; } | undefined; } | { panelView?: \"networkDetail\" | undefined; params?: { ip: string; flowTarget: FlowTarget; } | undefined; } | undefined; graph?: Record<any, never> | { panelView?: \"eventDetail\" | undefined; params?: { eventId: string; indexName: string; } | undefined; } | { panelView?: \"hostDetail\" | undefined; params?: { hostName: string; } | undefined; } | { panelView?: \"networkDetail\" | undefined; params?: { ip: string; flowTarget: FlowTarget; } | undefined; } | undefined; notes?: Record<any, never> | { panelView?: \"eventDetail\" | undefined; params?: { eventId: string; indexName: string; } | undefined; } | { panelView?: \"hostDetail\" | undefined; params?: { hostName: string; } | undefined; } | { panelView?: \"networkDetail\" | undefined; params?: { ip: string; flowTarget: FlowTarget; } | undefined; } | undefined; pinned?: Record<any, never> | { panelView?: \"eventDetail\" | undefined; params?: { eventId: string; indexName: string; } | undefined; } | { panelView?: \"hostDetail\" | undefined; params?: { hostName: string; } | undefined; } | { panelView?: \"networkDetail\" | undefined; params?: { ip: string; flowTarget: FlowTarget; } | undefined; } | undefined; eql?: Record<any, never> | { panelView?: \"eventDetail\" | undefined; params?: { eventId: string; indexName: string; } | undefined; } | { panelView?: \"hostDetail\" | undefined; params?: { hostName: string; } | undefined; } | { panelView?: \"networkDetail\" | undefined; params?: { ip: string; flowTarget: FlowTarget; } | undefined; } | undefined; }"
+          "{ [x: string]: { panelView?: \"eventDetail\" | undefined; params?: { eventId: string; indexName: string; ecsData?: ",
+          "Ecs",
+          " | undefined; } | undefined; } | Partial<Record<any, never>> | { panelView?: \"hostDetail\" | undefined; params?: { hostName: string; } | undefined; } | { panelView?: \"networkDetail\" | undefined; params?: { ip: string; flowTarget: FlowTarget; } | undefined; } | undefined; }"
         ],
         "path": "x-pack/plugins/timelines/common/types/timeline/index.ts",
         "deprecated": false,
@@ -14185,7 +14408,9 @@
         "label": "TimelineExpandedDetailType",
         "description": [],
         "signature": [
-          "Record<any, never> | { panelView?: \"eventDetail\" | undefined; params?: { eventId: string; indexName: string; } | undefined; } | { panelView?: \"hostDetail\" | undefined; params?: { hostName: string; } | undefined; } | { panelView?: \"networkDetail\" | undefined; params?: { ip: string; flowTarget: FlowTarget; } | undefined; }"
+          "{ panelView?: \"eventDetail\" | undefined; params?: { eventId: string; indexName: string; ecsData?: ",
+          "Ecs",
+          " | undefined; } | undefined; } | Partial<Record<any, never>> | { panelView?: \"hostDetail\" | undefined; params?: { hostName: string; } | undefined; } | { panelView?: \"networkDetail\" | undefined; params?: { ip: string; flowTarget: FlowTarget; } | undefined; }"
         ],
         "path": "x-pack/plugins/timelines/common/types/timeline/index.ts",
         "deprecated": false,
@@ -14199,7 +14424,9 @@
         "label": "TimelineExpandedEventType",
         "description": [],
         "signature": [
-          "Record<any, never> | { panelView?: \"eventDetail\" | undefined; params?: { eventId: string; indexName: string; } | undefined; }"
+          "{ panelView?: \"eventDetail\" | undefined; params?: { eventId: string; indexName: string; ecsData?: ",
+          "Ecs",
+          " | undefined; } | undefined; } | Partial<Record<any, never>>"
         ],
         "path": "x-pack/plugins/timelines/common/types/timeline/index.ts",
         "deprecated": false,
@@ -14213,7 +14440,7 @@
         "label": "TimelineExpandedHostType",
         "description": [],
         "signature": [
-          "Record<any, never> | { panelView?: \"hostDetail\" | undefined; params?: { hostName: string; } | undefined; }"
+          "Partial<Record<any, never>> | { panelView?: \"hostDetail\" | undefined; params?: { hostName: string; } | undefined; }"
         ],
         "path": "x-pack/plugins/timelines/common/types/timeline/index.ts",
         "deprecated": false,
@@ -14227,7 +14454,7 @@
         "label": "TimelineExpandedNetworkType",
         "description": [],
         "signature": [
-          "Record<any, never> | { panelView?: \"networkDetail\" | undefined; params?: { ip: string; flowTarget: FlowTarget; } | undefined; }"
+          "Partial<Record<any, never>> | { panelView?: \"networkDetail\" | undefined; params?: { ip: string; flowTarget: FlowTarget; } | undefined; }"
         ],
         "path": "x-pack/plugins/timelines/common/types/timeline/index.ts",
         "deprecated": false,
@@ -14668,7 +14895,9 @@
         "label": "ToggleDetailPanel",
         "description": [],
         "signature": [
-          "(Record<any, never> & { tabType?: ",
+          "({ panelView?: \"eventDetail\" | undefined; params?: { eventId: string; indexName: string; ecsData?: ",
+          "Ecs",
+          " | undefined; } | undefined; } & { tabType?: ",
           {
             "pluginId": "timelines",
             "scope": "common",
@@ -14676,7 +14905,7 @@
             "section": "def-common.TimelineTabs",
             "text": "TimelineTabs"
           },
-          " | undefined; timelineId: string; }) | ({ panelView?: \"eventDetail\" | undefined; params?: { eventId: string; indexName: string; } | undefined; } & { tabType?: ",
+          " | undefined; timelineId: string; }) | (Partial<Record<any, never>> & { tabType?: ",
           {
             "pluginId": "timelines",
             "scope": "common",

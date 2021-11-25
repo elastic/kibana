@@ -11,37 +11,38 @@ import { decryptJobHeaders } from '../common';
 import { createGenerateCsv } from './generate_csv';
 import { TaskPayloadDeprecatedCSV } from './types';
 
-export const runTaskFnFactory: RunTaskFnFactory<
-  RunTaskFn<TaskPayloadDeprecatedCSV>
-> = function executeJobFactoryFn(reporting, parentLogger) {
-  const config = reporting.getConfig();
+export const runTaskFnFactory: RunTaskFnFactory<RunTaskFn<TaskPayloadDeprecatedCSV>> =
+  function executeJobFactoryFn(reporting, parentLogger) {
+    const config = reporting.getConfig();
 
-  return async function runTask(jobId, job, cancellationToken, stream) {
-    const elasticsearch = await reporting.getEsClient();
-    const logger = parentLogger.clone([jobId]);
-    const generateCsv = createGenerateCsv(logger);
+    return async function runTask(jobId, job, cancellationToken, stream) {
+      const elasticsearch = await reporting.getEsClient();
+      const logger = parentLogger.clone([jobId]);
+      const generateCsv = createGenerateCsv(logger);
 
-    const encryptionKey = config.get('encryptionKey');
-    const headers = await decryptJobHeaders(encryptionKey, job.headers, logger);
-    const fakeRequest = reporting.getFakeRequest({ headers }, job.spaceId, logger);
-    const uiSettingsClient = await reporting.getUiSettingsClient(fakeRequest, logger);
-    const { asCurrentUser: elasticsearchClient } = elasticsearch.asScoped(fakeRequest);
+      const encryptionKey = config.get('encryptionKey');
+      const headers = await decryptJobHeaders(encryptionKey, job.headers, logger);
+      const fakeRequest = reporting.getFakeRequest({ headers }, job.spaceId, logger);
+      const uiSettingsClient = await reporting.getUiSettingsClient(fakeRequest, logger);
+      const { asCurrentUser: elasticsearchClient } = elasticsearch.asScoped(fakeRequest);
+      const dataViews = await reporting.getDataViewsService(fakeRequest);
 
-    const { maxSizeReached, csvContainsFormulas, warnings } = await generateCsv(
-      job,
-      config,
-      uiSettingsClient,
-      elasticsearchClient,
-      cancellationToken,
-      stream
-    );
+      const { maxSizeReached, csvContainsFormulas, warnings } = await generateCsv(
+        job,
+        config,
+        uiSettingsClient,
+        elasticsearchClient,
+        dataViews,
+        cancellationToken,
+        stream
+      );
 
-    // @TODO: Consolidate these one-off warnings into the warnings array (max-size reached and csv contains formulas)
-    return {
-      content_type: CONTENT_TYPE_CSV,
-      max_size_reached: maxSizeReached,
-      csv_contains_formulas: csvContainsFormulas,
-      warnings,
+      // @TODO: Consolidate these one-off warnings into the warnings array (max-size reached and csv contains formulas)
+      return {
+        content_type: CONTENT_TYPE_CSV,
+        max_size_reached: maxSizeReached,
+        csv_contains_formulas: csvContainsFormulas,
+        warnings,
+      };
     };
   };
-};

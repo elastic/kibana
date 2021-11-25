@@ -22,11 +22,7 @@ async function getDependencies(cwd: string, entries: string[]) {
 export async function findUsedDependencies(listedPkgDependencies: any, baseDir: any) {
   // Define the entry points for the server code in order to
   // start here later looking for the server side dependencies
-  const mainCodeEntries = [
-    Path.resolve(baseDir, `src/cli/dist.js`),
-    Path.resolve(baseDir, `src/cli_keystore/dist.js`),
-    Path.resolve(baseDir, `src/cli_plugin/dist.js`),
-  ];
+  const mainCodeEntries = await globby(normalize(Path.resolve(baseDir, `src/cli*/dist.js`)));
 
   const discoveredPluginEntries = await globby([
     normalize(Path.resolve(baseDir, `src/plugins/**/server/index.js`)),
@@ -42,7 +38,7 @@ export async function findUsedDependencies(listedPkgDependencies: any, baseDir: 
   // Another way would be to include an index file and import all the functions
   // using named imports
   const dynamicRequiredEntries = await globby([
-    normalize(Path.resolve(baseDir, 'src/plugins/vis_type_timelion/server/**/*.js')),
+    normalize(Path.resolve(baseDir, 'src/plugins/vis_types/timelion/server/**/*.js')),
   ]);
 
   // Compose all the needed entries

@@ -63,15 +63,8 @@ export class FieldChooser extends Component {
   };
 
   render() {
-    const {
-      buttonLabel,
-      columns,
-      fields,
-      selectedFields,
-      prompt,
-      onSelectField,
-      dataTestSubj,
-    } = this.props;
+    const { buttonLabel, columns, fields, selectedFields, prompt, onSelectField, dataTestSubj } =
+      this.props;
 
     const { isOpen, searchValue } = this.state;
 

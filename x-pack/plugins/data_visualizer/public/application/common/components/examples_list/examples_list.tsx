@@ -11,6 +11,7 @@ import { EuiListGroup, EuiListGroupItem } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 import { ExpandedRowFieldHeader } from '../stats_table/components/expanded_row_field_header';
+import { ExpandedRowPanel } from '../stats_table/components/field_data_expanded_row/expanded_row_panel';
 interface Props {
   examples: Array<string | object>;
 }
@@ -31,8 +32,7 @@ export const ExamplesList: FC<Props> = ({ examples }) => {
     examplesContent = examples.map((example, i) => {
       return (
         <EuiListGroupItem
-          className="fieldDataCard__codeContent"
-          size="s"
+          size="xs"
           key={`example_${i}`}
           label={typeof example === 'string' ? example : JSON.stringify(example)}
         />
@@ -41,7 +41,10 @@ export const ExamplesList: FC<Props> = ({ examples }) => {
   }
 
   return (
-    <div data-test-subj="dataVisualizerFieldDataExamplesList">
+    <ExpandedRowPanel
+      dataTestSubj="dataVisualizerFieldDataExamplesList"
+      className="dvText__wrapper dvPanel__wrapper"
+    >
       <ExpandedRowFieldHeader>
         <FormattedMessage
           id="xpack.dataVisualizer.dataGrid.field.examplesList.title"
@@ -54,6 +57,6 @@ export const ExamplesList: FC<Props> = ({ examples }) => {
       <EuiListGroup showToolTips={true} maxWidth={'s'} gutterSize={'none'} flush={true}>
         {examplesContent}
       </EuiListGroup>
-    </div>
+    </ExpandedRowPanel>
   );
 };

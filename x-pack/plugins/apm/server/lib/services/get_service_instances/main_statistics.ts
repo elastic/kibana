@@ -8,7 +8,7 @@
 import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
 import { joinByKey } from '../../../../common/utils/join_by_key';
 import { withApmSpan } from '../../../utils/with_apm_span';
-import { Setup, SetupTimeRange } from '../../helpers/setup_request';
+import { Setup } from '../../helpers/setup_request';
 import { getServiceInstancesSystemMetricStatistics } from './get_service_instances_system_metric_statistics';
 import { getServiceInstancesTransactionStatistics } from './get_service_instances_transaction_statistics';
 
@@ -16,7 +16,7 @@ interface ServiceInstanceMainStatisticsParams {
   environment: string;
   kuery: string;
   latencyAggregationType: LatencyAggregationType;
-  setup: Setup & SetupTimeRange;
+  setup: Setup;
   serviceName: string;
   transactionType: string;
   searchAggregatedTransactions: boolean;

@@ -27,7 +27,7 @@ import {
 import type { SecurityLicenseFeatures } from '../../common/licensing';
 import { licenseMock } from '../../common/licensing/index.mock';
 import { mockAuthenticatedUser } from '../../common/model/authenticated_user.mock';
-import { auditServiceMock, securityAuditLoggerMock } from '../audit/index.mock';
+import { auditServiceMock } from '../audit/index.mock';
 import { ConfigSchema, createConfig } from '../config';
 import { securityFeatureUsageServiceMock } from '../feature_usage/index.mock';
 import type { SessionValue } from '../session_management';
@@ -48,7 +48,6 @@ function getMockOptions({
   selector?: AuthenticatorOptions['config']['authc']['selector'];
 } = {}) {
   return {
-    legacyAuditLogger: securityAuditLoggerMock.create(),
     audit: auditServiceMock.create(),
     getCurrentUser: jest.fn(),
     clusterClient: elasticsearchServiceMock.createClusterClient(),
@@ -120,8 +119,8 @@ describe('Authenticator', () => {
 
     describe('#options.urls.loggedOut', () => {
       it('points to /login if provider requires login form', () => {
-        const authenticationProviderMock = jest.requireMock(`./providers/basic`)
-          .BasicAuthenticationProvider;
+        const authenticationProviderMock =
+          jest.requireMock(`./providers/basic`).BasicAuthenticationProvider;
         authenticationProviderMock.mockClear();
         new Authenticator(getMockOptions());
         const getLoggedOutURL = authenticationProviderMock.mock.calls[0][0].urls.loggedOut;
@@ -140,8 +139,8 @@ describe('Authenticator', () => {
       });
 
       it('points to /login if login selector is enabled', () => {
-        const authenticationProviderMock = jest.requireMock(`./providers/saml`)
-          .SAMLAuthenticationProvider;
+        const authenticationProviderMock =
+          jest.requireMock(`./providers/saml`).SAMLAuthenticationProvider;
         authenticationProviderMock.mockClear();
         new Authenticator(
           getMockOptions({
@@ -165,8 +164,8 @@ describe('Authenticator', () => {
       });
 
       it('points to /security/logged_out if login selector is NOT enabled', () => {
-        const authenticationProviderMock = jest.requireMock(`./providers/saml`)
-          .SAMLAuthenticationProvider;
+        const authenticationProviderMock =
+          jest.requireMock(`./providers/saml`).SAMLAuthenticationProvider;
         authenticationProviderMock.mockClear();
         new Authenticator(
           getMockOptions({
@@ -210,7 +209,7 @@ describe('Authenticator', () => {
         expect(
           jest.requireMock('./providers/http').HTTPAuthenticationProvider
         ).toHaveBeenCalledWith(expect.anything(), {
-          supportedSchemes: new Set(['apikey', 'basic']),
+          supportedSchemes: new Set(['apikey', 'bearer', 'basic']),
         });
       });
 
@@ -238,7 +237,9 @@ describe('Authenticator', () => {
 
         expect(
           jest.requireMock('./providers/http').HTTPAuthenticationProvider
-        ).toHaveBeenCalledWith(expect.anything(), { supportedSchemes: new Set(['apikey']) });
+        ).toHaveBeenCalledWith(expect.anything(), {
+          supportedSchemes: new Set(['apikey', 'bearer']),
+        });
       });
 
       it('disabled if explicitly disabled', () => {
@@ -1478,6 +1479,29 @@ describe('Authenticator', () => {
         );
         expect(mockBasicAuthenticationProvider.authenticate).not.toHaveBeenCalled();
       });
+
+      it('redirects to the Login Selector with auth provider hint when needed.', async () => {
+        const request = httpServerMock.createKibanaRequest({
+          query: { [AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER]: 'custom1' },
+        });
+
+        // Includes hint if there is no active session.
+        await expect(authenticator.authenticate(request)).resolves.toEqual(
+          AuthenticationResult.redirectTo(
+            '/mock-server-basepath/login?next=%2Fmock-server-basepath%2Fpath%3Fauth_provider_hint%3Dcustom1&auth_provider_hint=custom1'
+          )
+        );
+
+        // Includes hint if session is unauthenticated.
+        mockOptions.session.get.mockResolvedValue({ ...mockSessVal, username: undefined });
+        await expect(authenticator.authenticate(request)).resolves.toEqual(
+          AuthenticationResult.redirectTo(
+            '/mock-server-basepath/login?next=%2Fmock-server-basepath%2Fpath%3Fauth_provider_hint%3Dcustom1&auth_provider_hint=custom1'
+          )
+        );
+
+        expect(mockBasicAuthenticationProvider.authenticate).not.toHaveBeenCalled();
+      });
     });
 
     describe('with Access Agreement', () => {
@@ -1865,10 +1889,15 @@ describe('Authenticator', () => {
     let authenticator: Authenticator;
     let mockOptions: ReturnType<typeof getMockOptions>;
     let mockSessionValue: SessionValue;
+    const auditLogger = {
+      log: jest.fn(),
+    };
+
     beforeEach(() => {
       mockOptions = getMockOptions({ providers: { basic: { basic1: { order: 0 } } } });
       mockSessionValue = sessionMock.createValue({ state: { authorization: 'Basic xxx' } });
       mockOptions.session.get.mockResolvedValue(mockSessionValue);
+      mockOptions.audit.asScoped.mockReturnValue(auditLogger);
       mockOptions.getCurrentUser.mockReturnValue(mockAuthenticatedUser());
       mockOptions.license.getFeatures.mockReturnValue({
         allowAccessAgreement: true,
@@ -1928,13 +1957,11 @@ describe('Authenticator', () => {
         accessAgreementAcknowledged: true,
       });
 
-      expect(mockOptions.legacyAuditLogger.accessAgreementAcknowledged).toHaveBeenCalledTimes(1);
-      expect(mockOptions.legacyAuditLogger.accessAgreementAcknowledged).toHaveBeenCalledWith(
-        'user',
-        {
-          type: 'basic',
-          name: 'basic1',
-        }
+      expect(auditLogger.log).toHaveBeenCalledTimes(1);
+      expect(auditLogger.log).toHaveBeenCalledWith(
+        expect.objectContaining({
+          event: { action: 'access_agreement_acknowledged', category: ['authentication'] },
+        })
       );
 
       expect(mockOptions.featureUsageService.recordPreAccessAgreementUsage).toHaveBeenCalledTimes(

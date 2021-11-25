@@ -130,7 +130,7 @@ describe('getColumns', () => {
   });
 
   it('should return the first data column if no buckets specified', () => {
-    const visParamsOnlyMetric = ({
+    const visParamsOnlyMetric = {
       addLegend: true,
       addTooltip: true,
       isDonut: true,
@@ -162,7 +162,7 @@ describe('getColumns', () => {
           aggType: 'count',
         },
       },
-    } as unknown) as PieVisParams;
+    } as unknown as PieVisParams;
     const { metricColumn } = getColumns(visParamsOnlyMetric, visData);
     expect(metricColumn).toEqual({
       id: 'col-1-1',
@@ -187,7 +187,7 @@ describe('getColumns', () => {
   });
 
   it('should return an object with the name of the metric if no buckets specified', () => {
-    const visParamsOnlyMetric = ({
+    const visParamsOnlyMetric = {
       addLegend: true,
       addTooltip: true,
       isDonut: true,
@@ -217,7 +217,7 @@ describe('getColumns', () => {
           aggType: 'count',
         },
       },
-    } as unknown) as PieVisParams;
+    } as unknown as PieVisParams;
     const { bucketColumns, metricColumn } = getColumns(visParamsOnlyMetric, visData);
     expect(bucketColumns).toEqual([{ name: metricColumn.name }]);
   });

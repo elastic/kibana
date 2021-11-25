@@ -34,6 +34,7 @@ interface Props {
   browserFields: BrowserFields;
   data: TimelineEventsDetailsItem[];
   eventId: string;
+  isDraggable?: boolean;
   timelineId: string;
   timelineTabType: TimelineTabs | 'flyout';
 }
@@ -136,7 +137,7 @@ const StyledEuiInMemoryTable = styled(EuiInMemoryTable as any)`
 
 /** Renders a table view or JSON view of the `ECS` `data` */
 export const EventFieldsBrowser = React.memo<Props>(
-  ({ browserFields, data, eventId, timelineTabType, timelineId }) => {
+  ({ browserFields, data, eventId, isDraggable, timelineTabType, timelineId }) => {
     const containerElement = useRef<HTMLDivElement | null>(null);
     const dispatch = useDispatch();
     const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
@@ -217,6 +218,7 @@ export const EventFieldsBrowser = React.memo<Props>(
           timelineId,
           toggleColumn,
           getLinkValue,
+          isDraggable,
         }),
       [
         browserFields,
@@ -227,6 +229,7 @@ export const EventFieldsBrowser = React.memo<Props>(
         timelineTabType,
         toggleColumn,
         getLinkValue,
+        isDraggable,
       ]
     );
 
@@ -278,6 +281,7 @@ export const EventFieldsBrowser = React.memo<Props>(
           rowProps={onSetRowProps}
           search={search}
           sorting={false}
+          data-test-subj="event-fields-browser"
         />
       </TableWrapper>
     );

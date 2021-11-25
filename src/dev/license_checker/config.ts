@@ -22,6 +22,7 @@ export const LICENSE_ALLOWED = [
   '(MIT OR Apache-2.0)',
   '(MIT OR GPL-3.0)',
   '(WTFPL OR MIT)',
+  '(MIT OR WTFPL)',
   '(Unlicense OR Apache-2.0)',
   'AFLv2.1',
   'Apache 2.0',
@@ -73,13 +74,7 @@ export const DEV_ONLY_LICENSE_ALLOWED = ['MPL-2.0'];
 export const LICENSE_OVERRIDES = {
   'jsts@1.6.2': ['Eclipse Distribution License - v 1.0'], // cf. https://github.com/bjornharrtell/jsts
   '@mapbox/jsonlint-lines-primitives@2.0.2': ['MIT'], // license in readme https://github.com/tmcw/jsonlint
-  'node-sql-parser@3.6.1': ['(GPL-2.0 OR MIT)'], // GPL-2.0* https://github.com/taozhi8833998/node-sql-parser
-  '@elastic/ems-client@7.15.0': ['Elastic License 2.0'],
-  '@elastic/eui@37.3.1': ['SSPL-1.0 OR Elastic License 2.0'],
-
-  // TODO can be removed if the https://github.com/jindw/xmldom/issues/239 is released
-  'xmldom@0.1.27': ['MIT'],
-
-  // TODO can be removed once we upgrade the use of walk dependency past or equal to v2.3.14
-  'walk@2.3.9': ['MIT'],
+  '@elastic/ems-client@8.0.0': ['Elastic License 2.0'],
+  '@elastic/eui@40.1.0': ['SSPL-1.0 OR Elastic License 2.0'],
+  'language-subtag-registry@0.3.21': ['CC-BY-4.0'], // retired ODC‑By license https://github.com/mattcg/language-subtag-registry
 };

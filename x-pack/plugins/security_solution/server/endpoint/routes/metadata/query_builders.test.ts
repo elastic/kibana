@@ -6,12 +6,17 @@
  */
 
 import { httpServerMock, loggingSystemMock } from '../../../../../../../src/core/server/mocks';
-import { kibanaRequestToMetadataListESQuery, getESQueryHostMetadataByID } from './query_builders';
+import {
+  kibanaRequestToMetadataListESQuery,
+  getESQueryHostMetadataByID,
+  buildUnitedIndexQuery,
+} from './query_builders';
 import { EndpointAppContextService } from '../../endpoint_app_context_services';
 import { createMockConfig } from '../../../lib/detection_engine/routes/__mocks__';
 import { metadataCurrentIndexPattern } from '../../../../common/endpoint/constants';
 import { parseExperimentalConfigValue } from '../../../../common/experimental_features';
 import { get } from 'lodash';
+import { expectedCompleteUnitedIndexQuery } from './query_builders.fixtures';
 
 describe('query builder', () => {
   describe('MetadataListESQuery', () => {
@@ -48,19 +53,6 @@ describe('query builder', () => {
       });
     });
 
-    it('queries for all endpoints when no specific parameters requested', async () => {
-      const mockRequest = httpServerMock.createKibanaRequest({
-        body: {},
-      });
-      const query = await kibanaRequestToMetadataListESQuery(mockRequest, {
-        logFactory: loggingSystemMock.create(),
-        service: new EndpointAppContextService(),
-        config: () => Promise.resolve(createMockConfig()),
-        experimentalFeatures: parseExperimentalConfigValue(createMockConfig().enableExperimental),
-      });
-      expect(query.body.query).toHaveProperty('match_all');
-    });
-
     it('excludes unenrolled elastic agents when they exist, by default', async () => {
       const unenrolledElasticAgentId = '1fdca33f-799f-49f4-939c-ea4383c77672';
       const mockRequest = httpServerMock.createKibanaRequest({
@@ -82,8 +74,24 @@ describe('query builder', () => {
       expect(query.body.query).toEqual({
         bool: {
           must_not: [
-            { terms: { 'elastic.agent.id': [unenrolledElasticAgentId] } },
-            { terms: { 'HostDetails.elastic.agent.id': [unenrolledElasticAgentId] } },
+            {
+              terms: {
+                'elastic.agent.id': [
+                  '00000000-0000-0000-0000-000000000000',
+                  '11111111-1111-1111-1111-111111111111',
+                  unenrolledElasticAgentId,
+                ],
+              },
+            },
+            {
+              terms: {
+                'HostDetails.elastic.agent.id': [
+                  '00000000-0000-0000-0000-000000000000',
+                  '11111111-1111-1111-1111-111111111111',
+                  unenrolledElasticAgentId,
+                ],
+              },
+            },
           ],
         },
       });
@@ -147,31 +155,42 @@ describe('query builder', () => {
           }
         );
 
-        expect(query.body.query.bool.must).toContainEqual({
-          bool: {
-            must_not: [
-              // both of these should exist, since the schema can be *either*
-              { terms: { 'elastic.agent.id': [unenrolledElasticAgentId] } },
-              { terms: { 'HostDetails.elastic.agent.id': [unenrolledElasticAgentId] } },
-            ],
-          },
-        });
-        expect(query.body.query.bool.must).toContainEqual({
-          bool: {
-            must_not: {
-              bool: {
-                should: [
-                  {
-                    match: {
-                      'host.ip': '10.140.73.246',
-                    },
+        expect(query.body.query.bool.must).toEqual([
+          {
+            bool: {
+              must_not: [
+                {
+                  terms: {
+                    'elastic.agent.id': [
+                      '00000000-0000-0000-0000-000000000000',
+                      '11111111-1111-1111-1111-111111111111',
+                      '1fdca33f-799f-49f4-939c-ea4383c77672',
+                    ],
                   },
-                ],
-                minimum_should_match: 1,
+                },
+                {
+                  terms: {
+                    'HostDetails.elastic.agent.id': [
+                      '00000000-0000-0000-0000-000000000000',
+                      '11111111-1111-1111-1111-111111111111',
+                      '1fdca33f-799f-49f4-939c-ea4383c77672',
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+          {
+            bool: {
+              must_not: {
+                bool: {
+                  minimum_should_match: 1,
+                  should: [{ match: { 'host.ip': '10.140.73.246' } }],
+                },
               },
             },
           },
-        });
+        ]);
       }
     );
   });
@@ -198,6 +217,65 @@ describe('query builder', () => {
       expect(get(query, 'body.query.bool.filter.0.bool.should')).toContainEqual({
         term: { 'HostDetails.agent.id': mockID },
       });
+    });
+  });
+
+  describe('buildUnitedIndexQuery', () => {
+    it('correctly builds empty query', async () => {
+      const query = await buildUnitedIndexQuery({ page: 1, pageSize: 10, filters: {} }, []);
+      const expected = {
+        bool: {
+          must_not: {
+            terms: {
+              'agent.id': [
+                '00000000-0000-0000-0000-000000000000',
+                '11111111-1111-1111-1111-111111111111',
+              ],
+            },
+          },
+          filter: [
+            {
+              terms: {
+                'united.agent.policy_id': [],
+              },
+            },
+            {
+              exists: {
+                field: 'united.endpoint.agent.id',
+              },
+            },
+            {
+              exists: {
+                field: 'united.agent.agent.id',
+              },
+            },
+            {
+              term: {
+                'united.agent.active': {
+                  value: true,
+                },
+              },
+            },
+          ],
+        },
+      };
+      expect(query.body.query).toEqual(expected);
+    });
+
+    it('correctly builds query', async () => {
+      const query = await buildUnitedIndexQuery(
+        {
+          page: 1,
+          pageSize: 10,
+          filters: {
+            kql: 'united.endpoint.host.os.name : *',
+            host_status: ['healthy'],
+          },
+        },
+        ['test-endpoint-policy-id']
+      );
+      const expected = expectedCompleteUnitedIndexQuery;
+      expect(query.body.query).toEqual(expected);
     });
   });
 });

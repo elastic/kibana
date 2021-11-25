@@ -75,7 +75,6 @@ exports[`MetricsAxisOptions component should init with the default set of props 
   />
   <ValueAxesPanel
     addValueAxis={[Function]}
-    isNewLibrary={false}
     onValueAxisPositionChanged={[Function]}
     removeValueAxis={[Function]}
     seriesParams={

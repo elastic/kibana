@@ -12,7 +12,6 @@ import typeDetect from 'type-detect';
 import type { Logger } from 'src/core/server';
 
 import type { AuthenticatedUser } from '../../../security/common/model';
-import type { EncryptedSavedObjectsAuditLogger } from '../audit';
 import { EncryptedSavedObjectAttributesDefinition } from './encrypted_saved_object_type_definition';
 import { EncryptionError, EncryptionErrorOperation } from './encryption_error';
 
@@ -85,11 +84,6 @@ interface EncryptedSavedObjectsServiceOptions {
   logger: Logger;
 
   /**
-   * Audit logger instance.
-   */
-  audit: EncryptedSavedObjectsAuditLogger;
-
-  /**
    * NodeCrypto instance used for both encryption and decryption.
    */
   primaryCrypto?: Crypto;
@@ -122,10 +116,8 @@ export class EncryptedSavedObjectsService {
    * Map of all registered saved object types where the `key` is saved object type and the `value`
    * is the definition (names of attributes that need to be encrypted etc.).
    */
-  private readonly typeDefinitions: Map<
-    string,
-    EncryptedSavedObjectAttributesDefinition
-  > = new Map();
+  private readonly typeDefinitions: Map<string, EncryptedSavedObjectAttributesDefinition> =
+    new Map();
 
   constructor(private readonly options: EncryptedSavedObjectsServiceOptions) {}
 
@@ -296,7 +288,6 @@ export class EncryptedSavedObjectsService {
           this.options.logger.error(
             `Failed to encrypt "${attributeName}" attribute: ${err.message || err}`
           );
-          this.options.audit.encryptAttributeFailure(attributeName, descriptor, params?.user);
 
           throw new EncryptionError(
             `Unable to encrypt attribute "${attributeName}"`,
@@ -324,8 +315,6 @@ export class EncryptedSavedObjectsService {
     if (encryptedAttributesKeys.length === 0) {
       return attributes;
     }
-
-    this.options.audit.encryptAttributesSuccess(encryptedAttributesKeys, descriptor, params?.user);
 
     return {
       ...attributes,
@@ -525,7 +514,6 @@ export class EncryptedSavedObjectsService {
       }
 
       if (typeof attributeValue !== 'string') {
-        this.options.audit.decryptAttributeFailure(attributeName, descriptor, params?.user);
         throw new Error(
           `Encrypted "${attributeName}" attribute should be a string, but found ${typeDetect(
             attributeValue
@@ -558,7 +546,6 @@ export class EncryptedSavedObjectsService {
         this.options.logger.error(
           `Failed to decrypt "${attributeName}" attribute: ${err.message || err}`
         );
-        this.options.audit.decryptAttributeFailure(attributeName, descriptor, params?.user);
 
         throw new EncryptionError(
           `Unable to decrypt attribute "${attributeName}"`,
@@ -585,8 +572,6 @@ export class EncryptedSavedObjectsService {
     if (decryptedAttributesKeys.length === 0) {
       return attributes;
     }
-
-    this.options.audit.decryptAttributesSuccess(decryptedAttributesKeys, descriptor, params?.user);
 
     return {
       ...attributes,

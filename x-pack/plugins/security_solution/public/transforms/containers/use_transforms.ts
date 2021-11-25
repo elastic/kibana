@@ -43,7 +43,7 @@ export interface ReturnTransform {
 export const useTransforms = (): ReturnTransform => {
   const [transformSettings] = useUiSetting$<TransformConfigSchema>(
     DEFAULT_TRANSFORMS,
-    (JSON.stringify(defaultTransformsSetting) as unknown) as TransformConfigSchema // TODO: The types are not 100% correct within uiSettings$, so I have to cast here. Once that is fixed, this cast can be removed
+    JSON.stringify(defaultTransformsSetting) as unknown as TransformConfigSchema // TODO: The types are not 100% correct within uiSettings$, so I have to cast here. Once that is fixed, this cast can be removed
   );
   // TODO: Once we are past experimental phase this code should be removed
   const metricsEntitiesEnabled = useIsExperimentalFeatureEnabled('metricsEntitiesEnabled');

@@ -9,28 +9,72 @@ import React, { useEffect } from 'react';
 
 import { useValues, useActions } from 'kea';
 
-import { EuiBasicTable, EuiBasicTableColumn, EuiPanel } from '@elastic/eui';
+import { EuiBadge } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { EDIT_BUTTON_LABEL, DELETE_BUTTON_LABEL } from '../../../../shared/constants';
-import { KibanaLogic } from '../../../../shared/kibana';
-import { EuiButtonTo, EuiLinkTo } from '../../../../shared/react_router_helpers';
-import { convertMetaToPagination, handlePageChange } from '../../../../shared/table_pagination';
+import { EuiButtonTo } from '../../../../shared/react_router_helpers';
 
-import { ENGINE_CURATIONS_NEW_PATH, ENGINE_CURATION_PATH } from '../../../routes';
-import { FormattedDateTime } from '../../../utils/formatted_date_time';
-import { generateEnginePath } from '../../engine';
+import { ENGINE_CURATIONS_NEW_PATH } from '../../../routes';
+import { EngineLogic, generateEnginePath } from '../../engine';
 import { AppSearchPageTemplate } from '../../layout';
 
-import { EmptyState } from '../components';
 import { CURATIONS_OVERVIEW_TITLE, CREATE_NEW_CURATION_TITLE } from '../constants';
 import { CurationsLogic } from '../curations_logic';
-import { Curation } from '../types';
-import { getCurationsBreadcrumbs, convertToDate } from '../utils';
+import { getCurationsBreadcrumbs } from '../utils';
+
+import { CurationsHistory } from './curations_history/curations_history';
+import { CurationsOverview } from './curations_overview';
+import { CurationsSettings } from './curations_settings';
 
 export const Curations: React.FC = () => {
-  const { dataLoading, curations, meta } = useValues(CurationsLogic);
-  const { loadCurations } = useActions(CurationsLogic);
+  const { dataLoading, meta, selectedPageTab } = useValues(CurationsLogic);
+  const { loadCurations, onSelectPageTab } = useActions(CurationsLogic);
+  const {
+    engine: { adaptive_relevance_suggestions_active: adaptiveRelevanceSuggestionsActive },
+  } = useValues(EngineLogic);
+
+  const suggestionsEnabled = adaptiveRelevanceSuggestionsActive;
+
+  const OVERVIEW_TAB = {
+    label: i18n.translate(
+      'xpack.enterpriseSearch.appSearch.engine.curations.overviewPageTabLabel',
+      {
+        defaultMessage: 'Overview',
+      }
+    ),
+    isSelected: selectedPageTab === 'overview',
+    onClick: () => onSelectPageTab('overview'),
+  };
+
+  const HISTORY_TAB = {
+    label: i18n.translate('xpack.enterpriseSearch.appSearch.engine.curations.historyPageTabLabel', {
+      defaultMessage: 'History',
+    }),
+    isSelected: selectedPageTab === 'history',
+    onClick: () => onSelectPageTab('history'),
+  };
+
+  const SETTINGS_TAB = {
+    label: i18n.translate(
+      'xpack.enterpriseSearch.appSearch.engine.curations.settingsPageTabLabel',
+      {
+        defaultMessage: 'Settings',
+      }
+    ),
+    isSelected: selectedPageTab === 'settings',
+    onClick: () => onSelectPageTab('settings'),
+    append: suggestionsEnabled ? undefined : (
+      <EuiBadge color="success">
+        {i18n.translate('xpack.enterpriseSearch.appSearch.engine.curations.newBadgeLabel', {
+          defaultMessage: 'New!',
+        })}
+      </EuiBadge>
+    ),
+  };
+
+  const pageTabs = adaptiveRelevanceSuggestionsActive
+    ? [OVERVIEW_TAB, HISTORY_TAB, SETTINGS_TAB]
+    : [OVERVIEW_TAB, SETTINGS_TAB];
 
   useEffect(() => {
     loadCurations();
@@ -50,105 +94,13 @@ export const Curations: React.FC = () => {
             {CREATE_NEW_CURATION_TITLE}
           </EuiButtonTo>,
         ],
+        tabs: dataLoading ? undefined : pageTabs,
       }}
-      isLoading={dataLoading && !curations.length}
-      isEmptyState={!curations.length}
-      emptyState={<EmptyState />}
+      isLoading={dataLoading}
     >
-      <EuiPanel hasBorder>
-        <CurationsTable />
-      </EuiPanel>
+      {selectedPageTab === 'overview' && <CurationsOverview />}
+      {selectedPageTab === 'history' && <CurationsHistory />}
+      {selectedPageTab === 'settings' && <CurationsSettings />}
     </AppSearchPageTemplate>
-  );
-};
-
-export const CurationsTable: React.FC = () => {
-  const { dataLoading, curations, meta } = useValues(CurationsLogic);
-  const { onPaginate, deleteCuration } = useActions(CurationsLogic);
-
-  const columns: Array<EuiBasicTableColumn<Curation>> = [
-    {
-      field: 'queries',
-      name: i18n.translate(
-        'xpack.enterpriseSearch.appSearch.engine.curations.table.column.queries',
-        { defaultMessage: 'Queries' }
-      ),
-      render: (queries: Curation['queries'], curation: Curation) => (
-        <EuiLinkTo
-          data-test-subj="CurationsTableQueriesLink"
-          to={generateEnginePath(ENGINE_CURATION_PATH, { curationId: curation.id })}
-        >
-          {queries.join(', ')}
-        </EuiLinkTo>
-      ),
-      width: '40%',
-      truncateText: true,
-      mobileOptions: {
-        header: true,
-        // Note: the below props are valid props per https://elastic.github.io/eui/#/tabular-content/tables (Responsive tables), but EUI's types have a bug reporting it as an error
-        // @ts-ignore
-        enlarge: true,
-        width: '100%',
-        truncateText: false,
-      },
-    },
-    {
-      field: 'last_updated',
-      name: i18n.translate(
-        'xpack.enterpriseSearch.appSearch.engine.curations.table.column.lastUpdated',
-        { defaultMessage: 'Last updated' }
-      ),
-      width: '30%',
-      dataType: 'string',
-      render: (dateString: string) => <FormattedDateTime date={convertToDate(dateString)} />,
-    },
-    {
-      width: '120px',
-      actions: [
-        {
-          name: EDIT_BUTTON_LABEL,
-          description: i18n.translate(
-            'xpack.enterpriseSearch.appSearch.engine.curations.table.editTooltip',
-            { defaultMessage: 'Edit curation' }
-          ),
-          type: 'icon',
-          icon: 'pencil',
-          color: 'primary',
-          onClick: (curation: Curation) => {
-            const { navigateToUrl } = KibanaLogic.values;
-            const url = generateEnginePath(ENGINE_CURATION_PATH, { curationId: curation.id });
-            navigateToUrl(url);
-          },
-          'data-test-subj': 'CurationsTableEditButton',
-        },
-        {
-          name: DELETE_BUTTON_LABEL,
-          description: i18n.translate(
-            'xpack.enterpriseSearch.appSearch.engine.curations.table.deleteTooltip',
-            { defaultMessage: 'Delete curation' }
-          ),
-          type: 'icon',
-          icon: 'trash',
-          color: 'danger',
-          onClick: (curation: Curation) => deleteCuration(curation.id),
-          'data-test-subj': 'CurationsTableDeleteButton',
-        },
-      ],
-    },
-  ];
-
-  return (
-    <EuiBasicTable
-      columns={columns}
-      items={curations}
-      responsive
-      hasActions
-      loading={dataLoading}
-      pagination={{
-        ...convertMetaToPagination(meta),
-        hidePerPageOptions: true,
-      }}
-      onChange={handlePageChange(onPaginate)}
-    />
   );
 };

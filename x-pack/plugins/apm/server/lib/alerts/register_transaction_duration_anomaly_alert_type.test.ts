@@ -41,10 +41,10 @@ describe('Transaction duration anomaly alert', () => {
 
       const { services, dependencies, executor } = createRuleTypeMocks();
 
-      const ml = ({
+      const ml = {
         mlSystemProvider: () => ({ mlAnomalySearch: jest.fn() }),
         anomalyDetectorsProvider: jest.fn(),
-      } as unknown) as MlPluginSetup;
+      } as unknown as MlPluginSetup;
 
       registerTransactionDurationAnomalyAlertType({
         ...dependencies,
@@ -63,7 +63,7 @@ describe('Transaction duration anomaly alert', () => {
 
     it('anomaly is less than threshold', async () => {
       jest.spyOn(GetServiceAnomalies, 'getMLJobs').mockReturnValue(
-        Promise.resolve(([
+        Promise.resolve([
           {
             job_id: '1',
             custom_settings: { job_tags: { environment: 'development' } },
@@ -72,12 +72,12 @@ describe('Transaction duration anomaly alert', () => {
             job_id: '2',
             custom_settings: { job_tags: { environment: 'production' } },
           },
-        ] as unknown) as Job[])
+        ] as unknown as Job[])
       );
 
       const { services, dependencies, executor } = createRuleTypeMocks();
 
-      const ml = ({
+      const ml = {
         mlSystemProvider: () => ({
           mlAnomalySearch: () => ({
             aggregations: {
@@ -95,7 +95,7 @@ describe('Transaction duration anomaly alert', () => {
           }),
         }),
         anomalyDetectorsProvider: jest.fn(),
-      } as unknown) as MlPluginSetup;
+      } as unknown as MlPluginSetup;
 
       registerTransactionDurationAnomalyAlertType({
         ...dependencies,
@@ -116,7 +116,7 @@ describe('Transaction duration anomaly alert', () => {
   describe('sends alert', () => {
     it('for all services that exceeded the threshold', async () => {
       jest.spyOn(GetServiceAnomalies, 'getMLJobs').mockReturnValue(
-        Promise.resolve(([
+        Promise.resolve([
           {
             job_id: '1',
             custom_settings: { job_tags: { environment: 'development' } },
@@ -125,17 +125,13 @@ describe('Transaction duration anomaly alert', () => {
             job_id: '2',
             custom_settings: { job_tags: { environment: 'production' } },
           },
-        ] as unknown) as Job[])
+        ] as unknown as Job[])
       );
 
-      const {
-        services,
-        dependencies,
-        executor,
-        scheduleActions,
-      } = createRuleTypeMocks();
+      const { services, dependencies, executor, scheduleActions } =
+        createRuleTypeMocks();
 
-      const ml = ({
+      const ml = {
         mlSystemProvider: () => ({
           mlAnomalySearch: () => ({
             aggregations: {
@@ -175,7 +171,7 @@ describe('Transaction duration anomaly alert', () => {
           }),
         }),
         anomalyDetectorsProvider: jest.fn(),
-      } as unknown) as MlPluginSetup;
+      } as unknown as MlPluginSetup;
 
       registerTransactionDurationAnomalyAlertType({
         ...dependencies,

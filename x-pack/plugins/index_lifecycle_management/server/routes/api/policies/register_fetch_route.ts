@@ -6,7 +6,7 @@
  */
 
 import { ElasticsearchClient } from 'kibana/server';
-import { ApiResponse } from '@elastic/elasticsearch';
+import type { TransportResult } from '@elastic/elasticsearch';
 
 import { PolicyFromES, SerializedPolicy } from '../../../../common/types';
 import { RouteDependencies } from '../../../types';
@@ -46,7 +46,7 @@ function formatPolicies(policiesMap: PoliciesMap): PolicyFromES[] {
   }, []);
 }
 
-async function fetchPolicies(client: ElasticsearchClient): Promise<ApiResponse<PoliciesMap>> {
+async function fetchPolicies(client: ElasticsearchClient): Promise<TransportResult<PoliciesMap>> {
   const options = {
     // we allow 404 since they may have no policies
     ignore: [404],

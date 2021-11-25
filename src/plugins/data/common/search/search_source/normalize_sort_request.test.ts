@@ -8,7 +8,7 @@
 
 import { normalizeSortRequest } from './normalize_sort_request';
 import { SortDirection } from './types';
-import { IIndexPattern } from '../../index_patterns';
+import { IIndexPattern } from '../..';
 
 describe('SearchSource#normalizeSortRequest', function () {
   const scriptedField = {

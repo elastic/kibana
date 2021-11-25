@@ -13,7 +13,7 @@ import { unenrollForAgentPolicyId } from './agents';
 import { agentPolicyService } from './agent_policy';
 import { appContextService } from './app_context';
 
-const fakeRequest = ({
+const fakeRequest = {
   headers: {},
   getBasePath: () => '',
   path: '/',
@@ -26,7 +26,7 @@ const fakeRequest = ({
       url: '/',
     },
   },
-} as unknown) as KibanaRequest;
+} as unknown as KibanaRequest;
 
 export async function agentPolicyUpdateEventHandler(
   soClient: SavedObjectsClientContract,
@@ -43,11 +43,11 @@ export async function agentPolicyUpdateEventHandler(
       name: 'Default',
       agentPolicyId,
     });
-    await agentPolicyService.createFleetPolicyChangeAction(internalSoClient, agentPolicyId);
+    await agentPolicyService.createFleetServerPolicy(internalSoClient, agentPolicyId);
   }
 
   if (action === 'updated') {
-    await agentPolicyService.createFleetPolicyChangeAction(internalSoClient, agentPolicyId);
+    await agentPolicyService.createFleetServerPolicy(internalSoClient, agentPolicyId);
   }
 
   if (action === 'deleted') {

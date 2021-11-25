@@ -19,7 +19,7 @@ interface OverviewServerData {
   sourcesCount: number;
   pendingInvitationsCount: number;
   accountsCount: number;
-  personalSourcesCount: number;
+  privateSourcesCount: number;
   activityFeed: FeedActivity[];
 }
 
@@ -75,10 +75,10 @@ export const OverviewLogic = kea<MakeLogicType<OverviewValues, OverviewActions>>
         setServerData: (_, { accountsCount }) => accountsCount,
       },
     ],
-    personalSourcesCount: [
+    privateSourcesCount: [
       0,
       {
-        setServerData: (_, { personalSourcesCount }) => personalSourcesCount,
+        setServerData: (_, { privateSourcesCount }) => privateSourcesCount,
       },
     ],
     activityFeed: [
@@ -97,7 +97,9 @@ export const OverviewLogic = kea<MakeLogicType<OverviewValues, OverviewActions>>
   listeners: ({ actions }) => ({
     initializeOverview: async () => {
       try {
-        const response = await HttpLogic.values.http.get('/internal/workplace_search/overview');
+        const response = await HttpLogic.values.http.get<OverviewServerData>(
+          '/internal/workplace_search/overview'
+        );
         actions.setServerData(response);
       } catch (e) {
         flashAPIErrors(e);

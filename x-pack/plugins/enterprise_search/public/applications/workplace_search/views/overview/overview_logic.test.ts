@@ -33,7 +33,7 @@ describe('OverviewLogic', () => {
       hasUsers: true,
       isOldAccount: true,
       pendingInvitationsCount: 1,
-      personalSourcesCount: 1,
+      privateSourcesCount: 1,
       sourcesCount: 1,
     };
 
@@ -52,7 +52,7 @@ describe('OverviewLogic', () => {
       expect(OverviewLogic.values.sourcesCount).toEqual(1);
       expect(OverviewLogic.values.pendingInvitationsCount).toEqual(1);
       expect(OverviewLogic.values.accountsCount).toEqual(1);
-      expect(OverviewLogic.values.personalSourcesCount).toEqual(1);
+      expect(OverviewLogic.values.privateSourcesCount).toEqual(1);
       expect(OverviewLogic.values.activityFeed).toEqual(feed);
     });
   });

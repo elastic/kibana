@@ -12,7 +12,7 @@ import { ToolsControl } from './tools_control';
 import { setDrawMode, updateDrawState } from '../../../actions';
 import { MapStoreState } from '../../../reducers/store';
 import { DrawState } from '../../../../common/descriptor_types';
-import { DRAW_MODE } from '../../../../common';
+import { DRAW_MODE } from '../../../../common/constants';
 import { getDrawMode } from '../../../selectors/ui_selectors';
 
 function mapStateToProps(state: MapStoreState) {

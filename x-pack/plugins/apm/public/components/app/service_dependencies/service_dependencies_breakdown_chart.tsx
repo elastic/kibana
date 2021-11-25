@@ -22,14 +22,15 @@ export function ServiceDependenciesBreakdownChart({
 
   const {
     query: { kuery, environment, rangeFrom, rangeTo },
-  } = useApmParams('/services/:serviceName/dependencies');
+  } = useApmParams('/services/{serviceName}/dependencies');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
   const { data, status } = useFetcher(
     (callApmApi) => {
       return callApmApi({
-        endpoint: 'GET /api/apm/services/{serviceName}/dependencies/breakdown',
+        endpoint:
+          'GET /internal/apm/services/{serviceName}/dependencies/breakdown',
         params: {
           path: {
             serviceName,

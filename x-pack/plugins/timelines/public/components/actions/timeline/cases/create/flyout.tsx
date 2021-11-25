@@ -19,13 +19,13 @@ export interface CreateCaseModalProps {
   onCloseFlyout: () => void;
   onSuccess: (theCase: Case) => Promise<void>;
   useInsertTimeline?: Function;
-  appId: string;
+  owner: string;
   disableAlerts?: boolean;
 }
 
 const StyledFlyout = styled(EuiFlyout)`
   ${({ theme }) => `
-    z-index: ${theme.eui.euiZModal};
+    z-index: ${theme.eui.euiZLevel5};
   `}
 `;
 
@@ -37,10 +37,10 @@ const maskOverlayClassName = 'create-case-flyout-mask-overlay';
  * A global style is needed to target a parent element.
  */
 
-const GlobalStyle = createGlobalStyle<{ theme: { eui: { euiZModal: number } } }>`
+const GlobalStyle = createGlobalStyle<{ theme: { eui: { euiZLevel5: number } } }>`
   .${maskOverlayClassName} {
     ${({ theme }) => `
-    z-index: ${theme.eui.euiZModal};
+    z-index: ${theme.eui.euiZLevel5};
   `}
   }
 `;
@@ -70,7 +70,7 @@ const CreateCaseFlyoutComponent: React.FC<CreateCaseModalProps> = ({
   afterCaseCreated,
   onCloseFlyout,
   onSuccess,
-  appId,
+  owner,
   disableAlerts,
 }) => {
   const { cases } = useKibana<TimelinesStartServices>().services;
@@ -80,10 +80,10 @@ const CreateCaseFlyoutComponent: React.FC<CreateCaseModalProps> = ({
       onCancel: onCloseFlyout,
       onSuccess,
       withSteps: false,
-      owner: [appId],
+      owner: [owner],
       disableAlerts,
     };
-  }, [afterCaseCreated, onCloseFlyout, onSuccess, appId, disableAlerts]);
+  }, [afterCaseCreated, onCloseFlyout, onSuccess, owner, disableAlerts]);
   return (
     <>
       <GlobalStyle />

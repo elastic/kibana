@@ -7,7 +7,7 @@
  */
 import React from 'react';
 import * as t from 'io-ts';
-import { toNumberRt } from '@kbn/io-ts-utils';
+import { toNumberRt } from '@kbn/io-ts-utils/to_number_rt';
 import { createRouter } from './create_router';
 import { createMemoryHistory } from 'history';
 import { route } from './route';
@@ -34,6 +34,28 @@ describe('createRouter', () => {
           },
           children: [
             {
+              path: '/services/{serviceName}/errors',
+              element: <></>,
+              params: t.type({
+                path: t.type({
+                  serviceName: t.string,
+                }),
+              }),
+              children: [
+                {
+                  path: '/services/{serviceName}/errors/{groupId}',
+                  element: <></>,
+                  params: t.type({
+                    path: t.type({ groupId: t.string }),
+                  }),
+                },
+                {
+                  path: '/services/{serviceName}/errors',
+                  element: <></>,
+                },
+              ],
+            },
+            {
               path: '/services',
               element: <></>,
               params: t.type({
@@ -43,17 +65,23 @@ describe('createRouter', () => {
               }),
             },
             {
-              path: '/services/:serviceName',
+              path: '/services/{serviceName}',
               element: <></>,
-              params: t.type({
-                path: t.type({
-                  serviceName: t.string,
-                }),
-                query: t.type({
-                  transactionType: t.string,
-                  environment: t.string,
-                }),
-              }),
+              children: [
+                {
+                  element: <></>,
+                  path: '/services/{serviceName}',
+                  params: t.type({
+                    path: t.type({
+                      serviceName: t.string,
+                    }),
+                    query: t.type({
+                      transactionType: t.string,
+                      environment: t.string,
+                    }),
+                  }),
+                },
+              ],
             },
             {
               path: '/traces',
@@ -131,7 +159,7 @@ describe('createRouter', () => {
         '/services/opbeans-java?rangeFrom=now-15m&rangeTo=now&environment=production&transactionType=request'
       );
 
-      const serviceOverviewParams = router.getParams('/services/:serviceName', history.location);
+      const serviceOverviewParams = router.getParams('/services/{serviceName}', history.location);
 
       expect(serviceOverviewParams).toEqual({
         path: {
@@ -246,11 +274,33 @@ describe('createRouter', () => {
         },
       });
     });
+
+    it('matches deep routes', () => {
+      history.push('/services/opbeans-java/errors/foo?rangeFrom=now-15m&rangeTo=now');
+
+      const matchedRoutes = router.matchRoutes(
+        '/services/{serviceName}/errors/{groupId}',
+        history.location
+      );
+
+      expect(matchedRoutes.length).toEqual(4);
+
+      expect(matchedRoutes[matchedRoutes.length - 1].match).toEqual({
+        isExact: true,
+        params: {
+          path: {
+            groupId: 'foo',
+          },
+        },
+        path: '/services/:serviceName/errors/:groupId',
+        url: '/services/opbeans-java/errors/foo',
+      });
+    });
   });
 
   describe('link', () => {
     it('returns a link for the given route', () => {
-      const serviceOverviewLink = router.link('/services/:serviceName', {
+      const serviceOverviewLink = router.link('/services/{serviceName}', {
         path: { serviceName: 'opbeans-java' },
         query: {
           rangeFrom: 'now-15m',

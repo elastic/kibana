@@ -8,6 +8,7 @@
 import { BehaviorSubject } from 'rxjs';
 import type { SharePluginSetup } from 'src/plugins/share/public';
 import { ChartsPluginSetup, ChartsPluginStart } from 'src/plugins/charts/public';
+import { VisualizationsStart } from 'src/plugins/visualizations/public';
 import { ReportingStart } from '../../reporting/public';
 import {
   CoreSetup,
@@ -19,6 +20,7 @@ import {
   PluginInitializerContext,
 } from '../../../../src/core/public';
 import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
+import { SpacesPluginStart } from '../../spaces/public';
 import { initLoadingIndicator } from './lib/loading_indicator';
 import { getSessionStorage } from './lib/storage';
 import { SESSIONSTORAGE_LASTPATH, CANVAS_APP } from '../common/lib/constants';
@@ -36,7 +38,7 @@ import { getPluginApi, CanvasApi } from './plugin_api';
 import { setupExpressions } from './setup_expressions';
 import { pluginServiceRegistry } from './services/kibana';
 
-export { CoreStart, CoreSetup };
+export type { CoreStart, CoreSetup };
 
 /**
  * These are the private interfaces for the services your plugin depends on.
@@ -62,6 +64,8 @@ export interface CanvasStartDeps {
   charts: ChartsPluginStart;
   data: DataPublicPluginStart;
   presentationUtil: PresentationUtilPluginStart;
+  visualizations: VisualizationsStart;
+  spaces?: SpacesPluginStart;
 }
 
 /**
@@ -76,7 +80,8 @@ export type CanvasStart = void;
 
 /** @internal */
 export class CanvasPlugin
-  implements Plugin<CanvasSetup, CanvasStart, CanvasSetupDeps, CanvasStartDeps> {
+  implements Plugin<CanvasSetup, CanvasStart, CanvasSetupDeps, CanvasStartDeps>
+{
   private appUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
   private initContext: PluginInitializerContext;
 
@@ -119,7 +124,12 @@ export class CanvasPlugin
 
         const { pluginServices } = await import('./services');
         pluginServices.setRegistry(
-          pluginServiceRegistry.start({ coreStart, startPlugins, initContext: this.initContext })
+          pluginServiceRegistry.start({
+            coreStart,
+            startPlugins,
+            appUpdater: this.appUpdater,
+            initContext: this.initContext,
+          })
         );
 
         // Load application bundle
@@ -131,8 +141,7 @@ export class CanvasPlugin
           setupPlugins,
           startPlugins,
           registries,
-          this.appUpdater,
-          pluginServices
+          this.appUpdater
         );
 
         const unmount = renderApp({ coreStart, startPlugins, params, canvasStore, pluginServices });

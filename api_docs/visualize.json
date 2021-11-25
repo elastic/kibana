@@ -60,7 +60,13 @@
             "label": "filters",
             "description": [],
             "signature": [
-              "Filter",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
               "[]"
             ],
             "path": "src/plugins/visualize/public/application/types.ts",
@@ -87,7 +93,13 @@
             "label": "query",
             "description": [],
             "signature": [
-              "Query",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Query",
+                "text": "Query"
+              },
               " | undefined"
             ],
             "path": "src/plugins/visualize/public/application/types.ts",
@@ -102,11 +114,11 @@
             "description": [],
             "signature": [
               {
-                "pluginId": "savedObjects",
+                "pluginId": "discover",
                 "scope": "public",
-                "docId": "kibSavedObjectsPluginApi",
-                "section": "def-public.SavedObject",
-                "text": "SavedObject"
+                "docId": "kibDiscoverPluginApi",
+                "section": "def-public.SavedSearch",
+                "text": "SavedSearch"
               },
               " | undefined"
             ],
@@ -230,7 +242,7 @@
         "tags": [],
         "label": "VisualizeConstants",
         "description": [],
-        "path": "src/plugins/visualize/public/application/visualize_constants.ts",
+        "path": "src/plugins/visualize/common/constants.ts",
         "deprecated": false,
         "children": [
           {
@@ -240,7 +252,7 @@
             "tags": [],
             "label": "VISUALIZE_BASE_PATH",
             "description": [],
-            "path": "src/plugins/visualize/public/application/visualize_constants.ts",
+            "path": "src/plugins/visualize/common/constants.ts",
             "deprecated": false
           },
           {
@@ -250,7 +262,7 @@
             "tags": [],
             "label": "LANDING_PAGE_PATH",
             "description": [],
-            "path": "src/plugins/visualize/public/application/visualize_constants.ts",
+            "path": "src/plugins/visualize/common/constants.ts",
             "deprecated": false
           },
           {
@@ -260,7 +272,7 @@
             "tags": [],
             "label": "WIZARD_STEP_1_PAGE_PATH",
             "description": [],
-            "path": "src/plugins/visualize/public/application/visualize_constants.ts",
+            "path": "src/plugins/visualize/common/constants.ts",
             "deprecated": false
           },
           {
@@ -270,7 +282,7 @@
             "tags": [],
             "label": "WIZARD_STEP_2_PAGE_PATH",
             "description": [],
-            "path": "src/plugins/visualize/public/application/visualize_constants.ts",
+            "path": "src/plugins/visualize/common/constants.ts",
             "deprecated": false
           },
           {
@@ -280,7 +292,7 @@
             "tags": [],
             "label": "CREATE_PATH",
             "description": [],
-            "path": "src/plugins/visualize/public/application/visualize_constants.ts",
+            "path": "src/plugins/visualize/common/constants.ts",
             "deprecated": false
           },
           {
@@ -290,7 +302,7 @@
             "tags": [],
             "label": "EDIT_PATH",
             "description": [],
-            "path": "src/plugins/visualize/public/application/visualize_constants.ts",
+            "path": "src/plugins/visualize/common/constants.ts",
             "deprecated": false
           },
           {
@@ -300,7 +312,7 @@
             "tags": [],
             "label": "EDIT_BY_VALUE_PATH",
             "description": [],
-            "path": "src/plugins/visualize/public/application/visualize_constants.ts",
+            "path": "src/plugins/visualize/common/constants.ts",
             "deprecated": false
           },
           {
@@ -310,7 +322,7 @@
             "tags": [],
             "label": "APP_ID",
             "description": [],
-            "path": "src/plugins/visualize/public/application/visualize_constants.ts",
+            "path": "src/plugins/visualize/common/constants.ts",
             "deprecated": false
           }
         ],

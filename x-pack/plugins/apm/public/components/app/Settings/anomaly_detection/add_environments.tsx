@@ -34,7 +34,8 @@ interface Props {
   onCancel: () => void;
 }
 
-type ApiResponse = APIReturnType<'GET /api/apm/settings/anomaly-detection/environments'>;
+type ApiResponse =
+  APIReturnType<'GET /internal/apm/settings/anomaly-detection/environments'>;
 const INITIAL_DATA: ApiResponse = { environments: [] };
 
 export function AddEnvironments({
@@ -49,7 +50,7 @@ export function AddEnvironments({
   const { data = INITIAL_DATA, status } = useFetcher(
     (callApmApi) =>
       callApmApi({
-        endpoint: `GET /api/apm/settings/anomaly-detection/environments`,
+        endpoint: `GET /internal/apm/settings/anomaly-detection/environments`,
       }),
     [],
     { preservePreviousData: false }

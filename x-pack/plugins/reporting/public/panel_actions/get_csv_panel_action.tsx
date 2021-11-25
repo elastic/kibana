@@ -7,7 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 import * as Rx from 'rxjs';
-import type { CoreSetup, IUiSettingsClient, NotificationsSetup } from 'src/core/public';
+import { first } from 'rxjs/operators';
+import type { CoreSetup, NotificationsSetup } from 'src/core/public';
 import { CoreStart } from 'src/core/public';
 import type { ISearchEmbeddable, SavedSearch } from '../../../../../src/plugins/discover/public';
 import {
@@ -22,6 +23,7 @@ import type { LicensingPluginSetup } from '../../../licensing/public';
 import { CSV_REPORTING_ACTION } from '../../common/constants';
 import { checkLicense } from '../lib/license_check';
 import { ReportingAPIClient } from '../lib/reporting_api_client';
+import type { ReportingPublicPluginStartDendencies } from '../plugin';
 
 function isSavedSearchEmbeddable(
   embeddable: IEmbeddable | ISearchEmbeddable
@@ -36,7 +38,7 @@ export interface ActionContext {
 interface Params {
   apiClient: ReportingAPIClient;
   core: CoreSetup;
-  startServices$: Rx.Observable<[CoreStart, object, unknown]>;
+  startServices$: Rx.Observable<[CoreStart, ReportingPublicPluginStartDendencies, unknown]>;
   license$: LicensingPluginSetup['license$'];
   usesUiCapabilities: boolean;
 }
@@ -47,16 +49,16 @@ export class ReportingCsvPanelAction implements ActionDefinition<ActionContext> 
   public readonly id = CSV_REPORTING_ACTION;
   private licenseHasDownloadCsv: boolean = false;
   private capabilityHasDownloadCsv: boolean = false;
-  private uiSettings: IUiSettingsClient;
   private notifications: NotificationsSetup;
   private apiClient: ReportingAPIClient;
+  private startServices$: Params['startServices$'];
 
   constructor({ core, startServices$, license$, usesUiCapabilities, apiClient }: Params) {
     this.isDownloading = false;
 
-    this.uiSettings = core.uiSettings;
     this.notifications = core.notifications;
     this.apiClient = apiClient;
+    this.startServices$ = startServices$;
 
     license$.subscribe((license) => {
       const results = license.check('reporting', 'basic');
@@ -65,7 +67,7 @@ export class ReportingCsvPanelAction implements ActionDefinition<ActionContext> 
     });
 
     if (usesUiCapabilities) {
-      startServices$.subscribe(([{ application }]) => {
+      this.startServices$.subscribe(([{ application }]) => {
         this.capabilityHasDownloadCsv = application.capabilities.dashboard?.downloadCsv === true;
       });
     } else {
@@ -84,11 +86,12 @@ export class ReportingCsvPanelAction implements ActionDefinition<ActionContext> 
   }
 
   public async getSearchSource(savedSearch: SavedSearch, embeddable: ISearchEmbeddable) {
+    const [{ uiSettings }, { data }] = await this.startServices$.pipe(first()).toPromise();
     const { getSharingData } = await loadSharingDataHelpers();
     return await getSharingData(
       savedSearch.searchSource,
-      savedSearch, // TODO: get unsaved state (using embeddale.searchScope): https://github.com/elastic/kibana/issues/43977
-      this.uiSettings
+      savedSearch, // TODO: get unsaved state (using embeddable.searchScope): https://github.com/elastic/kibana/issues/43977
+      { uiSettings, data }
     );
   }
 
@@ -114,12 +117,12 @@ export class ReportingCsvPanelAction implements ActionDefinition<ActionContext> 
     }
 
     const savedSearch = embeddable.getSavedSearch();
-    const { columns, searchSource } = await this.getSearchSource(savedSearch, embeddable);
+    const { columns, getSearchSource } = await this.getSearchSource(savedSearch, embeddable);
 
     const immediateJobParams = this.apiClient.getDecoratedJobParams({
-      searchSource,
+      searchSource: getSearchSource(true),
       columns,
-      title: savedSearch.title,
+      title: savedSearch.title || '',
       objectType: 'downloadCsv', // FIXME: added for typescript, but immediate download job does not need objectType
     });
 
@@ -141,7 +144,7 @@ export class ReportingCsvPanelAction implements ActionDefinition<ActionContext> 
         this.isDownloading = false;
 
         const download = `${savedSearch.title}.csv`;
-        const blob = new Blob([rawResponse], { type: 'text/csv;charset=utf-8;' });
+        const blob = new Blob([rawResponse as BlobPart], { type: 'text/csv;charset=utf-8;' });
 
         // Hack for IE11 Support
         if (window.navigator.msSaveOrOpenBlob) {

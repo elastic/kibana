@@ -43,7 +43,7 @@ export class JsonLayout implements Layout {
 
   public format(record: LogRecord): string {
     const log: Ecs = {
-      ecs: { version: '1.9.0' },
+      ecs: { version: '8.0.0' },
       '@timestamp': moment(record.timestamp).format('YYYY-MM-DDTHH:mm:ss.SSSZ'),
       message: record.message,
       error: JsonLayout.errorToSerializableObject(record.error),
@@ -54,6 +54,9 @@ export class JsonLayout implements Layout {
       process: {
         pid: record.pid,
       },
+      span: record.spanId ? { id: record.spanId } : undefined,
+      trace: record.traceId ? { id: record.traceId } : undefined,
+      transaction: record.transactionId ? { id: record.transactionId } : undefined,
     };
     const output = record.meta ? merge({ ...record.meta }, log) : log;
 

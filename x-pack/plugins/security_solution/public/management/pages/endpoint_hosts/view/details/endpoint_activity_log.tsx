@@ -53,9 +53,13 @@ export const EndpointActivityLog = memo(
     const activityLogSize = activityLogData.length;
     const activityLogError = useEndpointSelector(getActivityLogError);
     const dispatch = useDispatch<(action: EndpointAction) => void>();
-    const { page, pageSize, startDate, endDate, disabled: isPagingDisabled } = useEndpointSelector(
-      getActivityLogDataPaging
-    );
+    const {
+      page,
+      pageSize,
+      startDate,
+      endDate,
+      disabled: isPagingDisabled,
+    } = useEndpointSelector(getActivityLogDataPaging);
 
     const hasActiveDateRange = useMemo(() => !!startDate || !!endDate, [startDate, endDate]);
     const showEmptyState = useMemo(
@@ -65,6 +69,11 @@ export const EndpointActivityLog = memo(
     const isShorter = useMemo(
       () => !!(hasActiveDateRange && isPagingDisabled && !activityLogLoading && !activityLogSize),
       [hasActiveDateRange, isPagingDisabled, activityLogLoading, activityLogSize]
+    );
+
+    const showCallout = useMemo(
+      () => !isPagingDisabled && activityLogLoaded && !activityLogData.length,
+      [isPagingDisabled, activityLogLoaded, activityLogData]
     );
 
     const loadMoreTrigger = useRef<HTMLInputElement | null>(null);
@@ -116,7 +125,7 @@ export const EndpointActivityLog = memo(
             <>
               <DateRangePicker />
               <EuiFlexItem grow={true}>
-                {!isPagingDisabled && activityLogLoaded && !activityLogData.length && (
+                {showCallout && (
                   <>
                     <EuiSpacer size="m" />
                     <EuiCallOut
@@ -138,8 +147,11 @@ export const EndpointActivityLog = memo(
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 {activityLogLoading && <EuiLoadingContent lines={3} />}
-                {(!activityLogLoading || !isPagingDisabled) && (
-                  <LoadMoreTrigger ref={loadMoreTrigger} />
+                {(!activityLogLoading || !isPagingDisabled) && !showCallout && (
+                  <LoadMoreTrigger
+                    data-test-subj="activityLogLoadMoreTrigger"
+                    ref={loadMoreTrigger}
+                  />
                 )}
                 {isPagingDisabled && !activityLogLoading && (
                   <EuiText color="subdued" textAlign="center">

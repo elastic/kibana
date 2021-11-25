@@ -158,7 +158,7 @@ export default function (providerContext: FtrProviderContext) {
         });
     });
 
-    it('should return a 500 if there is another package policy with the same name', async function () {
+    it('should return a 400 if there is another package policy with the same name', async function () {
       await supertest
         .put(`/api/fleet/package_policies/${packagePolicyId2}`)
         .set('kbn-xsrf', 'xxxx')
@@ -176,7 +176,37 @@ export default function (providerContext: FtrProviderContext) {
             version: '0.1.0',
           },
         })
-        .expect(500);
+        .expect(400);
+    });
+
+    it('should return a 400 if there is another package policy with the same name on a different policy', async function () {
+      const { body: agentPolicyResponse } = await supertest
+        .post(`/api/fleet/agent_policies`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          name: 'Test policy 2',
+          namespace: 'default',
+        });
+      const otherAgentPolicyId = agentPolicyResponse.item.id;
+
+      await supertest
+        .put(`/api/fleet/package_policies/${packagePolicyId2}`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          name: 'filetest-1',
+          description: '',
+          namespace: 'updated_namespace',
+          policy_id: otherAgentPolicyId,
+          enabled: true,
+          output_id: '',
+          inputs: [],
+          package: {
+            name: 'filetest',
+            title: 'For File Tests',
+            version: '0.1.0',
+          },
+        })
+        .expect(400);
     });
 
     it('should work with frozen input vars', async function () {

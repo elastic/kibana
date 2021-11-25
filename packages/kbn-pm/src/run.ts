@@ -15,6 +15,8 @@ import { buildProjectGraph } from './utils/projects';
 import { renderProjectsTree } from './utils/projects_tree';
 import { Kibana } from './utils/kibana';
 
+process.env.CI_STATS_NESTED_TIMING = 'true';
+
 export async function runCommand(command: ICommand, config: Omit<ICommandConfig, 'kbn'>) {
   const runStartTime = Date.now();
   let kbn;

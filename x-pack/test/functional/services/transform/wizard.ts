@@ -22,6 +22,7 @@ export type HistogramCharts = Array<{
 export function TransformWizardProvider({ getService, getPageObjects }: FtrProviderContext) {
   const aceEditor = getService('aceEditor');
   const canvasElement = getService('canvasElement');
+  const log = getService('log');
   const testSubjects = getService('testSubjects');
   const comboBox = getService('comboBox');
   const retry = getService('retry');
@@ -106,7 +107,6 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
       // To determine row and column of a cell, we're utilizing the screen reader
       // help text, which enumerates the rows and columns 1-based.
       const cells = $.findTestSubjects('dataGridRowCell')
-        .find('.euiDataGridRowCell__truncate')
         .toArray()
         .map((cell) => {
           const cellText = $(cell).text();
@@ -241,6 +241,11 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
     },
 
     async assertIndexPreviewHistogramCharts(expectedHistogramCharts: HistogramCharts) {
+      if (process.env.TEST_CLOUD) {
+        log.warning('Not running color assertions in cloud');
+        return;
+      }
+
       // For each chart, get the content of each header cell and assert
       // the legend text and column id and if the chart should be present or not.
       await retry.tryForTime(5000, async () => {
@@ -732,7 +737,7 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
         'true';
       expect(actualCheckState).to.eql(
         expectedCheckState,
-        `Create index pattern switch check state should be '${expectedCheckState}' (got '${actualCheckState}')`
+        `Create data view switch check state should be '${expectedCheckState}' (got '${actualCheckState}')`
       );
     },
 

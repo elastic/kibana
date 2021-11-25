@@ -34,7 +34,7 @@ export interface PluginInitializerContext<ConfigSchema extends object = object> 
 }
 
 /**
- * Provides a plugin-specific context passed to the plugin's construtor. This is currently
+ * Provides a plugin-specific context passed to the plugin's constructor. This is currently
  * empty but should provide static services in the future, such as config and logging.
  *
  * @param coreContext
@@ -56,7 +56,7 @@ export function createPluginInitializerContext(
     env: coreContext.env,
     config: {
       get<T>() {
-        return (pluginConfig as unknown) as T;
+        return pluginConfig as unknown as T;
       },
     },
   };

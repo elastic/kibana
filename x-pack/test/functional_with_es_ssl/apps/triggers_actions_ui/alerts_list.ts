@@ -88,9 +88,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       const searchResults = await pageObjects.triggersActionsUI.getAlertsList();
       expect(searchResults).to.have.length(3);
-      expect(searchResults[0].name).to.eql('a');
-      expect(searchResults[1].name).to.eql('b');
-      expect(searchResults[2].name).to.eql('c');
+      // rule list shows name and rule type id
+      expect(searchResults[0].name).to.eql('aTest: Noop');
+      expect(searchResults[1].name).to.eql('bTest: Noop');
+      expect(searchResults[2].name).to.eql('cTest: Noop');
     });
 
     it('should search for alert', async () => {
@@ -99,67 +100,54 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
 
       const searchResults = await pageObjects.triggersActionsUI.getAlertsList();
-      expect(searchResults).to.eql([
-        {
-          name: createdAlert.name,
-          tagsText: 'foo, bar',
-          alertType: 'Test: Noop',
-          interval: '1m',
-        },
-      ]);
+      expect(searchResults.length).to.equal(1);
+      expect(searchResults[0].name).to.equal(`${createdAlert.name}Test: Noop`);
+      expect(searchResults[0].interval).to.equal('1 min');
+      expect(searchResults[0].tags).to.equal('2');
+      expect(searchResults[0].duration).to.match(/\d{2}:\d{2}:\d{2}.\d{3}/);
     });
 
     it('should update alert list on the search clear button click', async () => {
       await createAlert({ name: 'b' });
-      await createAlert({ name: 'c' });
+      await createAlert({ name: 'c', tags: [] });
       await refreshAlertsList();
       await pageObjects.triggersActionsUI.searchAlerts('b');
 
       const searchResults = await pageObjects.triggersActionsUI.getAlertsList();
-      expect(searchResults).to.eql([
-        {
-          name: 'b',
-          tagsText: 'foo, bar',
-          alertType: 'Test: Noop',
-          interval: '1m',
-        },
-      ]);
+      expect(searchResults.length).to.equal(1);
+      expect(searchResults[0].name).to.equal('bTest: Noop');
+      expect(searchResults[0].interval).to.equal('1 min');
+      expect(searchResults[0].tags).to.equal('2');
+      expect(searchResults[0].duration).to.match(/\d{2}:\d{2}:\d{2}.\d{3}/);
+
       const searchClearButton = await find.byCssSelector('.euiFormControlLayoutClearButton');
       await searchClearButton.click();
       await find.byCssSelector(
         '.euiBasicTable[data-test-subj="alertsList"]:not(.euiBasicTable-loading)'
       );
       const searchResultsAfterClear = await pageObjects.triggersActionsUI.getAlertsList();
-      expect(searchResultsAfterClear).to.eql([
-        {
-          name: 'b',
-          tagsText: 'foo, bar',
-          alertType: 'Test: Noop',
-          interval: '1m',
-        },
-        {
-          name: 'c',
-          tagsText: 'foo, bar',
-          alertType: 'Test: Noop',
-          interval: '1m',
-        },
-      ]);
+      expect(searchResultsAfterClear.length).to.equal(2);
+      expect(searchResultsAfterClear[0].name).to.equal('bTest: Noop');
+      expect(searchResultsAfterClear[0].interval).to.equal('1 min');
+      expect(searchResultsAfterClear[0].tags).to.equal('2');
+      expect(searchResultsAfterClear[0].duration).to.match(/\d{2}:\d{2}:\d{2}.\d{3}/);
+      expect(searchResultsAfterClear[1].name).to.equal('cTest: Noop');
+      expect(searchResultsAfterClear[1].interval).to.equal('1 min');
+      expect(searchResultsAfterClear[1].tags).to.equal('');
+      expect(searchResultsAfterClear[1].duration).to.match(/\d{2}:\d{2}:\d{2}.\d{3}/);
     });
 
     it('should search for tags', async () => {
-      const createdAlert = await createAlert();
+      const createdAlert = await createAlert({ tags: ['tag', 'tagtag', 'taggity tag'] });
       await refreshAlertsList();
-      await pageObjects.triggersActionsUI.searchAlerts(`${createdAlert.name} foo`);
+      await pageObjects.triggersActionsUI.searchAlerts(`${createdAlert.name} tag`);
 
       const searchResults = await pageObjects.triggersActionsUI.getAlertsList();
-      expect(searchResults).to.eql([
-        {
-          name: createdAlert.name,
-          tagsText: 'foo, bar',
-          alertType: 'Test: Noop',
-          interval: '1m',
-        },
-      ]);
+      expect(searchResults.length).to.equal(1);
+      expect(searchResults[0].name).to.equal(`${createdAlert.name}Test: Noop`);
+      expect(searchResults[0].interval).to.equal('1 min');
+      expect(searchResults[0].tags).to.equal('3');
+      expect(searchResults[0].duration).to.match(/\d{2}:\d{2}:\d{2}.\d{3}/);
     });
 
     it('should display an empty list when search did not return any alerts', async () => {
@@ -204,6 +192,22 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     it('should mute single alert', async () => {
       const createdAlert = await createAlert();
+      await refreshAlertsList();
+      await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
+
+      await testSubjects.click('collapsedItemActions');
+
+      await testSubjects.click('muteButton');
+
+      await retry.tryForTime(30000, async () => {
+        await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
+        const muteBadge = await testSubjects.find('mutedActionsBadge');
+        expect(await muteBadge.isDisplayed()).to.eql(true);
+      });
+    });
+
+    it('should be able to mute the rule with non "alerts" consumer from a non editable context', async () => {
+      const createdAlert = await createAlert({ consumer: 'siem' });
       await refreshAlertsList();
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
 
@@ -383,16 +387,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('alertStatusFilterButton');
       await testSubjects.click('alertStatuserrorFilerOption'); // select Error status filter
       await retry.try(async () => {
-        const filterErrorOnlyResults = await pageObjects.triggersActionsUI.getAlertsListWithStatus();
-        expect(filterErrorOnlyResults).to.eql([
-          {
-            name: failingAlert.name,
-            tagsText: 'foo, bar',
-            alertType: 'Test: Failing',
-            interval: '30s',
-            status: 'Error',
-          },
-        ]);
+        const filterErrorOnlyResults =
+          await pageObjects.triggersActionsUI.getAlertsListWithStatus();
+        expect(filterErrorOnlyResults.length).to.equal(1);
+        expect(filterErrorOnlyResults[0].name).to.equal(`${failingAlert.name}Test: Failing`);
+        expect(filterErrorOnlyResults[0].interval).to.equal('30 sec');
+        expect(filterErrorOnlyResults[0].status).to.equal('Error');
+        expect(filterErrorOnlyResults[0].duration).to.match(/\d{2}:\d{2}:\d{2}.\d{3}/);
       });
     });
 
@@ -401,15 +402,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await retry.try(async () => {
         await refreshAlertsList();
         const refreshResults = await pageObjects.triggersActionsUI.getAlertsListWithStatus();
-        expect(refreshResults).to.eql([
-          {
-            name: createdAlert.name,
-            tagsText: 'foo, bar',
-            alertType: 'Test: Noop',
-            interval: '1m',
-            status: 'Ok',
-          },
-        ]);
+        expect(refreshResults.length).to.equal(1);
+        expect(refreshResults[0].name).to.equal(`${createdAlert.name}Test: Noop`);
+        expect(refreshResults[0].interval).to.equal('1 min');
+        expect(refreshResults[0].status).to.equal('Ok');
+        expect(refreshResults[0].duration).to.match(/\d{2}:\d{2}:\d{2}.\d{3}/);
       });
 
       const alertsErrorBannerWhenNoErrors = await find.allByCssSelector(
@@ -450,14 +447,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await retry.try(async () => {
         const filterFailingAlertOnlyResults = await pageObjects.triggersActionsUI.getAlertsList();
-        expect(filterFailingAlertOnlyResults).to.eql([
-          {
-            name: failingAlert.name,
-            tagsText: 'foo, bar',
-            alertType: 'Test: Failing',
-            interval: '30s',
-          },
-        ]);
+        expect(filterFailingAlertOnlyResults.length).to.equal(1);
+        expect(filterFailingAlertOnlyResults[0].name).to.equal(`${failingAlert.name}Test: Failing`);
+        expect(filterFailingAlertOnlyResults[0].interval).to.equal('30 sec');
+        expect(filterFailingAlertOnlyResults[0].duration).to.match(/\d{2}:\d{2}:\d{2}.\d{3}/);
       });
     });
 
@@ -479,15 +472,20 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await retry.try(async () => {
         const filterWithSlackOnlyResults = await pageObjects.triggersActionsUI.getAlertsList();
-        expect(filterWithSlackOnlyResults).to.eql([
-          {
-            name: noopAlertWithAction.name,
-            tagsText: 'foo, bar',
-            alertType: 'Test: Noop',
-            interval: '1m',
-          },
-        ]);
+        expect(filterWithSlackOnlyResults.length).to.equal(1);
+        expect(filterWithSlackOnlyResults[0].name).to.equal(
+          `${noopAlertWithAction.name}Test: Noop`
+        );
+        expect(filterWithSlackOnlyResults[0].interval).to.equal('1 min');
+        expect(filterWithSlackOnlyResults[0].duration).to.match(/\d{2}:\d{2}:\d{2}.\d{3}/);
       });
+      await testSubjects.click('alertTypeFilterButton');
+
+      // de-select action type filter
+      await testSubjects.click('actionTypeFilterButton');
+      await testSubjects.click('actionType.slackFilterOption');
+
+      await testSubjects.missingOrFail('centerJustifiedSpinner');
     });
   });
 };

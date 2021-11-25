@@ -11,7 +11,7 @@ import { AggConfig } from './agg_config';
 import { AggConfigs } from './agg_configs';
 import { AggTypesRegistryStart } from './agg_types_registry';
 import { mockAggTypesRegistry } from './test_helpers';
-import { IndexPattern } from '../../index_patterns/';
+import { IndexPattern } from '../..';
 import { stubIndexPattern } from '../../stubs';
 import { IEsSearchResponse } from '..';
 
@@ -627,9 +627,7 @@ describe('AggConfigs', () => {
           },
         },
       };
-      const mergedResponse = ac.postFlightTransform(
-        (response as unknown) as IEsSearchResponse<any>
-      );
+      const mergedResponse = ac.postFlightTransform(response as unknown as IEsSearchResponse<any>);
       expect(mergedResponse.rawResponse).toEqual({
         aggregations: {
           '1': {
@@ -724,9 +722,7 @@ describe('AggConfigs', () => {
           },
         },
       };
-      const mergedResponse = ac.postFlightTransform(
-        (response as unknown) as IEsSearchResponse<any>
-      );
+      const mergedResponse = ac.postFlightTransform(response as unknown as IEsSearchResponse<any>);
       expect(mergedResponse.rawResponse).toEqual({
         aggregations: {
           '1': {

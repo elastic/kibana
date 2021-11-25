@@ -18,6 +18,8 @@ export const createMockLayoutInstance = (captureConfig: CaptureConfig) => {
     renderComplete: 'renderedSelector',
     itemsCountAttribute: 'itemsSelector',
     screenshot: 'screenshotSelector',
+    renderError: '[dataRenderErrorSelector]',
+    renderErrorAttribute: 'dataRenderErrorSelector',
     timefilterDurationAttribute: 'timefilterDurationSelector',
   };
   return mockLayout;

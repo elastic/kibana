@@ -25,7 +25,7 @@ describe('Key rotation routes', () => {
     router = routeParamsMock.router;
     mockEncryptionKeyRotationService = routeParamsMock.encryptionKeyRotationService;
 
-    mockContext = ({} as unknown) as RequestHandlerContext;
+    mockContext = {} as unknown as RequestHandlerContext;
 
     defineKeyRotationRoutes(routeParamsMock);
   });
@@ -92,8 +92,7 @@ describe('Key rotation routes', () => {
         payload:
           'Kibana is not configured to support encryption key rotation. Update `kibana.yml` to include `xpack.encryptedSavedObjects.keyRotation.decryptionOnlyKeys` to rotate your encryption keys.',
         options: {
-          body:
-            'Kibana is not configured to support encryption key rotation. Update `kibana.yml` to include `xpack.encryptedSavedObjects.keyRotation.decryptionOnlyKeys` to rotate your encryption keys.',
+          body: 'Kibana is not configured to support encryption key rotation. Update `kibana.yml` to include `xpack.encryptedSavedObjects.keyRotation.decryptionOnlyKeys` to rotate your encryption keys.',
         },
       });
     });
@@ -145,8 +144,7 @@ describe('Key rotation routes', () => {
           'Encryption key rotation is in progress already. Please wait until it is completed and try again.',
         options: {
           statusCode: 429,
-          body:
-            'Encryption key rotation is in progress already. Please wait until it is completed and try again.',
+          body: 'Encryption key rotation is in progress already. Please wait until it is completed and try again.',
         },
       });
 

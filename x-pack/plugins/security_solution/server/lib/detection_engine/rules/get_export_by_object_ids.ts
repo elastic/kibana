@@ -6,15 +6,23 @@
  */
 
 import { chunk } from 'lodash';
+import { transformDataToNdjson } from '@kbn/securitysolution-utils';
 
+import { Logger } from 'src/core/server';
+import { ExceptionListClient } from '../../../../../lists/server';
 import { RulesSchema } from '../../../../common/detection_engine/schemas/response/rules_schema';
-import { RulesClient } from '../../../../../alerting/server';
+import { RulesClient, AlertServices } from '../../../../../alerting/server';
+
 import { getExportDetailsNdjson } from './get_export_details_ndjson';
+
 import { isAlertType } from '../rules/types';
 import { transformAlertToRule } from '../routes/rules/utils';
-import { transformDataToNdjson } from '../../../utils/read_stream/create_stream_from_ndjson';
 import { INTERNAL_RULE_ID_KEY } from '../../../../common/constants';
 import { findRules } from './find_rules';
+import { getRuleExceptionsForExport } from './get_export_rule_exceptions';
+
+// eslint-disable-next-line no-restricted-imports
+import { legacyGetBulkRuleActionsSavedObject } from '../rule_actions/legacy_get_bulk_rule_actions_saved_object';
 
 interface ExportSuccessRule {
   statusCode: 200;
@@ -34,22 +42,49 @@ export interface RulesErrors {
 
 export const getExportByObjectIds = async (
   rulesClient: RulesClient,
-  objects: Array<{ rule_id: string }>
+  exceptionsClient: ExceptionListClient | undefined,
+  savedObjectsClient: AlertServices['savedObjectsClient'],
+  objects: Array<{ rule_id: string }>,
+  logger: Logger,
+  isRuleRegistryEnabled: boolean
 ): Promise<{
   rulesNdjson: string;
   exportDetails: string;
+  exceptionLists: string | null;
 }> => {
-  const rulesAndErrors = await getRulesFromObjects(rulesClient, objects);
-  // We do not support importing/exporting actions. When we do, delete this line of code
-  const rulesWithoutActions = rulesAndErrors.rules.map((rule) => ({ ...rule, actions: [] }));
-  const rulesNdjson = transformDataToNdjson(rulesWithoutActions);
-  const exportDetails = getExportDetailsNdjson(rulesWithoutActions, rulesAndErrors.missingRules);
-  return { rulesNdjson, exportDetails };
+  const rulesAndErrors = await getRulesFromObjects(
+    rulesClient,
+    savedObjectsClient,
+    objects,
+    logger,
+    isRuleRegistryEnabled
+  );
+
+  // Retrieve exceptions
+  const exceptions = rulesAndErrors.rules.flatMap((rule) => rule.exceptions_list ?? []);
+  const { exportData: exceptionLists, exportDetails: exceptionDetails } =
+    await getRuleExceptionsForExport(exceptions, exceptionsClient);
+
+  const rulesNdjson = transformDataToNdjson(rulesAndErrors.rules);
+  const exportDetails = getExportDetailsNdjson(
+    rulesAndErrors.rules,
+    rulesAndErrors.missingRules,
+    exceptionDetails
+  );
+
+  return {
+    rulesNdjson,
+    exportDetails,
+    exceptionLists,
+  };
 };
 
 export const getRulesFromObjects = async (
   rulesClient: RulesClient,
-  objects: Array<{ rule_id: string }>
+  savedObjectsClient: AlertServices['savedObjectsClient'],
+  objects: Array<{ rule_id: string }>,
+  logger: Logger,
+  isRuleRegistryEnabled: boolean
 ): Promise<RulesErrors> => {
   // If we put more than 1024 ids in one block like "alert.attributes.tags: (id1 OR id2 OR ... OR id1100)"
   // then the KQL -> ES DSL query generator still puts them all in the same "should" array, but ES defaults
@@ -67,6 +102,7 @@ export const getRulesFromObjects = async (
     })
     .join(' OR ');
   const rules = await findRules({
+    isRuleRegistryEnabled,
     rulesClient,
     filter,
     page: 1,
@@ -75,16 +111,23 @@ export const getRulesFromObjects = async (
     sortField: undefined,
     sortOrder: undefined,
   });
+  const alertIds = rules.data.map((rule) => rule.id);
+  const legacyActions = await legacyGetBulkRuleActionsSavedObject({
+    alertIds,
+    savedObjectsClient,
+    logger,
+  });
+
   const alertsAndErrors = objects.map(({ rule_id: ruleId }) => {
     const matchingRule = rules.data.find((rule) => rule.params.ruleId === ruleId);
     if (
       matchingRule != null &&
-      isAlertType(matchingRule) &&
+      isAlertType(isRuleRegistryEnabled, matchingRule) &&
       matchingRule.params.immutable !== true
     ) {
       return {
         statusCode: 200,
-        rule: transformAlertToRule(matchingRule),
+        rule: transformAlertToRule(matchingRule, undefined, legacyActions[matchingRule.id]),
       };
     } else {
       return {

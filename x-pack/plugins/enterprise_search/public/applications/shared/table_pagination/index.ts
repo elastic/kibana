@@ -22,11 +22,11 @@ export const convertMetaToPagination = (meta: Meta) => ({
 interface EuiBasicTableOnChange {
   page: { index: number };
 }
-export const handlePageChange = (paginationCallback: Function) => ({
-  page: { index },
-}: EuiBasicTableOnChange) => {
-  paginationCallback(index + 1);
-};
+export const handlePageChange =
+  (paginationCallback: Function) =>
+  ({ page: { index } }: EuiBasicTableOnChange) => {
+    paginationCallback(index + 1);
+  };
 
 /**
  * Helper for updating Kea `meta` state without mutating nested objs

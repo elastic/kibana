@@ -13,16 +13,14 @@ export interface BuildRuleMessageFactoryParams {
   index: string;
 }
 
-export const buildRuleMessageFactory = ({
-  id,
-  ruleId,
-  index,
-  name,
-}: BuildRuleMessageFactoryParams): BuildRuleMessage => (...messages) =>
-  [
-    ...messages,
-    `name: "${name}"`,
-    `id: "${id}"`,
-    `rule id: "${ruleId ?? '(unknown rule id)'}"`,
-    `signals index alias: "${index}"`,
-  ].join(' ');
+// TODO: change `index` param to `spaceId`
+export const buildRuleMessageFactory =
+  ({ id, ruleId, index, name }: BuildRuleMessageFactoryParams): BuildRuleMessage =>
+  (...messages) =>
+    [
+      ...messages,
+      `name: "${name}"`,
+      `id: "${id}"`,
+      `rule id: "${ruleId ?? '(unknown rule id)'}"`,
+      `space ID: "${index}"`,
+    ].join(' ');

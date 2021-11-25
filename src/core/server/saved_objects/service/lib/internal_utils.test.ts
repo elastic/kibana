@@ -11,7 +11,11 @@ import type { SavedObjectsRawDoc } from '../../serialization';
 import { encodeHitVersion } from '../../version';
 import {
   getBulkOperationError,
+  getCurrentTime,
+  getObjectKey,
   getSavedObjectFromSource,
+  normalizeNamespace,
+  parseObjectKey,
   rawDocExistsInNamespace,
   rawDocExistsInNamespaces,
 } from './internal_utils';
@@ -324,5 +328,52 @@ describe('#rawDocExistsInNamespaces', () => {
       expect(rawDocExistsInNamespaces(registry, doc2, ['some-space'])).toBe(true);
       expect(rawDocExistsInNamespaces(registry, doc2, ['other-space'])).toBe(true);
     });
+  });
+});
+
+describe('#normalizeNamespace', () => {
+  it('throws an error for * (All namespaces string)', () => {
+    expect(() => normalizeNamespace(ALL_NAMESPACES_STRING)).toThrowErrorMatchingInlineSnapshot(
+      `"\\"options.namespace\\" cannot be \\"*\\": Bad Request"`
+    );
+  });
+
+  it('returns undefined for undefined or "default" namespace inputs', () => {
+    [undefined, 'default'].forEach((namespace) => {
+      expect(normalizeNamespace(namespace)).toBeUndefined();
+    });
+  });
+
+  it('returns namespace string for other namespace string inputs', () => {
+    ['foo', 'bar'].forEach((namespace) => {
+      expect(normalizeNamespace(namespace)).toBe(namespace);
+    });
+  });
+});
+
+describe('#getCurrentTime', () => {
+  let dateNowSpy: jest.SpyInstance<number, []>;
+
+  beforeAll(() => (dateNowSpy = jest.spyOn(Date, 'now').mockImplementation(() => 1631307600000)));
+  afterAll(() => dateNowSpy.mockRestore());
+
+  it('returns the current time', () => {
+    expect(getCurrentTime()).toEqual('2021-09-10T21:00:00.000Z');
+  });
+});
+
+describe('#getObjectKey', () => {
+  it('returns the expected key string', () => {
+    expect(getObjectKey({ type: 'foo', id: 'bar' })).toEqual('foo:bar');
+  });
+});
+
+describe('#parseObjectKey', () => {
+  it('returns the expected object', () => {
+    expect(parseObjectKey('foo:bar')).toEqual({ type: 'foo', id: 'bar' });
+  });
+
+  it('throws error when input is malformed', () => {
+    expect(() => parseObjectKey('foobar')).toThrowError('Malformed object key');
   });
 });

@@ -17,7 +17,7 @@ import { ExecutionContract } from './execution_contract';
 
 beforeAll(() => {
   if (typeof performance === 'undefined') {
-    (global as any).performance = { now: Date.now };
+    global.performance = { now: Date.now } as typeof performance;
   }
 });
 
@@ -41,7 +41,7 @@ const createExecution = (
 const run = async (
   expression: string = 'foo bar=123',
   context?: Record<string, unknown>,
-  input: any = null
+  input: unknown = null
 ) => {
   const execution = createExecution(expression, context);
   execution.start(input);
@@ -262,45 +262,45 @@ describe('Execution', () => {
 
   describe('execution context', () => {
     test('context.variables is an object', async () => {
-      const { result } = (await run('introspectContext key="variables"')) as any;
+      const { result } = await run('introspectContext key="variables"');
 
       expect(result).toHaveProperty('result', expect.any(Object));
     });
 
     test('context.types is an object', async () => {
-      const { result } = (await run('introspectContext key="types"')) as any;
+      const { result } = await run('introspectContext key="types"');
 
       expect(result).toHaveProperty('result', expect.any(Object));
     });
 
     test('context.abortSignal is an object', async () => {
-      const { result } = (await run('introspectContext key="abortSignal"')) as any;
+      const { result } = await run('introspectContext key="abortSignal"');
 
       expect(result).toHaveProperty('result', expect.any(Object));
     });
 
     test('context.inspectorAdapters is an object', async () => {
-      const { result } = (await run('introspectContext key="inspectorAdapters"')) as any;
+      const { result } = await run('introspectContext key="inspectorAdapters"');
 
       expect(result).toHaveProperty('result', expect.any(Object));
     });
 
     test('context.getKibanaRequest is a function if provided', async () => {
-      const { result } = (await run('introspectContext key="getKibanaRequest"', {
+      const { result } = await run('introspectContext key="getKibanaRequest"', {
         kibanaRequest: {},
-      })) as any;
+      });
 
       expect(result).toHaveProperty('result', expect.any(Function));
     });
 
     test('context.getKibanaRequest is undefined if not provided', async () => {
-      const { result } = (await run('introspectContext key="getKibanaRequest"')) as any;
+      const { result } = await run('introspectContext key="getKibanaRequest"');
 
       expect(result).toHaveProperty('result', undefined);
     });
 
     test('unknown context key is undefined', async () => {
-      const { result } = (await run('introspectContext key="foo"')) as any;
+      const { result } = await run('introspectContext key="foo"');
 
       expect(result).toHaveProperty('result', undefined);
     });
@@ -314,7 +314,7 @@ describe('Execution', () => {
 
   describe('inspector adapters', () => {
     test('by default, "tables" and "requests" inspector adapters are available', async () => {
-      const { result } = (await run('introspectContext key="inspectorAdapters"')) as any;
+      const { result } = await run('introspectContext key="inspectorAdapters"');
       expect(result).toHaveProperty(
         'result',
         expect.objectContaining({
@@ -326,9 +326,9 @@ describe('Execution', () => {
 
     test('can set custom inspector adapters', async () => {
       const inspectorAdapters = {};
-      const { result } = (await run('introspectContext key="inspectorAdapters"', {
+      const { result } = await run('introspectContext key="inspectorAdapters"', {
         inspectorAdapters,
-      })) as any;
+      });
       expect(result).toHaveProperty('result', inspectorAdapters);
     });
 
@@ -351,7 +351,7 @@ describe('Execution', () => {
 
   describe('expression abortion', () => {
     test('context has abortSignal object', async () => {
-      const { result } = (await run('introspectContext key="abortSignal"')) as any;
+      const { result } = await run('introspectContext key="abortSignal"');
 
       expect(result).toHaveProperty('result.aborted', false);
     });
@@ -400,7 +400,7 @@ describe('Execution', () => {
       testScheduler.run(({ cold, expectObservable }) => {
         const arg = cold('     -a-b-c|', { a: 1, b: 2, c: 3 });
         const expected = '     -a-b-c|';
-        const observable: ExpressionFunctionDefinition<'observable', any, {}, any> = {
+        const observable: ExpressionFunctionDefinition<'observable', unknown, {}, unknown> = {
           name: 'observable',
           args: {},
           help: '',
@@ -468,7 +468,7 @@ describe('Execution', () => {
     });
 
     test('does not execute remaining functions in pipeline', async () => {
-      const spy: ExpressionFunctionDefinition<'spy', any, {}, any> = {
+      const spy: ExpressionFunctionDefinition<'spy', unknown, {}, unknown> = {
         name: 'spy',
         args: {},
         help: '',
@@ -621,7 +621,12 @@ describe('Execution', () => {
           help: '',
           fn: () => arg2,
         };
-        const max: ExpressionFunctionDefinition<'max', any, { val1: number; val2: number }, any> = {
+        const max: ExpressionFunctionDefinition<
+          'max',
+          unknown,
+          { val1: number; val2: number },
+          unknown
+        > = {
           name: 'max',
           args: {
             val1: { help: '', types: ['number'] },
@@ -679,7 +684,12 @@ describe('Execution', () => {
 
   describe('when arguments are missing', () => {
     it('when required argument is missing and has not alias, returns error', async () => {
-      const requiredArg: ExpressionFunctionDefinition<'requiredArg', any, { arg: any }, any> = {
+      const requiredArg: ExpressionFunctionDefinition<
+        'requiredArg',
+        unknown,
+        { arg: unknown },
+        unknown
+      > = {
         name: 'requiredArg',
         args: {
           arg: {

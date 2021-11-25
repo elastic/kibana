@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable react/display-name */
-
 import { get } from 'lodash/fp';
 import React from 'react';
 import styled from 'styled-components';
@@ -36,7 +34,7 @@ import {
 import {
   DESTINATION_PORT_FIELD_NAME,
   SOURCE_PORT_FIELD_NAME,
-} from '../../../../../../network/components/port';
+} from '../../../../../../network/components/port/helpers';
 import {
   NETWORK_BYTES_FIELD_NAME,
   NETWORK_COMMUNITY_ID_FIELD_NAME,

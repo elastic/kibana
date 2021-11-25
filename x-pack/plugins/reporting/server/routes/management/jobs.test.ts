@@ -131,7 +131,7 @@ describe('GET /api/reporting/jobs/download', () => {
 
   it('fails on unauthenticated users', async () => {
     // @ts-ignore
-    core.pluginSetupDeps = ({
+    core.pluginSetupDeps = {
       // @ts-ignore
       ...core.pluginSetupDeps,
       security: {
@@ -142,7 +142,7 @@ describe('GET /api/reporting/jobs/download', () => {
           getCurrentUser: () => undefined,
         },
       },
-    } as unknown) as ReportingInternalSetup;
+    } as unknown as ReportingInternalSetup;
     registerJobInfoRoutes(core);
 
     await server.start();
@@ -176,6 +176,36 @@ describe('GET /api/reporting/jobs/download', () => {
     await server.start();
 
     await supertest(httpSetup.server.listener).get('/api/reporting/jobs/download/poo').expect(401);
+  });
+
+  it(`returns job's info`, async () => {
+    mockEsClient.search.mockResolvedValueOnce({
+      body: getHits({
+        jobtype: 'base64EncodedJobType',
+        payload: {}, // payload is irrelevant
+      }),
+    } as any);
+
+    registerJobInfoRoutes(core);
+
+    await server.start();
+
+    await supertest(httpSetup.server.listener).get('/api/reporting/jobs/info/test').expect(200);
+  });
+
+  it(`returns 403 if a user cannot view a job's info`, async () => {
+    mockEsClient.search.mockResolvedValueOnce({
+      body: getHits({
+        jobtype: 'customForbiddenJobType',
+        payload: {}, // payload is irrelevant
+      }),
+    } as any);
+
+    registerJobInfoRoutes(core);
+
+    await server.start();
+
+    await supertest(httpSetup.server.listener).get('/api/reporting/jobs/info/test').expect(403);
   });
 
   it('when a job is incomplete', async () => {
@@ -305,7 +335,7 @@ describe('GET /api/reporting/jobs/download', () => {
       const deprecatedConfig = createMockConfigSchema({ roles: { enabled: true } });
       core = await createMockReportingCore(deprecatedConfig, mockSetupDeps);
       // @ts-ignore
-      core.pluginSetupDeps = ({
+      core.pluginSetupDeps = {
         // @ts-ignore
         ...core.pluginSetupDeps,
         security: {
@@ -320,7 +350,7 @@ describe('GET /api/reporting/jobs/download', () => {
             }),
           },
         },
-      } as unknown) as ReportingInternalSetup;
+      } as unknown as ReportingInternalSetup;
       registerJobInfoRoutes(core);
 
       await server.start();

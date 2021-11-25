@@ -12,12 +12,10 @@ describe('config validation', () => {
     const config: Record<string, unknown> = {};
     expect(configSchema.validate(config)).toMatchInlineSnapshot(`
       Object {
-        "enabled": true,
         "ephemeral_tasks": Object {
           "enabled": false,
           "request_capacity": 10,
         },
-        "index": ".kibana_task_manager",
         "max_attempts": 3,
         "max_poll_inactivity_cycles": 10,
         "max_workers": 10,
@@ -37,20 +35,12 @@ describe('config validation', () => {
         },
         "poll_interval": 3000,
         "request_capacity": 1000,
+        "unsafe": Object {
+          "exclude_task_types": Array [],
+        },
         "version_conflict_threshold": 80,
       }
     `);
-  });
-
-  test('the ElastiSearch Tasks index cannot be used for task manager', () => {
-    const config: Record<string, unknown> = {
-      index: '.tasks',
-    };
-    expect(() => {
-      configSchema.validate(config);
-    }).toThrowErrorMatchingInlineSnapshot(
-      `"[index]: \\".tasks\\" is an invalid Kibana Task Manager index, as it is already in use by the ElasticSearch Tasks Manager"`
-    );
   });
 
   test('the required freshness of the monitored stats config must always be less-than-equal to the poll interval', () => {
@@ -68,12 +58,10 @@ describe('config validation', () => {
     const config: Record<string, unknown> = {};
     expect(configSchema.validate(config)).toMatchInlineSnapshot(`
       Object {
-        "enabled": true,
         "ephemeral_tasks": Object {
           "enabled": false,
           "request_capacity": 10,
         },
-        "index": ".kibana_task_manager",
         "max_attempts": 3,
         "max_poll_inactivity_cycles": 10,
         "max_workers": 10,
@@ -93,6 +81,9 @@ describe('config validation', () => {
         },
         "poll_interval": 3000,
         "request_capacity": 1000,
+        "unsafe": Object {
+          "exclude_task_types": Array [],
+        },
         "version_conflict_threshold": 80,
       }
     `);
@@ -111,12 +102,10 @@ describe('config validation', () => {
     };
     expect(configSchema.validate(config)).toMatchInlineSnapshot(`
       Object {
-        "enabled": true,
         "ephemeral_tasks": Object {
           "enabled": false,
           "request_capacity": 10,
         },
-        "index": ".kibana_task_manager",
         "max_attempts": 3,
         "max_poll_inactivity_cycles": 10,
         "max_workers": 10,
@@ -141,6 +130,9 @@ describe('config validation', () => {
         },
         "poll_interval": 3000,
         "request_capacity": 1000,
+        "unsafe": Object {
+          "exclude_task_types": Array [],
+        },
         "version_conflict_threshold": 80,
       }
     `);

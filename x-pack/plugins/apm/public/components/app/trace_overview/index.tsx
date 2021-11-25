@@ -16,7 +16,7 @@ import { useFallbackToTransactionsFetcher } from '../../../hooks/use_fallback_to
 import { AggregatedTransactionsBadge } from '../../shared/aggregated_transactions_badge';
 import { useTimeRange } from '../../../hooks/use_time_range';
 
-type TracesAPIResponse = APIReturnType<'GET /api/apm/traces'>;
+type TracesAPIResponse = APIReturnType<'GET /internal/apm/traces'>;
 const DEFAULT_RESPONSE: TracesAPIResponse = {
   items: [],
 };
@@ -35,7 +35,7 @@ export function TraceOverview() {
     (callApmApi) => {
       if (start && end) {
         return callApmApi({
-          endpoint: 'GET /api/apm/traces',
+          endpoint: 'GET /internal/apm/traces',
           params: {
             query: {
               environment,
@@ -65,6 +65,7 @@ export function TraceOverview() {
       <TraceList
         items={data.items}
         isLoading={status === FETCH_STATUS.LOADING}
+        isFailure={status === FETCH_STATUS.FAILURE}
       />
     </>
   );

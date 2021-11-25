@@ -50,6 +50,7 @@ function ListItem({
   children: ReactNode;
 }) {
   return (
+    // eslint-disable-next-line jsx-a11y/role-supports-aria-props
     <li
       className={classNames('gphGuidancePanel__item', {
         // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -173,13 +174,13 @@ function GuidancePanelComponent(props: GuidancePanelProps) {
           <p>
             <FormattedMessage
               id="xpack.graph.noDataSourceNotificationMessageText"
-              defaultMessage="No data sources found. Go to {managementIndexPatternsLink} and create an index pattern for your Elasticsearch indices."
+              defaultMessage="No data sources found. Go to {managementIndexPatternsLink} and create a data view for your Elasticsearch indices."
               values={{
                 managementIndexPatternsLink: (
                   <a href={indexPatternUrl}>
                     <FormattedMessage
-                      id="xpack.graph.noDataSourceNotificationMessageText.managementIndexPatternLinkText"
-                      defaultMessage="Management &gt; Index Patterns"
+                      id="xpack.graph.noDataSourceNotificationMessageText.managementDataViewLinkText"
+                      defaultMessage="Management &gt; Data views"
                     />
                   </a>
                 ),

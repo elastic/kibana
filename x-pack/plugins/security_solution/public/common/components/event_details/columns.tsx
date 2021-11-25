@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable react/display-name */
-
 import { EuiPanel, EuiText } from '@elastic/eui';
 import { get } from 'lodash';
 import memoizeOne from 'memoize-one';
@@ -48,6 +46,7 @@ export const getColumns = ({
   timelineId,
   toggleColumn,
   getLinkValue,
+  isDraggable,
 }: {
   browserFields: BrowserFields;
   columnHeaders: ColumnHeaderOptions[];
@@ -57,6 +56,7 @@ export const getColumns = ({
   timelineId: string;
   toggleColumn: (column: ColumnHeaderOptions) => void;
   getLinkValue: (field: string) => string | null;
+  isDraggable?: boolean;
 }) => [
   {
     field: 'values',
@@ -138,6 +138,7 @@ export const getColumns = ({
           eventId={eventId}
           fieldFromBrowserField={fieldFromBrowserField}
           getLinkValue={getLinkValue}
+          isDraggable={isDraggable}
           values={values}
         />
       );

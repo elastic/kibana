@@ -17,6 +17,7 @@ import {
 import React, { useState, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
+import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { BrowserFields, DocValueFields } from '../../../../common/containers/source';
 import { ExpandableEvent, ExpandableEventTitle } from './expandable_event';
 import { useTimelineEventsDetails } from '../../../containers/details';
@@ -34,6 +35,7 @@ import { TimelineNonEcsData } from '../../../../../common';
 import { Ecs } from '../../../../../common/ecs';
 import { EventDetailsFooter } from './footer';
 import { EntityType } from '../../../../../../timelines/common';
+import { useHostsRiskScore } from '../../../../overview/containers/overview_risky_host_links/use_hosts_risk_score';
 
 const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
   .euiFlyoutBody__overflow {
@@ -61,7 +63,9 @@ interface EventDetailsPanelProps {
     refetch?: () => void;
   };
   handleOnEventClosed: () => void;
+  isDraggable?: boolean;
   isFlyoutView?: boolean;
+  runtimeMappings: MappingRuntimeFields;
   tabType: TimelineTabs;
   timelineId: string;
 }
@@ -72,15 +76,18 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
   entityType = 'events', // Default to events so only alerts have to pass entityType in
   expandedEvent,
   handleOnEventClosed,
+  isDraggable,
   isFlyoutView,
+  runtimeMappings,
   tabType,
   timelineId,
 }) => {
-  const [loading, detailsData] = useTimelineEventsDetails({
+  const [loading, detailsData, rawEventData] = useTimelineEventsDetails({
     docValueFields,
     entityType,
     indexName: expandedEvent.indexName ?? '',
     eventId: expandedEvent.eventId ?? '',
+    runtimeMappings,
     skip: !expandedEvent.eventId,
   });
 
@@ -90,9 +97,8 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
     'isolateHost'
   );
 
-  const [isIsolateActionSuccessBannerVisible, setIsIsolateActionSuccessBannerVisible] = useState(
-    false
-  );
+  const [isIsolateActionSuccessBannerVisible, setIsIsolateActionSuccessBannerVisible] =
+    useState(false);
 
   const showAlertDetails = useCallback(() => {
     setIsHostIsolationPanel(false);
@@ -106,21 +112,26 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
     }
   }, []);
 
-  const isAlert = some({ category: 'signal', field: 'signal.rule.id' }, detailsData);
+  const isAlert = some({ category: 'kibana', field: 'kibana.alert.rule.uuid' }, detailsData);
 
   const ruleName = useMemo(
-    () => getFieldValue({ category: 'signal', field: 'signal.rule.name' }, detailsData),
+    () => getFieldValue({ category: 'kibana', field: 'kibana.alert.rule.name' }, detailsData),
     [detailsData]
   );
 
-  const alertId = useMemo(() => getFieldValue({ category: '_id', field: '_id' }, detailsData), [
-    detailsData,
-  ]);
+  const alertId = useMemo(
+    () => getFieldValue({ category: '_id', field: '_id' }, detailsData),
+    [detailsData]
+  );
 
   const hostName = useMemo(
     () => getFieldValue({ category: 'host', field: 'host.name' }, detailsData),
     [detailsData]
   );
+
+  const hostRisk = useHostsRiskScore({
+    hostName,
+  });
 
   const backToAlertDetailsLink = useMemo(() => {
     return (
@@ -186,9 +197,12 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
             detailsData={detailsData}
             event={expandedEvent}
             isAlert={isAlert}
+            isDraggable={isDraggable}
             loading={loading}
+            rawEventData={rawEventData}
             timelineId={timelineId}
             timelineTabType="flyout"
+            hostRisk={hostRisk}
           />
         )}
       </StyledEuiFlyoutBody>
@@ -217,9 +231,12 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
         detailsData={detailsData}
         event={expandedEvent}
         isAlert={isAlert}
+        isDraggable={isDraggable}
         loading={loading}
+        rawEventData={rawEventData}
         timelineId={timelineId}
         timelineTabType={tabType}
+        hostRisk={hostRisk}
       />
     </>
   );
@@ -231,5 +248,6 @@ export const EventDetailsPanel = React.memo(
     deepEqual(prevProps.browserFields, nextProps.browserFields) &&
     deepEqual(prevProps.docValueFields, nextProps.docValueFields) &&
     deepEqual(prevProps.expandedEvent, nextProps.expandedEvent) &&
-    prevProps.timelineId === nextProps.timelineId
+    prevProps.timelineId === nextProps.timelineId &&
+    prevProps.isDraggable === nextProps.isDraggable
 );

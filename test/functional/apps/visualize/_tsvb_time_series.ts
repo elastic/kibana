@@ -17,6 +17,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'timeToVisualize',
     'dashboard',
   ]);
+  const security = getService('security');
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
   const filterBar = getService('filterBar');
@@ -27,6 +28,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   describe('visual builder', function describeIndexTests() {
     before(async () => {
+      await security.testUser.setRoles([
+        'kibana_admin',
+        'long_window_logstash',
+        'test_logstash_reader',
+      ]);
       await visualize.initTests();
     });
     beforeEach(async () => {
@@ -89,6 +95,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         const expectedLegendValue = '$ 156';
 
         await visualBuilder.clickSeriesOption();
+        await visualBuilder.changeDataFormatter('number');
         await visualBuilder.enterSeriesTemplate('$ {{value}}');
         await retry.try(async () => {
           const actualCount = await visualBuilder.getRhythmChartLegendValue();
@@ -100,7 +107,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         const expectedLegendValue = '15,600%';
 
         await visualBuilder.clickSeriesOption();
-        await visualBuilder.changeDataFormatter('Percent');
+        await visualBuilder.changeDataFormatter('percent');
         const actualCount = await visualBuilder.getRhythmChartLegendValue();
         expect(actualCount).to.be(expectedLegendValue);
       });
@@ -109,14 +116,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         const expectedLegendValue = '156B';
 
         await visualBuilder.clickSeriesOption();
-        await visualBuilder.changeDataFormatter('Bytes');
+        await visualBuilder.changeDataFormatter('bytes');
         const actualCount = await visualBuilder.getRhythmChartLegendValue();
         expect(actualCount).to.be(expectedLegendValue);
       });
 
       it('should show the correct count in the legend with "Human readable" duration formatter', async () => {
         await visualBuilder.clickSeriesOption();
-        await visualBuilder.changeDataFormatter('Duration');
+        await visualBuilder.changeDataFormatter('duration');
         await visualBuilder.setDurationFormatterSettings({ to: 'Human readable' });
         const actualCountDefault = await visualBuilder.getRhythmChartLegendValue();
         expect(actualCountDefault).to.be('a few seconds');
@@ -354,6 +361,40 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           expect(chartData).to.eql(expectedChartData);
         });
 
+        describe('Hiding series', () => {
+          it('should hide series by legend item click', async () => {
+            await visualBuilder.clickDataTab('timeSeries');
+            await visualBuilder.setMetricsGroupByTerms('@tags.raw');
+
+            let areasCount = (await visualBuilder.getChartItems())?.length;
+            expect(areasCount).to.be(6);
+
+            await visualBuilder.clickSeriesLegendItem('success');
+            await visualBuilder.clickSeriesLegendItem('info');
+            await visualBuilder.clickSeriesLegendItem('error');
+
+            areasCount = (await visualBuilder.getChartItems())?.length;
+            expect(areasCount).to.be(3);
+          });
+
+          it('should keep series hidden after refresh', async () => {
+            await visualBuilder.clickDataTab('timeSeries');
+            await visualBuilder.setMetricsGroupByTerms('extension.raw');
+
+            let legendNames = await visualBuilder.getLegendNames();
+            expect(legendNames).to.eql(['jpg', 'css', 'png', 'gif', 'php']);
+
+            await visualBuilder.clickSeriesLegendItem('png');
+            await visualBuilder.clickSeriesLegendItem('php');
+            legendNames = await visualBuilder.getLegendNames();
+            expect(legendNames).to.eql(['jpg', 'css', 'gif']);
+
+            await visualize.clickRefresh(true);
+            legendNames = await visualBuilder.getLegendNames();
+            expect(legendNames).to.eql(['jpg', 'css', 'gif']);
+          });
+        });
+
         describe('Query filter', () => {
           it('should display correct chart data for applied series filter', async () => {
             const expectedChartData = [
@@ -431,6 +472,49 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
 
         after(async () => await visualBuilder.toggleNewChartsLibraryWithDebug(false));
+      });
+
+      describe('index pattern selection mode', () => {
+        it('should disable switch for Kibana index patterns mode by default', async () => {
+          await visualBuilder.clickPanelOptions('timeSeries');
+          const isEnabled = await visualBuilder.checkIndexPatternSelectionModeSwitchIsEnabled();
+          expect(isEnabled).to.be(false);
+        });
+
+        describe('metrics:allowStringIndices = true', () => {
+          before(async () => {
+            await kibanaServer.uiSettings.update({ 'metrics:allowStringIndices': true });
+            await browser.refresh();
+          });
+
+          beforeEach(async () => await visualBuilder.clickPanelOptions('timeSeries'));
+
+          it('should not disable switch for Kibana index patterns mode', async () => {
+            await visualBuilder.switchIndexPatternSelectionMode(true);
+
+            const isEnabled = await visualBuilder.checkIndexPatternSelectionModeSwitchIsEnabled();
+            expect(isEnabled).to.be(true);
+          });
+
+          it('should disable switch after selecting Kibana index patterns mode and metrics:allowStringIndices = false', async () => {
+            await visualBuilder.switchIndexPatternSelectionMode(false);
+            await kibanaServer.uiSettings.update({ 'metrics:allowStringIndices': false });
+            await browser.refresh();
+            await visualBuilder.clickPanelOptions('timeSeries');
+
+            let isEnabled = await visualBuilder.checkIndexPatternSelectionModeSwitchIsEnabled();
+            expect(isEnabled).to.be(true);
+
+            await visualBuilder.switchIndexPatternSelectionMode(true);
+            isEnabled = await visualBuilder.checkIndexPatternSelectionModeSwitchIsEnabled();
+            expect(isEnabled).to.be(false);
+          });
+
+          after(
+            async () =>
+              await kibanaServer.uiSettings.update({ 'metrics:allowStringIndices': false })
+          );
+        });
       });
     });
   });

@@ -8,7 +8,8 @@
 import { CreateRulesOptions } from './types';
 import { rulesClientMock } from '../../../../../alerting/server/mocks';
 
-export const getCreateRulesOptionsMock = (): CreateRulesOptions => ({
+export const getCreateRulesOptionsMock = (isRuleRegistryEnabled: boolean): CreateRulesOptions => ({
+  isRuleRegistryEnabled,
   author: ['Elastic'],
   buildingBlockType: undefined,
   rulesClient: rulesClientMock.create(),
@@ -61,7 +62,10 @@ export const getCreateRulesOptionsMock = (): CreateRulesOptions => ({
   actions: [],
 });
 
-export const getCreateMlRulesOptionsMock = (): CreateRulesOptions => ({
+export const getCreateMlRulesOptionsMock = (
+  isRuleRegistryEnabled: boolean
+): CreateRulesOptions => ({
+  isRuleRegistryEnabled,
   author: ['Elastic'],
   buildingBlockType: undefined,
   rulesClient: rulesClientMock.create(),

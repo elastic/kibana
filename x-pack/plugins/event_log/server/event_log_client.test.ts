@@ -322,7 +322,7 @@ function fakeEvent(overrides = {}) {
 function FakeRequest(): KibanaRequest {
   const savedObjectGetter = jest.fn();
 
-  return ({
+  return {
     headers: {},
     getBasePath: () => '',
     path: '/',
@@ -336,5 +336,5 @@ function FakeRequest(): KibanaRequest {
       },
     },
     getSavedObjectsClient: () => savedObjectGetter,
-  } as unknown) as KibanaRequest;
+  } as unknown as KibanaRequest;
 }

@@ -21,7 +21,7 @@ import { environmentQuery } from '../../../../common/utils/environment_query';
 import { withApmSpan } from '../../../utils/with_apm_span';
 import { getBucketSize } from '../../helpers/get_bucket_size';
 import { getErrorName } from '../../helpers/get_error_name';
-import { Setup, SetupTimeRange } from '../../helpers/setup_request';
+import { Setup } from '../../helpers/setup_request';
 
 export type ServiceErrorGroupItem = ValuesType<
   PromiseReturnType<typeof getServiceErrorGroups>
@@ -38,20 +38,24 @@ export async function getServiceErrorGroups({
   sortDirection,
   sortField,
   transactionType,
+  start,
+  end,
 }: {
   environment: string;
   kuery: string;
   serviceName: string;
-  setup: Setup & SetupTimeRange;
+  setup: Setup;
   size: number;
   pageIndex: number;
   numBuckets: number;
   sortDirection: 'asc' | 'desc';
   sortField: 'name' | 'lastSeen' | 'occurrences';
   transactionType: string;
+  start: number;
+  end: number;
 }) {
   return withApmSpan('get_service_error_groups', async () => {
-    const { apmEventClient, start, end } = setup;
+    const { apmEventClient } = setup;
 
     const { intervalString } = getBucketSize({ start, end, numBuckets });
 
@@ -87,11 +91,11 @@ export async function getServiceErrorGroups({
                 sample: {
                   top_hits: {
                     size: 1,
-                    _source: ([
+                    _source: [
                       ERROR_LOG_MESSAGE,
                       ERROR_EXC_MESSAGE,
                       '@timestamp',
-                    ] as any) as string,
+                    ] as any as string,
                     sort: {
                       '@timestamp': 'desc',
                     },

@@ -18,8 +18,8 @@ export const buttonRenderer: ExpressionRenderDefinition<any> = {
   render(domNode, config, handlers) {
     const buttonClick = () => {
       handlers.event({
-        id: 'NAVIGATE',
-        value: {
+        name: 'NAVIGATE',
+        data: {
           href: config.href,
         },
       });

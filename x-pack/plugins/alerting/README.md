@@ -75,29 +75,6 @@ To change the schedule for the invalidation task, use the kibana.yml configurati
 
 To change the default delay for the API key invalidation, use the kibana.yml configuration option `xpack.alerting.invalidateApiKeysTask.removalDelay`.
 
-## Plugin Status
-
-The plugin status of the Alerting Framework is customized by including information about checking for failures during framework decryption:
-
-```js
-core.status.set(
-        combineLatest([
-          core.status.derivedStatus$,
-          getHealthStatusStream(startPlugins.taskManager),
-        ]).pipe(
-          map(([derivedStatus, healthStatus]) => {
-            if (healthStatus.level > derivedStatus.level) {
-              return healthStatus as ServiceStatus;
-            } else {
-              return derivedStatus;
-            }
-          })
-        )
-      );
-```
-
-To check for framework decryption failures, we use the task `alerting_health_check`, which runs every 60 minutes by default. To change the default schedule, use the kibana.yml configuration option `xpack.alerting.healthCheck.interval`.
-
 ## Rule Types
 
 ### Methods
@@ -118,9 +95,12 @@ The following table describes the properties of the `options` object.
 |executor|This is where the code for the rule type lives. This is a function to be called when executing a rule on an interval basis. For full details, see the executor section below.|Function|
 |producer|The id of the application producing this rule type.|string|
 |minimumLicenseRequired|The value of a minimum license. Most of the rules are licensed as "basic".|string|
+|ruleTaskTimeout|The length of time a rule can run before being cancelled due to timeout. By default, this value is "5m".|string|
 |useSavedObjectReferences.extractReferences|(Optional) When developing a rule type, you can choose to implement hooks for extracting saved object references from rule parameters. This hook will be invoked when a rule is created or updated. Implementing this hook is optional, but if an extract hook is implemented, an inject hook must also be implemented.|Function
 |useSavedObjectReferences.injectReferences|(Optional) When developing a rule type, you can choose to implement hooks for injecting saved object references into rule parameters. This hook will be invoked when a rule is retrieved (get or find). Implementing this hook is optional, but if an inject hook is implemented, an extract hook must also be implemented.|Function
 |isExportable|Whether the rule type is exportable from the Saved Objects Management UI.|boolean|
+|defaultScheduleInterval|The default interval that will show up in the UI when creating a rule of this rule type.|boolean|
+|minimumScheduleInterval|The minimum interval that will be allowed for all rules of this rule type.|boolean|
 
 ### Executor
 
@@ -344,6 +324,7 @@ const myRuleType: AlertType<
 		};
 	},
 	producer: 'alerting',
+	ruleTaskTimeout: '10m',
 	useSavedObjectReferences: {
 		extractReferences: (params: Params): RuleParamsAndRefs<ExtractedParams> => {
 			const { testSavedObjectId, ...otherParams } = params;

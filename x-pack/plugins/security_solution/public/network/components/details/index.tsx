@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import darkTheme from '@elastic/eui/dist/eui_theme_dark.json';
-import lightTheme from '@elastic/eui/dist/eui_theme_light.json';
+import {
+  euiLightVars as lightTheme,
+  euiDarkVars as darkTheme,
+} from '@kbn/ui-shared-deps-src/theme';
 import React from 'react';
 
 import { DEFAULT_DARK_MODE } from '../../../../common/constants';
@@ -43,6 +45,7 @@ export interface IpOverviewProps {
   flowTarget: FlowTarget;
   id: string;
   ip: string;
+  isDraggable?: boolean;
   isInDetailsSidePanel: boolean;
   isLoadingAnomaliesData: boolean;
   loading: boolean;
@@ -57,6 +60,7 @@ export const IpOverview = React.memo<IpOverviewProps>(
     id,
     ip,
     data,
+    isDraggable = false,
     isInDetailsSidePanel = false, // Rather than duplicate the component, alter the structure based on it's location
     loading,
     flowTarget,
@@ -69,20 +73,21 @@ export const IpOverview = React.memo<IpOverviewProps>(
     const capabilities = useMlCapabilities();
     const userPermissions = hasMlUserPermissions(capabilities);
     const [darkMode] = useUiSetting$<boolean>(DEFAULT_DARK_MODE);
-    const typeData = data[flowTarget]!;
+    const typeData = data[flowTarget];
     const column: DescriptionList[] = [
       {
         title: i18n.LOCATION,
         description: locationRenderer(
           [`${flowTarget}.geo.city_name`, `${flowTarget}.geo.region_name`],
           data,
-          contextID
+          contextID,
+          isDraggable
         ),
       },
       {
         title: i18n.AUTONOMOUS_SYSTEM,
         description: typeData
-          ? autonomousSystemRenderer(typeData.autonomousSystem, flowTarget, contextID)
+          ? autonomousSystemRenderer(typeData.autonomousSystem, flowTarget, contextID, isDraggable)
           : getEmptyTagValue(),
       },
     ];
@@ -122,13 +127,15 @@ export const IpOverview = React.memo<IpOverviewProps>(
           title: i18n.HOST_ID,
           description:
             typeData && data.host
-              ? hostIdRenderer({ host: data.host, ipFilter: ip, contextID })
+              ? hostIdRenderer({ host: data.host, isDraggable, ipFilter: ip, contextID })
               : getEmptyTagValue(),
         },
         {
           title: i18n.HOST_NAME,
           description:
-            typeData && data.host ? hostNameRenderer(data.host, ip, contextID) : getEmptyTagValue(),
+            typeData && data.host
+              ? hostNameRenderer(data.host, ip, contextID, isDraggable)
+              : getEmptyTagValue(),
         },
       ],
       [

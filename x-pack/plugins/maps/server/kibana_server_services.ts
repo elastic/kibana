@@ -7,9 +7,10 @@
 
 import { ElasticsearchClient, ISavedObjectsRepository } from 'kibana/server';
 import { SavedObjectsClient } from '../../../../src/core/server';
-import { IndexPatternsCommonService } from '../../../../src/plugins/data/server';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { IndexPatternsServiceStart } from '../../../../src/plugins/data/server/index_patterns';
+import {
+  IndexPatternsCommonService,
+  IndexPatternsServiceStart,
+} from '../../../../src/plugins/data/server';
 
 let internalRepository: ISavedObjectsRepository;
 export const setInternalRepository = (
@@ -19,14 +20,17 @@ export const setInternalRepository = (
 };
 export const getInternalRepository = () => internalRepository;
 
+let esClient: ElasticsearchClient;
 let indexPatternsService: IndexPatternsCommonService;
 export const setIndexPatternsService = async (
   indexPatternsServiceFactory: IndexPatternsServiceStart['indexPatternsServiceFactory'],
   elasticsearchClient: ElasticsearchClient
 ) => {
+  esClient = elasticsearchClient;
   indexPatternsService = await indexPatternsServiceFactory(
     new SavedObjectsClient(getInternalRepository()),
     elasticsearchClient
   );
 };
 export const getIndexPatternsService = () => indexPatternsService;
+export const getESClient = () => esClient;

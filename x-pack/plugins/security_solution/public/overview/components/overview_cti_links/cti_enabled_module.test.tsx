@@ -8,7 +8,7 @@
 import React from 'react';
 import { Provider } from 'react-redux';
 import { cloneDeep } from 'lodash/fp';
-import { mount } from 'enzyme';
+import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n/react';
 import { CtiEnabledModule } from './cti_enabled_module';
 import { ThemeProvider } from 'styled-components';
@@ -50,7 +50,7 @@ describe('CtiEnabledModule', () => {
   });
 
   it('renders CtiWithEvents when there are events', () => {
-    const wrapper = mount(
+    render(
       <Provider store={store}>
         <I18nProvider>
           <ThemeProvider theme={mockTheme}>
@@ -60,12 +60,12 @@ describe('CtiEnabledModule', () => {
       </Provider>
     );
 
-    expect(wrapper.exists('[data-test-subj="cti-with-events"]')).toBe(true);
+    expect(screen.getByTestId('cti-with-events')).toBeInTheDocument();
   });
 
   it('renders CtiWithNoEvents when there are no events', () => {
     useCTIEventCountsMock.mockReturnValueOnce({ totalCount: 0 });
-    const wrapper = mount(
+    render(
       <Provider store={store}>
         <I18nProvider>
           <ThemeProvider theme={mockTheme}>
@@ -75,12 +75,12 @@ describe('CtiEnabledModule', () => {
       </Provider>
     );
 
-    expect(wrapper.exists('[data-test-subj="cti-with-no-events"]')).toBe(true);
+    expect(screen.getByTestId('cti-with-no-events')).toBeInTheDocument();
   });
 
   it('renders null while event counts are loading', () => {
     useCTIEventCountsMock.mockReturnValueOnce({ totalCount: -1 });
-    const wrapper = mount(
+    const { container } = render(
       <Provider store={store}>
         <I18nProvider>
           <ThemeProvider theme={mockTheme}>
@@ -90,6 +90,6 @@ describe('CtiEnabledModule', () => {
       </Provider>
     );
 
-    expect(wrapper.html()).toEqual('');
+    expect(container.firstChild).toBeNull();
   });
 });

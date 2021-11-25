@@ -17,9 +17,9 @@ jest.mock('../../../../../observability/public');
 
 cytoscape.use(dagre);
 
-const theme = ({
+const theme = {
   eui: { avatarSizing: { l: { size: 10 } } },
-} as unknown) as EuiTheme;
+} as unknown as EuiTheme;
 
 describe('useCytoscapeEventHandlers', () => {
   describe('when cytoscape is undefined', () => {
@@ -38,13 +38,12 @@ describe('useCytoscapeEventHandlers', () => {
         });
 
         // Mock the chain that leads to layout run
-        jest.spyOn(cy, 'elements').mockReturnValueOnce(({
+        jest.spyOn(cy, 'elements').mockReturnValueOnce({
           difference: () =>
-            (({
-              layout: () =>
-                (({ run: () => {} } as unknown) as cytoscape.Layouts),
-            } as unknown) as cytoscape.CollectionReturnValue),
-        } as unknown) as cytoscape.CollectionReturnValue);
+            ({
+              layout: () => ({ run: () => {} } as unknown as cytoscape.Layouts),
+            } as unknown as cytoscape.CollectionReturnValue),
+        } as unknown as cytoscape.CollectionReturnValue);
 
         renderHook(() =>
           useCytoscapeEventHandlers({ serviceName: 'test', cy, theme })
@@ -62,12 +61,12 @@ describe('useCytoscapeEventHandlers', () => {
       const run = jest.fn();
 
       // Mock the chain that leads to layout run
-      jest.spyOn(cy, 'elements').mockReturnValueOnce(({
+      jest.spyOn(cy, 'elements').mockReturnValueOnce({
         difference: () =>
-          (({
-            layout: () => (({ run } as unknown) as cytoscape.Layouts),
-          } as unknown) as cytoscape.CollectionReturnValue),
-      } as unknown) as cytoscape.CollectionReturnValue);
+          ({
+            layout: () => ({ run } as unknown as cytoscape.Layouts),
+          } as unknown as cytoscape.CollectionReturnValue),
+      } as unknown as cytoscape.CollectionReturnValue);
 
       renderHook(() => useCytoscapeEventHandlers({ cy, theme }));
       cy.trigger('custom:data');
@@ -124,9 +123,9 @@ describe('useCytoscapeEventHandlers', () => {
   describe('when a drag ends', () => {
     it('changes the cursor to pointer', () => {
       const cy = cytoscape({ elements: [{ data: { id: 'test' } }] });
-      const container = ({
+      const container = {
         style: { cursor: 'grabbing' },
-      } as unknown) as HTMLElement;
+      } as unknown as HTMLElement;
       jest.spyOn(cy, 'container').mockReturnValueOnce(container);
 
       renderHook(() => useCytoscapeEventHandlers({ cy, theme }));
@@ -151,9 +150,9 @@ describe('useCytoscapeEventHandlers', () => {
 
     it('sets the cursor to pointer', () => {
       const cy = cytoscape({ elements: [{ data: { id: 'test' } }] });
-      const container = ({
+      const container = {
         style: { cursor: 'default' },
-      } as unknown) as HTMLElement;
+      } as unknown as HTMLElement;
       jest.spyOn(cy, 'container').mockReturnValueOnce(container);
 
       renderHook(() => useCytoscapeEventHandlers({ cy, theme }));
@@ -195,9 +194,9 @@ describe('useCytoscapeEventHandlers', () => {
 
     it('sets the cursor to the default', () => {
       const cy = cytoscape({ elements: [{ data: { id: 'test' } }] });
-      const container = ({
+      const container = {
         style: { cursor: 'pointer' },
-      } as unknown) as HTMLElement;
+      } as unknown as HTMLElement;
       jest.spyOn(cy, 'container').mockReturnValueOnce(container);
 
       renderHook(() => useCytoscapeEventHandlers({ cy, theme }));
@@ -216,9 +215,9 @@ describe('useCytoscapeEventHandlers', () => {
           { data: { id: 'b' } },
         ],
       });
-      const container = ({
+      const container = {
         style: { cursor: 'default' },
-      } as unknown) as HTMLElement;
+      } as unknown as HTMLElement;
       jest.spyOn(cy, 'container').mockReturnValueOnce(container);
 
       renderHook(() => useCytoscapeEventHandlers({ cy, theme }));
@@ -273,9 +272,9 @@ describe('useCytoscapeEventHandlers', () => {
   describe('when a tap starts', () => {
     it('sets the cursor to grabbing', () => {
       const cy = cytoscape({});
-      const container = ({
+      const container = {
         style: { cursor: 'grab' },
-      } as unknown) as HTMLElement;
+      } as unknown as HTMLElement;
       jest.spyOn(cy, 'container').mockReturnValueOnce(container);
 
       renderHook(() => useCytoscapeEventHandlers({ cy, theme }));
@@ -287,9 +286,9 @@ describe('useCytoscapeEventHandlers', () => {
     describe('when the target is a node', () => {
       it('does not change the cursor', () => {
         const cy = cytoscape({ elements: [{ data: { id: 'test' } }] });
-        const container = ({
+        const container = {
           style: { cursor: 'grab' },
-        } as unknown) as HTMLElement;
+        } as unknown as HTMLElement;
         jest.spyOn(cy, 'container').mockReturnValueOnce(container);
 
         renderHook(() => useCytoscapeEventHandlers({ cy, theme }));
@@ -303,9 +302,9 @@ describe('useCytoscapeEventHandlers', () => {
   describe('when a tap ends', () => {
     it('sets the cursor to the default', () => {
       const cy = cytoscape({});
-      const container = ({
+      const container = {
         style: { cursor: 'grabbing' },
-      } as unknown) as HTMLElement;
+      } as unknown as HTMLElement;
       jest.spyOn(cy, 'container').mockReturnValueOnce(container);
 
       renderHook(() => useCytoscapeEventHandlers({ cy, theme }));
@@ -317,9 +316,9 @@ describe('useCytoscapeEventHandlers', () => {
     describe('when the target is a node', () => {
       it('does not change the cursor', () => {
         const cy = cytoscape({ elements: [{ data: { id: 'test' } }] });
-        const container = ({
+        const container = {
           style: { cursor: 'pointer' },
-        } as unknown) as HTMLElement;
+        } as unknown as HTMLElement;
         jest.spyOn(cy, 'container').mockReturnValueOnce(container);
 
         renderHook(() => useCytoscapeEventHandlers({ cy, theme }));

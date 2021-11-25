@@ -14,7 +14,7 @@ import type { Criteria } from '@elastic/eui/src/components/basic_table/basic_tab
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { useUiTracker } from '../../../../../observability/public';
 import { useTheme } from '../../../hooks/use_theme';
-import type { FieldValuePair } from '../../../../common/search_strategies/types';
+import type { FieldValuePair } from '../../../../common/correlations/types';
 
 const PAGINATION_SIZE_OPTIONS = [5, 10, 20, 50];
 
@@ -22,6 +22,7 @@ interface CorrelationsTableProps<T extends FieldValuePair> {
   significantTerms?: T[];
   status: FETCH_STATUS;
   percentageColumnName?: string;
+  setPinnedSignificantTerm?: (term: T | null) => void;
   setSelectedSignificantTerm: (term: T | null) => void;
   selectedTerm?: FieldValuePair;
   onFilter?: () => void;
@@ -33,6 +34,7 @@ interface CorrelationsTableProps<T extends FieldValuePair> {
 export function CorrelationsTable<T extends FieldValuePair>({
   significantTerms,
   status,
+  setPinnedSignificantTerm,
   setSelectedSignificantTerm,
   columns,
   selectedTerm,
@@ -87,9 +89,15 @@ export function CorrelationsTable<T extends FieldValuePair>({
         status === FETCH_STATUS.LOADING ? loadingText : noDataText
       }
       loading={status === FETCH_STATUS.LOADING}
+      error={status === FETCH_STATUS.FAILURE ? errorMessage : ''}
       columns={columns}
       rowProps={(term) => {
         return {
+          onClick: () => {
+            if (setPinnedSignificantTerm) {
+              setPinnedSignificantTerm(term);
+            }
+          },
           onMouseEnter: () => {
             setSelectedSignificantTerm(term);
             trackSelectSignificantCorrelationTerm();
@@ -120,4 +128,9 @@ const loadingText = i18n.translate(
 const noDataText = i18n.translate(
   'xpack.apm.correlations.correlationsTable.noDataText',
   { defaultMessage: 'No data' }
+);
+
+const errorMessage = i18n.translate(
+  'xpack.apm.correlations.correlationsTable.errorMessage',
+  { defaultMessage: 'Failed to fetch' }
 );

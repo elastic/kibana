@@ -48,6 +48,7 @@ import {
   getSplitDimensionAccessor,
 } from './utils';
 import { ChartSplit, SMALL_MULTIPLES_ID } from './components/chart_split';
+import { VisualizationNoResults } from './components/visualization_noresults';
 
 import './chart.scss';
 
@@ -128,17 +129,18 @@ const PieComponent = (props: PieComponentProps) => {
 
   // handles legend action event data
   const getLegendActionEventData = useCallback(
-    (visData: Datatable) => (series: SeriesIdentifier): ClickTriggerEvent | null => {
-      const data = getFilterEventData(visData, series);
+    (visData: Datatable) =>
+      (series: SeriesIdentifier): ClickTriggerEvent | null => {
+        const data = getFilterEventData(visData, series);
 
-      return {
-        name: 'filterBucket',
-        data: {
-          negate: false,
-          data,
-        },
-      };
-    },
+        return {
+          name: 'filterBucket',
+          data: {
+            negate: false,
+            data,
+          },
+        };
+      },
     []
   );
 
@@ -186,10 +188,8 @@ const PieComponent = (props: PieComponentProps) => {
   const { visData, visParams, services, syncColors } = props;
 
   function getSliceValue(d: Datum, metricColumn: DatatableColumn) {
-    if (typeof d[metricColumn.id] === 'number' && d[metricColumn.id] !== 0) {
-      return d[metricColumn.id];
-    }
-    return Number.EPSILON;
+    const value = d[metricColumn.id];
+    return Number.isFinite(value) && value >= 0 ? value : 0;
   }
 
   // formatters
@@ -208,10 +208,10 @@ const PieComponent = (props: PieComponentProps) => {
     },
   });
 
-  const { bucketColumns, metricColumn } = useMemo(() => getColumns(visParams, visData), [
-    visData,
-    visParams,
-  ]);
+  const { bucketColumns, metricColumn } = useMemo(
+    () => getColumns(visParams, visData),
+    [visData, visParams]
+  );
 
   const layers = useMemo(
     () =>
@@ -234,11 +234,22 @@ const PieComponent = (props: PieComponentProps) => {
       syncColors,
     ]
   );
-  const config = useMemo(() => getConfig(visParams, chartTheme, dimensions), [
-    chartTheme,
-    visParams,
-    dimensions,
-  ]);
+
+  const rescaleFactor = useMemo(() => {
+    const overallSum = visData.rows.reduce((sum, row) => sum + row[metricColumn.id], 0);
+    const slices = visData.rows.map((row) => row[metricColumn.id] / overallSum);
+    const smallSlices = slices.filter((value) => value < 0.02).length;
+    if (smallSlices) {
+      // shrink up to 20% to give some room for the linked values
+      return 1 / (1 + Math.min(smallSlices * 0.05, 0.2));
+    }
+    return 1;
+  }, [visData.rows, metricColumn]);
+
+  const config = useMemo(
+    () => getConfig(visParams, chartTheme, dimensions, rescaleFactor),
+    [chartTheme, visParams, dimensions, rescaleFactor]
+  );
   const tooltip: TooltipProps = {
     type: visParams.addTooltip ? TooltipType.Follow : TooltipType.None,
   };
@@ -285,82 +296,110 @@ const PieComponent = (props: PieComponentProps) => {
     ? visData.columns[visParams.dimensions.splitRow[0].accessor]
     : undefined;
 
+  /**
+   * Checks whether data have all zero values.
+   * If so, the no data container is loaded.
+   */
+  const isAllZeros = useMemo(
+    () => visData.rows.every((row) => row[metricColumn.id] === 0),
+    [visData.rows, metricColumn]
+  );
+
+  /**
+   * Checks whether data have negative values.
+   * If so, the no data container is loaded.
+   */
+  const hasNegative = useMemo(
+    () =>
+      visData.rows.some((row) => {
+        const value = row[metricColumn.id];
+        return typeof value === 'number' && value < 0;
+      }),
+    [visData.rows, metricColumn]
+  );
+
+  const canShowPieChart = !isAllZeros && !hasNegative;
+
   return (
     <div className="pieChart__container" data-test-subj="visTypePieChart">
-      <div className="pieChart__wrapper" ref={parentRef}>
-        <LegendToggle
-          onClick={toggleLegend}
-          showLegend={showLegend}
-          legendPosition={legendPosition}
-        />
-        <Chart size="100%">
-          <ChartSplit
-            splitColumnAccessor={splitChartColumnAccessor}
-            splitRowAccessor={splitChartRowAccessor}
-            splitDimension={splitChartDimension}
-          />
-          <Settings
-            debugState={window._echDebugStateFlag ?? false}
+      {!canShowPieChart ? (
+        <VisualizationNoResults hasNegativeValues={hasNegative} />
+      ) : (
+        <div className="pieChart__wrapper" ref={parentRef}>
+          <LegendToggle
+            onClick={toggleLegend}
             showLegend={showLegend}
             legendPosition={legendPosition}
-            legendMaxDepth={visParams.nestedLegend ? undefined : 1}
-            legendColorPicker={legendColorPicker}
-            flatLegend={Boolean(splitChartDimension)}
-            tooltip={tooltip}
-            onElementClick={(args) => {
-              handleSliceClick(
-                args[0][0] as LayerValue[],
-                bucketColumns,
-                visData,
-                splitChartDimension,
-                splitChartFormatter
-              );
-            }}
-            legendAction={getLegendActions(
-              canFilter,
-              getLegendActionEventData(visData),
-              handleLegendAction,
-              visParams,
-              services.actions,
-              services.fieldFormats
-            )}
-            theme={[
-              chartTheme,
-              {
-                legend: {
-                  labelOptions: {
-                    maxLines: visParams.truncateLegend ? visParams.maxLegendLines ?? 1 : 0,
+          />
+          <Chart size="100%">
+            <ChartSplit
+              splitColumnAccessor={splitChartColumnAccessor}
+              splitRowAccessor={splitChartRowAccessor}
+              splitDimension={splitChartDimension}
+            />
+            <Settings
+              debugState={window._echDebugStateFlag ?? false}
+              showLegend={showLegend}
+              legendPosition={legendPosition}
+              legendMaxDepth={visParams.nestedLegend ? undefined : 1}
+              legendColorPicker={legendColorPicker}
+              flatLegend={Boolean(splitChartDimension)}
+              tooltip={tooltip}
+              onElementClick={(args) => {
+                handleSliceClick(
+                  args[0][0] as LayerValue[],
+                  bucketColumns,
+                  visData,
+                  splitChartDimension,
+                  splitChartFormatter
+                );
+              }}
+              legendAction={getLegendActions(
+                canFilter,
+                getLegendActionEventData(visData),
+                handleLegendAction,
+                visParams,
+                services.actions,
+                services.fieldFormats
+              )}
+              theme={[
+                chartTheme,
+                {
+                  legend: {
+                    labelOptions: {
+                      maxLines: visParams.truncateLegend ? visParams.maxLegendLines ?? 1 : 0,
+                    },
                   },
                 },
-              },
-            ]}
-            baseTheme={chartBaseTheme}
-            onRenderChange={onRenderChange}
-          />
-          <Partition
-            id="pie"
-            smallMultiples={SMALL_MULTIPLES_ID}
-            data={visData.rows}
-            valueAccessor={(d: Datum) => getSliceValue(d, metricColumn)}
-            percentFormatter={(d: number) => percentFormatter.convert(d / 100)}
-            valueGetter={
-              !visParams.labels.show ||
-              visParams.labels.valuesFormat === ValueFormats.VALUE ||
-              !visParams.labels.values
-                ? undefined
-                : 'percent'
-            }
-            valueFormatter={(d: number) =>
-              !visParams.labels.show || !visParams.labels.values
-                ? ''
-                : metricFieldFormatter.convert(d)
-            }
-            layers={layers}
-            config={config}
-            topGroove={!visParams.labels.show ? 0 : undefined}
-          />
-        </Chart>
-      </div>
+              ]}
+              baseTheme={chartBaseTheme}
+              onRenderChange={onRenderChange}
+            />
+            <Partition
+              id="pie"
+              smallMultiples={SMALL_MULTIPLES_ID}
+              data={visData.rows}
+              valueAccessor={(d: Datum) => getSliceValue(d, metricColumn)}
+              percentFormatter={(d: number) => percentFormatter.convert(d / 100)}
+              valueGetter={
+                !visParams.labels.show ||
+                visParams.labels.valuesFormat === ValueFormats.VALUE ||
+                !visParams.labels.values
+                  ? undefined
+                  : 'percent'
+              }
+              valueFormatter={(d: number) =>
+                !visParams.labels.show || !visParams.labels.values
+                  ? ''
+                  : metricFieldFormatter.convert(d)
+              }
+              layers={layers}
+              config={config}
+              topGroove={!visParams.labels.show ? 0 : undefined}
+            />
+          </Chart>
+        </div>
+      )}
     </div>
   );
 };

@@ -15,7 +15,8 @@ export async function fetchMemoryUsageNodeStats(
   index: string,
   startMs: number,
   endMs: number,
-  size: number
+  size: number,
+  filterQuery?: string
 ): Promise<AlertMemoryUsageNodeStats[]> {
   const clustersIds = clusters.map((cluster) => cluster.clusterUuid);
   const params = {
@@ -91,6 +92,15 @@ export async function fetchMemoryUsageNodeStats(
       },
     },
   };
+
+  try {
+    if (filterQuery) {
+      const filterQueryObject = JSON.parse(filterQuery);
+      params.body.query.bool.filter.push(filterQueryObject);
+    }
+  } catch (e) {
+    // meh
+  }
 
   const { body: response } = await esClient.search(params);
   const stats: AlertMemoryUsageNodeStats[] = [];

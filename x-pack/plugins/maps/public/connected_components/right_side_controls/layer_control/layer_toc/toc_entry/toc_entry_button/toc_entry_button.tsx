@@ -117,7 +117,7 @@ export class TOCEntryButton extends Component<Props, State> {
         footnotes.push({
           icon: <EuiIcon color="subdued" type="filter" size="s" />,
           message: i18n.translate('xpack.maps.layer.isUsingSearchMsg', {
-            defaultMessage: 'Results narrowed by query and filters',
+            defaultMessage: 'Results narrowed by global search',
           }),
         });
       }
@@ -125,7 +125,7 @@ export class TOCEntryButton extends Component<Props, State> {
         footnotes.push({
           icon: <EuiIcon color="subdued" type="clock" size="s" />,
           message: i18n.translate('xpack.maps.layer.isUsingTimeFilter', {
-            defaultMessage: 'Results narrowed by time filter',
+            defaultMessage: 'Results narrowed by global time',
           }),
         });
       }

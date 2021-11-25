@@ -346,7 +346,7 @@
             "signature": [
               "({ listId, id, namespaceType, }: ",
               "GetExceptionListOptions",
-              ") => Promise<{ _version: string | undefined; created_at: string; created_by: string; description: string; id: string; immutable: boolean; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"endpoint\" | \"detection\" | \"endpoint_events\"; updated_at: string; updated_by: string; version: number; } | null>"
+              ") => Promise<{ _version: string | undefined; created_at: string; created_by: string; description: string; id: string; immutable: boolean; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"endpoint\" | \"detection\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\"; updated_at: string; updated_by: string; version: number; } | null>"
             ],
             "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
             "deprecated": false,
@@ -410,7 +410,7 @@
             "signature": [
               "({ itemId, id, namespaceType, }: ",
               "GetExceptionListItemOptions",
-              ") => Promise<{ _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"keyword\" | \"long\" | \"double\" | \"ip\" | \"geo_point\" | \"date_nanos\" | \"ip_range\" | \"date_range\" | \"geo_shape\" | \"text\" | \"shape\" | \"short\" | \"binary\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; })[]; field: string; type: \"nested\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; })[]; id: string; item_id: string; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; } | null>"
+              ") => Promise<{ _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"keyword\" | \"ip_range\" | \"date_range\" | \"date\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"long\" | \"double\" | \"text\" | \"date_nanos\" | \"shape\" | \"short\" | \"binary\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; })[]; field: string; type: \"nested\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; })[]; id: string; item_id: string; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; } | null>"
             ],
             "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
             "deprecated": false,
@@ -442,7 +442,7 @@
               "\nThis creates an agnostic space endpoint list if it does not exist. This tries to be\nas fast as possible by ignoring conflict errors and not returning the contents of the\nlist if it already exists."
             ],
             "signature": [
-              "() => Promise<{ _version: string | undefined; created_at: string; created_by: string; description: string; id: string; immutable: boolean; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"endpoint\" | \"detection\" | \"endpoint_events\"; updated_at: string; updated_by: string; version: number; } | null>"
+              "() => Promise<{ _version: string | undefined; created_at: string; created_by: string; description: string; id: string; immutable: boolean; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"endpoint\" | \"detection\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\"; updated_at: string; updated_by: string; version: number; } | null>"
             ],
             "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
             "deprecated": false,
@@ -461,7 +461,7 @@
               "\nCreate the Trusted Apps Agnostic list if it does not yet exist (`null` is returned if it does exist)"
             ],
             "signature": [
-              "() => Promise<{ _version: string | undefined; created_at: string; created_by: string; description: string; id: string; immutable: boolean; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"endpoint\" | \"detection\" | \"endpoint_events\"; updated_at: string; updated_by: string; version: number; } | null>"
+              "() => Promise<{ _version: string | undefined; created_at: string; created_by: string; description: string; id: string; immutable: boolean; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"endpoint\" | \"detection\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\"; updated_at: string; updated_by: string; version: number; } | null>"
             ],
             "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
             "deprecated": false,
@@ -480,7 +480,7 @@
             "signature": [
               "({ comments, description, entries, itemId, meta, name, osTypes, tags, type, }: ",
               "CreateEndpointListItemOptions",
-              ") => Promise<{ _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"keyword\" | \"long\" | \"double\" | \"ip\" | \"geo_point\" | \"date_nanos\" | \"ip_range\" | \"date_range\" | \"geo_shape\" | \"text\" | \"shape\" | \"short\" | \"binary\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; })[]; field: string; type: \"nested\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; })[]; id: string; item_id: string; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; }>"
+              ") => Promise<{ _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"keyword\" | \"ip_range\" | \"date_range\" | \"date\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"long\" | \"double\" | \"text\" | \"date_nanos\" | \"shape\" | \"short\" | \"binary\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; })[]; field: string; type: \"nested\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; })[]; id: string; item_id: string; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; }>"
             ],
             "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
             "deprecated": false,
@@ -514,7 +514,7 @@
             "signature": [
               "({ _version, comments, description, entries, id, itemId, meta, name, osTypes, tags, type, }: ",
               "UpdateEndpointListItemOptions",
-              ") => Promise<{ _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"keyword\" | \"long\" | \"double\" | \"ip\" | \"geo_point\" | \"date_nanos\" | \"ip_range\" | \"date_range\" | \"geo_shape\" | \"text\" | \"shape\" | \"short\" | \"binary\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; })[]; field: string; type: \"nested\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; })[]; id: string; item_id: string; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; } | null>"
+              ") => Promise<{ _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"keyword\" | \"ip_range\" | \"date_range\" | \"date\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"long\" | \"double\" | \"text\" | \"date_nanos\" | \"shape\" | \"short\" | \"binary\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; })[]; field: string; type: \"nested\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; })[]; id: string; item_id: string; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; } | null>"
             ],
             "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
             "deprecated": false,
@@ -548,7 +548,7 @@
             "signature": [
               "({ itemId, id, }: ",
               "GetEndpointListItemOptions",
-              ") => Promise<{ _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"keyword\" | \"long\" | \"double\" | \"ip\" | \"geo_point\" | \"date_nanos\" | \"ip_range\" | \"date_range\" | \"geo_shape\" | \"text\" | \"shape\" | \"short\" | \"binary\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; })[]; field: string; type: \"nested\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; })[]; id: string; item_id: string; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; } | null>"
+              ") => Promise<{ _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"keyword\" | \"ip_range\" | \"date_range\" | \"date\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"long\" | \"double\" | \"text\" | \"date_nanos\" | \"shape\" | \"short\" | \"binary\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; })[]; field: string; type: \"nested\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; })[]; id: string; item_id: string; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; } | null>"
             ],
             "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
             "deprecated": false,
@@ -580,7 +580,7 @@
             "signature": [
               "({ description, immutable, listId, meta, name, namespaceType, tags, type, version, }: ",
               "CreateExceptionListOptions",
-              ") => Promise<{ _version: string | undefined; created_at: string; created_by: string; description: string; id: string; immutable: boolean; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"endpoint\" | \"detection\" | \"endpoint_events\"; updated_at: string; updated_by: string; version: number; }>"
+              ") => Promise<{ _version: string | undefined; created_at: string; created_by: string; description: string; id: string; immutable: boolean; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"endpoint\" | \"detection\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\"; updated_at: string; updated_by: string; version: number; }>"
             ],
             "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
             "deprecated": false,
@@ -612,7 +612,7 @@
             "signature": [
               "({ _version, id, description, listId, meta, name, namespaceType, osTypes, tags, type, version, }: ",
               "UpdateExceptionListOptions",
-              ") => Promise<{ _version: string | undefined; created_at: string; created_by: string; description: string; id: string; immutable: boolean; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"endpoint\" | \"detection\" | \"endpoint_events\"; updated_at: string; updated_by: string; version: number; } | null>"
+              ") => Promise<{ _version: string | undefined; created_at: string; created_by: string; description: string; id: string; immutable: boolean; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"endpoint\" | \"detection\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\"; updated_at: string; updated_by: string; version: number; } | null>"
             ],
             "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
             "deprecated": false,
@@ -644,7 +644,7 @@
             "signature": [
               "({ id, listId, namespaceType, }: ",
               "DeleteExceptionListOptions",
-              ") => Promise<{ _version: string | undefined; created_at: string; created_by: string; description: string; id: string; immutable: boolean; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"endpoint\" | \"detection\" | \"endpoint_events\"; updated_at: string; updated_by: string; version: number; } | null>"
+              ") => Promise<{ _version: string | undefined; created_at: string; created_by: string; description: string; id: string; immutable: boolean; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"endpoint\" | \"detection\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\"; updated_at: string; updated_by: string; version: number; } | null>"
             ],
             "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
             "deprecated": false,
@@ -682,7 +682,7 @@
                 "section": "def-server.CreateExceptionListItemOptions",
                 "text": "CreateExceptionListItemOptions"
               },
-              ") => Promise<{ _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"keyword\" | \"long\" | \"double\" | \"ip\" | \"geo_point\" | \"date_nanos\" | \"ip_range\" | \"date_range\" | \"geo_shape\" | \"text\" | \"shape\" | \"short\" | \"binary\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; })[]; field: string; type: \"nested\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; })[]; id: string; item_id: string; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; }>"
+              ") => Promise<{ _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"keyword\" | \"ip_range\" | \"date_range\" | \"date\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"long\" | \"double\" | \"text\" | \"date_nanos\" | \"shape\" | \"short\" | \"binary\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; })[]; field: string; type: \"nested\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; })[]; id: string; item_id: string; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; }>"
             ],
             "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
             "deprecated": false,
@@ -726,7 +726,7 @@
                 "section": "def-server.UpdateExceptionListItemOptions",
                 "text": "UpdateExceptionListItemOptions"
               },
-              ") => Promise<{ _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"keyword\" | \"long\" | \"double\" | \"ip\" | \"geo_point\" | \"date_nanos\" | \"ip_range\" | \"date_range\" | \"geo_shape\" | \"text\" | \"shape\" | \"short\" | \"binary\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; })[]; field: string; type: \"nested\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; })[]; id: string; item_id: string; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; } | null>"
+              ") => Promise<{ _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"keyword\" | \"ip_range\" | \"date_range\" | \"date\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"long\" | \"double\" | \"text\" | \"date_nanos\" | \"shape\" | \"short\" | \"binary\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; })[]; field: string; type: \"nested\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; })[]; id: string; item_id: string; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; } | null>"
             ],
             "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
             "deprecated": false,
@@ -764,7 +764,7 @@
             "signature": [
               "({ id, itemId, namespaceType, }: ",
               "DeleteExceptionListItemOptions",
-              ") => Promise<{ _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"keyword\" | \"long\" | \"double\" | \"ip\" | \"geo_point\" | \"date_nanos\" | \"ip_range\" | \"date_range\" | \"geo_shape\" | \"text\" | \"shape\" | \"short\" | \"binary\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; })[]; field: string; type: \"nested\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; })[]; id: string; item_id: string; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; } | null>"
+              ") => Promise<{ _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"keyword\" | \"ip_range\" | \"date_range\" | \"date\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"long\" | \"double\" | \"text\" | \"date_nanos\" | \"shape\" | \"short\" | \"binary\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; })[]; field: string; type: \"nested\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; })[]; id: string; item_id: string; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; } | null>"
             ],
             "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
             "deprecated": false,
@@ -830,7 +830,7 @@
             "signature": [
               "({ id, itemId, }: ",
               "DeleteEndpointListItemOptions",
-              ") => Promise<{ _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"keyword\" | \"long\" | \"double\" | \"ip\" | \"geo_point\" | \"date_nanos\" | \"ip_range\" | \"date_range\" | \"geo_shape\" | \"text\" | \"shape\" | \"short\" | \"binary\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; })[]; field: string; type: \"nested\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; })[]; id: string; item_id: string; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; } | null>"
+              ") => Promise<{ _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"keyword\" | \"ip_range\" | \"date_range\" | \"date\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"long\" | \"double\" | \"text\" | \"date_nanos\" | \"shape\" | \"short\" | \"binary\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; })[]; field: string; type: \"nested\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; })[]; id: string; item_id: string; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; } | null>"
             ],
             "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
             "deprecated": false,
@@ -862,7 +862,7 @@
             "signature": [
               "({ listId, filter, perPage, page, sortField, sortOrder, namespaceType, }: ",
               "FindExceptionListItemOptions",
-              ") => Promise<{ data: { _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"keyword\" | \"long\" | \"double\" | \"ip\" | \"geo_point\" | \"date_nanos\" | \"ip_range\" | \"date_range\" | \"geo_shape\" | \"text\" | \"shape\" | \"short\" | \"binary\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; })[]; field: string; type: \"nested\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; })[]; id: string; item_id: string; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; }[]; page: number; per_page: number; total: number; } | null>"
+              ") => Promise<{ data: { _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"keyword\" | \"ip_range\" | \"date_range\" | \"date\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"long\" | \"double\" | \"text\" | \"date_nanos\" | \"shape\" | \"short\" | \"binary\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; })[]; field: string; type: \"nested\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; })[]; id: string; item_id: string; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; }[]; page: number; per_page: number; total: number; } | null>"
             ],
             "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
             "deprecated": false,
@@ -894,7 +894,7 @@
             "signature": [
               "({ listId, filter, perPage, page, sortField, sortOrder, namespaceType, }: ",
               "FindExceptionListsItemOptions",
-              ") => Promise<{ data: { _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"keyword\" | \"long\" | \"double\" | \"ip\" | \"geo_point\" | \"date_nanos\" | \"ip_range\" | \"date_range\" | \"geo_shape\" | \"text\" | \"shape\" | \"short\" | \"binary\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; })[]; field: string; type: \"nested\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; })[]; id: string; item_id: string; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; }[]; page: number; per_page: number; total: number; } | null>"
+              ") => Promise<{ data: { _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"keyword\" | \"ip_range\" | \"date_range\" | \"date\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"long\" | \"double\" | \"text\" | \"date_nanos\" | \"shape\" | \"short\" | \"binary\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; })[]; field: string; type: \"nested\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; })[]; id: string; item_id: string; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; }[]; page: number; per_page: number; total: number; } | null>"
             ],
             "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
             "deprecated": false,
@@ -926,7 +926,7 @@
             "signature": [
               "({ perPage, page, sortField, sortOrder, valueListId, }: ",
               "FindValueListExceptionListsItems",
-              ") => Promise<{ data: { _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"keyword\" | \"long\" | \"double\" | \"ip\" | \"geo_point\" | \"date_nanos\" | \"ip_range\" | \"date_range\" | \"geo_shape\" | \"text\" | \"shape\" | \"short\" | \"binary\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; })[]; field: string; type: \"nested\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; })[]; id: string; item_id: string; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; }[]; page: number; per_page: number; total: number; } | null>"
+              ") => Promise<{ data: { _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"keyword\" | \"ip_range\" | \"date_range\" | \"date\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"long\" | \"double\" | \"text\" | \"date_nanos\" | \"shape\" | \"short\" | \"binary\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; })[]; field: string; type: \"nested\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; })[]; id: string; item_id: string; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; }[]; page: number; per_page: number; total: number; } | null>"
             ],
             "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
             "deprecated": false,
@@ -958,7 +958,7 @@
             "signature": [
               "({ filter, perPage, page, sortField, sortOrder, namespaceType, }: ",
               "FindExceptionListOptions",
-              ") => Promise<{ data: { _version: string | undefined; created_at: string; created_by: string; description: string; id: string; immutable: boolean; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"endpoint\" | \"detection\" | \"endpoint_events\"; updated_at: string; updated_by: string; version: number; }[]; page: number; per_page: number; total: number; }>"
+              ") => Promise<{ data: { _version: string | undefined; created_at: string; created_by: string; description: string; id: string; immutable: boolean; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"endpoint\" | \"detection\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\"; updated_at: string; updated_by: string; version: number; }[]; page: number; per_page: number; total: number; }>"
             ],
             "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
             "deprecated": false,
@@ -992,7 +992,7 @@
             "signature": [
               "({ filter, perPage, page, sortField, sortOrder, }: ",
               "FindEndpointListItemOptions",
-              ") => Promise<{ data: { _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"keyword\" | \"long\" | \"double\" | \"ip\" | \"geo_point\" | \"date_nanos\" | \"ip_range\" | \"date_range\" | \"geo_shape\" | \"text\" | \"shape\" | \"short\" | \"binary\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; })[]; field: string; type: \"nested\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; })[]; id: string; item_id: string; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; }[]; page: number; per_page: number; total: number; } | null>"
+              ") => Promise<{ data: { _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"keyword\" | \"ip_range\" | \"date_range\" | \"date\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"long\" | \"double\" | \"text\" | \"date_nanos\" | \"shape\" | \"short\" | \"binary\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; })[]; field: string; type: \"nested\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; })[]; id: string; item_id: string; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; }[]; page: number; per_page: number; total: number; } | null>"
             ],
             "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
             "deprecated": false,
@@ -1006,6 +1006,46 @@
                 "description": [],
                 "signature": [
                   "FindEndpointListItemOptions"
+                ],
+                "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "lists",
+            "id": "def-server.ExceptionListClient.exportExceptionListAndItems",
+            "type": "Function",
+            "tags": [],
+            "label": "exportExceptionListAndItems",
+            "description": [],
+            "signature": [
+              "({ listId, id, namespaceType, }: ",
+              "ExportExceptionListAndItemsOptions",
+              ") => Promise<",
+              {
+                "pluginId": "lists",
+                "scope": "server",
+                "docId": "kibListsPluginApi",
+                "section": "def-server.ExportExceptionListAndItemsReturn",
+                "text": "ExportExceptionListAndItemsReturn"
+              },
+              " | null>"
+            ],
+            "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "lists",
+                "id": "def-server.ExceptionListClient.exportExceptionListAndItems.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "{\n    listId,\n    id,\n    namespaceType,\n  }",
+                "description": [],
+                "signature": [
+                  "ExportExceptionListAndItemsOptions"
                 ],
                 "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
                 "deprecated": false,
@@ -1097,7 +1137,7 @@
             "signature": [
               "({ id }: ",
               "GetListOptions",
-              ") => Promise<{ _version: string | undefined; created_at: string; created_by: string; description: string; deserializer: string | undefined; id: string; immutable: boolean; meta: object | undefined; name: string; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"date\" | \"keyword\" | \"long\" | \"double\" | \"ip\" | \"geo_point\" | \"date_nanos\" | \"ip_range\" | \"date_range\" | \"geo_shape\" | \"text\" | \"shape\" | \"short\" | \"binary\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; updated_at: string; updated_by: string; version: number; } | null>"
+              ") => Promise<{ _version: string | undefined; created_at: string; created_by: string; description: string; deserializer: string | undefined; id: string; immutable: boolean; meta: object | undefined; name: string; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"keyword\" | \"ip_range\" | \"date_range\" | \"date\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"long\" | \"double\" | \"text\" | \"date_nanos\" | \"shape\" | \"short\" | \"binary\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; updated_at: string; updated_by: string; version: number; } | null>"
             ],
             "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
             "deprecated": false,
@@ -1129,7 +1169,7 @@
             "signature": [
               "({ id, deserializer, immutable, serializer, name, description, type, meta, version, }: ",
               "CreateListOptions",
-              ") => Promise<{ _version: string | undefined; created_at: string; created_by: string; description: string; deserializer: string | undefined; id: string; immutable: boolean; meta: object | undefined; name: string; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"date\" | \"keyword\" | \"long\" | \"double\" | \"ip\" | \"geo_point\" | \"date_nanos\" | \"ip_range\" | \"date_range\" | \"geo_shape\" | \"text\" | \"shape\" | \"short\" | \"binary\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; updated_at: string; updated_by: string; version: number; }>"
+              ") => Promise<{ _version: string | undefined; created_at: string; created_by: string; description: string; deserializer: string | undefined; id: string; immutable: boolean; meta: object | undefined; name: string; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"keyword\" | \"ip_range\" | \"date_range\" | \"date\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"long\" | \"double\" | \"text\" | \"date_nanos\" | \"shape\" | \"short\" | \"binary\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; updated_at: string; updated_by: string; version: number; }>"
             ],
             "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
             "deprecated": false,
@@ -1161,7 +1201,7 @@
             "signature": [
               "({ id, deserializer, serializer, name, description, immutable, type, meta, version, }: ",
               "CreateListIfItDoesNotExistOptions",
-              ") => Promise<{ _version: string | undefined; created_at: string; created_by: string; description: string; deserializer: string | undefined; id: string; immutable: boolean; meta: object | undefined; name: string; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"date\" | \"keyword\" | \"long\" | \"double\" | \"ip\" | \"geo_point\" | \"date_nanos\" | \"ip_range\" | \"date_range\" | \"geo_shape\" | \"text\" | \"shape\" | \"short\" | \"binary\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; updated_at: string; updated_by: string; version: number; }>"
+              ") => Promise<{ _version: string | undefined; created_at: string; created_by: string; description: string; deserializer: string | undefined; id: string; immutable: boolean; meta: object | undefined; name: string; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"keyword\" | \"ip_range\" | \"date_range\" | \"date\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"long\" | \"double\" | \"text\" | \"date_nanos\" | \"shape\" | \"short\" | \"binary\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; updated_at: string; updated_by: string; version: number; }>"
             ],
             "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
             "deprecated": false,
@@ -1493,7 +1533,7 @@
             "signature": [
               "({ id }: ",
               "DeleteListItemOptions",
-              ") => Promise<{ _version: string | undefined; created_at: string; created_by: string; deserializer: string | undefined; id: string; list_id: string; meta: object | undefined; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"date\" | \"keyword\" | \"long\" | \"double\" | \"ip\" | \"geo_point\" | \"date_nanos\" | \"ip_range\" | \"date_range\" | \"geo_shape\" | \"text\" | \"shape\" | \"short\" | \"binary\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; updated_at: string; updated_by: string; value: string; } | null>"
+              ") => Promise<{ _version: string | undefined; created_at: string; created_by: string; deserializer: string | undefined; id: string; list_id: string; meta: object | undefined; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"keyword\" | \"ip_range\" | \"date_range\" | \"date\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"long\" | \"double\" | \"text\" | \"date_nanos\" | \"shape\" | \"short\" | \"binary\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; updated_at: string; updated_by: string; value: string; } | null>"
             ],
             "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
             "deprecated": false,
@@ -1525,7 +1565,7 @@
             "signature": [
               "({ listId, value, type, }: ",
               "DeleteListItemByValueOptions",
-              ") => Promise<{ _version: string | undefined; created_at: string; created_by: string; deserializer: string | undefined; id: string; list_id: string; meta: object | undefined; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"date\" | \"keyword\" | \"long\" | \"double\" | \"ip\" | \"geo_point\" | \"date_nanos\" | \"ip_range\" | \"date_range\" | \"geo_shape\" | \"text\" | \"shape\" | \"short\" | \"binary\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; updated_at: string; updated_by: string; value: string; }[]>"
+              ") => Promise<{ _version: string | undefined; created_at: string; created_by: string; deserializer: string | undefined; id: string; list_id: string; meta: object | undefined; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"keyword\" | \"ip_range\" | \"date_range\" | \"date\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"long\" | \"double\" | \"text\" | \"date_nanos\" | \"shape\" | \"short\" | \"binary\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; updated_at: string; updated_by: string; value: string; }[]>"
             ],
             "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
             "deprecated": false,
@@ -1557,7 +1597,7 @@
             "signature": [
               "({ id }: ",
               "DeleteListOptions",
-              ") => Promise<{ _version: string | undefined; created_at: string; created_by: string; description: string; deserializer: string | undefined; id: string; immutable: boolean; meta: object | undefined; name: string; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"date\" | \"keyword\" | \"long\" | \"double\" | \"ip\" | \"geo_point\" | \"date_nanos\" | \"ip_range\" | \"date_range\" | \"geo_shape\" | \"text\" | \"shape\" | \"short\" | \"binary\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; updated_at: string; updated_by: string; version: number; } | null>"
+              ") => Promise<{ _version: string | undefined; created_at: string; created_by: string; description: string; deserializer: string | undefined; id: string; immutable: boolean; meta: object | undefined; name: string; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"keyword\" | \"ip_range\" | \"date_range\" | \"date\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"long\" | \"double\" | \"text\" | \"date_nanos\" | \"shape\" | \"short\" | \"binary\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; updated_at: string; updated_by: string; version: number; } | null>"
             ],
             "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
             "deprecated": false,
@@ -1621,7 +1661,7 @@
             "signature": [
               "({ deserializer, serializer, type, listId, stream, meta, version, }: ",
               "ImportListItemsToStreamOptions",
-              ") => Promise<{ _version: string | undefined; created_at: string; created_by: string; description: string; deserializer: string | undefined; id: string; immutable: boolean; meta: object | undefined; name: string; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"date\" | \"keyword\" | \"long\" | \"double\" | \"ip\" | \"geo_point\" | \"date_nanos\" | \"ip_range\" | \"date_range\" | \"geo_shape\" | \"text\" | \"shape\" | \"short\" | \"binary\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; updated_at: string; updated_by: string; version: number; } | null>"
+              ") => Promise<{ _version: string | undefined; created_at: string; created_by: string; description: string; deserializer: string | undefined; id: string; immutable: boolean; meta: object | undefined; name: string; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"keyword\" | \"ip_range\" | \"date_range\" | \"date\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"long\" | \"double\" | \"text\" | \"date_nanos\" | \"shape\" | \"short\" | \"binary\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; updated_at: string; updated_by: string; version: number; } | null>"
             ],
             "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
             "deprecated": false,
@@ -1653,7 +1693,7 @@
             "signature": [
               "({ listId, value, type, }: ",
               "GetListItemByValueOptions",
-              ") => Promise<{ _version: string | undefined; created_at: string; created_by: string; deserializer: string | undefined; id: string; list_id: string; meta: object | undefined; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"date\" | \"keyword\" | \"long\" | \"double\" | \"ip\" | \"geo_point\" | \"date_nanos\" | \"ip_range\" | \"date_range\" | \"geo_shape\" | \"text\" | \"shape\" | \"short\" | \"binary\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; updated_at: string; updated_by: string; value: string; }[]>"
+              ") => Promise<{ _version: string | undefined; created_at: string; created_by: string; deserializer: string | undefined; id: string; list_id: string; meta: object | undefined; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"keyword\" | \"ip_range\" | \"date_range\" | \"date\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"long\" | \"double\" | \"text\" | \"date_nanos\" | \"shape\" | \"short\" | \"binary\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; updated_at: string; updated_by: string; value: string; }[]>"
             ],
             "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
             "deprecated": false,
@@ -1685,7 +1725,7 @@
             "signature": [
               "({ id, deserializer, serializer, listId, value, type, meta, }: ",
               "CreateListItemOptions",
-              ") => Promise<{ _version: string | undefined; created_at: string; created_by: string; deserializer: string | undefined; id: string; list_id: string; meta: object | undefined; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"date\" | \"keyword\" | \"long\" | \"double\" | \"ip\" | \"geo_point\" | \"date_nanos\" | \"ip_range\" | \"date_range\" | \"geo_shape\" | \"text\" | \"shape\" | \"short\" | \"binary\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; updated_at: string; updated_by: string; value: string; } | null>"
+              ") => Promise<{ _version: string | undefined; created_at: string; created_by: string; deserializer: string | undefined; id: string; list_id: string; meta: object | undefined; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"keyword\" | \"ip_range\" | \"date_range\" | \"date\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"long\" | \"double\" | \"text\" | \"date_nanos\" | \"shape\" | \"short\" | \"binary\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; updated_at: string; updated_by: string; value: string; } | null>"
             ],
             "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
             "deprecated": false,
@@ -1717,7 +1757,7 @@
             "signature": [
               "({ _version, id, value, meta, }: ",
               "UpdateListItemOptions",
-              ") => Promise<{ _version: string | undefined; created_at: string; created_by: string; deserializer: string | undefined; id: string; list_id: string; meta: object | undefined; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"date\" | \"keyword\" | \"long\" | \"double\" | \"ip\" | \"geo_point\" | \"date_nanos\" | \"ip_range\" | \"date_range\" | \"geo_shape\" | \"text\" | \"shape\" | \"short\" | \"binary\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; updated_at: string; updated_by: string; value: string; } | null>"
+              ") => Promise<{ _version: string | undefined; created_at: string; created_by: string; deserializer: string | undefined; id: string; list_id: string; meta: object | undefined; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"keyword\" | \"ip_range\" | \"date_range\" | \"date\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"long\" | \"double\" | \"text\" | \"date_nanos\" | \"shape\" | \"short\" | \"binary\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; updated_at: string; updated_by: string; value: string; } | null>"
             ],
             "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
             "deprecated": false,
@@ -1749,7 +1789,7 @@
             "signature": [
               "({ _version, id, name, description, meta, version, }: ",
               "UpdateListOptions",
-              ") => Promise<{ _version: string | undefined; created_at: string; created_by: string; description: string; deserializer: string | undefined; id: string; immutable: boolean; meta: object | undefined; name: string; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"date\" | \"keyword\" | \"long\" | \"double\" | \"ip\" | \"geo_point\" | \"date_nanos\" | \"ip_range\" | \"date_range\" | \"geo_shape\" | \"text\" | \"shape\" | \"short\" | \"binary\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; updated_at: string; updated_by: string; version: number; } | null>"
+              ") => Promise<{ _version: string | undefined; created_at: string; created_by: string; description: string; deserializer: string | undefined; id: string; immutable: boolean; meta: object | undefined; name: string; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"keyword\" | \"ip_range\" | \"date_range\" | \"date\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"long\" | \"double\" | \"text\" | \"date_nanos\" | \"shape\" | \"short\" | \"binary\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; updated_at: string; updated_by: string; version: number; } | null>"
             ],
             "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
             "deprecated": false,
@@ -1781,7 +1821,7 @@
             "signature": [
               "({ id }: ",
               "GetListItemOptions",
-              ") => Promise<{ _version: string | undefined; created_at: string; created_by: string; deserializer: string | undefined; id: string; list_id: string; meta: object | undefined; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"date\" | \"keyword\" | \"long\" | \"double\" | \"ip\" | \"geo_point\" | \"date_nanos\" | \"ip_range\" | \"date_range\" | \"geo_shape\" | \"text\" | \"shape\" | \"short\" | \"binary\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; updated_at: string; updated_by: string; value: string; } | null>"
+              ") => Promise<{ _version: string | undefined; created_at: string; created_by: string; deserializer: string | undefined; id: string; list_id: string; meta: object | undefined; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"keyword\" | \"ip_range\" | \"date_range\" | \"date\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"long\" | \"double\" | \"text\" | \"date_nanos\" | \"shape\" | \"short\" | \"binary\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; updated_at: string; updated_by: string; value: string; } | null>"
             ],
             "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
             "deprecated": false,
@@ -1813,7 +1853,7 @@
             "signature": [
               "({ type, listId, value, }: ",
               "GetListItemsByValueOptions",
-              ") => Promise<{ _version: string | undefined; created_at: string; created_by: string; deserializer: string | undefined; id: string; list_id: string; meta: object | undefined; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"date\" | \"keyword\" | \"long\" | \"double\" | \"ip\" | \"geo_point\" | \"date_nanos\" | \"ip_range\" | \"date_range\" | \"geo_shape\" | \"text\" | \"shape\" | \"short\" | \"binary\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; updated_at: string; updated_by: string; value: string; }[]>"
+              ") => Promise<{ _version: string | undefined; created_at: string; created_by: string; deserializer: string | undefined; id: string; list_id: string; meta: object | undefined; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"keyword\" | \"ip_range\" | \"date_range\" | \"date\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"long\" | \"double\" | \"text\" | \"date_nanos\" | \"shape\" | \"short\" | \"binary\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; updated_at: string; updated_by: string; value: string; }[]>"
             ],
             "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
             "deprecated": false,
@@ -1845,7 +1885,7 @@
             "signature": [
               "({ type, listId, value, }: ",
               "SearchListItemByValuesOptions",
-              ") => Promise<{ items: { _version: string | undefined; created_at: string; created_by: string; deserializer: string | undefined; id: string; list_id: string; meta: object | undefined; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"date\" | \"keyword\" | \"long\" | \"double\" | \"ip\" | \"geo_point\" | \"date_nanos\" | \"ip_range\" | \"date_range\" | \"geo_shape\" | \"text\" | \"shape\" | \"short\" | \"binary\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; updated_at: string; updated_by: string; value: string; }[]; value: unknown; }[]>"
+              ") => Promise<{ items: { _version: string | undefined; created_at: string; created_by: string; deserializer: string | undefined; id: string; list_id: string; meta: object | undefined; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"keyword\" | \"ip_range\" | \"date_range\" | \"date\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"long\" | \"double\" | \"text\" | \"date_nanos\" | \"shape\" | \"short\" | \"binary\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; updated_at: string; updated_by: string; value: string; }[]; value: unknown; }[]>"
             ],
             "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
             "deprecated": false,
@@ -1877,7 +1917,7 @@
             "signature": [
               "({ filter, currentIndexPosition, perPage, page, sortField, sortOrder, searchAfter, }: ",
               "FindListOptions",
-              ") => Promise<{ cursor: string; data: { _version: string | undefined; created_at: string; created_by: string; description: string; deserializer: string | undefined; id: string; immutable: boolean; meta: object | undefined; name: string; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"date\" | \"keyword\" | \"long\" | \"double\" | \"ip\" | \"geo_point\" | \"date_nanos\" | \"ip_range\" | \"date_range\" | \"geo_shape\" | \"text\" | \"shape\" | \"short\" | \"binary\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; updated_at: string; updated_by: string; version: number; }[]; page: number; per_page: number; total: number; }>"
+              ") => Promise<{ cursor: string; data: { _version: string | undefined; created_at: string; created_by: string; description: string; deserializer: string | undefined; id: string; immutable: boolean; meta: object | undefined; name: string; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"keyword\" | \"ip_range\" | \"date_range\" | \"date\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"long\" | \"double\" | \"text\" | \"date_nanos\" | \"shape\" | \"short\" | \"binary\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; updated_at: string; updated_by: string; version: number; }[]; page: number; per_page: number; total: number; }>"
             ],
             "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
             "deprecated": false,
@@ -1909,7 +1949,7 @@
             "signature": [
               "({ listId, filter, currentIndexPosition, perPage, page, sortField, sortOrder, searchAfter, }: ",
               "FindListItemOptions",
-              ") => Promise<{ cursor: string; data: { _version: string | undefined; created_at: string; created_by: string; deserializer: string | undefined; id: string; list_id: string; meta: object | undefined; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"date\" | \"keyword\" | \"long\" | \"double\" | \"ip\" | \"geo_point\" | \"date_nanos\" | \"ip_range\" | \"date_range\" | \"geo_shape\" | \"text\" | \"shape\" | \"short\" | \"binary\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; updated_at: string; updated_by: string; value: string; }[]; page: number; per_page: number; total: number; } | null>"
+              ") => Promise<{ cursor: string; data: { _version: string | undefined; created_at: string; created_by: string; deserializer: string | undefined; id: string; list_id: string; meta: object | undefined; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"keyword\" | \"ip_range\" | \"date_range\" | \"date\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"long\" | \"double\" | \"text\" | \"date_nanos\" | \"shape\" | \"short\" | \"binary\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; updated_at: string; updated_by: string; value: string; }[]; page: number; per_page: number; total: number; } | null>"
             ],
             "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
             "deprecated": false,
@@ -1968,7 +2008,7 @@
             "label": "entries",
             "description": [],
             "signature": [
-              "({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"keyword\" | \"long\" | \"double\" | \"ip\" | \"geo_point\" | \"date_nanos\" | \"ip_range\" | \"date_range\" | \"geo_shape\" | \"text\" | \"shape\" | \"short\" | \"binary\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; })[]; field: string; type: \"nested\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; })[]"
+              "({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"keyword\" | \"ip_range\" | \"date_range\" | \"date\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"long\" | \"double\" | \"text\" | \"date_nanos\" | \"shape\" | \"short\" | \"binary\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; })[]; field: string; type: \"nested\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; })[]"
             ],
             "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
             "deprecated": false
@@ -2083,441 +2123,36 @@
       },
       {
         "parentPluginId": "lists",
-        "id": "def-server.ListPluginSetup",
+        "id": "def-server.ExportExceptionListAndItemsReturn",
         "type": "Interface",
         "tags": [],
-        "label": "ListPluginSetup",
+        "label": "ExportExceptionListAndItemsReturn",
         "description": [],
-        "path": "x-pack/plugins/lists/server/types.ts",
+        "path": "x-pack/plugins/lists/server/services/exception_lists/export_exception_list_and_items.ts",
         "deprecated": false,
         "children": [
           {
             "parentPluginId": "lists",
-            "id": "def-server.ListPluginSetup.getExceptionListClient",
-            "type": "Function",
+            "id": "def-server.ExportExceptionListAndItemsReturn.exportData",
+            "type": "string",
             "tags": [],
-            "label": "getExceptionListClient",
+            "label": "exportData",
             "description": [],
-            "signature": [
-              "(savedObjectsClient: Pick<",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsClient",
-                "text": "SavedObjectsClient"
-              },
-              ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"find\" | \"bulkGet\" | \"resolve\" | \"update\" | \"collectMultiNamespaceReferences\" | \"updateObjectsSpaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">, user: string) => ",
-              {
-                "pluginId": "lists",
-                "scope": "server",
-                "docId": "kibListsPluginApi",
-                "section": "def-server.ExceptionListClient",
-                "text": "ExceptionListClient"
-              }
-            ],
-            "path": "x-pack/plugins/lists/server/types.ts",
-            "deprecated": false,
-            "returnComment": [],
-            "children": [
-              {
-                "parentPluginId": "lists",
-                "id": "def-server.savedObjectsClient",
-                "type": "Object",
-                "tags": [],
-                "label": "savedObjectsClient",
-                "description": [],
-                "signature": [
-                  "{ get: <T = unknown>(type: string, id: string, options?: ",
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-server.SavedObjectsBaseOptions",
-                    "text": "SavedObjectsBaseOptions"
-                  },
-                  ") => Promise<",
-                  "SavedObject",
-                  "<T>>; delete: (type: string, id: string, options?: ",
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-server.SavedObjectsDeleteOptions",
-                    "text": "SavedObjectsDeleteOptions"
-                  },
-                  ") => Promise<{}>; create: <T = unknown>(type: string, attributes: T, options?: ",
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-server.SavedObjectsCreateOptions",
-                    "text": "SavedObjectsCreateOptions"
-                  },
-                  " | undefined) => Promise<",
-                  "SavedObject",
-                  "<T>>; bulkCreate: <T = unknown>(objects: ",
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-server.SavedObjectsBulkCreateObject",
-                    "text": "SavedObjectsBulkCreateObject"
-                  },
-                  "<T>[], options?: ",
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-server.SavedObjectsCreateOptions",
-                    "text": "SavedObjectsCreateOptions"
-                  },
-                  " | undefined) => Promise<",
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-server.SavedObjectsBulkResponse",
-                    "text": "SavedObjectsBulkResponse"
-                  },
-                  "<T>>; checkConflicts: (objects?: ",
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-server.SavedObjectsCheckConflictsObject",
-                    "text": "SavedObjectsCheckConflictsObject"
-                  },
-                  "[], options?: ",
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-server.SavedObjectsBaseOptions",
-                    "text": "SavedObjectsBaseOptions"
-                  },
-                  ") => Promise<",
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-server.SavedObjectsCheckConflictsResponse",
-                    "text": "SavedObjectsCheckConflictsResponse"
-                  },
-                  ">; find: <T = unknown, A = unknown>(options: ",
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-server.SavedObjectsFindOptions",
-                    "text": "SavedObjectsFindOptions"
-                  },
-                  ") => Promise<",
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-server.SavedObjectsFindResponse",
-                    "text": "SavedObjectsFindResponse"
-                  },
-                  "<T, A>>; bulkGet: <T = unknown>(objects?: ",
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-server.SavedObjectsBulkGetObject",
-                    "text": "SavedObjectsBulkGetObject"
-                  },
-                  "[], options?: ",
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-server.SavedObjectsBaseOptions",
-                    "text": "SavedObjectsBaseOptions"
-                  },
-                  ") => Promise<",
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-server.SavedObjectsBulkResponse",
-                    "text": "SavedObjectsBulkResponse"
-                  },
-                  "<T>>; resolve: <T = unknown>(type: string, id: string, options?: ",
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-server.SavedObjectsBaseOptions",
-                    "text": "SavedObjectsBaseOptions"
-                  },
-                  ") => Promise<",
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-server.SavedObjectsResolveResponse",
-                    "text": "SavedObjectsResolveResponse"
-                  },
-                  "<T>>; update: <T = unknown>(type: string, id: string, attributes: Partial<T>, options?: ",
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-server.SavedObjectsUpdateOptions",
-                    "text": "SavedObjectsUpdateOptions"
-                  },
-                  "<T>) => Promise<",
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-server.SavedObjectsUpdateResponse",
-                    "text": "SavedObjectsUpdateResponse"
-                  },
-                  "<T>>; collectMultiNamespaceReferences: (objects: ",
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-server.SavedObjectsCollectMultiNamespaceReferencesObject",
-                    "text": "SavedObjectsCollectMultiNamespaceReferencesObject"
-                  },
-                  "[], options?: ",
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-server.SavedObjectsCollectMultiNamespaceReferencesOptions",
-                    "text": "SavedObjectsCollectMultiNamespaceReferencesOptions"
-                  },
-                  " | undefined) => Promise<",
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-server.SavedObjectsCollectMultiNamespaceReferencesResponse",
-                    "text": "SavedObjectsCollectMultiNamespaceReferencesResponse"
-                  },
-                  ">; updateObjectsSpaces: (objects: ",
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-server.SavedObjectsUpdateObjectsSpacesObject",
-                    "text": "SavedObjectsUpdateObjectsSpacesObject"
-                  },
-                  "[], spacesToAdd: string[], spacesToRemove: string[], options?: ",
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-server.SavedObjectsUpdateObjectsSpacesOptions",
-                    "text": "SavedObjectsUpdateObjectsSpacesOptions"
-                  },
-                  " | undefined) => Promise<",
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-server.SavedObjectsUpdateObjectsSpacesResponse",
-                    "text": "SavedObjectsUpdateObjectsSpacesResponse"
-                  },
-                  ">; bulkUpdate: <T = unknown>(objects: ",
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-server.SavedObjectsBulkUpdateObject",
-                    "text": "SavedObjectsBulkUpdateObject"
-                  },
-                  "<T>[], options?: ",
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-server.SavedObjectsBulkUpdateOptions",
-                    "text": "SavedObjectsBulkUpdateOptions"
-                  },
-                  " | undefined) => Promise<",
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-server.SavedObjectsBulkUpdateResponse",
-                    "text": "SavedObjectsBulkUpdateResponse"
-                  },
-                  "<T>>; removeReferencesTo: (type: string, id: string, options?: ",
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-server.SavedObjectsRemoveReferencesToOptions",
-                    "text": "SavedObjectsRemoveReferencesToOptions"
-                  },
-                  " | undefined) => Promise<",
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-server.SavedObjectsRemoveReferencesToResponse",
-                    "text": "SavedObjectsRemoveReferencesToResponse"
-                  },
-                  ">; openPointInTimeForType: (type: string | string[], options?: ",
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-server.SavedObjectsOpenPointInTimeOptions",
-                    "text": "SavedObjectsOpenPointInTimeOptions"
-                  },
-                  ") => Promise<",
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-server.SavedObjectsOpenPointInTimeResponse",
-                    "text": "SavedObjectsOpenPointInTimeResponse"
-                  },
-                  ">; closePointInTime: (id: string, options?: ",
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-server.SavedObjectsBaseOptions",
-                    "text": "SavedObjectsBaseOptions"
-                  },
-                  " | undefined) => Promise<",
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-server.SavedObjectsClosePointInTimeResponse",
-                    "text": "SavedObjectsClosePointInTimeResponse"
-                  },
-                  ">; createPointInTimeFinder: <T = unknown, A = unknown>(findOptions: Pick<",
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-server.SavedObjectsFindOptions",
-                    "text": "SavedObjectsFindOptions"
-                  },
-                  ", \"type\" | \"filter\" | \"aggs\" | \"fields\" | \"perPage\" | \"sortField\" | \"sortOrder\" | \"search\" | \"searchFields\" | \"rootSearchFields\" | \"hasReference\" | \"hasReferenceOperator\" | \"defaultSearchOperator\" | \"namespaces\" | \"typeToNamespacesMap\" | \"preference\">, dependencies?: ",
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-server.SavedObjectsCreatePointInTimeFinderDependencies",
-                    "text": "SavedObjectsCreatePointInTimeFinderDependencies"
-                  },
-                  " | undefined) => ",
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-server.ISavedObjectsPointInTimeFinder",
-                    "text": "ISavedObjectsPointInTimeFinder"
-                  },
-                  "<T, A>; errors: typeof ",
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-server.SavedObjectsErrorHelpers",
-                    "text": "SavedObjectsErrorHelpers"
-                  },
-                  "; }"
-                ],
-                "path": "x-pack/plugins/lists/server/types.ts",
-                "deprecated": false
-              },
-              {
-                "parentPluginId": "lists",
-                "id": "def-server.user",
-                "type": "string",
-                "tags": [],
-                "label": "user",
-                "description": [],
-                "path": "x-pack/plugins/lists/server/types.ts",
-                "deprecated": false
-              }
-            ]
+            "path": "x-pack/plugins/lists/server/services/exception_lists/export_exception_list_and_items.ts",
+            "deprecated": false
           },
           {
             "parentPluginId": "lists",
-            "id": "def-server.ListPluginSetup.getListClient",
-            "type": "Function",
+            "id": "def-server.ExportExceptionListAndItemsReturn.exportDetails",
+            "type": "Object",
             "tags": [],
-            "label": "getListClient",
+            "label": "exportDetails",
             "description": [],
             "signature": [
-              "(esClient: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.ElasticsearchClient",
-                "text": "ElasticsearchClient"
-              },
-              ", spaceId: string, user: string) => ",
-              {
-                "pluginId": "lists",
-                "scope": "server",
-                "docId": "kibListsPluginApi",
-                "section": "def-server.ListClient",
-                "text": "ListClient"
-              }
+              "{ exported_exception_list_count: number; exported_exception_list_item_count: number; missing_exception_list_item_count: number; missing_exception_list_items: string[]; missing_exception_lists: string[]; missing_exception_lists_count: number; }"
             ],
-            "path": "x-pack/plugins/lists/server/types.ts",
-            "deprecated": false,
-            "returnComment": [],
-            "children": [
-              {
-                "parentPluginId": "lists",
-                "id": "def-server.esClient",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "esClient",
-                "description": [],
-                "signature": [
-                  "Pick<",
-                  "KibanaClient",
-                  ", \"get\" | \"delete\" | \"create\" | \"index\" | \"update\" | \"closePointInTime\" | \"count\" | \"search\" | \"security\" | \"transform\" | \"eql\" | \"helpers\" | \"emit\" | \"on\" | \"once\" | \"off\" | \"asyncSearch\" | \"autoscaling\" | \"bulk\" | \"cat\" | \"ccr\" | \"clearScroll\" | \"cluster\" | \"danglingIndices\" | \"dataFrameTransformDeprecated\" | \"deleteByQuery\" | \"deleteByQueryRethrottle\" | \"deleteScript\" | \"enrich\" | \"exists\" | \"existsSource\" | \"explain\" | \"features\" | \"fieldCaps\" | \"fleet\" | \"getScript\" | \"getScriptContext\" | \"getScriptLanguages\" | \"getSource\" | \"graph\" | \"ilm\" | \"indices\" | \"info\" | \"ingest\" | \"license\" | \"logstash\" | \"mget\" | \"migration\" | \"ml\" | \"monitoring\" | \"msearch\" | \"msearchTemplate\" | \"mtermvectors\" | \"nodes\" | \"openPointInTime\" | \"ping\" | \"putScript\" | \"rankEval\" | \"reindex\" | \"reindexRethrottle\" | \"renderSearchTemplate\" | \"rollup\" | \"scriptsPainlessExecute\" | \"scroll\" | \"searchShards\" | \"searchTemplate\" | \"searchableSnapshots\" | \"shutdown\" | \"slm\" | \"snapshot\" | \"sql\" | \"ssl\" | \"tasks\" | \"termsEnum\" | \"termvectors\" | \"textStructure\" | \"updateByQuery\" | \"updateByQueryRethrottle\" | \"watcher\" | \"xpack\"> & { transport: { request(params: ",
-                  "TransportRequestParams",
-                  ", options?: ",
-                  "TransportRequestOptions",
-                  " | undefined): ",
-                  "TransportRequestPromise",
-                  "<",
-                  "ApiResponse",
-                  "<Record<string, any>, unknown>>; }; }"
-                ],
-                "path": "x-pack/plugins/lists/server/types.ts",
-                "deprecated": false
-              },
-              {
-                "parentPluginId": "lists",
-                "id": "def-server.spaceId",
-                "type": "string",
-                "tags": [],
-                "label": "spaceId",
-                "description": [],
-                "path": "x-pack/plugins/lists/server/types.ts",
-                "deprecated": false
-              },
-              {
-                "parentPluginId": "lists",
-                "id": "def-server.user",
-                "type": "string",
-                "tags": [],
-                "label": "user",
-                "description": [],
-                "path": "x-pack/plugins/lists/server/types.ts",
-                "deprecated": false
-              }
-            ]
+            "path": "x-pack/plugins/lists/server/services/exception_lists/export_exception_list_and_items.ts",
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -2623,7 +2258,7 @@
             "label": "entries",
             "description": [],
             "signature": [
-              "({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"keyword\" | \"long\" | \"double\" | \"ip\" | \"geo_point\" | \"date_nanos\" | \"ip_range\" | \"date_range\" | \"geo_shape\" | \"text\" | \"shape\" | \"short\" | \"binary\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; })[]; field: string; type: \"nested\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; })[]"
+              "({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"keyword\" | \"ip_range\" | \"date_range\" | \"date\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"long\" | \"double\" | \"text\" | \"date_nanos\" | \"shape\" | \"short\" | \"binary\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; })[]; field: string; type: \"nested\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; })[]"
             ],
             "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
             "deprecated": false
@@ -2751,7 +2386,471 @@
     ],
     "enums": [],
     "misc": [],
-    "objects": []
+    "objects": [],
+    "setup": {
+      "parentPluginId": "lists",
+      "id": "def-server.ListPluginSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "ListPluginSetup",
+      "description": [],
+      "path": "x-pack/plugins/lists/server/types.ts",
+      "deprecated": false,
+      "children": [
+        {
+          "parentPluginId": "lists",
+          "id": "def-server.ListPluginSetup.getExceptionListClient",
+          "type": "Function",
+          "tags": [],
+          "label": "getExceptionListClient",
+          "description": [],
+          "signature": [
+            "(savedObjectsClient: Pick<",
+            {
+              "pluginId": "core",
+              "scope": "server",
+              "docId": "kibCoreSavedObjectsPluginApi",
+              "section": "def-server.SavedObjectsClient",
+              "text": "SavedObjectsClient"
+            },
+            ", \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"delete\" | \"find\" | \"bulkGet\" | \"bulkResolve\" | \"get\" | \"resolve\" | \"update\" | \"collectMultiNamespaceReferences\" | \"updateObjectsSpaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">, user: string) => ",
+            {
+              "pluginId": "lists",
+              "scope": "server",
+              "docId": "kibListsPluginApi",
+              "section": "def-server.ExceptionListClient",
+              "text": "ExceptionListClient"
+            }
+          ],
+          "path": "x-pack/plugins/lists/server/types.ts",
+          "deprecated": false,
+          "returnComment": [],
+          "children": [
+            {
+              "parentPluginId": "lists",
+              "id": "def-server.ListPluginSetup.getExceptionListClient.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "savedObjectsClient",
+              "description": [],
+              "signature": [
+                "{ create: <T = unknown>(type: string, attributes: T, options?: ",
+                {
+                  "pluginId": "core",
+                  "scope": "server",
+                  "docId": "kibCoreSavedObjectsPluginApi",
+                  "section": "def-server.SavedObjectsCreateOptions",
+                  "text": "SavedObjectsCreateOptions"
+                },
+                " | undefined) => Promise<",
+                "SavedObject",
+                "<T>>; bulkCreate: <T = unknown>(objects: ",
+                {
+                  "pluginId": "core",
+                  "scope": "server",
+                  "docId": "kibCoreSavedObjectsPluginApi",
+                  "section": "def-server.SavedObjectsBulkCreateObject",
+                  "text": "SavedObjectsBulkCreateObject"
+                },
+                "<T>[], options?: ",
+                {
+                  "pluginId": "core",
+                  "scope": "server",
+                  "docId": "kibCoreSavedObjectsPluginApi",
+                  "section": "def-server.SavedObjectsCreateOptions",
+                  "text": "SavedObjectsCreateOptions"
+                },
+                " | undefined) => Promise<",
+                {
+                  "pluginId": "core",
+                  "scope": "server",
+                  "docId": "kibCoreSavedObjectsPluginApi",
+                  "section": "def-server.SavedObjectsBulkResponse",
+                  "text": "SavedObjectsBulkResponse"
+                },
+                "<T>>; checkConflicts: (objects?: ",
+                {
+                  "pluginId": "core",
+                  "scope": "server",
+                  "docId": "kibCoreSavedObjectsPluginApi",
+                  "section": "def-server.SavedObjectsCheckConflictsObject",
+                  "text": "SavedObjectsCheckConflictsObject"
+                },
+                "[], options?: ",
+                {
+                  "pluginId": "core",
+                  "scope": "server",
+                  "docId": "kibCoreSavedObjectsPluginApi",
+                  "section": "def-server.SavedObjectsBaseOptions",
+                  "text": "SavedObjectsBaseOptions"
+                },
+                ") => Promise<",
+                {
+                  "pluginId": "core",
+                  "scope": "server",
+                  "docId": "kibCoreSavedObjectsPluginApi",
+                  "section": "def-server.SavedObjectsCheckConflictsResponse",
+                  "text": "SavedObjectsCheckConflictsResponse"
+                },
+                ">; delete: (type: string, id: string, options?: ",
+                {
+                  "pluginId": "core",
+                  "scope": "server",
+                  "docId": "kibCoreSavedObjectsPluginApi",
+                  "section": "def-server.SavedObjectsDeleteOptions",
+                  "text": "SavedObjectsDeleteOptions"
+                },
+                ") => Promise<{}>; find: <T = unknown, A = unknown>(options: ",
+                {
+                  "pluginId": "core",
+                  "scope": "server",
+                  "docId": "kibCoreSavedObjectsPluginApi",
+                  "section": "def-server.SavedObjectsFindOptions",
+                  "text": "SavedObjectsFindOptions"
+                },
+                ") => Promise<",
+                {
+                  "pluginId": "core",
+                  "scope": "server",
+                  "docId": "kibCoreSavedObjectsPluginApi",
+                  "section": "def-server.SavedObjectsFindResponse",
+                  "text": "SavedObjectsFindResponse"
+                },
+                "<T, A>>; bulkGet: <T = unknown>(objects?: ",
+                {
+                  "pluginId": "core",
+                  "scope": "server",
+                  "docId": "kibCoreSavedObjectsPluginApi",
+                  "section": "def-server.SavedObjectsBulkGetObject",
+                  "text": "SavedObjectsBulkGetObject"
+                },
+                "[], options?: ",
+                {
+                  "pluginId": "core",
+                  "scope": "server",
+                  "docId": "kibCoreSavedObjectsPluginApi",
+                  "section": "def-server.SavedObjectsBaseOptions",
+                  "text": "SavedObjectsBaseOptions"
+                },
+                ") => Promise<",
+                {
+                  "pluginId": "core",
+                  "scope": "server",
+                  "docId": "kibCoreSavedObjectsPluginApi",
+                  "section": "def-server.SavedObjectsBulkResponse",
+                  "text": "SavedObjectsBulkResponse"
+                },
+                "<T>>; bulkResolve: <T = unknown>(objects: ",
+                {
+                  "pluginId": "core",
+                  "scope": "server",
+                  "docId": "kibCoreSavedObjectsPluginApi",
+                  "section": "def-server.SavedObjectsBulkResolveObject",
+                  "text": "SavedObjectsBulkResolveObject"
+                },
+                "[], options?: ",
+                {
+                  "pluginId": "core",
+                  "scope": "server",
+                  "docId": "kibCoreSavedObjectsPluginApi",
+                  "section": "def-server.SavedObjectsBaseOptions",
+                  "text": "SavedObjectsBaseOptions"
+                },
+                " | undefined) => Promise<",
+                {
+                  "pluginId": "core",
+                  "scope": "server",
+                  "docId": "kibCoreSavedObjectsPluginApi",
+                  "section": "def-server.SavedObjectsBulkResolveResponse",
+                  "text": "SavedObjectsBulkResolveResponse"
+                },
+                "<T>>; get: <T = unknown>(type: string, id: string, options?: ",
+                {
+                  "pluginId": "core",
+                  "scope": "server",
+                  "docId": "kibCoreSavedObjectsPluginApi",
+                  "section": "def-server.SavedObjectsBaseOptions",
+                  "text": "SavedObjectsBaseOptions"
+                },
+                ") => Promise<",
+                "SavedObject",
+                "<T>>; resolve: <T = unknown>(type: string, id: string, options?: ",
+                {
+                  "pluginId": "core",
+                  "scope": "server",
+                  "docId": "kibCoreSavedObjectsPluginApi",
+                  "section": "def-server.SavedObjectsBaseOptions",
+                  "text": "SavedObjectsBaseOptions"
+                },
+                ") => Promise<",
+                {
+                  "pluginId": "core",
+                  "scope": "server",
+                  "docId": "kibCoreSavedObjectsPluginApi",
+                  "section": "def-server.SavedObjectsResolveResponse",
+                  "text": "SavedObjectsResolveResponse"
+                },
+                "<T>>; update: <T = unknown>(type: string, id: string, attributes: Partial<T>, options?: ",
+                {
+                  "pluginId": "core",
+                  "scope": "server",
+                  "docId": "kibCoreSavedObjectsPluginApi",
+                  "section": "def-server.SavedObjectsUpdateOptions",
+                  "text": "SavedObjectsUpdateOptions"
+                },
+                "<T>) => Promise<",
+                {
+                  "pluginId": "core",
+                  "scope": "server",
+                  "docId": "kibCoreSavedObjectsPluginApi",
+                  "section": "def-server.SavedObjectsUpdateResponse",
+                  "text": "SavedObjectsUpdateResponse"
+                },
+                "<T>>; collectMultiNamespaceReferences: (objects: ",
+                {
+                  "pluginId": "core",
+                  "scope": "server",
+                  "docId": "kibCoreSavedObjectsPluginApi",
+                  "section": "def-server.SavedObjectsCollectMultiNamespaceReferencesObject",
+                  "text": "SavedObjectsCollectMultiNamespaceReferencesObject"
+                },
+                "[], options?: ",
+                {
+                  "pluginId": "core",
+                  "scope": "server",
+                  "docId": "kibCoreSavedObjectsPluginApi",
+                  "section": "def-server.SavedObjectsCollectMultiNamespaceReferencesOptions",
+                  "text": "SavedObjectsCollectMultiNamespaceReferencesOptions"
+                },
+                " | undefined) => Promise<",
+                {
+                  "pluginId": "core",
+                  "scope": "server",
+                  "docId": "kibCoreSavedObjectsPluginApi",
+                  "section": "def-server.SavedObjectsCollectMultiNamespaceReferencesResponse",
+                  "text": "SavedObjectsCollectMultiNamespaceReferencesResponse"
+                },
+                ">; updateObjectsSpaces: (objects: ",
+                {
+                  "pluginId": "core",
+                  "scope": "server",
+                  "docId": "kibCoreSavedObjectsPluginApi",
+                  "section": "def-server.SavedObjectsUpdateObjectsSpacesObject",
+                  "text": "SavedObjectsUpdateObjectsSpacesObject"
+                },
+                "[], spacesToAdd: string[], spacesToRemove: string[], options?: ",
+                {
+                  "pluginId": "core",
+                  "scope": "server",
+                  "docId": "kibCoreSavedObjectsPluginApi",
+                  "section": "def-server.SavedObjectsUpdateObjectsSpacesOptions",
+                  "text": "SavedObjectsUpdateObjectsSpacesOptions"
+                },
+                " | undefined) => Promise<",
+                {
+                  "pluginId": "core",
+                  "scope": "server",
+                  "docId": "kibCoreSavedObjectsPluginApi",
+                  "section": "def-server.SavedObjectsUpdateObjectsSpacesResponse",
+                  "text": "SavedObjectsUpdateObjectsSpacesResponse"
+                },
+                ">; bulkUpdate: <T = unknown>(objects: ",
+                {
+                  "pluginId": "core",
+                  "scope": "server",
+                  "docId": "kibCoreSavedObjectsPluginApi",
+                  "section": "def-server.SavedObjectsBulkUpdateObject",
+                  "text": "SavedObjectsBulkUpdateObject"
+                },
+                "<T>[], options?: ",
+                {
+                  "pluginId": "core",
+                  "scope": "server",
+                  "docId": "kibCoreSavedObjectsPluginApi",
+                  "section": "def-server.SavedObjectsBulkUpdateOptions",
+                  "text": "SavedObjectsBulkUpdateOptions"
+                },
+                " | undefined) => Promise<",
+                {
+                  "pluginId": "core",
+                  "scope": "server",
+                  "docId": "kibCoreSavedObjectsPluginApi",
+                  "section": "def-server.SavedObjectsBulkUpdateResponse",
+                  "text": "SavedObjectsBulkUpdateResponse"
+                },
+                "<T>>; removeReferencesTo: (type: string, id: string, options?: ",
+                {
+                  "pluginId": "core",
+                  "scope": "server",
+                  "docId": "kibCoreSavedObjectsPluginApi",
+                  "section": "def-server.SavedObjectsRemoveReferencesToOptions",
+                  "text": "SavedObjectsRemoveReferencesToOptions"
+                },
+                " | undefined) => Promise<",
+                {
+                  "pluginId": "core",
+                  "scope": "server",
+                  "docId": "kibCoreSavedObjectsPluginApi",
+                  "section": "def-server.SavedObjectsRemoveReferencesToResponse",
+                  "text": "SavedObjectsRemoveReferencesToResponse"
+                },
+                ">; openPointInTimeForType: (type: string | string[], options?: ",
+                {
+                  "pluginId": "core",
+                  "scope": "server",
+                  "docId": "kibCoreSavedObjectsPluginApi",
+                  "section": "def-server.SavedObjectsOpenPointInTimeOptions",
+                  "text": "SavedObjectsOpenPointInTimeOptions"
+                },
+                ") => Promise<",
+                {
+                  "pluginId": "core",
+                  "scope": "server",
+                  "docId": "kibCoreSavedObjectsPluginApi",
+                  "section": "def-server.SavedObjectsOpenPointInTimeResponse",
+                  "text": "SavedObjectsOpenPointInTimeResponse"
+                },
+                ">; closePointInTime: (id: string, options?: ",
+                {
+                  "pluginId": "core",
+                  "scope": "server",
+                  "docId": "kibCoreSavedObjectsPluginApi",
+                  "section": "def-server.SavedObjectsBaseOptions",
+                  "text": "SavedObjectsBaseOptions"
+                },
+                " | undefined) => Promise<",
+                {
+                  "pluginId": "core",
+                  "scope": "server",
+                  "docId": "kibCoreSavedObjectsPluginApi",
+                  "section": "def-server.SavedObjectsClosePointInTimeResponse",
+                  "text": "SavedObjectsClosePointInTimeResponse"
+                },
+                ">; createPointInTimeFinder: <T = unknown, A = unknown>(findOptions: Pick<",
+                {
+                  "pluginId": "core",
+                  "scope": "server",
+                  "docId": "kibCoreSavedObjectsPluginApi",
+                  "section": "def-server.SavedObjectsFindOptions",
+                  "text": "SavedObjectsFindOptions"
+                },
+                ", \"type\" | \"filter\" | \"aggs\" | \"fields\" | \"perPage\" | \"sortField\" | \"sortOrder\" | \"search\" | \"searchFields\" | \"rootSearchFields\" | \"hasReference\" | \"hasReferenceOperator\" | \"defaultSearchOperator\" | \"namespaces\" | \"typeToNamespacesMap\" | \"preference\">, dependencies?: ",
+                {
+                  "pluginId": "core",
+                  "scope": "server",
+                  "docId": "kibCoreSavedObjectsPluginApi",
+                  "section": "def-server.SavedObjectsCreatePointInTimeFinderDependencies",
+                  "text": "SavedObjectsCreatePointInTimeFinderDependencies"
+                },
+                " | undefined) => ",
+                {
+                  "pluginId": "core",
+                  "scope": "server",
+                  "docId": "kibCoreSavedObjectsPluginApi",
+                  "section": "def-server.ISavedObjectsPointInTimeFinder",
+                  "text": "ISavedObjectsPointInTimeFinder"
+                },
+                "<T, A>; errors: typeof ",
+                {
+                  "pluginId": "core",
+                  "scope": "server",
+                  "docId": "kibCoreSavedObjectsPluginApi",
+                  "section": "def-server.SavedObjectsErrorHelpers",
+                  "text": "SavedObjectsErrorHelpers"
+                },
+                "; }"
+              ],
+              "path": "x-pack/plugins/lists/server/types.ts",
+              "deprecated": false
+            },
+            {
+              "parentPluginId": "lists",
+              "id": "def-server.ListPluginSetup.getExceptionListClient.$2",
+              "type": "string",
+              "tags": [],
+              "label": "user",
+              "description": [],
+              "path": "x-pack/plugins/lists/server/types.ts",
+              "deprecated": false
+            }
+          ]
+        },
+        {
+          "parentPluginId": "lists",
+          "id": "def-server.ListPluginSetup.getListClient",
+          "type": "Function",
+          "tags": [],
+          "label": "getListClient",
+          "description": [],
+          "signature": [
+            "(esClient: ",
+            {
+              "pluginId": "core",
+              "scope": "server",
+              "docId": "kibCorePluginApi",
+              "section": "def-server.ElasticsearchClient",
+              "text": "ElasticsearchClient"
+            },
+            ", spaceId: string, user: string) => ",
+            {
+              "pluginId": "lists",
+              "scope": "server",
+              "docId": "kibListsPluginApi",
+              "section": "def-server.ListClient",
+              "text": "ListClient"
+            }
+          ],
+          "path": "x-pack/plugins/lists/server/types.ts",
+          "deprecated": false,
+          "returnComment": [],
+          "children": [
+            {
+              "parentPluginId": "lists",
+              "id": "def-server.ListPluginSetup.getListClient.$1",
+              "type": "CompoundType",
+              "tags": [],
+              "label": "esClient",
+              "description": [],
+              "signature": [
+                "Pick<",
+                "KibanaClient",
+                ", \"monitoring\" | \"security\" | \"create\" | \"name\" | \"index\" | \"delete\" | \"get\" | \"update\" | \"closePointInTime\" | \"search\" | \"transform\" | \"eql\" | \"helpers\" | \"asyncSearch\" | \"autoscaling\" | \"bulk\" | \"cat\" | \"ccr\" | \"clearScroll\" | \"cluster\" | \"count\" | \"danglingIndices\" | \"deleteByQuery\" | \"deleteByQueryRethrottle\" | \"deleteScript\" | \"enrich\" | \"exists\" | \"existsSource\" | \"explain\" | \"features\" | \"fieldCaps\" | \"fleet\" | \"getScript\" | \"getScriptContext\" | \"getScriptLanguages\" | \"getSource\" | \"graph\" | \"ilm\" | \"indices\" | \"info\" | \"ingest\" | \"knnSearch\" | \"license\" | \"logstash\" | \"mget\" | \"migration\" | \"ml\" | \"msearch\" | \"msearchTemplate\" | \"mtermvectors\" | \"nodes\" | \"openPointInTime\" | \"ping\" | \"putScript\" | \"rankEval\" | \"reindex\" | \"reindexRethrottle\" | \"renderSearchTemplate\" | \"rollup\" | \"scriptsPainlessExecute\" | \"scroll\" | \"searchMvt\" | \"searchShards\" | \"searchTemplate\" | \"searchableSnapshots\" | \"shutdown\" | \"slm\" | \"snapshot\" | \"sql\" | \"ssl\" | \"tasks\" | \"termsEnum\" | \"termvectors\" | \"textStructure\" | \"updateByQuery\" | \"updateByQueryRethrottle\" | \"watcher\" | \"xpack\"> & { transport: { request<TResponse = unknown>(params: ",
+                "TransportRequestParams",
+                ", options?: ",
+                "TransportRequestOptions",
+                " | undefined): Promise<",
+                "TransportResult",
+                "<TResponse, unknown>>; }; }"
+              ],
+              "path": "x-pack/plugins/lists/server/types.ts",
+              "deprecated": false
+            },
+            {
+              "parentPluginId": "lists",
+              "id": "def-server.ListPluginSetup.getListClient.$2",
+              "type": "string",
+              "tags": [],
+              "label": "spaceId",
+              "description": [],
+              "path": "x-pack/plugins/lists/server/types.ts",
+              "deprecated": false
+            },
+            {
+              "parentPluginId": "lists",
+              "id": "def-server.ListPluginSetup.getListClient.$3",
+              "type": "string",
+              "tags": [],
+              "label": "user",
+              "description": [],
+              "path": "x-pack/plugins/lists/server/types.ts",
+              "deprecated": false
+            }
+          ]
+        }
+      ],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    }
   },
   "common": {
     "classes": [],

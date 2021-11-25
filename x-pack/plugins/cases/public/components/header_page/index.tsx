@@ -52,9 +52,9 @@ const LinkBack = styled.div.attrs({
 `;
 LinkBack.displayName = 'LinkBack';
 
-const Badge = (styled(EuiBadge)`
+const Badge = styled(EuiBadge)`
   letter-spacing: 0;
-` as unknown) as typeof EuiBadge;
+` as unknown as typeof EuiBadge;
 Badge.displayName = 'Badge';
 
 interface BackOptions {

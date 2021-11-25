@@ -7,10 +7,12 @@
 
 import { IRouter } from 'kibana/server';
 import { schema } from '@kbn/config-schema';
+import { UsageCounter } from 'src/plugins/usage_collection/server';
 import { ILicenseState } from '../lib';
 import { AggregateResult, AggregateOptions } from '../rules_client';
 import { RewriteResponseCase, RewriteRequestCase, verifyAccessAndContext } from './lib';
 import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../types';
+import { trackLegacyTerminology } from './lib/track_legacy_terminology';
 
 // config definition
 const querySchema = schema.object({
@@ -53,7 +55,8 @@ const rewriteBodyRes: RewriteResponseCase<AggregateResult> = ({
 
 export const aggregateRulesRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
-  licenseState: ILicenseState
+  licenseState: ILicenseState,
+  usageCounter?: UsageCounter
 ) => {
   router.get(
     {
@@ -69,6 +72,10 @@ export const aggregateRulesRoute = (
           ...req.query,
           has_reference: req.query.has_reference || undefined,
         });
+        trackLegacyTerminology(
+          [req.query.search, req.query.search_fields].filter(Boolean) as string[],
+          usageCounter
+        );
         const aggregateResult = await rulesClient.aggregate({ options });
         return res.ok({
           body: rewriteBodyRes(aggregateResult),

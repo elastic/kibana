@@ -16,26 +16,31 @@ import { SERVICE_NODE_NAME_MISSING } from '../../../common/service_nodes';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import { getServiceNodesProjection } from '../../projections/service_nodes';
 import { mergeProjection } from '../../projections/util/merge_projection';
-import { Setup, SetupTimeRange } from '../helpers/setup_request';
+import { Setup } from '../helpers/setup_request';
 
 const getServiceNodes = async ({
   kuery,
   setup,
   serviceName,
   environment,
+  start,
+  end,
 }: {
   kuery: string;
-  setup: Setup & SetupTimeRange;
+  setup: Setup;
   serviceName: string;
   environment: string;
+  start: number;
+  end: number;
 }) => {
   const { apmEventClient } = setup;
 
   const projection = getServiceNodesProjection({
     kuery,
-    setup,
     serviceName,
     environment,
+    start,
+    end,
   });
 
   const params = mergeProjection(projection, {

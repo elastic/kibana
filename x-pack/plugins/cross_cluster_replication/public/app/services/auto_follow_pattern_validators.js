@@ -12,11 +12,8 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { indexPatterns } from '../../../../../../src/plugins/data/public';
 import { indices } from '../../shared_imports';
 
-const {
-  indexNameBeginsWithPeriod,
-  findIllegalCharactersInIndexName,
-  indexNameContainsSpaces,
-} = indices;
+const { indexNameBeginsWithPeriod, findIllegalCharactersInIndexName, indexNameContainsSpaces } =
+  indices;
 
 export const validateName = (name = '') => {
   let errorMsg = null;

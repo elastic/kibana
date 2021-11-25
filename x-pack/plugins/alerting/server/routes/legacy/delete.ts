@@ -6,16 +6,22 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { UsageCounter } from 'src/plugins/usage_collection/server';
 import type { AlertingRouter } from '../../types';
 import { ILicenseState } from '../../lib/license_state';
 import { verifyApiAccess } from '../../lib/license_api_access';
 import { LEGACY_BASE_ALERT_API_PATH } from '../../../common';
+import { trackLegacyRouteUsage } from '../../lib/track_legacy_route_usage';
 
 const paramSchema = schema.object({
   id: schema.string(),
 });
 
-export const deleteAlertRoute = (router: AlertingRouter, licenseState: ILicenseState) => {
+export const deleteAlertRoute = (
+  router: AlertingRouter,
+  licenseState: ILicenseState,
+  usageCounter?: UsageCounter
+) => {
   router.delete(
     {
       path: `${LEGACY_BASE_ALERT_API_PATH}/alert/{id}`,
@@ -28,6 +34,7 @@ export const deleteAlertRoute = (router: AlertingRouter, licenseState: ILicenseS
       if (!context.alerting) {
         return res.badRequest({ body: 'RouteHandlerContext is not registered for alerting' });
       }
+      trackLegacyRouteUsage('delete', usageCounter);
       const rulesClient = context.alerting.getRulesClient();
       const { id } = req.params;
       await rulesClient.delete({ id });

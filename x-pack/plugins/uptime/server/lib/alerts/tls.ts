@@ -13,7 +13,6 @@ import { TLS } from '../../../common/constants/alerts';
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../common/constants';
 import { Cert, CertResult } from '../../../common/runtime_types';
 import { commonStateTranslations, tlsTranslations } from './translations';
-import { DEFAULT_FROM, DEFAULT_TO } from '../../rest_api/certs/certs';
 import { TlsTranslations } from '../../../common/translations';
 
 import { ActionGroupIdsOf } from '../../../../alerting/common';
@@ -22,8 +21,6 @@ import { savedObjectsAdapter } from '../saved_objects';
 import { createUptimeESClient } from '../lib';
 
 export type ActionGroupIds = ActionGroupIdsOf<typeof TLS>;
-
-export const DEFAULT_SIZE = 20;
 
 interface TlsAlertState {
   commonName: string;
@@ -130,10 +127,8 @@ export const tlsAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (_server,
 
     const { certs, total }: CertResult = await libs.requests.getCerts({
       uptimeEsClient,
-      from: DEFAULT_FROM,
-      to: DEFAULT_TO,
-      index: 0,
-      size: DEFAULT_SIZE,
+      pageIndex: 0,
+      size: 1000,
       notValidAfter: `now+${
         dynamicSettings?.certExpirationThreshold ??
         DYNAMIC_SETTINGS_DEFAULTS.certExpirationThreshold

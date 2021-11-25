@@ -31,7 +31,8 @@ export class FeatureUsageTestPlugin
       FeatureUsageTestPluginStart,
       FeatureUsageTestSetupDependencies,
       FeatureUsageTestStartDependencies
-    > {
+    >
+{
   public setup(
     {
       http,

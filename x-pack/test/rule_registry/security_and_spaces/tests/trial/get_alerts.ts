@@ -30,13 +30,12 @@ export default ({ getService }: FtrProviderContext) => {
   const SPACE2 = 'space2';
 
   const getAPMIndexName = async (user: User) => {
-    const {
-      body: indexNames,
-    }: { body: { index_name: string[] | undefined } } = await supertestWithoutAuth
-      .get(`${getSpaceUrlPrefix(SPACE1)}${ALERTS_INDEX_URL}`)
-      .auth(user.username, user.password)
-      .set('kbn-xsrf', 'true')
-      .expect(200);
+    const { body: indexNames }: { body: { index_name: string[] | undefined } } =
+      await supertestWithoutAuth
+        .get(`${getSpaceUrlPrefix(SPACE1)}${ALERTS_INDEX_URL}`)
+        .auth(user.username, user.password)
+        .set('kbn-xsrf', 'true')
+        .expect(200);
     const observabilityIndex = indexNames?.index_name?.find(
       (indexName) => indexName === '.alerts-observability.apm.alerts'
     );

@@ -21,7 +21,7 @@ import {
 import { getLayerListRaw } from '../../../../../../selectors/map_selectors';
 import { getIsReadOnly } from '../../../../../../selectors/ui_selectors';
 import { TOCEntryActionsPopover } from './toc_entry_actions_popover';
-import { DRAW_MODE } from '../../../../../../../common';
+import { DRAW_MODE } from '../../../../../../../common/constants';
 
 function mapStateToProps(state: MapStoreState) {
   return {

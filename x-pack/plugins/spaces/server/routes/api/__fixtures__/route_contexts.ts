@@ -7,7 +7,7 @@
 
 import type { RequestHandlerContext } from 'src/core/server';
 
-export const mockRouteContext = ({
+export const mockRouteContext = {
   licensing: {
     license: {
       check: jest.fn().mockReturnValue({
@@ -15,9 +15,9 @@ export const mockRouteContext = ({
       }),
     },
   },
-} as unknown) as RequestHandlerContext;
+} as unknown as RequestHandlerContext;
 
-export const mockRouteContextWithInvalidLicense = ({
+export const mockRouteContextWithInvalidLicense = {
   licensing: {
     license: {
       check: jest.fn().mockReturnValue({
@@ -26,4 +26,4 @@ export const mockRouteContextWithInvalidLicense = ({
       }),
     },
   },
-} as unknown) as RequestHandlerContext;
+} as unknown as RequestHandlerContext;

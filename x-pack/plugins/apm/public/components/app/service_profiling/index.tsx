@@ -18,7 +18,8 @@ import { APIReturnType } from '../../../services/rest/createCallApmApi';
 import { ServiceProfilingFlamegraph } from './service_profiling_flamegraph';
 import { ServiceProfilingTimeline } from './service_profiling_timeline';
 
-type ApiResponse = APIReturnType<'GET /api/apm/services/{serviceName}/profiling/timeline'>;
+type ApiResponse =
+  APIReturnType<'GET /internal/apm/services/{serviceName}/profiling/timeline'>;
 const DEFAULT_DATA: ApiResponse = { profilingTimeline: [] };
 
 export function ServiceProfiling() {
@@ -26,7 +27,7 @@ export function ServiceProfiling() {
 
   const {
     query: { environment, kuery, rangeFrom, rangeTo },
-  } = useApmParams('/services/:serviceName/profiling');
+  } = useApmParams('/services/{serviceName}/profiling');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
@@ -37,7 +38,7 @@ export function ServiceProfiling() {
       }
 
       return callApmApi({
-        endpoint: 'GET /api/apm/services/{serviceName}/profiling/timeline',
+        endpoint: 'GET /internal/apm/services/{serviceName}/profiling/timeline',
         params: {
           path: { serviceName },
           query: {
@@ -62,9 +63,11 @@ export function ServiceProfiling() {
     }
 
     const availableValueTypes = profilingTimeline.reduce((set, point) => {
-      (Object.keys(point.valueTypes).filter(
-        (type) => type !== 'unknown'
-      ) as ProfilingValueType[])
+      (
+        Object.keys(point.valueTypes).filter(
+          (type) => type !== 'unknown'
+        ) as ProfilingValueType[]
+      )
         .filter((type) => point.valueTypes[type] > 0)
         .forEach((type) => {
           set.add(type);

@@ -40,7 +40,7 @@ describe('Legacy (Ace) Console Editor Component Smoke Test', () => {
       <I18nProvider>
         <ServicesContextProvider value={mockedAppContextValue}>
           <RequestContextProvider>
-            <EditorContextProvider settings={({} as unknown) as DevToolsSettings}>
+            <EditorContextProvider settings={{} as unknown as DevToolsSettings}>
               <Editor initialTextValue="" />
             </EditorContextProvider>
           </RequestContextProvider>
@@ -63,7 +63,7 @@ describe('Legacy (Ace) Console Editor Component Smoke Test', () => {
     (sendRequestToES as jest.Mock).mockRejectedValue({});
     const editor = doMount();
     act(() => {
-      editor.find('[data-test-subj~="sendRequestButton"]').simulate('click');
+      editor.find('button[data-test-subj~="sendRequestButton"]').simulate('click');
     });
     await nextTick();
     expect(sendRequestToES).toBeCalledTimes(1);

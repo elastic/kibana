@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { estypes } from '@elastic/elasticsearch';
-import { IndexPattern, IndexPatternsContract } from '../../../../../src/plugins/data/common';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { DataView, DataViewsContract } from '../../../../../src/plugins/data_views/common';
 import { ObjectEntries } from '../utility_types';
+import { TIMESTAMP_FIELD, TIEBREAKER_FIELD } from '../constants';
 import { ResolveLogSourceConfigurationError } from './errors';
 import {
   LogSourceColumnConfiguration,
@@ -21,14 +22,14 @@ export interface ResolvedLogSourceConfiguration {
   timestampField: string;
   tiebreakerField: string;
   messageField: string[];
-  fields: IndexPattern['fields'];
+  fields: DataView['fields'];
   runtimeMappings: estypes.MappingRuntimeFields;
   columns: LogSourceColumnConfiguration[];
 }
 
 export const resolveLogSourceConfiguration = async (
   sourceConfiguration: LogSourceConfigurationProperties,
-  indexPatternsService: IndexPatternsContract
+  indexPatternsService: DataViewsContract
 ): Promise<ResolvedLogSourceConfiguration> => {
   if (sourceConfiguration.logIndices.type === 'index_name') {
     return await resolveLegacyReference(sourceConfiguration, indexPatternsService);
@@ -39,7 +40,7 @@ export const resolveLogSourceConfiguration = async (
 
 const resolveLegacyReference = async (
   sourceConfiguration: LogSourceConfigurationProperties,
-  indexPatternsService: IndexPatternsContract
+  indexPatternsService: DataViewsContract
 ): Promise<ResolvedLogSourceConfiguration> => {
   if (sourceConfiguration.logIndices.type !== 'index_name') {
     throw new Error('This function can only resolve legacy references');
@@ -61,8 +62,8 @@ const resolveLegacyReference = async (
 
   return {
     indices: sourceConfiguration.logIndices.indexName,
-    timestampField: sourceConfiguration.fields.timestamp,
-    tiebreakerField: sourceConfiguration.fields.tiebreaker,
+    timestampField: TIMESTAMP_FIELD,
+    tiebreakerField: TIEBREAKER_FIELD,
     messageField: sourceConfiguration.fields.message,
     fields,
     runtimeMappings: {},
@@ -74,7 +75,7 @@ const resolveLegacyReference = async (
 
 const resolveKibanaIndexPatternReference = async (
   sourceConfiguration: LogSourceConfigurationProperties,
-  indexPatternsService: IndexPatternsContract
+  indexPatternsService: DataViewsContract
 ): Promise<ResolvedLogSourceConfiguration> => {
   if (sourceConfiguration.logIndices.type !== 'index_pattern') {
     throw new Error('This function can only resolve Kibana Index Pattern references');
@@ -91,8 +92,8 @@ const resolveKibanaIndexPatternReference = async (
 
   return {
     indices: indexPattern.title,
-    timestampField: indexPattern.timeFieldName ?? '@timestamp',
-    tiebreakerField: '_doc',
+    timestampField: indexPattern.timeFieldName ?? TIMESTAMP_FIELD,
+    tiebreakerField: TIEBREAKER_FIELD,
     messageField: ['message'],
     fields: indexPattern.fields,
     runtimeMappings: resolveRuntimeMappings(indexPattern),
@@ -103,13 +104,12 @@ const resolveKibanaIndexPatternReference = async (
 };
 
 // this might take other sources of runtime fields into account in the future
-const resolveRuntimeMappings = (indexPattern: IndexPattern): estypes.MappingRuntimeFields => {
+const resolveRuntimeMappings = (indexPattern: DataView): estypes.MappingRuntimeFields => {
   const { runtimeFields } = indexPattern.getComputedFields();
 
-  const runtimeMappingsFromIndexPattern = (Object.entries(runtimeFields) as ObjectEntries<
-    typeof runtimeFields
-  >).reduce<estypes.MappingRuntimeFields>(
-    // @ts-expect-error @elasticsearch/elasticsearch does not support yet "composite" type for runtime fields
+  const runtimeMappingsFromIndexPattern = (
+    Object.entries(runtimeFields) as ObjectEntries<typeof runtimeFields>
+  ).reduce<estypes.MappingRuntimeFields>(
     (accumulatedMappings, [runtimeFieldName, runtimeFieldSpec]) => ({
       ...accumulatedMappings,
       [runtimeFieldName]: {
@@ -118,7 +118,7 @@ const resolveRuntimeMappings = (indexPattern: IndexPattern): estypes.MappingRunt
           ? {
               script: {
                 lang: 'painless', // required in the es types
-                source: (runtimeFieldSpec.script as estypes.InlineScript).source,
+                source: runtimeFieldSpec.script.source,
               },
             }
           : {}),
@@ -127,6 +127,5 @@ const resolveRuntimeMappings = (indexPattern: IndexPattern): estypes.MappingRunt
     {}
   );
 
-  // @ts-expect-error @elasticsearch/elasticsearch does not support yet "composite" type for runtime fields
   return runtimeMappingsFromIndexPattern;
 };

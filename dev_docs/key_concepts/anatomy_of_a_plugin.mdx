@@ -1,6 +1,6 @@
 ---
 id: kibDevAnatomyOfAPlugin
-slug: /kibana-dev-docs/anatomy-of-a-plugin
+slug: /kibana-dev-docs/key-concepts/anatomy-of-a-plugin
 title: Anatomy of a plugin
 summary: Anatomy of a Kibana plugin.
 date: 2021-08-03
@@ -32,6 +32,7 @@ plugins/
       plugin.ts
     common
       index.ts
+    jest.config.js
 ```
 
 ### kibana.json
@@ -75,7 +76,7 @@ plugins/
 - preboot plugins are bootstrapped to prepare the environment before Kibana starts.
 - standard plugins define Kibana functionality while Kibana is running.
 
-`owner` - [Required] Help users of your plugin know who manages this plugin and how to get in touch. For internal developers, `Owner.name` should be the name of the team that manages this plugin. This should match the team that owns this code in the [CODEOWNERS](https://github.com/elastic/kibana/blob/master/.github/CODEOWNERS) file (however, this is not currently enforced). Internal teams should also use a [GitHub team alias](https://github.com/orgs/elastic/teams) for `owner.githubTeam`. This value is used to create a link to `https://github.com/orgs/elastic/teams/${githubTeam}`, so leave the `elastic/` prefix should be left out. While many teams can contribute to a plugin, only a single team should be the primary owner.
+`owner` - [Required] Help users of your plugin know who manages this plugin and how to get in touch. For internal developers, `Owner.name` should be the name of the team that manages this plugin. This should match the team that owns this code in the [CODEOWNERS](https://github.com/elastic/kibana/blob/main/.github/CODEOWNERS) file (however, this is not currently enforced). Internal teams should also use a [GitHub team alias](https://github.com/orgs/elastic/teams) for `owner.githubTeam`. This value is used to create a link to `https://github.com/orgs/elastic/teams/${githubTeam}`, so leave the `elastic/` prefix should be left out. While many teams can contribute to a plugin, only a single team should be the primary owner.
 
 `description` - [Required] Give your plugin a description to help other developers understand what it does. This is required for internal plugins.
 
@@ -208,6 +209,29 @@ considerations related to how plugins integrate with core APIs and APIs exposed 
 ### common/index.ts
 
 `common/index.ts` is the entry-point into code that can be used both server-side or client side.
+
+### jest.config.js
+
+If you are adding unit tests (which we recommend), you will need to add a `jest.config.js` file. Here is an example file that you would use if adding a plugin into the `examples` directory.
+
+```js
+module.exports = {
+  // Default Jest settings, defined in kbn-test package
+  preset: '@kbn/test',
+  // The root of the directory containing package.json
+  rootDir: '../../..',
+  // The directory which Jest should use to search for files in
+  roots: ['<rootDir>/src/plugins/demo'],
+  // The directory where Jest should output plugin coverage details, e.g. html report
+  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/src/plugins/demo',
+  // A list of reporter names that Jest uses when writing coverage reports, default: ["json"]
+  // "text" is available in console and is good for quick check
+  // "html" helps to dig into specific files and fix coverage
+  coverageReporters: ['text', 'html'],
+  // An array of regexp pattern strings that matched files to include/exclude for code coverage
+  collectCoverageFrom: ['<rootDir>/src/plugins/demo/{common,public,server}/**/*.{ts,tsx}'],
+};
+```
 
 ## How plugin's interact with each other, and Core
 

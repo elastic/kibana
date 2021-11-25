@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { IndexResponse, UpdateResponse } from '@elastic/elasticsearch/api/types';
+import { IndexResponse, UpdateResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ElasticsearchClient } from 'src/core/server';
 import { LevelLogger, statuses } from '../';
 import { ReportingCore } from '../../';
-import { ILM_POLICY_NAME } from '../../../common/constants';
+import { ILM_POLICY_NAME, REPORTING_SYSTEM_INDEX } from '../../../common/constants';
 import { JobStatus, ReportOutput, ReportSource } from '../../../common/types';
 import { ReportTaskParams } from '../tasks';
 import { Report, ReportDocument, SavedReport } from './';
@@ -87,7 +87,7 @@ export class ReportingStore {
   constructor(private reportingCore: ReportingCore, private logger: LevelLogger) {
     const config = reportingCore.getConfig();
 
-    this.indexPrefix = config.get('index');
+    this.indexPrefix = REPORTING_SYSTEM_INDEX;
     this.indexInterval = config.get('queue', 'indexInterval');
     this.logger = logger.clone(['store']);
   }
@@ -196,7 +196,7 @@ export class ReportingStore {
       await ilmPolicyManager.createIlmPolicy();
     } catch (e) {
       this.logger.error('Error in start phase');
-      this.logger.error(e.body.error);
+      this.logger.error(e.body?.error);
       throw e;
     }
   }

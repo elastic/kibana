@@ -10,7 +10,8 @@ import { join } from 'path';
 import { logger } from '@storybook/node-logger';
 import buildStandalone from '@storybook/react/standalone';
 import { Flags, run } from '@kbn/dev-utils';
-import { distDir } from '@kbn/ui-shared-deps';
+import UiSharedDepsNpm from '@kbn/ui-shared-deps-npm';
+import UiSharedDepsSrc from '@kbn/ui-shared-deps-src';
 import * as constants from './constants';
 
 // Convert the flags to a Storybook loglevel
@@ -35,7 +36,11 @@ export function runStorybookCli({ configDir, name }: { configDir: string; name: 
     async ({ flags, log }) => {
       log.debug('Global config:\n', constants);
 
-      const staticDir = [distDir];
+      const staticDir = [
+        UiSharedDepsNpm.distDir,
+        UiSharedDepsSrc.distDir,
+        'src/plugins/kibana_react/public/assets:plugins/kibanaReact/assets',
+      ];
       const config: Record<string, any> = {
         configDir,
         mode: flags.site ? 'static' : 'dev',

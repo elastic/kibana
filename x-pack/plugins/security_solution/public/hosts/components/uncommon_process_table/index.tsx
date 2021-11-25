@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable react/display-name */
-
 import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 

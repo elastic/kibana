@@ -8,6 +8,7 @@ exports[`setupMode SetupModeTooltip allInternalCollection should render for apm 
   <EuiToolTip
     content="At least one server isn’t monitored using Metricbeat. Click to view status."
     delay="regular"
+    display="inlineBlock"
     position="top"
   >
     <EuiBadge
@@ -30,6 +31,7 @@ exports[`setupMode SetupModeTooltip allInternalCollection should render for beat
   <EuiToolTip
     content="At least one instance isn’t monitored using Metricbeat. Click to view status."
     delay="regular"
+    display="inlineBlock"
     position="top"
   >
     <EuiBadge
@@ -52,6 +54,7 @@ exports[`setupMode SetupModeTooltip allInternalCollection should render for elas
   <EuiToolTip
     content="At least one node isn’t monitored using Metricbeat. Click to view status."
     delay="regular"
+    display="inlineBlock"
     position="top"
   >
     <EuiBadge
@@ -74,6 +77,7 @@ exports[`setupMode SetupModeTooltip allInternalCollection should render for kiba
   <EuiToolTip
     content="At least one instance isn’t monitored using Metricbeat. Click to view status."
     delay="regular"
+    display="inlineBlock"
     position="top"
   >
     <EuiBadge
@@ -96,6 +100,7 @@ exports[`setupMode SetupModeTooltip allInternalCollection should render for logs
   <EuiToolTip
     content="At least one node isn’t monitored using Metricbeat. Click to view status."
     delay="regular"
+    display="inlineBlock"
     position="top"
   >
     <EuiBadge
@@ -118,6 +123,7 @@ exports[`setupMode SetupModeTooltip allMonitoredByMetricbeat should render for a
   <EuiToolTip
     content="Metricbeat is monitoring all servers."
     delay="regular"
+    display="inlineBlock"
     position="top"
   >
     <EuiBadge
@@ -140,6 +146,7 @@ exports[`setupMode SetupModeTooltip allMonitoredByMetricbeat should render for b
   <EuiToolTip
     content="Metricbeat is monitoring all instances."
     delay="regular"
+    display="inlineBlock"
     position="top"
   >
     <EuiBadge
@@ -162,6 +169,7 @@ exports[`setupMode SetupModeTooltip allMonitoredByMetricbeat should render for e
   <EuiToolTip
     content="Metricbeat is monitoring all nodes."
     delay="regular"
+    display="inlineBlock"
     position="top"
   >
     <EuiBadge
@@ -184,6 +192,7 @@ exports[`setupMode SetupModeTooltip allMonitoredByMetricbeat should render for k
   <EuiToolTip
     content="Metricbeat is monitoring all instances."
     delay="regular"
+    display="inlineBlock"
     position="top"
   >
     <EuiBadge
@@ -206,6 +215,7 @@ exports[`setupMode SetupModeTooltip allMonitoredByMetricbeat should render for l
   <EuiToolTip
     content="Metricbeat is monitoring all nodes."
     delay="regular"
+    display="inlineBlock"
     position="top"
   >
     <EuiBadge
@@ -228,6 +238,7 @@ exports[`setupMode SetupModeTooltip internalCollectionOn should render for apm 1
   <EuiToolTip
     content="Metricbeat is monitoring all servers. Click to view servers and disable self monitoring."
     delay="regular"
+    display="inlineBlock"
     position="top"
   >
     <EuiBadge
@@ -250,6 +261,7 @@ exports[`setupMode SetupModeTooltip internalCollectionOn should render for beats
   <EuiToolTip
     content="Metricbeat is monitoring all instances. Click to view instances and disable self monitoring."
     delay="regular"
+    display="inlineBlock"
     position="top"
   >
     <EuiBadge
@@ -272,6 +284,7 @@ exports[`setupMode SetupModeTooltip internalCollectionOn should render for elast
   <EuiToolTip
     content="Metricbeat is monitoring all nodes. Click to view nodes and disable self monitoring."
     delay="regular"
+    display="inlineBlock"
     position="top"
   >
     <EuiBadge
@@ -294,6 +307,7 @@ exports[`setupMode SetupModeTooltip internalCollectionOn should render for kiban
   <EuiToolTip
     content="Metricbeat is monitoring all instances. Click to view instances and disable self monitoring."
     delay="regular"
+    display="inlineBlock"
     position="top"
   >
     <EuiBadge
@@ -316,6 +330,7 @@ exports[`setupMode SetupModeTooltip internalCollectionOn should render for logst
   <EuiToolTip
     content="Metricbeat is monitoring all nodes. Click to view nodes and disable self monitoring."
     delay="regular"
+    display="inlineBlock"
     position="top"
   >
     <EuiBadge
@@ -338,6 +353,7 @@ exports[`setupMode SetupModeTooltip no detectable instances should render for ap
   <EuiToolTip
     content="We did not detect any usage. Click to view servers."
     delay="regular"
+    display="inlineBlock"
     position="top"
   >
     <EuiBadge
@@ -360,6 +376,7 @@ exports[`setupMode SetupModeTooltip no detectable instances should render for be
   <EuiToolTip
     content="We did not detect any usage. Click to view instances."
     delay="regular"
+    display="inlineBlock"
     position="top"
   >
     <EuiBadge
@@ -382,6 +399,7 @@ exports[`setupMode SetupModeTooltip no detectable instances should render for el
   <EuiToolTip
     content="We did not detect any usage. Click to view nodes."
     delay="regular"
+    display="inlineBlock"
     position="top"
   >
     <EuiBadge
@@ -404,6 +422,7 @@ exports[`setupMode SetupModeTooltip no detectable instances should render for ki
   <EuiToolTip
     content="We did not detect any usage. Click to view instances."
     delay="regular"
+    display="inlineBlock"
     position="top"
   >
     <EuiBadge
@@ -426,6 +445,7 @@ exports[`setupMode SetupModeTooltip no detectable instances should render for lo
   <EuiToolTip
     content="We did not detect any usage. Click to view nodes."
     delay="regular"
+    display="inlineBlock"
     position="top"
   >
     <EuiBadge
@@ -448,6 +468,7 @@ exports[`setupMode SetupModeTooltip only detectable instances should render for 
   <EuiToolTip
     content="We detected usage of this product. Click to start monitoring."
     delay="regular"
+    display="inlineBlock"
     position="top"
   >
     <EuiBadge
@@ -470,6 +491,7 @@ exports[`setupMode SetupModeTooltip only detectable instances should render for 
   <EuiToolTip
     content="We detected usage of this product. Click to start monitoring."
     delay="regular"
+    display="inlineBlock"
     position="top"
   >
     <EuiBadge
@@ -492,6 +514,7 @@ exports[`setupMode SetupModeTooltip only detectable instances should render for 
   <EuiToolTip
     content="We detected usage of this product. Click to start monitoring."
     delay="regular"
+    display="inlineBlock"
     position="top"
   >
     <EuiBadge
@@ -514,6 +537,7 @@ exports[`setupMode SetupModeTooltip only detectable instances should render for 
   <EuiToolTip
     content="We detected usage of this product. Click to start monitoring."
     delay="regular"
+    display="inlineBlock"
     position="top"
   >
     <EuiBadge
@@ -536,6 +560,7 @@ exports[`setupMode SetupModeTooltip only detectable instances should render for 
   <EuiToolTip
     content="We detected usage of this product. Click to start monitoring."
     delay="regular"
+    display="inlineBlock"
     position="top"
   >
     <EuiBadge

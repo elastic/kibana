@@ -398,7 +398,7 @@ export const registerCollector: RegisterCollector = ({
     isReady: () => true,
     fetch: async ({ esClient }: CollectorFetchContext): Promise<UsageData> => {
       const internalSavedObjectsClient = await getInternalSavedObjectsClient(core);
-      const soClient = (internalSavedObjectsClient as unknown) as SavedObjectsClientContract;
+      const soClient = internalSavedObjectsClient as unknown as SavedObjectsClientContract;
 
       return {
         detectionMetrics:

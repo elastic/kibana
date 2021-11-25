@@ -6,16 +6,16 @@
  */
 
 import { removeNestedFieldChildren } from './new_job_capabilities_service_analytics';
-import { IndexPattern } from '../../../../../../../src/plugins/data/public';
+import type { DataView } from '../../../../../../../src/plugins/data_views/public';
 
 // there is magic happening here. starting the include name with `mock..`
 // ensures it can be lazily loaded by the jest.mock function below.
 import nestedFieldIndexResponse from '../__mocks__/nested_field_index_response.json';
 
-const indexPattern = ({
+const indexPattern = {
   id: 'nested-field-index',
   title: 'nested-field-index',
-} as unknown) as IndexPattern;
+} as unknown as DataView;
 
 describe('removeNestedFieldChildren', () => {
   describe('cloudwatch newJobCapsAnalytics()', () => {

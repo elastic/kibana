@@ -55,7 +55,7 @@ describe('LayerControl', () => {
     describe('spinner icon', () => {
       const isLayerLoading = true;
       let isVisible = true;
-      const mockLayerThatIsLoading = ({
+      const mockLayerThatIsLoading = {
         hasErrors: () => {
           return false;
         },
@@ -65,7 +65,7 @@ describe('LayerControl', () => {
         isVisible: () => {
           return isVisible;
         },
-      } as unknown) as ILayer;
+      } as unknown as ILayer;
       test('Should render expand button with loading icon when layer is loading', () => {
         const component = shallow(
           <LayerControl
@@ -90,14 +90,14 @@ describe('LayerControl', () => {
     });
 
     test('Should render expand button with error icon when layer has error', () => {
-      const mockLayerThatHasError = ({
+      const mockLayerThatHasError = {
         hasErrors: () => {
           return true;
         },
         isLayerLoading: () => {
           return false;
         },
-      } as unknown) as ILayer;
+      } as unknown as ILayer;
       const component = shallow(
         <LayerControl
           {...defaultProps}

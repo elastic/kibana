@@ -31,9 +31,9 @@ interface MetaEngineCreationValues {
 interface MetaEngineCreationActions {
   fetchIndexedEngineNames(page?: number): { page: number };
   onEngineCreationSuccess(): void;
-  setIndexedEngineNames(
-    indexedEngineNames: MetaEngineCreationValues['indexedEngineNames']
-  ): { indexedEngineNames: MetaEngineCreationValues['indexedEngineNames'] };
+  setIndexedEngineNames(indexedEngineNames: MetaEngineCreationValues['indexedEngineNames']): {
+    indexedEngineNames: MetaEngineCreationValues['indexedEngineNames'];
+  };
   setRawName(rawName: string): { rawName: string };
   setSelectedIndexedEngineNames(
     selectedIndexedEngineNames: MetaEngineCreationValues['selectedIndexedEngineNames']

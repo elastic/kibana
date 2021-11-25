@@ -5,8 +5,25 @@
  * 2.0.
  */
 
-// TODO: https://github.com/elastic/kibana/issues/109853
-/* eslint-disable @kbn/eslint/no_export_all */
+export {
+  AGG_TYPE,
+  COLOR_MAP_TYPE,
+  ES_GEO_FIELD_TYPE,
+  FIELD_ORIGIN,
+  INITIAL_LOCATION,
+  LABEL_BORDER_SIZES,
+  LAYER_TYPE,
+  MAP_SAVED_OBJECT_TYPE,
+  SOURCE_TYPES,
+  STYLE_TYPE,
+  SYMBOLIZE_AS_TYPES,
+} from './constants';
 
-export * from './constants';
-export * from './types';
+export type {
+  EMSFileSourceDescriptor,
+  ESTermSourceDescriptor,
+  LayerDescriptor,
+  TooltipFeature,
+  VectorLayerDescriptor,
+  VectorStyleDescriptor,
+} from './descriptor_types';

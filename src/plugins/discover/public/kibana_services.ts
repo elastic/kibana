@@ -6,14 +6,13 @@
  * Side Public License, v 1.
  */
 
-import _ from 'lodash';
+import { once } from 'lodash';
 import { createHashHistory } from 'history';
-import { ScopedHistory, AppMountParameters } from 'kibana/public';
-import { UiActionsStart } from 'src/plugins/ui_actions/public';
+import type { ScopedHistory, AppMountParameters } from 'kibana/public';
+import type { UiActionsStart } from 'src/plugins/ui_actions/public';
 import { DiscoverServices } from './build_services';
 import { createGetterSetter } from '../../kibana_utils/public';
-import { search } from '../../data/public';
-import { DocViewsRegistry } from './application/doc_views/doc_views_registry';
+import { DocViewsRegistry } from './services/doc_views/doc_views_registry';
 
 let services: DiscoverServices | null = null;
 let uiActions: UiActionsStart;
@@ -32,23 +31,21 @@ export function setServices(newServices: DiscoverServices) {
 export const setUiActions = (pluginUiActions: UiActionsStart) => (uiActions = pluginUiActions);
 export const getUiActions = () => uiActions;
 
-export const [getHeaderActionMenuMounter, setHeaderActionMenuMounter] = createGetterSetter<
-  AppMountParameters['setHeaderActionMenu']
->('headerActionMenuMounter');
+export const [getHeaderActionMenuMounter, setHeaderActionMenuMounter] =
+  createGetterSetter<AppMountParameters['setHeaderActionMenu']>('headerActionMenuMounter');
 
 export const [getUrlTracker, setUrlTracker] = createGetterSetter<{
   setTrackedUrl: (url: string) => void;
   restorePreviousUrl: () => void;
 }>('urlTracker');
 
-export const [getDocViewsRegistry, setDocViewsRegistry] = createGetterSetter<DocViewsRegistry>(
-  'DocViewsRegistry'
-);
+export const [getDocViewsRegistry, setDocViewsRegistry] =
+  createGetterSetter<DocViewsRegistry>('DocViewsRegistry');
 
 /**
  * Makes sure discover and context are using one instance of history.
  */
-export const getHistory = _.once(() => {
+export const getHistory = once(() => {
   const history = createHashHistory();
   history.listen(() => {
     // keep at least one listener so that `history.location` always in sync
@@ -69,21 +66,5 @@ export const syncHistoryLocations = () => {
   return h;
 };
 
-export const [getScopedHistory, setScopedHistory] = createGetterSetter<ScopedHistory>(
-  'scopedHistory'
-);
-
-export const { tabifyAggResponse } = search;
-export { unhashUrl, redirectWhenMissing } from '../../kibana_utils/public';
-export { formatMsg, formatStack, subscribeWithScope } from '../../kibana_legacy/public';
-
-// EXPORT types
-export {
-  IndexPatternsContract,
-  IndexPattern,
-  indexPatterns,
-  IndexPatternField,
-  ISearchSource,
-  EsQuerySortValue,
-  SortDirection,
-} from '../../data/public';
+export const [getScopedHistory, setScopedHistory] =
+  createGetterSetter<ScopedHistory>('scopedHistory');

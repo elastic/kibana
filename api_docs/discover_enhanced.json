@@ -584,19 +584,6 @@
           },
           {
             "parentPluginId": "discoverEnhanced",
-            "id": "def-public.DiscoverEnhancedSetupDependencies.kibanaLegacy",
-            "type": "Object",
-            "tags": [],
-            "label": "kibanaLegacy",
-            "description": [],
-            "signature": [
-              "{} | undefined"
-            ],
-            "path": "x-pack/plugins/discover_enhanced/public/plugin.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "discoverEnhanced",
             "id": "def-public.DiscoverEnhancedSetupDependencies.share",
             "type": "CompoundType",
             "tags": [],
@@ -715,19 +702,6 @@
           },
           {
             "parentPluginId": "discoverEnhanced",
-            "id": "def-public.DiscoverEnhancedStartDependencies.kibanaLegacy",
-            "type": "Object",
-            "tags": [],
-            "label": "kibanaLegacy",
-            "description": [],
-            "signature": [
-              "{ loadFontAwesome: () => Promise<void>; loadAngularBootstrap: () => Promise<void>; config: Readonly<{} & { defaultAppId: string; }>; } | undefined"
-            ],
-            "path": "x-pack/plugins/discover_enhanced/public/plugin.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "discoverEnhanced",
             "id": "def-public.DiscoverEnhancedStartDependencies.share",
             "type": "CompoundType",
             "tags": [],
@@ -754,15 +728,7 @@
             "label": "uiActions",
             "description": [],
             "signature": [
-              "{ readonly clear: () => void; readonly fork: () => ",
-              {
-                "pluginId": "uiActions",
-                "scope": "public",
-                "docId": "kibUiActionsPluginApi",
-                "section": "def-public.UiActionsService",
-                "text": "UiActionsService"
-              },
-              "; readonly addTriggerAction: (triggerId: string, action: ",
+              "{ readonly clear: () => void; readonly addTriggerAction: (triggerId: string, action: ",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -832,7 +798,15 @@
                 "section": "def-public.Action",
                 "text": "Action"
               },
-              "<object>[]>; readonly executeTriggerActions: (triggerId: string, context: object) => Promise<void>; }"
+              "<object>[]>; readonly executeTriggerActions: (triggerId: string, context: object) => Promise<void>; readonly fork: () => ",
+              {
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.UiActionsService",
+                "text": "UiActionsService"
+              },
+              "; }"
             ],
             "path": "x-pack/plugins/discover_enhanced/public/plugin.ts",
             "deprecated": false

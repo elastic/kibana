@@ -17,7 +17,7 @@ export function useInstanceDetailsFetcher({
 }) {
   const {
     query: { rangeFrom, rangeTo },
-  } = useApmParams('/services/:serviceName/overview');
+  } = useApmParams('/services/{serviceName}/overview');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
@@ -28,7 +28,7 @@ export function useInstanceDetailsFetcher({
       }
       return callApmApi({
         endpoint:
-          'GET /api/apm/services/{serviceName}/service_overview_instances/details/{serviceNodeName}',
+          'GET /internal/apm/services/{serviceName}/service_overview_instances/details/{serviceNodeName}',
         params: {
           path: {
             serviceName,

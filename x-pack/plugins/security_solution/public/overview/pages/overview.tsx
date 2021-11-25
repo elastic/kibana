@@ -27,14 +27,14 @@ import { SecurityPageName } from '../../app/types';
 import { EndpointNotice } from '../components/endpoint_notice';
 import { useMessagesStorage } from '../../common/containers/local_storage/use_messages_storage';
 import { ENDPOINT_METADATA_INDEX } from '../../../common/constants';
-import { useSourcererScope } from '../../common/containers/sourcerer';
-import { Sourcerer } from '../../common/components/sourcerer';
-import { SourcererScopeName } from '../../common/store/sourcerer/model';
+import { useSourcererDataView } from '../../common/containers/sourcerer';
 import { useDeepEqualSelector } from '../../common/hooks/use_selector';
 import { ThreatIntelLinkPanel } from '../components/overview_cti_links';
 import { useIsThreatIntelModuleEnabled } from '../containers/overview_cti_links/use_is_threat_intel_module_enabled';
 import { useUserPrivileges } from '../../common/components/user_privileges';
+import { RiskyHostLinks } from '../components/overview_risky_host_links';
 import { useAlertsPrivileges } from '../../detections/containers/detection_engine/alerts/use_alerts_privileges';
+import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 
 const SidebarFlexItem = styled(EuiFlexItem)`
   margin-right: 24px;
@@ -54,7 +54,7 @@ const OverviewComponent = () => {
   const filters = useDeepEqualSelector(getGlobalFiltersQuerySelector);
 
   const { from, deleteQuery, setQuery, to } = useGlobalTime();
-  const { indicesExist, indexPattern, selectedPatterns } = useSourcererScope();
+  const { indicesExist, indexPattern, selectedPatterns } = useSourcererDataView();
 
   const endpointMetadataIndex = useMemo<string[]>(() => {
     return [ENDPOINT_METADATA_INDEX];
@@ -76,6 +76,9 @@ const OverviewComponent = () => {
   } = useUserPrivileges();
   const { hasIndexRead, hasKibanaREAD } = useAlertsPrivileges();
   const isThreatIntelModuleEnabled = useIsThreatIntelModuleEnabled();
+
+  const riskyHostsEnabled = useIsExperimentalFeatureEnabled('riskyHostsEnabled');
+
   return (
     <>
       {indicesExist ? (
@@ -91,7 +94,6 @@ const OverviewComponent = () => {
                 <EuiSpacer size="l" />
               </>
             )}
-            <Sourcerer scope={SourcererScopeName.default} />
             <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween">
               <SidebarFlexItem grow={false}>
                 <StatefulSidebar />
@@ -146,13 +148,27 @@ const OverviewComponent = () => {
                     />
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
-                    <ThreatIntelLinkPanel
-                      isThreatIntelModuleEnabled={isThreatIntelModuleEnabled}
-                      deleteQuery={deleteQuery}
-                      from={from}
-                      setQuery={setQuery}
-                      to={to}
-                    />
+                    <EuiFlexGroup direction="row">
+                      <EuiFlexItem grow={1}>
+                        <ThreatIntelLinkPanel
+                          isThreatIntelModuleEnabled={isThreatIntelModuleEnabled}
+                          deleteQuery={deleteQuery}
+                          from={from}
+                          setQuery={setQuery}
+                          to={to}
+                        />
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={1}>
+                        {riskyHostsEnabled && (
+                          <RiskyHostLinks
+                            timerange={{
+                              from,
+                              to,
+                            }}
+                          />
+                        )}
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
                   </EuiFlexItem>
                 </EuiFlexGroup>
               </EuiFlexItem>

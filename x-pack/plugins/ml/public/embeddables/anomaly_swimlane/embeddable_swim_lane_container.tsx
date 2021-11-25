@@ -54,22 +54,15 @@ export const EmbeddableSwimLaneContainer: FC<ExplorerSwimlaneContainerProps> = (
 
   const [selectedCells, setSelectedCells] = useState<AppStateSelectedCells | undefined>();
 
-  const [
-    swimlaneType,
-    swimlaneData,
-    perPage,
-    setPerPage,
-    timeBuckets,
-    isLoading,
-    error,
-  ] = useSwimlaneInputResolver(
-    embeddableInput,
-    onInputChange,
-    refresh,
-    services,
-    chartWidth,
-    fromPage
-  );
+  const [swimlaneType, swimlaneData, perPage, setPerPage, timeBuckets, isLoading, error] =
+    useSwimlaneInputResolver(
+      embeddableInput,
+      onInputChange,
+      refresh,
+      services,
+      chartWidth,
+      fromPage
+    );
 
   useEffect(() => {
     onOutputChange({

@@ -118,7 +118,9 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           `--xpack.actions.allowedHosts=${JSON.stringify(['localhost', 'some.non.existent.com'])}`,
           `--xpack.actions.enabledActionTypes=${JSON.stringify(enabledActionTypes)}`,
           '--xpack.eventLog.logEntries=true',
-          ...disabledPlugins.map((key) => `--xpack.${key}.enabled=false`),
+          ...disabledPlugins
+            .filter((k) => k !== 'security')
+            .map((key) => `--xpack.${key}.enabled=false`),
           // Actions simulators plugin. Needed for testing push to external services.
           ...alertingPlugins.map(
             (pluginDir) =>
@@ -137,13 +139,16 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
             (pluginDir) =>
               `--plugin-path=${path.resolve(__dirname, 'fixtures', 'plugins', pluginDir)}`
           ),
-          `--server.xsrf.whitelist=${JSON.stringify(getAllExternalServiceSimulatorPaths())}`,
+          `--server.xsrf.allowlist=${JSON.stringify(getAllExternalServiceSimulatorPaths())}`,
           ...(ssl
             ? [
                 `--elasticsearch.hosts=${servers.elasticsearch.protocol}://${servers.elasticsearch.hostname}:${servers.elasticsearch.port}`,
                 `--elasticsearch.ssl.certificateAuthorities=${CA_CERT_PATH}`,
               ]
             : []),
+          '--xpack.ruleRegistry.write.enabled=true',
+          '--xpack.ruleRegistry.write.cache.enabled=false',
+          `--xpack.securitySolution.enableExperimental=${JSON.stringify(['ruleRegistryEnabled'])}`,
         ],
       },
     };

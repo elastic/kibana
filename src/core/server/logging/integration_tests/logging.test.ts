@@ -14,7 +14,6 @@ import { Subject } from 'rxjs';
 function createRoot() {
   return kbnTestServer.createRoot({
     logging: {
-      silent: true, // set "true" in kbnTestServer
       appenders: {
         'test-console': {
           type: 'console',

@@ -15,8 +15,7 @@ import type { ActiveCursorSyncOption, ActiveCursorPayload } from './types';
 import type { Chart, PointerEvent } from '@elastic/charts';
 import type { Datatable } from '../../../../expressions/public';
 
-// FLAKY: https://github.com/elastic/kibana/issues/110038
-describe.skip('useActiveCursor', () => {
+describe('useActiveCursor', () => {
   let cursor: ActiveCursorPayload['cursor'];
   let dispatchExternalPointerEvent: jest.Mock;
 
@@ -77,7 +76,7 @@ describe.skip('useActiveCursor', () => {
   test('should debounce events', async () => {
     await act(
       {
-        debounce: 5,
+        debounce: 50,
         datatables: [
           {
             columns: [
@@ -111,7 +110,7 @@ describe.skip('useActiveCursor', () => {
   test('should trigger cursor pointer update (chart type: datatable - time based, event type: time)', async () => {
     await act(
       {
-        datatables: ([
+        datatables: [
           {
             columns: [
               {
@@ -125,7 +124,7 @@ describe.skip('useActiveCursor', () => {
               },
             ],
           },
-        ] as unknown) as Datatable[],
+        ] as unknown as Datatable[],
       },
       [{ isDateHistogram: true }, { accessors: ['foo_index:foo_field'] }]
     );

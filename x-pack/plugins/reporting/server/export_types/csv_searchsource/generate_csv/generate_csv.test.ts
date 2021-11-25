@@ -75,20 +75,21 @@ const mockSearchSourceGetFieldDefault = jest.fn().mockImplementation((key: strin
           getByName: jest.fn().mockImplementation(() => []),
           getByType: jest.fn().mockImplementation(() => []),
         },
+        metaFields: ['_id', '_index', '_type', '_score'],
         getFormatterForField: jest.fn(),
       };
   }
 });
 
-const mockFieldFormatsRegistry = ({
+const mockFieldFormatsRegistry = {
   deserialize: jest
     .fn()
     .mockImplementation(() => ({ id: 'string', convert: jest.fn().mockImplementation(identity) })),
-} as unknown) as FieldFormatsRegistry;
+} as unknown as FieldFormatsRegistry;
 
 beforeEach(async () => {
   content = '';
-  stream = ({ write: jest.fn((chunk) => (content += chunk)) } as unknown) as typeof stream;
+  stream = { write: jest.fn((chunk) => (content += chunk)) } as unknown as typeof stream;
   mockEsClient = elasticsearchServiceMock.createScopedClusterClient();
   mockDataClient = dataPluginMock.createStartContract().search.asScoped({} as any);
   mockDataClient.search = mockDataClientSearchDefault;
@@ -344,12 +345,13 @@ it('uses the scrollId to page all the data', async () => {
   // `scroll` and `clearScroll` must be called with scroll ID in the post body!
   expect(mockEsClient.asCurrentUser.scroll).toHaveBeenCalledTimes(9);
   expect(mockEsClient.asCurrentUser.scroll).toHaveBeenCalledWith({
-    body: { scroll: '30s', scroll_id: 'awesome-scroll-hero' },
+    scroll: '30s',
+    scroll_id: 'awesome-scroll-hero',
   });
 
   expect(mockEsClient.asCurrentUser.clearScroll).toHaveBeenCalledTimes(1);
   expect(mockEsClient.asCurrentUser.clearScroll).toHaveBeenCalledWith({
-    body: { scroll_id: ['awesome-scroll-hero'] },
+    scroll_id: ['awesome-scroll-hero'],
   });
 });
 

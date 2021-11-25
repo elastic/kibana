@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import Bluebird from 'bluebird';
 import { createSavedObjectClass } from './saved_object';
 import {
   SavedObject,
@@ -20,7 +19,7 @@ import { coreMock } from '../../../../core/public/mocks';
 import { dataPluginMock, createSearchSourceMock } from '../../../../plugins/data/public/mocks';
 import { createStubIndexPattern } from '../../../../plugins/data/common/stubs';
 import { SavedObjectAttributes, SimpleSavedObject } from 'kibana/public';
-import { IndexPattern } from '../../../data/common/index_patterns/index_patterns';
+import { DataView } from '../../../data/common';
 import { savedObjectsDecoratorRegistryMock } from './decorators/registry.mock';
 
 describe('Saved Object', () => {
@@ -55,16 +54,16 @@ describe('Saved Object', () => {
    */
   function stubESResponse(mockDocResponse: SimpleSavedObject<SavedObjectAttributes>) {
     // Stub out search for duplicate title:
-    savedObjectsClientStub.get = jest.fn().mockReturnValue(Bluebird.resolve(mockDocResponse));
-    savedObjectsClientStub.update = jest.fn().mockReturnValue(Bluebird.resolve(mockDocResponse));
+    savedObjectsClientStub.get = jest.fn().mockReturnValue(Promise.resolve(mockDocResponse));
+    savedObjectsClientStub.update = jest.fn().mockReturnValue(Promise.resolve(mockDocResponse));
 
     savedObjectsClientStub.find = jest
       .fn()
-      .mockReturnValue(Bluebird.resolve({ savedObjects: [], total: 0 }));
+      .mockReturnValue(Promise.resolve({ savedObjects: [], total: 0 }));
 
     savedObjectsClientStub.bulkGet = jest
       .fn()
-      .mockReturnValue(Bluebird.resolve({ savedObjects: [mockDocResponse] }));
+      .mockReturnValue(Promise.resolve({ savedObjects: [mockDocResponse] }));
   }
 
   function stubSavedObjectsClientCreate(
@@ -73,7 +72,7 @@ describe('Saved Object', () => {
   ) {
     savedObjectsClientStub.create = jest
       .fn()
-      .mockReturnValue(resolve ? Bluebird.resolve(resp) : Bluebird.reject(resp));
+      .mockReturnValue(resolve ? Promise.resolve(resp) : Promise.reject(resp));
   }
 
   /**
@@ -93,7 +92,7 @@ describe('Saved Object', () => {
 
   const initSavedObjectClass = () => {
     SavedObjectClass = createSavedObjectClass(
-      ({
+      {
         savedObjectsClient: savedObjectsClientStub,
         indexPatterns: dataStartMock.indexPatterns,
         search: {
@@ -104,7 +103,7 @@ describe('Saved Object', () => {
             createEmpty: createSearchSourceMock,
           },
         },
-      } as unknown) as SavedObjectKibanaServices,
+      } as unknown as SavedObjectKibanaServices,
       decoratorRegistry
     );
   };
@@ -262,7 +261,7 @@ describe('Saved Object', () => {
         return createInitializedSavedObject({ type: 'dashboard', id: myId }).then((savedObject) => {
           savedObjectsClientStub.create = jest.fn().mockImplementation(() => {
             expect(savedObject.id).toBe(myId);
-            return Bluebird.resolve({ id: myId });
+            return Promise.resolve({ id: myId });
           });
           savedObject.copyOnSave = false;
 
@@ -296,7 +295,7 @@ describe('Saved Object', () => {
         return createInitializedSavedObject({ type: 'dashboard', id }).then((savedObject) => {
           savedObjectsClientStub.create = jest.fn().mockImplementation(() => {
             expect(savedObject.isSaving).toBe(true);
-            return Bluebird.resolve({
+            return Promise.resolve({
               type: 'dashboard',
               id,
               _version: 'foo',
@@ -315,7 +314,7 @@ describe('Saved Object', () => {
         return createInitializedSavedObject({ type: 'dashboard' }).then((savedObject) => {
           savedObjectsClientStub.create = jest.fn().mockImplementation(() => {
             expect(savedObject.isSaving).toBe(true);
-            return Bluebird.reject('');
+            return Promise.reject('');
           });
 
           expect(savedObject.isSaving).toBe(false);
@@ -653,13 +652,13 @@ describe('Saved Object', () => {
 
     it('passes references to search source parsing function', async () => {
       SavedObjectClass = createSavedObjectClass(
-        ({
+        {
           savedObjectsClient: savedObjectsClientStub,
           indexPatterns: dataStartMock.indexPatterns,
           search: {
             ...dataStartMock.search,
           },
-        } as unknown) as SavedObjectKibanaServices,
+        } as unknown as SavedObjectKibanaServices,
         decoratorRegistry
       );
       const savedObject = new SavedObjectClass({ type: 'dashboard', searchSource: true });
@@ -725,7 +724,7 @@ describe('Saved Object', () => {
           type: 'dashboard',
           afterESResp: afterESRespCallback,
           searchSource: true,
-          indexPattern: { id: indexPatternId } as IndexPattern,
+          indexPattern: { id: indexPatternId } as DataView,
         };
 
         stubESResponse(
@@ -745,14 +744,14 @@ describe('Saved Object', () => {
             },
           });
           savedObject.searchSource!.setField('index', indexPattern);
-          return Bluebird.resolve(indexPattern);
+          return Promise.resolve(indexPattern);
         });
         expect(!!savedObject.searchSource!.getField('index')).toBe(false);
 
         return savedObject.init!().then(() => {
           expect(afterESRespCallback).toHaveBeenCalled();
           const index = savedObject.searchSource!.getField('index');
-          expect(index instanceof IndexPattern).toBe(true);
+          expect(index instanceof DataView).toBe(true);
           expect(index!.id).toEqual(indexPatternId);
         });
       });
@@ -765,7 +764,7 @@ describe('Saved Object', () => {
           type: 'dashboard',
           afterESResp: afterESRespCallback,
           searchSource: false,
-          indexPattern: { id: indexPatternId } as IndexPattern,
+          indexPattern: { id: indexPatternId } as DataView,
         };
 
         stubESResponse(getMockedDocResponse(indexPatternId));

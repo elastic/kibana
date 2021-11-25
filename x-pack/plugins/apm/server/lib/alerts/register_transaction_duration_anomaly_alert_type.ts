@@ -8,7 +8,7 @@
 import { schema } from '@kbn/config-schema';
 import { compact } from 'lodash';
 import { ESSearchResponse } from 'src/core/types/elasticsearch';
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type {
   ALERT_EVALUATION_THRESHOLD as ALERT_EVALUATION_THRESHOLD_TYPED,
   ALERT_EVALUATION_VALUE as ALERT_EVALUATION_VALUE_TYPED,
@@ -46,9 +46,12 @@ import {
   getEnvironmentEsField,
   getEnvironmentLabel,
 } from '../../../common/environment_filter_values';
+import { termQuery } from '../../../../observability/server';
 
-const ALERT_EVALUATION_THRESHOLD: typeof ALERT_EVALUATION_THRESHOLD_TYPED = ALERT_EVALUATION_THRESHOLD_NON_TYPED;
-const ALERT_EVALUATION_VALUE: typeof ALERT_EVALUATION_VALUE_TYPED = ALERT_EVALUATION_VALUE_NON_TYPED;
+const ALERT_EVALUATION_THRESHOLD: typeof ALERT_EVALUATION_THRESHOLD_TYPED =
+  ALERT_EVALUATION_THRESHOLD_NON_TYPED;
+const ALERT_EVALUATION_VALUE: typeof ALERT_EVALUATION_VALUE_TYPED =
+  ALERT_EVALUATION_VALUE_NON_TYPED;
 const ALERT_SEVERITY: typeof ALERT_SEVERITY_TYPED = ALERT_SEVERITY_NON_TYPED;
 const ALERT_REASON: typeof ALERT_REASON_TYPED = ALERT_REASON_NON_TYPED;
 
@@ -155,24 +158,11 @@ export function registerTransactionDurationAnomalyAlertType({
                       },
                     },
                   },
-                  ...(alertParams.serviceName
-                    ? [
-                        {
-                          term: {
-                            partition_field_value: alertParams.serviceName,
-                          },
-                        },
-                      ]
-                    : []),
-                  ...(alertParams.transactionType
-                    ? [
-                        {
-                          term: {
-                            by_field_value: alertParams.transactionType,
-                          },
-                        },
-                      ]
-                    : []),
+                  ...termQuery(
+                    'partition_field_value',
+                    alertParams.serviceName
+                  ),
+                  ...termQuery('by_field_value', alertParams.transactionType),
                 ] as QueryDslQueryContainer[],
               },
             },
@@ -206,10 +196,8 @@ export function registerTransactionDurationAnomalyAlertType({
           },
         };
 
-        const response: ESSearchResponse<
-          unknown,
-          typeof anomalySearchParams
-        > = (await mlAnomalySearch(anomalySearchParams, [])) as any;
+        const response: ESSearchResponse<unknown, typeof anomalySearchParams> =
+          (await mlAnomalySearch(anomalySearchParams, [])) as any;
 
         const anomalies =
           response.aggregations?.anomaly_groups.buckets

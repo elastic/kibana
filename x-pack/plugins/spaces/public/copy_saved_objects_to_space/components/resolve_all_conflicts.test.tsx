@@ -17,7 +17,7 @@ import type { ResolveAllConflictsProps } from './resolve_all_conflicts';
 import { ResolveAllConflicts } from './resolve_all_conflicts';
 
 describe('ResolveAllConflicts', () => {
-  const summarizedCopyResult = ({
+  const summarizedCopyResult = {
     objects: [
       // these objects have minimal attributes to exercise test scenarios; these are not fully realistic results
       { type: 'type-1', id: 'id-1', conflict: undefined }, // not a conflict
@@ -51,7 +51,7 @@ describe('ResolveAllConflicts', () => {
         },
       },
     ],
-  } as unknown) as SummarizedCopyToSpaceResult;
+  } as unknown as SummarizedCopyToSpaceResult;
   const retries: ImportRetry[] = [
     { type: 'type-1', id: 'id-1', overwrite: false },
     { type: 'type-5', id: 'id-5', overwrite: true, destinationId: 'dest-5b' },

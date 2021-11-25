@@ -25,28 +25,26 @@ import { i18n } from '@kbn/i18n';
 
 async function getDeprecations({ esClient, savedObjectsClient }: GetDeprecationsContext): Promise<DeprecationsDetails[]> {
   const deprecations: DeprecationsDetails[] = [];
-  const count = await getTimelionSheetsCount(savedObjectsClient);
-
+  const count = await getFooCount(savedObjectsClient);
   if (count > 0) {
-    // Example of a manual correctiveAction
     deprecations.push({
-      title: i18n.translate('xpack.timelion.deprecations.worksheetsTitle', {
-        defaultMessage: 'Timelion worksheets are deprecated'
+      title: i18n.translate('xpack.foo.deprecations.title', {
+        defaultMessage: `Foo's are deprecated`
       }),
-      message: i18n.translate('xpack.timelion.deprecations.worksheetsMessage', {
-        defaultMessage: 'You have {count} Timelion worksheets. Migrate your Timelion worksheets to a dashboard to continue using them.',
+      message: i18n.translate('xpack.foo.deprecations.message', {
+        defaultMessage: `You have {count} Foo's. Migrate your Foo's to a dashboard to continue using them.`,
         values: { count },
       }),
       documentationUrl:
-        'https://www.elastic.co/guide/en/kibana/current/create-panels-with-timelion.html',
+        'https://www.elastic.co/guide/en/kibana/current/foo.html',
       level: 'warning',
       correctiveActions: {
         manualSteps: [
-           i18n.translate('xpack.timelion.deprecations.worksheets.manualStepOneMessage', {
+           i18n.translate('xpack.foo.deprecations.manualStepOneMessage', {
              defaultMessage: 'Navigate to the Kibana Dashboard and click "Create dashboard".',
            }),
-           i18n.translate('xpack.timelion.deprecations.worksheets.manualStepTwoMessage', {
-             defaultMessage: 'Select Timelion from the "New Visualization" window.',
+           i18n.translate('xpack.foo.deprecations.manualStepTwoMessage', {
+             defaultMessage: 'Select Foo from the "New Visualization" window.',
            }),
         ],
         api: {
@@ -77,12 +75,11 @@ export class Plugin() {
     core.deprecations.registerDeprecations({ getDeprecations });
   }
 }
-
 ```
 
 ## Properties
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [registerDeprecations](./kibana-plugin-core-server.deprecationsservicesetup.registerdeprecations.md) | <code>(deprecationContext: RegisterDeprecationsConfig) =&gt; void</code> |  |
+|  [registerDeprecations](./kibana-plugin-core-server.deprecationsservicesetup.registerdeprecations.md) | (deprecationContext: RegisterDeprecationsConfig) =&gt; void |  |
 

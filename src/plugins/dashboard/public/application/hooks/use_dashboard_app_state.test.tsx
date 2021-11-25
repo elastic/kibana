@@ -12,13 +12,13 @@ import { Provider } from 'react-redux';
 import { createBrowserHistory } from 'history';
 import { renderHook, act, RenderHookResult } from '@testing-library/react-hooks';
 
-import { DashboardContainer } from '..';
 import { DashboardSessionStorage } from '../lib';
 import { coreMock } from '../../../../../core/public/mocks';
 import { DashboardConstants } from '../../dashboard_constants';
 import { dataPluginMock } from '../../../../data/public/mocks';
 import { SavedObjectLoader } from '../../services/saved_objects';
 import { DashboardAppServices, DashboardAppState } from '../../types';
+import { DashboardContainer } from '../embeddable/dashboard_container';
 import { KibanaContextProvider } from '../../../../kibana_react/public';
 import { EmbeddableFactory, ViewMode } from '../../services/embeddable';
 import { dashboardStateStore, setDescription, setViewMode } from '../state';
@@ -59,9 +59,7 @@ const createDashboardAppStateServices = () => {
   const defaults = makeDefaultServices();
   const indexPatterns = {} as IndexPatternsContract;
   const defaultIndexPattern = { id: 'foo', fields: [{ name: 'bar' }] } as IIndexPattern;
-  indexPatterns.ensureDefaultIndexPattern = jest
-    .fn()
-    .mockImplementation(() => Promise.resolve(true));
+  indexPatterns.ensureDefaultDataView = jest.fn().mockImplementation(() => Promise.resolve(true));
   indexPatterns.getDefault = jest
     .fn()
     .mockImplementation(() => Promise.resolve(defaultIndexPattern));
@@ -82,7 +80,7 @@ const setupEmbeddableFactory = (
   id: string
 ): SetupEmbeddableFactoryReturn => {
   const coreStart = coreMock.createStart();
-  const containerOptions = ({
+  const containerOptions = {
     notifications: services.core.notifications,
     savedObjectMetaData: {} as unknown,
     ExitFullScreenButton: () => null,
@@ -94,7 +92,7 @@ const setupEmbeddableFactory = (
     inspector: {} as unknown,
     uiActions: {} as unknown,
     http: coreStart.http,
-  } as unknown) as DashboardContainerServices;
+  } as unknown as DashboardContainerServices;
 
   const dashboardContainer = new DashboardContainer(
     { ...getSampleDashboardInput(), id },
@@ -103,9 +101,9 @@ const setupEmbeddableFactory = (
   const deferEmbeddableCreate = defer();
   services.embeddable.getEmbeddableFactory = jest.fn().mockImplementation(
     () =>
-      (({
+      ({
         create: () => deferEmbeddableCreate.promise,
-      } as unknown) as EmbeddableFactory)
+      } as unknown as EmbeddableFactory)
   );
   const dashboardDestroySpy = jest.spyOn(dashboardContainer, 'destroy');
 
@@ -208,7 +206,9 @@ describe('Dashboard container lifecycle', () => {
   });
 });
 
-describe('Dashboard initial state', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/116050
+// FLAKY: https://github.com/elastic/kibana/issues/105018
+describe.skip('Dashboard initial state', () => {
   it('Extracts state from Dashboard Saved Object', async () => {
     const { renderHookResult, embeddableFactoryResult } = renderDashboardAppStateHook({});
     const getResult = () => renderHookResult.result.current;
@@ -230,7 +230,7 @@ describe('Dashboard initial state', () => {
     savedDashboards.get = jest.fn().mockImplementation((id?: string) =>
       Promise.resolve(
         getSavedDashboardMock({
-          getFilters: () => [({ meta: { test: 'filterMeTimbers' } } as unknown) as Filter],
+          getFilters: () => [{ meta: { test: 'filterMeTimbers' } } as unknown as Filter],
           timeRestore: true,
           timeFrom: 'now-13d',
           timeTo: 'now',
@@ -253,16 +253,16 @@ describe('Dashboard initial state', () => {
       to: 'now',
     });
     expect(services.data.query.filterManager.setAppFilters).toHaveBeenCalledWith([
-      ({ meta: { test: 'filterMeTimbers' } } as unknown) as Filter,
+      { meta: { test: 'filterMeTimbers' } } as unknown as Filter,
     ]);
   });
 
   it('Combines session state and URL state into initial state', async () => {
-    const dashboardSessionStorage = ({
+    const dashboardSessionStorage = {
       getState: jest
         .fn()
         .mockReturnValue({ viewMode: ViewMode.EDIT, description: 'this should be overwritten' }),
-    } as unknown) as DashboardSessionStorage;
+    } as unknown as DashboardSessionStorage;
     const kbnUrlStateStorage = createKbnUrlStateStorage();
     kbnUrlStateStorage.set('_a', { description: 'with this' });
     const { renderHookResult, embeddableFactoryResult } = renderDashboardAppStateHook({
@@ -278,7 +278,8 @@ describe('Dashboard initial state', () => {
   });
 });
 
-describe('Dashboard state sync', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/116043
+describe.skip('Dashboard state sync', () => {
   let defaultDashboardAppStateHookResult: RenderDashboardStateHookReturn;
   const getResult = () => defaultDashboardAppStateHookResult.renderHookResult.result.current;
 

@@ -9,7 +9,12 @@ import { Server } from '@hapi/hapi';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import { Logger } from '@kbn/logging';
-import { CoreSetup, PluginInitializerContext, Plugin } from 'src/core/server';
+import {
+  CoreSetup,
+  PluginInitializerContext,
+  Plugin,
+  PluginConfigDescriptor,
+} from 'src/core/server';
 import { LOGS_FEATURE_ID, METRICS_FEATURE_ID } from '../common/constants';
 import { InfraStaticSourceConfiguration } from '../common/source_configuration/source_configuration';
 import { inventoryViewSavedObjectType } from '../common/saved_objects/inventory_view';
@@ -35,10 +40,10 @@ import { UsageCollector } from './usage/usage_collector';
 import { createGetLogQueryFields } from './services/log_queries/get_log_query_fields';
 import { handleEsError } from '../../../../src/plugins/es_ui_shared/server';
 import { RulesService } from './services/rules';
+import { configDeprecations, getInfraDeprecationsFactory } from './deprecations';
 
-export const config = {
+export const config: PluginConfigDescriptor = {
   schema: schema.object({
-    enabled: schema.boolean({ defaultValue: true }),
     inventory: schema.object({
       compositeSize: schema.number({ defaultValue: 2000 }),
     }),
@@ -46,16 +51,9 @@ export const config = {
       schema.object({
         default: schema.maybe(
           schema.object({
-            logAlias: schema.maybe(schema.string()), // NOTE / TODO: Should be deprecated in 8.0.0
-            metricAlias: schema.maybe(schema.string()),
             fields: schema.maybe(
               schema.object({
-                timestamp: schema.maybe(schema.string()),
                 message: schema.maybe(schema.arrayOf(schema.string())),
-                tiebreaker: schema.maybe(schema.string()),
-                host: schema.maybe(schema.string()),
-                container: schema.maybe(schema.string()),
-                pod: schema.maybe(schema.string()),
               })
             ),
           })
@@ -63,6 +61,7 @@ export const config = {
       })
     ),
   }),
+  deprecations: configDeprecations,
 };
 
 export type InfraConfig = TypeOf<typeof config.schema>;
@@ -154,7 +153,8 @@ export class InfraServerPlugin implements Plugin<InfraPluginSetup> {
 
     plugins.home.sampleData.addAppLinksToSampleDataset('logs', [
       {
-        path: `/app/logs`,
+        sampleObject: null, // indicates that there is no sample object associated with this app link's path
+        getPath: () => `/app/logs`,
         label: logsSampleDataLinkLabel,
         icon: 'logsApp',
       },
@@ -186,6 +186,11 @@ export class InfraServerPlugin implements Plugin<InfraPluginSetup> {
 
     const logEntriesService = new LogEntriesService();
     logEntriesService.setup(core, { ...plugins, sources });
+
+    // register deprecated source configuration fields
+    core.deprecations.registerDeprecations({
+      getDeprecations: getInfraDeprecationsFactory(sources),
+    });
 
     return {
       defineInternalSourceConfiguration(sourceId, sourceProperties) {

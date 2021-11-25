@@ -22,6 +22,13 @@ describe('parseEsInterval', () => {
     expect(parseEsInterval('1y')).toEqual({ value: 1, unit: 'y', type: 'calendar' });
   });
 
+  it('should correctly parse an user-friendly intervals', () => {
+    expect(parseEsInterval('minute')).toEqual({ value: 1, unit: 'm', type: 'calendar' });
+    expect(parseEsInterval('hour')).toEqual({ value: 1, unit: 'h', type: 'calendar' });
+    expect(parseEsInterval('month')).toEqual({ value: 1, unit: 'M', type: 'calendar' });
+    expect(parseEsInterval('year')).toEqual({ value: 1, unit: 'y', type: 'calendar' });
+  });
+
   it('should correctly parse an interval containing unit and multiple value', () => {
     expect(parseEsInterval('250ms')).toEqual({ value: 250, unit: 'ms', type: 'fixed' });
     expect(parseEsInterval('90s')).toEqual({ value: 90, unit: 's', type: 'fixed' });

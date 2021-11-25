@@ -6,20 +6,21 @@
  * Side Public License, v 1.
  */
 
-export interface AnchorLink {
+export interface PluginOrPackage {
+  manifest: {
+    id: string;
+    description?: string;
+    owner: { name: string; githubTeam?: string };
+    serviceFolders: readonly string[];
+  };
+  isPlugin: boolean;
+  directory: string;
+  manifestPath: string;
   /**
-   * The plugin that contains the API being referenced.
+   * Only relevant if `isPlugin` is false. Plugins define functionality for each scope using folder structure,
+   * while a package defines it's intended usage via package.json fields.
    */
-  pluginName: string;
-  /**
-   * It's possible the client and the server both emit an API with
-   * the same name so we need scope in here to add uniqueness.
-   */
-  scope: ApiScope;
-  /**
-   * The name of the api.
-   */
-  apiName: string;
+  scope?: ApiScope;
 }
 
 /**
@@ -242,3 +243,9 @@ export interface ApiStats {
   missingExports: number;
   deprecatedAPIsReferencedCount: number;
 }
+
+export type PluginMetaInfo = ApiStats & {
+  owner: { name: string; githubTeam?: string };
+  description?: string;
+  isPlugin: boolean; // True if plugin, false if a package;
+};

@@ -99,4 +99,6 @@ export const SpyRouteComponent = memo<
   }
 );
 
+SpyRouteComponent.displayName = 'SpyRouteComponent';
+
 export const SpyRoute = withRouter(SpyRouteComponent);

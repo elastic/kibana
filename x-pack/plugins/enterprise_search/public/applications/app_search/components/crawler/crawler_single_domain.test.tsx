@@ -28,15 +28,11 @@ const MOCK_VALUES = {
   domain: {
     url: 'https://elastic.co',
   },
-  // CrawlerOverviewLogic
-  domains: [],
-  crawlRequests: [],
 };
 
 const MOCK_ACTIONS = {
   fetchCrawlerData: jest.fn(),
   fetchDomainData: jest.fn(),
-  getLatestCrawlRequests: jest.fn(),
 };
 
 describe('CrawlerSingleDomain', () => {

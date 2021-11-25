@@ -6,9 +6,7 @@
  * Side Public License, v 1.
  */
 
-declare const expectSnapshot: (
-  received: any
-) => {
+declare const expectSnapshot: (received: any) => {
   toMatch: () => void;
   toMatchInline: (_actual?: any) => void;
 };

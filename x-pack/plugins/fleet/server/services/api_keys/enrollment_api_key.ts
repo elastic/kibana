@@ -8,7 +8,7 @@
 import uuid from 'uuid';
 import Boom from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
-import { ResponseError } from '@elastic/elasticsearch/lib/errors';
+import { errors } from '@elastic/elasticsearch';
 import type { SavedObjectsClientContract, ElasticsearchClient } from 'src/core/server';
 
 import { toElasticsearchQuery, fromKueryExpression } from '@kbn/es-query';
@@ -22,7 +22,8 @@ import { escapeSearchQueryPhrase } from '../saved_object';
 
 import { invalidateAPIKeys } from './security';
 
-const uuidRegex = /^\([0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}\)$/;
+const uuidRegex =
+  /^\([0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}\)$/;
 
 export async function listEnrollmentApiKeys(
   esClient: ElasticsearchClient,
@@ -41,10 +42,12 @@ export async function listEnrollmentApiKeys(
     index: ENROLLMENT_API_KEYS_INDEX,
     from: (page - 1) * perPage,
     size: perPage,
-    sort: 'created_at:desc',
     track_total_hits: true,
     ignore_unavailable: true,
-    body: query ? { query } : undefined,
+    body: {
+      sort: [{ created_at: { order: 'desc' } }],
+      ...(query ? { query } : {}),
+    },
   });
 
   // @ts-expect-error @elastic/elasticsearch _source is optional
@@ -83,7 +86,7 @@ export async function getEnrollmentAPIKey(
     // @ts-expect-error esDocToEnrollmentApiKey doesn't accept optional _source
     return esDocToEnrollmentApiKey(res.body);
   } catch (e) {
-    if (e instanceof ResponseError && e.statusCode === 404) {
+    if (e instanceof errors.ResponseError && e.statusCode === 404) {
       throw Boom.notFound(`Enrollment api key ${id} not found`);
     }
 

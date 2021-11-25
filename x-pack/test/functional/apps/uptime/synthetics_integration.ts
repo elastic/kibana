@@ -129,8 +129,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     use_output: 'default',
   });
 
-  describe('When on the Synthetics Integration Policy Create Page', function () {
-    this.tags(['ciGroup6']);
+  // Failing: See https://github.com/elastic/kibana/issues/116980
+  describe.skip('When on the Synthetics Integration Policy Create Page', function () {
+    this.tags(['ciGroup10']);
     const basicConfig = {
       name: monitorName,
       apmServiceName: 'Sample APM Service',
@@ -166,11 +167,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         const saveButton = await uptimePage.syntheticsIntegration.findSaveButton();
         await saveButton.click();
 
-        await testSubjects.missingOrFail('packagePolicyCreateSuccessToast');
+        await testSubjects.missingOrFail('postInstallAddAgentModal');
       });
     });
 
-    describe('create new policy', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/109329
+    describe.skip('create new policy', () => {
       let version: string;
 
       beforeEach(async () => {

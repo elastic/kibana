@@ -216,7 +216,7 @@ describe('IndexPattern Data Source', () => {
         operationType: 'count',
         sourceField: 'Records',
       };
-      const map = indexPatternDatasource.uniqueLabels(({
+      const map = indexPatternDatasource.uniqueLabels({
         layers: {
           a: {
             columnOrder: ['a', 'b'],
@@ -238,7 +238,7 @@ describe('IndexPattern Data Source', () => {
             indexPatternId: 'foo',
           },
         },
-      } as unknown) as IndexPatternPrivateState);
+      } as unknown as IndexPatternPrivateState);
 
       expect(map).toMatchInlineSnapshot(`
         Object {
@@ -1345,8 +1345,11 @@ describe('IndexPattern Data Source', () => {
   });
 
   describe('#getWarningMessages', () => {
-    it('should return mismatched time shifts', () => {
-      const state: IndexPatternPrivateState = {
+    let state: IndexPatternPrivateState;
+    let framePublicAPI: FramePublicAPI;
+
+    beforeEach(() => {
+      state = {
         indexPatternRefs: [],
         existingFields: {},
         isFirstExistenceFetch: false,
@@ -1410,7 +1413,8 @@ describe('IndexPattern Data Source', () => {
         },
         currentIndexPatternId: '1',
       };
-      const warnings = indexPatternDatasource.getWarningMessages!(state, ({
+
+      framePublicAPI = {
         activeData: {
           first: {
             type: 'datatable',
@@ -1433,20 +1437,39 @@ describe('IndexPattern Data Source', () => {
             ],
           },
         },
-      } as unknown) as FramePublicAPI);
-      expect(warnings!.length).toBe(2);
-      expect((warnings![0] as React.ReactElement).props.id).toEqual(
-        'xpack.lens.indexPattern.timeShiftSmallWarning'
-      );
-      expect((warnings![1] as React.ReactElement).props.id).toEqual(
-        'xpack.lens.indexPattern.timeShiftMultipleWarning'
-      );
+      } as unknown as FramePublicAPI;
+    });
+
+    it('should return mismatched time shifts', () => {
+      const warnings = indexPatternDatasource.getWarningMessages!(state, framePublicAPI);
+
+      expect(warnings!.map((item) => (item as React.ReactElement).props.id)).toMatchInlineSnapshot(`
+        Array [
+          "xpack.lens.indexPattern.timeShiftSmallWarning",
+          "xpack.lens.indexPattern.timeShiftMultipleWarning",
+        ]
+      `);
+    });
+
+    it('should show different types of warning messages', () => {
+      framePublicAPI.activeData!.first.columns[0].meta.sourceParams!.hasPrecisionError = true;
+
+      const warnings = indexPatternDatasource.getWarningMessages!(state, framePublicAPI);
+
+      expect(warnings!.map((item) => (item as React.ReactElement).props.id)).toMatchInlineSnapshot(`
+        Array [
+          "xpack.lens.indexPattern.timeShiftSmallWarning",
+          "xpack.lens.indexPattern.timeShiftMultipleWarning",
+          "xpack.lens.indexPattern.precisionErrorWarning",
+        ]
+      `);
     });
 
     it('should prepend each error with its layer number on multi-layer chart', () => {
       (getErrorMessages as jest.Mock).mockClear();
       (getErrorMessages as jest.Mock).mockReturnValueOnce(['error 1', 'error 2']);
-      const state: IndexPatternPrivateState = {
+
+      state = {
         indexPatternRefs: [],
         existingFields: {},
         isFirstExistenceFetch: false,
@@ -1465,6 +1488,7 @@ describe('IndexPattern Data Source', () => {
         },
         currentIndexPatternId: '1',
       };
+
       expect(indexPatternDatasource.getErrorMessages(state)).toEqual([
         { longMessage: 'Layer 1 error: error 1', shortMessage: '' },
         { longMessage: 'Layer 1 error: error 2', shortMessage: '' },
@@ -1621,6 +1645,89 @@ describe('IndexPattern Data Source', () => {
         },
       });
       expect(indexPatternDatasource.isTimeBased(state)).toEqual(false);
+    });
+  });
+
+  describe('#initializeDimension', () => {
+    it('should return the same state if no static value is passed', () => {
+      const state = enrichBaseState({
+        currentIndexPatternId: '1',
+        layers: {
+          first: {
+            indexPatternId: '1',
+            columnOrder: ['metric'],
+            columns: {
+              metric: {
+                label: 'Count of records',
+                dataType: 'number',
+                isBucketed: false,
+                sourceField: 'Records',
+                operationType: 'count',
+              },
+            },
+          },
+        },
+      });
+      expect(
+        indexPatternDatasource.initializeDimension!(state, 'first', {
+          columnId: 'newStatic',
+          label: 'MyNewColumn',
+          groupId: 'a',
+          dataType: 'number',
+        })
+      ).toBe(state);
+    });
+
+    it('should add a new static value column if a static value is passed', () => {
+      const state = enrichBaseState({
+        currentIndexPatternId: '1',
+        layers: {
+          first: {
+            indexPatternId: '1',
+            columnOrder: ['metric'],
+            columns: {
+              metric: {
+                label: 'Count of records',
+                dataType: 'number',
+                isBucketed: false,
+                sourceField: 'Records',
+                operationType: 'count',
+              },
+            },
+          },
+        },
+      });
+      expect(
+        indexPatternDatasource.initializeDimension!(state, 'first', {
+          columnId: 'newStatic',
+          label: 'MyNewColumn',
+          groupId: 'a',
+          dataType: 'number',
+          staticValue: 0, // use a falsy value to check also this corner case
+        })
+      ).toEqual({
+        ...state,
+        layers: {
+          ...state.layers,
+          first: {
+            ...state.layers.first,
+            incompleteColumns: {},
+            columnOrder: ['metric', 'newStatic'],
+            columns: {
+              ...state.layers.first.columns,
+              newStatic: {
+                dataType: 'number',
+                isBucketed: false,
+                label: 'Static value: 0',
+                operationType: 'static_value',
+                params: { value: '0' },
+                references: [],
+                scale: 'ratio',
+              },
+            },
+          },
+        },
+      });
     });
   });
 });

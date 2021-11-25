@@ -87,14 +87,8 @@ export class DatasourceComponent extends PureComponent {
   });
 
   setSelectedDatasource = (value) => {
-    const {
-      datasource,
-      resetArgs,
-      updateArgs,
-      selectDatasource,
-      datasources,
-      setSelecting,
-    } = this.props;
+    const { datasource, resetArgs, updateArgs, selectDatasource, datasources, setSelecting } =
+      this.props;
 
     if (datasource.name === value) {
       // if selecting the current datasource, reset the arguments

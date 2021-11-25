@@ -12,10 +12,11 @@ import {
   ENGINE_CURATIONS_PATH,
   ENGINE_CURATIONS_NEW_PATH,
   ENGINE_CURATION_PATH,
+  ENGINE_CURATION_SUGGESTION_PATH,
 } from '../../routes';
 
 import { Curation } from './curation';
-import { Curations, CurationCreation } from './views';
+import { Curations, CurationCreation, CurationSuggestion } from './views';
 
 export const CurationsRouter: React.FC = () => {
   return (
@@ -25,6 +26,9 @@ export const CurationsRouter: React.FC = () => {
       </Route>
       <Route exact path={ENGINE_CURATIONS_NEW_PATH}>
         <CurationCreation />
+      </Route>
+      <Route exact path={ENGINE_CURATION_SUGGESTION_PATH}>
+        <CurationSuggestion />
       </Route>
       <Route path={ENGINE_CURATION_PATH}>
         <Curation />

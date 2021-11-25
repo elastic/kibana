@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import uuid from 'uuid';
 import { FtrProviderContext } from '../ftr_provider_context';
 import {
   CreateAgentPolicyRequest,
@@ -161,7 +162,7 @@ export function EndpointPolicyTestResourcesProvider({ getService }: FtrProviderC
       let agentPolicy: CreateAgentPolicyResponse['item'];
       try {
         const newAgentPolicyData: CreateAgentPolicyRequest['body'] = {
-          name: 'East Coast',
+          name: `East Coast ${uuid.v4()}`,
           description: 'East Coast call center',
           namespace: 'default',
         };
@@ -182,7 +183,7 @@ export function EndpointPolicyTestResourcesProvider({ getService }: FtrProviderC
       let packagePolicy: CreatePackagePolicyResponse['item'];
       try {
         const newPackagePolicyData: CreatePackagePolicyRequest['body'] = {
-          name: 'Protect East Coast',
+          name: `Protect East Coast ${uuid.v4()}`,
           description: 'Protect the worlds data - but in the East Coast',
           policy_id: agentPolicy!.id,
           enabled: true,
@@ -206,9 +207,7 @@ export function EndpointPolicyTestResourcesProvider({ getService }: FtrProviderC
             version: endpointPackageInfo?.version ?? '',
           },
         };
-        const {
-          body: createResponse,
-        }: { body: CreatePackagePolicyResponse } = await supertest
+        const { body: createResponse }: { body: CreatePackagePolicyResponse } = await supertest
           .post(INGEST_API_PACKAGE_POLICIES)
           .set('kbn-xsrf', 'xxx')
           .send(newPackagePolicyData)
@@ -261,14 +260,13 @@ export function EndpointPolicyTestResourcesProvider({ getService }: FtrProviderC
     async deletePolicyByName(name: string) {
       let packagePolicyList: GetPackagePoliciesResponse['items'];
       try {
-        const {
-          body: packagePoliciesResponse,
-        }: { body: GetPackagePoliciesResponse } = await supertest
-          .get(INGEST_API_PACKAGE_POLICIES)
-          .set('kbn-xsrf', 'xxx')
-          .query({ kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.name: ${name}` })
-          .send()
-          .expect(200);
+        const { body: packagePoliciesResponse }: { body: GetPackagePoliciesResponse } =
+          await supertest
+            .get(INGEST_API_PACKAGE_POLICIES)
+            .set('kbn-xsrf', 'xxx')
+            .query({ kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.name: ${name}` })
+            .send()
+            .expect(200);
         packagePolicyList = packagePoliciesResponse.items;
       } catch (error) {
         return logSupertestApiErrorAndThrow(

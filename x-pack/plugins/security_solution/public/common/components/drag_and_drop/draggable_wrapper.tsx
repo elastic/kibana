@@ -95,10 +95,8 @@ type RenderFunctionProp = (
 
 interface Props {
   dataProvider: DataProvider;
-  disabled?: boolean;
   hideTopN?: boolean;
   isDraggable?: boolean;
-  inline?: boolean;
   render: RenderFunctionProp;
   timelineId?: string;
   truncate?: boolean;

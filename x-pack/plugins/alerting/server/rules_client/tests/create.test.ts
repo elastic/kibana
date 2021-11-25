@@ -40,8 +40,8 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   taskManager,
   ruleTypeRegistry,
   unsecuredSavedObjectsClient,
-  authorization: (authorization as unknown) as AlertingAuthorization,
-  actionsAuthorization: (actionsAuthorization as unknown) as ActionsAuthorization,
+  authorization: authorization as unknown as AlertingAuthorization,
+  actionsAuthorization: actionsAuthorization as unknown as ActionsAuthorization,
   spaceId: 'default',
   namespace: 'default',
   getUserName: jest.fn(),
@@ -61,9 +61,7 @@ beforeEach(() => {
 
 setGlobalDate();
 
-function getMockData(
-  overwrites: Record<string, unknown> = {}
-): CreateOptions<{
+function getMockData(overwrites: Record<string, unknown> = {}): CreateOptions<{
   bar: boolean;
 }>['data'] {
   return {
@@ -443,6 +441,7 @@ describe('create()', () => {
     expect(taskManager.schedule.mock.calls[0]).toMatchInlineSnapshot(`
                                                                         Array [
                                                                           Object {
+                                                                            "id": "1",
                                                                             "params": Object {
                                                                               "alertId": "1",
                                                                               "spaceId": "default",
@@ -1925,6 +1924,52 @@ describe('create()', () => {
     });
   });
 
+  test('fails if task scheduling fails due to conflict', async () => {
+    const data = getMockData();
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+      id: '1',
+      type: 'alert',
+      attributes: {
+        alertTypeId: '123',
+        schedule: { interval: '10s' },
+        params: {
+          bar: true,
+        },
+        actions: [
+          {
+            group: 'default',
+            actionRef: 'action_0',
+            actionTypeId: 'test',
+            params: {
+              foo: true,
+            },
+          },
+        ],
+      },
+      references: [
+        {
+          name: 'action_0',
+          type: 'action',
+          id: '1',
+        },
+      ],
+    });
+    taskManager.schedule.mockRejectedValueOnce(
+      Object.assign(new Error('Conflict!'), { statusCode: 409 })
+    );
+    unsecuredSavedObjectsClient.delete.mockResolvedValueOnce({});
+    await expect(rulesClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Conflict!"`
+    );
+    expect(unsecuredSavedObjectsClient.delete).toHaveBeenCalledTimes(1);
+    expect(unsecuredSavedObjectsClient.delete.mock.calls[0]).toMatchInlineSnapshot(`
+                                                                                                                  Array [
+                                                                                                                    "alert",
+                                                                                                                    "1",
+                                                                                                                  ]
+                                                                            `);
+  });
+
   test('attempts to remove saved object if scheduling failed', async () => {
     const data = getMockData();
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
@@ -2266,6 +2311,32 @@ describe('create()', () => {
     ]);
     await expect(rulesClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Invalid connectors: email connector"`
+    );
+    expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+    expect(taskManager.schedule).not.toHaveBeenCalled();
+  });
+
+  test('throws error when updating with an interval less than the minimum configured one', async () => {
+    ruleTypeRegistry.get.mockImplementation(() => ({
+      id: '123',
+      name: 'Test',
+      actionGroups: [{ id: 'default', name: 'Default' }],
+      recoveryActionGroup: RecoveredActionGroup,
+      defaultActionGroupId: 'default',
+      minimumLicenseRequired: 'basic',
+      isExportable: true,
+      async executor() {},
+      producer: 'alerts',
+      minimumScheduleInterval: '5m',
+      useSavedObjectReferences: {
+        extractReferences: jest.fn(),
+        injectReferences: jest.fn(),
+      },
+    }));
+
+    const data = getMockData({ schedule: { interval: '1m' } });
+    await expect(rulesClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Error updating rule: the interval is less than the minimum interval of 5m"`
     );
     expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
     expect(taskManager.schedule).not.toHaveBeenCalled();

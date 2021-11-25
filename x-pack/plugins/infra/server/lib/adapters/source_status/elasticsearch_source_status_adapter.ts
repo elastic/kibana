@@ -18,13 +18,13 @@ export class InfraElasticsearchSourceStatusAdapter implements InfraSourceStatusA
       this.framework
         .callWithRequest(requestContext, 'indices.getAlias', {
           name: aliasName,
-          filterPath: '*.settings.index.uuid', // to keep the response size as small as possible
+          filter_path: '*.settings.index.uuid', // to keep the response size as small as possible
         })
         .catch(withDefaultIfNotFound<InfraDatabaseGetIndicesResponse>({})),
       this.framework
         .callWithRequest(requestContext, 'indices.get', {
           index: aliasName,
-          filterPath: '*.settings.index.uuid', // to keep the response size as small as possible
+          filter_path: '*.settings.index.uuid', // to keep the response size as small as possible
         })
         .catch(withDefaultIfNotFound<InfraDatabaseGetIndicesResponse>({})),
     ]);
@@ -76,11 +76,11 @@ export class InfraElasticsearchSourceStatusAdapter implements InfraSourceStatusA
   }
 }
 
-const withDefaultIfNotFound = <DefaultValue>(defaultValue: DefaultValue) => (
-  error: any
-): DefaultValue => {
-  if (error && error.status === 404) {
-    return defaultValue;
-  }
-  throw error;
-};
+const withDefaultIfNotFound =
+  <DefaultValue>(defaultValue: DefaultValue) =>
+  (error: any): DefaultValue => {
+    if (error && error.status === 404) {
+      return defaultValue;
+    }
+    throw error;
+  };

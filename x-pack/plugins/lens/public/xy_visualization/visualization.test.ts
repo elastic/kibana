@@ -15,6 +15,7 @@ import { createMockDatasource, createMockFramePublicAPI } from '../mocks';
 import { LensIconChartBar } from '../assets/chart_bar';
 import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
 import { fieldFormatsServiceMock } from '../../../../../src/plugins/field_formats/public/mocks';
+import { Datatable } from 'src/plugins/expressions';
 
 function exampleState(): State {
   return {
@@ -216,8 +217,8 @@ describe('xy_visualization', () => {
   });
 
   describe('#getSupportedLayers', () => {
-    it('should return a single layer type', () => {
-      expect(xyVisualization.getSupportedLayers()).toHaveLength(1);
+    it('should return a double layer types', () => {
+      expect(xyVisualization.getSupportedLayers()).toHaveLength(2);
     });
 
     it('should return the icon for the visualization type', () => {
@@ -315,6 +316,39 @@ describe('xy_visualization', () => {
         seriesType: 'area',
         xAccessor: 'newCol',
         accessors: [],
+      });
+    });
+
+    it('should add a dimension to a reference layer', () => {
+      expect(
+        xyVisualization.setDimension({
+          frame,
+          prevState: {
+            ...exampleState(),
+            layers: [
+              {
+                layerId: 'referenceLine',
+                layerType: layerTypes.REFERENCELINE,
+                seriesType: 'line',
+                accessors: [],
+              },
+            ],
+          },
+          layerId: 'referenceLine',
+          groupId: 'xReferenceLine',
+          columnId: 'newCol',
+        }).layers[0]
+      ).toEqual({
+        layerId: 'referenceLine',
+        layerType: layerTypes.REFERENCELINE,
+        seriesType: 'line',
+        accessors: ['newCol'],
+        yConfig: [
+          {
+            axisMode: 'bottom',
+            forAccessor: 'newCol',
+          },
+        ],
       });
     });
   });
@@ -502,6 +536,507 @@ describe('xy_visualization', () => {
         { ...exampleOperation, dataType: 'date' },
       ];
       expect(ops.filter(filterOperations).map((x) => x.dataType)).toEqual(['number']);
+    });
+
+    describe('breakdown group: percentage chart checks', () => {
+      const baseState = exampleState();
+
+      it('should require break down group with one accessor + one split accessor configuration', () => {
+        const [, , splitGroup] = xyVisualization.getConfiguration({
+          state: {
+            ...baseState,
+            layers: [
+              { ...baseState.layers[0], accessors: ['a'], seriesType: 'bar_percentage_stacked' },
+            ],
+          },
+          frame,
+          layerId: 'first',
+        }).groups;
+        expect(splitGroup.required).toBe(true);
+      });
+
+      test.each([
+        [
+          'multiple accessors on the same layer',
+          [
+            {
+              ...baseState.layers[0],
+              splitAccessor: undefined,
+              seriesType: 'bar_percentage_stacked',
+            },
+          ],
+        ],
+        [
+          'multiple accessors spread on compatible layers',
+          [
+            {
+              ...baseState.layers[0],
+              accessors: ['a'],
+              splitAccessor: undefined,
+              seriesType: 'bar_percentage_stacked',
+            },
+            {
+              ...baseState.layers[0],
+              splitAccessor: undefined,
+              xAccessor: 'd',
+              accessors: ['e'],
+              seriesType: 'bar_percentage_stacked',
+            },
+          ],
+        ],
+      ] as Array<[string, State['layers']]>)(
+        'should not require break down group for %s',
+        (_, layers) => {
+          const [, , splitGroup] = xyVisualization.getConfiguration({
+            state: { ...baseState, layers },
+            frame,
+            layerId: 'first',
+          }).groups;
+          expect(splitGroup.required).toBe(false);
+        }
+      );
+
+      it.each([
+        [
+          'one accessor only',
+          [
+            {
+              ...baseState.layers[0],
+              accessors: ['a'],
+              seriesType: 'bar_percentage_stacked',
+              splitAccessor: undefined,
+              xAccessor: undefined,
+            },
+          ],
+        ],
+        [
+          'one accessor only with split accessor',
+          [
+            {
+              ...baseState.layers[0],
+              accessors: ['a'],
+              seriesType: 'bar_percentage_stacked',
+              xAccessor: undefined,
+            },
+          ],
+        ],
+        [
+          'one accessor only with xAccessor',
+          [
+            {
+              ...baseState.layers[0],
+              accessors: ['a'],
+              seriesType: 'bar_percentage_stacked',
+              splitAccessor: undefined,
+            },
+          ],
+        ],
+        [
+          'multiple accessors spread on incompatible layers (different xAccessor)',
+          [
+            {
+              ...baseState.layers[0],
+              accessors: ['a'],
+              seriesType: 'bar_percentage_stacked',
+              splitAccessor: undefined,
+            },
+            {
+              ...baseState.layers[0],
+              accessors: ['e'],
+              seriesType: 'bar_percentage_stacked',
+              splitAccessor: undefined,
+              xAccessor: undefined,
+            },
+          ],
+        ],
+        [
+          'multiple accessors spread on incompatible layers (different splitAccessor)',
+          [
+            {
+              ...baseState.layers[0],
+              accessors: ['a'],
+              seriesType: 'bar_percentage_stacked',
+            },
+            {
+              ...baseState.layers[0],
+              accessors: ['e'],
+              seriesType: 'bar_percentage_stacked',
+              splitAccessor: undefined,
+              xAccessor: undefined,
+            },
+          ],
+        ],
+        [
+          'multiple accessors spread on incompatible layers (different seriesType)',
+          [
+            {
+              ...baseState.layers[0],
+              accessors: ['a'],
+              seriesType: 'bar_percentage_stacked',
+            },
+            {
+              ...baseState.layers[0],
+              accessors: ['e'],
+              seriesType: 'bar',
+            },
+          ],
+        ],
+        [
+          'one data layer with one accessor + one reference layer',
+          [
+            {
+              ...baseState.layers[0],
+              accessors: ['a'],
+              seriesType: 'bar_percentage_stacked',
+            },
+            {
+              ...baseState.layers[0],
+              accessors: ['e'],
+              seriesType: 'bar_percentage_stacked',
+              layerType: layerTypes.REFERENCELINE,
+            },
+          ],
+        ],
+
+        [
+          'multiple accessors on the same layers with different axis assigned',
+          [
+            {
+              ...baseState.layers[0],
+              splitAccessor: undefined,
+              seriesType: 'bar_percentage_stacked',
+              yConfig: [
+                { forAccessor: 'a', axisMode: 'left' },
+                { forAccessor: 'b', axisMode: 'right' },
+              ],
+            },
+          ],
+        ],
+        [
+          'multiple accessors spread on multiple layers with different axis assigned',
+          [
+            {
+              ...baseState.layers[0],
+              accessors: ['a'],
+              xAccessor: undefined,
+              splitAccessor: undefined,
+              seriesType: 'bar_percentage_stacked',
+              yConfig: [{ forAccessor: 'a', axisMode: 'left' }],
+            },
+            {
+              ...baseState.layers[0],
+              accessors: ['b'],
+              xAccessor: undefined,
+              splitAccessor: undefined,
+              seriesType: 'bar_percentage_stacked',
+              yConfig: [{ forAccessor: 'b', axisMode: 'right' }],
+            },
+          ],
+        ],
+      ] as Array<[string, State['layers']]>)(
+        'should require break down group for %s',
+        (_, layers) => {
+          const [, , splitGroup] = xyVisualization.getConfiguration({
+            state: { ...baseState, layers },
+            frame,
+            layerId: 'first',
+          }).groups;
+          expect(splitGroup.required).toBe(true);
+        }
+      );
+    });
+
+    describe('reference lines', () => {
+      beforeEach(() => {
+        frame.datasourceLayers = {
+          first: mockDatasource.publicAPIMock,
+          referenceLine: mockDatasource.publicAPIMock,
+        };
+      });
+
+      function getStateWithBaseReferenceLine(): State {
+        return {
+          ...exampleState(),
+          layers: [
+            {
+              layerId: 'first',
+              layerType: layerTypes.DATA,
+              seriesType: 'area',
+              splitAccessor: undefined,
+              xAccessor: undefined,
+              accessors: ['a'],
+            },
+            {
+              layerId: 'referenceLine',
+              layerType: layerTypes.REFERENCELINE,
+              seriesType: 'line',
+              accessors: [],
+              yConfig: [{ axisMode: 'left', forAccessor: 'a' }],
+            },
+          ],
+        };
+      }
+
+      it('should support static value', () => {
+        const state = getStateWithBaseReferenceLine();
+        state.layers[0].accessors = [];
+        state.layers[1].yConfig = undefined;
+        expect(
+          xyVisualization.getConfiguration({
+            state: getStateWithBaseReferenceLine(),
+            frame,
+            layerId: 'referenceLine',
+          }).groups[0].supportStaticValue
+        ).toBeTruthy();
+      });
+
+      it('should return no referenceLine groups for a empty data layer', () => {
+        const state = getStateWithBaseReferenceLine();
+        state.layers[0].accessors = [];
+        state.layers[1].yConfig = undefined;
+
+        const options = xyVisualization.getConfiguration({
+          state,
+          frame,
+          layerId: 'referenceLine',
+        }).groups;
+
+        expect(options).toHaveLength(0);
+      });
+
+      it('should return a group for the vertical left axis', () => {
+        const options = xyVisualization.getConfiguration({
+          state: getStateWithBaseReferenceLine(),
+          frame,
+          layerId: 'referenceLine',
+        }).groups;
+
+        expect(options).toHaveLength(1);
+        expect(options[0].groupId).toBe('yReferenceLineLeft');
+      });
+
+      it('should return a group for the vertical right axis', () => {
+        const state = getStateWithBaseReferenceLine();
+        state.layers[0].yConfig = [{ axisMode: 'right', forAccessor: 'a' }];
+        state.layers[1].yConfig![0].axisMode = 'right';
+
+        const options = xyVisualization.getConfiguration({
+          state,
+          frame,
+          layerId: 'referenceLine',
+        }).groups;
+
+        expect(options).toHaveLength(1);
+        expect(options[0].groupId).toBe('yReferenceLineRight');
+      });
+
+      it('should compute no groups for referenceLines when the only data accessor available is a date histogram', () => {
+        const state = getStateWithBaseReferenceLine();
+        state.layers[0].xAccessor = 'b';
+        state.layers[0].accessors = [];
+        state.layers[1].yConfig = []; // empty the configuration
+        // set the xAccessor as date_histogram
+        frame.datasourceLayers.referenceLine.getOperationForColumnId = jest.fn((accessor) => {
+          if (accessor === 'b') {
+            return {
+              dataType: 'date',
+              isBucketed: true,
+              scale: 'interval',
+              label: 'date_histogram',
+            };
+          }
+          return null;
+        });
+
+        const options = xyVisualization.getConfiguration({
+          state,
+          frame,
+          layerId: 'referenceLine',
+        }).groups;
+
+        expect(options).toHaveLength(0);
+      });
+
+      it('should mark horizontal group is invalid when xAccessor is changed to a date histogram', () => {
+        const state = getStateWithBaseReferenceLine();
+        state.layers[0].xAccessor = 'b';
+        state.layers[0].accessors = [];
+        state.layers[1].yConfig![0].axisMode = 'bottom';
+        // set the xAccessor as date_histogram
+        frame.datasourceLayers.referenceLine.getOperationForColumnId = jest.fn((accessor) => {
+          if (accessor === 'b') {
+            return {
+              dataType: 'date',
+              isBucketed: true,
+              scale: 'interval',
+              label: 'date_histogram',
+            };
+          }
+          return null;
+        });
+
+        const options = xyVisualization.getConfiguration({
+          state,
+          frame,
+          layerId: 'referenceLine',
+        }).groups;
+
+        expect(options[0]).toEqual(
+          expect.objectContaining({
+            invalid: true,
+            groupId: 'xReferenceLine',
+          })
+        );
+      });
+
+      it('should return groups in a specific order (left, right, bottom)', () => {
+        const state = getStateWithBaseReferenceLine();
+        state.layers[0].xAccessor = 'c';
+        state.layers[0].accessors = ['a', 'b'];
+        // invert them on purpose
+        state.layers[0].yConfig = [
+          { axisMode: 'right', forAccessor: 'b' },
+          { axisMode: 'left', forAccessor: 'a' },
+        ];
+        state.layers[1].yConfig = [
+          { forAccessor: 'c', axisMode: 'bottom' },
+          { forAccessor: 'b', axisMode: 'right' },
+          { forAccessor: 'a', axisMode: 'left' },
+        ];
+        // set the xAccessor as number histogram
+        frame.datasourceLayers.referenceLine.getOperationForColumnId = jest.fn((accessor) => {
+          if (accessor === 'c') {
+            return {
+              dataType: 'number',
+              isBucketed: true,
+              scale: 'interval',
+              label: 'histogram',
+            };
+          }
+          return null;
+        });
+
+        const [left, right, bottom] = xyVisualization.getConfiguration({
+          state,
+          frame,
+          layerId: 'referenceLine',
+        }).groups;
+
+        expect(left.groupId).toBe('yReferenceLineLeft');
+        expect(right.groupId).toBe('yReferenceLineRight');
+        expect(bottom.groupId).toBe('xReferenceLine');
+      });
+
+      it('should ignore terms operation for xAccessor', () => {
+        const state = getStateWithBaseReferenceLine();
+        state.layers[0].xAccessor = 'b';
+        state.layers[0].accessors = [];
+        state.layers[1].yConfig = []; // empty the configuration
+        // set the xAccessor as top values
+        frame.datasourceLayers.referenceLine.getOperationForColumnId = jest.fn((accessor) => {
+          if (accessor === 'b') {
+            return {
+              dataType: 'string',
+              isBucketed: true,
+              scale: 'ordinal',
+              label: 'top values',
+            };
+          }
+          return null;
+        });
+
+        const options = xyVisualization.getConfiguration({
+          state,
+          frame,
+          layerId: 'referenceLine',
+        }).groups;
+
+        expect(options).toHaveLength(0);
+      });
+
+      it('should mark horizontal group is invalid when accessor is changed to a terms operation', () => {
+        const state = getStateWithBaseReferenceLine();
+        state.layers[0].xAccessor = 'b';
+        state.layers[0].accessors = [];
+        state.layers[1].yConfig![0].axisMode = 'bottom';
+        // set the xAccessor as date_histogram
+        frame.datasourceLayers.referenceLine.getOperationForColumnId = jest.fn((accessor) => {
+          if (accessor === 'b') {
+            return {
+              dataType: 'string',
+              isBucketed: true,
+              scale: 'ordinal',
+              label: 'top values',
+            };
+          }
+          return null;
+        });
+
+        const options = xyVisualization.getConfiguration({
+          state,
+          frame,
+          layerId: 'referenceLine',
+        }).groups;
+
+        expect(options[0]).toEqual(
+          expect.objectContaining({
+            invalid: true,
+            groupId: 'xReferenceLine',
+          })
+        );
+      });
+
+      it('differ vertical axis if the formatters are not compatibles between each other', () => {
+        const tables: Record<string, Datatable> = {
+          first: {
+            type: 'datatable',
+            rows: [],
+            columns: [
+              {
+                id: 'xAccessorId',
+                name: 'horizontal axis',
+                meta: {
+                  type: 'date',
+                  params: { params: { id: 'date', params: { pattern: 'HH:mm' } } },
+                },
+              },
+              {
+                id: 'yAccessorId',
+                name: 'left axis',
+                meta: {
+                  type: 'number',
+                  params: { id: 'number' },
+                },
+              },
+              {
+                id: 'yAccessorId2',
+                name: 'right axis',
+                meta: {
+                  type: 'number',
+                  params: { id: 'bytes' },
+                },
+              },
+            ],
+          },
+        };
+
+        const state = getStateWithBaseReferenceLine();
+        state.layers[0].accessors = ['yAccessorId', 'yAccessorId2'];
+        state.layers[1].yConfig = []; // empty the configuration
+
+        const options = xyVisualization.getConfiguration({
+          state,
+          frame: { ...frame, activeData: tables },
+          layerId: 'referenceLine',
+        }).groups;
+
+        expect(options).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({ groupId: 'yReferenceLineLeft' }),
+            expect.objectContaining({ groupId: 'yReferenceLineRight' }),
+          ])
+        );
+      });
     });
 
     describe('color assignment', () => {
@@ -926,18 +1461,18 @@ describe('xy_visualization', () => {
       };
       datasourceLayers.first.getOperationForColumnId = jest.fn((id: string) =>
         id === 'a'
-          ? (({
+          ? ({
               dataType: 'date',
               scale: 'interval',
-            } as unknown) as Operation)
+            } as unknown as Operation)
           : null
       );
       datasourceLayers.second.getOperationForColumnId = jest.fn((id: string) =>
         id === 'e'
-          ? (({
+          ? ({
               dataType: 'number',
               scale: 'interval',
-            } as unknown) as Operation)
+            } as unknown as Operation)
           : null
       );
       expect(
@@ -982,18 +1517,18 @@ describe('xy_visualization', () => {
       };
       datasourceLayers.first.getOperationForColumnId = jest.fn((id: string) =>
         id === 'a'
-          ? (({
+          ? ({
               dataType: 'date',
               scale: 'interval',
-            } as unknown) as Operation)
+            } as unknown as Operation)
           : null
       );
       datasourceLayers.second.getOperationForColumnId = jest.fn((id: string) =>
         id === 'e'
-          ? (({
+          ? ({
               dataType: 'string',
               scale: 'ordinal',
-            } as unknown) as Operation)
+            } as unknown as Operation)
           : null
       );
       expect(

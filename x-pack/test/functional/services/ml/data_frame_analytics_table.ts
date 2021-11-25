@@ -163,9 +163,11 @@ export function MachineLearningDataFrameAnalyticsTableProvider({ getService }: F
     }
 
     public async openMapView(analyticsId: string) {
-      await this.assertJobRowMapButtonExists(analyticsId);
-      await testSubjects.click(this.rowSelector(analyticsId, 'mlAnalyticsJobMapButton'));
-      await testSubjects.existOrFail('mlPageDataFrameAnalyticsMap', { timeout: 20 * 1000 });
+      await retry.tryForTime(20 * 1000, async () => {
+        await this.assertJobRowMapButtonExists(analyticsId);
+        await testSubjects.click(this.rowSelector(analyticsId, 'mlAnalyticsJobMapButton'));
+        await testSubjects.existOrFail('mlPageDataFrameAnalyticsMap', { timeout: 5 * 1000 });
+      });
     }
 
     public async assertAnalyticsSearchInputValue(expectedSearchValue: string) {
@@ -196,6 +198,11 @@ export function MachineLearningDataFrameAnalyticsTableProvider({ getService }: F
       analyticsId: string,
       shouldBeDisplayed: boolean
     ) {
+      await this.waitForRefreshButtonLoaded();
+      await testSubjects.click('~mlAnalyticsRefreshListButton');
+      await this.waitForRefreshButtonLoaded();
+      await testSubjects.existOrFail('mlAnalyticsJobList', { timeout: 30 * 1000 });
+
       if (shouldBeDisplayed) {
         await this.filterWithSearchString(analyticsId, 1);
       } else {

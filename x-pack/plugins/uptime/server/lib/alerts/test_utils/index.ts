@@ -43,11 +43,11 @@ export const createRuleTypeMocks = (
     certExpirationThreshold: DYNAMIC_SETTINGS_DEFAULTS.certExpirationThreshold,
   }
 ) => {
-  const loggerMock = ({
+  const loggerMock = {
     debug: jest.fn(),
     warn: jest.fn(),
     error: jest.fn(),
-  } as unknown) as Logger;
+  } as unknown as Logger;
 
   const scheduleActions = jest.fn();
   const replaceState = jest.fn();

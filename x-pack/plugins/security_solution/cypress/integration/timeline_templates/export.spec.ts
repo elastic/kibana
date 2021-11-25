@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import _ from 'lodash';
 import { exportTimeline } from '../../tasks/timelines';
 import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
 import {
@@ -19,7 +20,10 @@ import { cleanKibana } from '../../tasks/common';
 describe('Export timelines', () => {
   beforeEach(() => {
     cleanKibana();
-    cy.intercept('POST', 'api/timeline/_export?file_name=timelines_export.ndjson').as('export');
+    cy.intercept({
+      method: 'POST',
+      path: '/api/timeline/_export?file_name=timelines_export.ndjson',
+    }).as('export');
     createTimelineTemplate(getTimelineTemplate()).then((response) => {
       cy.wrap(response).as('templateResponse');
       cy.wrap(response.body.data.persistTimeline.timeline.savedObjectId).as('templateId');
@@ -31,7 +35,9 @@ describe('Export timelines', () => {
     exportTimeline(this.templateId);
 
     cy.wait('@export').then(({ response }) => {
-      cy.wrap(response!.body).should(
+      cy.wrap(response?.statusCode).should('eql', 200);
+
+      cy.wrap(response?.body).should(
         'eql',
         expectedExportedTimelineTemplate(this.templateResponse)
       );

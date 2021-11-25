@@ -132,7 +132,6 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
                     label: dependenciesTitle,
                     app: 'apm',
                     path: '/backends',
-                    isNewFeature: true,
                     onClick: () => {
                       const { usageCollection } = pluginsStart as {
                         usageCollection?: UsageCollectionStart;
@@ -368,6 +367,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       fleet.registerExtension({
         package: 'apm',
         view: 'package-policy-edit',
+        useLatestPackageVersion: true,
         Component: getLazyAPMPolicyEditExtension(),
       });
 

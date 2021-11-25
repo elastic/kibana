@@ -10,9 +10,10 @@ import { spawn } from 'child_process';
 import del from 'del';
 import { mkdtempSync } from 'fs';
 import { uniq } from 'lodash';
-import os, { tmpdir } from 'os';
+import os from 'os';
 import { join } from 'path';
 import { createInterface } from 'readline';
+import { getDataPath } from '@kbn/utils';
 import { fromEvent, merge, of, timer } from 'rxjs';
 import { catchError, map, reduce, takeUntil, tap } from 'rxjs/operators';
 import { ReportingCore } from '../../../';
@@ -61,7 +62,7 @@ export const browserStartLogs = (
   const config = core.getConfig();
   const proxy = config.get('capture', 'browser', 'chromium', 'proxy');
   const disableSandbox = config.get('capture', 'browser', 'chromium', 'disableSandbox');
-  const userDataDir = mkdtempSync(join(tmpdir(), 'chromium-'));
+  const userDataDir = mkdtempSync(join(getDataPath(), 'chromium-'));
 
   const platform = process.platform;
   const architecture = os.arch();
@@ -73,7 +74,6 @@ export const browserStartLogs = (
 
   const kbnArgs = args({
     userDataDir,
-    viewport: { width: 800, height: 600 },
     disableSandbox,
     proxy,
   });

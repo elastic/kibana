@@ -66,9 +66,10 @@ export const useWaffleFilters = () => {
     setFilterQueryDraft(filterQuery.expression);
   }, []);
 
-  const isFilterQueryDraftValid = useMemo(() => validateKuery(filterQueryDraft), [
-    filterQueryDraft,
-  ]);
+  const isFilterQueryDraftValid = useMemo(
+    () => validateKuery(filterQueryDraft),
+    [filterQueryDraft]
+  );
 
   const { inventoryPrefill } = useAlertPrefillContext();
   const prefillContext = useMemo(() => inventoryPrefill, [inventoryPrefill]); // For Jest compatibility

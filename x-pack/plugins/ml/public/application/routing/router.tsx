@@ -9,9 +9,13 @@ import React, { useEffect, FC } from 'react';
 import { useHistory, useLocation, Router, Route, RouteProps } from 'react-router-dom';
 import { Location } from 'history';
 
-import { AppMountParameters, IUiSettingsClient, ChromeStart } from 'kibana/public';
-import { ChromeBreadcrumb } from 'kibana/public';
-import { IndexPatternsContract } from 'src/plugins/data/public';
+import type {
+  AppMountParameters,
+  IUiSettingsClient,
+  ChromeStart,
+  ChromeBreadcrumb,
+} from 'kibana/public';
+import type { DataViewsContract } from 'src/plugins/data_views/public';
 
 import { useMlKibana, useNavigateToPath } from '../contexts/kibana';
 import { MlContext, MlContextValue } from '../contexts/ml';
@@ -39,7 +43,7 @@ export interface PageProps {
 interface PageDependencies {
   config: IUiSettingsClient;
   history: AppMountParameters['history'];
-  indexPatterns: IndexPatternsContract;
+  dataViewsContract: DataViewsContract;
   setBreadcrumbs: ChromeStart['setBreadcrumbs'];
   redirectToMlAccessDeniedPage: () => Promise<void>;
 }

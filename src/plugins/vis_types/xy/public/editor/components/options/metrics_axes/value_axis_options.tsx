@@ -36,7 +36,6 @@ export interface ValueAxisOptionsParams {
   setParamByIndex: SetParamByIndex;
   valueAxis: ValueAxis;
   setMultipleValidity: (paramName: string, isValid: boolean) => void;
-  isNewLibrary?: boolean;
 }
 
 export function ValueAxisOptions({
@@ -46,7 +45,6 @@ export function ValueAxisOptions({
   onValueAxisPositionChanged,
   setParamByIndex,
   setMultipleValidity,
-  isNewLibrary = false,
 }: ValueAxisOptionsParams) {
   const setValueAxis = useCallback(
     <T extends keyof ValueAxis>(paramName: T, value: ValueAxis[T]) =>
@@ -193,7 +191,7 @@ export function ValueAxisOptions({
             setMultipleValidity={setMultipleValidity}
             setValueAxisScale={setValueAxisScale}
             setValueAxis={setValueAxis}
-            disableAxisExtents={isNewLibrary && axis.scale.mode === 'percentage'}
+            disableAxisExtents={axis.scale.mode === 'percentage'}
           />
         </>
       </EuiAccordion>

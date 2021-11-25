@@ -16,7 +16,6 @@ import {
   SavedObjectsClientContract,
   SavedObjectsClient,
   CoreStart,
-  ICustomClusterClient,
 } from '../../../core/server';
 import {
   getTelemetryChannelEndpoint,
@@ -25,7 +24,8 @@ import {
   getTelemetryFailureDetails,
 } from '../common/telemetry_config';
 import { getTelemetrySavedObject, updateTelemetrySavedObject } from './telemetry_repository';
-import { REPORT_INTERVAL_MS } from '../common/constants';
+import { REPORT_INTERVAL_MS, PAYLOAD_CONTENT_ENCODING } from '../common/constants';
+import type { EncryptedTelemetryPayload } from '../common/types';
 import { TelemetryConfigType } from './config';
 
 export interface FetcherTaskDepsStart {
@@ -52,7 +52,6 @@ export class FetcherTask {
   private isSending = false;
   private internalRepository?: SavedObjectsClientContract;
   private telemetryCollectionManager?: TelemetryCollectionManagerPluginStart;
-  private elasticsearchClient?: ICustomClusterClient;
 
   constructor(initializerContext: PluginInitializerContext<TelemetryConfigType>) {
     this.config$ = initializerContext.config.create();
@@ -66,7 +65,6 @@ export class FetcherTask {
   ) {
     this.internalRepository = new SavedObjectsClient(savedObjects.createInternalRepository());
     this.telemetryCollectionManager = telemetryCollectionManager;
-    this.elasticsearchClient = elasticsearch.createClient('telemetry-fetcher');
 
     this.intervalId = timer(this.initialCheckDelayMs, this.checkIntervalMs).subscribe(() =>
       this.sendIfDue()
@@ -76,9 +74,6 @@ export class FetcherTask {
   public stop() {
     if (this.intervalId) {
       this.intervalId.unsubscribe();
-    }
-    if (this.elasticsearchClient) {
-      this.elasticsearchClient.close();
     }
   }
 
@@ -103,7 +98,7 @@ export class FetcherTask {
       return;
     }
 
-    let clusters: string[] = [];
+    let clusters: EncryptedTelemetryPayload = [];
     this.isSending = true;
 
     try {
@@ -120,9 +115,7 @@ export class FetcherTask {
 
     try {
       const { telemetryUrl } = telemetryConfig;
-      for (const cluster of clusters) {
-        await this.sendTelemetry(telemetryUrl, cluster);
-      }
+      await this.sendTelemetry(telemetryUrl, clusters);
 
       await this.updateLastReported();
     } catch (err) {
@@ -141,7 +134,7 @@ export class FetcherTask {
     const allowChangingOptInStatus = config.allowChangingOptInStatus;
     const configTelemetryOptIn = typeof config.optIn === 'undefined' ? null : config.optIn;
     const telemetryUrl = getTelemetryChannelEndpoint({
-      channelName: 'main',
+      channelName: 'snapshot',
       env: config.sendUsageTo,
     });
     const { failureCount, failureVersion } = getTelemetryFailureDetails({
@@ -206,13 +199,16 @@ export class FetcherTask {
     return false;
   }
 
-  private async fetchTelemetry() {
+  private async fetchTelemetry(): Promise<EncryptedTelemetryPayload> {
     return await this.telemetryCollectionManager!.getStats({
       unencrypted: false,
     });
   }
 
-  private async sendTelemetry(telemetryUrl: string, cluster: string): Promise<void> {
+  private async sendTelemetry(
+    telemetryUrl: string,
+    payload: EncryptedTelemetryPayload
+  ): Promise<void> {
     this.logger.debug(`Sending usage stats.`);
     /**
      * send OPTIONS before sending usage data.
@@ -222,10 +218,19 @@ export class FetcherTask {
       method: 'options',
     });
 
-    await fetch(telemetryUrl, {
-      method: 'post',
-      body: cluster,
-      headers: { 'X-Elastic-Stack-Version': this.currentKibanaVersion },
-    });
+    await Promise.all(
+      payload.map(async ({ clusterUuid, stats }) => {
+        await fetch(telemetryUrl, {
+          method: 'post',
+          body: stats,
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Elastic-Stack-Version': this.currentKibanaVersion,
+            'X-Elastic-Cluster-ID': clusterUuid,
+            'X-Elastic-Content-Encoding': PAYLOAD_CONTENT_ENCODING,
+          },
+        });
+      })
+    );
   }
 }

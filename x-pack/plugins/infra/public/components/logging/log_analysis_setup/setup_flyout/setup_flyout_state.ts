@@ -42,7 +42,5 @@ export const useLogAnalysisSetupFlyoutState = ({
   };
 };
 
-export const [
-  LogAnalysisSetupFlyoutStateProvider,
-  useLogAnalysisSetupFlyoutStateContext,
-] = createContainer(useLogAnalysisSetupFlyoutState);
+export const [LogAnalysisSetupFlyoutStateProvider, useLogAnalysisSetupFlyoutStateContext] =
+  createContainer(useLogAnalysisSetupFlyoutState);

@@ -96,21 +96,19 @@ export const FormattedDate = React.memo<{
   fieldName: string;
   value?: string | number | null;
   className?: string;
-}>(
-  ({ value, fieldName, className = '' }): JSX.Element => {
-    if (value == null) {
-      return getOrEmptyTagFromValue(value);
-    }
-    const maybeDate = getMaybeDate(value);
-    return maybeDate.isValid() ? (
-      <LocalizedDateTooltip date={maybeDate.toDate()} fieldName={fieldName} className={className}>
-        <PreferenceFormattedDate value={maybeDate.toDate()} />
-      </LocalizedDateTooltip>
-    ) : (
-      getOrEmptyTagFromValue(value)
-    );
+}>(({ value, fieldName, className = '' }): JSX.Element => {
+  if (value == null) {
+    return getOrEmptyTagFromValue(value);
   }
-);
+  const maybeDate = getMaybeDate(value);
+  return maybeDate.isValid() ? (
+    <LocalizedDateTooltip date={maybeDate.toDate()} fieldName={fieldName} className={className}>
+      <PreferenceFormattedDate value={maybeDate.toDate()} />
+    </LocalizedDateTooltip>
+  ) : (
+    getOrEmptyTagFromValue(value)
+  );
+});
 
 FormattedDate.displayName = 'FormattedDate';
 

@@ -22,7 +22,7 @@ import {
 } from '../../../common/constants';
 import { VectorStyle } from '../styles/vector/vector_style';
 import { EMSFileSource } from '../sources/ems_file_source';
-import { VectorLayer } from './vector_layer';
+import { GeoJsonVectorLayer } from './vector_layer';
 import { getDefaultDynamicProperties } from '../styles/vector/vector_style_defaults';
 import { NUMERICAL_COLOR_PALETTES } from '../styles/color_palettes';
 import { getJoinAggKey } from '../../../common/get_agg_key';
@@ -92,11 +92,12 @@ export function createRegionMapLayerDescriptor({
     metrics: [metricsDescriptor],
     applyGlobalQuery: true,
     applyGlobalTime: true,
+    applyForceRefresh: true,
   };
   if (termsSize !== undefined) {
     termSourceDescriptor.size = termsSize;
   }
-  return VectorLayer.createDescriptor({
+  return GeoJsonVectorLayer.createDescriptor({
     label,
     joins: [
       {

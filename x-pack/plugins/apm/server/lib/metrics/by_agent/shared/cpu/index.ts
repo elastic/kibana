@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import theme from '@elastic/eui/dist/eui_theme_light.json';
+import { euiLightVars as theme } from '@kbn/ui-shared-deps-src/theme';
 import { i18n } from '@kbn/i18n';
 import {
   METRIC_SYSTEM_CPU_PERCENT,
   METRIC_PROCESS_CPU_PERCENT,
 } from '../../../../../../common/elasticsearch_fieldnames';
-import { Setup, SetupTimeRange } from '../../../../helpers/setup_request';
+import { Setup } from '../../../../helpers/setup_request';
 import { ChartBase } from '../../../types';
 import { fetchAndTransformMetrics } from '../../../fetch_and_transform_metrics';
 
@@ -58,12 +58,16 @@ export function getCPUChartData({
   setup,
   serviceName,
   serviceNodeName,
+  start,
+  end,
 }: {
   environment: string;
   kuery: string;
-  setup: Setup & SetupTimeRange;
+  setup: Setup;
   serviceName: string;
   serviceNodeName?: string;
+  start: number;
+  end: number;
 }) {
   return fetchAndTransformMetrics({
     environment,
@@ -71,6 +75,8 @@ export function getCPUChartData({
     setup,
     serviceName,
     serviceNodeName,
+    start,
+    end,
     chartBase,
     aggs: {
       systemCPUAverage: { avg: { field: METRIC_SYSTEM_CPU_PERCENT } },

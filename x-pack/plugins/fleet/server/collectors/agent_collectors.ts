@@ -9,7 +9,6 @@ import type { SavedObjectsClient, ElasticsearchClient } from 'kibana/server';
 
 import type { FleetConfigType } from '../../common/types';
 import * as AgentService from '../services/agents';
-import { isFleetServerSetup } from '../services/fleet_server';
 
 export interface AgentUsage {
   total_enrolled: number;
@@ -26,7 +25,7 @@ export const getAgentUsage = async (
   esClient?: ElasticsearchClient
 ): Promise<AgentUsage> => {
   // TODO: unsure if this case is possible at all.
-  if (!soClient || !esClient || !(await isFleetServerSetup())) {
+  if (!soClient || !esClient) {
     return {
       total_enrolled: 0,
       healthy: 0,
@@ -37,14 +36,8 @@ export const getAgentUsage = async (
     };
   }
 
-  const {
-    total,
-    inactive,
-    online,
-    error,
-    offline,
-    updating,
-  } = await AgentService.getAgentStatusForAgentPolicy(esClient);
+  const { total, inactive, online, error, offline, updating } =
+    await AgentService.getAgentStatusForAgentPolicy(esClient);
   return {
     total_enrolled: total,
     healthy: online,

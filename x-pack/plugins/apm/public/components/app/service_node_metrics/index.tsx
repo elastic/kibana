@@ -54,7 +54,7 @@ export function ServiceNodeMetrics() {
   const {
     path: { serviceNodeName },
     query,
-  } = useApmParams('/services/:serviceName/nodes/:serviceNodeName/metrics');
+  } = useApmParams('/services/{serviceName}/nodes/{serviceNodeName}/metrics');
 
   const { environment, kuery, rangeFrom, rangeTo } = query;
 
@@ -63,7 +63,7 @@ export function ServiceNodeMetrics() {
   useBreadcrumb({
     title: getServiceNodeName(serviceNodeName),
     href: apmRouter.link(
-      '/services/:serviceName/nodes/:serviceNodeName/metrics',
+      '/services/{serviceName}/nodes/{serviceNodeName}/metrics',
       {
         path: {
           serviceName,
@@ -85,7 +85,7 @@ export function ServiceNodeMetrics() {
       if (start && end) {
         return callApmApi({
           endpoint:
-            'GET /api/apm/services/{serviceName}/node/{serviceNodeName}/metadata',
+            'GET /internal/apm/services/{serviceName}/node/{serviceNodeName}/metadata',
           params: {
             path: { serviceName, serviceNodeName },
             query: {

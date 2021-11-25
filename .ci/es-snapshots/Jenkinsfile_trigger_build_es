@@ -1,10 +1,7 @@
 #!/bin/groovy
 
-if (!params.branches_yaml) {
-  error "'branches_yaml' parameter must be specified"
-}
-
-def branches = readYaml text: params.branches_yaml
+// Only run this pipeline for 6.8. Higher branches are now running in Buildkite.
+def branches = ['6.8']
 
 branches.each { branch ->
   build(

@@ -105,14 +105,12 @@ export const DragDropContextWrapperComponent: React.FC<Props> = ({ browserFields
   const getDataProviders = useMemo(() => dragAndDropSelectors.getDataProvidersSelector(), []);
   const { timelines } = useKibana().services;
   const sensors = [timelines.getUseAddToTimelineSensor()];
-  const {
-    dataProviders: activeTimelineDataProviders,
-    timelineType,
-  } = useDeepEqualSelector((state) =>
-    pick(
-      ['dataProviders', 'timelineType'],
-      getTimeline(state, TimelineId.active) ?? timelineDefaults
-    )
+  const { dataProviders: activeTimelineDataProviders, timelineType } = useDeepEqualSelector(
+    (state) =>
+      pick(
+        ['dataProviders', 'timelineType'],
+        getTimeline(state, TimelineId.active) ?? timelineDefaults
+      )
   );
   const dataProviders = useDeepEqualSelector(getDataProviders);
 

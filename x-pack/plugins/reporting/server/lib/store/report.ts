@@ -15,10 +15,10 @@ import {
   ReportDocumentHead,
   ReportSource,
 } from '../../../common/types';
-import { ReportTaskParams } from '../tasks';
+import type { ReportTaskParams } from '../tasks';
 
-export { ReportDocument };
-export { ReportApiJSON, ReportSource };
+export type { ReportDocument };
+export type { ReportApiJSON, ReportSource };
 
 const puid = new Puid();
 export const MIGRATION_VERSION = '7.14.0';
@@ -67,7 +67,7 @@ export class Report implements Partial<ReportSource & ReportDocumentHead> {
 
     this.migration_version = MIGRATION_VERSION;
 
-    // see enqueue_job for all the fields that are expected to exist when adding a report
+    // see RequestHandler.enqueueJob for all the fields that are expected to exist when adding a report
     if (opts.jobtype == null) {
       throw new Error(`jobtype is expected!`);
     }

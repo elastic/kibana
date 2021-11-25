@@ -20,17 +20,23 @@ import { useApmParams } from '../../hooks/use_apm_params';
 import { useTimeRange } from '../../hooks/use_time_range';
 
 export type APMServiceAlert = ValuesType<
-  APIReturnType<'GET /api/apm/services/{serviceName}/alerts'>['alerts']
+  APIReturnType<'GET /internal/apm/services/{serviceName}/alerts'>['alerts']
 >;
 
-export const APMServiceContext = createContext<{
+export interface APMServiceContextValue {
   serviceName: string;
   agentName?: string;
   transactionType?: string;
   transactionTypes: string[];
   alerts: APMServiceAlert[];
   runtimeName?: string;
-}>({ serviceName: '', transactionTypes: [], alerts: [] });
+}
+
+export const APMServiceContext = createContext<APMServiceContextValue>({
+  serviceName: '',
+  transactionTypes: [],
+  alerts: [],
+});
 
 export function ApmServiceContextProvider({
   children,
@@ -41,7 +47,7 @@ export function ApmServiceContextProvider({
     path: { serviceName },
     query,
     query: { rangeFrom, rangeTo },
-  } = useApmParams('/services/:serviceName');
+  } = useApmParams('/services/{serviceName}');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
@@ -51,7 +57,11 @@ export function ApmServiceContextProvider({
     end,
   });
 
-  const transactionTypes = useServiceTransactionTypesFetcher(serviceName);
+  const transactionTypes = useServiceTransactionTypesFetcher({
+    serviceName,
+    start,
+    end,
+  });
 
   const transactionType = getTransactionType({
     transactionType: query.transactionType,

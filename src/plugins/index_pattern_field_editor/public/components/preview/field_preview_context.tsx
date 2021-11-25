@@ -20,83 +20,18 @@ import useDebounce from 'react-use/lib/useDebounce';
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
 
-import type { FieldPreviewContext } from '../../types';
 import { parseEsError } from '../../lib/runtime_field_validation';
-import { RuntimeType, SerializedFieldFormat } from '../../shared_imports';
 import { useFieldEditorContext } from '../field_editor_context';
-
-type From = 'cluster' | 'custom';
-interface EsDocument {
-  _id: string;
-  [key: string]: any;
-}
-
-interface PreviewError {
-  code: 'DOC_NOT_FOUND' | 'PAINLESS_SCRIPT_ERROR' | 'ERR_FETCHING_DOC';
-  error: Record<string, any>;
-}
-
-interface ClusterData {
-  documents: EsDocument[];
-  currentIdx: number;
-}
-
-// The parameters required to preview the field
-interface Params {
-  name: string | null;
-  index: string | null;
-  type: RuntimeType | null;
-  script: { source: string } | null;
-  format: SerializedFieldFormat | null;
-  document: EsDocument | null;
-}
-
-export interface FieldPreview {
-  key: string;
-  value: unknown;
-  formattedValue?: string;
-}
-
-interface Context {
-  fields: FieldPreview[];
-  error: PreviewError | null;
-  params: {
-    value: Params;
-    update: (updated: Partial<Params>) => void;
-  };
-  isLoadingPreview: boolean;
-  currentDocument: {
-    value?: EsDocument;
-    id: string;
-    isLoading: boolean;
-    isCustomId: boolean;
-  };
-  documents: {
-    loadSingle: (id: string) => void;
-    loadFromCluster: () => Promise<void>;
-  };
-  panel: {
-    isVisible: boolean;
-    setIsVisible: (isVisible: boolean) => void;
-  };
-  from: {
-    value: From;
-    set: (value: From) => void;
-  };
-  navigation: {
-    isFirstDoc: boolean;
-    isLastDoc: boolean;
-    next: () => void;
-    prev: () => void;
-  };
-  reset: () => void;
-  pinnedFields: {
-    value: { [key: string]: boolean };
-    set: React.Dispatch<React.SetStateAction<{ [key: string]: boolean }>>;
-  };
-  /** List of fields detected in the Painless script */
-  fieldsInScript: string[];
-}
+import type {
+  PainlessExecuteContext,
+  Context,
+  Params,
+  ClusterData,
+  From,
+  EsDocument,
+  ScriptErrorCodes,
+  FetchDocError,
+} from './types';
 
 const fieldPreviewContext = createContext<Context | undefined>(undefined);
 
@@ -114,7 +49,10 @@ export const defaultValueFormatter = (value: unknown) =>
 
 export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
   const previewCount = useRef(0);
-  const [lastExecutePainlessRequestParams, setLastExecutePainlessReqParams] = useState<{
+
+  // We keep in cache the latest params sent to the _execute API so we don't make unecessary requests
+  // when changing parameters that don't affect the preview result (e.g. changing the "name" field).
+  const lastExecutePainlessRequestParams = useRef<{
     type: Params['type'];
     script: string | undefined;
     documentId: string | undefined;
@@ -140,6 +78,8 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
     fields: Context['fields'];
     error: Context['error'];
   }>({ fields: [], error: null });
+  /** Possible error while fetching sample documents */
+  const [fetchDocError, setFetchDocError] = useState<FetchDocError | null>(null);
   /** The parameters required for the Painless _execute API */
   const [params, setParams] = useState<Params>(defaultParams);
   /** The sample documents fetched from the cluster */
@@ -148,7 +88,7 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
     currentIdx: 0,
   });
   /** Flag to show/hide the preview panel */
-  const [isPanelVisible, setIsPanelVisible] = useState(false);
+  const [isPanelVisible, setIsPanelVisible] = useState(true);
   /** Flag to indicate if we are loading document from cluster */
   const [isFetchingDocument, setIsFetchingDocument] = useState(false);
   /** Flag to indicate if we are calling the _execute API */
@@ -159,46 +99,66 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
   const [from, setFrom] = useState<From>('cluster');
   /** Map of fields pinned to the top of the list */
   const [pinnedFields, setPinnedFields] = useState<{ [key: string]: boolean }>({});
-  /** Array of fields detected in the script (returned by the _execute API) */
-  const [fieldsInScript, setFieldsInScript] = useState<string[]>([]);
+  /** Keep track if the script painless syntax is being validated and if it is valid  */
+  const [scriptEditorValidation, setScriptEditorValidation] = useState<{
+    isValidating: boolean;
+    isValid: boolean;
+    message: string | null;
+  }>({ isValidating: false, isValid: true, message: null });
 
   const { documents, currentIdx } = clusterData;
-  const currentDocument: EsDocument | undefined = useMemo(() => documents[currentIdx], [
-    documents,
-    currentIdx,
-  ]);
-
-  const currentDocIndex = currentDocument?._index;
-  const currentDocId: string = currentDocument?._id ?? '';
+  const currentDocument: EsDocument | undefined = documents[currentIdx];
+  const currentDocIndex: string | undefined = currentDocument?._index;
+  const currentDocId: string | undefined = currentDocument?._id;
   const totalDocs = documents.length;
+  const isCustomDocId = customDocIdToLoad !== null;
+  let isPreviewAvailable = true;
+
+  // If no documents could be fetched from the cluster (and we are not trying to load
+  // a custom doc ID) then we disable preview as the script field validation expect the result
+  // of the preview to before resolving. If there are no documents we can't have a preview
+  // (the _execute API expects one) and thus the validation should not expect any value.
+  if (!isFetchingDocument && !isCustomDocId && documents.length === 0) {
+    isPreviewAvailable = false;
+  }
+
   const { name, document, script, format, type } = params;
 
   const updateParams: Context['params']['update'] = useCallback((updated) => {
     setParams((prev) => ({ ...prev, ...updated }));
   }, []);
 
-  const needToUpdatePreview = useMemo(() => {
-    const isCurrentDocIdDefined = currentDocId !== '';
-
-    if (!isCurrentDocIdDefined) {
+  const allParamsDefined = useMemo(() => {
+    if (!currentDocIndex || !script?.source || !type) {
       return false;
     }
+    return true;
+  }, [currentDocIndex, script?.source, type]);
 
-    const allParamsDefined = (['type', 'script', 'index', 'document'] as Array<
-      keyof Params
-    >).every((key) => Boolean(params[key]));
+  const hasSomeParamsChanged = useMemo(() => {
+    return (
+      lastExecutePainlessRequestParams.current.type !== type ||
+      lastExecutePainlessRequestParams.current.script !== script?.source ||
+      lastExecutePainlessRequestParams.current.documentId !== currentDocId
+    );
+  }, [type, script, currentDocId]);
 
-    if (!allParamsDefined) {
-      return false;
-    }
+  const setPreviewError = useCallback((error: Context['error']) => {
+    setPreviewResponse((prev) => ({
+      ...prev,
+      error,
+    }));
+  }, []);
 
-    const hasSomeParamsChanged =
-      lastExecutePainlessRequestParams.type !== type ||
-      lastExecutePainlessRequestParams.script !== script?.source ||
-      lastExecutePainlessRequestParams.documentId !== currentDocId;
-
-    return hasSomeParamsChanged;
-  }, [type, script?.source, currentDocId, params, lastExecutePainlessRequestParams]);
+  const clearPreviewError = useCallback((errorCode: ScriptErrorCodes) => {
+    setPreviewResponse((prev) => {
+      const error = prev.error === null || prev.error?.code === errorCode ? null : prev.error;
+      return {
+        ...prev,
+        error,
+      };
+    });
+  }, []);
 
   const valueFormatter = useCallback(
     (value: unknown) => {
@@ -221,14 +181,11 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
         throw new Error('The "limit" option must be a number');
       }
 
+      lastExecutePainlessRequestParams.current.documentId = undefined;
       setIsFetchingDocument(true);
-      setClusterData({
-        documents: [],
-        currentIdx: 0,
-      });
       setPreviewResponse({ fields: [], error: null });
 
-      const [response, error] = await search
+      const [response, searchError] = await search
         .search({
           params: {
             index: indexPattern.title,
@@ -244,12 +201,29 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
       setIsFetchingDocument(false);
       setCustomDocIdToLoad(null);
 
-      setClusterData({
-        documents: response ? response.rawResponse.hits.hits : [],
-        currentIdx: 0,
-      });
+      const error: FetchDocError | null = Boolean(searchError)
+        ? {
+            code: 'ERR_FETCHING_DOC',
+            error: {
+              message: searchError.toString(),
+              reason: i18n.translate(
+                'indexPatternFieldEditor.fieldPreview.error.errorLoadingSampleDocumentsDescription',
+                {
+                  defaultMessage: 'Error loading sample documents.',
+                }
+              ),
+            },
+          }
+        : null;
 
-      setPreviewResponse((prev) => ({ ...prev, error }));
+      setFetchDocError(error);
+
+      if (error === null) {
+        setClusterData({
+          documents: response ? response.rawResponse.hits.hits : [],
+          currentIdx: 0,
+        });
+      }
     },
     [indexPattern, search]
   );
@@ -260,6 +234,7 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
         return;
       }
 
+      lastExecutePainlessRequestParams.current.documentId = undefined;
       setIsFetchingDocument(true);
 
       const [response, searchError] = await search
@@ -284,11 +259,17 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
 
       const isDocumentFound = response?.rawResponse.hits.total > 0;
       const loadedDocuments: EsDocument[] = isDocumentFound ? response.rawResponse.hits.hits : [];
-      const error: Context['error'] = Boolean(searchError)
+      const error: FetchDocError | null = Boolean(searchError)
         ? {
             code: 'ERR_FETCHING_DOC',
             error: {
               message: searchError.toString(),
+              reason: i18n.translate(
+                'indexPatternFieldEditor.fieldPreview.error.errorLoadingDocumentDescription',
+                {
+                  defaultMessage: 'Error loading document.',
+                }
+              ),
             },
           }
         : isDocumentFound === false
@@ -305,14 +286,14 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
           }
         : null;
 
-      setPreviewResponse((prev) => ({ ...prev, error }));
+      setFetchDocError(error);
 
-      setClusterData({
-        documents: loadedDocuments,
-        currentIdx: 0,
-      });
-
-      if (error !== null) {
+      if (error === null) {
+        setClusterData({
+          documents: loadedDocuments,
+          currentIdx: 0,
+        });
+      } else {
         // Make sure we disable the "Updating..." indicator as we have an error
         // and we won't fetch the preview
         setIsLoadingPreview(false);
@@ -321,71 +302,30 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
     [indexPattern, search]
   );
 
-  const updateSingleFieldPreview = useCallback(
-    (fieldName: string, values: unknown[]) => {
-      const [value] = values;
-      const formattedValue = valueFormatter(value);
-
-      setPreviewResponse({
-        fields: [{ key: fieldName, value, formattedValue }],
-        error: null,
-      });
-    },
-    [valueFormatter]
-  );
-
-  const updateCompositeFieldPreview = useCallback(
-    (compositeName: string | null, compositeValues: Record<string, unknown[]>) => {
-      if (typeof compositeValues !== 'object') {
-        return;
-      }
-
-      const updatedFieldsInScript: string[] = [];
-
-      const fields = Object.entries(compositeValues).map(([key, values]) => {
-        // The Painless _execute API returns the composite field values under a map.
-        // Each of the key is prefixed with "composite_field." (e.g. "composite_field.field1: ['value']")
-        const { 1: fieldName } = key.split('composite_field.');
-        updatedFieldsInScript.push(fieldName);
-
-        const [value] = values;
-        const formattedValue = valueFormatter(value);
-
-        return {
-          key: `${compositeName ?? ''}.${fieldName}`,
-          value,
-          formattedValue,
-        };
-      });
-
-      setPreviewResponse({
-        fields,
-        error: null,
-      });
-
-      setFieldsInScript(updatedFieldsInScript);
-    },
-    [valueFormatter]
-  );
-
   const updatePreview = useCallback(async () => {
-    setLastExecutePainlessReqParams({
-      type: params.type,
-      script: params.script?.source,
-      documentId: currentDocId,
-    });
-
-    if (!needToUpdatePreview) {
+    if (scriptEditorValidation.isValidating) {
       return;
     }
+
+    if (!allParamsDefined || !hasSomeParamsChanged || scriptEditorValidation.isValid === false) {
+      setIsLoadingPreview(false);
+      return;
+    }
+
+    lastExecutePainlessRequestParams.current = {
+      type,
+      script: script?.source,
+      documentId: currentDocId,
+    };
 
     const currentApiCall = ++previewCount.current;
 
     const response = await getFieldPreview({
-      index: currentDocIndex,
-      document: params.document!,
-      context: `${params.type!}_field` as FieldPreviewContext,
-      script: params.script!,
+      index: currentDocIndex!,
+      document: document!,
+      context: `${type!}_field` as PainlessExecuteContext,
+      script: script!,
+      documentId: currentDocId,
     });
 
     if (currentApiCall !== previewCount.current) {
@@ -393,8 +333,6 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
       // or we have called reset() and don't need the response anymore.
       return;
     }
-
-    setIsLoadingPreview(false);
 
     const { error: serverError } = response;
 
@@ -405,38 +343,43 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
       });
       notifications.toasts.addError(serverError, { title });
 
+      setIsLoadingPreview(false);
       return;
     }
 
-    const { values, error } = response.data ?? { values: [], error: {} };
+    if (response.data) {
+      const { values, error } = response.data;
 
-    if (error) {
-      const fallBackError = {
-        message: i18n.translate('indexPatternFieldEditor.fieldPreview.defaultErrorTitle', {
-          defaultMessage: 'Unable to run the provided script',
-        }),
-      };
+      if (error) {
+        setPreviewResponse({
+          fields: [{ key: name ?? '', value: '', formattedValue: defaultValueFormatter('') }],
+          error: { code: 'PAINLESS_SCRIPT_ERROR', error: parseEsError(error) },
+        });
+      } else {
+        const [value] = values;
+        const formattedValue = valueFormatter(value);
 
-      setPreviewResponse({
-        fields: [],
-        error: { code: 'PAINLESS_SCRIPT_ERROR', error: parseEsError(error, true) ?? fallBackError },
-      });
-    } else {
-      if (!Array.isArray(values)) {
-        updateCompositeFieldPreview(params.name, values);
-        return;
+        setPreviewResponse({
+          fields: [{ key: name!, value, formattedValue }],
+          error: null,
+        });
       }
-      updateSingleFieldPreview(params.name!, values);
     }
+
+    setIsLoadingPreview(false);
   }, [
-    needToUpdatePreview,
-    params,
+    name,
+    type,
+    script,
+    document,
     currentDocIndex,
     currentDocId,
     getFieldPreview,
     notifications.toasts,
-    updateSingleFieldPreview,
-    updateCompositeFieldPreview,
+    valueFormatter,
+    allParamsDefined,
+    scriptEditorValidation,
+    hasSomeParamsChanged,
   ]);
 
   const goToNextDoc = useCallback(() => {
@@ -465,11 +408,6 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
       currentIdx: 0,
     });
     setPreviewResponse({ fields: [], error: null });
-    setLastExecutePainlessReqParams({
-      type: null,
-      script: undefined,
-      documentId: undefined,
-    });
     setFrom('cluster');
     setIsLoadingPreview(false);
     setIsFetchingDocument(false);
@@ -479,6 +417,7 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
     () => ({
       fields: previewResponse.fields,
       error: previewResponse.error,
+      isPreviewAvailable,
       isLoadingPreview,
       params: {
         value: params,
@@ -486,13 +425,14 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
       },
       currentDocument: {
         value: currentDocument,
-        id: customDocIdToLoad !== null ? customDocIdToLoad : currentDocId,
+        id: isCustomDocId ? customDocIdToLoad! : currentDocId,
         isLoading: isFetchingDocument,
-        isCustomId: customDocIdToLoad !== null,
+        isCustomId: isCustomDocId,
       },
       documents: {
         loadSingle: setCustomDocIdToLoad,
         loadFromCluster: fetchSampleDocuments,
+        fetchDocError,
       },
       navigation: {
         isFirstDoc: currentIdx === 0,
@@ -513,15 +453,20 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
         value: pinnedFields,
         set: setPinnedFields,
       },
-      fieldsInScript,
+      validation: {
+        setScriptEditorValidation,
+      },
     }),
     [
       previewResponse,
+      fetchDocError,
       params,
+      isPreviewAvailable,
       isLoadingPreview,
       updateParams,
       currentDocument,
       currentDocId,
+      isCustomDocId,
       fetchSampleDocuments,
       isFetchingDocument,
       customDocIdToLoad,
@@ -533,44 +478,28 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
       from,
       reset,
       pinnedFields,
-      fieldsInScript,
     ]
   );
 
   /**
    * In order to immediately display the "Updating..." state indicator and not have to wait
-   * the 500ms of the debounce, we set the isLoadingPreview state in this effect
+   * the 500ms of the debounce, we set the isLoadingPreview state in this effect whenever
+   * one of the _execute API param changes
    */
   useEffect(() => {
-    if (needToUpdatePreview) {
+    if (allParamsDefined && hasSomeParamsChanged) {
       setIsLoadingPreview(true);
     }
-  }, [needToUpdatePreview, customDocIdToLoad]);
+  }, [allParamsDefined, hasSomeParamsChanged, script?.source, type, currentDocId]);
 
   /**
-   * Whenever we enter manually a document ID to load we'll clear the
-   * documents and the preview value.
+   * In order to immediately display the "Updating..." state indicator and not have to wait
+   * the 500ms of the debounce, we set the isFetchingDocument state in this effect whenever
+   * "customDocIdToLoad" changes
    */
   useEffect(() => {
-    if (customDocIdToLoad !== null) {
+    if (customDocIdToLoad !== null && Boolean(customDocIdToLoad.trim())) {
       setIsFetchingDocument(true);
-
-      setClusterData({
-        documents: [],
-        currentIdx: 0,
-      });
-
-      setPreviewResponse((prev) => {
-        const {
-          fields: { 0: field },
-        } = prev;
-        return {
-          ...prev,
-          fields: [
-            { ...field, value: undefined, formattedValue: defaultValueFormatter(undefined) },
-          ],
-        };
-      });
     }
   }, [customDocIdToLoad]);
 
@@ -595,76 +524,82 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
   }, [currentDocument, updateParams]);
 
   /**
-   * Whenever the name changes we immediately update the preview
+   * Whenever the name or the format changes we immediately update the preview
    */
   useEffect(() => {
     setPreviewResponse((prev) => {
-      const { fields } = prev;
+      const {
+        fields: { 0: field },
+      } = prev;
 
-      let updatedFields: Context['fields'] = fields.map((field) => {
-        let key: string = name ?? '';
+      const nextValue =
+        script === null && Boolean(document)
+          ? get(document, name ?? '') // When there is no script we read the value from _source
+          : field?.value;
 
-        if (type === 'composite') {
-          const { 1: fieldName } = field.key.split('.');
-          key = `${name ?? ''}.${fieldName}`;
-        }
-
-        return {
-          ...field,
-          key,
-        };
-      });
-
-      // If the user has entered a name but not yet any script we will display
-      // the field in the preview with just the name (and a "-" for the value)
-      if (updatedFields.length === 0 && name !== null) {
-        updatedFields = [
-          { key: name, value: undefined, formattedValue: defaultValueFormatter(undefined) },
-        ];
-      }
+      const formattedValue = valueFormatter(nextValue);
 
       return {
         ...prev,
-        fields: updatedFields,
-      };
-    });
-  }, [name, type]);
-
-  /**
-   * Whenever the format changes we immediately update the preview
-   */
-  useEffect(() => {
-    setPreviewResponse((prev) => {
-      const { fields } = prev;
-
-      return {
-        ...prev,
-        fields: fields.map((field) => {
-          const nextValue =
-            script === null && Boolean(document)
-              ? get(document, name ?? '') // When there is no script we try to read the value from _source
-              : field?.value;
-
-          const formattedValue = valueFormatter(nextValue);
-
-          return {
-            ...field,
-            value: nextValue,
-            formattedValue,
-          };
-        }),
+        fields: [{ ...field, key: name ?? '', value: nextValue, formattedValue }],
       };
     });
   }, [name, script, document, valueFormatter]);
 
-  useDebounce(
-    // Whenever updatePreview() changes (meaning whenever any of the params changes)
-    // we call it to update the preview response with the field(s) value or possible error.
-    updatePreview,
-    500,
-    [updatePreview]
-  );
+  useEffect(() => {
+    if (script?.source === undefined) {
+      // Whenever the source is not defined ("Set value" is toggled off or the
+      // script is empty) we clear the error and update the params cache.
+      lastExecutePainlessRequestParams.current.script = undefined;
+      setPreviewError(null);
+    }
+  }, [script?.source, setPreviewError]);
 
+  // Handle the validation state coming from the Painless DiagnosticAdapter
+  // (see @kbn-monaco/src/painless/diagnostics_adapter.ts)
+  useEffect(() => {
+    if (scriptEditorValidation.isValidating) {
+      return;
+    }
+
+    if (scriptEditorValidation.isValid === false) {
+      // Make sure to remove the "Updating..." spinner
+      setIsLoadingPreview(false);
+
+      // Set preview response error so it is displayed in the flyout footer
+      const error =
+        script?.source === undefined
+          ? null
+          : {
+              code: 'PAINLESS_SYNTAX_ERROR' as const,
+              error: {
+                reason:
+                  scriptEditorValidation.message ??
+                  i18n.translate('indexPatternFieldEditor.fieldPreview.error.painlessSyntax', {
+                    defaultMessage: 'Invalid Painless syntax',
+                  }),
+              },
+            };
+      setPreviewError(error);
+
+      // Make sure to update the lastExecutePainlessRequestParams cache so when the user updates
+      // the script and fixes the syntax the "updatePreview()" will run
+      lastExecutePainlessRequestParams.current.script = script?.source;
+    } else {
+      // Clear possible previous syntax error
+      clearPreviewError('PAINLESS_SYNTAX_ERROR');
+    }
+  }, [scriptEditorValidation, script?.source, setPreviewError, clearPreviewError]);
+
+  /**
+   * Whenever updatePreview() changes (meaning whenever any of the params changes)
+   * we call it to update the preview response with the field(s) value or possible error.
+   */
+  useDebounce(updatePreview, 500, [updatePreview]);
+
+  /**
+   * Whenever the doc ID to load changes we load the document (after a 500ms debounce)
+   */
   useDebounce(
     () => {
       if (customDocIdToLoad === null) {

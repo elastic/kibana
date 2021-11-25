@@ -90,7 +90,7 @@ describe('Execution abortion tests', () => {
     const completed = jest.fn();
     const aborted = jest.fn();
 
-    const defer: ExpressionFunctionDefinition<'defer', any, { time: number }, any> = {
+    const defer: ExpressionFunctionDefinition<'defer', unknown, { time: number }, unknown> = {
       name: 'defer',
       args: {
         time: {

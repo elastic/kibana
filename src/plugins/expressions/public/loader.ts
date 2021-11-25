@@ -9,7 +9,7 @@
 import { BehaviorSubject, Observable, Subject, Subscription, asyncScheduler, identity } from 'rxjs';
 import { filter, map, delay, throttleTime } from 'rxjs/operators';
 import { defaults } from 'lodash';
-import { UnwrapObservable } from '@kbn/utility-types';
+import { SerializableRecord, UnwrapObservable } from '@kbn/utility-types';
 import { Adapters } from '../../inspector/public';
 import { IExpressionLoaderParams } from './types';
 import { ExpressionAstExpression } from '../common';
@@ -18,7 +18,7 @@ import { ExecutionContract } from '../common/execution/execution_contract';
 import { ExpressionRenderHandler } from './render';
 import { getExpressionsService } from './services';
 
-type Data = any;
+type Data = unknown;
 
 export class ExpressionLoader {
   data$: ReturnType<ExecutionContract['getData']>;
@@ -156,7 +156,7 @@ export class ExpressionLoader {
   };
 
   private render(data: Data): void {
-    this.renderHandler.render(data, this.params.uiState);
+    this.renderHandler.render(data as SerializableRecord, this.params.uiState);
   }
 
   private setParams(params?: IExpressionLoaderParams) {
@@ -169,7 +169,7 @@ export class ExpressionLoader {
         {},
         params.searchContext,
         this.params.searchContext || {}
-      ) as any;
+      );
     }
     if (params.uiState && this.params) {
       this.params.uiState = params.uiState;
@@ -194,10 +194,10 @@ export class ExpressionLoader {
 
 export type IExpressionLoader = (
   element: HTMLElement,
-  expression: string | ExpressionAstExpression,
-  params: IExpressionLoaderParams
-) => ExpressionLoader;
+  expression?: string | ExpressionAstExpression,
+  params?: IExpressionLoaderParams
+) => Promise<ExpressionLoader>;
 
-export const loader: IExpressionLoader = (element, expression, params) => {
+export const loader: IExpressionLoader = async (element, expression?, params?) => {
   return new ExpressionLoader(element, expression, params);
 };

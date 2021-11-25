@@ -43,14 +43,14 @@ export const setup = (
       return convert.call(format, value, options);
     }
 
-    const subValues = value.map((v: any) => recurse(v, options));
+    const subValues = value.map((v: unknown) => recurse(v, options));
     const useMultiLine = subValues.some((sub: string) => sub.indexOf('\n') > -1);
 
     return subValues.join(',' + (useMultiLine ? '\n' : ' '));
   };
 
   const wrap: HtmlContextTypeConvert = (value, options) => {
-    return `<span ng-non-bindable>${recurse(value, options)}</span>`;
+    return recurse(value, options);
   };
 
   return wrap;

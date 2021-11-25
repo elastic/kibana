@@ -10,20 +10,19 @@ import { ValidationFunc } from '../../hook_form_lib';
 import { isJSON } from '../../../validators/string';
 import { ERROR_CODE } from './types';
 
-export const isJsonField = (
-  message: string,
-  { allowEmptyString = false }: { allowEmptyString?: boolean } = {}
-) => (...args: Parameters<ValidationFunc>): ReturnType<ValidationFunc<any, ERROR_CODE>> => {
-  const [{ value }] = args;
+export const isJsonField =
+  (message: string, { allowEmptyString = false }: { allowEmptyString?: boolean } = {}) =>
+  (...args: Parameters<ValidationFunc>): ReturnType<ValidationFunc<any, ERROR_CODE>> => {
+    const [{ value }] = args;
 
-  if (typeof value !== 'string' || (allowEmptyString && value.trim() === '')) {
-    return;
-  }
+    if (typeof value !== 'string' || (allowEmptyString && value.trim() === '')) {
+      return;
+    }
 
-  if (!isJSON(value)) {
-    return {
-      code: 'ERR_JSON_FORMAT',
-      message,
-    };
-  }
-};
+    if (!isJSON(value)) {
+      return {
+        code: 'ERR_JSON_FORMAT',
+        message,
+      };
+    }
+  };

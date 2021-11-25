@@ -38,19 +38,23 @@ export const exporters = {
  * Index patterns:
  */
 
-import { isNestedField, isFilterable } from '../common';
+import {
+  isNestedField,
+  isFilterable,
+  isMultiField,
+  getFieldSubtypeNested,
+  getFieldSubtypeMulti,
+} from '../common';
 
 import {
   ILLEGAL_CHARACTERS_KEY,
   CONTAINS_SPACES_KEY,
   ILLEGAL_CHARACTERS_VISIBLE,
   ILLEGAL_CHARACTERS,
-  isDefault,
   validateDataView,
-  flattenHitWrapper,
-} from './index_patterns';
+} from './data_views';
 
-export type { IndexPatternsService } from './index_patterns';
+export type { IndexPatternsService } from './data_views';
 
 // Index patterns namespace:
 export const indexPatterns = {
@@ -58,41 +62,37 @@ export const indexPatterns = {
   CONTAINS_SPACES_KEY,
   ILLEGAL_CHARACTERS_VISIBLE,
   ILLEGAL_CHARACTERS,
-  isDefault,
   isFilterable,
   isNestedField,
+  isMultiField,
+  getFieldSubtypeMulti,
+  getFieldSubtypeNested,
   validate: validateDataView,
-  flattenHitWrapper,
 };
 
-export {
-  IndexPatternsContract,
-  DataViewsContract,
-  IndexPattern,
-  IndexPatternField,
-  TypeMeta,
-} from './index_patterns';
+export type { IndexPatternsContract, DataViewsContract, TypeMeta } from './data_views';
+export { IndexPattern, IndexPatternField } from './data_views';
 
-export {
+export type {
   IIndexPattern,
   IFieldType,
-  ES_FIELD_TYPES,
-  KBN_FIELD_TYPES,
   IndexPatternAttributes,
-  UI_SETTINGS,
   AggregationRestrictions as IndexPatternAggRestrictions,
   IndexPatternSpec,
   IndexPatternLoadExpressionFunctionDefinition,
-  fieldList,
   GetFieldsOptions,
-  INDEX_PATTERN_SAVED_OBJECT_TYPE,
   AggregationRestrictions,
-  IndexPatternType,
   IndexPatternListItem,
   RuntimeType,
 } from '../common';
-
-export { DuplicateDataViewError } from '../common/index_patterns/errors';
+export {
+  ES_FIELD_TYPES,
+  KBN_FIELD_TYPES,
+  UI_SETTINGS,
+  fieldList,
+  IndexPatternType,
+  DuplicateDataViewError,
+} from '../common';
 
 /*
  * Autocomplete query suggestions:
@@ -140,6 +140,7 @@ import {
   // tabify
   tabifyAggResponse,
   tabifyGetColumns,
+  checkColumnForPrecisionError,
 } from '../common';
 
 export { AggGroupLabels, AggGroupNames, METRIC_TYPES, BUCKET_TYPES } from '../common';
@@ -215,7 +216,8 @@ export type {
   SearchUsageCollector,
 } from './search';
 
-export { ISearchOptions, isErrorResponse, isCompleteResponse, isPartialResponse } from '../common';
+export type { ISearchOptions } from '../common';
+export { isErrorResponse, isCompleteResponse, isPartialResponse } from '../common';
 
 // Search namespace
 export const search = {
@@ -246,6 +248,7 @@ export const search = {
   getResponseInspectorStats,
   tabifyAggResponse,
   tabifyGetColumns,
+  checkColumnForPrecisionError,
 };
 
 /*
@@ -299,7 +302,8 @@ export {
 
 export { isTimeRange, isQuery } from '../common';
 
-export { ACTION_GLOBAL_APPLY_FILTER, ApplyGlobalFilterActionContext } from './actions';
+export type { ApplyGlobalFilterActionContext } from './actions';
+export { ACTION_GLOBAL_APPLY_FILTER } from './actions';
 export { APPLY_FILTER_TRIGGER } from './triggers';
 
 /*

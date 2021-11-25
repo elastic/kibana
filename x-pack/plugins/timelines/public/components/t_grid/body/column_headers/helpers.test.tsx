@@ -98,12 +98,9 @@ describe('helpers', () => {
   describe('getColumnHeaders', () => {
     // additional properties used by `EuiDataGrid`:
     const actions = {
-      showSortAsc: {
-        label: 'Sort A-Z',
-      },
-      showSortDesc: {
-        label: 'Sort Z-A',
-      },
+      showHide: false,
+      showSortAsc: true,
+      showSortDesc: true,
     };
     const defaultSortDirection = 'desc';
     const isSortable = true;

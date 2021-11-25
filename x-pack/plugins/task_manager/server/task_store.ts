@@ -11,7 +11,7 @@
 import { Subject } from 'rxjs';
 import { omit, defaults } from 'lodash';
 
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import {
   SavedObject,
@@ -211,19 +211,18 @@ export class TaskStore {
 
     let updatedSavedObjects: Array<SavedObjectsUpdateResponse | Error>;
     try {
-      ({
-        saved_objects: updatedSavedObjects,
-      } = await this.savedObjectsRepository.bulkUpdate<SerializedConcreteTaskInstance>(
-        docs.map((doc) => ({
-          type: 'task',
-          id: doc.id,
-          options: { version: doc.version },
-          attributes: attributesByDocId.get(doc.id)!,
-        })),
-        {
-          refresh: false,
-        }
-      ));
+      ({ saved_objects: updatedSavedObjects } =
+        await this.savedObjectsRepository.bulkUpdate<SerializedConcreteTaskInstance>(
+          docs.map((doc) => ({
+            type: 'task',
+            id: doc.id,
+            options: { version: doc.version },
+            attributes: attributesByDocId.get(doc.id)!,
+          })),
+          {
+            refresh: false,
+          }
+        ));
     } catch (e) {
       this.errors$.next(e);
       throw e;

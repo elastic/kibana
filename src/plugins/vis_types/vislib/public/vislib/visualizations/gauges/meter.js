@@ -175,7 +175,6 @@ export class MeterGauge {
     const marginFactor = 0.95;
     const tooltip = this.gaugeChart.tooltip;
     const isTooltip = this.gaugeChart.handler.visConfig.get('addTooltip');
-    const isDisplayWarning = this.gaugeChart.handler.visConfig.get('isDisplayWarning', false);
     const { angleFactor, maxAngle, minAngle } =
       this.gaugeConfig.gaugeType === 'Circle' ? circleAngles : arcAngles;
     const maxRadius = (Math.min(width, height / angleFactor) / 2) * marginFactor;
@@ -261,7 +260,6 @@ export class MeterGauge {
       .style('fill', (d) => this.getColorBucket(Math.max(min, d.y)));
 
     const smallContainer = svg.node().getBBox().height < 70;
-    let hiddenLabels = smallContainer;
 
     // If the value label is hidden we later want to hide also all other labels
     // since they don't make sense as long as the actual value is hidden.
@@ -286,7 +284,6 @@ export class MeterGauge {
         // The text is too long if it's larger than the inner free space minus a couple of random pixels for padding.
         const textTooLong = textLength >= getInnerFreeSpace() - 6;
         if (textTooLong) {
-          hiddenLabels = true;
           valueLabelHidden = true;
         }
         return textTooLong ? 'none' : 'initial';
@@ -302,9 +299,6 @@ export class MeterGauge {
         .style('display', function () {
           const textLength = this.getBBox().width;
           const textTooLong = textLength > maxRadius;
-          if (textTooLong) {
-            hiddenLabels = true;
-          }
           return smallContainer || textTooLong ? 'none' : 'initial';
         });
 
@@ -317,9 +311,6 @@ export class MeterGauge {
         .style('display', function () {
           const textLength = this.getBBox().width;
           const textTooLong = textLength > maxRadius;
-          if (textTooLong) {
-            hiddenLabels = true;
-          }
           return valueLabelHidden || smallContainer || textTooLong ? 'none' : 'initial';
         });
     }
@@ -333,10 +324,6 @@ export class MeterGauge {
         const gauge = d3.select(this);
         gauge.call(tooltip.render());
       });
-    }
-
-    if (hiddenLabels && isDisplayWarning) {
-      this.gaugeChart.handler.alerts.show('Some labels were hidden due to size constraints');
     }
 
     //center the visualization

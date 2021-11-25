@@ -20,8 +20,9 @@ export function getThresholdLine(
   yAxes: Array<AxisConfig<YScaleType>>,
   seriesParams: SeriesParam[]
 ): ThresholdLineConfig {
-  const groupId = yAxes.find(({ id }) => seriesParams.some(({ valueAxis }) => id === valueAxis))
-    ?.groupId;
+  const groupId = yAxes.find(({ id }) =>
+    seriesParams.some(({ valueAxis }) => id === valueAxis)
+  )?.groupId;
 
   return {
     ...rest,

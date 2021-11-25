@@ -7,7 +7,8 @@
 
 import * as t from 'io-ts';
 import Boom from '@hapi/boom';
-import { toBooleanRt } from '@kbn/io-ts-utils';
+import { toBooleanRt } from '@kbn/io-ts-utils/to_boolean_rt';
+import { maxSuggestions } from '../../../../observability/common';
 import { setupRequest } from '../../lib/helpers/setup_request';
 import { getServiceNames } from '../../lib/settings/agent_configuration/get_service_names';
 import { createOrUpdateConfiguration } from '../../lib/settings/agent_configuration/create_or_update_configuration';
@@ -16,15 +17,15 @@ import { findExactConfiguration } from '../../lib/settings/agent_configuration/f
 import { listConfigurations } from '../../lib/settings/agent_configuration/list_configurations';
 import { getEnvironments } from '../../lib/settings/agent_configuration/get_environments';
 import { deleteConfiguration } from '../../lib/settings/agent_configuration/delete_configuration';
-import { createApmServerRoute } from '../create_apm_server_route';
+import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { getAgentNameByService } from '../../lib/settings/agent_configuration/get_agent_name_by_service';
 import { markAppliedByAgent } from '../../lib/settings/agent_configuration/mark_applied_by_agent';
 import {
   serviceRt,
   agentConfigurationIntakeRt,
 } from '../../../common/agent_configuration/runtime_types/agent_configuration_intake_rt';
-import { getSearchAggregatedTransactions } from '../../lib/helpers/aggregated_transactions';
-import { createApmServerRouteRepository } from '../create_apm_server_route_repository';
+import { getSearchAggregatedTransactions } from '../../lib/helpers/transactions';
+import { createApmServerRouteRepository } from '../apm_routes/create_apm_server_route_repository';
 import { syncAgentConfigsToApmPackagePolicies } from '../../lib/fleet/sync_agent_configs_to_apm_package_policies';
 
 // get list of configurations
@@ -205,7 +206,7 @@ const agentConfigurationSearchRoute = createApmServerRoute({
       logger.debug(
         `[Central configuration] Config was not found for ${service.name}/${service.environment}`
       );
-      throw Boom.notFound();
+      return null;
     }
 
     // whether to update `applied_by_agent` field
@@ -243,14 +244,21 @@ const listAgentConfigurationServicesRoute = createApmServerRoute({
   options: { tags: ['access:apm'] },
   handler: async (resources) => {
     const setup = await setupRequest(resources);
+    const { start, end } = resources.params.query;
     const searchAggregatedTransactions = await getSearchAggregatedTransactions({
       apmEventClient: setup.apmEventClient,
       config: setup.config,
       kuery: '',
+      start,
+      end,
     });
+    const size = await resources.context.core.uiSettings.client.get<number>(
+      maxSuggestions
+    );
     const serviceNames = await getServiceNames({
-      setup,
       searchAggregatedTransactions,
+      setup,
+      size,
     });
 
     return { serviceNames };
@@ -266,19 +274,24 @@ const listAgentConfigurationEnvironmentsRoute = createApmServerRoute({
   options: { tags: ['access:apm'] },
   handler: async (resources) => {
     const setup = await setupRequest(resources);
-    const { params } = resources;
+    const { context, params } = resources;
 
-    const { serviceName } = params.query;
+    const { serviceName, start, end } = params.query;
     const searchAggregatedTransactions = await getSearchAggregatedTransactions({
       apmEventClient: setup.apmEventClient,
       config: setup.config,
       kuery: '',
+      start,
+      end,
     });
-
+    const size = await context.core.uiSettings.client.get<number>(
+      maxSuggestions
+    );
     const environments = await getEnvironments({
       serviceName,
       setup,
       searchAggregatedTransactions,
+      size,
     });
 
     return { environments };
@@ -301,12 +314,13 @@ const agentConfigurationAgentNameRoute = createApmServerRoute({
   },
 });
 
-export const agentConfigurationRouteRepository = createApmServerRouteRepository()
-  .add(agentConfigurationRoute)
-  .add(getSingleAgentConfigurationRoute)
-  .add(deleteAgentConfigurationRoute)
-  .add(createOrUpdateAgentConfigurationRoute)
-  .add(agentConfigurationSearchRoute)
-  .add(listAgentConfigurationServicesRoute)
-  .add(listAgentConfigurationEnvironmentsRoute)
-  .add(agentConfigurationAgentNameRoute);
+export const agentConfigurationRouteRepository =
+  createApmServerRouteRepository()
+    .add(agentConfigurationRoute)
+    .add(getSingleAgentConfigurationRoute)
+    .add(deleteAgentConfigurationRoute)
+    .add(createOrUpdateAgentConfigurationRoute)
+    .add(agentConfigurationSearchRoute)
+    .add(listAgentConfigurationServicesRoute)
+    .add(listAgentConfigurationEnvironmentsRoute)
+    .add(agentConfigurationAgentNameRoute);

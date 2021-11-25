@@ -6,7 +6,6 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
-import { TrustedApp } from '../../../common/endpoint/types';
 
 type BaseSearchTypes = string | number | boolean | object;
 export type SearchTypes = BaseSearchTypes | BaseSearchTypes[] | undefined;
@@ -211,26 +210,52 @@ export interface GetEndpointListResponse {
   per_page: number;
   page: number;
   total: number;
-  data: EndpointExceptionListItem[];
+  data: ExceptionListItem[];
 }
 
 // Telemetry List types
 
-export interface EndpointExceptionListItem {
+export interface ExceptionListItem {
   id: string;
-  version: string;
+  rule_version?: number;
   name: string;
-  description: string;
   created_at: string;
-  created_by: string;
   updated_at: string;
-  updated_by: string;
   entries: object;
   os_types: object;
 }
 
 export interface ListTemplate {
-  trusted_application: TrustedApp[];
-  endpoint_exception: EndpointExceptionListItem[];
-  endpoint_event_filter: EndpointExceptionListItem[];
+  '@timestamp': string;
+  detection_rule?: TelemetryEvent;
+  endpoint_exception?: TelemetryEvent;
+  endpoint_event_filter?: TelemetryEvent;
+  trusted_application?: TelemetryEvent;
+}
+
+// Detection Rule types
+
+interface ExceptionListEntry {
+  id: string;
+  list_id: string;
+  type: string;
+  namespace_type: string;
+}
+
+interface DetectionRuleParms {
+  ruleId: string;
+  version: number;
+  type: string;
+  exceptionsList: ExceptionListEntry[];
+}
+
+export interface RuleSearchResult {
+  alert: {
+    name: string;
+    enabled: boolean;
+    tags: string[];
+    createdAt: string;
+    updatedAt: string;
+    params: DetectionRuleParms;
+  };
 }

@@ -15,6 +15,38 @@ import { SavedObjectsErrorHelpers } from './errors';
 import { ALL_NAMESPACES_STRING, SavedObjectsUtils } from './utils';
 
 /**
+ * Discriminated union (TypeScript approximation of an algebraic data type); this design pattern is used for internal repository operations.
+ * @internal
+ */
+export type Either<L = unknown, R = L> = Left<L> | Right<R>;
+/**
+ * Left part of discriminated union ({@link Either}).
+ * @internal
+ */
+export interface Left<L> {
+  tag: 'Left';
+  value: L;
+}
+/**
+ * Right part of discriminated union ({@link Either}).
+ * @internal
+ */
+export interface Right<R> {
+  tag: 'Right';
+  value: R;
+}
+/**
+ * Type guard for left part of discriminated union ({@link Left}, {@link Either}).
+ * @internal
+ */
+export const isLeft = <L, R>(either: Either<L, R>): either is Left<L> => either.tag === 'Left';
+/**
+ * Type guard for right part of discriminated union ({@link Right}, {@link Either}).
+ * @internal
+ */
+export const isRight = <L, R>(either: Either<L, R>): either is Right<R> => either.tag === 'Right';
+
+/**
  * Checks the raw response of a bulk operation and returns an error if necessary.
  *
  * @param type
@@ -121,6 +153,8 @@ export function getSavedObjectFromSource<T>(
  * @param registry
  * @param raw
  * @param namespace
+ *
+ * @internal
  */
 export function rawDocExistsInNamespace(
   registry: ISavedObjectTypeRegistry,
@@ -153,6 +187,8 @@ export function rawDocExistsInNamespace(
  * @param registry
  * @param raw
  * @param namespaces
+ *
+ * @internal
  */
 export function rawDocExistsInNamespaces(
   registry: ISavedObjectTypeRegistry,
@@ -178,4 +214,54 @@ export function rawDocExistsInNamespaces(
   }
 
   return existingNamespaces.some((x) => x === ALL_NAMESPACES_STRING || namespacesToCheck.has(x));
+}
+
+/**
+ * Ensure that a namespace is always in its namespace ID representation.
+ * This allows `'default'` to be used interchangeably with `undefined`.
+ *
+ * @param namespace
+ *
+ * @internal
+ */
+export function normalizeNamespace(namespace?: string) {
+  if (namespace === ALL_NAMESPACES_STRING) {
+    throw SavedObjectsErrorHelpers.createBadRequestError('"options.namespace" cannot be "*"');
+  } else if (namespace === undefined) {
+    return namespace;
+  } else {
+    return SavedObjectsUtils.namespaceStringToId(namespace);
+  }
+}
+
+/**
+ * Returns the current time. For use in Elasticsearch operations.
+ *
+ * @internal
+ */
+export function getCurrentTime() {
+  return new Date(Date.now()).toISOString();
+}
+
+/**
+ * Takes an object with a `type` and `id` field and returns a key string.
+ *
+ * @internal
+ */
+export function getObjectKey({ type, id }: { type: string; id: string }) {
+  return `${type}:${id}`;
+}
+
+/**
+ * Parses a 'type:id' key string and returns an object with a `type` field and an `id` field.
+ *
+ * @internal
+ */
+export function parseObjectKey(key: string) {
+  const type = key.slice(0, key.indexOf(':'));
+  const id = key.slice(type.length + 1);
+  if (!type || !id) {
+    throw new Error('Malformed object key (should be "type:id")');
+  }
+  return { type, id };
 }

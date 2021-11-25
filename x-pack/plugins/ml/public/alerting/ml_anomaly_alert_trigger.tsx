@@ -33,7 +33,8 @@ import { AlertTypeParamsExpressionProps } from '../../../triggers_actions_ui/pub
 import { parseInterval } from '../../common/util/parse_interval';
 import { BetaBadge } from './beta_badge';
 
-export type MlAnomalyAlertTriggerProps = AlertTypeParamsExpressionProps<MlAnomalyDetectionAlertParams>;
+export type MlAnomalyAlertTriggerProps =
+  AlertTypeParamsExpressionProps<MlAnomalyDetectionAlertParams>;
 
 const MlAnomalyAlertTrigger: FC<MlAnomalyAlertTriggerProps> = ({
   alertParams,
@@ -54,11 +55,10 @@ const MlAnomalyAlertTrigger: FC<MlAnomalyAlertTriggerProps> = ({
   const [jobConfigs, setJobConfigs] = useState<CombinedJobWithStats[]>([]);
 
   const onAlertParamChange = useCallback(
-    <T extends keyof MlAnomalyDetectionAlertParams>(param: T) => (
-      update: MlAnomalyDetectionAlertParams[T]
-    ) => {
-      setAlertParams(param, update);
-    },
+    <T extends keyof MlAnomalyDetectionAlertParams>(param: T) =>
+      (update: MlAnomalyDetectionAlertParams[T]) => {
+        setAlertParams(param, update);
+      },
     []
   );
 
@@ -88,7 +88,7 @@ const MlAnomalyAlertTrigger: FC<MlAnomalyAlertTriggerProps> = ({
   const availableResultTypes = useMemo(() => {
     if (jobConfigs.length === 0) return Object.values(ANOMALY_RESULT_TYPE);
 
-    return (jobConfigs ?? []).some((v) => v.analysis_config.influencers.length > 0)
+    return (jobConfigs ?? []).some((v) => Boolean(v.analysis_config?.influencers?.length))
       ? Object.values(ANOMALY_RESULT_TYPE)
       : [ANOMALY_RESULT_TYPE.BUCKET, ANOMALY_RESULT_TYPE.RECORD];
   }, [jobConfigs]);

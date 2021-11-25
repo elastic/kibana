@@ -20,6 +20,7 @@ type VegaVisType = new (el: HTMLDivElement, fireEvent: IInterpreterRenderHandler
 };
 
 export const createVegaVisualization = ({
+  core,
   getServiceSettings,
 }: VegaVisualizationDependencies): VegaVisType =>
   class VegaVisualization {
@@ -73,6 +74,7 @@ export const createVegaVisualization = ({
         const { filterManager } = this.dataPlugin.query;
         const { timefilter } = this.dataPlugin.query.timefilter;
         const vegaViewParams = {
+          externalUrl: core.http.externalUrl,
           parentEl: this.el,
           fireEvent: this.fireEvent,
           vegaStateRestorer: this.vegaStateRestorer,

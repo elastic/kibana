@@ -25,6 +25,7 @@ export const contentSources = [
     allowsReauth: true,
     boost: 1,
     activities: [],
+    isOauth1: false,
   },
   {
     id: '124',
@@ -40,6 +41,7 @@ export const contentSources = [
     allowsReauth: true,
     boost: 0.5,
     activities: [],
+    isOauth1: true,
   },
 ];
 
@@ -48,8 +50,29 @@ const defaultIndexing = {
   defaultAction: 'include',
   rules: [],
   schedule: {
-    intervals: [],
-    blocked: [],
+    full: 'P1D',
+    incremental: 'PT2H',
+    delete: 'PT10M',
+    permissions: 'PT3H',
+    blockedWindows: [],
+    estimates: {
+      full: {
+        nextStart: '2021-09-30T15:37:38+00:00',
+        duration: 'PT1M5S',
+      },
+      incremental: {
+        nextStart: '2021-09-27T17:39:24+00:00',
+        duration: 'PT2S',
+      },
+      delete: {
+        nextStart: '2021-09-27T21:39:24+00:00',
+        duration: 'PT49S',
+      },
+      permissions: {
+        nextStart: '2021-09-27T17:39:24+00:00',
+        duration: 'PT2S',
+      },
+    },
   },
   features: {
     contentExtraction: {
@@ -88,6 +111,7 @@ export const fullContentSources = [
     groups,
     custom: false,
     isIndexedSource: true,
+    isSyncConfigEnabled: true,
     areThumbnailsConfigEnabled: true,
     accessToken: '123token',
     urlField: 'myLink',
@@ -109,6 +133,7 @@ export const fullContentSources = [
     indexing: defaultIndexing,
     custom: true,
     isIndexedSource: true,
+    isSyncConfigEnabled: true,
     areThumbnailsConfigEnabled: true,
     accessToken: '123token',
     urlField: 'url',
@@ -303,6 +328,7 @@ export const sourceConfigData = {
   privateSourcesEnabled: false,
   categories: ['wiki', 'atlassian', 'intranet'],
   configuredFields: {
+    isOauth1: false,
     clientId: 'CyztADsSECRETCSAUCEh1a',
     clientSecret: 'GSjJxqSECRETCSAUCEksHk',
     baseUrl: 'https://mine.atlassian.net',
@@ -350,7 +376,7 @@ export const exampleResult = {
       source: 'custom',
     },
   ],
-  schemaFields: {},
+  schemaFields: { cats: 'text', dogs: 'text' },
 };
 
 export const mostRecentIndexJob = {

@@ -23,18 +23,17 @@ import { EmbeddableStart, EmbeddableSetup } from 'src/plugins/embeddable/public'
 import { ChartsPluginStart } from 'src/plugins/charts/public';
 import { NavigationPublicPluginStart as NavigationStart } from 'src/plugins/navigation/public';
 import { SharePluginStart, SharePluginSetup, UrlGeneratorContract } from 'src/plugins/share/public';
-import { KibanaLegacySetup, KibanaLegacyStart } from 'src/plugins/kibana_legacy/public';
 import { UrlForwardingSetup, UrlForwardingStart } from 'src/plugins/url_forwarding/public';
 import { HomePublicPluginSetup } from 'src/plugins/home/public';
 import { Start as InspectorPublicPluginStart } from 'src/plugins/inspector/public';
+import { EuiLoadingContent } from '@elastic/eui';
 import { DataPublicPluginStart, DataPublicPluginSetup, esFilters } from '../../data/public';
-import { SavedObjectLoader, SavedObjectsStart } from '../../saved_objects/public';
+import { SavedObjectsStart } from '../../saved_objects/public';
 import { createKbnUrlTracker } from '../../kibana_utils/public';
 import { DEFAULT_APP_CATEGORIES } from '../../../core/public';
 import { UrlGeneratorState } from '../../share/public';
-import { DocViewInput, DocViewInputFn } from './application/doc_views/doc_views_types';
-import { DocViewsRegistry } from './application/doc_views/doc_views_registry';
-import { DocViewerTable } from './application/components/table/table';
+import { DocViewInput, DocViewInputFn } from './services/doc_views/doc_views_types';
+import { DocViewsRegistry } from './services/doc_views/doc_views_registry';
 import {
   setDocViewsRegistry,
   setUrlTracker,
@@ -45,7 +44,6 @@ import {
   getScopedHistory,
   syncHistoryLocations,
 } from './kibana_services';
-import { createSavedSearchesLoader } from './saved_searches';
 import { registerFeature } from './register_feature';
 import { buildServices } from './build_services';
 import {
@@ -55,17 +53,25 @@ import {
   SEARCH_SESSION_ID_QUERY_PARAM,
 } from './url_generator';
 import { DiscoverAppLocatorDefinition, DiscoverAppLocator } from './locator';
-import { SearchEmbeddableFactory } from './application/embeddable';
+import { SearchEmbeddableFactory } from './embeddable';
 import { UsageCollectionSetup } from '../../usage_collection/public';
 import { replaceUrlHashQuery } from '../../kibana_utils/public/';
 import { IndexPatternFieldEditorStart } from '../../../plugins/index_pattern_field_editor/public';
-import { SourceViewer } from './application/components/source_viewer/source_viewer';
+import { DeferredSpinner } from './components';
+import { ViewSavedSearchAction } from './embeddable/view_saved_search_action';
+import type { SpacesPluginStart } from '../../../../x-pack/plugins/spaces/public';
+import { FieldFormatsStart } from '../../field_formats/public';
+import { injectTruncateStyles } from './utils/truncate_styles';
+import { TRUNCATE_MAX_HEIGHT } from '../common';
 
 declare module '../../share/public' {
   export interface UrlGeneratorStateMapping {
     [DISCOVER_APP_URL_GENERATOR]: UrlGeneratorState<DiscoverUrlGeneratorState>;
   }
 }
+
+const DocViewerTable = React.lazy(() => import('./services/doc_views/components/doc_viewer_table'));
+const SourceViewer = React.lazy(() => import('./services/doc_views/components/doc_viewer_source'));
 
 /**
  * @public
@@ -113,8 +119,6 @@ export interface DiscoverSetup {
 }
 
 export interface DiscoverStart {
-  savedSearchLoader: SavedObjectLoader;
-
   /**
    * @deprecated Use URL locator instead. URL generator will be removed.
    */
@@ -160,7 +164,6 @@ export interface DiscoverSetupPlugins {
   share?: SharePluginSetup;
   uiActions: UiActionsSetup;
   embeddable: EmbeddableSetup;
-  kibanaLegacy: KibanaLegacySetup;
   urlForwarding: UrlForwardingSetup;
   home?: HomePublicPluginSetup;
   data: DataPublicPluginSetup;
@@ -175,13 +178,14 @@ export interface DiscoverStartPlugins {
   navigation: NavigationStart;
   charts: ChartsPluginStart;
   data: DataPublicPluginStart;
+  fieldFormats: FieldFormatsStart;
   share?: SharePluginStart;
-  kibanaLegacy: KibanaLegacyStart;
   urlForwarding: UrlForwardingStart;
   inspector: InspectorPublicPluginStart;
   savedObjects: SavedObjectsStart;
   usageCollection?: UsageCollectionSetup;
   indexPatternFieldEditor: IndexPatternFieldEditorStart;
+  spaces?: SpacesPluginStart;
 }
 
 /**
@@ -189,7 +193,8 @@ export interface DiscoverStartPlugins {
  * Discover provides embeddables for Dashboards
  */
 export class DiscoverPlugin
-  implements Plugin<DiscoverSetup, DiscoverStart, DiscoverSetupPlugins, DiscoverStartPlugins> {
+  implements Plugin<DiscoverSetup, DiscoverStart, DiscoverSetupPlugins, DiscoverStartPlugins>
+{
   constructor(private readonly initializerContext: PluginInitializerContext) {}
 
   private appStateUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
@@ -232,7 +237,17 @@ export class DiscoverPlugin
         defaultMessage: 'Table',
       }),
       order: 10,
-      component: DocViewerTable,
+      component: (props) => (
+        <React.Suspense
+          fallback={
+            <DeferredSpinner>
+              <EuiLoadingContent />
+            </DeferredSpinner>
+          }
+        >
+          <DocViewerTable {...props} />
+        </React.Suspense>
+      ),
     });
     this.docViewsRegistry.addDocView({
       title: i18n.translate('discover.docViews.json.jsonTitle', {
@@ -240,12 +255,20 @@ export class DiscoverPlugin
       }),
       order: 20,
       component: ({ hit, indexPattern }) => (
-        <SourceViewer
-          index={hit._index}
-          id={hit._id}
-          indexPatternId={indexPattern?.id || ''}
-          hasLineNumbers
-        />
+        <React.Suspense
+          fallback={
+            <DeferredSpinner>
+              <EuiLoadingContent />
+            </DeferredSpinner>
+          }
+        >
+          <SourceViewer
+            index={hit._index}
+            id={hit._id}
+            indexPattern={indexPattern}
+            hasLineNumbers
+          />
+        </React.Suspense>
       ),
     });
 
@@ -320,10 +343,12 @@ export class DiscoverPlugin
         // make sure the index pattern list is up to date
         await depsStart.data.indexPatterns.clearCache();
 
-        const { renderApp } = await import('./application/application');
-        const unmount = await renderApp('discover', params.element);
+        const { renderApp } = await import('./application');
+        // FIXME: Temporarily hide overflow-y in Discover app when Field Stats table is shown
+        // due to EUI bug https://github.com/elastic/eui/pull/5152
+        params.element.classList.add('dscAppWrapper');
+        const unmount = renderApp(params.element);
         return () => {
-          params.element.classList.remove('dscAppWrapper');
           unlistenParentHistory();
           unmount();
           appUnMounted();
@@ -373,18 +398,20 @@ export class DiscoverPlugin
     // initializeServices are assigned at start and used
     // when the application/embeddable is mounted
 
+    const { uiActions } = plugins;
+
+    const viewSavedSearchAction = new ViewSavedSearchAction(core.application);
+    uiActions.addTriggerAction('CONTEXT_MENU_TRIGGER', viewSavedSearchAction);
     setUiActions(plugins.uiActions);
 
     const services = buildServices(core, plugins, this.initializerContext);
     setServices(services);
 
+    injectTruncateStyles(services.uiSettings.get(TRUNCATE_MAX_HEIGHT));
+
     return {
       urlGenerator: this.urlGenerator,
       locator: this.locator,
-      savedSearchLoader: createSavedSearchesLoader({
-        savedObjectsClient: core.savedObjects.client,
-        savedObjects: plugins.savedObjects,
-      }),
     };
   }
 

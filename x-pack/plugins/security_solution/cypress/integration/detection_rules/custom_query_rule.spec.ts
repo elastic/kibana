@@ -133,7 +133,7 @@ describe('Custom detection rules creation', () => {
     });
   });
 
-  it('Creates and activates a new rule', function () {
+  it.skip('Creates and activates a new rule', function () {
     loginAndWaitForPageWithoutDateRange(ALERTS_URL);
     waitForAlertsPanelToBeLoaded();
     waitForAlertsIndexToBeCreated();
@@ -346,15 +346,15 @@ describe('Custom detection rules deletion and edition', () => {
     it('Only modifies rule active status on enable/disable', () => {
       activatesRule();
 
-      cy.intercept('GET', `/api/detection_engine/rules?id=`).as('fetchRuleDetails');
+      cy.intercept('GET', `/api/detection_engine/rules?id=*`).as('fetchRuleDetails');
 
       goToRuleDetails();
 
       cy.wait('@fetchRuleDetails').then(({ response }) => {
-        cy.wrap(response!.statusCode).should('eql', 200);
+        cy.wrap(response?.statusCode).should('eql', 200);
 
-        cy.wrap(response!.body.max_signals).should('eql', getExistingRule().maxSignals);
-        cy.wrap(response!.body.enabled).should('eql', false);
+        cy.wrap(response?.body.max_signals).should('eql', getExistingRule().maxSignals);
+        cy.wrap(response?.body.enabled).should('eql', false);
       });
     });
 
@@ -409,14 +409,14 @@ describe('Custom detection rules deletion and edition', () => {
       cy.get(TAGS_CLEAR_BUTTON).click({ force: true });
       fillAboutRule(getEditedRule());
 
-      cy.intercept('GET', '/api/detection_engine/rules?id').as('getRule');
+      cy.intercept('GET', '/api/detection_engine/rules?id*').as('getRule');
 
       saveEditedRule();
 
       cy.wait('@getRule').then(({ response }) => {
-        cy.wrap(response!.statusCode).should('eql', 200);
+        cy.wrap(response?.statusCode).should('eql', 200);
         // ensure that editing rule does not modify max_signals
-        cy.wrap(response!.body.max_signals).should('eql', getExistingRule().maxSignals);
+        cy.wrap(response?.body.max_signals).should('eql', getExistingRule().maxSignals);
       });
 
       cy.get(RULE_NAME_HEADER).should('contain', `${getEditedRule().name}`);

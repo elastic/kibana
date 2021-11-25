@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { omit } from 'lodash';
-import type { ApiResponse, estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { UserAtSpaceScenarios, Superuser } from '../../scenarios';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import {
@@ -39,8 +39,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
   const esTestIndexTool = new ESTestIndexTool(es, retry);
   const taskManagerUtils = new TaskManagerUtils(es, retry);
 
-  // FLAKY: https://github.com/elastic/kibana/issues/106492
-  describe.skip('alerts', () => {
+  describe('alerts', () => {
     const authorizationIndex = '.kibana-test-authorization';
     const objectRemover = new ObjectRemover(supertest);
 
@@ -135,9 +134,10 @@ export default function alertTests({ getService }: FtrProviderContext) {
                 'alert:test.always-firing',
                 reference
               );
+              // @ts-expect-error doesnt handle total: number
               expect(alertSearchResult.body.hits.total.value).to.eql(1);
               const alertSearchResultWithoutDates = omit(
-                alertSearchResult.body.hits.hits[0]._source,
+                alertSearchResult.body.hits.hits[0]._source as object,
                 ['alertInfo.createdAt', 'alertInfo.updatedAt']
               );
               expect(alertSearchResultWithoutDates).to.eql({
@@ -178,9 +178,12 @@ export default function alertTests({ getService }: FtrProviderContext) {
                   ruleTypeName: 'Test: Always Firing',
                 },
               });
+              // @ts-expect-error _source: unknown
               expect(alertSearchResult.body.hits.hits[0]._source.alertInfo.createdAt).to.match(
                 /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/
               );
+
+              // @ts-expect-error _source: unknown
               expect(alertSearchResult.body.hits.hits[0]._source.alertInfo.updatedAt).to.match(
                 /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/
               );
@@ -190,6 +193,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
                 'action:test.index-record',
                 reference
               );
+              // @ts-expect-error doesnt handle total: number
               expect(actionSearchResult.body.hits.total.value).to.eql(1);
               expect(actionSearchResult.body.hits.hits[0]._source).to.eql({
                 config: {
@@ -282,9 +286,10 @@ instanceStateValue: true
                 'alert:test.always-firing',
                 reference
               );
+              // @ts-expect-error doesnt handle total: number
               expect(alertSearchResult.body.hits.total.value).to.eql(1);
               const alertSearchResultWithoutDates = omit(
-                alertSearchResult.body.hits.hits[0]._source,
+                alertSearchResult.body.hits.hits[0]._source as object,
                 ['alertInfo.createdAt', 'alertInfo.updatedAt']
               );
               expect(alertSearchResultWithoutDates).to.eql({
@@ -326,9 +331,11 @@ instanceStateValue: true
                 },
               });
 
+              // @ts-expect-error _source: unknown
               expect(alertSearchResult.body.hits.hits[0]._source.alertInfo.createdAt).to.match(
                 /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/
               );
+              // @ts-expect-error _source: unknown
               expect(alertSearchResult.body.hits.hits[0]._source.alertInfo.updatedAt).to.match(
                 /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/
               );
@@ -337,6 +344,7 @@ instanceStateValue: true
                 'action:test.index-record',
                 reference
               );
+              // @ts-expect-error doesnt handle total: number
               expect(actionSearchResult.body.hits.total.value).to.eql(1);
               expect(actionSearchResult.body.hits.hits[0]._source).to.eql({
                 config: {
@@ -417,8 +425,10 @@ instanceStateValue: true
             reference2
           );
 
+          // @ts-expect-error doesnt handle total: number
           expect(alertSearchResult.body.hits.total.value).to.be.greaterThan(0);
           const alertSearchResultInfoWithoutDates = omit(
+            // @ts-expect-error _source: unknown
             alertSearchResult.body.hits.hits[0]._source.alertInfo,
             ['createdAt', 'updatedAt']
           );
@@ -452,9 +462,11 @@ instanceStateValue: true
             ruleTypeName: 'Test: Always Firing',
           });
 
+          // @ts-expect-error _source: unknown
           expect(alertSearchResult.body.hits.hits[0]._source.alertInfo.createdAt).to.match(
             /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/
           );
+          // @ts-expect-error _source: unknown
           expect(alertSearchResult.body.hits.hits[0]._source.alertInfo.updatedAt).to.match(
             /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/
           );
@@ -502,19 +514,6 @@ instanceStateValue: true
               })
             );
 
-          // Enqueue non ephemerically so we the latter code can query properly
-          const enqueueResponse = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/alerts_fixture/${createdAction.id}/enqueue_action`)
-            .set('kbn-xsrf', 'foo')
-            .send({
-              params: {
-                reference,
-                index: ES_TEST_INDEX_NAME,
-                retryAt: retryDate.getTime(),
-              },
-            });
-          expect(enqueueResponse.status).to.eql(204);
-
           switch (scenario.id) {
             case 'no_kibana_privileges at space1':
             case 'global_read at space1':
@@ -548,9 +547,9 @@ instanceStateValue: true
               const scheduledActionTask: estypes.SearchHit<
                 TaskRunning<TaskRunningStage.RAN, ConcreteTaskInstance>
               > = await retry.try(async () => {
-                const searchResult: ApiResponse<
-                  estypes.SearchResponse<TaskRunning<TaskRunningStage.RAN, ConcreteTaskInstance>>
-                > = await es.search({
+                const searchResult = await es.search<
+                  TaskRunning<TaskRunningStage.RAN, ConcreteTaskInstance>
+                >({
                   index: '.kibana_task_manager',
                   body: {
                     query: {
@@ -583,8 +582,8 @@ instanceStateValue: true
                     },
                   },
                 });
-                expect((searchResult.body.hits.total as estypes.SearchTotalHits).value).to.eql(1);
-                return searchResult.body.hits.hits[0];
+                expect((searchResult.hits.total as estypes.SearchTotalHits).value).to.eql(1);
+                return searchResult.hits.hits[0];
               });
 
               // Ensure the next runAt is set to the retryDate by custom logic
@@ -866,6 +865,7 @@ instanceStateValue: true
                 'action:test.index-record',
                 reference
               );
+              // @ts-expect-error doesnt handle total: number
               expect(searchResult.body.hits.total.value).to.eql(1);
               break;
             default:
@@ -945,8 +945,10 @@ instanceStateValue: true
                 'action:test.index-record',
                 reference
               );
+              // @ts-expect-error doesnt handle total: number
               expect(searchResult.body.hits.total.value).to.eql(2);
               const messages: string[] = searchResult.body.hits.hits.map(
+                // @ts-expect-error _search: unknown
                 (hit: { _source: { params: { message: string } } }) => hit._source.params.message
               );
               expect(messages.sort()).to.eql(['from:default', 'from:other']);
@@ -1019,8 +1021,10 @@ instanceStateValue: true
                 'action:test.index-record',
                 reference
               );
+              // @ts-expect-error doesnt handle total: number
               expect(searchResult.body.hits.total.value).to.eql(2);
               const messages: string[] = searchResult.body.hits.hits.map(
+                // @ts-expect-error _source: unknown
                 (hit: { _source: { params: { message: string } } }) => hit._source.params.message
               );
               expect(messages.sort()).to.eql(['from:default:next', 'from:default:prev']);
@@ -1082,6 +1086,7 @@ instanceStateValue: true
                 'action:test.index-record',
                 reference
               );
+              // @ts-expect-error doesnt handle total: number
               expect(searchResult.body.hits.total.value).to.eql(2);
               break;
             default:
@@ -1140,6 +1145,7 @@ instanceStateValue: true
                 'action:test.index-record',
                 reference
               );
+              // @ts-expect-error doesnt handle total: number
               expect(executedActionsResult.body.hits.total.value).to.eql(0);
               break;
             default:
@@ -1198,6 +1204,7 @@ instanceStateValue: true
                 'action:test.index-record',
                 reference
               );
+              // @ts-expect-error doesnt handle total: number
               expect(executedActionsResult.body.hits.total.value).to.eql(0);
               break;
             default:
@@ -1257,6 +1264,7 @@ instanceStateValue: true
                 'action:test.index-record',
                 reference
               );
+              // @ts-expect-error doesnt handle total: number
               expect(searchResult.body.hits.total.value).to.eql(1);
               break;
             default:

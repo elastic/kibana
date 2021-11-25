@@ -96,7 +96,16 @@ export class SearchAPI {
                 }
               )
               .pipe(
-                tap((data) => this.inspectSearchResult(data, requestResponders[requestId])),
+                tap(
+                  (data) => this.inspectSearchResult(data, requestResponders[requestId]),
+                  (err) =>
+                    this.inspectSearchResult(
+                      {
+                        rawResponse: err?.err,
+                      },
+                      requestResponders[requestId]
+                    )
+                ),
                 map((data) => ({
                   name: requestId,
                   rawResponse: data.rawResponse,

@@ -29,7 +29,6 @@ const fullStoryConfigSchema = schema.object({
 });
 
 const configSchema = schema.object({
-  enabled: schema.boolean({ defaultValue: true }),
   id: schema.maybe(schema.string()),
   apm: schema.maybe(apmConfigSchema),
   cname: schema.maybe(schema.string()),

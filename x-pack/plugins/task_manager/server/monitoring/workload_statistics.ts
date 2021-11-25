@@ -10,7 +10,7 @@ import { mergeMap, map, filter, switchMap, catchError } from 'rxjs/operators';
 import { Logger } from 'src/core/server';
 import { JsonObject } from '@kbn/utility-types';
 import { keyBy, mapValues } from 'lodash';
-import { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { AggregatedStatProvider } from './runtime_statistics_aggregator';
 import { parseIntervalAsSecond, asInterval, parseIntervalAsMillisecond } from '../lib/intervals';
 import { AggregationResultOf } from '../../../../../src/core/types/elasticsearch';
@@ -147,8 +147,19 @@ export function createWorkloadAggregator(
             missing: { field: 'task.schedule' },
           },
           ownerIds: {
-            cardinality: {
-              field: 'task.ownerId',
+            filter: {
+              range: {
+                'task.startedAt': {
+                  gte: 'now-1w/w',
+                },
+              },
+            },
+            aggs: {
+              ownerIds: {
+                cardinality: {
+                  field: 'task.ownerId',
+                },
+              },
             },
           },
           idleTasks: {
@@ -213,7 +224,7 @@ export function createWorkloadAggregator(
 
       const taskTypes = aggregations.taskType.buckets;
       const nonRecurring = aggregations.nonRecurringTasks.doc_count;
-      const ownerIds = aggregations.ownerIds.value;
+      const ownerIds = aggregations.ownerIds.ownerIds.value;
 
       const {
         overdue: {
@@ -415,9 +426,10 @@ export function estimateRecurringTaskScheduling(
   });
 }
 
-export function summarizeWorkloadStat(
-  workloadStats: WorkloadStat
-): { value: SummarizedWorkloadStat; status: HealthStatus } {
+export function summarizeWorkloadStat(workloadStats: WorkloadStat): {
+  value: SummarizedWorkloadStat;
+  status: HealthStatus;
+} {
   return {
     value: {
       ...workloadStats,
@@ -447,7 +459,9 @@ export interface WorkloadAggregationResponse {
     doc_count: number;
   };
   ownerIds: {
-    value: number;
+    ownerIds: {
+      value: number;
+    };
   };
   [otherAggs: string]: estypes.AggregationsAggregate;
 }

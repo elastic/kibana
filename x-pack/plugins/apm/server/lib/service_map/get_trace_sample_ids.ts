@@ -18,7 +18,7 @@ import { ProcessorEvent } from '../../../common/processor_event';
 import { SERVICE_MAP_TIMEOUT_ERROR } from '../../../common/service_map';
 import { rangeQuery } from '../../../../observability/server';
 import { environmentQuery } from '../../../common/utils/environment_query';
-import { Setup, SetupTimeRange } from '../helpers/setup_request';
+import { Setup } from '../helpers/setup_request';
 
 const MAX_TRACES_TO_INSPECT = 1000;
 
@@ -26,12 +26,16 @@ export async function getTraceSampleIds({
   serviceName,
   environment,
   setup,
+  start,
+  end,
 }: {
   serviceName?: string;
   environment: string;
-  setup: Setup & SetupTimeRange;
+  setup: Setup;
+  start: number;
+  end: number;
 }) {
-  const { start, end, apmEventClient, config } = setup;
+  const { apmEventClient, config } = setup;
 
   const query = {
     bool: {
@@ -56,13 +60,11 @@ export async function getTraceSampleIds({
   query.bool.filter.push(...environmentQuery(environment));
 
   const fingerprintBucketSize = serviceName
-    ? config['xpack.apm.serviceMapFingerprintBucketSize']
-    : config['xpack.apm.serviceMapFingerprintGlobalBucketSize'];
-
+    ? config.serviceMapFingerprintBucketSize
+    : config.serviceMapFingerprintGlobalBucketSize;
   const traceIdBucketSize = serviceName
-    ? config['xpack.apm.serviceMapTraceIdBucketSize']
-    : config['xpack.apm.serviceMapTraceIdGlobalBucketSize'];
-
+    ? config.serviceMapTraceIdBucketSize
+    : config.serviceMapTraceIdGlobalBucketSize;
   const samplerShardSize = traceIdBucketSize * 10;
 
   const params = {
@@ -133,8 +135,7 @@ export async function getTraceSampleIds({
       'get_trace_sample_ids',
       params
     );
-    // make sure at least one trace per composite/connection bucket
-    // is queried
+    // make sure at least one trace per composite/connection bucket is queried
     const traceIdsWithPriority =
       tracesSampleResponse.aggregations?.connections.buckets.flatMap((bucket) =>
         bucket.sample.trace_ids.buckets.map((sampleDocBucket, index) => ({

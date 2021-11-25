@@ -27,27 +27,29 @@ export type Action =
       lastEntry: ThreatMapEntries;
     };
 
-export const reducer = () => (state: State, action: Action): State => {
-  switch (action.type) {
-    case 'setEntries': {
-      const isAndLogicIncluded =
-        action.entries.filter(({ entries }) => entries.length > 1).length > 0;
+export const reducer =
+  () =>
+  (state: State, action: Action): State => {
+    switch (action.type) {
+      case 'setEntries': {
+        const isAndLogicIncluded =
+          action.entries.filter(({ entries }) => entries.length > 1).length > 0;
 
-      const returnState = {
-        ...state,
-        andLogicIncluded: isAndLogicIncluded,
-        entries: action.entries,
-      };
-      return returnState;
+        const returnState = {
+          ...state,
+          andLogicIncluded: isAndLogicIncluded,
+          entries: action.entries,
+        };
+        return returnState;
+      }
+      case 'setDefault': {
+        return {
+          ...state,
+          ...action.initialState,
+          entries: [{ ...action.lastEntry, entries: [getDefaultEmptyEntry()] }],
+        };
+      }
+      default:
+        return state;
     }
-    case 'setDefault': {
-      return {
-        ...state,
-        ...action.initialState,
-        entries: [{ ...action.lastEntry, entries: [getDefaultEmptyEntry()] }],
-      };
-    }
-    default:
-      return state;
-  }
-};
+  };

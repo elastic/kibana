@@ -16,7 +16,7 @@ import { EuiThemeProvider } from '../../../../../../../../src/plugins/kibana_rea
 import { KibanaContextProvider } from '../../../../../../../../src/plugins/kibana_react/public';
 import { UrlParamsProvider } from '../../../../context/url_params_context/url_params_context';
 
-export const core = ({
+export const core = {
   http: {
     basePath: {
       prepend: jest.fn(),
@@ -26,7 +26,7 @@ export const core = ({
     get: (key: string) => true,
     get$: (key: string) => of(true),
   },
-} as unknown) as CoreStart;
+} as unknown as CoreStart;
 
 export const render = (
   component: React.ReactNode,

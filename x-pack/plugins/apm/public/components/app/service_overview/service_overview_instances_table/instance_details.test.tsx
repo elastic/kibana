@@ -15,7 +15,8 @@ import {
 import { InstanceDetails } from './intance_details';
 import * as useInstanceDetailsFetcher from './use_instance_details_fetcher';
 
-type ServiceInstanceDetails = APIReturnType<'GET /api/apm/services/{serviceName}/service_overview_instances/details/{serviceNodeName}'>;
+type ServiceInstanceDetails =
+  APIReturnType<'GET /internal/apm/services/{serviceName}/service_overview_instances/details/{serviceNodeName}'>;
 
 describe('InstanceDetails', () => {
   it('renders loading spinner when data is being fetched', () => {

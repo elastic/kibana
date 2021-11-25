@@ -11,7 +11,7 @@ import { getLicenses, handleLicenses, fetchLicenses } from './get_licenses';
 
 describe('get_licenses', () => {
   const searchMock = sinon.stub();
-  const client = ({ search: searchMock } as unknown) as ElasticsearchClient;
+  const client = { search: searchMock } as unknown as ElasticsearchClient;
   const body = {
     hits: {
       hits: [

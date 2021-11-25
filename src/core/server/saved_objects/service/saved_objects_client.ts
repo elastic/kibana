@@ -321,6 +321,23 @@ export interface SavedObjectsUpdateResponse<T = unknown>
  *
  * @public
  */
+export interface SavedObjectsBulkResolveObject {
+  id: string;
+  type: string;
+}
+
+/**
+ *
+ * @public
+ */
+export interface SavedObjectsBulkResolveResponse<T = unknown> {
+  resolved_objects: Array<SavedObjectsResolveResponse<T>>;
+}
+
+/**
+ *
+ * @public
+ */
 export interface SavedObjectsResolveResponse<T = unknown> {
   /**
    * The saved object that was found.
@@ -501,6 +518,28 @@ export class SavedObjectsClient {
     options: SavedObjectsBaseOptions = {}
   ): Promise<SavedObject<T>> {
     return await this._repository.get(type, id, options);
+  }
+
+  /**
+   * Resolves an array of objects by id, using any legacy URL aliases if they exist
+   *
+   * @param objects - an array of objects containing id, type
+   * @example
+   *
+   * bulkResolve([
+   *   { id: 'one', type: 'config' },
+   *   { id: 'foo', type: 'index-pattern' }
+   * ])
+   *
+   * @note Saved objects that Kibana fails to find are replaced with an error object and an "exactMatch" outcome. The rationale behind the
+   * outcome is that "exactMatch" is the default outcome, and the outcome only changes if an alias is found. This behavior is unique to
+   * `bulkResolve`; the regular `resolve` API will throw an error instead.
+   */
+  async bulkResolve<T = unknown>(
+    objects: SavedObjectsBulkResolveObject[],
+    options?: SavedObjectsBaseOptions
+  ): Promise<SavedObjectsBulkResolveResponse<T>> {
+    return await this._repository.bulkResolve(objects, options);
   }
 
   /**

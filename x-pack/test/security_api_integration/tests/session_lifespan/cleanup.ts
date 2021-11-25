@@ -6,7 +6,7 @@
  */
 
 import { parse as parseCookie, Cookie } from 'tough-cookie';
-import { delay } from 'bluebird';
+import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import expect from '@kbn/expect';
 import { adminTestUser } from '@kbn/test';
 import type { AuthenticationProvider } from '../../../../plugins/security/common/model';
@@ -40,7 +40,7 @@ export default function ({ getService }: FtrProviderContext) {
   async function getNumberOfSessionDocuments() {
     return (
       // @ts-expect-error doesn't handle total as number
-      (await es.search({ index: '.kibana_security_session*' })).body.hits.total.value as number
+      (await es.search({ index: '.kibana_security_session*' })).hits.total.value as number
     );
   }
 
@@ -98,7 +98,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       // Cleanup routine runs every 10s, let's wait for 40s to make sure it runs multiple times and
       // when lifespan is exceeded.
-      await delay(40000);
+      await setTimeoutAsync(40000);
 
       // Session info is removed from the index and cookie isn't valid anymore
       expect(await getNumberOfSessionDocuments()).to.be(0);
@@ -112,15 +112,12 @@ export default function ({ getService }: FtrProviderContext) {
     it('should properly clean up session expired because of lifespan when providers override global session config', async function () {
       this.timeout(60000);
 
-      const [
-        samlDisableSessionCookie,
-        samlOverrideSessionCookie,
-        samlFallbackSessionCookie,
-      ] = await Promise.all([
-        loginWithSAML('saml_disable'),
-        loginWithSAML('saml_override'),
-        loginWithSAML('saml_fallback'),
-      ]);
+      const [samlDisableSessionCookie, samlOverrideSessionCookie, samlFallbackSessionCookie] =
+        await Promise.all([
+          loginWithSAML('saml_disable'),
+          loginWithSAML('saml_override'),
+          loginWithSAML('saml_fallback'),
+        ]);
 
       const response = await supertest
         .post('/internal/security/login')
@@ -141,7 +138,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       // Cleanup routine runs every 10s, let's wait for 40s to make sure it runs multiple times and
       // when lifespan is exceeded.
-      await delay(40000);
+      await setTimeoutAsync(40000);
 
       // Session for basic and SAML that used global session settings should not be valid anymore.
       expect(await getNumberOfSessionDocuments()).to.be(2);

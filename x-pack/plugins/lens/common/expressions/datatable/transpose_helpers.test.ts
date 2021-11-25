@@ -100,13 +100,13 @@ describe('transpose_helpes', () => {
   }
 
   function buildFormatters() {
-    return ({
+    return {
       bucket1: { convert: (x: unknown) => x },
       bucket2: { convert: (x: unknown) => x },
       bucket3: { convert: (x: unknown) => x },
       metric1: { convert: (x: unknown) => x },
       metric2: { convert: (x: unknown) => x },
-    } as unknown) as Record<string, FieldFormat>;
+    } as unknown as Record<string, FieldFormat>;
   }
 
   it('should transpose table by one column', () => {

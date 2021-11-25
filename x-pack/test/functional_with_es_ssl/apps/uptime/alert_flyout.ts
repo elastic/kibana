@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { delay } from 'bluebird';
+import { setTimeout as setTimeoutAsync } from 'timers/promises';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -20,9 +20,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const DEFAULT_DATE_START = 'Sep 10, 2019 @ 12:40:08.078';
       const DEFAULT_DATE_END = 'Sep 11, 2019 @ 19:40:08.078';
       let alerts: any;
+      let common: any;
 
       before(async () => {
-        alerts = getService('uptime').alerts;
+        const uptimeServices = getService('uptime');
+        alerts = uptimeServices.alerts;
+        common = uptimeServices.common;
       });
 
       it('can open alert flyout', async () => {
@@ -67,17 +70,20 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       it('can select location filter', async () => {
         await alerts.clickAddFilterLocation();
-        await alerts.clickLocationExpression('mpls');
+        await common.clickFilterItems(['mpls']);
+        await common.applyFilterItems('Location');
       });
 
       it('can select port filter', async () => {
         await alerts.clickAddFilterPort();
-        await alerts.clickPortExpression('5678');
+        await common.clickFilterItems(['5678']);
+        await common.applyFilterItems('Port');
       });
 
       it('can select type/scheme filter', async () => {
         await alerts.clickAddFilterType();
-        await alerts.clickTypeExpression('http');
+        await common.clickFilterItems(['http']);
+        await common.applyFilterItems('Scheme');
       });
 
       it('can save alert', async () => {
@@ -93,7 +99,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         let alert: any;
         await retry.tryForTime(60 * 1000, async () => {
           // add a delay before next call to not overload the server
-          await delay(1500);
+          await setTimeoutAsync(1500);
           const apiResponse = await supertest.get('/api/alerts/_find?search=uptime-test');
           const alertsFromThisTest = apiResponse.body.data.filter(
             ({ name }: { name: string }) => name === 'uptime-test'

@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { flatten, get } from 'lodash';
 import { KibanaRequest } from 'src/core/server';
+import { TIMESTAMP_FIELD } from '../../../../common/constants';
 import { NodeDetailsMetricData } from '../../../../common/http_api/node_details_api';
 import { KibanaFramework } from '../framework/kibana_framework_adapter';
 import { InfraMetricsAdapter, InfraMetricsRequestOptions } from './adapter_types';
@@ -21,7 +22,7 @@ import {
 import { calculateMetricInterval } from '../../../utils/calculate_metric_interval';
 import { CallWithRequestParams, InfraDatabaseSearchResponse } from '../framework';
 import type { InfraPluginRequestHandlerContext } from '../../../types';
-import { isVisSeriesData } from '../../../../../../../src/plugins/vis_type_timeseries/server';
+import { isVisSeriesData } from '../../../../../../../src/plugins/vis_types/timeseries/server';
 
 export class KibanaMetricsAdapter implements InfraMetricsAdapter {
   private framework: KibanaFramework;
@@ -36,7 +37,7 @@ export class KibanaMetricsAdapter implements InfraMetricsAdapter {
     rawRequest: KibanaRequest
   ): Promise<NodeDetailsMetricData[]> {
     const indexPattern = `${options.sourceConfiguration.metricAlias}`;
-    const fields = findInventoryFields(options.nodeType, options.sourceConfiguration.fields);
+    const fields = findInventoryFields(options.nodeType);
     const nodeField = fields.id;
 
     const search = <Aggregation>(searchOptions: object) =>
@@ -122,11 +123,7 @@ export class KibanaMetricsAdapter implements InfraMetricsAdapter {
       max: options.timerange.to,
     };
 
-    const model = createTSVBModel(
-      options.sourceConfiguration.fields.timestamp,
-      indexPattern,
-      options.timerange.interval
-    );
+    const model = createTSVBModel(TIMESTAMP_FIELD, indexPattern, options.timerange.interval);
 
     const client = <Hit = {}, Aggregation = undefined>(
       opts: CallWithRequestParams
@@ -137,7 +134,6 @@ export class KibanaMetricsAdapter implements InfraMetricsAdapter {
       client,
       {
         indexPattern: `${options.sourceConfiguration.metricAlias}`,
-        timestampField: options.sourceConfiguration.fields.timestamp,
         timerange: options.timerange,
       },
       model.requires

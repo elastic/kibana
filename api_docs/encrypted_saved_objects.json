@@ -307,7 +307,7 @@
         "children": [
           {
             "parentPluginId": "encryptedSavedObjects",
-            "id": "def-server.encryptedDoc",
+            "id": "def-server.IsMigrationNeededPredicate.$1",
             "type": "CompoundType",
             "tags": [],
             "label": "encryptedDoc",
@@ -422,7 +422,7 @@
           "children": [
             {
               "parentPluginId": "encryptedSavedObjects",
-              "id": "def-server.opts",
+              "id": "def-server.EncryptedSavedObjectsPluginSetup.createMigration.$1",
               "type": "Object",
               "tags": [],
               "label": "opts",
@@ -505,7 +505,7 @@
           "children": [
             {
               "parentPluginId": "encryptedSavedObjects",
-              "id": "def-server.options",
+              "id": "def-server.EncryptedSavedObjectsPluginStart.getClient.$1",
               "type": "Object",
               "tags": [],
               "label": "options",

@@ -109,7 +109,7 @@ it('notifies of changes and completes once all bundles have changed', async () =
   );
 
   expect(MockWatchPack.mock.instances).toHaveLength(1);
-  const [watcher] = (MockWatchPack.mock.instances as any) as Array<jest.Mocked<ActualWatchpack>>;
+  const [watcher] = MockWatchPack.mock.instances as any as Array<jest.Mocked<ActualWatchpack>>;
   expect(watcher.on).toHaveBeenCalledTimes(1);
   expect(watcher.on).toHaveBeenCalledWith('change', expect.any(Function));
   const [, changeListener] = watcher.on.mock.calls[0];

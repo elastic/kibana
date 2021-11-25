@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { SavedObject } from 'src/core/types';
 import { Logger } from 'src/core/server';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import {
@@ -15,15 +14,15 @@ import {
 } from '../../../../../../alerting/server';
 import { ListClient } from '../../../../../../lists/server';
 import { getInputIndex } from '../get_input_output_index';
-import { RuleRangeTuple, AlertAttributes, BulkCreate, WrapHits } from '../types';
+import { RuleRangeTuple, BulkCreate, WrapHits } from '../types';
 import { TelemetryEventsSender } from '../../../telemetry/sender';
 import { BuildRuleMessage } from '../rule_messages';
 import { createThreatSignals } from '../threat_mapping/create_threat_signals';
-import { ThreatRuleParams } from '../../schemas/rule_schemas';
+import { CompleteRule, ThreatRuleParams } from '../../schemas/rule_schemas';
 import { ExperimentalFeatures } from '../../../../../common/experimental_features';
 
 export const threatMatchExecutor = async ({
-  rule,
+  completeRule,
   tuple,
   listClient,
   exceptionItems,
@@ -37,7 +36,7 @@ export const threatMatchExecutor = async ({
   bulkCreate,
   wrapHits,
 }: {
-  rule: SavedObject<AlertAttributes<ThreatRuleParams>>;
+  completeRule: CompleteRule<ThreatRuleParams>;
   tuple: RuleRangeTuple;
   listClient: ListClient;
   exceptionItems: ExceptionListItemSchema[];
@@ -51,7 +50,7 @@ export const threatMatchExecutor = async ({
   bulkCreate: BulkCreate;
   wrapHits: WrapHits;
 }) => {
-  const ruleParams = rule.attributes.params;
+  const ruleParams = completeRule.ruleParams;
   const inputIndex = await getInputIndex({
     experimentalFeatures,
     services,
@@ -59,32 +58,32 @@ export const threatMatchExecutor = async ({
     index: ruleParams.index,
   });
   return createThreatSignals({
-    tuple,
-    threatMapping: ruleParams.threatMapping,
-    query: ruleParams.query,
-    inputIndex,
-    type: ruleParams.type,
-    filters: ruleParams.filters ?? [],
-    language: ruleParams.language,
-    savedId: ruleParams.savedId,
-    services,
+    alertId: completeRule.alertId,
+    buildRuleMessage,
+    bulkCreate,
+    completeRule,
+    concurrentSearches: ruleParams.concurrentSearches ?? 1,
+    eventsTelemetry,
     exceptionItems,
+    filters: ruleParams.filters ?? [],
+    inputIndex,
+    itemsPerSearch: ruleParams.itemsPerSearch ?? 9000,
+    language: ruleParams.language,
     listClient,
     logger,
-    eventsTelemetry,
-    alertId: rule.id,
     outputIndex: ruleParams.outputIndex,
-    ruleSO: rule,
+    query: ruleParams.query,
+    savedId: ruleParams.savedId,
     searchAfterSize,
+    services,
     threatFilters: ruleParams.threatFilters ?? [],
-    threatQuery: ruleParams.threatQuery,
-    threatLanguage: ruleParams.threatLanguage,
-    buildRuleMessage,
     threatIndex: ruleParams.threatIndex,
     threatIndicatorPath: ruleParams.threatIndicatorPath,
-    concurrentSearches: ruleParams.concurrentSearches ?? 1,
-    itemsPerSearch: ruleParams.itemsPerSearch ?? 9000,
-    bulkCreate,
+    threatLanguage: ruleParams.threatLanguage,
+    threatMapping: ruleParams.threatMapping,
+    threatQuery: ruleParams.threatQuery,
+    tuple,
+    type: ruleParams.type,
     wrapHits,
   });
 };

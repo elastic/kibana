@@ -49,7 +49,6 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
   );
 
   // Configure inputs (and their streams)
-  // Assume packages only export one config template for now
   const renderConfigureInputs = () =>
     packagePolicyTemplates.length ? (
       <>

@@ -19,6 +19,7 @@ export { rulesClientMock };
 const createSetupMock = () => {
   const mock: jest.Mocked<PluginSetupContract> = {
     registerType: jest.fn(),
+    getSecurityHealth: jest.fn(),
   };
   return mock;
 };
@@ -59,7 +60,7 @@ const createAlertInstanceFactoryMock = <
   mock.unscheduleActions.mockReturnValue(mock);
   mock.scheduleActions.mockReturnValue(mock);
 
-  return (mock as unknown) as AlertInstanceMock<InstanceState, InstanceContext>;
+  return mock as unknown as AlertInstanceMock<InstanceState, InstanceContext>;
 };
 
 const createAlertServicesMock = <

@@ -18,13 +18,13 @@ export function getNewPath() {
   return '/workspace';
 }
 
-export function getEditPath({ id }: GraphWorkspaceSavedObject) {
+export function getEditPath({ id }: Pick<GraphWorkspaceSavedObject, 'id'>) {
   return `/workspace/${id}`;
 }
 
 export function getEditUrl(
   addBasePath: (url: string) => string,
-  workspace: GraphWorkspaceSavedObject
+  workspace: Pick<GraphWorkspaceSavedObject, 'id'>
 ) {
   return addBasePath(`#${getEditPath(workspace)}`);
 }

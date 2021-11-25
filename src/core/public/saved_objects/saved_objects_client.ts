@@ -12,6 +12,7 @@ import type { PublicMethodsOf } from '@kbn/utility-types';
 import {
   SavedObject,
   SavedObjectReference,
+  SavedObjectsBulkResolveResponse,
   SavedObjectsClientContract as SavedObjectsApi,
   SavedObjectsFindOptions as SavedObjectFindOptionsServer,
   SavedObjectsMigrationVersion,
@@ -21,8 +22,6 @@ import {
 import { SimpleSavedObject } from './simple_saved_object';
 import type { ResolvedSimpleSavedObject } from './types';
 import { HttpFetchOptions, HttpSetup } from '../http';
-
-export type { SavedObjectsResolveResponse };
 
 type PromiseType<T extends Promise<any>> = T extends Promise<infer U> ? U : never;
 
@@ -113,10 +112,16 @@ export interface SavedObjectsFindResponsePublic<T = unknown, A = unknown>
   page: number;
 }
 
-interface BatchQueueEntry {
+interface BatchGetQueueEntry {
   type: string;
   id: string;
   resolve: <T = unknown>(value: SimpleSavedObject<T> | SavedObject<T>) => void;
+  reject: (reason?: any) => void;
+}
+interface BatchResolveQueueEntry {
+  type: string;
+  id: string;
+  resolve: <T = unknown>(value: ResolvedSimpleSavedObject<T>) => void;
   reject: (reason?: any) => void;
 }
 
@@ -146,7 +151,7 @@ interface ObjectTypeAndId {
   type: string;
 }
 
-const getObjectsToFetch = (queue: BatchQueueEntry[]): ObjectTypeAndId[] => {
+const getObjectsToFetch = (queue: BatchGetQueueEntry[]): ObjectTypeAndId[] => {
   const objects: ObjectTypeAndId[] = [];
   const inserted = new Set<string>();
   queue.forEach(({ id, type }) => {
@@ -156,6 +161,24 @@ const getObjectsToFetch = (queue: BatchQueueEntry[]): ObjectTypeAndId[] => {
     }
   });
   return objects;
+};
+
+const getObjectsToResolve = (queue: BatchResolveQueueEntry[]) => {
+  const responseIndices: number[] = [];
+  const objectsToResolve: ObjectTypeAndId[] = [];
+  const inserted = new Map<string, number>();
+  queue.forEach(({ id, type }) => {
+    const key = `${type}|${id}`;
+    const indexForTypeAndId = inserted.get(key);
+    if (indexForTypeAndId === undefined) {
+      inserted.set(key, objectsToResolve.length);
+      responseIndices.push(objectsToResolve.length);
+      objectsToResolve.push({ id, type });
+    } else {
+      responseIndices.push(indexForTypeAndId);
+    }
+  });
+  return { objectsToResolve, responseIndices };
 };
 
 /**
@@ -168,15 +191,16 @@ const getObjectsToFetch = (queue: BatchQueueEntry[]): ObjectTypeAndId[] => {
  */
 export class SavedObjectsClient {
   private http: HttpSetup;
-  private batchQueue: BatchQueueEntry[];
+  private batchGetQueue: BatchGetQueueEntry[];
+  private batchResolveQueue: BatchResolveQueueEntry[];
 
   /**
    * Throttled processing of get requests into bulk requests at 100ms interval
    */
-  private processBatchQueue = throttle(
+  private processBatchGetQueue = throttle(
     async () => {
-      const queue = [...this.batchQueue];
-      this.batchQueue = [];
+      const queue = [...this.batchGetQueue];
+      this.batchGetQueue = [];
 
       try {
         const objectsToFetch = getObjectsToFetch(queue);
@@ -207,10 +231,43 @@ export class SavedObjectsClient {
     { leading: false }
   );
 
+  /**
+   * Throttled processing of resolve requests into bulk requests at 100ms interval
+   */
+  private processBatchResolveQueue = throttle(
+    async () => {
+      const queue = [...this.batchResolveQueue];
+      this.batchResolveQueue = [];
+
+      try {
+        const { objectsToResolve, responseIndices } = getObjectsToResolve(queue);
+        const { resolved_objects: resolvedObjects } = await this.performBulkResolve(
+          objectsToResolve
+        );
+
+        queue.forEach((queueItem, i) => {
+          // This differs from the older processBatchGetQueue approach because the resolved object IDs are *not* guaranteed to be the same.
+          // Instead, we rely on the guarantee that the objects in the bulkResolve response will be in the same order as the requests.
+          // However, we still need to clone the response object because we deduplicate batched requests.
+          const responseIndex = responseIndices[i];
+          const clone = cloneDeep(resolvedObjects[responseIndex]);
+          queueItem.resolve(this.createResolvedSavedObject(clone));
+        });
+      } catch (err) {
+        queue.forEach((queueItem) => {
+          queueItem.reject(err);
+        });
+      }
+    },
+    BATCH_INTERVAL,
+    { leading: false }
+  );
+
   /** @internal */
   constructor(http: HttpSetup) {
     this.http = http;
-    this.batchQueue = [];
+    this.batchGetQueue = [];
+    this.batchResolveQueue = [];
   }
 
   /**
@@ -235,7 +292,7 @@ export class SavedObjectsClient {
       overwrite: options.overwrite,
     };
 
-    const createRequest: Promise<SavedObject<T>> = this.savedObjectsFetch(path, {
+    const createRequest = this.savedObjectsFetch<SavedObject<T>>(path, {
       method: 'POST',
       query,
       body: JSON.stringify({
@@ -387,8 +444,8 @@ export class SavedObjectsClient {
     }
 
     return new Promise((resolve, reject) => {
-      this.batchQueue.push({ type, id, resolve, reject } as BatchQueueEntry);
-      this.processBatchQueue();
+      this.batchGetQueue.push({ type, id, resolve, reject } as BatchGetQueueEntry);
+      this.processBatchGetQueue();
     });
   };
 
@@ -430,6 +487,11 @@ export class SavedObjectsClient {
    * @param {string} type
    * @param {string} id
    * @returns The resolve result for the saved object for the given type and id.
+   *
+   * @note Saved objects that Kibana fails to find are replaced with an error object and an "exactMatch" outcome. The rationale behind the
+   * outcome is that "exactMatch" is the default outcome, and the outcome only changes if an alias is found. This behavior for the `resolve`
+   * API is unique to the public client, which batches individual calls with `bulkResolve` under the hood. We don't throw an error in that
+   * case for legacy compatibility reasons.
    */
   public resolve = <T = unknown>(
     type: string,
@@ -439,17 +501,46 @@ export class SavedObjectsClient {
       return Promise.reject(new Error('requires type and id'));
     }
 
-    const path = `${this.getPath(['resolve'])}/${type}/${id}`;
-    const request: Promise<SavedObjectsResolveResponse<T>> = this.savedObjectsFetch(path, {});
-    return request.then((resolveResponse) => {
-      const simpleSavedObject = new SimpleSavedObject<T>(this, resolveResponse.saved_object);
-      return {
-        saved_object: simpleSavedObject,
-        outcome: resolveResponse.outcome,
-        alias_target_id: resolveResponse.alias_target_id,
-      };
+    return new Promise((resolve, reject) => {
+      this.batchResolveQueue.push({ type, id, resolve, reject } as BatchResolveQueueEntry);
+      this.processBatchResolveQueue();
     });
   };
+
+  /**
+   * Resolves an array of objects by id, using any legacy URL aliases if they exist
+   *
+   * @param objects - an array of objects containing id, type
+   * @returns The bulk resolve result for the saved objects for the given types and ids.
+   * @example
+   *
+   * bulkResolve([
+   *   { id: 'one', type: 'config' },
+   *   { id: 'foo', type: 'index-pattern' }
+   * ])
+   *
+   * @note Saved objects that Kibana fails to find are replaced with an error object and an "exactMatch" outcome. The rationale behind the
+   * outcome is that "exactMatch" is the default outcome, and the outcome only changes if an alias is found. The `resolve` method in the
+   * public client uses `bulkResolve` under the hood, so it behaves the same way.
+   */
+  public bulkResolve = async <T = unknown>(objects: Array<{ id: string; type: string }> = []) => {
+    const filteredObjects = objects.map(({ type, id }) => ({ type, id }));
+    const response = await this.performBulkResolve<T>(filteredObjects);
+    return {
+      resolved_objects: response.resolved_objects.map((resolveResponse) =>
+        this.createResolvedSavedObject<T>(resolveResponse)
+      ),
+    };
+  };
+
+  private async performBulkResolve<T>(objects: ObjectTypeAndId[]) {
+    const path = this.getPath(['_bulk_resolve']);
+    const request: Promise<SavedObjectsBulkResolveResponse<T>> = this.savedObjectsFetch(path, {
+      method: 'POST',
+      body: JSON.stringify(objects),
+    });
+    return request;
+  }
 
   /**
    * Updates an object
@@ -480,10 +571,10 @@ export class SavedObjectsClient {
       upsert,
     };
 
-    return this.savedObjectsFetch(path, {
+    return this.savedObjectsFetch<SavedObject<T>>(path, {
       method: 'PUT',
       body: JSON.stringify(body),
-    }).then((resp: SavedObject<T>) => {
+    }).then((resp) => {
       return this.createSavedObject(resp);
     });
   }
@@ -497,11 +588,11 @@ export class SavedObjectsClient {
   public bulkUpdate<T = unknown>(objects: SavedObjectsBulkUpdateObject[] = []) {
     const path = this.getPath(['_bulk_update']);
 
-    return this.savedObjectsFetch(path, {
+    return this.savedObjectsFetch<{ saved_objects: Array<SavedObject<T>> }>(path, {
       method: 'PUT',
       body: JSON.stringify(objects),
     }).then((resp) => {
-      resp.saved_objects = resp.saved_objects.map((d: SavedObject<T>) => this.createSavedObject(d));
+      resp.saved_objects = resp.saved_objects.map((d) => this.createSavedObject(d));
       return renameKeys<
         PromiseType<ReturnType<SavedObjectsApi['bulkUpdate']>>,
         SavedObjectsBatchResponse
@@ -513,6 +604,17 @@ export class SavedObjectsClient {
     return new SimpleSavedObject(this, options);
   }
 
+  private createResolvedSavedObject<T = unknown>(
+    resolveResponse: SavedObjectsResolveResponse<T>
+  ): ResolvedSimpleSavedObject<T> {
+    const simpleSavedObject = new SimpleSavedObject<T>(this, resolveResponse.saved_object);
+    return {
+      saved_object: simpleSavedObject,
+      outcome: resolveResponse.outcome,
+      alias_target_id: resolveResponse.alias_target_id,
+    };
+  }
+
   private getPath(path: Array<string | undefined>): string {
     return API_BASE_URL + joinUriComponents(...path);
   }
@@ -522,8 +624,8 @@ export class SavedObjectsClient {
    * the old kfetch error format of `{res: {status: number}}` whereas `http.fetch`
    * uses `{response: {status: number}}`.
    */
-  private savedObjectsFetch(path: string, { method, query, body }: HttpFetchOptions) {
-    return this.http.fetch(path, { method, query, body });
+  private savedObjectsFetch<T = unknown>(path: string, { method, query, body }: HttpFetchOptions) {
+    return this.http.fetch<T>(path, { method, query, body });
   }
 }
 

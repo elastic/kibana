@@ -16,6 +16,8 @@ import { ConnectorCard } from '../card';
 import { useGetChoices } from './use_get_choices';
 import { Fields, Choice } from './types';
 import { choicesToEuiOptions } from './helpers';
+import { connectorValidator } from './validator';
+import { DeprecatedCallout } from '../deprecated_callout';
 
 const useGetChoicesFields = ['urgency', 'severity', 'impact', 'category', 'subcategory'];
 const defaultFields: Fields = {
@@ -30,10 +32,16 @@ const ServiceNowITSMFieldsComponent: React.FunctionComponent<
   ConnectorFieldsProps<ServiceNowITSMFieldsType>
 > = ({ isEdit = true, fields, connector, onChange }) => {
   const init = useRef(true);
-  const { severity = null, urgency = null, impact = null, category = null, subcategory = null } =
-    fields ?? {};
+  const {
+    severity = null,
+    urgency = null,
+    impact = null,
+    category = null,
+    subcategory = null,
+  } = fields ?? {};
   const { http, notifications } = useKibana().services;
   const [choices, setChoices] = useState<Fields>(defaultFields);
+  const showConnectorWarning = useMemo(() => connectorValidator(connector) != null, [connector]);
 
   const categoryOptions = useMemo(() => choicesToEuiOptions(choices.category), [choices.category]);
   const urgencyOptions = useMemo(() => choicesToEuiOptions(choices.urgency), [choices.urgency]);
@@ -144,90 +152,111 @@ const ServiceNowITSMFieldsComponent: React.FunctionComponent<
     }
   }, [category, impact, onChange, severity, subcategory, urgency]);
 
-  return isEdit ? (
-    <div data-test-subj={'connector-fields-sn-itsm'}>
-      <EuiFormRow fullWidth label={i18n.URGENCY}>
-        <EuiSelect
-          fullWidth
-          data-test-subj="urgencySelect"
-          options={urgencyOptions}
-          value={urgency ?? undefined}
-          isLoading={isLoadingChoices}
-          disabled={isLoadingChoices}
-          hasNoInitialSelection
-          onChange={(e) => onChangeCb('urgency', e.target.value)}
-        />
-      </EuiFormRow>
-      <EuiSpacer size="m" />
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          <EuiFormRow fullWidth label={i18n.SEVERITY}>
-            <EuiSelect
-              fullWidth
-              data-test-subj="severitySelect"
-              options={severityOptions}
-              value={severity ?? undefined}
-              isLoading={isLoadingChoices}
-              disabled={isLoadingChoices}
-              hasNoInitialSelection
-              onChange={(e) => onChangeCb('severity', e.target.value)}
+  return (
+    <>
+      {showConnectorWarning && (
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <DeprecatedCallout />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      )}
+      {isEdit ? (
+        <div data-test-subj="connector-fields-sn-itsm">
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <EuiFormRow fullWidth label={i18n.URGENCY}>
+                <EuiSelect
+                  fullWidth
+                  data-test-subj="urgencySelect"
+                  options={urgencyOptions}
+                  value={urgency ?? undefined}
+                  isLoading={isLoadingChoices}
+                  disabled={isLoadingChoices}
+                  hasNoInitialSelection
+                  onChange={(e) => onChangeCb('urgency', e.target.value)}
+                />
+              </EuiFormRow>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer size="m" />
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <EuiFormRow fullWidth label={i18n.SEVERITY}>
+                <EuiSelect
+                  fullWidth
+                  data-test-subj="severitySelect"
+                  options={severityOptions}
+                  value={severity ?? undefined}
+                  isLoading={isLoadingChoices}
+                  disabled={isLoadingChoices}
+                  hasNoInitialSelection
+                  onChange={(e) => onChangeCb('severity', e.target.value)}
+                />
+              </EuiFormRow>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiFormRow fullWidth label={i18n.IMPACT}>
+                <EuiSelect
+                  fullWidth
+                  data-test-subj="impactSelect"
+                  options={impactOptions}
+                  value={impact ?? undefined}
+                  isLoading={isLoadingChoices}
+                  disabled={isLoadingChoices}
+                  hasNoInitialSelection
+                  onChange={(e) => onChangeCb('impact', e.target.value)}
+                />
+              </EuiFormRow>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <EuiFormRow fullWidth label={i18n.CATEGORY}>
+                <EuiSelect
+                  fullWidth
+                  data-test-subj="categorySelect"
+                  options={categoryOptions}
+                  value={category ?? undefined}
+                  isLoading={isLoadingChoices}
+                  disabled={isLoadingChoices}
+                  hasNoInitialSelection
+                  onChange={(e) =>
+                    onChange({ ...fields, category: e.target.value, subcategory: null })
+                  }
+                />
+              </EuiFormRow>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiFormRow fullWidth label={i18n.SUBCATEGORY}>
+                <EuiSelect
+                  fullWidth
+                  data-test-subj="subcategorySelect"
+                  options={subcategoryOptions}
+                  // Needs an empty string instead of undefined to select the blank option when changing categories
+                  value={subcategory ?? ''}
+                  isLoading={isLoadingChoices}
+                  disabled={isLoadingChoices}
+                  hasNoInitialSelection
+                  onChange={(e) => onChangeCb('subcategory', e.target.value)}
+                />
+              </EuiFormRow>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </div>
+      ) : (
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <ConnectorCard
+              connectorType={ConnectorTypes.serviceNowITSM}
+              title={connector.name}
+              listItems={listItems}
+              isLoading={false}
             />
-          </EuiFormRow>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiFormRow fullWidth label={i18n.IMPACT}>
-            <EuiSelect
-              fullWidth
-              data-test-subj="impactSelect"
-              options={impactOptions}
-              value={impact ?? undefined}
-              isLoading={isLoadingChoices}
-              disabled={isLoadingChoices}
-              hasNoInitialSelection
-              onChange={(e) => onChangeCb('impact', e.target.value)}
-            />
-          </EuiFormRow>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          <EuiFormRow fullWidth label={i18n.CATEGORY}>
-            <EuiSelect
-              fullWidth
-              data-test-subj="categorySelect"
-              options={categoryOptions}
-              value={category ?? undefined}
-              isLoading={isLoadingChoices}
-              disabled={isLoadingChoices}
-              hasNoInitialSelection
-              onChange={(e) => onChange({ ...fields, category: e.target.value, subcategory: null })}
-            />
-          </EuiFormRow>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiFormRow fullWidth label={i18n.SUBCATEGORY}>
-            <EuiSelect
-              fullWidth
-              data-test-subj="subcategorySelect"
-              options={subcategoryOptions}
-              // Needs an empty string instead of undefined to select the blank option when changing categories
-              value={subcategory ?? ''}
-              isLoading={isLoadingChoices}
-              disabled={isLoadingChoices}
-              hasNoInitialSelection
-              onChange={(e) => onChangeCb('subcategory', e.target.value)}
-            />
-          </EuiFormRow>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </div>
-  ) : (
-    <ConnectorCard
-      connectorType={ConnectorTypes.serviceNowITSM}
-      title={connector.name}
-      listItems={listItems}
-      isLoading={false}
-    />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      )}
+    </>
   );
 };
 

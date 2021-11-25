@@ -6,13 +6,14 @@
  */
 
 import Boom from '@hapi/boom';
-import { jsonRt, isoToEpochRt, toNumberRt } from '@kbn/io-ts-utils';
+import { jsonRt } from '@kbn/io-ts-utils/json_rt';
+import { isoToEpochRt } from '@kbn/io-ts-utils/iso_to_epoch_rt';
+import { toNumberRt } from '@kbn/io-ts-utils/to_number_rt';
 import * as t from 'io-ts';
 import { uniq } from 'lodash';
 import { latencyAggregationTypeRt } from '../../common/latency_aggregation_types';
 import { ProfilingValueType } from '../../common/profiling';
-import { getSearchAggregatedTransactions } from '../lib/helpers/aggregated_transactions';
-import { getThroughputUnit } from '../lib/helpers/calculate_throughput';
+import { getSearchAggregatedTransactions } from '../lib/helpers/transactions';
 import { setupRequest } from '../lib/helpers/setup_request';
 import { getServiceAnnotations } from '../lib/services/annotations';
 import { getServices } from '../lib/services/get_services';
@@ -33,8 +34,8 @@ import { getServiceProfilingStatistics } from '../lib/services/profiling/get_ser
 import { getServiceProfilingTimeline } from '../lib/services/profiling/get_service_profiling_timeline';
 import { getServiceInfrastructure } from '../lib/services/get_service_infrastructure';
 import { withApmSpan } from '../utils/with_apm_span';
-import { createApmServerRoute } from './create_apm_server_route';
-import { createApmServerRouteRepository } from './create_apm_server_route_repository';
+import { createApmServerRoute } from './apm_routes/create_apm_server_route';
+import { createApmServerRouteRepository } from './apm_routes/create_apm_server_route_repository';
 import {
   comparisonRangeRt,
   environmentRt,
@@ -48,7 +49,7 @@ import { getServiceDependenciesBreakdown } from '../lib/services/get_service_dep
 import { getBucketSizeForAggregatedTransactions } from '../lib/helpers/get_bucket_size_for_aggregated_transactions';
 
 const servicesRoute = createApmServerRoute({
-  endpoint: 'GET /api/apm/services',
+  endpoint: 'GET /internal/apm/services',
   params: t.type({
     query: t.intersection([environmentRt, kueryRt, rangeRt]),
   }),
@@ -56,7 +57,7 @@ const servicesRoute = createApmServerRoute({
   handler: async (resources) => {
     const setup = await setupRequest(resources);
     const { params, logger } = resources;
-    const { environment, kuery } = params.query;
+    const { environment, kuery, start, end } = params.query;
     const searchAggregatedTransactions = await getSearchAggregatedTransactions({
       ...setup,
       kuery,
@@ -68,12 +69,14 @@ const servicesRoute = createApmServerRoute({
       setup,
       searchAggregatedTransactions,
       logger,
+      start,
+      end,
     });
   },
 });
 
 const servicesDetailedStatisticsRoute = createApmServerRoute({
-  endpoint: 'GET /api/apm/services/detailed_statistics',
+  endpoint: 'GET /internal/apm/services/detailed_statistics',
   params: t.type({
     query: t.intersection([
       environmentRt,
@@ -87,9 +90,12 @@ const servicesDetailedStatisticsRoute = createApmServerRoute({
   handler: async (resources) => {
     const setup = await setupRequest(resources);
     const { params } = resources;
-    const { environment, kuery, offset, serviceNames } = params.query;
+    const { environment, kuery, offset, serviceNames, start, end } =
+      params.query;
     const searchAggregatedTransactions = await getSearchAggregatedTransactions({
       ...setup,
+      start,
+      end,
       kuery,
     });
 
@@ -104,12 +110,14 @@ const servicesDetailedStatisticsRoute = createApmServerRoute({
       searchAggregatedTransactions,
       offset,
       serviceNames,
+      start,
+      end,
     });
   },
 });
 
 const serviceMetadataDetailsRoute = createApmServerRoute({
-  endpoint: 'GET /api/apm/services/{serviceName}/metadata/details',
+  endpoint: 'GET /internal/apm/services/{serviceName}/metadata/details',
   params: t.type({
     path: t.type({ serviceName: t.string }),
     query: rangeRt,
@@ -119,12 +127,13 @@ const serviceMetadataDetailsRoute = createApmServerRoute({
     const setup = await setupRequest(resources);
     const { params } = resources;
     const { serviceName } = params.path;
+    const { start, end } = params.query;
 
     const searchAggregatedTransactions = await getSearchAggregatedTransactions({
       apmEventClient: setup.apmEventClient,
       config: setup.config,
-      start: setup.start,
-      end: setup.end,
+      start,
+      end,
       kuery: '',
     });
 
@@ -132,12 +141,14 @@ const serviceMetadataDetailsRoute = createApmServerRoute({
       serviceName,
       setup,
       searchAggregatedTransactions,
+      start,
+      end,
     });
   },
 });
 
 const serviceMetadataIconsRoute = createApmServerRoute({
-  endpoint: 'GET /api/apm/services/{serviceName}/metadata/icons',
+  endpoint: 'GET /internal/apm/services/{serviceName}/metadata/icons',
   params: t.type({
     path: t.type({ serviceName: t.string }),
     query: rangeRt,
@@ -147,12 +158,13 @@ const serviceMetadataIconsRoute = createApmServerRoute({
     const setup = await setupRequest(resources);
     const { params } = resources;
     const { serviceName } = params.path;
+    const { start, end } = params.query;
 
     const searchAggregatedTransactions = await getSearchAggregatedTransactions({
       apmEventClient: setup.apmEventClient,
       config: setup.config,
-      start: setup.start,
-      end: setup.end,
+      start,
+      end,
       kuery: '',
     });
 
@@ -160,12 +172,14 @@ const serviceMetadataIconsRoute = createApmServerRoute({
       serviceName,
       setup,
       searchAggregatedTransactions,
+      start,
+      end,
     });
   },
 });
 
 const serviceAgentRoute = createApmServerRoute({
-  endpoint: 'GET /api/apm/services/{serviceName}/agent',
+  endpoint: 'GET /internal/apm/services/{serviceName}/agent',
   params: t.type({
     path: t.type({
       serviceName: t.string,
@@ -177,24 +191,19 @@ const serviceAgentRoute = createApmServerRoute({
     const setup = await setupRequest(resources);
     const { params } = resources;
     const { serviceName } = params.path;
-    const searchAggregatedTransactions = await getSearchAggregatedTransactions({
-      apmEventClient: setup.apmEventClient,
-      config: setup.config,
-      start: setup.start,
-      end: setup.end,
-      kuery: '',
-    });
+    const { start, end } = params.query;
 
     return getServiceAgent({
       serviceName,
       setup,
-      searchAggregatedTransactions,
+      start,
+      end,
     });
   },
 });
 
 const serviceTransactionTypesRoute = createApmServerRoute({
-  endpoint: 'GET /api/apm/services/{serviceName}/transaction_types',
+  endpoint: 'GET /internal/apm/services/{serviceName}/transaction_types',
   params: t.type({
     path: t.type({
       serviceName: t.string,
@@ -206,6 +215,7 @@ const serviceTransactionTypesRoute = createApmServerRoute({
     const setup = await setupRequest(resources);
     const { params } = resources;
     const { serviceName } = params.path;
+    const { start, end } = params.query;
 
     return getServiceTransactionTypes({
       serviceName,
@@ -213,17 +223,19 @@ const serviceTransactionTypesRoute = createApmServerRoute({
       searchAggregatedTransactions: await getSearchAggregatedTransactions({
         apmEventClient: setup.apmEventClient,
         config: setup.config,
-        start: setup.start,
-        end: setup.end,
+        start,
+        end,
         kuery: '',
       }),
+      start,
+      end,
     });
   },
 });
 
 const serviceNodeMetadataRoute = createApmServerRoute({
   endpoint:
-    'GET /api/apm/services/{serviceName}/node/{serviceNodeName}/metadata',
+    'GET /internal/apm/services/{serviceName}/node/{serviceNodeName}/metadata',
   params: t.type({
     path: t.type({
       serviceName: t.string,
@@ -236,13 +248,15 @@ const serviceNodeMetadataRoute = createApmServerRoute({
     const setup = await setupRequest(resources);
     const { params } = resources;
     const { serviceName, serviceNodeName } = params.path;
-    const { kuery } = params.query;
+    const { kuery, start, end } = params.query;
 
     return getServiceNodeMetadata({
       kuery,
       setup,
       serviceName,
       serviceNodeName,
+      start,
+      end,
     });
   },
 });
@@ -260,7 +274,7 @@ const serviceAnnotationsRoute = createApmServerRoute({
     const setup = await setupRequest(resources);
     const { params, plugins, context, request, logger } = resources;
     const { serviceName } = params.path;
-    const { environment } = params.query;
+    const { environment, start, end } = params.query;
 
     const { observability } = plugins;
 
@@ -274,8 +288,8 @@ const serviceAnnotationsRoute = createApmServerRoute({
         getSearchAggregatedTransactions({
           apmEventClient: setup.apmEventClient,
           config: setup.config,
-          start: setup.start,
-          end: setup.end,
+          start,
+          end,
           kuery: '',
         }),
       ]
@@ -289,6 +303,8 @@ const serviceAnnotationsRoute = createApmServerRoute({
       annotationsClient,
       client: context.core.elasticsearch.client.asCurrentUser,
       logger,
+      start,
+      end,
     });
   },
 });
@@ -359,7 +375,8 @@ const serviceAnnotationsCreateRoute = createApmServerRoute({
 });
 
 const serviceErrorGroupsMainStatisticsRoute = createApmServerRoute({
-  endpoint: 'GET /api/apm/services/{serviceName}/error_groups/main_statistics',
+  endpoint:
+    'GET /internal/apm/services/{serviceName}/error_groups/main_statistics',
   params: t.type({
     path: t.type({
       serviceName: t.string,
@@ -377,24 +394,26 @@ const serviceErrorGroupsMainStatisticsRoute = createApmServerRoute({
   handler: async (resources) => {
     const setup = await setupRequest(resources);
     const { params } = resources;
-
     const {
       path: { serviceName },
-      query: { kuery, transactionType, environment },
+      query: { kuery, transactionType, environment, start, end },
     } = params;
+
     return getServiceErrorGroupMainStatistics({
       kuery,
       serviceName,
       setup,
       transactionType,
       environment,
+      start,
+      end,
     });
   },
 });
 
 const serviceErrorGroupsDetailedStatisticsRoute = createApmServerRoute({
   endpoint:
-    'GET /api/apm/services/{serviceName}/error_groups/detailed_statistics',
+    'GET /internal/apm/services/{serviceName}/error_groups/detailed_statistics',
   params: t.type({
     path: t.type({
       serviceName: t.string,
@@ -426,6 +445,8 @@ const serviceErrorGroupsDetailedStatisticsRoute = createApmServerRoute({
         groupIds,
         comparisonStart,
         comparisonEnd,
+        start,
+        end,
       },
     } = params;
 
@@ -439,12 +460,14 @@ const serviceErrorGroupsDetailedStatisticsRoute = createApmServerRoute({
       groupIds,
       comparisonStart,
       comparisonEnd,
+      start,
+      end,
     });
   },
 });
 
 const serviceThroughputRoute = createApmServerRoute({
-  endpoint: 'GET /api/apm/services/{serviceName}/throughput',
+  endpoint: 'GET /internal/apm/services/{serviceName}/throughput',
   params: t.type({
     path: t.type({
       serviceName: t.string,
@@ -467,23 +490,22 @@ const serviceThroughputRoute = createApmServerRoute({
       transactionName,
       comparisonStart,
       comparisonEnd,
+      start,
+      end,
     } = params.query;
     const searchAggregatedTransactions = await getSearchAggregatedTransactions({
       ...setup,
       kuery,
-    });
-
-    const { start, end } = setup;
-    const {
-      bucketSize,
-      intervalString,
-    } = getBucketSizeForAggregatedTransactions({
       start,
       end,
-      searchAggregatedTransactions,
     });
 
-    const throughputUnit = getThroughputUnit(bucketSize);
+    const { bucketSize, intervalString } =
+      getBucketSizeForAggregatedTransactions({
+        start,
+        end,
+        searchAggregatedTransactions,
+      });
 
     const commonProps = {
       environment,
@@ -493,8 +515,8 @@ const serviceThroughputRoute = createApmServerRoute({
       setup,
       transactionType,
       transactionName,
-      throughputUnit,
       intervalString,
+      bucketSize,
     };
 
     const [currentPeriod, previousPeriod] = await Promise.all([
@@ -518,14 +540,13 @@ const serviceThroughputRoute = createApmServerRoute({
         currentPeriodTimeseries: currentPeriod,
         previousPeriodTimeseries: previousPeriod,
       }),
-      throughputUnit,
     };
   },
 });
 
 const serviceInstancesMainStatisticsRoute = createApmServerRoute({
   endpoint:
-    'GET /api/apm/services/{serviceName}/service_overview_instances/main_statistics',
+    'GET /internal/apm/services/{serviceName}/service_overview_instances/main_statistics',
   params: t.type({
     path: t.type({
       serviceName: t.string,
@@ -553,14 +574,16 @@ const serviceInstancesMainStatisticsRoute = createApmServerRoute({
       latencyAggregationType,
       comparisonStart,
       comparisonEnd,
+      start,
+      end,
     } = params.query;
 
     const searchAggregatedTransactions = await getSearchAggregatedTransactions({
       ...setup,
       kuery,
+      start,
+      end,
     });
-
-    const { start, end } = setup;
 
     const [currentPeriod, previousPeriod] = await Promise.all([
       getServiceInstancesMainStatistics({
@@ -597,7 +620,7 @@ const serviceInstancesMainStatisticsRoute = createApmServerRoute({
 
 const serviceInstancesDetailedStatisticsRoute = createApmServerRoute({
   endpoint:
-    'GET /api/apm/services/{serviceName}/service_overview_instances/detailed_statistics',
+    'GET /internal/apm/services/{serviceName}/service_overview_instances/detailed_statistics',
   params: t.type({
     path: t.type({
       serviceName: t.string,
@@ -629,11 +652,15 @@ const serviceInstancesDetailedStatisticsRoute = createApmServerRoute({
       serviceNodeIds,
       numBuckets,
       latencyAggregationType,
+      start,
+      end,
     } = params.query;
 
     const searchAggregatedTransactions = await getSearchAggregatedTransactions({
       ...setup,
       kuery,
+      start,
+      end,
     });
 
     return getServiceInstancesDetailedStatisticsPeriods({
@@ -648,13 +675,15 @@ const serviceInstancesDetailedStatisticsRoute = createApmServerRoute({
       serviceNodeIds,
       comparisonStart,
       comparisonEnd,
+      start,
+      end,
     });
   },
 });
 
 export const serviceInstancesMetadataDetails = createApmServerRoute({
   endpoint:
-    'GET /api/apm/services/{serviceName}/service_overview_instances/details/{serviceNodeName}',
+    'GET /internal/apm/services/{serviceName}/service_overview_instances/details/{serviceNodeName}',
   params: t.type({
     path: t.type({
       serviceName: t.string,
@@ -666,17 +695,20 @@ export const serviceInstancesMetadataDetails = createApmServerRoute({
   handler: async (resources) => {
     const setup = await setupRequest(resources);
     const { serviceName, serviceNodeName } = resources.params.path;
+    const { start, end } = resources.params.query;
 
     return await getServiceInstanceMetadataDetails({
       setup,
       serviceName,
       serviceNodeName,
+      start,
+      end,
     });
   },
 });
 
 export const serviceDependenciesRoute = createApmServerRoute({
-  endpoint: 'GET /api/apm/services/{serviceName}/dependencies',
+  endpoint: 'GET /internal/apm/services/{serviceName}/dependencies',
   params: t.type({
     path: t.type({
       serviceName: t.string,
@@ -731,7 +763,7 @@ export const serviceDependenciesRoute = createApmServerRoute({
 });
 
 export const serviceDependenciesBreakdownRoute = createApmServerRoute({
-  endpoint: 'GET /api/apm/services/{serviceName}/dependencies/breakdown',
+  endpoint: 'GET /internal/apm/services/{serviceName}/dependencies/breakdown',
   params: t.type({
     path: t.type({
       serviceName: t.string,
@@ -763,7 +795,7 @@ export const serviceDependenciesBreakdownRoute = createApmServerRoute({
 });
 
 const serviceProfilingTimelineRoute = createApmServerRoute({
-  endpoint: 'GET /api/apm/services/{serviceName}/profiling/timeline',
+  endpoint: 'GET /internal/apm/services/{serviceName}/profiling/timeline',
   params: t.type({
     path: t.type({
       serviceName: t.string,
@@ -778,7 +810,7 @@ const serviceProfilingTimelineRoute = createApmServerRoute({
     const { params } = resources;
     const {
       path: { serviceName },
-      query: { environment, kuery },
+      query: { environment, kuery, start, end },
     } = params;
 
     const profilingTimeline = await getServiceProfilingTimeline({
@@ -786,6 +818,8 @@ const serviceProfilingTimelineRoute = createApmServerRoute({
       setup,
       serviceName,
       environment,
+      start,
+      end,
     });
 
     return { profilingTimeline };
@@ -793,7 +827,7 @@ const serviceProfilingTimelineRoute = createApmServerRoute({
 });
 
 const serviceProfilingStatisticsRoute = createApmServerRoute({
-  endpoint: 'GET /api/apm/services/{serviceName}/profiling/statistics',
+  endpoint: 'GET /internal/apm/services/{serviceName}/profiling/statistics',
   params: t.type({
     path: t.type({
       serviceName: t.string,
@@ -825,7 +859,7 @@ const serviceProfilingStatisticsRoute = createApmServerRoute({
 
     const {
       path: { serviceName },
-      query: { environment, kuery, valueType },
+      query: { environment, kuery, valueType, start, end },
     } = params;
 
     return getServiceProfilingStatistics({
@@ -835,12 +869,14 @@ const serviceProfilingStatisticsRoute = createApmServerRoute({
       valueType,
       setup,
       logger,
+      start,
+      end,
     });
   },
 });
 
 const serviceAlertsRoute = createApmServerRoute({
-  endpoint: 'GET /api/apm/services/{serviceName}/alerts',
+  endpoint: 'GET /internal/apm/services/{serviceName}/alerts',
   params: t.type({
     path: t.type({
       serviceName: t.string,
@@ -876,7 +912,7 @@ const serviceAlertsRoute = createApmServerRoute({
 });
 
 const serviceInfrastructureRoute = createApmServerRoute({
-  endpoint: 'GET /api/apm/services/{serviceName}/infrastructure',
+  endpoint: 'GET /internal/apm/services/{serviceName}/infrastructure',
   params: t.type({
     path: t.type({
       serviceName: t.string,
@@ -891,7 +927,7 @@ const serviceInfrastructureRoute = createApmServerRoute({
 
     const {
       path: { serviceName },
-      query: { environment, kuery },
+      query: { environment, kuery, start, end },
     } = params;
 
     const serviceInfrastructure = await getServiceInfrastructure({
@@ -899,6 +935,8 @@ const serviceInfrastructureRoute = createApmServerRoute({
       serviceName,
       environment,
       kuery,
+      start,
+      end,
     });
     return { serviceInfrastructure };
   },

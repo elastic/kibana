@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { IRouter, KibanaRequest, RequestHandlerContext } from 'src/core/server';
+import type { IRouter, RequestHandlerContext } from 'src/core/server';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { DataPluginStart } from 'src/plugins/data/server/plugin';
 import { ScreenshotModePluginSetup } from 'src/plugins/screenshot_mode/server';
@@ -57,14 +57,13 @@ export type ReportingUser = { username: AuthenticatedUser['username'] } | false;
 export type CaptureConfig = ReportingConfigType['capture'];
 export type ScrollConfig = ReportingConfigType['csv']['scroll'];
 
-export { BaseParams, BasePayload };
+export type { BaseParams, BasePayload };
 
 // default fn type for CreateJobFnFactory
 export type CreateJobFn<JobParamsType = BaseParams, JobPayloadType = BasePayload> = (
   jobParams: JobParamsType,
-  context: ReportingRequestHandlerContext,
-  request: KibanaRequest
-) => Promise<JobPayloadType>;
+  context: ReportingRequestHandlerContext
+) => Promise<Omit<JobPayloadType, 'headers' | 'spaceId'>>;
 
 // default fn type for RunTaskFnFactory
 export type RunTaskFn<TaskPayloadType = BasePayload> = (

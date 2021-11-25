@@ -59,7 +59,7 @@ export const formattedSearchStrategyResponse = {
     dsl: [
       JSON.stringify(
         {
-          allowNoIndices: true,
+          allow_no_indices: true,
           index: [
             'apm-*-transaction*',
             'traces-apm*',
@@ -70,7 +70,7 @@ export const formattedSearchStrategyResponse = {
             'packetbeat-*',
             'winlogbeat-*',
           ],
-          ignoreUnavailable: true,
+          ignore_unavailable: true,
           track_total_hits: false,
           body: {
             aggs: {
@@ -81,7 +81,7 @@ export const formattedSearchStrategyResponse = {
                   issuers: { terms: { field: 'tls.server.issuer' } },
                   subjects: { terms: { field: 'tls.server.subject' } },
                   not_after: { terms: { field: 'tls.server.not_after' } },
-                  ja3: { terms: { field: 'tls.server.ja3s' } },
+                  ja3: { terms: { field: 'tls.client.ja3' } },
                 },
               },
             },
@@ -114,7 +114,7 @@ export const formattedSearchStrategyResponse = {
 };
 
 export const expectedDsl = {
-  allowNoIndices: true,
+  allow_no_indices: true,
   index: [
     'apm-*-transaction*',
     'traces-apm*',
@@ -125,7 +125,7 @@ export const expectedDsl = {
     'packetbeat-*',
     'winlogbeat-*',
   ],
-  ignoreUnavailable: true,
+  ignore_unavailable: true,
   track_total_hits: false,
   body: {
     aggs: {
@@ -136,7 +136,7 @@ export const expectedDsl = {
           issuers: { terms: { field: 'tls.server.issuer' } },
           subjects: { terms: { field: 'tls.server.subject' } },
           not_after: { terms: { field: 'tls.server.not_after' } },
-          ja3: { terms: { field: 'tls.server.ja3s' } },
+          ja3: { terms: { field: 'tls.client.ja3' } },
         },
       },
     },

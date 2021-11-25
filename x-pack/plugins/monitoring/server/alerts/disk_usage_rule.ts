@@ -72,7 +72,8 @@ export class DiskUsageRule extends BaseRule {
       clusters,
       esIndexPattern,
       duration as string,
-      Globals.app.config.ui.max_bucket_size
+      Globals.app.config.ui.max_bucket_size,
+      params.filterQuery
     );
 
     return stats.map((stat) => {
@@ -212,7 +213,7 @@ export class DiskUsageRule extends BaseRule {
       internalShortMessage,
       internalFullMessage: Globals.app.isCloud ? internalShortMessage : internalFullMessage,
       state: AlertingDefaults.ALERT_STATE.firing,
-      /* continue to send "nodes" and "count" values for users before https://github.com/elastic/kibana/pull/102544 
+      /* continue to send "nodes" and "count" values for users before https://github.com/elastic/kibana/pull/102544
           see https://github.com/elastic/kibana/issues/100136#issuecomment-865229431
           */
       nodes: `${firingNode.nodeName}:${firingNode.diskUsage}`,

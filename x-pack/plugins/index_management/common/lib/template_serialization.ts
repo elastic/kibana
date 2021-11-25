@@ -16,15 +16,8 @@ import {
 const hasEntries = (data: object = {}) => Object.entries(data).length > 0;
 
 export function serializeTemplate(templateDeserialized: TemplateDeserialized): TemplateSerialized {
-  const {
-    version,
-    priority,
-    indexPatterns,
-    template,
-    composedOf,
-    dataStream,
-    _meta,
-  } = templateDeserialized;
+  const { version, priority, indexPatterns, template, composedOf, dataStream, _meta } =
+    templateDeserialized;
 
   return {
     version,
@@ -86,10 +79,8 @@ export function deserializeTemplateList(
   cloudManagedTemplatePrefix?: string
 ): TemplateListItem[] {
   return indexTemplates.map(({ name, index_template: templateSerialized }) => {
-    const {
-      template: { mappings, settings, aliases } = {},
-      ...deserializedTemplate
-    } = deserializeTemplate({ name, ...templateSerialized }, cloudManagedTemplatePrefix);
+    const { template: { mappings, settings, aliases } = {}, ...deserializedTemplate } =
+      deserializeTemplate({ name, ...templateSerialized }, cloudManagedTemplatePrefix);
 
     return {
       ...deserializedTemplate,
@@ -150,10 +141,8 @@ export function deserializeLegacyTemplateList(
   cloudManagedTemplatePrefix?: string
 ): TemplateListItem[] {
   return Object.entries(indexTemplatesByName).map(([name, templateSerialized]) => {
-    const {
-      template: { mappings, settings, aliases } = {},
-      ...deserializedTemplate
-    } = deserializeLegacyTemplate({ name, ...templateSerialized }, cloudManagedTemplatePrefix);
+    const { template: { mappings, settings, aliases } = {}, ...deserializedTemplate } =
+      deserializeLegacyTemplate({ name, ...templateSerialized }, cloudManagedTemplatePrefix);
 
     return {
       ...deserializedTemplate,

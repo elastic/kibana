@@ -235,6 +235,42 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(panelCount).to.eql(2);
     });
 
+    // issue #111104
+    it('should add a Lens heatmap to the dashboard', async () => {
+      await PageObjects.visualize.navigateToNewVisualization();
+      await PageObjects.visualize.clickVisType('lens');
+      await PageObjects.lens.goToTimeRange();
+
+      await PageObjects.lens.configureDimension({
+        dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
+        operation: 'terms',
+        field: 'ip',
+      });
+
+      await PageObjects.lens.configureDimension({
+        dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
+        operation: 'average',
+        field: 'bytes',
+      });
+
+      await PageObjects.lens.waitForVisualization();
+
+      await PageObjects.lens.switchToVisualization('heatmap', 'heatmap');
+
+      await PageObjects.lens.waitForVisualization();
+      await PageObjects.lens.openDimensionEditor('lnsHeatmap_cellPanel > lns-dimensionTrigger');
+      await PageObjects.lens.openPalettePanel('lnsHeatmap');
+      await testSubjects.click('lnsPalettePanel_dynamicColoring_rangeType_groups_number');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+
+      await PageObjects.lens.save('New Lens Heatmap', false, false, true, 'new');
+
+      await PageObjects.dashboard.waitForRenderComplete();
+
+      const panelCount = await PageObjects.dashboard.getPanelCount();
+      expect(panelCount).to.eql(1);
+    });
+
     describe('Capabilities', function capabilitiesTests() {
       describe('dashboard no-access privileges', () => {
         before(async () => {

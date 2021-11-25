@@ -93,7 +93,6 @@ export class UrlDrilldown implements Drilldown<Config, ActionContext, ActionFact
     onConfig,
     context,
   }) => {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
     const variables = React.useMemo(() => this.getVariableList(context), [context]);
 
     return (
@@ -129,7 +128,7 @@ export class UrlDrilldown implements Drilldown<Config, ActionContext, ActionFact
 
   public readonly isCompatible = async (config: Config, context: ActionContext) => {
     const scope = this.getRuntimeVariables(context);
-    const { isValid, error } = urlDrilldownValidateUrlTemplate(config.url, scope);
+    const { isValid, error } = await urlDrilldownValidateUrlTemplate(config.url, scope);
 
     if (!isValid) {
       // eslint-disable-next-line no-console
@@ -139,7 +138,7 @@ export class UrlDrilldown implements Drilldown<Config, ActionContext, ActionFact
       return false;
     }
 
-    const url = this.buildUrl(config, context);
+    const url = await this.buildUrl(config, context);
     const validUrl = this.deps.externalUrl.validateUrl(url);
     if (!validUrl) {
       return false;
@@ -148,9 +147,9 @@ export class UrlDrilldown implements Drilldown<Config, ActionContext, ActionFact
     return true;
   };
 
-  private buildUrl(config: Config, context: ActionContext): string {
+  private async buildUrl(config: Config, context: ActionContext): Promise<string> {
     const doEncode = config.encodeUrl ?? true;
-    const url = urlDrilldownCompileUrl(
+    const url = await urlDrilldownCompileUrl(
       config.url.template,
       this.getRuntimeVariables(context),
       doEncode
@@ -159,7 +158,7 @@ export class UrlDrilldown implements Drilldown<Config, ActionContext, ActionFact
   }
 
   public readonly getHref = async (config: Config, context: ActionContext): Promise<string> => {
-    const url = this.buildUrl(config, context);
+    const url = await this.buildUrl(config, context);
     const validUrl = this.deps.externalUrl.validateUrl(url);
     if (!validUrl) {
       throw new Error(

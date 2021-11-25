@@ -58,6 +58,8 @@ import {
   tags,
   interval,
   enabled,
+  outcome,
+  alias_target_id,
   updated_at,
   updated_by,
   created_at,
@@ -68,6 +70,7 @@ import {
   last_success_message,
   last_failure_at,
   last_failure_message,
+  namespace,
 } from '../common/schemas';
 
 export const createSchema = <
@@ -149,12 +152,15 @@ const baseParams = {
     building_block_type,
     note,
     license,
+    outcome,
+    alias_target_id,
     output_index,
     timeline_id,
     timeline_title,
     meta,
     rule_name_override,
     timestamp_override,
+    namespace,
   },
   defaultable: {
     tags,
@@ -356,6 +362,11 @@ export type MachineLearningCreateSchema = CreateSchema<
 
 export const createRulesSchema = t.intersection([sharedCreateSchema, createTypeSpecific]);
 export type CreateRulesSchema = t.TypeOf<typeof createRulesSchema>;
+export const previewRulesSchema = t.intersection([
+  sharedCreateSchema,
+  createTypeSpecific,
+  t.type({ invocationCount: t.number }),
+]);
 
 type UpdateSchema<T> = SharedUpdateSchema & T;
 export type EqlUpdateSchema = UpdateSchema<t.TypeOf<typeof eqlCreateParams>>;
@@ -420,3 +431,9 @@ export const fullResponseSchema = t.intersection([
   t.exact(t.partial(responseOptionalFields)),
 ]);
 export type FullResponseSchema = t.TypeOf<typeof fullResponseSchema>;
+
+export interface PreviewResponse {
+  previewId: string | undefined;
+  errors: string[] | undefined;
+  warnings: string[] | undefined;
+}

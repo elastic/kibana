@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ApiResponse } from '@elastic/elasticsearch';
-import { BulkRequest, BulkResponse } from '@elastic/elasticsearch/api/types';
+import type { TransportResult } from '@elastic/elasticsearch';
+import { BulkRequest, BulkResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { ESSearchRequest, ESSearchResponse } from 'src/core/types/elasticsearch';
 import { FieldDescriptor } from 'src/plugins/data/server';
@@ -27,9 +27,7 @@ export interface IRuleDataReader {
     ESSearchResponse<Partial<Record<TechnicalRuleDataFieldName, unknown[]>>, TSearchRequest>
   >;
 
-  getDynamicIndexPattern(
-    target?: string
-  ): Promise<{
+  getDynamicIndexPattern(target?: string): Promise<{
     title: string;
     timeFieldName: string;
     fields: FieldDescriptor[];
@@ -37,5 +35,5 @@ export interface IRuleDataReader {
 }
 
 export interface IRuleDataWriter {
-  bulk(request: BulkRequest): Promise<ApiResponse<BulkResponse>>;
+  bulk(request: BulkRequest): Promise<TransportResult<BulkResponse, unknown> | undefined>;
 }

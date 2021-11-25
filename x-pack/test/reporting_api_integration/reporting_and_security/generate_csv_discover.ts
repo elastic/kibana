@@ -6,75 +6,70 @@
  */
 
 import expect from '@kbn/expect';
-import supertest from 'supertest';
-import { JOB_PARAMS_RISON_CSV_DEPRECATED } from '../services/fixtures';
+import { SearchSourceFields } from 'src/plugins/data/common';
+import { ReportApiJSON } from '../../../plugins/reporting/common/types';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
-  const supertestSvc = getService('supertest');
   const reportingAPI = getService('reportingAPI');
 
-  const generateAPI = {
-    getCsvFromParamsInPayload: async (jobParams: object = {}) => {
-      return await supertestSvc
-        .post(`/api/reporting/generate/csv`)
-        .set('kbn-xsrf', 'xxx')
-        .send(jobParams);
-    },
-    getCsvFromParamsInQueryString: async (jobParams: string = '') => {
-      return await supertestSvc
-        .post(`/api/reporting/generate/csv?jobParams=${encodeURIComponent(jobParams)}`)
-        .set('kbn-xsrf', 'xxx');
-    },
-  };
+  describe('Generate CSV from SearchSource', () => {
+    it(`exported CSV file matches snapshot`, async () => {
+      await reportingAPI.initEcommerce();
 
-  describe('Generation from Job Params', () => {
-    before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/reporting/logs');
-      await esArchiver.load('x-pack/test/functional/es_archives/logstash_functional');
-    });
+      const fromTime = '2019-06-20T00:00:00.000Z';
+      const toTime = '2019-06-24T00:00:00.000Z';
 
-    after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/reporting/logs');
-      await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
+      const { text: reportApiJson, status } = await reportingAPI.generateCsv({
+        title: 'CSV Report',
+        browserTimezone: 'UTC',
+        objectType: 'search',
+        version: '7.15.0',
+        searchSource: {
+          version: true,
+          query: { query: '', language: 'kuery' },
+          index: '5193f870-d861-11e9-a311-0fa548c5f953',
+          sort: [{ order_date: 'desc' }],
+          fields: ['*'],
+          filter: [],
+          parent: {
+            query: { language: 'kuery', query: '' },
+            filter: [],
+            parent: {
+              filter: [
+                {
+                  meta: { index: '5193f870-d861-11e9-a311-0fa548c5f953', params: {} },
+                  range: {
+                    order_date: {
+                      gte: fromTime,
+                      lte: toTime,
+                      format: 'strict_date_optional_time',
+                    },
+                  },
+                },
+              ],
+            },
+          },
+        } as unknown as SearchSourceFields,
+      });
+      expect(status).to.be(200);
+
+      const { job: report, path: downloadPath } = JSON.parse(reportApiJson) as {
+        job: ReportApiJSON;
+        path: string;
+      };
+      expect(report.created_by).to.be('elastic');
+      expect(report.jobtype).to.be('csv_searchsource');
+
+      // wait for the the pending job to complete
+      await reportingAPI.waitForJobToFinish(downloadPath);
+
+      const csvFile = await reportingAPI.getCompletedJobOutput(downloadPath);
+      expectSnapshot(csvFile).toMatch();
+
+      await reportingAPI.teardownEcommerce();
       await reportingAPI.deleteAllReports();
-    });
-
-    it('Rejects bogus jobParams', async () => {
-      const { status: resStatus, text: resText } = (await generateAPI.getCsvFromParamsInPayload({
-        jobParams: 0,
-      })) as supertest.Response;
-
-      expect(resText).to.match(/expected value of type \[string\] but got \[number\]/);
-      expect(resStatus).to.eql(400);
-    });
-
-    it('Rejects empty jobParams', async () => {
-      const {
-        status: resStatus,
-        text: resText,
-      } = (await generateAPI.getCsvFromParamsInPayload()) as supertest.Response;
-
-      expect(resStatus).to.eql(400);
-      expect(resText).to.match(/jobParams RISON string is required/);
-    });
-
-    it('Accepts jobParams in POST payload', async () => {
-      const { status: resStatus, text: resText } = (await generateAPI.getCsvFromParamsInPayload({
-        jobParams: JOB_PARAMS_RISON_CSV_DEPRECATED,
-      })) as supertest.Response;
-      expect(resText).to.match(/"jobtype":"csv"/);
-      expect(resStatus).to.eql(200);
-    });
-
-    it('Accepts jobParams in query string', async () => {
-      const { status: resStatus, text: resText } = (await generateAPI.getCsvFromParamsInQueryString(
-        JOB_PARAMS_RISON_CSV_DEPRECATED
-      )) as supertest.Response;
-      expect(resText).to.match(/"jobtype":"csv"/);
-      expect(resStatus).to.eql(200);
     });
   });
 }

@@ -30,7 +30,9 @@ export default function ({ getService }: FtrProviderContext) {
       const { body } = await supertest.get('/api/deprecations/');
 
       const { deprecations } = body as DeprecationsGetResponse;
-      const dataPluginDeprecations = deprecations.filter(({ domainId }) => domainId === 'data');
+      const dataPluginDeprecations = deprecations.filter(
+        ({ domainId }) => domainId === 'dataViews'
+      );
 
       expect(dataPluginDeprecations.length).to.be(0);
     });
@@ -59,7 +61,9 @@ export default function ({ getService }: FtrProviderContext) {
 
       const { body } = await supertest.get('/api/deprecations/');
       const { deprecations } = body as DeprecationsGetResponse;
-      const dataPluginDeprecations = deprecations.filter(({ domainId }) => domainId === 'data');
+      const dataPluginDeprecations = deprecations.filter(
+        ({ domainId }) => domainId === 'dataViews'
+      );
 
       expect(dataPluginDeprecations.length).to.be(1);
       expect(dataPluginDeprecations[0].message).to.contain(title);

@@ -24,8 +24,7 @@ import {
 } from './services';
 
 import { visTypesDefinitions } from './vis_types';
-import { LEGACY_CHARTS_LIBRARY } from '../common/';
-import { xyVisRenderer } from './vis_renderer';
+import { getXYVisRenderer } from './vis_renderer';
 
 import * as expressionFunctions from './expression_functions';
 
@@ -60,28 +59,31 @@ export class VisTypeXyPlugin
       VisTypeXyPluginStart,
       VisTypeXyPluginSetupDependencies,
       VisTypeXyPluginStartDependencies
-    > {
+    >
+{
   public setup(
     core: VisTypeXyCoreSetup,
     { expressions, visualizations, charts, usageCollection }: VisTypeXyPluginSetupDependencies
   ) {
-    if (!core.uiSettings.get(LEGACY_CHARTS_LIBRARY, false)) {
-      setUISettings(core.uiSettings);
-      setThemeService(charts.theme);
-      setPalettesService(charts.palettes);
+    setUISettings(core.uiSettings);
+    setThemeService(charts.theme);
+    setPalettesService(charts.palettes);
 
-      expressions.registerRenderer(xyVisRenderer);
-      expressions.registerFunction(expressionFunctions.visTypeXyVisFn);
-      expressions.registerFunction(expressionFunctions.categoryAxis);
-      expressions.registerFunction(expressionFunctions.timeMarker);
-      expressions.registerFunction(expressionFunctions.valueAxis);
-      expressions.registerFunction(expressionFunctions.seriesParam);
-      expressions.registerFunction(expressionFunctions.thresholdLine);
-      expressions.registerFunction(expressionFunctions.label);
-      expressions.registerFunction(expressionFunctions.visScale);
+    expressions.registerRenderer(
+      getXYVisRenderer({
+        uiSettings: core.uiSettings,
+      })
+    );
+    expressions.registerFunction(expressionFunctions.visTypeXyVisFn);
+    expressions.registerFunction(expressionFunctions.categoryAxis);
+    expressions.registerFunction(expressionFunctions.timeMarker);
+    expressions.registerFunction(expressionFunctions.valueAxis);
+    expressions.registerFunction(expressionFunctions.seriesParam);
+    expressions.registerFunction(expressionFunctions.thresholdLine);
+    expressions.registerFunction(expressionFunctions.label);
+    expressions.registerFunction(expressionFunctions.visScale);
 
-      visTypesDefinitions.forEach(visualizations.createBaseVisualization);
-    }
+    visTypesDefinitions.forEach(visualizations.createBaseVisualization);
 
     setTrackUiMetric(usageCollection?.reportUiCounter.bind(usageCollection, 'vis_type_xy'));
 

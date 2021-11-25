@@ -33,8 +33,8 @@ import { getSafePaletteParams } from './utils';
 import type { CustomPaletteParams } from '../../common';
 import { layerTypes } from '../../common';
 
-const groupLabelForBar = i18n.translate('xpack.lens.heatmapVisualization.heatmapGroupLabel', {
-  defaultMessage: 'Heatmap',
+const groupLabelForHeatmap = i18n.translate('xpack.lens.heatmapVisualization.heatmapGroupLabel', {
+  defaultMessage: 'Magnitude',
 });
 
 interface HeatmapVisualizationDeps {
@@ -105,8 +105,9 @@ export const getHeatmapVisualization = ({
       label: i18n.translate('xpack.lens.heatmapVisualization.heatmapLabel', {
         defaultMessage: 'Heatmap',
       }),
-      groupLabel: groupLabelForBar,
+      groupLabel: groupLabelForHeatmap,
       showExperimentalBadge: true,
+      sortPriority: 1,
     },
   ],
 
@@ -158,16 +159,12 @@ export const getHeatmapVisualization = ({
       return { groups: [] };
     }
 
-    const { displayStops, activePalette } = state.valueAccessor
-      ? getSafePaletteParams(
-          paletteService,
-          frame.activeData?.[state.layerId],
-          state.valueAccessor,
-          state?.palette && state.palette.accessor === state.valueAccessor
-            ? state.palette
-            : undefined
-        )
-      : { displayStops: [], activePalette: {} as HeatmapVisualizationState['palette'] };
+    const { displayStops, activePalette } = getSafePaletteParams(
+      paletteService,
+      frame.activeData?.[state.layerId],
+      state.valueAccessor,
+      state?.palette && state.palette.accessor === state.valueAccessor ? state.palette : undefined
+    );
 
     return {
       groups: [
@@ -199,11 +196,21 @@ export const getHeatmapVisualization = ({
           }),
           accessors: state.valueAccessor
             ? [
-                {
-                  columnId: state.valueAccessor,
-                  triggerIcon: 'colorBy',
-                  palette: getStopsForFixedMode(displayStops, activePalette?.params?.colorStops),
-                },
+                // When data is not available and the range type is numeric, return a placeholder while refreshing
+                displayStops.length &&
+                (frame.activeData || activePalette?.params?.rangeType !== 'number')
+                  ? {
+                      columnId: state.valueAccessor,
+                      triggerIcon: 'colorBy',
+                      palette: getStopsForFixedMode(
+                        displayStops,
+                        activePalette?.params?.colorStops
+                      ),
+                    }
+                  : {
+                      columnId: state.valueAccessor,
+                      triggerIcon: 'none',
+                    },
               ]
             : [],
           filterOperations: isCellValueSupported,

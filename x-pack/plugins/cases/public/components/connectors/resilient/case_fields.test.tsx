@@ -111,9 +111,11 @@ describe('ResilientParamsFields renders', () => {
     const wrapper = mount(<Fields fields={fields} onChange={onChange} connector={connector} />);
 
     await waitFor(() => {
-      ((wrapper.find(EuiComboBox).props() as unknown) as {
-        onChange: (a: EuiComboBoxOptionOption[]) => void;
-      }).onChange([{ value: '19', label: 'Denial of Service' }]);
+      (
+        wrapper.find(EuiComboBox).props() as unknown as {
+          onChange: (a: EuiComboBoxOptionOption[]) => void;
+        }
+      ).onChange([{ value: '19', label: 'Denial of Service' }]);
     });
 
     expect(onChange).toHaveBeenCalledWith({ incidentTypes: ['19'], severityCode: '6' });

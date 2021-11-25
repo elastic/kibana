@@ -15,10 +15,6 @@ import { BadRequestError } from '@kbn/securitysolution-es-utils';
 import {
   transformBulkError,
   BulkError,
-  createSuccessObject,
-  ImportSuccessError,
-  createImportErrorObject,
-  transformImportError,
   convertToSnakeCase,
   SiemResponseFactory,
   mergeStatuses,
@@ -33,7 +29,10 @@ import { RuleExecutionStatus } from '../../../../common/detection_engine/schemas
 
 let rulesClient: ReturnType<typeof rulesClientMock.create>;
 
-describe('utils', () => {
+describe.each([
+  ['Legacy', false],
+  ['RAC', true],
+])('utils - %s', (_, isRuleRegistryEnabled) => {
   describe('transformBulkError', () => {
     test('returns transformed object if it is a boom object', () => {
       const boom = new Boom.Boom('some boom message', { statusCode: 400 });
@@ -78,166 +77,6 @@ describe('utils', () => {
       const expected: BulkError = {
         rule_id: 'rule-1',
         error: { message: 'I have a type error', status_code: 400 },
-      };
-      expect(transformed).toEqual(expected);
-    });
-  });
-
-  describe('createSuccessObject', () => {
-    test('it should increment the existing success object by 1', () => {
-      const success = createSuccessObject({
-        success_count: 0,
-        success: true,
-        errors: [],
-      });
-      const expected: ImportSuccessError = {
-        success_count: 1,
-        success: true,
-        errors: [],
-      };
-      expect(success).toEqual(expected);
-    });
-
-    test('it should increment the existing success object by 1 and not touch the boolean or errors', () => {
-      const success = createSuccessObject({
-        success_count: 0,
-        success: false,
-        errors: [
-          { rule_id: 'rule-1', error: { status_code: 500, message: 'some sad sad sad error' } },
-        ],
-      });
-      const expected: ImportSuccessError = {
-        success_count: 1,
-        success: false,
-        errors: [
-          { rule_id: 'rule-1', error: { status_code: 500, message: 'some sad sad sad error' } },
-        ],
-      };
-      expect(success).toEqual(expected);
-    });
-  });
-
-  describe('createImportErrorObject', () => {
-    test('it creates an error message and does not increment the success count', () => {
-      const error = createImportErrorObject({
-        ruleId: 'some-rule-id',
-        statusCode: 400,
-        message: 'some-message',
-        existingImportSuccessError: {
-          success_count: 1,
-          success: true,
-          errors: [],
-        },
-      });
-      const expected: ImportSuccessError = {
-        success_count: 1,
-        success: false,
-        errors: [{ rule_id: 'some-rule-id', error: { status_code: 400, message: 'some-message' } }],
-      };
-      expect(error).toEqual(expected);
-    });
-
-    test('appends a second error message and does not increment the success count', () => {
-      const error = createImportErrorObject({
-        ruleId: 'some-rule-id',
-        statusCode: 400,
-        message: 'some-message',
-        existingImportSuccessError: {
-          success_count: 1,
-          success: false,
-          errors: [
-            { rule_id: 'rule-1', error: { status_code: 500, message: 'some sad sad sad error' } },
-          ],
-        },
-      });
-      const expected: ImportSuccessError = {
-        success_count: 1,
-        success: false,
-        errors: [
-          { rule_id: 'rule-1', error: { status_code: 500, message: 'some sad sad sad error' } },
-          { rule_id: 'some-rule-id', error: { status_code: 400, message: 'some-message' } },
-        ],
-      };
-      expect(error).toEqual(expected);
-    });
-  });
-
-  describe('transformImportError', () => {
-    test('returns transformed object if it is a boom object', () => {
-      const boom = new Boom.Boom('some boom message', { statusCode: 400 });
-      const transformed = transformImportError('rule-1', boom, {
-        success_count: 1,
-        success: false,
-        errors: [{ rule_id: 'some-rule-id', error: { status_code: 400, message: 'some-message' } }],
-      });
-      const expected: ImportSuccessError = {
-        success_count: 1,
-        success: false,
-        errors: [
-          { rule_id: 'some-rule-id', error: { status_code: 400, message: 'some-message' } },
-          { rule_id: 'rule-1', error: { status_code: 400, message: 'some boom message' } },
-        ],
-      };
-      expect(transformed).toEqual(expected);
-    });
-
-    test('returns a normal error if it is some non boom object that has a statusCode', () => {
-      const error: Error & { statusCode?: number } = {
-        statusCode: 403,
-        name: 'some name',
-        message: 'some message',
-      };
-      const transformed = transformImportError('rule-1', error, {
-        success_count: 1,
-        success: false,
-        errors: [{ rule_id: 'some-rule-id', error: { status_code: 400, message: 'some-message' } }],
-      });
-      const expected: ImportSuccessError = {
-        success_count: 1,
-        success: false,
-        errors: [
-          { rule_id: 'some-rule-id', error: { status_code: 400, message: 'some-message' } },
-          { rule_id: 'rule-1', error: { status_code: 403, message: 'some message' } },
-        ],
-      };
-      expect(transformed).toEqual(expected);
-    });
-
-    test('returns a 500 if the status code is not set', () => {
-      const error: Error & { statusCode?: number } = {
-        name: 'some name',
-        message: 'some message',
-      };
-      const transformed = transformImportError('rule-1', error, {
-        success_count: 1,
-        success: false,
-        errors: [{ rule_id: 'some-rule-id', error: { status_code: 400, message: 'some-message' } }],
-      });
-      const expected: ImportSuccessError = {
-        success_count: 1,
-        success: false,
-        errors: [
-          { rule_id: 'some-rule-id', error: { status_code: 400, message: 'some-message' } },
-          { rule_id: 'rule-1', error: { status_code: 500, message: 'some message' } },
-        ],
-      };
-      expect(transformed).toEqual(expected);
-    });
-
-    test('it detects a BadRequestError and returns a Boom status of 400', () => {
-      const error: BadRequestError = new BadRequestError('I have a type error');
-      const transformed = transformImportError('rule-1', error, {
-        success_count: 1,
-        success: false,
-        errors: [{ rule_id: 'some-rule-id', error: { status_code: 400, message: 'some-message' } }],
-      });
-      const expected: ImportSuccessError = {
-        success_count: 1,
-        success: false,
-        errors: [
-          { rule_id: 'some-rule-id', error: { status_code: 400, message: 'some-message' } },
-          { rule_id: 'rule-1', error: { status_code: 400, message: 'I have a type error' } },
-        ],
       };
       expect(transformed).toEqual(expected);
     });
@@ -303,10 +142,9 @@ describe('utils', () => {
       statusTwo.attributes.status = RuleExecutionStatus.failed;
       const currentStatus = exampleRuleStatus();
       const foundRules = [currentStatus.attributes, statusOne.attributes, statusTwo.attributes];
-      const res = mergeStatuses(currentStatus.attributes.alertId, foundRules, {
+      const res = mergeStatuses(currentStatus.references[0].id, foundRules, {
         'myfakealertid-8cfac': {
           current_status: {
-            alert_id: 'myfakealertid-8cfac',
             status_date: '2020-03-27T22:55:59.517Z',
             status: RuleExecutionStatus.succeeded,
             last_failure_at: null,
@@ -324,7 +162,6 @@ describe('utils', () => {
       expect(res).toEqual({
         'myfakealertid-8cfac': {
           current_status: {
-            alert_id: 'myfakealertid-8cfac',
             status_date: '2020-03-27T22:55:59.517Z',
             status: 'succeeded',
             last_failure_at: null,
@@ -340,7 +177,6 @@ describe('utils', () => {
         },
         'f4b8e31d-cf93-4bde-a265-298bde885cd7': {
           current_status: {
-            alert_id: 'f4b8e31d-cf93-4bde-a265-298bde885cd7',
             status_date: '2020-03-27T22:55:59.517Z',
             status: 'succeeded',
             last_failure_at: null,
@@ -354,7 +190,6 @@ describe('utils', () => {
           },
           failures: [
             {
-              alert_id: 'f4b8e31d-cf93-4bde-a265-298bde885cd7',
               status_date: '2020-03-27T22:55:59.517Z',
               status: 'failed',
               last_failure_at: null,
@@ -367,7 +202,6 @@ describe('utils', () => {
               last_look_back_date: null, // NOTE: This is no longer used on the UI, but left here in case users are using it within the API
             },
             {
-              alert_id: 'f4b8e31d-cf93-4bde-a265-298bde885cd7',
               status_date: '2020-03-27T22:55:59.517Z',
               status: 'failed',
               last_failure_at: null,
@@ -390,12 +224,12 @@ describe('utils', () => {
       rulesClient = rulesClientMock.create();
     });
     it('getFailingRules finds no failing rules', async () => {
-      rulesClient.get.mockResolvedValue(getAlertMock(getQueryRuleParams()));
+      rulesClient.get.mockResolvedValue(getAlertMock(isRuleRegistryEnabled, getQueryRuleParams()));
       const res = await getFailingRules(['my-fake-id'], rulesClient);
       expect(res).toEqual({});
     });
     it('getFailingRules finds a failing rule', async () => {
-      const foundRule = getAlertMock(getQueryRuleParams());
+      const foundRule = getAlertMock(isRuleRegistryEnabled, getQueryRuleParams());
       foundRule.executionStatus = {
         status: 'error',
         lastExecutionDate: foundRule.executionStatus.lastExecutionDate,

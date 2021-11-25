@@ -32,7 +32,6 @@ interface Range {
 
 const DatePickerWrapper = styled.div`
   width: ${(props) => props.theme.eui.fractions.single.percentage};
-  max-width: 350px;
 `;
 const StickyFlexItem = styled(EuiFlexItem)`
   background: ${(props) => `${props.theme.eui.euiHeaderBackgroundColor}`};
@@ -44,14 +43,8 @@ const StickyFlexItem = styled(EuiFlexItem)`
 
 export const DateRangePicker = memo(() => {
   const dispatch = useDispatch();
-  const {
-    page,
-    pageSize,
-    startDate,
-    endDate,
-    autoRefreshOptions,
-    recentlyUsedDateRanges,
-  } = useEndpointSelector(getActivityLogDataPaging);
+  const { page, pageSize, startDate, endDate, autoRefreshOptions, recentlyUsedDateRanges } =
+    useEndpointSelector(getActivityLogDataPaging);
 
   const activityLogLoading = useEndpointSelector(getActivityLogRequestLoading);
 

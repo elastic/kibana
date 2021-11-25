@@ -56,7 +56,10 @@ export async function generatePdfObservableFactory(reporting: ReportingCore) {
     /**
      * For each locator we get the relative URL to the redirect app
      */
-    const urls = locatorParams.map(() => getFullRedirectAppUrl(reporting.getConfig(), job.spaceId));
+    const urls = locatorParams.map(() =>
+      getFullRedirectAppUrl(reporting.getConfig(), job.spaceId, job.forceNow)
+    );
+
     const screenshots$ = getScreenshots$(captureConfig, browserDriverFactory, {
       logger,
       urlsOrUrlLocatorTuples: zip(urls, locatorParams) as UrlOrUrlLocatorTuple[],
@@ -116,6 +119,9 @@ export async function generatePdfObservableFactory(reporting: ReportingCore) {
           warnings: results.reduce((found, current) => {
             if (current.error) {
               found.push(current.error.message);
+            }
+            if (current.renderErrors) {
+              found.push(...current.renderErrors);
             }
             return found;
           }, [] as string[]),

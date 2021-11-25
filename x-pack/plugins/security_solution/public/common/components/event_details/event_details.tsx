@@ -10,10 +10,10 @@ import {
   EuiTabbedContentTab,
   EuiSpacer,
   EuiLoadingContent,
-  EuiLoadingSpinner,
   EuiNotificationBadge,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
@@ -38,6 +38,9 @@ import {
 import { EnrichmentRangePicker } from './cti_details/enrichment_range_picker';
 import { Reason } from './reason';
 
+import { InvestigationGuideView } from './investigation_guide_view';
+import { HostRisk } from '../../../overview/containers/overview_risky_host_links/use_hosts_risk_score';
+
 type EventViewTab = EuiTabbedContentTab;
 
 export type EventViewId =
@@ -57,9 +60,17 @@ interface Props {
   data: TimelineEventsDetailsItem[];
   id: string;
   isAlert: boolean;
+  isDraggable?: boolean;
+  rawEventData: object | undefined;
   timelineTabType: TimelineTabs | 'flyout';
   timelineId: string;
+  hostRisk: HostRisk | null;
 }
+
+export const Indent = styled.div`
+  padding: 0 8px;
+  word-break: break-word;
+`;
 
 const StyledEuiTabbedContent = styled(EuiTabbedContent)`
   display: flex;
@@ -95,8 +106,11 @@ const EventDetailsComponent: React.FC<Props> = ({
   data,
   id,
   isAlert,
+  isDraggable,
+  rawEventData,
   timelineId,
   timelineTabType,
+  hostRisk,
 }) => {
   const [selectedTabId, setSelectedTabId] = useState<EventViewId>(EventsViewType.summaryView);
   const handleTabClick = useCallback(
@@ -144,12 +158,16 @@ const EventDetailsComponent: React.FC<Props> = ({
                     data,
                     eventId: id,
                     browserFields,
+                    isDraggable,
                     timelineId,
                     title: i18n.DUCOMENT_SUMMARY,
                   }}
                 />
-                {enrichmentCount > 0 && (
+
+                {(enrichmentCount > 0 || hostRisk) && (
                   <ThreatSummaryView
+                    isDraggable={isDraggable}
+                    hostRisk={hostRisk}
                     browserFields={browserFields}
                     data={data}
                     eventId={id}
@@ -157,24 +175,29 @@ const EventDetailsComponent: React.FC<Props> = ({
                     enrichments={allEnrichments}
                   />
                 )}
+
                 {isEnrichmentsLoading && (
                   <>
                     <EuiLoadingContent lines={2} />
                   </>
                 )}
+
+                <InvestigationGuideView data={data} />
               </>
             ),
           }
         : undefined,
     [
       isAlert,
-      data,
       id,
+      data,
       browserFields,
+      isDraggable,
       timelineId,
-      isEnrichmentsLoading,
       enrichmentCount,
       allEnrichments,
+      isEnrichmentsLoading,
+      hostRisk,
     ]
   );
 
@@ -238,13 +261,14 @@ const EventDetailsComponent: React.FC<Props> = ({
             browserFields={browserFields}
             data={data}
             eventId={id}
+            isDraggable={isDraggable}
             timelineId={timelineId}
             timelineTabType={timelineTabType}
           />
         </>
       ),
     }),
-    [browserFields, data, id, timelineId, timelineTabType]
+    [browserFields, data, id, isDraggable, timelineId, timelineTabType]
   );
 
   const jsonTab = useMemo(
@@ -256,12 +280,12 @@ const EventDetailsComponent: React.FC<Props> = ({
         <>
           <EuiSpacer size="m" />
           <TabContentWrapper data-test-subj="jsonViewWrapper">
-            <JsonView data={data} />
+            <JsonView rawEventData={rawEventData} />
           </TabContentWrapper>
         </>
       ),
     }),
-    [data]
+    [rawEventData]
   );
 
   const tabs = useMemo(() => {
@@ -270,10 +294,10 @@ const EventDetailsComponent: React.FC<Props> = ({
     );
   }, [summaryTab, threatIntelTab, tableTab, jsonTab]);
 
-  const selectedTab = useMemo(() => tabs.find((tab) => tab.id === selectedTabId) ?? tabs[0], [
-    tabs,
-    selectedTabId,
-  ]);
+  const selectedTab = useMemo(
+    () => tabs.find((tab) => tab.id === selectedTabId) ?? tabs[0],
+    [tabs, selectedTabId]
+  );
 
   return (
     <StyledEuiTabbedContent

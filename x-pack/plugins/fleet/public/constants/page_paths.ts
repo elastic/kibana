@@ -11,14 +11,15 @@ export type StaticPage =
   | 'base'
   | 'overview'
   | 'integrations'
-  | 'integrations_all'
-  | 'integrations_installed'
   | 'policies'
   | 'policies_list'
   | 'enrollment_tokens'
-  | 'data_streams';
+  | 'data_streams'
+  | 'settings';
 
 export type DynamicPage =
+  | 'integrations_all'
+  | 'integrations_installed'
   | 'integration_details_overview'
   | 'integration_details_policies'
   | 'integration_details_assets'
@@ -26,7 +27,6 @@ export type DynamicPage =
   | 'integration_details_custom'
   | 'integration_policy_edit'
   | 'policy_details'
-  | 'add_integration_from_policy'
   | 'add_integration_to_policy'
   | 'edit_integration'
   | 'upgrade_package_policy'
@@ -56,19 +56,19 @@ export const FLEET_ROUTING_PATHS = {
   policy_details_settings: '/policies/:policyId/settings',
   edit_integration: '/policies/:policyId/edit-integration/:packagePolicyId',
   upgrade_package_policy: '/policies/:policyId/upgrade-package-policy/:packagePolicyId',
-  // TODO: Review uses and remove if it is no longer used or linked to in any UX flows
-  add_integration_from_policy: '/policies/:policyId/add-integration',
   enrollment_tokens: '/enrollment-tokens',
   data_streams: '/data-streams',
+  settings: '/settings',
 
   // TODO: Move this to the integrations app
   add_integration_to_policy: '/integrations/:pkgkey/add-integration/:integration?',
 };
 
+export const INTEGRATIONS_SEARCH_QUERYPARAM = 'q';
 export const INTEGRATIONS_ROUTING_PATHS = {
   integrations: '/:tabId',
-  integrations_all: '/browse',
-  integrations_installed: '/installed',
+  integrations_all: '/browse/:category?',
+  integrations_installed: '/installed/:category?',
   integration_details: '/detail/:pkgkey/:panel?',
   integration_details_overview: '/detail/:pkgkey/overview',
   integration_details_policies: '/detail/:pkgkey/policies',
@@ -80,15 +80,22 @@ export const INTEGRATIONS_ROUTING_PATHS = {
 
 export const pagePathGetters: {
   [key in StaticPage]: () => [string, string];
-} &
-  {
-    [key in DynamicPage]: (values: DynamicPagePathValues) => [string, string];
-  } = {
+} & {
+  [key in DynamicPage]: (values: DynamicPagePathValues) => [string, string];
+} = {
   base: () => [FLEET_BASE_PATH, '/'],
   overview: () => [FLEET_BASE_PATH, '/'],
   integrations: () => [INTEGRATIONS_BASE_PATH, '/'],
-  integrations_all: () => [INTEGRATIONS_BASE_PATH, '/browse'],
-  integrations_installed: () => [INTEGRATIONS_BASE_PATH, '/installed'],
+  integrations_all: ({ searchTerm, category }: { searchTerm?: string; category?: string }) => {
+    const categoryPath = category ? `/${category}` : ``;
+    const queryParams = searchTerm ? `?${INTEGRATIONS_SEARCH_QUERYPARAM}=${searchTerm}` : ``;
+    return [INTEGRATIONS_BASE_PATH, `/browse${categoryPath}${queryParams}`];
+  },
+  integrations_installed: ({ query, category }: { query?: string; category?: string }) => {
+    const categoryPath = category ? `/${category}` : ``;
+    const queryParams = query ? `?${INTEGRATIONS_SEARCH_QUERYPARAM}=${query}` : ``;
+    return [INTEGRATIONS_BASE_PATH, `/installed${categoryPath}${queryParams}`];
+  },
   integration_details_overview: ({ pkgkey, integration }) => [
     INTEGRATIONS_BASE_PATH,
     `/detail/${pkgkey}/overview${integration ? `?integration=${integration}` : ''}`,
@@ -119,11 +126,6 @@ export const pagePathGetters: {
     FLEET_BASE_PATH,
     `/policies/${policyId}${tabId ? `/${tabId}` : ''}`,
   ],
-  // TODO: This might need to be removed because we do not have a way to pick an integration in line anymore
-  add_integration_from_policy: ({ policyId }) => [
-    FLEET_BASE_PATH,
-    `/policies/${policyId}/add-integration`,
-  ],
   add_integration_to_policy: ({ pkgkey, integration, agentPolicyId }) => [
     FLEET_BASE_PATH,
     // prettier-ignore
@@ -145,4 +147,5 @@ export const pagePathGetters: {
   agent_details_logs: ({ agentId }) => [FLEET_BASE_PATH, `/agents/${agentId}/logs`],
   enrollment_tokens: () => [FLEET_BASE_PATH, '/enrollment-tokens'],
   data_streams: () => [FLEET_BASE_PATH, '/data-streams'],
+  settings: () => [FLEET_BASE_PATH, '/settings'],
 };

@@ -6,9 +6,13 @@
  */
 
 import { omit } from 'lodash';
+import getPort from 'get-port';
+import http from 'http';
+
 import expect from '@kbn/expect';
-import type { ApiResponse, estypes } from '@elastic/elasticsearch';
-import type { KibanaClient } from '@elastic/elasticsearch/api/kibana';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { TransportResult } from '@elastic/elasticsearch';
+import type { Client } from '@elastic/elasticsearch';
 
 import type SuperTest from 'supertest';
 import { ObjectRemover as ActionsRemover } from '../../../alerting_api_integration/common/lib';
@@ -47,6 +51,7 @@ import {
   AlertResponse,
   ConnectorMappings,
   CasesByAlertId,
+  CaseResolveResponse,
 } from '../../../../plugins/cases/common/api';
 import { getPostCaseRequest, postCollectionReq, postCommentGenAlertReq } from './mock';
 import { getCaseUserActionUrl, getSubCasesUrl } from '../../../../plugins/cases/common/api/helpers';
@@ -57,6 +62,7 @@ import { User } from './authentication/types';
 import { superUser } from './authentication/users';
 import { ESCasesConfigureAttributes } from '../../../../plugins/cases/server/services/configure/types';
 import { ESCaseAttributes } from '../../../../plugins/cases/server/services/cases/types';
+import { getServiceNowServer } from '../../../alerting_api_integration/common/fixtures/plugins/actions_simulators/server/plugin';
 
 function toArray<T>(input: T | T[]): T[] {
   if (Array.isArray(input)) {
@@ -68,32 +74,36 @@ function toArray<T>(input: T | T[]): T[] {
 /**
  * Query Elasticsearch for a set of signals within a set of indices
  */
+// TODO: fix this to use new API/schema
 export const getSignalsWithES = async ({
   es,
   indices,
   ids,
 }: {
-  es: KibanaClient;
+  es: Client;
   indices: string | string[];
   ids: string | string[];
 }): Promise<Map<string, Map<string, estypes.SearchHit<SignalHit>>>> => {
-  const signals: ApiResponse<estypes.SearchResponse<SignalHit>> = await es.search({
-    index: indices,
-    body: {
-      size: 10000,
-      query: {
-        bool: {
-          filter: [
-            {
-              ids: {
-                values: toArray(ids),
+  const signals: TransportResult<estypes.SearchResponse<SignalHit>, unknown> = await es.search(
+    {
+      index: indices,
+      body: {
+        size: 10000,
+        query: {
+          bool: {
+            filter: [
+              {
+                ids: {
+                  values: toArray(ids),
+                },
               },
-            },
-          ],
+            ],
+          },
         },
       },
     },
-  });
+    { meta: true }
+  );
 
   return signals.body.hits.hits.reduce((acc, hit) => {
     let indexMap = acc.get(hit._index);
@@ -324,6 +334,7 @@ export const getServiceNowConnector = () => ({
   },
   config: {
     apiUrl: 'http://some.non.existent.com',
+    usesTableApi: false,
   },
 });
 
@@ -380,6 +391,7 @@ export const getServiceNowSIRConnector = () => ({
   },
   config: {
     apiUrl: 'http://some.non.existent.com',
+    usesTableApi: false,
   },
 });
 
@@ -463,7 +475,7 @@ export const removeServerGeneratedPropertiesFromComments = (
   });
 };
 
-export const deleteAllCaseItems = async (es: KibanaClient) => {
+export const deleteAllCaseItems = async (es: Client) => {
   await Promise.all([
     deleteCasesByESQuery(es),
     deleteSubCases(es),
@@ -474,7 +486,7 @@ export const deleteAllCaseItems = async (es: KibanaClient) => {
   ]);
 };
 
-export const deleteCasesUserActions = async (es: KibanaClient): Promise<void> => {
+export const deleteCasesUserActions = async (es: Client): Promise<void> => {
   await es.deleteByQuery({
     index: '.kibana',
     q: 'type:cases-user-actions',
@@ -485,7 +497,7 @@ export const deleteCasesUserActions = async (es: KibanaClient): Promise<void> =>
   });
 };
 
-export const deleteCasesByESQuery = async (es: KibanaClient): Promise<void> => {
+export const deleteCasesByESQuery = async (es: Client): Promise<void> => {
   await es.deleteByQuery({
     index: '.kibana',
     q: 'type:cases',
@@ -500,7 +512,7 @@ export const deleteCasesByESQuery = async (es: KibanaClient): Promise<void> => {
  * Deletes all sub cases in the .kibana index. This uses ES to perform the delete and does
  * not go through the case API.
  */
-export const deleteSubCases = async (es: KibanaClient): Promise<void> => {
+export const deleteSubCases = async (es: Client): Promise<void> => {
   await es.deleteByQuery({
     index: '.kibana',
     q: 'type:cases-sub-case',
@@ -511,7 +523,7 @@ export const deleteSubCases = async (es: KibanaClient): Promise<void> => {
   });
 };
 
-export const deleteComments = async (es: KibanaClient): Promise<void> => {
+export const deleteComments = async (es: Client): Promise<void> => {
   await es.deleteByQuery({
     index: '.kibana',
     q: 'type:cases-comments',
@@ -522,7 +534,7 @@ export const deleteComments = async (es: KibanaClient): Promise<void> => {
   });
 };
 
-export const deleteConfiguration = async (es: KibanaClient): Promise<void> => {
+export const deleteConfiguration = async (es: Client): Promise<void> => {
   await es.deleteByQuery({
     index: '.kibana',
     q: 'type:cases-configure',
@@ -533,7 +545,7 @@ export const deleteConfiguration = async (es: KibanaClient): Promise<void> => {
   });
 };
 
-export const deleteMappings = async (es: KibanaClient): Promise<void> => {
+export const deleteMappings = async (es: Client): Promise<void> => {
   await es.deleteByQuery({
     index: '.kibana',
     q: 'type:cases-connector-mappings',
@@ -550,9 +562,10 @@ export const superUserSpace1Auth = getAuthWithSuperUser();
  * Returns an auth object with the specified space and user set as super user. The result can be passed to other utility
  * functions.
  */
-export function getAuthWithSuperUser(
-  space: string | null = 'space1'
-): { user: User; space: string | null } {
+export function getAuthWithSuperUser(space: string | null = 'space1'): {
+  user: User;
+  space: string | null;
+} {
   return { user: superUser, space };
 }
 
@@ -587,21 +600,25 @@ interface ConnectorMappingsSavedObject {
 /**
  * Returns connector mappings saved objects from Elasticsearch directly.
  */
-export const getConnectorMappingsFromES = async ({ es }: { es: KibanaClient }) => {
-  const mappings: ApiResponse<
-    estypes.SearchResponse<ConnectorMappingsSavedObject>
-  > = await es.search({
-    index: '.kibana',
-    body: {
-      query: {
-        term: {
-          type: {
-            value: 'cases-connector-mappings',
+export const getConnectorMappingsFromES = async ({ es }: { es: Client }) => {
+  const mappings: TransportResult<
+    estypes.SearchResponse<ConnectorMappingsSavedObject>,
+    unknown
+  > = await es.search(
+    {
+      index: '.kibana',
+      body: {
+        query: {
+          term: {
+            type: {
+              value: 'cases-connector-mappings',
+            },
           },
         },
       },
     },
-  });
+    { meta: true }
+  );
 
   return mappings;
 };
@@ -613,38 +630,48 @@ interface ConfigureSavedObject {
 /**
  * Returns configure saved objects from Elasticsearch directly.
  */
-export const getConfigureSavedObjectsFromES = async ({ es }: { es: KibanaClient }) => {
-  const configure: ApiResponse<estypes.SearchResponse<ConfigureSavedObject>> = await es.search({
-    index: '.kibana',
-    body: {
-      query: {
-        term: {
-          type: {
-            value: 'cases-configure',
+export const getConfigureSavedObjectsFromES = async ({ es }: { es: Client }) => {
+  const configure: TransportResult<
+    estypes.SearchResponse<ConfigureSavedObject>,
+    unknown
+  > = await es.search(
+    {
+      index: '.kibana',
+      body: {
+        query: {
+          term: {
+            type: {
+              value: 'cases-configure',
+            },
           },
         },
       },
     },
-  });
+    { meta: true }
+  );
 
   return configure;
 };
 
-export const getCaseSavedObjectsFromES = async ({ es }: { es: KibanaClient }) => {
-  const configure: ApiResponse<
-    estypes.SearchResponse<{ cases: ESCaseAttributes }>
-  > = await es.search({
-    index: '.kibana',
-    body: {
-      query: {
-        term: {
-          type: {
-            value: 'cases',
+export const getCaseSavedObjectsFromES = async ({ es }: { es: Client }) => {
+  const configure: TransportResult<
+    estypes.SearchResponse<{ cases: ESCaseAttributes }>,
+    unknown
+  > = await es.search(
+    {
+      index: '.kibana',
+      body: {
+        query: {
+          term: {
+            type: {
+              value: 'cases',
+            },
           },
         },
       },
     },
-  });
+    { meta: true }
+  );
 
   return configure;
 };
@@ -652,13 +679,13 @@ export const getCaseSavedObjectsFromES = async ({ es }: { es: KibanaClient }) =>
 export const createCaseWithConnector = async ({
   supertest,
   configureReq = {},
-  servicenowSimulatorURL,
+  serviceNowSimulatorURL,
   actionsRemover,
   auth = { user: superUser, space: null },
   createCaseReq = getPostCaseRequest(),
 }: {
   supertest: SuperTest.SuperTest<SuperTest.Test>;
-  servicenowSimulatorURL: string;
+  serviceNowSimulatorURL: string;
   actionsRemover: ActionsRemover;
   configureReq?: Record<string, unknown>;
   auth?: { user: User; space: string | null };
@@ -671,7 +698,7 @@ export const createCaseWithConnector = async ({
     supertest,
     req: {
       ...getServiceNowConnector(),
-      config: { apiUrl: servicenowSimulatorURL },
+      config: { apiUrl: serviceNowSimulatorURL },
     },
     auth,
   });
@@ -1067,6 +1094,32 @@ export const getCase = async ({
   return theCase;
 };
 
+export const resolveCase = async ({
+  supertest,
+  caseId,
+  includeComments = false,
+  expectedHttpCode = 200,
+  auth = { user: superUser, space: null },
+}: {
+  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  caseId: string;
+  includeComments?: boolean;
+  expectedHttpCode?: number;
+  auth?: { user: User; space: string | null };
+}): Promise<CaseResolveResponse> => {
+  const { body: theResolvedCase } = await supertest
+    .get(
+      `${getSpaceUrlPrefix(
+        auth?.space
+      )}${CASES_URL}/${caseId}/resolve?includeComments=${includeComments}`
+    )
+    .set('kbn-xsrf', 'true')
+    .auth(auth.user.username, auth.user.password)
+    .expect(expectedHttpCode);
+
+  return theResolvedCase;
+};
+
 export const findCases = async ({
   supertest,
   query = {},
@@ -1193,4 +1246,18 @@ export const getAlertsAttachedToCase = async ({
     .expect(expectedHttpCode);
 
   return theCase;
+};
+
+export const getServiceNowSimulationServer = async (): Promise<{
+  server: http.Server;
+  url: string;
+}> => {
+  const server = await getServiceNowServer();
+  const port = await getPort({ port: getPort.makeRange(9000, 9100) });
+  if (!server.listening) {
+    server.listen(port);
+  }
+  const url = `http://localhost:${port}`;
+
+  return { server, url };
 };

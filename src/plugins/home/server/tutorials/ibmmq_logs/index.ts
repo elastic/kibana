@@ -24,12 +24,12 @@ export function ibmmqLogsSpecProvider(context: TutorialContext): TutorialSchema 
   return {
     id: 'ibmmqLogs',
     name: i18n.translate('home.tutorials.ibmmqLogs.nameTitle', {
-      defaultMessage: 'IBM MQ logs',
+      defaultMessage: 'IBM MQ Logs',
     }),
     moduleName,
     category: TutorialsCategory.LOGGING,
     shortDescription: i18n.translate('home.tutorials.ibmmqLogs.shortDescription', {
-      defaultMessage: 'Collect IBM MQ logs with Filebeat.',
+      defaultMessage: 'Collect and parse logs from IBM MQ with Filebeat.',
     }),
     longDescription: i18n.translate('home.tutorials.ibmmqLogs.longDescription', {
       defaultMessage: 'Collect IBM MQ logs with Filebeat. \
@@ -58,5 +58,6 @@ export function ibmmqLogsSpecProvider(context: TutorialContext): TutorialSchema 
     onPrem: onPremInstructions(moduleName, platforms, context),
     elasticCloud: cloudInstructions(moduleName, platforms),
     onPremElasticCloud: onPremCloudInstructions(moduleName, platforms),
+    integrationBrowserCategories: ['security'],
   };
 }

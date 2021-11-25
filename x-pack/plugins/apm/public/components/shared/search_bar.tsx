@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   EuiFlexGroup,
   EuiFlexGroupProps,
@@ -13,7 +13,10 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import React from 'react';
-import { useBreakPoints } from '../../hooks/use_break_points';
+import { useTimeRangeId } from '../../context/time_range_id/use_time_range_id';
+import { toBoolean, toNumber } from '../../context/url_params_context/helpers';
+import { useApmParams } from '../../hooks/use_apm_params';
+import { useBreakpoints } from '../../hooks/use_breakpoints';
 import { DatePicker } from './DatePicker';
 import { KueryBar } from './kuery_bar';
 import { TimeComparison } from './time_comparison';
@@ -28,6 +31,39 @@ interface Props {
   kueryBarBoolFilter?: QueryDslQueryContainer[];
 }
 
+function ApmDatePicker() {
+  const { query } = useApmParams('/*');
+
+  if (!('rangeFrom' in query)) {
+    throw new Error('range not available in route parameters');
+  }
+
+  const {
+    rangeFrom,
+    rangeTo,
+    refreshPaused: refreshPausedFromUrl = 'true',
+    refreshInterval: refreshIntervalFromUrl = '0',
+  } = query;
+
+  const refreshPaused = toBoolean(refreshPausedFromUrl);
+
+  const refreshInterval = toNumber(refreshIntervalFromUrl);
+
+  const { incrementTimeRangeId } = useTimeRangeId();
+
+  return (
+    <DatePicker
+      rangeFrom={rangeFrom}
+      rangeTo={rangeTo}
+      refreshPaused={refreshPaused}
+      refreshInterval={refreshInterval}
+      onTimeRangeRefresh={() => {
+        incrementTimeRangeId();
+      }}
+    />
+  );
+}
+
 export function SearchBar({
   hidden = false,
   showKueryBar = true,
@@ -36,7 +72,7 @@ export function SearchBar({
   kueryBarBoolFilter,
   kueryBarPlaceholder,
 }: Props) {
-  const { isSmall, isMedium, isLarge, isXl, isXXL, isXXXL } = useBreakPoints();
+  const { isSmall, isMedium, isLarge, isXl, isXXL, isXXXL } = useBreakpoints();
 
   if (hidden) {
     return null;
@@ -87,7 +123,7 @@ export function SearchBar({
               </EuiFlexItem>
             )}
             <EuiFlexItem grow={false}>
-              <DatePicker />
+              <ApmDatePicker />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>

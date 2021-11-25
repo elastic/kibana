@@ -5,10 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import type { AgentConfigOptions } from 'elastic-apm-node';
 import { getConfigurationFilePaths, getConfigFromFiles, applyConfigOverrides } from './utils';
 import { ApmConfiguration } from './config';
-import { ApmAgentConfig } from './types';
 
 let apmConfig: ApmConfiguration | undefined;
 
@@ -32,7 +31,7 @@ export const loadConfiguration = (
   return apmConfig;
 };
 
-export const getConfiguration = (serviceName: string): ApmAgentConfig | undefined => {
+export const getConfiguration = (serviceName: string): AgentConfigOptions | undefined => {
   // integration test runner starts a kibana server that import the module without initializing APM.
   // so we need to check initialization of the config.
   // note that we can't just load the configuration during this module's import

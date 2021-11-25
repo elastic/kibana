@@ -52,14 +52,14 @@ export class PolicyWatcher {
    * client to do
    */
   private makeInternalSOClient(soStart: SavedObjectsServiceStart): SavedObjectsClientContract {
-    const fakeRequest = ({
+    const fakeRequest = {
       headers: {},
       getBasePath: () => '',
       path: '/',
       route: { settings: {} },
       url: { href: {} },
       raw: { req: { url: '/' } },
-    } as unknown) as KibanaRequest;
+    } as unknown as KibanaRequest;
     return soStart.getScopedClient(fakeRequest, { excludedWrappers: ['security'] });
   }
 

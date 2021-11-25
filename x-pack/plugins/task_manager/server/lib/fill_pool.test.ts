@@ -78,7 +78,7 @@ describe('fillPool', () => {
     const fetchAvailableTasks = mockFetchAvailableTasks(tasks);
     const run = sinon.spy(async () => TaskPoolRunResult.RanOutOfCapacity);
     const converter = (instance: ConcreteTaskInstance) =>
-      (instance.id as unknown) as TaskManagerRunner;
+      instance.id as unknown as TaskManagerRunner;
 
     await fillPool(fetchAvailableTasks, converter, run);
 
@@ -89,7 +89,7 @@ describe('fillPool', () => {
     test('throws exception from fetchAvailableTasks', async () => {
       const run = sinon.spy(async () => TaskPoolRunResult.RanOutOfCapacity);
       const converter = (instance: ConcreteTaskInstance) =>
-        (instance.id as unknown) as TaskManagerRunner;
+        instance.id as unknown as TaskManagerRunner;
 
       try {
         const fetchAvailableTasks = () =>
@@ -107,7 +107,7 @@ describe('fillPool', () => {
     test('throws exception from run', async () => {
       const run = sinon.spy(() => Promise.reject('run is not working'));
       const converter = (instance: ConcreteTaskInstance) =>
-        (instance.id as unknown) as TaskManagerRunner;
+        instance.id as unknown as TaskManagerRunner;
 
       try {
         const tasks = [

@@ -24,10 +24,11 @@ exports[`TOCEntry is rendered 1`] = `
           "isVisible": [Function],
           "renderLegendDetails": [Function],
           "showAtZoomLevel": [Function],
+          "supportsFitToBounds": [Function],
         }
       }
       openLayerSettings={[Function]}
-      supportsFitToBounds={false}
+      supportsFitToBounds={true}
     />
     <div
       className="mapTocEntry__layerIcons"
@@ -38,6 +39,13 @@ exports[`TOCEntry is rendered 1`] = `
         key="toggleVisiblity"
         onClick={[Function]}
         title="Hide layer"
+      />
+      <EuiButtonIcon
+        aria-label="Fit to data"
+        iconType="expand"
+        key="fitToBounds"
+        onClick={[Function]}
+        title="Fit to data"
       />
       <EuiButtonIcon
         aria-label="Edit layer settings"
@@ -99,10 +107,11 @@ exports[`TOCEntry props Should shade background when not selected layer 1`] = `
           "isVisible": [Function],
           "renderLegendDetails": [Function],
           "showAtZoomLevel": [Function],
+          "supportsFitToBounds": [Function],
         }
       }
       openLayerSettings={[Function]}
-      supportsFitToBounds={false}
+      supportsFitToBounds={true}
     />
     <div
       className="mapTocEntry__layerIcons"
@@ -113,6 +122,13 @@ exports[`TOCEntry props Should shade background when not selected layer 1`] = `
         key="toggleVisiblity"
         onClick={[Function]}
         title="Hide layer"
+      />
+      <EuiButtonIcon
+        aria-label="Fit to data"
+        iconType="expand"
+        key="fitToBounds"
+        onClick={[Function]}
+        title="Fit to data"
       />
       <EuiButtonIcon
         aria-label="Edit layer settings"
@@ -174,10 +190,11 @@ exports[`TOCEntry props Should shade background when selected layer 1`] = `
           "isVisible": [Function],
           "renderLegendDetails": [Function],
           "showAtZoomLevel": [Function],
+          "supportsFitToBounds": [Function],
         }
       }
       openLayerSettings={[Function]}
-      supportsFitToBounds={false}
+      supportsFitToBounds={true}
     />
     <div
       className="mapTocEntry__layerIcons"
@@ -188,6 +205,13 @@ exports[`TOCEntry props Should shade background when selected layer 1`] = `
         key="toggleVisiblity"
         onClick={[Function]}
         title="Hide layer"
+      />
+      <EuiButtonIcon
+        aria-label="Fit to data"
+        iconType="expand"
+        key="fitToBounds"
+        onClick={[Function]}
+        title="Fit to data"
       />
       <EuiButtonIcon
         aria-label="Edit layer settings"
@@ -249,10 +273,11 @@ exports[`TOCEntry props isReadOnly 1`] = `
           "isVisible": [Function],
           "renderLegendDetails": [Function],
           "showAtZoomLevel": [Function],
+          "supportsFitToBounds": [Function],
         }
       }
       openLayerSettings={[Function]}
-      supportsFitToBounds={false}
+      supportsFitToBounds={true}
     />
     <div
       className="mapTocEntry__layerIcons"
@@ -263,6 +288,13 @@ exports[`TOCEntry props isReadOnly 1`] = `
         key="toggleVisiblity"
         onClick={[Function]}
         title="Hide layer"
+      />
+      <EuiButtonIcon
+        aria-label="Fit to data"
+        iconType="expand"
+        key="fitToBounds"
+        onClick={[Function]}
+        title="Fit to data"
       />
     </div>
   </div>
@@ -309,10 +341,11 @@ exports[`TOCEntry props should display layer details when isLegendDetailsOpen is
           "isVisible": [Function],
           "renderLegendDetails": [Function],
           "showAtZoomLevel": [Function],
+          "supportsFitToBounds": [Function],
         }
       }
       openLayerSettings={[Function]}
-      supportsFitToBounds={false}
+      supportsFitToBounds={true}
     />
     <div
       className="mapTocEntry__layerIcons"
@@ -323,6 +356,13 @@ exports[`TOCEntry props should display layer details when isLegendDetailsOpen is
         key="toggleVisiblity"
         onClick={[Function]}
         title="Hide layer"
+      />
+      <EuiButtonIcon
+        aria-label="Fit to data"
+        iconType="expand"
+        key="fitToBounds"
+        onClick={[Function]}
+        title="Fit to data"
       />
       <EuiButtonIcon
         aria-label="Edit layer settings"

@@ -29,9 +29,7 @@ describe('managed configuration', () => {
     clock = sinon.useFakeTimers();
 
     const context = coreMock.createPluginInitializerContext<TaskManagerConfig>({
-      enabled: true,
       max_workers: 10,
-      index: 'foo',
       max_attempts: 9,
       poll_interval: 3000,
       version_conflict_threshold: 80,
@@ -54,6 +52,9 @@ describe('managed configuration', () => {
       ephemeral_tasks: {
         enabled: true,
         request_capacity: 10,
+      },
+      unsafe: {
+        exclude_task_types: [],
       },
     });
     logger = context.logger.get('taskManager');

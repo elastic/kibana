@@ -6,33 +6,26 @@
  */
 
 import { countBy } from 'lodash/fp';
-import { SavedObject } from 'kibana/server';
 import uuid from 'uuid';
 
 import { RulesSchema } from '../../../../../common/detection_engine/schemas/response/rules_schema';
 import { ImportRulesSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/import_rules_schema';
 import { CreateRulesBulkSchema } from '../../../../../common/detection_engine/schemas/request/create_rules_bulk_schema';
 import { PartialAlert, FindResult } from '../../../../../../alerting/server';
+import { ActionsClient } from '../../../../../../actions/server';
 import { INTERNAL_IDENTIFIER } from '../../../../../common/constants';
 import {
   RuleAlertType,
   isAlertType,
-  IRuleSavedAttributesSavedObjectAttributes,
-  isRuleStatusFindType,
-  isRuleStatusSavedObjectType,
+  isRuleStatusSavedObjectAttributes,
   IRuleStatusSOAttributes,
 } from '../../rules/types';
-import {
-  createBulkErrorObject,
-  BulkError,
-  createSuccessObject,
-  ImportSuccessError,
-  createImportErrorObject,
-  OutputError,
-} from '../utils';
+import { createBulkErrorObject, BulkError, OutputError } from '../utils';
 import { internalRuleToAPIResponse } from '../../schemas/rule_converters';
 import { RuleParams } from '../../schemas/rule_schemas';
 import { SanitizedAlert } from '../../../../../../alerting/common';
+// eslint-disable-next-line no-restricted-imports
+import { LegacyRulesActionsSavedObject } from '../../rule_actions/legacy_get_rule_actions_saved_object';
 
 type PromiseFromStreams = ImportRulesSchemaDecoded | Error;
 
@@ -103,18 +96,23 @@ export const transformTags = (tags: string[]): string[] => {
 // those on the export
 export const transformAlertToRule = (
   alert: SanitizedAlert<RuleParams>,
-  ruleStatus?: SavedObject<IRuleSavedAttributesSavedObjectAttributes>
+  ruleStatus?: IRuleStatusSOAttributes,
+  legacyRuleActions?: LegacyRulesActionsSavedObject | null
 ): Partial<RulesSchema> => {
-  return internalRuleToAPIResponse(alert, ruleStatus?.attributes);
+  return internalRuleToAPIResponse(alert, ruleStatus, legacyRuleActions);
 };
 
-export const transformAlertsToRules = (alerts: RuleAlertType[]): Array<Partial<RulesSchema>> => {
-  return alerts.map((alert) => transformAlertToRule(alert));
+export const transformAlertsToRules = (
+  alerts: RuleAlertType[],
+  legacyRuleActions: Record<string, LegacyRulesActionsSavedObject>
+): Array<Partial<RulesSchema>> => {
+  return alerts.map((alert) => transformAlertToRule(alert, undefined, legacyRuleActions[alert.id]));
 };
 
 export const transformFindAlerts = (
   findResults: FindResult<RuleParams>,
-  ruleStatuses: { [key: string]: IRuleStatusSOAttributes[] | undefined }
+  currentStatusesByRuleId: { [key: string]: IRuleStatusSOAttributes | undefined },
+  legacyRuleActions: Record<string, LegacyRulesActionsSavedObject | undefined>
 ): {
   page: number;
   perPage: number;
@@ -126,62 +124,27 @@ export const transformFindAlerts = (
     perPage: findResults.perPage,
     total: findResults.total,
     data: findResults.data.map((alert) => {
-      const statuses = ruleStatuses[alert.id];
-      const status = statuses ? statuses[0] : undefined;
-      return internalRuleToAPIResponse(alert, status);
+      const status = currentStatusesByRuleId[alert.id];
+      return internalRuleToAPIResponse(alert, status, legacyRuleActions[alert.id]);
     }),
   };
 };
 
 export const transform = (
   alert: PartialAlert<RuleParams>,
-  ruleStatus?: SavedObject<IRuleSavedAttributesSavedObjectAttributes>
+  ruleStatus?: IRuleStatusSOAttributes,
+  isRuleRegistryEnabled?: boolean,
+  legacyRuleActions?: LegacyRulesActionsSavedObject | null
 ): Partial<RulesSchema> | null => {
-  if (isAlertType(alert)) {
+  if (isAlertType(isRuleRegistryEnabled ?? false, alert)) {
     return transformAlertToRule(
       alert,
-      isRuleStatusSavedObjectType(ruleStatus) ? ruleStatus : undefined
+      isRuleStatusSavedObjectAttributes(ruleStatus) ? ruleStatus : undefined,
+      legacyRuleActions
     );
   }
 
   return null;
-};
-
-export const transformOrBulkError = (
-  ruleId: string,
-  alert: PartialAlert<RuleParams>,
-  ruleStatus?: unknown
-): Partial<RulesSchema> | BulkError => {
-  if (isAlertType(alert)) {
-    if (isRuleStatusFindType(ruleStatus) && ruleStatus?.saved_objects.length > 0) {
-      return transformAlertToRule(alert, ruleStatus?.saved_objects[0] ?? ruleStatus);
-    } else {
-      return transformAlertToRule(alert);
-    }
-  } else {
-    return createBulkErrorObject({
-      ruleId,
-      statusCode: 500,
-      message: 'Internal error transforming',
-    });
-  }
-};
-
-export const transformOrImportError = (
-  ruleId: string,
-  alert: PartialAlert<RuleParams>,
-  existingImportSuccessError: ImportSuccessError
-): ImportSuccessError => {
-  if (isAlertType(alert)) {
-    return createSuccessObject(existingImportSuccessError);
-  } else {
-    return createImportErrorObject({
-      ruleId,
-      statusCode: 500,
-      message: 'Internal error transforming',
-      existingImportSuccessError,
-    });
-  }
 };
 
 export const getDuplicates = (ruleDefinitions: CreateRulesBulkSchema, by: 'rule_id'): string[] => {
@@ -219,6 +182,60 @@ export const getTupleDuplicateErrorsAndUniqueRules = (
         acc.rulesAcc.set(ruleId, parsedRule);
       }
 
+      return acc;
+    }, // using map (preserves ordering)
+    {
+      errors: new Map<string, BulkError>(),
+      rulesAcc: new Map<string, PromiseFromStreams>(),
+    }
+  );
+
+  return [Array.from(errors.values()), Array.from(rulesAcc.values())];
+};
+
+/**
+ * Given a set of rules and an actions client this will return connectors that are invalid
+ * such as missing connectors and filter out the rules that have invalid connectors.
+ * @param rules The rules to check for invalid connectors
+ * @param actionsClient The actions client to get all the connectors.
+ * @returns An array of connector errors if it found any and then the promise stream of valid and invalid connectors.
+ */
+export const getInvalidConnectors = async (
+  rules: PromiseFromStreams[],
+  actionsClient: ActionsClient
+): Promise<[BulkError[], PromiseFromStreams[]]> => {
+  const actionsFind = await actionsClient.getAll();
+  const actionIds = new Set(actionsFind.map((action) => action.id));
+  const { errors, rulesAcc } = rules.reduce(
+    (acc, parsedRule) => {
+      if (parsedRule instanceof Error) {
+        acc.rulesAcc.set(uuid.v4(), parsedRule);
+      } else {
+        const { rule_id: ruleId, actions } = parsedRule;
+        const missingActionIds = actions.flatMap((action) => {
+          if (!actionIds.has(action.id)) {
+            return [action.id];
+          } else {
+            return [];
+          }
+        });
+        if (missingActionIds.length === 0) {
+          acc.rulesAcc.set(ruleId, parsedRule);
+        } else {
+          const errorMessage =
+            missingActionIds.length > 1
+              ? 'connectors are missing. Connector ids missing are:'
+              : 'connector is missing. Connector id missing is:';
+          acc.errors.set(
+            uuid.v4(),
+            createBulkErrorObject({
+              ruleId,
+              statusCode: 404,
+              message: `${missingActionIds.length} ${errorMessage} ${missingActionIds.join(', ')}`,
+            })
+          );
+        }
+      }
       return acc;
     }, // using map (preserves ordering)
     {

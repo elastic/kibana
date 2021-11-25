@@ -9,7 +9,7 @@ import * as module from './helpers';
 import { savePinnedEvents } from '../../../saved_object/pinned_events';
 import { getNote } from '../../../saved_object/notes';
 import { FrameworkRequest } from '../../../../framework';
-import { SavedTimeline } from '../../../../../../common/types/timeline';
+import { SavedTimeline } from '../../../../../../common';
 import { mockTemplate, mockTimeline } from '../../../__mocks__/create_timelines';
 import { buildFrameworkRequest } from '../../../utils/common';
 import { SecurityPluginSetup } from '../../../../../../../security/server';
@@ -31,18 +31,6 @@ const notes = [
 ];
 const existingNoteIds = undefined;
 const isImmutable = true;
-
-jest.mock('moment', () => {
-  const mockMoment = {
-    toISOString: jest
-      .fn()
-      .mockReturnValueOnce('2020-11-03T11:37:31.655Z')
-      .mockReturnValue('2020-11-04T11:37:31.655Z'),
-    subtract: jest.fn(),
-  };
-  mockMoment.subtract.mockReturnValue(mockMoment);
-  return jest.fn().mockReturnValue(mockMoment);
-});
 
 jest.mock('../../../saved_object/timelines', () => ({
   persistTimeline: jest.fn().mockResolvedValue({
@@ -71,17 +59,18 @@ describe('createTimelines', () => {
   let frameworkRequest: FrameworkRequest;
 
   beforeAll(async () => {
-    securitySetup = ({
+    securitySetup = {
       authc: {
         getCurrentUser: jest.fn(),
       },
       authz: {},
-    } as unknown) as SecurityPluginSetup;
+    } as unknown as SecurityPluginSetup;
 
     const { context } = requestContextMock.createTools();
     const mockRequest = getCreateTimelinesRequest(createTimelineWithoutTimelineId);
 
     frameworkRequest = await buildFrameworkRequest(context, securitySetup, mockRequest);
+    Date.now = jest.fn().mockReturnValue(new Date('2020-11-04T11:37:31.655Z'));
   });
 
   describe('create timelines', () => {
@@ -119,7 +108,7 @@ describe('createTimelines', () => {
     });
 
     test('persistNotes', () => {
-      expect((persistNotes as jest.Mock).mock.calls[0][4]).toEqual([
+      expect((persistNotes as jest.Mock).mock.calls[0][3]).toEqual([
         {
           created: 1603885051655,
           createdBy: 'elastic',

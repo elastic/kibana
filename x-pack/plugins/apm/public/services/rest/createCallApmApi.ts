@@ -9,7 +9,6 @@ import { CoreSetup, CoreStart } from 'kibana/public';
 import * as t from 'io-ts';
 import type {
   ClientRequestParamsOf,
-  EndpointOf,
   formatRequest as formatRequestType,
   ReturnOf,
   RouteRepositoryClient,
@@ -26,9 +25,10 @@ import { callApi } from './callApi';
 import type {
   APMServerRouteRepository,
   APMRouteHandlerResources,
+  APIEndpoint,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../server';
-import { InspectResponse } from '../../../typings/common';
+import { InspectResponse } from '../../../../observability/typings/common';
 
 export type APMClientOptions = Omit<
   FetchOptions,
@@ -47,17 +47,15 @@ export type AutoAbortedAPMClient = RouteRepositoryClient<
   Omit<APMClientOptions, 'signal'>
 >;
 
-export type APIReturnType<
-  TEndpoint extends EndpointOf<APMServerRouteRepository>
-> = ReturnOf<APMServerRouteRepository, TEndpoint> & {
+export type APIReturnType<TEndpoint extends APIEndpoint> = ReturnOf<
+  APMServerRouteRepository,
+  TEndpoint
+> & {
   _inspect?: InspectResponse;
 };
 
-export type APIEndpoint = EndpointOf<APMServerRouteRepository>;
-
-export type APIClientRequestParamsOf<
-  TEndpoint extends EndpointOf<APMServerRouteRepository>
-> = ClientRequestParamsOf<APMServerRouteRepository, TEndpoint>;
+export type APIClientRequestParamsOf<TEndpoint extends APIEndpoint> =
+  ClientRequestParamsOf<APMServerRouteRepository, TEndpoint>;
 
 export type AbstractAPMRepository = ServerRouteRepository<
   APMRouteHandlerResources,
@@ -82,7 +80,7 @@ export let callApmApi: APMClient = () => {
 export function createCallApmApi(core: CoreStart | CoreSetup) {
   callApmApi = ((options) => {
     const { endpoint, ...opts } = options;
-    const { params } = (options as unknown) as {
+    const { params } = options as unknown as {
       params?: Partial<Record<string, any>>;
     };
 

@@ -60,7 +60,7 @@ export interface Props {
 }
 
 const editorTitle = i18n.translate('indexPatternEditor.title', {
-  defaultMessage: 'Create index pattern',
+  defaultMessage: 'Create data view',
 });
 
 const IndexPatternEditorFlyoutContentComponent = ({
@@ -126,10 +126,8 @@ const IndexPatternEditorFlyoutContentComponent = ({
   const [isLoadingIndexPatterns, setIsLoadingIndexPatterns] = useState<boolean>(true);
   const [existingIndexPatterns, setExistingIndexPatterns] = useState<string[]>([]);
   const [rollupIndex, setRollupIndex] = useState<string | undefined>();
-  const [
-    rollupIndicesCapabilities,
-    setRollupIndicesCapabilities,
-  ] = useState<RollupIndicesCapsResponse>({});
+  const [rollupIndicesCapabilities, setRollupIndicesCapabilities] =
+    useState<RollupIndicesCapsResponse>({});
   const [matchedIndices, setMatchedIndices] = useState<MatchedIndicesSet>({
     allIndices: [],
     exactMatchedIndices: [],
@@ -169,7 +167,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
   useEffect(() => {
     const getRollups = async () => {
       try {
-        const response = await http.get('/api/rollup/indices');
+        const response = await http.get<RollupIndicesCapsResponse>('/api/rollup/indices');
         if (response) {
           setRollupIndicesCapabilities(response);
         }

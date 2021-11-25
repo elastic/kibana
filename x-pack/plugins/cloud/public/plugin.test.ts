@@ -11,6 +11,7 @@ import { homePluginMock } from 'src/plugins/home/public/mocks';
 import { securityMock } from '../../security/public/mocks';
 import { fullStoryApiMock, initializeFullStoryMock } from './plugin.test.mocks';
 import { CloudPlugin, CloudConfigType, loadFullStoryUserId } from './plugin';
+import { Observable, Subject } from 'rxjs';
 
 describe('Cloud Plugin', () => {
   describe('#setup', () => {
@@ -23,10 +24,12 @@ describe('Cloud Plugin', () => {
         config = {},
         securityEnabled = true,
         currentUserProps = {},
+        currentAppId$ = undefined,
       }: {
         config?: Partial<CloudConfigType>;
         securityEnabled?: boolean;
         currentUserProps?: Record<string, any>;
+        currentAppId$?: Observable<string | undefined>;
       }) => {
         const initContext = coreMock.createPluginInitializerContext({
           id: 'cloudId',
@@ -39,9 +42,15 @@ describe('Cloud Plugin', () => {
           },
           ...config,
         });
+
         const plugin = new CloudPlugin(initContext);
 
         const coreSetup = coreMock.createSetup();
+        const coreStart = coreMock.createStart();
+        if (currentAppId$) {
+          coreStart.application.currentAppId$ = currentAppId$;
+        }
+        coreSetup.getStartServices.mockResolvedValue([coreStart, {}, undefined]);
         const securitySetup = securityMock.createSetup();
         securitySetup.authc.getCurrentUser.mockResolvedValue(
           securityMock.createMockAuthenticatedUser(currentUserProps)
@@ -78,8 +87,44 @@ describe('Cloud Plugin', () => {
         });
 
         expect(fullStoryApiMock.identify).toHaveBeenCalledWith(
-          '03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4'
+          '03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4',
+          {
+            version_str: 'version',
+            version_major_int: -1,
+            version_minor_int: -1,
+            version_patch_int: -1,
+          }
         );
+      });
+
+      it('calls FS.setUserVars everytime an app changes', async () => {
+        const currentAppId$ = new Subject<string | undefined>();
+        const { plugin } = await setupPlugin({
+          config: { full_story: { enabled: true, org_id: 'foo' } },
+          currentUserProps: {
+            username: '1234',
+          },
+          currentAppId$,
+        });
+
+        expect(fullStoryApiMock.setUserVars).not.toHaveBeenCalled();
+        currentAppId$.next('App1');
+        expect(fullStoryApiMock.setUserVars).toHaveBeenCalledWith({
+          app_id_str: 'App1',
+        });
+        currentAppId$.next();
+        expect(fullStoryApiMock.setUserVars).toHaveBeenCalledWith({
+          app_id_str: 'unknown',
+        });
+
+        currentAppId$.next('App2');
+        expect(fullStoryApiMock.setUserVars).toHaveBeenCalledWith({
+          app_id_str: 'App2',
+        });
+
+        expect(currentAppId$.observers.length).toBe(1);
+        plugin.stop();
+        expect(currentAppId$.observers.length).toBe(0);
       });
 
       it('does not call FS.identify when security is not available', async () => {
@@ -91,16 +136,41 @@ describe('Cloud Plugin', () => {
         expect(fullStoryApiMock.identify).not.toHaveBeenCalled();
       });
 
-      it('calls FS.event when security is available', async () => {
-        const { initContext } = await setupPlugin({
-          config: { full_story: { enabled: true, org_id: 'foo' } },
-          currentUserProps: {
-            username: '1234',
-          },
+      describe('with memory', () => {
+        beforeAll(() => {
+          // @ts-expect-error 2339
+          window.performance.memory = {
+            get jsHeapSizeLimit() {
+              return 3;
+            },
+            get totalJSHeapSize() {
+              return 2;
+            },
+            get usedJSHeapSize() {
+              return 1;
+            },
+          };
         });
 
-        expect(fullStoryApiMock.event).toHaveBeenCalledWith('Loaded Kibana', {
-          kibana_version_str: initContext.env.packageInfo.version,
+        afterAll(() => {
+          // @ts-expect-error 2339
+          delete window.performance.memory;
+        });
+
+        it('calls FS.event when security is available', async () => {
+          const { initContext } = await setupPlugin({
+            config: { full_story: { enabled: true, org_id: 'foo' } },
+            currentUserProps: {
+              username: '1234',
+            },
+          });
+
+          expect(fullStoryApiMock.event).toHaveBeenCalledWith('Loaded Kibana', {
+            kibana_version_str: initContext.env.packageInfo.version,
+            memory_js_heap_size_limit_int: 3,
+            memory_js_heap_size_total_int: 2,
+            memory_js_heap_size_used_int: 1,
+          });
         });
       });
 
@@ -278,7 +348,7 @@ describe('Cloud Plugin', () => {
       expect(coreStart.chrome.setCustomNavLink.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
           Object {
-            "euiIconType": "arrowLeft",
+            "euiIconType": "logoCloud",
             "href": "https://cloud.elastic.co/abc123",
             "title": "Manage this deployment",
           },
@@ -300,7 +370,7 @@ describe('Cloud Plugin', () => {
       expect(coreStart.chrome.setCustomNavLink.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
           Object {
-            "euiIconType": "arrowLeft",
+            "euiIconType": "logoCloud",
             "href": "https://cloud.elastic.co/abc123",
             "title": "Manage this deployment",
           },

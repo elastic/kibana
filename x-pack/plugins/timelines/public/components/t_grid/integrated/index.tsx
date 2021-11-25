@@ -14,12 +14,20 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
 
+import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { DataViewBase, Filter, Query } from '@kbn/es-query';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { Direction, EntityType } from '../../../../common/search_strategy';
 import type { DocValueFields } from '../../../../common/search_strategy';
 import type { CoreStart } from '../../../../../../../src/core/public';
 import type { BrowserFields } from '../../../../common/search_strategy/index_fields';
-import { TGridCellAction, TimelineId, TimelineTabs } from '../../../../common/types/timeline';
+import {
+  BulkActionsProp,
+  CreateFieldComponentType,
+  TGridCellAction,
+  TimelineId,
+  TimelineTabs,
+} from '../../../../common/types/timeline';
 
 import type {
   CellValueElementProps,
@@ -29,13 +37,7 @@ import type {
   RowRenderer,
   AlertStatus,
 } from '../../../../common/types/timeline';
-import {
-  esQuery,
-  Filter,
-  IIndexPattern,
-  Query,
-  DataPublicPluginStart,
-} from '../../../../../../../src/plugins/data/public';
+import { esQuery, DataPublicPluginStart } from '../../../../../../../src/plugins/data/public';
 import { useDeepEqualSelector } from '../../../hooks/use_selector';
 import { defaultHeaders } from '../body/column_headers/default_headers';
 import { buildCombinedQuery, getCombinedFilterQuery, resolverIsShowing } from '../helpers';
@@ -46,7 +48,7 @@ import { SELECTOR_TIMELINE_GLOBAL_CONTAINER, UpdatedFlexGroup, UpdatedFlexItem }
 import { Sort } from '../body/sort';
 import { InspectButton, InspectButtonContainer } from '../../inspect';
 import { SummaryViewSelector, ViewSelection } from '../event_rendered_view/selector';
-import { TGridLoading, TGridEmpty } from '../shared';
+import { TGridLoading, TGridEmpty, TimelineContext } from '../shared';
 
 const AlertConsumers: typeof AlertConsumersTyped = AlertConsumersNonTyped;
 
@@ -95,7 +97,9 @@ const SECURITY_ALERTS_CONSUMERS = [AlertConsumers.SIEM];
 export interface TGridIntegratedProps {
   additionalFilters: React.ReactNode;
   browserFields: BrowserFields;
+  bulkActions?: BulkActionsProp;
   columns: ColumnHeaderOptions[];
+  createFieldComponent?: CreateFieldComponentType;
   data?: DataPublicPluginStart;
   dataProviders: DataProvider[];
   defaultCellActions?: TGridCellAction[];
@@ -113,7 +117,7 @@ export interface TGridIntegratedProps {
   height?: number;
   id: TimelineId;
   indexNames: string[];
-  indexPattern: IIndexPattern;
+  indexPattern: DataViewBase;
   isLive: boolean;
   isLoadingIndexPattern: boolean;
   itemsPerPage: number;
@@ -124,6 +128,7 @@ export interface TGridIntegratedProps {
   query: Query;
   renderCellValue: (props: CellValueElementProps) => React.ReactNode;
   rowRenderers: RowRenderer[];
+  runtimeMappings: MappingRuntimeFields;
   setQuery: (inspect: InspectResponse, loading: boolean, refetch: Refetch) => void;
   sort: Sort[];
   start: string;
@@ -135,6 +140,7 @@ export interface TGridIntegratedProps {
 const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
   additionalFilters,
   browserFields,
+  bulkActions = true,
   columns,
   data,
   dataProviders,
@@ -148,6 +154,7 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
   globalFullScreen,
   graphEventId,
   graphOverlay = null,
+  createFieldComponent,
   hasAlertsCrud,
   id,
   indexNames,
@@ -161,6 +168,7 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
   query,
   renderCellValue,
   rowRenderers,
+  runtimeMappings,
   setQuery,
   sort,
   start,
@@ -206,10 +214,10 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
     [isLoadingIndexPattern, combinedQueries, start, end]
   );
 
-  const fields = useMemo(() => [...columnsHeader.map((c) => c.id), ...(queryFields ?? [])], [
-    columnsHeader,
-    queryFields,
-  ]);
+  const fields = useMemo(
+    () => [...columnsHeader.map((c) => c.id), ...(queryFields ?? [])],
+    [columnsHeader, queryFields]
+  );
 
   const sortField = useMemo(
     () =>
@@ -221,25 +229,24 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
     [sort]
   );
 
-  const [
-    loading,
-    { events, loadPage, pageInfo, refetch, totalCount = 0, inspect },
-  ] = useTimelineEvents({
-    // We rely on entityType to determine Events vs Alerts
-    alertConsumers: SECURITY_ALERTS_CONSUMERS,
-    data,
-    docValueFields,
-    endDate: end,
-    entityType,
-    fields,
-    filterQuery: combinedQueries!.filterQuery,
-    id,
-    indexNames,
-    limit: itemsPerPage,
-    skip: !canQueryTimeline,
-    sort: sortField,
-    startDate: start,
-  });
+  const [loading, { events, loadPage, pageInfo, refetch, totalCount = 0, inspect }] =
+    useTimelineEvents({
+      // We rely on entityType to determine Events vs Alerts
+      alertConsumers: SECURITY_ALERTS_CONSUMERS,
+      data,
+      docValueFields,
+      endDate: end,
+      entityType,
+      fields,
+      filterQuery: combinedQueries?.filterQuery,
+      id,
+      indexNames,
+      limit: itemsPerPage,
+      runtimeMappings,
+      skip: !canQueryTimeline,
+      sort: sortField,
+      startDate: start,
+    });
 
   const filterQuery = useMemo(
     () =>
@@ -265,10 +272,10 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
 
   const hasAlerts = totalCountMinusDeleted > 0;
 
-  const nonDeletedEvents = useMemo(() => events.filter((e) => !deletedEventIds.includes(e._id)), [
-    deletedEventIds,
-    events,
-  ]);
+  const nonDeletedEvents = useMemo(
+    () => events.filter((e) => !deletedEventIds.includes(e._id)),
+    [deletedEventIds, events]
+  );
 
   useEffect(() => {
     setIsQueryLoading(loading);
@@ -286,6 +293,18 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
   useEffect(() => {
     setQuery(inspect, loading, refetch);
   }, [inspect, loading, refetch, setQuery]);
+  const timelineContext = useMemo(() => ({ timelineId: id }), [id]);
+
+  // Clear checkbox selection when new events are fetched
+  useEffect(() => {
+    dispatch(tGridActions.clearSelected({ id }));
+    dispatch(
+      tGridActions.setTGridSelectAll({
+        id,
+        selectAll: false,
+      })
+    );
+  }, [nonDeletedEvents, dispatch, id]);
 
   return (
     <InspectButtonContainer>
@@ -301,65 +320,69 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
         {graphOverlay}
 
         {canQueryTimeline && (
-          <EventsContainerLoading
-            data-timeline-id={id}
-            data-test-subj={`events-container-loading-${loading}`}
-          >
-            <UpdatedFlexGroup gutterSize="m" justifyContent="flexEnd" alignItems={alignItems}>
-              <UpdatedFlexItem grow={false} $show={!loading}>
-                <InspectButton title={justTitle} inspect={inspect} loading={loading} />
-              </UpdatedFlexItem>
-              <UpdatedFlexItem grow={false} $show={!loading}>
-                {!resolverIsShowing(graphEventId) && additionalFilters}
-              </UpdatedFlexItem>
-              {tGridEventRenderedViewEnabled &&
-                ['detections-page', 'detections-rules-details-page'].includes(id) && (
-                  <UpdatedFlexItem grow={false} $show={!loading}>
-                    <SummaryViewSelector viewSelected={tableView} onViewChange={setTableView} />
-                  </UpdatedFlexItem>
-                )}
-            </UpdatedFlexGroup>
-
-            {!graphEventId && graphOverlay == null && (
-              <>
-                {!hasAlerts && !loading && <TGridEmpty height="short" />}
-                {hasAlerts && (
-                  <FullWidthFlexGroup
-                    $visible={!graphEventId && graphOverlay == null}
-                    gutterSize="none"
-                  >
-                    <ScrollableFlexItem grow={1}>
-                      <StatefulBody
-                        hasAlertsCrud={hasAlertsCrud}
-                        activePage={pageInfo.activePage}
-                        browserFields={browserFields}
-                        filterQuery={filterQuery}
-                        data={nonDeletedEvents}
-                        defaultCellActions={defaultCellActions}
-                        id={id}
-                        isEventViewer={true}
-                        itemsPerPageOptions={itemsPerPageOptions}
-                        loadPage={loadPage}
-                        onRuleChange={onRuleChange}
-                        pageSize={itemsPerPage}
-                        renderCellValue={renderCellValue}
-                        rowRenderers={rowRenderers}
-                        tabType={TimelineTabs.query}
-                        tableView={tableView}
-                        totalItems={totalCountMinusDeleted}
-                        unit={unit}
-                        filterStatus={filterStatus}
-                        leadingControlColumns={leadingControlColumns}
-                        trailingControlColumns={trailingControlColumns}
-                        refetch={refetch}
-                        indexNames={indexNames}
-                      />
-                    </ScrollableFlexItem>
-                  </FullWidthFlexGroup>
-                )}
-              </>
-            )}
-          </EventsContainerLoading>
+          <TimelineContext.Provider value={timelineContext}>
+            <EventsContainerLoading
+              data-timeline-id={id}
+              data-test-subj={`events-container-loading-${loading}`}
+            >
+              <UpdatedFlexGroup gutterSize="m" justifyContent="flexEnd" alignItems={alignItems}>
+                <UpdatedFlexItem grow={false} $show={!loading}>
+                  <InspectButton title={justTitle} inspect={inspect} loading={loading} />
+                </UpdatedFlexItem>
+                <UpdatedFlexItem grow={false} $show={!loading}>
+                  {!resolverIsShowing(graphEventId) && additionalFilters}
+                </UpdatedFlexItem>
+                {tGridEventRenderedViewEnabled &&
+                  ['detections-page', 'detections-rules-details-page'].includes(id) && (
+                    <UpdatedFlexItem grow={false} $show={!loading}>
+                      <SummaryViewSelector viewSelected={tableView} onViewChange={setTableView} />
+                    </UpdatedFlexItem>
+                  )}
+              </UpdatedFlexGroup>
+              {!graphEventId && graphOverlay == null && (
+                <>
+                  {!hasAlerts && !loading && <TGridEmpty height="short" />}
+                  {hasAlerts && (
+                    <FullWidthFlexGroup
+                      $visible={!graphEventId && graphOverlay == null}
+                      gutterSize="none"
+                    >
+                      <ScrollableFlexItem grow={1}>
+                        <StatefulBody
+                          activePage={pageInfo.activePage}
+                          browserFields={browserFields}
+                          bulkActions={bulkActions}
+                          createFieldComponent={createFieldComponent}
+                          data={nonDeletedEvents}
+                          defaultCellActions={defaultCellActions}
+                          filterQuery={filterQuery}
+                          filters={filters}
+                          filterStatus={filterStatus}
+                          hasAlertsCrud={hasAlertsCrud}
+                          id={id}
+                          indexNames={indexNames}
+                          isEventViewer={true}
+                          itemsPerPageOptions={itemsPerPageOptions}
+                          leadingControlColumns={leadingControlColumns}
+                          loadPage={loadPage}
+                          onRuleChange={onRuleChange}
+                          pageSize={itemsPerPage}
+                          refetch={refetch}
+                          renderCellValue={renderCellValue}
+                          rowRenderers={rowRenderers}
+                          tableView={tableView}
+                          tabType={TimelineTabs.query}
+                          totalItems={totalCountMinusDeleted}
+                          trailingControlColumns={trailingControlColumns}
+                          unit={unit}
+                        />
+                      </ScrollableFlexItem>
+                    </FullWidthFlexGroup>
+                  )}
+                </>
+              )}
+            </EventsContainerLoading>
+          </TimelineContext.Provider>
         )}
       </StyledEuiPanel>
     </InspectButtonContainer>

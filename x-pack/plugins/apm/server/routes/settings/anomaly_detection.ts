@@ -7,22 +7,23 @@
 
 import * as t from 'io-ts';
 import Boom from '@hapi/boom';
+import { maxSuggestions } from '../../../../observability/common';
 import { isActivePlatinumLicense } from '../../../common/license_check';
 import { ML_ERRORS } from '../../../common/anomaly_detection';
-import { createApmServerRoute } from '../create_apm_server_route';
+import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { getAnomalyDetectionJobs } from '../../lib/anomaly_detection/get_anomaly_detection_jobs';
 import { createAnomalyDetectionJobs } from '../../lib/anomaly_detection/create_anomaly_detection_jobs';
 import { setupRequest } from '../../lib/helpers/setup_request';
 import { getAllEnvironments } from '../../lib/environments/get_all_environments';
 import { hasLegacyJobs } from '../../lib/anomaly_detection/has_legacy_jobs';
-import { getSearchAggregatedTransactions } from '../../lib/helpers/aggregated_transactions';
+import { getSearchAggregatedTransactions } from '../../lib/helpers/transactions';
 import { notifyFeatureUsage } from '../../feature';
 import { withApmSpan } from '../../utils/with_apm_span';
-import { createApmServerRouteRepository } from '../create_apm_server_route_repository';
+import { createApmServerRouteRepository } from '../apm_routes/create_apm_server_route_repository';
 
 // get ML anomaly detection jobs for each environment
 const anomalyDetectionJobsRoute = createApmServerRoute({
-  endpoint: 'GET /api/apm/settings/anomaly-detection/jobs',
+  endpoint: 'GET /internal/apm/settings/anomaly-detection/jobs',
   options: {
     tags: ['access:apm', 'access:ml:canGetJobs'],
   },
@@ -50,7 +51,7 @@ const anomalyDetectionJobsRoute = createApmServerRoute({
 
 // create new ML anomaly detection jobs for each given environment
 const createAnomalyDetectionJobsRoute = createApmServerRoute({
-  endpoint: 'POST /api/apm/settings/anomaly-detection/jobs',
+  endpoint: 'POST /internal/apm/settings/anomaly-detection/jobs',
   options: {
     tags: ['access:apm', 'access:apm_write', 'access:ml:canCreateJob'],
   },
@@ -82,7 +83,7 @@ const createAnomalyDetectionJobsRoute = createApmServerRoute({
 
 // get all available environments to create anomaly detection jobs for
 const anomalyDetectionEnvironmentsRoute = createApmServerRoute({
-  endpoint: 'GET /api/apm/settings/anomaly-detection/environments',
+  endpoint: 'GET /internal/apm/settings/anomaly-detection/environments',
   options: { tags: ['access:apm'] },
   handler: async (resources) => {
     const setup = await setupRequest(resources);
@@ -92,11 +93,14 @@ const anomalyDetectionEnvironmentsRoute = createApmServerRoute({
       config: setup.config,
       kuery: '',
     });
-
+    const size = await resources.context.core.uiSettings.client.get<number>(
+      maxSuggestions
+    );
     const environments = await getAllEnvironments({
-      setup,
-      searchAggregatedTransactions,
       includeMissing: true,
+      searchAggregatedTransactions,
+      setup,
+      size,
     });
 
     return { environments };

@@ -201,6 +201,8 @@ export class LensPlugin {
         plugins.fieldFormats.deserialize
       );
 
+      const visualizationMap = await this.editorFrameService!.loadVisualizations();
+
       return {
         attributeService: getLensAttributeService(coreStart, plugins),
         capabilities: coreStart.application.capabilities,
@@ -208,10 +210,12 @@ export class LensPlugin {
         timefilter: plugins.data.query.timefilter.timefilter,
         expressionRenderer: plugins.expressions.ReactExpressionRenderer,
         documentToExpression: this.editorFrameService!.documentToExpression,
+        visualizationMap,
         indexPatternService: plugins.data.indexPatterns,
         uiActions: plugins.uiActions,
         usageCollection,
         inspector: plugins.inspector,
+        spaces: plugins.spaces,
       };
     };
 
@@ -233,10 +237,10 @@ export class LensPlugin {
     const getPresentationUtilContext = () =>
       startServices().plugins.presentationUtil.ContextProvider;
 
-    const ensureDefaultIndexPattern = async () => {
+    const ensureDefaultDataView = async () => {
       // make sure a default index pattern exists
       // if not, the page will be redirected to management and visualize won't be rendered
-      await startServices().plugins.data.indexPatterns.ensureDefaultIndexPattern();
+      await startServices().plugins.data.indexPatterns.ensureDefaultDataView();
     };
 
     core.application.register({
@@ -261,7 +265,7 @@ export class LensPlugin {
         const frameStart = this.editorFrameService!.start(coreStart, deps);
 
         this.stopReportManager = stopReportManager;
-        await ensureDefaultIndexPattern();
+        await ensureDefaultDataView();
         return mountApp(core, params, {
           createEditorFrame: frameStart.createInstance,
           attributeService: getLensAttributeService(coreStart, deps),

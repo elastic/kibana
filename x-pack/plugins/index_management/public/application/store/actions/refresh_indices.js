@@ -13,19 +13,21 @@ import { clearRowStatus, reloadIndices } from '../actions';
 import { notificationService } from '../../services/notification';
 
 export const refreshIndicesStart = createAction('INDEX_MANAGEMENT_REFRESH_INDICES_START');
-export const refreshIndices = ({ indexNames }) => async (dispatch) => {
-  dispatch(refreshIndicesStart({ indexNames }));
-  try {
-    await request(indexNames);
-  } catch (error) {
-    notificationService.showDangerToast(error.message);
-    return dispatch(clearRowStatus({ indexNames }));
-  }
-  dispatch(reloadIndices(indexNames));
-  notificationService.showSuccessToast(
-    i18n.translate('xpack.idxMgmt.refreshIndicesAction.successfullyRefreshedIndicesMessage', {
-      defaultMessage: 'Successfully refreshed: [{indexNames}]',
-      values: { indexNames: indexNames.join(', ') },
-    })
-  );
-};
+export const refreshIndices =
+  ({ indexNames }) =>
+  async (dispatch) => {
+    dispatch(refreshIndicesStart({ indexNames }));
+    try {
+      await request(indexNames);
+    } catch (error) {
+      notificationService.showDangerToast(error.message);
+      return dispatch(clearRowStatus({ indexNames }));
+    }
+    dispatch(reloadIndices(indexNames));
+    notificationService.showSuccessToast(
+      i18n.translate('xpack.idxMgmt.refreshIndicesAction.successfullyRefreshedIndicesMessage', {
+        defaultMessage: 'Successfully refreshed: [{indexNames}]',
+        values: { indexNames: indexNames.join(', ') },
+      })
+    );
+  };

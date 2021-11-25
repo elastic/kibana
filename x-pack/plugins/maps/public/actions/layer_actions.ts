@@ -41,7 +41,7 @@ import {
   UPDATE_SOURCE_PROP,
 } from './map_action_constants';
 import { clearDataRequests, syncDataForLayerId, updateStyleMeta } from './data_request_actions';
-import { cleanTooltipStateForLayer } from './tooltip_actions';
+import { updateTooltipStateForLayer } from './tooltip_actions';
 import {
   Attribution,
   JoinDescriptor,
@@ -51,6 +51,7 @@ import {
 } from '../../common/descriptor_types';
 import { ILayer } from '../classes/layers/layer';
 import { IVectorLayer } from '../classes/layers/vector_layer';
+import { OnSourceChangeArgs } from '../classes/sources/source';
 import { DRAW_MODE, LAYER_STYLE_TYPE, LAYER_TYPE } from '../../common/constants';
 import { IVectorStyle } from '../classes/styles/vector/vector_style';
 import { notifyLicensedFeatureUsage } from '../licensed_features';
@@ -80,7 +81,7 @@ export function rollbackToTrackedLayerStateForSelectedLayer() {
     // syncDataForLayer may not trigger endDataLoad if no re-fetch is required
     dispatch(updateStyleMeta(layerId));
 
-    dispatch(syncDataForLayerId(layerId));
+    dispatch(syncDataForLayerId(layerId, false));
   };
 }
 
@@ -149,7 +150,7 @@ export function addLayer(layerDescriptor: LayerDescriptor) {
       type: ADD_LAYER,
       layer: layerDescriptor,
     });
-    dispatch(syncDataForLayerId(layerDescriptor.id));
+    dispatch(syncDataForLayerId(layerDescriptor.id, false));
 
     const layer = createLayerInstance(layerDescriptor);
     const features = await layer.getLicensedFeatures();
@@ -217,7 +218,7 @@ export function setLayerVisibility(layerId: string, makeVisible: boolean) {
     }
 
     if (!makeVisible) {
-      dispatch(cleanTooltipStateForLayer(layerId));
+      dispatch(updateTooltipStateForLayer(layer));
     }
 
     dispatch({
@@ -226,7 +227,7 @@ export function setLayerVisibility(layerId: string, makeVisible: boolean) {
       visibility: makeVisible,
     });
     if (makeVisible) {
-      dispatch(syncDataForLayerId(layerId));
+      dispatch(syncDataForLayerId(layerId, false));
     }
   };
 }
@@ -323,18 +324,17 @@ function updateMetricsProp(layerId: string, value: unknown) {
   ) => {
     const layer = getLayerById(layerId, getState());
     const previousFields = await (layer as IVectorLayer).getFields();
-    await dispatch({
+    dispatch({
       type: UPDATE_SOURCE_PROP,
       layerId,
       propName: 'metrics',
       value,
     });
     await dispatch(updateStyleProperties(layerId, previousFields as IESAggField[]));
-    dispatch(syncDataForLayerId(layerId));
   };
 }
 
-export function updateSourceProp(
+function updateSourcePropWithoutSync(
   layerId: string,
   propName: string,
   value: unknown,
@@ -356,7 +356,29 @@ export function updateSourceProp(
     if (newLayerType) {
       dispatch(updateLayerType(layerId, newLayerType));
     }
-    dispatch(syncDataForLayerId(layerId));
+  };
+}
+
+export function updateSourceProp(
+  layerId: string,
+  propName: string,
+  value: unknown,
+  newLayerType?: LAYER_TYPE
+) {
+  return async (dispatch: ThunkDispatch<MapStoreState, void, AnyAction>) => {
+    await dispatch(updateSourcePropWithoutSync(layerId, propName, value, newLayerType));
+    dispatch(syncDataForLayerId(layerId, false));
+  };
+}
+
+export function updateSourceProps(layerId: string, sourcePropChanges: OnSourceChangeArgs[]) {
+  return async (dispatch: ThunkDispatch<MapStoreState, void, AnyAction>) => {
+    // Using for loop to ensure update completes before starting next update
+    for (let i = 0; i < sourcePropChanges.length; i++) {
+      const { propName, value, newLayerType } = sourcePropChanges[i];
+      await dispatch(updateSourcePropWithoutSync(layerId, propName, value, newLayerType));
+    }
+    dispatch(syncDataForLayerId(layerId, false));
   };
 }
 
@@ -459,7 +481,7 @@ export function setLayerQuery(id: string, query: Query) {
       newValue: query,
     });
 
-    dispatch(syncDataForLayerId(id));
+    dispatch(syncDataForLayerId(id, false));
   };
 }
 
@@ -504,7 +526,7 @@ function removeLayerFromLayerList(layerId: string) {
     layerGettingRemoved.getInFlightRequestTokens().forEach((requestToken) => {
       dispatch(cancelRequest(requestToken));
     });
-    dispatch(cleanTooltipStateForLayer(layerId));
+    dispatch(updateTooltipStateForLayer(layerGettingRemoved));
     layerGettingRemoved.destroy();
     dispatch({
       type: REMOVE_LAYER,
@@ -534,14 +556,9 @@ function updateStyleProperties(layerId: string, previousFields: IField[]) {
     }
 
     const nextFields = await (targetLayer as IVectorLayer).getFields(); // take into account all fields, since labels can be driven by any field (source or join)
-    const {
-      hasChanges,
-      nextStyleDescriptor,
-    } = await (style as IVectorStyle).getDescriptorWithUpdatedStyleProps(
-      nextFields,
-      previousFields,
-      getMapColors(getState())
-    );
+    const { hasChanges, nextStyleDescriptor } = await (
+      style as IVectorStyle
+    ).getDescriptorWithUpdatedStyleProps(nextFields, previousFields, getMapColors(getState()));
     if (hasChanges && nextStyleDescriptor) {
       dispatch(updateLayerStyle(layerId, nextStyleDescriptor));
     }
@@ -563,7 +580,7 @@ export function updateLayerStyle(layerId: string, styleDescriptor: StyleDescript
     dispatch(updateStyleMeta(layerId));
 
     // Style update may require re-fetch, for example ES search may need to retrieve field used for dynamic styling
-    dispatch(syncDataForLayerId(layerId));
+    dispatch(syncDataForLayerId(layerId, false));
   };
 }
 
@@ -589,7 +606,7 @@ export function setJoinsForLayer(layer: ILayer, joins: JoinDescriptor[]) {
       joins,
     });
     await dispatch(updateStyleProperties(layer.getId(), previousFields));
-    dispatch(syncDataForLayerId(layer.getId()));
+    dispatch(syncDataForLayerId(layer.getId(), false));
   };
 }
 

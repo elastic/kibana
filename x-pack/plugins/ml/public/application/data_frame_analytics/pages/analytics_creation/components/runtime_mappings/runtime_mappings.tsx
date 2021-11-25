@@ -75,22 +75,15 @@ interface Props {
 }
 
 export const RuntimeMappings: FC<Props> = ({ actions, state }) => {
-  const [isRuntimeMappingsEditorEnabled, setIsRuntimeMappingsEditorEnabled] = useState<boolean>(
-    false
-  );
-  const [
-    isRuntimeMappingsEditorSwitchModalVisible,
-    setRuntimeMappingsEditorSwitchModalVisible,
-  ] = useState<boolean>(false);
+  const [isRuntimeMappingsEditorEnabled, setIsRuntimeMappingsEditorEnabled] =
+    useState<boolean>(false);
+  const [isRuntimeMappingsEditorSwitchModalVisible, setRuntimeMappingsEditorSwitchModalVisible] =
+    useState<boolean>(false);
 
-  const [
-    isRuntimeMappingsEditorApplyButtonEnabled,
-    setIsRuntimeMappingsEditorApplyButtonEnabled,
-  ] = useState<boolean>(false);
-  const [
-    advancedEditorRuntimeMappingsLastApplied,
-    setAdvancedEditorRuntimeMappingsLastApplied,
-  ] = useState<string>();
+  const [isRuntimeMappingsEditorApplyButtonEnabled, setIsRuntimeMappingsEditorApplyButtonEnabled] =
+    useState<boolean>(false);
+  const [advancedEditorRuntimeMappingsLastApplied, setAdvancedEditorRuntimeMappingsLastApplied] =
+    useState<string>();
 
   const { setFormState } = actions;
   const { jobType, previousRuntimeMapping, runtimeMappings } = state.form;
@@ -102,7 +95,7 @@ export const RuntimeMappings: FC<Props> = ({ actions, state }) => {
   } = useXJsonMode(runtimeMappings || '');
 
   const mlContext = useMlContext();
-  const { currentIndexPattern } = mlContext;
+  const { currentDataView } = mlContext;
 
   const applyChanges = () => {
     const removeRuntimeMappings = advancedRuntimeMappingsConfig === '';
@@ -140,10 +133,7 @@ export const RuntimeMappings: FC<Props> = ({ actions, state }) => {
   };
 
   useEffect(function getInitialRuntimeMappings() {
-    const combinedRuntimeMappings = getCombinedRuntimeMappings(
-      currentIndexPattern,
-      runtimeMappings
-    );
+    const combinedRuntimeMappings = getCombinedRuntimeMappings(currentDataView, runtimeMappings);
 
     const prettySourceConfig = JSON.stringify(combinedRuntimeMappings, null, 2);
 

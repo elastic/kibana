@@ -42,6 +42,7 @@ import {
   LazySyntheticsPolicyEditExtension,
 } from '../components/fleet_package';
 import { LazySyntheticsCustomAssetsExtension } from '../components/fleet_package/lazy_synthetics_custom_assets_extension';
+import { Start as InspectorPluginStart } from '../../../../../src/plugins/inspector/public';
 
 export interface ClientPluginsSetup {
   data: DataPublicPluginSetup;
@@ -56,6 +57,7 @@ export interface ClientPluginsStart {
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   fleet?: FleetStart;
   observability: ObservabilityPublicStart;
+  inspector: InspectorPluginStart;
 }
 
 export interface UptimePluginServices extends Partial<CoreStart> {
@@ -69,7 +71,8 @@ export type ClientSetup = void;
 export type ClientStart = void;
 
 export class UptimePlugin
-  implements Plugin<ClientSetup, ClientStart, ClientPluginsSetup, ClientPluginsStart> {
+  implements Plugin<ClientSetup, ClientStart, ClientPluginsSetup, ClientPluginsStart>
+{
   constructor(_context: PluginInitializerContext) {}
 
   public setup(core: CoreSetup<ClientPluginsStart, unknown>, plugins: ClientPluginsSetup): void {
@@ -218,6 +221,7 @@ export class UptimePlugin
       registerExtension({
         package: 'synthetics',
         view: 'package-policy-edit',
+        useLatestPackageVersion: true,
         Component: LazySyntheticsPolicyEditExtension,
       });
 

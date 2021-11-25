@@ -570,7 +570,7 @@
             "children": [
               {
                 "parentPluginId": "core",
-                "id": "def-public.element",
+                "id": "def-public.ChromeNavControl.mount.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "element",
@@ -1850,6 +1850,25 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.ChromeStart.hasHeaderBanner$",
+            "type": "Function",
+            "tags": [],
+            "label": "hasHeaderBanner$",
+            "description": [
+              "\nGet an observable of the current header banner presence state."
+            ],
+            "signature": [
+              "() => ",
+              "Observable",
+              "<boolean>"
+            ],
+            "path": "src/core/public/chrome/types.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -1887,7 +1906,7 @@
             "children": [
               {
                 "parentPluginId": "core",
-                "id": "def-public.element",
+                "id": "def-public.ChromeUserBanner.content.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "element",
@@ -1915,7 +1934,7 @@
         "description": [],
         "signature": [
           "CommonProps",
-          " & { text: React.ReactNode; href?: string | undefined; onClick?: ((event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => void) | undefined; truncate?: boolean | undefined; 'aria-current'?: boolean | \"date\" | \"location\" | \"page\" | \"time\" | \"true\" | \"false\" | \"step\" | undefined; }"
+          " & { text: React.ReactNode; href?: string | undefined; onClick?: ((event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => void) | undefined; truncate?: boolean | undefined; 'aria-current'?: boolean | \"date\" | \"page\" | \"time\" | \"true\" | \"false\" | \"step\" | \"location\" | undefined; }"
         ],
         "path": "src/core/public/chrome/types.ts",
         "deprecated": false,

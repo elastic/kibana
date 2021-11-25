@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IndexPattern } from '../../../../../../../../src/plugins/data/common/index_patterns/index_patterns';
+import { IndexPattern } from '../../../../../../../../src/plugins/data/common';
 import { getField } from '../../../../../common/elasticsearch_util';
 
 export interface ScriptField {

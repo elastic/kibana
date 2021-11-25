@@ -15,13 +15,14 @@ import { SubsetTimelineModel, TimelineModel } from './model';
 const { from: start, to: end } = normalizeTimeRange({ from: '', to: '' }, false);
 
 export const timelineDefaults: SubsetTimelineModel &
-  Pick<TimelineModel, 'filters' | 'eqlOptions'> = {
+  Pick<TimelineModel, 'filters' | 'eqlOptions' | 'resolveTimelineConfig'> = {
   activeTab: TimelineTabs.query,
   prevActiveTab: TimelineTabs.query,
   columns: defaultHeaders,
   documentType: '',
   defaultColumns: defaultHeaders,
   dataProviders: [],
+  dataViewId: '',
   dateRange: { start, end },
   deletedEventIds: [],
   description: '',
@@ -52,6 +53,7 @@ export const timelineDefaults: SubsetTimelineModel &
     filterQuery: null,
   },
   loadingEventIds: [],
+  resolveTimelineConfig: undefined,
   queryFields: [],
   title: '',
   timelineType: TimelineType.default,

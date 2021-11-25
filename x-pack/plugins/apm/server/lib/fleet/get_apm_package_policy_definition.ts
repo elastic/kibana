@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { POLICY_ELASTIC_AGENT_ON_CLOUD } from '../../../common/fleet';
+import {
+  POLICY_ELASTIC_AGENT_ON_CLOUD,
+  SUPPORTED_APM_PACKAGE_VERSION,
+} from '../../../common/fleet';
 import { APMPluginSetupDependencies } from '../../types';
 import { APM_PACKAGE_NAME } from './get_cloud_apm_package_policy';
 
@@ -36,13 +39,13 @@ export function getApmPackagePolicyDefinition(
     ],
     package: {
       name: APM_PACKAGE_NAME,
-      version: '0.4.0',
+      version: SUPPORTED_APM_PACKAGE_VERSION,
       title: 'Elastic APM',
     },
   };
 }
 
-function preprocessLegacyFields({
+export function preprocessLegacyFields({
   apmServerSchema,
 }: {
   apmServerSchema: Record<string, any>;
@@ -61,6 +64,10 @@ function preprocessLegacyFields({
       key: 'apm-server.auth.anonymous.allow_service',
       legacyKey: 'apm-server.rum.allow_service_names',
     },
+    {
+      key: 'apm-server.auth.secret_token',
+      legacyKey: 'apm-server.secret_token',
+    },
   ].forEach(({ key, legacyKey }) => {
     if (!copyOfApmServerSchema[key]) {
       copyOfApmServerSchema[key] = copyOfApmServerSchema[legacyKey];
@@ -72,20 +79,18 @@ function preprocessLegacyFields({
 
 function getApmPackageInputVars(options: GetApmPackagePolicyDefinitionOptions) {
   const { apmServerSchema } = options;
-  const apmServerConfigs = Object.entries(
-    apmConfigMapping
-  ).map(([key, { name, type, getValue }]) => ({ key, name, type, getValue }));
+  const apmServerConfigs = Object.entries(apmConfigMapping).map(
+    ([key, { name, type, getValue }]) => ({ key, name, type, getValue })
+  );
 
-  const inputVars: Record<
-    string,
-    { type: string; value: any }
-  > = apmServerConfigs.reduce((acc, { key, name, type, getValue }) => {
-    const value = (getValue ? getValue(options) : apmServerSchema[key]) ?? ''; // defaults to an empty string to be edited in Fleet UI
-    return {
-      ...acc,
-      [name]: { type, value },
-    };
-  }, {});
+  const inputVars: Record<string, { type: string; value: any }> =
+    apmServerConfigs.reduce((acc, { key, name, type, getValue }) => {
+      const value = (getValue ? getValue(options) : apmServerSchema[key]) ?? ''; // defaults to an empty string to be edited in Fleet UI
+      return {
+        ...acc,
+        [name]: { type, value },
+      };
+    }, {});
   return inputVars;
 }
 

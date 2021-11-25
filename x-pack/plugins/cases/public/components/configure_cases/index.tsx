@@ -95,9 +95,10 @@ const ConfigureCasesComponent: React.FC<Omit<ConfigureCasesProps, 'owner'>> = ({
     setEditFlyoutVisibility(true);
   }, []);
 
-  const onCloseAddFlyout = useCallback(() => setAddFlyoutVisibility(false), [
-    setAddFlyoutVisibility,
-  ]);
+  const onCloseAddFlyout = useCallback(
+    () => setAddFlyoutVisibility(false),
+    [setAddFlyoutVisibility]
+  );
 
   const onCloseEditFlyout = useCallback(() => setEditFlyoutVisibility(false), []);
 
@@ -240,6 +241,8 @@ export const ConfigureCases: React.FC<ConfigureCasesProps> = React.memo((props) 
     </OwnerProvider>
   );
 });
+
+ConfigureCases.displayName = 'ConfigureCases';
 
 // eslint-disable-next-line import/no-default-export
 export default ConfigureCases;

@@ -23,6 +23,5 @@ export const getNetworkEvents = createAction<FetchNetworkEventsParams>('GET_NETW
 export const getNetworkEventsSuccess = createAction<
   Pick<FetchNetworkEventsParams, 'checkGroup' | 'stepIndex'> & SyntheticsNetworkEventsApiResponse
 >('GET_NETWORK_EVENTS_SUCCESS');
-export const getNetworkEventsFail = createAction<FetchNetworkEventsFailPayload>(
-  'GET_NETWORK_EVENTS_FAIL'
-);
+export const getNetworkEventsFail =
+  createAction<FetchNetworkEventsFailPayload>('GET_NETWORK_EVENTS_FAIL');

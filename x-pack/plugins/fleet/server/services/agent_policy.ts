@@ -6,7 +6,6 @@
  */
 
 import { uniq, omit } from 'lodash';
-import { safeLoad } from 'js-yaml';
 import uuid from 'uuid/v4';
 import type {
   ElasticsearchClient,
@@ -14,12 +13,14 @@ import type {
   SavedObjectsBulkUpdateResponse,
 } from 'src/core/server';
 
+import { safeDump } from 'js-yaml';
+
 import { SavedObjectsErrorHelpers } from '../../../../../src/core/server';
 
 import type { AuthenticatedUser } from '../../../security/server';
 import {
   AGENT_POLICY_SAVED_OBJECT_TYPE,
-  AGENT_SAVED_OBJECT_TYPE,
+  AGENTS_PREFIX,
   PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
 } from '../constants';
 import type {
@@ -32,51 +33,31 @@ import type {
   ListWithKuery,
   NewPackagePolicy,
 } from '../types';
-import {
-  agentPolicyStatuses,
-  storedPackagePoliciesToAgentInputs,
-  dataTypes,
-  packageToPackagePolicy,
-  AGENT_POLICY_INDEX,
-} from '../../common';
+import { agentPolicyStatuses, packageToPackagePolicy, AGENT_POLICY_INDEX } from '../../common';
 import type {
   DeleteAgentPolicyResponse,
-  Settings,
   FleetServerPolicy,
   Installation,
   Output,
   DeletePackagePoliciesResponse,
 } from '../../common';
 import { AgentPolicyNameExistsError, HostedAgentPolicyRestrictionRelatedError } from '../errors';
-import {
-  storedPackagePoliciesToAgentPermissions,
-  DEFAULT_PERMISSIONS,
-} from '../services/package_policies_to_agent_permissions';
+
+import type { FullAgentConfigMap } from '../../common/types/models/agent_cm';
+
+import { fullAgentConfigMapToYaml } from '../../common/services/agent_cm_to_yaml';
+
+import { elasticAgentManifest } from './elastic_agent_manifest';
 
 import { getPackageInfo } from './epm/packages';
 import { getAgentsByKuery } from './agents';
 import { packagePolicyService } from './package_policy';
 import { outputService } from './output';
 import { agentPolicyUpdateEventHandler } from './agent_policy_update';
-import { getSettings } from './settings';
 import { normalizeKuery, escapeSearchQueryPhrase } from './saved_object';
 import { appContextService } from './app_context';
-
+import { getFullAgentPolicy } from './agent_policies';
 const SAVED_OBJECT_TYPE = AGENT_POLICY_SAVED_OBJECT_TYPE;
-
-const MONITORING_DATASETS = [
-  'elastic_agent',
-  'elastic_agent.elastic_agent',
-  'elastic_agent.apm_server',
-  'elastic_agent.filebeat',
-  'elastic_agent.fleet_server',
-  'elastic_agent.metricbeat',
-  'elastic_agent.osquerybeat',
-  'elastic_agent.packetbeat',
-  'elastic_agent.endpoint_security',
-  'elastic_agent.auditbeat',
-  'elastic_agent.heartbeat',
-];
 
 class AgentPolicyService {
   private triggerAgentPolicyUpdatedEvent = async (
@@ -429,12 +410,16 @@ class AgentPolicyService {
       options
     );
 
-    // Copy all package policies
+    // Copy all package policies and append (copy) to their names
     if (baseAgentPolicy.package_policies.length) {
       const newPackagePolicies = (baseAgentPolicy.package_policies as PackagePolicy[]).map(
         (packagePolicy: PackagePolicy) => {
           const { id: packagePolicyId, version, ...newPackagePolicy } = packagePolicy;
-          return newPackagePolicy;
+          const updatedPackagePolicy = {
+            ...newPackagePolicy,
+            name: `${packagePolicy.name} (copy)`,
+          };
+          return updatedPackagePolicy;
         }
       );
       await packagePolicyService.bulkCreate(
@@ -455,7 +440,7 @@ class AgentPolicyService {
       throw new Error('Copied agent policy not found');
     }
 
-    await this.createFleetPolicyChangeAction(soClient, newAgentPolicy.id);
+    await this.createFleetServerPolicy(soClient, newAgentPolicy.id);
 
     return updatedAgentPolicy;
   }
@@ -467,6 +452,38 @@ class AgentPolicyService {
     options?: { user?: AuthenticatedUser }
   ): Promise<AgentPolicy> {
     const res = await this._update(soClient, esClient, id, {}, options?.user);
+
+    return res;
+  }
+
+  public async bumpAllAgentPoliciesForOutput(
+    soClient: SavedObjectsClientContract,
+    esClient: ElasticsearchClient,
+    outputId: string,
+    options?: { user?: AuthenticatedUser }
+  ): Promise<SavedObjectsBulkUpdateResponse<AgentPolicy>> {
+    const currentPolicies = await soClient.find<AgentPolicySOAttributes>({
+      type: SAVED_OBJECT_TYPE,
+      fields: ['revision', 'data_output_id', 'monitoring_output_id'],
+      searchFields: ['data_output_id', 'monitoring_output_id'],
+      search: escapeSearchQueryPhrase(outputId),
+    });
+    const bumpedPolicies = currentPolicies.saved_objects.map((policy) => {
+      policy.attributes = {
+        ...policy.attributes,
+        revision: policy.attributes.revision + 1,
+        updated_at: new Date().toISOString(),
+        updated_by: options?.user ? options.user.username : 'system',
+      };
+      return policy;
+    });
+    const res = await soClient.bulkUpdate<AgentPolicySOAttributes>(bumpedPolicies);
+
+    await Promise.all(
+      currentPolicies.saved_objects.map((policy) =>
+        this.triggerAgentPolicyUpdatedEvent(soClient, esClient, 'updated', policy.id)
+      )
+    );
 
     return res;
   }
@@ -609,7 +626,7 @@ class AgentPolicyService {
       showInactive: false,
       perPage: 0,
       page: 1,
-      kuery: `${AGENT_SAVED_OBJECT_TYPE}.policy_id:${id}`,
+      kuery: `${AGENTS_PREFIX}.policy_id:${id}`,
     });
 
     if (total > 0) {
@@ -617,14 +634,15 @@ class AgentPolicyService {
     }
 
     if (agentPolicy.package_policies && agentPolicy.package_policies.length) {
-      const deletedPackagePolicies: DeletePackagePoliciesResponse = await packagePolicyService.delete(
-        soClient,
-        esClient,
-        agentPolicy.package_policies as string[],
-        {
-          skipUnassignFromAgentPolicies: true,
-        }
-      );
+      const deletedPackagePolicies: DeletePackagePoliciesResponse =
+        await packagePolicyService.delete(
+          soClient,
+          esClient,
+          agentPolicy.package_policies as string[],
+          {
+            skipUnassignFromAgentPolicies: true,
+          }
+        );
       try {
         await packagePolicyService.runDeleteExternalCallbacks(deletedPackagePolicies);
       } catch (error) {
@@ -648,25 +666,18 @@ class AgentPolicyService {
     };
   }
 
-  public async createFleetPolicyChangeAction(
+  public async createFleetServerPolicy(
     soClient: SavedObjectsClientContract,
     agentPolicyId: string
   ) {
+    // Use internal ES client so we have permissions to write to .fleet* indices
     const esClient = appContextService.getInternalUserESClient();
-    const defaultOutputId = await outputService.getDefaultOutputId(soClient);
+    const defaultOutputId = await outputService.getDefaultDataOutputId(soClient);
 
     if (!defaultOutputId) {
       return;
     }
 
-    await this.createFleetPolicyChangeFleetServer(soClient, esClient, agentPolicyId);
-  }
-
-  public async createFleetPolicyChangeFleetServer(
-    soClient: SavedObjectsClientContract,
-    esClient: ElasticsearchClient,
-    agentPolicyId: string
-  ) {
     const policy = await agentPolicyService.get(soClient, agentPolicyId);
     const fullPolicy = await agentPolicyService.getFullAgentPolicy(soClient, agentPolicyId);
     if (!policy || !fullPolicy || !fullPolicy.revision) {
@@ -677,7 +688,7 @@ class AgentPolicyService {
       '@timestamp': new Date().toISOString(),
       revision_idx: fullPolicy.revision,
       coordinator_idx: 0,
-      data: (fullPolicy as unknown) as FleetServerPolicy['data'],
+      data: fullPolicy as unknown as FleetServerPolicy['data'],
       policy_id: fullPolicy.id,
       default_fleet_server: policy.is_default_fleet_server === true,
     };
@@ -717,144 +728,46 @@ class AgentPolicyService {
     return res.body.hits.hits[0]._source;
   }
 
+  public async getFullAgentConfigMap(
+    soClient: SavedObjectsClientContract,
+    id: string,
+    options?: { standalone: boolean }
+  ): Promise<string | null> {
+    const fullAgentPolicy = await getFullAgentPolicy(soClient, id, options);
+    if (fullAgentPolicy) {
+      const fullAgentConfigMap: FullAgentConfigMap = {
+        apiVersion: 'v1',
+        kind: 'ConfigMap',
+        metadata: {
+          name: 'agent-node-datastreams',
+          namespace: 'kube-system',
+          labels: {
+            'k8s-app': 'elastic-agent',
+          },
+        },
+        data: {
+          'agent.yml': fullAgentPolicy,
+        },
+      };
+
+      const configMapYaml = fullAgentConfigMapToYaml(fullAgentConfigMap, safeDump);
+      const updateManifestVersion = elasticAgentManifest.replace(
+        'VERSION',
+        appContextService.getKibanaVersion()
+      );
+      const fixedAgentYML = configMapYaml.replace('agent.yml:', 'agent.yml: |-');
+      return [fixedAgentYML, updateManifestVersion].join('\n');
+    } else {
+      return '';
+    }
+  }
+
   public async getFullAgentPolicy(
     soClient: SavedObjectsClientContract,
     id: string,
     options?: { standalone: boolean }
   ): Promise<FullAgentPolicy | null> {
-    let agentPolicy;
-    const standalone = options?.standalone;
-
-    try {
-      agentPolicy = await this.get(soClient, id);
-    } catch (err) {
-      if (!err.isBoom || err.output.statusCode !== 404) {
-        throw err;
-      }
-    }
-
-    if (!agentPolicy) {
-      return null;
-    }
-
-    const defaultOutputId = await outputService.getDefaultOutputId(soClient);
-    if (!defaultOutputId) {
-      throw new Error('Default output is not setup');
-    }
-    const defaultOutput = await outputService.get(soClient, defaultOutputId);
-
-    const fullAgentPolicy: FullAgentPolicy = {
-      id: agentPolicy.id,
-      outputs: {
-        // TEMPORARY as we only support a default output
-        ...[defaultOutput].reduce<FullAgentPolicy['outputs']>(
-          // eslint-disable-next-line @typescript-eslint/naming-convention
-          (outputs, { config_yaml, name, type, hosts, ca_sha256, api_key }) => {
-            const configJs = config_yaml ? safeLoad(config_yaml) : {};
-            outputs[name] = {
-              type,
-              hosts,
-              ca_sha256,
-              api_key,
-              ...configJs,
-            };
-
-            if (options?.standalone) {
-              delete outputs[name].api_key;
-              outputs[name].username = 'ES_USERNAME';
-              outputs[name].password = 'ES_PASSWORD';
-            }
-
-            return outputs;
-          },
-          {}
-        ),
-      },
-      inputs: storedPackagePoliciesToAgentInputs(agentPolicy.package_policies as PackagePolicy[]),
-      revision: agentPolicy.revision,
-      ...(agentPolicy.monitoring_enabled && agentPolicy.monitoring_enabled.length > 0
-        ? {
-            agent: {
-              monitoring: {
-                namespace: agentPolicy.namespace,
-                use_output: defaultOutput.name,
-                enabled: true,
-                logs: agentPolicy.monitoring_enabled.includes(dataTypes.Logs),
-                metrics: agentPolicy.monitoring_enabled.includes(dataTypes.Metrics),
-              },
-            },
-          }
-        : {
-            agent: {
-              monitoring: { enabled: false, logs: false, metrics: false },
-            },
-          }),
-    };
-
-    const permissions = (await storedPackagePoliciesToAgentPermissions(
-      soClient,
-      agentPolicy.package_policies
-    )) || { _fallback: DEFAULT_PERMISSIONS };
-
-    permissions._elastic_agent_checks = {
-      cluster: DEFAULT_PERMISSIONS.cluster,
-    };
-
-    // TODO: fetch this from the elastic agent package
-    const monitoringOutput = fullAgentPolicy.agent?.monitoring.use_output;
-    const monitoringNamespace = fullAgentPolicy.agent?.monitoring.namespace;
-    if (
-      fullAgentPolicy.agent?.monitoring.enabled &&
-      monitoringNamespace &&
-      monitoringOutput &&
-      fullAgentPolicy.outputs[monitoringOutput]?.type === 'elasticsearch'
-    ) {
-      let names: string[] = [];
-      if (fullAgentPolicy.agent.monitoring.logs) {
-        names = names.concat(
-          MONITORING_DATASETS.map((dataset) => `logs-${dataset}-${monitoringNamespace}`)
-        );
-      }
-      if (fullAgentPolicy.agent.monitoring.metrics) {
-        names = names.concat(
-          MONITORING_DATASETS.map((dataset) => `metrics-${dataset}-${monitoringNamespace}`)
-        );
-      }
-
-      permissions._elastic_agent_checks.indices = [
-        {
-          names,
-          privileges: ['auto_configure', 'create_doc'],
-        },
-      ];
-    }
-
-    // Only add permissions if output.type is "elasticsearch"
-    fullAgentPolicy.output_permissions = Object.keys(fullAgentPolicy.outputs).reduce<
-      NonNullable<FullAgentPolicy['output_permissions']>
-    >((outputPermissions, outputName) => {
-      const output = fullAgentPolicy.outputs[outputName];
-      if (output && output.type === 'elasticsearch') {
-        outputPermissions[outputName] = permissions;
-      }
-      return outputPermissions;
-    }, {});
-
-    // only add settings if not in standalone
-    if (!standalone) {
-      let settings: Settings;
-      try {
-        settings = await getSettings(soClient);
-      } catch (error) {
-        throw new Error('Default settings is not setup');
-      }
-      if (settings.fleet_server_hosts && settings.fleet_server_hosts.length) {
-        fullAgentPolicy.fleet = {
-          hosts: settings.fleet_server_hosts,
-        };
-      }
-    }
-    return fullAgentPolicy;
+    return getFullAgentPolicy(soClient, id, options);
   }
 }
 

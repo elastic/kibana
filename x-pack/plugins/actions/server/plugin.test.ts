@@ -34,7 +34,6 @@ describe('Actions Plugin', () => {
 
     beforeEach(() => {
       context = coreMock.createPluginInitializerContext<ActionsConfig>({
-        enabled: true,
         enabledActionTypes: ['*'],
         allowedHosts: ['*'],
         preconfiguredAlertHistoryEsIndex: false,
@@ -88,8 +87,8 @@ describe('Actions Plugin', () => {
         ];
         expect(handler[0]).toEqual('actions');
 
-        const actionsContextHandler = ((await handler[1](
-          ({
+        const actionsContextHandler = (await handler[1](
+          {
             core: {
               savedObjects: {
                 client: {},
@@ -98,10 +97,10 @@ describe('Actions Plugin', () => {
                 client: jest.fn(),
               },
             },
-          } as unknown) as RequestHandlerContext,
+          } as unknown as RequestHandlerContext,
           httpServerMock.createKibanaRequest(),
           httpServerMock.createResponseFactory()
-        )) as unknown) as ActionsApiRequestHandlerContext;
+        )) as unknown as ActionsApiRequestHandlerContext;
         actionsContextHandler!.getActionsClient();
       });
 
@@ -115,17 +114,17 @@ describe('Actions Plugin', () => {
         ];
         expect(handler[0]).toEqual('actions');
 
-        const actionsContextHandler = ((await handler[1](
-          ({
+        const actionsContextHandler = (await handler[1](
+          {
             core: {
               savedObjects: {
                 client: {},
               },
             },
-          } as unknown) as RequestHandlerContext,
+          } as unknown as RequestHandlerContext,
           httpServerMock.createKibanaRequest(),
           httpServerMock.createResponseFactory()
-        )) as unknown) as ActionsApiRequestHandlerContext;
+        )) as unknown as ActionsApiRequestHandlerContext;
         expect(() => actionsContextHandler!.getActionsClient()).toThrowErrorMatchingInlineSnapshot(
           `"Unable to create actions client because the Encrypted Saved Objects plugin is missing encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command."`
         );
@@ -253,7 +252,6 @@ describe('Actions Plugin', () => {
 
     beforeEach(() => {
       context = coreMock.createPluginInitializerContext<ActionsConfig>({
-        enabled: true,
         enabledActionTypes: ['*'],
         allowedHosts: ['*'],
         preconfiguredAlertHistoryEsIndex: false,

@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Logger } from 'src/core/server';
 import { AlertType, AlertExecutorOptions } from '../../types';
 import { ActionContext, EsQueryAlertActionContext, addMessages } from './action_context';
@@ -25,9 +25,7 @@ export const ES_QUERY_ID = '.es-query';
 export const ActionGroupId = 'query matched';
 export const ConditionMetAlertInstanceId = 'query matched';
 
-export function getAlertType(
-  logger: Logger
-): AlertType<
+export function getAlertType(logger: Logger): AlertType<
   EsQueryAlertParams,
   never, // Only use if defining useSavedObjectReferences hook
   EsQueryAlertState,

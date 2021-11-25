@@ -48,7 +48,7 @@ import { AnomaliesQueryTabBody } from '../../../common/containers/anomalies/anom
 import { esQuery } from '../../../../../../../src/plugins/data/public';
 import { networkModel } from '../../store';
 import { SecurityPageName } from '../../../app/types';
-import { useSourcererScope } from '../../../common/containers/sourcerer';
+import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_query';
 export { getBreadcrumbs } from './utils';
 
@@ -92,7 +92,7 @@ const NetworkDetailsComponent: React.FC = () => {
     dispatch(setNetworkDetailsTablesActivePageToZero());
   }, [detailName, dispatch]);
 
-  const { docValueFields, indicesExist, indexPattern, selectedPatterns } = useSourcererScope();
+  const { docValueFields, indicesExist, indexPattern, selectedPatterns } = useSourcererDataView();
   const ip = decodeIpv6(detailName);
   const [filterQuery, kqlError] = convertToBuildEsQuery({
     config: esQuery.getEsQueryConfig(uiSettings),
@@ -118,16 +118,16 @@ const NetworkDetailsComponent: React.FC = () => {
     skip: isInitializing,
   });
 
-  const headerDraggableArguments = useMemo(() => ({ field: `${flowTarget}.ip`, value: ip }), [
-    flowTarget,
-    ip,
-  ]);
+  const headerDraggableArguments = useMemo(
+    () => ({ field: `${flowTarget}.ip`, value: ip }),
+    [flowTarget, ip]
+  );
 
   // When the filterQuery comes back as undefined, it means an error has been thrown and the request should be skipped
-  const shouldSkip = useMemo(() => isInitializing || filterQuery === undefined, [
-    isInitializing,
-    filterQuery,
-  ]);
+  const shouldSkip = useMemo(
+    () => isInitializing || filterQuery === undefined,
+    [isInitializing, filterQuery]
+  );
 
   return (
     <div data-test-subj="network-details-page">
@@ -273,7 +273,7 @@ const NetworkDetailsComponent: React.FC = () => {
             <TlsQueryTable
               endDate={to}
               filterQuery={filterQuery}
-              flowTarget={(flowTarget as unknown) as FlowTargetSourceDest}
+              flowTarget={flowTarget as unknown as FlowTargetSourceDest}
               indexNames={selectedPatterns}
               ip={ip}
               setQuery={setQuery}
@@ -302,8 +302,6 @@ const NetworkDetailsComponent: React.FC = () => {
         </>
       ) : (
         <SecuritySolutionPageWrapper>
-          <HeaderPage border title={ip} />
-
           <OverviewEmpty />
         </SecuritySolutionPageWrapper>
       )}

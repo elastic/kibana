@@ -13,7 +13,7 @@ import {
 } from '../../../../../../../common/elasticsearch_fieldnames';
 import { getNextEnvironmentUrlParam } from '../../../../../../../common/environment_filter_values';
 import { Transaction } from '../../../../../../../typings/es_schemas/ui/transaction';
-import { useUrlParams } from '../../../../../../context/url_params_context/use_url_params';
+import { useLegacyUrlParams } from '../../../../../../context/url_params_context/use_url_params';
 import { useApmParams } from '../../../../../../hooks/use_apm_params';
 import { TransactionDetailLink } from '../../../../../shared/Links/apm/transaction_detail_link';
 import { ServiceLink } from '../../../../../shared/service_link';
@@ -26,8 +26,8 @@ interface Props {
 export function FlyoutTopLevelProperties({ transaction }: Props) {
   const {
     urlParams: { latencyAggregationType },
-  } = useUrlParams();
-  const { query } = useApmParams('/services/:serviceName/transactions/view');
+  } = useLegacyUrlParams();
+  const { query } = useApmParams('/services/{serviceName}/transactions/view');
 
   if (!transaction) {
     return null;

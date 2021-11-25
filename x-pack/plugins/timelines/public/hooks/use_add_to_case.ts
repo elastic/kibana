@@ -81,6 +81,7 @@ export const useAddToCase = ({
   useInsertTimeline,
   casePermissions,
   appId,
+  owner,
   onClose,
 }: AddToCaseActionProps): UseAddToCase => {
   const eventId = event?.ecs._id ?? '';
@@ -120,13 +121,13 @@ export const useAddToCase = ({
   const isAlert = useMemo(() => {
     if (event !== undefined) {
       const data = [...event.data];
-      return data.some(({ field }) => field === 'kibana.alert.uuid');
+      return data.some(({ field }) => field === 'kibana.alert.rule.uuid');
     } else {
       return false;
     }
   }, [event]);
   const isSecurityAlert = useMemo(() => {
-    return !isEmpty(event?.ecs.signal?.rule?.id);
+    return !isEmpty(event?.ecs.signal?.rule?.id ?? event?.ecs.kibana?.alert?.rule?.uuid);
   }, [event]);
   const isEventSupported = isSecurityAlert || isAlert;
   const userCanCrud = casePermissions?.crud ?? false;
@@ -143,10 +144,10 @@ export const useAddToCase = ({
   );
   const currentSearch = useLocation().search;
   const urlSearch = useMemo(() => currentSearch, [currentSearch]);
-  const createCaseUrl = useMemo(() => getUrlForApp('cases') + getCreateCaseUrl(urlSearch), [
-    getUrlForApp,
-    urlSearch,
-  ]);
+  const createCaseUrl = useMemo(
+    () => getUrlForApp('cases') + getCreateCaseUrl(urlSearch),
+    [getUrlForApp, urlSearch]
+  );
 
   const attachAlertToCase = useCallback(
     async (
@@ -167,13 +168,13 @@ export const useAddToCase = ({
               id: ruleId,
               name: ruleName,
             },
-            owner: appId,
+            owner,
           },
           updateCase,
         });
       }
     },
-    [eventId, eventIndex, appId, dispatch, event]
+    [eventId, eventIndex, owner, dispatch, event]
   );
   const onCaseSuccess = useCallback(
     async (theCase: Case) => {
@@ -187,7 +188,7 @@ export const useAddToCase = ({
     async (ev) => {
       ev.preventDefault();
       return navigateToApp(appId, {
-        deepLinkId: appId === 'securitySolution' ? 'case' : 'cases',
+        deepLinkId: appId === 'securitySolutionUI' ? 'case' : 'cases',
         path: getCreateCaseUrl(urlSearch),
       });
     },

@@ -16,16 +16,14 @@ export const inputTimes = [
         time: 401690,
         relative: '89.8',
         color: '#feb6b6',
-        tip:
-          'The time taken to create the Weight object, which holds temporary information during scoring.',
+        tip: 'The time taken to create the Weight object, which holds temporary information during scoring.',
       },
       {
         key: 'build_scorer',
         time: 45672,
         relative: '10.2',
         color: '#f6eeee',
-        tip:
-          'The time taken to create the Scoring object, which is later used to execute the actual scoring of each doc.',
+        tip: 'The time taken to create the Scoring object, which is later used to execute the actual scoring of each doc.',
       },
       {
         key: 'build_scorer_count',
@@ -53,8 +51,7 @@ export const inputTimes = [
         time: 0,
         relative: '0.0',
         color: '#f5f5f5',
-        tip:
-          'The time taken to execute a secondary, more precise scoring phase (used by phrase queries).',
+        tip: 'The time taken to execute a secondary, more precise scoring phase (used by phrase queries).',
       },
       {
         key: 'match_count',
@@ -110,16 +107,14 @@ export const inputTimes = [
             time: 190989,
             relative: '99.2',
             color: '#ffb0b0',
-            tip:
-              'The time taken to create the Weight object, which holds temporary information during scoring.',
+            tip: 'The time taken to create the Weight object, which holds temporary information during scoring.',
           },
           {
             key: 'build_scorer',
             time: 1510,
             relative: '0.8',
             color: '#f5f4f4',
-            tip:
-              'The time taken to create the Scoring object, which is later used to execute the actual scoring of each doc.',
+            tip: 'The time taken to create the Scoring object, which is later used to execute the actual scoring of each doc.',
           },
           {
             key: 'build_scorer_count',
@@ -147,8 +142,7 @@ export const inputTimes = [
             time: 0,
             relative: '0.0',
             color: '#f5f5f5',
-            tip:
-              'The time taken to execute a secondary, more precise scoring phase (used by phrase queries).',
+            tip: 'The time taken to execute a secondary, more precise scoring phase (used by phrase queries).',
           },
           {
             key: 'match_count',
@@ -208,16 +202,14 @@ export const inputTimes = [
             time: 162016,
             relative: '99.6',
             color: '#ffafaf',
-            tip:
-              'The time taken to create the Weight object, which holds temporary information during scoring.',
+            tip: 'The time taken to create the Weight object, which holds temporary information during scoring.',
           },
           {
             key: 'build_scorer',
             time: 589,
             relative: '0.4',
             color: '#f5f5f5',
-            tip:
-              'The time taken to create the Scoring object, which is later used to execute the actual scoring of each doc.',
+            tip: 'The time taken to create the Scoring object, which is later used to execute the actual scoring of each doc.',
           },
           {
             key: 'build_scorer_count',
@@ -245,8 +237,7 @@ export const inputTimes = [
             time: 0,
             relative: '0.0',
             color: '#f5f5f5',
-            tip:
-              'The time taken to execute a secondary, more precise scoring phase (used by phrase queries).',
+            tip: 'The time taken to execute a secondary, more precise scoring phase (used by phrase queries).',
           },
           {
             key: 'match_count',
@@ -306,16 +297,14 @@ export const inputTimes = [
             time: 32522,
             relative: '92.5',
             color: '#feb4b4',
-            tip:
-              'The time taken to create the Scoring object, which is later used to execute the actual scoring of each doc.',
+            tip: 'The time taken to create the Scoring object, which is later used to execute the actual scoring of each doc.',
           },
           {
             key: 'create_weight',
             time: 2645,
             relative: '7.5',
             color: '#f6f0f0',
-            tip:
-              'The time taken to create the Weight object, which holds temporary information during scoring.',
+            tip: 'The time taken to create the Weight object, which holds temporary information during scoring.',
           },
           {
             key: 'build_scorer_count',
@@ -343,8 +332,7 @@ export const inputTimes = [
             time: 0,
             relative: '0.0',
             color: '#f5f5f5',
-            tip:
-              'The time taken to execute a secondary, more precise scoring phase (used by phrase queries).',
+            tip: 'The time taken to execute a secondary, more precise scoring phase (used by phrase queries).',
           },
           {
             key: 'match_count',
@@ -417,16 +405,14 @@ export const normalizedTimes = [
         time: 401690,
         relative: '89.8',
         color: '#feb6b6',
-        tip:
-          'The time taken to create the Weight object, which holds temporary information during scoring.',
+        tip: 'The time taken to create the Weight object, which holds temporary information during scoring.',
       },
       {
         key: 'build_scorer',
         time: 45672,
         relative: '10.2',
         color: '#f6eeee',
-        tip:
-          'The time taken to create the Scoring object, which is later used to execute the actual scoring of each doc.',
+        tip: 'The time taken to create the Scoring object, which is later used to execute the actual scoring of each doc.',
       },
       {
         key: 'build_scorer_count',
@@ -454,8 +440,7 @@ export const normalizedTimes = [
         time: 0,
         relative: '0.0',
         color: '#f5f5f5',
-        tip:
-          'The time taken to execute a secondary, more precise scoring phase (used by phrase queries).',
+        tip: 'The time taken to execute a secondary, more precise scoring phase (used by phrase queries).',
       },
       {
         key: 'match_count',
@@ -511,16 +496,14 @@ export const normalizedTimes = [
             time: 190989,
             relative: '99.2',
             color: '#ffb0b0',
-            tip:
-              'The time taken to create the Weight object, which holds temporary information during scoring.',
+            tip: 'The time taken to create the Weight object, which holds temporary information during scoring.',
           },
           {
             key: 'build_scorer',
             time: 1510,
             relative: '0.8',
             color: '#f5f4f4',
-            tip:
-              'The time taken to create the Scoring object, which is later used to execute the actual scoring of each doc.',
+            tip: 'The time taken to create the Scoring object, which is later used to execute the actual scoring of each doc.',
           },
           {
             key: 'build_scorer_count',
@@ -548,8 +531,7 @@ export const normalizedTimes = [
             time: 0,
             relative: '0.0',
             color: '#f5f5f5',
-            tip:
-              'The time taken to execute a secondary, more precise scoring phase (used by phrase queries).',
+            tip: 'The time taken to execute a secondary, more precise scoring phase (used by phrase queries).',
           },
           {
             key: 'match_count',
@@ -611,16 +593,14 @@ export const normalizedTimes = [
             time: 162016,
             relative: '99.6',
             color: '#ffafaf',
-            tip:
-              'The time taken to create the Weight object, which holds temporary information during scoring.',
+            tip: 'The time taken to create the Weight object, which holds temporary information during scoring.',
           },
           {
             key: 'build_scorer',
             time: 589,
             relative: '0.4',
             color: '#f5f5f5',
-            tip:
-              'The time taken to create the Scoring object, which is later used to execute the actual scoring of each doc.',
+            tip: 'The time taken to create the Scoring object, which is later used to execute the actual scoring of each doc.',
           },
           {
             key: 'build_scorer_count',
@@ -648,8 +628,7 @@ export const normalizedTimes = [
             time: 0,
             relative: '0.0',
             color: '#f5f5f5',
-            tip:
-              'The time taken to execute a secondary, more precise scoring phase (used by phrase queries).',
+            tip: 'The time taken to execute a secondary, more precise scoring phase (used by phrase queries).',
           },
           {
             key: 'match_count',
@@ -711,16 +690,14 @@ export const normalizedTimes = [
             time: 32522,
             relative: '92.5',
             color: '#feb4b4',
-            tip:
-              'The time taken to create the Scoring object, which is later used to execute the actual scoring of each doc.',
+            tip: 'The time taken to create the Scoring object, which is later used to execute the actual scoring of each doc.',
           },
           {
             key: 'create_weight',
             time: 2645,
             relative: '7.5',
             color: '#f6f0f0',
-            tip:
-              'The time taken to create the Weight object, which holds temporary information during scoring.',
+            tip: 'The time taken to create the Weight object, which holds temporary information during scoring.',
           },
           {
             key: 'build_scorer_count',
@@ -748,8 +725,7 @@ export const normalizedTimes = [
             time: 0,
             relative: '0.0',
             color: '#f5f5f5',
-            tip:
-              'The time taken to execute a secondary, more precise scoring phase (used by phrase queries).',
+            tip: 'The time taken to execute a secondary, more precise scoring phase (used by phrase queries).',
           },
           {
             key: 'match_count',

@@ -12,11 +12,13 @@ import { i18n } from '@kbn/i18n';
 import { AppLeaveAction, AppMountParameters } from 'kibana/public';
 import { Adapters } from 'src/plugins/embeddable/public';
 import { Subscription } from 'rxjs';
+import type { Query, Filter, TimeRange, IndexPattern } from 'src/plugins/data/common';
 import {
   getData,
   getCoreChrome,
   getMapsCapabilities,
   getNavigation,
+  getSpacesApi,
   getTimeFilter,
   getToasts,
 } from '../../../kibana_services';
@@ -30,10 +32,6 @@ import {
 } from '../url_state';
 import {
   esFilters,
-  Filter,
-  Query,
-  TimeRange,
-  IndexPattern,
   SavedQuery,
   QueryStateChange,
   QueryState,
@@ -41,10 +39,9 @@ import {
 import { MapContainer } from '../../../connected_components/map_container';
 import { getIndexPatternsFromIds } from '../../../index_pattern_util';
 import { getTopNavConfig } from '../top_nav_config';
-import { MapQuery } from '../../../../common/descriptor_types';
 import { goToSpecifiedPath } from '../../../render_app';
-import { MapSavedObjectAttributes } from '../../../../common/map_saved_object_type';
-import { getFullPath, APP_ID } from '../../../../common/constants';
+import { getEditPath, getFullPath, APP_ID } from '../../../../common/constants';
+import { getMapEmbeddableDisplayName } from '../../../../common/i18n_getters';
 import {
   getInitialQuery,
   getInitialRefreshConfig,
@@ -54,11 +51,7 @@ import {
   unsavedChangesWarning,
 } from '../saved_map';
 import { waitUntilTimeLayersLoad$ } from './wait_until_time_layers_load';
-
-interface MapRefreshConfig {
-  isPaused: boolean;
-  interval: number;
-}
+import { RefreshConfig as MapRefreshConfig, SerializedMapState } from '../saved_map';
 
 export interface Props {
   savedMap: SavedMap;
@@ -87,8 +80,9 @@ export interface Props {
   }) => void;
   timeFilters: TimeRange;
   isSaveDisabled: boolean;
-  query: MapQuery | undefined;
+  query: Query | undefined;
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
+  history: AppMountParameters['history'];
 }
 
 export interface State {
@@ -213,12 +207,10 @@ export class MapApp extends React.Component<Props, State> {
     filters,
     query,
     time,
-    forceRefresh = false,
   }: {
     filters?: Filter[];
     query?: Query;
     time?: TimeRange;
-    forceRefresh?: boolean;
   }) => {
     const { filterManager } = getData().query;
 
@@ -227,7 +219,7 @@ export class MapApp extends React.Component<Props, State> {
     }
 
     this.props.setQuery({
-      forceRefresh,
+      forceRefresh: false,
       filters: filterManager.getFilters(),
       query,
       timeFilters: time,
@@ -249,20 +241,14 @@ export class MapApp extends React.Component<Props, State> {
     updateGlobalState(updatedGlobalState, !this.state.initialized);
   };
 
-  _initMapAndLayerSettings(mapSavedObjectAttributes: MapSavedObjectAttributes) {
+  _initMapAndLayerSettings(serializedMapState?: SerializedMapState) {
     const globalState: MapsGlobalState = getGlobalState();
 
-    let savedObjectFilters = [];
-    if (mapSavedObjectAttributes.mapStateJSON) {
-      const mapState = JSON.parse(mapSavedObjectAttributes.mapStateJSON);
-      if (mapState.filters) {
-        savedObjectFilters = mapState.filters;
-      }
-    }
+    const savedObjectFilters = serializedMapState?.filters ? serializedMapState.filters : [];
     const appFilters = this._appStateManager.getFilters() || [];
 
     const query = getInitialQuery({
-      mapStateJSON: mapSavedObjectAttributes.mapStateJSON,
+      serializedMapState,
       appState: this._appStateManager.getAppState(),
     });
     if (query) {
@@ -273,14 +259,14 @@ export class MapApp extends React.Component<Props, State> {
       filters: [..._.get(globalState, 'filters', []), ...appFilters, ...savedObjectFilters],
       query,
       time: getInitialTimeFilters({
-        mapStateJSON: mapSavedObjectAttributes.mapStateJSON,
+        serializedMapState,
         globalState,
       }),
     });
 
     this._onRefreshConfigChange(
       getInitialRefreshConfig({
-        mapStateJSON: mapSavedObjectAttributes.mapStateJSON,
+        serializedMapState,
         globalState,
       })
     );
@@ -351,6 +337,16 @@ export class MapApp extends React.Component<Props, State> {
       return;
     }
 
+    const sharingSavedObjectProps = this.props.savedMap.getSharingSavedObjectProps();
+    const spaces = getSpacesApi();
+    if (spaces && sharingSavedObjectProps?.outcome === 'aliasMatch') {
+      // We found this object by a legacy URL alias from its old ID; redirect the user to the page with its new ID, preserving any URL hash
+      const newObjectId = sharingSavedObjectProps?.aliasTargetId; // This is always defined if outcome === 'aliasMatch'
+      const newPath = `${getEditPath(newObjectId)}${this.props.history.location.hash}`;
+      await spaces.ui.redirectLegacyUrl(newPath, getMapEmbeddableDisplayName());
+      return;
+    }
+
     this.props.savedMap.setBreadcrumbs();
     getCoreChrome().docTitle.change(this.props.savedMap.getTitle());
     const savedObjectId = this.props.savedMap.getSavedObjectId();
@@ -362,7 +358,16 @@ export class MapApp extends React.Component<Props, State> {
       );
     }
 
-    this._initMapAndLayerSettings(this.props.savedMap.getAttributes());
+    let serializedMapState: SerializedMapState | undefined;
+    try {
+      const attributes = this.props.savedMap.getAttributes();
+      if (attributes.mapStateJSON) {
+        serializedMapState = JSON.parse(attributes.mapStateJSON);
+      }
+    } catch (e) {
+      // ignore malformed mapStateJSON, not a critical error for viewing map - map will just use defaults
+    }
+    this._initMapAndLayerSettings(serializedMapState);
 
     this.setState({ initialized: true });
   }
@@ -391,11 +396,16 @@ export class MapApp extends React.Component<Props, State> {
         filters={this.props.filters}
         query={this.props.query}
         onQuerySubmit={({ dateRange, query }) => {
-          this._onQueryChange({
-            query,
-            time: dateRange,
-            forceRefresh: true,
-          });
+          const isUpdate =
+            !_.isEqual(dateRange, this.props.timeFilters) || !_.isEqual(query, this.props.query);
+          if (isUpdate) {
+            this._onQueryChange({
+              query,
+              time: dateRange,
+            });
+          } else {
+            this.props.setQuery({ forceRefresh: true });
+          }
         }}
         onFiltersUpdated={this._onFiltersChange}
         dateRangeFrom={this.props.timeFilters.from}
@@ -441,6 +451,21 @@ export class MapApp extends React.Component<Props, State> {
     this._onFiltersChange([...this.props.filters, ...newFilters]);
   };
 
+  _renderLegacyUrlConflict() {
+    const sharingSavedObjectProps = this.props.savedMap.getSharingSavedObjectProps();
+    const spaces = getSpacesApi();
+    return spaces && sharingSavedObjectProps?.outcome === 'conflict'
+      ? spaces.ui.components.getLegacyUrlConflict({
+          objectNoun: getMapEmbeddableDisplayName(),
+          currentObjectId: this.props.savedMap.getSavedObjectId()!,
+          otherObjectId: sharingSavedObjectProps.aliasTargetId!,
+          otherObjectPath: `${getEditPath(sharingSavedObjectProps.aliasTargetId!)}${
+            this.props.history.location.hash
+          }`,
+        })
+      : null;
+  }
+
   render() {
     if (!this.state.initialized) {
       return null;
@@ -451,6 +476,7 @@ export class MapApp extends React.Component<Props, State> {
         {this._renderTopNav()}
         <h1 className="euiScreenReaderOnly">{`screenTitle placeholder`}</h1>
         <div id="react-maps-root">
+          {this._renderLegacyUrlConflict()}
           <MapContainer
             addFilters={this._addFilter}
             title={this.props.savedMap.getAttributes().title}

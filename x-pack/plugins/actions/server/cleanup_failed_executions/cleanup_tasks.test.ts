@@ -10,20 +10,21 @@ import { loggingSystemMock, elasticsearchServiceMock } from '../../../../../src/
 import { spacesMock } from '../../../spaces/server/mocks';
 import { CleanupTasksOpts, cleanupTasks } from './cleanup_tasks';
 import { TaskInstance } from '../../../task_manager/server';
-import { ApiResponse, estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { TransportResult } from '@elastic/elasticsearch';
 
 describe('cleanupTasks', () => {
   const logger = loggingSystemMock.create().get();
   const esClient = elasticsearchServiceMock.createElasticsearchClient();
   const spaces = spacesMock.createStart();
-  const savedObjectsSerializer = ({
+  const savedObjectsSerializer = {
     generateRawId: jest
       .fn()
       .mockImplementation((namespace: string | undefined, type: string, id: string) => {
         const namespacePrefix = namespace ? `${namespace}:` : '';
         return `${namespacePrefix}${type}:${id}`;
       }),
-  } as unknown) as SavedObjectsSerializer;
+  } as unknown as SavedObjectsSerializer;
 
   const cleanupTasksOpts: CleanupTasksOpts = {
     logger,
@@ -69,9 +70,9 @@ describe('cleanupTasks', () => {
   });
 
   it('should delete action_task_params and task objects', async () => {
-    esClient.bulk.mockResolvedValue(({
+    esClient.bulk.mockResolvedValue({
       body: { items: [], errors: false, took: 1 },
-    } as unknown) as ApiResponse<estypes.BulkResponse, unknown>);
+    } as unknown as TransportResult<estypes.BulkResponse, unknown>);
     const result = await cleanupTasks({
       ...cleanupTasksOpts,
       tasks: [taskSO],
@@ -90,7 +91,7 @@ describe('cleanupTasks', () => {
   });
 
   it('should not delete the task if the action_task_params failed to delete', async () => {
-    esClient.bulk.mockResolvedValue(({
+    esClient.bulk.mockResolvedValue({
       body: {
         items: [
           {
@@ -106,7 +107,7 @@ describe('cleanupTasks', () => {
         errors: true,
         took: 1,
       },
-    } as unknown) as ApiResponse<estypes.BulkResponse, unknown>);
+    } as unknown as TransportResult<estypes.BulkResponse, unknown>);
     const result = await cleanupTasks({
       ...cleanupTasksOpts,
       tasks: [taskSO],

@@ -7,9 +7,6 @@
 
 import { useState, useLayoutEffect } from 'react';
 
-// That could be different from security and observability. Get it as parameter?
-const INITIAL_DATA_GRID_HEIGHT = 967;
-
 // It will recalculate DataGrid height after this time interval.
 const TIME_INTERVAL = 50;
 
@@ -18,7 +15,16 @@ const TIME_INTERVAL = 50;
  * 3 (three) is a number, numeral and digit. It is the natural number following 2 and preceding 4, and is the smallest
  * odd prime number and the only prime preceding a square number. It has religious or cultural significance in many societies.
  */
+
 const MAGIC_GAP = 3;
+
+// Hard coded height for every page size
+const DATA_GRID_HEIGHT_BY_PAGE_SIZE: { [key: number]: number } = {
+  10: 457,
+  25: 967,
+  50: 1817,
+  100: 3517,
+};
 
 /**
  * HUGE HACK!!!
@@ -29,14 +35,25 @@ const MAGIC_GAP = 3;
  *
  * Please delete me and allow DataGrid to calculate its height when the bug is fixed.
  */
+
+const dataGridRowHeight = 36;
+const headerSectionHeight = 32;
+const additionalFiltersHeight = 44;
+
 export const useDataGridHeightHack = (pageSize: number, rowCount: number) => {
-  const [height, setHeight] = useState(INITIAL_DATA_GRID_HEIGHT);
+  const [height, setHeight] = useState(DATA_GRID_HEIGHT_BY_PAGE_SIZE[pageSize]);
 
   useLayoutEffect(() => {
     setTimeout(() => {
       const gridVirtualized = document.querySelector('#body-data-grid .euiDataGrid__virtualized');
 
-      if (
+      if (rowCount === pageSize) {
+        setHeight(DATA_GRID_HEIGHT_BY_PAGE_SIZE[pageSize]);
+      } else if (rowCount <= pageSize) {
+        // This is unnecessary if we add rowCount > pageSize below
+        setHeight(dataGridRowHeight * rowCount + (headerSectionHeight + additionalFiltersHeight));
+      } else if (
+        // rowCount > pageSize && // This will fix the issue but is always full height so has a lot of empty state
         gridVirtualized &&
         gridVirtualized.children[0].clientHeight !== gridVirtualized.clientHeight // check if it has vertical scroll
       ) {

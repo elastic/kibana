@@ -19,13 +19,19 @@ import {
 } from '../../../../fleet/common';
 import { EndpointDataLoadingError, wrapErrorAndRejectPromise } from './utils';
 
+export interface SetupFleetForEndpointResponse {
+  endpointPackage: BulkInstallPackageInfo;
+}
+
 /**
  * Calls the fleet setup APIs and then installs the latest Endpoint package
  * @param kbnClient
  */
-export const setupFleetForEndpoint = async (kbnClient: KbnClient) => {
+export const setupFleetForEndpoint = async (
+  kbnClient: KbnClient
+): Promise<SetupFleetForEndpointResponse> => {
   // We try to use the kbnClient **private** logger, bug if unable to access it, then just use console
-  // @ts-ignore
+  // @ts-expect-error TS2341
   const log = kbnClient.log ? kbnClient.log : console;
 
   // Setup Fleet
@@ -65,12 +71,16 @@ export const setupFleetForEndpoint = async (kbnClient: KbnClient) => {
   }
 
   // Install/upgrade the endpoint package
+  let endpointPackage: BulkInstallPackageInfo;
+
   try {
-    await installOrUpgradeEndpointFleetPackage(kbnClient);
+    endpointPackage = await installOrUpgradeEndpointFleetPackage(kbnClient);
   } catch (error) {
     log.error(error);
     throw error;
   }
+
+  return { endpointPackage };
 };
 
 /**
@@ -78,7 +88,9 @@ export const setupFleetForEndpoint = async (kbnClient: KbnClient) => {
  *
  * @param kbnClient
  */
-export const installOrUpgradeEndpointFleetPackage = async (kbnClient: KbnClient): Promise<void> => {
+export const installOrUpgradeEndpointFleetPackage = async (
+  kbnClient: KbnClient
+): Promise<BulkInstallPackageInfo> => {
   const installEndpointPackageResp = (await kbnClient
     .request({
       path: EPM_API_ROUTES.BULK_INSTALL_PATTERN,
@@ -98,16 +110,23 @@ export const installOrUpgradeEndpointFleetPackage = async (kbnClient: KbnClient)
     );
   }
 
-  if (isFleetBulkInstallError(bulkResp[0])) {
-    if (bulkResp[0].error instanceof Error) {
+  const firstError = bulkResp[0];
+
+  if (isFleetBulkInstallError(firstError)) {
+    if (firstError.error instanceof Error) {
       throw new EndpointDataLoadingError(
-        `Installing the Endpoint package failed: ${bulkResp[0].error.message}, exiting`,
+        `Installing the Endpoint package failed: ${firstError.error.message}, exiting`,
         bulkResp
       );
     }
 
-    throw new EndpointDataLoadingError(bulkResp[0].error, bulkResp);
+    // Ignore `409` (conflicts due to Concurrent install or upgrades of package) errors
+    if (firstError.statusCode !== 409) {
+      throw new EndpointDataLoadingError(firstError.error, bulkResp);
+    }
   }
+
+  return bulkResp[0] as BulkInstallPackageInfo;
 };
 
 function isFleetBulkInstallError(

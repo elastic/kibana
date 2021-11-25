@@ -31,13 +31,19 @@ export class FieldEditorService extends FtrService {
     await this.testSubjects.setEuiSwitch('valueRow > toggle', 'uncheck');
   }
   public async typeScript(script: string) {
-    const editor = await (await this.testSubjects.find('valueRow')).findByClassName(
-      'react-monaco-editor-container'
-    );
+    const editor = await (
+      await this.testSubjects.find('valueRow')
+    ).findByClassName('react-monaco-editor-container');
     const textarea = await editor.findByClassName('monaco-mouse-cursor-text');
 
     await textarea.click();
-    await this.browser.pressKeys(script);
+
+    // To avoid issue with the timing needed for Selenium to write the script and the monaco editor
+    // syntax validation kicking in, we loop through all the chars of the script and enter
+    // them one by one (instead of calling "await this.browser.pressKeys(script);").
+    for (const letter of script.split('')) {
+      await this.browser.pressKeys(letter);
+    }
   }
   public async save() {
     await this.testSubjects.click('fieldSaveButton');

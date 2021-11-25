@@ -7,12 +7,10 @@
 
 import { Datatable, DatatableColumn } from 'src/plugins/expressions/public';
 import { functionWrapper } from 'src/plugins/expressions/common/expression_functions/specs/tests/utils';
-import { FormatColumnArgs, formatColumn } from './index';
+import { formatColumn } from './index';
 
 describe('format_column', () => {
-  const fn: (input: Datatable, args: FormatColumnArgs) => Promise<Datatable> = functionWrapper(
-    formatColumn
-  );
+  const fn = functionWrapper(formatColumn);
 
   let datatable: Datatable;
 

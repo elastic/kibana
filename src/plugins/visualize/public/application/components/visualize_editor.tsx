@@ -57,8 +57,11 @@ export const VisualizeEditor = ({ onAppLeave }: VisualizeAppProps) => {
 
   useEffect(() => {
     const { stateTransferService, data } = services;
-    const { originatingApp: value, searchSessionId, embeddableId } =
-      stateTransferService.getIncomingEditorState(VisualizeConstants.APP_ID) || {};
+    const {
+      originatingApp: value,
+      searchSessionId,
+      embeddableId,
+    } = stateTransferService.getIncomingEditorState(VisualizeConstants.APP_ID) || {};
 
     if (searchSessionId) {
       data.search.session.continue(searchSessionId);

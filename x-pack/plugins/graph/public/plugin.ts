@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { BehaviorSubject } from 'rxjs';
+import { SpacesApi } from '../../spaces/public';
 import {
   AppNavLinkStatus,
   AppUpdater,
@@ -44,10 +45,12 @@ export interface GraphPluginStartDependencies {
   savedObjects: SavedObjectsStart;
   kibanaLegacy: KibanaLegacyStart;
   home?: HomePublicPluginStart;
+  spaces?: SpacesApi;
 }
 
 export class GraphPlugin
-  implements Plugin<void, void, GraphPluginSetupDependencies, GraphPluginStartDependencies> {
+  implements Plugin<void, void, GraphPluginSetupDependencies, GraphPluginStartDependencies>
+{
   private readonly appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
 
   constructor(private initializerContext: PluginInitializerContext<ConfigSchema>) {}
@@ -110,6 +113,7 @@ export class GraphPlugin
           overlays: coreStart.overlays,
           savedObjects: pluginsStart.savedObjects,
           uiSettings: core.uiSettings,
+          spaces: pluginsStart.spaces,
         });
       },
     });

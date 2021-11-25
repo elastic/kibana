@@ -4,7 +4,6 @@
     "buildNum": 9007199254740991,
     "dateFormat:tz": "UTC",
     "defaultIndex": "rollup",
-    "visualization:visualize:legacyChartsLibrary": true,
     "visualization:visualize:legacyPieChartsLibrary": true
   },
   "coreMigrationVersion": "7.15.0",

@@ -29,6 +29,7 @@ Object.defineProperty(global.window, 'scrollTo', { value: spyScrollTo });
 import { ADD, UPDATE } from '../../../../../shared/constants/operations';
 import { defaultErrorMessage } from '../../../../../shared/flash_messages/handle_api_errors';
 import { SchemaType } from '../../../../../shared/schema/types';
+import { itShowsServerErrorAsFlashMessage } from '../../../../../test_helpers';
 import { AppLogic } from '../../../../app_logic';
 
 import {
@@ -40,12 +41,7 @@ import { SchemaLogic, dataTypeOptions } from './schema_logic';
 
 describe('SchemaLogic', () => {
   const { http } = mockHttpValues;
-  const {
-    clearFlashMessages,
-    flashAPIErrors,
-    flashSuccessToast,
-    setErrorMessage,
-  } = mockFlashMessageHelpers;
+  const { clearFlashMessages, flashSuccessToast, setErrorMessage } = mockFlashMessageHelpers;
   const { mount } = new LogicMounter(SchemaLogic);
 
   const defaultValues = {
@@ -228,12 +224,8 @@ describe('SchemaLogic', () => {
         expect(onInitializeSchemaSpy).toHaveBeenCalledWith(serverResponse);
       });
 
-      it('handles error', async () => {
-        http.get.mockReturnValue(Promise.reject('this is an error'));
+      itShowsServerErrorAsFlashMessage(http.get, () => {
         SchemaLogic.actions.initializeSchema();
-        await nextTick();
-
-        expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
       });
     });
 
@@ -451,12 +443,8 @@ describe('SchemaLogic', () => {
           expect(onSchemaSetSuccessSpy).toHaveBeenCalledWith(serverResponse);
         });
 
-        it('handles error', async () => {
-          http.post.mockReturnValue(Promise.reject('this is an error'));
+        itShowsServerErrorAsFlashMessage(http.post, () => {
           SchemaLogic.actions.setServerField(schema, UPDATE);
-          await nextTick();
-
-          expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
         });
       });
     });

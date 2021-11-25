@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+/* eslint-disable react/display-name */
+
 import React from 'react';
 
 import { RecursivePartial } from '@elastic/eui/src/components/common';
@@ -13,10 +15,11 @@ import { KibanaContextProvider } from '../../../../../../../src/plugins/kibana_r
 import { StartServices } from '../../../types';
 import { EuiTheme } from '../../../../../../../src/plugins/kibana_react/common';
 import { securityMock } from '../../../../../security/public/mocks';
+import { spacesPluginMock } from '../../../../../spaces/public/mocks';
 import { triggersActionsUiMock } from '../../../../../triggers_actions_ui/public/mocks';
 
 export const createStartServicesMock = (): StartServices =>
-  (({
+  ({
     ...coreMock.createStart(),
     storage: { ...coreMock.createStorage(), remove: jest.fn() },
     lens: {
@@ -25,7 +28,8 @@ export const createStartServicesMock = (): StartServices =>
     },
     security: securityMock.createStart(),
     triggersActionsUi: triggersActionsUiMock.createStart(),
-  } as unknown) as StartServices);
+    spaces: spacesPluginMock.createStartContract(),
+  } as unknown as StartServices);
 
 export const createWithKibanaMock = () => {
   const services = createStartServicesMock();

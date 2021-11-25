@@ -40,14 +40,14 @@ export const TEST_CASES = Object.freeze({
     type: 'resolvetype',
     id: 'exact-match',
     expectedNamespaces: EACH_SPACE,
-    expectedOutcome: 'exactMatch' as 'exactMatch',
+    expectedOutcome: 'exactMatch' as const,
     expectedId: 'exact-match',
   }),
   ALIAS_MATCH: Object.freeze({
     type: 'resolvetype',
     id: 'alias-match',
     expectedNamespaces: EACH_SPACE,
-    expectedOutcome: 'aliasMatch' as 'aliasMatch',
+    expectedOutcome: 'aliasMatch' as const,
     expectedId: 'alias-match-newid',
     expectedAliasTargetId: 'alias-match-newid',
   }),
@@ -55,7 +55,7 @@ export const TEST_CASES = Object.freeze({
     type: 'resolvetype',
     id: 'conflict',
     expectedNamespaces: EACH_SPACE,
-    expectedOutcome: 'conflict' as 'conflict', // only in space 1, where the alias exists
+    expectedOutcome: 'conflict' as const, // only in space 1, where the alias exists
     expectedId: 'conflict',
     expectedAliasTargetId: 'conflict-newid',
   }),
@@ -72,26 +72,27 @@ export const TEST_CASES = Object.freeze({
 
 export function resolveTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) {
   const expectSavedObjectForbidden = expectResponses.forbiddenTypes('get');
-  const expectResponseBody = (testCase: ResolveTestCase): ExpectResponseBody => async (
-    response: Record<string, any>
-  ) => {
-    if (testCase.failure === 403) {
-      await expectSavedObjectForbidden(testCase.type)(response);
-    } else {
-      // permitted
-      const object = response.body.saved_object || response.body; // errors do not have a saved_object field
-      const { expectedId: id, expectedOutcome, expectedAliasTargetId } = testCase;
-      await expectResponses.permitted(object, { ...testCase, ...(id && { id }) });
-      if (!testCase.failure) {
-        expect(response.body.outcome).to.eql(expectedOutcome);
-        if (expectedOutcome === 'conflict' || expectedOutcome === 'aliasMatch') {
-          expect(response.body.alias_target_id).to.eql(expectedAliasTargetId);
-        } else {
-          expect(response.body.alias_target_id).to.eql(undefined);
+  const expectResponseBody =
+    (testCase: ResolveTestCase): ExpectResponseBody =>
+    async (response: Record<string, any>) => {
+      if (testCase.failure === 403) {
+        await expectSavedObjectForbidden(testCase.type)(response);
+      } else {
+        // permitted
+        const object = response.body.saved_object || response.body; // errors do not have a saved_object field
+        const { expectedId: id, expectedOutcome, expectedAliasTargetId } = testCase;
+        await expectResponses.permitted(object, { ...testCase, ...(id && { id }) });
+        if (!testCase.failure) {
+          expect(response.body.outcome).to.eql(expectedOutcome);
+          if (expectedOutcome === 'conflict' || expectedOutcome === 'aliasMatch') {
+            expect(response.body.alias_target_id).to.eql(expectedAliasTargetId);
+          } else {
+            expect(response.body.alias_target_id).to.eql(undefined);
+          }
+          // TODO: add assertions for redacted namespaces (#112455)
         }
       }
-    }
-  };
+    };
   const createTestDefinitions = (
     testCases: ResolveTestCase | ResolveTestCase[],
     forbidden: boolean,
@@ -113,36 +114,34 @@ export function resolveTestSuiteFactory(esArchiver: any, supertest: SuperTest<an
     }));
   };
 
-  const makeResolveTest = (describeFn: Mocha.SuiteFunction) => (
-    description: string,
-    definition: ResolveTestSuite
-  ) => {
-    const { user, spaceId = SPACES.DEFAULT.spaceId, tests } = definition;
+  const makeResolveTest =
+    (describeFn: Mocha.SuiteFunction) => (description: string, definition: ResolveTestSuite) => {
+      const { user, spaceId = SPACES.DEFAULT.spaceId, tests } = definition;
 
-    describeFn(description, () => {
-      before(() =>
-        esArchiver.load(
-          'x-pack/test/saved_object_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
-        )
-      );
-      after(() =>
-        esArchiver.unload(
-          'x-pack/test/saved_object_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
-        )
-      );
+      describeFn(description, () => {
+        before(() =>
+          esArchiver.load(
+            'x-pack/test/saved_object_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
+          )
+        );
+        after(() =>
+          esArchiver.unload(
+            'x-pack/test/saved_object_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
+          )
+        );
 
-      for (const test of tests) {
-        it(`should return ${test.responseStatusCode} ${test.title}`, async () => {
-          const { type, id } = test.request;
-          await supertest
-            .get(`${getUrlPrefix(spaceId)}/api/saved_objects/resolve/${type}/${id}`)
-            .auth(user?.username, user?.password)
-            .expect(test.responseStatusCode)
-            .then(test.responseBody);
-        });
-      }
-    });
-  };
+        for (const test of tests) {
+          it(`should return ${test.responseStatusCode} ${test.title}`, async () => {
+            const { type, id } = test.request;
+            await supertest
+              .get(`${getUrlPrefix(spaceId)}/api/saved_objects/resolve/${type}/${id}`)
+              .auth(user?.username, user?.password)
+              .expect(test.responseStatusCode)
+              .then(test.responseBody);
+          });
+        }
+      });
+    };
 
   const addTests = makeResolveTest(describe);
   // @ts-ignore

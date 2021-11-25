@@ -13,6 +13,7 @@ import type { IRouter, RequestHandler, RequestHandlerContext, RouteConfig } from
 import { kibanaResponseFactory } from 'src/core/server';
 import { httpServerMock } from 'src/core/server/mocks';
 
+import { ERROR_OUTSIDE_PREBOOT_STAGE, ERROR_PING_FAILURE } from '../../common';
 import { interactiveSetupMock } from '../mocks';
 import { routeDefinitionParamsMock } from './index.mock';
 import { definePingRoute } from './ping';
@@ -25,7 +26,7 @@ describe('Configure routes', () => {
     mockRouteParams = routeDefinitionParamsMock.create();
     router = mockRouteParams.router;
 
-    mockContext = ({} as unknown) as RequestHandlerContext;
+    mockContext = {} as unknown as RequestHandlerContext;
 
     definePingRoute(mockRouteParams);
   });
@@ -66,11 +67,17 @@ describe('Configure routes', () => {
         body: { host: 'host' },
       });
 
-      await expect(routeHandler(mockContext, mockRequest, kibanaResponseFactory)).resolves.toEqual({
-        status: 400,
-        options: { body: 'Cannot process request outside of preboot stage.' },
-        payload: 'Cannot process request outside of preboot stage.',
-      });
+      await expect(routeHandler(mockContext, mockRequest, kibanaResponseFactory)).resolves.toEqual(
+        expect.objectContaining({
+          status: 400,
+          payload: {
+            attributes: {
+              type: ERROR_OUTSIDE_PREBOOT_STAGE,
+            },
+            message: 'Cannot process request outside of preboot stage.',
+          },
+        })
+      );
 
       expect(mockRouteParams.elasticsearch.authenticate).not.toHaveBeenCalled();
       expect(mockRouteParams.preboot.completeSetup).not.toHaveBeenCalled();
@@ -91,14 +98,12 @@ describe('Configure routes', () => {
         body: { host: 'host' },
       });
 
-      await expect(routeHandler(mockContext, mockRequest, kibanaResponseFactory)).resolves.toEqual({
-        status: 500,
-        options: {
-          body: { message: 'Failed to ping cluster.', attributes: { type: 'ping_failure' } },
-          statusCode: 500,
-        },
-        payload: { message: 'Failed to ping cluster.', attributes: { type: 'ping_failure' } },
-      });
+      await expect(routeHandler(mockContext, mockRequest, kibanaResponseFactory)).resolves.toEqual(
+        expect.objectContaining({
+          status: 500,
+          payload: { message: 'Failed to ping cluster.', attributes: { type: ERROR_PING_FAILURE } },
+        })
+      );
 
       expect(mockRouteParams.elasticsearch.ping).toHaveBeenCalledTimes(1);
       expect(mockRouteParams.preboot.completeSetup).not.toHaveBeenCalled();
@@ -111,11 +116,12 @@ describe('Configure routes', () => {
         body: { host: 'host' },
       });
 
-      await expect(routeHandler(mockContext, mockRequest, kibanaResponseFactory)).resolves.toEqual({
-        status: 200,
-        options: {},
-        payload: undefined,
-      });
+      await expect(routeHandler(mockContext, mockRequest, kibanaResponseFactory)).resolves.toEqual(
+        expect.objectContaining({
+          status: 200,
+          payload: undefined,
+        })
+      );
 
       expect(mockRouteParams.elasticsearch.ping).toHaveBeenCalledTimes(1);
       expect(mockRouteParams.elasticsearch.ping).toHaveBeenCalledWith('host');

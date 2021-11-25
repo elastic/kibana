@@ -106,6 +106,9 @@ export const FullscreenControl = compose(
     return { getAnimation };
   }),
   withHandlers({
-    onTransitionEnd: ({ setTransition }) => () => setTransition(null),
+    onTransitionEnd:
+      ({ setTransition }) =>
+      () =>
+        setTransition(null),
   })
 )(FullscreenControlWithContext);

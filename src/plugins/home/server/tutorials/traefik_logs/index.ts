@@ -24,12 +24,12 @@ export function traefikLogsSpecProvider(context: TutorialContext): TutorialSchem
   return {
     id: 'traefikLogs',
     name: i18n.translate('home.tutorials.traefikLogs.nameTitle', {
-      defaultMessage: 'Traefik logs',
+      defaultMessage: 'Traefik Logs',
     }),
     moduleName,
     category: TutorialsCategory.SECURITY_SOLUTION,
     shortDescription: i18n.translate('home.tutorials.traefikLogs.shortDescription', {
-      defaultMessage: 'Collect Traefik access logs.',
+      defaultMessage: 'Collect and parse logs from Traefik with Filebeat.',
     }),
     longDescription: i18n.translate('home.tutorials.traefikLogs.longDescription', {
       defaultMessage:
@@ -58,5 +58,6 @@ export function traefikLogsSpecProvider(context: TutorialContext): TutorialSchem
     onPrem: onPremInstructions(moduleName, platforms, context),
     elasticCloud: cloudInstructions(moduleName, platforms),
     onPremElasticCloud: onPremCloudInstructions(moduleName, platforms),
+    integrationBrowserCategories: ['web', 'security'],
   };
 }

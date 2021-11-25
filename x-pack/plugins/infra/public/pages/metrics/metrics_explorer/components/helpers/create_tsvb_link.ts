@@ -8,6 +8,7 @@
 import { encode } from 'rison-node';
 import uuid from 'uuid';
 import { set } from '@elastic/safer-lodash-set';
+import { TIMESTAMP_FIELD } from '../../../../../../common/constants';
 import { MetricsSourceConfigurationProperties } from '../../../../../../common/metrics_sources';
 import { colorTransformer, Color } from '../../../../../../common/color_palette';
 import { MetricsExplorerSeries } from '../../../../../../common/http_api/metrics_explorer';
@@ -84,27 +85,26 @@ export const metricsExplorerMetricToTSVBMetric = (metric: MetricsExplorerOptions
   }
 };
 
-const mapMetricToSeries = (chartOptions: MetricsExplorerChartOptions) => (
-  metric: MetricsExplorerOptionsMetric
-) => {
-  const format = metricToFormat(metric);
-  return {
-    label: createMetricLabel(metric),
-    axis_position: 'right',
-    chart_type: 'line',
-    color: (metric.color && colorTransformer(metric.color)) || colorTransformer(Color.color0),
-    fill: chartOptions.type === MetricsExplorerChartType.area ? 0.5 : 0,
-    formatter: format === InfraFormatterType.bits ? InfraFormatterType.bytes : format,
-    value_template: 'rate' === metric.aggregation ? '{{value}}/s' : '{{value}}',
-    id: uuid.v1(),
-    line_width: 2,
-    metrics: metricsExplorerMetricToTSVBMetric(metric),
-    point_size: 0,
-    separate_axis: 0,
-    split_mode: 'everything',
-    stacked: chartOptions.stack ? 'stacked' : 'none',
+const mapMetricToSeries =
+  (chartOptions: MetricsExplorerChartOptions) => (metric: MetricsExplorerOptionsMetric) => {
+    const format = metricToFormat(metric);
+    return {
+      label: createMetricLabel(metric),
+      axis_position: 'right',
+      chart_type: 'line',
+      color: (metric.color && colorTransformer(metric.color)) || colorTransformer(Color.color0),
+      fill: chartOptions.type === MetricsExplorerChartType.area ? 0.5 : 0,
+      formatter: format === InfraFormatterType.bits ? InfraFormatterType.bytes : format,
+      value_template: 'rate' === metric.aggregation ? '{{value}}/s' : '{{value}}',
+      id: uuid.v1(),
+      line_width: 2,
+      metrics: metricsExplorerMetricToTSVBMetric(metric),
+      point_size: 0,
+      separate_axis: 0,
+      split_mode: 'everything',
+      stacked: chartOptions.stack ? 'stacked' : 'none',
+    };
   };
-};
 
 export const createFilterFromOptions = (
   options: MetricsExplorerOptions,
@@ -170,7 +170,7 @@ export const createTSVBLink = (
         series: options.metrics.map(mapMetricToSeries(chartOptions)),
         show_grid: 1,
         show_legend: 1,
-        time_field: (source && source.fields.timestamp) || '@timestamp',
+        time_field: TIMESTAMP_FIELD,
         type: 'timeseries',
         filter: createFilterFromOptions(options, series),
       },

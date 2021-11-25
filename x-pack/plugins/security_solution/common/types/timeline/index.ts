@@ -272,6 +272,7 @@ export type TimelineTypeLiteralWithNull = runtimeTypes.TypeOf<typeof TimelineTyp
 export const SavedTimelineRuntimeType = runtimeTypes.partial({
   columns: unionWithNullType(runtimeTypes.array(SavedColumnHeaderRuntimeType)),
   dataProviders: unionWithNullType(runtimeTypes.array(SavedDataProviderRuntimeType)),
+  dataViewId: unionWithNullType(runtimeTypes.string),
   description: unionWithNullType(runtimeTypes.string),
   eqlOptions: unionWithNullType(EqlOptionsRuntimeType),
   eventType: unionWithNullType(runtimeTypes.string),
@@ -297,7 +298,15 @@ export const SavedTimelineRuntimeType = runtimeTypes.partial({
 
 export type SavedTimeline = runtimeTypes.TypeOf<typeof SavedTimelineRuntimeType>;
 
+export type SavedTimelineWithSavedObjectId = SavedTimeline & { savedObjectId?: string | null };
+
 export type SavedTimelineNote = runtimeTypes.TypeOf<typeof SavedTimelineRuntimeType>;
+
+/**
+ * This type represents a timeline type stored in a saved object that does not include any fields that reference
+ * other saved objects.
+ */
+export type TimelineWithoutExternalRefs = Omit<SavedTimeline, 'dataViewId' | 'savedQueryId'>;
 
 /*
  *  Timeline IDs
@@ -329,21 +338,6 @@ export const TimelineIdLiteralRt = runtimeTypes.union([
 
 export type TimelineIdLiteral = runtimeTypes.TypeOf<typeof TimelineIdLiteralRt>;
 
-/**
- * Timeline Saved object type with metadata
- */
-
-export const TimelineSavedObjectRuntimeType = runtimeTypes.intersection([
-  runtimeTypes.type({
-    id: runtimeTypes.string,
-    attributes: SavedTimelineRuntimeType,
-    version: runtimeTypes.string,
-  }),
-  runtimeTypes.partial({
-    savedObjectId: runtimeTypes.string,
-  }),
-]);
-
 export const TimelineSavedToReturnObjectRuntimeType = runtimeTypes.intersection([
   SavedTimelineRuntimeType,
   runtimeTypes.type({
@@ -370,6 +364,33 @@ export const SingleTimelineResponseType = runtimeTypes.type({
 });
 
 export type SingleTimelineResponse = runtimeTypes.TypeOf<typeof SingleTimelineResponseType>;
+
+/** Resolved Timeline Response */
+export const ResolvedTimelineSavedObjectToReturnObjectRuntimeType = runtimeTypes.intersection([
+  runtimeTypes.type({
+    timeline: TimelineSavedToReturnObjectRuntimeType,
+    outcome: runtimeTypes.union([
+      runtimeTypes.literal('exactMatch'),
+      runtimeTypes.literal('aliasMatch'),
+      runtimeTypes.literal('conflict'),
+    ]),
+  }),
+  runtimeTypes.partial({
+    alias_target_id: runtimeTypes.string,
+  }),
+]);
+
+export type ResolvedTimelineWithOutcomeSavedObject = runtimeTypes.TypeOf<
+  typeof ResolvedTimelineSavedObjectToReturnObjectRuntimeType
+>;
+
+export const ResolvedSingleTimelineResponseType = runtimeTypes.type({
+  data: ResolvedTimelineSavedObjectToReturnObjectRuntimeType,
+});
+
+export type SingleTimelineResolveResponse = runtimeTypes.TypeOf<
+  typeof ResolvedSingleTimelineResponseType
+>;
 
 /**
  * All Timeline Saved object type with metadata
@@ -699,6 +720,7 @@ export interface TimelineResult {
   created?: Maybe<number>;
   createdBy?: Maybe<string>;
   dataProviders?: Maybe<DataProviderResult[]>;
+  dataViewId?: Maybe<string>;
   dateRange?: Maybe<DateRangePickerResult>;
   description?: Maybe<string>;
   eqlOptions?: Maybe<EqlOptionsResult>;

@@ -22,10 +22,9 @@ import { StatefulBody } from '../body';
 import { Footer, footerHeight } from '../footer';
 import { requiredFieldsForActions } from '../../../../detections/components/alerts_table/default_config';
 import { EventDetailsWidthProvider } from '../../../../common/components/events_viewer/event_details_width_context';
-import { sourcererSelectors } from '../../../../common/store/sourcerer';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import { timelineDefaults } from '../../../store/timeline/defaults';
-import { useSourcererScope } from '../../../../common/containers/sourcerer';
+import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { useTimelineFullScreen } from '../../../../common/containers/use_full_screen';
 import { TimelineModel } from '../../../store/timeline/model';
 import { State } from '../../../../common/store';
@@ -37,7 +36,6 @@ import {
   ToggleDetailPanel,
 } from '../../../../../common/types/timeline';
 import { DetailsPanel } from '../../side_panel';
-import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { ExitFullScreen } from '../../../../common/components/exit_full_screen';
 import { defaultControlColumn } from '../body/control_columns';
 
@@ -115,16 +113,14 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
   showExpandedDetails,
   sort,
 }) => {
-  const { browserFields, docValueFields, loading: loadingSourcerer } = useSourcererScope(
-    SourcererScopeName.timeline
-  );
+  const {
+    browserFields,
+    docValueFields,
+    loading: loadingSourcerer,
+    runtimeMappings,
+    selectedPatterns,
+  } = useSourcererDataView(SourcererScopeName.timeline);
   const { setTimelineFullScreen, timelineFullScreen } = useTimelineFullScreen();
-
-  const existingIndexNamesSelector = useMemo(
-    () => sourcererSelectors.getAllExistingIndexNamesSelector(),
-    []
-  );
-  const existingIndexNames = useDeepEqualSelector<string[]>(existingIndexNamesSelector);
 
   const filterQuery = useMemo(() => {
     if (isEmpty(pinnedEventIds)) {
@@ -181,22 +177,21 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
     [sort]
   );
 
-  const [
-    isQueryLoading,
-    { events, totalCount, pageInfo, loadPage, updatedAt, refetch },
-  ] = useTimelineEvents({
-    docValueFields,
-    endDate: '',
-    id: `pinned-${timelineId}`,
-    indexNames: existingIndexNames,
-    fields: timelineQueryFields,
-    limit: itemsPerPage,
-    filterQuery,
-    skip: filterQuery === '',
-    startDate: '',
-    sort: timelineQuerySortField,
-    timerangeKind: undefined,
-  });
+  const [isQueryLoading, { events, totalCount, pageInfo, loadPage, updatedAt, refetch }] =
+    useTimelineEvents({
+      docValueFields,
+      endDate: '',
+      id: `pinned-${timelineId}`,
+      indexNames: selectedPatterns,
+      fields: timelineQueryFields,
+      limit: itemsPerPage,
+      filterQuery,
+      runtimeMappings,
+      skip: filterQuery === '',
+      startDate: '',
+      sort: timelineQuerySortField,
+      timerangeKind: undefined,
+    });
 
   const handleOnPanelClosed = useCallback(() => {
     onEventClosed({ tabType: TimelineTabs.pinned, timelineId });
@@ -269,6 +264,7 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
                 browserFields={browserFields}
                 docValueFields={docValueFields}
                 handleOnPanelClosed={handleOnPanelClosed}
+                runtimeMappings={runtimeMappings}
                 tabType={TimelineTabs.pinned}
                 timelineId={timelineId}
               />
@@ -284,14 +280,8 @@ const makeMapStateToProps = () => {
   const getTimeline = timelineSelectors.getTimelineByIdSelector();
   const mapStateToProps = (state: State, { timelineId }: OwnProps) => {
     const timeline: TimelineModel = getTimeline(state, timelineId) ?? timelineDefaults;
-    const {
-      columns,
-      expandedDetail,
-      itemsPerPage,
-      itemsPerPageOptions,
-      pinnedEventIds,
-      sort,
-    } = timeline;
+    const { columns, expandedDetail, itemsPerPage, itemsPerPageOptions, pinnedEventIds, sort } =
+      timeline;
 
     return {
       columns,

@@ -49,8 +49,9 @@ import {
   formulaOperation,
   FormulaIndexPatternColumn,
 } from './formula';
+import { staticValueOperation, StaticValueIndexPatternColumn } from './static_value';
 import { lastValueOperation, LastValueIndexPatternColumn } from './last_value';
-import { FrameDatasourceAPI, OperationMetadata } from '../../../types';
+import { FrameDatasourceAPI, OperationMetadata, ParamEditorCustomProps } from '../../../types';
 import type { BaseIndexPatternColumn, ReferenceBasedIndexPatternColumn } from './column_types';
 import { IndexPattern, IndexPatternField, IndexPatternLayer } from '../../types';
 import { DateRange, LayerType } from '../../../../common';
@@ -87,25 +88,26 @@ export type IndexPatternColumn =
   | DerivativeIndexPatternColumn
   | MovingAverageIndexPatternColumn
   | MathIndexPatternColumn
-  | FormulaIndexPatternColumn;
+  | FormulaIndexPatternColumn
+  | StaticValueIndexPatternColumn;
 
 export type FieldBasedIndexPatternColumn = Extract<IndexPatternColumn, { sourceField: string }>;
 
-export { IncompleteColumn } from './column_types';
+export type { IncompleteColumn } from './column_types';
 
-export { TermsIndexPatternColumn } from './terms';
-export { FiltersIndexPatternColumn } from './filters';
-export { CardinalityIndexPatternColumn } from './cardinality';
-export { PercentileIndexPatternColumn } from './percentile';
-export {
+export type { TermsIndexPatternColumn } from './terms';
+export type { FiltersIndexPatternColumn } from './filters';
+export type { CardinalityIndexPatternColumn } from './cardinality';
+export type { PercentileIndexPatternColumn } from './percentile';
+export type {
   MinIndexPatternColumn,
   AvgIndexPatternColumn,
   SumIndexPatternColumn,
   MaxIndexPatternColumn,
   MedianIndexPatternColumn,
 } from './metrics';
-export { DateHistogramIndexPatternColumn } from './date_histogram';
-export {
+export type { DateHistogramIndexPatternColumn } from './date_histogram';
+export type {
   CumulativeSumIndexPatternColumn,
   CounterRateIndexPatternColumn,
   DerivativeIndexPatternColumn,
@@ -115,10 +117,11 @@ export {
   OverallMaxIndexPatternColumn,
   OverallAverageIndexPatternColumn,
 } from './calculations';
-export { CountIndexPatternColumn } from './count';
-export { LastValueIndexPatternColumn } from './last_value';
-export { RangeIndexPatternColumn } from './ranges';
-export { FormulaIndexPatternColumn, MathIndexPatternColumn } from './formula';
+export type { CountIndexPatternColumn } from './count';
+export type { LastValueIndexPatternColumn } from './last_value';
+export type { RangeIndexPatternColumn } from './ranges';
+export type { FormulaIndexPatternColumn, MathIndexPatternColumn } from './formula';
+export type { StaticValueIndexPatternColumn } from './static_value';
 
 // List of all operation definitions registered to this data source.
 // If you want to implement a new operation, add the definition to this array and
@@ -147,6 +150,7 @@ const internalOperationDefinitions = [
   overallMinOperation,
   overallMaxOperation,
   overallAverageOperation,
+  staticValueOperation,
 ];
 
 export { termsOperation } from './terms';
@@ -168,6 +172,7 @@ export {
   overallMinOperation,
 } from './calculations';
 export { formulaOperation } from './formula/formula';
+export { staticValueOperation } from './static_value';
 
 /**
  * Properties passed to the operation-specific part of the popover editor
@@ -192,6 +197,7 @@ export interface ParamEditorProps<C> {
   data: DataPublicPluginStart;
   activeData?: IndexPatternDimensionEditorProps['activeData'];
   operationDefinitionMap: Record<string, GenericOperationDefinition>;
+  paramEditorCustomProps?: ParamEditorCustomProps;
 }
 
 export interface HelpProps<C> {
@@ -602,13 +608,11 @@ export const operationDefinitions = internalOperationDefinitions as GenericOpera
  * (e.g. `import { termsOperation } from './operations/definitions'`). This map is
  * intended to be used in situations where the operation type is not known during compile time.
  */
-export const operationDefinitionMap: Record<
-  string,
-  GenericOperationDefinition
-> = internalOperationDefinitions.reduce(
-  (definitionMap, definition) => ({ ...definitionMap, [definition.type]: definition }),
-  {}
-);
+export const operationDefinitionMap: Record<string, GenericOperationDefinition> =
+  internalOperationDefinitions.reduce(
+    (definitionMap, definition) => ({ ...definitionMap, [definition.type]: definition }),
+    {}
+  );
 
 /**
  * Cannot map the prev names, but can guarantee the new names are matching up using the type system

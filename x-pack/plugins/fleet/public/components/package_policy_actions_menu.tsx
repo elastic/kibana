@@ -24,13 +24,21 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
   packagePolicy: InMemoryPackagePolicy;
   viewDataStep?: EuiStepProps;
   showAddAgent?: boolean;
+  defaultIsOpen?: boolean;
   upgradePackagePolicyHref: string;
-}> = ({ agentPolicy, packagePolicy, viewDataStep, showAddAgent, upgradePackagePolicyHref }) => {
+}> = ({
+  agentPolicy,
+  packagePolicy,
+  viewDataStep,
+  showAddAgent,
+  upgradePackagePolicyHref,
+  defaultIsOpen = false,
+}) => {
   const [isEnrollmentFlyoutOpen, setIsEnrollmentFlyoutOpen] = useState(false);
   const { getHref } = useLink();
   const hasWriteCapabilities = useCapabilities().write;
   const refreshAgentPolicy = useAgentPolicyRefresh();
-  const [isActionsMenuOpen, setIsActionsMenuOpen] = useState(false);
+  const [isActionsMenuOpen, setIsActionsMenuOpen] = useState(defaultIsOpen);
 
   const onEnrollmentFlyoutClose = useMemo(() => {
     return () => setIsEnrollmentFlyoutOpen(false);
@@ -61,7 +69,7 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
           >
             <FormattedMessage
               id="xpack.fleet.epm.packageDetails.integrationList.addAgent"
-              defaultMessage="Add Agent"
+              defaultMessage="Add agent"
             />
           </EuiContextMenuItem>,
         ]
@@ -69,8 +77,7 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
     <EuiContextMenuItem
       disabled={!hasWriteCapabilities}
       icon="pencil"
-      href={getHref('edit_integration', {
-        policyId: agentPolicy.id,
+      href={getHref('integration_policy_edit', {
         packagePolicyId: packagePolicy.id,
       })}
       key="packagePolicyEdit"
@@ -84,10 +91,11 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
       disabled={!packagePolicy.hasUpgrade}
       icon="refresh"
       href={upgradePackagePolicyHref}
+      key="packagePolicyUpgrade"
     >
       <FormattedMessage
         id="xpack.fleet.policyDetails.packagePoliciesTable.upgradeActionTitle"
-        defaultMessage="Upgrade package policy"
+        defaultMessage="Upgrade integration policy"
       />
     </EuiContextMenuItem>,
     // FIXME: implement Copy package policy action
@@ -108,7 +116,10 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
               disabled={!hasWriteCapabilities}
               icon="trash"
               onClick={() => {
-                deletePackagePoliciesPrompt([packagePolicy.id], refreshAgentPolicy);
+                deletePackagePoliciesPrompt([packagePolicy.id], () => {
+                  setIsActionsMenuOpen(false);
+                  refreshAgentPolicy();
+                });
               }}
             >
               <FormattedMessage
@@ -135,7 +146,7 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
       <ContextMenuActions
         isOpen={isActionsMenuOpen}
         items={menuItems}
-        onChange={(isOpen) => setIsActionsMenuOpen(isOpen)}
+        onChange={(open) => setIsActionsMenuOpen(open)}
       />
     </>
   );

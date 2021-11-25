@@ -23,7 +23,7 @@ const deps: InjectDeps & ExtractDeps = {
 
 test('inject/extract panel references', () => {
   embeddablePersistableStateService.extract.mockImplementationOnce((state) => {
-    const { HARDCODED_ID, ...restOfState } = (state as unknown) as Record<string, unknown>;
+    const { HARDCODED_ID, ...restOfState } = state as unknown as Record<string, unknown>;
     return {
       state: restOfState as EmbeddableStateWithType,
       references: [{ id: HARDCODED_ID as string, name: 'refName', type: 'type' }],

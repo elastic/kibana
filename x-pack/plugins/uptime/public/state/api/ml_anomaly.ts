@@ -57,10 +57,12 @@ export const createMLJob = async ({
   const response: DataRecognizerConfigResponse = await apiService.post(url, data);
   if (response?.jobs?.[0]?.id === getMLJobId(monitorId)) {
     const jobResponse = response.jobs[0];
+    const datafeedResponse = response.datafeeds[0];
     if (jobResponse.success) {
       return {
         count: 1,
         jobId: jobResponse.id,
+        awaitingNodeAssignment: datafeedResponse.awaitingMlNodeAllocation === true,
       };
     } else {
       const { error } = jobResponse;

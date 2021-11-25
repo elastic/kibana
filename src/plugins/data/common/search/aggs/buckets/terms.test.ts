@@ -10,8 +10,8 @@ import { AggConfigs } from '../agg_configs';
 import { METRIC_TYPES } from '../metrics';
 import { mockAggTypesRegistry } from '../test_helpers';
 import { BUCKET_TYPES } from './bucket_agg_types';
-import type { IndexPatternField } from '../../../index_patterns';
-import { IndexPattern } from '../../../index_patterns/index_patterns/index_pattern';
+import type { IndexPatternField } from '../../..';
+import { IndexPattern } from '../../..';
 
 describe('Terms Agg', () => {
   describe('order agg editor UI', () => {
@@ -55,7 +55,7 @@ describe('Terms Agg', () => {
         ],
       } as IndexPattern;
 
-      indexPattern.fields.getByName = (name) => (({ name } as unknown) as IndexPatternField);
+      indexPattern.fields.getByName = (name) => ({ name } as unknown as IndexPatternField);
       indexPattern.fields.filter = () => indexPattern.fields;
 
       return new AggConfigs(
@@ -257,7 +257,7 @@ describe('Terms Agg', () => {
         ],
       } as IndexPattern;
 
-      indexPattern.fields.getByName = (name) => (({ name } as unknown) as IndexPatternField);
+      indexPattern.fields.getByName = (name) => ({ name } as unknown as IndexPatternField);
       indexPattern.fields.filter = () => indexPattern.fields;
 
       const aggConfigs = new AggConfigs(
@@ -286,7 +286,19 @@ describe('Terms Agg', () => {
         { typesRegistry: mockAggTypesRegistry() }
       );
       const { [BUCKET_TYPES.TERMS]: params } = aggConfigs.aggs[0].toDsl();
+
       expect(params.order).toEqual({ 'test-orderAgg.50': 'desc' });
+    });
+
+    test('should override "hasPrecisionError" for the "terms" bucket type', () => {
+      const aggConfigs = getAggConfigs();
+      const { type } = aggConfigs.aggs[0];
+
+      expect(type.hasPrecisionError).toBeInstanceOf(Function);
+
+      expect(type.hasPrecisionError!({})).toBeFalsy();
+      expect(type.hasPrecisionError!({ doc_count_error_upper_bound: 0 })).toBeFalsy();
+      expect(type.hasPrecisionError!({ doc_count_error_upper_bound: -1 })).toBeTruthy();
     });
   });
 });

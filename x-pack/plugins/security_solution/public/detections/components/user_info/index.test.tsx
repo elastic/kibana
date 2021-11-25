@@ -17,7 +17,7 @@ import { UserPrivilegesProvider } from '../../../common/components/user_privileg
 
 jest.mock('../../../common/lib/kibana');
 jest.mock('../../containers/detection_engine/alerts/api');
-jest.mock('../../../common/components/user_privileges/use_endpoint_privileges');
+jest.mock('../../../common/components/user_privileges/endpoint/use_endpoint_privileges');
 
 describe('useUserInfo', () => {
   beforeAll(() => {
@@ -69,9 +69,7 @@ describe('useUserInfo', () => {
     const wrapper = ({ children }: { children: JSX.Element }) => (
       <TestProviders>
         <UserPrivilegesProvider
-          kibanaCapabilities={
-            ({ siem: { crud_alerts: true, read_alerts: true } } as unknown) as Capabilities
-          }
+          kibanaCapabilities={{ siem: { show: true, crud: true } } as unknown as Capabilities}
         >
           <ManageUserInfo>{children}</ManageUserInfo>
         </UserPrivilegesProvider>

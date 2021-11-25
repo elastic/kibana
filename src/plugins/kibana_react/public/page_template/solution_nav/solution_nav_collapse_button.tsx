@@ -13,46 +13,44 @@ import classNames from 'classnames';
 import { EuiButtonIcon, EuiButtonIconPropsForButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-export type KibanaPageTemplateSolutionNavCollapseButtonProps = Partial<EuiButtonIconPropsForButton> & {
-  /**
-   * Boolean state of current collapsed status
-   */
-  isCollapsed: boolean;
-};
+export type KibanaPageTemplateSolutionNavCollapseButtonProps =
+  Partial<EuiButtonIconPropsForButton> & {
+    /**
+     * Boolean state of current collapsed status
+     */
+    isCollapsed: boolean;
+  };
 
 /**
  * Creates the styled icon button for showing/hiding solution nav
  */
-export const KibanaPageTemplateSolutionNavCollapseButton: FunctionComponent<KibanaPageTemplateSolutionNavCollapseButtonProps> = ({
-  className,
-  isCollapsed,
-  ...rest
-}) => {
-  const classes = classNames(
-    'kbnPageTemplateSolutionNavCollapseButton',
-    {
-      'kbnPageTemplateSolutionNavCollapseButton-isCollapsed': isCollapsed,
-    },
-    className
-  );
+export const KibanaPageTemplateSolutionNavCollapseButton: FunctionComponent<KibanaPageTemplateSolutionNavCollapseButtonProps> =
+  ({ className, isCollapsed, ...rest }) => {
+    const classes = classNames(
+      'kbnPageTemplateSolutionNavCollapseButton',
+      {
+        'kbnPageTemplateSolutionNavCollapseButton-isCollapsed': isCollapsed,
+      },
+      className
+    );
 
-  const collapseLabel = i18n.translate('kibana-react.solutionNav.collapsibleLabel', {
-    defaultMessage: 'Collapse side navigation',
-  });
+    const collapseLabel = i18n.translate('kibana-react.solutionNav.collapsibleLabel', {
+      defaultMessage: 'Collapse side navigation',
+    });
 
-  const openLabel = i18n.translate('kibana-react.solutionNav.openLabel', {
-    defaultMessage: 'Open side navigation',
-  });
+    const openLabel = i18n.translate('kibana-react.solutionNav.openLabel', {
+      defaultMessage: 'Open side navigation',
+    });
 
-  return (
-    <EuiButtonIcon
-      className={classes}
-      size="s"
-      color="text"
-      iconType={isCollapsed ? 'menuRight' : 'menuLeft'}
-      aria-label={isCollapsed ? openLabel : collapseLabel}
-      title={isCollapsed ? openLabel : collapseLabel}
-      {...rest}
-    />
-  );
-};
+    return (
+      <EuiButtonIcon
+        className={classes}
+        size="s"
+        color="text"
+        iconType={isCollapsed ? 'menuRight' : 'menuLeft'}
+        aria-label={isCollapsed ? openLabel : collapseLabel}
+        title={isCollapsed ? openLabel : collapseLabel}
+        {...rest}
+      />
+    );
+  };

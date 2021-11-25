@@ -9,7 +9,7 @@
 import { IpFormat } from './ip';
 
 describe('IP Address Format', () => {
-  let ip: Record<string, any>;
+  let ip: IpFormat;
 
   beforeEach(() => {
     ip = new IpFormat({}, jest.fn());

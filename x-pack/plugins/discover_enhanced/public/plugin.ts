@@ -12,7 +12,6 @@ import { APPLY_FILTER_TRIGGER } from '../../../../src/plugins/data/public';
 import { createStartServicesGetter } from '../../../../src/plugins/kibana_utils/public';
 import { DiscoverSetup, DiscoverStart } from '../../../../src/plugins/discover/public';
 import { SharePluginSetup, SharePluginStart } from '../../../../src/plugins/share/public';
-import { KibanaLegacySetup, KibanaLegacyStart } from '../../../../src/plugins/kibana_legacy/public';
 import {
   EmbeddableSetup,
   EmbeddableStart,
@@ -24,7 +23,6 @@ import { Config } from '../common';
 export interface DiscoverEnhancedSetupDependencies {
   discover: DiscoverSetup;
   embeddable: EmbeddableSetup;
-  kibanaLegacy?: KibanaLegacySetup;
   share?: SharePluginSetup;
   uiActions: UiActionsSetup;
 }
@@ -32,14 +30,14 @@ export interface DiscoverEnhancedSetupDependencies {
 export interface DiscoverEnhancedStartDependencies {
   discover: DiscoverStart;
   embeddable: EmbeddableStart;
-  kibanaLegacy?: KibanaLegacyStart;
   share?: SharePluginStart;
   uiActions: UiActionsStart;
 }
 
 export class DiscoverEnhancedPlugin
   implements
-    Plugin<void, void, DiscoverEnhancedSetupDependencies, DiscoverEnhancedStartDependencies> {
+    Plugin<void, void, DiscoverEnhancedSetupDependencies, DiscoverEnhancedStartDependencies>
+{
   public readonly config: Config;
 
   constructor(protected readonly context: PluginInitializerContext) {

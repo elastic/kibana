@@ -426,7 +426,7 @@ describe('PrivilegeSummaryTable', () => {
           with_sub_features: {
             'default, space-1': {
               hasCustomizedSubFeaturePrivileges: allowSubFeaturePrivileges,
-              primaryFeaturePrivilege: allowSubFeaturePrivileges ? 'Read' : 'None',
+              primaryFeaturePrivilege: 'Read',
               ...maybeExpectSubFeaturePrivileges(allowSubFeaturePrivileges, {
                 'Cool Sub Feature': [],
               }),
@@ -693,7 +693,7 @@ describe('PrivilegeSummaryTable', () => {
           with_sub_features: {
             '*': {
               hasCustomizedSubFeaturePrivileges: allowSubFeaturePrivileges,
-              primaryFeaturePrivilege: allowSubFeaturePrivileges ? 'Read' : 'None',
+              primaryFeaturePrivilege: 'Read',
               ...maybeExpectSubFeaturePrivileges(allowSubFeaturePrivileges, {
                 'Cool Sub Feature': ['All'],
               }),
@@ -787,7 +787,7 @@ describe('PrivilegeSummaryTable', () => {
           with_sub_features: {
             '*': {
               hasCustomizedSubFeaturePrivileges: allowSubFeaturePrivileges,
-              primaryFeaturePrivilege: allowSubFeaturePrivileges ? 'Read' : 'None',
+              primaryFeaturePrivilege: 'Read',
               ...maybeExpectSubFeaturePrivileges(allowSubFeaturePrivileges, {
                 'Cool Sub Feature': ['All'],
               }),
@@ -859,7 +859,7 @@ describe('PrivilegeSummaryTable', () => {
             },
             'space-1, space-2': {
               hasCustomizedSubFeaturePrivileges: allowSubFeaturePrivileges,
-              primaryFeaturePrivilege: allowSubFeaturePrivileges ? 'All' : 'None',
+              primaryFeaturePrivilege: 'All',
               ...maybeExpectSubFeaturePrivileges(allowSubFeaturePrivileges, {
                 'Cool Sub Feature': ['Cool toggle 2'],
               }),

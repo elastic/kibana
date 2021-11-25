@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-/* eslint-disable react/display-name */
-
 import React from 'react';
 import { EuiButtonIcon, EuiBasicTableColumn, EuiToolTip } from '@elastic/eui';
 
 import type { NamespaceType } from '@kbn/securitysolution-io-ts-list-types';
+import { DEFAULT_RELATIVE_DATE_THRESHOLD } from '../../../../../../../common/constants';
 import { FormatUrl } from '../../../../../../common/components/link_to';
+import { FormattedRelativePreferenceDate } from '../../../../../../common/components/formatted_date';
+
 import * as i18n from './translations';
 import { ExceptionListInfo } from './use_all_exception_lists';
 import { ExceptionOverflowDisplay } from './exceptions_overflow_display';
@@ -86,6 +87,14 @@ export const getAllExceptionListsColumns = (
     truncateText: true,
     dataType: 'date',
     width: '14%',
+    render: (value: ExceptionListInfo['created_at']) => (
+      <FormattedRelativePreferenceDate
+        relativeThresholdInHrs={DEFAULT_RELATIVE_DATE_THRESHOLD}
+        value={value}
+        tooltipFieldName={i18n.LIST_DATE_CREATED_TITLE}
+        tooltipAnchorClassName="eui-textTruncate"
+      />
+    ),
   },
   {
     align: 'left',
@@ -93,6 +102,14 @@ export const getAllExceptionListsColumns = (
     name: i18n.LIST_DATE_UPDATED_TITLE,
     truncateText: true,
     width: '14%',
+    render: (value: ExceptionListInfo['updated_at']) => (
+      <FormattedRelativePreferenceDate
+        relativeThresholdInHrs={DEFAULT_RELATIVE_DATE_THRESHOLD}
+        value={value}
+        tooltipFieldName={i18n.LIST_DATE_UPDATED_TITLE}
+        tooltipAnchorClassName="eui-textTruncate"
+      />
+    ),
   },
   {
     align: 'center',

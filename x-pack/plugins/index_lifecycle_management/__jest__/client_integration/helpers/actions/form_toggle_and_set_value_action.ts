@@ -9,14 +9,11 @@ import { TestBed } from '@kbn/test/jest';
 import { createFormToggleAction } from './form_toggle_action';
 import { createFormSetValueAction } from './form_set_value_action';
 
-export const createFormToggleAndSetValueAction = (
-  testBed: TestBed,
-  toggleSelector: string,
-  inputSelector: string
-) => async (value: string) => {
-  const { exists } = testBed;
-  if (!exists(inputSelector)) {
-    await createFormToggleAction(testBed, toggleSelector)();
-  }
-  await createFormSetValueAction(testBed, inputSelector)(value);
-};
+export const createFormToggleAndSetValueAction =
+  (testBed: TestBed, toggleSelector: string, inputSelector: string) => async (value: string) => {
+    const { exists } = testBed;
+    if (!exists(inputSelector)) {
+      await createFormToggleAction(testBed, toggleSelector)();
+    }
+    await createFormSetValueAction(testBed, inputSelector)(value);
+  };

@@ -16,14 +16,10 @@ export const config: PluginConfigDescriptor<ConfigSchema> = {
     enableExternalUrls: true,
   },
   schema: configSchema,
-  deprecations: ({ renameFromRoot }) => [
-    renameFromRoot('vega.enableExternalUrls', 'vis_type_vega.enableExternalUrls'),
-    renameFromRoot('vega.enabled', 'vis_type_vega.enabled'),
-  ],
 };
 
 export function plugin(initializerContext: PluginInitializerContext) {
   return new VisTypeVegaPlugin(initializerContext);
 }
 
-export { VisTypeVegaPluginStart, VisTypeVegaPluginSetup } from './types';
+export type { VisTypeVegaPluginStart, VisTypeVegaPluginSetup } from './types';

@@ -22,15 +22,12 @@ import {
   AxisMode,
   ThresholdLineStyle,
   InterpolationMode,
-  XyVisTypeDefinition,
 } from '../types';
 import { toExpressionAst } from '../to_ast';
 import { ChartType } from '../../common';
-import { getOptionTabs } from '../editor/common_config';
+import { optionTabs } from '../editor/common_config';
 
-export const getAreaVisTypeDefinition = (
-  showElasticChartsOptions = false
-): XyVisTypeDefinition => ({
+export const areaVisTypeDefinition = {
   name: 'area',
   title: i18n.translate('visTypeXy.area.areaTitle', { defaultMessage: 'Area' }),
   icon: 'visArea',
@@ -77,11 +74,11 @@ export const getAreaVisTypeDefinition = (
           labels: {
             show: true,
             rotate: LabelRotation.Horizontal,
-            filter: false,
+            filter: true,
             truncate: 100,
           },
           title: {
-            text: defaultCountLabel,
+            text: '',
           },
           style: {},
         },
@@ -128,7 +125,7 @@ export const getAreaVisTypeDefinition = (
     },
   },
   editorConfig: {
-    optionTabs: getOptionTabs(showElasticChartsOptions),
+    optionTabs,
     schemas: [
       {
         group: AggGroupNames.Metrics,
@@ -183,4 +180,4 @@ export const getAreaVisTypeDefinition = (
     ],
   },
   requiresSearch: true,
-});
+};

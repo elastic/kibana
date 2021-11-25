@@ -11,11 +11,11 @@ import { UXMetrics } from './UXMetrics';
 import { ImpactfulMetrics } from './ImpactfulMetrics';
 import { PageLoadAndViews } from './Panels/PageLoadAndViews';
 import { VisitorBreakdownsPanel } from './Panels/VisitorBreakdowns';
-import { useBreakPoints } from '../../../hooks/use_break_points';
+import { useBreakpoints } from '../../../hooks/use_breakpoints';
 import { ClientMetrics } from './ClientMetrics';
 
 export function RumDashboard() {
-  const { isSmall } = useBreakPoints();
+  const { isSmall } = useBreakpoints();
 
   return (
     <EuiFlexGroup direction={isSmall ? 'row' : 'column'} gutterSize="s">

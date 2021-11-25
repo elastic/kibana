@@ -6,5 +6,4 @@
  * Side Public License, v 1.
  */
 
-export const DIMMING_OPACITY_SETTING = 'visualization:dimmingOpacity';
 export const HEATMAP_MAX_BUCKETS_SETTING = 'visualization:heatmap:maxBuckets';

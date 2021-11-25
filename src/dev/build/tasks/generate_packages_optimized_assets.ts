@@ -6,10 +6,12 @@
  * Side Public License, v 1.
  */
 
+import Path from 'path';
+
 import { pipeline } from 'stream';
 import { promisify } from 'util';
-
 import fs from 'fs';
+
 import gulpBrotli from 'gulp-brotli';
 // @ts-expect-error
 import gulpGzip from 'gulp-gzip';
@@ -17,184 +19,175 @@ import gulpGzip from 'gulp-gzip';
 import gulpPostCSS from 'gulp-postcss';
 // @ts-expect-error
 import gulpTerser from 'gulp-terser';
+import { ToolingLog } from '@kbn/dev-utils';
 import terser from 'terser';
 import vfs from 'vinyl-fs';
+import globby from 'globby';
+import del from 'del';
 
-import { ToolingLog } from '@kbn/dev-utils';
-import { Task, Build, write, deleteAll } from '../lib';
+import { Task, write } from '../lib';
 
+const EUI_THEME_RE = /\.v\d\.(light|dark)\.css$/;
+const ASYNC_CHUNK_RE = /\.chunk\.\d+\.js$/;
 const asyncPipeline = promisify(pipeline);
-const asyncStat = promisify(fs.stat);
 
-const removePreMinifySourceMaps = async (log: ToolingLog, build: Build) => {
-  log.debug('Remove Pre Minify Sourcemaps');
+const getSize = (paths: string[]) => paths.reduce((acc, path) => acc + fs.statSync(path).size, 0);
 
-  await deleteAll(
-    [build.resolvePath('node_modules/@kbn/ui-shared-deps/shared_built_assets', '**', '*.map')],
-    log
-  );
+async function optimizeAssets(log: ToolingLog, assetDir: string) {
+  log.info('Creating optimized assets for', assetDir);
+  log.indent(4);
+  try {
+    log.debug('Remove Pre Minify Sourcemaps');
+    await del(['**/*.map'], { cwd: assetDir });
+
+    log.debug('Minify CSS');
+    await asyncPipeline(
+      vfs.src(['**/*.css'], { cwd: assetDir }),
+      gulpPostCSS([
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        require('cssnano')({
+          preset: ['default', { discardComments: false }],
+        }),
+      ]),
+      vfs.dest(assetDir)
+    );
+
+    log.debug('Minify JS');
+    await asyncPipeline(
+      vfs.src(['**/*.js'], { cwd: assetDir }),
+      gulpTerser({ compress: true, mangle: true }, terser.minify),
+      vfs.dest(assetDir)
+    );
+
+    log.debug('Brotli compress');
+    await asyncPipeline(
+      vfs.src(['**/*.{js,css}'], { cwd: assetDir }),
+      gulpBrotli(),
+      vfs.dest(assetDir)
+    );
+
+    log.debug('GZip compress');
+    await asyncPipeline(
+      vfs.src(['**/*.{js,css}'], { cwd: assetDir }),
+      gulpGzip(),
+      vfs.dest(assetDir)
+    );
+  } finally {
+    log.indent(-4);
+  }
+}
+
+type Category = ReturnType<typeof getCategory>;
+const getCategory = (relative: string) => {
+  if (EUI_THEME_RE.test(relative)) {
+    return 'euiTheme';
+  }
+
+  if (relative.endsWith('.css')) {
+    return 'css';
+  }
+
+  if (relative.endsWith('.ttf')) {
+    return 'font';
+  }
+
+  if (ASYNC_CHUNK_RE.test(relative)) {
+    return 'asyncChunk';
+  }
+
+  if (relative.includes('kbn-ui-shared-deps-npm')) {
+    return 'npm';
+  }
+
+  if (relative.includes('kbn-ui-shared-deps-src')) {
+    return 'src';
+  }
+
+  throw new Error(`unable to categorize file [${relative}]`);
 };
 
-const minifyKbnUiSharedDepsCSS = async (log: ToolingLog, build: Build) => {
-  const buildRoot = build.resolvePath();
-
-  log.debug('Minify CSS');
-
-  await asyncPipeline(
-    vfs.src(['node_modules/@kbn/ui-shared-deps/shared_built_assets/**/*.css'], {
-      cwd: buildRoot,
-    }),
-
-    gulpPostCSS([
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
-      require('cssnano')({
-        preset: [
-          'default',
-          {
-            discardComments: false,
-          },
-        ],
-      }),
-    ]),
-
-    vfs.dest('node_modules/@kbn/ui-shared-deps/shared_built_assets', { cwd: buildRoot })
-  );
-};
-
-const minifyKbnUiSharedDepsJS = async (log: ToolingLog, build: Build) => {
-  const buildRoot = build.resolvePath();
-
-  log.debug('Minify JS');
-
-  await asyncPipeline(
-    vfs.src(['node_modules/@kbn/ui-shared-deps/shared_built_assets/**/*.js'], {
-      cwd: buildRoot,
-    }),
-
-    gulpTerser(
-      {
-        compress: true,
-        mangle: true,
-      },
-      terser.minify
-    ),
-
-    vfs.dest('node_modules/@kbn/ui-shared-deps/shared_built_assets', { cwd: buildRoot })
-  );
-};
-
-const brotliCompressKbnUiSharedDeps = async (log: ToolingLog, build: Build) => {
-  const buildRoot = build.resolvePath();
-
-  log.debug('Brotli compress');
-
-  await asyncPipeline(
-    vfs.src(['node_modules/@kbn/ui-shared-deps/shared_built_assets/**/*.{js,css}'], {
-      cwd: buildRoot,
-    }),
-
-    gulpBrotli(),
-
-    vfs.dest('node_modules/@kbn/ui-shared-deps/shared_built_assets', { cwd: buildRoot })
-  );
-};
-
-const gzipCompressKbnUiSharedDeps = async (log: ToolingLog, build: Build) => {
-  const buildRoot = build.resolvePath();
-
-  log.debug('GZip compress');
-
-  await asyncPipeline(
-    vfs.src(['node_modules/@kbn/ui-shared-deps/shared_built_assets/**/*.{js,css}'], {
-      cwd: buildRoot,
-    }),
-
-    gulpGzip(),
-
-    vfs.dest('node_modules/@kbn/ui-shared-deps/shared_built_assets', { cwd: buildRoot })
-  );
-};
-
-const createKbnUiSharedDepsBundleMetrics = async (log: ToolingLog, build: Build) => {
-  const bundleMetricsFilePath = build.resolvePath(
-    'node_modules/@kbn/ui-shared-deps/shared_built_assets',
-    'metrics.json'
+function categorizeAssets(assetDirs: string[]) {
+  const assets = assetDirs.flatMap((assetDir) =>
+    globby
+      .sync(['**/*'], {
+        cwd: assetDir,
+        ignore: ['*-manifest.json', '*.gz', '*.br'],
+        absolute: true,
+      })
+      .map((path): { path: string; category: Category } => ({
+        path,
+        category: getCategory(Path.relative(assetDir, path)),
+      }))
   );
 
-  const kbnUISharedDepsJSFileSize = (
-    await asyncStat(
-      build.resolvePath(
-        'node_modules/@kbn/ui-shared-deps/shared_built_assets',
-        'kbn-ui-shared-deps.js'
-      )
-    )
-  ).size;
+  const groups = new Map<Category, string[]>();
+  const add = (cat: Category, path: string) => {
+    const group = groups.get(cat) ?? [];
+    group.push(path);
+    groups.set(cat, group);
+  };
 
-  const kbnUISharedDepsCSSFileSize =
-    (
-      await asyncStat(
-        build.resolvePath(
-          'node_modules/@kbn/ui-shared-deps/shared_built_assets',
-          'kbn-ui-shared-deps.css'
-        )
-      )
-    ).size +
-    (
-      await asyncStat(
-        build.resolvePath(
-          'node_modules/@kbn/ui-shared-deps/shared_built_assets',
-          'kbn-ui-shared-deps.v7.light.css'
-        )
-      )
-    ).size;
+  for (const { path, category } of assets) {
+    if (category === 'euiTheme') {
+      // only track v8.light theme
+      if (path.includes('v8.light')) {
+        add('css', path);
+      }
+      continue;
+    }
 
-  const kbnUISharedDepsElasticJSFileSize = (
-    await asyncStat(
-      build.resolvePath(
-        'node_modules/@kbn/ui-shared-deps/shared_built_assets',
-        'kbn-ui-shared-deps.@elastic.js'
-      )
-    )
-  ).size;
+    add(category, path);
+  }
 
-  log.debug('Create metrics.json');
-
-  const metrics = [
-    {
-      group: 'page load bundle size',
-      id: 'kbnUiSharedDeps-js',
-      value: kbnUISharedDepsJSFileSize,
-    },
-    {
-      group: 'page load bundle size',
-      id: 'kbnUiSharedDeps-css',
-      value: kbnUISharedDepsCSSFileSize,
-    },
-    {
-      group: 'page load bundle size',
-      id: 'kbnUiSharedDeps-elastic',
-      value: kbnUISharedDepsElasticJSFileSize,
-    },
-  ];
-
-  await write(bundleMetricsFilePath, JSON.stringify(metrics, null, 2));
-};
-
-const generateKbnUiSharedDepsOptimizedAssets = async (log: ToolingLog, build: Build) => {
-  log.info('Creating optimized assets for @kbn/ui-shared-deps');
-  await removePreMinifySourceMaps(log, build);
-  await minifyKbnUiSharedDepsCSS(log, build);
-  await minifyKbnUiSharedDepsJS(log, build);
-  await createKbnUiSharedDepsBundleMetrics(log, build);
-  await brotliCompressKbnUiSharedDeps(log, build);
-  await gzipCompressKbnUiSharedDeps(log, build);
-};
+  return groups;
+}
 
 export const GeneratePackagesOptimizedAssets: Task = {
   description: 'Generates Optimized Assets for Packages',
 
   async run(config, log, build) {
-    // Create optimized assets for @kbn/ui-shared-deps
-    await generateKbnUiSharedDepsOptimizedAssets(log, build);
+    const npmAssetDir = build.resolvePath(
+      `node_modules/@kbn/ui-shared-deps-npm/shared_built_assets`
+    );
+    const srcAssetDir = build.resolvePath(
+      `node_modules/@kbn/ui-shared-deps-src/shared_built_assets`
+    );
+    const assetDirs = [npmAssetDir, srcAssetDir];
+
+    // process assets in each ui-shared-deps package
+    for (const assetDir of assetDirs) {
+      await optimizeAssets(log, assetDir);
+    }
+
+    // analyze assets to produce metrics.json file
+    const groups = categorizeAssets(assetDirs);
+    log.verbose('categorized assets', groups);
+    const metrics = [
+      {
+        group: 'page load bundle size',
+        id: 'kbnUiSharedDeps-npmDll',
+        value: getSize(groups.get('npm') ?? []),
+      },
+      {
+        group: 'page load bundle size',
+        id: 'kbnUiSharedDeps-srcJs',
+        value: getSize(groups.get('src') ?? []),
+      },
+      {
+        group: 'page load bundle size',
+        id: 'kbnUiSharedDeps-css',
+        value: getSize(groups.get('css') ?? []),
+      },
+      {
+        group: 'page load bundle size',
+        id: 'kbnUiSharedDeps-fonts',
+        value: getSize(groups.get('font') ?? []),
+      },
+    ];
+    log.verbose('metrics:', metrics);
+
+    // write unified metrics to the @kbn/ui-shared-deps-src asset dir
+    log.debug('Create metrics.json');
+    await write(Path.resolve(srcAssetDir, 'metrics.json'), JSON.stringify(metrics, null, 2));
   },
 };

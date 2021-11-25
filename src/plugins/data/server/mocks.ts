@@ -15,7 +15,7 @@ import {
   createFieldFormatsSetupMock,
   createFieldFormatsStartMock,
 } from '../../field_formats/server/mocks';
-import { createIndexPatternsStartMock } from './index_patterns/mocks';
+import { createIndexPatternsStartMock } from './data_views/mocks';
 import { DataRequestHandlerContext } from './search';
 
 function createSetupContract() {
@@ -40,9 +40,9 @@ function createStartContract() {
 }
 
 function createRequestHandlerContext() {
-  return ({
+  return {
     search: createSearchRequestHandlerContext(),
-  } as unknown) as jest.Mocked<DataRequestHandlerContext>;
+  } as unknown as jest.Mocked<DataRequestHandlerContext>;
 }
 
 export const dataPluginMock = {

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Assign } from '@kbn/utility-types';
 import { Spec } from 'vega';
 import { EsQueryParser } from './es_query_parser';
@@ -192,7 +192,6 @@ export type EmsQueryRequest = Requests & {
 export interface ContextVarsObject {
   [index: string]: any;
   prop: ContextVarsObjectProps;
-  interval: string;
 }
 
 export interface TooltipConfig {

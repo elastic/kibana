@@ -104,7 +104,6 @@ function getTimeseriesexplorerDefaultState() {
     entitiesLoading: false,
     entityValues: {},
     focusAnnotationData: [],
-    focusAggregations: {},
     focusAggregationInterval: {},
     focusChartData: undefined,
     focusForecastData: undefined,
@@ -264,12 +263,8 @@ export class TimeSeriesExplorer extends React.Component {
    * Gets focus data for the current component state/
    */
   getFocusData(selection) {
-    const {
-      selectedJobId,
-      selectedForecastId,
-      selectedDetectorIndex,
-      functionDescription,
-    } = this.props;
+    const { selectedJobId, selectedForecastId, selectedDetectorIndex, functionDescription } =
+      this.props;
     const { modelPlotEnabled } = this.state;
     const selectedJob = mlJobService.getJob(selectedJobId);
     if (isMetricDetector(selectedJob, selectedDetectorIndex) && functionDescription === undefined) {
@@ -725,9 +720,7 @@ export class TimeSeriesExplorer extends React.Component {
       appStateHandler(APP_STATE_ACTION.SET_DETECTOR_INDEX, detectorId);
     }
     // Populate the map of jobs / detectors / field formatters for the selected IDs and refresh.
-    mlFieldFormatService.populateFormats([jobId]).catch((err) => {
-      console.log('Error populating field formats:', err);
-    });
+    mlFieldFormatService.populateFormats([jobId]);
   }
 
   componentDidMount() {
@@ -939,7 +932,6 @@ export class TimeSeriesExplorer extends React.Component {
       focusAggregationInterval,
       focusAnnotationError,
       focusAnnotationData,
-      focusAggregations,
       focusChartData,
       focusForecastData,
       fullRefresh,
@@ -1176,9 +1168,13 @@ export class TimeSeriesExplorer extends React.Component {
                     <EuiFlexItem grow={false}>
                       <EuiCheckbox
                         id="toggleShowForecastCheckbox"
-                        label={i18n.translate('xpack.ml.timeSeriesExplorer.showForecastLabel', {
-                          defaultMessage: 'show forecast',
-                        })}
+                        label={
+                          <span data-test-subj={'mlForecastCheckbox'}>
+                            {i18n.translate('xpack.ml.timeSeriesExplorer.showForecastLabel', {
+                              defaultMessage: 'show forecast',
+                            })}
+                          </span>
+                        }
                         checked={showForecast}
                         onChange={this.toggleShowForecastHandler}
                       />
@@ -1261,7 +1257,6 @@ export class TimeSeriesExplorer extends React.Component {
                       detectors={detectors}
                       jobIds={[this.props.selectedJobId]}
                       annotations={focusAnnotationData}
-                      aggregations={focusAggregations}
                       isSingleMetricViewerLinkVisible={false}
                       isNumberBadgeVisible={true}
                     />

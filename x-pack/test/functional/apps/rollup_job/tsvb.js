@@ -43,6 +43,7 @@ export default function ({ getService, getPageObjects }) {
       await kibanaServer.uiSettings.replace({
         defaultIndex: 'rollup',
       });
+      await kibanaServer.uiSettings.update({ 'metrics:allowStringIndices': true });
     });
 
     it('create rollup tsvb', async () => {
@@ -110,6 +111,7 @@ export default function ({ getService, getPageObjects }) {
       await kibanaServer.importExport.unload(
         'x-pack/test/functional/fixtures/kbn_archiver/rollup/rollup.json'
       );
+      await kibanaServer.uiSettings.update({ 'metrics:allowStringIndices': false });
       await security.testUser.restoreDefaults();
     });
   });

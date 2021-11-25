@@ -102,12 +102,19 @@ import {
   waitForAlertsToPopulate,
   waitForTheRuleToBeExecuted,
 } from '../../tasks/create_new_rule';
+import {
+  SCHEDULE_INTERVAL_AMOUNT_INPUT,
+  SCHEDULE_INTERVAL_UNITS_INPUT,
+  SCHEDULE_LOOKBACK_AMOUNT_INPUT,
+  SCHEDULE_LOOKBACK_UNITS_INPUT,
+} from '../../screens/create_new_rule';
 import { goBackToRuleDetails, waitForKibana } from '../../tasks/edit_rule';
 import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
 import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
 import { goBackToAllRulesTable } from '../../tasks/rule_details';
 
 import { ALERTS_URL, RULE_CREATION } from '../../urls/navigation';
+const DEFAULT_THREAT_MATCH_QUERY = '@timestamp >= "now-30d"';
 
 describe('indicator match', () => {
   describe('Detection rules, Indicator Match', () => {
@@ -180,8 +187,8 @@ describe('indicator match', () => {
       });
 
       describe('custom indicator query input', () => {
-        it('Has a default set of *:*', () => {
-          getCustomIndicatorQueryInput().should('have.text', '*:*');
+        it(`Has a default set of ${DEFAULT_THREAT_MATCH_QUERY}`, () => {
+          getCustomIndicatorQueryInput().should('have.text', DEFAULT_THREAT_MATCH_QUERY);
         });
 
         it('Shows invalidation text if text is removed', () => {
@@ -382,6 +389,19 @@ describe('indicator match', () => {
           getIndicatorMappingComboField(2).should('not.exist');
         });
       });
+
+      describe('Schedule', () => {
+        it('IM rule has 1h time interval and lookback by default', () => {
+          selectIndicatorMatchType();
+          fillDefineIndicatorMatchRuleAndContinue(getNewThreatIndicatorRule());
+          fillAboutRuleAndContinue(getNewThreatIndicatorRule());
+
+          cy.get(SCHEDULE_INTERVAL_AMOUNT_INPUT).invoke('val').should('eql', '1');
+          cy.get(SCHEDULE_INTERVAL_UNITS_INPUT).invoke('val').should('eql', 'h');
+          cy.get(SCHEDULE_LOOKBACK_AMOUNT_INPUT).invoke('val').should('eql', '5');
+          cy.get(SCHEDULE_LOOKBACK_UNITS_INPUT).invoke('val').should('eql', 'm');
+        });
+      });
     });
 
     describe('Generating signals', () => {
@@ -390,7 +410,8 @@ describe('indicator match', () => {
         loginAndWaitForPageWithoutDateRange(ALERTS_URL);
       });
 
-      it('Creates and activates a new Indicator Match rule', () => {
+      // Skipping until we fix dupe mitigation
+      it.skip('Creates and activates a new Indicator Match rule', () => {
         waitForAlertsPanelToBeLoaded();
         waitForAlertsIndexToBeCreated();
         goToManageAlertsDetectionRules();
@@ -488,7 +509,7 @@ describe('indicator match', () => {
           .should('have.text', getNewThreatIndicatorRule().riskScore);
       });
 
-      it('Investigate alert in timeline', () => {
+      it.skip('Investigate alert in timeline', () => {
         const accessibilityText = `Press enter for options, or press space to begin dragging.`;
 
         loadPrepackagedTimelineTemplates();

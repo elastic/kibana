@@ -157,7 +157,7 @@ const savedObject = resolveResult.saved_object;
 TIP: See an example of this in https://github.com/elastic/kibana/pull/107256#user-content-example-steps[step 2 of the POC]!
 
 The
-https://github.com/elastic/kibana/blob/master/docs/development/core/server/kibana-plugin-core-server.savedobjectsresolveresponse.md[SavedObjectsResolveResponse
+https://github.com/elastic/kibana/blob/main/docs/development/core/server/kibana-plugin-core-server.savedobjectsresolveresponse.md[SavedObjectsResolveResponse
 interface] has three fields, summarized below:
 
 * `saved_object` - The saved object that was found.
@@ -235,9 +235,7 @@ export class MyPlugin implements Plugin<{}, {}, {}, PluginStartDeps> {
 if (spacesApi && resolveResult.outcome === 'aliasMatch') {
   // We found this object by a legacy URL alias from its old ID; redirect the user to the page with its new ID, preserving any URL hash
   const newObjectId = resolveResult.alias_target_id!; // This is always defined if outcome === 'aliasMatch'
-  const newPath = http.basePath.prepend(
-    `path/to/this/page/${newObjectId}${window.location.hash}`
-  );
+  const newPath = `/this/page/${newObjectId}${window.location.hash}`; // Use the *local* path within this app (do not include the "/app/appId" prefix)
   await spacesApi.ui.redirectLegacyUrl(newPath, OBJECT_NOUN);
   return;
 }
@@ -255,9 +253,7 @@ const getLegacyUrlConflictCallout = () => {
     // callout with a warning for the user, and provide a way for them to navigate to the other object.
     const currentObjectId = savedObject.id;
     const otherObjectId = resolveResult.alias_target_id!; // This is always defined if outcome === 'conflict'
-    const otherObjectPath = http.basePath.prepend(
-      `path/to/this/page/${otherObjectId}${window.location.hash}`
-    );
+    const otherObjectPath = `/this/page/${otherObjectId}${window.location.hash}`; // Use the *local* path within this app (do not include the "/app/appId" prefix)
     return (
       <>
         {spacesApi.ui.components.getLegacyUrlConflict({
@@ -391,6 +387,13 @@ These should be handled on a case-by-case basis at the plugin owner's discretion
 * Any "secondary" objects on the page may handle the outcomes differently. If the secondary object ID is not important (for example, it just
   functions as a page anchor), it may make more sense to ignore the different outcomes. If the secondary object _is_ important but it is not
   directly represented in the UI, it may make more sense to throw a descriptive error when a `'conflict'` outcome is encountered.
+  - Embeddables should use `spacesApi.ui.components.getEmbeddableLegacyUrlConflict` to render conflict errors:
++
+image::images/sharing-saved-objects-faq-multiple-deep-link-objects-1.png["Sharing Saved Objects embeddable legacy URL conflict"]
+Viewing details shows the user how to disable the alias and fix the problem using the
+<<spaces-api-disable-legacy-url-aliases,_disable_legacy_url_aliases API>>:
++
+image::images/sharing-saved-objects-faq-multiple-deep-link-objects-2.png["Sharing Saved Objects embeddable legacy URL conflict (showing details)"]
   - If the secondary object is resolved by an external service (such as the index pattern service), the service should simply make the full
   outcome available to consumers.
 
@@ -412,7 +415,7 @@ deprecate and remove them.
 [[sharing-saved-objects-faq-resolve-outcomes]]
 ==== 5. Why are there three different resolve outcomes?
 
-The `resolve()` function first checks if an object with the given ID exists, and then it checks if an object has an alias with the given ID.
+The `resolve()` function checks both if an object with the given ID exists, _and_ if an object has an alias with the given ID.
 
 1. If only the former is true, the outcome is an `'exactMatch'` -- we found the exact object we were looking for.
 2. If only the latter is true, the outcome is an `'aliasMatch'` -- we found an alias with this ID, that pointed us to an object with a

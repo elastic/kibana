@@ -7,9 +7,11 @@
 
 import { ActionId, Json, PlainFun, Resolve, Selector, State } from '.';
 
-export const select = (fun: PlainFun): Selector => (...fns: Resolve[]) => {
-  let prevId: ActionId = NaN;
-  let cache: Json = null;
-  const old = (object: State): boolean => prevId === (prevId = object.primaryUpdate.payload.uid);
-  return (obj: State) => (old(obj) ? cache : (cache = fun(...fns.map((f) => f(obj)))));
-};
+export const select =
+  (fun: PlainFun): Selector =>
+  (...fns: Resolve[]) => {
+    let prevId: ActionId = NaN;
+    let cache: Json = null;
+    const old = (object: State): boolean => prevId === (prevId = object.primaryUpdate.payload.uid);
+    return (obj: State) => (old(obj) ? cache : (cache = fun(...fns.map((f) => f(obj)))));
+  };

@@ -17,7 +17,7 @@ export function decodeState<State>(expandedOrHashedState: string): State {
   if (isStateHash(expandedOrHashedState)) {
     return retrieveState(expandedOrHashedState);
   } else {
-    return (rison.decode(expandedOrHashedState) as unknown) as State;
+    return rison.decode(expandedOrHashedState) as unknown as State;
   }
 }
 
@@ -29,7 +29,7 @@ export function encodeState<State>(state: State, useHash: boolean): string {
   if (useHash) {
     return persistState(state);
   } else {
-    return rison.encode((state as unknown) as RisonValue);
+    return rison.encode(state as unknown as RisonValue);
   }
 }
 

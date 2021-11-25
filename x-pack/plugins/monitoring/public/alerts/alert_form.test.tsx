@@ -50,17 +50,13 @@ const initLegacyShims = () => {
     ruleTypeRegistry: ruleTypeRegistryMock.create(),
   };
   const data = { query: { timefilter: { timefilter: {} } } } as any;
-  const ngInjector = {} as angular.auto.IInjectorService;
-  Legacy.init(
-    {
-      core: coreMock.createStart(),
-      data,
-      isCloud: false,
-      triggersActionsUi,
-      usageCollection: {},
-    } as any,
-    ngInjector
-  );
+  Legacy.init({
+    core: coreMock.createStart(),
+    data,
+    isCloud: false,
+    triggersActionsUi,
+    usageCollection: {},
+  } as any);
 };
 
 const ALERTS_FEATURE_ID = 'alerts';
@@ -118,7 +114,7 @@ describe('alert_form', () => {
 
       const KibanaReactContext = createKibanaReactContext(Legacy.shims.kibanaServices);
 
-      const initialAlert = ({
+      const initialAlert = {
         name: 'test',
         alertTypeId: alertType.id,
         params: {},
@@ -131,7 +127,7 @@ describe('alert_form', () => {
         muteAll: false,
         enabled: false,
         mutedInstanceIds: [],
-      } as unknown) as Alert;
+      } as unknown as Alert;
 
       wrapper = mountWithIntl(
         <I18nProvider>
@@ -201,7 +197,7 @@ describe('alert_form', () => {
         actionTypeRegistry.has.mockReturnValue(true);
         actionTypeRegistry.get.mockReturnValue(actionType);
 
-        const initialAlert = ({
+        const initialAlert = {
           name: 'test',
           alertTypeId: alertType.id,
           params: {},
@@ -223,7 +219,7 @@ describe('alert_form', () => {
           muteAll: false,
           enabled: false,
           mutedInstanceIds: [],
-        } as unknown) as Alert;
+        } as unknown as Alert;
 
         const KibanaReactContext = createKibanaReactContext(Legacy.shims.kibanaServices);
 

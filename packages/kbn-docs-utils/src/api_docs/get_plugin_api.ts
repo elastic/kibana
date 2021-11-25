@@ -8,10 +8,10 @@
 
 import Path from 'path';
 import { Node, Project } from 'ts-morph';
-import { ToolingLog, KibanaPlatformPlugin } from '@kbn/dev-utils';
-import { ApiScope, Lifecycle } from './types';
+import { ToolingLog } from '@kbn/dev-utils';
+import { ApiScope, Lifecycle, PluginOrPackage } from './types';
 import { ApiDeclaration, PluginApi } from './types';
-import { buildApiDeclaration } from './build_api_declarations/build_api_declaration';
+import { buildApiDeclarationTopNode } from './build_api_declarations/build_api_declaration';
 import { getDeclarationNodesForPluginScope } from './get_declaration_nodes_for_plugin';
 import { getSourceFileMatching } from './tsmorph_utils';
 
@@ -20,8 +20,8 @@ import { getSourceFileMatching } from './tsmorph_utils';
  */
 export function getPluginApi(
   project: Project,
-  plugin: KibanaPlatformPlugin,
-  plugins: KibanaPlatformPlugin[],
+  plugin: PluginOrPackage,
+  plugins: PluginOrPackage[],
   log: ToolingLog,
   captureReferences: boolean
 ): PluginApi {
@@ -44,9 +44,9 @@ export function getPluginApi(
  */
 function getDeclarations(
   project: Project,
-  plugin: KibanaPlatformPlugin,
+  plugin: PluginOrPackage,
   scope: ApiScope,
-  plugins: KibanaPlatformPlugin[],
+  plugins: PluginOrPackage[],
   log: ToolingLog,
   captureReferences: boolean
 ): ApiDeclaration[] {
@@ -55,8 +55,7 @@ function getDeclarations(
   const contractTypes = getContractTypes(project, plugin, scope);
 
   const declarations = nodes.reduce<ApiDeclaration[]>((acc, node) => {
-    const apiDec = buildApiDeclaration({
-      node,
+    const apiDec = buildApiDeclarationTopNode(node, {
       plugins,
       log,
       currentPluginId: plugin.manifest.id,
@@ -114,7 +113,7 @@ function getLifecycle(
  */
 function getContractTypes(
   project: Project,
-  plugin: KibanaPlatformPlugin,
+  plugin: PluginOrPackage,
   scope: ApiScope
 ): { setup?: string; start?: string } {
   const contractTypes: { setup?: string; start?: string } = {};

@@ -125,10 +125,10 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
     [handleClose, markdownContext]
   );
 
-  const originatingPath = useMemo(() => `${location.pathname}${location.search}`, [
-    location.pathname,
-    location.search,
-  ]);
+  const originatingPath = useMemo(
+    () => `${location.pathname}${location.search}`,
+    [location.pathname, location.search]
+  );
 
   const handleCreateInLensClick = useCallback(() => {
     storage.set(DRAFT_COMMENT_STORAGE_ID, {
@@ -140,7 +140,7 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
     });
 
     lens?.navigateToPrefilledEditor(undefined, {
-      originatingApp: currentAppId!,
+      originatingApp: currentAppId,
       originatingPath,
     });
   }, [
@@ -174,7 +174,7 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
             }
           : undefined,
         {
-          originatingApp: currentAppId!,
+          originatingApp: currentAppId,
           originatingPath,
         }
       );
@@ -310,7 +310,6 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
 
       if (draftComment) {
         handleAdd(incomingEmbeddablePackage?.input.attributes, newTimeRange);
-        return;
       }
     }
   }, [embeddable, storage, timefilter, currentAppId, handleAdd, handleUpdate, draftComment]);

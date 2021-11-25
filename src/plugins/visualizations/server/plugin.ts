@@ -26,7 +26,8 @@ import type { EmbeddableSetup } from '../../embeddable/server';
 import { visualizeEmbeddableFactory } from './embeddable/visualize_embeddable_factory';
 
 export class VisualizationsPlugin
-  implements Plugin<VisualizationsPluginSetup, VisualizationsPluginStart> {
+  implements Plugin<VisualizationsPluginSetup, VisualizationsPluginStart>
+{
   private readonly logger: Logger;
 
   constructor(initializerContext: PluginInitializerContext) {

@@ -8,14 +8,19 @@
 
 import { Buffer } from 'buffer';
 import { stringify } from 'querystring';
-import { ApiError, Client, RequestEvent, errors, Transport } from '@elastic/elasticsearch';
+import { Client, errors, Transport, HttpConnection } from '@elastic/elasticsearch';
+import type { KibanaClient } from '@elastic/elasticsearch/lib/api/kibana';
 import type {
-  RequestBody,
   TransportRequestParams,
   TransportRequestOptions,
-} from '@elastic/elasticsearch/lib/Transport';
+  TransportResult,
+  DiagnosticResult,
+  RequestBody,
+} from '@elastic/elasticsearch';
+
 import { Logger } from '../../logging';
 import { parseClientOptions, ElasticsearchClientConfig } from './client_config';
+import type { ElasticsearchErrorDetails } from './types';
 
 const noop = () => undefined;
 
@@ -32,30 +37,33 @@ export const configureClient = (
     scoped?: boolean;
     getExecutionContext?: () => string | undefined;
   }
-): Client => {
+): KibanaClient => {
   const clientOptions = parseClientOptions(config, scoped);
   class KibanaTransport extends Transport {
     request(params: TransportRequestParams, options?: TransportRequestOptions) {
-      const opts = options || {};
+      const opts: TransportRequestOptions = options || {};
       const opaqueId = getExecutionContext();
       if (opaqueId && !opts.opaqueId) {
         // rewrites headers['x-opaque-id'] if it presents
         opts.opaqueId = opaqueId;
       }
-      return super.request(params, opts);
+      // Enforce the client to return TransportResult.
+      // It's required for bwc with responses in 7.x version.
+      if (opts.meta === undefined) {
+        opts.meta = true;
+      }
+      return super.request(params, opts) as Promise<TransportResult<any, any>>;
     }
   }
 
-  const client = new Client({ ...clientOptions, Transport: KibanaTransport });
+  const client = new Client({
+    ...clientOptions,
+    Transport: KibanaTransport,
+    Connection: HttpConnection,
+  });
   addLogging(client, logger.get('query', type));
 
-  // --------------------------------------------------------------------------------- //
-  // Hack to disable the "Product check" only in the scoped clients while we           //
-  // come up with a better approach in https://github.com/elastic/kibana/issues/110675 //
-  if (scoped) skipProductCheck(client);
-  // --------------------------------------------------------------------------------- //
-
-  return client;
+  return client as KibanaClient;
 };
 
 const convertQueryString = (qs: string | Record<string, any> | undefined): string => {
@@ -76,9 +84,10 @@ function ensureString(body: RequestBody): string {
  * Returns a debug message from an Elasticsearch error in the following format:
  * [error type] error reason
  */
-export function getErrorMessage(error: ApiError): string {
+export function getErrorMessage(error: errors.ElasticsearchClientError): string {
   if (error instanceof errors.ResponseError) {
-    return `[${error.meta.body?.error?.type}]: ${error.meta.body?.error?.reason ?? error.message}`;
+    const errorBody = error.meta.body as ElasticsearchErrorDetails;
+    return `[${errorBody?.error?.type}]: ${errorBody?.error?.reason ?? error.message}`;
   }
   return `[${error.name}]: ${error.message}`;
 }
@@ -92,7 +101,7 @@ export function getErrorMessage(error: ApiError): string {
  *
  * so it could be copy-pasted into the Dev console
  */
-function getResponseMessage(event: RequestEvent): string {
+function getResponseMessage(event: DiagnosticResult): string {
   const errorMeta = getRequestDebugMeta(event);
   const body = errorMeta.body ? `\n${errorMeta.body}` : '';
   return `${errorMeta.statusCode}\n${errorMeta.method} ${errorMeta.url}${body}`;
@@ -102,9 +111,12 @@ function getResponseMessage(event: RequestEvent): string {
  * Returns stringified debug information from an Elasticsearch request event
  * useful for logging in case of an unexpected failure.
  */
-export function getRequestDebugMeta(
-  event: RequestEvent
-): { url: string; body: string; statusCode: number | null; method: string } {
+export function getRequestDebugMeta(event: DiagnosticResult): {
+  url: string;
+  body: string;
+  statusCode: number | null;
+  method: string;
+} {
   const params = event.meta.request.params;
   // definition is wrong, `params.querystring` can be either a string or an object
   const querystring = convertQueryString(params.querystring);
@@ -112,12 +124,12 @@ export function getRequestDebugMeta(
     url: `${params.path}${querystring ? `?${querystring}` : ''}`,
     body: params.body ? `${ensureString(params.body)}` : '',
     method: params.method,
-    statusCode: event.statusCode,
+    statusCode: event.statusCode!,
   };
 }
 
 const addLogging = (client: Client, logger: Logger) => {
-  client.on('response', (error, event) => {
+  client.diagnostic.on('response', (error, event) => {
     if (event) {
       const opaqueId = event.meta.request.options.opaqueId;
       const meta = opaqueId
@@ -137,21 +149,3 @@ const addLogging = (client: Client, logger: Logger) => {
     }
   });
 };
-
-/**
- * Hack to skip the Product Check performed by the Elasticsearch-js client.
- * We noticed that the scoped clients are always performing this check because
- * of the way we initialize the clients. We'll discuss changing this in the issue
- * https://github.com/elastic/kibana/issues/110675. In the meanwhile, let's skip
- * it for the scoped clients.
- *
- * The hack is copied from the test/utils in the elasticsearch-js repo
- * (https://github.com/elastic/elasticsearch-js/blob/master/test/utils/index.js#L45-L56)
- */
-function skipProductCheck(client: Client) {
-  const tSymbol = Object.getOwnPropertySymbols(client.transport || client).filter(
-    (symbol) => symbol.description === 'product check'
-  )[0];
-  // @ts-expect-error `tSymbol` is missing in the index signature of Transport
-  (client.transport || client)[tSymbol] = 2;
-}

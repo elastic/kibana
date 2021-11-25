@@ -14,6 +14,7 @@ import {
   CasePatchRequest,
   CasePostRequest,
   CaseResponse,
+  CaseResolveResponse,
   CASES_URL,
   CasesFindResponse,
   CasesResponse,
@@ -35,6 +36,7 @@ import {
   SubCaseResponse,
   SubCasesResponse,
   User,
+  ResolvedCase,
 } from '../../common';
 
 import { getAllConnectorTypesUrl } from '../../common/utils/connectors_api';
@@ -61,6 +63,7 @@ import {
   decodeCasesFindResponse,
   decodeCasesStatusResponse,
   decodeCaseUserActionsResponse,
+  decodeCaseResolveResponse,
 } from './utils';
 
 export const getCase = async (
@@ -76,6 +79,24 @@ export const getCase = async (
     signal,
   });
   return convertToCamelCase<CaseResponse, Case>(decodeCaseResponse(response));
+};
+
+export const resolveCase = async (
+  caseId: string,
+  includeComments: boolean = true,
+  signal: AbortSignal
+): Promise<ResolvedCase> => {
+  const response = await KibanaServices.get().http.fetch<CaseResolveResponse>(
+    `${getCaseDetailsUrl(caseId)}/resolve`,
+    {
+      method: 'GET',
+      query: {
+        includeComments,
+      },
+      signal,
+    }
+  );
+  return convertToCamelCase<CaseResolveResponse, ResolvedCase>(decodeCaseResolveResponse(response));
 };
 
 export const getSubCase = async (

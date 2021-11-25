@@ -17,15 +17,22 @@ import { RuleStatusResponse } from '../../rules/types';
 import { AlertExecutionStatusErrorReasons } from '../../../../../../alerting/common';
 import { getQueryRuleParams } from '../../schemas/rule_schemas.mock';
 
-describe('find_statuses', () => {
+describe.each([
+  ['Legacy', false],
+  ['RAC', true],
+])('find_statuses - %s', (_, isRuleRegistryEnabled) => {
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
 
   beforeEach(async () => {
     server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
-    clients.ruleExecutionLogClient.findBulk.mockResolvedValue(getFindBulkResultStatus()); // successful status search
-    clients.rulesClient.get.mockResolvedValue(getAlertMock(getQueryRuleParams()));
+    clients.ruleExecutionLogClient.getCurrentStatusBulk.mockResolvedValue(
+      getFindBulkResultStatus()
+    ); // successful status search
+    clients.rulesClient.get.mockResolvedValue(
+      getAlertMock(isRuleRegistryEnabled, getQueryRuleParams())
+    );
     findRulesStatusesRoute(server.router);
   });
 
@@ -36,14 +43,14 @@ describe('find_statuses', () => {
     });
 
     test('returns 404 if alertClient is not available on the route', async () => {
-      context.alerting!.getRulesClient = jest.fn();
+      context.alerting.getRulesClient = jest.fn();
       const response = await server.inject(ruleStatusRequest(), context);
       expect(response.status).toEqual(404);
       expect(response.body).toEqual({ message: 'Not Found', status_code: 404 });
     });
 
     test('catch error when status search throws error', async () => {
-      clients.ruleExecutionLogClient.findBulk.mockImplementation(async () => {
+      clients.ruleExecutionLogClient.getCurrentStatusBulk.mockImplementation(async () => {
         throw new Error('Test error');
       });
       const response = await server.inject(ruleStatusRequest(), context);
@@ -57,7 +64,7 @@ describe('find_statuses', () => {
     test('returns success if rule status client writes an error status', async () => {
       // 0. task manager tried to run the rule but couldn't, so the alerting framework
       // wrote an error to the executionStatus.
-      const failingExecutionRule = getAlertMock(getQueryRuleParams());
+      const failingExecutionRule = getAlertMock(isRuleRegistryEnabled, getQueryRuleParams());
       failingExecutionRule.executionStatus = {
         status: 'error',
         lastExecutionDate: failingExecutionRule.executionStatus.lastExecutionDate,

@@ -21,12 +21,10 @@ import { SCHEMA_TITLE } from '../constants';
 import { SchemaLogic } from '../schema_logic';
 
 export const Schema: React.FC = () => {
-  const { loadSchema, updateSchema, addSchemaField, openModal, closeModal } = useActions(
-    SchemaLogic
-  );
-  const { dataLoading, isUpdating, hasSchema, hasSchemaChanged, isModalOpen } = useValues(
-    SchemaLogic
-  );
+  const { loadSchema, updateSchema, addSchemaField, openModal, closeModal } =
+    useActions(SchemaLogic);
+  const { dataLoading, isUpdating, hasSchema, hasSchemaChanged, isModalOpen } =
+    useValues(SchemaLogic);
 
   useEffect(() => {
     loadSchema();

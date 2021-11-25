@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import typeDetect from 'type-detect';
 import { LEGACY_URL_ALIAS_TYPE } from '../object_types';
 import { decodeVersion, encodeVersion } from '../version';
 import { ISavedObjectTypeRegistry } from '../saved_objects_type_registry';
@@ -84,14 +84,8 @@ export class SavedObjectsSerializer {
 
     const { namespaceTreatment = 'strict' } = options;
     const { _id, _source, _seq_no, _primary_term } = doc;
-    const {
-      type,
-      namespaces,
-      originId,
-      migrationVersion,
-      references,
-      coreMigrationVersion,
-    } = _source;
+    const { type, namespaces, originId, migrationVersion, references, coreMigrationVersion } =
+      _source;
 
     const version =
       _seq_no != null || _primary_term != null
@@ -242,6 +236,8 @@ function checkIdMatchesPrefix(id: string, prefix: string) {
 
 function assertNonEmptyString(value: string, name: string) {
   if (!value || typeof value !== 'string') {
-    throw new TypeError(`Expected "${value}" to be a ${name}`);
+    throw new TypeError(
+      `Expected ${name} to be a string but given [${typeDetect(value)}] with [${value}] value.`
+    );
   }
 }

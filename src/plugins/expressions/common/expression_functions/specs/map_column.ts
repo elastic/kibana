@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { Observable, defer, of, zip } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { Observable, combineLatest, defer } from 'rxjs';
+import { defaultIfEmpty, map } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
 import { ExpressionFunctionDefinition } from '../types';
-import { Datatable, DatatableColumn, DatatableColumnType, getType } from '../../expression_types';
+import { Datatable, DatatableColumnType, getType } from '../../expression_types';
 
 export interface MapColumnArguments {
   id?: string | null;
@@ -81,64 +81,59 @@ export const mapColumn: ExpressionFunctionDefinition<
     },
   },
   fn(input, args) {
+    const metaColumn = args.copyMetaFrom
+      ? input.columns.find(({ id }) => id === args.copyMetaFrom)
+      : undefined;
     const existingColumnIndex = input.columns.findIndex(({ id, name }) =>
       args.id ? id === args.id : name === args.name
     );
-    const id = input.columns[existingColumnIndex]?.id ?? args.id ?? args.name;
+    const columnIndex = existingColumnIndex === -1 ? input.columns.length : existingColumnIndex;
+    const id = input.columns[columnIndex]?.id ?? args.id ?? args.name;
 
-    return defer(() => {
-      const rows$ = input.rows.length
-        ? zip(
-            ...input.rows.map((row) =>
-              args
-                .expression({
-                  type: 'datatable',
-                  columns: [...input.columns],
-                  rows: [row],
-                })
-                .pipe(map((value) => ({ ...row, [id]: value })))
+    return defer(() =>
+      combineLatest(
+        input.rows.map((row) =>
+          args
+            .expression({
+              type: 'datatable',
+              columns: [...input.columns],
+              rows: [row],
+            })
+            .pipe(
+              map((value) => ({ ...row, [id]: value })),
+              defaultIfEmpty(row)
             )
-          )
-        : of([]);
-
-      return rows$.pipe<Datatable>(
-        map((rows) => {
-          let type: DatatableColumnType = 'null';
-          if (rows.length) {
-            for (const row of rows) {
-              const rowType = getType(row[id]);
-              if (rowType !== 'null') {
-                type = rowType;
-                break;
-              }
-            }
+        )
+      )
+    ).pipe(
+      defaultIfEmpty([] as Datatable['rows']),
+      map((rows) => {
+        let type: DatatableColumnType = 'null';
+        for (const row of rows) {
+          const rowType = getType(row[id]) as DatatableColumnType;
+          if (rowType !== 'null') {
+            type = rowType;
+            break;
           }
-          const newColumn: DatatableColumn = {
-            id,
-            name: args.name,
-            meta: { type, params: { id: type } },
-          };
-          if (args.copyMetaFrom) {
-            const metaSourceFrom = input.columns.find(
-              ({ id: columnId }) => columnId === args.copyMetaFrom
-            );
-            newColumn.meta = { ...newColumn.meta, ...(metaSourceFrom?.meta ?? {}) };
-          }
+        }
 
-          const columns = [...input.columns];
-          if (existingColumnIndex === -1) {
-            columns.push(newColumn);
-          } else {
-            columns[existingColumnIndex] = newColumn;
-          }
+        const columns = [...input.columns];
+        columns[columnIndex] = {
+          id,
+          name: args.name,
+          meta: {
+            type,
+            params: { id: type },
+            ...(metaColumn?.meta ?? {}),
+          },
+        };
 
-          return {
-            columns,
-            rows,
-            type: 'datatable',
-          };
-        })
-      );
-    });
+        return {
+          columns,
+          rows,
+          type: 'datatable',
+        };
+      })
+    );
   },
 };

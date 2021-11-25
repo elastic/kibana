@@ -28,7 +28,7 @@ describe('StatusFilter', () => {
           const props = { onChange, status };
 
           const { getByTestId } = render(<WorkflowStatusFilter {...props} />);
-          const button = getByTestId(`WorkflowStatusFilter ${status} button`);
+          const button = getByTestId(`workflowStatusFilterButton-${status}`);
           const input = button.querySelector('input') as Element;
 
           Simulate.change(input);

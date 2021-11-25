@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable react/display-name */
-
 import { get } from 'lodash/fp';
 import React from 'react';
 

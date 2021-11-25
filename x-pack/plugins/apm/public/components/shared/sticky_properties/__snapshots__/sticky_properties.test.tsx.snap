@@ -29,6 +29,7 @@ exports[`StickyProperties should render entire component 1`] = `
           </styled.span>
         }
         delay="regular"
+        display="inlineBlock"
         position="top"
       >
         <span>
@@ -39,6 +40,7 @@ exports[`StickyProperties should render entire component 1`] = `
     <EuiToolTip
       content="https://www.elastic.co/test"
       delay="regular"
+      display="inlineBlock"
       position="top"
     >
       <styled.span>
@@ -64,6 +66,7 @@ exports[`StickyProperties should render entire component 1`] = `
           </styled.span>
         }
         delay="regular"
+        display="inlineBlock"
         position="top"
       >
         <span>
@@ -93,6 +96,7 @@ exports[`StickyProperties should render entire component 1`] = `
           </styled.span>
         }
         delay="regular"
+        display="inlineBlock"
         position="top"
       >
         <span>
@@ -122,6 +126,7 @@ exports[`StickyProperties should render entire component 1`] = `
           </styled.span>
         }
         delay="regular"
+        display="inlineBlock"
         position="top"
       >
         <span>

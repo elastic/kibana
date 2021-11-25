@@ -140,7 +140,13 @@
           ],
           "signature": [
             "(appName: string, type: ",
-            "UiCounterMetricType",
+            {
+              "pluginId": "@kbn/analytics",
+              "scope": "common",
+              "docId": "kibKbnAnalyticsPluginApi",
+              "section": "def-common.UiCounterMetricType",
+              "text": "UiCounterMetricType"
+            },
             ", eventNames: string | string[], count?: number | undefined) => void"
           ],
           "path": "src/plugins/usage_collection/public/plugin.tsx",
@@ -168,7 +174,13 @@
               "label": "type",
               "description": [],
               "signature": [
-                "UiCounterMetricType"
+                {
+                  "pluginId": "@kbn/analytics",
+                  "scope": "common",
+                  "docId": "kibKbnAnalyticsPluginApi",
+                  "section": "def-common.UiCounterMetricType",
+                  "text": "UiCounterMetricType"
+                }
               ],
               "path": "src/plugins/usage_collection/public/plugin.tsx",
               "deprecated": false,
@@ -232,7 +244,13 @@
           ],
           "signature": [
             "(appName: string, type: ",
-            "UiCounterMetricType",
+            {
+              "pluginId": "@kbn/analytics",
+              "scope": "common",
+              "docId": "kibKbnAnalyticsPluginApi",
+              "section": "def-common.UiCounterMetricType",
+              "text": "UiCounterMetricType"
+            },
             ", eventNames: string | string[], count?: number | undefined) => void"
           ],
           "path": "src/plugins/usage_collection/public/plugin.tsx",
@@ -260,7 +278,13 @@
               "label": "type",
               "description": [],
               "signature": [
-                "UiCounterMetricType"
+                {
+                  "pluginId": "@kbn/analytics",
+                  "scope": "common",
+                  "docId": "kibKbnAnalyticsPluginApi",
+                  "section": "def-common.UiCounterMetricType",
+                  "text": "UiCounterMetricType"
+                }
               ],
               "path": "src/plugins/usage_collection/public/plugin.tsx",
               "deprecated": false,
@@ -338,7 +362,13 @@
               "Logger"
             ],
             "signature": [
-              "Logger"
+              {
+                "pluginId": "@kbn/logging",
+                "scope": "server",
+                "docId": "kibKbnLoggingPluginApi",
+                "section": "def-server.Logger",
+                "text": "Logger"
+              }
             ],
             "path": "src/plugins/usage_collection/server/collector/types.ts",
             "deprecated": false
@@ -409,7 +439,7 @@
             "children": [
               {
                 "parentPluginId": "usageCollection",
-                "id": "def-server.context",
+                "id": "def-server.ICollector.fetch.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "context",
@@ -431,7 +461,7 @@
                     "section": "def-server.SavedObjectsClient",
                     "text": "SavedObjectsClient"
                   },
-                  ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"find\" | \"bulkGet\" | \"resolve\" | \"update\" | \"collectMultiNamespaceReferences\" | \"updateObjectsSpaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">; } & (WithKibanaRequest extends true ? { kibanaRequest?: ",
+                  ", \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"delete\" | \"find\" | \"bulkGet\" | \"bulkResolve\" | \"get\" | \"resolve\" | \"update\" | \"collectMultiNamespaceReferences\" | \"updateObjectsSpaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">; } & (WithKibanaRequest extends true ? { kibanaRequest?: ",
                   {
                     "pluginId": "core",
                     "scope": "server",
@@ -671,7 +701,7 @@
           "\nPossible type values in the schema"
         ],
         "signature": [
-          "\"boolean\" | \"date\" | \"keyword\" | \"long\" | \"double\" | \"text\" | \"short\" | \"float\" | \"integer\" | \"byte\""
+          "\"boolean\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"text\" | \"short\" | \"float\" | \"integer\" | \"byte\""
         ],
         "path": "src/plugins/usage_collection/server/collector/types.ts",
         "deprecated": false,
@@ -703,7 +733,7 @@
             "section": "def-server.SavedObjectsClient",
             "text": "SavedObjectsClient"
           },
-          ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"find\" | \"bulkGet\" | \"resolve\" | \"update\" | \"collectMultiNamespaceReferences\" | \"updateObjectsSpaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">; } & (WithKibanaRequest extends true ? { kibanaRequest?: ",
+          ", \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"delete\" | \"find\" | \"bulkGet\" | \"bulkResolve\" | \"get\" | \"resolve\" | \"update\" | \"collectMultiNamespaceReferences\" | \"updateObjectsSpaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">; } & (WithKibanaRequest extends true ? { kibanaRequest?: ",
           {
             "pluginId": "core",
             "scope": "server",
@@ -751,7 +781,7 @@
         "children": [
           {
             "parentPluginId": "usageCollection",
-            "id": "def-server.context",
+            "id": "def-server.CollectorFetchMethod.$1",
             "type": "CompoundType",
             "tags": [],
             "label": "context",
@@ -773,7 +803,7 @@
                 "section": "def-server.SavedObjectsClient",
                 "text": "SavedObjectsClient"
               },
-              ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"find\" | \"bulkGet\" | \"resolve\" | \"update\" | \"collectMultiNamespaceReferences\" | \"updateObjectsSpaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">; } & (WithKibanaRequest extends true ? { kibanaRequest?: ",
+              ", \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"delete\" | \"find\" | \"bulkGet\" | \"bulkResolve\" | \"get\" | \"resolve\" | \"update\" | \"collectMultiNamespaceReferences\" | \"updateObjectsSpaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">; } & (WithKibanaRequest extends true ? { kibanaRequest?: ",
               {
                 "pluginId": "core",
                 "scope": "server",

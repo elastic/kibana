@@ -34,6 +34,7 @@ exports[`scaling form should disable clusters option when clustering is not supp
       <EuiToolTip
         content="Simulated clustering disabled"
         delay="regular"
+        display="inlineBlock"
         position="left"
       >
         <EuiRadio
@@ -45,18 +46,9 @@ exports[`scaling form should disable clusters option when clustering is not supp
         />
       </EuiToolTip>
       <EuiToolTip
-        content={
-          <React.Fragment>
-            <EuiBetaBadge
-              label="beta"
-            />
-            <EuiHorizontalRule
-              margin="xs"
-            />
-            Use vector tiles for faster display of large datasets.
-          </React.Fragment>
-        }
+        content="Use vector tiles for faster display of large datasets."
         delay="regular"
+        display="inlineBlock"
         position="left"
       >
         <EuiRadio
@@ -125,18 +117,9 @@ exports[`scaling form should render 1`] = `
         onChange={[Function]}
       />
       <EuiToolTip
-        content={
-          <React.Fragment>
-            <EuiBetaBadge
-              label="beta"
-            />
-            <EuiHorizontalRule
-              margin="xs"
-            />
-            Use vector tiles for faster display of large datasets.
-          </React.Fragment>
-        }
+        content="Use vector tiles for faster display of large datasets."
         delay="regular"
+        display="inlineBlock"
         position="left"
       >
         <EuiRadio

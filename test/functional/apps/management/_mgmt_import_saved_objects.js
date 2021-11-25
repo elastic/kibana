@@ -10,21 +10,21 @@ import expect from '@kbn/expect';
 import path from 'path';
 
 export default function ({ getService, getPageObjects }) {
-  const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects(['common', 'settings', 'header', 'savedObjects']);
 
   //in 6.4.0 bug the Saved Search conflict would be resolved and get imported but the visualization
   //that referenced the saved search was not imported.( https://github.com/elastic/kibana/issues/22238)
 
   describe('mgmt saved objects', function describeIndexTests() {
-    beforeEach(async function () {
-      await esArchiver.emptyKibanaIndex();
-      await esArchiver.load('test/functional/fixtures/es_archiver/discover');
+    before(async () => {
+      await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
       await PageObjects.settings.navigateTo();
     });
 
-    afterEach(async function () {
-      await esArchiver.unload('test/functional/fixtures/es_archiver/discover');
+    after(async () => {
+      await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/discover');
+      await kibanaServer.savedObjects.clean({ types: ['search', 'visualization'] });
     });
 
     it('should import saved objects mgmt', async function () {
@@ -39,6 +39,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.savedObjects.clickConfirmChanges();
       await PageObjects.savedObjects.clickImportDone();
       await PageObjects.savedObjects.waitTableIsLoaded();
+      await PageObjects.savedObjects.searchForObject('mysaved');
 
       //instead of asserting on count- am asserting on the titles- which is more accurate than count.
       const objects = await PageObjects.savedObjects.getRowTitles();

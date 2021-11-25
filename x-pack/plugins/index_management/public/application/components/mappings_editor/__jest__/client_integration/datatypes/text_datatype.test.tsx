@@ -7,7 +7,7 @@
 
 import { act } from 'react-dom/test-utils';
 
-import { componentHelpers, MappingsEditorTestBed } from '../helpers';
+import { componentHelpers, MappingsEditorTestBed, kibanaVersion } from '../helpers';
 import { getFieldConfig } from '../../../lib';
 
 const { setup, getMappingsEditorDataFactory } = componentHelpers.mappingsEditor;
@@ -64,6 +64,7 @@ describe('Mappings editor: text datatype', () => {
 
     const {
       component,
+      exists,
       actions: { startEditField, getToggleValue, updateFieldAndCloseFlyout },
     } = testBed;
 
@@ -73,6 +74,13 @@ describe('Mappings editor: text datatype', () => {
     // It should have searchable ("index" param) active by default
     const indexFieldConfig = getFieldConfig('index');
     expect(getToggleValue('indexParameter.formRowToggle')).toBe(indexFieldConfig.defaultValue);
+
+    if (kibanaVersion.major < 7) {
+      expect(exists('boostParameterToggle')).toBe(true);
+    } else {
+      // Since 8.x the boost parameter is deprecated
+      expect(exists('boostParameterToggle')).toBe(false);
+    }
 
     // Save the field and close the flyout
     await updateFieldAndCloseFlyout();

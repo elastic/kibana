@@ -164,6 +164,7 @@ export class GisPageObject extends FtrService {
       await this.testSubjects.click('savedObjectTitle');
     }
     await this.testSubjects.clickWhenNotDisabled('confirmSaveSavedObjectButton');
+    await this.header.waitUntilLoadingHasFinished();
   }
 
   async clickSaveAndReturnButton() {
@@ -521,7 +522,7 @@ export class GisPageObject extends FtrService {
   }
 
   async selectEMSBoundariesSource() {
-    this.log.debug(`Select EMS boundaries source`);
+    this.log.debug(`Select Elastic Maps Service boundaries source`);
     await this.testSubjects.click('emsBoundaries');
   }
 

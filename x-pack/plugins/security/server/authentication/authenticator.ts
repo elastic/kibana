@@ -19,8 +19,8 @@ import {
 import type { SecurityLicense } from '../../common/licensing';
 import type { AuthenticatedUser, AuthenticationProvider } from '../../common/model';
 import { shouldProviderUseLoginForm } from '../../common/model';
-import type { AuditServiceSetup, SecurityAuditLogger } from '../audit';
-import { userLoginEvent } from '../audit';
+import type { AuditServiceSetup } from '../audit';
+import { accessAgreementAcknowledgedEvent, userLoginEvent } from '../audit';
 import type { ConfigType } from '../config';
 import { getErrorStatusCode } from '../errors';
 import type { SecurityFeatureUsageServiceStart } from '../feature_usage';
@@ -77,7 +77,6 @@ export interface ProviderLoginAttempt {
 }
 
 export interface AuthenticatorOptions {
-  legacyAuditLogger: SecurityAuditLogger;
   audit: AuditServiceSetup;
   featureUsageService: SecurityFeatureUsageServiceStart;
   getCurrentUser: (request: KibanaRequest) => AuthenticatedUser | null;
@@ -349,27 +348,33 @@ export class Authenticator {
     assertRequest(request);
 
     const existingSessionValue = await this.getSessionValue(request);
-    const suggestedProviderName =
-      existingSessionValue?.provider.name ??
-      request.url.searchParams.get(AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER);
-
     if (this.shouldRedirectToLoginSelector(request, existingSessionValue)) {
-      this.logger.debug('Redirecting request to Login Selector.');
+      const providerNameSuggestedByHint = request.url.searchParams.get(
+        AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER
+      );
+      this.logger.debug(
+        `Redirecting request to Login Selector (provider hint: ${
+          providerNameSuggestedByHint ?? 'n/a'
+        }).`
+      );
       return AuthenticationResult.redirectTo(
         `${
           this.options.basePath.serverBasePath
         }/login?${NEXT_URL_QUERY_STRING_PARAMETER}=${encodeURIComponent(
           `${this.options.basePath.get(request)}${request.url.pathname}${request.url.search}`
         )}${
-          suggestedProviderName && !existingSessionValue
+          providerNameSuggestedByHint
             ? `&${AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER}=${encodeURIComponent(
-                suggestedProviderName
+                providerNameSuggestedByHint
               )}`
             : ''
         }`
       );
     }
 
+    const suggestedProviderName =
+      existingSessionValue?.provider.name ??
+      request.url.searchParams.get(AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER);
     for (const [providerName, provider] of this.providerIterator(suggestedProviderName)) {
       // Check if current session has been set by this provider.
       const ownsSession =
@@ -459,9 +464,12 @@ export class Authenticator {
       accessAgreementAcknowledged: true,
     });
 
-    this.options.legacyAuditLogger.accessAgreementAcknowledged(
-      currentUser.username,
-      existingSessionValue.provider
+    const auditLogger = this.options.audit.asScoped(request);
+    auditLogger.log(
+      accessAgreementAcknowledgedEvent({
+        username: currentUser.username,
+        provider: existingSessionValue.provider,
+      })
     );
 
     this.options.featureUsageService.recordPreAccessAgreementUsage();

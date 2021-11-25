@@ -25,6 +25,7 @@ import { LensAttributeService } from '../lens_attribute_service';
 import { OnSaveProps } from '../../../../../src/plugins/saved_objects/public/save_modal';
 import { act } from 'react-dom/test-utils';
 import { inspectorPluginMock } from '../../../../../src/plugins/inspector/public/mocks';
+import { Visualization } from '../types';
 
 jest.mock('../../../../../src/plugins/inspector/public/', () => ({
   isAvailable: false,
@@ -125,6 +126,7 @@ describe('embeddable', () => {
         },
         inspector: inspectorPluginMock.createStartContract(),
         getTrigger,
+        visualizationMap: {},
         documentToExpression: () =>
           Promise.resolve({
             ast: {
@@ -165,6 +167,7 @@ describe('embeddable', () => {
         inspector: inspectorPluginMock.createStartContract(),
         capabilities: { canSaveDashboards: true, canSaveVisualizations: true },
         getTrigger,
+        visualizationMap: {},
         documentToExpression: () =>
           Promise.resolve({
             ast: {
@@ -209,6 +212,7 @@ describe('embeddable', () => {
           canSaveVisualizations: true,
         },
         getTrigger,
+        visualizationMap: {},
         documentToExpression: () =>
           Promise.resolve({
             ast: {
@@ -236,7 +240,7 @@ describe('embeddable', () => {
           ...savedVis,
           sharingSavedObjectProps: {
             outcome: 'conflict',
-            errorJSON: '{targetType: "lens", sourceId: "1", targetSpace: "space"}',
+            sourceId: '1',
             aliasTargetId: '2',
           },
         } as ResolvedLensSavedObjectAttributes);
@@ -255,6 +259,7 @@ describe('embeddable', () => {
           canSaveVisualizations: true,
         },
         getTrigger,
+        visualizationMap: {},
         documentToExpression: () =>
           Promise.resolve({
             ast: {
@@ -289,14 +294,15 @@ describe('embeddable', () => {
         expressionRenderer,
         basePath,
         inspector: inspectorPluginMock.createStartContract(),
-        indexPatternService: ({
+        indexPatternService: {
           get: (id: string) => Promise.resolve({ id }),
-        } as unknown) as IndexPatternsContract,
+        } as unknown as IndexPatternsContract,
         capabilities: {
           canSaveDashboards: true,
           canSaveVisualizations: true,
         },
         getTrigger,
+        visualizationMap: {},
         documentToExpression: () =>
           Promise.resolve({
             ast: {
@@ -336,6 +342,7 @@ describe('embeddable', () => {
           canSaveVisualizations: true,
         },
         getTrigger,
+        visualizationMap: {},
         documentToExpression: () =>
           Promise.resolve({
             ast: {
@@ -378,6 +385,7 @@ describe('embeddable', () => {
         indexPatternService: {} as IndexPatternsContract,
         capabilities: { canSaveDashboards: true, canSaveVisualizations: true },
         getTrigger,
+        visualizationMap: {},
         documentToExpression: () =>
           Promise.resolve({
             ast: {
@@ -408,12 +416,12 @@ describe('embeddable', () => {
   });
 
   it('should re-render when dashboard view/edit mode changes if dynamic actions are set', async () => {
-    const sampleInput = ({
+    const sampleInput = {
       id: '123',
       enhancements: {
         dynamicActions: {},
       },
-    } as unknown) as LensEmbeddableInput;
+    } as unknown as LensEmbeddableInput;
     const embeddable = new Embeddable(
       {
         timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
@@ -427,6 +435,7 @@ describe('embeddable', () => {
           canSaveVisualizations: true,
         },
         getTrigger,
+        visualizationMap: {},
         documentToExpression: () =>
           Promise.resolve({
             ast: {
@@ -474,6 +483,7 @@ describe('embeddable', () => {
           canSaveVisualizations: true,
         },
         getTrigger,
+        visualizationMap: {},
         documentToExpression: () =>
           Promise.resolve({
             ast: {
@@ -528,6 +538,7 @@ describe('embeddable', () => {
           canSaveVisualizations: true,
         },
         getTrigger,
+        visualizationMap: {},
         documentToExpression: () =>
           Promise.resolve({
             ast: {
@@ -583,6 +594,7 @@ describe('embeddable', () => {
           canSaveVisualizations: true,
         },
         getTrigger,
+        visualizationMap: {},
         documentToExpression: () =>
           Promise.resolve({
             ast: {
@@ -635,12 +647,13 @@ describe('embeddable', () => {
         expressionRenderer,
         basePath,
         inspector: inspectorPluginMock.createStartContract(),
-        indexPatternService: ({ get: jest.fn() } as unknown) as IndexPatternsContract,
+        indexPatternService: { get: jest.fn() } as unknown as IndexPatternsContract,
         capabilities: {
           canSaveDashboards: true,
           canSaveVisualizations: true,
         },
         getTrigger,
+        visualizationMap: {},
         documentToExpression: () =>
           Promise.resolve({
             ast: {
@@ -683,6 +696,7 @@ describe('embeddable', () => {
           canSaveVisualizations: true,
         },
         getTrigger,
+        visualizationMap: {},
         documentToExpression: () =>
           Promise.resolve({
             ast: {
@@ -725,6 +739,7 @@ describe('embeddable', () => {
           canSaveVisualizations: true,
         },
         getTrigger,
+        visualizationMap: {},
         documentToExpression: () =>
           Promise.resolve({
             ast: {
@@ -767,6 +782,7 @@ describe('embeddable', () => {
           canSaveVisualizations: true,
         },
         getTrigger,
+        visualizationMap: {},
         documentToExpression: () =>
           Promise.resolve({
             ast: {
@@ -824,6 +840,7 @@ describe('embeddable', () => {
           canSaveVisualizations: true,
         },
         getTrigger,
+        visualizationMap: {},
         documentToExpression: () =>
           Promise.resolve({
             ast: {
@@ -836,7 +853,7 @@ describe('embeddable', () => {
             errors: undefined,
           }),
       },
-      ({ id: '123', onLoad } as unknown) as LensEmbeddableInput
+      { id: '123', onLoad } as unknown as LensEmbeddableInput
     );
 
     await embeddable.initializeSavedVis({ id: '123' } as LensEmbeddableInput);
@@ -897,6 +914,7 @@ describe('embeddable', () => {
           canSaveVisualizations: true,
         },
         getTrigger,
+        visualizationMap: {},
         documentToExpression: () =>
           Promise.resolve({
             ast: {
@@ -909,7 +927,7 @@ describe('embeddable', () => {
             errors: undefined,
           }),
       },
-      ({ id: '123', onFilter } as unknown) as LensEmbeddableInput
+      { id: '123', onFilter } as unknown as LensEmbeddableInput
     );
 
     await embeddable.initializeSavedVis({ id: '123' } as LensEmbeddableInput);
@@ -945,6 +963,7 @@ describe('embeddable', () => {
           canSaveVisualizations: true,
         },
         getTrigger,
+        visualizationMap: {},
         documentToExpression: () =>
           Promise.resolve({
             ast: {
@@ -957,7 +976,7 @@ describe('embeddable', () => {
             errors: undefined,
           }),
       },
-      ({ id: '123', onBrushEnd } as unknown) as LensEmbeddableInput
+      { id: '123', onBrushEnd } as unknown as LensEmbeddableInput
     );
 
     await embeddable.initializeSavedVis({ id: '123' } as LensEmbeddableInput);
@@ -993,6 +1012,7 @@ describe('embeddable', () => {
           canSaveVisualizations: true,
         },
         getTrigger,
+        visualizationMap: {},
         documentToExpression: () =>
           Promise.resolve({
             ast: {
@@ -1005,7 +1025,7 @@ describe('embeddable', () => {
             errors: undefined,
           }),
       },
-      ({ id: '123', onTableRowClick } as unknown) as LensEmbeddableInput
+      { id: '123', onTableRowClick } as unknown as LensEmbeddableInput
     );
 
     await embeddable.initializeSavedVis({ id: '123' } as LensEmbeddableInput);
@@ -1015,5 +1035,83 @@ describe('embeddable', () => {
 
     expect(onTableRowClick).toHaveBeenCalledWith({ name: 'test' });
     expect(onTableRowClick).toHaveBeenCalledTimes(1);
+  });
+
+  it('handles edit actions ', async () => {
+    const editedVisualizationState = { value: 'edited' };
+    const onEditActionMock = jest.fn().mockReturnValue(editedVisualizationState);
+    const documentToExpressionMock = jest.fn().mockImplementation(async (document) => {
+      const isStateEdited = document.state.visualization.value === 'edited';
+      return {
+        ast: {
+          type: 'expression',
+          chain: [
+            {
+              type: 'function',
+              function: isStateEdited ? 'edited' : 'not_edited',
+              arguments: {},
+            },
+          ],
+        },
+        errors: undefined,
+      };
+    });
+
+    const visDocument: Document = {
+      state: {
+        visualization: {},
+        datasourceStates: {},
+        query: { query: '', language: 'lucene' },
+        filters: [],
+      },
+      references: [],
+      title: 'My title',
+      visualizationType: 'lensDatatable',
+    };
+
+    const embeddable = new Embeddable(
+      {
+        timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
+        attributeService: attributeServiceMockFromSavedVis(visDocument),
+        expressionRenderer,
+        basePath,
+        inspector: inspectorPluginMock.createStartContract(),
+        indexPatternService: {} as IndexPatternsContract,
+        capabilities: {
+          canSaveDashboards: true,
+          canSaveVisualizations: true,
+        },
+        getTrigger,
+        visualizationMap: {
+          [visDocument.visualizationType as string]: {
+            onEditAction: onEditActionMock,
+          } as unknown as Visualization,
+        },
+        documentToExpression: documentToExpressionMock,
+      },
+      { id: '123' } as unknown as LensEmbeddableInput
+    );
+
+    // SETUP FRESH STATE
+    await embeddable.initializeSavedVis({ id: '123' } as LensEmbeddableInput);
+    embeddable.render(mountpoint);
+
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    expect(expressionRenderer).toHaveBeenCalledTimes(1);
+    expect(expressionRenderer.mock.calls[0][0]!.expression).toBe(`not_edited`);
+
+    // TEST EDIT EVENT
+    await embeddable.handleEvent({ name: 'edit' });
+
+    expect(onEditActionMock).toHaveBeenCalledTimes(1);
+    expect(documentToExpressionMock).toHaveBeenCalled();
+
+    const docToExpCalls = documentToExpressionMock.mock.calls;
+    const editedVisDocument = docToExpCalls[docToExpCalls.length - 1][0];
+    expect(editedVisDocument.state.visualization).toEqual(editedVisualizationState);
+
+    expect(expressionRenderer).toHaveBeenCalledTimes(2);
+    expect(expressionRenderer.mock.calls[1][0]!.expression).toBe(`edited`);
   });
 });

@@ -15,7 +15,6 @@ import {
 
 const createSetupMock = (): jest.Mocked<SampleDataRegistrySetup> => {
   const setup = {
-    registerSampleDataset: jest.fn(),
     getSampleDatasets: jest.fn(),
     addSavedObjectsToSampleDataset: jest.fn(),
     addAppLinksToSampleDataset: jest.fn(),

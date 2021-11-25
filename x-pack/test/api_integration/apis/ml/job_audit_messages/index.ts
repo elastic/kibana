@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MlJob } from '@elastic/elasticsearch/api/types';
+import { MlJob } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
@@ -18,7 +18,7 @@ export default function ({ loadTestFile }: FtrProviderContext) {
 export const getJobConfig = (numOfJobs: number) => {
   return new Array(numOfJobs).fill(null).map(
     (v, i) =>
-      (({
+      ({
         job_id: `test_get_job_audit_messages_${i + 1}`,
         description: 'job_audit_messages',
         groups: ['farequote', 'automated', 'single-metric'],
@@ -38,6 +38,6 @@ export const getJobConfig = (numOfJobs: number) => {
         },
         data_description: { time_field: '@timestamp' },
         analysis_limits: { model_memory_limit: '10mb' },
-      } as unknown) as MlJob)
+      } as unknown as MlJob)
   );
 };

@@ -1,50 +1,5 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`TelemetryManagementSectionComponent does not show the endpoint link when isSecurityExampleEnabled returns false 1`] = `
-<React.Fragment>
-  <p>
-    <FormattedMessage
-      defaultMessage="Enabling data usage collection helps us manage and improve our products and services. See our {privacyStatementLink} for more details."
-      id="telemetry.telemetryConfigAndLinkDescription"
-      values={
-        Object {
-          "privacyStatementLink": <EuiLink
-            href="https://www.elastic.co/legal/privacy-statement"
-            target="_blank"
-          >
-            <FormattedMessage
-              defaultMessage="Privacy Statement"
-              id="telemetry.readOurUsageDataPrivacyStatementLinkText"
-              values={Object {}}
-            />
-          </EuiLink>,
-        }
-      }
-    />
-  </p>
-  <p>
-    <FormattedMessage
-      defaultMessage="See an example of the {clusterData} that we collect."
-      id="telemetry.seeExampleOfClusterData"
-      values={
-        Object {
-          "clusterData": <EuiLink
-            data-test-id="cluster_data_example"
-            onClick={[Function]}
-          >
-            <FormattedMessage
-              defaultMessage="cluster data"
-              id="telemetry.clusterData"
-              values={Object {}}
-            />
-          </EuiLink>,
-        }
-      }
-    />
-  </p>
-</React.Fragment>
-`;
-
 exports[`TelemetryManagementSectionComponent renders as expected 1`] = `
 <Fragment>
   <_EuiSplitPanelOuter
@@ -98,7 +53,7 @@ exports[`TelemetryManagementSectionComponent renders as expected 1`] = `
           loading={false}
           setting={
             Object {
-              "ariaName": "Provide usage statistics",
+              "ariaName": "Provide usage data",
               "category": Array [],
               "defVal": true,
               "description": <React.Fragment>
@@ -124,7 +79,7 @@ exports[`TelemetryManagementSectionComponent renders as expected 1`] = `
                 </p>
                 <p>
                   <FormattedMessage
-                    defaultMessage="See examples of the {clusterData} and {endpointSecurityData} that we collect."
+                    defaultMessage="See examples of the {clusterData} and {securityData} that we collect."
                     id="telemetry.seeExampleOfClusterDataAndEndpointSecuity"
                     values={
                       Object {
@@ -138,12 +93,13 @@ exports[`TelemetryManagementSectionComponent renders as expected 1`] = `
                             values={Object {}}
                           />
                         </EuiLink>,
-                        "endpointSecurityData": <EuiLink
+                        "securityData": <EuiLink
                           data-test-id="endpoint_security_example"
-                          onClick={[Function]}
+                          href="https://www.elastic.co/guide/en/security/current/advanced-settings.html#telemetry-settings"
+                          target="_blank"
                         >
                           <FormattedMessage
-                            defaultMessage="endpoint security data"
+                            defaultMessage="security data"
                             id="telemetry.securityData"
                             values={Object {}}
                           />
@@ -153,7 +109,7 @@ exports[`TelemetryManagementSectionComponent renders as expected 1`] = `
                   />
                 </p>
               </React.Fragment>,
-              "displayName": "Provide usage statistics",
+              "displayName": "Provide usage data",
               "isCustom": true,
               "isOverridden": false,
               "name": "telemetry:enabled",
@@ -285,19 +241,6 @@ exports[`TelemetryManagementSectionComponent renders null because allowChangingO
       "onError": [Function],
       "textComponent": Symbol(react.fragment),
       "timeZone": null,
-    }
-  }
-  isSecurityExampleEnabled={
-    [MockFunction] {
-      "calls": Array [
-        Array [],
-      ],
-      "results": Array [
-        Object {
-          "type": "return",
-          "value": true,
-        },
-      ],
     }
   }
   onQueryMatchChange={[MockFunction]}

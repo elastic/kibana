@@ -19,14 +19,6 @@ export default function ({ getService }: FtrProviderContext) {
   const retry = getService('retry');
 
   describe('Event Log service API', () => {
-    it('should check if it is enabled', async () => {
-      const configValue = config
-        .get('kbnTestServer.serverArgs')
-        .find((val: string) => val === '--xpack.eventLog.enabled=true');
-      const result = await isEventLogServiceEnabled();
-      expect(configValue).to.be.eql(`--xpack.eventLog.enabled=${result.body.isEnabled}`);
-    });
-
     it('should check if logging entries is enabled', async () => {
       const configValue = config
         .get('kbnTestServer.serverArgs')
@@ -41,7 +33,7 @@ export default function ({ getService }: FtrProviderContext) {
         .find((val: string) => val === '--xpack.eventLog.indexEntries=true');
       const result = await isIndexingEntries();
       const exists = await es.indices.exists({ index: '.kibana-event-log-*' });
-      expect(exists.body).to.be.eql(true);
+      expect(exists).to.be.eql(true);
       expect(configValue).to.be.eql(
         `--xpack.eventLog.indexEntries=${result.body.isIndexingEntries}`
       );
@@ -158,6 +150,21 @@ export default function ({ getService }: FtrProviderContext) {
         },
         kibana: {
           saved_objects: [savedObject],
+          space_ids: ['space id'],
+          alert: {
+            rule: {
+              execution: {
+                uuid: '1fef0e1a-25ba-11ec-9621-0242ac130002',
+                status: 'succeeded',
+                status_order: 10,
+                metrics: {
+                  total_indexing_duration_ms: 1000,
+                  total_search_duration_ms: 2000,
+                  execution_gap_duration_s: 3000,
+                },
+              },
+            },
+          },
           alerting: {
             instance_id: 'alert instance id',
             action_group_id: 'alert action group',
@@ -212,14 +219,6 @@ export default function ({ getService }: FtrProviderContext) {
     log.debug(`isIndexingEntries`);
     return await supertest
       .get(`/api/log_event_fixture/isIndexingEntries`)
-      .set('kbn-xsrf', 'foo')
-      .expect(200);
-  }
-
-  async function isEventLogServiceEnabled() {
-    log.debug(`isEventLogServiceEnabled`);
-    return await supertest
-      .get(`/api/log_event_fixture/isEventLogServiceEnabled`)
       .set('kbn-xsrf', 'foo')
       .expect(200);
   }

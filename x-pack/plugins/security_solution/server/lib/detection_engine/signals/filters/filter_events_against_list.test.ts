@@ -59,7 +59,7 @@ describe('filterEventsAgainstList', () => {
       buildRuleMessage,
     });
     expect(res.hits.hits.length).toEqual(4);
-    expect(((mockLogger.debug as unknown) as jest.Mock).mock.calls[0][0]).toContain(
+    expect((mockLogger.debug as unknown as jest.Mock).mock.calls[0][0]).toContain(
       'no exception items of type list found - returning original search result'
     );
   });

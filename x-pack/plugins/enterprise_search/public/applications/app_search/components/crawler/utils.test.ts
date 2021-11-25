@@ -26,6 +26,7 @@ import {
   crawlRequestServerToClient,
   getDeleteDomainConfirmationMessage,
   getDeleteDomainSuccessMessage,
+  getCrawlRulePathPatternTooltip,
 } from './utils';
 
 const DEFAULT_CRAWL_RULE: CrawlRule = {
@@ -153,10 +154,27 @@ describe('crawlerDataServerToClient', () => {
   beforeAll(() => {
     output = crawlerDataServerToClient({
       domains,
+      events: [
+        {
+          id: '618d0e66abe97bc688328900',
+          status: CrawlerStatus.Pending,
+          stage: 'crawl',
+          created_at: 'Mon, 31 Aug 2020 17:00:00 +0000',
+          began_at: null,
+          completed_at: null,
+        },
+      ],
+      most_recent_crawl_request: {
+        id: '618d0e66abe97bc688328900',
+        status: CrawlerStatus.Pending,
+        created_at: 'Mon, 31 Aug 2020 17:00:00 +0000',
+        began_at: null,
+        completed_at: null,
+      },
     });
   });
 
-  it('converts all domains from the server form to their client form', () => {
+  it('converts all data from the server form to their client form', () => {
     expect(output.domains).toEqual([
       {
         id: 'x',
@@ -185,6 +203,23 @@ describe('crawlerDataServerToClient', () => {
         availableDeduplicationFields: ['title', 'description'],
       },
     ]);
+    expect(output.events).toEqual([
+      {
+        id: '618d0e66abe97bc688328900',
+        status: CrawlerStatus.Pending,
+        stage: 'crawl',
+        createdAt: 'Mon, 31 Aug 2020 17:00:00 +0000',
+        beganAt: null,
+        completedAt: null,
+      },
+    ]);
+    expect(output.mostRecentCrawlRequest).toEqual({
+      id: '618d0e66abe97bc688328900',
+      status: CrawlerStatus.Pending,
+      createdAt: 'Mon, 31 Aug 2020 17:00:00 +0000',
+      beganAt: null,
+      completedAt: null,
+    });
   });
 });
 
@@ -256,5 +291,30 @@ describe('getDeleteDomainConfirmationMessage', () => {
 describe('getDeleteDomainSuccessMessage', () => {
   it('includes the url', () => {
     expect(getDeleteDomainSuccessMessage('https://elastic.co/')).toContain('https://elastic.co');
+  });
+});
+
+describe('getCrawlRulePathPatternTooltip', () => {
+  it('includes regular expression', () => {
+    const crawlRule: CrawlRule = {
+      id: '-',
+      policy: CrawlerPolicies.allow,
+      rule: CrawlerRules.regex,
+      pattern: '.*',
+    };
+
+    expect(getCrawlRulePathPatternTooltip(crawlRule)).toContain('regular expression');
+  });
+
+  it('includes meta', () => {
+    const crawlRule: CrawlRule = {
+      id: '-',
+      policy: CrawlerPolicies.allow,
+      rule: CrawlerRules.beginsWith,
+      pattern: '/elastic',
+    };
+
+    expect(getCrawlRulePathPatternTooltip(crawlRule)).not.toContain('regular expression');
+    expect(getCrawlRulePathPatternTooltip(crawlRule)).toContain('meta');
   });
 });

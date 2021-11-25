@@ -15,15 +15,13 @@ import {
 } from 'react-router-config';
 import qs from 'query-string';
 import { findLastIndex, merge, compact } from 'lodash';
-import type { deepExactRt as deepExactRtTyped, mergeRt as mergeRtTyped } from '@kbn/io-ts-utils';
-// @ts-expect-error
-import { deepExactRt as deepExactRtNonTyped } from '@kbn/io-ts-utils/target_node/deep_exact_rt';
-// @ts-expect-error
-import { mergeRt as mergeRtNonTyped } from '@kbn/io-ts-utils/target_node/merge_rt';
-import { Route, Router } from './types';
+import { mergeRt } from '@kbn/io-ts-utils/merge_rt';
+import { deepExactRt } from '@kbn/io-ts-utils/deep_exact_rt';
+import { FlattenRoutesOf, Route, Router } from './types';
 
-const deepExactRt: typeof deepExactRtTyped = deepExactRtNonTyped;
-const mergeRt: typeof mergeRtTyped = mergeRtNonTyped;
+function toReactRouterPath(path: string) {
+  return path.replace(/(?:{([^\/]+)})/g, ':$1');
+}
 
 export function createRouter<TRoutes extends Route[]>(routes: TRoutes): Router<TRoutes> {
   const routesByReactRouterConfig = new Map<ReactRouterConfig, Route>();
@@ -31,22 +29,34 @@ export function createRouter<TRoutes extends Route[]>(routes: TRoutes): Router<T
 
   const reactRouterConfigs = routes.map((route) => toReactRouterConfigRoute(route));
 
-  function toReactRouterConfigRoute(route: Route, prefix: string = ''): ReactRouterConfig {
-    const path = `${prefix}${route.path}`.replace(/\/{2,}/g, '/').replace(/\/$/, '') || '/';
+  function toReactRouterConfigRoute(route: Route): ReactRouterConfig {
     const reactRouterConfig: ReactRouterConfig = {
       component: () => route.element,
       routes:
-        (route.children as Route[] | undefined)?.map((child) =>
-          toReactRouterConfigRoute(child, path)
-        ) ?? [],
+        (route.children as Route[] | undefined)?.map((child) => toReactRouterConfigRoute(child)) ??
+        [],
       exact: !route.children?.length,
-      path,
+      path: toReactRouterPath(route.path),
     };
 
     routesByReactRouterConfig.set(reactRouterConfig, route);
     reactRouterConfigsByRoute.set(route, reactRouterConfig);
 
     return reactRouterConfig;
+  }
+
+  function getRoutesToMatch(path: string) {
+    const matches = matchRoutesConfig(reactRouterConfigs, toReactRouterPath(path));
+
+    if (!matches.length) {
+      throw new Error(`No matching route found for ${path}`);
+    }
+
+    const matchedRoutes = matches.map((match) => {
+      return routesByReactRouterConfig.get(match.route)!;
+    });
+
+    return matchedRoutes;
   }
 
   const matchRoutes = (...args: any[]) => {
@@ -71,11 +81,11 @@ export function createRouter<TRoutes extends Route[]>(routes: TRoutes): Router<T
 
     for (const path of paths) {
       const greedy = path.endsWith('/*') || args.length === 0;
-      matches = matchRoutesConfig(reactRouterConfigs, location.pathname);
+      matches = matchRoutesConfig(reactRouterConfigs, toReactRouterPath(location.pathname));
 
       matchIndex = greedy
         ? matches.length - 1
-        : findLastIndex(matches, (match) => match.route.path === path);
+        : findLastIndex(matches, (match) => match.route.path === toReactRouterPath(path));
 
       if (matchIndex !== -1) {
         break;
@@ -135,19 +145,12 @@ export function createRouter<TRoutes extends Route[]>(routes: TRoutes): Router<T
     path = path
       .split('/')
       .map((part) => {
-        return part.startsWith(':') ? paramsWithBuiltInDefaults.path[part.split(':')[1]] : part;
+        const match = part.match(/(?:{([a-zA-Z]+)})/);
+        return match ? paramsWithBuiltInDefaults.path[match[1]] : part;
       })
       .join('/');
 
-    const matches = matchRoutesConfig(reactRouterConfigs, path);
-
-    if (!matches.length) {
-      throw new Error(`No matching route found for ${path}`);
-    }
-
-    const matchedRoutes = matches.map((match) => {
-      return routesByReactRouterConfig.get(match.route)!;
-    });
+    const matchedRoutes = getRoutesToMatch(path);
 
     const validationType = mergeRt(
       ...(compact(
@@ -196,6 +199,9 @@ export function createRouter<TRoutes extends Route[]>(routes: TRoutes): Router<T
     },
     getRoutePath: (route) => {
       return reactRouterConfigsByRoute.get(route)!.path as string;
+    },
+    getRoutesToMatch: (path: string) => {
+      return getRoutesToMatch(path) as unknown as FlattenRoutesOf<TRoutes>;
     },
   };
 }

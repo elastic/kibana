@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { MetricsCollector } from './types';
+import type { MetricsCollector } from './types';
+import { createMockOpsProcessMetrics } from './process.mocks';
 
 const createMock = () => {
   const mocked: jest.Mocked<MetricsCollector<any>> = {
@@ -21,4 +22,5 @@ const createMock = () => {
 
 export const collectorMock = {
   create: createMock,
+  createOpsProcessMetrics: createMockOpsProcessMetrics,
 };

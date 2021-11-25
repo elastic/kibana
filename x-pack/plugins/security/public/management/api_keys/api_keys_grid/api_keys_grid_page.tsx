@@ -111,15 +111,8 @@ export class APIKeysGridPage extends Component<Props, State> {
   }
 
   public renderContent() {
-    const {
-      isLoadingApp,
-      isLoadingTable,
-      areApiKeysEnabled,
-      isAdmin,
-      canManage,
-      error,
-      apiKeys,
-    } = this.state;
+    const { isLoadingApp, isLoadingTable, areApiKeysEnabled, isAdmin, canManage, error, apiKeys } =
+      this.state;
 
     if (!apiKeys) {
       if (isLoadingApp) {
@@ -171,6 +164,7 @@ export class APIKeysGridPage extends Component<Props, State> {
               {...reactRouterNavigate(this.props.history, '/create')}
               fill
               iconType="plusInCircleFilled"
+              data-test-subj="apiKeysCreatePromptButton"
             >
               <FormattedMessage
                 id="xpack.security.management.apiKeys.table.createButton"
@@ -214,6 +208,7 @@ export class APIKeysGridPage extends Component<Props, State> {
               {...reactRouterNavigate(this.props.history, '/create')}
               fill
               iconType="plusInCircleFilled"
+              data-test-subj="apiKeysCreateTableButton"
             >
               <FormattedMessage
                 id="xpack.security.management.apiKeys.table.createButton"
@@ -604,6 +599,7 @@ export class APIKeysGridPage extends Component<Props, State> {
             color: 'danger',
             onClick: (item) =>
               invalidateApiKeyPrompt([{ id: item.id, name: item.name }], this.onApiKeysInvalidated),
+            'data-test-subj': 'apiKeysTableDeleteAction',
           },
         ],
       },
@@ -620,11 +616,8 @@ export class APIKeysGridPage extends Component<Props, State> {
 
   private async checkPrivileges() {
     try {
-      const {
-        isAdmin,
-        canManage,
-        areApiKeysEnabled,
-      } = await this.props.apiKeysAPIClient.checkPrivileges();
+      const { isAdmin, canManage, areApiKeysEnabled } =
+        await this.props.apiKeysAPIClient.checkPrivileges();
       this.setState({ isAdmin, canManage, areApiKeysEnabled });
 
       if (!canManage || !areApiKeysEnabled) {

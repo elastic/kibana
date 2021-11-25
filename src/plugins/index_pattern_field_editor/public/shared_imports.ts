@@ -6,22 +6,30 @@
  * Side Public License, v 1.
  */
 
-export { IndexPattern, IndexPatternField, DataPublicPluginStart } from '../../data/public';
+export type { DataPublicPluginStart } from '../../data/public';
+export { IndexPattern, IndexPatternField } from '../../data/public';
 
-export { UsageCollectionStart } from '../../usage_collection/public';
+export type { UsageCollectionStart } from '../../usage_collection/public';
 
-export {
+export type {
   RuntimeType,
   RuntimeField,
   RuntimeFieldSpec,
   RuntimeFieldSubField,
-  KBN_FIELD_TYPES,
-  ES_FIELD_TYPES,
-} from '../../data/common';
+} from '../../data_views/common';
+export { KBN_FIELD_TYPES, ES_FIELD_TYPES } from '../../data/common';
 
 export { createKibanaReactContext, toMountPoint, CodeEditor } from '../../kibana_react/public';
 
-export { FieldFormat, SerializedFieldFormat } from '../../field_formats/common';
+export type { FieldFormat, SerializedFieldFormat } from '../../field_formats/common';
+
+export type {
+  FormSchema,
+  FormHook,
+  ValidationFunc,
+  FieldConfig,
+  ValidationCancelablePromise,
+} from '../../es_ui_shared/static/forms/hook_form_lib';
 
 export {
   useForm,
@@ -29,11 +37,8 @@ export {
   useFormContext,
   useFormIsModified,
   Form,
-  FormSchema,
   UseField,
-  FormHook,
-  ValidationFunc,
-  FieldConfig,
+  useBehaviorSubject,
 } from '../../es_ui_shared/static/forms/hook_form_lib';
 
 export { fieldValidators } from '../../es_ui_shared/static/forms/helpers';

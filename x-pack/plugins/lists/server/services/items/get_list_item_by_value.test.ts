@@ -26,7 +26,7 @@ describe('get_list_by_value', () => {
 
   test('Calls get_list_item_by_values with its input', async () => {
     const listItemMock = getListItemResponseMock();
-    ((getListItemByValues as unknown) as jest.Mock).mockResolvedValueOnce([listItemMock]);
+    (getListItemByValues as unknown as jest.Mock).mockResolvedValueOnce([listItemMock]);
     const options = getListItemByValueOptionsMocks();
     const listItem = await getListItemByValue(options);
     const expected = getListItemResponseMock();

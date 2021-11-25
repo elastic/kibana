@@ -39,11 +39,11 @@ export default {
           {' '}
           <PluginContext.Provider
             value={
-              ({
+              {
                 core: {
                   http: { basePath: { prepend: (_: string) => '' } },
                 },
-              } as unknown) as PluginContextValue
+              } as unknown as PluginContextValue
             }
           >
             <Story />

@@ -6,7 +6,6 @@
  */
 
 import React, { FunctionComponent } from 'react';
-// @ts-expect-error unconverted component
 import { SidebarContent } from './sidebar_content';
 
 interface Props {

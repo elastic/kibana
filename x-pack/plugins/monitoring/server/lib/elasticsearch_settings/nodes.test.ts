@@ -10,7 +10,7 @@ import { LegacyRequest } from '../../types';
 
 describe('Elasticsearch Nodes Settings', () => {
   const getReq = (response?: any) => {
-    return ({
+    return {
       server: {
         newPlatform: {
           setup: {
@@ -31,7 +31,7 @@ describe('Elasticsearch Nodes Settings', () => {
           },
         },
       },
-    } as unknown) as LegacyRequest;
+    } as unknown as LegacyRequest;
   };
 
   it('should return { found: false } given no response from ES', async () => {

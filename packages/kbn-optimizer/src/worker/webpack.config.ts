@@ -15,7 +15,8 @@ import TerserPlugin from 'terser-webpack-plugin';
 import webpackMerge from 'webpack-merge';
 import { CleanWebpackPlugin } from 'clean-webpack-plugin';
 import CompressionPlugin from 'compression-webpack-plugin';
-import * as UiSharedDeps from '@kbn/ui-shared-deps';
+import UiSharedDepsNpm from '@kbn/ui-shared-deps-npm';
+import UiSharedDepsSrc from '@kbn/ui-shared-deps-src';
 
 import { Bundle, BundleRefs, WorkerConfig } from '../common';
 import { BundleRefsPlugin } from './bundle_refs_plugin';
@@ -26,6 +27,14 @@ import { PopulateBundleCachePlugin } from './populate_bundle_cache_plugin';
 const IS_CODE_COVERAGE = !!process.env.CODE_COVERAGE;
 const ISTANBUL_PRESET_PATH = require.resolve('@kbn/babel-preset/istanbul_preset');
 const BABEL_PRESET_PATH = require.resolve('@kbn/babel-preset/webpack_preset');
+
+const nodeModulesButNotKbnPackages = (path: string) => {
+  if (!path.includes('node_modules')) {
+    return false;
+  }
+
+  return !path.includes(`node_modules${Path.sep}@kbn${Path.sep}`);
+};
 
 export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker: WorkerConfig) {
   const ENTRY_CREATOR = require.resolve('./entry_point_creator');
@@ -65,13 +74,17 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
       },
     },
 
-    externals: [UiSharedDeps.externals],
+    externals: [UiSharedDepsSrc.externals],
 
     plugins: [
       new CleanWebpackPlugin(),
       new BundleRefsPlugin(bundle, bundleRefs),
       new PopulateBundleCachePlugin(worker, bundle),
       new BundleMetricsPlugin(bundle),
+      new webpack.DllReferencePlugin({
+        context: worker.repoRoot,
+        manifest: require(UiSharedDepsNpm.dllManifestPath),
+      }),
       ...(worker.profileWebpack ? [new EmitStatsPlugin(bundle)] : []),
       ...(bundle.banner ? [new webpack.BannerPlugin({ banner: bundle.banner, raw: true })] : []),
     ],
@@ -90,7 +103,7 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
           include: [ENTRY_CREATOR],
           use: [
             {
-              loader: UiSharedDeps.publicPathLoader,
+              loader: UiSharedDepsNpm.publicPathLoader,
               options: {
                 key: bundle.id,
               },
@@ -133,7 +146,7 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
         },
         {
           test: /\.scss$/,
-          exclude: /node_modules/,
+          exclude: nodeModulesButNotKbnPackages,
           oneOf: [
             ...worker.themeTags.map((theme) => ({
               resourceQuery: `?${theme}`,
@@ -271,7 +284,8 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
           parallel: false,
           terserOptions: {
             compress: true,
-            mangle: false,
+            keep_classnames: true,
+            mangle: true,
           },
         }),
       ],

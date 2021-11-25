@@ -14,7 +14,7 @@
         },
         "namespace": "default"
       },
-      "dynamic": "strict",
+      "dynamic": "false",
       "properties": {
         "@timestamp": {
           "type": "date"
@@ -65,8 +65,12 @@
                     }
                   }
                 },
-                "id": {
-                  "type": "keyword"
+                "instance": {
+                  "properties": {
+                    "id": {
+                      "type": "keyword"
+                    }
+                  }
                 },
                 "reason": {
                   "type": "keyword"
@@ -95,7 +99,7 @@
                       "type": "keyword"
                     },
                     "from": {
-                      "type": "date"
+                      "type": "keyword"
                     },
                     "interval": {
                       "type": "keyword"
@@ -107,6 +111,10 @@
                       "type": "keyword"
                     },
                     "note": {
+                      "type": "keyword"
+                    },
+                    "params": {
+                      "index": false,
                       "type": "keyword"
                     },
                     "producer": {
@@ -274,7 +282,7 @@
         },
         "namespace": "default"
       },
-      "dynamic": "strict",
+      "dynamic": "false",
       "properties": {
         "@timestamp": {
           "type": "date"
@@ -325,8 +333,12 @@
                     }
                   }
                 },
-                "id": {
-                  "type": "keyword"
+                "instance": {
+                  "properties": {
+                    "id": {
+                      "type": "keyword"
+                    }
+                  }
                 },
                 "reason": {
                   "type": "keyword"
@@ -355,7 +367,7 @@
                       "type": "keyword"
                     },
                     "from": {
-                      "type": "date"
+                      "type": "keyword"
                     },
                     "interval": {
                       "type": "keyword"
@@ -367,6 +379,10 @@
                       "type": "keyword"
                     },
                     "note": {
+                      "type": "keyword"
+                    },
+                    "params": {
+                      "index": false,
                       "type": "keyword"
                     },
                     "producer": {
@@ -510,7 +526,7 @@
         },
         "namespace": "default"
       },
-      "dynamic": "strict",
+      "dynamic": "false",
       "properties": {
         "@timestamp": {
           "type": "date"
@@ -561,8 +577,12 @@
                     }
                   }
                 },
-                "id": {
-                  "type": "keyword"
+                "instance": {
+                  "properties": {
+                    "id": {
+                      "type": "keyword"
+                    }
+                  }
                 },
                 "reason": {
                   "type": "keyword"
@@ -591,7 +611,7 @@
                       "type": "keyword"
                     },
                     "from": {
-                      "type": "date"
+                      "type": "keyword"
                     },
                     "interval": {
                       "type": "keyword"
@@ -603,6 +623,10 @@
                       "type": "keyword"
                     },
                     "note": {
+                      "type": "keyword"
+                    },
+                    "params": {
+                      "index": false,
                       "type": "keyword"
                     },
                     "producer": {

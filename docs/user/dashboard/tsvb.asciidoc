@@ -8,7 +8,7 @@ With *TSVB*, you can:
 * Combine an infinite number of <<aggregation-reference,aggregations>> to display your data.
 * Annotate time series data with timestamped events from an {es} index.
 * View the data in several types of visualizations, including charts, data tables, and markdown panels.
-* Display multiple <<index-patterns, index patterns>> in each visualization.
+* Display multiple <<data-views, data views>> in each visualization.
 * Use custom functions and some math on aggregations.
 * Customize the data with labels and colors.
 
@@ -39,27 +39,30 @@ By default, *TSVB* drops the last bucket because the time filter intersects the 
 
 [float]
 [[tsvb-index-pattern-mode]]
-==== Index pattern mode
-Create *TSVB* visualizations with {kib} index patterns. 
+==== Change the {data-source} mode
 
-IMPORTANT: Creating *TSVB* visualizations with an {es} index string is deprecated and will be removed in a future release.
-It is the default one for new visualizations but it can also be switched for the old implementations:
+You can create *TSVB* visualizations with only {data-sources}, or {es} index strings. 
 
-. Click *Panel options*, then click the gear icon to open the *Index pattern selection mode* options.
+When you use only {data-sources}, you are able to:
+
+* Create visualizations with runtime fields
+
+* Add URL drilldowns
+
+* Add interactive filters for time series visualizations
+
+* Improve performance
+
+IMPORTANT: Creating *TSVB* visualizations with an {es} index string is deprecated. To use an {es} index string, contact your administrator, or go to <<advanced-options, Advanced Settings>> and set `metrics:allowStringIndices` to `true`.  Creating *TSVB* visualizations with an {es} index string will be removed in a future release.
+Creating visualizations with only {data-sources} is the default one for new visualizations but it can also be switched for the old implementations:
+
+. Click *Panel options*, then open the *Index pattern selection mode* options next to the *Index pattern* dropdown.
+
 . Select *Use only Kibana index patterns*.
-. Reselect the index pattern from the dropdown, then select the *Time field*.
 
+. From the *Index pattern* drodpown, select the index pattern, then select the *Time field*.
++
 image::images/tsvb_index_pattern_selection_mode.png[Change index pattern selection mode action]
-
-The index pattern mode unlocks many new features, such as:
-
-* Runtime fields
-
-* URL drilldowns
-
-* Interactive filters for time series visualizations
-
-* Better performance
 
 [float]
 [[configure-the-data-series]]
@@ -119,7 +122,7 @@ To change this behavior, click *Panel options*, then specify a URL in the *Item 
 [[tsvb-markdown]]
 ===== Markdown
 
-The *Markdown* visualization supports Markdown with Handlebar (mustache) syntax to insert dynamic data, and supports custom CSS using the LESS syntax.
+The *Markdown* visualization supports Markdown with Handlebar (mustache) syntax to insert dynamic data, and supports custom CSS.
 
 [float]
 [[tsvb-function-reference]]
@@ -150,13 +153,44 @@ The *Markdown* visualization supports Markdown with Handlebar (mustache) syntax 
   This function must always be the last metric in the series.
 
 [float]
+[[save-the-tsvb-panel]]
+===== Save and add the panel
+
+Save the panel to the *Visualize Library* and add it to the dashboard, or add it to the dashboard without saving.
+
+To save the panel to the *Visualize Library*:
+
+. Click *Save to library*.
+
+. Enter the *Title* and add any applicable <<managing-tags,*Tags*>>.
+
+. Make sure that *Add to Dashboard after saving* is selected.
+
+. Click *Save and return*.
+
+To save the panel to the dashboard:
+
+. Click *Save and return*.
+
+. Add an optional title to the panel.
+
+.. In the panel header, click *No Title*.
+
+.. On the *Customize panel* window, select *Show panel title*.
+
+.. Enter the *Panel title*, then click *Save*.
+
+[float]
 [[tsvb-faq]]
 ==== Frequently asked questions
 
 For answers to frequently asked *TSVB* question, review the following. 
 
-[float]
-===== How do I create dashboard drilldowns for Top N and Table visualizations?
+[discrete]
+[[how-do-i-create-dashboard-drilldowns]]
+.*How do I create dashboard drilldowns for Top N and Table visualizations?*
+[%collapsible]
+====
 
 You can create dashboard drilldowns that include the specified time range for *Top N* and *Table* visualizations.
 
@@ -174,10 +208,14 @@ For example `dashboards#/view/f193ca90-c9f4-11eb-b038-dd3270053a27`.
 
 . Click *Save and return*.
 
-. In the toolbar, cick *Save as*, then make sure *Store time with dashboard* is deselected. 
+. In the toolbar, click *Save as*, then make sure *Store time with dashboard* is deselected. 
+====
 
-[float]
-===== Why is my TSVB visualization missing data?
+[discrete]
+[[why-is-my-tsvb-visualiztion-missing-data]]
+.*Why is my TSVB visualization missing data?*
+[%collapsible]
+====
 
 It depends, but most often there are two causes:
 
@@ -186,14 +224,22 @@ It depends, but most often there are two causes:
 * For all other *TSVB* visualizations, the cause is probably the *Data timerange mode*, which is controlled by *Panel options > Data timerange mode > Entire time range*.
 By default, *TSVB* displays the last whole bucket. For example, if the time filter is set to *Last 24 hours*, and the
 current time is 9:41, *TSVB* displays only the last 10 minutes &mdash; from 9:30 to 9:40.
+====
 
-[float]
-===== How do I calculate the difference between two data series?
+[discrete]
+[[how-do-i-calculate-the-difference-between-two-data-series]]
+.*How do I calculate the difference between two data series?*
+[%collapsible]
+====
 
 Performing math across data series is unsupported in *TSVB*. To calculate the difference between two data series, use <<timelion, *Timelion*>> or <<vega, *Vega*>>.
+====
 
-[float]
-===== How do I compare the current versus previous month?
+[discrete]
+[[how-do-i-compare-the-current-versus-previous-month]]
+.*How do I compare the current versus previous month?*
+[%collapsible]
+====
 
 *TSVB* can display two series with time offsets, but it can't perform math across series. To add a time offset:
 
@@ -203,25 +249,37 @@ Performing math across data series is unsupported in *TSVB*. To calculate the di
 image::images/tsvb_clone_series.png[Clone Series action]
   
 . Click *Options*, then enter the offset value in the *Offset series time by* field.
+====
 
-[float]
-===== How do I calculate a month over month change?
-  
+[discrete]
+[[how-do-i-calculate-a-month-over-month-change]]
+.*How do I calculate a month over month change?*
+[%collapsible]
+====
+
 The ability to calculate a month over month change is not fully supported in *TSVB*, but there is a special case that is supported _if_ the
 time filter is set to 3 months or more _and_ the *Interval* is `1m`. Use the *Derivative* to get the absolute monthly change. To convert to a percent, 
 add the *Math* function with the `params.current / (params.current - params.derivative)` formula, then select *Percent* from the *Data Formatter* dropdown.
 
 For other types of month over month calculations, use <<timelion, *Timelion*>> or <<vega, *Vega*>>.
+====
 
-[float]
-===== How do I calculate the duration between the start and end of an event?
-  
+[discrete]
+[[calculate-duration-start-end]]
+.*How do I calculate the duration between the start and end of an event?*
+[%collapsible]
+====
+
 Calculating the duration between the start and end of an event is unsupported in *TSVB* because *TSVB* requires correlation between different time periods. 
 *TSVB* requires that the duration is pre-calculated.
+====
 
-[float]
-===== How do I group on multiple fields?
-  
+[discrete]
+[group-on-multiple-fields]
+.*How do I group on multiple fields?*
+[%collapsible]
+====
+
 To group with multiple fields, create runtime fields in the index pattern you are visualizing.
 
 . Create a runtime field. Refer to <<managing-index-patterns, *Manage index patterns data fields*>> for more information.
@@ -230,3 +288,4 @@ To group with multiple fields, create runtime fields in the index pattern you ar
 image::images/tsvb_group_by_multiple_fields.png[Group by multiple fields]
 
 . Create a *TSVB* visualization and group by this field.
+====

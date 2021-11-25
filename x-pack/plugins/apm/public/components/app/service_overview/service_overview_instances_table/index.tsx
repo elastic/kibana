@@ -14,10 +14,9 @@ import {
 import { i18n } from '@kbn/i18n';
 import React, { ReactNode, useEffect, useState } from 'react';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
-import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
+import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { APIReturnType } from '../../../../services/rest/createCallApmApi';
-import { TableFetchWrapper } from '../../../shared/table_fetch_wrapper';
 import {
   PAGE_SIZE,
   SortDirection,
@@ -27,10 +26,14 @@ import { OverviewTableContainer } from '../../../shared/overview_table_container
 import { getColumns } from './get_columns';
 import { InstanceDetails } from './intance_details';
 import { useApmParams } from '../../../../hooks/use_apm_params';
+import { useBreakpoints } from '../../../../hooks/use_breakpoints';
 
-type ServiceInstanceMainStatistics = APIReturnType<'GET /api/apm/services/{serviceName}/service_overview_instances/main_statistics'>;
-type MainStatsServiceInstanceItem = ServiceInstanceMainStatistics['currentPeriod'][0];
-type ServiceInstanceDetailedStatistics = APIReturnType<'GET /api/apm/services/{serviceName}/service_overview_instances/detailed_statistics'>;
+type ServiceInstanceMainStatistics =
+  APIReturnType<'GET /internal/apm/services/{serviceName}/service_overview_instances/main_statistics'>;
+type MainStatsServiceInstanceItem =
+  ServiceInstanceMainStatistics['currentPeriod'][0];
+type ServiceInstanceDetailedStatistics =
+  APIReturnType<'GET /internal/apm/services/{serviceName}/service_overview_instances/detailed_statistics'>;
 
 export interface TableOptions {
   pageIndex: number;
@@ -69,16 +72,14 @@ export function ServiceOverviewInstancesTable({
 
   const {
     query: { kuery },
-  } = useApmParams('/services/:serviceName');
+  } = useApmParams('/services/{serviceName}');
 
   const {
     urlParams: { latencyAggregationType, comparisonEnabled },
-  } = useUrlParams();
+  } = useLegacyUrlParams();
 
-  const [
-    itemIdToOpenActionMenuRowMap,
-    setItemIdToOpenActionMenuRowMap,
-  ] = useState<Record<string, boolean>>({});
+  const [itemIdToOpenActionMenuRowMap, setItemIdToOpenActionMenuRowMap] =
+    useState<Record<string, boolean>>({});
 
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<
     Record<string, ReactNode>
@@ -118,6 +119,10 @@ export function ServiceOverviewInstancesTable({
     setItemIdToExpandedRowMap(expandedRowMapValues);
   };
 
+  // Hide the spark plots if we're below 1600 px
+  const { isXl } = useBreakpoints();
+  const shouldShowSparkPlots = !isXl;
+
   const columns = getColumns({
     agentName,
     serviceName,
@@ -129,6 +134,7 @@ export function ServiceOverviewInstancesTable({
     itemIdToExpandedRowMap,
     toggleRowActionMenu,
     itemIdToOpenActionMenuRowMap,
+    shouldShowSparkPlots,
   });
 
   const pagination = {
@@ -150,33 +156,39 @@ export function ServiceOverviewInstancesTable({
         </EuiTitle>
       </EuiFlexItem>
       <EuiFlexItem data-test-subj="serviceInstancesTableContainer">
-        <TableFetchWrapper status={status}>
-          <OverviewTableContainer
-            fixedHeight={true}
-            isEmptyAndNotInitiated={mainStatsItemCount === 0 && isNotInitiated}
-          >
-            <EuiBasicTable
-              noItemsMessage={
-                isLoading
-                  ? i18n.translate('xpack.apm.serviceOverview.loadingText', {
-                      defaultMessage: 'Loading…',
-                    })
-                  : i18n.translate('xpack.apm.serviceOverview.noResultsText', {
-                      defaultMessage: 'No instances found',
-                    })
-              }
-              data-test-subj="instancesTable"
-              loading={isLoading}
-              items={mainStatsItems}
-              columns={columns}
-              pagination={pagination}
-              sorting={{ sort: { field, direction } }}
-              onChange={onChangeTableOptions}
-              itemId="serviceNodeName"
-              itemIdToExpandedRowMap={itemIdToExpandedRowMap}
-            />
-          </OverviewTableContainer>
-        </TableFetchWrapper>
+        <OverviewTableContainer
+          fixedHeight={true}
+          isEmptyAndNotInitiated={mainStatsItemCount === 0 && isNotInitiated}
+        >
+          <EuiBasicTable
+            noItemsMessage={
+              isLoading
+                ? i18n.translate('xpack.apm.serviceOverview.loadingText', {
+                    defaultMessage: 'Loading…',
+                  })
+                : i18n.translate('xpack.apm.serviceOverview.noResultsText', {
+                    defaultMessage: 'No instances found',
+                  })
+            }
+            data-test-subj="instancesTable"
+            loading={isLoading}
+            items={mainStatsItems}
+            columns={columns}
+            pagination={pagination}
+            sorting={{ sort: { field, direction } }}
+            onChange={onChangeTableOptions}
+            itemId="serviceNodeName"
+            itemIdToExpandedRowMap={itemIdToExpandedRowMap}
+            error={
+              status === FETCH_STATUS.FAILURE
+                ? i18n.translate(
+                    'xpack.apm.serviceOverview.instancesTable.errorMessage',
+                    { defaultMessage: 'Failed to fetch' }
+                  )
+                : ''
+            }
+          />
+        </OverviewTableContainer>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

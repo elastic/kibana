@@ -9,9 +9,9 @@ import React, { useEffect, useState } from 'react';
 import { EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { QueryStringInput } from '../../../../../../../../src/plugins/data/public';
-import { useIndexPattern } from '../../query_bar/use_index_pattern';
 import { isValidKuery } from '../../query_bar/query_bar';
 import * as labels from '../translations';
+import { useIndexPattern } from '../../../../hooks';
 
 interface Props {
   query: string;
@@ -19,7 +19,7 @@ interface Props {
 }
 
 export const AlertQueryBar = ({ query = '', onChange }: Props) => {
-  const { index_pattern: indexPattern } = useIndexPattern();
+  const indexPattern = useIndexPattern();
 
   const [inputVal, setInputVal] = useState<string>(query);
 

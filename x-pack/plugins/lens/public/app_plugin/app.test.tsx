@@ -13,7 +13,13 @@ import { App } from './app';
 import { LensAppProps, LensAppServices } from './types';
 import { EditorFrameInstance, EditorFrameProps } from '../types';
 import { Document } from '../persistence';
-import { visualizationMap, datasourceMap, makeDefaultServices, mountWithProvider } from '../mocks';
+import {
+  visualizationMap,
+  datasourceMap,
+  makeDefaultServices,
+  mountWithProvider,
+  mockStoreDeps,
+} from '../mocks';
 import { I18nProvider } from '@kbn/i18n/react';
 import {
   SavedObjectSaveModal,
@@ -92,9 +98,11 @@ describe('Lens App', () => {
     };
   }
 
+  const makeDefaultServicesForApp = () => makeDefaultServices(sessionIdSubject, 'sessionId-1');
+
   async function mountWith({
     props = makeDefaultProps(),
-    services = makeDefaultServices(sessionIdSubject),
+    services = makeDefaultServicesForApp(),
     preloadedState,
   }: {
     props?: jest.Mocked<LensAppProps>;
@@ -110,11 +118,11 @@ describe('Lens App', () => {
         </I18nProvider>
       );
     };
-
+    const storeDeps = mockStoreDeps({ lensServices: services });
     const { instance, lensStore } = await mountWithProvider(
       <App {...props} />,
       {
-        data: services.data,
+        storeDeps,
         preloadedState,
       },
       { wrappingComponent }
@@ -126,7 +134,7 @@ describe('Lens App', () => {
 
   beforeEach(() => {
     defaultSavedObjectId = '1234';
-    defaultDoc = ({
+    defaultDoc = {
       savedObjectId: defaultSavedObjectId,
       title: 'An extremely cool default document!',
       expression: 'definitely a valid expression',
@@ -135,7 +143,7 @@ describe('Lens App', () => {
         filters: [{ query: { match_phrase: { src: 'test' } } }],
       },
       references: [{ type: 'index-pattern', id: '1', name: 'index-pattern-0' }],
-    } as unknown) as Document;
+    } as unknown as Document;
   });
 
   it('renders the editor frame', async () => {
@@ -144,9 +152,9 @@ describe('Lens App', () => {
   });
 
   it('updates global filters with store state', async () => {
-    const services = makeDefaultServices(sessionIdSubject);
-    const indexPattern = ({ id: 'index1' } as unknown) as IndexPattern;
-    const pinnedField = ({ name: 'pinnedField' } as unknown) as FieldSpec;
+    const services = makeDefaultServicesForApp();
+    const indexPattern = { id: 'index1' } as unknown as IndexPattern;
+    const pinnedField = { name: 'pinnedField' } as unknown as FieldSpec;
     const pinnedFilter = esFilters.buildExistsFilter(pinnedField, indexPattern);
     services.data.query.filterManager.getFilters = jest.fn().mockImplementation(() => {
       return [];
@@ -173,7 +181,7 @@ describe('Lens App', () => {
 
   describe('breadcrumbs', () => {
     const breadcrumbDocSavedObjectId = defaultSavedObjectId;
-    const breadcrumbDoc = ({
+    const breadcrumbDoc = {
       savedObjectId: breadcrumbDocSavedObjectId,
       title: 'Daaaaaaadaumching!',
       state: {
@@ -181,7 +189,7 @@ describe('Lens App', () => {
         filters: [],
       },
       references: [],
-    } as unknown) as Document;
+    } as unknown as Document;
 
     it('sets breadcrumbs when the document title changes', async () => {
       const { instance, services, lensStore } = await mountWith({});
@@ -216,7 +224,7 @@ describe('Lens App', () => {
 
     it('sets originatingApp breadcrumb when the document title changes', async () => {
       const props = makeDefaultProps();
-      const services = makeDefaultServices(sessionIdSubject);
+      const services = makeDefaultServicesForApp();
       props.incomingState = { originatingApp: 'coolContainer' };
       services.getOriginatingAppName = jest.fn(() => 'The Coolest Container Ever Made');
 
@@ -262,7 +270,7 @@ describe('Lens App', () => {
 
   describe('TopNavMenu#showDatePicker', () => {
     it('shows date picker if any used index pattern isTimeBased', async () => {
-      const customServices = makeDefaultServices(sessionIdSubject);
+      const customServices = makeDefaultServicesForApp();
       customServices.data.indexPatterns.get = jest
         .fn()
         .mockImplementation((id) =>
@@ -275,7 +283,7 @@ describe('Lens App', () => {
       );
     });
     it('shows date picker if active datasource isTimeBased', async () => {
-      const customServices = makeDefaultServices(sessionIdSubject);
+      const customServices = makeDefaultServicesForApp();
       customServices.data.indexPatterns.get = jest
         .fn()
         .mockImplementation((id) =>
@@ -290,7 +298,7 @@ describe('Lens App', () => {
       );
     });
     it('does not show date picker if index pattern nor active datasource is not time based', async () => {
-      const customServices = makeDefaultServices(sessionIdSubject);
+      const customServices = makeDefaultServicesForApp();
       customServices.data.indexPatterns.get = jest
         .fn()
         .mockImplementation((id) =>
@@ -309,19 +317,19 @@ describe('Lens App', () => {
   describe('persistence', () => {
     it('passes query and indexPatterns to TopNavMenu', async () => {
       const { instance, lensStore, services } = await mountWith({ preloadedState: {} });
-      const document = ({
+      const document = {
         savedObjectId: defaultSavedObjectId,
         state: {
           query: 'fake query',
           filters: [{ query: { match_phrase: { src: 'test' } } }],
         },
         references: [{ type: 'index-pattern', id: '1', name: 'index-pattern-0' }],
-      } as unknown) as Document;
+      } as unknown as Document;
 
       act(() => {
         lensStore.dispatch(
           setState({
-            query: ('fake query' as unknown) as Query,
+            query: 'fake query' as unknown as Query,
             persistedDoc: document,
           })
         );
@@ -336,7 +344,18 @@ describe('Lens App', () => {
         {}
       );
     });
-
+    it('handles rejected index pattern', async () => {
+      const customServices = makeDefaultServicesForApp();
+      customServices.data.indexPatterns.get = jest
+        .fn()
+        .mockImplementation((id) => Promise.reject({ reason: 'Could not locate that data view' }));
+      const customProps = makeDefaultProps();
+      const { services } = await mountWith({ props: customProps, services: customServices });
+      expect(services.navigation.ui.TopNavMenu).toHaveBeenCalledWith(
+        expect.objectContaining({ indexPatterns: [] }),
+        {}
+      );
+    });
     describe('save buttons', () => {
       interface SaveProps {
         newCopyOnSave: boolean;
@@ -345,11 +364,9 @@ describe('Lens App', () => {
       }
 
       function getButton(inst: ReactWrapper): TopNavMenuData {
-        return (inst
-          .find('[data-test-subj="lnsApp_topNav"]')
-          .prop('config') as TopNavMenuData[]).find(
-          (button) => button.testId === 'lnsApp_saveButton'
-        )!;
+        return (
+          inst.find('[data-test-subj="lnsApp_topNav"]').prop('config') as TopNavMenuData[]
+        ).find((button) => button.testId === 'lnsApp_saveButton')!;
       }
 
       async function testSave(inst: ReactWrapper, saveProps: SaveProps) {
@@ -376,7 +393,7 @@ describe('Lens App', () => {
             : undefined,
         };
 
-        const services = makeDefaultServices(sessionIdSubject);
+        const services = makeDefaultServicesForApp();
         services.attributeService.wrapAttributes = jest
           .fn()
           .mockImplementation(async ({ savedObjectId }) => ({
@@ -410,7 +427,7 @@ describe('Lens App', () => {
       }
 
       it('shows a disabled save button when the user does not have permissions', async () => {
-        const services = makeDefaultServices(sessionIdSubject);
+        const services = makeDefaultServicesForApp();
         services.application = {
           ...services.application,
           capabilities: {
@@ -460,7 +477,7 @@ describe('Lens App', () => {
 
       it('Shows Save and Return and Save As buttons in create by value mode with originating app', async () => {
         const props = makeDefaultProps();
-        const services = makeDefaultServices(sessionIdSubject);
+        const services = makeDefaultServicesForApp();
         services.dashboardFeatureFlag = { allowByValueEmbeddables: true };
         props.incomingState = {
           originatingApp: 'ultraDashboard',
@@ -606,7 +623,10 @@ describe('Lens App', () => {
       });
 
       it('handles save failure by showing a warning, but still allows another save', async () => {
-        const services = makeDefaultServices(sessionIdSubject);
+        const mockedConsoleDir = jest.spyOn(console, 'dir'); // mocked console.dir to avoid messages in the console when running tests
+        mockedConsoleDir.mockImplementation(() => {});
+
+        const services = makeDefaultServicesForApp();
         services.attributeService.wrapAttributes = jest
           .fn()
           .mockRejectedValue({ message: 'failed' });
@@ -622,6 +642,9 @@ describe('Lens App', () => {
         });
         expect(props.redirectTo).not.toHaveBeenCalled();
         expect(getButton(instance).disableButton).toEqual(false);
+        // eslint-disable-next-line no-console
+        expect(console.dir).toHaveBeenCalledTimes(1);
+        mockedConsoleDir.mockRestore();
       });
 
       it('saves new doc and redirects to originating app', async () => {
@@ -646,9 +669,9 @@ describe('Lens App', () => {
       });
 
       it('saves app filters and does not save pinned filters', async () => {
-        const indexPattern = ({ id: 'index1' } as unknown) as IndexPattern;
-        const field = ({ name: 'myfield' } as unknown) as FieldSpec;
-        const pinnedField = ({ name: 'pinnedField' } as unknown) as FieldSpec;
+        const indexPattern = { id: 'index1' } as unknown as IndexPattern;
+        const field = { name: 'myfield' } as unknown as FieldSpec;
+        const pinnedField = { name: 'pinnedField' } as unknown as FieldSpec;
         const unpinned = esFilters.buildExistsFilter(field, indexPattern);
         const pinned = esFilters.buildExistsFilter(pinnedField, indexPattern);
         await act(async () => {
@@ -677,7 +700,7 @@ describe('Lens App', () => {
       });
 
       it('checks for duplicate title before saving', async () => {
-        const services = makeDefaultServices(sessionIdSubject);
+        const services = makeDefaultServicesForApp();
         services.attributeService.wrapAttributes = jest
           .fn()
           .mockReturnValue(Promise.resolve({ savedObjectId: '123' }));
@@ -685,7 +708,7 @@ describe('Lens App', () => {
           services,
           preloadedState: {
             isSaveable: true,
-            persistedDoc: ({ savedObjectId: '123' } as unknown) as Document,
+            persistedDoc: { savedObjectId: '123' } as unknown as Document,
           },
         });
         await act(async () => {
@@ -722,11 +745,9 @@ describe('Lens App', () => {
 
   describe('download button', () => {
     function getButton(inst: ReactWrapper): TopNavMenuData {
-      return (inst
-        .find('[data-test-subj="lnsApp_topNav"]')
-        .prop('config') as TopNavMenuData[]).find(
-        (button) => button.testId === 'lnsApp_downloadCSVButton'
-      )!;
+      return (
+        inst.find('[data-test-subj="lnsApp_topNav"]').prop('config') as TopNavMenuData[]
+      ).find((button) => button.testId === 'lnsApp_downloadCSVButton')!;
     }
 
     it('should be disabled when no data is available', async () => {
@@ -746,7 +767,7 @@ describe('Lens App', () => {
     });
 
     it('should still be enabled even if the user is missing save permissions', async () => {
-      const services = makeDefaultServices(sessionIdSubject);
+      const services = makeDefaultServicesForApp();
       services.application = {
         ...services.application,
         capabilities: {
@@ -768,11 +789,9 @@ describe('Lens App', () => {
 
   describe('inspector', () => {
     function getButton(inst: ReactWrapper): TopNavMenuData {
-      return (inst
-        .find('[data-test-subj="lnsApp_topNav"]')
-        .prop('config') as TopNavMenuData[]).find(
-        (button) => button.testId === 'lnsApp_inspectButton'
-      )!;
+      return (
+        inst.find('[data-test-subj="lnsApp_topNav"]').prop('config') as TopNavMenuData[]
+      ).find((button) => button.testId === 'lnsApp_inspectButton')!;
     }
 
     async function runInspect(inst: ReactWrapper) {
@@ -788,12 +807,12 @@ describe('Lens App', () => {
     });
 
     it('should open inspect panel', async () => {
-      const services = makeDefaultServices(sessionIdSubject);
+      const services = makeDefaultServicesForApp();
       const { instance } = await mountWith({ services, preloadedState: { isSaveable: true } });
 
       await runInspect(instance);
 
-      expect(services.inspector.open).toHaveBeenCalledTimes(1);
+      expect(services.inspector.inspect).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -859,8 +878,8 @@ describe('Lens App', () => {
 
     it('updates the filters when the user changes them', async () => {
       const { instance, services, lensStore } = await mountWith({});
-      const indexPattern = ({ id: 'index1' } as unknown) as IndexPattern;
-      const field = ({ name: 'myfield' } as unknown) as FieldSpec;
+      const indexPattern = { id: 'index1' } as unknown as IndexPattern;
+      const field = { name: 'myfield' } as unknown as FieldSpec;
       expect(lensStore.getState()).toEqual({
         lens: expect.objectContaining({
           filters: [],
@@ -914,8 +933,8 @@ describe('Lens App', () => {
           searchSessionId: `sessionId-3`,
         }),
       });
-      const indexPattern = ({ id: 'index1' } as unknown) as IndexPattern;
-      const field = ({ name: 'myfield' } as unknown) as FieldSpec;
+      const indexPattern = { id: 'index1' } as unknown as IndexPattern;
+      const field = { name: 'myfield' } as unknown as FieldSpec;
       act(() =>
         services.data.query.filterManager.setFilters([
           esFilters.buildExistsFilter(field, indexPattern),
@@ -932,7 +951,7 @@ describe('Lens App', () => {
 
   describe('saved query handling', () => {
     it('does not allow saving when the user is missing the saveQuery permission', async () => {
-      const services = makeDefaultServices(sessionIdSubject);
+      const services = makeDefaultServicesForApp();
       services.application = {
         ...services.application,
         capabilities: {
@@ -1049,9 +1068,9 @@ describe('Lens App', () => {
           query: { query: 'new', language: 'lucene' },
         })
       );
-      const indexPattern = ({ id: 'index1' } as unknown) as IndexPattern;
-      const field = ({ name: 'myfield' } as unknown) as FieldSpec;
-      const pinnedField = ({ name: 'pinnedField' } as unknown) as FieldSpec;
+      const indexPattern = { id: 'index1' } as unknown as IndexPattern;
+      const field = { name: 'myfield' } as unknown as FieldSpec;
+      const pinnedField = { name: 'pinnedField' } as unknown as FieldSpec;
       const unpinned = esFilters.buildExistsFilter(field, indexPattern);
       const pinned = esFilters.buildExistsFilter(pinnedField, indexPattern);
       FilterManager.setFiltersStore([pinned], esFilters.FilterStateStore.GLOBAL_STATE);
@@ -1106,9 +1125,9 @@ describe('Lens App', () => {
           query: { query: 'new', language: 'lucene' },
         })
       );
-      const indexPattern = ({ id: 'index1' } as unknown) as IndexPattern;
-      const field = ({ name: 'myfield' } as unknown) as FieldSpec;
-      const pinnedField = ({ name: 'pinnedField' } as unknown) as FieldSpec;
+      const indexPattern = { id: 'index1' } as unknown as IndexPattern;
+      const field = { name: 'myfield' } as unknown as FieldSpec;
+      const pinnedField = { name: 'pinnedField' } as unknown as FieldSpec;
       const unpinned = esFilters.buildExistsFilter(field, indexPattern);
       const pinned = esFilters.buildExistsFilter(pinnedField, indexPattern);
       FilterManager.setFiltersStore([pinned], esFilters.FilterStateStore.GLOBAL_STATE);
@@ -1123,9 +1142,30 @@ describe('Lens App', () => {
       });
     });
 
+    it('dispatches update to searchSessionId and dateRange when the user hits refresh', async () => {
+      const { instance, services, lensStore } = await mountWith({});
+      act(() =>
+        instance.find(services.navigation.ui.TopNavMenu).prop('onQuerySubmit')!({
+          dateRange: { from: 'now-7d', to: 'now' },
+        })
+      );
+
+      instance.update();
+      expect(lensStore.dispatch).toHaveBeenCalledWith({
+        type: 'lens/setState',
+        payload: {
+          resolvedDateRange: {
+            fromDate: '2021-01-10T04:00:00.000Z',
+            toDate: '2021-01-10T08:00:00.000Z',
+          },
+          searchSessionId: 'sessionId-2',
+        },
+      });
+    });
+
     it('updates the state if session id changes from the outside', async () => {
       const sessionIdS = new Subject<string>();
-      const services = makeDefaultServices(sessionIdS);
+      const services = makeDefaultServices(sessionIdS, 'sessionId-1');
       const { lensStore } = await mountWith({ props: undefined, services });
 
       act(() => {
@@ -1169,7 +1209,7 @@ describe('Lens App', () => {
     });
 
     it('does not confirm if the user is missing save permissions', async () => {
-      const services = makeDefaultServices(sessionIdSubject);
+      const services = makeDefaultServicesForApp();
       services.application = {
         ...services.application,
         capabilities: {

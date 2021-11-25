@@ -23,7 +23,7 @@ test('Pick and configure action', () => {
   const screen = render(
     <Demo
       actionFactories={
-        ([dashboardFactory, urlFactory] as unknown) as Array<
+        [dashboardFactory, urlFactory] as unknown as Array<
           ActionFactory<SerializableRecord, object, BaseActionFactoryContext>
         >
       }
@@ -56,7 +56,7 @@ test('If only one actions factory is available then actionFactory selection is e
   const screen = render(
     <Demo
       actionFactories={[
-        (urlFactory as unknown) as ActionFactory<
+        urlFactory as unknown as ActionFactory<
           SerializableRecord,
           object,
           BaseActionFactoryContext
@@ -94,7 +94,7 @@ test('If not enough license, button is disabled', () => {
   const screen = render(
     <Demo
       actionFactories={
-        ([dashboardFactory, urlWithGoldLicense] as unknown) as Array<
+        [dashboardFactory, urlWithGoldLicense] as unknown as Array<
           ActionFactory<SerializableRecord, object, BaseActionFactoryContext>
         >
       }
@@ -121,7 +121,7 @@ test('if action is beta, beta badge is shown', () => {
   const screen = render(
     <Demo
       actionFactories={
-        ([dashboardFactory, betaUrl] as unknown) as Array<
+        [dashboardFactory, betaUrl] as unknown as Array<
           ActionFactory<SerializableRecord, object, BaseActionFactoryContext>
         >
       }

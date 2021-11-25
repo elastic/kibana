@@ -92,11 +92,13 @@ PreferenceFormattedP1DTDate.displayName = 'PreferenceFormattedP1DTDate';
  * - a long representation of the date that includes the day of the week (e.g. Thursday, March 21, 2019 6:47pm)
  * - the raw date value (e.g. 2019-03-22T00:47:46Z)
  */
-export const FormattedDate = React.memo<{
+
+interface FormattedDateProps {
+  className?: string;
   fieldName: string;
   value?: string | number | null;
-  className?: string;
-}>(
+}
+export const FormattedDate = React.memo<FormattedDateProps>(
   ({ value, fieldName, className = '' }): JSX.Element => {
     if (value == null) {
       return getOrEmptyTagFromValue(value);
@@ -114,36 +116,62 @@ export const FormattedDate = React.memo<{
 
 FormattedDate.displayName = 'FormattedDate';
 
+export interface FormattedRelativePreferenceDateProps {
+  value?: string | number | null;
+  /**
+   * Set dateFormat if wanting to override the Kibana system default for when displaying the non-relative date.
+   * For a list of tokens that can be used to create a date format
+   * @see https://momentjs.com/docs/#/displaying/format/
+   */
+  dateFormat?: string;
+  relativeThresholdInHrs?: number;
+  tooltipFieldName?: string;
+  tooltipAnchorClassName?: string;
+}
 /**
- * Renders the specified date value according to under/over one hour
- * Under an hour = relative format
- * Over an hour = in a format determined by the user's preferences,
+ * Renders the specified date value according to under/over configured by relativeThresholdInHrs in hours (default 1 hr)
+ * Under the relativeThresholdInHrs = relative format
+ * Over the relativeThresholdInHrs  = in a format determined by the user's preferences (can be overridden via prop),
  * with a tooltip that renders:
  * - the name of the field
  * - a humanized relative date (e.g. 16 minutes ago)
  * - a long representation of the date that includes the day of the week (e.g. Thursday, March 21, 2019 6:47pm)
  * - the raw date value (e.g. 2019-03-22T00:47:46Z)
  */
+export const FormattedRelativePreferenceDate = React.memo<FormattedRelativePreferenceDateProps>(
+  ({ value, dateFormat, tooltipFieldName, tooltipAnchorClassName, relativeThresholdInHrs = 1 }) => {
+    if (value == null) {
+      return getOrEmptyTagFromValue(value);
+    }
+    const maybeDate = getMaybeDate(value);
+    if (!maybeDate.isValid()) {
+      return getOrEmptyTagFromValue(value);
+    }
+    const date = maybeDate.toDate();
+    const shouldDisplayPreferenceTime = moment(date)
+      .add(relativeThresholdInHrs, 'hours')
+      .isBefore(new Date());
 
-export const FormattedRelativePreferenceDate = ({ value }: { value?: string | number | null }) => {
-  if (value == null) {
-    return getOrEmptyTagFromValue(value);
+    return (
+      <LocalizedDateTooltip
+        date={date}
+        fieldName={tooltipFieldName}
+        className={tooltipAnchorClassName}
+      >
+        {shouldDisplayPreferenceTime ? (
+          <PreferenceFormattedDate
+            data-test-subj="preference-time"
+            value={date}
+            dateFormat={dateFormat}
+          />
+        ) : (
+          <FormattedRelative data-test-subj="relative-time" value={date} />
+        )}
+      </LocalizedDateTooltip>
+    );
   }
-  const maybeDate = getMaybeDate(value);
-  if (!maybeDate.isValid()) {
-    return getOrEmptyTagFromValue(value);
-  }
-  const date = maybeDate.toDate();
-  return (
-    <LocalizedDateTooltip date={date}>
-      {moment(date).add(1, 'hours').isBefore(new Date()) ? (
-        <PreferenceFormattedDate data-test-subj="preference-time" value={date} />
-      ) : (
-        <FormattedRelative data-test-subj="relative-time" value={date} />
-      )}
-    </LocalizedDateTooltip>
-  );
-};
+);
+FormattedRelativePreferenceDate.displayName = 'FormattedRelativePreferenceDate';
 
 /**
  * Renders a preceding label according to under/over one hour

@@ -8,25 +8,27 @@
 import { KibanaRequest, KibanaResponseFactory } from 'kibana/server';
 import { coreMock, httpServerMock } from 'src/core/server/mocks';
 import { ReportingCore } from '../..';
+import { JobParamsPDF, TaskPayloadPDF } from '../../export_types/printable_pdf/types';
+import { Report, ReportingStore } from '../../lib/store';
+import { ReportApiJSON } from '../../lib/store/report';
 import {
   createMockConfigSchema,
   createMockLevelLogger,
   createMockReportingCore,
 } from '../../test_helpers';
-import { BaseParams, ReportingRequestHandlerContext, ReportingSetup } from '../../types';
+import { ReportingRequestHandlerContext, ReportingSetup } from '../../types';
 import { RequestHandler } from './request_handler';
 
-jest.mock('../../lib/enqueue_job', () => ({
-  enqueueJob: () => ({
-    _id: 'id-of-this-test-report',
-    toApiJSON: () => JSON.stringify({ id: 'id-of-this-test-report' }),
+jest.mock('../../lib/crypto', () => ({
+  cryptoFactory: () => ({
+    encrypt: () => `hello mock cypher text`,
   }),
 }));
 
 const getMockContext = () =>
-  (({
+  ({
     core: coreMock.createRequestHandlerContext(),
-  } as unknown) as ReportingRequestHandlerContext);
+  } as unknown as ReportingRequestHandlerContext);
 
 const getMockRequest = () =>
   ({
@@ -35,11 +37,11 @@ const getMockRequest = () =>
   } as KibanaRequest);
 
 const getMockResponseFactory = () =>
-  (({
+  ({
     ...httpServerMock.createResponseFactory(),
     forbidden: (obj: unknown) => obj,
     unauthorized: (obj: unknown) => obj,
-  } as unknown) as KibanaResponseFactory);
+  } as unknown as KibanaResponseFactory);
 
 const mockLogger = createMockLevelLogger();
 
@@ -50,10 +52,26 @@ describe('Handle request to generate', () => {
   let mockResponseFactory: ReturnType<typeof getMockResponseFactory>;
   let requestHandler: RequestHandler;
 
-  const mockJobParams = {} as BaseParams;
+  const mockJobParams: JobParamsPDF = {
+    browserTimezone: 'UTC',
+    objectType: 'cool_object_type',
+    title: 'cool_title',
+    version: 'unknown',
+    layout: { id: 'preserve_layout' },
+    relativeUrls: [],
+  };
 
   beforeEach(async () => {
     reportingCore = await createMockReportingCore(createMockConfigSchema({}));
+    reportingCore.getStore = () =>
+      Promise.resolve({
+        addReport: jest
+          .fn()
+          .mockImplementation(
+            (report) => new Report({ ...report, _index: '.reporting-foo-index-234' })
+          ),
+      } as unknown as ReportingStore);
+
     mockRequest = getMockRequest();
 
     mockResponseFactory = getMockResponseFactory();
@@ -63,6 +81,7 @@ describe('Handle request to generate', () => {
 
     mockContext = getMockContext();
     mockContext.reporting = {} as ReportingSetup;
+
     requestHandler = new RequestHandler(
       reportingCore,
       { username: 'testymcgee' },
@@ -71,6 +90,64 @@ describe('Handle request to generate', () => {
       mockResponseFactory,
       mockLogger
     );
+  });
+
+  describe('Enqueue Job', () => {
+    test('creates a report object to queue', async () => {
+      const report = await requestHandler.enqueueJob('printablePdf', mockJobParams);
+
+      const { _id, created_at: _created_at, payload, ...snapObj } = report;
+      expect(snapObj).toMatchInlineSnapshot(`
+        Object {
+          "_index": ".reporting-foo-index-234",
+          "_primary_term": undefined,
+          "_seq_no": undefined,
+          "attempts": 0,
+          "browser_type": undefined,
+          "completed_at": undefined,
+          "created_by": "testymcgee",
+          "jobtype": "printable_pdf",
+          "kibana_id": undefined,
+          "kibana_name": undefined,
+          "max_attempts": undefined,
+          "meta": Object {
+            "isDeprecated": false,
+            "layout": "preserve_layout",
+            "objectType": "cool_object_type",
+          },
+          "migration_version": "7.14.0",
+          "output": null,
+          "process_expiration": undefined,
+          "started_at": undefined,
+          "status": "pending",
+          "timeout": undefined,
+        }
+      `);
+      const { forceNow, ...snapPayload } = payload as TaskPayloadPDF;
+      expect(snapPayload).toMatchInlineSnapshot(`
+        Object {
+          "browserTimezone": "UTC",
+          "headers": "hello mock cypher text",
+          "isDeprecated": false,
+          "layout": Object {
+            "id": "preserve_layout",
+          },
+          "objectType": "cool_object_type",
+          "objects": Array [],
+          "spaceId": undefined,
+          "title": "cool_title",
+          "version": "unknown",
+        }
+      `);
+    });
+
+    test('provides a default kibana version field for older POST URLs', async () => {
+      (mockJobParams as unknown as { version?: string }).version = undefined;
+      const report = await requestHandler.enqueueJob('printablePdf', mockJobParams);
+
+      const { _id, created_at: _created_at, ...snapObj } = report;
+      expect(snapObj.payload.version).toBe('7.14.0');
+    });
   });
 
   test('disallows invalid export type', async () => {
@@ -95,15 +172,44 @@ describe('Handle request to generate', () => {
   });
 
   test('generates the download path', async () => {
-    expect(await requestHandler.handleGenerateRequest('csv', mockJobParams)).toMatchInlineSnapshot(`
+    const response = (await requestHandler.handleGenerateRequest(
+      'csv',
+      mockJobParams
+    )) as unknown as { body: { job: ReportApiJSON } };
+    const { id, created_at: _created_at, ...snapObj } = response.body.job;
+    expect(snapObj).toMatchInlineSnapshot(`
       Object {
-        "body": Object {
-          "job": "{\\"id\\":\\"id-of-this-test-report\\"}",
-          "path": "undefined/api/reporting/jobs/download/id-of-this-test-report",
+        "attempts": 0,
+        "browser_type": undefined,
+        "completed_at": undefined,
+        "created_by": "testymcgee",
+        "index": ".reporting-foo-index-234",
+        "jobtype": "csv",
+        "kibana_id": undefined,
+        "kibana_name": undefined,
+        "max_attempts": undefined,
+        "meta": Object {
+          "isDeprecated": true,
+          "layout": "preserve_layout",
+          "objectType": "cool_object_type",
         },
-        "headers": Object {
-          "content-type": "application/json",
+        "migration_version": "7.14.0",
+        "output": Object {},
+        "payload": Object {
+          "browserTimezone": "UTC",
+          "isDeprecated": true,
+          "layout": Object {
+            "id": "preserve_layout",
+          },
+          "objectType": "cool_object_type",
+          "relativeUrls": Array [],
+          "spaceId": undefined,
+          "title": "cool_title",
+          "version": "7.14.0",
         },
+        "started_at": undefined,
+        "status": "pending",
+        "timeout": undefined,
       }
     `);
   });

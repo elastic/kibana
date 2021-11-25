@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import * as Rx from 'rxjs';
 import { catchError, filter, map, mergeMap, takeUntil } from 'rxjs/operators';
+import type { DataPublicPluginStart } from 'src/plugins/data/public';
 import {
   CoreSetup,
   CoreStart,
@@ -40,9 +41,9 @@ import type {
   UiActionsSetup,
   UiActionsStart,
 } from './shared_imports';
+import { AppNavLinkStatus } from './shared_imports';
 import { ReportingCsvShareProvider } from './share_context_menu/register_csv_reporting';
 import { reportingScreenshotShareProvider } from './share_context_menu/register_pdf_png_reporting';
-import { isRedirectAppPath } from './utils';
 
 export interface ClientConfigType {
   poll: { jobsRefresh: { interval: number; intervalErrorMultiplier: number } };
@@ -77,6 +78,7 @@ export interface ReportingPublicPluginSetupDendencies {
 
 export interface ReportingPublicPluginStartDendencies {
   home: HomePublicPluginStart;
+  data: DataPublicPluginStart;
   management: ManagementStart;
   licensing: LicensingPluginStart;
   uiActions: UiActionsStart;
@@ -90,7 +92,8 @@ export class ReportingPublicPlugin
       ReportingStart,
       ReportingPublicPluginSetupDendencies,
       ReportingPublicPluginStartDendencies
-    > {
+    >
+{
   private kibanaVersion: string;
   private apiClient?: ReportingAPIClient;
   private readonly stop$ = new Rx.ReplaySubject(1);
@@ -133,7 +136,10 @@ export class ReportingPublicPlugin
     return this.contract;
   }
 
-  public setup(core: CoreSetup, setupDeps: ReportingPublicPluginSetupDendencies) {
+  public setup(
+    core: CoreSetup<ReportingPublicPluginStartDendencies>,
+    setupDeps: ReportingPublicPluginSetupDendencies
+  ) {
     const { getStartServices, uiSettings } = core;
     const {
       home,
@@ -167,15 +173,6 @@ export class ReportingPublicPlugin
       title: this.title,
       order: 1,
       mount: async (params) => {
-        // The redirect app will be mounted if reporting is opened on a specific path. The redirect app expects a
-        // specific environment to be present so that it can navigate to a specific application. This is used by
-        // report generation to navigate to the correct place with full app state.
-        if (isRedirectAppPath(params.history.location.pathname)) {
-          const { mountRedirectApp } = await import('./redirect');
-          return mountRedirectApp({ ...params, share, apiClient });
-        }
-
-        // Otherwise load the reporting management UI.
         params.setBreadcrumbs([{ text: this.breadcrumbText }]);
         const [[start], { mountManagementSection }] = await Promise.all([
           getStartServices(),
@@ -200,6 +197,19 @@ export class ReportingPublicPlugin
           umountAppCallback();
         };
       },
+    });
+
+    core.application.register({
+      id: 'reportingRedirect',
+      mount: async (params) => {
+        const { mountRedirectApp } = await import('./redirect');
+        return mountRedirectApp({ ...params, share, apiClient });
+      },
+      title: 'Reporting redirect app',
+      searchable: false,
+      chromeless: true,
+      exactRoute: true,
+      navLinkStatus: AppNavLinkStatus.hidden,
     });
 
     uiActions.addTriggerAction(

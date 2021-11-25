@@ -28,8 +28,8 @@ export const useLensOpenVisualization = ({ comment }: { comment: string }) => {
       {
         id: '',
         timeRange: lensVisualization[0].timeRange,
-        attributes: (lensVisualization[0]
-          .attributes as unknown) as TypedLensByValueInput['attributes'],
+        attributes: lensVisualization[0]
+          .attributes as unknown as TypedLensByValueInput['attributes'],
       },
       {
         openInNewTab: true,

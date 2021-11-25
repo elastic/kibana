@@ -16,8 +16,10 @@ const createContextMock = (mockContext: any = {}) => {
     registerContext: jest.fn(),
     createHandler: jest.fn(),
   };
-  contextMock.createHandler.mockImplementation((pluginId, handler) => (...args) =>
-    Promise.resolve(handler(mockContext, ...args))
+  contextMock.createHandler.mockImplementation(
+    (pluginId, handler) =>
+      (...args) =>
+        Promise.resolve(handler(mockContext, ...args))
   );
   return contextMock;
 };

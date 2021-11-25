@@ -77,39 +77,36 @@ const dispatchFromResponse = async (
   }
 };
 
-export const uploadLicense = (licenseString, currentLicenseType, acknowledge) => async (
-  dispatch,
-  getState,
-  services
-) => {
-  dispatch(uploadLicenseStatus({ applying: true }));
-  let newLicenseType = null;
-  try {
-    ({ type: newLicenseType } = JSON.parse(licenseString).license);
-  } catch (err) {
-    dispatch(uploadLicenseStatus({}));
-    return dispatch(
-      addUploadErrorMessage(
-        i18n.translate('xpack.licenseMgmt.uploadLicense.checkLicenseFileErrorMessage', {
-          defaultMessage: '{genericUploadError} Check your license file.',
-          values: {
-            genericUploadError,
-          },
-        })
-      )
-    );
-  }
-  try {
-    const response = await putLicense(services.http, licenseString, acknowledge);
-    await dispatchFromResponse(response, dispatch, currentLicenseType, newLicenseType, services);
-  } catch (err) {
-    const message =
-      err.responseJSON && err.responseJSON.error.reason
-        ? err.responseJSON.error.reason
-        : i18n.translate('xpack.licenseMgmt.uploadLicense.unknownErrorErrorMessage', {
-            defaultMessage: 'Unknown error.',
-          });
-    dispatch(uploadLicenseStatus({}));
-    dispatch(addUploadErrorMessage(`${genericUploadError} ${message}`));
-  }
-};
+export const uploadLicense =
+  (licenseString, currentLicenseType, acknowledge) => async (dispatch, getState, services) => {
+    dispatch(uploadLicenseStatus({ applying: true }));
+    let newLicenseType = null;
+    try {
+      ({ type: newLicenseType } = JSON.parse(licenseString).license);
+    } catch (err) {
+      dispatch(uploadLicenseStatus({}));
+      return dispatch(
+        addUploadErrorMessage(
+          i18n.translate('xpack.licenseMgmt.uploadLicense.checkLicenseFileErrorMessage', {
+            defaultMessage: '{genericUploadError} Check your license file.',
+            values: {
+              genericUploadError,
+            },
+          })
+        )
+      );
+    }
+    try {
+      const response = await putLicense(services.http, licenseString, acknowledge);
+      await dispatchFromResponse(response, dispatch, currentLicenseType, newLicenseType, services);
+    } catch (err) {
+      const message =
+        err.responseJSON && err.responseJSON.error.reason
+          ? err.responseJSON.error.reason
+          : i18n.translate('xpack.licenseMgmt.uploadLicense.unknownErrorErrorMessage', {
+              defaultMessage: 'Unknown error.',
+            });
+      dispatch(uploadLicenseStatus({}));
+      dispatch(addUploadErrorMessage(`${genericUploadError} ${message}`));
+    }
+  };

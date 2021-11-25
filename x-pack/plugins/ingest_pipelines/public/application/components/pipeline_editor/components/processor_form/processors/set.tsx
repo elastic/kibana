@@ -97,9 +97,7 @@ const fieldsConfig: FieldsConfig = {
 };
 
 // Required fields config
-const getValueConfig: (
-  toggleCustom: () => void
-) => Record<
+const getValueConfig: (toggleCustom: () => void) => Record<
   keyof ValueToggleFields,
   {
     path: string;

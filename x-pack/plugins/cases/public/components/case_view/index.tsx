@@ -26,7 +26,7 @@ import { UserActionTree } from '../user_action_tree';
 import { UserList } from '../user_list';
 import { useUpdateCase } from '../../containers/use_update_case';
 import { getTypedPayload } from '../../containers/utils';
-import { ContentWrapper, WhitePageWrapper, HeaderWrapper } from '../wrappers';
+import { ContentWrapper, WhitePageWrapper } from '../wrappers';
 import { CaseActionBar } from '../case_action_bar';
 import { useGetCaseUserActions } from '../../containers/use_get_case_user_actions';
 import { EditConnector } from '../edit_connector';
@@ -40,6 +40,7 @@ import { CasesNavigation } from '../links';
 import { OwnerProvider } from '../owner_context';
 import { getConnectorById } from '../utils';
 import { DoesNotExist } from './does_not_exist';
+import { useKibana } from '../../common/lib/kibana';
 
 export interface CaseViewComponentProps {
   allCasesNavigation: CasesNavigation;
@@ -82,6 +83,7 @@ export interface CaseComponentProps extends CaseViewComponentProps {
   fetchCase: UseGetCase['fetchCase'];
   caseData: Case;
   updateCase: (newCase: Case) => void;
+  onCaseDataSuccess?: (newCase: Case) => void;
 }
 
 export const CaseComponent = React.memo<CaseComponentProps>(
@@ -93,6 +95,7 @@ export const CaseComponent = React.memo<CaseComponentProps>(
     configureCasesNavigation,
     getCaseDetailHrefWithCommentId,
     fetchCase,
+    onCaseDataSuccess,
     onComponentInitialized,
     actionsNavigation,
     ruleDetailsNavigation,
@@ -270,7 +273,11 @@ export const CaseComponent = React.memo<CaseComponentProps>(
       [updateCase, fetchCaseUserActions, caseId, subCaseId]
     );
 
-    const { loading: isLoadingConnectors, connectors, permissionsError } = useConnectors({
+    const {
+      loading: isLoadingConnectors,
+      connectors,
+      permissionsError,
+    } = useConnectors({
       toastPermissionsErrors: false,
     });
 
@@ -304,13 +311,23 @@ export const CaseComponent = React.memo<CaseComponentProps>(
       [onUpdateField, connectors]
     );
 
-    const onSubmitTags = useCallback((newTags) => onUpdateField({ key: 'tags', value: newTags }), [
-      onUpdateField,
-    ]);
+    const onSubmitTags = useCallback(
+      (newTags) => onUpdateField({ key: 'tags', value: newTags }),
+      [onUpdateField]
+    );
 
     const onSubmitTitle = useCallback(
-      (newTitle) => onUpdateField({ key: 'title', value: newTitle }),
-      [onUpdateField]
+      (newTitle) =>
+        onUpdateField({
+          key: 'title',
+          value: newTitle,
+          onSuccess: () => {
+            if (onCaseDataSuccess) {
+              onCaseDataSuccess({ ...caseData, title: newTitle });
+            }
+          },
+        }),
+      [caseData, onUpdateField, onCaseDataSuccess]
     );
 
     const changeStatus = useCallback(
@@ -372,32 +389,31 @@ export const CaseComponent = React.memo<CaseComponentProps>(
 
     return (
       <>
-        <HeaderWrapper>
-          <HeaderPage
-            backOptions={backOptions}
-            data-test-subj="case-view-title"
-            titleNode={
-              <EditableTitle
-                userCanCrud={userCanCrud}
-                isLoading={isLoading && updateKey === 'title'}
-                title={caseData.title}
-                onSubmit={onSubmitTitle}
-              />
-            }
-            title={caseData.title}
-          >
-            <CaseActionBar
-              allCasesNavigation={allCasesNavigation}
-              caseData={caseData}
-              currentExternalIncident={currentExternalIncident}
+        <HeaderPage
+          backOptions={backOptions}
+          data-test-subj="case-view-title"
+          titleNode={
+            <EditableTitle
               userCanCrud={userCanCrud}
-              disableAlerting={ruleDetailsNavigation == null || hideSyncAlerts}
-              isLoading={isLoading && (updateKey === 'status' || updateKey === 'settings')}
-              onRefresh={handleRefresh}
-              onUpdateField={onUpdateField}
+              isLoading={isLoading && updateKey === 'title'}
+              title={caseData.title}
+              onSubmit={onSubmitTitle}
             />
-          </HeaderPage>
-        </HeaderWrapper>
+          }
+          title={caseData.title}
+        >
+          <CaseActionBar
+            allCasesNavigation={allCasesNavigation}
+            caseData={caseData}
+            currentExternalIncident={currentExternalIncident}
+            userCanCrud={userCanCrud}
+            disableAlerting={ruleDetailsNavigation == null || hideSyncAlerts}
+            isLoading={isLoading && (updateKey === 'status' || updateKey === 'settings')}
+            onRefresh={handleRefresh}
+            onUpdateField={onUpdateField}
+          />
+        </HeaderPage>
+
         <WhitePageWrapper>
           <ContentWrapper>
             <EuiFlexGroup>
@@ -494,6 +510,14 @@ export const CaseComponent = React.memo<CaseComponentProps>(
   }
 );
 
+export const CaseViewLoading = () => (
+  <MyEuiFlexGroup gutterSize="none" justifyContent="center" alignItems="center">
+    <EuiFlexItem grow={false}>
+      <EuiLoadingSpinner data-test-subj="case-view-loading" size="xl" />
+    </EuiFlexItem>
+  </MyEuiFlexGroup>
+);
+
 export const CaseView = React.memo(
   ({
     allCasesNavigation,
@@ -513,27 +537,59 @@ export const CaseView = React.memo(
     refreshRef,
     hideSyncAlerts,
   }: CaseViewProps) => {
-    const { data, isLoading, isError, fetchCase, updateCase } = useGetCase(caseId, subCaseId);
-    if (isError) {
-      return <DoesNotExist allCasesNavigation={allCasesNavigation} caseId={caseId} />;
-    }
-    if (isLoading) {
-      return (
-        <MyEuiFlexGroup gutterSize="none" justifyContent="center" alignItems="center">
-          <EuiFlexItem grow={false}>
-            <EuiLoadingSpinner data-test-subj="case-view-loading" size="xl" />
-          </EuiFlexItem>
-        </MyEuiFlexGroup>
-      );
-    }
-    if (onCaseDataSuccess && data) {
-      onCaseDataSuccess(data);
-    }
+    const { data, resolveOutcome, resolveAliasId, isLoading, isError, fetchCase, updateCase } =
+      useGetCase(caseId, subCaseId);
+    const { spaces: spacesApi, http } = useKibana().services;
 
-    return (
+    useEffect(() => {
+      if (onCaseDataSuccess && data) {
+        onCaseDataSuccess(data);
+      }
+    }, [data, onCaseDataSuccess]);
+
+    useEffect(() => {
+      if (spacesApi && resolveOutcome === 'aliasMatch' && resolveAliasId != null) {
+        // CAUTION: the path /cases/:detailName is working in both Observability (/app/observability/cases/:detailName) and
+        // Security Solutions (/app/security/cases/:detailName) plugins. This will need to be changed if this component is loaded
+        // under any another path, passing a path builder function by props from every parent plugin.
+        const newPath = http.basePath.prepend(
+          `cases/${resolveAliasId}${window.location.search}${window.location.hash}`
+        );
+        spacesApi.ui.redirectLegacyUrl(newPath, i18n.CASE);
+      }
+    }, [resolveOutcome, resolveAliasId, spacesApi, http]);
+
+    const getLegacyUrlConflictCallout = useCallback(() => {
+      // This function returns a callout component *if* we have encountered a "legacy URL conflict" scenario
+      if (data && spacesApi && resolveOutcome === 'conflict' && resolveAliasId != null) {
+        // We have resolved to one object, but another object has a legacy URL alias associated with this ID/page. We should display a
+        // callout with a warning for the user, and provide a way for them to navigate to the other object.
+        const otherObjectId = resolveAliasId; // This is always defined if outcome === 'conflict'
+        // CAUTION: the path /cases/:detailName is working in both Observability (/app/observability/cases/:detailName) and
+        // Security Solutions (/app/security/cases/:detailName) plugins. This will need to be changed if this component is loaded
+        // under any another path, passing a path builder function by props from every parent plugin.
+        const otherObjectPath = http.basePath.prepend(
+          `cases/${otherObjectId}${window.location.search}${window.location.hash}`
+        );
+        return spacesApi.ui.components.getLegacyUrlConflict({
+          objectNoun: i18n.CASE,
+          currentObjectId: data.id,
+          otherObjectId,
+          otherObjectPath,
+        });
+      }
+      return null;
+    }, [data, resolveAliasId, resolveOutcome, spacesApi, http.basePath]);
+
+    return isError ? (
+      <DoesNotExist allCasesNavigation={allCasesNavigation} caseId={caseId} />
+    ) : isLoading ? (
+      <CaseViewLoading />
+    ) : (
       data && (
         <CasesTimelineIntegrationProvider timelineIntegration={timelineIntegration}>
           <OwnerProvider owner={[data.owner]}>
+            {getLegacyUrlConflictCallout()}
             <CaseComponent
               allCasesNavigation={allCasesNavigation}
               caseData={data}
@@ -542,6 +598,7 @@ export const CaseView = React.memo(
               configureCasesNavigation={configureCasesNavigation}
               getCaseDetailHrefWithCommentId={getCaseDetailHrefWithCommentId}
               fetchCase={fetchCase}
+              onCaseDataSuccess={onCaseDataSuccess}
               onComponentInitialized={onComponentInitialized}
               actionsNavigation={actionsNavigation}
               ruleDetailsNavigation={ruleDetailsNavigation}
@@ -561,6 +618,7 @@ export const CaseView = React.memo(
 );
 
 CaseComponent.displayName = 'CaseComponent';
+CaseViewLoading.displayName = 'CaseViewLoading';
 CaseView.displayName = 'CaseView';
 
 // eslint-disable-next-line import/no-default-export

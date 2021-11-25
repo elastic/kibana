@@ -12,8 +12,8 @@ const DOT_PREFIX_RE = /(.).+?\./g;
  * Convert a dot.notated.string into a short
  * version (d.n.string)
  *
- * @return {any}
+ * @return {unknown}
  */
-export function shortenDottedString(input: any) {
+export function shortenDottedString(input: unknown) {
   return typeof input !== 'string' ? input : input.replace(DOT_PREFIX_RE, '$1.');
 }

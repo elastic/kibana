@@ -9,6 +9,7 @@
 import { StatusResponse } from '../../../../types/status';
 import { httpServiceMock } from '../../../http/http_service.mock';
 import { notificationServiceMock } from '../../../notifications/notifications_service.mock';
+import { mocked } from '../../../../server/metrics/event_loop_delays/event_loop_delays_monitor.mocks';
 import { loadStatus } from './load_status';
 
 const mockedResponse: StatusResponse = {
@@ -61,6 +62,7 @@ const mockedResponse: StatusResponse = {
       },
     },
     process: {
+      pid: 1,
       memory: {
         heap: {
           size_limit: 1000000,
@@ -70,9 +72,25 @@ const mockedResponse: StatusResponse = {
         resident_set_size_in_bytes: 1,
       },
       event_loop_delay: 1,
-      pid: 1,
+      event_loop_delay_histogram: mocked.createHistogram(),
       uptime_in_millis: 1,
     },
+    processes: [
+      {
+        pid: 1,
+        memory: {
+          heap: {
+            size_limit: 1000000,
+            used_in_bytes: 100,
+            total_in_bytes: 0,
+          },
+          resident_set_size_in_bytes: 1,
+        },
+        event_loop_delay: 1,
+        event_loop_delay_histogram: mocked.createHistogram(),
+        uptime_in_millis: 1,
+      },
+    ],
     response_times: {
       avg_in_millis: 4000,
       max_in_millis: 8000,

@@ -36,7 +36,7 @@ export function MLHeader({ hasValidMlLicense, mlJobId }: Props) {
 
   const {
     query: { kuery },
-  } = useApmParams('/services/:serviceName');
+  } = useApmParams('/services/{serviceName}');
 
   if (!hasValidMlLicense || !mlJobId) {
     return null;

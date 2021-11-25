@@ -19,10 +19,10 @@ import {
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
 import {
-  getDocumentTypeFilterForAggregatedTransactions,
-  getProcessorEventForAggregatedTransactions,
-  getTransactionDurationFieldForAggregatedTransactions,
-} from '../../helpers/aggregated_transactions';
+  getDocumentTypeFilterForTransactions,
+  getTransactionDurationFieldForTransactions,
+  getProcessorEventForTransactions,
+} from '../../helpers/transactions';
 import { calculateThroughput } from '../../helpers/calculate_throughput';
 import {
   calculateFailedTransactionRate,
@@ -36,6 +36,8 @@ interface AggregationParams {
   setup: ServicesItemsSetup;
   searchAggregatedTransactions: boolean;
   maxNumServices: number;
+  start: number;
+  end: number;
 }
 
 export async function getServiceTransactionStats({
@@ -44,15 +46,17 @@ export async function getServiceTransactionStats({
   setup,
   searchAggregatedTransactions,
   maxNumServices,
+  start,
+  end,
 }: AggregationParams) {
-  const { apmEventClient, start, end } = setup;
+  const { apmEventClient } = setup;
 
   const outcomes = getOutcomeAggregation();
 
   const metrics = {
     avg_duration: {
       avg: {
-        field: getTransactionDurationFieldForAggregatedTransactions(
+        field: getTransactionDurationFieldForTransactions(
           searchAggregatedTransactions
         ),
       },
@@ -65,9 +69,7 @@ export async function getServiceTransactionStats({
     {
       apm: {
         events: [
-          getProcessorEventForAggregatedTransactions(
-            searchAggregatedTransactions
-          ),
+          getProcessorEventForTransactions(searchAggregatedTransactions),
         ],
       },
       body: {
@@ -75,7 +77,7 @@ export async function getServiceTransactionStats({
         query: {
           bool: {
             filter: [
-              ...getDocumentTypeFilterForAggregatedTransactions(
+              ...getDocumentTypeFilterForTransactions(
                 searchAggregatedTransactions
               ),
               ...rangeQuery(start, end),

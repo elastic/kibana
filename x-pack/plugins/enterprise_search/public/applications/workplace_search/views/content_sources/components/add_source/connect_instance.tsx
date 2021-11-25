@@ -30,6 +30,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 import { LicensingLogic } from '../../../../../shared/licensing';
 import { AppLogic } from '../../../../app_logic';
+import { EXPLORE_PLATINUM_FEATURES_LINK } from '../../../../constants';
 import { DOCUMENT_PERMISSIONS_DOCS_URL, ENT_SEARCH_LICENSE_MANAGEMENT } from '../../../../routes';
 import { FeatureIds, Configuration, Features } from '../../../../types';
 import { LEARN_MORE_LINK } from '../../constants';
@@ -44,7 +45,6 @@ import {
   CONNECT_NOT_SYNCED_TEXT,
   SOURCE_FEATURES_DOCUMENT_LEVEL_PERMISSIONS_FEATURE,
   SOURCE_FEATURES_DOCUMENT_LEVEL_PERMISSIONS_TITLE,
-  SOURCE_FEATURES_EXPLORE_BUTTON,
 } from './constants';
 import { SourceFeatures } from './source_features';
 
@@ -82,9 +82,8 @@ export const ConnectInstance: React.FC<ConnectInstanceProps> = ({
     setSourceIndexPermissionsValue,
   } = useActions(AddSourceLogic);
 
-  const { loginValue, passwordValue, indexPermissionsValue, subdomainValue } = useValues(
-    AddSourceLogic
-  );
+  const { loginValue, passwordValue, indexPermissionsValue, subdomainValue } =
+    useValues(AddSourceLogic);
 
   const { isOrganization } = useValues(AppLogic);
 
@@ -230,7 +229,7 @@ export const ConnectInstance: React.FC<ConnectInstanceProps> = ({
         <EuiSpacer size="s" />
         <EuiText size="xs">
           <EuiLink external target="_blank" href={ENT_SEARCH_LICENSE_MANAGEMENT}>
-            {SOURCE_FEATURES_EXPLORE_BUTTON}
+            {EXPLORE_PLATINUM_FEATURES_LINK}
           </EuiLink>
         </EuiText>
       </EuiPanel>

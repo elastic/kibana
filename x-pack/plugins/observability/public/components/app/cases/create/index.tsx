@@ -6,7 +6,6 @@
  */
 
 import React, { useCallback } from 'react';
-import { EuiPanel } from '@elastic/eui';
 
 import { useKibana } from '../../../../utils/kibana_react';
 import { getCaseDetailsUrl } from '../../../../pages/cases/links';
@@ -24,21 +23,17 @@ export const Create = React.memo(() => {
     [casesUrl, navigateToUrl]
   );
 
-  const handleSetIsCancel = useCallback(() => navigateToUrl(`${casesUrl}`), [
-    casesUrl,
-    navigateToUrl,
-  ]);
-
-  return (
-    <EuiPanel>
-      {cases.getCreateCase({
-        disableAlerts: true,
-        onCancel: handleSetIsCancel,
-        onSuccess,
-        owner: [CASES_OWNER],
-      })}
-    </EuiPanel>
+  const handleSetIsCancel = useCallback(
+    () => navigateToUrl(`${casesUrl}`),
+    [casesUrl, navigateToUrl]
   );
+
+  return cases.getCreateCase({
+    disableAlerts: true,
+    onCancel: handleSetIsCancel,
+    onSuccess,
+    owner: [CASES_OWNER],
+  });
 });
 
 Create.displayName = 'Create';

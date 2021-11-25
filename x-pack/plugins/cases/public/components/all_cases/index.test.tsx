@@ -32,8 +32,8 @@ import { useKibana } from '../../common/lib/kibana';
 import { AllCasesGeneric as AllCases } from './all_cases_generic';
 import { AllCasesProps } from '.';
 import { CasesColumns, GetCasesColumn, useCasesColumns } from './columns';
-import { actionTypeRegistryMock } from '../../../../triggers_actions_ui/public/application/action_type_registry.mock';
 import { triggersActionsUiMock } from '../../../../triggers_actions_ui/public/mocks';
+import { registerConnectorsToMockActionRegistry } from '../../common/mock/register_connectors';
 
 jest.mock('../../containers/use_bulk_update_case');
 jest.mock('../../containers/use_delete_cases');
@@ -148,14 +148,10 @@ describe('AllCasesGeneric', () => {
     userCanCrud: true,
   };
 
-  const { createMockActionTypeModel } = actionTypeRegistryMock;
+  const actionTypeRegistry = useKibanaMock().services.triggersActionsUi.actionTypeRegistry;
 
   beforeAll(() => {
-    connectorsMock.forEach((connector) =>
-      useKibanaMock().services.triggersActionsUi.actionTypeRegistry.register(
-        createMockActionTypeModel({ id: connector.actionTypeId, iconClass: 'logoSecurity' })
-      )
-    );
+    registerConnectorsToMockActionRegistry(actionTypeRegistry, connectorsMock);
   });
 
   beforeEach(() => {
@@ -307,7 +303,10 @@ describe('AllCasesGeneric', () => {
 
     await waitFor(() => {
       result.current.map(
-        (i, key) => i.name != null && !i.hasOwnProperty('actions') && checkIt(`${i.name}`, key)
+        (i, key) =>
+          i.name != null &&
+          !Object.prototype.hasOwnProperty.call(i, 'actions') &&
+          checkIt(`${i.name}`, key)
       );
     });
   });
@@ -382,7 +381,9 @@ describe('AllCasesGeneric', () => {
       })
     );
     await waitFor(() => {
-      result.current.map((i) => i.name != null && !i.hasOwnProperty('actions'));
+      result.current.map(
+        (i) => i.name != null && !Object.prototype.hasOwnProperty.call(i, 'actions')
+      );
       expect(wrapper.find(`a[data-test-subj="case-details-link"]`).exists()).toBeFalsy();
     });
   });
@@ -748,7 +749,7 @@ describe('AllCasesGeneric', () => {
         />
       </TestProviders>
     );
-    wrapper.find('[data-test-subj="cases-table-row-1"]').first().simulate('click');
+    wrapper.find('[data-test-subj="cases-table-row-select-1"]').first().simulate('click');
     await waitFor(() => {
       expect(onRowClick).toHaveBeenCalledWith({
         closedAt: null,

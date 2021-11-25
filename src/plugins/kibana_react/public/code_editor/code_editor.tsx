@@ -14,6 +14,7 @@ import { monaco } from '@kbn/monaco';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import classNames from 'classnames';
+import './register_languages';
 
 import {
   DARK_THEME,
@@ -135,7 +136,9 @@ export const CodeEditor: React.FC<Props> = ({
   const MonacoEditor: typeof ReactMonacoEditor = useMemo(() => {
     const isMockedComponent =
       typeof ReactMonacoEditor === 'function' && ReactMonacoEditor.name === 'JestMockEditor';
-    return isMockedComponent ? (ReactMonacoEditor as any)() : ReactMonacoEditor;
+    return isMockedComponent
+      ? (ReactMonacoEditor as unknown as () => typeof ReactMonacoEditor)()
+      : ReactMonacoEditor;
   }, []);
 
   const isReadOnly = options?.readOnly ?? false;

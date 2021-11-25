@@ -54,7 +54,6 @@ export const createTimelines = async ({
     isImmutable
   );
   const newTimelineSavedObjectId = responseTimeline.timeline.savedObjectId;
-  const newTimelineVersion = responseTimeline.timeline.version;
 
   let myPromises: unknown[] = [];
   if (pinnedEventIds != null && !isEmpty(pinnedEventIds)) {
@@ -73,7 +72,6 @@ export const createTimelines = async ({
       persistNotes(
         frameworkRequest,
         timelineSavedObjectId ?? newTimelineSavedObjectId,
-        newTimelineVersion,
         existingNoteIds,
         notes,
         overrideNotesOwner

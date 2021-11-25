@@ -8,6 +8,7 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
+import { setupFleetAndAgents } from '../agents/services';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
@@ -23,6 +24,7 @@ export default function (providerContext: FtrProviderContext) {
 
   describe('installs packages that include settings and mappings overrides', async () => {
     skipIfNoDockerRegistry(providerContext);
+    setupFleetAndAgents(providerContext);
     after(async () => {
       if (server.enabled) {
         // remove the package just in case it being installed will affect other tests
@@ -38,10 +40,13 @@ export default function (providerContext: FtrProviderContext) {
 
       const templateName = body.response[0].id;
 
-      const { body: indexTemplateResponse } = await es.transport.request({
-        method: 'GET',
-        path: `/_index_template/${templateName}`,
-      });
+      const { body: indexTemplateResponse } = await es.transport.request<any>(
+        {
+          method: 'GET',
+          path: `/_index_template/${templateName}`,
+        },
+        { meta: true }
+      );
 
       // the index template composed_of has the correct component templates in the correct order
       const indexTemplate = indexTemplateResponse.index_templates[0].index_template;
@@ -52,28 +57,37 @@ export default function (providerContext: FtrProviderContext) {
         '.fleet_component_template-1',
       ]);
 
-      ({ body } = await es.transport.request({
-        method: 'GET',
-        path: `/_component_template/${templateName}@mappings`,
-      }));
+      ({ body } = await es.transport.request(
+        {
+          method: 'GET',
+          path: `/_component_template/${templateName}@mappings`,
+        },
+        { meta: true }
+      ));
 
       // The mappings override provided in the package is set in the mappings component template
       expect(body.component_templates[0].component_template.template.mappings.dynamic).to.be(false);
 
-      ({ body } = await es.transport.request({
-        method: 'GET',
-        path: `/_component_template/${templateName}@settings`,
-      }));
+      ({ body } = await es.transport.request(
+        {
+          method: 'GET',
+          path: `/_component_template/${templateName}@settings`,
+        },
+        { meta: true }
+      ));
 
       // The settings override provided in the package is set in the settings component template
       expect(
         body.component_templates[0].component_template.template.settings.index.lifecycle.name
       ).to.be('reference');
 
-      ({ body } = await es.transport.request({
-        method: 'GET',
-        path: `/_component_template/${templateName}@custom`,
-      }));
+      ({ body } = await es.transport.request(
+        {
+          method: 'GET',
+          path: `/_component_template/${templateName}@custom`,
+        },
+        { meta: true }
+      ));
 
       // The user_settings component template is an empty/stub template at first
       const storedTemplate = body.component_templates[0].component_template.template.settings;
@@ -97,19 +111,22 @@ export default function (providerContext: FtrProviderContext) {
       }));
 
       // simulate the result
-      ({ body } = await es.transport.request({
-        method: 'POST',
-        path: `/_index_template/_simulate/${templateName}`,
-        // body: indexTemplate, // I *think* this should work, but it doesn't
-        body: {
-          index_patterns: [`${templateName}-*`],
-          composed_of: [
-            `${templateName}@mappings`,
-            `${templateName}@settings`,
-            `${templateName}@custom`,
-          ],
+      ({ body } = await es.transport.request(
+        {
+          method: 'POST',
+          path: `/_index_template/_simulate/${templateName}`,
+          // body: indexTemplate, // I *think* this should work, but it doesn't
+          body: {
+            index_patterns: [`${templateName}-*`],
+            composed_of: [
+              `${templateName}@mappings`,
+              `${templateName}@settings`,
+              `${templateName}@custom`,
+            ],
+          },
         },
-      }));
+        { meta: true }
+      ));
 
       expect(body).to.eql({
         template: {
@@ -124,9 +141,7 @@ export default function (providerContext: FtrProviderContext) {
                   limit: '10000',
                 },
               },
-              number_of_routing_shards: 30,
               number_of_shards: '3',
-              refresh_interval: '5s',
             },
           },
           mappings: {

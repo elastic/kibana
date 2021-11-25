@@ -21,7 +21,7 @@ import {
   initialUserPrivilegesState,
   useUserPrivileges,
 } from '../../common/components/user_privileges';
-import { useSourcererScope } from '../../common/containers/sourcerer';
+import { useSourcererDataView } from '../../common/containers/sourcerer';
 import { useFetchIndex } from '../../common/containers/source';
 import { useIsThreatIntelModuleEnabled } from '../containers/overview_cti_links/use_is_threat_intel_module_enabled';
 import { useCtiEventCounts } from '../containers/overview_cti_links/use_cti_event_counts';
@@ -30,7 +30,9 @@ import {
   mockCtiLinksResponse,
 } from '../components/overview_cti_links/mock';
 import { useCtiDashboardLinks } from '../containers/overview_cti_links';
-import { EndpointPrivileges } from '../../common/components/user_privileges/use_endpoint_privileges';
+import { EndpointPrivileges } from '../../common/components/user_privileges/endpoint/use_endpoint_privileges';
+import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
+import { useHostsRiskScore } from '../containers/overview_risky_host_links/use_hosts_risk_score';
 
 jest.mock('../../common/lib/kibana');
 jest.mock('../../common/containers/source');
@@ -72,7 +74,6 @@ jest.mock('../../common/containers/local_storage/use_messages_storage');
 
 jest.mock('../containers/overview_cti_links');
 jest.mock('../containers/overview_cti_links/use_cti_event_counts');
-jest.mock('../containers/overview_cti_links');
 
 const useCtiDashboardLinksMock = useCtiDashboardLinks as jest.Mock;
 useCtiDashboardLinksMock.mockReturnValue(mockCtiLinksResponse);
@@ -85,6 +86,18 @@ jest.mock('../containers/overview_cti_links/use_is_threat_intel_module_enabled')
 const useIsThreatIntelModuleEnabledMock = useIsThreatIntelModuleEnabled as jest.Mock;
 useIsThreatIntelModuleEnabledMock.mockReturnValue(true);
 
+jest.mock('../containers/overview_risky_host_links/use_hosts_risk_score');
+const useHostsRiskScoreMock = useHostsRiskScore as jest.Mock;
+useHostsRiskScoreMock.mockReturnValue({
+  loading: false,
+  isModuleEnabled: false,
+  listItems: [],
+});
+
+jest.mock('../../common/hooks/use_experimental_features');
+const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as jest.Mock;
+useIsExperimentalFeatureEnabledMock.mockReturnValue(true);
+
 const endpointNoticeMessage = (hasMessageValue: boolean) => {
   return {
     hasMessage: () => hasMessageValue,
@@ -94,7 +107,7 @@ const endpointNoticeMessage = (hasMessageValue: boolean) => {
     clearAllMessages: () => undefined,
   };
 };
-const mockUseSourcererScope = useSourcererScope as jest.Mock;
+const mockUseSourcererDataView = useSourcererDataView as jest.Mock;
 const mockUseUserPrivileges = useUserPrivileges as jest.Mock;
 const mockUseFetchIndex = useFetchIndex as jest.Mock;
 const mockUseMessagesStorage: jest.Mock = useMessagesStorage as jest.Mock<UseMessagesStorage>;
@@ -128,7 +141,7 @@ describe('Overview', () => {
 
   describe('rendering', () => {
     test('it DOES NOT render the Getting started text when an index is available', () => {
-      mockUseSourcererScope.mockReturnValue({
+      mockUseSourcererDataView.mockReturnValue({
         selectedPatterns: [],
         indicesExist: true,
         indexPattern: {},
@@ -155,7 +168,7 @@ describe('Overview', () => {
           indexExists: false,
         },
       ]);
-      mockUseSourcererScope.mockReturnValue({
+      mockUseSourcererDataView.mockReturnValue({
         selectedPatterns: [],
         indicesExist: true,
         indexPattern: {},
@@ -182,7 +195,7 @@ describe('Overview', () => {
           indexExists: false,
         },
       ]);
-      mockUseSourcererScope.mockReturnValueOnce({
+      mockUseSourcererDataView.mockReturnValueOnce({
         selectedPatterns: [],
         indicesExist: true,
         indexPattern: {},
@@ -203,7 +216,7 @@ describe('Overview', () => {
     });
 
     test('it does NOT render the Endpoint banner when the endpoint index is available AND storage is set', () => {
-      mockUseSourcererScope.mockReturnValue({
+      mockUseSourcererDataView.mockReturnValue({
         selectedPatterns: [],
         indexExists: true,
         indexPattern: {},
@@ -224,7 +237,7 @@ describe('Overview', () => {
     });
 
     test('it does NOT render the Endpoint banner when an index IS available but storage is NOT set', () => {
-      mockUseSourcererScope.mockReturnValue({
+      mockUseSourcererDataView.mockReturnValue({
         selectedPatterns: [],
         indicesExist: true,
         indexPattern: {},
@@ -245,7 +258,7 @@ describe('Overview', () => {
     });
 
     test('it does NOT render the Endpoint banner when Ingest is NOT available', () => {
-      mockUseSourcererScope.mockReturnValue({
+      mockUseSourcererDataView.mockReturnValue({
         selectedPatterns: [],
         indicesExist: true,
         indexPattern: {},
@@ -268,7 +281,7 @@ describe('Overview', () => {
 
     describe('when no index is available', () => {
       beforeEach(() => {
-        mockUseSourcererScope.mockReturnValue({
+        mockUseSourcererDataView.mockReturnValue({
           selectedPatterns: [],
           indicesExist: false,
         });
@@ -285,29 +298,6 @@ describe('Overview', () => {
           </TestProviders>
         );
         expect(wrapper.find('[data-test-subj="empty-page"]').exists()).toBe(true);
-      });
-
-      it('does not show Endpoint get ready button when ingest is not enabled', () => {
-        const wrapper = mount(
-          <TestProviders>
-            <MemoryRouter>
-              <Overview />
-            </MemoryRouter>
-          </TestProviders>
-        );
-        expect(wrapper.find('[data-test-subj="empty-page-endpoint-action"]').exists()).toBe(false);
-      });
-
-      it('shows Endpoint get ready button when ingest is enabled', () => {
-        mockUseUserPrivileges.mockReturnValue(loadedUserPrivilegesState({ canAccessFleet: true }));
-        const wrapper = mount(
-          <TestProviders>
-            <MemoryRouter>
-              <Overview />
-            </MemoryRouter>
-          </TestProviders>
-        );
-        expect(wrapper.find('[data-test-subj="empty-page-endpoint-action"]').exists()).toBe(true);
       });
     });
   });

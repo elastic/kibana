@@ -19,6 +19,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
 
   const CorePluginDeprecationsPluginDeprecations: DomainDeprecationDetails[] = [
     {
+      configPath: 'corePluginDeprecations.oldProperty',
       title: 'Setting "corePluginDeprecations.oldProperty" is deprecated',
       level: 'critical',
       message:
@@ -33,6 +34,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
       requireRestart: true,
     },
     {
+      configPath: 'corePluginDeprecations.noLongerUsed',
       title: 'Setting "corePluginDeprecations.noLongerUsed" is deprecated',
       level: 'critical',
       message: 'You no longer need to configure "corePluginDeprecations.noLongerUsed".',
@@ -46,6 +48,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
       requireRestart: true,
     },
     {
+      configPath: 'corePluginDeprecations.secret',
       title: 'corePluginDeprecations has a deprecated setting',
       level: 'critical',
       message:
@@ -254,11 +257,9 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
           const { deprecations } = await supertest
             .get('/api/deprecations/')
             .set('kbn-xsrf', 'true')
-            .then(
-              ({ body }): Promise<DeprecationsGetResponse> => {
-                return body;
-              }
-            );
+            .then(({ body }): Promise<DeprecationsGetResponse> => {
+              return body;
+            });
 
           const deprecation = deprecations.find(
             ({ message }) => message === 'SavedObject test-deprecations-plugin is still being used.'

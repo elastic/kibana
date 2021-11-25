@@ -103,7 +103,7 @@ describe('Vislib AxisTitle Class Test Suite', function () {
     dataObj = new Data(data, getMockUiState(), () => undefined);
     visConfig = new VisConfig(
       {
-        type: 'histogram',
+        type: 'heatmap',
       },
       data,
       getMockUiState(),

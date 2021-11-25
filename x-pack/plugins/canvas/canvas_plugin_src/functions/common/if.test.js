@@ -62,9 +62,10 @@ describe('if', () => {
 
       it('without else', () => {
         testScheduler.run(({ expectObservable }) => {
-          expectObservable(
-            fn('some context', { condition: false, then: () => of('foo') })
-          ).toBe('(0|)', ['some context']);
+          expectObservable(fn('some context', { condition: false, then: () => of('foo') })).toBe(
+            '(0|)',
+            ['some context']
+          );
         });
       });
     });
@@ -78,9 +79,10 @@ describe('if', () => {
         ${0}
       `('for then with $value', ({ value }) => {
         testScheduler.run(({ expectObservable }) => {
-          expectObservable(
-            fn('some context', { condition: true, then: () => of(value) })
-          ).toBe('(0|)', [value]);
+          expectObservable(fn('some context', { condition: true, then: () => of(value) })).toBe(
+            '(0|)',
+            [value]
+          );
         });
       });
 
@@ -92,9 +94,10 @@ describe('if', () => {
         ${0}
       `('for else with $value', ({ value }) => {
         testScheduler.run(({ expectObservable }) => {
-          expectObservable(
-            fn('some context', { condition: false, else: () => of(value) })
-          ).toBe('(0|)', [value]);
+          expectObservable(fn('some context', { condition: false, else: () => of(value) })).toBe(
+            '(0|)',
+            [value]
+          );
         });
       });
     });

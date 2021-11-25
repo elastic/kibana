@@ -297,21 +297,25 @@ describe('Pipeline Editor', () => {
         none: 'No description',
       };
 
-      const createAssertForProcessor = (processorIndex: string) => ({
-        description,
-        descriptionVisible,
-      }: {
-        description: string;
-        descriptionVisible: boolean;
-      }) => {
-        expect(find(`processors>${processorIndex}.inlineTextInputNonEditableText`).text()).toBe(
-          description
-        );
-        expect(
-          (find(`processors>${processorIndex}.pipelineProcessorItemDescriptionContainer`).props()
-            .className as string).includes('--displayNone')
-        ).toBe(!descriptionVisible);
-      };
+      const createAssertForProcessor =
+        (processorIndex: string) =>
+        ({
+          description,
+          descriptionVisible,
+        }: {
+          description: string;
+          descriptionVisible: boolean;
+        }) => {
+          expect(find(`processors>${processorIndex}.inlineTextInputNonEditableText`).text()).toBe(
+            description
+          );
+          expect(
+            (
+              find(`processors>${processorIndex}.pipelineProcessorItemDescriptionContainer`).props()
+                .className as string
+            ).includes('--displayNone')
+          ).toBe(!descriptionVisible);
+        };
 
       const assertScriptProcessor = createAssertForProcessor('0');
       const assertSetProcessor = createAssertForProcessor('2');

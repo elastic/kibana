@@ -11,7 +11,8 @@ import { PluginSetup, PluginStart, SetupPlugins, StartPlugins } from './types';
 import { getRuntimeFieldEditorLoader } from './load_editor';
 
 export class RuntimeFieldsPlugin
-  implements Plugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
+  implements Plugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins>
+{
   public setup(core: CoreSetup<StartPlugins, PluginStart>, plugins: SetupPlugins): PluginSetup {
     return {
       loadEditor: getRuntimeFieldEditorLoader(core),

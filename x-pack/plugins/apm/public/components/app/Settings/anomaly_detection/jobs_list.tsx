@@ -12,6 +12,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  RIGHT_ALIGNMENT,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -24,6 +25,7 @@ import { LoadingStatePrompt } from '../../../shared/LoadingStatePrompt';
 import { ITableColumn, ManagedTable } from '../../../shared/managed_table';
 import { AnomalyDetectionApiResponse } from './index';
 import { LegacyJobsCallout } from './legacy_jobs_callout';
+import { MLJobsAwaitingNodeWarning } from '../../../../../../ml/public';
 
 type Jobs = AnomalyDetectionApiResponse['jobs'];
 
@@ -38,7 +40,7 @@ const columns: Array<ITableColumn<Jobs[0]>> = [
   },
   {
     field: 'job_id',
-    align: 'right',
+    align: RIGHT_ALIGNMENT,
     name: i18n.translate(
       'xpack.apm.settings.anomalyDetection.jobList.actionColumnLabel',
       { defaultMessage: 'Action' }
@@ -66,6 +68,7 @@ export function JobsList({ data, status, onAddEnvironments }: Props) {
 
   return (
     <>
+      <MLJobsAwaitingNodeWarning jobIds={jobs.map((j) => j.job_id)} />
       <EuiText color="subdued">
         <FormattedMessage
           id="xpack.apm.settings.anomalyDetection.jobList.mlDescriptionText"

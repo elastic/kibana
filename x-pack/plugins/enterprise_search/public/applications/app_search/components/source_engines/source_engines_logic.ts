@@ -32,19 +32,19 @@ interface SourceEnginesLogicActions {
   fetchIndexedEngines: () => void;
   fetchSourceEngines: () => void;
   onSourceEngineRemove: (sourceEngineNameToRemove: string) => { sourceEngineNameToRemove: string };
-  onSourceEnginesAdd: (
-    sourceEnginesToAdd: EngineDetails[]
-  ) => { sourceEnginesToAdd: EngineDetails[] };
-  onSourceEnginesFetch: (
-    sourceEngines: SourceEnginesLogicValues['sourceEngines']
-  ) => { sourceEngines: SourceEnginesLogicValues['sourceEngines'] };
+  onSourceEnginesAdd: (sourceEnginesToAdd: EngineDetails[]) => {
+    sourceEnginesToAdd: EngineDetails[];
+  };
+  onSourceEnginesFetch: (sourceEngines: SourceEnginesLogicValues['sourceEngines']) => {
+    sourceEngines: SourceEnginesLogicValues['sourceEngines'];
+  };
   removeSourceEngine: (sourceEngineName: string) => { sourceEngineName: string };
   setIndexedEngines: (indexedEngines: EngineDetails[]) => { indexedEngines: EngineDetails[] };
   openModal: () => void;
   closeModal: () => void;
-  onAddEnginesSelection: (
-    selectedEngineNamesToAdd: string[]
-  ) => { selectedEngineNamesToAdd: string[] };
+  onAddEnginesSelection: (selectedEngineNamesToAdd: string[]) => {
+    selectedEngineNamesToAdd: string[];
+  };
 }
 
 export const SourceEnginesLogic = kea<

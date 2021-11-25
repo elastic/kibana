@@ -145,7 +145,7 @@ describe('Executor', () => {
         executor.extendContext({ foo });
         const execution = executor.createExecution('foo bar="baz"');
 
-        expect((execution.context as any).foo).toBe(foo);
+        expect(execution.context).toHaveProperty('foo', foo);
       });
     });
   });
@@ -173,12 +173,12 @@ describe('Executor', () => {
         return injectFn(state);
       },
       migrations: {
-        '7.10.0': (((state: ExpressionAstFunction, version: string): ExpressionAstFunction => {
+        '7.10.0': ((state: ExpressionAstFunction, version: string): ExpressionAstFunction => {
           return migrateFn(state, version);
-        }) as any) as MigrateFunction,
-        '7.10.1': (((state: ExpressionAstFunction, version: string): ExpressionAstFunction => {
+        }) as unknown as MigrateFunction,
+        '7.10.1': ((state: ExpressionAstFunction, version: string): ExpressionAstFunction => {
           return migrateFn(state, version);
-        }) as any) as MigrateFunction,
+        }) as unknown as MigrateFunction,
       },
       fn: jest.fn(),
     };
@@ -196,6 +196,11 @@ describe('Executor', () => {
         other: {
           types: ['string'],
           help: 'other arg',
+        },
+        nullable: {
+          types: ['string', 'null'],
+          help: 'nullable arg',
+          default: null,
         },
       },
       extract: (state: ExpressionAstFunction['arguments']) => {
@@ -252,6 +257,14 @@ describe('Executor', () => {
         expect(references[1].name).toBe('l2_ref.id');
         expect(references[1].id).toBe('my-id');
 
+        expect(formatExpression(executor.inject(state, references))).toBe(expression);
+      });
+
+      test('allows expression function argument to be null', () => {
+        const expression = `ref nullable=null id="my-id" other={ref id="nested-id" other="other" | foo bar="baz"}`;
+        const { state, references } = executor.extract(parseExpression(expression));
+
+        expect(state.chain[0].arguments.nullable[0]).toBeNull();
         expect(formatExpression(executor.inject(state, references))).toBe(expression);
       });
     });

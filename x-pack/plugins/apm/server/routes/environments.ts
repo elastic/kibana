@@ -6,15 +6,16 @@
  */
 
 import * as t from 'io-ts';
-import { getSearchAggregatedTransactions } from '../lib/helpers/aggregated_transactions';
+import { maxSuggestions } from '../../../observability/common';
+import { getSearchAggregatedTransactions } from '../lib/helpers/transactions';
 import { setupRequest } from '../lib/helpers/setup_request';
 import { getEnvironments } from '../lib/environments/get_environments';
 import { rangeRt } from './default_api_types';
-import { createApmServerRoute } from './create_apm_server_route';
-import { createApmServerRouteRepository } from './create_apm_server_route_repository';
+import { createApmServerRoute } from './apm_routes/create_apm_server_route';
+import { createApmServerRouteRepository } from './apm_routes/create_apm_server_route_repository';
 
 const environmentsRoute = createApmServerRoute({
-  endpoint: 'GET /api/apm/environments',
+  endpoint: 'GET /internal/apm/environments',
   params: t.type({
     query: t.intersection([
       t.partial({
@@ -26,26 +27,30 @@ const environmentsRoute = createApmServerRoute({
   options: { tags: ['access:apm'] },
   handler: async (resources) => {
     const setup = await setupRequest(resources);
-    const { params } = resources;
-    const { serviceName } = params.query;
+    const { context, params } = resources;
+    const { serviceName, start, end } = params.query;
     const searchAggregatedTransactions = await getSearchAggregatedTransactions({
       apmEventClient: setup.apmEventClient,
       config: setup.config,
-      start: setup.start,
-      end: setup.end,
+      start,
+      end,
       kuery: '',
     });
-
+    const size = await context.core.uiSettings.client.get<number>(
+      maxSuggestions
+    );
     const environments = await getEnvironments({
       setup,
       serviceName,
       searchAggregatedTransactions,
+      size,
+      start,
+      end,
     });
 
     return { environments };
   },
 });
 
-export const environmentsRouteRepository = createApmServerRouteRepository().add(
-  environmentsRoute
-);
+export const environmentsRouteRepository =
+  createApmServerRouteRepository().add(environmentsRoute);

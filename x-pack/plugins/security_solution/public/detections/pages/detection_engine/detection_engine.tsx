@@ -66,7 +66,9 @@ import {
   buildShowBuildingBlockFilterRuleRegistry,
   buildThreatMatchFilter,
 } from '../../components/alerts_table/default_config';
-import { useSourcererScope } from '../../../common/containers/sourcerer';
+import { useSourcererDataView } from '../../../common/containers/sourcerer';
+import { useSignalHelpers } from '../../../common/containers/sourcerer/use_signal_helpers';
+
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { NeedAdminForUpdateRulesCallOut } from '../../components/callouts/need_admin_for_update_callout';
 import { MissingPrivilegesCallOut } from '../../components/callouts/missing_privileges_callout';
@@ -78,7 +80,6 @@ import {
   FILTER_OPEN,
 } from '../../components/alerts_table/alerts_filter_group';
 import { EmptyPage } from '../../../common/components/empty_page';
-
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
  */
@@ -132,10 +133,8 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
       hasIndexRead,
     },
   ] = useUserData();
-  const {
-    loading: listsConfigLoading,
-    needsConfiguration: needsListsConfiguration,
-  } = useListsConfig();
+  const { loading: listsConfigLoading, needsConfiguration: needsListsConfiguration } =
+    useListsConfig();
   const { formatUrl } = useFormatUrl(SecurityPageName.rules);
   const [showBuildingBlockAlerts, setShowBuildingBlockAlerts] = useState(false);
   const [showOnlyThreatIndicatorAlerts, setShowOnlyThreatIndicatorAlerts] = useState(false);
@@ -178,12 +177,11 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
   const onFilterGroupChangedCallback = useCallback(
     (newFilterGroup: Status) => {
       const timelineId = TimelineId.detectionsPage;
-      clearEventsLoading!({ id: timelineId });
-      clearEventsDeleted!({ id: timelineId });
-      clearSelected!({ id: timelineId });
+      clearEventsLoading({ id: timelineId });
+      clearEventsDeleted({ id: timelineId });
       setFilterGroup(newFilterGroup);
     },
-    [clearEventsLoading, clearEventsDeleted, clearSelected, setFilterGroup]
+    [clearEventsLoading, clearEventsDeleted, setFilterGroup]
   );
 
   const alertsHistogramDefaultFilters = useMemo(
@@ -238,7 +236,9 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
     [setShowOnlyThreatIndicatorAlerts]
   );
 
-  const { indicesExist, indexPattern } = useSourcererScope(SourcererScopeName.detections);
+  const { indexPattern } = useSourcererDataView(SourcererScopeName.detections);
+
+  const { signalIndexNeedsInit, pollForSignalIndex } = useSignalHelpers();
 
   const onSkipFocusBeforeEventsTable = useCallback(() => {
     focusUtilityBarAction(containerElement.current);
@@ -294,35 +294,38 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
     );
   }
 
-  if (!loading && (indicesExist === false || needsListsConfiguration)) {
+  if ((!loading && signalIndexNeedsInit) || needsListsConfiguration) {
     return (
       <SecuritySolutionPageWrapper>
         <DetectionEngineHeaderPage border title={i18n.PAGE_TITLE} />
         <DetectionEngineNoIndex
-          needsSignalsIndex={indicesExist === false}
+          needsSignalsIndex={signalIndexNeedsInit}
           needsListsIndex={needsListsConfiguration}
         />
       </SecuritySolutionPageWrapper>
     );
   }
-
   return (
     <>
       {hasEncryptionKey != null && !hasEncryptionKey && <NoApiIntegrationKeyCallOut />}
       <NeedAdminForUpdateRulesCallOut />
       <MissingPrivilegesCallOut />
-      {indicesExist && (hasIndexRead === false || canUserREAD === false) ? (
+      {!signalIndexNeedsInit && (hasIndexRead === false || canUserREAD === false) ? (
         <EmptyPage
           actions={emptyPageActions}
           message={i18n.ALERTS_FEATURE_NO_PERMISSIONS_MSG}
           data-test-subj="no_feature_permissions-alerts"
           title={i18n.FEATURE_NO_PERMISSIONS_TITLE}
         />
-      ) : indicesExist && hasIndexRead && canUserREAD ? (
+      ) : !signalIndexNeedsInit && hasIndexRead && canUserREAD ? (
         <StyledFullHeightContainer onKeyDown={onKeyDown} ref={containerElement}>
           <EuiWindowEvent event="resize" handler={noop} />
           <FiltersGlobal show={showGlobalFilters({ globalFullScreen, graphEventId })}>
-            <SiemSearchBar id="global" indexPattern={indexPattern} />
+            <SiemSearchBar
+              id="global"
+              pollForSignalIndex={pollForSignalIndex}
+              indexPattern={indexPattern}
+            />
           </FiltersGlobal>
           <SecuritySolutionPageWrapper
             noPadding={globalFullScreen}
@@ -356,6 +359,13 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
               </EuiFlexGroup>
               <EuiSpacer size="m" />
               <EuiFlexGroup wrap>
+                <EuiFlexItem grow={1}>
+                  <AlertsCountPanel
+                    filters={alertsHistogramDefaultFilters}
+                    query={query}
+                    signalIndexName={signalIndexName}
+                  />
+                </EuiFlexItem>
                 <EuiFlexItem grow={2}>
                   <AlertsHistogramPanel
                     chartHeight={CHART_HEIGHT}
@@ -365,14 +375,6 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
                     titleSize={'s'}
                     signalIndexName={signalIndexName}
                     updateDateRange={updateDateRangeCallback}
-                  />
-                </EuiFlexItem>
-
-                <EuiFlexItem grow={1}>
-                  <AlertsCountPanel
-                    filters={alertsHistogramDefaultFilters}
-                    query={query}
-                    signalIndexName={signalIndexName}
                   />
                 </EuiFlexItem>
               </EuiFlexGroup>

@@ -5,5 +5,6 @@
  * 2.0.
  */
 
-export { ElasticsearchRole, transformElasticsearchRoleToRole } from './elasticsearch_role';
+export type { ElasticsearchRole } from '../../../../authorization';
+export { transformElasticsearchRoleToRole } from '../../../../authorization';
 export { getPutPayloadSchema, transformPutPayloadToElasticsearchRole } from './put_payload';

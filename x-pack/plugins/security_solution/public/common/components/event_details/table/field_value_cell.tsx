@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { BrowserField } from '../../../containers/source';
 import { OverflowField } from '../../tables/helpers';
 import { FormattedFieldValue } from '../../../../timelines/components/timeline/body/renderers/formatted_field';
@@ -19,6 +19,7 @@ export interface FieldValueCellProps {
   eventId: string;
   fieldFromBrowserField?: BrowserField;
   getLinkValue?: (field: string) => string | null;
+  isDraggable?: boolean;
   linkValue?: string | null | undefined;
   values: string[] | null | undefined;
 }
@@ -30,22 +31,34 @@ export const FieldValueCell = React.memo(
     eventId,
     fieldFromBrowserField,
     getLinkValue,
+    isDraggable = false,
     linkValue,
     values,
   }: FieldValueCellProps) => {
     return (
-      <div>
+      <EuiFlexGroup
+        alignItems="flexStart"
+        data-test-subj={`event-field-${data.field}`}
+        direction="column"
+        gutterSize="none"
+      >
         {values != null &&
           values.map((value, i) => {
             if (fieldFromBrowserField == null) {
               return (
-                <EuiText size="xs" key={value}>
-                  {value}
-                </EuiText>
+                <EuiFlexItem grow={false} key={`${i}-${value}`}>
+                  <EuiText size="xs" key={`${i}-${value}`}>
+                    {value}
+                  </EuiText>
+                </EuiFlexItem>
               );
             }
             return (
-              <div className="eventFieldsTable__fieldValue" key={value}>
+              <EuiFlexItem
+                className="eventFieldsTable__fieldValue"
+                grow={false}
+                key={`${i}-${value}`}
+              >
                 {data.field === MESSAGE_FIELD_NAME ? (
                   <OverflowField value={value} />
                 ) : (
@@ -55,16 +68,17 @@ export const FieldValueCell = React.memo(
                     fieldFormat={data.format}
                     fieldName={data.field}
                     fieldType={data.type}
-                    isDraggable={false}
+                    isDraggable={isDraggable}
                     isObjectArray={data.isObjectArray}
                     value={value}
                     linkValue={(getLinkValue && getLinkValue(data.field)) ?? linkValue}
+                    truncate={false}
                   />
                 )}
-              </div>
+              </EuiFlexItem>
             );
           })}
-      </div>
+      </EuiFlexGroup>
     );
   }
 );

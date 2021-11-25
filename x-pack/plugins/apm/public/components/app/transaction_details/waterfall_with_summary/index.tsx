@@ -30,7 +30,6 @@ import { useApmParams } from '../../../../hooks/use_apm_params';
 interface Props {
   urlParams: ApmUrlParams;
   waterfall: IWaterfall;
-  exceedsMax: boolean;
   isLoading: boolean;
   traceSamples: TraceSample[];
 }
@@ -38,7 +37,6 @@ interface Props {
 export function WaterfallWithSummary({
   urlParams,
   waterfall,
-  exceedsMax,
   isLoading,
   traceSamples,
 }: Props) {
@@ -47,7 +45,7 @@ export function WaterfallWithSummary({
 
   const {
     query: { environment },
-  } = useApmParams('/services/:serviceName/transactions/view');
+  } = useApmParams('/services/{serviceName}/transactions/view');
 
   useEffect(() => {
     setSampleActivePage(0);
@@ -125,7 +123,7 @@ export function WaterfallWithSummary({
       <EuiSpacer size="s" />
 
       <TransactionSummary
-        errorCount={waterfall.errorsCount}
+        errorCount={waterfall.apiResponse.errorDocs.length}
         totalDuration={waterfall.rootTransaction?.transaction.duration.us}
         transaction={entryTransaction}
       />
@@ -135,7 +133,6 @@ export function WaterfallWithSummary({
         transaction={entryTransaction}
         urlParams={urlParams}
         waterfall={waterfall}
-        exceedsMax={exceedsMax}
       />
     </>
   );

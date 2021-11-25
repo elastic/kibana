@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import {
   EuiFormRow,
@@ -27,13 +27,16 @@ import { DataSourceStrings, LUCENE_QUERY_URL } from '../../../i18n';
 const { ESDocs: strings } = DataSourceStrings;
 
 const EsdocsDatasource = ({ args, updateArgs, defaultIndex }) => {
-  const setArg = (name, value) => {
-    updateArgs &&
-      updateArgs({
-        ...args,
-        ...setSimpleArg(name, value),
-      });
-  };
+  const setArg = useCallback(
+    (name, value) => {
+      updateArgs &&
+        updateArgs({
+          ...args,
+          ...setSimpleArg(name, value),
+        });
+    },
+    [args, updateArgs]
+  );
 
   // TODO: This is a terrible way of doing defaults. We need to find a way to read the defaults for the function
   // and set them for the data source UI.
@@ -48,7 +51,7 @@ const EsdocsDatasource = ({ args, updateArgs, defaultIndex }) => {
   };
 
   const getIndex = () => {
-    return getSimpleArg('index', args)[0] || '';
+    return getSimpleArg('index', args)[0] || defaultIndex || '';
   };
 
   const getQuery = () => {
@@ -73,9 +76,11 @@ const EsdocsDatasource = ({ args, updateArgs, defaultIndex }) => {
 
   const index = getIndex();
 
-  if (!index && defaultIndex) {
-    setArg('index', defaultIndex);
-  }
+  useEffect(() => {
+    if (getSimpleArg('index', args)[0] !== index) {
+      setArg('index', index);
+    }
+  }, [args, index, setArg]);
 
   const sortOptions = [
     { value: 'asc', text: strings.getAscendingOption() },

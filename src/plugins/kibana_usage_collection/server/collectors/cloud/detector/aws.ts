@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import fs from 'fs';
-import { get, isString, omit } from 'lodash';
-import { promisify } from 'util';
-import { CloudService, CloudServiceOptions, Request, RequestOptions } from './cloud_service';
+import { readFile } from 'fs/promises';
+import { get, omit } from 'lodash';
+import fetch from 'node-fetch';
+import { CloudService } from './cloud_service';
 import { CloudServiceResponse } from './cloud_response';
 
 // We explicitly call out the version, 2016-09-02, rather than 'latest' to avoid unexpected changes
@@ -40,9 +40,9 @@ export interface AWSResponse {
  * @internal
  */
 export class AWSCloudService extends CloudService {
-  private readonly _isWindows: boolean;
-  private readonly _fs: typeof fs;
-
+  constructor() {
+    super('aws');
+  }
   /**
    * Parse the AWS response, if possible.
    *
@@ -64,7 +64,8 @@ export class AWSCloudService extends CloudService {
    *   "version" : "2010-08-31",
    * }
    */
-  static parseBody(name: string, body: AWSResponse): CloudServiceResponse | null {
+  parseBody = (body: AWSResponse): CloudServiceResponse | null => {
+    const name = this.getName();
     const id: string | undefined = get(body, 'instanceId');
     const vmType: string | undefined = get(body, 'instanceType');
     const region: string | undefined = get(body, 'region');
@@ -88,64 +89,60 @@ export class AWSCloudService extends CloudService {
     }
 
     return null;
-  }
+  };
 
-  constructor(options: CloudServiceOptions = {}) {
-    super('aws', options);
+  private _isWindows = (): boolean => {
+    return process.platform.startsWith('win');
+  };
 
-    // Allow the file system handler to be swapped out for tests
-    const { _fs = fs, _isWindows = process.platform.startsWith('win') } = options;
+  protected _checkIfService = async () => {
+    try {
+      const response = await fetch(SERVICE_ENDPOINT, {
+        method: 'GET',
+      });
 
-    this._fs = _fs;
-    this._isWindows = _isWindows;
-  }
+      if (!response.ok || response.status === 404) {
+        throw new Error('AWS request failed');
+      }
 
-  async _checkIfService(request: Request) {
-    const req: RequestOptions = {
-      method: 'GET',
-      uri: SERVICE_ENDPOINT,
-      json: true,
-    };
-
-    return promisify(request)(req)
-      .then((response) =>
-        this._parseResponse(response.body, (body) =>
-          AWSCloudService.parseBody(this.getName(), body)
-        )
-      )
-      .catch(() => this._tryToDetectUuid());
-  }
+      const jsonBody: AWSResponse = await response.json();
+      return this._parseResponse(jsonBody, this.parseBody);
+    } catch (_) {
+      return this.tryToDetectUuid();
+    }
+  };
 
   /**
    * Attempt to load the UUID by checking `/sys/hypervisor/uuid`.
    *
    * This is a fallback option if the metadata service is unavailable for some reason.
    */
-  _tryToDetectUuid() {
+  private tryToDetectUuid = async () => {
+    const isWindows = this._isWindows();
     // Windows does not have an easy way to check
-    if (!this._isWindows) {
+    if (!isWindows) {
       const pathsToCheck = ['/sys/hypervisor/uuid', '/sys/devices/virtual/dmi/id/product_uuid'];
-      const promises = pathsToCheck.map((path) => promisify(this._fs.readFile)(path, 'utf8'));
+      const responses = await Promise.allSettled(
+        pathsToCheck.map((path) => readFile(path, 'utf8'))
+      );
 
-      return Promise.allSettled(promises).then((responses) => {
-        for (const response of responses) {
-          let uuid;
-          if (response.status === 'fulfilled' && isString(response.value)) {
-            // Some AWS APIs return it lowercase (like the file did in testing), while others return it uppercase
-            uuid = response.value.trim().toLowerCase();
+      for (const response of responses) {
+        let uuid;
+        if (response.status === 'fulfilled' && typeof response.value === 'string') {
+          // Some AWS APIs return it lowercase (like the file did in testing), while others return it uppercase
+          uuid = response.value.trim().toLowerCase();
 
-            // There is a small chance of a false positive here in the unlikely event that a uuid which doesn't
-            // belong to ec2 happens to be generated with `ec2` as the first three characters.
-            if (uuid.startsWith('ec2')) {
-              return new CloudServiceResponse(this._name, true, { id: uuid });
-            }
+          // There is a small chance of a false positive here in the unlikely event that a uuid which doesn't
+          // belong to ec2 happens to be generated with `ec2` as the first three characters.
+          if (uuid.startsWith('ec2')) {
+            return new CloudServiceResponse(this._name, true, { id: uuid });
           }
         }
+      }
 
-        return this._createUnconfirmedResponse();
-      });
+      return this._createUnconfirmedResponse();
     }
 
-    return Promise.resolve(this._createUnconfirmedResponse());
-  }
+    return this._createUnconfirmedResponse();
+  };
 }

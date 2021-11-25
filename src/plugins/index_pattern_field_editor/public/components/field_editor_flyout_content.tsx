@@ -6,8 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useState, useCallback, useMemo, useEffect } from 'react';
-import { estypes } from '@elastic/elasticsearch';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
@@ -16,15 +15,11 @@ import {
   EuiFlexItem,
   EuiButtonEmpty,
   EuiButton,
-  EuiCallOut,
-  EuiSpacer,
   EuiText,
 } from '@elastic/eui';
 
 import type { Field } from '../types';
-import { RuntimeFieldPainlessError } from '../lib';
 import { euiFlyoutClassname } from '../constants';
-import type { RuntimeFieldSubField } from '../shared_imports';
 import { FlyoutPanels } from './flyout_panels';
 import { useFieldEditorContext } from './field_editor_context';
 import { FieldEditor, FieldEditorFormState } from './field_editor/field_editor';
@@ -37,9 +32,6 @@ const i18nTexts = {
   }),
   saveButtonLabel: i18n.translate('indexPatternFieldEditor.editor.flyoutSaveButtonLabel', {
     defaultMessage: 'Save',
-  }),
-  formErrorsCalloutTitle: i18n.translate('indexPatternFieldEditor.editor.validationErrorTitle', {
-    defaultMessage: 'Fix errors in form before continuing.',
   }),
 };
 
@@ -57,10 +49,6 @@ export interface Props {
    * Handler for the "cancel" footer button
    */
   onCancel: () => void;
-  /** Handler to validate the script  */
-  runtimeFieldValidator: (
-    field: estypes.MappingRuntimeField
-  ) => Promise<RuntimeFieldPainlessError | null>;
   /** Optional field to process */
   field?: Field;
   isSavingField: boolean;
@@ -74,45 +62,30 @@ const FieldEditorFlyoutContentComponent = ({
   field,
   onSave,
   onCancel,
-  runtimeFieldValidator,
   isSavingField,
   onMounted,
 }: Props) => {
+  const isMounted = useRef(false);
   const isEditingExistingField = !!field;
   const { indexPattern } = useFieldEditorContext();
   const {
     panel: { isVisible: isPanelVisible },
-    fieldsInScript,
   } = useFieldPreviewContext();
 
   const [formState, setFormState] = useState<FieldEditorFormState>({
     isSubmitted: false,
+    isSubmitting: false,
     isValid: field ? true : undefined,
     submit: field
       ? async () => ({ isValid: true, data: field })
       : async () => ({ isValid: false, data: {} as Field }),
   });
 
-  const [painlessSyntaxError, setPainlessSyntaxError] = useState<RuntimeFieldPainlessError | null>(
-    null
-  );
-
-  const [isValidating, setIsValidating] = useState(false);
   const [modalVisibility, setModalVisibility] = useState(defaultModalVisibility);
   const [isFormModified, setIsFormModified] = useState(false);
 
-  const { submit, isValid: isFormValid, isSubmitted } = formState;
-  const hasErrors = isFormValid === false || painlessSyntaxError !== null;
-
-  const clearSyntaxError = useCallback(() => setPainlessSyntaxError(null), []);
-
-  const syntaxError = useMemo(
-    () => ({
-      error: painlessSyntaxError,
-      clear: clearSyntaxError,
-    }),
-    [painlessSyntaxError, clearSyntaxError]
-  );
+  const { submit, isValid: isFormValid, isSubmitting } = formState;
+  const hasErrors = isFormValid === false;
 
   const canCloseValidator = useCallback(() => {
     if (isFormModified) {
@@ -124,64 +97,17 @@ const FieldEditorFlyoutContentComponent = ({
     return !isFormModified;
   }, [isFormModified]);
 
-  const addSubfieldsToField = useCallback(
-    (_field: Field): Field => {
-      const { name, type, script, format } = _field;
-
-      // This is a **temporary hack** to create the subfields.
-      // It will be replaced by a UI where the user will set the type and format
-      // of each subField.
-      if (type === 'composite' && fieldsInScript.length > 0) {
-        const fields = fieldsInScript.reduce<Record<string, RuntimeFieldSubField>>(
-          (acc, subFieldName) => {
-            const subField: RuntimeFieldSubField = {
-              type: 'keyword' as const,
-              format,
-            };
-
-            acc[subFieldName] = subField;
-            return acc;
-          },
-          {}
-        );
-
-        const updatedField: Field = {
-          name,
-          type,
-          script,
-          fields,
-        };
-
-        return updatedField;
-      }
-
-      return _field;
-    },
-    [fieldsInScript]
-  );
-
   const onClickSave = useCallback(async () => {
-    const { isValid, data: updatedField } = await submit();
-    const nameChange = field?.name !== updatedField.name;
-    const typeChange = field?.type !== updatedField.type;
+    const { isValid, data } = await submit();
+
+    if (!isMounted.current) {
+      // User has closed the flyout meanwhile submitting the form
+      return;
+    }
 
     if (isValid) {
-      if (updatedField.script) {
-        setIsValidating(true);
-
-        const error = await runtimeFieldValidator({
-          // @ts-expect-error @elastic/elasticsearch does not support "composite" type yet
-          type: updatedField.type,
-          script: updatedField.script,
-        });
-
-        setIsValidating(false);
-        setPainlessSyntaxError(error);
-
-        if (error) {
-          return;
-        }
-      }
+      const nameChange = field?.name !== data.name;
+      const typeChange = field?.type !== data.type;
 
       if (isEditingExistingField && (nameChange || typeChange)) {
         setModalVisibility({
@@ -189,10 +115,10 @@ const FieldEditorFlyoutContentComponent = ({
           confirmChangeNameOrType: true,
         });
       } else {
-        onSave(addSubfieldsToField(updatedField));
+        onSave(data);
       }
     }
-  }, [onSave, submit, runtimeFieldValidator, field, isEditingExistingField, addSubfieldsToField]);
+  }, [onSave, submit, field, isEditingExistingField]);
 
   const onClickCancel = useCallback(() => {
     const canClose = canCloseValidator();
@@ -208,8 +134,8 @@ const FieldEditorFlyoutContentComponent = ({
         <SaveFieldTypeOrNameChangedModal
           fieldName={field?.name!}
           onConfirm={async () => {
-            const { data: updatedField } = await submit();
-            onSave(addSubfieldsToField(updatedField));
+            const { data } = await submit();
+            onSave(data);
           }}
           onCancel={() => {
             setModalVisibility(defaultModalVisibility);
@@ -248,6 +174,14 @@ const FieldEditorFlyoutContentComponent = ({
     }
   }, [onMounted, canCloseValidator]);
 
+  useEffect(() => {
+    isMounted.current = true;
+
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
+
   return (
     <>
       <FlyoutPanels.Group
@@ -282,7 +216,7 @@ const FieldEditorFlyoutContentComponent = ({
                 <p>
                   <FormattedMessage
                     id="indexPatternFieldEditor.editor.flyoutEditFieldSubtitle"
-                    defaultMessage="Index pattern: {patternName}"
+                    defaultMessage="Data view: {patternName}"
                     values={{
                       patternName: <i>{indexPattern.title}</i>,
                     }}
@@ -295,23 +229,11 @@ const FieldEditorFlyoutContentComponent = ({
               field={field}
               onChange={setFormState}
               onFormModifiedChange={setIsFormModified}
-              syntaxError={syntaxError}
             />
           </FlyoutPanels.Content>
 
           <FlyoutPanels.Footer>
             <>
-              {isSubmitted && hasErrors && (
-                <>
-                  <EuiCallOut
-                    title={i18nTexts.formErrorsCalloutTitle}
-                    color="danger"
-                    iconType="cross"
-                    data-test-subj="formError"
-                  />
-                  <EuiSpacer size="m" />
-                </>
-              )}
               <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
                 <EuiFlexItem grow={false}>
                   <EuiButtonEmpty
@@ -331,7 +253,7 @@ const FieldEditorFlyoutContentComponent = ({
                     data-test-subj="fieldSaveButton"
                     fill
                     disabled={hasErrors}
-                    isLoading={isSavingField || isValidating}
+                    isLoading={isSavingField || isSubmitting}
                   >
                     {i18nTexts.saveButtonLabel}
                   </EuiButton>

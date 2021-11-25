@@ -57,6 +57,13 @@ describe('ElasticsearchService', () => {
             return mockConnectionStatusClient;
         }
       });
+      mockPingClient.asInternalUser.transport.request.mockResolvedValue(
+        interactiveSetupMock.createApiResponse({
+          statusCode: 200,
+          body: {},
+          headers: { 'x-elastic-product': 'Elasticsearch' },
+        })
+      );
 
       setupContract = service.setup({
         elasticsearch: mockElasticsearchPreboot,
@@ -282,7 +289,8 @@ describe('ElasticsearchService', () => {
 
       it('treats product check error the same as successful response', async () => {
         mockConnectionStatusClient.asInternalUser.ping.mockRejectedValue(
-          new errors.ProductNotSupportedError(interactiveSetupMock.createApiResponse({ body: {} }))
+          // @ts-expect-error not full interface
+          new errors.ProductNotSupportedError('product-name', { body: {} })
         );
 
         const mockHandler = jest.fn();
@@ -378,7 +386,8 @@ describe('ElasticsearchService', () => {
       it('iterates through all provided hosts until find an accessible one', async () => {
         mockElasticsearchPreboot.createClient.mockClear();
 
-        const mockHostOneEnrollScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+        const mockHostOneEnrollScopedClusterClient =
+          elasticsearchServiceMock.createScopedClusterClient();
         mockHostOneEnrollScopedClusterClient.asCurrentUser.transport.request.mockRejectedValue(
           new errors.ConnectionError(
             'some-message',
@@ -386,7 +395,8 @@ describe('ElasticsearchService', () => {
           )
         );
 
-        const mockHostTwoEnrollScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+        const mockHostTwoEnrollScopedClusterClient =
+          elasticsearchServiceMock.createScopedClusterClient();
         mockHostTwoEnrollScopedClusterClient.asCurrentUser.transport.request.mockResolvedValue(
           interactiveSetupMock.createApiResponse({
             statusCode: 200,
@@ -529,11 +539,25 @@ some weird+ca/with
 
       it('fails if host is not supported', async () => {
         mockPingClient.asInternalUser.ping.mockRejectedValue(
-          new errors.ProductNotSupportedError(interactiveSetupMock.createApiResponse({ body: {} }))
+          // @ts-expect-error not full interface
+          new errors.ProductNotSupportedError('Elasticsearch', { body: {} })
         );
 
         await expect(setupContract.ping('http://localhost:9200')).rejects.toMatchInlineSnapshot(
           `[ProductNotSupportedError: The client noticed that the server is not Elasticsearch and we do not support this unknown product.]`
+        );
+      });
+
+      it('fails if host is not Elasticsearch', async () => {
+        mockPingClient.asInternalUser.ping.mockResolvedValue(
+          interactiveSetupMock.createApiResponse({ statusCode: 200, body: true })
+        );
+        mockPingClient.asInternalUser.transport.request.mockResolvedValue(
+          interactiveSetupMock.createApiResponse({ statusCode: 200, body: {}, headers: {} })
+        );
+
+        await expect(setupContract.ping('http://localhost:9200')).rejects.toMatchInlineSnapshot(
+          `[Error: Host did not respond with valid Elastic product header.]`
         );
       });
 
@@ -568,7 +592,7 @@ some weird+ca/with
           )
         );
 
-        tlsConnectMock.mockReturnValue(({
+        tlsConnectMock.mockReturnValue({
           once: jest.fn((event, fn) => {
             if (event === 'secureConnect') {
               fn();
@@ -576,7 +600,7 @@ some weird+ca/with
           }),
           getPeerCertificate: jest.fn().mockReturnValue({ raw: Buffer.from('cert') }),
           destroy: jest.fn(),
-        } as unknown) as tls.TLSSocket);
+        } as unknown as tls.TLSSocket);
 
         await expect(setupContract.ping('https://localhost:9200')).resolves.toEqual({
           authRequired: true,
@@ -601,13 +625,13 @@ some weird+ca/with
           )
         );
 
-        tlsConnectMock.mockReturnValue(({
+        tlsConnectMock.mockReturnValue({
           once: jest.fn((event, fn) => {
             if (event === 'error') {
               fn(new Error('some-message'));
             }
           }),
-        } as unknown) as tls.TLSSocket);
+        } as unknown as tls.TLSSocket);
 
         await expect(setupContract.ping('https://localhost:9200')).rejects.toMatchInlineSnapshot(
           `[Error: some-message]`

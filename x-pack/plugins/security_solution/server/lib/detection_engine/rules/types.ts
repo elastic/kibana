@@ -8,12 +8,7 @@
 import { get } from 'lodash/fp';
 import { Readable } from 'stream';
 
-import {
-  SavedObject,
-  SavedObjectAttributes,
-  SavedObjectsFindResponse,
-  SavedObjectsFindResult,
-} from 'kibana/server';
+import { SavedObject, SavedObjectAttributes, SavedObjectsClientContract } from 'kibana/server';
 import type {
   MachineLearningJobIdOrUndefined,
   From,
@@ -45,6 +40,7 @@ import type {
   ThrottleOrNull,
 } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { VersionOrUndefined, Version } from '@kbn/securitysolution-io-ts-types';
+import { SIGNALS_ID, ruleTypeMappings } from '@kbn/securitysolution-rules';
 
 import type { ListArrayOrUndefined, ListArray } from '@kbn/securitysolution-io-ts-list-types';
 import { UpdateRulesSchema } from '../../../../common/detection_engine/schemas/request';
@@ -101,20 +97,19 @@ import {
   BuildingBlockTypeOrUndefined,
   RuleNameOverrideOrUndefined,
   EventCategoryOverrideOrUndefined,
+  NamespaceOrUndefined,
 } from '../../../../common/detection_engine/schemas/common/schemas';
 
 import { RulesClient, PartialAlert } from '../../../../../alerting/server';
-import { Alert, SanitizedAlert } from '../../../../../alerting/common';
-import { SIGNALS_ID } from '../../../../common/constants';
+import { SanitizedAlert } from '../../../../../alerting/common';
 import { PartialFilter } from '../types';
 import { RuleParams } from '../schemas/rule_schemas';
 import { IRuleExecutionLogClient } from '../rule_execution_log/types';
 
-export type RuleAlertType = Alert<RuleParams>;
+export type RuleAlertType = SanitizedAlert<RuleParams>;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export interface IRuleStatusSOAttributes extends Record<string, any> {
-  alertId: string; // created alert id.
   statusDate: StatusDate;
   lastFailureAt: LastFailureAt | null | undefined;
   lastFailureMessage: LastFailureMessage | null | undefined;
@@ -128,7 +123,6 @@ export interface IRuleStatusSOAttributes extends Record<string, any> {
 }
 
 export interface IRuleStatusResponseAttributes {
-  alert_id: string; // created alert id.
   status_date: StatusDate;
   last_failure_at: LastFailureAt | null | undefined;
   last_failure_message: LastFailureMessage | null | undefined;
@@ -192,27 +186,24 @@ export interface Clients {
 }
 
 export const isAlertTypes = (
+  isRuleRegistryEnabled: boolean,
   partialAlert: Array<PartialAlert<RuleParams>>
 ): partialAlert is RuleAlertType[] => {
-  return partialAlert.every((rule) => isAlertType(rule));
+  return partialAlert.every((rule) => isAlertType(isRuleRegistryEnabled, rule));
 };
 
 export const isAlertType = (
+  isRuleRegistryEnabled: boolean,
   partialAlert: PartialAlert<RuleParams>
 ): partialAlert is RuleAlertType => {
-  return partialAlert.alertTypeId === SIGNALS_ID;
+  const ruleTypeValues = Object.values(ruleTypeMappings) as unknown as string[];
+  return isRuleRegistryEnabled
+    ? ruleTypeValues.includes(partialAlert.alertTypeId as string)
+    : partialAlert.alertTypeId === SIGNALS_ID;
 };
 
-export const isRuleStatusSavedObjectType = (
-  obj: unknown
-): obj is SavedObject<IRuleSavedAttributesSavedObjectAttributes> => {
-  return get('attributes', obj) != null;
-};
-
-export const isRuleStatusFindType = (
-  obj: unknown
-): obj is SavedObjectsFindResponse<IRuleSavedAttributesSavedObjectAttributes> => {
-  return get('saved_objects', obj) != null;
+export const isRuleStatusSavedObjectAttributes = (obj: unknown): obj is IRuleStatusSOAttributes => {
+  return get('status', obj) != null;
 };
 
 export interface CreateRulesOptions {
@@ -266,13 +257,17 @@ export interface CreateRulesOptions {
   version: Version;
   exceptionsList: ListArray;
   actions: RuleAlertAction[];
+  isRuleRegistryEnabled: boolean;
+  namespace?: NamespaceOrUndefined;
 }
 
 export interface UpdateRulesOptions {
+  isRuleRegistryEnabled: boolean;
   spaceId: string;
   ruleStatusClient: IRuleExecutionLogClient;
   rulesClient: RulesClient;
   defaultOutputIndex: string;
+  existingRule: SanitizedAlert<RuleParams> | null | undefined;
   ruleUpdate: UpdateRulesSchema;
 }
 
@@ -280,6 +275,7 @@ export interface PatchRulesOptions {
   spaceId: string;
   ruleStatusClient: IRuleExecutionLogClient;
   rulesClient: RulesClient;
+  savedObjectsClient: SavedObjectsClientContract;
   anomalyThreshold: AnomalyThresholdOrUndefined;
   author: AuthorOrUndefined;
   buildingBlockType: BuildingBlockTypeOrUndefined;
@@ -326,23 +322,25 @@ export interface PatchRulesOptions {
   version: VersionOrUndefined;
   exceptionsList: ListArrayOrUndefined;
   actions: RuleAlertAction[] | undefined;
-  rule: SanitizedAlert<RuleParams> | null;
+  rule: SanitizedAlert<RuleParams> | null | undefined;
+  namespace?: NamespaceOrUndefined;
 }
 
 export interface ReadRuleOptions {
+  isRuleRegistryEnabled: boolean;
   rulesClient: RulesClient;
   id: IdOrUndefined;
   ruleId: RuleIdOrUndefined;
 }
 
 export interface DeleteRuleOptions {
+  ruleId: Id;
   rulesClient: RulesClient;
   ruleStatusClient: IRuleExecutionLogClient;
-  ruleStatuses: Array<SavedObjectsFindResult<IRuleStatusSOAttributes>>;
-  id: Id;
 }
 
 export interface FindRuleOptions {
+  isRuleRegistryEnabled: boolean;
   rulesClient: RulesClient;
   perPage: PerPageOrUndefined;
   page: PageOrUndefined;
@@ -350,4 +348,10 @@ export interface FindRuleOptions {
   filter: QueryFilterOrUndefined;
   fields: FieldsOrUndefined;
   sortOrder: SortOrderOrUndefined;
+}
+
+export interface LegacyMigrateParams {
+  rulesClient: RulesClient;
+  savedObjectsClient: SavedObjectsClientContract;
+  rule: SanitizedAlert<RuleParams> | null | undefined;
 }

@@ -4,15 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ElasticsearchClient } from 'kibana/server';
 import { get } from 'lodash';
 import type { ReportingConfig } from '../';
+import { REPORTING_SYSTEM_INDEX } from '../../common/constants';
 import type { ExportTypesRegistry } from '../lib/export_types_registry';
 import type { GetLicense } from './';
-import { decorateRangeStats } from './decorate_range_stats';
+import { getExportStats } from './get_export_stats';
 import { getExportTypesHandler } from './get_export_type_handler';
 import type {
+  AggregationBuckets,
   AggregationResultBuckets,
   AvailableTotal,
   FeatureAvailabilityMap,
@@ -33,6 +35,8 @@ const OBJECT_TYPES_FIELD = 'meta.objectType.keyword';
 const STATUS_TYPES_KEY = 'statusTypes';
 const STATUS_BY_APP_KEY = 'statusByApp';
 const STATUS_TYPES_FIELD = 'status';
+const OUTPUT_SIZES_KEY = 'sizes';
+const OUTPUT_SIZES_FIELD = 'output.size';
 
 const DEFAULT_TERMS_SIZE = 10;
 const PRINTABLE_PDF_JOBTYPE = 'printable_pdf';
@@ -64,13 +68,14 @@ const getAppStatuses = (buckets: StatusByAppBucket[]) =>
   }, {});
 
 function getAggStats(aggs: AggregationResultBuckets): Partial<RangeStats> {
-  const { buckets: jobBuckets } = aggs[JOB_TYPES_KEY];
+  const { buckets: jobBuckets } = aggs[JOB_TYPES_KEY] as AggregationBuckets;
   const jobTypes = jobBuckets.reduce((accum: JobTypes, bucket) => {
-    const { key, doc_count: count, isDeprecated } = bucket;
+    const { key, doc_count: count, isDeprecated, sizes } = bucket;
     const deprecatedCount = isDeprecated?.doc_count;
     const total: Omit<AvailableTotal, 'available'> = {
       total: count,
       deprecated: deprecatedCount,
+      sizes: sizes?.values,
     };
     return { ...accum, [key]: total };
   }, {} as JobTypes);
@@ -97,7 +102,13 @@ function getAggStats(aggs: AggregationResultBuckets): Partial<RangeStats> {
     statusByApp = getAppStatuses(statusAppBuckets);
   }
 
-  return { _all: all, status: statusTypes, statuses: statusByApp, ...jobTypes };
+  return {
+    _all: all,
+    status: statusTypes,
+    statuses: statusByApp,
+    output_size: get(aggs[OUTPUT_SIZES_KEY], 'values') ?? undefined,
+    ...jobTypes,
+  };
 }
 
 type RangeStatSets = Partial<RangeStats> & {
@@ -108,11 +119,16 @@ type RangeStatSets = Partial<RangeStats> & {
 type ESResponse = Partial<estypes.SearchResponse>;
 
 async function handleResponse(response: ESResponse): Promise<Partial<RangeStatSets>> {
-  const buckets = get(response, 'aggregations.ranges.buckets');
+  const buckets = get(response, 'aggregations.ranges.buckets') as Record<
+    'all' | 'last7Days',
+    AggregationResultBuckets
+  >;
+
   if (!buckets) {
     return {};
   }
-  const { last7Days, all } = buckets as any;
+
+  const { all, last7Days } = buckets;
 
   const last7DaysUsage = last7Days ? getAggStats(last7Days) : {};
   const allUsage = all ? getAggStats(all) : {};
@@ -129,11 +145,10 @@ export async function getReportingUsage(
   esClient: ElasticsearchClient,
   exportTypesRegistry: ExportTypesRegistry
 ): Promise<ReportingUsageType> {
-  const reportingIndex = config.get('index');
-
+  const reportingIndex = REPORTING_SYSTEM_INDEX;
   const params = {
     index: `${reportingIndex}-*`,
-    filterPath: 'aggregations.*.buckets',
+    filter_path: 'aggregations.*.buckets',
     body: {
       size: 0,
       aggs: {
@@ -147,8 +162,14 @@ export async function getReportingUsage(
           aggs: {
             [JOB_TYPES_KEY]: {
               terms: { field: JOB_TYPES_FIELD, size: DEFAULT_TERMS_SIZE },
-              aggs: { isDeprecated: { filter: { term: { [OBJECT_TYPE_DEPRECATED_KEY]: true } } } },
+              aggs: {
+                isDeprecated: { filter: { term: { [OBJECT_TYPE_DEPRECATED_KEY]: true } } },
+                [OUTPUT_SIZES_KEY]: {
+                  percentiles: { field: OUTPUT_SIZES_FIELD },
+                },
+              },
             },
+
             [STATUS_TYPES_KEY]: { terms: { field: STATUS_TYPES_FIELD, size: DEFAULT_TERMS_SIZE } },
             [STATUS_BY_APP_KEY]: {
               terms: { field: 'status', size: DEFAULT_TERMS_SIZE },
@@ -156,18 +177,23 @@ export async function getReportingUsage(
                 jobTypes: {
                   terms: { field: JOB_TYPES_FIELD, size: DEFAULT_TERMS_SIZE },
                   aggs: {
-                    appNames: { terms: { field: OBJECT_TYPES_FIELD, size: DEFAULT_TERMS_SIZE } }, // NOTE Discover/CSV export is missing the 'meta.objectType' field, so Discover/CSV results are missing for this agg
+                    appNames: { terms: { field: OBJECT_TYPES_FIELD, size: DEFAULT_TERMS_SIZE } },
                   },
                 },
               },
             },
             [OBJECT_TYPES_KEY]: {
               filter: { term: { jobtype: PRINTABLE_PDF_JOBTYPE } },
-              aggs: { pdf: { terms: { field: OBJECT_TYPES_FIELD, size: DEFAULT_TERMS_SIZE } } },
+              aggs: {
+                pdf: { terms: { field: OBJECT_TYPES_FIELD, size: DEFAULT_TERMS_SIZE } },
+              },
             },
             [LAYOUT_TYPES_KEY]: {
               filter: { term: { jobtype: PRINTABLE_PDF_JOBTYPE } },
               aggs: { pdf: { terms: { field: LAYOUT_TYPES_FIELD, size: DEFAULT_TERMS_SIZE } } },
+            },
+            [OUTPUT_SIZES_KEY]: {
+              percentiles: { field: OUTPUT_SIZES_FIELD },
             },
           },
         },
@@ -179,26 +205,24 @@ export async function getReportingUsage(
   return esClient
     .search(params)
     .then(({ body: response }) => handleResponse(response))
-    .then(
-      (usage: Partial<RangeStatSets>): ReportingUsageType => {
-        // Allow this to explicitly throw an exception if/when this config is deprecated,
-        // because we shouldn't collect browserType in that case!
-        const browserType = config.get('capture', 'browser', 'type');
+    .then((usage: Partial<RangeStatSets>): ReportingUsageType => {
+      // Allow this to explicitly throw an exception if/when this config is deprecated,
+      // because we shouldn't collect browserType in that case!
+      const browserType = config.get('capture', 'browser', 'type');
 
-        const exportTypesHandler = getExportTypesHandler(exportTypesRegistry);
-        const availability = exportTypesHandler.getAvailability(
-          featureAvailability
-        ) as FeatureAvailabilityMap;
+      const exportTypesHandler = getExportTypesHandler(exportTypesRegistry);
+      const availability = exportTypesHandler.getAvailability(
+        featureAvailability
+      ) as FeatureAvailabilityMap;
 
-        const { last7Days, ...all } = usage;
+      const { last7Days, ...all } = usage;
 
-        return {
-          available: true,
-          browser_type: browserType,
-          enabled: true,
-          last7Days: decorateRangeStats(last7Days, availability),
-          ...decorateRangeStats(all, availability),
-        };
-      }
-    );
+      return {
+        available: true,
+        browser_type: browserType,
+        enabled: true,
+        last7Days: getExportStats(last7Days, availability, exportTypesHandler),
+        ...getExportStats(all, availability, exportTypesHandler),
+      };
+    });
 }

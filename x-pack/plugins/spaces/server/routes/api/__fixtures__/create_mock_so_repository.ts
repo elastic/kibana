@@ -9,7 +9,7 @@ import type { ISavedObjectsRepository } from 'src/core/server';
 import { SavedObjectsErrorHelpers } from 'src/core/server';
 
 export const createMockSavedObjectsRepository = (spaces: any[] = []) => {
-  const mockSavedObjectsClientContract = ({
+  const mockSavedObjectsClientContract = {
     get: jest.fn((type, id) => {
       const result = spaces.filter((s) => s.id === id);
       if (!result.length) {
@@ -40,7 +40,7 @@ export const createMockSavedObjectsRepository = (spaces: any[] = []) => {
       return {};
     }),
     deleteByNamespace: jest.fn(),
-  } as unknown) as jest.Mocked<ISavedObjectsRepository>;
+  } as unknown as jest.Mocked<ISavedObjectsRepository>;
 
   return mockSavedObjectsClientContract;
 };

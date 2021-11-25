@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import { ResponseError } from '@elastic/elasticsearch/lib/errors';
+import { errors } from '@elastic/elasticsearch';
 import { schema } from '@kbn/config-schema';
 import { IScopedClusterClient, SavedObjectsClientContract } from 'kibana/server';
 import { API_BASE_PATH } from '../../common/constants';
 import { MlOperation, ML_UPGRADE_OP_TYPE } from '../../common/types';
 import { versionCheckHandlerWrapper } from '../lib/es_version_precheck';
-import { handleEsError } from '../shared_imports';
 import { RouteDependencies } from '../types';
 
 const findMlOperation = async (
@@ -56,7 +55,7 @@ const verifySnapshotUpgrade = async (
   snapshot: { snapshotId: string; jobId: string }
 ): Promise<{
   isSuccessful: boolean;
-  error?: ResponseError;
+  error?: errors.ResponseError;
 }> => {
   const { snapshotId, jobId } = snapshot;
 
@@ -99,7 +98,7 @@ const verifySnapshotUpgrade = async (
   }
 };
 
-export function registerMlSnapshotRoutes({ router }: RouteDependencies) {
+export function registerMlSnapshotRoutes({ router, lib: { handleEsError } }: RouteDependencies) {
   // Upgrade ML model snapshot
   router.post(
     {
@@ -147,8 +146,8 @@ export function registerMlSnapshotRoutes({ router }: RouteDependencies) {
               status: body.completed === true ? 'complete' : 'in_progress',
             },
           });
-        } catch (e) {
-          return handleEsError({ error: e, response });
+        } catch (error) {
+          return handleEsError({ error, response });
         }
       }
     )
@@ -238,13 +237,11 @@ export function registerMlSnapshotRoutes({ router }: RouteDependencies) {
               });
             } else {
               // The task ID was not found; verify the deprecation was resolved
-              const {
-                isSuccessful: isSnapshotDeprecationResolved,
-                error: upgradeSnapshotError,
-              } = await verifySnapshotUpgrade(esClient, {
-                snapshotId,
-                jobId,
-              });
+              const { isSuccessful: isSnapshotDeprecationResolved, error: upgradeSnapshotError } =
+                await verifySnapshotUpgrade(esClient, {
+                  snapshotId,
+                  jobId,
+                });
 
               // Delete the SO; if it's complete, no need to store it anymore. If there's an error, this will give the user a chance to retry
               await deleteMlOperation(savedObjectsClient, snapshotOp.id);
@@ -259,7 +256,7 @@ export function registerMlSnapshotRoutes({ router }: RouteDependencies) {
               }
 
               return response.customError({
-                statusCode: upgradeSnapshotError ? upgradeSnapshotError.statusCode : 500,
+                statusCode: upgradeSnapshotError ? upgradeSnapshotError.statusCode! : 500,
                 body: {
                   message:
                     upgradeSnapshotError?.body?.error?.reason ||
@@ -269,13 +266,11 @@ export function registerMlSnapshotRoutes({ router }: RouteDependencies) {
             }
           } else {
             // No tasks found; verify the deprecation was resolved
-            const {
-              isSuccessful: isSnapshotDeprecationResolved,
-              error: upgradeSnapshotError,
-            } = await verifySnapshotUpgrade(esClient, {
-              snapshotId,
-              jobId,
-            });
+            const { isSuccessful: isSnapshotDeprecationResolved, error: upgradeSnapshotError } =
+              await verifySnapshotUpgrade(esClient, {
+                snapshotId,
+                jobId,
+              });
 
             // Delete the SO; if it's complete, no need to store it anymore. If there's an error, this will give the user a chance to retry
             await deleteMlOperation(savedObjectsClient, snapshotOp.id);
@@ -290,7 +285,7 @@ export function registerMlSnapshotRoutes({ router }: RouteDependencies) {
             }
 
             return response.customError({
-              statusCode: upgradeSnapshotError ? upgradeSnapshotError.statusCode : 500,
+              statusCode: upgradeSnapshotError ? upgradeSnapshotError.statusCode! : 500,
               body: {
                 message:
                   upgradeSnapshotError?.body?.error?.reason ||
@@ -298,6 +293,37 @@ export function registerMlSnapshotRoutes({ router }: RouteDependencies) {
               },
             });
           }
+        } catch (e) {
+          return handleEsError({ error: e, response });
+        }
+      }
+    )
+  );
+
+  // Get the ml upgrade mode
+  router.get(
+    {
+      path: `${API_BASE_PATH}/ml_upgrade_mode`,
+      validate: false,
+    },
+    versionCheckHandlerWrapper(
+      async (
+        {
+          core: {
+            elasticsearch: { client: esClient },
+          },
+        },
+        request,
+        response
+      ) => {
+        try {
+          const { body: mlInfo } = await esClient.asCurrentUser.ml.info();
+
+          return response.ok({
+            body: {
+              mlUpgradeModeEnabled: mlInfo.upgrade_mode,
+            },
+          });
         } catch (e) {
           return handleEsError({ error: e, response });
         }
@@ -329,12 +355,11 @@ export function registerMlSnapshotRoutes({ router }: RouteDependencies) {
         try {
           const { snapshotId, jobId } = request.params;
 
-          const {
-            body: deleteSnapshotResponse,
-          } = await client.asCurrentUser.ml.deleteModelSnapshot({
-            job_id: jobId,
-            snapshot_id: snapshotId,
-          });
+          const { body: deleteSnapshotResponse } =
+            await client.asCurrentUser.ml.deleteModelSnapshot({
+              job_id: jobId,
+              snapshot_id: snapshotId,
+            });
 
           return response.ok({
             body: deleteSnapshotResponse,

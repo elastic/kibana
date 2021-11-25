@@ -190,7 +190,7 @@ export async function getClustersFromRequest(
   // add logstash data
   if (isInCodePath(codePaths, [CODE_PATH_LOGSTASH])) {
     const logstashes = await getLogstashForClusters(req, lsIndexPattern, clusters);
-    const pipelines = await getLogstashPipelineIds(req, lsIndexPattern, { clusterUuid }, 1);
+    const pipelines = await getLogstashPipelineIds({ req, lsIndexPattern, clusterUuid, size: 1 });
     logstashes.forEach((logstash) => {
       const clusterIndex = clusters.findIndex(
         (cluster) =>

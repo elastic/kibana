@@ -32,8 +32,8 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   taskManager,
   ruleTypeRegistry,
   unsecuredSavedObjectsClient,
-  authorization: (authorization as unknown) as AlertingAuthorization,
-  actionsAuthorization: (actionsAuthorization as unknown) as ActionsAuthorization,
+  authorization: authorization as unknown as AlertingAuthorization,
+  actionsAuthorization: actionsAuthorization as unknown as ActionsAuthorization,
   spaceId: 'default',
   namespace: 'default',
   getUserName: jest.fn(),
@@ -69,7 +69,6 @@ describe('aggregate()', () => {
   beforeEach(() => {
     authorization.getFindAuthorizationFilter.mockResolvedValue({
       ensureRuleTypeIsAuthorized() {},
-      logSuccessfulAuthorization() {},
     });
     unsecuredSavedObjectsClient.find
       .mockResolvedValueOnce({

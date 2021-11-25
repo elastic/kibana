@@ -48,6 +48,21 @@ export const NAV = {
   SCHEMA: i18n.translate('xpack.enterpriseSearch.workplaceSearch.nav.schema', {
     defaultMessage: 'Schema',
   }),
+  SYNCHRONIZATION: i18n.translate('xpack.enterpriseSearch.workplaceSearch.nav.synchronization', {
+    defaultMessage: 'Synchronization',
+  }),
+  SYNCHRONIZATION_FREQUENCY: i18n.translate(
+    'xpack.enterpriseSearch.workplaceSearch.nav.synchronizationFrequency',
+    {
+      defaultMessage: 'Frequency',
+    }
+  ),
+  SYNCHRONIZATION_OBJECTS_AND_ASSETS: i18n.translate(
+    'xpack.enterpriseSearch.workplaceSearch.nav.synchronizationObjectsAndAssets',
+    {
+      defaultMessage: 'Objects and assets',
+    }
+  ),
   DISPLAY_SETTINGS: i18n.translate('xpack.enterpriseSearch.workplaceSearch.nav.displaySettings', {
     defaultMessage: 'Display Settings',
   }),
@@ -238,12 +253,12 @@ export const SOURCE_OBJ_TYPES = {
     defaultMessage: 'Bugs',
   }),
   ISSUES: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.objTypes.issues', {
-    defaultMessage: 'Issues',
+    defaultMessage: 'Issues (including comments)',
   }),
   PULL_REQUESTS: i18n.translate(
     'xpack.enterpriseSearch.workplaceSearch.sources.objTypes.pullRequests',
     {
-      defaultMessage: 'Pull Requests',
+      defaultMessage: 'Pull Requests (including comments)',
     }
   ),
   REPOSITORY_LIST: i18n.translate(
@@ -252,6 +267,9 @@ export const SOURCE_OBJ_TYPES = {
       defaultMessage: 'Repository List',
     }
   ),
+  FILES: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.objTypes.files', {
+    defaultMessage: 'Files (markdown only)',
+  }),
   EMAILS: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.objTypes.emails', {
     defaultMessage: 'Emails',
   }),
@@ -272,6 +290,9 @@ export const SOURCE_OBJ_TYPES = {
   }),
   CAMPAIGNS: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.objTypes.campaigns', {
     defaultMessage: 'Campaigns',
+  }),
+  CASES: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.objTypes.cases', {
+    defaultMessage: 'Cases (including feeds and comments)',
   }),
   USERS: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.objTypes.users', {
     defaultMessage: 'Users',
@@ -583,8 +604,8 @@ export const NON_PLATINUM_OAUTH_DESCRIPTION = i18n.translate(
   }
 );
 
-export const NON_PLATINUM_OAUTH_LINK = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.nonPlatinumOauthLinkLabel',
+export const EXPLORE_PLATINUM_FEATURES_LINK = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.explorePlatinumFeatures.link',
   {
     defaultMessage: 'Explore Platinum features',
   }
@@ -734,12 +755,28 @@ export const FIELD_LABEL = i18n.translate('xpack.enterpriseSearch.workplaceSearc
   defaultMessage: 'Field',
 });
 
+export const LABEL_LABEL = i18n.translate('xpack.enterpriseSearch.workplaceSearch.label.label', {
+  defaultMessage: 'Label',
+});
+
 export const DESCRIPTION_LABEL = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.description.label',
   {
     defaultMessage: 'Description',
   }
 );
+
+export const BLOCK_LABEL = i18n.translate('xpack.enterpriseSearch.workplaceSearch.blockLabel', {
+  defaultMessage: 'Block',
+});
+
+export const BETWEEN_LABEL = i18n.translate('xpack.enterpriseSearch.workplaceSearch.betweenLabel', {
+  defaultMessage: 'between',
+});
+
+export const ON_LABEL = i18n.translate('xpack.enterpriseSearch.workplaceSearch.onLabel', {
+  defaultMessage: 'on',
+});
 
 export const AND = i18n.translate('xpack.enterpriseSearch.workplaceSearch.and', {
   defaultMessage: 'and',

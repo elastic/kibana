@@ -26,17 +26,11 @@ import {
 import { RoleMappingsLogic } from './role_mappings_logic';
 
 export const EngineAssignmentSelector: React.FC = () => {
-  const { handleAccessAllEnginesChange, handleEngineSelectionChange } = useActions(
-    RoleMappingsLogic
-  );
+  const { handleAccessAllEnginesChange, handleEngineSelectionChange } =
+    useActions(RoleMappingsLogic);
 
-  const {
-    accessAllEngines,
-    availableEngines,
-    roleType,
-    selectedEngines,
-    selectedOptions,
-  } = useValues(RoleMappingsLogic);
+  const { accessAllEngines, availableEngines, roleType, selectedEngines, selectedOptions } =
+    useValues(RoleMappingsLogic);
 
   const hasEngineAssignment = selectedEngines.size > 0 || accessAllEngines;
 

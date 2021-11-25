@@ -9,7 +9,6 @@
 import expect from '@kbn/expect';
 
 export default function ({ getService, getPageObjects }) {
-  const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const log = getService('log');
   const browser = getService('browser');
@@ -17,22 +16,17 @@ export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['settings']);
   const testSubjects = getService('testSubjects');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/95376
-  describe.skip('runtime fields', function () {
+  describe('runtime fields', function () {
     this.tags(['skipFirefox']);
 
     before(async function () {
       await browser.setWindowSize(1200, 800);
-      await esArchiver.load('test/functional/fixtures/es_archiver/discover');
-      // delete .kibana index and then wait for Kibana to re-create it
+      await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
       await kibanaServer.uiSettings.replace({});
-      await kibanaServer.uiSettings.update({});
     });
 
     after(async function afterAll() {
-      await PageObjects.settings.navigateTo();
-      await PageObjects.settings.clickKibanaIndexPatterns();
-      await PageObjects.settings.removeLogstashIndexPatternIfExist();
+      await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/discover');
     });
 
     describe('create runtime field', function describeIndexTests() {
@@ -65,7 +59,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.settings.filterField(fieldName);
         await testSubjects.click('editFieldFormat');
         await PageObjects.settings.setFieldType('Long');
-        await PageObjects.settings.changeFieldScript('emit(6);');
+        await PageObjects.settings.setFieldScript('emit(6);');
         await testSubjects.find('changeWarning');
         await PageObjects.settings.clickSaveField();
         await PageObjects.settings.confirmSave();

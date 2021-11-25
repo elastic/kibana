@@ -27,7 +27,7 @@
         "tags": [],
         "label": "TableVisParams",
         "description": [],
-        "path": "src/plugins/vis_type_table/common/types.ts",
+        "path": "src/plugins/vis_types/table/common/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -40,7 +40,7 @@
             "signature": [
               "number | \"\""
             ],
-            "path": "src/plugins/vis_type_table/common/types.ts",
+            "path": "src/plugins/vis_types/table/common/types.ts",
             "deprecated": false
           },
           {
@@ -50,7 +50,7 @@
             "tags": [],
             "label": "showPartialRows",
             "description": [],
-            "path": "src/plugins/vis_type_table/common/types.ts",
+            "path": "src/plugins/vis_types/table/common/types.ts",
             "deprecated": false
           },
           {
@@ -60,7 +60,7 @@
             "tags": [],
             "label": "showMetricsAtAllLevels",
             "description": [],
-            "path": "src/plugins/vis_type_table/common/types.ts",
+            "path": "src/plugins/vis_types/table/common/types.ts",
             "deprecated": false
           },
           {
@@ -70,7 +70,7 @@
             "tags": [],
             "label": "showToolbar",
             "description": [],
-            "path": "src/plugins/vis_type_table/common/types.ts",
+            "path": "src/plugins/vis_types/table/common/types.ts",
             "deprecated": false
           },
           {
@@ -80,7 +80,7 @@
             "tags": [],
             "label": "showTotal",
             "description": [],
-            "path": "src/plugins/vis_type_table/common/types.ts",
+            "path": "src/plugins/vis_types/table/common/types.ts",
             "deprecated": false
           },
           {
@@ -99,7 +99,7 @@
                 "text": "AggTypes"
               }
             ],
-            "path": "src/plugins/vis_type_table/common/types.ts",
+            "path": "src/plugins/vis_types/table/common/types.ts",
             "deprecated": false
           },
           {
@@ -109,7 +109,20 @@
             "tags": [],
             "label": "percentageCol",
             "description": [],
-            "path": "src/plugins/vis_type_table/common/types.ts",
+            "path": "src/plugins/vis_types/table/common/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "visTypeTable",
+            "id": "def-common.TableVisParams.autoFitRowToContent",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "autoFitRowToContent",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/vis_types/table/common/types.ts",
             "deprecated": false
           },
           {
@@ -122,7 +135,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/vis_type_table/common/types.ts",
+            "path": "src/plugins/vis_types/table/common/types.ts",
             "deprecated": false
           }
         ],
@@ -137,7 +150,7 @@
         "tags": [],
         "label": "AggTypes",
         "description": [],
-        "path": "src/plugins/vis_type_table/common/types.ts",
+        "path": "src/plugins/vis_types/table/common/types.ts",
         "deprecated": false,
         "initialIsOpen": false
       }
@@ -153,7 +166,7 @@
         "signature": [
           "\"table\""
         ],
-        "path": "src/plugins/vis_type_table/common/types.ts",
+        "path": "src/plugins/vis_types/table/common/types.ts",
         "deprecated": false,
         "initialIsOpen": false
       }

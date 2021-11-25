@@ -6,18 +6,19 @@
  */
 
 import * as t from 'io-ts';
+import { toNumberRt } from '@kbn/io-ts-utils/to_number_rt';
 import { setupRequest } from '../lib/helpers/setup_request';
 import { getServiceCount } from '../lib/observability_overview/get_service_count';
 import { getTransactionsPerMinute } from '../lib/observability_overview/get_transactions_per_minute';
 import { getHasData } from '../lib/observability_overview/has_data';
 import { rangeRt } from './default_api_types';
-import { getSearchAggregatedTransactions } from '../lib/helpers/aggregated_transactions';
+import { getSearchAggregatedTransactions } from '../lib/helpers/transactions';
 import { withApmSpan } from '../utils/with_apm_span';
-import { createApmServerRouteRepository } from './create_apm_server_route_repository';
-import { createApmServerRoute } from './create_apm_server_route';
+import { createApmServerRouteRepository } from './apm_routes/create_apm_server_route_repository';
+import { createApmServerRoute } from './apm_routes/create_apm_server_route';
 
 const observabilityOverviewHasDataRoute = createApmServerRoute({
-  endpoint: 'GET /api/apm/observability_overview/has_data',
+  endpoint: 'GET /internal/apm/observability_overview/has_data',
   options: { tags: ['access:apm'] },
   handler: async (resources) => {
     const setup = await setupRequest(resources);
@@ -26,20 +27,23 @@ const observabilityOverviewHasDataRoute = createApmServerRoute({
 });
 
 const observabilityOverviewRoute = createApmServerRoute({
-  endpoint: 'GET /api/apm/observability_overview',
+  endpoint: 'GET /internal/apm/observability_overview',
   params: t.type({
-    query: t.intersection([rangeRt, t.type({ bucketSize: t.string })]),
+    query: t.intersection([
+      rangeRt,
+      t.type({ bucketSize: toNumberRt, intervalString: t.string }),
+    ]),
   }),
   options: { tags: ['access:apm'] },
   handler: async (resources) => {
     const setup = await setupRequest(resources);
-    const { bucketSize } = resources.params.query;
+    const { bucketSize, intervalString, start, end } = resources.params.query;
 
     const searchAggregatedTransactions = await getSearchAggregatedTransactions({
       apmEventClient: setup.apmEventClient,
       config: setup.config,
-      start: setup.start,
-      end: setup.end,
+      start,
+      end,
       kuery: '',
     });
 
@@ -48,11 +52,16 @@ const observabilityOverviewRoute = createApmServerRoute({
         getServiceCount({
           setup,
           searchAggregatedTransactions,
+          start,
+          end,
         }),
         getTransactionsPerMinute({
           setup,
           bucketSize,
           searchAggregatedTransactions,
+          start,
+          end,
+          intervalString,
         }),
       ]);
       return { serviceCount, transactionPerMinute };
@@ -60,6 +69,7 @@ const observabilityOverviewRoute = createApmServerRoute({
   },
 });
 
-export const observabilityOverviewRouteRepository = createApmServerRouteRepository()
-  .add(observabilityOverviewRoute)
-  .add(observabilityOverviewHasDataRoute);
+export const observabilityOverviewRouteRepository =
+  createApmServerRouteRepository()
+    .add(observabilityOverviewRoute)
+    .add(observabilityOverviewHasDataRoute);

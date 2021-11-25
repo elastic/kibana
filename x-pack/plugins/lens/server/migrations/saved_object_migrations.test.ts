@@ -170,7 +170,7 @@ describe('Lens migrations', () => {
   });
 
   describe('7.8.0 auto timestamp', () => {
-    const context = ({ log: { warning: () => {} } } as unknown) as SavedObjectMigrationContext;
+    const context = { log: { warning: () => {} } } as unknown as SavedObjectMigrationContext;
 
     const example = {
       type: 'lens',
@@ -522,7 +522,7 @@ describe('Lens migrations', () => {
   });
 
   describe('7.11.0 remove suggested priority', () => {
-    const context = ({ log: { warning: () => {} } } as unknown) as SavedObjectMigrationContext;
+    const context = { log: { warning: () => {} } } as unknown as SavedObjectMigrationContext;
 
     const example = {
       type: 'lens',
@@ -607,7 +607,7 @@ describe('Lens migrations', () => {
   });
 
   describe('7.12.0 restructure datatable state', () => {
-    const context = ({ log: { warning: () => {} } } as unknown) as SavedObjectMigrationContext;
+    const context = { log: { warning: () => {} } } as unknown as SavedObjectMigrationContext;
     const example = {
       type: 'lens',
       id: 'mock-saved-object-id',
@@ -680,7 +680,7 @@ describe('Lens migrations', () => {
   });
 
   describe('7.13.0 rename operations for Formula', () => {
-    const context = ({ log: { warning: () => {} } } as unknown) as SavedObjectMigrationContext;
+    const context = { log: { warning: () => {} } } as unknown as SavedObjectMigrationContext;
     const example = {
       type: 'lens',
       id: 'mocked-saved-object-id',
@@ -858,7 +858,7 @@ describe('Lens migrations', () => {
   });
 
   describe('7.14.0 remove time zone from date histogram', () => {
-    const context = ({ log: { warning: () => {} } } as unknown) as SavedObjectMigrationContext;
+    const context = { log: { warning: () => {} } } as unknown as SavedObjectMigrationContext;
     const example = {
       type: 'lens',
       id: 'mocked-saved-object-id',
@@ -950,8 +950,8 @@ describe('Lens migrations', () => {
   });
 
   describe('7.15.0 add layer type information', () => {
-    const context = ({ log: { warning: () => {} } } as unknown) as SavedObjectMigrationContext;
-    const example = ({
+    const context = { log: { warning: () => {} } } as unknown as SavedObjectMigrationContext;
+    const example = {
       type: 'lens',
       id: 'mocked-saved-object-id',
       attributes: {
@@ -1006,12 +1006,12 @@ describe('Lens migrations', () => {
           filters: [],
         },
       },
-    } as unknown) as SavedObjectUnsanitizedDoc<LensDocShape715<unknown>>;
+    } as unknown as SavedObjectUnsanitizedDoc<LensDocShape715<unknown>>;
 
     it('should add the layerType to a XY visualization', () => {
       const xyExample = cloneDeep(example);
       xyExample.attributes.visualizationType = 'lnsXY';
-      (xyExample.attributes as LensDocShape715<VisStatePre715>).state.visualization = ({
+      (xyExample.attributes as LensDocShape715<VisStatePre715>).state.visualization = {
         title: 'Empty XY chart',
         legend: { isVisible: true, position: 'right' },
         valueLabels: 'hide',
@@ -1042,7 +1042,7 @@ describe('Lens migrations', () => {
             xAccessor: '2e57a41e-5a52-42d3-877f-bd211d903ef8',
           },
         ],
-      } as unknown) as VisStatePre715;
+      } as unknown as VisStatePre715;
       const result = migrations['7.15.0'](xyExample, context) as ReturnType<
         SavedObjectMigrationFn<LensDocShape, LensDocShape>
       >;
@@ -1057,7 +1057,7 @@ describe('Lens migrations', () => {
     it('should add layer info to a pie visualization', () => {
       const pieExample = cloneDeep(example);
       pieExample.attributes.visualizationType = 'lnsPie';
-      (pieExample.attributes as LensDocShape715<VisStatePre715>).state.visualization = ({
+      (pieExample.attributes as LensDocShape715<VisStatePre715>).state.visualization = {
         shape: 'pie',
         layers: [
           {
@@ -1070,7 +1070,7 @@ describe('Lens migrations', () => {
             nestedLegend: false,
           },
         ],
-      } as unknown) as VisStatePre715;
+      } as unknown as VisStatePre715;
       const result = migrations['7.15.0'](pieExample, context) as ReturnType<
         SavedObjectMigrationFn<LensDocShape, LensDocShape>
       >;
@@ -1084,10 +1084,10 @@ describe('Lens migrations', () => {
     it('should add layer info to a metric visualization', () => {
       const metricExample = cloneDeep(example);
       metricExample.attributes.visualizationType = 'lnsMetric';
-      (metricExample.attributes as LensDocShape715<VisStatePre715>).state.visualization = ({
+      (metricExample.attributes as LensDocShape715<VisStatePre715>).state.visualization = {
         layerId: '1',
         accessor: undefined,
-      } as unknown) as VisStatePre715;
+      } as unknown as VisStatePre715;
       const result = migrations['7.15.0'](metricExample, context) as ReturnType<
         SavedObjectMigrationFn<LensDocShape, LensDocShape>
       >;
@@ -1100,10 +1100,10 @@ describe('Lens migrations', () => {
     it('should add layer info to a datatable visualization', () => {
       const datatableExample = cloneDeep(example);
       datatableExample.attributes.visualizationType = 'lnsDatatable';
-      (datatableExample.attributes as LensDocShape715<VisStatePre715>).state.visualization = ({
+      (datatableExample.attributes as LensDocShape715<VisStatePre715>).state.visualization = {
         layerId: '1',
         accessor: undefined,
-      } as unknown) as VisStatePre715;
+      } as unknown as VisStatePre715;
       const result = migrations['7.15.0'](datatableExample, context) as ReturnType<
         SavedObjectMigrationFn<LensDocShape, LensDocShape>
       >;
@@ -1116,10 +1116,10 @@ describe('Lens migrations', () => {
     it('should add layer info to a heatmap visualization', () => {
       const heatmapExample = cloneDeep(example);
       heatmapExample.attributes.visualizationType = 'lnsHeatmap';
-      (heatmapExample.attributes as LensDocShape715<VisStatePre715>).state.visualization = ({
+      (heatmapExample.attributes as LensDocShape715<VisStatePre715>).state.visualization = {
         layerId: '1',
         accessor: undefined,
-      } as unknown) as VisStatePre715;
+      } as unknown as VisStatePre715;
       const result = migrations['7.15.0'](heatmapExample, context) as ReturnType<
         SavedObjectMigrationFn<LensDocShape, LensDocShape>
       >;
@@ -1132,8 +1132,8 @@ describe('Lens migrations', () => {
   });
 
   describe('7.16.0 move reversed default palette to custom palette', () => {
-    const context = ({ log: { warning: () => {} } } as unknown) as SavedObjectMigrationContext;
-    const example = ({
+    const context = { log: { warning: () => {} } } as unknown as SavedObjectMigrationContext;
+    const example = {
       type: 'lens',
       id: 'mocked-saved-object-id',
       attributes: {
@@ -1188,14 +1188,14 @@ describe('Lens migrations', () => {
           filters: [],
         },
       },
-    } as unknown) as SavedObjectUnsanitizedDoc<LensDocShape715<unknown>>;
+    } as unknown as SavedObjectUnsanitizedDoc<LensDocShape715<unknown>>;
 
     it('should just return the same document for XY, partition and metric visualization types', () => {
       for (const vizType of ['lnsXY', 'lnsPie', 'lnsMetric']) {
         const exampleCopy = cloneDeep(example);
         exampleCopy.attributes.visualizationType = vizType;
         // add datatable state here, even with another viz (manual change?)
-        (exampleCopy.attributes as LensDocShape715<VisState716>).state.visualization = ({
+        (exampleCopy.attributes as LensDocShape715<VisState716>).state.visualization = {
           columns: [
             { palette: { type: 'palette', name: 'temperature' }, colorMode: 'cell' },
             { palette: { type: 'palette', name: 'temperature' }, colorMode: 'text' },
@@ -1204,7 +1204,7 @@ describe('Lens migrations', () => {
               colorMode: 'cell',
             },
           ],
-        } as unknown) as VisState716;
+        } as unknown as VisState716;
         const result = migrations['7.16.0'](exampleCopy, context) as ReturnType<
           SavedObjectMigrationFn<LensDocShape, LensDocShape>
         >;
@@ -1215,7 +1215,7 @@ describe('Lens migrations', () => {
     it('should not change non reversed default palettes in datatable', () => {
       const datatableExample = cloneDeep(example);
       datatableExample.attributes.visualizationType = 'lnsDatatable';
-      (datatableExample.attributes as LensDocShape715<VisState716>).state.visualization = ({
+      (datatableExample.attributes as LensDocShape715<VisState716>).state.visualization = {
         columns: [
           { palette: { type: 'palette', name: 'temperature' }, colorMode: 'cell' },
           { palette: { type: 'palette', name: 'temperature' }, colorMode: 'text' },
@@ -1224,7 +1224,7 @@ describe('Lens migrations', () => {
             colorMode: 'cell',
           },
         ],
-      } as unknown) as VisState716;
+      } as unknown as VisState716;
       const result = migrations['7.16.0'](datatableExample, context) as ReturnType<
         SavedObjectMigrationFn<LensDocShape, LensDocShape>
       >;
@@ -1234,7 +1234,7 @@ describe('Lens migrations', () => {
     it('should not change custom palettes in datatable', () => {
       const datatableExample = cloneDeep(example);
       datatableExample.attributes.visualizationType = 'lnsDatatable';
-      (datatableExample.attributes as LensDocShape715<VisState716>).state.visualization = ({
+      (datatableExample.attributes as LensDocShape715<VisState716>).state.visualization = {
         columns: [
           { palette: { type: 'palette', name: 'custom' }, colorMode: 'cell' },
           { palette: { type: 'palette', name: 'custom' }, colorMode: 'text' },
@@ -1243,7 +1243,7 @@ describe('Lens migrations', () => {
             colorMode: 'cell',
           },
         ],
-      } as unknown) as VisState716;
+      } as unknown as VisState716;
       const result = migrations['7.16.0'](datatableExample, context) as ReturnType<
         SavedObjectMigrationFn<LensDocShape, LensDocShape>
       >;
@@ -1253,9 +1253,9 @@ describe('Lens migrations', () => {
     it('should not change a datatable with no conditional coloring', () => {
       const datatableExample = cloneDeep(example);
       datatableExample.attributes.visualizationType = 'lnsDatatable';
-      (datatableExample.attributes as LensDocShape715<VisState716>).state.visualization = ({
+      (datatableExample.attributes as LensDocShape715<VisState716>).state.visualization = {
         columns: [{ colorMode: 'none' }, {}],
-      } as unknown) as VisState716;
+      } as unknown as VisState716;
       const result = migrations['7.16.0'](datatableExample, context) as ReturnType<
         SavedObjectMigrationFn<LensDocShape, LensDocShape>
       >;
@@ -1265,7 +1265,7 @@ describe('Lens migrations', () => {
     it('should not change default palette if the colorMode is set to "none" in datatable', () => {
       const datatableExample = cloneDeep(example);
       datatableExample.attributes.visualizationType = 'lnsDatatable';
-      (datatableExample.attributes as LensDocShape715<VisState716>).state.visualization = ({
+      (datatableExample.attributes as LensDocShape715<VisState716>).state.visualization = {
         columns: [
           { palette: { type: 'palette', name: 'temperature' }, colorMode: 'none' },
           { palette: { type: 'palette', name: 'temperature' }, colorMode: 'none' },
@@ -1274,7 +1274,7 @@ describe('Lens migrations', () => {
             colorMode: 'cell',
           },
         ],
-      } as unknown) as VisState716;
+      } as unknown as VisState716;
       const result = migrations['7.16.0'](datatableExample, context) as ReturnType<
         SavedObjectMigrationFn<LensDocShape, LensDocShape>
       >;
@@ -1284,7 +1284,7 @@ describe('Lens migrations', () => {
     it('should change a default palette reversed in datatable', () => {
       const datatableExample = cloneDeep(example);
       datatableExample.attributes.visualizationType = 'lnsDatatable';
-      (datatableExample.attributes as LensDocShape715<VisState716>).state.visualization = ({
+      (datatableExample.attributes as LensDocShape715<VisState716>).state.visualization = {
         columns: [
           {
             colorMode: 'cell',
@@ -1323,13 +1323,13 @@ describe('Lens migrations', () => {
             },
           },
         ],
-      } as unknown) as VisState716;
+      } as unknown as VisState716;
       const result = migrations['7.16.0'](datatableExample, context) as ReturnType<
         SavedObjectMigrationFn<LensDocShape, LensDocShape>
       >;
-      const state = (result.attributes as LensDocShape715<
-        Extract<VisState716, { columns: unknown[] }>
-      >).state.visualization;
+      const state = (
+        result.attributes as LensDocShape715<Extract<VisState716, { columns: unknown[] }>>
+      ).state.visualization;
       for (const column of state.columns) {
         expect(column.palette!.name).toBe('custom');
         expect(column.palette!.params!.name).toBe('custom');
@@ -1357,7 +1357,7 @@ describe('Lens migrations', () => {
     it('should change a default palette reversed in heatmap', () => {
       const datatableExample = cloneDeep(example);
       datatableExample.attributes.visualizationType = 'lnsHeatmap';
-      (datatableExample.attributes as LensDocShape715<VisState716>).state.visualization = ({
+      (datatableExample.attributes as LensDocShape715<VisState716>).state.visualization = {
         palette: {
           type: 'palette',
           name: 'temperature1',
@@ -1373,13 +1373,15 @@ describe('Lens migrations', () => {
             ],
           },
         },
-      } as unknown) as VisState716;
+      } as unknown as VisState716;
       const result = migrations['7.16.0'](datatableExample, context) as ReturnType<
         SavedObjectMigrationFn<LensDocShape, LensDocShape>
       >;
-      const state = (result.attributes as LensDocShape715<
-        Extract<VisState716, { palette?: PaletteOutput<CustomPaletteParams> }>
-      >).state.visualization;
+      const state = (
+        result.attributes as LensDocShape715<
+          Extract<VisState716, { palette?: PaletteOutput<CustomPaletteParams> }>
+        >
+      ).state.visualization;
       expect(state.palette!.name).toBe('custom');
       expect(state.palette!.params!.name).toBe('custom');
       expect(state.palette!.params!.rangeMin).toBe(0);

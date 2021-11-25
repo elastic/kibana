@@ -14,9 +14,9 @@ import { CanvasWorkpad } from '../../../types';
 import { getMockedRouterDeps } from '../test_helpers';
 import { workpadRouteContextMock, MockWorkpadRouteContext } from '../../mocks';
 
-const mockRouteContext = ({
+const mockRouteContext = {
   canvas: workpadRouteContextMock.create(),
-} as unknown) as MockWorkpadRouteContext;
+} as unknown as MockWorkpadRouteContext;
 
 describe('GET workpad', () => {
   let routeHandler: RequestHandler<any, any, any>;

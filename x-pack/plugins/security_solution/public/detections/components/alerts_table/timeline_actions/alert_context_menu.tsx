@@ -9,9 +9,10 @@ import React, { useCallback, useMemo, useState } from 'react';
 
 import { EuiButtonIcon, EuiContextMenuPanel, EuiPopover, EuiToolTip } from '@elastic/eui';
 import { indexOf } from 'lodash';
-
+import { connect, ConnectedProps } from 'react-redux';
 import { ExceptionListType } from '@kbn/securitysolution-io-ts-list-types';
 import { get } from 'lodash/fp';
+import { useRouteSpy } from '../../../../common/utils/route/use_route_spy';
 import { buildGetAlertByIdQuery } from '../../../../common/components/exceptions/helpers';
 import { EventsTdContent } from '../../../../timelines/components/timeline/styles';
 import { DEFAULT_ICON_BUTTON_WIDTH } from '../../../../timelines/components/timeline/helpers';
@@ -21,7 +22,8 @@ import {
   AddExceptionModalProps,
 } from '../../../../common/components/exceptions/add_exception_modal';
 import * as i18n from '../translations';
-import { inputsModel } from '../../../../common/store';
+import { inputsModel, inputsSelectors, State } from '../../../../common/store';
+import { TimelineId } from '../../../../../common';
 import { AlertData, EcsHit } from '../../../../common/components/exceptions/types';
 import { useQueryAlerts } from '../../../containers/detection_engine/alerts/use_query';
 import { useSignalIndex } from '../../../containers/detection_engine/alerts/use_signal_index';
@@ -32,7 +34,6 @@ import { useExceptionActions } from './use_add_exception_actions';
 import { useEventFilterModal } from './use_event_filter_modal';
 import { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
 import { useKibana } from '../../../../common/lib/kibana';
-import { useInvestigateInResolverContextItem } from './investigate_in_resolver';
 import { ATTACH_ALERT_TO_CASE_FOR_ROW } from '../../../../timelines/components/timeline/body/translations';
 import { useEventFilterAction } from './use_event_filter_action';
 import { useAddToCaseActions } from './use_add_to_case_actions';
@@ -49,7 +50,7 @@ interface AlertContextMenuProps {
   timelineId: string;
 }
 
-const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
+const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux> = ({
   ariaLabel = i18n.MORE_ACTIONS,
   ariaRowindex,
   columnValues,
@@ -58,14 +59,17 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
   refetch,
   onRuleChange,
   timelineId,
+  globalQuery,
+  timelineQuery,
 }) => {
   const [isPopoverOpen, setPopover] = useState(false);
+  const [routeProps] = useRouteSpy();
 
   const afterItemSelection = useCallback(() => {
     setPopover(false);
   }, []);
-  const ruleId = get(0, ecsRowData?.signal?.rule?.id);
-  const ruleName = get(0, ecsRowData?.signal?.rule?.name);
+  const ruleId = get(0, ecsRowData?.kibana?.alert?.rule?.uuid);
+  const ruleName = get(0, ecsRowData?.kibana?.alert?.rule?.name);
   const { timelines: timelinesUi } = useKibana().services;
 
   const { addToCaseActionProps, addToCaseActionItems } = useAddToCaseActions({
@@ -75,7 +79,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
     ariaLabel: ATTACH_ALERT_TO_CASE_FOR_ROW({ ariaRowindex, columnValues }),
   });
 
-  const alertStatus = get(0, ecsRowData?.signal?.status) as Status;
+  const alertStatus = get(0, ecsRowData?.['kibana.alert.workflow_status']) as Status;
 
   const isEvent = useMemo(() => indexOf(ecsRowData.event?.kind, 'event') !== -1, [ecsRowData]);
 
@@ -102,6 +106,21 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
     );
   }, [disabled, onButtonClick, ariaLabel]);
 
+  const refetchQuery = (newQueries: inputsModel.GlobalQuery[]) => {
+    newQueries.forEach((q) => q.refetch && (q.refetch as inputsModel.Refetch)());
+  };
+
+  const refetchAll = useCallback(() => {
+    if (timelineId === TimelineId.active) {
+      refetchQuery([timelineQuery]);
+      if (routeProps.pageName === 'alerts') {
+        refetchQuery(globalQuery);
+      }
+    } else {
+      refetchQuery(globalQuery);
+    }
+  }, [timelineId, globalQuery, timelineQuery, routeProps]);
+
   const {
     exceptionModalType,
     onAddExceptionCancel,
@@ -110,22 +129,19 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
     ruleIndices,
   } = useExceptionModal({
     ruleIndex: ecsRowData?.signal?.rule?.index,
-    refetch,
+    refetch: refetchAll,
     timelineId,
   });
 
-  const {
-    closeAddEventFilterModal,
-    isAddEventFilterModalOpen,
-    onAddEventFilterClick,
-  } = useEventFilterModal();
+  const { closeAddEventFilterModal, isAddEventFilterModalOpen, onAddEventFilterClick } =
+    useEventFilterModal();
 
   const { actionItems: statusActionItems } = useAlertsActions({
     alertStatus,
     eventId: ecsRowData?._id,
     indexName: ecsRowData?._index ?? '',
     timelineId,
-    refetch,
+    refetch: refetchAll,
     closePopover,
   });
 
@@ -146,30 +162,19 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
     isEndpointAlert: isAlertFromEndpointAlert({ ecsData: ecsRowData }),
     onAddExceptionTypeClick: handleOnAddExceptionTypeClick,
   });
-  const investigateInResolverActionItems = useInvestigateInResolverContextItem({
-    timelineId,
-    ecsData: ecsRowData,
-    onClose: afterItemSelection,
-  });
   const { eventFilterActionItems } = useEventFilterAction({
     onAddEventFilterClick: handleOnAddEventFilterClick,
   });
   const items: React.ReactElement[] = useMemo(
     () =>
       !isEvent && ruleId
-        ? [
-            ...investigateInResolverActionItems,
-            ...addToCaseActionItems,
-            ...statusActionItems,
-            ...exceptionActionItems,
-          ]
-        : [...investigateInResolverActionItems, ...addToCaseActionItems, ...eventFilterActionItems],
+        ? [...addToCaseActionItems, ...statusActionItems, ...exceptionActionItems]
+        : [...addToCaseActionItems, ...eventFilterActionItems],
     [
       statusActionItems,
       addToCaseActionItems,
       eventFilterActionItems,
       exceptionActionItems,
-      investigateInResolverActionItems,
       isEvent,
       ruleId,
     ]
@@ -218,7 +223,23 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
   );
 };
 
-export const AlertContextMenu = React.memo(AlertContextMenuComponent);
+const makeMapStateToProps = () => {
+  const getGlobalQueries = inputsSelectors.globalQuery();
+  const getTimelineQuery = inputsSelectors.timelineQueryByIdSelector();
+  const mapStateToProps = (state: State, { timelineId }: AlertContextMenuProps) => {
+    return {
+      globalQuery: getGlobalQueries(state),
+      timelineQuery: getTimelineQuery(state, timelineId),
+    };
+  };
+  return mapStateToProps;
+};
+
+const connector = connect(makeMapStateToProps);
+
+type PropsFromRedux = ConnectedProps<typeof connector>;
+
+export const AlertContextMenu = connector(React.memo(AlertContextMenuComponent));
 
 type AddExceptionModalWrapperProps = Omit<
   AddExceptionModalProps,

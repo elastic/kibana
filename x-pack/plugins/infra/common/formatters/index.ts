@@ -25,13 +25,13 @@ export const FORMATTERS = {
   highPercision: formatHighPercision,
 };
 
-export const createFormatter = (format: InventoryFormatterType, template: string = '{{value}}') => (
-  val: string | number
-) => {
-  if (val == null) {
-    return '';
-  }
-  const fmtFn = FORMATTERS[format];
-  const value = fmtFn(Number(val));
-  return template.replace(/{{value}}/g, value);
-};
+export const createFormatter =
+  (format: InventoryFormatterType, template: string = '{{value}}') =>
+  (val: string | number) => {
+    if (val == null) {
+      return '';
+    }
+    const fmtFn = FORMATTERS[format];
+    const value = fmtFn(Number(val));
+    return template.replace(/{{value}}/g, value);
+  };

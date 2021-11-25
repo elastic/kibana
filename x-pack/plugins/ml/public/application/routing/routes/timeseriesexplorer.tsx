@@ -65,11 +65,17 @@ export const timeSeriesExplorerRouteFactory = (
 });
 
 const PageWrapper: FC<PageProps> = ({ deps }) => {
-  const { context, results } = useResolver(undefined, undefined, deps.config, {
-    ...basicResolvers(deps),
-    jobs: mlJobService.loadJobsWrapper,
-    jobsWithTimeRange: () => ml.jobs.jobsWithTimerange(getDateFormatTz()),
-  });
+  const { context, results } = useResolver(
+    undefined,
+    undefined,
+    deps.config,
+    deps.dataViewsContract,
+    {
+      ...basicResolvers(deps),
+      jobs: mlJobService.loadJobsWrapper,
+      jobsWithTimeRange: () => ml.jobs.jobsWithTimerange(getDateFormatTz()),
+    }
+  );
   const annotationUpdatesService = useMemo(() => new AnnotationUpdatesService(), []);
 
   return (
@@ -97,10 +103,8 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
 }) => {
   const { toasts } = useNotifications();
   const toastNotificationService = useToastNotificationService();
-  const [
-    timeSeriesExplorerUrlState,
-    setTimeSeriesExplorerUrlState,
-  ] = useTimeSeriesExplorerUrlState();
+  const [timeSeriesExplorerUrlState, setTimeSeriesExplorerUrlState] =
+    useTimeSeriesExplorerUrlState();
   const [globalState, setGlobalState] = useUrlState('_g');
   const [lastRefresh, setLastRefresh] = useState(0);
   const previousRefresh = usePrevious(lastRefresh);

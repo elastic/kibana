@@ -21,6 +21,7 @@ const { useGlobalFlyout } = GlobalFlyout;
 interface TableRowProps {
   deprecation: EnrichedDeprecationInfo;
   rowFieldNames: DeprecationTableColumns[];
+  mlUpgradeModeEnabled: boolean;
 }
 
 export const MlSnapshotsTableRowCells: React.FunctionComponent<TableRowProps> = ({
@@ -30,10 +31,8 @@ export const MlSnapshotsTableRowCells: React.FunctionComponent<TableRowProps> = 
   const [showFlyout, setShowFlyout] = useState(false);
   const snapshotState = useMlSnapshotContext();
 
-  const {
-    addContent: addContentToGlobalFlyout,
-    removeContent: removeContentFromGlobalFlyout,
-  } = useGlobalFlyout();
+  const { addContent: addContentToGlobalFlyout, removeContent: removeContentFromGlobalFlyout } =
+    useGlobalFlyout();
 
   const closeFlyout = useCallback(() => {
     setShowFlyout(false);
@@ -52,6 +51,7 @@ export const MlSnapshotsTableRowCells: React.FunctionComponent<TableRowProps> = 
         },
         flyoutProps: {
           onClose: closeFlyout,
+          className: 'eui-textBreakWord',
           'data-test-subj': 'mlSnapshotDetails',
           'aria-labelledby': 'mlSnapshotDetailsFlyoutTitle',
         },
@@ -78,12 +78,15 @@ export const MlSnapshotsTableRowCells: React.FunctionComponent<TableRowProps> = 
 };
 
 export const MlSnapshotsTableRow: React.FunctionComponent<TableRowProps> = (props) => {
-  const { api } = useAppContext();
+  const {
+    services: { api },
+  } = useAppContext();
 
   return (
     <MlSnapshotsStatusProvider
       snapshotId={(props.deprecation.correctiveAction as MlAction).snapshotId}
       jobId={(props.deprecation.correctiveAction as MlAction).jobId}
+      mlUpgradeModeEnabled={props.mlUpgradeModeEnabled}
       api={api}
     >
       <MlSnapshotsTableRowCells {...props} />

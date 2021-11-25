@@ -35,8 +35,8 @@ import type { SecurityLicense } from '../../common/licensing';
 import { licenseMock } from '../../common/licensing/index.mock';
 import type { AuthenticatedUser } from '../../common/model';
 import { mockAuthenticatedUser } from '../../common/model/authenticated_user.mock';
-import type { AuditServiceSetup, SecurityAuditLogger } from '../audit';
-import { auditServiceMock, securityAuditLoggerMock } from '../audit/index.mock';
+import type { AuditServiceSetup } from '../audit';
+import { auditServiceMock } from '../audit/index.mock';
 import type { ConfigType } from '../config';
 import { ConfigSchema, createConfig } from '../config';
 import type { SecurityFeatureUsageServiceStart } from '../feature_usage';
@@ -57,7 +57,6 @@ describe('AuthenticationService', () => {
     buildNumber: number;
   };
   let mockStartAuthenticationParams: {
-    legacyAuditLogger: jest.Mocked<SecurityAuditLogger>;
     audit: jest.Mocked<AuditServiceSetup>;
     config: ConfigType;
     loggers: LoggerFactory;
@@ -86,7 +85,6 @@ describe('AuthenticationService', () => {
 
     const coreStart = coreMock.createStart();
     mockStartAuthenticationParams = {
-      legacyAuditLogger: securityAuditLoggerMock.create(),
       audit: auditServiceMock.create(),
       config: createConfig(
         ConfigSchema.validate({
@@ -147,8 +145,8 @@ describe('AuthenticationService', () => {
         service.start(mockStartAuthenticationParams);
 
         authHandler = mockSetupAuthenticationParams.http.registerAuth.mock.calls[0][0];
-        authenticate = jest.requireMock('./authenticator').Authenticator.mock.instances[0]
-          .authenticate;
+        authenticate =
+          jest.requireMock('./authenticator').Authenticator.mock.instances[0].authenticate;
       });
 
       it('returns error if license is not available.', async () => {
@@ -331,8 +329,8 @@ describe('AuthenticationService', () => {
         service.setup(mockSetupAuthenticationParams);
         service.start(mockStartAuthenticationParams);
 
-        getServerBaseURL = jest.requireMock('./authenticator').Authenticator.mock.calls[0][0]
-          .getServerBaseURL;
+        getServerBaseURL =
+          jest.requireMock('./authenticator').Authenticator.mock.calls[0][0].getServerBaseURL;
       });
 
       it('falls back to legacy server config if `public` config is not specified', async () => {

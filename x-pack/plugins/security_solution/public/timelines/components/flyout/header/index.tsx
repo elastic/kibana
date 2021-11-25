@@ -40,7 +40,7 @@ import { useGetUserCasesPermissions, useKibana } from '../../../../common/lib/ki
 import { InspectButton } from '../../../../common/components/inspect';
 import { useTimelineKpis } from '../../../containers/kpis';
 import { esQuery } from '../../../../../../../../src/plugins/data/public';
-import { useSourcererScope } from '../../../../common/containers/sourcerer';
+import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { TimelineModel } from '../../../../timelines/store/timeline/model';
 import {
   startSelector,
@@ -76,7 +76,7 @@ const ActiveTimelinesContainer = styled(EuiFlexItem)`
 
 const FlyoutHeaderPanelComponent: React.FC<FlyoutHeaderPanelProps> = ({ timelineId }) => {
   const dispatch = useDispatch();
-  const { indexPattern, browserFields } = useSourcererScope(SourcererScopeName.timeline);
+  const { browserFields, indexPattern } = useSourcererDataView(SourcererScopeName.timeline);
   const { uiSettings } = useKibana().services;
   const esQueryConfig = useMemo(() => esQuery.getEsQueryConfig(uiSettings), [uiSettings]);
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
@@ -113,15 +113,17 @@ const FlyoutHeaderPanelComponent: React.FC<FlyoutHeaderPanelProps> = ({ timeline
     [dataProviders, kqlQuery]
   );
   const getKqlQueryTimeline = useMemo(() => timelineSelectors.getKqlFilterQuerySelector(), []);
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const kqlQueryTimeline = useSelector((state: State) => getKqlQueryTimeline(state, timelineId)!);
 
   const kqlQueryExpression =
     isEmpty(dataProviders) && isEmpty(kqlQueryTimeline) && timelineType === 'template'
       ? ' '
       : kqlQueryTimeline;
-  const kqlQueryTest = useMemo(() => ({ query: kqlQueryExpression, language: 'kuery' }), [
-    kqlQueryExpression,
-  ]);
+  const kqlQueryTest = useMemo(
+    () => ({ query: kqlQueryExpression, language: 'kuery' }),
+    [kqlQueryExpression]
+  );
 
   const combinedQueries = useMemo(
     () =>
@@ -332,6 +334,7 @@ const TimelineStatusInfoComponent: React.FC<FlyoutHeaderProps> = ({ timelineId }
         <FormattedRelative
           data-test-subj="timeline-status"
           key="timeline-status-autosaved"
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           value={new Date(updated!)}
         />
       </EuiTextColor>
@@ -342,7 +345,7 @@ const TimelineStatusInfoComponent: React.FC<FlyoutHeaderProps> = ({ timelineId }
 const TimelineStatusInfo = React.memo(TimelineStatusInfoComponent);
 
 const FlyoutHeaderComponent: React.FC<FlyoutHeaderProps> = ({ timelineId }) => {
-  const { selectedPatterns, indexPattern, docValueFields, browserFields } = useSourcererScope(
+  const { selectedPatterns, indexPattern, docValueFields, browserFields } = useSourcererDataView(
     SourcererScopeName.timeline
   );
   const getStartSelector = useMemo(() => startSelector(), []);
@@ -371,15 +374,17 @@ const FlyoutHeaderComponent: React.FC<FlyoutHeaderProps> = ({ timelineId }) => {
   );
   const { dataProviders, filters, timelineType, kqlMode, activeTab } = timeline;
   const getKqlQueryTimeline = useMemo(() => timelineSelectors.getKqlFilterQuerySelector(), []);
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const kqlQueryTimeline = useSelector((state: State) => getKqlQueryTimeline(state, timelineId)!);
 
   const kqlQueryExpression =
     isEmpty(dataProviders) && isEmpty(kqlQueryTimeline) && timelineType === 'template'
       ? ' '
       : kqlQueryTimeline;
-  const kqlQuery = useMemo(() => ({ query: kqlQueryExpression, language: 'kuery' }), [
-    kqlQueryExpression,
-  ]);
+  const kqlQuery = useMemo(
+    () => ({ query: kqlQueryExpression, language: 'kuery' }),
+    [kqlQueryExpression]
+  );
 
   const combinedQueries = useMemo(
     () =>

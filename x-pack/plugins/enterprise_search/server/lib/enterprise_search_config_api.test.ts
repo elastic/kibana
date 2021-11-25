@@ -46,7 +46,6 @@ describe('callEnterpriseSearchConfigAPI', () => {
     settings: {
       external_url: 'http://some.vanity.url/',
       read_only_mode: false,
-      ilm_enabled: true,
       is_federated_auth: false,
       search_oauth: {
         client_id: 'someUID',
@@ -100,7 +99,7 @@ describe('callEnterpriseSearchConfigAPI', () => {
           id: 'some-id-string',
           groups: ['Default', 'Cats'],
           is_admin: true,
-          can_create_personal_sources: true,
+          can_create_private_sources: true,
           can_create_invitations: true,
           is_curated: false,
           viewed_onboarding_page: true,
@@ -114,7 +113,7 @@ describe('callEnterpriseSearchConfigAPI', () => {
   });
 
   it('calls the config API endpoint', async () => {
-    ((fetch as unknown) as jest.Mock).mockImplementationOnce((url: string) => {
+    (fetch as unknown as jest.Mock).mockImplementationOnce((url: string) => {
       expect(url).toEqual('http://localhost:3002/api/ent/v2/internal/client_config');
       return Promise.resolve(new Response(JSON.stringify(mockResponse)));
     });
@@ -130,7 +129,7 @@ describe('callEnterpriseSearchConfigAPI', () => {
   });
 
   it('falls back without error when data is unavailable', async () => {
-    ((fetch as unknown) as jest.Mock).mockReturnValueOnce(Promise.resolve(new Response('{}')));
+    (fetch as unknown as jest.Mock).mockReturnValueOnce(Promise.resolve(new Response('{}')));
 
     expect(await callEnterpriseSearchConfigAPI(mockDependencies)).toEqual({
       access: {
@@ -139,7 +138,6 @@ describe('callEnterpriseSearchConfigAPI', () => {
       },
       publicUrl: undefined,
       readOnlyMode: false,
-      ilmEnabled: false,
       searchOAuth: {
         clientId: undefined,
         redirectUrl: undefined,
@@ -183,7 +181,7 @@ describe('callEnterpriseSearchConfigAPI', () => {
           id: undefined,
           groups: [],
           isAdmin: false,
-          canCreatePersonalSources: false,
+          canCreatePrivateSources: false,
           viewedOnboardingPage: false,
         },
       },
@@ -198,13 +196,13 @@ describe('callEnterpriseSearchConfigAPI', () => {
   });
 
   it('handles server errors', async () => {
-    ((fetch as unknown) as jest.Mock).mockReturnValueOnce(Promise.reject('500'));
+    (fetch as unknown as jest.Mock).mockReturnValueOnce(Promise.reject('500'));
     expect(await callEnterpriseSearchConfigAPI(mockDependencies)).toEqual({});
     expect(mockDependencies.log.error).toHaveBeenCalledWith(
       'Could not perform access check to Enterprise Search: 500'
     );
 
-    ((fetch as unknown) as jest.Mock).mockReturnValueOnce(Promise.resolve('Bad Data'));
+    (fetch as unknown as jest.Mock).mockReturnValueOnce(Promise.resolve('Bad Data'));
     expect(await callEnterpriseSearchConfigAPI(mockDependencies)).toEqual({});
     expect(mockDependencies.log.error).toHaveBeenCalledWith(
       'Could not perform access check to Enterprise Search: TypeError: response.json is not a function'
@@ -222,7 +220,7 @@ describe('callEnterpriseSearchConfigAPI', () => {
     );
 
     // Timeout
-    ((fetch as unknown) as jest.Mock).mockImplementationOnce(async () => {
+    (fetch as unknown as jest.Mock).mockImplementationOnce(async () => {
       jest.advanceTimersByTime(250);
       return Promise.reject({ name: 'AbortError' });
     });

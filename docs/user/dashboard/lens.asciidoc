@@ -48,6 +48,8 @@ Choose the data you want to visualize.
 
 . If you want to learn more about the data a field contains, click the field.
 
+. To visualize more than one index pattern, click *Add layer > Add visualization layer*, then select the index pattern.
+
 Edit and delete.
 
 . To change the aggregation *Quick function* and display options, click the field in the layer pane. 
@@ -60,11 +62,11 @@ Edit and delete.
 
 Change the fields list to display a different index pattern, different time range, or add your own fields.
 
-* To create a visualization with fields in a different index pattern, open the *Change index pattern* dropdown, then select the index pattern. 
+* To create a visualization with fields in a different index pattern, open the *Index pattern* dropdown, then select the index pattern. 
 
 * If the fields list is empty, change the <<set-time-filter,time filter>>.
 
-* To add fields, open the action menu (*...*) next to the *Change index pattern* dropdown, then select *Add field to index pattern*.
+* To add fields, open the action menu (*...*) next to the *Index pattern* dropdown, then select *Add field to index pattern*.
 +
 [role="screenshot"]
 image:images/runtime-field-menu.png[Dropdown menu located next to index pattern field with items for adding and managing fields, width=50%]
@@ -177,8 +179,63 @@ Compare your real-time data set to the results that are offset by a time increme
 For a time shift example, refer to <<compare-time-ranges>>.
 
 [float]
+[[add-reference-lines]]
+==== Add reference lines
+
+With reference lines, you can identify specific values in your visualizations with icons, colors, and other display options. You can add reference lines to any visualization type that displays axes.
+
+For example, to track the number of bytes in the 75th percentile, add a shaded *Percentile* reference line to your time series visualization.  
+
+[role="screenshot"]
+image::images/lens_referenceLine_7.16.png[Lens drag and drop focus state]
+
+. In the layer pane, click *Add layer > Add reference layer*.
+
+. Click the reference line value, then specify the reference line you want to use:
+
+* To add a static reference line, click *Static*, then enter the reference line value you want to use.
+
+* To add a dynamic reference line, click *Quick functions*, then click and configure the functions you want to use.
+
+* To calculate the reference line value with math, click *Formula*, then enter the formula.
+
+. Specify the display options, such as *Display name* and *Icon*, then click *Close*.
+
+[float]
 [[filter-the-data]]
-==== Apply filters with the legend
+==== Apply filters
+
+You can use the <<semi-structured-search, KQL query bar>> to focus on a known set of data for the entire visualization, or use the filter options from the layer pane or legend.
+
+[float]
+[[filter-with-the-function]]
+===== Apply multiple KQL filters
+
+With the *Filters* function, you can apply more than one KQL filter, and apply a KQL filter to a single layer so you can visualize filtered and unfiltered data at the same time.
+
+. In the layer pane, click a field.
+
+. Click the *Filters* function.
+
+. Click *Add a filter*, then enter the KQL filter you want to apply.
++
+To try the *Filters* function on your own, refer to <<custom-ranges,Compare a subset of documents to all documents>>.
+
+[float]
+[[filter-with-the-advanced-option]]
+===== Apply a single KQL filter
+
+With the *Filter by* advanced option, you can assign a color to each filter group in *Bar* and *Line and area* visualizations, and build complex tables. For example, to display failure rate and the overall data.
+
+. In the layer pane, click a field.
+
+. Click *Add advanced options*, then select *Filter by*.
+
+. Enter the KQL filter you want to apply.
+
+[float]
+[[filter-with-legend-filters]]
+===== Apply legend filters
 
 Apply filters to visualizations directly from the values in the legend. *Bar*, *Line and area*, and *Proportion* visualizations support legend filters.
 
@@ -205,30 +262,58 @@ The following component menus are available:
 * *Left axis*, *Bottom axis*, and *Right axis* &mdash; Specify how you want to display the chart axes. For example, add axis labels and change the orientation and bounds.
 
 [float]
+[[view-data-and-requests]]
+==== View the visualization data and requests
+
+To view the data included in the visualization and the requests that collected the data, use the *Inspector*.
+
+. In the toolbar, click *Inspect*.
+
+. Open the *View* dropdown, then click *Data*.
+
+.. From the dropdown, select the table that contains the data you want to view.
+
+.. To download the data, click *Download CSV*, then select the format type.
+
+. Open the *View* dropdown, then click *Requests*.
+
+.. From the dropdown, select the requests you want to view.
+
+.. To view the requests in *Console*, click *Request*, then click *Open in Console*.
+
+[float]
+[[save-the-lens-panel]]
+==== Save and add the panel
+
+Save the panel to the *Visualize Library* and add it to the dashboard, or add it to the dashboard without saving.
+
+To save the panel to the *Visualize Library*:
+
+. Click *Save to library*.
+
+. Enter the *Title* and add any applicable <<managing-tags,*Tags*>>.
+
+. Make sure that *Add to Dashboard after saving* is selected.
+
+. Click *Save and return*.
+
+To save the panel to the dashboard:
+
+. Click *Save and return*.
+
+. Add an optional title to the panel.
+
+.. In the panel header, click *No Title*.
+
+.. On the *Customize panel* window, select *Show panel title*.
+
+.. Enter the *Panel title*, then click *Save*.
+
+[float]
 [[lens-faq]]
-==== Frequently asked questions
+=== Frequently asked questions
 
 For answers to common *Lens* questions, review the following. 
-
-[discrete]
-[[kql]]
-.*When should I use KQL filters, the Filters function, or the Filter by option?*
-[%collapsible]
-====
-Use the <<semi-structured-search, KQL *Search*>> field to focus on a known set of data for the entire visualization. You can combine KQL filters with other filters using AND logic.
-
-Use the *Filters* function to apply:
-
-* More than one KQL filter.
-
-* The KQL filter to a single layer, which allows you to visualize filtered and unfiltered data.
-
-Use the *Filter by* advanced option to:
-
-* Assign a custom color to each filter group in a bar, line, or area chart.
-
-* Build a complex table. For example, to display the failure rate and overall data.
-====
 
 [discrete]
 [[when-should-i-normalize-the-data-by-unit-or-use-a-custom-interval]]
@@ -368,7 +453,7 @@ To configure the bounds, use the menus in the editor toolbar. Bar and area chart
 .*Is it possible to display icons in data tables?*
 [%collapsible]
 ====
-You can display icons with <<managing-index-patterns, field formatter>> in data tables.
+You can display icons with <<managing-index-patterns, field formatters>> in data tables.
 ====
 
 [discrete]
@@ -401,4 +486,20 @@ Pagination in a data table is unsupported. To use pagination in data tables, cre
 [%collapsible]
 ====
 Specifying the color for a single data point, such as a single bar or line, is unsupported.
+====
+
+[discrete]
+[[is-it-possible-to-inspect-the-elasticsearch-queries-in-Lens]]
+.*How do I inspect {es} queries in visualizations?*
+[%collapsible]
+====
+You can inspect the requests sent by the visualization to {es} using the Inspector. It can be accessed within the editor or in the dashboard.
+====
+
+[discrete]
+[[how-to-isolate-a-single-series-in-a-chart]]
+.*How do I isolate a single series in a chart?*
+[%collapsible]
+====
+For area, line, and bar charts, press Shift, then click the series in the legend. All other series are automatically unselected.
 ====

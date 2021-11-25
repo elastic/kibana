@@ -8,17 +8,23 @@
 
 import moment from 'moment-timezone';
 import { DateNanosFormat, analysePatternForFract, formatWithNanos } from './date_nanos_shared';
+import { FieldFormatsGetConfigFn } from '../types';
 
 describe('Date Nanos Format', () => {
   let convert: Function;
-  let mockConfig: Record<string, any>;
+  let mockConfig: {
+    dateNanosFormat: string;
+    'dateFormat:tz': string;
+    [other: string]: string;
+  };
 
   beforeEach(() => {
-    mockConfig = {};
-    mockConfig.dateNanosFormat = 'MMMM Do YYYY, HH:mm:ss.SSSSSSSSS';
-    mockConfig['dateFormat:tz'] = 'Browser';
+    mockConfig = {
+      dateNanosFormat: 'MMMM Do YYYY, HH:mm:ss.SSSSSSSSS',
+      'dateFormat:tz': 'Browser',
+    };
 
-    const getConfig = (key: string) => mockConfig[key];
+    const getConfig: FieldFormatsGetConfigFn = (key: string) => mockConfig[key];
     const date = new DateNanosFormat({}, getConfig);
 
     convert = date.convert.bind(date);

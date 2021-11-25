@@ -183,10 +183,10 @@ export const urlFactory = new ActionFactory(urlDrilldownActionFactory, {
   getFeatureUsageStart: () => licensingMock.createStart().featureUsage,
 });
 
-export const mockActionFactories: ActionFactory[] = ([
+export const mockActionFactories: ActionFactory[] = [
   dashboardFactory,
   urlFactory,
-] as unknown) as ActionFactory[];
+] as unknown as ActionFactory[];
 
 export const mockSupportedTriggers: string[] = [
   VALUE_CLICK_TRIGGER,

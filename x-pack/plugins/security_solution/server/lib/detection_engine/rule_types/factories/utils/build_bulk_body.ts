@@ -5,16 +5,19 @@
  * 2.0.
  */
 
-import { SavedObject } from 'src/core/types';
+import { EVENT_KIND, TIMESTAMP } from '@kbn/rule-data-utils';
+import { flattenWithPrefix } from '@kbn/securitysolution-rules';
+
 import { BaseHit } from '../../../../../../common/detection_engine/types';
 import type { ConfigType } from '../../../../../config';
 import { buildRuleWithOverrides, buildRuleWithoutOverrides } from '../../../signals/build_rule';
 import { BuildReasonMessage } from '../../../signals/reason_formatters';
 import { getMergeStrategy } from '../../../signals/source_fields_merging/strategies';
-import { AlertAttributes, SignalSource, SignalSourceHit } from '../../../signals/types';
+import { BaseSignalHit, SignalSource, SignalSourceHit, SimpleHit } from '../../../signals/types';
 import { RACAlert } from '../../types';
 import { additionalAlertFields, buildAlert } from './build_alert';
 import { filterSource } from './filter_source';
+import { CompleteRule, RuleParams } from '../../../schemas/rule_schemas';
 
 const isSourceDoc = (
   hit: SignalSourceHit
@@ -22,19 +25,26 @@ const isSourceDoc = (
   return hit._source != null;
 };
 
+const buildEventTypeAlert = (doc: BaseSignalHit): object => {
+  if (doc._source?.event != null && doc._source?.event instanceof Object) {
+    return flattenWithPrefix('event', doc._source?.event ?? {});
+  }
+  return {};
+};
+
 /**
  * Formats the search_after result for insertion into the signals index. We first create a
  * "best effort" merged "fields" with the "_source" object, then build the signal object,
  * then the event object, and finally we strip away any additional temporary data that was added
  * such as the "threshold_result".
- * @param ruleSO The rule saved object to build overrides
+ * @param completeRule The rule saved object to build overrides
  * @param doc The SignalSourceHit with "_source", "fields", and additional data such as "threshold_result"
  * @returns The body that can be added to a bulk call for inserting the signal.
  */
 export const buildBulkBody = (
   spaceId: string | null | undefined,
-  ruleSO: SavedObject<AlertAttributes>,
-  doc: SignalSourceHit,
+  completeRule: CompleteRule<RuleParams>,
+  doc: SimpleHit,
   mergeStrategy: ConfigType['alertMergeStrategy'],
   ignoreFields: ConfigType['alertIgnoreFields'],
   applyOverrides: boolean,
@@ -42,18 +52,20 @@ export const buildBulkBody = (
 ): RACAlert => {
   const mergedDoc = getMergeStrategy(mergeStrategy)({ doc, ignoreFields });
   const rule = applyOverrides
-    ? buildRuleWithOverrides(ruleSO, mergedDoc._source ?? {})
-    : buildRuleWithoutOverrides(ruleSO);
+    ? buildRuleWithOverrides(completeRule, mergedDoc._source ?? {})
+    : buildRuleWithoutOverrides(completeRule);
+  const eventFields = buildEventTypeAlert(mergedDoc);
   const filteredSource = filterSource(mergedDoc);
-  const timestamp = new Date().toISOString();
-
   const reason = buildReasonMessage({ mergedDoc, rule });
+
   if (isSourceDoc(mergedDoc)) {
     return {
       ...filteredSource,
+      ...eventFields,
       ...buildAlert([mergedDoc], rule, spaceId, reason),
-      ...additionalAlertFields(mergedDoc),
-      '@timestamp': timestamp,
+      ...additionalAlertFields({ ...mergedDoc, _source: { ...mergedDoc._source, ...eventFields } }),
+      [EVENT_KIND]: 'signal',
+      [TIMESTAMP]: new Date().toISOString(),
     };
   }
 

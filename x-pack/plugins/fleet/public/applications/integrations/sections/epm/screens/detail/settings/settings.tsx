@@ -5,28 +5,49 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n/react';
 import semverLt from 'semver/functions/lt';
+import { uniq } from 'lodash';
 
-import { EuiTitle, EuiFlexGroup, EuiFlexItem, EuiText, EuiSpacer, EuiLink } from '@elastic/eui';
+import {
+  EuiCallOut,
+  EuiTitle,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
+  EuiSpacer,
+  EuiLink,
+} from '@elastic/eui';
 
-import type { PackageInfo } from '../../../../../types';
+import { i18n } from '@kbn/i18n';
+
+import type { PackageInfo, UpgradePackagePolicyDryRunResponse } from '../../../../../types';
 import { InstallStatus } from '../../../../../types';
-import { useGetPackagePolicies, useGetPackageInstallStatus, useLink } from '../../../../../hooks';
-import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../../../constants';
-import { UpdateIcon } from '../components';
+import {
+  useGetPackagePolicies,
+  useGetPackageInstallStatus,
+  useLink,
+  sendUpgradePackagePolicyDryRun,
+  sendUpdatePackage,
+  useStartServices,
+} from '../../../../../hooks';
+import {
+  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+  AUTO_UPDATE_PACKAGES,
+  DEFAULT_PACKAGES,
+} from '../../../../../constants';
 
-import { InstallationButton } from './installation_button';
+import { KeepPoliciesUpToDateSwitch } from '../components';
+
+import { InstallButton } from './install_button';
+import { UpdateButton } from './update_button';
+import { UninstallButton } from './uninstall_button';
 
 const SettingsTitleCell = styled.td`
   padding-right: ${(props) => props.theme.eui.spacerSizes.xl};
   padding-bottom: ${(props) => props.theme.eui.spacerSizes.m};
-`;
-
-const UpdatesAvailableMsgContainer = styled.span`
-  padding-left: ${(props) => props.theme.eui.spacerSizes.s};
 `;
 
 const NoteLabel = () => (
@@ -37,14 +58,20 @@ const NoteLabel = () => (
     />
   </strong>
 );
-const UpdatesAvailableMsg = () => (
-  <UpdatesAvailableMsgContainer>
-    <UpdateIcon size="l" />
+const UpdatesAvailableMsg = ({ latestVersion }: { latestVersion: string }) => (
+  <EuiCallOut
+    color="warning"
+    iconType="alert"
+    title={i18n.translate('xpack.fleet.integrations.settings.versionInfo.updatesAvailable', {
+      defaultMessage: 'New version available',
+    })}
+  >
     <FormattedMessage
-      id="xpack.fleet.integrations.settings.versionInfo.updatesAvailable"
-      defaultMessage="Updates are available"
+      id="xpack.fleet.integration.settings.versionInfo.updatesAvailableBody"
+      defaultMessage="Upgrade to version {latestVersion} to get the latest features"
+      values={{ latestVersion }}
     />
-  </UpdatesAvailableMsgContainer>
+  </EuiCallOut>
 );
 
 const LatestVersionLink = ({ name, version }: { name: string; version: string }) => {
@@ -67,15 +94,97 @@ interface Props {
 }
 
 export const SettingsPage: React.FC<Props> = memo(({ packageInfo }: Props) => {
-  const { name, title, removable, latestVersion, version } = packageInfo;
+  const { name, title, removable, latestVersion, version, keepPoliciesUpToDate } = packageInfo;
+  const [dryRunData, setDryRunData] = useState<UpgradePackagePolicyDryRunResponse | null>();
+  const [isUpgradingPackagePolicies, setIsUpgradingPackagePolicies] = useState<boolean>(false);
   const getPackageInstallStatus = useGetPackageInstallStatus();
   const { data: packagePoliciesData } = useGetPackagePolicies({
-    perPage: 0,
+    perPage: 1000,
     page: 1,
     kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${name}`,
   });
+
+  const { notifications } = useStartServices();
+
+  const shouldShowKeepPoliciesUpToDateSwitch = useMemo(() => {
+    const packages = [...DEFAULT_PACKAGES, ...AUTO_UPDATE_PACKAGES];
+
+    const packageNames = uniq(packages.map((pkg) => pkg.name));
+
+    return packageNames.includes(name);
+  }, [name]);
+
+  const [keepPoliciesUpToDateSwitchValue, setKeepPoliciesUpToDateSwitchValue] = useState<boolean>(
+    keepPoliciesUpToDate ?? false
+  );
+
+  const handleKeepPoliciesUpToDateSwitchChange = useCallback(() => {
+    const saveKeepPoliciesUpToDate = async () => {
+      try {
+        setKeepPoliciesUpToDateSwitchValue((prev) => !prev);
+
+        await sendUpdatePackage(`${packageInfo.name}-${packageInfo.version}`, {
+          keepPoliciesUpToDate: !keepPoliciesUpToDateSwitchValue,
+        });
+
+        notifications.toasts.addSuccess({
+          title: i18n.translate('xpack.fleet.integrations.integrationSaved', {
+            defaultMessage: 'Integration settings saved',
+          }),
+          text: !keepPoliciesUpToDateSwitchValue
+            ? i18n.translate('xpack.fleet.integrations.keepPoliciesUpToDateEnabledSuccess', {
+                defaultMessage:
+                  'Fleet will automatically keep integration policies up to date for {title}',
+                values: { title },
+              })
+            : i18n.translate('xpack.fleet.integrations.keepPoliciesUpToDateDisabledSuccess', {
+                defaultMessage:
+                  'Fleet will not automatically keep integration policies up to date for {title}',
+                values: { title },
+              }),
+        });
+      } catch (error) {
+        notifications.toasts.addError(error, {
+          title: i18n.translate('xpack.fleet.integrations.integrationSavedError', {
+            defaultMessage: 'Error saving integration settings',
+          }),
+          toastMessage: i18n.translate('xpack.fleet.integrations.keepPoliciesUpToDateError', {
+            defaultMessage: 'Error saving integration settings for {title}',
+            values: { title },
+          }),
+        });
+      }
+    };
+
+    saveKeepPoliciesUpToDate();
+  }, [
+    keepPoliciesUpToDateSwitchValue,
+    notifications.toasts,
+    packageInfo.name,
+    packageInfo.version,
+    title,
+  ]);
+
   const { status: installationStatus, version: installedVersion } = getPackageInstallStatus(name);
   const packageHasUsages = !!packagePoliciesData?.total;
+
+  const packagePolicyIds = useMemo(
+    () => packagePoliciesData?.items.map(({ id }) => id),
+    [packagePoliciesData]
+  );
+
+  useEffect(() => {
+    const fetchDryRunData = async () => {
+      if (packagePolicyIds && packagePolicyIds.length) {
+        const { data } = await sendUpgradePackagePolicyDryRun(packagePolicyIds, latestVersion);
+
+        setDryRunData(data);
+      }
+    };
+
+    fetchDryRunData();
+  }, [latestVersion, packagePolicyIds]);
+
   const updateAvailable =
     installedVersion && semverLt(installedVersion, latestVersion) ? true : false;
 
@@ -87,6 +196,20 @@ export const SettingsPage: React.FC<Props> = memo(({ packageInfo }: Props) => {
     (installationStatus === InstallStatus.installed && installedVersion !== version);
 
   const isUpdating = installationStatus === InstallStatus.installing && installedVersion;
+
+  const numOfAssets = useMemo(
+    () =>
+      Object.entries(packageInfo.assets).reduce(
+        (acc, [serviceName, serviceNameValue]) =>
+          acc +
+          Object.entries(serviceNameValue).reduce(
+            (acc2, [assetName, assetNameValue]) => acc2 + assetNameValue.length,
+            0
+          ),
+        0
+      ),
+    [packageInfo.assets]
+  );
 
   return (
     <EuiFlexGroup alignItems="flexStart">
@@ -126,10 +249,9 @@ export const SettingsPage: React.FC<Props> = memo(({ packageInfo }: Props) => {
                       />
                     </SettingsTitleCell>
                     <td>
-                      <EuiTitle size="xs">
+                      <EuiTitle size="xs" data-test-subj="installedVersion">
                         <span>{installedVersion}</span>
                       </EuiTitle>
-                      {updateAvailable && <UpdatesAvailableMsg />}
                     </td>
                   </tr>
                   <tr>
@@ -140,22 +262,38 @@ export const SettingsPage: React.FC<Props> = memo(({ packageInfo }: Props) => {
                       />
                     </SettingsTitleCell>
                     <td>
-                      <EuiTitle size="xs">
+                      <EuiTitle size="xs" data-test-subj="latestVersion">
                         <span>{latestVersion}</span>
                       </EuiTitle>
                     </td>
                   </tr>
                 </tbody>
               </table>
-              {updateAvailable && (
-                <p>
-                  <InstallationButton
-                    {...packageInfo}
-                    version={latestVersion}
-                    disabled={false}
-                    isUpdate={true}
+              {shouldShowKeepPoliciesUpToDateSwitch && (
+                <>
+                  <KeepPoliciesUpToDateSwitch
+                    checked={keepPoliciesUpToDateSwitchValue}
+                    onChange={handleKeepPoliciesUpToDateSwitchChange}
                   />
-                </p>
+                  <EuiSpacer size="l" />
+                </>
+              )}
+
+              {(updateAvailable || isUpgradingPackagePolicies) && (
+                <>
+                  <UpdatesAvailableMsg latestVersion={latestVersion} />
+                  <EuiSpacer size="l" />
+                  <p>
+                    <UpdateButton
+                      {...packageInfo}
+                      version={latestVersion}
+                      packagePolicyIds={packagePolicyIds}
+                      dryRunData={dryRunData}
+                      isUpgradingPackagePolicies={isUpgradingPackagePolicies}
+                      setIsUpgradingPackagePolicies={setIsUpgradingPackagePolicies}
+                    />
+                  </p>
+                </>
               )}
             </div>
           )}
@@ -189,8 +327,9 @@ export const SettingsPage: React.FC<Props> = memo(({ packageInfo }: Props) => {
                   <EuiFlexGroup>
                     <EuiFlexItem grow={false}>
                       <p>
-                        <InstallationButton
+                        <InstallButton
                           {...packageInfo}
+                          numOfAssets={numOfAssets}
                           disabled={!packagePoliciesData || packageHasUsages}
                         />
                       </p>
@@ -220,8 +359,9 @@ export const SettingsPage: React.FC<Props> = memo(({ packageInfo }: Props) => {
                     <EuiFlexGroup>
                       <EuiFlexItem grow={false}>
                         <p>
-                          <InstallationButton
+                          <UninstallButton
                             {...packageInfo}
+                            numOfAssets={numOfAssets}
                             latestVersion={latestVersion}
                             disabled={!packagePoliciesData || packageHasUsages}
                           />

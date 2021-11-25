@@ -41,9 +41,12 @@ import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
 import { apmActionVariables } from './action_variables';
 import { alertingEsClient } from './alerting_es_client';
 import { RegisterRuleDependencies } from './register_apm_alerts';
+import { termQuery } from '../../../../observability/server';
 
-const ALERT_EVALUATION_THRESHOLD: typeof ALERT_EVALUATION_THRESHOLD_TYPED = ALERT_EVALUATION_THRESHOLD_NON_TYPED;
-const ALERT_EVALUATION_VALUE: typeof ALERT_EVALUATION_VALUE_TYPED = ALERT_EVALUATION_VALUE_NON_TYPED;
+const ALERT_EVALUATION_THRESHOLD: typeof ALERT_EVALUATION_THRESHOLD_TYPED =
+  ALERT_EVALUATION_THRESHOLD_NON_TYPED;
+const ALERT_EVALUATION_VALUE: typeof ALERT_EVALUATION_VALUE_TYPED =
+  ALERT_EVALUATION_VALUE_NON_TYPED;
 const ALERT_REASON: typeof ALERT_REASON_TYPED = ALERT_REASON_NON_TYPED;
 
 const paramsSchema = schema.object({
@@ -97,7 +100,7 @@ export function registerErrorCountAlertType({
         });
 
         const searchParams = {
-          index: indices['apm_oss.errorIndices'],
+          index: indices.error,
           size: 0,
           body: {
             query: {
@@ -111,9 +114,7 @@ export function registerErrorCountAlertType({
                     },
                   },
                   { term: { [PROCESSOR_EVENT]: ProcessorEvent.error } },
-                  ...(alertParams.serviceName
-                    ? [{ term: { [SERVICE_NAME]: alertParams.serviceName } }]
-                    : []),
+                  ...termQuery(SERVICE_NAME, alertParams.serviceName),
                   ...environmentQuery(alertParams.environment),
                 ],
               },

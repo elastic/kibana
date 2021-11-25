@@ -180,6 +180,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
     });
 
+    it('should not show static value tab for data layers', async () => {
+      await PageObjects.lens.openDimensionEditor('lnsXY_yDimensionPanel > lns-dimensionTrigger');
+      // Quick functions and Formula tabs should be visible
+      expect(await testSubjects.exists('lens-dimensionTabs-quickFunctions')).to.eql(true);
+      expect(await testSubjects.exists('lens-dimensionTabs-formula')).to.eql(true);
+      // Static value tab should not be visible
+      expect(await testSubjects.exists('lens-dimensionTabs-static_value')).to.eql(false);
+
+      await PageObjects.lens.closeDimensionEditor();
+    });
+
     it('should be able to add very long labels and still be able to remove a dimension', async () => {
       await PageObjects.lens.openDimensionEditor('lnsXY_yDimensionPanel > lns-dimensionTrigger');
       const longLabel =
@@ -245,7 +256,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should show value labels on bar charts when enabled', async () => {
       // enable value labels
       await PageObjects.lens.openVisualOptions();
-      await testSubjects.click('lnsXY_valueLabels_inside');
+      await testSubjects.click('lns_valueLabels_inside');
 
       await PageObjects.lens.waitForVisualization();
 

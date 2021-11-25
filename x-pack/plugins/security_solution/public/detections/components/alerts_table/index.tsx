@@ -18,7 +18,7 @@ import {
   displaySuccessToast,
   useStateToaster,
 } from '../../../common/components/toasters';
-import { useSourcererScope } from '../../../common/containers/sourcerer';
+import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_query';
@@ -100,7 +100,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
     indexPattern: indexPatterns,
     loading: indexPatternsLoading,
     selectedPatterns,
-  } = useSourcererScope(SourcererScopeName.detections);
+  } = useSourcererDataView(SourcererScopeName.detections);
   const kibana = useKibana();
   const [, dispatchToaster] = useStateToaster();
   const { addWarning } = useAppToasts();
@@ -142,14 +142,14 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
 
   const setEventsLoadingCallback = useCallback(
     ({ eventIds, isLoading }: SetEventsLoadingProps) => {
-      setEventsLoading!({ id: timelineId, eventIds, isLoading });
+      setEventsLoading({ id: timelineId, eventIds, isLoading });
     },
     [setEventsLoading, timelineId]
   );
 
   const setEventsDeletedCallback = useCallback(
     ({ eventIds, isDeleted }: SetEventsDeletedProps) => {
-      setEventsDeleted!({ id: timelineId, eventIds, isDeleted });
+      setEventsDeleted({ id: timelineId, eventIds, isDeleted });
     },
     [setEventsDeleted, timelineId]
   );
@@ -172,6 +172,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
             title = i18n.OPENED_ALERT_SUCCESS_TOAST(updated);
             break;
           case 'acknowledged':
+          case 'in-progress':
             title = i18n.ACKNOWLEDGED_ALERT_SUCCESS_TOAST(updated);
         }
         displaySuccessToast(title, dispatchToaster);
@@ -191,6 +192,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
           title = i18n.OPENED_ALERT_FAILED_TOAST;
           break;
         case 'acknowledged':
+        case 'in-progress':
           title = i18n.ACKNOWLEDGED_ALERT_FAILED_TOAST;
       }
       displayErrorToast(title, [error.message], dispatchToaster);
@@ -214,7 +216,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
 
   // Callback for clearing entire selection from utility bar
   const clearSelectionCallback = useCallback(() => {
-    clearSelected!({ id: timelineId });
+    clearSelected({ id: timelineId });
     dispatch(
       timelineActions.setTGridSelectAll({
         id: timelineId,
@@ -373,21 +375,21 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
 
   return (
     <StatefulEventsViewer
-      pageFilters={defaultFiltersMemo}
+      additionalFilters={additionalFiltersComponent}
+      currentFilter={filterGroup}
       defaultCellActions={defaultCellActions}
       defaultModel={defaultTimelineModel}
-      entityType="events"
       end={to}
-      currentFilter={filterGroup}
+      entityType="events"
+      hasAlertsCrud={hasIndexWrite && hasIndexMaintenance}
       id={timelineId}
       onRuleChange={onRuleChange}
+      pageFilters={defaultFiltersMemo}
       renderCellValue={RenderCellValue}
       rowRenderers={defaultRowRenderers}
       scopeId={SourcererScopeName.detections}
       start={from}
       utilityBar={utilityBarCallback}
-      additionalFilters={additionalFiltersComponent}
-      hasAlertsCrud={hasIndexWrite && hasIndexMaintenance}
     />
   );
 };

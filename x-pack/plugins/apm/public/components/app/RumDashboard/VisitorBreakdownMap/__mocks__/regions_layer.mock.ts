@@ -11,6 +11,7 @@ export const mockLayerList = [
       {
         leftField: 'iso2',
         right: {
+          applyForceRefresh: true,
           applyGlobalQuery: true,
           applyGlobalTime: true,
           type: 'ES_TERM_SOURCE',
@@ -50,8 +51,7 @@ export const mockLayerList = [
             fieldMetaOptions: { isEnabled: true, sigma: 3 },
             type: 'ORDINAL',
             field: {
-              name:
-                '__kbnjoin__avg_of_transaction.duration.us__3657625d-17b0-41ef-99ba-3a2b2938655c',
+              name: '__kbnjoin__avg_of_transaction.duration.us__3657625d-17b0-41ef-99ba-3a2b2938655c',
               origin: 'join',
             },
             useCustomColorRamp: false,
@@ -86,6 +86,7 @@ export const mockLayerList = [
       {
         leftField: 'region_iso_code',
         right: {
+          applyForceRefresh: true,
           applyGlobalQuery: true,
           applyGlobalTime: true,
           type: 'ES_TERM_SOURCE',
@@ -119,8 +120,7 @@ export const mockLayerList = [
             fieldMetaOptions: { isEnabled: true, sigma: 3 },
             type: 'ORDINAL',
             field: {
-              name:
-                '__kbnjoin__avg_of_transaction.duration.us__e62a1b9c-d7ff-4fd4-a0f6-0fdc44bb9e41',
+              name: '__kbnjoin__avg_of_transaction.duration.us__e62a1b9c-d7ff-4fd4-a0f6-0fdc44bb9e41',
               origin: 'join',
             },
             useCustomColorRamp: false,

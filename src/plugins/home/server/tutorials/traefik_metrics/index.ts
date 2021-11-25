@@ -20,16 +20,16 @@ export function traefikMetricsSpecProvider(context: TutorialContext): TutorialSc
   return {
     id: 'traefikMetrics',
     name: i18n.translate('home.tutorials.traefikMetrics.nameTitle', {
-      defaultMessage: 'Traefik metrics',
+      defaultMessage: 'Traefik Metrics',
     }),
     moduleName,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.traefikMetrics.shortDescription', {
-      defaultMessage: 'Fetch monitoring metrics from Traefik.',
+      defaultMessage: 'Collect metrics from Traefik with Metricbeat.',
     }),
     longDescription: i18n.translate('home.tutorials.traefikMetrics.longDescription', {
       defaultMessage:
-        'The `traefik` Metricbeat module fetches monitoring metrics from Traefik. \
+        'The `traefik` Metricbeat module fetches metrics from Traefik. \
 [Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-traefik.html',
@@ -46,5 +46,6 @@ export function traefikMetricsSpecProvider(context: TutorialContext): TutorialSc
     onPrem: onPremInstructions(moduleName, context),
     elasticCloud: cloudInstructions(moduleName),
     onPremElasticCloud: onPremCloudInstructions(moduleName),
+    integrationBrowserCategories: ['web', 'security'],
   };
 }

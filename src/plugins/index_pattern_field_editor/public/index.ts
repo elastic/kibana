@@ -25,8 +25,9 @@ export type {
   PluginStart as IndexPatternFieldEditorStart,
 } from './types';
 export { DefaultFormatEditor } from './components/field_format_editor/editors/default/default';
-export { FieldFormatEditorFactory, FieldFormatEditor } from './components';
 export type {
+  FieldFormatEditorFactory,
+  FieldFormatEditor,
   DeleteFieldProviderProps,
   FormatEditorProps,
   FormatEditorState,

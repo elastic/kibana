@@ -6,9 +6,13 @@
  * Side Public License, v 1.
  */
 
+import { PluginInitializerContext } from 'src/core/public';
+import { KibanaUtilsPublicPlugin } from './plugin';
+
 // TODO: https://github.com/elastic/kibana/issues/109893
 /* eslint-disable @kbn/eslint/no_export_all */
 
+export type { Get, Set, UiComponent, UiComponentInstance } from '../common';
 export {
   AbortError,
   abortSignalToPromise,
@@ -17,11 +21,7 @@ export {
   Defer,
   fieldWildcardFilter,
   fieldWildcardMatcher,
-  Get,
   of,
-  Set,
-  UiComponent,
-  UiComponentInstance,
   url,
   createGetterSetter,
 } from '../common';
@@ -53,11 +53,7 @@ export {
   replaceUrlQuery,
   replaceUrlHashQuery,
 } from './state_management/url';
-export {
-  syncState,
-  syncStates,
-  createKbnUrlStateStorage,
-  createSessionStorageStateStorage,
+export type {
   IStateSyncConfig,
   ISyncStateRef,
   IKbnUrlStateStorage,
@@ -66,7 +62,13 @@ export {
   StartSyncStateFnType,
   StopSyncStateFnType,
 } from './state_sync';
-export { Configurable, CollectConfigProps } from './ui';
+export {
+  syncState,
+  syncStates,
+  createKbnUrlStateStorage,
+  createSessionStorageStateStorage,
+} from './state_sync';
+export type { Configurable, CollectConfigProps } from './ui';
 export {
   removeQueryParam,
   redirectWhenMissing,
@@ -76,12 +78,11 @@ export {
   createQueryParamObservable,
 } from './history';
 export { applyDiff } from './state_management/utils/diff_object';
-export { createStartServicesGetter, StartServicesGetter } from './core/create_start_service_getter';
+export type { StartServicesGetter } from './core/create_start_service_getter';
+export { createStartServicesGetter } from './core/create_start_service_getter';
 
-/** dummy plugin, we just want kibanaUtils to have its own bundle */
-export function plugin() {
-  return new (class KibanaUtilsPlugin {
-    setup() {}
-    start() {}
-  })();
+export type { KibanaUtilsSetup } from './plugin';
+
+export function plugin(initializerContext: PluginInitializerContext) {
+  return new KibanaUtilsPublicPlugin(initializerContext);
 }

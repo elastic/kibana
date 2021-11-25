@@ -9,12 +9,15 @@ import React, { FC, useEffect, useMemo, useState } from 'react';
 import {
   Chart,
   ElementClickListener,
+  BrushEndListener,
   Heatmap,
   HeatmapBrushEvent,
   HeatmapElementEvent,
   HeatmapSpec,
   ScaleType,
   Settings,
+  ESFixedIntervalUnit,
+  ESCalendarIntervalUnit,
 } from '@elastic/charts';
 import type { CustomPaletteState } from 'src/plugins/charts/public';
 import { VisualizationContainer } from '../visualization_container';
@@ -29,6 +32,7 @@ import {
 } from '../shared_components';
 import { LensIconChartHeatmap } from '../assets/chart_heatmap';
 import { DEFAULT_PALETTE_NAME } from './constants';
+import { search } from '../../../../../src/plugins/data/public';
 
 declare global {
   interface Window {
@@ -125,7 +129,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = ({
   const tableId = Object.keys(data.tables)[0];
   const table = data.tables[tableId];
 
-  const paletteParams = args.palette?.params as CustomPaletteState;
+  const paletteParams = args.palette?.params;
 
   const xAxisColumnIndex = table.columns.findIndex((v) => v.id === args.xAccessor);
   const yAxisColumnIndex = table.columns.findIndex((v) => v.id === args.yAccessor);
@@ -134,10 +138,10 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = ({
   const yAxisColumn = table.columns[yAxisColumnIndex];
   const valueColumn = table.columns.find((v) => v.id === args.valueAccessor);
 
-  const minMaxByColumnId = useMemo(() => findMinMaxByColumnId([args.valueAccessor!], table), [
-    args.valueAccessor,
-    table,
-  ]);
+  const minMaxByColumnId = useMemo(
+    () => findMinMaxByColumnId([args.valueAccessor!], table),
+    [args.valueAccessor, table]
+  );
 
   if (!xAxisColumn || !valueColumn) {
     // Chart is not ready
@@ -161,8 +165,30 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = ({
 
   // Fallback to the ordinal scale type when a single row of data is provided.
   // Related issue https://github.com/elastic/elastic-charts/issues/1184
-  const xScaleType =
-    isTimeBasedSwimLane && chartData.length > 1 ? ScaleType.Time : ScaleType.Ordinal;
+
+  let xScale: HeatmapSpec['xScale'] = { type: ScaleType.Ordinal };
+  if (isTimeBasedSwimLane && chartData.length > 1) {
+    const dateInterval =
+      search.aggs.getDateHistogramMetaDataByDatatableColumn(xAxisColumn)?.interval;
+    const esInterval = dateInterval ? search.aggs.parseEsInterval(dateInterval) : undefined;
+    if (esInterval) {
+      xScale = {
+        type: ScaleType.Time,
+        interval:
+          esInterval.type === 'fixed'
+            ? {
+                type: 'fixed',
+                unit: esInterval.unit as ESFixedIntervalUnit,
+                value: esInterval.value,
+              }
+            : {
+                type: 'calendar',
+                unit: esInterval.unit as ESCalendarIntervalUnit,
+                value: esInterval.value,
+              },
+      };
+    }
+  }
 
   const xValuesFormatter = formatFactory(xAxisMeta.params);
   const valueFormatter = formatFactory(valueColumn.meta.params);
@@ -270,7 +296,6 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = ({
   };
 
   const config: HeatmapSpec['config'] = {
-    onBrushEnd,
     grid: {
       stroke: {
         width:
@@ -288,6 +313,9 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = ({
       maxHeight: 'fill',
       label: {
         visible: args.gridConfig.isCellLabelVisible ?? false,
+        minFontSize: 8,
+        maxFontSize: 18,
+        useGlobalMinFontSize: true, // override the min if there's a different directive upstream
       },
       border: {
         strokeWidth: 0,
@@ -338,6 +366,11 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = ({
             labelOptions: { maxLines: args.legend.shouldTruncate ? args.legend?.maxLines ?? 1 : 0 },
           },
         }}
+        xDomain={{
+          min: data.dateRange?.fromDate.getTime() ?? NaN,
+          max: data.dateRange?.toDate.getTime() ?? NaN,
+        }}
+        onBrushEnd={onBrushEnd as BrushEndListener}
       />
       <Heatmap
         id={tableId}
@@ -351,7 +384,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = ({
         yAccessor={args.yAccessor || 'unifiedY'}
         valueAccessor={args.valueAccessor}
         valueFormatter={(v: number) => valueFormatter.convert(v)}
-        xScaleType={xScaleType}
+        xScale={xScale}
         ySortPredicate="dataIndex"
         config={config}
         xSortPredicate="dataIndex"

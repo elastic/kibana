@@ -493,7 +493,7 @@ describe('DocumentCreationLogic', () => {
           await nextTick();
 
           expect(DocumentCreationLogic.actions.setErrors).toHaveBeenCalledWith(
-            "Cannot read property 'total' of undefined"
+            "Cannot read properties of undefined (reading 'total')"
           );
         });
 
@@ -516,7 +516,7 @@ describe('DocumentCreationLogic', () => {
 
       describe('chunks large uploads', () => {
         // Using an array of #s for speed, it doesn't really matter what the contents of the documents are for this test
-        const largeDocumentsArray = ([...Array(200).keys()] as unknown) as object[];
+        const largeDocumentsArray = [...Array(200).keys()] as unknown as object[];
 
         const mockFirstResponse = {
           validDocuments: { total: 99, examples: largeDocumentsArray.slice(0, 98) },

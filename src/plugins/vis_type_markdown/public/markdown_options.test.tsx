@@ -14,14 +14,14 @@ import { MarkdownVisParams } from './types';
 import { MarkdownOptions } from './markdown_options';
 
 describe('MarkdownOptions', () => {
-  const props = ({
+  const props = {
     stateParams: {
       fontSize: 12,
       markdown: 'hello from 2020 🥳',
       openLinksInNewTab: false,
     },
     setValue: jest.fn(),
-  } as unknown) as VisEditorOptionsProps<MarkdownVisParams>;
+  } as unknown as VisEditorOptionsProps<MarkdownVisParams>;
 
   it('should match snapshot', () => {
     const comp = shallow(<MarkdownOptions {...props} />);

@@ -17,7 +17,7 @@ import { ExecutionContextSearch, KibanaContext, KibanaFilter } from './kibana_co
 import { KibanaQueryOutput } from './kibana_context_type';
 import { KibanaTimerangeOutput } from './timerange';
 import { SavedObjectReference } from '../../../../../core/types';
-import { SavedObjectsClientCommon } from '../../index_patterns';
+import { SavedObjectsClientCommon } from '../..';
 
 /** @internal */
 export interface KibanaContextStartDependencies {

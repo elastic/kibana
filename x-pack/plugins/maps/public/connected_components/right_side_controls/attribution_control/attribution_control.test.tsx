@@ -13,16 +13,16 @@ import { AttributionControl } from './attribution_control';
 
 describe('AttributionControl', () => {
   test('is rendered', async () => {
-    const mockLayer1 = ({
+    const mockLayer1 = {
       getAttributions: async () => {
         return [{ url: '', label: 'attribution with no link' }];
       },
-    } as unknown) as ILayer;
-    const mockLayer2 = ({
+    } as unknown as ILayer;
+    const mockLayer2 = {
       getAttributions: async () => {
         return [{ url: 'https://coolmaps.com', label: 'attribution with link' }];
       },
-    } as unknown) as ILayer;
+    } as unknown as ILayer;
     const component = shallow(
       <AttributionControl layerList={[mockLayer1, mockLayer2]} isFullScreen={true} />
     );

@@ -187,10 +187,6 @@
     fill: $visHoverBackgroundColor;
   }
 
-  .visAreaChart__overlapArea {
-    opacity: .8;
-  }
-
   .series > path,
   .series > rect {
     stroke-opacity: 1;
@@ -273,10 +269,6 @@
   margin: 5px;
   min-height: 0;
   min-width: 0;
-}
-
-.visWrapper__alerts {
-  position: relative;
 }
 
 // General Axes

@@ -49,35 +49,34 @@ const getIndexTags = (isRollupIndex: (indexName: string) => boolean) => (indexNa
       ]
     : [];
 
-export const searchResponseToArray = (
-  getTags: (indexName: string) => Tag[],
-  showAllIndices: boolean
-) => (response: IEsSearchResponse<any>) => {
-  const { rawResponse } = response;
-  if (!rawResponse.aggregations) {
-    return [];
-  } else {
-    // @ts-expect-error @elastic/elasticsearch no way to declare a type for aggregation in the search response
-    return rawResponse.aggregations.indices.buckets
-      .map((bucket: { key: string }) => {
-        return bucket.key;
-      })
-      .filter((indexName: string) => {
-        if (showAllIndices) {
-          return true;
-        } else {
-          return !indexName.startsWith('.');
-        }
-      })
-      .map((indexName: string) => {
-        return {
-          name: indexName,
-          tags: getTags(indexName),
-          item: {},
-        };
-      });
-  }
-};
+export const searchResponseToArray =
+  (getTags: (indexName: string) => Tag[], showAllIndices: boolean) =>
+  (response: IEsSearchResponse<any>) => {
+    const { rawResponse } = response;
+    if (!rawResponse.aggregations) {
+      return [];
+    } else {
+      // @ts-expect-error @elastic/elasticsearch no way to declare a type for aggregation in the search response
+      return rawResponse.aggregations.indices.buckets
+        .map((bucket: { key: string }) => {
+          return bucket.key;
+        })
+        .filter((indexName: string) => {
+          if (showAllIndices) {
+            return true;
+          } else {
+            return !indexName.startsWith('.');
+          }
+        })
+        .map((indexName: string) => {
+          return {
+            name: indexName,
+            tags: getTags(indexName),
+            item: {},
+          };
+        });
+    }
+  };
 
 export const getIndicesViaSearch = async ({
   pattern,

@@ -8,7 +8,7 @@
 import { EqlSearchStrategyResponse } from '../../../../../../../../src/plugins/data/common';
 import { EqlSearchResponse } from '../../../../../common/detection_engine/types';
 
-export const sequenceResponse = ({
+export const sequenceResponse = {
   rawResponse: {
     body: {
       is_partial: false,
@@ -788,4 +788,4 @@ export const sequenceResponse = ({
     meta: {},
     hits: {},
   },
-} as unknown) as EqlSearchStrategyResponse<EqlSearchResponse<unknown>>;
+} as unknown as EqlSearchStrategyResponse<EqlSearchResponse<unknown>>;

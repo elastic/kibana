@@ -74,7 +74,6 @@ export const callEnterpriseSearchConfigAPI = async ({
       },
       publicUrl: stripTrailingSlash(data?.settings?.external_url),
       readOnlyMode: !!data?.settings?.read_only_mode,
-      ilmEnabled: !!data?.settings?.ilm_enabled,
       searchOAuth: {
         clientId: data?.settings?.search_oauth?.client_id,
         redirectUrl: data?.settings?.search_oauth?.redirect_url,
@@ -124,10 +123,10 @@ export const callEnterpriseSearchConfigAPI = async ({
           id: data?.current_user?.workplace_search?.account?.id,
           groups: data?.current_user?.workplace_search?.account?.groups || [],
           isAdmin: !!data?.current_user?.workplace_search?.account?.is_admin,
-          canCreatePersonalSources: !!data?.current_user?.workplace_search?.account
-            ?.can_create_personal_sources,
-          viewedOnboardingPage: !!data?.current_user?.workplace_search?.account
-            ?.viewed_onboarding_page,
+          canCreatePrivateSources:
+            !!data?.current_user?.workplace_search?.account?.can_create_private_sources,
+          viewedOnboardingPage:
+            !!data?.current_user?.workplace_search?.account?.viewed_onboarding_page,
         },
       },
     };

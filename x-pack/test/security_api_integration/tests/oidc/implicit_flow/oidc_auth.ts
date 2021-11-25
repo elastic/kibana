@@ -50,8 +50,7 @@ export default function ({ getService }: FtrProviderContext) {
             (window as Record<string, any>).__isScriptExecuted__ = new Promise<void>((resolve) => {
               Object.defineProperty(window, 'location', {
                 value: {
-                  href:
-                    'https://kibana.com/api/security/oidc/implicit#token=some_token&access_token=some_access_token',
+                  href: 'https://kibana.com/api/security/oidc/implicit#token=some_token&access_token=some_access_token',
                   replace(newLocation: string) {
                     this.href = newLocation;
                     resolve();

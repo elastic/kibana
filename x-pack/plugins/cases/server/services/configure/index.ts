@@ -134,16 +134,17 @@ export class CaseConfigureService {
       this.log.debug(`Attempting to UPDATE case configuration ${configurationId}`);
       const esUpdateInfo = transformAttributesToESModel(updatedAttributes);
 
-      const updatedConfiguration = await unsecuredSavedObjectsClient.update<ESCasesConfigureAttributes>(
-        CASE_CONFIGURE_SAVED_OBJECT,
-        configurationId,
-        {
-          ...esUpdateInfo.attributes,
-        },
-        {
-          references: esUpdateInfo.referenceHandler.build(originalConfiguration.references),
-        }
-      );
+      const updatedConfiguration =
+        await unsecuredSavedObjectsClient.update<ESCasesConfigureAttributes>(
+          CASE_CONFIGURE_SAVED_OBJECT,
+          configurationId,
+          {
+            ...esUpdateInfo.attributes,
+          },
+          {
+            references: esUpdateInfo.referenceHandler.build(originalConfiguration.references),
+          }
+        );
 
       return transformUpdateResponseToExternalModel(updatedConfiguration);
     } catch (error) {
@@ -205,21 +206,15 @@ function transformFindResponseToExternalModel(
   };
 }
 
-function transformAttributesToESModel(
-  configuration: CasesConfigureAttributes
-): {
+function transformAttributesToESModel(configuration: CasesConfigureAttributes): {
   attributes: ESCasesConfigureAttributes;
   referenceHandler: ConnectorReferenceHandler;
 };
-function transformAttributesToESModel(
-  configuration: Partial<CasesConfigureAttributes>
-): {
+function transformAttributesToESModel(configuration: Partial<CasesConfigureAttributes>): {
   attributes: Partial<ESCasesConfigureAttributes>;
   referenceHandler: ConnectorReferenceHandler;
 };
-function transformAttributesToESModel(
-  configuration: Partial<CasesConfigureAttributes>
-): {
+function transformAttributesToESModel(configuration: Partial<CasesConfigureAttributes>): {
   attributes: Partial<ESCasesConfigureAttributes>;
   referenceHandler: ConnectorReferenceHandler;
 } {

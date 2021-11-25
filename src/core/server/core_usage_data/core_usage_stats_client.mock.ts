@@ -9,10 +9,11 @@
 import { CoreUsageStatsClient } from '.';
 
 const createUsageStatsClientMock = () =>
-  (({
+  ({
     getUsageStats: jest.fn().mockResolvedValue({}),
     incrementSavedObjectsBulkCreate: jest.fn().mockResolvedValue(null),
     incrementSavedObjectsBulkGet: jest.fn().mockResolvedValue(null),
+    incrementSavedObjectsBulkResolve: jest.fn().mockResolvedValue(null),
     incrementSavedObjectsBulkUpdate: jest.fn().mockResolvedValue(null),
     incrementSavedObjectsCreate: jest.fn().mockResolvedValue(null),
     incrementSavedObjectsDelete: jest.fn().mockResolvedValue(null),
@@ -23,7 +24,9 @@ const createUsageStatsClientMock = () =>
     incrementSavedObjectsImport: jest.fn().mockResolvedValue(null),
     incrementSavedObjectsResolveImportErrors: jest.fn().mockResolvedValue(null),
     incrementSavedObjectsExport: jest.fn().mockResolvedValue(null),
-  } as unknown) as jest.Mocked<CoreUsageStatsClient>);
+    incrementLegacyDashboardsImport: jest.fn().mockResolvedValue(null),
+    incrementLegacyDashboardsExport: jest.fn().mockResolvedValue(null),
+  } as unknown as jest.Mocked<CoreUsageStatsClient>);
 
 export const coreUsageStatsClientMock = {
   create: createUsageStatsClientMock,

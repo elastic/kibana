@@ -23,9 +23,8 @@ const getTableColumnRender = (
   component: ShallowWrapper<TableProps, TableState, Table>,
   index: number = 0
 ) => {
-  const columns = component.prop<Array<EuiTableFieldDataColumnType<SourceFiltersTableFilter>>>(
-    'columns'
-  );
+  const columns =
+    component.prop<Array<EuiTableFieldDataColumnType<SourceFiltersTableFilter>>>('columns');
   return {
     render: columns[index].render as (...args: any) => ReactElement,
   };

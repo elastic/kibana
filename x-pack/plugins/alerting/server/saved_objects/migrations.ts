@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { isRuleType, ruleTypeMappings } from '@kbn/securitysolution-rules';
 import { isString } from 'lodash/fp';
 import {
   LogMeta,
@@ -19,6 +20,7 @@ import {
 import { RawAlert, RawAlertAction } from '../types';
 import { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server';
 import type { IsMigrationNeededPredicate } from '../../../encrypted_saved_objects/server';
+import { extractRefsFromGeoContainmentAlert } from './geo_containment/migrations';
 
 const SIEM_APP_ID = 'securitySolution';
 const SIEM_SERVER_APP_ID = 'siem';
@@ -51,8 +53,20 @@ export const isAnyActionSupportIncidents = (doc: SavedObjectUnsanitizedDoc<RawAl
     SUPPORT_INCIDENTS_ACTION_TYPES.includes(action.actionTypeId)
   );
 
-export const isSecuritySolutionRule = (doc: SavedObjectUnsanitizedDoc<RawAlert>): boolean =>
+// Deprecated in 8.0
+export const isSiemSignalsRuleType = (doc: SavedObjectUnsanitizedDoc<RawAlert>): boolean =>
   doc.attributes.alertTypeId === 'siem.signals';
+
+/**
+ * Returns true if the alert type is that of "siem.notifications" which is a legacy notification system that was deprecated in 7.16.0
+ * in favor of using the newer alerting notifications system.
+ * @param doc The saved object alert type document
+ * @returns true if this is a legacy "siem.notifications" rule, otherwise false
+ * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
+ */
+export const isSecuritySolutionLegacyNotification = (
+  doc: SavedObjectUnsanitizedDoc<RawAlert>
+): boolean => doc.attributes.alertTypeId === 'siem.notifications';
 
 export function getMigrations(
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup,
@@ -84,32 +98,37 @@ export function getMigrations(
 
   const migrationSecurityRules713 = createEsoMigration(
     encryptedSavedObjects,
-    (doc): doc is SavedObjectUnsanitizedDoc<RawAlert> => isSecuritySolutionRule(doc),
+    (doc): doc is SavedObjectUnsanitizedDoc<RawAlert> => isSiemSignalsRuleType(doc),
     pipeMigrations(removeNullsFromSecurityRules)
   );
 
   const migrationSecurityRules714 = createEsoMigration(
     encryptedSavedObjects,
-    (doc): doc is SavedObjectUnsanitizedDoc<RawAlert> => isSecuritySolutionRule(doc),
+    (doc): doc is SavedObjectUnsanitizedDoc<RawAlert> => isSiemSignalsRuleType(doc),
     pipeMigrations(removeNullAuthorFromSecurityRules)
   );
 
   const migrationSecurityRules715 = createEsoMigration(
     encryptedSavedObjects,
-    (doc): doc is SavedObjectUnsanitizedDoc<RawAlert> => isSecuritySolutionRule(doc),
+    (doc): doc is SavedObjectUnsanitizedDoc<RawAlert> => isSiemSignalsRuleType(doc),
     pipeMigrations(addExceptionListsToReferences)
   );
 
   const migrateRules716 = createEsoMigration(
     encryptedSavedObjects,
     (doc): doc is SavedObjectUnsanitizedDoc<RawAlert> => true,
-    pipeMigrations(setLegacyId, getRemovePreconfiguredConnectorsFromReferencesFn(isPreconfigured))
+    pipeMigrations(
+      setLegacyId,
+      getRemovePreconfiguredConnectorsFromReferencesFn(isPreconfigured),
+      addRuleIdsToLegacyNotificationReferences,
+      extractRefsFromGeoContainmentAlert
+    )
   );
 
   const migrationRules800 = createEsoMigration(
     encryptedSavedObjects,
     (doc: SavedObjectUnsanitizedDoc<RawAlert>): doc is SavedObjectUnsanitizedDoc<RawAlert> => true,
-    (doc) => doc // no-op
+    pipeMigrations(addRACRuleTypes)
   );
 
   return {
@@ -313,25 +332,17 @@ function restructureConnectorsThatSupportIncident(
           },
         ] as RawAlertAction[];
       } else if (action.actionTypeId === '.jira') {
-        const {
-          title,
-          comments,
-          description,
-          issueType,
-          priority,
-          labels,
-          parent,
-          summary,
-        } = action.params.subActionParams as {
-          title: string;
-          description: string;
-          issueType: string;
-          priority?: string;
-          labels?: string[];
-          parent?: string;
-          comments?: unknown[];
-          summary?: string;
-        };
+        const { title, comments, description, issueType, priority, labels, parent, summary } =
+          action.params.subActionParams as {
+            title: string;
+            description: string;
+            issueType: string;
+            priority?: string;
+            labels?: string[];
+            parent?: string;
+            comments?: unknown[];
+            summary?: string;
+          };
         return [
           ...acc,
           {
@@ -582,6 +593,49 @@ function removeMalformedExceptionsList(
   }
 }
 
+/**
+ * This migrates rule_id's within the legacy siem.notification to saved object references on an upgrade.
+ * We only migrate if we find these conditions:
+ *   - ruleAlertId is a string and not null, undefined, or malformed data.
+ *   - The existing references do not already have a ruleAlertId found within it.
+ * Some of these issues could crop up during either user manual errors of modifying things, earlier migration
+ * issues, etc... so we are safer to check them as possibilities
+ * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
+ * @param doc The document that might have "ruleAlertId" to migrate into the references
+ * @returns The document migrated with saved object references
+ */
+function addRuleIdsToLegacyNotificationReferences(
+  doc: SavedObjectUnsanitizedDoc<RawAlert>
+): SavedObjectUnsanitizedDoc<RawAlert> {
+  const {
+    attributes: {
+      params: { ruleAlertId },
+    },
+    references,
+  } = doc;
+  if (!isSecuritySolutionLegacyNotification(doc) || !isString(ruleAlertId)) {
+    // early return if we are not a string or if we are not a security solution notification saved object.
+    return doc;
+  } else {
+    const existingReferences = references ?? [];
+    const existingReferenceFound = existingReferences.find((reference) => {
+      return reference.id === ruleAlertId && reference.type === 'alert';
+    });
+    if (existingReferenceFound) {
+      // skip this if the references already exists for some uncommon reason so we do not add an additional one.
+      return doc;
+    } else {
+      const savedObjectReference: SavedObjectReference = {
+        id: ruleAlertId,
+        name: 'param:alert_0',
+        type: 'alert',
+      };
+      const newReferences = [...existingReferences, savedObjectReference];
+      return { ...doc, references: newReferences };
+    }
+  }
+}
+
 function setLegacyId(
   doc: SavedObjectUnsanitizedDoc<RawAlert>
 ): SavedObjectUnsanitizedDoc<RawAlert> {
@@ -593,6 +647,25 @@ function setLegacyId(
       legacyId: id,
     },
   };
+}
+
+function addRACRuleTypes(
+  doc: SavedObjectUnsanitizedDoc<RawAlert>
+): SavedObjectUnsanitizedDoc<RawAlert> {
+  const ruleType = doc.attributes.params.type;
+  return isSiemSignalsRuleType(doc) && isRuleType(ruleType)
+    ? {
+        ...doc,
+        attributes: {
+          ...doc.attributes,
+          alertTypeId: ruleTypeMappings[ruleType],
+          params: {
+            ...doc.attributes.params,
+            outputIndex: '',
+          },
+        },
+      }
+    : doc;
 }
 
 function getRemovePreconfiguredConnectorsFromReferencesFn(

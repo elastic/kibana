@@ -180,13 +180,11 @@ export default function ({ getService }: FtrProviderContext) {
               icon: 'discoverApp',
               title: 'OneRecord',
               hiddenType: false,
-              editUrl:
-                '/management/kibana/objects/savedSearches/960372e0-3224-11e8-a572-ffca06da1357',
               inAppUrl: {
                 path: '/app/discover#/view/960372e0-3224-11e8-a572-ffca06da1357',
                 uiCapabilitiesPath: 'discover.show',
               },
-              namespaceType: 'single',
+              namespaceType: 'multiple-isolated',
             });
           }));
 
@@ -200,13 +198,11 @@ export default function ({ getService }: FtrProviderContext) {
               icon: 'dashboardApp',
               title: 'Dashboard',
               hiddenType: false,
-              editUrl:
-                '/management/kibana/objects/savedDashboards/b70c7ae0-3224-11e8-a572-ffca06da1357',
               inAppUrl: {
                 path: '/app/dashboards#/view/b70c7ae0-3224-11e8-a572-ffca06da1357',
                 uiCapabilitiesPath: 'dashboard.show',
               },
-              namespaceType: 'single',
+              namespaceType: 'multiple-isolated',
             });
           }));
 
@@ -220,25 +216,21 @@ export default function ({ getService }: FtrProviderContext) {
               icon: 'visualizeApp',
               title: 'VisualizationFromSavedSearch',
               hiddenType: false,
-              editUrl:
-                '/management/kibana/objects/savedVisualizations/a42c0580-3224-11e8-a572-ffca06da1357',
               inAppUrl: {
                 path: '/app/visualize#/edit/a42c0580-3224-11e8-a572-ffca06da1357',
                 uiCapabilitiesPath: 'visualize.show',
               },
-              namespaceType: 'single',
+              namespaceType: 'multiple-isolated',
             });
             expect(resp.body.saved_objects[1].meta).to.eql({
               icon: 'visualizeApp',
               title: 'Visualization',
               hiddenType: false,
-              editUrl:
-                '/management/kibana/objects/savedVisualizations/add810b0-3224-11e8-a572-ffca06da1357',
               inAppUrl: {
                 path: '/app/visualize#/edit/add810b0-3224-11e8-a572-ffca06da1357',
                 uiCapabilitiesPath: 'visualize.show',
               },
-              namespaceType: 'single',
+              namespaceType: 'multiple-isolated',
             });
           }));
 
@@ -252,14 +244,12 @@ export default function ({ getService }: FtrProviderContext) {
               icon: 'indexPatternApp',
               title: 'saved_objects*',
               hiddenType: false,
-              editUrl:
-                '/management/kibana/indexPatterns/patterns/8963ca30-3224-11e8-a572-ffca06da1357',
+              editUrl: '/management/kibana/dataViews/dataView/8963ca30-3224-11e8-a572-ffca06da1357',
               inAppUrl: {
-                path:
-                  '/app/management/kibana/indexPatterns/patterns/8963ca30-3224-11e8-a572-ffca06da1357',
+                path: '/app/management/kibana/dataViews/dataView/8963ca30-3224-11e8-a572-ffca06da1357',
                 uiCapabilitiesPath: 'management.kibana.indexPatterns',
               },
-              namespaceType: 'single',
+              namespaceType: 'multiple-isolated',
             });
           }));
     });

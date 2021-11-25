@@ -18,8 +18,19 @@ import type {
   LocatorNavigationParams,
   LocatorGetUrlParams,
 } from './types';
+import { formatSearchParams, FormatSearchParamsOptions, RedirectOptions } from './redirect';
 
 export interface LocatorDependencies {
+  /**
+   * Public URL of the Kibana server.
+   */
+  baseUrl?: string;
+
+  /**
+   * Current version of Kibana, e.g. `7.0.0`.
+   */
+  version?: string;
+
   /**
    * Navigate without reloading the page to a KibanaLocation.
    */
@@ -32,12 +43,14 @@ export interface LocatorDependencies {
 }
 
 export class Locator<P extends SerializableRecord> implements LocatorPublic<P> {
+  public readonly id: string;
   public readonly migrations: PersistableState<P>['migrations'];
 
   constructor(
     public readonly definition: LocatorDefinition<P>,
     protected readonly deps: LocatorDependencies
   ) {
+    this.id = definition.id;
     this.migrations = definition.migrations || {};
   }
 
@@ -54,13 +67,15 @@ export class Locator<P extends SerializableRecord> implements LocatorPublic<P> {
     state: P,
     references: SavedObjectReference[]
   ): P => {
-    return this.definition.inject ? this.definition.inject(state, references) : state;
+    if (!this.definition.inject) return state;
+    return this.definition.inject(state, references);
   };
 
   public readonly extract: PersistableState<P>['extract'] = (
     state: P
   ): { state: P; references: SavedObjectReference[] } => {
-    return this.definition.extract ? this.definition.extract(state) : { state, references: [] };
+    if (!this.definition.extract) return { state, references: [] };
+    return this.definition.extract(state);
   };
 
   // LocatorPublic<P> ----------------------------------------------------------
@@ -76,6 +91,22 @@ export class Locator<P extends SerializableRecord> implements LocatorPublic<P> {
     return url;
   }
 
+  public getRedirectUrl(params: P, options: FormatSearchParamsOptions = {}): string {
+    const { baseUrl = '', version = '0.0.0' } = this.deps;
+    const redirectOptions: RedirectOptions = {
+      id: this.definition.id,
+      version,
+      params,
+    };
+    const formatOptions: FormatSearchParamsOptions = {
+      ...options,
+      lzCompress: options.lzCompress ?? true,
+    };
+    const search = formatSearchParams(redirectOptions, formatOptions).toString();
+
+    return baseUrl + '/app/r?' + search;
+  }
+
   public async navigate(
     params: P,
     { replace = false }: LocatorNavigationParams = {}
@@ -87,11 +118,9 @@ export class Locator<P extends SerializableRecord> implements LocatorPublic<P> {
     });
   }
 
-  /* eslint-disable react-hooks/rules-of-hooks */
   public readonly useUrl = (
     params: P,
     getUrlParams?: LocatorGetUrlParams,
     deps: DependencyList = []
   ): string => useLocatorUrl<P>(this, params, getUrlParams, deps);
-  /* eslint-enable react-hooks/rules-of-hooks */
 }

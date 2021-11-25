@@ -50,9 +50,10 @@ export const OperatorComponent: React.FC<OperatorState> = ({
         : getOperators(selectedField),
     [operatorOptions, selectedField]
   );
-  const selectedOptionsMemo = useMemo((): OperatorOption[] => (operator ? [operator] : []), [
-    operator,
-  ]);
+  const selectedOptionsMemo = useMemo(
+    (): OperatorOption[] => (operator ? [operator] : []),
+    [operator]
+  );
   const { comboOptions, labels, selectedComboOptions } = useMemo(
     (): GetGenericComboBoxPropsReturn =>
       getGenericComboBoxProps<OperatorOption>({

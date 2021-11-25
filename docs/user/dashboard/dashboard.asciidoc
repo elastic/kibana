@@ -1,24 +1,23 @@
 [[dashboard]]
-= Dashboard
+= Dashboard and visualizations
 
 [partintro]
 --
 **_Visualize your data with dashboards._**
 
-The best way to understand your data is to visualize it. With dashboards, you can turn your data from one or more <<index-patterns, index patterns>> into a collection of panels 
+The best way to understand your data is to visualize it. With dashboards, you can turn your data from one or more <<data-views, data views>> into a collection of panels 
 that bring clarity to your data, tell a story about your data, and allow you to focus on only the data that's important to you. 
 
 [role="screenshot"]
-image:images/Dashboard_example.png[Example dashboard]
+image:images/dashboard_ecommerceRevenueDashboard_7.15.0.png[Example dashboard]
 
-Panels display your data in charts, tables, maps, and more, which allow you to compare your data side-by-side to identify patterns and connections. Dashboards support several editors you can use to create panels, and support many types of panels to display your data.
+Panels display your data in charts, tables, maps, and more, which allow you to compare your data side-by-side to identify patterns and connections. Dashboards support several types of panels to display your data, and several options to create panels.
 
 [cols="2"]
 |===
 
 | <<aggregation-reference,Editors>>
-| Use the *Lens*, *TSVB*, *Vega*, and *Timelion* editors to create visualizations of your data, or create *Aggregation based* visualizations using {es} aggregations. 
-*Lens* is the recommended editor.
+| Use one of the editors to create visualizations of your data. Each editor varies in capabilities for all levels of analysts.
 
 | <<maps,Maps>>
 | Create beautiful displays of your geographical data.
@@ -33,7 +32,10 @@ Panels display your data in charts, tables, maps, and more, which allow you to c
 | Display a table of live streaming logs.
 
 | <<add-controls,Tools>>
-| Add context to your panels with <<add-text,text>>, or add dynamic filters with <<add-controls,*Controls*>>.
+| Add interactive filters with *Controls* panels.
+
+| <<add-text,Text>>
+| Add context to your panels with *Text*.
 
 |===
 
@@ -51,7 +53,7 @@ To create dashboards, you must meet the minimum requirements.
 
 * If you need to set up {kib}, use https://www.elastic.co/cloud/elasticsearch-service/signup?baymax=docs-body&elektra=docs[our free trial].
 
-* Make sure you have {ref}/getting-started-index.html[data indexed into {es}] and an <<index-patterns,index pattern>>.
+* Make sure you have {ref}/getting-started-index.html[data indexed into {es}] and a <<data-views, data view>>.
 
 * When the read-only indicator appears, you have insufficient privileges
 to create or save dashboards, and the options to create and save dashboards are not visible. For more information,
@@ -61,71 +63,115 @@ refer to <<xpack-security-authorization,Granting access to {kib}>>.
 [[open-the-dashboard]]
 === Open the dashboard
 
-Begin with an empty dashboard, or open an existing dashboard. 
+Begin with an empty dashboard, or open an existing dashboard.
 
 . Open the main menu, then click *Dashboard*.
 
 . On the *Dashboards* page, choose one of the following options:
 
 * To start with an empty dashboard, click *Create dashboard*.
++
+When you create a dashboard, you are automatically in edit mode and can make changes to the dashboard. 
 
 * To open an existing dashboard, click the dashboard *Title* you want to open.
++
+When you open an existing dashboard, you are in view mode. To make changes to the dashboard, click *Edit* in the toolbar. 
 
 [float]
 [[create-panels-with-lens]]
-=== Add panels
+=== Create and add panels
 
-Create and add panels of your data to the dashboard, or add existing panels from the library. 
+You create panels using the editors, which you can access from the dashboard toolbar or the *Visualize Library*, or add panels that are saved in the *Visualize Library*, or search results from <<save-your-search,*Discover*>>.
 
-* *Create visualization* &mdash; Opens *Lens*, the recommended editor to create visualizations of your data.
+To create panels from the dashboard toolbar, use one of the following options:
 
-* *All types* &mdash; Select the editor to create the panel, or select the panel type you want to add to the dashboard.
+* *Create visualization* &mdash; Opens the drag-and-drop editor, which is the recommended way to create visualization panels.
 
-* *Add from library* &mdash; Add panels from the *Visualize Library*, including search results from <<save-your-search,*Discover*>>. The search results from *Discover* are not aggregated.
+* *All types* &mdash; Opens the menu for all of the editors and panel types. 
+
+To create panels from the *Visualize Library*:
+
+. Open the main menu, then click *Visualize Library*.
+
+. Click *Create visualization*, then select an editor. 
+
+To add existing panels from the *Visualize Library*:
+
+. In the dashboard toolbar, click *Add from library*.
+
+. Click the panel you want to add to the dashboard, then click *X*.
 +
 When a panel contains a saved query, both queries are applied.
++
+When you add search results from *Discover* to dashboards, the results are not aggregated.
 
 [[tsvb]]
 
 [float]
 [[save-panels]]
-=== Save panels
+=== Save and add panels
 
-Consider where you want to save the panel in {kib}. You can save the panel just on the dashboard you are working on, or save the panel in the *Visualize Library*.
+Consider where you want to save and add the panel in {kib}.
 
 [float]
 [[save-to-visualize-library]]
 ==== Save to the Visualize Library
 
-To use the panel on *Canvas* workpads and other dashboards, save the panel to the *Visualize Library*.
+To use the panel on other dashboards and *Canvas* workpads, save the panel to the *Visualize Library*. When panels are saved in the *Visualize Library*, image:dashboard/images/visualize-library-icon.png[Visualize Library icon] appears in the panel header.
 
-. Click *Save to library*.
+If you created the panel from the dashboard:
 
-. Enter the *Title* and add any applicable *Tags*.
+. In the editor, click *Save to library*.
+
+. Enter the *Title* and add any applicable <<managing-tags,*Tags*>>.
 
 . Make sure that *Add to Dashboard after saving* is selected.
 
 . Click *Save and return*.
-+
-When panels are saved in the *Visualize Library*, image:dashboard/images/visualize-library-icon.png[Visualize Library icon] appears in the panel header.
+
+If you created the panel from the *Visualize Library*:
+
+. In the editor, click *Save*.
+
+. On the *Save* window, enter the *Title*.
+
+. Choose one of the following options:
+
+* To save the panel to a dashboard and the *Visualize Library*, select *Add to library*, add any applicable <<managing-tags,*Tags*>>, then click *Save and go to Dashboard*.
+
+* To save the panel only to the *Visualize Library*, select *None*, add any applicable <<managing-tags,*Tags*>>, then click *Save and add to library*.
 
 [float]
 [[save-to-the-dashboard]]
 ==== Save to the dashboard
 
-Quickly add the panel and return to the dashboard without specifying the save options or adding the panel to the *Visualize Library*. 
+Return to the dashboard and add the panel without specifying the save options or adding the panel to the *Visualize Library*. 
 
-. Click *Save and return*.
+If you created the panel from the dashboard:
 
-. Add more panels to the dashboard, or specify the panel title.
+. In the editor, click *Save and return*.
+
+. Add an optional title to the panel.
 
 .. In the panel header, click *No Title*.
 
-.. Select *Show panel title*.
+.. On the *Customize panel* window, select *Show panel title*.
 
-.. Enter the *Panel title*. 
+.. Enter the *Panel title*, then click *Save*.
 
-If you change your mind and want to add the panel to the *Visualize Library*:
+If you created the panel from the *Visualize Library*:
+
+. Click *Save*.
+
+. On the *Save* window, enter the *Title*.
+
+. Choose one of the following options:
+
+* If you want to add the panel to an existing dashboard, select *Existing*, select the dashboard from the dropdown, then click *Save and go to Dashboard*.
+
+* If you want to add the panel to a new dashboard, select *New*, then click *Save and go to Dashboard*.
+
+To add unsaved dashboard panels to the *Visualize Library*:
 
 . Open the panel menu, then select *More > Save to library*.
 
@@ -135,33 +181,77 @@ If you change your mind and want to add the panel to the *Visualize Library*:
 [[add-text]]
 == Add context to panels
 
-To provide context to your dashboard panels, add *Text* panels that display important information, instructions, images, and more.
+To provide context to your dashboard panels, add *Text* panels that display important information, instructions, images, and more. You create *Text* panels using GitHub-flavored Markdown text.
 
-You create *Text* panels using GitHub-flavored Markdown text. For information about GitHub-flavored Markdown text, click *Help*.
-
-. From the dashboard, click *All types*, then select *Text*.
+. On the dashboard, click image:images/dashboard_createNewTextButton_7.15.0.png[Create New Text button in dashboard toolbar].
 
 . In the *Markdown* field, enter the text, then click *Update*.
 
 For example, when you enter:
 
 [role="screenshot"]
-image::images/markdown_example_1.png[]
+image::images/markdown_example_1.png[Markdown text with links]
 
 The following instructions are displayed:
 
 [role="screenshot"]
-image::images/markdown_example_2.png[]
+image::images/markdown_example_2.png[Panel with markdown link text]
 
 Or when you enter:
 
 [role="screenshot"]
-image::images/markdown_example_3.png[]
+image::images/markdown_example_3.png[Markdown text with image file]
 
 The following image is displayed:
 
 [role="screenshot"]
-image::images/markdown_example_4.png[]
+image::images/markdown_example_4.png[Panel with markdown image]
+
+For detailed information about writing on GitHub, click *Help*.
+
+[float]
+[[save-the-markdown-panel]]
+=== Save and add the panel
+
+Save the panel to the *Visualize Library* and add it to the dashboard, or add it to the dashboard without saving.
+
+To save the panel to the *Visualize Library*:
+
+. Click *Save to library*.
+
+. Enter the *Title* and add any applicable <<managing-tags,*Tags*>>.
+
+. Make sure that *Add to Dashboard after saving* is selected.
+
+. Click *Save and return*.
+
+To save the panel to the dashboard:
+
+. Click *Save and return*.
+
+. Add an optional title to the panel.
+
+.. In the panel header, click *No Title*.
+
+.. On the *Customize panel* window, select *Show panel title*.
+
+.. Enter the *Panel title*, then click *Save*.
+
+[float]
+[[arrange-panels]]
+[[moving-containers]]
+[[resizing-containers]]
+== Arrange panels
+
+Compare the data in your panels side-by-side, organize panels by priority, resize the panels so they all appear immediately on the dashboard, and more.
+
+In the toolbar, click *Edit*, then use the following options:
+
+* To move, click and hold the panel header, then drag to the new location.
+
+* To resize, click the resize control, then drag to the new dimensions.
+
+* To maximize to fullscreen, open the panel menu, then click *More > Maximize panel*.
 
 [float]
 [[edit-panels]]
@@ -186,51 +276,6 @@ To make changes without changing the original version, open the panel menu, then
 * *More > Delete from dashboard* &mdash; Removes the panel from the dashboard. 
 +
 If you want to use the panel later, make sure that you save the panel to the *Visualize Library*.  
-
-[float]
-[[search-or-filter-your-data]]
-== Search and filter your data
-
-{kib} supports several ways to search your data and apply {es} filters. You can combine the filters with any panel
-filter to display the data want to you see.
-
-For more information about {kib} and {es} filters, refer to <<kibana-concepts-analysts,{kib} concepts>>.
-
-To apply a panel-level time filter:
-
-. Open the panel menu, then select *More > Customize time range*.
-
-. Enter the time range you want to view, then click *Add to panel*.
-
-[float]
-[[arrange-panels]]
-[[moving-containers]]
-[[resizing-containers]]
-== Arrange panels
-
-To compare the data side-by-side, move and arrange the panels.
-
-In the toolbar, click *Edit*, then use the following options:
-
-* To move, click and hold the panel header, then drag to the new location.
-
-* To resize, click the resize control, then drag to the new dimensions.
-
-* To maximize to fullscreen, open the panel menu, then click *More > Maximize panel*.
-
-[float]
-[[apply-design-options]]
-== Apply design options
-
-Apply a set of design options to the entire dashboard.
-
-In the toolbar, click *Edit > Options*, then use the following options:
-
-* *Use margins between panels* &mdash; Specifies a margin of space between each panel.
-
-* *Show panel titles* &mdash; Specifies the appearance of titles in the header of each panel.
-
-* *Sync color pallettes across panels* &mdash; Specifies whether the color pallette is applied to all panels.
 
 [float]
 [[duplicate-panels]]
@@ -262,22 +307,57 @@ Copy panels from one dashboard to another dashboard.
 . On the *Copy to dashboard* window, select the dashboard, then click *Copy and go to dashboard*.
 
 [float]
-[[explore-the-underlying-documents]]
-== Explore the underlying documents
+[[search-or-filter-your-data]]
+== Search and filter your data
 
-You can add additional interactions that allow you to open *Discover* from dashboard panels. To use the interactions, the panel must use only one index pattern.
+{kib} supports several ways to search your data and apply {es} filters. You can combine the filters with any panel
+filter to display the data want to you see.
 
-Panel interaction:: Opens the data in *Discover* with the current dashboard filters, but does not take the filters
-saved with the panel.
-+
-To enable panel interactions, refer to <<settings-explore-data-in-context,`xpack.discoverEnhanced.actions.exploreDataInContextMenu.enabled`>>.
-+
-NOTE: In {kib} 7.13 and earlier, the panel interaction is enabled by default.
+For more information about {kib} and {es} filters, refer to <<kibana-concepts-analysts,{kib} concepts>>.
 
-Series interaction::
-Opens the series data in *Discover* from inside the panel.
-+
-To enable series interactions, refer to <<settings-explore-data-in-chart,`xpack.discoverEnhanced.actions.exploreDataInChart.enabled`>>.
+To apply a panel-level time filter:
+
+. Open the panel menu, then select *More > Customize time range*.
+
+. Enter the time range you want to view, then click *Add to panel*.
+
+[float]
+[[apply-design-options]]
+== Apply design options
+
+Apply a set of design options to the entire dashboard.
+
+. If you're in view mode, click *Edit* in the toolbar.
+
+. In the toolbar, *Options*, then use the following options:
+
+* *Use margins between panels* &mdash; Adds a margin of space between each panel.
+
+* *Show panel titles* &mdash; Displays the titles in the panels headers.
+
+* *Sync color pallettes across panels* &mdash; Applies the same color palette to all panels on the dashboard.
+
+[float]
+[[save-dashboards]]
+== Save dashboards
+
+When you've finished making changes to the dashboard, save it.
+
+If you are saving a new dashboard:
+
+. In the toolbar, click *Save*.
+
+. On the *Save dashboard* window, enter the *Title* and an optional *Description*.
+
+. Add any applicable <<managing-tags,*Tags*>>. 
+
+. To save the time filter to the dashboard, select *Store time with dashboard*.
+
+. Click *Save*.
+
+If you are saving an existing dashboard, click *Save*.
+
+To exit *Edit* mode, click *Switch to view mode*. 
 
 [float]
 [[download-csv]]
@@ -292,26 +372,6 @@ Download panel data in a CSV file. When you download visualization panels with m
 * *Formatted CSV* &mdash; Contains human-readable dates and numbers.
 
 * *Unformatted* &mdash; Best used for computer use.
-
-[float]
-[[defer-loading-panels-below-the-fold]]
-== Improve dashboard loading time
-
-To improve the dashboard loading time, enable the *Defer loading panels below the fold* *Lab*, which loads the dashboard panels as they become visible on the dashboard.
-
-. In the toolbar, click *Labs*.
-+
-To enable *Labs*, contact your administrator, or configure the <<advanced-options,Advanced Settings>>. 
-
-. To specify how you want to enable the lab, use the following actions:
-
-* *{kib}* &mdash; Enables the lab in {kib}.
-
-* *Browser* &mdash; Enables the lab for your browser, and persists after you close the browser.
-
-* *Session* &mdash; Enables the lab for this browser session, then resets after you close the browser.
-
-. Click *Close*.
 
 [float]
 [[share-the-dashboard]]
@@ -333,3 +393,5 @@ include::lens-advanced.asciidoc[]
 include::create-panels-with-editors.asciidoc[]
 
 include::make-dashboards-interactive.asciidoc[]
+
+include::dashboard-troubleshooting.asciidoc[]

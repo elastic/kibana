@@ -10,8 +10,8 @@ import { getTransactionDurationChartPreview } from '../../lib/alerts/chart_previ
 import { getTransactionErrorCountChartPreview } from '../../lib/alerts/chart_preview/get_transaction_error_count';
 import { getTransactionErrorRateChartPreview } from '../../lib/alerts/chart_preview/get_transaction_error_rate';
 import { setupRequest } from '../../lib/helpers/setup_request';
-import { createApmServerRoute } from '../create_apm_server_route';
-import { createApmServerRouteRepository } from '../create_apm_server_route_repository';
+import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
+import { createApmServerRouteRepository } from '../apm_routes/create_apm_server_route_repository';
 import { environmentRt, rangeRt } from '../default_api_types';
 
 const alertParamsRt = t.intersection([
@@ -26,12 +26,15 @@ const alertParamsRt = t.intersection([
   }),
   environmentRt,
   rangeRt,
+  t.type({
+    interval: t.string,
+  }),
 ]);
 
 export type AlertParams = t.TypeOf<typeof alertParamsRt>;
 
 const transactionErrorRateChartPreview = createApmServerRoute({
-  endpoint: 'GET /api/apm/alerts/chart_preview/transaction_error_rate',
+  endpoint: 'GET /internal/apm/alerts/chart_preview/transaction_error_rate',
   params: t.type({ query: alertParamsRt }),
   options: { tags: ['access:apm'] },
   handler: async (resources) => {
@@ -49,7 +52,7 @@ const transactionErrorRateChartPreview = createApmServerRoute({
 });
 
 const transactionErrorCountChartPreview = createApmServerRoute({
-  endpoint: 'GET /api/apm/alerts/chart_preview/transaction_error_count',
+  endpoint: 'GET /internal/apm/alerts/chart_preview/transaction_error_count',
   params: t.type({ query: alertParamsRt }),
   options: { tags: ['access:apm'] },
   handler: async (resources) => {
@@ -68,7 +71,7 @@ const transactionErrorCountChartPreview = createApmServerRoute({
 });
 
 const transactionDurationChartPreview = createApmServerRoute({
-  endpoint: 'GET /api/apm/alerts/chart_preview/transaction_duration',
+  endpoint: 'GET /internal/apm/alerts/chart_preview/transaction_duration',
   params: t.type({ query: alertParamsRt }),
   options: { tags: ['access:apm'] },
   handler: async (resources) => {
@@ -87,8 +90,9 @@ const transactionDurationChartPreview = createApmServerRoute({
   },
 });
 
-export const alertsChartPreviewRouteRepository = createApmServerRouteRepository()
-  .add(transactionErrorRateChartPreview)
-  .add(transactionDurationChartPreview)
-  .add(transactionErrorCountChartPreview)
-  .add(transactionDurationChartPreview);
+export const alertsChartPreviewRouteRepository =
+  createApmServerRouteRepository()
+    .add(transactionErrorRateChartPreview)
+    .add(transactionDurationChartPreview)
+    .add(transactionErrorCountChartPreview)
+    .add(transactionDurationChartPreview);

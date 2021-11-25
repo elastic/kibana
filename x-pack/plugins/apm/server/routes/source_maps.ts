@@ -7,7 +7,7 @@
 import Boom from '@hapi/boom';
 import * as t from 'io-ts';
 import { SavedObjectsClientContract } from 'kibana/server';
-import { jsonRt } from '@kbn/io-ts-utils';
+import { jsonRt } from '@kbn/io-ts-utils/json_rt';
 import {
   createApmArtifact,
   deleteApmArtifact,
@@ -16,8 +16,8 @@ import {
   getCleanedBundleFilePath,
 } from '../lib/fleet/source_maps';
 import { getInternalSavedObjectsClient } from '../lib/helpers/get_internal_saved_objects_client';
-import { createApmServerRoute } from './create_apm_server_route';
-import { createApmServerRouteRepository } from './create_apm_server_route_repository';
+import { createApmServerRoute } from './apm_routes/create_apm_server_route';
+import { createApmServerRouteRepository } from './apm_routes/create_apm_server_route_repository';
 import { stringFromBufferRt } from '../utils/string_from_buffer_rt';
 
 export const sourceMapRt = t.intersection([
@@ -98,7 +98,8 @@ const uploadSourceMapRoute = createApmServerRoute({
         await updateSourceMapsOnFleetPolicies({
           core,
           fleetPluginStart,
-          savedObjectsClient: (savedObjectsClient as unknown) as SavedObjectsClientContract,
+          savedObjectsClient:
+            savedObjectsClient as unknown as SavedObjectsClientContract,
           elasticsearchClient: esClient,
         });
 
@@ -133,7 +134,8 @@ const deleteSourceMapRoute = createApmServerRoute({
         await updateSourceMapsOnFleetPolicies({
           core,
           fleetPluginStart,
-          savedObjectsClient: (savedObjectsClient as unknown) as SavedObjectsClientContract,
+          savedObjectsClient:
+            savedObjectsClient as unknown as SavedObjectsClientContract,
           elasticsearchClient: esClient,
         });
       }

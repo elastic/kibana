@@ -24,7 +24,8 @@ import type {
 import { registerReportingUsageCollector } from './usage';
 
 export class ReportingPlugin
-  implements Plugin<ReportingSetup, ReportingStart, ReportingSetupDeps, ReportingStartDeps> {
+  implements Plugin<ReportingSetup, ReportingStart, ReportingSetupDeps, ReportingStartDeps>
+{
   private logger: LevelLogger;
   private reportingCore?: ReportingCore;
 
@@ -51,7 +52,6 @@ export class ReportingPlugin
 
     const router = http.createRouter<ReportingRequestHandlerContext>();
     const basePath = http.basePath;
-
     reportingCore.pluginSetup({
       screenshotMode,
       features,
@@ -62,6 +62,7 @@ export class ReportingPlugin
       spaces,
       taskManager,
       logger: this.logger,
+      status: core.status,
     });
 
     registerUiSettings(core);

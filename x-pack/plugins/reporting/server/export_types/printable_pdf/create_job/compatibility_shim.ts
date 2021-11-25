@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { KibanaRequest, SavedObjectsClientContract } from 'kibana/server';
+import type { SavedObjectsClientContract } from 'kibana/server';
 import { url as urlUtils } from '../../../../../../../src/plugins/kibana_utils/server';
 import type { LevelLogger } from '../../../lib';
 import type { CreateJobFn, ReportingRequestHandlerContext } from '../../../types';
@@ -22,7 +22,10 @@ const getSavedObjectTitle = async (
   savedObjectId: string,
   savedObjectsClient: SavedObjectsClientContract
 ) => {
-  const savedObject = await savedObjectsClient.get<{ title: string }>(objectType, savedObjectId);
+  const { saved_object: savedObject } = await savedObjectsClient.resolve<{ title: string }>(
+    objectType,
+    savedObjectId
+  );
   return savedObject.attributes.title;
 };
 
@@ -56,8 +59,7 @@ export function compatibilityShim(
 ) {
   return async function (
     jobParams: JobParamsPDF | JobParamsPDFLegacy,
-    context: ReportingRequestHandlerContext,
-    req: KibanaRequest
+    context: ReportingRequestHandlerContext
   ) {
     let kibanaRelativeUrls = (jobParams as JobParamsPDF).relativeUrls;
     let reportTitle = jobParams.title;
@@ -125,6 +127,6 @@ export function compatibilityShim(
       isDeprecated, // tack on this flag so it will be saved the TaskPayload
     };
 
-    return await createJobFn(transformedJobParams, context, req);
+    return await createJobFn(transformedJobParams, context);
   };
 }

@@ -12,7 +12,7 @@ describe('kql_encoder', () => {
   let workspaceMock: jest.Mocked<Workspace>;
 
   beforeEach(() => {
-    workspaceMock = ({
+    workspaceMock = {
       returnUnpackedGroupeds: (nodes: []) => nodes,
       getSelectedOrAllNodes: jest.fn(() => [
         {
@@ -34,7 +34,7 @@ describe('kql_encoder', () => {
           },
         },
       ]),
-    } as unknown) as jest.Mocked<Workspace>;
+    } as unknown as jest.Mocked<Workspace>;
   });
 
   it('should encode query as URI component', () => {

@@ -13,10 +13,11 @@ import { InheritedFtrProviderContext, InheritedServices } from './ftr_provider_c
 import { PromiseReturnType } from '../../../plugins/observability/typings/common';
 import { createApmUser, APM_TEST_PASSWORD, ApmUser } from './authentication';
 import { APMFtrConfigName } from '../configs';
-import { createSupertestClient } from './apm_api_supertest';
-import { registry } from './registry';
+import { createApmApiClient } from './apm_api_supertest';
+import { RegistryProvider } from './registry';
+import { synthtraceEsClientService } from './synthtrace_es_client_service';
 
-interface Config {
+export interface ApmFtrConfig {
   name: APMFtrConfigName;
   license: 'basic' | 'trial';
   kibanaConfig?: Record<string, string | string[]>;
@@ -52,12 +53,12 @@ async function getApmApiClient(
     auth: `${apmUser}:${APM_TEST_PASSWORD}`,
   });
 
-  return createSupertestClient(supertest(url));
+  return createApmApiClient(supertest(url));
 }
 
 export type CreateTestConfig = ReturnType<typeof createTestConfig>;
 
-export function createTestConfig(config: Config) {
+export function createTestConfig(config: ApmFtrConfig) {
   const { license, name, kibanaConfig } = config;
 
   return async ({ readConfigFile }: FtrConfigProviderContext) => {
@@ -69,14 +70,15 @@ export function createTestConfig(config: Config) {
     const servers = xPackAPITestsConfig.get('servers');
     const kibanaServer = servers.kibana;
 
-    registry.init(config.name);
-
     return {
       testFiles: [require.resolve('../tests')],
       servers,
+      servicesRequiredForTestAnalysis: ['apmFtrConfig', 'registry'],
       services: {
         ...services,
-
+        apmFtrConfig: () => config,
+        registry: RegistryProvider,
+        synthtraceEsClient: synthtraceEsClientService,
         apmApiClient: async (context: InheritedFtrProviderContext) => {
           const security = context.getService('security');
           await security.init();

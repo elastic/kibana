@@ -196,22 +196,21 @@ export const TemplateForm = ({
   };
 
   const buildTemplateObject = useCallback(
-    (initialTemplate: TemplateDeserialized) => (
-      wizardData: WizardContent
-    ): TemplateDeserialized => {
-      const outputTemplate = {
-        ...wizardData.logistics,
-        _kbnMeta: initialTemplate._kbnMeta,
-        composedOf: wizardData.components,
-        template: {
-          settings: wizardData.settings,
-          mappings: wizardData.mappings,
-          aliases: wizardData.aliases,
-        },
-      };
+    (initialTemplate: TemplateDeserialized) =>
+      (wizardData: WizardContent): TemplateDeserialized => {
+        const outputTemplate = {
+          ...wizardData.logistics,
+          _kbnMeta: initialTemplate._kbnMeta,
+          composedOf: wizardData.components,
+          template: {
+            settings: wizardData.settings,
+            mappings: wizardData.mappings,
+            aliases: wizardData.aliases,
+          },
+        };
 
-      return cleanupTemplateObject(outputTemplate);
-    },
+        return cleanupTemplateObject(outputTemplate);
+      },
     []
   );
 

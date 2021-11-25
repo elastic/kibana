@@ -517,10 +517,6 @@
                 "path": "x-pack/plugins/security/common/licensing/license_service.test.ts"
               },
               {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/common/licensing/license_service.test.ts"
-              },
-              {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/common/license/policy_config.test.ts"
               },
@@ -559,6 +555,14 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/isolation.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/endpoint/routes/trusted_apps/handlers.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/endpoint/routes/trusted_apps/handlers.test.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -628,19 +632,7 @@
         "initialIsOpen": false
       }
     ],
-    "enums": [
-      {
-        "parentPluginId": "licensing",
-        "id": "def-public.LICENSE_TYPE",
-        "type": "Enum",
-        "tags": [],
-        "label": "LICENSE_TYPE",
-        "description": [],
-        "path": "x-pack/plugins/licensing/common/types.ts",
-        "deprecated": false,
-        "initialIsOpen": false
-      }
-    ],
+    "enums": [],
     "misc": [
       {
         "parentPluginId": "licensing",
@@ -2266,10 +2258,6 @@
                 "path": "x-pack/plugins/security/common/licensing/license_service.test.ts"
               },
               {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/common/licensing/license_service.test.ts"
-              },
-              {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/common/license/policy_config.test.ts"
               },
@@ -2308,6 +2296,14 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/isolation.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/endpoint/routes/trusted_apps/handlers.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/endpoint/routes/trusted_apps/handlers.test.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -2409,7 +2405,7 @@
         "children": [
           {
             "parentPluginId": "licensing",
-            "id": "def-server.license",
+            "id": "def-server.CheckLicense.$1",
             "type": "Object",
             "tags": [],
             "label": "license",

@@ -56,7 +56,7 @@ import * as i18n from './translations';
 import { SecurityPageName } from '../../../../../app/types';
 import { ruleStepsOrder } from '../utils';
 import { useKibana } from '../../../../../common/lib/kibana';
-import { APP_ID } from '../../../../../../common/constants';
+import { APP_UI_ID } from '../../../../../../common/constants';
 
 const formHookNoop = async (): Promise<undefined> => undefined;
 
@@ -71,10 +71,8 @@ const EditRulePageComponent: FC = () => {
       canUserCRUD,
     },
   ] = useUserData();
-  const {
-    loading: listsConfigLoading,
-    needsConfiguration: needsListsConfiguration,
-  } = useListsConfig();
+  const { loading: listsConfigLoading, needsConfiguration: needsListsConfiguration } =
+    useListsConfig();
   const { navigateToApp } = useKibana().services.application;
 
   const { detailName: ruleId } = useParams<{ detailName: string | undefined }>();
@@ -302,7 +300,7 @@ const EditRulePageComponent: FC = () => {
   const goToDetailsRule = useCallback(
     (ev) => {
       ev.preventDefault();
-      navigateToApp(APP_ID, {
+      navigateToApp(APP_UI_ID, {
         deepLinkId: SecurityPageName.rules,
         path: getRuleDetailsUrl(ruleId ?? ''),
       });
@@ -320,7 +318,7 @@ const EditRulePageComponent: FC = () => {
 
   if (isSaved) {
     displaySuccessToast(i18n.SUCCESSFULLY_SAVED_RULE(rule?.name ?? ''), dispatchToaster);
-    navigateToApp(APP_ID, {
+    navigateToApp(APP_UI_ID, {
       deepLinkId: SecurityPageName.rules,
       path: getRuleDetailsUrl(ruleId ?? ''),
     });
@@ -335,13 +333,13 @@ const EditRulePageComponent: FC = () => {
       needsListsConfiguration
     )
   ) {
-    navigateToApp(APP_ID, {
+    navigateToApp(APP_UI_ID, {
       deepLinkId: SecurityPageName.alerts,
       path: getDetectionEngineUrl(),
     });
     return null;
   } else if (!userHasPermissions(canUserCRUD)) {
-    navigateToApp(APP_ID, {
+    navigateToApp(APP_UI_ID, {
       deepLinkId: SecurityPageName.rules,
       path: getRuleDetailsUrl(ruleId ?? ''),
     });

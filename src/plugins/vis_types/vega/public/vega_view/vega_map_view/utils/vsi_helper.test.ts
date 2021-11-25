@@ -12,12 +12,12 @@ import { VegaSpec } from '../../../data_model/types';
 describe('vega_map_view/vsi_helper', () => {
   describe('injectMapPropsIntoSpec', () => {
     test('should inject map properties into vega spec', () => {
-      const spec = ({
+      const spec = {
         $schema: 'https://vega.github.io/schema/vega/v5.json',
         config: {
           kibana: { type: 'map', latitude: 25, longitude: -70, zoom: 3 },
         },
-      } as unknown) as VegaSpec;
+      } as unknown as VegaSpec;
 
       expect(injectMapPropsIntoSpec(spec)).toMatchInlineSnapshot(`
         Object {

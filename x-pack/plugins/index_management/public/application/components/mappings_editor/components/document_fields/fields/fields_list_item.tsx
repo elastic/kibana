@@ -131,12 +131,8 @@ function FieldListItemComponent(
       return null;
     }
 
-    const {
-      addMultiFieldButtonLabel,
-      addPropertyButtonLabel,
-      editButtonLabel,
-      deleteButtonLabel,
-    } = i18nTexts;
+    const { addMultiFieldButtonLabel, addPropertyButtonLabel, editButtonLabel, deleteButtonLabel } =
+      i18nTexts;
 
     return (
       <EuiFlexGroup gutterSize="s" className="mappingsEditor__fieldsListItem__actions">

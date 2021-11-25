@@ -19,7 +19,7 @@ import {
   getSourcesPath,
   GROUPS_PATH,
   SOURCES_PATH,
-  PERSONAL_SOURCES_PATH,
+  PRIVATE_SOURCES_PATH,
   SOURCE_DETAILS_PATH,
 } from './routes';
 
@@ -40,7 +40,7 @@ describe('getContentSourcePath', () => {
     const wrapper = shallow(<TestComponent id="123" />);
     const path = wrapper.find(EuiLink).prop('href');
 
-    expect(path).toEqual(`${PERSONAL_SOURCES_PATH}/123`);
+    expect(path).toEqual(`${PRIVATE_SOURCES_PATH}/123`);
   });
 });
 

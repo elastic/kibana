@@ -10,22 +10,21 @@ import { DatatableColumn } from '../../../../expressions/public';
 import type { FieldFormatsStart } from '../../../../field_formats/public';
 import { Dimension } from '../types';
 
-export const getSplitDimensionAccessor = (
-  fieldFormats: FieldFormatsStart,
-  columns: DatatableColumn[]
-) => (splitDimension: Dimension): AccessorFn => {
-  const formatter = fieldFormats.deserialize(splitDimension.format);
-  const splitChartColumn = columns[splitDimension.accessor];
-  const accessor = splitChartColumn.id;
+export const getSplitDimensionAccessor =
+  (fieldFormats: FieldFormatsStart, columns: DatatableColumn[]) =>
+  (splitDimension: Dimension): AccessorFn => {
+    const formatter = fieldFormats.deserialize(splitDimension.format);
+    const splitChartColumn = columns[splitDimension.accessor];
+    const accessor = splitChartColumn.id;
 
-  const fn: AccessorFn = (d) => {
-    const v = d[accessor];
-    if (v === undefined) {
-      return;
-    }
-    const f = formatter.convert(v);
-    return f;
+    const fn: AccessorFn = (d) => {
+      const v = d[accessor];
+      if (v === undefined) {
+        return;
+      }
+      const f = formatter.convert(v);
+      return f;
+    };
+
+    return fn;
   };
-
-  return fn;
-};

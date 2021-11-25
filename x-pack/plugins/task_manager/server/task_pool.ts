@@ -11,7 +11,6 @@
  */
 import { Observable, Subject } from 'rxjs';
 import moment, { Duration } from 'moment';
-import { performance } from 'perf_hooks';
 import { padStart } from 'lodash';
 import { Logger } from '../../../../src/core/server';
 import { TaskRunner } from './task_running';
@@ -111,7 +110,6 @@ export class TaskPool {
   public run = async (tasks: TaskRunner[]): Promise<TaskPoolRunResult> => {
     const [tasksToRun, leftOverTasks] = partitionListByCount(tasks, this.availableWorkers);
     if (tasksToRun.length) {
-      performance.mark('attemptToRun_start');
       await Promise.all(
         tasksToRun
           .filter((taskRunner) => !this.tasksInPool.has(taskRunner.id))
@@ -130,9 +128,6 @@ export class TaskPool {
               .catch((err) => this.handleFailureOfMarkAsRunning(taskRunner, err));
           })
       );
-
-      performance.mark('attemptToRun_stop');
-      performance.measure('taskPool.attemptToRun', 'attemptToRun_start', 'attemptToRun_stop');
     }
 
     if (leftOverTasks.length) {

@@ -352,7 +352,7 @@
         "children": [
           {
             "parentPluginId": "esUiShared",
-            "id": "def-public.__0",
+            "id": "def-public.JsonEditor.$1",
             "type": "Object",
             "tags": [],
             "label": "__0",
@@ -610,7 +610,8 @@
         "label": "useAuthorizationContext",
         "description": [],
         "signature": [
-          "() => Authorization"
+          "() => ",
+          "Authorization"
         ],
         "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/authorization_provider.tsx",
         "deprecated": false,
@@ -732,6 +733,62 @@
       }
     ],
     "interfaces": [
+      {
+        "parentPluginId": "esUiShared",
+        "id": "def-public.Authorization",
+        "type": "Interface",
+        "tags": [],
+        "label": "Authorization",
+        "description": [],
+        "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/authorization_provider.tsx",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "esUiShared",
+            "id": "def-public.Authorization.isLoading",
+            "type": "boolean",
+            "tags": [],
+            "label": "isLoading",
+            "description": [],
+            "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/authorization_provider.tsx",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "esUiShared",
+            "id": "def-public.Authorization.apiError",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "apiError",
+            "description": [],
+            "signature": [
+              "Error",
+              " | null"
+            ],
+            "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/authorization_provider.tsx",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "esUiShared",
+            "id": "def-public.Authorization.privileges",
+            "type": "Object",
+            "tags": [],
+            "label": "privileges",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "esUiShared",
+                "scope": "common",
+                "docId": "kibEsUiSharedPluginApi",
+                "section": "def-common.Privileges",
+                "text": "Privileges"
+              }
+            ],
+            "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/authorization_provider.tsx",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "esUiShared",
         "id": "def-public.Error",
@@ -1118,7 +1175,7 @@
             "label": "method",
             "description": [],
             "signature": [
-              "\"get\" | \"post\" | \"put\" | \"delete\" | \"patch\" | \"head\""
+              "\"delete\" | \"get\" | \"post\" | \"put\" | \"patch\" | \"head\""
             ],
             "path": "src/plugins/es_ui_shared/public/request/send_request.ts",
             "deprecated": false
@@ -1434,7 +1491,7 @@
         "children": [
           {
             "parentPluginId": "esUiShared",
-            "id": "def-public.arg",
+            "id": "def-public.OnJsonEditorUpdateHandler.$1",
             "type": "Object",
             "tags": [],
             "label": "arg",
@@ -1465,7 +1522,9 @@
         "label": "AuthorizationContext",
         "description": [],
         "signature": [
-          "React.Context<Authorization>"
+          "React.Context<",
+          "Authorization",
+          ">"
         ],
         "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/authorization_provider.tsx",
         "deprecated": false,
@@ -1510,7 +1569,7 @@
             "children": [
               {
                 "parentPluginId": "esUiShared",
-                "id": "def-public.indexName",
+                "id": "def-public.indices.indexNameBeginsWithPeriod.$1",
                 "type": "string",
                 "tags": [],
                 "label": "indexName",
@@ -1539,7 +1598,7 @@
             "children": [
               {
                 "parentPluginId": "esUiShared",
-                "id": "def-public.indexName",
+                "id": "def-public.indices.findIllegalCharactersInIndexName.$1",
                 "type": "string",
                 "tags": [],
                 "label": "indexName",
@@ -1565,7 +1624,7 @@
             "children": [
               {
                 "parentPluginId": "esUiShared",
-                "id": "def-public.indexName",
+                "id": "def-public.indices.indexNameContainsSpaces.$1",
                 "type": "string",
                 "tags": [],
                 "label": "indexName",

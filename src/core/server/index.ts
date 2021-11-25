@@ -96,6 +96,7 @@ export type {
   ConfigPath,
   ConfigService,
   ConfigDeprecation,
+  ConfigDeprecationContext,
   ConfigDeprecationProvider,
   ConfigDeprecationFactory,
   AddConfigDeprecation,
@@ -135,6 +136,7 @@ export type {
   GetResponse,
   DeleteDocumentResponse,
   ElasticsearchConfigPreboot,
+  ElasticsearchErrorDetails,
 } from './elasticsearch';
 
 export type { IExternalUrlConfig, IExternalUrlPolicy } from './external_url';
@@ -311,6 +313,8 @@ export type {
   SavedObjectUnsanitizedDoc,
   SavedObjectsRepositoryFactory,
   SavedObjectsResolveImportErrorsOptions,
+  SavedObjectsBulkResolveObject,
+  SavedObjectsBulkResolveResponse,
   SavedObjectsResolveResponse,
   SavedObjectsUpdateOptions,
   SavedObjectsUpdateResponse,
@@ -378,11 +382,16 @@ export type {
   OpsProcessMetrics,
   MetricsServiceSetup,
   MetricsServiceStart,
+  IntervalHistogram,
 } from './metrics';
+export { EventLoopDelaysMonitor } from './metrics';
 
 export type { I18nServiceSetup } from './i18n';
 export type {
+  BaseDeprecationDetails,
   DeprecationsDetails,
+  ConfigDeprecationDetails,
+  FeatureDeprecationDetails,
   RegisterDeprecationsConfig,
   GetDeprecationsContext,
   DeprecationsServiceSetup,

@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-import { ActionConnector } from '../../common';
-
-export type CaseActionConnector = ActionConnector;
+export type { CaseActionConnector } from '../../common';

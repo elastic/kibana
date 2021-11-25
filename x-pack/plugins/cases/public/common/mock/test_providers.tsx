@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
+import { euiDarkVars } from '@kbn/ui-shared-deps-src/theme';
 import { I18nProvider } from '@kbn/i18n/react';
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
@@ -43,7 +43,7 @@ export const TestProviders = React.memo(TestProvidersComponent);
 export const useFormFieldMock = <T,>(options?: Partial<FieldHook<T>>): FieldHook<T> => ({
   path: 'path',
   type: 'type',
-  value: ('mockedValue' as unknown) as T,
+  value: 'mockedValue' as unknown as T,
   isPristine: false,
   isDirty: false,
   isModified: false,

@@ -32,13 +32,13 @@ interface GroupActions {
   removeGroupSource(sourceId: string): string;
   onGroupSourcesSaved(group: GroupDetails): GroupDetails;
   setGroupModalErrors(errors: string[]): string[];
-  hideSharedSourcesModal(group: GroupDetails): GroupDetails;
+  hideOrgSourcesModal(group: GroupDetails): GroupDetails;
   selectAllSources(contentSources: ContentSourceDetails[]): ContentSourceDetails[];
   updatePriority(id: string, boost: number): { id: string; boost: number };
   resetGroup(): void;
   showConfirmDeleteModal(): void;
   hideConfirmDeleteModal(): void;
-  showSharedSourcesModal(): void;
+  showOrgSourcesModal(): void;
   resetFlashMessages(): void;
   initializeGroup(groupId: string): { groupId: string };
   deleteGroup(): void;
@@ -51,7 +51,7 @@ interface GroupValues {
   group: GroupDetails;
   dataLoading: boolean;
   managerModalFormErrors: string[];
-  sharedSourcesModalVisible: boolean;
+  orgSourcesModalVisible: boolean;
   confirmDeleteModalVisible: boolean;
   groupNameInputValue: string;
   selectedGroupSources: string[];
@@ -71,13 +71,13 @@ export const GroupLogic = kea<MakeLogicType<GroupValues, GroupActions>>({
     removeGroupSource: (sourceId) => sourceId,
     onGroupSourcesSaved: (group) => group,
     setGroupModalErrors: (errors) => errors,
-    hideSharedSourcesModal: (group) => group,
+    hideOrgSourcesModal: (group) => group,
     selectAllSources: (contentSources) => contentSources,
     updatePriority: (id, boost) => ({ id, boost }),
     resetGroup: () => true,
     showConfirmDeleteModal: () => true,
     hideConfirmDeleteModal: () => true,
-    showSharedSourcesModal: () => true,
+    showOrgSourcesModal: () => true,
     resetFlashMessages: () => true,
     initializeGroup: (groupId) => ({ groupId }),
     deleteGroup: () => true,
@@ -109,11 +109,11 @@ export const GroupLogic = kea<MakeLogicType<GroupValues, GroupActions>>({
         setGroupModalErrors: (_, errors) => errors,
       },
     ],
-    sharedSourcesModalVisible: [
+    orgSourcesModalVisible: [
       false,
       {
-        showSharedSourcesModal: () => true,
-        hideSharedSourcesModal: () => false,
+        showOrgSourcesModal: () => true,
+        hideOrgSourcesModal: () => false,
         onGroupSourcesSaved: () => false,
       },
     ],
@@ -138,7 +138,7 @@ export const GroupLogic = kea<MakeLogicType<GroupValues, GroupActions>>({
         onInitializeGroup: (_, { contentSources }) => contentSources.map(({ id }) => id),
         onGroupSourcesSaved: (_, { contentSources }) => contentSources.map(({ id }) => id),
         selectAllSources: (_, contentSources) => contentSources.map(({ id }) => id),
-        hideSharedSourcesModal: (_, { contentSources }) => contentSources.map(({ id }) => id),
+        hideOrgSourcesModal: (_, { contentSources }) => contentSources.map(({ id }) => id),
         addGroupSource: (state, sourceId) => [...state, sourceId].sort(),
         removeGroupSource: (state, sourceId) => state.filter((id) => id !== sourceId),
       },
@@ -174,7 +174,7 @@ export const GroupLogic = kea<MakeLogicType<GroupValues, GroupActions>>({
   listeners: ({ actions, values }) => ({
     initializeGroup: async ({ groupId }) => {
       try {
-        const response = await HttpLogic.values.http.get(
+        const response = await HttpLogic.values.http.get<GroupDetails>(
           `/internal/workplace_search/groups/${groupId}`
         );
         actions.onInitializeGroup(response);
@@ -220,7 +220,7 @@ export const GroupLogic = kea<MakeLogicType<GroupValues, GroupActions>>({
       } = values;
 
       try {
-        const response = await HttpLogic.values.http.put(
+        const response = await HttpLogic.values.http.put<GroupDetails>(
           `/internal/workplace_search/groups/${id}`,
           {
             body: JSON.stringify({ group: { name: groupNameInputValue } }),
@@ -247,7 +247,7 @@ export const GroupLogic = kea<MakeLogicType<GroupValues, GroupActions>>({
       } = values;
 
       try {
-        const response = await HttpLogic.values.http.post(
+        const response = await HttpLogic.values.http.post<GroupDetails>(
           `/internal/workplace_search/groups/${id}/share`,
           {
             body: JSON.stringify({ content_source_ids: selectedGroupSources }),
@@ -257,7 +257,7 @@ export const GroupLogic = kea<MakeLogicType<GroupValues, GroupActions>>({
         const GROUP_SOURCES_UPDATED_MESSAGE = i18n.translate(
           'xpack.enterpriseSearch.workplaceSearch.groups.groupSourcesUpdated',
           {
-            defaultMessage: 'Successfully updated shared content sources.',
+            defaultMessage: 'Successfully updated organizational content sources.',
           }
         );
         flashSuccessToast(GROUP_SOURCES_UPDATED_MESSAGE);
@@ -279,7 +279,7 @@ export const GroupLogic = kea<MakeLogicType<GroupValues, GroupActions>>({
       );
 
       try {
-        const response = await HttpLogic.values.http.put(
+        const response = await HttpLogic.values.http.put<GroupDetails>(
           `/internal/workplace_search/groups/${id}/boosts`,
           {
             body: JSON.stringify({ content_source_boosts: boosts }),
@@ -289,7 +289,7 @@ export const GroupLogic = kea<MakeLogicType<GroupValues, GroupActions>>({
         const GROUP_PRIORITIZATION_UPDATED_MESSAGE = i18n.translate(
           'xpack.enterpriseSearch.workplaceSearch.groups.groupPrioritizationUpdated',
           {
-            defaultMessage: 'Successfully updated shared source prioritization.',
+            defaultMessage: 'Successfully updated organizational source prioritization.',
           }
         );
 
@@ -302,7 +302,7 @@ export const GroupLogic = kea<MakeLogicType<GroupValues, GroupActions>>({
     showConfirmDeleteModal: () => {
       clearFlashMessages();
     },
-    showSharedSourcesModal: () => {
+    showOrgSourcesModal: () => {
       clearFlashMessages();
     },
     resetFlashMessages: () => {

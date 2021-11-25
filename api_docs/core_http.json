@@ -1249,7 +1249,7 @@
             "tags": [],
             "label": "fetch",
             "description": [
-              "Makes an HTTP request. Defaults to a GET request unless overriden. See {@link HttpHandler} for options."
+              "Makes an HTTP request. Defaults to a GET request unless overridden. See {@link HttpHandler} for options."
             ],
             "signature": [
               {
@@ -2248,9 +2248,21 @@
             ],
             "signature": [
               "{ readonly path: string; readonly method: ",
-              "RecursiveReadonly",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "server",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-server.RecursiveReadonly",
+                "text": "RecursiveReadonly"
+              },
               "<Method>; readonly options: ",
-              "RecursiveReadonly",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "server",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-server.RecursiveReadonly",
+                "text": "RecursiveReadonly"
+              },
               "<",
               {
                 "pluginId": "core",
@@ -2274,7 +2286,7 @@
               "\nReadonly copy of incoming request headers."
             ],
             "signature": [
-              "{ accept?: string | string[] | undefined; \"accept-language\"?: string | string[] | undefined; \"accept-patch\"?: string | string[] | undefined; \"accept-ranges\"?: string | string[] | undefined; \"access-control-allow-credentials\"?: string | string[] | undefined; \"access-control-allow-headers\"?: string | string[] | undefined; \"access-control-allow-methods\"?: string | string[] | undefined; \"access-control-allow-origin\"?: string | string[] | undefined; \"access-control-expose-headers\"?: string | string[] | undefined; \"access-control-max-age\"?: string | string[] | undefined; \"access-control-request-headers\"?: string | string[] | undefined; \"access-control-request-method\"?: string | string[] | undefined; age?: string | string[] | undefined; allow?: string | string[] | undefined; \"alt-svc\"?: string | string[] | undefined; authorization?: string | string[] | undefined; \"cache-control\"?: string | string[] | undefined; connection?: string | string[] | undefined; \"content-disposition\"?: string | string[] | undefined; \"content-encoding\"?: string | string[] | undefined; \"content-language\"?: string | string[] | undefined; \"content-length\"?: string | string[] | undefined; \"content-location\"?: string | string[] | undefined; \"content-range\"?: string | string[] | undefined; \"content-type\"?: string | string[] | undefined; cookie?: string | string[] | undefined; date?: string | string[] | undefined; expect?: string | string[] | undefined; expires?: string | string[] | undefined; forwarded?: string | string[] | undefined; from?: string | string[] | undefined; host?: string | string[] | undefined; \"if-match\"?: string | string[] | undefined; \"if-modified-since\"?: string | string[] | undefined; \"if-none-match\"?: string | string[] | undefined; \"if-unmodified-since\"?: string | string[] | undefined; \"last-modified\"?: string | string[] | undefined; location?: string | string[] | undefined; origin?: string | string[] | undefined; pragma?: string | string[] | undefined; \"proxy-authenticate\"?: string | string[] | undefined; \"proxy-authorization\"?: string | string[] | undefined; \"public-key-pins\"?: string | string[] | undefined; range?: string | string[] | undefined; referer?: string | string[] | undefined; \"retry-after\"?: string | string[] | undefined; \"sec-websocket-accept\"?: string | string[] | undefined; \"sec-websocket-extensions\"?: string | string[] | undefined; \"sec-websocket-key\"?: string | string[] | undefined; \"sec-websocket-protocol\"?: string | string[] | undefined; \"sec-websocket-version\"?: string | string[] | undefined; \"set-cookie\"?: string | string[] | undefined; \"strict-transport-security\"?: string | string[] | undefined; tk?: string | string[] | undefined; trailer?: string | string[] | undefined; \"transfer-encoding\"?: string | string[] | undefined; upgrade?: string | string[] | undefined; \"user-agent\"?: string | string[] | undefined; vary?: string | string[] | undefined; via?: string | string[] | undefined; warning?: string | string[] | undefined; \"www-authenticate\"?: string | string[] | undefined; } & { [header: string]: string | string[] | undefined; }"
+              "{ from?: string | string[] | undefined; date?: string | string[] | undefined; origin?: string | string[] | undefined; range?: string | string[] | undefined; warning?: string | string[] | undefined; location?: string | string[] | undefined; allow?: string | string[] | undefined; accept?: string | string[] | undefined; \"accept-language\"?: string | string[] | undefined; \"accept-patch\"?: string | string[] | undefined; \"accept-ranges\"?: string | string[] | undefined; \"access-control-allow-credentials\"?: string | string[] | undefined; \"access-control-allow-headers\"?: string | string[] | undefined; \"access-control-allow-methods\"?: string | string[] | undefined; \"access-control-allow-origin\"?: string | string[] | undefined; \"access-control-expose-headers\"?: string | string[] | undefined; \"access-control-max-age\"?: string | string[] | undefined; \"access-control-request-headers\"?: string | string[] | undefined; \"access-control-request-method\"?: string | string[] | undefined; age?: string | string[] | undefined; \"alt-svc\"?: string | string[] | undefined; authorization?: string | string[] | undefined; \"cache-control\"?: string | string[] | undefined; connection?: string | string[] | undefined; \"content-disposition\"?: string | string[] | undefined; \"content-encoding\"?: string | string[] | undefined; \"content-language\"?: string | string[] | undefined; \"content-length\"?: string | string[] | undefined; \"content-location\"?: string | string[] | undefined; \"content-range\"?: string | string[] | undefined; \"content-type\"?: string | string[] | undefined; cookie?: string | string[] | undefined; etag?: string | string[] | undefined; expect?: string | string[] | undefined; expires?: string | string[] | undefined; forwarded?: string | string[] | undefined; host?: string | string[] | undefined; \"if-match\"?: string | string[] | undefined; \"if-modified-since\"?: string | string[] | undefined; \"if-none-match\"?: string | string[] | undefined; \"if-unmodified-since\"?: string | string[] | undefined; \"last-modified\"?: string | string[] | undefined; pragma?: string | string[] | undefined; \"proxy-authenticate\"?: string | string[] | undefined; \"proxy-authorization\"?: string | string[] | undefined; \"public-key-pins\"?: string | string[] | undefined; referer?: string | string[] | undefined; \"retry-after\"?: string | string[] | undefined; \"sec-websocket-accept\"?: string | string[] | undefined; \"sec-websocket-extensions\"?: string | string[] | undefined; \"sec-websocket-key\"?: string | string[] | undefined; \"sec-websocket-protocol\"?: string | string[] | undefined; \"sec-websocket-version\"?: string | string[] | undefined; \"set-cookie\"?: string | string[] | undefined; \"strict-transport-security\"?: string | string[] | undefined; tk?: string | string[] | undefined; trailer?: string | string[] | undefined; \"transfer-encoding\"?: string | string[] | undefined; upgrade?: string | string[] | undefined; \"user-agent\"?: string | string[] | undefined; vary?: string | string[] | undefined; via?: string | string[] | undefined; \"www-authenticate\"?: string | string[] | undefined; } & { [header: string]: string | string[] | undefined; }"
             ],
             "path": "src/core/server/http/router/request.ts",
             "deprecated": false
@@ -2469,7 +2481,13 @@
             "text": "RouteValidationError"
           },
           " extends ",
-          "SchemaTypeError"
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "server",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-server.SchemaTypeError",
+            "text": "SchemaTypeError"
+          }
         ],
         "path": "src/core/server/http/router/validator/validator_error.ts",
         "deprecated": false,
@@ -2679,7 +2697,7 @@
               "\nHeaders to attach for auth redirect.\nMust include \"location\" header"
             ],
             "signature": [
-              "({ location: string; } & Record<\"accept\" | \"accept-language\" | \"accept-patch\" | \"accept-ranges\" | \"access-control-allow-credentials\" | \"access-control-allow-headers\" | \"access-control-allow-methods\" | \"access-control-allow-origin\" | \"access-control-expose-headers\" | \"access-control-max-age\" | \"access-control-request-headers\" | \"access-control-request-method\" | \"age\" | \"allow\" | \"alt-svc\" | \"authorization\" | \"cache-control\" | \"connection\" | \"content-disposition\" | \"content-encoding\" | \"content-language\" | \"content-length\" | \"content-location\" | \"content-range\" | \"content-type\" | \"cookie\" | \"date\" | \"expect\" | \"expires\" | \"forwarded\" | \"from\" | \"host\" | \"if-match\" | \"if-modified-since\" | \"if-none-match\" | \"if-unmodified-since\" | \"last-modified\" | \"location\" | \"origin\" | \"pragma\" | \"proxy-authenticate\" | \"proxy-authorization\" | \"public-key-pins\" | \"range\" | \"referer\" | \"retry-after\" | \"sec-websocket-accept\" | \"sec-websocket-extensions\" | \"sec-websocket-key\" | \"sec-websocket-protocol\" | \"sec-websocket-version\" | \"set-cookie\" | \"strict-transport-security\" | \"tk\" | \"trailer\" | \"transfer-encoding\" | \"upgrade\" | \"user-agent\" | \"vary\" | \"via\" | \"warning\" | \"www-authenticate\", string | string[]>) | ({ location: string; } & Record<string, string | string[]>)"
+              "({ location: string; } & Record<\"from\" | \"date\" | \"origin\" | \"range\" | \"warning\" | \"location\" | \"allow\" | \"accept\" | \"accept-language\" | \"accept-patch\" | \"accept-ranges\" | \"access-control-allow-credentials\" | \"access-control-allow-headers\" | \"access-control-allow-methods\" | \"access-control-allow-origin\" | \"access-control-expose-headers\" | \"access-control-max-age\" | \"access-control-request-headers\" | \"access-control-request-method\" | \"age\" | \"alt-svc\" | \"authorization\" | \"cache-control\" | \"connection\" | \"content-disposition\" | \"content-encoding\" | \"content-language\" | \"content-length\" | \"content-location\" | \"content-range\" | \"content-type\" | \"cookie\" | \"etag\" | \"expect\" | \"expires\" | \"forwarded\" | \"host\" | \"if-match\" | \"if-modified-since\" | \"if-none-match\" | \"if-unmodified-since\" | \"last-modified\" | \"pragma\" | \"proxy-authenticate\" | \"proxy-authorization\" | \"public-key-pins\" | \"referer\" | \"retry-after\" | \"sec-websocket-accept\" | \"sec-websocket-extensions\" | \"sec-websocket-key\" | \"sec-websocket-protocol\" | \"sec-websocket-version\" | \"set-cookie\" | \"strict-transport-security\" | \"tk\" | \"trailer\" | \"transfer-encoding\" | \"upgrade\" | \"user-agent\" | \"vary\" | \"via\" | \"www-authenticate\", string | string[]>) | ({ location: string; } & Record<string, string | string[]>)"
             ],
             "path": "src/core/server/http/lifecycle/auth.ts",
             "deprecated": false
@@ -2845,7 +2863,7 @@
               "\nRedirects user to another location to complete authentication when authRequired: true\nAllows user to access a resource without redirection when authRequired: 'optional'"
             ],
             "signature": [
-              "(headers: ({ location: string; } & Record<\"accept\" | \"accept-language\" | \"accept-patch\" | \"accept-ranges\" | \"access-control-allow-credentials\" | \"access-control-allow-headers\" | \"access-control-allow-methods\" | \"access-control-allow-origin\" | \"access-control-expose-headers\" | \"access-control-max-age\" | \"access-control-request-headers\" | \"access-control-request-method\" | \"age\" | \"allow\" | \"alt-svc\" | \"authorization\" | \"cache-control\" | \"connection\" | \"content-disposition\" | \"content-encoding\" | \"content-language\" | \"content-length\" | \"content-location\" | \"content-range\" | \"content-type\" | \"cookie\" | \"date\" | \"expect\" | \"expires\" | \"forwarded\" | \"from\" | \"host\" | \"if-match\" | \"if-modified-since\" | \"if-none-match\" | \"if-unmodified-since\" | \"last-modified\" | \"location\" | \"origin\" | \"pragma\" | \"proxy-authenticate\" | \"proxy-authorization\" | \"public-key-pins\" | \"range\" | \"referer\" | \"retry-after\" | \"sec-websocket-accept\" | \"sec-websocket-extensions\" | \"sec-websocket-key\" | \"sec-websocket-protocol\" | \"sec-websocket-version\" | \"set-cookie\" | \"strict-transport-security\" | \"tk\" | \"trailer\" | \"transfer-encoding\" | \"upgrade\" | \"user-agent\" | \"vary\" | \"via\" | \"warning\" | \"www-authenticate\", string | string[]>) | ({ location: string; } & Record<string, string | string[]>)) => ",
+              "(headers: ({ location: string; } & Record<\"from\" | \"date\" | \"origin\" | \"range\" | \"warning\" | \"location\" | \"allow\" | \"accept\" | \"accept-language\" | \"accept-patch\" | \"accept-ranges\" | \"access-control-allow-credentials\" | \"access-control-allow-headers\" | \"access-control-allow-methods\" | \"access-control-allow-origin\" | \"access-control-expose-headers\" | \"access-control-max-age\" | \"access-control-request-headers\" | \"access-control-request-method\" | \"age\" | \"alt-svc\" | \"authorization\" | \"cache-control\" | \"connection\" | \"content-disposition\" | \"content-encoding\" | \"content-language\" | \"content-length\" | \"content-location\" | \"content-range\" | \"content-type\" | \"cookie\" | \"etag\" | \"expect\" | \"expires\" | \"forwarded\" | \"host\" | \"if-match\" | \"if-modified-since\" | \"if-none-match\" | \"if-unmodified-since\" | \"last-modified\" | \"pragma\" | \"proxy-authenticate\" | \"proxy-authorization\" | \"public-key-pins\" | \"referer\" | \"retry-after\" | \"sec-websocket-accept\" | \"sec-websocket-extensions\" | \"sec-websocket-key\" | \"sec-websocket-protocol\" | \"sec-websocket-version\" | \"set-cookie\" | \"strict-transport-security\" | \"tk\" | \"trailer\" | \"transfer-encoding\" | \"upgrade\" | \"user-agent\" | \"vary\" | \"via\" | \"www-authenticate\", string | string[]>) | ({ location: string; } & Record<string, string | string[]>)) => ",
               {
                 "pluginId": "core",
                 "scope": "server",
@@ -2865,7 +2883,7 @@
                 "label": "headers",
                 "description": [],
                 "signature": [
-                  "({ location: string; } & Record<\"accept\" | \"accept-language\" | \"accept-patch\" | \"accept-ranges\" | \"access-control-allow-credentials\" | \"access-control-allow-headers\" | \"access-control-allow-methods\" | \"access-control-allow-origin\" | \"access-control-expose-headers\" | \"access-control-max-age\" | \"access-control-request-headers\" | \"access-control-request-method\" | \"age\" | \"allow\" | \"alt-svc\" | \"authorization\" | \"cache-control\" | \"connection\" | \"content-disposition\" | \"content-encoding\" | \"content-language\" | \"content-length\" | \"content-location\" | \"content-range\" | \"content-type\" | \"cookie\" | \"date\" | \"expect\" | \"expires\" | \"forwarded\" | \"from\" | \"host\" | \"if-match\" | \"if-modified-since\" | \"if-none-match\" | \"if-unmodified-since\" | \"last-modified\" | \"location\" | \"origin\" | \"pragma\" | \"proxy-authenticate\" | \"proxy-authorization\" | \"public-key-pins\" | \"range\" | \"referer\" | \"retry-after\" | \"sec-websocket-accept\" | \"sec-websocket-extensions\" | \"sec-websocket-key\" | \"sec-websocket-protocol\" | \"sec-websocket-version\" | \"set-cookie\" | \"strict-transport-security\" | \"tk\" | \"trailer\" | \"transfer-encoding\" | \"upgrade\" | \"user-agent\" | \"vary\" | \"via\" | \"warning\" | \"www-authenticate\", string | string[]>) | ({ location: string; } & Record<string, string | string[]>)"
+                  "({ location: string; } & Record<\"from\" | \"date\" | \"origin\" | \"range\" | \"warning\" | \"location\" | \"allow\" | \"accept\" | \"accept-language\" | \"accept-patch\" | \"accept-ranges\" | \"access-control-allow-credentials\" | \"access-control-allow-headers\" | \"access-control-allow-methods\" | \"access-control-allow-origin\" | \"access-control-expose-headers\" | \"access-control-max-age\" | \"access-control-request-headers\" | \"access-control-request-method\" | \"age\" | \"alt-svc\" | \"authorization\" | \"cache-control\" | \"connection\" | \"content-disposition\" | \"content-encoding\" | \"content-language\" | \"content-length\" | \"content-location\" | \"content-range\" | \"content-type\" | \"cookie\" | \"etag\" | \"expect\" | \"expires\" | \"forwarded\" | \"host\" | \"if-match\" | \"if-modified-since\" | \"if-none-match\" | \"if-unmodified-since\" | \"last-modified\" | \"pragma\" | \"proxy-authenticate\" | \"proxy-authorization\" | \"public-key-pins\" | \"referer\" | \"retry-after\" | \"sec-websocket-accept\" | \"sec-websocket-extensions\" | \"sec-websocket-key\" | \"sec-websocket-protocol\" | \"sec-websocket-version\" | \"set-cookie\" | \"strict-transport-security\" | \"tk\" | \"trailer\" | \"transfer-encoding\" | \"upgrade\" | \"user-agent\" | \"vary\" | \"via\" | \"www-authenticate\", string | string[]>) | ({ location: string; } & Record<string, string | string[]>)"
                 ],
                 "path": "src/core/server/http/lifecycle/auth.ts",
                 "deprecated": false,
@@ -2924,7 +2942,7 @@
               "HTTP Headers with additional information about response"
             ],
             "signature": [
-              "Record<\"accept\" | \"accept-language\" | \"accept-patch\" | \"accept-ranges\" | \"access-control-allow-credentials\" | \"access-control-allow-headers\" | \"access-control-allow-methods\" | \"access-control-allow-origin\" | \"access-control-expose-headers\" | \"access-control-max-age\" | \"access-control-request-headers\" | \"access-control-request-method\" | \"age\" | \"allow\" | \"alt-svc\" | \"authorization\" | \"cache-control\" | \"connection\" | \"content-disposition\" | \"content-encoding\" | \"content-language\" | \"content-length\" | \"content-location\" | \"content-range\" | \"content-type\" | \"cookie\" | \"date\" | \"expect\" | \"expires\" | \"forwarded\" | \"from\" | \"host\" | \"if-match\" | \"if-modified-since\" | \"if-none-match\" | \"if-unmodified-since\" | \"last-modified\" | \"location\" | \"origin\" | \"pragma\" | \"proxy-authenticate\" | \"proxy-authorization\" | \"public-key-pins\" | \"range\" | \"referer\" | \"retry-after\" | \"sec-websocket-accept\" | \"sec-websocket-extensions\" | \"sec-websocket-key\" | \"sec-websocket-protocol\" | \"sec-websocket-version\" | \"set-cookie\" | \"strict-transport-security\" | \"tk\" | \"trailer\" | \"transfer-encoding\" | \"upgrade\" | \"user-agent\" | \"vary\" | \"via\" | \"warning\" | \"www-authenticate\", string | string[]> | Record<string, string | string[]> | undefined"
+              "Record<\"from\" | \"date\" | \"origin\" | \"range\" | \"warning\" | \"location\" | \"allow\" | \"accept\" | \"accept-language\" | \"accept-patch\" | \"accept-ranges\" | \"access-control-allow-credentials\" | \"access-control-allow-headers\" | \"access-control-allow-methods\" | \"access-control-allow-origin\" | \"access-control-expose-headers\" | \"access-control-max-age\" | \"access-control-request-headers\" | \"access-control-request-method\" | \"age\" | \"alt-svc\" | \"authorization\" | \"cache-control\" | \"connection\" | \"content-disposition\" | \"content-encoding\" | \"content-language\" | \"content-length\" | \"content-location\" | \"content-range\" | \"content-type\" | \"cookie\" | \"etag\" | \"expect\" | \"expires\" | \"forwarded\" | \"host\" | \"if-match\" | \"if-modified-since\" | \"if-none-match\" | \"if-unmodified-since\" | \"last-modified\" | \"pragma\" | \"proxy-authenticate\" | \"proxy-authorization\" | \"public-key-pins\" | \"referer\" | \"retry-after\" | \"sec-websocket-accept\" | \"sec-websocket-extensions\" | \"sec-websocket-key\" | \"sec-websocket-protocol\" | \"sec-websocket-version\" | \"set-cookie\" | \"strict-transport-security\" | \"tk\" | \"trailer\" | \"transfer-encoding\" | \"upgrade\" | \"user-agent\" | \"vary\" | \"via\" | \"www-authenticate\", string | string[]> | Record<string, string | string[]> | undefined"
             ],
             "path": "src/core/server/http/router/response.ts",
             "deprecated": false
@@ -2994,7 +3012,7 @@
               "HTTP Headers with additional information about response"
             ],
             "signature": [
-              "Record<\"accept\" | \"accept-language\" | \"accept-patch\" | \"accept-ranges\" | \"access-control-allow-credentials\" | \"access-control-allow-headers\" | \"access-control-allow-methods\" | \"access-control-allow-origin\" | \"access-control-expose-headers\" | \"access-control-max-age\" | \"access-control-request-headers\" | \"access-control-request-method\" | \"age\" | \"allow\" | \"alt-svc\" | \"authorization\" | \"cache-control\" | \"connection\" | \"content-disposition\" | \"content-encoding\" | \"content-language\" | \"content-length\" | \"content-location\" | \"content-range\" | \"content-type\" | \"cookie\" | \"date\" | \"expect\" | \"expires\" | \"forwarded\" | \"from\" | \"host\" | \"if-match\" | \"if-modified-since\" | \"if-none-match\" | \"if-unmodified-since\" | \"last-modified\" | \"location\" | \"origin\" | \"pragma\" | \"proxy-authenticate\" | \"proxy-authorization\" | \"public-key-pins\" | \"range\" | \"referer\" | \"retry-after\" | \"sec-websocket-accept\" | \"sec-websocket-extensions\" | \"sec-websocket-key\" | \"sec-websocket-protocol\" | \"sec-websocket-version\" | \"set-cookie\" | \"strict-transport-security\" | \"tk\" | \"trailer\" | \"transfer-encoding\" | \"upgrade\" | \"user-agent\" | \"vary\" | \"via\" | \"warning\" | \"www-authenticate\", string | string[]> | Record<string, string | string[]> | undefined"
+              "Record<\"from\" | \"date\" | \"origin\" | \"range\" | \"warning\" | \"location\" | \"allow\" | \"accept\" | \"accept-language\" | \"accept-patch\" | \"accept-ranges\" | \"access-control-allow-credentials\" | \"access-control-allow-headers\" | \"access-control-allow-methods\" | \"access-control-allow-origin\" | \"access-control-expose-headers\" | \"access-control-max-age\" | \"access-control-request-headers\" | \"access-control-request-method\" | \"age\" | \"alt-svc\" | \"authorization\" | \"cache-control\" | \"connection\" | \"content-disposition\" | \"content-encoding\" | \"content-language\" | \"content-length\" | \"content-location\" | \"content-range\" | \"content-type\" | \"cookie\" | \"etag\" | \"expect\" | \"expires\" | \"forwarded\" | \"host\" | \"if-match\" | \"if-modified-since\" | \"if-none-match\" | \"if-unmodified-since\" | \"last-modified\" | \"pragma\" | \"proxy-authenticate\" | \"proxy-authorization\" | \"public-key-pins\" | \"referer\" | \"retry-after\" | \"sec-websocket-accept\" | \"sec-websocket-extensions\" | \"sec-websocket-key\" | \"sec-websocket-protocol\" | \"sec-websocket-version\" | \"set-cookie\" | \"strict-transport-security\" | \"tk\" | \"trailer\" | \"transfer-encoding\" | \"upgrade\" | \"user-agent\" | \"vary\" | \"via\" | \"www-authenticate\", string | string[]> | Record<string, string | string[]> | undefined"
             ],
             "path": "src/core/server/http/router/response.ts",
             "deprecated": false
@@ -3046,7 +3064,7 @@
             "children": [
               {
                 "parentPluginId": "core",
-                "id": "def-server.request",
+                "id": "def-server.HttpAuth.get.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "request",
@@ -3092,7 +3110,7 @@
             "children": [
               {
                 "parentPluginId": "core",
-                "id": "def-server.request",
+                "id": "def-server.HttpAuth.isAuthenticated.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "request",
@@ -3154,7 +3172,7 @@
               "HTTP Headers with additional information about response"
             ],
             "signature": [
-              "Record<\"accept\" | \"accept-language\" | \"accept-patch\" | \"accept-ranges\" | \"access-control-allow-credentials\" | \"access-control-allow-headers\" | \"access-control-allow-methods\" | \"access-control-allow-origin\" | \"access-control-expose-headers\" | \"access-control-max-age\" | \"access-control-request-headers\" | \"access-control-request-method\" | \"age\" | \"allow\" | \"alt-svc\" | \"authorization\" | \"cache-control\" | \"connection\" | \"content-disposition\" | \"content-encoding\" | \"content-language\" | \"content-length\" | \"content-location\" | \"content-range\" | \"content-type\" | \"cookie\" | \"date\" | \"expect\" | \"expires\" | \"forwarded\" | \"from\" | \"host\" | \"if-match\" | \"if-modified-since\" | \"if-none-match\" | \"if-unmodified-since\" | \"last-modified\" | \"location\" | \"origin\" | \"pragma\" | \"proxy-authenticate\" | \"proxy-authorization\" | \"public-key-pins\" | \"range\" | \"referer\" | \"retry-after\" | \"sec-websocket-accept\" | \"sec-websocket-extensions\" | \"sec-websocket-key\" | \"sec-websocket-protocol\" | \"sec-websocket-version\" | \"set-cookie\" | \"strict-transport-security\" | \"tk\" | \"trailer\" | \"transfer-encoding\" | \"upgrade\" | \"user-agent\" | \"vary\" | \"via\" | \"warning\" | \"www-authenticate\", string | string[]> | Record<string, string | string[]> | undefined"
+              "Record<\"from\" | \"date\" | \"origin\" | \"range\" | \"warning\" | \"location\" | \"allow\" | \"accept\" | \"accept-language\" | \"accept-patch\" | \"accept-ranges\" | \"access-control-allow-credentials\" | \"access-control-allow-headers\" | \"access-control-allow-methods\" | \"access-control-allow-origin\" | \"access-control-expose-headers\" | \"access-control-max-age\" | \"access-control-request-headers\" | \"access-control-request-method\" | \"age\" | \"alt-svc\" | \"authorization\" | \"cache-control\" | \"connection\" | \"content-disposition\" | \"content-encoding\" | \"content-language\" | \"content-length\" | \"content-location\" | \"content-range\" | \"content-type\" | \"cookie\" | \"etag\" | \"expect\" | \"expires\" | \"forwarded\" | \"host\" | \"if-match\" | \"if-modified-since\" | \"if-none-match\" | \"if-unmodified-since\" | \"last-modified\" | \"pragma\" | \"proxy-authenticate\" | \"proxy-authorization\" | \"public-key-pins\" | \"referer\" | \"retry-after\" | \"sec-websocket-accept\" | \"sec-websocket-extensions\" | \"sec-websocket-key\" | \"sec-websocket-protocol\" | \"sec-websocket-version\" | \"set-cookie\" | \"strict-transport-security\" | \"tk\" | \"trailer\" | \"transfer-encoding\" | \"upgrade\" | \"user-agent\" | \"vary\" | \"via\" | \"www-authenticate\", string | string[]> | Record<string, string | string[]> | undefined"
             ],
             "path": "src/core/server/http/router/response.ts",
             "deprecated": false
@@ -4089,9 +4107,9 @@
               " | null; (detailed: false): ",
               "PeerCertificate",
               " | null; (detailed?: boolean | undefined): ",
-              "DetailedPeerCertificate",
-              " | ",
               "PeerCertificate",
+              " | ",
+              "DetailedPeerCertificate",
               " | null; }"
             ],
             "path": "src/core/server/http/router/socket.ts",
@@ -4127,9 +4145,9 @@
               " | null; (detailed: false): ",
               "PeerCertificate",
               " | null; (detailed?: boolean | undefined): ",
-              "DetailedPeerCertificate",
-              " | ",
               "PeerCertificate",
+              " | ",
+              "DetailedPeerCertificate",
               " | null; }"
             ],
             "path": "src/core/server/http/router/socket.ts",
@@ -4167,9 +4185,9 @@
               " | null; (detailed: false): ",
               "PeerCertificate",
               " | null; (detailed?: boolean | undefined): ",
-              "DetailedPeerCertificate",
-              " | ",
               "PeerCertificate",
+              " | ",
+              "DetailedPeerCertificate",
               " | null; }"
             ],
             "path": "src/core/server/http/router/socket.ts",
@@ -4230,7 +4248,7 @@
             "children": [
               {
                 "parentPluginId": "core",
-                "id": "def-server.IKibanaSocket.renegotiate.$1.options",
+                "id": "def-server.IKibanaSocket.renegotiate.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "options",
@@ -4240,7 +4258,7 @@
                 "children": [
                   {
                     "parentPluginId": "core",
-                    "id": "def-server.IKibanaSocket.renegotiate.$1.options.rejectUnauthorized",
+                    "id": "def-server.IKibanaSocket.renegotiate.$1.rejectUnauthorized",
                     "type": "CompoundType",
                     "tags": [],
                     "label": "rejectUnauthorized",
@@ -4253,7 +4271,7 @@
                   },
                   {
                     "parentPluginId": "core",
-                    "id": "def-server.IKibanaSocket.renegotiate.$1.options.requestCert",
+                    "id": "def-server.IKibanaSocket.renegotiate.$1.requestCert",
                     "type": "CompoundType",
                     "tags": [],
                     "label": "requestCert",
@@ -4546,7 +4564,7 @@
             "children": [
               {
                 "parentPluginId": "core",
-                "id": "def-server.route",
+                "id": "def-server.IRouter.get.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "route",
@@ -4566,7 +4584,7 @@
               },
               {
                 "parentPluginId": "core",
-                "id": "def-server.handler",
+                "id": "def-server.IRouter.get.$2",
                 "type": "Function",
                 "tags": [],
                 "label": "handler",
@@ -4778,7 +4796,7 @@
                 "children": [
                   {
                     "parentPluginId": "core",
-                    "id": "def-server.context",
+                    "id": "def-server.IRouter.get.$2.$1",
                     "type": "Uncategorized",
                     "tags": [],
                     "label": "context",
@@ -4791,7 +4809,7 @@
                   },
                   {
                     "parentPluginId": "core",
-                    "id": "def-server.request",
+                    "id": "def-server.IRouter.get.$2.$2",
                     "type": "Object",
                     "tags": [],
                     "label": "request",
@@ -4811,7 +4829,7 @@
                   },
                   {
                     "parentPluginId": "core",
-                    "id": "def-server.response",
+                    "id": "def-server.IRouter.get.$2.$3",
                     "type": "Uncategorized",
                     "tags": [],
                     "label": "response",
@@ -5034,7 +5052,7 @@
             "children": [
               {
                 "parentPluginId": "core",
-                "id": "def-server.route",
+                "id": "def-server.IRouter.post.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "route",
@@ -5054,7 +5072,7 @@
               },
               {
                 "parentPluginId": "core",
-                "id": "def-server.handler",
+                "id": "def-server.IRouter.post.$2",
                 "type": "Function",
                 "tags": [],
                 "label": "handler",
@@ -5266,7 +5284,7 @@
                 "children": [
                   {
                     "parentPluginId": "core",
-                    "id": "def-server.context",
+                    "id": "def-server.IRouter.post.$2.$1",
                     "type": "Uncategorized",
                     "tags": [],
                     "label": "context",
@@ -5279,7 +5297,7 @@
                   },
                   {
                     "parentPluginId": "core",
-                    "id": "def-server.request",
+                    "id": "def-server.IRouter.post.$2.$2",
                     "type": "Object",
                     "tags": [],
                     "label": "request",
@@ -5299,7 +5317,7 @@
                   },
                   {
                     "parentPluginId": "core",
-                    "id": "def-server.response",
+                    "id": "def-server.IRouter.post.$2.$3",
                     "type": "Uncategorized",
                     "tags": [],
                     "label": "response",
@@ -5522,7 +5540,7 @@
             "children": [
               {
                 "parentPluginId": "core",
-                "id": "def-server.route",
+                "id": "def-server.IRouter.put.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "route",
@@ -5542,7 +5560,7 @@
               },
               {
                 "parentPluginId": "core",
-                "id": "def-server.handler",
+                "id": "def-server.IRouter.put.$2",
                 "type": "Function",
                 "tags": [],
                 "label": "handler",
@@ -5754,7 +5772,7 @@
                 "children": [
                   {
                     "parentPluginId": "core",
-                    "id": "def-server.context",
+                    "id": "def-server.IRouter.put.$2.$1",
                     "type": "Uncategorized",
                     "tags": [],
                     "label": "context",
@@ -5767,7 +5785,7 @@
                   },
                   {
                     "parentPluginId": "core",
-                    "id": "def-server.request",
+                    "id": "def-server.IRouter.put.$2.$2",
                     "type": "Object",
                     "tags": [],
                     "label": "request",
@@ -5787,7 +5805,7 @@
                   },
                   {
                     "parentPluginId": "core",
-                    "id": "def-server.response",
+                    "id": "def-server.IRouter.put.$2.$3",
                     "type": "Uncategorized",
                     "tags": [],
                     "label": "response",
@@ -6010,7 +6028,7 @@
             "children": [
               {
                 "parentPluginId": "core",
-                "id": "def-server.route",
+                "id": "def-server.IRouter.patch.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "route",
@@ -6030,7 +6048,7 @@
               },
               {
                 "parentPluginId": "core",
-                "id": "def-server.handler",
+                "id": "def-server.IRouter.patch.$2",
                 "type": "Function",
                 "tags": [],
                 "label": "handler",
@@ -6242,7 +6260,7 @@
                 "children": [
                   {
                     "parentPluginId": "core",
-                    "id": "def-server.context",
+                    "id": "def-server.IRouter.patch.$2.$1",
                     "type": "Uncategorized",
                     "tags": [],
                     "label": "context",
@@ -6255,7 +6273,7 @@
                   },
                   {
                     "parentPluginId": "core",
-                    "id": "def-server.request",
+                    "id": "def-server.IRouter.patch.$2.$2",
                     "type": "Object",
                     "tags": [],
                     "label": "request",
@@ -6275,7 +6293,7 @@
                   },
                   {
                     "parentPluginId": "core",
-                    "id": "def-server.response",
+                    "id": "def-server.IRouter.patch.$2.$3",
                     "type": "Uncategorized",
                     "tags": [],
                     "label": "response",
@@ -6498,7 +6516,7 @@
             "children": [
               {
                 "parentPluginId": "core",
-                "id": "def-server.route",
+                "id": "def-server.IRouter.delete.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "route",
@@ -6518,7 +6536,7 @@
               },
               {
                 "parentPluginId": "core",
-                "id": "def-server.handler",
+                "id": "def-server.IRouter.delete.$2",
                 "type": "Function",
                 "tags": [],
                 "label": "handler",
@@ -6730,7 +6748,7 @@
                 "children": [
                   {
                     "parentPluginId": "core",
-                    "id": "def-server.context",
+                    "id": "def-server.IRouter.delete.$2.$1",
                     "type": "Uncategorized",
                     "tags": [],
                     "label": "context",
@@ -6743,7 +6761,7 @@
                   },
                   {
                     "parentPluginId": "core",
-                    "id": "def-server.request",
+                    "id": "def-server.IRouter.delete.$2.$2",
                     "type": "Object",
                     "tags": [],
                     "label": "request",
@@ -6763,7 +6781,7 @@
                   },
                   {
                     "parentPluginId": "core",
-                    "id": "def-server.response",
+                    "id": "def-server.IRouter.delete.$2.$3",
                     "type": "Uncategorized",
                     "tags": [],
                     "label": "response",
@@ -7184,7 +7202,7 @@
             "children": [
               {
                 "parentPluginId": "core",
-                "id": "def-server.handler",
+                "id": "def-server.IRouter.handleLegacyErrors.$1",
                 "type": "Function",
                 "tags": [],
                 "label": "handler",
@@ -7222,7 +7240,7 @@
                 "children": [
                   {
                     "parentPluginId": "core",
-                    "id": "def-server.context",
+                    "id": "def-server.IRouter.handleLegacyErrors.$1.$1",
                     "type": "Uncategorized",
                     "tags": [],
                     "label": "context",
@@ -7235,7 +7253,7 @@
                   },
                   {
                     "parentPluginId": "core",
-                    "id": "def-server.request",
+                    "id": "def-server.IRouter.handleLegacyErrors.$1.$2",
                     "type": "Object",
                     "tags": [],
                     "label": "request",
@@ -7255,7 +7273,7 @@
                   },
                   {
                     "parentPluginId": "core",
-                    "id": "def-server.response",
+                    "id": "def-server.IRouter.handleLegacyErrors.$1.$3",
                     "type": "Uncategorized",
                     "tags": [],
                     "label": "response",
@@ -7389,7 +7407,7 @@
                 "section": "def-server.RouteConfigOptions",
                 "text": "RouteConfigOptions"
               },
-              "<Method>, \"timeout\" | \"tags\" | \"authRequired\" | \"xsrfRequired\">> : Required<",
+              "<Method>, \"tags\" | \"timeout\" | \"authRequired\" | \"xsrfRequired\">> : Required<",
               {
                 "pluginId": "core",
                 "scope": "server",
@@ -7487,7 +7505,7 @@
               "additional headers to attach to the response"
             ],
             "signature": [
-              "Record<\"accept\" | \"accept-language\" | \"accept-patch\" | \"accept-ranges\" | \"access-control-allow-credentials\" | \"access-control-allow-headers\" | \"access-control-allow-methods\" | \"access-control-allow-origin\" | \"access-control-expose-headers\" | \"access-control-max-age\" | \"access-control-request-headers\" | \"access-control-request-method\" | \"age\" | \"allow\" | \"alt-svc\" | \"authorization\" | \"cache-control\" | \"connection\" | \"content-disposition\" | \"content-encoding\" | \"content-language\" | \"content-length\" | \"content-location\" | \"content-range\" | \"content-type\" | \"cookie\" | \"date\" | \"expect\" | \"expires\" | \"forwarded\" | \"from\" | \"host\" | \"if-match\" | \"if-modified-since\" | \"if-none-match\" | \"if-unmodified-since\" | \"last-modified\" | \"location\" | \"origin\" | \"pragma\" | \"proxy-authenticate\" | \"proxy-authorization\" | \"public-key-pins\" | \"range\" | \"referer\" | \"retry-after\" | \"sec-websocket-accept\" | \"sec-websocket-extensions\" | \"sec-websocket-key\" | \"sec-websocket-protocol\" | \"sec-websocket-version\" | \"set-cookie\" | \"strict-transport-security\" | \"tk\" | \"trailer\" | \"transfer-encoding\" | \"upgrade\" | \"user-agent\" | \"vary\" | \"via\" | \"warning\" | \"www-authenticate\", string | string[]> | Record<string, string | string[]> | undefined"
+              "Record<\"from\" | \"date\" | \"origin\" | \"range\" | \"warning\" | \"location\" | \"allow\" | \"accept\" | \"accept-language\" | \"accept-patch\" | \"accept-ranges\" | \"access-control-allow-credentials\" | \"access-control-allow-headers\" | \"access-control-allow-methods\" | \"access-control-allow-origin\" | \"access-control-expose-headers\" | \"access-control-max-age\" | \"access-control-request-headers\" | \"access-control-request-method\" | \"age\" | \"alt-svc\" | \"authorization\" | \"cache-control\" | \"connection\" | \"content-disposition\" | \"content-encoding\" | \"content-language\" | \"content-length\" | \"content-location\" | \"content-range\" | \"content-type\" | \"cookie\" | \"etag\" | \"expect\" | \"expires\" | \"forwarded\" | \"host\" | \"if-match\" | \"if-modified-since\" | \"if-none-match\" | \"if-unmodified-since\" | \"last-modified\" | \"pragma\" | \"proxy-authenticate\" | \"proxy-authorization\" | \"public-key-pins\" | \"referer\" | \"retry-after\" | \"sec-websocket-accept\" | \"sec-websocket-extensions\" | \"sec-websocket-key\" | \"sec-websocket-protocol\" | \"sec-websocket-version\" | \"set-cookie\" | \"strict-transport-security\" | \"tk\" | \"trailer\" | \"transfer-encoding\" | \"upgrade\" | \"user-agent\" | \"vary\" | \"via\" | \"www-authenticate\", string | string[]> | Record<string, string | string[]> | undefined"
             ],
             "path": "src/core/server/http/lifecycle/on_pre_response.ts",
             "deprecated": false
@@ -7542,7 +7560,7 @@
               "additional headers to attach to the response"
             ],
             "signature": [
-              "Record<\"accept\" | \"accept-language\" | \"accept-patch\" | \"accept-ranges\" | \"access-control-allow-credentials\" | \"access-control-allow-headers\" | \"access-control-allow-methods\" | \"access-control-allow-origin\" | \"access-control-expose-headers\" | \"access-control-max-age\" | \"access-control-request-headers\" | \"access-control-request-method\" | \"age\" | \"allow\" | \"alt-svc\" | \"authorization\" | \"cache-control\" | \"connection\" | \"content-disposition\" | \"content-encoding\" | \"content-language\" | \"content-length\" | \"content-location\" | \"content-range\" | \"content-type\" | \"cookie\" | \"date\" | \"expect\" | \"expires\" | \"forwarded\" | \"from\" | \"host\" | \"if-match\" | \"if-modified-since\" | \"if-none-match\" | \"if-unmodified-since\" | \"last-modified\" | \"location\" | \"origin\" | \"pragma\" | \"proxy-authenticate\" | \"proxy-authorization\" | \"public-key-pins\" | \"range\" | \"referer\" | \"retry-after\" | \"sec-websocket-accept\" | \"sec-websocket-extensions\" | \"sec-websocket-key\" | \"sec-websocket-protocol\" | \"sec-websocket-version\" | \"set-cookie\" | \"strict-transport-security\" | \"tk\" | \"trailer\" | \"transfer-encoding\" | \"upgrade\" | \"user-agent\" | \"vary\" | \"via\" | \"warning\" | \"www-authenticate\", string | string[]> | Record<string, string | string[]> | undefined"
+              "Record<\"from\" | \"date\" | \"origin\" | \"range\" | \"warning\" | \"location\" | \"allow\" | \"accept\" | \"accept-language\" | \"accept-patch\" | \"accept-ranges\" | \"access-control-allow-credentials\" | \"access-control-allow-headers\" | \"access-control-allow-methods\" | \"access-control-allow-origin\" | \"access-control-expose-headers\" | \"access-control-max-age\" | \"access-control-request-headers\" | \"access-control-request-method\" | \"age\" | \"alt-svc\" | \"authorization\" | \"cache-control\" | \"connection\" | \"content-disposition\" | \"content-encoding\" | \"content-language\" | \"content-length\" | \"content-location\" | \"content-range\" | \"content-type\" | \"cookie\" | \"etag\" | \"expect\" | \"expires\" | \"forwarded\" | \"host\" | \"if-match\" | \"if-modified-since\" | \"if-none-match\" | \"if-unmodified-since\" | \"last-modified\" | \"pragma\" | \"proxy-authenticate\" | \"proxy-authorization\" | \"public-key-pins\" | \"referer\" | \"retry-after\" | \"sec-websocket-accept\" | \"sec-websocket-extensions\" | \"sec-websocket-key\" | \"sec-websocket-protocol\" | \"sec-websocket-version\" | \"set-cookie\" | \"strict-transport-security\" | \"tk\" | \"trailer\" | \"transfer-encoding\" | \"upgrade\" | \"user-agent\" | \"vary\" | \"via\" | \"www-authenticate\", string | string[]> | Record<string, string | string[]> | undefined"
             ],
             "path": "src/core/server/http/lifecycle/on_pre_response.ts",
             "deprecated": false
@@ -8150,9 +8168,21 @@
               "\nValidation logic for the URL params"
             ],
             "signature": [
-              "ObjectType",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "server",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-server.ObjectType",
+                "text": "ObjectType"
+              },
               "<any> | ",
-              "Type",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "server",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-server.Type",
+                "text": "Type"
+              },
               "<P> | ",
               {
                 "pluginId": "core",
@@ -8176,9 +8206,21 @@
               "\nValidation logic for the Query params"
             ],
             "signature": [
-              "ObjectType",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "server",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-server.ObjectType",
+                "text": "ObjectType"
+              },
               "<any> | ",
-              "Type",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "server",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-server.Type",
+                "text": "Type"
+              },
               "<Q> | ",
               {
                 "pluginId": "core",
@@ -8202,9 +8244,21 @@
               "\nValidation logic for the body payload"
             ],
             "signature": [
-              "ObjectType",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "server",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-server.ObjectType",
+                "text": "ObjectType"
+              },
               "<any> | ",
-              "Type",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "server",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-server.Type",
+                "text": "Type"
+              },
               "<B> | ",
               {
                 "pluginId": "core",
@@ -8833,7 +8887,7 @@
         "children": [
           {
             "parentPluginId": "core",
-            "id": "def-server.request",
+            "id": "def-server.AuthenticationHandler.$1",
             "type": "Object",
             "tags": [],
             "label": "request",
@@ -8853,7 +8907,7 @@
           },
           {
             "parentPluginId": "core",
-            "id": "def-server.response",
+            "id": "def-server.AuthenticationHandler.$2",
             "type": "Object",
             "tags": [],
             "label": "response",
@@ -8994,7 +9048,7 @@
           },
           {
             "parentPluginId": "core",
-            "id": "def-server.toolkit",
+            "id": "def-server.AuthenticationHandler.$3",
             "type": "Object",
             "tags": [],
             "label": "toolkit",
@@ -9076,7 +9130,7 @@
           "\nSet of HTTP methods changing the state of the server."
         ],
         "signature": [
-          "\"post\" | \"put\" | \"delete\" | \"patch\""
+          "\"delete\" | \"post\" | \"put\" | \"patch\""
         ],
         "path": "src/core/server/http/router/route.ts",
         "deprecated": false,
@@ -9112,7 +9166,7 @@
         "children": [
           {
             "parentPluginId": "core",
-            "id": "def-server.request",
+            "id": "def-server.GetAuthHeaders.$1",
             "type": "Object",
             "tags": [],
             "label": "request",
@@ -9167,7 +9221,7 @@
         "children": [
           {
             "parentPluginId": "core",
-            "id": "def-server.request",
+            "id": "def-server.GetAuthState.$1",
             "type": "Object",
             "tags": [],
             "label": "request",
@@ -9198,7 +9252,7 @@
           "\nHttp request headers to read."
         ],
         "signature": [
-          "{ accept?: string | string[] | undefined; \"accept-language\"?: string | string[] | undefined; \"accept-patch\"?: string | string[] | undefined; \"accept-ranges\"?: string | string[] | undefined; \"access-control-allow-credentials\"?: string | string[] | undefined; \"access-control-allow-headers\"?: string | string[] | undefined; \"access-control-allow-methods\"?: string | string[] | undefined; \"access-control-allow-origin\"?: string | string[] | undefined; \"access-control-expose-headers\"?: string | string[] | undefined; \"access-control-max-age\"?: string | string[] | undefined; \"access-control-request-headers\"?: string | string[] | undefined; \"access-control-request-method\"?: string | string[] | undefined; age?: string | string[] | undefined; allow?: string | string[] | undefined; \"alt-svc\"?: string | string[] | undefined; authorization?: string | string[] | undefined; \"cache-control\"?: string | string[] | undefined; connection?: string | string[] | undefined; \"content-disposition\"?: string | string[] | undefined; \"content-encoding\"?: string | string[] | undefined; \"content-language\"?: string | string[] | undefined; \"content-length\"?: string | string[] | undefined; \"content-location\"?: string | string[] | undefined; \"content-range\"?: string | string[] | undefined; \"content-type\"?: string | string[] | undefined; cookie?: string | string[] | undefined; date?: string | string[] | undefined; expect?: string | string[] | undefined; expires?: string | string[] | undefined; forwarded?: string | string[] | undefined; from?: string | string[] | undefined; host?: string | string[] | undefined; \"if-match\"?: string | string[] | undefined; \"if-modified-since\"?: string | string[] | undefined; \"if-none-match\"?: string | string[] | undefined; \"if-unmodified-since\"?: string | string[] | undefined; \"last-modified\"?: string | string[] | undefined; location?: string | string[] | undefined; origin?: string | string[] | undefined; pragma?: string | string[] | undefined; \"proxy-authenticate\"?: string | string[] | undefined; \"proxy-authorization\"?: string | string[] | undefined; \"public-key-pins\"?: string | string[] | undefined; range?: string | string[] | undefined; referer?: string | string[] | undefined; \"retry-after\"?: string | string[] | undefined; \"sec-websocket-accept\"?: string | string[] | undefined; \"sec-websocket-extensions\"?: string | string[] | undefined; \"sec-websocket-key\"?: string | string[] | undefined; \"sec-websocket-protocol\"?: string | string[] | undefined; \"sec-websocket-version\"?: string | string[] | undefined; \"set-cookie\"?: string | string[] | undefined; \"strict-transport-security\"?: string | string[] | undefined; tk?: string | string[] | undefined; trailer?: string | string[] | undefined; \"transfer-encoding\"?: string | string[] | undefined; upgrade?: string | string[] | undefined; \"user-agent\"?: string | string[] | undefined; vary?: string | string[] | undefined; via?: string | string[] | undefined; warning?: string | string[] | undefined; \"www-authenticate\"?: string | string[] | undefined; } & { [header: string]: string | string[] | undefined; }"
+          "{ from?: string | string[] | undefined; date?: string | string[] | undefined; origin?: string | string[] | undefined; range?: string | string[] | undefined; warning?: string | string[] | undefined; location?: string | string[] | undefined; allow?: string | string[] | undefined; accept?: string | string[] | undefined; \"accept-language\"?: string | string[] | undefined; \"accept-patch\"?: string | string[] | undefined; \"accept-ranges\"?: string | string[] | undefined; \"access-control-allow-credentials\"?: string | string[] | undefined; \"access-control-allow-headers\"?: string | string[] | undefined; \"access-control-allow-methods\"?: string | string[] | undefined; \"access-control-allow-origin\"?: string | string[] | undefined; \"access-control-expose-headers\"?: string | string[] | undefined; \"access-control-max-age\"?: string | string[] | undefined; \"access-control-request-headers\"?: string | string[] | undefined; \"access-control-request-method\"?: string | string[] | undefined; age?: string | string[] | undefined; \"alt-svc\"?: string | string[] | undefined; authorization?: string | string[] | undefined; \"cache-control\"?: string | string[] | undefined; connection?: string | string[] | undefined; \"content-disposition\"?: string | string[] | undefined; \"content-encoding\"?: string | string[] | undefined; \"content-language\"?: string | string[] | undefined; \"content-length\"?: string | string[] | undefined; \"content-location\"?: string | string[] | undefined; \"content-range\"?: string | string[] | undefined; \"content-type\"?: string | string[] | undefined; cookie?: string | string[] | undefined; etag?: string | string[] | undefined; expect?: string | string[] | undefined; expires?: string | string[] | undefined; forwarded?: string | string[] | undefined; host?: string | string[] | undefined; \"if-match\"?: string | string[] | undefined; \"if-modified-since\"?: string | string[] | undefined; \"if-none-match\"?: string | string[] | undefined; \"if-unmodified-since\"?: string | string[] | undefined; \"last-modified\"?: string | string[] | undefined; pragma?: string | string[] | undefined; \"proxy-authenticate\"?: string | string[] | undefined; \"proxy-authorization\"?: string | string[] | undefined; \"public-key-pins\"?: string | string[] | undefined; referer?: string | string[] | undefined; \"retry-after\"?: string | string[] | undefined; \"sec-websocket-accept\"?: string | string[] | undefined; \"sec-websocket-extensions\"?: string | string[] | undefined; \"sec-websocket-key\"?: string | string[] | undefined; \"sec-websocket-protocol\"?: string | string[] | undefined; \"sec-websocket-version\"?: string | string[] | undefined; \"set-cookie\"?: string | string[] | undefined; \"strict-transport-security\"?: string | string[] | undefined; tk?: string | string[] | undefined; trailer?: string | string[] | undefined; \"transfer-encoding\"?: string | string[] | undefined; upgrade?: string | string[] | undefined; \"user-agent\"?: string | string[] | undefined; vary?: string | string[] | undefined; via?: string | string[] | undefined; \"www-authenticate\"?: string | string[] | undefined; } & { [header: string]: string | string[] | undefined; }"
         ],
         "path": "src/core/server/http/router/headers.ts",
         "deprecated": false,
@@ -9280,7 +9334,7 @@
         "children": [
           {
             "parentPluginId": "core",
-            "id": "def-server.request",
+            "id": "def-server.IsAuthenticated.$1",
             "type": "Object",
             "tags": [],
             "label": "request",
@@ -9327,7 +9381,7 @@
             "section": "def-server.RouteConfigOptions",
             "text": "RouteConfigOptions"
           },
-          "<Method>, \"timeout\" | \"tags\" | \"authRequired\" | \"xsrfRequired\">> : Required<",
+          "<Method>, \"tags\" | \"timeout\" | \"authRequired\" | \"xsrfRequired\">> : Required<",
           {
             "pluginId": "core",
             "scope": "server",
@@ -9541,7 +9595,7 @@
           "\nSet of well-known HTTP headers."
         ],
         "signature": [
-          "\"accept\" | \"accept-language\" | \"accept-patch\" | \"accept-ranges\" | \"access-control-allow-credentials\" | \"access-control-allow-headers\" | \"access-control-allow-methods\" | \"access-control-allow-origin\" | \"access-control-expose-headers\" | \"access-control-max-age\" | \"access-control-request-headers\" | \"access-control-request-method\" | \"age\" | \"allow\" | \"alt-svc\" | \"authorization\" | \"cache-control\" | \"connection\" | \"content-disposition\" | \"content-encoding\" | \"content-language\" | \"content-length\" | \"content-location\" | \"content-range\" | \"content-type\" | \"cookie\" | \"date\" | \"expect\" | \"expires\" | \"forwarded\" | \"from\" | \"host\" | \"if-match\" | \"if-modified-since\" | \"if-none-match\" | \"if-unmodified-since\" | \"last-modified\" | \"location\" | \"origin\" | \"pragma\" | \"proxy-authenticate\" | \"proxy-authorization\" | \"public-key-pins\" | \"range\" | \"referer\" | \"retry-after\" | \"sec-websocket-accept\" | \"sec-websocket-extensions\" | \"sec-websocket-key\" | \"sec-websocket-protocol\" | \"sec-websocket-version\" | \"set-cookie\" | \"strict-transport-security\" | \"tk\" | \"trailer\" | \"transfer-encoding\" | \"upgrade\" | \"user-agent\" | \"vary\" | \"via\" | \"warning\" | \"www-authenticate\""
+          "\"from\" | \"date\" | \"origin\" | \"range\" | \"warning\" | \"location\" | \"allow\" | \"accept\" | \"accept-language\" | \"accept-patch\" | \"accept-ranges\" | \"access-control-allow-credentials\" | \"access-control-allow-headers\" | \"access-control-allow-methods\" | \"access-control-allow-origin\" | \"access-control-expose-headers\" | \"access-control-max-age\" | \"access-control-request-headers\" | \"access-control-request-method\" | \"age\" | \"alt-svc\" | \"authorization\" | \"cache-control\" | \"connection\" | \"content-disposition\" | \"content-encoding\" | \"content-language\" | \"content-length\" | \"content-location\" | \"content-range\" | \"content-type\" | \"cookie\" | \"etag\" | \"expect\" | \"expires\" | \"forwarded\" | \"host\" | \"if-match\" | \"if-modified-since\" | \"if-none-match\" | \"if-unmodified-since\" | \"last-modified\" | \"pragma\" | \"proxy-authenticate\" | \"proxy-authorization\" | \"public-key-pins\" | \"referer\" | \"retry-after\" | \"sec-websocket-accept\" | \"sec-websocket-extensions\" | \"sec-websocket-key\" | \"sec-websocket-protocol\" | \"sec-websocket-version\" | \"set-cookie\" | \"strict-transport-security\" | \"tk\" | \"trailer\" | \"transfer-encoding\" | \"upgrade\" | \"user-agent\" | \"vary\" | \"via\" | \"www-authenticate\""
         ],
         "path": "src/core/server/http/router/headers.ts",
         "deprecated": false,
@@ -9857,7 +9911,7 @@
         "children": [
           {
             "parentPluginId": "core",
-            "id": "def-server.request",
+            "id": "def-server.OnPostAuthHandler.$1",
             "type": "Object",
             "tags": [],
             "label": "request",
@@ -9877,7 +9931,7 @@
           },
           {
             "parentPluginId": "core",
-            "id": "def-server.response",
+            "id": "def-server.OnPostAuthHandler.$2",
             "type": "Object",
             "tags": [],
             "label": "response",
@@ -10018,7 +10072,7 @@
           },
           {
             "parentPluginId": "core",
-            "id": "def-server.toolkit",
+            "id": "def-server.OnPostAuthHandler.$3",
             "type": "Object",
             "tags": [],
             "label": "toolkit",
@@ -10204,7 +10258,7 @@
         "children": [
           {
             "parentPluginId": "core",
-            "id": "def-server.request",
+            "id": "def-server.OnPreAuthHandler.$1",
             "type": "Object",
             "tags": [],
             "label": "request",
@@ -10224,7 +10278,7 @@
           },
           {
             "parentPluginId": "core",
-            "id": "def-server.response",
+            "id": "def-server.OnPreAuthHandler.$2",
             "type": "Object",
             "tags": [],
             "label": "response",
@@ -10365,7 +10419,7 @@
           },
           {
             "parentPluginId": "core",
-            "id": "def-server.toolkit",
+            "id": "def-server.OnPreAuthHandler.$3",
             "type": "Object",
             "tags": [],
             "label": "toolkit",
@@ -10427,7 +10481,7 @@
         "children": [
           {
             "parentPluginId": "core",
-            "id": "def-server.request",
+            "id": "def-server.OnPreResponseHandler.$1",
             "type": "Object",
             "tags": [],
             "label": "request",
@@ -10447,7 +10501,7 @@
           },
           {
             "parentPluginId": "core",
-            "id": "def-server.preResponse",
+            "id": "def-server.OnPreResponseHandler.$2",
             "type": "Object",
             "tags": [],
             "label": "preResponse",
@@ -10466,7 +10520,7 @@
           },
           {
             "parentPluginId": "core",
-            "id": "def-server.toolkit",
+            "id": "def-server.OnPreResponseHandler.$3",
             "type": "Object",
             "tags": [],
             "label": "toolkit",
@@ -10652,7 +10706,7 @@
         "children": [
           {
             "parentPluginId": "core",
-            "id": "def-server.request",
+            "id": "def-server.OnPreRoutingHandler.$1",
             "type": "Object",
             "tags": [],
             "label": "request",
@@ -10672,7 +10726,7 @@
           },
           {
             "parentPluginId": "core",
-            "id": "def-server.response",
+            "id": "def-server.OnPreRoutingHandler.$2",
             "type": "Object",
             "tags": [],
             "label": "response",
@@ -10813,7 +10867,7 @@
           },
           {
             "parentPluginId": "core",
-            "id": "def-server.toolkit",
+            "id": "def-server.OnPreRoutingHandler.$3",
             "type": "Object",
             "tags": [],
             "label": "toolkit",
@@ -10898,7 +10952,7 @@
         "children": [
           {
             "parentPluginId": "core",
-            "id": "def-server.context",
+            "id": "def-server.RequestHandler.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "context",
@@ -10911,7 +10965,7 @@
           },
           {
             "parentPluginId": "core",
-            "id": "def-server.request",
+            "id": "def-server.RequestHandler.$2",
             "type": "Object",
             "tags": [],
             "label": "request",
@@ -10931,7 +10985,7 @@
           },
           {
             "parentPluginId": "core",
-            "id": "def-server.response",
+            "id": "def-server.RequestHandler.$3",
             "type": "Uncategorized",
             "tags": [],
             "label": "response",
@@ -11167,7 +11221,7 @@
         "children": [
           {
             "parentPluginId": "core",
-            "id": "def-server.context",
+            "id": "def-server.RequestHandlerContextProvider.$1",
             "type": "Object",
             "tags": [],
             "label": "context",
@@ -11180,7 +11234,7 @@
           },
           {
             "parentPluginId": "core",
-            "id": "def-server.rest",
+            "id": "def-server.RequestHandlerContextProvider.$2",
             "type": "Object",
             "tags": [],
             "label": "rest",
@@ -11782,7 +11836,7 @@
         "children": [
           {
             "parentPluginId": "core",
-            "id": "def-server.handler",
+            "id": "def-server.RequestHandlerWrapper.$1",
             "type": "Function",
             "tags": [],
             "label": "handler",
@@ -11820,7 +11874,7 @@
             "children": [
               {
                 "parentPluginId": "core",
-                "id": "def-server.context",
+                "id": "def-server.RequestHandlerWrapper.$1.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "context",
@@ -11833,7 +11887,7 @@
               },
               {
                 "parentPluginId": "core",
-                "id": "def-server.request",
+                "id": "def-server.RequestHandlerWrapper.$1.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "request",
@@ -11853,7 +11907,7 @@
               },
               {
                 "parentPluginId": "core",
-                "id": "def-server.response",
+                "id": "def-server.RequestHandlerWrapper.$1.$3",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "response",
@@ -11911,7 +11965,7 @@
           "\nHttp response headers to set."
         ],
         "signature": [
-          "Record<\"accept\" | \"accept-language\" | \"accept-patch\" | \"accept-ranges\" | \"access-control-allow-credentials\" | \"access-control-allow-headers\" | \"access-control-allow-methods\" | \"access-control-allow-origin\" | \"access-control-expose-headers\" | \"access-control-max-age\" | \"access-control-request-headers\" | \"access-control-request-method\" | \"age\" | \"allow\" | \"alt-svc\" | \"authorization\" | \"cache-control\" | \"connection\" | \"content-disposition\" | \"content-encoding\" | \"content-language\" | \"content-length\" | \"content-location\" | \"content-range\" | \"content-type\" | \"cookie\" | \"date\" | \"expect\" | \"expires\" | \"forwarded\" | \"from\" | \"host\" | \"if-match\" | \"if-modified-since\" | \"if-none-match\" | \"if-unmodified-since\" | \"last-modified\" | \"location\" | \"origin\" | \"pragma\" | \"proxy-authenticate\" | \"proxy-authorization\" | \"public-key-pins\" | \"range\" | \"referer\" | \"retry-after\" | \"sec-websocket-accept\" | \"sec-websocket-extensions\" | \"sec-websocket-key\" | \"sec-websocket-protocol\" | \"sec-websocket-version\" | \"set-cookie\" | \"strict-transport-security\" | \"tk\" | \"trailer\" | \"transfer-encoding\" | \"upgrade\" | \"user-agent\" | \"vary\" | \"via\" | \"warning\" | \"www-authenticate\", string | string[]> | Record<string, string | string[]>"
+          "Record<\"from\" | \"date\" | \"origin\" | \"range\" | \"warning\" | \"location\" | \"allow\" | \"accept\" | \"accept-language\" | \"accept-patch\" | \"accept-ranges\" | \"access-control-allow-credentials\" | \"access-control-allow-headers\" | \"access-control-allow-methods\" | \"access-control-allow-origin\" | \"access-control-expose-headers\" | \"access-control-max-age\" | \"access-control-request-headers\" | \"access-control-request-method\" | \"age\" | \"alt-svc\" | \"authorization\" | \"cache-control\" | \"connection\" | \"content-disposition\" | \"content-encoding\" | \"content-language\" | \"content-length\" | \"content-location\" | \"content-range\" | \"content-type\" | \"cookie\" | \"etag\" | \"expect\" | \"expires\" | \"forwarded\" | \"host\" | \"if-match\" | \"if-modified-since\" | \"if-none-match\" | \"if-unmodified-since\" | \"last-modified\" | \"pragma\" | \"proxy-authenticate\" | \"proxy-authorization\" | \"public-key-pins\" | \"referer\" | \"retry-after\" | \"sec-websocket-accept\" | \"sec-websocket-extensions\" | \"sec-websocket-key\" | \"sec-websocket-protocol\" | \"sec-websocket-version\" | \"set-cookie\" | \"strict-transport-security\" | \"tk\" | \"trailer\" | \"transfer-encoding\" | \"upgrade\" | \"user-agent\" | \"vary\" | \"via\" | \"www-authenticate\", string | string[]> | Record<string, string | string[]>"
         ],
         "path": "src/core/server/http/router/headers.ts",
         "deprecated": false,
@@ -11943,7 +11997,7 @@
           "\nThe set of common HTTP methods supported by Kibana routing."
         ],
         "signature": [
-          "\"get\" | \"options\" | \"post\" | \"put\" | \"delete\" | \"patch\""
+          "\"options\" | \"delete\" | \"get\" | \"post\" | \"put\" | \"patch\""
         ],
         "path": "src/core/server/http/router/route.ts",
         "deprecated": false,
@@ -12157,7 +12211,7 @@
         "children": [
           {
             "parentPluginId": "core",
-            "id": "def-server.route",
+            "id": "def-server.RouteRegistrar.$1",
             "type": "Object",
             "tags": [],
             "label": "route",
@@ -12177,7 +12231,7 @@
           },
           {
             "parentPluginId": "core",
-            "id": "def-server.handler",
+            "id": "def-server.RouteRegistrar.$2",
             "type": "Function",
             "tags": [],
             "label": "handler",
@@ -12389,7 +12443,7 @@
             "children": [
               {
                 "parentPluginId": "core",
-                "id": "def-server.context",
+                "id": "def-server.RouteRegistrar.$2.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "context",
@@ -12402,7 +12456,7 @@
               },
               {
                 "parentPluginId": "core",
-                "id": "def-server.request",
+                "id": "def-server.RouteRegistrar.$2.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "request",
@@ -12422,7 +12476,7 @@
               },
               {
                 "parentPluginId": "core",
-                "id": "def-server.response",
+                "id": "def-server.RouteRegistrar.$2.$3",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "response",
@@ -12472,7 +12526,7 @@
         "children": [
           {
             "parentPluginId": "core",
-            "id": "def-server.data",
+            "id": "def-server.RouteValidationFunction.$1",
             "type": "Any",
             "tags": [],
             "label": "data",
@@ -12485,7 +12539,7 @@
           },
           {
             "parentPluginId": "core",
-            "id": "def-server.validationResult",
+            "id": "def-server.RouteValidationFunction.$2",
             "type": "Object",
             "tags": [],
             "label": "validationResult",
@@ -12515,9 +12569,21 @@
           "\nAllowed property validation options: either @kbn/config-schema validations or custom validation functions\n\nSee {@link RouteValidationFunction} for custom validation.\n"
         ],
         "signature": [
-          "ObjectType",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "server",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-server.ObjectType",
+            "text": "ObjectType"
+          },
           "<any> | ",
-          "Type",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "server",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-server.Type",
+            "text": "Type"
+          },
           "<T> | ",
           {
             "pluginId": "core",
@@ -12572,7 +12638,7 @@
           "\nSet of HTTP methods not changing the state of the server."
         ],
         "signature": [
-          "\"get\" | \"options\""
+          "\"options\" | \"get\""
         ],
         "path": "src/core/server/http/router/route.ts",
         "deprecated": false,

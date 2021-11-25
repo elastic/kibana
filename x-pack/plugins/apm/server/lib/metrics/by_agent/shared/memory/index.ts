@@ -13,7 +13,7 @@ import {
   METRIC_SYSTEM_FREE_MEMORY,
   METRIC_SYSTEM_TOTAL_MEMORY,
 } from '../../../../../../common/elasticsearch_fieldnames';
-import { Setup, SetupTimeRange } from '../../../../helpers/setup_request';
+import { Setup } from '../../../../helpers/setup_request';
 import { fetchAndTransformMetrics } from '../../../fetch_and_transform_metrics';
 import { ChartBase } from '../../../types';
 
@@ -76,12 +76,16 @@ export async function getMemoryChartData({
   setup,
   serviceName,
   serviceNodeName,
+  start,
+  end,
 }: {
   environment: string;
   kuery: string;
-  setup: Setup & SetupTimeRange;
+  setup: Setup;
   serviceName: string;
   serviceNodeName?: string;
+  start: number;
+  end: number;
 }) {
   return withApmSpan('get_memory_metrics_charts', async () => {
     const cgroupResponse = await fetchAndTransformMetrics({
@@ -90,6 +94,8 @@ export async function getMemoryChartData({
       setup,
       serviceName,
       serviceNodeName,
+      start,
+      end,
       chartBase,
       aggs: {
         memoryUsedAvg: { avg: { script: percentCgroupMemoryUsedScript } },
@@ -101,13 +107,15 @@ export async function getMemoryChartData({
       operationName: 'get_cgroup_memory_metrics_charts',
     });
 
-    if (cgroupResponse.noHits) {
+    if (cgroupResponse.series.length === 0) {
       return await fetchAndTransformMetrics({
         environment,
         kuery,
         setup,
         serviceName,
         serviceNodeName,
+        start,
+        end,
         chartBase,
         aggs: {
           memoryUsedAvg: { avg: { script: percentSystemMemoryUsedScript } },

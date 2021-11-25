@@ -16,3 +16,13 @@ export const findRulesStatusesSchema = t.exact(
 export type FindRulesStatusesSchema = t.TypeOf<typeof findRulesStatusesSchema>;
 
 export type FindRulesStatusesSchemaDecoded = FindRulesStatusesSchema;
+
+export const findRuleStatusSchema = t.exact(
+  t.type({
+    ruleId: t.string,
+  })
+);
+
+export type FindRuleStatusSchema = t.TypeOf<typeof findRuleStatusSchema>;
+
+export type FindRuleStatusSchemaDecoded = FindRuleStatusSchema;

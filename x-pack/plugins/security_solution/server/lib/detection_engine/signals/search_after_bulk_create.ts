@@ -6,7 +6,7 @@
  */
 
 import { identity } from 'lodash';
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { singleSearchAfter } from './single_search_after';
 import { filterEventsAgainstList } from './filters/filter_events_against_list';
 import { sendAlertTelemetryEvents } from './send_telemetry_events';
@@ -23,25 +23,25 @@ import { SearchAfterAndBulkCreateParams, SearchAfterAndBulkCreateReturnType } fr
 
 // search_after through documents and re-index using bulk endpoint.
 export const searchAfterAndBulkCreate = async ({
-  tuple,
-  ruleSO,
+  buildReasonMessage,
+  buildRuleMessage,
+  bulkCreate,
+  completeRule,
+  enrichment = identity,
+  eventsTelemetry,
   exceptionsList,
-  services,
+  filter,
+  inputIndexPattern,
   listClient,
   logger,
-  eventsTelemetry,
-  inputIndexPattern,
-  filter,
   pageSize,
-  buildRuleMessage,
-  buildReasonMessage,
-  enrichment = identity,
-  bulkCreate,
-  wrapHits,
+  services,
   sortOrder,
   trackTotalHits,
+  tuple,
+  wrapHits,
 }: SearchAfterAndBulkCreateParams): Promise<SearchAfterAndBulkCreateReturnType> => {
-  const ruleParams = ruleSO.attributes.params;
+  const ruleParams = completeRule.ruleParams;
   let toReturn = createSearchAfterReturnType();
 
   // sortId tells us where to start our next consecutive search_after query
@@ -182,7 +182,7 @@ export const searchAfterAndBulkCreate = async ({
         break;
       }
     } catch (exc: unknown) {
-      logger.error(buildRuleMessage(`[-] search_after and bulk threw an error ${exc}`));
+      logger.error(buildRuleMessage(`[-] search_after_bulk_create threw an error ${exc}`));
       return mergeReturns([
         toReturn,
         createSearchAfterReturnType({

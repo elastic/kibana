@@ -5,17 +5,24 @@
  * 2.0.
  */
 
+import { schema } from '@kbn/config-schema';
+
 import { PluginInitializerContext } from '../../../../src/core/server';
 
-import { ConfigSchema } from './config';
 import { MetricsEntitiesPlugin } from './plugin';
 
 //  This exports static code and TypeScript types,
 //  as well as, Kibana Platform `plugin()` initializer.
 
-export const config = { schema: ConfigSchema };
 export const plugin = (initializerContext: PluginInitializerContext): MetricsEntitiesPlugin => {
   return new MetricsEntitiesPlugin(initializerContext);
 };
 
-export { MetricsEntitiesPluginSetup, MetricsEntitiesPluginStart } from './types';
+export type { MetricsEntitiesPluginSetup, MetricsEntitiesPluginStart } from './types';
+
+export const config = {
+  schema: schema.object({
+    // This plugin is experimental and should be disabled by default.
+    enabled: schema.boolean({ defaultValue: false }),
+  }),
+};

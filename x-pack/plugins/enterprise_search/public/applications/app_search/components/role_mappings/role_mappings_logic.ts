@@ -48,11 +48,9 @@ const emptyUser = { username: '', email: '' } as ElasticsearchUser;
 interface RoleMappingsActions extends RoleMappingsBaseActions {
   setRoleMapping(roleMapping: ASRoleMapping): { roleMapping: ASRoleMapping };
   setSingleUserRoleMapping(data?: UserMapping): { singleUserRoleMapping: UserMapping };
-  setRoleMappings({
-    roleMappings,
-  }: {
+  setRoleMappings({ roleMappings }: { roleMappings: ASRoleMapping[] }): {
     roleMappings: ASRoleMapping[];
-  }): { roleMappings: ASRoleMapping[] };
+  };
   setRoleMappingsData(data: RoleMappingsServerDetails): RoleMappingsServerDetails;
   handleAccessAllEnginesChange(selected: boolean): { selected: boolean };
   handleEngineSelectionChange(engineNames: string[]): { engineNames: string[] };
@@ -178,6 +176,7 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
       null,
       {
         setRoleMapping: (_, { roleMapping }) => roleMapping,
+        initializeRoleMappings: () => null,
         resetState: () => null,
         closeUsersAndRolesFlyout: () => null,
       },
@@ -357,7 +356,7 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
       const route = '/internal/app_search/role_mappings/enable_role_based_access';
 
       try {
-        const response = await http.post(route);
+        const response = await http.post<{ roleMappings: ASRoleMapping[] }>(route);
         actions.setRoleMappings(response);
       } catch (e) {
         flashAPIErrors(e);
@@ -368,7 +367,7 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
       const route = '/internal/app_search/role_mappings';
 
       try {
-        const response = await http.get(route);
+        const response = await http.get<RoleMappingsServerDetails>(route);
         actions.setRoleMappingsData(response);
       } catch (e) {
         flashAPIErrors(e);
@@ -467,7 +466,10 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
       });
 
       try {
-        const response = await http.post('/internal/app_search/single_user_role_mapping', { body });
+        const response = await http.post<UserMapping | undefined>(
+          '/internal/app_search/single_user_role_mapping',
+          { body }
+        );
         actions.setSingleUserRoleMapping(response);
         actions.setUserCreated();
         actions.initializeRoleMappings();

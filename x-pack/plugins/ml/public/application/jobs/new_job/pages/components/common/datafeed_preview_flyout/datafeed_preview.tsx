@@ -29,9 +29,10 @@ export const DatafeedPreview: FC<{
     jobs: { datafeedPreview },
   } = useMlApiContext();
   // the ace editor requires a fixed height
-  const editorHeight = useMemo(() => `${window.innerHeight - 230 - heightOffset}px`, [
-    heightOffset,
-  ]);
+  const editorHeight = useMemo(
+    () => `${window.innerHeight - 230 - heightOffset}px`,
+    [heightOffset]
+  );
   const [loading, setLoading] = useState(false);
   const [previewJsonString, setPreviewJsonString] = useState('');
   const [outOfDate, setOutOfDate] = useState(false);

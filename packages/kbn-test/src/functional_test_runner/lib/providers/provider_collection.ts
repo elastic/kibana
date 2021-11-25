@@ -67,7 +67,7 @@ export class ProviderCollection {
     };
 
     if (provider.prototype instanceof GenericFtrService) {
-      const Constructor = (provider as any) as new (ctx: any) => any;
+      const Constructor = provider as any as new (ctx: any) => any;
       return new Constructor(ctx);
     }
 

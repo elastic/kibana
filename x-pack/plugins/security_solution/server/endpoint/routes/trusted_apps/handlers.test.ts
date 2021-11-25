@@ -6,6 +6,7 @@
  */
 
 import { KibanaResponseFactory } from 'kibana/server';
+import { Subject } from 'rxjs';
 
 import { xpackMocks } from '../../../fixtures';
 import { loggingSystemMock, httpServerMock } from '../../../../../../../src/core/server/mocks';
@@ -20,6 +21,9 @@ import {
   OperatingSystem,
   TrustedApp,
 } from '../../../../common/endpoint/types';
+import { LicenseService } from '../../../../common/license';
+import { ILicense } from '../../../../../licensing/common/types';
+import { licenseMock } from '../../../../../licensing/common/licensing.mock';
 import { parseExperimentalConfigValue } from '../../../../common/experimental_features';
 import { EndpointAppContextService } from '../../endpoint_app_context_services';
 import { createConditionEntry, createEntryMatch } from './mapping';
@@ -41,7 +45,12 @@ import { updateExceptionListItemImplementationMock } from './test_utils';
 import { Logger } from '@kbn/logging';
 import { PackagePolicyServiceInterface } from '../../../../../fleet/server';
 import { createPackagePolicyServiceMock } from '../../../../../fleet/server/mocks';
-import { getPackagePoliciesResponse, getTrustedAppByPolicy } from './mocks';
+import {
+  getPackagePoliciesResponse,
+  getPutTrustedAppByPolicyMock,
+  getTrustedAppByPolicy,
+} from './mocks';
+import { EndpointLicenseError } from '../../errors';
 
 const EXCEPTION_LIST_ITEM: ExceptionListItemSchema = {
   _version: 'abc123',
@@ -95,12 +104,19 @@ const TRUSTED_APP: TrustedApp = {
   ],
 };
 
-const packagePolicyClient = createPackagePolicyServiceMock() as jest.Mocked<PackagePolicyServiceInterface>;
+const Platinum = licenseMock.createLicense({ license: { type: 'platinum', mode: 'platinum' } });
+const Gold = licenseMock.createLicense({ license: { type: 'gold', mode: 'gold' } });
 
-describe('handlers', () => {
+const packagePolicyClient =
+  createPackagePolicyServiceMock() as jest.Mocked<PackagePolicyServiceInterface>;
+
+describe('TrustedApps API Handlers', () => {
   beforeEach(() => {
     packagePolicyClient.getByIDs.mockReset();
   });
+  const licenseEmitter: Subject<ILicense> = new Subject();
+  const licenseService = new LicenseService();
+  licenseService.start(licenseEmitter);
 
   const createAppContextMock = () => {
     const context = {
@@ -111,33 +127,33 @@ describe('handlers', () => {
     };
 
     context.service.getPackagePolicyService = () => packagePolicyClient;
+    context.service.getLicenseService = () => licenseService;
 
     // Ensure that `logFactory.get()` always returns the same instance for the same given prefix
     const instances = new Map<string, ReturnType<typeof context.logFactory.get>>();
     const logFactoryGetMock = context.logFactory.get.getMockImplementation();
-    context.logFactory.get.mockImplementation(
-      (prefix): Logger => {
-        if (!instances.has(prefix)) {
-          instances.set(prefix, logFactoryGetMock!(prefix)!);
-        }
-        return instances.get(prefix)!;
+    context.logFactory.get.mockImplementation((prefix): Logger => {
+      if (!instances.has(prefix)) {
+        instances.set(prefix, logFactoryGetMock!(prefix)!);
       }
-    );
+      return instances.get(prefix)!;
+    });
 
     return context;
   };
 
   let appContextMock: ReturnType<typeof createAppContextMock> = createAppContextMock();
-  let exceptionsListClient: jest.Mocked<ExceptionListClient> = listMock.getExceptionListClient() as jest.Mocked<ExceptionListClient>;
+  let exceptionsListClient: jest.Mocked<ExceptionListClient> =
+    listMock.getExceptionListClient() as jest.Mocked<ExceptionListClient>;
 
   const createHandlerContextMock = () =>
-    (({
+    ({
       ...xpackMocks.createRequestHandlerContext(),
       lists: {
         getListClient: jest.fn(),
         getExceptionListClient: jest.fn().mockReturnValue(exceptionsListClient),
       },
-    } as unknown) as jest.Mocked<SecuritySolutionRequestHandlerContext>);
+    } as unknown as jest.Mocked<SecuritySolutionRequestHandlerContext>);
 
   const assertResponse = <T>(
     response: jest.Mocked<KibanaResponseFactory>,
@@ -151,6 +167,7 @@ describe('handlers', () => {
   beforeEach(() => {
     appContextMock = createAppContextMock();
     exceptionsListClient = listMock.getExceptionListClient() as jest.Mocked<ExceptionListClient>;
+    licenseEmitter.next(Platinum);
   });
 
   describe('getTrustedAppsDeleteRouteHandler', () => {
@@ -178,6 +195,7 @@ describe('handlers', () => {
       const mockResponse = httpServerMock.createResponseFactory();
 
       exceptionsListClient.deleteExceptionListItem.mockResolvedValue(null);
+      exceptionsListClient.getExceptionListItem.mockResolvedValue(null);
 
       await deleteTrustedAppHandler(
         createHandlerContextMock(),
@@ -261,6 +279,27 @@ describe('handlers', () => {
         body: { message: error.message, attributes: { type: error.type } },
       });
     });
+
+    it('should return error when license under platinum and by policy', async () => {
+      licenseEmitter.next(Gold);
+      const mockResponse = httpServerMock.createResponseFactory();
+      packagePolicyClient.getByIDs.mockReset();
+      packagePolicyClient.getByIDs.mockResolvedValueOnce(getPackagePoliciesResponse());
+
+      const trustedAppByPolicy = getTrustedAppByPolicy();
+      await createTrustedAppHandler(
+        createHandlerContextMock(),
+        httpServerMock.createKibanaRequest({ body: trustedAppByPolicy }),
+        mockResponse
+      );
+
+      const error = new EndpointLicenseError();
+
+      expect(appContextMock.logFactory.get('trusted_apps').error).toHaveBeenCalledWith(error);
+      expect(mockResponse.badRequest).toHaveBeenCalledWith({
+        body: { message: error.message, attributes: { type: error.name } },
+      });
+    });
   });
 
   describe('getTrustedAppsListRouteHandler', () => {
@@ -337,14 +376,7 @@ describe('handlers', () => {
 
   describe('getTrustedAppsSummaryHandler', () => {
     let getTrustedAppsSummaryHandler: ReturnType<typeof getTrustedAppsSummaryRouteHandler>;
-
-    beforeEach(() => {
-      getTrustedAppsSummaryHandler = getTrustedAppsSummaryRouteHandler(appContextMock);
-    });
-
-    it('should return ok with list when no errors', async () => {
-      const mockResponse = httpServerMock.createResponseFactory();
-
+    const getExceptionsListClientMokcResolvedValue = () => {
       exceptionsListClient.findExceptionListItem.mockResolvedValue({
         data: [
           // Linux === 5
@@ -373,10 +405,45 @@ describe('handlers', () => {
         per_page: 100,
         total: 23,
       });
+    };
+
+    beforeEach(() => {
+      getTrustedAppsSummaryHandler = getTrustedAppsSummaryRouteHandler(appContextMock);
+    });
+
+    it('should return ok with list when no errors', async () => {
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      getExceptionsListClientMokcResolvedValue();
 
       await getTrustedAppsSummaryHandler(
         createHandlerContextMock(),
         httpServerMock.createKibanaRequest(),
+        mockResponse
+      );
+
+      assertResponse(mockResponse, 'ok', {
+        linux: 5,
+        macos: 3,
+        windows: 15,
+        total: 23,
+      });
+    });
+
+    it('should return ok with list when no errors filtering by policyId', async () => {
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      const policyId = 'caf1a334-53f3-4be9-814d-a32245f43d34';
+
+      getExceptionsListClientMokcResolvedValue();
+
+      await getTrustedAppsSummaryHandler(
+        createHandlerContextMock(),
+        httpServerMock.createKibanaRequest({
+          query: {
+            kuery: `exception-list-agnostic.attributes.tags:"policy:${policyId}" OR exception-list-agnostic.attributes.tags:"policy:all"`,
+          },
+        }),
         mockResponse
       );
 
@@ -516,7 +583,7 @@ describe('handlers', () => {
     });
 
     it('should return 404 if trusted app does not exist', async () => {
-      exceptionsListClient.getExceptionListItem.mockResolvedValueOnce(null);
+      exceptionsListClient.getExceptionListItem.mockResolvedValue(null);
 
       await updateHandler(
         createHandlerContextMock(),
@@ -550,17 +617,56 @@ describe('handlers', () => {
       packagePolicyClient.getByIDs.mockReset();
       packagePolicyClient.getByIDs.mockResolvedValueOnce(getPackagePoliciesResponse());
 
-      const trustedAppByPolicy = getTrustedAppByPolicy();
+      const exceptionByPolicy = getPutTrustedAppByPolicyMock();
+      const customExceptionListClient = {
+        ...exceptionsListClient,
+        getExceptionListItem: () => exceptionByPolicy,
+      };
+      const handlerContextMock = {
+        ...xpackMocks.createRequestHandlerContext(),
+        lists: {
+          getListClient: jest.fn(),
+          getExceptionListClient: jest.fn().mockReturnValue(customExceptionListClient),
+        },
+      } as unknown as jest.Mocked<SecuritySolutionRequestHandlerContext>;
       await updateHandler(
-        createHandlerContextMock(),
-        httpServerMock.createKibanaRequest({ body: trustedAppByPolicy }),
+        handlerContextMock,
+        httpServerMock.createKibanaRequest({ body: getTrustedAppByPolicy() }),
         mockResponse
       );
 
       expect(appContextMock.logFactory.get('trusted_apps').error).toHaveBeenCalledWith(
-        new TrustedAppPolicyNotExistsError(trustedAppByPolicy.name, [
+        new TrustedAppPolicyNotExistsError(exceptionByPolicy.name, [
           '9da95be9-9bee-4761-a8c4-28d6d9bd8c71',
         ])
+      );
+    });
+
+    it('should return error when license under platinum and by policy', async () => {
+      licenseEmitter.next(Gold);
+      packagePolicyClient.getByIDs.mockReset();
+      packagePolicyClient.getByIDs.mockResolvedValueOnce(getPackagePoliciesResponse());
+
+      const exceptionByPolicy = getPutTrustedAppByPolicyMock();
+      const customExceptionListClient = {
+        ...exceptionsListClient,
+        getExceptionListItem: () => exceptionByPolicy,
+      };
+      const handlerContextMock = {
+        ...xpackMocks.createRequestHandlerContext(),
+        lists: {
+          getListClient: jest.fn(),
+          getExceptionListClient: jest.fn().mockReturnValue(customExceptionListClient),
+        },
+      } as unknown as jest.Mocked<SecuritySolutionRequestHandlerContext>;
+      await updateHandler(
+        handlerContextMock,
+        httpServerMock.createKibanaRequest({ body: getTrustedAppByPolicy() }),
+        mockResponse
+      );
+
+      expect(appContextMock.logFactory.get('trusted_apps').error).toHaveBeenCalledWith(
+        new EndpointLicenseError()
       );
     });
   });

@@ -12,25 +12,26 @@ import { execSync } from 'child_process';
 // deep import to avoid loading the whole package
 import { getDataPath } from '@kbn/utils';
 import { readFileSync } from 'fs';
-import { ApmAgentConfig } from './types';
+import type { AgentConfigOptions } from 'elastic-apm-node';
 
 // https://www.elastic.co/guide/en/apm/agent/nodejs/current/configuration.html
-const DEFAULT_CONFIG: ApmAgentConfig = {
-  active: false,
+const DEFAULT_CONFIG: AgentConfigOptions = {
+  active: true,
+  contextPropagationOnly: true,
   environment: 'development',
   logUncaughtExceptions: true,
   globalLabels: {},
 };
 
-const CENTRALIZED_SERVICE_BASE_CONFIG: ApmAgentConfig = {
-  serverUrl: 'https://38b80fbd79fb4c91bae06b4642d4d093.apm.us-east-1.aws.cloud.es.io',
+const CENTRALIZED_SERVICE_BASE_CONFIG: AgentConfigOptions = {
+  serverUrl: 'https://kibana-ci-apm.apm.us-central1.gcp.cloud.es.io',
 
   // The secretToken below is intended to be hardcoded in this file even though
   // it makes it public. This is not a security/privacy issue. Normally we'd
   // instead disable the need for a secretToken in the APM Server config where
   // the data is transmitted to, but due to how it's being hosted, it's easier,
   // for now, to simply leave it in.
-  secretToken: 'ZQHYvrmXEx04ozge8F',
+  secretToken: '7YKhoXsO4MzjhXjx2c',
 
   centralConfig: false,
   metricsInterval: '30s',
@@ -39,7 +40,7 @@ const CENTRALIZED_SERVICE_BASE_CONFIG: ApmAgentConfig = {
   breakdownMetrics: true,
 };
 
-const CENTRALIZED_SERVICE_DIST_CONFIG: ApmAgentConfig = {
+const CENTRALIZED_SERVICE_DIST_CONFIG: AgentConfigOptions = {
   metricsInterval: '120s',
   captureBody: 'off',
   captureHeaders: false,
@@ -47,7 +48,7 @@ const CENTRALIZED_SERVICE_DIST_CONFIG: ApmAgentConfig = {
 };
 
 export class ApmConfiguration {
-  private baseConfig?: ApmAgentConfig;
+  private baseConfig?: AgentConfigOptions;
   private kibanaVersion: string;
   private pkgBuild: Record<string, any>;
 
@@ -62,7 +63,7 @@ export class ApmConfiguration {
     this.pkgBuild = build;
   }
 
-  public getConfig(serviceName: string): ApmAgentConfig {
+  public getConfig(serviceName: string): AgentConfigOptions {
     return {
       ...this.getBaseConfig(),
       serviceName,
@@ -71,6 +72,8 @@ export class ApmConfiguration {
 
   private getBaseConfig() {
     if (!this.baseConfig) {
+      const configFromSources = this.getConfigFromAllSources();
+
       this.baseConfig = merge(
         {
           serviceVersion: this.kibanaVersion,
@@ -79,9 +82,7 @@ export class ApmConfiguration {
         this.getUuidConfig(),
         this.getGitConfig(),
         this.getCiConfig(),
-        this.getConfigFromKibanaConfig(),
-        this.getDevConfig(),
-        this.getConfigFromEnv()
+        configFromSources
       );
 
       /**
@@ -107,11 +108,17 @@ export class ApmConfiguration {
   /**
    * Override some config values when specific environment variables are used
    */
-  private getConfigFromEnv(): ApmAgentConfig {
-    const config: ApmAgentConfig = {};
+  private getConfigFromEnv(): AgentConfigOptions {
+    const config: AgentConfigOptions = {};
 
     if (process.env.ELASTIC_APM_ACTIVE === 'true') {
       config.active = true;
+    }
+
+    if (process.env.ELASTIC_APM_CONTEXT_PROPAGATION_ONLY === 'true') {
+      config.contextPropagationOnly = true;
+    } else if (process.env.ELASTIC_APM_CONTEXT_PROPAGATION_ONLY === 'false') {
+      config.contextPropagationOnly = false;
     }
 
     if (process.env.ELASTIC_APM_ENVIRONMENT || process.env.NODE_ENV) {
@@ -142,7 +149,7 @@ export class ApmConfiguration {
    * Get the elastic.apm configuration from the --config file, supersedes the
    * default config.
    */
-  private getConfigFromKibanaConfig(): ApmAgentConfig {
+  private getConfigFromKibanaConfig(): AgentConfigOptions {
     return this.rawKibanaConfig?.elastic?.apm ?? {};
   }
 
@@ -150,7 +157,7 @@ export class ApmConfiguration {
    * Get the configuration from the apm.dev.js file, supersedes config
    * from the --config file, disabled when running the distributable
    */
-  private getDevConfig(): ApmAgentConfig {
+  private getDevConfig(): AgentConfigOptions {
     if (this.isDistributable) {
       return {};
     }
@@ -167,7 +174,7 @@ export class ApmConfiguration {
    * Determine the Kibana UUID, initialized the value of `globalLabels.kibana_uuid`
    * when the UUID can be determined.
    */
-  private getUuidConfig(): ApmAgentConfig {
+  private getUuidConfig(): AgentConfigOptions {
     // try to access the `server.uuid` value from the config file first.
     // if not manually defined, we will then read the value from the `{DATA_FOLDER}/uuid` file.
     // note that as the file is created by the platform AFTER apm init, the file
@@ -207,7 +214,7 @@ export class ApmConfiguration {
    * When running Kibana with ELASTIC_APM_ENVIRONMENT=ci we attempt to grab
    * some environment variables we populate in CI related to the build under test
    */
-  private getCiConfig(): ApmAgentConfig {
+  private getCiConfig(): AgentConfigOptions {
     if (process.env.ELASTIC_APM_ENVIRONMENT !== 'ci') {
       return {};
     }
@@ -248,5 +255,29 @@ export class ApmConfiguration {
     } catch {
       return {};
     }
+  }
+
+  /**
+   * Reads APM configuration from different sources and merges them together.
+   */
+  private getConfigFromAllSources(): AgentConfigOptions {
+    const config = merge(
+      {},
+      this.getConfigFromKibanaConfig(),
+      this.getDevConfig(),
+      this.getConfigFromEnv()
+    );
+
+    if (config.active === false && config.contextPropagationOnly !== false) {
+      throw new Error(
+        'APM is disabled, but context propagation is enabled. Please disable context propagation with contextPropagationOnly:false'
+      );
+    }
+
+    if (config.active === true) {
+      config.contextPropagationOnly = config.contextPropagationOnly ?? false;
+    }
+
+    return config;
   }
 }

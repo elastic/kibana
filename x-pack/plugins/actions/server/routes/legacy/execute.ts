@@ -6,12 +6,14 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { UsageCounter } from 'src/plugins/usage_collection/server';
 import { IRouter } from 'kibana/server';
 import { ILicenseState, verifyApiAccess, isErrorThatHandlesItsOwnResponse } from '../../lib';
 
 import { ActionTypeExecutorResult, ActionsRequestHandlerContext } from '../../types';
 import { BASE_ACTION_API_PATH } from '../../../common';
 import { asHttpRequestExecutionSource } from '../../lib/action_execution_source';
+import { trackLegacyRouteUsage } from '../../lib/track_legacy_route_usage';
 
 const paramSchema = schema.object({
   id: schema.string(),
@@ -23,7 +25,8 @@ const bodySchema = schema.object({
 
 export const executeActionRoute = (
   router: IRouter<ActionsRequestHandlerContext>,
-  licenseState: ILicenseState
+  licenseState: ILicenseState,
+  usageCounter?: UsageCounter
 ) => {
   router.post(
     {
@@ -43,6 +46,7 @@ export const executeActionRoute = (
       const actionsClient = context.actions.getActionsClient();
       const { params } = req.body;
       const { id } = req.params;
+      trackLegacyRouteUsage('execute', usageCounter);
       try {
         const body: ActionTypeExecutorResult<unknown> = await actionsClient.execute({
           params,

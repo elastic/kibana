@@ -25,6 +25,7 @@ import { CustomizePanelModal } from '../lib/panel/panel_header/panel_actions/cus
 import { EmbeddableStart } from '../plugin';
 import { createEmbeddablePanelMock } from '../mocks';
 import { mountWithIntl } from '@kbn/test/jest';
+import { OverlayStart } from 'kibana/public';
 
 let api: EmbeddableStart;
 let container: Container;
@@ -38,7 +39,7 @@ beforeEach(async () => {
 
   const contactCardFactory = new ContactCardEmbeddableFactory(
     uiActions.executeTriggerActions,
-    {} as any
+    {} as unknown as OverlayStart
   );
   setup.registerEmbeddableFactory(contactCardFactory.type, contactCardFactory);
 

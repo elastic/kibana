@@ -140,9 +140,8 @@ export const JobSelectorFlyoutContent: FC<JobSelectorFlyoutProps> = ({
     if (jobs.length === 0 || !flyoutEl.current) return;
 
     // get all cols in flyout table
-    const tableHeaderCols: NodeListOf<HTMLElement> = flyoutEl.current.querySelectorAll(
-      'table thead th'
-    );
+    const tableHeaderCols: NodeListOf<HTMLElement> =
+      flyoutEl.current.querySelectorAll('table thead th');
     // get the width of the last col
     const derivedWidth = tableHeaderCols[tableHeaderCols.length - 1].offsetWidth - 16;
     const normalizedJobs = normalizeTimes(jobs, dateFormatTz, derivedWidth);

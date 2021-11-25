@@ -13,7 +13,7 @@ import { EuiSpacer, EuiSwitch, EuiText } from '@elastic/eui';
 import { OperatingSystem } from '../../../../../../../common/endpoint/types';
 import { isAntivirusRegistrationEnabled } from '../../../store/policy_details/selectors';
 import { usePolicyDetailsSelector } from '../../policy_hooks';
-import { ConfigForm } from '../../components/config_form';
+import { ConfigForm } from '../config_form';
 
 const TRANSLATIONS: Readonly<{ [K in 'title' | 'description' | 'label']: string }> = {
   title: i18n.translate(

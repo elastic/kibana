@@ -5,7 +5,7 @@
 When running {kib} from source, you must have this version installed locally.
 
 The required version of Node.js is listed in several different files throughout the {kib} source code.
-Theses files must be updated when upgrading Node.js:
+These files must be updated when upgrading Node.js:
 
   - {kib-repo}blob/{branch}/.ci/Dockerfile[`.ci/Dockerfile`] - The version is specified in the `NODE_VERSION` constant.
     This is used to pull the relevant image from https://hub.docker.com/_/node[Docker Hub].
@@ -29,7 +29,7 @@ The following rules are not set in stone.
 Use best judgement when backporting.
 
 Currently version 7.11 and newer run Node.js 14, while 7.10 and older run Node.js 10.
-Hence, upgrades to either Node.js 14 or Node.js 10 shold be done as separate PRs.
+Hence, upgrades to either Node.js 14 or Node.js 10 should be done as separate PRs.
 
 ==== Node.js patch upgrades
 

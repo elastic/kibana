@@ -21,15 +21,22 @@ export type ThreatIntelLinkPanelProps = Pick<
 const ThreatIntelLinkPanelComponent: React.FC<ThreatIntelLinkPanelProps> = (props) => {
   switch (props.isThreatIntelModuleEnabled) {
     case true:
-      return <CtiEnabledModule {...props} data-test-subj="cti-enabled-module" />;
+      return (
+        <div data-test-subj="cti-enabled-module">
+          <CtiEnabledModule {...props} />
+        </div>
+      );
     case false:
-      return <CtiDisabledModule data-test-subj="cti-disabled-module" />;
+      return (
+        <div data-test-subj="cti-disabled-module">
+          <CtiDisabledModule />
+        </div>
+      );
     case undefined:
     default:
       return null;
   }
 };
 
-ThreatIntelLinkPanelComponent.displayName = 'ThreatIntelDashboardLinksComponent';
-
 export const ThreatIntelLinkPanel = React.memo(ThreatIntelLinkPanelComponent);
+ThreatIntelLinkPanel.displayName = 'ThreatIntelDashboardLinksComponent';

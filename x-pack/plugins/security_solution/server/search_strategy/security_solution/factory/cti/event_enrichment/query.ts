@@ -11,42 +11,37 @@ import { createQueryFilterClauses } from '../../../../../utils/build_query';
 import { SecuritySolutionFactory } from '../../types';
 import { buildIndicatorShouldClauses } from './helpers';
 
-export const buildEventEnrichmentQuery: SecuritySolutionFactory<CtiQueries.eventEnrichment>['buildDsl'] = ({
-  defaultIndex,
-  docValueFields,
-  eventFields,
-  filterQuery,
-  timerange: { from, to },
-}) => {
-  const filter = [
-    ...createQueryFilterClauses(filterQuery),
-    { term: { 'event.type': 'indicator' } },
-    {
-      range: {
-        '@timestamp': {
-          gte: from,
-          lte: to,
-          format: 'strict_date_optional_time',
+export const buildEventEnrichmentQuery: SecuritySolutionFactory<CtiQueries.eventEnrichment>['buildDsl'] =
+  ({ defaultIndex, docValueFields, eventFields, filterQuery, timerange: { from, to } }) => {
+    const filter = [
+      ...createQueryFilterClauses(filterQuery),
+      { term: { 'event.type': 'indicator' } },
+      {
+        range: {
+          '@timestamp': {
+            gte: from,
+            lte: to,
+            format: 'strict_date_optional_time',
+          },
         },
       },
-    },
-  ];
+    ];
 
-  return {
-    allowNoIndices: true,
-    ignoreUnavailable: true,
-    index: defaultIndex,
-    body: {
-      _source: false,
-      ...(!isEmpty(docValueFields) && { docvalue_fields: docValueFields }),
-      fields: ['*'],
-      query: {
-        bool: {
-          should: buildIndicatorShouldClauses(eventFields),
-          filter,
-          minimum_should_match: 1,
+    return {
+      allow_no_indices: true,
+      ignore_unavailable: true,
+      index: defaultIndex,
+      body: {
+        _source: false,
+        ...(!isEmpty(docValueFields) && { docvalue_fields: docValueFields }),
+        fields: ['*'],
+        query: {
+          bool: {
+            should: buildIndicatorShouldClauses(eventFields),
+            filter,
+            minimum_should_match: 1,
+          },
         },
       },
-    },
+    };
   };
-};

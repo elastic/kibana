@@ -59,12 +59,16 @@ export const PROJECTS = [
   createProject('x-pack/plugins/osquery/cypress/tsconfig.json', {
     name: 'osquery/cypress',
   }),
-  createProject('x-pack/plugins/apm/e2e/tsconfig.json', {
-    name: 'apm/cypress',
-    disableTypeCheck: true,
-  }),
   createProject('x-pack/plugins/apm/ftr_e2e/tsconfig.json', {
     name: 'apm/ftr_e2e',
+    disableTypeCheck: true,
+  }),
+  createProject('x-pack/plugins/fleet/cypress/tsconfig.json', {
+    name: 'fleet/cypress',
+  }),
+
+  createProject('x-pack/plugins/uptime/e2e/tsconfig.json', {
+    name: 'uptime/synthetics-e2e-tests',
     disableTypeCheck: true,
   }),
 

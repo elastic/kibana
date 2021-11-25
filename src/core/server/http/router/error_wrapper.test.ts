@@ -11,9 +11,11 @@ import { KibanaResponse, KibanaResponseFactory, kibanaResponseFactory } from './
 import { wrapErrors } from './error_wrapper';
 import { KibanaRequest, RequestHandler, RequestHandlerContext } from 'kibana/server';
 
-const createHandler = (handler: () => any): RequestHandler<any, any, any> => () => {
-  return handler();
-};
+const createHandler =
+  (handler: () => any): RequestHandler<any, any, any> =>
+  () => {
+    return handler();
+  };
 
 describe('wrapErrors', () => {
   let context: RequestHandlerContext;

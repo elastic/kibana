@@ -13,7 +13,8 @@ export function setupSavedObjects(core: CoreSetup) {
   core.savedObjects.registerType({
     name: 'lens',
     hidden: false,
-    namespaceType: 'single',
+    namespaceType: 'multiple-isolated',
+    convertToMultiNamespaceTypeVersion: '8.0.0',
     management: {
       icon: 'lensApp',
       defaultSearchField: 'title',

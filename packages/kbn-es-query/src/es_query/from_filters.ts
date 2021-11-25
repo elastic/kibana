@@ -7,7 +7,7 @@
  */
 
 import { isUndefined } from 'lodash';
-import { estypes } from '@elastic/elasticsearch';
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { migrateFilter } from './migrate_filter';
 import { filterMatchesIndex } from './filter_matches_index';
 import { Filter, cleanFilter, isFilterDisabled } from '../filters';
@@ -35,12 +35,7 @@ const filterNegate = (reverse: boolean) => (filter: Filter) => {
  * @return {Object} the query version of that filter
  */
 const translateToQuery = (filter: Partial<Filter>): estypes.QueryDslQueryContainer => {
-  if (filter.query) {
-    return filter.query as estypes.QueryDslQueryContainer;
-  }
-
-  // TODO: investigate what's going on here! What does this mean for filters that don't have a query!
-  return filter as estypes.QueryDslQueryContainer;
+  return filter.query || filter;
 };
 
 /**

@@ -10,7 +10,7 @@ import { ActionFactoryDefinition } from './action_factory_definition';
 import { licensingMock } from '../../../licensing/public/mocks';
 import { PublicLicense } from '../../../licensing/public';
 
-const def: ActionFactoryDefinition = ({
+const def: ActionFactoryDefinition = {
   id: 'ACTION_FACTORY_1',
   CollectConfig: {},
   createConfig: () => ({}),
@@ -22,7 +22,7 @@ const def: ActionFactoryDefinition = ({
     enhancements: {},
   }),
   supportedTriggers: () => [],
-} as unknown) as ActionFactoryDefinition;
+} as unknown as ActionFactoryDefinition;
 
 const featureUsage = licensingMock.createStart().featureUsage;
 

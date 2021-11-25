@@ -25,6 +25,7 @@ import { SearchFilterConfig } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { IBasePath } from 'src/core/public';
+import type { SavedObjectManagementTypeInfo } from '../../../../common/types';
 import { getDefaultTitle, getSavedObjectLabel } from '../../../lib';
 import {
   SavedObjectWithMetadata,
@@ -41,6 +42,7 @@ export interface RelationshipsProps {
   close: () => void;
   goInspectObject: (obj: SavedObjectWithMetadata) => void;
   canGoInApp: (obj: SavedObjectWithMetadata) => boolean;
+  allowedTypes: SavedObjectManagementTypeInfo[];
 }
 
 export interface RelationshipsState {
@@ -213,7 +215,7 @@ export class Relationships extends Component<RelationshipsProps, RelationshipsSt
   }
 
   renderRelationshipsTable() {
-    const { goInspectObject, basePath, savedObject } = this.props;
+    const { goInspectObject, basePath, savedObject, allowedTypes } = this.props;
     const { relations, isLoading, error } = this.state;
 
     if (error) {
@@ -238,10 +240,11 @@ export class Relationships extends Component<RelationshipsProps, RelationshipsSt
         ),
         sortable: false,
         render: (type: string, object: SavedObjectWithMetadata) => {
+          const typeLabel = getSavedObjectLabel(type, allowedTypes);
           return (
-            <EuiToolTip position="top" content={getSavedObjectLabel(type)}>
+            <EuiToolTip position="top" content={typeLabel}>
               <EuiIcon
-                aria-label={getSavedObjectLabel(type)}
+                aria-label={typeLabel}
                 type={object.meta.icon || 'apps'}
                 size="s"
                 data-test-subj="relationshipsObjectType"
@@ -298,7 +301,7 @@ export class Relationships extends Component<RelationshipsProps, RelationshipsSt
             icon: 'inspect',
             'data-test-subj': 'relationshipsTableAction-inspect',
             onClick: (object: SavedObjectWithMetadata) => goInspectObject(object),
-            available: (object: SavedObjectWithMetadata) => !!object.meta.editUrl,
+            available: (object: SavedObjectWithMetadata) => !!(object.type && object.id),
           },
         ],
       },
@@ -390,19 +393,16 @@ export class Relationships extends Component<RelationshipsProps, RelationshipsSt
   }
 
   render() {
-    const { close, savedObject } = this.props;
+    const { close, savedObject, allowedTypes } = this.props;
+    const typeLabel = getSavedObjectLabel(savedObject.type, allowedTypes);
 
     return (
       <EuiFlyout onClose={close}>
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">
             <h2>
-              <EuiToolTip position="top" content={getSavedObjectLabel(savedObject.type)}>
-                <EuiIcon
-                  aria-label={getSavedObjectLabel(savedObject.type)}
-                  size="m"
-                  type={savedObject.meta.icon || 'apps'}
-                />
+              <EuiToolTip position="top" content={typeLabel}>
+                <EuiIcon aria-label={typeLabel} size="m" type={savedObject.meta.icon || 'apps'} />
               </EuiToolTip>
               &nbsp;&nbsp;
               {savedObject.meta.title || getDefaultTitle(savedObject)}

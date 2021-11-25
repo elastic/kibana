@@ -7,6 +7,7 @@
 
 import { isEqual, uniqBy } from 'lodash';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { render, unmountComponentAtNode } from 'react-dom';
 import type {
   ExecutionContextSearch,
@@ -41,19 +42,18 @@ import {
   ReferenceOrValueEmbeddable,
 } from '../../../../../src/plugins/embeddable/public';
 import { Document, injectFilterReferences } from '../persistence';
-import {
-  ExpressionWrapper,
-  ExpressionWrapperProps,
-  savedObjectConflictError,
-} from './expression_wrapper';
+import { ExpressionWrapper, ExpressionWrapperProps } from './expression_wrapper';
 import { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
 import {
   isLensBrushEvent,
   isLensFilterEvent,
+  isLensEditEvent,
   isLensTableRowContextMenuClickEvent,
   LensBrushEvent,
   LensFilterEvent,
   LensTableRowContextMenuEvent,
+  VisualizationMap,
+  Visualization,
 } from '../types';
 
 import { IndexPatternsContract } from '../../../../../src/plugins/data/public';
@@ -63,6 +63,7 @@ import { LensAttributeService } from '../lens_attribute_service';
 import type { ErrorMessage } from '../editor_frame_service/types';
 import { getLensInspectorService, LensInspector } from '../lens_inspector_service';
 import { SharingSavedObjectProps } from '../types';
+import type { SpacesPluginStart } from '../../../spaces/public';
 
 export type LensSavedObjectAttributes = Omit<Document, 'savedObjectId' | 'type'>;
 export interface ResolvedLensSavedObjectAttributes extends LensSavedObjectAttributes {
@@ -99,6 +100,7 @@ export interface LensEmbeddableDeps {
   documentToExpression: (
     doc: Document
   ) => Promise<{ ast: Ast | null; errors: ErrorMessage[] | undefined }>;
+  visualizationMap: VisualizationMap;
   indexPatternService: IndexPatternsContract;
   expressionRenderer: ReactExpressionRendererType;
   timefilter: TimefilterContract;
@@ -108,11 +110,24 @@ export interface LensEmbeddableDeps {
   getTriggerCompatibleActions?: UiActionsStart['getTriggerCompatibleActions'];
   capabilities: { canSaveVisualizations: boolean; canSaveDashboards: boolean };
   usageCollection?: UsageCollectionSetup;
+  spaces?: SpacesPluginStart;
 }
+
+const getExpressionFromDocument = async (
+  document: Document,
+  documentToExpression: LensEmbeddableDeps['documentToExpression']
+) => {
+  const { ast, errors } = await documentToExpression(document);
+  return {
+    expression: ast ? toExpression(ast) : null,
+    errors,
+  };
+};
 
 export class Embeddable
   extends AbstractEmbeddable<LensEmbeddableInput, LensEmbeddableOutput>
-  implements ReferenceOrValueEmbeddable<LensByValueInput, LensByReferenceInput> {
+  implements ReferenceOrValueEmbeddable<LensByValueInput, LensByReferenceInput>
+{
   type = DOC_TYPE;
 
   deferEmbeddableLoad = true;
@@ -260,13 +275,36 @@ export class Embeddable
     return this.lensInspector.adapters;
   }
 
+  private maybeAddConflictError(
+    errors: ErrorMessage[],
+    sharingSavedObjectProps?: SharingSavedObjectProps
+  ) {
+    const ret = [...errors];
+
+    if (sharingSavedObjectProps?.outcome === 'conflict' && !!this.deps.spaces) {
+      ret.push({
+        shortMessage: i18n.translate('xpack.lens.embeddable.legacyURLConflict.shortMessage', {
+          defaultMessage: `You've encountered a URL conflict`,
+        }),
+        longMessage: (
+          <this.deps.spaces.ui.components.getEmbeddableLegacyUrlConflict
+            targetType={DOC_TYPE}
+            sourceId={sharingSavedObjectProps.sourceId!}
+          />
+        ),
+      });
+    }
+
+    return ret;
+  }
+
   async initializeSavedVis(input: LensEmbeddableInput) {
-    const attrs:
-      | ResolvedLensSavedObjectAttributes
-      | false = await this.deps.attributeService.unwrapAttributes(input).catch((e: Error) => {
-      this.onFatalError(e);
-      return false;
-    });
+    const attrs: ResolvedLensSavedObjectAttributes | false = await this.deps.attributeService
+      .unwrapAttributes(input)
+      .catch((e: Error) => {
+        this.onFatalError(e);
+        return false;
+      });
     if (!attrs || this.isDestroyed) {
       return;
     }
@@ -278,13 +316,14 @@ export class Embeddable
       type: this.type,
       savedObjectId: (input as LensByReferenceInput)?.savedObjectId,
     };
-    const { ast, errors } = await this.deps.documentToExpression(this.savedVis);
-    this.errors = errors;
-    if (sharingSavedObjectProps?.outcome === 'conflict') {
-      const conflictError = savedObjectConflictError(sharingSavedObjectProps.errorJSON!);
-      this.errors = this.errors ? [...this.errors, conflictError] : [conflictError];
-    }
-    this.expression = ast ? toExpression(ast) : null;
+
+    const { expression, errors } = await getExpressionFromDocument(
+      this.savedVis,
+      this.deps.documentToExpression
+    );
+    this.expression = expression;
+    this.errors = errors && this.maybeAddConflictError(errors, sharingSavedObjectProps);
+
     if (this.errors) {
       this.logError('validation');
     }
@@ -422,7 +461,17 @@ export class Embeddable
     return output;
   }
 
-  handleEvent = (event: ExpressionRendererEvent) => {
+  private get onEditAction(): Visualization['onEditAction'] {
+    const visType = this.savedVis?.visualizationType;
+
+    if (!visType) {
+      return;
+    }
+
+    return this.deps.visualizationMap[visType].onEditAction;
+  }
+
+  handleEvent = async (event: ExpressionRendererEvent) => {
     if (!this.deps.getTrigger || this.input.disableTriggers) {
       return;
     }
@@ -455,12 +504,32 @@ export class Embeddable
         true
       );
       if (this.input.onTableRowClick) {
-        this.input.onTableRowClick((event.data as unknown) as LensTableRowContextMenuEvent['data']);
+        this.input.onTableRowClick(event.data as unknown as LensTableRowContextMenuEvent['data']);
       }
+    }
+
+    // We allow for edit actions in the Embeddable for display purposes only (e.g. changing the datatable sort order).
+    // No state changes made here with an edit action are persisted.
+    if (isLensEditEvent(event) && this.onEditAction) {
+      if (!this.savedVis) return;
+
+      // have to dance since this.savedVis.state is readonly
+      const newVis = JSON.parse(JSON.stringify(this.savedVis)) as Document;
+      newVis.state.visualization = this.onEditAction(newVis.state.visualization, event);
+      this.savedVis = newVis;
+
+      const { expression, errors } = await getExpressionFromDocument(
+        this.savedVis,
+        this.deps.documentToExpression
+      );
+      this.expression = expression;
+      this.errors = errors;
+
+      this.reload();
     }
   };
 
-  async reload() {
+  reload() {
     if (!this.savedVis || !this.isInitialized || this.isDestroyed) {
       return;
     }

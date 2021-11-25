@@ -69,20 +69,20 @@ export interface Props {
   };
 }
 
-const createNameNotAllowedValidator = (
-  namesNotAllowed: string[]
-): ValidationFunc<{}, string, string> => ({ value }) => {
-  if (namesNotAllowed.includes(value)) {
-    return {
-      message: i18n.translate(
-        'xpack.runtimeFields.runtimeFieldsEditor.existRuntimeFieldNamesValidationErrorMessage',
-        {
-          defaultMessage: 'There is already a field with this name.',
-        }
-      ),
-    };
-  }
-};
+const createNameNotAllowedValidator =
+  (namesNotAllowed: string[]): ValidationFunc<{}, string, string> =>
+  ({ value }) => {
+    if (namesNotAllowed.includes(value)) {
+      return {
+        message: i18n.translate(
+          'xpack.runtimeFields.runtimeFieldsEditor.existRuntimeFieldNamesValidationErrorMessage',
+          {
+            defaultMessage: 'There is already a field with this name.',
+          }
+        ),
+      };
+    }
+  };
 
 /**
  * Dynamically retrieve the config for the "name" field, adding

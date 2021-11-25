@@ -60,8 +60,9 @@ export const SpaceListInternal = ({
   }
 
   const isSharedToAllSpaces = namespaces.includes(ALL_SPACES_ID);
-  const unauthorizedSpacesCount = namespaces.filter((namespace) => namespace === UNKNOWN_SPACE)
-    .length;
+  const unauthorizedSpacesCount = namespaces.filter(
+    (namespace) => namespace === UNKNOWN_SPACE
+  ).length;
   let displayedSpaces: SpaceTarget[];
   let button: ReactNode = null;
 

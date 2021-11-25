@@ -27,7 +27,8 @@ export type MultiTaskTodoEmbeddableFactory = EmbeddableFactory<
 
 export class MultiTaskTodoEmbeddableFactoryDefinition
   implements
-    EmbeddableFactoryDefinition<MultiTaskTodoInput, MultiTaskTodoOutput, MultiTaskTodoEmbeddable> {
+    EmbeddableFactoryDefinition<MultiTaskTodoInput, MultiTaskTodoOutput, MultiTaskTodoEmbeddable>
+{
   public readonly type = MULTI_TASK_TODO_EMBEDDABLE;
 
   public async isEditable() {

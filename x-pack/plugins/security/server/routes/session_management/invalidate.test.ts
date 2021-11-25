@@ -115,7 +115,7 @@ describe('Invalidate sessions routes', () => {
       });
       await expect(
         routeHandler(
-          ({} as unknown) as SecurityRequestHandlerContext,
+          {} as unknown as SecurityRequestHandlerContext,
           mockRequest,
           kibanaResponseFactory
         )
@@ -138,7 +138,7 @@ describe('Invalidate sessions routes', () => {
       const mockRequest = httpServerMock.createKibanaRequest({ body: { match: 'all' } });
       await expect(
         routeHandler(
-          ({} as unknown) as SecurityRequestHandlerContext,
+          {} as unknown as SecurityRequestHandlerContext,
           mockRequest,
           kibanaResponseFactory
         )

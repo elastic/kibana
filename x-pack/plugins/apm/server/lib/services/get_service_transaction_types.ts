@@ -10,37 +10,37 @@ import {
   TRANSACTION_TYPE,
 } from '../../../common/elasticsearch_fieldnames';
 import { rangeQuery } from '../../../../observability/server';
-import { Setup, SetupTimeRange } from '../helpers/setup_request';
+import { Setup } from '../helpers/setup_request';
 import {
-  getDocumentTypeFilterForAggregatedTransactions,
-  getProcessorEventForAggregatedTransactions,
-} from '../helpers/aggregated_transactions';
+  getDocumentTypeFilterForTransactions,
+  getProcessorEventForTransactions,
+} from '../helpers/transactions';
 
 export async function getServiceTransactionTypes({
   setup,
   serviceName,
   searchAggregatedTransactions,
+  start,
+  end,
 }: {
   serviceName: string;
-  setup: Setup & SetupTimeRange;
+  setup: Setup;
   searchAggregatedTransactions: boolean;
+  start: number;
+  end: number;
 }) {
-  const { start, end, apmEventClient } = setup;
+  const { apmEventClient } = setup;
 
   const params = {
     apm: {
-      events: [
-        getProcessorEventForAggregatedTransactions(
-          searchAggregatedTransactions
-        ),
-      ],
+      events: [getProcessorEventForTransactions(searchAggregatedTransactions)],
     },
     body: {
       size: 0,
       query: {
         bool: {
           filter: [
-            ...getDocumentTypeFilterForAggregatedTransactions(
+            ...getDocumentTypeFilterForTransactions(
               searchAggregatedTransactions
             ),
             { term: { [SERVICE_NAME]: serviceName } },

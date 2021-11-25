@@ -29,9 +29,8 @@ import { RelevanceTuningLogic } from '.';
 
 export const RelevanceTuning: React.FC = () => {
   const { dataLoading, engineHasSchemaFields, unsavedChanges } = useValues(RelevanceTuningLogic);
-  const { initializeRelevanceTuning, resetSearchSettings, updateSearchSettings } = useActions(
-    RelevanceTuningLogic
-  );
+  const { initializeRelevanceTuning, resetSearchSettings, updateSearchSettings } =
+    useActions(RelevanceTuningLogic);
 
   useEffect(() => {
     initializeRelevanceTuning();

@@ -22,7 +22,8 @@ export interface UIExtensionsStorage {
  * UI Component Extension is used on the pages displaying the ability to edit an
  * Integration Policy
  */
-export type PackagePolicyEditExtensionComponent = ComponentType<PackagePolicyEditExtensionComponentProps>;
+export type PackagePolicyEditExtensionComponent =
+  ComponentType<PackagePolicyEditExtensionComponentProps>;
 
 export interface PackagePolicyEditExtensionComponentProps {
   /** The current integration policy being edited */
@@ -49,6 +50,7 @@ export interface PackagePolicyEditExtensionComponentProps {
 export interface PackagePolicyEditExtension {
   package: string;
   view: 'package-policy-edit';
+  useLatestPackageVersion?: boolean;
   Component: LazyExoticComponent<PackagePolicyEditExtensionComponent>;
 }
 
@@ -66,7 +68,8 @@ export interface PackagePolicyEditTabsExtension {
  * UI Component Extension is used on the pages displaying the ability to Create an
  * Integration Policy
  */
-export type PackagePolicyCreateExtensionComponent = ComponentType<PackagePolicyCreateExtensionComponentProps>;
+export type PackagePolicyCreateExtensionComponent =
+  ComponentType<PackagePolicyCreateExtensionComponentProps>;
 
 export interface PackagePolicyCreateExtensionComponentProps {
   /** The integration policy being created */

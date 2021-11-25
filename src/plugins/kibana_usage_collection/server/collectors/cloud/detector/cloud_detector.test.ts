@@ -44,12 +44,12 @@ describe('CloudDetector', () => {
       };
     },
   };
-  const cloudServices = ([
+  const cloudServices = [
     cloudService1,
     cloudService2,
     cloudService3,
     cloudService4,
-  ] as unknown) as CloudService[];
+  ] as unknown as CloudService[];
 
   describe('getCloudDetails', () => {
     it('returns undefined by default', () => {
@@ -70,7 +70,7 @@ describe('CloudDetector', () => {
     });
 
     it('returns null if none match', async () => {
-      const services = ([cloudService1, cloudService2] as unknown) as CloudService[];
+      const services = [cloudService1, cloudService2] as unknown as CloudService[];
 
       const detector1 = new CloudDetector({ cloudServices: services });
       await detector1.detectCloudService();
@@ -83,7 +83,7 @@ describe('CloudDetector', () => {
 
     // this is already tested above, but this just tests it explicitly
     it('ignores exceptions from cloud services', async () => {
-      const services = ([cloudService2] as unknown) as CloudService[];
+      const services = [cloudService2] as unknown as CloudService[];
       const detector = new CloudDetector({ cloudServices: services });
 
       await detector.detectCloudService();

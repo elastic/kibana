@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable react/display-name */
-
 import { EuiButtonIcon, EuiLink } from '@elastic/eui';
 import { omit } from 'lodash/fp';
 import React from 'react';

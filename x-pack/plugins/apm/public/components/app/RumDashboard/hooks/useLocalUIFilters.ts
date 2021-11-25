@@ -17,7 +17,7 @@ import {
   toQuery,
 } from '../../../../components/shared/Links/url_helpers';
 import { removeUndefinedProps } from '../../../../context/url_params_context/helpers';
-import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
+import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { getExcludedName } from '../LocalUIFilters';
 
 export type FiltersUIHook = ReturnType<typeof useLocalUIFilters>;
@@ -28,7 +28,7 @@ export function useLocalUIFilters({
   filterNames: UxLocalUIFilterName[];
 }) {
   const history = useHistory();
-  const { uxUiFilters } = useUrlParams();
+  const { uxUiFilters } = useLegacyUrlParams();
 
   const setFilterValue = (name: UxLocalUIFilterName, value: string[]) => {
     const search = omit(toQuery(history.location.search), name);
@@ -81,6 +81,7 @@ export function useLocalUIFilters({
   const clearValues = () => {
     const search = omit(toQuery(history.location.search), [
       ...filterNames,
+      'searchTerm',
       'transactionUrl',
     ]);
 

@@ -19,16 +19,16 @@ import { kqlQuery, rangeQuery } from '../../../../observability/server';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { Coordinate } from '../../../typings/timeseries';
 import {
-  getDocumentTypeFilterForAggregatedTransactions,
-  getProcessorEventForAggregatedTransactions,
-  getTransactionDurationFieldForAggregatedTransactions,
-} from '../helpers/aggregated_transactions';
+  getDocumentTypeFilterForTransactions,
+  getTransactionDurationFieldForTransactions,
+  getProcessorEventForTransactions,
+} from '../helpers/transactions';
 import { getBucketSizeForAggregatedTransactions } from '../helpers/get_bucket_size_for_aggregated_transactions';
 import {
   getLatencyAggregation,
   getLatencyValue,
 } from '../helpers/latency_aggregation_type';
-import { Setup, SetupTimeRange } from '../helpers/setup_request';
+import { Setup } from '../helpers/setup_request';
 import { calculateFailedTransactionRate } from '../helpers/transaction_error_rate';
 
 export async function getServiceTransactionGroupDetailedStatistics({
@@ -72,7 +72,7 @@ export async function getServiceTransactionGroupDetailedStatistics({
     searchAggregatedTransactions,
   });
 
-  const field = getTransactionDurationFieldForAggregatedTransactions(
+  const field = getTransactionDurationFieldForTransactions(
     searchAggregatedTransactions
   );
 
@@ -81,9 +81,7 @@ export async function getServiceTransactionGroupDetailedStatistics({
     {
       apm: {
         events: [
-          getProcessorEventForAggregatedTransactions(
-            searchAggregatedTransactions
-          ),
+          getProcessorEventForTransactions(searchAggregatedTransactions),
         ],
       },
       body: {
@@ -93,7 +91,7 @@ export async function getServiceTransactionGroupDetailedStatistics({
             filter: [
               { term: { [SERVICE_NAME]: serviceName } },
               { term: { [TRANSACTION_TYPE]: transactionType } },
-              ...getDocumentTypeFilterForAggregatedTransactions(
+              ...getDocumentTypeFilterForTransactions(
                 searchAggregatedTransactions
               ),
               ...rangeQuery(start, end),
@@ -125,11 +123,6 @@ export async function getServiceTransactionGroupDetailedStatistics({
                   },
                 },
                 aggs: {
-                  throughput_rate: {
-                    rate: {
-                      unit: 'minute',
-                    },
-                  },
                   ...getLatencyAggregation(latencyAggregationType, field),
                   [EVENT_OUTCOME]: {
                     terms: {
@@ -160,7 +153,7 @@ export async function getServiceTransactionGroupDetailedStatistics({
     }));
     const throughput = bucket.timeseries.buckets.map((timeseriesBucket) => ({
       x: timeseriesBucket.key,
-      y: timeseriesBucket.throughput_rate.value,
+      y: timeseriesBucket.doc_count, // sparklines only shows trend (no axis)
     }));
     const errorRate = bucket.timeseries.buckets.map((timeseriesBucket) => ({
       x: timeseriesBucket.key,
@@ -192,10 +185,12 @@ export async function getServiceTransactionGroupDetailedStatisticsPeriods({
   comparisonEnd,
   environment,
   kuery,
+  start,
+  end,
 }: {
   serviceName: string;
   transactionNames: string[];
-  setup: Setup & SetupTimeRange;
+  setup: Setup;
   numBuckets: number;
   searchAggregatedTransactions: boolean;
   transactionType: string;
@@ -204,9 +199,9 @@ export async function getServiceTransactionGroupDetailedStatisticsPeriods({
   comparisonEnd?: number;
   environment: string;
   kuery: string;
+  start: number;
+  end: number;
 }) {
-  const { start, end } = setup;
-
   const commonProps = {
     setup,
     serviceName,

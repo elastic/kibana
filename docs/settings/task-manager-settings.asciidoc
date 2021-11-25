@@ -22,9 +22,6 @@ Task Manager runs background tasks by polling for work on an interval.  You can 
 | `xpack.task_manager.request_capacity`
   | How many requests can Task Manager buffer before it rejects new requests.  Defaults to 1000.
 
-| `xpack.task_manager.index`
-  | The name of the index used to store task information.  Defaults to `.kibana_task_manager`.
-
   | `xpack.task_manager.max_workers`
   | The maximum number of tasks that this Kibana instance will run simultaneously.  Defaults to 10.
     Starting in 8.0, it will not be possible to set the value greater than 100.
@@ -57,6 +54,6 @@ Settings that configure the <<task-manager-health-monitoring>> endpoint.
 |===
 | `xpack.task_manager.`
 `monitored_task_execution_thresholds`
-  | Configures the threshold of failed task executions at which point the `warn` or `error` health status is set under each task type execution status (under `stats.runtime.value.excution.result_frequency_percent_as_number[${task type}].status`). This setting allows configuration of both the default level and a custom task type specific level. By default, this setting is configured to mark the health of every task type as `warning` when it exceeds 80% failed executions, and as `error` at 90%. Custom configurations allow you to reduce this threshold to catch failures sooner for task types that you might consider critical, such as alerting tasks. This value can be set to any number between 0 to 100, and a threshold is hit when the value *exceeds* this number. This means that you can avoid setting the status to `error` by setting the threshold at 100, or hit `error` the moment any task fails by setting the threshold to 0 (as it will exceed 0 once a single failure occurs).
+  | Configures the threshold of failed task executions at which point the `warn` or `error` health status is set under each task type execution status (under `stats.runtime.value.execution.result_frequency_percent_as_number[${task type}].status`). This setting allows configuration of both the default level and a custom task type specific level. By default, this setting is configured to mark the health of every task type as `warning` when it exceeds 80% failed executions, and as `error` at 90%. Custom configurations allow you to reduce this threshold to catch failures sooner for task types that you might consider critical, such as alerting tasks. This value can be set to any number between 0 to 100, and a threshold is hit when the value *exceeds* this number. This means that you can avoid setting the status to `error` by setting the threshold at 100, or hit `error` the moment any task fails by setting the threshold to 0 (as it will exceed 0 once a single failure occurs).
 
 |===

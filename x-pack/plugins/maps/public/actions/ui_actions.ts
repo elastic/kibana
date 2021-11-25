@@ -12,7 +12,7 @@ import { getFlyoutDisplay } from '../selectors/ui_selectors';
 import { FLYOUT_STATE } from '../reducers/ui';
 import { setQuery, trackMapSettings } from './map_actions';
 import { setSelectedLayer } from './layer_actions';
-import { DRAW_MODE } from '../../common';
+import { DRAW_MODE } from '../../common/constants';
 import { UPDATE_EDIT_STATE } from './map_action_constants';
 
 export const UPDATE_FLYOUT = 'UPDATE_FLYOUT';

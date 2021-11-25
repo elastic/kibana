@@ -25,7 +25,7 @@ function Wrapper({ children }: { children?: ReactNode }) {
   );
 }
 
-const transaction = ({
+const transaction = {
   service: {
     name: 'name',
     environment: 'env',
@@ -34,7 +34,7 @@ const transaction = ({
     name: 'tx name',
     type: 'tx type',
   },
-} as unknown) as Transaction;
+} as unknown as Transaction;
 
 describe('Custom links', () => {
   it('shows empty message when no custom link is available', () => {

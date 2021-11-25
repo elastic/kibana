@@ -14,8 +14,9 @@ import { FieldFormat } from '../field_format';
 import {
   TextContextTypeConvert,
   HtmlContextTypeConvert,
-  IFieldFormatMetaParams,
+  FieldFormatMetaParams,
   FIELD_FORMAT_IDS,
+  FieldFormatParams,
 } from '../types';
 
 const templateMatchRE = /{{([\s\S]+?)}}/g;
@@ -61,7 +62,7 @@ export class UrlFormat extends FieldFormat {
   ];
   static urlTypes = URL_TYPES;
 
-  constructor(params: IFieldFormatMetaParams) {
+  constructor(params: FieldFormatParams & FieldFormatMetaParams) {
     super(params);
     this.compileTemplate = memoize(this.compileTemplate);
   }
@@ -101,7 +102,7 @@ export class UrlFormat extends FieldFormat {
     // trim all the odd bits, the variable names
     const parts = template.split(templateMatchRE).map((part, i) => (i % 2 ? part.trim() : part));
 
-    return function (locals: Record<string, any>): string {
+    return function (locals: Record<string, string>): string {
       // replace all the odd bits with their local var
       let output = '';
       let i = -1;
@@ -129,9 +130,9 @@ export class UrlFormat extends FieldFormat {
     return `<img src="${url}" alt="${imageLabel}" style="width:auto; height:auto; max-width:${maxWidth}; max-height:${maxHeight};">`;
   }
 
-  textConvert: TextContextTypeConvert = (value) => this.formatLabel(value);
+  textConvert: TextContextTypeConvert = (value: string) => this.formatLabel(value);
 
-  htmlConvert: HtmlContextTypeConvert = (rawValue, options = {}) => {
+  htmlConvert: HtmlContextTypeConvert = (rawValue: string, options = {}) => {
     const { field, hit } = options;
     const { parsedUrl } = this._params;
     const { basePath, pathname, origin } = parsedUrl || {};
@@ -187,8 +188,8 @@ export class UrlFormat extends FieldFormat {
 
         let linkLabel;
 
-        if (hit && hit.highlight && hit.highlight[field.name]) {
-          linkLabel = getHighlightHtml(label, hit.highlight[field.name]);
+        if (hit && hit.highlight && hit.highlight[field?.name!]) {
+          linkLabel = getHighlightHtml(label, hit.highlight[field!.name]);
         } else {
           linkLabel = label;
         }

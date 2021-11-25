@@ -2,12 +2,19 @@
 
 set -euo pipefail
 
+source .buildkite/scripts/common/util.sh
+
+BUILDKITE_TOKEN="$(retry 5 5 vault read -field=buildkite_token_all_jobs secret/kibana-issues/dev/buildkite-ci)"
+export BUILDKITE_TOKEN
+
+echo '--- Install buildkite dependencies'
 cd '.buildkite'
-yarn install
+retry 5 15 yarn install
 cd -
 
-BUILDKITE_TOKEN="$(vault read -field=buildkite_token_all_jobs secret/kibana-issues/dev/buildkite-ci)"
-export BUILDKITE_TOKEN
+node .buildkite/scripts/lifecycle/print_agent_links.js || true
+
+echo '--- Job Environment Setup'
 
 # Set up a custom ES Snapshot Manifest if one has been specified for this build
 {
@@ -43,10 +50,10 @@ EOF
   if [[ "$CI_STATS_BUILD_ID" ]]; then
     echo "CI Stats Build ID: $CI_STATS_BUILD_ID"
 
-    CI_STATS_TOKEN="$(vault read -field=api_token secret/kibana-issues/dev/kibana_ci_stats)"
+    CI_STATS_TOKEN="$(retry 5 5 vault read -field=api_token secret/kibana-issues/dev/kibana_ci_stats)"
     export CI_STATS_TOKEN
 
-    CI_STATS_HOST="$(vault read -field=api_host secret/kibana-issues/dev/kibana_ci_stats)"
+    CI_STATS_HOST="$(retry 5 5 vault read -field=api_host secret/kibana-issues/dev/kibana_ci_stats)"
     export CI_STATS_HOST
 
     KIBANA_CI_STATS_CONFIG=$(jq -n \
@@ -59,16 +66,34 @@ EOF
   fi
 }
 
-GITHUB_TOKEN=$(vault read -field=github_token secret/kibana-issues/dev/kibanamachine)
+GITHUB_TOKEN=$(retry 5 5 vault read -field=github_token secret/kibana-issues/dev/kibanamachine)
 export GITHUB_TOKEN
+
+KIBANA_CI_REPORTER_KEY=$(retry 5 5 vault read -field=value secret/kibana-issues/dev/kibanamachine-reporter)
+export KIBANA_CI_REPORTER_KEY
+
+# Setup Failed Test Reporter Elasticsearch credentials
+{
+  TEST_FAILURES_ES_CLOUD_ID=$(retry 5 5 vault read -field=cloud_id secret/kibana-issues/dev/failed_tests_reporter_es)
+  export TEST_FAILURES_ES_CLOUD_ID
+
+  TEST_FAILURES_ES_USERNAME=$(retry 5 5 vault read -field=username secret/kibana-issues/dev/failed_tests_reporter_es)
+  export TEST_FAILURES_ES_USERNAME
+
+  TEST_FAILURES_ES_PASSWORD=$(retry 5 5 vault read -field=password secret/kibana-issues/dev/failed_tests_reporter_es)
+  export TEST_FAILURES_ES_PASSWORD
+}
 
 # By default, all steps should set up these things to get a full environment before running
 # It can be skipped for pipeline upload steps though, to make job start time a little faster
 if [[ "${SKIP_CI_SETUP:-}" != "true" ]]; then
   if [[ -d .buildkite/scripts && "${BUILDKITE_COMMAND:-}" != "buildkite-agent pipeline upload"* ]]; then
-    source .buildkite/scripts/common/util.sh
     source .buildkite/scripts/common/env.sh
     source .buildkite/scripts/common/setup_node.sh
-    source .buildkite/scripts/common/setup_bazel.sh
   fi
+fi
+
+PIPELINE_PRE_COMMAND=${PIPELINE_PRE_COMMAND:-".buildkite/scripts/lifecycle/pipelines/$BUILDKITE_PIPELINE_SLUG/pre_command.sh"}
+if [[ -f "$PIPELINE_PRE_COMMAND" ]]; then
+  source "$PIPELINE_PRE_COMMAND"
 fi

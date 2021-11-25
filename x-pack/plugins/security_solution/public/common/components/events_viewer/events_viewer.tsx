@@ -11,6 +11,8 @@ import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
 
 import { useDispatch } from 'react-redux';
+import { DataViewBase, Filter, Query } from '@kbn/es-query';
+import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Direction } from '../../../../common/search_strategy';
 import { BrowserFields, DocValueFields } from '../../containers/source';
 import { useTimelineEvents } from '../../../timelines/containers';
@@ -30,12 +32,7 @@ import {
 import { TimelineRefetch } from '../../../timelines/components/timeline/refetch_timeline';
 import { EventDetailsWidthProvider } from './event_details_width_context';
 import * as i18n from './translations';
-import {
-  Filter,
-  esQuery,
-  IIndexPattern,
-  Query,
-} from '../../../../../../../src/plugins/data/public';
+import { esQuery } from '../../../../../../../src/plugins/data/public';
 import { inputsModel } from '../../store';
 import { ExitFullScreen } from '../exit_full_screen';
 import { useGlobalFullScreen } from '../../containers/use_full_screen';
@@ -52,6 +49,7 @@ import { SELECTOR_TIMELINE_GLOBAL_CONTAINER } from '../../../timelines/component
 import { timelineSelectors, timelineActions } from '../../../timelines/store/timeline';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
 import { defaultControlColumn } from '../../../timelines/components/timeline/body/control_columns';
+import { TimelineContext } from '../../../../../timelines/public';
 
 export const EVENTS_VIEWER_HEADER_HEIGHT = 90; // px
 const UTILITY_BAR_HEIGHT = 19; // px
@@ -120,10 +118,9 @@ interface Props {
   end: string;
   filters: Filter[];
   headerFilterGroup?: React.ReactNode;
-  height?: number;
   id: TimelineId;
   indexNames: string[];
-  indexPattern: IIndexPattern;
+  indexPattern: DataViewBase;
   isLive: boolean;
   isLoadingIndexPattern: boolean;
   itemsPerPage: number;
@@ -133,6 +130,7 @@ interface Props {
   onRuleChange?: () => void;
   renderCellValue: (props: CellValueElementProps) => React.ReactNode;
   rowRenderers: RowRenderer[];
+  runtimeMappings: MappingRuntimeFields;
   start: string;
   sort: Sort[];
   showTotalCount?: boolean;
@@ -162,6 +160,7 @@ const EventsViewerComponent: React.FC<Props> = ({
   query,
   renderCellValue,
   rowRenderers,
+  runtimeMappings,
   start,
   sort,
   showTotalCount = true,
@@ -217,10 +216,10 @@ const EventsViewerComponent: React.FC<Props> = ({
     [isLoadingIndexPattern, combinedQueries, start, end]
   );
 
-  const fields = useMemo(() => [...columnsHeader.map((c) => c.id), ...(queryFields ?? [])], [
-    columnsHeader,
-    queryFields,
-  ]);
+  const fields = useMemo(
+    () => [...columnsHeader.map((c) => c.id), ...(queryFields ?? [])],
+    [columnsHeader, queryFields]
+  );
 
   const sortField = useMemo(
     () =>
@@ -232,21 +231,20 @@ const EventsViewerComponent: React.FC<Props> = ({
     [sort]
   );
 
-  const [
-    loading,
-    { events, updatedAt, inspect, loadPage, pageInfo, refetch, totalCount = 0 },
-  ] = useTimelineEvents({
-    docValueFields,
-    fields,
-    filterQuery: combinedQueries!.filterQuery,
-    id,
-    indexNames,
-    limit: itemsPerPage,
-    sort: sortField,
-    startDate: start,
-    endDate: end,
-    skip: !canQueryTimeline || combinedQueries?.filterQuery === undefined, // When the filterQuery comes back as undefined, it means an error has been thrown and the request should be skipped
-  });
+  const [loading, { events, updatedAt, inspect, loadPage, pageInfo, refetch, totalCount = 0 }] =
+    useTimelineEvents({
+      docValueFields,
+      fields,
+      filterQuery: combinedQueries?.filterQuery,
+      id,
+      indexNames,
+      limit: itemsPerPage,
+      runtimeMappings,
+      sort: sortField,
+      startDate: start,
+      endDate: end,
+      skip: !canQueryTimeline || combinedQueries?.filterQuery === undefined, // When the filterQuery comes back as undefined, it means an error has been thrown and the request should be skipped
+    });
 
   const totalCountMinusDeleted = useMemo(
     () => (totalCount > 0 ? totalCount - deletedEventIds.length : 0),
@@ -263,10 +261,10 @@ const EventsViewerComponent: React.FC<Props> = ({
     [showTotalCount, totalCountMinusDeleted, unit]
   );
 
-  const nonDeletedEvents = useMemo(() => events.filter((e) => !deletedEventIds.includes(e._id)), [
-    deletedEventIds,
-    events,
-  ]);
+  const nonDeletedEvents = useMemo(
+    () => events.filter((e) => !deletedEventIds.includes(e._id)),
+    [deletedEventIds, events]
+  );
 
   const HeaderSectionContent = useMemo(
     () =>
@@ -287,7 +285,7 @@ const EventsViewerComponent: React.FC<Props> = ({
 
   const leadingControlColumns: ControlColumnProps[] = [defaultControlColumn];
   const trailingControlColumns: ControlColumnProps[] = [];
-
+  const timelineContext = useMemo(() => ({ timelineId: id }), [id]);
   return (
     <StyledEuiPanel
       data-test-subj="events-viewer-panel"
@@ -302,64 +300,66 @@ const EventsViewerComponent: React.FC<Props> = ({
               height={headerFilterGroup ? COMPACT_HEADER_HEIGHT : EVENTS_VIEWER_HEADER_HEIGHT}
               subtitle={utilityBar ? undefined : subtitle}
               title={globalFullScreen ? titleWithExitFullScreen : justTitle}
-              isInspectDisabled={combinedQueries!.filterQuery === undefined}
+              isInspectDisabled={combinedQueries?.filterQuery === undefined}
             >
               {HeaderSectionContent}
             </HeaderSection>
             {utilityBar && !resolverIsShowing(graphEventId) && (
               <UtilityBar>{utilityBar?.(refetch, totalCountMinusDeleted)}</UtilityBar>
             )}
-            <EventsContainerLoading
-              data-timeline-id={id}
-              data-test-subj={`events-container-loading-${loading}`}
-            >
-              <TimelineRefetch
-                id={id}
-                inputId="global"
-                inspect={inspect}
-                loading={loading}
-                refetch={refetch}
-              />
+            <TimelineContext.Provider value={timelineContext}>
+              <EventsContainerLoading
+                data-timeline-id={id}
+                data-test-subj={`events-container-loading-${loading}`}
+              >
+                <TimelineRefetch
+                  id={id}
+                  inputId="global"
+                  inspect={inspect}
+                  loading={loading}
+                  refetch={refetch}
+                />
 
-              {graphEventId && <GraphOverlay timelineId={id} />}
-              <FullWidthFlexGroup $visible={!graphEventId} gutterSize="none">
-                <ScrollableFlexItem grow={1}>
-                  <StatefulBody
-                    activePage={pageInfo.activePage}
-                    browserFields={browserFields}
-                    data={nonDeletedEvents}
-                    id={id}
-                    isEventViewer={true}
-                    onRuleChange={onRuleChange}
-                    refetch={refetch}
-                    renderCellValue={renderCellValue}
-                    rowRenderers={rowRenderers}
-                    sort={sort}
-                    tabType={TimelineTabs.query}
-                    totalPages={calculateTotalPages({
-                      itemsCount: totalCountMinusDeleted,
-                      itemsPerPage,
-                    })}
-                    leadingControlColumns={leadingControlColumns}
-                    trailingControlColumns={trailingControlColumns}
-                  />
-                  <Footer
-                    activePage={pageInfo.activePage}
-                    data-test-subj="events-viewer-footer"
-                    updatedAt={updatedAt}
-                    height={footerHeight}
-                    id={id}
-                    isLive={isLive}
-                    isLoading={loading}
-                    itemsCount={nonDeletedEvents.length}
-                    itemsPerPage={itemsPerPage}
-                    itemsPerPageOptions={itemsPerPageOptions}
-                    onChangePage={loadPage}
-                    totalCount={totalCountMinusDeleted}
-                  />
-                </ScrollableFlexItem>
-              </FullWidthFlexGroup>
-            </EventsContainerLoading>
+                {graphEventId && <GraphOverlay timelineId={id} />}
+                <FullWidthFlexGroup $visible={!graphEventId} gutterSize="none">
+                  <ScrollableFlexItem grow={1}>
+                    <StatefulBody
+                      activePage={pageInfo.activePage}
+                      browserFields={browserFields}
+                      data={nonDeletedEvents}
+                      id={id}
+                      isEventViewer={true}
+                      onRuleChange={onRuleChange}
+                      refetch={refetch}
+                      renderCellValue={renderCellValue}
+                      rowRenderers={rowRenderers}
+                      sort={sort}
+                      tabType={TimelineTabs.query}
+                      totalPages={calculateTotalPages({
+                        itemsCount: totalCountMinusDeleted,
+                        itemsPerPage,
+                      })}
+                      leadingControlColumns={leadingControlColumns}
+                      trailingControlColumns={trailingControlColumns}
+                    />
+                    <Footer
+                      activePage={pageInfo.activePage}
+                      data-test-subj="events-viewer-footer"
+                      updatedAt={updatedAt}
+                      height={footerHeight}
+                      id={id}
+                      isLive={isLive}
+                      isLoading={loading}
+                      itemsCount={nonDeletedEvents.length}
+                      itemsPerPage={itemsPerPage}
+                      itemsPerPageOptions={itemsPerPageOptions}
+                      onChangePage={loadPage}
+                      totalCount={totalCountMinusDeleted}
+                    />
+                  </ScrollableFlexItem>
+                </FullWidthFlexGroup>
+              </EventsContainerLoading>
+            </TimelineContext.Provider>
           </>
         </EventDetailsWidthProvider>
       ) : null}

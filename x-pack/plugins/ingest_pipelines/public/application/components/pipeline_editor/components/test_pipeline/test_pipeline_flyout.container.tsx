@@ -43,11 +43,8 @@ export const TestPipelineFlyout: React.FunctionComponent<Props> = ({
   const { services } = useKibana();
   const isMounted = useIsMounted();
 
-  const {
-    testPipelineData,
-    testPipelineDataDispatch,
-    updateTestOutputPerProcessor,
-  } = useTestPipelineContext();
+  const { testPipelineData, testPipelineDataDispatch, updateTestOutputPerProcessor } =
+    useTestPipelineContext();
 
   const {
     config: { documents: cachedDocuments, verbose: cachedVerbose },

@@ -35,6 +35,18 @@ export type Description = t.TypeOf<typeof description>;
 export const descriptionOrUndefined = t.union([description, t.undefined]);
 export type DescriptionOrUndefined = t.TypeOf<typeof descriptionOrUndefined>;
 
+// outcome is a property of the saved object resolve api
+// will tell us info about the rule after 8.0 migrations
+export const outcome = t.union([
+  t.literal('exactMatch'),
+  t.literal('aliasMatch'),
+  t.literal('conflict'),
+]);
+export type Outcome = t.TypeOf<typeof outcome>;
+
+export const alias_target_id = t.string;
+export type AliasTargetId = t.TypeOf<typeof alias_target_id>;
+
 export const enabled = t.boolean;
 export type Enabled = t.TypeOf<typeof enabled>;
 
@@ -58,6 +70,9 @@ export type FileName = t.TypeOf<typeof file_name>;
 
 export const exclude_export_details = t.boolean;
 export type ExcludeExportDetails = t.TypeOf<typeof exclude_export_details>;
+
+export const namespace = t.string;
+export type Namespace = t.TypeOf<typeof namespace>;
 
 /**
  * TODO: Right now the filters is an "unknown", when it could more than likely
@@ -351,6 +366,9 @@ export const timelines_not_updated = PositiveInteger;
 
 export const note = t.string;
 export type Note = t.TypeOf<typeof note>;
+
+export const namespaceOrUndefined = t.union([namespace, t.undefined]);
+export type NamespaceOrUndefined = t.TypeOf<typeof namespaceOrUndefined>;
 
 export const noteOrUndefined = t.union([note, t.undefined]);
 export type NoteOrUndefined = t.TypeOf<typeof noteOrUndefined>;

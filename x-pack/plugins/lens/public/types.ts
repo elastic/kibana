@@ -234,7 +234,11 @@ export interface Datasource<T = unknown, P = unknown> {
 
   toExpression: (state: T, layerId: string) => ExpressionAstExpression | string | null;
 
-  getDatasourceSuggestionsForField: (state: T, field: unknown) => Array<DatasourceSuggestion<T>>;
+  getDatasourceSuggestionsForField: (
+    state: T,
+    field: unknown,
+    filterFn: (layerId: string) => boolean
+  ) => Array<DatasourceSuggestion<T>>;
   getDatasourceSuggestionsForVisualizeField: (
     state: T,
     indexPatternId: string,
@@ -242,6 +246,7 @@ export interface Datasource<T = unknown, P = unknown> {
   ) => Array<DatasourceSuggestion<T>>;
   getDatasourceSuggestionsFromCurrentState: (
     state: T,
+    filterFn?: (layerId: string) => boolean,
     activeData?: Record<string, Datatable>
   ) => Array<DatasourceSuggestion<T>>;
 
@@ -276,6 +281,10 @@ export interface Datasource<T = unknown, P = unknown> {
    * Checks if the visualization created is time based, for example date histogram
    */
   isTimeBased: (state: T) => boolean;
+  /**
+   * Given the current state layer and a columnId will verify if the column configuration has errors
+   */
+  isValidColumn: (state: T, layerId: string, columnId: string) => boolean;
 }
 
 export interface DatasourceFixAction<T> {
@@ -326,8 +335,10 @@ export type DatasourceDimensionProps<T> = SharedDimensionProps & {
   onRemove?: (accessor: string) => void;
   state: T;
   activeData?: Record<string, Datatable>;
+  invalid?: boolean;
+  invalidMessage?: string;
 };
-
+export type ParamEditorCustomProps = Record<string, unknown> & { label?: string };
 // The only way a visualization has to restrict the query building
 export type DatasourceDimensionEditorProps<T = unknown> = DatasourceDimensionProps<T> & {
   // Not a StateSetter because we have this unique use case of determining valid columns
@@ -335,6 +346,7 @@ export type DatasourceDimensionEditorProps<T = unknown> = DatasourceDimensionPro
     newState: Parameters<StateSetter<T>>[0],
     publishToVisualization?: {
       isDimensionComplete?: boolean;
+      forceRender?: boolean;
     }
   ) => void;
   core: Pick<CoreSetup, 'http' | 'notifications' | 'uiSettings'>;
@@ -343,6 +355,9 @@ export type DatasourceDimensionEditorProps<T = unknown> = DatasourceDimensionPro
   toggleFullscreen: () => void;
   isFullscreen: boolean;
   layerType: LayerType | undefined;
+  supportStaticValue: boolean;
+  paramEditorCustomProps?: ParamEditorCustomProps;
+  supportFieldFormat?: boolean;
 };
 
 export type DatasourceDimensionTriggerProps<T> = DatasourceDimensionProps<T>;
@@ -434,7 +449,7 @@ export interface VisualizationToolbarProps<T = unknown> {
 export type VisualizationDimensionEditorProps<T = unknown> = VisualizationConfigProps<T> & {
   groupId: string;
   accessor: string;
-  setState: (newState: T) => void;
+  setState(newState: T | ((currState: T) => T)): void;
   panelRef: MutableRefObject<HTMLDivElement | null>;
 };
 
@@ -466,13 +481,21 @@ export type VisualizationDimensionGroupConfig = SharedDimensionProps & {
   // this dimension group in the hierarchy. If not specified, the position of the dimension in the array is used. specified nesting
   // orders are always higher in the hierarchy than non-specified ones.
   nestingOrder?: number;
+  // some type of layers can produce groups even if invalid. Keep this information to visually show the user that.
+  invalid?: boolean;
+  invalidMessage?: string;
+  // need a special flag to know when to pass the previous column on duplicating
+  requiresPreviousColumnOnDuplicate?: boolean;
+  supportStaticValue?: boolean;
+  paramEditorCustomProps?: ParamEditorCustomProps;
+  supportFieldFormat?: boolean;
 };
 
 interface VisualizationDimensionChangeProps<T> {
   layerId: string;
   columnId: string;
   prevState: T;
-  frame: Pick<FramePublicAPI, 'datasourceLayers'>;
+  frame: Pick<FramePublicAPI, 'datasourceLayers' | 'activeData'>;
 }
 
 /**
@@ -652,9 +675,9 @@ export interface Visualization<T = unknown> {
   /**
    * For consistency across different visualizations, the dimension configuration UI is standardized
    */
-  getConfiguration: (
-    props: VisualizationConfigProps<T>
-  ) => { groups: VisualizationDimensionGroupConfig[]; supportStaticValue?: boolean };
+  getConfiguration: (props: VisualizationConfigProps<T>) => {
+    groups: VisualizationDimensionGroupConfig[];
+  };
 
   /**
    * Header rendered as layer title This can be used for both static and dynamic content lioke
@@ -755,7 +778,7 @@ export interface LensBrushEvent {
 }
 
 // Use same technique as TriggerContext
-interface LensEditContextMapping {
+export interface LensEditContextMapping {
   [LENS_EDIT_SORT_ACTION]: LensSortActionData;
   [LENS_EDIT_RESIZE_ACTION]: LensResizeActionData;
   [LENS_TOGGLE_ACTION]: LensToggleActionData;
@@ -817,5 +840,5 @@ export interface ILensInterpreterRenderHandlers extends IInterpreterRenderHandle
 export interface SharingSavedObjectProps {
   outcome?: 'aliasMatch' | 'exactMatch' | 'conflict';
   aliasTargetId?: string;
-  errorJSON?: string;
+  sourceId?: string;
 }

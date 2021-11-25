@@ -8,6 +8,7 @@
 
 import { getFields } from './get_fields';
 import { IndexPatternBase, IndexPatternFieldBase, KueryNode } from '../../..';
+import { getDataViewFieldSubtypeNested } from '../../../utils';
 
 export function getFullFieldNameNode(
   rootNameNode: any,
@@ -28,8 +29,8 @@ export function getFullFieldNameNode(
   const fields = getFields(fullFieldNameNode, indexPattern);
 
   const errors = fields!.reduce((acc: any, field: IndexPatternFieldBase) => {
-    const nestedPathFromField =
-      field.subType && field.subType.nested ? field.subType.nested.path : undefined;
+    const subTypeNested = getDataViewFieldSubtypeNested(field);
+    const nestedPathFromField = subTypeNested?.nested.path;
 
     if (nestedPath && !nestedPathFromField) {
       return [
@@ -48,11 +49,7 @@ export function getFullFieldNameNode(
     if (nestedPathFromField !== nestedPath) {
       return [
         ...acc,
-        `Nested field ${
-          field.name
-        } is being queried with the incorrect nested path. The correct path is ${
-          field.subType!.nested!.path
-        }.`,
+        `Nested field ${field.name} is being queried with the incorrect nested path. The correct path is ${subTypeNested?.nested.path}.`,
       ];
     }
 

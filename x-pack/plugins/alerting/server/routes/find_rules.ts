@@ -7,11 +7,13 @@
 
 import { omit } from 'lodash';
 import { IRouter } from 'kibana/server';
+import { UsageCounter } from 'src/plugins/usage_collection/server';
 import { schema } from '@kbn/config-schema';
 import { ILicenseState } from '../lib';
 import { FindOptions, FindResult } from '../rules_client';
 import { RewriteRequestCase, RewriteResponseCase, verifyAccessAndContext } from './lib';
 import { AlertTypeParams, AlertingRequestHandlerContext, BASE_ALERTING_API_PATH } from '../types';
+import { trackLegacyTerminology } from './lib/track_legacy_terminology';
 
 // query definition
 const querySchema = schema.object({
@@ -91,8 +93,9 @@ const rewriteBodyRes: RewriteResponseCase<FindResult<AlertTypeParams>> = ({
         muted_alert_ids: mutedInstanceIds,
         scheduled_task_id: scheduledTaskId,
         execution_status: executionStatus && {
-          ...omit(executionStatus, 'lastExecutionDate'),
+          ...omit(executionStatus, 'lastExecutionDate', 'lastDuration'),
           last_execution_date: executionStatus.lastExecutionDate,
+          last_duration: executionStatus.lastDuration,
         },
         actions: actions.map(({ group, id, actionTypeId, params }) => ({
           group,
@@ -107,7 +110,8 @@ const rewriteBodyRes: RewriteResponseCase<FindResult<AlertTypeParams>> = ({
 
 export const findRulesRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
-  licenseState: ILicenseState
+  licenseState: ILicenseState,
+  usageCounter?: UsageCounter
 ) => {
   router.get(
     {
@@ -120,11 +124,26 @@ export const findRulesRoute = (
       verifyAccessAndContext(licenseState, async function (context, req, res) {
         const rulesClient = context.alerting.getRulesClient();
 
+        trackLegacyTerminology(
+          [req.query.search, req.query.search_fields, req.query.sort_field].filter(
+            Boolean
+          ) as string[],
+          usageCounter
+        );
+
         const options = rewriteQueryReq({
           ...req.query,
           has_reference: req.query.has_reference || undefined,
           search_fields: searchFieldsAsArray(req.query.search_fields),
         });
+
+        if (req.query.fields) {
+          usageCounter?.incrementCounter({
+            counterName: `alertingFieldsUsage`,
+            counterType: 'alertingFieldsUsage',
+            incrementBy: 1,
+          });
+        }
 
         const findResult = await rulesClient.find({ options });
         return res.ok({

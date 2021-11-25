@@ -25,10 +25,9 @@ import { isEqual, pull, merge, castArray } from 'lodash';
 */
 
 type JoinedReturnType<T extends Record<string, any>, U extends UnionToIntersection<T>> = Array<
-  Partial<U> &
-    {
-      [k in keyof T]: T[k];
-    }
+  Partial<U> & {
+    [k in keyof T]: T[k];
+  }
 >;
 
 type ArrayOrSingle<T> = T | T[];

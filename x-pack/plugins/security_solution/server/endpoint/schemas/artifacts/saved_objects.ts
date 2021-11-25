@@ -73,6 +73,10 @@ export const internalManifestSchema = t.exact(
     semanticVersion,
   })
 );
+
+/**
+ * The Internal map of all artifacts that the ManifestManager knows about and is managing
+ */
 export type InternalManifestSchema = t.TypeOf<typeof internalManifestSchema>;
 
 export const internalManifestCreateSchema = t.intersection([

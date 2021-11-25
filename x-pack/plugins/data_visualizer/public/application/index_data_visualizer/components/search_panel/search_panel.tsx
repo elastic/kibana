@@ -6,21 +6,23 @@
  */
 
 import React, { FC, useEffect, useState } from 'react';
-import { EuiCode, EuiFlexItem, EuiFlexGroup, EuiInputPopover } from '@elastic/eui';
+import { EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Query, fromKueryExpression, luceneStringToDsl, toElasticsearchQuery } from '@kbn/es-query';
-import { QueryStringInput } from '../../../../../../../../src/plugins/data/public';
+import { Query, Filter } from '@kbn/es-query';
 import { ShardSizeFilter } from './shard_size_select';
 import { DataVisualizerFieldNamesFilter } from './field_name_filter';
-import { DatavisualizerFieldTypeFilter } from './field_type_filter';
-import { IndexPattern } from '../../../../../../../../src/plugins/data/common/index_patterns/index_patterns';
-import { JobFieldType } from '../../../../../common/types';
+import { DataVisualizerFieldTypeFilter } from './field_type_filter';
 import {
-  ErrorMessage,
-  SEARCH_QUERY_LANGUAGE,
-  SearchQueryLanguage,
-} from '../../types/combined_query';
-
+  IndexPattern,
+  IndexPatternField,
+  TimeRange,
+} from '../../../../../../../../src/plugins/data/common';
+import { JobFieldType } from '../../../../../common/types';
+import { SearchQueryLanguage } from '../../types/combined_query';
+import { useDataVisualizerKibana } from '../../../kibana_context';
+import './_index.scss';
+import { createMergedEsQuery } from '../../utils/saved_search_utils';
+import { OverallStats } from '../../types/overall_stats';
 interface Props {
   indexPattern: IndexPattern;
   searchString: Query['query'];
@@ -28,7 +30,7 @@ interface Props {
   searchQueryLanguage: SearchQueryLanguage;
   samplerShardSize: number;
   setSamplerShardSize(s: number): void;
-  overallStats: any;
+  overallStats: OverallStats;
   indexedFieldTypes: JobFieldType[];
   setVisibleFieldTypes(q: string[]): void;
   visibleFieldTypes: string[];
@@ -38,12 +40,15 @@ interface Props {
     searchQuery,
     searchString,
     queryLanguage,
+    filters,
   }: {
     searchQuery: Query['query'];
     searchString: Query['query'];
     queryLanguage: SearchQueryLanguage;
+    filters: Filter[];
   }): void;
   showEmptyFields: boolean;
+  onAddFilter?: (field: IndexPatternField | string, value: string, type: '+' | '-') => void;
 }
 
 export const SearchPanel: FC<Props> = ({
@@ -61,98 +66,109 @@ export const SearchPanel: FC<Props> = ({
   setSearchParams,
   showEmptyFields,
 }) => {
+  const {
+    services: {
+      uiSettings,
+      notifications: { toasts },
+      data: {
+        query: queryManager,
+        ui: { SearchBar },
+      },
+    },
+  } = useDataVisualizerKibana();
   // The internal state of the input query bar updated on every key stroke.
   const [searchInput, setSearchInput] = useState<Query>({
     query: searchString || '',
     language: searchQueryLanguage,
   });
-  const [errorMessage, setErrorMessage] = useState<ErrorMessage | undefined>(undefined);
 
   useEffect(() => {
     setSearchInput({
       query: searchString || '',
       language: searchQueryLanguage,
     });
-  }, [searchQueryLanguage, searchString]);
+  }, [searchQueryLanguage, searchString, queryManager.filterManager]);
 
-  const searchHandler = (query: Query) => {
-    let filterQuery;
+  const searchHandler = ({ query, filters }: { query?: Query; filters?: Filter[] }) => {
+    const mergedQuery = query ?? searchInput;
+    const mergedFilters = filters ?? queryManager.filterManager.getFilters();
     try {
-      if (query.language === SEARCH_QUERY_LANGUAGE.KUERY) {
-        filterQuery = toElasticsearchQuery(fromKueryExpression(query.query), indexPattern);
-      } else if (query.language === SEARCH_QUERY_LANGUAGE.LUCENE) {
-        filterQuery = luceneStringToDsl(query.query);
-      } else {
-        filterQuery = {};
+      if (mergedFilters) {
+        queryManager.filterManager.setFilters(mergedFilters);
       }
+
+      const combinedQuery = createMergedEsQuery(
+        mergedQuery,
+        queryManager.filterManager.getFilters() ?? [],
+        indexPattern,
+        uiSettings
+      );
+
       setSearchParams({
-        searchQuery: filterQuery,
-        searchString: query.query,
-        queryLanguage: query.language as SearchQueryLanguage,
+        searchQuery: combinedQuery,
+        searchString: mergedQuery.query,
+        queryLanguage: mergedQuery.language as SearchQueryLanguage,
+        filters: mergedFilters,
       });
     } catch (e) {
       console.log('Invalid syntax', JSON.stringify(e, null, 2)); // eslint-disable-line no-console
-      setErrorMessage({ query: query.query as string, message: e.message });
+      toasts.addError(e, {
+        title: i18n.translate('xpack.dataVisualizer.searchPanel.invalidSyntax', {
+          defaultMessage: 'Invalid syntax',
+        }),
+      });
     }
   };
-  const searchChangeHandler = (query: Query) => setSearchInput(query);
 
   return (
-    <EuiFlexGroup gutterSize="m" alignItems="center" data-test-subj="dataVisualizerSearchPanel">
-      <EuiFlexItem>
-        <EuiInputPopover
-          style={{ maxWidth: '100%' }}
-          closePopover={() => setErrorMessage(undefined)}
-          input={
-            <QueryStringInput
-              bubbleSubmitEvent={false}
-              query={searchInput}
-              indexPatterns={[indexPattern]}
-              onChange={searchChangeHandler}
-              onSubmit={searchHandler}
-              placeholder={i18n.translate(
-                'xpack.dataVisualizer.searchPanel.queryBarPlaceholderText',
-                {
-                  defaultMessage: 'Search… (e.g. status:200 AND extension:"PHP")',
-                }
-              )}
-              disableAutoFocus={true}
-              dataTestSubj="dataVisualizerQueryInput"
-              languageSwitcherPopoverAnchorPosition="rightDown"
-            />
+    <EuiFlexGroup
+      gutterSize="s"
+      alignItems="flexStart"
+      data-test-subj="dataVisualizerSearchPanel"
+      className={'dvSearchPanel__container'}
+      responsive={false}
+    >
+      <EuiFlexItem grow={9} className={'dvSearchBar'}>
+        <SearchBar
+          dataTestSubj="dataVisualizerQueryInput"
+          appName={'dataVisualizer'}
+          showFilterBar={true}
+          showDatePicker={false}
+          showQueryInput={true}
+          query={searchInput}
+          onQuerySubmit={(params: { dateRange: TimeRange; query?: Query | undefined }) =>
+            searchHandler({ query: params.query })
           }
-          isOpen={errorMessage?.query === searchInput.query && errorMessage?.message !== ''}
-        >
-          <EuiCode>
-            {i18n.translate(
-              'xpack.dataVisualizer.searchPanel.invalidKuerySyntaxErrorMessageQueryBar',
-              {
-                defaultMessage: 'Invalid query',
-              }
-            )}
-            {': '}
-            {errorMessage?.message.split('\n')[0]}
-          </EuiCode>
-        </EuiInputPopover>
+          // @ts-expect-error onFiltersUpdated is a valid prop on SearchBar
+          onFiltersUpdated={(filters: Filter[]) => searchHandler({ filters })}
+          indexPatterns={[indexPattern]}
+          placeholder={i18n.translate('xpack.dataVisualizer.searchPanel.queryBarPlaceholderText', {
+            defaultMessage: 'Search… (e.g. status:200 AND extension:"PHP")',
+          })}
+          displayStyle={'inPage'}
+          isClearable={true}
+          customSubmitButton={<div />}
+        />
       </EuiFlexItem>
 
-      <EuiFlexItem grow={false}>
+      <EuiFlexItem grow={2} className={'dvSearchPanel__controls'}>
         <ShardSizeFilter
           samplerShardSize={samplerShardSize}
           setSamplerShardSize={setSamplerShardSize}
         />
+
+        <DataVisualizerFieldNamesFilter
+          overallStats={overallStats}
+          setVisibleFieldNames={setVisibleFieldNames}
+          visibleFieldNames={visibleFieldNames}
+          showEmptyFields={showEmptyFields}
+        />
+        <DataVisualizerFieldTypeFilter
+          indexedFieldTypes={indexedFieldTypes}
+          setVisibleFieldTypes={setVisibleFieldTypes}
+          visibleFieldTypes={visibleFieldTypes}
+        />
       </EuiFlexItem>
-      <DataVisualizerFieldNamesFilter
-        overallStats={overallStats}
-        setVisibleFieldNames={setVisibleFieldNames}
-        visibleFieldNames={visibleFieldNames}
-        showEmptyFields={showEmptyFields}
-      />
-      <DatavisualizerFieldTypeFilter
-        indexedFieldTypes={indexedFieldTypes}
-        setVisibleFieldTypes={setVisibleFieldTypes}
-        visibleFieldTypes={visibleFieldTypes}
-      />
     </EuiFlexGroup>
   );
 };

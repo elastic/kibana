@@ -10,6 +10,7 @@ import { isEmpty, isEqual, pick } from 'lodash/fp';
 import { Subscription } from 'rxjs/internal/Subscription';
 
 import memoizeOne from 'memoize-one';
+import { DataViewBase } from '@kbn/es-query';
 import {
   BrowserField,
   BrowserFields,
@@ -21,7 +22,6 @@ import {
 import * as i18n from './translations';
 
 import {
-  IIndexPattern,
   DataPublicPluginStart,
   isCompleteResponse,
   isErrorResponse,
@@ -37,7 +37,7 @@ interface FetchIndexReturn {
   docValueFields: DocValueFields[];
   indexes: string[];
   indexExists: boolean;
-  indexPatterns: IIndexPattern;
+  indexPatterns: DataViewBase;
 }
 
 /**
@@ -61,7 +61,7 @@ export const getBrowserFields = memoizeOne(
       if (accumulator[field.category].fields == null) {
         accumulator[field.category].fields = {};
       }
-      accumulator[field.category].fields[field.name] = (field as unknown) as BrowserField;
+      accumulator[field.category].fields[field.name] = field as unknown as BrowserField;
       return accumulator;
     }, {});
   },
@@ -90,7 +90,7 @@ export const getDocValueFields = memoizeOne(
 );
 
 export const getIndexFields = memoizeOne(
-  (title: string, fields: IndexField[]): IIndexPattern =>
+  (title: string, fields: IndexField[]): DataViewBase =>
     fields && fields.length > 0
       ? {
           fields: fields.map((field) =>
@@ -127,7 +127,7 @@ export const useFetchIndex = (
         abortCtrl.current = new AbortController();
         setLoading(true);
         searchSubscription$.current = data.search
-          .search<IndexFieldsStrategyRequest, IndexFieldsStrategyResponse>(
+          .search<IndexFieldsStrategyRequest<'indices'>, IndexFieldsStrategyResponse>(
             { indices: iNames, onlyCheckIfIndicesExist },
             {
               abortSignal: abortCtrl.current.signal,

@@ -6,6 +6,7 @@
  */
 
 import { rulesClientMock } from '../../../../../alerting/server/mocks';
+import { savedObjectsClientMock } from '../../../../../../../src/core/server/mocks';
 import { getFindResultWithSingleHit } from '../routes/__mocks__/request_responses';
 import { updatePrepackagedRules } from './update_prepacked_rules';
 import { patchRules } from './patch_rules';
@@ -13,13 +14,18 @@ import { getAddPrepackagedRulesSchemaDecodedMock } from '../../../../common/dete
 import { ruleExecutionLogClientMock } from '../rule_execution_log/__mocks__/rule_execution_log_client';
 jest.mock('./patch_rules');
 
-describe('updatePrepackagedRules', () => {
+describe.each([
+  ['Legacy', false],
+  ['RAC', true],
+])('updatePrepackagedRules - %s', (_, isRuleRegistryEnabled) => {
   let rulesClient: ReturnType<typeof rulesClientMock.create>;
   let ruleStatusClient: ReturnType<typeof ruleExecutionLogClientMock.create>;
+  let savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;
 
   beforeEach(() => {
     rulesClient = rulesClientMock.create();
     ruleStatusClient = ruleExecutionLogClientMock.create();
+    savedObjectsClient = savedObjectsClientMock.create();
   });
 
   it('should omit actions and enabled when calling patchRules', async () => {
@@ -33,14 +39,16 @@ describe('updatePrepackagedRules', () => {
     ];
     const outputIndex = 'outputIndex';
     const prepackagedRule = getAddPrepackagedRulesSchemaDecodedMock();
-    rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
+    rulesClient.find.mockResolvedValue(getFindResultWithSingleHit(isRuleRegistryEnabled));
 
     await updatePrepackagedRules(
       rulesClient,
+      savedObjectsClient,
       'default',
       ruleStatusClient,
       [{ ...prepackagedRule, actions }],
-      outputIndex
+      outputIndex,
+      isRuleRegistryEnabled
     );
 
     expect(patchRules).toHaveBeenCalledWith(

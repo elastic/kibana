@@ -20,7 +20,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { Join } from './resources/join';
-import { ILayer } from '../../../classes/layers/layer';
+import { IVectorLayer } from '../../../classes/layers/vector_layer';
 import { JoinDescriptor } from '../../../../common/descriptor_types';
 import { SOURCE_TYPES } from '../../../../common/constants';
 
@@ -31,10 +31,10 @@ export interface JoinField {
 
 export interface Props {
   joins: JoinDescriptor[];
-  layer: ILayer;
+  layer: IVectorLayer;
   layerDisplayName: string;
   leftJoinFields: JoinField[];
-  onChange: (layer: ILayer, joins: JoinDescriptor[]) => void;
+  onChange: (layer: IVectorLayer, joins: JoinDescriptor[]) => void;
 }
 
 export function JoinEditor({ joins, layer, onChange, leftJoinFields, layerDisplayName }: Props) {
@@ -90,9 +90,7 @@ export function JoinEditor({ joins, layer, onChange, leftJoinFields, layerDispla
     ) : (
       <Fragment>
         {renderJoins()}
-
         <EuiSpacer size="s" />
-
         <EuiTextAlign textAlign="center">
           <EuiButtonEmpty
             onClick={addJoin}

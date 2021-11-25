@@ -293,7 +293,7 @@ This content has moved. Refer to <<dashboard, **Dashboard**>>.
 This content has moved. Refer to <<dashboard, **Dashboard**>>.
 
 [role="exclude",id="ingest-node-pipelines"]
-== Ingest Node Pipelines
+== Ingest Pipelines
 
 This content has moved. Refer to {ref}/ingest.html[Ingest pipelines].
 
@@ -358,3 +358,13 @@ This content has moved. Refer to <<xpack-profiler>>.
 == Rendering pre-captured profiler JSON
 
 This content has moved. Refer to <<xpack-profiler>>.
+
+[role="exclude",id="index-patterns"]
+== Index patterns has been renamed to data views.
+
+This content has moved. Refer to <<data-views>>.
+
+[role="exclude",id="managing-index-patterns"]
+== Index patterns has been renamed to data views.
+
+This content has moved. Refer to <<managing-data-views>>.

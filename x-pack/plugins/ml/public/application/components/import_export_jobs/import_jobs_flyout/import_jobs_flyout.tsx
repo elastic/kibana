@@ -257,7 +257,7 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled }) => {
     });
 
     const errorList = errors.map(extractErrorProperties);
-    displayErrorToast((errorList as unknown) as ErrorType, title);
+    displayErrorToast(errorList as unknown as ErrorType, title);
   }, []);
 
   const deleteJob = useCallback(

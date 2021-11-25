@@ -68,6 +68,24 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.dashboard.waitForRenderComplete();
       });
 
+      it('adds a new timelion visualization', async () => {
+        // adding this case, as the timelion agg-based viz doesn't need the `clickNewSearch()` step
+        const originalPanelCount = await PageObjects.dashboard.getPanelCount();
+        await dashboardAddPanel.clickEditorMenuButton();
+        await dashboardAddPanel.clickAggBasedVisualizations();
+        await PageObjects.visualize.clickTimelion();
+        await PageObjects.visualize.saveVisualizationExpectSuccess(
+          'timelion visualization from add new link',
+          { redirectToOrigin: true }
+        );
+
+        await retry.try(async () => {
+          const panelCount = await PageObjects.dashboard.getPanelCount();
+          expect(panelCount).to.eql(originalPanelCount + 1);
+        });
+        await PageObjects.dashboard.waitForRenderComplete();
+      });
+
       it('adds a markdown visualization via the quick button', async () => {
         const originalPanelCount = await PageObjects.dashboard.getPanelCount();
         await dashboardAddPanel.clickMarkdownQuickButton();

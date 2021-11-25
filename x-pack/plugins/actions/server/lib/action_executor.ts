@@ -9,7 +9,12 @@ import type { PublicMethodsOf } from '@kbn/utility-types';
 import { Logger, KibanaRequest } from 'src/core/server';
 import { cloneDeep } from 'lodash';
 import { withSpan } from '@kbn/apm-utils';
-import { validateParams, validateConfig, validateSecrets } from './validate_with_schema';
+import {
+  validateParams,
+  validateConfig,
+  validateSecrets,
+  validateConnector,
+} from './validate_with_schema';
 import {
   ActionTypeExecutorResult,
   ActionTypeRegistryContract,
@@ -44,6 +49,7 @@ export interface ActionExecutorContext {
 
 export interface TaskInfo {
   scheduled: Date;
+  attempts: number;
 }
 
 export interface ExecuteOptions<Source = unknown> {
@@ -141,11 +147,16 @@ export class ActionExecutor {
         let validatedParams: Record<string, unknown>;
         let validatedConfig: Record<string, unknown>;
         let validatedSecrets: Record<string, unknown>;
-
         try {
           validatedParams = validateParams(actionType, params);
           validatedConfig = validateConfig(actionType, config);
           validatedSecrets = validateSecrets(actionType, secrets);
+          if (actionType.validate?.connector) {
+            validateConnector(actionType, {
+              config,
+              secrets,
+            });
+          }
         } catch (err) {
           span?.setOutcome('failure');
           return { status: 'error', actionId, message: err.message, retry: false };
@@ -210,6 +221,7 @@ export class ActionExecutor {
             config: validatedConfig,
             secrets: validatedSecrets,
             isEphemeral,
+            taskInfo,
           });
         } catch (err) {
           rawResult = {

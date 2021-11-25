@@ -39,7 +39,8 @@ export interface SavedObjectsStartDeps {
 }
 
 export class SavedObjectsPublicPlugin
-  implements Plugin<SavedObjectSetup, SavedObjectsStart, object, SavedObjectsStartDeps> {
+  implements Plugin<SavedObjectSetup, SavedObjectsStart, object, SavedObjectsStartDeps>
+{
   private decoratorRegistry = new SavedObjectDecoratorRegistry();
 
   public setup(): SavedObjectSetup {

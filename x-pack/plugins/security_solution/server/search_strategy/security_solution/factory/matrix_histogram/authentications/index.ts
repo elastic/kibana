@@ -5,19 +5,20 @@
  * 2.0.
  */
 
+import { MatrixHistogramTypeToAggName } from '../../../../../../common';
 import { getEntitiesParser } from '../helpers';
 import { buildAuthenticationsHistogramQuery } from './query.authentications_histogram.dsl';
 import { buildAuthenticationsHistogramQueryEntities } from './query.authentications_histogram_entities.dsl';
 
 export const authenticationsMatrixHistogramConfig = {
   buildDsl: buildAuthenticationsHistogramQuery,
-  aggName: 'aggregations.eventActionGroup.buckets',
+  aggName: MatrixHistogramTypeToAggName.authentications,
   parseKey: 'events.buckets',
 };
 
 export const authenticationsMatrixHistogramEntitiesConfig = {
   buildDsl: buildAuthenticationsHistogramQueryEntities,
-  aggName: 'aggregations.events.buckets',
+  aggName: MatrixHistogramTypeToAggName.authenticationsEntities,
   parseKey: 'events.buckets',
   parser: getEntitiesParser,
 };

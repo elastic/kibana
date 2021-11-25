@@ -15,37 +15,23 @@ import type { VisParams } from '../types';
 import { MetricsAxisOptions, PointSeriesOptions } from './components/options';
 import { ValidationWrapper } from './components/common/validation_wrapper';
 
-export function getOptionTabs(showElasticChartsOptions = false) {
-  return [
-    {
-      name: 'advanced',
-      title: i18n.translate('visTypeXy.area.tabs.metricsAxesTitle', {
-        defaultMessage: 'Metrics & axes',
-      }),
-      editor: (props: VisEditorOptionsProps<VisParams>) => (
-        <ValidationWrapper
-          {...props}
-          extraProps={{
-            showElasticChartsOptions,
-          }}
-          component={MetricsAxisOptions}
-        />
-      ),
-    },
-    {
-      name: 'options',
-      title: i18n.translate('visTypeXy.area.tabs.panelSettingsTitle', {
-        defaultMessage: 'Panel settings',
-      }),
-      editor: (props: VisEditorOptionsProps<VisParams>) => (
-        <ValidationWrapper
-          {...props}
-          extraProps={{
-            showElasticChartsOptions,
-          }}
-          component={PointSeriesOptions}
-        />
-      ),
-    },
-  ];
-}
+export const optionTabs = [
+  {
+    name: 'advanced',
+    title: i18n.translate('visTypeXy.area.tabs.metricsAxesTitle', {
+      defaultMessage: 'Metrics & axes',
+    }),
+    editor: (props: VisEditorOptionsProps<VisParams>) => (
+      <ValidationWrapper {...props} component={MetricsAxisOptions} />
+    ),
+  },
+  {
+    name: 'options',
+    title: i18n.translate('visTypeXy.area.tabs.panelSettingsTitle', {
+      defaultMessage: 'Panel settings',
+    }),
+    editor: (props: VisEditorOptionsProps<VisParams>) => (
+      <ValidationWrapper {...props} component={PointSeriesOptions} />
+    ),
+  },
+];

@@ -26,7 +26,7 @@ export function TransactionOverview() {
       rangeTo,
       transactionType: transactionTypeFromUrl,
     },
-  } = useApmParams('/services/:serviceName/transactions');
+  } = useApmParams('/services/{serviceName}/transactions');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 

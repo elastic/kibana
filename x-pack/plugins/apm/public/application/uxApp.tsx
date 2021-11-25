@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
-import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
+import { euiLightVars, euiDarkVars } from '@kbn/ui-shared-deps-src/theme';
+import { EuiErrorBoundary } from '@elastic/eui';
 import { AppMountParameters, CoreStart } from 'kibana/public';
 import React from 'react';
 import ReactDOM from 'react-dom';
@@ -22,16 +22,22 @@ import {
 } from '../../../../../src/plugins/kibana_react/public';
 import { APMRouteDefinition } from '../application/routes';
 import { ScrollToTopOnPathChange } from '../components/app/Main/ScrollToTopOnPathChange';
-import { RumHome, UX_LABEL } from '../components/app/RumDashboard/RumHome';
+import {
+  RumHome,
+  DASHBOARD_LABEL,
+} from '../components/app/RumDashboard/RumHome';
 import { ApmPluginContext } from '../context/apm_plugin/apm_plugin_context';
 import { UrlParamsProvider } from '../context/url_params_context/url_params_context';
 import { ConfigSchema } from '../index';
 import { ApmPluginSetupDeps, ApmPluginStartDeps } from '../plugin';
 import { createCallApmApi } from '../services/rest/createCallApmApi';
-import { createStaticIndexPattern } from '../services/rest/index_pattern';
+import { createStaticDataView } from '../services/rest/data_view';
 import { UXActionMenu } from '../components/app/RumDashboard/ActionMenu';
 import { redirectTo } from '../components/routing/redirect_to';
-import { useBreadcrumbs } from '../../../observability/public';
+import {
+  InspectorContextProvider,
+  useBreadcrumbs,
+} from '../../../observability/public';
 import { useApmPluginContext } from '../context/apm_plugin/use_apm_plugin_context';
 import { APP_WRAPPER_CLASS } from '../../../../../src/core/public';
 
@@ -40,7 +46,7 @@ export const uxRoutes: APMRouteDefinition[] = [
     exact: true,
     path: '/',
     render: redirectTo('/ux'),
-    breadcrumb: UX_LABEL,
+    breadcrumb: DASHBOARD_LABEL,
   },
 ];
 
@@ -125,10 +131,14 @@ export function UXAppRoot({
         >
           <i18nCore.Context>
             <RouterProvider history={history} router={uxRouter}>
-              <UrlParamsProvider>
-                <UxApp />
-                <UXActionMenu appMountParameters={appMountParameters} />
-              </UrlParamsProvider>
+              <InspectorContextProvider>
+                <UrlParamsProvider>
+                  <EuiErrorBoundary>
+                    <UxApp />
+                  </EuiErrorBoundary>
+                  <UXActionMenu appMountParameters={appMountParameters} />
+                </UrlParamsProvider>
+              </InspectorContextProvider>
             </RouterProvider>
           </i18nCore.Context>
         </KibanaContextProvider>
@@ -160,10 +170,10 @@ export const renderApp = ({
 
   createCallApmApi(core);
 
-  // Automatically creates static index pattern and stores as saved object
-  createStaticIndexPattern().catch((e) => {
+  // Automatically creates static data view and stores as saved object
+  createStaticDataView().catch((e) => {
     // eslint-disable-next-line no-console
-    console.log('Error creating static index pattern', e);
+    console.log('Error creating static data view', e);
   });
 
   ReactDOM.render(

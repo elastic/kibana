@@ -22,7 +22,8 @@ interface SetupDependencies {
 }
 
 export class AdvancedUiActionsServerPlugin
-  implements Plugin<SetupContract, StartContract, SetupDependencies> {
+  implements Plugin<SetupContract, StartContract, SetupDependencies>
+{
   protected readonly actionFactories: ActionFactoryRegistry = new Map();
 
   constructor() {}

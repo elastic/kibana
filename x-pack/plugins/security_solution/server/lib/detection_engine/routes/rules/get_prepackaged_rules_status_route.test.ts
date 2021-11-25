@@ -51,7 +51,10 @@ jest.mock('../../../timeline/utils/check_timelines_status', () => {
   };
 });
 
-describe('get_prepackaged_rule_status_route', () => {
+describe.each([
+  ['Legacy', false],
+  ['RAC', true],
+])('get_prepackaged_rule_status_route - %s', (_, isRuleRegistryEnabled) => {
   const mockGetCurrentUser = {
     user: {
       username: 'mockUser',
@@ -63,19 +66,31 @@ describe('get_prepackaged_rule_status_route', () => {
   let securitySetup: SecurityPluginSetup;
 
   beforeEach(() => {
+    jest.clearAllMocks();
     server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
 
-    securitySetup = ({
+    securitySetup = {
       authc: {
         getCurrentUser: jest.fn().mockReturnValue(mockGetCurrentUser),
       },
       authz: {},
-    } as unknown) as SecurityPluginSetup;
+    } as unknown as SecurityPluginSetup;
 
     clients.rulesClient.find.mockResolvedValue(getEmptyFindResult());
 
-    getPrepackagedRulesStatusRoute(server.router, createMockConfig(), securitySetup);
+    (checkTimelinesStatus as jest.Mock).mockResolvedValue({
+      timelinesToInstall: [],
+      timelinesToUpdate: [],
+      prepackagedTimelines: [],
+    });
+
+    getPrepackagedRulesStatusRoute(
+      server.router,
+      createMockConfig(),
+      securitySetup,
+      isRuleRegistryEnabled
+    );
   });
 
   describe('status codes with actionClient and alertClient', () => {
@@ -85,7 +100,7 @@ describe('get_prepackaged_rule_status_route', () => {
     });
 
     test('returns 404 if alertClient is not available on the route', async () => {
-      context.alerting!.getRulesClient = jest.fn();
+      context.alerting.getRulesClient = jest.fn();
       const response = await server.inject(getPrepackagedRulesStatusRequest(), context);
       expect(response.status).toEqual(404);
       expect(response.body).toEqual({ message: 'Not Found', status_code: 404 });
@@ -123,7 +138,7 @@ describe('get_prepackaged_rule_status_route', () => {
     });
 
     test('1 rule installed, 1 custom rules, 0 rules not installed, and 1 rule to not updated', async () => {
-      clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
+      clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit(isRuleRegistryEnabled));
       const request = getPrepackagedRulesStatusRequest();
       const response = await server.inject(request, context);
 

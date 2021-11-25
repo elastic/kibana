@@ -41,7 +41,7 @@ describe('Alert Actions factory', () => {
   it('generate expected action for pager duty', async () => {
     const resp = populateAlertActions({
       selectedMonitor,
-      defaultActions: ([
+      defaultActions: [
         {
           actionTypeId: '.pagerduty',
           group: 'xpack.uptime.alerts.actionGroups.monitorStatus',
@@ -54,7 +54,7 @@ describe('Alert Actions factory', () => {
           },
           id: 'f2a3b195-ed76-499a-805d-82d24d4eeba9',
         },
-      ] as unknown) as ActionConnector[],
+      ] as unknown as ActionConnector[],
     });
     expect(resp).toEqual([
       {
@@ -84,7 +84,7 @@ describe('Alert Actions factory', () => {
   it('generate expected action for slack action connector', async () => {
     const resp = populateAlertActions({
       selectedMonitor,
-      defaultActions: ([
+      defaultActions: [
         {
           actionTypeId: '.pagerduty',
           group: 'xpack.uptime.alerts.actionGroups.monitorStatus',
@@ -97,7 +97,7 @@ describe('Alert Actions factory', () => {
           },
           id: 'f2a3b195-ed76-499a-805d-82d24d4eeba9',
         },
-      ] as unknown) as ActionConnector[],
+      ] as unknown as ActionConnector[],
     });
     expect(resp).toEqual([
       {

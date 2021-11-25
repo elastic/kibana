@@ -23,6 +23,7 @@ import {
   CrawlerDomain,
   CrawlerDomainValidationResult,
   CrawlerDomainValidationResultChange,
+  CrawlerDomainValidationResultFromServer,
   CrawlerDomainValidationStepName,
 } from '../../types';
 import { crawlDomainValidationToResult, crawlerDataServerToClient } from '../../utils';
@@ -57,9 +58,9 @@ export interface AddDomainLogicActions {
     checks: string[];
   };
   setAddDomainFormInputValue(newValue: string): string;
-  setDomainValidationResult(
-    change: CrawlerDomainValidationResultChange
-  ): { change: CrawlerDomainValidationResultChange };
+  setDomainValidationResult(change: CrawlerDomainValidationResultChange): {
+    change: CrawlerDomainValidationResultChange;
+  };
   startDomainValidation(): void;
   submitNewDomain(): void;
   validateDomainInitialVerification(
@@ -207,7 +208,7 @@ export const AddDomainLogic = kea<MakeLogicType<AddDomainLogicValues, AddDomainL
       const route = '/internal/app_search/crawler/validate_url';
 
       try {
-        const data = await http.post(route, {
+        const data = await http.post<CrawlerDomainValidationResultFromServer>(route, {
           body: JSON.stringify({ url: values.addDomainFormInputValue.trim(), checks }),
         });
         const result = crawlDomainValidationToResult(data);

@@ -22,8 +22,8 @@ export type ExpressionMetricPluginSetup = void;
 export type ExpressionMetricPluginStart = void;
 
 export class ExpressionMetricPlugin
-  implements
-    Plugin<ExpressionMetricPluginSetup, ExpressionMetricPluginStart, SetupDeps, StartDeps> {
+  implements Plugin<ExpressionMetricPluginSetup, ExpressionMetricPluginStart, SetupDeps, StartDeps>
+{
   public setup(core: CoreSetup, { expressions }: SetupDeps): ExpressionMetricPluginSetup {
     expressions.registerFunction(metricFunction);
   }

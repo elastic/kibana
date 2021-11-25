@@ -29,7 +29,7 @@ NPM_MODULE_EXTRA_FILES = [
 ]
 
 DEPS = [
-  "@npm//babel-eslint",
+  "@npm//@babel/eslint-parser",
   "@npm//dedent",
   "@npm//eslint",
   "@npm//eslint-module-utils",

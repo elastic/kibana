@@ -14,6 +14,8 @@ import {
   EuiSuperSelect,
   EuiSuperSelectOption,
   EuiTextArea,
+  EuiText,
+  EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { EuiFormProps } from '@elastic/eui/src/components/form/form';
@@ -46,6 +48,7 @@ import {
   EffectedPolicySelectProps,
 } from './effected_policy_select';
 import { useTestIdGenerator } from '../../../../components/hooks/use_test_id_generator';
+import { useLicense } from '../../../../../common/hooks/use_license';
 
 const OPERATING_SYSTEMS: readonly OperatingSystem[] = [
   OperatingSystem.MAC,
@@ -64,11 +67,9 @@ interface ValidationResult {
   isValid: boolean;
 
   /** Individual form field validations */
-  result: Partial<
-    {
-      [key in keyof NewTrustedApp]: FieldValidationState;
-    }
-  >;
+  result: Partial<{
+    [key in keyof NewTrustedApp]: FieldValidationState;
+  }>;
 }
 
 const addResultToValidation = (
@@ -85,7 +86,9 @@ const addResultToValidation = (
     };
   }
   const errorMarkup: React.ReactNode = type === 'warnings' ? <div>{resultValue}</div> : resultValue;
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   validation.result[field]![type].push(errorMarkup);
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   validation.result[field]!.isInvalid = true;
 };
 
@@ -189,6 +192,8 @@ export type CreateTrustedAppFormProps = Pick<
 > & {
   /** The trusted app values that will be passed to the form */
   trustedApp: MaybeImmutable<NewTrustedApp>;
+  isEditMode: boolean;
+  isDirty: boolean;
   onChange: (state: TrustedAppFormState) => void;
   /** Setting passed on to the EffectedPolicySelect component */
   policies: Pick<EffectedPolicySelectProps, 'options' | 'isLoading'>;
@@ -196,7 +201,15 @@ export type CreateTrustedAppFormProps = Pick<
   fullWidth?: boolean;
 };
 export const CreateTrustedAppForm = memo<CreateTrustedAppFormProps>(
-  ({ fullWidth, onChange, trustedApp: _trustedApp, policies = { options: [] }, ...formProps }) => {
+  ({
+    fullWidth,
+    isEditMode,
+    isDirty,
+    onChange,
+    trustedApp: _trustedApp,
+    policies = { options: [] },
+    ...formProps
+  }) => {
     const trustedApp = _trustedApp as NewTrustedApp;
 
     const dataTestSubj = formProps['data-test-subj'];
@@ -204,6 +217,16 @@ export const CreateTrustedAppForm = memo<CreateTrustedAppFormProps>(
     const isTrustedAppsByPolicyEnabled = useIsExperimentalFeatureEnabled(
       'trustedAppsByPolicyEnabled'
     );
+
+    const isPlatinumPlus = useLicense().isPlatinumPlus();
+
+    const isGlobal = useMemo(() => {
+      return isGlobalEffectScope(trustedApp.effectScope);
+    }, [trustedApp]);
+
+    const hideAssignmentSection = useMemo(() => {
+      return !isPlatinumPlus && (!isEditMode || (isGlobal && !isDirty));
+    }, [isEditMode, isGlobal, isDirty, isPlatinumPlus]);
 
     const osOptions: Array<EuiSuperSelectOption<OperatingSystem>> = useMemo(
       () => OPERATING_SYSTEMS.map((os) => ({ value: os, inputDisplay: OS_TITLES[os] })),
@@ -213,7 +236,7 @@ export const CreateTrustedAppForm = memo<CreateTrustedAppFormProps>(
     // We create local state for the list of policies because we want the selected policies to
     // persist while the user is on the form and possibly toggling between global/non-global
     const [selectedPolicies, setSelectedPolicies] = useState<EffectedPolicySelection>({
-      isGlobal: isGlobalEffectScope(trustedApp.effectScope),
+      isGlobal,
       selected: [],
     });
 
@@ -222,11 +245,9 @@ export const CreateTrustedAppForm = memo<CreateTrustedAppFormProps>(
     );
 
     const [wasVisited, setWasVisited] = useState<
-      Partial<
-        {
-          [key in keyof NewTrustedApp]: boolean;
-        }
-      >
+      Partial<{
+        [key in keyof NewTrustedApp]: boolean;
+      }>
     >({});
 
     const getTestId = useTestIdGenerator(dataTestSubj);
@@ -358,14 +379,15 @@ export const CreateTrustedAppForm = memo<CreateTrustedAppFormProps>(
       [notifyOfChange, trustedApp]
     );
 
-    const handleConditionBuilderOnVisited: LogicalConditionBuilderProps['onVisited'] = useCallback(() => {
-      setWasVisited((prevState) => {
-        return {
-          ...prevState,
-          entries: true,
-        };
-      });
-    }, []);
+    const handleConditionBuilderOnVisited: LogicalConditionBuilderProps['onVisited'] =
+      useCallback(() => {
+        setWasVisited((prevState) => {
+          return {
+            ...prevState,
+            entries: true,
+          };
+        });
+      }, []);
 
     const handlePolicySelectChange: EffectedPolicySelectProps['onChange'] = useCallback(
       (selection) => {
@@ -407,7 +429,7 @@ export const CreateTrustedAppForm = memo<CreateTrustedAppFormProps>(
     }, [notifyOfChange, trustedApp]);
 
     // Anytime the TrustedApp has an effective scope of `policies`, then ensure that
-    // those polices are selected in the UI while at teh same time preserving prior
+    // those polices are selected in the UI while at the same time preserving prior
     // selections (UX requirement)
     useEffect(() => {
       setSelectedPolicies((currentSelection) => {
@@ -456,11 +478,46 @@ export const CreateTrustedAppForm = memo<CreateTrustedAppFormProps>(
             onChange={handleDomChangeEvents}
             onBlur={handleDomBlurEvents}
             fullWidth
-            required
+            required={wasVisited?.name}
             maxLength={256}
             data-test-subj={getTestId('nameTextField')}
           />
         </EuiFormRow>
+        <EuiFormRow
+          label={i18n.translate('xpack.securitySolution.trustedapps.create.description', {
+            defaultMessage: 'Description',
+          })}
+          fullWidth={fullWidth}
+          data-test-subj={getTestId('descriptionRow')}
+        >
+          <EuiTextArea
+            name="description"
+            value={trustedApp.description}
+            onChange={handleDomChangeEvents}
+            fullWidth
+            compressed={isTrustedAppsByPolicyEnabled}
+            maxLength={256}
+            data-test-subj={getTestId('descriptionField')}
+          />
+        </EuiFormRow>
+        <EuiHorizontalRule />
+        <EuiText size="xs">
+          <h3>
+            {i18n.translate('xpack.securitySolution.trustedApps.conditionsSectionTitle', {
+              defaultMessage: 'Conditions',
+            })}
+          </h3>
+        </EuiText>
+        <EuiSpacer size="xs" />
+        <EuiText size="s">
+          <p>
+            {i18n.translate('xpack.securitySolution.trustedApps.conditionsSectionDescription', {
+              defaultMessage:
+                'Select an operating system and add conditions. Availability of conditions may depend on your chosen OS.',
+            })}
+          </p>
+        </EuiText>
+        <EuiSpacer size="m" />
         <EuiFormRow
           label={i18n.translate('xpack.securitySolution.trustedapps.create.os', {
             defaultMessage: 'Select operating system',
@@ -496,30 +553,13 @@ export const CreateTrustedAppForm = memo<CreateTrustedAppFormProps>(
             data-test-subj={getTestId('conditionsBuilder')}
           />
         </EuiFormRow>
-        <EuiFormRow
-          label={i18n.translate('xpack.securitySolution.trustedapps.create.description', {
-            defaultMessage: 'Description',
-          })}
-          fullWidth={fullWidth}
-          data-test-subj={getTestId('descriptionRow')}
-        >
-          <EuiTextArea
-            name="description"
-            value={trustedApp.description}
-            onChange={handleDomChangeEvents}
-            fullWidth
-            compressed={isTrustedAppsByPolicyEnabled ? true : false}
-            maxLength={256}
-            data-test-subj={getTestId('descriptionField')}
-          />
-        </EuiFormRow>
-
-        {isTrustedAppsByPolicyEnabled ? (
+        {isTrustedAppsByPolicyEnabled && !hideAssignmentSection ? (
           <>
             <EuiHorizontalRule />
             <EuiFormRow fullWidth={fullWidth} data-test-subj={getTestId('policySelection')}>
               <EffectedPolicySelect
-                isGlobal={isGlobalEffectScope(trustedApp.effectScope)}
+                isGlobal={isGlobal}
+                isPlatinumPlus={isPlatinumPlus}
                 selected={selectedPolicies.selected}
                 options={policies.options}
                 onChange={handlePolicySelectChange}

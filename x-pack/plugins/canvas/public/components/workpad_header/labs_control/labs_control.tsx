@@ -34,8 +34,9 @@ export const LabsControl = () => {
   }
 
   const projects = getProjects(['canvas']);
-  const overrideCount = Object.values(projects).filter((project) => project.status.isOverride)
-    .length;
+  const overrideCount = Object.values(projects).filter(
+    (project) => project.status.isOverride
+  ).length;
 
   return (
     <>

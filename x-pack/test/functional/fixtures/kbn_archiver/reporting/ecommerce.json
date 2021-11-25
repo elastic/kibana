@@ -11,8 +11,8 @@
   },
   "references": [],
   "type": "index-pattern",
-  "updated_at": "2019-12-11T23:24:13.381Z",
-  "version": "WzE3LDJd"
+  "updated_at": "2021-09-20T23:37:22.367Z",
+  "version": "WzU1LDFd"
 }
 
 {
@@ -39,8 +39,8 @@
     }
   ],
   "type": "visualization",
-  "updated_at": "2020-04-08T23:24:05.971Z",
-  "version": "WzIwLDJd"
+  "updated_at": "2021-09-20T23:37:22.367Z",
+  "version": "WzU2LDFd"
 }
 
 {
@@ -67,8 +67,8 @@
     }
   ],
   "type": "visualization",
-  "updated_at": "2020-04-10T00:34:44.700Z",
-  "version": "WzIzLDJd"
+  "updated_at": "2021-09-20T23:37:22.367Z",
+  "version": "WzU3LDFd"
 }
 
 {
@@ -110,8 +110,8 @@
     }
   ],
   "type": "search",
-  "updated_at": "2019-12-11T23:24:28.540Z",
-  "version": "WzE4LDJd"
+  "updated_at": "2021-09-20T23:37:22.367Z",
+  "version": "WzU4LDFd"
 }
 
 {
@@ -139,8 +139,8 @@
     }
   ],
   "type": "visualization",
-  "updated_at": "2021-01-07T00:23:04.624Z",
-  "version": "WzI3LDJd"
+  "updated_at": "2021-09-20T23:37:22.367Z",
+  "version": "WzU5LDFd"
 }
 
 {
@@ -167,8 +167,8 @@
     }
   ],
   "type": "visualization",
-  "updated_at": "2020-04-08T23:24:42.460Z",
-  "version": "WzIxLDJd"
+  "updated_at": "2021-09-20T23:37:22.367Z",
+  "version": "WzYwLDFd"
 }
 
 {
@@ -189,8 +189,8 @@
   },
   "references": [],
   "type": "visualization",
-  "updated_at": "2020-04-10T00:36:17.053Z",
-  "version": "WzI0LDJd"
+  "updated_at": "2021-09-20T23:37:22.367Z",
+  "version": "WzYxLDFd"
 }
 
 {
@@ -217,8 +217,8 @@
     }
   ],
   "type": "visualization",
-  "updated_at": "2020-04-10T00:33:44.909Z",
-  "version": "WzIyLDJd"
+  "updated_at": "2021-09-20T23:37:22.367Z",
+  "version": "WzYyLDFd"
 }
 
 {
@@ -283,8 +283,44 @@
     }
   ],
   "type": "dashboard",
-  "updated_at": "2021-01-07T00:22:16.102Z",
-  "version": "WzI2LDJd"
+  "updated_at": "2021-09-20T23:37:22.367Z",
+  "version": "WzYzLDFd"
+}
+
+{
+  "attributes": {
+    "description": "",
+    "hits": 0,
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"query\":{\"language\":\"kuery\",\"query\":\"\"},\"filter\":[]}"
+    },
+    "optionsJSON": "{\"hidePanelTitles\":false,\"useMargins\":true}",
+    "panelsJSON": "[{\"version\":\"8.0.0\",\"type\":\"search\",\"gridData\":{\"x\":0,\"y\":0,\"w\":41,\"h\":20,\"i\":\"e80a3ff4-cb4a-479e-971d-438eeedd8b29\"},\"panelIndex\":\"e80a3ff4-cb4a-479e-971d-438eeedd8b29\",\"embeddableConfig\":{\"enhancements\":{}},\"panelRefName\":\"panel_e80a3ff4-cb4a-479e-971d-438eeedd8b29\"}]",
+    "refreshInterval": {
+      "pause": true,
+      "value": 0
+    },
+    "timeFrom": "2019-06-19T07:00:00.000Z",
+    "timeRestore": true,
+    "timeTo": "2019-06-22T07:00:00.000Z",
+    "title": "Ecom Dashboard - 3 Day Period",
+    "version": 1
+  },
+  "coreMigrationVersion": "8.0.0",
+  "id": "6c263e00-1c6d-11ea-a100-8589bb9d7c6b-COPY",
+  "migrationVersion": {
+    "dashboard": "7.14.0"
+  },
+  "references": [
+    {
+      "id": "6091ead0-1c6d-11ea-a100-8589bb9d7c6b",
+      "name": "e80a3ff4-cb4a-479e-971d-438eeedd8b29:panel_e80a3ff4-cb4a-479e-971d-438eeedd8b29",
+      "type": "search"
+    }
+  ],
+  "type": "dashboard",
+  "updated_at": "2021-09-20T23:42:15.675Z",
+  "version": "WzE2MiwxXQ=="
 }
 
 {
@@ -344,8 +380,8 @@
     }
   ],
   "type": "dashboard",
-  "updated_at": "2020-04-10T00:37:48.462Z",
-  "version": "WzE5LDJd"
+  "updated_at": "2021-09-20T23:37:22.367Z",
+  "version": "WzY1LDFd"
 }
 
 {
@@ -387,8 +423,8 @@
     }
   ],
   "type": "search",
-  "updated_at": "2021-05-03T18:39:30.751Z",
-  "version": "WzI4LDJd"
+  "updated_at": "2021-09-20T23:37:22.367Z",
+  "version": "WzY2LDFd"
 }
 
 {
@@ -673,6 +709,57 @@
     }
   ],
   "type": "dashboard",
-  "updated_at": "2021-05-03T18:39:45.983Z",
-  "version": "WzI5LDJd"
+  "updated_at": "2021-09-20T23:37:22.367Z",
+  "version": "WzY3LDFd"
+}
+
+{
+  "attributes": {
+    "fields": "[{\"count\":0,\"name\":\"_id\",\"type\":\"string\",\"esTypes\":[\"_id\"],\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":false},{\"count\":0,\"name\":\"_index\",\"type\":\"string\",\"esTypes\":[\"_index\"],\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":false},{\"count\":0,\"name\":\"_score\",\"type\":\"number\",\"scripted\":false,\"searchable\":false,\"aggregatable\":false,\"readFromDocValues\":false},{\"count\":0,\"name\":\"_source\",\"type\":\"_source\",\"esTypes\":[\"_source\"],\"scripted\":false,\"searchable\":false,\"aggregatable\":false,\"readFromDocValues\":false},{\"count\":0,\"name\":\"_type\",\"type\":\"string\",\"esTypes\":[\"_type\"],\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":false},{\"count\":0,\"name\":\"category\",\"type\":\"string\",\"esTypes\":[\"text\"],\"scripted\":false,\"searchable\":true,\"aggregatable\":false,\"readFromDocValues\":false},{\"count\":0,\"name\":\"category.keyword\",\"type\":\"string\",\"esTypes\":[\"keyword\"],\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true,\"subType\":{\"multi\":{\"parent\":\"category\"}}},{\"count\":0,\"name\":\"currency\",\"type\":\"string\",\"esTypes\":[\"keyword\"],\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"count\":0,\"name\":\"customer_birth_date\",\"type\":\"date\",\"esTypes\":[\"date\"],\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"count\":1,\"name\":\"customer_first_name\",\"type\":\"string\",\"esTypes\":[\"text\"],\"scripted\":false,\"searchable\":true,\"aggregatable\":false,\"readFromDocValues\":false},{\"count\":0,\"name\":\"customer_first_name.keyword\",\"type\":\"string\",\"esTypes\":[\"keyword\"],\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true,\"subType\":{\"multi\":{\"parent\":\"customer_first_name\"}}},{\"count\":1,\"name\":\"customer_full_name\",\"type\":\"string\",\"esTypes\":[\"text\"],\"scripted\":false,\"searchable\":true,\"aggregatable\":false,\"readFromDocValues\":false},{\"count\":0,\"name\":\"customer_full_name.keyword\",\"type\":\"string\",\"esTypes\":[\"keyword\"],\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true,\"subType\":{\"multi\":{\"parent\":\"customer_full_name\"}}},{\"count\":0,\"name\":\"customer_gender\",\"type\":\"string\",\"esTypes\":[\"keyword\"],\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"count\":0,\"name\":\"customer_id\",\"type\":\"string\",\"esTypes\":[\"keyword\"],\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"count\":0,\"name\":\"customer_last_name\",\"type\":\"string\",\"esTypes\":[\"text\"],\"scripted\":false,\"searchable\":true,\"aggregatable\":false,\"readFromDocValues\":false},{\"count\":0,\"name\":\"customer_last_name.keyword\",\"type\":\"string\",\"esTypes\":[\"keyword\"],\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true,\"subType\":{\"multi\":{\"parent\":\"customer_last_name\"}}},{\"count\":0,\"name\":\"customer_phone\",\"type\":\"string\",\"esTypes\":[\"keyword\"],\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"count\":0,\"name\":\"day_of_week\",\"type\":\"string\",\"esTypes\":[\"keyword\"],\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"count\":0,\"name\":\"day_of_week_i\",\"type\":\"number\",\"esTypes\":[\"integer\"],\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"count\":0,\"name\":\"email\",\"type\":\"string\",\"esTypes\":[\"keyword\"],\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"count\":0,\"name\":\"geoip.city_name\",\"type\":\"string\",\"esTypes\":[\"keyword\"],\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"count\":0,\"name\":\"geoip.continent_name\",\"type\":\"string\",\"esTypes\":[\"keyword\"],\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"count\":0,\"name\":\"geoip.country_iso_code\",\"type\":\"string\",\"esTypes\":[\"keyword\"],\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"count\":0,\"name\":\"geoip.location\",\"type\":\"geo_point\",\"esTypes\":[\"geo_point\"],\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"count\":0,\"name\":\"geoip.region_name\",\"type\":\"string\",\"esTypes\":[\"keyword\"],\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"count\":0,\"name\":\"manufacturer\",\"type\":\"string\",\"esTypes\":[\"text\"],\"scripted\":false,\"searchable\":true,\"aggregatable\":false,\"readFromDocValues\":false},{\"count\":0,\"name\":\"manufacturer.keyword\",\"type\":\"string\",\"esTypes\":[\"keyword\"],\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true,\"subType\":{\"multi\":{\"parent\":\"manufacturer\"}}},{\"count\":1,\"name\":\"order_date\",\"type\":\"date\",\"esTypes\":[\"date\"],\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"count\":0,\"name\":\"order_id\",\"type\":\"string\",\"esTypes\":[\"keyword\"],\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"count\":0,\"name\":\"products._id\",\"type\":\"string\",\"esTypes\":[\"text\"],\"scripted\":false,\"searchable\":true,\"aggregatable\":false,\"readFromDocValues\":false},{\"count\":0,\"name\":\"products._id.keyword\",\"type\":\"string\",\"esTypes\":[\"keyword\"],\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true,\"subType\":{\"multi\":{\"parent\":\"products._id\"}}},{\"count\":0,\"name\":\"products.base_price\",\"type\":\"number\",\"esTypes\":[\"half_float\"],\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"count\":0,\"name\":\"products.base_unit_price\",\"type\":\"number\",\"esTypes\":[\"half_float\"],\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"count\":0,\"name\":\"products.category\",\"type\":\"string\",\"esTypes\":[\"text\"],\"scripted\":false,\"searchable\":true,\"aggregatable\":false,\"readFromDocValues\":false},{\"count\":0,\"name\":\"products.category.keyword\",\"type\":\"string\",\"esTypes\":[\"keyword\"],\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true,\"subType\":{\"multi\":{\"parent\":\"products.category\"}}},{\"count\":0,\"name\":\"products.created_on\",\"type\":\"date\",\"esTypes\":[\"date\"],\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"count\":0,\"name\":\"products.discount_amount\",\"type\":\"number\",\"esTypes\":[\"half_float\"],\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"count\":0,\"name\":\"products.discount_percentage\",\"type\":\"number\",\"esTypes\":[\"half_float\"],\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"count\":0,\"name\":\"products.manufacturer\",\"type\":\"string\",\"esTypes\":[\"text\"],\"scripted\":false,\"searchable\":true,\"aggregatable\":false,\"readFromDocValues\":false},{\"count\":0,\"name\":\"products.manufacturer.keyword\",\"type\":\"string\",\"esTypes\":[\"keyword\"],\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true,\"subType\":{\"multi\":{\"parent\":\"products.manufacturer\"}}},{\"count\":0,\"name\":\"products.min_price\",\"type\":\"number\",\"esTypes\":[\"half_float\"],\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"count\":0,\"name\":\"products.price\",\"type\":\"number\",\"esTypes\":[\"half_float\"],\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"count\":0,\"name\":\"products.product_id\",\"type\":\"number\",\"esTypes\":[\"long\"],\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"count\":0,\"name\":\"products.product_name\",\"type\":\"string\",\"esTypes\":[\"text\"],\"scripted\":false,\"searchable\":true,\"aggregatable\":false,\"readFromDocValues\":false},{\"count\":0,\"name\":\"products.product_name.keyword\",\"type\":\"string\",\"esTypes\":[\"keyword\"],\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true,\"subType\":{\"multi\":{\"parent\":\"products.product_name\"}}},{\"count\":0,\"name\":\"products.quantity\",\"type\":\"number\",\"esTypes\":[\"integer\"],\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"count\":0,\"name\":\"products.sku\",\"type\":\"string\",\"esTypes\":[\"keyword\"],\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"count\":0,\"name\":\"products.tax_amount\",\"type\":\"number\",\"esTypes\":[\"half_float\"],\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"count\":0,\"name\":\"products.taxful_price\",\"type\":\"number\",\"esTypes\":[\"half_float\"],\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"count\":0,\"name\":\"products.taxless_price\",\"type\":\"number\",\"esTypes\":[\"half_float\"],\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"count\":0,\"name\":\"products.unit_discount_amount\",\"type\":\"number\",\"esTypes\":[\"half_float\"],\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"count\":0,\"name\":\"sku\",\"type\":\"string\",\"esTypes\":[\"keyword\"],\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"count\":1,\"name\":\"taxful_total_price\",\"type\":\"number\",\"esTypes\":[\"half_float\"],\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"count\":1,\"name\":\"taxless_total_price\",\"type\":\"number\",\"esTypes\":[\"half_float\"],\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"count\":1,\"name\":\"total_quantity\",\"type\":\"number\",\"esTypes\":[\"integer\"],\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"count\":1,\"name\":\"total_unique_products\",\"type\":\"number\",\"esTypes\":[\"integer\"],\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"count\":0,\"name\":\"type\",\"type\":\"string\",\"esTypes\":[\"keyword\"],\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"count\":0,\"name\":\"user\",\"type\":\"string\",\"esTypes\":[\"keyword\"],\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true}]",
+    "timeFieldName": "order_date",
+    "title": "ec*"
+  },
+  "coreMigrationVersion": "8.0.0",
+  "id": "aac3e500-f2c7-11ea-8250-fb138aa491e7",
+  "migrationVersion": {
+    "index-pattern": "8.0.0"
+  },
+  "references": [],
+  "type": "index-pattern",
+  "updated_at": "2020-09-09T18:10:54.007Z",
+  "version": "WzIwLDJd"
+}
+
+{
+  "attributes": {
+    "columns": [
+      "category",
+      "customer_full_name",
+      "taxful_total_price",
+      "currency"
+    ],
+    "description": "",
+    "hits": 0,
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"highlightAll\":true,\"version\":true,\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+    },
+    "sort": [],
+    "title": "EC SEARCH from DEFAULT",
+    "version": 1
+  },
+  "coreMigrationVersion": "8.0.0",
+  "id": "bbe45ae0-f2c7-11ea-8250-fb138aa491e7",
+  "migrationVersion": {
+    "search": "8.0.0"
+  },
+  "references": [
+    {
+      "id": "aac3e500-f2c7-11ea-8250-fb138aa491e7",
+      "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+      "type": "index-pattern"
+    }
+  ],
+  "type": "search",
+  "updated_at": "2020-09-09T18:10:58.011Z",
+  "version": "WzI4LDJd"
 }

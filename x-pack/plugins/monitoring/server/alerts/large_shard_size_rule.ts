@@ -75,7 +75,8 @@ export class LargeShardSizeRule extends BaseRule {
       esIndexPattern,
       threshold!,
       shardIndexPatterns,
-      Globals.app.config.ui.max_bucket_size
+      Globals.app.config.ui.max_bucket_size,
+      params.filterQuery
     );
 
     return stats.map((stat) => {
@@ -211,7 +212,7 @@ export class LargeShardSizeRule extends BaseRule {
       internalShortMessage,
       internalFullMessage,
       state: AlertingDefaults.ALERT_STATE.firing,
-      /* continue to send "shardIndices" values for users still using it though 
+      /* continue to send "shardIndices" values for users still using it though
         we have replaced it with shardIndex in the template due to alerts per index instead of all indices
         see https://github.com/elastic/kibana/issues/100136#issuecomment-865229431
         */

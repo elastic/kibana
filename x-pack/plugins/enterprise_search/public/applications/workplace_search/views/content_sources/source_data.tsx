@@ -105,7 +105,7 @@ export const staticSourceData = [
       hasOauthRedirect: true,
       needsBaseUrl: true,
       documentationUrl: CONFLUENCE_DOCS_URL,
-      applicationPortalUrl: 'https://developer.atlassian.com/apps/',
+      applicationPortalUrl: 'https://developer.atlassian.com/console/myapps/',
     },
     objTypes: [
       SOURCE_OBJ_TYPES.PAGES,
@@ -207,6 +207,7 @@ export const staticSourceData = [
       SOURCE_OBJ_TYPES.ISSUES,
       SOURCE_OBJ_TYPES.PULL_REQUESTS,
       SOURCE_OBJ_TYPES.REPOSITORY_LIST,
+      SOURCE_OBJ_TYPES.FILES,
     ],
     features: {
       basicOrgContext: [
@@ -247,6 +248,7 @@ export const staticSourceData = [
       SOURCE_OBJ_TYPES.ISSUES,
       SOURCE_OBJ_TYPES.PULL_REQUESTS,
       SOURCE_OBJ_TYPES.REPOSITORY_LIST,
+      SOURCE_OBJ_TYPES.FILES,
     ],
     features: {
       basicOrgContext: [
@@ -320,11 +322,11 @@ export const staticSourceData = [
     addPath: ADD_JIRA_PATH,
     editPath: EDIT_JIRA_PATH,
     configuration: {
-      isPublicKey: true,
+      isPublicKey: false,
       hasOauthRedirect: true,
-      needsBaseUrl: false,
+      needsBaseUrl: true,
       documentationUrl: JIRA_DOCS_URL,
-      applicationPortalUrl: '',
+      applicationPortalUrl: 'https://developer.atlassian.com/console/myapps/',
     },
     objTypes: [
       SOURCE_OBJ_TYPES.EPICS,
@@ -431,7 +433,9 @@ export const staticSourceData = [
       SOURCE_OBJ_TYPES.OPPORTUNITIES,
       SOURCE_OBJ_TYPES.LEADS,
       SOURCE_OBJ_TYPES.ACCOUNTS,
+      SOURCE_OBJ_TYPES.ATTACHMENTS,
       SOURCE_OBJ_TYPES.CAMPAIGNS,
+      SOURCE_OBJ_TYPES.CASES,
     ],
     features: {
       basicOrgContext: [
@@ -465,7 +469,9 @@ export const staticSourceData = [
       SOURCE_OBJ_TYPES.OPPORTUNITIES,
       SOURCE_OBJ_TYPES.LEADS,
       SOURCE_OBJ_TYPES.ACCOUNTS,
+      SOURCE_OBJ_TYPES.ATTACHMENTS,
       SOURCE_OBJ_TYPES.CAMPAIGNS,
+      SOURCE_OBJ_TYPES.CASES,
     ],
     features: {
       basicOrgContext: [

@@ -28,6 +28,7 @@ import type {
   StatsGetterConfig,
   StatsCollectionConfig,
   UsageStatsPayload,
+  OptInStatsPayload,
   StatsCollectionContext,
   UnencryptedStatsGetterConfig,
   EncryptedStatsGetterConfig,
@@ -40,7 +41,8 @@ interface TelemetryCollectionPluginsDepsSetup {
 }
 
 export class TelemetryCollectionManagerPlugin
-  implements Plugin<TelemetryCollectionManagerPluginSetup, TelemetryCollectionManagerPluginStart> {
+  implements Plugin<TelemetryCollectionManagerPluginSetup, TelemetryCollectionManagerPluginStart>
+{
   private readonly logger: Logger;
   private collectionStrategy: CollectionStrategy | undefined;
   private usageGetterMethodPriority = -1;
@@ -162,6 +164,14 @@ export class TelemetryCollectionManagerPlugin
     }
   }
 
+  private async getOptInStats(
+    optInStatus: boolean,
+    config: UnencryptedStatsGetterConfig
+  ): Promise<Array<{ clusterUuid: string; stats: OptInStatsPayload }>>;
+  private async getOptInStats(
+    optInStatus: boolean,
+    config: EncryptedStatsGetterConfig
+  ): Promise<Array<{ clusterUuid: string; stats: string }>>;
   private async getOptInStats(optInStatus: boolean, config: StatsGetterConfig) {
     if (!this.usageCollection) {
       return [];
@@ -178,13 +188,23 @@ export class TelemetryCollectionManagerPlugin
             optInStatus,
             statsCollectionConfig
           );
-          if (optInStats && optInStats.length) {
-            this.logger.debug(`Got Opt In stats using ${collection.title} collection.`);
-            if (config.unencrypted) {
-              return optInStats;
-            }
-            return encryptTelemetry(optInStats, { useProdKey: this.isDistributable });
-          }
+
+          this.logger.debug(`Received Opt In stats using ${collection.title} collection.`);
+
+          return await Promise.all(
+            optInStats.map(async (clusterStats) => {
+              const clusterUuid = clusterStats.cluster_uuid;
+
+              return {
+                clusterUuid,
+                stats: config.unencrypted
+                  ? clusterStats
+                  : await encryptTelemetry(clusterStats, {
+                      useProdKey: this.isDistributable,
+                    }),
+              };
+            })
+          );
         } catch (err) {
           this.logger.debug(
             `Failed to collect any opt in stats with collection ${collection.title}.`
@@ -204,7 +224,7 @@ export class TelemetryCollectionManagerPlugin
     collection: CollectionStrategy,
     optInStatus: boolean,
     statsCollectionConfig: StatsCollectionConfig
-  ) => {
+  ): Promise<OptInStatsPayload[]> => {
     const context: StatsCollectionContext = {
       logger: this.logger.get(collection.title),
       version: this.version,
@@ -217,8 +237,12 @@ export class TelemetryCollectionManagerPlugin
     }));
   };
 
-  private async getStats(config: UnencryptedStatsGetterConfig): Promise<UsageStatsPayload[]>;
-  private async getStats(config: EncryptedStatsGetterConfig): Promise<string[]>;
+  private async getStats(
+    config: UnencryptedStatsGetterConfig
+  ): Promise<Array<{ clusterUuid: string; stats: UsageStatsPayload }>>;
+  private async getStats(
+    config: EncryptedStatsGetterConfig
+  ): Promise<Array<{ clusterUuid: string; stats: string }>>;
   private async getStats(config: StatsGetterConfig) {
     if (!this.usageCollection) {
       return [];
@@ -230,16 +254,25 @@ export class TelemetryCollectionManagerPlugin
       if (statsCollectionConfig) {
         try {
           const usageData = await this.getUsageForCollection(collection, statsCollectionConfig);
-          if (usageData.length) {
-            this.logger.debug(`Got Usage using ${collection.title} collection.`);
-            if (config.unencrypted) {
-              return usageData;
-            }
+          this.logger.debug(`Received Usage using ${collection.title} collection.`);
 
-            return await encryptTelemetry(usageData, {
-              useProdKey: this.isDistributable,
-            });
-          }
+          return await Promise.all(
+            usageData.map(async (clusterStats) => {
+              const { cluster_uuid: clusterUuid } = clusterStats.cluster_stats as Record<
+                string,
+                string
+              >;
+
+              return {
+                clusterUuid,
+                stats: config.unencrypted
+                  ? clusterStats
+                  : await encryptTelemetry(clusterStats, {
+                      useProdKey: this.isDistributable,
+                    }),
+              };
+            })
+          );
         } catch (err) {
           this.logger.debug(
             `Failed to collect any usage with registered collection ${collection.title}.`

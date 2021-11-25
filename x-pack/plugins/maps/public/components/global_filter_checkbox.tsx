@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { EuiFormRow, EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
+import { EuiFormRow, EuiSwitch, EuiSwitchEvent, EuiToolTip } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 interface Props {
   applyGlobalQuery: boolean;
@@ -21,13 +22,20 @@ export function GlobalFilterCheckbox({ applyGlobalQuery, label, setApplyGlobalQu
 
   return (
     <EuiFormRow display="columnCompressedSwitch">
-      <EuiSwitch
-        label={label}
-        checked={applyGlobalQuery}
-        onChange={onApplyGlobalQueryChange}
-        data-test-subj="mapLayerPanelApplyGlobalQueryCheckbox"
-        compressed
-      />
+      <EuiToolTip
+        position="top"
+        content={i18n.translate('xpack.maps.filterEditor.applyGlobalFilterHelp', {
+          defaultMessage: 'When enabled, results narrowed by global search',
+        })}
+      >
+        <EuiSwitch
+          label={label}
+          checked={applyGlobalQuery}
+          onChange={onApplyGlobalQueryChange}
+          data-test-subj="mapLayerPanelApplyGlobalQueryCheckbox"
+          compressed
+        />
+      </EuiToolTip>
     </EuiFormRow>
   );
 }

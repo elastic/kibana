@@ -283,6 +283,7 @@ const SchemaFileTemplate = `
 // the event log
 
 import { schema, TypeOf } from '@kbn/config-schema';
+import semver from 'semver';
 
 type DeepWriteable<T> = { -readonly [P in keyof T]: DeepWriteable<T[P]> };
 type DeepPartial<T> = {

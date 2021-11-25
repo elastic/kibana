@@ -7,20 +7,10 @@
 
 import { getBasePath, isIntegrationsPopupOpen } from './index';
 import { AppState } from '../../state';
-import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../common/constants';
+import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../common/constants/settings_defaults';
 
 describe('state selectors', () => {
   const state: AppState = {
-    overviewFilters: {
-      filters: {
-        locations: [],
-        ports: [],
-        schemes: [],
-        tags: [],
-      },
-      errors: [],
-      loading: false,
-    },
     dynamicSettings: {
       settings: DYNAMIC_SETTINGS_DEFAULTS,
       loading: false,
@@ -42,11 +32,6 @@ describe('state selectors', () => {
     monitorStatus: {
       status: null,
       loading: false,
-    },
-    indexPattern: {
-      index_pattern: null,
-      loading: false,
-      errors: [],
     },
     ping: {
       pingHistogram: null,
@@ -93,10 +78,7 @@ describe('state selectors', () => {
       },
     },
     certificates: {
-      certs: {
-        data: null,
-        loading: false,
-      },
+      total: 0,
     },
     selectedFilters: null,
     alerts: {

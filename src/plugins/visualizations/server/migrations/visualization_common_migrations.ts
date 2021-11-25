@@ -157,3 +157,32 @@ export const commonMigrateTagCloud = (visState: any) => {
 
   return visState;
 };
+
+export const commonRemoveMarkdownLessFromTSVB = (visState: any) => {
+  if (visState && visState.type === 'metrics') {
+    const params: any = get(visState, 'params') || {};
+
+    if (params.type === 'markdown') {
+      // remove less
+      if (params.markdown_less) {
+        delete params.markdown_less;
+      }
+
+      // remove markdown id from css
+      if (params.markdown_css) {
+        params.markdown_css = params.markdown_css
+          .replace(new RegExp(`#markdown-${params.id}`, 'g'), '')
+          .trim();
+      }
+    }
+
+    return {
+      ...visState,
+      params: {
+        ...params,
+      },
+    };
+  }
+
+  return visState;
+};

@@ -11,7 +11,7 @@ import { Location } from 'history';
 import { UrlInputsModel } from '../../store/inputs/model';
 import { TimelineUrl } from '../../../timelines/store/timeline/model';
 import { CONSTANTS } from '../url_state/constants';
-import { URL_STATE_KEYS, KeyUrlState, UrlState } from '../url_state/types';
+import { KeyUrlState, UrlState, isAdministration, ALL_URL_STATE_KEYS } from '../url_state/types';
 import {
   replaceQueryStringInLocation,
   replaceStateKeyInQueryString,
@@ -20,16 +20,16 @@ import {
 import { Query, Filter } from '../../../../../../../src/plugins/data/public';
 
 import { SearchNavTab } from './types';
-import { SourcererScopePatterns } from '../../store/sourcerer/model';
+import { SourcererUrlState } from '../../store/sourcerer/model';
 
 export const getSearch = (tab: SearchNavTab, urlState: UrlState): string => {
-  if (tab && tab.urlKey != null && URL_STATE_KEYS[tab.urlKey] != null) {
-    return URL_STATE_KEYS[tab.urlKey].reduce<Location>(
+  if (tab && tab.urlKey != null && !isAdministration(tab.urlKey)) {
+    return ALL_URL_STATE_KEYS.reduce<Location>(
       (myLocation: Location, urlKey: KeyUrlState) => {
         let urlStateToReplace:
           | Filter[]
           | Query
-          | SourcererScopePatterns
+          | SourcererUrlState
           | TimelineUrl
           | UrlInputsModel
           | string = '';

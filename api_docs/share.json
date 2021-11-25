@@ -355,77 +355,6 @@
       },
       {
         "parentPluginId": "share",
-        "id": "def-public.formatSearchParams",
-        "type": "Function",
-        "tags": [],
-        "label": "formatSearchParams",
-        "description": [],
-        "signature": [
-          "(opts: ",
-          "RedirectOptions",
-          ") => URLSearchParams"
-        ],
-        "path": "src/plugins/share/public/url_service/redirect/util/format_search_params.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "share",
-            "id": "def-public.formatSearchParams.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "opts",
-            "description": [],
-            "signature": [
-              "RedirectOptions"
-            ],
-            "path": "src/plugins/share/public/url_service/redirect/util/format_search_params.ts",
-            "deprecated": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "share",
-        "id": "def-public.parseSearchParams",
-        "type": "Function",
-        "tags": [],
-        "label": "parseSearchParams",
-        "description": [
-          "\nParses redirect endpoint URL path search parameters. Expects them in the\nfollowing form:\n\n```\n/r?l=<locator_id>&v=<version>&p=<params>\n```\n"
-        ],
-        "signature": [
-          "(urlSearch: string) => ",
-          "RedirectOptions"
-        ],
-        "path": "src/plugins/share/public/url_service/redirect/util/parse_search_params.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "share",
-            "id": "def-public.parseSearchParams.$1",
-            "type": "string",
-            "tags": [],
-            "label": "urlSearch",
-            "description": [
-              "Search part of URL path."
-            ],
-            "signature": [
-              "string"
-            ],
-            "path": "src/plugins/share/public/url_service/redirect/util/parse_search_params.ts",
-            "deprecated": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [
-          "Parsed out locator ID, version, and locator params."
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "share",
         "id": "def-public.useLocatorUrl",
         "type": "Function",
         "tags": [],
@@ -433,7 +362,13 @@
         "description": [],
         "signature": [
           "<P extends ",
-          "SerializableRecord",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "server",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-server.SerializableRecord",
+            "text": "SerializableRecord"
+          },
           ">(locator: ",
           {
             "pluginId": "share",
@@ -690,6 +625,16 @@
         "children": [
           {
             "parentPluginId": "share",
+            "id": "def-public.LocatorPublic.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "src/plugins/share/common/url_service/locators/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "share",
             "id": "def-public.LocatorPublic.getLocation",
             "type": "Function",
             "tags": [],
@@ -728,7 +673,9 @@
             "parentPluginId": "share",
             "id": "def-public.LocatorPublic.getUrl",
             "type": "Function",
-            "tags": [],
+            "tags": [
+              "deprecated"
+            ],
             "label": "getUrl",
             "description": [
               "\nReturns a URL as a string.\n"
@@ -739,7 +686,117 @@
               " | undefined) => Promise<string>"
             ],
             "path": "src/plugins/share/common/url_service/locators/types.ts",
-            "deprecated": false,
+            "deprecated": true,
+            "references": [
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/contexts/kibana/use_create_url.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/contexts/kibana/use_create_url.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/components/navigation_menu/main_tabs.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/overview/components/anomaly_detection_panel/anomaly_detection_panel.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/overview/components/anomaly_detection_panel/anomaly_detection_panel.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/data_frame_analytics/pages/analytics_management/components/action_view/use_view_action.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/data_frame_analytics/pages/analytics_management/components/action_map/use_map_action.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/overview/components/analytics_panel/analytics_panel.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/jobs/new_job/pages/job_type/page.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/jobs/new_job/recognize/page.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/datavisualizer/index_based/index_data_visualizer.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/datavisualizer/index_based/index_data_visualizer.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/datavisualizer/file_based/file_datavisualizer.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/datavisualizer/file_based/file_datavisualizer.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/data_frame_analytics/pages/job_map/components/controls.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/data_frame_analytics/pages/job_map/job_map.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/routing/routes/data_frame_analytics/analytics_job_exploration.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/components/anomaly_results_view_selector/anomaly_results_view_selector.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/timeseriesexplorer/components/timeseriesexplorer_no_jobs_found/timeseriesexplorer_no_jobs_found.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/trained_models/models_management/models_list.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/trained_models/models_management/models_list.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/app.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/ui_actions/open_in_anomaly_explorer_action.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/ui_actions/open_in_anomaly_explorer_action.tsx"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/plugins/infra/public/components/logging/log_analysis_setup/setup_flyout/module_list_card.tsx"
+              },
+              {
+                "plugin": "reporting",
+                "path": "x-pack/plugins/reporting/public/management/ilm_policy_link.tsx"
+              },
+              {
+                "plugin": "ingestPipelines",
+                "path": "x-pack/plugins/ingest_pipelines/public/locator.test.ts"
+              }
+            ],
             "children": [
               {
                 "parentPluginId": "share",
@@ -768,6 +825,59 @@
                 ],
                 "signature": [
                   "LocatorGetUrlParams",
+                  " | undefined"
+                ],
+                "path": "src/plugins/share/common/url_service/locators/types.ts",
+                "deprecated": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "share",
+            "id": "def-public.LocatorPublic.getRedirectUrl",
+            "type": "Function",
+            "tags": [],
+            "label": "getRedirectUrl",
+            "description": [
+              "\nReturns a URL to the redirect endpoint, which will redirect the user to\nthe final destination.\n"
+            ],
+            "signature": [
+              "(params: P, options?: ",
+              "FormatSearchParamsOptions",
+              " | undefined) => string"
+            ],
+            "path": "src/plugins/share/common/url_service/locators/types.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "share",
+                "id": "def-public.LocatorPublic.getRedirectUrl.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "params",
+                "description": [
+                  "URL locator parameters."
+                ],
+                "signature": [
+                  "P"
+                ],
+                "path": "src/plugins/share/common/url_service/locators/types.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "share",
+                "id": "def-public.LocatorPublic.getRedirectUrl.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [
+                  "URL serialization options."
+                ],
+                "signature": [
+                  "FormatSearchParamsOptions",
                   " | undefined"
                 ],
                 "path": "src/plugins/share/common/url_service/locators/types.ts",
@@ -892,6 +1002,62 @@
               }
             ],
             "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "share",
+        "id": "def-public.RedirectOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "RedirectOptions",
+        "description": [],
+        "signature": [
+          "RedirectOptions",
+          "<P>"
+        ],
+        "path": "src/plugins/share/common/url_service/locators/redirect/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "share",
+            "id": "def-public.RedirectOptions.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [
+              "Locator ID."
+            ],
+            "path": "src/plugins/share/common/url_service/locators/redirect/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "share",
+            "id": "def-public.RedirectOptions.version",
+            "type": "string",
+            "tags": [],
+            "label": "version",
+            "description": [
+              "Kibana version when locator params were generated."
+            ],
+            "path": "src/plugins/share/common/url_service/locators/redirect/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "share",
+            "id": "def-public.RedirectOptions.params",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "params",
+            "description": [
+              "Locator params."
+            ],
+            "signature": [
+              "P"
+            ],
+            "path": "src/plugins/share/common/url_service/locators/redirect/types.ts",
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -1736,9 +1902,25 @@
         "UrlGeneratorsSetup",
         "; url: ",
         "UrlService",
-        "; navigate(options: ",
+        "<unknown>; navigate(options: ",
         "RedirectOptions",
-        "): void; }"
+        "<",
+        {
+          "pluginId": "@kbn/utility-types",
+          "scope": "server",
+          "docId": "kibKbnUtilityTypesPluginApi",
+          "section": "def-server.SerializableRecord",
+          "text": "SerializableRecord"
+        },
+        ">): void; setAnonymousAccessServiceProvider: (provider: () => ",
+        {
+          "pluginId": "share",
+          "scope": "common",
+          "docId": "kibSharePluginApi",
+          "section": "def-common.AnonymousAccessServiceContract",
+          "text": "AnonymousAccessServiceContract"
+        },
+        ") => void; }"
       ],
       "path": "src/plugins/share/public/plugin.ts",
       "deprecated": false,
@@ -1765,9 +1947,17 @@
         "UrlGeneratorsStart",
         "; url: ",
         "UrlService",
-        "; navigate(options: ",
+        "<unknown>; navigate(options: ",
         "RedirectOptions",
-        "): void; }"
+        "<",
+        {
+          "pluginId": "@kbn/utility-types",
+          "scope": "server",
+          "docId": "kibKbnUtilityTypesPluginApi",
+          "section": "def-server.SerializableRecord",
+          "text": "SerializableRecord"
+        },
+        ">): void; }"
       ],
       "path": "src/plugins/share/public/plugin.ts",
       "deprecated": false,
@@ -1829,7 +2019,10 @@
           "label": "url",
           "description": [],
           "signature": [
-            "UrlService"
+            "UrlService",
+            "<",
+            "ServerShortUrlClientFactoryCreateParams",
+            ">"
           ],
           "path": "src/plugins/share/server/plugin.ts",
           "deprecated": false
@@ -1856,7 +2049,10 @@
           "label": "url",
           "description": [],
           "signature": [
-            "UrlService"
+            "UrlService",
+            "<",
+            "ServerShortUrlClientFactoryCreateParams",
+            ">"
           ],
           "path": "src/plugins/share/server/plugin.ts",
           "deprecated": false
@@ -1871,6 +2067,72 @@
     "functions": [
       {
         "parentPluginId": "share",
+        "id": "def-common.formatSearchParams",
+        "type": "Function",
+        "tags": [],
+        "label": "formatSearchParams",
+        "description": [],
+        "signature": [
+          "(opts: ",
+          "RedirectOptions",
+          "<",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "server",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-server.SerializableRecord",
+            "text": "SerializableRecord"
+          },
+          ">, { lzCompress }: ",
+          "FormatSearchParamsOptions",
+          ") => URLSearchParams"
+        ],
+        "path": "src/plugins/share/common/url_service/locators/redirect/format_search_params.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "share",
+            "id": "def-common.formatSearchParams.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "opts",
+            "description": [],
+            "signature": [
+              "RedirectOptions",
+              "<",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "server",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-server.SerializableRecord",
+                "text": "SerializableRecord"
+              },
+              ">"
+            ],
+            "path": "src/plugins/share/common/url_service/locators/redirect/format_search_params.ts",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "share",
+            "id": "def-common.formatSearchParams.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "{ lzCompress }",
+            "description": [],
+            "signature": [
+              "FormatSearchParamsOptions"
+            ],
+            "path": "src/plugins/share/common/url_service/locators/redirect/format_search_params.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "share",
         "id": "def-common.useLocatorUrl",
         "type": "Function",
         "tags": [],
@@ -1878,7 +2140,13 @@
         "description": [],
         "signature": [
           "<P extends ",
-          "SerializableRecord",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "server",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-server.SerializableRecord",
+            "text": "SerializableRecord"
+          },
           ">(locator: ",
           {
             "pluginId": "share",
@@ -1964,6 +2232,107 @@
       }
     ],
     "interfaces": [
+      {
+        "parentPluginId": "share",
+        "id": "def-common.AnonymousAccessServiceContract",
+        "type": "Interface",
+        "tags": [],
+        "label": "AnonymousAccessServiceContract",
+        "description": [
+          "\nThe contract that is used to check anonymous access for the purposes of sharing public links. The implementation is intended to be\nprovided by the security plugin."
+        ],
+        "path": "src/plugins/share/common/anonymous_access/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "share",
+            "id": "def-common.AnonymousAccessServiceContract.getState",
+            "type": "Function",
+            "tags": [],
+            "label": "getState",
+            "description": [
+              "\nThis function returns the current state of anonymous access."
+            ],
+            "signature": [
+              "() => Promise<",
+              {
+                "pluginId": "share",
+                "scope": "common",
+                "docId": "kibSharePluginApi",
+                "section": "def-common.AnonymousAccessState",
+                "text": "AnonymousAccessState"
+              },
+              ">"
+            ],
+            "path": "src/plugins/share/common/anonymous_access/types.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "share",
+            "id": "def-common.AnonymousAccessServiceContract.getCapabilities",
+            "type": "Function",
+            "tags": [],
+            "label": "getCapabilities",
+            "description": [
+              "\nThis function returns the capabilities of the anonymous access user."
+            ],
+            "signature": [
+              "() => Promise<",
+              "Capabilities",
+              ">"
+            ],
+            "path": "src/plugins/share/common/anonymous_access/types.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "share",
+        "id": "def-common.AnonymousAccessState",
+        "type": "Interface",
+        "tags": [],
+        "label": "AnonymousAccessState",
+        "description": [
+          "\nThe state of anonymous access."
+        ],
+        "path": "src/plugins/share/common/anonymous_access/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "share",
+            "id": "def-common.AnonymousAccessState.isEnabled",
+            "type": "boolean",
+            "tags": [],
+            "label": "isEnabled",
+            "description": [
+              "\nWhether anonymous access is enabled or not."
+            ],
+            "path": "src/plugins/share/common/anonymous_access/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "share",
+            "id": "def-common.AnonymousAccessState.accessURLParameters",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "accessURLParameters",
+            "description": [
+              "\nIf anonymous access is enabled, this reflects what URL parameters need to be added to a Kibana link to make it publicly accessible.\nNote that if anonymous access is the only authentication method, this will be null."
+            ],
+            "signature": [
+              "Record<string, string> | null"
+            ],
+            "path": "src/plugins/share/common/anonymous_access/types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "share",
         "id": "def-common.LocatorDefinition",
@@ -2077,6 +2446,16 @@
         "children": [
           {
             "parentPluginId": "share",
+            "id": "def-common.LocatorPublic.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "src/plugins/share/common/url_service/locators/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "share",
             "id": "def-common.LocatorPublic.getLocation",
             "type": "Function",
             "tags": [],
@@ -2115,7 +2494,9 @@
             "parentPluginId": "share",
             "id": "def-common.LocatorPublic.getUrl",
             "type": "Function",
-            "tags": [],
+            "tags": [
+              "deprecated"
+            ],
             "label": "getUrl",
             "description": [
               "\nReturns a URL as a string.\n"
@@ -2126,7 +2507,117 @@
               " | undefined) => Promise<string>"
             ],
             "path": "src/plugins/share/common/url_service/locators/types.ts",
-            "deprecated": false,
+            "deprecated": true,
+            "references": [
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/contexts/kibana/use_create_url.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/contexts/kibana/use_create_url.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/components/navigation_menu/main_tabs.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/overview/components/anomaly_detection_panel/anomaly_detection_panel.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/overview/components/anomaly_detection_panel/anomaly_detection_panel.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/data_frame_analytics/pages/analytics_management/components/action_view/use_view_action.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/data_frame_analytics/pages/analytics_management/components/action_map/use_map_action.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/overview/components/analytics_panel/analytics_panel.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/jobs/new_job/pages/job_type/page.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/jobs/new_job/recognize/page.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/datavisualizer/index_based/index_data_visualizer.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/datavisualizer/index_based/index_data_visualizer.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/datavisualizer/file_based/file_datavisualizer.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/datavisualizer/file_based/file_datavisualizer.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/data_frame_analytics/pages/job_map/components/controls.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/data_frame_analytics/pages/job_map/job_map.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/routing/routes/data_frame_analytics/analytics_job_exploration.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/components/anomaly_results_view_selector/anomaly_results_view_selector.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/timeseriesexplorer/components/timeseriesexplorer_no_jobs_found/timeseriesexplorer_no_jobs_found.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/trained_models/models_management/models_list.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/trained_models/models_management/models_list.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/app.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/ui_actions/open_in_anomaly_explorer_action.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/ui_actions/open_in_anomaly_explorer_action.tsx"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/plugins/infra/public/components/logging/log_analysis_setup/setup_flyout/module_list_card.tsx"
+              },
+              {
+                "plugin": "reporting",
+                "path": "x-pack/plugins/reporting/public/management/ilm_policy_link.tsx"
+              },
+              {
+                "plugin": "ingestPipelines",
+                "path": "x-pack/plugins/ingest_pipelines/public/locator.test.ts"
+              }
+            ],
             "children": [
               {
                 "parentPluginId": "share",
@@ -2155,6 +2646,59 @@
                 ],
                 "signature": [
                   "LocatorGetUrlParams",
+                  " | undefined"
+                ],
+                "path": "src/plugins/share/common/url_service/locators/types.ts",
+                "deprecated": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "share",
+            "id": "def-common.LocatorPublic.getRedirectUrl",
+            "type": "Function",
+            "tags": [],
+            "label": "getRedirectUrl",
+            "description": [
+              "\nReturns a URL to the redirect endpoint, which will redirect the user to\nthe final destination.\n"
+            ],
+            "signature": [
+              "(params: P, options?: ",
+              "FormatSearchParamsOptions",
+              " | undefined) => string"
+            ],
+            "path": "src/plugins/share/common/url_service/locators/types.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "share",
+                "id": "def-common.LocatorPublic.getRedirectUrl.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "params",
+                "description": [
+                  "URL locator parameters."
+                ],
+                "signature": [
+                  "P"
+                ],
+                "path": "src/plugins/share/common/url_service/locators/types.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "share",
+                "id": "def-common.LocatorPublic.getRedirectUrl.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [
+                  "URL serialization options."
+                ],
+                "signature": [
+                  "FormatSearchParamsOptions",
                   " | undefined"
                 ],
                 "path": "src/plugins/share/common/url_service/locators/types.ts",

@@ -10,8 +10,15 @@ import {
   ESGeoGridSourceDescriptor,
   ESSearchSourceDescriptor,
   LayerDescriptor,
+  VectorLayerDescriptor,
 } from '../../common/descriptor_types';
-import { GRID_RESOLUTION, LAYER_TYPE, RENDER_AS, SCALING_TYPES, SOURCE_TYPES } from '../../common';
+import {
+  GRID_RESOLUTION,
+  LAYER_TYPE,
+  RENDER_AS,
+  SCALING_TYPES,
+  SOURCE_TYPES,
+} from '../../common/constants';
 import {
   DEFAULT_EMS_DARKMAP_ID,
   DEFAULT_EMS_ROADMAP_DESATURATED_ID,
@@ -259,8 +266,7 @@ export function getTermJoinsPerCluster(
 ): TELEMETRY_TERM_JOIN_COUNTS_PER_CLUSTER {
   return getCountsByCluster(layerLists, (layerDescriptor: LayerDescriptor) => {
     return layerDescriptor.type === LAYER_TYPE.VECTOR &&
-      layerDescriptor.joins &&
-      layerDescriptor.joins.length
+      (layerDescriptor as VectorLayerDescriptor)?.joins?.length
       ? TELEMETRY_TERM_JOIN
       : null;
   });

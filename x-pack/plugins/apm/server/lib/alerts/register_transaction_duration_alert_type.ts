@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { schema } from '@kbn/config-schema';
 import type {
   ALERT_EVALUATION_THRESHOLD as ALERT_EVALUATION_THRESHOLD_TYPED,
@@ -41,16 +41,18 @@ import { ProcessorEvent } from '../../../common/processor_event';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { getDurationFormatter } from '../../../common/utils/formatters';
 import {
-  getDocumentTypeFilterForAggregatedTransactions,
-  getTransactionDurationFieldForAggregatedTransactions,
-} from '../helpers/aggregated_transactions';
+  getDocumentTypeFilterForTransactions,
+  getTransactionDurationFieldForTransactions,
+} from '../helpers/transactions';
 import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
 import { apmActionVariables } from './action_variables';
 import { alertingEsClient } from './alerting_es_client';
 import { RegisterRuleDependencies } from './register_apm_alerts';
 
-const ALERT_EVALUATION_THRESHOLD: typeof ALERT_EVALUATION_THRESHOLD_TYPED = ALERT_EVALUATION_THRESHOLD_NON_TYPED;
-const ALERT_EVALUATION_VALUE: typeof ALERT_EVALUATION_VALUE_TYPED = ALERT_EVALUATION_VALUE_NON_TYPED;
+const ALERT_EVALUATION_THRESHOLD: typeof ALERT_EVALUATION_THRESHOLD_TYPED =
+  ALERT_EVALUATION_THRESHOLD_NON_TYPED;
+const ALERT_EVALUATION_VALUE: typeof ALERT_EVALUATION_VALUE_TYPED =
+  ALERT_EVALUATION_VALUE_NON_TYPED;
 const ALERT_REASON: typeof ALERT_REASON_TYPED = ALERT_REASON_NON_TYPED;
 
 const paramsSchema = schema.object({
@@ -113,14 +115,14 @@ export function registerTransactionDurationAlertType({
       // to prevent (likely) unnecessary blocking request
       // in rule execution
       const searchAggregatedTransactions =
-        config['xpack.apm.searchAggregatedTransactions'] !==
+        config.searchAggregatedTransactions !==
         SearchAggregatedTransactionSetting.never;
 
       const index = searchAggregatedTransactions
-        ? indices['apm_oss.metricsIndices']
-        : indices['apm_oss.transactionIndices'];
+        ? indices.metric
+        : indices.transaction;
 
-      const field = getTransactionDurationFieldForAggregatedTransactions(
+      const field = getTransactionDurationFieldForTransactions(
         searchAggregatedTransactions
       );
 
@@ -138,7 +140,7 @@ export function registerTransactionDurationAlertType({
                     },
                   },
                 },
-                ...getDocumentTypeFilterForAggregatedTransactions(
+                ...getDocumentTypeFilterForTransactions(
                   searchAggregatedTransactions
                 ),
                 { term: { [SERVICE_NAME]: alertParams.serviceName } },
@@ -186,9 +188,8 @@ export function registerTransactionDurationAlertType({
 
       if (transactionDuration && transactionDuration > thresholdMicroseconds) {
         const durationFormatter = getDurationFormatter(transactionDuration);
-        const transactionDurationFormatted = durationFormatter(
-          transactionDuration
-        ).formatted;
+        const transactionDurationFormatted =
+          durationFormatter(transactionDuration).formatted;
 
         services
           .alertWithLifecycle({
@@ -201,11 +202,11 @@ export function registerTransactionDurationAlertType({
               [TRANSACTION_TYPE]: alertParams.transactionType,
               [PROCESSOR_EVENT]: ProcessorEvent.transaction,
               [ALERT_EVALUATION_VALUE]: transactionDuration,
-              [ALERT_EVALUATION_THRESHOLD]: alertParams.threshold,
+              [ALERT_EVALUATION_THRESHOLD]: thresholdMicroseconds,
               [ALERT_REASON]: formatTransactionDurationReason({
                 measured: transactionDuration,
                 serviceName: alertParams.serviceName,
-                threshold: alertParams.threshold,
+                threshold: thresholdMicroseconds,
                 asDuration,
               }),
             },
@@ -214,7 +215,7 @@ export function registerTransactionDurationAlertType({
             transactionType: alertParams.transactionType,
             serviceName: alertParams.serviceName,
             environment: getEnvironmentLabel(alertParams.environment),
-            threshold: alertParams.threshold,
+            threshold: thresholdMicroseconds,
             triggerValue: transactionDurationFormatted,
             interval: `${alertParams.windowSize}${alertParams.windowUnit}`,
           });

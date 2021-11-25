@@ -7,7 +7,7 @@
  */
 
 import { ValuesType } from 'utility-types';
-import { estypes } from '@elastic/elasticsearch';
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 type InvalidAggregationRequest = unknown;
 
@@ -27,13 +27,12 @@ type KeysOfSources<T extends any[]> = T extends [infer U, ...infer V]
   ? KeyOfSource<U>
   : {};
 
-type CompositeKeysOf<
-  TAggregationContainer extends estypes.AggregationsAggregationContainer
-> = TAggregationContainer extends {
-  composite: { sources: [...infer TSource] };
-}
-  ? KeysOfSources<TSource>
-  : unknown;
+type CompositeKeysOf<TAggregationContainer extends estypes.AggregationsAggregationContainer> =
+  TAggregationContainer extends {
+    composite: { sources: [...infer TSource] };
+  }
+    ? KeysOfSources<TSource>
+    : unknown;
 
 type Source = estypes.SearchSourceFilter | boolean | estypes.Fields;
 
@@ -49,7 +48,7 @@ type ValueTypeOfField<T> = T extends Record<string, string | number>
 
 type MaybeArray<T> = T | T[];
 
-type Fields = Exclude<Required<estypes.SearchRequest>['body']['fields'], undefined>;
+type Fields = Required<Required<estypes.SearchRequest>['body']>['fields'];
 type DocValueFields = MaybeArray<string | estypes.SearchDocValueField>;
 
 export type SearchHit<
@@ -263,13 +262,12 @@ export type AggregateOf<
           [key in keyof TAggregationContainer['filters']['filters']]: {
             doc_count: number;
           } & SubAggregateOf<TAggregationContainer, TDocument>;
-        } &
-          (TAggregationContainer extends { filters: { other_bucket_key: infer TOtherBucketKey } }
-            ? Record<
-                TOtherBucketKey & string,
-                { doc_count: number } & SubAggregateOf<TAggregationContainer, TDocument>
-              >
-            : unknown) &
+        } & (TAggregationContainer extends { filters: { other_bucket_key: infer TOtherBucketKey } }
+          ? Record<
+              TOtherBucketKey & string,
+              { doc_count: number } & SubAggregateOf<TAggregationContainer, TDocument>
+            >
+          : unknown) &
           (TAggregationContainer extends { filters: { other_bucket: true } }
             ? { _other: { doc_count: number } & SubAggregateOf<TAggregationContainer, TDocument> }
             : unknown)

@@ -33,7 +33,7 @@ interface Props {
 }
 
 export function StickySpanProperties({ span, transaction }: Props) {
-  const { query } = useApmParams('/services/:serviceName/transactions/view');
+  const { query } = useApmParams('/services/{serviceName}/transactions/view');
   const { environment, latencyAggregationType } = query;
 
   const trackEvent = useUiTracker();
@@ -103,8 +103,10 @@ export function StickySpanProperties({ span, transaction }: Props) {
           fieldName: SPAN_DESTINATION_SERVICE_RESOURCE,
           val: (
             <BackendLink
-              backendName={backendName}
-              query={query}
+              query={{
+                ...query,
+                backendName,
+              }}
               subtype={span.span.subtype}
               type={span.span.type}
               onClick={() => {

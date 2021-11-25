@@ -22,7 +22,7 @@ export class TruncateFormat extends FieldFormat {
   });
   static fieldType = KBN_FIELD_TYPES.STRING;
 
-  textConvert: TextContextTypeConvert = (val) => {
+  textConvert: TextContextTypeConvert = (val: string) => {
     const length = this.param('fieldLength');
     if (length > 0) {
       return truncate(val, {

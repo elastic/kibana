@@ -9,7 +9,7 @@
 import { CoreStart } from 'kibana/public';
 
 import { isErrorEmbeddable, IContainer, ErrorEmbeddable } from '../../services/embeddable';
-import { DashboardContainer } from '../../application/embeddable';
+import { DashboardContainer } from '../../application/embeddable/dashboard_container';
 import { getSampleDashboardInput, getSampleDashboardPanel } from '../../application/test_helpers';
 import {
   ContactCardEmbeddable,
@@ -100,7 +100,7 @@ describe('Export CSV action', () => {
 
   test('Should download a compatible Embeddable', async () => {
     const action = new ExportCSVAction({ core: coreStart, data: dataMock });
-    const result = ((await action.execute({ embeddable, asString: true })) as unknown) as
+    const result = (await action.execute({ embeddable, asString: true })) as unknown as
       | undefined
       | Record<string, { content: string; type: string }>;
     expect(result).toEqual({
@@ -118,10 +118,10 @@ describe('Export CSV action', () => {
       { id: ' 404' },
       embeddable.getRoot() as IContainer
     );
-    const result = ((await action.execute({
+    const result = (await action.execute({
       embeddable: errorEmbeddable,
       asString: true,
-    })) as unknown) as undefined | Record<string, string>;
+    })) as unknown as undefined | Record<string, string>;
     expect(result).toBeUndefined();
   });
 });

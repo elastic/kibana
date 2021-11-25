@@ -37,7 +37,7 @@ export const DatasetFilter: React.FunctionComponent<{
           field: DATASET_FIELD,
           query: '',
         });
-        setDatasetValues(values.sort());
+        if (values.length > 0) setDatasetValues(values.sort());
       } catch (e) {
         setDatasetValues([AGENT_DATASET]);
       }

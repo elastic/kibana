@@ -38,6 +38,7 @@ describe('pickSavedTimeline', () => {
       { columnHeaderType: 'not-filtered', id: 'destination.ip' },
       { columnHeaderType: 'not-filtered', id: 'user.name' },
     ],
+    dataViewId: 'security-solution',
     indexNames: [
       'auditbeat-*',
       'endgame-*',
@@ -76,13 +77,13 @@ describe('pickSavedTimeline', () => {
   });
 
   beforeAll(() => {
-    Date = (jest.fn(() => ({
+    Date = jest.fn(() => ({
       valueOf: jest.fn().mockReturnValue(mockDateNow),
-    })) as unknown) as DateConstructor;
+    })) as unknown as DateConstructor;
   });
 
   afterAll(() => {
-    ((Date as unknown) as jest.Mock).mockRestore();
+    (Date as unknown as jest.Mock).mockRestore();
   });
 
   describe('Set create / update time correctly ', () => {

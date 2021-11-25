@@ -7,7 +7,7 @@
 
 import { Writable } from 'stream';
 import { i18n } from '@kbn/i18n';
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { IScopedClusterClient, IUiSettingsClient } from 'src/core/server';
 import { IScopedSearchClient } from 'src/plugins/data/server';
 import { Datatable } from 'src/plugins/expressions/server';
@@ -109,10 +109,8 @@ export class CsvGenerator {
     this.logger.debug(`executing scroll request`);
     const results = (
       await this.clients.es.asCurrentUser.scroll({
-        body: {
-          scroll: scrollSettings.duration,
-          scroll_id: scrollId,
-        },
+        scroll: scrollSettings.duration,
+        scroll_id: scrollId,
       })
     ).body;
     return results;
@@ -184,7 +182,7 @@ export class CsvGenerator {
       data: dataTableCell,
     }: {
       column: string;
-      data: any;
+      data: unknown;
     }): string => {
       let cell: string[] | string | object;
       // check truthiness to guard against _score, _type, etc
@@ -291,7 +289,7 @@ export class CsvGenerator {
     const index = searchSource.getField('index');
 
     if (!index) {
-      throw new Error(`The search must have a revference to an index pattern!`);
+      throw new Error(`The search must have a reference to an index pattern!`);
     }
 
     const { maxSizeBytes, bom, escapeFormulaValues, scroll: scrollSettings } = settings;
@@ -345,9 +343,18 @@ export class CsvGenerator {
           break;
         }
 
+        // TODO check for shard failures, log them and add a warning if found
+        {
+          const {
+            hits: { hits, ...hitsMeta },
+            ...header
+          } = results;
+          this.logger.debug('Results metadata: ' + JSON.stringify({ header, hitsMeta }));
+        }
+
         let table: Datatable | undefined;
         try {
-          table = tabifyDocs(results, index, { shallow: true, meta: true });
+          table = tabifyDocs(results, index, { shallow: true, includeIgnoredValues: true });
         } catch (err) {
           this.logger.error(err);
         }
@@ -394,7 +401,7 @@ export class CsvGenerator {
       if (scrollId) {
         this.logger.debug(`executing clearScroll request`);
         try {
-          await this.clients.es.asCurrentUser.clearScroll({ body: { scroll_id: [scrollId] } });
+          await this.clients.es.asCurrentUser.clearScroll({ scroll_id: [scrollId] });
         } catch (err) {
           this.logger.error(err);
         }
@@ -404,6 +411,14 @@ export class CsvGenerator {
     }
 
     this.logger.debug(`Finished generating. Row count: ${this.csvRowCount}.`);
+
+    // FIXME: https://github.com/elastic/kibana/issues/112186 -- find root cause
+    if (!this.maxSizeReached && this.csvRowCount !== totalRecords) {
+      this.logger.warning(
+        `ES scroll returned fewer total hits than expected! ` +
+          `Search result total hits: ${totalRecords}. Row count: ${this.csvRowCount}.`
+      );
+    }
 
     return {
       content_type: CONTENT_TYPE_CSV,

@@ -286,19 +286,14 @@ test('Container view mode change propagates to children', async () => {
 });
 
 test(`Container updates its state when a child's input is updated`, async (done) => {
-  const {
-    container,
-    embeddable,
-    start,
-    coreStart,
-    uiActions,
-  } = await creatHelloWorldContainerAndEmbeddable(
-    { id: 'hello', panels: {}, viewMode: ViewMode.VIEW },
-    {
-      id: '123',
-      firstName: 'Susy',
-    }
-  );
+  const { container, embeddable, start, coreStart, uiActions } =
+    await creatHelloWorldContainerAndEmbeddable(
+      { id: 'hello', panels: {}, viewMode: ViewMode.VIEW },
+      {
+        id: '123',
+        firstName: 'Susy',
+      }
+    );
 
   expect(isErrorEmbeddable(embeddable)).toBe(false);
 
@@ -499,8 +494,7 @@ test('Panel removed from input state', async () => {
   const { container } = await creatHelloWorldContainerAndEmbeddable({
     id: 'hello',
     panels: {},
-    filters: [],
-  } as any);
+  });
 
   const embeddable = await container.addNewEmbeddable<
     FilterableEmbeddableInput,
@@ -526,8 +520,7 @@ test('Panel added to input state', async () => {
   const { container, start } = await creatHelloWorldContainerAndEmbeddable({
     id: 'hello',
     panels: {},
-    filters: [],
-  } as any);
+  });
 
   const embeddable = await container.addNewEmbeddable<
     FilterableEmbeddableInput,
@@ -717,7 +710,7 @@ test('untilEmbeddableLoaded() throws an error if there is no such child panel in
 
   const [, error] = await of(container.untilEmbeddableLoaded('123'));
   expect(error).toBeInstanceOf(Error);
-  expect(error.message).toMatchInlineSnapshot(`"Panel not found"`);
+  expect((error as Error).message).toMatchInlineSnapshot(`"Panel not found"`);
 });
 
 test('untilEmbeddableLoaded() resolves if child is loaded in the container', async (done) => {

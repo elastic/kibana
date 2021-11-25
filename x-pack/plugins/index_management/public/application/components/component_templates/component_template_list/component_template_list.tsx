@@ -42,10 +42,8 @@ export const ComponentTemplateList: React.FunctionComponent<Props> = ({
   componentTemplateName,
   history,
 }) => {
-  const {
-    addContent: addContentToGlobalFlyout,
-    removeContent: removeContentFromGlobalFlyout,
-  } = useGlobalFlyout();
+  const { addContent: addContentToGlobalFlyout, removeContent: removeContentFromGlobalFlyout } =
+    useGlobalFlyout();
   const { api, trackMetric, documentation } = useComponentTemplatesContext();
 
   const { data, isLoading, error, resendRequest } = api.useLoadComponentTemplates();

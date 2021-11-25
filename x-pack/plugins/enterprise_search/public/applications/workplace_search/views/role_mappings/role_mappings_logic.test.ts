@@ -23,6 +23,8 @@ import {
 } from '../../../shared/role_mapping/__mocks__/roles';
 import { ANY_AUTH_PROVIDER } from '../../../shared/role_mapping/constants';
 
+import { itShowsServerErrorAsFlashMessage } from '../../../test_helpers';
+
 import { RoleMappingsLogic } from './role_mappings_logic';
 
 const emptyUser = { username: '', email: '' };
@@ -349,12 +351,8 @@ describe('RoleMappingsLogic', () => {
         expect(setRoleMappingsSpy).toHaveBeenCalledWith(mappingsServerProps);
       });
 
-      it('handles error', async () => {
-        http.post.mockReturnValue(Promise.reject('this is an error'));
+      itShowsServerErrorAsFlashMessage(http.post, () => {
         RoleMappingsLogic.actions.enableRoleBasedAccess();
-        await nextTick();
-
-        expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
       });
     });
 
@@ -369,12 +367,18 @@ describe('RoleMappingsLogic', () => {
         expect(setRoleMappingsDataSpy).toHaveBeenCalledWith(mappingsServerProps);
       });
 
-      it('handles error', async () => {
-        http.get.mockReturnValue(Promise.reject('this is an error'));
+      itShowsServerErrorAsFlashMessage(http.get, () => {
         RoleMappingsLogic.actions.initializeRoleMappings();
-        await nextTick();
+      });
 
-        expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
+      it('resets roleMapping state', () => {
+        mount({
+          ...mappingsServerProps,
+          roleMapping: wsRoleMapping,
+        });
+        RoleMappingsLogic.actions.initializeRoleMappings();
+
+        expect(RoleMappingsLogic.values.roleMapping).toEqual(null);
       });
     });
 

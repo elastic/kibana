@@ -47,11 +47,9 @@ interface RoleMappingsActions extends RoleMappingsBaseActions {
   setDefaultGroup(availableGroups: RoleGroup[]): { availableGroups: RoleGroup[] };
   setRoleMapping(roleMapping: WSRoleMapping): { roleMapping: WSRoleMapping };
   setSingleUserRoleMapping(data?: UserMapping): { singleUserRoleMapping: UserMapping };
-  setRoleMappings({
-    roleMappings,
-  }: {
+  setRoleMappings({ roleMappings }: { roleMappings: WSRoleMapping[] }): {
     roleMappings: WSRoleMapping[];
-  }): { roleMappings: WSRoleMapping[] };
+  };
   setRoleMappingsData(data: RoleMappingsServerDetails): RoleMappingsServerDetails;
   handleAllGroupsSelectionChange(selected: boolean): { selected: boolean };
   handleGroupSelectionChange(groupIds: string[]): { groupIds: string[] };
@@ -168,6 +166,7 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
       null,
       {
         setRoleMapping: (_, { roleMapping }) => roleMapping,
+        initializeRoleMappings: () => null,
         resetState: () => null,
         closeUsersAndRolesFlyout: () => null,
       },
@@ -357,7 +356,9 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
       const route = '/internal/workplace_search/org/role_mappings/enable_role_based_access';
 
       try {
-        const response = await http.post(route);
+        const response = await http.post<{
+          roleMappings: WSRoleMapping[];
+        }>(route);
         actions.setRoleMappings(response);
       } catch (e) {
         flashAPIErrors(e);
@@ -368,7 +369,7 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
       const route = '/internal/workplace_search/org/role_mappings';
 
       try {
-        const response = await http.get(route);
+        const response = await http.get<RoleMappingsServerDetails>(route);
         actions.setRoleMappingsData(response);
       } catch (e) {
         flashAPIErrors(e);
@@ -467,11 +468,9 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
       });
 
       try {
-        const response = await http.post(
+        const response = await http.post<UserMapping>(
           '/internal/workplace_search/org/single_user_role_mapping',
-          {
-            body,
-          }
+          { body }
         );
         actions.setSingleUserRoleMapping(response);
         actions.setUserCreated();

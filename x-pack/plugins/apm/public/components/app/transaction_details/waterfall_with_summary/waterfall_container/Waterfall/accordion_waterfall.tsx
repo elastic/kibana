@@ -5,16 +5,22 @@
  * 2.0.
  */
 
-import { EuiAccordion, EuiAccordionProps } from '@elastic/eui';
-import { isEmpty } from 'lodash';
-import React, { useState } from 'react';
+import {
+  EuiAccordion,
+  EuiAccordionProps,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiText,
+} from '@elastic/eui';
+import React, { Dispatch, SetStateAction, useState } from 'react';
 import { euiStyled } from '../../../../../../../../../../src/plugins/kibana_react/common';
 import { Margins } from '../../../../../shared/charts/Timeline';
-import { WaterfallItem } from './waterfall_item';
 import {
   IWaterfall,
   IWaterfallSpanOrTransaction,
 } from './waterfall_helpers/waterfall_helpers';
+import { WaterfallItem } from './waterfall_item';
 
 interface AccordionWaterfallProps {
   isOpen: boolean;
@@ -22,12 +28,13 @@ interface AccordionWaterfallProps {
   level: number;
   duration: IWaterfall['duration'];
   waterfallItemId?: string;
-  errorsPerTransaction: IWaterfall['errorsPerTransaction'];
-  childrenByParentId: Record<string, IWaterfallSpanOrTransaction[]>;
-  onToggleEntryTransaction?: () => void;
+  setMaxLevel: Dispatch<SetStateAction<number>>;
+  waterfall: IWaterfall;
   timelineMargins: Margins;
   onClickWaterfallItem: (item: IWaterfallSpanOrTransaction) => void;
 }
+
+const ACCORDION_HEIGHT = '48px';
 
 const StyledAccordion = euiStyled(EuiAccordion).withConfig({
   shouldForwardProp: (prop) =>
@@ -39,33 +46,12 @@ const StyledAccordion = euiStyled(EuiAccordion).withConfig({
     hasError: boolean;
   }
 >`
-  .euiAccordion {
+  .waterfall_accordion {
     border-top: 1px solid ${({ theme }) => theme.eui.euiColorLightShade};
   }
-  .euiIEFlexWrapFix {
-    width: 100%;
-    height: 48px;
-  }
+
   .euiAccordion__childWrapper {
     transition: none;
-  }
-
-  .euiAccordion__padding--l {
-    padding-top: 0;
-    padding-bottom: 0;
-  }
-
-  .euiAccordion__iconWrapper {
-    display: flex;
-    position: relative;
-    &:after {
-      content: ${(props) => `'${props.childrenCount}'`};
-      position: absolute;
-      left: 20px;
-      top: -1px;
-      z-index: 1;
-      font-size: ${({ theme }) => theme.eui.euiFontSizeXS};
-    }
   }
 
   ${(props) => {
@@ -73,20 +59,20 @@ const StyledAccordion = euiStyled(EuiAccordion).withConfig({
       ? `2px solid ${props.theme.eui.euiColorDanger};`
       : `1px solid ${props.theme.eui.euiColorLightShade};`;
     return `.button_${props.id} {
+      width: 100%;
+      height: ${ACCORDION_HEIGHT};
       margin-left: ${props.marginLeftLevel}px;
       border-left: ${borderLeft}
       &:hover {
         background-color: ${props.theme.eui.euiColorLightestShade};
       }
     }`;
-    //
   }}
-`;
 
-const WaterfallItemContainer = euiStyled.div`
-  position: absolute;
-  width: 100%;
-  left: 0;
+  .accordion__buttonContent {
+    width: 100%;
+    height: 100%;
+  }
 `;
 
 export function AccordionWaterfall(props: AccordionWaterfallProps) {
@@ -96,74 +82,114 @@ export function AccordionWaterfall(props: AccordionWaterfallProps) {
     item,
     level,
     duration,
-    childrenByParentId,
+    waterfall,
     waterfallItemId,
-    errorsPerTransaction,
+    setMaxLevel,
     timelineMargins,
     onClickWaterfallItem,
-    onToggleEntryTransaction,
   } = props;
 
   const nextLevel = level + 1;
+  setMaxLevel(nextLevel);
 
-  const errorCount =
-    item.docType === 'transaction'
-      ? errorsPerTransaction[item.doc.transaction.id]
-      : 0;
-
-  const children = childrenByParentId[item.id] || [];
+  const children = waterfall.childrenByParentId[item.id] || [];
+  const errorCount = waterfall.getErrorCount(item.id);
 
   // To indent the items creating the parent/child tree
   const marginLeftLevel = 8 * level;
 
+  function toggleAccordion() {
+    setIsOpen((isCurrentOpen) => !isCurrentOpen);
+  }
+
   return (
     <StyledAccordion
+      className="waterfall_accordion"
+      style={{ position: 'relative' }}
       buttonClassName={`button_${item.id}`}
       key={item.id}
       id={item.id}
-      hasError={errorCount > 0}
+      hasError={item.doc.event?.outcome === 'failure'}
       marginLeftLevel={marginLeftLevel}
       childrenCount={children.length}
+      buttonContentClassName="accordion__buttonContent"
       buttonContent={
-        <WaterfallItemContainer>
-          <WaterfallItem
-            key={item.id}
-            timelineMargins={timelineMargins}
-            color={item.color}
-            item={item}
-            totalDuration={duration}
-            isSelected={item.id === waterfallItemId}
-            errorCount={errorCount}
-            onClick={() => {
-              onClickWaterfallItem(item);
-            }}
-          />
-        </WaterfallItemContainer>
+        <EuiFlexGroup gutterSize="none">
+          <EuiFlexItem grow={false}>
+            <ToggleAccordionButton
+              show={!!children.length}
+              isOpen={isOpen}
+              childrenAmount={children.length}
+              onClick={toggleAccordion}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <WaterfallItem
+              key={item.id}
+              timelineMargins={timelineMargins}
+              color={item.color}
+              item={item}
+              totalDuration={duration}
+              isSelected={item.id === waterfallItemId}
+              errorCount={errorCount}
+              onClick={() => {
+                onClickWaterfallItem(item);
+              }}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       }
-      arrowDisplay={isEmpty(children) ? 'none' : 'left'}
+      arrowDisplay="none"
       initialIsOpen={true}
       forceState={isOpen ? 'open' : 'closed'}
-      onToggle={() => {
-        setIsOpen((isCurrentOpen) => !isCurrentOpen);
-        if (onToggleEntryTransaction) {
-          onToggleEntryTransaction();
-        }
-      }}
+      onToggle={toggleAccordion}
     >
       {children.map((child) => (
         <AccordionWaterfall
+          {...props}
           key={child.id}
           isOpen={isOpen}
-          item={child}
           level={nextLevel}
-          waterfallItemId={waterfallItemId}
-          errorsPerTransaction={errorsPerTransaction}
-          duration={duration}
-          childrenByParentId={childrenByParentId}
-          timelineMargins={timelineMargins}
-          onClickWaterfallItem={onClickWaterfallItem}
+          item={child}
         />
       ))}
     </StyledAccordion>
+  );
+}
+
+function ToggleAccordionButton({
+  show,
+  isOpen,
+  childrenAmount,
+  onClick,
+}: {
+  show: boolean;
+  isOpen: boolean;
+  childrenAmount: number;
+  onClick: () => void;
+}) {
+  if (!show) {
+    return null;
+  }
+
+  return (
+    <div style={{ height: ACCORDION_HEIGHT, display: 'flex' }}>
+      <EuiFlexGroup gutterSize="xs" alignItems="center" justifyContent="center">
+        <EuiFlexItem grow={false}>
+          {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events */}
+          <div
+            onClick={(e: any) => {
+              e.stopPropagation();
+              onClick();
+            }}
+          >
+            <EuiIcon type={isOpen ? 'arrowDown' : 'arrowRight'} />
+          </div>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiText size="xs">{childrenAmount}</EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </div>
   );
 }

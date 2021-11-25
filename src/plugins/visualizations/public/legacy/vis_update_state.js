@@ -137,6 +137,30 @@ function convertSeriesParams(visState) {
 }
 
 /**
+ * This function is responsible for updating old TSVB visStates.
+ * Specifically, it identifies if the series and metrics ids are numbers
+ * and convert them to string with an x prefix. Number ids are never been generated
+ * from the editor, only programmatically. See https://github.com/elastic/kibana/issues/113601.
+ */
+function convertNumIdsToStringsForTSVB(visState) {
+  if (visState.params.series) {
+    visState.params.series.forEach((s) => {
+      const seriesId = s.id;
+      const metrics = s.metrics;
+      if (!isNaN(seriesId)) {
+        s.id = `x${seriesId}`;
+      }
+      metrics?.forEach((m) => {
+        const metricId = m.id;
+        if (!isNaN(metricId)) {
+          m.id = `x${metricId}`;
+        }
+      });
+    });
+  }
+}
+
+/**
  * This function is responsible for updating old visStates - the actual saved object
  * object - into the format, that will be required by the current Kibana version.
  * This method will be executed for each saved vis object, that will be loaded.
@@ -153,6 +177,10 @@ export const updateOldState = (visState) => {
 
   if (visState.params && ['line', 'area', 'histogram'].includes(visState.params.type)) {
     convertSeriesParams(newState);
+  }
+
+  if (visState.params && visState.type === 'metrics') {
+    convertNumIdsToStringsForTSVB(newState);
   }
 
   if (visState.type === 'gauge' && visState.fontSize) {

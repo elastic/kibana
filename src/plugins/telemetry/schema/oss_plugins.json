@@ -1088,137 +1088,6 @@
             }
           }
         },
-        "timelion": {
-          "properties": {
-            "appId": {
-              "type": "keyword",
-              "_meta": {
-                "description": "The application being tracked"
-              }
-            },
-            "viewId": {
-              "type": "keyword",
-              "_meta": {
-                "description": "Always `main`"
-              }
-            },
-            "clicks_total": {
-              "type": "long",
-              "_meta": {
-                "description": "General number of clicks in the application since we started counting them"
-              }
-            },
-            "clicks_7_days": {
-              "type": "long",
-              "_meta": {
-                "description": "General number of clicks in the application over the last 7 days"
-              }
-            },
-            "clicks_30_days": {
-              "type": "long",
-              "_meta": {
-                "description": "General number of clicks in the application over the last 30 days"
-              }
-            },
-            "clicks_90_days": {
-              "type": "long",
-              "_meta": {
-                "description": "General number of clicks in the application over the last 90 days"
-              }
-            },
-            "minutes_on_screen_total": {
-              "type": "float",
-              "_meta": {
-                "description": "Minutes the application is active and on-screen since we started counting them."
-              }
-            },
-            "minutes_on_screen_7_days": {
-              "type": "float",
-              "_meta": {
-                "description": "Minutes the application is active and on-screen over the last 7 days"
-              }
-            },
-            "minutes_on_screen_30_days": {
-              "type": "float",
-              "_meta": {
-                "description": "Minutes the application is active and on-screen over the last 30 days"
-              }
-            },
-            "minutes_on_screen_90_days": {
-              "type": "float",
-              "_meta": {
-                "description": "Minutes the application is active and on-screen over the last 90 days"
-              }
-            },
-            "views": {
-              "type": "array",
-              "items": {
-                "properties": {
-                  "appId": {
-                    "type": "keyword",
-                    "_meta": {
-                      "description": "The application being tracked"
-                    }
-                  },
-                  "viewId": {
-                    "type": "keyword",
-                    "_meta": {
-                      "description": "The application view being tracked"
-                    }
-                  },
-                  "clicks_total": {
-                    "type": "long",
-                    "_meta": {
-                      "description": "General number of clicks in the application sub view since we started counting them"
-                    }
-                  },
-                  "clicks_7_days": {
-                    "type": "long",
-                    "_meta": {
-                      "description": "General number of clicks in the active application sub view over the last 7 days"
-                    }
-                  },
-                  "clicks_30_days": {
-                    "type": "long",
-                    "_meta": {
-                      "description": "General number of clicks in the active application sub view over the last 30 days"
-                    }
-                  },
-                  "clicks_90_days": {
-                    "type": "long",
-                    "_meta": {
-                      "description": "General number of clicks in the active application sub view over the last 90 days"
-                    }
-                  },
-                  "minutes_on_screen_total": {
-                    "type": "float",
-                    "_meta": {
-                      "description": "Minutes the application sub view is active and on-screen since we started counting them."
-                    }
-                  },
-                  "minutes_on_screen_7_days": {
-                    "type": "float",
-                    "_meta": {
-                      "description": "Minutes the application is active and on-screen active application sub view over the last 7 days"
-                    }
-                  },
-                  "minutes_on_screen_30_days": {
-                    "type": "float",
-                    "_meta": {
-                      "description": "Minutes the application is active and on-screen active application sub view over the last 30 days"
-                    }
-                  },
-                  "minutes_on_screen_90_days": {
-                    "type": "float",
-                    "_meta": {
-                      "description": "Minutes the application is active and on-screen active application sub view over the last 90 days"
-                    }
-                  }
-                }
-              }
-            }
-          }
-        },
         "visualize": {
           "properties": {
             "appId": {
@@ -4363,6 +4232,137 @@
             }
           }
         },
+        "reportingRedirect": {
+          "properties": {
+            "appId": {
+              "type": "keyword",
+              "_meta": {
+                "description": "The application being tracked"
+              }
+            },
+            "viewId": {
+              "type": "keyword",
+              "_meta": {
+                "description": "Always `main`"
+              }
+            },
+            "clicks_total": {
+              "type": "long",
+              "_meta": {
+                "description": "General number of clicks in the application since we started counting them"
+              }
+            },
+            "clicks_7_days": {
+              "type": "long",
+              "_meta": {
+                "description": "General number of clicks in the application over the last 7 days"
+              }
+            },
+            "clicks_30_days": {
+              "type": "long",
+              "_meta": {
+                "description": "General number of clicks in the application over the last 30 days"
+              }
+            },
+            "clicks_90_days": {
+              "type": "long",
+              "_meta": {
+                "description": "General number of clicks in the application over the last 90 days"
+              }
+            },
+            "minutes_on_screen_total": {
+              "type": "float",
+              "_meta": {
+                "description": "Minutes the application is active and on-screen since we started counting them."
+              }
+            },
+            "minutes_on_screen_7_days": {
+              "type": "float",
+              "_meta": {
+                "description": "Minutes the application is active and on-screen over the last 7 days"
+              }
+            },
+            "minutes_on_screen_30_days": {
+              "type": "float",
+              "_meta": {
+                "description": "Minutes the application is active and on-screen over the last 30 days"
+              }
+            },
+            "minutes_on_screen_90_days": {
+              "type": "float",
+              "_meta": {
+                "description": "Minutes the application is active and on-screen over the last 90 days"
+              }
+            },
+            "views": {
+              "type": "array",
+              "items": {
+                "properties": {
+                  "appId": {
+                    "type": "keyword",
+                    "_meta": {
+                      "description": "The application being tracked"
+                    }
+                  },
+                  "viewId": {
+                    "type": "keyword",
+                    "_meta": {
+                      "description": "The application view being tracked"
+                    }
+                  },
+                  "clicks_total": {
+                    "type": "long",
+                    "_meta": {
+                      "description": "General number of clicks in the application sub view since we started counting them"
+                    }
+                  },
+                  "clicks_7_days": {
+                    "type": "long",
+                    "_meta": {
+                      "description": "General number of clicks in the active application sub view over the last 7 days"
+                    }
+                  },
+                  "clicks_30_days": {
+                    "type": "long",
+                    "_meta": {
+                      "description": "General number of clicks in the active application sub view over the last 30 days"
+                    }
+                  },
+                  "clicks_90_days": {
+                    "type": "long",
+                    "_meta": {
+                      "description": "General number of clicks in the active application sub view over the last 90 days"
+                    }
+                  },
+                  "minutes_on_screen_total": {
+                    "type": "float",
+                    "_meta": {
+                      "description": "Minutes the application sub view is active and on-screen since we started counting them."
+                    }
+                  },
+                  "minutes_on_screen_7_days": {
+                    "type": "float",
+                    "_meta": {
+                      "description": "Minutes the application is active and on-screen active application sub view over the last 7 days"
+                    }
+                  },
+                  "minutes_on_screen_30_days": {
+                    "type": "float",
+                    "_meta": {
+                      "description": "Minutes the application is active and on-screen active application sub view over the last 30 days"
+                    }
+                  },
+                  "minutes_on_screen_90_days": {
+                    "type": "float",
+                    "_meta": {
+                      "description": "Minutes the application is active and on-screen active application sub view over the last 90 days"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
         "security_access_agreement": {
           "properties": {
             "appId": {
@@ -5149,7 +5149,7 @@
             }
           }
         },
-        "securitySolution": {
+        "securitySolutionUI": {
           "properties": {
             "appId": {
               "type": "keyword",
@@ -6394,6 +6394,48 @@
             "description": "How many times this API has been called by a non-Kibana client in a custom space."
           }
         },
+        "apiCalls.savedObjectsBulkResolve.total": {
+          "type": "long",
+          "_meta": {
+            "description": "How many times this API has been called."
+          }
+        },
+        "apiCalls.savedObjectsBulkResolve.namespace.default.total": {
+          "type": "long",
+          "_meta": {
+            "description": "How many times this API has been called in the Default space."
+          }
+        },
+        "apiCalls.savedObjectsBulkResolve.namespace.default.kibanaRequest.yes": {
+          "type": "long",
+          "_meta": {
+            "description": "How many times this API has been called by the Kibana client in the Default space."
+          }
+        },
+        "apiCalls.savedObjectsBulkResolve.namespace.default.kibanaRequest.no": {
+          "type": "long",
+          "_meta": {
+            "description": "How many times this API has been called by a non-Kibana client in the Default space."
+          }
+        },
+        "apiCalls.savedObjectsBulkResolve.namespace.custom.total": {
+          "type": "long",
+          "_meta": {
+            "description": "How many times this API has been called in a custom space."
+          }
+        },
+        "apiCalls.savedObjectsBulkResolve.namespace.custom.kibanaRequest.yes": {
+          "type": "long",
+          "_meta": {
+            "description": "How many times this API has been called by the Kibana client in a custom space."
+          }
+        },
+        "apiCalls.savedObjectsBulkResolve.namespace.custom.kibanaRequest.no": {
+          "type": "long",
+          "_meta": {
+            "description": "How many times this API has been called by a non-Kibana client in a custom space."
+          }
+        },
         "apiCalls.savedObjectsBulkUpdate.total": {
           "type": "long",
           "_meta": {
@@ -6850,16 +6892,100 @@
             "description": "How many times this API has been called by a non-Kibana client in a custom space."
           }
         },
+        "apiCalls.legacyDashboardExport.total": {
+          "type": "long",
+          "_meta": {
+            "description": "How many times this API has been called."
+          }
+        },
+        "apiCalls.legacyDashboardExport.namespace.default.total": {
+          "type": "long",
+          "_meta": {
+            "description": "How many times this API has been called in the Default space."
+          }
+        },
+        "apiCalls.legacyDashboardExport.namespace.default.kibanaRequest.yes": {
+          "type": "long",
+          "_meta": {
+            "description": "How many times this API has been called by the Kibana client in the Default space."
+          }
+        },
+        "apiCalls.legacyDashboardExport.namespace.default.kibanaRequest.no": {
+          "type": "long",
+          "_meta": {
+            "description": "How many times this API has been called by a non-Kibana client in the Default space."
+          }
+        },
+        "apiCalls.legacyDashboardExport.namespace.custom.total": {
+          "type": "long",
+          "_meta": {
+            "description": "How many times this API has been called in a custom space."
+          }
+        },
+        "apiCalls.legacyDashboardExport.namespace.custom.kibanaRequest.yes": {
+          "type": "long",
+          "_meta": {
+            "description": "How many times this API has been called by the Kibana client in a custom space."
+          }
+        },
+        "apiCalls.legacyDashboardExport.namespace.custom.kibanaRequest.no": {
+          "type": "long",
+          "_meta": {
+            "description": "How many times this API has been called by a non-Kibana client in a custom space."
+          }
+        },
         "apiCalls.savedObjectsExport.allTypesSelected.yes": {
           "type": "long",
           "_meta": {
-            "description": "How many times this API has been called with the `createNewCopiesEnabled` option."
+            "description": "How many times this API has been called with all types selected."
           }
         },
         "apiCalls.savedObjectsExport.allTypesSelected.no": {
           "type": "long",
           "_meta": {
             "description": "How many times this API has been called without all types selected."
+          }
+        },
+        "apiCalls.legacyDashboardImport.total": {
+          "type": "long",
+          "_meta": {
+            "description": "How many times this API has been called."
+          }
+        },
+        "apiCalls.legacyDashboardImport.namespace.default.total": {
+          "type": "long",
+          "_meta": {
+            "description": "How many times this API has been called in the Default space."
+          }
+        },
+        "apiCalls.legacyDashboardImport.namespace.default.kibanaRequest.yes": {
+          "type": "long",
+          "_meta": {
+            "description": "How many times this API has been called by the Kibana client in the Default space."
+          }
+        },
+        "apiCalls.legacyDashboardImport.namespace.default.kibanaRequest.no": {
+          "type": "long",
+          "_meta": {
+            "description": "How many times this API has been called by a non-Kibana client in the Default space."
+          }
+        },
+        "apiCalls.legacyDashboardImport.namespace.custom.total": {
+          "type": "long",
+          "_meta": {
+            "description": "How many times this API has been called in a custom space."
+          }
+        },
+        "apiCalls.legacyDashboardImport.namespace.custom.kibanaRequest.yes": {
+          "type": "long",
+          "_meta": {
+            "description": "How many times this API has been called by the Kibana client in a custom space."
+          }
+        },
+        "apiCalls.legacyDashboardImport.namespace.custom.kibanaRequest.no": {
+          "type": "long",
+          "_meta": {
+            "description": "How many times this API has been called by a non-Kibana client in a custom space."
           }
         },
         "savedObjectsRepository.resolvedOutcome.exactMatch": {
@@ -6926,6 +7052,12 @@
                 "type": "long",
                 "_meta": {
                   "description": "The process id of the monitored kibana instance."
+                }
+              },
+              "instanceUuid": {
+                "type": "keyword",
+                "_meta": {
+                  "description": "The uuid of the kibana instance."
                 }
               },
               "fromTimestamp": {
@@ -7109,14 +7241,14 @@
             "description": "Non-default value of setting."
           }
         },
-        "visualization:regionmap:showWarnings": {
+        "visualization:useLegacyTimeAxis": {
           "type": "boolean",
           "_meta": {
             "description": "Non-default value of setting."
           }
         },
-        "visualization:dimmingOpacity": {
-          "type": "float",
+        "visualization:regionmap:showWarnings": {
+          "type": "boolean",
           "_meta": {
             "description": "Non-default value of setting."
           }
@@ -7169,26 +7301,8 @@
             "description": "Non-default value of setting."
           }
         },
-        "timelion:default_rows": {
-          "type": "long",
-          "_meta": {
-            "description": "Non-default value of setting."
-          }
-        },
-        "timelion:default_columns": {
-          "type": "long",
-          "_meta": {
-            "description": "Non-default value of setting."
-          }
-        },
         "timelion:es.default_index": {
           "type": "keyword",
-          "_meta": {
-            "description": "Non-default value of setting."
-          }
-        },
-        "timelion:showTutorial": {
-          "type": "boolean",
           "_meta": {
             "description": "Non-default value of setting."
           }
@@ -7451,6 +7565,12 @@
             "description": "Non-default value of setting."
           }
         },
+        "metrics:allowStringIndices": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
         "query:allowLeadingWildcards": {
           "type": "boolean",
           "_meta": {
@@ -7616,12 +7736,6 @@
             "description": "Non-default value of setting."
           }
         },
-        "visualization:visualize:legacyChartsLibrary": {
-          "type": "boolean",
-          "_meta": {
-            "description": "Non-default value of setting."
-          }
-        },
         "visualization:visualize:legacyPieChartsLibrary": {
           "type": "boolean",
           "_meta": {
@@ -7652,13 +7766,19 @@
             "description": "Non-default value of setting."
           }
         },
-        "apm:enableSignificantTerms": {
+        "observability:enableInspectEsQueries": {
           "type": "boolean",
           "_meta": {
             "description": "Non-default value of setting."
           }
         },
-        "observability:enableInspectEsQueries": {
+        "observability:maxSuggestions": {
+          "type": "integer",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
+        "observability:enableComparisonByDefault": {
           "type": "boolean",
           "_meta": {
             "description": "Non-default value of setting."
@@ -7694,6 +7814,12 @@
             "description": "Non-default value of setting."
           }
         },
+        "labs:canvas:byValueEmbeddable": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
         "labs:canvas:useDataService": {
           "type": "boolean",
           "_meta": {
@@ -7707,6 +7833,18 @@
           }
         },
         "labs:dashboard:deferBelowFold": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
+        "labs:dashboard:dashboardControls": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
+        "discover:showFieldStatistics": {
           "type": "boolean",
           "_meta": {
             "description": "Non-default value of setting."
@@ -7774,16 +7912,6 @@
               "type": "long",
               "_meta": {
                 "description": "Total number of graph_workspace saved objects"
-              }
-            }
-          }
-        },
-        "timelion_sheet": {
-          "properties": {
-            "total": {
-              "type": "long",
-              "_meta": {
-                "description": "Total number of timelion_sheet saved objects"
               }
             }
           }
@@ -8300,25 +8428,6 @@
           }
         },
         "short_url_redirect": {
-          "type": "array",
-          "items": {
-            "properties": {
-              "key": {
-                "type": "keyword",
-                "_meta": {
-                  "description": "The event that is tracked"
-                }
-              },
-              "value": {
-                "type": "long",
-                "_meta": {
-                  "description": "The value of the event"
-                }
-              }
-            }
-          }
-        },
-        "timelion": {
           "type": "array",
           "items": {
             "properties": {
@@ -9139,6 +9248,12 @@
           "type": "long",
           "_meta": {
             "description": "Number of TSVB visualizations using \"last value\" as a time range"
+          }
+        },
+        "timeseries_table_use_aggregate_function": {
+          "type": "long",
+          "_meta": {
+            "description": "Number of TSVB table visualizations using aggregate function"
           }
         }
       }

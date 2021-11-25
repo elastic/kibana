@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { uniqueId } from 'lodash';
+import { isEmpty, uniqueId } from 'lodash';
 import React, { createContext, useEffect, useState } from 'react';
 import { useRouteMatch } from 'react-router-dom';
+import { asyncForEach } from '@kbn/std';
 import { Alert } from '../../../alerting/common';
 import { getDataHandler } from '../data_handler';
 import { FETCH_STATUS } from '../hooks/use_fetcher';
@@ -31,7 +32,7 @@ export type HasDataMap = Record<
 
 export interface HasDataContextValue {
   hasDataMap: Partial<HasDataMap>;
-  hasAnyData: boolean;
+  hasAnyData?: boolean;
   isAllRequestsComplete: boolean;
   onRefreshTimeRange: () => void;
   forceUpdate: string;
@@ -53,7 +54,7 @@ export function HasDataContextProvider({ children }: { children: React.ReactNode
   useEffect(
     () => {
       if (!isExploratoryView)
-        apps.forEach(async (app) => {
+        asyncForEach(apps, async (app) => {
           try {
             const updateState = ({
               hasData,
@@ -145,15 +146,18 @@ export function HasDataContextProvider({ children }: { children: React.ReactNode
     return appStatus !== undefined && appStatus !== FETCH_STATUS.LOADING;
   });
 
-  const hasAnyData = (Object.keys(hasDataMap) as ObservabilityFetchDataPlugins[]).some(
-    (app) => hasDataMap[app]?.hasData === true
-  );
+  const hasAnyData = (Object.keys(hasDataMap) as ObservabilityFetchDataPlugins[]).some((app) => {
+    const appHasData = hasDataMap[app]?.hasData;
+    return (
+      appHasData === true || (Array.isArray(appHasData) && (appHasData as Alert[])?.length > 0)
+    );
+  });
 
   return (
     <HasDataContext.Provider
       value={{
         hasDataMap,
-        hasAnyData,
+        hasAnyData: isEmpty(hasDataMap) ? undefined : hasAnyData,
         isAllRequestsComplete,
         forceUpdate,
         onRefreshTimeRange: () => {

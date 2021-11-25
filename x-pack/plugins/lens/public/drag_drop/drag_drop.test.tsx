@@ -82,7 +82,7 @@ describe('DragDrop', () => {
 
   test('removes selection on mouse down before dragging', async () => {
     const removeAllRanges = jest.fn();
-    global.getSelection = jest.fn(() => (({ removeAllRanges } as unknown) as Selection));
+    global.getSelection = jest.fn(() => ({ removeAllRanges } as unknown as Selection));
     const component = mount(
       <DragDrop value={value} draggable={true} order={[2, 0, 1, 0]}>
         <button>Hi!</button>

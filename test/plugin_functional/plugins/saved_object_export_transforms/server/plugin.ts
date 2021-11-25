@@ -176,6 +176,60 @@ export class SavedObjectExportTransformsPlugin implements Plugin {
         },
       },
     });
+
+    // example of a SO type with `visibleInManagement: false`
+    savedObjects.registerType<{ enabled: boolean; title: string }>({
+      name: 'test-not-visible-in-management',
+      hidden: false,
+      namespaceType: 'single',
+      mappings: {
+        properties: {
+          title: { type: 'text' },
+          enabled: { type: 'boolean' },
+        },
+      },
+      management: {
+        defaultSearchField: 'title',
+        importableAndExportable: true,
+        visibleInManagement: false,
+      },
+    });
+
+    // example of a SO type with `visibleInManagement: true`
+    savedObjects.registerType<{ enabled: boolean; title: string }>({
+      name: 'test-visible-in-management',
+      hidden: false,
+      namespaceType: 'single',
+      mappings: {
+        properties: {
+          title: { type: 'text' },
+          enabled: { type: 'boolean' },
+        },
+      },
+      management: {
+        defaultSearchField: 'title',
+        importableAndExportable: true,
+        visibleInManagement: true,
+      },
+    });
+
+    // example of a SO type specifying a display name
+    savedObjects.registerType<{ enabled: boolean; title: string }>({
+      name: 'test-with-display-name',
+      hidden: false,
+      namespaceType: 'single',
+      mappings: {
+        properties: {
+          title: { type: 'text' },
+          enabled: { type: 'boolean' },
+        },
+      },
+      management: {
+        defaultSearchField: 'title',
+        importableAndExportable: true,
+        displayName: 'my display name',
+      },
+    });
   }
 
   public start() {}

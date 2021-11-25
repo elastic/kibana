@@ -16,9 +16,10 @@ interface Props {
   options: MetricsExplorerOptions;
   onChange: (groupBy: string | null | string[]) => void;
   fields: IFieldType[];
+  errorOptions?: string[];
 }
 
-export const MetricsExplorerGroupBy = ({ options, onChange, fields }: Props) => {
+export const MetricsExplorerGroupBy = ({ options, onChange, fields, errorOptions }: Props) => {
   const handleChange = useCallback(
     (selectedOptions: Array<{ label: string }>) => {
       const groupBy = selectedOptions.map((option) => option.label);
@@ -28,9 +29,17 @@ export const MetricsExplorerGroupBy = ({ options, onChange, fields }: Props) => 
   );
 
   const selectedOptions = Array.isArray(options.groupBy)
-    ? options.groupBy.map((field) => ({ label: field }))
+    ? options.groupBy.map((field) => ({
+        label: field,
+        color: errorOptions?.includes(field) ? 'danger' : undefined,
+      }))
     : options.groupBy
-    ? [{ label: options.groupBy }]
+    ? [
+        {
+          label: options.groupBy,
+          color: errorOptions?.includes(options.groupBy) ? 'danger' : undefined,
+        },
+      ]
     : [];
 
   return (

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { estypes } from '@elastic/elasticsearch';
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import * as ast from '../ast';
 import * as literal from '../node_types/literal';
 import { IndexPatternBase, KueryNode, KueryQueryOptions } from '../..';
@@ -26,7 +26,7 @@ export function toElasticsearchQuery(
   context: Record<string, any> = {}
 ): estypes.QueryDslQueryContainer {
   const [path, child] = node.arguments;
-  const stringPath = (ast.toElasticsearchQuery(path) as unknown) as string;
+  const stringPath = ast.toElasticsearchQuery(path) as unknown as string;
   const fullPath = context?.nested?.path ? `${context.nested.path}.${stringPath}` : stringPath;
 
   return {

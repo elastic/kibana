@@ -20,15 +20,22 @@ export async function getEnvironments({
   serviceName,
   setup,
   searchAggregatedTransactions,
+  size,
 }: {
   serviceName: string | undefined;
   setup: Setup;
   searchAggregatedTransactions: boolean;
+  size: number;
 }) {
   return withApmSpan('get_environments_for_agent_configuration', async () => {
     const [allEnvironments, existingEnvironments] = await Promise.all([
-      getAllEnvironments({ serviceName, setup, searchAggregatedTransactions }),
-      getExistingEnvironmentsForService({ serviceName, setup }),
+      getAllEnvironments({
+        searchAggregatedTransactions,
+        serviceName,
+        setup,
+        size,
+      }),
+      getExistingEnvironmentsForService({ serviceName, setup, size }),
     ]);
 
     return [ALL_OPTION_VALUE, ...allEnvironments].map((environment) => {

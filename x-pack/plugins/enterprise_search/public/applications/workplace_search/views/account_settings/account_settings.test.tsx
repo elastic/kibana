@@ -27,6 +27,9 @@ describe('AccountSettings', () => {
   const mockCurrentUser = (user?: unknown) =>
     (getCurrentUser as jest.Mock).mockReturnValue(Promise.resolve(user));
 
+  const mockCurrentUserError = () =>
+    (getCurrentUser as jest.Mock).mockReturnValue(Promise.reject());
+
   beforeAll(() => {
     mockCurrentUser();
   });
@@ -39,6 +42,13 @@ describe('AccountSettings', () => {
 
   it('does not render if the current user does not exist', async () => {
     mockCurrentUser(null);
+    const wrapper = await shallow(<AccountSettings />);
+
+    expect(wrapper.isEmptyRender()).toBe(true);
+  });
+
+  it('does not render if the getCurrentUser promise returns error', async () => {
+    mockCurrentUserError();
     const wrapper = await shallow(<AccountSettings />);
 
     expect(wrapper.isEmptyRender()).toBe(true);

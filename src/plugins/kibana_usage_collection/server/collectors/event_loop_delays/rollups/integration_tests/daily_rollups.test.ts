@@ -14,7 +14,7 @@ import {
   createRootWithCorePlugins,
 } from '../../../../../../../core/test_helpers/kbn_server';
 import { rollDailyData } from '../daily';
-import { mocked } from '../../event_loop_delays.mocks';
+import { metricsServiceMock } from '../../../../../../../core/server/mocks';
 
 import {
   SAVED_OBJECTS_DAILY_TYPE,
@@ -26,18 +26,20 @@ import moment from 'moment';
 const { startES } = createTestServers({
   adjustTimeout: (t: number) => jest.setTimeout(t),
 });
-
+const eventLoopDelaysMonitor = metricsServiceMock.createEventLoopDelaysMonitor();
 function createRawObject(date: moment.MomentInput) {
   const pid = Math.round(Math.random() * 10000);
+  const instanceUuid = 'mock_instance';
+
   return {
     type: SAVED_OBJECTS_DAILY_TYPE,
-    id: serializeSavedObjectId({ pid, date }),
+    id: serializeSavedObjectId({ pid, date, instanceUuid }),
     attributes: {
-      ...mocked.createHistogram({
-        fromTimestamp: moment(date).startOf('day').toISOString(),
-        lastUpdatedAt: moment(date).toISOString(),
-      }),
+      ...eventLoopDelaysMonitor.collect(),
+      fromTimestamp: moment(date).startOf('day').toISOString(),
+      lastUpdatedAt: moment(date).toISOString(),
       processId: pid,
+      instanceUuid,
     },
   };
 }
@@ -54,7 +56,8 @@ const outdatedRawEventLoopDelaysDaily = [
   createRawObject(moment().subtract(7, 'days')),
 ];
 
-describe('daily rollups integration test', () => {
+// FLAKY https://github.com/elastic/kibana/issues/111821
+describe.skip('daily rollups integration test', () => {
   let esServer: TestElasticsearchUtils;
   let root: TestKibanaUtils['root'];
   let internalRepository: ISavedObjectsRepository;
@@ -83,10 +86,8 @@ describe('daily rollups integration test', () => {
 
   it('deletes documents older that 3 days from the saved objects repository', async () => {
     await rollDailyData(logger, internalRepository);
-    const {
-      total,
-      saved_objects: savedObjects,
-    } = await internalRepository.find<EventLoopDelaysDaily>({ type: SAVED_OBJECTS_DAILY_TYPE });
+    const { total, saved_objects: savedObjects } =
+      await internalRepository.find<EventLoopDelaysDaily>({ type: SAVED_OBJECTS_DAILY_TYPE });
     expect(total).toBe(rawEventLoopDelaysDaily.length);
     expect(savedObjects.map(({ id, type, attributes }) => ({ id, type, attributes }))).toEqual(
       rawEventLoopDelaysDaily

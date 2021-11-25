@@ -27,7 +27,7 @@ export function ServiceLogs() {
 
   const {
     query: { environment, kuery, rangeFrom, rangeTo },
-  } = useApmParams('/services/:serviceName/logs');
+  } = useApmParams('/services/{serviceName}/logs');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
@@ -35,7 +35,7 @@ export function ServiceLogs() {
     (callApmApi) => {
       if (start && end) {
         return callApmApi({
-          endpoint: 'GET /api/apm/services/{serviceName}/infrastructure',
+          endpoint: 'GET /internal/apm/services/{serviceName}/infrastructure',
           params: {
             path: { serviceName },
             query: {
@@ -92,7 +92,7 @@ export function ServiceLogs() {
 }
 
 export const getInfrastructureKQLFilter = (
-  data?: APIReturnType<'GET /api/apm/services/{serviceName}/infrastructure'>
+  data?: APIReturnType<'GET /internal/apm/services/{serviceName}/infrastructure'>
 ) => {
   const containerIds = data?.serviceInfrastructure?.containerIds ?? [];
   const hostNames = data?.serviceInfrastructure?.hostNames ?? [];

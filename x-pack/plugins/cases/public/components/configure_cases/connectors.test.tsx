@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { mount, ReactWrapper } from 'enzyme';
+import { render, screen } from '@testing-library/react';
 
 import { Connectors, Props } from './connectors';
 import { TestProviders } from '../../common/mock';
@@ -14,6 +15,7 @@ import { ConnectorsDropdown } from './connectors_dropdown';
 import { connectors, actionTypes } from './__mock__';
 import { ConnectorTypes } from '../../../common';
 import { useKibana } from '../../common/lib/kibana';
+import { registerConnectorsToMockActionRegistry } from '../../common/mock/register_connectors';
 
 jest.mock('../../common/lib/kibana');
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
@@ -35,11 +37,10 @@ describe('Connectors', () => {
     updateConnectorDisabled: false,
   };
 
+  const actionTypeRegistry = useKibanaMock().services.triggersActionsUi.actionTypeRegistry;
+
   beforeAll(() => {
-    useKibanaMock().services.triggersActionsUi.actionTypeRegistry.get = jest.fn().mockReturnValue({
-      actionTypeTitle: 'test',
-      iconClass: 'logoSecurity',
-    });
+    registerConnectorsToMockActionRegistry(actionTypeRegistry, connectors);
     wrapper = mount(<Connectors {...props} />, { wrappingComponent: TestProviders });
   });
 
@@ -120,5 +121,30 @@ describe('Connectors', () => {
         .find('button[data-test-subj="case-configure-update-selected-connector-button"]')
         .text()
     ).toBe('Update My Connector');
+  });
+
+  test('it shows the deprecated callout when the connector is deprecated', async () => {
+    render(
+      <Connectors
+        {...props}
+        selectedConnector={{ id: 'servicenow-uses-table-api', type: ConnectorTypes.serviceNowITSM }}
+      />,
+      {
+        // wrapper: TestProviders produces a TS error
+        wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+      }
+    );
+
+    expect(screen.getByText('This connector type is deprecated')).toBeInTheDocument();
+    expect(screen.getByText('Update this connector, or create a new one.')).toBeInTheDocument();
+  });
+
+  test('it does not shows the deprecated callout when the connector is none', async () => {
+    render(<Connectors {...props} />, {
+      // wrapper: TestProviders produces a TS error
+      wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+    });
+
+    expect(screen.queryByText('Deprecated connector type')).not.toBeInTheDocument();
   });
 });

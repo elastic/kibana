@@ -165,7 +165,9 @@ export function getAlertType(
       interval: undefined,
     };
     // console.log(`index_threshold: query: ${JSON.stringify(queryParams, null, 4)}`);
-    const result = await (await data).timeSeriesQuery({
+    const result = await (
+      await data
+    ).timeSeriesQuery({
       logger,
       esClient,
       query: queryParams,

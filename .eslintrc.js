@@ -156,6 +156,82 @@ const DEV_PATTERNS = [
   'x-pack/plugins/*/server/scripts/**/*',
 ];
 
+/** Restricted imports with suggested alternatives */
+const RESTRICTED_IMPORTS = [
+  {
+    name: 'lodash',
+    importNames: ['set', 'setWith'],
+    message: 'Please use @elastic/safer-lodash-set instead',
+  },
+  {
+    name: 'lodash.set',
+    message: 'Please use @elastic/safer-lodash-set instead',
+  },
+  {
+    name: 'lodash.setwith',
+    message: 'Please use @elastic/safer-lodash-set instead',
+  },
+  {
+    name: 'lodash/set',
+    message: 'Please use @elastic/safer-lodash-set instead',
+  },
+  {
+    name: 'lodash/setWith',
+    message: 'Please use @elastic/safer-lodash-set instead',
+  },
+  {
+    name: 'lodash/fp',
+    importNames: ['set', 'setWith', 'assoc', 'assocPath'],
+    message: 'Please use @elastic/safer-lodash-set instead',
+  },
+  {
+    name: 'lodash/fp/set',
+    message: 'Please use @elastic/safer-lodash-set instead',
+  },
+  {
+    name: 'lodash/fp/setWith',
+    message: 'Please use @elastic/safer-lodash-set instead',
+  },
+  {
+    name: 'lodash/fp/assoc',
+    message: 'Please use @elastic/safer-lodash-set instead',
+  },
+  {
+    name: 'lodash/fp/assocPath',
+    message: 'Please use @elastic/safer-lodash-set instead',
+  },
+  {
+    name: 'lodash',
+    importNames: ['template'],
+    message: 'lodash.template is unsafe, and not compatible with our content security policy.',
+  },
+  {
+    name: 'lodash.template',
+    message: 'lodash.template is unsafe, and not compatible with our content security policy.',
+  },
+  {
+    name: 'lodash/template',
+    message: 'lodash.template is unsafe, and not compatible with our content security policy.',
+  },
+  {
+    name: 'lodash/fp',
+    importNames: ['template'],
+    message: 'lodash.template is unsafe, and not compatible with our content security policy.',
+  },
+  {
+    name: 'lodash/fp/template',
+    message: 'lodash.template is unsafe, and not compatible with our content security policy.',
+  },
+  {
+    name: 'react-use',
+    message: 'Please use react-use/lib/{method} instead.',
+  },
+  {
+    name: '@kbn/io-ts-utils',
+    message: `Import directly from @kbn/io-ts-utils/{method} submodules`,
+  },
+];
+
 module.exports = {
   root: true,
 
@@ -492,11 +568,13 @@ module.exports = {
     {
       files: [
         '**/*.stories.tsx',
+        '**/*.test.js',
         'x-pack/test/apm_api_integration/**/*.ts',
         'x-pack/test/functional/apps/**/*.js',
         'x-pack/plugins/apm/**/*.js',
         'test/*/config.ts',
         'test/*/config_open.ts',
+        'test/*/*.config.ts',
         'test/*/{tests,test_suites,apis,apps}/**/*',
         'test/visual_regression/tests/**/*',
         'x-pack/test/*/{tests,test_suites,apis,apps}/**/*',
@@ -506,6 +584,7 @@ module.exports = {
       ],
       rules: {
         'import/no-default-export': 'off',
+        'import/no-named-as-default-member': 'off',
         'import/no-named-as-default': 'off',
       },
     },
@@ -625,6 +704,7 @@ module.exports = {
         'packages/kbn-eslint-plugin-eslint/**/*',
         'x-pack/gulpfile.js',
         'x-pack/scripts/*.js',
+        '**/jest.config.js',
       ],
       excludedFiles: ['**/integration_tests/**/*'],
       rules: {
@@ -665,81 +745,7 @@ module.exports = {
         'no-restricted-imports': [
           2,
           {
-            paths: [
-              {
-                name: 'lodash',
-                importNames: ['set', 'setWith'],
-                message: 'Please use @elastic/safer-lodash-set instead',
-              },
-              {
-                name: 'lodash.set',
-                message: 'Please use @elastic/safer-lodash-set instead',
-              },
-              {
-                name: 'lodash.setwith',
-                message: 'Please use @elastic/safer-lodash-set instead',
-              },
-              {
-                name: 'lodash/set',
-                message: 'Please use @elastic/safer-lodash-set instead',
-              },
-              {
-                name: 'lodash/setWith',
-                message: 'Please use @elastic/safer-lodash-set instead',
-              },
-              {
-                name: 'lodash/fp',
-                importNames: ['set', 'setWith', 'assoc', 'assocPath'],
-                message: 'Please use @elastic/safer-lodash-set instead',
-              },
-              {
-                name: 'lodash/fp/set',
-                message: 'Please use @elastic/safer-lodash-set instead',
-              },
-              {
-                name: 'lodash/fp/setWith',
-                message: 'Please use @elastic/safer-lodash-set instead',
-              },
-              {
-                name: 'lodash/fp/assoc',
-                message: 'Please use @elastic/safer-lodash-set instead',
-              },
-              {
-                name: 'lodash/fp/assocPath',
-                message: 'Please use @elastic/safer-lodash-set instead',
-              },
-              {
-                name: 'lodash',
-                importNames: ['template'],
-                message:
-                  'lodash.template is unsafe, and not compatible with our content security policy.',
-              },
-              {
-                name: 'lodash.template',
-                message:
-                  'lodash.template is unsafe, and not compatible with our content security policy.',
-              },
-              {
-                name: 'lodash/template',
-                message:
-                  'lodash.template is unsafe, and not compatible with our content security policy.',
-              },
-              {
-                name: 'lodash/fp',
-                importNames: ['template'],
-                message:
-                  'lodash.template is unsafe, and not compatible with our content security policy.',
-              },
-              {
-                name: 'lodash/fp/template',
-                message:
-                  'lodash.template is unsafe, and not compatible with our content security policy.',
-              },
-              {
-                name: 'react-use',
-                message: 'Please use react-use/lib/{method} instead.',
-              },
-            ],
+            paths: RESTRICTED_IMPORTS,
           },
         ],
         'no-restricted-modules': [
@@ -832,6 +838,23 @@ module.exports = {
         ],
       },
     },
+    {
+      files: ['**/common/**/*.{js,mjs,ts,tsx}', '**/public/**/*.{js,mjs,ts,tsx}'],
+      rules: {
+        'no-restricted-imports': [
+          2,
+          {
+            paths: [
+              ...RESTRICTED_IMPORTS,
+              {
+                name: 'semver',
+                message: 'Please use "semver/*/{function}" instead',
+              },
+            ],
+          },
+        ],
+      },
+    },
 
     /**
      * APM and Observability overrides
@@ -885,18 +908,12 @@ module.exports = {
     },
 
     /**
-     * Cases overrides
-     */
-    {
-      files: ['x-pack/plugins/cases/**/*.{js,mjs,ts,tsx}'],
-      rules: {
-        'no-duplicate-imports': 'off',
-        '@typescript-eslint/no-duplicate-imports': ['error'],
-      },
-    },
-
-    /**
-     * Security Solution overrides
+     * Security Solution overrides. These rules below are maintained and owned by
+     * the people within the security-solution-platform team. Please see ping them
+     * or check with them if you are encountering issues, have suggestions, or would
+     * like to add, change, or remove any particular rule. Linters, Typescript, and rules
+     * evolve and change over time just like coding styles, so please do not hesitate to
+     * reach out.
      */
     {
       // front end and common typescript and javascript files only
@@ -905,6 +922,8 @@ module.exports = {
         'x-pack/plugins/security_solution/common/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/timelines/public/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/timelines/common/**/*.{js,mjs,ts,tsx}',
+        'x-pack/plugins/cases/public/**/*.{js,mjs,ts,tsx}',
+        'x-pack/plugins/cases/common/**/*.{js,mjs,ts,tsx}',
       ],
       rules: {
         'import/no-nodejs-modules': 'error',
@@ -920,16 +939,44 @@ module.exports = {
       },
     },
     {
+      // typescript only for front and back end, but excludes the test files.
+      // We use this section to add rules in which we do not want to apply to test files.
+      // This should be a very small set as most linter rules are useful for tests as well.
+      files: [
+        'x-pack/plugins/security_solution/**/*.{ts,tsx}',
+        'x-pack/plugins/timelines/**/*.{ts,tsx}',
+        'x-pack/plugins/cases/**/*.{ts,tsx}',
+      ],
+      excludedFiles: [
+        'x-pack/plugins/security_solution/**/*.{test,mock,test_helper}.{ts,tsx}',
+        'x-pack/plugins/timelines/**/*.{test,mock,test_helper}.{ts,tsx}',
+        'x-pack/plugins/cases/**/*.{test,mock,test_helper}.{ts,tsx}',
+      ],
+      rules: {
+        '@typescript-eslint/no-non-null-assertion': 'error',
+      },
+    },
+    {
       // typescript only for front and back end
       files: [
         'x-pack/plugins/security_solution/**/*.{ts,tsx}',
         'x-pack/plugins/timelines/**/*.{ts,tsx}',
+        'x-pack/plugins/cases/**/*.{ts,tsx}',
       ],
       rules: {
         '@typescript-eslint/no-this-alias': 'error',
         '@typescript-eslint/no-explicit-any': 'error',
         '@typescript-eslint/no-useless-constructor': 'error',
         '@typescript-eslint/unified-signatures': 'error',
+        'no-restricted-imports': [
+          'error',
+          {
+            // prevents code from importing files that contain the name "legacy" within their name. This is a mechanism
+            // to help deprecation and prevent accidental re-use/continued use of code we plan on removing. If you are
+            // finding yourself turning this off a lot for "new code" consider renaming the file and functions if it is has valid uses.
+            patterns: ['*legacy*'],
+          },
+        ],
       },
     },
     {
@@ -937,6 +984,7 @@ module.exports = {
       files: [
         'x-pack/plugins/security_solution/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/timelines/**/*.{js,mjs,ts,tsx}',
+        'x-pack/plugins/cases/**/*.{js,mjs,ts,tsx}',
       ],
       plugins: ['eslint-plugin-node', 'react'],
       env: {
@@ -1028,7 +1076,12 @@ module.exports = {
     },
 
     /**
-     * Lists overrides
+     * Lists overrides. These rules below are maintained and owned by
+     * the people within the security-solution-platform team. Please see ping them
+     * or check with them if you are encountering issues, have suggestions, or would
+     * like to add, change, or remove any particular rule. Linters, Typescript, and rules
+     * evolve and change over time just like coding styles, so please do not hesitate to
+     * reach out.
      */
     {
       // front end and common typescript and javascript files only
@@ -1192,10 +1245,25 @@ module.exports = {
         'no-template-curly-in-string': 'error',
         'sort-keys': 'error',
         'prefer-destructuring': 'error',
+        'no-restricted-imports': [
+          'error',
+          {
+            // prevents code from importing files that contain the name "legacy" within their name. This is a mechanism
+            // to help deprecation and prevent accidental re-use/continued use of code we plan on removing. If you are
+            // finding yourself turning this off a lot for "new code" consider renaming the file and functions if it has valid uses.
+            patterns: ['*legacy*'],
+          },
+        ],
       },
     },
+
     /**
-     * Metrics entities overrides
+     * Metrics entities overrides. These rules below are maintained and owned by
+     * the people within the security-solution-platform team. Please see ping them
+     * or check with them if you are encountering issues, have suggestions, or would
+     * like to add, change, or remove any particular rule. Linters, Typescript, and rules
+     * evolve and change over time just like coding styles, so please do not hesitate to
+     * reach out.
      */
     {
       // front end and common typescript and javascript files only
@@ -1304,6 +1372,15 @@ module.exports = {
         'no-template-curly-in-string': 'error',
         'sort-keys': 'error',
         'prefer-destructuring': 'error',
+        'no-restricted-imports': [
+          'error',
+          {
+            // prevents code from importing files that contain the name "legacy" within their name. This is a mechanism
+            // to help deprecation and prevent accidental re-use/continued use of code we plan on removing. If you are
+            // finding yourself turning this off a lot for "new code" consider renaming the file and functions if it has valid uses.
+            patterns: ['*legacy*'],
+          },
+        ],
       },
     },
     /**
@@ -1492,7 +1569,7 @@ module.exports = {
       },
     },
     {
-      files: ['packages/kbn-ui-shared-deps/src/flot_charts/**/*.js'],
+      files: ['packages/kbn-ui-shared-deps-src/src/flot_charts/**/*.js'],
       env: {
         jquery: true,
       },
@@ -1502,7 +1579,7 @@ module.exports = {
      * TSVB overrides
      */
     {
-      files: ['src/plugins/vis_type_timeseries/**/*.{js,mjs,ts,tsx}'],
+      files: ['src/plugins/vis_types/timeseries/**/*.{js,mjs,ts,tsx}'],
       rules: {
         'import/no-default-export': 'error',
       },
@@ -1566,8 +1643,8 @@ module.exports = {
      */
     {
       files: [
-        'src/plugins/security_oss/**/*.{js,mjs,ts,tsx}',
         'src/plugins/interactive_setup/**/*.{js,mjs,ts,tsx}',
+        'test/interactive_setup_api_integration/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/encrypted_saved_objects/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/security/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/spaces/**/*.{js,mjs,ts,tsx}',

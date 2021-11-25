@@ -22,9 +22,9 @@ describe('Header', () => {
     const component = mount(
       <Header.WrappedComponent
         indexPatternId="test"
-        history={(scopedHistoryMock.create() as unknown) as ScopedHistory}
-        location={({} as unknown) as RouteComponentProps['location']}
-        match={({} as unknown) as RouteComponentProps['match']}
+        history={scopedHistoryMock.create() as unknown as ScopedHistory}
+        location={{} as unknown as RouteComponentProps['location']}
+        match={{} as unknown as RouteComponentProps['match']}
       />,
       {
         wrappingComponent: KibanaContextProvider,

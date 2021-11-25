@@ -39,7 +39,7 @@ import { Display } from '../display';
 import { timelineSelectors } from '../../../timelines/store/timeline';
 import { TimelineId } from '../../../../common/types/timeline';
 import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
-import { useSourcererScope } from '../../../common/containers/sourcerer';
+import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import { useDeepEqualSelector, useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_query';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
@@ -63,12 +63,13 @@ const UebaDetailsComponent: React.FC<UebaDetailsProps> = ({ detailName, uebaDeta
   const { globalFullScreen } = useGlobalFullScreen();
 
   const kibana = useKibana();
-  const uebaDetailsPageFilters: Filter[] = useMemo(() => getUebaDetailsPageFilters(detailName), [
-    detailName,
-  ]);
+  const uebaDetailsPageFilters: Filter[] = useMemo(
+    () => getUebaDetailsPageFilters(detailName),
+    [detailName]
+  );
   const getFilters = () => [...uebaDetailsPageFilters, ...filters];
 
-  const { docValueFields, indicesExist, indexPattern, selectedPatterns } = useSourcererScope(
+  const { docValueFields, indicesExist, indexPattern, selectedPatterns } = useSourcererDataView(
     SourcererScopeName.detections
   );
 
@@ -98,7 +99,6 @@ const UebaDetailsComponent: React.FC<UebaDetailsProps> = ({ detailName, uebaDeta
             <Display show={!globalFullScreen}>
               <HeaderPage
                 border
-                sourcererScope={SourcererScopeName.detections}
                 subtitle={
                   <LastEventTime
                     docValueFields={docValueFields}

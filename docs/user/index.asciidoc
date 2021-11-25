@@ -34,11 +34,13 @@ include::{kib-repo-dir}/siem/index.asciidoc[]
 
 include::dev-tools.asciidoc[]
 
+include::{kib-repo-dir}/fleet/fleet.asciidoc[]
+
+include::{kib-repo-dir}/osquery/osquery.asciidoc[]
+
 include::monitoring/index.asciidoc[]
 
 include::management.asciidoc[]
-
-include::{kib-repo-dir}/fleet/fleet.asciidoc[]
 
 include::api.asciidoc[]
 

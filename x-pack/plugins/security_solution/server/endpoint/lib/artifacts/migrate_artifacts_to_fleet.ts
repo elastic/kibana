@@ -39,14 +39,12 @@ export const migrateArtifactsToFleet = async (
   try {
     while (hasMore) {
       // Retrieve list of artifact records
-      const {
-        saved_objects: artifactList,
-        total,
-      } = await soClient.find<InternalArtifactCompleteSchema>({
-        type: ArtifactConstants.SAVED_OBJECT_TYPE,
-        page: 1,
-        perPage: 10,
-      });
+      const { saved_objects: artifactList, total } =
+        await soClient.find<InternalArtifactCompleteSchema>({
+          type: ArtifactConstants.SAVED_OBJECT_TYPE,
+          page: 1,
+          perPage: 10,
+        });
 
       if (totalArtifactsMigrated === -1) {
         totalArtifactsMigrated = total;

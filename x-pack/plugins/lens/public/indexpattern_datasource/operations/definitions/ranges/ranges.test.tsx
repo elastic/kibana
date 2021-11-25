@@ -8,14 +8,7 @@
 import React from 'react';
 import { mount } from 'enzyme';
 import { act } from 'react-dom/test-utils';
-import {
-  EuiFieldNumber,
-  EuiRange,
-  EuiButtonEmpty,
-  EuiLink,
-  EuiText,
-  EuiFieldText,
-} from '@elastic/eui';
+import { EuiFieldNumber, EuiRange, EuiButtonEmpty, EuiLink, EuiText } from '@elastic/eui';
 import { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from 'kibana/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import type { IndexPatternLayer, IndexPattern } from '../../../types';
@@ -59,7 +52,7 @@ jest.mock('lodash', () => {
 
 const dataPluginMockValue = dataPluginMock.createStartContract();
 // need to overwrite the formatter field first
-dataPluginMockValue.fieldFormats.deserialize = jest.fn().mockImplementation(({ params }) => {
+dataPluginMockValue.fieldFormats.deserialize = jest.fn().mockImplementation(({ id, params }) => {
   return {
     convert: ({ gte, lt }: { gte: string; lt: string }) => {
       if (params?.id === 'custom') {
@@ -68,18 +61,18 @@ dataPluginMockValue.fieldFormats.deserialize = jest.fn().mockImplementation(({ p
       if (params?.id === 'bytes') {
         return `Bytes format: ${gte} - ${lt}`;
       }
+      if (!id) {
+        return 'Error';
+      }
       return `${gte} - ${lt}`;
     },
   };
 });
 
-type ReactMouseEvent = React.MouseEvent<HTMLAnchorElement, MouseEvent> &
-  React.MouseEvent<HTMLButtonElement, MouseEvent>;
-
 // need this for MAX_HISTOGRAM value
-const uiSettingsMock = ({
+const uiSettingsMock = {
   get: jest.fn().mockReturnValue(100),
-} as unknown) as IUiSettingsClient;
+} as unknown as IUiSettingsClient;
 
 const sourceField = 'MyField';
 const defaultOptions = {
@@ -419,7 +412,7 @@ describe('ranges', () => {
           instance
             .find('[data-test-subj="lns-indexPattern-range-maxBars-minus"]')
             .find('button')
-            .prop('onClick')!({} as ReactMouseEvent);
+            .simulate('click');
           jest.advanceTimersByTime(TYPING_DEBOUNCE_TIME * 4);
           instance.update();
         });
@@ -443,7 +436,7 @@ describe('ranges', () => {
           instance
             .find('[data-test-subj="lns-indexPattern-range-maxBars-plus"]')
             .find('button')
-            .prop('onClick')!({} as ReactMouseEvent);
+            .simulate('click');
           jest.advanceTimersByTime(TYPING_DEBOUNCE_TIME * 4);
           instance.update();
         });
@@ -486,6 +479,49 @@ describe('ranges', () => {
         expect(instance.find(DragDropBuckets).children).toHaveLength(1);
       });
 
+      it('should use the parentFormat to create the trigger label', () => {
+        const updateLayerSpy = jest.fn();
+
+        const instance = mount(
+          <InlineOptions
+            {...defaultOptions}
+            layer={layer}
+            updateLayer={updateLayerSpy}
+            columnId="col1"
+            currentColumn={layer.columns.col1 as RangeIndexPatternColumn}
+          />
+        );
+
+        expect(
+          instance.find('[data-test-subj="indexPattern-ranges-popover-trigger"]').first().text()
+        ).toBe('0 - 1000');
+      });
+
+      it('should not print error if the parentFormat is not provided', () => {
+        // while in the actual React implementation will print an error, here
+        // we intercept the formatter without an id assigned an print "Error"
+        const updateLayerSpy = jest.fn();
+
+        const instance = mount(
+          <InlineOptions
+            {...defaultOptions}
+            layer={layer}
+            updateLayer={updateLayerSpy}
+            columnId="col1"
+            currentColumn={
+              {
+                ...layer.columns.col1,
+                params: { ...layer.columns.col1.params, parentFormat: undefined },
+              } as RangeIndexPatternColumn
+            }
+          />
+        );
+
+        expect(
+          instance.find('[data-test-subj="indexPattern-ranges-popover-trigger"]').first().text()
+        ).not.toBe('Error');
+      });
+
       it('should add a new range', () => {
         const updateLayerSpy = jest.fn();
 
@@ -501,7 +537,7 @@ describe('ranges', () => {
 
         // This series of act closures are made to make it work properly the update flush
         act(() => {
-          instance.find(EuiButtonEmpty).prop('onClick')!({} as ReactMouseEvent);
+          instance.find(EuiButtonEmpty).simulate('click');
         });
 
         act(() => {
@@ -511,11 +547,15 @@ describe('ranges', () => {
           expect(instance.find(RangePopover)).toHaveLength(2);
 
           // edit the range and check
-          instance.find(RangePopover).find(EuiFieldNumber).first().prop('onChange')!({
-            target: {
-              value: '50',
-            },
-          } as React.ChangeEvent<HTMLInputElement>);
+          instance
+            .find('RangePopover input[type="number"]')
+            .first()
+            .simulate('change', {
+              target: {
+                value: '50',
+              },
+            });
+
           jest.advanceTimersByTime(TYPING_DEBOUNCE_TIME * 4);
 
           expect(updateLayerSpy).toHaveBeenCalledWith({
@@ -552,7 +592,7 @@ describe('ranges', () => {
 
         // This series of act closures are made to make it work properly the update flush
         act(() => {
-          instance.find(EuiButtonEmpty).prop('onClick')!({} as ReactMouseEvent);
+          instance.find(EuiButtonEmpty).simulate('click');
         });
 
         act(() => {
@@ -562,11 +602,15 @@ describe('ranges', () => {
           expect(instance.find(RangePopover)).toHaveLength(2);
 
           // edit the label and check
-          instance.find(RangePopover).find(EuiFieldText).first().prop('onChange')!({
-            target: {
-              value: 'customlabel',
-            },
-          } as React.ChangeEvent<HTMLInputElement>);
+          instance
+            .find('RangePopover input[type="text"]')
+            .first()
+            .simulate('change', {
+              target: {
+                value: 'customlabel',
+              },
+            });
+
           jest.advanceTimersByTime(TYPING_DEBOUNCE_TIME * 4);
 
           expect(updateLayerSpy).toHaveBeenCalledWith({
@@ -603,19 +647,20 @@ describe('ranges', () => {
 
         // This series of act closures are made to make it work properly the update flush
         act(() => {
-          instance.find(RangePopover).find(EuiLink).prop('onClick')!({} as ReactMouseEvent);
+          instance.find(RangePopover).find(EuiLink).simulate('click');
         });
 
         act(() => {
           // need another wrapping for this in order to work
           instance.update();
-
-          // edit the range "to" field
-          instance.find(RangePopover).find(EuiFieldNumber).last().prop('onChange')!({
-            target: {
-              value: '50',
-            },
-          } as React.ChangeEvent<HTMLInputElement>);
+          instance
+            .find('RangePopover input[type="number"]')
+            .last()
+            .simulate('change', {
+              target: {
+                value: '50',
+              },
+            });
           jest.advanceTimersByTime(TYPING_DEBOUNCE_TIME * 4);
 
           expect(updateLayerSpy).toHaveBeenCalledWith({
@@ -649,7 +694,7 @@ describe('ranges', () => {
 
         // This series of act closures are made to make it work properly the update flush
         act(() => {
-          instance.find(RangePopover).find(EuiLink).prop('onClick')!({} as ReactMouseEvent);
+          instance.find(RangePopover).find(EuiLink).simulate('click');
         });
 
         act(() => {
@@ -657,11 +702,14 @@ describe('ranges', () => {
           instance.update();
 
           // edit the range "to" field
-          instance.find(RangePopover).find(EuiFieldNumber).last().prop('onChange')!({
-            target: {
-              value: '-1',
-            },
-          } as React.ChangeEvent<HTMLInputElement>);
+          instance
+            .find('RangePopover input[type="number"]')
+            .last()
+            .simulate('change', {
+              target: {
+                value: '-1',
+              },
+            });
         });
 
         act(() => {
@@ -701,7 +749,7 @@ describe('ranges', () => {
           instance
             .find('[data-test-subj="lns-customBucketContainer-remove"]')
             .last()
-            .prop('onClick')!({} as ReactMouseEvent);
+            .simulate('click');
         });
 
         act(() => {
@@ -733,7 +781,7 @@ describe('ranges', () => {
         );
 
         act(() => {
-          instance.find(RangePopover).last().find(EuiLink).prop('onClick')!({} as ReactMouseEvent);
+          instance.find(RangePopover).last().find(EuiLink).simulate('click');
         });
 
         act(() => {
@@ -840,7 +888,7 @@ describe('ranges', () => {
 
         // This series of act closures are made to make it work properly the update flush
         act(() => {
-          instance.find(EuiLink).first().prop('onClick')!({} as ReactMouseEvent);
+          instance.find(EuiLink).first().simulate('click');
         });
 
         expect(updateLayerSpy.mock.calls[0][0].columns.col1.params.format).toEqual({

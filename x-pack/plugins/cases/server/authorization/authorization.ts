@@ -204,9 +204,7 @@ export class Authorization {
     };
   }
 
-  private async getAuthorizedOwners(
-    operations: OperationDetails[]
-  ): Promise<{
+  private async getAuthorizedOwners(operations: OperationDetails[]): Promise<{
     username?: string;
     hasAllRequested: boolean;
     authorizedOwners: string[];
@@ -233,8 +231,10 @@ export class Authorization {
           ? Array.from(featureCaseOwners)
           : privileges.kibana.reduce<string[]>((authorizedOwners, { authorized, privilege }) => {
               if (authorized && requiredPrivileges.has(privilege)) {
-                const owner = requiredPrivileges.get(privilege)!;
-                authorizedOwners.push(owner);
+                const owner = requiredPrivileges.get(privilege);
+                if (owner) {
+                  authorizedOwners.push(owner);
+                }
               }
 
               return authorizedOwners;

@@ -126,7 +126,7 @@ describe('Actions', () => {
     test('it enables for eventType=signal', () => {
       const ecsData = {
         ...mockTimelineData[0].ecs,
-        signal: { rule: { id: ['123'] } },
+        kibana: { alert: { rule: { uuid: ['123'] } } },
       };
       const wrapper = mount(
         <TestProviders>
@@ -184,6 +184,35 @@ describe('Actions', () => {
       expect(
         wrapper.find('[data-test-subj="timeline-context-menu-button"]').first().prop('isDisabled')
       ).toBe(false);
+    });
+    test('it shows the analyze event button when the event is from an endpoint', () => {
+      const ecsData = {
+        ...mockTimelineData[0].ecs,
+        event: { kind: ['alert'] },
+        agent: { type: ['endpoint'] },
+        process: { entity_id: ['1'] },
+      };
+      const wrapper = mount(
+        <TestProviders>
+          <Actions {...defaultProps} ecsData={ecsData} />
+        </TestProviders>
+      );
+
+      expect(wrapper.find('[data-test-subj="view-in-analyzer"]').exists()).toBe(true);
+    });
+    test('it does not render the analyze event button when the event is from an unsupported source', () => {
+      const ecsData = {
+        ...mockTimelineData[0].ecs,
+        event: { kind: ['alert'] },
+        agent: { type: ['notendpoint'] },
+      };
+      const wrapper = mount(
+        <TestProviders>
+          <Actions {...defaultProps} ecsData={ecsData} />
+        </TestProviders>
+      );
+
+      expect(wrapper.find('[data-test-subj="view-in-analyzer"]').exists()).toBe(false);
     });
   });
 });

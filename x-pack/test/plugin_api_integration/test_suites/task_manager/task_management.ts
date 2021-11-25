@@ -7,7 +7,7 @@
 
 import { random, times } from 'lodash';
 import expect from '@kbn/expect';
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import TaskManagerMapping from '../../../../plugins/task_manager/server/saved_objects/mappings.json';
 import {
@@ -64,7 +64,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     beforeEach(async () => {
       const exists = await es.indices.exists({ index: testHistoryIndex });
-      if (exists.body) {
+      if (exists) {
         await es.deleteByQuery({
           index: testHistoryIndex,
           refresh: true,
@@ -151,7 +151,7 @@ export default function ({ getService }: FtrProviderContext) {
           },
         })
         .then((result) =>
-          ((result.body as unknown) as SearchResults).hits.hits.filter((task) =>
+          (result as unknown as SearchResults).hits.hits.filter((task) =>
             taskId ? task._source?.taskId === taskId : true
           )
         );

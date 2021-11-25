@@ -23,16 +23,16 @@ export function consulMetricsSpecProvider(context: TutorialContext): TutorialSch
   return {
     id: 'consulMetrics',
     name: i18n.translate('home.tutorials.consulMetrics.nameTitle', {
-      defaultMessage: 'Consul metrics',
+      defaultMessage: 'Consul Metrics',
     }),
     moduleName,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.consulMetrics.shortDescription', {
-      defaultMessage: 'Fetch monitoring metrics from the Consul server.',
+      defaultMessage: 'Collect metrics from Consul servers with Metricbeat.',
     }),
     longDescription: i18n.translate('home.tutorials.consulMetrics.longDescription', {
       defaultMessage:
-        'The `consul` Metricbeat module fetches monitoring metrics from Consul. \
+        'The `consul` Metricbeat module fetches metrics from Consul. \
 [Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-consul.html',
@@ -58,5 +58,6 @@ export function consulMetricsSpecProvider(context: TutorialContext): TutorialSch
     onPrem: onPremInstructions(moduleName, context),
     elasticCloud: cloudInstructions(moduleName),
     onPremElasticCloud: onPremCloudInstructions(moduleName),
+    integrationBrowserCategories: ['security', 'network', 'web'],
   };
 }

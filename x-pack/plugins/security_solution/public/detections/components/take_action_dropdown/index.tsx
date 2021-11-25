@@ -23,7 +23,6 @@ import { Status } from '../../../../common/detection_engine/schemas/common/schem
 import { isAlertFromEndpointAlert } from '../../../common/utils/endpoint_alert_check';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { useAddToCaseActions } from '../alerts_table/timeline_actions/use_add_to_case_actions';
-
 interface ActionsData {
   alertStatus: Status;
   eventId: string;
@@ -67,9 +66,9 @@ export const TakeActionDropdown = React.memo(
     const actionsData = useMemo(
       () =>
         [
-          { category: 'signal', field: 'signal.rule.id', name: 'ruleId' },
-          { category: 'signal', field: 'signal.rule.name', name: 'ruleName' },
-          { category: 'signal', field: 'signal.status', name: 'alertStatus' },
+          { category: 'kibana', field: 'kibana.alert.rule.uuid', name: 'ruleId' },
+          { category: 'kibana', field: 'kibana.alert.rule.name', name: 'ruleName' },
+          { category: 'kibana', field: 'kibana.alert.workflow_status', name: 'alertStatus' },
           { category: 'event', field: 'event.kind', name: 'eventKind' },
           { category: '_id', field: '_id', name: 'eventId' },
         ].reduce<ActionsData>(
@@ -82,9 +81,10 @@ export const TakeActionDropdown = React.memo(
       [detailsData]
     );
 
-    const alertIds = useMemo(() => (isEmpty(actionsData.eventId) ? null : [actionsData.eventId]), [
-      actionsData.eventId,
-    ]);
+    const alertIds = useMemo(
+      () => (isEmpty(actionsData.eventId) ? null : [actionsData.eventId]),
+      [actionsData.eventId]
+    );
     const isEvent = actionsData.eventKind === 'event';
 
     const togglePopoverHandler = useCallback(() => {

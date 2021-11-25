@@ -9,7 +9,7 @@ import { JobsHealthService, jobsHealthServiceProvider } from './jobs_health_serv
 import type { DatafeedsService } from '../../models/job_service/datafeeds';
 import type { Logger } from 'kibana/server';
 import { MlClient } from '../ml_client';
-import { MlJob, MlJobStats } from '@elastic/elasticsearch/api/types';
+import { MlJob, MlJobStats } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { AnnotationService } from '../../models/annotation_service/annotation';
 import { JobsHealthExecutorOptions } from './register_jobs_monitoring_rule_type';
 import { JobAuditMessagesService } from '../../models/job_audit_messages/job_audit_messages';
@@ -21,7 +21,7 @@ const MOCK_DATE_NOW = 1487076708000;
 function getDefaultExecutorOptions(
   overrides: DeepPartial<JobsHealthExecutorOptions> = {}
 ): JobsHealthExecutorOptions {
-  return ({
+  return {
     state: {},
     startedAt: new Date('2021-08-12T13:13:39.396Z'),
     previousStartedAt: new Date('2021-08-12T13:13:27.396Z'),
@@ -42,37 +42,37 @@ function getDefaultExecutorOptions(
       schedule: { interval: '10s' },
     },
     ...overrides,
-  } as unknown) as JobsHealthExecutorOptions;
+  } as unknown as JobsHealthExecutorOptions;
 }
 
 describe('JobsHealthService', () => {
-  const mlClient = ({
+  const mlClient = {
     getJobs: jest.fn().mockImplementation(({ job_id: jobIds = [] }) => {
       let jobs: MlJob[] = [];
 
       if (jobIds.some((v: string) => v === 'test_group')) {
         jobs = [
-          ({
+          {
             job_id: 'test_job_01',
             analysis_config: { bucket_span: '1h' },
-          } as unknown) as MlJob,
-          ({
+          } as unknown as MlJob,
+          {
             job_id: 'test_job_02',
             analysis_config: { bucket_span: '15m' },
-          } as unknown) as MlJob,
-          ({
+          } as unknown as MlJob,
+          {
             job_id: 'test_job_03',
             analysis_config: { bucket_span: '8m' },
-          } as unknown) as MlJob,
+          } as unknown as MlJob,
         ];
       }
 
       if (jobIds[0]?.startsWith('test_job_')) {
         jobs = [
-          ({
+          {
             job_id: jobIds[0],
             analysis_config: { bucket_span: '1h' },
-          } as unknown) as MlJob,
+          } as unknown as MlJob,
         ];
       }
 
@@ -119,9 +119,9 @@ describe('JobsHealthService', () => {
         },
       });
     }),
-  } as unknown) as jest.Mocked<MlClient>;
+  } as unknown as jest.Mocked<MlClient>;
 
-  const datafeedsService = ({
+  const datafeedsService = {
     getDatafeedByJobId: jest.fn().mockImplementation((jobIds: string[]) => {
       return Promise.resolve(
         jobIds.map((j) => {
@@ -133,9 +133,9 @@ describe('JobsHealthService', () => {
         })
       );
     }),
-  } as unknown) as jest.Mocked<DatafeedsService>;
+  } as unknown as jest.Mocked<DatafeedsService>;
 
-  const annotationService = ({
+  const annotationService = {
     getDelayedDataAnnotations: jest.fn().mockImplementation(({ jobIds }: { jobIds: string[] }) => {
       return Promise.resolve(
         jobIds.map((jobId) => {
@@ -150,19 +150,19 @@ describe('JobsHealthService', () => {
         })
       );
     }),
-  } as unknown) as jest.Mocked<AnnotationService>;
+  } as unknown as jest.Mocked<AnnotationService>;
 
-  const jobAuditMessagesService = ({
+  const jobAuditMessagesService = {
     getJobsErrorMessages: jest.fn().mockImplementation((jobIds: string) => {
       return Promise.resolve([]);
     }),
-  } as unknown) as jest.Mocked<JobAuditMessagesService>;
+  } as unknown as jest.Mocked<JobAuditMessagesService>;
 
-  const logger = ({
+  const logger = {
     warn: jest.fn(),
     info: jest.fn(),
     debug: jest.fn(),
-  } as unknown) as jest.Mocked<Logger>;
+  } as unknown as jest.Mocked<Logger>;
 
   const getFieldsFormatRegistry = jest.fn().mockImplementation(() => {
     return Promise.resolve({

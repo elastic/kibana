@@ -28,7 +28,7 @@ import {
 
 import { renderEndzoneTooltip } from '../../../../charts/public';
 
-import { getThemeService, getUISettings } from '../services';
+import { getThemeService } from '../services';
 import { VisConfig } from '../types';
 
 declare global {
@@ -71,7 +71,6 @@ function getValueLabelsStyling() {
   return {
     displayValue: {
       fontSize: { min: VALUE_LABELS_MIN_FONTSIZE, max: VALUE_LABELS_MAX_FONTSIZE },
-      fill: { textInverted: false, textContrast: true },
       alignment: { horizontal: HorizontalAlignment.Center, vertical: VerticalAlignment.Middle },
     },
   };
@@ -101,16 +100,10 @@ export const XYSettings: FC<XYSettingsProps> = ({
   const themeService = getThemeService();
   const theme = themeService.useChartsTheme();
   const baseTheme = themeService.useChartsBaseTheme();
-  const dimmingOpacity = getUISettings().get<number | undefined>('visualization:dimmingOpacity');
   const valueLabelsStyling = getValueLabelsStyling();
 
   const themeOverrides: PartialTheme = {
     markSizeRatio,
-    sharedStyle: {
-      unhighlighted: {
-        opacity: dimmingOpacity,
-      },
-    },
     barSeriesStyle: {
       ...valueLabelsStyling,
     },
@@ -172,7 +165,7 @@ export const XYSettings: FC<XYSettingsProps> = ({
       baseTheme={baseTheme}
       showLegend={showLegend}
       legendPosition={legendPosition}
-      allowBrushingLastHistogramBucket={isTimeChart}
+      allowBrushingLastHistogramBin={isTimeChart}
       roundHistogramBrushValues={enableHistogramMode && !isTimeChart}
       legendColorPicker={legendColorPicker}
       onElementClick={onElementClick}

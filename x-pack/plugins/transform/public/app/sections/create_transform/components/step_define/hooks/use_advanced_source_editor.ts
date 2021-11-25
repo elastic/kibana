@@ -20,28 +20,21 @@ export const useAdvancedSourceEditor = (
   // Advanced editor for source config state
   const [sourceConfigUpdated, setSourceConfigUpdated] = useState(defaults.sourceConfigUpdated);
 
-  const [
-    isAdvancedSourceEditorSwitchModalVisible,
-    setAdvancedSourceEditorSwitchModalVisible,
-  ] = useState(false);
+  const [isAdvancedSourceEditorSwitchModalVisible, setAdvancedSourceEditorSwitchModalVisible] =
+    useState(false);
 
   const [isAdvancedSourceEditorEnabled, setAdvancedSourceEditorEnabled] = useState(
     defaults.isAdvancedSourceEditorEnabled
   );
 
-  const [
-    isAdvancedSourceEditorApplyButtonEnabled,
-    setAdvancedSourceEditorApplyButtonEnabled,
-  ] = useState(false);
+  const [isAdvancedSourceEditorApplyButtonEnabled, setAdvancedSourceEditorApplyButtonEnabled] =
+    useState(false);
 
-  const [
-    advancedEditorSourceConfigLastApplied,
-    setAdvancedEditorSourceConfigLastApplied,
-  ] = useState(stringifiedSourceConfig);
+  const [advancedEditorSourceConfigLastApplied, setAdvancedEditorSourceConfigLastApplied] =
+    useState(stringifiedSourceConfig);
 
-  const [advancedEditorSourceConfig, setAdvancedEditorSourceConfig] = useState(
-    stringifiedSourceConfig
-  );
+  const [advancedEditorSourceConfig, setAdvancedEditorSourceConfig] =
+    useState(stringifiedSourceConfig);
 
   const applyAdvancedSourceEditorChanges = () => {
     const sourceConfig = JSON.parse(advancedEditorSourceConfig);

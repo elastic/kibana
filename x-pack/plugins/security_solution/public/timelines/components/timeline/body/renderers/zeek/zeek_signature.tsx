@@ -22,9 +22,9 @@ import { IS_OPERATOR, QueryOperator } from '../../../data_providers/data_provide
 
 import * as i18n from './translations';
 
-const Badge = (styled(EuiBadge)`
+const Badge = styled(EuiBadge)`
   vertical-align: top;
-` as unknown) as typeof EuiBadge;
+` as unknown as typeof EuiBadge;
 
 Badge.displayName = 'Badge';
 
@@ -76,12 +76,12 @@ export const DraggableZeekElement = React.memo<{
       and: [],
       enabled: true,
       id: escapeDataProviderId(`draggable-zeek-element-draggable-wrapper-${id}-${field}-${value}`),
-      name: value!,
+      name: String(value),
       excluded: false,
       kqlQuery: '',
       queryMatch: {
         field,
-        value: value!,
+        value: String(value),
         operator: IS_OPERATOR as QueryOperator,
       },
     }),
@@ -97,7 +97,7 @@ export const DraggableZeekElement = React.memo<{
       ) : (
         <EuiToolTip data-test-subj="badge-tooltip" content={field}>
           <Badge iconType="tag" color="hollow" title="">
-            {stringRenderer(value!)}
+            {stringRenderer(String(value))}
           </Badge>
         </EuiToolTip>
       ),

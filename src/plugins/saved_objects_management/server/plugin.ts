@@ -15,7 +15,8 @@ import { registerRoutes } from './routes';
 import { capabilitiesProvider } from './capabilities_provider';
 
 export class SavedObjectsManagementPlugin
-  implements Plugin<SavedObjectsManagementPluginSetup, SavedObjectsManagementPluginStart, {}, {}> {
+  implements Plugin<SavedObjectsManagementPluginSetup, SavedObjectsManagementPluginStart, {}, {}>
+{
   private readonly logger: Logger;
   private managementService$ = new Subject<SavedObjectsManagement>();
 

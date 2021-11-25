@@ -22,7 +22,7 @@ import { PersistableStateDefinition } from '../../../../../src/plugins/kibana_ut
 
 import { DynamicActionsState } from '../../common/types';
 
-export { DynamicActionsState };
+export type { DynamicActionsState };
 
 export interface UiActionsServiceEnhancementsParams {
   readonly actionFactories?: ActionFactoryRegistry;
@@ -32,7 +32,8 @@ export interface UiActionsServiceEnhancementsParams {
 }
 
 export class UiActionsServiceEnhancements
-  implements PersistableStateDefinition<DynamicActionsState> {
+  implements PersistableStateDefinition<DynamicActionsState>
+{
   protected readonly actionFactories: ActionFactoryRegistry;
   protected readonly deps: Omit<UiActionsServiceEnhancementsParams, 'actionFactories'>;
 
@@ -63,13 +64,13 @@ export class UiActionsServiceEnhancements
 
     this.actionFactories.set(
       actionFactory.id,
-      (actionFactory as unknown) as ActionFactory<
+      actionFactory as unknown as ActionFactory<
         SerializableRecord,
         ExecutionContext,
         BaseActionFactoryContext
       >
     );
-    this.registerFeatureUsage((definition as unknown) as ActionFactoryDefinition);
+    this.registerFeatureUsage(definition as unknown as ActionFactoryDefinition);
   };
 
   public readonly getActionFactory = (actionFactoryId: string): ActionFactory => {

@@ -9,34 +9,24 @@
 import { i18n } from '@kbn/i18n';
 
 import { ValidationFunc, FieldConfig } from '../../shared_imports';
-import type { Field } from '../../types';
-import type { Context } from '../field_editor_context';
+import { Field } from '../../types';
 import { schema } from './form_schema';
 import type { Props } from './field_editor';
 
-const createNameNotAllowedValidator = (
-  namesNotAllowed: Context['namesNotAllowed']
-): ValidationFunc<{}, string, string> => ({ value }) => {
-  if (namesNotAllowed.fields.includes(value)) {
-    return {
-      message: i18n.translate(
-        'indexPatternFieldEditor.editor.runtimeFieldsEditor.existRuntimeFieldNamesValidationErrorMessage',
-        {
-          defaultMessage: 'A field with this name already exists.',
-        }
-      ),
-    };
-  } else if (namesNotAllowed.runtimeComposites.includes(value)) {
-    return {
-      message: i18n.translate(
-        'indexPatternFieldEditor.editor.runtimeFieldsEditor.existCompositeNamesValidationErrorMessage',
-        {
-          defaultMessage: 'A runtime composite with this name already exists.',
-        }
-      ),
-    };
-  }
-};
+const createNameNotAllowedValidator =
+  (namesNotAllowed: string[]): ValidationFunc<{}, string, string> =>
+  ({ value }) => {
+    if (namesNotAllowed.includes(value)) {
+      return {
+        message: i18n.translate(
+          'indexPatternFieldEditor.editor.runtimeFieldsEditor.existRuntimeFieldNamesValidationErrorMessage',
+          {
+            defaultMessage: 'A field with this name already exists.',
+          }
+        ),
+      };
+    }
+  };
 
 /**
  * Dynamically retrieve the config for the "name" field, adding
@@ -46,7 +36,7 @@ const createNameNotAllowedValidator = (
  * @param field Initial value of the form
  */
 export const getNameFieldConfig = (
-  namesNotAllowed?: Context['namesNotAllowed'],
+  namesNotAllowed?: string[],
   field?: Props['field']
 ): FieldConfig<string, Field> => {
   const nameFieldConfig = schema.name as FieldConfig<string, Field>;
@@ -55,18 +45,15 @@ export const getNameFieldConfig = (
     return nameFieldConfig;
   }
 
-  const filterOutCurrentFieldName = (name: string) => name !== field?.name;
-
   // Add validation to not allow duplicates
   return {
     ...nameFieldConfig!,
     validations: [
       ...(nameFieldConfig.validations ?? []),
       {
-        validator: createNameNotAllowedValidator({
-          fields: namesNotAllowed.fields.filter(filterOutCurrentFieldName),
-          runtimeComposites: namesNotAllowed.runtimeComposites.filter(filterOutCurrentFieldName),
-        }),
+        validator: createNameNotAllowedValidator(
+          namesNotAllowed.filter((name) => name !== field?.name)
+        ),
       },
     ],
   };

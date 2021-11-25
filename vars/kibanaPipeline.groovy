@@ -93,7 +93,7 @@ def withFunctionalTestEnv(List additionalEnvs = [], Closure closure) {
   def corsTestServerPort = "64${parallelId}3"
   // needed for https://github.com/elastic/kibana/issues/107246
   def proxyTestServerPort = "64${parallelId}4"
-  def apmActive = githubPr.isPr() ? "false" : "true"
+  def contextPropagationOnly = githubPr.isPr() ? "true" : "false"
 
   withEnv([
     "CI_GROUP=${parallelId}",
@@ -109,7 +109,8 @@ def withFunctionalTestEnv(List additionalEnvs = [], Closure closure) {
     "KBN_NP_PLUGINS_BUILT=true",
     "FLEET_PACKAGE_REGISTRY_PORT=${fleetPackageRegistryPort}",
     "ALERTING_PROXY_PORT=${alertingProxyPort}",
-    "ELASTIC_APM_ACTIVE=${apmActive}",
+    "ELASTIC_APM_ACTIVE=true",
+    "ELASTIC_APM_CONTEXT_PROPAGATION_ONLY=${contextPropagationOnly}",
     "ELASTIC_APM_TRANSACTION_SAMPLE_RATE=0.1",
   ] + additionalEnvs) {
     closure()
@@ -203,7 +204,6 @@ def withGcsArtifactUpload(workerName, closure) {
     'x-pack/test/**/screenshots/diff/*.png',
     'x-pack/test/**/screenshots/failure/*.png',
     'x-pack/test/**/screenshots/session/*.png',
-    'x-pack/test/functional/apps/reporting/reports/session/*.pdf',
     'x-pack/test/functional/failure_debug/html/*.html',
     '.es/**/*.hprof'
   ]
@@ -351,7 +351,7 @@ def runErrorReporter(workspaces) {
   bash(
     """
       source src/dev/ci_setup/setup_env.sh
-      node scripts/report_failed_tests ${dryRun} ${globs}
+      node scripts/report_failed_tests --no-index-errors ${dryRun} ${globs}
     """,
     "Report failed tests, if necessary"
   )

@@ -62,10 +62,17 @@ interface NetworkDetailsProps {
   expandedNetwork: { ip: string; flowTarget: FlowTarget };
   handleOnNetworkClosed: () => void;
   isFlyoutView?: boolean;
+  isDraggable?: boolean;
 }
 
 export const NetworkDetailsPanel = React.memo(
-  ({ contextID, expandedNetwork, handleOnNetworkClosed, isFlyoutView }: NetworkDetailsProps) => {
+  ({
+    contextID,
+    expandedNetwork,
+    handleOnNetworkClosed,
+    isFlyoutView,
+    isDraggable,
+  }: NetworkDetailsProps) => {
     const { ip } = expandedNetwork;
 
     return isFlyoutView ? (
@@ -105,7 +112,11 @@ export const NetworkDetailsPanel = React.memo(
         </StyledEuiFlexButtonWrapper>
         <EuiSpacer size="m" />
         <StyledPanelContent>
-          <ExpandableNetworkDetails contextID={contextID} expandedNetwork={expandedNetwork} />
+          <ExpandableNetworkDetails
+            contextID={contextID}
+            expandedNetwork={expandedNetwork}
+            isDraggable={isDraggable}
+          />
         </StyledPanelContent>
       </>
     );

@@ -71,11 +71,11 @@ import {
   tap,
 } from 'rxjs/operators';
 import { defer, EMPTY, from, Observable } from 'rxjs';
-import { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { buildEsQuery, Filter } from '@kbn/es-query';
 import { normalizeSortRequest } from './normalize_sort_request';
 import { fieldWildcardFilter } from '../../../../kibana_utils/common';
-import { IIndexPattern, IndexPattern, IndexPatternField } from '../../index_patterns';
+import { IIndexPattern, IndexPattern, IndexPatternField } from '../..';
 import {
   AggConfigs,
   EsQuerySortValue,
@@ -124,7 +124,8 @@ export interface SearchSourceDependencies extends FetchHandlers {
 /** @public **/
 export class SearchSource {
   private id: string = uniqueId('data_source');
-  private searchStrategyId?: string;
+  private shouldOverwriteDataViewType: boolean = false;
+  private overwriteDataViewType?: string;
   private parent?: SearchSource;
   private requestStartHandlers: Array<
     (searchSource: SearchSource, options?: ISearchOptions) => Promise<unknown>
@@ -149,11 +150,22 @@ export class SearchSource {
    *****/
 
   /**
-   * internal, dont use
-   * @param searchStrategyId
+   * Used to make the search source overwrite the actual data view type for the
+   * specific requests done. This should only be needed very rarely, since it means
+   * e.g. we'd be treating a rollup index pattern as a regular one. Be very sure
+   * you understand the consequences of using this method before using it.
+   *
+   * @param overwriteType If `false` is passed in it will disable the overwrite, otherwise
+   *    the passed in value will be used as the data view type for this search source.
    */
-  setPreferredSearchStrategyId(searchStrategyId: string) {
-    this.searchStrategyId = searchStrategyId;
+  setOverwriteDataViewType(overwriteType: string | undefined | false) {
+    if (overwriteType === false) {
+      this.shouldOverwriteDataViewType = false;
+      this.overwriteDataViewType = undefined;
+    } else {
+      this.shouldOverwriteDataViewType = true;
+      this.overwriteDataViewType = overwriteType;
+    }
   }
 
   /**
@@ -609,11 +621,7 @@ export class SearchSource {
   }
 
   private getIndexType(index?: IIndexPattern) {
-    if (this.searchStrategyId) {
-      return this.searchStrategyId === 'default' ? undefined : this.searchStrategyId;
-    } else {
-      return index?.type;
-    }
+    return this.shouldOverwriteDataViewType ? this.overwriteDataViewType : index?.type;
   }
 
   private readonly getFieldName = (fld: string | Record<string, any>): string =>
@@ -828,7 +836,7 @@ export class SearchSource {
     body.query = buildEsQuery(index, query, filters, esQueryConfigs);
 
     if (highlightAll && body.query) {
-      body.highlight = getHighlightRequest(body.query, getConfig(UI_SETTINGS.DOC_HIGHLIGHT));
+      body.highlight = getHighlightRequest(getConfig(UI_SETTINGS.DOC_HIGHLIGHT));
       delete searchRequest.highlightAll;
     }
 

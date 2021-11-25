@@ -87,6 +87,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       input = await find.activeElement();
       await input.type(`Men\'s Clothing`);
 
+      await PageObjects.common.sleep(100);
+
       await PageObjects.lens.expectFormulaText(`count(kql='Men\\'s Clothing')`);
     });
 
@@ -96,7 +98,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.goToTimeRange();
       await PageObjects.lens.switchToVisualization('lnsDatatable');
       await PageObjects.lens.clickAddField();
-      await fieldEditor.setName(`*' "'`);
+      await fieldEditor.setName(`ab' "'`);
       await fieldEditor.enableValue();
       await fieldEditor.typeScript("emit('abc')");
       await fieldEditor.save();
@@ -104,21 +106,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.configureDimension({
         dimension: 'lnsDatatable_metrics > lns-empty-dimension',
         operation: 'unique_count',
-        field: `*`,
+        field: `ab`,
         keepOpen: true,
       });
 
       await PageObjects.lens.switchToFormula();
-      await PageObjects.lens.expectFormulaText(`unique_count('*\\' "\\'')`);
+      await PageObjects.lens.expectFormulaText(`unique_count('ab\\' "\\'')`);
 
       await PageObjects.lens.typeFormula('unique_count(');
       const input = await find.activeElement();
-      await input.type('*');
+      await input.type('ab');
       await input.pressKeys(browser.keys.ENTER);
 
       await PageObjects.common.sleep(100);
 
-      await PageObjects.lens.expectFormulaText(`unique_count('*\\' "\\'')`);
+      await PageObjects.lens.expectFormulaText(`unique_count('ab\\' "\\'')`);
     });
 
     it('should persist a broken formula on close', async () => {
@@ -232,6 +234,38 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await PageObjects.lens.getDimensionTriggerText('lnsDatatable_metrics', 0)).to.eql(
         'count()'
       );
+    });
+
+    it('should keep the formula if the user does not fully transition to a static value', async () => {
+      await PageObjects.visualize.navigateToNewVisualization();
+      await PageObjects.visualize.clickVisType('lens');
+      await PageObjects.lens.goToTimeRange();
+
+      await PageObjects.lens.configureDimension({
+        dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
+        operation: 'average',
+        field: 'bytes',
+      });
+
+      await PageObjects.lens.createLayer('referenceLine');
+
+      await PageObjects.lens.configureDimension(
+        {
+          dimension: 'lnsXY_yReferenceLineLeftPanel > lns-dimensionTrigger',
+          operation: 'formula',
+          formula: `count()`,
+          keepOpen: true,
+        },
+        1
+      );
+
+      await PageObjects.lens.switchToStaticValue();
+      await PageObjects.lens.closeDimensionEditor();
+      await PageObjects.common.sleep(1000);
+
+      expect(
+        await PageObjects.lens.getDimensionTriggerText('lnsXY_yReferenceLineLeftPanel', 0)
+      ).to.eql('count()');
     });
 
     it('should allow numeric only formulas', async () => {

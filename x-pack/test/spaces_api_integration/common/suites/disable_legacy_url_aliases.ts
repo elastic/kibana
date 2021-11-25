@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { SuperTest } from 'supertest';
-import type { KibanaClient } from '@elastic/elasticsearch/api/kibana';
+import type { Client } from '@elastic/elasticsearch';
 import { LegacyUrlAlias } from 'src/core/server/saved_objects/object_types';
 import { SPACES } from '../lib/spaces';
 import { getUrlPrefix } from '../../../saved_object_api_integration/common/lib/saved_object_test_utils';
@@ -44,30 +44,29 @@ const getTestTitle = ({ targetSpace, targetType, sourceId }: DisableLegacyUrlAli
 };
 
 export function disableLegacyUrlAliasesTestSuiteFactory(
-  es: KibanaClient,
+  es: Client,
   esArchiver: any,
   supertest: SuperTest<any>
 ) {
-  const expectResponseBody = (
-    testCase: DisableLegacyUrlAliasesTestCase,
-    statusCode: 204 | 403
-  ): ExpectResponseBody => async (response: Record<string, any>) => {
-    if (statusCode === 403) {
-      expect(response.body).to.eql({
-        statusCode: 403,
-        error: 'Forbidden',
-        message: `Unable to disable aliases for ${testCase.targetType}`,
+  const expectResponseBody =
+    (testCase: DisableLegacyUrlAliasesTestCase, statusCode: 204 | 403): ExpectResponseBody =>
+    async (response: Record<string, any>) => {
+      if (statusCode === 403) {
+        expect(response.body).to.eql({
+          statusCode: 403,
+          error: 'Forbidden',
+          message: `Unable to disable aliases for ${testCase.targetType}`,
+        });
+      }
+      const { targetSpace, targetType, sourceId } = testCase;
+      const esResponse = await es.get<RawLegacyUrlAlias>({
+        index: '.kibana',
+        id: `${LEGACY_URL_ALIAS_TYPE}:${targetSpace}:${targetType}:${sourceId}`,
       });
-    }
-    const { targetSpace, targetType, sourceId } = testCase;
-    const esResponse = await es.get<RawLegacyUrlAlias>({
-      index: '.kibana',
-      id: `${LEGACY_URL_ALIAS_TYPE}:${targetSpace}:${targetType}:${sourceId}`,
-    });
-    const doc = esResponse.body._source!;
-    expect(doc).not.to.be(undefined);
-    expect(doc[LEGACY_URL_ALIAS_TYPE].disabled).to.be(statusCode === 204 ? true : undefined);
-  };
+      const doc = esResponse._source!;
+      expect(doc).not.to.be(undefined);
+      expect(doc[LEGACY_URL_ALIAS_TYPE].disabled).to.be(statusCode === 204 ? true : undefined);
+    };
   const createTestDefinitions = (
     testCases: DisableLegacyUrlAliasesTestCase | DisableLegacyUrlAliasesTestCase[],
     forbidden: boolean,
@@ -85,37 +84,36 @@ export function disableLegacyUrlAliasesTestSuiteFactory(
     }));
   };
 
-  const makeDisableLegacyUrlAliasesTest = (describeFn: Mocha.SuiteFunction) => (
-    description: string,
-    definition: DisableLegacyUrlAliasesTestSuite
-  ) => {
-    const { user, spaceId = SPACES.DEFAULT.spaceId, tests } = definition;
+  const makeDisableLegacyUrlAliasesTest =
+    (describeFn: Mocha.SuiteFunction) =>
+    (description: string, definition: DisableLegacyUrlAliasesTestSuite) => {
+      const { user, spaceId = SPACES.DEFAULT.spaceId, tests } = definition;
 
-    describeFn(description, () => {
-      before(() =>
-        esArchiver.load(
-          'x-pack/test/spaces_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
-        )
-      );
-      after(() =>
-        esArchiver.unload(
-          'x-pack/test/spaces_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
-        )
-      );
+      describeFn(description, () => {
+        before(() =>
+          esArchiver.load(
+            'x-pack/test/spaces_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
+          )
+        );
+        after(() =>
+          esArchiver.unload(
+            'x-pack/test/spaces_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
+          )
+        );
 
-      for (const test of tests) {
-        it(`should return ${test.responseStatusCode} ${test.title}`, async () => {
-          const requestBody = test.request;
-          await supertest
-            .post(`${getUrlPrefix(spaceId)}/api/spaces/_disable_legacy_url_aliases`)
-            .auth(user?.username, user?.password)
-            .send(requestBody)
-            .expect(test.responseStatusCode)
-            .then(test.responseBody);
-        });
-      }
-    });
-  };
+        for (const test of tests) {
+          it(`should return ${test.responseStatusCode} ${test.title}`, async () => {
+            const requestBody = test.request;
+            await supertest
+              .post(`${getUrlPrefix(spaceId)}/api/spaces/_disable_legacy_url_aliases`)
+              .auth(user?.username, user?.password)
+              .send(requestBody)
+              .expect(test.responseStatusCode)
+              .then(test.responseBody);
+          });
+        }
+      });
+    };
 
   const addTests = makeDisableLegacyUrlAliasesTest(describe);
   // @ts-ignore

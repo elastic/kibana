@@ -7,14 +7,14 @@
 
 import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { APP_ID } from '../../../../../../common/constants';
+import { APP_UI_ID } from '../../../../../../common/constants';
 import { pagePathGetters } from '../../../../../../../fleet/public';
 import { getEndpointDetailsPath } from '../../../../common/routing';
 import { HostMetadata, MaybeImmutable } from '../../../../../../common/endpoint/types';
 import { useEndpointSelector } from './hooks';
 import { agentPolicies, uiQueryParams } from '../../store/selectors';
 import { useAppUrl } from '../../../../../common/lib/kibana/hooks';
-import { ContextMenuItemNavByRouterProps } from '../components/context_menu_item_nav_by_rotuer';
+import { ContextMenuItemNavByRouterProps } from '../../../../components/context_menu_with_router_support/context_menu_item_nav_by_router';
 import { isEndpointHostIsolated } from '../../../../../common/utils/validators';
 import { useLicense } from '../../../../../common/hooks/use_license';
 import { isIsolationSupported } from '../../../../../../common/endpoint/service/host_isolation/utils';
@@ -67,7 +67,7 @@ export const useEndpointActionItems = (
           'data-test-subj': 'unIsolateLink',
           icon: 'logoSecurity',
           key: 'unIsolateHost',
-          navigateAppId: APP_ID,
+          navigateAppId: APP_UI_ID,
           navigateOptions: {
             path: endpointUnIsolatePath,
           },
@@ -85,7 +85,7 @@ export const useEndpointActionItems = (
           'data-test-subj': 'isolateLink',
           icon: 'logoSecurity',
           key: 'isolateHost',
-          navigateAppId: APP_ID,
+          navigateAppId: APP_UI_ID,
           navigateOptions: {
             path: endpointIsolatePath,
           },
@@ -105,7 +105,7 @@ export const useEndpointActionItems = (
           'data-test-subj': 'hostLink',
           icon: 'logoSecurity',
           key: 'hostDetailsLink',
-          navigateAppId: APP_ID,
+          navigateAppId: APP_UI_ID,
           navigateOptions: { path: `/hosts/${endpointHostName}` },
           href: getAppUrl({ path: `/hosts/${endpointHostName}` }),
           children: (

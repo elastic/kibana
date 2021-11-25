@@ -9,7 +9,6 @@ import React, { useCallback, useMemo, useEffect } from 'react';
 import { connect, ConnectedProps, useDispatch } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 import styled from 'styled-components';
-
 import { isEmpty } from 'lodash/fp';
 import { inputsModel, inputsSelectors, State } from '../../store';
 import { inputsActions } from '../../store/actions';
@@ -22,7 +21,7 @@ import { InspectButtonContainer } from '../inspect';
 import { useGlobalFullScreen } from '../../containers/use_full_screen';
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 import { SourcererScopeName } from '../../store/sourcerer/model';
-import { useSourcererScope } from '../../containers/sourcerer';
+import { useSourcererDataView } from '../../containers/sourcerer';
 import type { EntityType } from '../../../../../timelines/common';
 import { TGridCellAction } from '../../../../../timelines/common/types';
 import { DetailsPanel } from '../../../timelines/components/side_panel';
@@ -32,11 +31,12 @@ import { defaultControlColumn } from '../../../timelines/components/timeline/bod
 import { EventsViewer } from './events_viewer';
 import * as i18n from './translations';
 import { GraphOverlay } from '../../../timelines/components/graph_overlay';
+import { useCreateFieldButton } from '../../../timelines/components/create_field_button';
+
 const EMPTY_CONTROL_COLUMNS: ControlColumnProps[] = [];
 const leadingControlColumns: ControlColumnProps[] = [
   {
     ...defaultControlColumn,
-    // eslint-disable-next-line react/display-name
     headerCellRender: () => <>{i18n.ACTIONS}</>,
   },
 ];
@@ -87,6 +87,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   entityType,
   excludedRowRendererIds,
   filters,
+  globalQuery,
   id,
   isLive,
   itemsPerPage,
@@ -102,6 +103,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   scopeId,
   showCheckboxes,
   sort,
+  timelineQuery,
   utilityBar,
   additionalFilters,
   // If truthy, the graph viewer (Resolver) is showing
@@ -115,9 +117,12 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
     browserFields,
     docValueFields,
     indexPattern,
+    runtimeMappings,
     selectedPatterns,
+    dataViewId: selectedDataViewId,
     loading: isLoadingIndexPattern,
-  } = useSourcererScope(scopeId);
+  } = useSourcererDataView(scopeId);
+
   const { globalFullScreen } = useGlobalFullScreen();
   // TODO: Once we are past experimental phase this code should be removed
   const tGridEnabled = useIsExperimentalFeatureEnabled('tGridEnabled');
@@ -127,14 +132,15 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   useEffect(() => {
     if (createTimeline != null) {
       createTimeline({
-        id,
         columns,
+        dataViewId: selectedDataViewId,
         defaultColumns,
         excludedRowRendererIds,
+        id,
         indexNames: selectedPatterns,
-        sort,
         itemsPerPage,
         showCheckboxes,
+        sort,
       });
     }
     return () => {
@@ -157,47 +163,64 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
     [dispatch, id]
   );
 
+  const refetchQuery = (newQueries: inputsModel.GlobalQuery[]) => {
+    newQueries.forEach((q) => q.refetch && (q.refetch as inputsModel.Refetch)());
+  };
+  const onAlertStatusActionSuccess = useCallback(() => {
+    if (id === TimelineId.active) {
+      refetchQuery([timelineQuery]);
+    } else {
+      refetchQuery(globalQuery);
+    }
+  }, [id, timelineQuery, globalQuery]);
+  const bulkActions = useMemo(() => ({ onAlertStatusActionSuccess }), [onAlertStatusActionSuccess]);
+
+  const createFieldComponent = useCreateFieldButton(scopeId, id);
+
   return (
     <>
       <FullScreenContainer $isFullScreen={globalFullScreen}>
         <InspectButtonContainer>
           {tGridEnabled ? (
             timelinesUi.getTGrid<'embedded'>({
-              id,
-              type: 'embedded',
+              additionalFilters,
               browserFields,
+              bulkActions,
               columns,
-              dataProviders: dataProviders!,
+              dataProviders,
               defaultCellActions,
               deletedEventIds,
               docValueFields,
               end,
               entityType,
               filters: globalFilters,
+              filterStatus: currentFilter,
               globalFullScreen,
+              graphEventId,
               graphOverlay,
               hasAlertsCrud,
+              id,
               indexNames: selectedPatterns,
               indexPattern,
               isLive,
               isLoadingIndexPattern,
               itemsPerPage,
-              itemsPerPageOptions: itemsPerPageOptions!,
+              itemsPerPageOptions,
               kqlMode,
-              query,
+              leadingControlColumns,
               onRuleChange,
+              query,
               renderCellValue,
               rowRenderers,
+              runtimeMappings,
               setQuery,
-              start,
               sort,
-              additionalFilters,
-              graphEventId,
-              filterStatus: currentFilter,
-              leadingControlColumns,
-              trailingControlColumns,
+              start,
               tGridEventRenderedViewEnabled,
+              trailingControlColumns,
+              type: 'embedded',
               unit,
+              createFieldComponent,
             })
           ) : (
             <EventsViewer
@@ -205,7 +228,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
               columns={columns}
               docValueFields={docValueFields}
               id={id}
-              dataProviders={dataProviders!}
+              dataProviders={dataProviders}
               deletedEventIds={deletedEventIds}
               end={end}
               isLoadingIndexPattern={isLoadingIndexPattern}
@@ -213,13 +236,14 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
               indexNames={selectedPatterns}
               indexPattern={indexPattern}
               isLive={isLive}
-              itemsPerPage={itemsPerPage!}
-              itemsPerPageOptions={itemsPerPageOptions!}
+              itemsPerPage={itemsPerPage}
+              itemsPerPageOptions={itemsPerPageOptions}
               kqlMode={kqlMode}
               query={query}
               onRuleChange={onRuleChange}
               renderCellValue={renderCellValue}
               rowRenderers={rowRenderers}
+              runtimeMappings={runtimeMappings}
               start={start}
               sort={sort}
               showTotalCount={isEmpty(graphEventId) ? true : false}
@@ -234,6 +258,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
         entityType={entityType}
         docValueFields={docValueFields}
         isFlyoutView
+        runtimeMappings={runtimeMappings}
         timelineId={id}
       />
     </>
@@ -245,6 +270,8 @@ const makeMapStateToProps = () => {
   const getGlobalQuerySelector = inputsSelectors.globalQuerySelector();
   const getGlobalFiltersQuerySelector = inputsSelectors.globalFiltersQuerySelector();
   const getTimeline = timelineSelectors.getTimelineByIdSelector();
+  const getGlobalQueries = inputsSelectors.globalQuery();
+  const getTimelineQuery = inputsSelectors.timelineQueryByIdSelector();
   const mapStateToProps = (state: State, { id, defaultModel }: OwnProps) => {
     const input: inputsModel.InputsRange = getInputsTimeline(state);
     const timeline: TimelineModel = getTimeline(state, id) ?? defaultModel;
@@ -280,6 +307,8 @@ const makeMapStateToProps = () => {
       // Used to determine whether the footer should show (since it is hidden if the graph is showing.)
       // `getTimeline` actually returns `TimelineModel | undefined`
       graphEventId,
+      globalQuery: getGlobalQueries(state),
+      timelineQuery: getTimelineQuery(state, id),
     };
   };
   return mapStateToProps;

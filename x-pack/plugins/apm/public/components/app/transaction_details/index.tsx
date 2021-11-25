@@ -22,7 +22,7 @@ import { TransactionDetailsTabs } from './transaction_details_tabs';
 
 export function TransactionDetails() {
   const { path, query } = useApmParams(
-    '/services/:serviceName/transactions/view'
+    '/services/{serviceName}/transactions/view'
   );
   const {
     transactionName,
@@ -43,7 +43,7 @@ export function TransactionDetails() {
 
   useBreadcrumb({
     title: transactionName,
-    href: apmRouter.link('/services/:serviceName/transactions/view', {
+    href: apmRouter.link('/services/{serviceName}/transactions/view', {
       path,
       query,
     }),

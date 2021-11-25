@@ -5,170 +5,37 @@
  * 2.0.
  */
 
+import { PromiseType } from 'utility-types';
 import { UMElasticsearchQueryFn } from '../adapters';
 import { CertResult, GetCertsParams, Ping } from '../../../common/runtime_types';
+import {
+  getCertsRequestBody,
+  processCertsResult,
+} from '../../../common/requests/get_certs_request_body';
+import { UptimeESClient } from '../lib';
 
-enum SortFields {
-  'issuer' = 'tls.server.x509.issuer.common_name',
-  'not_after' = 'tls.server.x509.not_after',
-  'not_before' = 'tls.server.x509.not_before',
-  'common_name' = 'tls.server.x509.subject.common_name',
-}
+export const getCerts: UMElasticsearchQueryFn<GetCertsParams, CertResult> = async (
+  requestParams
+) => {
+  const result = await getCertsResults(requestParams);
 
-export const getCerts: UMElasticsearchQueryFn<GetCertsParams, CertResult> = async ({
-  uptimeEsClient,
-  index,
-  from,
-  to,
-  size,
-  search,
-  notValidBefore,
-  notValidAfter,
-  sortBy,
-  direction,
-}) => {
-  const sort = SortFields[sortBy as keyof typeof SortFields];
+  return processCertsResult(result);
+};
 
-  const searchBody = {
-    from: index * size,
-    size,
-    sort: [
-      {
-        [sort]: {
-          order: direction as 'asc' | 'desc',
-        },
-      },
-    ],
-    query: {
-      bool: {
-        ...(search
-          ? {
-              minimum_should_match: 1,
-              should: [
-                {
-                  multi_match: {
-                    query: escape(search),
-                    type: 'phrase_prefix' as const,
-                    fields: [
-                      'monitor.id.text',
-                      'monitor.name.text',
-                      'url.full.text',
-                      'tls.server.x509.subject.common_name.text',
-                      'tls.server.x509.issuer.common_name.text',
-                    ],
-                  },
-                },
-              ],
-            }
-          : {}),
-        filter: [
-          {
-            exists: {
-              field: 'tls.server.hash.sha256',
-            },
-          },
-          {
-            range: {
-              'monitor.timespan': {
-                gte: from,
-                lte: to,
-              },
-            },
-          },
-        ],
-      },
-    },
-    _source: [
-      'monitor.id',
-      'monitor.name',
-      'tls.server.x509.issuer.common_name',
-      'tls.server.x509.subject.common_name',
-      'tls.server.hash.sha1',
-      'tls.server.hash.sha256',
-      'tls.server.x509.not_after',
-      'tls.server.x509.not_before',
-    ],
-    collapse: {
-      field: 'tls.server.hash.sha256',
-      inner_hits: {
-        _source: {
-          includes: ['monitor.id', 'monitor.name', 'url.full'],
-        },
-        collapse: {
-          field: 'monitor.id',
-        },
-        name: 'monitors',
-        sort: [{ 'monitor.id': 'asc' as const }],
-      },
-    },
-    aggs: {
-      total: {
-        cardinality: {
-          field: 'tls.server.hash.sha256',
-        },
-      },
-    },
-  };
+export type CertificatesResults = PromiseType<ReturnType<typeof getCertsResults>>;
 
-  if (notValidBefore || notValidAfter) {
-    const validityFilters: any = {
-      bool: {
-        should: [],
-      },
-    };
-    if (notValidBefore) {
-      validityFilters.bool.should.push({
-        range: {
-          'tls.certificate_not_valid_before': {
-            lte: notValidBefore,
-          },
-        },
-      });
-    }
-    if (notValidAfter) {
-      validityFilters.bool.should.push({
-        range: {
-          'tls.certificate_not_valid_after': {
-            lte: notValidAfter,
-          },
-        },
-      });
-    }
+const getCertsResults = async (
+  requestParams: GetCertsParams & { uptimeEsClient: UptimeESClient }
+) => {
+  const { uptimeEsClient } = requestParams;
 
-    searchBody.query.bool.filter.push(validityFilters);
-  }
+  const searchBody = getCertsRequestBody(requestParams);
 
-  const { body: result } = await uptimeEsClient.search({
+  const request = { body: searchBody };
+
+  const { body: result } = await uptimeEsClient.search<Ping, typeof request>({
     body: searchBody,
   });
 
-  const certs = (result?.hits?.hits ?? []).map((hit) => {
-    const ping = hit._source as Ping;
-    const server = ping.tls?.server!;
-
-    const notAfter = server?.x509?.not_after;
-    const notBefore = server?.x509?.not_before;
-    const issuer = server?.x509?.issuer?.common_name;
-    const commonName = server?.x509?.subject?.common_name;
-    const sha1 = server?.hash?.sha1;
-    const sha256 = server?.hash?.sha256;
-
-    const monitors = hit.inner_hits!.monitors.hits.hits.map((monitor: any) => ({
-      name: monitor._source?.monitor.name,
-      id: monitor._source?.monitor.id,
-      url: monitor._source?.url?.full,
-    }));
-
-    return {
-      monitors,
-      issuer,
-      sha1,
-      sha256: sha256 as string,
-      not_after: notAfter,
-      not_before: notBefore,
-      common_name: commonName,
-    };
-  });
-  const total = result?.aggregations?.total?.value ?? 0;
-  return { certs, total };
+  return result;
 };

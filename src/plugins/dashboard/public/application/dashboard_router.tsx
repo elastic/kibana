@@ -84,6 +84,7 @@ export async function mountApp({
     savedObjectsTaggingOss,
     visualizations,
     presentationUtil,
+    screenshotMode,
   } = pluginsStart;
 
   const activeSpaceId =
@@ -113,8 +114,8 @@ export async function mountApp({
     savedObjectsClient: coreStart.savedObjects.client,
     savedDashboards: dashboardStart.getSavedDashboardLoader(),
     savedObjectsTagging: savedObjectsTaggingOss?.getTaggingApi(),
-    allowByValueEmbeddables: initializerContext.config.get<DashboardFeatureFlagConfig>()
-      .allowByValueEmbeddables,
+    allowByValueEmbeddables:
+      initializerContext.config.get<DashboardFeatureFlagConfig>().allowByValueEmbeddables,
     dashboardCapabilities: {
       show: Boolean(coreStart.application.capabilities.dashboard.show),
       saveQuery: Boolean(coreStart.application.capabilities.dashboard.saveQuery),
@@ -129,6 +130,8 @@ export async function mountApp({
       core.notifications.toasts,
       activeSpaceId || 'default'
     ),
+    spacesService: spacesApi,
+    screenshotModeService: screenshotMode,
   };
 
   const getUrlStateStorage = (history: RouteComponentProps['history']) =>

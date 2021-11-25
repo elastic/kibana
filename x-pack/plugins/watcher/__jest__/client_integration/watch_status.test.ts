@@ -9,7 +9,7 @@ import { act } from 'react-dom/test-utils';
 import moment from 'moment';
 import { getWatchHistory } from '../../__fixtures__';
 import { ROUTES, WATCH_STATES, ACTION_STATES } from '../../common/constants';
-import { setupEnvironment, pageHelpers, nextTick } from './helpers';
+import { setupEnvironment, pageHelpers } from './helpers';
 import { WatchStatusTestBed } from './helpers/watch_status.helpers';
 import { WATCH } from './helpers/jest_constants';
 
@@ -43,7 +43,12 @@ describe('<WatchStatus />', () => {
   const { server, httpRequestsMockHelpers } = setupEnvironment();
   let testBed: WatchStatusTestBed;
 
+  beforeAll(() => {
+    jest.useFakeTimers();
+  });
+
   afterAll(() => {
+    jest.useRealTimers();
     server.restore();
   });
 
@@ -53,11 +58,7 @@ describe('<WatchStatus />', () => {
       httpRequestsMockHelpers.setLoadWatchHistoryResponse(watchHistoryItems);
 
       testBed = await setup();
-
-      await act(async () => {
-        await nextTick();
-        testBed.component.update();
-      });
+      testBed.component.update();
     });
 
     test('should set the correct page title', () => {
@@ -175,9 +176,8 @@ describe('<WatchStatus />', () => {
 
         await act(async () => {
           confirmButton!.click();
-          await nextTick();
-          component.update();
         });
+        component.update();
 
         const latestRequest = server.requests[server.requests.length - 1];
 

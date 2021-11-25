@@ -16,6 +16,10 @@ import {
   CrawlerDomainValidationStep,
   CrawlRequestFromServer,
   CrawlRequest,
+  CrawlRule,
+  CrawlerRules,
+  CrawlEventFromServer,
+  CrawlEvent,
 } from './types';
 
 export function crawlerDomainServerToClient(payload: CrawlerDomainFromServer): CrawlerDomain {
@@ -76,11 +80,34 @@ export function crawlRequestServerToClient(crawlRequest: CrawlRequestFromServer)
   };
 }
 
+export function crawlerEventServerToClient(event: CrawlEventFromServer): CrawlEvent {
+  const {
+    id,
+    stage,
+    status,
+    created_at: createdAt,
+    began_at: beganAt,
+    completed_at: completedAt,
+  } = event;
+
+  return {
+    id,
+    stage,
+    status,
+    createdAt,
+    beganAt,
+    completedAt,
+  };
+}
+
 export function crawlerDataServerToClient(payload: CrawlerDataFromServer): CrawlerData {
-  const { domains } = payload;
+  const { domains, events, most_recent_crawl_request: mostRecentCrawlRequest } = payload;
 
   return {
     domains: domains.map((domain) => crawlerDomainServerToClient(domain)),
+    events: events.map((event) => crawlerEventServerToClient(event)),
+    mostRecentCrawlRequest:
+      mostRecentCrawlRequest && crawlRequestServerToClient(mostRecentCrawlRequest),
   };
 }
 
@@ -131,6 +158,26 @@ export const getDeleteDomainSuccessMessage = (domainUrl: string) => {
       values: {
         domainUrl,
       },
+    }
+  );
+};
+
+export const getCrawlRulePathPatternTooltip = (crawlRule: CrawlRule) => {
+  if (crawlRule.rule === CrawlerRules.regex) {
+    return i18n.translate(
+      'xpack.enterpriseSearch.appSearch.crawler.crawlRulesTable.regexPathPatternTooltip',
+      {
+        defaultMessage:
+          'The path pattern is a regular expression compatible with the Ruby language regular expression engine.',
+      }
+    );
+  }
+
+  return i18n.translate(
+    'xpack.enterpriseSearch.appSearch.crawler.crawlRulesTable.pathPatternTooltip',
+    {
+      defaultMessage:
+        'The path pattern is a literal string except for the asterisk (*) character, which is a meta character that will match anything.',
     }
   );
 };

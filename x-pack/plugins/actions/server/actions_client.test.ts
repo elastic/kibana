@@ -20,6 +20,7 @@ import { licenseStateMock } from './lib/license_state.mock';
 import { licensingMock } from '../../licensing/server/mocks';
 import { httpServerMock } from '../../../../src/core/server/mocks';
 import { auditServiceMock } from '../../security/server/audit/index.mock';
+import { usageCountersServiceMock } from 'src/plugins/usage_collection/server/usage_counters/usage_counters_service.mock';
 
 import {
   elasticsearchServiceMock,
@@ -28,7 +29,12 @@ import {
 import { actionExecutorMock } from './lib/action_executor.mock';
 import uuid from 'uuid';
 import { ActionsAuthorization } from './authorization/actions_authorization';
+import {
+  getAuthorizationModeBySource,
+  AuthorizationMode,
+} from './authorization/get_authorization_mode_by_source';
 import { actionsAuthorizationMock } from './authorization/actions_authorization.mock';
+import { trackLegacyRBACExemption } from './lib/track_legacy_rbac_exemption';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { elasticsearchClientMock } from '../../../../src/core/server/elasticsearch/client/mocks';
 
@@ -37,6 +43,22 @@ jest.mock('../../../../src/core/server/saved_objects/service/lib/utils', () => (
     generateId: () => 'mock-saved-object-id',
   },
 }));
+
+jest.mock('./lib/track_legacy_rbac_exemption', () => ({
+  trackLegacyRBACExemption: jest.fn(),
+}));
+
+jest.mock('./authorization/get_authorization_mode_by_source', () => {
+  return {
+    getAuthorizationModeBySource: jest.fn(() => {
+      return 1;
+    }),
+    AuthorizationMode: {
+      Legacy: 0,
+      RBAC: 1,
+    },
+  };
+});
 
 const defaultKibanaIndex = '.kibana';
 const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
@@ -47,6 +69,8 @@ const executionEnqueuer = jest.fn();
 const ephemeralExecutionEnqueuer = jest.fn();
 const request = httpServerMock.createKibanaRequest();
 const auditLogger = auditServiceMock.create().asScoped(request);
+const mockUsageCountersSetup = usageCountersServiceMock.createSetupContract();
+const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');
 
 const mockTaskManager = taskManagerMock.createSetup();
 
@@ -80,8 +104,9 @@ beforeEach(() => {
     executionEnqueuer,
     ephemeralExecutionEnqueuer,
     request,
-    authorization: (authorization as unknown) as ActionsAuthorization,
+    authorization: authorization as unknown as ActionsAuthorization,
     auditLogger,
+    usageCounter: mockUsageCounter,
   });
 });
 
@@ -328,6 +353,36 @@ describe('create()', () => {
     );
   });
 
+  test('validates connector: config and secrets', async () => {
+    const connectorValidator = ({}, secrets: { param1: '1' }) => {
+      if (secrets.param1 == null) {
+        return '[param1] is required';
+      }
+      return null;
+    };
+    actionTypeRegistry.register({
+      id: 'my-action-type',
+      name: 'My action type',
+      minimumLicenseRequired: 'basic',
+      validate: {
+        connector: connectorValidator,
+      },
+      executor,
+    });
+    await expect(
+      actionsClient.create({
+        action: {
+          name: 'my name',
+          actionTypeId: 'my-action-type',
+          config: {},
+          secrets: {},
+        },
+      })
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"error validating action type connector: [param1] is required"`
+    );
+  });
+
   test(`throws an error when an action type doesn't exist`, async () => {
     await expect(
       actionsClient.create({
@@ -414,7 +469,6 @@ describe('create()', () => {
 
   test('throws error creating action with disabled actionType', async () => {
     const localConfigUtils = getActionsConfigurationUtilities({
-      enabled: true,
       enabledActionTypes: ['some-not-ignored-action-type'],
       allowedHosts: ['*'],
       preconfiguredAlertHistoryEsIndex: false,
@@ -457,7 +511,7 @@ describe('create()', () => {
       executionEnqueuer,
       ephemeralExecutionEnqueuer,
       request,
-      authorization: (authorization as unknown) as ActionsAuthorization,
+      authorization: authorization as unknown as ActionsAuthorization,
     });
 
     const savedObjectCreateResult = {
@@ -558,7 +612,7 @@ describe('get()', () => {
         executionEnqueuer,
         ephemeralExecutionEnqueuer,
         request,
-        authorization: (authorization as unknown) as ActionsAuthorization,
+        authorization: authorization as unknown as ActionsAuthorization,
         preconfiguredActions: [
           {
             id: 'testPreconfigured',
@@ -614,7 +668,7 @@ describe('get()', () => {
         executionEnqueuer,
         ephemeralExecutionEnqueuer,
         request,
-        authorization: (authorization as unknown) as ActionsAuthorization,
+        authorization: authorization as unknown as ActionsAuthorization,
         preconfiguredActions: [
           {
             id: 'testPreconfigured',
@@ -731,7 +785,7 @@ describe('get()', () => {
       executionEnqueuer,
       ephemeralExecutionEnqueuer,
       request,
-      authorization: (authorization as unknown) as ActionsAuthorization,
+      authorization: authorization as unknown as ActionsAuthorization,
       preconfiguredActions: [
         {
           id: 'testPreconfigured',
@@ -801,7 +855,7 @@ describe('getAll()', () => {
         executionEnqueuer,
         ephemeralExecutionEnqueuer,
         request,
-        authorization: (authorization as unknown) as ActionsAuthorization,
+        authorization: authorization as unknown as ActionsAuthorization,
         preconfiguredActions: [
           {
             id: 'testPreconfigured',
@@ -939,7 +993,7 @@ describe('getAll()', () => {
       executionEnqueuer,
       ephemeralExecutionEnqueuer,
       request,
-      authorization: (authorization as unknown) as ActionsAuthorization,
+      authorization: authorization as unknown as ActionsAuthorization,
       preconfiguredActions: [
         {
           id: 'testPreconfigured',
@@ -1015,7 +1069,7 @@ describe('getBulk()', () => {
         executionEnqueuer,
         ephemeralExecutionEnqueuer,
         request,
-        authorization: (authorization as unknown) as ActionsAuthorization,
+        authorization: authorization as unknown as ActionsAuthorization,
         preconfiguredActions: [
           {
             id: 'testPreconfigured',
@@ -1147,7 +1201,7 @@ describe('getBulk()', () => {
       executionEnqueuer,
       ephemeralExecutionEnqueuer,
       request,
-      authorization: (authorization as unknown) as ActionsAuthorization,
+      authorization: authorization as unknown as ActionsAuthorization,
       preconfiguredActions: [
         {
           id: 'testPreconfigured',
@@ -1515,6 +1569,40 @@ describe('update()', () => {
     );
   });
 
+  test('validates connector: config and secrets', async () => {
+    actionTypeRegistry.register({
+      id: 'my-action-type',
+      name: 'My action type',
+      minimumLicenseRequired: 'basic',
+      validate: {
+        connector: () => {
+          return '[param1] is required';
+        },
+      },
+      executor,
+    });
+    unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
+      id: 'my-action',
+      type: 'action',
+      attributes: {
+        actionTypeId: 'my-action-type',
+      },
+      references: [],
+    });
+    await expect(
+      actionsClient.update({
+        id: 'my-action',
+        action: {
+          name: 'my name',
+          config: {},
+          secrets: {},
+        },
+      })
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"error validating action type connector: [param1] is required"`
+    );
+  });
+
   test('encrypts action type options unless specified not to', async () => {
     actionTypeRegistry.register({
       id: 'my-action-type',
@@ -1640,6 +1728,9 @@ describe('update()', () => {
 describe('execute()', () => {
   describe('authorization', () => {
     test('ensures user is authorised to excecute actions', async () => {
+      (getAuthorizationModeBySource as jest.Mock).mockImplementationOnce(() => {
+        return AuthorizationMode.RBAC;
+      });
       await actionsClient.execute({
         actionId: 'action-id',
         params: {
@@ -1650,6 +1741,9 @@ describe('execute()', () => {
     });
 
     test('throws when user is not authorised to create the type of action', async () => {
+      (getAuthorizationModeBySource as jest.Mock).mockImplementationOnce(() => {
+        return AuthorizationMode.RBAC;
+      });
       authorization.ensureAuthorized.mockRejectedValue(
         new Error(`Unauthorized to execute all actions`)
       );
@@ -1664,6 +1758,21 @@ describe('execute()', () => {
       ).rejects.toMatchInlineSnapshot(`[Error: Unauthorized to execute all actions]`);
 
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith('execute');
+    });
+
+    test('tracks legacy RBAC', async () => {
+      (getAuthorizationModeBySource as jest.Mock).mockImplementationOnce(() => {
+        return AuthorizationMode.Legacy;
+      });
+
+      await actionsClient.execute({
+        actionId: 'action-id',
+        params: {
+          name: 'my name',
+        },
+      });
+
+      expect(trackLegacyRBACExemption as jest.Mock).toBeCalledWith('execute', mockUsageCounter);
     });
   });
 
@@ -1756,6 +1865,9 @@ describe('execute()', () => {
 describe('enqueueExecution()', () => {
   describe('authorization', () => {
     test('ensures user is authorised to excecute actions', async () => {
+      (getAuthorizationModeBySource as jest.Mock).mockImplementationOnce(() => {
+        return AuthorizationMode.RBAC;
+      });
       await actionsClient.enqueueExecution({
         id: uuid.v4(),
         params: {},
@@ -1766,6 +1878,9 @@ describe('enqueueExecution()', () => {
     });
 
     test('throws when user is not authorised to create the type of action', async () => {
+      (getAuthorizationModeBySource as jest.Mock).mockImplementationOnce(() => {
+        return AuthorizationMode.RBAC;
+      });
       authorization.ensureAuthorized.mockRejectedValue(
         new Error(`Unauthorized to execute all actions`)
       );
@@ -1780,6 +1895,24 @@ describe('enqueueExecution()', () => {
       ).rejects.toMatchInlineSnapshot(`[Error: Unauthorized to execute all actions]`);
 
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith('execute');
+    });
+
+    test('tracks legacy RBAC', async () => {
+      (getAuthorizationModeBySource as jest.Mock).mockImplementationOnce(() => {
+        return AuthorizationMode.Legacy;
+      });
+
+      await actionsClient.enqueueExecution({
+        id: uuid.v4(),
+        params: {},
+        spaceId: 'default',
+        apiKey: null,
+      });
+
+      expect(trackLegacyRBACExemption as jest.Mock).toBeCalledWith(
+        'enqueueExecution',
+        mockUsageCounter
+      );
     });
   });
 
@@ -1835,7 +1968,7 @@ describe('isPreconfigured()', () => {
       executionEnqueuer,
       ephemeralExecutionEnqueuer,
       request,
-      authorization: (authorization as unknown) as ActionsAuthorization,
+      authorization: authorization as unknown as ActionsAuthorization,
       preconfiguredActions: [
         {
           id: 'testPreconfigured',
@@ -1865,7 +1998,7 @@ describe('isPreconfigured()', () => {
       executionEnqueuer,
       ephemeralExecutionEnqueuer,
       request,
-      authorization: (authorization as unknown) as ActionsAuthorization,
+      authorization: authorization as unknown as ActionsAuthorization,
       preconfiguredActions: [
         {
           id: 'testPreconfigured',

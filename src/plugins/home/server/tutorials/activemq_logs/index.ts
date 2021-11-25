@@ -24,12 +24,12 @@ export function activemqLogsSpecProvider(context: TutorialContext): TutorialSche
   return {
     id: 'activemqLogs',
     name: i18n.translate('home.tutorials.activemqLogs.nameTitle', {
-      defaultMessage: 'ActiveMQ logs',
+      defaultMessage: 'ActiveMQ Logs',
     }),
     moduleName,
     category: TutorialsCategory.LOGGING,
     shortDescription: i18n.translate('home.tutorials.activemqLogs.shortDescription', {
-      defaultMessage: 'Collect ActiveMQ logs with Filebeat.',
+      defaultMessage: 'Collect and parse logs from ActiveMQ instances with Filebeat.',
     }),
     longDescription: i18n.translate('home.tutorials.activemqLogs.longDescription', {
       defaultMessage: 'Collect ActiveMQ logs with Filebeat. \
@@ -58,5 +58,6 @@ export function activemqLogsSpecProvider(context: TutorialContext): TutorialSche
     onPrem: onPremInstructions(moduleName, platforms, context),
     elasticCloud: cloudInstructions(moduleName, platforms),
     onPremElasticCloud: onPremCloudInstructions(moduleName, platforms),
+    integrationBrowserCategories: ['web'],
   };
 }

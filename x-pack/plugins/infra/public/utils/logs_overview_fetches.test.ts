@@ -21,14 +21,16 @@ const mockedCallFetchLogSourceStatusAPI = callFetchLogSourceStatusAPI as jest.Mo
 >;
 
 jest.mock('../containers/logs/log_source/api/fetch_log_source_configuration');
-const mockedCallFetchLogSourceConfigurationAPI = callFetchLogSourceConfigurationAPI as jest.MockedFunction<
-  typeof callFetchLogSourceConfigurationAPI
->;
+const mockedCallFetchLogSourceConfigurationAPI =
+  callFetchLogSourceConfigurationAPI as jest.MockedFunction<
+    typeof callFetchLogSourceConfigurationAPI
+  >;
 
 const DEFAULT_PARAMS = {
   absoluteTime: { start: 1593430680000, end: 1593430800000 },
   relativeTime: { start: 'now-2m', end: 'now' }, // Doesn't matter for the test
-  bucketSize: '30s', // Doesn't matter for the test
+  intervalString: '30s', // Doesn't matter for the test
+  bucketSize: 30, // Doesn't matter for the test
 };
 
 function setup() {
@@ -47,6 +49,7 @@ function setup() {
       id: 'test-index-pattern',
       title: 'log-indices-*',
       timeFieldName: '@timestamp',
+      type: undefined,
       fields: [
         {
           name: 'event.dataset',
@@ -147,7 +150,6 @@ describe('Logs UI Observability Homepage Functions', () => {
               type: 'index_pattern',
               indexPatternId: 'test-index-pattern',
             },
-            fields: { timestamp: '@timestamp', tiebreaker: '_doc' },
           },
         },
       } as GetLogSourceConfigurationSuccessResponsePayload);

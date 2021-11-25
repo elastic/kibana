@@ -26,6 +26,7 @@ import {
   generateSelectedAgentsMessage,
   ALL_AGENTS_LABEL,
   AGENT_POLICY_LABEL,
+  AGENT_SELECTION_LABEL,
 } from './translations';
 
 import {
@@ -42,7 +43,7 @@ interface AgentsTableProps {
 }
 
 const perPage = 10;
-const DEBOUNCE_DELAY = 100; // ms
+const DEBOUNCE_DELAY = 300; // ms
 
 const AgentsTableComponent: React.FC<AgentsTableProps> = ({ agentSelection, onChange }) => {
   // search related
@@ -61,17 +62,20 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ agentSelection, onCh
 
   // grouping related
   const osqueryPolicyData = useOsqueryPolicies();
-  const { loading: groupsLoading, totalCount: totalNumAgents, groups } = useAgentGroups(
-    osqueryPolicyData
-  );
+  const {
+    loading: groupsLoading,
+    totalCount: totalNumAgents,
+    groups,
+    isFetched: groupsFetched,
+  } = useAgentGroups(osqueryPolicyData);
   const grouper = useMemo(() => new AgentGrouper(), []);
-  const { isLoading: agentsLoading, data: agents } = useAllAgents(
-    osqueryPolicyData,
-    debouncedSearchValue,
-    {
-      perPage,
-    }
-  );
+  const {
+    isLoading: agentsLoading,
+    data: agents,
+    isFetched: agentsFetched,
+  } = useAllAgents(osqueryPolicyData, debouncedSearchValue, {
+    perPage,
+  });
 
   // option related
   const [options, setOptions] = useState<GroupOption[]>([]);
@@ -95,7 +99,24 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ agentSelection, onCh
 
         if (policyOptions) {
           const defaultOptions = policyOptions.options?.filter((option) =>
-            agentSelection.policiesSelected.includes(option.label)
+            // @ts-expect-error update types
+            agentSelection.policiesSelected.includes(option.key)
+          );
+
+          if (defaultOptions?.length) {
+            setSelectedOptions(defaultOptions);
+            defaultValueInitialized.current = true;
+          }
+        }
+      }
+
+      if (agentSelection.agents.length) {
+        const agentOptions = find(['label', AGENT_SELECTION_LABEL], options);
+
+        if (agentOptions) {
+          const defaultOptions = agentOptions.options?.filter((option) =>
+            // @ts-expect-error update types
+            agentSelection.agents.includes(option.key)
           );
 
           if (defaultOptions?.length) {
@@ -108,15 +129,26 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ agentSelection, onCh
   }, [agentSelection, options, selectedOptions]);
 
   useEffect(() => {
-    // update the groups when groups or agents have changed
-    grouper.setTotalAgents(totalNumAgents);
-    grouper.updateGroup(AGENT_GROUP_KEY.Platform, groups.platforms);
-    grouper.updateGroup(AGENT_GROUP_KEY.Policy, groups.policies);
-    // @ts-expect-error update types
-    grouper.updateGroup(AGENT_GROUP_KEY.Agent, agents);
-    const newOptions = grouper.generateOptions();
-    setOptions(newOptions);
-  }, [groups.platforms, groups.policies, totalNumAgents, groupsLoading, agents, grouper]);
+    if (agentsFetched && groupsFetched) {
+      // update the groups when groups or agents have changed
+      grouper.setTotalAgents(totalNumAgents);
+      grouper.updateGroup(AGENT_GROUP_KEY.Platform, groups.platforms);
+      grouper.updateGroup(AGENT_GROUP_KEY.Policy, groups.policies);
+      // @ts-expect-error update types
+      grouper.updateGroup(AGENT_GROUP_KEY.Agent, agents);
+      const newOptions = grouper.generateOptions();
+      setOptions(newOptions);
+    }
+  }, [
+    groups.platforms,
+    groups.policies,
+    totalNumAgents,
+    groupsLoading,
+    agents,
+    agentsFetched,
+    groupsFetched,
+    grouper,
+  ]);
 
   const onSelection = useCallback(
     (selection: GroupOption[]) => {

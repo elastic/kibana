@@ -26,9 +26,10 @@ export const MetricsAlertDropdown = () => {
   const [visibleFlyoutType, setVisibleFlyoutType] = useState<VisibleFlyoutType>(null);
   const uiCapabilities = useKibana().services.application?.capabilities;
 
-  const canCreateAlerts = useMemo(() => Boolean(uiCapabilities?.infrastructure?.save), [
-    uiCapabilities,
-  ]);
+  const canCreateAlerts = useMemo(
+    () => Boolean(uiCapabilities?.infrastructure?.save),
+    [uiCapabilities]
+  );
 
   const closeFlyout = useCallback(() => setVisibleFlyoutType(null), [setVisibleFlyoutType]);
 

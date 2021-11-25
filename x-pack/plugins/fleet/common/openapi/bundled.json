@@ -181,6 +181,8 @@
                           "type": "string",
                           "enum": [
                             "installed",
+                            "installing",
+                            "install_failed",
                             "not_installed"
                           ]
                         },
@@ -2410,6 +2412,16 @@
           },
           "description": {
             "type": "string"
+          },
+          "monitoring_enabled": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "metrics",
+                "logs"
+              ]
+            }
           }
         }
       },

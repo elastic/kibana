@@ -43,12 +43,8 @@ describe('Error count alert', () => {
   });
 
   it('sends alerts with service name and environment for those that exceeded the threshold', async () => {
-    const {
-      services,
-      dependencies,
-      executor,
-      scheduleActions,
-    } = createRuleTypeMocks();
+    const { services, dependencies, executor, scheduleActions } =
+      createRuleTypeMocks();
 
     registerErrorCountAlertType(dependencies);
 

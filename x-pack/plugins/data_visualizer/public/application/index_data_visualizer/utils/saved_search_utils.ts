@@ -8,56 +8,20 @@
 import { cloneDeep } from 'lodash';
 import { IUiSettingsClient } from 'kibana/public';
 import {
-  buildEsQuery,
-  buildQueryFromFilters,
-  decorateQuery,
   fromKueryExpression,
-  luceneStringToDsl,
   toElasticsearchQuery,
+  buildQueryFromFilters,
+  buildEsQuery,
+  Query,
+  Filter,
 } from '@kbn/es-query';
-import { estypes } from '@elastic/elasticsearch';
-import { SavedSearchSavedObject } from '../../../../common/types';
-import { IndexPattern } from '../../../../../../../src/plugins/data/common/index_patterns/index_patterns';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { isSavedSearchSavedObject, SavedSearchSavedObject } from '../../../../common/types';
+import { IndexPattern, SearchSource } from '../../../../../../../src/plugins/data/common';
 import { SEARCH_QUERY_LANGUAGE, SearchQueryLanguage } from '../types/combined_query';
-import { getEsQueryConfig, Query } from '../../../../../../../src/plugins/data/public';
-
-export function getQueryFromSavedSearch(savedSearch: SavedSearchSavedObject) {
-  const search = savedSearch.attributes.kibanaSavedObjectMeta as { searchSourceJSON: string };
-  return JSON.parse(search.searchSourceJSON) as {
-    query: Query;
-    filter: any[];
-  };
-}
-
-/**
- * Extract query data from the saved search object.
- */
-export function extractSearchData(
-  savedSearch: SavedSearchSavedObject | null,
-  currentIndexPattern: IndexPattern,
-  queryStringOptions: Record<string, any> | string
-) {
-  if (!savedSearch) {
-    return undefined;
-  }
-
-  const { query: extractedQuery } = getQueryFromSavedSearch(savedSearch);
-  const queryLanguage = extractedQuery.language as SearchQueryLanguage;
-  const qryString = extractedQuery.query;
-  let qry;
-  if (queryLanguage === SEARCH_QUERY_LANGUAGE.KUERY) {
-    const ast = fromKueryExpression(qryString);
-    qry = toElasticsearchQuery(ast, currentIndexPattern);
-  } else {
-    qry = luceneStringToDsl(qryString);
-    decorateQuery(qry, queryStringOptions);
-  }
-  return {
-    searchQuery: qry,
-    searchString: qryString,
-    queryLanguage,
-  };
-}
+import { SavedSearch } from '../../../../../../../src/plugins/discover/public';
+import { getEsQueryConfig } from '../../../../../../../src/plugins/data/common';
+import { FilterManager } from '../../../../../../../src/plugins/data/public';
 
 const DEFAULT_QUERY = {
   bool: {
@@ -69,43 +33,59 @@ const DEFAULT_QUERY = {
   },
 };
 
-export function getDefaultDatafeedQuery() {
+export function getDefaultQuery() {
   return cloneDeep(DEFAULT_QUERY);
 }
 
-export function createSearchItems(
-  kibanaConfig: IUiSettingsClient,
-  indexPattern: IndexPattern | undefined,
-  savedSearch: SavedSearchSavedObject | null
+/**
+ * Parse the stringified searchSourceJSON
+ * from a saved search or saved search object
+ */
+export function getQueryFromSavedSearchObject(savedSearch: SavedSearchSavedObject | SavedSearch) {
+  const search = isSavedSearchSavedObject(savedSearch)
+    ? savedSearch?.attributes?.kibanaSavedObjectMeta
+    : // @ts-ignore
+      savedSearch?.kibanaSavedObjectMeta;
+
+  const parsed =
+    typeof search?.searchSourceJSON === 'string'
+      ? (JSON.parse(search.searchSourceJSON) as {
+          query: Query;
+          filter: Filter[];
+        })
+      : undefined;
+
+  // Remove indexRefName because saved search might no longer be relevant
+  // if user modifies the query or filter
+  // after opening a saved search
+  if (parsed && Array.isArray(parsed.filter)) {
+    parsed.filter.forEach((f) => {
+      // @ts-expect-error indexRefName does appear in meta for newly created saved search
+      f.meta.indexRefName = undefined;
+    });
+  }
+  return parsed;
+}
+
+/**
+ * Create an Elasticsearch query that combines both lucene/kql query string and filters
+ * Should also form a valid query if only the query or filters is provided
+ */
+export function createMergedEsQuery(
+  query?: Query,
+  filters?: Filter[],
+  indexPattern?: IndexPattern,
+  uiSettings?: IUiSettingsClient
 ) {
-  // query is only used by the data visualizer as it needs
-  // a lucene query_string.
-  // Using a blank query will cause match_all:{} to be used
-  // when passed through luceneStringToDsl
-  let query: Query = {
-    query: '',
-    language: 'lucene',
-  };
+  let combinedQuery: QueryDslQueryContainer = getDefaultQuery();
 
-  let combinedQuery: estypes.QueryDslQueryContainer = getDefaultDatafeedQuery();
-  if (savedSearch !== null) {
-    const data = getQueryFromSavedSearch(savedSearch);
-
-    query = data.query;
-    const filter = data.filter;
-
-    const filters = Array.isArray(filter) ? filter : [];
-
-    if (query.language === SEARCH_QUERY_LANGUAGE.KUERY) {
-      const ast = fromKueryExpression(query.query);
-      if (query.query !== '') {
-        combinedQuery = toElasticsearchQuery(ast, indexPattern);
-      }
+  if (query && query.language === SEARCH_QUERY_LANGUAGE.KUERY) {
+    const ast = fromKueryExpression(query.query);
+    if (query.query !== '') {
+      combinedQuery = toElasticsearchQuery(ast, indexPattern);
+    }
+    if (combinedQuery.bool !== undefined) {
       const filterQuery = buildQueryFromFilters(filters, indexPattern);
-
-      if (!combinedQuery.bool) {
-        throw new Error('Missing bool on query');
-      }
 
       if (!Array.isArray(combinedQuery.bool.filter)) {
         combinedQuery.bool.filter =
@@ -119,14 +99,113 @@ export function createSearchItems(
 
       combinedQuery.bool.filter = [...combinedQuery.bool.filter, ...filterQuery.filter];
       combinedQuery.bool.must_not = [...combinedQuery.bool.must_not, ...filterQuery.must_not];
-    } else {
-      const esQueryConfigs = getEsQueryConfig(kibanaConfig);
-      combinedQuery = buildEsQuery(indexPattern, [query], filters, esQueryConfigs);
     }
+  } else {
+    combinedQuery = buildEsQuery(
+      indexPattern,
+      query ? [query] : [],
+      filters ? filters : [],
+      uiSettings ? getEsQueryConfig(uiSettings) : undefined
+    );
+  }
+  return combinedQuery;
+}
+
+/**
+ * Extract query data from the saved search object
+ * with overrides from the provided query data and/or filters
+ */
+export function getEsQueryFromSavedSearch({
+  indexPattern,
+  uiSettings,
+  savedSearch,
+  query,
+  filters,
+  filterManager,
+}: {
+  indexPattern: IndexPattern;
+  uiSettings: IUiSettingsClient;
+  savedSearch: SavedSearchSavedObject | SavedSearch | null | undefined;
+  query?: Query;
+  filters?: Filter[];
+  filterManager?: FilterManager;
+}) {
+  if (!indexPattern || !savedSearch) return;
+
+  const userQuery = query;
+  const userFilters = filters;
+
+  // If saved search has a search source with nested parent
+  // e.g. a search coming from Dashboard saved search embeddable
+  // which already combines both the saved search's original query/filters and the Dashboard's
+  // then no need to process any further
+  if (
+    savedSearch &&
+    'searchSource' in savedSearch &&
+    savedSearch?.searchSource instanceof SearchSource &&
+    savedSearch.searchSource.getParent() !== undefined &&
+    userQuery
+  ) {
+    // Flattened query from search source may contain a clause that narrows the time range
+    // which might interfere with global time pickers so we need to remove
+    const savedQuery =
+      cloneDeep(savedSearch.searchSource.getSearchRequestBody()?.query) ?? getDefaultQuery();
+    const timeField = savedSearch.searchSource.getField('index')?.timeFieldName;
+
+    if (Array.isArray(savedQuery.bool.filter) && timeField !== undefined) {
+      savedQuery.bool.filter = savedQuery.bool.filter.filter(
+        (c: QueryDslQueryContainer) =>
+          !(c.hasOwnProperty('range') && c.range?.hasOwnProperty(timeField))
+      );
+    }
+    return {
+      searchQuery: savedQuery,
+      searchString: userQuery.query,
+      queryLanguage: userQuery.language as SearchQueryLanguage,
+    };
   }
 
-  return {
-    query,
-    combinedQuery,
-  };
+  // If saved search is an json object with the original query and filter
+  // retrieve the parsed query and filter
+  const savedSearchData = getQueryFromSavedSearchObject(savedSearch);
+
+  // If no saved search available, use user's query and filters
+  if (!savedSearchData && userQuery) {
+    if (filterManager && userFilters) filterManager.setFilters(userFilters);
+
+    const combinedQuery = createMergedEsQuery(
+      userQuery,
+      Array.isArray(userFilters) ? userFilters : [],
+      indexPattern,
+      uiSettings
+    );
+
+    return {
+      searchQuery: combinedQuery,
+      searchString: userQuery.query,
+      queryLanguage: userQuery.language as SearchQueryLanguage,
+    };
+  }
+
+  // If saved search available, merge saved search with latest user query or filters
+  // which might differ from extracted saved search data
+  if (savedSearchData) {
+    const currentQuery = userQuery ?? savedSearchData?.query;
+    const currentFilters = userFilters ?? savedSearchData?.filter;
+
+    if (filterManager) filterManager.setFilters(currentFilters);
+
+    const combinedQuery = createMergedEsQuery(
+      currentQuery,
+      Array.isArray(currentFilters) ? currentFilters : [],
+      indexPattern,
+      uiSettings
+    );
+
+    return {
+      searchQuery: combinedQuery,
+      searchString: currentQuery.query,
+      queryLanguage: currentQuery.language as SearchQueryLanguage,
+    };
+  }
 }

@@ -67,7 +67,7 @@ export const CaseView = React.memo(({ caseId, subCaseId, userCanCrud }: Props) =
 
   const onCaseDataSuccess = useCallback(
     (data: Case) => {
-      if (caseTitle === null) {
+      if (caseTitle === null || caseTitle !== data.title) {
         setCaseTitle(data.title);
       }
     },

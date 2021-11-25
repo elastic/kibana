@@ -28,7 +28,12 @@ import {
   exceptionListItemSchema,
   nestedEntryItem,
 } from '@kbn/securitysolution-io-ts-list-types';
-import { IndexPatternBase, IndexPatternFieldBase } from '@kbn/es-query';
+import {
+  IndexPatternBase,
+  IndexPatternFieldBase,
+  getDataViewFieldSubtypeNested,
+  isDataViewFieldSubtypeNested,
+} from '@kbn/es-query';
 
 import {
   EXCEPTION_OPERATORS,
@@ -297,11 +302,11 @@ export const getFilteredIndexPatterns = (
       ...indexPatterns,
       fields: indexPatterns.fields
         .filter((indexField) => {
+          const subTypeNested = getDataViewFieldSubtypeNested(indexField);
           const fieldHasCommonParentPath =
-            indexField.subType != null &&
-            indexField.subType.nested != null &&
+            subTypeNested &&
             item.parent != null &&
-            indexField.subType.nested.path === item.parent.parent.field;
+            subTypeNested.nested.path === item.parent.parent.field;
 
           return fieldHasCommonParentPath;
         })
@@ -317,9 +322,7 @@ export const getFilteredIndexPatterns = (
     // when user selects to add a nested entry, only nested fields are shown as options
     return {
       ...indexPatterns,
-      fields: indexPatterns.fields.filter(
-        (field) => field.subType != null && field.subType.nested != null
-      ),
+      fields: indexPatterns.fields.filter((field) => isDataViewFieldSubtypeNested(field)),
     };
   } else {
     return indexPatterns;
@@ -346,10 +349,8 @@ export const getEntryOnFieldChange = (
     // a user selects "exists", as soon as they make a selection
     // we can now identify the 'parent' and 'child' this is where
     // we first convert the entry into type "nested"
-    const newParentFieldValue =
-      newField.subType != null && newField.subType.nested != null
-        ? newField.subType.nested.path
-        : '';
+    const subTypeNested = getDataViewFieldSubtypeNested(newField);
+    const newParentFieldValue = subTypeNested?.nested.path || '';
 
     return {
       index: entryIndex,

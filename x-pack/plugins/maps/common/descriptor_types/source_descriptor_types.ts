@@ -27,6 +27,7 @@ export type AbstractSourceDescriptor = {
 export type EMSTMSSourceDescriptor = AbstractSourceDescriptor & {
   // id: EMS TMS layer id. Used when !isAutoSelect
   isAutoSelect: boolean;
+  lightModeDefault: string;
 };
 
 export type EMSFileSourceDescriptor = AbstractSourceDescriptor & {
@@ -42,6 +43,7 @@ export type AbstractESSourceDescriptor = AbstractSourceDescriptor & {
   geoField?: string;
   applyGlobalQuery: boolean;
   applyGlobalTime: boolean;
+  applyForceRefresh: boolean;
 };
 
 type AbstractAggDescriptor = {

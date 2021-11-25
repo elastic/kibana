@@ -5,32 +5,35 @@
  * 2.0.
  */
 
-import { SearchAfterAndBulkCreateParams, WrappedSignalHit, WrapSequences } from './types';
+import { WrappedSignalHit, WrapSequences } from './types';
 import { buildSignalGroupFromSequence } from './build_bulk_body';
 import { ConfigType } from '../../../config';
+import { CompleteRule, RuleParams } from '../schemas/rule_schemas';
 
-export const wrapSequencesFactory = ({
-  ruleSO,
-  signalsIndex,
-  mergeStrategy,
-  ignoreFields,
-}: {
-  ruleSO: SearchAfterAndBulkCreateParams['ruleSO'];
-  signalsIndex: string;
-  mergeStrategy: ConfigType['alertMergeStrategy'];
-  ignoreFields: ConfigType['alertIgnoreFields'];
-}): WrapSequences => (sequences, buildReasonMessage) =>
-  sequences.reduce(
-    (acc: WrappedSignalHit[], sequence) => [
-      ...acc,
-      ...buildSignalGroupFromSequence(
-        sequence,
-        ruleSO,
-        signalsIndex,
-        mergeStrategy,
-        ignoreFields,
-        buildReasonMessage
-      ),
-    ],
-    []
-  );
+export const wrapSequencesFactory =
+  ({
+    completeRule,
+    signalsIndex,
+    mergeStrategy,
+    ignoreFields,
+  }: {
+    completeRule: CompleteRule<RuleParams>;
+    signalsIndex: string;
+    mergeStrategy: ConfigType['alertMergeStrategy'];
+    ignoreFields: ConfigType['alertIgnoreFields'];
+  }): WrapSequences =>
+  (sequences, buildReasonMessage) =>
+    sequences.reduce(
+      (acc: WrappedSignalHit[], sequence) => [
+        ...acc,
+        ...buildSignalGroupFromSequence(
+          sequence,
+          completeRule,
+          signalsIndex,
+          mergeStrategy,
+          ignoreFields,
+          buildReasonMessage
+        ),
+      ],
+      []
+    );

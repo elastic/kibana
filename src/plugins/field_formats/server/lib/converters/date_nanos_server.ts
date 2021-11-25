@@ -16,7 +16,7 @@ import {
 import { TextContextTypeConvert } from '../../../common/types';
 
 class DateNanosFormatServer extends DateNanosFormat {
-  textConvert: TextContextTypeConvert = (val) => {
+  textConvert: TextContextTypeConvert = (val: string | number) => {
     // don't give away our ref to converter so
     // we can hot-swap when config changes
     const pattern = this.param('pattern');
@@ -30,7 +30,7 @@ class DateNanosFormatServer extends DateNanosFormat {
       this.timeZone = timezone;
       this.memoizedPattern = pattern;
 
-      this.memoizedConverter = memoize((value: any) => {
+      this.memoizedConverter = memoize((value: string | number) => {
         if (value === null || value === undefined) {
           return '-';
         }
@@ -44,16 +44,16 @@ class DateNanosFormatServer extends DateNanosFormat {
         if (this.timeZone === 'Browser') {
           // Assume a warning has been logged that this can be unpredictable. It
           // would be too verbose to log anything here.
-          date = moment.utc(val);
+          date = moment.utc(value);
         } else {
-          date = moment.utc(val).tz(this.timeZone);
+          date = moment.utc(value).tz(this.timeZone);
         }
 
         if (typeof value !== 'string' && date.isValid()) {
           // fallback for max/min aggregation, where unixtime in ms is returned as a number
           // aggregations in Elasticsearch generally just return ms
           return date.format(fallbackPattern);
-        } else if (date.isValid()) {
+        } else if (date.isValid() && typeof value === 'string') {
           return formatWithNanos(date, value, fractPattern);
         } else {
           return value;

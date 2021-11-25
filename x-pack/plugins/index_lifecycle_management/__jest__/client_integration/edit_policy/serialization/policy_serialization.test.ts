@@ -171,7 +171,7 @@ describe('<EditPolicy /> serialization', () => {
       await actions.hot.toggleForceMerge();
       await actions.hot.setForcemergeSegmentsCount('123');
       await actions.hot.setBestCompression(true);
-      await actions.hot.setShrink('2');
+      await actions.hot.setShrinkCount('2');
       await actions.hot.toggleReadonly();
       await actions.hot.setIndexPriority('123');
 
@@ -274,7 +274,7 @@ describe('<EditPolicy /> serialization', () => {
       await actions.warm.setDataAllocation('node_attrs');
       await actions.warm.setSelectedNodeAttribute('test:123');
       await actions.warm.setReplicas('123');
-      await actions.warm.setShrink('123');
+      await actions.warm.setShrinkCount('123');
       await actions.warm.toggleForceMerge();
       await actions.warm.setForcemergeSegmentsCount('123');
       await actions.warm.setBestCompression(true);
@@ -408,7 +408,6 @@ describe('<EditPolicy /> serialization', () => {
       await actions.cold.setDataAllocation('node_attrs');
       await actions.cold.setSelectedNodeAttribute('test:123');
       await actions.cold.setReplicas('123');
-      await actions.cold.setFreeze();
       await actions.cold.toggleReadonly();
       await actions.cold.setIndexPriority('123');
 
@@ -428,7 +427,6 @@ describe('<EditPolicy /> serialization', () => {
                     "test": "123",
                   },
                 },
-                "freeze": Object {},
                 "readonly": Object {},
                 "set_priority": Object {
                   "priority": 123,
@@ -544,6 +542,51 @@ describe('<EditPolicy /> serialization', () => {
           },
         },
       });
+    });
+  });
+
+  describe('shrink', () => {
+    test('shrink shard size', async () => {
+      const { actions } = testBed;
+      await actions.hot.setShrinkSize('50');
+
+      await actions.togglePhase('warm');
+      await actions.warm.setMinAgeValue('11');
+      await actions.warm.setShrinkSize('100');
+
+      await actions.savePolicy();
+      const latestRequest = server.requests[server.requests.length - 1];
+      const entirePolicy = JSON.parse(JSON.parse(latestRequest.requestBody).body);
+      expect(entirePolicy).toMatchInlineSnapshot(`
+        Object {
+          "name": "my_policy",
+          "phases": Object {
+            "hot": Object {
+              "actions": Object {
+                "rollover": Object {
+                  "max_age": "30d",
+                  "max_primary_shard_size": "50gb",
+                },
+                "shrink": Object {
+                  "max_primary_shard_size": "50gb",
+                },
+              },
+              "min_age": "0ms",
+            },
+            "warm": Object {
+              "actions": Object {
+                "set_priority": Object {
+                  "priority": 50,
+                },
+                "shrink": Object {
+                  "max_primary_shard_size": "100gb",
+                },
+              },
+              "min_age": "11d",
+            },
+          },
+        }
+      `);
     });
   });
 });

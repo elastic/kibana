@@ -24,6 +24,7 @@ const createActionsConfigMock = () => {
       timeout: 360000,
     }),
     getCustomHostSettings: jest.fn().mockReturnValue(undefined),
+    getMicrosoftGraphApiUrl: jest.fn().mockReturnValue(undefined),
   };
   return mocked;
 };

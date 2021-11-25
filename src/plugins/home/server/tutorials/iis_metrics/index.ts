@@ -28,7 +28,7 @@ export function iisMetricsSpecProvider(context: TutorialContext): TutorialSchema
     moduleName,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.iisMetrics.shortDescription', {
-      defaultMessage: 'Collect IIS server related metrics.',
+      defaultMessage: 'Collect metrics from IIS HTTP servers with Metricbeat.',
     }),
     longDescription: i18n.translate('home.tutorials.iisMetrics.longDescription', {
       defaultMessage:
@@ -59,5 +59,6 @@ export function iisMetricsSpecProvider(context: TutorialContext): TutorialSchema
     onPrem: onPremInstructions(moduleName, context),
     elasticCloud: cloudInstructions(moduleName),
     onPremElasticCloud: onPremCloudInstructions(moduleName),
+    integrationBrowserCategories: ['web'],
   };
 }

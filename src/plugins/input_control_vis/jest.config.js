@@ -10,4 +10,7 @@ module.exports = {
   preset: '@kbn/test',
   rootDir: '../../..',
   roots: ['<rootDir>/src/plugins/input_control_vis'],
+  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/src/plugins/input_control_vis',
+  coverageReporters: ['text', 'html'],
+  collectCoverageFrom: ['<rootDir>/src/plugins/input_control_vis/public/**/*.{ts,tsx}'],
 };

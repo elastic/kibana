@@ -9,7 +9,7 @@ import { MlLocatorDefinition } from './ml_locator';
 import { ML_PAGES } from '../../common/constants/locator';
 import { ANALYSIS_CONFIG_TYPE } from '../../common/constants/data_frame_analytics';
 
-describe('MlUrlGenerator', () => {
+describe('ML locator', () => {
   const definition = new MlLocatorDefinition();
 
   describe('AnomalyDetection', () => {
@@ -80,8 +80,7 @@ describe('MlUrlGenerator', () => {
 
         expect(location).toMatchObject({
           app: 'ml',
-          path:
-            '/jobs/new_job/step/job_type?index=3da93760-e0af-11ea-9ad3-3bcfc330e42a&_g=(time:(from:now-30m,to:now))',
+          path: '/jobs/new_job/step/job_type?index=3da93760-e0af-11ea-9ad3-3bcfc330e42a&_g=(time:(from:now-30m,to:now))',
           state: {},
         });
       });
@@ -112,8 +111,7 @@ describe('MlUrlGenerator', () => {
 
         expect(location).toMatchObject({
           app: 'ml',
-          path:
-            "/explorer?_g=(ml:(jobIds:!(fq_single_1)),refreshInterval:(pause:!f,value:0),time:(from:'2019-02-07T00:00:00.000Z',mode:absolute,to:'2020-08-13T17:15:00.000Z'))&_a=(explorer:(mlExplorerFilter:(),mlExplorerSwimlane:(viewByFromPage:2,viewByPerPage:20),query:(analyze_wildcard:!t,query:'*')))",
+          path: "/explorer?_g=(ml:(jobIds:!(fq_single_1)),refreshInterval:(pause:!f,value:0),time:(from:'2019-02-07T00:00:00.000Z',mode:absolute,to:'2020-08-13T17:15:00.000Z'))&_a=(explorer:(mlExplorerFilter:(),mlExplorerSwimlane:(viewByFromPage:2,viewByPerPage:20),query:(analyze_wildcard:!t,query:'*')))",
           state: {},
         });
       });
@@ -133,8 +131,7 @@ describe('MlUrlGenerator', () => {
 
         expect(location).toMatchObject({
           app: 'ml',
-          path:
-            "/explorer?_g=(ml:(jobIds:!(fq_single_1,logs_categorization_1)),time:(from:'2019-02-07T00:00:00.000Z',mode:absolute,to:'2020-08-13T17:15:00.000Z'))&_a=(explorer:(mlExplorerFilter:(),mlExplorerSwimlane:()))",
+          path: "/explorer?_g=(ml:(jobIds:!(fq_single_1,logs_categorization_1)),time:(from:'2019-02-07T00:00:00.000Z',mode:absolute,to:'2020-08-13T17:15:00.000Z'))&_a=(explorer:(mlExplorerFilter:(),mlExplorerSwimlane:()))",
           state: {},
         });
       });
@@ -164,8 +161,7 @@ describe('MlUrlGenerator', () => {
 
         expect(location).toMatchObject({
           app: 'ml',
-          path:
-            "/timeseriesexplorer?_g=(ml:(jobIds:!(logs_categorization_1)),refreshInterval:(pause:!f,value:0),time:(from:'2020-07-12T00:39:02.912Z',mode:absolute,to:'2020-07-22T15:52:18.613Z'))&_a=(timeseriesexplorer:(mlTimeSeriesExplorer:(),query:(query_string:(analyze_wildcard:!t,query:'*'))))",
+          path: "/timeseriesexplorer?_g=(ml:(jobIds:!(logs_categorization_1)),refreshInterval:(pause:!f,value:0),time:(from:'2020-07-12T00:39:02.912Z',mode:absolute,to:'2020-07-22T15:52:18.613Z'))&_a=(timeseriesexplorer:(mlTimeSeriesExplorer:(),query:(query_string:(analyze_wildcard:!t,query:'*'))))",
           state: {},
         });
       });
@@ -199,8 +195,7 @@ describe('MlUrlGenerator', () => {
 
         expect(location).toMatchObject({
           app: 'ml',
-          path:
-            "/timeseriesexplorer?_g=(ml:(jobIds:!(logs_categorization_1)),refreshInterval:(pause:!f,value:0),time:(from:'2020-07-12T00:39:02.912Z',mode:absolute,to:'2020-07-22T15:52:18.613Z'))&_a=(timeseriesexplorer:(mlTimeSeriesExplorer:(detectorIndex:0,entities:(mlcategory:'2'),zoom:(from:'2020-07-20T23:58:29.367Z',to:'2020-07-21T11:00:13.173Z')),query:(query_string:(analyze_wildcard:!t,query:'*'))))",
+          path: "/timeseriesexplorer?_g=(ml:(jobIds:!(logs_categorization_1)),refreshInterval:(pause:!f,value:0),time:(from:'2020-07-12T00:39:02.912Z',mode:absolute,to:'2020-07-22T15:52:18.613Z'))&_a=(timeseriesexplorer:(mlTimeSeriesExplorer:(detectorIndex:0,entities:(mlcategory:'2'),zoom:(from:'2020-07-20T23:58:29.367Z',to:'2020-07-21T11:00:13.173Z')),query:(query_string:(analyze_wildcard:!t,query:'*'))))",
           state: {},
         });
       });
@@ -230,8 +225,7 @@ describe('MlUrlGenerator', () => {
 
           expect(location).toMatchObject({
             app: 'ml',
-            path:
-              "/data_frame_analytics?_a=(data_frame_analytics:(queryText:'id:grid_regression_1'))",
+            path: "/data_frame_analytics?_a=(data_frame_analytics:(queryText:'id:grid_regression_1'))",
             state: {},
           });
         });
@@ -246,8 +240,7 @@ describe('MlUrlGenerator', () => {
 
           expect(location).toMatchObject({
             app: 'ml',
-            path:
-              "/data_frame_analytics?_a=(data_frame_analytics:(queryText:'groups:(group_1%20or%20group_2)'))",
+            path: "/data_frame_analytics?_a=(data_frame_analytics:(queryText:'groups:(group_1%20or%20group_2)'))",
             state: {},
           });
         });
@@ -265,8 +258,7 @@ describe('MlUrlGenerator', () => {
 
           expect(location).toMatchObject({
             app: 'ml',
-            path:
-              '/data_frame_analytics/exploration?_g=(ml:(analysisType:regression,jobId:grid_regression_1))',
+            path: '/data_frame_analytics/exploration?_g=(ml:(analysisType:regression,jobId:grid_regression_1))',
             state: {},
           });
         });
@@ -298,7 +290,7 @@ describe('MlUrlGenerator', () => {
         });
       });
 
-      it('should generate valid URL for the Index Data Visualizer select index pattern or saved search page', async () => {
+      it('should generate valid URL for the Index Data Visualizer select data view or saved search page', async () => {
         const location = await definition.getLocation({
           page: ML_PAGES.DATA_VISUALIZER_INDEX_SELECT,
         });
@@ -326,8 +318,7 @@ describe('MlUrlGenerator', () => {
 
         expect(location).toMatchObject({
           app: 'ml',
-          path:
-            '/jobs/new_job/datavisualizer?index=3da93760-e0af-11ea-9ad3-3bcfc330e42a&_g=(time:(from:now-30m,to:now))',
+          path: '/jobs/new_job/datavisualizer?index=3da93760-e0af-11ea-9ad3-3bcfc330e42a&_g=(time:(from:now-30m,to:now))',
           state: {},
         });
       });

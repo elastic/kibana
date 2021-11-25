@@ -71,6 +71,16 @@ export const connectorsMock: ActionConnector[] = [
     },
     isPreconfigured: false,
   },
+  {
+    id: 'servicenow-uses-table-api',
+    actionTypeId: '.servicenow',
+    name: 'My Connector',
+    config: {
+      apiUrl: 'https://instance1.service-now.com',
+      usesTableApi: true,
+    },
+    isPreconfigured: false,
+  },
 ];
 
 export const actionTypesMock: ActionTypeConnector[] = [

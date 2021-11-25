@@ -6,14 +6,12 @@
  */
 
 import { defaults, omit } from 'lodash';
-import React from 'react';
-import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
+import React, { useEffect } from 'react';
 import { CoreStart } from '../../../../../../../src/core/public';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { ForLastExpression } from '../../../../../triggers_actions_ui/public';
+import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { asPercent } from '../../../../common/utils/formatters';
-import { useServiceTransactionTypesFetcher } from '../../../context/apm_service/use_service_transaction_types_fetcher';
-import { useEnvironmentsFetcher } from '../../../hooks/use_environments_fetcher';
 import { useFetcher } from '../../../hooks/use_fetcher';
 import { createCallApmApi } from '../../../services/rest/createCallApmApi';
 import { ChartPreview } from '../chart_preview';
@@ -23,16 +21,16 @@ import {
   ServiceField,
   TransactionTypeField,
 } from '../fields';
-import { AlertMetadata, getAbsoluteTimeRange } from '../helper';
+import { AlertMetadata, getIntervalAndTimeRange, TimeUnit } from '../helper';
 import { ServiceAlertTrigger } from '../service_alert_trigger';
 
 interface AlertParams {
-  windowSize: number;
-  windowUnit: string;
-  threshold: number;
-  serviceName: string;
-  transactionType: string;
-  environment: string;
+  windowSize?: number;
+  windowUnit?: string;
+  threshold?: number;
+  serviceName?: string;
+  transactionType?: string;
+  environment?: string;
 }
 
 interface Props {
@@ -46,11 +44,9 @@ export function TransactionErrorRateAlertTrigger(props: Props) {
   const { services } = useKibana();
   const { alertParams, metadata, setAlertParams, setAlertProperty } = props;
 
-  createCallApmApi(services as CoreStart);
-
-  const transactionTypes = useServiceTransactionTypesFetcher(
-    metadata?.serviceName
-  );
+  useEffect(() => {
+    createCallApmApi(services as CoreStart);
+  }, [services]);
 
   const params = defaults(
     { ...omit(metadata, ['start', 'end']), ...alertParams },
@@ -62,25 +58,26 @@ export function TransactionErrorRateAlertTrigger(props: Props) {
     }
   );
 
-  const { environmentOptions } = useEnvironmentsFetcher({
-    serviceName: params.serviceName,
-    start: metadata?.start,
-    end: metadata?.end,
-  });
-
   const thresholdAsPercent = (params.threshold ?? 0) / 100;
 
   const { data } = useFetcher(
     (callApmApi) => {
-      if (params.windowSize && params.windowUnit) {
+      const { interval, start, end } = getIntervalAndTimeRange({
+        windowSize: params.windowSize,
+        windowUnit: params.windowUnit as TimeUnit,
+      });
+      if (interval && start && end) {
         return callApmApi({
-          endpoint: 'GET /api/apm/alerts/chart_preview/transaction_error_rate',
+          endpoint:
+            'GET /internal/apm/alerts/chart_preview/transaction_error_rate',
           params: {
             query: {
-              ...getAbsoluteTimeRange(params.windowSize, params.windowUnit),
               environment: params.environment,
               serviceName: params.serviceName,
               transactionType: params.transactionType,
+              interval,
+              start,
+              end,
             },
           },
         });
@@ -96,16 +93,17 @@ export function TransactionErrorRateAlertTrigger(props: Props) {
   );
 
   const fields = [
-    <ServiceField value={params.serviceName} />,
+    <ServiceField
+      currentValue={params.serviceName}
+      onChange={(value) => setAlertParams('serviceName', value)}
+    />,
     <TransactionTypeField
       currentValue={params.transactionType}
-      options={transactionTypes.map((key) => ({ text: key, value: key }))}
-      onChange={(e) => setAlertParams('transactionType', e.target.value)}
+      onChange={(value) => setAlertParams('transactionType', value)}
     />,
     <EnvironmentField
       currentValue={params.environment}
-      options={environmentOptions}
-      onChange={(e) => setAlertParams('environment', e.target.value)}
+      onChange={(value) => setAlertParams('environment', value)}
     />,
     <IsAboveField
       value={params.threshold}
@@ -133,6 +131,7 @@ export function TransactionErrorRateAlertTrigger(props: Props) {
       data={data?.errorRateChartPreview}
       yTickFormat={(d: number | null) => asPercent(d, 1)}
       threshold={thresholdAsPercent}
+      uiSettings={services.uiSettings}
     />
   );
 

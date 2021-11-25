@@ -11,8 +11,8 @@ import chalk from 'chalk';
 import { KibanaRequest } from '../../../../../../../src/core/server';
 import { RequestStatus } from '../../../../../../../src/plugins/inspector';
 import { WrappedElasticsearchClientError } from '../../../../../observability/server';
-import { inspectableEsQueriesMap } from '../../../routes/register_routes';
-import { getInspectResponse } from './get_inspect_response';
+import { inspectableEsQueriesMap } from '../../../routes/apm_routes/register_apm_server_routes';
+import { getInspectResponse } from '../../../../../observability/server';
 
 function formatObj(obj: Record<string, any>) {
   return JSON.stringify(obj, null, 2);

@@ -32,7 +32,7 @@ describe('ConnectorSelector', () => {
 
   it('it should render', async () => {
     const wrapper = mount(
-      <Form form={(formHookMock as unknown) as FormHook}>
+      <Form form={formHookMock as unknown as FormHook}>
         <UseField
           path="connectorId"
           component={ConnectorSelector}
@@ -52,7 +52,7 @@ describe('ConnectorSelector', () => {
 
   it('it should not render when is not in edit mode', async () => {
     const wrapper = mount(
-      <Form form={(formHookMock as unknown) as FormHook}>
+      <Form form={formHookMock as unknown as FormHook}>
         <UseField
           path="connectorId"
           component={ConnectorSelector}

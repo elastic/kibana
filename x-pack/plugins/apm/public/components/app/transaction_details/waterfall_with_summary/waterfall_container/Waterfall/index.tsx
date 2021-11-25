@@ -21,7 +21,6 @@ import { WaterfallFlyout } from './waterfall_flyout';
 import {
   IWaterfall,
   IWaterfallItem,
-  IWaterfallSpanOrTransaction,
 } from './waterfall_helpers/waterfall_helpers';
 
 const Container = euiStyled.div`
@@ -29,13 +28,6 @@ const Container = euiStyled.div`
   position: relative;
   overflow: hidden;
 `;
-
-const TIMELINE_MARGINS = {
-  top: 40,
-  left: 100,
-  right: 50,
-  bottom: 0,
-};
 
 const toggleFlyout = ({
   history,
@@ -61,9 +53,8 @@ const WaterfallItemsContainer = euiStyled.div`
 interface Props {
   waterfallItemId?: string;
   waterfall: IWaterfall;
-  exceedsMax: boolean;
 }
-export function Waterfall({ waterfall, exceedsMax, waterfallItemId }: Props) {
+export function Waterfall({ waterfall, waterfallItemId }: Props) {
   const history = useHistory();
   const [isAccordionOpen, setIsAccordionOpen] = useState(true);
   const itemContainerHeight = 58; // TODO: This is a nasty way to calculate the height of the svg element. A better approach should be found
@@ -74,37 +65,20 @@ export function Waterfall({ waterfall, exceedsMax, waterfallItemId }: Props) {
   const agentMarks = getAgentMarks(waterfall.entryWaterfallTransaction?.doc);
   const errorMarks = getErrorMarks(waterfall.errorItems);
 
-  function renderItems(
-    childrenByParentId: Record<string | number, IWaterfallSpanOrTransaction[]>
-  ) {
-    const { entryWaterfallTransaction } = waterfall;
-    if (!entryWaterfallTransaction) {
-      return null;
-    }
-    return (
-      <AccordionWaterfall
-        // used to recreate the entire tree when `isAccordionOpen` changes, collapsing or expanding all elements.
-        key={`accordion_state_${isAccordionOpen}`}
-        isOpen={isAccordionOpen}
-        item={entryWaterfallTransaction}
-        level={0}
-        waterfallItemId={waterfallItemId}
-        errorsPerTransaction={waterfall.errorsPerTransaction}
-        duration={duration}
-        childrenByParentId={childrenByParentId}
-        timelineMargins={TIMELINE_MARGINS}
-        onClickWaterfallItem={(item: IWaterfallItem) =>
-          toggleFlyout({ history, item })
-        }
-        onToggleEntryTransaction={() => setIsAccordionOpen((isOpen) => !isOpen)}
-      />
-    );
-  }
+  // Calculate the left margin relative to the deepest level, or 100px, whichever
+  // is more.
+  const [maxLevel, setMaxLevel] = useState(0);
+  const timelineMargins = {
+    top: 40,
+    left: Math.max(100, maxLevel * 10),
+    right: 50,
+    bottom: 0,
+  };
 
   return (
     <HeightRetainer>
       <Container>
-        {exceedsMax && (
+        {waterfall.apiResponse.exceedsMax && (
           <EuiCallOut
             color="warning"
             size="s"
@@ -128,11 +102,27 @@ export function Waterfall({ waterfall, exceedsMax, waterfallItemId }: Props) {
               marks={[...agentMarks, ...errorMarks]}
               xMax={duration}
               height={waterfallHeight}
-              margins={TIMELINE_MARGINS}
+              margins={timelineMargins}
             />
           </div>
           <WaterfallItemsContainer>
-            {renderItems(waterfall.childrenByParentId)}
+            {!waterfall.entryWaterfallTransaction ? null : (
+              <AccordionWaterfall
+                // used to recreate the entire tree when `isAccordionOpen` changes, collapsing or expanding all elements.
+                key={`accordion_state_${isAccordionOpen}`}
+                isOpen={isAccordionOpen}
+                item={waterfall.entryWaterfallTransaction}
+                level={0}
+                setMaxLevel={setMaxLevel}
+                waterfallItemId={waterfallItemId}
+                duration={duration}
+                waterfall={waterfall}
+                timelineMargins={timelineMargins}
+                onClickWaterfallItem={(item: IWaterfallItem) =>
+                  toggleFlyout({ history, item })
+                }
+              />
+            )}
           </WaterfallItemsContainer>
         </div>
 

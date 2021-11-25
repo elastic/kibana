@@ -59,6 +59,82 @@
       },
       {
         "parentPluginId": "kibanaUtils",
+        "id": "def-public.CharacterNotAllowedInField",
+        "type": "Class",
+        "tags": [],
+        "label": "CharacterNotAllowedInField",
+        "description": [
+          "\nwhen a user is attempting to create a field with disallowed character in the name, like *"
+        ],
+        "signature": [
+          {
+            "pluginId": "kibanaUtils",
+            "scope": "common",
+            "docId": "kibKibanaUtilsPluginApi",
+            "section": "def-common.CharacterNotAllowedInField",
+            "text": "CharacterNotAllowedInField"
+          },
+          " extends ",
+          {
+            "pluginId": "kibanaUtils",
+            "scope": "common",
+            "docId": "kibKibanaUtilsPluginApi",
+            "section": "def-common.KbnError",
+            "text": "KbnError"
+          }
+        ],
+        "path": "src/plugins/kibana_utils/common/errors/errors.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "kibanaUtils",
+            "id": "def-public.CharacterNotAllowedInField.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "src/plugins/kibana_utils/common/errors/errors.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "kibanaUtils",
+                "id": "def-public.CharacterNotAllowedInField.Unnamed.$1",
+                "type": "string",
+                "tags": [],
+                "label": "character",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/plugins/kibana_utils/common/errors/errors.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "kibanaUtils",
+                "id": "def-public.CharacterNotAllowedInField.Unnamed.$2",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/plugins/kibana_utils/common/errors/errors.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "kibanaUtils",
         "id": "def-public.Defer",
         "type": "Class",
         "tags": [],
@@ -95,7 +171,7 @@
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-public.data",
+                "id": "def-public.Defer.resolve.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "data",
@@ -124,7 +200,7 @@
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-public.error",
+                "id": "def-public.Defer.reject.$1",
                 "type": "Any",
                 "tags": [],
                 "label": "error",
@@ -814,7 +890,7 @@
               },
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-public.ResizeChecker.Unnamed.$2.args",
+                "id": "def-public.ResizeChecker.Unnamed.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "args",
@@ -824,7 +900,7 @@
                 "children": [
                   {
                     "parentPluginId": "kibanaUtils",
-                    "id": "def-public.ResizeChecker.Unnamed.$2.args.disabled",
+                    "id": "def-public.ResizeChecker.Unnamed.$2.disabled",
                     "type": "CompoundType",
                     "tags": [],
                     "label": "disabled",
@@ -1464,7 +1540,7 @@
         "children": [
           {
             "parentPluginId": "kibanaUtils",
-            "id": "def-public.o",
+            "id": "def-public.calculateObjectHash.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "o",
@@ -1486,7 +1562,7 @@
         "label": "createGetterSetter",
         "description": [],
         "signature": [
-          "<T extends object>(name: string) => [",
+          "<T extends object>(name: string, isValueRequired?: boolean) => [",
           {
             "pluginId": "kibanaUtils",
             "scope": "common",
@@ -1516,6 +1592,20 @@
             "description": [],
             "signature": [
               "string"
+            ],
+            "path": "src/plugins/kibana_utils/common/create_getter_setter.ts",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "kibanaUtils",
+            "id": "def-public.createGetterSetter.$2",
+            "type": "boolean",
+            "tags": [],
+            "label": "isValueRequired",
+            "description": [],
+            "signature": [
+              "boolean"
             ],
             "path": "src/plugins/kibana_utils/common/create_getter_setter.ts",
             "deprecated": false,
@@ -1614,7 +1704,7 @@
           "\nCreates {@link IKbnUrlStateStorage} state storage"
         ],
         "signature": [
-          "({ useHash, history, onGetError, onSetError, }?: { useHash: boolean; history?: ",
+          "({ useHash, useHashQuery, history, onGetError, onSetError, }?: { useHash: boolean; useHashQuery?: boolean | undefined; history?: ",
           "History",
           "<any> | undefined; onGetError?: ((error: Error) => void) | undefined; onSetError?: ((error: Error) => void) | undefined; }) => ",
           {
@@ -1630,17 +1720,17 @@
         "children": [
           {
             "parentPluginId": "kibanaUtils",
-            "id": "def-public.createKbnUrlStateStorage.$1.useHashfalsehistoryonGetErroronSetError",
+            "id": "def-public.createKbnUrlStateStorage.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n    useHash = false,\n    history,\n    onGetError,\n    onSetError,\n  }",
+            "label": "{\n    useHash = false,\n    useHashQuery = true,\n    history,\n    onGetError,\n    onSetError,\n  }",
             "description": [],
             "path": "src/plugins/kibana_utils/public/state_sync/state_sync_state_storage/create_kbn_url_state_storage.ts",
             "deprecated": false,
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-public.createKbnUrlStateStorage.$1.useHashfalsehistoryonGetErroronSetError.useHash",
+                "id": "def-public.createKbnUrlStateStorage.$1.useHash",
                 "type": "boolean",
                 "tags": [],
                 "label": "useHash",
@@ -1650,7 +1740,20 @@
               },
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-public.createKbnUrlStateStorage.$1.useHashfalsehistoryonGetErroronSetError.history",
+                "id": "def-public.createKbnUrlStateStorage.$1.useHashQuery",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "useHashQuery",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
+                ],
+                "path": "src/plugins/kibana_utils/public/state_sync/state_sync_state_storage/create_kbn_url_state_storage.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "kibanaUtils",
+                "id": "def-public.createKbnUrlStateStorage.$1.history",
                 "type": "Object",
                 "tags": [],
                 "label": "history",
@@ -1664,7 +1767,7 @@
               },
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-public.createKbnUrlStateStorage.$1.useHashfalsehistoryonGetErroronSetError.onGetError",
+                "id": "def-public.createKbnUrlStateStorage.$1.onGetError",
                 "type": "Function",
                 "tags": [],
                 "label": "onGetError",
@@ -1677,7 +1780,7 @@
                 "children": [
                   {
                     "parentPluginId": "kibanaUtils",
-                    "id": "def-public.createKbnUrlStateStorage.$1.useHashfalsehistoryonGetErroronSetError.onGetError.$1",
+                    "id": "def-public.createKbnUrlStateStorage.$1.onGetError.$1",
                     "type": "Object",
                     "tags": [],
                     "label": "error",
@@ -1694,7 +1797,7 @@
               },
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-public.createKbnUrlStateStorage.$1.useHashfalsehistoryonGetErroronSetError.onSetError",
+                "id": "def-public.createKbnUrlStateStorage.$1.onSetError",
                 "type": "Function",
                 "tags": [],
                 "label": "onSetError",
@@ -1707,7 +1810,7 @@
                 "children": [
                   {
                     "parentPluginId": "kibanaUtils",
-                    "id": "def-public.createKbnUrlStateStorage.$1.useHashfalsehistoryonGetErroronSetError.onSetError.$1",
+                    "id": "def-public.createKbnUrlStateStorage.$1.onSetError.$1",
                     "type": "Object",
                     "tags": [],
                     "label": "error",
@@ -1772,7 +1875,7 @@
         "children": [
           {
             "parentPluginId": "kibanaUtils",
-            "id": "def-public.createKbnUrlTracker.$1.baseUrldefaultSubUrlstorageKeystateParamsnavLinkUpdater$toastNotificationshistorygetHistorystorageshouldTrackUrlUpdatereturntrueonBeforeNavLinkSavednewNavLinknewNavLink",
+            "id": "def-public.createKbnUrlTracker.$1",
             "type": "Object",
             "tags": [],
             "label": "{\n  baseUrl,\n  defaultSubUrl,\n  storageKey,\n  stateParams,\n  navLinkUpdater$,\n  toastNotifications,\n  history,\n  getHistory,\n  storage,\n  shouldTrackUrlUpdate = () => {\n    return true;\n  },\n  onBeforeNavLinkSaved = (newNavLink) => newNavLink,\n}",
@@ -1782,7 +1885,7 @@
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-public.createKbnUrlTracker.$1.baseUrldefaultSubUrlstorageKeystateParamsnavLinkUpdater$toastNotificationshistorygetHistorystorageshouldTrackUrlUpdatereturntrueonBeforeNavLinkSavednewNavLinknewNavLink.baseUrl",
+                "id": "def-public.createKbnUrlTracker.$1.baseUrl",
                 "type": "string",
                 "tags": [],
                 "label": "baseUrl",
@@ -1794,7 +1897,7 @@
               },
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-public.createKbnUrlTracker.$1.baseUrldefaultSubUrlstorageKeystateParamsnavLinkUpdater$toastNotificationshistorygetHistorystorageshouldTrackUrlUpdatereturntrueonBeforeNavLinkSavednewNavLinknewNavLink.defaultSubUrl",
+                "id": "def-public.createKbnUrlTracker.$1.defaultSubUrl",
                 "type": "string",
                 "tags": [],
                 "label": "defaultSubUrl",
@@ -1806,7 +1909,7 @@
               },
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-public.createKbnUrlTracker.$1.baseUrldefaultSubUrlstorageKeystateParamsnavLinkUpdater$toastNotificationshistorygetHistorystorageshouldTrackUrlUpdatereturntrueonBeforeNavLinkSavednewNavLinknewNavLink.stateParams",
+                "id": "def-public.createKbnUrlTracker.$1.stateParams",
                 "type": "Array",
                 "tags": [],
                 "label": "stateParams",
@@ -1823,7 +1926,7 @@
               },
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-public.createKbnUrlTracker.$1.baseUrldefaultSubUrlstorageKeystateParamsnavLinkUpdater$toastNotificationshistorygetHistorystorageshouldTrackUrlUpdatereturntrueonBeforeNavLinkSavednewNavLinknewNavLink.storageKey",
+                "id": "def-public.createKbnUrlTracker.$1.storageKey",
                 "type": "string",
                 "tags": [],
                 "label": "storageKey",
@@ -1835,7 +1938,7 @@
               },
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-public.createKbnUrlTracker.$1.baseUrldefaultSubUrlstorageKeystateParamsnavLinkUpdater$toastNotificationshistorygetHistorystorageshouldTrackUrlUpdatereturntrueonBeforeNavLinkSavednewNavLinknewNavLink.navLinkUpdater$",
+                "id": "def-public.createKbnUrlTracker.$1.navLinkUpdater$",
                 "type": "Object",
                 "tags": [],
                 "label": "navLinkUpdater$",
@@ -1859,7 +1962,7 @@
               },
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-public.createKbnUrlTracker.$1.baseUrldefaultSubUrlstorageKeystateParamsnavLinkUpdater$toastNotificationshistorygetHistorystorageshouldTrackUrlUpdatereturntrueonBeforeNavLinkSavednewNavLinknewNavLink.toastNotifications",
+                "id": "def-public.createKbnUrlTracker.$1.toastNotifications",
                 "type": "Object",
                 "tags": [],
                 "label": "toastNotifications",
@@ -2020,7 +2123,7 @@
               },
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-public.createKbnUrlTracker.$1.baseUrldefaultSubUrlstorageKeystateParamsnavLinkUpdater$toastNotificationshistorygetHistorystorageshouldTrackUrlUpdatereturntrueonBeforeNavLinkSavednewNavLinknewNavLink.history",
+                "id": "def-public.createKbnUrlTracker.$1.history",
                 "type": "Object",
                 "tags": [],
                 "label": "history",
@@ -2036,7 +2139,7 @@
               },
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-public.createKbnUrlTracker.$1.baseUrldefaultSubUrlstorageKeystateParamsnavLinkUpdater$toastNotificationshistorygetHistorystorageshouldTrackUrlUpdatereturntrueonBeforeNavLinkSavednewNavLinknewNavLink.getHistory",
+                "id": "def-public.createKbnUrlTracker.$1.getHistory",
                 "type": "Function",
                 "tags": [],
                 "label": "getHistory",
@@ -2055,7 +2158,7 @@
               },
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-public.createKbnUrlTracker.$1.baseUrldefaultSubUrlstorageKeystateParamsnavLinkUpdater$toastNotificationshistorygetHistorystorageshouldTrackUrlUpdatereturntrueonBeforeNavLinkSavednewNavLinknewNavLink.storage",
+                "id": "def-public.createKbnUrlTracker.$1.storage",
                 "type": "Object",
                 "tags": [],
                 "label": "storage",
@@ -2070,7 +2173,7 @@
               },
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-public.createKbnUrlTracker.$1.baseUrldefaultSubUrlstorageKeystateParamsnavLinkUpdater$toastNotificationshistorygetHistorystorageshouldTrackUrlUpdatereturntrueonBeforeNavLinkSavednewNavLinknewNavLink.shouldTrackUrlUpdate",
+                "id": "def-public.createKbnUrlTracker.$1.shouldTrackUrlUpdate",
                 "type": "Function",
                 "tags": [],
                 "label": "shouldTrackUrlUpdate",
@@ -2085,7 +2188,7 @@
                 "children": [
                   {
                     "parentPluginId": "kibanaUtils",
-                    "id": "def-public.createKbnUrlTracker.$1.baseUrldefaultSubUrlstorageKeystateParamsnavLinkUpdater$toastNotificationshistorygetHistorystorageshouldTrackUrlUpdatereturntrueonBeforeNavLinkSavednewNavLinknewNavLink.shouldTrackUrlUpdate.$1",
+                    "id": "def-public.createKbnUrlTracker.$1.shouldTrackUrlUpdate.$1",
                     "type": "string",
                     "tags": [],
                     "label": "pathname",
@@ -2104,7 +2207,7 @@
               },
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-public.createKbnUrlTracker.$1.baseUrldefaultSubUrlstorageKeystateParamsnavLinkUpdater$toastNotificationshistorygetHistorystorageshouldTrackUrlUpdatereturntrueonBeforeNavLinkSavednewNavLinknewNavLink.onBeforeNavLinkSaved",
+                "id": "def-public.createKbnUrlTracker.$1.onBeforeNavLinkSaved",
                 "type": "Function",
                 "tags": [],
                 "label": "onBeforeNavLinkSaved",
@@ -2119,7 +2222,7 @@
                 "children": [
                   {
                     "parentPluginId": "kibanaUtils",
-                    "id": "def-public.createKbnUrlTracker.$1.baseUrldefaultSubUrlstorageKeystateParamsnavLinkUpdater$toastNotificationshistorygetHistorystorageshouldTrackUrlUpdatereturntrueonBeforeNavLinkSavednewNavLinknewNavLink.onBeforeNavLinkSaved.$1",
+                    "id": "def-public.createKbnUrlTracker.$1.onBeforeNavLinkSaved.$1",
                     "type": "string",
                     "tags": [],
                     "label": "newNavLink",
@@ -2245,7 +2348,7 @@
         "tags": [],
         "label": "createSessionStorageStateStorage",
         "description": [
-          "\nCreates {@link ISessionStorageStateStorage}\n{@link https://github.com/elastic/kibana/blob/master/src/plugins/kibana_utils/docs/state_sync/storages/session_storage.md | guide}"
+          "\nCreates {@link ISessionStorageStateStorage}\n{@link https://github.com/elastic/kibana/blob/main/src/plugins/kibana_utils/docs/state_sync/storages/session_storage.md | guide}"
         ],
         "signature": [
           "(storage?: Storage) => ",
@@ -2565,7 +2668,7 @@
         "tags": [],
         "label": "createStateContainerReactHelpers",
         "description": [
-          "\nCreates helpers for using {@link StateContainer | State Containers} with react\nRefer to {@link https://github.com/elastic/kibana/blob/master/src/plugins/kibana_utils/docs/state_containers/react.md | guide} for details"
+          "\nCreates helpers for using {@link StateContainer | State Containers} with react\nRefer to {@link https://github.com/elastic/kibana/blob/main/src/plugins/kibana_utils/docs/state_containers/react.md | guide} for details"
         ],
         "signature": [
           "<Container extends ",
@@ -2974,7 +3077,7 @@
           },
           {
             "parentPluginId": "kibanaUtils",
-            "id": "def-public.getStateFromKbnUrl.$3.getFromHashQuerytrue",
+            "id": "def-public.getStateFromKbnUrl.$3",
             "type": "Object",
             "tags": [],
             "label": "{ getFromHashQuery = true }",
@@ -2984,7 +3087,7 @@
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-public.getStateFromKbnUrl.$3.getFromHashQuerytrue.getFromHashQuery",
+                "id": "def-public.getStateFromKbnUrl.$3.getFromHashQuery",
                 "type": "boolean",
                 "tags": [],
                 "label": "getFromHashQuery",
@@ -3043,7 +3146,7 @@
           },
           {
             "parentPluginId": "kibanaUtils",
-            "id": "def-public.getStatesFromKbnUrl.$3.getFromHashQuerytrue",
+            "id": "def-public.getStatesFromKbnUrl.$3",
             "type": "Object",
             "tags": [],
             "label": "{ getFromHashQuery = true }",
@@ -3053,7 +3156,7 @@
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-public.getStatesFromKbnUrl.$3.getFromHashQuerytrue.getFromHashQuery",
+                "id": "def-public.getStatesFromKbnUrl.$3.getFromHashQuery",
                 "type": "boolean",
                 "tags": [],
                 "label": "getFromHashQuery",
@@ -3083,7 +3186,7 @@
         "children": [
           {
             "parentPluginId": "kibanaUtils",
-            "id": "def-public.query",
+            "id": "def-public.hashQuery.$1",
             "type": "Object",
             "tags": [],
             "label": "query",
@@ -3096,7 +3199,7 @@
           },
           {
             "parentPluginId": "kibanaUtils",
-            "id": "def-public.options",
+            "id": "def-public.hashQuery.$2",
             "type": "Object",
             "tags": [],
             "label": "options",
@@ -3126,7 +3229,7 @@
         "children": [
           {
             "parentPluginId": "kibanaUtils",
-            "id": "def-public.url",
+            "id": "def-public.hashUrl.$1",
             "type": "string",
             "tags": [],
             "label": "url",
@@ -3293,7 +3396,7 @@
         "children": [
           {
             "parentPluginId": "kibanaUtils",
-            "id": "def-public.redirectWhenMissing.$1.historynavigateToAppbasePathmappingtoastNotificationsonBeforeRedirect",
+            "id": "def-public.redirectWhenMissing.$1",
             "type": "Object",
             "tags": [],
             "label": "{\n  history,\n  navigateToApp,\n  basePath,\n  mapping,\n  toastNotifications,\n  onBeforeRedirect,\n}",
@@ -3303,7 +3406,7 @@
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-public.redirectWhenMissing.$1.historynavigateToAppbasePathmappingtoastNotificationsonBeforeRedirect.history",
+                "id": "def-public.redirectWhenMissing.$1.history",
                 "type": "Object",
                 "tags": [],
                 "label": "history",
@@ -3317,7 +3420,7 @@
               },
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-public.redirectWhenMissing.$1.historynavigateToAppbasePathmappingtoastNotificationsonBeforeRedirect.navigateToApp",
+                "id": "def-public.redirectWhenMissing.$1.navigateToApp",
                 "type": "Function",
                 "tags": [],
                 "label": "navigateToApp",
@@ -3339,7 +3442,7 @@
                 "children": [
                   {
                     "parentPluginId": "kibanaUtils",
-                    "id": "def-public.appId",
+                    "id": "def-public.redirectWhenMissing.$1.navigateToApp.$1",
                     "type": "string",
                     "tags": [],
                     "label": "appId",
@@ -3349,7 +3452,7 @@
                   },
                   {
                     "parentPluginId": "kibanaUtils",
-                    "id": "def-public.options",
+                    "id": "def-public.redirectWhenMissing.$1.navigateToApp.$2",
                     "type": "Object",
                     "tags": [],
                     "label": "options",
@@ -3371,7 +3474,7 @@
               },
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-public.redirectWhenMissing.$1.historynavigateToAppbasePathmappingtoastNotificationsonBeforeRedirect.basePath",
+                "id": "def-public.redirectWhenMissing.$1.basePath",
                 "type": "Object",
                 "tags": [],
                 "label": "basePath",
@@ -3390,7 +3493,7 @@
               },
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-public.redirectWhenMissing.$1.historynavigateToAppbasePathmappingtoastNotificationsonBeforeRedirect.mapping",
+                "id": "def-public.redirectWhenMissing.$1.mapping",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "mapping",
@@ -3405,7 +3508,7 @@
               },
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-public.redirectWhenMissing.$1.historynavigateToAppbasePathmappingtoastNotificationsonBeforeRedirect.toastNotifications",
+                "id": "def-public.redirectWhenMissing.$1.toastNotifications",
                 "type": "Object",
                 "tags": [],
                 "label": "toastNotifications",
@@ -3566,7 +3669,7 @@
               },
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-public.redirectWhenMissing.$1.historynavigateToAppbasePathmappingtoastNotificationsonBeforeRedirect.onBeforeRedirect",
+                "id": "def-public.redirectWhenMissing.$1.onBeforeRedirect",
                 "type": "Function",
                 "tags": [],
                 "label": "onBeforeRedirect",
@@ -3589,7 +3692,7 @@
                 "children": [
                   {
                     "parentPluginId": "kibanaUtils",
-                    "id": "def-public.redirectWhenMissing.$1.historynavigateToAppbasePathmappingtoastNotificationsonBeforeRedirect.onBeforeRedirect.$1",
+                    "id": "def-public.redirectWhenMissing.$1.onBeforeRedirect.$1",
                     "type": "Object",
                     "tags": [],
                     "label": "error",
@@ -3860,7 +3963,7 @@
           },
           {
             "parentPluginId": "kibanaUtils",
-            "id": "def-public.setStateToKbnUrl.$3.useHashfalsestoreInHashQuerytrue",
+            "id": "def-public.setStateToKbnUrl.$3",
             "type": "Object",
             "tags": [],
             "label": "{ useHash = false, storeInHashQuery = true }",
@@ -3870,7 +3973,7 @@
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-public.setStateToKbnUrl.$3.useHashfalsestoreInHashQuerytrue.useHash",
+                "id": "def-public.setStateToKbnUrl.$3.useHash",
                 "type": "boolean",
                 "tags": [],
                 "label": "useHash",
@@ -3880,7 +3983,7 @@
               },
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-public.setStateToKbnUrl.$3.useHashfalsestoreInHashQuerytrue.storeInHashQuery",
+                "id": "def-public.setStateToKbnUrl.$3.storeInHashQuery",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "storeInHashQuery",
@@ -3918,7 +4021,7 @@
         "tags": [],
         "label": "syncState",
         "description": [
-          "\nUtility for syncing application state wrapped in state container\nwith some kind of storage (e.g. URL)\n\nGo {@link https://github.com/elastic/kibana/tree/master/src/plugins/kibana_utils/docs/state_sync | here} for a complete guide and examples.\n"
+          "\nUtility for syncing application state wrapped in state container\nwith some kind of storage (e.g. URL)\n\nGo {@link https://github.com/elastic/kibana/tree/main/src/plugins/kibana_utils/docs/state_sync | here} for a complete guide and examples.\n"
         ],
         "signature": [
           "({\n  storageKey,\n  stateStorage,\n  stateContainer,\n}: ",
@@ -4053,7 +4156,7 @@
         "children": [
           {
             "parentPluginId": "kibanaUtils",
-            "id": "def-public.query",
+            "id": "def-public.unhashQuery.$1",
             "type": "Object",
             "tags": [],
             "label": "query",
@@ -4066,7 +4169,7 @@
           },
           {
             "parentPluginId": "kibanaUtils",
-            "id": "def-public.options",
+            "id": "def-public.unhashQuery.$2",
             "type": "Object",
             "tags": [],
             "label": "options",
@@ -4096,7 +4199,7 @@
         "children": [
           {
             "parentPluginId": "kibanaUtils",
-            "id": "def-public.url",
+            "id": "def-public.unhashUrl.$1",
             "type": "string",
             "tags": [],
             "label": "url",
@@ -4690,7 +4793,7 @@
         "tags": [],
         "label": "IKbnUrlStateStorage",
         "description": [
-          "\nKbnUrlStateStorage is a state storage for {@link syncState} utility which:\n\n1. Keeps state in sync with the URL.\n2. Serializes data and stores it in the URL in one of the supported formats:\n  * Rison encoded.\n  * Hashed URL: In URL we store only the hash from the serialized state, but the state itself is stored in sessionStorage. See Kibana's `state:storeInSessionStorage` advanced option for more context.\n3. Takes care of listening to the URL updates and notifies state about the updates.\n4. Takes care of batching URL updates to prevent redundant browser history records.\n\n{@link https://github.com/elastic/kibana/blob/master/src/plugins/kibana_utils/docs/state_sync/storages/kbn_url_storage.md | Refer to this guide for more info}"
+          "\nKbnUrlStateStorage is a state storage for {@link syncState} utility which:\n\n1. Keeps state in sync with the URL.\n2. Serializes data and stores it in the URL in one of the supported formats:\n  * Rison encoded.\n  * Hashed URL: In URL we store only the hash from the serialized state, but the state itself is stored in sessionStorage. See Kibana's `state:storeInSessionStorage` advanced option for more context.\n3. Takes care of listening to the URL updates and notifies state about the updates.\n4. Takes care of batching URL updates to prevent redundant browser history records.\n\n{@link https://github.com/elastic/kibana/blob/main/src/plugins/kibana_utils/docs/state_sync/storages/kbn_url_storage.md | Refer to this guide for more info}"
         ],
         "signature": [
           {
@@ -4749,7 +4852,7 @@
               },
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-public.IKbnUrlStateStorage.set.$3.opts",
+                "id": "def-public.IKbnUrlStateStorage.set.$3",
                 "type": "Object",
                 "tags": [],
                 "label": "opts",
@@ -4759,7 +4862,7 @@
                 "children": [
                   {
                     "parentPluginId": "kibanaUtils",
-                    "id": "def-public.IKbnUrlStateStorage.set.$3.opts.replace",
+                    "id": "def-public.IKbnUrlStateStorage.set.$3.replace",
                     "type": "boolean",
                     "tags": [],
                     "label": "replace",
@@ -4939,7 +5042,7 @@
         "tags": [],
         "label": "ISessionStorageStateStorage",
         "description": [
-          "\n{@link IStateStorage} for storing state in browser {@link Storage}\n{@link https://github.com/elastic/kibana/blob/master/src/plugins/kibana_utils/docs/state_sync/storages/session_storage.md | guide}"
+          "\n{@link IStateStorage} for storing state in browser {@link Storage}\n{@link https://github.com/elastic/kibana/blob/main/src/plugins/kibana_utils/docs/state_sync/storages/session_storage.md | guide}"
         ],
         "signature": [
           {
@@ -5566,7 +5669,7 @@
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-public.state",
+                "id": "def-public.ReduxLikeStateContainer.reducer.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "state",
@@ -5579,7 +5682,7 @@
               },
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-public.action",
+                "id": "def-public.ReduxLikeStateContainer.reducer.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "action",
@@ -6019,7 +6122,7 @@
         "children": [
           {
             "parentPluginId": "kibanaUtils",
-            "id": "def-public.previous",
+            "id": "def-public.Comparator.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "previous",
@@ -6032,7 +6135,7 @@
           },
           {
             "parentPluginId": "kibanaUtils",
-            "id": "def-public.current",
+            "id": "def-public.Comparator.$2",
             "type": "Uncategorized",
             "tags": [],
             "label": "current",
@@ -6072,7 +6175,7 @@
         "children": [
           {
             "parentPluginId": "kibanaUtils",
-            "id": "def-public.mapStateToProp",
+            "id": "def-public.Connect.$1",
             "type": "Function",
             "tags": [],
             "label": "mapStateToProp",
@@ -6086,7 +6189,7 @@
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-public.state",
+                "id": "def-public.Connect.$1.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "state",
@@ -6120,7 +6223,7 @@
         "children": [
           {
             "parentPluginId": "kibanaUtils",
-            "id": "def-public.action",
+            "id": "def-public.Dispatch.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "action",
@@ -6158,7 +6261,7 @@
         "children": [
           {
             "parentPluginId": "kibanaUtils",
-            "id": "def-public.state",
+            "id": "def-public.EnsurePureSelector.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "state",
@@ -6190,7 +6293,7 @@
         "children": [
           {
             "parentPluginId": "kibanaUtils",
-            "id": "def-public.state",
+            "id": "def-public.EnsurePureTransition.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "state",
@@ -6238,7 +6341,7 @@
         "children": [
           {
             "parentPluginId": "kibanaUtils",
-            "id": "def-public.state",
+            "id": "def-public.MapStateToProps.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "state",
@@ -6290,7 +6393,7 @@
         "children": [
           {
             "parentPluginId": "kibanaUtils",
-            "id": "def-public.store",
+            "id": "def-public.Middleware.$1",
             "type": "Object",
             "tags": [],
             "label": "store",
@@ -6330,7 +6433,7 @@
         "children": [
           {
             "parentPluginId": "kibanaUtils",
-            "id": "def-public.state",
+            "id": "def-public.PureSelector.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "state",
@@ -6353,9 +6456,21 @@
         "description": [],
         "signature": [
           "{ [K in keyof T]: ReturnType<",
-          "Ensure",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "server",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-server.Ensure",
+            "text": "Ensure"
+          },
           "<",
-          "Ensure",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "server",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-server.Ensure",
+            "text": "Ensure"
+          },
           "<T[K], ",
           {
             "pluginId": "kibanaUtils",
@@ -6386,7 +6501,13 @@
         "label": "PureSelectorToSelector",
         "description": [],
         "signature": [
-          "Ensure",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "server",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-server.Ensure",
+            "text": "Ensure"
+          },
           "<T, ",
           {
             "pluginId": "kibanaUtils",
@@ -6403,7 +6524,7 @@
         "children": [
           {
             "parentPluginId": "kibanaUtils",
-            "id": "def-public.args",
+            "id": "def-public.PureSelectorToSelector.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "args",
@@ -6437,7 +6558,7 @@
         "children": [
           {
             "parentPluginId": "kibanaUtils",
-            "id": "def-public.state",
+            "id": "def-public.Reducer.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "state",
@@ -6450,7 +6571,7 @@
           },
           {
             "parentPluginId": "kibanaUtils",
-            "id": "def-public.action",
+            "id": "def-public.Reducer.$2",
             "type": "Object",
             "tags": [],
             "label": "action",
@@ -6481,7 +6602,7 @@
         "children": [
           {
             "parentPluginId": "kibanaUtils",
-            "id": "def-public.args",
+            "id": "def-public.Selector.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "args",
@@ -6511,7 +6632,7 @@
         "children": [
           {
             "parentPluginId": "kibanaUtils",
-            "id": "def-public.value",
+            "id": "def-public.Set.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "value",
@@ -6691,7 +6812,7 @@
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-public.query",
+                "id": "def-public.url.encodeQuery.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "query",
@@ -6705,7 +6826,7 @@
               },
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-public.encodeFunction",
+                "id": "def-public.url.encodeQuery.$2",
                 "type": "Function",
                 "tags": [],
                 "label": "encodeFunction",
@@ -6719,7 +6840,7 @@
                 "children": [
                   {
                     "parentPluginId": "kibanaUtils",
-                    "id": "def-public.val",
+                    "id": "def-public.url.encodeQuery.$2.$1",
                     "type": "string",
                     "tags": [],
                     "label": "val",
@@ -6729,7 +6850,7 @@
                   },
                   {
                     "parentPluginId": "kibanaUtils",
-                    "id": "def-public.pctEncodeSpaces",
+                    "id": "def-public.url.encodeQuery.$2.$2",
                     "type": "CompoundType",
                     "tags": [],
                     "label": "pctEncodeSpaces",
@@ -6744,7 +6865,7 @@
               },
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-public.pctEncodeSpaces",
+                "id": "def-public.url.encodeQuery.$3",
                 "type": "boolean",
                 "tags": [],
                 "label": "pctEncodeSpaces",
@@ -6770,7 +6891,7 @@
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-public.val",
+                "id": "def-public.url.encodeUriQuery.$1",
                 "type": "string",
                 "tags": [],
                 "label": "val",
@@ -6780,7 +6901,7 @@
               },
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-public.pctEncodeSpaces",
+                "id": "def-public.url.encodeUriQuery.$2",
                 "type": "boolean",
                 "tags": [],
                 "label": "pctEncodeSpaces",
@@ -6806,7 +6927,7 @@
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-public.params",
+                "id": "def-public.url.addQueryParam.$1",
                 "type": "string",
                 "tags": [],
                 "label": "params",
@@ -6816,7 +6937,7 @@
               },
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-public.key",
+                "id": "def-public.url.addQueryParam.$2",
                 "type": "string",
                 "tags": [],
                 "label": "key",
@@ -6826,7 +6947,7 @@
               },
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-public.value",
+                "id": "def-public.url.addQueryParam.$3",
                 "type": "string",
                 "tags": [],
                 "label": "value",
@@ -6842,7 +6963,55 @@
         ],
         "initialIsOpen": false
       }
-    ]
+    ],
+    "setup": {
+      "parentPluginId": "kibanaUtils",
+      "id": "def-public.KibanaUtilsSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "KibanaUtilsSetup",
+      "description": [],
+      "path": "src/plugins/kibana_utils/public/plugin.ts",
+      "deprecated": false,
+      "children": [
+        {
+          "parentPluginId": "kibanaUtils",
+          "id": "def-public.KibanaUtilsSetup.setVersion",
+          "type": "Function",
+          "tags": [],
+          "label": "setVersion",
+          "description": [],
+          "signature": [
+            "(history: Pick<",
+            "History",
+            "<any>, \"replace\" | \"location\">) => void"
+          ],
+          "path": "src/plugins/kibana_utils/public/plugin.ts",
+          "deprecated": false,
+          "children": [
+            {
+              "parentPluginId": "kibanaUtils",
+              "id": "def-public.KibanaUtilsSetup.setVersion.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "history",
+              "description": [],
+              "signature": [
+                "Pick<",
+                "History",
+                "<any>, \"replace\" | \"location\">"
+              ],
+              "path": "src/plugins/kibana_utils/public/plugin.ts",
+              "deprecated": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
+        }
+      ],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    }
   },
   "server": {
     "classes": [
@@ -7047,7 +7216,7 @@
         "label": "createGetterSetter",
         "description": [],
         "signature": [
-          "<T extends object>(name: string) => [",
+          "<T extends object>(name: string, isValueRequired?: boolean) => [",
           {
             "pluginId": "kibanaUtils",
             "scope": "common",
@@ -7077,6 +7246,20 @@
             "description": [],
             "signature": [
               "string"
+            ],
+            "path": "src/plugins/kibana_utils/common/create_getter_setter.ts",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "kibanaUtils",
+            "id": "def-server.createGetterSetter.$2",
+            "type": "boolean",
+            "tags": [],
+            "label": "isValueRequired",
+            "description": [],
+            "signature": [
+              "boolean"
             ],
             "path": "src/plugins/kibana_utils/common/create_getter_setter.ts",
             "deprecated": false,
@@ -7218,6 +7401,94 @@
         "returnComment": [
           "`KbnServerError`"
         ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "kibanaUtils",
+        "id": "def-server.mergeMigrationFunctionMaps",
+        "type": "Function",
+        "tags": [],
+        "label": "mergeMigrationFunctionMaps",
+        "description": [],
+        "signature": [
+          "(obj1: ",
+          {
+            "pluginId": "kibanaUtils",
+            "scope": "common",
+            "docId": "kibKibanaUtilsPluginApi",
+            "section": "def-common.MigrateFunctionsObject",
+            "text": "MigrateFunctionsObject"
+          },
+          ", obj2: ",
+          {
+            "pluginId": "kibanaUtils",
+            "scope": "common",
+            "docId": "kibKibanaUtilsPluginApi",
+            "section": "def-common.MigrateFunctionsObject",
+            "text": "MigrateFunctionsObject"
+          },
+          ") => { [x: string]: ",
+          {
+            "pluginId": "kibanaUtils",
+            "scope": "common",
+            "docId": "kibKibanaUtilsPluginApi",
+            "section": "def-common.MigrateFunction",
+            "text": "MigrateFunction"
+          },
+          "<any, any>; } & ",
+          {
+            "pluginId": "kibanaUtils",
+            "scope": "common",
+            "docId": "kibKibanaUtilsPluginApi",
+            "section": "def-common.MigrateFunctionsObject",
+            "text": "MigrateFunctionsObject"
+          }
+        ],
+        "path": "src/plugins/kibana_utils/common/persistable_state/merge_migration_function_map.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "kibanaUtils",
+            "id": "def-server.mergeMigrationFunctionMaps.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "obj1",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "kibanaUtils",
+                "scope": "common",
+                "docId": "kibKibanaUtilsPluginApi",
+                "section": "def-common.MigrateFunctionsObject",
+                "text": "MigrateFunctionsObject"
+              }
+            ],
+            "path": "src/plugins/kibana_utils/common/persistable_state/merge_migration_function_map.ts",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "kibanaUtils",
+            "id": "def-server.mergeMigrationFunctionMaps.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "obj2",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "kibanaUtils",
+                "scope": "common",
+                "docId": "kibKibanaUtilsPluginApi",
+                "section": "def-common.MigrateFunctionsObject",
+                "text": "MigrateFunctionsObject"
+              }
+            ],
+            "path": "src/plugins/kibana_utils/common/persistable_state/merge_migration_function_map.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
         "initialIsOpen": false
       },
       {
@@ -7677,7 +7948,7 @@
         "children": [
           {
             "parentPluginId": "kibanaUtils",
-            "id": "def-server.value",
+            "id": "def-server.Set.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "value",
@@ -7723,7 +7994,7 @@
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-server.query",
+                "id": "def-server.url.encodeQuery.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "query",
@@ -7737,7 +8008,7 @@
               },
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-server.encodeFunction",
+                "id": "def-server.url.encodeQuery.$2",
                 "type": "Function",
                 "tags": [],
                 "label": "encodeFunction",
@@ -7751,7 +8022,7 @@
                 "children": [
                   {
                     "parentPluginId": "kibanaUtils",
-                    "id": "def-server.val",
+                    "id": "def-server.url.encodeQuery.$2.$1",
                     "type": "string",
                     "tags": [],
                     "label": "val",
@@ -7761,7 +8032,7 @@
                   },
                   {
                     "parentPluginId": "kibanaUtils",
-                    "id": "def-server.pctEncodeSpaces",
+                    "id": "def-server.url.encodeQuery.$2.$2",
                     "type": "CompoundType",
                     "tags": [],
                     "label": "pctEncodeSpaces",
@@ -7776,7 +8047,7 @@
               },
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-server.pctEncodeSpaces",
+                "id": "def-server.url.encodeQuery.$3",
                 "type": "boolean",
                 "tags": [],
                 "label": "pctEncodeSpaces",
@@ -7802,7 +8073,7 @@
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-server.val",
+                "id": "def-server.url.encodeUriQuery.$1",
                 "type": "string",
                 "tags": [],
                 "label": "val",
@@ -7812,7 +8083,7 @@
               },
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-server.pctEncodeSpaces",
+                "id": "def-server.url.encodeUriQuery.$2",
                 "type": "boolean",
                 "tags": [],
                 "label": "pctEncodeSpaces",
@@ -7838,7 +8109,7 @@
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-server.params",
+                "id": "def-server.url.addQueryParam.$1",
                 "type": "string",
                 "tags": [],
                 "label": "params",
@@ -7848,7 +8119,7 @@
               },
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-server.key",
+                "id": "def-server.url.addQueryParam.$2",
                 "type": "string",
                 "tags": [],
                 "label": "key",
@@ -7858,7 +8129,7 @@
               },
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-server.value",
+                "id": "def-server.url.addQueryParam.$3",
                 "type": "string",
                 "tags": [],
                 "label": "value",
@@ -7935,6 +8206,82 @@
       },
       {
         "parentPluginId": "kibanaUtils",
+        "id": "def-common.CharacterNotAllowedInField",
+        "type": "Class",
+        "tags": [],
+        "label": "CharacterNotAllowedInField",
+        "description": [
+          "\nwhen a user is attempting to create a field with disallowed character in the name, like *"
+        ],
+        "signature": [
+          {
+            "pluginId": "kibanaUtils",
+            "scope": "common",
+            "docId": "kibKibanaUtilsPluginApi",
+            "section": "def-common.CharacterNotAllowedInField",
+            "text": "CharacterNotAllowedInField"
+          },
+          " extends ",
+          {
+            "pluginId": "kibanaUtils",
+            "scope": "common",
+            "docId": "kibKibanaUtilsPluginApi",
+            "section": "def-common.KbnError",
+            "text": "KbnError"
+          }
+        ],
+        "path": "src/plugins/kibana_utils/common/errors/errors.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "kibanaUtils",
+            "id": "def-common.CharacterNotAllowedInField.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "src/plugins/kibana_utils/common/errors/errors.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "kibanaUtils",
+                "id": "def-common.CharacterNotAllowedInField.Unnamed.$1",
+                "type": "string",
+                "tags": [],
+                "label": "character",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/plugins/kibana_utils/common/errors/errors.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "kibanaUtils",
+                "id": "def-common.CharacterNotAllowedInField.Unnamed.$2",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/plugins/kibana_utils/common/errors/errors.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "kibanaUtils",
         "id": "def-common.Defer",
         "type": "Class",
         "tags": [],
@@ -7971,7 +8318,7 @@
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-common.data",
+                "id": "def-common.Defer.resolve.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "data",
@@ -8000,7 +8347,7 @@
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-common.error",
+                "id": "def-common.Defer.reject.$1",
                 "type": "Any",
                 "tags": [],
                 "label": "error",
@@ -8510,7 +8857,7 @@
         "children": [
           {
             "parentPluginId": "kibanaUtils",
-            "id": "def-common.o",
+            "id": "def-common.calculateObjectHash.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "o",
@@ -8532,7 +8879,7 @@
         "label": "createGetterSetter",
         "description": [],
         "signature": [
-          "<T extends object>(name: string) => [",
+          "<T extends object>(name: string, isValueRequired?: boolean) => [",
           {
             "pluginId": "kibanaUtils",
             "scope": "common",
@@ -8562,6 +8909,20 @@
             "description": [],
             "signature": [
               "string"
+            ],
+            "path": "src/plugins/kibana_utils/common/create_getter_setter.ts",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "kibanaUtils",
+            "id": "def-common.createGetterSetter.$2",
+            "type": "boolean",
+            "tags": [],
+            "label": "isValueRequired",
+            "description": [],
+            "signature": [
+              "boolean"
             ],
             "path": "src/plugins/kibana_utils/common/create_getter_setter.ts",
             "deprecated": false,
@@ -8786,7 +9147,7 @@
         "tags": [],
         "label": "createStateContainerReactHelpers",
         "description": [
-          "\nCreates helpers for using {@link StateContainer | State Containers} with react\nRefer to {@link https://github.com/elastic/kibana/blob/master/src/plugins/kibana_utils/docs/state_containers/react.md | guide} for details"
+          "\nCreates helpers for using {@link StateContainer | State Containers} with react\nRefer to {@link https://github.com/elastic/kibana/blob/main/src/plugins/kibana_utils/docs/state_containers/react.md | guide} for details"
         ],
         "signature": [
           "<Container extends ",
@@ -9022,7 +9383,7 @@
         "children": [
           {
             "parentPluginId": "kibanaUtils",
-            "id": "def-common.glob",
+            "id": "def-common.makeRegEx.$1",
             "type": "string",
             "tags": [],
             "label": "glob",
@@ -9146,7 +9507,13 @@
             "text": "VersionedState"
           },
           "<",
-          "SerializableRecord",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "server",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-server.Serializable",
+            "text": "Serializable"
+          },
           ">) => S"
         ],
         "path": "src/plugins/kibana_utils/common/persistable_state/migrate_to_latest.ts",
@@ -9188,7 +9555,13 @@
                 "text": "VersionedState"
               },
               "<",
-              "SerializableRecord",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "server",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-server.Serializable",
+                "text": "Serializable"
+              },
               ">"
             ],
             "path": "src/plugins/kibana_utils/common/persistable_state/migrate_to_latest.ts",
@@ -9991,7 +10364,13 @@
                 "text": "VersionedState"
               },
               "<",
-              "SerializableRecord",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "server",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-server.Serializable",
+                "text": "Serializable"
+              },
               ">) => P) | undefined"
             ],
             "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
@@ -10015,7 +10394,13 @@
                     "text": "VersionedState"
                   },
                   "<",
-                  "SerializableRecord",
+                  {
+                    "pluginId": "@kbn/utility-types",
+                    "scope": "server",
+                    "docId": "kibKbnUtilityTypesPluginApi",
+                    "section": "def-server.Serializable",
+                    "text": "Serializable"
+                  },
                   ">"
                 ],
                 "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
@@ -10117,7 +10502,7 @@
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-common.state",
+                "id": "def-common.ReduxLikeStateContainer.reducer.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "state",
@@ -10130,7 +10515,7 @@
               },
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-common.action",
+                "id": "def-common.ReduxLikeStateContainer.reducer.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "action",
@@ -10556,7 +10941,7 @@
         "children": [
           {
             "parentPluginId": "kibanaUtils",
-            "id": "def-common.previous",
+            "id": "def-common.Comparator.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "previous",
@@ -10569,7 +10954,7 @@
           },
           {
             "parentPluginId": "kibanaUtils",
-            "id": "def-common.current",
+            "id": "def-common.Comparator.$2",
             "type": "Uncategorized",
             "tags": [],
             "label": "current",
@@ -10609,7 +10994,7 @@
         "children": [
           {
             "parentPluginId": "kibanaUtils",
-            "id": "def-common.mapStateToProp",
+            "id": "def-common.Connect.$1",
             "type": "Function",
             "tags": [],
             "label": "mapStateToProp",
@@ -10623,7 +11008,7 @@
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-common.state",
+                "id": "def-common.Connect.$1.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "state",
@@ -10657,7 +11042,7 @@
         "children": [
           {
             "parentPluginId": "kibanaUtils",
-            "id": "def-common.action",
+            "id": "def-common.Dispatch.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "action",
@@ -10695,7 +11080,7 @@
         "children": [
           {
             "parentPluginId": "kibanaUtils",
-            "id": "def-common.state",
+            "id": "def-common.EnsurePureSelector.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "state",
@@ -10727,7 +11112,7 @@
         "children": [
           {
             "parentPluginId": "kibanaUtils",
-            "id": "def-common.state",
+            "id": "def-common.EnsurePureTransition.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "state",
@@ -10775,7 +11160,7 @@
         "children": [
           {
             "parentPluginId": "kibanaUtils",
-            "id": "def-common.state",
+            "id": "def-common.MapStateToProps.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "state",
@@ -10827,7 +11212,7 @@
         "children": [
           {
             "parentPluginId": "kibanaUtils",
-            "id": "def-common.store",
+            "id": "def-common.Middleware.$1",
             "type": "Object",
             "tags": [],
             "label": "store",
@@ -10859,7 +11244,7 @@
         "children": [
           {
             "parentPluginId": "kibanaUtils",
-            "id": "def-common.state",
+            "id": "def-common.MigrateFunction.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "state",
@@ -10936,9 +11321,21 @@
         ],
         "signature": [
           "(state: ",
-          "SerializableRecord",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "server",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-server.SerializableRecord",
+            "text": "SerializableRecord"
+          },
           ", version: string) => ",
-          "SerializableRecord"
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "server",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-server.SerializableRecord",
+            "text": "SerializableRecord"
+          }
         ],
         "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
         "deprecated": false,
@@ -10946,20 +11343,26 @@
         "children": [
           {
             "parentPluginId": "kibanaUtils",
-            "id": "def-common.state",
+            "id": "def-common.PersistableStateMigrateFn.$1",
             "type": "Object",
             "tags": [],
             "label": "state",
             "description": [],
             "signature": [
-              "SerializableRecord"
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "server",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-server.SerializableRecord",
+                "text": "SerializableRecord"
+              }
             ],
             "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
             "deprecated": false
           },
           {
             "parentPluginId": "kibanaUtils",
-            "id": "def-common.version",
+            "id": "def-common.PersistableStateMigrateFn.$2",
             "type": "string",
             "tags": [],
             "label": "version",
@@ -10994,7 +11397,7 @@
         "children": [
           {
             "parentPluginId": "kibanaUtils",
-            "id": "def-common.state",
+            "id": "def-common.PureSelector.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "state",
@@ -11017,9 +11420,21 @@
         "description": [],
         "signature": [
           "{ [K in keyof T]: ReturnType<",
-          "Ensure",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "server",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-server.Ensure",
+            "text": "Ensure"
+          },
           "<",
-          "Ensure",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "server",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-server.Ensure",
+            "text": "Ensure"
+          },
           "<T[K], ",
           {
             "pluginId": "kibanaUtils",
@@ -11050,7 +11465,13 @@
         "label": "PureSelectorToSelector",
         "description": [],
         "signature": [
-          "Ensure",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "server",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-server.Ensure",
+            "text": "Ensure"
+          },
           "<T, ",
           {
             "pluginId": "kibanaUtils",
@@ -11067,7 +11488,7 @@
         "children": [
           {
             "parentPluginId": "kibanaUtils",
-            "id": "def-common.args",
+            "id": "def-common.PureSelectorToSelector.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "args",
@@ -11101,7 +11522,7 @@
         "children": [
           {
             "parentPluginId": "kibanaUtils",
-            "id": "def-common.state",
+            "id": "def-common.Reducer.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "state",
@@ -11114,7 +11535,7 @@
           },
           {
             "parentPluginId": "kibanaUtils",
-            "id": "def-common.action",
+            "id": "def-common.Reducer.$2",
             "type": "Object",
             "tags": [],
             "label": "action",
@@ -11145,7 +11566,7 @@
         "children": [
           {
             "parentPluginId": "kibanaUtils",
-            "id": "def-common.args",
+            "id": "def-common.Selector.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "args",
@@ -11175,7 +11596,7 @@
         "children": [
           {
             "parentPluginId": "kibanaUtils",
-            "id": "def-common.value",
+            "id": "def-common.Set.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "value",
@@ -11271,7 +11692,7 @@
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-common.query",
+                "id": "def-common.url.encodeQuery.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "query",
@@ -11285,7 +11706,7 @@
               },
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-common.encodeFunction",
+                "id": "def-common.url.encodeQuery.$2",
                 "type": "Function",
                 "tags": [],
                 "label": "encodeFunction",
@@ -11299,7 +11720,7 @@
                 "children": [
                   {
                     "parentPluginId": "kibanaUtils",
-                    "id": "def-common.val",
+                    "id": "def-common.url.encodeQuery.$2.$1",
                     "type": "string",
                     "tags": [],
                     "label": "val",
@@ -11309,7 +11730,7 @@
                   },
                   {
                     "parentPluginId": "kibanaUtils",
-                    "id": "def-common.pctEncodeSpaces",
+                    "id": "def-common.url.encodeQuery.$2.$2",
                     "type": "CompoundType",
                     "tags": [],
                     "label": "pctEncodeSpaces",
@@ -11324,7 +11745,7 @@
               },
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-common.pctEncodeSpaces",
+                "id": "def-common.url.encodeQuery.$3",
                 "type": "boolean",
                 "tags": [],
                 "label": "pctEncodeSpaces",
@@ -11350,7 +11771,7 @@
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-common.val",
+                "id": "def-common.url.encodeUriQuery.$1",
                 "type": "string",
                 "tags": [],
                 "label": "val",
@@ -11360,7 +11781,7 @@
               },
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-common.pctEncodeSpaces",
+                "id": "def-common.url.encodeUriQuery.$2",
                 "type": "boolean",
                 "tags": [],
                 "label": "pctEncodeSpaces",
@@ -11386,7 +11807,7 @@
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-common.params",
+                "id": "def-common.url.addQueryParam.$1",
                 "type": "string",
                 "tags": [],
                 "label": "params",
@@ -11396,7 +11817,7 @@
               },
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-common.key",
+                "id": "def-common.url.addQueryParam.$2",
                 "type": "string",
                 "tags": [],
                 "label": "key",
@@ -11406,7 +11827,7 @@
               },
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-common.value",
+                "id": "def-common.url.addQueryParam.$3",
                 "type": "string",
                 "tags": [],
                 "label": "value",

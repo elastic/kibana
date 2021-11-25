@@ -23,7 +23,8 @@ export type ExpressionTagcloudPluginStart = void;
 
 export class ExpressionTagcloudPlugin
   implements
-    Plugin<ExpressionTagcloudPluginSetup, ExpressionTagcloudPluginStart, SetupDeps, StartDeps> {
+    Plugin<ExpressionTagcloudPluginSetup, ExpressionTagcloudPluginStart, SetupDeps, StartDeps>
+{
   public setup(core: CoreSetup, { expressions }: SetupDeps): ExpressionTagcloudPluginSetup {
     expressions.registerFunction(tagcloudFunction);
   }

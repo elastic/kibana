@@ -20,7 +20,8 @@ import { ContactCardInitializer } from './contact_card_initializer';
 export const CONTACT_CARD_EMBEDDABLE = 'CONTACT_CARD_EMBEDDABLE';
 
 export class ContactCardEmbeddableFactory
-  implements EmbeddableFactoryDefinition<ContactCardEmbeddableInput> {
+  implements EmbeddableFactoryDefinition<ContactCardEmbeddableInput>
+{
   public readonly type = CONTACT_CARD_EMBEDDABLE;
 
   constructor(

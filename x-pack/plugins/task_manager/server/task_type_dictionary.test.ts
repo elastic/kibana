@@ -36,7 +36,7 @@ const getMockTaskDefinitions = (opts: Opts) => {
       },
     };
   }
-  return (tasks as unknown) as Record<string, TaskDefinition>;
+  return tasks as unknown as Record<string, TaskDefinition>;
 };
 
 describe('taskTypeDictionary', () => {

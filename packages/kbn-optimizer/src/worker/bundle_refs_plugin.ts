@@ -65,21 +65,22 @@ export class BundleRefsPlugin {
       // entry then create a BundleRefModule instead of a NormalModule.
       compilationParams.normalModuleFactory.hooks.factory.tap(
         'BundleRefsPlugin/normalModuleFactory/factory',
-        (wrappedFactory: ModuleFactory): ModuleFactory => (data, callback) => {
-          const context = data.context;
-          const dep = data.dependencies[0];
+        (wrappedFactory: ModuleFactory): ModuleFactory =>
+          (data, callback) => {
+            const context = data.context;
+            const dep = data.dependencies[0];
 
-          this.maybeReplaceImport(context, dep.request).then(
-            (module) => {
-              if (!module) {
-                wrappedFactory(data, callback);
-              } else {
-                callback(undefined, module);
-              }
-            },
-            (error) => callback(error)
-          );
-        }
+            this.maybeReplaceImport(context, dep.request).then(
+              (module) => {
+                if (!module) {
+                  wrappedFactory(data, callback);
+                } else {
+                  callback(undefined, module);
+                }
+              },
+              (error) => callback(error)
+            );
+          }
       );
     });
 

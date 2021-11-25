@@ -43,14 +43,15 @@ describe('EngineLogic', () => {
     schema: { test: SchemaType.Text },
     apiTokens: [],
     apiKey: 'some-key',
+    adaptive_relevance_suggestions_active: true,
   };
 
   const DEFAULT_VALUES = {
     dataLoading: true,
     engine: {},
     engineName: '',
-    isEngineEmpty: true,
-    isEngineSchemaEmpty: true,
+    hasNoDocuments: true,
+    hasEmptySchema: true,
     isMetaEngine: false,
     isSampleEngine: false,
     hasSchemaErrors: false,
@@ -64,8 +65,8 @@ describe('EngineLogic', () => {
   const DEFAULT_VALUES_WITH_ENGINE = {
     ...DEFAULT_VALUES,
     engine: mockEngineData,
-    isEngineEmpty: false,
-    isEngineSchemaEmpty: false,
+    hasNoDocuments: false,
+    hasEmptySchema: false,
   };
 
   beforeEach(() => {
@@ -255,8 +256,8 @@ describe('EngineLogic', () => {
         expect(EngineLogic.actions.onPollStart).toHaveBeenCalled();
       });
 
-      it('polls for engine data if the current engine is empty', () => {
-        mount({ engine: {} });
+      it('polls for engine data if the current engine has no documents', () => {
+        mount({ engine: { ...mockEngineData, document_count: 0 } });
         jest.spyOn(EngineLogic.actions, 'initializeEngine');
 
         EngineLogic.actions.pollEmptyEngine();
@@ -267,8 +268,8 @@ describe('EngineLogic', () => {
         expect(EngineLogic.actions.initializeEngine).toHaveBeenCalledTimes(2);
       });
 
-      it('cancels the poll if the current engine changed from empty to non-empty', () => {
-        mount({ engine: mockEngineData });
+      it('cancels the poll if the current engine has documents', () => {
+        mount({ engine: { ...mockEngineData, document_count: 1 } });
         jest.spyOn(EngineLogic.actions, 'stopPolling');
         jest.spyOn(EngineLogic.actions, 'initializeEngine');
 
@@ -312,7 +313,7 @@ describe('EngineLogic', () => {
   });
 
   describe('selectors', () => {
-    describe('isEngineEmpty', () => {
+    describe('hasNoDocuments', () => {
       it('returns true if the engine contains no documents', () => {
         const engine = { ...mockEngineData, document_count: 0 };
         mount({ engine });
@@ -320,7 +321,7 @@ describe('EngineLogic', () => {
         expect(EngineLogic.values).toEqual({
           ...DEFAULT_VALUES_WITH_ENGINE,
           engine,
-          isEngineEmpty: true,
+          hasNoDocuments: true,
         });
       });
 
@@ -329,12 +330,12 @@ describe('EngineLogic', () => {
 
         expect(EngineLogic.values).toEqual({
           ...DEFAULT_VALUES,
-          isEngineEmpty: true,
+          hasNoDocuments: true,
         });
       });
     });
 
-    describe('isEngineSchemaEmpty', () => {
+    describe('hasEmptySchema', () => {
       it('returns true if the engine schema contains no fields', () => {
         const engine = { ...mockEngineData, schema: {} };
         mount({ engine });
@@ -342,7 +343,7 @@ describe('EngineLogic', () => {
         expect(EngineLogic.values).toEqual({
           ...DEFAULT_VALUES_WITH_ENGINE,
           engine,
-          isEngineSchemaEmpty: true,
+          hasEmptySchema: true,
         });
       });
 
@@ -351,7 +352,7 @@ describe('EngineLogic', () => {
 
         expect(EngineLogic.values).toEqual({
           ...DEFAULT_VALUES,
-          isEngineSchemaEmpty: true,
+          hasEmptySchema: true,
         });
       });
     });

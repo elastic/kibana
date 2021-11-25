@@ -11,10 +11,11 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const { visualBuilder, visualize, visChart } = getPageObjects([
+  const { visualBuilder, visualize, visChart, settings } = getPageObjects([
     'visualBuilder',
     'visualize',
     'visChart',
+    'settings',
   ]);
   const findService = getService('find');
   const retry = getService('retry');
@@ -45,6 +46,19 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(tableData).to.be(EXPECTED);
       });
 
+      it('should display drilldown urls', async () => {
+        const baseURL = 'http://elastic.co/foo/';
+
+        await visualBuilder.clickPanelOptions('table');
+        await visualBuilder.setDrilldownUrl(`${baseURL}{{key}}`);
+
+        await retry.try(async () => {
+          const links = await findService.allByCssSelector(`a[href="${baseURL}ios"]`);
+
+          expect(links.length).to.be(1);
+        });
+      });
+
       it('should display correct values on changing metrics aggregation', async () => {
         const EXPECTED = 'OS Cardinality\nwin 8 12\nwin xp 9\nwin 7 8\nios 5\nosx 3';
 
@@ -71,6 +85,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           'OS Variance of bytes\nwin 8 2,707,941.822\nwin xp 2,595,612.24\nwin 7 16,055,541.306\nios 6,505,206.56\nosx 1,016,620.667';
         await visualBuilder.selectAggType('Variance');
         await visualBuilder.setFieldForAggregation('bytes');
+        await visualBuilder.clickSeriesOption();
+        await visualBuilder.changeDataFormatter('number');
 
         const tableData = await visualBuilder.getViewTable();
         expect(tableData).to.be(EXPECTED);
@@ -120,6 +136,63 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         const tableData = await visualBuilder.getViewTable();
         expect(tableData).to.be(EXPECTED);
+      });
+
+      describe('applying field formats from Advanced Settings', () => {
+        const toggleSetFormatForMachineOsRaw = async () => {
+          await settings.navigateTo();
+          await settings.clickKibanaIndexPatterns();
+          await settings.clickIndexPatternLogstash();
+          await settings.openControlsByName('machine.os.raw');
+          await settings.toggleRow('formatRow');
+        };
+
+        before(async () => {
+          await toggleSetFormatForMachineOsRaw();
+          await settings.setFieldFormat('string');
+          await settings.setScriptedFieldStringTransform('upper');
+          await settings.controlChangeSave();
+        });
+
+        beforeEach(async () => {
+          await visualBuilder.selectAggType('Average');
+          await visualBuilder.setFieldForAggregation('bytes');
+        });
+
+        it('should display field formatted row labels with field formatted data by default', async () => {
+          const expected =
+            'OS Average of bytes\nWIN 8 6.786KB\nWIN XP 3.804KB\nWIN 7 6.596KB\nIOS 4.844KB\nOSX 3.06KB';
+
+          const tableData = await visualBuilder.getViewTable();
+          expect(tableData).to.be(expected);
+        });
+
+        it('should display field formatted row labels with raw data', async () => {
+          const expected =
+            'OS Average of bytes\nWIN 8 6,948.846\nWIN XP 3,895.6\nWIN 7 6,753.833\nIOS 4,960.2\nOSX 3,133';
+
+          await visualBuilder.clickSeriesOption();
+          await visualBuilder.changeDataFormatter('number');
+
+          const tableData = await visualBuilder.getViewTable();
+          expect(tableData).to.be(expected);
+        });
+
+        it('should display field formatted row labels with TSVB formatted data', async () => {
+          const expected =
+            'OS Average of bytes\nWIN 8 694,884.615%\nWIN XP 389,560%\nWIN 7 675,383.333%\nIOS 496,020%\nOSX 313,300%';
+
+          await visualBuilder.clickSeriesOption();
+          await visualBuilder.changeDataFormatter('percent');
+
+          const tableData = await visualBuilder.getViewTable();
+          expect(tableData).to.be(expected);
+        });
+
+        after(async () => {
+          await toggleSetFormatForMachineOsRaw();
+          await settings.controlChangeSave();
+        });
       });
 
       it('should display drilldown urls', async () => {

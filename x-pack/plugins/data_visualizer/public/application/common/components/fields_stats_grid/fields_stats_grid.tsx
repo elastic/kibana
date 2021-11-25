@@ -10,7 +10,7 @@ import { EuiFlexGroup, EuiSpacer } from '@elastic/eui';
 import type { FindFileStructureResponse } from '../../../../../../file_upload/common';
 import type { DataVisualizerTableState } from '../../../../../common';
 import { DataVisualizerTable, ItemIdToExpandedRowMap } from '../stats_table';
-import type { FileBasedFieldVisConfig } from '../stats_table/types/field_vis_config';
+import type { FileBasedFieldVisConfig } from '../../../../../common/types/field_vis_config';
 import { FileBasedDataVisualizerExpandedRow } from '../expanded_row';
 
 import { DataVisualizerFieldNamesFilter } from '../field_names_filter';
@@ -25,7 +25,7 @@ interface Props {
 
 export const getDefaultDataVisualizerListState = (): DataVisualizerTableState => ({
   pageIndex: 0,
-  pageSize: 10,
+  pageSize: 25,
   sortField: 'fieldName',
   sortDirection: 'asc',
   visibleFieldTypes: [],
@@ -49,9 +49,8 @@ function getItemIdToExpandedRowMap(
 export const FieldsStatsGrid: FC<Props> = ({ results }) => {
   const restorableDefaults = getDefaultDataVisualizerListState();
 
-  const [dataVisualizerListState, setDataVisualizerListState] = useState<DataVisualizerTableState>(
-    restorableDefaults
-  );
+  const [dataVisualizerListState, setDataVisualizerListState] =
+    useState<DataVisualizerTableState>(restorableDefaults);
 
   const visibleFieldTypes =
     dataVisualizerListState.visibleFieldTypes ?? restorableDefaults.visibleFieldTypes;

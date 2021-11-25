@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 import { EuiBadge, EuiBasicTableColumn, EuiInMemoryTable, EuiTextColor } from '@elastic/eui';
 import type { EuiSearchBarOnChangeArgs } from '@elastic/eui';
@@ -57,6 +57,8 @@ const noItemsPlaceholder = <EuiTextColor color="subdued">&mdash;</EuiTextColor>;
 const invitationBadge = <EuiBadge color="hollow">{INVITATION_PENDING_LABEL}</EuiBadge>;
 const deactivatedBadge = <EuiBadge color="hollow">{DEACTIVATED_LABEL}</EuiBadge>;
 
+type Users = Array<Omit<SharedUser, 'elasticsearchUser | roleMapping'>>;
+
 export const UsersTable: React.FC<Props> = ({
   accessItemKey,
   singleUserRoleMappings,
@@ -64,7 +66,7 @@ export const UsersTable: React.FC<Props> = ({
   handleDeleteMapping,
 }) => {
   // 'accessItems' is needed because App Search has `engines` and Workplace Search has `groups`.
-  const users = ((singleUserRoleMappings as SharedUser[]).map((user) => ({
+  const users = (singleUserRoleMappings as SharedUser[]).map((user) => ({
     username: user.elasticsearchUser.username,
     email: user.elasticsearchUser.email,
     enabled: user.elasticsearchUser.enabled,
@@ -72,9 +74,13 @@ export const UsersTable: React.FC<Props> = ({
     id: user.roleMapping.id,
     accessItems: (user.roleMapping as SharedRoleMapping)[accessItemKey],
     invitation: user.invitation,
-  })) as unknown) as Array<Omit<SharedUser, 'elasticsearchUser | roleMapping'>>;
+  })) as unknown as Users;
 
-  const [items, setItems] = useState(users);
+  const [items, setItems] = useState([] as Users);
+
+  useEffect(() => {
+    setItems(users);
+  }, [singleUserRoleMappings]);
 
   const columns: Array<EuiBasicTableColumn<SharedUser>> = [
     {

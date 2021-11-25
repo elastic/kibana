@@ -40,17 +40,17 @@ type RequestValidationResult<T> =
  *
  * TODO: Figure out a way to move this function into a package rather than copying it/forking it within plugins
  */
-export const buildRouteValidation = <T extends rt.Mixed, A = rt.TypeOf<T>>(
-  schema: T
-): RouteValidationFunction<A> => (
-  inputValue: unknown,
-  validationResult: RouteValidationResultFactory
-): RequestValidationResult<A> =>
-  pipe(
-    schema.decode(inputValue),
-    (decoded) => exactCheck(inputValue, decoded),
-    fold<rt.Errors, A, RequestValidationResult<A>>(
-      (errors: rt.Errors) => validationResult.badRequest(formatErrors(errors).join()),
-      (validatedInput: A) => validationResult.ok(validatedInput)
-    )
-  );
+export const buildRouteValidation =
+  <T extends rt.Mixed, A = rt.TypeOf<T>>(schema: T): RouteValidationFunction<A> =>
+  (
+    inputValue: unknown,
+    validationResult: RouteValidationResultFactory
+  ): RequestValidationResult<A> =>
+    pipe(
+      schema.decode(inputValue),
+      (decoded) => exactCheck(inputValue, decoded),
+      fold<rt.Errors, A, RequestValidationResult<A>>(
+        (errors: rt.Errors) => validationResult.badRequest(formatErrors(errors).join()),
+        (validatedInput: A) => validationResult.ok(validatedInput)
+      )
+    );

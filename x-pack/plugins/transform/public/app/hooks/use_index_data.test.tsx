@@ -27,7 +27,7 @@ jest.mock('./use_api');
 
 import { useAppDependencies } from '../__mocks__/app_dependencies';
 import { MlSharedContext } from '../__mocks__/shared_context';
-import { RuntimeField } from '../../../../../../src/plugins/data/common/index_patterns';
+import { RuntimeField } from '../../../../../../src/plugins/data/common';
 
 const query: SimpleQuery = {
   query_string: {
@@ -57,11 +57,11 @@ describe('Transform: useIndexData()', () => {
     const { result, waitForNextUpdate } = renderHook(
       () =>
         useIndexData(
-          ({
+          {
             id: 'the-id',
             title: 'the-title',
             fields: [],
-          } as unknown) as SearchItems['indexPattern'],
+          } as unknown as SearchItems['indexPattern'],
           query,
           runtimeMappings
         ),
@@ -78,7 +78,8 @@ describe('Transform: useIndexData()', () => {
   });
 });
 
-describe('Transform: <DataGrid /> with useIndexData()', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/109943
+describe.skip('Transform: <DataGrid /> with useIndexData()', () => {
   test('Minimal initialization, no cross cluster search warning.', async () => {
     // Arrange
     const indexPattern = {

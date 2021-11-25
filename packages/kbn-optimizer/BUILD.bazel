@@ -32,9 +32,11 @@ NPM_MODULE_EXTRA_FILES = [
 
 RUNTIME_DEPS = [
   "//packages/kbn-config",
+  "//packages/kbn-config-schema",
   "//packages/kbn-dev-utils",
   "//packages/kbn-std",
-  "//packages/kbn-ui-shared-deps",
+  "//packages/kbn-ui-shared-deps-npm",
+  "//packages/kbn-ui-shared-deps-src",
   "//packages/kbn-utils",
   "@npm//chalk",
   "@npm//clean-webpack-plugin",
@@ -61,9 +63,11 @@ RUNTIME_DEPS = [
 
 TYPES_DEPS = [
   "//packages/kbn-config",
+  "//packages/kbn-config-schema",
   "//packages/kbn-dev-utils",
   "//packages/kbn-std",
-  "//packages/kbn-ui-shared-deps",
+  "//packages/kbn-ui-shared-deps-npm",
+  "//packages/kbn-ui-shared-deps-src",
   "//packages/kbn-utils",
   "@npm//chalk",
   "@npm//clean-webpack-plugin",

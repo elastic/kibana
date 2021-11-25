@@ -7,6 +7,7 @@
 
 import { EndpointAppContextService } from '../../endpoint_app_context_services';
 import {
+  createMockEndpointAppContextServiceSetupContract,
   createMockEndpointAppContextServiceStartContract,
   createRouteHandlerContext,
 } from '../../mocks';
@@ -22,7 +23,7 @@ import {
   loggingSystemMock,
   savedObjectsClientMock,
 } from '../../../../../../../src/core/server/mocks';
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { GetHostPolicyResponse, HostPolicyResponse } from '../../../../common/endpoint/types';
 import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
 import { parseExperimentalConfigValue } from '../../../../common/experimental_features';
@@ -45,6 +46,7 @@ describe('test policy response handler', () => {
       mockSavedObjectClient = savedObjectsClientMock.create();
       mockResponse = httpServerMock.createResponseFactory();
       endpointAppContextService = new EndpointAppContextService();
+      endpointAppContextService.setup(createMockEndpointAppContextServiceSetupContract());
       endpointAppContextService.start(createMockEndpointAppContextServiceStartContract());
     });
 
@@ -129,7 +131,7 @@ describe('test policy response handler', () => {
 
       agentListResult = {
         agents: [
-          ({
+          {
             local_metadata: {
               elastic: {
                 agent: {
@@ -137,8 +139,8 @@ describe('test policy response handler', () => {
                 },
               },
             },
-          } as unknown) as Agent,
-          ({
+          } as unknown as Agent,
+          {
             local_metadata: {
               elastic: {
                 agent: {
@@ -146,8 +148,8 @@ describe('test policy response handler', () => {
                 },
               },
             },
-          } as unknown) as Agent,
-          ({
+          } as unknown as Agent,
+          {
             local_metadata: {
               elastic: {
                 agent: {
@@ -155,12 +157,13 @@ describe('test policy response handler', () => {
                 },
               },
             },
-          } as unknown) as Agent,
+          } as unknown as Agent,
         ],
         total: 2,
         page: 1,
         perPage: 1,
       };
+      endpointAppContextService.setup(createMockEndpointAppContextServiceSetupContract());
       endpointAppContextService.start({
         ...createMockEndpointAppContextServiceStartContract(),
         ...{ agentService: mockAgentService },
@@ -240,7 +243,7 @@ describe('test policy response handler', () => {
 function createSearchResponse(
   hostPolicyResponse?: HostPolicyResponse
 ): estypes.SearchResponse<HostPolicyResponse> {
-  return ({
+  return {
     took: 15,
     timed_out: false,
     _shards: {
@@ -267,5 +270,5 @@ function createSearchResponse(
           ]
         : [],
     },
-  } as unknown) as estypes.SearchResponse<HostPolicyResponse>;
+  } as unknown as estypes.SearchResponse<HostPolicyResponse>;
 }

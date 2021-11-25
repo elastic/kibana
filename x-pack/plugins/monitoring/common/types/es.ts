@@ -156,7 +156,7 @@ export interface ElasticsearchLegacySource {
           heap_max_in_bytes?: number;
         };
       };
-      fs: {
+      fs?: {
         available_in_bytes?: number;
         total_in_bytes?: number;
       };
@@ -228,6 +228,7 @@ export interface ElasticsearchLegacySource {
     };
     queue?: {
       type?: string;
+      events?: number;
     };
     jvm?: {
       uptime_in_millis?: number;
@@ -249,6 +250,8 @@ export interface ElasticsearchLegacySource {
     };
     events?: {
       out?: number;
+      in?: number;
+      filtered?: number;
     };
     reloads?: {
       failures?: number;
@@ -494,7 +497,7 @@ export interface ElasticsearchMetricbeatSource {
         };
         nodes?: {
           versions?: string[];
-          count?: number;
+          count?: number | {};
           jvm?: {
             max_uptime?: {
               ms?: number;

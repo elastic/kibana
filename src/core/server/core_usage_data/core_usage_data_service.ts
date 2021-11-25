@@ -17,7 +17,7 @@ import {
   AggregationsFiltersAggregate,
   AggregationsFiltersBucketItem,
   SearchTotalHits,
-} from '@elastic/elasticsearch/api/types';
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { CoreContext } from '../core_context';
 import { ElasticsearchConfigType } from '../elasticsearch/elasticsearch_config';
 import { HttpConfigType, InternalHttpServiceSetup } from '../http';
@@ -33,7 +33,6 @@ import type {
 } from './types';
 import { isConfigured } from './is_configured';
 import { ElasticsearchServiceStart } from '../elasticsearch';
-import { KibanaConfigType } from '../kibana_config';
 import { coreUsageStatsType } from './core_usage_stats';
 import { LEGACY_URL_ALIAS_TYPE } from '../saved_objects/object_types';
 import { CORE_USAGE_STATS_TYPE } from './constants';
@@ -56,6 +55,8 @@ export interface StartDeps {
   exposedConfigsToUsage: ExposedConfigsToUsage;
 }
 
+const kibanaIndex = '.kibana';
+
 /**
  * Because users can configure their Saved Object to any arbitrary index name,
  * we need to map customized index names back to a "standard" index name.
@@ -74,21 +75,9 @@ const kibanaOrTaskManagerIndex = (index: string, kibanaConfigIndex: string) => {
   return index === kibanaConfigIndex ? '.kibana' : '.kibana_task_manager';
 };
 
-/**
- * This is incredibly hacky... The config service doesn't allow you to determine
- * whether or not a config value has been changed from the default value, and the
- * default value is defined in legacy code.
- *
- * This will be going away in 8.0, so please look away for a few months
- *
- * @param index The `kibana.index` setting from the `kibana.yml`
- */
-const isCustomIndex = (index: string) => {
-  return index !== '.kibana';
-};
-
 export class CoreUsageDataService
-  implements CoreService<InternalCoreUsageDataSetup, CoreUsageDataStart> {
+  implements CoreService<InternalCoreUsageDataSetup, CoreUsageDataStart>
+{
   private logger: Logger;
   private elasticsearchConfig?: ElasticsearchConfigType;
   private configService: CoreContext['configService'];
@@ -97,7 +86,6 @@ export class CoreUsageDataService
   private soConfig?: SavedObjectsConfigType;
   private stop$: Subject<void>;
   private opsMetrics?: OpsMetrics;
-  private kibanaConfig?: KibanaConfigType;
   private coreUsageStatsClient?: CoreUsageStatsClient;
   private deprecatedConfigPaths: ChangedDeprecatedPaths = { set: [], unset: [] };
   private incrementUsageCounter: CoreIncrementUsageCounter = () => {}; // Initially set to noop
@@ -132,8 +120,8 @@ export class CoreUsageDataService
           .getTypeRegistry()
           .getAllTypes()
           .reduce((acc, type) => {
-            const index = type.indexPattern ?? this.kibanaConfig!.index;
-            return index != null ? acc.add(index) : acc;
+            const index = type.indexPattern ?? kibanaIndex;
+            return acc.add(index);
           }, new Set<string>())
           .values()
       ).map((index) => {
@@ -149,7 +137,7 @@ export class CoreUsageDataService
           .then(({ body }) => {
             const stats = body[0];
             return {
-              alias: kibanaOrTaskManagerIndex(index, this.kibanaConfig!.index),
+              alias: kibanaOrTaskManagerIndex(index, kibanaIndex),
               docsCount: stats['docs.count'] ? parseInt(stats['docs.count'], 10) : 0,
               docsDeleted: stats['docs.deleted'] ? parseInt(stats['docs.deleted'], 10) : 0,
               storeSizeBytes: stats['store.size'] ? parseInt(stats['store.size'], 10) : 0,
@@ -166,7 +154,7 @@ export class CoreUsageDataService
     // Note: this agg can be changed to use `savedObjectsRepository.find` in the future after `filters` is supported.
     // See src/core/server/saved_objects/service/lib/aggregations/aggs_types/bucket_aggs.ts for supported aggregations.
     const { body: resp } = await elasticsearch.client.asInternalUser.search({
-      index: this.kibanaConfig!.index,
+      index: kibanaIndex,
       body: {
         track_total_hits: true,
         query: { match: { type: LEGACY_URL_ALIAS_TYPE } },
@@ -312,7 +300,7 @@ export class CoreUsageDataService
         },
 
         savedObjects: {
-          customIndex: isCustomIndex(this.kibanaConfig!.index),
+          customIndex: false,
           maxImportPayloadBytes: this.soConfig.maxImportPayloadBytes.getValueInBytes(),
           maxImportExportSize: this.soConfig.maxImportExportSize,
         },
@@ -469,13 +457,6 @@ export class CoreUsageDataService
       .pipe(takeUntil(this.stop$))
       .subscribe((config) => {
         this.soConfig = config;
-      });
-
-    this.configService
-      .atPath<KibanaConfigType>('kibana')
-      .pipe(takeUntil(this.stop$))
-      .subscribe((config) => {
-        this.kibanaConfig = config;
       });
 
     changedDeprecatedConfigPath$

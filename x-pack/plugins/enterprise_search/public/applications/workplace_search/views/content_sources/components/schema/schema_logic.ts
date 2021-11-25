@@ -44,13 +44,10 @@ interface SchemaActions {
   onSchemaSetSuccess(schemaProps: SchemaResponseProps): SchemaResponseProps;
   onSchemaSetFormErrors(errors: string[]): string[];
   updateNewFieldType(newFieldType: SchemaType): SchemaType;
-  onFieldUpdate({
-    schema,
-    formUnchanged,
-  }: {
+  onFieldUpdate({ schema, formUnchanged }: { schema: Schema; formUnchanged: boolean }): {
     schema: Schema;
     formUnchanged: boolean;
-  }): { schema: Schema; formUnchanged: boolean };
+  };
   onIndexingComplete(numDocumentsWithErrors: number): number;
   resetMostRecentIndexJob(emptyReindexJob: IndexJob): IndexJob;
   setFieldName(rawFieldName: string): string;
@@ -275,7 +272,9 @@ export const SchemaLogic = kea<MakeLogicType<SchemaValues, SchemaActions>>({
         : `/internal/workplace_search/account/sources/${sourceId}/schemas`;
 
       try {
-        const response = await http.get(route);
+        const response = await http.get<SchemaInitialData>(route);
+        // TODO: fix
+        // @ts-expect-error TS2783
         actions.onInitializeSchema({ sourceId, ...response });
       } catch (e) {
         flashAPIErrors(e);
@@ -290,7 +289,7 @@ export const SchemaLogic = kea<MakeLogicType<SchemaValues, SchemaActions>>({
 
       try {
         await actions.initializeSchema();
-        const response = await http.get(route);
+        const response = await http.get<SchemaChangeErrorsProps>(route);
         actions.onInitializeSchemaFieldErrors({
           fieldCoercionErrors: response.fieldCoercionErrors,
         });
@@ -342,7 +341,7 @@ export const SchemaLogic = kea<MakeLogicType<SchemaValues, SchemaActions>>({
       actions.resetMostRecentIndexJob(emptyReindexJob);
 
       try {
-        const response = await http.post(route, {
+        const response = await http.post<SchemaResponseProps>(route, {
           body: JSON.stringify({ ...updatedSchema }),
         });
         actions.onSchemaSetSuccess(response);

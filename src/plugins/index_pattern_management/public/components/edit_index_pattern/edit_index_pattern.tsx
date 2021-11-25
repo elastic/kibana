@@ -49,19 +49,15 @@ const confirmModalOptionsDelete = {
   confirmButtonText: i18n.translate('indexPatternManagement.editIndexPattern.deleteButton', {
     defaultMessage: 'Delete',
   }),
-  title: i18n.translate('indexPatternManagement.editIndexPattern.deleteHeader', {
-    defaultMessage: 'Delete index pattern?',
+  title: i18n.translate('indexPatternManagement.editDataView.deleteHeader', {
+    defaultMessage: 'Delete data view?',
   }),
 };
 
 export const EditIndexPattern = withRouter(
   ({ indexPattern, history, location }: EditIndexPatternProps) => {
-    const {
-      uiSettings,
-      overlays,
-      chrome,
-      data,
-    } = useKibana<IndexPatternManagmentContext>().services;
+    const { application, uiSettings, overlays, chrome, data } =
+      useKibana<IndexPatternManagmentContext>().services;
     const [fields, setFields] = useState<IndexPatternField[]>(indexPattern.getNonScriptedFields());
     const [conflictedFields, setConflictedFields] = useState<IndexPatternField[]>(
       indexPattern.fields.getAll().filter((field) => field.type === 'conflict')
@@ -129,8 +125,8 @@ export const EditIndexPattern = withRouter(
       }
     );
 
-    const headingAriaLabel = i18n.translate('indexPatternManagement.editIndexPattern.detailsAria', {
-      defaultMessage: 'Index pattern details',
+    const headingAriaLabel = i18n.translate('indexPatternManagement.editDataView.detailsAria', {
+      defaultMessage: 'Data view details',
     });
 
     chrome.docTitle.change(indexPattern.title);
@@ -138,12 +134,14 @@ export const EditIndexPattern = withRouter(
     const showTagsSection = Boolean(indexPattern.timeFieldName || (tags && tags.length > 0));
     const kibana = useKibana();
     const docsUrl = kibana.services.docLinks!.links.elasticsearch.mapping;
+    const userEditPermission = !!application?.capabilities?.indexPatterns?.save;
+
     return (
       <div data-test-subj="editIndexPattern" role="region" aria-label={headingAriaLabel}>
         <IndexHeader
           indexPattern={indexPattern}
           setDefault={setDefaultPattern}
-          deleteIndexPatternClick={removePattern}
+          {...(userEditPermission ? { deleteIndexPatternClick: removePattern } : {})}
           defaultIndex={defaultIndex}
         >
           {showTagsSection && (

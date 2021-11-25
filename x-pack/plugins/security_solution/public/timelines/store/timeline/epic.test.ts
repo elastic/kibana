@@ -75,8 +75,7 @@ describe('Epic Timeline', () => {
             },
             and: [
               {
-                id:
-                  'plain-column-renderer-data-provider-hosts-page-event_module-CQg7I24BHe9nqdOi_LYL-event_module-endgame',
+                id: 'plain-column-renderer-data-provider-hosts-page-event_module-CQg7I24BHe9nqdOi_LYL-event_module-endgame',
                 name: 'event.module: endgame',
                 enabled: true,
                 excluded: false,
@@ -90,6 +89,7 @@ describe('Epic Timeline', () => {
             ],
           },
         ],
+        dataViewId: '',
         deletedEventIds: [],
         description: '',
         documentType: '',
@@ -127,7 +127,7 @@ describe('Epic Timeline', () => {
               type: 'exists',
               value: 'exists',
             },
-            exists: { field: '@timestamp' },
+            query: { exists: { field: '@timestamp' } },
           } as Filter,
         ],
         indexNames: [],
@@ -217,8 +217,7 @@ describe('Epic Timeline', () => {
               {
                 enabled: true,
                 excluded: false,
-                id:
-                  'plain-column-renderer-data-provider-hosts-page-event_module-CQg7I24BHe9nqdOi_LYL-event_module-endgame',
+                id: 'plain-column-renderer-data-provider-hosts-page-event_module-CQg7I24BHe9nqdOi_LYL-event_module-endgame',
                 kqlQuery: '',
                 name: 'event.module: endgame',
                 queryMatch: {
@@ -240,6 +239,7 @@ describe('Epic Timeline', () => {
             },
           },
         ],
+        dataViewId: '',
         dateRange: {
           end: '2019-10-31T21:06:27.644Z',
           start: '2019-10-30T21:06:27.644Z',
@@ -266,13 +266,12 @@ describe('Epic Timeline', () => {
               type: 'phrase',
               value: null,
             },
-            missing: null,
             query: '{"match_phrase":{"event.category":"file"}}',
             range: null,
             script: null,
           },
           {
-            exists: '{"field":"@timestamp"}',
+            query: '{"exists":{"field":"@timestamp"}}',
             match_all: null,
             meta: {
               alias: null,
@@ -284,8 +283,6 @@ describe('Epic Timeline', () => {
               type: 'exists',
               value: 'exists',
             },
-            missing: null,
-            query: null,
             range: null,
             script: null,
           },

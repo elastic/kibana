@@ -15,7 +15,7 @@ import {
 
 describe('get_high_level_stats', () => {
   const searchMock = sinon.stub();
-  const callCluster = ({ search: searchMock } as unknown) as ElasticsearchClient;
+  const callCluster = { search: searchMock } as unknown as ElasticsearchClient;
   const product = 'xyz';
   const cloudName = 'bare-metal';
   const start = new Date().toISOString();

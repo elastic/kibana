@@ -11,56 +11,56 @@ type CreateUseLogSource = (sourceConfiguration?: { sourceId?: string }) => typeo
 
 const defaultSourceId = 'default';
 
-export const createUninitializedUseLogSourceMock: CreateUseLogSource = ({
-  sourceId = defaultSourceId,
-} = {}) => () => ({
-  derivedIndexPattern: {
-    fields: [],
-    title: 'unknown',
-  },
-  hasFailedLoading: false,
-  hasFailedLoadingSource: false,
-  hasFailedLoadingSourceStatus: false,
-  hasFailedResolvingSource: false,
-  initialize: jest.fn(),
-  isLoading: false,
-  isLoadingSourceConfiguration: false,
-  isLoadingSourceStatus: false,
-  isResolvingSourceConfiguration: false,
-  isUninitialized: true,
-  loadSource: jest.fn(),
-  loadSourceConfiguration: jest.fn(),
-  latestLoadSourceFailures: [],
-  resolveSourceFailureMessage: undefined,
-  loadSourceStatus: jest.fn(),
-  sourceConfiguration: undefined,
-  sourceId,
-  sourceStatus: undefined,
-  updateSource: jest.fn(),
-  resolvedSourceConfiguration: undefined,
-  loadResolveLogSourceConfiguration: jest.fn(),
-});
+export const createUninitializedUseLogSourceMock: CreateUseLogSource =
+  ({ sourceId = defaultSourceId } = {}) =>
+  () => ({
+    derivedIndexPattern: {
+      fields: [],
+      title: 'unknown',
+    },
+    hasFailedLoading: false,
+    hasFailedLoadingSource: false,
+    hasFailedLoadingSourceStatus: false,
+    hasFailedResolvingSource: false,
+    initialize: jest.fn(),
+    isLoading: false,
+    isLoadingSourceConfiguration: false,
+    isLoadingSourceStatus: false,
+    isResolvingSourceConfiguration: false,
+    isUninitialized: true,
+    loadSource: jest.fn(),
+    loadSourceConfiguration: jest.fn(),
+    latestLoadSourceFailures: [],
+    resolveSourceFailureMessage: undefined,
+    loadSourceStatus: jest.fn(),
+    sourceConfiguration: undefined,
+    sourceId,
+    sourceStatus: undefined,
+    updateSource: jest.fn(),
+    resolvedSourceConfiguration: undefined,
+    loadResolveLogSourceConfiguration: jest.fn(),
+  });
 
-export const createLoadingUseLogSourceMock: CreateUseLogSource = ({
-  sourceId = defaultSourceId,
-} = {}) => (args) => ({
-  ...createUninitializedUseLogSourceMock({ sourceId })(args),
-  isLoading: true,
-  isLoadingSourceConfiguration: true,
-  isLoadingSourceStatus: true,
-  isResolvingSourceConfiguration: true,
-});
+export const createLoadingUseLogSourceMock: CreateUseLogSource =
+  ({ sourceId = defaultSourceId } = {}) =>
+  (args) => ({
+    ...createUninitializedUseLogSourceMock({ sourceId })(args),
+    isLoading: true,
+    isLoadingSourceConfiguration: true,
+    isLoadingSourceStatus: true,
+    isResolvingSourceConfiguration: true,
+  });
 
-export const createLoadedUseLogSourceMock: CreateUseLogSource = ({
-  sourceId = defaultSourceId,
-} = {}) => (args) => ({
-  ...createUninitializedUseLogSourceMock({ sourceId })(args),
-  sourceConfiguration: createBasicSourceConfiguration(sourceId),
-  sourceStatus: {
-    logIndexFields: [],
-    logIndexStatus: 'available',
-  },
-});
+export const createLoadedUseLogSourceMock: CreateUseLogSource =
+  ({ sourceId = defaultSourceId } = {}) =>
+  (args) => ({
+    ...createUninitializedUseLogSourceMock({ sourceId })(args),
+    sourceConfiguration: createBasicSourceConfiguration(sourceId),
+    sourceStatus: {
+      logIndexFields: [],
+      logIndexStatus: 'available',
+    },
+  });
 
 export const createBasicSourceConfiguration = (sourceId: string): LogSourceConfiguration => ({
   id: sourceId,
@@ -73,11 +73,6 @@ export const createBasicSourceConfiguration = (sourceId: string): LogSourceConfi
     },
     logColumns: [],
     fields: {
-      container: 'CONTAINER_FIELD',
-      host: 'HOST_FIELD',
-      pod: 'POD_FIELD',
-      tiebreaker: 'TIEBREAKER_FIELD',
-      timestamp: 'TIMESTAMP_FIELD',
       message: ['MESSAGE_FIELD'],
     },
     name: sourceId,

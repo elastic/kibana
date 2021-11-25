@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import type { Datatable } from 'src/plugins/expressions';
 import { functionWrapper } from '../../../expressions/common/expression_functions/specs/tests/utils';
 import { createPieVisFn } from './pie_fn';
 // @ts-ignore
@@ -34,7 +35,7 @@ describe('interpreter/functions#pie', () => {
     type: 'datatable',
     rows: [{ 'col-0-1': 0 }],
     columns: [{ id: 'col-0-1', name: 'Count' }],
-  };
+  } as unknown as Datatable;
   const visConfig = {
     type: 'pie',
     addTooltip: true,
