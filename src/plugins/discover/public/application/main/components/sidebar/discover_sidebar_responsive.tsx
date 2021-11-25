@@ -9,7 +9,7 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { sortBy } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { UiCounterMetricType } from '@kbn/analytics';
 import {
   EuiTitle,
@@ -192,7 +192,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
       }
       const ref = indexPatternFieldEditor.openEditor({
         ctx: {
-          indexPattern: selectedIndexPattern,
+          dataView: selectedIndexPattern,
         },
         fieldName,
         onSave: async () => {

@@ -17,7 +17,7 @@ import {
   EuiTextColor,
   EuiSpacer,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { AddTooltipFieldPopover, FieldProps } from './add_tooltip_field_popover';
 import { IField } from '../../classes/fields/field';
@@ -217,7 +217,7 @@ export class TooltipSelector extends Component<Props, State> {
                         <EuiButtonIcon
                           className="mapTooltipSelector__grab"
                           iconType="grab"
-                          color="subdued"
+                          color="text"
                           title={i18n.translate('xpack.maps.tooltipSelector.grabButtonTitle', {
                             defaultMessage: 'Reorder property',
                           })}
