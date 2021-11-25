@@ -117,13 +117,6 @@ export const CreateControlButton = ({ isIconButton }: { isIconButton: boolean })
 
   if (getControlTypes().length === 0) return null;
 
-  const commonButtonProps = {
-    iconType: 'plusInCircle',
-    color: 'primary' as EuiButtonIconColor,
-    'data-test-subj': 'controlsCreateButton',
-    'aria-label': ControlGroupStrings.management.getManageButtonTitle(),
-  };
-
   const onCreateButtonClick = () => {
     if (getControlTypes().length > 1) {
       setIsControlTypePopoverOpen(!isControlTypePopoverOpen);
@@ -132,15 +125,17 @@ export const CreateControlButton = ({ isIconButton }: { isIconButton: boolean })
     createNewControl(getControlTypes()[0]);
   };
 
+  const commonButtonProps = {
+    onClick: onCreateButtonClick,
+    color: 'primary' as EuiButtonIconColor,
+    'data-test-subj': 'controls-create-button',
+    'aria-label': ControlGroupStrings.management.getManageButtonTitle(),
+  };
+
   const createControlButton = isIconButton ? (
-    <EuiButtonIcon {...commonButtonProps} onClick={onCreateButtonClick} />
+    <EuiButtonIcon {...commonButtonProps} iconType={'plusInCircle'} />
   ) : (
-    <EuiButton
-      data-test-subj={'controlsCreateButton'}
-      onClick={onCreateButtonClick}
-      color="primary"
-      size="s"
-    >
+    <EuiButton {...commonButtonProps} size="s">
       {ControlGroupStrings.emptyState.getAddControlButtonTitle()}
     </EuiButton>
   );
@@ -153,6 +148,7 @@ export const CreateControlButton = ({ isIconButton }: { isIconButton: boolean })
         <EuiContextMenuItem
           key={type}
           icon={factory.getIconType?.()}
+          data-test-subj={`create-${type}-control`}
           onClick={() => {
             setIsControlTypePopoverOpen(false);
             createNewControl(type);
@@ -169,6 +165,7 @@ export const CreateControlButton = ({ isIconButton }: { isIconButton: boolean })
         isOpen={isControlTypePopoverOpen}
         panelPaddingSize="none"
         anchorPosition="downLeft"
+        data-test-subj="control-type-picker"
         closePopover={() => setIsControlTypePopoverOpen(false)}
       >
         <EuiContextMenuPanel size="s" items={items} />

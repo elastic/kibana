@@ -70,6 +70,7 @@ export const ControlFrame = ({ customPrepend, enableActions, embeddableId }: Con
       </EuiToolTip>
       <EuiToolTip content={ControlGroupStrings.floatingActions.getRemoveButtonTitle()}>
         <EuiButtonIcon
+          data-test-subj={`control-action-${embeddableId}-delete`}
           aria-label={ControlGroupStrings.floatingActions.getRemoveButtonTitle()}
           onClick={() =>
             openConfirm(ControlGroupStrings.management.deleteControls.getSubtitle(), {
@@ -131,6 +132,7 @@ export const ControlFrame = ({ customPrepend, enableActions, embeddableId }: Con
     <>
       {embeddable && enableActions && floatingActions}
       <EuiFormRow
+        data-test-subj="control-frame-title"
         fullWidth
         label={
           usingTwoLineLayout

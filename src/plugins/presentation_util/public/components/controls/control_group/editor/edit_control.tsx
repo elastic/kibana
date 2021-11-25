@@ -132,6 +132,7 @@ export const EditControlButton = ({ embeddableId }: { embeddableId: string }) =>
 
   return (
     <EuiButtonIcon
+      data-test-subj={`control-action-${embeddableId}-edit`}
       aria-label={ControlGroupStrings.floatingActions.getEditButtonTitle()}
       iconType="pencil"
       onClick={() => editControl()}

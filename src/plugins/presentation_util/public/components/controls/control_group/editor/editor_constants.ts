@@ -14,18 +14,22 @@ export const DEFAULT_CONTROL_WIDTH: ControlWidth = 'auto';
 export const CONTROL_WIDTH_OPTIONS = [
   {
     id: `auto`,
+    'data-test-subj': 'control-editor-width-auto',
     label: ControlGroupStrings.management.controlWidth.getAutoWidthTitle(),
   },
   {
     id: `small`,
+    'data-test-subj': 'control-editor-width-small',
     label: ControlGroupStrings.management.controlWidth.getSmallWidthTitle(),
   },
   {
     id: `medium`,
+    'data-test-subj': 'control-editor-width-medium',
     label: ControlGroupStrings.management.controlWidth.getMediumWidthTitle(),
   },
   {
     id: `large`,
+    'data-test-subj': 'control-editor-width-large',
     label: ControlGroupStrings.management.controlWidth.getLargeWidthTitle(),
   },
 ];
