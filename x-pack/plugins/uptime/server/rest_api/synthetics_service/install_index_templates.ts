@@ -9,7 +9,7 @@ import { UMRestApiRouteFactory } from '../types';
 import { API_URLS } from '../../../common/constants';
 import { UptimeCoreSetup } from '../../lib/adapters';
 
-export const installIndexTemplates: UMRestApiRouteFactory = () => ({
+export const installIndexTemplatesRoute: UMRestApiRouteFactory = () => ({
   method: 'GET',
   path: API_URLS.INDEX_TEMPLATES,
   validate: {},
