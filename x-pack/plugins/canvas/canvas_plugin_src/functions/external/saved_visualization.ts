@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { omit } from 'lodash';
 import { ExpressionFunctionDefinition } from 'src/plugins/expressions';
 import { VisualizeInput } from 'src/plugins/visualizations/public';
 import {
@@ -96,7 +97,7 @@ export function savedVisualization(): ExpressionFunctionDefinition<
           id,
           savedObjectId: id,
           disableTriggers: true,
-          timeRange: timerange || defaultTimeRange,
+          timeRange: timerange ? omit(timerange, 'type') : defaultTimeRange,
           filters: getQueryFilters(filters),
           vis: visOptions,
           title: title === null ? undefined : title,
