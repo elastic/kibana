@@ -48,6 +48,8 @@ import {
   TaskRunner,
   TaskRunningInstance,
   TaskRunResult,
+  TASK_MANAGER_TRANSACTION_TYPE,
+  TASK_MANAGER_TRANSATION_MARK_AS_RUNNING,
 } from './task_runner';
 
 type Opts = {
@@ -61,6 +63,8 @@ type Opts = {
 // ephemeral tasks cannot be rescheduled or scheduled to run again in the future
 type EphemeralSuccessfulRunResult = Omit<SuccessfulRunResult, 'runAt' | 'schedule'>;
 type EphemeralFailedRunResult = Omit<FailedRunResult, 'runAt' | 'schedule'>;
+
+const TASK_MANAGER_TRANSATION_RUN_EPHEMERAL = 'run-ephemeral';
 
 /**
  *
@@ -206,9 +210,15 @@ export class EphemeralTaskManagerRunner implements TaskRunner {
       );
     }
     this.logger.debug(`Running ephemeral task ${this}`);
-    const apmTrans = apm.startTransaction(this.taskType, 'taskManager ephemeral run', {
-      childOf: this.instance.task.traceparent,
-    });
+    const apmTrans = apm.startTransaction(
+      TASK_MANAGER_TRANSATION_RUN_EPHEMERAL,
+      TASK_MANAGER_TRANSACTION_TYPE,
+      {
+        childOf: this.instance.task.traceparent,
+      }
+    );
+    apmTrans?.setLabels('task', this.taskType);
+
     const modifiedContext = await this.beforeRun({
       taskInstance: asConcreteInstance(this.instance.task),
     });
@@ -261,7 +271,11 @@ export class EphemeralTaskManagerRunner implements TaskRunner {
       );
     }
 
-    const apmTrans = apm.startTransaction('taskManager', 'taskManager markTaskAsRunning');
+    const apmTrans = apm.startTransaction(
+      TASK_MANAGER_TRANSACTION_MARK_AS_RUNNING,
+      TASK_MANAGER_TRANSACTION_TYPE
+    );
+    apmTrans?.setLabels('task', this.taskType);
 
     const now = new Date();
     try {

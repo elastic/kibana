@@ -60,6 +60,10 @@ import { isUnrecoverableError } from './errors';
 const defaultBackoffPerFailure = 5 * 60 * 1000;
 export const EMPTY_RUN_RESULT: SuccessfulRunResult = { state: {} };
 
+export const TASK_MANAGER_TRANSACTION_TYPE = 'task-manager';
+export const TASK_MANAGER_TRANSACTION_MARK_AS_RUNNING = 'mark-task-as-running';
+const TASK_MANAGER_TRANSATION_RUN = 'run';
+
 export interface TaskRunner {
   isExpired: boolean;
   expiration: Date;
@@ -276,9 +280,15 @@ export class TaskManagerRunner implements TaskRunner {
     }
     this.logger.debug(`Running task ${this}`);
 
-    const apmTrans = apm.startTransaction(this.taskType, 'taskManager run', {
-      childOf: this.instance.task.traceparent,
-    });
+    const apmTrans = apm.startTransaction(
+      TASK_MANAGER_TRANSATION_RUN,
+      TASK_MANAGER_TRANSACTION_TYPE,
+      {
+        childOf: this.instance.task.traceparent,
+      }
+    );
+
+    apmTrans?.setLabels('task', this.taskType);
 
     const modifiedContext = await this.beforeRun({
       taskInstance: this.instance.task,
@@ -333,7 +343,11 @@ export class TaskManagerRunner implements TaskRunner {
       );
     }
 
-    const apmTrans = apm.startTransaction('taskManager', 'taskManager markTaskAsRunning');
+    const apmTrans = apm.startTransaction(
+      TASK_MANAGER_TRANSACTION_MARK_AS_RUNNING,
+      TASK_MANAGER_TRANSACTION_TYPE
+    );
+    apmTrans?.setLabels('task', this.taskType);
 
     const now = new Date();
     try {

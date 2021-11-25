@@ -52,6 +52,7 @@ import {
   SearchOpts,
 } from '../task_store';
 import { FillPoolResult } from '../lib/fill_pool';
+import { TASK_MANAGER_TRANSACTION_TYPE } from '../task_running';
 
 export interface TaskClaimingOpts {
   logger: Logger;
@@ -105,6 +106,8 @@ interface TaskClaimingBatch<Concurrency extends BatchConcurrency, TaskType> {
 }
 type UnlimitedBatch = TaskClaimingBatch<BatchConcurrency.Unlimited, Set<string>>;
 type LimitedBatch = TaskClaimingBatch<BatchConcurrency.Limited, string>;
+
+export const TASK_MANAGER_MARK_AS_CLAIMED = 'mark-available-tasks-as-claimed';
 
 export class TaskClaiming {
   public readonly errors$ = new Subject<Error>();
@@ -412,9 +415,10 @@ export class TaskClaiming {
     );
 
     const apmTrans = apm.startTransaction(
-      'markAvailableTasksAsClaimed',
-      `taskManager markAvailableTasksAsClaimed`
+      TASK_MANAGER_MARK_AS_CLAIMED,
+      TASK_MANAGER_TRANSACTION_TYPE
     );
+
     try {
       const result = await this.taskStore.updateByQuery(
         {
