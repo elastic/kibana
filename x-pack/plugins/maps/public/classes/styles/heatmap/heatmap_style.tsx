@@ -87,8 +87,11 @@ export class HeatmapStyle implements IStyle {
       radius = 8;
     }
     mbMap.setPaintProperty(layerId, 'heatmap-radius', radius);
-    const safeMax = max <= 0 ? 1 : max;
-    mbMap.setPaintProperty(layerId, 'heatmap-weight', ['/', ['get', propertyName], safeMax]);
+    if (max <= 0) {
+      mbMap.setPaintProperty(layerId, 'heatmap-weight', 0);
+    } else {
+      mbMap.setPaintProperty(layerId, 'heatmap-weight', ['/', ['get', propertyName], max]);
+    }
 
     const colorStops = getOrdinalMbColorRampStops(
       this._descriptor.colorRampName,

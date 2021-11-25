@@ -2473,12 +2473,12 @@
                   {
                     "parentPluginId": "@kbn/mapbox-gl",
                     "id": "def-server.Map.setFeatureState.$2.Unnamed",
-                    "type": "Any",
+                    "type": "IndexSignature",
                     "tags": [],
-                    "label": "Unnamed",
+                    "label": "[key: string]: any",
                     "description": [],
                     "signature": [
-                      "any"
+                      "[key: string]:  any"
                     ],
                     "path": "node_modules/maplibre-gl/src/index.d.ts",
                     "deprecated": false
