@@ -217,7 +217,7 @@ export class EphemeralTaskManagerRunner implements TaskRunner {
         childOf: this.instance.task.traceparent,
       }
     );
-    apmTrans?.setLabel('task', this.taskType);
+    apmTrans?.addLabels({ entityId: this.taskType });
 
     const modifiedContext = await this.beforeRun({
       taskInstance: asConcreteInstance(this.instance.task),
@@ -275,7 +275,7 @@ export class EphemeralTaskManagerRunner implements TaskRunner {
       TASK_MANAGER_TRANSACTION_MARK_AS_RUNNING,
       TASK_MANAGER_TRANSACTION_TYPE
     );
-    apmTrans?.setLabel('task', this.taskType);
+    apmTrans?.addLabels({ entityId: this.taskType });
 
     const now = new Date();
     try {

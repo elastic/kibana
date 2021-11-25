@@ -29,7 +29,7 @@ interface StartDeps {
   application: InternalApplicationStart;
 }
 
-export const KIBANA_PLATFORM_TRANSACTION_TYPE = 'kibana-client';
+export const CHANGE_ROUTE_TRANSACTION_TYPE = 'change-route';
 
 export class ApmSystem {
   private readonly enabled: boolean;
@@ -73,16 +73,10 @@ export class ApmSystem {
     start.application.currentAppId$.subscribe((appId) => {
       if (appId && this.apm) {
         this.closePageLoadTransaction();
-        const apmTran = this.apm.startTransaction(
-          'route-change',
-          KIBANA_PLATFORM_TRANSACTION_TYPE,
-          {
-            managed: true,
-            canReuse: true,
-          }
-        );
-
-        apmTran?.addLabels({ appId });
+        this.apm.startTransaction(appId, CHANGE_ROUTE_TRANSACTION_TYPE, {
+          managed: true,
+          canReuse: true,
+        });
       }
     });
   }

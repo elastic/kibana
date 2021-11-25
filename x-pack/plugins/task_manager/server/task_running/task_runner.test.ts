@@ -47,6 +47,8 @@ describe('TaskManagerRunner', () => {
   const readyToRunStageSetup = (opts: TestOpts) => testOpts(TaskRunningStage.READY_TO_RUN, opts);
   const mockApmTrans = {
     end: jest.fn(),
+    addLabels: jest.fn(),
+    setLabel: jest.fn(),
   };
 
   test('execution ID', async () => {
@@ -87,10 +89,7 @@ describe('TaskManagerRunner', () => {
         },
       });
       await runner.markTaskAsRunning();
-      expect(apm.startTransaction).toHaveBeenCalledWith(
-        'taskManager',
-        'taskManager markTaskAsRunning'
-      );
+      expect(apm.startTransaction).toHaveBeenCalledWith('mark-task-as-running', 'task-manager');
       expect(mockApmTrans.end).toHaveBeenCalledWith('success');
     });
     test('makes calls to APM as expected when task markedAsRunning fails', async () => {
@@ -116,10 +115,7 @@ describe('TaskManagerRunner', () => {
         `[Error: Saved object [type/id] not found]`
       );
       // await runner.markTaskAsRunning();
-      expect(apm.startTransaction).toHaveBeenCalledWith(
-        'taskManager',
-        'taskManager markTaskAsRunning'
-      );
+      expect(apm.startTransaction).toHaveBeenCalledWith('mark-task-as-running', 'task-manager');
       expect(mockApmTrans.end).toHaveBeenCalledWith('failure');
     });
     test('provides execution context on run', async () => {
@@ -706,7 +702,7 @@ describe('TaskManagerRunner', () => {
         },
       });
       await runner.run();
-      expect(apm.startTransaction).toHaveBeenCalledWith('bar', 'taskManager run', {
+      expect(apm.startTransaction).toHaveBeenCalledWith('run', 'task-manager', {
         childOf: 'apmTraceparent',
       });
       expect(mockApmTrans.end).toHaveBeenCalledWith('success');
@@ -729,7 +725,7 @@ describe('TaskManagerRunner', () => {
         },
       });
       await runner.run();
-      expect(apm.startTransaction).toHaveBeenCalledWith('bar', 'taskManager run', {
+      expect(apm.startTransaction).toHaveBeenCalledWith('run', 'task-manager', {
         childOf: 'apmTraceparent',
       });
       expect(mockApmTrans.end).toHaveBeenCalledWith('failure');
