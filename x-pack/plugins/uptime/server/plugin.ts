@@ -59,7 +59,11 @@ export class Plugin implements PluginType {
       ],
     });
 
-    this.server = { router: core.http.createRouter(), config } as UptimeCoreSetup;
+    this.server = {
+      router: core.http.createRouter(),
+      config,
+      cloud: plugins.cloud,
+    } as UptimeCoreSetup;
 
     initServerWithKibana(this.server, plugins, ruleDataClient, this.logger);
 
