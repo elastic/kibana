@@ -210,8 +210,10 @@ export function PieComponent(
     };
   });
 
+  const { legend, partitionType: partitionLayout, label: chartType } = PartitionChartsMeta[shape];
+
   const config: RecursivePartial<PartitionConfig> = {
-    partitionLayout: PartitionChartsMeta[shape].partitionType,
+    partitionLayout,
     fontFamily: chartTheme.barSeriesStyle?.displayValue?.fontFamily,
     outerSizeRatio: 1,
     specialFirstInnermostSector: true,
@@ -293,7 +295,7 @@ export function PieComponent(
           id="xpack.lens.pie.pieWithNegativeWarningLabel"
           defaultMessage="{chartType} charts can't render with negative values."
           values={{
-            chartType: PartitionChartsMeta[shape].label,
+            chartType,
           }}
         />
       </EuiText>
@@ -320,11 +322,10 @@ export function PieComponent(
             !hideLabels &&
             (legendDisplay === 'show' ||
               (legendDisplay === 'default' &&
-                bucketColumns.length > 1 &&
-                !isTreemapOrMosaicShape(shape)))
+                (legend.getShowLegendDefault?.(bucketColumns) ?? false)))
           }
-          flatLegend={PartitionChartsMeta[shape].legend?.flat}
-          showLegendExtra={PartitionChartsMeta[shape].legend?.showValues}
+          flatLegend={legend.flat}
+          showLegendExtra={legend.showValues}
           legendPosition={legendPosition || Position.Right}
           legendMaxDepth={nestedLegend ? undefined : 1 /* Color is based only on first layer */}
           onElementClick={props.interactive ?? true ? onElementClickHandler : undefined}

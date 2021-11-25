@@ -17,6 +17,7 @@ import { LensIconChartWaffle } from '../assets/chart_waffle';
 
 import type { SharedPieLayerState } from '../../common/expressions';
 import type { PieChartTypes } from '../../common/expressions/pie_chart/types';
+import type { DatatableColumn } from '../../../../../src/plugins/expressions';
 
 interface PartitionChartMeta {
   icon: ({ title, titleId, ...props }: Omit<EuiIconProps, 'type'>) => JSX.Element;
@@ -34,9 +35,10 @@ interface PartitionChartMeta {
   maxBuckets: number;
   isExperimental?: boolean;
   requiredMinDimensionCount?: number;
-  legend?: {
+  legend: {
     flat?: boolean;
     showValues?: boolean;
+    getShowLegendDefault?: (bucketColumns: DatatableColumn[]) => boolean;
   };
 }
 
@@ -112,6 +114,9 @@ export const PartitionChartsMeta: Record<PieChartTypes, PartitionChartMeta> = {
     categoryOptions,
     numberOptions,
     maxBuckets: 3,
+    legend: {
+      getShowLegendDefault: (bucketColumns) => bucketColumns.length > 1,
+    },
   },
   pie: {
     icon: LensIconChartPie,
@@ -123,6 +128,9 @@ export const PartitionChartsMeta: Record<PieChartTypes, PartitionChartMeta> = {
     categoryOptions,
     numberOptions,
     maxBuckets: 3,
+    legend: {
+      getShowLegendDefault: (bucketColumns) => bucketColumns.length > 1,
+    },
   },
   treemap: {
     icon: LensIconChartTreemap,
@@ -134,6 +142,9 @@ export const PartitionChartsMeta: Record<PieChartTypes, PartitionChartMeta> = {
     categoryOptions: categoryOptionsTreemap,
     numberOptions,
     maxBuckets: 2,
+    legend: {
+      getShowLegendDefault: () => false,
+    },
   },
   mosaic: {
     icon: LensIconChartMosaic,
@@ -147,6 +158,9 @@ export const PartitionChartsMeta: Record<PieChartTypes, PartitionChartMeta> = {
     maxBuckets: 2,
     isExperimental: true,
     requiredMinDimensionCount: 2,
+    legend: {
+      getShowLegendDefault: () => false,
+    },
   },
   waffle: {
     icon: LensIconChartWaffle,
@@ -162,6 +176,7 @@ export const PartitionChartsMeta: Record<PieChartTypes, PartitionChartMeta> = {
     legend: {
       flat: true,
       showValues: true,
+      getShowLegendDefault: () => true,
     },
   },
 };

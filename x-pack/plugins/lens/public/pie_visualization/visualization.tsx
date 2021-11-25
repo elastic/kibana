@@ -276,6 +276,7 @@ export const getPieVisualization = ({
       if (
         numericColumn &&
         state.shape === 'waffle' &&
+        layer.groups.length &&
         checkTableForContainsSmallValues(frame.activeData[layerId], numericColumn.id, 1)
       ) {
         warningMessages.push(
