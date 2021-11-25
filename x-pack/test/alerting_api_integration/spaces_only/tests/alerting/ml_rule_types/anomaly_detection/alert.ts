@@ -25,7 +25,7 @@ const ACTION_TYPE_ID = '.index';
 const ALERT_TYPE_ID = ML_ALERT_TYPES.ANOMALY_DETECTION;
 const ES_TEST_INDEX_SOURCE = 'ml-alert:anomaly-detection';
 const ES_TEST_INDEX_REFERENCE = '-na-';
-const ES_TEST_OUTPUT_INDEX_NAME = `${ES_TEST_INDEX_NAME}-ts-output`;
+const ES_TEST_OUTPUT_INDEX_NAME = `${ES_TEST_INDEX_NAME}-ad-alert-output`;
 
 const ALERT_INTERVAL_SECONDS = 3;
 
@@ -124,17 +124,16 @@ export default function alertTests({ getService }: FtrProviderContext) {
       //  Ingest anomalous records
       await ingestAnomalousDoc(BASIC_TEST_DATA_INDEX);
 
-      //  Ingest anomalous records
-      await ingestAnomalousDoc(BASIC_TEST_DATA_INDEX);
-
       log.debug('Checking created alert instances...');
 
       const docs = await waitForDocs(1);
       for (const doc of docs) {
         const { name, message } = doc._source.params;
 
-        expect(name).to.be('Test all transforms');
-        expect(message).to.be('Transform test_transform_01 is not started.');
+        expect(name).to.be('Test AD job');
+        expect(message).to.be(
+          'Alerts are raised based on real-time scores. Remember that scores may be adjusted over time as data continues to be analyzed.'
+        );
       }
     });
 
