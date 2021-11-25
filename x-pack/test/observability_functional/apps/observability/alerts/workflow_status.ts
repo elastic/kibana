@@ -13,7 +13,7 @@ const OPEN_ALERTS_ROWS_COUNT = 33;
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
 
-  describe('alert workflow status', function () {
+  describe.skip('alert workflow status', function () {
     this.tags('includeFirefox');
 
     const observability = getService('observability');
