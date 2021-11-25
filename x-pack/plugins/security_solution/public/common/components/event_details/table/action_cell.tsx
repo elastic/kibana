@@ -14,6 +14,7 @@ import { TimelineContext } from '../../../../../../timelines/public';
 
 interface Props extends EnrichedFieldInfo {
   contextId: string;
+  applyWidthAndPadding?: boolean;
   disabled?: boolean;
   getLinkValue?: (field: string) => string | null;
   onFilterAdded?: () => void;
@@ -22,6 +23,7 @@ interface Props extends EnrichedFieldInfo {
 
 export const ActionCell: React.FC<Props> = React.memo(
   ({
+    applyWidthAndPadding = true,
     contextId,
     data,
     eventId,
@@ -61,6 +63,7 @@ export const ActionCell: React.FC<Props> = React.memo(
 
     return (
       <HoverActions
+        applyWidthAndPadding={applyWidthAndPadding}
         closeTopN={closeTopN}
         dataType={data.type}
         dataProvider={actionCellConfig?.dataProvider}
