@@ -10,12 +10,14 @@ import React from 'react';
 import styled from 'styled-components';
 
 import { useBreadcrumbs } from '../hooks/use_breadcrumbs';
-import { useTrackPageview } from '../../../observability/public';
+import { useFetcher, useTrackPageview } from '../../../observability/public';
 import { MonitorList } from '../components/overview/monitor_list/monitor_list_container';
 import { StatusPanel } from '../components/overview/status_panel';
 import { QueryBar } from '../components/overview/query_bar/query_bar';
 import { MONITORING_OVERVIEW_LABEL } from '../routes';
 import { FilterGroup } from '../components/overview/filter_group/filter_group';
+import { apiService } from '../state/api/utils';
+import { API_URLS } from '../../common/constants';
 
 const EuiFlexItemStyled = styled(EuiFlexItem)`
   && {
@@ -34,6 +36,10 @@ export const OverviewPageComponent = () => {
   useTrackPageview({ app: 'uptime', path: 'overview', delay: 15000 });
 
   useBreadcrumbs([{ text: MONITORING_OVERVIEW_LABEL }]); // No extra breadcrumbs on overview
+
+  useFetcher(() => {
+    return apiService.get(API_URLS.INDEX_TEMPLATES);
+  }, []);
 
   return (
     <>
