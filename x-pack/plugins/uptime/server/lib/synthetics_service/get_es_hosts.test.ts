@@ -25,6 +25,7 @@ describe('getEsHostsTest', () => {
   it('should return expected host in cloud', function () {
     const esHosts = getEsHosts({
       cloud: cloudSetup,
+      config: {},
     });
 
     expect(esHosts).toEqual([
