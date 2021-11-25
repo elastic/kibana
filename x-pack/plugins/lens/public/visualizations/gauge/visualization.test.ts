@@ -13,7 +13,6 @@ import { chartPluginMock } from 'src/plugins/charts/public/mocks';
 import { CustomPaletteParams, layerTypes } from '../../../common';
 import { GAUGE_FUNCTION, GaugeVisualizationState } from '../../../common/expressions/gauge_chart';
 import { PaletteOutput } from 'src/plugins/charts/common';
-import { GaugeVisualization } from '.';
 
 function exampleState(): GaugeVisualizationState {
   return {

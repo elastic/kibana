@@ -118,7 +118,8 @@ function getTicks(
 ) {
   if (ticksPosition === GaugeTicksPositions.auto) {
     const TICKS_NO = 3;
-    const [min, max] = range;
+    const min = Math.min(...(colorBands || []), ...range);
+    const max = Math.max(...(colorBands || []), ...range);
     const step = (max - min) / TICKS_NO;
     return [
       ...Array(TICKS_NO)
