@@ -39,7 +39,8 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async findAllFields() {
-      return await testSubjects.findAll('lnsFieldListPanelField');
+      const fields = await testSubjects.findAll('lnsFieldListPanelField');
+      return await Promise.all(fields.map((field) => field.getVisibleText()));
     },
 
     async isLensPageOrFail() {
