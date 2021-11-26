@@ -12,6 +12,9 @@ import type {
   RequestHandlerContext,
 } from 'src/core/server';
 
+import type { FleetAuthz } from '../../common';
+import { calculateAuthz } from '../../common';
+
 import { appContextService } from '../services';
 
 const SUPERUSER_AUTHZ_MESSAGE =
@@ -118,6 +121,48 @@ function makeRouterEnforcingFleetSetupPrivilege<TContext extends RequestHandlerC
     getRoutes: () => router.getRoutes(),
     routerPath: router.routerPath,
   };
+}
+
+export async function getAuthzFromRequest(req: KibanaRequest): Promise<FleetAuthz> {
+  const security = appContextService.getSecurity();
+
+  if (security.authz.mode.useRbacForRequest(req)) {
+    const checkPrivileges = security.authz.checkPrivilegesDynamicallyWithRequest(req);
+    const { privileges } = await checkPrivileges({
+      kibana: [
+        security.authz.actions.api.get('fleet-all'),
+        security.authz.actions.api.get('fleet-setup'),
+        security.authz.actions.api.get('integrations-all'),
+        security.authz.actions.api.get('integrations-read'),
+      ],
+    });
+
+    const [fleetAll, fleetSetup, intAll, intRead] = privileges.kibana;
+
+    return calculateAuthz({
+      fleet: {
+        all: fleetAll.authorized,
+        setup: fleetSetup.authorized,
+      },
+
+      integrations: {
+        all: intAll.authorized,
+        read: intRead.authorized,
+      },
+    });
+  }
+
+  return calculateAuthz({
+    fleet: {
+      all: true,
+      setup: true,
+    },
+
+    integrations: {
+      all: true,
+      read: true,
+    },
+  });
 }
 
 export type RouterWrapper = <T extends RequestHandlerContext>(route: IRouter<T>) => IRouter<T>;

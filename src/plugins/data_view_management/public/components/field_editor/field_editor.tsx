@@ -31,7 +31,7 @@ import {
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { PainlessLang } from '@kbn/monaco';
 import type { FieldFormatInstanceType } from 'src/plugins/field_formats/common';
 import {
