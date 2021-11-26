@@ -10,8 +10,9 @@ import {
   CoreStart,
   CoreSetup,
   Plugin as PluginType,
-  ISavedObjectsRepository,
   Logger,
+  SavedObjectsClient,
+  SavedObjectsClientContract,
 } from '../../../../src/core/server';
 import { uptimeRuleFieldMap } from '../common/rules/uptime_rule_field_map';
 import { initServerWithKibana } from './kibana.index';
@@ -19,7 +20,7 @@ import {
   KibanaTelemetryAdapter,
   UptimeCorePluginsSetup,
   UptimeCorePluginsStart,
-  UptimeCoreSetup,
+  UptimeServerSetup,
 } from './lib/adapters';
 import { registerUptimeSavedObjects, savedObjectsAdapter } from './lib/saved_objects/saved_objects';
 import { mappingFromFieldMap } from '../../rule_registry/common/mapping_from_field_map';
@@ -30,10 +31,10 @@ import { SyntheticsService } from './lib/synthetics_service/synthetics_service';
 export type UptimeRuleRegistry = ReturnType<Plugin['setup']>['ruleRegistry'];
 
 export class Plugin implements PluginType {
-  private savedObjectsClient?: ISavedObjectsRepository;
+  private savedObjectsClient?: SavedObjectsClientContract;
   private initContext: PluginInitializerContext;
   private logger: Logger;
-  private server?: UptimeCoreSetup;
+  private server?: UptimeServerSetup;
   private syntheticService?: SyntheticsService;
 
   constructor(initializerContext: PluginInitializerContext<UptimeConfig>) {
@@ -70,7 +71,7 @@ export class Plugin implements PluginType {
       config,
       router: core.http.createRouter(),
       cloud: plugins.cloud,
-    } as UptimeCoreSetup;
+    } as UptimeServerSetup;
 
     initServerWithKibana(this.server, plugins, ruleDataClient, this.logger);
 
@@ -86,16 +87,19 @@ export class Plugin implements PluginType {
     };
   }
 
-  public start(core: CoreStart, plugins: UptimeCorePluginsStart) {
-    this.savedObjectsClient = core.savedObjects.createInternalRepository();
+  public start(coreStart: CoreStart, plugins: UptimeCorePluginsStart) {
+    this.savedObjectsClient = new SavedObjectsClient(
+      coreStart.savedObjects.createInternalRepository()
+    );
     if (this.server) {
       this.server.security = plugins.security;
       this.server.fleet = plugins.fleet;
       this.server.encryptedSavedObjects = plugins.encryptedSavedObjects;
+      this.server.savedObjectsClient = this.savedObjectsClient;
     }
 
     if (this.server?.config?.unsafe?.service.enabled) {
-      this.syntheticService?.setupTemplate(core);
+      this.syntheticService?.init(coreStart);
     }
   }
 
