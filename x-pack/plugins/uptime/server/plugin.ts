@@ -15,11 +15,16 @@ import {
 } from '../../../../src/core/server';
 import { uptimeRuleFieldMap } from '../common/rules/uptime_rule_field_map';
 import { initServerWithKibana } from './kibana.index';
-import { KibanaTelemetryAdapter, UptimeCorePlugins } from './lib/adapters';
+import {
+  KibanaTelemetryAdapter,
+  UptimeCorePluginsSetup,
+  UptimeCorePluginsStart,
+  UptimeCoreSetup,
+} from './lib/adapters';
 import { registerUptimeSavedObjects, savedObjectsAdapter } from './lib/saved_objects/saved_objects';
 import { mappingFromFieldMap } from '../../rule_registry/common/mapping_from_field_map';
 import { Dataset } from '../../rule_registry/server';
-import { UptimeConfig } from './config';
+import { UptimeConfig } from '../common/config';
 
 export type UptimeRuleRegistry = ReturnType<Plugin['setup']>['ruleRegistry'];
 
@@ -27,12 +32,13 @@ export class Plugin implements PluginType {
   private savedObjectsClient?: ISavedObjectsRepository;
   private initContext: PluginInitializerContext;
   private logger?: Logger;
+  private server?: UptimeCoreSetup;
 
-  constructor(_initializerContext: PluginInitializerContext) {
+  constructor(_initializerContext: PluginInitializerContext<UptimeConfig>) {
     this.initContext = _initializerContext;
   }
 
-  public setup(core: CoreSetup, plugins: UptimeCorePlugins) {
+  public setup(core: CoreSetup, plugins: UptimeCorePluginsSetup) {
     const config = this.initContext.config.get<UptimeConfig>();
 
     savedObjectsAdapter.config = config;
@@ -53,14 +59,15 @@ export class Plugin implements PluginType {
       ],
     });
 
-    initServerWithKibana(
-      { router: core.http.createRouter() },
-      plugins,
-      ruleDataClient,
-      this.logger
-    );
+    this.server = {
+      router: core.http.createRouter(),
+      config,
+      cloud: plugins.cloud,
+    } as UptimeCoreSetup;
 
-    registerUptimeSavedObjects(core.savedObjects);
+    initServerWithKibana(this.server, plugins, ruleDataClient, this.logger);
+
+    registerUptimeSavedObjects(core.savedObjects, plugins.encryptedSavedObjects, config);
 
     KibanaTelemetryAdapter.registerUsageCollector(
       plugins.usageCollection,
@@ -72,8 +79,12 @@ export class Plugin implements PluginType {
     };
   }
 
-  public start(core: CoreStart, _plugins: any) {
+  public start(core: CoreStart, plugins: UptimeCorePluginsStart) {
     this.savedObjectsClient = core.savedObjects.createInternalRepository();
+    if (this.server) {
+      this.server.security = plugins.security;
+      this.server.encryptedSavedObjects = plugins.encryptedSavedObjects;
+    }
   }
 
   public stop() {}

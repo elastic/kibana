@@ -4671,7 +4671,7 @@
             "id": "def-common.FieldFormatParams.Unnamed",
             "type": "IndexSignature",
             "tags": [],
-            "label": "[param: string}]: any",
+            "label": "[param: string]: any",
             "description": [],
             "signature": [
               "[param: string]:  any"
