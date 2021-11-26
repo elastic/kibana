@@ -9,7 +9,6 @@ import { SavedObjectsFindResult } from 'kibana/server';
 import {
   IRuleExecutionLogClient,
   LogStatusChangeArgs,
-  LogExecutionMetricsArgs,
   FindBulkExecutionLogArgs,
   FindBulkExecutionLogResponse,
   FindExecutionLogArgs,
@@ -63,10 +62,6 @@ export const createWarningsAndErrors = () => {
 
     logStatusChange(args: LogStatusChangeArgs): Promise<void> {
       warningsAndErrorsStore.push(args);
-      return Promise.resolve();
-    },
-
-    logExecutionMetrics(args: LogExecutionMetricsArgs): Promise<void> {
       return Promise.resolve();
     },
   };
