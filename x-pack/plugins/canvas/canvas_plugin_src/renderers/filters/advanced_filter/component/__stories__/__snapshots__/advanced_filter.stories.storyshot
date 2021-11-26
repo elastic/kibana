@@ -2,7 +2,18 @@
 
 exports[`Storyshots renderers/AdvancedFilter default 1`] = `
 <form
-  className="canvasAdvancedFilter"
+  css={
+    Object {
+      "map": undefined,
+      "name": "mhepyd",
+      "next": undefined,
+      "styles": "
+  width: 100%;
+  font-size: inherit;
+",
+      "toString": [Function],
+    }
+  }
   onSubmit={[Function]}
 >
   <div
@@ -12,7 +23,28 @@ exports[`Storyshots renderers/AdvancedFilter default 1`] = `
       className="euiFlexItem"
     >
       <input
-        className="canvasAdvancedFilter__input"
+        css={
+          Object {
+            "map": undefined,
+            "name": "iwqzsn",
+            "next": undefined,
+            "styles": "
+  background-color: #FFF;
+  width: 100%;
+  padding: 4px 16px;
+  border: 1px solid #D3DAE6;
+  border-radius: medium:4px;small:2px;;
+  font-size: inherit;
+  line-height: 19px;
+  font-family: monospace;
+
+  &:focus {
+    box-shadow: none;
+  }
+",
+            "toString": [Function],
+          }
+        }
         onChange={[Function]}
         placeholder="Enter filter expression"
         type="text"
@@ -23,7 +55,26 @@ exports[`Storyshots renderers/AdvancedFilter default 1`] = `
       className="euiFlexItem euiFlexItem--flexGrowZero"
     >
       <button
-        className="canvasAdvancedFilter__button"
+        css={
+          Object {
+            "map": undefined,
+            "name": "zezoe8",
+            "next": undefined,
+            "styles": "
+  width: 100%;
+  padding: 4px 8px;
+  border: 1px solid #D3DAE6;
+  border-radius: medium:4px;small:2px;;
+  background-color: #FFF;
+  font-size: inherit;
+
+  &:hover {
+    background-color: #F5F7FA;
+  }
+",
+            "toString": [Function],
+          }
+        }
         type="submit"
       >
         Apply
@@ -35,7 +86,18 @@ exports[`Storyshots renderers/AdvancedFilter default 1`] = `
 
 exports[`Storyshots renderers/AdvancedFilter with value 1`] = `
 <form
-  className="canvasAdvancedFilter"
+  css={
+    Object {
+      "map": undefined,
+      "name": "mhepyd",
+      "next": undefined,
+      "styles": "
+  width: 100%;
+  font-size: inherit;
+",
+      "toString": [Function],
+    }
+  }
   onSubmit={[Function]}
 >
   <div
@@ -45,7 +107,28 @@ exports[`Storyshots renderers/AdvancedFilter with value 1`] = `
       className="euiFlexItem"
     >
       <input
-        className="canvasAdvancedFilter__input"
+        css={
+          Object {
+            "map": undefined,
+            "name": "iwqzsn",
+            "next": undefined,
+            "styles": "
+  background-color: #FFF;
+  width: 100%;
+  padding: 4px 16px;
+  border: 1px solid #D3DAE6;
+  border-radius: medium:4px;small:2px;;
+  font-size: inherit;
+  line-height: 19px;
+  font-family: monospace;
+
+  &:focus {
+    box-shadow: none;
+  }
+",
+            "toString": [Function],
+          }
+        }
         onChange={[Function]}
         placeholder="Enter filter expression"
         type="text"
@@ -56,7 +139,26 @@ exports[`Storyshots renderers/AdvancedFilter with value 1`] = `
       className="euiFlexItem euiFlexItem--flexGrowZero"
     >
       <button
-        className="canvasAdvancedFilter__button"
+        css={
+          Object {
+            "map": undefined,
+            "name": "zezoe8",
+            "next": undefined,
+            "styles": "
+  width: 100%;
+  padding: 4px 8px;
+  border: 1px solid #D3DAE6;
+  border-radius: medium:4px;small:2px;;
+  background-color: #FFF;
+  font-size: inherit;
+
+  &:hover {
+    background-color: #F5F7FA;
+  }
+",
+            "toString": [Function],
+          }
+        }
         type="submit"
       >
         Apply
