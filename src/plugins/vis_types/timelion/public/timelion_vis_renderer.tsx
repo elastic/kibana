@@ -10,7 +10,7 @@ import React, { lazy } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 
 import { ExpressionRenderDefinition } from 'src/plugins/expressions';
-import { KibanaContextProvider } from '../../../kibana_react/public';
+import { KibanaContextProvider, KibanaThemeProvider } from '../../../kibana_react/public';
 import { VisualizationContainer } from '../../../visualizations/public';
 import { TimelionVisDependencies } from './plugin';
 import { TimelionRenderValue } from './timelion_vis_fn';
@@ -60,14 +60,16 @@ export const getTimelionVisRenderer: (
 
     render(
       <VisualizationContainer handlers={handlers} showNoResult={showNoResult}>
-        <KibanaContextProvider services={{ ...deps }}>
-          <VisComponent
-            interval={visParams.interval}
-            seriesList={seriesList}
-            renderComplete={handlers.done}
-            onBrushEvent={onBrushEvent}
-          />
-        </KibanaContextProvider>
+        <KibanaThemeProvider theme$={deps.theme.theme$}>
+          <KibanaContextProvider services={{ ...deps }}>
+            <VisComponent
+              interval={visParams.interval}
+              seriesList={seriesList}
+              renderComplete={handlers.done}
+              onBrushEvent={onBrushEvent}
+            />
+          </KibanaContextProvider>
+        </KibanaThemeProvider>
       </VisualizationContainer>,
       domNode
     );

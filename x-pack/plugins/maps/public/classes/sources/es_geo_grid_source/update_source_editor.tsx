@@ -8,7 +8,7 @@
 import React, { Fragment, Component } from 'react';
 
 import uuid from 'uuid/v4';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiPanel, EuiSpacer, EuiComboBoxOptionOption, EuiTitle } from '@elastic/eui';
 import { getDataViewNotFoundMessage } from '../../../../common/i18n_getters';
 import { AGG_TYPE, GRID_RESOLUTION, LAYER_TYPE, RENDER_AS } from '../../../../common/constants';

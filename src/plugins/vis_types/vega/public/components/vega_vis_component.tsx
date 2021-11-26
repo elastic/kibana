@@ -10,7 +10,7 @@ import React, { useEffect, useCallback, useRef } from 'react';
 import { EuiResizeObserver } from '@elastic/eui';
 import { throttle } from 'lodash';
 
-import { IInterpreterRenderHandlers } from 'src/plugins/expressions';
+import type { IInterpreterRenderHandlers, RenderMode } from 'src/plugins/expressions';
 import { createVegaVisualization } from '../vega_visualization';
 import { VegaVisualizationDependencies } from '../plugin';
 import { VegaParser } from '../data_model/vega_parser';
@@ -21,6 +21,7 @@ interface VegaVisComponentProps {
   deps: VegaVisualizationDependencies;
   fireEvent: IInterpreterRenderHandlers['event'];
   renderComplete: () => void;
+  renderMode: RenderMode;
   visData: VegaParser;
 }
 
@@ -31,13 +32,14 @@ export const VegaVisComponent = ({
   fireEvent,
   renderComplete,
   deps,
+  renderMode,
 }: VegaVisComponentProps) => {
   const chartDiv = useRef<HTMLDivElement>(null);
   const visController = useRef<VegaVisController | null>(null);
 
   useEffect(() => {
     if (chartDiv.current) {
-      const VegaVis = createVegaVisualization(deps);
+      const VegaVis = createVegaVisualization(deps, renderMode);
       visController.current = new VegaVis(chartDiv.current, fireEvent);
     }
 
@@ -45,7 +47,7 @@ export const VegaVisComponent = ({
       visController.current?.destroy();
       visController.current = null;
     };
-  }, [deps, fireEvent]);
+  }, [deps, fireEvent, renderMode]);
 
   useEffect(() => {
     if (visController.current) {
