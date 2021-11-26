@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -19,12 +19,13 @@ import {
 import { euiLightVars as lightEuiTheme } from '@kbn/ui-shared-deps-src/theme';
 import { Axis, BarSeries, Chart, CurveType, LineSeries, Settings } from '@elastic/charts';
 import { assign, fill } from 'lodash';
+import moment from 'moment';
 import { formatMillisForDisplay } from '../../../lib/execution_duration_utils';
 
 export interface ComponentOpts {
   executionDuration: {
     average: number;
-    values: number[];
+    valuesWithTimestamp: Record<string, number>;
   };
 }
 
@@ -34,7 +35,7 @@ export const ExecutionDurationChart: React.FunctionComponent<ComponentOpts> = ({
   executionDuration,
 }: ComponentOpts) => {
   const paddedExecutionDurations = padOrTruncateDurations(
-    executionDuration.values,
+    executionDuration.valuesWithTimestamp,
     DESIRED_NUM_EXECUTION_DURATIONS
   );
 
@@ -69,7 +70,8 @@ export const ExecutionDurationChart: React.FunctionComponent<ComponentOpts> = ({
         </EuiFlexItem>
       </EuiFlexGroup>
 
-      {executionDuration.values && executionDuration.values.length > 0 ? (
+      {executionDuration.valuesWithTimestamp &&
+      Object.entries(executionDuration.valuesWithTimestamp).length > 0 ? (
         <>
           <Chart data-test-subj="executionDurationChart" size={{ height: 80 }}>
             <Settings
@@ -92,7 +94,10 @@ export const ExecutionDurationChart: React.FunctionComponent<ComponentOpts> = ({
               yScaleType="linear"
               xAccessor={0}
               yAccessors={[1]}
-              data={paddedExecutionDurations.map((val, ndx) => [ndx, val])}
+              data={paddedExecutionDurations.map(([timestamp, val], ndx) => [
+                timestamp ? moment(timestamp).format('D MMM YYYY @ HH:mm:ss') : ndx,
+                val,
+              ])}
               minBarHeight={2}
             />
             <LineSeries
@@ -107,8 +112,8 @@ export const ExecutionDurationChart: React.FunctionComponent<ComponentOpts> = ({
               yScaleType="linear"
               xAccessor={0}
               yAccessors={[1]}
-              data={paddedExecutionDurations.map((val, ndx) => [
-                ndx,
+              data={paddedExecutionDurations.map(([timestamp, val], ndx) => [
+                timestamp ? moment(timestamp).format('D MMM YYYY @ HH:mm:ss') : ndx,
                 val ? executionDuration.average : null,
               ])}
               curve={CurveType.CURVE_NATURAL}
@@ -137,11 +142,15 @@ export const ExecutionDurationChart: React.FunctionComponent<ComponentOpts> = ({
   );
 };
 
-export function padOrTruncateDurations(values: number[], desiredSize: number) {
+export function padOrTruncateDurations(
+  valuesWithTimestamp: Record<string, number>,
+  desiredSize: number
+) {
+  const values = Object.entries(valuesWithTimestamp);
   if (values.length === desiredSize) {
     return values;
   } else if (values.length < desiredSize) {
-    return assign(fill(new Array(desiredSize), null), values);
+    return assign(fill(new Array(desiredSize), [null, null]), values);
   } else {
     // oldest durations are at the start of the array, so take the last {desiredSize} values
     return values.slice(-desiredSize);
