@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { markdownFactory } from '../canvas_plugin_src/renderers/markdown';
+import { getMarkdownFn } from '../canvas_plugin_src/renderers/markdown';
 import { pie } from '../canvas_plugin_src/renderers/pie';
 import { plot } from '../canvas_plugin_src/renderers/plot';
-import { tableFactory } from '../canvas_plugin_src/renderers/table';
-import { textFactory } from '../canvas_plugin_src/renderers/text';
+import { getTableFn } from '../canvas_plugin_src/renderers/table';
+import { getTextFn } from '../canvas_plugin_src/renderers/text';
 import { imageRenderer as image } from '../../../../src/plugins/expression_image/public';
 import {
   errorRenderer as error,
@@ -23,9 +23,9 @@ import {
 } from '../../../../src/plugins/expression_shape/public';
 import { metricRenderer as metric } from '../../../../src/plugins/expression_metric/public';
 
-const unboxFactory = (factory) => factory({ theme: {} });
+const unboxFactory = (factory) => factory();
 
-const renderFunctionsFactories = [markdownFactory, textFactory, tableFactory];
+const renderFunctionsFactories = [getMarkdownFn, getTextFn, getTableFn];
 
 /**
  * This is a collection of renderers which are bundled with the runtime.  If
