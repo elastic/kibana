@@ -69,6 +69,7 @@ export function GaugeDimensionEditor(
   };
 
   const displayStops = applyPaletteParams(props.paletteService, activePalette, currentMinMax);
+
   const togglePalette = () => setIsPaletteOpen(!isPaletteOpen);
   return (
     <>

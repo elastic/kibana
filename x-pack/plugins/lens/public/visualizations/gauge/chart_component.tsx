@@ -42,49 +42,25 @@ declare global {
   }
 }
 
-function getStops(
+function normalizeBands(
   { colors, stops, range }: CustomPaletteState,
   { min, max }: { min: number; max: number }
 ) {
-  if (stops.length) {
-    return stops;
+  if (!stops.length) {
+    const step = (max - min) / colors.length;
+    return [min, ...colors.map((_, i) => min + (i + 1) * step)];
   }
-  const step = (max - min) / colors.length;
-  return colors.map((_, i) => min + i * step);
-}
+  if (range === 'percent') {
+    return [min, ...stops.map((step) => min + step * ((max - min) / 100))];
+  }
 
-function shiftAndNormalizeStops(
-  params: CustomPaletteState,
-  { min, max }: { min: number; max: number }
-) {
-  const baseStops = [
-    ...getStops(params, { min, max }).map((value) => {
-      let result = value;
-      if (params.range === 'percent' && params.stops.length) {
-        result = min + value * ((max - min) / 100);
-      }
-      // for a range of 1 value the formulas above will divide by 0, so here's a safety guard
-      if (Number.isNaN(result)) {
-        return 1;
-      }
-      return result;
-    }),
-  ];
-  if (params.range === 'percent') {
-    const convertedMax = min + params.rangeMin * ((max - min) / 100);
-    baseStops.push(Math.max(max, convertedMax));
+  if (max >= Math.max(...stops)) {
+    // the max value has changed but the palette has outdated information
+    const updatedStops = [...stops.slice(0, -1), max];
+    return [min, ...updatedStops];
   } else {
-    baseStops.push(Math.max(max, ...params.stops));
+    return [min, ...stops.slice(0, -1)];
   }
-
-  if (params.stops.length) {
-    if (params.range === 'percent') {
-      baseStops.unshift(min + params.rangeMin * ((max - min) / 100));
-    } else {
-      baseStops.unshift(params.rangeMin);
-    }
-  }
-  return baseStops;
 }
 
 function getTitle(visTitleMode: GaugeTitleMode, visTitle?: string, fallbackTitle?: string) {
@@ -174,6 +150,7 @@ export const GaugeComponent: FC<GaugeRenderProps> = ({
   const goal = getValueFromAccessor('goalAccessor', row, args);
   const min = getMinValue(row, args);
   const max = getMaxValue(row, args);
+
   if (min === max) {
     return (
       <EmptyPlaceholder
@@ -199,8 +176,8 @@ export const GaugeComponent: FC<GaugeRenderProps> = ({
         }
   );
   const colors = (palette?.params as CustomPaletteState)?.colors ?? undefined;
-  const ranges = (palette?.params as CustomPaletteState)
-    ? shiftAndNormalizeStops(args.palette?.params as CustomPaletteState, { min, max })
+  const bands = (palette?.params as CustomPaletteState)
+    ? normalizeBands(args.palette?.params as CustomPaletteState, { min, max })
     : [min, max];
 
   return (
@@ -213,15 +190,15 @@ export const GaugeComponent: FC<GaugeRenderProps> = ({
         target={goal}
         actual={metricValue}
         tickValueFormatter={({ value: tickValue }) => formatter.convert(tickValue)}
-        bands={ranges}
-        ticks={getTicks(ticksPosition, [min, max], ranges)}
+        bands={bands}
+        ticks={getTicks(ticksPosition, [min, max], bands)}
         bandFillColor={
           colorMode === 'palette'
             ? (val) => {
-                const index = ranges && ranges.indexOf(val.value) - 1;
-                return index !== undefined && colors && index >= 0
+                const index = bands && bands.indexOf(val.value) - 1;
+                return colors && index >= 0 && colors[index]
                   ? colors[index]
-                  : 'rgb(255,255,255, 0)';
+                  : colors[colors.length - 1];
               }
             : undefined
         }

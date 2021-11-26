@@ -435,7 +435,7 @@ export const getGaugeVisualization = ({
       if (minValue > goalValue) {
         warnings.push([
           <FormattedMessage
-            id="xpack.lens.gaugeVisualization.goalValueGreaterMaximumShortMessage"
+            id="xpack.lens.gaugeVisualization.minimumValueGreaterGoalShortMessage"
             defaultMessage="Minimum value is greater than goal value."
           />,
         ]);
