@@ -28,5 +28,5 @@ export function getDataViewsServiceFactory(
   }
 
   return () =>
-    dataViews.dataViewsServiceFactory(savedObjectClient, scopedClient.asInternalUser, request);
+    dataViews.dataViewsServiceFactory(savedObjectClient, scopedClient.asCurrentUser, request);
 }
