@@ -25,7 +25,7 @@ import type { ReactElement } from 'react';
 import React, { Component } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { AppCategory } from 'src/core/public';
 
 import type { Role } from '../../../../../../../common/model';
