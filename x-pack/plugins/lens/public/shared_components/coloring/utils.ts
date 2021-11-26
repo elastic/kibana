@@ -198,10 +198,14 @@ export function isValidColor(colorString: string) {
   return colorString !== '' && /^#/.test(colorString) && isValidPonyfill(colorString);
 }
 
+export function roundValue(value: number) {
+  return Number((Math.floor(value * 100) / 100).toFixed(2));
+}
+
 export function roundStopValues(colorStops: ColorStop[]) {
   return colorStops.map(({ color, stop }) => {
     // when rounding mind to not go in excess, rather use the floor function
-    const roundedStop = Number((Math.floor(stop * 100) / 100).toFixed(2));
+    const roundedStop = roundValue(stop);
     return { color, stop: roundedStop };
   });
 }
@@ -307,7 +311,11 @@ export function getContrastColor(color: string, isDarkTheme: boolean) {
 /**
  * Same as stops, but remapped against a range 0-100
  */
-export function getStopsForFixedMode(stops: ColorStop[], colorStops?: ColorStop[], dataBounds = { min: 0, max: 100}) {
+export function getStopsForFixedMode(
+  stops: ColorStop[],
+  colorStops?: ColorStop[],
+  dataBounds = { min: 0, max: 100 }
+) {
   const referenceStops =
     colorStops || stops.map(({ color }, index) => ({ color, stop: 20 * index }));
   const fallbackStops = stops;
@@ -326,7 +334,7 @@ export function getStopsForFixedMode(stops: ColorStop[], colorStops?: ColorStop[
     newInterval: 100,
     oldInterval,
     newMin: 0,
-    oldMin: isFinite(referenceStops[0].stop) ?  referenceStops[0].stop : min,
+    oldMin: isFinite(referenceStops[0].stop) ? referenceStops[0].stop : min,
   });
 }
 

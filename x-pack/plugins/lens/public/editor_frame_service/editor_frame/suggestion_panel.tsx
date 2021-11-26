@@ -389,7 +389,7 @@ export function SuggestionPanel({
             />
           )}
           {!hideSuggestions &&
-            localSuggestions.map((suggestion, index) => {
+            suggestions.map((suggestion, index) => {
               return (
                 <SuggestionPreview
                   preview={{
@@ -408,7 +408,6 @@ export function SuggestionPanel({
                       switchToSuggestion(dispatchLens, suggestion);
                     }
                   }}
-                  isLoading={!isEqual(localParams.context, context) || !isEqual(suggestion, suggestions[index])}
                   selected={index === lastSelectedSuggestion}
                 />
               );

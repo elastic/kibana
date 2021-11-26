@@ -20,9 +20,11 @@ import {
   htmlIdGenerator,
   EuiTextColor,
 } from '@elastic/eui';
-import { InfinityIcon } from '../../assets/infinity_icon';
+import { ValueMaxIcon } from '../../assets/value_max';
+import { ValueMinIcon } from '../../assets/value_min';
 import { RelatedIcon } from '../../assets/related';
-import { getDataMinMax, getStepValue, isValidColor } from '../coloring/utils';
+import { DistributeEquallyIcon } from '../../assets/distribute_equally';
+import { getDataMinMax, getStepValue, isValidColor, roundValue } from '../coloring/utils';
 import { useDebouncedValue } from '../index';
 
 const idGeneratorFn = htmlIdGenerator();
@@ -47,6 +49,8 @@ function reversePalette(colorRanges) {
 export function ColorRanges(props) {
   const { colorRanges, rangeType, onChange, dataBounds } = props;
   const [isValid, setValid] = useState(true);
+  const [isDisabledStart, setDisableStart] = useState(false);
+  const [isDisabledEnd, setDisableEnd] = useState(false);
   const onChangeWithValidation = (newColorRanges) => {
     const colorStops = newColorRanges.map((colorRange) => {
       return {
@@ -67,12 +71,13 @@ export function ColorRanges(props) {
   const getColorRangeElem = (colorRange, index, isLast = false) => {
     const value = isLast ? colorRange.end : colorRange.start;
     const showDelete = index !== 0 && !isLast;
-    const showEdit = !showDelete && !isFinite(isLast ? colorRange.end : colorRange.start);
+    const showEdit = !showDelete && isLast ? isDisabledEnd : isDisabledStart;
     const dataTestPrefix = 'lnsPalettePanel';
+    const isDisabled = isLast ? isDisabledEnd : index === 0 ? isDisabledStart : false;
     return (
       <EuiFlexItem
         //key={id}
-        data-test-subj={`${dataTestPrefix}_dynamicColoring_stop_row_${index}`}
+        data-test-subj={`${dataTestPrefix}_dynamicColoring_range_row_${index}`}
         onBlur={(e: FocusEvent<HTMLDivElement>) => {
           const isFocusStillInContent = (e.currentTarget as Node)?.contains(
             e.relatedTarget as Node
@@ -94,7 +99,7 @@ export function ColorRanges(props) {
         <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
           <EuiFlexItem
             grow={false}
-            data-test-subj={`${dataTestPrefix}_dynamicColoring_stop_color_${index}`}
+            data-test-subj={`${dataTestPrefix}_dynamicColoring_range_color_${index}`}
           >
             {isLast ? (
               <EuiIcon type={RelatedIcon} />
@@ -118,10 +123,9 @@ export function ColorRanges(props) {
             <EuiFieldNumber
               compressed
               isInvalid={!isValid && isLast}
-              data-test-subj={`${dataTestPrefix}_dynamicColoring_stop_value_${index}`}
-              value={isFinite(value) ? value : ''}
-              placeholder={!isFinite(value) ? `${!isLast ? '-' : ''}∞` : ''}
-              disabled={!isFinite(value)}
+              data-test-subj={`${dataTestPrefix}_dynamicColoring_range_value_${index}`}
+              value={value}
+              disabled={isDisabled}
               min={-Infinity}
               onChange={({ target }) => {
                 const newValue = target.value.trim();
@@ -146,8 +150,8 @@ export function ColorRanges(props) {
                   <label className="euiFormLabel">&#8805;</label>
                 )
               }
-              aria-label={i18n.translate('xpack.lens.dynamicColoring.customPalette.stopAriaLabel', {
-                defaultMessage: 'Stop {index}',
+              aria-label={i18n.translate('xpack.lens.dynamicColoring.customPalette.rangeAriaLabel', {
+                defaultMessage: 'Range {index}',
                 values: {
                   index: index + 1,
                 },
@@ -180,7 +184,7 @@ export function ColorRanges(props) {
                   const newColorRanges = colorRanges.filter((_, i) => i !== index);
                   setColorRanges(newColorRanges);
                 }}
-                data-test-subj={`${dataTestPrefix}_dynamicColoring_removeStop_${index}`}
+                data-test-subj={`${dataTestPrefix}_dynamicColoring_removeColorRange_${index}`}
               />
             )}
             {!showDelete &&
@@ -188,13 +192,13 @@ export function ColorRanges(props) {
                 <EuiButtonIcon
                   iconType="pencil"
                   aria-label={i18n.translate(
-                    'xpack.lens.dynamicColoring.customPalette.deleteButtonAriaLabel',
+                    'xpack.lens.dynamicColoring.customPalette.editButtonAriaLabel',
                     {
                       defaultMessage: 'Edit',
                     }
                   )}
                   title={i18n.translate(
-                    'xpack.lens.dynamicColoring.customPalette.deleteButtonLabel',
+                    'xpack.lens.dynamicColoring.customPalette.editButtonLabel',
                     {
                       defaultMessage: 'Edit',
                     }
@@ -206,37 +210,53 @@ export function ColorRanges(props) {
                       color,
                       stop: Number(start),
                     }));
-                    const step = getStepValue(colorStops, colorStops, max);
+                    const step = roundValue(getStepValue(colorStops, colorStops, max));
                     if (isLast) {
                       value = colorRanges[index].start + step;
                     } else {
                       value = colorRanges[index].end - step;
                     }
-                    colorRanges[index][isLast ? 'end' : 'start'] = value;
+                    if (isLast) {
+                      setDisableEnd(false);
+                    } else {
+                      setDisableStart(false);
+                    }
+                    colorRanges[index][isLast ? 'end' : 'start'] = roundValue(value);
                     setColorRanges([...colorRanges]);
                   }}
-                  data-test-subj={`${dataTestPrefix}_dynamicColoring_removeStop_${index}`}
+                  data-test-subj={`${dataTestPrefix}_dynamicColoring_editValue_${index}`}
                 />
               ) : (
                 <EuiButtonIcon
-                  iconType={InfinityIcon}
+                  iconType={isLast ? ValueMaxIcon : ValueMinIcon}
                   aria-label={i18n.translate(
-                    'xpack.lens.dynamicColoring.customPalette.deleteButtonAriaLabel',
+                    `xpack.lens.dynamicColoring.customPalette.autoDetect${isLast ? 'Maximum' : 'Minimum'}AriaLabel`,
                     {
-                      defaultMessage: 'Set Infinity',
+                      defaultMessage: `Auto detect ${isLast ? 'maximum' : 'minimum'} value`,
                     }
                   )}
                   title={i18n.translate(
-                    'xpack.lens.dynamicColoring.customPalette.deleteButtonLabel',
+                    `xpack.lens.dynamicColoring.customPalette.autoDetect${isLast ? 'Maximum' : 'Minimum'}Label`,
                     {
-                      defaultMessage: 'Set Infinity',
+                      defaultMessage: `Auto detect ${isLast ? 'maximum' : 'minimum'} value`,
                     }
                   )}
                   onClick={() => {
-                    colorRanges[index][isLast ? 'end' : 'start'] = isLast ? Infinity : -Infinity;
+                    let value;
+                    if (rangeType !== 'percent') {
+                      value = roundValue(dataBounds[isLast ? 'max' : 'min']);
+                    } else {
+                      value = isLast ? '100' : '0';
+                    }
+                    if (isLast) {
+                      setDisableEnd(true);
+                    } else {
+                      setDisableStart(true);
+                    }
+                    colorRanges[index][isLast ? 'end' : 'start'] = value;
                     setColorRanges([...colorRanges]);
                   }}
-                  data-test-subj={`${dataTestPrefix}_dynamicColoring_removeStop_${index}`}
+                  data-test-subj={`${dataTestPrefix}_dynamicColoring_removeColorRange_${index}`}
                 />
               ))}
           </EuiFlexItem>
@@ -245,7 +265,7 @@ export function ColorRanges(props) {
           <>
             <EuiSpacer size="s" />
             <EuiTextColor color="danger" data-test-subj="lensDateHistogramError">
-              {i18n.translate('xpack.lens.indexPattern.invalidInterval', {
+              {i18n.translate('xpack.lens.dynamicColoring.customPalette.invalidMaxValue', {
                 defaultMessage: 'Maximum value should be greater than preceding values',
               })}
             </EuiTextColor>
@@ -268,10 +288,10 @@ export function ColorRanges(props) {
       )}
       <EuiSpacer size="s" />
       <EuiButtonEmpty
-        data-test-subj={`_dynamicColoring_addStop`}
+        data-test-subj={`lnsPalettePanel_dynamicColoring_addColorRange`}
         iconType="plusInCircle"
         color="primary"
-        aria-label={i18n.translate('xpack.lens.dynamicColoring.customPalette.addColorStop', {
+        aria-label={i18n.translate('xpack.lens.dynamicColoring.customPalette.addColorRange', {
           defaultMessage: 'Add color range',
         })}
         size="xs"
@@ -297,31 +317,60 @@ export function ColorRanges(props) {
                 ? prevEndValue
                 : dataBounds.max > newStart
                 ? dataBounds.max
-                : Infinity,
+                : newStart + step,
             id: idGeneratorFn(),
           });
           setColorRanges(newColorRanges);
         }}
       >
-        {i18n.translate('xpack.lens.dynamicColoring.customPalette.addColorStop', {
+        {i18n.translate('xpack.lens.dynamicColoring.customPalette.addColorRange', {
           defaultMessage: 'Add color range',
         })}
       </EuiButtonEmpty>
       <EuiButtonEmpty
-        data-test-subj={`_dynamicColoring_addStop`}
+        data-test-subj={`lnsPalettePanel_dynamicColoring_reverseColors`}
         iconType="sortable"
         color="primary"
-        aria-label={i18n.translate('xpack.lens.dynamicColoring.customPalette.addColorStop', {
+        aria-label={i18n.translate('xpack.lens.dynamicColoring.customPalette.reverseColors', {
           defaultMessage: 'Reverse colors',
         })}
         size="xs"
         flush="left"
         onClick={() => {
-          setColorRanges(reversePalette(colorRanges));
+          setColorRanges(reversePalette(localColorRanges));
         }}
       >
-        {i18n.translate('xpack.lens.dynamicColoring.customPalette.addColorStop', {
+        {i18n.translate('xpack.lens.dynamicColoring.customPalette.reverseColors', {
           defaultMessage: 'Reverse colors',
+        })}
+      </EuiButtonEmpty>
+      <EuiButtonEmpty
+        data-test-subj={`lnsPalettePanel_dynamicColoring_distributeEqually`}
+        iconType={DistributeEquallyIcon}
+        color="primary"
+        aria-label={i18n.translate('xpack.lens.dynamicColoring.customPalette.distributeEqually', {
+          defaultMessage: 'Distribute equally',
+        })}
+        size="xs"
+        flush="left"
+        onClick={() => {
+          const colorsCount = localColorRanges.length;
+          const start = localColorRanges[0].start;
+          const end = localColorRanges[colorsCount - 1].end;
+          const step = (end - start) / colorsCount;
+          setColorRanges(
+            localColorRanges.map((colorRange, index) => {
+              return {
+                color: colorRange.color,
+                start: start + step * index,
+                end: start + step * (index + 1),
+              };
+            })
+          );
+        }}
+      >
+        {i18n.translate('xpack.lens.dynamicColoring.customPalette.distributeEqually', {
+          defaultMessage: 'Distribute equally',
         })}
       </EuiButtonEmpty>
     </>
