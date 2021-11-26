@@ -27,6 +27,7 @@ import { createGetIndexStatusRoute } from './index_state';
 import { createNetworkEventsRoute } from './network_events';
 import { createJourneyFailedStepsRoute } from './pings/journeys';
 import { createLastSuccessfulStepRoute } from './synthetics/last_successful_step';
+import { installIndexTemplatesRoute } from './synthetics_service/install_index_templates';
 
 export * from './types';
 export { createRouteWithAuth } from './create_route_with_auth';
@@ -51,4 +52,5 @@ export const restApiRoutes: UMRestApiRouteFactory[] = [
   createJourneyFailedStepsRoute,
   createLastSuccessfulStepRoute,
   createJourneyScreenshotBlocksRoute,
+  installIndexTemplatesRoute,
 ];
