@@ -16,9 +16,8 @@ import { RendererFactory } from '../../../types';
 
 const { markdown: strings } = RendererStrings;
 
-export const markdownFactory: StartInitializer<RendererFactory<Config>> = (core, plugins) => {
-  const { theme } = core;
-  return () => ({
+export const markdownFactory: StartInitializer<RendererFactory<Config>> =
+  (core, plugins) => () => ({
     name: 'markdown',
     displayName: strings.getDisplayName(),
     help: strings.getHelpDescription(),
@@ -27,7 +26,7 @@ export const markdownFactory: StartInitializer<RendererFactory<Config>> = (core,
       const fontStyle = config.font ? config.font.spec : {};
 
       ReactDOM.render(
-        <KibanaThemeProvider theme$={theme.theme$}>
+        <KibanaThemeProvider theme$={core.theme.theme$}>
           <Markdown
             className="canvasMarkdown"
             style={fontStyle as CSSProperties}
@@ -42,4 +41,3 @@ export const markdownFactory: StartInitializer<RendererFactory<Config>> = (core,
       handlers.onDestroy(() => ReactDOM.unmountComponentAtNode(domNode));
     },
   });
-};

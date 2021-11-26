@@ -14,7 +14,6 @@ import { RendererStrings } from '../../i18n';
 import { RendererFactory, Style, Datatable } from '../../types';
 
 const { dropdownFilter: strings } = RendererStrings;
-
 export interface TableArguments {
   font?: Style;
   paginate: boolean;
@@ -23,9 +22,8 @@ export interface TableArguments {
   datatable: Datatable;
 }
 
-export const tableFactory: StartInitializer<RendererFactory<TableArguments>> = (core, plugins) => {
-  const { theme } = core;
-  return () => ({
+export const tableFactory: StartInitializer<RendererFactory<TableArguments>> =
+  (core, plugins) => () => ({
     name: 'table',
     displayName: strings.getDisplayName(),
     help: strings.getHelpDescription(),
@@ -33,7 +31,7 @@ export const tableFactory: StartInitializer<RendererFactory<TableArguments>> = (
     render(domNode, config, handlers) {
       const { datatable, paginate, perPage, font = { spec: {} }, showHeader } = config;
       ReactDOM.render(
-        <KibanaThemeProvider theme$={theme.theme$}>
+        <KibanaThemeProvider theme$={core.theme.theme$}>
           <div style={{ ...(font.spec as React.CSSProperties), height: '100%' }}>
             <DatatableComponent
               datatable={datatable}
@@ -50,4 +48,3 @@ export const tableFactory: StartInitializer<RendererFactory<TableArguments>> = (
       handlers.onDestroy(() => ReactDOM.unmountComponentAtNode(domNode));
     },
   });
-};

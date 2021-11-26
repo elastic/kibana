@@ -15,9 +15,8 @@ import { RendererStrings } from '../../../../i18n';
 
 const { advancedFilter: strings } = RendererStrings;
 
-export const advancedFilterFactory: StartInitializer<RendererFactory<{}>> = (core, plugins) => {
-  const { theme } = core;
-  return () => ({
+export const advancedFilterFactory: StartInitializer<RendererFactory<{}>> =
+  (core, plugins) => () => ({
     name: 'advanced_filter',
     displayName: strings.getDisplayName(),
     help: strings.getHelpDescription(),
@@ -25,7 +24,7 @@ export const advancedFilterFactory: StartInitializer<RendererFactory<{}>> = (cor
     height: 50,
     render(domNode, _, handlers) {
       ReactDOM.render(
-        <KibanaThemeProvider theme$={theme.theme$}>
+        <KibanaThemeProvider theme$={core.theme.theme$}>
           <AdvancedFilter commit={handlers.setFilter} value={handlers.getFilter()} />
         </KibanaThemeProvider>,
         domNode,
@@ -37,4 +36,3 @@ export const advancedFilterFactory: StartInitializer<RendererFactory<{}>> = (cor
       });
     },
   });
-};

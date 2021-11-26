@@ -14,16 +14,15 @@ import { RendererFactory } from '../../types';
 
 const { text: strings } = RendererStrings;
 
-export const textFactory: StartInitializer<RendererFactory<{ text: string }>> = (core, plugins) => {
-  const { theme } = core;
-  return () => ({
+export const textFactory: StartInitializer<RendererFactory<{ text: string }>> =
+  (core, plugins) => () => ({
     name: 'text',
     displayName: strings.getDisplayName(),
     help: strings.getHelpDescription(),
     reuseDomNode: true,
     render(domNode, { text: textString }, handlers) {
       ReactDOM.render(
-        <KibanaThemeProvider theme$={theme.theme$}>
+        <KibanaThemeProvider theme$={core.theme.theme$}>
           <div>{textString}</div>
         </KibanaThemeProvider>,
         domNode,
@@ -32,4 +31,3 @@ export const textFactory: StartInitializer<RendererFactory<{ text: string }>> = 
       handlers.onDestroy(() => ReactDOM.unmountComponentAtNode(domNode));
     },
   });
-};

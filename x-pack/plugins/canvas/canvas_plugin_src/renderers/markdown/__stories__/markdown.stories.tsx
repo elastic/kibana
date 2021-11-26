@@ -7,9 +7,12 @@
 
 import React from 'react';
 import { storiesOf } from '@storybook/react';
-import { markdown } from '../';
+import { markdownFactory } from '../';
 import { Render } from '../../__stories__/render';
+import { StartDeps } from '../../../plugin';
+import { coreStartMock } from '../../../../__fixtures__/core_dependencies';
 
+const markdown = markdownFactory(coreStartMock, {} as StartDeps);
 storiesOf('renderers/markdown', module)
   .add('default', () => {
     const config = {

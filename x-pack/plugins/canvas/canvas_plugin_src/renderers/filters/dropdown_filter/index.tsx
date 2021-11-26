@@ -40,9 +40,8 @@ const getFilterValue = (filterExpression: string) => {
   return get(filterAST, 'chain[0].arguments.value[0]', MATCH_ALL) as string;
 };
 
-export const dropdownFilterFactory: StartInitializer<RendererFactory<Config>> = (core, plugins) => {
-  const { theme } = core;
-  return () => ({
+export const dropdownFilterFactory: StartInitializer<RendererFactory<Config>> =
+  (core, plugins) => () => ({
     name: 'dropdown_filter',
     displayName: strings.getDisplayName(),
     help: strings.getHelpDescription(),
@@ -92,7 +91,7 @@ export const dropdownFilterFactory: StartInitializer<RendererFactory<Config>> = 
       };
 
       ReactDOM.render(
-        <KibanaThemeProvider theme$={theme.theme$}>
+        <KibanaThemeProvider theme$={core.theme.theme$}>
           <DropdownFilter
             commit={commit}
             choices={config.choices || []}
@@ -108,4 +107,3 @@ export const dropdownFilterFactory: StartInitializer<RendererFactory<Config>> = 
       });
     },
   });
-};

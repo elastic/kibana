@@ -22,8 +22,9 @@ import {
   progressRenderer as progress,
 } from '../../../../src/plugins/expression_shape/public';
 import { metricRenderer as metric } from '../../../../src/plugins/expression_metric/public';
+import { coreStartMock } from '../__fixtures__/core_dependencies';
 
-const unboxFactory = (factory) => factory({ theme: {} });
+const unboxFactory = (factory) => factory(coreStartMock, {});
 
 const renderFunctionsFactories = [markdownFactory, textFactory, tableFactory];
 
