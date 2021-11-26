@@ -26,6 +26,7 @@ import useAsyncFn from 'react-use/lib/useAsyncFn';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { monaco } from '@kbn/monaco';
 
 import { CodeEditorField, useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import type { ApiKeyRoleDescriptors } from '../../../../common/model';
@@ -63,8 +64,53 @@ const defaultDefaultValues: ApiKeyFormValues = {
   customPrivileges: false,
   includeMetadata: false,
   role_descriptors: '{}',
-  metadata: '{}',
+  metadata: `## Heading
+
+!{user{"id":"larry.gregory"}} What do you think? 
+
+- list
+- items
+`,
 };
+
+class MarkdownCompletionProvider implements monaco.languages.CompletionItemProvider {
+  public triggerCharacters = ['!', '@'];
+
+  public async provideCompletionItems(
+    model: monaco.editor.ITextModel,
+    position: monaco.Position,
+    context: monaco.languages.CompletionContext,
+    token: monaco.CancellationToken
+  ) {
+    const textUntilPosition = model.getValueInRange({
+      startLineNumber: 1,
+      startColumn: 1,
+      endLineNumber: position.lineNumber,
+      endColumn: position.column,
+    });
+    const word = model.getWordUntilPosition(position);
+    const range = {
+      startLineNumber: position.lineNumber,
+      endLineNumber: position.lineNumber,
+      startColumn: word.startColumn,
+      endColumn: word.endColumn,
+    };
+    console.log('provideCompletionItems', textUntilPosition, word);
+    return {
+      suggestions: ['Thom', 'Larry', 'Joe', 'Oleg', 'Thomas', 'Xavier'].map((label) => ({
+        label,
+        insertText: `!{user{id:${label}}}`,
+        range,
+        kind: monaco.languages.CompletionItemKind.User,
+      })),
+    };
+  }
+
+  // resolveCompletionItem(item: monaco.languages.CompletionItem, token: monaco.CancellationToken) {
+  //   console.log('resolveCompletionItem', item, token);
+  //   return item;
+  // }
+}
 
 export const CreateApiKeyFlyout: FunctionComponent<CreateApiKeyFlyoutProps> = ({
   onSuccess,
@@ -131,7 +177,6 @@ export const CreateApiKeyFlyout: FunctionComponent<CreateApiKeyFlyoutProps> = ({
       )}
       isLoading={form.isSubmitting}
       isDisabled={isLoading || (form.isSubmitted && form.isInvalid)}
-      size="s"
       ownFocus
     >
       {form.submitError && (
@@ -205,6 +250,17 @@ export const CreateApiKeyFlyout: FunctionComponent<CreateApiKeyFlyoutProps> = ({
               data-test-subj="apiKeyNameInput"
             />
           </EuiFormRow>
+
+          <CodeEditorField
+            value={form.values.metadata!}
+            onChange={(value) => form.setValue('metadata', value)}
+            languageId="markdown"
+            suggestionProvider={new MarkdownCompletionProvider()}
+            options={{
+              lineNumbers: 'off',
+            }}
+            height={200}
+          />
 
           <EuiSpacer />
           <EuiFormFieldset>

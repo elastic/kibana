@@ -285,8 +285,30 @@ export const CodeEditor: React.FC<Props> = ({
       }
 
       editorWillMount?.();
+      // const allLangs = await monaco.languages.getLanguages();
 
       monaco.languages.onLanguage(languageId, () => {
+        monaco.languages.setMonarchTokensProvider(languageId, {
+          defaultToken: '',
+          tokenizer: {
+            root: [
+              [/!\{\w*/, 'keyword', '@customEmbed'],
+              [/#+.*/, 'keyword'],
+              // list (starting with * or number)
+              [/^\s*([\*\-+:]|\d+\.)\s/, 'keyword'],
+            ],
+            customEmbed: [
+              [/\{/, 'variable', '@bracketCounting'],
+              [/\}/, 'keyword', '@pop'],
+            ],
+            bracketCounting: [
+              [/\{/, 'variable', '@bracketCounting'],
+              [/\}/, 'variable', '@pop'],
+              [/[^\}]+/, 'variable'],
+            ],
+          },
+        });
+
         if (suggestionProvider) {
           monaco.languages.registerCompletionItemProvider(languageId, suggestionProvider);
         }

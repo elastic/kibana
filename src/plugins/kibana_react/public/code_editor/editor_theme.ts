@@ -75,7 +75,7 @@ export function createTheme(
       { token: 'string.sql', foreground: euiTheme.euiColorDanger },
       { token: 'string.yaml', foreground: euiTheme.euiColorPrimary },
 
-      { token: 'keyword', foreground: euiTheme.euiColorPrimary },
+      { token: 'keyword', foreground: euiTheme.euiColorPrimary, fontStyle: 'bold' },
       { token: 'keyword.json', foreground: euiTheme.euiColorPrimary },
       { token: 'keyword.flow', foreground: euiTheme.euiColorWarning },
       { token: 'keyword.flow.scss', foreground: euiTheme.euiColorPrimary },
