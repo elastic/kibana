@@ -30,11 +30,10 @@ import { Provider, alertsPageStateContainer, useAlertsPageStateContainer } from 
 import './styles.scss';
 import { WorkflowStatusFilter } from './workflow_status_filter';
 import { AlertsDisclaimer } from './alerts_disclaimer';
-import { loadAlertAggregations } from '../../../../../plugins/triggers_actions_ui/public';
+import { loadAlertAggregations as loadRuleAggregations } from '../../../../../plugins/triggers_actions_ui/public';
 
-interface AlertStatsState {
-  isLoading: boolean;
-  ruleCount: number;
+interface RuleStatsState {
+  total: number;
   disabled: number;
   muted: number;
   errors: number;
@@ -75,10 +74,9 @@ function AlertsPage() {
     http,
     notifications: { toasts },
   } = useKibana().services;
-  const [alertStatsLoading, setAlertStatsLoading] = useState<boolean>(false);
-  const [alertStats, setAlertStats] = useState<AlertStatsState>({
-    isLoading: false,
-    ruleCount: -1,
+  const [ruleStatsLoading, setRuleStatsLoading] = useState<boolean>(false);
+  const [ruleStats, setRuleStats] = useState<RuleStatsState>({
+    total: -1,
     disabled: -1,
     muted: -1,
     errors: -1,
@@ -92,10 +90,10 @@ function AlertsPage() {
     },
   ]);
 
-  async function loadAlertStats() {
-    setAlertStatsLoading(true);
+  async function loadRuleStats() {
+    setRuleStatsLoading(true);
     try {
-      const alertsResponse = await loadAlertAggregations({
+      const response = await loadRuleAggregations({
         http,
         page: { index: 0, size: 9999 },
         searchText: undefined,
@@ -104,27 +102,33 @@ function AlertsPage() {
         alertStatusesFilter: [],
         sort: undefined,
       });
-      const status = alertsResponse?.alertExecutionStatus;
+      // Note that the API uses the semantics of 'alerts' instead of 'rules'
+      const status = response?.alertExecutionStatus;
       if (status) {
-        setAlertStats({
-          ...alertStats,
-          ruleCount: status.active,
+        setRuleStats({
+          ...ruleStats,
+          // FIXME: this is the active count, while we want the grand total
+          total: status.active,
+          // TODO:
+          // disabled: status.disabled,
+          // TODO:
+          // muted: status.muted,
           errors: status.error,
         });
-        setAlertStatsLoading(false);
+        setRuleStatsLoading(false);
       }
     } catch (_e) {
       toasts.addDanger({
-        title: i18n.translate('xpack.observability.alerts.stats.loadError', {
+        title: i18n.translate('xpack.observability.alerts.ruleStats.loadError', {
           defaultMessage: 'Unable to load rule stats',
         }),
       });
-      setAlertStatsLoading(false);
+      setRuleStatsLoading(false);
     }
   }
 
   useEffect(() => {
-    loadAlertStats();
+    loadRuleStats();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -234,43 +238,43 @@ function AlertsPage() {
         ),
         rightSideItems: [
           <EuiStat
-            title={alertStats.ruleCount}
-            description={i18n.translate('xpack.observability.alerts.stats.ruleCount', {
+            title={ruleStats.total}
+            description={i18n.translate('xpack.observability.alerts.ruleStats.ruleCount', {
               defaultMessage: 'Rule count',
             })}
             color="primary"
             titleSize="xs"
-            isLoading={alertStatsLoading}
+            isLoading={ruleStatsLoading}
             data-test-subj="statRuleCount"
           />,
           <EuiStat
-            title={alertStats.disabled}
-            description={i18n.translate('xpack.observability.alerts.stats.disabled', {
+            title={ruleStats.disabled}
+            description={i18n.translate('xpack.observability.alerts.ruleStats.disabled', {
               defaultMessage: 'Disabled',
             })}
             color="primary"
             titleSize="xs"
-            isLoading={alertStatsLoading}
+            isLoading={ruleStatsLoading}
             data-test-subj="statDisabled"
           />,
           <EuiStat
-            title={alertStats.muted}
-            description={i18n.translate('xpack.observability.alerts.stats.muted', {
+            title={ruleStats.muted}
+            description={i18n.translate('xpack.observability.alerts.ruleStats.muted', {
               defaultMessage: 'Muted',
             })}
             color="primary"
             titleSize="xs"
-            isLoading={alertStatsLoading}
+            isLoading={ruleStatsLoading}
             data-test-subj="statMuted"
           />,
           <EuiStat
-            title={alertStats.errors}
-            description={i18n.translate('xpack.observability.alerts.stats.errors', {
+            title={ruleStats.errors}
+            description={i18n.translate('xpack.observability.alerts.ruleStats.errors', {
               defaultMessage: 'Errors',
             })}
             color="primary"
             titleSize="xs"
-            isLoading={alertStatsLoading}
+            isLoading={ruleStatsLoading}
             data-test-subj="statErrors"
           />,
           <Divider />,
