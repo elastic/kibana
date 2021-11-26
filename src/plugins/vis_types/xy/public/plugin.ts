@@ -72,6 +72,7 @@ export class VisTypeXyPlugin
     expressions.registerRenderer(
       getXYVisRenderer({
         uiSettings: core.uiSettings,
+        theme: core.theme,
       })
     );
     expressions.registerFunction(expressionFunctions.visTypeXyVisFn);

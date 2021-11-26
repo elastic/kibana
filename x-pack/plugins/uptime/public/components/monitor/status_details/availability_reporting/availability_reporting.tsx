@@ -7,7 +7,7 @@
 
 import React, { useState } from 'react';
 import { EuiBasicTable, EuiSpacer, Criteria, Pagination } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { StatusTag } from './location_status_tags';
 import { TagLabel } from './tag_label';
 import { AvailabilityLabel, LastCheckLabel, LocationLabel } from '../translations';
