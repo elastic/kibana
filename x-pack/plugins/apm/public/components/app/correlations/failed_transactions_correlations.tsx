@@ -55,6 +55,8 @@ import { OnAddFilter } from './context_popover/top_values';
 
 import { useFailedTransactionsCorrelations } from './use_failed_transactions_correlations';
 import { getTransactionDistributionChartData } from './get_transaction_distribution_chart_data';
+import { ChartTitleToolTip } from './chart_title_tool_tip';
+import { MIN_TAB_TITLE_HEIGHT } from '../transaction_details/distribution';
 
 export function FailedTransactionsCorrelations({
   onFilter,
@@ -430,53 +432,59 @@ export function FailedTransactionsCorrelations({
 
   return (
     <div data-test-subj="apmFailedTransactionsCorrelationsTabContent">
-      <EuiFlexItem style={{ flexDirection: 'row', alignItems: 'center' }}>
-        <EuiFlexGroup direction="row" gutterSize="s">
-          <EuiFlexItem grow={false}>
-            <EuiTitle
-              size="xs"
-              data-test-subj="apmFailedTransactionsCorrelationsTabTitle"
-            >
-              <h5 data-test-subj="apmFailedTransactionsCorrelationsChartTitle">
-                {i18n.translate(
-                  'xpack.apm.correlations.failedTransactions.panelTitle',
-                  {
-                    defaultMessage: 'Failed transactions latency distribution',
-                  }
-                )}
-              </h5>
-            </EuiTitle>
-          </EuiFlexItem>
+      <EuiFlexGroup
+        style={{ minHeight: MIN_TAB_TITLE_HEIGHT }}
+        alignItems="center"
+        gutterSize="s"
+      >
+        <EuiFlexItem grow={false}>
+          <EuiTitle
+            size="xs"
+            data-test-subj="apmFailedTransactionsCorrelationsTabTitle"
+          >
+            <h5 data-test-subj="apmFailedTransactionsCorrelationsChartTitle">
+              {i18n.translate(
+                'xpack.apm.correlations.failedTransactions.panelTitle',
+                {
+                  defaultMessage: 'Failed transactions latency distribution',
+                }
+              )}
+            </h5>
+          </EuiTitle>
+        </EuiFlexItem>
 
-          <EuiFlexItem grow={false}>
-            <EuiBetaBadge
-              label={i18n.translate(
-                'xpack.apm.transactionDetails.tabs.failedTransactionsCorrelationsBetaLabel',
-                {
-                  defaultMessage: 'Beta',
-                }
-              )}
-              title={i18n.translate(
-                'xpack.apm.transactionDetails.tabs.failedTransactionsCorrelationsBetaTitle',
-                {
-                  defaultMessage: 'Failed transaction correlations',
-                }
-              )}
-              tooltipContent={i18n.translate(
-                'xpack.apm.transactionDetails.tabs.failedTransactionsCorrelationsBetaDescription',
-                {
-                  defaultMessage:
-                    'Failed transaction correlations is not GA. Please help us by reporting any bugs.',
-                }
-              )}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <EuiFlexItem grow={false}>
+          <EuiBetaBadge
+            label={i18n.translate(
+              'xpack.apm.transactionDetails.tabs.failedTransactionsCorrelationsBetaLabel',
+              {
+                defaultMessage: 'Beta',
+              }
+            )}
+            title={i18n.translate(
+              'xpack.apm.transactionDetails.tabs.failedTransactionsCorrelationsBetaTitle',
+              {
+                defaultMessage: 'Failed transaction correlations',
+              }
+            )}
+            tooltipContent={i18n.translate(
+              'xpack.apm.transactionDetails.tabs.failedTransactionsCorrelationsBetaDescription',
+              {
+                defaultMessage:
+                  'Failed transaction correlations is not GA. Please help us by reporting any bugs.',
+              }
+            )}
+          />
+        </EuiFlexItem>
+
+        <EuiFlexItem>
+          <ChartTitleToolTip />
+        </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
           <FailedTransactionsCorrelationsHelpPopover />
         </EuiFlexItem>
-      </EuiFlexItem>
+      </EuiFlexGroup>
 
       <EuiSpacer size="s" />
 

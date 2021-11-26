@@ -47,6 +47,8 @@ import { OnAddFilter } from './context_popover/top_values';
 import { useLatencyCorrelations } from './use_latency_correlations';
 import { getTransactionDistributionChartData } from './get_transaction_distribution_chart_data';
 import { useTheme } from '../../../hooks/use_theme';
+import { ChartTitleToolTip } from './chart_title_tool_tip';
+import { MIN_TAB_TITLE_HEIGHT } from '../transaction_details/distribution';
 
 export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
   const {
@@ -278,8 +280,12 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
 
   return (
     <div data-test-subj="apmLatencyCorrelationsTabContent">
-      <EuiFlexGroup>
-        <EuiFlexItem style={{ flexDirection: 'row', alignItems: 'center' }}>
+      <EuiFlexGroup
+        style={{ minHeight: MIN_TAB_TITLE_HEIGHT }}
+        alignItems="center"
+        gutterSize="s"
+      >
+        <EuiFlexItem grow={false}>
           <EuiTitle size="xs">
             <h5 data-test-subj="apmCorrelationsLatencyCorrelationsChartTitle">
               {i18n.translate(
@@ -291,6 +297,11 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
             </h5>
           </EuiTitle>
         </EuiFlexItem>
+
+        <EuiFlexItem>
+          <ChartTitleToolTip />
+        </EuiFlexItem>
+
         <EuiFlexItem grow={false}>
           <LatencyCorrelationsHelpPopover />
         </EuiFlexItem>

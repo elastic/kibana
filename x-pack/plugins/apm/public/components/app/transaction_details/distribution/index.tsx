@@ -18,7 +18,6 @@ import {
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 
 import { useUiTracker } from '../../../../../../observability/public';
 
@@ -36,10 +35,11 @@ import { WaterfallWithSummary } from '../waterfall_with_summary';
 
 import { useTransactionDistributionChartData } from './use_transaction_distribution_chart_data';
 import { HeightRetainer } from '../../../shared/HeightRetainer';
+import { ChartTitleToolTip } from '../../correlations/chart_title_tool_tip';
 
 // Enforce min height so it's consistent across all tabs on the same level
 // to prevent "flickering" behavior
-const MIN_TAB_TITLE_HEIGHT = 56;
+export const MIN_TAB_TITLE_HEIGHT = 56;
 
 type Selection = [number, number];
 
@@ -106,8 +106,12 @@ export function TransactionDistribution({
   return (
     <HeightRetainer>
       <div data-test-subj="apmTransactionDistributionTabContent">
-        <EuiFlexGroup style={{ minHeight: MIN_TAB_TITLE_HEIGHT }}>
-          <EuiFlexItem style={{ flexDirection: 'row', alignItems: 'center' }}>
+        <EuiFlexGroup
+          style={{ minHeight: MIN_TAB_TITLE_HEIGHT }}
+          alignItems="center"
+          gutterSize="s"
+        >
+          <EuiFlexItem grow={false}>
             <EuiTitle size="xs">
               <h5 data-test-subj="apmTransactionDistributionChartTitle">
                 {i18n.translate(
@@ -119,79 +123,56 @@ export function TransactionDistribution({
               </h5>
             </EuiTitle>
           </EuiFlexItem>
-          {hasData && !selection && (
-            <EuiFlexItem>
-              <EuiFlexGroup justifyContent="flexEnd" gutterSize="xs">
-                <EuiFlexItem
-                  grow={false}
-                  style={{ flexDirection: 'row', alignItems: 'center' }}
-                >
-                  <EuiIcon
-                    type="iInCircle"
-                    title={emptySelectionText}
-                    size="s"
-                  />
-                </EuiFlexItem>
-                <EuiFlexItem
-                  grow={false}
-                  style={{ flexDirection: 'row', alignItems: 'center' }}
-                >
-                  <EuiText size="xs">{emptySelectionText}</EuiText>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-          )}
-          {hasData && selection && (
-            <EuiFlexItem grow={false}>
-              <EuiBadge
-                iconType="cross"
-                iconSide="left"
-                onClick={onTrackedClearSelection}
-                onClickAriaLabel={clearSelectionAriaLabel}
-                iconOnClick={onTrackedClearSelection}
-                iconOnClickAriaLabel={clearSelectionAriaLabel}
-                data-test-sub="apmTransactionDetailsDistributionClearSelectionBadge"
-              >
-                {i18n.translate(
-                  'xpack.apm.transactionDetails.distribution.selectionText',
-                  {
-                    defaultMessage: `Selection: {formattedSelection}`,
-                    values: {
-                      formattedSelection: getFormattedSelection(selection),
-                    },
-                  }
-                )}
-              </EuiBadge>
-            </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
 
-        <EuiText color="subdued" size="xs">
-          <FormattedMessage
-            id="xpack.apm.transactionDetails.tabs.transactionDistributionChartDescription"
-            defaultMessage="Log-log plot for latency (x) by transactions (y) with overlapping bands for {allTransactions} and {failedTransactions}."
-            values={{
-              allTransactions: (
-                <span style={{ color: transactionColors.ALL_TRANSACTIONS }}>
-                  <FormattedMessage
-                    id="xpack.apm.transactionDetails.tabs.transactionDistributionChartAllTransactions"
-                    defaultMessage="all transactions"
-                  />
-                </span>
-              ),
-              failedTransactions: (
-                <span
-                  style={{ color: transactionColors.ALL_FAILED_TRANSACTIONS }}
-                >
-                  <FormattedMessage
-                    id="xpack.apm.transactionDetails.tabs.transactionDistributionChartFailedTransactions"
-                    defaultMessage="failed transactions"
-                  />
-                </span>
-              ),
-            }}
-          />
-        </EuiText>
+          <EuiFlexItem grow={false}>
+            <ChartTitleToolTip />
+          </EuiFlexItem>
+
+          <EuiFlexItem>
+            <EuiFlexGroup
+              justifyContent="flexEnd"
+              alignItems="center"
+              gutterSize="xs"
+            >
+              {selection ? (
+                <EuiFlexItem grow={false}>
+                  <EuiBadge
+                    iconType="cross"
+                    iconSide="left"
+                    onClick={onTrackedClearSelection}
+                    onClickAriaLabel={clearSelectionAriaLabel}
+                    iconOnClick={onTrackedClearSelection}
+                    iconOnClickAriaLabel={clearSelectionAriaLabel}
+                    data-test-sub="apmTransactionDetailsDistributionClearSelectionBadge"
+                  >
+                    {i18n.translate(
+                      'xpack.apm.transactionDetails.distribution.selectionText',
+                      {
+                        defaultMessage: `Selection: {formattedSelection}`,
+                        values: {
+                          formattedSelection: getFormattedSelection(selection),
+                        },
+                      }
+                    )}
+                  </EuiBadge>
+                </EuiFlexItem>
+              ) : (
+                <>
+                  <EuiFlexItem grow={false}>
+                    <EuiIcon
+                      type="iInCircle"
+                      title={emptySelectionText}
+                      size="s"
+                    />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiText size="xs">{emptySelectionText}</EuiText>
+                  </EuiFlexItem>
+                </>
+              )}
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
 
         <EuiSpacer size="s" />
 
