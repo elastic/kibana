@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
+import { useEuiTheme } from '@elastic/eui';
+import React, { FC } from 'react';
 import ReactDOM from 'react-dom';
 import { CoreStart } from '../../../../../../src/core/public';
 import { StartDeps } from '../../plugin';
@@ -22,6 +23,7 @@ import { embeddableInputToExpression } from './embeddable_input_to_expression';
 import { RendererFactory, EmbeddableInput } from '../../../types';
 import { CANVAS_EMBEDDABLE_CLASSNAME } from '../../../common/lib';
 import type { EmbeddableContainerContext } from '../../../../../../src/plugins/embeddable/public/';
+import { embeddableContainerStyles, embeddableStyles } from './embeddable.styles';
 
 const { embeddable: strings } = RendererStrings;
 
@@ -30,28 +32,40 @@ const embeddablesRegistry: {
   [key: string]: IEmbeddable | Promise<IEmbeddable>;
 } = {};
 
+const EmbeddableComponentContainer: FC<{ Component: FC<any>; componentProps: unknown }> = ({
+  Component,
+  componentProps,
+}) => {
+  const theme = useEuiTheme();
+  return (
+    <div
+      className={`${CANVAS_EMBEDDABLE_CLASSNAME}`}
+      css={[embeddableContainerStyles, embeddableStyles(theme.euiTheme)]}
+    >
+      <Component {...componentProps} />
+    </div>
+  );
+};
+
 const renderEmbeddableFactory = (core: CoreStart, plugins: StartDeps) => {
   const I18nContext = core.i18n.Context;
 
   const embeddableContainerContext: EmbeddableContainerContext = {
     getCurrentPath: () => window.location.hash,
   };
-
   return (embeddableObject: IEmbeddable) => {
     return (
-      <div
-        className={CANVAS_EMBEDDABLE_CLASSNAME}
-        style={{ width: '100%', height: '100%', cursor: 'auto' }}
-      >
-        <I18nContext>
-          <KibanaThemeProvider theme$={core.theme.theme$}>
-            <plugins.embeddable.EmbeddablePanel
-              embeddable={embeddableObject}
-              containerContext={embeddableContainerContext}
-            />
-          </KibanaThemeProvider>
-        </I18nContext>
-      </div>
+      <I18nContext>
+        <KibanaThemeProvider theme$={core.theme.theme$}>
+          <EmbeddableComponentContainer
+            Component={plugins.embeddable.EmbeddablePanel}
+            componentProps={{
+              embeddable: embeddableObject,
+              containerContext: embeddableContainerContext,
+            }}
+          />
+        </KibanaThemeProvider>
+      </I18nContext>
     );
   };
 };
