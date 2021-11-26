@@ -277,9 +277,7 @@ export function createTestEsCluster<
         )
         .then((res) => {
           const deps = res.body.hits.hits
-            .filter(
-              (d) => d._source!['elasticsearch.http.request.x_opaque_id'] !== 'kbn-test-client'
-            )
+            .filter((d) => /^kbn-test.*/.test(d._source!['elasticsearch.http.request.x_opaque_id']))
             .map((d) => {
               return `ES DEPRECATION ${d._source!['log.level']} ${d._source!.message}`;
             });
@@ -315,7 +313,7 @@ export function createTestEsCluster<
     getClient(): KibanaClient {
       return new Client({
         node: this.getHostUrls(),
-        headers: { 'X-Opaque-Id': 'kbn-test-client' },
+        headers: { 'X-Opaque-Id': 'kbn-test' },
         ...(ssl && { ssl: { ca: Fs.readFileSync(CA_CERT_PATH), rejectUnauthorized: true } }),
       });
     }

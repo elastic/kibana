@@ -107,6 +107,7 @@ export function runCli() {
       const client = new Client({
         node: esUrl,
         ssl: esCa ? { ca: esCa } : undefined,
+        headers: { 'X-Opaque-Id': 'kbn-es-archiver' },
       });
       addCleanupTask(() => client.close());
 
