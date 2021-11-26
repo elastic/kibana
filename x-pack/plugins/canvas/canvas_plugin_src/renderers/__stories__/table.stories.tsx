@@ -7,10 +7,8 @@
 
 import React from 'react';
 import { storiesOf } from '@storybook/react';
-import { tableFactory } from '../table';
+import { getTableFn } from '../table';
 import { Render } from './render';
-import { StartDeps } from '../../plugin';
-import { coreStartMock } from '../../../__fixtures__/core_dependencies';
 
 storiesOf('renderers/table', module).add('default', () => {
   const config = {
@@ -44,7 +42,5 @@ storiesOf('renderers/table', module).add('default', () => {
       ],
     },
   };
-  return (
-    <Render renderer={tableFactory(coreStartMock, {} as StartDeps)} config={config} width="400px" />
-  );
+  return <Render renderer={getTableFn()} config={config} width="400px" />;
 });

@@ -7,11 +7,14 @@
 
 import ReactDOM from 'react-dom';
 import React from 'react';
+import { CoreTheme } from 'kibana/public';
+import { Observable } from 'rxjs';
 import { KibanaThemeProvider } from '../../../../../src/plugins/kibana_react/public';
 import { StartInitializer } from '../plugin';
 import { Datatable as DatatableComponent } from '../../public/components/datatable';
 import { RendererStrings } from '../../i18n';
 import { RendererFactory, Style, Datatable } from '../../types';
+import { defaultTheme$ } from '../../public/lib/default_theme';
 
 const { dropdownFilter: strings } = RendererStrings;
 export interface TableArguments {
@@ -22,8 +25,9 @@ export interface TableArguments {
   datatable: Datatable;
 }
 
-export const tableFactory: StartInitializer<RendererFactory<TableArguments>> =
-  (core, plugins) => () => ({
+export const getTableFn =
+  (theme$: Observable<CoreTheme> = defaultTheme$): RendererFactory<TableArguments> =>
+  () => ({
     name: 'table',
     displayName: strings.getDisplayName(),
     help: strings.getHelpDescription(),
@@ -31,7 +35,7 @@ export const tableFactory: StartInitializer<RendererFactory<TableArguments>> =
     render(domNode, config, handlers) {
       const { datatable, paginate, perPage, font = { spec: {} }, showHeader } = config;
       ReactDOM.render(
-        <KibanaThemeProvider theme$={core.theme.theme$}>
+        <KibanaThemeProvider theme$={theme$}>
           <div style={{ ...(font.spec as React.CSSProperties), height: '100%' }}>
             <DatatableComponent
               datatable={datatable}
@@ -44,7 +48,9 @@ export const tableFactory: StartInitializer<RendererFactory<TableArguments>> =
         domNode,
         () => handlers.done()
       );
-
       handlers.onDestroy(() => ReactDOM.unmountComponentAtNode(domNode));
     },
   });
+
+export const tableFactory: StartInitializer<RendererFactory<TableArguments>> = (core, plugins) =>
+  getTableFn(core.theme.theme$);

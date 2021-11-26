@@ -7,17 +7,21 @@
 
 import React, { CSSProperties } from 'react';
 import ReactDOM from 'react-dom';
+import { CoreTheme } from 'kibana/public';
+import { Observable } from 'rxjs';
 import { KibanaThemeProvider } from '../../../../../../src/plugins/kibana_react/public';
 import { StartInitializer } from '../../plugin';
 import { RendererStrings } from '../../../i18n';
 import { Return as Config } from '../../functions/browser/markdown';
 import { Markdown } from '../../../../../../src/plugins/kibana_react/public';
 import { RendererFactory } from '../../../types';
+import { defaultTheme$ } from '../../../public/lib/default_theme';
 
 const { markdown: strings } = RendererStrings;
 
-export const markdownFactory: StartInitializer<RendererFactory<Config>> =
-  (core, plugins) => () => ({
+export const getMarkdownFn =
+  (theme$: Observable<CoreTheme> = defaultTheme$): RendererFactory<Config> =>
+  () => ({
     name: 'markdown',
     displayName: strings.getDisplayName(),
     help: strings.getHelpDescription(),
@@ -26,7 +30,7 @@ export const markdownFactory: StartInitializer<RendererFactory<Config>> =
       const fontStyle = config.font ? config.font.spec : {};
 
       ReactDOM.render(
-        <KibanaThemeProvider theme$={core.theme.theme$}>
+        <KibanaThemeProvider theme$={theme$}>
           <Markdown
             className="canvasMarkdown"
             style={fontStyle as CSSProperties}
@@ -41,3 +45,6 @@ export const markdownFactory: StartInitializer<RendererFactory<Config>> =
       handlers.onDestroy(() => ReactDOM.unmountComponentAtNode(domNode));
     },
   });
+
+export const markdownFactory: StartInitializer<RendererFactory<Config>> = (core, plugins) =>
+  getMarkdownFn(core.theme.theme$);
