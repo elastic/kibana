@@ -31,7 +31,6 @@ import { useUiTracker } from '../../../../../observability/public';
 
 import { asPercent } from '../../../../common/utils/formatters';
 import { FailedTransactionsCorrelation } from '../../../../common/correlations/failed_transactions_correlations/types';
-import { DEFAULT_PERCENTILE_THRESHOLD } from '../../../../common/correlations/constants';
 import { FieldStats } from '../../../../common/correlations/field_stats_types';
 
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
@@ -489,7 +488,6 @@ export function FailedTransactionsCorrelations({
       <EuiSpacer size="s" />
 
       <TransactionDistributionChart
-        markerPercentile={DEFAULT_PERCENTILE_THRESHOLD}
         markerValue={response.percentileThresholdValue ?? 0}
         data={transactionDistributionChartData}
         hasData={hasData}

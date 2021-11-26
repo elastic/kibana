@@ -22,7 +22,6 @@ import { i18n } from '@kbn/i18n';
 import { useUiTracker } from '../../../../../../observability/public';
 
 import { getDurationFormatter } from '../../../../../common/utils/formatters';
-import { DEFAULT_PERCENTILE_THRESHOLD } from '../../../../../common/correlations/constants';
 
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
@@ -179,7 +178,6 @@ export function TransactionDistribution({
         <TransactionDistributionChart
           data={chartData}
           markerCurrentTransaction={markerCurrentTransaction}
-          markerPercentile={DEFAULT_PERCENTILE_THRESHOLD}
           markerValue={percentileThresholdValue ?? 0}
           onChartSelection={onTrackedChartSelection as BrushEndListener}
           hasData={hasData}

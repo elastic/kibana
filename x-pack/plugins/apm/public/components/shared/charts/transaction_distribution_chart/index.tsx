@@ -33,6 +33,7 @@ import { useChartTheme } from '../../../../../../observability/public';
 
 import { getDurationFormatter } from '../../../../../common/utils/formatters';
 import type { HistogramItem } from '../../../../../common/correlations/types';
+import { DEFAULT_PERCENTILE_THRESHOLD } from '../../../../../common/correlations/constants';
 
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { useTheme } from '../../../../hooks/use_theme';
@@ -50,7 +51,6 @@ interface TransactionDistributionChartProps {
   hasData: boolean;
   markerCurrentTransaction?: number;
   markerValue: number;
-  markerPercentile: number;
   onChartSelection?: BrushEndListener;
   selection?: [number, number];
   status: FETCH_STATUS;
@@ -98,13 +98,13 @@ export function TransactionDistributionChart({
   hasData,
   markerCurrentTransaction,
   markerValue,
-  markerPercentile,
   onChartSelection,
   selection,
   status,
 }: TransactionDistributionChartProps) {
   const chartTheme = useChartTheme();
   const euiTheme = useTheme();
+  const markerPercentile = DEFAULT_PERCENTILE_THRESHOLD;
 
   const annotationsDataValues: LineAnnotationDatum[] = [
     {

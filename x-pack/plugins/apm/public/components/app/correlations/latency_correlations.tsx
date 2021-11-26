@@ -26,7 +26,6 @@ import { i18n } from '@kbn/i18n';
 import { useUiTracker } from '../../../../../observability/public';
 
 import { asPreciseDecimal } from '../../../../common/utils/formatters';
-import { DEFAULT_PERCENTILE_THRESHOLD } from '../../../../common/correlations/constants';
 import { LatencyCorrelation } from '../../../../common/correlations/latency_correlations/types';
 import { FieldStats } from '../../../../common/correlations/field_stats_types';
 
@@ -310,7 +309,6 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
       <EuiSpacer size="s" />
 
       <TransactionDistributionChart
-        markerPercentile={DEFAULT_PERCENTILE_THRESHOLD}
         markerValue={response.percentileThresholdValue ?? 0}
         data={transactionDistributionChartData}
         hasData={hasData}
