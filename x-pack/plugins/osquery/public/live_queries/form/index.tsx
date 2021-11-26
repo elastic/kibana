@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 import { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
 import { useMutation } from 'react-query';
 import deepMerge from 'deepmerge';

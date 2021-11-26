@@ -27,6 +27,7 @@ filegroup(
       "//packages/kbn-expect:build",
       "//packages/kbn-field-types:build",
       "//packages/kbn-i18n:build",
+      "//packages/kbn-i18n-react:build",
       "//packages/kbn-interpreter:build",
       "//packages/kbn-io-ts-utils:build",
       "//packages/kbn-logging:build",
@@ -76,6 +77,9 @@ filegroup(
   srcs = [
       "//packages/elastic-apm-synthtrace:build_types",
       "//packages/elastic-datemath:build_types",
+      "//packages/kbn-ace:build_types",
+      "//packages/kbn-i18n:build_types",
+      "//packages/kbn-i18n-react:build_types",
   ],
 )
 
