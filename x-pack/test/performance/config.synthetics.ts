@@ -9,18 +9,18 @@ import Url from 'url';
 import { FtrConfigProviderContext } from '@kbn/test';
 import { run as playwrightRun } from '@elastic/synthetics';
 
+import './tests/synthetics';
+
 // These "secret" values are intentionally written in the source. We would make the APM server accept annonymous traffic if we could
 const APM_SERVER_URL = 'https://2fad4006bf784bb8a54e52f4a5862609.apm.us-west1.gcp.cloud.es.io:443';
 const APM_PUBLIC_TOKEN = 'Q5q5rWQEw6tKeirBpw';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
-  const functionalConfig = await readConfigFile(require.resolve('../functional/config'));
+  const functionalConfig = await readConfigFile(require.resolve('../../../test/common/config'));
 
   return {
-    testFiles: [require.resolve('./tests/index.ts')],
     ...functionalConfig.getAll(),
     esTestCluster: functionalConfig.get('esTestCluster'),
-    junit: { reportName: 'Performance Tests' },
     kbnTestServer: {
       ...functionalConfig.get('kbnTestServer'),
       env: {
@@ -65,9 +65,9 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         },
       });
 
-      // if (result && result.perf_login_and_home.status !== 'succeeded') {
-      //   throw new Error('Tests failed');
-      // }
+      if (result && result.perf_login_and_home.status !== 'succeeded') {
+        throw new Error('Tests failed');
+      }
     },
   };
 }
