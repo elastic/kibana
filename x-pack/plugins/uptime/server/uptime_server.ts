@@ -9,7 +9,7 @@ import { Logger } from 'kibana/server';
 import { createLifecycleRuleTypeFactory, IRuleDataClient } from '../../rule_registry/server';
 import { UMServerLibs } from './lib/lib';
 import { createRouteWithAuth, restApiRoutes, uptimeRouteWrapper } from './rest_api';
-import { UptimeCoreSetup, UptimeCorePlugins } from './lib/adapters';
+import { UptimeCoreSetup, UptimeCorePluginsSetup } from './lib/adapters';
 
 import { statusCheckAlertFactory } from './lib/alerts/status_check';
 import { tlsAlertFactory } from './lib/alerts/tls';
@@ -19,12 +19,12 @@ import { durationAnomalyAlertFactory } from './lib/alerts/duration_anomaly';
 export const initUptimeServer = (
   server: UptimeCoreSetup,
   libs: UMServerLibs,
-  plugins: UptimeCorePlugins,
+  plugins: UptimeCorePluginsSetup,
   ruleDataClient: IRuleDataClient,
   logger: Logger
 ) => {
   restApiRoutes.forEach((route) =>
-    libs.framework.registerRoute(uptimeRouteWrapper(createRouteWithAuth(libs, route)))
+    libs.framework.registerRoute(uptimeRouteWrapper(createRouteWithAuth(libs, route), server))
   );
 
   const {
