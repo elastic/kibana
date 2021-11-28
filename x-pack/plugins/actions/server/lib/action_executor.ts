@@ -105,7 +105,7 @@ export class ActionExecutor {
         name: `execute_action`,
         type: 'actions',
         labels: {
-          actions_action_id: actionId,
+          actions_connector_id: actionId,
         },
       },
       async (span) => {
@@ -135,7 +135,7 @@ export class ActionExecutor {
         if (span) {
           span.name = `execute_action ${actionTypeId}`;
           span.addLabels({
-            actions_action_type_id: actionTypeId,
+            actions_connector_type_id: actionTypeId,
           });
         }
 

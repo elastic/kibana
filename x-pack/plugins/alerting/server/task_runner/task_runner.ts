@@ -883,7 +883,7 @@ function generateNewAndRecoveredInstanceEvents<
 
   if (apm.currentTransaction) {
     apm.currentTransaction.addLabels({
-      alerting_new_instances: newIds.length,
+      alerting_new_alerts: newIds.length,
     });
   }
 
@@ -1070,8 +1070,8 @@ function logActiveAndRecoveredInstances<
 
   if (apm.currentTransaction) {
     apm.currentTransaction.addLabels({
-      alerting_active_instances: activeInstanceIds.length,
-      alerting_recovered_instances: recoveredInstanceIds.length,
+      alerting_active_alerts: activeInstanceIds.length,
+      alerting_recovered_alerts: recoveredInstanceIds.length,
     });
   }
 
