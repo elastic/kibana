@@ -13,7 +13,7 @@ journey('perf_login_and_home', ({ page, params }) => {
   });
 
   step('Login to Kibana', async () => {
-    await page.fill('[data-test-subj=loginUsername]', 'elastic', { timeout: 60 * 1000 });
+    await page.fill('[data-test-subj=loginUsername]', 'elastic', { timeout: 60 * 1000 * 10 });
     await page.fill('[data-test-subj=loginPassword]', 'changeme');
     await page.click('[data-test-subj=loginSubmit]');
   });
