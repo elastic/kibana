@@ -13,7 +13,7 @@ import { createEmptyMappings } from './generate_empty_mappings';
 /*
 Usage: node x-pack/plugins/apm/scripts/generate_apm_es_queries \
   --es-url='http://elastic:changeme@localhost:9200' \
-  --kibana-url='http://elastic:changeme@localhost:5601/njc'
+  --kibana-url='http://elastic:changeme@localhost:5601'
 */
 
 async function init() {
@@ -27,22 +27,35 @@ async function init() {
       describe: 'Kibana target, including username/password',
       demandOption: true,
       string: true,
+    })
+    .option('clean', {
+      describe: 'Clean synthtrace data from previous run',
+      default: true,
+      boolean: true,
+    })
+    .option('createMappings', {
+      describe: 'Clean synthtrace data from previous run',
+      default: true,
+      boolean: true,
     });
-
   const { esUrl, kibanaUrl } = argv;
 
   const serviceName = 'sorens-service';
-  const environment = 'testing';
+  const environment = 'production';
   const start = '2021-11-17T17:00:00.000Z';
-  const end = '2021-11-17T17:15:00.000Z';
+  const end = '2021-11-17T17:00:01.000Z';
 
-  // createEmptyMappings({ esUrl, kibanaUrl });
+  if (argv.createMappings) {
+    createEmptyMappings({ esUrl, kibanaUrl });
+  }
+
   const traceEvents = await generateTraceData({
     serviceName,
     environment,
     start,
     end,
     esUrl,
+    clean: argv.clean,
   });
 
   const responses = await callApmEndpoints({
@@ -53,6 +66,7 @@ async function init() {
     start,
     end,
   });
+  // eslint-disable-next-line no-console
   console.log(JSON.stringify(responses, null, 2));
 }
 

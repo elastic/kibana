@@ -20,12 +20,14 @@ export async function generateTraceData({
   start,
   end,
   esUrl,
+  clean,
 }: {
   serviceName: string;
   environment: string;
   start: string;
   end: string;
   esUrl: string;
+  clean: boolean;
 }) {
   const esClient = new Client({ node: esUrl, Connection: HttpConnection });
 
@@ -41,8 +43,10 @@ export async function generateTraceData({
     environment,
   });
 
-  await synthtraceEsClient.clean();
+  if (clean) {
+    await synthtraceEsClient.clean();
+  }
+
   await synthtraceEsClient.index(traceEvents);
-  console.log('Trace data generated');
   return traceEvents;
 }

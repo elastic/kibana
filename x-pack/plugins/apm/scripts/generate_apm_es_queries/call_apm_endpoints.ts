@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 import { Fields } from '@elastic/apm-synthtrace';
 import { ProcessorEvent } from '../../common/processor_event';
 import { callApmApi } from './call_apm_api';
 
-export function callApmEndpoints({
+export async function callApmEndpoints({
   kibanaUrl,
   traceEvents,
   serviceName,
@@ -26,7 +26,12 @@ export function callApmEndpoints({
   environment: string;
 }) {
   const kuery = '';
-  axios.defaults.baseURL = kibanaUrl;
+  const backendName = 'my-backend';
+  const agentName = 'nodejs';
+  const transactionType = 'request';
+
+  const kibanaUrlWithBasePath = await getKibanaUrlWithBasePath(kibanaUrl);
+  axios.defaults.baseURL = kibanaUrlWithBasePath;
 
   const transactionEvent = traceEvents.find(
     (traceEvent) => traceEvent['processor.event'] === 'transaction'
@@ -35,8 +40,6 @@ export function callApmEndpoints({
   const errorEvent = traceEvents.find(
     (traceEvent) => traceEvent['processor.event'] === 'error'
   );
-
-  console.log({ errorEvent, transactionEvent });
 
   const promises = [
     callApmApi({
@@ -76,25 +79,25 @@ export function callApmEndpoints({
     callApmApi({
       endpoint: 'GET /internal/apm/backends/charts/error_rate',
       params: {
-        query: { start, end, environment, kuery, backendName: 'foo' },
+        query: { start, end, environment, kuery, backendName },
       },
     }),
     callApmApi({
       endpoint: 'GET /internal/apm/backends/charts/latency',
       params: {
-        query: { start, end, environment, kuery, backendName: 'foo' },
+        query: { start, end, environment, kuery, backendName },
       },
     }),
     callApmApi({
       endpoint: 'GET /internal/apm/backends/charts/throughput',
       params: {
-        query: { start, end, environment, kuery, backendName: 'foo' },
+        query: { start, end, environment, kuery, backendName },
       },
     }),
     callApmApi({
       endpoint: 'GET /internal/apm/backends/metadata',
       params: {
-        query: { start, end, backendName: 'foo' },
+        query: { start, end, backendName },
       },
     }),
     callApmApi({
@@ -111,7 +114,7 @@ export function callApmEndpoints({
           end,
           environment,
           kuery,
-          backendName: 'foo',
+          backendName,
           numBuckets: 10,
         },
       },
@@ -179,7 +182,7 @@ export function callApmEndpoints({
     callApmApi({
       endpoint: 'GET /internal/apm/service-map/backend',
       params: {
-        query: { start, end, environment, backendName: 'foo' },
+        query: { start, end, environment, backendName },
       },
     }),
     callApmApi({
@@ -206,7 +209,7 @@ export function callApmEndpoints({
       endpoint: 'GET /internal/apm/services/{serviceName}/alerts',
       params: {
         path: { serviceName },
-        query: { start, end, environment, transactionType: 'request' },
+        query: { start, end, environment, transactionType },
       },
     }),
     callApmApi({
@@ -225,10 +228,27 @@ export function callApmEndpoints({
       },
     }),
     callApmApi({
-      endpoint: 'GET /internal/apm/services/{serviceName}/errors',
+      endpoint:
+        'GET /internal/apm/services/{serviceName}/errors/groups/main_statistics',
       params: {
         path: { serviceName },
-        query: { start, end, environment, kuery },
+        query: { start, end, environment, kuery, transactionType },
+      },
+    }),
+    callApmApi({
+      endpoint:
+        'GET /internal/apm/services/{serviceName}/errors/groups/detailed_statistics',
+      params: {
+        path: { serviceName },
+        query: {
+          start,
+          end,
+          environment,
+          kuery,
+          transactionType,
+          groupIds: JSON.stringify([errorEvent['error.grouping_key']]),
+          numBuckets: 10,
+        },
       },
     }),
     callApmApi({
@@ -270,7 +290,7 @@ export function callApmEndpoints({
       endpoint: 'GET /internal/apm/services/{serviceName}/metrics/charts',
       params: {
         path: { serviceName },
-        query: { start, end, environment, kuery, agentName: 'nodejs' },
+        query: { start, end, environment, kuery, agentName },
       },
     }),
     callApmApi({
@@ -284,7 +304,7 @@ export function callApmEndpoints({
       endpoint: 'GET /internal/apm/services/{serviceName}/throughput',
       params: {
         path: { serviceName },
-        query: { start, end, environment, kuery, transactionType: 'request' },
+        query: { start, end, environment, kuery, transactionType },
       },
     }),
     callApmApi({
@@ -358,4 +378,21 @@ export function callApmEndpoints({
   ];
 
   return Promise.all(promises);
+}
+
+async function getKibanaUrlWithBasePath(kibanaUrl: string) {
+  try {
+    await axios.request({ url: kibanaUrl, maxRedirects: 0 });
+  } catch (e) {
+    if (!e.isAxiosError) {
+      throw e;
+    }
+
+    const axiosError = e as AxiosError;
+    const location = axiosError.response?.headers?.location;
+    const hasBasePath = RegExp(/^\/\w{3}$/).test(location);
+    const basePath = hasBasePath ? location : '';
+    return `${kibanaUrl}${basePath}`;
+  }
+  return kibanaUrl;
 }

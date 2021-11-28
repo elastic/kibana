@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 import type { formatRequest as formatRequestType } from '@kbn/server-route-repository';
 // @ts-expect-error cannot find module or correspondent type declarations
 // The code and types are at separated folders on @kbn/server-route-repository
@@ -65,7 +65,9 @@ export async function callApmApi<TEndpoint extends APIEndpoint>(
       throw e;
     }
 
-    const { message, statusCode } = e.response.data;
-    return { endpoint, errorMessage: message, statusCode };
+    const axiosError = e as AxiosError;
+    const status = axiosError.response?.status;
+    const data = axiosError.response?.data;
+    return { endpoint, data, status, isError: true };
   }
 }
