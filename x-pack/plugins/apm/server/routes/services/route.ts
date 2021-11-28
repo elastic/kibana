@@ -51,6 +51,7 @@ import {
   MLPrivilegesUninitialized,
 } from '../../../../ml/server';
 import { getServiceInstancesDetailedStatisticsPeriods } from './get_service_instances/detailed_statistics';
+import { ML_ERRORS } from '../../../common/anomaly_detection';
 
 const servicesRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/services',
@@ -867,6 +868,10 @@ const serviceAnomalyChartsRoute = createApmServerRoute({
   },
   handler: async (resources) => {
     const setup = await setupRequest(resources);
+
+    if (!setup.ml) {
+      throw Boom.notImplemented(ML_ERRORS.ML_NOT_AVAILABLE);
+    }
 
     const {
       path: { serviceName },

@@ -68,7 +68,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     'fetching service anomalies with a basic license',
     { config: 'basic', archives: ['apm_mappings_only_8.0.0'] },
     () => {
-      it('returns a 403', async () => {
+      it('returns a 501', async () => {
         const status = await statusOf(
           getAnomalyCharts({
             serviceName: 'a',
@@ -78,7 +78,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           })
         );
 
-        expect(status).to.eql(403);
+        expect(status).to.eql(501);
       });
     }
   );

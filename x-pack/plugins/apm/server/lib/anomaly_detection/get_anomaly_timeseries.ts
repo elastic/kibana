@@ -35,7 +35,7 @@ export async function getAnomalyTimeseries({
   start: number;
   end: number;
   logger: Logger;
-  mlSetup: Setup['ml'];
+  mlSetup: Required<Setup>['ml'];
 }): Promise<ServiceAnomalyTimeseries[]> {
   if (!mlSetup) {
     return [];

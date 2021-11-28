@@ -55,7 +55,6 @@ export function getChartAnomalyTimeseries({
   ];
 
   const severities = [
-    { severity: ANOMALY_SEVERITY.MINOR, threshold: ANOMALY_THRESHOLD.MINOR },
     { severity: ANOMALY_SEVERITY.MAJOR, threshold: ANOMALY_THRESHOLD.MAJOR },
     {
       severity: ANOMALY_SEVERITY.CRITICAL,

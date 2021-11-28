@@ -10,7 +10,10 @@ import { ServiceAnomalyTimeseries } from '../../../common/anomaly_detection/serv
 import { useApmParams } from '../../hooks/use_apm_params';
 import { FETCH_STATUS, useFetcher } from '../../hooks/use_fetcher';
 import { useTimeRange } from '../../hooks/use_time_range';
+import { useApmPluginContext } from '../apm_plugin/use_apm_plugin_context';
 import { useApmServiceContext } from '../apm_service/use_apm_service_context';
+import { isActivePlatinumLicense } from '../../../common/license_check';
+import { useLicenseContext } from '../license/use_license_context';
 
 export const ServiceAnomalyTimeseriesContext = React.createContext<{
   status: FETCH_STATUS;
@@ -27,6 +30,17 @@ export function ServiceAnomalyTimeseriesContextProvider({
 }) {
   const { serviceName, transactionType } = useApmServiceContext();
 
+  const { core } = useApmPluginContext();
+
+  const license = useLicenseContext();
+
+  const mlCapabilities = core.application.capabilities.ml as
+    | { canGetJobs: boolean }
+    | undefined;
+
+  const canGetAnomalies =
+    mlCapabilities?.canGetJobs && isActivePlatinumLicense(license);
+
   const {
     query: { rangeFrom, rangeTo },
   } = useApmParams('/services/{serviceName}');
@@ -35,7 +49,7 @@ export function ServiceAnomalyTimeseriesContextProvider({
 
   const { status, data } = useFetcher(
     (callApmApi) => {
-      if (!transactionType) {
+      if (!transactionType || !canGetAnomalies) {
         return;
       }
 
@@ -53,7 +67,7 @@ export function ServiceAnomalyTimeseriesContextProvider({
         },
       });
     },
-    [serviceName, transactionType, start, end]
+    [serviceName, canGetAnomalies, transactionType, start, end]
   );
 
   return (
