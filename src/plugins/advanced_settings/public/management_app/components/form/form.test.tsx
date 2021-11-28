@@ -9,6 +9,7 @@
 import React from 'react';
 import { shallowWithI18nProvider, mountWithI18nProvider } from '@kbn/test/jest';
 import { UiSettingsType } from '../../../../../../core/public';
+import { themeServiceMock } from '../../../../../../core/public/mocks';
 
 import { findTestSubject } from '@elastic/eui/lib/test';
 
@@ -127,6 +128,7 @@ describe('Form', () => {
         enableSaving={true}
         toasts={{} as any}
         dockLinks={{} as any}
+        theme={themeServiceMock.createStartContract().theme$}
       />
     );
 
@@ -146,6 +148,7 @@ describe('Form', () => {
         enableSaving={false}
         toasts={{} as any}
         dockLinks={{} as any}
+        theme={themeServiceMock.createStartContract().theme$}
       />
     );
 
@@ -165,6 +168,7 @@ describe('Form', () => {
         enableSaving={true}
         toasts={{} as any}
         dockLinks={{} as any}
+        theme={themeServiceMock.createStartContract().theme$}
       />
     );
 
@@ -184,6 +188,7 @@ describe('Form', () => {
         enableSaving={true}
         toasts={{} as any}
         dockLinks={{} as any}
+        theme={themeServiceMock.createStartContract().theme$}
       />
     );
 
@@ -203,6 +208,7 @@ describe('Form', () => {
         enableSaving={false}
         toasts={{} as any}
         dockLinks={{} as any}
+        theme={themeServiceMock.createStartContract().theme$}
       />
     );
     (wrapper.instance() as Form).setState({
@@ -233,6 +239,7 @@ describe('Form', () => {
         enableSaving={false}
         toasts={toasts}
         dockLinks={{} as any}
+        theme={themeServiceMock.createStartContract().theme$}
       />
     );
     (wrapper.instance() as Form).setState({
@@ -269,6 +276,7 @@ describe('Form', () => {
         enableSaving={false}
         toasts={{} as any}
         dockLinks={{} as any}
+        theme={themeServiceMock.createStartContract().theme$}
       />
     );
 
@@ -297,6 +305,7 @@ describe('Form', () => {
         enableSaving={false}
         toasts={{} as any}
         dockLinks={{} as any}
+        theme={themeServiceMock.createStartContract().theme$}
       />
     );
 

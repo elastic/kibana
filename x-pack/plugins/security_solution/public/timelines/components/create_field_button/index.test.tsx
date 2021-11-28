@@ -11,7 +11,7 @@ import { CreateFieldButton } from './index';
 import {
   indexPatternFieldEditorPluginMock,
   Start,
-} from '../../../../../../../src/plugins/index_pattern_field_editor/public/mocks';
+} from '../../../../../../../src/plugins/data_view_field_editor/public/mocks';
 
 import { TestProviders } from '../../../common/mock';
 import { useKibana } from '../../../common/lib/kibana';
@@ -28,7 +28,7 @@ const runAllPromises = () => new Promise(setImmediate);
 describe('CreateFieldButton', () => {
   beforeEach(() => {
     mockIndexPatternFieldEditor = indexPatternFieldEditorPluginMock.createStartContract();
-    useKibanaMock().services.indexPatternFieldEditor = mockIndexPatternFieldEditor;
+    useKibanaMock().services.dataViewFieldEditor = mockIndexPatternFieldEditor;
     useKibanaMock().services.data.dataViews.get = () => new Promise(() => undefined);
   });
 
