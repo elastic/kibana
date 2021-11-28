@@ -284,19 +284,16 @@ export class FleetPlugin
 
     // For all the routes we enforce the user to have role superuser
     const superuserRouter = RouterWrappers.require.superuser(router);
-    const fleetSetupRouter = RouterWrappers.require.fleetSetupPrivilege(router);
+    const fleetAuthzRouter = RouterWrappers.require.fleetAuthz(router);
 
     // Some EPM routes use regular rbac to support integrations app
     registerEPMRoutes({ rbac: router, superuser: superuserRouter });
 
     // Register rest of routes only if security is enabled
     if (deps.security) {
-      registerSetupRoutes(fleetSetupRouter, config);
-      registerAgentPolicyRoutes({
-        fleetSetup: fleetSetupRouter,
-        superuser: superuserRouter,
-      });
-      registerPackagePolicyRoutes(superuserRouter);
+      registerSetupRoutes(fleetAuthzRouter, config);
+      registerAgentPolicyRoutes(fleetAuthzRouter);
+      registerPackagePolicyRoutes(fleetAuthzRouter);
       registerOutputRoutes(superuserRouter);
       registerSettingsRoutes(superuserRouter);
       registerDataStreamRoutes(superuserRouter);
@@ -304,11 +301,8 @@ export class FleetPlugin
 
       // Conditional config routes
       if (config.agents.enabled) {
-        registerAgentAPIRoutes(superuserRouter, config);
-        registerEnrollmentApiKeyRoutes({
-          fleetSetup: fleetSetupRouter,
-          superuser: superuserRouter,
-        });
+        registerAgentAPIRoutes(fleetAuthzRouter, config);
+        registerEnrollmentApiKeyRoutes(fleetAuthzRouter);
       }
     }
 

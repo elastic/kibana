@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type { IRouter } from 'src/core/server';
-
 import { PLUGIN_ID, OUTPUT_API_ROUTES } from '../../constants';
 import {
   DeleteOutputRequestSchema,
@@ -15,6 +13,7 @@ import {
   PostOutputRequestSchema,
   PutOutputRequestSchema,
 } from '../../types';
+import type { FleetAuthzRouter } from '../security';
 
 import {
   deleteOutputHandler,
@@ -24,7 +23,7 @@ import {
   putOuputHandler,
 } from './handler';
 
-export const registerRoutes = (router: IRouter) => {
+export const registerRoutes = (router: FleetAuthzRouter) => {
   router.get(
     {
       path: OUTPUT_API_ROUTES.LIST_PATTERN,
