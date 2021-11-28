@@ -39,7 +39,7 @@ import type {
 import { IngestManagerError } from '../errors';
 
 import {
-  overridePackageInputs,
+  preconfigurePackageInputs,
   updatePackageInputs,
   packagePolicyService,
   _applyIndexPrivileges,
@@ -1171,7 +1171,7 @@ describe('Package policy service', () => {
     });
   });
 
-  describe('overridePackageInputs', () => {
+  describe('preconfigurePackageInputs', () => {
     describe('when variable is already defined', () => {
       it('override original variable value', () => {
         const basePackagePolicy: NewPackagePolicy = {
@@ -1249,7 +1249,7 @@ describe('Package policy service', () => {
           },
         ];
 
-        const result = overridePackageInputs(
+        const result = preconfigurePackageInputs(
           basePackagePolicy,
           packageInfo,
           // TODO: Update this type assertion when the `InputsOverride` type is updated such
@@ -1346,7 +1346,7 @@ describe('Package policy service', () => {
           },
         ];
 
-        const result = overridePackageInputs(
+        const result = preconfigurePackageInputs(
           basePackagePolicy,
           packageInfo,
           // TODO: Update this type assertion when the `InputsOverride` type is updated such
@@ -1444,7 +1444,7 @@ describe('Package policy service', () => {
           },
         ];
 
-        const result = overridePackageInputs(
+        const result = preconfigurePackageInputs(
           basePackagePolicy,
           packageInfo,
           // TODO: Update this type assertion when the `InputsOverride` type is updated such
@@ -1596,7 +1596,7 @@ describe('Package policy service', () => {
           },
         ];
 
-        const result = overridePackageInputs(
+        const result = preconfigurePackageInputs(
           basePackagePolicy,
           packageInfo,
           // TODO: Update this type assertion when the `InputsOverride` type is updated such
@@ -1816,7 +1816,7 @@ describe('Package policy service', () => {
           },
         ];
 
-        const result = overridePackageInputs(
+        const result = preconfigurePackageInputs(
           basePackagePolicy,
           packageInfo,
           // TODO: Update this type assertion when the `InputsOverride` type is updated such
@@ -1928,7 +1928,7 @@ describe('Package policy service', () => {
           },
         ];
 
-        const result = overridePackageInputs(
+        const result = preconfigurePackageInputs(
           basePackagePolicy,
           packageInfo,
           // TODO: Update this type assertion when the `InputsOverride` type is updated such

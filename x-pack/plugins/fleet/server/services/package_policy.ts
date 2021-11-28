@@ -1169,12 +1169,12 @@ export function updatePackageInputs(
   return resultingPackagePolicy;
 }
 
-export function overridePackageInputs(
+export function preconfigurePackageInputs(
   basePackagePolicy: NewPackagePolicy,
   packageInfo: PackageInfo,
-  inputsOverride?: InputsOverride[]
+  preconfiguredInputs?: InputsOverride[]
 ): NewPackagePolicy {
-  if (!inputsOverride) return basePackagePolicy;
+  if (!preconfiguredInputs) return basePackagePolicy;
 
   const availablePolicyTemplates = packageInfo.policy_templates ?? [];
 
@@ -1203,42 +1203,47 @@ export function overridePackageInputs(
     }),
   ];
 
-  for (const override of inputsOverride) {
+  for (const preconfiguredInput of preconfiguredInputs) {
     // Preconfiguration does not currently support multiple policy templates, so overrides will have an undefined
     // policy template, so we only match on `type` in that case.
-    let originalInput = override.policy_template
+    let originalInput = preconfiguredInput.policy_template
       ? inputs.find(
-          (i) => i.type === override.type && i.policy_template === override.policy_template
+          (i) =>
+            i.type === preconfiguredInput.type &&
+            i.policy_template === preconfiguredInput.policy_template
         )
-      : inputs.find((i) => i.type === override.type);
+      : inputs.find((i) => i.type === preconfiguredInput.type);
 
     // If there's no corresponding input on the original package policy, just
     // take the override value from the new package as-is. This case typically
     // occurs when inputs or package policy templates are added/removed between versions.
     if (originalInput === undefined) {
-      inputs.push(override as NewPackagePolicyInput);
+      inputs.push(preconfiguredInput as NewPackagePolicyInput);
       continue;
     }
 
     // For flags like this, we only want to override the original value if it was set
     // as `undefined` in the original object. An explicit true/false value should be
     // persisted from the original object to the result after the override process is complete.
-    if (originalInput.enabled === undefined && override.enabled !== undefined) {
-      originalInput.enabled = override.enabled;
+    if (originalInput.enabled === undefined && preconfiguredInput.enabled !== undefined) {
+      originalInput.enabled = preconfiguredInput.enabled;
     }
 
-    if (originalInput.keep_enabled === undefined && override.keep_enabled !== undefined) {
-      originalInput.keep_enabled = override.keep_enabled;
+    if (originalInput.keep_enabled === undefined && preconfiguredInput.keep_enabled !== undefined) {
+      originalInput.keep_enabled = preconfiguredInput.keep_enabled;
     }
 
-    if (override.vars) {
+    if (preconfiguredInput.vars) {
       const indexOfInput = inputs.indexOf(originalInput);
-      inputs[indexOfInput] = deepMergeVars(originalInput, override) as NewPackagePolicyInput;
+      inputs[indexOfInput] = deepMergeVars(
+        originalInput,
+        preconfiguredInput
+      ) as NewPackagePolicyInput;
       originalInput = inputs[indexOfInput];
     }
 
-    if (override.streams) {
-      for (const stream of override.streams) {
+    if (preconfiguredInput.streams) {
+      for (const stream of preconfiguredInput.streams) {
         let originalStream = originalInput?.streams.find(
           (s) => s.data_stream.dataset === stream.data_stream.dataset
         );
@@ -1262,15 +1267,6 @@ export function overridePackageInputs(
         }
       }
     }
-
-    // Filter all stream that have been removed from the input
-    originalInput.streams = originalInput.streams.filter((originalStream) => {
-      return (
-        override.streams?.some(
-          (s) => s.data_stream.dataset === originalStream.data_stream.dataset
-        ) ?? false
-      );
-    });
   }
 
   const resultingPackagePolicy: NewPackagePolicy = {
