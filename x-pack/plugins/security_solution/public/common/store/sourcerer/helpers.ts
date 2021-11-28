@@ -83,6 +83,10 @@ export const validateSelectedPatterns = (
   };
 };
 
+/* This is called when no validation involved.
+ * This happens when upgrading from legacy index patterns to data view.
+ */
+
 export const getSelectedPatterns = (
   state: SourcererModel,
   payload: SelectedDataViewPayload
@@ -91,25 +95,8 @@ export const getSelectedPatterns = (
 
   const dataView = state.kibanaDataViews.find((p) => p.id === rest.selectedDataViewId);
   // dedupe because these could come from a silly url or pre 8.0 timeline
-  const dedupePatterns = ensurePatternFormat(rest.selectedPatterns);
+  const newSelectedPatterns = ensurePatternFormat(rest.selectedPatterns);
 
-  const selectedPatterns =
-    dataView != null
-      ? dedupePatterns.filter(
-          (pattern) =>
-            // Typescript is being mean and telling me dataView could be undefined here
-            // so redoing the dataView != null check
-            (dataView != null && dataView.patternList.includes(pattern)) ||
-            // this is a hack, but sometimes signal index is deleted and is getting regenerated. it gets set before it is put in the dataView
-            state.signalIndexName == null ||
-            state.signalIndexName === pattern
-        )
-      : // 7.16 -> 8.0 this will get hit because dataView == null
-        dedupePatterns;
-  const missingPatterns = dedupePatterns.filter(
-    (pattern) => state?.defaultDataView?.title.indexOf(pattern) === -1
-  );
-  const newSelectedPatterns = [...selectedPatterns, ...missingPatterns];
   return {
     [id]: {
       ...state.sourcererScopes[id],

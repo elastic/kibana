@@ -22,7 +22,6 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
-import styled from 'styled-components';
 
 import * as i18n from './translations';
 import { sourcererActions, sourcererModel, sourcererSelectors } from '../../store/sourcerer';
@@ -46,14 +45,11 @@ import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
 import { useAppToasts } from '../../hooks/use_app_toasts';
 import { toMountPoint } from '../../../../../../../src/plugins/kibana_react/public';
 import { ensurePatternFormat } from '../../store/sourcerer/helpers';
+import { RefreshButton } from './refresh_button';
 
 interface SourcererComponentProps {
   scope: sourcererModel.SourcererScopeName;
 }
-
-const StyledRefreshButton = styled(EuiButton)`
-  float: right;
-`;
 
 export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }) => {
   const dispatch = useDispatch();
@@ -75,7 +71,6 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
 
   const isOnlyDetectionAlerts: boolean =
     isDetectionsSourcerer || (isTimelineSourcerer && isOnlyDetectionAlertsChecked);
-
   const [isPopoverOpen, setPopoverIsOpen] = useState(false);
   const [dataViewId, setDataViewId] = useState<string | null>(selectedDataViewId);
   const { addSuccess, addError } = useAppToasts();
@@ -183,10 +178,6 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
     }
   }, [missingPatterns, onContinueUpdateDeprecated]);
 
-  const onPageReload = useCallback(() => {
-    document.location.reload();
-  }, []);
-
   const onUpdateDataView = useCallback(async () => {
     // @Angela this is where your work is for "Add index pattern"
     // update ui settings string
@@ -196,7 +187,7 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
 
     const defaultIndex = await uiSettings.get<string[]>(DEFAULT_INDEX_KEY);
     const newSelectedOptions = [...defaultIndex, ...missingIndexPatterns];
-    const isSuccess = await uiSettings.set(
+    const isUiSettingsSuccess = await uiSettings.set(
       DEFAULT_INDEX_KEY,
       ensurePatternFormat(newSelectedOptions)
     );
@@ -205,17 +196,17 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
     setPopoverIsOpen(false);
     // make alternate onChangeDataView/setSelectedDataView that does NOT validate, validation will happen after refresh
     // but technically sourcerer is in a "wrong" state until the refresh happens.
-    if (isSuccess) {
+    if (isUiSettingsSuccess) {
       onChangeDataView(defaultDataView.id, newSelectedOptions, false);
       // openToast() to refresh page
       // show toaster to refresh page when confirmed
       // that ui settings update was successful
+
       addSuccess({
         color: 'success',
         title: toMountPoint(i18n.SUCCESS_TOAST_TITLE),
-        text: toMountPoint(
-          <StyledRefreshButton onClick={onPageReload}>{i18n.RELOAD_PAGE_TITLE}</StyledRefreshButton>
-        ),
+        text: toMountPoint(RefreshButton),
+        iconType: undefined,
         toastLifeTimeMs: 600000,
       });
     } else {
@@ -230,7 +221,6 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
     defaultDataView.id,
     missingIndexPatterns,
     onChangeDataView,
-    onPageReload,
     uiSettings,
   ]);
 
@@ -254,7 +244,7 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
           </StyledBadge>
         )}
         {isModified === 'deprecated' && (
-          <StyledBadge color="warning" data-test-subj="sourcerer-alerts-badge">
+          <StyledBadge color="warning" data-test-subj="sourcerer-deprecated-badge">
             {i18n.DEPRECATED_BADGE_TITLE}
           </StyledBadge>
         )}
@@ -309,7 +299,6 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
   const onExpandAdvancedOptionsClicked = useCallback(() => {
     setExpandAdvancedOptions((prevState) => !prevState);
   }, []);
-
   return (
     <EuiPopover
       panelClassName="sourcererPopoverPanel"

@@ -55,7 +55,6 @@ export const usePickIndexPatterns = ({
     () => (signalIndexName ? patternListToOptions([signalIndexName]) : []),
     [signalIndexName]
   );
-
   const { patternList, selectablePatterns } = useMemo(() => {
     if (isOnlyDetectionAlerts && signalIndexName) {
       return {

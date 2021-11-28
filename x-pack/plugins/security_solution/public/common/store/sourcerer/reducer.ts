@@ -25,54 +25,67 @@ export const sourcererReducer = reducerWithInitialState(initialSourcererState)
     ...state,
     signalIndexName,
   }))
-  .case(setDataViewLoading, (state, { id, loading }) => ({
-    ...state,
-    ...(id === state.defaultDataView.id
-      ? {
-          defaultDataView: { ...state.defaultDataView, loading },
-        }
-      : {}),
-    kibanaDataViews: state.kibanaDataViews.map((dv) => (dv.id === id ? { ...dv, loading } : dv)),
-  }))
-  .case(setSourcererDataViews, (state, { defaultDataView, kibanaDataViews }) => ({
-    ...state,
-    defaultDataView: {
-      ...state.defaultDataView,
-      ...defaultDataView,
-    },
-    kibanaDataViews: kibanaDataViews.map((dataView) => ({
-      ...(state.kibanaDataViews.find(({ id }) => id === dataView.id) ?? initDataView),
-      ...dataView,
-    })),
-  }))
-  .case(setSourcererScopeLoading, (state, { id, loading }) => ({
-    ...state,
-    sourcererScopes: {
-      ...state.sourcererScopes,
-      ...(id != null
+  .case(setDataViewLoading, (state, { id, loading }) => {
+    console.log('---setDataViewLoading');
+
+    return {
+      ...state,
+      ...(id === state.defaultDataView.id
         ? {
-            [id]: {
-              ...state.sourcererScopes[id],
-              loading,
-            },
+            defaultDataView: { ...state.defaultDataView, loading },
           }
-        : {
-            [SourcererScopeName.default]: {
-              ...state.sourcererScopes[SourcererScopeName.default],
-              loading,
-            },
-            [SourcererScopeName.detections]: {
-              ...state.sourcererScopes[SourcererScopeName.detections],
-              loading,
-            },
-            [SourcererScopeName.timeline]: {
-              ...state.sourcererScopes[SourcererScopeName.timeline],
-              loading,
-            },
-          }),
-    },
-  }))
+        : {}),
+      kibanaDataViews: state.kibanaDataViews.map((dv) => (dv.id === id ? { ...dv, loading } : dv)),
+    };
+  })
+  .case(setSourcererDataViews, (state, { defaultDataView, kibanaDataViews }) => {
+    console.log('---setSourcererDataViews');
+
+    return {
+      ...state,
+      defaultDataView: {
+        ...state.defaultDataView,
+        ...defaultDataView,
+      },
+      kibanaDataViews: kibanaDataViews.map((dataView) => ({
+        ...(state.kibanaDataViews.find(({ id }) => id === dataView.id) ?? initDataView),
+        ...dataView,
+      })),
+    };
+  })
+  .case(setSourcererScopeLoading, (state, { id, loading }) => {
+    console.log('---setSourcererScopeLoading');
+    return {
+      ...state,
+      sourcererScopes: {
+        ...state.sourcererScopes,
+        ...(id != null
+          ? {
+              [id]: {
+                ...state.sourcererScopes[id],
+                loading,
+              },
+            }
+          : {
+              [SourcererScopeName.default]: {
+                ...state.sourcererScopes[SourcererScopeName.default],
+                loading,
+              },
+              [SourcererScopeName.detections]: {
+                ...state.sourcererScopes[SourcererScopeName.detections],
+                loading,
+              },
+              [SourcererScopeName.timeline]: {
+                ...state.sourcererScopes[SourcererScopeName.timeline],
+                loading,
+              },
+            }),
+      },
+    };
+  })
   .case(setSelectedDataView, (state, payload) => {
+    console.log('---setSelectedDataView');
+
     const { shouldValidateSelectedPatterns = true, ...patternsInfo } = payload;
     return {
       ...state,

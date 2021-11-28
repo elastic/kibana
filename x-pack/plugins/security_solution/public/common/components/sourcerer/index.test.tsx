@@ -19,14 +19,65 @@ import {
 } from '../../mock';
 import { createStore } from '../../store';
 import { EuiSuperSelectOption } from '@elastic/eui/src/components/form/super_select/super_select_control';
+import { waitFor } from '@testing-library/dom';
+import { useAppToasts } from '../../hooks/use_app_toasts';
+import { toMountPoint } from '../../../../../../../src/plugins/kibana_react/public';
+import { RefreshButton } from './refresh_button';
 
 const mockDispatch = jest.fn();
+
+jest.mock('../../lib/kibana', () => {
+  const original = jest.requireActual('../../lib/kibana');
+  return {
+    ...original,
+    useKibana: jest.fn().mockReturnValue({
+      services: {
+        uiSettings: {
+          get: jest
+            .fn()
+            .mockResolvedValue([
+              'apm-*-transaction*',
+              'traces-apm*',
+              'auditbeat-*',
+              'endgame-*',
+              'filebeat-*',
+              'logs-*',
+              'packetbeat-*',
+              'winlogbeat-*',
+            ]),
+          set: jest.fn().mockResolvedValue(true),
+        },
+      },
+    }),
+  };
+});
 jest.mock('react-redux', () => {
   const original = jest.requireActual('react-redux');
 
   return {
     ...original,
     useDispatch: () => mockDispatch,
+  };
+});
+
+jest.mock('../../hooks/use_app_toasts', () => {
+  const original = jest.requireActual('../../hooks/use_app_toasts');
+
+  return {
+    ...original,
+    useAppToasts: jest.fn().mockReturnValue({
+      addSuccess: jest.fn(),
+      addError: jest.fn(),
+    }),
+  };
+});
+
+jest.mock('../../../../../../../src/plugins/kibana_react/public', () => {
+  const original = jest.requireActual('../../../../../../../src/plugins/kibana_react/public');
+
+  return {
+    ...original,
+    toMountPoint: jest.fn(),
   };
 });
 
@@ -63,6 +114,9 @@ describe('Sourcerer component', () => {
   beforeEach(() => {
     store = createStore(mockGlobalState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
     jest.clearAllMocks();
+  });
+
+  afterAll(() => {
     jest.restoreAllMocks();
   });
 
@@ -781,5 +835,143 @@ describe('Sourcerer integration tests', () => {
         selectedPatterns: ['fakebeat-*'],
       })
     );
+  });
+});
+
+describe('Update available', () => {
+  const { storage } = createSecuritySolutionStorageMock();
+  const state2 = {
+    ...mockGlobalState,
+    sourcerer: {
+      ...mockGlobalState.sourcerer,
+      kibanaDataViews: [
+        mockGlobalState.sourcerer.defaultDataView,
+        {
+          ...mockGlobalState.sourcerer.defaultDataView,
+          id: '1234',
+          title: 'auditbeat-*',
+          patternList: ['auditbeat-*'],
+        },
+        {
+          ...mockGlobalState.sourcerer.defaultDataView,
+          id: '12347',
+          title: 'packetbeat-*',
+          patternList: ['packetbeat-*'],
+        },
+      ],
+      sourcererScopes: {
+        ...mockGlobalState.sourcerer.sourcererScopes,
+        [SourcererScopeName.timeline]: {
+          ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.timeline],
+          loading: false,
+          patternList,
+          selectedDataViewId: null,
+          selectedPatterns: ['myFakebeat-*'],
+        },
+      },
+    },
+  };
+  const mockAddError = jest.fn();
+  const mockAddSuccess = jest.fn();
+
+  let wrapper: ReactWrapper;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  beforeAll(() => {
+    (useAppToasts as jest.Mock).mockReturnValue({
+      addSuccess: mockAddSuccess,
+      addError: mockAddError,
+    });
+    store = createStore(state2, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+
+    wrapper = mount(
+      <TestProviders store={store}>
+        <Sourcerer scope={sourcererModel.SourcererScopeName.timeline} />
+      </TestProviders>
+    );
+  });
+
+  test('Show Update available label', () => {
+    expect(wrapper.find(`[data-test-subj="sourcerer-deprecated-badge"]`).exists()).toBeTruthy();
+  });
+
+  test('Show correct tooltip', () => {
+    expect(wrapper.find(`[data-test-subj="sourcerer-tooltip"]`).prop('content')).toEqual(
+      'myFakebeat-*'
+    );
+  });
+
+  test('Show UpdateDefaultDataViewModal', () => {
+    wrapper.find(`[data-test-subj="timeline-sourcerer-trigger"]`).first().simulate('click');
+
+    wrapper.find(`button[data-test-subj="sourcerer-deprecated-update"]`).first().simulate('click');
+
+    expect(wrapper.find(`UpdateDefaultDataViewModal`).prop('isShowing')).toEqual(true);
+  });
+
+  test('Show Add index pattern in UpdateDefaultDataViewModal', () => {
+    wrapper.find(`[data-test-subj="timeline-sourcerer-trigger"]`).first().simulate('click');
+
+    wrapper.find(`button[data-test-subj="sourcerer-deprecated-update"]`).first().simulate('click');
+
+    expect(wrapper.find(`button[data-test-subj="sourcerer-update-data-view"]`).text()).toEqual(
+      'Add index pattern'
+    );
+  });
+
+  test('Set all the index patterns from legacy timeline to sorcerer, after clicking on "Add index pattern"', async () => {
+    wrapper.find(`[data-test-subj="timeline-sourcerer-trigger"]`).first().simulate('click');
+
+    wrapper.find(`button[data-test-subj="sourcerer-deprecated-update"]`).first().simulate('click');
+
+    wrapper.find(`button[data-test-subj="sourcerer-update-data-view"]`).simulate('click');
+
+    await waitFor(() => wrapper.update());
+    expect(mockDispatch).toHaveBeenCalledWith(
+      sourcererActions.setSelectedDataView({
+        id: SourcererScopeName.timeline,
+        selectedDataViewId: 'security-solution',
+        selectedPatterns: [
+          'apm-*-transaction*',
+          'traces-apm*',
+          'auditbeat-*',
+          'endgame-*',
+          'filebeat-*',
+          'logs-*',
+          'packetbeat-*',
+          'winlogbeat-*',
+          'myFakebeat-*',
+        ],
+        shouldValidateSelectedPatterns: false,
+      })
+    );
+  });
+
+  test('Show success toast after Adding index pattern successfully', async () => {
+    wrapper.find(`[data-test-subj="timeline-sourcerer-trigger"]`).first().simulate('click');
+
+    wrapper.find(`button[data-test-subj="sourcerer-deprecated-update"]`).first().simulate('click');
+
+    wrapper.find(`button[data-test-subj="sourcerer-update-data-view"]`).simulate('click');
+
+    await waitFor(() => wrapper.update());
+    expect(mockAddSuccess).toHaveBeenCalled();
+  });
+
+  test('Show page refresh button in success toast after Adding index pattern successfully', async () => {
+    wrapper.find(`[data-test-subj="timeline-sourcerer-trigger"]`).first().simulate('click');
+
+    wrapper.find(`button[data-test-subj="sourcerer-deprecated-update"]`).first().simulate('click');
+
+    wrapper.find(`button[data-test-subj="sourcerer-update-data-view"]`).simulate('click');
+
+    await waitFor(() => wrapper.update());
+    expect((toMountPoint as jest.Mock).mock.calls[0][0]).toEqual(
+      'One or more settings require you to reload the page to take effect'
+    );
+    expect((toMountPoint as jest.Mock).mock.calls[1][0]).toEqual(RefreshButton);
   });
 });
