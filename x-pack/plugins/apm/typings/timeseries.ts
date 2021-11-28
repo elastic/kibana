@@ -11,7 +11,6 @@ import {
   Fit,
   FitConfig,
   LineSeriesStyle,
-  RectAnnotation,
   SeriesColorAccessorFn,
   SeriesColorsArray,
 } from '@elastic/charts';
