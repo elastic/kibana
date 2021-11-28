@@ -331,7 +331,7 @@ describe('migration actions', () => {
               // Allocate 1 replica so that this index stays yellow
               number_of_replicas: '1',
               // Disable all shard allocation so that the index status is red
-              'index.routing.allocation.enable': 'none',
+              index: { routing: { allocation: { enable: 'none' } } },
             },
           },
         })
@@ -395,7 +395,7 @@ describe('migration actions', () => {
               // Allocate 1 replica so that this index stays yellow
               number_of_replicas: '1',
               // Disable all shard allocation so that the index status is red
-              'index.routing.allocation.enable': 'none',
+              index: { routing: { allocation: { enable: 'none' } } },
             },
           },
         })
@@ -1450,7 +1450,7 @@ describe('migration actions', () => {
                 // Allocate 1 replica so that this index stays yellow
                 number_of_replicas: '1',
                 // Disable all shard allocation so that the index status is red
-                'index.routing.allocation.enable': 'none',
+                index: { routing: { allocation: { enable: 'none' } } },
               },
             },
           },
