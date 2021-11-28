@@ -259,7 +259,7 @@
             "section": "def-public.Presentable",
             "text": "Presentable"
           },
-          "<FactoryContext>, \"id\" | \"getDisplayName\" | \"grouping\" | \"getIconType\" | \"order\" | \"MenuItem\" | \"getDisplayNameTooltip\" | \"isCompatible\">,",
+          "<FactoryContext>, \"id\" | \"order\" | \"getDisplayName\" | \"grouping\" | \"getIconType\" | \"MenuItem\" | \"getDisplayNameTooltip\" | \"isCompatible\">,",
           {
             "pluginId": "kibanaUtils",
             "scope": "public",
@@ -288,57 +288,6 @@
         "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
         "deprecated": false,
         "children": [
-          {
-            "parentPluginId": "uiActionsEnhanced",
-            "id": "def-public.ActionFactory.Unnamed",
-            "type": "Function",
-            "tags": [],
-            "label": "Constructor",
-            "description": [],
-            "signature": [
-              "any"
-            ],
-            "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
-            "deprecated": false,
-            "children": [
-              {
-                "parentPluginId": "uiActionsEnhanced",
-                "id": "def-public.ActionFactory.Unnamed.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "def",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "uiActionsEnhanced",
-                    "scope": "public",
-                    "docId": "kibUiActionsEnhancedPluginApi",
-                    "section": "def-public.ActionFactoryDefinition",
-                    "text": "ActionFactoryDefinition"
-                  },
-                  "<Config, ExecutionContext, FactoryContext>"
-                ],
-                "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
-                "deprecated": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "uiActionsEnhanced",
-                "id": "def-public.ActionFactory.Unnamed.$2",
-                "type": "Object",
-                "tags": [],
-                "label": "deps",
-                "description": [],
-                "signature": [
-                  "ActionFactoryDeps"
-                ],
-                "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
-                "deprecated": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
           {
             "parentPluginId": "uiActionsEnhanced",
             "id": "def-public.ActionFactory.id",
@@ -410,7 +359,15 @@
                 "section": "def-common.UiComponent",
                 "text": "UiComponent"
               },
-              "<{ context: FactoryContext; }> | undefined"
+              "<",
+              {
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.ActionMenuItemProps",
+                "text": "ActionMenuItemProps"
+              },
+              "<FactoryContext>> | undefined"
             ],
             "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
             "deprecated": false
@@ -423,7 +380,15 @@
             "label": "ReactMenuItem",
             "description": [],
             "signature": [
-              "React.FC<{ context: FactoryContext; }> | undefined"
+              "React.FC<",
+              {
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.ActionMenuItemProps",
+                "text": "ActionMenuItemProps"
+              },
+              "<FactoryContext>> | undefined"
             ],
             "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
             "deprecated": false
@@ -531,9 +496,9 @@
                 "label": "context",
                 "description": [],
                 "signature": [
-                  "Context"
+                  "FactoryContext"
                 ],
-                "path": "src/plugins/kibana_utils/public/ui/configurable.ts",
+                "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
                 "deprecated": false
               }
             ]
@@ -562,7 +527,7 @@
                 "signature": [
                   "Config"
                 ],
-                "path": "src/plugins/kibana_utils/public/ui/configurable.ts",
+                "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
                 "deprecated": false
               },
               {
@@ -573,9 +538,9 @@
                 "label": "context",
                 "description": [],
                 "signature": [
-                  "Context"
+                  "FactoryContext"
                 ],
-                "path": "src/plugins/kibana_utils/public/ui/configurable.ts",
+                "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
                 "deprecated": false
               }
             ]
@@ -600,6 +565,57 @@
             ],
             "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
             "deprecated": false
+          },
+          {
+            "parentPluginId": "uiActionsEnhanced",
+            "id": "def-public.ActionFactory.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "uiActionsEnhanced",
+                "id": "def-public.ActionFactory.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "def",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "uiActionsEnhanced",
+                    "scope": "public",
+                    "docId": "kibUiActionsEnhancedPluginApi",
+                    "section": "def-public.ActionFactoryDefinition",
+                    "text": "ActionFactoryDefinition"
+                  },
+                  "<Config, ExecutionContext, FactoryContext>"
+                ],
+                "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "uiActionsEnhanced",
+                "id": "def-public.ActionFactory.Unnamed.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "deps",
+                "description": [],
+                "signature": [
+                  "ActionFactoryDeps"
+                ],
+                "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "uiActionsEnhanced",
@@ -2267,7 +2283,7 @@
             "section": "def-public.Presentable",
             "text": "Presentable"
           },
-          "<FactoryContext>, \"id\" | \"getDisplayName\" | \"grouping\" | \"getIconType\" | \"order\" | \"MenuItem\" | \"getDisplayNameTooltip\" | \"isCompatible\">>,",
+          "<FactoryContext>, \"id\" | \"order\" | \"getDisplayName\" | \"grouping\" | \"getIconType\" | \"MenuItem\" | \"getDisplayNameTooltip\" | \"isCompatible\">>,",
           {
             "pluginId": "kibanaUtils",
             "scope": "public",
@@ -3416,7 +3432,7 @@
         },
         ">>,Pick<",
         "UiActionsServiceEnhancements",
-        ", \"telemetry\" | \"extract\" | \"inject\" | \"getActionFactory\" | \"hasActionFactory\" | \"getActionFactories\">"
+        ", \"telemetry\" | \"inject\" | \"extract\" | \"getActionFactory\" | \"hasActionFactory\" | \"getActionFactories\">"
       ],
       "path": "x-pack/plugins/ui_actions_enhanced/public/plugin.ts",
       "deprecated": false,

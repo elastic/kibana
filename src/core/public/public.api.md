@@ -41,6 +41,7 @@ import { RecursiveReadonly } from '@kbn/utility-types';
 import { Request as Request_2 } from '@hapi/hapi';
 import * as Rx from 'rxjs';
 import { SchemaTypeError } from '@kbn/config-schema';
+import type { ThemeVersion } from '@kbn/ui-shared-deps-npm';
 import type { TransportRequestOptions } from '@elastic/elasticsearch';
 import type { TransportRequestParams } from '@elastic/elasticsearch';
 import type { TransportResult } from '@elastic/elasticsearch';
@@ -170,6 +171,7 @@ export interface AppMountParameters<HistoryLocationState = unknown> {
     // @deprecated
     onAppLeave: (handler: AppLeaveHandler) => void;
     setHeaderActionMenu: (menuMount: MountPoint | undefined) => void;
+    theme$: Observable<CoreTheme>;
 }
 
 // @public
@@ -407,6 +409,8 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
     // (undocumented)
     notifications: NotificationsSetup;
     // (undocumented)
+    theme: ThemeServiceSetup;
+    // (undocumented)
     uiSettings: IUiSettingsClient;
 }
 
@@ -437,6 +441,8 @@ export interface CoreStart {
     // (undocumented)
     savedObjects: SavedObjectsStart;
     // (undocumented)
+    theme: ThemeServiceStart;
+    // (undocumented)
     uiSettings: IUiSettingsClient;
 }
 
@@ -454,6 +460,11 @@ export class CoreSystem {
     } | undefined>;
     // (undocumented)
     stop(): void;
+}
+
+// @public
+export interface CoreTheme {
+    readonly darkMode: boolean;
 }
 
 // @internal (undocumented)
@@ -711,7 +722,6 @@ export interface DocLinksStart {
         readonly snapshotRestore: Record<string, string>;
         readonly ingest: Record<string, string>;
         readonly fleet: Readonly<{
-            datastreamsILM: string;
             beatsAgentComparison: string;
             guide: string;
             fleetServer: string;
@@ -724,6 +734,7 @@ export interface DocLinksStart {
             datastreams: string;
             datastreamsNamingScheme: string;
             installElasticAgent: string;
+            installElasticAgentStandalone: string;
             upgradeElasticAgent: string;
             upgradeElasticAgent712lower: string;
             learnMoreBlog: string;
@@ -1668,6 +1679,18 @@ export class SimpleSavedObject<T = unknown> {
 // @public
 export type StartServicesAccessor<TPluginsStart extends object = object, TStart = unknown> = () => Promise<[CoreStart, TPluginsStart, TStart]>;
 
+// @public (undocumented)
+export interface ThemeServiceSetup {
+    // (undocumented)
+    theme$: Observable<CoreTheme>;
+}
+
+// @public (undocumented)
+export interface ThemeServiceStart {
+    // (undocumented)
+    theme$: Observable<CoreTheme>;
+}
+
 // Warning: (ae-missing-release-tag) "Toast" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
@@ -1764,6 +1787,6 @@ export interface UserProvidedValues<T = any> {
 
 // Warnings were encountered during analysis:
 //
-// src/core/public/core_system.ts:168:21 - (ae-forgotten-export) The symbol "InternalApplicationStart" needs to be exported by the entry point index.d.ts
+// src/core/public/core_system.ts:173:21 - (ae-forgotten-export) The symbol "InternalApplicationStart" needs to be exported by the entry point index.d.ts
 
 ```
