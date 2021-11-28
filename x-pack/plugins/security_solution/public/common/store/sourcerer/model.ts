@@ -29,8 +29,8 @@ export interface SourcererScope {
   id: SourcererScopeName;
   /** is an update being made to the sourcerer data view */
   loading: boolean;
-  /** selected data view id */
-  selectedDataViewId: string;
+  /** selected data view id, null if it is legacy index patterns*/
+  selectedDataViewId: string | null;
   /** selected patterns within the data view */
   selectedPatterns: string[];
 }
