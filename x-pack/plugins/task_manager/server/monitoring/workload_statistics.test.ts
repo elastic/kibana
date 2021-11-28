@@ -516,6 +516,7 @@ describe('Workload Statistics Aggregator', () => {
     const taskStore = taskStoreMock.create({});
     taskStore.aggregate
       .mockResolvedValueOnce(
+        // @ts-expect-error not full interface
         mockAggregatedResult().then((res) =>
           setTaskTypeCount(res, 'alerting_telemetry', {
             idle: 2,
@@ -524,6 +525,7 @@ describe('Workload Statistics Aggregator', () => {
       )
       .mockRejectedValueOnce(new Error('Elasticsearch has gone poof'))
       .mockResolvedValueOnce(
+        // @ts-expect-error not full interface
         mockAggregatedResult().then((res) =>
           setTaskTypeCount(res, 'alerting_telemetry', {
             idle: 1,
@@ -685,6 +687,7 @@ describe('Workload Statistics Aggregator', () => {
 
     return new Promise<void>((resolve, reject) => {
       let errorWasThrowAt = 0;
+      // @ts-expect-error not compatible interface
       taskStore.aggregate.mockImplementation(async () => {
         if (errorWasThrowAt === 0) {
           errorWasThrowAt = Date.now();

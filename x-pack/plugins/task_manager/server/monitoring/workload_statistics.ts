@@ -452,12 +452,15 @@ function hasAggregations(
   );
 }
 export interface WorkloadAggregationResponse {
+  // @ts-expect-error is not compatible with AggregationsAggregate
   taskType: TaskTypeAggregation;
+  // @ts-expect-error is not compatible with AggregationsAggregate
   schedule: ScheduleAggregation;
   idleTasks: IdleTasksAggregation;
   nonRecurringTasks: {
     doc_count: number;
   };
+  // @ts-expect-error is not compatible with AggregationsAggregate
   ownerIds: {
     ownerIds: {
       value: number;
@@ -465,6 +468,7 @@ export interface WorkloadAggregationResponse {
   };
   [otherAggs: string]: estypes.AggregationsAggregate;
 }
+// @ts-expect-error key doesn't accept a string
 export interface TaskTypeAggregation extends estypes.AggregationsFiltersAggregate {
   buckets: Array<{
     doc_count: number;
@@ -481,6 +485,8 @@ export interface TaskTypeAggregation extends estypes.AggregationsFiltersAggregat
   doc_count_error_upper_bound?: number | undefined;
   sum_other_doc_count?: number | undefined;
 }
+
+// @ts-expect-error key doesn't accept a string
 export interface ScheduleAggregation extends estypes.AggregationsFiltersAggregate {
   buckets: Array<{
     doc_count: number;
