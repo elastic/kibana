@@ -67,7 +67,9 @@ import {
 } from '../lib/detection_engine/rule_types/types';
 // eslint-disable-next-line no-restricted-imports
 import { legacyCreateLegacyNotificationRoute } from '../lib/detection_engine/routes/rules/legacy_create_legacy_notification';
-import { createSourcererDataViewRoute, getSourcererDataViewRoute } from '../lib/sourcerer/routes';
+import { createSourcererDataViewRoute , getSourcererDataViewRoute} from '../lib/sourcerer/routes';
+import { createPreviewIndexRoute } from '../lib/detection_engine/routes/index/create_preview_index_route';
+import { createCSPRoutes } from '../cloud_posture';
 
 export const initRoutes = (
   router: SecuritySolutionPluginRouter,
@@ -160,5 +162,11 @@ export const initRoutes = (
 
   // Sourcerer API to generate default pattern
   createSourcererDataViewRoute(router, getStartServices);
+<<<<<<< HEAD
   getSourcererDataViewRoute(router, getStartServices);
+=======
+
+  // CSP Routes
+  createCSPRoutes(router, logger);
+>>>>>>> CSP initial base entry
 };

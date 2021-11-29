@@ -7,6 +7,8 @@
 
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
+import { useLocation } from 'react-router-dom';
+
 import { EuiPanel } from '@elastic/eui';
 import { IS_DRAGGING_CLASS_NAME } from '@kbn/securitysolution-t-grid';
 import { AppLeaveHandler } from '../../../../../../../src/core/public';
@@ -27,7 +29,7 @@ import {
 import { useShowTimeline } from '../../../common/utils/timeline/use_show_timeline';
 import { gutterTimeline } from '../../../common/lib/helpers';
 import { useShowPagesWithEmptyView } from '../../../common/utils/empty_view/use_show_pages_with_empty_view';
-
+import { navTabs, cloudPostureNavTabs } from '../home_navigations';
 /**
  * Need to apply the styles via a className to effect the containing bottom bar
  * rather than applying them to the timeline bar directly
@@ -67,9 +69,15 @@ interface SecuritySolutionPageWrapperProps {
   onAppLeave: (handler: AppLeaveHandler) => void;
 }
 
+const isCloudPostureNav = (v: string) => v?.includes('/csp');
+
 export const SecuritySolutionTemplateWrapper: React.FC<SecuritySolutionPageWrapperProps> =
   React.memo(({ children, onAppLeave }) => {
-    const solutionNav = useSecuritySolutionNavigation();
+    const loc = useLocation();
+    // Temp hack
+    const solutionNav = useSecuritySolutionNavigation(
+      isCloudPostureNav(loc.pathname) ? { ...cloudPostureNavTabs, ueba: {} } : navTabs
+    );
     const [isTimelineBottomBarVisible] = useShowTimeline();
     const getTimelineShowStatus = useMemo(() => getTimelineShowStatusByIdSelector(), []);
     const { show: isShowingTimelineOverlay } = useDeepEqualSelector((state) =>

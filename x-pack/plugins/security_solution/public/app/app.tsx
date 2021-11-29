@@ -99,22 +99,24 @@ const SecurityAppComponent: React.FC<SecurityAppComponentProps> = ({
   services,
   setHeaderActionMenu,
   store,
-}) => (
-  <KibanaContextProvider
-    services={{
-      appName: APP_NAME,
-      ...services,
-    }}
-  >
-    <StartApp
-      history={history}
-      onAppLeave={onAppLeave}
-      setHeaderActionMenu={setHeaderActionMenu}
-      store={store}
+}) => {
+  return (
+    <KibanaContextProvider
+      services={{
+        appName: APP_NAME,
+        ...services,
+      }}
     >
-      {children}
-    </StartApp>
-  </KibanaContextProvider>
-);
+      <StartApp
+        history={history}
+        onAppLeave={onAppLeave}
+        setHeaderActionMenu={setHeaderActionMenu}
+        store={store}
+      >
+        {children}
+      </StartApp>
+    </KibanaContextProvider>
+  );
+};
 
 export const SecurityApp = memo(SecurityAppComponent);
