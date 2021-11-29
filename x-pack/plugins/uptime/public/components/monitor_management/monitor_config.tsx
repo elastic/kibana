@@ -32,8 +32,6 @@ export const MonitorConfig = () => {
     config: policyConfig[monitorType],
     defaultConfig: defaultConfig[monitorType],
   });
-  console.log(formattedMonitor);
-  console.log(isValid);
 
   return <MonitorFields />;
 };
