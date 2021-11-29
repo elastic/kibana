@@ -212,8 +212,8 @@ export async function _installPackage({
     const installedTemplateRefs = getAllTemplateRefs(installedTemplates);
 
     // make sure the assets are installed (or didn't error)
-    if (installKibanaAssetsError) throw installKibanaAssetsError;
     await installKibanaAssetsPromise;
+    if (installKibanaAssetsError) throw installKibanaAssetsError;
 
     const packageAssetResults = await saveArchiveEntries({
       savedObjectsClient,
