@@ -51,6 +51,10 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       loadTestFile(require.resolve('./monitor_states_generated'));
       loadTestFile(require.resolve('./telemetry_collectors'));
       loadTestFile(require.resolve('./telemetry_collectors_fleet'));
+      loadTestFile(require.resolve('./add_monitor'));
+      loadTestFile(require.resolve('./edit_monitor'));
+      loadTestFile(require.resolve('./delete_monitor'));
+      loadTestFile(require.resolve('./get_monitor'));
     });
 
     describe('with real-world data', () => {
