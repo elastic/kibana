@@ -13,6 +13,7 @@ const OPEN_ALERTS_ROWS_COUNT = 33;
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
 
+  // Keep the Workflow status code commented (no delete) as requested: https://github.com/elastic/kibana/issues/117686
   describe.skip('alert workflow status', function () {
     this.tags('includeFirefox');
 
