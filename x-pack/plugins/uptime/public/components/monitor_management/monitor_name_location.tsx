@@ -10,7 +10,7 @@ import { EuiFormRow, EuiFieldText } from '@elastic/eui';
 import { usePolicyConfigContext } from '../fleet_package/contexts';
 
 export const MonitorNameAndLocation = () => {
-  const { name, setName, locations, setLocations } = usePolicyConfigContext();
+  const { name, setName } = usePolicyConfigContext();
   return (
     <>
       <EuiFormRow label="Monitor name" fullWidth={true}>
