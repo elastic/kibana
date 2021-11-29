@@ -134,6 +134,13 @@ describe('Legacy config', () => {
       ]);
     });
 
+    it('handles CAs with contents before the begin pragma and after the end pragma', () => {
+      const ca = `Bag Attributes\n    friendlyName: ca\n${TEST_CA_CONTENTS}\n other data blah blah...`;
+      expect(parseCaFingerprints([ca])).toEqual([
+        '23:14:29:49:F8:84:C6:0E:8F:BE:60:D5:69:CB:4F:35:D5:76:B2:54:E6:FE:8C:93:0D:DD:75:39:FC:64:34:17',
+      ]);
+    });
+
     it('handles CA bundles', () => {
       const bundledCa = [TEST_CA_CONTENTS, TEST_CA_CONTENTS].join('\n');
       expect(parseCaFingerprints([bundledCa])).toEqual([
