@@ -21,6 +21,7 @@ import {
   BASE_POLICY_ROUTE,
   BASE_POLICY_RESPONSE_ROUTE,
 } from '../../../../common/endpoint/constants';
+import { GetPackagePoliciesRequest } from '../../../../../fleet/common/types/rest_spec/package_policy';
 
 export const INITIAL_POLICY_ID = '00000000-0000-0000-0000-000000000000';
 
@@ -46,7 +47,7 @@ export function registerPolicyRoutes(router: IRouter, endpointAppContext: Endpoi
   router.get(
     {
       path: BASE_POLICY_ROUTE,
-      validate: false,
+      validate: GetPackagePoliciesRequest,
       options: { authRequired: true },
     },
     getPolicyListHandler(endpointAppContext)
