@@ -100,6 +100,20 @@ export interface RuleAggregation {
       doc_count: number;
     }>;
   };
+  muted: {
+    buckets: Array<{
+      key: number;
+      key_as_string: string;
+      doc_count: number;
+    }>;
+  };
+  enabled: {
+    buckets: Array<{
+      key: number;
+      key_as_string: string;
+      doc_count: number;
+    }>;
+  };
 }
 
 export interface ConstructorOptions {
@@ -159,6 +173,8 @@ interface IndexType {
 
 export interface AggregateResult {
   alertExecutionStatus: { [status: string]: number };
+  ruleEnabledStatus?: { enabled: number; disabled: number };
+  ruleMutedStatus?: { muted: number; unmuted: number };
 }
 
 export interface FindResult<Params extends AlertTypeParams> {
@@ -687,7 +703,7 @@ export class RulesClient {
       })
     );
 
-    const ret = {
+    const ret: AggregateResult = {
       alertExecutionStatus: alertExecutionStatus.reduce(
         (acc, curr: { [status: string]: number }) => Object.assign(acc, curr),
         {}
@@ -700,6 +716,18 @@ export class RulesClient {
         ret.alertExecutionStatus[key] = 0;
       }
     }
+
+    const enabledBuckets = resp.aggregations!.enabled.buckets;
+    ret.ruleEnabledStatus = {
+      enabled: enabledBuckets.find((bucket) => bucket.key === 1)?.doc_count ?? 0,
+      disabled: enabledBuckets.find((bucket) => bucket.key === 0)?.doc_count ?? 0,
+    };
+
+    const mutedBuckets = resp.aggregations!.muted.buckets;
+    ret.ruleMutedStatus = {
+      muted: mutedBuckets.find((bucket) => bucket.key === 1)?.doc_count ?? 0,
+      unmuted: mutedBuckets.find((bucket) => bucket.key === 0)?.doc_count ?? 0,
+    };
 
     return ret;
   }
