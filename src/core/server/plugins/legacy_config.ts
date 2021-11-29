@@ -30,11 +30,8 @@ const createGlobalConfig = ({
   path: PathConfigType;
   savedObjects: SavedObjectsConfigType;
 }): SharedGlobalConfig => {
-  const resolvedElasticsearchConfig = new ElasticsearchConfig(elasticsearch);
-  const caFingerprints =
-    resolvedElasticsearchConfig.ssl.certificateAuthorities?.map(
-      (ca) => new X509Certificate(Buffer.from(ca)).fingerprint256
-    ) ?? [];
+  const resolvedEsConfig = new ElasticsearchConfig(elasticsearch);
+  const caFingerprints = parseCaFingerprints(resolvedEsConfig.ssl.certificateAuthorities ?? []);
 
   return deepFreeze({
     elasticsearch: {
@@ -72,4 +69,34 @@ export const getGlobalConfig$ = (configService: IConfigService): Observable<Shar
       shareReplay(1)
     )
   );
+};
+
+// TODO: move this to Elasticsearch service itself
+const BEGIN_CERT_PRAGMA = `-----BEGIN CERTIFICATE-----\n`;
+const END_CERT_PRAGMA = `\n-----END CERTIFICATE-----`;
+
+export const parseCaFingerprints = (certificateAuthorities: string[]): string[] => {
+  return certificateAuthorities
+    .flatMap((caBundle) => {
+      const beginChunks = caBundle.split(BEGIN_CERT_PRAGMA);
+      // Skip if no valid BEGIN_CERT_PRAGMA is found
+      if (beginChunks.length === 1) return [];
+
+      return beginChunks.map((chunk) => {
+        const endIndex = chunk.indexOf(END_CERT_PRAGMA);
+        if (endIndex > 0) {
+          return `${BEGIN_CERT_PRAGMA}${chunk.substring(0, endIndex)}${END_CERT_PRAGMA}`;
+        }
+      });
+    })
+    .filter((ca): ca is string => !!ca)
+    .map((ca) => {
+      try {
+        return new X509Certificate(Buffer.from(ca)).fingerprint256;
+      } catch {
+        // Ignore any certs that can't be successfully parsed
+        return undefined;
+      }
+    })
+    .filter((fingerprint): fingerprint is string => !!fingerprint);
 };

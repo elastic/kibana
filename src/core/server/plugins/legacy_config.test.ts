@@ -7,10 +7,11 @@
  */
 
 import path from 'path';
+import fs from 'fs';
 import { take } from 'rxjs/operators';
 import { ConfigService, Env } from '@kbn/config';
 import { getEnvOptions, rawConfigServiceMock } from '../config/mocks';
-import { getGlobalConfig, getGlobalConfig$ } from './legacy_config';
+import { getGlobalConfig, getGlobalConfig$, parseCaFingerprints } from './legacy_config';
 import { REPO_ROOT } from '@kbn/utils';
 import { loggingSystemMock } from '../logging/logging_system.mock';
 import { duration } from 'moment';
@@ -19,6 +20,7 @@ import { ByteSizeValue } from '@kbn/config-schema';
 import { Server } from '../server';
 
 const TEST_CA_PATH = path.join(__dirname, '__fixtures__', 'test_ca.crt');
+const TEST_CA_CONTENTS = fs.readFileSync(TEST_CA_PATH, 'utf-8');
 
 describe('Legacy config', () => {
   let env: Env;
@@ -115,6 +117,51 @@ describe('Legacy config', () => {
           "23:14:29:49:F8:84:C6:0E:8F:BE:60:D5:69:CB:4F:35:D5:76:B2:54:E6:FE:8C:93:0D:DD:75:39:FC:64:34:17",
         ]
       `);
+    });
+  });
+
+  describe('parseCaFingerprints', () => {
+    it('handles single CAs', () => {
+      expect(parseCaFingerprints([TEST_CA_CONTENTS])).toEqual([
+        '23:14:29:49:F8:84:C6:0E:8F:BE:60:D5:69:CB:4F:35:D5:76:B2:54:E6:FE:8C:93:0D:DD:75:39:FC:64:34:17',
+      ]);
+    });
+
+    it('handles multiple CAs', () => {
+      expect(parseCaFingerprints([TEST_CA_CONTENTS, TEST_CA_CONTENTS])).toEqual([
+        '23:14:29:49:F8:84:C6:0E:8F:BE:60:D5:69:CB:4F:35:D5:76:B2:54:E6:FE:8C:93:0D:DD:75:39:FC:64:34:17',
+        '23:14:29:49:F8:84:C6:0E:8F:BE:60:D5:69:CB:4F:35:D5:76:B2:54:E6:FE:8C:93:0D:DD:75:39:FC:64:34:17',
+      ]);
+    });
+
+    it('handles CA bundles', () => {
+      const bundledCa = [TEST_CA_CONTENTS, TEST_CA_CONTENTS].join('\n');
+      expect(parseCaFingerprints([bundledCa])).toEqual([
+        '23:14:29:49:F8:84:C6:0E:8F:BE:60:D5:69:CB:4F:35:D5:76:B2:54:E6:FE:8C:93:0D:DD:75:39:FC:64:34:17',
+        '23:14:29:49:F8:84:C6:0E:8F:BE:60:D5:69:CB:4F:35:D5:76:B2:54:E6:FE:8C:93:0D:DD:75:39:FC:64:34:17',
+      ]);
+    });
+
+    it('ignores CAs without a begin pragma', () => {
+      const invalidCa = 'asdf\n-----END CERTIFICATE-----';
+      expect(parseCaFingerprints([invalidCa])).toEqual([]);
+    });
+
+    it('ignores CAs without an end pragma', () => {
+      const invalidCa = '-----BEGIN CERTIFICATE-----\nasdf';
+      expect(parseCaFingerprints([invalidCa])).toEqual([]);
+    });
+
+    it('ignores invalid CAs', () => {
+      const invalidCa = '-----BEGIN CERTIFICATE-----\nasdf\n-----END CERTIFICATE-----';
+      expect(parseCaFingerprints([invalidCa])).toEqual([]);
+    });
+
+    it('ignores invalid CAs but still returns valid ones', () => {
+      const invalidCa = 'asdf\n-----END CERTIFICATE-----';
+      expect(parseCaFingerprints([TEST_CA_CONTENTS, invalidCa])).toEqual([
+        '23:14:29:49:F8:84:C6:0E:8F:BE:60:D5:69:CB:4F:35:D5:76:B2:54:E6:FE:8C:93:0D:DD:75:39:FC:64:34:17',
+      ]);
     });
   });
 });
