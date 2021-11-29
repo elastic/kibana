@@ -109,7 +109,7 @@ describe('Create Query', () => {
     });
   });
 
-  it('Uses `type` option to add type filter with all other option fields', () => {
+  it('Uses `type` option to add type filter with all other option fields and no data stream fields', () => {
     const options = {
       type: 'cluster_stats',
       clusterUuid: 'cuid123',
@@ -129,6 +129,102 @@ describe('Create Query', () => {
               timestamp: { format: 'epoch_millis', gte: 1456826400000, lte: 14568264000000 },
             },
           },
+        ],
+      },
+    });
+  });
+
+  it('Uses `dsType` option to add filter with all other option fields', () => {
+    const options = {
+      dsDataset: 'cluster_stats',
+      clusterUuid: 'cuid123',
+      uuid: 'abc123',
+      start: 1456826400000,
+      end: 14568264000000,
+      metric,
+    };
+    expect(createQuery(options)).toEqual({
+      bool: {
+        filter: [
+          {
+            bool: {
+              should: [
+                { term: { 'data_stream.type': 'metrics' } },
+                { term: { 'data_stream.dataset': 'cluster_stats' } },
+              ],
+            },
+          },
+          { term: { cluster_uuid: 'cuid123' } },
+          { term: { 'source_node.uuid': 'abc123' } },
+          {
+            range: {
+              timestamp: { format: 'epoch_millis', gte: 1456826400000, lte: 14568264000000 },
+            },
+          },
+        ],
+      },
+    });
+  });
+
+  it('Uses legacy `type` and `dsDataset` option to add type filters and data stream filters with minimal fields that defaults to `metrics` data_stream', () => {
+    const options = {
+      type: 'cluster_stats',
+      dsDataset: 'elasticsearch.cluster_stats',
+      clusterUuid: 'cuid123',
+      metric,
+    };
+    expect(createQuery(options)).toEqual({
+      bool: {
+        filter: [
+          {
+            bool: {
+              should: [
+                {
+                  term: {
+                    'data_stream.type': 'metrics',
+                  },
+                },
+                {
+                  term: {
+                    'data_stream.dataset': 'elasticsearch.cluster_stats',
+                  },
+                },
+                { term: { type: 'cluster_stats' } },
+              ],
+            },
+          },
+          { term: { cluster_uuid: 'cuid123' } },
+        ],
+      },
+    });
+  });
+
+  it('Uses legacy `type`, `dsDataset`, and `filters` options', () => {
+    const options = {
+      type: 'cluster_stats',
+      dsDataset: 'elasticsearch.cluster_stats',
+      clusterUuid: 'cuid123',
+      metric,
+      filters: [
+        {
+          term: { 'source_node.uuid': `nuid123` },
+        },
+      ],
+    };
+    expect(createQuery(options)).toEqual({
+      bool: {
+        filter: [
+          {
+            bool: {
+              should: [
+                { term: { 'data_stream.type': 'metrics' } },
+                { term: { 'data_stream.dataset': 'elasticsearch.cluster_stats' } },
+                { term: { type: 'cluster_stats' } },
+              ],
+            },
+          },
+          { term: { cluster_uuid: 'cuid123' } },
+          { term: { 'source_node.uuid': 'nuid123' } },
         ],
       },
     });
