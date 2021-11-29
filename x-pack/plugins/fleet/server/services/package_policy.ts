@@ -96,17 +96,22 @@ class PackagePolicyService {
       bumpRevision?: boolean;
       force?: boolean;
       skipEnsureInstalled?: boolean;
+      skipUniqueNameVerification?: boolean;
+      overwrite?: boolean;
     }
   ): Promise<PackagePolicy> {
-    const existingPoliciesWithName = await this.list(soClient, {
-      perPage: 1,
-      kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.name: "${packagePolicy.name}"`,
-    });
+    if (!options?.skipUniqueNameVerification) {
+      const existingPoliciesWithName = await this.list(soClient, {
+        perPage: 1,
+        kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.name: "${packagePolicy.name}"`,
+      });
 
-    // Check that the name does not exist already
-    if (existingPoliciesWithName.items.length > 0) {
-      throw new IngestManagerError('There is already a package with the same name');
+      // Check that the name does not exist already
+      if (existingPoliciesWithName.items.length > 0) {
+        throw new IngestManagerError('There is already an integration policy with the same name');
+      }
     }
+
     let elasticsearch: PackagePolicy['elasticsearch'];
     // Add ids to stream
     const packagePolicyId = options?.id || uuid.v4();
@@ -366,7 +371,7 @@ class PackagePolicyService {
     const filtered = (existingPoliciesWithName?.items || []).filter((p) => p.id !== id);
 
     if (filtered.length > 0) {
-      throw new IngestManagerError('There is already a package with the same name');
+      throw new IngestManagerError('There is already an integration policy with the same name');
     }
 
     let inputs = restOfPackagePolicy.inputs.map((input) =>
@@ -428,7 +433,6 @@ class PackagePolicyService {
           currentVersion: currentVersion || 'unknown',
           newVersion: packagePolicy.package.version,
           status: 'success',
-          dryRun: false,
           eventType: 'package-policy-upgrade' as UpdateEventType,
         };
         sendTelemetryEvents(
@@ -1194,4 +1198,31 @@ function deepMergeVars(original: any, override: any): any {
   }
 
   return result;
+}
+
+export async function incrementPackageName(
+  soClient: SavedObjectsClientContract,
+  packageName: string
+) {
+  // Fetch all packagePolicies having the package name
+  const packagePolicyData = await packagePolicyService.list(soClient, {
+    perPage: 1,
+    kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: "${packageName}"`,
+  });
+
+  // Retrieve highest number appended to package policy name and increment it by one
+  const pkgPoliciesNamePattern = new RegExp(`${packageName}-(\\d+)`);
+
+  const pkgPoliciesWithMatchingNames = packagePolicyData?.items
+    ? packagePolicyData.items
+        .filter((ds) => Boolean(ds.name.match(pkgPoliciesNamePattern)))
+        .map((ds) => parseInt(ds.name.match(pkgPoliciesNamePattern)![1], 10))
+        .sort()
+    : [];
+
+  return `${packageName}-${
+    pkgPoliciesWithMatchingNames.length
+      ? pkgPoliciesWithMatchingNames[pkgPoliciesWithMatchingNames.length - 1] + 1
+      : 1
+  }`;
 }

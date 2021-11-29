@@ -7,21 +7,14 @@
 
 import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { i18n } from '@kbn/i18n';
-import React, { Dispatch, useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { EuiButton, EuiText, EuiSpacer } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useHistory } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
 import { ExceptionItem } from '../../../../common/components/exceptions/viewer/exception_item';
+import { getCurrentLocation } from '../store/selector';
 import {
-  getCurrentLocation,
-  getListFetchError,
-  getListIsLoading,
-  getListItems,
-  getListPagination,
-  getTotalListItems,
-} from '../store/selector';
-import {
+  useFetchHostIsolationExceptionsList,
   useHostIsolationExceptionsNavigateCallback,
   useHostIsolationExceptionsSelector,
 } from './hooks';
@@ -39,7 +32,10 @@ import {
 } from './components/translations';
 import { getEndpointListPath } from '../../../common/routing';
 import { useEndpointPrivileges } from '../../../../common/components/user_privileges/endpoint';
-import { HostIsolationExceptionsPageAction } from '../store/action';
+import {
+  MANAGEMENT_DEFAULT_PAGE_SIZE,
+  MANAGEMENT_PAGE_SIZE_OPTIONS,
+} from '../../../common/constants';
 
 type HostIsolationExceptionPaginatedContent = PaginatedContentProps<
   Immutable<ExceptionListItemSchema>,
@@ -47,19 +43,26 @@ type HostIsolationExceptionPaginatedContent = PaginatedContentProps<
 >;
 
 export const HostIsolationExceptionsList = () => {
-  const listItems = useHostIsolationExceptionsSelector(getListItems);
-  const totalCountListItems = useHostIsolationExceptionsSelector(getTotalListItems);
-  const pagination = useHostIsolationExceptionsSelector(getListPagination);
-  const isLoading = useHostIsolationExceptionsSelector(getListIsLoading);
-  const fetchError = useHostIsolationExceptionsSelector(getListFetchError);
+  const history = useHistory();
+  const privileges = useEndpointPrivileges();
+
   const location = useHostIsolationExceptionsSelector(getCurrentLocation);
-  const dispatch = useDispatch<Dispatch<HostIsolationExceptionsPageAction>>();
   const navigateCallback = useHostIsolationExceptionsNavigateCallback();
 
   const [itemToDelete, setItemToDelete] = useState<ExceptionListItemSchema | null>(null);
 
-  const history = useHistory();
-  const privileges = useEndpointPrivileges();
+  const { isLoading, data, error, refetch } = useFetchHostIsolationExceptionsList();
+
+  const pagination = {
+    totalItemCount: data?.total ?? 0,
+    pageSize: data?.per_page ?? MANAGEMENT_DEFAULT_PAGE_SIZE,
+    pageSizeOptions: [...MANAGEMENT_PAGE_SIZE_OPTIONS],
+    pageIndex: (data?.page ?? 1) - 1,
+  };
+
+  const listItems = data?.data || [];
+  const totalCountListItems = data?.total || 0;
+
   const showFlyout = privileges.canIsolateHost && !!location.show;
   const hasDataToShow = !!location.filter || listItems.length > 0;
 
@@ -125,12 +128,19 @@ export const HostIsolationExceptionsList = () => {
 
   const handleCloseDeleteDialog = (forceRefresh: boolean = false) => {
     if (forceRefresh) {
-      dispatch({
-        type: 'hostIsolationExceptionsRefreshList',
-      });
+      refetch();
     }
     setItemToDelete(null);
   };
+
+  const handleCloseFlyout = useCallback(
+    () =>
+      navigateCallback({
+        show: undefined,
+        id: undefined,
+      }),
+    [navigateCallback]
+  );
 
   return (
     <AdministrationListPage
@@ -166,7 +176,9 @@ export const HostIsolationExceptionsList = () => {
       }
       hideHeader={!hasDataToShow}
     >
-      {showFlyout && <HostIsolationExceptionsFormFlyout />}
+      {showFlyout && (
+        <HostIsolationExceptionsFormFlyout onCancel={handleCloseFlyout} id={location.id} />
+      )}
 
       {itemToDelete ? (
         <HostIsolationExceptionDeleteModal item={itemToDelete} onCancel={handleCloseDeleteDialog} />
@@ -201,7 +213,7 @@ export const HostIsolationExceptionsList = () => {
         ItemComponent={ArtifactEntryCard}
         itemComponentProps={handleItemComponentProps}
         onChange={handlePaginatedContentChange}
-        error={fetchError?.message}
+        error={error?.message}
         loading={isLoading}
         pagination={pagination}
         contentClassName="host-isolation-exceptions-container"

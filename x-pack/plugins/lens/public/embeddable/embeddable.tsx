@@ -27,6 +27,7 @@ import { map, distinctUntilChanged, skip } from 'rxjs/operators';
 import fastIsEqual from 'fast-deep-equal';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
 import { METRIC_TYPE } from '@kbn/analytics';
+import { KibanaThemeProvider } from '../../../../../src/plugins/kibana_react/public';
 import {
   ExpressionRendererEvent,
   ReactExpressionRendererType,
@@ -58,7 +59,7 @@ import {
 
 import { IndexPatternsContract } from '../../../../../src/plugins/data/public';
 import { getEditPath, DOC_TYPE, PLUGIN_ID } from '../../common';
-import { IBasePath } from '../../../../../src/core/public';
+import { IBasePath, ThemeServiceStart } from '../../../../../src/core/public';
 import { LensAttributeService } from '../lens_attribute_service';
 import type { ErrorMessage } from '../editor_frame_service/types';
 import { getLensInspectorService, LensInspector } from '../lens_inspector_service';
@@ -111,6 +112,7 @@ export interface LensEmbeddableDeps {
   capabilities: { canSaveVisualizations: boolean; canSaveDashboards: boolean };
   usageCollection?: UsageCollectionSetup;
   spaces?: SpacesPluginStart;
+  theme: ThemeServiceStart;
 }
 
 const getExpressionFromDocument = async (
@@ -364,6 +366,10 @@ export class Embeddable
     }
   };
 
+  private onRender: ExpressionWrapperProps['onRender$'] = () => {
+    this.renderComplete.dispatchComplete();
+  };
+
   /**
    *
    * @param {HTMLElement} domNode
@@ -371,12 +377,17 @@ export class Embeddable
    */
   render(domNode: HTMLElement | Element) {
     this.domNode = domNode;
+    super.render(domNode as HTMLElement);
     if (!this.savedVis || !this.isInitialized || this.isDestroyed) {
       return;
     }
     if (this.input.onLoad) {
       this.input.onLoad(true);
     }
+
+    this.domNode.setAttribute('data-shared-item', '');
+
+    this.renderComplete.dispatchInProgress();
 
     const executionContext = {
       type: 'lens',
@@ -390,28 +401,31 @@ export class Embeddable
     const input = this.getInput();
 
     render(
-      <ExpressionWrapper
-        ExpressionRenderer={this.expressionRenderer}
-        expression={this.expression || null}
-        errors={this.errors}
-        lensInspector={this.lensInspector}
-        searchContext={this.getMergedSearchContext()}
-        variables={input.palette ? { theme: { palette: input.palette } } : {}}
-        searchSessionId={this.externalSearchContext.searchSessionId}
-        handleEvent={this.handleEvent}
-        onData$={this.updateActiveData}
-        interactive={!input.disableTriggers}
-        renderMode={input.renderMode}
-        syncColors={input.syncColors}
-        hasCompatibleActions={this.hasCompatibleActions}
-        className={input.className}
-        style={input.style}
-        executionContext={executionContext}
-        canEdit={this.getIsEditable() && input.viewMode === 'edit'}
-        onRuntimeError={() => {
-          this.logError('runtime');
-        }}
-      />,
+      <KibanaThemeProvider theme$={this.deps.theme.theme$}>
+        <ExpressionWrapper
+          ExpressionRenderer={this.expressionRenderer}
+          expression={this.expression || null}
+          errors={this.errors}
+          lensInspector={this.lensInspector}
+          searchContext={this.getMergedSearchContext()}
+          variables={input.palette ? { theme: { palette: input.palette } } : {}}
+          searchSessionId={this.externalSearchContext.searchSessionId}
+          handleEvent={this.handleEvent}
+          onData$={this.updateActiveData}
+          onRender$={this.onRender}
+          interactive={!input.disableTriggers}
+          renderMode={input.renderMode}
+          syncColors={input.syncColors}
+          hasCompatibleActions={this.hasCompatibleActions}
+          className={input.className}
+          style={input.style}
+          executionContext={executionContext}
+          canEdit={this.getIsEditable() && input.viewMode === 'edit'}
+          onRuntimeError={() => {
+            this.logError('runtime');
+          }}
+        />
+      </KibanaThemeProvider>,
       domNode
     );
   }

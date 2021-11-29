@@ -11,11 +11,11 @@ import { CreateFieldButton } from './index';
 import {
   indexPatternFieldEditorPluginMock,
   Start,
-} from '../../../../../../../src/plugins/index_pattern_field_editor/public/mocks';
+} from '../../../../../../../src/plugins/data_view_field_editor/public/mocks';
 
 import { TestProviders } from '../../../common/mock';
 import { useKibana } from '../../../common/lib/kibana';
-import { DataView } from '../../../../../../../src/plugins/data/common';
+import type { DataView } from '../../../../../../../src/plugins/data/common';
 import { TimelineId } from '../../../../common';
 
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
@@ -28,7 +28,7 @@ const runAllPromises = () => new Promise(setImmediate);
 describe('CreateFieldButton', () => {
   beforeEach(() => {
     mockIndexPatternFieldEditor = indexPatternFieldEditorPluginMock.createStartContract();
-    useKibanaMock().services.indexPatternFieldEditor = mockIndexPatternFieldEditor;
+    useKibanaMock().services.dataViewFieldEditor = mockIndexPatternFieldEditor;
     useKibanaMock().services.data.dataViews.get = () => new Promise(() => undefined);
   });
 

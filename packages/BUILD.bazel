@@ -1,7 +1,6 @@
-# Grouping target to call all underlying packages build
-# targets so we can build them all at once
+# It will build all declared code packages
 filegroup(
-  name = "build",
+  name = "build_pkg_code",
   srcs = [
       "//packages/elastic-apm-synthtrace:build",
       "//packages/elastic-datemath:build",
@@ -28,6 +27,7 @@ filegroup(
       "//packages/kbn-expect:build",
       "//packages/kbn-field-types:build",
       "//packages/kbn-i18n:build",
+      "//packages/kbn-i18n-react:build",
       "//packages/kbn-interpreter:build",
       "//packages/kbn-io-ts-utils:build",
       "//packages/kbn-logging:build",
@@ -68,5 +68,30 @@ filegroup(
       "//packages/kbn-ui-shared-deps-src:build",
       "//packages/kbn-utility-types:build",
       "//packages/kbn-utils:build",
+  ],
+)
+
+# It will build all declared package types
+filegroup(
+  name = "build_pkg_types",
+  srcs = [
+      "//packages/elastic-apm-synthtrace:build_types",
+      "//packages/elastic-datemath:build_types",
+      "//packages/kbn-ace:build_types",
+      "//packages/kbn-i18n:build_types",
+      "//packages/kbn-i18n-react:build_types",
+  ],
+)
+
+
+
+# Grouping target to call all underlying packages build
+# targets so we can build them all at once
+# It will auto build all declared code packages and types packages
+filegroup(
+  name = "build",
+  srcs = [
+      ":build_pkg_code",
+      ":build_pkg_types"
   ],
 )
