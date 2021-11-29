@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { VisParams } from 'src/plugins/visualizations/common';
 import { getVisTypeFromParams } from './get_vis_type_from_params';
 
 describe('extracting visualization type from vis params', () => {
@@ -23,7 +24,7 @@ describe('extracting visualization type from vis params', () => {
             type: 'line',
           },
         ],
-      },
+      } as VisParams,
       expectedType: 'line',
     },
     {
@@ -34,7 +35,7 @@ describe('extracting visualization type from vis params', () => {
             type: 'area',
           },
         ],
-      },
+      } as VisParams,
       expectedType: 'area',
     },
     {
@@ -45,7 +46,7 @@ describe('extracting visualization type from vis params', () => {
             type: 'histogram',
           },
         ],
-      },
+      } as VisParams,
       expectedType: 'histogram',
     },
     {
@@ -57,7 +58,7 @@ describe('extracting visualization type from vis params', () => {
           },
         ],
         categoryAxes: [{ position: 'bottom' }],
-      },
+      } as VisParams,
       expectedType: 'histogram',
     },
     {
@@ -69,7 +70,7 @@ describe('extracting visualization type from vis params', () => {
           },
         ],
         categoryAxes: [{ position: 'top' }],
-      },
+      } as VisParams,
       expectedType: 'histogram',
     },
     {
@@ -81,7 +82,7 @@ describe('extracting visualization type from vis params', () => {
           },
         ],
         categoryAxes: [{ position: 'left' }],
-      },
+      } as VisParams,
       expectedType: 'horizontal_bar',
     },
     {
@@ -93,7 +94,7 @@ describe('extracting visualization type from vis params', () => {
           },
         ],
         categoryAxes: [{ position: 'right' }],
-      },
+      } as VisParams,
       expectedType: 'horizontal_bar',
     },
   ].forEach(({ message, params, expectedType }) =>
