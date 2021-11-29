@@ -48,6 +48,7 @@ import { SortOrder } from '../components/doc_table/components/table_header/helpe
 import { VIEW_MODE } from '../components/view_mode_toggle';
 import { updateSearchSource } from './utils/update_search_source';
 import { FieldStatsTableSavedSearchEmbeddable } from '../application/main/components/field_stats_table';
+import { KibanaThemeProvider } from '../../../kibana_react/public';
 
 export type SearchProps = Partial<DiscoverGridProps> &
   Partial<DocTableProps> & {
@@ -391,15 +392,17 @@ export class SavedSearchEmbeddable
       Array.isArray(searchProps.columns)
     ) {
       ReactDOM.render(
-        <FieldStatsTableSavedSearchEmbeddable
-          services={searchProps.services}
-          indexPattern={searchProps.indexPattern}
-          columns={searchProps.columns}
-          savedSearch={this.savedSearch}
-          filters={this.input.filters}
-          query={this.input.query}
-          onAddFilter={searchProps.onFilter}
-        />,
+        <KibanaThemeProvider theme$={searchProps.services.core.theme.theme$}>
+          <FieldStatsTableSavedSearchEmbeddable
+            services={searchProps.services}
+            indexPattern={searchProps.indexPattern}
+            columns={searchProps.columns}
+            savedSearch={this.savedSearch}
+            filters={this.input.filters}
+            query={this.input.query}
+            onAddFilter={searchProps.onFilter}
+          />
+        </KibanaThemeProvider>,
         domNode
       );
       return;
