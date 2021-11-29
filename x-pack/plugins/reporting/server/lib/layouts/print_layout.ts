@@ -5,13 +5,8 @@
  * 2.0.
  */
 
-import path from 'path';
 import { PageOrientation, PredefinedPageSize } from 'pdfmake/interfaces';
-import { EvaluateFn, SerializableOrJSHandle } from 'puppeteer';
-import { LevelLogger } from '../';
 import { DEFAULT_VIEWPORT, LAYOUT_TYPES } from '../../../common/constants';
-import { Size } from '../../../common/types';
-import { HeadlessChromiumDriver } from '../../browsers';
 import { CaptureConfig } from '../../types';
 import { getDefaultLayoutSelectors, LayoutInstance, LayoutSelectorDictionary } from './';
 import { Layout } from './layout';
@@ -31,7 +26,7 @@ export class PrintLayout extends Layout implements LayoutInstance {
   }
 
   public getCssOverridesPath() {
-    return path.join(__dirname, 'print.css');
+    return undefined;
   }
 
   public getBrowserViewport() {
@@ -49,40 +44,6 @@ export class PrintLayout extends Layout implements LayoutInstance {
       height: this.viewport.height * itemsCount,
     };
   }
-
-  public async positionElements(
-    browser: HeadlessChromiumDriver,
-    logger: LevelLogger
-  ): Promise<void> {
-    logger.debug('positioning elements');
-
-    const elementSize: Size = {
-      width: this.viewport.width / this.captureConfig.zoom,
-      height: this.viewport.height / this.captureConfig.zoom,
-    };
-    const evalOptions: { fn: EvaluateFn; args: SerializableOrJSHandle[] } = {
-      fn: (selector: string, height: number, width: number) => {
-        const visualizations = document.querySelectorAll(selector) as NodeListOf<HTMLElement>;
-        const visualizationsLength = visualizations.length;
-
-        for (let i = 0; i < visualizationsLength; i++) {
-          const visualization = visualizations[i];
-          const style = visualization.style;
-          style.position = 'fixed';
-          style.top = `${height * i}px`;
-          style.left = '0';
-          style.width = `${width}px`;
-          style.height = `${height}px`;
-          style.zIndex = '1';
-          style.backgroundColor = 'inherit';
-        }
-      },
-      args: [this.selectors.screenshot, elementSize.height, elementSize.width],
-    };
-
-    await browser.evaluate(evalOptions, { context: 'PositionElements' }, logger);
-  }
-
   public getPdfImageSize() {
     return {
       width: 500,

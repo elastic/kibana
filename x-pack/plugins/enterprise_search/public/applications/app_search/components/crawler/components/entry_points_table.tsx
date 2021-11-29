@@ -12,7 +12,7 @@ import { useActions } from 'kea';
 import { EuiFieldText, EuiLink, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { GenericEndpointInlineEditableTable } from '../../../../shared/tables/generic_endpoint_inline_editable_table';
 import { InlineEditableTableColumn } from '../../../../shared/tables/inline_editable_table/types';
