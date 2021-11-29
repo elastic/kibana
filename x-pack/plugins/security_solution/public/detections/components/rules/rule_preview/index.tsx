@@ -130,6 +130,7 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
           spaceId={spaceId}
           threshold={threshold}
           query={query}
+          index={index}
         />
       )}
       <CalloutGroup items={errors} isError />

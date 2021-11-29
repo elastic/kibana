@@ -38,6 +38,7 @@ interface PreviewHistogramProps {
   threshold?: FieldValueThreshold;
   ruleType: Type;
   query: FieldValueQueryBar;
+  index: string[];
 }
 
 const DEFAULT_HISTOGRAM_HEIGHT = 300;
@@ -50,6 +51,7 @@ export const PreviewHistogram = ({
   threshold,
   ruleType,
   query,
+  index,
 }: PreviewHistogramProps) => {
   const { setQuery, isInitializing } = useGlobalTime();
 
@@ -67,6 +69,7 @@ export const PreviewHistogram = ({
     spaceId,
     threshold: isThresholdRule ? threshold : undefined,
     query,
+    index,
   });
 
   const previousPreviewId = usePrevious(previewId);
