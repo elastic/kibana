@@ -6,7 +6,7 @@
  */
 
 import axios, { AxiosError } from 'axios';
-import { Fields } from '@elastic/apm-synthtrace';
+import type { Fields } from '@elastic/apm-synthtrace';
 import { ProcessorEvent } from '../../common/processor_event';
 import { callApmApi } from './call_apm_api';
 
