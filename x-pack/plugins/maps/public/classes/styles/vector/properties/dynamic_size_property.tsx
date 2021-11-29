@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import _ from 'lodash';
 import React from 'react';
 import type { Map as MbMap } from '@kbn/mapbox-gl';
 import { DynamicStyleProperty } from './dynamic_style_property';
@@ -115,7 +114,7 @@ export class DynamicSizeProperty extends DynamicStyleProperty<SizeDynamicOptions
       // returning minimum allows "growing" of the symbols when the meta comes in
       // A grow effect us less visually jarring as shrinking.
       // especially relevant when displaying fine-grained grids using mvt
-      return this._options.minSize;
+      return this._options.minSize >= 0 ? this._options.minSize : null;
     }
 
     return this._getMbDataDrivenSize({
@@ -160,8 +159,8 @@ export class DynamicSizeProperty extends DynamicStyleProperty<SizeDynamicOptions
     return (
       this._field &&
       this._field.isValid() &&
-      _.has(this._options, 'minSize') &&
-      _.has(this._options, 'maxSize')
+      this._options.minSize >= 0 &&
+      this._options.maxSize >= 0
     );
   }
 
