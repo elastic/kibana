@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { pick, sortBy } from 'lodash';
 import moment from 'moment';
-import { service, timerange } from '@elastic/apm-synthtrace';
+import { apm, timerange } from '@elastic/apm-synthtrace';
 import { APIReturnType } from '../../../../plugins/apm/public/services/rest/createCallApmApi';
 import { isFiniteNumber } from '../../../../plugins/apm/common/utils/is_finite_number';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
@@ -298,8 +298,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         const rangeEnd = new Date('2021-01-01T12:15:00.000Z').getTime() - 1;
 
         before(async () => {
-          const goService = service('opbeans-go', 'production', 'go');
-          const javaService = service('opbeans-java', 'production', 'java');
+          const goService = apm.service('opbeans-go', 'production', 'go');
+          const javaService = apm.service('opbeans-java', 'production', 'java');
 
           const goInstanceA = goService.instance('go-instance-a');
           const goInstanceB = goService.instance('go-instance-b');

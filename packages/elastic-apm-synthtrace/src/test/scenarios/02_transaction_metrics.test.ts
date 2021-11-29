@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { service } from '../../lib/service';
+import { apm } from '../../lib/apm';
 import { timerange } from '../../lib/timerange';
-import { getTransactionMetrics } from '../../lib/utils/get_transaction_metrics';
+import { getTransactionMetrics } from '../../lib/apm/utils/get_transaction_metrics';
 
 describe('transaction metrics', () => {
   let events: Array<Record<string, any>>;
 
   beforeEach(() => {
-    const javaService = service('opbeans-java', 'production', 'java');
+    const javaService = apm.service('opbeans-java', 'production', 'java');
     const javaInstance = javaService.instance('instance-1');
 
     const range = timerange(

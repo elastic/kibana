@@ -5,40 +5,29 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { Client } from '@elastic/elasticsearch';
 import pLimit from 'p-limit';
 import Path from 'path';
 import { Worker } from 'worker_threads';
-import { ElasticsearchOutputWriteTargets } from '../../lib/output/to_elasticsearch_output';
-import { Logger, LogLevel } from '../../lib/utils/create_logger';
+import { getCommonServices } from './get_common_services';
+import { RunOptions } from './parse_run_cli_flags';
+import { WorkerData } from './upload_next_batch';
 
 export async function startHistoricalDataUpload({
   from,
   to,
+  intervalInMs,
   bucketSizeInMs,
   workers,
   clientWorkers,
   batchSize,
-  writeTargets,
   logLevel,
-  logger,
   target,
   file,
-}: {
-  from: number;
-  to: number;
-  bucketSizeInMs: number;
-  client: Client;
-  workers: number;
-  clientWorkers: number;
-  batchSize: number;
-  writeTargets: ElasticsearchOutputWriteTargets;
-  logger: Logger;
-  logLevel: LogLevel;
-  target: string;
-  file: string;
-}) {
+  writeTarget,
+}: RunOptions & { from: number; to: number }) {
   let requestedUntil: number = from;
+
+  const { logger } = getCommonServices({ target, logLevel });
 
   function processNextBatch() {
     const bucketFrom = requestedUntil;
@@ -56,17 +45,22 @@ export async function startHistoricalDataUpload({
       ).toISOString()}`
     );
 
+    const workerData: WorkerData = {
+      bucketFrom,
+      bucketTo,
+      file,
+      logLevel,
+      batchSize,
+      bucketSizeInMs,
+      clientWorkers,
+      intervalInMs,
+      target,
+      workers,
+      writeTarget,
+    };
+
     const worker = new Worker(Path.join(__dirname, './upload_next_batch.js'), {
-      workerData: {
-        bucketFrom,
-        bucketTo,
-        logLevel,
-        writeTargets,
-        target,
-        file,
-        clientWorkers,
-        batchSize,
-      },
+      workerData,
     });
 
     logger.perf('created_worker', () => {

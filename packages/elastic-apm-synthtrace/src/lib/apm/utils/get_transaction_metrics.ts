@@ -7,7 +7,7 @@
  */
 
 import { sortBy } from 'lodash';
-import { Fields } from '../entity';
+import { ApmFields } from '../apm_fields';
 import { aggregate } from './aggregate';
 
 function sortAndCompressHistogram(histogram?: { values: number[]; counts: number[] }) {
@@ -28,7 +28,7 @@ function sortAndCompressHistogram(histogram?: { values: number[]; counts: number
   );
 }
 
-export function getTransactionMetrics(events: Fields[]) {
+export function getTransactionMetrics(events: ApmFields[]) {
   const transactions = events
     .filter((event) => event['processor.event'] === 'transaction')
     .map((transaction) => {

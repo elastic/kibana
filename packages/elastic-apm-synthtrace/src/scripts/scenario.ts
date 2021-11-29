@@ -6,20 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { Entity, Fields } from './entity';
+import { ElasticsearchOutput } from '../lib/utils/to_elasticsearch_output';
+import { RunOptions } from './utils/parse_run_cli_flags';
 
-export class Serializable<TFields extends Fields> extends Entity<TFields> {
-  constructor(fields: TFields) {
-    super({
-      ...fields,
-    });
-  }
-
-  timestamp(time: number) {
-    this.fields['@timestamp'] = time;
-    return this;
-  }
-  serialize(): TFields[] {
-    return [this.fields];
-  }
-}
+type Generate = (range: { from: number; to: number }) => ElasticsearchOutput[];
+export type Scenario = (options: RunOptions) => Promise<{ generate: Generate }>;

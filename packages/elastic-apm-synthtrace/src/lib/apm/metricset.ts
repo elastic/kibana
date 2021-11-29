@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { Fields } from './entity';
-import { Serializable } from './serializable';
+import { Serializable } from '../serializable';
+import { ApmFields } from './apm_fields';
 
-export class Metricset extends Serializable {
-  constructor(fields: Fields) {
+export class Metricset extends Serializable<ApmFields> {
+  constructor(fields: ApmFields) {
     super({
       'processor.event': 'metric',
       'processor.name': 'metric',
