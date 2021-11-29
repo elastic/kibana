@@ -6,6 +6,7 @@
  */
 
 import { ESFilter } from '../../../../../../src/core/types/elasticsearch';
+import { rangeQuery } from '../../../../observability/server';
 import {
   METRIC_CGROUP_MEMORY_USAGE_BYTES,
   METRIC_SYSTEM_CPU_PERCENT,
@@ -19,20 +20,21 @@ import {
   TRANSACTION_PAGE_LOAD,
   TRANSACTION_REQUEST,
 } from '../../../common/transaction_types';
-import { rangeQuery } from '../../../../observability/server';
 import { environmentQuery } from '../../../common/utils/environment_query';
-import { withApmSpan } from '../../utils/with_apm_span';
+import { Coordinate } from '../../../typings/timeseries';
+import { getBucketSizeForAggregatedTransactions } from '../../lib/helpers/get_bucket_size_for_aggregated_transactions';
+import { Setup } from '../../lib/helpers/setup_request';
 import {
   getDocumentTypeFilterForTransactions,
-  getTransactionDurationFieldForTransactions,
   getProcessorEventForTransactions,
+  getTransactionDurationFieldForTransactions,
 } from '../../lib/helpers/transactions';
-import { Setup } from '../../lib/helpers/setup_request';
+import { getErrorRate } from '../../lib/transaction_groups/get_error_rate';
+import { withApmSpan } from '../../utils/with_apm_span';
 import {
   percentCgroupMemoryUsedScript,
   percentSystemMemoryUsedScript,
 } from '../metrics/by_agent/shared/memory';
-import { getErrorRate } from '../../lib/transaction_groups/get_error_rate';
 
 interface Options {
   setup: Setup;
@@ -48,8 +50,12 @@ interface TaskParameters {
   filter: ESFilter[];
   searchAggregatedTransactions: boolean;
   minutes: number;
-  serviceName?: string;
+  serviceName: string;
   setup: Setup;
+  start: number;
+  end: number;
+  intervalString: string;
+  numBuckets: number;
 }
 
 export function getServiceMapServiceNodeInfo({
@@ -68,6 +74,13 @@ export function getServiceMapServiceNodeInfo({
     ];
 
     const minutes = Math.abs((end - start) / (1000 * 60));
+    const numBuckets = 20;
+    const { intervalString } = getBucketSizeForAggregatedTransactions({
+      start,
+      end,
+      searchAggregatedTransactions,
+      numBuckets,
+    });
     const taskParams = {
       environment,
       filter,
@@ -77,6 +90,8 @@ export function getServiceMapServiceNodeInfo({
       setup,
       start,
       end,
+      intervalString,
+      numBuckets,
     };
 
     const [errorStats, transactionStats, cpuStats, memoryStats] =
@@ -102,9 +117,10 @@ async function getErrorStats({
   searchAggregatedTransactions,
   start,
   end,
-}: Options) {
+  numBuckets,
+}: TaskParameters) {
   return withApmSpan('get_error_rate_for_service_map_node', async () => {
-    const { average } = await getErrorRate({
+    const { average, timeseries: errorRateTimeseries } = await getErrorRate({
       environment,
       setup,
       serviceName,
@@ -112,8 +128,9 @@ async function getErrorStats({
       start,
       end,
       kuery: '',
+      numBuckets,
     });
-    return { avgErrorRate: average };
+    return { avgErrorRate: average, errorRateTimeseries };
   });
 }
 
@@ -122,11 +139,19 @@ async function getTransactionStats({
   filter,
   minutes,
   searchAggregatedTransactions,
+  start,
+  end,
+  intervalString,
 }: TaskParameters): Promise<{
   avgTransactionDuration: number | null;
   avgRequestsPerMinute: number | null;
+  latencyTimeseries?: Coordinate[];
 }> {
   const { apmEventClient } = setup;
+
+  const field = getTransactionDurationFieldForTransactions(
+    searchAggregatedTransactions
+  );
 
   const params = {
     apm: {
@@ -154,11 +179,16 @@ async function getTransactionStats({
       },
       track_total_hits: true,
       aggs: {
-        duration: {
-          avg: {
-            field: getTransactionDurationFieldForTransactions(
-              searchAggregatedTransactions
-            ),
+        duration: { avg: { field } },
+        timeseries: {
+          date_histogram: {
+            field: '@timestamp',
+            fixed_interval: intervalString,
+            min_doc_count: 0,
+            extended_bounds: { min: start, max: end },
+          },
+          aggs: {
+            latency: { avg: { field } },
           },
         },
       },
@@ -174,6 +204,14 @@ async function getTransactionStats({
   return {
     avgTransactionDuration: response.aggregations?.duration.value ?? null,
     avgRequestsPerMinute: totalRequests > 0 ? totalRequests / minutes : null,
+    latencyTimeseries: response.aggregations?.timeseries.buckets.map(
+      (bucket) => {
+        return {
+          x: bucket.key,
+          y: bucket.latency.value,
+        };
+      }
+    ),
   };
 }
 

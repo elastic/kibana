@@ -42,6 +42,7 @@ export async function getErrorRate({
   searchAggregatedTransactions,
   start,
   end,
+  numBuckets,
 }: {
   environment: string;
   kuery: string;
@@ -52,6 +53,7 @@ export async function getErrorRate({
   searchAggregatedTransactions: boolean;
   start: number;
   end: number;
+  numBuckets?: number;
 }): Promise<{
   timeseries: Coordinate[];
   average: number | null;
@@ -91,6 +93,7 @@ export async function getErrorRate({
               start,
               end,
               searchAggregatedTransactions,
+              numBuckets,
             }).intervalString,
             min_doc_count: 0,
             extended_bounds: { min: start, max: end },
