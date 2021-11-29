@@ -99,7 +99,7 @@ export function updateMapSetting(
       settingValue,
     });
 
-    if (settingKey === 'autoFitToDataBounds' && typeof settingValue === 'boolean' && settingValue) {
+    if (settingKey === 'autoFitToDataBounds' && settingValue === true) {
       dispatch(autoFitToBounds());
     }
   };
