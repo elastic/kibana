@@ -58,6 +58,7 @@ export interface AggTypeConfig<
   getValue?: (agg: TAggConfig, bucket: any) => any;
   getKey?: (bucket: any, key: any, agg: TAggConfig) => any;
   getValueBucketPath?: (agg: TAggConfig) => string;
+  getResponseId?: (agg: TAggConfig) => string;
 }
 
 // TODO need to make a more explicit interface for this
@@ -224,6 +225,8 @@ export class AggType<
     return false;
   }
 
+  getResponseId: (agg: TAggConfig) => string;
+
   /**
    * Generic AggType Constructor
    *
@@ -298,5 +301,7 @@ export class AggType<
       });
 
     this.getValue = config.getValue || ((agg: TAggConfig, bucket: any) => {});
+
+    this.getResponseId = config.getResponseId || ((agg: TAggConfig) => agg.id);
   }
 }

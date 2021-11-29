@@ -186,7 +186,7 @@ export function mergeTimeShifts(
         return;
       } else {
         // a sub-agg
-        const agg = requestAggs.find((requestAgg) => key === requestAgg.id);
+        const agg = requestAggs.find((requestAgg) => key === requestAgg.getResponseId());
         if (agg && agg.type.type === AggGroupNames.Metrics) {
           const timeShift = agg.getTimeShift();
           if (

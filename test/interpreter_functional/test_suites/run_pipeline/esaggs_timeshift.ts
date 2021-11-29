@@ -26,6 +26,15 @@ function getCell(esaggsResult: any, row: number, column: number): unknown | unde
 function checkShift(rows: Datatable['rows'], columns: Datatable['columns'], metricIndex = 1) {
   rows.shift();
   rows.pop();
+  function getValue(row: number, column: number) {
+    return getCell({ rows, columns }, row, column);
+  }
+  // check whether there is actual data in the table
+  if (
+    rows.every((_, index) => !getValue(index, metricIndex) && !getValue(index, metricIndex + 1))
+  ) {
+    throw new Error('all cell contents falsy');
+  }
   rows.forEach((_, index) => {
     if (index < rows.length - 1) {
       expect(getCell({ rows, columns }, index, metricIndex + 1)).to.be(
