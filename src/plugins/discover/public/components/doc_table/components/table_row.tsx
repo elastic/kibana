@@ -16,10 +16,9 @@ import { DocViewer } from '../../../services/doc_views/components/doc_viewer/doc
 import { FilterManager, IndexPattern } from '../../../../../data/public';
 import { TableCell } from './table_row/table_cell';
 import { ElasticSearchHit, DocViewFilterFn } from '../../../services/doc_views/doc_views_types';
-import { getContextUrl } from '../../../utils/get_context_url';
-import { getSingleDocUrl } from '../../../utils/get_single_doc_url';
 import { TableRowDetails } from './table_row_details';
 import { formatRow, formatTopLevelObject } from '../lib/row_formatter';
+import { useBreadcrumbReffs } from '../../../utils/use_breadcrumb_reffs';
 
 export type DocTableRow = ElasticSearchHit & {
   isAnchor?: boolean;
@@ -50,7 +49,6 @@ export const TableRow = ({
   onAddColumn,
   onRemoveColumn,
   filterManager,
-  addBasePath,
 }: TableRowProps) => {
   const [open, setOpen] = useState(false);
   const docTableRowClassName = classNames('kbnDocTable__row', {
@@ -99,13 +97,12 @@ export const TableRow = ({
     [filter, flattenedRow, indexPattern.fields]
   );
 
-  const getContextAppHref = () => {
-    return getContextUrl(row._id, indexPattern.id!, columns, filterManager, addBasePath);
-  };
-
-  const getSingleDocHref = () => {
-    return addBasePath(getSingleDocUrl(indexPattern.id!, row._index, row._id));
-  };
+  const { singleDocProps, surrDocsProps } = useBreadcrumbReffs({
+    indexPatternId: indexPattern.id!,
+    rowIndex: row._index,
+    rowId: row._id,
+    columns,
+  });
 
   const rowCells = [
     <td className="kbnDocTableCell__toggleDetails" key="toggleDetailsCell">
@@ -207,8 +204,8 @@ export const TableRow = ({
           open={open}
           colLength={(columns.length || 1) + 2}
           isTimeBased={indexPattern.isTimeBased()}
-          getContextAppHref={getContextAppHref}
-          getSingleDocHref={getSingleDocHref}
+          singleDocProps={singleDocProps}
+          surrDocsProps={surrDocsProps}
         >
           <DocViewer
             columns={columns}

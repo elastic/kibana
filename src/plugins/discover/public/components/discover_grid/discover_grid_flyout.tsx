@@ -27,8 +27,7 @@ import {
 import { DocViewer } from '../../services/doc_views/components/doc_viewer/doc_viewer';
 import { DocViewFilterFn, ElasticSearchHit } from '../../services/doc_views/doc_views_types';
 import { DiscoverServices } from '../../build_services';
-import { getContextUrl } from '../../utils/get_context_url';
-import { getSingleDocUrl } from '../../utils/get_single_doc_url';
+import { useBreadcrumbReffs } from '../../utils/use_breadcrumb_reffs';
 
 interface Props {
   columns: string[];
@@ -102,6 +101,13 @@ export function DiscoverGridFlyout({
     [activePage, setPage]
   );
 
+  const { singleDocProps, surrDocsProps } = useBreadcrumbReffs({
+    indexPatternId: indexPattern.id!,
+    rowIndex: hit._index,
+    rowId: hit._id,
+    columns,
+  });
+
   return (
     <EuiPortal>
       <EuiFlyout
@@ -142,8 +148,8 @@ export function DiscoverGridFlyout({
                 size="xs"
                 iconType="document"
                 flush="left"
-                href={services.addBasePath(getSingleDocUrl(indexPattern.id!, hit._index, hit._id))}
                 data-test-subj="docTableRowAction"
+                {...singleDocProps}
               >
                 {i18n.translate('discover.grid.tableRow.viewSingleDocumentLinkTextSimple', {
                   defaultMessage: 'Single document',
@@ -156,13 +162,7 @@ export function DiscoverGridFlyout({
                   size="xs"
                   iconType="documents"
                   flush="left"
-                  href={getContextUrl(
-                    String(hit._id),
-                    indexPattern.id,
-                    columns,
-                    services.filterManager,
-                    services.addBasePath
-                  )}
+                  {...surrDocsProps}
                   data-test-subj="docTableRowAction"
                 >
                   {i18n.translate('discover.grid.tableRow.viewSurroundingDocumentsLinkTextSimple', {

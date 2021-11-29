@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import React, { useEffect } from 'react';
-import { useLocation, useParams } from 'react-router-dom';
+import { useHistory, useLocation, useParams } from 'react-router-dom';
 import { EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DiscoverServices } from '../../build_services';
@@ -36,18 +36,19 @@ export function SingleDocRoute(props: SingleDocRouteProps) {
   const { chrome, timefilter } = services;
 
   const { indexPatternId, index } = useParams<DocUrlParams>();
+  const referrer = useHistory().location.state?.referrer;
 
   const query = useQuery();
   const docId = query.get('id') || '';
 
   useEffect(() => {
     chrome.setBreadcrumbs([
-      ...getRootBreadcrumbs(),
+      ...getRootBreadcrumbs(referrer),
       {
         text: `${index}#${docId}`,
       },
     ]);
-  }, [chrome, index, docId]);
+  }, [chrome, index, docId, referrer]);
 
   useEffect(() => {
     timefilter.disableAutoRefreshSelector();
