@@ -119,8 +119,11 @@ export class Vis<TVisParams = VisParams> {
     const { updateVisTypeOnParamsChange } = this.type;
     const newType = updateVisTypeOnParamsChange && updateVisTypeOnParamsChange(state.params);
     if (newType) {
-      state = JSON.parse(JSON.stringify(inState));
-      state.params.type = state.type = newType;
+      state = {
+        ...inState,
+        type: newType,
+        params: { ...inState.params, type: newType },
+      };
     }
 
     let typeChanged = false;
