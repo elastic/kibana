@@ -39,8 +39,8 @@ export function registerGetIndexPatternsRoute({
         await finder.close();
 
         return response.ok({ body: responses });
-      } catch (e) {
-        return handleEsError({ error: e, response });
+      } catch (error) {
+        return handleEsError({ error, response });
       }
     })
   );
