@@ -722,7 +722,6 @@ export interface DocLinksStart {
         readonly snapshotRestore: Record<string, string>;
         readonly ingest: Record<string, string>;
         readonly fleet: Readonly<{
-            datastreamsILM: string;
             beatsAgentComparison: string;
             guide: string;
             fleetServer: string;
@@ -735,6 +734,7 @@ export interface DocLinksStart {
             datastreams: string;
             datastreamsNamingScheme: string;
             installElasticAgent: string;
+            installElasticAgentStandalone: string;
             upgradeElasticAgent: string;
             upgradeElasticAgent712lower: string;
             learnMoreBlog: string;

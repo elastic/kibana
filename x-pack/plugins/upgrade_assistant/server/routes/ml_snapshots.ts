@@ -63,7 +63,7 @@ const verifySnapshotUpgrade = async (
     const { body: deprecations } = await esClient.asCurrentUser.migration.deprecations();
 
     const mlSnapshotDeprecations = deprecations.ml_settings.filter((deprecation) => {
-      return /model snapshot/.test(deprecation.message);
+      return /[Mm]odel snapshot/.test(deprecation.message);
     });
 
     // If there are no ML deprecations, we assume the deprecation was resolved successfully
