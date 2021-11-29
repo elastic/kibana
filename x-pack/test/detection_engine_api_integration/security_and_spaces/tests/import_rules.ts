@@ -563,7 +563,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 rule_id: 'rule-1',
                 error: {
                   message:
-                    'Rule with rule_id: "rule-1" references a non existent exception list of list_id: "123" and id: "i_dont_exist". Reference has been removed.',
+                    'Rule with rule_id: "rule-1" references a non existent exception list of list_id: "123". Reference has been removed.',
                   status_code: 400,
                 },
               },
