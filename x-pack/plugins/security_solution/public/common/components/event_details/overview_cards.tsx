@@ -58,14 +58,6 @@ const OverviewPanel = euiStyled(EuiPanel)`
   }
 `;
 
-const ClampedContent = euiStyled.div`
-  /* Clamp text content to 2 lines */
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-`;
-
 interface OverviewCardProps {
   title: string;
 }
@@ -79,6 +71,16 @@ const OverviewCard: React.FC<OverviewCardProps> = ({ title, children }) => (
 );
 
 OverviewCard.displayName = 'OverviewCard';
+
+const ClampedContent = euiStyled.div`
+  /* Clamp text content to 2 lines */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+`;
+
+ClampedContent.displayName = 'ClampedContent';
 
 type OverviewCardWithActionsProps = OverviewCardProps & {
   contextId: string;
