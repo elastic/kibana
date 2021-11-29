@@ -71,5 +71,12 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       loadTestFile(require.resolve('./index_status'));
       loadTestFile(require.resolve('./monitor_states_real_data'));
     });
+
+    describe('uptime CRUD routes', () => {
+      loadTestFile(require.resolve('./get_monitor'));
+      loadTestFile(require.resolve('./add_monitor'));
+      loadTestFile(require.resolve('./edit_monitor'));
+      loadTestFile(require.resolve('./delete_monitor'));
+    });
   });
 }
