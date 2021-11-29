@@ -316,7 +316,7 @@ exports[`prepares assets for distribution: bar bundle 1`] = `
       if (
         (o ? e.setAttribute(\\"media\\", o) : e.removeAttribute(\\"media\\"),
         i &&
-          btoa &&
+          \\"undefined\\" != typeof btoa &&
           (r += \\"\\\\n/*# sourceMappingURL=data:application/json;base64,\\".concat(
             btoa(unescape(encodeURIComponent(JSON.stringify(i)))),
             \\" */\\"

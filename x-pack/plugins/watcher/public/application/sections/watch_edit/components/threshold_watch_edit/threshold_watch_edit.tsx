@@ -28,7 +28,7 @@ import {
   EuiPageContentBody,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { TIME_UNITS } from '../../../../../../common/constants';
 import { serializeThresholdWatch } from '../../../../../../common/lib/serialization';
 import { ErrableFormRow, SectionError, Error as ServerError } from '../../../../components';
