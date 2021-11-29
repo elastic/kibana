@@ -5809,6 +5809,10 @@
   version "0.0.0"
   uid ""
 
+"@types/kbn__alerts@link:bazel-bin/packages/kbn-alerts/npm_module_types":
+  version "0.0.0"
+  uid ""
+
 "@types/kbn__analytics@link:bazel-bin/packages/kbn-analytics/npm_module_types":
   version "0.0.0"
   uid ""
