@@ -89,6 +89,7 @@ export function ColorRanges(props: ColorRangesProps) {
     const showEdit = !showDelete && isLast ? isDisabledEnd : isDisabledStart;
     const dataTestPrefix = 'lnsPalettePanel';
     const isDisabled = isLast ? isDisabledEnd : index === 0 ? isDisabledStart : false;
+    const isInvalid = (!isValid && isLast) || value === undefined || Number.isNaN(value);
     return (
       <EuiFlexItem
         data-test-subj={`${dataTestPrefix}_dynamicColoring_range_row_${index}`}
@@ -154,7 +155,7 @@ export function ColorRanges(props: ColorRangesProps) {
           <EuiFlexItem>
             <EuiFieldNumber
               compressed
-              isInvalid={(!isValid && isLast) || !value || Number.isNaN(value)}
+              isInvalid={isInvalid}
               data-test-subj={`${dataTestPrefix}_dynamicColoring_range_value_${index}`}
               value={value}
               disabled={isDisabled}
