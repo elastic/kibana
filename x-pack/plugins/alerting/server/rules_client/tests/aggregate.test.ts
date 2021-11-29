@@ -84,6 +84,18 @@ describe('aggregate()', () => {
             { key: 'unknown', doc_count: 2 },
           ],
         },
+        enabled: {
+          buckets: [
+            { key: 0, key_as_string: '0', doc_count: 2 },
+            { key: 1, key_as_string: '1', doc_count: 28 },
+          ],
+        },
+        muted: {
+          buckets: [
+            { key: 0, key_as_string: '0', doc_count: 27 },
+            { key: 1, key_as_string: '1', doc_count: 3 },
+          ],
+        },
       },
     });
 
@@ -119,6 +131,14 @@ describe('aggregate()', () => {
           "ok": 10,
           "pending": 4,
           "unknown": 2,
+        },
+        "ruleEnabledStatus": Object {
+          "disabled": 2,
+          "enabled": 28,
+        },
+        "ruleMutedStatus": Object {
+          "muted": 3,
+          "unmuted": 27,
         },
       }
     `);
