@@ -11,10 +11,8 @@ import { SyntheticsProviders } from '../components/fleet_package/contexts';
 import { MonitorConfig } from '../components/monitor_management/monitor_config';
 
 export const AddMonitorPage: React.FC = () => {
-  //   useInitApp();
-
-  useTrackPageview({ app: 'uptime', path: 'monitor/add' });
-  useTrackPageview({ app: 'uptime', path: 'monitor/add', delay: 15000 });
+  useTrackPageview({ app: 'uptime', path: 'add-monitor' });
+  useTrackPageview({ app: 'uptime', path: 'add-monitor', delay: 15000 });
 
   return (
     <SyntheticsProviders>

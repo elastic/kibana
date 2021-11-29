@@ -170,7 +170,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    describe('create new policy', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/103390
+    describe.skip('create new policy', () => {
       let version: string;
 
       beforeEach(async () => {

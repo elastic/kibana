@@ -18,10 +18,8 @@ import { SyntheticsProviders } from '../components/fleet_package/contexts';
 import { MonitorConfig } from '../components/monitor_management/monitor_config';
 
 export const EditMonitorPage: React.FC = () => {
-  //   useInitApp();
-
-  useTrackPageview({ app: 'uptime', path: 'monitor/add' });
-  useTrackPageview({ app: 'uptime', path: 'monitor/add', delay: 15000 });
+  useTrackPageview({ app: 'uptime', path: 'edit-monitor' });
+  useTrackPageview({ app: 'uptime', path: 'edit-monitor', delay: 15000 });
 
   const {
     enableTLS: isTLSEnabled,
@@ -87,13 +85,13 @@ export const EditMonitorPage: React.FC = () => {
 
   return (
     <SyntheticsProviders
-      defaultPolicyValues={{
+      policyDefaultValues={{
         defaultIsTLSEnabled: isTLSEnabled,
         defaultIsZipUrlTLSEnabled: isZipUrlTLSEnabled,
         defaultMonitorType: monitorType,
+        defaultName: defaultConfig?.name || '', // TODO - figure out typing concerns for name
+        defaultLocations: [], // TODO - figure out locations
         isEditable: true,
-        // name: defaultConfig?.name, // TODO - figure out typing concerns for name
-        // locations: defaultConfig?.locations, // TODO - figure out locations
       }}
       httpDefaultValues={fullDefaultConfig[DataStream.HTTP]}
       tcpDefaultValues={fullDefaultConfig[DataStream.TCP]}
