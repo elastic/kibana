@@ -6,20 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { Entity, Fields } from './entity';
+import { ApmFields } from '../apm_fields';
 
-export class Serializable<TFields extends Fields> extends Entity<TFields> {
-  constructor(fields: TFields) {
-    super({
-      ...fields,
-    });
-  }
-
-  timestamp(time: number) {
-    this.fields['@timestamp'] = time;
-    return this;
-  }
-  serialize(): TFields[] {
-    return [this.fields];
-  }
+export function getObserverDefaults(): ApmFields {
+  return {
+    'observer.version': '7.16.0',
+    'observer.version_major': 7,
+  };
 }

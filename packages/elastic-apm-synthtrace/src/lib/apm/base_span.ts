@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { Fields } from './entity';
-import { Serializable } from './serializable';
+import { Serializable } from '../serializable';
 import { Span } from './span';
 import { Transaction } from './transaction';
-import { generateLongId } from './utils/generate_id';
+import { generateLongId } from '../utils/generate_id';
+import { ApmFields } from './apm_fields';
 
-export class BaseSpan extends Serializable {
+export class BaseSpan extends Serializable<ApmFields> {
   private readonly _children: BaseSpan[] = [];
 
-  constructor(fields: Fields) {
+  constructor(fields: ApmFields) {
     super({
       ...fields,
       'event.outcome': 'unknown',
@@ -65,7 +65,7 @@ export class BaseSpan extends Serializable {
     return this;
   }
 
-  serialize(): Fields[] {
+  serialize(): ApmFields[] {
     return [this.fields, ...this._children.flatMap((child) => child.serialize())];
   }
 

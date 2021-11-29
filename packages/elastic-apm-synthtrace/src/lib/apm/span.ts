@@ -7,11 +7,11 @@
  */
 
 import { BaseSpan } from './base_span';
-import { Fields } from './entity';
-import { generateShortId } from './utils/generate_id';
+import { generateShortId } from '../utils/generate_id';
+import { ApmFields } from './apm_fields';
 
 export class Span extends BaseSpan {
-  constructor(fields: Fields) {
+  constructor(fields: ApmFields) {
     super({
       ...fields,
       'processor.event': 'span',
