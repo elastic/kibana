@@ -37,9 +37,9 @@ export enum API_URLS {
   CONNECTOR_TYPES = '/api/actions/connector_types',
 
   // Service end points
-  INDEX_TEMPLATES = '/api/uptime/service/index_templates',
-  GET_MONITOR = '/api/uptime/service/get_monitors',
-  ADD_MONITOR = '/api/uptime/service/add_monitor',
-  EDIT_MONITOR = '/api/uptime/service/edit_monitor',
-  DELETE_MONITOR = '/api/uptime/service/delete_monitor',
+  INDEX_TEMPLATES = '/internal/uptime/service/index_templates',
+  GET_MONITOR = '/internal/uptime/service/get_monitors',
+  ADD_MONITOR = '/internal/uptime/service/add_monitor',
+  EDIT_MONITOR = '/internal/uptime/service/edit_monitor',
+  DELETE_MONITOR = '/internal/uptime/service/delete_monitor',
 }
