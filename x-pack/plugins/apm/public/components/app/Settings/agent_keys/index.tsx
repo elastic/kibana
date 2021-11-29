@@ -74,7 +74,7 @@ function AgentKeysContent() {
     refetch: refetchAgentKeys,
   } = useFetcher(
     (callApmApi) => {
-      if (areApiKeysEnabled || canManage) {
+      if (areApiKeysEnabled && canManage) {
         return callApmApi({
           endpoint: 'GET /internal/apm/agent_keys',
         });
