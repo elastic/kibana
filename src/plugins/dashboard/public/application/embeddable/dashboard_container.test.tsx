@@ -12,7 +12,7 @@ import { mount } from 'enzyme';
 import { findTestSubject, nextTick } from '@kbn/test/jest';
 import { DashboardContainer, DashboardContainerServices } from './dashboard_container';
 import { getSampleDashboardInput, getSampleDashboardPanel } from '../test_helpers';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import { embeddablePluginMock } from 'src/plugins/embeddable/public/mocks';
 
 import { KibanaContextProvider } from '../../services/kibana_react';
@@ -43,11 +43,13 @@ import { getStubPluginServices } from '../../../../presentation_util/public';
 const presentationUtil = getStubPluginServices();
 
 const options: DashboardContainerServices = {
+  // TODO: clean up use of any
   application: {} as any,
   embeddable: {} as any,
   notifications: {} as any,
   overlays: {} as any,
   inspector: {} as any,
+  screenshotMode: {} as any,
   SavedObjectFinder: () => null,
   ExitFullScreenButton: () => null,
   uiActions: {} as any,

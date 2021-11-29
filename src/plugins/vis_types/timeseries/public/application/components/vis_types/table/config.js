@@ -30,7 +30,7 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { getDefaultQueryLanguage } from '../../lib/get_default_query_language';
 import { checkIfNumericMetric } from '../../lib/check_if_numeric_metric';
 import { QueryBarWrapper } from '../../query_bar_wrapper';
