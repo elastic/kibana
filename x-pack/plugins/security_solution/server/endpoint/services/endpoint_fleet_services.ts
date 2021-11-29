@@ -6,7 +6,7 @@
  */
 
 import { KibanaRequest } from 'kibana/server';
-import {
+import type {
   AgentClient,
   AgentPolicyServiceInterface,
   FleetStartContract,

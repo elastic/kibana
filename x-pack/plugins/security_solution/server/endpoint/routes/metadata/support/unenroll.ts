@@ -6,7 +6,7 @@
  */
 
 import { ElasticsearchClient } from 'kibana/server';
-import { AgentClient } from '../../../../../../fleet/server';
+import type { AgentClient } from '../../../../../../fleet/server';
 import { Agent } from '../../../../../../fleet/common/types/models';
 
 export async function findAllUnenrolledAgentIds(
