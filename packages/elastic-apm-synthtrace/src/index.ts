@@ -20,3 +20,4 @@ export { cleanWriteTargets } from './lib/utils/clean_write_targets';
 export { getWriteTargets } from './lib/utils/get_write_targets';
 export { SynthtraceEsClient } from './lib/client/synthtrace_es_client';
 export { createLogger, LogLevel } from './lib/utils/create_logger';
+export { Fields } from './lib/entity';

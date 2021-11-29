@@ -41,6 +41,14 @@ export async function callApmEndpoints({
     (traceEvent) => traceEvent['processor.event'] === 'error'
   );
 
+  if (!transactionEvent) {
+    throw new Error('Could not find transaction event');
+  }
+
+  if (!errorEvent) {
+    throw new Error('Could not find error event');
+  }
+
   const promises = [
     callApmApi({
       endpoint: 'GET /internal/apm/alerts/chart_preview/transaction_duration',
@@ -246,7 +254,9 @@ export async function callApmEndpoints({
           environment,
           kuery,
           transactionType,
-          groupIds: JSON.stringify([errorEvent['error.grouping_key']]),
+          groupIds: JSON.stringify([
+            errorEvent['error.grouping_key'] as string,
+          ]),
           numBuckets: 10,
         },
       },
@@ -254,7 +264,10 @@ export async function callApmEndpoints({
     callApmApi({
       endpoint: 'GET /internal/apm/services/{serviceName}/errors/{groupId}',
       params: {
-        path: { serviceName, groupId: errorEvent['error.grouping_key'] },
+        path: {
+          serviceName,
+          groupId: errorEvent['error.grouping_key'] as string,
+        },
         query: { start, end, environment, kuery },
       },
     }),
@@ -359,20 +372,20 @@ export async function callApmEndpoints({
     callApmApi({
       endpoint: 'GET /internal/apm/traces/{traceId}',
       params: {
-        path: { traceId: transactionEvent['trace.id'] },
+        path: { traceId: transactionEvent['trace.id'] as string },
         query: { start, end },
       },
     }),
     callApmApi({
       endpoint: 'GET /internal/apm/traces/{traceId}/root_transaction',
       params: {
-        path: { traceId: transactionEvent['trace.id'] },
+        path: { traceId: transactionEvent['trace.id'] as string },
       },
     }),
     callApmApi({
       endpoint: 'GET /internal/apm/transactions/{transactionId}',
       params: {
-        path: { transactionId: transactionEvent['transaction.id'] },
+        path: { transactionId: transactionEvent['transaction.id'] as string },
       },
     }),
   ];
