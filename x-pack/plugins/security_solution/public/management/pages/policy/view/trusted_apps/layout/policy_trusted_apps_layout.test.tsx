@@ -16,12 +16,13 @@ import { MiddlewareActionSpyHelper } from '../../../../../../common/store/test_u
 import { createLoadedResourceState, isLoadedResourceState } from '../../../../../state';
 import { getPolicyDetailsArtifactsListPath } from '../../../../../common/routing';
 import { EndpointDocGenerator } from '../../../../../../../common/endpoint/generate_data';
-import { GetTrustedAppsListRequest } from '../../../../../../../common/endpoint/types';
 import { policyListApiPathHandlers } from '../../../store/test_mock_utils';
 import { useEndpointPrivileges } from '../../../../../../common/components/user_privileges/endpoint/use_endpoint_privileges';
 import { getEndpointPrivilegesInitialStateMock } from '../../../../../../common/components/user_privileges/endpoint/mocks';
 import { PACKAGE_POLICY_API_ROOT, AGENT_API_ROUTES } from '../../../../../../../../fleet/common';
 import { trustedAppsAllHttpMocks } from '../../../../mocks';
+import { HttpFetchOptionsWithPath } from 'kibana/public';
+import { ExceptionsListItemGenerator } from '../../../../../../../common/endpoint/data_generators/exceptions_list_item_generator';
 
 jest.mock('../../../../../../common/components/user_privileges/endpoint/use_endpoint_privileges');
 const mockUseEndpointPrivileges = useEndpointPrivileges as jest.Mock;
@@ -137,19 +138,24 @@ describe('Policy trusted apps layout', () => {
   });
 
   it('should renders layout with data but no results', async () => {
-    TrustedAppsHttpServiceMock.mockImplementation(() => {
-      return {
-        getTrustedAppsList: (params: GetTrustedAppsListRequest) => {
-          const hasAnyQuery =
-            'exception-list-agnostic.attributes.tags:"policy:1234" OR exception-list-agnostic.attributes.tags:"policy:all"';
-          if (params.kuery === hasAnyQuery) {
-            return getMockListResponse();
-          } else {
-            return { data: [], total: 0 };
-          }
-        },
-      };
-    });
+    mockedApis.responseProvider.trustedAppsList.mockImplementation(
+      (options: HttpFetchOptionsWithPath) => {
+        const hasAnyQuery =
+          'exception-list-agnostic.attributes.tags:"policy:1234" OR exception-list-agnostic.attributes.tags:"policy:all"';
+        if (options.query?.filter === hasAnyQuery) {
+          return {
+            data: Array.from({ length: 10 }, () =>
+              new ExceptionsListItemGenerator('seed').generate()
+            ),
+            total: 10,
+            page: 0,
+            per_page: 10,
+          };
+        } else {
+          return { data: [], total: 0, page: 0, per_page: 10 };
+        }
+      }
+    );
 
     const component = render();
     mockedContext.history.push(getPolicyDetailsArtifactsListPath('1234', { filter: 'search' }));
