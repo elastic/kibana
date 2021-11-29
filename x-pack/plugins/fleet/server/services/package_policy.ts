@@ -717,11 +717,11 @@ class PackagePolicyService {
     let newPackagePolicy: NewPackagePolicy = newPolicy;
     if (newPolicy.package) {
       const newPP = await this.buildPackagePolicyFromPackage(soClient, newPolicy.package.name);
+      // TODO when package not installed at all, should take from registry
       if (newPP) {
         if (newPolicy.package.version !== newPP.package?.version) {
-          throw new Error(
-            `Package version ${newPolicy.package.version} is not installed, cannot create policy`
-          );
+          // when request package version does not match installed version, do not enrich
+          return newPackagePolicy;
         }
         const inputs = newPolicy.inputs.map((input) => {
           const defaultInput = newPP.inputs.find((i) => i.type === input.type);

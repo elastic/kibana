@@ -49,7 +49,7 @@ export default function ({ getService }: FtrProviderContext) {
           const policy = await indexFleetEndpointPolicy(
             getService('kibanaServer'),
             `Default ${uuid.v4()}`,
-            '1.3.0-dev.1'
+            '1.1.1'
           );
           const policyId = policy.integrationPolicies[0].policy_id;
           const currentTime = new Date().getTime();
@@ -589,7 +589,7 @@ export default function ({ getService }: FtrProviderContext) {
           const policy = await indexFleetEndpointPolicy(
             getService('kibanaServer'),
             `Default ${uuid.v4()}`,
-            '1.3.0-dev.1'
+            '1.1.1'
           );
           const policyId = policy.integrationPolicies[0].policy_id;
           const currentTime = new Date().getTime();
