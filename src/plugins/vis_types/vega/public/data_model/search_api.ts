@@ -32,8 +32,7 @@ export const extendSearchParamsWithRuntimeFields = async (
       const indexPattern = (await indexPatterns.find(indexPatternString)).find(
         (index) => index.title === indexPatternString
       );
-      // @ts-expect-error The MappingRuntimeFieldType from @elastic/elasticsearch does not expose the "composite" runtime type yet
-      runtimeMappings = indexPattern?.getComputedFields().runtimeFields;
+      runtimeMappings = indexPattern?.getRuntimeMappings();
     }
 
     return {

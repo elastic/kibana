@@ -133,7 +133,6 @@ async function fetchFieldExistence({
     index: indexPattern.title,
     timeFieldName: timeFieldName || indexPattern.timeFieldName,
     fields,
-    // @ts-expect-error The MappingRuntimeField from @elastic/elasticsearch does not expose the "composite" runtime type yet
     runtimeMappings,
     includeFrozen,
   });

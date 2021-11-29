@@ -22,6 +22,7 @@ export type {
   FieldFormatMap,
   RuntimeType,
   RuntimeField,
+  RuntimeFieldSpec,
   IIndexPattern,
   DataViewAttributes,
   IndexPatternAttributes,

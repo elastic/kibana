@@ -53,22 +53,24 @@ export const CreateFieldButton = React.memo<CreateFieldButtonProps>(
       if (dataView) {
         dataViewFieldEditor?.openEditor({
           ctx: { dataView },
-          onSave: (field: DataViewField) => {
+          onSave: (fields: DataViewField[]) => {
             // Fetch the updated list of fields
             indexFieldsSearch(selectedDataViewId);
 
-            // Add the new field to the event table
-            dispatch(
-              tGridActions.upsertColumn({
-                column: {
-                  columnHeaderType: defaultColumnHeaderType,
-                  id: field.name,
-                  initialWidth: DEFAULT_COLUMN_MIN_WIDTH,
-                },
-                id: timelineId,
-                index: 0,
-              })
-            );
+            for (const field of fields) {
+              // Add the new field(s) to the event table
+              dispatch(
+                tGridActions.upsertColumn({
+                  column: {
+                    columnHeaderType: defaultColumnHeaderType,
+                    id: field.name,
+                    initialWidth: DEFAULT_COLUMN_MIN_WIDTH,
+                  },
+                  id: timelineId,
+                  index: 0,
+                })
+              );
+            }
           },
         });
       }
