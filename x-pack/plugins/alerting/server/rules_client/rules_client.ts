@@ -653,16 +653,12 @@ export class RulesClient {
   }
 
   public async aggregate({
-    options: { fields, ...options } = {},
+    options: { fields, filter, ...options } = {},
   }: { options?: AggregateOptions } = {}): Promise<AggregateResult> {
     const { filter: authorizationFilter } = await this.authorization.getFindAuthorizationFilter(
       AlertingAuthorizationEntity.Rule,
       alertingAuthorizationFilterOpts
     );
-    const filter = '';
-    // const filter = options.filter
-    //   ? `${options.filter} and alert.attributes.executionStatus.status:(${status})`
-    //   : `alert.attributes.executionStatus.status:(${status})`;
     const resp = await this.unsecuredSavedObjectsClient.find<RawAlert, RuleAggregation>({
       ...options,
       filter:
