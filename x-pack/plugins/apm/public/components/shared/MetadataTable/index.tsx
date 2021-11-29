@@ -22,7 +22,7 @@ import { useHistory, useLocation } from 'react-router-dom';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_params';
 import { HeightRetainer } from '../HeightRetainer';
-import { fromQuery, toQuery } from '../Links/url_helpers';
+import { fromQuery, toQuery } from '../links/url_helpers';
 import { filterSectionsByTerm } from './helper';
 import { Section } from './Section';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';

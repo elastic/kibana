@@ -7,7 +7,7 @@
 
 import { History } from 'history';
 import { isEmpty } from 'lodash';
-import { push } from '../Links/url_helpers';
+import { push } from '../links/url_helpers';
 
 export function pushNewItemToKueryBar({
   kuery,

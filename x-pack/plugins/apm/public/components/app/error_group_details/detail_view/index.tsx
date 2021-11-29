@@ -23,11 +23,11 @@ import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/comm
 import type { APIReturnType } from '../../../../services/rest/createCallApmApi';
 import type { APMError } from '../../../../../typings/es_schemas/ui/apm_error';
 import type { ApmUrlParams } from '../../../../context/url_params_context/types';
-import { TransactionDetailLink } from '../../../shared/Links/apm/transaction_detail_link';
-import { DiscoverErrorLink } from '../../../shared/Links/DiscoverLinks/DiscoverErrorLink';
-import { fromQuery, toQuery } from '../../../shared/Links/url_helpers';
+import { TransactionDetailLink } from '../../../shared/links/apm/transaction_detail_link';
+import { DiscoverErrorLink } from '../../../shared/links/DiscoverLinks/DiscoverErrorLink';
+import { fromQuery, toQuery } from '../../../shared/links/url_helpers';
 import { ErrorMetadata } from '../../../shared/MetadataTable/ErrorMetadata';
-import { Stacktrace } from '../../../shared/Stacktrace';
+import { Stacktrace } from '../../../shared/stack_trace';
 import { Summary } from '../../../shared/Summary';
 import { HttpInfoSummaryItem } from '../../../shared/Summary/http_info_summary_item';
 import { UserAgentSummaryItem } from '../../../shared/Summary/UserAgentSummaryItem';

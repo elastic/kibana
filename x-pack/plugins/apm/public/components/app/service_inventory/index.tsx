@@ -18,11 +18,11 @@ import { toMountPoint } from '../../../../../../../src/plugins/kibana_react/publ
 import { useAnomalyDetectionJobsContext } from '../../../context/anomaly_detection_jobs/use_anomaly_detection_jobs_context';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_params';
-import { useLocalStorage } from '../../../hooks/useLocalStorage';
 import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
+import { useLocalStorage } from '../../../hooks/use_local_storage';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../hooks/use_time_range';
-import { useUpgradeAssistantHref } from '../../shared/Links/kibana';
+import { useUpgradeAssistantHref } from '../../shared/links/kibana';
 import { SearchBar } from '../../shared/search_bar';
 import { getTimeRangeComparison } from '../../shared/time_comparison/get_time_range_comparison';
 import { ServiceList } from './service_list';

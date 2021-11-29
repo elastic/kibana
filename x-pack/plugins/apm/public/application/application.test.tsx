@@ -15,18 +15,18 @@ import { AppMountParameters, DocLinksStart, HttpStart } from 'src/core/public';
 import { mockApmPluginContextValue } from '../context/apm_plugin/mock_apm_plugin_context';
 import { createCallApmApi } from '../services/rest/createCallApmApi';
 import { renderApp as renderApmApp } from './';
-import { UXAppRoot } from './uxApp';
+import { UXAppRoot } from './ux_app';
 import { disableConsoleWarning } from '../utils/testHelpers';
 import { dataPluginMock } from 'src/plugins/data/public/mocks';
 import { embeddablePluginMock } from 'src/plugins/embeddable/public/mocks';
 import { ApmPluginSetupDeps, ApmPluginStartDeps } from '../plugin';
-import { RumHome } from '../components/app/RumDashboard/RumHome';
+import { RumHome } from '../components/app/rum_dashboard/RumHome';
 
 jest.mock('../services/rest/data_view', () => ({
   createStaticDataView: () => Promise.resolve(undefined),
 }));
 
-jest.mock('../components/app/RumDashboard/RumHome', () => ({
+jest.mock('../components/app/rum_dashboard/RumHome', () => ({
   RumHome: () => <p>Home Mock</p>,
 }));
 

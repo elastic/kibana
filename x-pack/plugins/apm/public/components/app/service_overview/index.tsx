@@ -26,7 +26,7 @@ import { useApmParams } from '../../../hooks/use_apm_params';
 import { AggregatedTransactionsBadge } from '../../shared/aggregated_transactions_badge';
 import { useApmRouter } from '../../../hooks/use_apm_router';
 import { useTimeRange } from '../../../hooks/use_time_range';
-import { replace } from '../../shared/Links/url_helpers';
+import { replace } from '../../shared/links/url_helpers';
 
 /**
  * The height a chart should be if it's next to a table with 5 rows and a title.

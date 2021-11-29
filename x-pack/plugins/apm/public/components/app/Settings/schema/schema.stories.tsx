@@ -11,7 +11,7 @@ import { MemoryRouter } from 'react-router-dom';
 import { CoreStart } from '../../../../../../../../src/core/public';
 import { MockApmPluginContextWrapper } from '../../../../context/apm_plugin/mock_apm_plugin_context';
 import { createCallApmApi } from '../../../../services/rest/createCallApmApi';
-import { Schema } from './';
+import { Schema } from '.';
 import { ConfirmSwitchModal } from './confirm_switch_modal';
 
 interface Args {

@@ -10,7 +10,7 @@ import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { useFetcher } from '../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../hooks/use_time_range';
-import { getWaterfall } from './waterfall_with_summary/waterfall_container/Waterfall/waterfall_helpers/waterfall_helpers';
+import { getWaterfall } from './waterfall_with_summary/waterfall_container/waterfall/waterfall_helpers/waterfall_helpers';
 
 const INITIAL_DATA = {
   errorDocs: [],

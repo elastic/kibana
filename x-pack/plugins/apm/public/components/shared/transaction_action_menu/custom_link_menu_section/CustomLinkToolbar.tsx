@@ -16,7 +16,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { NO_PERMISSION_LABEL } from '../../../../../common/custom_link';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
-import { APMLink } from '../../Links/apm/APMLink';
+import { APMLink } from '../../links/apm/APMLink';
 
 export function CustomLinkToolbar({
   onClickCreate,

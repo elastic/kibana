@@ -24,7 +24,7 @@ import {
   getResponseTimeTickFormatter,
 } from '../../../shared/charts/transaction_charts/helper';
 import { MLHeader } from '../../../shared/charts/transaction_charts/ml_header';
-import * as urlHelpers from '../../../shared/Links/url_helpers';
+import * as urlHelpers from '../../../shared/links/url_helpers';
 import { getComparisonChartTheme } from '../../time_comparison/get_time_range_comparison';
 import { useEnvironmentsContext } from '../../../../context/environments_context/use_environments_context';
 import { ApmMlDetectorType } from '../../../../../common/anomaly_detection/apm_ml_detectors';

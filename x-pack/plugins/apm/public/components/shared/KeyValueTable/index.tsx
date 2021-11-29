@@ -14,7 +14,7 @@ import {
   EuiTableRowCell,
 } from '@elastic/eui';
 import { FormattedValue } from './FormattedValue';
-import { KeyValuePair } from '../../../utils/flattenObject';
+import { KeyValuePair } from '../../../utils/flatten_object';
 
 export function KeyValueTable({
   keyValuePairs,

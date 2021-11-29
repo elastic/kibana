@@ -8,7 +8,7 @@
 import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { useKibanaUrl } from '../../hooks/useKibanaUrl';
+import { useKibanaUrl } from '../../hooks/use_kibana_url';
 
 export function InvalidLicenseNotification() {
   const manageLicenseURL = useKibanaUrl(

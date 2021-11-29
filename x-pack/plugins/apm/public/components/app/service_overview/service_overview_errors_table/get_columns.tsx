@@ -11,7 +11,7 @@ import React from 'react';
 import { asInteger } from '../../../../../common/utils/formatters';
 import { APIReturnType } from '../../../../services/rest/createCallApmApi';
 import { SparkPlot } from '../../../shared/charts/spark_plot';
-import { ErrorDetailLink } from '../../../shared/Links/apm/ErrorDetailLink';
+import { ErrorDetailLink } from '../../../shared/links/apm/ErrorDetailLink';
 import { TimestampTooltip } from '../../../shared/TimestampTooltip';
 import { TruncateWithTooltip } from '../../../shared/truncate_with_tooltip';
 

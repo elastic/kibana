@@ -20,7 +20,7 @@ import { APIReturnType } from '../../../services/rest/createCallApmApi';
 import { truncate } from '../../../utils/style';
 import { EmptyMessage } from '../../shared/EmptyMessage';
 import { ImpactBar } from '../../shared/ImpactBar';
-import { TransactionDetailLink } from '../../shared/Links/apm/transaction_detail_link';
+import { TransactionDetailLink } from '../../shared/links/apm/transaction_detail_link';
 import { ITableColumn, ManagedTable } from '../../shared/managed_table';
 import { ServiceLink } from '../../shared/service_link';
 import { TruncateWithTooltip } from '../../shared/truncate_with_tooltip';

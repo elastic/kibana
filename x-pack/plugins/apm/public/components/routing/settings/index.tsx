@@ -12,14 +12,15 @@ import { Redirect } from 'react-router-dom';
 import { agentConfigurationPageStepRt } from '../../../../common/agent_configuration/constants';
 import { Breadcrumb } from '../../app/breadcrumb';
 import { SettingsTemplate } from '../templates/settings_template';
-import { AgentConfigurations } from '../../app/Settings/agent_configurations';
+import { AgentConfigurations } from '../../app/settings/agent_configurations';
 import { CreateAgentConfigurationRouteView } from './create_agent_configuration_route_view';
 import { EditAgentConfigurationRouteView } from './edit_agent_configuration_route_view';
-import { ApmIndices } from '../../app/Settings/ApmIndices';
 import { CustomLinkOverview } from '../../app/Settings/custom_link';
-import { Schema } from '../../app/Settings/schema';
-import { AnomalyDetection } from '../../app/Settings/anomaly_detection';
 import { AgentKeys } from '../../app/Settings/agent_keys';
+import { ApmIndices } from '../../app/settings/ApmIndices';
+import { CustomizeUI } from '../../app/settings/customize_ui';
+import { Schema } from '../../app/settings/schema';
+import { AnomalyDetection } from '../../app/settings/anomaly_detection';
 
 function page<TPath extends string>({
   path,

@@ -15,7 +15,7 @@ import {
 } from '@elastic/eui';
 import React, { Dispatch, SetStateAction, useState } from 'react';
 import { euiStyled } from '../../../../../../../../../../src/plugins/kibana_react/common';
-import { Margins } from '../../../../../shared/charts/Timeline';
+import { Margins } from '../../../../../shared/charts/timeline';
 import {
   IWaterfall,
   IWaterfallSpanOrTransaction,
