@@ -91,7 +91,6 @@ export const requestIndexFieldSearch = async (
   const dataViewService = await indexPatterns.indexPatternsServiceFactory(
     savedObjectsClient,
     esClient.asCurrentUser
-    // todo does this need to pass the request?
   );
 
   let indicesExist: string[] = [];
