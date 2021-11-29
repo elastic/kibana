@@ -672,9 +672,6 @@ export class RulesClient {
         status: {
           terms: { field: 'alert.attributes.executionStatus.status' },
         },
-        // ruleName: {
-        //   terms: { field: 'alert.attributes.rule.name' },
-        // },
         enabled: {
           terms: { field: 'alert.attributes.enabled' },
         },
