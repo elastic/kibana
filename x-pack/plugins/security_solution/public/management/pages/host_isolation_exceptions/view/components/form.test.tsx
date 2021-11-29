@@ -18,8 +18,9 @@ import {
 } from '@kbn/securitysolution-io-ts-list-types';
 import userEvent from '@testing-library/user-event';
 import uuid from 'uuid';
+import { sendGetEndpointSpecificPackagePoliciesMock } from '../../../../services/test_mock_utilts';
 
-describe('When on the host isolation exceptions add entry form', () => {
+describe('When on the host isolation exceptions entry form', () => {
   let render: (
     exception: CreateExceptionListItemSchema | UpdateExceptionListItemSchema
   ) => ReturnType<AppContextTestRender['render']>;
@@ -31,9 +32,15 @@ describe('When on the host isolation exceptions add entry form', () => {
     onChange.mockReset();
     onError.mockReset();
     const mockedContext = createAppRootMockRenderer();
+    const policiesRequest = sendGetEndpointSpecificPackagePoliciesMock();
     render = (exception) => {
       return mockedContext.render(
-        <HostIsolationExceptionsForm exception={exception} onChange={onChange} onError={onError} />
+        <HostIsolationExceptionsForm
+          exception={exception}
+          policies={policiesRequest.items}
+          onChange={onChange}
+          onError={onError}
+        />
       );
     };
   });
@@ -77,11 +84,10 @@ describe('When on the host isolation exceptions add entry form', () => {
       }
     );
 
-    it('should call onChange when a value is introduced in a field', () => {
+    it('should call onChange with the partial change when a value is introduced in a field', () => {
       const ipInput = renderResult.getByTestId('hostIsolationExceptions-form-ip-input');
       userEvent.type(ipInput, '10.0.0.1');
       expect(onChange).toHaveBeenLastCalledWith({
-        ...newException,
         entries: [
           { field: 'destination.ip', operator: 'included', type: 'match', value: '10.0.0.1' },
         ],
@@ -122,12 +128,11 @@ describe('When on the host isolation exceptions add entry form', () => {
       ).toHaveValue('initial description');
     });
 
-    it('should call onChange when a value is introduced in a field', () => {
+    it('should call onChange with the partial change when a value is introduced in a field', () => {
       const ipInput = renderResult.getByTestId('hostIsolationExceptions-form-ip-input');
       userEvent.clear(ipInput);
       userEvent.type(ipInput, '10.0.100.1');
       expect(onChange).toHaveBeenCalledWith({
-        ...existingException,
         entries: [
           { field: 'destination.ip', operator: 'included', type: 'match', value: '10.0.100.1' },
         ],

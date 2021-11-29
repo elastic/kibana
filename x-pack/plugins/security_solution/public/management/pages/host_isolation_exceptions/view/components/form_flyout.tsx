@@ -144,6 +144,7 @@ export const HostIsolationExceptionsFormFlyout = memo(
     ) => {
       setException(Object.assign(exception, change));
     };
+
     return exception && policiesRequest.data?.items ? (
       <EuiFlyout
         size="m"
