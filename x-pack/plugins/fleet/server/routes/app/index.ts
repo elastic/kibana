@@ -47,7 +47,7 @@ export const getCheckPermissionsHandler: RequestHandler = async (context, reques
 };
 
 export const generateServiceTokenHandler: RequestHandler = async (context, request, response) => {
-  const esClient = context.core.elasticsearch.client.asCurrentUser;
+  const esClient = context.core.elasticsearch.client.asInternalUser;
   try {
     const { body: tokenResponse } = await esClient.transport.request<{
       created?: boolean;

@@ -272,13 +272,10 @@ export class FleetPlugin
       })
     );
 
-    const router: FleetRouter = core.http.createRouter<FleetRequestHandlerContext>();
-
     // Register usage collection
     registerFleetUsageCollector(core, config, deps.usageCollection);
 
-    // Always register app routes for permissions checking
-    registerAppRoutes(router);
+    const router: FleetRouter = core.http.createRouter<FleetRequestHandlerContext>();
     // Allow read-only users access to endpoints necessary for Integrations UI
     // Only some endpoints require superuser so we pass a raw IRouter here
 
@@ -286,18 +283,21 @@ export class FleetPlugin
     const superuserRouter = RouterWrappers.require.superuser(router);
     const fleetAuthzRouter = RouterWrappers.require.fleetAuthz(router);
 
+    // Always register app routes for permissions checking
+    registerAppRoutes(fleetAuthzRouter);
+
     // Some EPM routes use regular rbac to support integrations app
-    registerEPMRoutes({ rbac: router, superuser: superuserRouter });
+    registerEPMRoutes({ rbac: fleetAuthzRouter, superuser: superuserRouter });
 
     // Register rest of routes only if security is enabled
     if (deps.security) {
       registerSetupRoutes(fleetAuthzRouter, config);
       registerAgentPolicyRoutes(fleetAuthzRouter);
       registerPackagePolicyRoutes(fleetAuthzRouter);
-      registerOutputRoutes(superuserRouter);
-      registerSettingsRoutes(superuserRouter);
-      registerDataStreamRoutes(superuserRouter);
-      registerPreconfigurationRoutes(superuserRouter);
+      registerOutputRoutes(fleetAuthzRouter);
+      registerSettingsRoutes(fleetAuthzRouter);
+      registerDataStreamRoutes(fleetAuthzRouter);
+      registerPreconfigurationRoutes(fleetAuthzRouter);
 
       // Conditional config routes
       if (config.agents.enabled) {

@@ -7,7 +7,7 @@
 
 import { httpServerMock, httpServiceMock } from 'src/core/server/mocks';
 import type { KibanaRequest } from 'kibana/server';
-import type { IRouter, RequestHandler, RouteConfig } from 'kibana/server';
+import type { RouteConfig } from 'kibana/server';
 
 import { PACKAGE_POLICY_API_ROUTES } from '../../../common/constants';
 import { appContextService, packagePolicyService } from '../../services';
@@ -18,6 +18,8 @@ import type {
   PutPackagePolicyUpdateCallback,
 } from '../..';
 import type { CreatePackagePolicyRequestSchema } from '../../types/rest_spec';
+import type { FleetAuthzRouter } from '../security';
+import type { FleetRequestHandler, FleetRequestHandlerContext } from '../../types';
 
 import { registerRoutes } from './index';
 
@@ -85,20 +87,20 @@ jest.mock('../../services/epm/packages', () => {
 });
 
 describe('When calling package policy', () => {
-  let routerMock: jest.Mocked<IRouter>;
-  let routeHandler: RequestHandler<any, any, any>;
+  let routerMock: jest.Mocked<FleetAuthzRouter>;
+  let routeHandler: FleetRequestHandler<any, any, any>;
   let routeConfig: RouteConfig<any, any, any, any>;
-  let context: ReturnType<typeof xpackMocks.createRequestHandlerContext>;
+  let context: jest.Mocked<FleetRequestHandlerContext>;
   let response: ReturnType<typeof httpServerMock.createResponseFactory>;
 
   beforeAll(() => {
-    routerMock = httpServiceMock.createRouter();
+    routerMock = httpServiceMock.createRouter() as unknown as jest.Mocked<FleetAuthzRouter>;
     registerRoutes(routerMock);
   });
 
   beforeEach(() => {
     appContextService.start(createAppContextStartContractMock());
-    context = xpackMocks.createRequestHandlerContext();
+    context = xpackMocks.createRequestHandlerContext() as unknown as FleetRequestHandlerContext;
     response = httpServerMock.createResponseFactory();
   });
 

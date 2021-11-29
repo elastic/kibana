@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PLUGIN_ID, OUTPUT_API_ROUTES } from '../../constants';
+import { OUTPUT_API_ROUTES } from '../../constants';
 import {
   DeleteOutputRequestSchema,
   GetOneOutputRequestSchema,
@@ -28,7 +28,9 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     {
       path: OUTPUT_API_ROUTES.LIST_PATTERN,
       validate: GetOutputsRequestSchema,
-      options: { tags: [`access:${PLUGIN_ID}-read`] },
+      fleetAuthz: {
+        fleet: ['all'],
+      },
     },
     getOutputsHandler
   );
@@ -36,7 +38,9 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     {
       path: OUTPUT_API_ROUTES.INFO_PATTERN,
       validate: GetOneOutputRequestSchema,
-      options: { tags: [`access:${PLUGIN_ID}-read`] },
+      fleetAuthz: {
+        fleet: ['all'],
+      },
     },
     getOneOuputHandler
   );
@@ -44,7 +48,9 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     {
       path: OUTPUT_API_ROUTES.UPDATE_PATTERN,
       validate: PutOutputRequestSchema,
-      options: { tags: [`access:${PLUGIN_ID}-all`] },
+      fleetAuthz: {
+        fleet: ['all'],
+      },
     },
     putOuputHandler
   );
@@ -53,7 +59,9 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     {
       path: OUTPUT_API_ROUTES.CREATE_PATTERN,
       validate: PostOutputRequestSchema,
-      options: { tags: [`access:${PLUGIN_ID}-all`] },
+      fleetAuthz: {
+        fleet: ['all'],
+      },
     },
     postOuputHandler
   );
@@ -62,7 +70,9 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     {
       path: OUTPUT_API_ROUTES.DELETE_PATTERN,
       validate: DeleteOutputRequestSchema,
-      options: { tags: [`access:${PLUGIN_ID}-all`] },
+      fleetAuthz: {
+        fleet: ['all'],
+      },
     },
     deleteOutputHandler
   );

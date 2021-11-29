@@ -19,6 +19,7 @@ import {
   UpdatePackageRequestSchema,
 } from '../../types';
 import type { FleetRouter } from '../../types/request_context';
+import type { FleetAuthzRouter } from '../security';
 
 import {
   getCategoriesHandler,
@@ -36,12 +37,14 @@ import {
 
 const MAX_FILE_SIZE_BYTES = 104857600; // 100MB
 
-export const registerRoutes = (routers: { rbac: FleetRouter; superuser: FleetRouter }) => {
+export const registerRoutes = (routers: { rbac: FleetAuthzRouter; superuser: FleetRouter }) => {
   routers.rbac.get(
     {
       path: EPM_API_ROUTES.CATEGORIES_PATTERN,
       validate: GetCategoriesRequestSchema,
-      options: { tags: [`access:${PLUGIN_ID}-read`] },
+      fleetAuthz: {
+        integrations: ['readPackageInfo'],
+      },
     },
     getCategoriesHandler
   );
@@ -50,7 +53,9 @@ export const registerRoutes = (routers: { rbac: FleetRouter; superuser: FleetRou
     {
       path: EPM_API_ROUTES.LIST_PATTERN,
       validate: GetPackagesRequestSchema,
-      options: { tags: [`access:${PLUGIN_ID}-read`] },
+      fleetAuthz: {
+        integrations: ['readPackageInfo'],
+      },
     },
     getListHandler
   );
@@ -59,7 +64,9 @@ export const registerRoutes = (routers: { rbac: FleetRouter; superuser: FleetRou
     {
       path: EPM_API_ROUTES.LIMITED_LIST_PATTERN,
       validate: false,
-      options: { tags: [`access:${PLUGIN_ID}-read`] },
+      fleetAuthz: {
+        integrations: ['readPackageInfo'],
+      },
     },
     getLimitedListHandler
   );
@@ -68,7 +75,9 @@ export const registerRoutes = (routers: { rbac: FleetRouter; superuser: FleetRou
     {
       path: EPM_API_ROUTES.STATS_PATTERN,
       validate: GetStatsRequestSchema,
-      options: { tags: [`access:${PLUGIN_ID}-read`] },
+      fleetAuthz: {
+        integrations: ['readPackageInfo'],
+      },
     },
     getStatsHandler
   );
@@ -77,7 +86,9 @@ export const registerRoutes = (routers: { rbac: FleetRouter; superuser: FleetRou
     {
       path: EPM_API_ROUTES.FILEPATH_PATTERN,
       validate: GetFileRequestSchema,
-      options: { tags: [`access:${PLUGIN_ID}-read`] },
+      fleetAuthz: {
+        integrations: ['readPackageInfo'],
+      },
     },
     getFileHandler
   );
@@ -86,38 +97,47 @@ export const registerRoutes = (routers: { rbac: FleetRouter; superuser: FleetRou
     {
       path: EPM_API_ROUTES.INFO_PATTERN,
       validate: GetInfoRequestSchema,
-      options: { tags: [`access:${PLUGIN_ID}-read`] },
+      fleetAuthz: {
+        integrations: ['readPackageInfo'],
+      },
     },
     getInfoHandler
   );
 
-  routers.superuser.put(
+  routers.rbac.put(
     {
       path: EPM_API_ROUTES.INFO_PATTERN,
       validate: UpdatePackageRequestSchema,
-      options: { tags: [`access:${PLUGIN_ID}-all`] },
+      fleetAuthz: {
+        integrations: ['upgradePackages', 'writePackageSettings'],
+      },
     },
     updatePackageHandler
   );
 
-  routers.superuser.post(
+  routers.rbac.post(
     {
       path: EPM_API_ROUTES.INSTALL_FROM_REGISTRY_PATTERN,
       validate: InstallPackageFromRegistryRequestSchema,
-      options: { tags: [`access:${PLUGIN_ID}-all`] },
+      fleetAuthz: {
+        integrations: ['installPackages'],
+      },
     },
     installPackageFromRegistryHandler
   );
 
-  routers.superuser.post(
+  routers.rbac.post(
     {
       path: EPM_API_ROUTES.BULK_INSTALL_PATTERN,
       validate: BulkUpgradePackagesFromRegistryRequestSchema,
-      options: { tags: [`access:${PLUGIN_ID}-all`] },
+      fleetAuthz: {
+        integrations: ['installPackages'],
+      },
     },
     bulkInstallPackagesFromRegistryHandler
   );
 
+  // Only allow upload for superuser
   routers.superuser.post(
     {
       path: EPM_API_ROUTES.INSTALL_BY_UPLOAD_PATTERN,
@@ -134,11 +154,13 @@ export const registerRoutes = (routers: { rbac: FleetRouter; superuser: FleetRou
     installPackageByUploadHandler
   );
 
-  routers.superuser.delete(
+  routers.rbac.delete(
     {
       path: EPM_API_ROUTES.DELETE_PATTERN,
       validate: DeletePackageRequestSchema,
-      options: { tags: [`access:${PLUGIN_ID}-all`] },
+      fleetAuthz: {
+        integrations: ['removePackages'],
+      },
     },
     deletePackageHandler
   );

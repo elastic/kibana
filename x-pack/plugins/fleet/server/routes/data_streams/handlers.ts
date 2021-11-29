@@ -44,7 +44,7 @@ interface ESDataStreamStats {
 }
 
 export const getListHandler: RequestHandler = async (context, request, response) => {
-  const esClient = context.core.elasticsearch.client.asCurrentUser;
+  const esClient = context.core.elasticsearch.client.asInternalUser;
 
   const body: GetDataStreamsResponse = {
     data_streams: [],
