@@ -30,7 +30,8 @@ const columns: Array<EuiTableFieldDataColumnType<LinkPanelListItem>> = [
     align: 'right',
     field: 'count',
     name: 'Risk Score',
-    render: (riskScore) => (isNaN(riskScore) ? riskScore : Number.parseFloat(riskScore).toFixed(2)),
+    render: (riskScore) =>
+      Number.isNaN(riskScore) ? riskScore : Number.parseFloat(riskScore).toFixed(2),
     sortable: true,
     truncateText: true,
     width: '15%',
