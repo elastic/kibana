@@ -16,13 +16,18 @@ const APM_SERVER_URL = 'https://2fad4006bf784bb8a54e52f4a5862609.apm.us-west1.gc
 const APM_PUBLIC_TOKEN = 'Q5q5rWQEw6tKeirBpw';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
-  const functionalConfig = await readConfigFile(require.resolve('../../../test/common/config'));
+  const kibanaCommonTestsConfig = await readConfigFile(
+    require.resolve('../../../test/common/config')
+  );
+  const xpackFunctionalTestsConfig = await readConfigFile(
+    require.resolve('../../../x-pack/test/functional/config')
+  );
 
   return {
-    ...functionalConfig.getAll(),
-    esTestCluster: functionalConfig.get('esTestCluster'),
+    ...kibanaCommonTestsConfig.getAll(),
+    esTestCluster: xpackFunctionalTestsConfig.get('esTestCluster'),
     kbnTestServer: {
-      ...functionalConfig.get('kbnTestServer'),
+      ...xpackFunctionalTestsConfig.get('kbnTestServer'),
       env: {
         ELASTIC_APM_ACTIVE: 'true',
         ELASTIC_APM_CONTEXT_PROPAGATION_ONLY: 'false',
