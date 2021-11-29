@@ -14,7 +14,7 @@ Saved objects can only be imported into the same version, a newer minor on the s
 | 6.7.x | 6.8.x | Yes
 | 6.x.x | 7.x.x | Yes
 | 7.x.x | 8.x.x | Yes
-| 7.1.0| 7.15.x | Yes
+| 7.1.x | 7.15.x | Yes
 | 7.x.x | 6.x.x | No
 | 7.15.x | 7.1.x | No
 | 6.x.x | 8.x.x | No
