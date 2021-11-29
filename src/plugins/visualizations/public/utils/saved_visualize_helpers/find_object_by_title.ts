@@ -12,14 +12,7 @@ import type {
   SavedObjectAttributes,
 } from 'kibana/public';
 
-/**
- * Returns an object matching a given title
- *
- * @param savedObjectsClient {SavedObjectsClientContract}
- * @param type {string}
- * @param title {string}
- * @returns {Promise<SimpleSavedObject|undefined>}
- */
+/** Returns an object matching a given title */
 export async function findObjectByTitle<T extends SavedObjectAttributes>(
   savedObjectsClient: SavedObjectsClientContract,
   type: string,

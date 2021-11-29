@@ -39,17 +39,12 @@ import type { TypesStart, BaseVisType } from '../vis_types';
 import { updateOldState } from '../legacy/vis_update_state';
 import { injectReferences, extractReferences } from './saved_visualization_references';
 
-/**
- * An error message to be used when the user rejects a confirm overwrite.
- * @type {string}
- */
+/** An error message to be used when the user rejects a confirm overwrite. */
 export const OVERWRITE_REJECTED = i18n.translate('visualizations.overwriteRejectedDescription', {
   defaultMessage: 'Overwrite confirmation was rejected',
 });
-/**
- * An error message to be used when the user rejects a confirm save with duplicate title.
- * @type {string}
- */
+
+/** An error message to be used when the user rejects a confirm save with duplicate title. */
 export const SAVE_DUPLICATE_REJECTED = i18n.translate(
   'visualizations.saveDuplicateRejectedDescription',
   {

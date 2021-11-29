@@ -269,14 +269,14 @@ describe('saved_visualize_utils', () => {
             { isTitleDuplicateConfirmed },
             { savedObjectsClient, overlays }
           );
-          expect(savedObjectsClient.create).not.toHaveBeenCalled();
-          expect(mockSaveWithConfirmation).not.toHaveBeenCalled();
-          expect(mockCheckForDuplicateTitle).toHaveBeenCalled();
           expect(savedVisId).toBe('');
-          expect(vis.id).toBeUndefined();
-        } catch (e) {
+        } catch {
           // ignore
         }
+        expect(savedObjectsClient.create).not.toHaveBeenCalled();
+        expect(mockSaveWithConfirmation).not.toHaveBeenCalled();
+        expect(mockCheckForDuplicateTitle).toHaveBeenCalled();
+        expect(vis.id).toBeUndefined();
       });
 
       it('as true we should save vis with duplicated title', async () => {

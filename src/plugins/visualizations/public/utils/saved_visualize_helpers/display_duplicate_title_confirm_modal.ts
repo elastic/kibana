@@ -30,7 +30,7 @@ export function displayDuplicateTitleConfirmModal(
   });
   try {
     return confirmModalPromise(confirmMessage, '', confirmButtonText, overlays);
-  } catch (_) {
+  } catch {
     return Promise.reject(new Error(SAVE_DUPLICATE_REJECTED));
   }
 }
