@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { service, timerange } from '@elastic/apm-synthtrace';
+import { apm, timerange } from '@elastic/apm-synthtrace';
 import expect from '@kbn/expect';
 import { meanBy, sumBy } from 'lodash';
 import { LatencyAggregationType } from '../../../../plugins/apm/common/latency_aggregation_types';
@@ -109,12 +109,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       const GO_PROD_RATE = 80;
       const GO_DEV_RATE = 20;
       before(async () => {
-        const serviceGoProdInstance = service(serviceName, 'production', 'go').instance(
-          'instance-a'
-        );
-        const serviceGoDevInstance = service(serviceName, 'development', 'go').instance(
-          'instance-b'
-        );
+        const serviceGoProdInstance = apm
+          .service(serviceName, 'production', 'go')
+          .instance('instance-a');
+        const serviceGoDevInstance = apm
+          .service(serviceName, 'development', 'go')
+          .instance('instance-b');
+
         await synthtraceEsClient.index([
           ...timerange(start, end)
             .interval('1m')
