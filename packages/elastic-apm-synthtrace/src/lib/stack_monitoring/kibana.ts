@@ -6,20 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { Entity, Fields } from './entity';
+import { Serializable } from '../serializable';
+import { StackMonitoringFields } from './stack_monitoring_fields';
+import { KibanaStats } from './kibana_stats';
 
-export class Serializable<TFields extends Fields> extends Entity<TFields> {
-  constructor(fields: TFields) {
-    super({
-      ...fields,
+export class Kibana extends Serializable<StackMonitoringFields> {
+  stats() {
+    return new KibanaStats({
+      ...this.fields,
     });
-  }
-
-  timestamp(time: number) {
-    this.fields['@timestamp'] = time;
-    return this;
-  }
-  serialize(): TFields[] {
-    return [this.fields];
   }
 }

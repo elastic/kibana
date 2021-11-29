@@ -5,21 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import { cluster } from './cluster';
 
-import { Entity, Fields } from './entity';
-
-export class Serializable<TFields extends Fields> extends Entity<TFields> {
-  constructor(fields: TFields) {
-    super({
-      ...fields,
-    });
-  }
-
-  timestamp(time: number) {
-    this.fields['@timestamp'] = time;
-    return this;
-  }
-  serialize(): TFields[] {
-    return [this.fields];
-  }
-}
+export const stackMonitoring = {
+  cluster,
+};

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { Fields } from '../lib/entity';
-import { toElasticsearchOutput } from '../lib/output/to_elasticsearch_output';
+import { apmEventsToElasticsearchOutput } from '../lib/apm/utils/apm_events_to_elasticsearch_output';
+import { ApmFields } from '../lib/apm/apm_fields';
 
 const writeTargets = {
   transaction: 'apm-8.0.0-transaction',
@@ -16,8 +16,8 @@ const writeTargets = {
   error: 'apm-8.0.0-error',
 };
 
-describe('output to elasticsearch', () => {
-  let event: Fields;
+describe('output apm events to elasticsearch', () => {
+  let event: ApmFields;
 
   beforeEach(() => {
     event = {
@@ -29,13 +29,13 @@ describe('output to elasticsearch', () => {
   });
 
   it('properly formats @timestamp', () => {
-    const doc = toElasticsearchOutput({ events: [event], writeTargets })[0] as any;
+    const doc = apmEventsToElasticsearchOutput({ events: [event], writeTargets })[0] as any;
 
     expect(doc._source['@timestamp']).toEqual('2020-12-31T23:00:00.000Z');
   });
 
   it('formats a nested object', () => {
-    const doc = toElasticsearchOutput({ events: [event], writeTargets })[0] as any;
+    const doc = apmEventsToElasticsearchOutput({ events: [event], writeTargets })[0] as any;
 
     expect(doc._source.processor).toEqual({
       event: 'transaction',
@@ -44,7 +44,7 @@ describe('output to elasticsearch', () => {
   });
 
   it('formats all fields consistently', () => {
-    const doc = toElasticsearchOutput({ events: [event], writeTargets })[0] as any;
+    const doc = apmEventsToElasticsearchOutput({ events: [event], writeTargets })[0] as any;
 
     expect(doc._source).toMatchInlineSnapshot(`
       Object {
