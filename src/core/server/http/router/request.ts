@@ -78,13 +78,6 @@ export interface KibanaRequestEvents {
 }
 
 /**
- * @deprecated
- * `hapi` request object, supported during migration process only for backward compatibility.
- * @public
- */
-export interface LegacyRequest extends Request {} // eslint-disable-line @typescript-eslint/no-empty-interface
-
-/**
  * Kibana specific abstraction for an incoming request.
  * @public
  */
