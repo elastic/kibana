@@ -13,6 +13,8 @@ import {
   savedObjectsClientMock,
 } from '../../../../src/core/server/mocks';
 import { actionsAuthorizationMock } from './authorization/actions_authorization.mock';
+import { encryptedSavedObjectsMock } from '../../encrypted_saved_objects/server/mocks';
+import { ConnectorTokenClient } from './builtin_action_types/lib/connector_token_client';
 export { actionsAuthorizationMock };
 export { actionsClientMock };
 
@@ -56,6 +58,10 @@ const createServicesMock = () => {
   > = {
     savedObjectsClient: savedObjectsClientMock.create(),
     scopedClusterClient: elasticsearchServiceMock.createScopedClusterClient().asCurrentUser,
+    connectorTokenClient: new ConnectorTokenClient({
+      savedObjectsClient: savedObjectsClientMock.create(),
+      encryptedSavedObjectsClient: encryptedSavedObjectsMock.createStart().getClient(),
+    }),
   };
   return mock;
 };

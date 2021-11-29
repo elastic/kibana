@@ -17,6 +17,7 @@ import { sendEmailGraphApi } from './send_email_graph_api';
 import { requestOAuthClientCredentialsToken } from './request_oauth_client_credentials_token';
 import { ProxySettings } from '../../types';
 import { AdditionalEmailServices } from '../../../common';
+import { ConnectorTokenClient } from './connector_token_client';
 
 // an email "service" which doesn't actually send, just returns what it would send
 export const JSON_TRANSPORT_SERVICE = '__json';
@@ -25,6 +26,7 @@ export const GRAPH_API_OAUTH_SCOPE = 'https://graph.microsoft.com/.default';
 export const EXCHANGE_ONLINE_SERVER_HOST = 'https://login.microsoftonline.com';
 
 export interface SendEmailOptions {
+  connectorId: string;
   transport: Transport;
   routing: Routing;
   content: Content;
@@ -59,13 +61,17 @@ export interface Content {
   message: string;
 }
 
-export async function sendEmail(logger: Logger, options: SendEmailOptions): Promise<unknown> {
+export async function sendEmail(
+  logger: Logger,
+  options: SendEmailOptions,
+  connectorTokenClient: ConnectorTokenClient
+): Promise<unknown> {
   const { transport, content } = options;
   const { message } = content;
   const messageHTML = htmlFromMarkdown(logger, message);
 
   if (transport.service === AdditionalEmailServices.EXCHANGE) {
-    return await sendEmailWithExchange(logger, options, messageHTML);
+    return await sendEmailWithExchange(logger, options, messageHTML, connectorTokenClient);
   } else {
     return await sendEmailWithNodemailer(logger, options, messageHTML);
   }
@@ -75,25 +81,51 @@ export async function sendEmail(logger: Logger, options: SendEmailOptions): Prom
 async function sendEmailWithExchange(
   logger: Logger,
   options: SendEmailOptions,
-  messageHTML: string
+  messageHTML: string,
+  connectorTokenClient: ConnectorTokenClient
 ): Promise<unknown> {
-  const { transport, configurationUtilities } = options;
+  const { transport, configurationUtilities, connectorId } = options;
   const { clientId, clientSecret, tenantId, oauthTokenUrl } = transport;
-  // request access token for microsoft exchange online server with Graph API scope
 
-  const tokenResult = await requestOAuthClientCredentialsToken(
-    oauthTokenUrl ?? `${EXCHANGE_ONLINE_SERVER_HOST}/${tenantId}/oauth2/v2.0/token`,
-    logger,
-    {
-      scope: GRAPH_API_OAUTH_SCOPE,
-      clientId,
-      clientSecret,
-    },
-    configurationUtilities
-  );
+  let accessToken: string;
+
+  const connectorToken = await connectorTokenClient.get({ connectorId });
+  if (connectorToken === null || Date.parse(connectorToken.expiresIn) <= Date.now()) {
+    // request new access token for microsoft exchange online server with Graph API scope
+    const tokenResult = await requestOAuthClientCredentialsToken(
+      oauthTokenUrl ?? `${EXCHANGE_ONLINE_SERVER_HOST}/${tenantId}/oauth2/v2.0/token`,
+      logger,
+      {
+        scope: GRAPH_API_OAUTH_SCOPE,
+        clientId,
+        clientSecret,
+      },
+      configurationUtilities
+    );
+    accessToken = `${tokenResult.tokenType} ${tokenResult.accessToken}`;
+
+    if (connectorToken === null) {
+      await connectorTokenClient.create({
+        connectorId,
+        token: accessToken,
+        expiresIn: new Date(Date.now() + tokenResult.expiresIn).toISOString(),
+        tokenType: 'access_token',
+      });
+    } else {
+      await connectorTokenClient.update({
+        id: connectorToken.id!.toString(),
+        token: accessToken,
+        expiresIn: new Date(Date.now() + tokenResult.expiresIn).toISOString(),
+        tokenType: 'access_token',
+      });
+    }
+  } else {
+    // use existing valid token
+    accessToken = connectorToken.token;
+  }
   const headers = {
     'Content-Type': 'application/json',
-    Authorization: `${tokenResult.tokenType} ${tokenResult.accessToken}`,
+    Authorization: accessToken,
   };
 
   return await sendEmailGraphApi(

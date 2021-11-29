@@ -18,18 +18,27 @@ jest.mock('./request_oauth_client_credentials_token', () => ({
 
 import { Logger } from '../../../../../../src/core/server';
 import { sendEmail } from './send_email';
-import { loggingSystemMock } from '../../../../../../src/core/server/mocks';
+import { loggingSystemMock, savedObjectsClientMock } from '../../../../../../src/core/server/mocks';
 import nodemailer from 'nodemailer';
 import { ProxySettings } from '../../types';
 import { actionsConfigMock } from '../../actions_config.mock';
 import { CustomHostSettings } from '../../config';
 import { sendEmailGraphApi } from './send_email_graph_api';
 import { requestOAuthClientCredentialsToken } from './request_oauth_client_credentials_token';
+import { ConnectorTokenClient } from './connector_token_client';
+import { encryptedSavedObjectsMock } from '../../../../encrypted_saved_objects/server/mocks';
 
 const createTransportMock = nodemailer.createTransport as jest.Mock;
 const sendMailMockResult = { result: 'does not matter' };
 const sendMailMock = jest.fn();
 const mockLogger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
+const savedObjectsClient = savedObjectsClientMock.create();
+const encryptedSavedObjectsClient = encryptedSavedObjectsMock.createStart().getClient();
+
+const connectorTokenClient = new ConnectorTokenClient({
+  savedObjectsClient,
+  encryptedSavedObjectsClient,
+});
 
 describe('send_email module', () => {
   beforeEach(() => {
@@ -40,7 +49,7 @@ describe('send_email module', () => {
 
   test('handles authenticated email using service', async () => {
     const sendEmailOptions = getSendEmailOptions({ transport: { service: 'other' } });
-    const result = await sendEmail(mockLogger, sendEmailOptions);
+    const result = await sendEmail(mockLogger, sendEmailOptions, connectorTokenClient);
     expect(result).toBe(sendMailMockResult);
     expect(createTransportMock.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
@@ -102,7 +111,17 @@ describe('send_email module', () => {
       status: 202,
     });
 
-    await sendEmail(mockLogger, sendEmailOptions);
+    savedObjectsClient.find.mockResolvedValue([
+      {
+        id: '1',
+        attributes: {
+          connectorId: '123',
+          expiresIn: '11111',
+          tokenType: 'access_token',
+        },
+      },
+    ]);
+    await sendEmail(mockLogger, sendEmailOptions, connectorTokenClient);
     expect(requestOAuthClientCredentialsTokenMock.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         "https://login.microsoftonline.com/undefined/oauth2/v2.0/token",
@@ -264,7 +283,7 @@ describe('send_email module', () => {
       }
     );
 
-    const result = await sendEmail(mockLogger, sendEmailOptions);
+    const result = await sendEmail(mockLogger, sendEmailOptions, connectorTokenClient);
     expect(result).toBe(sendMailMockResult);
     expect(createTransportMock.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
@@ -314,7 +333,7 @@ describe('send_email module', () => {
     delete sendEmailOptions.transport.user;
     // @ts-expect-error
     delete sendEmailOptions.transport.password;
-    const result = await sendEmail(mockLogger, sendEmailOptions);
+    const result = await sendEmail(mockLogger, sendEmailOptions, connectorTokenClient);
     expect(result).toBe(sendMailMockResult);
     expect(createTransportMock.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
@@ -364,7 +383,7 @@ describe('send_email module', () => {
     // @ts-expect-error
     delete sendEmailOptions.transport.password;
 
-    const result = await sendEmail(mockLogger, sendEmailOptions);
+    const result = await sendEmail(mockLogger, sendEmailOptions, connectorTokenClient);
     expect(result).toBe(sendMailMockResult);
     expect(createTransportMock.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
@@ -405,7 +424,9 @@ describe('send_email module', () => {
     sendMailMock.mockReset();
     sendMailMock.mockRejectedValue(new Error('wops'));
 
-    await expect(sendEmail(mockLogger, sendEmailOptions)).rejects.toThrow('wops');
+    await expect(sendEmail(mockLogger, sendEmailOptions, connectorTokenClient)).rejects.toThrow(
+      'wops'
+    );
   });
 
   test('it bypasses with proxyBypassHosts when expected', async () => {
@@ -426,7 +447,7 @@ describe('send_email module', () => {
       }
     );
 
-    const result = await sendEmail(mockLogger, sendEmailOptions);
+    const result = await sendEmail(mockLogger, sendEmailOptions, connectorTokenClient);
     expect(result).toBe(sendMailMockResult);
     expect(createTransportMock.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
@@ -460,7 +481,7 @@ describe('send_email module', () => {
       }
     );
 
-    const result = await sendEmail(mockLogger, sendEmailOptions);
+    const result = await sendEmail(mockLogger, sendEmailOptions, connectorTokenClient);
     expect(result).toBe(sendMailMockResult);
     expect(createTransportMock.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
@@ -496,7 +517,7 @@ describe('send_email module', () => {
       }
     );
 
-    const result = await sendEmail(mockLogger, sendEmailOptions);
+    const result = await sendEmail(mockLogger, sendEmailOptions, connectorTokenClient);
     expect(result).toBe(sendMailMockResult);
     expect(createTransportMock.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
@@ -530,7 +551,7 @@ describe('send_email module', () => {
       }
     );
 
-    const result = await sendEmail(mockLogger, sendEmailOptions);
+    const result = await sendEmail(mockLogger, sendEmailOptions, connectorTokenClient);
     expect(result).toBe(sendMailMockResult);
     expect(createTransportMock.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
@@ -567,7 +588,7 @@ describe('send_email module', () => {
       }
     );
 
-    const result = await sendEmail(mockLogger, sendEmailOptions);
+    const result = await sendEmail(mockLogger, sendEmailOptions, connectorTokenClient);
     expect(result).toBe(sendMailMockResult);
 
     // note in the object below, the rejectUnauthenticated got set to false,
@@ -610,7 +631,7 @@ describe('send_email module', () => {
       }
     );
 
-    const result = await sendEmail(mockLogger, sendEmailOptions);
+    const result = await sendEmail(mockLogger, sendEmailOptions, connectorTokenClient);
     expect(result).toBe(sendMailMockResult);
 
     // in this case, rejectUnauthorized is true, as the custom host settings
@@ -657,7 +678,7 @@ describe('send_email module', () => {
       }
     );
 
-    const result = await sendEmail(mockLogger, sendEmailOptions);
+    const result = await sendEmail(mockLogger, sendEmailOptions, connectorTokenClient);
     expect(result).toBe(sendMailMockResult);
     expect(createTransportMock.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
@@ -711,6 +732,7 @@ function getSendEmailOptions(
     },
     hasAuth: true,
     configurationUtilities,
+    connectorId: '1',
   };
 }
 
@@ -745,5 +767,6 @@ function getSendEmailOptionsNoAuth(
     },
     hasAuth: false,
     configurationUtilities,
+    connectorId: '2',
   };
 }

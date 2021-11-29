@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import {
   ACTION_SAVED_OBJECT_TYPE,
   ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
+  CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
 } from './constants/saved_objects';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
 
@@ -31,7 +32,11 @@ export const ACTIONS_FEATURE = {
         insightsAndAlerting: ['triggersActions'],
       },
       savedObject: {
-        all: [ACTION_SAVED_OBJECT_TYPE, ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE],
+        all: [
+          ACTION_SAVED_OBJECT_TYPE,
+          ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
+          CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
+        ],
         read: [],
       },
       ui: ['show', 'execute', 'save', 'delete'],
@@ -45,7 +50,7 @@ export const ACTIONS_FEATURE = {
       },
       savedObject: {
         // action execution requires 'read' over `actions`, but 'all' over `action_task_params`
-        all: [ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE],
+        all: [ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE, CONNECTOR_TOKEN_SAVED_OBJECT_TYPE],
         read: [ACTION_SAVED_OBJECT_TYPE],
       },
       ui: ['show', 'execute'],

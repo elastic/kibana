@@ -21,6 +21,7 @@ import {
 } from '../../../../src/core/server';
 
 import {
+  EncryptedSavedObjectsClient,
   EncryptedSavedObjectsPluginSetup,
   EncryptedSavedObjectsPluginStart,
 } from '../../encrypted_saved_objects/server';
@@ -70,6 +71,7 @@ import {
   ACTION_SAVED_OBJECT_TYPE,
   ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
   ALERT_SAVED_OBJECT_TYPE,
+  CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
 } from './constants/saved_objects';
 import { setupSavedObjects } from './saved_objects';
 import { ACTIONS_FEATURE } from './feature';
@@ -85,6 +87,7 @@ import { getAlertHistoryEsIndex } from './preconfigured_connectors/alert_history
 import { createAlertHistoryIndexTemplate } from './preconfigured_connectors/alert_history_es_index/create_alert_history_index_template';
 import { ACTIONS_FEATURE_ID, AlertHistoryEsIndexConnectorId } from '../common';
 import { EVENT_LOG_ACTIONS, EVENT_LOG_PROVIDER } from './constants/event_log';
+import { ConnectorTokenClient } from './builtin_action_types/lib/connector_token_client';
 
 export interface PluginSetupContract {
   registerType<
@@ -144,6 +147,7 @@ const includedHiddenTypes = [
   ACTION_SAVED_OBJECT_TYPE,
   ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
   ALERT_SAVED_OBJECT_TYPE,
+  CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
 ];
 
 export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartContract> {
@@ -405,7 +409,9 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       getActionsClientWithRequest,
       getServices: this.getServicesFactory(
         getScopedSavedObjectsClientWithoutAccessToActions,
-        core.elasticsearch
+        core.elasticsearch,
+        encryptedSavedObjectsClient,
+        (request: KibanaRequest) => this.getUnsecuredSavedObjectsClient(core.savedObjects, request)
       ),
       encryptedSavedObjectsClient,
       actionTypeRegistry: actionTypeRegistry!,
@@ -484,12 +490,20 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
 
   private getServicesFactory(
     getScopedClient: (request: KibanaRequest) => SavedObjectsClientContract,
-    elasticsearch: ElasticsearchServiceStart
+    elasticsearch: ElasticsearchServiceStart,
+    encryptedSavedObjectsClient: EncryptedSavedObjectsClient,
+    unsecuredSavedObjectsClient: (request: KibanaRequest) => SavedObjectsClientContract
   ): (request: KibanaRequest) => Services {
-    return (request) => ({
-      savedObjectsClient: getScopedClient(request),
-      scopedClusterClient: elasticsearch.client.asScoped(request).asCurrentUser,
-    });
+    return (request) => {
+      return {
+        savedObjectsClient: getScopedClient(request),
+        scopedClusterClient: elasticsearch.client.asScoped(request).asCurrentUser,
+        connectorTokenClient: new ConnectorTokenClient({
+          savedObjectsClient: unsecuredSavedObjectsClient(request),
+          encryptedSavedObjectsClient,
+        }),
+      };
+    };
   }
 
   private createRouteHandlerContext = (
