@@ -6,7 +6,6 @@
  */
 
 import { useHistory } from 'react-router-dom';
-import { encode } from 'rison-node';
 
 export const useNavigateToCSPFindings = () => {
   const history = useHistory();
