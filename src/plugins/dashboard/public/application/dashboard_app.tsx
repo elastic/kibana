@@ -17,11 +17,11 @@ import {
   getDashboardTitle,
   leaveConfirmStrings,
 } from '../dashboard_strings';
-import { EmbeddableRenderer } from '../services/embeddable';
+import { createDashboardEditUrl } from '../dashboard_constants';
+import { EmbeddableRenderer, ViewMode } from '../services/embeddable';
 import { DashboardTopNav, isCompleteDashboardAppState } from './top_nav/dashboard_top_nav';
 import { DashboardAppServices, DashboardEmbedSettings, DashboardRedirect } from '../types';
 import { createKbnUrlStateStorage, withNotifyOnErrors } from '../services/kibana_utils';
-import { createDashboardEditUrl } from '../dashboard_constants';
 export interface DashboardAppProps {
   history: History;
   savedDashboardId?: string;
@@ -51,7 +51,6 @@ export function DashboardApp({
   const dashboardState = useDashboardSelector((state) => state.dashboardStateReducer);
   const dashboardAppState = useDashboardAppState({
     history,
-    redirectTo,
     savedDashboardId,
     kbnUrlStateStorage,
     isEmbeddedExternally: Boolean(embedSettings),
@@ -101,15 +100,26 @@ export function DashboardApp({
     };
   }, [data.search.session]);
 
+  const printMode = useMemo(
+    () => dashboardAppState.getLatestDashboardState?.().viewMode === ViewMode.PRINT,
+    [dashboardAppState]
+  );
+
+  useEffect(() => {
+    if (!embedSettings) chrome.setIsVisible(!printMode);
+  }, [chrome, printMode, embedSettings]);
+
   return (
     <>
       {isCompleteDashboardAppState(dashboardAppState) && (
         <>
-          <DashboardTopNav
-            redirectTo={redirectTo}
-            embedSettings={embedSettings}
-            dashboardAppState={dashboardAppState}
-          />
+          {!printMode && (
+            <DashboardTopNav
+              redirectTo={redirectTo}
+              embedSettings={embedSettings}
+              dashboardAppState={dashboardAppState}
+            />
+          )}
 
           {dashboardAppState.savedDashboard.outcome === 'conflict' &&
           dashboardAppState.savedDashboard.id &&
