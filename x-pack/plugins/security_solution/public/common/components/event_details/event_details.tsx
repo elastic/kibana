@@ -61,6 +61,7 @@ interface Props {
   browserFields: BrowserFields;
   data: TimelineEventsDetailsItem[];
   id: string;
+  indexName: string;
   isAlert: boolean;
   isDraggable?: boolean;
   rawEventData: object | undefined;
@@ -107,6 +108,7 @@ const EventDetailsComponent: React.FC<Props> = ({
   browserFields,
   data,
   id,
+  indexName,
   isAlert,
   isDraggable,
   rawEventData,
@@ -160,6 +162,7 @@ const EventDetailsComponent: React.FC<Props> = ({
                   contextId={timelineId}
                   data={data}
                   eventId={id}
+                  indexName={indexName}
                   timelineId={timelineId}
                 />
                 <Reason eventId={id} data={data} />
@@ -198,8 +201,9 @@ const EventDetailsComponent: React.FC<Props> = ({
           }
         : undefined,
     [
-      isAlert,
       id,
+      indexName,
+      isAlert,
       data,
       browserFields,
       isDraggable,

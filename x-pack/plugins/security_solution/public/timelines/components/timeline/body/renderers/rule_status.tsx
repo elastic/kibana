@@ -28,6 +28,7 @@ interface Props {
   fieldName: string;
   isDraggable: boolean;
   value: string | number | undefined | null;
+  onClick?: () => void;
 }
 
 const RuleStatusComponent: React.FC<Props> = ({
@@ -36,8 +37,15 @@ const RuleStatusComponent: React.FC<Props> = ({
   fieldName,
   isDraggable,
   value,
+  onClick,
 }) => {
   const color = useMemo(() => getOr('default', `${value}`, mapping), [value]);
+  const badge = (
+    <StyledEuiBadge color={color} onClick={onClick}>
+      {value}
+    </StyledEuiBadge>
+  );
+
   return isDraggable ? (
     <DefaultDraggable
       field={fieldName}
@@ -46,10 +54,10 @@ const RuleStatusComponent: React.FC<Props> = ({
       value={`${value}`}
       tooltipContent={fieldName}
     >
-      <StyledEuiBadge color={color}>{value}</StyledEuiBadge>
+      {badge}
     </DefaultDraggable>
   ) : (
-    <StyledEuiBadge color={color}>{value}</StyledEuiBadge>
+    badge
   );
 };
 

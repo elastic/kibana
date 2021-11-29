@@ -6,15 +6,18 @@
  */
 
 import {
+  EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHealth,
   EuiPanel,
+  EuiPopover,
+  EuiPopoverTitle,
   EuiSpacer,
   EuiText,
   IconColor,
 } from '@elastic/eui';
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { find } from 'lodash/fp';
 
 import type { BrowserFields } from '../../containers/source';
@@ -27,6 +30,7 @@ import {
   ALERTS_HEADERS_RISK_SCORE,
   ALERTS_HEADERS_RULE,
   ALERTS_HEADERS_SEVERITY,
+  CHANGE_ALERT_STATUS,
   SIGNAL_STATUS,
 } from '../../../detections/components/alerts_table/translations';
 import {
@@ -34,6 +38,8 @@ import {
   SIGNAL_STATUS_FIELD_NAME,
 } from '../../../timelines/components/timeline/body/renderers/constants';
 import { FormattedFieldValue } from '../../../timelines/components/timeline/body/renderers/formatted_field';
+import { useAlertsActions } from '../../../detections/components/alerts_table/timeline_actions/use_alerts_actions';
+import { Status } from '../../../../common/detection_engine/schemas/common/schemas';
 
 const OverviewPanel = euiStyled(EuiPanel)`
   &&& {
@@ -139,6 +145,55 @@ export const OverviewRiskScore = React.memo<{ riskScore: string }>(({ riskScore 
 
 OverviewRiskScore.displayName = 'OverviewRiskScore';
 
+interface StatusPopoverButtonProps {
+  eventId: string;
+  contextId: string;
+  enrichedFieldInfo: EnrichedDataWithValues;
+  indexName: string;
+  timelineId: string;
+}
+const StatusPopoverButton = React.memo<StatusPopoverButtonProps>(
+  ({ eventId, contextId, enrichedFieldInfo, indexName, timelineId }) => {
+    const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+    const togglePopover = () => setIsPopoverOpen(!isPopoverOpen);
+    const closePopover = () => setIsPopoverOpen(false);
+
+    const { actionItems } = useAlertsActions({
+      closePopover,
+      eventId,
+      timelineId,
+      indexName,
+      alertStatus: enrichedFieldInfo.values[0] as Status,
+    });
+
+    return (
+      <EuiPopover
+        button={
+          <FormattedFieldValue
+            contextId={contextId}
+            eventId={eventId}
+            value={enrichedFieldInfo.values[0]}
+            fieldName={enrichedFieldInfo.data.field}
+            linkValue={enrichedFieldInfo.linkValue}
+            fieldType={enrichedFieldInfo.data.type}
+            fieldFormat={enrichedFieldInfo.data.format}
+            isDraggable={false}
+            truncate={false}
+            onClick={togglePopover}
+          />
+        }
+        isOpen={isPopoverOpen}
+        closePopover={closePopover}
+      >
+        <EuiPopoverTitle>{CHANGE_ALERT_STATUS}</EuiPopoverTitle>
+        <EuiContextMenuPanel size="s" items={actionItems} />
+      </EuiPopover>
+    );
+  }
+);
+
+StatusPopoverButton.displayName = 'StatusPopoverButton';
+
 export const NotGrowingFlexGroup = euiStyled(EuiFlexGroup)`
   flex-grow: 0;
 `;
@@ -148,11 +203,12 @@ interface Props {
   contextId: string;
   data: TimelineEventsDetailsItem[];
   eventId: string;
+  indexName: string;
   timelineId: string;
 }
 
 export const OverviewCards = React.memo<Props>(
-  ({ browserFields, contextId, data, eventId, timelineId }) => {
+  ({ browserFields, contextId, data, eventId, indexName, timelineId }) => {
     const statusData = useMemo(() => {
       const item = find({ field: SIGNAL_STATUS_FIELD_NAME, category: 'kibana' }, data);
       return (
@@ -212,20 +268,16 @@ export const OverviewCards = React.memo<Props>(
     }, [browserFields, contextId, data, eventId, timelineId]);
 
     return (
-      <NotGrowingFlexGroup gutterSize="m">
+      <NotGrowingFlexGroup gutterSize="s">
         {hasData(statusData) && (
           <EuiFlexItem>
             <OverviewCard title={SIGNAL_STATUS}>
-              <FormattedFieldValue
-                contextId={contextId}
+              <StatusPopoverButton
                 eventId={eventId}
-                value={statusData.values[0]}
-                fieldName={statusData.data.field}
-                linkValue={statusData.linkValue}
-                fieldType={statusData.data.type}
-                fieldFormat={statusData.data.format}
-                isDraggable={false}
-                truncate={false}
+                contextId={contextId}
+                enrichedFieldInfo={statusData}
+                indexName={indexName}
+                timelineId={timelineId}
               />
             </OverviewCard>
           </EuiFlexItem>

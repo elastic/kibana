@@ -190,6 +190,7 @@ const FormattedFieldValueComponent: React.FC<{
         fieldName={fieldName}
         isDraggable={isDraggable}
         value={value}
+        onClick={onClick}
       />
     );
   } else if (fieldName === AGENT_STATUS_FIELD_NAME) {

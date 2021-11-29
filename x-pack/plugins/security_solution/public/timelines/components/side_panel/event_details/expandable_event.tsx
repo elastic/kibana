@@ -125,6 +125,7 @@ export const ExpandableEvent = React.memo<Props>(
             data={detailsData ?? []}
             id={event.eventId}
             isAlert={isAlert}
+            indexName={event.indexName}
             isDraggable={isDraggable}
             rawEventData={rawEventData}
             timelineId={timelineId}
