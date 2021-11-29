@@ -16,7 +16,7 @@ import { CreateRuleOptions, SecurityAlertType } from '../types';
 export const createQueryAlertType = (
   createOptions: CreateRuleOptions
 ): SecurityAlertType<QueryRuleParams, {}, {}, 'default'> => {
-  const { experimentalFeatures, logger, version } = createOptions;
+  const { eventsTelemetry, experimentalFeatures, logger, version } = createOptions;
   return {
     id: QUERY_RULE_TYPE_ID,
     name: 'Custom Query Rule',
@@ -63,12 +63,14 @@ export const createQueryAlertType = (
         state,
       } = execOptions;
 
+      console.log('BEFORE');
+
       const result = await queryExecutor({
         buildRuleMessage,
         bulkCreate,
         exceptionItems,
         experimentalFeatures,
-        eventsTelemetry: undefined,
+        eventsTelemetry,
         listClient,
         logger,
         completeRule: completeRule as CompleteRule<QueryRuleParams>,

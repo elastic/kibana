@@ -179,6 +179,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       experimentalFeatures,
       logger: this.logger,
       ml: plugins.ml,
+      eventsTelemetry: this.telemetryEventsSender,
       version: pluginContext.env.packageInfo.version,
     };
 

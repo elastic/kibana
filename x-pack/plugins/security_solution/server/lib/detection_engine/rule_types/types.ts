@@ -36,6 +36,7 @@ import {
 import { ExperimentalFeatures } from '../../../../common/experimental_features';
 import { IEventLogService } from '../../../../../event_log/server';
 import { AlertsFieldMap, RulesFieldMap } from '../../../../common/field_maps';
+import { TelemetryEventsSender } from '../../telemetry/sender';
 
 export interface SecurityAlertTypeReturnValue<TState extends AlertTypeState> {
   bulkCreateTimes: string[];
@@ -118,5 +119,6 @@ export interface CreateRuleOptions {
   experimentalFeatures: ExperimentalFeatures;
   logger: Logger;
   ml?: SetupPlugins['ml'];
+  eventsTelemetry?: TelemetryEventsSender | undefined;
   version: string;
 }

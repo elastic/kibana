@@ -20,10 +20,11 @@ import { ConfigType } from '../../../../config';
 import { AlertAttributes } from '../../signals/types';
 import { createRuleMock } from './rule';
 import { listMock } from '../../../../../../lists/server/mocks';
-import { RuleParams } from '../../schemas/rule_schemas';
+import { QueryRuleParams, RuleParams } from '../../schemas/rule_schemas';
 // this is only used in tests
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { createDefaultAlertExecutorOptions } from '../../../../../../rule_registry/server/utils/rule_executor_test_utils';
+import { getCompleteRuleMock } from '../../schemas/rule_schemas.mock';
 
 export const createRuleTypeMocks = (
   ruleType: string = 'query',
