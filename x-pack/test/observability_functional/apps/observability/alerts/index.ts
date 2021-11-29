@@ -186,7 +186,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      describe('Cell actions', () => {
+      describe.skip('Cell actions', () => {
         beforeEach(async () => {
           await retry.try(async () => {
             const cells = await observability.alerts.common.getTableCells();
