@@ -1595,7 +1595,6 @@
     "discover.advancedSettings.docTableHideTimeColumnTitle": "隐藏“时间”列",
     "discover.advancedSettings.fieldsPopularLimitText": "要显示的排名前 N 最常见字段",
     "discover.advancedSettings.fieldsPopularLimitTitle": "常见字段限制",
-    "discover.advancedSettings.maxDocFieldsDisplayedText": "在文档列中渲染的最大字段数目",
     "discover.advancedSettings.maxDocFieldsDisplayedTitle": "显示的最大文档字段数",
     "discover.advancedSettings.sampleSizeText": "要在表中显示的行数目",
     "discover.advancedSettings.sampleSizeTitle": "行数目",

@@ -49,7 +49,7 @@ export const getUiSettings: () => Record<string, UiSettingsParams> = () => ({
     }),
     value: 200,
     description: i18n.translate('discover.advancedSettings.maxDocFieldsDisplayedText', {
-      defaultMessage: 'Maximum number of fields rendered in the document column',
+      defaultMessage: 'Maximum number of fields rendered in the document summary',
     }),
     category: ['discover'],
     schema: schema.number(),

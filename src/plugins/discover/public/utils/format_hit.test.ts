@@ -32,6 +32,9 @@ describe('formatHit', () => {
     (dataViewMock.getFormatterForField as jest.Mock).mockReturnValue({
       convert: (value: unknown) => `formatted:${value}`,
     });
+    (discoverServiceMock.uiSettings.get as jest.Mock).mockImplementation(
+      (key) => key === MAX_DOC_FIELDS_DISPLAYED && 220
+    );
   });
 
   afterEach(() => {
@@ -72,6 +75,7 @@ describe('formatHit', () => {
     expect(formatted).toEqual([
       ['extension', 'formatted:png'],
       ['message', 'formatted:foobar'],
+      ['and 3 more fields', ''],
     ]);
   });
 
