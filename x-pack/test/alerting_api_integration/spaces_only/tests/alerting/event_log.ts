@@ -490,8 +490,11 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
             });
           });
 
-          const startEvent = events[0];
-          const executeEvent = events[1];
+          const executeEvents = getEventsByAction(events, 'execute');
+          const executeStartEvents = getEventsByAction(events, 'execute-start');
+
+          const startEvent = executeStartEvents[0];
+          const executeEvent = executeEvents[0];
 
           expect(startEvent).to.be.ok();
           expect(executeEvent).to.be.ok();
