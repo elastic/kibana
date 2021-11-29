@@ -4,11 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState, useEffect } from 'react';
-import { useQuery } from 'react-query';
+import React, { useState } from 'react';
 import {
   EuiSearchBar,
-  EuiSearchBarOnChangeArgs,
   EuiEmptyPrompt,
   EuiButton,
   EuiSplitPanel,
@@ -16,30 +14,21 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
-import { CoreStart } from '../../../../../../src/core/public';
 import { SectionLoading } from '../../shared_imports';
 import { ProcessTree } from '../ProcessTree';
-import { Process, ProcessEvent } from '../../hooks/use_process_tree';
+import { Process } from '../../hooks/use_process_tree';
 import { SessionViewDetailPanel } from '../SessionViewDetailPanel';
 import { useStyles } from './styles';
-import { PROCESS_EVENTS_ROUTE } from '../../../common/constants';
+import {
+  useSearchQuery,
+  useFetchSessionViewProcessEvents,
+  useParseSessionViewProcessEvents,
+} from './hooks';
 
 interface SessionViewDeps {
   // the root node of the process tree to render. e.g process.entry.entity_id or process.session.entity_id
   sessionEntityId: string;
   height?: number;
-}
-
-interface ProcessEventResults {
-  events: {
-    hits: any[];
-    total: number;
-  };
-  alerts: {
-    hits: any[];
-    total: number;
-  };
 }
 
 /**
@@ -51,13 +40,9 @@ interface ProcessEventResults {
  * - Settings menu (needs design)
  */
 export const SessionView = ({ sessionEntityId, height }: SessionViewDeps) => {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [data, setData] = useState<ProcessEvent[]>([]);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [isDetailMounted, setIsDetailMounted] = useState(false);
   const [selectedProcess, setSelectedProcess] = useState<Process | null>(null);
-
-  const { http } = useKibana<CoreStart>().services;
 
   const styles = useStyles({ height });
 
@@ -67,54 +52,14 @@ export const SessionView = ({ sessionEntityId, height }: SessionViewDeps) => {
     }
   };
 
-  const onSearch = ({ query }: EuiSearchBarOnChangeArgs) => {
-    if (query) {
-      setSearchQuery(query.text);
-    } else {
-      setSearchQuery('');
-    }
-  };
-
-  const {
-    isLoading,
-    isError,
-    data: getData,
-  } = useQuery<ProcessEventResults, Error>(['process-tree', 'process_tree'], () =>
-    http.get<ProcessEventResults>(PROCESS_EVENTS_ROUTE, {
-      query: {
-        sessionEntityId,
-      },
-    })
-  );
-
-  const sortEvents = (a: ProcessEvent, b: ProcessEvent) => {
-    if (a['@timestamp'].valueOf() < b['@timestamp'].valueOf()) {
-      return -1;
-    } else if (a['@timestamp'].valueOf() > b['@timestamp'].valueOf()) {
-      return 1;
-    }
-
-    return 0;
-  };
-
-  useEffect(() => {
-    if (!getData) {
-      return;
-    }
-
-    const events: ProcessEvent[] = (getData.events?.hits || []).map(
-      (event: any) => event._source as ProcessEvent
-    );
-    const alerts: ProcessEvent[] = (getData.alerts?.hits || []).map((event: any) => {
-      return event._source as ProcessEvent;
-    });
-    const all: ProcessEvent[] = events.concat(alerts).sort(sortEvents);
-    setData(all);
-  }, [getData]);
+  const { onSearch, searchQuery } = useSearchQuery();
+  const { isLoading, isError, data: getData } = useFetchSessionViewProcessEvents(sessionEntityId);
+  const { data } = useParseSessionViewProcessEvents(getData);
 
   const renderNoData = () => {
     return (
       <EuiEmptyPrompt
+        data-test-subj="sessionViewProcessEventsEmpty"
         title={<h2>No data to render</h2>}
         body={<p>No process events found for this query.</p>}
       />
@@ -185,7 +130,7 @@ export const SessionView = ({ sessionEntityId, height }: SessionViewDeps) => {
   return (
     <>
       <EuiFlexGroup>
-        <EuiFlexItem>
+        <EuiFlexItem data-test-subj="sessionViewProcessEventsSearch">
           <EuiSearchBar query={searchQuery} onChange={onSearch} />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>

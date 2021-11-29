@@ -178,11 +178,6 @@ class ProcessImpl implements Process {
       }, {} as EventActionPartition)
     );
 
-    if (!(eventsPartition.exec.length || eventsPartition.fork.length)) {
-      // eslint-disable-next-line no-debugger
-      debugger;
-    }
-
     if (eventsPartition.exec.length) {
       return eventsPartition.exec[eventsPartition.exec.length - 1];
     }
