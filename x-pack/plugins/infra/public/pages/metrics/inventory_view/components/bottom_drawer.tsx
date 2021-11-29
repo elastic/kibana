@@ -7,7 +7,7 @@
 
 import React, { useCallback, useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
 import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
 import { useUiTracker } from '../../../../../../observability/public';
 import { useWaffleOptionsContext } from '../hooks/use_waffle_options';
