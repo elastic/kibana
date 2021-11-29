@@ -39,6 +39,7 @@ export const PutOutputRequestSchema = {
     outputId: schema.string(),
   }),
   body: schema.object({
+    type: schema.maybe(schema.oneOf([schema.literal('elasticsearch')])),
     name: schema.maybe(schema.string()),
     is_default: schema.maybe(schema.boolean()),
     is_default_monitoring: schema.maybe(schema.boolean()),
