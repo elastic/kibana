@@ -9,7 +9,7 @@ import React, { useCallback, useEffect } from 'react';
 
 import { EuiSwitch, EuiFormRow } from '@elastic/eui';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { TLSOptions, TLSConfig } from '../common/tls_options';
 import {

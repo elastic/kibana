@@ -11,7 +11,7 @@ import { DurationFormat } from 'src/plugins/field_formats/common';
 
 import { EuiFieldNumber, EuiFormRow, EuiSelect, EuiSwitch } from '@elastic/eui';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { DefaultFormatEditor, defaultState, FormatEditorState } from '../default/default';
 

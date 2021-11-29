@@ -10,6 +10,7 @@ import { LevelLogger, startTrace } from '../';
 import { LocatorParams, UrlOrUrlLocatorTuple } from '../../../common/types';
 import { HeadlessChromiumDriver } from '../../browsers';
 import { ConditionalHeaders } from '../../export_types/common';
+import { Layout } from '../layouts';
 import { DEFAULT_PAGELOAD_SELECTOR } from './constants';
 
 export const openUrl = async (
@@ -18,6 +19,7 @@ export const openUrl = async (
   index: number,
   urlOrUrlLocatorTuple: UrlOrUrlLocatorTuple,
   conditionalHeaders: ConditionalHeaders,
+  layout: undefined | Layout,
   logger: LevelLogger
 ): Promise<void> => {
   // If we're moving to another page in the app, we'll want to wait for the app to tell us
@@ -36,7 +38,11 @@ export const openUrl = async (
   }
 
   try {
-    await browser.open(url, { conditionalHeaders, waitForSelector, timeout, locator }, logger);
+    await browser.open(
+      url,
+      { conditionalHeaders, waitForSelector, timeout, locator, layout },
+      logger
+    );
   } catch (err) {
     logger.error(err);
     throw new Error(
