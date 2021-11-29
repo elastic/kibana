@@ -9,15 +9,6 @@
 import { duration } from 'moment';
 import { ElasticsearchClientConfig, parseClientOptions } from './client_config';
 import { DEFAULT_HEADERS } from '../default_headers';
-import { readFileSync } from 'fs';
-import { X509Certificate } from 'crypto';
-import path from 'path';
-
-const testCertContents = readFileSync(
-  path.join(__dirname, '..', '__fixtures__', 'test_ca.crt'),
-  'utf8'
-);
-const testCertX509 = new X509Certificate(testCertContents);
 
 const createConfig = (
   parts: Partial<ElasticsearchClientConfig> = {}
@@ -347,19 +338,19 @@ describe('parseClientOptions', () => {
       expect(
         parseClientOptions(
           createConfig({
-            ssl: { verificationMode: 'full', certificateAuthorities: [testCertX509] },
+            ssl: { verificationMode: 'full', certificateAuthorities: ['content-of-ca-path'] },
           }),
           false
         ).tls!.ca
-      ).toEqual([testCertContents]);
+      ).toEqual(['content-of-ca-path']);
       expect(
         parseClientOptions(
           createConfig({
-            ssl: { verificationMode: 'full', certificateAuthorities: [testCertX509] },
+            ssl: { verificationMode: 'full', certificateAuthorities: ['content-of-ca-path'] },
           }),
           true
         ).tls!.ca
-      ).toEqual([testCertContents]);
+      ).toEqual(['content-of-ca-path']);
     });
 
     describe('verificationMode', () => {
@@ -374,11 +365,11 @@ describe('parseClientOptions', () => {
             false
           ).tls
         ).toMatchInlineSnapshot(`
-                  Object {
-                    "ca": undefined,
-                    "rejectUnauthorized": false,
-                  }
-              `);
+        Object {
+          "ca": undefined,
+          "rejectUnauthorized": false,
+        }
+      `);
       });
       it('handles `certificate` value', () => {
         expect(
@@ -391,12 +382,12 @@ describe('parseClientOptions', () => {
             false
           ).tls
         ).toMatchInlineSnapshot(`
-                  Object {
-                    "ca": undefined,
-                    "checkServerIdentity": [Function],
-                    "rejectUnauthorized": true,
-                  }
-              `);
+        Object {
+          "ca": undefined,
+          "checkServerIdentity": [Function],
+          "rejectUnauthorized": true,
+        }
+      `);
       });
       it('handles `full` value', () => {
         expect(
@@ -409,11 +400,11 @@ describe('parseClientOptions', () => {
             false
           ).tls
         ).toMatchInlineSnapshot(`
-                  Object {
-                    "ca": undefined,
-                    "rejectUnauthorized": true,
-                  }
-              `);
+        Object {
+          "ca": undefined,
+          "rejectUnauthorized": true,
+        }
+      `);
       });
       it('throws for invalid values', () => {
         expect(
@@ -450,18 +441,18 @@ describe('parseClientOptions', () => {
             createConfig({
               ssl: {
                 verificationMode: 'full',
-                certificate: testCertX509,
+                certificate: 'content-of-cert',
                 keyPassphrase: 'passphrase',
               },
             }),
             false
           ).tls
         ).toMatchInlineSnapshot(`
-                  Object {
-                    "ca": undefined,
-                    "rejectUnauthorized": true,
-                  }
-              `);
+        Object {
+          "ca": undefined,
+          "rejectUnauthorized": true,
+        }
+      `);
       });
 
       it('are not added if `certificate` is not present', () => {
@@ -477,11 +468,11 @@ describe('parseClientOptions', () => {
             false
           ).tls
         ).toMatchInlineSnapshot(`
-                  Object {
-                    "ca": undefined,
-                    "rejectUnauthorized": true,
-                  }
-              `);
+        Object {
+          "ca": undefined,
+          "rejectUnauthorized": true,
+        }
+      `);
       });
 
       it('are added if `key` and `certificate` are present and `scoped` is false', () => {
@@ -491,52 +482,21 @@ describe('parseClientOptions', () => {
               ssl: {
                 verificationMode: 'full',
                 key: 'content-of-key',
-                certificate: testCertX509,
+                certificate: 'content-of-cert',
                 keyPassphrase: 'passphrase',
               },
             }),
             false
           ).tls
         ).toMatchInlineSnapshot(`
-          Object {
-            "ca": undefined,
-            "cert": "-----BEGIN CERTIFICATE-----
-          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
-          -----END CERTIFICATE-----
-          ",
-            "key": "content-of-key",
-            "passphrase": "passphrase",
-            "rejectUnauthorized": true,
-          }
-        `);
+        Object {
+          "ca": undefined,
+          "cert": "content-of-cert",
+          "key": "content-of-key",
+          "passphrase": "passphrase",
+          "rejectUnauthorized": true,
+        }
+      `);
       });
 
       it('are not added if `scoped` is true unless `alwaysPresentCertificate` is true', () => {
@@ -546,18 +506,18 @@ describe('parseClientOptions', () => {
               ssl: {
                 verificationMode: 'full',
                 key: 'content-of-key',
-                certificate: testCertX509,
+                certificate: 'content-of-cert',
                 keyPassphrase: 'passphrase',
               },
             }),
             true
           ).tls
         ).toMatchInlineSnapshot(`
-                  Object {
-                    "ca": undefined,
-                    "rejectUnauthorized": true,
-                  }
-              `);
+        Object {
+          "ca": undefined,
+          "rejectUnauthorized": true,
+        }
+      `);
 
         expect(
           parseClientOptions(
@@ -565,7 +525,7 @@ describe('parseClientOptions', () => {
               ssl: {
                 verificationMode: 'full',
                 key: 'content-of-key',
-                certificate: testCertX509,
+                certificate: 'content-of-cert',
                 keyPassphrase: 'passphrase',
                 alwaysPresentCertificate: true,
               },
@@ -573,45 +533,14 @@ describe('parseClientOptions', () => {
             true
           ).tls
         ).toMatchInlineSnapshot(`
-          Object {
-            "ca": undefined,
-            "cert": "-----BEGIN CERTIFICATE-----
-          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
-          -----END CERTIFICATE-----
-          ",
-            "key": "content-of-key",
-            "passphrase": "passphrase",
-            "rejectUnauthorized": true,
-          }
-        `);
+        Object {
+          "ca": undefined,
+          "cert": "content-of-cert",
+          "key": "content-of-key",
+          "passphrase": "passphrase",
+          "rejectUnauthorized": true,
+        }
+      `);
       });
     });
   });

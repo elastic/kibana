@@ -9,8 +9,7 @@ Set of settings configure SSL connection between Kibana and Elasticsearch that a
 <b>Signature:</b>
 
 ```typescript
-readonly ssl: Pick<SslConfigSchema, Exclude<keyof SslConfigSchema, 'certificate' | 'certificateAuthorities' | 'keystore' | 'truststore'>> & {
-        certificate?: X509Certificate;
-        certificateAuthorities?: X509Certificate[];
+readonly ssl: Pick<SslConfigSchema, Exclude<keyof SslConfigSchema, 'certificateAuthorities' | 'keystore' | 'truststore'>> & {
+        certificateAuthorities?: string[];
     };
 ```

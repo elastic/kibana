@@ -11,6 +11,7 @@ import { combineLatest, Observable } from 'rxjs';
 import { PathConfigType, config as pathConfig } from '@kbn/utils';
 import { pick, deepFreeze } from '@kbn/std';
 import { IConfigService } from '@kbn/config';
+import { X509Certificate } from 'crypto';
 
 import { SharedGlobalConfig, SharedGlobalConfigKeys } from './types';
 import {
@@ -31,7 +32,9 @@ const createGlobalConfig = ({
 }): SharedGlobalConfig => {
   const resolvedElasticsearchConfig = new ElasticsearchConfig(elasticsearch);
   const caFingerprints =
-    resolvedElasticsearchConfig.ssl.certificateAuthorities?.map((ca) => ca.fingerprint256) ?? [];
+    resolvedElasticsearchConfig.ssl.certificateAuthorities?.map(
+      (ca) => new X509Certificate(Buffer.from(ca)).fingerprint256
+    ) ?? [];
 
   return deepFreeze({
     elasticsearch: {

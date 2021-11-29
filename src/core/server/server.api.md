@@ -59,7 +59,6 @@ import { Type } from '@kbn/config-schema';
 import { TypeOf } from '@kbn/config-schema';
 import { UiCounterMetricType } from '@kbn/analytics';
 import { URL as URL_2 } from 'url';
-import { X509Certificate } from 'crypto';
 
 export { AddConfigDeprecation }
 
@@ -908,9 +907,8 @@ export class ElasticsearchConfig {
     readonly sniffOnConnectionFault: boolean;
     readonly sniffOnStart: boolean;
     // Warning: (ae-forgotten-export) The symbol "SslConfigSchema" needs to be exported by the entry point index.d.ts
-    readonly ssl: Pick<SslConfigSchema, Exclude<keyof SslConfigSchema, 'certificate' | 'certificateAuthorities' | 'keystore' | 'truststore'>> & {
-        certificate?: X509Certificate;
-        certificateAuthorities?: X509Certificate[];
+    readonly ssl: Pick<SslConfigSchema, Exclude<keyof SslConfigSchema, 'certificateAuthorities' | 'keystore' | 'truststore'>> & {
+        certificateAuthorities?: string[];
     };
     readonly username?: string;
 }

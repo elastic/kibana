@@ -10,7 +10,6 @@ import {
   mockReadFileSync,
   mockReadPkcs12Keystore,
   mockReadPkcs12Truststore,
-  TEST_X509,
 } from './elasticsearch_config.test.mocks';
 
 import { ElasticsearchConfig, config } from './elasticsearch_config';
@@ -129,26 +128,33 @@ describe('reserved headers', () => {
 });
 
 describe('reads files', () => {
-  afterEach(() => {
-    mockReadFileSync.mockClear();
-    mockReadPkcs12Keystore.mockClear();
-    mockReadPkcs12Truststore.mockClear();
+  beforeEach(() => {
+    mockReadFileSync.mockReset();
+    mockReadFileSync.mockImplementation((path: string) => `content-of-${path}`);
+    mockReadPkcs12Keystore.mockReset();
+    mockReadPkcs12Keystore.mockImplementation((path: string) => ({
+      key: `content-of-${path}.key`,
+      cert: `content-of-${path}.cert`,
+      ca: [`content-of-${path}.ca`],
+    }));
+    mockReadPkcs12Truststore.mockReset();
+    mockReadPkcs12Truststore.mockImplementation((path: string) => [`content-of-${path}`]);
   });
 
   it('reads certificate authorities when ssl.keystore.path is specified', () => {
     const configValue = new ElasticsearchConfig(
       config.schema.validate({ ssl: { keystore: { path: 'some-path' } } })
     );
-    expect(mockReadPkcs12Keystore).toHaveBeenCalledWith('some-path', undefined);
-    expect(configValue.ssl.certificateAuthorities).toEqual([TEST_X509]);
+    expect(mockReadPkcs12Keystore).toHaveBeenCalledTimes(1);
+    expect(configValue.ssl.certificateAuthorities).toEqual(['content-of-some-path.ca']);
   });
 
   it('reads certificate authorities when ssl.truststore.path is specified', () => {
     const configValue = new ElasticsearchConfig(
       config.schema.validate({ ssl: { truststore: { path: 'some-path' } } })
     );
-    expect(mockReadPkcs12Truststore).toHaveBeenCalledWith('some-path', undefined);
-    expect(configValue.ssl.certificateAuthorities).toEqual([TEST_X509]);
+    expect(mockReadPkcs12Truststore).toHaveBeenCalledTimes(1);
+    expect(configValue.ssl.certificateAuthorities).toEqual(['content-of-some-path']);
   });
 
   it('reads certificate authorities when ssl.certificateAuthorities is specified', () => {
@@ -156,14 +162,14 @@ describe('reads files', () => {
       config.schema.validate({ ssl: { certificateAuthorities: 'some-path' } })
     );
     expect(mockReadFileSync).toHaveBeenCalledTimes(1);
-    expect(configValue.ssl.certificateAuthorities).toEqual([TEST_X509]);
+    expect(configValue.ssl.certificateAuthorities).toEqual(['content-of-some-path']);
 
     mockReadFileSync.mockClear();
     configValue = new ElasticsearchConfig(
       config.schema.validate({ ssl: { certificateAuthorities: ['some-path'] } })
     );
     expect(mockReadFileSync).toHaveBeenCalledTimes(1);
-    expect(configValue.ssl.certificateAuthorities).toEqual([TEST_X509]);
+    expect(configValue.ssl.certificateAuthorities).toEqual(['content-of-some-path']);
 
     mockReadFileSync.mockClear();
     configValue = new ElasticsearchConfig(
@@ -172,7 +178,10 @@ describe('reads files', () => {
       })
     );
     expect(mockReadFileSync).toHaveBeenCalledTimes(2);
-    expect(configValue.ssl.certificateAuthorities).toEqual([TEST_X509, TEST_X509]);
+    expect(configValue.ssl.certificateAuthorities).toEqual([
+      'content-of-some-path',
+      'content-of-another-path',
+    ]);
   });
 
   it('reads certificate authorities when ssl.keystore.path, ssl.truststore.path, and ssl.certificateAuthorities are specified', () => {
@@ -188,7 +197,11 @@ describe('reads files', () => {
     expect(mockReadPkcs12Keystore).toHaveBeenCalledTimes(1);
     expect(mockReadPkcs12Truststore).toHaveBeenCalledTimes(1);
     expect(mockReadFileSync).toHaveBeenCalledTimes(1);
-    expect(configValue.ssl.certificateAuthorities).toEqual([TEST_X509, TEST_X509, TEST_X509]);
+    expect(configValue.ssl.certificateAuthorities).toEqual([
+      'content-of-some-path.ca',
+      'content-of-another-path',
+      'content-of-yet-another-path',
+    ]);
   });
 
   it('reads a private key and certificate when ssl.keystore.path is specified', () => {
@@ -197,12 +210,10 @@ describe('reads files', () => {
     );
     expect(mockReadPkcs12Keystore).toHaveBeenCalledTimes(1);
     expect(configValue.ssl.key).toEqual('content-of-some-path.key');
-    expect(configValue.ssl.certificate).toEqual(TEST_X509);
+    expect(configValue.ssl.certificate).toEqual('content-of-some-path.cert');
   });
 
   it('reads a private key when ssl.key is specified', () => {
-    mockReadFileSync.mockImplementationOnce((path: string) => `content-of-${path}`);
-
     const configValue = new ElasticsearchConfig(
       config.schema.validate({ ssl: { key: 'some-path' } })
     );
@@ -214,8 +225,8 @@ describe('reads files', () => {
     const configValue = new ElasticsearchConfig(
       config.schema.validate({ ssl: { certificate: 'some-path' } })
     );
-    expect(mockReadFileSync).toHaveBeenCalledWith('some-path', 'utf8');
-    expect(configValue.ssl.certificate).toEqual(TEST_X509);
+    expect(mockReadFileSync).toHaveBeenCalledTimes(1);
+    expect(configValue.ssl.certificate).toEqual('content-of-some-path');
   });
 });
 
@@ -255,18 +266,6 @@ describe('throws when config is invalid', () => {
     expect(
       () => new ElasticsearchConfig(config.schema.validate(value))
     ).toThrowErrorMatchingInlineSnapshot(`"ENOENT: no such file or directory, open '/invalid/ca'"`);
-  });
-
-  it('throws if certificateAuthorities is corrupt', () => {
-    mockReadFileSync.mockImplementationOnce(() => `-----BEGIN CERTIFICATE-----`);
-    const value = {
-      ssl: { certificateAuthorities: '/corrupt/ca' },
-    };
-    expect(
-      () => new ElasticsearchConfig(config.schema.validate(value))
-    ).toThrowErrorMatchingInlineSnapshot(
-      `"Could not read certificate authority from [file /corrupt/ca] due to error: Error: error:0908F066:PEM routines:get_header_and_data:bad end line"`
-    );
   });
 
   it('throws if keystore path is invalid', () => {

@@ -111,7 +111,7 @@ const generateSslConfig = (
   ignoreCertAndKey: boolean
 ): TlsConnectionOptions => {
   const ssl: TlsConnectionOptions = {
-    ca: sslConfig.certificateAuthorities?.map((ca) => ca.toString()),
+    ca: sslConfig.certificateAuthorities,
   };
 
   const verificationMode = sslConfig.verificationMode;
@@ -133,7 +133,7 @@ const generateSslConfig = (
 
   // Add client certificate and key if required by elasticsearch
   if (!ignoreCertAndKey && sslConfig.certificate && sslConfig.key) {
-    ssl.cert = sslConfig.certificate.toString();
+    ssl.cert = sslConfig.certificate;
     ssl.key = sslConfig.key;
     ssl.passphrase = sslConfig.keyPassphrase;
   }

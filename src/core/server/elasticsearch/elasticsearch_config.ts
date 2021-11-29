@@ -12,7 +12,6 @@ import { i18n } from '@kbn/i18n';
 import { Duration } from 'moment';
 import { readFileSync } from 'fs';
 import { ConfigDeprecationProvider } from 'src/core/server';
-import { X509Certificate } from 'crypto';
 import { ServiceConfigDescriptor } from '../internal_types';
 import { getReservedHeaders } from './default_headers';
 
@@ -375,14 +374,8 @@ export class ElasticsearchConfig {
    */
   public readonly ssl: Pick<
     SslConfigSchema,
-    Exclude<
-      keyof SslConfigSchema,
-      'certificate' | 'certificateAuthorities' | 'keystore' | 'truststore'
-    >
-  > & {
-    certificate?: X509Certificate;
-    certificateAuthorities?: X509Certificate[];
-  };
+    Exclude<keyof SslConfigSchema, 'certificateAuthorities' | 'keystore' | 'truststore'>
+  > & { certificateAuthorities?: string[] };
 
   /**
    * Header names and values to send to Elasticsearch with every request. These
@@ -428,21 +421,12 @@ export class ElasticsearchConfig {
 const readKeyAndCerts = (rawConfig: ElasticsearchConfigType) => {
   let key: string | undefined;
   let keyPassphrase: string | undefined;
-  let certificate: X509Certificate | undefined;
-  let certificateAuthorities: X509Certificate[] | undefined;
+  let certificate: string | undefined;
+  let certificateAuthorities: string[] | undefined;
 
-  const validateCertificate = (cert: string, source: string): X509Certificate => {
-    try {
-      return new X509Certificate(Buffer.from(cert));
-    } catch (e) {
-      throw new Error(`Could not read certificate authority from [${source}] due to error: ${e}`);
-    }
-  };
-
-  const addCAs = (cas: string[] | undefined, source: string) => {
-    if (cas && cas.length) {
-      const processedCas = cas.map((ca) => validateCertificate(ca, source));
-      certificateAuthorities = [...(certificateAuthorities || []), ...processedCas];
+  const addCAs = (ca: string[] | undefined) => {
+    if (ca && ca.length) {
+      certificateAuthorities = [...(certificateAuthorities || []), ...ca];
     }
   };
 
@@ -457,18 +441,15 @@ const readKeyAndCerts = (rawConfig: ElasticsearchConfigType) => {
       throw new Error(`Did not find certificate in Elasticsearch keystore.`);
     }
     key = keystore.key;
-    certificate = validateCertificate(keystore.cert, `keystore ${rawConfig.ssl.keystore.path}`);
-    addCAs(keystore.ca, `keystore ${rawConfig.ssl.keystore.path}`);
+    certificate = keystore.cert;
+    addCAs(keystore.ca);
   } else {
     if (rawConfig.ssl.key) {
       key = readFile(rawConfig.ssl.key);
       keyPassphrase = rawConfig.ssl.keyPassphrase;
     }
     if (rawConfig.ssl.certificate) {
-      certificate = validateCertificate(
-        readFile(rawConfig.ssl.certificate),
-        `file ${rawConfig.ssl.certificate}`
-      );
+      certificate = readFile(rawConfig.ssl.certificate);
     }
   }
 
@@ -477,17 +458,18 @@ const readKeyAndCerts = (rawConfig: ElasticsearchConfigType) => {
       rawConfig.ssl.truststore.path,
       rawConfig.ssl.truststore.password
     );
-    addCAs(ca, `truststore ${rawConfig.ssl.truststore.path}`);
+    addCAs(ca);
   }
 
   const ca = rawConfig.ssl.certificateAuthorities;
   if (ca) {
+    const parsed: string[] = [];
     const paths = Array.isArray(ca) ? ca : [ca];
     if (paths.length > 0) {
       for (const path of paths) {
-        const parsed = readFile(path);
-        addCAs([parsed], `file ${path}`);
+        parsed.push(readFile(path));
       }
+      addCAs(parsed);
     }
   }
 

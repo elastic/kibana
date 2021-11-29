@@ -34,9 +34,6 @@ import { elasticsearchClientMock } from './client/mocks';
 import { duration } from 'moment';
 import { isValidConnection as isValidConnectionMock } from './is_valid_connection';
 import { pollEsNodesVersion as pollEsNodesVersionMocked } from './version_check/ensure_es_version';
-import { readFileSync } from 'fs';
-import { X509Certificate } from 'crypto';
-import path from 'path';
 
 const { pollEsNodesVersion: pollEsNodesVersionActual } = jest.requireActual(
   './version_check/ensure_es_version'
@@ -53,9 +50,6 @@ let coreContext: CoreContext;
 let mockClusterClientInstance: ReturnType<typeof elasticsearchClientMock.createCustomClusterClient>;
 let mockConfig$: BehaviorSubject<any>;
 let setupDeps: SetupDeps;
-
-const testCertContents = readFileSync(path.join(__dirname, '__fixtures__', 'test_ca.crt'));
-const testCertX509 = new X509Certificate(testCertContents);
 
 beforeEach(() => {
   setupDeps = {
@@ -153,13 +147,13 @@ describe('#preboot', () => {
       const customConfig = {
         hosts: ['http://8.8.8.8'],
         logQueries: true,
-        ssl: { certificate: testCertX509 },
+        ssl: { certificate: 'certificate-value' },
       };
 
       prebootContract.createClient('some-custom-type', customConfig);
-      const { ssl, ...restConfig } = MockClusterClient.mock.calls[0][0];
+      const config = MockClusterClient.mock.calls[0][0];
 
-      expect(restConfig).toMatchInlineSnapshot(`
+      expect(config).toMatchInlineSnapshot(`
         Object {
           "healthCheckDelay": "PT0.01S",
           "hosts": Array [
@@ -169,12 +163,12 @@ describe('#preboot', () => {
           "requestHeadersWhitelist": Array [
             undefined,
           ],
+          "ssl": Object {
+            "certificate": "certificate-value",
+            "verificationMode": "none",
+          },
         }
       `);
-      expect(ssl).toEqual({
-        certificate: testCertX509,
-        verificationMode: 'none',
-      });
     });
   });
 });
@@ -367,13 +361,13 @@ describe('#start', () => {
       const customConfig = {
         hosts: ['http://8.8.8.8'],
         logQueries: true,
-        ssl: { certificate: testCertX509 },
+        ssl: { certificate: 'certificate-value' },
       };
 
       startContract.createClient('some-custom-type', customConfig);
-      const { ssl, ...restConfig } = MockClusterClient.mock.calls[0][0];
+      const config = MockClusterClient.mock.calls[0][0];
 
-      expect(restConfig).toMatchInlineSnapshot(`
+      expect(config).toMatchInlineSnapshot(`
         Object {
           "healthCheckDelay": "PT0.01S",
           "hosts": Array [
@@ -383,12 +377,12 @@ describe('#start', () => {
           "requestHeadersWhitelist": Array [
             undefined,
           ],
+          "ssl": Object {
+            "certificate": "certificate-value",
+            "verificationMode": "none",
+          },
         }
       `);
-      expect(ssl).toEqual({
-        certificate: testCertX509,
-        verificationMode: 'none',
-      });
     });
   });
 });
