@@ -11,6 +11,30 @@ import { getSecurityKPIConfig } from './kpi_over_time_config';
 import { RenderAppProps } from '../types';
 import { getSecurityAlertsKPIConfig } from './alert_kpi_over_time_config';
 
+export const reportConfigMap = {
+  security: [getSecurityKPIConfig],
+  securityAlerts: [getSecurityAlertsKPIConfig],
+};
+
+export const indexPatternList = {
+  security:
+    'remote_cluster:-*elastic-cloud-logs-*,remote_cluster:apm-*-transaction*,remote_cluster:traces-apm*,remote_cluster:auditbeat-*,remote_cluster:endgame-*,remote_cluster:filebeat-*,remote_cluster:logs-*,remote_cluster:packetbeat-*,remote_cluster:winlogbeat-*',
+  securityAlerts: 'remote_cluster:.internal.alerts-security.alerts-default-*',
+};
+
+export const dataTypes: any = [
+  {
+    id: 'security',
+    label: 'Security',
+  },
+  {
+    id: 'securityAlerts',
+    label: 'Security alerts',
+  },
+];
+
+export const reportTypes = [{ reportType: 'kpi-over-time', label: 'KPI over time' }];
+
 export const SecurityExploratoryView = ({
   setHeaderActionMenu,
 }: {
@@ -18,26 +42,10 @@ export const SecurityExploratoryView = ({
 }) => {
   return (
     <ExploratoryViewContextProvider
-      reportTypes={[{ reportType: 'kpi-over-time', label: 'KPI over time' }]}
-      dataTypes={[
-        {
-          id: 'security',
-          label: 'Security',
-        },
-        {
-          id: 'securityAlerts',
-          label: 'Security alerts',
-        },
-      ]}
-      indexPatterns={{
-        security:
-          'remote_cluster:-*elastic-cloud-logs-*,remote_cluster:apm-*-transaction*,remote_cluster:traces-apm*,remote_cluster:auditbeat-*,remote_cluster:endgame-*,remote_cluster:filebeat-*,remote_cluster:logs-*,remote_cluster:packetbeat-*,remote_cluster:winlogbeat-*',
-        securityAlerts: 'remote_cluster:.internal.alerts-security.alerts-default-*',
-      }}
-      reportConfigMap={{
-        security: [getSecurityKPIConfig],
-        securityAlerts: [getSecurityAlertsKPIConfig],
-      }}
+      reportTypes={reportTypes}
+      dataTypes={dataTypes}
+      indexPatterns={indexPatternList}
+      reportConfigMap={reportConfigMap}
       setHeaderActionMenu={setHeaderActionMenu}
       asPanel={false}
     >

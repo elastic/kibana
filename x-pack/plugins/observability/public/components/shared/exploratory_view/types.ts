@@ -106,7 +106,15 @@ export interface ConfigProps {
   series?: SeriesUrl;
 }
 
-export type AppDataType = 'synthetics' | 'ux' | 'infra_logs' | 'infra_metrics' | 'apm' | 'mobile';
+export type AppDataType =
+  | 'synthetics'
+  | 'ux'
+  | 'infra_logs'
+  | 'infra_metrics'
+  | 'apm'
+  | 'mobile'
+  | 'security'
+  | 'securityAlerts';
 
 type FormatType = 'duration' | 'number' | 'bytes' | 'percent';
 type InputFormat = 'microseconds' | 'milliseconds' | 'seconds';

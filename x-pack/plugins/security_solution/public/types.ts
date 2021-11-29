@@ -42,6 +42,7 @@ import { Ueba } from './ueba';
 import { LicensingPluginStart, LicensingPluginSetup } from '../../licensing/public';
 import { DashboardStart } from '../../../../src/plugins/dashboard/public';
 import { IndexPatternFieldEditorStart } from '../../../../src/plugins/data_view_field_editor/public';
+import { ObservabilityPublicStart } from '../../observability/public';
 
 export interface SetupPlugins {
   home?: HomePublicPluginSetup;
@@ -69,6 +70,7 @@ export interface StartPlugins {
   ml?: MlPluginStart;
   spaces?: SpacesPluginStart;
   dataViewFieldEditor: IndexPatternFieldEditorStart;
+  observability: ObservabilityPublicStart;
 }
 
 export type StartServices = CoreStart &
