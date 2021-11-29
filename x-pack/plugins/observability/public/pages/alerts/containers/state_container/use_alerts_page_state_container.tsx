@@ -8,14 +8,14 @@
 import { useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 
-import { TimefilterContract } from '../../../../../../../src/plugins/data/public';
+import { TimefilterContract } from '../../../../../../../../src/plugins/data/public';
 import {
   createKbnUrlStateStorage,
   syncState,
   IKbnUrlStateStorage,
   useContainerSelector,
-} from '../../../../../../../src/plugins/kibana_utils/public';
-import { useTimefilterService } from '../../../hooks/use_timefilter_service';
+} from '../../../../../../../../src/plugins/kibana_utils/public';
+import { useTimefilterService } from '../../../../hooks/use_timefilter_service';
 
 import {
   useContainer,

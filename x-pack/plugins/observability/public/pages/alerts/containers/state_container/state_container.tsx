@@ -8,8 +8,8 @@
 import {
   createStateContainer,
   createStateContainerReactHelpers,
-} from '../../../../../../../src/plugins/kibana_utils/public';
-import type { AlertWorkflowStatus } from '../../../../common/typings';
+} from '../../../../../../../../src/plugins/kibana_utils/public';
+import type { AlertWorkflowStatus } from '../../../../../common/typings';
 
 interface AlertsPageContainerState {
   rangeFrom: string;

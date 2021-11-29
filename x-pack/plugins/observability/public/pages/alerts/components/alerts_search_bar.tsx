@@ -8,8 +8,8 @@
 import { IndexPatternBase } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo, useState } from 'react';
-import { SearchBar, TimeHistory } from '../../../../../../src/plugins/data/public';
-import { Storage } from '../../../../../../src/plugins/kibana_utils/public';
+import { SearchBar, TimeHistory } from '../../../../../../../src/plugins/data/public';
+import { Storage } from '../../../../../../../src/plugins/kibana_utils/public';
 
 export function AlertsSearchBar({
   dynamicIndexPatterns,

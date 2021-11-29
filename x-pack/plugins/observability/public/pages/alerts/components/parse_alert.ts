@@ -12,10 +12,10 @@ import {
   ALERT_RULE_NAME,
 } from '@kbn/rule-data-utils/technical_field_names';
 import { ALERT_STATUS_ACTIVE } from '@kbn/rule-data-utils/alerts_as_data_status';
-import type { TopAlert } from '.';
-import { parseTechnicalFields } from '../../../../rule_registry/common/parse_technical_fields';
-import { asDuration, asPercent } from '../../../common/utils/formatters';
-import { ObservabilityRuleTypeRegistry } from '../../rules/create_observability_rule_type_registry';
+import type { TopAlert } from '../';
+import { parseTechnicalFields } from '../../../../../rule_registry/common/parse_technical_fields';
+import { asDuration, asPercent } from '../../../../common/utils/formatters';
+import { ObservabilityRuleTypeRegistry } from '../../../rules/create_observability_rule_type_registry';
 
 export const parseAlert =
   (observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry) =>

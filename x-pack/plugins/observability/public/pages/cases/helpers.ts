@@ -6,10 +6,8 @@
  */
 import { useEffect, useState } from 'react';
 import { isEmpty } from 'lodash';
-
 import { usePluginContext } from '../../hooks/use_plugin_context';
-import { parseAlert } from '../../pages/alerts/parse_alert';
-import { TopAlert } from '../../pages/alerts/';
+import { TopAlert, parseAlert } from '../../pages/alerts/';
 import { useKibana } from '../../utils/kibana_react';
 import { Ecs } from '../../../../cases/common';
 

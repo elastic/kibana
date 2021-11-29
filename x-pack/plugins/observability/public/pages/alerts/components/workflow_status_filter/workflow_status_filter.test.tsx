@@ -8,7 +8,7 @@
 import { render } from '@testing-library/react';
 import { Simulate } from 'react-dom/test-utils';
 import React from 'react';
-import type { AlertWorkflowStatus } from '../../../common/typings';
+import type { AlertWorkflowStatus } from '../../../../../common/typings';
 import { WorkflowStatusFilter } from './workflow_status_filter';
 
 describe('StatusFilter', () => {

@@ -10,10 +10,10 @@ import {
   ALERT_STATUS_RECOVERED,
 } from '@kbn/rule-data-utils/alerts_as_data_status';
 import { ALERT_STATUS } from '@kbn/rule-data-utils/technical_field_names';
-import type { CellValueElementProps } from '../../../../timelines/common';
-import { createObservabilityRuleTypeRegistryMock } from '../../rules/observability_rule_type_registry_mock';
-import * as PluginHook from '../../hooks/use_plugin_context';
-import { render } from '../../utils/test_helper';
+import type { CellValueElementProps } from '../../../../../../timelines/common';
+import { createObservabilityRuleTypeRegistryMock } from '../../../../rules/observability_rule_type_registry_mock';
+import * as PluginHook from '../../../../hooks/use_plugin_context';
+import { render } from '../../../../utils/test_helper';
 import { getRenderCellValue } from './render_cell_value';
 
 interface AlertsTableRow {

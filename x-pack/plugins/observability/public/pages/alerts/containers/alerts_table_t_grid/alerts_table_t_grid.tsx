@@ -33,33 +33,33 @@ import styled from 'styled-components';
 import React, { Suspense, useMemo, useState, useCallback, useEffect } from 'react';
 import usePrevious from 'react-use/lib/usePrevious';
 import { pick } from 'lodash';
-import { getAlertsPermissions } from '../../hooks/use_alert_permission';
+import { getAlertsPermissions } from '../../../../hooks/use_alert_permission';
 import type {
   TimelinesUIStart,
   TGridType,
   TGridState,
   TGridModel,
   SortDirection,
-} from '../../../../timelines/public';
+} from '../../../../../../timelines/public';
 
-import type { TopAlert } from './';
-import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
+import type { TopAlert } from '../alerts_page/alerts_page';
+import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import type {
   ActionProps,
   AlertWorkflowStatus,
   ColumnHeaderOptions,
   ControlColumnProps,
   RowRenderer,
-} from '../../../../timelines/common';
+} from '../../../../../../timelines/common';
 
-import { getRenderCellValue } from './render_cell_value';
-import { observabilityAppId, observabilityFeatureId } from '../../../common';
-import { useGetUserCasesPermissions } from '../../hooks/use_get_user_cases_permissions';
-import { usePluginContext } from '../../hooks/use_plugin_context';
-import { LazyAlertsFlyout } from '../..';
-import { parseAlert } from './parse_alert';
-import { CoreStart } from '../../../../../../src/core/public';
-import { translations, paths } from '../../config';
+import { getRenderCellValue } from '../../components/render_cell_value';
+import { observabilityAppId, observabilityFeatureId } from '../../../../../common';
+import { useGetUserCasesPermissions } from '../../../../hooks/use_get_user_cases_permissions';
+import { usePluginContext } from '../../../../hooks/use_plugin_context';
+import { LazyAlertsFlyout } from '../../../..';
+import { parseAlert } from '../../components/parse_alert';
+import { CoreStart } from '../../../../../../../../src/core/public';
+import { translations, paths } from '../../../../config';
 
 const ALERT_TABLE_STATE_STORAGE_KEY = 'xpack.observability.alert.tableState';
 

@@ -13,8 +13,8 @@ import {
   ALERT_STATUS_RECOVERED,
 } from '@kbn/rule-data-utils/alerts_as_data_status';
 import { ALERT_STATUS } from '@kbn/rule-data-utils/technical_field_names';
-import { AlertStatusFilterButton } from '../../../common/typings';
-import { AlertStatusFilter } from '../../../common/typings';
+import { AlertStatusFilterButton } from '../../../../common/typings';
+import { AlertStatusFilter } from '../../../../common/typings';
 
 export interface AlertStatusFilterProps {
   status: AlertStatusFilterButton;

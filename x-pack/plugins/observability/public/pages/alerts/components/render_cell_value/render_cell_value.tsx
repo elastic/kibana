@@ -17,14 +17,14 @@ import {
   ALERT_STATUS_ACTIVE,
   ALERT_STATUS_RECOVERED,
 } from '@kbn/rule-data-utils/alerts_as_data_status';
-import type { CellValueElementProps, TimelineNonEcsData } from '../../../../timelines/common';
-import { AlertStatusIndicator } from '../../components/shared/alert_status_indicator';
-import { TimestampTooltip } from '../../components/shared/timestamp_tooltip';
-import { asDuration } from '../../../common/utils/formatters';
-import { SeverityBadge } from './severity_badge';
-import { TopAlert } from '.';
-import { parseAlert } from './parse_alert';
-import { usePluginContext } from '../../hooks/use_plugin_context';
+import type { CellValueElementProps, TimelineNonEcsData } from '../../../../../../timelines/common';
+import { AlertStatusIndicator } from '../../../../components/shared/alert_status_indicator';
+import { TimestampTooltip } from '../../../../components/shared/timestamp_tooltip';
+import { asDuration } from '../../../../../common/utils/formatters';
+import { SeverityBadge } from '../severity_badge';
+import { TopAlert } from '../../';
+import { parseAlert } from '../parse_alert';
+import { usePluginContext } from '../../../../hooks/use_plugin_context';
 
 export const getMappedNonEcsValue = ({
   data,
