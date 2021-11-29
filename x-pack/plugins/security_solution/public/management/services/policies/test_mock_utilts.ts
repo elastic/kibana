@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { FleetPackagePolicyGenerator } from '../../../common/endpoint/data_generators/fleet_package_policy_generator';
-import { GetPolicyListResponse } from '../pages/policy/types';
+import { FleetPackagePolicyGenerator } from '../../../../common/endpoint/data_generators/fleet_package_policy_generator';
+import { GetPolicyListResponse } from '../../pages/policy/types';
 
 export const sendGetEndpointSpecificPackagePoliciesMock =
   async (): Promise<GetPolicyListResponse> => {

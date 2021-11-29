@@ -14,8 +14,8 @@ import {
   createAppRootMockRenderer,
 } from '../../../../../common/mock/endpoint';
 import { getHostIsolationExceptionsListPath } from '../../../../common/routing';
-import { sendGetEndpointSpecificPackagePolicies } from '../../../../services/policies';
-import { sendGetEndpointSpecificPackagePoliciesMock } from '../../../../services/test_mock_utilts';
+import { sendGetEndpointSpecificPackagePolicies } from '../../../../services/policies/policies';
+import { sendGetEndpointSpecificPackagePoliciesMock } from '../../../../services/policies/test_mock_utilts';
 import {
   createHostIsolationExceptionItem,
   getOneHostIsolationExceptionItem,
@@ -26,7 +26,7 @@ import { HostIsolationExceptionsFormFlyout } from './form_flyout';
 
 jest.mock('../../service.ts');
 jest.mock('../../../../../common/hooks/use_license');
-jest.mock('../../../../services/policies');
+jest.mock('../../../../services/policies/policies');
 
 const createHostIsolationExceptionItemMock = createHostIsolationExceptionItem as jest.Mock;
 const updateOneHostIsolationExceptionItemMock = updateOneHostIsolationExceptionItem as jest.Mock;

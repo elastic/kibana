@@ -5,9 +5,9 @@
  * 2.0.
  */
 import { QueryObserverResult, useQuery } from 'react-query';
-import { useHttp } from '../../common/lib/kibana/hooks';
-import { ServerApiError } from '../../common/types';
-import { GetPolicyListResponse } from '../pages/policy/types';
+import { useHttp } from '../../../common/lib/kibana/hooks';
+import { ServerApiError } from '../../../common/types';
+import { GetPolicyListResponse } from '../../pages/policy/types';
 import { sendGetEndpointSpecificPackagePolicies } from './policies';
 
 export function useGetEndpointSpecificPolicies({

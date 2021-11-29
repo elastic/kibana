@@ -12,15 +12,15 @@ import { getFoundExceptionListItemSchemaMock } from '../../../../../../lists/com
 import { HOST_ISOLATION_EXCEPTIONS_PATH } from '../../../../../common/constants';
 import { useEndpointPrivileges } from '../../../../common/components/user_privileges/endpoint';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../../../common/mock/endpoint';
-import { sendGetEndpointSpecificPackagePolicies } from '../../../services/policies';
-import { sendGetEndpointSpecificPackagePoliciesMock } from '../../../services/test_mock_utilts';
+import { sendGetEndpointSpecificPackagePolicies } from '../../../services/policies/policies';
+import { sendGetEndpointSpecificPackagePoliciesMock } from '../../../services/policies/test_mock_utilts';
 import { getHostIsolationExceptionItems } from '../service';
 import { HostIsolationExceptionsList } from './host_isolation_exceptions_list';
 
 jest.mock('../service');
 jest.mock('../../../../common/hooks/use_license');
 jest.mock('../../../../common/components/user_privileges/endpoint/use_endpoint_privileges');
-jest.mock('../../../services/policies');
+jest.mock('../../../services/policies/policies');
 
 const getHostIsolationExceptionItemsMock = getHostIsolationExceptionItems as jest.Mock;
 (sendGetEndpointSpecificPackagePolicies as jest.Mock).mockImplementation(
