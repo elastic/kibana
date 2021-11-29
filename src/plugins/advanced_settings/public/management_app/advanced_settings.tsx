@@ -274,7 +274,8 @@ export class AdvancedSettings extends Component<AdvancedSettingsProps, AdvancedS
             toasts={this.props.toasts}
             trackUiMetric={this.props.trackUiMetric}
             queryText={query.text}
-          theme={this.props.theme}/>
+            theme={this.props.theme}
+          />
         </KibanaContextProvider>
         <PageFooter
           toasts={this.props.toasts}
