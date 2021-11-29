@@ -188,6 +188,7 @@ export const LegendControls = ({
       id="legendControls"
       button={buttonComponent}
       anchorPosition="leftCenter"
+      data-test-subj="legendControls"
     >
       <EuiPopoverTitle>Legend Options</EuiPopoverTitle>
       <EuiForm style={{ minWidth: 400 }}>
