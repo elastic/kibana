@@ -51,6 +51,7 @@ export default function (providerContext: FtrProviderContext) {
           .post(`/api/fleet/epm/packages/_bulk`)
           .auth(testUsers.fleet_read_only.username, testUsers.fleet_read_only.password)
           .set('kbn-xsrf', 'xxxx')
+          .send({ packages: ['multiple_versions'] })
           .expect(403);
       });
       it('should return 200 and an array for upgrading a package', async function () {
