@@ -40,11 +40,8 @@ export const getCaseMetrics = async (
   const computedMetrics = await Promise.all(
     params.features.map(async (feature) => {
       const handler = handlers.get(feature);
-      if (!handler) {
-        return;
-      }
 
-      return handler.compute();
+      return handler?.compute();
     })
   );
 

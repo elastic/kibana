@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
-import { deleteAllCaseItems, getSingleCaseMetrics } from '../../../../common/lib/utils';
+import { deleteAllCaseItems, getCaseMetrics } from '../../../../common/lib/utils';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -33,7 +33,7 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it('returns the lifespan of the case', async () => {
-      const metrics = await getSingleCaseMetrics({
+      const metrics = await getCaseMetrics({
         supertest,
         caseId: closedCaseId,
         features: ['lifespan'],
@@ -48,7 +48,7 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it('returns an error when passing invalid features', async () => {
-      const errorResponse = (await getSingleCaseMetrics({
+      const errorResponse = (await getCaseMetrics({
         supertest,
         caseId: closedCaseId,
         features: ['bananas'],

@@ -1095,7 +1095,7 @@ export const getCase = async ({
   return theCase;
 };
 
-export const getSingleCaseMetrics = async ({
+export const getCaseMetrics = async ({
   supertest,
   caseId,
   features,

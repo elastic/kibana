@@ -35,7 +35,7 @@ export function initGetCaseMetricsApi({ router, logger }: RouteDeps) {
           }),
         });
       } catch (error) {
-        logger.error(`Failed to get metrics in route: ${error}`);
+        logger.error(`Failed to get case metrics in route: ${error}`);
         return response.customError(wrapError(error));
       }
     }
