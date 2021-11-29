@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { NavigationPublicPluginStart } from 'src/plugins/navigation/public';
 import { CoreStart } from '../../../../src/core/public';
 import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
 import type { DataPublicPluginStart } from '../../../../src/plugins/data/public';
@@ -39,6 +40,7 @@ import { Rules } from './rules';
 import { Timelines } from './timelines';
 import { Management } from './management';
 import { Ueba } from './ueba';
+import { CloudPosture } from './cloud_posture';
 import { LicensingPluginStart, LicensingPluginSetup } from '../../licensing/public';
 import { DashboardStart } from '../../../../src/plugins/dashboard/public';
 import { IndexPatternFieldEditorStart } from '../../../../src/plugins/data_view_field_editor/public';
@@ -69,6 +71,8 @@ export interface StartPlugins {
   ml?: MlPluginStart;
   spaces?: SpacesPluginStart;
   dataViewFieldEditor: IndexPatternFieldEditorStart;
+  indexPatternFieldEditor: IndexPatternFieldEditorStart;
+  navigation: NavigationPublicPluginStart; // remove?
 }
 
 export type StartServices = CoreStart &
@@ -101,6 +105,7 @@ export interface SubPlugins {
   overview: Overview;
   timelines: Timelines;
   management: Management;
+  cloud_posture: CloudPosture;
 }
 
 // TODO: find a better way to defined these types
@@ -115,4 +120,5 @@ export interface StartedSubPlugins {
   overview: ReturnType<Overview['start']>;
   timelines: ReturnType<Timelines['start']>;
   management: ReturnType<Management['start']>;
+  cloud_posture: ReturnType<CloudPosture['start']>;
 }

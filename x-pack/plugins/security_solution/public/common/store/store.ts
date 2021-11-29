@@ -45,6 +45,13 @@ declare global {
 export type SecurityAppStore = Store<State, Action>;
 let store: Store<State, Action> | null = null;
 
+// const logger = (store) => (next) => (action) => {
+//   console.log('dispatching', action);
+//   let result = next(action);
+//   console.log('next state', store.getState());
+//   return result;
+// };
+
 /**
  * Factory for Security App's redux store.
  */
@@ -72,12 +79,12 @@ export const createStore = (
     }
   );
 
+  const mdls = [...(additionalMiddleware || [])];
+
   store = createReduxStore(
     createReducer(pluginsReducer),
     state as PreloadedState<State>,
-    composeEnhancers(
-      applyMiddleware(epicMiddleware, telemetryMiddleware, ...(additionalMiddleware ?? []))
-    )
+    composeEnhancers(applyMiddleware(epicMiddleware, telemetryMiddleware, ...(mdls ?? [])))
   );
 
   epicMiddleware.run(createRootEpic<CombinedState<State>>());
