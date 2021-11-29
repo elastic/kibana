@@ -31,7 +31,7 @@ import {
 } from '../helpers/transactions';
 import { Setup } from '../helpers/setup_request';
 import { getAverages, getCounts, getSums } from './get_transaction_group_stats';
-
+import { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
 export interface TopTraceOptions {
   environment: string;
   kuery: string;
@@ -51,7 +51,7 @@ export interface TransactionGroup {
   averageResponseTime: number | null | undefined;
   transactionsPerMinute: number;
   impact: number;
-  agentName: string;
+  agentName: AgentName;
 }
 
 export type ESResponse = Promise<{ items: TransactionGroup[] }>;
@@ -143,7 +143,7 @@ function getItemsWithRelativeImpact(
     avg?: number | null;
     count?: number | null;
     transactionType?: string;
-    agentName?: string;
+    agentName?: AgentName;
   }>,
   start: number,
   end: number
@@ -168,7 +168,7 @@ function getItemsWithRelativeImpact(
         item.sum !== null && item.sum !== undefined
           ? ((item.sum - min) / (max - min)) * 100 || 0
           : 0,
-      agentName: item.agentName,
+      agentName: item.agentName as AgentName,
     };
   });
 
