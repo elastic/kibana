@@ -26,7 +26,7 @@ export const MonitorConfig = () => {
      This type of helper should ideally be moved to task manager where we are syncing the config.
      We can process validation (isValid) and formatting for heartbeat (formattedMonitor) separately
      We don't need to save the heartbeat compatible version in saved objects */
-  const { formattedMonitor, isValid } = useFormatMonitor({
+  useFormatMonitor({
     monitorType,
     validate,
     config: policyConfig[monitorType],
