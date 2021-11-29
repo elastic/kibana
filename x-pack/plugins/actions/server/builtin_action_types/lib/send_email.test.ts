@@ -20,7 +20,7 @@ import { Logger } from '../../../../../../src/core/server';
 import { sendEmail } from './send_email';
 import { loggingSystemMock, savedObjectsClientMock } from '../../../../../../src/core/server/mocks';
 import nodemailer from 'nodemailer';
-import { ProxySettings } from '../../types';
+import { ConnectorToken, ProxySettings } from '../../types';
 import { actionsConfigMock } from '../../actions_config.mock';
 import { CustomHostSettings } from '../../config';
 import { sendEmailGraphApi } from './send_email_graph_api';
@@ -110,17 +110,15 @@ describe('send_email module', () => {
     sendEmailGraphApiMock.mockReturnValue({
       status: 202,
     });
+    const date = new Date();
+    date.setDate(date.getDate() + 5);
 
-    savedObjectsClient.find.mockResolvedValue([
-      {
-        id: '1',
-        attributes: {
-          connectorId: '123',
-          expiresIn: '11111',
-          tokenType: 'access_token',
-        },
-      },
-    ]);
+    savedObjectsClient.find.mockResolvedValueOnce({
+      total: 0,
+      saved_objects: [],
+      per_page: 500,
+      page: 1,
+    });
     await sendEmail(mockLogger, sendEmailOptions, connectorTokenClient);
     expect(requestOAuthClientCredentialsTokenMock.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
@@ -173,6 +171,150 @@ describe('send_email module', () => {
           "graphApiUrl": undefined,
           "headers": Object {
             "Authorization": "undefined undefined",
+            "Content-Type": "application/json",
+          },
+          "messageHTML": "<p>a message</p>
+      ",
+          "options": Object {
+            "configurationUtilities": Object {
+              "ensureActionTypeEnabled": [MockFunction],
+              "ensureHostnameAllowed": [MockFunction],
+              "ensureUriAllowed": [MockFunction],
+              "getCustomHostSettings": [MockFunction],
+              "getMicrosoftGraphApiUrl": [MockFunction] {
+                "calls": Array [
+                  Array [],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": undefined,
+                  },
+                ],
+              },
+              "getProxySettings": [MockFunction],
+              "getResponseSettings": [MockFunction],
+              "getSSLSettings": [MockFunction],
+              "isActionTypeEnabled": [MockFunction],
+              "isHostnameAllowed": [MockFunction],
+              "isUriAllowed": [MockFunction],
+            },
+            "content": Object {
+              "message": "a message",
+              "subject": "a subject",
+            },
+            "hasAuth": true,
+            "routing": Object {
+              "bcc": Array [],
+              "cc": Array [
+                "bob@example.com",
+                "robert@example.com",
+              ],
+              "from": "fred@example.com",
+              "to": Array [
+                "jim@example.com",
+              ],
+            },
+            "transport": Object {
+              "clientId": "123456",
+              "clientSecret": "sdfhkdsjhfksdjfh",
+              "password": "changeme",
+              "service": "exchange_server",
+              "user": "elastic",
+            },
+          },
+        },
+        Object {
+          "context": Array [],
+          "debug": [MockFunction],
+          "error": [MockFunction],
+          "fatal": [MockFunction],
+          "get": [MockFunction],
+          "info": [MockFunction],
+          "log": [MockFunction],
+          "trace": [MockFunction],
+          "warn": [MockFunction],
+        },
+        Object {
+          "ensureActionTypeEnabled": [MockFunction],
+          "ensureHostnameAllowed": [MockFunction],
+          "ensureUriAllowed": [MockFunction],
+          "getCustomHostSettings": [MockFunction],
+          "getMicrosoftGraphApiUrl": [MockFunction] {
+            "calls": Array [
+              Array [],
+            ],
+            "results": Array [
+              Object {
+                "type": "return",
+                "value": undefined,
+              },
+            ],
+          },
+          "getProxySettings": [MockFunction],
+          "getResponseSettings": [MockFunction],
+          "getSSLSettings": [MockFunction],
+          "isActionTypeEnabled": [MockFunction],
+          "isHostnameAllowed": [MockFunction],
+          "isUriAllowed": [MockFunction],
+        },
+      ]
+    `);
+  });
+
+  test('uses existing "access_token" from "connector_token" SO for authentication for email using "exchange_server" service', async () => {
+    const sendEmailGraphApiMock = sendEmailGraphApi as jest.Mock;
+    const requestOAuthClientCredentialsTokenMock = requestOAuthClientCredentialsToken as jest.Mock;
+    const sendEmailOptions = getSendEmailOptions({
+      transport: {
+        service: 'exchange_server',
+        clientId: '123456',
+        clientSecret: 'sdfhkdsjhfksdjfh',
+      },
+    });
+    requestOAuthClientCredentialsTokenMock.mockReturnValueOnce({
+      status: 200,
+      data: {
+        tokenType: 'Bearer',
+        accessToken: 'dfjsdfgdjhfgsjdf',
+        expiresIn: 123,
+      },
+    });
+
+    sendEmailGraphApiMock.mockReturnValue({
+      status: 202,
+    });
+    const date = new Date();
+    date.setDate(date.getDate() + 5);
+
+    savedObjectsClient.find.mockResolvedValueOnce({
+      total: 2,
+      saved_objects: [
+        {
+          id: '1',
+          score: 1,
+          type: 'connector_token',
+          references: [],
+          attributes: {
+            connectorId: '123',
+            expiresIn: date.toISOString(),
+            tokenType: 'access_token',
+            token: '11111111',
+          },
+        },
+      ],
+      per_page: 500,
+      page: 1,
+    });
+    await sendEmail(mockLogger, sendEmailOptions, connectorTokenClient);
+    expect(requestOAuthClientCredentialsTokenMock.mock.calls.length).toBe(0);
+
+    expect(sendEmailGraphApiMock.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "graphApiUrl": undefined,
+          "headers": Object {
+            "Authorization": "11111111",
             "Content-Type": "application/json",
           },
           "messageHTML": "<p>a message</p>
