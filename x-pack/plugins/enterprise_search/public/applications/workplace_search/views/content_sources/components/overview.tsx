@@ -228,7 +228,7 @@ export const Overview: React.FC = () => {
                 <EuiTableRowCell>
                   <EuiText size="s">
                     <small>
-                      textadd {status} {activityDetails && <StatusItem details={activityDetails} />}
+                      {status} {activityDetails && <StatusItem details={activityDetails} />}
                     </small>
                   </EuiText>
                 </EuiTableRowCell>
