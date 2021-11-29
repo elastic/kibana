@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { withEuiTheme } from '@elastic/eui';
 import { Loading } from '../loading';
 import { ArgLabel } from './arg_label';
-import { argStylesFactory } from './pending_arg_value.styles';
+import { argStylesFactory } from './arg_form.styles';
 
 const strings = {
   getLoadingMessage: () =>

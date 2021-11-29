@@ -17,9 +17,11 @@ import {
   EuiTableActionsColumnType,
   EuiSpacer,
   EuiButton,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-
+import { ClassNames } from '@emotion/react';
+import { tooltipStylesFactory } from '../shared_styles';
 import { CanvasVariable } from '../../../types';
 
 import { EditVar } from './edit_var';
@@ -106,7 +108,7 @@ export const VarConfig: FC<Props> = ({
 }) => {
   const [panelMode, setPanelMode] = useState<PanelMode>(PanelMode.List);
   const [selectedVar, setSelectedVar] = useState<CanvasVariable | null>(null);
-
+  const { euiTheme } = useEuiTheme();
   const selectAndEditVar = (v: CanvasVariable) => {
     setSelectedVar(v);
     setPanelMode(PanelMode.Edit);
@@ -174,106 +176,110 @@ export const VarConfig: FC<Props> = ({
   ];
 
   return (
-    <div
-      className={`canvasSidebar__expandable canvasVarConfig__container ${
-        panelMode !== PanelMode.List ? 'canvasVarConfig-isEditMode' : ''
-      }`}
-    >
-      <div className="canvasVarConfig__innerContainer">
-        <EuiAccordion
-          id="accordion-variables"
-          className="canvasVarConfig__listView canvasSidebar__accordion"
-          buttonContent={
-            <EuiToolTip
-              content={strings.getTitleTooltip()}
-              position="left"
-              className="canvasArg__tooltip"
-            >
-              <span>{strings.getTitle()}</span>
-            </EuiToolTip>
-          }
-          extraAction={
-            <EuiToolTip position="top" content={strings.getAddTooltipLabel()}>
-              <EuiButtonIcon
-                color="primary"
-                iconType="plusInCircle"
-                aria-label={strings.getAddTooltipLabel()}
-                onClick={() => {
-                  setSelectedVar(null);
-                  setPanelMode(PanelMode.Edit);
-                }}
-              />
-            </EuiToolTip>
-          }
+    <ClassNames>
+      {({ css }) => (
+        <div
+          className={`canvasSidebar__expandable canvasVarConfig__container ${
+            panelMode !== PanelMode.List ? 'canvasVarConfig-isEditMode' : ''
+          }`}
         >
-          {variables.length !== 0 && (
-            <div className="canvasSidebar__accordionContent">
-              <EuiInMemoryTable
-                className="canvasVarConfig__list"
-                items={variables}
-                columns={varColumns}
-                hasActions={true}
-                pagination={false}
-                sorting={true}
-                compressed
-              />
+          <div className="canvasVarConfig__innerContainer">
+            <EuiAccordion
+              id="accordion-variables"
+              className="canvasVarConfig__listView canvasSidebar__accordion"
+              buttonContent={
+                <EuiToolTip
+                  content={strings.getTitleTooltip()}
+                  position="left"
+                  className={css(tooltipStylesFactory(euiTheme))}
+                >
+                  <span>{strings.getTitle()}</span>
+                </EuiToolTip>
+              }
+              extraAction={
+                <EuiToolTip position="top" content={strings.getAddTooltipLabel()}>
+                  <EuiButtonIcon
+                    color="primary"
+                    iconType="plusInCircle"
+                    aria-label={strings.getAddTooltipLabel()}
+                    onClick={() => {
+                      setSelectedVar(null);
+                      setPanelMode(PanelMode.Edit);
+                    }}
+                  />
+                </EuiToolTip>
+              }
+            >
+              {variables.length !== 0 && (
+                <div className="canvasSidebar__accordionContent">
+                  <EuiInMemoryTable
+                    className="canvasVarConfig__list"
+                    items={variables}
+                    columns={varColumns}
+                    hasActions={true}
+                    pagination={false}
+                    sorting={true}
+                    compressed
+                  />
+                </div>
+              )}
+              {variables.length === 0 && (
+                <div className="canvasSidebar__accordionContent">
+                  <EuiText color="subdued" size="s">
+                    {strings.getEmptyDescription()}
+                  </EuiText>
+                  <EuiSpacer size="m" />
+                  <EuiButton
+                    size="s"
+                    iconType="plusInCircle"
+                    onClick={() => setPanelMode(PanelMode.Edit)}
+                  >
+                    {strings.getAddButtonLabel()}
+                  </EuiButton>
+                </div>
+              )}
+            </EuiAccordion>
+            <div className="canvasVarConfig__editView canvasSidebar__accordion">
+              {panelMode === PanelMode.Edit && (
+                <EditVar
+                  variables={variables}
+                  selectedVar={selectedVar}
+                  onSave={(newVar: CanvasVariable) => {
+                    if (!selectedVar) {
+                      onAddVar(newVar);
+                    } else {
+                      onEditVar(selectedVar, newVar);
+                    }
+
+                    setSelectedVar(null);
+                    setPanelMode(PanelMode.List);
+                  }}
+                  onCancel={() => {
+                    setSelectedVar(null);
+                    setPanelMode(PanelMode.List);
+                  }}
+                />
+              )}
+
+              {panelMode === PanelMode.Delete && selectedVar && (
+                <DeleteVar
+                  selectedVar={selectedVar}
+                  onDelete={(v: CanvasVariable) => {
+                    onDeleteVar(v);
+
+                    setSelectedVar(null);
+                    setPanelMode(PanelMode.List);
+                  }}
+                  onCancel={() => {
+                    setSelectedVar(null);
+                    setPanelMode(PanelMode.List);
+                  }}
+                />
+              )}
             </div>
-          )}
-          {variables.length === 0 && (
-            <div className="canvasSidebar__accordionContent">
-              <EuiText color="subdued" size="s">
-                {strings.getEmptyDescription()}
-              </EuiText>
-              <EuiSpacer size="m" />
-              <EuiButton
-                size="s"
-                iconType="plusInCircle"
-                onClick={() => setPanelMode(PanelMode.Edit)}
-              >
-                {strings.getAddButtonLabel()}
-              </EuiButton>
-            </div>
-          )}
-        </EuiAccordion>
-        <div className="canvasVarConfig__editView canvasSidebar__accordion">
-          {panelMode === PanelMode.Edit && (
-            <EditVar
-              variables={variables}
-              selectedVar={selectedVar}
-              onSave={(newVar: CanvasVariable) => {
-                if (!selectedVar) {
-                  onAddVar(newVar);
-                } else {
-                  onEditVar(selectedVar, newVar);
-                }
-
-                setSelectedVar(null);
-                setPanelMode(PanelMode.List);
-              }}
-              onCancel={() => {
-                setSelectedVar(null);
-                setPanelMode(PanelMode.List);
-              }}
-            />
-          )}
-
-          {panelMode === PanelMode.Delete && selectedVar && (
-            <DeleteVar
-              selectedVar={selectedVar}
-              onDelete={(v: CanvasVariable) => {
-                onDeleteVar(v);
-
-                setSelectedVar(null);
-                setPanelMode(PanelMode.List);
-              }}
-              onCancel={() => {
-                setSelectedVar(null);
-                setPanelMode(PanelMode.List);
-              }}
-            />
-          )}
+          </div>
         </div>
-      </div>
-    </div>
+      )}
+    </ClassNames>
   );
 };

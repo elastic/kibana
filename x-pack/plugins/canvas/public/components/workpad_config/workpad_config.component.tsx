@@ -20,12 +20,15 @@ import {
   EuiTextArea,
   EuiAccordion,
   EuiButton,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { ClassNames } from '@emotion/react';
 
 import { VarConfig } from '../var_config';
 import { DEFAULT_WORKPAD_CSS } from '../../../common/lib/constants';
 import { CanvasVariable } from '../../../types';
+import { tooltipStylesFactory } from '../shared_styles';
 
 const strings = {
   getApplyStylesheetButtonLabel: () =>
@@ -97,6 +100,8 @@ export interface Props {
 }
 
 export const WorkpadConfig: FC<Props> = (props) => {
+  const { euiTheme } = useEuiTheme();
+
   const [css, setCSS] = useState(props.css);
   const { size, name, setSize, setName, setWorkpadCSS, variables, setWorkpadVariables } = props;
   const rotate = () => setSize({ width: size.height, height: size.width });
@@ -121,98 +126,102 @@ export const WorkpadConfig: FC<Props> = (props) => {
   ];
 
   return (
-    <div>
-      <EuiFormRow label={strings.getNameLabel()} display="rowCompressed">
-        <EuiFieldText compressed value={name} onChange={(e) => setName(e.target.value)} />
-      </EuiFormRow>
-
-      <EuiSpacer size="s" />
-
-      <EuiFlexGroup gutterSize="s" alignItems="center">
-        <EuiFlexItem>
-          <EuiFormRow label={strings.getPageWidthLabel()} display="rowCompressed">
-            <EuiFieldNumber
-              compressed
-              onChange={(e) => setSize({ width: Number(e.target.value), height: size.height })}
-              value={size.width}
-            />
+    <ClassNames>
+      {({ css: cssEmotion }) => (
+        <div>
+          <EuiFormRow label={strings.getNameLabel()} display="rowCompressed">
+            <EuiFieldText compressed value={name} onChange={(e) => setName(e.target.value)} />
           </EuiFormRow>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiFormRow display="rowCompressed" hasEmptyLabelSpace>
-            <EuiToolTip position="bottom" content={strings.getFlipDimensionTooltip()}>
-              <EuiButtonIcon
-                iconType="merge"
-                color="text"
-                onClick={rotate}
-                aria-label={strings.getFlipDimensionAriaLabel()}
-              />
-            </EuiToolTip>
-          </EuiFormRow>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiFormRow label={strings.getPageHeightLabel()} display="rowCompressed">
-            <EuiFieldNumber
-              compressed
-              onChange={(e) => setSize({ height: Number(e.target.value), width: size.width })}
-              value={size.height}
-            />
-          </EuiFormRow>
-        </EuiFlexItem>
-      </EuiFlexGroup>
 
-      <EuiSpacer size="s" />
+          <EuiSpacer size="s" />
 
-      <div>
-        {badges.map((badge, i) => (
-          <EuiBadge
-            key={`page-size-badge-${i}`}
-            color="hollow"
-            onClick={() => setSize(badge.size)}
-            aria-label={strings.getPageSizeBadgeAriaLabel(badge.name)}
-            onClickAriaLabel={strings.getPageSizeBadgeOnClickAriaLabel(badge.name)}
-          >
-            {badge.name}
-          </EuiBadge>
-        ))}
-      </div>
+          <EuiFlexGroup gutterSize="s" alignItems="center">
+            <EuiFlexItem>
+              <EuiFormRow label={strings.getPageWidthLabel()} display="rowCompressed">
+                <EuiFieldNumber
+                  compressed
+                  onChange={(e) => setSize({ width: Number(e.target.value), height: size.height })}
+                  value={size.width}
+                />
+              </EuiFormRow>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiFormRow display="rowCompressed" hasEmptyLabelSpace>
+                <EuiToolTip position="bottom" content={strings.getFlipDimensionTooltip()}>
+                  <EuiButtonIcon
+                    iconType="merge"
+                    color="text"
+                    onClick={rotate}
+                    aria-label={strings.getFlipDimensionAriaLabel()}
+                  />
+                </EuiToolTip>
+              </EuiFormRow>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiFormRow label={strings.getPageHeightLabel()} display="rowCompressed">
+                <EuiFieldNumber
+                  compressed
+                  onChange={(e) => setSize({ height: Number(e.target.value), width: size.width })}
+                  value={size.height}
+                />
+              </EuiFormRow>
+            </EuiFlexItem>
+          </EuiFlexGroup>
 
-      <EuiSpacer size="m" />
+          <EuiSpacer size="s" />
 
-      <VarConfig variables={variables} setVariables={setWorkpadVariables} />
-
-      <div className="canvasSidebar__expandable">
-        <EuiAccordion
-          id="accordion-global-css"
-          className="canvasSidebar__accordion"
-          style={{ marginBottom: 0 }}
-          buttonContent={
-            <EuiToolTip
-              content={strings.getGlobalCSSTooltip()}
-              position="left"
-              className="canvasArg__tooltip"
-            >
-              <span>{strings.getGlobalCSSLabel()}</span>
-            </EuiToolTip>
-          }
-        >
-          <div className="canvasSidebar__accordionContent">
-            <EuiTextArea
-              aria-label={strings.getGlobalCSSTooltip()}
-              value={css}
-              compressed
-              onChange={(e) => setCSS(e.target.value)}
-              rows={10}
-            />
-            <EuiSpacer size="s" />
-            <EuiButton size="s" onClick={() => setWorkpadCSS(css || DEFAULT_WORKPAD_CSS)}>
-              {strings.getApplyStylesheetButtonLabel()}
-            </EuiButton>
-            <EuiSpacer size="xs" />
+          <div>
+            {badges.map((badge, i) => (
+              <EuiBadge
+                key={`page-size-badge-${i}`}
+                color="hollow"
+                onClick={() => setSize(badge.size)}
+                aria-label={strings.getPageSizeBadgeAriaLabel(badge.name)}
+                onClickAriaLabel={strings.getPageSizeBadgeOnClickAriaLabel(badge.name)}
+              >
+                {badge.name}
+              </EuiBadge>
+            ))}
           </div>
-        </EuiAccordion>
-      </div>
-    </div>
+
+          <EuiSpacer size="m" />
+
+          <VarConfig variables={variables} setVariables={setWorkpadVariables} />
+
+          <div className="canvasSidebar__expandable">
+            <EuiAccordion
+              id="accordion-global-css"
+              className="canvasSidebar__accordion"
+              style={{ marginBottom: 0 }}
+              buttonContent={
+                <EuiToolTip
+                  content={strings.getGlobalCSSTooltip()}
+                  position="left"
+                  className={cssEmotion(tooltipStylesFactory(euiTheme))}
+                >
+                  <span>{strings.getGlobalCSSLabel()}</span>
+                </EuiToolTip>
+              }
+            >
+              <div className="canvasSidebar__accordionContent">
+                <EuiTextArea
+                  aria-label={strings.getGlobalCSSTooltip()}
+                  value={css}
+                  compressed
+                  onChange={(e) => setCSS(e.target.value)}
+                  rows={10}
+                />
+                <EuiSpacer size="s" />
+                <EuiButton size="s" onClick={() => setWorkpadCSS(css || DEFAULT_WORKPAD_CSS)}>
+                  {strings.getApplyStylesheetButtonLabel()}
+                </EuiButton>
+                <EuiSpacer size="xs" />
+              </div>
+            </EuiAccordion>
+          </div>
+        </div>
+      )}
+    </ClassNames>
   );
 };
 

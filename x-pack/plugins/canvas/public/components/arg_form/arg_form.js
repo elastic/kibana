@@ -7,6 +7,7 @@
 
 import React, { useRef, useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
+import { useEuiTheme } from '@elastic/eui';
 import { ErrorBoundary } from '../enhance/error_boundary';
 import { ArgSimpleForm } from './arg_simple_form';
 import { ArgTemplateForm } from './arg_template_form';
@@ -14,6 +15,7 @@ import { SimpleFailure } from './simple_failure';
 import { AdvancedFailure } from './advanced_failure';
 import { ArgLabel } from './arg_label';
 import { PendingArgValue } from './pending_arg_value';
+import { argStylesFactory } from './arg_form.styles';
 
 const isPending = (argTypeInstance, resolvedArgValue) => {
   const { argType } = argTypeInstance;
@@ -43,6 +45,7 @@ export const ArgForm = (props) => {
   } = props;
   const [renderError, setRenderError] = useState(false);
   const isMounted = useRef();
+  const { euiTheme } = useEuiTheme();
 
   useEffect(() => {
     isMounted.current = true;
@@ -111,7 +114,10 @@ export const ArgForm = (props) => {
         );
 
         return (
-          <div className={`canvasArg ${expandableLabel ? 'canvasSidebar__expandable' : null}`}>
+          <div
+            css={argStylesFactory(euiTheme)}
+            className={`${expandableLabel ? 'canvasSidebar__expandable' : null}`}
+          >
             <ArgLabel
               className="resolved"
               argId={argId}
