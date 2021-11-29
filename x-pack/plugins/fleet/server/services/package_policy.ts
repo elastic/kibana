@@ -1176,32 +1176,7 @@ export function preconfigurePackageInputs(
 ): NewPackagePolicy {
   if (!preconfiguredInputs) return basePackagePolicy;
 
-  const availablePolicyTemplates = packageInfo.policy_templates ?? [];
-
-  const inputs = [
-    ...basePackagePolicy.inputs.filter((input) => {
-      if (!input.policy_template) {
-        return true;
-      }
-
-      const policyTemplate = availablePolicyTemplates.find(
-        ({ name }) => name === input.policy_template
-      );
-
-      // Ignore any policy templates removed in the new package version
-      if (!policyTemplate) {
-        return false;
-      }
-
-      // Ignore any inputs removed from this policy template in the new package version
-      const policyTemplateStillIncludesInput =
-        policyTemplate.inputs?.some(
-          (policyTemplateInput) => policyTemplateInput.type === input.type
-        ) ?? false;
-
-      return policyTemplateStillIncludesInput;
-    }),
-  ];
+  const inputs = [...basePackagePolicy.inputs];
 
   for (const preconfiguredInput of preconfiguredInputs) {
     // Preconfiguration does not currently support multiple policy templates, so overrides will have an undefined
@@ -1214,11 +1189,8 @@ export function preconfigurePackageInputs(
         )
       : inputs.find((i) => i.type === preconfiguredInput.type);
 
-    // If there's no corresponding input on the original package policy, just
-    // take the override value from the new package as-is. This case typically
-    // occurs when inputs or package policy templates are added/removed between versions.
+    // If the input do not exist skip
     if (originalInput === undefined) {
-      inputs.push(preconfiguredInput as NewPackagePolicyInput);
       continue;
     }
 
@@ -1249,7 +1221,6 @@ export function preconfigurePackageInputs(
         );
 
         if (originalStream === undefined) {
-          originalInput.streams.push(stream);
           continue;
         }
 
