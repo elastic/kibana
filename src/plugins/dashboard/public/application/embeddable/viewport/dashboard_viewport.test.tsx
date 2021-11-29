@@ -27,6 +27,7 @@ import {
   CONTACT_CARD_EMBEDDABLE,
 } from '../../../../../embeddable/public/lib/test_samples';
 import { getStubPluginServices } from '../../../../../presentation_util/public';
+import { screenshotModePluginMock } from '../../../../../screenshot_mode/public/mocks';
 
 let dashboardContainer: DashboardContainer | undefined;
 const presentationUtil = getStubPluginServices();
@@ -65,6 +66,7 @@ function getProps(props?: Partial<DashboardViewportProps>): {
       getTriggerCompatibleActions: (() => []) as any,
     } as any,
     presentationUtil,
+    screenshotMode: screenshotModePluginMock.createSetupContract(),
   };
 
   const input = getSampleDashboardInput({
