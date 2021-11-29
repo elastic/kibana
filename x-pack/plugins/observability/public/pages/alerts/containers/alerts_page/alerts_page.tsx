@@ -26,7 +26,11 @@ import { callObservabilityApi } from '../../../../services/call_observability_ap
 import { getNoDataConfig } from '../../../../utils/no_data_config';
 import { LoadingObservability } from '../../../overview/loading_observability';
 import { AlertsTableTGrid } from '../alerts_table_t_grid';
-import { Provider, alertsPageStateContainer, useAlertsPageStateContainer } from '../state_container';
+import {
+  Provider,
+  alertsPageStateContainer,
+  useAlertsPageStateContainer,
+} from '../state_container';
 import './styles.scss';
 import { AlertsStatusFilter, AlertsDisclaimer, AlertsSearchBar } from '../../components';
 
