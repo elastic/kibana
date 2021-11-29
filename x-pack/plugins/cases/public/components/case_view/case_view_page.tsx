@@ -353,7 +353,7 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
                   <EuiLoadingContent lines={8} data-test-subj="case-view-loading-content" />
                 )}
                 {!initLoadingData && (
-                  <EuiFlexGroup direction="column">
+                  <EuiFlexGroup direction="column" responsive={false}>
                     <EuiFlexItem>
                       <CaseViewMetrics
                         data-test-subj="case-view-metrics"

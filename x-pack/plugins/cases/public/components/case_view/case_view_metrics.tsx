@@ -59,7 +59,7 @@ const CaseViewMetricItems: React.FC<{ metricItems: MetricItems }> = React.memo(
     <>
       {metricItems.map(({ title, value }, index) => (
         <EuiFlexItem key={index}>
-          <EuiFlexGroup direction="column" gutterSize="s">
+          <EuiFlexGroup direction="column" gutterSize="s" responsive={false}>
             <EuiFlexItem>{title}</EuiFlexItem>
             <MetricValue>{value}</MetricValue>
           </EuiFlexGroup>
@@ -75,7 +75,7 @@ export const CaseViewMetrics: React.FC<CaseViewMetricsProps> = React.memo(
     const metricItems = useMetricItems(metrics);
     return (
       <EuiPanel data-test-subj="case-view-metrics-panel" hasShadow={false} hasBorder={true}>
-        <EuiFlexGroup gutterSize="xl">
+        <EuiFlexGroup gutterSize="xl" wrap={true} responsive={false}>
           {isLoading ? (
             <EuiFlexItem>
               <EuiLoadingSpinner data-test-subj="case-view-metrics-spinner" size="l" />
