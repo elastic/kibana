@@ -166,9 +166,9 @@ export class SecurityPlugin
       this.anonymousAccessService.start({ http: core.http });
     }
 
-    this.authc.getCurrentUser().then(() => {
-      // Only start the telemetry when you are log in
-      this.securityTelemetryService.start({ http: core.http });
+    this.securityTelemetryService.start({
+      http: core.http,
+      getCurrentUser: this.authc.getCurrentUser,
     });
 
     return {

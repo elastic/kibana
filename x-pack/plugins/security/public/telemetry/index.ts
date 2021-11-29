@@ -7,8 +7,11 @@
 
 import type { HttpStart } from 'src/core/public';
 
+import type { AuthenticatedUser } from '../../common';
+
 interface SecurityTelemetryStartParams {
   http: HttpStart;
+  getCurrentUser: () => Promise<AuthenticatedUser>;
 }
 
 interface SecurityTelemetryAuthType {
@@ -20,8 +23,9 @@ interface SecurityTelemetryAuthType {
 export class SecurityTelemetryService {
   public static KeyAuthType = 'kibana-user-auth-type';
 
-  public async start({ http }: SecurityTelemetryStartParams) {
-    await this.postAuthTypeTelemetry(http);
+  public async start({ http, getCurrentUser }: SecurityTelemetryStartParams) {
+    // wait for the user to be authenticated before doing telemetry
+    getCurrentUser().then(() => this.postAuthTypeTelemetry(http));
   }
 
   private async postAuthTypeTelemetry(http: HttpStart) {
