@@ -3,54 +3,56 @@
 
 The best way to add data to the Elastic Stack is to use one of our many integrations.
 All integrations are available in a single view, and
-{kib} guides you there from the Welcome screen and home page.
+{kib} guides you there from the Welcome screen, home page, and main menu.
 
 [role="screenshot"]
 image::images/add-integration.png[Integrations page from which you can choose integrations to start collecting and analyzing data]
 
-If an integration is available for both
+NOTE: If an integration is available for both
 https://www.elastic.co/guide/en/fleet/master/beats-agent-comparison.html[Elastic Agent and Beats], the *Integrations* view defaults to the
 Elastic Agent integration, if it is generally available (GA).
 To switch to a
 Beats integration, use the filter on the bottom left.
 
 [float]
-=== Search your data
+=== Add data with Elastic solutions
+
+A good place to start is with one of the promoted integrations:
+
+* *Web site search crawler.*
 Discover, extract, and index your web content into App Search engines using the
-{app-search-ref}/web-crawler.html[Enterprise Search web crawler].
+{app-search-ref}/web-crawler.html[Enterprise Search web site crawler].
 Search across Google Drive, GitHub, Salesforce, and many other web services using
 {workplace-search-ref}/workplace-search-content-sources.html[Workplace Search content sources].
 
-[float]
-=== Observe your data
-
+* *Elastic APM.*
 Get logs, metrics, traces, and uptime data into the Elastic Stack.
 Integrations are available for popular services and platforms,
 such as Nginx, AWS, and MongoDB,
 and generic input types like log files.
-Refer to {observability-guide}/observability-introduction.html[What is Elastic Observability] for more information.
+Refer to {observability-guide}/observability-introduction.html[Elastic Observability]
+for more information.
+
+* *Endpoint Security.*
+Protect your hosts and send logs, metrics, and endpoint security data
+to Elastic Security.
+Refer to {security-guide}/ingest-data.html[Ingest data to Elastic Security]
+for more information.
 
 [float]
-=== Secure your data
+=== Add data with language clients
 
-Collect security events and threat intelligence with Filebeat,
-Auditbeat, Winlogbeat, Packetbeat, and Elastic Agent.
-Install the Endpoint Security integration for Elastic Agent
-to protect your hosts with threat detection and prevention.
-Refer to {security-guide}/ingest-data.html[Ingest data to Elastic Security] for more information.
+Add any data to the Elastic Stack using a programming language,
+such as JavaScript, Java, Python, and Ruby.
+Details for each programming language library that Elastic provides are in the
+https://www.elastic.co/guide/en/elasticsearch/client/index.html[{es} Client documentation].
 
-[float]
-=== Build on your data
-
-Elastic provides
-https://www.elastic.co/guide/en/elasticsearch/client/index.html[libraries for several programming languages] that
-allow you to connect your code directly to your {es} Service deployment.
 If you are running {kib} on our hosted {es} Service,
 click *View deployment details* on the *Integrations* view
 to verify your {es} endpoint and Cloud ID, and create API keys for integestion.
 
 [float]
-=== Get sample data
+=== Add sample data
 
 Sample data sets come with sample visualizations, dashboards, and more to help you
 explore {kib} before you ingest or upload your own data.
@@ -62,7 +64,7 @@ image::images/add-sample-data.png[eCommerce, flights, and web logs sample data s
 
 [discrete]
 [[upload-data-kibana]]
-=== Upload your data
+=== Upload data
 
 If you have a log file or delimited CSV, TSV, or JSON file, you can upload it,
 view its fields and metrics, and optionally import it into {es}.
@@ -81,17 +83,16 @@ The {stack-security-features} provide roles and privileges that control which
 users can upload files. To upload a file in {kib} and import it into an {es}
 index, you'll need:
 
-* `all` {kib} privileges for *Discover*
 * `manage_pipeline` or `manage_ingest_pipelines` cluster privilege
 * `create`, `create_index`, `manage`, and `read` index privileges for the index
-* `Data Views Management: All` {kib} feature privileges
+* `all` {kib} privileges for *Discover* and *Data Views Management*
 
 You can manage your roles, privileges, and spaces in **{stack-manage-app}**.
 
 [discrete]
 === What's next?
 
-Now that you added data to the Elastic Stack, take your investigation
+Once you add data to the Elastic Stack, take your investigation
 to a deeper level. Use <<discover, **Discover**>> to quickly gain insight to your data:
 search and filter your data, get information about the structure of the fields,
 and present your findings in a visualization.
