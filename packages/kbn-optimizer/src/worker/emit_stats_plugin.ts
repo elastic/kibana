@@ -26,7 +26,7 @@ export class EmitStatsPlugin {
       (stats) => {
         Fs.writeFileSync(
           Path.resolve(this.bundle.outputDir, 'stats.json'),
-          JSON.stringify(stats.toJson())
+          JSON.stringify(stats.toJson(), null, 2)
         );
       }
     );
