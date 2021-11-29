@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
 import { Ast } from '@kbn/interpreter/common';
 import { Position } from '@elastic/charts';
-import { ThemeServiceStart } from 'kibana/public';
+import type { ThemeServiceStart, SavedObjectsClientContract } from 'kibana/public';
 import { KibanaThemeProvider } from '../../../../../src/plugins/kibana_react/public';
 import { PaletteRegistry } from '../../../../../src/plugins/charts/public';
 import type { OperationMetadata, Visualization } from '../types';
@@ -42,6 +42,7 @@ const groupLabelForHeatmap = i18n.translate('xpack.lens.heatmapVisualization.hea
 interface HeatmapVisualizationDeps {
   paletteService: PaletteRegistry;
   theme: ThemeServiceStart;
+  savedObjectsClient: SavedObjectsClientContract;
 }
 
 function getAxisName(axis: 'x' | 'y') {
@@ -99,6 +100,7 @@ function computePaletteParams(params: CustomPaletteParams) {
 export const getHeatmapVisualization = ({
   paletteService,
   theme,
+  savedObjectsClient,
 }: HeatmapVisualizationDeps): Visualization<HeatmapVisualizationState> => ({
   id: LENS_HEATMAP_ID,
 
@@ -264,7 +266,11 @@ export const getHeatmapVisualization = ({
     render(
       <KibanaThemeProvider theme$={theme.theme$}>
         <I18nProvider>
-          <HeatmapDimensionEditor {...props} paletteService={paletteService} />
+          <HeatmapDimensionEditor
+            {...props}
+            paletteService={paletteService}
+            savedObjectsClient={savedObjectsClient}
+          />
         </I18nProvider>
       </KibanaThemeProvider>,
       domElement

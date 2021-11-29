@@ -64,6 +64,7 @@ export interface CustomPaletteParams {
   colorTerms?: ColorTerm[];
   steps?: number;
   title?: string;
+  paletteType?: string;
 }
 export type CustomPaletteParamsConfig = CustomPaletteParams & {
   maxSteps?: number;

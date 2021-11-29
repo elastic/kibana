@@ -69,18 +69,25 @@ const ContinuityOption: FC<{ iconType: string }> = ({ children, iconType }) => {
 
 export function CustomizablePalette({
   palettes,
+  libraryPalettes,
   activePalette,
   setPalette,
   dataBounds,
   showContinuity = true,
   showRangeTypeSelector = true,
+  savePaletteToLibrary,
 }: {
   palettes: PaletteRegistry;
+  libraryPalettes: Array<PaletteOutput<CustomPaletteParams>>;
   activePalette?: PaletteOutput<CustomPaletteParams>;
   setPalette: (palette: PaletteOutput<CustomPaletteParams>) => void;
   dataBounds?: { min: number; max: number };
   showContinuity?: boolean;
   showRangeTypeSelector?: boolean;
+  savePaletteToLibrary: (
+    palette: PaletteOutput<CustomPaletteParams>,
+    title: string
+  ) => Promise<void>;
 }) {
   if (!dataBounds || !activePalette) {
     return null;
@@ -90,6 +97,10 @@ export function CustomizablePalette({
   const colorStopsToShow = roundStopValues(
     getColorStops(palettes, activePalette?.params?.colorStops || [], activePalette, dataBounds)
   );
+
+  const savePalette = (title: string) => {
+    return savePaletteToLibrary(activePalette, title);
+  };
 
   return (
     <>
@@ -105,8 +116,10 @@ export function CustomizablePalette({
             data-test-subj="lnsPalettePanel_dynamicColoring_palette_picker"
             palettes={palettes}
             activePalette={activePalette}
+            libraryPalettes={libraryPalettes}
             setPalette={(newPalette) => {
               const isNewPaletteCustom = newPalette.name === CUSTOM_PALETTE;
+              const isSavedToLibrary = newPalette.isSavedToLibrary ?? false;
               const newParams: CustomPaletteParams = {
                 ...activePalette.params,
                 name: newPalette.name,
@@ -117,11 +130,19 @@ export function CustomizablePalette({
               const newColorStops = getColorStops(palettes, [], activePalette, dataBounds);
               if (isNewPaletteCustom) {
                 newParams.colorStops = newColorStops;
+              } else if (isSavedToLibrary) {
+                const savedPalette = libraryPalettes?.find(
+                  (p) => p.params?.title === newPalette.name
+                );
+                newParams.colorStops = savedPalette?.params?.colorStops;
+                newParams.name = CUSTOM_PALETTE;
               }
 
               newParams.stops = getPaletteStops(palettes, newParams, {
                 prevPalette:
-                  isNewPaletteCustom || isCurrentPaletteCustom ? undefined : newPalette.name,
+                  isNewPaletteCustom || isCurrentPaletteCustom || isSavedToLibrary
+                    ? undefined
+                    : newPalette.name,
                 dataBounds,
                 mapFromMinValue: true,
               });
@@ -131,6 +152,7 @@ export function CustomizablePalette({
 
               setPalette({
                 ...newPalette,
+                name: isSavedToLibrary ? CUSTOM_PALETTE : newPalette.name,
                 params: newParams,
               });
             }}
@@ -360,6 +382,7 @@ export function CustomizablePalette({
             data-test-prefix="lnsPalettePanel"
             colorStops={colorStopsToShow}
             dataBounds={dataBounds}
+            savePalette={savePalette}
             onChange={(colorStops) => {
               const newParams = getSwitchToCustomParams(
                 palettes,

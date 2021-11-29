@@ -270,7 +270,7 @@ export function DimensionEditor(
   );
   useEffect(() => {
     const getPalettesFromLibrary = () => {
-      getPalettesFromStore(paletteStore).then(
+      getPalettesFromStore(paletteStore, 'terms').then(
         (palettes: Array<PaletteOutput<CustomPaletteParams>>) => {
           setLibraryPalettes(palettes);
         }
@@ -284,7 +284,7 @@ export function DimensionEditor(
     type: 'palette',
   };
   const savePaletteToLibrary = (palette: PaletteOutput<CustomPaletteParams>, title: string) => {
-    return savePaletteToStore(paletteStore, palette, title).then((savedPalette) => {
+    return savePaletteToStore(paletteStore, palette, title, 'terms').then((savedPalette) => {
       setLibraryPalettes([...libraryPalettes, savedPalette]);
     });
   };

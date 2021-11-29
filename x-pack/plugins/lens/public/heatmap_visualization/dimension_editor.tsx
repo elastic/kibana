@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiFormRow,
@@ -14,7 +14,10 @@ import {
   EuiFlexGroup,
   EuiButtonEmpty,
 } from '@elastic/eui';
-import type { PaletteRegistry } from 'src/plugins/charts/public';
+import type { PaletteRegistry, PaletteOutput } from 'src/plugins/charts/public';
+import type { SavedObjectsClientContract } from 'kibana/public';
+import type { CustomPaletteParams } from '../../common';
+import { SavedObjectPaletteStore, getPalettesFromStore, savePaletteToStore } from '../persistence';
 import type { VisualizationDimensionEditorProps } from '../types';
 import {
   CustomizablePalette,
@@ -29,10 +32,41 @@ import { getSafePaletteParams } from './utils';
 export function HeatmapDimensionEditor(
   props: VisualizationDimensionEditorProps<HeatmapVisualizationState> & {
     paletteService: PaletteRegistry;
+    savedObjectsClient: SavedObjectsClientContract;
   }
 ) {
-  const { state, setState, frame, accessor } = props;
+  const { state, setState, frame, accessor, savedObjectsClient } = props;
   const [isPaletteOpen, setIsPaletteOpen] = useState(false);
+  const [libraryPalettes, setLibraryPalettes] = useState<Array<PaletteOutput<CustomPaletteParams>>>(
+    []
+  );
+
+  const paletteStore = useMemo(
+    () => new SavedObjectPaletteStore(savedObjectsClient),
+    [savedObjectsClient]
+  );
+
+  useEffect(() => {
+    const getPalettesFromLibrary = () => {
+      getPalettesFromStore(paletteStore, 'stops').then(
+        (palettes: Array<PaletteOutput<CustomPaletteParams>>) => {
+          setLibraryPalettes(palettes);
+        }
+      );
+    };
+    getPalettesFromLibrary();
+  }, [paletteStore]);
+
+  const savePaletteToLibrary = (palette: PaletteOutput<CustomPaletteParams>, title: string) => {
+    const newPalette = palette as HeatmapVisualizationState['palette'];
+    if (!newPalette) {
+      throw new Error('Palette is not valid');
+    }
+    const { accessor: splitAccessor, ...docToSave } = newPalette;
+    return savePaletteToStore(paletteStore, docToSave, title, 'stops').then((savedPalette) => {
+      setLibraryPalettes([...libraryPalettes, savedPalette]);
+    });
+  };
 
   if (state?.valueAccessor !== accessor) return null;
 
@@ -94,6 +128,7 @@ export function HeatmapDimensionEditor(
             handleClose={() => setIsPaletteOpen(!isPaletteOpen)}
           >
             <CustomizablePalette
+              libraryPalettes={libraryPalettes}
               palettes={props.paletteService}
               activePalette={activePalette}
               dataBounds={currentMinMax}
@@ -109,6 +144,7 @@ export function HeatmapDimensionEditor(
                   palette: newPalette as HeatmapVisualizationState['palette'],
                 });
               }}
+              savePaletteToLibrary={savePaletteToLibrary}
             />
           </PalettePanelContainer>
         </EuiFlexItem>

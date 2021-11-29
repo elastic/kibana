@@ -53,8 +53,8 @@ export class SavedObjectPaletteStore implements SavedPaletteStore {
     return { ...palette, savedObjectId: result.id };
   };
 
-  getAll = async () => {
-    const resolveResult = await this.client.find({ type: PALETTE_DOC_TYPE });
+  getAll = async (paletteType?: string) => {
+    const resolveResult = await this.client.find({ type: PALETTE_DOC_TYPE, search: paletteType });
     return resolveResult;
   };
 

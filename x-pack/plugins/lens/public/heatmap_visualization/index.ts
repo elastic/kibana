@@ -28,6 +28,7 @@ export class HeatmapVisualization {
       const timeZone = getTimeZone(core.uiSettings);
       const { getHeatmapVisualization, getHeatmapRenderer } = await import('../async_services');
       const palettes = await charts.palettes.getPalettes();
+      const [{ savedObjects }] = await core.getStartServices();
 
       expressions.registerRenderer(
         getHeatmapRenderer({
@@ -38,7 +39,11 @@ export class HeatmapVisualization {
           kibanaTheme: core.theme,
         })
       );
-      return getHeatmapVisualization({ paletteService: palettes, theme: core.theme });
+      return getHeatmapVisualization({
+        paletteService: palettes,
+        theme: core.theme,
+        savedObjectsClient: savedObjects.client,
+      });
     });
   }
 }

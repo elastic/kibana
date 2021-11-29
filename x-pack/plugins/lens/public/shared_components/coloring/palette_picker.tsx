@@ -106,13 +106,16 @@ export function PalettePicker({
   }
   if (libraryPalettes) {
     const savedPalettes = libraryPalettes.map((palette) => {
-      const colors = palette.params?.colorTerms?.map(({ color }) => color);
+      const params = palette?.params;
+      const colors = params?.colorTerms
+        ? params?.colorTerms?.map(({ color }) => color)
+        : params?.colorStops?.map(({ color }) => color);
       return {
-        value: palette.params?.title ?? palette.name,
-        title: palette.params?.title ?? palette.name,
+        value: params?.title ?? palette.name,
+        title: params?.title ?? palette.name,
         type: FIXED_PROGRESSION,
         palette: colors ?? [],
-        'data-test-subj': `${palette.params?.title}-palette`,
+        'data-test-subj': `${params?.title}-palette`,
       };
     });
     palettesToShow.push(...savedPalettes);

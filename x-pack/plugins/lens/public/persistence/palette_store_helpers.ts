@@ -9,9 +9,10 @@ import type { CustomPaletteParams } from '../../common';
 import { SavedObjectPaletteStore } from './saved_palette_store';
 
 export const getPalettesFromStore = (
-  paletteStore: SavedObjectPaletteStore
+  paletteStore: SavedObjectPaletteStore,
+  paletteType?: string
 ): Promise<Array<PaletteOutput<CustomPaletteParams>>> => {
-  return paletteStore.getAll().then((response) => {
+  return paletteStore.getAll(paletteType).then((response) => {
     return response.savedObjects.map((palette) => {
       const attributes = palette.attributes as PaletteOutput<CustomPaletteParams>;
       return {
@@ -26,7 +27,8 @@ export const getPalettesFromStore = (
 export const savePaletteToStore = (
   paletteStore: SavedObjectPaletteStore,
   palette: PaletteOutput<CustomPaletteParams>,
-  title: string
+  title: string,
+  paletteType?: string
 ) => {
   const paletteToSave = {
     ...palette,
@@ -34,6 +36,7 @@ export const savePaletteToStore = (
     params: {
       ...palette.params,
       title,
+      paletteType,
     },
   };
   return paletteStore

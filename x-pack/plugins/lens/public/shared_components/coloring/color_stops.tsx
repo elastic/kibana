@@ -23,6 +23,7 @@ import { DEFAULT_COLOR } from './constants';
 import { getDataMinMax, getStepValue, isValidColor } from './utils';
 import { TooltipWrapper, useDebouncedValue } from '../index';
 import type { ColorStop, CustomPaletteParamsConfig } from '../../../common';
+import { SavePaletteModal } from './save_palette_modal';
 
 const idGeneratorFn = htmlIdGenerator();
 
@@ -43,6 +44,7 @@ function shouldSortStops(colorStops: Array<{ color: string; stop: string | numbe
 export interface CustomStopsProps {
   colorStops: ColorStop[];
   onChange: (colorStops: ColorStop[]) => void;
+  savePalette: (title: string) => Promise<void>;
   dataBounds: { min: number; max: number };
   paletteConfiguration: CustomPaletteParamsConfig | undefined;
   'data-test-prefix': string;
@@ -50,10 +52,12 @@ export interface CustomStopsProps {
 export const CustomStops = ({
   colorStops,
   onChange,
+  savePalette,
   paletteConfiguration,
   dataBounds,
   ['data-test-prefix']: dataTestPrefix,
 }: CustomStopsProps) => {
+  const [isSavePaletteModalOpen, setSavePaletteModalOpen] = useState(false);
   const onChangeWithValidation = useCallback(
     (newColorStops: Array<{ color: string; stop: string }>) => {
       const areStopsValuesValid = areStopsValid(newColorStops);
@@ -63,6 +67,15 @@ export const CustomStops = ({
       }
     },
     [onChange]
+  );
+
+  const onPaletteSave = useCallback(
+    (title: string) => {
+      return savePalette(title).then(() => {
+        setSavePaletteModalOpen(false);
+      });
+    },
+    [savePalette]
   );
 
   const memoizedValues = useMemo(() => {
@@ -305,6 +318,28 @@ export const CustomStops = ({
           })}
         </EuiButtonEmpty>
       </TooltipWrapper>
+      <EuiSpacer size="s" />
+      <EuiButtonEmpty
+        data-test-subj={`${dataTestPrefix}_dynamicColoring_savePalette`}
+        iconType="save"
+        color="primary"
+        aria-label={i18n.translate('xpack.lens.dynamicColoring.customPalette.save', {
+          defaultMessage: 'Save palette',
+        })}
+        size="xs"
+        isDisabled={shouldDisableAdd}
+        flush="left"
+        onClick={() => {
+          setSavePaletteModalOpen(true);
+        }}
+      >
+        {i18n.translate('xpack.lens.dynamicColoring.customPalette.save', {
+          defaultMessage: 'Save palette',
+        })}
+      </EuiButtonEmpty>
+      {isSavePaletteModalOpen && (
+        <SavePaletteModal onCancel={() => setSavePaletteModalOpen(false)} onSave={onPaletteSave} />
+      )}
     </>
   );
 };
