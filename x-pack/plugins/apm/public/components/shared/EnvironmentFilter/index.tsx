@@ -19,7 +19,7 @@ import { fromQuery, toQuery } from '../Links/url_helpers';
 import { useUxUrlParams } from '../../../context/url_params_context/use_ux_url_params';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { Environment } from '../../../../common/environment_rt';
-import { useEnvironmentsContext } from '../../../context/environments_context.tsx/use_environments_context';
+import { useEnvironmentsContext } from '../../../context/environments_context/use_environments_context';
 
 function updateEnvironmentUrl(
   history: History,

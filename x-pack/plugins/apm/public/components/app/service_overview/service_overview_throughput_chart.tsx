@@ -17,7 +17,7 @@ import React from 'react';
 import { ApmMlDetectorType } from '../../../../common/anomaly_detection/apm_ml_detectors';
 import { asExactTransactionRate } from '../../../../common/utils/formatters';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
-import { useEnvironmentsContext } from '../../../context/environments_context.tsx/use_environments_context';
+import { useEnvironmentsContext } from '../../../context/environments_context/use_environments_context';
 import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { useFetcher } from '../../../hooks/use_fetcher';

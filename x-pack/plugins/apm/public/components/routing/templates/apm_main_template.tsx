@@ -12,7 +12,7 @@ import {
   useKibana,
   KibanaPageTemplateProps,
 } from '../../../../../../../src/plugins/kibana_react/public';
-import { EnvironmentsContextProvider } from '../../../context/environments_context.tsx/environments_context';
+import { EnvironmentsContextProvider } from '../../../context/environments_context/environments_context';
 import { useFetcher } from '../../../hooks/use_fetcher';
 import { ApmPluginStartDeps } from '../../../plugin';
 import { ApmEnvironmentFilter } from '../../shared/EnvironmentFilter';
