@@ -8,7 +8,7 @@
 import React, { memo } from 'react';
 import styled, { css } from 'styled-components';
 import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { ManagementEmptyStateWraper } from '../../../../components/management_empty_state_wraper';
 
 const EmptyPrompt = styled(EuiEmptyPrompt)`

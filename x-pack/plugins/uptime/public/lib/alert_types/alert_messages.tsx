@@ -7,7 +7,7 @@
 
 import type { Observable } from 'rxjs';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import type { CoreTheme } from 'kibana/public';
 import { toMountPoint } from '../../../../../../src/plugins/kibana_react/public';

@@ -6,7 +6,7 @@
  */
 
 import { EuiButton, EuiDatePicker, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import moment, { Moment } from 'moment';
 import React, { useCallback } from 'react';
 import { convertIntervalToString } from '../../../../../utils/convert_interval_to_string';
