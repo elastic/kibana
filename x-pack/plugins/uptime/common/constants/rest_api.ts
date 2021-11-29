@@ -38,8 +38,5 @@ export enum API_URLS {
 
   // Service end points
   INDEX_TEMPLATES = '/internal/uptime/service/index_templates',
-  GET_MONITOR = '/internal/uptime/service/get_monitors',
-  ADD_MONITOR = '/internal/uptime/service/add_monitor',
-  EDIT_MONITOR = '/internal/uptime/service/edit_monitor',
-  DELETE_MONITOR = '/internal/uptime/service/delete_monitor',
+  SYNTHETICS_MONITORS = '/internal/uptime/service/monitors',
 }

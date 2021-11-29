@@ -5,25 +5,47 @@
  * 2.0.
  */
 
-import { expectFixtureEql } from './helper/expect_fixture_eql';
+import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { API_URLS } from '../../../../../plugins/uptime/common/constants';
 
 export default function ({ getService }: FtrProviderContext) {
-  describe('edit synthetics monitor', () => {
-    const dateStart = '2018-01-28T17:40:08.078Z';
-    const dateEnd = '2025-01-28T19:00:16.078Z';
-    const monitorId = '0002-up';
+  describe('get synthetics monitor', () => {
+    const newMonitor = {
+      type: 'http',
+      name: 'Test monitor',
+      urls: 'https://www.elastic.co',
+    };
+
+    const addMonitor = async () => {
+      const res = await supertest
+        .post(API_URLS.SYNTHETICS_MONITORS)
+        .set('kbn-xsrf', 'true')
+        .send(newMonitor);
+      return res.body.id;
+    };
 
     const supertest = getService('supertest');
 
-    it('returns the status for only the given monitor', async () => {
-      const apiResponse = await supertest.get(API_URLS.MONITOR_STATUS).query({
-        monitorId,
-        dateStart,
-        dateEnd,
-      });
-      expectFixtureEql(apiResponse.body, 'monitor_latest_status');
+    it('get all monitors', async () => {
+      const id1 = await addMonitor();
+      const id2 = await addMonitor();
+
+      const apiResponse = await supertest.get(API_URLS.SYNTHETICS_MONITORS);
+
+      const monitor1 = apiResponse.body.saved_objects.find((obj: any) => obj.id === id1);
+      const monitor2 = apiResponse.body.saved_objects.find((obj: any) => obj.id === id2);
+
+      expect(monitor1.id).eql(id1);
+      expect(monitor2.id).eql(id2);
+    });
+
+    it('get monitor by id', async () => {
+      const monitorId = await addMonitor();
+
+      const apiResponse = await supertest.get(API_URLS.SYNTHETICS_MONITORS + '/' + monitorId);
+
+      expect(apiResponse.body.id).eql(monitorId);
     });
   });
 }

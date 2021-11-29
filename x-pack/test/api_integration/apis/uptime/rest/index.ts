@@ -51,10 +51,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       loadTestFile(require.resolve('./monitor_states_generated'));
       loadTestFile(require.resolve('./telemetry_collectors'));
       loadTestFile(require.resolve('./telemetry_collectors_fleet'));
-      loadTestFile(require.resolve('./add_monitor'));
-      loadTestFile(require.resolve('./edit_monitor'));
-      loadTestFile(require.resolve('./delete_monitor'));
-      loadTestFile(require.resolve('./get_monitor'));
     });
 
     describe('with real-world data', () => {
@@ -74,6 +70,13 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       loadTestFile(require.resolve('./monitor_duration'));
       loadTestFile(require.resolve('./index_status'));
       loadTestFile(require.resolve('./monitor_states_real_data'));
+    });
+
+    describe('uptime CRUD routes', () => {
+      loadTestFile(require.resolve('./get_monitor'));
+      loadTestFile(require.resolve('./add_monitor'));
+      loadTestFile(require.resolve('./edit_monitor'));
+      loadTestFile(require.resolve('./delete_monitor'));
     });
   });
 }

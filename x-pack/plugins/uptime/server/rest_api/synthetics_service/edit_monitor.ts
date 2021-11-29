@@ -8,19 +8,23 @@ import { UMRestApiRouteFactory } from '../types';
 import { API_URLS } from '../../../common/constants';
 import { SyntheticsMonitorSavedObject } from '../../../common/types';
 import { syntheticsMonitorType } from '../../lib/saved_objects/synthetics_monitor';
+import { schema } from '../../../../../../../../../../private/var/tmp/_bazel_shahzad-16/974662a0be78d7012b40ce12cff92960/execroot/kibana/bazel-out/darwin-fastbuild/bin/packages/kbn-config-schema';
 
 export const editSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
   method: 'PUT',
-  path: API_URLS.EDIT_MONITOR,
-  validate: {},
+  path: API_URLS.SYNTHETICS_MONITORS + '/{monitorId}',
+  validate: {
+    params: schema.object({
+      monitorId: schema.string(),
+    }),
+    body: schema.any(),
+  },
   handler: async ({ request, savedObjectsClient }): Promise<any> => {
-    const monitor = request.body as SyntheticsMonitorSavedObject;
+    const monitor = request.body as SyntheticsMonitorSavedObject['attributes'];
 
-    const editMonitor = await savedObjectsClient.update(
-      syntheticsMonitorType,
-      monitor.id,
-      monitor.attributes
-    );
+    const { monitorId } = request.params;
+
+    const editMonitor = await savedObjectsClient.update(syntheticsMonitorType, monitorId, monitor);
     // TODO: call to service sync
     return editMonitor;
   },

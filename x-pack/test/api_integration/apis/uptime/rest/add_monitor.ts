@@ -17,12 +17,13 @@ export default function ({ getService }: FtrProviderContext) {
       urls: 'https://www.elastic.co',
     };
 
-    it('returns the status for only the given monitor', async () => {
+    it('returns the newly added monitor', async () => {
       const apiResponse = await supertest
-        .post(API_URLS.ADD_MONITOR)
+        .post(API_URLS.SYNTHETICS_MONITORS)
         .set('kbn-xsrf', 'true')
         .send(newMonitor);
-      expect(apiResponse.body).eql({});
+
+      expect(apiResponse.body.attributes).eql(newMonitor);
     });
   });
 }
