@@ -570,6 +570,73 @@ export default ({ getService }: FtrProviderContext): void => {
             ],
           });
         });
+
+        it('should resolve exception references when importing into a clean slate', async () => {
+          // So importing a rule that references an exception list
+          // Keep in mind, no exception lists or rules exist yet
+          const simpleRule: ReturnType<typeof getSimpleRule> = {
+            ...getSimpleRule('rule-1'),
+            exceptions_list: [
+              {
+                id: 'abc',
+                list_id: 'i_exist',
+                type: 'detection',
+                namespace_type: 'single',
+              },
+            ],
+          };
+
+          // Importing the "simpleRule", along with the exception list
+          // it's referencing and the list's item
+          const { body } = await supertest
+            .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
+            .set('kbn-xsrf', 'true')
+            .attach(
+              'file',
+              toNdJsonString([
+                simpleRule,
+                {
+                  ...getImportExceptionsListSchemaMock('i_exist'),
+                  id: 'abc',
+                  type: 'detection',
+                  namespace_type: 'single',
+                },
+                getImportExceptionsListItemSchemaMock('test_item_id', 'i_exist'),
+              ]),
+              'rules.ndjson'
+            )
+            .expect(200);
+
+          const { body: ruleResponse } = await supertest
+            .get(`${DETECTION_ENGINE_RULES_URL}?rule_id=rule-1`)
+            .send()
+            .expect(200);
+          const bodyToCompare = removeServerGeneratedProperties(ruleResponse);
+          const referencedExceptionList = ruleResponse.exceptions_list[0];
+
+          // create an exception list
+          const { body: exceptionBody } = await supertest
+            .get(
+              `${EXCEPTION_LIST_URL}?list_id=${referencedExceptionList.list_id}&id=${referencedExceptionList.id}`
+            )
+            .set('kbn-xsrf', 'true')
+            .expect(200);
+
+          expect(bodyToCompare.exceptions_list).to.eql([
+            {
+              id: exceptionBody.id,
+              list_id: 'i_exist',
+              namespace_type: 'single',
+              type: 'detection',
+            },
+          ]);
+
+          expect(body).to.eql({
+            success: true,
+            success_count: 3,
+            errors: [],
+          });
+        });
       });
     });
   });

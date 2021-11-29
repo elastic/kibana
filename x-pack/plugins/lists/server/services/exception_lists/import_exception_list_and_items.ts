@@ -16,7 +16,7 @@ import { chunk } from 'lodash/fp';
 
 import { HapiReadableStream } from './exception_list_client_types';
 import {
-  createRulesStreamFromNdJson,
+  createExceptionsStreamFromNdjson,
   getTupleErrorsAndUniqueExceptionListItems,
   getTupleErrorsAndUniqueExceptionLists,
   importExceptionListItems,
@@ -47,7 +47,7 @@ export const importExceptions = async ({
 }: ImportExceptionListAndItemsOptions): Promise<ImportExceptionsResponseSchema> => {
   try {
     // validation of import and sorting of lists and items
-    const readStream = createRulesStreamFromNdJson(maxExceptionsImportSize);
+    const readStream = createExceptionsStreamFromNdjson(maxExceptionsImportSize);
     const [parsedObjects] = await createPromiseFromStreams<PromiseFromStreams[]>([
       fileToImport,
       ...readStream,

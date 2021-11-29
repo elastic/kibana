@@ -26,7 +26,7 @@ import { PartialFilter } from '../../types';
 import { BulkError } from '../utils';
 import { getOutputRuleAlertForRest } from '../__mocks__/utils';
 import { PartialAlert } from '../../../../../../alerting/server';
-import { createRulesStreamFromNdJson } from '../../rules/create_rules_stream_from_ndjson';
+import { sortRuleImports } from '../../rules/create_rules_stream_from_ndjson';
 import { RuleAlertType } from '../../rules/types';
 import { ImportRulesSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/import_rules_schema';
 import { getCreateRulesSchemaMock } from '../../../../../common/detection_engine/schemas/request/rule_schemas.mock';
@@ -43,6 +43,7 @@ import { requestContextMock } from '../__mocks__';
 import { LegacyRulesActionsSavedObject } from '../../rule_actions/legacy_get_rule_actions_saved_object';
 // eslint-disable-next-line no-restricted-imports
 import { LegacyRuleAlertAction } from '../../rule_actions/legacy_types';
+import { RuleExceptionsPromiseFromStreams } from './utils/import_rules_utils';
 
 type PromiseFromStreams = ImportRulesSchemaDecoded | Error;
 
@@ -543,12 +544,11 @@ describe.each([
           this.push(null);
         },
       });
-      const rulesObjectsStream = createRulesStreamFromNdJson(1000);
-      const parsedObjects = await createPromiseFromStreams<PromiseFromStreams[]>([
+      const [{ rules }] = await createPromiseFromStreams<RuleExceptionsPromiseFromStreams[]>([
         ndJsonStream,
-        ...rulesObjectsStream,
+        ...sortRuleImports(1000),
       ]);
-      const [errors, output] = getTupleDuplicateErrorsAndUniqueRules(parsedObjects, false);
+      const [errors, output] = getTupleDuplicateErrorsAndUniqueRules(rules, false);
       const isInstanceOfError = output[0] instanceof Error;
 
       expect(isInstanceOfError).toEqual(true);
@@ -565,12 +565,12 @@ describe.each([
           this.push(null);
         },
       });
-      const rulesObjectsStream = createRulesStreamFromNdJson(1000);
-      const parsedObjects = await createPromiseFromStreams<PromiseFromStreams[]>([
+      const [{ rules }] = await createPromiseFromStreams<RuleExceptionsPromiseFromStreams[]>([
         ndJsonStream,
-        ...rulesObjectsStream,
+        ...sortRuleImports(1000),
       ]);
-      const [errors, output] = getTupleDuplicateErrorsAndUniqueRules(parsedObjects, false);
+
+      const [errors, output] = getTupleDuplicateErrorsAndUniqueRules(rules, false);
 
       expect(output.length).toEqual(1);
       expect(errors).toEqual([
@@ -596,12 +596,12 @@ describe.each([
           this.push(null);
         },
       });
-      const rulesObjectsStream = createRulesStreamFromNdJson(1000);
-      const parsedObjects = await createPromiseFromStreams<PromiseFromStreams[]>([
+      const [{ rules }] = await createPromiseFromStreams<RuleExceptionsPromiseFromStreams[]>([
         ndJsonStream,
-        ...rulesObjectsStream,
+        ...sortRuleImports(1000),
       ]);
-      const [errors, output] = getTupleDuplicateErrorsAndUniqueRules(parsedObjects, false);
+
+      const [errors, output] = getTupleDuplicateErrorsAndUniqueRules(rules, false);
       const isInstanceOfError = output[0] instanceof Error;
 
       expect(isInstanceOfError).toEqual(true);
@@ -618,12 +618,12 @@ describe.each([
           this.push(null);
         },
       });
-      const rulesObjectsStream = createRulesStreamFromNdJson(1000);
-      const parsedObjects = await createPromiseFromStreams<PromiseFromStreams[]>([
+      const [{ rules }] = await createPromiseFromStreams<RuleExceptionsPromiseFromStreams[]>([
         ndJsonStream,
-        ...rulesObjectsStream,
+        ...sortRuleImports(1000),
       ]);
-      const [errors, output] = getTupleDuplicateErrorsAndUniqueRules(parsedObjects, true);
+
+      const [errors, output] = getTupleDuplicateErrorsAndUniqueRules(rules, true);
 
       expect(output.length).toEqual(1);
       expect(errors.length).toEqual(0);
@@ -639,12 +639,12 @@ describe.each([
           this.push(null);
         },
       });
-      const rulesObjectsStream = createRulesStreamFromNdJson(1000);
-      const parsedObjects = await createPromiseFromStreams<PromiseFromStreams[]>([
+      const [{ rules }] = await createPromiseFromStreams<RuleExceptionsPromiseFromStreams[]>([
         ndJsonStream,
-        ...rulesObjectsStream,
+        ...sortRuleImports(1000),
       ]);
-      const [errors, output] = getTupleDuplicateErrorsAndUniqueRules(parsedObjects, false);
+
+      const [errors, output] = getTupleDuplicateErrorsAndUniqueRules(rules, false);
       const isInstanceOfError = output[0] instanceof Error;
 
       expect(isInstanceOfError).toEqual(true);
@@ -667,13 +667,13 @@ describe.each([
           this.push(null);
         },
       });
-      const rulesObjectsStream = createRulesStreamFromNdJson(1000);
-      const parsedObjects = await createPromiseFromStreams<PromiseFromStreams[]>([
+      const [{ rules }] = await createPromiseFromStreams<RuleExceptionsPromiseFromStreams[]>([
         ndJsonStream,
-        ...rulesObjectsStream,
+        ...sortRuleImports(1000),
       ]);
+
       clients.actionsClient.getAll.mockResolvedValue([]);
-      const [errors, output] = await getInvalidConnectors(parsedObjects, clients.actionsClient);
+      const [errors, output] = await getInvalidConnectors(rules, clients.actionsClient);
       const isInstanceOfError = output[0] instanceof Error;
 
       expect(isInstanceOfError).toEqual(true);
@@ -698,13 +698,12 @@ describe.each([
           this.push(null);
         },
       });
-      const rulesObjectsStream = createRulesStreamFromNdJson(1000);
-      const parsedObjects = await createPromiseFromStreams<PromiseFromStreams[]>([
+      const [{ rules }] = await createPromiseFromStreams<RuleExceptionsPromiseFromStreams[]>([
         ndJsonStream,
-        ...rulesObjectsStream,
+        ...sortRuleImports(1000),
       ]);
       clients.actionsClient.getAll.mockResolvedValue([]);
-      const [errors, output] = await getInvalidConnectors(parsedObjects, clients.actionsClient);
+      const [errors, output] = await getInvalidConnectors(rules, clients.actionsClient);
       expect(output.length).toEqual(0);
       expect(errors).toEqual<BulkError[]>([
         {
@@ -735,10 +734,9 @@ describe.each([
           this.push(null);
         },
       });
-      const rulesObjectsStream = createRulesStreamFromNdJson(1000);
-      const parsedObjects = await createPromiseFromStreams<PromiseFromStreams[]>([
+      const [{ rules }] = await createPromiseFromStreams<RuleExceptionsPromiseFromStreams[]>([
         ndJsonStream,
-        ...rulesObjectsStream,
+        ...sortRuleImports(1000),
       ]);
       clients.actionsClient.getAll.mockResolvedValue([
         {
@@ -749,7 +747,7 @@ describe.each([
           isPreconfigured: false,
         },
       ]);
-      const [errors, output] = await getInvalidConnectors(parsedObjects, clients.actionsClient);
+      const [errors, output] = await getInvalidConnectors(rules, clients.actionsClient);
       expect(errors.length).toEqual(0);
       expect(output.length).toEqual(1);
       expect(output[0]).toEqual<PromiseFromStreams[]>(expect.objectContaining(rule));
@@ -779,10 +777,9 @@ describe.each([
           this.push(null);
         },
       });
-      const rulesObjectsStream = createRulesStreamFromNdJson(1000);
-      const parsedObjects = await createPromiseFromStreams<PromiseFromStreams[]>([
+      const [{ rules }] = await createPromiseFromStreams<RuleExceptionsPromiseFromStreams[]>([
         ndJsonStream,
-        ...rulesObjectsStream,
+        ...sortRuleImports(1000),
       ]);
       clients.actionsClient.getAll.mockResolvedValue([
         {
@@ -800,7 +797,7 @@ describe.each([
           isPreconfigured: false,
         },
       ]);
-      const [errors, output] = await getInvalidConnectors(parsedObjects, clients.actionsClient);
+      const [errors, output] = await getInvalidConnectors(rules, clients.actionsClient);
       expect(errors.length).toEqual(0);
       expect(output.length).toEqual(1);
       expect(output[0]).toEqual<PromiseFromStreams[]>(expect.objectContaining(rule));
@@ -836,10 +833,9 @@ describe.each([
           this.push(null);
         },
       });
-      const rulesObjectsStream = createRulesStreamFromNdJson(1000);
-      const parsedObjects = await createPromiseFromStreams<PromiseFromStreams[]>([
+      const [{ rules }] = await createPromiseFromStreams<RuleExceptionsPromiseFromStreams[]>([
         ndJsonStream,
-        ...rulesObjectsStream,
+        ...sortRuleImports(1000),
       ]);
       clients.actionsClient.getAll.mockResolvedValue([
         {
@@ -857,7 +853,7 @@ describe.each([
           isPreconfigured: false,
         },
       ]);
-      const [errors, output] = await getInvalidConnectors(parsedObjects, clients.actionsClient);
+      const [errors, output] = await getInvalidConnectors(rules, clients.actionsClient);
       expect(errors.length).toEqual(0);
       expect(output.length).toEqual(2);
       expect(output[0]).toEqual<PromiseFromStreams[]>(expect.objectContaining(rule1));
@@ -900,10 +896,9 @@ describe.each([
           this.push(null);
         },
       });
-      const rulesObjectsStream = createRulesStreamFromNdJson(1000);
-      const parsedObjects = await createPromiseFromStreams<PromiseFromStreams[]>([
+      const [{ rules }] = await createPromiseFromStreams<RuleExceptionsPromiseFromStreams[]>([
         ndJsonStream,
-        ...rulesObjectsStream,
+        ...sortRuleImports(1000),
       ]);
       clients.actionsClient.getAll.mockResolvedValue([
         {
@@ -921,7 +916,7 @@ describe.each([
           isPreconfigured: false,
         },
       ]);
-      const [errors, output] = await getInvalidConnectors(parsedObjects, clients.actionsClient);
+      const [errors, output] = await getInvalidConnectors(rules, clients.actionsClient);
       expect(errors.length).toEqual(1);
       expect(output.length).toEqual(1);
       expect(output[0]).toEqual<PromiseFromStreams[]>(expect.objectContaining(rule1));
@@ -966,10 +961,9 @@ describe.each([
           this.push(null);
         },
       });
-      const rulesObjectsStream = createRulesStreamFromNdJson(1000);
-      const parsedObjects = await createPromiseFromStreams<PromiseFromStreams[]>([
+      const [{ rules }] = await createPromiseFromStreams<RuleExceptionsPromiseFromStreams[]>([
         ndJsonStream,
-        ...rulesObjectsStream,
+        ...sortRuleImports(1000),
       ]);
       clients.actionsClient.getAll.mockResolvedValue([
         {
@@ -987,7 +981,7 @@ describe.each([
           isPreconfigured: false,
         },
       ]);
-      const [errors, output] = await getInvalidConnectors(parsedObjects, clients.actionsClient);
+      const [errors, output] = await getInvalidConnectors(rules, clients.actionsClient);
       expect(errors.length).toEqual(1);
       expect(output.length).toEqual(0);
       expect(errors).toEqual<BulkError[]>([
@@ -1073,10 +1067,9 @@ describe.each([
           this.push(null);
         },
       });
-      const rulesObjectsStream = createRulesStreamFromNdJson(1000);
-      const parsedObjects = await createPromiseFromStreams<PromiseFromStreams[]>([
+      const [{ rules }] = await createPromiseFromStreams<RuleExceptionsPromiseFromStreams[]>([
         ndJsonStream,
-        ...rulesObjectsStream,
+        ...sortRuleImports(1000),
       ]);
       clients.actionsClient.getAll.mockResolvedValue([
         {
@@ -1094,7 +1087,7 @@ describe.each([
           isPreconfigured: false,
         },
       ]);
-      const [errors, output] = await getInvalidConnectors(parsedObjects, clients.actionsClient);
+      const [errors, output] = await getInvalidConnectors(rules, clients.actionsClient);
       expect(errors.length).toEqual(2);
       expect(output.length).toEqual(1);
       expect(output[0]).toEqual<PromiseFromStreams[]>(expect.objectContaining(rule2));

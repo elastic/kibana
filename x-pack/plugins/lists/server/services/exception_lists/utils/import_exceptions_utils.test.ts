@@ -18,13 +18,13 @@ import {
 
 import {
   PromiseStream,
-  createRulesStreamFromNdJson,
+  createExceptionsStreamFromNdjson,
   getTupleErrorsAndUniqueExceptionListItems,
   getTupleErrorsAndUniqueExceptionLists,
 } from './import_exceptions_utils';
 
 describe('import_exceptions_utils', () => {
-  describe('createRulesStreamFromNdJson', () => {
+  describe('createExceptionsStreamFromNdjson', () => {
     it('filters out empty strings', async () => {
       const ndJsonStream = new Readable({
         read(): void {
@@ -37,7 +37,7 @@ describe('import_exceptions_utils', () => {
       });
       const result = await createPromiseFromStreams<PromiseStream[]>([
         ndJsonStream,
-        ...createRulesStreamFromNdJson(100),
+        ...createExceptionsStreamFromNdjson(100),
       ]);
 
       expect(result).toEqual([
@@ -68,7 +68,7 @@ describe('import_exceptions_utils', () => {
       });
       const result = await createPromiseFromStreams<PromiseStream[]>([
         ndJsonStream,
-        ...createRulesStreamFromNdJson(100),
+        ...createExceptionsStreamFromNdjson(100),
       ]);
 
       expect(result).toEqual([
@@ -90,7 +90,7 @@ describe('import_exceptions_utils', () => {
       });
       const result = await createPromiseFromStreams<PromiseStream[]>([
         ndJsonStream,
-        ...createRulesStreamFromNdJson(100),
+        ...createExceptionsStreamFromNdjson(100),
       ]);
 
       expect(result).toEqual([
@@ -118,7 +118,7 @@ describe('import_exceptions_utils', () => {
         });
         const result = await createPromiseFromStreams<PromiseStream[]>([
           ndJsonStream,
-          ...createRulesStreamFromNdJson(100),
+          ...createExceptionsStreamFromNdjson(100),
         ]);
 
         expect(result).toEqual([
@@ -142,7 +142,7 @@ describe('import_exceptions_utils', () => {
         });
         const result = await createPromiseFromStreams<PromiseStream[]>([
           ndJsonStream,
-          ...createRulesStreamFromNdJson(100),
+          ...createExceptionsStreamFromNdjson(100),
         ]);
 
         expect(result).toEqual([
@@ -164,7 +164,7 @@ describe('import_exceptions_utils', () => {
         });
         const result = await createPromiseFromStreams<PromiseStream[]>([
           ndJsonStream,
-          ...createRulesStreamFromNdJson(100),
+          ...createExceptionsStreamFromNdjson(100),
         ]);
 
         expect(result).toEqual([
@@ -190,7 +190,7 @@ describe('import_exceptions_utils', () => {
         });
         const result = await createPromiseFromStreams<PromiseStream[]>([
           ndJsonStream,
-          ...createRulesStreamFromNdJson(100),
+          ...createExceptionsStreamFromNdjson(100),
         ]);
 
         expect(result).toEqual([
@@ -212,7 +212,7 @@ describe('import_exceptions_utils', () => {
         });
         const result = await createPromiseFromStreams<PromiseStream[]>([
           ndJsonStream,
-          ...createRulesStreamFromNdJson(100),
+          ...createExceptionsStreamFromNdjson(100),
         ]);
 
         expect(result).toEqual([

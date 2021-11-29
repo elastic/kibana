@@ -33,16 +33,12 @@ import {
 } from '../utils';
 
 import { getTupleDuplicateErrorsAndUniqueRules, getInvalidConnectors } from './utils';
-import {
-  createRulesStreamFromNdJson,
-  sortRuleImports,
-} from '../../rules/create_rules_stream_from_ndjson';
+import { sortRuleImports } from '../../rules/create_rules_stream_from_ndjson';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 import { HapiReadableStream } from '../../rules/types';
 import {
   importExceptionsHelper,
   importRules as importRulesHelper,
-  PromiseFromStreams,
   RuleExceptionsPromiseFromStreams,
 } from './utils/import_rules_utils';
 
@@ -107,25 +103,13 @@ export const importRulesRoute = (
             body: `To create a rule, the index must exist first. Index ${signalsIndex} does not exist`,
           });
         }
+        const objectLimit = config.maxRuleImportExportSize;
 
         // parse file to separate out exceptions from rules
-        const readAllStream = sortRuleImports();
+        const readAllStream = sortRuleImports(objectLimit);
         const [{ exceptions, rules }] = await createPromiseFromStreams<
           RuleExceptionsPromiseFromStreams[]
         >([request.body.file as HapiReadableStream, ...readAllStream]);
-
-        // validate rules
-        const objectLimit = config.maxRuleImportExportSize;
-        const readStream = createRulesStreamFromNdJson(objectLimit);
-        const parsedObjects = await createPromiseFromStreams<PromiseFromStreams[]>([
-          new Readable({
-            read(): void {
-              this.push(rules.map((rule) => `${JSON.stringify(rule)}`).join('\n'));
-              this.push(null);
-            },
-          }),
-          ...readStream,
-        ]);
 
         // import exceptions, includes validation
         const {
@@ -135,12 +119,14 @@ export const importRulesRoute = (
         } = await importExceptionsHelper({
           exceptions,
           exceptionsClient,
+          // TODO: Add option of overwriting exceptions separately
           overwrite: request.query.overwrite,
           maxExceptionsImportSize: objectLimit,
         });
 
+        // report on duplicate rules
         const [duplicateIdErrors, parsedObjectsWithoutDuplicateErrors] =
-          getTupleDuplicateErrorsAndUniqueRules(parsedObjects, request.query.overwrite);
+          getTupleDuplicateErrorsAndUniqueRules(rules, request.query.overwrite);
 
         const [nonExistentActionErrors, uniqueParsedObjects] = await getInvalidConnectors(
           parsedObjectsWithoutDuplicateErrors,

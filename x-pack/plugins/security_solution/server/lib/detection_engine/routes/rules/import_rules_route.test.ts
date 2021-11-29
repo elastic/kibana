@@ -19,7 +19,7 @@ import { createMockConfig, requestContextMock, serverMock, requestMock } from '.
 import { mlServicesMock, mlAuthzMock as mockMlAuthzFactory } from '../../../machine_learning/mocks';
 import { buildMlAuthz } from '../../../machine_learning/authz';
 import { importRulesRoute } from './import_rules_route';
-import * as createRulesStreamFromNdJson from '../../rules/create_rules_stream_from_ndjson';
+import * as sortRuleImports from '../../rules/create_rules_stream_from_ndjson';
 import {
   getImportRulesWithIdSchemaMock,
   ruleIdsToNdJsonString,
@@ -105,9 +105,9 @@ describe.each([
       });
     });
 
-    test('returns error if createPromiseFromStreams throws error', async () => {
+    test('returns error if sortRuleImports throws error', async () => {
       const transformMock = jest
-        .spyOn(createRulesStreamFromNdJson, 'createRulesStreamFromNdJson')
+        .spyOn(sortRuleImports, 'sortRuleImports')
         .mockImplementation(() => {
           throw new Error('Test error');
         });

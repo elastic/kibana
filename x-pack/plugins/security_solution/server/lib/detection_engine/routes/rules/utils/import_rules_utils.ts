@@ -32,7 +32,7 @@ import { ExceptionListClient } from '../../../../../../../../plugins/lists/serve
 
 export type PromiseFromStreams = ImportRulesSchemaDecoded | Error;
 export interface RuleExceptionsPromiseFromStreams {
-  rules: ImportRulesSchema[];
+  rules: PromiseFromStreams[];
   exceptions: Array<ImportExceptionsListSchema | ImportExceptionListItemSchema>;
 }
 
@@ -328,15 +328,15 @@ export const checkExceptions = async ({
     return [[], exceptions];
   }
   for await (const exception of exceptions) {
-    const { list_id: listId, id, namespace_type: namespaceType } = exception;
+    const { list_id: listId, namespace_type: namespaceType } = exception;
     const list = await exceptionsClient.getExceptionList({
-      id,
+      id: undefined,
       listId,
       namespaceType,
     });
 
     if (list != null) {
-      ruleExceptions = [...ruleExceptions, exception];
+      ruleExceptions = [...ruleExceptions, { ...exception, id: list.id }];
     } else {
       // if exception is not found remove link
       errors = [
@@ -344,7 +344,7 @@ export const checkExceptions = async ({
         createBulkErrorObject({
           ruleId,
           statusCode: 400,
-          message: `Rule with rule_id: "${ruleId}" references a non existent exception list of list_id: "${listId}" and id: "${id}". Reference has been removed.`,
+          message: `Rule with rule_id: "${ruleId}" references a non existent exception list of list_id: "${listId}". Reference has been removed.`,
         }),
       ];
     }

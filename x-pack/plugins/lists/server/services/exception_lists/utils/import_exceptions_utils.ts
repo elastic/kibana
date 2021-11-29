@@ -213,7 +213,7 @@ export const createLimitStream = (limit: number): Transform => {
  * Inspiration and the pattern of code followed is from:
  * saved_objects/lib/create_saved_objects_stream_from_ndjson.ts
  */
-export const createRulesStreamFromNdJson = (exceptionsLimit: number): Transform[] => {
+export const createExceptionsStreamFromNdjson = (exceptionsLimit: number): Transform[] => {
   return [
     createSplitStream('\n'),
     filterEmptyStrings(),

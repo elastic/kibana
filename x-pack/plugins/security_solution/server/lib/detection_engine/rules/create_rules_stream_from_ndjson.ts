@@ -35,8 +35,23 @@ import {
   filterExportedCounts,
 } from '../../../utils/read_stream/create_stream_from_ndjson';
 
-export const validateRules = (): Transform => {
-  return createMapStream((obj: ImportRulesSchema) => {
+/**
+ * Validates exception lists and items schemas
+ */
+export const validateRulesStream = (): Transform => {
+  return createMapStream<{
+    exceptions: Array<ImportExceptionsListSchema | ImportExceptionListItemSchema | Error>;
+    rules: Array<ImportRulesSchemaDecoded | Error>;
+  }>((items) => ({
+    exceptions: items.exceptions,
+    rules: validateRules(items.rules),
+  }));
+};
+
+export const validateRules = (
+  rules: Array<ImportRulesSchema | Error>
+): Array<ImportRulesSchemaDecoded | Error> => {
+  return rules.map((obj: ImportRulesSchema | Error) => {
     if (!(obj instanceof Error)) {
       const decoded = importRulesSchema.decode(obj);
       const checked = exactCheck(obj, decoded);
@@ -86,27 +101,14 @@ export const sortImports = (): Transform => {
 // TODO: Capture both the line number and the rule_id if you have that information for the error message
 // eventually and then pass it down so we can give error messages on the line number
 
-/**
- * Inspiration and the pattern of code followed is from:
- * saved_objects/lib/create_saved_objects_stream_from_ndjson.ts
- */
-export const createRulesStreamFromNdJson = (ruleLimit: number) => {
-  return [
-    createSplitStream('\n'),
-    parseNdjsonStrings(),
-    validateRules(),
-    createLimitStream(ruleLimit),
-    createConcatStream([]),
-  ];
-};
-
-export const sortRuleImports = () => {
+export const sortRuleImports = (ruleLimit: number) => {
   return [
     createSplitStream('\n'),
     parseNdjsonStrings(),
     filterExportedCounts(),
     sortImports(),
-    createLimitStream(10000),
+    validateRulesStream(),
+    createLimitStream(ruleLimit),
     createConcatStream([]),
   ];
 };
