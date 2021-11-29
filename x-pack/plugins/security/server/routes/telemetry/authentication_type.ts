@@ -35,6 +35,7 @@ export function defineTelemetryOnAuthTypeRoutes({
     },
     createLicensedRouteHandler(async (context, request, response) => {
       try {
+        let timestamp = new Date().getTime();
         const {
           auth_type: oldAuthType,
           username_hash: oldUsernameHash,
@@ -42,13 +43,13 @@ export function defineTelemetryOnAuthTypeRoutes({
         } = request.body || {
           auth_type: '',
           username_hash: '',
-          timestamp: new Date().getTime(),
+          timestamp,
         };
         const authUser = await getAuthenticationService().getCurrentUser(request);
         const usernameHash = authUser
           ? createHash('sha3-256').update(authUser?.username).digest('hex')
           : '';
-        let timestamp = new Date().getTime();
+
         const elapsedTimeInHrs = (timestamp - oldTimestamp) / (1000 * 60 * 60);
 
         if (
