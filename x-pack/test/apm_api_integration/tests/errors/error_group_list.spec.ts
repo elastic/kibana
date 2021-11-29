@@ -5,7 +5,7 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
-import { service, timerange } from '@elastic/apm-synthtrace';
+import { apm, timerange } from '@elastic/apm-synthtrace';
 import {
   APIClientRequestParamsOf,
   APIReturnType,
@@ -72,7 +72,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         };
 
         before(async () => {
-          const serviceInstance = service(serviceName, 'production', 'go').instance('instance-a');
+          const serviceInstance = apm
+            .service(serviceName, 'production', 'go')
+            .instance('instance-a');
 
           await synthtraceEsClient.index([
             ...timerange(start, end)
