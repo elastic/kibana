@@ -191,7 +191,7 @@ export interface HelpProps<C> {
 
 export type TimeScalingMode = 'disabled' | 'mandatory' | 'optional';
 
-interface BaseOperationDefinitionProps<C extends BaseIndexPatternColumn> {
+interface BaseOperationDefinitionProps<C extends BaseIndexPatternColumn, P = {}> {
   type: C['operationType'];
   /**
    * The priority of the operation. If multiple operations are possible in
@@ -224,7 +224,7 @@ interface BaseOperationDefinitionProps<C extends BaseIndexPatternColumn> {
     changedColumnId: string
   ) => C;
   /**
-   * React component for operation specific settings shown in the popover editor
+   * React component for operation specific settings shown in the flyout editor
    */
   paramEditor?: React.ComponentType<ParamEditorProps<C>>;
   /**
@@ -306,8 +306,14 @@ interface BaseOperationDefinitionProps<C extends BaseIndexPatternColumn> {
     description: string;
     section: 'elasticsearch' | 'calculation';
   };
-
+  /**
+   * React component for operation field specific behaviour
+   */
   renderFieldInput?: React.ComponentType<FieldInputProps<C>>;
+  /**
+   * Builds the correct parameter for field additions
+   */
+  getParamsForMultipleFields?: (oldColumn: C, field: IndexPatternField) => Partial<P>;
 }
 
 interface BaseBuildColumnArgs {
@@ -398,8 +404,9 @@ interface FieldBasedOperationDefinition<C extends BaseIndexPatternColumn, P = {}
    *
    * @param oldColumn The column before the user changed the field.
    * @param field The field that the user changed to.
+   * @param params An additional set of params
    */
-  onFieldChange: (oldColumn: C, field: IndexPatternField) => C;
+  onFieldChange: (oldColumn: C, field: IndexPatternField, params?: Partial<P>) => C;
   /**
    * Function turning a column into an agg config passed to the `esaggs` function
    * together with the agg configs returned from other columns.

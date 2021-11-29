@@ -11,7 +11,7 @@ import {
   DraggedOperation,
   DropType,
 } from '../../../types';
-import { getOperationDisplay } from '../../operations';
+import { getOperationDisplay, hasOperationSupportForMultipleFields } from '../../operations';
 import { hasField, isDraggedField } from '../../pure_utils';
 import { DragContextState } from '../../../drag_drop/providers';
 import { OperationMetadata } from '../../../types';
@@ -124,10 +124,15 @@ function getDropPropsForField({
       (hasField(targetColumn) && targetColumn.sourceField !== dragging.field.name) ||
       !hasField(targetColumn)
     ) {
-      return {
-        dropTypes: ['field_replace'],
-        nextLabel,
-      };
+      return hasField(targetColumn) &&
+        hasOperationSupportForMultipleFields(targetColumn.operationType)
+        ? {
+            dropTypes: ['field_replace', 'field_combine'],
+          }
+        : {
+            dropTypes: ['field_replace'],
+            nextLabel,
+          };
     }
   }
   return;
@@ -140,7 +145,12 @@ function getDropPropsForSameGroup(targetColumn?: GenericIndexPatternColumn): Dro
 function getDropPropsForCompatibleGroup(targetColumn?: GenericIndexPatternColumn): DropProps {
   return {
     dropTypes: targetColumn
-      ? ['replace_compatible', 'replace_duplicate_compatible', 'swap_compatible']
+      ? [
+          'replace_compatible',
+          'replace_duplicate_compatible',
+          'swap_compatible',
+          'combine_compatible',
+        ]
       : ['move_compatible', 'duplicate_compatible'],
   };
 }

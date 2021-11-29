@@ -71,13 +71,20 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
   }),
   priority: 3, // Higher than any metric
   input: 'field',
+  getParamsForMultipleFields: (oldColumn, field) => {
+    return { secondaryFields: [...(oldColumn.params?.secondaryFields || []), field.name] };
+  },
   getPossibleOperationForField: ({ aggregationRestrictions, aggregatable, type }) => {
     if (
       supportedTypes.has(type) &&
       aggregatable &&
       (!aggregationRestrictions || aggregationRestrictions.terms)
     ) {
-      return { dataType: type as DataType, isBucketed: true, scale: 'ordinal' };
+      return {
+        dataType: type as DataType,
+        isBucketed: true,
+        scale: 'ordinal',
+      };
     }
   },
   getErrorMessage: (layer, columnId, indexPattern) => {
@@ -178,8 +185,8 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
       indexPattern.getFieldByName(column.sourceField)?.displayName,
       column.params.secondaryFields?.length
     ),
-  onFieldChange: (oldColumn, field) => {
-    const newParams = { ...oldColumn.params };
+  onFieldChange: (oldColumn, field, params) => {
+    const newParams = { ...oldColumn.params, ...params };
     if ('format' in newParams && field.type !== 'number') {
       delete newParams.format;
     }

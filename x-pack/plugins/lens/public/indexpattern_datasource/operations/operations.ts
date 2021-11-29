@@ -61,6 +61,17 @@ export function getSortScoreByPriority(
   return (b.priority || Number.NEGATIVE_INFINITY) - (a.priority || Number.NEGATIVE_INFINITY);
 }
 
+export function getOperationHelperForMultipleFields(operationType: string) {
+  const op = operationDefinitions.find(({ type }) => operationType === type);
+  return op?.getParamsForMultipleFields;
+}
+
+export function hasOperationSupportForMultipleFields(operationType: string) {
+  return Boolean(
+    operationDefinitions.find(({ type }) => operationType === type)?.getParamsForMultipleFields
+  );
+}
+
 /**
  * Returns all `OperationType`s that can build a column using `buildColumn` based on the
  * passed in field.
