@@ -10,6 +10,7 @@ import {
   SERVICE_NAME,
   TRANSACTION_NAME,
   TRANSACTION_TYPE,
+  ERROR_GROUP_ID,
 } from '../../../common/elasticsearch_fieldnames';
 import { EventOutcome } from '../../../common/event_outcome';
 import { offsetPreviousPeriodCoordinates } from '../../../common/utils/offset_previous_period_coordinate';
@@ -32,7 +33,7 @@ import {
   getFailedTransactionRateTimeSeries,
 } from '../helpers/transaction_error_rate';
 
-export async function getErrorRate({
+export async function getFailedTransactionRate({
   environment,
   kuery,
   serviceName,
@@ -42,6 +43,7 @@ export async function getErrorRate({
   searchAggregatedTransactions,
   start,
   end,
+  groupId,
 }: {
   environment: string;
   kuery: string;
@@ -52,6 +54,7 @@ export async function getErrorRate({
   searchAggregatedTransactions: boolean;
   start: number;
   end: number;
+  groupId?: string;
 }): Promise<{
   timeseries: Coordinate[];
   average: number | null;
@@ -67,6 +70,7 @@ export async function getErrorRate({
     },
     ...termQuery(TRANSACTION_NAME, transactionName),
     ...termQuery(TRANSACTION_TYPE, transactionType),
+    ...termQuery(ERROR_GROUP_ID, groupId),
     ...getDocumentTypeFilterForTransactions(searchAggregatedTransactions),
     ...rangeQuery(start, end),
     ...environmentQuery(environment),
@@ -119,7 +123,7 @@ export async function getErrorRate({
   return { timeseries, average };
 }
 
-export async function getErrorRatePeriods({
+export async function getFailedTransactionRatePeriods({
   environment,
   kuery,
   serviceName,
@@ -131,6 +135,7 @@ export async function getErrorRatePeriods({
   comparisonEnd,
   start,
   end,
+  groupId,
 }: {
   environment: string;
   kuery: string;
@@ -143,6 +148,7 @@ export async function getErrorRatePeriods({
   comparisonEnd?: number;
   start: number;
   end: number;
+  groupId?: string;
 }) {
   const commonProps = {
     environment,
@@ -152,13 +158,18 @@ export async function getErrorRatePeriods({
     transactionName,
     setup,
     searchAggregatedTransactions,
+    groupId,
   };
 
-  const currentPeriodPromise = getErrorRate({ ...commonProps, start, end });
+  const currentPeriodPromise = getFailedTransactionRate({
+    ...commonProps,
+    start,
+    end,
+  });
 
   const previousPeriodPromise =
     comparisonStart && comparisonEnd
-      ? getErrorRate({
+      ? getFailedTransactionRate({
           ...commonProps,
           start: comparisonStart,
           end: comparisonEnd,

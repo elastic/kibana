@@ -20,6 +20,7 @@ import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common'
 import { NOT_AVAILABLE_LABEL } from '../../../../common/i18n';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { useBreadcrumb } from '../../../context/breadcrumbs/use_breadcrumb';
+import { ChartPointerEventContextProvider } from '../../../context/chart_pointer_event/chart_pointer_event_context';
 import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../hooks/use_apm_router';
@@ -27,6 +28,7 @@ import { useErrorGroupDistributionFetcher } from '../../../hooks/use_error_group
 import { useFetcher } from '../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import type { APIReturnType } from '../../../services/rest/createCallApmApi';
+import { FailedTransactionRateChart } from '../../shared/charts/failed_transaction_rate_chart';
 import { DetailView } from './detail_view';
 import { ErrorDistribution } from './Distribution';
 
@@ -218,16 +220,33 @@ export function ErrorGroupDetails() {
             </EuiText>
           </Titles>
         )}
-        <ErrorDistribution
-          fetchStatus={status}
-          distribution={showDetails ? errorDistributionData : emptyState}
-          title={i18n.translate(
-            'xpack.apm.errorGroupDetails.occurrencesChartLabel',
-            {
-              defaultMessage: 'Occurrences',
-            }
-          )}
-        />
+        <EuiFlexGroup direction="row" gutterSize="s">
+          <ChartPointerEventContextProvider>
+            <EuiFlexItem>
+              <EuiPanel hasBorder={true}>
+                <ErrorDistribution
+                  fetchStatus={status}
+                  distribution={
+                    showDetails ? errorDistributionData : emptyState
+                  }
+                  title={i18n.translate(
+                    'xpack.apm.errorGroupDetails.occurrencesChartLabel',
+                    {
+                      defaultMessage: 'Occurrences',
+                    }
+                  )}
+                />
+              </EuiPanel>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <FailedTransactionRateChart
+                groupId={groupId}
+                kuery={kuery}
+                environment={environment}
+              />
+            </EuiFlexItem>
+          </ChartPointerEventContextProvider>
+        </EuiFlexGroup>
       </EuiPanel>
       <EuiSpacer size="s" />
       {showDetails && (

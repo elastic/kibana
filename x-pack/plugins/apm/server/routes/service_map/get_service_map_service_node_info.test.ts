@@ -7,7 +7,7 @@
 
 import { getServiceMapServiceNodeInfo } from './get_service_map_service_node_info';
 import { Setup } from '../../lib/helpers/setup_request';
-import * as getErrorRateModule from '../../lib/transaction_groups/get_error_rate';
+import * as getErrorRateModule from '../../lib/transaction_groups/get_failed_transaction_rate';
 import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
 
 describe('getServiceMapServiceNodeInfo', () => {
@@ -47,10 +47,12 @@ describe('getServiceMapServiceNodeInfo', () => {
 
   describe('with some results', () => {
     it('returns data', async () => {
-      jest.spyOn(getErrorRateModule, 'getErrorRate').mockResolvedValueOnce({
-        average: 0.5,
-        timeseries: [{ x: 1634808240000, y: 0 }],
-      });
+      jest
+        .spyOn(getErrorRateModule, 'getFailedTransactionRate')
+        .mockResolvedValueOnce({
+          average: 0.5,
+          timeseries: [{ x: 1634808240000, y: 0 }],
+        });
 
       const setup = {
         apmEventClient: {

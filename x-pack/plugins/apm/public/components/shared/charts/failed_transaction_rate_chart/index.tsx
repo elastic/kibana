@@ -33,6 +33,7 @@ interface Props {
   showAnnotations?: boolean;
   kuery: string;
   environment: string;
+  groupId?: string;
 }
 
 type ErrorRate =
@@ -54,6 +55,7 @@ export function FailedTransactionRateChart({
   showAnnotations = true,
   environment,
   kuery,
+  groupId,
 }: Props) {
   const theme = useTheme();
   const {
@@ -94,6 +96,7 @@ export function FailedTransactionRateChart({
               transactionName,
               comparisonStart,
               comparisonEnd,
+              groupId,
             },
           },
         });
@@ -109,6 +112,7 @@ export function FailedTransactionRateChart({
       transactionName,
       comparisonStart,
       comparisonEnd,
+      groupId,
     ]
   );
 

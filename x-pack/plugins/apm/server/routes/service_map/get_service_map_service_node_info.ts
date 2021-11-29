@@ -32,7 +32,7 @@ import {
   percentCgroupMemoryUsedScript,
   percentSystemMemoryUsedScript,
 } from '../metrics/by_agent/shared/memory';
-import { getErrorRate } from '../../lib/transaction_groups/get_error_rate';
+import { getFailedTransactionRate } from '../../lib/transaction_groups/get_failed_transaction_rate';
 
 interface Options {
   setup: Setup;
@@ -104,7 +104,7 @@ async function getErrorStats({
   end,
 }: Options) {
   return withApmSpan('get_error_rate_for_service_map_node', async () => {
-    const { average } = await getErrorRate({
+    const { average } = await getFailedTransactionRate({
       environment,
       setup,
       serviceName,
