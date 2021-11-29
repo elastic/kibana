@@ -7,11 +7,11 @@
 
 import { ALERT_UUID } from '@kbn/rule-data-utils/technical_field_names';
 import React, { ComponentType } from 'react';
-import { KibanaContextProvider } from '../../../../../../../src/plugins/kibana_react/public';
-import { PluginContext, PluginContextValue } from '../../../context/plugin_context';
-import { createObservabilityRuleTypeRegistryMock } from '../../../rules/observability_rule_type_registry_mock';
-import { apmAlertResponseExample } from '../example_data';
-import { AlertsFlyout } from './';
+import { KibanaContextProvider } from '../../../../../../../../src/plugins/kibana_react/public';
+import { PluginContext, PluginContextValue } from '../../../../context/plugin_context';
+import { createObservabilityRuleTypeRegistryMock } from '../../../../rules/observability_rule_type_registry_mock';
+import { apmAlertResponseExample } from './example_data';
+import { AlertsFlyout } from '..';
 
 interface Args {
   alerts: Array<Record<string, unknown>>;

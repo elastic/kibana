@@ -6,7 +6,7 @@
  */
 
 import React, { ComponentProps, useState } from 'react';
-import type { AlertWorkflowStatus } from '../../../common/typings';
+import type { AlertWorkflowStatus } from '../../../../../common/typings';
 import { WorkflowStatusFilter } from './workflow_status_filter';
 
 type Args = ComponentProps<typeof WorkflowStatusFilter>;
