@@ -13,7 +13,7 @@ import { EuiDatePicker, EuiFieldText } from '@elastic/eui';
 
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { TIME_FORMAT } from '../../../../../../../common/constants/time_format';
 
 export class TimeRangeSelector extends Component {

@@ -10,7 +10,7 @@ import { createMemoryHistory } from 'history';
 import React, { ReactNode } from 'react';
 import { of } from 'rxjs';
 
-import { __IntlProvider as IntlProvider } from '@kbn/i18n/react';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
 import { CoreStart } from 'kibana/public';
 import { merge } from 'lodash';

@@ -15,7 +15,7 @@ import {
   EuiSpacer,
   EuiFlexGrid,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { AggSelect } from '../agg_select';
 import { FieldSelect } from '../field_select';
 // @ts-ignore
