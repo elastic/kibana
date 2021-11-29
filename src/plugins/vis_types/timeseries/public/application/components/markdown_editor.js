@@ -19,7 +19,7 @@ import { CodeEditor, MarkdownLang } from '../../../../../kibana_react/public';
 
 import { EuiText, EuiCodeBlock, EuiSpacer, EuiTitle } from '@elastic/eui';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { getDataStart } from '../../services';
 import { fetchIndexPattern } from '../../../common/index_patterns_utils';
 

@@ -30,7 +30,7 @@ import {
   EuiTextColor,
   EuiTitle,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { CANCEL_BUTTON_LABEL, START_BUTTON_LABEL } from '../../../../shared/constants';
 import { EuiListGroupItemTo, EuiLinkTo } from '../../../../shared/react_router_helpers';
@@ -373,7 +373,7 @@ export const Overview: React.FC = () => {
       <EuiSpacer size="s" />
       <EuiFlexGroup gutterSize="m" alignItems="center">
         <EuiFlexItem grow={false}>
-          <EuiIcon size="l" type="checkInCircleFilled" color="secondary" />
+          <EuiIcon size="l" type="checkInCircleFilled" color="success" />
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiText>
