@@ -37,7 +37,7 @@ import { getPrePackagedRuleStatus } from '../helpers';
 import * as i18n from '../translations';
 import { EuiBasicTableOnChange } from '../types';
 import { getBatchItems } from './batch_actions';
-import { getRulesColumns, getMonitoringColumns, TableRow } from './columns';
+import { getRulesColumns, getMonitoringColumns, TableItem } from './columns';
 import { showRulesTable } from './helpers';
 import { RulesTableFilters } from './rules_table_filters/rules_table_filters';
 import { useMlCapabilities } from '../../../../../common/components/ml/hooks/use_ml_capabilities';
@@ -328,7 +328,7 @@ export const RulesTables = React.memo<RulesTableProps>(
     }, selectedRuleIds);
 
     const euiBasicTableSelectionProps = useMemo(
-      <T extends TableRow>() => ({
+      <T extends TableItem>() => ({
         selectable: (item: T) => !loadingRuleIds.includes(item.id),
         onSelectionChange: (selected: T[]) => {
           /**

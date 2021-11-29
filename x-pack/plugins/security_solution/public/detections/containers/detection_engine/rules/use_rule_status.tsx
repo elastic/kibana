@@ -9,7 +9,7 @@ import { useEffect, useRef, useState } from 'react';
 import { isNotFoundError } from '@kbn/securitysolution-t-grid';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 
-import { RuleStatusRowItemType } from '../../../pages/detection_engine/rules/all/columns';
+import { EnhancedRuleStatus } from '../../../pages/detection_engine/rules/all/columns';
 import { getRuleStatusById, getRulesStatusByIds } from './api';
 import * as i18n from './translations';
 import { RuleStatus, Rules } from './types';
@@ -18,7 +18,7 @@ type Func = (ruleId: string) => void;
 export type ReturnRuleStatus = [boolean, RuleStatus | null, Func | null];
 export interface ReturnRulesStatuses {
   loading: boolean;
-  rulesStatuses: RuleStatusRowItemType[];
+  rulesStatuses: EnhancedRuleStatus[];
 }
 
 /**
@@ -78,7 +78,7 @@ export const useRuleStatus = (id: string | undefined | null): ReturnRuleStatus =
  *
  */
 export const useRulesStatuses = (rules: Rules): ReturnRulesStatuses => {
-  const [rulesStatuses, setRuleStatuses] = useState<RuleStatusRowItemType[]>([]);
+  const [rulesStatuses, setRuleStatuses] = useState<EnhancedRuleStatus[]>([]);
   const [loading, setLoading] = useState(false);
   const { addError } = useAppToasts();
 

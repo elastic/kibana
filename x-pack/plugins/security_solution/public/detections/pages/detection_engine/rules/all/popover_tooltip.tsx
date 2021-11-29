@@ -34,6 +34,7 @@ const PopoverTooltipComponent = ({ columnName, children }: PopoverTooltipProps) 
           size="s"
           color="primary"
           iconType="questionInCircle"
+          style={{ height: 'auto' }}
         />
       }
     >

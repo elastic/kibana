@@ -54,10 +54,10 @@ type HasReadActionsPrivileges =
       [x: string]: boolean;
     }>;
 
-export type TableRow = RuleStatus & Rule;
-export type TableColumn = EuiBasicTableColumn<TableRow> | EuiTableActionsColumnType<TableRow>;
+export type TableItem = RuleStatus & Rule;
+export type TableColumn = EuiBasicTableColumn<TableItem> | EuiTableActionsColumnType<TableItem>;
 
-const extractRuleFromRow = ({ current_status: _, failures, ...rule }: TableRow): Rule => rule;
+const extractRuleFromRow = ({ current_status: _, failures, ...rule }: TableItem): Rule => rule;
 
 export const getActions = (
   dispatch: React.Dispatch<RulesTableAction>,
@@ -78,8 +78,8 @@ export const getActions = (
       i18n.EDIT_RULE_SETTINGS
     ),
     icon: 'controlsHorizontal',
-    onClick: (rowItem: TableRow) => editRuleAction(rowItem.id, navigateToApp),
-    enabled: (rowItem: TableRow) =>
+    onClick: (rowItem: TableItem) => editRuleAction(rowItem.id, navigateToApp),
+    enabled: (rowItem: TableItem) =>
       canEditRuleWithActions(extractRuleFromRow(rowItem), actionsPrivileges),
   },
   {
@@ -93,8 +93,8 @@ export const getActions = (
     ) : (
       i18n.DUPLICATE_RULE
     ),
-    enabled: (rowItem: TableRow) => canEditRuleWithActions(rowItem, actionsPrivileges),
-    onClick: async (rowItem: TableRow) => {
+    enabled: (rowItem: TableItem) => canEditRuleWithActions(rowItem, actionsPrivileges),
+    onClick: async (rowItem: TableItem) => {
       const createdRules = await duplicateRulesAction(
         [extractRuleFromRow(rowItem)],
         [rowItem.id],
@@ -127,7 +127,7 @@ export const getActions = (
   },
 ];
 
-export type RuleStatusRowItemType = RuleStatus & {
+export type EnhancedRuleStatus = RuleStatus & {
   id: string;
   rule: Rule;
 };
@@ -155,7 +155,7 @@ const getColumnEnabled = ({
 }: GetColumnsProps): TableColumn => ({
   field: 'enabled',
   name: i18n.COLUMN_ACTIVATE,
-  render: (_, rule: TableRow) => (
+  render: (_, rule: TableItem) => (
     <EuiToolTip
       position="top"
       content={getToolTipContent(rule, hasMlPermissions, hasReadActionsPrivileges)}
@@ -181,7 +181,7 @@ const getColumnEnabled = ({
 const getColumnRuleName = ({ navigateToApp, formatUrl }: GetColumnsProps): TableColumn => ({
   field: 'name',
   name: i18n.COLUMN_RULE,
-  render: (value: Rule['name'], item: TableRow) => (
+  render: (value: Rule['name'], item: TableItem) => (
     <EuiToolTip content={value} anchorClassName="eui-textTruncate">
       <LinkAnchor
         data-test-subj="ruleName"
@@ -200,6 +200,35 @@ const getColumnRuleName = ({ navigateToApp, formatUrl }: GetColumnsProps): Table
   ),
   width: '38%',
   sortable: true,
+  truncateText: true,
+});
+
+const getColumnTags = (): TableColumn => ({
+  field: 'tags',
+  name: null,
+  align: 'center',
+  render: (tags: Rule['tags']) => {
+    if (tags.length === 0) {
+      return null;
+    }
+
+    const renderItem = (tag: string, i: number) => (
+      <EuiBadge color="hollow" key={`${tag}-${i}`} data-test-subj="tag">
+        {tag}
+      </EuiBadge>
+    );
+    return (
+      <PopoverItems
+        items={tags}
+        popoverTitle={i18n.COLUMN_TAGS}
+        popoverButtonTitle={tags.length.toString()}
+        popoverButtonIcon="tag"
+        dataTestPrefix="tags"
+        renderItem={renderItem}
+      />
+    );
+  },
+  width: '65px',
   truncateText: true,
 });
 
@@ -224,41 +253,14 @@ const getActionsColumns = ({
             hasReadActionsPrivileges
           ),
           width: '40px',
-        } as EuiTableActionsColumnType<TableRow>,
+        } as EuiTableActionsColumnType<TableItem>,
       ]
     : [];
 
 export const getRulesColumns = (columnsProps: GetColumnsProps): TableColumn[] => {
   const cols: TableColumn[] = [
     getColumnRuleName(columnsProps),
-    {
-      field: 'tags',
-      name: null,
-      align: 'center',
-      render: (tags: Rule['tags']) => {
-        if (tags.length === 0) {
-          return null;
-        }
-
-        const renderItem = (tag: string, i: number) => (
-          <EuiBadge color="hollow" key={`${tag}-${i}`} data-test-subj="tag">
-            {tag}
-          </EuiBadge>
-        );
-        return (
-          <PopoverItems
-            items={tags}
-            popoverTitle={i18n.COLUMN_TAGS}
-            popoverButtonTitle={tags.length.toString()}
-            popoverButtonIcon="tag"
-            dataTestPrefix="tags"
-            renderItem={renderItem}
-          />
-        );
-      },
-      width: '65px',
-      truncateText: true,
-    },
+    getColumnTags(),
     {
       field: 'risk_score',
       name: i18n.COLUMN_RISK_SCORE,
@@ -346,6 +348,7 @@ export const getMonitoringColumns = (columnsProps: GetColumnsProps): TableColumn
   const { docLinks } = columnsProps;
   const cols: TableColumn[] = [
     { ...getColumnRuleName(columnsProps), width: '28%' },
+    getColumnTags(),
     {
       field: 'current_status.bulk_create_time_durations',
       name: (
@@ -361,7 +364,7 @@ export const getMonitoringColumns = (columnsProps: GetColumnsProps): TableColumn
           {value?.length ? sum(value.map(Number)).toFixed() : getEmptyTagValue()}
         </EuiText>
       ),
-      width: '14%',
+      width: '16%',
       truncateText: true,
     },
     {
@@ -438,7 +441,7 @@ export const getMonitoringColumns = (columnsProps: GetColumnsProps): TableColumn
           />
         );
       },
-      width: '18%',
+      width: '16%',
       truncateText: true,
     },
     getColumnEnabled(columnsProps),
