@@ -54,7 +54,7 @@ const agentKeysPrivilegesRoute = createApmServerRoute({
 
 const invalidateAgentKeyRoute = createApmServerRoute({
   endpoint: 'POST /internal/apm/api_key/invalidate',
-  options: { tags: ['access:apm'] },
+  options: { tags: ['access:apm', 'access:apm_write'] },
   params: t.type({
     body: t.type({ id: t.string }),
   }),
