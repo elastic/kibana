@@ -347,8 +347,6 @@ export class VisualizeChartPageObject extends FtrService {
     rowIndex: number = 0,
     colIndex: number = 0
   ) {
-    // const headers = await this.dataGrid.getHeaders();
-    // const fieldColumnIndex = headers.indexOf(fieldName);
     const cell = await this.dataGrid.getCellElement(rowIndex, colIndex);
     return await cell.findByTagName('a');
   }

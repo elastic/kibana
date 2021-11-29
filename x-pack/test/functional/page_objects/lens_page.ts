@@ -817,9 +817,6 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async getDatatableCell(rowIndex = 0, colIndex = 0) {
-      // const table = await find.byCssSelector('.euiDataGrid');
-      // const $ = await table.parseDomContent();
-      // const columnNumber = $('.euiDataGridHeaderCell__content').length;
       return await find.byCssSelector(
         `[data-test-subj="lnsDataTable"] [data-test-subj="dataGridRowCell"][data-gridcell-id="${rowIndex},${colIndex}"]`
       );
