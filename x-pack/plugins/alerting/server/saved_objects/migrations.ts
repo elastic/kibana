@@ -784,7 +784,7 @@ function fixInventoryThresholdGroupId(
     ...doc,
     attributes: {
       ...doc.attributes,
-      actions: [...updatedActions],
+      actions: updatedActions,
     },
   };
 }
