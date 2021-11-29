@@ -90,7 +90,7 @@ Failures can seem confusing if you've never seen one before. Here is a breakdown
    [aria-hidden-focus]: Ensures aria-hidden elements do not contain focusable elements
      Help: https://dequeuniversity.com/rules/axe/3.5/aria-hidden-focus?application=axeAPI
      Elements:
-       - #example
+       - <span aria-hidden="true"><button type="button">Submit</button></span>
        at Accessibility.testAxeReport (test/accessibility/services/a11y/a11y.ts:90:15)
        at Accessibility.testAppSnapshot (test/accessibility/services/a11y/a11y.ts:58:18)
        at process._tickCallback (internal/process/next_tick.js:68:7)
