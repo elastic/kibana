@@ -288,7 +288,7 @@ export const buildAlertsKqlFilter = (
         negate: false,
         disabled: false,
         type: 'phrases',
-        key: key.replace('signal.', 'kibana.alert.'),
+        key,
         value: alertIds.join(),
         params: alertIds,
       },
