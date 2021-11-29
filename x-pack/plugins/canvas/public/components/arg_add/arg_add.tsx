@@ -8,10 +8,12 @@
 import React, { FC, ReactEventHandler } from 'react';
 import PropTypes from 'prop-types';
 import {
+  useEuiTheme,
   EuiDescriptionList,
   EuiDescriptionListTitle,
   EuiDescriptionListDescription,
 } from '@elastic/eui';
+import { argAddStylesFactory } from './arg_add.styles';
 
 interface Props {
   displayName: string;
@@ -20,8 +22,9 @@ interface Props {
 }
 
 export const ArgAdd: FC<Props> = ({ onValueAdd = () => {}, displayName, help }) => {
+  const { euiTheme } = useEuiTheme();
   return (
-    <button className="canvasArg__add" onClick={onValueAdd}>
+    <button css={argAddStylesFactory(euiTheme)} onClick={onValueAdd}>
       <EuiDescriptionList compressed>
         <EuiDescriptionListTitle>{displayName}</EuiDescriptionListTitle>
         <EuiDescriptionListDescription>
