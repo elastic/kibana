@@ -972,6 +972,6 @@ describe('Update available', () => {
     expect((toMountPoint as jest.Mock).mock.calls[0][0]).toEqual(
       'One or more settings require you to reload the page to take effect'
     );
-    expect((toMountPoint as jest.Mock).mock.calls[1][0]).toEqual(RefreshButton);
+    expect((toMountPoint as jest.Mock).mock.calls[1][0]).toEqual(<RefreshButton />);
   });
 });

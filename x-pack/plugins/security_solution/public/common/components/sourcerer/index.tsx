@@ -205,7 +205,7 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
       addSuccess({
         color: 'success',
         title: toMountPoint(i18n.SUCCESS_TOAST_TITLE),
-        text: toMountPoint(RefreshButton),
+        text: toMountPoint(<RefreshButton />),
         iconType: undefined,
         toastLifeTimeMs: 600000,
       });
