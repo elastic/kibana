@@ -9,7 +9,7 @@ import { GetPolicyListResponse } from '../pages/policy/types';
 
 export const sendGetEndpointSpecificPackagePoliciesMock = (): GetPolicyListResponse => {
   const generator = new FleetPackagePolicyGenerator();
-  const items = Array(5).map((_, index) => {
+  const items = Array.from({ length: 5 }, (_, index) => {
     const policy = generator.generateEndpointPackagePolicy();
     policy.name += ` ${index}`;
     return policy;
