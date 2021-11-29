@@ -22,6 +22,7 @@ import {
 } from '../../services/embeddable_test_samples';
 import { ErrorEmbeddable, IContainer, isErrorEmbeddable } from '../../services/embeddable';
 import { getStubPluginServices } from '../../../../presentation_util/public';
+import { screenshotModePluginMock } from '../../../../screenshot_mode/public/mocks';
 
 const { setup, doStart } = embeddablePluginMock.createInstance();
 setup.registerEmbeddableFactory(
@@ -55,6 +56,7 @@ beforeEach(async () => {
     uiSettings: uiSettingsServiceMock.createStartContract(),
     http: coreStart.http,
     presentationUtil: getStubPluginServices(),
+    screenshotMode: screenshotModePluginMock.createSetupContract(),
   };
   const input = getSampleDashboardInput({
     panels: {
