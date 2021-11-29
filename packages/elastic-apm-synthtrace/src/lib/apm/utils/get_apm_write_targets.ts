@@ -7,13 +7,13 @@
  */
 
 import { Client } from '@elastic/elasticsearch';
-import { ElasticsearchOutputWriteTargets } from '../../lib/output/to_elasticsearch_output';
+import { ApmElasticsearchOutputWriteTargets } from './apm_events_to_elasticsearch_output';
 
-export async function getWriteTargets({
+export async function getApmWriteTargets({
   client,
 }: {
   client: Client;
-}): Promise<ElasticsearchOutputWriteTargets> {
+}): Promise<ApmElasticsearchOutputWriteTargets> {
   const [indicesResponse, datastreamsResponse] = await Promise.all([
     client.indices.getAlias({
       index: 'apm-*',
