@@ -58,6 +58,14 @@ const OverviewPanel = euiStyled(EuiPanel)`
   }
 `;
 
+const ClampedContent = euiStyled.div`
+  /* Clamp text content to 2 lines */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+`;
+
 interface OverviewCardProps {
   title: string;
 }
@@ -86,7 +94,9 @@ export const OverviewCardWithActions: React.FC<OverviewCardWithActionsProps> = (
   return (
     <OverviewCard title={title}>
       <EuiFlexGroup alignItems="flexEnd" gutterSize="s">
-        <EuiFlexItem grow={false}>{children}</EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <ClampedContent>{children}</ClampedContent>
+        </EuiFlexItem>
         <EuiFlexItem>
           <ActionCell {...enrichedFieldInfo} contextId={contextId} applyWidthAndPadding={false} />
         </EuiFlexItem>
