@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { range, omit } from 'lodash';
-import { timerange, service } from '@elastic/apm-synthtrace';
+import { apm, timerange } from '@elastic/apm-synthtrace';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { ApmApiError } from '../../common/apm_api_supertest';
 import job from '../../../../plugins/ml/server/models/data_recognizer/modules/apm_transaction/ml/apm_tx_metrics.json';
@@ -97,9 +97,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       const NORMAL_RATE = 1;
 
       before(async () => {
-        const serviceA = service('a', 'production', 'java').instance('a');
+        const serviceA = apm.service('a', 'production', 'java').instance('a');
 
-        const serviceB = service('b', 'development', 'go').instance('b');
+        const serviceB = apm.service('b', 'development', 'go').instance('b');
 
         const events = timerange(new Date(start).getTime(), new Date(end).getTime())
           .interval('1m')
