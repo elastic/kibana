@@ -7,9 +7,8 @@
  */
 import './histogram.scss';
 import moment, { unitOfTime } from 'moment-timezone';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import {
-  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -17,8 +16,6 @@ import {
   EuiLoadingChart,
   EuiSpacer,
   EuiText,
-  EuiPanel,
-  EuiCodeBlock,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import dateMath from '@elastic/datemath';
@@ -78,7 +75,6 @@ export function DiscoverHistogram({
   const uiSettings = services.uiSettings;
   const timeZone = getTimezone(uiSettings);
   const { chartData, bucketInterval, fetchStatus, error } = dataState;
-  const [showError, setShowError] = useState(false);
 
   const onBrushEnd = useCallback(
     ({ x }: XYBrushEvent) => {
@@ -124,31 +120,6 @@ export function DiscoverHistogram({
     [dateFormat]
   );
 
-  const renderErrorMsgButton = () => {
-    return (
-      <EuiPanel color="transparent" hasBorder={false}>
-        <EuiButtonEmpty onClick={() => setShowError(!showError)}>
-          {showError ? (
-            <FormattedMessage
-              id="discover.errorLoadingChart.hideError"
-              defaultMessage="Hide error"
-            />
-          ) : (
-            <FormattedMessage
-              id="discover.errorLoadingChart.showError"
-              defaultMessage="Show error"
-            />
-          )}
-        </EuiButtonEmpty>
-        {showError && error ? (
-          <EuiCodeBlock language="json" paddingSize="s">
-            {error.message}
-          </EuiCodeBlock>
-        ) : null}
-      </EuiPanel>
-    );
-  };
-
   const timeRangeText = useMemo(() => {
     const timeRange = {
       from: dateMath.parse(from),
@@ -175,11 +146,11 @@ export function DiscoverHistogram({
     return (
       <div className="dscHistogram__errorChartContainer">
         <EuiFlexGroup>
-          <EuiFlexItem grow={false}>
+          <EuiFlexItem grow={false} className="dscHistogram__errorChart__icon">
             <EuiIcon type="visBarVertical" color="danger" size="m" />
           </EuiFlexItem>
           <EuiFlexItem className="dscHistogram__errorChart">
-            <EuiText size="xs" color="danger">
+            <EuiText size="s" color="danger">
               <FormattedMessage
                 id="discover.errorLoadingChart"
                 defaultMessage="Error loading chart"
@@ -187,7 +158,9 @@ export function DiscoverHistogram({
             </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
-        {renderErrorMsgButton()}
+        <EuiText className="dscHistogram__errorChart__text" size="s">
+          {error.message}
+        </EuiText>
       </div>
     );
   }
