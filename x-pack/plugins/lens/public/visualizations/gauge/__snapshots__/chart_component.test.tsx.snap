@@ -10,6 +10,7 @@ exports[`GaugeComponent renders the chart 1`] = `
   />
   <Connect(SpecInstance)
     actual={3}
+    bandFillColor={[Function]}
     bands={
       Array [
         0,

@@ -34,7 +34,7 @@ export const getValueFromAccessor = (
   }
 };
 
-export const getMaxValue = (row?: DatatableRow, state?: GaugeAccessorsType) => {
+export const getMaxValue = (row?: DatatableRow, state?: GaugeAccessorsType): number => {
   const FALLBACK_VALUE = 100;
   const currentValue = getValueFromAccessor('maxAccessor', row, state);
   if (currentValue != null) {
@@ -65,10 +65,11 @@ export const getMinValue = (row?: DatatableRow, state?: GaugeAccessorsType) => {
   }
   const FALLBACK_VALUE = 0;
   if (row && state) {
-    const { metricAccessor } = state;
+    const { metricAccessor, maxAccessor } = state;
     const metricValue = metricAccessor && row[metricAccessor];
-    if (metricValue < 0) {
-      return metricValue - 10; // TODO: TO THINK THROUGH
+    const maxValue = maxAccessor && row[maxAccessor];
+    if (Math.min(metricValue, maxValue) < 0) {
+      return Math.min(metricValue, maxValue) - 10; // TODO: TO THINK THROUGH
     }
   }
   return FALLBACK_VALUE;

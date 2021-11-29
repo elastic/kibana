@@ -115,6 +115,35 @@ describe('GaugeComponent', function () {
     const component = shallowWithIntl(<GaugeComponent {...customProps} />);
     expect(component.find('EmptyPlaceholder')).toHaveLength(1);
   });
+  it('shows empty placeholder when minimum accessor value is greater maximum accessor value', async () => {
+    const customProps = {
+      ...wrapperProps,
+      args: {
+        ...wrapperProps.args,
+        metricAccessor: 'metric-accessor',
+        minAccessor: 'min-accessor',
+        maxAccessor: 'max-accessor',
+      },
+      data: createData({ 'metric-accessor': 0, 'min-accessor': 0, 'max-accessor': -10 }),
+    };
+    const component = shallowWithIntl(<GaugeComponent {...customProps} />);
+    expect(component.find('EmptyPlaceholder')).toHaveLength(1);
+  });
+  it('when metric value is bigger than max, it takes maximum value', () => {
+    const customProps = {
+      ...wrapperProps,
+      args: {
+        ...wrapperProps.args,
+        ticksPosition: 'bands',
+        metricAccessor: 'metric-accessor',
+        minAccessor: 'min-accessor',
+        maxAccessor: 'max-accessor',
+      },
+      data: createData({ 'metric-accessor': 12, 'min-accessor': 0, 'max-accessor': 10 }),
+    } as GaugeRenderProps;
+    const goal = shallowWithIntl(<GaugeComponent {...customProps} />).find(Goal);
+    expect(goal.prop('actual')).toEqual(10);
+  });
 
   describe('title and subtitle settings', () => {
     it('displays no title and no subtitle when no passed', () => {

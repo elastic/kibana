@@ -163,6 +163,18 @@ export const GaugeComponent: FC<GaugeRenderProps> = ({
         }
       />
     );
+  } else if (min > max) {
+    return (
+      <EmptyPlaceholder
+        icon={icon}
+        message={
+          <FormattedMessage
+            id="xpack.lens.guageVisualization.chartCannotRender"
+            defaultMessage="Minimum Value is smaller than Maximum Value. Chart cannot render."
+          />
+        }
+      />
+    );
   }
 
   const formatter = formatFactory(
@@ -171,7 +183,7 @@ export const GaugeComponent: FC<GaugeRenderProps> = ({
       : {
           id: 'number',
           params: {
-            pattern: max - min > 10 ? `0,0` : `0,0.0`,
+            pattern: max - min > 5 ? `0,0` : `0,0.0`,
           },
         }
   );
@@ -203,7 +215,7 @@ export const GaugeComponent: FC<GaugeRenderProps> = ({
                   ? colors[index]
                   : colors[colors.length - 1];
               }
-            : undefined
+            : () => `rgba(255,255,255,0)`
         }
         labelMajor={getTitle(visTitleMode, visTitle, metricColumn?.name)}
         labelMinor={subtitle ? subtitle + '  ' : ''}

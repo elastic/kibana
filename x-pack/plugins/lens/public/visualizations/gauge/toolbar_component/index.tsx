@@ -9,7 +9,12 @@ import React, { memo, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { VisualizationToolbarProps } from '../../../types';
-import { ToolbarPopover, useDebouncedValue, VisLabel } from '../../../shared_components';
+import {
+  ToolbarPopover,
+  TooltipWrapper,
+  useDebouncedValue,
+  VisLabel,
+} from '../../../shared_components';
 import './gauge_config_panel.scss';
 import {
   GaugeTicksPositions,
@@ -101,24 +106,34 @@ export const GaugeToolbar = memo((props: VisualizationToolbarProps<GaugeVisualiz
                 defaultMessage: 'Ticks on color bands',
               })}
             >
-              <EuiSwitch
-                compressed
-                label={i18n.translate('xpack.lens.shared.ticksPositionOptions', {
-                  defaultMessage: 'Ticks on color bands',
+              <TooltipWrapper
+                tooltipContent={i18n.translate('xpack.lens.gauge.toolbar.colorBandsDisabled', {
+                  defaultMessage: 'Add color bands in metric value settings to enable this setting',
                 })}
-                data-test-subj="lens-ticks-position-switch"
-                showLabel={false}
-                disabled={state.colorMode !== 'palette'}
-                checked={state.ticksPosition === GaugeTicksPositions.bands}
-                onChange={(e: EuiSwitchEvent) => {
-                  handleInputChange({
-                    ...inputValue,
-                    ticksPosition: e.target.checked
-                      ? GaugeTicksPositions.bands
-                      : GaugeTicksPositions.auto,
-                  });
-                }}
-              />
+                condition={state.colorMode !== 'palette'}
+                position="top"
+                delay="regular"
+                display="block"
+              >
+                <EuiSwitch
+                  compressed
+                  label={i18n.translate('xpack.lens.shared.ticksPositionOptions', {
+                    defaultMessage: 'Ticks on color bands',
+                  })}
+                  data-test-subj="lens-ticks-position-switch"
+                  showLabel={false}
+                  disabled={state.colorMode !== 'palette'}
+                  checked={state.ticksPosition === GaugeTicksPositions.bands}
+                  onChange={(e: EuiSwitchEvent) => {
+                    handleInputChange({
+                      ...inputValue,
+                      ticksPosition: e.target.checked
+                        ? GaugeTicksPositions.bands
+                        : GaugeTicksPositions.auto,
+                    });
+                  }}
+                />
+              </TooltipWrapper>
             </EuiFormRow>
           </ToolbarPopover>
         </EuiFlexGroup>
