@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MetricsResponse } from '../../../../common';
+import { CaseMetricsResponse } from '../../../common';
 import { MetricsHandler } from './types';
 
 export class AlertDetails implements MetricsHandler {
@@ -19,18 +19,19 @@ export class AlertDetails implements MetricsHandler {
     return new Set(['alertHosts', 'alertUsers']);
   }
 
-  public async applyMetrics(results: MetricsResponse): Promise<MetricsResponse> {
+  public async compute(): Promise<CaseMetricsResponse> {
     // we already retrieved the metrics so just return them as they are
     if (this.retrievedMetrics) {
-      return results;
+      return {};
     }
 
     this.retrievedMetrics = true;
 
     return {
-      ...results,
-      alertHosts: { total: 0, values: [] },
-      alertUsers: { total: 0, values: [] },
+      alerts: {
+        hosts: { total: 0, values: [] },
+        users: { total: 0, values: [] },
+      },
     };
   }
 }

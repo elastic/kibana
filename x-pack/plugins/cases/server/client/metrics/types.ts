@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { MetricsResponse } from '../../../../common';
+import { CaseMetricsResponse } from '../../../common';
 
 export interface MetricsHandler {
   getFeatures(): Set<string>;
-  applyMetrics(metricsResult: MetricsResponse): Promise<MetricsResponse>;
+  compute(): Promise<CaseMetricsResponse>;
 }

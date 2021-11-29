@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { MetricsResponse } from '../../../../common';
-import { CasesClient } from '../../client';
+import { CaseMetricsResponse } from '../../../common';
+import { CasesClient } from '../client';
 import { MetricsHandler } from './types';
 
 export class Lifespan implements MetricsHandler {
@@ -16,10 +16,9 @@ export class Lifespan implements MetricsHandler {
     return new Set(['lifespan']);
   }
 
-  public async applyMetrics(results: MetricsResponse): Promise<MetricsResponse> {
+  public async compute(): Promise<CaseMetricsResponse> {
     const caseInfo = await this.casesClient.cases.get({ id: this.caseId });
     return {
-      ...results,
       lifespan: {
         creationDate: caseInfo.created_at,
         closeDate: caseInfo.closed_at,

@@ -40,7 +40,7 @@ import { initDeleteSubCasesApi } from './sub_case/delete_sub_cases';
 import { ENABLE_CASE_CONNECTOR } from '../../../common';
 import { initGetCasesByAlertIdApi } from './cases/alerts/get_cases';
 import { initGetAllAlertsAttachToCaseApi } from './comments/get_alerts';
-import { initGetMetricsApi } from './cases/get_metrics';
+import { initGetCaseMetricsApi } from './metrics/get_case_metrics';
 
 /**
  * Default page number when interacting with the saved objects API.
@@ -60,7 +60,6 @@ export function initCaseApi(deps: RouteDeps) {
   initPostCaseApi(deps);
   initPushCaseApi(deps);
   initGetAllCaseUserActionsApi(deps);
-  initGetMetricsApi(deps);
 
   if (ENABLE_CASE_CONNECTOR) {
     // Sub cases
@@ -93,4 +92,6 @@ export function initCaseApi(deps: RouteDeps) {
   // Alerts
   initGetCasesByAlertIdApi(deps);
   initGetAllAlertsAttachToCaseApi(deps);
+  // Metrics
+  initGetCaseMetricsApi(deps);
 }

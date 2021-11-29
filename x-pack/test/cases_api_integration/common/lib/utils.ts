@@ -52,7 +52,7 @@ import {
   ConnectorMappings,
   CasesByAlertId,
   CaseResolveResponse,
-  MetricsResponse,
+  CaseMetricsResponse,
 } from '../../../../plugins/cases/common/api';
 import { getPostCaseRequest, postCollectionReq, postCommentGenAlertReq } from './mock';
 import { getCaseUserActionUrl, getSubCasesUrl } from '../../../../plugins/cases/common/api/helpers';
@@ -1095,7 +1095,7 @@ export const getCase = async ({
   return theCase;
 };
 
-export const getCaseMetrics = async ({
+export const getSingleCaseMetrics = async ({
   supertest,
   caseId,
   features,
@@ -1107,9 +1107,9 @@ export const getCaseMetrics = async ({
   features: string[];
   expectedHttpCode?: number;
   auth?: { user: User; space: string | null };
-}): Promise<MetricsResponse> => {
+}): Promise<CaseMetricsResponse> => {
   const { body: metricsResponse } = await supertest
-    .get(`${getSpaceUrlPrefix(auth?.space)}${CASES_URL}/${caseId}/metrics`)
+    .get(`${getSpaceUrlPrefix(auth?.space)}${CASES_URL}/metrics/${caseId}`)
     .query({ features: JSON.stringify(features) })
     .auth(auth.user.username, auth.user.password)
     .expect(expectedHttpCode);

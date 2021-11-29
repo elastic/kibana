@@ -5,18 +5,17 @@
  * 2.0.
  */
 
-import { MetricsResponse } from '../../../../common';
+import { CaseMetricsResponse } from '../../../common';
 import { MetricsHandler } from './types';
 
-export class AlertsCount implements MetricsHandler {
+export class Connectors implements MetricsHandler {
   public getFeatures(): Set<string> {
-    return new Set(['alertsCount']);
+    return new Set(['connectors']);
   }
 
-  public async applyMetrics(results: MetricsResponse): Promise<MetricsResponse> {
+  public async compute(): Promise<CaseMetricsResponse> {
     return {
-      ...results,
-      alertsCount: 0,
+      connectors: [],
     };
   }
 }

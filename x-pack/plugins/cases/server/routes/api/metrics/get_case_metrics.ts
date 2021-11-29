@@ -10,12 +10,12 @@ import { schema } from '@kbn/config-schema';
 import { RouteDeps } from '../types';
 import { wrapError } from '../utils';
 
-import { CASE_DETAILS_METRICS_URL } from '../../../../common';
+import { CASE_METRICS_DETAILS_URL } from '../../../../common';
 
-export function initGetMetricsApi({ router, logger }: RouteDeps) {
+export function initGetCaseMetricsApi({ router, logger }: RouteDeps) {
   router.get(
     {
-      path: CASE_DETAILS_METRICS_URL,
+      path: CASE_METRICS_DETAILS_URL,
       validate: {
         params: schema.object({
           case_id: schema.string({ minLength: 1 }),
@@ -29,7 +29,7 @@ export function initGetMetricsApi({ router, logger }: RouteDeps) {
       try {
         const client = await context.cases.getCasesClient();
         return response.ok({
-          body: await client.cases.getMetrics({
+          body: await client.metrics.getCaseMetrics({
             caseId: request.params.case_id,
             features: request.query.features,
           }),

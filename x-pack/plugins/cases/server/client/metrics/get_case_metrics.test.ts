@@ -5,16 +5,13 @@
  * 2.0.
  */
 
-import { getMetrics } from './index';
-import { CaseAttributes, CaseResponse } from '../../../../common';
-import { createCasesClientMock } from '../../mocks';
-import { CasesClientArgs } from '../../types';
-import { createAuthorizationMock } from '../../../authorization/mock';
-import {
-  loggingSystemMock,
-  savedObjectsClientMock,
-} from '../../../../../../../src/core/server/mocks';
-import { createCaseServiceMock } from '../../../services/mocks';
+import { getCaseMetrics } from './get_case_metrics';
+import { CaseAttributes, CaseResponse } from '../../../common';
+import { createCasesClientMock } from '../mocks';
+import { CasesClientArgs } from '../types';
+import { createAuthorizationMock } from '../../authorization/mock';
+import { loggingSystemMock, savedObjectsClientMock } from '../../../../../../src/core/server/mocks';
+import { createCaseServiceMock } from '../../services/mocks';
 import { SavedObject } from 'kibana/server';
 
 describe('getMetrics', () => {
@@ -57,7 +54,11 @@ describe('getMetrics', () => {
   });
 
   it('returns the lifespan metrics', async () => {
-    const metrics = await getMetrics({ caseId: '', features: ['lifespan'] }, client, clientArgs);
+    const metrics = await getCaseMetrics(
+      { caseId: '', features: ['lifespan'] },
+      client,
+      clientArgs
+    );
 
     expect(metrics).toEqual({
       lifespan: {
@@ -68,14 +69,18 @@ describe('getMetrics', () => {
   });
 
   it('populates the alertHosts and alertUsers sections', async () => {
-    const metrics = await getMetrics({ caseId: '', features: ['alertHosts'] }, client, clientArgs);
+    const metrics = await getCaseMetrics(
+      { caseId: '', features: ['alertHosts'] },
+      client,
+      clientArgs
+    );
 
-    expect(metrics.alertHosts).toBeDefined();
-    expect(metrics.alertUsers).toBeDefined();
+    expect(metrics.alerts?.hosts).toBeDefined();
+    expect(metrics.alerts?.users).toBeDefined();
   });
 
   it('populates multiple sections at a time', async () => {
-    const metrics = await getMetrics(
+    const metrics = await getCaseMetrics(
       { caseId: '', features: ['alertsCount', 'lifespan'] },
       client,
       clientArgs
@@ -85,14 +90,25 @@ describe('getMetrics', () => {
       creationDate: mockCreateCloseInfo.created_at,
       closeDate: mockCreateCloseInfo.closed_at,
     });
-    expect(metrics.alertsCount).toBeDefined();
+    expect(metrics.alerts?.count).toBeDefined();
+  });
+
+  it('populates multiple alerts sections at a time', async () => {
+    const metrics = await getCaseMetrics(
+      { caseId: '', features: ['alertsCount', 'alertHosts'] },
+      client,
+      clientArgs
+    );
+
+    expect(metrics.alerts?.count).toBeDefined();
+    expect(metrics.alerts?.hosts).toBeDefined();
   });
 
   it('throws an error for an invalid feature', async () => {
     expect.assertions(1);
 
     await expect(
-      getMetrics({ caseId: '', features: ['bananas'] }, client, clientArgs)
+      getCaseMetrics({ caseId: '', features: ['bananas'] }, client, clientArgs)
     ).rejects.toThrow();
   });
 
@@ -100,7 +116,7 @@ describe('getMetrics', () => {
     expect.assertions(1);
 
     try {
-      await getMetrics(
+      await getCaseMetrics(
         { caseId: '', features: ['bananas', 'lifespan', 'alertsCount'] },
         client,
         clientArgs

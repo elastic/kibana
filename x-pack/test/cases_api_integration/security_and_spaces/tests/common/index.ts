@@ -26,7 +26,6 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./cases/patch_cases'));
     loadTestFile(require.resolve('./cases/post_case'));
     loadTestFile(require.resolve('./cases/resolve_case'));
-    loadTestFile(require.resolve('./cases/get_metrics'));
     loadTestFile(require.resolve('./cases/reporters/get_reporters'));
     loadTestFile(require.resolve('./cases/status/get_status'));
     loadTestFile(require.resolve('./cases/tags/get_tags'));
@@ -40,6 +39,7 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./sub_cases/delete_sub_cases'));
     loadTestFile(require.resolve('./sub_cases/get_sub_case'));
     loadTestFile(require.resolve('./sub_cases/find_sub_cases'));
+    loadTestFile(require.resolve('./metrics/get_single_case_metrics'));
 
     // NOTE: Migrations are not included because they can inadvertently remove the .kibana indices which removes the users and spaces
     // which causes errors in any tests after them that relies on those
