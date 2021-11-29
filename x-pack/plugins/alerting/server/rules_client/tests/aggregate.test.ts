@@ -15,7 +15,6 @@ import { actionsAuthorizationMock } from '../../../../actions/server/mocks';
 import { AlertingAuthorization } from '../../authorization/alerting_authorization';
 import { ActionsAuthorization } from '../../../../actions/server';
 import { getBeforeSetup, setGlobalDate } from './lib';
-import { AlertExecutionStatusValues } from '../../types';
 import { RecoveredActionGroup } from '../../../common';
 import { RegistryRuleType } from '../../rule_type_registry';
 
