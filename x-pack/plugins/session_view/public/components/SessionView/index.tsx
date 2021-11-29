@@ -103,7 +103,7 @@ export const SessionView = ({ sessionEntityId, height }: SessionViewDeps) => {
   };
 
   const renderSessionViewDetailPanel = () => {
-    if (selectedProcess && isDetailOpen) {
+    if (isDetailOpen) {
       return (
         <SessionViewDetailPanel
           isDetailMounted={isDetailMounted}

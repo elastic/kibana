@@ -16,28 +16,28 @@ interface StylesDeps {
   hasAlerts: boolean;
 }
 
+export enum ButtonType {
+  children = 'children',
+  alerts = 'alerts',
+  output = 'output',
+  userChanged = 'user',
+}
+
 export const useStyles = ({ depth, hasAlerts }: StylesDeps) => {
   const { euiTheme } = useEuiTheme();
 
   const cached = useMemo(() => {
     const { colors, border, font, size } = euiTheme;
 
-    enum ButtonType {
-      children = 'children',
-      alerts = 'alerts',
-      output = 'output',
-      userChanged = 'user',
-    }
-
     const darkText: CSSObject = {
       color: colors.text,
     };
 
-    const searchHighlight = `
-      background-color: ${colors.highlight};
-      color: ${colors.text};
-      border-radius: ${border.radius.medium};
-    `;
+    const searchHighlight: CSSObject = {
+      backgroundColor: colors.highlight,
+      color: colors.text,
+      borderRadius: border.radius.medium,
+    };
 
     const children: CSSObject = {
       position: 'relative',
@@ -73,7 +73,7 @@ export const useStyles = ({ depth, hasAlerts }: StylesDeps) => {
       marginLeft: size.s,
     };
 
-    const getButtonStyle = (type: string) => {
+    const getButtonStyle = (type: string): CSSObject => {
       let background = 'rgba(170, 101, 86, 0.04)';
       let borderStyle = '1px solid rgba(170, 101, 86, 0.48)';
 
@@ -175,7 +175,6 @@ export const useStyles = ({ depth, hasAlerts }: StylesDeps) => {
       workingDir,
       userEnteredIcon,
       buttonArrow,
-      ButtonType,
       getButtonStyle,
       alertDetails,
     };
