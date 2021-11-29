@@ -27,7 +27,7 @@ import {
 import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { DownloadStep } from '../../../../components';
 import {
