@@ -26,7 +26,10 @@ export const sourcererDefaultDataViewSelector = ({
   sourcerer,
 }: State): SourcererModel['defaultDataView'] => sourcerer.defaultDataView;
 
-export const dataViewSelector = ({ sourcerer }: State, id: string): SourcererDataView | undefined =>
+export const dataViewSelector = (
+  { sourcerer }: State,
+  id: string | null
+): SourcererDataView | undefined =>
   sourcerer.kibanaDataViews.find((dataView) => dataView.id === id);
 
 export const sourcererScopeIdSelector = (

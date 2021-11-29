@@ -118,7 +118,10 @@ export const useCreateFieldButton = (
     scopeIdSelector(state, sourcererScope)
   );
 
-  const createFieldComponent = useMemo(() => {
+  return useMemo(() => {
+    if (selectedDataViewId == null) {
+      return;
+    }
     // It receives onClick props from field browser in order to close the modal.
     const CreateFieldButtonComponent: CreateFieldComponentType = ({ onClick }) => (
       <CreateFieldButton
@@ -130,6 +133,4 @@ export const useCreateFieldButton = (
 
     return CreateFieldButtonComponent;
   }, [selectedDataViewId, timelineId]);
-
-  return createFieldComponent;
 };

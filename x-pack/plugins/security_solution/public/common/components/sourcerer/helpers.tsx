@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React from 'react';
 import {
   EuiSuperSelectOption,
   EuiIcon,
