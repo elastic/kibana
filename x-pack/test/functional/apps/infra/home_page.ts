@@ -14,6 +14,7 @@ const DATE_WITHOUT_DATA = DATES.metricsAndLogs.hosts.withoutData;
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
+  const retry = getService('retry');
   const pageObjects = getPageObjects(['common', 'infraHome', 'infraSavedViews']);
 
   describe('Home page', function () {
@@ -34,7 +35,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
-    describe('with metrics present', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/119763
+    describe.skip('with metrics present', () => {
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
         await pageObjects.common.navigateToApp('infraOps');
@@ -60,15 +62,17 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.infraHome.goToTime(DATE_WITH_DATA);
         await pageObjects.infraHome.getWaffleMap();
         await pageObjects.infraHome.sortNodesBy('value');
-        const nodesWithValue = await pageObjects.infraHome.getNodesWithValues();
-        expect(nodesWithValue).to.eql([
-          { name: 'demo-stack-apache-01', value: 1.4, color: '#6092c0' },
-          { name: 'demo-stack-mysql-01', value: 1.2, color: '#82a7cd' },
-          { name: 'demo-stack-nginx-01', value: 1.1, color: '#93b1d3' },
-          { name: 'demo-stack-redis-01', value: 1, color: '#a2bcd9' },
-          { name: 'demo-stack-haproxy-01', value: 0.8, color: '#c2d2e6' },
-          { name: 'demo-stack-client-01', value: 0.6, color: '#f0f4f9' },
-        ]);
+        await retry.try(async () => {
+          const nodesWithValue = await pageObjects.infraHome.getNodesWithValues();
+          expect(nodesWithValue).to.eql([
+            { name: 'demo-stack-apache-01', value: 1.4, color: '#6092c0' },
+            { name: 'demo-stack-mysql-01', value: 1.2, color: '#82a7cd' },
+            { name: 'demo-stack-nginx-01', value: 1.1, color: '#93b1d3' },
+            { name: 'demo-stack-redis-01', value: 1, color: '#a2bcd9' },
+            { name: 'demo-stack-haproxy-01', value: 0.8, color: '#c2d2e6' },
+            { name: 'demo-stack-client-01', value: 0.6, color: '#f0f4f9' },
+          ]);
+        });
       });
 
       it('sort nodes by ascending value', async () => {
@@ -76,15 +80,17 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.infraHome.getWaffleMap();
         await pageObjects.infraHome.sortNodesBy('value');
         await pageObjects.infraHome.toggleReverseSort();
-        const nodesWithValue = await pageObjects.infraHome.getNodesWithValues();
-        expect(nodesWithValue).to.eql([
-          { name: 'demo-stack-client-01', value: 0.6, color: '#f0f4f9' },
-          { name: 'demo-stack-haproxy-01', value: 0.8, color: '#c2d2e6' },
-          { name: 'demo-stack-redis-01', value: 1, color: '#a2bcd9' },
-          { name: 'demo-stack-nginx-01', value: 1.1, color: '#93b1d3' },
-          { name: 'demo-stack-mysql-01', value: 1.2, color: '#82a7cd' },
-          { name: 'demo-stack-apache-01', value: 1.4, color: '#6092c0' },
-        ]);
+        await retry.try(async () => {
+          const nodesWithValue = await pageObjects.infraHome.getNodesWithValues();
+          expect(nodesWithValue).to.eql([
+            { name: 'demo-stack-client-01', value: 0.6, color: '#f0f4f9' },
+            { name: 'demo-stack-haproxy-01', value: 0.8, color: '#c2d2e6' },
+            { name: 'demo-stack-redis-01', value: 1, color: '#a2bcd9' },
+            { name: 'demo-stack-nginx-01', value: 1.1, color: '#93b1d3' },
+            { name: 'demo-stack-mysql-01', value: 1.2, color: '#82a7cd' },
+            { name: 'demo-stack-apache-01', value: 1.4, color: '#6092c0' },
+          ]);
+        });
       });
 
       it('group nodes by custom field', async () => {
@@ -98,10 +104,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.infraHome.goToTime(DATE_WITH_DATA);
         await pageObjects.infraHome.getWaffleMap();
         await pageObjects.infraHome.enterSearchTerm('host.name: "demo-stack-apache-01"');
-        const nodesWithValue = await pageObjects.infraHome.getNodesWithValues();
-        expect(nodesWithValue).to.eql([
-          { name: 'demo-stack-apache-01', value: 1.4, color: '#6092c0' },
-        ]);
+        await retry.try(async () => {
+          const nodesWithValue = await pageObjects.infraHome.getNodesWithValues();
+          expect(nodesWithValue).to.eql([
+            { name: 'demo-stack-apache-01', value: 1.4, color: '#6092c0' },
+          ]);
+        });
         await pageObjects.infraHome.clearSearchTerm();
       });
 
@@ -109,15 +117,17 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.infraHome.openLegendControls();
         await pageObjects.infraHome.changePalette('temperature');
         await pageObjects.infraHome.applyLegendControls();
-        const nodesWithValue = await pageObjects.infraHome.getNodesWithValues();
-        expect(nodesWithValue).to.eql([
-          { name: 'demo-stack-client-01', value: 0.6, color: '#6092c0' },
-          { name: 'demo-stack-haproxy-01', value: 0.8, color: '#b5c9df' },
-          { name: 'demo-stack-redis-01', value: 1, color: '#f1d9b9' },
-          { name: 'demo-stack-nginx-01', value: 1.1, color: '#eec096' },
-          { name: 'demo-stack-mysql-01', value: 1.2, color: '#eba47a' },
-          { name: 'demo-stack-apache-01', value: 1.4, color: '#e7664c' },
-        ]);
+        await retry.try(async () => {
+          const nodesWithValue = await pageObjects.infraHome.getNodesWithValues();
+          expect(nodesWithValue).to.eql([
+            { name: 'demo-stack-client-01', value: 0.6, color: '#6092c0' },
+            { name: 'demo-stack-haproxy-01', value: 0.8, color: '#b5c9df' },
+            { name: 'demo-stack-redis-01', value: 1, color: '#f1d9b9' },
+            { name: 'demo-stack-nginx-01', value: 1.1, color: '#eec096' },
+            { name: 'demo-stack-mysql-01', value: 1.2, color: '#eba47a' },
+            { name: 'demo-stack-apache-01', value: 1.4, color: '#e7664c' },
+          ]);
+        });
       });
 
       it('toggle the timeline', async () => {

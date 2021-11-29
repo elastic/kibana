@@ -13,7 +13,7 @@ import { Router } from 'react-router-dom';
 import { getContext, resetContext } from 'kea';
 import { Store } from 'redux';
 
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 
 import { AppMountParameters, CoreStart } from '../../../../../src/core/public';
 import { EuiThemeProvider } from '../../../../../src/plugins/kibana_react/common';

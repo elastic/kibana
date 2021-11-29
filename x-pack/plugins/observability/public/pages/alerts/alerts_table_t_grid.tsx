@@ -11,23 +11,12 @@
  * This way plugins can do targeted imports to reduce the final code bundle
  */
 import {
-  ALERT_DURATION as ALERT_DURATION_TYPED,
-  ALERT_REASON as ALERT_REASON_TYPED,
-  ALERT_RULE_CONSUMER,
-  ALERT_RULE_PRODUCER,
-  ALERT_STATUS as ALERT_STATUS_TYPED,
-  ALERT_WORKFLOW_STATUS as ALERT_WORKFLOW_STATUS_TYPED,
-} from '@kbn/rule-data-utils';
-// @ts-expect-error importing from a place other than root because we want to limit what we import from this package
-import { AlertConsumers as AlertConsumersNonTyped } from '@kbn/rule-data-utils/target_node/alerts_as_data_rbac';
-import {
-  ALERT_DURATION as ALERT_DURATION_NON_TYPED,
-  ALERT_REASON as ALERT_REASON_NON_TYPED,
-  ALERT_STATUS as ALERT_STATUS_NON_TYPED,
-  ALERT_WORKFLOW_STATUS as ALERT_WORKFLOW_STATUS_NON_TYPED,
+  ALERT_DURATION,
+  ALERT_REASON,
+  ALERT_STATUS,
+  ALERT_WORKFLOW_STATUS,
   TIMESTAMP,
-  // @ts-expect-error importing from a place other than root because we want to limit what we import from this package
-} from '@kbn/rule-data-utils/target_node/technical_field_names';
+} from '@kbn/rule-data-utils/technical_field_names';
 
 import {
   EuiButtonIcon,
@@ -43,36 +32,36 @@ import {
 import styled from 'styled-components';
 import React, { Suspense, useMemo, useState, useCallback, useEffect } from 'react';
 import usePrevious from 'react-use/lib/usePrevious';
-import { get } from 'lodash';
-import {
-  getAlertsPermissions,
-  useGetUserAlertsPermissions,
-} from '../../hooks/use_alert_permission';
-import type { TimelinesUIStart, TGridType, SortDirection } from '../../../../timelines/public';
-import { useStatusBulkActionItems } from '../../../../timelines/public';
+import { pick } from 'lodash';
+import { getAlertsPermissions } from '../../hooks/use_alert_permission';
+import type {
+  TimelinesUIStart,
+  TGridType,
+  TGridState,
+  TGridModel,
+  SortDirection,
+} from '../../../../timelines/public';
+
 import type { TopAlert } from './';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import type {
   ActionProps,
   AlertWorkflowStatus,
   ColumnHeaderOptions,
+  ControlColumnProps,
   RowRenderer,
 } from '../../../../timelines/common';
 
 import { getRenderCellValue } from './render_cell_value';
-import { observabilityFeatureId } from '../../../common';
+import { observabilityAppId, observabilityFeatureId } from '../../../common';
 import { useGetUserCasesPermissions } from '../../hooks/use_get_user_cases_permissions';
 import { usePluginContext } from '../../hooks/use_plugin_context';
-import { getDefaultCellActions } from './default_cell_actions';
 import { LazyAlertsFlyout } from '../..';
 import { parseAlert } from './parse_alert';
 import { CoreStart } from '../../../../../../src/core/public';
 import { translations, paths } from '../../config';
 
-const ALERT_DURATION: typeof ALERT_DURATION_TYPED = ALERT_DURATION_NON_TYPED;
-const ALERT_REASON: typeof ALERT_REASON_TYPED = ALERT_REASON_NON_TYPED;
-const ALERT_STATUS: typeof ALERT_STATUS_TYPED = ALERT_STATUS_NON_TYPED;
-const ALERT_WORKFLOW_STATUS: typeof ALERT_WORKFLOW_STATUS_TYPED = ALERT_WORKFLOW_STATUS_NON_TYPED;
+const ALERT_TABLE_STATE_STORAGE_KEY = 'xpack.observability.alert.tableState';
 
 interface AlertsTableTGridProps {
   indexNames: string[];
@@ -81,7 +70,6 @@ interface AlertsTableTGridProps {
   kuery: string;
   workflowStatus: AlertWorkflowStatus;
   setRefetch: (ref: () => void) => void;
-  addToQuery: (value: string) => void;
 }
 
 interface ObservabilityActionsProps extends ActionProps {
@@ -160,21 +148,21 @@ function ObservabilityActions({
   const [openActionsPopoverId, setActionsPopover] = useState(null);
   const {
     timelines,
-    application: { capabilities },
+    application: {},
   } = useKibana<CoreStart & { timelines: TimelinesUIStart }>().services;
 
   const parseObservabilityAlert = useMemo(
     () => parseAlert(observabilityRuleTypeRegistry),
     [observabilityRuleTypeRegistry]
   );
-  const alertDataConsumer = useMemo<string>(
-    () => get(dataFieldEs, ALERT_RULE_CONSUMER, [''])[0],
-    [dataFieldEs]
-  );
-  const alertDataProducer = useMemo<string>(
-    () => get(dataFieldEs, ALERT_RULE_PRODUCER, [''])[0],
-    [dataFieldEs]
-  );
+  // const alertDataConsumer = useMemo<string>(
+  //   () => get(dataFieldEs, ALERT_RULE_CONSUMER, [''])[0],
+  //   [dataFieldEs]
+  // );
+  // const alertDataProducer = useMemo<string>(
+  //   () => get(dataFieldEs, ALERT_RULE_PRODUCER, [''])[0],
+  //   [dataFieldEs]
+  // );
 
   const alert = parseObservabilityAlert(dataFieldEs);
   const { prepend } = core.http.basePath;
@@ -200,27 +188,29 @@ function ObservabilityActions({
     };
   }, [data, eventId, ecsData]);
 
-  const onAlertStatusUpdated = useCallback(() => {
-    setActionsPopover(null);
-    if (refetch) {
-      refetch();
-    }
-  }, [setActionsPopover, refetch]);
+  // Hide the WorkFlow filter, but keep its code as required in https://github.com/elastic/kibana/issues/117686
 
-  const alertPermissions = useGetUserAlertsPermissions(
-    capabilities,
-    alertDataConsumer === 'alerts' ? alertDataProducer : alertDataConsumer
-  );
+  // const onAlertStatusUpdated = useCallback(() => {
+  //   setActionsPopover(null);
+  //   if (refetch) {
+  //     refetch();
+  //   }
+  // }, [setActionsPopover, refetch]);
 
-  const statusActionItems = useStatusBulkActionItems({
-    eventIds: [eventId],
-    currentStatus,
-    indexName: ecsData._index ?? '',
-    setEventsLoading,
-    setEventsDeleted,
-    onUpdateSuccess: onAlertStatusUpdated,
-    onUpdateFailure: onAlertStatusUpdated,
-  });
+  // const alertPermissions = useGetUserAlertsPermissions(
+  //   capabilities,
+  //   alertDataConsumer === 'alerts' ? alertDataProducer : alertDataConsumer
+  // );
+
+  // const statusActionItems = useStatusBulkActionItems({
+  //   eventIds: [eventId],
+  //   currentStatus,
+  //   indexName: ecsData._index ?? '',
+  //   setEventsLoading,
+  //   setEventsDeleted,
+  //   onUpdateSuccess: onAlertStatusUpdated,
+  //   onUpdateFailure: onAlertStatusUpdated,
+  // });
 
   const ruleId = alert.fields['kibana.alert.rule.uuid'] ?? null;
   const linkToRule = ruleId ? prepend(paths.management.ruleDetails(ruleId)) : null;
@@ -245,7 +235,8 @@ function ObservabilityActions({
             }),
           ]
         : []),
-      ...(alertPermissions.crud ? statusActionItems : []),
+      // Hide the WorkFlow filter, but keep its code as required in https://github.com/elastic/kibana/issues/117686
+      // ...(alertPermissions.crud ? statusActionItems : []),
       ...(!!linkToRule
         ? [
             <EuiContextMenuItem
@@ -258,15 +249,7 @@ function ObservabilityActions({
           ]
         : []),
     ];
-  }, [
-    afterCaseSelection,
-    casePermissions,
-    timelines,
-    event,
-    statusActionItems,
-    alertPermissions,
-    linkToRule,
-  ]);
+  }, [afterCaseSelection, casePermissions, timelines, event, linkToRule]);
 
   const actionsToolTip =
     actionsMenuItems.length <= 0
@@ -326,9 +309,18 @@ function ObservabilityActions({
     </>
   );
 }
+// Hide the WorkFlow filter, but keep its code as required in https://github.com/elastic/kibana/issues/117686
+
+const FIELDS_WITHOUT_CELL_ACTIONS = [
+  '@timestamp',
+  'signal.rule.risk_score',
+  'signal.reason',
+  'kibana.alert.duration.us',
+  'kibana.alert.reason',
+];
 
 export function AlertsTableTGrid(props: AlertsTableTGridProps) {
-  const { indexNames, rangeFrom, rangeTo, kuery, workflowStatus, setRefetch, addToQuery } = props;
+  const { indexNames, rangeFrom, rangeTo, kuery, workflowStatus, setRefetch } = props;
   const prevWorkflowStatus = usePrevious(workflowStatus);
   const {
     timelines,
@@ -336,6 +328,9 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
   } = useKibana<CoreStart & { timelines: TimelinesUIStart }>().services;
 
   const [flyoutAlert, setFlyoutAlert] = useState<TopAlert | undefined>(undefined);
+  const [tGridState, setTGridState] = useState<Partial<TGridModel> | null>(
+    JSON.parse(localStorage.getItem(ALERT_TABLE_STATE_STORAGE_KEY) ?? 'null')
+  );
 
   const casePermissions = useGetUserCasesPermissions();
 
@@ -357,13 +352,27 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
     }
   }, [workflowStatus, prevWorkflowStatus]);
 
+  useEffect(() => {
+    if (tGridState) {
+      const newState = JSON.stringify({
+        ...tGridState,
+        columns: tGridState.columns?.map((c) =>
+          pick(c, ['columnHeaderType', 'displayAsText', 'id', 'initialWidth', 'linkField'])
+        ),
+      });
+      if (newState !== localStorage.getItem(ALERT_TABLE_STATE_STORAGE_KEY)) {
+        localStorage.setItem(ALERT_TABLE_STATE_STORAGE_KEY, newState);
+      }
+    }
+  }, [tGridState]);
+
   const setEventsDeleted = useCallback<ObservabilityActionsProps['setEventsDeleted']>((action) => {
     if (action.isDeleted) {
       setDeletedEventIds((ids) => [...ids, ...action.eventIds]);
     }
   }, []);
 
-  const leadingControlColumns = useMemo(() => {
+  const leadingControlColumns: ControlColumnProps[] = useMemo(() => {
     return [
       {
         id: 'expand',
@@ -385,17 +394,33 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
     ];
   }, [workflowStatus, setEventsDeleted]);
 
+  const onStateChange = useCallback(
+    (state: TGridState) => {
+      const pickedState = pick(state.timelineById['standalone-t-grid'], [
+        'columns',
+        'sort',
+        'selectedEventIds',
+      ]);
+      if (JSON.stringify(pickedState) !== JSON.stringify(tGridState)) {
+        setTGridState(pickedState);
+      }
+    },
+    [tGridState]
+  );
+
   const tGridProps = useMemo(() => {
     const type: TGridType = 'standalone';
     const sortDirection: SortDirection = 'desc';
     return {
-      appId: observabilityFeatureId,
+      appId: observabilityAppId,
       casesOwner: observabilityFeatureId,
       casePermissions,
       type,
-      columns,
+      columns: tGridState?.columns ?? columns,
       deletedEventIds,
-      defaultCellActions: getDefaultCellActions({ addToQuery }),
+      // Hide the WorkFlow filter, but keep its code as required in https://github.com/elastic/kibana/issues/117686
+      // defaultCellActions: getDefaultCellActions({ addToQuery }),
+      disabledCellActions: FIELDS_WITHOUT_CELL_ACTIONS,
       end: rangeTo,
       filters: [],
       hasAlertsCrudPermissions,
@@ -403,6 +428,7 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
       itemsPerPageOptions: [10, 25, 50],
       loadingText: translations.alertsTable.loadingTextLabel,
       footerText: translations.alertsTable.footerTextLabel,
+      onStateChange,
       query: {
         query: `${ALERT_WORKFLOW_STATUS}: ${workflowStatus}${kuery !== '' ? ` and ${kuery}` : ''}`,
         language: 'kuery',
@@ -413,7 +439,7 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
       runtimeMappings: {},
       start: rangeFrom,
       setRefetch,
-      sort: [
+      sort: tGridState?.sort ?? [
         {
           columnId: '@timestamp',
           columnType: 'date',
@@ -427,7 +453,6 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
     };
   }, [
     casePermissions,
-    addToQuery,
     rangeTo,
     hasAlertsCrudPermissions,
     indexNames,
@@ -437,6 +462,8 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
     setRefetch,
     leadingControlColumns,
     deletedEventIds,
+    onStateChange,
+    tGridState,
   ]);
 
   const handleFlyoutClose = () => setFlyoutAlert(undefined);
