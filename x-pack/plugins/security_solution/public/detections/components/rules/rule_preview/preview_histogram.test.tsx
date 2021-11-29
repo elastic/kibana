@@ -56,6 +56,7 @@ describe('PreviewHistogram', () => {
           spaceId={'default'}
           ruleType={'query'}
           query={mockQueryBar}
+          index={['']}
         />
       </TestProviders>
     );
@@ -91,6 +92,7 @@ describe('PreviewHistogram', () => {
           spaceId={'default'}
           ruleType={'query'}
           query={mockQueryBar}
+          index={['']}
         />
       </TestProviders>
     );

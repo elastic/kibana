@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { useMemo } from 'react';
-import { useMatrixHistogramCombined } from '../../../../common/containers/matrix_histogram';
+import { useMatrixHistogram } from '../../../../common/containers/matrix_histogram';
 import { MatrixHistogramType } from '../../../../../common';
 import { convertToBuildEsQuery } from '../../../../common/lib/keury';
 import { getEsQueryConfig } from '../../../../../../../../src/plugins/data/common';
@@ -68,5 +68,5 @@ export const usePreviewHistogram = ({
     };
   }, [startDate, endDate, filterQuery, spaceId, error, threshold]);
 
-  return useMatrixHistogramCombined(matrixHistogramRequest);
+  return useMatrixHistogram(matrixHistogramRequest);
 };

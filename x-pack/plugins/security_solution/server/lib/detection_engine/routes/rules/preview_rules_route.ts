@@ -45,10 +45,10 @@ import {
 import { createSecurityRuleTypeWrapper } from '../../rule_types/create_security_rule_type_wrapper';
 
 enum InvocationCount {
-  HOUR = 1,
+  HOUR = 20,
   DAY = 24,
   WEEK = 168,
-  MONTH = 720,
+  MONTH = 30,
 }
 
 export const previewRulesRoute = async (

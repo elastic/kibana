@@ -24,13 +24,13 @@ import { ESQuery } from '../../../../../common/typed_json';
  */
 export const isNoisy = (hits: number, timeframe: Unit): boolean => {
   if (timeframe === 'h') {
-    return hits > 1;
+    return hits > 20;
   } else if (timeframe === 'd') {
     return hits / 24 > 1;
   } else if (timeframe === 'w') {
     return hits / 168 > 1;
   } else if (timeframe === 'M') {
-    return hits / 730 > 1;
+    return hits / 30 > 1;
   }
 
   return false;
@@ -54,6 +54,8 @@ export const getTimeframeOptions = (ruleType: Type): EuiSelectOption[] => {
       { value: 'd', text: i18n.LAST_DAY },
       { value: 'w', text: i18n.LAST_WEEK },
     ];
+  } else if (ruleType === 'threshold') {
+    return [{ value: 'h', text: i18n.LAST_HOUR }];
   } else {
     return [
       { value: 'h', text: i18n.LAST_HOUR },

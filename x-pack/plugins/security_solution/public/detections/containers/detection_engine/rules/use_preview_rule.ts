@@ -29,7 +29,7 @@ export const usePreviewRule = (timeframe: Unit = 'h') => {
   const [response, setResponse] = useState<PreviewResponse>(emptyPreviewRule);
   const [isLoading, setIsLoading] = useState(false);
   const { addError } = useAppToasts();
-  let invocationCount = 1; // Defaults to an hour
+  let invocationCount = 20; // Defaults to an hour
 
   switch (timeframe) {
     case 'd':
@@ -39,7 +39,7 @@ export const usePreviewRule = (timeframe: Unit = 'h') => {
       invocationCount = 168;
       break;
     case 'M':
-      invocationCount = 720;
+      invocationCount = 30;
       break;
   }
 
