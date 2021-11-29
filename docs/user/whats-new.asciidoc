@@ -5,15 +5,13 @@ coming::[7.16.0]
 
 Here are the highlights of what's new and improved in {minor-version}.
 For detailed information about this release,
-check out the <<release-notes, release notes>>.
+check out the <<release-notes-7.16.0>>.
 
 Other versions: {kibana-ref-all}/7.15/whats-new.html[7.15] | {kibana-ref-all}/7.14/whats-new.html[7.14] | {kibana-ref-all}/7.13/whats-new.html[7.13] | {kibana-ref-all}/7.12/whats-new.html[7.12] | {kibana-ref-all}/7.11/whats-new.html[7.11] |
 {kibana-ref-all}/7.10/whats-new.html[7.10] | {kibana-ref-all}/7.9/whats-new.html[7.9] | {kibana-ref-all}/7.8/whats-new.html[7.8] | {kibana-ref-all}/7.7/release-highlights-7.7.0.html[7.7] |
 {kibana-ref-all}/7.6/release-highlights-7.6.0.html[7.6] | {kibana-ref-all}/7.5/release-highlights-7.5.0.html[7.5] | {kibana-ref-all}/7.4/release-highlights-7.4.0.html[7.4] |
 {kibana-ref-all}/7.3/release-highlights-7.3.0.html[7.3] | {kibana-ref-all}/7.2/release-highlights-7.2.0.html[7.2] | {kibana-ref-all}/7.1/release-highlights-7.1.0.html[7.1] |
 {kibana-ref-all}/7.0/release-highlights-7.0.0.html[7.0]
-
-For the full list of changes in {minor-version}, refer to the <<release-notes-7.16.0>>.
 
 //NOTE: The notable-highlights tagged regions are re-used in the
 //Installation and Upgrade Guide
@@ -81,7 +79,7 @@ View the requests that collect the data in visualizations in *Console*.
 Automatically resize *Aggregation-based* data table rows so that text and images are fully visible.
 
 [float]
-==== New and updated connectors in Alerting
+=== New and updated connectors in Alerting
 
 Alerting has grown its collection of connectors with the addition of the ServiceNow ITOM
 connector, which allows for easy integration with ServiceNow event management. In addition,
@@ -91,7 +89,7 @@ is the ability to authenticate the email connector with OAuth 2.0
 Client Credentials for the MS Exchange email service.
 
 [float]
-==== Rule duration on display
+=== Rule duration on display
 
 In *Rules and Connectors*, the *Rules* view now includes the rule duration field, which shows how long a rule is taking to
 complete execution. This helps you identify rules that run longer than you anticipate.
