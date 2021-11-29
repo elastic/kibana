@@ -46,7 +46,13 @@ describe('renderApp', () => {
       uiSettings: { get: () => false },
       http: { basePath: { prepend: (path: string) => path } },
     } as unknown as CoreStart;
-    const config = { unsafe: { alertingExperience: { enabled: true }, cases: { enabled: true } } };
+    const config = {
+      unsafe: {
+        alertingExperience: { enabled: true },
+        cases: { enabled: true },
+        overviewNext: { enabled: false },
+      },
+    };
     const params = {
       element: window.document.createElement('div'),
       history: createMemoryHistory(),
