@@ -80,6 +80,7 @@ export const createPackagePolicyServiceMock = (): jest.Mocked<PackagePolicyServi
   return {
     _compilePackagePolicyInputs: jest.fn(),
     buildPackagePolicyFromPackage: jest.fn(),
+    buildPackagePolicyFromPackageWithVersion: jest.fn(),
     bulkCreate: jest.fn(),
     create: jest.fn(),
     delete: jest.fn(),
