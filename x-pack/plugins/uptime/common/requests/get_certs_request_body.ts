@@ -85,28 +85,37 @@ export const getCertsRequestBody = ({
                 },
               },
             },
-            ...(notValidBefore
-              ? [
-                  {
-                    range: {
-                      'tls.certificate_not_valid_before': {
-                        lte: notValidBefore,
-                      },
-                    },
-                  },
-                ]
-              : []),
-            ...(notValidAfter
-              ? [
-                  {
-                    range: {
-                      'tls.certificate_not_valid_after': {
-                        lte: notValidAfter,
-                      },
-                    },
-                  },
-                ]
-              : []),
+            {
+              bool: {
+                // these notValidBefore and notValidAfter should be inside should block, since
+                // we want to match either of the condition, making ir an OR operation
+                minimum_should_match: 1,
+                should: [
+                  ...(notValidBefore
+                    ? [
+                        {
+                          range: {
+                            'tls.certificate_not_valid_before': {
+                              lte: notValidBefore,
+                            },
+                          },
+                        },
+                      ]
+                    : []),
+                  ...(notValidAfter
+                    ? [
+                        {
+                          range: {
+                            'tls.certificate_not_valid_after': {
+                              lte: notValidAfter,
+                            },
+                          },
+                        },
+                      ]
+                    : []),
+                ],
+              },
+            },
           ] as estypes.QueryDslQueryContainer,
         },
       },
