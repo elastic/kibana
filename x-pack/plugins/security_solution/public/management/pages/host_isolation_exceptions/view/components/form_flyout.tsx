@@ -26,7 +26,7 @@ import { useMutation, useQueryClient } from 'react-query';
 import { Loader } from '../../../../../common/components/loader';
 import { useHttp, useToasts } from '../../../../../common/lib/kibana';
 import { ServerApiError } from '../../../../../common/types';
-import { useGetEndpointSpecificPolicies } from '../../../../services/policies';
+import { useGetEndpointSpecificPolicies } from '../../../../services/hooks';
 import {
   createHostIsolationExceptionItem,
   updateOneHostIsolationExceptionItem,

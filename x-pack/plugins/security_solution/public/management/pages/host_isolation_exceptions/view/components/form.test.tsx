@@ -30,11 +30,11 @@ describe('When on the host isolation exceptions entry form', () => {
   const onError = jest.fn();
   let policiesRequest: GetPolicyListResponse;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     onChange.mockReset();
     onError.mockReset();
     const mockedContext = createAppRootMockRenderer();
-    policiesRequest = sendGetEndpointSpecificPackagePoliciesMock();
+    policiesRequest = await sendGetEndpointSpecificPackagePoliciesMock();
     render = (exception) => {
       return mockedContext.render(
         <HostIsolationExceptionsForm
@@ -216,7 +216,7 @@ describe('When on the host isolation exceptions entry form', () => {
       expect(renderResult.queryByTestId('effectedPolicies-select-policiesSelectable')).toBeFalsy();
     });
 
-    it('should show  pre-selected policies', () => {
+    it('should show pre-selected policies', () => {
       const policyId1 = policiesRequest.items[0].id;
       const policyId2 = policiesRequest.items[3].id;
       existingException.tags = [`policy:${policyId1}`, `policy:${policyId2}`];
