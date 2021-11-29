@@ -101,12 +101,20 @@ export default function createAggregateTests({ getService }: FtrProviderContext)
 
       expect(reponse.status).to.eql(200);
       expect(reponse.body).to.eql({
+        rule_enabled_status: {
+          disabled: 0,
+          enabled: 7,
+        },
         rule_execution_status: {
           ok: NumOkAlerts,
           active: NumActiveAlerts,
           error: NumErrorAlerts,
           pending: 0,
           unknown: 0,
+        },
+        rule_muted_status: {
+          muted: 0,
+          unmuted: 7,
         },
       });
     });
