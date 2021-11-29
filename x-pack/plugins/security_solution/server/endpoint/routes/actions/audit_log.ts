@@ -11,6 +11,7 @@ import { actionsLogRequestHandler } from './audit_log_handler';
 
 import { SecuritySolutionPluginRouter } from '../../../types';
 import { EndpointAppContext } from '../../types';
+import { ENDPOINT_FEATURE_ID } from '../../../../common/constants';
 
 /**
  * Registers the endpoint activity_log route
@@ -23,7 +24,13 @@ export function registerActionAuditLogRoutes(
     {
       path: ENDPOINT_ACTION_LOG_ROUTE,
       validate: EndpointActionLogRequestSchema,
-      options: { authRequired: true, tags: ['access:securitySolution'] },
+      options: {
+        authRequired: true,
+        tags: [
+          'access:securitySolution',
+          `access: ${ENDPOINT_FEATURE_ID}-readIsolationActionsAndResponses`,
+        ],
+      },
     },
     actionsLogRequestHandler(endpointContext)
   );

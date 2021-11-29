@@ -15,7 +15,7 @@ import {
 } from '../../../types';
 import { EndpointAppContext } from '../../types';
 import { getPendingActionCounts } from '../../services';
-
+import { ENDPOINT_FEATURE_ID } from '../../../../common/constants';
 /**
  * Registers routes for checking status of endpoints based on pending actions
  */
@@ -27,7 +27,13 @@ export function registerActionStatusRoutes(
     {
       path: ACTION_STATUS_ROUTE,
       validate: ActionStatusRequestSchema,
-      options: { authRequired: true, tags: ['access:securitySolution'] },
+      options: {
+        authRequired: true,
+        tags: [
+          'access:securitySolution',
+          `access: ${ENDPOINT_FEATURE_ID}-readIsolationActionsAndResponses`,
+        ],
+      },
     },
     actionStatusRequestHandler(endpointContext)
   );

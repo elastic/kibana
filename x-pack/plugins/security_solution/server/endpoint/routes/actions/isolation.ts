@@ -32,10 +32,13 @@ import {
 } from '../../../types';
 import { getMetadataForEndpoints } from '../../services';
 import { EndpointAppContext } from '../../types';
-import { APP_ID } from '../../../../common/constants';
-import { userCanIsolate } from '../../../../common/endpoint/actions';
+import { APP_ID, ENDPOINT_FEATURE_ID } from '../../../../common/constants';
 import { doLogsEndpointActionDsExists } from '../../utils';
 
+const privilegesTags: Readonly<string[]> = [
+  'access:securitySolution',
+  `access: ${ENDPOINT_FEATURE_ID}-writeIsolationActions`,
+];
 /**
  * Registers the Host-(un-)isolation routes
  */
@@ -48,7 +51,10 @@ export function registerHostIsolationRoutes(
     {
       path: ISOLATE_HOST_ROUTE,
       validate: HostIsolationRequestSchema,
-      options: { authRequired: true, tags: ['access:securitySolution'] },
+      options: {
+        authRequired: true,
+        tags: privilegesTags,
+      },
     },
     isolationRequestHandler(endpointContext, true)
   );
@@ -58,7 +64,10 @@ export function registerHostIsolationRoutes(
     {
       path: UNISOLATE_HOST_ROUTE,
       validate: HostIsolationRequestSchema,
-      options: { authRequired: true, tags: ['access:securitySolution'] },
+      options: {
+        authRequired: true,
+        tags: privilegesTags,
+      },
     },
     isolationRequestHandler(endpointContext, false)
   );
@@ -100,16 +109,6 @@ export const isolationRequestHandler = function (
   SecuritySolutionRequestHandlerContext
 > {
   return async (context, req, res) => {
-    // only allow admin users
-    const user = endpointContext.service.security?.authc.getCurrentUser(req);
-    if (!userCanIsolate(user?.roles)) {
-      return res.forbidden({
-        body: {
-          message: 'You do not have permission to perform this action',
-        },
-      });
-    }
-
     // isolation requires plat+
     if (isolate && !endpointContext.service.getLicenseService()?.isPlatinumPlus()) {
       return res.forbidden({
@@ -121,9 +120,11 @@ export const isolationRequestHandler = function (
 
     // fetch the Agent IDs to send the commands to
     const endpointIDs = [...new Set(req.body.endpoint_ids)]; // dedupe
-    const endpointData = await getMetadataForEndpoints(endpointIDs, context);
-
-    const casesClient = await endpointContext.service.getCasesClient(req);
+    const [endpointData, casesClient, currentUser] = await Promise.all([
+      getMetadataForEndpoints(endpointIDs, context),
+      endpointContext.service.getCasesClient(req),
+      endpointContext.service.security?.authc.getCurrentUser(req),
+    ]);
 
     // convert any alert IDs into cases
     let caseIDs: string[] = req.body.case_ids?.slice() || [];
@@ -166,8 +167,7 @@ export const isolationRequestHandler = function (
         },
       } as Omit<EndpointAction, 'agents' | 'user_id'>,
       user: {
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        id: user!.username,
+        id: currentUser?.username ?? '',
       },
     };
 
