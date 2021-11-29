@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 
-import { NewPackagePolicySchema, UpdatePackagePolicySchema } from '../models';
+import { CreatePackagePolicySchema, UpdatePackagePolicySchema } from '../models';
 
 import { ListWithKuerySchema } from './index';
 
@@ -22,7 +22,7 @@ export const GetOnePackagePolicyRequestSchema = {
 };
 
 export const CreatePackagePolicyRequestSchema = {
-  body: NewPackagePolicySchema,
+  body: CreatePackagePolicySchema,
 };
 
 export const UpdatePackagePolicyRequestSchema = {

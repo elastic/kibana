@@ -734,7 +734,7 @@ class PackagePolicyService {
               ...stream,
               enabled: input.enabled,
             })),
-          };
+          } as NewPackagePolicyInput;
         });
         newPackagePolicy = {
           ...newPP,
