@@ -362,25 +362,11 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
       {
         id: CloudPosturePage.dashboard,
         title: 'Dashboard',
-        // eslint-disable-next-line prettier/prettier
         path: '/csp/dashboard',
-      },
-      {
-        id: CloudPosturePage.rules,
-        title: 'Rules',
-        // eslint-disable-next-line prettier/prettier
-        path: '/csp/rules',
-      },
-      {
-        id: CloudPosturePage.alerts,
-        title: 'Alerts',
-        // eslint-disable-next-line prettier/prettier
-        path: '/csp/alerts',
       },
       {
         id: CloudPosturePage.findings,
         title: 'Findings',
-        // eslint-disable-next-line prettier/prettier
         path: '/csp/findings',
       },
     ],

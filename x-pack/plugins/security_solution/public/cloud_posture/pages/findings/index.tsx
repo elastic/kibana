@@ -43,7 +43,6 @@ export const Findings = () => (
   </SecuritySolutionPageWrapper>
 );
 
-type R = keyof {} | string;
 interface URLState {
   query: Query;
   dateRange?: TimeRange;

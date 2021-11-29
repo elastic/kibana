@@ -21,7 +21,7 @@ import { GenericNavRecord } from '../types';
  * TODO: Consolidate & re-use the logic in the hooks in this directory that are replicated from the tab_navigation to maintain breadcrumbs, telemetry, etc...
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const useSecuritySolutionNavigation = (navTabs?: any = navTabsOriginal) => {
+export const useSecuritySolutionNavigation = (navTabs: any = navTabsOriginal) => {
   const [routeProps] = useRouteSpy();
   const urlMapState = makeMapStateToProps();
   const { urlState } = useDeepEqualSelector(urlMapState);
