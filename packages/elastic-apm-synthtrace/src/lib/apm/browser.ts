@@ -6,11 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { Entity, UserAgentFields } from './entity';
+import { ApmFields, ApmUserAgentFields } from './apm_fields';
+import { Entity } from '../entity';
 import { RumSpan } from './rum_span';
 import { RumTransaction } from './rum_transaction';
 
-export class Browser extends Entity {
+export class Browser extends Entity<ApmFields> {
   transaction(transactionName: string, transactionType: string = 'page-load') {
     return new RumTransaction({
       ...this.fields,
@@ -29,7 +30,7 @@ export class Browser extends Entity {
   }
 }
 
-export function browser(serviceName: string, production: string, userAgent: UserAgentFields) {
+export function browser(serviceName: string, production: string, userAgent: ApmUserAgentFields) {
   return new Browser({
     'agent.name': 'rum-js',
     'service.name': serviceName,

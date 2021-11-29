@@ -6,16 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { set } from 'lodash';
-import { getObserverDefaults } from '../..';
-import { Fields } from '../entity';
+import { getObserverDefaults } from '../defaults/get_observer_defaults';
+import { ApmFields } from '../apm_fields';
+import { dedot } from '../../utils/dedot';
+import { ElasticsearchOutput } from '../../utils/to_elasticsearch_output';
 
-export interface ElasticsearchOutput {
-  _index: string;
-  _source: unknown;
-}
-
-export interface ElasticsearchOutputWriteTargets {
+export interface ApmElasticsearchOutputWriteTargets {
   transaction: string;
   span: string;
   error: string;
@@ -30,16 +26,14 @@ const esDocumentDefaults = {
   },
 };
 
-// eslint-disable-next-line guard-for-in
-for (const key in observerDefaults) {
-  set(esDocumentDefaults, key, observerDefaults[key as keyof typeof observerDefaults]);
-}
-export function toElasticsearchOutput({
+dedot(observerDefaults, esDocumentDefaults);
+
+export function apmEventsToElasticsearchOutput({
   events,
   writeTargets,
 }: {
-  events: Fields[];
-  writeTargets: ElasticsearchOutputWriteTargets;
+  events: ApmFields[];
+  writeTargets: ApmElasticsearchOutputWriteTargets;
 }): ElasticsearchOutput[] {
   return events.map((event) => {
     const values = {};
@@ -55,15 +49,12 @@ export function toElasticsearchOutput({
 
     Object.assign(document, esDocumentDefaults);
 
-    // eslint-disable-next-line guard-for-in
-    for (const key in values) {
-      const val = values[key as keyof typeof values];
-      set(document, key, val);
-    }
+    dedot(values, document);
 
     return {
-      _index: writeTargets[event['processor.event'] as keyof ElasticsearchOutputWriteTargets],
+      _index: writeTargets[event['processor.event'] as keyof ApmElasticsearchOutputWriteTargets],
       _source: document,
+      timestamp: event['@timestamp']!,
     };
   });
 }
