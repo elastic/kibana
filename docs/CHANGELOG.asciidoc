@@ -109,7 +109,7 @@ Use the following supported browsers:
 The legacy aggregation-based data table and `vis_type_table.legacyVisEnabled` setting are no longer supported. For more information, refer to {kibana-pull}111339[#111339].
 
 *Impact* +
-To auto-fit the table row height, create a <<create-aggregation-based-panel,data table>>, click *Options*, then select *Auto fit rows to content*.
+To auto-fit the table row height, create an aggregation-based data table, click *Options*, then select *Auto fit rows to content*.
 ====
       
 [discrete]
@@ -388,6 +388,7 @@ Canvas::
 * Fixes Storybook for DatasourceComponent is crashing {kibana-pull}110180[#110180]
 Dashboard::
 * Adds *Timelion* panel without asking for the index pattern {kibana-pull}113896[#113896]
+* Fixes duplicating tags {kibana-pull}119079[#119079]
 Discover::
 * Shows ignored field values {kibana-pull}115040[#115040]
 * Fixes search highlighting of expanded document {kibana-pull}114884[#114884]
