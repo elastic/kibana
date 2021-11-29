@@ -409,7 +409,7 @@
         "label": "OriginString",
         "description": [],
         "signature": [
-          "\"top\" | \"bottom\" | \"left\" | \"right\""
+          "\"top\" | \"left\" | \"bottom\" | \"right\""
         ],
         "path": "src/plugins/expression_repeat_image/common/types/expression_renderers.ts",
         "deprecated": false,

@@ -10,7 +10,7 @@ import { EuiButton } from '@elastic/eui';
 import styled from 'styled-components';
 
 import { useDispatch } from 'react-redux';
-import { IndexPattern, IndexPatternField } from '../../../../../../../src/plugins/data/public';
+import type { DataViewField, DataView } from '../../../../../../../src/plugins/data_views/common';
 import { useKibana } from '../../../common/lib/kibana';
 
 import * as i18n from './translations';
@@ -34,12 +34,12 @@ const StyledButton = styled(EuiButton)`
 
 export const CreateFieldButton = React.memo<CreateFieldButtonProps>(
   ({ selectedDataViewId, onClick: onClickParam, timelineId }) => {
-    const [dataView, setDataView] = useState<IndexPattern | null>(null);
+    const [dataView, setDataView] = useState<DataView | null>(null);
     const dispatch = useDispatch();
 
     const { indexFieldsSearch } = useDataView();
     const {
-      indexPatternFieldEditor,
+      dataViewFieldEditor,
       data: { dataViews },
     } = useKibana().services;
 
@@ -51,9 +51,9 @@ export const CreateFieldButton = React.memo<CreateFieldButtonProps>(
 
     const onClick = useCallback(() => {
       if (dataView) {
-        indexPatternFieldEditor?.openEditor({
-          ctx: { indexPattern: dataView },
-          onSave: (field: IndexPatternField) => {
+        dataViewFieldEditor?.openEditor({
+          ctx: { dataView },
+          onSave: (field: DataViewField) => {
             // Fetch the updated list of fields
             indexFieldsSearch(selectedDataViewId);
 
@@ -74,7 +74,7 @@ export const CreateFieldButton = React.memo<CreateFieldButtonProps>(
       }
       onClickParam();
     }, [
-      indexPatternFieldEditor,
+      dataViewFieldEditor,
       dataView,
       onClickParam,
       indexFieldsSearch,
@@ -83,7 +83,7 @@ export const CreateFieldButton = React.memo<CreateFieldButtonProps>(
       timelineId,
     ]);
 
-    if (!indexPatternFieldEditor?.userPermissions.editIndexPattern()) {
+    if (!dataViewFieldEditor?.userPermissions.editIndexPattern()) {
       return null;
     }
 

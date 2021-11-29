@@ -8,7 +8,7 @@
 import React, { memo, useMemo, useCallback } from 'react';
 import deepEqual from 'fast-deep-equal';
 
-import { DataViewBase, Filter, Query } from '@kbn/es-query';
+import type { DataViewBase, Filter, Query } from '@kbn/es-query';
 import {
   FilterManager,
   TimeHistory,
