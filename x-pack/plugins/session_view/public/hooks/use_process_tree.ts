@@ -26,6 +26,13 @@ export enum EventAction {
   output = 'output',
 }
 
+interface EventActionPartition {
+  fork: ProcessEvent[];
+  exec: ProcessEvent[];
+  exit: ProcessEvent[];
+  output: ProcessEvent[];
+}
+
 interface User {
   id: string;
   name: string;
@@ -160,16 +167,31 @@ class ProcessImpl implements Process {
   }
 
   getDetails() {
-    const execsForks = this.events.filter(
-      ({ event }) => event.action === EventAction.exec || event.action === EventAction.fork
+    const eventsPartition = this.events.reduce(
+      (currEventsParition, processEvent) => {
+        currEventsParition[processEvent.event.action]?.push(processEvent);
+        return currEventsParition;
+      },
+      Object.values(EventAction).reduce((currActions, action) => {
+        currActions[action] = [] as ProcessEvent[];
+        return currActions;
+      }, {} as EventActionPartition)
     );
 
-    if (execsForks.length === 0) {
+    if (!(eventsPartition.exec.length || eventsPartition.fork.length)) {
       // eslint-disable-next-line no-debugger
       debugger;
     }
 
-    return execsForks[execsForks.length - 1];
+    if (eventsPartition.exec.length) {
+      return eventsPartition.exec[eventsPartition.exec.length - 1];
+    }
+
+    if (eventsPartition.fork.length) {
+      return eventsPartition.fork[eventsPartition.fork.length - 1];
+    }
+
+    return {} as ProcessEvent;
   }
 
   getOutput() {
@@ -249,7 +271,7 @@ export const useProcessTree = ({
       if (parentProcess) {
         process.parent = parentProcess; // handy for recursive operations (like auto expand)
 
-        if (!parentProcess.children.includes(process)) {
+        if (!parentProcess.children.includes(process) && parentProcess.id !== process.id) {
           if (backwardDirection) {
             parentProcess.children.unshift(process);
           } else {
