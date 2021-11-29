@@ -280,7 +280,12 @@ const DragInner = memo(function DragInner({
         } else if (e.shiftKey) {
           setTargetOfIndex(activeDropTarget.id, 2);
         } else if (e.ctrlKey) {
-          setTargetOfIndex(activeDropTarget.id, 3);
+          // the control option is available either for new or existing cases,
+          // so need to offset based on some flags
+          const offsetIndex =
+            Number(activeDropTarget.humanData.canSwap) +
+            Number(activeDropTarget.humanData.canDuplicate);
+          setTargetOfIndex(activeDropTarget.id, offsetIndex + 1);
         } else {
           setTargetOfIndex(activeDropTarget.id, 0);
         }
@@ -292,7 +297,12 @@ const DragInner = memo(function DragInner({
       } else if (e.key === 'Shift' && activeDropTarget?.id) {
         setTargetOfIndex(activeDropTarget.id, 2);
       } else if (e.key === 'Control' && activeDropTarget?.id) {
-        setTargetOfIndex(activeDropTarget.id, 3);
+        // the control option is available either for new or existing cases,
+        // so need to offset based on some flags
+        const offsetIndex =
+          Number(activeDropTarget.humanData.canSwap) +
+          Number(activeDropTarget.humanData.canDuplicate);
+        setTargetOfIndex(activeDropTarget.id, offsetIndex + 1);
       }
     };
     return { onKeyDown, onKeyUp };
