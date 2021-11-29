@@ -9,5 +9,9 @@
 import { VisParams } from 'src/plugins/visualizations/common';
 
 export const getVisTypeFromParams = (params: VisParams) => {
-  return params?.seriesParams?.[0]?.type;
+  let type = params?.seriesParams?.[0]?.type;
+  if (type === 'histogram' && ['left', 'right'].includes(params?.categoryAxes?.[0]?.position)) {
+    type = 'horizontal_bar';
+  }
+  return type;
 };
