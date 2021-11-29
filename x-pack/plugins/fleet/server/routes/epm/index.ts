@@ -37,8 +37,11 @@ import {
 
 const MAX_FILE_SIZE_BYTES = 104857600; // 100MB
 
-export const registerRoutes = (routers: { rbac: FleetAuthzRouter; superuser: FleetRouter }) => {
-  routers.rbac.get(
+export const registerRoutes = (routers: {
+  fleetRouter: FleetAuthzRouter;
+  superuser: FleetRouter;
+}) => {
+  routers.fleetRouter.get(
     {
       path: EPM_API_ROUTES.CATEGORIES_PATTERN,
       validate: GetCategoriesRequestSchema,
@@ -49,7 +52,7 @@ export const registerRoutes = (routers: { rbac: FleetAuthzRouter; superuser: Fle
     getCategoriesHandler
   );
 
-  routers.rbac.get(
+  routers.fleetRouter.get(
     {
       path: EPM_API_ROUTES.LIST_PATTERN,
       validate: GetPackagesRequestSchema,
@@ -60,7 +63,7 @@ export const registerRoutes = (routers: { rbac: FleetAuthzRouter; superuser: Fle
     getListHandler
   );
 
-  routers.rbac.get(
+  routers.fleetRouter.get(
     {
       path: EPM_API_ROUTES.LIMITED_LIST_PATTERN,
       validate: false,
@@ -71,7 +74,7 @@ export const registerRoutes = (routers: { rbac: FleetAuthzRouter; superuser: Fle
     getLimitedListHandler
   );
 
-  routers.rbac.get(
+  routers.fleetRouter.get(
     {
       path: EPM_API_ROUTES.STATS_PATTERN,
       validate: GetStatsRequestSchema,
@@ -82,7 +85,7 @@ export const registerRoutes = (routers: { rbac: FleetAuthzRouter; superuser: Fle
     getStatsHandler
   );
 
-  routers.rbac.get(
+  routers.fleetRouter.get(
     {
       path: EPM_API_ROUTES.FILEPATH_PATTERN,
       validate: GetFileRequestSchema,
@@ -93,7 +96,7 @@ export const registerRoutes = (routers: { rbac: FleetAuthzRouter; superuser: Fle
     getFileHandler
   );
 
-  routers.rbac.get(
+  routers.fleetRouter.get(
     {
       path: EPM_API_ROUTES.INFO_PATTERN,
       validate: GetInfoRequestSchema,
@@ -104,7 +107,7 @@ export const registerRoutes = (routers: { rbac: FleetAuthzRouter; superuser: Fle
     getInfoHandler
   );
 
-  routers.rbac.put(
+  routers.fleetRouter.put(
     {
       path: EPM_API_ROUTES.INFO_PATTERN,
       validate: UpdatePackageRequestSchema,
@@ -115,7 +118,7 @@ export const registerRoutes = (routers: { rbac: FleetAuthzRouter; superuser: Fle
     updatePackageHandler
   );
 
-  routers.rbac.post(
+  routers.fleetRouter.post(
     {
       path: EPM_API_ROUTES.INSTALL_FROM_REGISTRY_PATTERN,
       validate: InstallPackageFromRegistryRequestSchema,
@@ -126,12 +129,12 @@ export const registerRoutes = (routers: { rbac: FleetAuthzRouter; superuser: Fle
     installPackageFromRegistryHandler
   );
 
-  routers.rbac.post(
+  routers.fleetRouter.post(
     {
       path: EPM_API_ROUTES.BULK_INSTALL_PATTERN,
       validate: BulkUpgradePackagesFromRegistryRequestSchema,
       fleetAuthz: {
-        integrations: ['installPackages'],
+        integrations: ['installPackages', 'upgradePackages'],
       },
     },
     bulkInstallPackagesFromRegistryHandler
@@ -154,7 +157,7 @@ export const registerRoutes = (routers: { rbac: FleetAuthzRouter; superuser: Fle
     installPackageByUploadHandler
   );
 
-  routers.rbac.delete(
+  routers.fleetRouter.delete(
     {
       path: EPM_API_ROUTES.DELETE_PATTERN,
       validate: DeletePackageRequestSchema,

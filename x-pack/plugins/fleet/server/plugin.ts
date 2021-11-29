@@ -286,8 +286,8 @@ export class FleetPlugin
     // Always register app routes for permissions checking
     registerAppRoutes(fleetAuthzRouter);
 
-    // Some EPM routes use regular rbac to support integrations app
-    registerEPMRoutes({ rbac: fleetAuthzRouter, superuser: superuserRouter });
+    // The upload package route is only authorized for the superuser
+    registerEPMRoutes({ fleetRouter: fleetAuthzRouter, superuser: superuserRouter });
 
     // Register rest of routes only if security is enabled
     if (deps.security) {
