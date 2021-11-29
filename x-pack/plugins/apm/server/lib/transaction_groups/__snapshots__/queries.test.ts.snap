@@ -18,6 +18,9 @@ Array [
                   Object {
                     "field": "transaction.type",
                   },
+                  Object {
+                    "field": "agent.name",
+                  },
                 ],
                 "sort": Object {
                   "@timestamp": "desc",
@@ -227,6 +230,9 @@ Array [
                 "metrics": Array [
                   Object {
                     "field": "transaction.type",
+                  },
+                  Object {
+                    "field": "agent.name",
                   },
                 ],
                 "sort": Object {

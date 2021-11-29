@@ -3,6 +3,7 @@
 exports[`APM API tests basic apm_8.0.0 Top traces when data is loaded returns the correct buckets 1`] = `
 Array [
   Object {
+    "agentName": "java",
     "averageResponseTime": 1639,
     "impact": 0,
     "key": Object {
@@ -15,6 +16,7 @@ Array [
     "transactionsPerMinute": 0.0333333333333333,
   },
   Object {
+    "agentName": "nodejs",
     "averageResponseTime": 3279,
     "impact": 0.00144735571024101,
     "key": Object {
@@ -27,6 +29,7 @@ Array [
     "transactionsPerMinute": 0.0333333333333333,
   },
   Object {
+    "agentName": "nodejs",
     "averageResponseTime": 6175,
     "impact": 0.00400317408637392,
     "key": Object {
@@ -39,6 +42,7 @@ Array [
     "transactionsPerMinute": 0.0333333333333333,
   },
   Object {
+    "agentName": "dotnet",
     "averageResponseTime": 3495,
     "impact": 0.00472243927164613,
     "key": Object {
@@ -51,6 +55,7 @@ Array [
     "transactionsPerMinute": 0.0666666666666667,
   },
   Object {
+    "agentName": "python",
     "averageResponseTime": 7039,
     "impact": 0.00476568343615943,
     "key": Object {
@@ -63,6 +68,7 @@ Array [
     "transactionsPerMinute": 0.0333333333333333,
   },
   Object {
+    "agentName": "ruby",
     "averageResponseTime": 6303,
     "impact": 0.00967875004525193,
     "key": Object {
@@ -75,6 +81,7 @@ Array [
     "transactionsPerMinute": 0.0666666666666667,
   },
   Object {
+    "agentName": "java",
     "averageResponseTime": 7209.66666666667,
     "impact": 0.0176418540534865,
     "key": Object {
@@ -87,6 +94,7 @@ Array [
     "transactionsPerMinute": 0.1,
   },
   Object {
+    "agentName": "java",
     "averageResponseTime": 4511,
     "impact": 0.0224401912465233,
     "key": Object {
@@ -99,6 +107,7 @@ Array [
     "transactionsPerMinute": 0.2,
   },
   Object {
+    "agentName": "python",
     "averageResponseTime": 7607,
     "impact": 0.0254072704525173,
     "key": Object {
@@ -111,6 +120,7 @@ Array [
     "transactionsPerMinute": 0.133333333333333,
   },
   Object {
+    "agentName": "nodejs",
     "averageResponseTime": 10143,
     "impact": 0.025408152986487,
     "key": Object {
@@ -123,6 +133,7 @@ Array [
     "transactionsPerMinute": 0.1,
   },
   Object {
+    "agentName": "ruby",
     "averageResponseTime": 6105.66666666667,
     "impact": 0.0308842762682221,
     "key": Object {
@@ -135,6 +146,7 @@ Array [
     "transactionsPerMinute": 0.2,
   },
   Object {
+    "agentName": "java",
     "averageResponseTime": 6116.33333333333,
     "impact": 0.0309407584422802,
     "key": Object {
@@ -147,6 +159,7 @@ Array [
     "transactionsPerMinute": 0.2,
   },
   Object {
+    "agentName": "java",
     "averageResponseTime": 12543,
     "impact": 0.0317623975680329,
     "key": Object {
@@ -159,6 +172,7 @@ Array [
     "transactionsPerMinute": 0.1,
   },
   Object {
+    "agentName": "nodejs",
     "averageResponseTime": 5551,
     "impact": 0.0328461492827744,
     "key": Object {
@@ -171,6 +185,7 @@ Array [
     "transactionsPerMinute": 0.233333333333333,
   },
   Object {
+    "agentName": "java",
     "averageResponseTime": 13183,
     "impact": 0.0334568627897785,
     "key": Object {
@@ -183,6 +198,7 @@ Array [
     "transactionsPerMinute": 0.1,
   },
   Object {
+    "agentName": "go",
     "averageResponseTime": 8050.2,
     "impact": 0.0340764016364792,
     "key": Object {
@@ -195,6 +211,7 @@ Array [
     "transactionsPerMinute": 0.166666666666667,
   },
   Object {
+    "agentName": "ruby",
     "averageResponseTime": 10079,
     "impact": 0.0341337663445071,
     "key": Object {
@@ -207,6 +224,7 @@ Array [
     "transactionsPerMinute": 0.133333333333333,
   },
   Object {
+    "agentName": "nodejs",
     "averageResponseTime": 8463,
     "impact": 0.0358979517498557,
     "key": Object {
@@ -219,6 +237,7 @@ Array [
     "transactionsPerMinute": 0.166666666666667,
   },
   Object {
+    "agentName": "ruby",
     "averageResponseTime": 10799,
     "impact": 0.0366754641771254,
     "key": Object {
@@ -231,6 +250,7 @@ Array [
     "transactionsPerMinute": 0.133333333333333,
   },
   Object {
+    "agentName": "ruby",
     "averageResponseTime": 7428.33333333333,
     "impact": 0.0378880658514371,
     "key": Object {
@@ -243,6 +263,7 @@ Array [
     "transactionsPerMinute": 0.2,
   },
   Object {
+    "agentName": "java",
     "averageResponseTime": 3105.13333333333,
     "impact": 0.039659311528543,
     "key": Object {
@@ -255,6 +276,7 @@ Array [
     "transactionsPerMinute": 0.5,
   },
   Object {
+    "agentName": "java",
     "averageResponseTime": 6883.57142857143,
     "impact": 0.0410784261517549,
     "key": Object {
@@ -267,6 +289,7 @@ Array [
     "transactionsPerMinute": 0.233333333333333,
   },
   Object {
+    "agentName": "dotnet",
     "averageResponseTime": 3505,
     "impact": 0.0480460318422139,
     "key": Object {
@@ -279,6 +302,7 @@ Array [
     "transactionsPerMinute": 0.533333333333333,
   },
   Object {
+    "agentName": "java",
     "averageResponseTime": 5621.4,
     "impact": 0.0481642913941483,
     "key": Object {
@@ -291,6 +315,7 @@ Array [
     "transactionsPerMinute": 0.333333333333333,
   },
   Object {
+    "agentName": "nodejs",
     "averageResponseTime": 8428.71428571429,
     "impact": 0.0506239135675883,
     "key": Object {
@@ -303,6 +328,7 @@ Array [
     "transactionsPerMinute": 0.233333333333333,
   },
   Object {
+    "agentName": "nodejs",
     "averageResponseTime": 8520.14285714286,
     "impact": 0.0511887353081702,
     "key": Object {
@@ -315,6 +341,7 @@ Array [
     "transactionsPerMinute": 0.233333333333333,
   },
   Object {
+    "agentName": "nodejs",
     "averageResponseTime": 6683.44444444444,
     "impact": 0.0516388276326964,
     "key": Object {
@@ -327,6 +354,7 @@ Array [
     "transactionsPerMinute": 0.3,
   },
   Object {
+    "agentName": "dotnet",
     "averageResponseTime": 3482.78947368421,
     "impact": 0.0569534471979838,
     "key": Object {
@@ -339,6 +367,7 @@ Array [
     "transactionsPerMinute": 0.633333333333333,
   },
   Object {
+    "agentName": "python",
     "averageResponseTime": 16703,
     "impact": 0.057517386404596,
     "key": Object {
@@ -351,6 +380,7 @@ Array [
     "transactionsPerMinute": 0.133333333333333,
   },
   Object {
+    "agentName": "dotnet",
     "averageResponseTime": 4943,
     "impact": 0.0596266425920813,
     "key": Object {
@@ -363,6 +393,7 @@ Array [
     "transactionsPerMinute": 0.466666666666667,
   },
   Object {
+    "agentName": "nodejs",
     "averageResponseTime": 7892.33333333333,
     "impact": 0.0612407972225879,
     "key": Object {
@@ -375,6 +406,7 @@ Array [
     "transactionsPerMinute": 0.3,
   },
   Object {
+    "agentName": "dotnet",
     "averageResponseTime": 6346.42857142857,
     "impact": 0.0769666700279444,
     "key": Object {
@@ -387,6 +419,7 @@ Array [
     "transactionsPerMinute": 0.466666666666667,
   },
   Object {
+    "agentName": "go",
     "averageResponseTime": 7052.84615384615,
     "impact": 0.0794704188998674,
     "key": Object {
@@ -399,6 +432,7 @@ Array [
     "transactionsPerMinute": 0.433333333333333,
   },
   Object {
+    "agentName": "java",
     "averageResponseTime": 10484.3333333333,
     "impact": 0.0818285496667966,
     "key": Object {
@@ -411,6 +445,7 @@ Array [
     "transactionsPerMinute": 0.3,
   },
   Object {
+    "agentName": "nodejs",
     "averageResponseTime": 23711,
     "impact": 0.0822565786420813,
     "key": Object {
@@ -423,6 +458,7 @@ Array [
     "transactionsPerMinute": 0.133333333333333,
   },
   Object {
+    "agentName": "dotnet",
     "averageResponseTime": 4491.36363636364,
     "impact": 0.0857567083657495,
     "key": Object {
@@ -435,6 +471,7 @@ Array [
     "transactionsPerMinute": 0.733333333333333,
   },
   Object {
+    "agentName": "python",
     "averageResponseTime": 20715.8,
     "impact": 0.089965512867054,
     "key": Object {
@@ -447,6 +484,7 @@ Array [
     "transactionsPerMinute": 0.166666666666667,
   },
   Object {
+    "agentName": "nodejs",
     "averageResponseTime": 9036.33333333333,
     "impact": 0.0942519803576885,
     "key": Object {
@@ -459,6 +497,7 @@ Array [
     "transactionsPerMinute": 0.4,
   },
   Object {
+    "agentName": "java",
     "averageResponseTime": 7504.06666666667,
     "impact": 0.0978924329825326,
     "key": Object {
@@ -471,6 +510,7 @@ Array [
     "transactionsPerMinute": 0.5,
   },
   Object {
+    "agentName": "go",
     "averageResponseTime": 4250.55555555556,
     "impact": 0.0998375378516613,
     "key": Object {
@@ -483,6 +523,7 @@ Array [
     "transactionsPerMinute": 0.9,
   },
   Object {
+    "agentName": "nodejs",
     "averageResponseTime": 21343,
     "impact": 0.11156906191034,
     "key": Object {
@@ -495,6 +536,7 @@ Array [
     "transactionsPerMinute": 0.2,
   },
   Object {
+    "agentName": "ruby",
     "averageResponseTime": 16655,
     "impact": 0.116142352941114,
     "key": Object {
@@ -507,6 +549,7 @@ Array [
     "transactionsPerMinute": 0.266666666666667,
   },
   Object {
+    "agentName": "go",
     "averageResponseTime": 5749,
     "impact": 0.12032203382142,
     "key": Object {
@@ -519,6 +562,7 @@ Array [
     "transactionsPerMinute": 0.8,
   },
   Object {
+    "agentName": "ruby",
     "averageResponseTime": 9951,
     "impact": 0.121502864272824,
     "key": Object {
@@ -531,6 +575,7 @@ Array [
     "transactionsPerMinute": 0.466666666666667,
   },
   Object {
+    "agentName": "go",
     "averageResponseTime": 14040.6,
     "impact": 0.122466591367692,
     "key": Object {
@@ -543,6 +588,7 @@ Array [
     "transactionsPerMinute": 0.333333333333333,
   },
   Object {
+    "agentName": "ruby",
     "averageResponseTime": 20963.5714285714,
     "impact": 0.128060974201361,
     "key": Object {
@@ -555,6 +601,7 @@ Array [
     "transactionsPerMinute": 0.233333333333333,
   },
   Object {
+    "agentName": "python",
     "averageResponseTime": 22874.4285714286,
     "impact": 0.139865748579522,
     "key": Object {
@@ -567,6 +614,7 @@ Array [
     "transactionsPerMinute": 0.233333333333333,
   },
   Object {
+    "agentName": "python",
     "averageResponseTime": 32203.8,
     "impact": 0.140658264084276,
     "key": Object {
@@ -579,6 +627,7 @@ Array [
     "transactionsPerMinute": 0.166666666666667,
   },
   Object {
+    "agentName": "go",
     "averageResponseTime": 4482.11111111111,
     "impact": 0.140955678032051,
     "key": Object {
@@ -591,6 +640,7 @@ Array [
     "transactionsPerMinute": 1.2,
   },
   Object {
+    "agentName": "ruby",
     "averageResponseTime": 12582.3846153846,
     "impact": 0.142910490774846,
     "key": Object {
@@ -603,6 +653,7 @@ Array [
     "transactionsPerMinute": 0.433333333333333,
   },
   Object {
+    "agentName": "ruby",
     "averageResponseTime": 10009.9473684211,
     "impact": 0.166401779979233,
     "key": Object {
@@ -615,6 +666,7 @@ Array [
     "transactionsPerMinute": 0.633333333333333,
   },
   Object {
+    "agentName": "python",
     "averageResponseTime": 27825.2857142857,
     "impact": 0.170450845832029,
     "key": Object {
@@ -627,6 +679,7 @@ Array [
     "transactionsPerMinute": 0.233333333333333,
   },
   Object {
+    "agentName": "python",
     "averageResponseTime": 20562.2,
     "impact": 0.180021926732983,
     "key": Object {
@@ -639,6 +692,7 @@ Array [
     "transactionsPerMinute": 0.333333333333333,
   },
   Object {
+    "agentName": "dotnet",
     "averageResponseTime": 7106.76470588235,
     "impact": 0.21180020991247,
     "key": Object {
@@ -651,6 +705,7 @@ Array [
     "transactionsPerMinute": 1.13333333333333,
   },
   Object {
+    "agentName": "go",
     "averageResponseTime": 8612.51724137931,
     "impact": 0.218977858687708,
     "key": Object {
@@ -663,6 +718,7 @@ Array [
     "transactionsPerMinute": 0.966666666666667,
   },
   Object {
+    "agentName": "ruby",
     "averageResponseTime": 11295,
     "impact": 0.277663720068132,
     "key": Object {
@@ -675,6 +731,7 @@ Array [
     "transactionsPerMinute": 0.933333333333333,
   },
   Object {
+    "agentName": "python",
     "averageResponseTime": 65035.8,
     "impact": 0.285535040543522,
     "key": Object {
@@ -687,6 +744,7 @@ Array [
     "transactionsPerMinute": 0.166666666666667,
   },
   Object {
+    "agentName": "go",
     "averageResponseTime": 30999.4705882353,
     "impact": 0.463640986028375,
     "key": Object {
@@ -699,6 +757,7 @@ Array [
     "transactionsPerMinute": 0.566666666666667,
   },
   Object {
+    "agentName": "go",
     "averageResponseTime": 20197.4,
     "impact": 0.622424732781511,
     "key": Object {
@@ -711,6 +770,7 @@ Array [
     "transactionsPerMinute": 1.16666666666667,
   },
   Object {
+    "agentName": "python",
     "averageResponseTime": 64681.6666666667,
     "impact": 0.68355874339377,
     "key": Object {
@@ -723,6 +783,7 @@ Array [
     "transactionsPerMinute": 0.4,
   },
   Object {
+    "agentName": "dotnet",
     "averageResponseTime": 41416.1428571429,
     "impact": 0.766127739061111,
     "key": Object {
@@ -735,6 +796,7 @@ Array [
     "transactionsPerMinute": 0.7,
   },
   Object {
+    "agentName": "go",
     "averageResponseTime": 19429,
     "impact": 0.821597646656097,
     "key": Object {
@@ -747,6 +809,7 @@ Array [
     "transactionsPerMinute": 1.6,
   },
   Object {
+    "agentName": "dotnet",
     "averageResponseTime": 62390.652173913,
     "impact": 1.26497653527507,
     "key": Object {
@@ -759,6 +822,7 @@ Array [
     "transactionsPerMinute": 0.766666666666667,
   },
   Object {
+    "agentName": "python",
     "averageResponseTime": 33266.2,
     "impact": 1.76006661931225,
     "key": Object {
@@ -771,6 +835,7 @@ Array [
     "transactionsPerMinute": 2,
   },
   Object {
+    "agentName": "nodejs",
     "averageResponseTime": 38491.4444444444,
     "impact": 1.83293391905112,
     "key": Object {
@@ -783,6 +848,7 @@ Array [
     "transactionsPerMinute": 1.8,
   },
   Object {
+    "agentName": "dotnet",
     "averageResponseTime": 118488.6,
     "impact": 2.08995781717084,
     "key": Object {
@@ -795,6 +861,7 @@ Array [
     "transactionsPerMinute": 0.666666666666667,
   },
   Object {
+    "agentName": "dotnet",
     "averageResponseTime": 250440.142857143,
     "impact": 4.64001412901584,
     "key": Object {
@@ -807,6 +874,7 @@ Array [
     "transactionsPerMinute": 0.7,
   },
   Object {
+    "agentName": "java",
     "averageResponseTime": 312096.523809524,
     "impact": 5.782704992387,
     "key": Object {
@@ -819,6 +887,7 @@ Array [
     "transactionsPerMinute": 0.7,
   },
   Object {
+    "agentName": "ruby",
     "averageResponseTime": 91519.7032967033,
     "impact": 7.34855500859826,
     "key": Object {
@@ -831,6 +900,7 @@ Array [
     "transactionsPerMinute": 3.03333333333333,
   },
   Object {
+    "agentName": "rum-js",
     "averageResponseTime": 648269.769230769,
     "impact": 7.43611473386403,
     "key": Object {
@@ -843,6 +913,7 @@ Array [
     "transactionsPerMinute": 0.433333333333333,
   },
   Object {
+    "agentName": "python",
     "averageResponseTime": 1398919.72727273,
     "impact": 13.5790895084132,
     "key": Object {
@@ -855,6 +926,7 @@ Array [
     "transactionsPerMinute": 0.366666666666667,
   },
   Object {
+    "agentName": "rum-js",
     "averageResponseTime": 1199907.57142857,
     "impact": 14.8239822181408,
     "key": Object {
@@ -867,6 +939,7 @@ Array [
     "transactionsPerMinute": 0.466666666666667,
   },
   Object {
+    "agentName": "rum-js",
     "averageResponseTime": 955876.052631579,
     "impact": 16.026822184214,
     "key": Object {
@@ -879,6 +952,7 @@ Array [
     "transactionsPerMinute": 0.633333333333333,
   },
   Object {
+    "agentName": "go",
     "averageResponseTime": 965009.526315789,
     "impact": 16.1799735991728,
     "key": Object {
@@ -891,6 +965,7 @@ Array [
     "transactionsPerMinute": 0.633333333333333,
   },
   Object {
+    "agentName": "rum-js",
     "averageResponseTime": 1213675.30769231,
     "impact": 27.8474053933734,
     "key": Object {
@@ -903,6 +978,7 @@ Array [
     "transactionsPerMinute": 0.866666666666667,
   },
   Object {
+    "agentName": "nodejs",
     "averageResponseTime": 924019.363636364,
     "impact": 35.8796065162284,
     "key": Object {
@@ -915,6 +991,7 @@ Array [
     "transactionsPerMinute": 1.46666666666667,
   },
   Object {
+    "agentName": "nodejs",
     "averageResponseTime": 1060469.15384615,
     "impact": 36.498655556576,
     "key": Object {
@@ -927,6 +1004,7 @@ Array [
     "transactionsPerMinute": 1.3,
   },
   Object {
+    "agentName": "python",
     "averageResponseTime": 118686.822222222,
     "impact": 37.7068083771466,
     "key": Object {
@@ -939,6 +1017,7 @@ Array [
     "transactionsPerMinute": 12,
   },
   Object {
+    "agentName": "nodejs",
     "averageResponseTime": 1039228.27659574,
     "impact": 43.1048035741496,
     "key": Object {
@@ -951,6 +1030,7 @@ Array [
     "transactionsPerMinute": 1.56666666666667,
   },
   Object {
+    "agentName": "python",
     "averageResponseTime": 1949922.55555556,
     "impact": 61.9499776921889,
     "key": Object {
@@ -963,6 +1043,7 @@ Array [
     "transactionsPerMinute": 1.2,
   },
   Object {
+    "agentName": "dotnet",
     "averageResponseTime": 5963775,
     "impact": 100,
     "key": Object {
