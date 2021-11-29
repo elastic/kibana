@@ -8,7 +8,7 @@
 import { render as testLibRender } from '@testing-library/react';
 import { AppMountParameters, CoreStart } from 'kibana/public';
 import React from 'react';
-import { __IntlProvider as IntlProvider } from '@kbn/i18n/react';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { of } from 'rxjs';
 import {
   KibanaContextProvider,
@@ -34,7 +34,13 @@ export const core = {
   },
 } as unknown as CoreStart;
 
-const config = { unsafe: { alertingExperience: { enabled: true }, cases: { enabled: true } } };
+const config = {
+  unsafe: {
+    alertingExperience: { enabled: true },
+    cases: { enabled: true },
+    overviewNext: { enabled: false },
+  },
+};
 
 const plugins = {
   data: { query: { timefilter: { timefilter: { setTime: jest.fn() } } } },

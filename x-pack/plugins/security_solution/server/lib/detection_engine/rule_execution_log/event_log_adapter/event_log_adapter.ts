@@ -79,9 +79,8 @@ export class EventLogAdapter implements IRuleExecutionLogClient {
     // EventLog execution events are immutable, nothing to do here
   }
 
-  public async logExecutionMetrics(args: LogExecutionMetricsArgs) {
+  private async logExecutionMetrics(args: LogExecutionMetricsArgs) {
     const { executionId, ruleId, spaceId, ruleType, ruleName, metrics } = args;
-    await this.savedObjectsAdapter.logExecutionMetrics(args);
 
     this.eventLogClient.logExecutionMetrics({
       executionId,

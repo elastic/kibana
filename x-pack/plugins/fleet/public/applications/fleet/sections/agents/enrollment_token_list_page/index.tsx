@@ -19,7 +19,7 @@ import {
   EuiIcon,
   EuiText,
 } from '@elastic/eui';
-import { FormattedMessage, FormattedDate } from '@kbn/i18n/react';
+import { FormattedMessage, FormattedDate } from '@kbn/i18n-react';
 
 import { ENROLLMENT_API_KEYS_INDEX } from '../../../constants';
 import { NewEnrollmentTokenModal } from '../../../components';

@@ -28,7 +28,6 @@ export interface IRuleExecutionLogClient {
   deleteCurrentStatus(ruleId: string): Promise<void>;
 
   logStatusChange(args: LogStatusChangeArgs): Promise<void>;
-  logExecutionMetrics(args: LogExecutionMetricsArgs): Promise<void>;
 }
 
 /** @deprecated */

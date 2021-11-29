@@ -8,7 +8,7 @@
 
 import React, { lazy } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import { IUiSettingsClient, ThemeServiceStart } from 'kibana/public';
 
 import { KibanaThemeProvider } from '../../../kibana_react/public';

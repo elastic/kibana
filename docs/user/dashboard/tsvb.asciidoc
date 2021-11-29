@@ -31,7 +31,7 @@ When you use only {data-sources}, you are able to:
 
 * Improve performance
 
-IMPORTANT: Creating *TSVB* visualizations with an {es} index string is deprecated and will be removed in a fytyre release. By default, you create *TSVB* visualizations with only {data-sources}. To use an {es} index string, contact your administrator, or go to <<advanced-options, Advanced Settings>> and set `metrics:allowStringIndices` to `true`.
+IMPORTANT: Creating *TSVB* visualizations with an {es} index string is deprecated and will be removed in a future release. By default, you create *TSVB* visualizations with only {data-sources}. To use an {es} index string, contact your administrator, or go to <<advanced-options, Advanced Settings>> and set `metrics:allowStringIndices` to `true`.
 
 . On the dashboard, click *All types*, then select *TSVB*.
 

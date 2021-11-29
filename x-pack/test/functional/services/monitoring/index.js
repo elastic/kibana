@@ -30,3 +30,4 @@ export { MonitoringKibanaInstancesProvider } from './kibana_instances';
 export { MonitoringKibanaInstanceProvider } from './kibana_instance';
 export { MonitoringKibanaSummaryStatusProvider } from './kibana_summary_status';
 export { MonitoringSetupModeProvider } from './setup_mode';
+export { MonitoringAlertsProvider } from './alerts';
