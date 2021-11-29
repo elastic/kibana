@@ -43,20 +43,26 @@ const idPrefix = htmlIdGenerator()();
  * for a single change.
  */
 
-function getColorRanges(palettes, colorStops, activePalette, dataBounds) {
+function getColorRanges(
+  palettes: PaletteRegistry,
+  colorStops: CustomPaletteParams['colorStops'],
+  activePalette: PaletteOutput<CustomPaletteParams>,
+  dataBounds: { min: number; max: number }
+) {
   const colorStopsToShow = roundStopValues(
     getColorStops(palettes, colorStops || [], activePalette, dataBounds)
   );
+  let max = activePalette.params?.rangeMax || dataBounds.max;
+  // as default range type is percent
+  if (!activePalette.params?.rangeType) {
+    max = (max * 100) / dataBounds.max;
+  }
+
   return colorStopsToShow.map((colorStop, index) => {
     return {
       color: colorStop.color,
       start: colorStop.stop ?? activePalette.params?.rangeMin,
-      end:
-        index < colorStopsToShow.length - 1
-          ? colorStopsToShow[index + 1].stop
-          : activePalette.params?.rangeType === 'number'
-          ? activePalette.params?.rangeMax
-          : 100,
+      end: index < colorStopsToShow.length - 1 ? colorStopsToShow[index + 1].stop : max,
     };
   });
 }
@@ -222,9 +228,6 @@ export function NewCustomizablePalette({
                   { prevPalette: activePalette.name, dataBounds }
                 );
               }
-              // why not use newMin/newMax here?
-              // That's because there's the concept of continuity to accomodate, where in some scenarios it has to
-              // take into account the stop value rather than the data value
               params.rangeMin = newColorStops[0].stop;
               params.rangeMax = newMax;
               setPalette(mergePaletteParams(activePalette, params));
@@ -234,7 +237,6 @@ export function NewCustomizablePalette({
         <ColorRanges
           paletteConfiguration={activePalette?.params}
           colorRanges={colorRangesToShow}
-          rangeType={activePalette.params?.rangeType}
           dataBounds={dataBounds}
           onChange={(colorStops, upperMax) => {
             const newParams = getSwitchToCustomParams(

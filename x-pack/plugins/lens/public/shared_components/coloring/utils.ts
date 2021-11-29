@@ -83,7 +83,7 @@ export function remapStopsByNewInterval(
   return (controlStops || []).map(({ color, stop }) => {
     return {
       color,
-      stop: newMin + ((stop - oldMin) * newInterval) / oldInterval,
+      stop: newMin + ((stop - oldMin) * 100 * newInterval) / 100 / oldInterval,
     };
   });
 }
