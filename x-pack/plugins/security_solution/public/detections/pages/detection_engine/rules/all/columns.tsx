@@ -14,7 +14,7 @@ import {
   EuiLink,
   EuiBadge,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import * as H from 'history';
 import { sum } from 'lodash';
 import React, { Dispatch } from 'react';
@@ -189,7 +189,7 @@ export const getColumns = ({
       align: 'center',
       render: (tags: Rule['tags']) => {
         if (tags.length === 0) {
-          return getEmptyTagValue();
+          return null;
         }
 
         const renderItem = (tag: string, i: number) => (

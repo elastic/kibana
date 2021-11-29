@@ -35,7 +35,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { FieldCodeEditor } from './field_code_editor';
 import { FieldSetting, FieldState } from '../../types';
 import { isDefaultValue } from '../../lib';

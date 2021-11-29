@@ -7,7 +7,7 @@
 
 import React, { FC } from 'react';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { Query } from 'src/plugins/data/public';
 import { EuiButton } from '@elastic/eui';
 import type { DataView } from '../../../../../../../src/plugins/data_views/public';
