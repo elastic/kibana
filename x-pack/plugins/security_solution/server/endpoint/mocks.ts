@@ -17,6 +17,7 @@ import {
   createMockAgentPolicyService,
   createMockAgentService,
   createArtifactsClientMock,
+  fleetAuthzMock,
 } from '../../../fleet/server/mocks';
 import { createMockConfig } from '../lib/detection_engine/routes/__mocks__';
 import {
@@ -152,6 +153,9 @@ export const createMockPackageService = (): jest.Mocked<PackageService> => {
  */
 export const createMockFleetStartContract = (indexPattern: string): FleetStartContract => {
   return {
+    authz: {
+      fromRequest: jest.fn().mockResolvedValue(fleetAuthzMock),
+    },
     fleetSetupCompleted: jest.fn().mockResolvedValue(undefined),
     esIndexPatternService: {
       getESIndexPattern: jest.fn().mockResolvedValue(indexPattern),

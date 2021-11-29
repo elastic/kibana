@@ -13,11 +13,13 @@ import type {
   SavedObjectsClientContract,
   IRouter,
 } from '../../../../../src/core/server';
+import type { FleetAuthz } from '../../common/authz';
 import type { AgentClient } from '../services';
 
 /** @internal */
 export interface FleetRequestHandlerContext extends RequestHandlerContext {
   fleet: {
+    authz: FleetAuthz;
     agentClient: {
       asCurrentUser: AgentClient;
       asInternalUser: AgentClient;

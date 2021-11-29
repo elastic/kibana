@@ -36,7 +36,7 @@ export function buildStatusesKuery(statusesToFilter: string[]): string | undefin
 export async function findAgentIdsByStatus(
   agentClient: AgentClient,
   esClient: ElasticsearchClient,
-  statuses: string[] = [],
+  statuses: string[],
   pageSize: number = 1000
 ): Promise<string[]> {
   if (!statuses.length) {

@@ -15,6 +15,7 @@ import type {
   PluginInitializerContext,
   SavedObjectsServiceStart,
   HttpServiceSetup,
+  KibanaRequest,
   ElasticsearchClient,
 } from 'kibana/server';
 import type { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
@@ -30,7 +31,7 @@ import type {
 } from '../../encrypted_saved_objects/server';
 import type { SecurityPluginSetup, SecurityPluginStart } from '../../security/server';
 import type { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
-import type { FleetConfigType } from '../common';
+import type { FleetConfigType, FleetAuthz } from '../common';
 import { INTEGRATIONS_PLUGIN_ID } from '../common';
 import type { CloudSetup } from '../../cloud/server';
 
@@ -61,9 +62,9 @@ import {
 import type { ExternalCallback, FleetRequestHandlerContext } from './types';
 import type {
   ESIndexPatternService,
+  AgentService,
   AgentPolicyServiceInterface,
   PackageService,
-  AgentService,
 } from './services';
 import {
   appContextService,
@@ -75,7 +76,7 @@ import {
 } from './services';
 import { registerFleetUsageCollector } from './collectors/register';
 import { getInstallation, ensureInstalledPackage } from './services/epm/packages';
-import { RouterWrappers } from './routes/security';
+import { getAuthzFromRequest, RouterWrappers } from './routes/security';
 import { FleetArtifactsClient } from './services/artifacts';
 import type { FleetRouter } from './types/request_context';
 import { TelemetryEventsSender } from './telemetry/sender';
@@ -138,6 +139,9 @@ export interface FleetStartContract {
    * services
    */
   fleetSetupCompleted: () => Promise<void>;
+  authz: {
+    fromRequest(request: KibanaRequest): Promise<FleetAuthz>;
+  };
   esIndexPatternService: ESIndexPatternService;
   packageService: PackageService;
   agentService: AgentService;
@@ -228,7 +232,7 @@ export class FleetPlugin
         },
         privileges: {
           all: {
-            api: [`${PLUGIN_ID}-read`, `${PLUGIN_ID}-all`],
+            api: [`${PLUGIN_ID}-read`, `${PLUGIN_ID}-all`, `integrations-all`, `integrations-read`],
             app: [PLUGIN_ID, INTEGRATIONS_PLUGIN_ID, 'kibana'],
             catalogue: ['fleet'],
             savedObject: {
@@ -238,7 +242,7 @@ export class FleetPlugin
             ui: ['show', 'read', 'write'],
           },
           read: {
-            api: [`${PLUGIN_ID}-read`],
+            api: [`${PLUGIN_ID}-read`, `integrations-read`],
             app: [PLUGIN_ID, INTEGRATIONS_PLUGIN_ID, 'kibana'],
             catalogue: ['fleet'], // TODO: check if this is actually available to read user
             savedObject: {
@@ -253,7 +257,7 @@ export class FleetPlugin
 
     core.http.registerRouteHandlerContext<FleetRequestHandlerContext, 'fleet'>(
       'fleet',
-      (context, request) => {
+      async (context, request) => {
         const plugin = this;
 
         return {
@@ -267,6 +271,7 @@ export class FleetPlugin
               asInternalUser: agentService.asInternalUser,
             };
           },
+          authz: await getAuthzFromRequest(request),
           epm: {
             // Use a lazy getter to avoid constructing this client when not used by a request handler
             get internalSoClient() {
@@ -360,6 +365,9 @@ export class FleetPlugin
     })();
 
     return {
+      authz: {
+        fromRequest: getAuthzFromRequest,
+      },
       fleetSetupCompleted: () => fleetSetupPromise,
       esIndexPatternService: new ESIndexPatternSavedObjectService(),
       packageService: {

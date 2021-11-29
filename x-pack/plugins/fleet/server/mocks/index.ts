@@ -21,6 +21,7 @@ import type { PackagePolicyServiceInterface } from '../services/package_policy';
 import type { AgentPolicyServiceInterface, PackageService } from '../services';
 import type { FleetAppContext } from '../plugin';
 import { createMockTelemetryEventsSender } from '../telemetry/__mocks__';
+import type { FleetAuthz } from '../../common';
 import { agentServiceMock } from '../services/agents/agent_service.mock';
 import type { FleetRequestHandlerContext } from '../types';
 
@@ -142,4 +143,26 @@ export const createMockPackageService = (): PackageService => {
     getInstallation: jest.fn(),
     ensureInstalledPackage: jest.fn(),
   };
+};
+
+/**
+ * Creates mock `authz` object
+ */
+export const fleetAuthzMock: FleetAuthz = {
+  fleet: {
+    all: true,
+    setup: true,
+    readEnrollmentTokens: true,
+  },
+  integrations: {
+    readPackageInfo: true,
+    readInstalledPackages: true,
+    installPackages: true,
+    upgradePackages: true,
+    removePackages: true,
+    readPackageSettings: true,
+    writePackageSettings: true,
+    readIntegrationPolicies: true,
+    writeIntegrationPolicies: true,
+  },
 };
