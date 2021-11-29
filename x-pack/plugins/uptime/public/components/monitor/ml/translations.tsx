@@ -179,3 +179,10 @@ export const ENABLE_MANAGE_JOB = i18n.translate(
       'You can enable anomaly detection job or if job is already there you can manage the job or alert.',
   }
 );
+
+export const ADD_JOB_PERMISSIONS_NEEDED = i18n.translate(
+  'xpack.uptime.ml.enableAnomalyDetectionPanel.add_job_permissions_needed',
+  {
+    defaultMessage: 'Permissions needed',
+  }
+);
