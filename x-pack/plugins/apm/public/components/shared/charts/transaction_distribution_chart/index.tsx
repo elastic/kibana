@@ -132,7 +132,8 @@ export function TransactionDistributionChart({
     Math.max(
       ...flatten(data.map((d) => d.histogram)).map((d) => d.doc_count)
     ) ?? 0;
-  const yTicks = Math.max(1, Math.ceil(Math.log10(yMax)));
+  // A minimum of 2 ticks avoids that Elastic Charts 38.0.3 falls back to more defeault ticks.
+  const yTicks = Math.max(2, Math.ceil(Math.log10(yMax)));
   const yAxisDomain = {
     min: 0.5,
     max: Math.pow(10, yTicks),
