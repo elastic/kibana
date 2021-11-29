@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { addDecorator } from '@storybook/react';
-import { Title, Subtitle, Description, Primary, Stories } from '@storybook/addon-docs/blocks';
+import { Title, Subtitle, Description, Primary, Stories } from '@storybook/addon-docs';
 
 import { decorator } from './decorator';
 

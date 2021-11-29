@@ -106,7 +106,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     { config: 'trial', archives: ['8.0.0'] },
     () => {
       // putting this into a single `it` because the responses depend on each other
-      it('runs queries and returns results', async () => {
+      // flaky: https://github.com/elastic/kibana/issues/118023
+      it.skip('runs queries and returns results', async () => {
         const overallDistributionResponse = await apmApiClient.readUser({
           endpoint: 'POST /internal/apm/latency/overall_distribution',
           params: {
