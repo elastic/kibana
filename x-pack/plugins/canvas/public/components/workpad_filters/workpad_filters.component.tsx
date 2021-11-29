@@ -7,12 +7,18 @@
 
 import React, { FC, Fragment } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSelect, EuiText } from '@elastic/eui';
+import { ClassNames } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { identity } from 'lodash';
 import { FiltersGroup as FiltersGroupType } from './types';
 import { FiltersGroup } from './filters_group.component';
 import { FilterField } from '../../../types';
 import { formatByKey } from './utils';
+import {
+  sidebarPanelClassName,
+  sidebarExpandableClassName,
+  sidebarExpandableStyles,
+} from '../shared_styles/sidebar';
 
 interface Props {
   filtersGroups: FiltersGroupType[];
@@ -73,26 +79,36 @@ export const WorkpadFilters: FC<Props> = ({
   });
 
   return (
-    <Fragment>
-      <div className="canvasSidebar__panel canvasSidebar__expandable">
-        <EuiFlexGroup gutterSize="l" alignItems="center">
-          <EuiFlexItem>
-            <EuiText>
-              <h5>{strings.getGroupBySelectLabel()}</h5>
-            </EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiSelect
-              compressed
-              options={groupByOptions}
-              value={groupFiltersByField}
-              onChange={(e) => onGroupByChange(e.target.value as FilterField)}
-              aria-label="Use aria labels when no actual label is in use"
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </div>
-      {filtersGroupsComponents}
-    </Fragment>
+    <ClassNames>
+      {({ cx, css }) => (
+        <Fragment>
+          <div
+            className={cx(
+              sidebarPanelClassName,
+              sidebarExpandableClassName,
+              css(sidebarExpandableStyles)
+            )}
+          >
+            <EuiFlexGroup gutterSize="l" alignItems="center">
+              <EuiFlexItem>
+                <EuiText>
+                  <h5>{strings.getGroupBySelectLabel()}</h5>
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiSelect
+                  compressed
+                  options={groupByOptions}
+                  value={groupFiltersByField}
+                  onChange={(e) => onGroupByChange(e.target.value as FilterField)}
+                  aria-label="Use aria labels when no actual label is in use"
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </div>
+          {filtersGroupsComponents}
+        </Fragment>
+      )}
+    </ClassNames>
   );
 };

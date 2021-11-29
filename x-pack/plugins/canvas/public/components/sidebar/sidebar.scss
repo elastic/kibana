@@ -24,43 +24,12 @@
   margin-bottom: $euiSizeS;
 }
 
-.canvasSidebar__panel {
-  border-bottom: $euiBorderThin;
-  padding: $euiSizeS $euiSizeM;
-
-  &--isEmpty {
-    border-bottom: none;
-  }
-
-  .canvasSidebar__expandable:last-child {
-    .canvasSidebar__accordion {
-      margin-bottom: (-$euiSizeS);
-    }
-
-    .canvasSidebar__accordion:after {
-      content: none;
-    }
-
-    .canvasSidebar__accordion.euiAccordion-isOpen:after {
-      display: none;
-    }
-  }
-}
-
 .canvasSidebar__panel-noMinWidth .euiButton {
   min-width: 0;
 }
 
 .canvasSidebar__expandable {
   width: 100%;
-}
-
-.canvasSidebar__expandable + .canvasSidebar__expandable {
-  margin-top: 1px;
-
-  .canvasSidebar__accordion:before {
-    display: none;
-  }
 }
 
 .canvasSidebar__accordion {

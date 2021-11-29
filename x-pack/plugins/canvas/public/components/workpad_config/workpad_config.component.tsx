@@ -28,7 +28,13 @@ import { ClassNames } from '@emotion/react';
 import { VarConfig } from '../var_config';
 import { DEFAULT_WORKPAD_CSS } from '../../../common/lib/constants';
 import { CanvasVariable } from '../../../types';
-import { tooltipStylesFactory } from '../shared_styles';
+import {
+  sidebarAccordionClassName,
+  sidebarAccordionStylesFactory,
+  sidebarExpandableStyles,
+  sidebarExpandableClassName,
+  tooltipStylesFactory,
+} from '../shared_styles';
 
 const strings = {
   getApplyStylesheetButtonLabel: () =>
@@ -127,7 +133,7 @@ export const WorkpadConfig: FC<Props> = (props) => {
 
   return (
     <ClassNames>
-      {({ css: cssEmotion }) => (
+      {({ css: cssEmotion, cx }) => (
         <div>
           <EuiFormRow label={strings.getNameLabel()} display="rowCompressed">
             <EuiFieldText compressed value={name} onChange={(e) => setName(e.target.value)} />
@@ -188,10 +194,13 @@ export const WorkpadConfig: FC<Props> = (props) => {
 
           <VarConfig variables={variables} setVariables={setWorkpadVariables} />
 
-          <div className="canvasSidebar__expandable">
+          <div className={cx(sidebarExpandableClassName, cssEmotion(sidebarExpandableStyles))}>
             <EuiAccordion
               id="accordion-global-css"
-              className="canvasSidebar__accordion"
+              className={cx(
+                sidebarAccordionClassName,
+                cssEmotion(sidebarAccordionStylesFactory(euiTheme))
+              )}
               style={{ marginBottom: 0 }}
               buttonContent={
                 <EuiToolTip

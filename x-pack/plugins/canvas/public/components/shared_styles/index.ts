@@ -6,3 +6,13 @@
  */
 
 export { tooltipStylesFactory } from './tooltip';
+export { argFormStyles } from './arg_form';
+export {
+  sidebarAccordionClassName,
+  sidebarExpandableClassName,
+  sidebarFiltersClassName,
+  sidebarPanelClassName,
+  sidebarAccordionStylesFactory,
+  sidebarExpandableStyles,
+  sidebarPanelStylesFactory,
+} from './sidebar';

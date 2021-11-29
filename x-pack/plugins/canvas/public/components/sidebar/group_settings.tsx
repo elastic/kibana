@@ -6,8 +6,10 @@
  */
 
 import React, { FunctionComponent } from 'react';
-import { EuiText } from '@elastic/eui';
+import { useEuiTheme, EuiText } from '@elastic/eui';
+import { ClassNames } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { sidebarPanelClassName, sidebarPanelStylesFactory } from '../shared_styles';
 
 const strings = {
   getSaveGroupDescription: () =>
@@ -23,11 +25,24 @@ const strings = {
     }),
 };
 
-export const GroupSettings: FunctionComponent = () => (
-  <div className="canvasSidebar__panel canvasSidebar__panel--isEmpty">
-    <EuiText size="s">
-      <p>{strings.getUngroupDescription()}</p>
-      <p>{strings.getSaveGroupDescription()}</p>
-    </EuiText>
-  </div>
-);
+export const GroupSettings: FunctionComponent = () => {
+  const { euiTheme } = useEuiTheme();
+  return (
+    <ClassNames>
+      {({ css, cx }) => (
+        <div
+          className={cx(
+            sidebarPanelClassName,
+            `${sidebarPanelClassName}--isEmpty`,
+            css(sidebarPanelStylesFactory(euiTheme))
+          )}
+        >
+          <EuiText size="s">
+            <p>{strings.getUngroupDescription()}</p>
+            <p>{strings.getSaveGroupDescription()}</p>
+          </EuiText>
+        </div>
+      )}
+    </ClassNames>
+  );
+};

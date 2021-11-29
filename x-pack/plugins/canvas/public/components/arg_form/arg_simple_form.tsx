@@ -12,6 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { ClassNames } from '@emotion/react';
 import { TooltipIcon, IconType } from '../tooltip_icon';
 import { argSimpleFormRemoveStylesFactory } from './arg_simple_form.styles';
+import { argFormStyles } from '../shared_styles';
 
 const strings = {
   getRemoveAriaLabel: () =>
@@ -41,7 +42,7 @@ export const ArgSimpleForm: React.FunctionComponent<Props> = ({
   return (
     <ClassNames>
       {({ css }) => (
-        <EuiFlexGroup alignItems="center" gutterSize="s" className="canvasArg__form">
+        <EuiFlexGroup alignItems="center" gutterSize="s" className={css(argFormStyles)}>
           <EuiFlexItem>{children}</EuiFlexItem>
           {valueMissing && (
             <EuiFlexItem grow={false}>

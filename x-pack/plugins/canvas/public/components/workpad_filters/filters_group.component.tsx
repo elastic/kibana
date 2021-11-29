@@ -5,10 +5,18 @@
  * 2.0.
  */
 
-import { EuiAccordion } from '@elastic/eui';
+import { useEuiTheme, EuiAccordion } from '@elastic/eui';
 import React, { FC } from 'react';
+import { ClassNames } from '@emotion/react';
 import { FormattedFilterViewInstance } from '../../../types';
 import { createFilledFilterView } from '../../lib/filter';
+import {
+  sidebarAccordionClassName,
+  sidebarAccordionStylesFactory,
+  sidebarExpandableClassName,
+  sidebarExpandableStyles,
+  sidebarFiltersClassName,
+} from '../shared_styles';
 import { Filter } from './filter.component';
 import { filterViews } from './filter_views';
 import { FiltersGroup as FiltersGroupType } from './types';
@@ -23,6 +31,7 @@ const panelStyle = {
 };
 
 export const FiltersGroup: FC<Props> = ({ filtersGroup, id }) => {
+  const { euiTheme } = useEuiTheme();
   const { name, filters: groupFilters } = filtersGroup;
 
   const filledFilterViews: FormattedFilterViewInstance[] = groupFilters.map((filter) => {
@@ -35,16 +44,24 @@ export const FiltersGroup: FC<Props> = ({ filtersGroup, id }) => {
   ));
 
   return (
-    <div className="canvasSidebar__expandable">
-      <EuiAccordion
-        id={`canvas-filter-group-${id}`}
-        buttonContent={name}
-        initialIsOpen={true}
-        className="canvasSidebar__accordion filtersSidebar__accordion"
-        style={{ marginLeft: '0px' }}
-      >
-        <div style={panelStyle}>{filtersComponents}</div>
-      </EuiAccordion>
-    </div>
+    <ClassNames>
+      {({ css, cx }) => (
+        <div className={cx(sidebarExpandableClassName, css(sidebarExpandableStyles))}>
+          <EuiAccordion
+            id={`canvas-filter-group-${id}`}
+            buttonContent={name}
+            initialIsOpen={true}
+            className={cx(
+              sidebarFiltersClassName,
+              sidebarAccordionClassName,
+              css(sidebarAccordionStylesFactory(euiTheme))
+            )}
+            style={{ marginLeft: '0px' }}
+          >
+            <div style={panelStyle}>{filtersComponents}</div>
+          </EuiAccordion>
+        </div>
+      )}
+    </ClassNames>
   );
 };

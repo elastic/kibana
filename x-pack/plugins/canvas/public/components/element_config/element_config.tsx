@@ -7,10 +7,17 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { EuiFlexGroup, EuiFlexItem, EuiStat, EuiAccordion } from '@elastic/eui';
+import { ClassNames } from '@emotion/react';
+import { useEuiTheme, EuiFlexGroup, EuiFlexItem, EuiStat, EuiAccordion } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { State } from '../../../types';
+import {
+  sidebarAccordionClassName,
+  sidebarAccordionStylesFactory,
+  sidebarExpandableClassName,
+  sidebarExpandableStyles,
+} from '../shared_styles';
 
 const strings = {
   getFailedLabel: () =>
@@ -47,6 +54,8 @@ interface Props {
 }
 
 export const ElementConfig = ({ elementStats }: Props) => {
+  const { euiTheme } = useEuiTheme();
+
   if (!elementStats) {
     return null;
   }
@@ -55,35 +64,39 @@ export const ElementConfig = ({ elementStats }: Props) => {
   const progress = total > 0 ? Math.round(((ready + error) / total) * 100) : 100;
 
   return (
-    <div className="canvasSidebar__expandable">
-      <EuiAccordion
-        id="canvas-element-stats"
-        buttonContent={strings.getTitle()}
-        initialIsOpen={false}
-        className="canvasSidebar__accordion"
-      >
-        <div className="canvasSidebar__accordionContent">
-          <EuiFlexGroup gutterSize="none">
-            <EuiFlexItem>
-              <EuiStat title={total} description={strings.getTotalLabel()} titleSize="xs" />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiStat title={ready} description={strings.getLoadedLabel()} titleSize="xs" />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiStat title={error} description={strings.getFailedLabel()} titleSize="xs" />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiStat
-                title={progress + '%'}
-                description={strings.getProgressLabel()}
-                titleSize="xs"
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
+    <ClassNames>
+      {({ css, cx }) => (
+        <div className={cx(sidebarExpandableClassName, css(sidebarExpandableStyles))}>
+          <EuiAccordion
+            id="canvas-element-stats"
+            buttonContent={strings.getTitle()}
+            initialIsOpen={false}
+            className={cx(sidebarAccordionClassName, css(sidebarAccordionStylesFactory(euiTheme)))}
+          >
+            <div className="canvasSidebar__accordionContent">
+              <EuiFlexGroup gutterSize="none">
+                <EuiFlexItem>
+                  <EuiStat title={total} description={strings.getTotalLabel()} titleSize="xs" />
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiStat title={ready} description={strings.getLoadedLabel()} titleSize="xs" />
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiStat title={error} description={strings.getFailedLabel()} titleSize="xs" />
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiStat
+                    title={progress + '%'}
+                    description={strings.getProgressLabel()}
+                    titleSize="xs"
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </div>
+          </EuiAccordion>
         </div>
-      </EuiAccordion>
-    </div>
+      )}
+    </ClassNames>
   );
 };
 

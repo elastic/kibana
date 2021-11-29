@@ -21,7 +21,13 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ClassNames } from '@emotion/react';
-import { tooltipStylesFactory } from '../shared_styles';
+import {
+  sidebarAccordionClassName,
+  sidebarAccordionStylesFactory,
+  tooltipStylesFactory,
+  sidebarExpandableStyles,
+  sidebarExpandableClassName,
+} from '../shared_styles';
 import { CanvasVariable } from '../../../types';
 
 import { EditVar } from './edit_var';
@@ -177,16 +183,23 @@ export const VarConfig: FC<Props> = ({
 
   return (
     <ClassNames>
-      {({ css }) => (
+      {({ css, cx }) => (
         <div
-          className={`canvasSidebar__expandable canvasVarConfig__container ${
-            panelMode !== PanelMode.List ? 'canvasVarConfig-isEditMode' : ''
-          }`}
+          className={cx(
+            sidebarExpandableClassName,
+            'canvasVarConfig__container',
+            `${panelMode !== PanelMode.List ? 'canvasVarConfig-isEditMode' : ''}`,
+            css(sidebarExpandableStyles)
+          )}
         >
           <div className="canvasVarConfig__innerContainer">
             <EuiAccordion
               id="accordion-variables"
-              className="canvasVarConfig__listView canvasSidebar__accordion"
+              className={cx(
+                'canvasVarConfig__listView',
+                sidebarAccordionClassName,
+                css(sidebarAccordionStylesFactory(euiTheme))
+              )}
               buttonContent={
                 <EuiToolTip
                   content={strings.getTitleTooltip()}
@@ -239,7 +252,13 @@ export const VarConfig: FC<Props> = ({
                 </div>
               )}
             </EuiAccordion>
-            <div className="canvasVarConfig__editView canvasSidebar__accordion">
+            <div
+              className={cx(
+                'canvasVarConfig__editView',
+                sidebarAccordionClassName,
+                css(sidebarAccordionStylesFactory(euiTheme))
+              )}
+            >
               {panelMode === PanelMode.Edit && (
                 <EditVar
                   variables={variables}

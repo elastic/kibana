@@ -7,8 +7,10 @@
 
 import React, { useRef, useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
+import { ClassNames } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
 import { ErrorBoundary } from '../enhance/error_boundary';
+import { sidebarExpandableClassName, sidebarExpandebleStyles } from '../shared_styles';
 import { ArgSimpleForm } from './arg_simple_form';
 import { ArgTemplateForm } from './arg_template_form';
 import { SimpleFailure } from './simple_failure';
@@ -59,80 +61,88 @@ export const ArgForm = (props) => {
   }
 
   return (
-    <ErrorBoundary>
-      {({ error, resetErrorState }) => {
-        const { template, simpleTemplate } = argTypeInstance.argType;
-        const hasError = Boolean(error) || renderError;
-        const argumentProps = {
-          ...templateProps,
-          resolvedArgValue,
-          defaultValue: argTypeInstance.default,
+    <ClassNames>
+      {({ css, cx }) => (
+        <ErrorBoundary>
+          {({ error, resetErrorState }) => {
+            const { template, simpleTemplate } = argTypeInstance.argType;
+            const hasError = Boolean(error) || renderError;
+            const argumentProps = {
+              ...templateProps,
+              resolvedArgValue,
+              defaultValue: argTypeInstance.default,
 
-          renderError: () => {
-            // Provide templates with a renderError method, and wrap the error in a known error type
-            // to stop Kibana's window.error from being called
-            isMounted.current && setRenderError(true);
-          },
-          error: hasError,
-          setLabel: (label) => isMounted.current && setLabel(label),
-          resetErrorState: () => {
-            resetErrorState();
-            isMounted.current && setRenderError(false);
-          },
-          label,
-          workpad,
-          argId,
-          assets,
-        };
+              renderError: () => {
+                // Provide templates with a renderError method, and wrap the error in a known error type
+                // to stop Kibana's window.error from being called
+                isMounted.current && setRenderError(true);
+              },
+              error: hasError,
+              setLabel: (label) => isMounted.current && setLabel(label),
+              resetErrorState: () => {
+                resetErrorState();
+                isMounted.current && setRenderError(false);
+              },
+              label,
+              workpad,
+              argId,
+              assets,
+            };
 
-        const expandableLabel = Boolean(hasError || template);
+            const expandableLabel = Boolean(hasError || template);
 
-        const simpleArg = (
-          <ArgSimpleForm
-            required={argTypeInstance.required}
-            valueMissing={valueMissing}
-            onRemove={onValueRemove}
-          >
-            <ArgTemplateForm
-              template={simpleTemplate}
-              errorTemplate={SimpleFailure}
-              error={hasError}
-              argumentProps={argumentProps}
-            />
-          </ArgSimpleForm>
-        );
+            const simpleArg = (
+              <ArgSimpleForm
+                required={argTypeInstance.required}
+                valueMissing={valueMissing}
+                onRemove={onValueRemove}
+              >
+                <ArgTemplateForm
+                  template={simpleTemplate}
+                  errorTemplate={SimpleFailure}
+                  error={hasError}
+                  argumentProps={argumentProps}
+                />
+              </ArgSimpleForm>
+            );
 
-        const extendedArg = (
-          <div className="canvasArg--controls">
-            <ArgTemplateForm
-              template={template}
-              errorTemplate={AdvancedFailure}
-              error={hasError}
-              argumentProps={argumentProps}
-            />
-          </div>
-        );
+            const extendedArg = (
+              <div className="canvasArg--controls">
+                <ArgTemplateForm
+                  template={template}
+                  errorTemplate={AdvancedFailure}
+                  error={hasError}
+                  argumentProps={argumentProps}
+                />
+              </div>
+            );
 
-        return (
-          <div
-            css={argStylesFactory(euiTheme)}
-            className={`${expandableLabel ? 'canvasSidebar__expandable' : null}`}
-          >
-            <ArgLabel
-              className="resolved"
-              argId={argId}
-              label={label}
-              help={argTypeInstance.help}
-              expandable={expandableLabel}
-              simpleArg={simpleArg}
-              initialIsOpen={!simpleTemplate}
-            >
-              {extendedArg}
-            </ArgLabel>
-          </div>
-        );
-      }}
-    </ErrorBoundary>
+            return (
+              <div
+                css={argStylesFactory(euiTheme)}
+                className={`${
+                  expandableLabel
+                    ? cx(sidebarExpandableClassName, css(sidebarExpandebleStyles))
+                    : null
+                }`}
+              >
+                <ArgLabel
+                  className="resolved"
+                  argId={argId}
+                  label={label}
+                  help={argTypeInstance.help}
+                  expandable={expandableLabel}
+                  simpleArg={simpleArg}
+                  initialIsOpen={!simpleTemplate}
+                >
+                  {extendedArg}
+                </ArgLabel>
+              </div>
+            );
+          }}
+        </ErrorBoundary>
+      )}
+    </ClassNames>
   );
 };
 
