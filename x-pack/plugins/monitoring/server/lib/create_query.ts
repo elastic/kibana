@@ -56,7 +56,8 @@ export function createTimeFilter(options: {
  * document UUIDs, start time and end time, and injecting additional filters.
  *
  * Options object:
- * @param {Array} options.types - `types` field values of the documents
+ * @param {string} options.type - `type` field value of the documents in legay .monitoring indices
+ * @param {string} options.dsDataset - `data_stream.dataset` field values of the documents
  * @param {Array} options.filters - additional filters to add to the `bool` section of the query. Default: []
  * @param {string} options.clusterUuid - a UUID of the cluster. Required.
  * @param {string} options.uuid - a UUID of the metric to filter for, or `null` if UUID should not be part of the query
@@ -67,7 +68,6 @@ export function createTimeFilter(options: {
 export function createQuery(options: {
   type?: string;
   dsDataset?: string;
-  dsType?: string;
   filters?: any[];
   clusterUuid: string;
   uuid?: string;
@@ -75,14 +75,7 @@ export function createQuery(options: {
   end?: number;
   metric?: { uuidField?: string; timestampField: string };
 }) {
-  const {
-    type,
-    dsDataset,
-    clusterUuid,
-    uuid,
-    filters,
-    dsType = DS_INDEX_PATTERN_METRICS,
-  } = defaults(options, {
+  const { type, dsDataset, clusterUuid, uuid, filters } = defaults(options, {
     filters: [],
   });
 
@@ -92,7 +85,7 @@ export function createQuery(options: {
   let typeFilter: any;
   if (dsDataset) {
     terms.push(
-      { term: { 'data_stream.type': dsType } },
+      { term: { 'data_stream.type': DS_INDEX_PATTERN_METRICS } },
       { term: { 'data_stream.dataset': dsDataset } }
     );
   }
