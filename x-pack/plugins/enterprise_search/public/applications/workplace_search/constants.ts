@@ -43,7 +43,7 @@ export const NAV = {
     defaultMessage: 'Users and roles',
   }),
   API_KEYS: i18n.translate('xpack.enterpriseSearch.workplaceSearch.nav.apiKeys', {
-    defaultMessage: 'Api keys',
+    defaultMessage: 'API keys',
   }),
   SECURITY: i18n.translate('xpack.enterpriseSearch.workplaceSearch.nav.security', {
     defaultMessage: 'Security',
@@ -331,6 +331,13 @@ export const SOURCE_OBJ_TYPES = {
     }
   ),
 };
+
+export const API_KEYS_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.apiKeysTitle',
+  {
+    defaultMessage: 'API keys',
+  }
+);
 
 export const API_KEY_LABEL = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.sources.apiKeyLabel',
