@@ -9,5 +9,5 @@
 import { VisParams } from 'src/plugins/visualizations/common';
 
 export const getVisTypeFromParams = (params: VisParams) => {
-  return params?.seriesParams && params.seriesParams[0]?.type;
+  return params?.seriesParams?.[0]?.type;
 };
