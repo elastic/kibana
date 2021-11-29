@@ -34,6 +34,7 @@ export const config: PluginConfigDescriptor = {
     unsafe: schema.object({
       alertingExperience: schema.object({ enabled: schema.boolean({ defaultValue: true }) }),
       cases: schema.object({ enabled: schema.boolean({ defaultValue: true }) }),
+      overviewNext: schema.object({ enabled: schema.boolean({ defaultValue: false }) }),
     }),
   }),
 };
