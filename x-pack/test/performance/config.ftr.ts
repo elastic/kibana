@@ -18,7 +18,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const functionalConfig = await readConfigFile(require.resolve('../functional/config'));
 
   return {
-    testFiles: [require.resolve('./tests/index.ts')],
+    testFiles: [require.resolve('./tests/ftr/home.ts')],
     services,
     pageObjects,
     servers: functionalConfig.get('servers'),
