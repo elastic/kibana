@@ -79,10 +79,6 @@ function makeRouterEnforcingSuperuser<TContext extends RequestHandlerContext>(
 }
 
 async function checkFleetSetupPrivilege(req: KibanaRequest) {
-  if (!checkSecurityEnabled()) {
-    return false;
-  }
-
   const security = appContextService.getSecurity();
 
   if (security.authz.mode.useRbacForRequest(req)) {
@@ -146,13 +142,19 @@ function enforceFleetAuthzPrivilege<P, Q, B, TContext extends FleetRequestHandle
   allowFleetSetupPrivilege?: boolean
 ): RequestHandler<P, Q, B, TContext> {
   return async (context, req, res) => {
+    if (!checkSecurityEnabled()) {
+      return res.forbidden();
+    }
+
     if (allowFleetSetupPrivilege) {
       const hasFleetSetupPrivilege = await checkFleetSetupPrivilege(req);
       if (hasFleetSetupPrivilege) {
         return handler(context, req, res);
       }
     }
-
+    if (!context.fleet || !context.fleet.authz) {
+      return res.forbidden();
+    }
     const { authz } = context.fleet;
 
     const missingAuthz = [];
@@ -246,7 +248,7 @@ export function makeRouterWithFleetAuthz<TContext extends FleetRequestHandlerCon
   };
 }
 
-export type RouterWrapper = <T extends RequestHandlerContext>(route: IRouter<T>) => IRouter<T>;
+export type RouterWrapper = <T extends FleetRequestHandlerContext>(route: IRouter<T>) => IRouter<T>;
 
 interface RouterWrappersSetup {
   require: {
