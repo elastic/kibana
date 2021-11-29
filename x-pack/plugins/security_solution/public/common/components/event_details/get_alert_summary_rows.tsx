@@ -14,7 +14,6 @@ import {
   ALERTS_HEADERS_THRESHOLD_COUNT,
   ALERTS_HEADERS_THRESHOLD_TERMS,
   ALERTS_HEADERS_RULE_NAME,
-  SIGNAL_STATUS,
   ALERTS_HEADERS_TARGET_IMPORT_HASH,
   ALERTS_HEADERS_RULE_DESCRIPTION,
 } from '../../../detections/components/alerts_table/translations';
@@ -31,7 +30,6 @@ import { isAlertFromEndpointEvent } from '../../utils/endpoint_alert_check';
 import { EventCode } from '../../../../common/ecs/event';
 
 const defaultDisplayFields: EventSummaryField[] = [
-  { id: 'kibana.alert.workflow_status', label: SIGNAL_STATUS },
   { id: 'host.name' },
   { id: 'agent.id', overrideField: AGENT_STATUS_FIELD_NAME, label: i18n.AGENT_STATUS },
   { id: 'user.name' },
