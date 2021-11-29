@@ -11,19 +11,19 @@ import { getConvertedValueForField } from '../filters';
 import { Filter } from '../filters';
 import { IndexPatternBase } from './types';
 
+// See https://www.elastic.co/guide/en/elasticsearch/reference/2.0/query-dsl-match-query.html
 /** @internal */
 export interface DeprecatedMatchPhraseFilter extends Filter {
   match: {
     [field: string]: {
-      query: any;
+      query: string;
       type: 'phrase';
     };
   };
 }
 
 function isDeprecatedMatchPhraseFilter(filter: Filter): filter is DeprecatedMatchPhraseFilter {
-  // @ts-ignore
-  const fieldName = Object.keys((filter.match || filter.query?.match) ?? {})[0];
+  const [fieldName] = Object.keys(get(filter, 'match') || get(filter, 'query.match'));
   return Boolean(
     fieldName &&
       (get(filter, ['query', 'match', fieldName, 'type']) === 'phrase' ||
@@ -34,8 +34,7 @@ function isDeprecatedMatchPhraseFilter(filter: Filter): filter is DeprecatedMatc
 /** @internal */
 export function migrateFilter(filter: Filter, indexPattern?: IndexPatternBase) {
   if (isDeprecatedMatchPhraseFilter(filter)) {
-    // @ts-ignore
-    const match = filter.match || filter.query.match;
+    const match = filter.match ?? filter.query?.match;
     const fieldName = Object.keys(match)[0];
     const params: Record<string, any> = get(match, [fieldName]);
     let query = params.query;

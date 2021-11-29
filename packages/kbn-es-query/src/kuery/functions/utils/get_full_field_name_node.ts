@@ -30,7 +30,7 @@ export function getFullFieldNameNode(
   }
   const fields = getFields(fullFieldNameNode, indexPattern);
 
-  const errors = fields!.reduce((acc: any, field: DataViewFieldBase) => {
+  const errors = fields!.reduce((acc: string[], field: DataViewFieldBase) => {
     const subTypeNested = getDataViewFieldSubtypeNested(field);
     const nestedPathFromField = subTypeNested?.nested.path;
 
