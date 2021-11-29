@@ -37,7 +37,7 @@ import { ensurePackagesCompletedInstall } from './epm/packages/install';
 import { bulkInstallPackages } from './epm/packages/bulk_install_packages';
 import { agentPolicyService, addPackageToAgentPolicy } from './agent_policy';
 import type { InputsOverride } from './package_policy';
-import { overridePackageInputs, packagePolicyService } from './package_policy';
+import { preconfigurePackageInputs, packagePolicyService } from './package_policy';
 import { appContextService } from './app_context';
 import type { UpgradeManagedPackagePoliciesResult } from './managed_package_policies';
 import { upgradeManagedPackagePolicies } from './managed_package_policies';
@@ -429,7 +429,8 @@ async function addPreconfiguredPolicyPackages(
       defaultOutput,
       name,
       description,
-      (policy) => overridePackageInputs(policy, packageInfo, inputs)
+      (policy) => overridePackageInputs(policy, packageInfo, inputs),
+      bumpAgentPolicyRevison
     );
   }
 }
