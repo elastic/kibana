@@ -68,7 +68,8 @@ export async function getSharingData(
             : ([timeFilter, existingFilter] as Filter[])
         );
       } else {
-        searchSource.setField('filter', timeFilter);
+        const filter = timeFilter || existingFilter;
+        searchSource.setField('filter', filter);
       }
 
       return searchSource.getSerializedFields(true);
