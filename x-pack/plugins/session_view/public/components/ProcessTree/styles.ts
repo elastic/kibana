@@ -7,6 +7,7 @@
 
 import { useMemo } from 'react';
 import { useEuiTheme } from '@elastic/eui';
+import { CSSObject } from '@emotion/react';
 
 export const useStyles = () => {
   const { euiTheme } = useEuiTheme();
@@ -14,25 +15,25 @@ export const useStyles = () => {
   const cached = useMemo(() => {
     const defaultSelectionColor = euiTheme.colors.accent;
 
-    const scroller = `
-      font-family: ${euiTheme.font.familyCode};
-      overflow: auto;
-      height: 100%;
-      background-color: ${euiTheme.colors.lightestShade};
-      display: flex;
-      flex-direction: column;
-    `;
+    const scroller: CSSObject = {
+      fontFamily: euiTheme.font.familyCode,
+      overflow: 'auto',
+      height: '100%',
+      backgroundColor: euiTheme.colors.lightestShade,
+      display: 'flex',
+      flexDirection: 'column',
+    };
 
-    const selectionArea = `
-      position: absolute;
-      display: none;
-      margin-left: -50%;
-      width: 150%;
-      height: 100%;
-      background-color: ${defaultSelectionColor};
-      pointer-events:none;
-      opacity: .1;
-    `;
+    const selectionArea: CSSObject = {
+      position: 'absolute',
+      display: 'none',
+      marginLeft: '-50%',
+      width: '150%',
+      height: '100%',
+      backgroundColor: defaultSelectionColor,
+      pointerEvents: 'none',
+      opacity: 0.1,
+    };
 
     return {
       scroller,

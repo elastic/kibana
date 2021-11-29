@@ -7,7 +7,7 @@
 
 import { useMemo } from 'react';
 import { useEuiTheme } from '@elastic/eui';
-import { keyframes, CSSObject } from '@emotion/react';
+import { CSSObject } from '@emotion/react';
 
 interface StylesDeps {
   height: number | undefined;
@@ -35,52 +35,10 @@ export const useStyles = ({ height = 500 }: StylesDeps) => {
       paddingLeft: padding,
     };
 
-    const slideIn = keyframes({
-      to: {
-        right: '0',
-      },
-    });
-
-    const slideOut = keyframes({
-      from: {
-        right: '0',
-      },
-      to: {
-        right: '-100%',
-      },
-    });
-
-    const detailPanel: CSSObject = {
-      width: '424px',
-      height: `${height}px`,
-      overflowY: 'auto',
-      position: 'absolute',
-      top: '8px',
-      right: '-100%',
-    };
-
-    const detailPanelIn: Array<string | CSSObject> = [
-      slideIn.styles,
-      {
-        ...detailPanel,
-        animation: `${slideIn.name} 200ms ease forwards`,
-      },
-    ];
-
-    const detailPanelOut: Array<string | CSSObject> = [
-      slideOut.styles,
-      {
-        ...detailPanel,
-        animation: `${slideOut.name} 150ms ease`,
-      },
-    ];
-
     return {
       processTree,
       outerPanel,
       treePanel,
-      detailPanelIn,
-      detailPanelOut,
     };
   }, [height, euiTheme]);
 
