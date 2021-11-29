@@ -39,12 +39,13 @@ export function alertSummaryFromEventLog(params: AlertSummaryFromEventLogParams)
     alerts: {},
     executionDuration: {
       average: 0,
-      values: [],
+      valuesWithTimestamp: {},
     },
   };
 
   const alerts = new Map<string, AlertStatus>();
   const eventDurations: number[] = [];
+  const eventDurationsWithTimestamp: Record<string, number> = {};
 
   // loop through the events
   // should be sorted newest to oldest, we want oldest to newest, so reverse
@@ -73,7 +74,11 @@ export function alertSummaryFromEventLog(params: AlertSummaryFromEventLogParams)
       }
 
       if (event?.event?.duration) {
-        eventDurations.push(event?.event?.duration / Millis2Nanos);
+        const eventDirationMillis = event?.event?.duration / Millis2Nanos;
+        eventDurations.push(eventDirationMillis);
+        if (event?.['@timestamp']) {
+          eventDurationsWithTimestamp[event?.['@timestamp']] = eventDirationMillis;
+        }
       }
 
       continue;
@@ -124,7 +129,7 @@ export function alertSummaryFromEventLog(params: AlertSummaryFromEventLogParams)
   if (eventDurations.length > 0) {
     alertSummary.executionDuration = {
       average: Math.round(mean(eventDurations)),
-      values: eventDurations,
+      valuesWithTimestamp: eventDurationsWithTimestamp,
     };
   }
 

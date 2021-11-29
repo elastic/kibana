@@ -6,7 +6,7 @@
  */
 
 import React, { Fragment, useState, useEffect } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -24,8 +24,6 @@ import {
   EuiCodeBlock,
   EuiText,
 } from '@elastic/eui';
-
-import 'brace/theme/textmate';
 
 import { SectionError, Error } from '../../../../../shared_imports';
 

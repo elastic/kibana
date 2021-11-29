@@ -36,7 +36,7 @@ const CentralizedContainer = styled.div`
   align-items: center;
 `;
 
-type APIResponseType = APIReturnType<'GET /internal/apm/fleet/has_data'>;
+type APIResponseType = APIReturnType<'GET /internal/apm/fleet/migration_check'>;
 
 function TutorialFleetInstructions({
   http,
@@ -52,7 +52,7 @@ function TutorialFleetInstructions({
     async function fetchData() {
       setIsLoading(true);
       try {
-        const response = await http.get('/internal/apm/fleet/has_data');
+        const response = await http.get('/internal/apm/fleet/migration_check');
         setData(response as APIResponseType);
       } catch (e) {
         setIsLoading(false);
@@ -63,6 +63,24 @@ function TutorialFleetInstructions({
     fetchData();
   }, [http]);
 
+  const hasApmIntegrations = !!data?.has_apm_integrations;
+  const cloudApmMigrationEnabled = !!data?.cloud_apm_migration_enabled;
+  const hasCloudAgentPolicy = !!data?.has_cloud_agent_policy;
+  const cloudApmPackagePolicy = data?.cloud_apm_package_policy;
+  const hasCloudApmPackagePolicy = !!cloudApmPackagePolicy;
+  const hasRequiredRole = !!data?.has_required_role;
+  const shouldLinkToMigration =
+    cloudApmMigrationEnabled &&
+    hasCloudAgentPolicy &&
+    !hasCloudApmPackagePolicy &&
+    hasRequiredRole;
+
+  const apmIntegrationHref = shouldLinkToMigration
+    ? `${basePath}/app/apm/settings/schema`
+    : isPrerelease
+    ? `${basePath}/app/integrations#/detail/apm/overview`
+    : `${basePath}/app/integrations/detail/apm-${SUPPORTED_APM_PACKAGE_VERSION}/overview`;
+
   if (isLoading) {
     return (
       <CentralizedContainer>
@@ -72,9 +90,13 @@ function TutorialFleetInstructions({
   }
 
   // When APM integration is enable in Fleet
-  if (data?.hasData) {
+  if (hasApmIntegrations) {
     return (
-      <EuiButton iconType="gear" fill href={`${basePath}/app/fleet#/policies`}>
+      <EuiButton
+        iconType="gear"
+        fill
+        href={`${basePath}/app/integrations/detail/apm-${SUPPORTED_APM_PACKAGE_VERSION}/policies`}
+      >
         {i18n.translate(
           'xpack.apm.tutorial.apmServer.fleet.manageApmIntegration.button',
           {
@@ -107,11 +129,7 @@ function TutorialFleetInstructions({
                 <EuiButton
                   iconType="analyzeEvent"
                   color="secondary"
-                  href={
-                    isPrerelease
-                      ? `${basePath}/app/integrations#/detail/apm/overview`
-                      : `${basePath}/app/integrations#/detail/apm-${SUPPORTED_APM_PACKAGE_VERSION}/overview`
-                  }
+                  href={apmIntegrationHref}
                 >
                   {i18n.translate(
                     'xpack.apm.tutorial.apmServer.fleet.apmIntegration.button',
