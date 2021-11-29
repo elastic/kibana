@@ -189,7 +189,10 @@ describe('TaskClaiming', () => {
 
       const results = await getAllAsPromise(taskClaiming.claimAvailableTasks(claimingOpts));
 
-      expect(apm.startTransaction).toHaveBeenCalledWith('mark-task-as-running', 'task-manager');
+      expect(apm.startTransaction).toHaveBeenCalledWith(
+        'mark-available-tasks-as-claimed',
+        'task-manager'
+      );
       expect(mockApmTrans.end).toHaveBeenCalledWith('success');
 
       expect(store.updateByQuery.mock.calls[0][1]).toMatchObject({
@@ -246,7 +249,10 @@ describe('TaskClaiming', () => {
         )
       ).rejects.toMatchInlineSnapshot(`[Error: Oh no]`);
 
-      expect(apm.startTransaction).toHaveBeenCalledWith('mark-task-as-running', 'task-manager');
+      expect(apm.startTransaction).toHaveBeenCalledWith(
+        'mark-available-tasks-as-claimed',
+        'task-manager'
+      );
       expect(mockApmTrans.end).toHaveBeenCalledWith('failure');
     });
 
