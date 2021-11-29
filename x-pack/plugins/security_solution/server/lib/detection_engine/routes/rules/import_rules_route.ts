@@ -14,7 +14,6 @@ import { transformError, getIndexExists } from '@kbn/securitysolution-es-utils';
 import { validate } from '@kbn/securitysolution-io-ts-utils';
 import { ImportQuerySchemaDecoded, importQuerySchema } from '@kbn/securitysolution-io-ts-types';
 
-import { Readable } from 'stream';
 import {
   ImportRulesSchema as ImportRulesResponseSchema,
   importRulesSchema as importRulesResponseSchema,

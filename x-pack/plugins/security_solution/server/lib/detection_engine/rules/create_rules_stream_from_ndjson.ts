@@ -31,7 +31,7 @@ import {
 } from '../../../../common/detection_engine/schemas/request/import_rules_schema';
 import {
   parseNdjsonStrings,
-  createLimitStream,
+  createRulesLimitStream,
   filterExportedCounts,
 } from '../../../utils/read_stream/create_stream_from_ndjson';
 
@@ -108,7 +108,7 @@ export const sortRuleImports = (ruleLimit: number) => {
     filterExportedCounts(),
     sortImports(),
     validateRulesStream(),
-    createLimitStream(ruleLimit),
+    createRulesLimitStream(ruleLimit),
     createConcatStream([]),
   ];
 };

@@ -8,12 +8,16 @@
 
 import { ImportExceptionsResponseSchema } from '.';
 
-export const getImportExceptionsResponseSchemaMock = (): ImportExceptionsResponseSchema => ({
+export const getImportExceptionsResponseSchemaMock = (
+  success = 0,
+  lists = 0,
+  items = 0
+): ImportExceptionsResponseSchema => ({
   errors: [],
   success: true,
-  success_count: 2,
+  success_count: success,
   success_exception_lists: true,
-  success_count_exception_lists: 1,
+  success_count_exception_lists: lists,
   success_exception_list_items: true,
-  success_count_exception_list_items: 1,
+  success_count_exception_list_items: items,
 });

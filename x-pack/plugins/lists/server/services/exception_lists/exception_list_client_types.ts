@@ -48,12 +48,6 @@ import {
   VersionOrUndefined,
 } from '@kbn/securitysolution-io-ts-types';
 
-export interface HapiReadableStream extends Readable {
-  hapi: {
-    filename: string;
-  };
-}
-
 export interface ConstructorOptions {
   user: string;
   savedObjectsClient: SavedObjectsClientContract;
@@ -242,7 +236,7 @@ export interface ExportExceptionListAndItemsReturn {
 }
 
 export interface ImportExceptionListAndItemsOptions {
-  fileToImport: HapiReadableStream;
+  exceptionsToImport: Readable;
   maxExceptionsImportSize: number;
   overwrite: boolean;
 }

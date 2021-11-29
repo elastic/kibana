@@ -247,7 +247,6 @@ export class ExceptionListClient {
     meta,
     name,
     namespaceType,
-    osTypes,
     tags,
     type,
     version,
@@ -261,7 +260,6 @@ export class ExceptionListClient {
       meta,
       name,
       namespaceType,
-      osTypes,
       savedObjectsClient,
       tags,
       type,
@@ -517,14 +515,14 @@ export class ExceptionListClient {
   };
 
   public importExceptionListAndItems = async ({
-    fileToImport,
+    exceptionsToImport,
     maxExceptionsImportSize,
     overwrite,
   }: ImportExceptionListAndItemsOptions): Promise<ImportExceptionsResponseSchema> => {
     const { savedObjectsClient, user } = this;
 
     return importExceptions({
-      fileToImport,
+      exceptionsToImport,
       maxExceptionsImportSize,
       overwrite,
       savedObjectsClient,

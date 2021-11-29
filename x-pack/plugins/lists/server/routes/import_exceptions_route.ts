@@ -53,7 +53,7 @@ export const importExceptionsRoute = (router: ListsPluginRouter, config: ConfigT
         }
 
         const importsSummary = await exceptionListsClient.importExceptionListAndItems({
-          fileToImport: request.body.file as HapiReadableStream,
+          exceptionsToImport: request.body.file,
           maxExceptionsImportSize: config.maxExceptionsImportSize,
           overwrite: request.query.overwrite,
         });

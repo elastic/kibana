@@ -6,13 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ENTRIES } from '../../constants/index.mock';
-import {
-  ImportExceptionListItemSchema,
-  ImportExceptionListItemSchemaDecoded,
-  ImportExceptionListSchemaDecoded,
-  ImportExceptionsListSchema,
-} from './';
+import { ImportExceptionListSchemaDecoded, ImportExceptionsListSchema } from '.';
 
 export const getImportExceptionsListSchemaMock = (
   listId = 'detection_list_id'
@@ -21,18 +15,6 @@ export const getImportExceptionsListSchemaMock = (
   list_id: listId,
   name: 'Query with a rule id',
   type: 'detection',
-});
-
-export const getImportExceptionsListItemSchemaMock = (
-  itemId = 'item_id_1',
-  listId = 'detection_list_id'
-): ImportExceptionListItemSchema => ({
-  description: 'some description',
-  entries: ENTRIES,
-  item_id: itemId,
-  list_id: listId,
-  name: 'Query with a rule id',
-  type: 'simple',
 });
 
 export const getImportExceptionsListSchemaDecodedMock = (
@@ -47,24 +29,12 @@ export const getImportExceptionsListSchemaDecodedMock = (
   version: 1,
 });
 
-export const getImportExceptionsListItemSchemaDecodedMock = (
-  itemId = 'item_id_1',
-  listId = 'detection_list_id'
-): ImportExceptionListItemSchemaDecoded => ({
-  ...getImportExceptionsListItemSchemaMock(itemId, listId),
-  comments: [],
-  meta: undefined,
-  namespace_type: 'single',
-  os_types: [],
-  tags: [],
-});
-
 /**
  * Given an array of exception lists and items, builds a stream
  * @param items Array of exception lists and items objects with which to generate JSON
  */
-export const toNdJsonString = (items: unknown[]): Buffer => {
+export const toNdJsonString = (items: unknown[]): string => {
   const stringOfExceptions = items.map((item) => JSON.stringify(item));
 
-  return Buffer.from(stringOfExceptions.join('\n'));
+  return stringOfExceptions.join('\n');
 };

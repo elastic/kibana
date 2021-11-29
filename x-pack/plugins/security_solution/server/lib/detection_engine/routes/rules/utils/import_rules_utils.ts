@@ -378,7 +378,7 @@ export const importExceptionsHelper = async ({
       success,
       success_count: successCount,
     } = await exceptionsClient.importExceptionListAndItems({
-      fileToImport: new Readable({
+      exceptionsToImport: new Readable({
         read(): void {
           this.push(exceptions.map((exception) => `${JSON.stringify(exception)}`).join('\n'));
           this.push(null);

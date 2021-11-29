@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { Readable } from 'stream';
+
 import {
   ImportExceptionListItemSchemaDecoded,
   ImportExceptionListSchemaDecoded,
@@ -14,7 +16,6 @@ import { createPromiseFromStreams } from '@kbn/utils';
 import { SavedObjectsClientContract } from 'kibana/server';
 import { chunk } from 'lodash/fp';
 
-import { HapiReadableStream } from './exception_list_client_types';
 import {
   createExceptionsStreamFromNdjson,
   getTupleErrorsAndUniqueExceptionListItems,
@@ -24,7 +25,7 @@ import {
 } from './utils/import_exceptions_utils';
 
 interface ImportExceptionListAndItemsOptions {
-  fileToImport: HapiReadableStream;
+  exceptionsToImport: Readable;
   maxExceptionsImportSize: number;
   overwrite: boolean;
   savedObjectsClient: SavedObjectsClientContract;
@@ -39,7 +40,7 @@ interface PromiseFromStreams {
 const CHUNK_PARSED_OBJECT_SIZE = 50;
 
 export const importExceptions = async ({
-  fileToImport,
+  exceptionsToImport,
   overwrite,
   savedObjectsClient,
   maxExceptionsImportSize,
@@ -49,7 +50,7 @@ export const importExceptions = async ({
     // validation of import and sorting of lists and items
     const readStream = createExceptionsStreamFromNdjson(maxExceptionsImportSize);
     const [parsedObjects] = await createPromiseFromStreams<PromiseFromStreams[]>([
-      fileToImport,
+      exceptionsToImport,
       ...readStream,
     ]);
 
@@ -63,7 +64,8 @@ export const importExceptions = async ({
     const chunkParsedListObjects = chunk(CHUNK_PARSED_OBJECT_SIZE, uniqueExceptionLists);
     const chunkParsedItemsObjects = chunk(CHUNK_PARSED_OBJECT_SIZE, uniqueExceptionListItems);
 
-    // where the magic happens
+    // where the magic happens - purposely importing parent exception
+    // containers first, items second
     const importExceptionListsResponse = await importExceptionLists({
       isOverwrite: overwrite,
       listsChunks: chunkParsedListObjects,
