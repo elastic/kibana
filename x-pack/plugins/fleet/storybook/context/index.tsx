@@ -69,6 +69,24 @@ export const StorybookContext: React.FC<{ storyContext?: StoryContext }> = ({
       notifications: getNotifications(),
       share: getShare(),
       uiSettings: getUiSettings(),
+      authz: {
+        fleet: {
+          all: true,
+          setup: true,
+          readEnrollmentTokens: true,
+        },
+        integrations: {
+          readPackageInfo: true,
+          readInstalledPackages: true,
+          installPackages: true,
+          upgradePackages: true,
+          removePackages: true,
+          readPackageSettings: true,
+          writePackageSettings: true,
+          readIntegrationPolicies: true,
+          writeIntegrationPolicies: true,
+        },
+      },
     }),
     [isCloudEnabled]
   );
