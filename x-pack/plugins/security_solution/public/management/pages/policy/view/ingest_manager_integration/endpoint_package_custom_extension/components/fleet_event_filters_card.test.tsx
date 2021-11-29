@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import { FleetEventFiltersCard } from './fleet_event_filters_card';
 import * as reactTestingLibrary from '@testing-library/react';
 import { EventFiltersHttpService } from '../../../../../event_filters/service';

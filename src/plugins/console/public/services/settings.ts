@@ -14,6 +14,7 @@ export const DEFAULT_SETTINGS = Object.freeze({
   tripleQuotes: true,
   wrapMode: true,
   autocomplete: Object.freeze({ fields: true, indices: true, templates: true }),
+  historyDisabled: false,
 });
 
 export interface DevToolsSettings {
@@ -26,6 +27,7 @@ export interface DevToolsSettings {
   };
   polling: boolean;
   tripleQuotes: boolean;
+  historyDisabled: boolean;
 }
 
 export class Settings {
@@ -76,6 +78,15 @@ export class Settings {
     return true;
   }
 
+  setHistoryDisabled(disable: boolean) {
+    this.storage.set('disable_history', disable);
+    return true;
+  }
+
+  getHistoryDisabled() {
+    return this.storage.get('disable_history', DEFAULT_SETTINGS.historyDisabled);
+  }
+
   toJSON(): DevToolsSettings {
     return {
       autocomplete: this.getAutocomplete(),
@@ -83,15 +94,24 @@ export class Settings {
       tripleQuotes: this.getTripleQuotes(),
       fontSize: parseFloat(this.getFontSize()),
       polling: Boolean(this.getPolling()),
+      historyDisabled: Boolean(this.getHistoryDisabled()),
     };
   }
 
-  updateSettings({ fontSize, wrapMode, tripleQuotes, autocomplete, polling }: DevToolsSettings) {
+  updateSettings({
+    fontSize,
+    wrapMode,
+    tripleQuotes,
+    autocomplete,
+    polling,
+    historyDisabled,
+  }: DevToolsSettings) {
     this.setFontSize(fontSize);
     this.setWrapMode(wrapMode);
     this.setTripleQuotes(tripleQuotes);
     this.setAutocomplete(autocomplete);
     this.setPolling(polling);
+    this.setHistoryDisabled(historyDisabled);
   }
 }
 
