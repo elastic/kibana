@@ -25,6 +25,7 @@ export const renderApp = ({
 }: RenderAppProps): (() => void) => {
   const ApplicationUsageTrackingProvider =
     usageCollection?.components.ApplicationUsageTrackingProvider ?? React.Fragment;
+
   render(
     <SecurityApp
       history={history}

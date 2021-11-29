@@ -122,6 +122,10 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     const startServices: Promise<StartServices> = (async () => {
       const [coreStart, startPlugins] = await core.getStartServices();
 
+      const demo_data = coreStart.http.get('/api/csp/stats');
+
+      console.log({ demo_data });
+
       const services: StartServices = {
         ...coreStart,
         ...startPlugins,
@@ -300,6 +304,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         overview: new subPluginClasses.Overview(),
         timelines: new subPluginClasses.Timelines(),
         management: new subPluginClasses.Management(),
+        cloud_posture: new subPluginClasses.CloudPosture(),
       };
     }
     return this._subPlugins;
@@ -325,6 +330,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       ueba: subPlugins.ueba.start(storage),
       timelines: subPlugins.timelines.start(),
       management: subPlugins.management.start(core, plugins),
+      cloud_posture: subPlugins.cloud_posture.start(storage, core, plugins),
     };
   }
   /**
