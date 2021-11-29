@@ -69,7 +69,7 @@ export const fetchFieldValueFieldStats = async (
   const stats = {
     fieldName: field.fieldName,
     topValues,
-    topValuesSampleSize: aggregations.doc_count ?? 0,
+    topValuesSampleSize: aggregations.filtered_count.doc_count ?? 0,
   };
 
   return stats;

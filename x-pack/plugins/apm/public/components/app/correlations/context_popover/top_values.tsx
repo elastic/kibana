@@ -14,17 +14,18 @@ import {
   EuiToolTip,
   EuiText,
   EuiHorizontalRule,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
 import numeral from '@elastic/numeral';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   FieldStats,
   TopValueBucket,
 } from '../../../../../common/correlations/field_stats_types';
 import { asPercent } from '../../../../../common/utils/formatters';
 import { useTheme } from '../../../../hooks/use_theme';
-import { useFetcher } from '../../../../hooks/use_fetcher';
+import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { useFetchParams } from '../use_fetch_params';
 import { SAMPLER_SHARD_SIZE } from '../../../../../common/correlations/constants';
 
@@ -178,7 +179,7 @@ export function TopValues({
     : null;
 
   const params = useFetchParams();
-  const { data: fieldValueStats } = useFetcher(
+  const { data: fieldValueStats, status } = useFetcher(
     (callApmApi) => {
       if (
         idxToHighlight === -1 &&
@@ -200,7 +201,6 @@ export function TopValues({
     },
     [params, fieldName, fieldValue, idxToHighlight]
   );
-
   if (
     !Array.isArray(topValues) ||
     topValues?.length === 0 ||
@@ -248,7 +248,7 @@ export function TopValues({
           );
         })}
 
-      {Array.isArray(fieldValueStats?.topValues) && (
+      {idxToHighlight === -1 && (
         <>
           <EuiHorizontalRule margin="s" />
           <EuiText size="xs" color="subdued">
@@ -258,25 +258,32 @@ export function TopValues({
             />
           </EuiText>
           <EuiSpacer size="s" />
-          {fieldValueStats?.topValues.map((value) => {
-            const valueText =
-              progressBarMax !== undefined
-                ? asPercent(value.doc_count, progressBarMax)
-                : undefined;
+          {status === FETCH_STATUS.SUCCESS &&
+          Array.isArray(fieldValueStats?.topValues) ? (
+            fieldValueStats?.topValues.map((value) => {
+              const valueText =
+                progressBarMax !== undefined
+                  ? asPercent(value.doc_count, progressBarMax)
+                  : undefined;
 
-            return (
-              <TopValue
-                value={value}
-                barColor={'accent'}
-                valueText={valueText}
-                onAddFilter={onAddFilter}
-                progressBarMax={progressBarMax}
-                isHighlighted={true}
-                fieldName={fieldName}
-                reverseLabel={true}
-              />
-            );
-          })}
+              return (
+                <TopValue
+                  value={value}
+                  barColor={'accent'}
+                  valueText={valueText}
+                  onAddFilter={onAddFilter}
+                  progressBarMax={progressBarMax}
+                  isHighlighted={true}
+                  fieldName={fieldName}
+                  reverseLabel={true}
+                />
+              );
+            })
+          ) : (
+            <EuiText textAlign="center">
+              <EuiLoadingSpinner />
+            </EuiText>
+          )}
         </>
       )}
 
