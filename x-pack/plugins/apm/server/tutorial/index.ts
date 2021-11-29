@@ -18,7 +18,6 @@ import { getApmDataViewTitle } from '../routes/data_view/get_apm_data_view_title
 import { ApmIndicesConfig } from '../routes/settings/apm_indices/get_apm_indices';
 import { createElasticCloudInstructions } from './envs/elastic_cloud';
 import { onPremInstructions } from './envs/on_prem';
-import apmDataView from './index_pattern.json';
 
 const apmIntro = i18n.translate('xpack.apm.tutorial.introduction', {
   defaultMessage:
@@ -43,10 +42,8 @@ export const tutorialProvider =
 
     const savedObjects = [
       {
-        ...apmDataView,
         id: APM_STATIC_INDEX_PATTERN_ID,
         attributes: {
-          ...apmDataView.attributes,
           title: indexPatternTitle,
         },
       },
