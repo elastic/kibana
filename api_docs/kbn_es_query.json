@@ -3500,7 +3500,7 @@
             "id": "def-common.KueryNode.Unnamed",
             "type": "IndexSignature",
             "tags": [],
-            "label": "[key: string}]: any",
+            "label": "[key: string]: any",
             "description": [],
             "signature": [
               "[key: string]:  any"

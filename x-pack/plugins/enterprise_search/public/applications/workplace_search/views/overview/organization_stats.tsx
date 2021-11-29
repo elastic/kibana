@@ -11,7 +11,7 @@ import { useValues } from 'kea';
 
 import { EuiFlexGrid, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { ContentSection } from '../../components/shared/content_section';
 import { SOURCES_PATH, USERS_AND_ROLES_PATH } from '../../routes';
