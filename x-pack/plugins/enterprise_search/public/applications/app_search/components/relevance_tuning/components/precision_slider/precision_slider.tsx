@@ -21,7 +21,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { DOCS_PREFIX } from '../../../../routes';
+import { PRECISION_DOCS_URL } from '../../../../routes';
 import { RelevanceTuningLogic } from '../../relevance_tuning_logic';
 
 import { STEP_DESCRIPTIONS } from './constants';
@@ -57,11 +57,7 @@ export const PrecisionSlider: React.FC = () => {
             defaultMessage: 'Fine tune the precision vs. recall settings on your engine.',
           }
         )}{' '}
-        <EuiLink
-          data-test-subj="documentationLink"
-          href={`${DOCS_PREFIX}/precision-tuning.html`}
-          target="_blank"
-        >
+        <EuiLink data-test-subj="documentationLink" href={PRECISION_DOCS_URL} target="_blank">
           {i18n.translate(
             'xpack.enterpriseSearch.appSearch.engine.relevanceTuning.precisionSlider.learnMore.link',
             {

@@ -18,7 +18,7 @@ import { RoleRules } from '../types';
 
 import './role_mappings_table.scss';
 
-const AUTH_PROVIDER_DOCUMENTATION_URL = `${docLinks.enterpriseSearchBase}/users-access.html`;
+const AUTH_PROVIDER_DOCUMENTATION_URL = `${docLinks.enterpriseSearchUsersAccess}`;
 
 import {
   ANY_AUTH_PROVIDER,

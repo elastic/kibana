@@ -19,6 +19,8 @@ import { EuiButtonEmpty, EuiCallOut, EuiSwitch } from '@elastic/eui';
 
 import { mountWithIntl } from '@kbn/test/jest';
 
+import { docLinks } from '../../../../../shared/doc_links';
+
 import { Loading } from '../../../../../shared/loading';
 import { EuiButtonTo } from '../../../../../shared/react_router_helpers';
 import { DataPanel } from '../../../data_panel';
@@ -227,7 +229,7 @@ describe('CurationsSettings', () => {
       const wrapper = shallow(<CurationsSettings />);
       expect(wrapper.is(DataPanel)).toBe(true);
       expect(wrapper.prop('action').props.to).toEqual('/app/management/stack/license_management');
-      expect(wrapper.find(EuiButtonEmpty).prop('href')).toEqual('/license-management.html');
+      expect(wrapper.find(EuiButtonEmpty).prop('href')).toEqual(docLinks.licenseManagement);
     });
   });
 });
