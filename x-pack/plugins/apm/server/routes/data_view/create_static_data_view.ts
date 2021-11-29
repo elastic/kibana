@@ -8,7 +8,7 @@
 import {
   TRACE_ID,
   TRANSACTION_ID,
-} from '../../../../../../../../../../private/var/tmp/_bazel_sqren/0095b6903ba3e5f57f5da9fcb4ada8db/execroot/kibana/bazel-out/darwin-fastbuild/bin/x-pack/plugins/apm/common/elasticsearch_fieldnames';
+} from '../../../common/elasticsearch_fieldnames';
 import { SavedObjectsErrorHelpers } from '../../../../../../src/core/server';
 import { APM_STATIC_INDEX_PATTERN_ID } from '../../../common/index_pattern_constants';
 import { hasHistoricalAgentData } from '../../routes/historical_data/has_historical_agent_data';
@@ -84,6 +84,7 @@ export async function createStaticDataView({
           }
         )
       );
+
       return true;
     } catch (e) {
       // if the data view (saved object) already exists a conflict error (code: 409) will be thrown
