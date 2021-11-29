@@ -63,7 +63,6 @@ const SavedObjectsTablePage = ({
         text: i18n.translate('savedObjectsManagement.breadcrumb.index', {
           defaultMessage: 'Saved objects',
         }),
-        href: '/',
       },
     ]);
   }, [setBreadcrumbs]);
