@@ -22,12 +22,13 @@ const staticDataViewRoute = createApmServerRoute({
       config,
     } = resources;
 
-    const [setup, savedObjectsClient] = await Promise.all([
-      setupRequest(resources),
-      core
-        .start()
-        .then((coreStart) => coreStart.savedObjects.createInternalRepository()),
-    ]);
+    const setupPromise = setupRequest(resources);
+    const clientPromise = core
+      .start()
+      .then((coreStart) => coreStart.savedObjects.createInternalRepository());
+
+    const setup = await setupPromise;
+    const savedObjectsClient = await clientPromise;
 
     const spaceId = spaces?.setup.spacesService.getSpaceId(request);
 
