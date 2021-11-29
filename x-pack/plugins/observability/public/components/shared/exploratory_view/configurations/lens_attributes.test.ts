@@ -18,6 +18,7 @@ import {
 import { buildExistsFilter, buildPhrasesFilter } from './utils';
 import { sampleAttributeKpi } from './test_data/sample_attribute_kpi';
 import { RECORDS_FIELD, REPORT_METRIC_FIELD, PERCENTILE_RANKS, ReportTypes } from './constants';
+import { obsvReportConfigMap } from '../obsv_exploratory_view';
 
 describe('Lens Attribute', () => {
   mockAppIndexPattern();
@@ -26,6 +27,7 @@ describe('Lens Attribute', () => {
     reportType: 'data-distribution',
     dataType: 'ux',
     indexPattern: mockIndexPattern,
+    reportConfigMap: obsvReportConfigMap,
   });
 
   reportViewConfig.baseFilters?.push(...buildExistsFilter('transaction.type', mockIndexPattern));
@@ -57,6 +59,7 @@ describe('Lens Attribute', () => {
       reportType: ReportTypes.KPI,
       dataType: 'ux',
       indexPattern: mockIndexPattern,
+      reportConfigMap: obsvReportConfigMap,
     });
 
     const lnsAttrKpi = new LensAttributes([
@@ -81,6 +84,7 @@ describe('Lens Attribute', () => {
       reportType: ReportTypes.KPI,
       dataType: 'ux',
       indexPattern: mockIndexPattern,
+      reportConfigMap: obsvReportConfigMap,
     });
 
     const lnsAttrKpi = new LensAttributes([

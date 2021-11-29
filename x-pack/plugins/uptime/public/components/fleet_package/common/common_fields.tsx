@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFormRow, EuiFieldText, EuiFieldNumber } from '@elastic/eui';
 import { ConfigKeys, Validation, ICommonFields } from '../types';
 import { ComboBox } from '../combo_box';
