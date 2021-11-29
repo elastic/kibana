@@ -13,9 +13,11 @@ import { instance as registry } from '../../contexts/editor_context/editor_regis
 import { useRequestActionContext, useServicesContext } from '../../contexts';
 import { sendRequestToES } from './send_request_to_es';
 import { track } from './track';
+import { toMountPoint } from '../../../../../kibana_react/public';
 
 // @ts-ignore
 import { retrieveAutoCompleteInfo } from '../../../lib/mappings/mappings';
+import { StorageQuotaError } from '../../components/storage_quota_error';
 
 export const useSendCurrentRequestToES = () => {
   const {
@@ -46,29 +48,43 @@ export const useSendCurrentRequestToES = () => {
       const results = await sendRequestToES({ requests });
 
       let saveToHistoryError: undefined | Error;
+      const { historyDisabled } = settings.toJSON();
 
-      results.forEach(({ request: { path, method, data } }) => {
-        try {
-          history.addToHistory(path, method, data);
-        } catch (e) {
-          // Grab only the first error
-          if (!saveToHistoryError) {
-            saveToHistoryError = e;
+      if (!historyDisabled) {
+        results.forEach(({ request: { path, method, data } }) => {
+          try {
+            history.addToHistory(path, method, data);
+          } catch (e) {
+            // Grab only the first error
+            if (!saveToHistoryError) {
+              saveToHistoryError = e;
+            }
           }
-        }
-      });
+        });
+      }
 
       if (saveToHistoryError) {
         const errorTitle = i18n.translate('console.notification.error.couldNotSaveRequestTitle', {
           defaultMessage: 'Could not save request to Console history.',
         });
         if (isQuotaExceededError(saveToHistoryError)) {
-          notifications.toasts.addError(saveToHistoryError, {
-            title: errorTitle,
-            toastMessage: i18n.translate('console.notification.error.historyQuotaReachedMessage', {
+          const toast = notifications.toasts.addWarning({
+            title: i18n.translate('console.notification.error.historyQuotaReachedMessage', {
               defaultMessage:
-                'Request history is full. Clear the Console history to save new requests.',
+                'Request history is full. Clear the console history or disable saving new requests.',
             }),
+            text: toMountPoint(
+              StorageQuotaError({
+                onClearHistory: () => {
+                  history.clearHistory();
+                  notifications.toasts.remove(toast);
+                },
+                onDisableSavingToHistory: () => {
+                  settings.setHistoryDisabled(true);
+                  notifications.toasts.remove(toast);
+                },
+              })
+            ),
           });
         } else {
           // Best effort, but still notify the user.

@@ -9,7 +9,7 @@
 import React, { Fragment, memo, useEffect, useRef, useMemo, useCallback } from 'react';
 import './context_app.scss';
 import classNames from 'classnames';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiText, EuiPageContent, EuiPage, EuiSpacer } from '@elastic/eui';
 import { cloneDeep } from 'lodash';
 import { esFilters } from '../../../../data/public';
@@ -50,21 +50,29 @@ export const ContextApp = ({ indexPattern, anchorId }: ContextAppProps) => {
   /**
    * Context fetched state
    */
-  const { fetchedState, fetchContextRows, fetchAllRows, fetchSurroundingRows } = useContextAppFetch(
-    {
+  const { fetchedState, fetchContextRows, fetchAllRows, fetchSurroundingRows, resetFetchedState } =
+    useContextAppFetch({
       anchorId,
       indexPattern,
       appState,
       useNewFieldsApi,
       services,
+    });
+  /**
+   * Reset state when anchor changes
+   */
+  useEffect(() => {
+    if (prevAppState.current) {
+      prevAppState.current = undefined;
+      resetFetchedState();
     }
-  );
+  }, [anchorId, resetFetchedState]);
 
   /**
    * Fetch docs on ui changes
    */
   useEffect(() => {
-    if (!prevAppState.current || fetchedState.anchor._id !== anchorId) {
+    if (!prevAppState.current) {
       fetchAllRows();
     } else if (prevAppState.current.predecessorCount !== appState.predecessorCount) {
       fetchSurroundingRows(SurrDocType.PREDECESSORS);

@@ -89,6 +89,7 @@ export class VegaBaseView {
     this._initialized = false;
     this._externalUrl = opts.externalUrl;
     this._enableExternalUrls = getEnableExternalUrls();
+    this._renderMode = opts.renderMode;
     this._vegaStateRestorer = opts.vegaStateRestorer;
   }
 
@@ -238,7 +239,7 @@ export class VegaBaseView {
   }
 
   onWarn() {
-    if (!this._parser || !this._parser.hideWarnings) {
+    if (this._renderMode !== 'view' && (!this._parser || !this._parser.hideWarnings)) {
       this._addMessage('warn', Utils.formatWarningToStr(...arguments));
     }
   }
@@ -247,11 +248,16 @@ export class VegaBaseView {
     if (!this._$messages) {
       this._$messages = $(`<ul class="vgaVis__messages">`).appendTo(this._$parentEl);
     }
-    this._$messages.append(
-      $(`<li class="vgaVis__message vgaVis__message--${type}">`).append(
-        $(`<pre class="vgaVis__messageCode">`).text(text)
-      )
-    );
+    const isMessageAlreadyDisplayed = this._$messages
+      .find(`pre.vgaVis__messageCode`)
+      .filter((index, element) => element.textContent === text).length;
+    if (!isMessageAlreadyDisplayed) {
+      this._$messages.append(
+        $(`<li class="vgaVis__message vgaVis__message--${type}">`).append(
+          $(`<pre class="vgaVis__messageCode">`).text(text)
+        )
+      );
+    }
   }
 
   resize() {

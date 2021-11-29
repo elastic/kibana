@@ -19,14 +19,14 @@ import { InspectorHeaderLink } from '../../../shared/apm_header_action_menu/insp
 import { SERVICE_NAME } from '../../../../../common/elasticsearch_fieldnames';
 
 const ANALYZE_DATA = i18n.translate('xpack.apm.analyzeDataButtonLabel', {
-  defaultMessage: 'Analyze data',
+  defaultMessage: 'Explore data',
 });
 
 const ANALYZE_MESSAGE = i18n.translate(
   'xpack.apm.analyzeDataButtonLabel.message',
   {
     defaultMessage:
-      'EXPERIMENTAL - Analyze Data allows you to select and filter result data in any dimension and look for the cause or impact of performance problems.',
+      'Explore Data allows you to select and filter result data in any dimension and look for the cause or impact of performance problems.',
   }
 );
 

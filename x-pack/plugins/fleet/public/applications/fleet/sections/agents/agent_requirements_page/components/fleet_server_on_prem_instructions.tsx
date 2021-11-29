@@ -27,7 +27,7 @@ import {
 import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { DownloadStep } from '../../../../components';
 import {
@@ -41,11 +41,12 @@ import {
   sendPutSettings,
   sendGetFleetStatus,
   useFleetStatus,
-  useUrlModal,
+  useLink,
 } from '../../../../hooks';
 import type { PLATFORM_TYPE } from '../../../../hooks';
 import type { PackagePolicy } from '../../../../types';
 import { FLEET_SERVER_PACKAGE } from '../../../../constants';
+import { FleetServerOnPremRequiredCallout } from '../../components';
 
 import { getInstallCommandForPlatform } from './install_command_utils';
 
@@ -416,7 +417,8 @@ export const AddFleetServerHostStepContent = ({
   const [isLoading, setIsLoading] = useState(false);
   const [fleetServerHost, setFleetServerHost] = useState('');
   const [error, setError] = useState<undefined | string>();
-  const { getModalHref } = useUrlModal();
+
+  const { getHref } = useLink();
 
   const validate = useCallback(
     (host: string) => {
@@ -519,7 +521,7 @@ export const AddFleetServerHostStepContent = ({
               values={{
                 host: calloutHost,
                 fleetSettingsLink: (
-                  <EuiLink href={getModalHref('settings')}>
+                  <EuiLink href={getHref('settings')}>
                     <FormattedMessage
                       id="xpack.fleet.fleetServerSetup.fleetSettingsLink"
                       defaultMessage="Fleet Settings"
@@ -685,20 +687,11 @@ export const OnPremInstructions: React.FC = () => {
     installCommand,
     platform,
     setPlatform,
-    refresh,
     deploymentMode,
     setDeploymentMode,
     fleetServerHost,
     addFleetServerHost,
   } = useFleetServerInstructions(policyId);
-
-  const { modal } = useUrlModal();
-  useEffect(() => {
-    // Refresh settings when the settings modal is closed
-    if (!modal) {
-      refresh();
-    }
-  }, [modal, refresh]);
 
   const { docLinks } = useStartServices();
 
@@ -728,6 +721,8 @@ export const OnPremInstructions: React.FC = () => {
 
   return (
     <>
+      <FleetServerOnPremRequiredCallout />
+      <EuiSpacer size="xl" />
       <EuiText>
         <h2>
           <FormattedMessage
@@ -759,8 +754,8 @@ export const OnPremInstructions: React.FC = () => {
       <EuiSteps
         className="eui-textLeft"
         steps={[
-          DownloadStep(),
           AgentPolicySelectionStep({ policyId, setPolicyId }),
+          DownloadStep(true),
           deploymentModeStep({ deploymentMode, setDeploymentMode }),
           addFleetServerHostStep({ addFleetServerHost }),
           ServiceTokenStep({

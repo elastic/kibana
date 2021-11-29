@@ -9,12 +9,11 @@
     "embeddable",
     "inspector",
     "fieldFormats",
-    "kibanaLegacy",
     "urlForwarding",
     "navigation",
     "uiActions",
     "savedObjects",
-    "indexPatternFieldEditor"
+    "dataViewFieldEditor"
   ],
   "optionalPlugins": ["home", "share", "usageCollection", "spaces"],
   "requiredBundles": ["kibanaUtils", "home", "kibanaReact", "dataViews"],

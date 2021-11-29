@@ -22,8 +22,8 @@ import { REPOSITORY_NAME } from './helpers/constant';
 const { setup } = pageHelpers.home;
 
 // Mocking FormattedDate and FormattedTime due to timezone differences on CI
-jest.mock('@kbn/i18n/react', () => {
-  const original = jest.requireActual('@kbn/i18n/react');
+jest.mock('@kbn/i18n-react', () => {
+  const original = jest.requireActual('@kbn/i18n-react');
 
   return {
     ...original,
@@ -371,6 +371,60 @@ describe('<SnapshotRestoreHome />', () => {
 
             expect(latestRequest.method).toBe('GET');
             expect(latestRequest.url).toBe(`${API_BASE_PATH}repositories/${repo1.name}/verify`);
+          });
+
+          describe('clean repository', () => {
+            test('shows results when request succeeds', async () => {
+              httpRequestsMockHelpers.setCleanupRepositoryResponse({
+                cleanup: {
+                  cleaned: true,
+                  response: {
+                    results: {
+                      deleted_bytes: 0,
+                      deleted_blobs: 0,
+                    },
+                  },
+                },
+              });
+
+              const { exists, find, component } = testBed;
+              await act(async () => {
+                find('repositoryDetail.cleanupRepositoryButton').simulate('click');
+              });
+              component.update();
+
+              const latestRequest = server.requests[server.requests.length - 1];
+              expect(latestRequest.method).toBe('POST');
+              expect(latestRequest.url).toBe(`${API_BASE_PATH}repositories/${repo1.name}/cleanup`);
+
+              expect(exists('repositoryDetail.cleanupCodeBlock')).toBe(true);
+              expect(exists('repositoryDetail.cleanupError')).toBe(false);
+            });
+
+            test('shows error when success fails', async () => {
+              httpRequestsMockHelpers.setCleanupRepositoryResponse({
+                cleanup: {
+                  cleaned: false,
+                  error: {
+                    message: 'Error message',
+                    statusCode: 400,
+                  },
+                },
+              });
+
+              const { exists, find, component } = testBed;
+              await act(async () => {
+                find('repositoryDetail.cleanupRepositoryButton').simulate('click');
+              });
+              component.update();
+
+              const latestRequest = server.requests[server.requests.length - 1];
+              expect(latestRequest.method).toBe('POST');
+              expect(latestRequest.url).toBe(`${API_BASE_PATH}repositories/${repo1.name}/cleanup`);
+
+              expect(exists('repositoryDetail.cleanupCodeBlock')).toBe(false);
+              expect(exists('repositoryDetail.cleanupError')).toBe(true);
+            });
           });
         });
 

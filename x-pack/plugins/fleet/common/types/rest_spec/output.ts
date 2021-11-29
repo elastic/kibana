@@ -11,6 +11,10 @@ export interface GetOneOutputResponse {
   item: Output;
 }
 
+export interface DeleteOutputResponse {
+  id: string;
+}
+
 export interface GetOneOutputRequest {
   params: {
     outputId: string;
@@ -22,9 +26,25 @@ export interface PutOutputRequest {
     outputId: string;
   };
   body: {
+    type?: 'elasticsearch';
+    name?: string;
     hosts?: string[];
     ca_sha256?: string;
-    config?: Record<string, any>;
+    config_yaml?: string;
+    is_default?: boolean;
+    is_default_monitoring?: boolean;
+  };
+}
+
+export interface PostOutputRequest {
+  body: {
+    id?: string;
+    type: 'elasticsearch';
+    name: string;
+    hosts?: string[];
+    ca_sha256?: string;
+    is_default?: boolean;
+    is_default_monitoring?: boolean;
     config_yaml?: string;
   };
 }

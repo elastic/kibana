@@ -24,8 +24,6 @@
 /x-pack/plugins/lens/ @elastic/kibana-vis-editors
 /src/plugins/advanced_settings/ @elastic/kibana-vis-editors
 /src/plugins/charts/ @elastic/kibana-vis-editors
-/src/plugins/management/ @elastic/kibana-vis-editors
-/src/plugins/kibana_legacy/ @elastic/kibana-vis-editors
 /src/plugins/vis_default_editor/ @elastic/kibana-vis-editors
 /src/plugins/vis_types/metric/ @elastic/kibana-vis-editors
 /src/plugins/vis_types/table/ @elastic/kibana-vis-editors
@@ -59,6 +57,7 @@
 /examples/url_generators_explorer/ @elastic/kibana-app-services
 /examples/field_formats_example/ @elastic/kibana-app-services
 /examples/partial_results_example/ @elastic/kibana-app-services
+/examples/search_examples/ @elastic/kibana-app-services
 /packages/elastic-datemath/ @elastic/kibana-app-services
 /packages/kbn-interpreter/ @elastic/kibana-app-services
 /packages/kbn-react-field/ @elastic/kibana-app-services
@@ -68,7 +67,7 @@
 /src/plugins/embeddable/ @elastic/kibana-app-services
 /src/plugins/expressions/ @elastic/kibana-app-services
 /src/plugins/field_formats/ @elastic/kibana-app-services
-/src/plugins/index_pattern_editor/ @elastic/kibana-app-services
+/src/plugins/data_view_editor/ @elastic/kibana-app-services
 /src/plugins/inspector/ @elastic/kibana-app-services
 /src/plugins/kibana_react/ @elastic/kibana-app-services
 /src/plugins/kibana_react/public/code_editor @elastic/kibana-presentation
@@ -76,25 +75,34 @@
 /src/plugins/navigation/ @elastic/kibana-app-services
 /src/plugins/share/ @elastic/kibana-app-services
 /src/plugins/ui_actions/ @elastic/kibana-app-services
-/src/plugins/index_pattern_field_editor @elastic/kibana-app-services
+/src/plugins/data_view_field_editor @elastic/kibana-app-services
 /src/plugins/screenshot_mode @elastic/kibana-app-services
+/src/plugins/bfetch/ @elastic/kibana-app-services
+/src/plugins/data_view_management/ @elastic/kibana-app-services
+/src/plugins/inspector/ @elastic/kibana-app-services
 /x-pack/examples/ui_actions_enhanced_examples/ @elastic/kibana-app-services
 /x-pack/plugins/data_enhanced/ @elastic/kibana-app-services
 /x-pack/plugins/embeddable_enhanced/ @elastic/kibana-app-services
 /x-pack/plugins/ui_actions_enhanced/ @elastic/kibana-app-services
 /x-pack/plugins/runtime_fields @elastic/kibana-app-services
 /x-pack/test/search_sessions_integration/ @elastic/kibana-app-services
-#CC# /src/plugins/bfetch/ @elastic/kibana-app-services
-#CC# /src/plugins/index_pattern_management/ @elastic/kibana-app-services
-#CC# /src/plugins/inspector/ @elastic/kibana-app-services
-#CC# /src/plugins/share/ @elastic/kibana-app-services
-#CC# /x-pack/plugins/drilldowns/ @elastic/kibana-app-services
-#CC# /packages/kbn-interpreter/ @elastic/kibana-app-services
 
 ### Observability Plugins
 
 # Observability Shared
 /x-pack/plugins/observability/ @elastic/observability-ui
+
+# Unified Observability
+/x-pack/plugins/observability/public/pages/overview @elastic/unified-observability
+/x-pack/plugins/observability/public/pages/home @elastic/unified-observability
+/x-pack/plugins/observability/public/pages/landing @elastic/unified-observability
+/x-pack/plugins/observability/public/context @elastic/unified-observability
+
+# Actionable Observability
+/x-pack/plugins/observability/common/rules @elastic/actionable-observability
+/x-pack/plugins/observability/public/rules @elastic/actionable-observability
+/x-pack/plugins/observability/public/pages/alerts @elastic/actionable-observability
+/x-pack/plugins/observability/public/pages/cases  @elastic/actionable-observability
 
 # Infra Monitoring
 /x-pack/plugins/infra/ @elastic/infra-monitoring-ui
@@ -353,6 +361,7 @@
 /src/plugins/dev_tools/ @elastic/kibana-stack-management
 /src/plugins/console/  @elastic/kibana-stack-management
 /src/plugins/es_ui_shared/  @elastic/kibana-stack-management
+/src/plugins/management/ @elastic/kibana-stack-management
 /x-pack/plugins/cross_cluster_replication/  @elastic/kibana-stack-management
 /x-pack/plugins/index_lifecycle_management/  @elastic/kibana-stack-management
 /x-pack/plugins/grokdebugger/  @elastic/kibana-stack-management
@@ -387,7 +396,7 @@
 # Security Solution sub teams
 /x-pack/plugins/cases @elastic/security-threat-hunting
 /x-pack/plugins/timelines @elastic/security-threat-hunting
-/x-pack/test/case_api_integration @elastic/security-threat-hunting
+/x-pack/test/cases_api_integration @elastic/security-threat-hunting
 /x-pack/plugins/lists @elastic/security-detections-response
 
 ## Security Solution sub teams - security-onboarding-and-lifecycle-mgt
@@ -404,6 +413,16 @@
 /x-pack/plugins/security_solution/scripts/endpoint/event_filters/ @elastic/security-onboarding-and-lifecycle-mgt
 /x-pack/plugins/security_solution/scripts/endpoint/trusted_apps/ @elastic/security-onboarding-and-lifecycle-mgt
 /x-pack/test/security_solution_endpoint/apps/endpoint/ @elastic/security-onboarding-and-lifecycle-mgt
+
+## Security Solution sub teams - security-telemetry (Data Engineering)
+x-pack/plugins/security_solution/server/usage/ @elastic/security-telemetry
+x-pack/plugins/security_solution/server/lib/telemetry/ @elastic/security-telemetry
+
+## Security Solution sub teams - security-engineering-productivity
+x-pack/plugins/security_solution/cypress/ccs_integration @elastic/security-engineering-productivity
+x-pack/plugins/security_solution/cypress/upgrade_integration @elastic/security-engineering-productivity
+x-pack/plugins/security_solution/cypress/README.md @elastic/security-engineering-productivity
+x-pack/test/security_solution_cypress @elastic/security-engineering-productivity
 
 # Security Intelligence And Analytics
 /x-pack/plugins/security_solution/server/lib/detection_engine/rules/prepackaged_rules @elastic/security-intelligence-analytics

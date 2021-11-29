@@ -7,14 +7,18 @@
 
 /* eslint-disable complexity */
 
-import { get, getOr, isEmpty } from 'lodash/fp';
+import { getOr, isEmpty } from 'lodash/fp';
 import moment from 'moment';
 
 import dateMath from '@elastic/datemath';
 
 import { FilterStateStore, Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import { ALERT_RULE_FROM, ALERT_RULE_TYPE, ALERT_RULE_NOTE } from '@kbn/rule-data-utils';
+import {
+  ALERT_RULE_FROM,
+  ALERT_RULE_TYPE,
+  ALERT_RULE_NOTE,
+} from '@kbn/rule-data-utils/technical_field_names';
 
 import {
   ALERT_ORIGINAL_TIME,
@@ -37,7 +41,6 @@ import {
 } from './types';
 import { Ecs } from '../../../../common/ecs';
 import {
-  TimelineNonEcsData,
   TimelineEventsDetailsItem,
   TimelineEventsDetailsRequestOptions,
   TimelineEventsDetailsStrategyResponse,
@@ -73,26 +76,6 @@ export const getUpdateAlertsQuery = (eventIds: Readonly<string[]>) => {
       },
     },
   };
-};
-
-export const getFilterAndRuleBounds = (
-  data: TimelineNonEcsData[][]
-): [string[], number, number] => {
-  const stringFilter =
-    data?.[0].filter(
-      (d) => d.field === 'signal.rule.filters' || d.field === 'kibana.alert.rule.filters'
-    )?.[0]?.value ?? [];
-
-  const eventTimes = data
-    .flatMap(
-      (alert) =>
-        alert.filter(
-          (d) => d.field === 'signal.original_time' || d.field === 'kibana.alert.original_time'
-        )?.[0]?.value ?? []
-    )
-    .map((d) => moment(d));
-
-  return [stringFilter, moment.min(eventTimes).valueOf(), moment.max(eventTimes).valueOf()];
 };
 
 export const updateAlertStatusAction = async ({
@@ -174,11 +157,7 @@ const getFiltersFromRule = (filters: string[]): Filter[] =>
     }
   }, [] as Filter[]);
 
-export const getThresholdAggregationData = (
-  ecsData: Ecs | Ecs[],
-  nonEcsData: TimelineNonEcsData[]
-): ThresholdAggregationData => {
-  // TODO: AAD fields
+export const getThresholdAggregationData = (ecsData: Ecs | Ecs[]): ThresholdAggregationData => {
   const thresholdEcsData: Ecs[] = Array.isArray(ecsData) ? ecsData : [ecsData];
   return thresholdEcsData.reduce<ThresholdAggregationData>(
     (outerAcc, thresholdData) => {
@@ -195,11 +174,9 @@ export const getThresholdAggregationData = (
       };
 
       try {
-        try {
-          thresholdResult = JSON.parse((thresholdData.signal?.threshold_result as string[])[0]);
-        } catch (err) {
-          thresholdResult = JSON.parse((get(ALERT_THRESHOLD_RESULT, thresholdData) as string[])[0]);
-        }
+        thresholdResult = JSON.parse(
+          (getField(thresholdData, ALERT_THRESHOLD_RESULT) as string[])[0]
+        );
         aggField = JSON.parse(threshold[0]).field;
       } catch (err) {
         // Legacy support
@@ -311,7 +288,7 @@ export const buildAlertsKqlFilter = (
         negate: false,
         disabled: false,
         type: 'phrases',
-        key: key.replace('signal.', 'kibana.alert.'),
+        key,
         value: alertIds.join(),
         params: alertIds,
       },
@@ -401,7 +378,6 @@ export const buildEqlDataProviderOrFilter = (
 export const sendAlertToTimelineAction = async ({
   createTimeline,
   ecsData: ecs,
-  nonEcsData,
   updateTimelineIsLoading,
   searchStrategyClient,
 }: SendAlertToTimelineActionProps) => {
@@ -498,10 +474,7 @@ export const sendAlertToTimelineAction = async ({
   }
 
   if (isThresholdRule(ecsData)) {
-    const { thresholdFrom, thresholdTo, dataProviders } = getThresholdAggregationData(
-      ecsData,
-      nonEcsData
-    );
+    const { thresholdFrom, thresholdTo, dataProviders } = getThresholdAggregationData(ecsData);
 
     return createTimeline({
       from: thresholdFrom,

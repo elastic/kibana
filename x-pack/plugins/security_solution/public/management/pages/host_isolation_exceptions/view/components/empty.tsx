@@ -8,7 +8,7 @@
 import React, { memo } from 'react';
 import styled, { css } from 'styled-components';
 import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { ManagementEmptyStateWraper } from '../../../../components/management_empty_state_wraper';
 
 const EmptyPrompt = styled(EuiEmptyPrompt)`
@@ -34,7 +34,7 @@ export const HostIsolationExceptionsEmptyState = memo<{ onAdd: () => void }>(({ 
         body={
           <FormattedMessage
             id="xpack.securitySolution.hostIsolationExceptions.listEmpty.message"
-            defaultMessage="There are currently no host isolation exceptions"
+            defaultMessage="Add a Host isolation exception to allow isolated hosts to communicate with specific IPs."
           />
         }
         actions={

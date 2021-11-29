@@ -14,6 +14,9 @@ import '../../__mocks__/engine_logic.mock';
 
 import { nextTick } from '@kbn/test/jest';
 
+import { itShowsServerErrorAsFlashMessage } from '../../../test_helpers';
+
+import { CrawlerDomainsLogic } from './crawler_domains_logic';
 import { CrawlerLogic, CrawlerValues } from './crawler_logic';
 import {
   CrawlerData,
@@ -22,6 +25,7 @@ import {
   CrawlerRules,
   CrawlerStatus,
   CrawlRule,
+  CrawlType,
 } from './types';
 import { crawlerDataServerToClient } from './utils';
 
@@ -129,6 +133,10 @@ describe('CrawlerLogic', () => {
             createdAt: 'Mon, 31 Aug 2020 17:00:00 +0000',
             beganAt: null,
             completedAt: null,
+            type: CrawlType.Full,
+            crawlConfig: {
+              domainAllowlist: ['elastic.co'],
+            },
           },
         ],
         mostRecentCrawlRequest: {
@@ -159,6 +167,16 @@ describe('CrawlerLogic', () => {
   });
 
   describe('listeners', () => {
+    describe('CrawlerDomainsLogic.actionTypes.crawlerDomainDeleted', () => {
+      it('updates data in state when a domain is deleted', () => {
+        jest.spyOn(CrawlerLogic.actions, 'onReceiveCrawlerData');
+        CrawlerDomainsLogic.actions.crawlerDomainDeleted(MOCK_CLIENT_CRAWLER_DATA);
+        expect(CrawlerLogic.actions.onReceiveCrawlerData).toHaveBeenCalledWith(
+          MOCK_CLIENT_CRAWLER_DATA
+        );
+      });
+    });
+
     describe('fetchCrawlerData', () => {
       it('updates logic with data that has been converted from server to client', async () => {
         jest.spyOn(CrawlerLogic.actions, 'onReceiveCrawlerData');
@@ -269,15 +287,8 @@ describe('CrawlerLogic', () => {
         });
       });
 
-      describe('on failure', () => {
-        it('flashes an error message', async () => {
-          http.post.mockReturnValueOnce(Promise.reject('error'));
-
-          CrawlerLogic.actions.startCrawl();
-          await nextTick();
-
-          expect(flashAPIErrors).toHaveBeenCalledWith('error');
-        });
+      itShowsServerErrorAsFlashMessage(http.post, () => {
+        CrawlerLogic.actions.startCrawl();
       });
     });
 
@@ -297,16 +308,8 @@ describe('CrawlerLogic', () => {
         });
       });
 
-      describe('on failure', () => {
-        it('flashes an error message', async () => {
-          jest.spyOn(CrawlerLogic.actions, 'fetchCrawlerData');
-          http.post.mockReturnValueOnce(Promise.reject('error'));
-
-          CrawlerLogic.actions.stopCrawl();
-          await nextTick();
-
-          expect(flashAPIErrors).toHaveBeenCalledWith('error');
-        });
+      itShowsServerErrorAsFlashMessage(http.post, () => {
+        CrawlerLogic.actions.stopCrawl();
       });
     });
 

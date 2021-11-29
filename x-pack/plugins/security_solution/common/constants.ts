@@ -69,6 +69,7 @@ export const DEFAULT_RULE_REFRESH_IDLE_VALUE = 2700000 as const; // ms
 export const DEFAULT_RULE_NOTIFICATION_QUERY_SIZE = 100 as const;
 export const SECURITY_FEATURE_ID = 'Security' as const;
 export const DEFAULT_SPACE_ID = 'default' as const;
+export const DEFAULT_RELATIVE_DATE_THRESHOLD = 24 as const;
 
 // Document path where threat indicator fields are expected. Fields are used
 // to enrich signals, and are copied to threat.enrichments.
@@ -82,9 +83,13 @@ export enum SecurityPageName {
   administration = 'administration',
   alerts = 'alerts',
   authentications = 'authentications',
-  case = 'case',
-  caseConfigure = 'case-configure',
-  caseCreate = 'case-create',
+  /*
+   * Warning: Computed values are not permitted in an enum with string valued members
+   * The 3 following Cases page names must match `CasesDeepLinkId` in x-pack/plugins/cases/public/common/navigation.ts
+   */
+  case = 'cases',
+  caseConfigure = 'cases_configure',
+  caseCreate = 'cases_create',
   detections = 'detections',
   endpoints = 'endpoints',
   eventFilters = 'event_filters',
