@@ -72,6 +72,7 @@ export const createFleetRequestHandlerContextMock = (): jest.Mocked<
   FleetRequestHandlerContext['fleet']
 > => {
   return {
+    authz: createFleetAuthzMock(),
     agentClient: {
       asCurrentUser: agentServiceMock.createClient(),
       asInternalUser: agentServiceMock.createClient(),
@@ -148,21 +149,25 @@ export const createMockPackageService = (): PackageService => {
 /**
  * Creates mock `authz` object
  */
-export const fleetAuthzMock: FleetAuthz = {
-  fleet: {
-    all: true,
-    setup: true,
-    readEnrollmentTokens: true,
-  },
-  integrations: {
-    readPackageInfo: true,
-    readInstalledPackages: true,
-    installPackages: true,
-    upgradePackages: true,
-    removePackages: true,
-    readPackageSettings: true,
-    writePackageSettings: true,
-    readIntegrationPolicies: true,
-    writeIntegrationPolicies: true,
-  },
+export const createFleetAuthzMock = (): FleetAuthz => {
+  return {
+    fleet: {
+      all: true,
+      setup: true,
+      readEnrollmentTokens: true,
+    },
+    integrations: {
+      readPackageInfo: true,
+      readInstalledPackages: true,
+      installPackages: true,
+      upgradePackages: true,
+      removePackages: true,
+      readPackageSettings: true,
+      writePackageSettings: true,
+      readIntegrationPolicies: true,
+      writeIntegrationPolicies: true,
+    },
+  };
 };
+
+export const fleetAuthzMock: FleetAuthz = createFleetAuthzMock();
