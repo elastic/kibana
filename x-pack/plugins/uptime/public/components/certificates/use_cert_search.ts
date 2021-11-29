@@ -50,7 +50,7 @@ export const useCertSearch = ({
 
   const { data: result, loading } = useEsSearch<Ping, typeof esParams>(
     esParams,
-    [settings.settings?.heartbeatIndices, size, pageIndex, lastRefresh, search],
+    [settings.settings?.heartbeatIndices, size, pageIndex, lastRefresh, search, sortBy, direction],
     {
       name: 'getTLSCertificates',
     }
