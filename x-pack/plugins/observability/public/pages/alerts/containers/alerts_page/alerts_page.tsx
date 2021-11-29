@@ -25,12 +25,10 @@ import { useTimefilterService } from '../../../../hooks/use_timefilter_service';
 import { callObservabilityApi } from '../../../../services/call_observability_api';
 import { getNoDataConfig } from '../../../../utils/no_data_config';
 import { LoadingObservability } from '../../../overview/loading_observability';
-import { AlertsSearchBar } from '../../components/alerts_search_bar';
-import { AlertsTableTGrid } from '../alerts_table_t_grid/alerts_table_t_grid';
+import { AlertsTableTGrid } from '../alerts_table_t_grid';
 import { Provider, alertsPageStateContainer, useAlertsPageStateContainer } from '../state_container';
 import './styles.scss';
-import { AlertsStatusFilter } from '../../components/alerts_status_filter';
-import { AlertsDisclaimer } from '../../components/alerts_disclaimer';
+import { AlertsStatusFilter, AlertsDisclaimer, AlertsSearchBar } from '../../components';
 
 export interface TopAlert {
   fields: ParsedTechnicalFields;

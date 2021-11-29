@@ -35,7 +35,7 @@ import {
 } from '@kbn/rule-data-utils/alerts_as_data_status';
 import moment from 'moment-timezone';
 import React, { useMemo } from 'react';
-import type { TopAlert } from '../../containers/alerts_page/alerts_page';
+import type { TopAlert } from '../../containers';
 import { useKibana, useUiSetting } from '../../../../../../../../src/plugins/kibana_react/public';
 import { asDuration } from '../../../../../common/utils/formatters';
 import type { ObservabilityRuleTypeRegistry } from '../../../../rules/create_observability_rule_type_registry';
