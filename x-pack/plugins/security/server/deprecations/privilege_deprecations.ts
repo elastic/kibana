@@ -47,11 +47,11 @@ export const getPrivilegeDeprecationsService = ({
       ]);
       kibanaRoles = Object.entries(elasticsearchRoles).map(([roleName, elasticsearchRole]) =>
         transformElasticsearchRoleToRole(
+          features,
           // @ts-expect-error `SecurityIndicesPrivileges.names` expected to be `string[]`
           elasticsearchRole,
           roleName,
-          authz.applicationName,
-          features
+          authz.applicationName
         )
       );
     } catch (e) {

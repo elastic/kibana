@@ -26,19 +26,16 @@ export type ElasticsearchRole = Pick<Role, 'name' | 'metadata' | 'transient_meta
 };
 
 export function transformElasticsearchRoleToRole(
+  features: KibanaFeature[],
   elasticsearchRole: Omit<ElasticsearchRole, 'name'>,
   name: string,
-  application: string,
-  features?: KibanaFeature[]
+  application: string
 ): Role {
-  const kibanaTransformResult = features
-    ? transformRoleApplicationsToKibanaPrivileges(
-        elasticsearchRole.applications,
-        application,
-        features
-      )
-    : transformRoleApplicationsToKibanaPrivileges(elasticsearchRole.applications, application);
-
+  const kibanaTransformResult = transformRoleApplicationsToKibanaPrivileges(
+    features,
+    elasticsearchRole.applications,
+    application
+  );
   return {
     name,
     metadata: elasticsearchRole.metadata,
@@ -58,9 +55,9 @@ export function transformElasticsearchRoleToRole(
 }
 
 function transformRoleApplicationsToKibanaPrivileges(
+  features: KibanaFeature[],
   roleApplications: ElasticsearchRole['applications'],
-  application: string,
-  features?: KibanaFeature[]
+  application: string
 ) {
   const roleKibanaApplications = roleApplications.filter(
     (roleApplication) =>
@@ -192,7 +189,6 @@ function transformRoleApplicationsToKibanaPrivileges(
 
   // if a feature privilege requires all spaces, but is assigned to other spaces, we won't transform these
   if (
-    features &&
     roleKibanaApplications.some(
       (entry) =>
         !entry.resources.includes(GLOBAL_RESOURCE) &&
@@ -214,10 +210,13 @@ function transformRoleApplicationsToKibanaPrivileges(
 
   // if a feature privilege has been disabled we won't transform these
   if (
-    features &&
     roleKibanaApplications.some((entry) =>
       features.some((f) =>
-        Object.values(f.privileges ?? {}).some((featurePrivilege) => featurePrivilege.disabled)
+        Object.entries(f.privileges ?? {}).some(
+          ([privName, featurePrivilege]) =>
+            featurePrivilege.disabled &&
+            entry.privileges.includes(PrivilegeSerializer.serializeFeaturePrivilege(f.id, privName))
+        )
       )
     )
   ) {
@@ -244,10 +243,10 @@ function transformRoleApplicationsToKibanaPrivileges(
         return {
           ...(reservedPrivileges.length
             ? {
-                _reserved: reservedPrivileges.map((privilege) =>
-                  PrivilegeSerializer.deserializeReservedPrivilege(privilege)
-                ),
-              }
+              _reserved: reservedPrivileges.map((privilege) =>
+                PrivilegeSerializer.deserializeReservedPrivilege(privilege)
+              ),
+            }
             : {}),
           base: basePrivileges.map((privilege) =>
             PrivilegeSerializer.serializeGlobalBasePrivilege(privilege)
