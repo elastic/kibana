@@ -1,12 +1,3 @@
-.canvasArg {
-  margin-top: $euiSizeS;
-}
-
-.canvasArg__remove {
-  min-width: $euiSize;
-  padding: $euiSizeXS 0;
-}
-
 .canvasArg__form {
   position: relative;
 }
@@ -20,9 +11,4 @@
   .canvasArg__form {
     position: static;
   }
-}
-
-// this is a workaround since an EuiFormRow label cannot be passed in toggle.js
-.canvasArg__switch {
-  padding-top: calc(#{$euiSizeS} * .75);
 }

@@ -8,9 +8,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { i18n } from '@kbn/i18n';
-
+import { withEuiTheme } from '@elastic/eui';
 import { Loading } from '../loading';
 import { ArgLabel } from './arg_label';
+import { argStylesFactory } from './pending_arg_value.styles';
 
 const strings = {
   getLoadingMessage: () =>
@@ -19,7 +20,7 @@ const strings = {
     }),
 };
 
-export class PendingArgValue extends React.PureComponent {
+class PendingArgValue extends React.PureComponent {
   static propTypes = {
     label: PropTypes.string,
     argTypeInstance: PropTypes.shape({
@@ -46,20 +47,17 @@ export class PendingArgValue extends React.PureComponent {
   }
 
   render() {
-    const { label, argTypeInstance } = this.props;
+    const { label, argTypeInstance, theme } = this.props;
     return (
-      <div className="canvasArg">
-        <ArgLabel
-          className="resolve-pending"
-          label={label}
-          help={argTypeInstance.help}
-          expandable={false}
-        >
-          <div className="canvasArg--pending">
-            <Loading animated text={strings.getLoadingMessage()} />
-          </div>
+      <div css={argStylesFactory(theme.euiTheme)}>
+        <ArgLabel label={label} help={argTypeInstance.help} expandable={false}>
+          <Loading animated text={strings.getLoadingMessage()} />
         </ArgLabel>
       </div>
     );
   }
 }
+
+const PendingArgValueWithTheme = withEuiTheme(PendingArgValue);
+
+export { PendingArgValueWithTheme as PendingArgValue };

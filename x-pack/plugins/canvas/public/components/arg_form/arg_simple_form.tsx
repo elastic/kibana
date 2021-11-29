@@ -7,10 +7,11 @@
 
 import React, { ReactNode, MouseEventHandler } from 'react';
 import PropTypes from 'prop-types';
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-
+import { ClassNames } from '@emotion/react';
 import { TooltipIcon, IconType } from '../tooltip_icon';
+import { argSimpleFormRemoveStylesFactory } from './arg_simple_form.styles';
 
 const strings = {
   getRemoveAriaLabel: () =>
@@ -36,32 +37,37 @@ export const ArgSimpleForm: React.FunctionComponent<Props> = ({
   valueMissing,
   onRemove,
 }) => {
+  const { euiTheme } = useEuiTheme();
   return (
-    <EuiFlexGroup alignItems="center" gutterSize="s" className="canvasArg__form">
-      <EuiFlexItem>{children}</EuiFlexItem>
-      {valueMissing && (
-        <EuiFlexItem grow={false}>
-          <TooltipIcon
-            position="left"
-            icon={IconType.error}
-            content={strings.getRequiredTooltip()}
-          />
-        </EuiFlexItem>
-      )}
+    <ClassNames>
+      {({ css }) => (
+        <EuiFlexGroup alignItems="center" gutterSize="s" className="canvasArg__form">
+          <EuiFlexItem>{children}</EuiFlexItem>
+          {valueMissing && (
+            <EuiFlexItem grow={false}>
+              <TooltipIcon
+                position="left"
+                icon={IconType.error}
+                content={strings.getRequiredTooltip()}
+              />
+            </EuiFlexItem>
+          )}
 
-      {!required && (
-        <EuiToolTip position="top" content={strings.getRemoveAriaLabel()}>
-          <EuiButtonIcon
-            color="text"
-            onClick={onRemove}
-            iconType="cross"
-            iconSize="s"
-            aria-label={strings.getRemoveAriaLabel()}
-            className="canvasArg__remove"
-          />
-        </EuiToolTip>
+          {!required && (
+            <EuiToolTip position="top" content={strings.getRemoveAriaLabel()}>
+              <EuiButtonIcon
+                color="text"
+                onClick={onRemove}
+                iconType="cross"
+                iconSize="s"
+                aria-label={strings.getRemoveAriaLabel()}
+                className={css(argSimpleFormRemoveStylesFactory(euiTheme))}
+              />
+            </EuiToolTip>
+          )}
+        </EuiFlexGroup>
       )}
-    </EuiFlexGroup>
+    </ClassNames>
   );
 };
 

@@ -27,7 +27,6 @@ const ToggleArgInput = ({ onValueChange, argValue, argId, renderError, typeInsta
           id={argId}
           checked={argValue}
           onChange={handleChange}
-          className="canvasArg__form"
           aria-label={typeInstance.displayName}
           resize="none"
           label={typeInstance.options.labelValue}
