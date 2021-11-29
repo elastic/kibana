@@ -90,7 +90,7 @@ async function sendEmailWithExchange(
   let accessToken: string;
 
   const connectorToken = await connectorTokenClient.get({ connectorId });
-  if (connectorToken === null || Date.parse(connectorToken.expiresIn) <= Date.now()) {
+  if (connectorToken === null || Date.parse(connectorToken.expiresAt) <= Date.now()) {
     // request new access token for microsoft exchange online server with Graph API scope
     const tokenResult = await requestOAuthClientCredentialsToken(
       oauthTokenUrl ?? `${EXCHANGE_ONLINE_SERVER_HOST}/${tenantId}/oauth2/v2.0/token`,
@@ -108,14 +108,14 @@ async function sendEmailWithExchange(
       await connectorTokenClient.create({
         connectorId,
         token: accessToken,
-        expiresIn: new Date(Date.now() + tokenResult.expiresIn).toISOString(),
+        expiresAt: new Date(Date.now() + tokenResult.expiresIn).toISOString(),
         tokenType: 'access_token',
       });
     } else {
       await connectorTokenClient.update({
         id: connectorToken.id!.toString(),
         token: accessToken,
-        expiresIn: new Date(Date.now() + tokenResult.expiresIn).toISOString(),
+        expiresAt: new Date(Date.now() + tokenResult.expiresIn).toISOString(),
         tokenType: 'access_token',
       });
     }

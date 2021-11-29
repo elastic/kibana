@@ -297,7 +297,7 @@ describe('send_email module', () => {
           references: [],
           attributes: {
             connectorId: '123',
-            expiresIn: date.toISOString(),
+            expiresAt: date.toISOString(),
             tokenType: 'access_token',
             token: '11111111',
           },

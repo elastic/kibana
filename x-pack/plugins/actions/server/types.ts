@@ -180,5 +180,6 @@ export interface ConnectorToken extends SavedObjectAttributes {
   connectorId: string;
   tokenType: string;
   token: string;
-  expiresIn: string;
+  expiresAt: string;
+  createdAt: string;
 }

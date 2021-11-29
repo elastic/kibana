@@ -499,7 +499,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
         savedObjectsClient: getScopedClient(request),
         scopedClusterClient: elasticsearch.client.asScoped(request).asCurrentUser,
         connectorTokenClient: new ConnectorTokenClient({
-          savedObjectsClient: unsecuredSavedObjectsClient(request),
+          unsecuredSavedObjectsClient: unsecuredSavedObjectsClient(request),
           encryptedSavedObjectsClient,
         }),
       };

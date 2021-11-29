@@ -104,11 +104,7 @@ export function setupSavedObjects(
     namespaceType: 'multiple',
     mappings: mappings.connector_token as SavedObjectsTypeMappingDefinition,
     management: {
-      defaultSearchField: 'name',
       importableAndExportable: false,
-      getTitle(savedObject: SavedObject<RawAction>) {
-        return `Connector OAuth token: [${savedObject.attributes.name}]`;
-      },
     },
   });
 

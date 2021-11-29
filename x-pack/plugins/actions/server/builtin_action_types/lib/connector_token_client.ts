@@ -5,40 +5,40 @@
  * 2.0.
  */
 
+import { omitBy, isUndefined } from 'lodash';
 import { ConnectorToken } from '../../types';
 import { EncryptedSavedObjectsClient } from '../../../../encrypted_saved_objects/server';
 import { SavedObjectsClientContract, SavedObjectsUtils } from '../../../../../../src/core/server';
 import { CONNECTOR_TOKEN_SAVED_OBJECT_TYPE } from '../../constants/saved_objects';
 
-// We are expecting max possible token types for the single connector to be not bigger then 2 - for access and refresh tokens
-export const MAX_TOKENS_RETURNED = 2;
+export const MAX_TOKENS_RETURNED = 1;
 
 interface ConstructorOptions {
   encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
-  savedObjectsClient: SavedObjectsClientContract;
+  unsecuredSavedObjectsClient: SavedObjectsClientContract;
 }
 
 interface CreateOptions {
   connectorId: string;
   token: string;
-  expiresIn: string;
+  expiresAt: string;
   tokenType?: string;
 }
 
 export interface UpdateOptions {
   id: string;
   token: string;
-  expiresIn: string;
+  expiresAt: string;
   tokenType?: string;
 }
 
 export class ConnectorTokenClient {
-  private readonly savedObjectsClient: SavedObjectsClientContract;
+  private readonly unsecuredSavedObjectsClient: SavedObjectsClientContract;
   private readonly encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
 
-  constructor({ savedObjectsClient, encryptedSavedObjectsClient }: ConstructorOptions) {
+  constructor({ unsecuredSavedObjectsClient, encryptedSavedObjectsClient }: ConstructorOptions) {
     this.encryptedSavedObjectsClient = encryptedSavedObjectsClient;
-    this.savedObjectsClient = savedObjectsClient;
+    this.unsecuredSavedObjectsClient = unsecuredSavedObjectsClient;
   }
 
   /**
@@ -47,17 +47,19 @@ export class ConnectorTokenClient {
   public async create({
     connectorId,
     token,
-    expiresIn,
+    expiresAt,
     tokenType,
   }: CreateOptions): Promise<ConnectorToken> {
     const id = SavedObjectsUtils.generateId();
-    const result = await this.savedObjectsClient.create(
+    const createTime = Date.now();
+    const result = await this.unsecuredSavedObjectsClient.create(
       CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
       {
         connectorId,
         token,
-        expiresIn,
+        expiresAt,
         tokenType,
+        createdAt: new Date(createTime).toISOString(),
       },
       { id }
     );
@@ -68,15 +70,30 @@ export class ConnectorTokenClient {
   /**
    * Update connector token
    */
-  public async update({ id, token, expiresIn, tokenType }: UpdateOptions): Promise<ConnectorToken> {
-    const result = await this.savedObjectsClient.update<ConnectorToken>(
+  public async update({ id, token, expiresAt, tokenType }: UpdateOptions): Promise<ConnectorToken> {
+    const { attributes, references, version } =
+      await this.unsecuredSavedObjectsClient.get<ConnectorToken>(
+        CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
+        id
+      );
+
+    const result = await this.unsecuredSavedObjectsClient.create<ConnectorToken>(
       CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
-      id,
       {
+        ...attributes,
         token,
-        expiresIn,
-        tokenType,
-      }
+        expiresAt,
+        tokenType: tokenType ?? 'access_token',
+      },
+      omitBy(
+        {
+          id,
+          overwrite: true,
+          references,
+          version,
+        },
+        isUndefined
+      )
     );
 
     return result.attributes as ConnectorToken;
@@ -97,10 +114,12 @@ export class ConnectorTokenClient {
       : '';
 
     const connectorTokensResult = (
-      await this.savedObjectsClient.find<ConnectorToken>({
+      await this.unsecuredSavedObjectsClient.find<ConnectorToken>({
         perPage: MAX_TOKENS_RETURNED,
         type: CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
         filter: `${CONNECTOR_TOKEN_SAVED_OBJECT_TYPE}.attributes.connectorId: "${connectorId}"${tokenTypeFilter}`,
+        sortField: 'createdAt',
+        sortOrder: 'desc',
       })
     ).saved_objects;
 

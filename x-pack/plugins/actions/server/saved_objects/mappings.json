@@ -53,7 +53,10 @@
       "token": {
         "type": "binary"
       },
-      "expiresIn": {
+      "expiresAt": {
+        "type": "date"
+      },
+      "createdAt": {
         "type": "date"
       }
     }
