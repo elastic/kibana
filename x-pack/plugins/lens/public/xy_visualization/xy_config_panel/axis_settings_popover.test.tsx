@@ -10,6 +10,9 @@ import { shallowWithIntl as shallow } from '@kbn/test/jest';
 import { AxisSettingsPopover, AxisSettingsPopoverProps } from './axis_settings_popover';
 import { ToolbarPopover } from '../../shared_components';
 import { layerTypes } from '../../../common';
+import { EuiColorPicker } from '@elastic/eui';
+import { defaultAxisLineColor } from '../color_assignment';
+import { EuiColorPickerOutput } from '@elastic/eui/src/components/color_picker/color_picker';
 
 describe('Axes Settings', () => {
   let props: AxisSettingsPopoverProps;
@@ -118,6 +121,26 @@ describe('Axes Settings', () => {
       <AxisSettingsPopover {...props} endzonesVisible={true} setEndzoneVisibility={() => {}} />
     );
     expect(component.find('[data-test-subj="lnsshowEndzones"]').prop('checked')).toBe(true);
+  });
+
+  describe('manipulating axis color', () => {
+    it('starts on default axis color', () => {
+      const component = shallow(<AxisSettingsPopover {...props} />);
+      expect(component.find(EuiColorPicker).prop('color')).toBe(defaultAxisLineColor);
+    });
+
+    it('reports a new color choice', () => {
+      const updateColorMock = jest.fn();
+
+      const component = shallow(<AxisSettingsPopover {...props} updateColor={updateColorMock} />);
+
+      const newColor = 'new-color';
+
+      component.find(EuiColorPicker).prop('onChange')(newColor, {} as EuiColorPickerOutput);
+
+      expect(updateColorMock).toHaveBeenCalledTimes(1);
+      expect(updateColorMock).toHaveBeenCalledWith(props.axis, newColor);
+    });
   });
 
   describe('axis extent', () => {

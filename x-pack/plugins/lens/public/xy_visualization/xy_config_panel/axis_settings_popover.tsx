@@ -18,6 +18,7 @@ import {
   EuiButtonGroup,
   htmlIdGenerator,
   EuiFieldNumber,
+  EuiColorPicker,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { XYLayerConfig, AxesSettingsConfig, AxisExtentConfig } from '../../../common/expressions';
@@ -29,6 +30,7 @@ import { EuiIconAxisRight } from '../../assets/axis_right';
 import { EuiIconAxisTop } from '../../assets/axis_top';
 import { ToolbarButtonProps } from '../../../../../../src/plugins/kibana_react/public';
 import { validateExtent } from '../axes_configuration';
+import { defaultAxisLineColor } from '../color_assignment';
 
 type AxesSettingsConfigKeys = keyof AxesSettingsConfig;
 
@@ -49,6 +51,14 @@ export interface AxisSettingsPopoverProps {
    * Callback to axis title change
    */
   updateTitleState: (value: string) => void;
+  /**
+   * Callback to axis color change
+   */
+  updateColor: (axis: AxesSettingsConfigKeys, value: string) => void;
+  /**
+   * Determines axis color
+   */
+  color?: string;
   /**
    * Determines if the popover is Disabled
    */
@@ -199,9 +209,11 @@ export const AxisSettingsPopover: React.FunctionComponent<AxisSettingsPopoverPro
   axis,
   axisTitle,
   updateTitleState,
+  updateColor,
   toggleTickLabelsVisibility,
   toggleGridlinesVisibility,
   isDisabled,
+  color,
   areTickLabelsVisible,
   areGridlinesVisible,
   isAxisTitleVisible,
@@ -318,6 +330,19 @@ export const AxisSettingsPopover: React.FunctionComponent<AxisSettingsPopoverPro
         })}
         onChange={() => toggleTickLabelsVisibility(axis)}
         checked={areTickLabelsVisible}
+      />
+      <EuiSpacer size="s" />
+      <EuiColorPicker
+        data-test-subj="indexPattern-dimension-colorPicker"
+        compressed
+        isClearable={false}
+        onChange={(newColor) => updateColor(axis, newColor)}
+        color={color || defaultAxisLineColor}
+        // TODO - is placeholder necessary?
+        placeholder={i18n.translate('xpack.lens.xyChart.seriesColor.auto', {
+          defaultMessage: 'Auto',
+        })}
+        // aria-label={inputLabel} TODO - renable
       />
       <EuiSpacer size="s" />
       <TooltipWrapper

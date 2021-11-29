@@ -40,6 +40,7 @@ import { getScaleType } from '../to_expression';
 import { ColorPicker } from './color_picker';
 import { ReferenceLinePanel } from './reference_line_panel';
 import { PalettePicker, TooltipWrapper } from '../../shared_components';
+import { defaultAxisLineColor } from '../color_assignment';
 
 type UnwrapArray<T> = T extends Array<infer P> ? P : T;
 type AxesSettingsConfigKeys = keyof AxesSettingsConfig;
@@ -246,6 +247,7 @@ export const XyToolbar = memo(function XyToolbar(
     yLeft: state?.axisTitlesVisibilitySettings?.yLeft ?? true,
     yRight: state?.axisTitlesVisibilitySettings?.yRight ?? true,
   };
+
   const onAxisTitlesVisibilitySettingsChange = (
     axis: AxesSettingsConfigKeys,
     checked: boolean
@@ -259,6 +261,25 @@ export const XyToolbar = memo(function XyToolbar(
     setState({
       ...state,
       axisTitlesVisibilitySettings: newAxisTitlesVisibilitySettings,
+    });
+  };
+
+  const axisColors = {
+    x: state?.axisColors?.x ?? defaultAxisLineColor,
+    yLeft: state?.axisColors?.yLeft ?? defaultAxisLineColor,
+    yRight: state?.axisColors?.yRight ?? defaultAxisLineColor,
+  };
+
+  const onAxisColorChanged = (axis: AxesSettingsConfigKeys, color: string): void => {
+    const newAxisColors = {
+      ...axisColors,
+      ...{
+        [axis]: color,
+      },
+    };
+    setState({
+      ...state,
+      axisColors: newAxisColors,
     });
   };
 
@@ -476,6 +497,8 @@ export const XyToolbar = memo(function XyToolbar(
               layers={state?.layers}
               axisTitle={state?.yTitle}
               updateTitleState={(value) => setState({ ...state, yTitle: value })}
+              color={state?.axisColors?.yLeft}
+              updateColor={onAxisColorChanged}
               areTickLabelsVisible={tickLabelsVisibilitySettings.yLeft}
               toggleTickLabelsVisibility={onTickLabelsVisibilitySettingsChange}
               areGridlinesVisible={gridlinesVisibilitySettings.yLeft}
@@ -499,6 +522,8 @@ export const XyToolbar = memo(function XyToolbar(
             layers={state?.layers}
             axisTitle={state?.xTitle}
             updateTitleState={(value) => setState({ ...state, xTitle: value })}
+            color={state?.axisColors?.x}
+            updateColor={onAxisColorChanged}
             areTickLabelsVisible={tickLabelsVisibilitySettings.x}
             toggleTickLabelsVisibility={onTickLabelsVisibilitySettingsChange}
             areGridlinesVisible={gridlinesVisibilitySettings.x}
@@ -534,6 +559,8 @@ export const XyToolbar = memo(function XyToolbar(
               layers={state?.layers}
               axisTitle={state?.yRightTitle}
               updateTitleState={(value) => setState({ ...state, yRightTitle: value })}
+              color={state?.axisColors?.yRight}
+              updateColor={onAxisColorChanged}
               areTickLabelsVisible={tickLabelsVisibilitySettings.yRight}
               toggleTickLabelsVisibility={onTickLabelsVisibilitySettingsChange}
               areGridlinesVisible={gridlinesVisibilitySettings.yRight}

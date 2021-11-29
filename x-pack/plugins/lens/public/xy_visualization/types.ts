@@ -25,6 +25,7 @@ import type {
   XYLayerConfig,
   XYCurveType,
   AxesSettingsConfig,
+  AxesSettingsStringConfig,
   FittingFunction,
   LabelsOrientationConfig,
 } from '../../common/expressions';
@@ -43,6 +44,7 @@ export interface XYState {
   yTitle?: string;
   yRightTitle?: string;
   axisTitlesVisibilitySettings?: AxesSettingsConfig;
+  axisColors?: AxesSettingsStringConfig;
   tickLabelsVisibilitySettings?: AxesSettingsConfig;
   gridlinesVisibilitySettings?: AxesSettingsConfig;
   labelsOrientation?: LabelsOrientationConfig;

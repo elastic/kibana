@@ -25,6 +25,7 @@ interface LayerColorConfig {
 }
 
 export const defaultReferenceLineColor = euiLightVars.euiColorDarkShade;
+export const defaultAxisLineColor = '#eaeaea'; // TODO - get this from somewhere
 
 export type ColorAssignments = Record<
   string,

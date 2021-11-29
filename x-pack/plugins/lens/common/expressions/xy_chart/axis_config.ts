@@ -16,6 +16,12 @@ export interface AxesSettingsConfig {
   yRight: boolean;
 }
 
+export interface AxesSettingsStringConfig {
+  x: string;
+  yLeft: string;
+  yRight: string;
+}
+
 export interface AxisExtentConfig {
   mode: 'full' | 'dataBounds' | 'custom';
   lowerBound?: number;
