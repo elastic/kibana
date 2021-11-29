@@ -460,7 +460,6 @@ export const RulesTables = React.memo<RulesTableProps>(
         ? {
             'data-test-subj': 'rules-table',
             columns: rulesColumns,
-            sorting,
           }
         : { 'data-test-subj': 'monitoring-table', columns: monitoringColumns };
 
@@ -567,6 +566,7 @@ export const RulesTables = React.memo<RulesTableProps>(
               pagination={paginationMemo}
               ref={tableRef}
               selection={euiBasicTableSelectionProps}
+              sorting={sorting}
               {...tableProps}
             />
           </>
