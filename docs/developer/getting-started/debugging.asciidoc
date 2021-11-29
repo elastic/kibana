@@ -131,7 +131,7 @@ Once you're finished, you can stop Kibana normally, then stop the {es} and APM s
 ./scripts/compose.py stop
 ----
 
-=== Using Kibana sever logs
+=== Using Kibana server logs
 Kibana Logs is one of the most important parts of Kibana. It's a great way to see what's going on in your application and debug performance issues. Although navigating through a large number of generated logs can be overwhelming, we will discuss what techniques you can use to optimize the process.
 
 Let's start by defining a problem area you are interested in. For example, you might be interested in seeing how a particular Kibana Plugin is performing, so no need to gather logs for all of Kibana. Or you want to focus on a particular feature, such as requests from the Kibana server to the Elasticsearch server.
@@ -166,7 +166,7 @@ logging.loggers:
     level: debug
     appenders: [file]
 ----
-WARNING: Note that we configured Kibana to produce logs in https://www.elastic.co/guide/en/ecs/master/ecs-reference.html[ECS JSON] format. At the moment, it's the only format including meta-information necessary for https://www.elastic.co/guide/en/apm/agent/nodejs/current/log-correlation.html[log correlation] out-of-the-box.
+WARNING: Note that we configured Kibana's `file` appender to produce logs in https://www.elastic.co/guide/en/ecs/master/ecs-reference.html[ECS JSON] format. At the moment, it's the only format including meta-information necessary for https://www.elastic.co/guide/en/apm/agent/nodejs/current/log-correlation.html[log correlation] out-of-the-box.
 
 The next step is to define what https://www.elastic.co/observability[observability tools] are available to you. 
 For a better Developer Experience, we recommend you to set up https://www.elastic.co/guide/en/apm/get-started/current/observability-integrations.html[Observability integration] provided by Elastic to debug your application with the powerful <<debugging-logs-apm-ui, APM UI.>>
@@ -174,7 +174,7 @@ If you need to debug something quickly without the necessity to set up additiona
 
 [[debugging-logs-apm-ui]]
 ==== APM UI
-*Prerequisites* Kibana logs are configured to be in ECS JSON format to include tracing identifiers.
+*Prerequisites* Kibana logs are configured to be in [ECS JSON](https://www.elastic.co/guide/en/ecs/master/ecs-reference.html[ECS JSON]) format to include tracing identifiers.
 
 If you would like to debug Kibana with Kibana APM UI, you need to set up the APM infrastructure. You can find instructions for the setup process
 https://www.elastic.co/guide/en/apm/get-started/current/observability-integrations.html[on this page].
@@ -186,7 +186,7 @@ Once you set up the APM infrastructure, you can enable the APM agent and put Kib
 *Prerequisites* Kibana logs are configured to be in ECS JSON format to include tracing identifiers.
 
 Open Kibana Logs and search for an operation you are interested in.
-For example, we want to investigate the slowness of the `/api/telemetry/v2/clusters/_stats` Kibana endpoint.
+For example, we want to investigate the response times for queries to the `/api/telemetry/v2/clusters/_stats` Kibana endpoint.
 Open the Kibana Logs and search for the HTTP server response for the endpoint. It looks like the following (some fields are omitted for brevity)
 [source,json]
 ----
@@ -197,4 +197,4 @@ Open the Kibana Logs and search for the HTTP server response for the endpoint. I
   "transaction":{"id":"d0c5bbf14f5febca"}
 }
 ----
-We are interested in https://www.elastic.co/guide/en/ecs/current/ecs-tracing.html#field-trace-id[trace.id] field. It's a unique identifier of a trace. It groups multiple events like transactions that belong together. In this case we search for `"trace":{"id":"9b99131a6f66587971ef085ef97dfd07"}` to get all the logs belonging to the same trace. So you can see how many Elasticsearch requests have been triggered during the `9b99131a6f66587971ef085ef97dfd07` trace, what they looked like, what elasticsearch endpoints were hit, etc.
+We are interested in https://www.elastic.co/guide/en/ecs/current/ecs-tracing.html#field-trace-id[trace.id] field that is a unique identifier of a trace. The `trace.id` gives us a way to group multiple events, like transactions, that belong together. In this case we search for `"trace":{"id":"9b99131a6f66587971ef085ef97dfd07"}` to get all the logs belonging to the same trace. So you can see how many Elasticsearch requests have been triggered during the `9b99131a6f66587971ef085ef97dfd07` trace, what they looked like, what elasticsearch endpoints were hit, etc.
