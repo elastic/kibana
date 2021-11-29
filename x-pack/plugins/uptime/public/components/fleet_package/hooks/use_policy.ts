@@ -54,12 +54,12 @@ export const defaultConfig: PolicyConfig = {
   },
 };
 
-/**
- * Exports Synthetics-specific package policy instructions
- * for use in the Ingest app create / edit package policy
- */
-export const usePolicy = (name: string) => {
-  const { isTLSEnabled, isZipUrlTLSEnabled } = usePolicyConfigContext();
+export const usePolicy = (fleetPolicyName: string = '') => {
+  const {
+    isTLSEnabled,
+    isZipUrlTLSEnabled,
+    name: monitorName, // the monitor name can come from two different places, either from fleet or from uptime
+  } = usePolicyConfigContext();
   const { fields: httpSimpleFields } = useHTTPSimpleFieldsContext();
   const { fields: tcpSimpleFields } = useTCPSimpleFieldsContext();
   const { fields: icmpSimpleFields } = useICMPSimpleFieldsContext();
@@ -77,6 +77,7 @@ export const usePolicy = (name: string) => {
     [isTLSEnabled, isZipUrlTLSEnabled]
   );
 
+  /* TODO add locations to policy config for synthetics service */
   const policyConfig: PolicyConfig = useMemo(
     () => ({
       [DataStream.HTTP]: {
@@ -87,7 +88,7 @@ export const usePolicy = (name: string) => {
           ...httpSimpleFields[ConfigKeys.METADATA],
           ...metadata,
         },
-        [ConfigKeys.NAME]: name,
+        [ConfigKeys.NAME]: fleetPolicyName || monitorName,
       } as HTTPFields,
       [DataStream.TCP]: {
         ...tcpSimpleFields,
@@ -97,11 +98,11 @@ export const usePolicy = (name: string) => {
           ...tcpSimpleFields[ConfigKeys.METADATA],
           ...metadata,
         },
-        [ConfigKeys.NAME]: name,
+        [ConfigKeys.NAME]: fleetPolicyName || monitorName,
       } as TCPFields,
       [DataStream.ICMP]: {
         ...icmpSimpleFields,
-        [ConfigKeys.NAME]: name,
+        [ConfigKeys.NAME]: fleetPolicyName || monitorName,
       } as ICMPFields,
       [DataStream.BROWSER]: {
         ...browserSimpleFields,
@@ -110,7 +111,7 @@ export const usePolicy = (name: string) => {
           ...browserSimpleFields[ConfigKeys.METADATA],
           ...metadata,
         },
-        [ConfigKeys.NAME]: name,
+        [ConfigKeys.NAME]: fleetPolicyName || monitorName,
       } as BrowserFields,
     }),
     [
@@ -123,7 +124,8 @@ export const usePolicy = (name: string) => {
       browserSimpleFields,
       browserAdvancedFields,
       tlsFields,
-      name,
+      fleetPolicyName,
+      monitorName,
     ]
   );
 
