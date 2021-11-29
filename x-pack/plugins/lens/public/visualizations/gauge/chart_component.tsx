@@ -176,9 +176,12 @@ export const GaugeComponent: FC<GaugeRenderProps> = ({
         }
   );
   const colors = (palette?.params as CustomPaletteState)?.colors ?? undefined;
-  const bands = (palette?.params as CustomPaletteState)
+  const bands: number[] = (palette?.params as CustomPaletteState)
     ? normalizeBands(args.palette?.params as CustomPaletteState, { min, max })
     : [min, max];
+
+  const maxBand = Math.max(...bands);
+  const minBand = Math.min(...bands);
 
   return (
     <Chart>
@@ -187,8 +190,8 @@ export const GaugeComponent: FC<GaugeRenderProps> = ({
         id="spec_1"
         subtype={subtype}
         base={min}
-        target={goal}
-        actual={metricValue}
+        target={goal ? Math.min(goal, maxBand) : undefined}
+        actual={Math.min(Math.max(metricValue, minBand), maxBand)}
         tickValueFormatter={({ value: tickValue }) => formatter.convert(tickValue)}
         bands={bands}
         ticks={getTicks(ticksPosition, [min, max], bands)}
