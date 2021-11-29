@@ -93,6 +93,15 @@ export type InvalidateAPIKeyResult =
   | { apiKeysEnabled: false }
   | { apiKeysEnabled: true; result: SecurityPluginInvalidateAPIKeyResult };
 
+export interface RuleAggregation {
+  status: {
+    buckets: Array<{
+      key: string;
+      doc_count: number;
+    }>;
+  };
+}
+
 export interface ConstructorOptions {
   logger: Logger;
   taskManager: TaskManagerStartContract;
@@ -646,40 +655,60 @@ export class RulesClient {
   public async aggregate({
     options: { fields, ...options } = {},
   }: { options?: AggregateOptions } = {}): Promise<AggregateResult> {
-    // Replace this when saved objects supports aggregations https://github.com/elastic/kibana/pull/64002
-    const alertExecutionStatus = await Promise.all(
-      AlertExecutionStatusValues.map(async (status: string) => {
-        const { filter: authorizationFilter } = await this.authorization.getFindAuthorizationFilter(
-          AlertingAuthorizationEntity.Rule,
-          alertingAuthorizationFilterOpts
-        );
-        const filter = options.filter
-          ? `${options.filter} and alert.attributes.executionStatus.status:(${status})`
-          : `alert.attributes.executionStatus.status:(${status})`;
-        const { total } = await this.unsecuredSavedObjectsClient.find<RawAlert>({
-          ...options,
-          filter:
-            (authorizationFilter && filter
-              ? nodeBuilder.and([
-                  esKuery.fromKueryExpression(filter),
-                  authorizationFilter as KueryNode,
-                ])
-              : authorizationFilter) ?? filter,
-          page: 1,
-          perPage: 0,
-          type: 'alert',
-        });
+    const { filter: authorizationFilter } = await this.authorization.getFindAuthorizationFilter(
+      AlertingAuthorizationEntity.Rule,
+      alertingAuthorizationFilterOpts
+    );
+    const filter = '';
+    // const filter = options.filter
+    //   ? `${options.filter} and alert.attributes.executionStatus.status:(${status})`
+    //   : `alert.attributes.executionStatus.status:(${status})`;
+    const resp = await this.unsecuredSavedObjectsClient.find<RawAlert, RuleAggregation>({
+      ...options,
+      filter:
+        (authorizationFilter && filter
+          ? nodeBuilder.and([esKuery.fromKueryExpression(filter), authorizationFilter as KueryNode])
+          : authorizationFilter) ?? filter,
+      page: 1,
+      perPage: 0,
+      type: 'alert',
+      aggs: {
+        status: {
+          terms: { field: 'alert.attributes.executionStatus.status' },
+        },
+        // ruleName: {
+        //   terms: { field: 'alert.attributes.rule.name' },
+        // },
+        enabled: {
+          terms: { field: 'alert.attributes.enabled' },
+        },
+        muted: {
+          terms: { field: 'alert.attributes.muteAll' },
+        },
+      },
+    });
 
-        return { [status]: total };
+    const alertExecutionStatus = resp.aggregations!.status.buckets.map(
+      ({ key, doc_count: docCount }) => ({
+        [key]: docCount,
       })
     );
 
-    return {
+    const ret = {
       alertExecutionStatus: alertExecutionStatus.reduce(
         (acc, curr: { [status: string]: number }) => Object.assign(acc, curr),
         {}
       ),
     };
+
+    // Fill missing keys
+    for (const key of AlertExecutionStatusValues) {
+      if (!ret.alertExecutionStatus.hasOwnProperty(key)) {
+        ret.alertExecutionStatus[key] = 0;
+      }
+    }
+
+    return ret;
   }
 
   public async delete({ id }: { id: string }) {
