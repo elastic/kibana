@@ -28,6 +28,10 @@ import { createNetworkEventsRoute } from './network_events';
 import { createJourneyFailedStepsRoute } from './pings/journeys';
 import { createLastSuccessfulStepRoute } from './synthetics/last_successful_step';
 import { installIndexTemplatesRoute } from './synthetics_service/install_index_templates';
+import { getSyntheticsMonitorRoute } from './synthetics_service/get_monitors';
+import { addSyntheticsMonitorRoute } from './synthetics_service/add_monitor';
+import { editSyntheticsMonitorRoute } from './synthetics_service/edit_monitor';
+import { deleteSyntheticsMonitorRoute } from './synthetics_service/delete_monitor';
 
 export * from './types';
 export { createRouteWithAuth } from './create_route_with_auth';
@@ -53,4 +57,8 @@ export const restApiRoutes: UMRestApiRouteFactory[] = [
   createLastSuccessfulStepRoute,
   createJourneyScreenshotBlocksRoute,
   installIndexTemplatesRoute,
+  getSyntheticsMonitorRoute,
+  addSyntheticsMonitorRoute,
+  editSyntheticsMonitorRoute,
+  deleteSyntheticsMonitorRoute,
 ];
