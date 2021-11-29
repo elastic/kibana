@@ -354,8 +354,6 @@ kibana_vars=(
     xpack.security.showInsecureClusterWarning
     xpack.securitySolution.alertMergeStrategy
     xpack.securitySolution.alertIgnoreFields
-    xpack.securitySolution.endpointResultListDefaultFirstPageIndex
-    xpack.securitySolution.endpointResultListDefaultPageSize
     xpack.securitySolution.maxRuleImportExportSize
     xpack.securitySolution.maxRuleImportPayloadBytes
     xpack.securitySolution.maxTimelineImportExportSize

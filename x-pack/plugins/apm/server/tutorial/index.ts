@@ -14,8 +14,8 @@ import {
 } from '../../../../../src/plugins/home/server';
 import { CloudSetup } from '../../../cloud/server';
 import { APM_STATIC_INDEX_PATTERN_ID } from '../../common/index_pattern_constants';
-import { getApmDataViewTitle } from '../lib/data_view/get_apm_data_view_title';
-import { ApmIndicesConfig } from '../lib/settings/apm_indices/get_apm_indices';
+import { getApmDataViewTitle } from '../routes/data_view/get_apm_data_view_title';
+import { ApmIndicesConfig } from '../routes/settings/apm_indices/get_apm_indices';
 import { createElasticCloudInstructions } from './envs/elastic_cloud';
 import { onPremInstructions } from './envs/on_prem';
 import apmDataView from './index_pattern.json';
@@ -107,7 +107,11 @@ It allows you to monitor the performance of thousands of applications in real ti
       artifacts,
       customStatusCheckName: 'apm_fleet_server_status_check',
       onPrem: onPremInstructions({ apmConfig, isFleetPluginEnabled }),
-      elasticCloud: createElasticCloudInstructions(cloud),
+      elasticCloud: createElasticCloudInstructions({
+        apmConfig,
+        isFleetPluginEnabled,
+        cloudSetup: cloud,
+      }),
       previewImagePath: '/plugins/apm/assets/apm.png',
       savedObjects,
       savedObjectsInstallMsg: i18n.translate(

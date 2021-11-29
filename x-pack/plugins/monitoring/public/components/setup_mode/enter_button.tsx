@@ -38,13 +38,14 @@ export const SetupModeEnterButton: React.FC<SetupModeEnterButtonProps> = (
   }
 
   return (
-    <div className="monSetupModeEnterButton__buttonWrapper" data-test-subj="monitoringSetupModeBtn">
+    <div className="monSetupModeEnterButton__buttonWrapper">
       <EuiButton
         onClick={enterSetupMode}
         iconType="flag"
         size="s"
         iconSide="right"
         isLoading={isLoading}
+        data-test-subj="monitoringSetupModeBtn"
       >
         {i18n.translate('xpack.monitoring.setupMode.enter', {
           defaultMessage: 'Enter setup mode',

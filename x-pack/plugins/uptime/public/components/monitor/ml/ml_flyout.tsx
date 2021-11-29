@@ -20,7 +20,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useSelector } from 'react-redux';
 import * as labels from './translations';
 import { UptimeSettingsContext } from '../../../contexts';

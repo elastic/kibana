@@ -62,7 +62,7 @@
             "label": "experimentalFeatures",
             "description": [],
             "signature": [
-              "{ readonly metricsEntitiesEnabled: boolean; readonly ruleRegistryEnabled: boolean; readonly tGridEnabled: boolean; readonly tGridEventRenderedViewEnabled: boolean; readonly trustedAppsByPolicyEnabled: boolean; readonly excludePoliciesInFilterEnabled: boolean; readonly uebaEnabled: boolean; readonly disableIsolationUIPendingStatuses: boolean; readonly riskyHostsEnabled: boolean; }"
+              "{ readonly metricsEntitiesEnabled: boolean; readonly ruleRegistryEnabled: boolean; readonly tGridEnabled: boolean; readonly tGridEventRenderedViewEnabled: boolean; readonly trustedAppsByPolicyEnabled: boolean; readonly excludePoliciesInFilterEnabled: boolean; readonly uebaEnabled: boolean; readonly disableIsolationUIPendingStatuses: boolean; readonly riskyHostsEnabled: boolean; readonly pendingActionResponsesWithAck: boolean; }"
             ],
             "path": "x-pack/plugins/security_solution/public/plugin.tsx",
             "deprecated": false
@@ -272,8 +272,14 @@
         "description": [],
         "signature": [
           "Pick<",
-          "TGridModel",
-          ", \"columns\" | \"id\" | \"title\" | \"filters\" | \"sort\" | \"version\" | \"isLoading\" | \"filterManager\" | \"dateRange\" | \"defaultColumns\" | \"savedObjectId\" | \"unit\" | \"dataProviders\" | \"deletedEventIds\" | \"documentType\" | \"excludedRowRendererIds\" | \"expandedDetail\" | \"footerText\" | \"graphEventId\" | \"kqlQuery\" | \"queryFields\" | \"indexNames\" | \"isSelectAllChecked\" | \"itemsPerPage\" | \"itemsPerPageOptions\" | \"loadingEventIds\" | \"loadingText\" | \"selectAll\" | \"showCheckboxes\" | \"selectedEventIds\"> & { activeTab: ",
+          {
+            "pluginId": "timelines",
+            "scope": "public",
+            "docId": "kibTimelinesPluginApi",
+            "section": "def-public.TGridModel",
+            "text": "TGridModel"
+          },
+          ", \"columns\" | \"sort\" | \"title\" | \"version\" | \"filters\" | \"id\" | \"isLoading\" | \"filterManager\" | \"dateRange\" | \"defaultColumns\" | \"savedObjectId\" | \"unit\" | \"dataProviders\" | \"dataViewId\" | \"deletedEventIds\" | \"documentType\" | \"excludedRowRendererIds\" | \"expandedDetail\" | \"footerText\" | \"graphEventId\" | \"kqlQuery\" | \"queryFields\" | \"indexNames\" | \"isSelectAllChecked\" | \"itemsPerPage\" | \"itemsPerPageOptions\" | \"loadingEventIds\" | \"loadingText\" | \"selectAll\" | \"showCheckboxes\" | \"selectedEventIds\"> & { activeTab: ",
           {
             "pluginId": "securitySolution",
             "scope": "common",
@@ -305,7 +311,7 @@
             "section": "def-common.EqlOptionsSelected",
             "text": "EqlOptionsSelected"
           },
-          "; eventType?: \"all\" | \"custom\" | \"raw\" | \"alert\" | \"eql\" | \"signal\" | undefined; eventIdToNoteIds: Record<string, string[]>; historyIds: string[]; highlightedDropAndProviderId: string; isFavorite: boolean; isLive: boolean; kqlMode: ",
+          "; eventType?: \"raw\" | \"alert\" | \"eql\" | \"custom\" | \"all\" | \"signal\" | undefined; eventIdToNoteIds: Record<string, string[]>; historyIds: string[]; highlightedDropAndProviderId: string; isFavorite: boolean; isLive: boolean; kqlMode: ",
           "KqlMode",
           "; title: string; timelineType: ",
           {
@@ -450,6 +456,21 @@
             "type": "Function",
             "tags": [],
             "label": "getPreviewIndex",
+            "description": [],
+            "signature": [
+              "() => string"
+            ],
+            "path": "x-pack/plugins/security_solution/server/client/client.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-server.AppClient.getSourcererDataViewId",
+            "type": "Function",
+            "tags": [],
+            "label": "getSourcererDataViewId",
             "description": [],
             "signature": [
               "() => string"
@@ -951,7 +972,7 @@
         "signature": [
           "Readonly<{} & { signalsIndex: string; maxRuleImportExportSize: number; maxRuleImportPayloadBytes: number; maxTimelineImportExportSize: number; maxTimelineImportPayloadBytes: number; alertMergeStrategy: \"allFields\" | \"missingFields\" | \"noFields\"; alertIgnoreFields: string[]; enableExperimental: string[]; ruleExecutionLog: Readonly<{} & { underlyingClient: ",
           "UnderlyingLogClient",
-          "; }>; endpointResultListDefaultFirstPageIndex: number; endpointResultListDefaultPageSize: number; packagerTaskInterval: string; prebuiltRulesFromFileSystem: boolean; prebuiltRulesFromSavedObjects: boolean; }> & { experimentalFeatures: Readonly<{ metricsEntitiesEnabled: boolean; ruleRegistryEnabled: boolean; tGridEnabled: boolean; tGridEventRenderedViewEnabled: boolean; trustedAppsByPolicyEnabled: boolean; excludePoliciesInFilterEnabled: boolean; uebaEnabled: boolean; disableIsolationUIPendingStatuses: boolean; riskyHostsEnabled: boolean; }>; }"
+          "; }>; endpointResultListDefaultFirstPageIndex: number; endpointResultListDefaultPageSize: number; packagerTaskInterval: string; prebuiltRulesFromFileSystem: boolean; prebuiltRulesFromSavedObjects: boolean; }> & { experimentalFeatures: Readonly<{ metricsEntitiesEnabled: boolean; ruleRegistryEnabled: boolean; tGridEnabled: boolean; tGridEventRenderedViewEnabled: boolean; trustedAppsByPolicyEnabled: boolean; excludePoliciesInFilterEnabled: boolean; uebaEnabled: boolean; disableIsolationUIPendingStatuses: boolean; riskyHostsEnabled: boolean; pendingActionResponsesWithAck: boolean; }>; }"
         ],
         "path": "x-pack/plugins/security_solution/server/config.ts",
         "deprecated": false,
@@ -1586,12 +1607,13 @@
           {
             "parentPluginId": "securitySolution",
             "id": "def-common.AggregationRequest.Unnamed",
-            "type": "Any",
+            "type": "IndexSignature",
             "tags": [],
-            "label": "Unnamed",
+            "label": "[aggField: string]: AggregationsAggregationContainer",
             "description": [],
             "signature": [
-              "any"
+              "[aggField: string]:  ",
+              "AggregationsAggregationContainer"
             ],
             "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/hosts/details/index.ts",
             "deprecated": false
@@ -1782,12 +1804,12 @@
           {
             "parentPluginId": "securitySolution",
             "id": "def-common.AnomalySource.Unnamed",
-            "type": "Any",
+            "type": "IndexSignature",
             "tags": [],
-            "label": "Unnamed",
+            "label": "[field: string]: any",
             "description": [],
             "signature": [
-              "any"
+              "[field: string]:  any"
             ],
             "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/matrix_histogram/anomalies/index.ts",
             "deprecated": false
@@ -1993,7 +2015,7 @@
             "label": "sort",
             "description": [],
             "signature": [
-              "React.ReactText[]"
+              "(string | number)[]"
             ],
             "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/hosts/authentications/index.ts",
             "deprecated": false
@@ -2417,7 +2439,7 @@
         "tags": [],
         "label": "BrowserField",
         "description": [],
-        "path": "x-pack/plugins/security_solution/common/search_strategy/index_fields/index.ts",
+        "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
         "deprecated": false,
         "children": [
           {
@@ -2427,7 +2449,7 @@
             "tags": [],
             "label": "aggregatable",
             "description": [],
-            "path": "x-pack/plugins/security_solution/common/search_strategy/index_fields/index.ts",
+            "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
             "deprecated": false
           },
           {
@@ -2437,7 +2459,7 @@
             "tags": [],
             "label": "category",
             "description": [],
-            "path": "x-pack/plugins/security_solution/common/search_strategy/index_fields/index.ts",
+            "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
             "deprecated": false
           },
           {
@@ -2450,7 +2472,7 @@
             "signature": [
               "string | null"
             ],
-            "path": "x-pack/plugins/security_solution/common/search_strategy/index_fields/index.ts",
+            "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
             "deprecated": false
           },
           {
@@ -2463,7 +2485,7 @@
             "signature": [
               "string | number | null"
             ],
-            "path": "x-pack/plugins/security_solution/common/search_strategy/index_fields/index.ts",
+            "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
             "deprecated": false
           },
           {
@@ -2476,15 +2498,15 @@
             "signature": [
               "{ readonly [x: string]: Partial<",
               {
-                "pluginId": "securitySolution",
+                "pluginId": "timelines",
                 "scope": "common",
-                "docId": "kibSecuritySolutionPluginApi",
+                "docId": "kibTimelinesPluginApi",
                 "section": "def-common.BrowserField",
                 "text": "BrowserField"
               },
               ">; }"
             ],
-            "path": "x-pack/plugins/security_solution/common/search_strategy/index_fields/index.ts",
+            "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
             "deprecated": false
           },
           {
@@ -2494,7 +2516,7 @@
             "tags": [],
             "label": "format",
             "description": [],
-            "path": "x-pack/plugins/security_solution/common/search_strategy/index_fields/index.ts",
+            "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
             "deprecated": false
           },
           {
@@ -2507,7 +2529,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "x-pack/plugins/security_solution/common/search_strategy/index_fields/index.ts",
+            "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
             "deprecated": false
           },
           {
@@ -2517,7 +2539,7 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "path": "x-pack/plugins/security_solution/common/search_strategy/index_fields/index.ts",
+            "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
             "deprecated": false
           },
           {
@@ -2527,7 +2549,7 @@
             "tags": [],
             "label": "searchable",
             "description": [],
-            "path": "x-pack/plugins/security_solution/common/search_strategy/index_fields/index.ts",
+            "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
             "deprecated": false
           },
           {
@@ -2537,7 +2559,7 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "path": "x-pack/plugins/security_solution/common/search_strategy/index_fields/index.ts",
+            "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
             "deprecated": false
           },
           {
@@ -2553,7 +2575,17 @@
               "IFieldSubTypeNestedOptional",
               " | undefined"
             ],
-            "path": "x-pack/plugins/security_solution/common/search_strategy/index_fields/index.ts",
+            "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.BrowserField.readFromDocValues",
+            "type": "boolean",
+            "tags": [],
+            "label": "readFromDocValues",
+            "description": [],
+            "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
             "deprecated": false
           }
         ],
@@ -3264,7 +3296,7 @@
                 "section": "def-common.DataProvider",
                 "text": "DataProvider"
               },
-              ", \"type\" | \"id\" | \"name\" | \"enabled\" | \"excluded\" | \"kqlQuery\" | \"queryMatch\">[]"
+              ", \"name\" | \"type\" | \"id\" | \"enabled\" | \"excluded\" | \"kqlQuery\" | \"queryMatch\">[]"
             ],
             "path": "x-pack/plugins/timelines/common/types/timeline/data_provider/index.ts",
             "deprecated": false
@@ -4376,12 +4408,12 @@
           {
             "parentPluginId": "securitySolution",
             "id": "def-common.EventSource.Unnamed",
-            "type": "Any",
+            "type": "IndexSignature",
             "tags": [],
-            "label": "Unnamed",
+            "label": "[field: string]: any",
             "description": [],
             "signature": [
-              "any"
+              "[field: string]:  any"
             ],
             "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/matrix_histogram/events/index.ts",
             "deprecated": false
@@ -4518,6 +4550,91 @@
       },
       {
         "parentPluginId": "securitySolution",
+        "id": "def-common.FieldInfo",
+        "type": "Interface",
+        "tags": [],
+        "label": "FieldInfo",
+        "description": [],
+        "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.FieldInfo.category",
+            "type": "string",
+            "tags": [],
+            "label": "category",
+            "description": [],
+            "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.FieldInfo.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.FieldInfo.example",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "example",
+            "description": [],
+            "signature": [
+              "string | number | undefined"
+            ],
+            "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.FieldInfo.format",
+            "type": "string",
+            "tags": [],
+            "label": "format",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.FieldInfo.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.FieldInfo.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "securitySolution",
         "id": "def-common.Fields",
         "type": "Interface",
         "tags": [],
@@ -4539,12 +4656,20 @@
           {
             "parentPluginId": "securitySolution",
             "id": "def-common.Fields.Unnamed",
-            "type": "Any",
+            "type": "IndexSignature",
             "tags": [],
-            "label": "Unnamed",
+            "label": "[x: string]: T | Fields<T>[]",
             "description": [],
             "signature": [
-              "any"
+              "[x: string]:  T | ",
+              {
+                "pluginId": "securitySolution",
+                "scope": "common",
+                "docId": "kibSecuritySolutionPluginApi",
+                "section": "def-common.Fields",
+                "text": "Fields"
+              },
+              "<T>[]"
             ],
             "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/matrix_histogram/events/index.ts",
             "deprecated": false
@@ -5341,6 +5466,19 @@
                 "text": "ColumnHeaderOptions"
               },
               "[]"
+            ],
+            "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.HeaderActionProps.createFieldComponent",
+            "type": "Function",
+            "tags": [],
+            "label": "createFieldComponent",
+            "description": [],
+            "signature": [
+              "React.FC<{ onClick: () => void; }> | undefined"
             ],
             "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
             "deprecated": false
@@ -6647,7 +6785,7 @@
             "label": "sort",
             "description": [],
             "signature": [
-              "React.ReactText[] | undefined"
+              "(string | number)[] | undefined"
             ],
             "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/hosts/common/index.ts",
             "deprecated": false
@@ -8513,7 +8651,7 @@
             "label": "sort",
             "description": [],
             "signature": [
-              "React.ReactText[]"
+              "(string | number)[]"
             ],
             "path": "x-pack/plugins/security_solution/common/search_strategy/security_solution/hosts/uncommon_processes/index.ts",
             "deprecated": false
@@ -9079,7 +9217,25 @@
         "tags": [],
         "label": "IndexField",
         "description": [],
-        "path": "x-pack/plugins/security_solution/common/search_strategy/index_fields/index.ts",
+        "signature": [
+          {
+            "pluginId": "timelines",
+            "scope": "common",
+            "docId": "kibTimelinesPluginApi",
+            "section": "def-common.IndexField",
+            "text": "IndexField"
+          },
+          " extends Pick<",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.FieldSpec",
+            "text": "FieldSpec"
+          },
+          ", \"name\" | \"type\" | \"subType\" | \"customLabel\" | \"script\" | \"lang\" | \"count\" | \"scripted\" | \"esTypes\" | \"searchable\" | \"indexed\" | \"aggregatable\" | \"conflictDescriptions\" | \"readFromDocValues\" | \"runtimeField\" | \"shortDotsEnable\" | \"isMapped\">"
+        ],
+        "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
         "deprecated": false,
         "children": [
           {
@@ -9091,7 +9247,7 @@
             "description": [
               "Where the field belong"
             ],
-            "path": "x-pack/plugins/security_solution/common/search_strategy/index_fields/index.ts",
+            "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
             "deprecated": false
           },
           {
@@ -9106,7 +9262,7 @@
             "signature": [
               "string | number | null | undefined"
             ],
-            "path": "x-pack/plugins/security_solution/common/search_strategy/index_fields/index.ts",
+            "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
             "deprecated": false
           },
           {
@@ -9121,55 +9277,7 @@
             "signature": [
               "(string | null)[]"
             ],
-            "path": "x-pack/plugins/security_solution/common/search_strategy/index_fields/index.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "securitySolution",
-            "id": "def-common.IndexField.name",
-            "type": "string",
-            "tags": [],
-            "label": "name",
-            "description": [
-              "The name of the field"
-            ],
-            "path": "x-pack/plugins/security_solution/common/search_strategy/index_fields/index.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "securitySolution",
-            "id": "def-common.IndexField.type",
-            "type": "string",
-            "tags": [],
-            "label": "type",
-            "description": [
-              "The type of the field's values as recognized by Kibana"
-            ],
-            "path": "x-pack/plugins/security_solution/common/search_strategy/index_fields/index.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "securitySolution",
-            "id": "def-common.IndexField.searchable",
-            "type": "boolean",
-            "tags": [],
-            "label": "searchable",
-            "description": [
-              "Whether the field's values can be efficiently searched for"
-            ],
-            "path": "x-pack/plugins/security_solution/common/search_strategy/index_fields/index.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "securitySolution",
-            "id": "def-common.IndexField.aggregatable",
-            "type": "boolean",
-            "tags": [],
-            "label": "aggregatable",
-            "description": [
-              "Whether the field's values can be aggregated"
-            ],
-            "path": "x-pack/plugins/security_solution/common/search_strategy/index_fields/index.ts",
+            "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
             "deprecated": false
           },
           {
@@ -9184,7 +9292,7 @@
             "signature": [
               "string | null | undefined"
             ],
-            "path": "x-pack/plugins/security_solution/common/search_strategy/index_fields/index.ts",
+            "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
             "deprecated": false
           },
           {
@@ -9197,101 +9305,7 @@
             "signature": [
               "string | null | undefined"
             ],
-            "path": "x-pack/plugins/security_solution/common/search_strategy/index_fields/index.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "securitySolution",
-            "id": "def-common.IndexField.esTypes",
-            "type": "Array",
-            "tags": [],
-            "label": "esTypes",
-            "description": [
-              "the elastic type as mapped in the index"
-            ],
-            "signature": [
-              "string[] | undefined"
-            ],
-            "path": "x-pack/plugins/security_solution/common/search_strategy/index_fields/index.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "securitySolution",
-            "id": "def-common.IndexField.subType",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "subType",
-            "description": [],
-            "signature": [
-              "IFieldSubTypeMultiOptional",
-              " | ",
-              "IFieldSubTypeNestedOptional",
-              " | undefined"
-            ],
-            "path": "x-pack/plugins/security_solution/common/search_strategy/index_fields/index.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "securitySolution",
-            "id": "def-common.IndexField.readFromDocValues",
-            "type": "boolean",
-            "tags": [],
-            "label": "readFromDocValues",
-            "description": [],
-            "path": "x-pack/plugins/security_solution/common/search_strategy/index_fields/index.ts",
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "securitySolution",
-        "id": "def-common.IndexFieldsStrategyRequest",
-        "type": "Interface",
-        "tags": [],
-        "label": "IndexFieldsStrategyRequest",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "securitySolution",
-            "scope": "common",
-            "docId": "kibSecuritySolutionPluginApi",
-            "section": "def-common.IndexFieldsStrategyRequest",
-            "text": "IndexFieldsStrategyRequest"
-          },
-          " extends ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataSearchPluginApi",
-            "section": "def-common.IEsSearchRequest",
-            "text": "IEsSearchRequest"
-          }
-        ],
-        "path": "x-pack/plugins/security_solution/common/search_strategy/index_fields/index.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "securitySolution",
-            "id": "def-common.IndexFieldsStrategyRequest.indices",
-            "type": "Array",
-            "tags": [],
-            "label": "indices",
-            "description": [],
-            "signature": [
-              "string[]"
-            ],
-            "path": "x-pack/plugins/security_solution/common/search_strategy/index_fields/index.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "securitySolution",
-            "id": "def-common.IndexFieldsStrategyRequest.onlyCheckIfIndicesExist",
-            "type": "boolean",
-            "tags": [],
-            "label": "onlyCheckIfIndicesExist",
-            "description": [],
-            "path": "x-pack/plugins/security_solution/common/search_strategy/index_fields/index.ts",
+            "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
             "deprecated": false
           }
         ],
@@ -9306,9 +9320,9 @@
         "description": [],
         "signature": [
           {
-            "pluginId": "securitySolution",
+            "pluginId": "timelines",
             "scope": "common",
-            "docId": "kibSecuritySolutionPluginApi",
+            "docId": "kibTimelinesPluginApi",
             "section": "def-common.IndexFieldsStrategyResponse",
             "text": "IndexFieldsStrategyResponse"
           },
@@ -9322,7 +9336,7 @@
           },
           "<any>"
         ],
-        "path": "x-pack/plugins/security_solution/common/search_strategy/index_fields/index.ts",
+        "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
         "deprecated": false,
         "children": [
           {
@@ -9334,15 +9348,15 @@
             "description": [],
             "signature": [
               {
-                "pluginId": "securitySolution",
+                "pluginId": "timelines",
                 "scope": "common",
-                "docId": "kibSecuritySolutionPluginApi",
+                "docId": "kibTimelinesPluginApi",
                 "section": "def-common.IndexField",
                 "text": "IndexField"
               },
               "[]"
             ],
-            "path": "x-pack/plugins/security_solution/common/search_strategy/index_fields/index.ts",
+            "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
             "deprecated": false
           },
           {
@@ -9355,7 +9369,22 @@
             "signature": [
               "string[]"
             ],
-            "path": "x-pack/plugins/security_solution/common/search_strategy/index_fields/index.ts",
+            "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.IndexFieldsStrategyResponse.runtimeMappings",
+            "type": "Object",
+            "tags": [],
+            "label": "runtimeMappings",
+            "description": [],
+            "signature": [
+              "{ [x: string]: ",
+              "MappingRuntimeField",
+              "; }"
+            ],
+            "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
             "deprecated": false
           }
         ],
@@ -15814,7 +15843,7 @@
             "section": "def-common.TimelineEventsAllRequestOptions",
             "text": "TimelineEventsAllRequestOptions"
           },
-          ", \"id\" | \"sort\" | \"fields\" | \"defaultIndex\" | \"timerange\" | \"language\" | \"pagination\" | \"filterQuery\" | \"docValueFields\" | \"factoryQueryType\" | \"indexType\" | \"entityType\" | \"fieldRequested\" | \"excludeEcsData\" | \"authFilter\">"
+          ", \"sort\" | \"fields\" | \"id\" | \"defaultIndex\" | \"timerange\" | \"language\" | \"pagination\" | \"filterQuery\" | \"docValueFields\" | \"factoryQueryType\" | \"indexType\" | \"entityType\" | \"runtimeMappings\" | \"authFilter\" | \"excludeEcsData\" | \"fieldRequested\">"
         ],
         "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/eql/index.ts",
         "deprecated": false,
@@ -16006,39 +16035,20 @@
         "children": [
           {
             "parentPluginId": "securitySolution",
-            "id": "def-common.TimelineEventsAllRequestOptions.fields",
-            "type": "CompoundType",
+            "id": "def-common.TimelineEventsAllRequestOptions.authFilter",
+            "type": "Object",
             "tags": [],
-            "label": "fields",
+            "label": "authFilter",
             "description": [],
             "signature": [
-              "string[] | { field: string; include_unmapped: boolean; }[]"
-            ],
-            "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "securitySolution",
-            "id": "def-common.TimelineEventsAllRequestOptions.fieldRequested",
-            "type": "Array",
-            "tags": [],
-            "label": "fieldRequested",
-            "description": [],
-            "signature": [
-              "string[]"
-            ],
-            "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "securitySolution",
-            "id": "def-common.TimelineEventsAllRequestOptions.language",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "language",
-            "description": [],
-            "signature": [
-              "\"eql\" | \"lucene\" | \"kuery\""
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "server",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-server.JsonObject",
+                "text": "JsonObject"
+              },
+              " | undefined"
             ],
             "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
             "deprecated": false
@@ -16058,20 +16068,54 @@
           },
           {
             "parentPluginId": "securitySolution",
-            "id": "def-common.TimelineEventsAllRequestOptions.authFilter",
-            "type": "Object",
+            "id": "def-common.TimelineEventsAllRequestOptions.fieldRequested",
+            "type": "Array",
             "tags": [],
-            "label": "authFilter",
+            "label": "fieldRequested",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "server",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.JsonObject",
-                "text": "JsonObject"
-              },
-              " | undefined"
+              "string[]"
+            ],
+            "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.TimelineEventsAllRequestOptions.fields",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "fields",
+            "description": [],
+            "signature": [
+              "string[] | { field: string; include_unmapped: boolean; }[]"
+            ],
+            "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.TimelineEventsAllRequestOptions.language",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "language",
+            "description": [],
+            "signature": [
+              "\"eql\" | \"lucene\" | \"kuery\""
+            ],
+            "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.TimelineEventsAllRequestOptions.runtimeMappings",
+            "type": "Object",
+            "tags": [],
+            "label": "runtimeMappings",
+            "description": [],
+            "signature": [
+              "{ [x: string]: ",
+              "MappingRuntimeField",
+              "; }"
             ],
             "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
             "deprecated": false
@@ -16611,6 +16655,19 @@
           },
           {
             "parentPluginId": "securitySolution",
+            "id": "def-common.TimelineInput.dataViewId",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "dataViewId",
+            "description": [],
+            "signature": [
+              "string | null | undefined"
+            ],
+            "path": "x-pack/plugins/security_solution/common/search_strategy/timeline/index.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "securitySolution",
             "id": "def-common.TimelineInput.description",
             "type": "CompoundType",
             "tags": [],
@@ -17094,11 +17151,21 @@
         "children": [
           {
             "parentPluginId": "securitySolution",
-            "id": "def-common.TimelinePersistInput.id",
-            "type": "string",
+            "id": "def-common.TimelinePersistInput.columns",
+            "type": "Array",
             "tags": [],
-            "label": "id",
+            "label": "columns",
             "description": [],
+            "signature": [
+              {
+                "pluginId": "timelines",
+                "scope": "common",
+                "docId": "kibTimelinesPluginApi",
+                "section": "def-common.ColumnHeaderOptions",
+                "text": "ColumnHeaderOptions"
+              },
+              "[]"
+            ],
             "path": "x-pack/plugins/security_solution/common/types/timeline/store.ts",
             "deprecated": false
           },
@@ -17124,6 +17191,16 @@
           },
           {
             "parentPluginId": "securitySolution",
+            "id": "def-common.TimelinePersistInput.dataViewId",
+            "type": "string",
+            "tags": [],
+            "label": "dataViewId",
+            "description": [],
+            "path": "x-pack/plugins/security_solution/common/types/timeline/store.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "securitySolution",
             "id": "def-common.TimelinePersistInput.dateRange",
             "type": "Object",
             "tags": [],
@@ -17131,6 +17208,26 @@
             "description": [],
             "signature": [
               "{ start: string; end: string; } | undefined"
+            ],
+            "path": "x-pack/plugins/security_solution/common/types/timeline/store.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.TimelinePersistInput.defaultColumns",
+            "type": "Array",
+            "tags": [],
+            "label": "defaultColumns",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "timelines",
+                "scope": "common",
+                "docId": "kibTimelinesPluginApi",
+                "section": "def-common.ColumnHeaderOptions",
+                "text": "ColumnHeaderOptions"
+              },
+              "[] | undefined"
             ],
             "path": "x-pack/plugins/security_solution/common/types/timeline/store.ts",
             "deprecated": false
@@ -17197,40 +17294,23 @@
           },
           {
             "parentPluginId": "securitySolution",
-            "id": "def-common.TimelinePersistInput.columns",
-            "type": "Array",
+            "id": "def-common.TimelinePersistInput.id",
+            "type": "string",
             "tags": [],
-            "label": "columns",
+            "label": "id",
             "description": [],
-            "signature": [
-              {
-                "pluginId": "timelines",
-                "scope": "common",
-                "docId": "kibTimelinesPluginApi",
-                "section": "def-common.ColumnHeaderOptions",
-                "text": "ColumnHeaderOptions"
-              },
-              "[]"
-            ],
             "path": "x-pack/plugins/security_solution/common/types/timeline/store.ts",
             "deprecated": false
           },
           {
             "parentPluginId": "securitySolution",
-            "id": "def-common.TimelinePersistInput.defaultColumns",
+            "id": "def-common.TimelinePersistInput.indexNames",
             "type": "Array",
             "tags": [],
-            "label": "defaultColumns",
+            "label": "indexNames",
             "description": [],
             "signature": [
-              {
-                "pluginId": "timelines",
-                "scope": "common",
-                "docId": "kibTimelinesPluginApi",
-                "section": "def-common.ColumnHeaderOptions",
-                "text": "ColumnHeaderOptions"
-              },
-              "[] | undefined"
+              "string[]"
             ],
             "path": "x-pack/plugins/security_solution/common/types/timeline/store.ts",
             "deprecated": false
@@ -17244,19 +17324,6 @@
             "description": [],
             "signature": [
               "number | undefined"
-            ],
-            "path": "x-pack/plugins/security_solution/common/types/timeline/store.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "securitySolution",
-            "id": "def-common.TimelinePersistInput.indexNames",
-            "type": "Array",
-            "tags": [],
-            "label": "indexNames",
-            "description": [],
-            "signature": [
-              "string[]"
             ],
             "path": "x-pack/plugins/security_solution/common/types/timeline/store.ts",
             "deprecated": false
@@ -17500,6 +17567,21 @@
             ],
             "path": "x-pack/plugins/security_solution/common/search_strategy/timeline/index.ts",
             "deprecated": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.TimelineRequestBasicOptions.runtimeMappings",
+            "type": "Object",
+            "tags": [],
+            "label": "runtimeMappings",
+            "description": [],
+            "signature": [
+              "{ [x: string]: ",
+              "MappingRuntimeField",
+              "; }"
+            ],
+            "path": "x-pack/plugins/security_solution/common/search_strategy/timeline/index.ts",
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -17680,6 +17762,19 @@
                 "text": "DataProviderResult"
               },
               "[] | null | undefined"
+            ],
+            "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-common.TimelineResult.dataViewId",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "dataViewId",
+            "description": [],
+            "signature": [
+              "string | null | undefined"
             ],
             "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
             "deprecated": false
@@ -19415,7 +19510,7 @@
             "section": "def-common.DataProviderType",
             "text": "DataProviderType"
           },
-          " | null | undefined; }[] | null | undefined; description?: string | null | undefined; eqlOptions?: { eventCategoryField?: string | null | undefined; query?: string | null | undefined; tiebreakerField?: string | null | undefined; timestampField?: string | null | undefined; size?: string | number | null | undefined; } | null | undefined; eventType?: string | null | undefined; excludedRowRendererIds?: ",
+          " | null | undefined; }[] | null | undefined; dataViewId?: string | null | undefined; description?: string | null | undefined; eqlOptions?: { eventCategoryField?: string | null | undefined; query?: string | null | undefined; tiebreakerField?: string | null | undefined; timestampField?: string | null | undefined; size?: string | number | null | undefined; } | null | undefined; eventType?: string | null | undefined; excludedRowRendererIds?: ",
           {
             "pluginId": "securitySolution",
             "scope": "common",
@@ -19461,7 +19556,7 @@
             "section": "def-common.DataProviderType",
             "text": "DataProviderType"
           },
-          " | null | undefined; }[] | null | undefined; description?: string | null | undefined; eqlOptions?: { eventCategoryField?: string | null | undefined; query?: string | null | undefined; tiebreakerField?: string | null | undefined; timestampField?: string | null | undefined; size?: string | number | null | undefined; } | null | undefined; eventType?: string | null | undefined; excludedRowRendererIds?: ",
+          " | null | undefined; }[] | null | undefined; dataViewId?: string | null | undefined; description?: string | null | undefined; eqlOptions?: { eventCategoryField?: string | null | undefined; query?: string | null | undefined; tiebreakerField?: string | null | undefined; timestampField?: string | null | undefined; size?: string | number | null | undefined; } | null | undefined; eventType?: string | null | undefined; excludedRowRendererIds?: ",
           {
             "pluginId": "securitySolution",
             "scope": "common",
@@ -19499,9 +19594,17 @@
         "label": "BeatFields",
         "description": [],
         "signature": [
-          "{ [x: string]: FieldInfo; }"
+          "{ [x: string]: ",
+          {
+            "pluginId": "timelines",
+            "scope": "common",
+            "docId": "kibTimelinesPluginApi",
+            "section": "def-common.FieldInfo",
+            "text": "FieldInfo"
+          },
+          "; }"
         ],
-        "path": "x-pack/plugins/security_solution/common/search_strategy/index_fields/index.ts",
+        "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -19515,15 +19618,15 @@
         "signature": [
           "{ readonly [x: string]: Partial<",
           {
-            "pluginId": "securitySolution",
+            "pluginId": "timelines",
             "scope": "common",
-            "docId": "kibSecuritySolutionPluginApi",
+            "docId": "kibTimelinesPluginApi",
             "section": "def-common.BrowserField",
             "text": "BrowserField"
           },
           ">; }"
         ],
-        "path": "x-pack/plugins/security_solution/common/search_strategy/index_fields/index.ts",
+        "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -19572,7 +19675,7 @@
             "section": "def-common.ColumnHeaderOptions",
             "text": "ColumnHeaderOptions"
           },
-          "; isDraggable: boolean; linkValues: string[] | undefined; rowRenderers?: ",
+          "; isDraggable: boolean; isTimeline?: boolean | undefined; linkValues: string[] | undefined; rowRenderers?: ",
           {
             "pluginId": "timelines",
             "scope": "common",
@@ -19664,7 +19767,7 @@
         "signature": [
           "Pick<",
           "EuiDataGridControlColumn",
-          ", never> & Partial<AdditionalControlColumnProps>"
+          ", \"width\"> & Partial<AdditionalControlColumnProps>"
         ],
         "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
         "deprecated": false,
@@ -19678,7 +19781,7 @@
         "label": "DataProvidersAnd",
         "description": [],
         "signature": [
-          "{ type?: ",
+          "{ name: string; type?: ",
           {
             "pluginId": "timelines",
             "scope": "common",
@@ -19686,7 +19789,7 @@
             "section": "def-common.DataProviderType",
             "text": "DataProviderType"
           },
-          " | undefined; id: string; name: string; enabled: boolean; excluded: boolean; kqlQuery: string; queryMatch: ",
+          " | undefined; id: string; enabled: boolean; excluded: boolean; kqlQuery: string; queryMatch: ",
           {
             "pluginId": "timelines",
             "scope": "common",
@@ -19725,7 +19828,28 @@
           "SearchDocValueField",
           "[]"
         ],
-        "path": "x-pack/plugins/security_solution/common/search_strategy/index_fields/index.ts",
+        "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "securitySolution",
+        "id": "def-common.EMPTY_INDEX_FIELDS",
+        "type": "Array",
+        "tags": [],
+        "label": "EMPTY_INDEX_FIELDS",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.FieldSpec",
+            "text": "FieldSpec"
+          },
+          "[]"
+        ],
+        "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -19793,7 +19917,7 @@
             "section": "def-common.DataProviderType",
             "text": "DataProviderType"
           },
-          " | null | undefined; }[] | null | undefined; description?: string | null | undefined; eqlOptions?: { eventCategoryField?: string | null | undefined; query?: string | null | undefined; tiebreakerField?: string | null | undefined; timestampField?: string | null | undefined; size?: string | number | null | undefined; } | null | undefined; eventType?: string | null | undefined; excludedRowRendererIds?: ",
+          " | null | undefined; }[] | null | undefined; dataViewId?: string | null | undefined; description?: string | null | undefined; eqlOptions?: { eventCategoryField?: string | null | undefined; query?: string | null | undefined; tiebreakerField?: string | null | undefined; timestampField?: string | null | undefined; size?: string | number | null | undefined; } | null | undefined; eventType?: string | null | undefined; excludedRowRendererIds?: ",
           {
             "pluginId": "securitySolution",
             "scope": "common",
@@ -20220,6 +20344,35 @@
           "{ success: boolean; success_count: number; timelines_installed: number; timelines_updated: number; errors: ({ id?: string | undefined; rule_id?: string | undefined; } & { error: { status_code: number; message: string; }; })[]; }"
         ],
         "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "securitySolution",
+        "id": "def-common.IndexFieldsStrategyRequest",
+        "type": "Type",
+        "tags": [],
+        "label": "IndexFieldsStrategyRequest",
+        "description": [],
+        "signature": [
+          "T extends \"dataView\" ? ",
+          {
+            "pluginId": "timelines",
+            "scope": "common",
+            "docId": "kibTimelinesPluginApi",
+            "section": "def-common.IndexFieldsStrategyRequestById",
+            "text": "IndexFieldsStrategyRequestById"
+          },
+          " : ",
+          {
+            "pluginId": "timelines",
+            "scope": "common",
+            "docId": "kibTimelinesPluginApi",
+            "section": "def-common.IndexFieldsStrategyRequestByIndices",
+            "text": "IndexFieldsStrategyRequestByIndices"
+          }
+        ],
+        "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -21252,7 +21405,7 @@
             "section": "def-common.DataProviderType",
             "text": "DataProviderType"
           },
-          " | null | undefined; }[] | null | undefined; description?: string | null | undefined; eqlOptions?: { eventCategoryField?: string | null | undefined; query?: string | null | undefined; tiebreakerField?: string | null | undefined; timestampField?: string | null | undefined; size?: string | number | null | undefined; } | null | undefined; eventType?: string | null | undefined; excludedRowRendererIds?: ",
+          " | null | undefined; }[] | null | undefined; dataViewId?: string | null | undefined; description?: string | null | undefined; eqlOptions?: { eventCategoryField?: string | null | undefined; query?: string | null | undefined; tiebreakerField?: string | null | undefined; timestampField?: string | null | undefined; size?: string | number | null | undefined; } | null | undefined; eventType?: string | null | undefined; excludedRowRendererIds?: ",
           {
             "pluginId": "securitySolution",
             "scope": "common",
@@ -21320,7 +21473,7 @@
             "section": "def-common.DataProviderType",
             "text": "DataProviderType"
           },
-          " | null | undefined; }[] | null | undefined; description?: string | null | undefined; eqlOptions?: { eventCategoryField?: string | null | undefined; query?: string | null | undefined; tiebreakerField?: string | null | undefined; timestampField?: string | null | undefined; size?: string | number | null | undefined; } | null | undefined; eventType?: string | null | undefined; excludedRowRendererIds?: ",
+          " | null | undefined; }[] | null | undefined; dataViewId?: string | null | undefined; description?: string | null | undefined; eqlOptions?: { eventCategoryField?: string | null | undefined; query?: string | null | undefined; tiebreakerField?: string | null | undefined; timestampField?: string | null | undefined; size?: string | number | null | undefined; } | null | undefined; eventType?: string | null | undefined; excludedRowRendererIds?: ",
           {
             "pluginId": "securitySolution",
             "scope": "common",
@@ -21449,7 +21602,7 @@
             "section": "def-common.DataProviderType",
             "text": "DataProviderType"
           },
-          " | null | undefined; }[] | null | undefined; description?: string | null | undefined; eqlOptions?: { eventCategoryField?: string | null | undefined; query?: string | null | undefined; tiebreakerField?: string | null | undefined; timestampField?: string | null | undefined; size?: string | number | null | undefined; } | null | undefined; eventType?: string | null | undefined; excludedRowRendererIds?: ",
+          " | null | undefined; }[] | null | undefined; dataViewId?: string | null | undefined; description?: string | null | undefined; eqlOptions?: { eventCategoryField?: string | null | undefined; query?: string | null | undefined; tiebreakerField?: string | null | undefined; timestampField?: string | null | undefined; size?: string | number | null | undefined; } | null | undefined; eventType?: string | null | undefined; excludedRowRendererIds?: ",
           {
             "pluginId": "securitySolution",
             "scope": "common",
@@ -21495,7 +21648,7 @@
             "section": "def-common.DataProviderType",
             "text": "DataProviderType"
           },
-          " | null | undefined; }[] | null | undefined; description?: string | null | undefined; eqlOptions?: { eventCategoryField?: string | null | undefined; query?: string | null | undefined; tiebreakerField?: string | null | undefined; timestampField?: string | null | undefined; size?: string | number | null | undefined; } | null | undefined; eventType?: string | null | undefined; excludedRowRendererIds?: ",
+          " | null | undefined; }[] | null | undefined; dataViewId?: string | null | undefined; description?: string | null | undefined; eqlOptions?: { eventCategoryField?: string | null | undefined; query?: string | null | undefined; tiebreakerField?: string | null | undefined; timestampField?: string | null | undefined; size?: string | number | null | undefined; } | null | undefined; eventType?: string | null | undefined; excludedRowRendererIds?: ",
           {
             "pluginId": "securitySolution",
             "scope": "common",
@@ -21541,7 +21694,7 @@
             "section": "def-common.DataProviderType",
             "text": "DataProviderType"
           },
-          " | null | undefined; }[] | null | undefined; description?: string | null | undefined; eqlOptions?: { eventCategoryField?: string | null | undefined; query?: string | null | undefined; tiebreakerField?: string | null | undefined; timestampField?: string | null | undefined; size?: string | number | null | undefined; } | null | undefined; eventType?: string | null | undefined; excludedRowRendererIds?: ",
+          " | null | undefined; }[] | null | undefined; dataViewId?: string | null | undefined; description?: string | null | undefined; eqlOptions?: { eventCategoryField?: string | null | undefined; query?: string | null | undefined; tiebreakerField?: string | null | undefined; timestampField?: string | null | undefined; size?: string | number | null | undefined; } | null | undefined; eventType?: string | null | undefined; excludedRowRendererIds?: ",
           {
             "pluginId": "securitySolution",
             "scope": "common",
@@ -21602,7 +21755,7 @@
             "section": "def-common.DataProviderType",
             "text": "DataProviderType"
           },
-          " | null | undefined; }[] | null | undefined; description?: string | null | undefined; eqlOptions?: { eventCategoryField?: string | null | undefined; query?: string | null | undefined; tiebreakerField?: string | null | undefined; timestampField?: string | null | undefined; size?: string | number | null | undefined; } | null | undefined; eventType?: string | null | undefined; excludedRowRendererIds?: ",
+          " | null | undefined; }[] | null | undefined; dataViewId?: string | null | undefined; description?: string | null | undefined; eqlOptions?: { eventCategoryField?: string | null | undefined; query?: string | null | undefined; tiebreakerField?: string | null | undefined; timestampField?: string | null | undefined; size?: string | number | null | undefined; } | null | undefined; eventType?: string | null | undefined; excludedRowRendererIds?: ",
           {
             "pluginId": "securitySolution",
             "scope": "common",
@@ -21648,7 +21801,7 @@
             "section": "def-common.DataProviderType",
             "text": "DataProviderType"
           },
-          " | null | undefined; }[] | null | undefined; description?: string | null | undefined; eqlOptions?: { eventCategoryField?: string | null | undefined; query?: string | null | undefined; tiebreakerField?: string | null | undefined; timestampField?: string | null | undefined; size?: string | number | null | undefined; } | null | undefined; eventType?: string | null | undefined; excludedRowRendererIds?: ",
+          " | null | undefined; }[] | null | undefined; dataViewId?: string | null | undefined; description?: string | null | undefined; eqlOptions?: { eventCategoryField?: string | null | undefined; query?: string | null | undefined; tiebreakerField?: string | null | undefined; timestampField?: string | null | undefined; size?: string | number | null | undefined; } | null | undefined; eventType?: string | null | undefined; excludedRowRendererIds?: ",
           {
             "pluginId": "securitySolution",
             "scope": "common",
@@ -22706,7 +22859,7 @@
         "label": "TimelineEventsType",
         "description": [],
         "signature": [
-          "\"all\" | \"custom\" | \"raw\" | \"alert\" | \"eql\" | \"signal\""
+          "\"raw\" | \"alert\" | \"eql\" | \"custom\" | \"all\" | \"signal\""
         ],
         "path": "x-pack/plugins/security_solution/common/types/timeline/index.ts",
         "deprecated": false,
@@ -22951,6 +23104,64 @@
       },
       {
         "parentPluginId": "securitySolution",
+        "id": "def-common.TimelineKpiStrategyRequest",
+        "type": "Type",
+        "tags": [],
+        "label": "TimelineKpiStrategyRequest",
+        "description": [],
+        "signature": [
+          "{ id?: string | undefined; defaultIndex: string[]; timerange: ",
+          {
+            "pluginId": "timelines",
+            "scope": "common",
+            "docId": "kibTimelinesPluginApi",
+            "section": "def-common.TimerangeInput",
+            "text": "TimerangeInput"
+          },
+          "; params?: ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.ISearchRequestParams",
+            "text": "ISearchRequestParams"
+          },
+          " | undefined; filterQuery: string | ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "server",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-server.JsonObject",
+            "text": "JsonObject"
+          },
+          " | ",
+          "ESRangeQuery",
+          " | ",
+          "ESQueryStringQuery",
+          " | ",
+          "ESMatchQuery",
+          " | ",
+          "ESTermQuery",
+          " | ",
+          "ESBoolQuery",
+          " | undefined; docValueFields?: ",
+          "SearchDocValueField",
+          "[] | undefined; factoryQueryType?: ",
+          {
+            "pluginId": "timelines",
+            "scope": "common",
+            "docId": "kibTimelinesPluginApi",
+            "section": "def-common.TimelineEventsQueries",
+            "text": "TimelineEventsQueries"
+          },
+          " | undefined; indexType?: string | undefined; entityType?: \"alerts\" | \"events\" | undefined; }"
+        ],
+        "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/last_event_time/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "securitySolution",
         "id": "def-common.TimelineResponse",
         "type": "Type",
         "tags": [],
@@ -22965,7 +23176,7 @@
             "section": "def-common.DataProviderType",
             "text": "DataProviderType"
           },
-          " | null | undefined; }[] | null | undefined; description?: string | null | undefined; eqlOptions?: { eventCategoryField?: string | null | undefined; query?: string | null | undefined; tiebreakerField?: string | null | undefined; timestampField?: string | null | undefined; size?: string | number | null | undefined; } | null | undefined; eventType?: string | null | undefined; excludedRowRendererIds?: ",
+          " | null | undefined; }[] | null | undefined; dataViewId?: string | null | undefined; description?: string | null | undefined; eqlOptions?: { eventCategoryField?: string | null | undefined; query?: string | null | undefined; tiebreakerField?: string | null | undefined; timestampField?: string | null | undefined; size?: string | number | null | undefined; } | null | undefined; eventType?: string | null | undefined; excludedRowRendererIds?: ",
           {
             "pluginId": "securitySolution",
             "scope": "common",
@@ -23011,7 +23222,7 @@
             "section": "def-common.DataProviderType",
             "text": "DataProviderType"
           },
-          " | null | undefined; }[] | null | undefined; description?: string | null | undefined; eqlOptions?: { eventCategoryField?: string | null | undefined; query?: string | null | undefined; tiebreakerField?: string | null | undefined; timestampField?: string | null | undefined; size?: string | number | null | undefined; } | null | undefined; eventType?: string | null | undefined; excludedRowRendererIds?: ",
+          " | null | undefined; }[] | null | undefined; dataViewId?: string | null | undefined; description?: string | null | undefined; eqlOptions?: { eventCategoryField?: string | null | undefined; query?: string | null | undefined; tiebreakerField?: string | null | undefined; timestampField?: string | null | undefined; size?: string | number | null | undefined; } | null | undefined; eventType?: string | null | undefined; excludedRowRendererIds?: ",
           {
             "pluginId": "securitySolution",
             "scope": "common",
@@ -23289,7 +23500,7 @@
           "\nThis type represents a timeline type stored in a saved object that does not include any fields that reference\nother saved objects."
         ],
         "signature": [
-          "{ status?: ",
+          "{ columns?: { aggregatable?: boolean | null | undefined; category?: string | null | undefined; columnHeaderType?: string | null | undefined; description?: string | null | undefined; example?: string | null | undefined; indexes?: string[] | null | undefined; id?: string | null | undefined; name?: string | null | undefined; placeholder?: string | null | undefined; searchable?: boolean | null | undefined; type?: string | null | undefined; }[] | null | undefined; sort?: { columnId?: string | null | undefined; columnType?: string | null | undefined; sortDirection?: string | null | undefined; } | { columnId?: string | null | undefined; columnType?: string | null | undefined; sortDirection?: string | null | undefined; }[] | null | undefined; title?: string | null | undefined; filters?: { exists?: string | null | undefined; meta?: { alias?: string | null | undefined; controlledBy?: string | null | undefined; disabled?: boolean | null | undefined; field?: string | null | undefined; formattedValue?: string | null | undefined; index?: string | null | undefined; key?: string | null | undefined; negate?: boolean | null | undefined; params?: string | null | undefined; type?: string | null | undefined; value?: string | null | undefined; } | null | undefined; match_all?: string | null | undefined; missing?: string | null | undefined; query?: string | null | undefined; range?: string | null | undefined; script?: string | null | undefined; }[] | null | undefined; description?: string | null | undefined; dateRange?: { start?: string | number | null | undefined; end?: string | number | null | undefined; } | null | undefined; status?: ",
           {
             "pluginId": "securitySolution",
             "scope": "common",
@@ -23297,7 +23508,7 @@
             "section": "def-common.TimelineStatus",
             "text": "TimelineStatus"
           },
-          " | null | undefined; columns?: { aggregatable?: boolean | null | undefined; category?: string | null | undefined; columnHeaderType?: string | null | undefined; description?: string | null | undefined; example?: string | null | undefined; indexes?: string[] | null | undefined; id?: string | null | undefined; name?: string | null | undefined; placeholder?: string | null | undefined; searchable?: boolean | null | undefined; type?: string | null | undefined; }[] | null | undefined; title?: string | null | undefined; description?: string | null | undefined; filters?: { exists?: string | null | undefined; meta?: { alias?: string | null | undefined; controlledBy?: string | null | undefined; disabled?: boolean | null | undefined; field?: string | null | undefined; formattedValue?: string | null | undefined; index?: string | null | undefined; key?: string | null | undefined; negate?: boolean | null | undefined; params?: string | null | undefined; type?: string | null | undefined; value?: string | null | undefined; } | null | undefined; match_all?: string | null | undefined; missing?: string | null | undefined; query?: string | null | undefined; range?: string | null | undefined; script?: string | null | undefined; }[] | null | undefined; sort?: { columnId?: string | null | undefined; columnType?: string | null | undefined; sortDirection?: string | null | undefined; } | { columnId?: string | null | undefined; columnType?: string | null | undefined; sortDirection?: string | null | undefined; }[] | null | undefined; dateRange?: { start?: string | number | null | undefined; end?: string | number | null | undefined; } | null | undefined; createdBy?: string | null | undefined; updatedBy?: string | null | undefined; created?: number | null | undefined; updated?: number | null | undefined; dataProviders?: { id?: string | null | undefined; name?: string | null | undefined; enabled?: boolean | null | undefined; excluded?: boolean | null | undefined; kqlQuery?: string | null | undefined; queryMatch?: { field?: string | null | undefined; displayField?: string | null | undefined; value?: string | null | undefined; displayValue?: string | null | undefined; operator?: string | null | undefined; } | null | undefined; and?: { id?: string | null | undefined; name?: string | null | undefined; enabled?: boolean | null | undefined; excluded?: boolean | null | undefined; kqlQuery?: string | null | undefined; queryMatch?: { field?: string | null | undefined; displayField?: string | null | undefined; value?: string | null | undefined; displayValue?: string | null | undefined; operator?: string | null | undefined; } | null | undefined; }[] | null | undefined; type?: ",
+          " | null | undefined; createdBy?: string | null | undefined; updatedBy?: string | null | undefined; created?: number | null | undefined; updated?: number | null | undefined; dataProviders?: { id?: string | null | undefined; name?: string | null | undefined; enabled?: boolean | null | undefined; excluded?: boolean | null | undefined; kqlQuery?: string | null | undefined; queryMatch?: { field?: string | null | undefined; displayField?: string | null | undefined; value?: string | null | undefined; displayValue?: string | null | undefined; operator?: string | null | undefined; } | null | undefined; and?: { id?: string | null | undefined; name?: string | null | undefined; enabled?: boolean | null | undefined; excluded?: boolean | null | undefined; kqlQuery?: string | null | undefined; queryMatch?: { field?: string | null | undefined; displayField?: string | null | undefined; value?: string | null | undefined; displayValue?: string | null | undefined; operator?: string | null | undefined; } | null | undefined; }[] | null | undefined; type?: ",
           {
             "pluginId": "securitySolution",
             "scope": "common",
@@ -23694,6 +23905,12 @@
           ".template>]>, ",
           "NullC",
           "]>; }>>, ",
+          "NullC",
+          "]>; dataViewId: ",
+          "UnionC",
+          "<[",
+          "StringC",
+          ", ",
           "NullC",
           "]>; description: ",
           "UnionC",
@@ -24618,6 +24835,12 @@
           "NullC",
           "]>; }>>, ",
           "NullC",
+          "]>; dataViewId: ",
+          "UnionC",
+          "<[",
+          "StringC",
+          ", ",
+          "NullC",
           "]>; description: ",
           "UnionC",
           "<[",
@@ -25365,45 +25588,9 @@
         "tags": [],
         "label": "EMPTY_BROWSER_FIELDS",
         "description": [],
-        "path": "x-pack/plugins/security_solution/common/search_strategy/index_fields/index.ts",
+        "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
         "deprecated": false,
         "children": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "securitySolution",
-        "id": "def-common.EMPTY_INDEX_PATTERN",
-        "type": "Object",
-        "tags": [],
-        "label": "EMPTY_INDEX_PATTERN",
-        "description": [],
-        "path": "x-pack/plugins/security_solution/common/search_strategy/index_fields/index.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "securitySolution",
-            "id": "def-common.EMPTY_INDEX_PATTERN.fields",
-            "type": "Array",
-            "tags": [],
-            "label": "fields",
-            "description": [],
-            "signature": [
-              "never[]"
-            ],
-            "path": "x-pack/plugins/security_solution/common/search_strategy/index_fields/index.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "securitySolution",
-            "id": "def-common.EMPTY_INDEX_PATTERN.title",
-            "type": "string",
-            "tags": [],
-            "label": "title",
-            "description": [],
-            "path": "x-pack/plugins/security_solution/common/search_strategy/index_fields/index.ts",
-            "deprecated": false
-          }
-        ],
         "initialIsOpen": false
       },
       {
@@ -25990,6 +26177,12 @@
           ".template>]>, ",
           "NullC",
           "]>; }>>, ",
+          "NullC",
+          "]>; dataViewId: ",
+          "UnionC",
+          "<[",
+          "StringC",
+          ", ",
           "NullC",
           "]>; description: ",
           "UnionC",
@@ -26925,6 +27118,12 @@
           ".template>]>, ",
           "NullC",
           "]>; }>>, ",
+          "NullC",
+          "]>; dataViewId: ",
+          "UnionC",
+          "<[",
+          "StringC",
+          ", ",
           "NullC",
           "]>; description: ",
           "UnionC",
@@ -27971,6 +28170,12 @@
           "NullC",
           "]>; }>>, ",
           "NullC",
+          "]>; dataViewId: ",
+          "UnionC",
+          "<[",
+          "StringC",
+          ", ",
+          "NullC",
           "]>; description: ",
           "UnionC",
           "<[",
@@ -28691,6 +28896,12 @@
           ".template>]>, ",
           "NullC",
           "]>; }>>, ",
+          "NullC",
+          "]>; dataViewId: ",
+          "UnionC",
+          "<[",
+          "StringC",
+          ", ",
           "NullC",
           "]>; description: ",
           "UnionC",
@@ -29955,6 +30166,12 @@
           "NullC",
           "]>; }>>, ",
           "NullC",
+          "]>; dataViewId: ",
+          "UnionC",
+          "<[",
+          "StringC",
+          ", ",
+          "NullC",
           "]>; description: ",
           "UnionC",
           "<[",
@@ -30871,6 +31088,12 @@
           ".template>]>, ",
           "NullC",
           "]>; }>>, ",
+          "NullC",
+          "]>; dataViewId: ",
+          "UnionC",
+          "<[",
+          "StringC",
+          ", ",
           "NullC",
           "]>; description: ",
           "UnionC",

@@ -5,12 +5,15 @@
  * 2.0.
  */
 
-import { metricVisualization } from './visualization';
+import { getMetricVisualization } from './visualization';
 import { MetricState } from '../../common/expressions';
 import { layerTypes } from '../../common';
 import { createMockDatasource, createMockFramePublicAPI } from '../mocks';
 import { generateId } from '../id_generator';
 import { DatasourcePublicAPI, FramePublicAPI } from '../types';
+import { chartPluginMock } from 'src/plugins/charts/public/mocks';
+import { ColorMode } from 'src/plugins/charts/common';
+import { themeServiceMock } from '../../../../../src/core/public/mocks';
 
 jest.mock('../id_generator');
 
@@ -31,6 +34,11 @@ function mockFrame(): FramePublicAPI {
     },
   };
 }
+
+const metricVisualization = getMetricVisualization({
+  paletteService: chartPluginMock.createPaletteRegistry(),
+  theme: themeServiceMock.createStartContract(),
+});
 
 describe('metric_visualization', () => {
   describe('#initialize', () => {
@@ -110,6 +118,54 @@ describe('metric_visualization', () => {
         ],
       });
     });
+
+    it('should show the palette when metric has coloring enabled', () => {
+      expect(
+        metricVisualization.getConfiguration({
+          state: {
+            accessor: 'a',
+            layerId: 'l1',
+            layerType: layerTypes.DATA,
+            palette: {
+              type: 'palette',
+              name: 'status',
+            },
+          },
+          layerId: 'l1',
+          frame: mockFrame(),
+        })
+      ).toEqual({
+        groups: [
+          expect.objectContaining({
+            accessors: expect.arrayContaining([
+              { columnId: 'a', triggerIcon: 'colorBy', palette: [] },
+            ]),
+          }),
+        ],
+      });
+    });
+
+    it('should not show the palette when not enabled', () => {
+      expect(
+        metricVisualization.getConfiguration({
+          state: {
+            accessor: 'a',
+            layerId: 'l1',
+            layerType: layerTypes.DATA,
+          },
+          layerId: 'l1',
+          frame: mockFrame(),
+        })
+      ).toEqual({
+        groups: [
+          expect.objectContaining({
+            accessors: expect.arrayContaining([
+              { columnId: 'a', triggerIcon: undefined, palette: undefined },
+            ]),
+          }),
+        ],
+      });
+    });
   });
 
   describe('#setDimension', () => {
@@ -151,6 +207,41 @@ describe('metric_visualization', () => {
         accessor: undefined,
         layerId: 'l1',
         layerType: layerTypes.DATA,
+        colorMode: ColorMode.None,
+        palette: undefined,
+      });
+    });
+
+    it('removes the palette configuration', () => {
+      expect(
+        metricVisualization.removeDimension({
+          prevState: {
+            accessor: 'a',
+            layerId: 'l1',
+            layerType: layerTypes.DATA,
+            colorMode: ColorMode.Background,
+            palette: {
+              type: 'palette',
+              name: 'status',
+              params: {
+                rangeType: 'number',
+                stops: [
+                  { color: 'blue', stop: 100 },
+                  { color: 'red', stop: 150 },
+                ],
+              },
+            },
+          },
+          layerId: 'l1',
+          columnId: 'a',
+          frame: mockFrame(),
+        })
+      ).toEqual({
+        accessor: undefined,
+        layerId: 'l1',
+        layerType: layerTypes.DATA,
+        colorMode: ColorMode.None,
+        palette: undefined,
       });
     });
   });
@@ -196,6 +287,9 @@ describe('metric_visualization', () => {
                 "accessor": Array [
                   "a",
                 ],
+                "colorMode": Array [
+                  "None",
+                ],
                 "description": Array [
                   "",
                 ],
@@ -205,6 +299,7 @@ describe('metric_visualization', () => {
                 "mode": Array [
                   "full",
                 ],
+                "palette": Array [],
                 "title": Array [
                   "",
                 ],
