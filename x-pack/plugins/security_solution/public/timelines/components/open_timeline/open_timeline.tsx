@@ -7,7 +7,7 @@
 
 import { EuiBasicTable } from '@elastic/eui';
 import React, { useCallback, useMemo, useRef } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import styled from 'styled-components';
 import { TimelineType, TimelineStatus } from '../../../../common/types/timeline';
