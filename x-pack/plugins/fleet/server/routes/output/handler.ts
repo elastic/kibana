@@ -21,6 +21,7 @@ import type {
 } from '../../../common';
 import { outputService } from '../../services/output';
 import { defaultIngestErrorHandler } from '../../errors';
+import { agentPolicyService } from '../../services';
 
 export const getOutputsHandler: RequestHandler = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
@@ -68,9 +69,15 @@ export const putOuputHandler: RequestHandler<
   TypeOf<typeof PutOutputRequestSchema.body>
 > = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
+  const esClient = context.core.elasticsearch.client.asInternalUser;
   try {
     await outputService.update(soClient, request.params.outputId, request.body);
     const output = await outputService.get(soClient, request.params.outputId);
+    if (output.is_default || output.is_default_monitoring) {
+      await agentPolicyService.bumpAllAgentPolicies(soClient, esClient);
+    } else {
+      await agentPolicyService.bumpAllAgentPoliciesForOutput(soClient, esClient, output.id);
+    }
 
     const body: GetOneOutputResponse = {
       item: output,
@@ -94,9 +101,13 @@ export const postOuputHandler: RequestHandler<
   TypeOf<typeof PostOutputRequestSchema.body>
 > = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
+  const esClient = context.core.elasticsearch.client.asInternalUser;
   try {
     const { id, ...data } = request.body;
     const output = await outputService.create(soClient, data, { id });
+    if (output.is_default || output.is_default_monitoring) {
+      await agentPolicyService.bumpAllAgentPolicies(soClient, esClient);
+    }
 
     const body: GetOneOutputResponse = {
       item: output,
