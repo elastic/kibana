@@ -305,12 +305,12 @@ export const registerEnterpriseSearchIntegrations = (
   customIntegrations.registerCustomIntegration({
     id: 'app_search_web_crawler',
     title: i18n.translate('xpack.enterpriseSearch.appSearch.integrations.webCrawlerName', {
-      defaultMessage: 'Web Crawler',
+      defaultMessage: 'Web site crawler',
     }),
     description: i18n.translate(
       'xpack.enterpriseSearch.appSearch.integrations.webCrawlerDescription',
       {
-        defaultMessage: "Add search to your website with App Search's web crawler.",
+        defaultMessage: 'Add search to your website with the App Search web crawler.',
       }
     ),
     categories: ['website_search'],
@@ -318,7 +318,7 @@ export const registerEnterpriseSearchIntegrations = (
     icons: [
       {
         type: 'eui',
-        src: 'globe',
+        src: 'logoAppSearch',
       },
     ],
     shipper: 'enterprise_search',
@@ -338,7 +338,7 @@ export const registerEnterpriseSearchIntegrations = (
     icons: [
       {
         type: 'eui',
-        src: 'exportAction',
+        src: 'logoAppSearch',
       },
     ],
     shipper: 'enterprise_search',
@@ -358,7 +358,7 @@ export const registerEnterpriseSearchIntegrations = (
     icons: [
       {
         type: 'eui',
-        src: 'editorCodeBlock',
+        src: 'logoAppSearch',
       },
     ],
     shipper: 'enterprise_search',

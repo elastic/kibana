@@ -18,13 +18,14 @@ import { Query, TimeRange, Filter, IndexPatternsContract } from 'src/plugins/dat
 import { Document } from '../persistence';
 import { dataPluginMock } from '../../../../../src/plugins/data/public/mocks';
 import { VIS_EVENT_TO_TRIGGER } from '../../../../../src/plugins/visualizations/public/embeddable';
-import { coreMock, httpServiceMock } from '../../../../../src/core/public/mocks';
+import { coreMock, httpServiceMock, themeServiceMock } from '../../../../../src/core/public/mocks';
 import { IBasePath } from '../../../../../src/core/public';
 import { AttributeService, ViewMode } from '../../../../../src/plugins/embeddable/public';
 import { LensAttributeService } from '../lens_attribute_service';
 import { OnSaveProps } from '../../../../../src/plugins/saved_objects/public/save_modal';
 import { act } from 'react-dom/test-utils';
 import { inspectorPluginMock } from '../../../../../src/plugins/inspector/public/mocks';
+import { Visualization } from '../types';
 
 jest.mock('../../../../../src/plugins/inspector/public/', () => ({
   isAvailable: false,
@@ -125,6 +126,8 @@ describe('embeddable', () => {
         },
         inspector: inspectorPluginMock.createStartContract(),
         getTrigger,
+        theme: themeServiceMock.createStartContract(),
+        visualizationMap: {},
         documentToExpression: () =>
           Promise.resolve({
             ast: {
@@ -165,6 +168,8 @@ describe('embeddable', () => {
         inspector: inspectorPluginMock.createStartContract(),
         capabilities: { canSaveDashboards: true, canSaveVisualizations: true },
         getTrigger,
+        visualizationMap: {},
+        theme: themeServiceMock.createStartContract(),
         documentToExpression: () =>
           Promise.resolve({
             ast: {
@@ -209,6 +214,8 @@ describe('embeddable', () => {
           canSaveVisualizations: true,
         },
         getTrigger,
+        visualizationMap: {},
+        theme: themeServiceMock.createStartContract(),
         documentToExpression: () =>
           Promise.resolve({
             ast: {
@@ -255,6 +262,8 @@ describe('embeddable', () => {
           canSaveVisualizations: true,
         },
         getTrigger,
+        visualizationMap: {},
+        theme: themeServiceMock.createStartContract(),
         documentToExpression: () =>
           Promise.resolve({
             ast: {
@@ -297,6 +306,8 @@ describe('embeddable', () => {
           canSaveVisualizations: true,
         },
         getTrigger,
+        visualizationMap: {},
+        theme: themeServiceMock.createStartContract(),
         documentToExpression: () =>
           Promise.resolve({
             ast: {
@@ -336,6 +347,8 @@ describe('embeddable', () => {
           canSaveVisualizations: true,
         },
         getTrigger,
+        visualizationMap: {},
+        theme: themeServiceMock.createStartContract(),
         documentToExpression: () =>
           Promise.resolve({
             ast: {
@@ -378,6 +391,8 @@ describe('embeddable', () => {
         indexPatternService: {} as IndexPatternsContract,
         capabilities: { canSaveDashboards: true, canSaveVisualizations: true },
         getTrigger,
+        visualizationMap: {},
+        theme: themeServiceMock.createStartContract(),
         documentToExpression: () =>
           Promise.resolve({
             ast: {
@@ -427,6 +442,8 @@ describe('embeddable', () => {
           canSaveVisualizations: true,
         },
         getTrigger,
+        visualizationMap: {},
+        theme: themeServiceMock.createStartContract(),
         documentToExpression: () =>
           Promise.resolve({
             ast: {
@@ -474,6 +491,8 @@ describe('embeddable', () => {
           canSaveVisualizations: true,
         },
         getTrigger,
+        visualizationMap: {},
+        theme: themeServiceMock.createStartContract(),
         documentToExpression: () =>
           Promise.resolve({
             ast: {
@@ -528,6 +547,8 @@ describe('embeddable', () => {
           canSaveVisualizations: true,
         },
         getTrigger,
+        visualizationMap: {},
+        theme: themeServiceMock.createStartContract(),
         documentToExpression: () =>
           Promise.resolve({
             ast: {
@@ -583,6 +604,8 @@ describe('embeddable', () => {
           canSaveVisualizations: true,
         },
         getTrigger,
+        visualizationMap: {},
+        theme: themeServiceMock.createStartContract(),
         documentToExpression: () =>
           Promise.resolve({
             ast: {
@@ -641,6 +664,8 @@ describe('embeddable', () => {
           canSaveVisualizations: true,
         },
         getTrigger,
+        visualizationMap: {},
+        theme: themeServiceMock.createStartContract(),
         documentToExpression: () =>
           Promise.resolve({
             ast: {
@@ -683,6 +708,8 @@ describe('embeddable', () => {
           canSaveVisualizations: true,
         },
         getTrigger,
+        visualizationMap: {},
+        theme: themeServiceMock.createStartContract(),
         documentToExpression: () =>
           Promise.resolve({
             ast: {
@@ -725,6 +752,8 @@ describe('embeddable', () => {
           canSaveVisualizations: true,
         },
         getTrigger,
+        visualizationMap: {},
+        theme: themeServiceMock.createStartContract(),
         documentToExpression: () =>
           Promise.resolve({
             ast: {
@@ -767,6 +796,8 @@ describe('embeddable', () => {
           canSaveVisualizations: true,
         },
         getTrigger,
+        visualizationMap: {},
+        theme: themeServiceMock.createStartContract(),
         documentToExpression: () =>
           Promise.resolve({
             ast: {
@@ -824,6 +855,8 @@ describe('embeddable', () => {
           canSaveVisualizations: true,
         },
         getTrigger,
+        visualizationMap: {},
+        theme: themeServiceMock.createStartContract(),
         documentToExpression: () =>
           Promise.resolve({
             ast: {
@@ -897,6 +930,8 @@ describe('embeddable', () => {
           canSaveVisualizations: true,
         },
         getTrigger,
+        visualizationMap: {},
+        theme: themeServiceMock.createStartContract(),
         documentToExpression: () =>
           Promise.resolve({
             ast: {
@@ -945,6 +980,8 @@ describe('embeddable', () => {
           canSaveVisualizations: true,
         },
         getTrigger,
+        visualizationMap: {},
+        theme: themeServiceMock.createStartContract(),
         documentToExpression: () =>
           Promise.resolve({
             ast: {
@@ -993,6 +1030,8 @@ describe('embeddable', () => {
           canSaveVisualizations: true,
         },
         getTrigger,
+        visualizationMap: {},
+        theme: themeServiceMock.createStartContract(),
         documentToExpression: () =>
           Promise.resolve({
             ast: {
@@ -1015,5 +1054,84 @@ describe('embeddable', () => {
 
     expect(onTableRowClick).toHaveBeenCalledWith({ name: 'test' });
     expect(onTableRowClick).toHaveBeenCalledTimes(1);
+  });
+
+  it('handles edit actions ', async () => {
+    const editedVisualizationState = { value: 'edited' };
+    const onEditActionMock = jest.fn().mockReturnValue(editedVisualizationState);
+    const documentToExpressionMock = jest.fn().mockImplementation(async (document) => {
+      const isStateEdited = document.state.visualization.value === 'edited';
+      return {
+        ast: {
+          type: 'expression',
+          chain: [
+            {
+              type: 'function',
+              function: isStateEdited ? 'edited' : 'not_edited',
+              arguments: {},
+            },
+          ],
+        },
+        errors: undefined,
+      };
+    });
+
+    const visDocument: Document = {
+      state: {
+        visualization: {},
+        datasourceStates: {},
+        query: { query: '', language: 'lucene' },
+        filters: [],
+      },
+      references: [],
+      title: 'My title',
+      visualizationType: 'lensDatatable',
+    };
+
+    const embeddable = new Embeddable(
+      {
+        timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
+        attributeService: attributeServiceMockFromSavedVis(visDocument),
+        expressionRenderer,
+        basePath,
+        inspector: inspectorPluginMock.createStartContract(),
+        indexPatternService: {} as IndexPatternsContract,
+        capabilities: {
+          canSaveDashboards: true,
+          canSaveVisualizations: true,
+        },
+        getTrigger,
+        theme: themeServiceMock.createStartContract(),
+        visualizationMap: {
+          [visDocument.visualizationType as string]: {
+            onEditAction: onEditActionMock,
+          } as unknown as Visualization,
+        },
+        documentToExpression: documentToExpressionMock,
+      },
+      { id: '123' } as unknown as LensEmbeddableInput
+    );
+
+    // SETUP FRESH STATE
+    await embeddable.initializeSavedVis({ id: '123' } as LensEmbeddableInput);
+    embeddable.render(mountpoint);
+
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    expect(expressionRenderer).toHaveBeenCalledTimes(1);
+    expect(expressionRenderer.mock.calls[0][0]!.expression).toBe(`not_edited`);
+
+    // TEST EDIT EVENT
+    await embeddable.handleEvent({ name: 'edit' });
+
+    expect(onEditActionMock).toHaveBeenCalledTimes(1);
+    expect(documentToExpressionMock).toHaveBeenCalled();
+
+    const docToExpCalls = documentToExpressionMock.mock.calls;
+    const editedVisDocument = docToExpCalls[docToExpCalls.length - 1][0];
+    expect(editedVisDocument.state.visualization).toEqual(editedVisualizationState);
+
+    expect(expressionRenderer).toHaveBeenCalledTimes(2);
+    expect(expressionRenderer.mock.calls[1][0]!.expression).toBe(`edited`);
   });
 });

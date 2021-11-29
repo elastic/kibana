@@ -21,8 +21,8 @@ import {
   EuiSpacer,
   EuiPopoverTitle,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { FieldIcon } from '../../../../kibana_react/public';
+import { FieldIcon } from '@kbn/react-field/field_icon';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 export interface Props {
   onSearchChange: (value: string) => void;

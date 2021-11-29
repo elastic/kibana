@@ -24,7 +24,7 @@ import React, { useCallback, useEffect } from 'react';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { MAX_NAME_LENGTH, NAME_REGEX } from '../../../../common/constants';
@@ -43,6 +43,7 @@ export interface UserFormValues {
   username?: string;
   full_name?: string;
   email?: string;
+  current_password?: string;
   password?: string;
   confirm_password?: string;
   roles: readonly string[];

@@ -26,7 +26,7 @@ import {
   EuiEmptyPrompt,
   EuiPageTemplate,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { AlertExecutionStatusErrorReasons } from '../../../../../../alerting/common';
 import { hasAllPrivilege, hasExecuteActionsCapability } from '../../../lib/capabilities';
 import { getAlertingSectionBreadcrumb, getAlertDetailsBreadcrumb } from '../../../lib/breadcrumb';
@@ -36,7 +36,7 @@ import {
   ComponentOpts as BulkOperationsComponentOpts,
   withBulkAlertOperations,
 } from '../../common/components/with_bulk_alert_api_operations';
-import { AlertInstancesRouteWithApi } from './alert_instances_route';
+import { AlertsRouteWithApi } from './alerts_route';
 import { ViewInApp } from './view_in_app';
 import { AlertEdit } from '../../alert_form';
 import { routeToRuleDetails } from '../../../constants';
@@ -441,10 +441,10 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
         <EuiFlexGroup>
           <EuiFlexItem>
             {alert.enabled ? (
-              <AlertInstancesRouteWithApi
+              <AlertsRouteWithApi
                 requestRefresh={requestRefresh}
-                alert={alert}
-                alertType={alertType}
+                rule={alert}
+                ruleType={alertType}
                 readOnly={!canSaveAlert}
               />
             ) : (

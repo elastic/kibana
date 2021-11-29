@@ -7,7 +7,7 @@
 
 import React, { memo } from 'react';
 import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { ManagementEmptyStateWraper } from '../../../../components/management_empty_state_wraper';
 
 export const EmptyState = memo<{
@@ -31,7 +31,7 @@ export const EmptyState = memo<{
         body={
           <FormattedMessage
             id="xpack.securitySolution.trustedapps.listEmptyState.message"
-            defaultMessage="There are currently no trusted applications on your endpoint."
+            defaultMessage="Add a trusted application to improve performance or alleviate conflicts with other applications running on your hosts."
           />
         }
         actions={

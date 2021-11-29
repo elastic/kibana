@@ -29,6 +29,7 @@ import {
   LayerDescriptor,
   MapExtent,
   StyleDescriptor,
+  TileMetaFeature,
   Timeslice,
   StyleMetaDescriptor,
 } from '../../../common/descriptor_types';
@@ -75,6 +76,11 @@ export interface ILayer {
    */
   getMbLayerIds(): string[];
 
+  /*
+   * ILayer.getMbSourceId returns mapbox source id assoicated with this layer.
+   */
+  getMbSourceId(): string;
+
   ownsMbLayerId(mbLayerId: string): boolean;
   ownsMbSourceId(mbSourceId: string): boolean;
   syncLayerWithMB(mbMap: MbMap, timeslice?: Timeslice): void;
@@ -97,14 +103,20 @@ export interface ILayer {
   isFittable(): Promise<boolean>;
   isIncludeInFitToBounds(): boolean;
   getLicensedFeatures(): Promise<LICENSED_FEATURES[]>;
-  getCustomIconAndTooltipContent(): CustomIconAndTooltipContent;
+
+  /*
+   * ILayer.getLayerIcon returns layer icon and associated state.
+   * isTocIcon is set to true when icon is generated for Table of Contents.
+   * Icons in Table of Contents may contain additional layer status, for example, indicate when a layer has incomplete results.
+   */
+  getLayerIcon(isTocIcon: boolean): LayerIcon;
   getDescriptor(): LayerDescriptor;
   getGeoFieldNames(): string[];
   getStyleMetaDescriptorFromLocalFeatures(): Promise<StyleMetaDescriptor | null>;
   isBasemap(order: number): boolean;
 }
 
-export type CustomIconAndTooltipContent = {
+export type LayerIcon = {
   icon: ReactElement;
   tooltipContent?: string | null;
   areResultsTrimmed?: boolean;
@@ -243,7 +255,7 @@ export class AbstractLayer implements ILayer {
     return this._descriptor.label ? this._descriptor.label : '';
   }
 
-  getCustomIconAndTooltipContent(): CustomIconAndTooltipContent {
+  getLayerIcon(isTocIcon: boolean): LayerIcon {
     return {
       icon: <EuiIcon size="m" type={this.getLayerTypeIconName()} />,
     };
@@ -289,7 +301,7 @@ export class AbstractLayer implements ILayer {
     return this._source.getMinZoom();
   }
 
-  _getMbSourceId() {
+  getMbSourceId() {
     return this.getId();
   }
 
@@ -466,7 +478,11 @@ export class AbstractLayer implements ILayer {
     return null;
   }
 
-  isBasemap(): boolean {
+  isBasemap(order: number): boolean {
     return false;
+  }
+
+  _getMetaFromTiles(): TileMetaFeature[] {
+    return this._descriptor.__metaFromTiles || [];
   }
 }

@@ -115,7 +115,7 @@ export type { CoreId } from './core_context';
 export { CspConfig } from './csp';
 export type { ICspConfig } from './csp';
 
-export { ElasticsearchConfig } from './elasticsearch';
+export { ElasticsearchConfig, pollEsNodesVersion } from './elasticsearch';
 export type {
   ElasticsearchServicePreboot,
   ElasticsearchServiceSetup,
@@ -137,6 +137,7 @@ export type {
   DeleteDocumentResponse,
   ElasticsearchConfigPreboot,
   ElasticsearchErrorDetails,
+  PollEsNodesVersionOptions,
 } from './elasticsearch';
 
 export type { IExternalUrlConfig, IExternalUrlPolicy } from './external_url';

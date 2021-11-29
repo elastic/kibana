@@ -74,7 +74,7 @@ describe('filters', () => {
               },
             ],
           },
-        },
+        } as FiltersIndexPatternColumn,
         col2: {
           label: 'Count',
           dataType: 'number',

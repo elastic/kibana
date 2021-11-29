@@ -17,7 +17,7 @@
     "maps",
     "home",
     "lens",
-    "indexPatternFieldEditor",
+    "dataViewFieldEditor",
     "customIntegrations"
   ],
   "requiredBundles": [
@@ -25,7 +25,8 @@
     "kibanaReact",
     "maps",
     "esUiShared",
-    "fieldFormats"
+    "fieldFormats",
+    "charts"
   ],
   "extraPublicDirs": [
     "common"

@@ -10,10 +10,11 @@
 ```typescript
 export interface SharedElasticsearchConfig extends Pick<ElasticsearchConfigType, typeof SharedGlobalConfigKeys.elasticsearch[number]> 
 ```
+<b>Extends:</b> Pick&lt;ElasticsearchConfigType, typeof SharedGlobalConfigKeys.elasticsearch\[number\]&gt;
 
 ## Properties
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [ssl](./kibana-plugin-core-server.sharedelasticsearchconfig.ssl.md) | <code>{</code><br/><code>        certificateAuthorityFingerprints: string[];</code><br/><code>    }</code> |  |
+|  [ssl](./kibana-plugin-core-server.sharedelasticsearchconfig.ssl.md) | { certificateAuthorityFingerprints: string\[\]; } |  |
 

@@ -32,10 +32,9 @@ import { Storage } from '../../kibana_utils/public';
 
 import { DiscoverStartPlugins } from './plugin';
 import { getHistory } from './kibana_services';
-import { KibanaLegacyStart } from '../../kibana_legacy/public';
 import { UrlForwardingStart } from '../../url_forwarding/public';
 import { NavigationPublicPluginStart } from '../../navigation/public';
-import { IndexPatternFieldEditorStart } from '../../index_pattern_field_editor/public';
+import { IndexPatternFieldEditorStart } from '../../data_view_field_editor/public';
 import { FieldFormatsStart } from '../../field_formats/public';
 import { EmbeddableStart } from '../../embeddable/public';
 
@@ -58,7 +57,6 @@ export interface DiscoverServices {
   metadata: { branch: string };
   navigation: NavigationPublicPluginStart;
   share?: SharePluginStart;
-  kibanaLegacy: KibanaLegacyStart;
   urlForwarding: UrlForwardingStart;
   timefilter: TimefilterContract;
   toastNotifications: ToastsStart;
@@ -97,14 +95,13 @@ export function buildServices(
     },
     navigation: plugins.navigation,
     share: plugins.share,
-    kibanaLegacy: plugins.kibanaLegacy,
     urlForwarding: plugins.urlForwarding,
     timefilter: plugins.data.query.timefilter.timefilter,
     toastNotifications: core.notifications.toasts,
     uiSettings: core.uiSettings,
     storage,
     trackUiMetric: usageCollection?.reportUiCounter.bind(usageCollection, 'discover'),
-    indexPatternFieldEditor: plugins.indexPatternFieldEditor,
+    indexPatternFieldEditor: plugins.dataViewFieldEditor,
     http: core.http,
     spaces: plugins.spaces,
   };

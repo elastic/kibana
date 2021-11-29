@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import Boom from '@hapi/boom';
-
 import { SavedObjectsFindResponse } from 'kibana/server';
 
 import { rulesClientMock } from '../../../../../alerting/server/mocks';
@@ -26,6 +24,7 @@ import { getAlertMock } from './__mocks__/request_responses';
 import { AlertExecutionStatusErrorReasons } from '../../../../../alerting/common';
 import { getQueryRuleParams } from '../schemas/rule_schemas.mock';
 import { RuleExecutionStatus } from '../../../../common/detection_engine/schemas/common/schemas';
+import { CustomHttpRequestError } from '../../../utils/custom_http_request_error';
 
 let rulesClient: ReturnType<typeof rulesClientMock.create>;
 
@@ -34,17 +33,17 @@ describe.each([
   ['RAC', true],
 ])('utils - %s', (_, isRuleRegistryEnabled) => {
   describe('transformBulkError', () => {
-    test('returns transformed object if it is a boom object', () => {
-      const boom = new Boom.Boom('some boom message', { statusCode: 400 });
-      const transformed = transformBulkError('rule-1', boom);
+    test('returns transformed object if it is a custom error object', () => {
+      const customError = new CustomHttpRequestError('some custom error message', 400);
+      const transformed = transformBulkError('rule-1', customError);
       const expected: BulkError = {
         rule_id: 'rule-1',
-        error: { message: 'some boom message', status_code: 400 },
+        error: { message: 'some custom error message', status_code: 400 },
       };
       expect(transformed).toEqual(expected);
     });
 
-    test('returns a normal error if it is some non boom object that has a statusCode', () => {
+    test('returns a normal error if it is some non custom error that has a statusCode', () => {
       const error: Error & { statusCode?: number } = {
         statusCode: 403,
         name: 'some name',
@@ -71,7 +70,7 @@ describe.each([
       expect(transformed).toEqual(expected);
     });
 
-    test('it detects a BadRequestError and returns a Boom status of 400', () => {
+    test('it detects a BadRequestError and returns an error status of 400', () => {
       const error: BadRequestError = new BadRequestError('I have a type error');
       const transformed = transformBulkError('rule-1', error);
       const expected: BulkError = {
@@ -136,7 +135,6 @@ describe.each([
 
   describe('mergeStatuses', () => {
     it('merges statuses and converts from camelCase saved object to snake_case HTTP response', () => {
-      //
       const statusOne = exampleRuleStatus();
       statusOne.attributes.status = RuleExecutionStatus.failed;
       const statusTwo = exampleRuleStatus();

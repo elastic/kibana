@@ -9,15 +9,13 @@ import React, { useCallback, useMemo, useEffect } from 'react';
 import { connect, ConnectedProps, useDispatch } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 import styled from 'styled-components';
-
-import { isEmpty } from 'lodash/fp';
+import type { Filter } from '@kbn/es-query';
 import { inputsModel, inputsSelectors, State } from '../../store';
 import { inputsActions } from '../../store/actions';
 import { ControlColumnProps, RowRenderer, TimelineId } from '../../../../common/types/timeline';
 import { timelineSelectors, timelineActions } from '../../../timelines/store/timeline';
 import type { SubsetTimelineModel, TimelineModel } from '../../../timelines/store/timeline/model';
 import { Status } from '../../../../common/detection_engine/schemas/common/schemas';
-import { Filter } from '../../../../../../../src/plugins/data/public';
 import { InspectButtonContainer } from '../inspect';
 import { useGlobalFullScreen } from '../../containers/use_full_screen';
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
@@ -27,19 +25,12 @@ import type { EntityType } from '../../../../../timelines/common';
 import { TGridCellAction } from '../../../../../timelines/common/types';
 import { DetailsPanel } from '../../../timelines/components/side_panel';
 import { CellValueElementProps } from '../../../timelines/components/timeline/cell_rendering';
+import { FIELDS_WITHOUT_CELL_ACTIONS } from '../../lib/cell_actions/constants';
 import { useKibana } from '../../lib/kibana';
-import { defaultControlColumn } from '../../../timelines/components/timeline/body/control_columns';
-import { EventsViewer } from './events_viewer';
-import * as i18n from './translations';
 import { GraphOverlay } from '../../../timelines/components/graph_overlay';
+import { useCreateFieldButton } from '../../../timelines/components/create_field_button';
 
 const EMPTY_CONTROL_COLUMNS: ControlColumnProps[] = [];
-const leadingControlColumns: ControlColumnProps[] = [
-  {
-    ...defaultControlColumn,
-    headerCellRender: () => <>{i18n.ACTIONS}</>,
-  },
-];
 
 const FullScreenContainer = styled.div<{ $isFullScreen: boolean }>`
   height: ${({ $isFullScreen }) => ($isFullScreen ? '100%' : undefined)};
@@ -54,6 +45,7 @@ export interface OwnProps {
   end: string;
   entityType: EntityType;
   id: TimelineId;
+  leadingControlColumns: ControlColumnProps[];
   scopeId: SourcererScopeName;
   start: string;
   showTotalCount?: boolean;
@@ -93,6 +85,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   itemsPerPage,
   itemsPerPageOptions,
   kqlMode,
+  leadingControlColumns,
   pageFilters,
   currentFilter,
   onRuleChange,
@@ -124,8 +117,6 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   } = useSourcererDataView(scopeId);
 
   const { globalFullScreen } = useGlobalFullScreen();
-  // TODO: Once we are past experimental phase this code should be removed
-  const tGridEnabled = useIsExperimentalFeatureEnabled('tGridEnabled');
   const tGridEventRenderedViewEnabled = useIsExperimentalFeatureEnabled(
     'tGridEventRenderedViewEnabled'
   );
@@ -175,79 +166,53 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   }, [id, timelineQuery, globalQuery]);
   const bulkActions = useMemo(() => ({ onAlertStatusActionSuccess }), [onAlertStatusActionSuccess]);
 
+  const createFieldComponent = useCreateFieldButton(scopeId, id);
+
   return (
     <>
       <FullScreenContainer $isFullScreen={globalFullScreen}>
         <InspectButtonContainer>
-          {tGridEnabled ? (
-            timelinesUi.getTGrid<'embedded'>({
-              additionalFilters,
-              browserFields,
-              bulkActions,
-              columns,
-              dataProviders,
-              defaultCellActions,
-              deletedEventIds,
-              docValueFields,
-              end,
-              entityType,
-              filters: globalFilters,
-              filterStatus: currentFilter,
-              globalFullScreen,
-              graphEventId,
-              graphOverlay,
-              hasAlertsCrud,
-              id,
-              indexNames: selectedPatterns,
-              indexPattern,
-              isLive,
-              isLoadingIndexPattern,
-              itemsPerPage,
-              itemsPerPageOptions,
-              kqlMode,
-              leadingControlColumns,
-              onRuleChange,
-              query,
-              renderCellValue,
-              rowRenderers,
-              runtimeMappings,
-              setQuery,
-              sort,
-              start,
-              tGridEventRenderedViewEnabled,
-              trailingControlColumns,
-              type: 'embedded',
-              unit,
-            })
-          ) : (
-            <EventsViewer
-              browserFields={browserFields}
-              columns={columns}
-              docValueFields={docValueFields}
-              id={id}
-              dataProviders={dataProviders}
-              deletedEventIds={deletedEventIds}
-              end={end}
-              isLoadingIndexPattern={isLoadingIndexPattern}
-              filters={globalFilters}
-              indexNames={selectedPatterns}
-              indexPattern={indexPattern}
-              isLive={isLive}
-              itemsPerPage={itemsPerPage}
-              itemsPerPageOptions={itemsPerPageOptions}
-              kqlMode={kqlMode}
-              query={query}
-              onRuleChange={onRuleChange}
-              renderCellValue={renderCellValue}
-              rowRenderers={rowRenderers}
-              runtimeMappings={runtimeMappings}
-              start={start}
-              sort={sort}
-              showTotalCount={isEmpty(graphEventId) ? true : false}
-              utilityBar={utilityBar}
-              graphEventId={graphEventId}
-            />
-          )}
+          {timelinesUi.getTGrid<'embedded'>({
+            additionalFilters,
+            browserFields,
+            bulkActions,
+            columns,
+            dataProviders,
+            defaultCellActions,
+            deletedEventIds,
+            disabledCellActions: FIELDS_WITHOUT_CELL_ACTIONS,
+            docValueFields,
+            end,
+            entityType,
+            filters: globalFilters,
+            filterStatus: currentFilter,
+            globalFullScreen,
+            graphEventId,
+            graphOverlay,
+            hasAlertsCrud,
+            id,
+            indexNames: selectedPatterns,
+            indexPattern,
+            isLive,
+            isLoadingIndexPattern,
+            itemsPerPage,
+            itemsPerPageOptions,
+            kqlMode,
+            leadingControlColumns,
+            onRuleChange,
+            query,
+            renderCellValue,
+            rowRenderers,
+            runtimeMappings,
+            setQuery,
+            sort,
+            start,
+            tGridEventRenderedViewEnabled,
+            trailingControlColumns,
+            type: 'embedded',
+            unit,
+            createFieldComponent,
+          })}
         </InspectButtonContainer>
       </FullScreenContainer>
       <DetailsPanel
@@ -338,6 +303,7 @@ export const StatefulEventsViewer = connector(
       prevProps.itemsPerPage === nextProps.itemsPerPage &&
       deepEqual(prevProps.itemsPerPageOptions, nextProps.itemsPerPageOptions) &&
       prevProps.kqlMode === nextProps.kqlMode &&
+      prevProps.leadingControlColumns === nextProps.leadingControlColumns &&
       deepEqual(prevProps.query, nextProps.query) &&
       prevProps.renderCellValue === nextProps.renderCellValue &&
       prevProps.rowRenderers === nextProps.rowRenderers &&

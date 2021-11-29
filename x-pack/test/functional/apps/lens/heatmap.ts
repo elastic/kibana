@@ -12,10 +12,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['visualize', 'lens', 'common', 'header']);
   const elasticChart = getService('elasticChart');
   const testSubjects = getService('testSubjects');
+  const retry = getService('retry');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/117404
-  // FLAKY: https://github.com/elastic/kibana/issues/113043
-  describe.skip('lens heatmap', () => {
+  describe('lens heatmap', () => {
     before(async () => {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisType('lens');
@@ -73,9 +72,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should reflect stop colors change on the chart', async () => {
       await PageObjects.lens.openDimensionEditor('lnsHeatmap_cellPanel > lns-dimensionTrigger');
       await PageObjects.lens.openPalettePanel('lnsHeatmap');
-      await testSubjects.setValue('lnsPalettePanel_dynamicColoring_stop_value_0', '10', {
-        clearWithKeyboard: true,
-        typeCharByChar: true,
+      await retry.try(async () => {
+        await testSubjects.setValue('lnsPalettePanel_dynamicColoring_stop_value_0', '10', {
+          clearWithKeyboard: true,
+          typeCharByChar: true,
+        });
       });
       await PageObjects.lens.waitForVisualization();
 
@@ -129,10 +130,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // assert legend has changed
       expect(debugState.legend!.items).to.eql([
-        { key: '0 - 8,529.22', name: '0 - 8,529.22', color: '#6092c0' },
-        { key: '8,529.22 - 11,335.66', name: '8,529.22 - 11,335.66', color: '#a8bfda' },
-        { key: '11,335.66 - 14,142.11', name: '11,335.66 - 14,142.11', color: '#ebeff5' },
-        { key: '14,142.11 - 16,948.55', name: '14,142.11 - 16,948.55', color: '#ecb385' },
+        { key: '0 - 8,529.21', name: '0 - 8,529.21', color: '#6092c0' },
+        { key: '8,529.21 - 11,335.66', name: '8,529.21 - 11,335.66', color: '#a8bfda' },
+        { key: '11,335.66 - 14,142.1', name: '11,335.66 - 14,142.1', color: '#ebeff5' },
+        { key: '14,142.1 - 16,948.55', name: '14,142.1 - 16,948.55', color: '#ecb385' },
         { key: '≥ 16,948.55', name: '≥ 16,948.55', color: '#e7664c' },
       ]);
     });

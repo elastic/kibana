@@ -17,7 +17,7 @@ import { ReportingCore } from '../../..';
 import { KBN_SCREENSHOT_MODE_HEADER } from '../../../../../../../src/plugins/screenshot_mode/server';
 import { ConditionalHeaders, ConditionalHeadersConditions } from '../../../export_types/common';
 import { LevelLogger } from '../../../lib';
-import { ViewZoomWidthHeight } from '../../../lib/layouts/layout';
+import { Layout, ViewZoomWidthHeight } from '../../../lib/layouts/layout';
 import { ElementPosition } from '../../../lib/screenshots';
 import { allowRequest, NetworkPolicy } from '../../network_policy';
 
@@ -97,11 +97,13 @@ export class HeadlessChromiumDriver {
       waitForSelector: pageLoadSelector,
       timeout,
       locator,
+      layout,
     }: {
       conditionalHeaders: ConditionalHeaders;
       waitForSelector: string;
       timeout: number;
       locator?: LocatorParams;
+      layout?: Layout;
     },
     logger: LevelLogger
   ): Promise<void> {
@@ -115,6 +117,10 @@ export class HeadlessChromiumDriver {
      * scripts have run on the browser page.
      */
     await this.page.evaluateOnNewDocument(this.core.getEnableScreenshotMode());
+
+    if (layout) {
+      await this.page.evaluateOnNewDocument(this.core.getSetScreenshotLayout(), layout.id);
+    }
 
     if (locator) {
       await this.page.evaluateOnNewDocument(
@@ -210,36 +216,16 @@ export class HeadlessChromiumDriver {
     return resp;
   }
 
-  public async waitFor(
-    {
-      fn,
-      args,
-      toEqual,
-      timeout,
-    }: {
-      fn: EvaluateFn;
-      args: SerializableOrJSHandle[];
-      toEqual: number;
-      timeout: number;
-    },
-    context: EvaluateMetaOpts,
-    logger: LevelLogger
-  ): Promise<void> {
-    const startTime = Date.now();
-
-    while (true) {
-      const result = await this.evaluate({ fn, args }, context, logger);
-      if (result === toEqual) {
-        return;
-      }
-
-      if (Date.now() - startTime > timeout) {
-        throw new Error(
-          `Timed out waiting for the items selected to equal ${toEqual}. Found: ${result}. Context: ${context.context}`
-        );
-      }
-      await new Promise((r) => setTimeout(r, WAIT_FOR_DELAY_MS));
-    }
+  public async waitFor({
+    fn,
+    args,
+    timeout,
+  }: {
+    fn: EvaluateFn;
+    args: SerializableOrJSHandle[];
+    timeout: number;
+  }): Promise<void> {
+    await this.page.waitForFunction(fn, { timeout, polling: WAIT_FOR_DELAY_MS }, ...args);
   }
 
   public async setViewport(

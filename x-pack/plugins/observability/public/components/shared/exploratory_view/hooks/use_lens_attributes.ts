@@ -13,6 +13,7 @@ import {
   AllSeries,
   allSeriesKey,
   convertAllShortSeries,
+  reportTypeKey,
   useSeriesStorage,
 } from './use_series_storage';
 import { getDefaultConfigs } from '../configurations/default_configs';
@@ -23,6 +24,7 @@ import { ALL_VALUES_SELECTED } from '../../field_value_suggestions/field_value_c
 import { useTheme } from '../../../../hooks/use_theme';
 import { EuiTheme } from '../../../../../../../../src/plugins/kibana_react/common';
 import { LABEL_FIELDS_BREAKDOWN } from '../configurations/constants';
+import { ReportConfigMap, useExploratoryView } from '../contexts/exploatory_view_config';
 
 export const getFiltersFromDefs = (reportDefinitions: SeriesUrl['reportDefinitions']) => {
   return Object.entries(reportDefinitions ?? {})
@@ -39,7 +41,8 @@ export function getLayerConfigs(
   allSeries: AllSeries,
   reportType: ReportViewType,
   theme: EuiTheme,
-  indexPatterns: IndexPatternState
+  indexPatterns: IndexPatternState,
+  reportConfigMap: ReportConfigMap
 ) {
   const layerConfigs: LayerConfig[] = [];
 
@@ -56,6 +59,7 @@ export function getLayerConfigs(
         reportType,
         indexPattern,
         dataType: series.dataType,
+        reportConfigMap,
       });
 
       const filters: UrlFilter[] = (series.filters ?? []).concat(
@@ -88,16 +92,25 @@ export const useLensAttributes = (): TypedLensByValueInput['attributes'] | null 
 
   const { indexPatterns } = useAppIndexPatternContext();
 
+  const { reportConfigMap } = useExploratoryView();
+
   const theme = useTheme();
 
   return useMemo(() => {
     // we only use the data from url to apply, since that gets updated to apply changes
     const allSeriesT: AllSeries = convertAllShortSeries(storage.get(allSeriesKey) ?? []);
+    const reportTypeT: ReportViewType = storage.get(reportTypeKey) as ReportViewType;
 
-    if (isEmpty(indexPatterns) || isEmpty(allSeriesT) || !reportType) {
+    if (isEmpty(indexPatterns) || isEmpty(allSeriesT) || !reportTypeT) {
       return null;
     }
-    const layerConfigs = getLayerConfigs(allSeriesT, reportType, theme, indexPatterns);
+    const layerConfigs = getLayerConfigs(
+      allSeriesT,
+      reportTypeT,
+      theme,
+      indexPatterns,
+      reportConfigMap
+    );
 
     if (layerConfigs.length < 1) {
       return null;

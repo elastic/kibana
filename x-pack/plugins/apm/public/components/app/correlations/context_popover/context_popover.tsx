@@ -18,8 +18,8 @@ import {
 } from '@elastic/eui';
 import React, { Fragment, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { FieldStats } from '../../../../../common/search_strategies/field_stats_types';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { FieldStats } from '../../../../../common/correlations/field_stats_types';
 import { OnAddFilter, TopValues } from './top_values';
 import { useTheme } from '../../../../hooks/use_theme';
 

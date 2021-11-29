@@ -18,6 +18,7 @@ import type {
   UpdatePackagePolicyRequestSchema,
   DeletePackagePoliciesRequestSchema,
   UpgradePackagePoliciesRequestSchema,
+  DryRunPackagePoliciesRequestSchema,
 } from '../../types';
 import type {
   CreatePackagePolicyResponse,
@@ -201,31 +202,56 @@ export const upgradePackagePolicyHandler: RequestHandler<
   const esClient = context.core.elasticsearch.client.asCurrentUser;
   const user = appContextService.getSecurity()?.authc.getCurrentUser(request) || undefined;
   try {
-    if (request.body.dryRun) {
-      const body: UpgradePackagePolicyDryRunResponse = [];
+    const body: UpgradePackagePolicyResponse = await packagePolicyService.upgrade(
+      soClient,
+      esClient,
+      request.body.packagePolicyIds,
+      { user }
+    );
 
-      for (const id of request.body.packagePolicyIds) {
-        const result = await packagePolicyService.getUpgradeDryRunDiff(
-          soClient,
-          id,
-          request.body.packageVersion
-        );
-        body.push(result);
-      }
-      return response.ok({
-        body,
-      });
-    } else {
-      const body: UpgradePackagePolicyResponse = await packagePolicyService.upgrade(
-        soClient,
-        esClient,
-        request.body.packagePolicyIds,
-        { user }
-      );
-      return response.ok({
-        body,
+    const firstFatalError = body.find((item) => item.statusCode && item.statusCode !== 200);
+
+    if (firstFatalError) {
+      return response.customError({
+        statusCode: firstFatalError.statusCode!,
+        body: { message: firstFatalError.body!.message },
       });
     }
+    return response.ok({
+      body,
+    });
+  } catch (error) {
+    return defaultIngestErrorHandler({ error, response });
+  }
+};
+
+export const dryRunUpgradePackagePolicyHandler: RequestHandler<
+  unknown,
+  unknown,
+  TypeOf<typeof DryRunPackagePoliciesRequestSchema.body>
+> = async (context, request, response) => {
+  const soClient = context.core.savedObjects.client;
+  try {
+    const body: UpgradePackagePolicyDryRunResponse = [];
+    const { packagePolicyIds, packageVersion } = request.body;
+
+    for (const id of packagePolicyIds) {
+      const result = await packagePolicyService.getUpgradeDryRunDiff(soClient, id, packageVersion);
+      body.push(result);
+    }
+
+    const firstFatalError = body.find((item) => item.statusCode && item.statusCode !== 200);
+
+    if (firstFatalError) {
+      return response.customError({
+        statusCode: firstFatalError.statusCode!,
+        body: { message: firstFatalError.body!.message },
+      });
+    }
+
+    return response.ok({
+      body,
+    });
   } catch (error) {
     return defaultIngestErrorHandler({ error, response });
   }

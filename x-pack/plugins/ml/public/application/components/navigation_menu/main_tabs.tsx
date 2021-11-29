@@ -7,7 +7,7 @@
 
 import React, { FC, useState, useEffect } from 'react';
 
-import { EuiPageHeader, EuiBetaBadge } from '@elastic/eui';
+import { EuiPageHeader } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { TabId } from './navigation_menu';
 import { useMlKibana, useMlLocator, useNavigateToPath } from '../../contexts/kibana';
@@ -57,20 +57,6 @@ function getTabs(disableLinks: boolean): Tab[] {
         defaultMessage: 'Model Management',
       }),
       disabled: disableLinks,
-      betaTag: (
-        <EuiBetaBadge
-          label={i18n.translate('xpack.ml.navMenu.trainedModelsTabBetaLabel', {
-            defaultMessage: 'Experimental',
-          })}
-          size="m"
-          color="hollow"
-          iconType="beaker"
-          tooltipContent={i18n.translate('xpack.ml.navMenu.trainedModelsTabBetaTooltipContent', {
-            defaultMessage:
-              "Model Management is an experimental feature and subject to change. We'd love to hear your feedback.",
-          })}
-        />
-      ),
     },
     {
       id: 'datavisualizer',
@@ -201,7 +187,6 @@ export const MainTabs: FC<Props> = ({ tabId, disableLinks }) => {
           },
           'data-test-subj': testSubject + (id === selectedTabId ? ' selected' : ''),
           isSelected: id === selectedTabId,
-          append: tab.betaTag,
         };
       })}
     />

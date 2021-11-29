@@ -29,7 +29,6 @@ pageLoadAssetSize:
   ingestPipelines: 58003
   inputControlVis: 172675
   inspector: 148711
-  kibanaLegacy: 107711
   kibanaOverview: 56279
   lens: 96624
   licenseManagement: 41817
@@ -104,7 +103,7 @@ pageLoadAssetSize:
   dataViews: 41532
   expressions: 140958
   fieldFormats: 65209
-  kibanaReact: 84422
+  kibanaReact: 74422
   share: 71239
   uiActions: 35121
   dataEnhanced: 24980
@@ -112,7 +111,7 @@ pageLoadAssetSize:
   embeddableEnhanced: 22107
   uiActionsEnhanced: 38494
   urlDrilldown: 30063
-  indexPatternEditor: 19123
-  indexPatternFieldEditor: 34448
-  indexPatternManagement: 19165
+  dataViewEditor: 12000
+  dataViewFieldEditor: 20000
+  dataViewManagement: 5000
   reporting: 57003

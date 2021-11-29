@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { delay } from 'bluebird';
+import { setTimeout as setTimeoutAsync } from 'timers/promises';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -16,7 +16,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     const supertest = getService('supertest');
     const retry = getService('retry');
 
-    describe('overview page alert flyout controls', function () {
+    // FLAKY: https://github.com/elastic/kibana/issues/88177
+    describe.skip('overview page alert flyout controls', function () {
       const DEFAULT_DATE_START = 'Sep 10, 2019 @ 12:40:08.078';
       const DEFAULT_DATE_END = 'Sep 11, 2019 @ 19:40:08.078';
       let alerts: any;
@@ -99,7 +100,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         let alert: any;
         await retry.tryForTime(60 * 1000, async () => {
           // add a delay before next call to not overload the server
-          await delay(1500);
+          await setTimeoutAsync(1500);
           const apiResponse = await supertest.get('/api/alerts/_find?search=uptime-test');
           const alertsFromThisTest = apiResponse.body.data.filter(
             ({ name }: { name: string }) => name === 'uptime-test'

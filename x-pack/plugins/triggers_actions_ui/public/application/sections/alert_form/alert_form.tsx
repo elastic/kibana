@@ -7,7 +7,7 @@
 
 import React, { Fragment, useState, useEffect, useCallback, Suspense } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -764,7 +764,12 @@ export const AlertForm = ({
                 <EuiFieldSearch
                   fullWidth
                   data-test-subj="alertSearchField"
-                  onChange={(e) => setInputText(e.target.value)}
+                  onChange={(e) => {
+                    setInputText(e.target.value);
+                    if (e.target.value === '') {
+                      setSearchText('');
+                    }
+                  }}
                   onKeyUp={(e) => {
                     if (e.keyCode === ENTER_KEY) {
                       setSearchText(inputText);
