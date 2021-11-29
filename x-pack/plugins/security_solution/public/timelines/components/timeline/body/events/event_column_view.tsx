@@ -61,6 +61,7 @@ export const EventColumnView = React.memo<Props>(
     data,
     ecsData,
     eventIdToNoteIds,
+    filterManager,
     isEventPinned = false,
     isEventViewer = false,
     loadingEventIds,
@@ -188,6 +189,7 @@ export const EventColumnView = React.memo<Props>(
           columnHeaders={columnHeaders}
           data={data}
           ecsData={ecsData}
+          filterManager={filterManager}
           hasRowRenderers={hasRowRenderers}
           notesCount={notesCount}
           renderCellValue={renderCellValue}

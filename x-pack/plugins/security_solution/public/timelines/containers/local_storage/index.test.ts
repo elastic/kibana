@@ -28,16 +28,8 @@ const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 const getExpectedColumns = (model: TimelineModel) =>
   model.columns.map(migrateColumnWidthToInitialWidth).map(migrateColumnLabelToDisplayAsText);
 
-const {
-  documentType,
-  filterManager,
-  isLoading,
-  loadingText,
-  queryFields,
-  selectAll,
-  unit,
-  ...timelineToStore
-} = mockTimelineModel;
+const { documentType, isLoading, loadingText, queryFields, selectAll, unit, ...timelineToStore } =
+  mockTimelineModel;
 
 describe('SiemLocalStorage', () => {
   const { localStorage, storage } = createSecuritySolutionStorageMock();

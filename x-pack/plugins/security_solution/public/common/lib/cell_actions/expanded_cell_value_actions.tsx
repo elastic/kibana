@@ -43,13 +43,9 @@ const ExpandedCellValueActionsComponent: React.FC<Props> = ({
   onFilterAdded,
   timelineId,
   value,
+  filterManager,
 }) => {
-  const {
-    timelines,
-    data: {
-      query: { filterManager },
-    },
-  } = useKibana().services;
+  const { timelines } = useKibana().services;
   const showButton = useMemo(
     () =>
       allowTopN({

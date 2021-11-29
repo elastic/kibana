@@ -29,6 +29,7 @@ const StatefulCellComponent = ({
   renderCellValue,
   tabType,
   timelineId,
+  filterManager,
 }: {
   ariaRowindex: number;
   data: TimelineNonEcsData[];
@@ -47,6 +48,7 @@ const StatefulCellComponent = ({
         eventId,
         data,
         header,
+        filterManager,
         isDraggable: true,
         isExpandable: true,
         isExpanded: false,

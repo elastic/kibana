@@ -16,7 +16,6 @@ import { defaultRowRenderers } from '../../../timelines/components/timeline/body
 import { DefaultCellRenderer } from '../../../timelines/components/timeline/cell_rendering/default_cell_renderer';
 import * as i18n from './translations';
 import { defaultCellActions } from '../../lib/cell_actions/default_cell_actions';
-import { useKibana } from '../../lib/kibana';
 import { SourcererScopeName } from '../../store/sourcerer/model';
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../../../timelines/components/timeline/body/constants';
@@ -79,7 +78,6 @@ const AlertsTableComponent: React.FC<Props> = ({
 }) => {
   const dispatch = useDispatch();
   const alertsFilter = useMemo(() => [...defaultAlertsFilters, ...pageFilters], [pageFilters]);
-  const { filterManager } = useKibana().services.data.query;
   const ACTION_BUTTON_COUNT = 3;
 
   const tGridEnabled = useIsExperimentalFeatureEnabled('tGridEnabled');
@@ -89,7 +87,6 @@ const AlertsTableComponent: React.FC<Props> = ({
       timelineActions.initializeTGridSettings({
         id: timelineId,
         documentType: i18n.ALERTS_DOCUMENT_TYPE,
-        filterManager,
         defaultColumns: alertsDefaultModel.columns.map((c) =>
           !tGridEnabled && c.initialWidth == null
             ? {
@@ -104,7 +101,7 @@ const AlertsTableComponent: React.FC<Props> = ({
         // TODO: avoid passing this through the store
       })
     );
-  }, [dispatch, filterManager, tGridEnabled, timelineId]);
+  }, [dispatch, tGridEnabled, timelineId]);
 
   const leadingControlColumns = useMemo(() => getDefaultControlColumn(ACTION_BUTTON_COUNT), []);
 

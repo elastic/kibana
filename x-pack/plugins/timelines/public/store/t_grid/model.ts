@@ -7,7 +7,6 @@
 
 import type { EuiDataGridColumn } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
-import type { FilterManager } from '../../../../../../src/plugins/data/public';
 import type { TimelineNonEcsData } from '../../../common/search_strategy';
 import type {
   ColumnHeaderOptions,
@@ -26,7 +25,6 @@ export interface TGridModelSettings {
   >;
   /** A list of Ids of excluded Row Renderers */
   excludedRowRendererIds: RowRendererId[];
-  filterManager?: FilterManager;
   footerText?: string | React.ReactNode;
   loadingText?: string | React.ReactNode;
   queryFields: string[];
@@ -100,7 +98,6 @@ export type TGridModelForTimeline = Pick<
   | 'excludedRowRendererIds'
   | 'expandedDetail'
   | 'filters'
-  | 'filterManager'
   | 'footerText'
   | 'graphEventId'
   | 'kqlQuery'

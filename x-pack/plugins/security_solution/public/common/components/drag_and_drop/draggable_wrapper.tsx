@@ -133,6 +133,7 @@ const DraggableOnWrapperComponent: React.FC<Props> = ({
   render,
   timelineId,
   truncate,
+  filterManager,
 }) => {
   const [providerRegistered, setProviderRegistered] = useState(false);
   const isDisabled = dataProvider.id.includes(`-${ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID}-`);
@@ -156,6 +157,7 @@ const DraggableOnWrapperComponent: React.FC<Props> = ({
     render,
     timelineId,
     truncate,
+    filterManager,
   });
 
   const registerProvider = useCallback(() => {
@@ -312,6 +314,7 @@ const DraggableWrapperComponent: React.FC<Props> = ({
   hideTopN = false,
   isDraggable = false,
   onFilterAdded,
+  filterManager,
   render,
   timelineId,
   truncate,
@@ -328,6 +331,7 @@ const DraggableWrapperComponent: React.FC<Props> = ({
     hideTopN,
     isDraggable,
     onFilterAdded,
+    filterManager,
     render,
     timelineId,
     truncate,
@@ -364,6 +368,7 @@ const DraggableWrapperComponent: React.FC<Props> = ({
         hoverContent={hoverContent}
         onCloseRequested={onCloseRequested}
         render={renderContent}
+        filterManager={filterManager}
       />
     );
   }
@@ -375,6 +380,7 @@ const DraggableWrapperComponent: React.FC<Props> = ({
       render={render}
       timelineId={timelineId}
       truncate={truncate}
+      filterManager={filterManager}
     />
   );
 };

@@ -54,7 +54,7 @@ export enum TimelineId {
   alternateTest = 'alternateTest',
 }
 
-export interface InitialyzeTGridSettings extends Partial<TGridModelSettings> {
+export interface InitializeTGridSettings extends Partial<TGridModelSettings> {
   id: string;
 }
 

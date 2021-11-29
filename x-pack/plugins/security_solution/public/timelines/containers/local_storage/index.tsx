@@ -95,16 +95,8 @@ export const addTimelineInStorage = (
 
 const cleanStorageTimeline = (timeline: TimelineModel) => {
   // discard unneeded fields to make sure the object serialization works
-  const {
-    documentType,
-    filterManager,
-    isLoading,
-    loadingText,
-    queryFields,
-    selectAll,
-    unit,
-    ...timelineToStore
-  } = timeline;
+  const { documentType, isLoading, loadingText, queryFields, selectAll, unit, ...timelineToStore } =
+    timeline;
   return timelineToStore;
 };
 

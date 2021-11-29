@@ -155,6 +155,7 @@ export const renderEventModule = ({
   linkValue,
   truncate,
   value,
+  filterManager,
 }: {
   contextId: string;
   eventId: string;
@@ -185,6 +186,7 @@ export const renderEventModule = ({
             isDraggable={isDraggable}
             tooltipContent={value}
             value={value}
+            filterManager={filterManager}
           >
             {content}
           </DefaultDraggable>
@@ -254,6 +256,7 @@ export const renderUrl = ({
   truncate,
   title,
   value,
+  filterManager,
 }: {
   contextId: string;
   /** `Component` is only used with `EuiDataGrid`; the grid keeps a reference to `Component` for show / hide functionality */
@@ -290,6 +293,7 @@ export const renderUrl = ({
         isDraggable={isDraggable}
         tooltipContent={value}
         value={value}
+        filterManager={filterManager}
       >
         {content}
       </DefaultDraggable>

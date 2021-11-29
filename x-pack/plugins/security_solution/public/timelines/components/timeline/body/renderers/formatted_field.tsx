@@ -77,6 +77,7 @@ const FormattedFieldValueComponent: React.FC<{
   truncate = true,
   value,
   linkValue,
+  filterManager,
 }) => {
   if (isObjectArray || asPlainText) {
     return <span data-test-subj={`formatted-field-${fieldName}`}>{value}</span>;
@@ -106,6 +107,7 @@ const FormattedFieldValueComponent: React.FC<{
         isDraggable={isDraggable}
         tooltipContent={null}
         value={`${value}`}
+        filterManager={filterManager}
       >
         <FormattedDate className={classNames} fieldName={fieldName} value={value} />
       </DefaultDraggable>
@@ -257,6 +259,7 @@ const FormattedFieldValueComponent: React.FC<{
             ? null
             : fieldName
         }
+        filterManager={filterManager}
       >
         {content}
       </DefaultDraggable>

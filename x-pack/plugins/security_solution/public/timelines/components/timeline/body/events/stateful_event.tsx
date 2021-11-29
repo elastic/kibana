@@ -83,6 +83,7 @@ const StatefulEventComponent: React.FC<Props> = ({
   columnHeaders,
   event,
   eventIdToNoteIds,
+  filterManager,
   isEventViewer = false,
   isEventPinned = false,
   lastFocusedAriaColindex,
@@ -280,6 +281,7 @@ const StatefulEventComponent: React.FC<Props> = ({
           data={event.data}
           ecsData={event.ecs}
           eventIdToNoteIds={eventIdToNoteIds}
+          filterManager={filterManager}
           hasRowRenderers={hasRowRenderers}
           isEventPinned={isEventPinned}
           isEventViewer={isEventViewer}

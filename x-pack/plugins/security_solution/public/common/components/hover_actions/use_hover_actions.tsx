@@ -43,6 +43,7 @@ export const useHoverActions = ({
   onFilterAdded,
   render,
   timelineId,
+  filterManager,
 }: Props) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const keyboardHandlerRef = useRef<HTMLDivElement | null>(null);
@@ -100,6 +101,7 @@ export const useHoverActions = ({
         dataProvider={dataProvider}
         draggableId={isDraggable ? getDraggableId(dataProvider.id) : undefined}
         field={dataProvider.queryMatch.field}
+        filterManager={filterManager}
         hideTopN={hideTopN}
         isObjectArray={false}
         onFilterAdded={onFilterAdded}
@@ -127,6 +129,7 @@ export const useHoverActions = ({
     showTopN,
     timelineId,
     toggleTopN,
+    filterManager,
   ]);
 
   const setContainerRef = useCallback((e: HTMLDivElement) => {
@@ -167,6 +170,7 @@ export const useHoverActions = ({
       openPopover,
       setContainerRef,
       showTopN,
+      filterManager,
     }),
     [
       closePopOverTrigger,
@@ -178,6 +182,7 @@ export const useHoverActions = ({
       openPopover,
       setContainerRef,
       showTopN,
+      filterManager,
     ]
   );
 };

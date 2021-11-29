@@ -13,7 +13,7 @@ export interface FilterValueFnArgs {
   Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon;
   field: string;
   value: string[] | string | null | undefined;
-  filterManager: FilterManager | undefined;
+  filterManager: FilterManager;
   onFilterAdded: (() => void) | undefined;
 }
 

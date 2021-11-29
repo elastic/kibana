@@ -14,7 +14,7 @@ import {
   EuiBadge,
 } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
-import React, { useMemo, useEffect, useCallback } from 'react';
+import React, { useMemo, useEffect, useCallback, useState } from 'react';
 import styled from 'styled-components';
 import { Dispatch } from 'redux';
 import { connect, ConnectedProps, useDispatch } from 'react-redux';
@@ -59,7 +59,6 @@ import { DetailsPanel } from '../../side_panel';
 import { ExitFullScreen } from '../../../../common/components/exit_full_screen';
 import { HeaderActions } from '../body/actions/header_actions';
 import { getDefaultControlColumn } from '../body/control_columns';
-import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { Sourcerer } from '../../../../common/components/sourcerer';
 const TimelineHeaderContainer = styled.div`
   margin-top: 6px;
@@ -195,15 +194,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   const { uiSettings } = useKibana().services;
   const ACTION_BUTTON_COUNT = 5;
 
-  const getManageTimeline = useMemo(() => timelineSelectors.getManageTimelineById(), []);
-  const { filterManager: activeFilterManager } = useDeepEqualSelector((state) =>
-    getManageTimeline(state, timelineId ?? '')
-  );
-
-  const filterManager = useMemo(
-    () => activeFilterManager ?? new FilterManager(uiSettings),
-    [activeFilterManager, uiSettings]
-  );
+  const [filterManager] = useState<FilterManager>(new FilterManager(uiSettings));
 
   const esQueryConfig = useMemo(() => getEsQueryConfig(uiSettings), [uiSettings]);
   const kqlQuery: {
@@ -266,11 +257,10 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   useEffect(() => {
     dispatch(
       timelineActions.initializeTGridSettings({
-        filterManager,
         id: timelineId,
       })
     );
-  }, [activeFilterManager, dispatch, filterManager, timelineId, uiSettings]);
+  }, [dispatch, timelineId, uiSettings]);
 
   const [isQueryLoading, { events, inspect, totalCount, pageInfo, loadPage, updatedAt, refetch }] =
     useTimelineEvents({
@@ -389,6 +379,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
                 activePage={pageInfo.activePage}
                 browserFields={browserFields}
                 data={isBlankTimeline ? EMPTY_EVENTS : events}
+                filterManager={filterManager}
                 id={timelineId}
                 refetch={refetch}
                 renderCellValue={renderCellValue}

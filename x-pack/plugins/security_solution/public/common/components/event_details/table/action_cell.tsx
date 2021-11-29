@@ -70,6 +70,7 @@ export const ActionCell: React.FC<Props> = React.memo(
         dataType={data.type}
         dataProvider={actionCellConfig?.dataProvider}
         enableOverflowButton={true}
+        filterManager={filterManager}
         field={data.field}
         isObjectArray={data.isObjectArray}
         onFilterAdded={onFilterAdded}

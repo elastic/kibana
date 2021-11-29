@@ -14,7 +14,7 @@ import type {
   TimelineExpandedDetailType,
 } from '../../../common/types/timeline';
 import { TimelineTabs } from '../../../common/types/timeline';
-import { InitialyzeTGridSettings, TGridPersistInput } from './types';
+import { InitializeTGridSettings, TGridPersistInput } from './types';
 
 const actionCreator = actionCreatorFactory('x-pack/timelines/t-grid');
 
@@ -106,7 +106,7 @@ export const clearEventsDeleted = actionCreator<{
   id: string;
 }>('CLEAR_TIMELINE_EVENTS_DELETED');
 
-export const initializeTGridSettings = actionCreator<InitialyzeTGridSettings>('INITIALIZE_TGRID');
+export const initializeTGridSettings = actionCreator<InitializeTGridSettings>('INITIALIZE_TGRID');
 
 export const setTGridSelectAll =
   actionCreator<{ id: string; selectAll: boolean }>('SET_TGRID_SELECT_ALL');

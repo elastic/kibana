@@ -14,13 +14,10 @@ import { isEmpty } from 'lodash';
 import { useKibana } from '../../lib/kibana';
 import { getAllFieldsByName } from '../../containers/source';
 import { allowTopN } from '../drag_and_drop/helpers';
-import { useDeepEqualSelector } from '../../hooks/use_selector';
 import { ColumnHeaderOptions, DataProvider, TimelineId } from '../../../../common/types/timeline';
 import { SourcererScopeName } from '../../store/sourcerer/model';
 import { useSourcererDataView } from '../../containers/sourcerer';
-import { timelineSelectors } from '../../../timelines/store/timeline';
 import { ShowTopNButton } from './actions/show_top_n';
-import { FilterManager } from '../../../../../../../src/plugins/data/public';
 
 export interface UseHoverActionItemsProps {
   dataProvider?: DataProvider | DataProvider[];
@@ -58,6 +55,7 @@ export const useHoverActionItems = ({
   draggableId,
   enableOverflowButton,
   field,
+  filterManager,
   handleHoverActionClicked,
   hideTopN,
   isCaseView,
@@ -75,7 +73,7 @@ export const useHoverActionItems = ({
   values,
 }: UseHoverActionItemsProps): UseHoverActionItems => {
   const kibana = useKibana();
-  const { timelines, uiSettings } = kibana.services;
+  const { timelines } = kibana.services;
   // Common actions used by the alert table and alert flyout
   const {
     getAddToTimelineButton,
@@ -85,21 +83,18 @@ export const useHoverActionItems = ({
     getFilterOutValueButton,
     getOverflowButton,
   } = timelines.getHoverActions();
-  const filterManagerBackup = useMemo(
-    () => kibana.services.data.query.filterManager,
-    [kibana.services.data.query.filterManager]
-  );
-  const getManageTimeline = useMemo(() => timelineSelectors.getManageTimelineById(), []);
-  const { filterManager: activeFilterManager } = useDeepEqualSelector((state) =>
-    getManageTimeline(state, timelineId ?? '')
-  );
-  const filterManager = useMemo(
-    () =>
-      timelineId === TimelineId.active
-        ? activeFilterManager ?? new FilterManager(uiSettings)
-        : filterManagerBackup,
-    [uiSettings, timelineId, activeFilterManager, filterManagerBackup]
-  );
+  console.log({field, timelineId, filterManager});
+  // const getManageTimeline = useMemo(() => timelineSelectors.getManageTimelineById(), []);
+  // const { filterManager: activeFilterManager } = useDeepEqualSelector((state) =>
+  //   getManageTimeline(state, timelineId ?? '')
+  // );
+  // const filterManager = useMemo(
+  //   () =>
+  //     timelineId === TimelineId.active
+  //       ? activeFilterManager ?? new FilterManager(uiSettings)
+  //       : filterManagerBackup,
+  //   [uiSettings, timelineId, activeFilterManager, filterManagerBackup]
+  // );
 
   //  Regarding data from useManageTimeline:
   //  * `indexToAdd`, which enables the alerts index to be appended to

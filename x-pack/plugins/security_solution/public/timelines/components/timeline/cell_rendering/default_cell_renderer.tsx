@@ -38,6 +38,7 @@ export const DefaultCellRenderer: React.FC<CellValueElementProps> = ({
   setCellProps,
   timelineId,
   truncate,
+  filterManager,
 }) => {
   const values = getMappedNonEcsValue({
     data,
@@ -46,6 +47,23 @@ export const DefaultCellRenderer: React.FC<CellValueElementProps> = ({
   const styledContentClassName = isDetails
     ? 'eui-textBreakWord'
     : 'eui-displayInlineBlock eui-textTruncate';
+  console.log({
+    browserFields,
+    data,
+    ecsData,
+    eventId,
+    globalFilters,
+    header,
+    isDetails,
+    isDraggable,
+    isTimeline,
+    linkValues,
+    rowRenderers,
+    setCellProps,
+    timelineId,
+    truncate,
+    filterManager,
+  });
   return (
     <>
       <StyledContent className={styledContentClassName} $isDetails={isDetails}>
@@ -56,6 +74,7 @@ export const DefaultCellRenderer: React.FC<CellValueElementProps> = ({
           ecsData,
           eventId,
           field: header,
+          filterManager,
           isDetails,
           isDraggable,
           linkValues,
@@ -73,6 +92,7 @@ export const DefaultCellRenderer: React.FC<CellValueElementProps> = ({
           browserFields={browserFields}
           field={header.id}
           globalFilters={globalFilters}
+          filterManager={filterManager}
           timelineId={timelineId}
           value={values}
         />
