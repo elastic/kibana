@@ -488,7 +488,7 @@ export class DocLinksService {
         fleet: {
           guide: `${FLEET_DOCS}index.html`,
           fleetServer: `${FLEET_DOCS}fleet-server.html`,
-          fleetServerAddFleetServer: `${FLEET_DOCS}fleet-server.html#add-fleet-server`,
+          fleetServerAddFleetServer: `${FLEET_DOCS}add-a-fleet-server.html`,
           settings: `${FLEET_DOCS}fleet-settings.html#fleet-server-hosts-setting`,
           settingsFleetServerHostSettings: `${FLEET_DOCS}fleet-settings.html#fleet-server-hosts-setting`,
           settingsFleetServerProxySettings: `${KIBANA_DOCS}fleet-settings-kb.html#fleet-data-visualizer-settings`,
@@ -498,6 +498,7 @@ export class DocLinksService {
           datastreams: `${FLEET_DOCS}data-streams.html`,
           datastreamsNamingScheme: `${FLEET_DOCS}data-streams.html#data-streams-naming-scheme`,
           installElasticAgent: `${FLEET_DOCS}install-fleet-managed-elastic-agent.html`,
+          installElasticAgentStandalone: `${FLEET_DOCS}install-standalone-elastic-agent.html`,
           upgradeElasticAgent: `${FLEET_DOCS}upgrade-elastic-agent.html`,
           upgradeElasticAgent712lower: `${FLEET_DOCS}upgrade-elastic-agent.html#upgrade-7.12-lower`,
           learnMoreBlog: `${ELASTIC_WEBSITE_URL}blog/elastic-agent-and-fleet-make-it-easier-to-integrate-your-systems-with-elastic`,
@@ -777,6 +778,7 @@ export interface DocLinksStart {
       datastreams: string;
       datastreamsNamingScheme: string;
       installElasticAgent: string;
+      installElasticAgentStandalone: string;
       upgradeElasticAgent: string;
       upgradeElasticAgent712lower: string;
       learnMoreBlog: string;
