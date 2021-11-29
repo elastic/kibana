@@ -716,13 +716,12 @@ class PackagePolicyService {
   ): Promise<NewPackagePolicy> {
     let newPackagePolicy: NewPackagePolicy = newPolicy;
     if (newPolicy.package) {
-      const newPP = await this.buildPackagePolicyFromPackage(soClient, newPolicy.package.name);
-      // TODO when package not installed at all, should take from registry
+      const newPP = await this.buildPackagePolicyFromPackageWithVersion(
+        soClient,
+        newPolicy.package.name,
+        newPolicy.package.version
+      );
       if (newPP) {
-        if (newPolicy.package.version !== newPP.package?.version) {
-          // when request package version does not match installed version, do not enrich
-          return newPackagePolicy;
-        }
         const inputs = newPolicy.inputs.map((input) => {
           const defaultInput = newPP.inputs.find((i) => i.type === input.type);
           return {
@@ -751,6 +750,21 @@ class PackagePolicyService {
       }
     }
     return newPackagePolicy;
+  }
+
+  public async buildPackagePolicyFromPackageWithVersion(
+    soClient: SavedObjectsClientContract,
+    pkgName: string,
+    pkgVersion: string
+  ): Promise<NewPackagePolicy | undefined> {
+    const packageInfo = await getPackageInfo({
+      savedObjectsClient: soClient,
+      pkgName,
+      pkgVersion,
+    });
+    if (packageInfo) {
+      return packageToPackagePolicy(packageInfo, '', '');
+    }
   }
 
   public async buildPackagePolicyFromPackage(
