@@ -15,7 +15,6 @@ import {
   EuiBadge,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import * as H from 'history';
 import { sum } from 'lodash';
 import React, { Dispatch } from 'react';
 
@@ -63,7 +62,6 @@ const extractRuleFromRow = ({ current_status: _, failures, ...rule }: TableRow):
 export const getActions = (
   dispatch: React.Dispatch<RulesTableAction>,
   dispatchToaster: Dispatch<ActionToaster>,
-  history: H.History,
   navigateToApp: (appId: string, options?: NavigateToAppOptions | undefined) => Promise<void>,
   reFetchRules: () => Promise<void>,
   refetchPrePackagedRulesStatus: () => Promise<void>,
@@ -143,7 +141,6 @@ interface GetColumnsProps {
   navigateToApp: (appId: string, options?: NavigateToAppOptions | undefined) => Promise<void>;
   hasReadActionsPrivileges: HasReadActionsPrivileges;
   dispatchToaster: Dispatch<ActionToaster>;
-  history: H.History;
   reFetchRules: () => Promise<void>;
   refetchPrePackagedRulesStatus: () => Promise<void>;
   docLinks: DocLinksStart;
@@ -181,12 +178,36 @@ const getColumnEnabled = ({
   sortable: true,
 });
 
+const getColumnRuleName = ({ navigateToApp, formatUrl }: GetColumnsProps): TableColumn => ({
+  field: 'name',
+  name: i18n.COLUMN_RULE,
+  render: (value: Rule['name'], item: TableRow) => (
+    <EuiToolTip content={value} anchorClassName="eui-textTruncate">
+      <LinkAnchor
+        data-test-subj="ruleName"
+        onClick={(ev: { preventDefault: () => void }) => {
+          ev.preventDefault();
+          navigateToApp(APP_UI_ID, {
+            deepLinkId: SecurityPageName.rules,
+            path: getRuleDetailsUrl(item.id),
+          });
+        }}
+        href={formatUrl(getRuleDetailsUrl(item.id))}
+      >
+        {value}
+      </LinkAnchor>
+    </EuiToolTip>
+  ),
+  width: '38%',
+  sortable: true,
+  truncateText: true,
+});
+
 const getActionsColumns = ({
   hasPermissions,
   hasReadActionsPrivileges,
   dispatch,
   dispatchToaster,
-  history,
   navigateToApp,
   reFetchRules,
   refetchPrePackagedRulesStatus,
@@ -197,7 +218,6 @@ const getActionsColumns = ({
           actions: getActions(
             dispatch,
             dispatchToaster,
-            history,
             navigateToApp,
             reFetchRules,
             refetchPrePackagedRulesStatus,
@@ -209,33 +229,8 @@ const getActionsColumns = ({
     : [];
 
 export const getRulesColumns = (columnsProps: GetColumnsProps): TableColumn[] => {
-  const { formatUrl, navigateToApp } = columnsProps;
-
   const cols: TableColumn[] = [
-    {
-      field: 'name',
-      name: i18n.COLUMN_RULE,
-      render: (value: Rule['name'], item: Rule) => (
-        <EuiToolTip content={value} anchorClassName="eui-textTruncate">
-          <LinkAnchor
-            data-test-subj="ruleName"
-            onClick={(ev: { preventDefault: () => void }) => {
-              ev.preventDefault();
-              navigateToApp(APP_UI_ID, {
-                deepLinkId: SecurityPageName.rules,
-                path: getRuleDetailsUrl(item.id),
-              });
-            }}
-            href={formatUrl(getRuleDetailsUrl(item.id))}
-          >
-            {value}
-          </LinkAnchor>
-        </EuiToolTip>
-      ),
-      width: '38%',
-      sortable: true,
-      truncateText: true,
-    },
+    getColumnRuleName(columnsProps),
     {
       field: 'tags',
       name: null,
@@ -348,33 +343,9 @@ export const getRulesColumns = (columnsProps: GetColumnsProps): TableColumn[] =>
 };
 
 export const getMonitoringColumns = (columnsProps: GetColumnsProps): TableColumn[] => {
-  const { docLinks, formatUrl, navigateToApp } = columnsProps;
+  const { docLinks } = columnsProps;
   const cols: TableColumn[] = [
-    {
-      field: 'name',
-      name: i18n.COLUMN_RULE,
-      render: (value: RuleStatus['current_status']['status'], item: TableRow) => {
-        return (
-          <EuiToolTip content={value} anchorClassName="eui-textTruncate">
-            <LinkAnchor
-              data-test-subj="ruleName"
-              onClick={(ev: { preventDefault: () => void }) => {
-                ev.preventDefault();
-                navigateToApp(APP_UI_ID, {
-                  deepLinkId: SecurityPageName.rules,
-                  path: getRuleDetailsUrl(item.id),
-                });
-              }}
-              href={formatUrl(getRuleDetailsUrl(item.id))}
-            >
-              {value}
-            </LinkAnchor>
-          </EuiToolTip>
-        );
-      },
-      width: '28%',
-      truncateText: true,
-    },
+    { ...getColumnRuleName(columnsProps), width: '28%' },
     {
       field: 'current_status.bulk_create_time_durations',
       name: (
