@@ -16,14 +16,12 @@ import { createDataStreamPayload, createNonDataStreamIndex } from './data_stream
 // component but an editor being instantiated on a div reference, we cannot mock
 // the component and replace it with something else. In this particular case we're
 // mocking the returned instance of the editor to always have the same values.
+const mockGetAceEditorValue = jest.fn().mockReturnValue(`{}`);
+
 jest.mock('../../../public/application/lib/ace.js', () => {
   const createAceEditor = () => {
     return {
-      getValue: () => {
-        return `{
-          "index.routing.allocation.include._tier_preference": "non_existent_tier"
-        }`;
-      },
+      getValue: mockGetAceEditorValue,
       getSession: () => {
         return {
           on: () => null,
@@ -255,6 +253,10 @@ describe('<IndexManagementHome />', () => {
 
     test('shows error callout when request fails', async () => {
       const { actions, find, component, exists } = testBed;
+
+      mockGetAceEditorValue.mockReturnValue(`{
+        "index.routing.allocation.include._tier_preference": "non_existent_tier"
+      }`);
 
       const error = {
         statusCode: 400,

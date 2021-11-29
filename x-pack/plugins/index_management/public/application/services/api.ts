@@ -194,15 +194,18 @@ export async function loadIndexSettings(indexName: string) {
 }
 
 export async function updateIndexSettings(indexName: string, body: object) {
-  return sendRequest({
+  const response = await sendRequest({
     path: `${API_BASE_PATH}/settings/${encodeURIComponent(indexName)}`,
     method: 'put',
     body: JSON.stringify(body),
-  }).then((result) => {
-    // Only track successful requests.
-    uiMetricService.trackMetric(METRIC_TYPE.COUNT, UIM_UPDATE_SETTINGS);
-    return result;
   });
+
+  // Only track successful requests.
+  if (!response.error) {
+    uiMetricService.trackMetric(METRIC_TYPE.COUNT, UIM_UPDATE_SETTINGS);
+  }
+
+  return response;
 }
 
 export async function loadIndexStats(indexName: string) {
