@@ -41,6 +41,21 @@ export function registerCrawlerRoutes({
     })
   );
 
+  router.get(
+    {
+      path: '/internal/app_search/engines/{name}/crawler/crawl_requests/{id}',
+      validate: {
+        params: schema.object({
+          name: schema.string(),
+          id: schema.string(),
+        }),
+      },
+    },
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/api/as/v0/engines/:name/crawler/crawl_requests/:id',
+    })
+  );
+
   router.post(
     {
       path: '/internal/app_search/engines/{name}/crawler/crawl_requests',

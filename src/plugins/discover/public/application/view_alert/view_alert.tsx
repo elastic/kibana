@@ -60,7 +60,7 @@ export function ViewAlertRoute(props: NotFoundRouteProps) {
         const index = searchSource.getField('index');
         const state: DiscoverAppLocatorParams = {
           query: searchSource.getField('query') || data.query.queryString.getDefaultQuery(),
-          index: index?.id,
+          indexPatternId: index?.id,
           timeRange: {
             from: query.get('from')!,
             to: query.get('to')!,
@@ -70,7 +70,6 @@ export function ViewAlertRoute(props: NotFoundRouteProps) {
         if (filter) {
           state.filter = filter as Filter;
         }
-        // const link = locator.getRedirectUrl(state);
         await locator.navigate(state);
       }
     };

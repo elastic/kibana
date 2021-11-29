@@ -208,7 +208,9 @@ export function getAlertType(
       const docs = await searchSourceChild.fetch();
       const nrOfDocs = Number(docs.hits.total);
       const met = compareFn(nrOfDocs, params.threshold);
-
+      // @TODO, there should be a checksum addon to verify if the searchSource was changed
+      // In this case the user should be notified that the displayed data when opening the link
+      // is a might be different to the data that triggered the alert.
       const link = (
         params.urlTemplate ??
         '{{basePath}}/app/discover#/viewAlert/{{alertId}}?from={{from}}&to={{to}}'

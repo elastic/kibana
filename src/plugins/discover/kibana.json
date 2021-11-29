@@ -13,7 +13,7 @@
     "navigation",
     "uiActions",
     "savedObjects",
-    "indexPatternFieldEditor"
+    "dataViewFieldEditor"
   ],
   "optionalPlugins": [
     "alerting",

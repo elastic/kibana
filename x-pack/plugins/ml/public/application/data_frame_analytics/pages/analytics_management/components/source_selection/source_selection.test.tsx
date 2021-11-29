@@ -8,7 +8,7 @@
 import React from 'react';
 import { render, fireEvent, waitFor, screen } from '@testing-library/react';
 
-import { __IntlProvider as IntlProvider } from '@kbn/i18n/react';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
 import { getDataViewAndSavedSearch, DataViewAndSavedSearch } from '../../../../../util/index_utils';
 
@@ -76,6 +76,11 @@ jest.mock('../../../../../contexts/kibana', () => ({
     },
   }),
   useNavigateToPath: () => mockNavigateToPath,
+  useNotifications: () => {
+    return {
+      toasts: { addSuccess: jest.fn(), addDanger: jest.fn(), addError: jest.fn() },
+    };
+  },
 }));
 
 jest.mock('../../../../../util/index_utils', () => {

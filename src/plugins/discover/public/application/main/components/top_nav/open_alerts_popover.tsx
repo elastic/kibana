@@ -10,7 +10,7 @@ import React, { useCallback, useState, useMemo } from 'react';
 import ReactDOM from 'react-dom';
 import { I18nStart } from 'kibana/public';
 import { EuiWrappingPopover, EuiLink, EuiContextMenu } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { ISearchSource } from '../../../../../../data/common';
 import { KibanaContextProvider, useKibana } from '../../../../../../kibana_react/public';
 import { DiscoverServices } from '../../../../build_services';
