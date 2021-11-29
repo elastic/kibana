@@ -6,10 +6,13 @@
  */
 
 import { HttpFetchOptions, HttpStart } from 'kibana/public';
+import { QueryObserverResult, useQuery } from 'react-query';
 import {
   GetPackagePoliciesRequest,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
 } from '../../../../fleet/common';
+import { useHttp } from '../../common/lib/kibana/hooks';
+import { ServerApiError } from '../../common/types';
 import { INGEST_API_PACKAGE_POLICIES } from '../pages/policy/store/services/ingest';
 import { GetPolicyListResponse } from '../pages/policy/types';
 
@@ -33,3 +36,27 @@ export const sendGetEndpointSpecificPackagePolicies = (
     },
   });
 };
+
+export function useGetEndpointSpecificPolicies({
+  onError,
+}: {
+  onError: (error: ServerApiError) => void;
+}): QueryObserverResult<GetPolicyListResponse> {
+  const http = useHttp();
+  return useQuery<GetPolicyListResponse, ServerApiError>(
+    ['endpointSpecificPolicies'],
+    () => {
+      return sendGetEndpointSpecificPackagePolicies(http, {
+        query: {
+          page: 1,
+          perPage: 1000,
+        },
+      });
+    },
+    {
+      refetchIntervalInBackground: false,
+      refetchOnWindowFocus: false,
+      onError,
+    }
+  );
+}
