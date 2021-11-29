@@ -46,10 +46,12 @@ export const getMaxValue = (row?: DatatableRow, state?: GaugeAccessorsType) => {
     const goalValue = goalAccessor && row[goalAccessor];
     if (metricValue != null) {
       const minValue = getMinValue(row, state);
-      const biggerValue = Math.max(goalValue ?? 0, metricValue, 1);
+      const biggerValue = goalValue ? Math.max(goalValue, metricValue) : metricValue;
       const nicelyRounded = scaleLinear().domain([minValue, biggerValue]).nice().ticks(4);
-      if (nicelyRounded.length > 2)
-        return nicelyRounded[nicelyRounded.length - 1] + nicelyRounded[1];
+      if (nicelyRounded.length > 2) {
+        const ticksDifference = Math.abs(nicelyRounded[0] - nicelyRounded[1]);
+        return nicelyRounded[nicelyRounded.length - 1] + ticksDifference;
+      }
       return minValue === biggerValue ? biggerValue + 1 : biggerValue;
     }
   }
@@ -79,7 +81,7 @@ export const getMetricValue = (row?: DatatableRow, state?: GaugeAccessorsType) =
   }
   const minValue = getMinValue(row, state);
   const maxValue = getMaxValue(row, state);
-  return Math.round((minValue + maxValue) * 0.6);
+  return Math.round((maxValue - minValue) * 0.6 + minValue);
 };
 
 export const getGoalValue = (row?: DatatableRow, state?: GaugeVisualizationState) => {
@@ -89,7 +91,7 @@ export const getGoalValue = (row?: DatatableRow, state?: GaugeVisualizationState
   }
   const minValue = getMinValue(row, state);
   const maxValue = getMaxValue(row, state);
-  return Math.round((minValue + maxValue) * 0.8);
+  return Math.round((maxValue - minValue) * 0.8 + minValue);
 };
 
 export const transparentizePalettes = (palettes: PaletteRegistry) => {
