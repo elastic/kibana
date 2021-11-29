@@ -513,7 +513,8 @@ export class DataView implements IIndexPattern {
   /**
    * Return the "runtime_mappings" section of the ES search query
    */
-  getRuntimeMappings(): Record<string, RuntimeFieldSpec> {
+  getRuntimeMappings(): estypes.MappingRuntimeFields {
+    // @ts-expect-error The ES client does not yet include the "composite" runtime type
     return _.cloneDeep(this.runtimeFieldMap);
   }
 

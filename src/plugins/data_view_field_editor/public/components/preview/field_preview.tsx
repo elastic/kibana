@@ -27,6 +27,7 @@ export const FieldPreview = () => {
     params: {
       value: { name, script, format },
     },
+    isLoadingPreview,
     fields,
     error,
     documents: { fetchDocError },

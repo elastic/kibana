@@ -555,6 +555,8 @@ const previewTransformHandler: RequestHandler<
   try {
     const reqBody = req.body;
     const { body } = await ctx.core.elasticsearch.client.asCurrentUser.transform.previewTransform({
+      // @ts-expect-error The ES client does not yet include the "composite" runtime type
+      // Once "composite" is added to the MappingRuntimeFieldType, those comments can be safely removed.
       body: reqBody,
     });
     if (isLatestTransform(reqBody)) {

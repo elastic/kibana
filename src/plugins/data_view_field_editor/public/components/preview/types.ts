@@ -7,8 +7,8 @@
  */
 import React from 'react';
 
-import type { RuntimeType, RuntimeField } from '../../shared_imports';
-import type { FieldFormatConfig, RuntimeFieldPainlessError } from '../../types';
+import type { RuntimeType, RuntimeField, FieldFormatsStart } from '../../shared_imports';
+import type { RuntimeFieldPainlessError } from '../../types';
 
 export type From = 'cluster' | 'custom';
 
@@ -54,7 +54,7 @@ export interface Params {
   index: string | null;
   type: RuntimeType | null;
   script: Required<RuntimeField>['script'] | null;
-  format: FieldFormatConfig | null;
+  format: FieldFormatsStart | null;
   document: { [key: string]: unknown } | null;
 }
 

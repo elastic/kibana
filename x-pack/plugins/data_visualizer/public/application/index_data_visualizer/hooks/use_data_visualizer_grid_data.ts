@@ -199,7 +199,7 @@ export const useDataVisualizerGridData = (
         sessionId: searchSessionId,
         index: currentIndexPattern.title,
         timeFieldName: currentIndexPattern.timeFieldName,
-        runtimeFieldMap: currentIndexPattern.getComputedFields().runtimeFields,
+        runtimeFieldMap: currentIndexPattern.getRuntimeMappings(),
         aggregatableFields,
         nonAggregatableFields,
       };

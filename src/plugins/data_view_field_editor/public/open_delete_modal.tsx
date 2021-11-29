@@ -39,7 +39,7 @@ export const getFieldDeleteModalOpener =
   ({ core, dataViews, usageCollection }: Dependencies) =>
   (options: OpenFieldDeleteModalOptions): CloseEditor => {
     if (typeof options.fieldName === 'string') {
-      const fieldToDelete = options.ctx.indexPattern.getFieldByName(options.fieldName);
+      const fieldToDelete = options.ctx.dataView.getFieldByName(options.fieldName);
       const doesBelongToCompositeField = fieldToDelete?.runtimeField?.type === 'composite';
 
       if (doesBelongToCompositeField) {
