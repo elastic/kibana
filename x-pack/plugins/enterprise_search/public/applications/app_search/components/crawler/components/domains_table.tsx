@@ -13,7 +13,7 @@ import { EuiBasicTableColumn, EuiBasicTable } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-import { FormattedNumber } from '@kbn/i18n/react';
+import { FormattedNumber } from '@kbn/i18n-react';
 
 import { DELETE_BUTTON_LABEL, MANAGE_BUTTON_LABEL } from '../../../../shared/constants';
 import { KibanaLogic } from '../../../../shared/kibana';

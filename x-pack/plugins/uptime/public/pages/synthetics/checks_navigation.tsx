@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useHistory } from 'react-router-dom';
 import moment from 'moment';
 import { SyntheticsJourneyApiResponse } from '../../../common/runtime_types/ping';

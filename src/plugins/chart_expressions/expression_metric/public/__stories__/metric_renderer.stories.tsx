@@ -8,11 +8,12 @@
 
 import React from 'react';
 import { storiesOf } from '@storybook/react';
+import { from } from 'rxjs';
 import { ExpressionValueVisDimension } from '../../../../visualizations/common';
 import { Datatable, DatatableColumn } from '../../../../expressions';
 import { Render } from '../../../../presentation_util/public/__stories__';
 import { ColorMode, CustomPaletteState } from '../../../../charts/common';
-import { metricVisRenderer } from '../expression_renderers';
+import { getMetricVisRenderer } from '../expression_renderers';
 import { MetricStyle, MetricVisRenderConfig, visType } from '../../common/types';
 
 const palette: CustomPaletteState = {
@@ -116,6 +117,8 @@ const containerSize = {
   width: '700px',
   height: '700px',
 };
+
+const metricVisRenderer = getMetricVisRenderer({ theme$: from([{ darkMode: false }]) });
 
 storiesOf('renderers/visMetric', module)
   .add('Default', () => {

@@ -10,20 +10,27 @@ import React, { useEffect, useRef } from 'react';
 import { Observable } from 'rxjs';
 import ReactDOM from 'react-dom';
 import { HashRouter as Router, Switch, Route, Redirect } from 'react-router-dom';
-import { EuiTab, EuiTabs, EuiToolTip } from '@elastic/eui';
-import { I18nProvider } from '@kbn/i18n/react';
+import { EuiTab, EuiTabs, EuiToolTip, EuiBetaBadge } from '@elastic/eui';
+import { I18nProvider } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { euiThemeVars } from '@kbn/ui-shared-deps-src/theme';
 
 import { ApplicationStart, ChromeStart, ScopedHistory, CoreTheme } from 'src/core/public';
+import type { DocTitleService, BreadcrumbService } from './services';
 
 import { DevToolApp } from './dev_tool';
+
+export interface AppServices {
+  docTitleService: DocTitleService;
+  breadcrumbService: BreadcrumbService;
+}
 
 interface DevToolsWrapperProps {
   devTools: readonly DevToolApp[];
   activeDevTool: DevToolApp;
   updateRoute: (newRoute: string) => void;
   theme$: Observable<CoreTheme>;
+  appServices: AppServices;
 }
 
 interface MountedDevToolDescriptor {
@@ -32,7 +39,14 @@ interface MountedDevToolDescriptor {
   unmountHandler: () => void;
 }
 
-function DevToolsWrapper({ devTools, activeDevTool, updateRoute, theme$ }: DevToolsWrapperProps) {
+function DevToolsWrapper({
+  devTools,
+  activeDevTool,
+  updateRoute,
+  theme$,
+  appServices,
+}: DevToolsWrapperProps) {
+  const { docTitleService, breadcrumbService } = appServices;
   const mountedTool = useRef<MountedDevToolDescriptor | null>(null);
 
   useEffect(
@@ -43,6 +57,11 @@ function DevToolsWrapper({ devTools, activeDevTool, updateRoute, theme$ }: DevTo
     },
     []
   );
+
+  useEffect(() => {
+    docTitleService.setTitle(activeDevTool.title);
+    breadcrumbService.setBreadcrumbs(activeDevTool.title);
+  }, [activeDevTool, docTitleService, breadcrumbService]);
 
   return (
     <main className="devApp">
@@ -59,7 +78,21 @@ function DevToolsWrapper({ devTools, activeDevTool, updateRoute, theme$ }: DevTo
             }}
           >
             <EuiToolTip content={currentDevTool.tooltipContent}>
-              <span>{currentDevTool.title}</span>
+              <span>
+                {currentDevTool.title}{' '}
+                {currentDevTool.isBeta && (
+                  <EuiBetaBadge
+                    size="s"
+                    className="devApp__tabBeta"
+                    label={i18n.translate('devTools.badge.betaLabel', {
+                      defaultMessage: 'Beta',
+                    })}
+                    tooltipContent={i18n.translate('devTools.badge.betaTooltipText', {
+                      defaultMessage: 'This feature might change drastically in future releases',
+                    })}
+                  />
+                )}
+              </span>
             </EuiToolTip>
           </EuiTab>
         ))}
@@ -127,40 +160,20 @@ function setBadge(application: ApplicationStart, chrome: ChromeStart) {
   });
 }
 
-function setTitle(chrome: ChromeStart) {
-  chrome.docTitle.change(
-    i18n.translate('devTools.pageTitle', {
-      defaultMessage: 'Dev Tools',
-    })
-  );
-}
-
-function setBreadcrumbs(chrome: ChromeStart) {
-  chrome.setBreadcrumbs([
-    {
-      text: i18n.translate('devTools.k7BreadcrumbsDevToolsLabel', {
-        defaultMessage: 'Dev Tools',
-      }),
-      href: '#/',
-    },
-  ]);
-}
-
 export function renderApp(
   element: HTMLElement,
   application: ApplicationStart,
   chrome: ChromeStart,
   history: ScopedHistory,
   theme$: Observable<CoreTheme>,
-  devTools: readonly DevToolApp[]
+  devTools: readonly DevToolApp[],
+  appServices: AppServices
 ) {
   if (redirectOnMissingCapabilities(application)) {
     return () => {};
   }
 
   setBadge(application, chrome);
-  setBreadcrumbs(chrome);
-  setTitle(chrome);
 
   ReactDOM.render(
     <I18nProvider>
@@ -180,6 +193,7 @@ export function renderApp(
                     activeDevTool={devTool}
                     devTools={devTools}
                     theme$={theme$}
+                    appServices={appServices}
                   />
                 )}
               />
