@@ -45,7 +45,8 @@ export const getPersisted = async ({
         },
       };
     }
-    const { sharingSavedObjectProps, ...attributes } = result;
+    const { metaInfo, attributes } = result;
+    const sharingSavedObjectProps = metaInfo?.sharingSavedObjectProps;
     if (spaces && sharingSavedObjectProps?.outcome === 'aliasMatch' && history) {
       // We found this object by a legacy URL alias from its old ID; redirect the user to the page with its new ID, preserving any URL hash
       const newObjectId = sharingSavedObjectProps?.aliasTargetId; // This is always defined if outcome === 'aliasMatch'
