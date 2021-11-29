@@ -17,6 +17,7 @@ import {
   DataPublicPluginStart,
   UsageCollectionStart,
   DataViewsPublicPluginStart,
+  FieldFormatsStart,
 } from '../shared_imports';
 import type { Field, PluginStart, InternalFieldType } from '../types';
 import { pluginName } from '../constants';
@@ -50,7 +51,7 @@ export interface Props {
   apiService: ApiService;
   /** Field format */
   fieldFormatEditors: PluginStart['fieldFormatEditors'];
-  fieldFormats: DataPublicPluginStart['fieldFormats'];
+  fieldFormats: FieldFormatsStart;
   uiSettings: CoreStart['uiSettings'];
 }
 
