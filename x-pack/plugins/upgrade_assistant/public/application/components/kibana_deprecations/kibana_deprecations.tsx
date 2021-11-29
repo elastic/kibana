@@ -30,7 +30,8 @@ const i18nTexts = {
     defaultMessage: 'Kibana deprecation issues',
   }),
   pageDescription: i18n.translate('xpack.upgradeAssistant.kibanaDeprecations.pageDescription', {
-    defaultMessage: 'Resolve all critical issues before upgrading.',
+    defaultMessage:
+      'Resolve all critical issues before upgrading to the next major version of Elastic.',
   }),
   docLinkText: i18n.translate('xpack.upgradeAssistant.kibanaDeprecations.docLinkText', {
     defaultMessage: 'Documentation',

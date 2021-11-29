@@ -48,7 +48,7 @@ export const EsDeprecationLogs: FunctionComponent = () => {
           })}
           description={i18n.translate('xpack.upgradeAssistant.esDeprecationLogs.pageDescription', {
             defaultMessage:
-              'Review the deprecation logs to determine if your applications are using any deprecated APIs. Update your applications to prevent errors or changes in behavior after you upgrade.',
+              'Review the deprecation logs to determine if your applications are using any deprecated APIs. Update your applications to prevent errors or changes in behavior after you upgrade to 8.x.',
           })}
           rightSideItems={[
             <EuiButtonEmpty

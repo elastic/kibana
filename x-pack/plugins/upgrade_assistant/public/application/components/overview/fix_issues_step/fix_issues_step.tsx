@@ -105,7 +105,7 @@ export const getFixIssuesStep = ({
           <p>
             <FormattedMessage
               id="xpack.upgradeAssistant.overview.fixIssuesStepDescription"
-              defaultMessage="You must resolve any critical Elasticsearch and Kibana configuration issues before upgrading to Elastic 8.x. Ignoring warnings might result in differences in behavior after you upgrade. {accessDeprecationLogsMessage}"
+              defaultMessage="You can start resolving any critical Elasticsearch and Kibana configuration issues before upgrading to the next major version of Elastic, ignoring warnings might result in differences in behavior. {accessDeprecationLogsMessage}"
               values={{
                 accessDeprecationLogsMessage: (
                   <AccessDeprecationLogsMessage

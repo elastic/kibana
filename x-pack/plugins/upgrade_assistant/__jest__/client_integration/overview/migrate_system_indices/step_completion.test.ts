@@ -11,7 +11,7 @@ import { OverviewTestBed, setupOverviewPage } from '../overview.helpers';
 import { setupEnvironment, advanceTime } from '../../helpers';
 import { SYSTEM_INDICES_MIGRATION_POLL_INTERVAL_MS } from '../../../../common/constants';
 
-describe('Overview - Migrate system indices - Step completion', () => {
+describe.skip('Overview - Migrate system indices - Step completion', () => {
   let testBed: OverviewTestBed;
   const { server, httpRequestsMockHelpers } = setupEnvironment();
 

@@ -11,7 +11,7 @@ import { OverviewTestBed, setupOverviewPage } from '../overview.helpers';
 import { setupEnvironment } from '../../helpers';
 import { systemIndicesMigrationStatus } from './mocks';
 
-describe('Overview - Migrate system indices - Flyout', () => {
+describe.skip('Overview - Migrate system indices - Flyout', () => {
   let testBed: OverviewTestBed;
   const { server, httpRequestsMockHelpers } = setupEnvironment();
 
