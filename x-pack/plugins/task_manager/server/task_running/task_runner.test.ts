@@ -26,6 +26,11 @@ import { throwUnrecoverableError } from './errors';
 import { taskStoreMock } from '../task_store.mock';
 import apm from 'elastic-apm-node';
 import { executionContextServiceMock } from '../../../../../src/core/server/mocks';
+import {
+  TASK_MANAGER_RUN_TRANSACTION_TYPE,
+  TASK_MANAGER_TRANSACTION_TYPE,
+  TASK_MANAGER_TRANSACTION_TYPE_MARK_AS_RUNNING,
+} from './task_runner';
 
 const executionContext = executionContextServiceMock.createSetupContract();
 const minutesFromNow = (mins: number): Date => secondsFromNow(mins * 60);
@@ -89,7 +94,10 @@ describe('TaskManagerRunner', () => {
         },
       });
       await runner.markTaskAsRunning();
-      expect(apm.startTransaction).toHaveBeenCalledWith('mark-task-as-running', 'task-manager');
+      expect(apm.startTransaction).toHaveBeenCalledWith(
+        TASK_MANAGER_TRANSACTION_TYPE_MARK_AS_RUNNING,
+        TASK_MANAGER_TRANSACTION_TYPE
+      );
       expect(mockApmTrans.end).toHaveBeenCalledWith('success');
     });
     test('makes calls to APM as expected when task markedAsRunning fails', async () => {
@@ -115,7 +123,10 @@ describe('TaskManagerRunner', () => {
         `[Error: Saved object [type/id] not found]`
       );
       // await runner.markTaskAsRunning();
-      expect(apm.startTransaction).toHaveBeenCalledWith('mark-task-as-running', 'task-manager');
+      expect(apm.startTransaction).toHaveBeenCalledWith(
+        TASK_MANAGER_TRANSACTION_TYPE_MARK_AS_RUNNING,
+        TASK_MANAGER_TRANSACTION_TYPE
+      );
       expect(mockApmTrans.end).toHaveBeenCalledWith('failure');
     });
     test('provides execution context on run', async () => {
@@ -702,7 +713,7 @@ describe('TaskManagerRunner', () => {
         },
       });
       await runner.run();
-      expect(apm.startTransaction).toHaveBeenCalledWith('run', 'task-manager', {
+      expect(apm.startTransaction).toHaveBeenCalledWith('bar', TASK_MANAGER_RUN_TRANSACTION_TYPE, {
         childOf: 'apmTraceparent',
       });
       expect(mockApmTrans.end).toHaveBeenCalledWith('success');
@@ -725,7 +736,7 @@ describe('TaskManagerRunner', () => {
         },
       });
       await runner.run();
-      expect(apm.startTransaction).toHaveBeenCalledWith('run', 'task-manager', {
+      expect(apm.startTransaction).toHaveBeenCalledWith('bar', TASK_MANAGER_RUN_TRANSACTION_TYPE, {
         childOf: 'apmTraceparent',
       });
       expect(mockApmTrans.end).toHaveBeenCalledWith('failure');

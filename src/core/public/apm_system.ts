@@ -29,7 +29,7 @@ interface StartDeps {
   application: InternalApplicationStart;
 }
 
-export const ROUTE_CHANGE_TRANSACTION_TYPE = 'route-change';
+export const APP_CHANGE_TRANSACTION_TYPE = 'app-change';
 
 export class ApmSystem {
   private readonly enabled: boolean;
@@ -73,7 +73,7 @@ export class ApmSystem {
     start.application.currentAppId$.subscribe((appId) => {
       if (appId && this.apm) {
         this.closePageLoadTransaction();
-        this.apm.startTransaction(appId, ROUTE_CHANGE_TRANSACTION_TYPE, {
+        this.apm.startTransaction(appId, APP_CHANGE_TRANSACTION_TYPE, {
           managed: true,
           canReuse: true,
         });

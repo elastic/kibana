@@ -49,7 +49,7 @@ import {
   TaskRunningInstance,
   TaskRunResult,
   TASK_MANAGER_TRANSACTION_TYPE,
-  TASK_MANAGER_TRANSACTION_MARK_AS_RUNNING,
+  TASK_MANAGER_TRANSACTION_TYPE_MARK_AS_RUNNING,
 } from './task_runner';
 
 type Opts = {
@@ -272,7 +272,7 @@ export class EphemeralTaskManagerRunner implements TaskRunner {
     }
 
     const apmTrans = apm.startTransaction(
-      TASK_MANAGER_TRANSACTION_MARK_AS_RUNNING,
+      TASK_MANAGER_TRANSACTION_TYPE_MARK_AS_RUNNING,
       TASK_MANAGER_TRANSACTION_TYPE
     );
     apmTrans?.addLabels({ entityId: this.taskType });
