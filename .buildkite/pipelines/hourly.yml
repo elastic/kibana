@@ -158,7 +158,7 @@ steps:
   - command: .buildkite/scripts/steps/checks.sh
     label: 'Checks'
     agents:
-      queue: c2-4
+      queue: c2-8
     key: checks
     timeout_in_minutes: 120
 

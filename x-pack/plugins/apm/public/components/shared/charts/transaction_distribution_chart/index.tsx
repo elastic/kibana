@@ -132,7 +132,8 @@ export function TransactionDistributionChart({
     Math.max(
       ...flatten(data.map((d) => d.histogram)).map((d) => d.doc_count)
     ) ?? 0;
-  const yTicks = Math.max(1, Math.ceil(Math.log10(yMax)));
+  // A minimum of 2 ticks avoids that Elastic Charts 38.0.3 falls back to more defeault ticks.
+  const yTicks = Math.max(2, Math.ceil(Math.log10(yMax)));
   const yAxisDomain = {
     min: 0.5,
     max: Math.pow(10, yTicks),
@@ -267,6 +268,14 @@ export function TransactionDistributionChart({
               yAccessors={['doc_count']}
               color={areaSeriesColors[i]}
               fit="lookahead"
+              // To make the area appear without the orphaned points technique,
+              // we changed the original data to replace values of 0 with 0.0001.
+              // To show the correct values again in tooltips, we use a custom tickFormat to round values.
+              // We can safely do this because all transaction values above 0 are without decimal points anyway.
+              // An update for Elastic Charts is in the works to be able to customize the above "fit"
+              // attribute. Once that is available we can get rid of the full workaround.
+              // Elastic Charts issue: https://github.com/elastic/elastic-charts/issues/1489
+              tickFormat={(p) => `${Math.round(p)}`}
             />
           ))}
         </Chart>
