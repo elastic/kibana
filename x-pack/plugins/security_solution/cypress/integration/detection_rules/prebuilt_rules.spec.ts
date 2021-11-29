@@ -14,7 +14,7 @@ import {
   RULE_SWITCH,
   SHOWING_RULES_TEXT,
   RULES_MONIROTING_TABLE,
-  SELECT_ALL_RULES_ON_PAFE_CHECKBOX,
+  SELECT_ALL_RULES_ON_PAGE_CHECKBOX,
 } from '../../screens/alerts_detection_rules';
 
 import { goToManageAlertsDetectionRules, waitForAlertsIndexToBeCreated } from '../../tasks/alerts';
@@ -96,9 +96,9 @@ describe('Actions with prebuilt rules', () => {
     cy.get(RULE_SWITCH).should('have.attr', 'aria-checked', 'false');
   });
 
-  it('Allows to activate all rules on a page and deactivate one at monitoring table', () => {
+  it('Allows to activate all rules on a page and deactivate single one at monitoring table', () => {
     cy.get(RULES_MONIROTING_TABLE).click();
-    cy.get(SELECT_ALL_RULES_ON_PAFE_CHECKBOX).click();
+    cy.get(SELECT_ALL_RULES_ON_PAGE_CHECKBOX).click();
     activateSelectedRules();
     waitForRuleToChangeStatus();
     cy.get(RULE_SWITCH).should('have.attr', 'aria-checked', 'true');

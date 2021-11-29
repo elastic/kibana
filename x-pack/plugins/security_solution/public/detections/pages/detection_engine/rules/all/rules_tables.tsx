@@ -328,9 +328,9 @@ export const RulesTables = React.memo<RulesTableProps>(
     }, selectedRuleIds);
 
     const euiBasicTableSelectionProps = useMemo(
-      <T extends TableItem>() => ({
-        selectable: (item: T) => !loadingRuleIds.includes(item.id),
-        onSelectionChange: (selected: T[]) => {
+      () => ({
+        selectable: (item: TableItem) => !loadingRuleIds.includes(item.id),
+        onSelectionChange: (selected: TableItem[]) => {
           /**
            * EuiBasicTable doesn't provide declarative API to control selected rows.
            * This limitation requires us to synchronize selection state manually using setSelection().
@@ -444,8 +444,6 @@ export const RulesTables = React.memo<RulesTableProps>(
       [initLoading, prePackagedRuleStatus, rulesCustomInstalled]
     );
 
-    // update rules statuses with rules to avoid having stale rule object in ruleStatus
-    // happens because ruleStatuses retrieved asyncronously from _find_statuses API
     const items = useMemo(() => {
       const rulesMap = new Map(rules.map((item) => [item.id, item]));
 

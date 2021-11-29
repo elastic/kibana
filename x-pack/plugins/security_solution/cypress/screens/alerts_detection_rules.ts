@@ -98,4 +98,4 @@ export const ALERT_DETAILS_CELLS = '[data-test-subj="dataGridRowCell"]';
 
 export const SERVER_SIDE_EVENT_COUNT = '[data-test-subj="server-side-event-count"]';
 
-export const SELECT_ALL_RULES_ON_PAFE_CHECKBOX = '[data-test-subj="checkboxSelectAll"]';
+export const SELECT_ALL_RULES_ON_PAGE_CHECKBOX = '[data-test-subj="checkboxSelectAll"]';
