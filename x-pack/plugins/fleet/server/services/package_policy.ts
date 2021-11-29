@@ -1066,8 +1066,8 @@ export function updatePackageInputs(
   ];
 
   for (const update of inputsUpdated) {
-    // Preconfiguration does not currently support multiple policy templates, so overrides will have an undefined
-    // policy template, so we only match on `type` in that case.
+    // If update have an undefined policy template
+    // we only match on `type` .
     let originalInput = update.policy_template
       ? inputs.find((i) => i.type === update.type && i.policy_template === update.policy_template)
       : inputs.find((i) => i.type === update.type);
