@@ -30,7 +30,6 @@ export async function bulkInstallPackages({
 }: BulkInstallPackagesParams): Promise<BulkInstallResponse[]> {
   const logger = appContextService.getLogger();
   const installSource = 'registry';
-
   const packagesResults = await Promise.allSettled(
     packagesToInstall.map((pkg) => {
       if (typeof pkg === 'string') return Registry.fetchFindLatestPackage(pkg);

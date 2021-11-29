@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-// import { SavedObjectsImporter } from 'src/core/server';
 import type {
   SavedObject,
   SavedObjectsBulkCreateObject,
@@ -184,7 +183,7 @@ async function installKibanaSavedObjects({
 
     if (errors?.length) {
       throw new Error(
-        `Encountered ${errors.length} creating saved objects: ${JSON.stringify(
+        `Encountered ${errors.length} errors creating saved objects: ${JSON.stringify(
           errors.map(({ type, id, error }) => ({ type, id, error })) // discard other fields
         )}`
       );
