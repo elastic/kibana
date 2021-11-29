@@ -53,6 +53,18 @@ const removeById =
   ({ id }: { id: string }) =>
     disabledActions.indexOf(id) === -1;
 
+/**
+ * Embeddable container may provide information about its environment,
+ * Use it for drilling down data that is static or doesn't have to be reactive,
+ * otherwise prefer passing data with input$
+ * */
+export interface EmbeddableContainerContext {
+  /**
+   * Current app's path including query and hash starting from {appId}
+   */
+  getCurrentPath?: () => string;
+}
+
 interface Props {
   embeddable: IEmbeddable<EmbeddableInput, EmbeddableOutput>;
   getActions: UiActionsService['getTriggerCompatibleActions'];
@@ -70,6 +82,7 @@ interface Props {
   showShadow?: boolean;
   showBadges?: boolean;
   showNotifications?: boolean;
+  containerContext?: EmbeddableContainerContext;
 }
 
 interface State {
@@ -238,7 +251,7 @@ export class EmbeddablePanel extends React.Component<Props, State> {
   };
 
   public render() {
-    const viewOnlyMode = this.state.viewMode === ViewMode.VIEW;
+    const viewOnlyMode = [ViewMode.VIEW, ViewMode.PRINT].includes(this.state.viewMode);
     const classes = classNames('embPanel', {
       'embPanel--editing': !viewOnlyMode,
       'embPanel--loading': this.state.loading,
@@ -373,7 +386,8 @@ export class EmbeddablePanel extends React.Component<Props, State> {
       editPanel: new EditPanelAction(
         this.props.getEmbeddableFactory,
         this.props.application,
-        this.props.stateTransfer
+        this.props.stateTransfer,
+        this.props.containerContext?.getCurrentPath
       ),
     };
   };
