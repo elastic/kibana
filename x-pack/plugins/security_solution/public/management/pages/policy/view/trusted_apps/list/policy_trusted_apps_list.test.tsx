@@ -114,8 +114,8 @@ describe('when rendering the PolicyTrustedAppsList', () => {
         : Promise.resolve();
 
       renderResult = appTestContext.render(<PolicyTrustedAppsList {...componentRenderProps} />);
-      await trustedAppDataReceived;
       await checkTrustedAppDataAssignedReceived;
+      await trustedAppDataReceived;
 
       return renderResult;
     };

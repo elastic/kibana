@@ -314,9 +314,6 @@ const fetchPolicyTrustedAppsIfNeeded = async (
     });
 
     try {
-      if (isUninitialisedResourceState(state.artifacts.hasTrustedApps)) {
-        await checkIfPolicyHasTrustedAppsAssigned({ getState, dispatch }, trustedAppsService);
-      }
       const urlLocationData = getCurrentUrlLocationPaginationParams(state);
       const policyId = policyIdFromParams(state);
       const kuery = [
@@ -343,6 +340,10 @@ const fetchPolicyTrustedAppsIfNeeded = async (
           artifacts: fetchResponse,
         }),
       });
+
+      if (isUninitialisedResourceState(state.artifacts.hasTrustedApps)) {
+        await checkIfPolicyHasTrustedAppsAssigned({ getState, dispatch }, trustedAppsService);
+      }
     } catch (error) {
       dispatch({
         type: 'assignedTrustedAppsListStateChanged',
