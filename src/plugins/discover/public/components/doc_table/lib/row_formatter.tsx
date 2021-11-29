@@ -16,14 +16,17 @@ import { formatHit } from '../../../utils/format_hit';
 import './row_formatter.scss';
 
 interface Props {
-  defPairs: Array<[string, string]>;
+  defPairs: Array<readonly [string, string]>;
 }
 const TemplateComponent = ({ defPairs }: Props) => {
   return (
     <dl className={'source dscTruncateByHeight'}>
       {defPairs.map((pair, idx) => (
         <Fragment key={idx}>
-          <dt>{pair[0]}:</dt>
+          <dt>
+            {pair[0]}
+            {!!pair[1] && ':'}
+          </dt>
           <dd
             className="rowFormatter__value"
             // eslint-disable-next-line react/no-danger
