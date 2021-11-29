@@ -8,7 +8,7 @@ import { useEffect, useState } from 'react';
 import { useQuery } from 'react-query';
 import { EuiSearchBarOnChangeArgs } from '@elastic/eui';
 import { CoreStart } from 'kibana/public';
-import { useKibana } from 'src/plugins/kibana_react/public';
+import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import { ProcessEvent } from '../../hooks/use_process_tree';
 import { PROCESS_EVENTS_ROUTE } from '../../../common/constants';
 

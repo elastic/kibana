@@ -64,12 +64,14 @@ export const SessionViewDetailPanel = ({
       kind: processEvent?.event.kind,
     }));
 
-    const [commandTabs, alertTabs] = partition(selectedProcessEvents, { kind: EventKind.event });
+    const [processCommandTabs, processAlertTabs] = partition(selectedProcessEvents, {
+      kind: EventKind.event,
+    });
 
-    setCommandTabs(commandTabs);
-    setSelectedCommandTab(commandTabs[0]?.id || '');
-    setAlertTabs(alertTabs);
-    setSelectedAlertTab(alertTabs[0]?.id || '');
+    setCommandTabs(processCommandTabs);
+    setSelectedCommandTab(processCommandTabs[0]?.id || '');
+    setAlertTabs(processAlertTabs);
+    setSelectedAlertTab(processAlertTabs[0]?.id || '');
   }, [selectedProcess]);
 
   const handleAnimationEnd = () => {
@@ -115,10 +117,7 @@ export const SessionViewDetailPanel = ({
         <div>
           <EuiTitle size="s">
             <span>
-              <FormattedMessage
-                id="xpack.sessionView.alertDetail"
-                defaultMessage="Alert detail"
-              />
+              <FormattedMessage id="xpack.sessionView.alertDetail" defaultMessage="Alert detail" />
             </span>
           </EuiTitle>
           <EuiSpacer />
