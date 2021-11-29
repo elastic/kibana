@@ -29,7 +29,7 @@ import { CustomFormattedTimestamp } from './custom_formatted_timestamp';
 
 export const CrawlRequestsTable: React.FC = () => {
   const { events } = useValues(CrawlerLogic);
-  const { fetchCrawlEvent, openFlyout } = useActions(CrawlDetailLogic);
+  const { fetchCrawlRequest, openFlyout } = useActions(CrawlDetailLogic);
 
   const columns: Array<
     EuiTableFieldDataColumnType<CrawlEvent> | EuiTableComputedColumnType<CrawlEvent>
@@ -47,7 +47,7 @@ export const CrawlRequestsTable: React.FC = () => {
           return (
             <EuiLink
               onClick={() => {
-                fetchCrawlEvent(id);
+                fetchCrawlRequest(id);
                 openFlyout();
               }}
             >

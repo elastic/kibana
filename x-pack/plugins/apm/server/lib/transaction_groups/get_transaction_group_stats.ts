@@ -8,22 +8,20 @@
 import { merge } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
-  SERVICE_NAME,
-  TRANSACTION_NAME,
   TRANSACTION_TYPE,
+  AGENT_NAME,
 } from '../../../common/elasticsearch_fieldnames';
 import { arrayUnionToCallable } from '../../../common/utils/array_union_to_callable';
 import { TransactionGroupRequestBase, TransactionGroupSetup } from './fetcher';
 import { getTransactionDurationFieldForTransactions } from '../helpers/transactions';
-import { asMutableArray } from '../../../common/utils/as_mutable_array';
-
+import { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
 interface MetricParams {
   request: TransactionGroupRequestBase;
   setup: TransactionGroupSetup;
   searchAggregatedTransactions: boolean;
 }
 
-type BucketKey = Record<typeof TRANSACTION_NAME | typeof SERVICE_NAME, string>;
+type BucketKey = Record<string, string>;
 
 function mergeRequestWithAggs<
   TRequestBase extends TransactionGroupRequestBase,
@@ -80,11 +78,14 @@ export async function getCounts({ request, setup }: MetricParams) {
         sort: {
           '@timestamp': 'desc' as const,
         },
-        metrics: asMutableArray([
+        metrics: [
           {
             field: TRANSACTION_TYPE,
-          },
-        ] as const),
+          } as const,
+          {
+            field: AGENT_NAME,
+          } as const,
+        ],
       },
     },
   });
@@ -103,6 +104,9 @@ export async function getCounts({ request, setup }: MetricParams) {
       transactionType: bucket.transaction_type.top[0].metrics[
         TRANSACTION_TYPE
       ] as string,
+      agentName: bucket.transaction_type.top[0].metrics[
+        AGENT_NAME
+      ] as AgentName,
     };
   });
 }

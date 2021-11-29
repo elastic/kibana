@@ -199,8 +199,6 @@ export interface CrawlRequest {
   completedAt: string | null;
 }
 
-export type CrawlEventStage = 'crawl' | 'process';
-
 export interface CrawlConfig {
   domainAllowlist: string[];
 }
@@ -208,6 +206,21 @@ export interface CrawlConfig {
 export interface CrawlConfigFromServer {
   domain_allowlist: string[];
 }
+
+export type CrawlRequestWithDetailsFromServer = CrawlRequestFromServer & {
+  type: CrawlType;
+  crawl_config: CrawlConfigFromServer;
+  // TODO add other properties like stats
+};
+
+export type CrawlRequestWithDetails = CrawlRequest & {
+  type: CrawlType;
+  crawlConfig: CrawlConfig;
+  // TODO add other properties like stats
+};
+
+export type CrawlEventStage = 'crawl' | 'process';
+
 export type CrawlEventFromServer = CrawlRequestFromServer & {
   stage: CrawlEventStage;
   type: CrawlType;
