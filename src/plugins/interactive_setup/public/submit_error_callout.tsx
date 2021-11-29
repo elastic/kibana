@@ -10,7 +10,7 @@ import { EuiButton, EuiCallOut } from '@elastic/eui';
 import type { FunctionComponent } from 'react';
 import React from 'react';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { IHttpFetchError, ResponseErrorBody } from 'kibana/public';
 
 import {

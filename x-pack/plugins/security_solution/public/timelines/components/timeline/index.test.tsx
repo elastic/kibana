@@ -35,8 +35,8 @@ jest.mock('./tabs_content');
 
 jest.mock('../../../common/lib/kibana');
 jest.mock('../../../common/components/url_state/normalize_time_range.ts');
-jest.mock('@kbn/i18n/react', () => {
-  const originalModule = jest.requireActual('@kbn/i18n/react');
+jest.mock('@kbn/i18n-react', () => {
+  const originalModule = jest.requireActual('@kbn/i18n-react');
   const FormattedRelative = jest.fn().mockImplementation(() => '20 hours ago');
 
   return {
