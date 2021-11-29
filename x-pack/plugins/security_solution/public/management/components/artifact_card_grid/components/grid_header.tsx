@@ -8,7 +8,7 @@
 import React, { memo, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { CommonProps, EuiText, EuiButtonIcon } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import styled from 'styled-components';
 import { CardCompressedHeaderLayout, CardSectionPanel } from '../../artifact_entry_card';
 import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
