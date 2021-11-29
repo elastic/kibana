@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiAccordion,
   EuiSelect,
