@@ -12,7 +12,7 @@ import ReactMonacoEditor from 'react-monaco-editor';
 import { htmlIdGenerator, EuiToolTip, keys } from '@elastic/eui';
 import { monaco } from '@kbn/monaco';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import classNames from 'classnames';
 import './register_languages';
 
