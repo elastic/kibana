@@ -38,6 +38,7 @@ import { FormattedFieldValue } from '../../../timelines/components/timeline/body
 const OverviewPanel = euiStyled(EuiPanel)`
   &&& {
     background-color: ${({ theme }) => theme.eui.euiColorLightestShade};
+    max-height: 87px;
   }
 
   & {
@@ -126,6 +127,10 @@ export const OverviewRiskScore = React.memo<{ riskScore: string }>(({ riskScore 
 
 OverviewRiskScore.displayName = 'OverviewRiskScore';
 
+export const NotGrowingFlexGroup = euiStyled(EuiFlexGroup)`
+  flex-grow: 0;
+`;
+
 interface Props {
   browserFields: BrowserFields;
   contextId: string;
@@ -195,7 +200,7 @@ export const OverviewCards = React.memo<Props>(
     }, [browserFields, contextId, data, eventId, timelineId]);
 
     return (
-      <EuiFlexGroup gutterSize="m">
+      <NotGrowingFlexGroup gutterSize="m">
         {hasData(statusData) && (
           <EuiFlexItem>
             <OverviewCard title={SIGNAL_STATUS}>
@@ -259,7 +264,7 @@ export const OverviewCards = React.memo<Props>(
             </OverviewCardWithActions>
           </EuiFlexItem>
         )}
-      </EuiFlexGroup>
+      </NotGrowingFlexGroup>
     );
   }
 );
