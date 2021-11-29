@@ -22,7 +22,7 @@ import {
 } from '@elastic/eui';
 import { IFieldType } from 'src/plugins/data/public';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   SnapshotCustomAggregation,
   SnapshotCustomMetricInput,
