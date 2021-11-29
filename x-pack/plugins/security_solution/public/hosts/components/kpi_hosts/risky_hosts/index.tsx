@@ -121,7 +121,7 @@ const RiskyHostsComponent: React.FC<Pick<HostsKpiProps, 'filterQuery' | 'from' |
                   <EuiIcon type={'alert'} color={euiLightVars.euiColorDarkestShade} size="l" />
                 </EuiFlexItem>
                 <EuiFlexItem>
-                  <StatusTitle className="eui-textTruncate">
+                  <StatusTitle className="eui-textTruncate" data-test-subj="riskyHostsTotal">
                     <p>
                       {(totalCount ?? 0).toLocaleString()} {i18n.RISKY_HOSTS}
                     </p>
@@ -138,7 +138,9 @@ const RiskyHostsComponent: React.FC<Pick<HostsKpiProps, 'filterQuery' | 'from' |
                   <HostRisk severity={HostRiskSeverity.critical} />
                 </EuiFlexItem>
                 <EuiFlexItem>
-                  <HostCount size="m">{i18n.HOSTS_COUNT(criticalRiskCount)}</HostCount>
+                  <HostCount size="m" data-test-subj="riskyHostsCriticalQuantity">
+                    {i18n.HOSTS_COUNT(criticalRiskCount)}
+                  </HostCount>
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>
@@ -148,7 +150,9 @@ const RiskyHostsComponent: React.FC<Pick<HostsKpiProps, 'filterQuery' | 'from' |
                   <HostRisk severity={HostRiskSeverity.high} />
                 </EuiFlexItem>
                 <EuiFlexItem>
-                  <HostCount size="m">{i18n.HOSTS_COUNT(hightlRiskCount)}</HostCount>
+                  <HostCount size="m" data-test-subj="riskyHostsHighQuantity">
+                    {i18n.HOSTS_COUNT(hightlRiskCount)}
+                  </HostCount>
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>

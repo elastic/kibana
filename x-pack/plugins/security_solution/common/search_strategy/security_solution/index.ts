@@ -84,7 +84,10 @@ import {
   UserRulesRequestOptions,
   UserRulesStrategyResponse,
 } from './ueba';
-import { HostsKpiRiskyHostsStrategyResponse } from './hosts/kpi/risky_hosts';
+import {
+  HostsKpiRiskyHostsRequestOptions,
+  HostsKpiRiskyHostsStrategyResponse,
+} from './hosts/kpi/risky_hosts';
 
 export * from './hosts';
 export * from './matrix_histogram';
@@ -146,9 +149,9 @@ export type StrategyResponseType<T extends FactoryQueryTypes> = T extends HostsQ
   : T extends HostsKpiQueries.kpiAuthentications
   ? HostsKpiAuthenticationsStrategyResponse
   : T extends HostsKpiQueries.kpiHosts
-  ? HostsKpiRiskyHostsStrategyResponse
-  : T extends HostsKpiQueries.kpiRiskyHosts
   ? HostsKpiHostsStrategyResponse
+  : T extends HostsKpiQueries.kpiRiskyHosts
+  ? HostsKpiRiskyHostsStrategyResponse
   : T extends HostsKpiQueries.kpiUniqueIps
   ? HostsKpiUniqueIpsStrategyResponse
   : T extends NetworkQueries.details
@@ -203,6 +206,8 @@ export type StrategyRequestType<T extends FactoryQueryTypes> = T extends HostsQu
   ? HostsKpiHostsRequestOptions
   : T extends HostsKpiQueries.kpiUniqueIps
   ? HostsKpiUniqueIpsRequestOptions
+  : T extends HostsKpiQueries.kpiRiskyHosts
+  ? HostsKpiRiskyHostsRequestOptions
   : T extends NetworkQueries.details
   ? NetworkDetailsRequestOptions
   : T extends NetworkQueries.dns

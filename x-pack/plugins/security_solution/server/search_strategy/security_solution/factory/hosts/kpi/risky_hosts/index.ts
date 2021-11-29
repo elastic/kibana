@@ -33,7 +33,7 @@ export const hostsKpiRiskyHosts: SecuritySolutionFactory<HostsKpiQueries.kpiRisk
       dsl: [inspectStringifyObject(buildHostsKpiRiskyHostsQuery(options))],
     };
 
-    const riskBuckets = getOr(null, 'aggregations.risk.buckets', response.rawResponse);
+    const riskBuckets = getOr([], 'aggregations.risk.buckets', response.rawResponse);
 
     const riskyHosts: Record<HostRiskSeverity, number> = riskBuckets.reduce(
       (cummulative: Record<string, number>, bucket: AggBucket) => ({

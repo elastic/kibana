@@ -76,7 +76,7 @@ HostsKpiBaseComponent.displayName = 'HostsKpiBaseComponent';
 export const HostsKpiBaseComponentManage = manageQuery(HostsKpiBaseComponent);
 
 export const HostsKpiBaseComponentLoader: React.FC = () => (
-  <FlexGroup justifyContent="center" alignItems="center">
+  <FlexGroup justifyContent="center" alignItems="center" data-test-subj="hostsKpiLoader">
     <EuiFlexItem grow={false}>
       <EuiLoadingSpinner size="xl" />
     </EuiFlexItem>
