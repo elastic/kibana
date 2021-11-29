@@ -224,7 +224,7 @@ In the legend, click the field, then choose one of the following options:
 [[configure-the-visualization-components]]
 ==== Configure the visualization components
 
-Each visualiztion type comes with a set of components that you access from the editor toolbar.
+Each visualization type comes with a set of components that you access from the editor toolbar.
 
 The following component menus are available:
 
