@@ -6,6 +6,7 @@
  */
 
 import React, { useEffect, useMemo, useCallback } from 'react';
+import { EMPTY } from 'rxjs';
 
 import type { StoryContext } from '@storybook/react';
 import { createBrowserHistory } from 'history';
@@ -69,6 +70,9 @@ export const StorybookContext: React.FC<{ storyContext?: StoryContext }> = ({
       notifications: getNotifications(),
       share: getShare(),
       uiSettings: getUiSettings(),
+      theme: {
+        theme$: EMPTY,
+      },
       authz: {
         fleet: {
           all: true,
