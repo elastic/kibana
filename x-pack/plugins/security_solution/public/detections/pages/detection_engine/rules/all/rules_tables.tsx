@@ -13,6 +13,7 @@ import {
   EuiProgress,
   EuiConfirmModal,
   EuiWindowEvent,
+  EuiEmptyPrompt,
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { debounce } from 'lodash/fp';
@@ -23,7 +24,6 @@ import {
   useRulesStatuses,
   CreatePreBuiltRules,
   FilterOptions,
-  Rule,
   RulesSortingFields,
 } from '../../../../containers/detection_engine/rules';
 
@@ -33,7 +33,6 @@ import { useKibana, useUiSetting$ } from '../../../../../common/lib/kibana';
 import { useStateToaster } from '../../../../../common/components/toasters';
 import { Loader } from '../../../../../common/components/loader';
 import { PrePackagedRulesPrompt } from '../../../../components/rules/pre_packaged_rules/load_empty_prompt';
-import { AllRulesTables, SortingType } from '../../../../components/rules/all_rules_tables';
 import { getPrePackagedRuleStatus } from '../helpers';
 import * as i18n from '../translations';
 import { EuiBasicTableOnChange } from '../types';
@@ -167,7 +166,7 @@ export const RulesTables = React.memo<RulesTableProps>(
     }, [loadingRuleIds, loadingRulesAction]);
 
     const sorting = useMemo(
-      (): SortingType => ({
+      () => ({
         sort: {
           field: filterOptions.sortField,
           direction: filterOptions.sortOrder,
@@ -456,6 +455,15 @@ export const RulesTables = React.memo<RulesTableProps>(
       }));
     }, [rulesStatuses, rules]);
 
+    const tableProps =
+      selectedTab === AllRulesTabs.rules
+        ? {
+            'data-test-subj': 'rules-table',
+            columns: rulesColumns,
+            sorting,
+          }
+        : { 'data-test-subj': 'monitoring-table', columns: monitoringColumns };
+
     return (
       <>
         <EuiWindowEvent event="mousemove" handler={debounceResetIdleTimer} />
@@ -544,17 +552,22 @@ export const RulesTables = React.memo<RulesTableProps>(
               onToggleSelectAll={toggleSelectAll}
               showBulkActions
             />
-            <AllRulesTables
-              selectedTab={selectedTab}
-              euiBasicTableSelectionProps={euiBasicTableSelectionProps}
-              hasPermissions={hasPermissions}
-              monitoringColumns={monitoringColumns}
-              pagination={paginationMemo}
-              rulesColumns={rulesColumns}
+            <EuiBasicTable
+              itemId="id"
               items={items}
-              sorting={sorting}
-              tableOnChangeCallback={tableOnChangeCallback}
-              tableRef={tableRef}
+              isSelectable={hasPermissions}
+              noItemsMessage={
+                <EuiEmptyPrompt
+                  title={<h3>{i18n.NO_RULES}</h3>}
+                  titleSize="xs"
+                  body={i18n.NO_RULES_BODY}
+                />
+              }
+              onChange={tableOnChangeCallback}
+              pagination={paginationMemo}
+              ref={tableRef}
+              selection={euiBasicTableSelectionProps}
+              {...tableProps}
             />
           </>
         )}

@@ -9,7 +9,7 @@ import { scopedHistoryMock } from 'src/core/public/mocks';
 import uuid from 'uuid';
 import '../../../../../common/mock/match_media';
 import { deleteRulesAction, duplicateRulesAction, editRuleAction } from './actions';
-import { getActions } from './columns';
+import { getActions, TableRow } from './columns';
 import { mockRule } from './__mocks__/mock';
 
 jest.mock('./actions', () => ({
@@ -51,7 +51,7 @@ describe('AllRulesTable Columns', () => {
         refetchPrePackagedRulesStatus,
         true
       )[1];
-      await duplicateRulesActionObject.onClick(rule);
+      await duplicateRulesActionObject.onClick(rule as TableRow);
       expect(duplicateRulesActionMock).toHaveBeenCalled();
       expect(editRuleActionMock).toHaveBeenCalledWith(ruleDuplicate.id, navigateToApp);
     });
@@ -68,7 +68,7 @@ describe('AllRulesTable Columns', () => {
         refetchPrePackagedRulesStatus,
         true
       )[3];
-      await deleteRulesActionObject.onClick(rule);
+      await deleteRulesActionObject.onClick(rule as TableRow);
       expect(deleteRulesActionMock).toHaveBeenCalledTimes(1);
       expect(reFetchRules).toHaveBeenCalledTimes(1);
       expect(deleteRulesActionMock.mock.invocationCallOrder[0]).toBeLessThan(
