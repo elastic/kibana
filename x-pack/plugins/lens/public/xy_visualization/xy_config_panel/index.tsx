@@ -49,7 +49,12 @@ import { getScaleType } from '../to_expression';
 import { ColorPicker } from './color_picker';
 import { ReferenceLinePanel } from './reference_line_panel';
 import { TooltipWrapper } from '../../shared_components';
-import { SavedObjectPaletteStore } from '../../persistence';
+import {
+  SavedObjectPaletteStore,
+  getPalettesFromStore,
+  savePaletteToStore,
+} from '../../persistence';
+import { computeTerms } from '../../utils';
 
 type UnwrapArray<T> = T extends Array<infer P> ? P : T;
 type AxesSettingsConfigKeys = keyof AxesSettingsConfig;
@@ -588,7 +593,6 @@ export function DimensionEditor(
     () => new SavedObjectPaletteStore(savedObjectsClient),
     [savedObjectsClient]
   );
-  // const paletteStore = new SavedObjectPaletteStore(savedObjectsClient);
   const isHorizontal = isHorizontalChart(state.layers);
   const [isPaletteOpen, setIsPaletteOpen] = useState(false);
   const [libraryPalettes, setLibraryPalettes] = useState<Array<PaletteOutput<CustomPaletteParams>>>(
@@ -597,17 +601,11 @@ export function DimensionEditor(
 
   useEffect(() => {
     const getPalettesFromLibrary = () => {
-      paletteStore.getAll().then((response) => {
-        const palettes = response.savedObjects.map((palette) => {
-          const attributes = palette.attributes as PaletteOutput<CustomPaletteParams>;
-          return {
-            type: palette.type,
-            name: attributes.name,
-            params: attributes.params,
-          };
-        }) as Array<PaletteOutput<CustomPaletteParams>>;
-        setLibraryPalettes(palettes);
-      });
+      getPalettesFromStore(paletteStore).then(
+        (palettes: Array<PaletteOutput<CustomPaletteParams>>) => {
+          setLibraryPalettes(palettes);
+        }
+      );
     };
     getPalettesFromLibrary();
   }, [paletteStore]);
@@ -622,34 +620,10 @@ export function DimensionEditor(
   };
   // compute terms
   const splitAccessor = layer.splitAccessor;
-  const terms: string[] = [];
-  if (splitAccessor) {
-    activeData?.[layerId].rows.map((row) => {
-      const column = activeData?.[layerId].columns.find((col) => col.id === splitAccessor);
-      const formattedValue = column
-        ? props.formatFactory(column.meta.params).convert(row[splitAccessor])
-        : row[splitAccessor];
-      if (!terms.includes(formattedValue)) {
-        terms.push(formattedValue);
-      }
-    });
-  }
+  const terms = computeTerms(splitAccessor, layerId, activeData, props.formatFactory);
 
   const savePaletteToLibrary = (palette: PaletteOutput<CustomPaletteParams>, title: string) => {
-    const paletteToSave = {
-      ...palette,
-      title,
-      params: {
-        ...palette.params,
-        title,
-      },
-    };
-    paletteStore.save(paletteToSave).then((response) => {
-      const savedPalette = {
-        type: response.type,
-        name: response.name,
-        params: response.params,
-      } as PaletteOutput<CustomPaletteParams>;
+    return savePaletteToStore(paletteStore, palette, title).then((savedPalette) => {
       setLibraryPalettes([...libraryPalettes, savedPalette]);
     });
   };

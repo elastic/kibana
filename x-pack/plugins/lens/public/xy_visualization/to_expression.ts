@@ -113,7 +113,7 @@ export function getScaleType(metadata: OperationMetadata | null, defaultScale: S
 function computePaletteParams(params: CustomPaletteParams) {
   return {
     ...params,
-    // rewrite colors and stops as two distinct arguments
+    // rewrite colors and term as two distinct arguments
     colors: (params?.colorTerms || []).map(({ color }) => color),
     terms: params?.name === 'custom' ? (params?.colorTerms || []).map(({ term }) => term) : [],
     reverse: false, // managed at UI level

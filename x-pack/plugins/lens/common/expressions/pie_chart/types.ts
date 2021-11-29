@@ -6,7 +6,7 @@
  */
 
 import type { PaletteOutput } from '../../../../../../src/plugins/charts/common';
-import type { LensMultiTable, LayerType } from '../../types';
+import type { LensMultiTable, LayerType, CustomPaletteParams } from '../../types';
 
 export type PieChartTypes = 'donut' | 'pie' | 'treemap' | 'mosaic';
 
@@ -31,7 +31,7 @@ export type PieLayerState = SharedPieLayerState & {
 export interface PieVisualizationState {
   shape: PieChartTypes;
   layers: PieLayerState[];
-  palette?: PaletteOutput;
+  palette?: PaletteOutput<CustomPaletteParams>;
 }
 
 export type PieExpressionArgs = SharedPieLayerState & {

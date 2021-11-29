@@ -7,6 +7,7 @@
 
 import { getXyVisualization } from './visualization';
 import { Position } from '@elastic/charts';
+import type { SavedObjectsClientContract } from 'kibana/public';
 import { Operation } from '../types';
 import type { State } from './types';
 import type { SeriesType, XYLayerConfig } from '../../common/expressions';
@@ -43,6 +44,7 @@ const xyVisualization = getXyVisualization({
   fieldFormats: fieldFormatsMock,
   useLegacyTimeAxis: false,
   kibanaTheme: themeServiceMock.createStartContract(),
+  savedObjectsClient: {} as SavedObjectsClientContract,
 });
 
 describe('xy_visualization', () => {

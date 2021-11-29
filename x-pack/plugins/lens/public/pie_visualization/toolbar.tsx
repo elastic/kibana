@@ -6,22 +6,36 @@
  */
 
 import './toolbar.scss';
-import React from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiFlexGroup,
+  EuiFlexItem,
   EuiFormRow,
   EuiSuperSelect,
   EuiRange,
   EuiHorizontalRule,
+  EuiColorPaletteDisplay,
+  EuiButtonEmpty,
 } from '@elastic/eui';
 import type { Position } from '@elastic/charts';
-import type { PaletteRegistry } from 'src/plugins/charts/public';
+import type { SavedObjectsClientContract } from 'kibana/public';
+import type { PaletteRegistry, PaletteOutput } from 'src/plugins/charts/public';
+import type { FormatFactory, CustomPaletteParams } from '../../common';
 import { DEFAULT_PERCENT_DECIMALS, CHART_NAMES } from './constants';
 import type { PieVisualizationState, SharedPieLayerState } from '../../common/expressions';
 import { VisualizationDimensionEditorProps, VisualizationToolbarProps } from '../types';
-import { ToolbarPopover, LegendSettingsPopover, useDebouncedValue } from '../shared_components';
-import { PalettePicker } from '../shared_components';
+import {
+  ToolbarPopover,
+  LegendSettingsPopover,
+  useDebouncedValue,
+  PalettePanelContainer,
+  CustomizableTermsPalette,
+  FIXED_PROGRESSION,
+  getTermsPaletteColors,
+} from '../shared_components';
+import { SavedObjectPaletteStore, getPalettesFromStore, savePaletteToStore } from '../persistence';
+import { computeTerms } from '../utils';
 
 const numberOptions: Array<{
   value: SharedPieLayerState['numberDisplay'];
@@ -232,17 +246,99 @@ const DecimalPlaceSlider = ({
 export function DimensionEditor(
   props: VisualizationDimensionEditorProps<PieVisualizationState> & {
     paletteService: PaletteRegistry;
+    formatFactory: FormatFactory;
+    savedObjectsClient: SavedObjectsClientContract;
   }
 ) {
+  const [isPaletteOpen, setIsPaletteOpen] = useState(false);
+  const [libraryPalettes, setLibraryPalettes] = useState<Array<PaletteOutput<CustomPaletteParams>>>(
+    []
+  );
+  const {
+    accessor,
+    formatFactory,
+    layerId,
+    state,
+    setState,
+    paletteService,
+    activeData,
+    savedObjectsClient,
+  } = props;
+  const paletteStore = useMemo(
+    () => new SavedObjectPaletteStore(savedObjectsClient),
+    [savedObjectsClient]
+  );
+  useEffect(() => {
+    const getPalettesFromLibrary = () => {
+      getPalettesFromStore(paletteStore).then(
+        (palettes: Array<PaletteOutput<CustomPaletteParams>>) => {
+          setLibraryPalettes(palettes);
+        }
+      );
+    };
+    getPalettesFromLibrary();
+  }, [paletteStore]);
+  const terms = computeTerms(accessor, layerId, activeData, formatFactory);
+  const activePalette = (state.palette as PaletteOutput<CustomPaletteParams>) ?? {
+    name: 'default',
+    type: 'palette',
+  };
+  const savePaletteToLibrary = (palette: PaletteOutput<CustomPaletteParams>, title: string) => {
+    return savePaletteToStore(paletteStore, palette, title).then((savedPalette) => {
+      setLibraryPalettes([...libraryPalettes, savedPalette]);
+    });
+  };
   return (
-    <>
-      <PalettePicker
-        palettes={props.paletteService}
-        activePalette={props.state.palette}
-        setPalette={(newPalette) => {
-          props.setState({ ...props.state, palette: newPalette });
-        }}
-      />
-    </>
+    <EuiFlexGroup
+      alignItems="center"
+      gutterSize="s"
+      responsive={false}
+      className="lnsDynamicColoringClickable"
+    >
+      <EuiFlexItem>
+        <EuiColorPaletteDisplay
+          data-test-subj="lnsPie_dynamicColoring_palette"
+          palette={getTermsPaletteColors(activePalette, props.paletteService, terms)}
+          type={FIXED_PROGRESSION}
+          onClick={() => {
+            setIsPaletteOpen(!isPaletteOpen);
+          }}
+        />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiButtonEmpty
+          data-test-subj="lnsPie_dynamicColoring_trigger"
+          aria-label={i18n.translate('xpack.lens.palettePieGradient.customizeLong', {
+            defaultMessage: 'Edit palette',
+          })}
+          iconType="controlsHorizontal"
+          onClick={() => {
+            setIsPaletteOpen(!isPaletteOpen);
+          }}
+          size="xs"
+          flush="both"
+        >
+          {i18n.translate('xpack.lens.palettePieGradient.customize', {
+            defaultMessage: 'Edit',
+          })}
+        </EuiButtonEmpty>
+        <PalettePanelContainer
+          siblingRef={props.panelRef}
+          isOpen={isPaletteOpen}
+          handleClose={() => setIsPaletteOpen(!isPaletteOpen)}
+        >
+          <CustomizableTermsPalette
+            libraryPalettes={libraryPalettes}
+            palettes={paletteService}
+            activePalette={activePalette}
+            terms={terms}
+            setPalette={(newPalette) => {
+              setState({ ...state, palette: newPalette });
+            }}
+            savePaletteToLibrary={savePaletteToLibrary}
+          />
+        </PalettePanelContainer>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 }

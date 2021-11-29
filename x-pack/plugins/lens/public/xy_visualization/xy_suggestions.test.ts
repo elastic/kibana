@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import type { SavedObjectsClientContract } from 'kibana/public';
 import { getSuggestions } from './xy_suggestions';
 import type { TableSuggestionColumn, VisualizationSuggestion, TableSuggestion } from '../types';
 import { State, XYState, visualizationTypes } from './types';
@@ -23,6 +23,7 @@ const xyVisualization = getXyVisualization({
   fieldFormats: fieldFormatsServiceMock.createStartContract(),
   useLegacyTimeAxis: false,
   kibanaTheme: themeServiceMock.createStartContract(),
+  savedObjectsClient: {} as SavedObjectsClientContract,
 });
 
 describe('xy_suggestions', () => {

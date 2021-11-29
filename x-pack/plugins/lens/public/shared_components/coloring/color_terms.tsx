@@ -33,7 +33,7 @@ function areColorsValid(colorTerms: Array<{ color: string; term: string }>) {
 export interface ColorTermsProps {
   colorTerms: ColorTerm[];
   onChange: (colorTerms: ColorTerm[]) => void;
-  savePalette: (title: string) => void;
+  savePalette: (title: string) => Promise<void>;
   paletteConfiguration: CustomPaletteParamsConfig | undefined;
   'data-test-prefix': string;
 }
@@ -74,8 +74,9 @@ export const ColorTerms = ({
 
   const onPaletteSave = useCallback(
     (title: string) => {
-      setSavePaletteModalOpen(false);
-      savePalette(title);
+      return savePalette(title).then(() => {
+        setSavePaletteModalOpen(false);
+      });
     },
     [savePalette]
   );

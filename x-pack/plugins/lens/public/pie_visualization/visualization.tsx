@@ -9,6 +9,7 @@ import React from 'react';
 import { render } from 'react-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
+import type { SavedObjectsClientContract } from 'kibana/public';
 import type { PaletteRegistry } from 'src/plugins/charts/public';
 import { ThemeServiceStart } from 'kibana/public';
 import { KibanaThemeProvider } from '../../../../../src/plugins/kibana_react/public';
@@ -20,7 +21,7 @@ import type {
 } from '../types';
 import { toExpression, toPreviewExpression } from './to_expression';
 import type { PieLayerState, PieVisualizationState } from '../../common/expressions';
-import { layerTypes } from '../../common';
+import { layerTypes, FormatFactory } from '../../common';
 import { suggestions } from './suggestions';
 import { CHART_NAMES, MAX_PIE_BUCKETS, MAX_TREEMAP_BUCKETS } from './constants';
 import { DimensionEditor, PieToolbar } from './toolbar';
@@ -53,9 +54,10 @@ const applyPaletteToColumnConfig = (
     columns[colorPickerIndex] = {
       columnId: columns[colorPickerIndex].columnId,
       triggerIcon: 'colorBy',
-      palette: paletteService
-        .get(palette?.name || 'default')
-        .getCategoricalColors(10, palette?.params),
+      palette:
+        palette?.name !== 'custom'
+          ? paletteService.get(palette?.name || 'default').getCategoricalColors(10, palette?.params)
+          : (palette?.params?.colorTerms || []).map(({ color }) => color),
     };
   }
 };
@@ -63,9 +65,13 @@ const applyPaletteToColumnConfig = (
 export const getPieVisualization = ({
   paletteService,
   kibanaTheme,
+  formatFactory,
+  savedObjectsClient,
 }: {
   paletteService: PaletteRegistry;
   kibanaTheme: ThemeServiceStart;
+  formatFactory: FormatFactory;
+  savedObjectsClient: SavedObjectsClientContract;
 }): Visualization<PieVisualizationState> => ({
   id: 'lnsPie',
 
@@ -238,7 +244,12 @@ export const getPieVisualization = ({
     render(
       <KibanaThemeProvider theme$={kibanaTheme.theme$}>
         <I18nProvider>
-          <DimensionEditor {...props} paletteService={paletteService} />
+          <DimensionEditor
+            {...props}
+            paletteService={paletteService}
+            formatFactory={formatFactory}
+            savedObjectsClient={savedObjectsClient}
+          />
         </I18nProvider>
       </KibanaThemeProvider>,
       domElement

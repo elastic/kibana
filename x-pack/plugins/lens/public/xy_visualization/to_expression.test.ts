@@ -7,6 +7,7 @@
 
 import { Ast } from '@kbn/interpreter/common';
 import { Position } from '@elastic/charts';
+import type { SavedObjectsClientContract } from 'kibana/public';
 import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
 import { getXyVisualization } from './xy_visualization';
 import { Operation } from '../types';
@@ -22,6 +23,7 @@ describe('#toExpression', () => {
     fieldFormats: fieldFormatsServiceMock.createStartContract(),
     kibanaTheme: themeServiceMock.createStartContract(),
     useLegacyTimeAxis: false,
+    savedObjectsClient: {} as SavedObjectsClientContract,
   });
   let mockDatasource: ReturnType<typeof createMockDatasource>;
   let frame: ReturnType<typeof createMockFramePublicAPI>;

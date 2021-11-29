@@ -31,6 +31,7 @@ export class PieVisualization {
     editorFrame.registerVisualization(async () => {
       const { getPieVisualization, getPieRenderer } = await import('../async_services');
       const palettes = await charts.palettes.getPalettes();
+      const [{ savedObjects }] = await core.getStartServices();
 
       expressions.registerRenderer(
         getPieRenderer({
@@ -40,7 +41,12 @@ export class PieVisualization {
           kibanaTheme: core.theme,
         })
       );
-      return getPieVisualization({ paletteService: palettes, kibanaTheme: core.theme });
+      return getPieVisualization({
+        paletteService: palettes,
+        kibanaTheme: core.theme,
+        formatFactory,
+        savedObjectsClient: savedObjects.client,
+      });
     });
   }
 }

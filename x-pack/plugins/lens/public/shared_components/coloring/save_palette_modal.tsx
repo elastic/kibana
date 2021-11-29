@@ -25,10 +25,11 @@ export function SavePaletteModal({
   onSave,
   onCancel,
 }: {
-  onSave: (title: string) => void;
+  onSave: (title: string) => Promise<void>;
   onCancel: () => void;
 }) {
   const [paletteTitle, setPaletteTitle] = useState('');
+  const [validateTitleError, setValidateTitleError] = useState('');
 
   return (
     <EuiModal
@@ -54,6 +55,8 @@ export function SavePaletteModal({
                 defaultMessage: 'Palette title',
               })}
               display="rowCompressed"
+              isInvalid={!!validateTitleError}
+              error={[validateTitleError]}
             >
               <EuiFieldText
                 value={paletteTitle}
@@ -79,7 +82,18 @@ export function SavePaletteModal({
             <EuiButton
               fill
               onClick={() => {
-                onSave(paletteTitle);
+                // palette title is required
+                if (paletteTitle === '') {
+                  setValidateTitleError(
+                    i18n.translate('xpack.lens.palette.saveModal.titleRequiredError', {
+                      defaultMessage: 'Title is required',
+                    })
+                  );
+                } else {
+                  onSave(paletteTitle).catch((e) => {
+                    setValidateTitleError(e.message);
+                  });
+                }
               }}
               data-test-subj="canvasCustomElementForm-submit"
             >

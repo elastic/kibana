@@ -4,10 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import type { SavedObjectsClientContract } from 'kibana/public';
 import { getPieVisualization } from './visualization';
 import type { PieVisualizationState } from '../../common/expressions';
 import { layerTypes } from '../../common';
+import { fieldFormatsServiceMock } from '../../../../../src/plugins/field_formats/public/mocks';
 import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
 import { createMockDatasource, createMockFramePublicAPI } from '../mocks';
 import { FramePublicAPI } from '../types';
@@ -16,10 +17,13 @@ import { themeServiceMock } from '../../../../../src/core/public/mocks';
 jest.mock('../id_generator');
 
 const LAYER_ID = 'l1';
+const fieldFormatsMock = fieldFormatsServiceMock.createStartContract();
 
 const pieVisualization = getPieVisualization({
   paletteService: chartPluginMock.createPaletteRegistry(),
   kibanaTheme: themeServiceMock.createStartContract(),
+  formatFactory: fieldFormatsMock.deserialize,
+  savedObjectsClient: {} as SavedObjectsClientContract,
 });
 
 function getExampleState(): PieVisualizationState {

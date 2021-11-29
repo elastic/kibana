@@ -111,7 +111,7 @@ export function palette(): ExpressionFunctionDefinition<
         types: ['string'],
         help: i18n.translate('charts.functions.palette.args.termHelpText', {
           defaultMessage:
-            'The palette color terns. When used, it must be associated with each color.',
+            'The palette color terms. When used, it must be associated with each color.',
         }),
         required: false,
       },

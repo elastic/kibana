@@ -8,6 +8,7 @@
 import React from 'react';
 import { mountWithIntl as mount, shallowWithIntl as shallow } from '@kbn/test/jest';
 import { EuiButtonGroupProps, EuiButtonGroup } from '@elastic/eui';
+import type { SavedObjectsClientContract } from 'kibana/public';
 import { LayerContextMenu, XyToolbar, DimensionEditor } from '.';
 import { AxisSettingsPopover } from './axis_settings_popover';
 import { FramePublicAPI } from '../../types';
@@ -263,6 +264,7 @@ describe('XY Config panels', () => {
           formatFactory={jest.fn()}
           paletteService={chartPluginMock.createPaletteRegistry()}
           panelRef={React.createRef()}
+          savedObjectsClient={{} as SavedObjectsClientContract}
         />
       );
 
@@ -287,6 +289,7 @@ describe('XY Config panels', () => {
           formatFactory={jest.fn()}
           paletteService={chartPluginMock.createPaletteRegistry()}
           panelRef={React.createRef()}
+          savedObjectsClient={{} as SavedObjectsClientContract}
         />
       );
 
@@ -332,6 +335,7 @@ describe('XY Config panels', () => {
           formatFactory={jest.fn()}
           paletteService={chartPluginMock.createPaletteRegistry()}
           panelRef={React.createRef()}
+          savedObjectsClient={{} as SavedObjectsClientContract}
         />
       );
 
@@ -373,6 +377,7 @@ describe('XY Config panels', () => {
           formatFactory={jest.fn()}
           paletteService={chartPluginMock.createPaletteRegistry()}
           panelRef={React.createRef()}
+          savedObjectsClient={{} as SavedObjectsClientContract}
         />
       );
 

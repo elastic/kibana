@@ -32,7 +32,10 @@ export function CustomizableTermsPalette({
   palettes: PaletteRegistry;
   activePalette?: PaletteOutput<CustomPaletteParams>;
   setPalette: (palette: PaletteOutput<CustomPaletteParams>) => void;
-  savePaletteToLibrary: (palette: PaletteOutput<CustomPaletteParams>, title: string) => void;
+  savePaletteToLibrary: (
+    palette: PaletteOutput<CustomPaletteParams>,
+    title: string
+  ) => Promise<void>;
   terms: string[];
 }) {
   let selectedPalette = activePalette ?? {
@@ -40,10 +43,12 @@ export function CustomizableTermsPalette({
     type: 'palette',
   };
   const colors = getTermsPaletteColors(selectedPalette, palettes, terms);
-  const colorTerms = terms.map((term, i) => ({
-    color: colors[i],
-    term,
-  }));
+  const colorTerms =
+    selectedPalette.params?.colorTerms ??
+    terms.map((term, i) => ({
+      color: colors[i],
+      term,
+    }));
 
   selectedPalette = {
     ...selectedPalette,
@@ -54,7 +59,7 @@ export function CustomizableTermsPalette({
   };
 
   const savePalette = (title: string) => {
-    savePaletteToLibrary(selectedPalette, title);
+    return savePaletteToLibrary(selectedPalette, title);
   };
 
   return (

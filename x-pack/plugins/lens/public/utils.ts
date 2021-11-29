@@ -13,9 +13,11 @@ import type {
   IndexPatternsContract,
   TimefilterContract,
 } from 'src/plugins/data/public';
+import type { Datatable } from 'src/plugins/expressions/public';
 import type { IUiSettingsClient } from 'kibana/public';
 import type { SavedObjectReference } from 'kibana/public';
 import type { Document } from './persistence/saved_object_store';
+import type { FormatFactory } from '../common';
 import type { Datasource, DatasourceMap, Visualization } from './types';
 import type { DatasourceStates, VisualizationState } from './state_management';
 
@@ -106,4 +108,25 @@ export function getRemoveOperation(
   }
   // fallback to generic count check
   return layerCount === 1 ? 'clear' : 'remove';
+}
+
+export function computeTerms(
+  accessor: string | undefined,
+  layerId: string,
+  data: Record<string, Datatable> | undefined,
+  formatFactory: FormatFactory
+) {
+  const terms: string[] = [];
+  if (accessor) {
+    data?.[layerId].rows.map((row) => {
+      const column = data?.[layerId].columns.find((col) => col.id === accessor);
+      const formattedValue = column
+        ? formatFactory(column.meta.params).convert(row[accessor])
+        : row[accessor];
+      if (!terms.includes(formattedValue)) {
+        terms.push(formattedValue);
+      }
+    });
+  }
+  return terms;
 }
