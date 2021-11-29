@@ -102,7 +102,7 @@ export const ALERT_ERROR_TIMEOUT_REASON = i18n.translate(
 export const ALERT_ERROR_DISABLED_REASON = i18n.translate(
   'xpack.triggersActionsUI.sections.alertsList.alertErrorReasonDisabled',
   {
-    defaultMessage: 'Rule execution cancelled due to rule disabled.',
+    defaultMessage: 'Rule failed to execute because rule ran after it was disabled.',
   }
 );
 

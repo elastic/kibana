@@ -118,7 +118,7 @@ export class TaskRunner<
   }
 
   async getDecryptedAttributes(
-    alertId: string,
+    ruleId: string,
     spaceId: string
   ): Promise<{ apiKey: string | null; enabled: boolean }> {
     const namespace = this.context.spaceIdToNamespace(spaceId);
@@ -128,7 +128,7 @@ export class TaskRunner<
       attributes: { apiKey, enabled },
     } = await this.context.encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawAlert>(
       'alert',
-      alertId,
+      ruleId,
       { namespace }
     );
 
