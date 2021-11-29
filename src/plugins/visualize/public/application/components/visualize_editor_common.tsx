@@ -39,6 +39,7 @@ interface VisualizeEditorCommonProps {
   visEditorRef: RefObject<HTMLDivElement>;
   originatingApp?: string;
   setOriginatingApp?: (originatingApp: string | undefined) => void;
+  originatingPath?: string;
   visualizationIdFromUrl?: string;
   embeddableId?: string;
 }
@@ -54,6 +55,7 @@ export const VisualizeEditorCommon = ({
   isEmbeddableRendered,
   onAppLeave,
   originatingApp,
+  originatingPath,
   setOriginatingApp,
   visualizationIdFromUrl,
   embeddableId,
@@ -122,6 +124,7 @@ export const VisualizeEditorCommon = ({
           isEmbeddableRendered={isEmbeddableRendered}
           hasUnappliedChanges={hasUnappliedChanges}
           originatingApp={originatingApp}
+          originatingPath={originatingPath}
           setOriginatingApp={setOriginatingApp}
           visInstance={visInstance}
           stateContainer={appState}
