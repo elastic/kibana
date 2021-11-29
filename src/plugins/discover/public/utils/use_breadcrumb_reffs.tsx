@@ -6,11 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { matchPath } from 'react-router-dom';
+import { useMemo, useRef } from 'react';
+import { useHistory, matchPath } from 'react-router-dom';
 import { stringify } from 'query-string';
 import rison from 'rison-node';
-import { useHistory } from 'react-router-dom';
-import { useMemo, useRef } from 'react';
 import { esFilters, FilterManager } from '../../../data/public';
 import { url } from '../../../kibana_utils/common';
 import { getServices } from '../kibana_services';
