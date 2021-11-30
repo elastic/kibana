@@ -14,6 +14,9 @@ import { encryptedSavedObjectsMock } from '../../../encrypted_saved_objects/serv
 import { rulesClientMock } from '../rules_client.mock';
 import { HealthStatus } from '../types';
 import { alertsMock } from '../mocks';
+import { RecoveredActionGroup } from '../../common';
+import { RegistryAlertTypeWithAuth } from '../authorization';
+
 const rulesClient = rulesClientMock.create();
 
 jest.mock('../lib/license_api_access.ts', () => ({
@@ -22,6 +25,33 @@ jest.mock('../lib/license_api_access.ts', () => ({
 
 const alerting = alertsMock.createStart();
 const currentDate = new Date().toISOString();
+const ruleTypes = [
+  {
+    id: '1',
+    name: 'name',
+    actionGroups: [
+      {
+        id: 'default',
+        name: 'Default',
+      },
+    ],
+    defaultActionGroupId: 'default',
+    minimumLicenseRequired: 'basic',
+    isExportable: true,
+    ruleTaskTimeout: '10m',
+    recoveryActionGroup: RecoveredActionGroup,
+    authorizedConsumers: {},
+    actionVariables: {
+      context: [],
+      state: [],
+    },
+    producer: 'test',
+    enabledInLicense: true,
+    minimumScheduleInterval: '1m',
+    defaultScheduleInterval: '10m',
+  } as RegistryAlertTypeWithAuth,
+];
+
 beforeEach(() => {
   jest.resetAllMocks();
   alerting.getFrameworkHealth.mockResolvedValue({
@@ -42,6 +72,7 @@ beforeEach(() => {
 
 describe('healthRoute', () => {
   it('registers the route', async () => {
+    rulesClient.listAlertTypes.mockResolvedValueOnce(new Set(ruleTypes));
     const router = httpServiceMock.createRouter();
 
     const licenseState = licenseStateMock.create();
@@ -54,6 +85,7 @@ describe('healthRoute', () => {
   });
 
   it('queries the usage api', async () => {
+    rulesClient.listAlertTypes.mockResolvedValueOnce(new Set(ruleTypes));
     const router = httpServiceMock.createRouter();
 
     const licenseState = licenseStateMock.create();
@@ -76,7 +108,34 @@ describe('healthRoute', () => {
     expect(verifyApiAccess).toHaveBeenCalledWith(licenseState);
   });
 
+  it('throws error when user does not have any access to any rule types', async () => {
+    rulesClient.listAlertTypes.mockResolvedValueOnce(new Set());
+    const router = httpServiceMock.createRouter();
+
+    const licenseState = licenseStateMock.create();
+    const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup({ canEncrypt: false });
+    healthRoute(router, licenseState, encryptedSavedObjects);
+    const [, handler] = router.get.mock.calls[0];
+
+    const [context, req, res] = mockHandlerArguments(
+      {
+        rulesClient,
+        getFrameworkHealth: alerting.getFrameworkHealth,
+        areApiKeysEnabled: () => Promise.resolve(true),
+      },
+      {},
+      ['ok']
+    );
+
+    await handler(context, req, res);
+
+    expect(res.forbidden).toHaveBeenCalledWith({
+      body: { message: `Unauthorized to access alerting framework health` },
+    });
+  });
+
   it('evaluates whether Encrypted Saved Objects is missing encryption key', async () => {
+    rulesClient.listAlertTypes.mockResolvedValueOnce(new Set(ruleTypes));
     const router = httpServiceMock.createRouter();
 
     const licenseState = licenseStateMock.create();
@@ -117,6 +176,7 @@ describe('healthRoute', () => {
   });
 
   test('when ES security status cannot be determined from license state, isSufficientlySecure should return false', async () => {
+    rulesClient.listAlertTypes.mockResolvedValueOnce(new Set(ruleTypes));
     const router = httpServiceMock.createRouter();
     const licenseState = licenseStateMock.create();
     const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup({ canEncrypt: true });
@@ -158,6 +218,7 @@ describe('healthRoute', () => {
   });
 
   test('when ES security is disabled, isSufficientlySecure should return true', async () => {
+    rulesClient.listAlertTypes.mockResolvedValueOnce(new Set(ruleTypes));
     const router = httpServiceMock.createRouter();
     const licenseState = licenseStateMock.create();
     const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup({ canEncrypt: true });
@@ -199,6 +260,7 @@ describe('healthRoute', () => {
   });
 
   test('when ES security is enabled but user cannot generate api keys, isSufficientlySecure should return false', async () => {
+    rulesClient.listAlertTypes.mockResolvedValueOnce(new Set(ruleTypes));
     const router = httpServiceMock.createRouter();
     const licenseState = licenseStateMock.create();
     const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup({ canEncrypt: true });
@@ -240,6 +302,7 @@ describe('healthRoute', () => {
   });
 
   test('when ES security is enabled and user can generate api keys, isSufficientlySecure should return true', async () => {
+    rulesClient.listAlertTypes.mockResolvedValueOnce(new Set(ruleTypes));
     const router = httpServiceMock.createRouter();
     const licenseState = licenseStateMock.create();
     const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup({ canEncrypt: true });
