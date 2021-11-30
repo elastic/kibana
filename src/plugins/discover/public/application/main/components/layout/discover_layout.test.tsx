@@ -150,6 +150,7 @@ function getProps(indexPattern: IndexPattern, wasSidebarClosed?: boolean): Disco
     services,
     state: { columns: [] },
     stateContainer: {} as GetStateReturn,
+    setExpandedDoc: jest.fn(),
   };
 }
 
