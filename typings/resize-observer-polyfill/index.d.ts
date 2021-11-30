@@ -11,7 +11,6 @@ declare global {
 
   interface ResizeObserverEntry {
     readonly target: Element;
-    readonly contentRect: DOMRectReadOnly;
   }
 
   interface ResizeObserver {
