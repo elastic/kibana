@@ -155,6 +155,7 @@ export class UpdateSourceEditor extends Component<Props, State> {
           </EuiTitle>
           <EuiSpacer size="m" />
           <ResolutionEditor
+            isHeatmap={this.props.currentLayerType === LAYER_TYPE.HEATMAP}
             resolution={this.props.resolution}
             onChange={this._onResolutionChange}
             metrics={this.props.metrics}
