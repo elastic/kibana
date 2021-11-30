@@ -40,7 +40,7 @@ Refer to {security-guide}/ingest-data.html[Ingest data to Elastic Security]
 for more information.
 
 [float]
-=== Add data with language clients
+=== Add data with programming languages
 
 Add any data to the Elastic Stack using a programming language,
 such as JavaScript, Java, Python, and Ruby.
