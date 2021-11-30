@@ -6,7 +6,7 @@
  */
 
 import React, { FC, Fragment } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiSelect, EuiText } from '@elastic/eui';
+import { useEuiTheme, EuiFlexGroup, EuiFlexItem, EuiSelect, EuiText } from '@elastic/eui';
 import { ClassNames } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { identity } from 'lodash';
@@ -18,7 +18,8 @@ import {
   sidebarPanelClassName,
   sidebarExpandableClassName,
   sidebarExpandableStyles,
-} from '../shared_styles/sidebar';
+  sidebarPanelStylesFactory,
+} from '../shared_styles';
 
 interface Props {
   filtersGroups: FiltersGroupType[];
@@ -64,6 +65,7 @@ export const WorkpadFilters: FC<Props> = ({
   onGroupByChange,
   groupFiltersByField,
 }) => {
+  const { euiTheme } = useEuiTheme();
   const groupedByFilterGroupField = groupFiltersByField === 'filterGroup';
   const formatter = groupFiltersByField ? formatByKey(groupFiltersByField) ?? identity : identity;
 
@@ -86,7 +88,8 @@ export const WorkpadFilters: FC<Props> = ({
             className={cx(
               sidebarPanelClassName,
               sidebarExpandableClassName,
-              css(sidebarExpandableStyles)
+              css(sidebarExpandableStyles),
+              css(sidebarPanelStylesFactory(euiTheme))
             )}
           >
             <EuiFlexGroup gutterSize="l" alignItems="center">

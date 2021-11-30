@@ -28,42 +28,6 @@
   min-width: 0;
 }
 
-.canvasSidebar__expandable {
-  width: 100%;
-}
-
-.canvasSidebar__accordion {
-  padding: $euiSizeM;
-  margin: 0 (-$euiSizeM);
-  background: $euiColorLightestShade;
-  position: relative;
-
-  &.euiAccordion-isOpen {
-    background: transparent;
-  }
-
-  &:before,
-  &:after {
-    content: '';
-    height: 1px;
-    position: absolute;
-    left: 0;
-    width: 100%;
-    background: $euiColorLightShade;
-  }
-
-  &:before {
-    top: 0;
-  }
-
-  &:after {
-    bottom: 0;
-  }
-}
-.canvasSidebar__accordion.filtersSidebar__accordion {
-  margin: auto;
-}
-
 .canvasSidebar__accordionContent {
   padding-top: $euiSize;
   padding-left: $euiSizeXS + $euiSizeS + $euiSize;

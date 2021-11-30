@@ -27,8 +27,7 @@ export const sidebarAccordionStylesFactory = (theme: EuiThemeComputed) => css`
     margin: auto;
   }
 
-  .${sidebarPanelClassName} > * > .${sidebarExpandableClassName}:last-child &,
-  .${sidebarPanelClassName} > .${sidebarExpandableClassName}:last-child & {
+  .${sidebarPanelClassName} .${sidebarExpandableClassName}:last-child & {
     margin-bottom: -${theme.size.s};
 
     &:after {
@@ -65,9 +64,9 @@ export const sidebarAccordionStylesFactory = (theme: EuiThemeComputed) => css`
 
 export const sidebarExpandableStyles = css`
   width: 100%;
-  /* + .${sidebarExpandableClassName} {
+  + .${sidebarExpandableClassName} {
     margin-top: 0px;
-  } */
+  }
 `;
 
 export const sidebarPanelStylesFactory = (theme: EuiThemeComputed) => css`
