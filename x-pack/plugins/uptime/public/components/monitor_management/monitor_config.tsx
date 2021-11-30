@@ -12,9 +12,14 @@ import { defaultConfig, usePolicyConfigContext } from '../fleet_package/contexts
 import { usePolicy } from '../fleet_package/hooks/use_policy';
 import { validate } from '../fleet_package/validation';
 import { MonitorFields } from './monitor_fields';
+import { ActionBar } from './action_bar/action_bar';
 import { useFormatMonitor } from './hooks/use_format_monitor';
 
-export const MonitorConfig = () => {
+interface Props {
+  id?: string;
+}
+
+export const MonitorConfig = ({ id }: Props) => {
   const { monitorType } = usePolicyConfigContext();
   /* TODO - Use Effect to make sure the package/index templates are loaded. Wait for it to load before showing view
    * then show error message if it fails */
@@ -26,12 +31,17 @@ export const MonitorConfig = () => {
      This type of helper should ideally be moved to task manager where we are syncing the config.
      We can process validation (isValid) and formatting for heartbeat (formattedMonitor) separately
      We don't need to save the heartbeat compatible version in saved objects */
-  useFormatMonitor({
+  const { isValid } = useFormatMonitor({
     monitorType,
     validate,
     config: policyConfig[monitorType],
     defaultConfig: defaultConfig[monitorType],
   });
 
-  return <MonitorFields />;
+  return (
+    <>
+      <MonitorFields />
+      <ActionBar id={id} monitor={policyConfig[monitorType]} isValid={isValid} />
+    </>
+  );
 };

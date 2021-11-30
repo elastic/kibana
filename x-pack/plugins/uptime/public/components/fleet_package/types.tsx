@@ -231,6 +231,8 @@ export type ICustomFields = HTTPFields &
     [ConfigKeys.NAME]: string;
   };
 
+export type Monitor = Partial<ICustomFields>;
+
 export interface PolicyConfig {
   [DataStream.HTTP]: HTTPFields;
   [DataStream.TCP]: TCPFields;
