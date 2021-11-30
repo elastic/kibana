@@ -6,6 +6,7 @@
  */
 
 import { Ast } from '@kbn/interpreter/common';
+import type { SavedObjectsClientContract } from 'kibana/public';
 import { buildExpression } from '../../../../../src/plugins/expressions/public';
 import { createMockDatasource, createMockFramePublicAPI, DatasourceMock } from '../mocks';
 import { DatatableVisualizationState, getDatatableVisualization } from './visualization';
@@ -30,6 +31,7 @@ function mockFrame(): FramePublicAPI {
 const datatableVisualization = getDatatableVisualization({
   paletteService: chartPluginMock.createPaletteRegistry(),
   theme: themeServiceMock.createStartContract(),
+  savedObjectsClient: {} as SavedObjectsClientContract,
 });
 
 describe('Datatable Visualization', () => {

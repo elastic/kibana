@@ -566,6 +566,7 @@ describe('palettes', () => {
               reverse: [false],
               continuity: ['above'],
               stop: [],
+              term: [],
               range: ['percent'],
               rangeMax: [],
               rangeMin: [],

@@ -11,7 +11,7 @@ import { Ast } from '@kbn/interpreter/common';
 import { I18nProvider } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import type { PaletteRegistry } from 'src/plugins/charts/public';
-import { ThemeServiceStart } from 'kibana/public';
+import { ThemeServiceStart, SavedObjectsClientContract } from 'kibana/public';
 import { KibanaThemeProvider } from '../../../../../src/plugins/kibana_react/public';
 import type {
   SuggestionRequest,
@@ -43,9 +43,11 @@ const visualizationLabel = i18n.translate('xpack.lens.datatable.label', {
 export const getDatatableVisualization = ({
   paletteService,
   theme,
+  savedObjectsClient,
 }: {
   paletteService: PaletteRegistry;
   theme: ThemeServiceStart;
+  savedObjectsClient: SavedObjectsClientContract;
 }): Visualization<DatatableVisualizationState> => ({
   id: 'lnsDatatable',
 
@@ -301,7 +303,11 @@ export const getDatatableVisualization = ({
     render(
       <KibanaThemeProvider theme$={theme.theme$}>
         <I18nProvider>
-          <TableDimensionEditor {...props} paletteService={paletteService} />
+          <TableDimensionEditor
+            {...props}
+            paletteService={paletteService}
+            savedObjectsClient={savedObjectsClient}
+          />
         </I18nProvider>
       </KibanaThemeProvider>,
       domElement

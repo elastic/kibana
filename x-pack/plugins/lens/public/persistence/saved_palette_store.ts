@@ -61,8 +61,8 @@ export class SavedObjectPaletteStore implements SavedPaletteStore {
   checkForDuplicateTitle = async (title: string) => {
     const result = await this.client.find({
       type: PALETTE_DOC_TYPE,
-      search: title,
       searchFields: ['title'],
+      search: `"${title}"`,
     });
 
     return result.savedObjects.length > 0;

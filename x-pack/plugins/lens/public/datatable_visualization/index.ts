@@ -30,6 +30,7 @@ export class DatatableVisualization {
     editorFrame.registerVisualization(async () => {
       const { getDatatableRenderer, getDatatableVisualization } = await import('../async_services');
       const palettes = await charts.palettes.getPalettes();
+      const [{ savedObjects }] = await core.getStartServices();
 
       expressions.registerRenderer(() =>
         getDatatableRenderer({
@@ -43,7 +44,11 @@ export class DatatableVisualization {
         })
       );
 
-      return getDatatableVisualization({ paletteService: palettes, theme: core.theme });
+      return getDatatableVisualization({
+        paletteService: palettes,
+        theme: core.theme,
+        savedObjectsClient: savedObjects.client,
+      });
     });
   }
 }

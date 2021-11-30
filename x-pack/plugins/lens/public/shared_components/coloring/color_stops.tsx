@@ -48,6 +48,7 @@ export interface CustomStopsProps {
   dataBounds: { min: number; max: number };
   paletteConfiguration: CustomPaletteParamsConfig | undefined;
   'data-test-prefix': string;
+  enableSave: boolean;
 }
 export const CustomStops = ({
   colorStops,
@@ -56,6 +57,7 @@ export const CustomStops = ({
   paletteConfiguration,
   dataBounds,
   ['data-test-prefix']: dataTestPrefix,
+  enableSave,
 }: CustomStopsProps) => {
   const [isSavePaletteModalOpen, setSavePaletteModalOpen] = useState(false);
   const onChangeWithValidation = useCallback(
@@ -319,25 +321,27 @@ export const CustomStops = ({
         </EuiButtonEmpty>
       </TooltipWrapper>
       <EuiSpacer size="s" />
-      <EuiButtonEmpty
-        data-test-subj={`${dataTestPrefix}_dynamicColoring_savePalette`}
-        iconType="save"
-        color="primary"
-        aria-label={i18n.translate('xpack.lens.dynamicColoring.customPalette.save', {
-          defaultMessage: 'Save palette',
-        })}
-        size="xs"
-        isDisabled={shouldDisableAdd}
-        flush="left"
-        onClick={() => {
-          setSavePaletteModalOpen(true);
-        }}
-      >
-        {i18n.translate('xpack.lens.dynamicColoring.customPalette.save', {
-          defaultMessage: 'Save palette',
-        })}
-      </EuiButtonEmpty>
-      {isSavePaletteModalOpen && (
+      {enableSave && (
+        <EuiButtonEmpty
+          data-test-subj={`${dataTestPrefix}_dynamicColoring_savePalette`}
+          iconType="save"
+          color="primary"
+          aria-label={i18n.translate('xpack.lens.dynamicColoring.customPalette.save', {
+            defaultMessage: 'Save palette',
+          })}
+          size="xs"
+          isDisabled={shouldDisableAdd}
+          flush="left"
+          onClick={() => {
+            setSavePaletteModalOpen(true);
+          }}
+        >
+          {i18n.translate('xpack.lens.dynamicColoring.customPalette.save', {
+            defaultMessage: 'Save palette',
+          })}
+        </EuiButtonEmpty>
+      )}
+      {isSavePaletteModalOpen && enableSave && (
         <SavePaletteModal onCancel={() => setSavePaletteModalOpen(false)} onSave={onPaletteSave} />
       )}
     </>

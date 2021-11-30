@@ -76,6 +76,7 @@ export function CustomizablePalette({
   showContinuity = true,
   showRangeTypeSelector = true,
   savePaletteToLibrary,
+  enableSave = true,
 }: {
   palettes: PaletteRegistry;
   libraryPalettes?: Array<PaletteOutput<CustomPaletteParams>>;
@@ -84,6 +85,7 @@ export function CustomizablePalette({
   dataBounds?: { min: number; max: number };
   showContinuity?: boolean;
   showRangeTypeSelector?: boolean;
+  enableSave?: boolean;
   savePaletteToLibrary?: (
     palette: PaletteOutput<CustomPaletteParams>,
     title: string
@@ -137,6 +139,7 @@ export function CustomizablePalette({
                 );
                 newParams.colorStops = savedPalette?.params?.colorStops;
                 newParams.name = CUSTOM_PALETTE;
+                newParams.rangeType = savedPalette?.params?.rangeType;
               }
 
               newParams.stops = getPaletteStops(palettes, newParams, {
@@ -384,6 +387,7 @@ export function CustomizablePalette({
             colorStops={colorStopsToShow}
             dataBounds={dataBounds}
             savePalette={savePalette}
+            enableSave={enableSave}
             onChange={(colorStops) => {
               const newParams = getSwitchToCustomParams(
                 palettes,

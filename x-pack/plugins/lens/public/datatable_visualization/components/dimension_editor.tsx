@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, useMemo, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiFormRow,
@@ -19,9 +19,17 @@ import {
   EuiFieldText,
   EuiComboBox,
 } from '@elastic/eui';
-import { PaletteRegistry } from 'src/plugins/charts/public';
+import type { SavedObjectsClientContract } from 'kibana/public';
+import { PaletteRegistry, PaletteOutput } from 'src/plugins/charts/public';
+import type { CustomPaletteParams } from '../../../common';
 import { VisualizationDimensionEditorProps } from '../../types';
 import { DatatableVisualizationState } from '../visualization';
+import {
+  SavedObjectPaletteStore,
+  getPalettesFromStore,
+  savePaletteToStore,
+} from '../../persistence';
+
 import {
   CustomizablePalette,
   applyPaletteParams,
@@ -65,11 +73,34 @@ function updateColumnWith(
 export function TableDimensionEditor(
   props: VisualizationDimensionEditorProps<DatatableVisualizationState> & {
     paletteService: PaletteRegistry;
+    savedObjectsClient: SavedObjectsClientContract;
   }
 ) {
-  const { state, setState, frame, accessor } = props;
+  const { state, setState, frame, accessor, savedObjectsClient } = props;
   const column = state.columns.find(({ columnId }) => accessor === columnId);
   const [isPaletteOpen, setIsPaletteOpen] = useState(false);
+  const [libraryPalettes, setLibraryPalettes] = useState<Array<PaletteOutput<CustomPaletteParams>>>(
+    []
+  );
+  const paletteStore = useMemo(
+    () => new SavedObjectPaletteStore(savedObjectsClient),
+    [savedObjectsClient]
+  );
+  useEffect(() => {
+    const getPalettesFromLibrary = () => {
+      getPalettesFromStore(paletteStore, 'stops').then(
+        (palettes: Array<PaletteOutput<CustomPaletteParams>>) => {
+          setLibraryPalettes(palettes);
+        }
+      );
+    };
+    getPalettesFromLibrary();
+  }, [paletteStore]);
+  const savePaletteToLibrary = (palette: PaletteOutput<CustomPaletteParams>, title: string) => {
+    return savePaletteToStore(paletteStore, palette, title, 'stops').then((savedPalette) => {
+      setLibraryPalettes([...libraryPalettes, savedPalette]);
+    });
+  };
   const onSummaryLabelChangeToDebounce = useCallback(
     (newSummaryLabel: string | undefined) => {
       setState({
@@ -379,6 +410,7 @@ export function TableDimensionEditor(
                     handleClose={() => setIsPaletteOpen(!isPaletteOpen)}
                   >
                     <CustomizablePalette
+                      libraryPalettes={libraryPalettes}
                       palettes={props.paletteService}
                       activePalette={activePalette}
                       dataBounds={currentMinMax}
@@ -388,6 +420,7 @@ export function TableDimensionEditor(
                           columns: updateColumnWith(state, accessor, { palette: newPalette }),
                         });
                       }}
+                      savePaletteToLibrary={savePaletteToLibrary}
                     />
                   </PalettePanelContainer>
                 </EuiFlexItem>

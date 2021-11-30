@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { EuiButtonGroup, EuiComboBox, EuiFieldText } from '@elastic/eui';
+import type { SavedObjectsClientContract } from 'kibana/public';
 import { FramePublicAPI, Operation, VisualizationDimensionEditorProps } from '../../types';
 import { DatatableVisualizationState } from '../visualization';
 import { createMockDatasource, createMockFramePublicAPI } from '../../mocks';
@@ -24,6 +25,7 @@ describe('data table dimension editor', () => {
   let setState: (newState: DatatableVisualizationState) => void;
   let props: VisualizationDimensionEditorProps<DatatableVisualizationState> & {
     paletteService: PaletteRegistry;
+    savedObjectsClient: SavedObjectsClientContract;
   };
 
   function testState(): DatatableVisualizationState {
@@ -69,6 +71,7 @@ describe('data table dimension editor', () => {
       setState,
       paletteService: chartPluginMock.createPaletteRegistry(),
       panelRef: React.createRef(),
+      savedObjectsClient: {} as SavedObjectsClientContract,
     };
   });
 
