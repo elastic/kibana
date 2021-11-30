@@ -16,7 +16,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import { SectionLoading } from '../../shared_imports';
 import { ProcessTree } from '../ProcessTree';
-import { Process } from '../../hooks/use_process_tree';
+import { Process } from '../../../common/types/process_tree';
 import { SessionViewDetailPanel } from '../SessionViewDetailPanel';
 import { useStyles } from './styles';
 import {

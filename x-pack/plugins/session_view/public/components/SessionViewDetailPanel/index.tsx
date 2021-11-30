@@ -9,7 +9,7 @@ import MonacoEditor from 'react-monaco-editor';
 import { partition } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiSpacer, EuiSplitPanel, EuiTitle, EuiTabs, EuiTab } from '@elastic/eui';
-import { EventKind, Process } from '../../hooks/use_process_tree';
+import { EventKind, Process } from '../../../common/types/process_tree';
 import { useStyles } from './styles';
 
 interface SessionViewDetailPanelDeps {
@@ -83,7 +83,7 @@ export const SessionViewDetailPanel = ({
   const renderSelectedProcessCommandDetail = () => {
     if (selectedProcess) {
       return (
-        <div>
+        <div data-test-subj="sessionViewDetailPanelCommandDetail">
           <EuiTitle size="s">
             <span>
               <FormattedMessage
@@ -114,7 +114,7 @@ export const SessionViewDetailPanel = ({
   const renderSelectedProcessAlertDetail = () => {
     if (selectedProcess && selectedProcess.hasAlerts()) {
       return (
-        <div>
+        <div data-test-subj="sessionViewDetailPanelAlertDetail">
           <EuiTitle size="s">
             <span>
               <FormattedMessage id="xpack.sessionView.alertDetail" defaultMessage="Alert detail" />
@@ -147,19 +147,26 @@ export const SessionViewDetailPanel = ({
       onAnimationEnd={handleAnimationEnd}
     >
       {renderSelectedProcessCommandDetail()}
-      <EuiTitle size="s">
-        <span>
-          <FormattedMessage id="xpack.sessionView.sessionDetail" defaultMessage="Session detail" />
-        </span>
-      </EuiTitle>
-      {/* Add session detail */}
+      <div data-test-subj="sessionViewDetailPanelSessionDetail">
+        <EuiTitle size="s">
+          <span>
+            <FormattedMessage
+              id="xpack.sessionView.sessionDetail"
+              defaultMessage="Session detail"
+            />
+          </span>
+        </EuiTitle>
+        {/* Add session detail */}
+      </div>
       <EuiSpacer size="xxl" />
-      <EuiTitle size="s">
-        <span>
-          <FormattedMessage id="xpack.sessionView.serverDetail" defaultMessage="Server detail" />
-        </span>
-      </EuiTitle>
-      {/* Add server detail */}
+      <div data-test-subj="sessionViewDetailPanelServerDetail">
+        <EuiTitle size="s">
+          <span>
+            <FormattedMessage id="xpack.sessionView.serverDetail" defaultMessage="Server detail" />
+          </span>
+        </EuiTitle>
+        {/* Add server detail */}
+      </div>
       <EuiSpacer size="xxl" />
       {renderSelectedProcessAlertDetail()}
     </EuiSplitPanel.Inner>
