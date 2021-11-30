@@ -10,7 +10,7 @@ image::images/add-integration.png[Integrations page from which you can choose in
 
 NOTE: If an integration is available for both
 https://www.elastic.co/guide/en/fleet/master/beats-agent-comparison.html[Elastic Agent and Beats], the *Integrations* view defaults to the
-Elastic Agent integration, if it is generally available (GA).
+Elastic Agent integration..
 To switch to a
 Beats integration, use the filter on the bottom left.
 
