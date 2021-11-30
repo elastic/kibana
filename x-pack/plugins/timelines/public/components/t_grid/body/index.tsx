@@ -122,6 +122,7 @@ interface OwnProps {
     ruleProducer?: string;
   }) => boolean;
   totalSelectAllAlerts?: number;
+  showCheckboxes?: boolean;
 }
 
 const defaultUnit = (n: number) => i18n.ALERTS_UNIT(n);
