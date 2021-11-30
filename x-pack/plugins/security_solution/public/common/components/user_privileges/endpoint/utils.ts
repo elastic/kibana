@@ -14,6 +14,5 @@ export const getEndpointPrivilegesInitialState = (): EndpointPrivileges => {
     canAccessEndpointManagement: false,
     canIsolateHost: false,
     canCreateArtifactsByPolicy: false,
-    isPlatinumPlus: false,
   };
 };

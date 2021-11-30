@@ -6,8 +6,7 @@
  */
 
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { useCurrentUser, useHttp, useKibana } from '../../../lib/kibana';
-import { appRoutesService, CheckPermissionsResponse } from '../../../../../../fleet/common';
+import { useCurrentUser, useKibana } from '../../../lib/kibana';
 import { useLicense } from '../../../hooks/use_license';
 import { Immutable } from '../../../../../common/endpoint/types';
 
@@ -21,8 +20,6 @@ export interface EndpointPrivileges {
   canCreateArtifactsByPolicy: boolean;
   /** If user has permissions to use the Host isolation feature */
   canIsolateHost: boolean;
-  /** @deprecated do not use. instead, use one of the other privileges defined */
-  isPlatinumPlus: boolean;
 }
 
 /**
@@ -46,9 +43,6 @@ export const useEndpointPrivileges = (): Immutable<EndpointPrivileges> => {
       canAccessEndpointManagement: canAccessFleet,
       canCreateArtifactsByPolicy: isPlatinumPlusLicense,
       canIsolateHost: isPlatinumPlusLicense,
-      // FIXME: Remove usages of the property below
-      /** @deprecated */
-      isPlatinumPlus: isPlatinumPlusLicense,
     });
 
     return privilegeList;

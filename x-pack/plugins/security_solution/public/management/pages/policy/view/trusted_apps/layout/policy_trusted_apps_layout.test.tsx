@@ -129,7 +129,7 @@ describe('Policy trusted apps layout', () => {
   it('should hide assign button on empty state with unassigned policies when downgraded to a gold or below license', async () => {
     mockUseEndpointPrivileges.mockReturnValue(
       getEndpointPrivilegesInitialStateMock({
-        isPlatinumPlus: false,
+        canCreateArtifactsByPolicy: false,
       })
     );
     const component = render();
@@ -147,7 +147,7 @@ describe('Policy trusted apps layout', () => {
   it('should hide the `Assign trusted applications` button when there is data and the license is downgraded to gold or below', async () => {
     mockUseEndpointPrivileges.mockReturnValue(
       getEndpointPrivilegesInitialStateMock({
-        isPlatinumPlus: false,
+        canCreateArtifactsByPolicy: false,
       })
     );
     const component = render();

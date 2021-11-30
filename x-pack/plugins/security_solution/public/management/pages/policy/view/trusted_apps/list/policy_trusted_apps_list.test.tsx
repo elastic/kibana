@@ -326,7 +326,7 @@ describe('when rendering the PolicyTrustedAppsList', () => {
   it('does not show remove option in actions menu if license is downgraded to gold or below', async () => {
     mockUseEndpointPrivileges.mockReturnValue(
       loadedUserEndpointPrivilegesState({
-        isPlatinumPlus: false,
+        canCreateArtifactsByPolicy: false,
       })
     );
     await render();
