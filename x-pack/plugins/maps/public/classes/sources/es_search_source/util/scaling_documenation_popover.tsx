@@ -6,8 +6,9 @@
  */
 
 import React, { Component } from 'react';
-import { EuiButtonIcon, EuiPopover, EuiText } from '@elastic/eui';
+import { EuiButtonIcon, EuiLink, EuiPopover, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { getDocLinks } from '../../../../kibana_services';
 
 interface Props {
   limitOptionLabel: string;
@@ -97,8 +98,19 @@ export class ScalingDocumenationPopover extends Component<Props, State> {
           <p style={{ fontStyle: 'italic' }}>
             <FormattedMessage
               id="xpack.maps.scalingDocs.maxResultWindow"
-              defaultMessage="{maxResultWindow} constraint provided by 'max_result_window' index setting."
-              values={{ maxResultWindow: this.props.maxResultWindow }}
+              defaultMessage="{maxResultWindow} constraint provided by {link} index setting."
+              values={{
+                maxResultWindow: this.props.maxResultWindow,
+                link: (
+                  <EuiLink
+                    href={getDocLinks().links.elasticsearch.dynamicIndexSettings}
+                    target="_blank"
+                    external={true}
+                  >
+                    max_result_window
+                  </EuiLink>
+                ),
+              }}
             />
           </p>
         </EuiText>
