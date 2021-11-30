@@ -33,8 +33,10 @@ import type {
   InputsOverride,
   NewPackagePolicy,
   NewPackagePolicyInput,
+  PackagePolicyPackage,
   RegistryPackage,
 } from '../../common';
+import { packageToPackagePolicy } from '../../common';
 
 import { IngestManagerError } from '../errors';
 
@@ -106,6 +108,11 @@ jest.mock('./epm/packages', () => {
   };
 });
 
+jest.mock('../../common', () => ({
+  ...jest.requireActual('../../common'),
+  packageToPackagePolicy: jest.fn(),
+}));
+
 jest.mock('./epm/registry');
 
 jest.mock('./agent_policy', () => {
@@ -124,6 +131,7 @@ jest.mock('./agent_policy', () => {
         return agentPolicy;
       },
       bumpRevision: () => {},
+      getDefaultAgentPolicyId: () => Promise.resolve('1'),
     },
   };
 });
@@ -1941,6 +1949,144 @@ describe('Package policy service', () => {
           false
         );
         expect(result.inputs[0]?.vars?.path.value).toEqual(['/var/log/logfile.log']);
+      });
+    });
+  });
+
+  describe('enrich package policy on create', () => {
+    beforeEach(() => {
+      (packageToPackagePolicy as jest.Mock).mockReturnValue({
+        package: { name: 'apache', title: 'Apache', version: '1.0.0' },
+        inputs: [
+          {
+            type: 'logfile',
+            enabled: true,
+            streams: [
+              {
+                enabled: true,
+                data_stream: {
+                  type: 'logs',
+                  dataset: 'apache.access',
+                },
+              },
+            ],
+          },
+        ],
+        vars: {
+          paths: {
+            value: ['/var/log/apache2/access.log*'],
+            type: 'text',
+          },
+        },
+      });
+    });
+
+    it('should enrich from epm with defaults', async () => {
+      const newPolicy = {
+        name: 'apache-1',
+        inputs: [{ type: 'logfile', enabled: false }],
+        package: { name: 'apache', version: '0.3.3' },
+      } as NewPackagePolicy;
+      const result = await packagePolicyService.enrichPolicyWithDefaultsFromPackage(
+        savedObjectsClientMock.create(),
+        newPolicy
+      );
+      expect(result).toEqual({
+        name: 'apache-1',
+        namespace: 'default',
+        description: '',
+        package: { name: 'apache', title: 'Apache', version: '1.0.0' },
+        enabled: true,
+        policy_id: '1',
+        output_id: '',
+        inputs: [
+          {
+            enabled: false,
+            type: 'logfile',
+            streams: [
+              {
+                enabled: false,
+                data_stream: {
+                  type: 'logs',
+                  dataset: 'apache.access',
+                },
+              },
+            ],
+          },
+        ],
+        vars: {
+          paths: {
+            value: ['/var/log/apache2/access.log*'],
+            type: 'text',
+          },
+        },
+      });
+    });
+
+    it('should override defaults with new values', async () => {
+      const newPolicy = {
+        name: 'apache-2',
+        namespace: 'namespace',
+        description: 'desc',
+        enabled: false,
+        policy_id: '2',
+        output_id: '3',
+        inputs: [
+          {
+            type: 'logfile',
+            enabled: true,
+            streams: [
+              {
+                enabled: true,
+                data_stream: {
+                  type: 'logs',
+                  dataset: 'apache.error',
+                },
+              },
+            ],
+          },
+        ],
+        vars: {
+          paths: {
+            value: ['/my/access.log*'],
+            type: 'text',
+          },
+        },
+        package: { name: 'apache', version: '1.0.0' } as PackagePolicyPackage,
+      } as NewPackagePolicy;
+      const result = await packagePolicyService.enrichPolicyWithDefaultsFromPackage(
+        savedObjectsClientMock.create(),
+        newPolicy
+      );
+      expect(result).toEqual({
+        name: 'apache-2',
+        namespace: 'namespace',
+        description: 'desc',
+        package: { name: 'apache', title: 'Apache', version: '1.0.0' },
+        enabled: false,
+        policy_id: '2',
+        output_id: '3',
+        inputs: [
+          {
+            enabled: true,
+            type: 'logfile',
+            streams: [
+              {
+                enabled: true,
+                data_stream: {
+                  type: 'logs',
+                  dataset: 'apache.error',
+                },
+              },
+            ],
+          },
+        ],
+        vars: {
+          paths: {
+            value: ['/my/access.log*'],
+            type: 'text',
+          },
+        },
       });
     });
   });
