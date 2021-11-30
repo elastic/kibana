@@ -17,7 +17,12 @@ import type {
   PostPackagePolicyCreateCallback,
   PutPackagePolicyUpdateCallback,
 } from '../..';
-import type { CreatePackagePolicyRequestSchema } from '../../types/rest_spec';
+import type {
+  CreatePackagePolicyRequestSchema,
+  UpdatePackagePolicyRequestSchema,
+} from '../../types/rest_spec';
+
+import type { PackagePolicy } from '../../types';
 
 import { registerRoutes } from './index';
 
@@ -94,7 +99,7 @@ describe('When calling package policy', () => {
   let context: ReturnType<typeof xpackMocks.createRequestHandlerContext>;
   let response: ReturnType<typeof httpServerMock.createResponseFactory>;
 
-  beforeAll(() => {
+  beforeEach(() => {
     routerMock = httpServiceMock.createRouter();
     registerRoutes(routerMock);
   });
@@ -135,7 +140,7 @@ describe('When calling package policy', () => {
     };
 
     // Set the routeConfig and routeHandler to the Create API
-    beforeAll(() => {
+    beforeEach(() => {
       [routeConfig, routeHandler] = routerMock.post.mock.calls.find(([{ path }]) =>
         path.startsWith(PACKAGE_POLICY_API_ROUTES.CREATE_PATTERN)
       )!;
@@ -259,6 +264,149 @@ describe('When calling package policy', () => {
             version: '0.5.0',
           },
         });
+      });
+    });
+  });
+
+  describe('update api handler', () => {
+    const getUpdateKibanaRequest = (
+      newData?: typeof UpdatePackagePolicyRequestSchema.body
+    ): KibanaRequest<
+      typeof UpdatePackagePolicyRequestSchema.params,
+      undefined,
+      typeof UpdatePackagePolicyRequestSchema.body
+    > => {
+      return httpServerMock.createKibanaRequest<
+        typeof UpdatePackagePolicyRequestSchema.params,
+        undefined,
+        typeof UpdatePackagePolicyRequestSchema.body
+      >({
+        path: routeConfig.path,
+        method: 'put',
+        params: { packagePolicyId: '1' },
+        body: newData || {},
+      });
+    };
+
+    const existingPolicy = {
+      name: 'endpoint-1',
+      description: 'desc',
+      policy_id: '2',
+      enabled: true,
+      output_id: '3',
+      inputs: [
+        {
+          type: 'logfile',
+          enabled: true,
+          streams: [
+            {
+              enabled: true,
+              data_stream: {
+                type: 'logs',
+                dataset: 'apache.access',
+              },
+              id: '1',
+            },
+          ],
+        },
+      ],
+      namespace: 'default',
+      package: { name: 'endpoint', title: 'Elastic Endpoint', version: '0.5.0' },
+      vars: {
+        paths: {
+          value: ['/var/log/apache2/access.log*'],
+          type: 'text',
+        },
+      },
+    };
+
+    beforeEach(() => {
+      [routeConfig, routeHandler] = routerMock.put.mock.calls.find(([{ path }]) =>
+        path.startsWith(PACKAGE_POLICY_API_ROUTES.UPDATE_PATTERN)
+      )!;
+    });
+
+    beforeEach(() => {
+      packagePolicyServiceMock.update.mockImplementation((soClient, esClient, policyId, newData) =>
+        Promise.resolve(newData as PackagePolicy)
+      );
+      packagePolicyServiceMock.get.mockResolvedValue({
+        id: '1',
+        revision: 1,
+        created_at: '',
+        created_by: '',
+        updated_at: '',
+        updated_by: '',
+        ...existingPolicy,
+        inputs: [
+          {
+            ...existingPolicy.inputs[0],
+            streams: [
+              {
+                ...existingPolicy.inputs[0].streams[0],
+                compiled_stream: {},
+              },
+            ],
+          },
+        ],
+      });
+    });
+
+    it('should use existing package policy props if not provided by request', async () => {
+      const request = getUpdateKibanaRequest();
+      await routeHandler(context, request, response);
+      expect(response.ok).toHaveBeenCalledWith({
+        body: { item: existingPolicy },
+      });
+    });
+
+    it('should use request package policy props if provided by request', async () => {
+      const newData = {
+        name: 'endpoint-2',
+        description: '',
+        policy_id: '3',
+        enabled: false,
+        output_id: '',
+        inputs: [
+          {
+            type: 'metrics',
+            enabled: true,
+            streams: [
+              {
+                enabled: true,
+                data_stream: {
+                  type: 'metrics',
+                  dataset: 'apache.access',
+                },
+                id: '1',
+              },
+            ],
+          },
+        ],
+        namespace: 'namespace',
+        package: { name: 'endpoint', title: 'Elastic Endpoint', version: '0.6.0' },
+        vars: {
+          paths: {
+            value: ['/my/access.log*'],
+            type: 'text',
+          },
+        },
+      };
+      const request = getUpdateKibanaRequest(newData as any);
+      await routeHandler(context, request, response);
+      expect(response.ok).toHaveBeenCalledWith({
+        body: { item: newData },
+      });
+    });
+
+    it('should override props provided by request only', async () => {
+      const newData = {
+        namespace: 'namespace',
+      };
+      const request = getUpdateKibanaRequest(newData as any);
+      await routeHandler(context, request, response);
+      expect(response.ok).toHaveBeenCalledWith({
+        body: { item: { ...existingPolicy, namespace: 'namespace' } },
       });
     });
   });

@@ -99,10 +99,8 @@ export const NewPackagePolicySchema = schema.object({
   force: schema.maybe(schema.boolean()),
 });
 
-export const CreatePackagePolicySchema = schema.object({
+const CreatePackagePolicyProps = {
   ...PackagePolicyBaseSchema,
-  id: schema.maybe(schema.string()),
-  force: schema.maybe(schema.boolean()),
   namespace: schema.maybe(NamespaceSchema),
   policy_id: schema.maybe(schema.string()),
   enabled: schema.maybe(schema.boolean()),
@@ -120,6 +118,26 @@ export const CreatePackagePolicySchema = schema.object({
       streams: schema.maybe(schema.arrayOf(schema.object(PackagePolicyStreamsSchema))),
     })
   ),
+};
+
+export const CreatePackagePolicyRequestBodySchema = schema.object({
+  ...CreatePackagePolicyProps,
+  id: schema.maybe(schema.string()),
+  force: schema.maybe(schema.boolean()),
+});
+
+export const UpdatePackagePolicyRequestBodySchema = schema.object({
+  ...CreatePackagePolicyProps,
+  name: schema.maybe(schema.string()),
+  inputs: schema.maybe(
+    schema.arrayOf(
+      schema.object({
+        ...PackagePolicyInputsSchema,
+        streams: schema.maybe(schema.arrayOf(schema.object(PackagePolicyStreamsSchema))),
+      })
+    )
+  ),
+  version: schema.maybe(schema.string()),
 });
 
 export const UpdatePackagePolicySchema = schema.object({

@@ -136,9 +136,29 @@ export const updatePackagePolicyHandler: RequestHandler<
     throw Boom.notFound('Package policy not found');
   }
 
-  let newData = { ...request.body };
-  const pkg = newData.package || packagePolicy.package;
-  const inputs = newData.inputs || packagePolicy.inputs;
+  const body = { ...request.body };
+  // removed compiled_stream as not recognized by schema
+  const packagePolicyInputs = packagePolicy.inputs.map((input) => ({
+    ...input,
+    streams: input.streams.map((stream) => {
+      const newStream = { ...stream };
+      delete newStream.compiled_stream;
+      return newStream;
+    }),
+  }));
+  // listing down accepted properties, because loaded packagePolicy contains some that are not accepted in update e.g. inputs.compiled_input
+  let newData = {
+    ...body,
+    name: body.name ?? packagePolicy.name,
+    description: body.description ?? packagePolicy.description,
+    namespace: body.namespace ?? packagePolicy.namespace,
+    policy_id: body.policy_id ?? packagePolicy.policy_id,
+    enabled: body.enabled ?? packagePolicy.enabled,
+    output_id: body.output_id ?? packagePolicy.output_id,
+    package: body.package ?? packagePolicy.package,
+    inputs: body.inputs ?? packagePolicyInputs,
+    vars: body.vars ?? packagePolicy.vars,
+  } as NewPackagePolicy;
 
   try {
     newData = await packagePolicyService.runExternalCallbacks(
@@ -152,7 +172,7 @@ export const updatePackagePolicyHandler: RequestHandler<
       soClient,
       esClient,
       request.params.packagePolicyId,
-      { ...newData, package: pkg, inputs },
+      newData,
       { user },
       packagePolicy.package?.version
     );
