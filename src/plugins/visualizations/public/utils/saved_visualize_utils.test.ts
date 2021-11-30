@@ -43,10 +43,10 @@ jest.mock('../../../../plugins/data/public', () => ({
 }));
 
 const mockInjectReferences = jest.fn();
-const mockExtractReferences = jest.fn(() => ({ references: [], attributes: {} }));
+const mockExtractReferences = jest.fn((arg) => arg);
 jest.mock('./saved_visualization_references', () => ({
   injectReferences: jest.fn((...args) => mockInjectReferences(...args)),
-  extractReferences: jest.fn(() => mockExtractReferences()),
+  extractReferences: jest.fn((arg) => mockExtractReferences(arg)),
 }));
 
 let isTitleDuplicateConfirmed = true;
@@ -184,6 +184,7 @@ describe('saved_visualize_utils', () => {
       vis = {
         visState: {
           type: 'area',
+          params: {},
         },
         title: 'test',
         uiStateJSON: '{}',

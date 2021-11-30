@@ -147,6 +147,12 @@ export interface VisTypeDefinition<TVisParams> {
    */
   readonly toExpressionAst: VisToExpressionAst<TVisParams>;
 
+  /**
+   * Should be defined when the visualization type should change
+   * when certain params are changed
+   */
+  readonly updateVisTypeOnParamsChange?: (params: VisParams) => string | undefined;
+
   readonly setup?: (vis: Vis<TVisParams>) => Promise<Vis<TVisParams>>;
   hidden?: boolean;
 
