@@ -4,12 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import Url from 'url';
 import { FtrConfigProviderContext } from '@kbn/test';
-import { run as playwrightRun } from '@elastic/synthetics';
-
-import './tests/synthetics';
+import testRunner from './tests/synthetics';
 
 // These "secret" values are intentionally written in the source. We would make the APM server accept annonymous traffic if we could
 const APM_SERVER_URL = 'https://2fad4006bf784bb8a54e52f4a5862609.apm.us-west1.gcp.cloud.es.io:443';
@@ -36,14 +32,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         ELASTIC_APM_SERVER_URL: APM_SERVER_URL,
         ELASTIC_APM_SECRET_TOKEN: APM_PUBLIC_TOKEN,
         ELASTIC_APM_GLOBAL_LABELS: Object.entries({
-          ftrConfig: `x-pack/test/performance`,
-          jenkinsJobName: process.env.JOB_NAME,
-          jenkinsBuildNumber: process.env.BUILD_NUMBER,
-          prId: process.env.PR_NUMBER,
-          branch: process.env.GIT_BRANCH,
-          commit: process.env.GIT_COMMIT,
-          mergeBase: process.env.PR_MERGE_BASE,
-          targetBranch: process.env.PR_TARGET_BRANCH,
+          ftrConfig: `x-pack/test/performance/tests/config.synthetics`,
           testRunner: process.env.TEST_RUNNER,
         })
           .filter(([, v]) => !!v)
@@ -52,27 +41,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       // delay shutdown by 15 seconds to ensure that APM can report the data it collects during test execution
       delayShutdown: 15_000,
     },
-    testRunner: async ({ getService }: any) => {
-      const config = getService('config');
-
-      const kibanaUrl = Url.format({
-        protocol: config.get('servers.kibana.protocol'),
-        hostname: config.get('servers.kibana.hostname'),
-        port: config.get('servers.kibana.port'),
-      });
-
-      const result = await playwrightRun({
-        params: { kibanaUrl },
-        playwrightOptions: {
-          headless: true,
-          chromiumSandbox: false,
-          timeout: 60 * 1000,
-        },
-      });
-
-      if (result && result.perf_login_and_home.status !== 'succeeded') {
-        throw new Error('Tests failed');
-      }
-    },
+    testRunner,
   };
 }

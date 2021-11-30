@@ -38,14 +38,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         ELASTIC_APM_SERVER_URL: APM_SERVER_URL,
         ELASTIC_APM_SECRET_TOKEN: APM_PUBLIC_TOKEN,
         ELASTIC_APM_GLOBAL_LABELS: Object.entries({
-          ftrConfig: `x-pack/test/performance`,
-          jenkinsJobName: process.env.JOB_NAME,
-          jenkinsBuildNumber: process.env.BUILD_NUMBER,
-          prId: process.env.PR_NUMBER,
-          branch: process.env.GIT_BRANCH,
-          commit: process.env.GIT_COMMIT,
-          mergeBase: process.env.PR_MERGE_BASE,
-          targetBranch: process.env.PR_TARGET_BRANCH,
+          ftrConfig: `x-pack/test/performance/tests/config.ftr`,
           testRunner: process.env.TEST_RUNNER,
         })
           .filter(([, v]) => !!v)

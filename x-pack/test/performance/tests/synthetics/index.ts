@@ -5,4 +5,30 @@
  * 2.0.
  */
 
-import './home.ts';
+import Url from 'url';
+import { run as playwrightRun } from '@elastic/synthetics';
+
+export default async function ({ getService }: any) {
+  const config = getService('config');
+
+  const kibanaUrl = Url.format({
+    protocol: config.get('servers.kibana.protocol'),
+    hostname: config.get('servers.kibana.hostname'),
+    port: config.get('servers.kibana.port'),
+  });
+
+  await import('./home');
+
+  const result = await playwrightRun({
+    params: { kibanaUrl },
+    playwrightOptions: {
+      headless: true,
+      chromiumSandbox: false,
+      timeout: 60 * 1000,
+    },
+  });
+
+  if (result && result.perf_login_and_home.status !== 'succeeded') {
+    throw new Error('Tests failed');
+  }
+}
