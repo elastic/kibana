@@ -6,7 +6,7 @@
  */
 
 import { SavedObjectsMigrationLogger } from 'kibana/server';
-import { migrationMocks } from 'src/core/server/mocks';
+import { migrationMocks } from '../../../../../../src/core/server/mocks';
 import { logError } from './utils';
 
 describe('migration utils', () => {

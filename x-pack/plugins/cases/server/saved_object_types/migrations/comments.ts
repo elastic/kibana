@@ -12,14 +12,14 @@ import {
   mergeMigrationFunctionMaps,
   MigrateFunction,
   MigrateFunctionsObject,
-} from 'src/plugins/kibana_utils/common';
+} from '../../../../../../src/plugins/kibana_utils/common';
 import {
   SavedObjectUnsanitizedDoc,
   SavedObjectSanitizedDoc,
   SavedObjectMigrationFn,
   SavedObjectMigrationMap,
   SavedObjectMigrationContext,
-} from 'src/core/server';
+} from '../../../../../../src/core/server';
 import { LensServerPluginSetup } from '../../../../lens/server';
 import { CommentType, AssociationType } from '../../../common';
 import {
