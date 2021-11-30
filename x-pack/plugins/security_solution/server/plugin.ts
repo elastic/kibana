@@ -319,8 +319,10 @@ export class Plugin implements ISecuritySolutionPlugin {
 
       const securitySolutionSearchStrategy = securitySolutionSearchStrategyProvider(
         depsStart.data,
-        endpointContext
+        endpointContext,
+        depsStart.spaces?.spacesService?.getSpaceId
       );
+
       plugins.data.search.registerSearchStrategy(
         'securitySolutionSearchStrategy',
         securitySolutionSearchStrategy
