@@ -39,12 +39,12 @@ export default function ({ getService }: FtrProviderContext) {
     it('should return the list of agents when requesting as a user with fleet write permissions', async () => {
       const { body: apiResponse } = await supertest.get(`/api/fleet/agents`).expect(200);
 
-      expect(apiResponse).to.have.keys('page', 'total', 'list');
+      expect(apiResponse).to.have.keys('page', 'total', 'items');
       expect(apiResponse.total).to.eql(4);
     });
     it('should return the list of agents when requesting as a user with fleet read permissions', async () => {
       const { body: apiResponse } = await supertest.get(`/api/fleet/agents`).expect(200);
-      expect(apiResponse).to.have.keys('page', 'total', 'list');
+      expect(apiResponse).to.have.keys('page', 'total', 'items');
       expect(apiResponse.total).to.eql(4);
     });
 
