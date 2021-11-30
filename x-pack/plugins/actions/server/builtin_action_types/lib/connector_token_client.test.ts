@@ -11,7 +11,7 @@ import { ConnectorTokenClient } from './connector_token_client';
 import { Logger } from '../../../../../../src/core/server';
 
 const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
-jest.mock('../../../../src/core/server/saved_objects/service/lib/utils', () => ({
+jest.mock('../../../../../../src/core/server/saved_objects/service/lib/utils', () => ({
   SavedObjectsUtils: {
     generateId: () => 'mock-saved-object-id',
   },
