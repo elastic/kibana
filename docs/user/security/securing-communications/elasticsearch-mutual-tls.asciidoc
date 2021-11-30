@@ -33,7 +33,7 @@ configures {kib} to authenticate with {es} using a
 needs to map the client certificate's distinguished name (DN) to the appropriate
 `kibana_system` role.
 
-NOTE: Using a PKI realm is a gold feature. For a comparison of the Elastic
+NOTE: Using a PKI realm is a subscription feature. For a comparison of the Elastic
 license levels, see https://www.elastic.co/subscriptions[the subscription page].
 
 [discrete]
