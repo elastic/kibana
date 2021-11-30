@@ -9,7 +9,7 @@ import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types'
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useEffect, useState } from 'react';
 import { EuiButton, EuiText, EuiSpacer } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useHistory } from 'react-router-dom';
 import { ExceptionItem } from '../../../../common/components/exceptions/viewer/exception_item';
 import { getCurrentLocation } from '../store/selector';

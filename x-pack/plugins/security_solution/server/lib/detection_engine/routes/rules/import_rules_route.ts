@@ -326,6 +326,7 @@ export const importRulesRoute = (
                           threshold,
                           threatFilters,
                           threatIndex,
+                          threatIndicatorPath,
                           threatQuery,
                           threatMapping,
                           threatLanguage,

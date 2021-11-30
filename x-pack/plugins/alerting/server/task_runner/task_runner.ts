@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import apm from 'elastic-apm-node';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { Dictionary, pickBy, mapValues, without, cloneDeep } from 'lodash';
 import type { Request } from '@hapi/hapi';
@@ -117,19 +117,22 @@ export class TaskRunner<
     this.cancelled = false;
   }
 
-  async getApiKeyForAlertPermissions(alertId: string, spaceId: string) {
+  async getDecryptedAttributes(
+    ruleId: string,
+    spaceId: string
+  ): Promise<{ apiKey: string | null; enabled: boolean }> {
     const namespace = this.context.spaceIdToNamespace(spaceId);
     // Only fetch encrypted attributes here, we'll create a saved objects client
     // scoped with the API key to fetch the remaining data.
     const {
-      attributes: { apiKey },
+      attributes: { apiKey, enabled },
     } = await this.context.encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawAlert>(
       'alert',
-      alertId,
+      ruleId,
       { namespace }
     );
 
-    return apiKey;
+    return { apiKey, enabled };
   }
 
   private getFakeKibanaRequest(spaceId: string, apiKey: RawAlert['apiKey']) {
@@ -532,12 +535,23 @@ export class TaskRunner<
     const {
       params: { alertId, spaceId },
     } = this.taskInstance;
+    let enabled: boolean;
     let apiKey: string | null;
     try {
-      apiKey = await this.getApiKeyForAlertPermissions(alertId, spaceId);
+      const decryptedAttributes = await this.getDecryptedAttributes(alertId, spaceId);
+      apiKey = decryptedAttributes.apiKey;
+      enabled = decryptedAttributes.enabled;
     } catch (err) {
       throw new ErrorWithReason(AlertExecutionStatusErrorReasons.Decrypt, err);
     }
+
+    if (!enabled) {
+      throw new ErrorWithReason(
+        AlertExecutionStatusErrorReasons.Disabled,
+        new Error(`Rule failed to execute because rule ran after it was disabled.`)
+      );
+    }
+
     const [services, rulesClient] = this.getServicesWithSpaceLevelPermissions(spaceId, apiKey);
 
     let alert: SanitizedAlert<Params>;
@@ -545,6 +559,17 @@ export class TaskRunner<
     // Ensure API key is still valid and user has access
     try {
       alert = await rulesClient.get({ id: alertId });
+
+      if (apm.currentTransaction) {
+        apm.currentTransaction.name = `Execute Alerting Rule: "${alert.name}"`;
+        apm.currentTransaction.addLabels({
+          alerting_rule_consumer: alert.consumer,
+          alerting_rule_name: alert.name,
+          alerting_rule_tags: alert.tags.join(', '),
+          alerting_rule_type_id: alert.alertTypeId,
+          alerting_rule_params: JSON.stringify(alert.params),
+        });
+      }
     } catch (err) {
       throw new ErrorWithReason(AlertExecutionStatusErrorReasons.Read, err);
     }
@@ -575,6 +600,13 @@ export class TaskRunner<
       state: originalState,
       schedule: taskSchedule,
     } = this.taskInstance;
+
+    if (apm.currentTransaction) {
+      apm.currentTransaction.name = `Execute Alerting Rule`;
+      apm.currentTransaction.addLabels({
+        alerting_rule_id: alertId,
+      });
+    }
 
     const runDate = new Date();
     const runDateString = runDate.toISOString();
@@ -629,6 +661,14 @@ export class TaskRunner<
     // set the executionStatus date to same as event, if it's set
     if (event.event?.start) {
       executionStatus.lastExecutionDate = new Date(event.event.start);
+    }
+
+    if (apm.currentTransaction) {
+      if (executionStatus.status === 'ok' || executionStatus.status === 'active') {
+        apm.currentTransaction.setOutcome('success');
+      } else if (executionStatus.status === 'error' || executionStatus.status === 'unknown') {
+        apm.currentTransaction.setOutcome('failure');
+      }
     }
 
     this.logger.debug(
@@ -871,6 +911,12 @@ function generateNewAndRecoveredInstanceEvents<
   const recoveredAlertInstanceIds = Object.keys(recoveredAlertInstances);
   const newIds = without(currentAlertInstanceIds, ...originalAlertInstanceIds);
 
+  if (apm.currentTransaction) {
+    apm.currentTransaction.addLabels({
+      alerting_new_alerts: newIds.length,
+    });
+  }
+
   for (const id of recoveredAlertInstanceIds) {
     const { group: actionGroup, subgroup: actionSubgroup } =
       recoveredAlertInstances[id].getLastScheduledActions() ?? {};
@@ -1051,6 +1097,14 @@ function logActiveAndRecoveredInstances<
   const { logger, activeAlertInstances, recoveredAlertInstances, alertLabel } = params;
   const activeInstanceIds = Object.keys(activeAlertInstances);
   const recoveredInstanceIds = Object.keys(recoveredAlertInstances);
+
+  if (apm.currentTransaction) {
+    apm.currentTransaction.addLabels({
+      alerting_active_alerts: activeInstanceIds.length,
+      alerting_recovered_alerts: recoveredInstanceIds.length,
+    });
+  }
+
   if (activeInstanceIds.length > 0) {
     logger.debug(
       `alert ${alertLabel} has ${activeInstanceIds.length} active alert instances: ${JSON.stringify(

@@ -96,17 +96,22 @@ class PackagePolicyService {
       bumpRevision?: boolean;
       force?: boolean;
       skipEnsureInstalled?: boolean;
+      skipUniqueNameVerification?: boolean;
+      overwrite?: boolean;
     }
   ): Promise<PackagePolicy> {
-    const existingPoliciesWithName = await this.list(soClient, {
-      perPage: 1,
-      kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.name: "${packagePolicy.name}"`,
-    });
+    if (!options?.skipUniqueNameVerification) {
+      const existingPoliciesWithName = await this.list(soClient, {
+        perPage: 1,
+        kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.name: "${packagePolicy.name}"`,
+      });
 
-    // Check that the name does not exist already
-    if (existingPoliciesWithName.items.length > 0) {
-      throw new IngestManagerError('There is already a package with the same name');
+      // Check that the name does not exist already
+      if (existingPoliciesWithName.items.length > 0) {
+        throw new IngestManagerError('There is already an integration policy with the same name');
+      }
     }
+
     let elasticsearch: PackagePolicy['elasticsearch'];
     // Add ids to stream
     const packagePolicyId = options?.id || uuid.v4();
@@ -366,7 +371,7 @@ class PackagePolicyService {
     const filtered = (existingPoliciesWithName?.items || []).filter((p) => p.id !== id);
 
     if (filtered.length > 0) {
-      throw new IngestManagerError('There is already a package with the same name');
+      throw new IngestManagerError('There is already an integration policy with the same name');
     }
 
     let inputs = restOfPackagePolicy.inputs.map((input) =>
@@ -428,7 +433,6 @@ class PackagePolicyService {
           currentVersion: currentVersion || 'unknown',
           newVersion: packagePolicy.package.version,
           status: 'success',
-          dryRun: false,
           eventType: 'package-policy-upgrade' as UpdateEventType,
         };
         sendTelemetryEvents(
@@ -586,7 +590,7 @@ class PackagePolicyService {
       try {
         const { packagePolicy, packageInfo } = await this.getUpgradePackagePolicyInfo(soClient, id);
 
-        const updatePackagePolicy = overridePackageInputs(
+        const updatePackagePolicy = updatePackageInputs(
           {
             ...omit(packagePolicy, 'id'),
             inputs: packagePolicy.inputs,
@@ -644,7 +648,7 @@ class PackagePolicyService {
         packageVersion
       );
 
-      const updatedPackagePolicy = overridePackageInputs(
+      const updatedPackagePolicy = updatePackageInputs(
         {
           ...omit(packagePolicy, 'id'),
           inputs: packagePolicy.inputs,
@@ -1026,13 +1030,13 @@ export const packagePolicyService = new PackagePolicyService();
 
 export type { PackagePolicyService };
 
-export function overridePackageInputs(
+export function updatePackageInputs(
   basePackagePolicy: NewPackagePolicy,
   packageInfo: PackageInfo,
-  inputsOverride?: InputsOverride[],
+  inputsUpdated?: InputsOverride[],
   dryRun?: boolean
 ): DryRunPackagePolicy {
-  if (!inputsOverride) return basePackagePolicy;
+  if (!inputsUpdated) return basePackagePolicy;
 
   const availablePolicyTemplates = packageInfo.policy_templates ?? [];
 
@@ -1061,42 +1065,40 @@ export function overridePackageInputs(
     }),
   ];
 
-  for (const override of inputsOverride) {
-    // Preconfiguration does not currently support multiple policy templates, so overrides will have an undefined
-    // policy template, so we only match on `type` in that case.
-    let originalInput = override.policy_template
-      ? inputs.find(
-          (i) => i.type === override.type && i.policy_template === override.policy_template
-        )
-      : inputs.find((i) => i.type === override.type);
+  for (const update of inputsUpdated) {
+    // If update have an undefined policy template
+    // we only match on `type` .
+    let originalInput = update.policy_template
+      ? inputs.find((i) => i.type === update.type && i.policy_template === update.policy_template)
+      : inputs.find((i) => i.type === update.type);
 
     // If there's no corresponding input on the original package policy, just
     // take the override value from the new package as-is. This case typically
     // occurs when inputs or package policy templates are added/removed between versions.
     if (originalInput === undefined) {
-      inputs.push(override as NewPackagePolicyInput);
+      inputs.push(update as NewPackagePolicyInput);
       continue;
     }
 
     // For flags like this, we only want to override the original value if it was set
     // as `undefined` in the original object. An explicit true/false value should be
     // persisted from the original object to the result after the override process is complete.
-    if (originalInput.enabled === undefined && override.enabled !== undefined) {
-      originalInput.enabled = override.enabled;
+    if (originalInput.enabled === undefined && update.enabled !== undefined) {
+      originalInput.enabled = update.enabled;
     }
 
-    if (originalInput.keep_enabled === undefined && override.keep_enabled !== undefined) {
-      originalInput.keep_enabled = override.keep_enabled;
+    if (originalInput.keep_enabled === undefined && update.keep_enabled !== undefined) {
+      originalInput.keep_enabled = update.keep_enabled;
     }
 
-    if (override.vars) {
+    if (update.vars) {
       const indexOfInput = inputs.indexOf(originalInput);
-      inputs[indexOfInput] = deepMergeVars(originalInput, override) as NewPackagePolicyInput;
+      inputs[indexOfInput] = deepMergeVars(originalInput, update, true) as NewPackagePolicyInput;
       originalInput = inputs[indexOfInput];
     }
 
-    if (override.streams) {
-      for (const stream of override.streams) {
+    if (update.streams) {
+      for (const stream of update.streams) {
         let originalStream = originalInput?.streams.find(
           (s) => s.data_stream.dataset === stream.data_stream.dataset
         );
@@ -1114,7 +1116,8 @@ export function overridePackageInputs(
           const indexOfStream = originalInput.streams.indexOf(originalStream);
           originalInput.streams[indexOfStream] = deepMergeVars(
             originalStream,
-            stream as InputsOverride
+            stream as InputsOverride,
+            true
           );
           originalStream = originalInput.streams[indexOfStream];
         }
@@ -1124,9 +1127,8 @@ export function overridePackageInputs(
     // Filter all stream that have been removed from the input
     originalInput.streams = originalInput.streams.filter((originalStream) => {
       return (
-        override.streams?.some(
-          (s) => s.data_stream.dataset === originalStream.data_stream.dataset
-        ) ?? false
+        update.streams?.some((s) => s.data_stream.dataset === originalStream.data_stream.dataset) ??
+        false
       );
     });
   }
@@ -1167,7 +1169,110 @@ export function overridePackageInputs(
   return resultingPackagePolicy;
 }
 
-function deepMergeVars(original: any, override: any): any {
+export function preconfigurePackageInputs(
+  basePackagePolicy: NewPackagePolicy,
+  packageInfo: PackageInfo,
+  preconfiguredInputs?: InputsOverride[]
+): NewPackagePolicy {
+  if (!preconfiguredInputs) return basePackagePolicy;
+
+  const inputs = [...basePackagePolicy.inputs];
+
+  for (const preconfiguredInput of preconfiguredInputs) {
+    // Preconfiguration does not currently support multiple policy templates, so overrides will have an undefined
+    // policy template, so we only match on `type` in that case.
+    let originalInput = preconfiguredInput.policy_template
+      ? inputs.find(
+          (i) =>
+            i.type === preconfiguredInput.type &&
+            i.policy_template === preconfiguredInput.policy_template
+        )
+      : inputs.find((i) => i.type === preconfiguredInput.type);
+
+    // If the input do not exist skip
+    if (originalInput === undefined) {
+      continue;
+    }
+
+    // For flags like this, we only want to override the original value if it was set
+    // as `undefined` in the original object. An explicit true/false value should be
+    // persisted from the original object to the result after the override process is complete.
+    if (originalInput.enabled === undefined && preconfiguredInput.enabled !== undefined) {
+      originalInput.enabled = preconfiguredInput.enabled;
+    }
+
+    if (originalInput.keep_enabled === undefined && preconfiguredInput.keep_enabled !== undefined) {
+      originalInput.keep_enabled = preconfiguredInput.keep_enabled;
+    }
+
+    if (preconfiguredInput.vars) {
+      const indexOfInput = inputs.indexOf(originalInput);
+      inputs[indexOfInput] = deepMergeVars(
+        originalInput,
+        preconfiguredInput
+      ) as NewPackagePolicyInput;
+      originalInput = inputs[indexOfInput];
+    }
+
+    if (preconfiguredInput.streams) {
+      for (const stream of preconfiguredInput.streams) {
+        let originalStream = originalInput?.streams.find(
+          (s) => s.data_stream.dataset === stream.data_stream.dataset
+        );
+
+        if (originalStream === undefined) {
+          continue;
+        }
+
+        if (originalStream?.enabled === undefined) {
+          originalStream.enabled = stream.enabled;
+        }
+
+        if (stream.vars) {
+          const indexOfStream = originalInput.streams.indexOf(originalStream);
+          originalInput.streams[indexOfStream] = deepMergeVars(
+            originalStream,
+            stream as InputsOverride
+          );
+          originalStream = originalInput.streams[indexOfStream];
+        }
+      }
+    }
+  }
+
+  const resultingPackagePolicy: NewPackagePolicy = {
+    ...basePackagePolicy,
+    inputs,
+  };
+
+  const validationResults = validatePackagePolicy(resultingPackagePolicy, packageInfo, safeLoad);
+
+  if (validationHasErrors(validationResults)) {
+    const responseFormattedValidationErrors = Object.entries(getFlattenedObject(validationResults))
+      .map(([key, value]) => ({
+        key,
+        message: value,
+      }))
+      .filter(({ message }) => !!message);
+
+    if (responseFormattedValidationErrors.length) {
+      throw new PackagePolicyValidationError(
+        i18n.translate('xpack.fleet.packagePolicyInvalidError', {
+          defaultMessage: 'Package policy is invalid: {errors}',
+          values: {
+            errors: responseFormattedValidationErrors
+              .map(({ key, message }) => `${key}: ${message}`)
+              .join('\n'),
+          },
+        })
+      );
+    }
+  }
+
+  return resultingPackagePolicy;
+}
+
+function deepMergeVars(original: any, override: any, keepOriginalValue = false): any {
   if (!original.vars) {
     original.vars = { ...override.vars };
   }
@@ -1188,7 +1293,7 @@ function deepMergeVars(original: any, override: any): any {
 
     // Ensure that any value from the original object is persisted on the newly merged resulting object,
     // even if we merge other data about the given variable
-    if (originalVar?.value) {
+    if (keepOriginalValue && originalVar?.value) {
       result.vars[name].value = originalVar.value;
     }
   }

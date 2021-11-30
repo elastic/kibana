@@ -139,8 +139,8 @@ export async function ensureFleetGlobalEsAssets(
   // Ensure Global Fleet ES assets are installed
   logger.debug('Creating Fleet component template and ingest pipeline');
   const globalAssetsRes = await Promise.all([
-    ensureDefaultComponentTemplate(esClient),
-    ensureFleetFinalPipelineIsInstalled(esClient),
+    ensureDefaultComponentTemplate(esClient, logger),
+    ensureFleetFinalPipelineIsInstalled(esClient, logger),
   ]);
 
   if (globalAssetsRes.some((asset) => asset.isCreated)) {
@@ -220,8 +220,15 @@ export function formatNonFatalErrors(
         name: e.error.name,
         message: e.error.message,
       };
-    } else {
+    } else if ('errors' in e) {
       return e.errors.map((upgradePackagePolicyError: any) => {
+        if (typeof upgradePackagePolicyError === 'string') {
+          return {
+            name: 'SetupNonFatalError',
+            message: upgradePackagePolicyError,
+          };
+        }
+
         return {
           name: upgradePackagePolicyError.key,
           message: upgradePackagePolicyError.message,

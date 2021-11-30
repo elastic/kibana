@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React, { memo, useMemo, useEffect, useCallback } from 'react';
+import React, { memo, useMemo, useEffect, useCallback, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { Dispatch } from 'redux';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiFlyout,
   EuiFlyoutHeader,
@@ -20,6 +20,7 @@ import {
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiTextColor,
 } from '@elastic/eui';
 import { AppAction } from '../../../../../../common/store/actions';
 import { EventFiltersForm } from '../form';
@@ -30,20 +31,27 @@ import {
   isCreationSuccessful,
 } from '../../../store/selector';
 import { getInitialExceptionFromEvent } from '../../../store/utils';
+import { Ecs } from '../../../../../../../common/ecs';
+import { useKibana } from '../../../../../../common/lib/kibana';
 
 export interface EventFiltersFlyoutProps {
   type?: 'create' | 'edit';
   id?: string;
+  data?: Ecs;
   onCancel(): void;
 }
 
 export const EventFiltersFlyout: React.FC<EventFiltersFlyoutProps> = memo(
-  ({ onCancel, id, type = 'create' }) => {
+  ({ onCancel, id, type = 'create', data }) => {
     useEventFiltersNotification();
+    const [enrichedData, setEnrichedData] = useState<Ecs | null>();
     const dispatch = useDispatch<Dispatch<AppAction>>();
     const formHasError = useEventFiltersSelector(getFormHasError);
     const creationInProgress = useEventFiltersSelector(isCreationInProgress);
     const creationSuccessful = useEventFiltersSelector(isCreationSuccessful);
+    const {
+      data: { search },
+    } = useKibana().services;
 
     useEffect(() => {
       if (creationSuccessful) {
@@ -59,11 +67,42 @@ export const EventFiltersFlyout: React.FC<EventFiltersFlyoutProps> = memo(
 
     // Initialize the store with the id passed as prop to allow render the form. It acts as componentDidMount
     useEffect(() => {
+      const enrichEvent = async () => {
+        if (!data || !data._index) return;
+        const searchResponse = await search
+          .search({
+            params: {
+              index: data._index,
+              body: {
+                query: {
+                  match: {
+                    _id: data._id,
+                  },
+                },
+              },
+            },
+          })
+          .toPromise();
+
+        setEnrichedData({
+          ...data,
+          host: {
+            ...data.host,
+            os: {
+              ...(data?.host?.os || {}),
+              name: [searchResponse.rawResponse.hits.hits[0]._source.host.os.name],
+            },
+          },
+        });
+      };
+
       if (type === 'edit' && !!id) {
         dispatch({
           type: 'eventFiltersInitFromId',
           payload: { id },
         });
+      } else if (data) {
+        enrichEvent();
       } else {
         dispatch({
           type: 'eventFiltersInitForm',
@@ -82,6 +121,16 @@ export const EventFiltersFlyout: React.FC<EventFiltersFlyoutProps> = memo(
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
+    // Initialize the store with the enriched event to allow render the form
+    useEffect(() => {
+      if (enrichedData) {
+        dispatch({
+          type: 'eventFiltersInitForm',
+          payload: { entry: getInitialExceptionFromEvent(enrichedData) },
+        });
+      }
+    }, [dispatch, enrichedData]);
+
     const handleOnCancel = useCallback(() => {
       if (creationInProgress) return;
       onCancel();
@@ -92,7 +141,7 @@ export const EventFiltersFlyout: React.FC<EventFiltersFlyoutProps> = memo(
         <EuiButton
           data-test-subj="add-exception-confirm-button"
           fill
-          disabled={formHasError || creationInProgress}
+          disabled={formHasError || creationInProgress || (!!data && !enrichedData)}
           onClick={() =>
             id
               ? dispatch({ type: 'eventFiltersUpdateStart' })
@@ -105,6 +154,11 @@ export const EventFiltersFlyout: React.FC<EventFiltersFlyoutProps> = memo(
               id="xpack.securitySolution.eventFilters.eventFiltersFlyout.actions.confirm.update"
               defaultMessage="Update event filter"
             />
+          ) : data ? (
+            <FormattedMessage
+              id="xpack.securitySolution.eventFilters.eventFiltersFlyout.actions.confirm.update.withData"
+              defaultMessage="Add endpoint event filter"
+            />
           ) : (
             <FormattedMessage
               id="xpack.securitySolution.eventFilters.eventFiltersFlyout.actions.confirm.create"
@@ -113,7 +167,7 @@ export const EventFiltersFlyout: React.FC<EventFiltersFlyoutProps> = memo(
           )}
         </EuiButton>
       ),
-      [formHasError, creationInProgress, id, dispatch]
+      [formHasError, creationInProgress, data, enrichedData, id, dispatch]
     );
 
     return (
@@ -126,6 +180,11 @@ export const EventFiltersFlyout: React.FC<EventFiltersFlyoutProps> = memo(
                   id="xpack.securitySolution.eventFilters.eventFiltersFlyout.subtitle.update"
                   defaultMessage="Update event filter"
                 />
+              ) : data ? (
+                <FormattedMessage
+                  id="xpack.securitySolution.eventFilters.eventFiltersFlyout.title.create.withData"
+                  defaultMessage="Add endpoint event filter"
+                />
               ) : (
                 <FormattedMessage
                   id="xpack.securitySolution.eventFilters.eventFiltersFlyout.subtitle.create"
@@ -134,10 +193,18 @@ export const EventFiltersFlyout: React.FC<EventFiltersFlyoutProps> = memo(
               )}
             </h2>
           </EuiTitle>
+          {data ? (
+            <EuiTextColor color="subdued">
+              <FormattedMessage
+                id="xpack.securitySolution.eventFilters.eventFiltersFlyout.subtitle.create.withData"
+                defaultMessage="Endpoint security"
+              />
+            </EuiTextColor>
+          ) : null}
         </EuiFlyoutHeader>
 
         <EuiFlyoutBody>
-          <EventFiltersForm allowSelectOs />
+          <EventFiltersForm allowSelectOs={!data} />
         </EuiFlyoutBody>
 
         <EuiFlyoutFooter>
