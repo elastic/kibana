@@ -106,7 +106,7 @@ image::images/rule-details-7.16.png[View of all ingest options for Elastic]
 [float]
 === Transform health alerting rules
 
-beta:[] There is a new rule type that notifies you when continuous transforms
+beta:[] A new rule type notifies you when continuous transforms
 experience operational issues. It enables you to detect when a transform stops
 indexing data or is in a failed state. For more details, refer to
 {ref}/transform-alerts.html[Generating alerts for transforms].
