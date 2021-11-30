@@ -104,7 +104,7 @@ export const DEFINE_INDEX_INPUT =
 
 export const EQL_TYPE = '[data-test-subj="eqlRuleType"]';
 
-export const PREVIEW_HISTOGRAM = '[data-test-subj="preview-histogram-bar-chart"]';
+export const PREVIEW_HISTOGRAM = '[data-test-subj="preview-histogram-panel"]';
 
 export const EQL_QUERY_INPUT = '[data-test-subj="eqlQueryBarTextInput"]';
 

@@ -184,7 +184,10 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   const index = formIndex || initialState.index;
   const threatIndex = formThreatIndex || initialState.threatIndex;
   const ruleType = formRuleType || initialState.ruleType;
-  const isPreviewRouteEnabled = useMemo(() => ruleType !== 'machine_learning', [ruleType]);
+  const isPreviewRouteEnabled = useMemo(
+    () => ruleType !== 'machine_learning' && ruleType !== 'threat_match',
+    [ruleType]
+  );
   const [indexPatternsLoading, { browserFields, indexPatterns }] = useFetchIndex(index);
   const aggregatableFields = Object.entries(browserFields).reduce<BrowserFields>(
     (groupAcc, [groupName, groupValue]) => {

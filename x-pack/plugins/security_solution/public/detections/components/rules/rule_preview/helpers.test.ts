@@ -174,7 +174,7 @@ describe('query_preview/helpers', () => {
     });
 
     test('returns hour option if ruleType is threshold', () => {
-      const options = getTimeframeOptions('query');
+      const options = getTimeframeOptions('threshold');
 
       expect(options).toEqual([{ value: 'h', text: 'Last hour' }]);
     });
