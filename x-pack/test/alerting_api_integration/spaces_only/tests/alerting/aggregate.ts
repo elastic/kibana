@@ -184,6 +184,14 @@ export default function createAggregateTests({ getService }: FtrProviderContext)
             pending: 0,
             unknown: 0,
           },
+          ruleEnabledStatus: {
+            disabled: 0,
+            enabled: 7,
+          },
+          ruleMutedStatus: {
+            muted: 0,
+            unmuted: 7,
+          },
         });
       });
     });

@@ -671,10 +671,22 @@ export class RulesClient {
   public async aggregate({
     options: { fields, filter, ...options } = {},
   }: { options?: AggregateOptions } = {}): Promise<AggregateResult> {
-    const { filter: authorizationFilter } = await this.authorization.getFindAuthorizationFilter(
-      AlertingAuthorizationEntity.Rule,
-      alertingAuthorizationFilterOpts
-    );
+    let authorizationTuple;
+    try {
+      authorizationTuple = await this.authorization.getFindAuthorizationFilter(
+        AlertingAuthorizationEntity.Rule,
+        alertingAuthorizationFilterOpts
+      );
+    } catch (error) {
+      this.auditLogger?.log(
+        ruleAuditEvent({
+          action: RuleAuditAction.AGGREGATE,
+          error,
+        })
+      );
+      throw error;
+    }
+    const { filter: authorizationFilter } = authorizationTuple;
     const resp = await this.unsecuredSavedObjectsClient.find<RawAlert, RuleAggregation>({
       ...options,
       filter:
