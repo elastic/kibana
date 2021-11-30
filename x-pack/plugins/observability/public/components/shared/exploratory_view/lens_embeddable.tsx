@@ -89,6 +89,7 @@ export function LensEmbeddable(props: Props) {
         attributes={lensAttributes}
         onLoad={onLensLoad}
         onBrushEnd={onBrushEnd}
+        withActions={true}
       />
     </LensWrapper>
   );

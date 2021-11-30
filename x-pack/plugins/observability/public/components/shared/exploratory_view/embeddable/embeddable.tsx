@@ -107,6 +107,7 @@ export default function Embeddable({
         timeRange={series?.time}
         attributes={attributesJSON}
         onBrushEnd={({ range }) => {}}
+        withActions={true}
       />
     </Wrapper>
   );

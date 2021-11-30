@@ -280,7 +280,6 @@ export const StatItemsComponent = React.memo<StatItemsProps>(
                       onBrushEnd: narrowDateRange,
                     })}
                   />
-                  <HostsChart />
                 </FlexItem>
               )}
             </EuiFlexGroup>

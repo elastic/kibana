@@ -12,44 +12,49 @@ import { HostsKpiAuthentications } from './authentications';
 import { HostsKpiHosts } from './hosts';
 import { HostsKpiUniqueIps } from './unique_ips';
 import { HostsKpiProps } from './types';
+import { HostsChart } from '../../../common/components/stat_items/hosts_chart';
 
 export const HostsKpiComponent = React.memo<HostsKpiProps>(
   ({ filterQuery, from, indexNames, to, setQuery, skip, narrowDateRange }) => (
-    <EuiFlexGroup wrap>
-      <EuiFlexItem grow={1}>
-        <HostsKpiHosts
-          filterQuery={filterQuery}
-          from={from}
-          indexNames={indexNames}
-          to={to}
-          narrowDateRange={narrowDateRange}
-          setQuery={setQuery}
-          skip={skip}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem grow={2}>
-        <HostsKpiAuthentications
-          filterQuery={filterQuery}
-          from={from}
-          indexNames={indexNames}
-          to={to}
-          narrowDateRange={narrowDateRange}
-          setQuery={setQuery}
-          skip={skip}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem grow={2}>
-        <HostsKpiUniqueIps
-          filterQuery={filterQuery}
-          from={from}
-          indexNames={indexNames}
-          to={to}
-          narrowDateRange={narrowDateRange}
-          setQuery={setQuery}
-          skip={skip}
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <>
+      <EuiFlexGroup wrap>
+        <EuiFlexItem grow={1}>
+          <HostsKpiHosts
+            filterQuery={filterQuery}
+            from={from}
+            indexNames={indexNames}
+            to={to}
+            narrowDateRange={narrowDateRange}
+            setQuery={setQuery}
+            skip={skip}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={2}>
+          <HostsKpiAuthentications
+            filterQuery={filterQuery}
+            from={from}
+            indexNames={indexNames}
+            to={to}
+            narrowDateRange={narrowDateRange}
+            setQuery={setQuery}
+            skip={skip}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={2}>
+          <HostsKpiUniqueIps
+            filterQuery={filterQuery}
+            from={from}
+            indexNames={indexNames}
+            to={to}
+            narrowDateRange={narrowDateRange}
+            setQuery={setQuery}
+            skip={skip}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
+      <HostsChart />
+    </>
   )
 );
 

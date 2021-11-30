@@ -19,6 +19,7 @@ import {
   StatItems,
 } from '../../../../common/components/stat_items';
 import { UpdateDateRange } from '../../../../common/components/charts/common';
+import { HostsChart } from '../../../../common/components/stat_items/hosts_chart';
 
 const kpiWidgetHeight = 247;
 
@@ -60,11 +61,13 @@ export const HostsKpiBaseComponent = React.memo<HostsKpiBaseComponentProps>(
     }
 
     return (
-      <EuiFlexGroup wrap>
-        {statItemsProps.map((mappedStatItemProps) => (
-          <StatItemsComponent {...mappedStatItemProps} />
-        ))}
-      </EuiFlexGroup>
+      <>
+        <EuiFlexGroup wrap>
+          {statItemsProps.map((mappedStatItemProps) => (
+            <StatItemsComponent {...mappedStatItemProps} />
+          ))}
+        </EuiFlexGroup>
+      </>
     );
   },
   (prevProps, nextProps) =>

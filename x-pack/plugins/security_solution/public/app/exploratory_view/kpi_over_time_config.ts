@@ -83,6 +83,16 @@ export function getSecurityKPIConfig(_config: ConfigProps): SeriesConfig {
           },
         ],
       },
+      {
+        label: 'source ip',
+        id: 'source.ip',
+        field: 'source.ip',
+      },
+      {
+        label: 'destination ip',
+        id: 'destination.ip',
+        field: 'destination.ip',
+      },
     ],
     labels: { 'host.name': 'Hosts', 'url.full': 'URL', 'agent.type': 'Agent type' },
   };

@@ -18,8 +18,8 @@ export const reportConfigMap = {
 
 export const indexPatternList = {
   security:
-    'remote_cluster:-*elastic-cloud-logs-*,remote_cluster:apm-*-transaction*,remote_cluster:traces-apm*,remote_cluster:auditbeat-*,remote_cluster:endgame-*,remote_cluster:filebeat-*,remote_cluster:logs-*,remote_cluster:packetbeat-*,remote_cluster:winlogbeat-*',
-  securityAlerts: 'remote_cluster:.internal.alerts-security.alerts-default-*',
+    'apm-*-transaction*,traces-apm*,auditbeat-*,endgame-*,filebeat-*,logs-*,packetbeat-*,winlogbeat-*,.alerts-security.alerts-default',
+  securityAlerts: '.alerts-security.alerts-default-*',
 };
 
 export const dataTypes: any = [
