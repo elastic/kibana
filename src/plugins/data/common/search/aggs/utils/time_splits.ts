@@ -430,6 +430,7 @@ export function insertTimeShiftSplit(
       filters[key] = {
         range: {
           [timeField]: {
+            format: 'strict_date_optional_time',
             gte: moment(timeFilter.query.range[timeField].gte).subtract(shift).toISOString(),
             lte: moment(timeFilter.query.range[timeField].lte).subtract(shift).toISOString(),
           },
