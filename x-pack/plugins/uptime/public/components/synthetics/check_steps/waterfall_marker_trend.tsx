@@ -9,11 +9,13 @@ import React from 'react';
 import { EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
+import { useSelector } from 'react-redux';
 import { useUptimeStartPlugins } from '../../../contexts/uptime_startup_plugins_context';
 import { JourneyStep } from '../../../../common/runtime_types';
 import { AllSeries, createExploratoryViewUrl } from '../../../../../observability/public';
 import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import { selectDynamicSettings } from '../../../state/selectors';
 
 export const getLast48Intervals = (activeStep: JourneyStep) => {
   const { lt, gte } = activeStep.monitor.timespan!;
@@ -46,6 +48,8 @@ export function StepFieldTrend({
   step: JourneyStep;
 }) {
   const { observability } = useUptimeStartPlugins();
+
+  const indexSettings = useSelector(selectDynamicSettings);
 
   const EmbeddableExpView = observability!.ExploratoryViewEmbeddable;
 
@@ -87,6 +91,13 @@ export function StepFieldTrend({
         attributes={allSeries}
         axisTitlesVisibility={{ x: false, yLeft: false, yRight: false }}
         legendIsVisible={false}
+        dataTypesIndexPatterns={
+          indexSettings.settings?.heartbeatIndices
+            ? {
+                synthetics: indexSettings.settings?.heartbeatIndices,
+              }
+            : undefined
+        }
       />
     </Wrapper>
   );

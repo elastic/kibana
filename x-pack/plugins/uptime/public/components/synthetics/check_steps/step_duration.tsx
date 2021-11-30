@@ -7,7 +7,7 @@
 
 import * as React from 'react';
 import { EuiButtonEmpty, EuiPopover } from '@elastic/eui';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import numeral from '@elastic/numeral';
 import { JourneyStep } from '../../../../common/runtime_types';
@@ -19,6 +19,17 @@ interface Props {
 
 export const StepDuration = ({ step }: Props) => {
   const [isOpen, setIsOpen] = useState(false);
+
+  const component = useMemo(
+    () => (
+      <StepFieldTrend
+        step={step}
+        field={'synthetics.step.duration.us'}
+        title={STEP_DURATION_TREND}
+      />
+    ),
+    [step]
+  );
 
   if (step.synthetics.step?.status === 'skipped') {
     return '--';
@@ -43,11 +54,7 @@ export const StepDuration = ({ step }: Props) => {
       zIndex={100}
       ownFocus={false}
     >
-      <StepFieldTrend
-        step={step}
-        field={'synthetics.step.duration.us'}
-        title={STEP_DURATION_TREND}
-      />
+      {component}
     </EuiPopover>
   );
 };
