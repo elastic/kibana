@@ -6,10 +6,11 @@
  */
 
 import React, { Fragment, FC } from 'react';
-import { EuiTabbedContent, EuiTitle, EuiSpacer } from '@elastic/eui';
+import { useEuiTheme, EuiTabbedContent, EuiTitle, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { GeneralConfig } from './general_config';
 import { FilterConfig } from './filter_config';
+import { sidebarPopStylesFactory } from '../sidebar_pop.styles';
 
 const strings = {
   getTitle: () =>
@@ -27,12 +28,14 @@ const strings = {
 };
 
 export const GlobalConfig: FC = () => {
+  const { euiTheme } = useEuiTheme();
+
   const tabs = [
     {
       id: 'general',
       name: strings.getGeneralLabel(),
       content: (
-        <div className="canvasSidebar__pop">
+        <div css={sidebarPopStylesFactory(euiTheme)}>
           <EuiSpacer size="m" />
           <GeneralConfig />
         </div>
@@ -42,7 +45,7 @@ export const GlobalConfig: FC = () => {
       id: 'filter',
       name: strings.getFilterLabel(),
       content: (
-        <div className="canvasSidebar__pop">
+        <div css={sidebarPopStylesFactory(euiTheme)}>
           <FilterConfig />
         </div>
       ),

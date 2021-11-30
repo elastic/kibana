@@ -7,7 +7,7 @@
 
 import React, { FunctionComponent } from 'react';
 import PropTypes from 'prop-types';
-import { EuiTabbedContent } from '@elastic/eui';
+import { useEuiTheme, EuiTabbedContent } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 // @ts-expect-error unconverted component
@@ -15,6 +15,7 @@ import { Datasource } from '../../datasource';
 // @ts-expect-error unconverted component
 import { FunctionFormList } from '../../function_form_list';
 import { PositionedElement } from '../../../../types';
+import { sidebarPopStylesFactory } from '../sidebar_pop.styles';
 
 const strings = {
   getDataTabLabel: () =>
@@ -39,15 +40,14 @@ interface Props {
 }
 
 export const ElementSettings: FunctionComponent<Props> = ({ element }) => {
+  const { euiTheme } = useEuiTheme();
   const tabs = [
     {
       id: 'edit',
       name: strings.getDisplayTabLabel(),
       content: (
-        <div className="canvasSidebar__pop">
-          <div className="canvasSidebar--args">
-            <FunctionFormList element={element} />
-          </div>
+        <div css={sidebarPopStylesFactory(euiTheme)}>
+          <FunctionFormList element={element} />
         </div>
       ),
     },
@@ -55,7 +55,7 @@ export const ElementSettings: FunctionComponent<Props> = ({ element }) => {
       id: 'data',
       name: strings.getDataTabLabel(),
       content: (
-        <div className="canvasSidebar__pop">
+        <div css={sidebarPopStylesFactory(euiTheme)}>
           <Datasource />
         </div>
       ),
