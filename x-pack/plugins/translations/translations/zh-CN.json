@@ -15503,7 +15503,6 @@
     "xpack.maps.source.esGrid.compositeInspectorDescription": "Elasticsearch 地理网格聚合请求：{requestId}",
     "xpack.maps.source.esGrid.compositePaginationErrorMessage": "{layerName} 正导致过多的请求。降低“网格分辨率”和/或减少热门词“指标”的数量。",
     "xpack.maps.source.esGrid.geospatialFieldLabel": "地理空间字段",
-    "xpack.maps.source.esGrid.geoTileGridLabel": "网格参数",
     "xpack.maps.source.esGrid.inspectorDescription": "Elasticsearch 地理网格聚合请求",
     "xpack.maps.source.esGrid.metricsLabel": "指标",
     "xpack.maps.source.esGrid.resolutionParamErrorMessage": "无法识别网格分辨率参数：{resolution}",

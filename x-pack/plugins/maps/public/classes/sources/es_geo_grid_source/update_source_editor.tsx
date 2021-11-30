@@ -20,6 +20,7 @@ import { IndexPatternField, indexPatterns } from '../../../../../../../src/plugi
 import { RenderAsSelect } from './render_as_select';
 import { AggDescriptor } from '../../../../common/descriptor_types';
 import { OnSourceChangeArgs } from '../source';
+import { clustersTitle, heatmapTitle } from './es_geo_grid_source';
 
 interface Props {
   currentLayerType?: string;
@@ -147,10 +148,7 @@ export class UpdateSourceEditor extends Component<Props, State> {
         <EuiPanel>
           <EuiTitle size="xs">
             <h6>
-              <FormattedMessage
-                id="xpack.maps.source.esGrid.geoTileGridLabel"
-                defaultMessage="Grid parameters"
-              />
+              {this.props.currentLayerType === LAYER_TYPE.HEATMAP ? heatmapTitle : clustersTitle}
             </h6>
           </EuiTitle>
           <EuiSpacer size="m" />

@@ -15305,7 +15305,6 @@
     "xpack.maps.source.esGrid.compositeInspectorDescription": "Elasticsearch ジオグリッド集約リクエスト：{requestId}",
     "xpack.maps.source.esGrid.compositePaginationErrorMessage": "{layerName} はリクエスト過多の原因になります。「グリッド解像度」を下げるか、またはトップ用語「メトリック」の数を減らしてください。",
     "xpack.maps.source.esGrid.geospatialFieldLabel": "地理空間フィールド",
-    "xpack.maps.source.esGrid.geoTileGridLabel": "グリッドパラメーター",
     "xpack.maps.source.esGrid.inspectorDescription": "Elasticsearch ジオグリッド集約リクエスト",
     "xpack.maps.source.esGrid.metricsLabel": "メトリック",
     "xpack.maps.source.esGrid.resolutionParamErrorMessage": "グリッド解像度パラメーターが認識されません：{resolution}",
