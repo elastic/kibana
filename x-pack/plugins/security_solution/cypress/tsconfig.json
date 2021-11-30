@@ -15,6 +15,7 @@
       "cypress-file-upload",
       "cypress-pipe",
       "node",
+      "resize-observer-polyfill",
     ],
   },
   "references": [
