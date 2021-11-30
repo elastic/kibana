@@ -29,7 +29,7 @@ import { useUpdateCases } from '../../containers/use_bulk_update_case';
 import { useGetActionLicense } from '../../containers/use_get_action_license';
 import { useConnectors } from '../../containers/configure/use_connectors';
 import { useKibana } from '../../common/lib/kibana';
-import { AllCasesList, AllCasesListProps } from './all_cases_list';
+import { AllCasesList } from './all_cases_list';
 import { CasesColumns, GetCasesColumn, useCasesColumns } from './columns';
 import { triggersActionsUiMock } from '../../../../triggers_actions_ui/public/mocks';
 import { registerConnectorsToMockActionRegistry } from '../../common/mock/register_connectors';
@@ -64,10 +64,6 @@ const mockKibana = () => {
 };
 
 describe('AllCasesListGeneric', () => {
-  const defaultAllCasesListProps: AllCasesListProps = {
-    disableAlerts: false,
-  };
-
   const dispatchResetIsDeleted = jest.fn();
   const dispatchResetIsUpdated = jest.fn();
   const dispatchUpdateCaseProperty = jest.fn();
@@ -161,7 +157,7 @@ describe('AllCasesListGeneric', () => {
 
     const wrapper = mount(
       <TestProviders>
-        <AllCasesList {...defaultAllCasesListProps} />
+        <AllCasesList />
       </TestProviders>
     );
 
@@ -215,7 +211,7 @@ describe('AllCasesListGeneric', () => {
     });
     const wrapper = mount(
       <TestProviders>
-        <AllCasesList {...defaultAllCasesListProps} />
+        <AllCasesList />
       </TestProviders>
     );
     const checkIt = (columnName: string, key: number) => {
@@ -245,7 +241,7 @@ describe('AllCasesListGeneric', () => {
     });
     const wrapper = mount(
       <TestProviders>
-        <AllCasesList {...defaultAllCasesListProps} />
+        <AllCasesList />
       </TestProviders>
     );
     await waitFor(() => {
@@ -281,7 +277,7 @@ describe('AllCasesListGeneric', () => {
     });
     const wrapper = mount(
       <TestProviders>
-        <AllCasesList {...defaultAllCasesListProps} />
+        <AllCasesList />
       </TestProviders>
     );
 
@@ -293,7 +289,7 @@ describe('AllCasesListGeneric', () => {
   it('should tableHeaderSortButton AllCasesList', async () => {
     const wrapper = mount(
       <TestProviders>
-        <AllCasesList {...defaultAllCasesListProps} />
+        <AllCasesList />
       </TestProviders>
     );
     wrapper.find('[data-test-subj="tableHeaderSortButton"]').first().simulate('click');
@@ -310,7 +306,7 @@ describe('AllCasesListGeneric', () => {
   it('Updates status when status context menu is updated', async () => {
     const wrapper = mount(
       <TestProviders>
-        <AllCasesList {...defaultAllCasesListProps} />
+        <AllCasesList />
       </TestProviders>
     );
     wrapper.find(`[data-test-subj="case-view-status-dropdown"] button`).first().simulate('click');
@@ -351,7 +347,7 @@ describe('AllCasesListGeneric', () => {
 
     const wrapper = mount(
       <TestProviders>
-        <AllCasesList {...defaultAllCasesListProps} />
+        <AllCasesList />
       </TestProviders>
     );
 
@@ -388,7 +384,7 @@ describe('AllCasesListGeneric', () => {
 
     const wrapper = mount(
       <TestProviders>
-        <AllCasesList {...defaultAllCasesListProps} />
+        <AllCasesList />
       </TestProviders>
     );
 
@@ -431,7 +427,7 @@ describe('AllCasesListGeneric', () => {
 
     const wrapper = mount(
       <TestProviders>
-        <AllCasesList {...defaultAllCasesListProps} />
+        <AllCasesList />
       </TestProviders>
     );
     wrapper.find('[data-test-subj="case-table-bulk-actions"] button').first().simulate('click');
@@ -458,7 +454,7 @@ describe('AllCasesListGeneric', () => {
 
     const wrapper = mount(
       <TestProviders>
-        <AllCasesList {...defaultAllCasesListProps} />
+        <AllCasesList />
       </TestProviders>
     );
     wrapper.find('[data-test-subj="case-table-bulk-actions"] button').first().simulate('click');
@@ -481,7 +477,7 @@ describe('AllCasesListGeneric', () => {
 
     const wrapper = mount(
       <TestProviders>
-        <AllCasesList {...defaultAllCasesListProps} />
+        <AllCasesList />
       </TestProviders>
     );
     wrapper.find('[data-test-subj="case-table-bulk-actions"] button').first().simulate('click');
@@ -500,7 +496,7 @@ describe('AllCasesListGeneric', () => {
 
     const wrapper = mount(
       <TestProviders>
-        <AllCasesList {...defaultAllCasesListProps} />
+        <AllCasesList />
       </TestProviders>
     );
     wrapper.find('[data-test-subj="case-table-bulk-actions"] button').first().simulate('click');
@@ -521,7 +517,7 @@ describe('AllCasesListGeneric', () => {
 
     mount(
       <TestProviders>
-        <AllCasesList {...defaultAllCasesListProps} />
+        <AllCasesList />
       </TestProviders>
     );
     await waitFor(() => {
@@ -539,7 +535,7 @@ describe('AllCasesListGeneric', () => {
 
     mount(
       <TestProviders>
-        <AllCasesList {...defaultAllCasesListProps} />
+        <AllCasesList />
       </TestProviders>
     );
     await waitFor(() => {
@@ -552,7 +548,7 @@ describe('AllCasesListGeneric', () => {
   it('should not render table utility bar when isSelectorView=true', async () => {
     const wrapper = mount(
       <TestProviders>
-        <AllCasesList {...defaultAllCasesListProps} isSelectorView={true} />
+        <AllCasesList isSelectorView={true} />
       </TestProviders>
     );
     await waitFor(() => {
@@ -566,7 +562,7 @@ describe('AllCasesListGeneric', () => {
   it('case table should not be selectable when isSelectorView=true', async () => {
     const wrapper = mount(
       <TestProviders>
-        <AllCasesList {...defaultAllCasesListProps} isSelectorView={true} />
+        <AllCasesList isSelectorView={true} />
       </TestProviders>
     );
     await waitFor(() => {
@@ -588,7 +584,7 @@ describe('AllCasesListGeneric', () => {
 
     const wrapper = mount(
       <TestProviders>
-        <AllCasesList {...defaultAllCasesListProps} isSelectorView={true} onRowClick={onRowClick} />
+        <AllCasesList isSelectorView={true} onRowClick={onRowClick} />
       </TestProviders>
     );
     wrapper.find('[data-test-subj="cases-table-add-case"]').first().simulate('click');
@@ -600,7 +596,7 @@ describe('AllCasesListGeneric', () => {
   it('should call onRowClick when clicking a case with modal=true', async () => {
     const wrapper = mount(
       <TestProviders>
-        <AllCasesList {...defaultAllCasesListProps} isSelectorView={true} onRowClick={onRowClick} />
+        <AllCasesList isSelectorView={true} onRowClick={onRowClick} />
       </TestProviders>
     );
 
@@ -657,7 +653,7 @@ describe('AllCasesListGeneric', () => {
   it('should NOT call onRowClick when clicking a case with modal=true', async () => {
     const wrapper = mount(
       <TestProviders>
-        <AllCasesList {...defaultAllCasesListProps} isSelectorView={false} />
+        <AllCasesList isSelectorView={false} />
       </TestProviders>
     );
     wrapper.find('[data-test-subj="cases-table-row-1"]').first().simulate('click');
@@ -669,7 +665,7 @@ describe('AllCasesListGeneric', () => {
   it('should change the status to closed', async () => {
     const wrapper = mount(
       <TestProviders>
-        <AllCasesList {...defaultAllCasesListProps} isSelectorView={false} />
+        <AllCasesList isSelectorView={false} />
       </TestProviders>
     );
     wrapper.find('button[data-test-subj="case-status-filter"]').simulate('click');
@@ -684,7 +680,7 @@ describe('AllCasesListGeneric', () => {
   it('should change the status to in-progress', async () => {
     const wrapper = mount(
       <TestProviders>
-        <AllCasesList {...defaultAllCasesListProps} isSelectorView={false} />
+        <AllCasesList isSelectorView={false} />
       </TestProviders>
     );
     wrapper.find('button[data-test-subj="case-status-filter"]').simulate('click');
@@ -699,7 +695,7 @@ describe('AllCasesListGeneric', () => {
   it('should change the status to open', async () => {
     const wrapper = mount(
       <TestProviders>
-        <AllCasesList {...defaultAllCasesListProps} isSelectorView={false} />
+        <AllCasesList isSelectorView={false} />
       </TestProviders>
     );
     wrapper.find('button[data-test-subj="case-status-filter"]').simulate('click');
@@ -714,7 +710,7 @@ describe('AllCasesListGeneric', () => {
   it('should show the correct count on stats', async () => {
     const wrapper = mount(
       <TestProviders>
-        <AllCasesList {...defaultAllCasesListProps} isSelectorView={false} />
+        <AllCasesList isSelectorView={false} />
       </TestProviders>
     );
     wrapper.find('button[data-test-subj="case-status-filter"]').simulate('click');
@@ -734,7 +730,7 @@ describe('AllCasesListGeneric', () => {
   it('should not render status when isSelectorView=true', async () => {
     const wrapper = mount(
       <TestProviders>
-        <AllCasesList {...defaultAllCasesListProps} isSelectorView={true} />
+        <AllCasesList isSelectorView={true} />
       </TestProviders>
     );
 
@@ -769,7 +765,7 @@ describe('AllCasesListGeneric', () => {
 
     const wrapper = mount(
       <TestProviders>
-        <AllCasesList {...defaultAllCasesListProps} isSelectorView={false} doRefresh={doRefresh} />
+        <AllCasesList isSelectorView={false} doRefresh={doRefresh} />
       </TestProviders>
     );
 

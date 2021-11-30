@@ -43,9 +43,9 @@ export const Cases = React.memo<CasesProps>(({ userCanCrud }) => {
       )}
       {casesUi.getCases({
         basePath: CASES_PATH,
-        disableAlerts: true,
         userCanCrud,
         owner: [CASES_OWNER],
+        features: { alerts: { sync: false } },
         useFetchAlertData,
         showAlertDetails: (alertId: string) => {
           setSelectedAlertId(alertId);
@@ -65,7 +65,6 @@ export const Cases = React.memo<CasesProps>(({ userCanCrud }) => {
             });
           },
         },
-        hideSyncAlerts: true,
       })}
     </>
   );

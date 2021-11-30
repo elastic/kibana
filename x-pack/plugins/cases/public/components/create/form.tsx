@@ -30,6 +30,7 @@ import { InsertTimeline } from '../insert_timeline';
 import { UsePostComment } from '../../containers/use_post_comment';
 import { SubmitCaseButton } from './submit_button';
 import { FormContext } from './form_context';
+import { useCasesFeatures } from '../cases_context/use_cases_features';
 
 interface ContainerProps {
   big?: boolean;
@@ -51,15 +52,11 @@ const MySpinner = styled(EuiLoadingSpinner)`
 export interface CreateCaseFormFieldsProps {
   connectors: ActionConnector[];
   isLoadingConnectors: boolean;
-  disableAlerts: boolean;
   hideConnectorServiceNowSir: boolean;
   withSteps: boolean;
 }
 export interface CreateCaseFormProps
-  extends Pick<
-    Partial<CreateCaseFormFieldsProps>,
-    'disableAlerts' | 'hideConnectorServiceNowSir' | 'withSteps'
-  > {
+  extends Pick<Partial<CreateCaseFormFieldsProps>, 'hideConnectorServiceNowSir' | 'withSteps'> {
   onCancel: () => void;
   onSuccess: (theCase: Case) => Promise<void>;
   afterCaseCreated?: (theCase: Case, postComment: UsePostComment['postComment']) => Promise<void>;
@@ -69,8 +66,10 @@ export interface CreateCaseFormProps
 
 const empty: ActionConnector[] = [];
 export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.memo(
-  ({ connectors, disableAlerts, isLoadingConnectors, hideConnectorServiceNowSir, withSteps }) => {
+  ({ connectors, isLoadingConnectors, hideConnectorServiceNowSir, withSteps }) => {
     const { isSubmitting } = useFormContext();
+    const { syncAlerts } = useCasesFeatures();
+
     const firstStep = useMemo(
       () => ({
         title: i18n.STEP_ONE_TITLE,
@@ -119,8 +118,8 @@ export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.m
     );
 
     const allSteps = useMemo(
-      () => [firstStep, ...(!disableAlerts ? [secondStep] : []), thirdStep],
-      [disableAlerts, firstStep, secondStep, thirdStep]
+      () => [firstStep, ...(syncAlerts ? [secondStep] : []), thirdStep],
+      [syncAlerts, firstStep, secondStep, thirdStep]
     );
 
     return (
@@ -135,7 +134,7 @@ export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.m
         ) : (
           <>
             {firstStep.children}
-            {!disableAlerts && secondStep.children}
+            {syncAlerts && secondStep.children}
             {thirdStep.children}
           </>
         )}
@@ -148,7 +147,6 @@ CreateCaseFormFields.displayName = 'CreateCaseFormFields';
 
 export const CreateCaseForm: React.FC<CreateCaseFormProps> = React.memo(
   ({
-    disableAlerts = false,
     hideConnectorServiceNowSir = false,
     withSteps = true,
     afterCaseCreated,
@@ -163,12 +161,9 @@ export const CreateCaseForm: React.FC<CreateCaseFormProps> = React.memo(
         caseType={caseType}
         hideConnectorServiceNowSir={hideConnectorServiceNowSir}
         onSuccess={onSuccess}
-        // if we are disabling alerts, then we should not sync alerts
-        syncAlertsDefaultValue={!disableAlerts}
       >
         <CreateCaseFormFields
           connectors={empty}
-          disableAlerts={disableAlerts}
           isLoadingConnectors={false}
           hideConnectorServiceNowSir={hideConnectorServiceNowSir}
           withSteps={withSteps}

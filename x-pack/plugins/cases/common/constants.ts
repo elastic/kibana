@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { ConnectorTypes } from './api';
+import { CasesContextValue } from './ui/types';
 
 export const DEFAULT_DATE_FORMAT = 'dateFormat';
 export const DEFAULT_DATE_FORMAT_TZ = 'dateFormat:tz';
@@ -102,3 +103,9 @@ export const MAX_CONCURRENT_SEARCHES = 10;
  */
 
 export const MAX_TITLE_LENGTH = 64;
+
+/**
+ * Cases features
+ */
+
+export const DEFAULT_FEATURES: CasesContextValue['features'] = { alerts: { sync: true } };

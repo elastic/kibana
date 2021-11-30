@@ -25,6 +25,7 @@ import { StatusContextMenu } from './status_context_menu';
 import { getStatusDate, getStatusTitle } from './helpers';
 import { SyncAlertsSwitch } from '../case_settings/sync_alerts_switch';
 import { OnUpdateFields } from '../case_view';
+import { useCasesFeatures } from '../cases_context/use_cases_features';
 
 const MyDescriptionList = styled(EuiDescriptionList)`
   ${({ theme }) => css`
@@ -43,7 +44,6 @@ interface CaseActionBarProps {
   caseData: Case;
   currentExternalIncident: CaseService | null;
   userCanCrud: boolean;
-  disableAlerting: boolean;
   isLoading: boolean;
   onRefresh: () => void;
   onUpdateField: (args: OnUpdateFields) => void;
@@ -51,12 +51,12 @@ interface CaseActionBarProps {
 const CaseActionBarComponent: React.FC<CaseActionBarProps> = ({
   caseData,
   currentExternalIncident,
-  disableAlerting,
   userCanCrud,
   isLoading,
   onRefresh,
   onUpdateField,
 }) => {
+  const { syncAlerts: syncAlertsFeatureOption } = useCasesFeatures();
   const date = useMemo(() => getStatusDate(caseData), [caseData]);
   const title = useMemo(() => getStatusTitle(caseData.status), [caseData.status]);
   const onStatusChanged = useCallback(
@@ -114,7 +114,7 @@ const CaseActionBarComponent: React.FC<CaseActionBarProps> = ({
             responsive={false}
             justifyContent="spaceBetween"
           >
-            {userCanCrud && !disableAlerting && (
+            {userCanCrud && syncAlertsFeatureOption && (
               <EuiFlexItem grow={false}>
                 <EuiDescriptionListTitle>
                   <EuiFlexGroup

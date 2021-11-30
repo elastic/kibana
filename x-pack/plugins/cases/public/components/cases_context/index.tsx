@@ -6,40 +6,34 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import { CasesContextValue, DEFAULT_FEATURES } from '../../../common';
 import { DEFAULT_BASE_PATH } from '../../common/navigation';
 import { useApplication } from './use_application';
-
-export interface CasesContextValue {
-  owner: string[];
-  appId: string;
-  appTitle: string;
-  userCanCrud: boolean;
-  basePath: string;
-}
 
 export const CasesContext = React.createContext<CasesContextValue | undefined>(undefined);
 
 export interface CasesContextProps
-  extends Omit<CasesContextValue, 'appId' | 'appTitle' | 'basePath'> {
+  extends Omit<CasesContextValue, 'appId' | 'appTitle' | 'basePath' | 'features'> {
   basePath?: string;
+  features?: Partial<CasesContextValue['features']>;
 }
 
-export interface CasesContextStateValue
-  extends Omit<CasesContextValue, 'appId' | 'appTitle' | 'userCanCrud'> {
+export interface CasesContextStateValue extends Omit<CasesContextValue, 'appId' | 'appTitle'> {
   appId?: string;
   appTitle?: string;
-  userCanCrud?: boolean;
 }
 
 export const CasesProvider: React.FC<{ value: CasesContextProps }> = ({
   children,
-  value: { owner, userCanCrud, basePath = DEFAULT_BASE_PATH },
+  value: { owner, userCanCrud, basePath = DEFAULT_BASE_PATH, features = {} },
 }) => {
   const { appId, appTitle } = useApplication();
+  const featuresOptions = { ...DEFAULT_FEATURES, ...features };
   const [value, setValue] = useState<CasesContextStateValue>({
     owner,
     userCanCrud,
     basePath,
+    features: featuresOptions,
   });
 
   /**
