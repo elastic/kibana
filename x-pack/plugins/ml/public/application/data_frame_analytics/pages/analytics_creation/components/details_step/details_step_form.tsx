@@ -7,15 +7,7 @@
 
 import React, { FC, Fragment, useRef, useEffect, useMemo, useState } from 'react';
 import { debounce } from 'lodash';
-import {
-  EuiFieldText,
-  EuiFormRow,
-  EuiLink,
-  EuiSpacer,
-  EuiSwitch,
-  EuiText,
-  EuiTextArea,
-} from '@elastic/eui';
+import { EuiFieldText, EuiFormRow, EuiLink, EuiSpacer, EuiSwitch, EuiTextArea } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { useMlKibana } from '../../../../../contexts/kibana';
@@ -42,11 +34,7 @@ export const DetailsStepForm: FC<CreateAnalyticsStepProps> = ({
   setCurrentStep,
 }) => {
   const {
-    services: {
-      docLinks,
-      notifications,
-      application: { capabilities },
-    },
+    services: { docLinks, notifications },
   } = useMlKibana();
   const createIndexLink = docLinks.links.apis.createIndex;
   const { setFormState } = actions;
@@ -75,11 +63,6 @@ export const DetailsStepForm: FC<CreateAnalyticsStepProps> = ({
       (cloneJob !== undefined && resultsField === DEFAULT_RESULTS_FIELD)
   );
 
-  const canCreateDataView = useMemo(
-    () =>
-      capabilities.savedObjectsManagement.edit === true || capabilities.indexPatterns.save === true,
-    [capabilities]
-  );
   const forceInput = useRef<HTMLInputElement | null>(null);
 
   const isStepInvalid =
@@ -157,12 +140,6 @@ export const DetailsStepForm: FC<CreateAnalyticsStepProps> = ({
       setFormState({ destinationIndex: '' });
     }
   }, [destIndexSameAsId, jobId]);
-
-  useEffect(() => {
-    if (canCreateDataView === false) {
-      setFormState({ createIndexPattern: false });
-    }
-  }, [capabilities]);
 
   return (
     <Fragment>
@@ -359,56 +336,6 @@ export const DetailsStepForm: FC<CreateAnalyticsStepProps> = ({
           />
         </EuiFormRow>
       )}
-      <EuiFormRow
-        fullWidth
-        isInvalid={
-          (createIndexPattern && destinationIndexPatternTitleExists) ||
-          createIndexPattern === false ||
-          canCreateDataView === false
-        }
-        error={[
-          ...(canCreateDataView === false
-            ? [
-                <EuiText size="xs" color="warning">
-                  {i18n.translate('xpack.ml.dataframe.analytics.create.dataViewPermissionWarning', {
-                    defaultMessage: 'You need permission to create data views.',
-                  })}
-                </EuiText>,
-              ]
-            : []),
-          ...(createIndexPattern && destinationIndexPatternTitleExists
-            ? [
-                i18n.translate('xpack.ml.dataframe.analytics.create.dataViewExistsError', {
-                  defaultMessage: 'A data view with this title already exists.',
-                }),
-              ]
-            : []),
-          ...(!createIndexPattern
-            ? [
-                <EuiText size="xs" color="warning">
-                  {i18n.translate(
-                    'xpack.ml.dataframe.analytics.create.shouldCreateDataViewMessage',
-                    {
-                      defaultMessage:
-                        'You may not be able to view job results if a data view is not created for the destination index.',
-                    }
-                  )}
-                </EuiText>,
-              ]
-            : []),
-        ]}
-      >
-        <EuiSwitch
-          disabled={isJobCreated === true || canCreateDataView === false}
-          name="mlDataFrameAnalyticsCreateIndexPattern"
-          label={i18n.translate('xpack.ml.dataframe.analytics.create.createDataViewLabel', {
-            defaultMessage: 'Create data view',
-          })}
-          checked={createIndexPattern === true}
-          onChange={() => setFormState({ createIndexPattern: !createIndexPattern })}
-          data-test-subj="mlAnalyticsCreateJobWizardCreateIndexPatternSwitch"
-        />
-      </EuiFormRow>
       <EuiSpacer />
       <ContinueButton
         isDisabled={isStepInvalid}
