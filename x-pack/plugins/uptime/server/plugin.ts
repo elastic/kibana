@@ -27,10 +27,6 @@ import { mappingFromFieldMap } from '../../rule_registry/common/mapping_from_fie
 import { Dataset } from '../../rule_registry/server';
 import { UptimeConfig } from '../common/config';
 import { SyntheticsService } from './lib/synthetics_service/synthetics_service';
-import {
-  ensureSyntheticsServiceSyncTaskScheduled,
-  registerSyntheticsServiceTasks,
-} from './lib/tasks';
 
 export type UptimeRuleRegistry = ReturnType<Plugin['setup']>['ruleRegistry'];
 
@@ -75,12 +71,12 @@ export class Plugin implements PluginType {
 
     if (this.server?.config?.unsafe?.service.enabled) {
       this.syntheticService = new SyntheticsService(this.logger, this.server);
+      this.syntheticService.registerSyncTask(plugins.taskManager);
     }
 
     initServerWithKibana(this.server, plugins, ruleDataClient, this.logger);
 
     registerUptimeSavedObjects(core.savedObjects, plugins.encryptedSavedObjects, config);
-    registerSyntheticsServiceTasks(plugins.taskManager, this.logger);
 
     KibanaTelemetryAdapter.registerUsageCollector(
       plugins.usageCollection,
@@ -105,8 +101,7 @@ export class Plugin implements PluginType {
 
     if (this.server?.config?.unsafe?.service.enabled) {
       this.syntheticService?.init(coreStart);
-      // TODO: Move inside service
-      ensureSyntheticsServiceSyncTaskScheduled(plugins.taskManager, this.logger);
+      this.syntheticService?.scheduleSyncTask(plugins.taskManager);
     }
   }
 
