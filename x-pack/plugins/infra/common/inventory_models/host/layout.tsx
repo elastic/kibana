@@ -256,7 +256,7 @@ export const Layout = withTheme(({ metrics, onChangeRangeTime, theme }: LayoutPr
                     defaultMessage: 'CPU Capacity',
                   }
                 ),
-                color: 'secondary',
+                color: 'success',
                 formatter: 'percent',
                 gaugeMax: 1,
               },
@@ -267,7 +267,7 @@ export const Layout = withTheme(({ metrics, onChangeRangeTime, theme }: LayoutPr
                     defaultMessage: 'Load (5m)',
                   }
                 ),
-                color: 'secondary',
+                color: 'success',
               },
               memorycap: {
                 name: i18n.translate(
@@ -276,7 +276,7 @@ export const Layout = withTheme(({ metrics, onChangeRangeTime, theme }: LayoutPr
                     defaultMessage: 'Memory Capacity',
                   }
                 ),
-                color: 'secondary',
+                color: 'success',
                 formatter: 'percent',
                 gaugeMax: 1,
               },
@@ -287,7 +287,7 @@ export const Layout = withTheme(({ metrics, onChangeRangeTime, theme }: LayoutPr
                     defaultMessage: 'Pod Capacity',
                   }
                 ),
-                color: 'secondary',
+                color: 'success',
                 formatter: 'percent',
                 gaugeMax: 1,
               },
@@ -298,7 +298,7 @@ export const Layout = withTheme(({ metrics, onChangeRangeTime, theme }: LayoutPr
                     defaultMessage: 'Disk Capacity',
                   }
                 ),
-                color: 'secondary',
+                color: 'success',
                 formatter: 'percent',
                 gaugeMax: 1,
               },

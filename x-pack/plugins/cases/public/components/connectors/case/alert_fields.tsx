@@ -12,13 +12,12 @@ import styled from 'styled-components';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 
 import { ActionParamsProps } from '../../../../../triggers_actions_ui/public/types';
-import { CommentType, SECURITY_SOLUTION_OWNER } from '../../../../common';
+import { CommentType } from '../../../../common';
 
 import { CaseActionParams } from './types';
 import { ExistingCase } from './existing_case';
 
 import * as i18n from './translations';
-import { OwnerProvider } from '../../owner_context';
 
 const Container = styled.div`
   ${({ theme }) => `
@@ -96,9 +95,7 @@ const CaseParamsFields: React.FunctionComponent<ActionParamsProps<CaseActionPara
    */
   return (
     <Container>
-      <OwnerProvider owner={[SECURITY_SOLUTION_OWNER]}>
-        <ExistingCase onCaseChanged={onCaseChanged} selectedCase={selectedCase} />
-      </OwnerProvider>
+      <ExistingCase onCaseChanged={onCaseChanged} selectedCase={selectedCase} />
       <EuiSpacer size="m" />
       <EuiCallOut size="s" title={i18n.CASE_CONNECTOR_CALL_OUT_TITLE} iconType="iInCircle">
         <p>{i18n.CASE_CONNECTOR_CALL_OUT_MSG}</p>

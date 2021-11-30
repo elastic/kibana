@@ -78,7 +78,7 @@ export async function renderApp(
   setAppChrome();
 
   function renderMapApp(routeProps: RouteComponentProps<{ savedMapId?: string }>) {
-    const { embeddableId, originatingApp, valueInput } =
+    const { embeddableId, originatingApp, valueInput, originatingPath } =
       stateTransfer.getIncomingEditorState(APP_ID) || {};
 
     let mapEmbeddableInput;
@@ -99,6 +99,7 @@ export async function renderApp(
         setHeaderActionMenu={setHeaderActionMenu}
         stateTransfer={stateTransfer}
         originatingApp={originatingApp}
+        originatingPath={originatingPath}
         history={history}
         key={routeProps.match.params.savedMapId ? routeProps.match.params.savedMapId : 'new'}
       />

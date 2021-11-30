@@ -20,7 +20,7 @@ import {
 import React, { Component } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type {
   ApplicationStart,
@@ -255,7 +255,7 @@ export class RoleMappingsGridPage extends Component<Props, State> {
       ) : undefined,
       toolsRight: (
         <EuiButton
-          color="secondary"
+          color="success"
           iconType="refresh"
           onClick={() => this.reloadRoleMappings()}
           data-test-subj="reloadButton"

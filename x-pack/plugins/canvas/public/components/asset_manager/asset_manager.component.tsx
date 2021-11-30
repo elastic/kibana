@@ -154,7 +154,7 @@ export const AssetManager: FC<Props> = (props) => {
             <EuiProgress
               value={assetsTotal}
               max={ASSET_MAX_SIZE}
-              color={percentageUsed < 90 ? 'secondary' : 'danger'}
+              color={percentageUsed < 90 ? 'success' : 'danger'}
               size="s"
               aria-labelledby="CanvasAssetManagerLabel"
             />

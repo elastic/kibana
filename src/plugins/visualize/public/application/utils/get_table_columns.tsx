@@ -18,7 +18,7 @@ import {
   EuiBasicTableColumn,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { ApplicationStart } from 'kibana/public';
 import { IKbnUrlStateStorage } from 'src/plugins/kibana_utils/public';
 import { VisualizationListItem } from 'src/plugins/visualizations/public';

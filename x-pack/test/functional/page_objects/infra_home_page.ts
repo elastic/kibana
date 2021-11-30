@@ -121,8 +121,12 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
     },
 
     async changePalette(paletteId: string) {
-      await testSubjects.find('legendControlsPalette');
-      await testSubjects.selectValue('legendControlsPalette', paletteId);
+      const paletteSelector = await testSubjects.find('legendControlsPalette');
+      await paletteSelector.click();
+      const paletteSelectorEntry = await paletteSelector.findByCssSelector(
+        `option[value=${paletteId}]`
+      );
+      await paletteSelectorEntry.click();
     },
 
     async applyLegendControls() {

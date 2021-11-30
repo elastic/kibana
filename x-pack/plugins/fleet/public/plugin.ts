@@ -38,8 +38,14 @@ import { Storage } from '../../../../src/plugins/kibana_utils/public';
 import type { LicensingPluginSetup } from '../../licensing/public';
 import type { CloudSetup } from '../../cloud/public';
 import type { GlobalSearchPluginSetup } from '../../global_search/public';
-import { PLUGIN_ID, INTEGRATIONS_PLUGIN_ID, setupRouteService, appRoutesService } from '../common';
-import type { CheckPermissionsResponse, PostFleetSetupResponse } from '../common';
+import {
+  PLUGIN_ID,
+  INTEGRATIONS_PLUGIN_ID,
+  setupRouteService,
+  appRoutesService,
+  calculateAuthz,
+} from '../common';
+import type { CheckPermissionsResponse, PostFleetSetupResponse, FleetAuthz } from '../common';
 
 import type { FleetConfigType } from '../common/types';
 
@@ -65,6 +71,8 @@ export interface FleetSetup {}
  * Describes public Fleet plugin contract returned at the `start` stage.
  */
 export interface FleetStart {
+  /** Authorization for the current user */
+  authz: FleetAuthz;
   registerExtension: UIExtensionRegistrationCallback;
   isInitialized: () => Promise<true>;
 }
@@ -90,6 +98,7 @@ export interface FleetStartServices extends CoreStart, FleetStartDeps {
   storage: Storage;
   share: SharePluginStart;
   cloud?: CloudSetup;
+  authz: FleetAuthz;
 }
 
 export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDeps, FleetStartDeps> {
@@ -103,7 +112,7 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
     this.kibanaVersion = initializerContext.env.packageInfo.version;
   }
 
-  public setup(core: CoreSetup, deps: FleetSetupDeps) {
+  public setup(core: CoreSetup<FleetStartDeps, FleetStart>, deps: FleetSetupDeps) {
     const config = this.config;
     const kibanaVersion = this.kibanaVersion;
     const extensions = this.extensions;
@@ -129,16 +138,13 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
       order: 9019,
       euiIconType: 'logoElastic',
       mount: async (params: AppMountParameters) => {
-        const [coreStartServices, startDepsServices] = (await core.getStartServices()) as [
-          CoreStart,
-          FleetStartDeps,
-          FleetStart
-        ];
+        const [coreStartServices, startDepsServices, fleetStart] = await core.getStartServices();
         const startServices: FleetStartServices = {
           ...coreStartServices,
           ...startDepsServices,
           storage: this.storage,
           cloud: deps.cloud,
+          authz: fleetStart.authz,
         };
         const { renderApp, teardownIntegrations } = await import('./applications/integrations');
 
@@ -169,16 +175,13 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
       euiIconType: 'logoElastic',
       appRoute: '/app/fleet',
       mount: async (params: AppMountParameters) => {
-        const [coreStartServices, startDepsServices] = (await core.getStartServices()) as [
-          CoreStart,
-          FleetStartDeps,
-          FleetStart
-        ];
+        const [coreStartServices, startDepsServices, fleetStart] = await core.getStartServices();
         const startServices: FleetStartServices = {
           ...coreStartServices,
           ...startDepsServices,
           storage: this.storage,
           cloud: deps.cloud,
+          authz: fleetStart.authz,
         };
         const { renderApp, teardownFleet } = await import('./applications/fleet');
         const unmount = renderApp(startServices, params, config, kibanaVersion, extensions);
@@ -243,7 +246,23 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
       Component: LazyCustomLogsAssetsExtension,
     });
 
+    const { capabilities } = core.application;
+    const authz = calculateAuthz({
+      fleet: {
+        // Once we have a split privilege, this should be using fleetv2
+        // all: capabilities.fleetv2.all as boolean,
+        all: capabilities.fleet.all as boolean,
+        setup: false, // browser users will never have setup privileges
+      },
+
+      integrations: {
+        all: capabilities.fleet.all as boolean,
+        read: capabilities.fleet.read as boolean,
+      },
+    });
+
     return {
+      authz,
       isInitialized: () => {
         if (!successPromise) {
           successPromise = Promise.resolve().then(async () => {

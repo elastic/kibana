@@ -24,7 +24,7 @@ export const getHostTacticsColumns = (): HostTacticsColumns => [
     field: `node.${HostTacticsFields.tactic}`,
     name: i18n.TACTIC,
     truncateText: false,
-    hideForMobile: false,
+    mobileOptions: { show: true },
     render: (tactic) => {
       if (tactic != null && tactic.length > 0) {
         const id = escapeDataProviderId(`ueba-table-tactic-${tactic}`);
@@ -63,7 +63,7 @@ export const getHostTacticsColumns = (): HostTacticsColumns => [
     field: `node.${HostTacticsFields.technique}`,
     name: i18n.TECHNIQUE,
     truncateText: false,
-    hideForMobile: false,
+    mobileOptions: { show: true },
     render: (technique) => {
       if (technique != null && technique.length > 0) {
         const id = escapeDataProviderId(`ueba-table-technique-${technique}`);
@@ -102,7 +102,7 @@ export const getHostTacticsColumns = (): HostTacticsColumns => [
     field: `node.${HostTacticsFields.riskScore}`,
     name: i18n.RISK_SCORE,
     truncateText: false,
-    hideForMobile: false,
+    mobileOptions: { show: true },
     render: (riskScore) => {
       if (riskScore != null) {
         const id = escapeDataProviderId(`ueba-table-riskScore-${riskScore}`);
@@ -141,7 +141,7 @@ export const getHostTacticsColumns = (): HostTacticsColumns => [
     field: `node.${HostTacticsFields.hits}`,
     name: i18n.HITS,
     truncateText: false,
-    hideForMobile: false,
+    mobileOptions: { show: true },
     sortable: false,
     render: (hits) => {
       if (hits != null) {

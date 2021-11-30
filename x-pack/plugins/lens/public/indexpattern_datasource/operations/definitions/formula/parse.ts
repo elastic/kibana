@@ -8,7 +8,11 @@
 import { i18n } from '@kbn/i18n';
 import { isObject } from 'lodash';
 import type { TinymathAST, TinymathVariable, TinymathLocation } from '@kbn/tinymath';
-import { OperationDefinition, GenericOperationDefinition, IndexPatternColumn } from '../index';
+import {
+  OperationDefinition,
+  GenericOperationDefinition,
+  GenericIndexPatternColumn,
+} from '../index';
 import { IndexPattern, IndexPatternLayer } from '../../../types';
 import { mathOperation } from './math';
 import { documentField } from '../../../document_field';
@@ -67,8 +71,8 @@ function extractColumns(
   layer: IndexPatternLayer,
   indexPattern: IndexPattern,
   label: string
-): Array<{ column: IndexPatternColumn; location?: TinymathLocation }> {
-  const columns: Array<{ column: IndexPatternColumn; location?: TinymathLocation }> = [];
+): Array<{ column: GenericIndexPatternColumn; location?: TinymathLocation }> {
+  const columns: Array<{ column: GenericIndexPatternColumn; location?: TinymathLocation }> = [];
 
   function parseNode(node: TinymathAST) {
     if (typeof node === 'number' || node.type !== 'function') {
@@ -102,7 +106,7 @@ function extractColumns(
       const mappedParams = getOperationParams(nodeOperation, namedArguments || []);
 
       const newCol = (
-        nodeOperation as OperationDefinition<IndexPatternColumn, 'field'>
+        nodeOperation as OperationDefinition<GenericIndexPatternColumn, 'field'>
       ).buildColumn(
         {
           layer,
@@ -139,7 +143,7 @@ function extractColumns(
 
       const mappedParams = getOperationParams(nodeOperation, namedArguments || []);
       const newCol = (
-        nodeOperation as OperationDefinition<IndexPatternColumn, 'fullReference'>
+        nodeOperation as OperationDefinition<GenericIndexPatternColumn, 'fullReference'>
       ).buildColumn(
         {
           layer,
@@ -227,7 +231,7 @@ export function regenerateLayerFromAst(
       isFormulaBroken: !isValid,
     },
     references: !isValid ? [] : [getManagedId(columnId, extracted.length - 1)],
-  };
+  } as FormulaIndexPatternColumn;
 
   return {
     newLayer: {

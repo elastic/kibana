@@ -7,7 +7,7 @@
 
 import React, { FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiEmptyPrompt, EuiSpacer, EuiLink } from '@elastic/eui';
 import { useKibana } from '../../../../shared_imports';
 import { usePipelineProcessorsContext } from '../context';

@@ -34,7 +34,7 @@ import {
   AxisStyle,
   ScaleType,
 } from '@elastic/charts';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import type {
   ExpressionRenderDefinition,
   Datatable,
@@ -43,6 +43,8 @@ import type {
 import { IconType } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { RenderMode } from 'src/plugins/expressions';
+import { ThemeServiceStart } from 'kibana/public';
+import { KibanaThemeProvider } from '../../../../../src/plugins/kibana_react/public';
 import type { ILensInterpreterRenderHandlers, LensFilterEvent, LensBrushEvent } from '../types';
 import type { LensMultiTable, FormatFactory } from '../../common';
 import { layerTypes } from '../../common';
@@ -134,6 +136,7 @@ export const getXyChartRenderer = (dependencies: {
   paletteService: PaletteRegistry;
   timeZone: string;
   useLegacyTimeAxis: boolean;
+  kibanaTheme: ThemeServiceStart;
 }): ExpressionRenderDefinition<XYChartProps> => ({
   name: 'lens_xy_chart_renderer',
   displayName: 'XY chart',
@@ -156,23 +159,25 @@ export const getXyChartRenderer = (dependencies: {
     };
 
     ReactDOM.render(
-      <I18nProvider>
-        <XYChartReportable
-          {...config}
-          formatFactory={dependencies.formatFactory}
-          chartsActiveCursorService={dependencies.chartsActiveCursorService}
-          chartsThemeService={dependencies.chartsThemeService}
-          paletteService={dependencies.paletteService}
-          timeZone={dependencies.timeZone}
-          useLegacyTimeAxis={dependencies.useLegacyTimeAxis}
-          minInterval={calculateMinInterval(config)}
-          interactive={handlers.isInteractive()}
-          onClickValue={onClickValue}
-          onSelectRange={onSelectRange}
-          renderMode={handlers.getRenderMode()}
-          syncColors={handlers.isSyncColorsEnabled()}
-        />
-      </I18nProvider>,
+      <KibanaThemeProvider theme$={dependencies.kibanaTheme.theme$}>
+        <I18nProvider>
+          <XYChartReportable
+            {...config}
+            formatFactory={dependencies.formatFactory}
+            chartsActiveCursorService={dependencies.chartsActiveCursorService}
+            chartsThemeService={dependencies.chartsThemeService}
+            paletteService={dependencies.paletteService}
+            timeZone={dependencies.timeZone}
+            useLegacyTimeAxis={dependencies.useLegacyTimeAxis}
+            minInterval={calculateMinInterval(config)}
+            interactive={handlers.isInteractive()}
+            onClickValue={onClickValue}
+            onSelectRange={onSelectRange}
+            renderMode={handlers.getRenderMode()}
+            syncColors={handlers.isSyncColorsEnabled()}
+          />
+        </I18nProvider>
+      </KibanaThemeProvider>,
       domNode,
       () => handlers.done()
     );

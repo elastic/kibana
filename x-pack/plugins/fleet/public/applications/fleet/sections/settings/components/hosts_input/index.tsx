@@ -25,7 +25,7 @@ import {
   EuiFormErrorText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { EuiTheme } from '../../../../../../../../../../src/plugins/kibana_react/common';
 
@@ -37,6 +37,7 @@ export interface HostInputProps {
   helpText?: ReactNode;
   errors?: Array<{ message: string; index?: number }>;
   isInvalid?: boolean;
+  disabled?: boolean;
 }
 
 interface SortableTextFieldProps {
@@ -47,6 +48,7 @@ interface SortableTextFieldProps {
   onDelete: (index: number) => void;
   errors?: string[];
   autoFocus?: boolean;
+  disabled?: boolean;
 }
 
 const DraggableDiv = sytled.div`
@@ -62,7 +64,7 @@ function displayErrors(errors?: string[]) {
 }
 
 const SortableTextField: FunctionComponent<SortableTextFieldProps> = React.memo(
-  ({ id, index, value, onChange, onDelete, autoFocus, errors }) => {
+  ({ id, index, value, onChange, onDelete, autoFocus, errors, disabled }) => {
     const onDeleteHandler = useCallback(() => {
       onDelete(index);
     }, [onDelete, index]);
@@ -75,6 +77,7 @@ const SortableTextField: FunctionComponent<SortableTextFieldProps> = React.memo(
         spacing="m"
         index={index}
         draggableId={id}
+        isDragDisabled={disabled}
         customDragHandle={true}
         style={{
           paddingLeft: 0,
@@ -109,6 +112,7 @@ const SortableTextField: FunctionComponent<SortableTextFieldProps> = React.memo(
                 onChange={onChange}
                 autoFocus={autoFocus}
                 isInvalid={isInvalid}
+                disabled={disabled}
                 placeholder={i18n.translate('xpack.fleet.hostsInput.placeholder', {
                   defaultMessage: 'Specify host URL',
                 })}
@@ -120,6 +124,7 @@ const SortableTextField: FunctionComponent<SortableTextFieldProps> = React.memo(
                 color="text"
                 onClick={onDeleteHandler}
                 iconType="cross"
+                disabled={disabled}
                 aria-label={i18n.translate('xpack.fleet.settings.deleteHostButton', {
                   defaultMessage: 'Delete host',
                 })}
@@ -140,6 +145,7 @@ export const HostsInput: FunctionComponent<HostInputProps> = ({
   label,
   isInvalid,
   errors,
+  disabled,
 }) => {
   const [autoFocus, setAutoFocus] = useState(false);
   const value = useMemo(() => {
@@ -214,7 +220,7 @@ export const HostsInput: FunctionComponent<HostInputProps> = ({
     <EuiFormRow fullWidth label={label} isInvalid={isInvalid}>
       <>
         <EuiFormHelpText>{helpText}</EuiFormHelpText>
-        <EuiSpacer size="m" />
+        {helpText && <EuiSpacer size="m" />}
         <EuiDragDropContext onDragEnd={onDragEndHandler}>
           <EuiDroppable droppableId={`${id}Droppable`} spacing="none">
             {rows.map((row, idx) => (
@@ -228,6 +234,7 @@ export const HostsInput: FunctionComponent<HostInputProps> = ({
                     value={row.value}
                     autoFocus={autoFocus}
                     errors={indexedErrors[idx]}
+                    disabled={disabled}
                   />
                 ) : (
                   <>
@@ -239,6 +246,7 @@ export const HostsInput: FunctionComponent<HostInputProps> = ({
                       placeholder={i18n.translate('xpack.fleet.hostsInput.placeholder', {
                         defaultMessage: 'Specify host URL',
                       })}
+                      disabled={disabled}
                     />
                     {displayErrors(indexedErrors[idx])}
                   </>
@@ -249,7 +257,13 @@ export const HostsInput: FunctionComponent<HostInputProps> = ({
         </EuiDragDropContext>
         {displayErrors(globalErrors)}
         <EuiSpacer size="m" />
-        <EuiButtonEmpty size="xs" flush="left" iconType="plusInCircle" onClick={addRowHandler}>
+        <EuiButtonEmpty
+          disabled={disabled}
+          size="xs"
+          flush="left"
+          iconType="plusInCircle"
+          onClick={addRowHandler}
+        >
           <FormattedMessage id="xpack.fleet.hostsInput.addRow" defaultMessage="Add row" />
         </EuiButtonEmpty>
       </>

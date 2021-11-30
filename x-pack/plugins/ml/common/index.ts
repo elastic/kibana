@@ -14,3 +14,4 @@ export { composeValidators, patternValidator } from './util/validators';
 export { isRuntimeMappings, isRuntimeField } from './util/runtime_field_utils';
 export { extractErrorMessage } from './util/errors';
 export type { RuntimeMappings } from './types/fields';
+export { getDefaultCapabilities as getDefaultMlCapabilities } from './types/capabilities';
