@@ -23,15 +23,10 @@ import { FindingsTable } from './findings_table';
 import { useKibana } from '../../../common/lib/kibana';
 import { CSPFinding } from './types';
 
-// import { Filter, Query } from '@kbn/es-query';
-// import { SpyRoute } from '../../../common/utils/route/spy_routes';
-// import { CloudPosturePage } from '../../../app/types';
-// import type { TimeRange } from '../../../../../../'
-// import { makeMapStateToProps } from '../../../common/components/url_state/helpers';
-// import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
-// TODO: use urlState
-// const urlMapState = makeMapStateToProps();
-// const { urlState } = useDeepEqualSelector(urlMapState);
+interface URLState {
+  query: Query;
+  dateRange?: TimeRange;
+}
 
 const KUBEBEAT_INDEX = 'kubebeat';
 
@@ -43,59 +38,9 @@ export const Findings = () => (
   </SecuritySolutionPageWrapper>
 );
 
-interface URLState {
-  query: Query;
-  dateRange?: TimeRange;
-}
-
-// Temp URL state utility
-const useSearchState = () => {
-  const loc = useLocation();
-  const [state, set] = useState<URLState>(DEFAULT_QUERY);
-
-  useEffect(() => {
-    const params = new URLSearchParams(loc.search);
-    const query = params.get('query');
-    const dateRange = params.get('dateRange');
-
-    try {
-      set({
-        query: (query ? decode(query as string) : DEFAULT_QUERY.query) as Query,
-        dateRange: (dateRange ? decode(dateRange as string) : undefined) as TimeRange,
-      });
-    } catch (e) {
-      // eslint-disable-next-line no-console
-      console.log('Unable to decode URL ');
-
-      set({} as URLState);
-    }
-  }, [loc.search]);
-
-  return state;
-};
-
 const DEFAULT_QUERY = {
   query: { language: 'kuery', query: '' },
   dateRange: undefined,
-};
-
-const createEntry = (v: SearchHit<CSPFinding>): CSPFinding => ({
-  ...v,
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-  ...v._source!,
-});
-
-// TODO: get it some other way
-const useKubebeatDataView = () => {
-  const [kubebeatDataView, setKubebeatDataView] = useState<DataView>();
-  const {
-    data: { dataViews },
-  } = useKibana().services;
-  useEffect(() => {
-    if (!dataViews) return;
-    (async () => setKubebeatDataView((await dataViews.find(KUBEBEAT_INDEX))?.[0]))();
-  }, [dataViews]);
-  return { kubebeatDataView };
 };
 
 const FindingsTableContainer = () => {
@@ -191,7 +136,6 @@ const FindingsTableContainer = () => {
 
   if (!kubebeatDataView || !findings) return null;
 
-  // console.log({ searchState });
   return (
     <div style={{ height: '100%', width: '100%' }}>
       <SearchBar
@@ -219,3 +163,52 @@ const FindingsTableContainer = () => {
     </div>
   );
 };
+
+/**
+ * Temp URL state utility
+ */
+const useSearchState = () => {
+  const loc = useLocation();
+  const [state, set] = useState<URLState>(DEFAULT_QUERY);
+
+  useEffect(() => {
+    const params = new URLSearchParams(loc.search);
+    const query = params.get('query');
+    const dateRange = params.get('dateRange');
+
+    try {
+      set({
+        query: (query ? decode(query as string) : DEFAULT_QUERY.query) as Query,
+        dateRange: (dateRange ? decode(dateRange as string) : undefined) as TimeRange,
+      });
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.log('Unable to decode URL ');
+
+      set({} as URLState);
+    }
+  }, [loc.search]);
+
+  return state;
+};
+
+/**
+ *  Temp DataView Utility
+ */
+const useKubebeatDataView = () => {
+  const [kubebeatDataView, setKubebeatDataView] = useState<DataView>();
+  const {
+    data: { dataViews },
+  } = useKibana().services;
+  useEffect(() => {
+    if (!dataViews) return;
+    (async () => setKubebeatDataView((await dataViews.find(KUBEBEAT_INDEX))?.[0]))();
+  }, [dataViews]);
+  return { kubebeatDataView };
+};
+
+const createEntry = (v: SearchHit<CSPFinding>): CSPFinding => ({
+  ...v,
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  ...v._source!,
+});

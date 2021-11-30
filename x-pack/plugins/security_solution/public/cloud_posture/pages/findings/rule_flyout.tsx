@@ -35,7 +35,7 @@ interface FindingFlyoutProps {
   findings: CSPFinding;
 }
 
-export const FindingsRuleFlyOut = ({ onClose, findings }: FindingFlyoutProps) => {
+export const FindingsRuleFlyout = ({ onClose, findings }: FindingFlyoutProps) => {
   const [tab, setTab] = useState<typeof tabs[number]>('resource');
 
   const Tab = useCallback(() => {
