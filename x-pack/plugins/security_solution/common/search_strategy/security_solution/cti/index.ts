@@ -47,7 +47,6 @@ export const isValidEventField = (field: string): field is EventField =>
 export interface CtiDataSourceRequestOptions extends IEsSearchRequest {
   defaultIndex: string[];
   factoryQueryType?: FactoryQueryTypes;
-  hostName?: string;
   timerange?: TimerangeInput;
 }
 
