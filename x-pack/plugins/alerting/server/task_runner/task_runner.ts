@@ -302,6 +302,8 @@ export class TaskRunner<
     const eventLogger = this.context.eventLogger;
     const alertLabel = `${this.alertType.id}:${alertId}: '${name}'`;
 
+    const recoveryContext: Record<string, InstanceContext> = {};
+
     let updatedAlertTypeState: void | Record<string, unknown>;
     try {
       const ctx = {
@@ -328,19 +330,7 @@ export class TaskRunner<
                 getRecoveredAlertIds(alertInstances, originalAlertInstanceIds),
 
               setRecoveryContext: (id: string, context: InstanceContext) => {
-                const recoveryAlertIds = getRecoveredAlertIds(
-                  alertInstances,
-                  originalAlertInstanceIds
-                );
-
-                // check that specified ID is actually a recovered alert
-                if (recoveryAlertIds.includes(id) && alertInstances[id]) {
-                  alertInstances[id].setContext(context);
-                } else {
-                  this.logger.debug(
-                    `Unable to set recovery context for ${id} because it is not considered a recovered alert.`
-                  );
-                }
+                recoveryContext[id] = context;
               },
             },
           },
@@ -396,6 +386,26 @@ export class TaskRunner<
       (alertInstance: AlertInstance<InstanceState, InstanceContext>) =>
         alertInstance.hasScheduledActions()
     );
+
+    const recoveryAlertIds = getRecoveredAlertIds(alertInstances, originalAlertInstanceIds);
+    for (const recoveryAlertId of recoveryAlertIds) {
+      if (!recoveryContext[recoveryAlertId]) {
+        // Log warning if alert has recovered but no context was set
+        this.logger.debug(`No recovery context specified for recovered alert ${recoveryAlertId}`);
+      } else if (alertInstances[recoveryAlertId]) {
+        this.logger.debug(`Setting recovery context for recovered alert ${recoveryAlertId}`);
+        alertInstances[recoveryAlertId].setContext(recoveryContext[recoveryAlertId]);
+      }
+    }
+
+    // Log warning for alerts where recovery context has been set but they are not considered recovered.
+    const badRecoveryAlertIds = without(Object.keys(recoveryContext), ...recoveryAlertIds);
+    for (const id of badRecoveryAlertIds) {
+      this.logger.debug(
+        `Unable to set recovery context for ${id} because it is not considered a recovered alert.`
+      );
+    }
+
     const recoveredAlertInstances = getRecoveredAlerts(alertInstances, originalAlertInstanceIds);
 
     logActiveAndRecoveredInstances({
