@@ -25,7 +25,7 @@ export const useStyles = ({ height = 500 }: StylesDeps) => {
         right: '0',
       },
       to: {
-        right: '-100%',
+        right: '-424px',
       },
     });
 
@@ -35,24 +35,18 @@ export const useStyles = ({ height = 500 }: StylesDeps) => {
       overflowY: 'auto',
       position: 'absolute',
       top: '8px',
-      right: '-100%',
+      right: '-424px',
     };
 
-    const detailPanelIn: Array<string | CSSObject> = [
-      slideIn.styles,
-      {
-        ...detailPanel,
-        animation: `${slideIn.name} 200ms ease forwards`,
-      },
-    ];
+    const detailPanelIn: CSSObject = {
+      ...detailPanel,
+      animation: `${slideIn} 200ms ease forwards`,
+    };
 
-    const detailPanelOut: Array<string | CSSObject> = [
-      slideOut.styles,
-      {
-        ...detailPanel,
-        animation: `${slideOut.name} 150ms ease`,
-      },
-    ];
+    const detailPanelOut: CSSObject = {
+      ...detailPanel,
+      animation: `${slideOut} 150ms ease`,
+    };
 
     return {
       detailPanelIn,
