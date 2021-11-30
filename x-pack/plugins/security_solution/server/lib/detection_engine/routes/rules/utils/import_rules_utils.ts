@@ -20,10 +20,7 @@ import { isMlRule } from '../../../../../../common/machine_learning/helpers';
 import { createRules } from '../../../rules/create_rules';
 import { readRules } from '../../../rules/read_rules';
 import { patchRules } from '../../../rules/patch_rules';
-import {
-  ImportRulesSchema,
-  ImportRulesSchemaDecoded,
-} from '../../../../../../common/detection_engine/schemas/request/import_rules_schema';
+import { ImportRulesSchemaDecoded } from '../../../../../../common/detection_engine/schemas/request/import_rules_schema';
 import { MlAuthz } from '../../../../machine_learning/authz';
 import { throwHttpError } from '../../../../machine_learning/validation';
 import { RulesClient } from '../../../../../../../../plugins/alerting/server';

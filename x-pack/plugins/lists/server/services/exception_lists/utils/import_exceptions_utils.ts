@@ -195,14 +195,12 @@ export const sortExceptions = (): Transform => {
 
 // Adaptation from: saved_objects/import/create_limit_stream.ts
 export const createLimitStream = (limit: number): Transform => {
-  let counter = 0;
   return new Transform({
     objectMode: true,
     async transform(obj, _, done): Promise<void> {
-      if (counter >= limit) {
+      if (obj.lists.length + obj.items.length >= limit) {
         done(new Error(`Can't import more than ${limit} exceptions`));
       } else {
-        counter++;
         done(undefined, obj);
       }
     },
