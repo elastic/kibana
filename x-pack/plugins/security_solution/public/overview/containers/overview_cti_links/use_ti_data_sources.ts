@@ -81,7 +81,7 @@ export const useTiDataSources = ({
   deleteQuery,
 }: TiDataSourcesProps) => {
   const [tiDataSources, setTiDataSources] = useState<TiDataSources[]>([]);
-  const [isInitialyLoaded, setIsInitialyLoaded] = useState(false);
+  const [isInitiallyLoaded, setIsInitiallyLoaded] = useState(false);
   const { data, uiSettings } = useKibana().services;
   const defaultThreatIndices = uiSettings.get<string[]>(DEFAULT_THREAT_INDEX_KEY);
   const { result, start, loading } = useTiDataSourcesComplete();
@@ -117,10 +117,10 @@ export const useTiDataSources = ({
   }, [deleteQuery]);
 
   useEffect(() => {
-    if (result && !isInitialyLoaded) {
-      setIsInitialyLoaded(true);
+    if (result && !isInitiallyLoaded) {
+      setIsInitiallyLoaded(true);
     }
-  }, [isInitialyLoaded, result]);
+  }, [isInitiallyLoaded, result]);
 
   useEffect(() => {
     if (!loading && result) {
@@ -170,5 +170,5 @@ export const useTiDataSources = ({
 
   const totalCount = tiDataSources.reduce((acc, val) => acc + val.count, 0);
 
-  return { tiDataSources, totalCount, isInitialyLoaded };
+  return { tiDataSources, totalCount, isInitiallyLoaded };
 };
