@@ -197,7 +197,6 @@ export const SearchThresholdAlertTypeExpression: React.FunctionComponent<
         />
       </EuiPopover>
       <EuiSpacer size="s" />
-      // this code was copied from search_threshold so it might make sense to share code
       <EuiTitle size="xs">
         <h5>
           <FormattedMessage
