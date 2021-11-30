@@ -10,29 +10,39 @@ import {
   CoreStart,
   CoreSetup,
   Plugin as PluginType,
-  ISavedObjectsRepository,
   Logger,
+  SavedObjectsClient,
+  SavedObjectsClientContract,
 } from '../../../../src/core/server';
 import { uptimeRuleFieldMap } from '../common/rules/uptime_rule_field_map';
 import { initServerWithKibana } from './kibana.index';
-import { KibanaTelemetryAdapter, UptimeCorePlugins } from './lib/adapters';
+import {
+  KibanaTelemetryAdapter,
+  UptimeCorePluginsSetup,
+  UptimeCorePluginsStart,
+  UptimeServerSetup,
+} from './lib/adapters';
 import { registerUptimeSavedObjects, savedObjectsAdapter } from './lib/saved_objects/saved_objects';
 import { mappingFromFieldMap } from '../../rule_registry/common/mapping_from_field_map';
 import { Dataset } from '../../rule_registry/server';
-import { UptimeConfig } from './config';
+import { UptimeConfig } from '../common/config';
+import { SyntheticsService } from './lib/synthetics_service/synthetics_service';
 
 export type UptimeRuleRegistry = ReturnType<Plugin['setup']>['ruleRegistry'];
 
 export class Plugin implements PluginType {
-  private savedObjectsClient?: ISavedObjectsRepository;
+  private savedObjectsClient?: SavedObjectsClientContract;
   private initContext: PluginInitializerContext;
-  private logger?: Logger;
+  private logger: Logger;
+  private server?: UptimeServerSetup;
+  private syntheticService?: SyntheticsService;
 
-  constructor(_initializerContext: PluginInitializerContext) {
-    this.initContext = _initializerContext;
+  constructor(initializerContext: PluginInitializerContext<UptimeConfig>) {
+    this.initContext = initializerContext;
+    this.logger = initializerContext.logger.get();
   }
 
-  public setup(core: CoreSetup, plugins: UptimeCorePlugins) {
+  public setup(core: CoreSetup, plugins: UptimeCorePluginsSetup) {
     const config = this.initContext.config.get<UptimeConfig>();
 
     savedObjectsAdapter.config = config;
@@ -53,14 +63,19 @@ export class Plugin implements PluginType {
       ],
     });
 
-    initServerWithKibana(
-      { router: core.http.createRouter(), config },
-      plugins,
-      ruleDataClient,
-      this.logger
-    );
+    this.server = {
+      config,
+      router: core.http.createRouter(),
+      cloud: plugins.cloud,
+    } as UptimeServerSetup;
 
-    registerUptimeSavedObjects(core.savedObjects, config);
+    if (this.server?.config?.unsafe?.service.enabled) {
+      this.syntheticService = new SyntheticsService(this.logger, this.server);
+    }
+
+    initServerWithKibana(this.server, plugins, ruleDataClient, this.logger);
+
+    registerUptimeSavedObjects(core.savedObjects, plugins.encryptedSavedObjects, config);
 
     KibanaTelemetryAdapter.registerUsageCollector(
       plugins.usageCollection,
@@ -72,8 +87,20 @@ export class Plugin implements PluginType {
     };
   }
 
-  public start(core: CoreStart, _plugins: any) {
-    this.savedObjectsClient = core.savedObjects.createInternalRepository();
+  public start(coreStart: CoreStart, plugins: UptimeCorePluginsStart) {
+    this.savedObjectsClient = new SavedObjectsClient(
+      coreStart.savedObjects.createInternalRepository()
+    );
+    if (this.server) {
+      this.server.security = plugins.security;
+      this.server.fleet = plugins.fleet;
+      this.server.encryptedSavedObjects = plugins.encryptedSavedObjects;
+      this.server.savedObjectsClient = this.savedObjectsClient;
+    }
+
+    if (this.server?.config?.unsafe?.service.enabled) {
+      this.syntheticService?.init(coreStart);
+    }
   }
 
   public stop() {}

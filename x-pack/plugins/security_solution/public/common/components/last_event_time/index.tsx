@@ -6,7 +6,7 @@
  */
 
 import { EuiIcon, EuiLoadingSpinner, EuiToolTip } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React, { memo } from 'react';
 
 import { DocValueFields, LastEventIndexKey } from '../../../../common/search_strategy';

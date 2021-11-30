@@ -15,8 +15,8 @@ async function asyncForEach<T>(array: T[], callback: (item: T, index: number) =>
 }
 
 const ACTIVE_ALERTS_CELL_COUNT = 78;
-const RECOVERED_ALERTS_CELL_COUNT = 120;
-const TOTAL_ALERTS_CELL_COUNT = 198;
+const RECOVERED_ALERTS_CELL_COUNT = 100;
+const TOTAL_ALERTS_CELL_COUNT = 165;
 
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
@@ -186,7 +186,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      describe('Cell actions', () => {
+      describe.skip('Cell actions', () => {
         beforeEach(async () => {
           await retry.try(async () => {
             const cells = await observability.alerts.common.getTableCells();
@@ -205,7 +205,7 @@ export default ({ getService }: FtrProviderContext) => {
           await observability.alerts.common.submitQuery('');
         });
 
-        it('Filter for value works', async () => {
+        it.skip('Filter for value works', async () => {
           await (await observability.alerts.common.getFilterForValueButton()).click();
           const queryBarValue = await (
             await observability.alerts.common.getQueryBar()
