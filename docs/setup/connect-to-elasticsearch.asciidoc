@@ -93,6 +93,6 @@ You can manage your roles, privileges, and spaces in **{stack-manage-app}**.
 === What's next?
 
 To take your investigation
-to a deeper level. Use <<discover, **Discover**>> to quickly gain insight to your data:
+to a deeper level, use <<discover, **Discover**>> and quickly gain insight to your data:
 search and filter your data, get information about the structure of the fields,
 and present your findings in a visualization.
