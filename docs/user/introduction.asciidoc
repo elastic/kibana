@@ -169,7 +169,7 @@ them in bulk operations.
 === Secure {kib}
 
 {kib} offers a range of security features for you to control who has access to what.
-{ref}/configuring-stack-security.html[Security is enabled automatically] when you enroll {kib} with an {es} cluster.
+{ref}/configuring-stack-security.html[Security is enabled automatically] when you enroll {kib} with a secured {es} cluster.
 For a description of all available configuration options,
 refer to <<security-settings-kb,Security settings in {kib}>>.
 
