@@ -19,6 +19,8 @@ import { securityMock } from '../../../security/server/mocks';
 import type { PackagePolicyServiceInterface } from '../services/package_policy';
 import type { AgentPolicyServiceInterface, AgentService } from '../services';
 import type { FleetAppContext } from '../plugin';
+import { createMockTelemetryEventsSender } from '../telemetry/__mocks__';
+import type { FleetAuthz } from '../../common';
 
 // Export all mocks from artifacts
 export * from '../services/artifacts/mocks';
@@ -59,6 +61,7 @@ export const createAppContextStartContractMock = (): MockedFleetAppContext => {
     config$,
     kibanaVersion: '8.99.0', // Fake version :)
     kibanaBranch: 'main',
+    telemetryEventsSender: createMockTelemetryEventsSender(),
   };
 };
 
@@ -117,4 +120,26 @@ export const createMockAgentService = (): jest.Mocked<AgentService> => {
     getAgent: jest.fn(),
     listAgents: jest.fn(),
   };
+};
+
+/**
+ * Creates mock `authz` object
+ */
+export const fleetAuthzMock: FleetAuthz = {
+  fleet: {
+    all: true,
+    setup: true,
+    readEnrollmentTokens: true,
+  },
+  integrations: {
+    readPackageInfo: true,
+    readInstalledPackages: true,
+    installPackages: true,
+    upgradePackages: true,
+    removePackages: true,
+    readPackageSettings: true,
+    writePackageSettings: true,
+    readIntegrationPolicies: true,
+    writeIntegrationPolicies: true,
+  },
 };

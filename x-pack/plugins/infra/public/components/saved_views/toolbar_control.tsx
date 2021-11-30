@@ -75,8 +75,12 @@ export function SavedViewsToolbarControls<ViewState>(props: Props<ViewState>) {
     setModalOpen(true);
   }, [find, hideSavedViewMenu]);
   const showSavedViewMenu = useCallback(() => {
+    if (isSavedViewMenuOpen) {
+      setIsSavedViewMenuOpen(false);
+      return;
+    }
     setIsSavedViewMenuOpen(true);
-  }, [setIsSavedViewMenuOpen]);
+  }, [setIsSavedViewMenuOpen, isSavedViewMenuOpen]);
   const save = useCallback(
     (name: string, hasTime: boolean = false) => {
       const currentState = {

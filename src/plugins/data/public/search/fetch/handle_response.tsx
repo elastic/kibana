@@ -16,17 +16,7 @@ import { getNotifications } from '../../services';
 import { SearchRequest } from '..';
 
 export function handleResponse(request: SearchRequest, response: IKibanaSearchResponse) {
-  const { rawResponse, warning } = response;
-  if (warning) {
-    getNotifications().toasts.addWarning({
-      title: i18n.translate('data.search.searchSource.fetch.warningMessage', {
-        defaultMessage: 'Warning: {warning}',
-        values: {
-          warning,
-        },
-      }),
-    });
-  }
+  const { rawResponse } = response;
 
   if (rawResponse.timed_out) {
     getNotifications().toasts.addWarning({

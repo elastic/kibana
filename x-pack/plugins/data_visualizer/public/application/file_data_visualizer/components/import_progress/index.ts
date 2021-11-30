@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export { ImportProgress, IMPORT_STATUS, Statuses } from './import_progress';
+export type { Statuses } from './import_progress';
+export { ImportProgress, IMPORT_STATUS } from './import_progress';

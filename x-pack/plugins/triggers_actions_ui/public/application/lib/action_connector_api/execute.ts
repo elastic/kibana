@@ -31,7 +31,7 @@ export async function executeAction({
   http: HttpSetup;
   params: Record<string, unknown>;
 }): Promise<ActionTypeExecutorResult<unknown>> {
-  const res = await http.post(
+  const res = await http.post<Parameters<typeof rewriteBodyRes>[0]>(
     `${BASE_ACTION_API_PATH}/connector/${encodeURIComponent(id)}/_execute`,
     {
       body: JSON.stringify({ params }),

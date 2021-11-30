@@ -16,7 +16,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import { useTrackPageview } from '../../../../../observability/public';
 import { LogIndexNameReference } from '../../../../common/log_sources';
@@ -52,12 +52,12 @@ export const IndexNamesConfigurationPanel: React.FC<{
         <FormattedMessage
           tagName="p"
           id="xpack.infra.logSourceConfiguration.indexPatternInformationCalloutDescription"
-          defaultMessage="The Logs UI can now integrate with Kibana index patterns to configure the used indices."
+          defaultMessage="The Logs UI can now integrate with data views to configure the used indices."
         />
         <EuiButton onClick={onSwitchToIndexPatternReference}>
           <FormattedMessage
-            id="xpack.infra.logSourceConfiguration.switchToIndexPatternReferenceButtonLabel"
-            defaultMessage="Use Kibana index patterns"
+            id="xpack.infra.logSourceConfiguration.switchToDataViewReferenceButtonLabel"
+            defaultMessage="Use data views"
           />
         </EuiButton>
       </EuiCallOut>

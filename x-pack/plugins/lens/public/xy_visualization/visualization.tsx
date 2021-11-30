@@ -9,10 +9,12 @@ import React from 'react';
 import { groupBy, uniq } from 'lodash';
 import { render } from 'react-dom';
 import { Position } from '@elastic/charts';
-import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
+import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { PaletteRegistry } from 'src/plugins/charts/public';
 import { FieldFormatsStart } from 'src/plugins/field_formats/public';
+import { ThemeServiceStart } from 'kibana/public';
+import { KibanaThemeProvider } from '../../../../../src/plugins/kibana_react/public';
 import { getSuggestions } from './xy_suggestions';
 import { XyToolbar, DimensionEditor } from './xy_config_panel';
 import { LayerHeader } from './xy_config_panel/layer_header';
@@ -98,9 +100,13 @@ function getDescription(state?: State) {
 export const getXyVisualization = ({
   paletteService,
   fieldFormats,
+  useLegacyTimeAxis,
+  kibanaTheme,
 }: {
   paletteService: PaletteRegistry;
   fieldFormats: FieldFormatsStart;
+  useLegacyTimeAxis: boolean;
+  kibanaTheme: ThemeServiceStart;
 }): Visualization<State> => ({
   id: 'lnsXY',
 
@@ -274,7 +280,7 @@ export const getXyVisualization = ({
   getConfiguration({ state, frame, layerId }) {
     const layer = state.layers.find((l) => l.layerId === layerId);
     if (!layer) {
-      return { groups: [], supportStaticValue: true };
+      return { groups: [] };
     }
 
     const datasource = frame.datasourceLayers[layer.layerId];
@@ -345,8 +351,6 @@ export const getXyVisualization = ({
         frame?.activeData
       );
       return {
-        supportFieldFormat: false,
-        supportStaticValue: true,
         // Each reference lines layer panel will have sections for each available axis
         // (horizontal axis, vertical axis left, vertical axis right).
         // Only axes that support numeric reference lines should be shown
@@ -362,6 +366,13 @@ export const getXyVisualization = ({
           supportsMoreColumns: true,
           required: false,
           enableDimensionEditor: true,
+          supportStaticValue: true,
+          paramEditorCustomProps: {
+            label: i18n.translate('xpack.lens.indexPattern.staticValue.label', {
+              defaultMessage: 'Reference line value',
+            }),
+          },
+          supportFieldFormat: false,
           dataTestSubj,
           invalid: !valid,
           invalidMessage:
@@ -558,31 +569,37 @@ export const getXyVisualization = ({
 
   renderLayerHeader(domElement, props) {
     render(
-      <I18nProvider>
-        <LayerHeader {...props} />
-      </I18nProvider>,
+      <KibanaThemeProvider theme$={kibanaTheme.theme$}>
+        <I18nProvider>
+          <LayerHeader {...props} />
+        </I18nProvider>
+      </KibanaThemeProvider>,
       domElement
     );
   },
 
   renderToolbar(domElement, props) {
     render(
-      <I18nProvider>
-        <XyToolbar {...props} />
-      </I18nProvider>,
+      <KibanaThemeProvider theme$={kibanaTheme.theme$}>
+        <I18nProvider>
+          <XyToolbar {...props} useLegacyTimeAxis={useLegacyTimeAxis} />
+        </I18nProvider>
+      </KibanaThemeProvider>,
       domElement
     );
   },
 
   renderDimensionEditor(domElement, props) {
     render(
-      <I18nProvider>
-        <DimensionEditor
-          {...props}
-          formatFactory={fieldFormats.deserialize}
-          paletteService={paletteService}
-        />
-      </I18nProvider>,
+      <KibanaThemeProvider theme$={kibanaTheme.theme$}>
+        <I18nProvider>
+          <DimensionEditor
+            {...props}
+            formatFactory={fieldFormats.deserialize}
+            paletteService={paletteService}
+          />
+        </I18nProvider>
+      </KibanaThemeProvider>,
       domElement
     );
   },

@@ -113,7 +113,7 @@ export function strictKeysRt<T extends t.Any>(type: T) {
         const excessKeys = difference([...keys.all], [...keys.handled]);
 
         if (excessKeys.length) {
-          return t.failure(i, context, `Excess keys are not allowed: \n${excessKeys.join('\n')}`);
+          return t.failure(i, context, `Excess keys are not allowed:\n${excessKeys.join('\n')}`);
         }
 
         return t.success(i);

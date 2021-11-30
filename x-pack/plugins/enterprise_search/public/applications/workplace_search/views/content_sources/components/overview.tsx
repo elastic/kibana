@@ -30,7 +30,7 @@ import {
   EuiTextColor,
   EuiTitle,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { CANCEL_BUTTON_LABEL, START_BUTTON_LABEL } from '../../../../shared/constants';
 import { EuiListGroupItemTo, EuiLinkTo } from '../../../../shared/react_router_helpers';
@@ -222,11 +222,11 @@ export const Overview: React.FC = () => {
           {activities.map(({ details: activityDetails, event, time, status }, i) => (
             <EuiTableRow key={i}>
               <EuiTableRowCell>
-                <EuiText size="xs">{event}</EuiText>
+                <EuiText size="s">{event}</EuiText>
               </EuiTableRowCell>
               {!custom && (
                 <EuiTableRowCell>
-                  <EuiText size="xs">
+                  <EuiText size="s">
                     <small>
                       {status} {activityDetails && <StatusItem details={activityDetails} />}
                     </small>
@@ -234,7 +234,7 @@ export const Overview: React.FC = () => {
                 </EuiTableRowCell>
               )}
               <EuiTableRowCell align="right">
-                <EuiText size="xs">
+                <EuiText size="s">
                   <small>{time}</small>
                 </EuiText>
               </EuiTableRowCell>
@@ -373,7 +373,7 @@ export const Overview: React.FC = () => {
       <EuiSpacer size="s" />
       <EuiFlexGroup gutterSize="m" alignItems="center">
         <EuiFlexItem grow={false}>
-          <EuiIcon size="l" type="checkInCircleFilled" color="secondary" />
+          <EuiIcon size="l" type="checkInCircleFilled" color="success" />
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiText>
@@ -544,6 +544,7 @@ export const Overview: React.FC = () => {
         </EuiFlexItem>
         <EuiFlexItem grow={7}>
           <EuiFlexGroup gutterSize="m" direction="column">
+            {showSyncTriggerCallout && syncTriggerCallout}
             <EuiFlexItem>{groups.length > 0 && groupsSummary}</EuiFlexItem>
             {details.length > 0 && <EuiFlexItem>{detailsSummary}</EuiFlexItem>}
             {!custom && serviceTypeSupportsPermissions && (
@@ -587,7 +588,6 @@ export const Overview: React.FC = () => {
                 )}
               </>
             )}
-            {showSyncTriggerCallout && syncTriggerCallout}
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>

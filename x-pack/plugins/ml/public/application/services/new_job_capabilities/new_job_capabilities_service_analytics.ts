@@ -43,14 +43,14 @@ export function removeNestedFieldChildren(resp: NewJobCapsResponse, indexPattern
 }
 
 class NewJobCapsServiceAnalytics extends NewJobCapabilitiesServiceBase {
-  public async initializeFromIndexPattern(indexPattern: DataView) {
+  public async initializeFromDataVIew(dataView: DataView) {
     try {
       const resp: NewJobCapsResponse = await ml.dataFrameAnalytics.newJobCapsAnalytics(
-        indexPattern.title,
-        indexPattern.type === 'rollup'
+        dataView.title,
+        dataView.type === 'rollup'
       );
 
-      const allFields = removeNestedFieldChildren(resp, indexPattern.title);
+      const allFields = removeNestedFieldChildren(resp, dataView.title);
 
       const { fieldsPreferringKeyword } = processTextAndKeywordFields(allFields);
 

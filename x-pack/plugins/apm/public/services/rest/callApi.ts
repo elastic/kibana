@@ -66,7 +66,7 @@ export async function callApi<T = void>(
     | 'delete'
     | 'patch';
 
-  const res = await http[lowercaseMethod](pathname, options);
+  const res = await http[lowercaseMethod]<T>(pathname, options);
 
   if (isCachable(fetchOptions)) {
     cache.set(cacheKey, res);

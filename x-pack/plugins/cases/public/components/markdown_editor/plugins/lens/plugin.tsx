@@ -23,7 +23,7 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useContext, useMemo, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 
@@ -140,7 +140,7 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
     });
 
     lens?.navigateToPrefilledEditor(undefined, {
-      originatingApp: currentAppId!,
+      originatingApp: currentAppId,
       originatingPath,
     });
   }, [
@@ -174,7 +174,7 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
             }
           : undefined,
         {
-          originatingApp: currentAppId!,
+          originatingApp: currentAppId,
           originatingPath,
         }
       );
@@ -310,7 +310,6 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
 
       if (draftComment) {
         handleAdd(incomingEmbeddablePackage?.input.attributes, newTimeRange);
-        return;
       }
     }
   }, [embeddable, storage, timefilter, currentAppId, handleAdd, handleUpdate, draftComment]);

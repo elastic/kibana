@@ -52,7 +52,7 @@ export const AgentPoliciesPopover = ({ agentPolicyIds }: { agentPolicyIds: strin
 
   const button = useMemo(
     () => (
-      <EuiButtonEmpty flush="both" onClick={onButtonClick}>
+      <EuiButtonEmpty size="s" flush="both" onClick={onButtonClick}>
         <>{agentPolicyIds?.length ?? 0}</>
       </EuiButtonEmpty>
     ),
@@ -126,7 +126,7 @@ const PacksTableComponent = () => {
       {
         field: 'policy_ids',
         name: i18n.translate('xpack.osquery.packs.table.policyColumnTitle', {
-          defaultMessage: 'Policies',
+          defaultMessage: 'Scheduled policies',
         }),
         truncateText: true,
         render: renderAgentPolicy,

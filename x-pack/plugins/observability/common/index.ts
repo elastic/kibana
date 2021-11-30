@@ -6,7 +6,11 @@
  */
 
 export type { AsDuration, AsPercent } from './utils/formatters';
-export { enableInspectEsQueries, maxSuggestions } from './ui_settings_keys';
+export {
+  enableInspectEsQueries,
+  maxSuggestions,
+  enableComparisonByDefault,
+} from './ui_settings_keys';
 
 export const casesFeatureId = 'observabilityCases';
 
@@ -17,3 +21,6 @@ export const observabilityAppId = 'observability-overview';
 
 // Used by feature and "solution" registration
 export const observabilityFeatureId = 'observability';
+
+// Used by Cases to install routes
+export const casesPath = '/cases';

@@ -5,49 +5,50 @@
  * 2.0.
  */
 
-import React, { FC, Fragment } from 'react';
+import React, { FC, useEffect, useState } from 'react';
+import { omit, pick } from 'lodash';
 import {
   EuiBadge,
-  EuiButtonEmpty,
   EuiCodeBlock,
   EuiDescriptionList,
   EuiFlexGrid,
-  EuiFlexGroup,
   EuiFlexItem,
-  EuiHorizontalRule,
   EuiNotificationBadge,
   EuiPanel,
   EuiSpacer,
   EuiTabbedContent,
-  EuiText,
-  EuiTextColor,
   EuiTitle,
 } from '@elastic/eui';
-import { EuiDescriptionListProps } from '@elastic/eui/src/components/description_list/description_list';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { ModelItemFull } from './models_list';
-import { useMlKibana } from '../../contexts/kibana';
+import type { EuiDescriptionListProps } from '@elastic/eui/src/components/description_list/description_list';
+import { FormattedMessage } from '@kbn/i18n-react';
+import type { ModelItemFull } from './models_list';
 import { timeFormatter } from '../../../../common/util/date_utils';
 import { isDefined } from '../../../../common/types/guards';
 import { isPopulatedObject } from '../../../../common';
+import { ModelPipelines } from './pipelines';
+import { AllocatedModels } from '../nodes_overview/allocated_models';
+import type { AllocatedModel } from '../../../../common/types/trained_models';
 
 interface ExpandedRowProps {
   item: ModelItemFull;
 }
 
+const badgeFormatter = (items: string[]) => {
+  if (items.length === 0) return;
+  return (
+    <div>
+      {items.map((item) => (
+        <EuiBadge key={item} color="hollow">
+          {item}
+        </EuiBadge>
+      ))}
+    </div>
+  );
+};
+
 const formatterDictionary: Record<string, (value: any) => JSX.Element | string | undefined> = {
-  tags: (tags: string[]) => {
-    if (tags.length === 0) return;
-    return (
-      <div>
-        {tags.map((tag) => (
-          <EuiBadge key={tag} color="hollow">
-            {tag}
-          </EuiBadge>
-        ))}
-      </div>
-    );
-  },
+  tags: badgeFormatter,
+  roles: badgeFormatter,
   create_time: timeFormatter,
   timestamp: timeFormatter,
 };
@@ -85,6 +86,8 @@ export function formatToListItems(
 }
 
 export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
+  const [modelItems, setModelItems] = useState<AllocatedModel[]>([]);
+
   const {
     inference_config: inferenceConfig,
     stats,
@@ -115,9 +118,36 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
     license_level,
   };
 
-  const {
-    services: { share },
-  } = useMlKibana();
+  useEffect(
+    function updateModelItems() {
+      (async function () {
+        const deploymentStats = stats.deployment_stats;
+
+        if (!deploymentStats) return;
+
+        const items: AllocatedModel[] = deploymentStats.nodes.map((n) => {
+          const nodeName = Object.values(n.node)[0].name;
+          return {
+            ...deploymentStats,
+            node: {
+              ...pick(n, [
+                'average_inference_time_ms',
+                'inference_count',
+                'routing_state',
+                'last_access',
+                'number_of_pending_requests',
+                'start_time',
+              ]),
+              name: nodeName,
+            } as AllocatedModel['node'],
+          };
+        });
+
+        setModelItems(items);
+      })();
+    },
+    [stats.deployment_stats]
+  );
 
   const tabs = [
     {
@@ -130,7 +160,7 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
       ),
       content: (
         <>
-          <EuiSpacer size={'m'} />
+          <EuiSpacer size={'s'} />
           <EuiFlexGrid columns={2} gutterSize={'m'}>
             <EuiFlexItem>
               <EuiPanel>
@@ -186,7 +216,7 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
             ),
             content: (
               <>
-                <EuiSpacer size={'m'} />
+                <EuiSpacer size={'s'} />
                 <EuiFlexGrid columns={2} gutterSize={'m'}>
                   <EuiFlexItem>
                     <EuiPanel>
@@ -234,165 +264,64 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
           },
         ]
       : []),
-    {
-      id: 'stats',
-      name: (
-        <FormattedMessage
-          id="xpack.ml.trainedModels.modelsList.expandedRow.statsTabLabel"
-          defaultMessage="Stats"
-        />
-      ),
-      content: (
-        <>
-          <EuiSpacer size={'m'} />
-          {stats.deployment_stats && (
-            <>
-              <EuiPanel>
-                <EuiTitle size={'xs'}>
-                  <h5>
-                    <FormattedMessage
-                      id="xpack.ml.trainedModels.modelsList.expandedRow.deploymentStatsTitle"
-                      defaultMessage="Deployment stats"
-                    />
-                  </h5>
-                </EuiTitle>
-                <EuiSpacer size={'m'} />
-                <EuiDescriptionList
-                  compressed={true}
-                  type="column"
-                  listItems={formatToListItems(stats.deployment_stats)}
-                />
-              </EuiPanel>
-              <EuiSpacer size={'m'} />
-            </>
-          )}
-          <EuiFlexGrid columns={2}>
-            {stats.inference_stats && (
-              <EuiFlexItem>
-                <EuiPanel>
-                  <EuiTitle size={'xs'}>
-                    <h5>
-                      <FormattedMessage
-                        id="xpack.ml.trainedModels.modelsList.expandedRow.inferenceStatsTitle"
-                        defaultMessage="Inference stats"
-                      />
-                    </h5>
-                  </EuiTitle>
-                  <EuiSpacer size={'m'} />
-                  <EuiDescriptionList
-                    compressed={true}
-                    type="column"
-                    listItems={formatToListItems(stats.inference_stats)}
-                  />
-                </EuiPanel>
-              </EuiFlexItem>
-            )}
-            {stats.ingest?.total && (
-              <EuiFlexItem>
-                <EuiPanel style={{ maxHeight: '400px', overflow: 'auto' }}>
-                  <EuiTitle size={'xs'}>
-                    <h5>
-                      <FormattedMessage
-                        id="xpack.ml.trainedModels.modelsList.expandedRow.ingestStatsTitle"
-                        defaultMessage="Ingest stats"
-                      />
-                    </h5>
-                  </EuiTitle>
-                  <EuiSpacer size={'m'} />
-                  <EuiDescriptionList
-                    compressed={true}
-                    type="column"
-                    listItems={formatToListItems(stats.ingest.total)}
-                  />
+    ...(isPopulatedObject(omit(stats, ['pipeline_count', 'ingest']))
+      ? [
+          {
+            id: 'stats',
+            name: (
+              <FormattedMessage
+                id="xpack.ml.trainedModels.modelsList.expandedRow.statsTabLabel"
+                defaultMessage="Stats"
+              />
+            ),
+            content: (
+              <>
+                <EuiSpacer size={'s'} />
 
-                  {stats.ingest?.pipelines && (
-                    <>
-                      <EuiSpacer size={'m'} />
-                      <EuiTitle size={'xs'}>
-                        <h5>
-                          <FormattedMessage
-                            id="xpack.ml.trainedModels.modelsList.expandedRow.byPipelineTitle"
-                            defaultMessage="By pipeline"
-                          />
-                        </h5>
-                      </EuiTitle>
-                      <EuiSpacer size={'s'} />
-                      {Object.entries(stats.ingest.pipelines).map(
-                        ([pipelineName, { processors, ...pipelineStats }], i) => {
-                          return (
-                            <Fragment key={pipelineName}>
-                              <EuiFlexGroup>
-                                <EuiFlexItem grow={false}>
-                                  <EuiTitle size={'xs'}>
-                                    <EuiTextColor color="subdued">
-                                      <h5>
-                                        {i + 1}. {pipelineName}
-                                      </h5>
-                                    </EuiTextColor>
-                                  </EuiTitle>
-                                </EuiFlexItem>
-                                <EuiFlexItem>
-                                  <EuiHorizontalRule size={'full'} margin={'s'} />
-                                </EuiFlexItem>
-                              </EuiFlexGroup>
-                              <EuiSpacer size={'m'} />
-                              <EuiDescriptionList
-                                compressed={true}
-                                type="column"
-                                listItems={formatToListItems(pipelineStats)}
-                              />
-                              <EuiSpacer size={'m'} />
-                              <EuiTitle size={'xxs'}>
-                                <h6>
-                                  <FormattedMessage
-                                    id="xpack.ml.trainedModels.modelsList.expandedRow.byProcessorTitle"
-                                    defaultMessage="By processor"
-                                  />
-                                </h6>
-                              </EuiTitle>
-                              <EuiSpacer size={'s'} />
-                              <>
-                                {processors.map((processor) => {
-                                  const name = Object.keys(processor)[0];
-                                  const { stats: processorStats } = processor[name];
-                                  return (
-                                    <Fragment key={name}>
-                                      <EuiFlexGroup>
-                                        <EuiFlexItem grow={false}>
-                                          <EuiTitle size={'xxs'}>
-                                            <EuiTextColor color="subdued">
-                                              <h6>{name}</h6>
-                                            </EuiTextColor>
-                                          </EuiTitle>
-                                        </EuiFlexItem>
-                                        <EuiFlexItem>
-                                          <EuiHorizontalRule size={'full'} margin={'s'} />
-                                        </EuiFlexItem>
-                                      </EuiFlexGroup>
-                                      <EuiSpacer size={'m'} />
-                                      <EuiDescriptionList
-                                        compressed={true}
-                                        type="column"
-                                        listItems={formatToListItems(processorStats)}
-                                      />
-                                    </Fragment>
-                                  );
-                                })}
-                              </>
-                            </Fragment>
-                          );
-                        }
-                      )}
-                    </>
-                  )}
-                </EuiPanel>
-              </EuiFlexItem>
-            )}
-          </EuiFlexGrid>
-        </>
-      ),
-    },
-    ...(pipelines && Object.keys(pipelines).length > 0
+                <EuiFlexGrid columns={2} gutterSize={'m'}>
+                  {!!modelItems?.length ? (
+                    <EuiFlexItem grow={2}>
+                      <EuiPanel>
+                        <EuiTitle size={'xs'}>
+                          <h5>
+                            <FormattedMessage
+                              id="xpack.ml.trainedModels.modelsList.expandedRow.deploymentStatsTitle"
+                              defaultMessage="Deployment stats"
+                            />
+                          </h5>
+                        </EuiTitle>
+                        <EuiSpacer size={'m'} />
+                        <AllocatedModels models={modelItems} hideColumns={['model_id']} />
+                      </EuiPanel>
+                    </EuiFlexItem>
+                  ) : null}
+                  {stats.inference_stats ? (
+                    <EuiFlexItem>
+                      <EuiPanel>
+                        <EuiTitle size={'xs'}>
+                          <h5>
+                            <FormattedMessage
+                              id="xpack.ml.trainedModels.modelsList.expandedRow.inferenceStatsTitle"
+                              defaultMessage="Inference stats"
+                            />
+                          </h5>
+                        </EuiTitle>
+                        <EuiSpacer size={'m'} />
+                        <EuiDescriptionList
+                          compressed={true}
+                          type="column"
+                          listItems={formatToListItems(stats.inference_stats)}
+                        />
+                      </EuiPanel>
+                    </EuiFlexItem>
+                  ) : null}
+                </EuiFlexGrid>
+              </>
+            ),
+          },
+        ]
+      : []),
+    ...((pipelines && Object.keys(pipelines).length > 0) || stats.ingest
       ? [
           {
             id: 'pipelines',
@@ -407,66 +336,8 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
             ),
             content: (
               <>
-                <EuiSpacer size={'m'} />
-                <EuiFlexGrid columns={2} gutterSize={'m'}>
-                  {Object.entries(pipelines).map(
-                    ([pipelineName, { processors, description: pipelineDescription }]) => {
-                      return (
-                        <EuiFlexItem key={pipelineName}>
-                          <EuiPanel>
-                            <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
-                              <EuiFlexItem grow={false}>
-                                <EuiTitle size={'xs'}>
-                                  <h5>{pipelineName}</h5>
-                                </EuiTitle>
-                              </EuiFlexItem>
-                              <EuiFlexItem grow={false}>
-                                <EuiButtonEmpty
-                                  onClick={() => {
-                                    const locator = share.url.locators.get(
-                                      'INGEST_PIPELINES_APP_LOCATOR'
-                                    );
-                                    if (!locator) return;
-                                    locator.navigate({
-                                      page: 'pipeline_edit',
-                                      pipelineId: pipelineName,
-                                      absolute: true,
-                                    });
-                                  }}
-                                >
-                                  <FormattedMessage
-                                    id="xpack.ml.trainedModels.modelsList.expandedRow.editPipelineLabel"
-                                    defaultMessage="Edit"
-                                  />
-                                </EuiButtonEmpty>
-                              </EuiFlexItem>
-                            </EuiFlexGroup>
-
-                            {pipelineDescription && <EuiText>{pipelineDescription}</EuiText>}
-                            <EuiSpacer size={'m'} />
-                            <EuiTitle size={'xxs'}>
-                              <h6>
-                                <FormattedMessage
-                                  id="xpack.ml.trainedModels.modelsList.expandedRow.processorsTitle"
-                                  defaultMessage="Processors"
-                                />
-                              </h6>
-                            </EuiTitle>
-                            <EuiCodeBlock
-                              language="json"
-                              fontSize="m"
-                              paddingSize="m"
-                              overflowHeight={300}
-                              isCopyable
-                            >
-                              {JSON.stringify(processors, null, 2)}
-                            </EuiCodeBlock>
-                          </EuiPanel>
-                        </EuiFlexItem>
-                      );
-                    }
-                  )}
-                </EuiFlexGrid>
+                <EuiSpacer size={'s'} />
+                <ModelPipelines pipelines={pipelines!} ingestStats={stats.ingest} />
               </>
             ),
           },

@@ -18,6 +18,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
   const testSubjects = getService('testSubjects');
   const kibanaServer = getService('kibanaServer');
+  const reportingAPI = getService('reporting');
   const filterBar = getService('filterBar');
   const find = getService('find');
   const retry = getService('retry');
@@ -124,9 +125,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('Field Formatters and Scripted Fields', () => {
       before(async () => {
+        await reportingAPI.initLogs();
         await esArchiver.load('x-pack/test/functional/es_archives/reporting/hugedata');
       });
       after(async () => {
+        await reportingAPI.teardownLogs();
         await esArchiver.unload('x-pack/test/functional/es_archives/reporting/hugedata');
       });
 

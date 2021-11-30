@@ -9,7 +9,7 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 import { htmlIdGenerator, EuiFlexItem, EuiFormRow, EuiToolTip, EuiFlexGroup } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { YesNo } from './yes_no';
 import { getDefaultQueryLanguage } from './lib/get_default_query_language';
 import { QueryBarWrapper } from './query_bar_wrapper';

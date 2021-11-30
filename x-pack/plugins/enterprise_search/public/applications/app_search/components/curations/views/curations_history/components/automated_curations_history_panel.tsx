@@ -21,9 +21,9 @@ export const AutomatedCurationsHistoryPanel: React.FC = () => {
   const filters = [
     'event.kind: event',
     'event.dataset: search-relevance-suggestions',
-    `appsearch.search_relevance_suggestions.engine: ${engineName}`,
+    `appsearch.adaptive_relevance.engine: ${engineName}`,
     'event.action: curation_suggestion',
-    'appsearch.search_relevance_suggestions.suggestion.new_status: automated',
+    'appsearch.adaptive_relevance.suggestion.new_status: automated',
   ];
 
   return (
@@ -54,7 +54,7 @@ export const AutomatedCurationsHistoryPanel: React.FC = () => {
         columns={[
           {
             type: 'field',
-            field: 'appsearch.search_relevance_suggestions.query',
+            field: 'appsearch.adaptive_relevance.query',
             header: i18n.translate(
               'xpack.enterpriseSearch.appSearch.engine.curations.automatedCurationsHistoryPanel.queryColumnHeader',
               { defaultMessage: 'Query' }

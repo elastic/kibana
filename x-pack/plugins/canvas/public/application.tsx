@@ -8,7 +8,7 @@
 import React from 'react';
 import { Store } from 'redux';
 import ReactDOM from 'react-dom';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { Provider } from 'react-redux';
 import { BehaviorSubject } from 'rxjs';
@@ -37,6 +37,7 @@ import {
   services,
   LegacyServicesProvider,
   CanvasPluginServices,
+  pluginServices as canvasServices,
 } from './services';
 import { initFunctions } from './functions';
 // @ts-expect-error untyped local
@@ -151,7 +152,13 @@ export const initializeCanvas = async (
       },
     ],
     content: (domNode) => {
-      ReactDOM.render(<HelpMenu functionRegistry={expressions.getFunctions()} />, domNode);
+      ReactDOM.render(
+        <HelpMenu
+          functionRegistry={expressions.getFunctions()}
+          notifyService={canvasServices.getServices().notify}
+        />,
+        domNode
+      );
       return () => ReactDOM.unmountComponentAtNode(domNode);
     },
   });

@@ -70,7 +70,7 @@ import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
 
 import { ALERTS_URL } from '../../urls/navigation';
 
-describe.skip('Detection rules, EQL', () => {
+describe('Detection rules, EQL', () => {
   const expectedUrls = getEqlRule().referenceUrls.join('');
   const expectedFalsePositives = getEqlRule().falsePositivesExamples.join('');
   const expectedTags = getEqlRule().tags.join('');
@@ -169,7 +169,7 @@ describe.skip('Detection rules, EQL', () => {
   });
 });
 
-describe.skip('Detection rules, sequence EQL', () => {
+describe('Detection rules, sequence EQL', () => {
   const expectedNumberOfRules = 1;
   const expectedNumberOfSequenceAlerts = '1 alert';
 
@@ -186,7 +186,7 @@ describe.skip('Detection rules, sequence EQL', () => {
     });
   });
 
-  it.skip('Creates and activates a new EQL rule with a sequence', function () {
+  it('Creates and activates a new EQL rule with a sequence', function () {
     loginAndWaitForPageWithoutDateRange(ALERTS_URL);
     waitForAlertsPanelToBeLoaded();
     waitForAlertsIndexToBeCreated();
@@ -219,7 +219,6 @@ describe.skip('Detection rules, sequence EQL', () => {
         cy.log('ALERT_DATA_GRID', text);
         expect(text).contains(this.rule.name);
         expect(text).contains(this.rule.severity.toLowerCase());
-        expect(text).contains(this.rule.riskScore);
       });
   });
 });

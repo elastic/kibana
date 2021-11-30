@@ -5,5 +5,6 @@
  * 2.0.
  */
 
-export { WithHeaderLayout, WithHeaderLayoutProps } from './with_header';
+export type { WithHeaderLayoutProps } from './with_header';
+export { WithHeaderLayout } from './with_header';
 export { WithoutHeaderLayout } from './without_header';

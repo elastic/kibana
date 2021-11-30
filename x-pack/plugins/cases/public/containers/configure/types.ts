@@ -17,7 +17,7 @@ import {
   ThirdPartyField,
 } from '../../../common';
 
-export {
+export type {
   ActionConnector,
   ActionTypeConnector,
   ActionType,

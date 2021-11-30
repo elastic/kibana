@@ -131,7 +131,7 @@ export class CloudPlugin implements Plugin<CloudSetup> {
           title: i18n.translate('xpack.cloud.deploymentLinkLabel', {
             defaultMessage: 'Manage this deployment',
           }),
-          euiIconType: 'arrowLeft',
+          euiIconType: 'logoCloud',
           href: getFullCloudUrl(baseUrl, deploymentUrl),
         });
       }

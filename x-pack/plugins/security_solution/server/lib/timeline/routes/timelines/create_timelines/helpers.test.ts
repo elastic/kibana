@@ -9,7 +9,7 @@ import * as module from './helpers';
 import { savePinnedEvents } from '../../../saved_object/pinned_events';
 import { getNote } from '../../../saved_object/notes';
 import { FrameworkRequest } from '../../../../framework';
-import { SavedTimeline } from '../../../../../../common/types/timeline';
+import { SavedTimeline } from '../../../../../../common';
 import { mockTemplate, mockTimeline } from '../../../__mocks__/create_timelines';
 import { buildFrameworkRequest } from '../../../utils/common';
 import { SecurityPluginSetup } from '../../../../../../../security/server';
@@ -31,13 +31,6 @@ const notes = [
 ];
 const existingNoteIds = undefined;
 const isImmutable = true;
-
-// System under test uses moment.js under the hood, so we need to mock time.
-// Mocking moment via jest.mock('moment') breaks imports of moment in other files.
-// Instead, we simply mock Date.now() via jest API and moment starts using it.
-// This affects all the tests in this file and doesn't affect tests in other files.
-// https://jestjs.io/docs/timer-mocks
-jest.useFakeTimers('modern').setSystemTime(new Date('2020-11-04T11:37:31.655Z'));
 
 jest.mock('../../../saved_object/timelines', () => ({
   persistTimeline: jest.fn().mockResolvedValue({
@@ -77,6 +70,7 @@ describe('createTimelines', () => {
     const mockRequest = getCreateTimelinesRequest(createTimelineWithoutTimelineId);
 
     frameworkRequest = await buildFrameworkRequest(context, securitySetup, mockRequest);
+    Date.now = jest.fn().mockReturnValue(new Date('2020-11-04T11:37:31.655Z'));
   });
 
   describe('create timelines', () => {

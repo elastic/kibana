@@ -12,21 +12,21 @@ import {
   createExploratoryViewUrl,
   HeaderMenuPortal,
 } from '../../../../../../observability/public';
-import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
+import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import { AppMountParameters } from '../../../../../../../../src/core/public';
 import { InspectorHeaderLink } from '../../../shared/apm_header_action_menu/inspector_header_link';
 import { SERVICE_NAME } from '../../../../../common/elasticsearch_fieldnames';
 
 const ANALYZE_DATA = i18n.translate('xpack.apm.analyzeDataButtonLabel', {
-  defaultMessage: 'Analyze data',
+  defaultMessage: 'Explore data',
 });
 
 const ANALYZE_MESSAGE = i18n.translate(
   'xpack.apm.analyzeDataButtonLabel.message',
   {
     defaultMessage:
-      'EXPERIMENTAL - Analyze Data allows you to select and filter result data in any dimension and look for the cause or impact of performance problems.',
+      'Explore Data allows you to select and filter result data in any dimension and look for the cause or impact of performance problems.',
   }
 );
 
@@ -38,7 +38,7 @@ export function UXActionMenu({
   const {
     services: { http },
   } = useKibana();
-  const { urlParams } = useUrlParams();
+  const { urlParams } = useLegacyUrlParams();
   const { rangeTo, rangeFrom, serviceName } = urlParams;
 
   const uxExploratoryViewLink = createExploratoryViewUrl(

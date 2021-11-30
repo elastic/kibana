@@ -11,7 +11,7 @@ import {
   Alert,
   AlertType,
   AlertTaskState,
-  AlertInstanceSummary,
+  AlertSummary,
   AlertingFrameworkHealth,
   ResolvedRule,
 } from '../../../../types';
@@ -29,7 +29,7 @@ import {
   unmuteAlertInstance,
   loadAlert,
   loadAlertState,
-  loadAlertInstanceSummary,
+  loadAlertSummary,
   loadAlertTypes,
   alertingFrameworkHealth,
   resolveRule,
@@ -57,7 +57,7 @@ export interface ComponentOpts {
   }>;
   loadAlert: (id: Alert['id']) => Promise<Alert>;
   loadAlertState: (id: Alert['id']) => Promise<AlertTaskState>;
-  loadAlertInstanceSummary: (id: Alert['id']) => Promise<AlertInstanceSummary>;
+  loadAlertSummary: (id: Alert['id']) => Promise<AlertSummary>;
   loadAlertTypes: () => Promise<AlertType[]>;
   getHealth: () => Promise<AlertingFrameworkHealth>;
   resolveRule: (id: Alert['id']) => Promise<ResolvedRule>;
@@ -127,9 +127,7 @@ export function withBulkAlertOperations<T>(
         deleteAlert={async (alert: Alert) => deleteAlerts({ http, ids: [alert.id] })}
         loadAlert={async (alertId: Alert['id']) => loadAlert({ http, alertId })}
         loadAlertState={async (alertId: Alert['id']) => loadAlertState({ http, alertId })}
-        loadAlertInstanceSummary={async (alertId: Alert['id']) =>
-          loadAlertInstanceSummary({ http, alertId })
-        }
+        loadAlertSummary={async (ruleId: Alert['id']) => loadAlertSummary({ http, ruleId })}
         loadAlertTypes={async () => loadAlertTypes({ http })}
         resolveRule={async (ruleId: Alert['id']) => resolveRule({ http, ruleId })}
         getHealth={async () => alertingFrameworkHealth({ http })}

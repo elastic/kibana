@@ -19,4 +19,5 @@ jest.mock('../../layouts/layouts', () => {
 });
 
 export const mockCreateWriteStream = jest.fn();
-jest.mock('fs', () => ({ createWriteStream: mockCreateWriteStream }));
+export const mockMkdirSync = jest.fn();
+jest.mock('fs', () => ({ createWriteStream: mockCreateWriteStream, mkdirSync: mockMkdirSync }));

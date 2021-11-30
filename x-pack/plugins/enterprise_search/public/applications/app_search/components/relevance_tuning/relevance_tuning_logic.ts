@@ -246,7 +246,7 @@ export const RelevanceTuningLogic = kea<
       const url = `/internal/app_search/engines/${engineName}/search_settings/details`;
 
       try {
-        const response = await http.get(url);
+        const response = await http.get<RelevanceTuningProps>(url);
         actions.onInitializeRelevanceTuning({
           ...response,
           searchSettings: {
@@ -278,7 +278,7 @@ export const RelevanceTuningLogic = kea<
       const filteredBoosts = removeEmptyValueBoosts(boosts);
 
       try {
-        const response = await http.post(url, {
+        const response = await http.post<{ results: Result[] }>(url, {
           query: {
             query,
           },
@@ -313,7 +313,7 @@ export const RelevanceTuningLogic = kea<
       const url = `/internal/app_search/engines/${engineName}/search_settings`;
 
       try {
-        const response = await http.put(url, {
+        const response = await http.put<SearchSettings>(url, {
           body: JSON.stringify(removeBoostStateProps(values.searchSettings)),
         });
         flashSuccessToast(UPDATE_SUCCESS_MESSAGE, { text: SUCCESS_CHANGES_MESSAGE });
@@ -337,7 +337,7 @@ export const RelevanceTuningLogic = kea<
         const url = `/internal/app_search/engines/${engineName}/search_settings/reset`;
 
         try {
-          const response = await http.post(url);
+          const response = await http.post<SearchSettings>(url);
           flashSuccessToast(DELETE_SUCCESS_MESSAGE, { text: SUCCESS_CHANGES_MESSAGE });
           actions.onSearchSettingsSuccess(response);
         } catch (e) {

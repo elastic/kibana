@@ -16,7 +16,7 @@ export interface RouteConfig<P, Q, B, Method extends RouteMethod>
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [options](./kibana-plugin-core-server.routeconfig.options.md) | <code>RouteConfigOptions&lt;Method&gt;</code> | Additional route options [RouteConfigOptions](./kibana-plugin-core-server.routeconfigoptions.md)<!-- -->. |
-|  [path](./kibana-plugin-core-server.routeconfig.path.md) | <code>string</code> | The endpoint \_within\_ the router path to register the route. |
-|  [validate](./kibana-plugin-core-server.routeconfig.validate.md) | <code>RouteValidatorFullConfig&lt;P, Q, B&gt; &#124; false</code> | A schema created with <code>@kbn/config-schema</code> that every request will be validated against. |
+|  [options?](./kibana-plugin-core-server.routeconfig.options.md) | RouteConfigOptions&lt;Method&gt; | <i>(Optional)</i> Additional route options [RouteConfigOptions](./kibana-plugin-core-server.routeconfigoptions.md)<!-- -->. |
+|  [path](./kibana-plugin-core-server.routeconfig.path.md) | string | The endpoint \_within\_ the router path to register the route. |
+|  [validate](./kibana-plugin-core-server.routeconfig.validate.md) | RouteValidatorFullConfig&lt;P, Q, B&gt; \| false | A schema created with <code>@kbn/config-schema</code> that every request will be validated against. |
 

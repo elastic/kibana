@@ -16,10 +16,10 @@ isRawSavedObject(doc: SavedObjectsRawDoc, options?: SavedObjectsRawDocParseOptio
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  doc | <code>SavedObjectsRawDoc</code> |  |
-|  options | <code>SavedObjectsRawDocParseOptions</code> |  |
+|  doc | SavedObjectsRawDoc | The raw ES document to be tested |
+|  options | SavedObjectsRawDocParseOptions | Options for parsing the raw document. |
 
 <b>Returns:</b>
 
-`boolean`
+boolean
 

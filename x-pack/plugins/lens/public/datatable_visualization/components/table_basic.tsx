@@ -7,7 +7,7 @@
 
 import './table_basic.scss';
 
-import React, { useCallback, useMemo, useRef, useState, useContext } from 'react';
+import React, { useCallback, useMemo, useRef, useState, useContext, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import useDeepCompareEffect from 'react-use/lib/useDeepCompareEffect';
 import {
@@ -30,6 +30,7 @@ import type {
   LensSortAction,
   LensResizeAction,
   LensToggleAction,
+  LensPagesizeAction,
 } from './types';
 import { createGridColumns } from './columns';
 import { createGridCell } from './cell_value';
@@ -50,6 +51,9 @@ const gridStyle: EuiDataGridStyle = {
   header: 'underline',
 };
 
+export const DEFAULT_PAGE_SIZE = 10;
+const PAGE_SIZE_OPTIONS = [DEFAULT_PAGE_SIZE, 20, 30, 50, 100];
+
 export const DatatableComponent = (props: DatatableRenderProps) => {
   const [firstTable] = Object.values(props.data.tables);
 
@@ -59,6 +63,22 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
     sortingDirection: props.args.sortingDirection,
   });
   const [firstLocalTable, updateTable] = useState(firstTable);
+
+  // ** Pagination config
+  const [pagination, setPagination] = useState<{ pageIndex: number; pageSize: number } | undefined>(
+    undefined
+  );
+
+  useEffect(() => {
+    setPagination(
+      props.args.pageSize
+        ? {
+            pageIndex: 0,
+            pageSize: props.args.pageSize ?? DEFAULT_PAGE_SIZE,
+          }
+        : undefined
+    );
+  }, [props.args.pageSize]);
 
   useDeepCompareEffect(() => {
     setColumnConfig({
@@ -102,13 +122,35 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
   );
 
   const onEditAction = useCallback(
-    (data: LensSortAction['data'] | LensResizeAction['data'] | LensToggleAction['data']) => {
-      if (renderMode === 'edit') {
-        dispatchEvent({ name: 'edit', data });
-      }
+    (
+      data:
+        | LensSortAction['data']
+        | LensResizeAction['data']
+        | LensToggleAction['data']
+        | LensPagesizeAction['data']
+    ) => {
+      dispatchEvent({ name: 'edit', data });
     },
-    [dispatchEvent, renderMode]
+    [dispatchEvent]
   );
+
+  const onChangeItemsPerPage = useCallback(
+    (pageSize) => onEditAction({ action: 'pagesize', size: pageSize }),
+    [onEditAction]
+  );
+
+  // active page isn't persisted, so we manage this state locally
+  const onChangePage = useCallback(
+    (pageIndex) => {
+      setPagination((_pagination) => {
+        if (_pagination) {
+          return { pageSize: _pagination?.pageSize, pageIndex };
+        }
+      });
+    },
+    [setPagination]
+  );
+
   const onRowContextMenuClick = useCallback(
     (data: LensTableRowContextMenuEvent['data']) => {
       dispatchEvent({ name: 'tableRowContextMenuClick', data });
@@ -264,8 +306,15 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
   }, [firstTableRef, onRowContextMenuClick, columnConfig, hasAtLeastOneRowClickAction]);
 
   const renderCellValue = useMemo(
-    () => createGridCell(formatters, columnConfig, DataContext, props.uiSettings),
-    [formatters, columnConfig, props.uiSettings]
+    () =>
+      createGridCell(
+        formatters,
+        columnConfig,
+        DataContext,
+        props.uiSettings,
+        props.args.fitRowToContent
+      ),
+    [formatters, columnConfig, props.uiSettings, props.args.fitRowToContent]
   );
 
   const columnVisibility = useMemo(
@@ -317,11 +366,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
 
   if (isEmpty) {
     return (
-      <VisualizationContainer
-        className="lnsDataTableContainer"
-        reportTitle={props.args.title}
-        reportDescription={props.args.description}
-      >
+      <VisualizationContainer className="lnsDataTableContainer">
         <EmptyPlaceholder icon={LensIconChartDatatable} />
       </VisualizationContainer>
     );
@@ -334,11 +379,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
     });
 
   return (
-    <VisualizationContainer
-      className="lnsDataTableContainer"
-      reportTitle={props.args.title}
-      reportDescription={props.args.description}
-    >
+    <VisualizationContainer className="lnsDataTableContainer">
       <DataContext.Provider
         value={{
           table: firstLocalTable,
@@ -349,8 +390,24 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
         }}
       >
         <EuiDataGrid
+          {
+            // we control the key when pagination is on to circumvent an EUI rendering bug
+            // see https://github.com/elastic/eui/issues/5391
+            ...(pagination
+              ? {
+                  key: columns.map(({ id }) => id).join('-') + '-' + pagination.pageSize,
+                }
+              : {})
+          }
           aria-label={dataGridAriaLabel}
           data-test-subj="lnsDataTable"
+          rowHeightsOptions={
+            props.args.fitRowToContent
+              ? {
+                  defaultHeight: 'auto',
+                }
+              : undefined
+          }
           columns={columns}
           columnVisibility={columnVisibility}
           trailingControlColumns={trailingControlColumns}
@@ -358,6 +415,14 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
           renderCellValue={renderCellValue}
           gridStyle={gridStyle}
           sorting={sorting}
+          pagination={
+            pagination && {
+              ...pagination,
+              pageSizeOptions: PAGE_SIZE_OPTIONS,
+              onChangeItemsPerPage,
+              onChangePage,
+            }
+          }
           onColumnResize={onColumnResize}
           toolbarVisibility={false}
           renderFooterCellValue={renderSummaryRow}

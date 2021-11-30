@@ -9,29 +9,36 @@ import React, { FC } from 'react';
 import {
   EuiDescriptionList,
   EuiFlexGrid,
-  EuiFlexGroup,
   EuiFlexItem,
-  EuiHorizontalRule,
   EuiPanel,
   EuiSpacer,
-  EuiTextColor,
   EuiTitle,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { NodeItemWithStats } from './nodes_list';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { NodeItem } from './nodes_list';
 import { formatToListItems } from '../models_management/expanded_row';
+import { AllocatedModels } from './allocated_models';
+import { useFieldFormatter } from '../../contexts/kibana/use_field_formatter';
+import { FIELD_FORMAT_IDS } from '../../../../../../../src/plugins/field_formats/common';
 
 interface ExpandedRowProps {
-  item: NodeItemWithStats;
+  item: NodeItem;
 }
 
 export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
+  const bytesFormatter = useFieldFormatter(FIELD_FORMAT_IDS.BYTES);
+
   const {
     allocated_models: allocatedModels,
     attributes,
     memory_overview: memoryOverview,
     ...details
   } = item;
+
+  // Process node attributes
+  attributes['ml.machine_memory'] = bytesFormatter(attributes['ml.machine_memory']);
+  attributes['ml.max_jvm_size'] = bytesFormatter(attributes['ml.max_jvm_size']);
+  delete attributes['xpack.installed'];
 
   return (
     <>
@@ -55,8 +62,6 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
               listItems={formatToListItems(details)}
             />
           </EuiPanel>
-
-          <EuiSpacer size={'m'} />
         </EuiFlexItem>
 
         <EuiFlexItem>
@@ -76,10 +81,10 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
               listItems={formatToListItems(attributes)}
             />
           </EuiPanel>
+        </EuiFlexItem>
 
-          <EuiSpacer size={'m'} />
-
-          {allocatedModels.length > 0 ? (
+        {allocatedModels.length > 0 ? (
+          <EuiFlexItem grow={2}>
             <EuiPanel>
               <EuiTitle size={'xs'}>
                 <h5>
@@ -91,34 +96,10 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
               </EuiTitle>
               <EuiSpacer size={'m'} />
 
-              {allocatedModels.map(({ model_id: modelId, ...rest }) => {
-                return (
-                  <>
-                    <EuiFlexGroup>
-                      <EuiFlexItem grow={false}>
-                        <EuiTitle size="xxs">
-                          <EuiTextColor color="subdued">
-                            <h5>{modelId}</h5>
-                          </EuiTextColor>
-                        </EuiTitle>
-                      </EuiFlexItem>
-                      <EuiFlexItem>
-                        <EuiHorizontalRule size={'full'} margin={'s'} />
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-
-                    <EuiDescriptionList
-                      compressed={true}
-                      type="column"
-                      listItems={formatToListItems(rest)}
-                    />
-                    <EuiSpacer size={'s'} />
-                  </>
-                );
-              })}
+              <AllocatedModels models={allocatedModels} />
             </EuiPanel>
-          ) : null}
-        </EuiFlexItem>
+          </EuiFlexItem>
+        ) : null}
       </EuiFlexGrid>
     </>
   );

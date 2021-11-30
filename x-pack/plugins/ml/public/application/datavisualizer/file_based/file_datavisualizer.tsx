@@ -30,7 +30,7 @@ export const FileDataVisualizerPage: FC = () => {
       docLinks,
       dataVisualizer,
       data: {
-        indexPatterns: { get: getIndexPattern },
+        dataViews: { get: getDataView },
       },
     },
   } = useMlKibana();
@@ -60,7 +60,7 @@ export const FileDataVisualizerPage: FC = () => {
         },
         canDisplay: async ({ indexPatternId }) => {
           try {
-            const { timeFieldName } = await getIndexPattern(indexPatternId);
+            const { timeFieldName } = await getDataView(indexPatternId);
             return (
               isFullLicense() &&
               timeFieldName !== undefined &&
@@ -89,7 +89,7 @@ export const FileDataVisualizerPage: FC = () => {
             },
           });
         },
-        canDisplay: async () => true,
+        canDisplay: async ({ indexPatternId }) => indexPatternId !== '',
       },
     ],
     []

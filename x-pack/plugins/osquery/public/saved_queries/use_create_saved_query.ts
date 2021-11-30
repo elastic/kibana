@@ -29,7 +29,7 @@ export const useCreateSavedQuery = ({ withRedirect }: UseCreateSavedQueryProps) 
 
   return useMutation(
     (payload) =>
-      http.post('/internal/osquery/saved_query', {
+      http.post<any>('/internal/osquery/saved_query', {
         body: JSON.stringify(payload),
       }),
     {

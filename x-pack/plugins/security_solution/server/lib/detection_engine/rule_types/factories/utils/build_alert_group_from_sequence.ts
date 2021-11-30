@@ -19,12 +19,13 @@ import { EqlSequence } from '../../../../../../common/detection_engine/types';
 import { generateBuildingBlockIds } from './generate_building_block_ids';
 import { objectArrayIntersection } from '../../../signals/build_bulk_body';
 import { BuildReasonMessage } from '../../../signals/reason_formatters';
+import { CompleteRule, RuleParams } from '../../../schemas/rule_schemas';
 import {
   ALERT_BUILDING_BLOCK_TYPE,
   ALERT_GROUP_ID,
   ALERT_GROUP_INDEX,
-} from '../../field_maps/field_names';
-import { CompleteRule, RuleParams } from '../../../schemas/rule_schemas';
+  ALERT_ORIGINAL_TIME,
+} from '../../../../../../common/field_maps/field_names';
 
 /**
  * Takes N raw documents from ES that form a sequence and builds them into N+1 signals ready to be indexed -
@@ -91,6 +92,13 @@ export const buildAlertRoot = (
   spaceId: string | null | undefined,
   buildReasonMessage: BuildReasonMessage
 ): RACAlert => {
+  const timestamps = wrappedBuildingBlocks
+    .sort(
+      (block1, block2) =>
+        (block1._source[ALERT_ORIGINAL_TIME] as number) -
+        (block2._source[ALERT_ORIGINAL_TIME] as number)
+    )
+    .map((alert) => alert._source[ALERT_ORIGINAL_TIME]);
   const rule = buildRuleWithoutOverrides(completeRule);
   const mergedAlerts = objectArrayIntersection(wrappedBuildingBlocks.map((alert) => alert._source));
   const reason = buildReasonMessage({ rule, mergedDoc: mergedAlerts as SignalSourceHit });
@@ -101,6 +109,8 @@ export const buildAlertRoot = (
       kind: 'signal',
     },
     ...doc,
+    [ALERT_ORIGINAL_TIME]: timestamps[0],
+    [ALERT_BUILDING_BLOCK_TYPE]: undefined,
     [ALERT_GROUP_ID]: generateAlertId(doc),
   };
 };

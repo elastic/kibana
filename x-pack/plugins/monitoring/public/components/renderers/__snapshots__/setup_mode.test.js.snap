@@ -78,6 +78,7 @@ exports[`SetupModeRenderer should render the flyout open 1`] = `
           >
             <EuiButton
               color="danger"
+              data-test-subj="exitSetupModeBtn"
               fill={true}
               iconSide="right"
               iconType="flag"
@@ -178,6 +179,7 @@ exports[`SetupModeRenderer should render with setup mode enabled 1`] = `
           >
             <EuiButton
               color="danger"
+              data-test-subj="exitSetupModeBtn"
               fill={true}
               iconSide="right"
               iconType="flag"

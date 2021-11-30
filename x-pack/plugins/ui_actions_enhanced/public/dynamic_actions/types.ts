@@ -7,7 +7,7 @@
 
 import { SerializedAction, SerializedEvent, BaseActionConfig } from '../../common/types';
 
-export { SerializedAction, SerializedEvent, BaseActionConfig };
+export type { SerializedAction, SerializedEvent, BaseActionConfig };
 
 /**
  * Action factory context passed into ActionFactories' CollectConfig, getDisplayName, getIconType

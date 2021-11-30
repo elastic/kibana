@@ -209,7 +209,8 @@ export const getHostEndpoint = async (
       ? getPendingActionCounts(
           esClient.asInternalUser,
           endpointContext.service.getEndpointMetadataService(),
-          [fleetAgentId]
+          [fleetAgentId],
+          endpointContext.experimentalFeatures.pendingActionResponsesWithAck
         )
           .then((results) => {
             return results[0].pending_actions;

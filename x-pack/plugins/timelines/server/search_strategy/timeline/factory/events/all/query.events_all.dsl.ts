@@ -17,14 +17,15 @@ import {
 import { createQueryFilterClauses } from '../../../../../../server/utils/build_query';
 
 export const buildTimelineEventsAllQuery = ({
+  authFilter,
   defaultIndex,
   docValueFields,
   fields,
   filterQuery,
   pagination: { activePage, querySize },
+  runtimeMappings,
   sort,
   timerange,
-  authFilter,
 }: Omit<TimelineEventsAllRequestOptions, 'fieldRequested'>) => {
   const filterClause = [...createQueryFilterClauses(filterQuery)];
 
@@ -78,12 +79,13 @@ export const buildTimelineEventsAllQuery = ({
           filter,
         },
       },
+      runtime_mappings: runtimeMappings,
       from: activePage * querySize,
       size: querySize,
       track_total_hits: true,
       sort: getSortField(sort),
       fields,
-      _source: ['signal.*'],
+      _source: ['signal.*', 'kibana.alert.*'],
     },
   };
 

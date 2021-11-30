@@ -6,7 +6,6 @@
  */
 
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-
 import {
   Plugin,
   CoreSetup,
@@ -16,10 +15,13 @@ import {
   SavedObjectsClient,
   SavedObjectsServiceStart,
 } from '../../../../src/core/server';
+import { SecurityPluginStart } from '../../security/server';
 import { InfraPluginSetup } from '../../infra/server';
 
 import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
+import { SecurityPluginSetup } from '../../security/server';
 import { LicensingPluginSetup } from '../../licensing/server';
+import { DEPRECATION_LOGS_SOURCE_ID, DEPRECATION_LOGS_INDEX } from '../common/constants';
 
 import { CredentialStore, credentialStoreFactory } from './lib/reindexing/credential_store';
 import { ReindexWorker } from './lib/reindexing';
@@ -32,7 +34,7 @@ import {
   reindexOperationSavedObjectType,
   mlSavedObjectType,
 } from './saved_object_types';
-import { DEPRECATION_LOGS_SOURCE_ID, DEPRECATION_LOGS_INDEX_PATTERN } from '../common/constants';
+import { handleEsError } from './shared_imports';
 
 import { RouteDependencies } from './types';
 
@@ -41,6 +43,11 @@ interface PluginsSetup {
   licensing: LicensingPluginSetup;
   features: FeaturesPluginSetup;
   infra: InfraPluginSetup;
+  security?: SecurityPluginSetup;
+}
+
+interface PluginsStart {
+  security: SecurityPluginStart;
 }
 
 export class UpgradeAssistantServerPlugin implements Plugin {
@@ -53,11 +60,12 @@ export class UpgradeAssistantServerPlugin implements Plugin {
 
   // Properties set at start
   private savedObjectsServiceStart?: SavedObjectsServiceStart;
+  private securityPluginStart?: SecurityPluginStart;
   private worker?: ReindexWorker;
 
   constructor({ logger, env }: PluginInitializerContext) {
     this.logger = logger.get();
-    this.credentialStore = credentialStoreFactory();
+    this.credentialStore = credentialStoreFactory(this.logger);
     this.kibanaVersion = env.packageInfo.version;
   }
 
@@ -70,7 +78,7 @@ export class UpgradeAssistantServerPlugin implements Plugin {
 
   setup(
     { http, getStartServices, savedObjects }: CoreSetup,
-    { usageCollection, features, licensing, infra }: PluginsSetup
+    { usageCollection, features, licensing, infra, security }: PluginsSetup
   ) {
     this.licensing = licensing;
 
@@ -93,12 +101,12 @@ export class UpgradeAssistantServerPlugin implements Plugin {
 
     // We need to initialize the deprecation logs plugin so that we can
     // navigate from this app to the observability app using a source_id.
-    infra.defineInternalSourceConfiguration(DEPRECATION_LOGS_SOURCE_ID, {
+    infra?.defineInternalSourceConfiguration(DEPRECATION_LOGS_SOURCE_ID, {
       name: 'deprecationLogs',
       description: 'deprecation logs',
       logIndices: {
         type: 'index_name',
-        indexName: DEPRECATION_LOGS_INDEX_PATTERN,
+        indexName: DEPRECATION_LOGS_INDEX,
       },
       logColumns: [
         { timestampColumn: { id: 'timestampField' } },
@@ -119,6 +127,13 @@ export class UpgradeAssistantServerPlugin implements Plugin {
         }
         return this.savedObjectsServiceStart;
       },
+      getSecurityPlugin: () => this.securityPluginStart,
+      lib: {
+        handleEsError,
+      },
+      config: {
+        isSecurityEnabled: () => security !== undefined && security.license.isEnabled(),
+      },
     };
 
     // Initialize version service with current kibana version
@@ -127,18 +142,18 @@ export class UpgradeAssistantServerPlugin implements Plugin {
     registerRoutes(dependencies, this.getWorker.bind(this));
 
     if (usageCollection) {
-      getStartServices().then(([{ savedObjects: savedObjectsService, elasticsearch }]) => {
+      getStartServices().then(([{ elasticsearch }]) => {
         registerUpgradeAssistantUsageCollector({
           elasticsearch,
           usageCollection,
-          savedObjects: savedObjectsService,
         });
       });
     }
   }
 
-  start({ savedObjects, elasticsearch }: CoreStart) {
+  start({ savedObjects, elasticsearch }: CoreStart, { security }: PluginsStart) {
     this.savedObjectsServiceStart = savedObjects;
+    this.securityPluginStart = security;
 
     // The ReindexWorker uses a map of request headers that contain the authentication credentials
     // for a given reindex. We cannot currently store these in an the .kibana index b/c we do not
@@ -155,6 +170,7 @@ export class UpgradeAssistantServerPlugin implements Plugin {
       savedObjects: new SavedObjectsClient(
         this.savedObjectsServiceStart.createInternalRepository()
       ),
+      security: this.securityPluginStart,
     });
 
     this.worker.start();

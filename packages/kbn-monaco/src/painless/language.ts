@@ -5,15 +5,16 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import { Observable, of } from 'rxjs';
 import { monaco } from '../monaco_imports';
 
 import { WorkerProxyService, EditorStateService } from './lib';
+import { LangValidation, SyntaxErrors } from '../types';
 import { ID } from './constants';
 import { PainlessContext, PainlessAutocompleteField } from './types';
 import { PainlessWorker } from './worker';
 import { PainlessCompletionAdapter } from './completion_adapter';
-import { DiagnosticsAdapter, SyntaxErrors } from './diagnostics_adapter';
+import { DiagnosticsAdapter } from './diagnostics_adapter';
 
 const workerProxyService = new WorkerProxyService();
 const editorStateService = new EditorStateService();
@@ -37,8 +38,12 @@ let diagnosticsAdapter: DiagnosticsAdapter;
 
 // Returns syntax errors for all models by model id
 export const getSyntaxErrors = (): SyntaxErrors => {
-  return diagnosticsAdapter.getSyntaxErrors();
+  return diagnosticsAdapter?.getSyntaxErrors() ?? {};
 };
+
+export const validation$: () => Observable<LangValidation> = () =>
+  diagnosticsAdapter?.validation$ ||
+  of<LangValidation>({ isValid: true, isValidating: false, errors: [] });
 
 monaco.languages.onLanguage(ID, async () => {
   workerProxyService.setup();

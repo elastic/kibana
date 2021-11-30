@@ -16,7 +16,7 @@ export interface PluginInitializerContext<ConfigSchema extends object = object>
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [config](./kibana-plugin-core-public.plugininitializercontext.config.md) | <code>{</code><br/><code>        get: &lt;T extends object = ConfigSchema&gt;() =&gt; T;</code><br/><code>    }</code> |  |
-|  [env](./kibana-plugin-core-public.plugininitializercontext.env.md) | <code>{</code><br/><code>        mode: Readonly&lt;EnvironmentMode&gt;;</code><br/><code>        packageInfo: Readonly&lt;PackageInfo&gt;;</code><br/><code>    }</code> |  |
-|  [opaqueId](./kibana-plugin-core-public.plugininitializercontext.opaqueid.md) | <code>PluginOpaqueId</code> | A symbol used to identify this plugin in the system. Needed when registering handlers or context providers. |
+|  [config](./kibana-plugin-core-public.plugininitializercontext.config.md) | { get: &lt;T extends object = ConfigSchema&gt;() =&gt; T; } |  |
+|  [env](./kibana-plugin-core-public.plugininitializercontext.env.md) | { mode: Readonly&lt;EnvironmentMode&gt;; packageInfo: Readonly&lt;PackageInfo&gt;; } |  |
+|  [opaqueId](./kibana-plugin-core-public.plugininitializercontext.opaqueid.md) | PluginOpaqueId | A symbol used to identify this plugin in the system. Needed when registering handlers or context providers. |
 

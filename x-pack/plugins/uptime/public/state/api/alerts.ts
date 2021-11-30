@@ -127,8 +127,11 @@ export const fetchAlertRecords = async ({
     sort_field: 'name.keyword',
     sort_order: 'asc',
   };
-  const alerts = await apiService.get(API_URLS.RULES_FIND, data);
-  return alerts.data.find((alert: Alert<NewAlertParams>) => alert.params.monitorId === monitorId);
+  const alerts = await apiService.get<{ data: Array<Alert<NewAlertParams>> }>(
+    API_URLS.RULES_FIND,
+    data
+  );
+  return alerts.data.find((alert) => alert.params.monitorId === monitorId) as Alert<NewAlertParams>;
 };
 
 export const disableAlertById = async ({ alertId }: { alertId: string }) => {

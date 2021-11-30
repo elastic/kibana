@@ -85,4 +85,58 @@ describe('ViewActions', () => {
 
     await assertApplyIsEnabled();
   });
+  it('apply button is disabled when no filter changes but different orders', async () => {
+    const allSeries: AllSeries = [
+      {
+        seriesType: 'area',
+        breakdown: 'monitor.type',
+        filters: [
+          {
+            values: ['spa-heartbeat', 'nyc-heartbeat', 'au-heartbeat'],
+            field: 'observer.geo.name',
+          },
+        ],
+        time: { from: 'now-15m', to: 'now' },
+        dataType: 'synthetics',
+        reportDefinitions: { 'monitor.name': [], 'url.full': ['ALL_VALUES'] },
+        selectedMetricField: 'monitor.duration.us',
+        name: 'All monitors response duration',
+      },
+    ];
+
+    const urlSeries: AllSeries = [
+      {
+        seriesType: 'area',
+        breakdown: 'monitor.type',
+        filters: [
+          {
+            field: 'observer.geo.name',
+            values: ['spa-heartbeat', 'nyc-heartbeat', 'au-heartbeat'],
+            notValues: undefined,
+            notWildcards: undefined,
+          },
+        ],
+        time: { from: 'now-15m', to: 'now' },
+        reportDefinitions: { 'monitor.name': [], 'url.full': ['ALL_VALUES'] },
+        dataType: 'synthetics',
+        selectedMetricField: 'monitor.duration.us',
+        name: 'All monitors response duration',
+      },
+    ];
+
+    mockSeriesStorage(allSeries, urlSeries);
+
+    render(<ViewActions />);
+    const applyBtn = screen.getByText(/Apply changes/i);
+
+    const btnComponent = screen.getByTestId('seriesChangesApplyButton');
+
+    expect(btnComponent.classList).toContain('euiButton-isDisabled');
+
+    fireEvent.click(applyBtn);
+
+    await waitFor(() => {
+      expect(applyChanges).toBeCalledTimes(0);
+    });
+  });
 });

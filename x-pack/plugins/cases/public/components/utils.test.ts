@@ -39,8 +39,49 @@ describe('Utils', () => {
   });
 
   describe('isDeprecatedConnector', () => {
+    const connector = {
+      id: 'test',
+      actionTypeId: '.webhook',
+      name: 'Test',
+      config: { usesTableApi: false },
+      secrets: {},
+      isPreconfigured: false,
+    };
+
     it('returns false if the connector is not defined', () => {
       expect(isDeprecatedConnector()).toBe(false);
+    });
+
+    it('returns false if the connector is not ITSM or SecOps', () => {
+      expect(isDeprecatedConnector(connector)).toBe(false);
+    });
+
+    it('returns false if the connector is .servicenow and the usesTableApi=false', () => {
+      expect(isDeprecatedConnector({ ...connector, actionTypeId: '.servicenow' })).toBe(false);
+    });
+
+    it('returns false if the connector is .servicenow-sir and the usesTableApi=false', () => {
+      expect(isDeprecatedConnector({ ...connector, actionTypeId: '.servicenow-sir' })).toBe(false);
+    });
+
+    it('returns true if the connector is .servicenow and the usesTableApi=true', () => {
+      expect(
+        isDeprecatedConnector({
+          ...connector,
+          actionTypeId: '.servicenow',
+          config: { usesTableApi: true },
+        })
+      ).toBe(true);
+    });
+
+    it('returns true if the connector is .servicenow-sir and the usesTableApi=true', () => {
+      expect(
+        isDeprecatedConnector({
+          ...connector,
+          actionTypeId: '.servicenow-sir',
+          config: { usesTableApi: true },
+        })
+      ).toBe(true);
     });
   });
 });

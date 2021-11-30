@@ -36,7 +36,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('should not show the Stack Management nav link', async () => {
         const links = await appsMenu.readLinks();
-        expect(links.map((link) => link.text)).to.eql(['Overview', 'Dashboard']);
+        expect(links.map((link) => link.text)).to.eql(['Dashboard']);
       });
 
       it('should render the "application not found" view when navigating to management directly', async () => {

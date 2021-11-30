@@ -3,10 +3,11 @@
   "version": "1.0.0",
   "kibanaVersion": "kibana",
   "ui": true,
+  "server": true,
   "owner": {
     "name": "App Services",
     "githubTeam": "kibana-app-services"
   },
   "description": "A plugin that demonstrates field formats usage",
-  "requiredPlugins": ["developerExamples", "fieldFormats", "indexPatternFieldEditor", "data"]
+  "requiredPlugins": ["developerExamples", "fieldFormats", "dataViewFieldEditor", "data"]
 }

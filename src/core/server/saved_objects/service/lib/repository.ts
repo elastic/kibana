@@ -100,6 +100,7 @@ import {
   preflightCheckForCreate,
   PreflightCheckForCreateObject,
 } from './preflight_check_for_create';
+import { deleteLegacyUrlAliases } from './legacy_url_aliases';
 
 // BEWARE: The SavedObjectClient depends on the implementation details of the SavedObjectsRepository
 // so any breaking changes to this repository are considered breaking changes to the SavedObjectsClient.
@@ -717,6 +718,25 @@ export class SavedObjectsRepository {
 
     const deleted = body.result === 'deleted';
     if (deleted) {
+      const namespaces = preflightResult?.savedObjectNamespaces;
+      if (namespaces) {
+        // This is a multi-namespace object type, and it might have legacy URL aliases that need to be deleted.
+        await deleteLegacyUrlAliases({
+          mappings: this._mappings,
+          registry: this._registry,
+          client: this.client,
+          getIndexForType: this.getIndexForType.bind(this),
+          type,
+          id,
+          ...(namespaces.includes(ALL_NAMESPACES_STRING)
+            ? { namespaces: [], deleteBehavior: 'exclusive' } // delete legacy URL aliases for this type/ID for all spaces
+            : { namespaces, deleteBehavior: 'inclusive' }), // delete legacy URL aliases for this type/ID for these specific spaces
+        }).catch((err) => {
+          // The object has already been deleted, but we caught an error when attempting to delete aliases.
+          // A consumer cannot attempt to delete the object again, so just log the error and swallow it.
+          this._logger.error(`Unable to delete aliases when deleting an object: ${err.message}`);
+        });
+      }
       return {};
     }
 
@@ -1344,10 +1364,12 @@ export class SavedObjectsRepository {
     options?: SavedObjectsUpdateObjectsSpacesOptions
   ) {
     return updateObjectsSpaces({
+      mappings: this._mappings,
       registry: this._registry,
       allowedTypes: this._allowedTypes,
       client: this.client,
       serializer: this._serializer,
+      logger: this._logger,
       getIndexForType: this.getIndexForType.bind(this),
       objects,
       spacesToAdd,
@@ -1803,7 +1825,7 @@ export class SavedObjectsRepository {
       index: this.getIndexForType(type),
       refresh,
       require_alias: true,
-      _source: 'true',
+      _source: true,
       body: {
         script: {
           source: `

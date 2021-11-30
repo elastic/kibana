@@ -10,7 +10,11 @@ import { sortBy } from 'lodash';
 import moment from 'moment';
 import { Unionize } from 'utility-types';
 import { AggregationOptionsByType } from '../../../../../../src/core/types/elasticsearch';
-import { kqlQuery, rangeQuery } from '../../../../observability/server';
+import {
+  kqlQuery,
+  rangeQuery,
+  termQuery,
+} from '../../../../observability/server';
 import {
   PARENT_ID,
   SERVICE_NAME,
@@ -27,7 +31,7 @@ import {
 } from '../helpers/transactions';
 import { Setup } from '../helpers/setup_request';
 import { getAverages, getCounts, getSums } from './get_transaction_group_stats';
-
+import { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
 export interface TopTraceOptions {
   environment: string;
   kuery: string;
@@ -47,6 +51,7 @@ export interface TransactionGroup {
   averageResponseTime: number | null | undefined;
   transactionsPerMinute: number;
   impact: number;
+  agentName: AgentName;
 }
 
 export type ESResponse = Promise<{ items: TransactionGroup[] }>;
@@ -69,10 +74,6 @@ function getRequest(topTraceOptions: TopTraceOptions) {
     end,
   } = topTraceOptions;
 
-  const transactionNameFilter = transactionName
-    ? [{ term: { [TRANSACTION_NAME]: transactionName } }]
-    : [];
-
   return {
     apm: {
       events: [getProcessorEventForTransactions(searchAggregatedTransactions)],
@@ -82,7 +83,7 @@ function getRequest(topTraceOptions: TopTraceOptions) {
       query: {
         bool: {
           filter: [
-            ...transactionNameFilter,
+            ...termQuery(TRANSACTION_NAME, transactionName),
             ...getDocumentTypeFilterForTransactions(
               searchAggregatedTransactions
             ),
@@ -142,6 +143,7 @@ function getItemsWithRelativeImpact(
     avg?: number | null;
     count?: number | null;
     transactionType?: string;
+    agentName?: AgentName;
   }>,
   start: number,
   end: number
@@ -166,6 +168,7 @@ function getItemsWithRelativeImpact(
         item.sum !== null && item.sum !== undefined
           ? ((item.sum - min) / (max - min)) * 100 || 0
           : 0,
+      agentName: item.agentName as AgentName,
     };
   });
 

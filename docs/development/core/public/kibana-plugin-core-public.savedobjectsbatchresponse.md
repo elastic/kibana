@@ -15,5 +15,5 @@ export interface SavedObjectsBatchResponse<T = unknown>
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [savedObjects](./kibana-plugin-core-public.savedobjectsbatchresponse.savedobjects.md) | <code>Array&lt;SimpleSavedObject&lt;T&gt;&gt;</code> |  |
+|  [savedObjects](./kibana-plugin-core-public.savedobjectsbatchresponse.savedobjects.md) | Array&lt;SimpleSavedObject&lt;T&gt;&gt; |  |
 

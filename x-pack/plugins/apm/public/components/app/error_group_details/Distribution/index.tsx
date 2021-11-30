@@ -16,9 +16,7 @@ import {
 } from '@elastic/charts';
 import { EuiTitle } from '@elastic/eui';
 import React, { Suspense, useState } from 'react';
-import type { ALERT_RULE_TYPE_ID as ALERT_RULE_TYPE_ID_TYPED } from '@kbn/rule-data-utils';
-// @ts-expect-error
-import { ALERT_RULE_TYPE_ID as ALERT_RULE_TYPE_ID_NON_TYPED } from '@kbn/rule-data-utils/target_node/technical_field_names';
+import { ALERT_RULE_TYPE_ID } from '@kbn/rule-data-utils/technical_field_names';
 import { i18n } from '@kbn/i18n';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { APIReturnType } from '../../../../services/rest/createCallApmApi';
@@ -29,11 +27,8 @@ import { getAlertAnnotations } from '../../../shared/charts/helper/get_alert_ann
 import { ChartContainer } from '../../../shared/charts/chart_container';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { LazyAlertsFlyout } from '../../../../../../observability/public';
-import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
+import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { getTimeZone } from '../../../shared/charts/helper/timezone';
-
-const ALERT_RULE_TYPE_ID: typeof ALERT_RULE_TYPE_ID_TYPED =
-  ALERT_RULE_TYPE_ID_NON_TYPED;
 
 type ErrorDistributionAPIResponse =
   APIReturnType<'GET /internal/apm/services/{serviceName}/errors/distribution'>;
@@ -48,7 +43,7 @@ export function ErrorDistribution({ distribution, title, fetchStatus }: Props) {
   const { core } = useApmPluginContext();
   const theme = useTheme();
 
-  const { urlParams } = useUrlParams();
+  const { urlParams } = useLegacyUrlParams();
   const { comparisonEnabled } = urlParams;
 
   const timeseries = [
@@ -56,7 +51,7 @@ export function ErrorDistribution({ distribution, title, fetchStatus }: Props) {
       data: distribution.currentPeriod,
       color: theme.eui.euiColorVis1,
       title: i18n.translate('xpack.apm.errorGroup.chart.ocurrences', {
-        defaultMessage: 'Occurences',
+        defaultMessage: 'Occurrences',
       }),
     },
     ...(comparisonEnabled

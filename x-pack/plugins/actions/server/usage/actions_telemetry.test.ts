@@ -7,7 +7,7 @@
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { elasticsearchClientMock } from '../../../../../src/core/server/elasticsearch/client/mocks';
-import { getInUseTotalCount, getTotalCount } from './actions_telemetry';
+import { getExecutionsPerDayCount, getInUseTotalCount, getTotalCount } from './actions_telemetry';
 
 describe('actions telemetry', () => {
   test('getTotalCount should replace first symbol . to __ for action types names', async () => {
@@ -603,5 +603,103 @@ Object {
   "countTotal": 6,
 }
 `);
+  });
+
+  test('getExecutionsTotalCount', async () => {
+    const mockEsClient = elasticsearchClientMock.createClusterClient().asScoped().asInternalUser;
+    mockEsClient.search.mockReturnValueOnce(
+      // @ts-expect-error not full search response
+      elasticsearchClientMock.createSuccessTransportRequestPromise({
+        aggregations: {
+          totalExecutions: {
+            byConnectorTypeId: {
+              value: {
+                connectorTypes: {
+                  '.slack': 100,
+                  '.server-log': 20,
+                },
+                total: 120,
+              },
+            },
+          },
+          failedExecutions: {
+            refs: {
+              byConnectorTypeId: {
+                value: {
+                  connectorTypes: {
+                    '.slack': 7,
+                  },
+                  total: 7,
+                },
+              },
+            },
+          },
+          avgDuration: { value: 10 },
+          avgDurationByType: {
+            doc_count: 216,
+            actionSavedObjects: {
+              doc_count: 108,
+              byTypeId: {
+                doc_count_error_upper_bound: 0,
+                sum_other_doc_count: 0,
+                buckets: [
+                  {
+                    key: '.server-log',
+                    doc_count: 99,
+                    refs: {
+                      doc_count: 99,
+                      avgDuration: {
+                        value: 919191.9191919192,
+                      },
+                    },
+                  },
+                  {
+                    key: '.email',
+                    doc_count: 9,
+                    refs: {
+                      doc_count: 9,
+                      avgDuration: {
+                        value: 4.196666666666667e8,
+                      },
+                    },
+                  },
+                ],
+              },
+            },
+          },
+        },
+      })
+    );
+
+    // for .slack connectors
+    mockEsClient.search.mockReturnValueOnce(
+      // @ts-expect-error not full search response
+      elasticsearchClientMock.createSuccessTransportRequestPromise({
+        aggregations: {
+          avgDuration: { value: 10 },
+        },
+      })
+    );
+    const telemetry = await getExecutionsPerDayCount(mockEsClient, 'test');
+
+    expect(mockEsClient.search).toHaveBeenCalledTimes(1);
+    expect(telemetry).toStrictEqual({
+      avgExecutionTime: 0,
+      avgExecutionTimeByType: {
+        '__server-log': 919191.9191919192,
+        __email: 419666666.6666667,
+      },
+
+      countByType: {
+        __slack: 100,
+
+        '__server-log': 20,
+      },
+      countFailed: 7,
+      countFailedByType: {
+        __slack: 7,
+      },
+      countTotal: 120,
+    });
   });
 });

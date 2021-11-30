@@ -128,6 +128,20 @@ export function MachineLearningTestResourcesProvider({ getService }: FtrProvider
       return createResponse.id;
     },
 
+    async createBulkSavedObjects(body: object[]): Promise<string> {
+      log.debug(`Creating bulk saved objects'`);
+
+      const createResponse = await supertest
+        .post(`/api/saved_objects/_bulk_create`)
+        .set(COMMON_REQUEST_HEADERS)
+        .send(body)
+        .expect(200)
+        .then((res: any) => res.body);
+
+      log.debug(` > Created bulk saved objects'`);
+      return createResponse;
+    },
+
     async createIndexPatternIfNeeded(title: string, timeFieldName?: string): Promise<string> {
       const indexPatternId = await this.getIndexPatternId(title);
       if (indexPatternId !== undefined) {
@@ -448,26 +462,34 @@ export function MachineLearningTestResourcesProvider({ getService }: FtrProvider
       log.debug('> ML saved objects deleted.');
     },
 
-    async installFleetPackage(packageName: string) {
+    async setupFleet() {
+      log.debug(`Setting up Fleet`);
+      await retry.tryForTime(2 * 60 * 1000, async () => {
+        await supertest.post(`/api/fleet/setup`).set(COMMON_REQUEST_HEADERS).expect(200);
+      });
+      log.debug(` > Setup done`);
+    },
+
+    async installFleetPackage(packageName: string): Promise<string> {
       log.debug(`Installing Fleet package '${packageName}'`);
 
       const version = await this.getFleetPackageVersion(packageName);
+      const packageWithVersion = `${packageName}-${version}`;
 
       await supertest
-        .post(`/api/fleet/epm/packages/${packageName}-${version}`)
+        .post(`/api/fleet/epm/packages/${packageWithVersion}`)
         .set(COMMON_REQUEST_HEADERS)
         .expect(200);
 
       log.debug(` > Installed`);
+      return packageWithVersion;
     },
 
-    async removeFleetPackage(packageName: string) {
-      log.debug(`Removing Fleet package '${packageName}'`);
-
-      const version = await this.getFleetPackageVersion(packageName);
+    async removeFleetPackage(packageWithVersion: string) {
+      log.debug(`Removing Fleet package '${packageWithVersion}'`);
 
       await supertest
-        .delete(`/api/fleet/epm/packages/${packageName}-${version}`)
+        .delete(`/api/fleet/epm/packages/${packageWithVersion}`)
         .set(COMMON_REQUEST_HEADERS)
         .expect(200);
 
@@ -476,24 +498,41 @@ export function MachineLearningTestResourcesProvider({ getService }: FtrProvider
 
     async getFleetPackageVersion(packageName: string): Promise<string> {
       log.debug(`Fetching version for Fleet package '${packageName}'`);
+      let packageVersion = '';
 
-      const { body } = await supertest
-        .get(`/api/fleet/epm/packages?experimental=true`)
-        .set(COMMON_REQUEST_HEADERS)
-        .expect(200);
+      await retry.tryForTime(10 * 1000, async () => {
+        const { body } = await supertest
+          .get(`/api/fleet/epm/packages?experimental=true`)
+          .set(COMMON_REQUEST_HEADERS)
+          .expect(200);
 
-      const packageVersion =
-        body.response.find(
-          ({ name, version }: { name: string; version: string }) => name === packageName && version
-        )?.version ?? '';
+        packageVersion =
+          body.response.find(
+            ({ name, version }: { name: string; version: string }) =>
+              name === packageName && version
+          )?.version ?? '';
 
-      expect(packageVersion).to.not.eql(
-        '',
-        `Fleet package definition for '${packageName}' should exist and have a version`
-      );
+        expect(packageVersion).to.not.eql(
+          '',
+          `Fleet package definition for '${packageName}' should exist and have a version`
+        );
+      });
 
       log.debug(` > found version '${packageVersion}'`);
       return packageVersion;
+    },
+
+    async setAdvancedSettingProperty(
+      propertyName: string,
+      propertyValue: string | number | boolean
+    ) {
+      await kibanaServer.uiSettings.update({
+        [propertyName]: propertyValue,
+      });
+    },
+
+    async clearAdvancedSettingProperty(propertyName: string) {
+      await kibanaServer.uiSettings.unset(propertyName);
     },
   };
 }

@@ -24,7 +24,7 @@ import {
 } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { createStructuredSelector } from 'reselect';
 import { useDispatch } from 'react-redux';
 import { EndpointDetailsFlyout } from './details';
@@ -534,14 +534,19 @@ export const EndpointList = () => {
     return endpointsExist && !patternsError;
   }, [endpointsExist, patternsError]);
 
-  const transformFailedCalloutDescription = useMemo(
-    () => (
+  const transformFailedCalloutDescription = useMemo(() => {
+    const failingTransformIds = metadataTransformStats
+      .filter((transformStat) => WARNING_TRANSFORM_STATES.has(transformStat.state))
+      .map((transformStat) => transformStat.id)
+      .join(', ');
+
+    return (
       <>
         <FormattedMessage
           id="xpack.securitySolution.endpoint.list.transformFailed.message"
           defaultMessage="A required transform, {transformId}, is currently failing. Most of the time this can be fixed by {transformsPage}. For additional help, please visit the {docsPage}"
           values={{
-            transformId: metadataTransformStats[0]?.id || metadataTransformPrefix,
+            transformId: failingTransformIds || metadataTransformPrefix,
             transformsPage: (
               <LinkToApp
                 data-test-subj="failed-transform-restart-link"
@@ -557,7 +562,7 @@ export const EndpointList = () => {
             docsPage: (
               <EuiLink
                 data-test-subj="failed-transform-docs-link"
-                href={services?.docLinks?.links.transforms.guide}
+                href={services?.docLinks?.links.endpoints.troubleshooting}
                 target="_blank"
               >
                 <FormattedMessage
@@ -570,9 +575,8 @@ export const EndpointList = () => {
         />
         <EuiSpacer size="s" />
       </>
-    ),
-    [metadataTransformStats, services?.docLinks?.links.transforms.guide]
-  );
+    );
+  }, [metadataTransformStats, services?.docLinks?.links.endpoints.troubleshooting]);
 
   const transformFailedCallout = useMemo(() => {
     if (!showTransformFailedCallout) {

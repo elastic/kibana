@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { filter, pickBy } from 'lodash';
+import { isEmpty, filter, pickBy } from 'lodash';
 import { schema } from '@kbn/config-schema';
 
 import { PLUGIN_ID } from '../../../common';
@@ -34,7 +34,10 @@ export const updateSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAp
               schema.recordOf(
                 schema.string(),
                 schema.object({
-                  field: schema.string(),
+                  field: schema.maybe(schema.string()),
+                  value: schema.maybe(
+                    schema.oneOf([schema.string(), schema.arrayOf(schema.string())])
+                  ),
                 })
               )
             ),
@@ -61,8 +64,7 @@ export const updateSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAp
 
       const conflictingEntries = await savedObjectsClient.find<{ id: string }>({
         type: savedQuerySavedObjectType,
-        search: id,
-        searchFields: ['id'],
+        filter: `${savedQuerySavedObjectType}.attributes.id: "${id}"`,
       });
 
       if (
@@ -75,17 +77,20 @@ export const updateSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAp
       const updatedSavedQuerySO = await savedObjectsClient.update(
         savedQuerySavedObjectType,
         request.params.id,
-        pickBy({
-          id,
-          description,
-          platform,
-          query,
-          version,
-          interval,
-          ecs_mapping: convertECSMappingToArray(ecs_mapping),
-          updated_by: currentUser,
-          updated_at: new Date().toISOString(),
-        }),
+        pickBy(
+          {
+            id,
+            description,
+            platform,
+            query,
+            version,
+            interval,
+            ecs_mapping: convertECSMappingToArray(ecs_mapping),
+            updated_by: currentUser,
+            updated_at: new Date().toISOString(),
+          },
+          (value) => !isEmpty(value)
+        ),
         {
           refresh: 'wait_for',
         }

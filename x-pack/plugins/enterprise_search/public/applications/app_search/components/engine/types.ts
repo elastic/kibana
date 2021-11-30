@@ -53,8 +53,8 @@ export interface EngineDetails extends Engine {
   isMeta: boolean;
   engine_count?: number;
   includedEngines?: EngineDetails[];
-  search_relevance_suggestions?: SearchRelevanceSuggestionDetails;
-  search_relevance_suggestions_active: boolean;
+  adaptive_relevance_suggestions?: SearchRelevanceSuggestionDetails;
+  adaptive_relevance_suggestions_active: boolean;
 }
 
 interface ResultField {

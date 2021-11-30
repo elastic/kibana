@@ -315,28 +315,6 @@ GET apm-*-metric-*,metrics-apm*/_search?terminate_after=1000
 
 The above example is overly simplified. In reality [we do a bit more](https://github.com/elastic/kibana/blob/fe9b5332e157fd456f81aecfd4ffa78d9e511a66/x-pack/plugins/apm/server/lib/metrics/by_agent/shared/memory/index.ts#L51-L71) to properly calculate memory usage inside containers. Please note that an [Exists Query](https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-exists-query.html) is used in the filter context in the query to ensure that the memory fields exist.
 
-
-
-# Transaction breakdown metrics
-
-A pre-aggregations of transaction documents where `transaction.breakdown.count` is the number of original transactions.
-
-Noteworthy fields: `transaction.name`, `transaction.type`
-
-#### Sample document
-
-```json
-{
-  "@timestamp": "2021-09-27T21:59:59.828Z",
-  "processor.event": "metric",
-  "metricset.name": "transaction_breakdown",
-  "transaction.breakdown.count": 12,
-  "transaction.name": "GET /api/products",
-  "transaction.type": "request"
-}
-}
-```
-
 # Span breakdown metrics
 
 A pre-aggregations of span documents where `span.self_time.count` is the number of original spans. Measures the "self-time" for a span type, and optional subtype, within a transaction group. 
@@ -483,6 +461,7 @@ GET apm-*-metric-*,metrics-apm*/_search?terminate_after=1000
       "aggs": {
         "throughput": {
           "rate": {
+            "field": "span.destination.service.response_time.count",
             "unit": "minute"
           }
         }

@@ -8,7 +8,7 @@
 import moment from 'moment';
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { StepScreenshotDisplay } from '../../step_screenshot_display';
 import { JourneyStep } from '../../../../../common/runtime_types/ping/synthetics';
 import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
@@ -36,6 +36,7 @@ export const StepScreenshots = ({ step }: Props) => {
         timestamp: step['@timestamp'],
         monitorId: step.monitor.id,
         stepIndex: step.synthetics?.step?.index!,
+        location: step.observer?.geo?.name,
       });
     }
   }, [step._id, step['@timestamp']]);

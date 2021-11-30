@@ -23,7 +23,7 @@ import type { ChangeEvent, FunctionComponent, HTMLProps } from 'react';
 import React, { Fragment, useCallback, useEffect, useRef, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type {
   Capabilities,
@@ -224,7 +224,7 @@ function useRole(
 function useSpaces(http: HttpStart, fatalErrors: FatalErrorsSetup) {
   const [spaces, setSpaces] = useState<{ enabled: boolean; list: Space[] } | null>(null);
   useEffect(() => {
-    http.get('/api/spaces/space').then(
+    http.get<Space[]>('/api/spaces/space').then(
       (fetchedSpaces) => setSpaces({ enabled: true, list: fetchedSpaces }),
       (err: IHttpFetchError) => {
         // Spaces plugin can be disabled and hence this endpoint can be unavailable.

@@ -9,7 +9,7 @@ import React, { useState, useMemo } from 'react';
 import { EuiSteps, EuiLink, EuiText, EuiSpacer } from '@elastic/eui';
 import type { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { useGetOneEnrollmentAPIKey, useLink, useFleetStatus } from '../../hooks';
 
@@ -95,7 +95,6 @@ export const ManagedInstructions = React.memo<Props>(
     const steps = useMemo(() => {
       const fleetServerHosts = settings?.fleet_server_hosts || [];
       const baseSteps: EuiContainedStepProps[] = [
-        DownloadStep(),
         !agentPolicy
           ? AgentPolicySelectionStep({
               agentPolicies,
@@ -104,6 +103,7 @@ export const ManagedInstructions = React.memo<Props>(
               setSelectedPolicyId,
             })
           : AgentEnrollmentKeySelectionStep({ agentPolicy, selectedApiKeyId, setSelectedAPIKeyId }),
+        DownloadStep(isFleetServerPolicySelected || false),
       ];
       if (isFleetServerPolicySelected) {
         baseSteps.push(...fleetServerSteps);
