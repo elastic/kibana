@@ -10,6 +10,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default function canvasLensTest({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['canvas', 'common', 'header', 'lens']);
   const esArchiver = getService('esArchiver');
+  const dashboardAddPanel = getService('dashboardAddPanel');
   const kibanaServer = getService('kibanaServer');
   const archives = {
     es: 'x-pack/test/functional/es_archives/canvas/logstash_lens',
@@ -33,16 +34,17 @@ export default function canvasLensTest({ getService, getPageObjects }: FtrProvid
       await kibanaServer.importExport.unload(archives.kbn);
     });
 
-    it('renders lens visualization', async () => {
-      await PageObjects.header.waitUntilLoadingHasFinished();
-
-      await PageObjects.lens.assertMetric('Maximum of bytes', '16,788');
-    });
-
     describe('by-reference', () => {
-      it('renders embeddable with using savedLens expression', () => {});
+      it('renders lens visualization using savedLens expression', async () => {
+        await PageObjects.header.waitUntilLoadingHasFinished();
 
-      it('adds existing visualize embeddable from the visualize library', async () => {});
+        await PageObjects.lens.assertMetric('Maximum of bytes', '16,788');
+      });
+
+      it('adds existing visualize embeddable from the visualize library', async () => {
+        await PageObjects.canvas.clickAddFromLibrary();
+        await dashboardAddPanel.toggleFilter('lens');
+      });
 
       it('edits visualize by-reference embeddable', async () => {});
     });

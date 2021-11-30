@@ -27,7 +27,10 @@ export default function canvasApp({ loadTestFile, getService }) {
     loadTestFile(require.resolve('./custom_elements'));
     loadTestFile(require.resolve('./feature_controls/canvas_security'));
     loadTestFile(require.resolve('./feature_controls/canvas_spaces'));
-    loadTestFile(require.resolve('./lens'));
+    loadTestFile(require.resolve('./embeddables/lens'));
+    loadTestFile(require.resolve('./embeddables/maps'));
+    loadTestFile(require.resolve('./embeddables/saved_search'));
+    loadTestFile(require.resolve('./embeddables/visualize'));
     loadTestFile(require.resolve('./reports'));
     loadTestFile(require.resolve('./saved_object_resolve'));
   });

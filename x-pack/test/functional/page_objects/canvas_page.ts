@@ -10,6 +10,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export function CanvasPageProvider({ getService, getPageObjects }: FtrProviderContext) {
+  const log = getService('log');
   const testSubjects = getService('testSubjects');
   const find = getService('find');
   const browser = getService('browser');
@@ -44,6 +45,11 @@ export function CanvasPageProvider({ getService, getPageObjects }: FtrProviderCo
       expect(text).to.be(workpadName);
       await elem.click();
       await testSubjects.existOrFail('canvasWorkpadPage');
+    },
+
+    async createNewWorkpad() {
+      log.debug('CanvasPage.createNewWorkpad');
+      await testSubjects.click('create-workpad-button');
     },
 
     async fillOutCustomElementForm(name: string, description: string) {
@@ -114,6 +120,12 @@ export function CanvasPageProvider({ getService, getPageObjects }: FtrProviderCo
       const filters = JSON.parse(content);
 
       return filters.and.filter((f: any) => f.filterType === 'exactly');
+    },
+
+    async clickAddFromLibrary() {
+      log.debug('CanvasPage.clickAddFromLibrary');
+      await testSubjects.click('canvas-add-from-library-button');
+      await testSubjects.existOrFail('dashboardAddPanel');
     },
   };
 }
