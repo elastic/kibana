@@ -30,6 +30,8 @@ import { useShowTimeline } from '../../../common/utils/timeline/use_show_timelin
 import { gutterTimeline } from '../../../common/lib/helpers';
 import { useShowPagesWithEmptyView } from '../../../common/utils/empty_view/use_show_pages_with_empty_view';
 import { navTabs, cloudPostureNavTabs } from '../home_navigations';
+import { CSP_ROOT_PATH } from '../../../../common/constants';
+
 /**
  * Need to apply the styles via a className to effect the containing bottom bar
  * rather than applying them to the timeline bar directly
@@ -69,7 +71,7 @@ interface SecuritySolutionPageWrapperProps {
   onAppLeave: (handler: AppLeaveHandler) => void;
 }
 
-const isCloudPostureNav = (v: string) => v?.includes('/csp');
+const isCloudPostureNav = (v: string) => v?.includes(CSP_ROOT_PATH);
 
 export const SecuritySolutionTemplateWrapper: React.FC<SecuritySolutionPageWrapperProps> =
   React.memo(({ children, onAppLeave }) => {

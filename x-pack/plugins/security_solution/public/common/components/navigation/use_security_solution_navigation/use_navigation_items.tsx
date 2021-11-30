@@ -18,6 +18,7 @@ import { useGetUserCasesPermissions } from '../../../lib/kibana';
 import { useNavigation } from '../../../lib/kibana/hooks';
 import { NavTab } from '../types';
 import { useCanSeeHostIsolationExceptionsMenu } from '../../../../management/pages/host_isolation_exceptions/view/hooks';
+import { CSP_ROOT_PATH } from '../../../../../common/constants';
 
 export const usePrimaryNavigationItems = ({
   navTabs,
@@ -63,7 +64,7 @@ export const usePrimaryNavigationItems = ({
   );
 };
 
-const useIsCloudPosture = () => !!useLocation()?.pathname?.includes('/csp');
+const useIsCloudPosture = () => !!useLocation()?.pathname?.includes(CSP_ROOT_PATH);
 
 function usePrimaryNavigationItemsToDisplay(navTabs: Record<string, NavTab>) {
   const hasCasesReadPermissions = useGetUserCasesPermissions()?.read;
