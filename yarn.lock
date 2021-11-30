@@ -5813,6 +5813,10 @@
   version "0.0.0"
   uid ""
 
+"@types/kbn__analytics@link:bazel-bin/packages/kbn-analytics/npm_module_types":
+  version "0.0.0"
+  uid ""
+
 "@types/kbn__i18n-react@link:bazel-bin/packages/kbn-i18n-react/npm_module_types":
   version "0.0.0"
   uid ""
