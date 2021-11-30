@@ -8,25 +8,28 @@
 import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
 import { validateExpression } from './validation';
-import { DiscoverThresholdAlertParams } from './types';
+import { SearchThresholdAlertParams } from './types';
 import { AlertTypeModel } from '../../../../triggers_actions_ui/public';
 
-export { DiscoverThresholdAlertParams } from './types';
+export { SearchThresholdAlertParams } from './types';
 
-export function getAlertType(): AlertTypeModel<DiscoverThresholdAlertParams> {
+export function getAlertType(): AlertTypeModel<SearchThresholdAlertParams> {
   return {
     id: '.search-threshold',
-    description: i18n.translate('xpack.stackAlerts.threshold.ui.alertType.descriptionText', {
+    description: i18n.translate('xpack.stackAlerts.searchThreshold.ui.alertType.descriptionText', {
       defaultMessage: 'Alert when number of documents meets the threshold.',
     }),
     iconClass: 'alert',
     documentationUrl: (docLinks) => docLinks.links.alerting.indexThreshold,
+    /**
+     * This actual UI displayed in the flyout
+     */
     alertParamsExpression: lazy(() => import('./expression')),
     validate: validateExpression,
     defaultActionMessage: i18n.translate(
-      'xpack.stackAlerts.threshold.ui.alertType.defaultActionMessage',
+      'xpack.stackAlerts.searchThreshold.ui.alertType.defaultActionMessage',
       {
-        defaultMessage: `alert '\\{\\{alertName\\}\\}' is active for group '\\{\\{context.group\\}\\}':
+        defaultMessage: `alert '\\{\\{alertName\\}\\}' is active':
 
 - Value: \\{\\{context.value\\}\\}
 - Conditions Met: \\{\\{context.conditions\\}\\} over \\{\\{params.timeWindowSize\\}\\}\\{\\{params.timeWindowUnit\\}\\}

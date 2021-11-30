@@ -6,7 +6,7 @@
  */
 
 import { getAlertType as getGeoContainmentAlertType } from './geo_containment';
-import { getAlertType as getDiscoverThresholdAlertType } from './discover_threshold';
+import { getAlertType as getSearchThresholdAlertType } from './search_threshold';
 import { getAlertType as getThresholdAlertType } from './threshold';
 import { getAlertType as getEsQueryAlertType } from './es_query';
 import { Config } from '../../common';
@@ -22,5 +22,5 @@ export function registerAlertTypes({
   ruleTypeRegistry.register(getGeoContainmentAlertType());
   ruleTypeRegistry.register(getThresholdAlertType());
   ruleTypeRegistry.register(getEsQueryAlertType());
-  ruleTypeRegistry.register(getDiscoverThresholdAlertType());
+  ruleTypeRegistry.register(getSearchThresholdAlertType());
 }

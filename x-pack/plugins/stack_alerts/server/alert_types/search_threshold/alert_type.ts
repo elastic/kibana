@@ -20,28 +20,30 @@ import {
 } from '../../../../../../src/plugins/data/common';
 import { AlertTypeParams } from '../../../../alerting/common';
 import { SharePluginSetup } from '../../../../../../src/plugins/share/server';
+import { STACK_ALERTS_FEATURE_ID } from '../../../common';
 
 export const ID = '.search-threshold';
 export const ActionGroupId = 'threshold met';
+export const ConditionMetAlertInstanceId = 'Search matched threshold';
 
-export interface DiscoverThresholdParams extends AlertTypeParams {
+/**
+ * These are the params the user can configure, except searchSourceFields
+ * they are matching the index-threshold rule
+ */
+export interface SearchThresholdParams extends AlertTypeParams {
   thresholdComparator: string;
   threshold: number[];
   timeWindowSize: number;
   timeWindowUnit: string;
   searchSourceFields: SearchSourceFields;
-  urlTemplate?: string;
 }
-export type DiscoverThresholdExtractedParams = Omit<
-  DiscoverThresholdParams,
-  'searchSourceFields'
-> & {
+export type SearchThresholdExtractedParams = Omit<SearchThresholdParams, 'searchSourceFields'> & {
   searchSourceFields: SearchSourceFields & { indexRefName: string };
 };
 
-export type DiscoverAlertType = AlertType<
-  DiscoverThresholdParams,
-  DiscoverThresholdExtractedParams,
+export type SearchThresholdAlertType = AlertType<
+  SearchThresholdParams,
+  SearchThresholdExtractedParams,
   {},
   {},
   ActionContext,
@@ -52,7 +54,7 @@ export function getAlertType(
   logger: Logger,
   share: SharePluginSetup,
   core: CoreSetup
-): DiscoverAlertType {
+): SearchThresholdAlertType {
   const alertTypeName = i18n.translate('xpack.stackAlerts.searchThreshold.alertTypeTitle', {
     defaultMessage: 'Search threshold',
   });
@@ -122,13 +124,33 @@ export function getAlertType(
   );
 
   return {
+    /**
+     * Unique identifier for the rule type. By convention, IDs starting with . are reserved for built-in rule types.
+     */
     id: ID,
+    /**
+     * A user-friendly name for the rule type
+     */
     name: alertTypeName,
+    /**
+     * An explicit list of groups the rule type may schedule actions for
+     * We just need a single group
+     */
     actionGroups: [{ id: ActionGroupId, name: actionGroupName }],
+    /**
+     * The default group
+     */
     defaultActionGroupId: ActionGroupId,
+    /**
+     * Validator for the parameters (threshold, thresholdComparator) executed before
+     * they are passed to the executor function
+     */
     validate: {
       params: ParamsSchema,
     },
+    /**
+     * These are the variables available in the UI in the action parameter templates
+     */
     actionVariables: {
       context: [
         { name: 'message', description: actionVariableContextMessageLabel },
@@ -145,37 +167,57 @@ export function getAlertType(
         { name: 'timeWindowSize', description: 'Time window size' },
         { name: 'timeWindowUnit', description: 'Time window unit' },
         { name: 'searchSourceFields', description: 'SearchSourceFields' },
-        { name: 'urlTemplate', description: 'Can contain a URL template' },
       ],
     },
     minimumLicenseRequired: 'basic',
+    /**
+     * Whether the rule type is exportable from the Saved Objects Management UI.
+     */
     isExportable: true,
+    /**
+     * This is a function to be called when executing a rule on an interval basis.
+     */
     executor,
-    producer: 'discover',
+    /**
+     * The id of the application producing this rule type.
+     * Since were creating a new stack rule type, we don't set Discover here
+     */
+    producer: STACK_ALERTS_FEATURE_ID,
+    /**
+     * The length of time a rule can run before being cancelled due to timeout
+     */
+    ruleTaskTimeout: '5m',
+    /**
+     * Used for extract and inject saved object references of search source
+     */
     useSavedObjectReferences: {
       extractReferences: (params) => {
         const [searchSourceFields, references] = extractReferences(params.searchSourceFields);
-        const newParams = { ...params, searchSourceFields } as DiscoverThresholdExtractedParams;
+        const newParams = { ...params, searchSourceFields } as SearchThresholdExtractedParams;
         return { params: newParams, references };
       },
       injectReferences: (params, references) => {
         return {
           ...params,
           searchSourceFields: injectReferences(params.searchSourceFields, references),
-        } as DiscoverThresholdParams;
+        } as SearchThresholdParams;
       },
     },
   };
+
   async function executor(
     options: AlertExecutorOptions<
-      DiscoverThresholdParams,
-      {},
+      SearchThresholdParams,
+      { previousTimestamp?: string; previousTimeRange?: { from: string; to: string } },
       {},
       ActionContext,
       typeof ActionGroupId
     >
   ) {
     const { name, services, params, alertId, state } = options;
+    const publicBaseUrl = core.http.basePath.publicBaseUrl ?? '';
+    const timestamp = new Date().toISOString();
+    logger.info(`searchThreshold (${alertId}) previousTimestamp: ${state.previousTimestamp}`);
 
     const compareFn = ComparatorFns.get(params.thresholdComparator);
     if (compareFn == null) {
@@ -202,14 +244,33 @@ export function getAlertType(
     }
 
     loadedSearchSource.setField('size', 0);
+    // the current state is we don't apply any logic to adapt the time range to prevent
+    // blind spots
     const filter = getTime(index, {
       from: `now-${params.timeWindowSize}${params.timeWindowUnit}`,
       to: 'now',
     });
+    const from = filter?.query.range[timeFieldName].gte;
+    const to = filter?.query.range[timeFieldName].lte;
+
     const searchSourceChild = loadedSearchSource.createChild();
     searchSourceChild.setField('filter', filter);
-    const docs = await searchSourceChild.fetch();
-    const nrOfDocs = Number(docs.hits.total);
+    let nrOfDocs = 0;
+
+    try {
+      logger.info(
+        `searchThreshold (${alertId}) query: ${JSON.stringify(
+          searchSourceChild.getSearchRequestBody()
+        )}`
+      );
+      const docs = await searchSourceChild.fetch();
+      nrOfDocs = Number(docs.hits.total);
+      logger.info(`searchThreshold (${alertId}) nrOfDocs: ${nrOfDocs}`);
+    } catch (e) {
+      logger.error('Error fetching documents', e);
+      throw e;
+    }
+
     const met = compareFn(nrOfDocs, params.threshold);
 
     if (met) {
@@ -219,47 +280,30 @@ export function getAlertType(
       // @TODO, there should be a checksum addon to verify if the searchSource was changed
       // In this case the user should be notified that the displayed data when opening the link
       // is a might be different to the data that triggered the alert.
-      const link = (
-        params.urlTemplate ??
-        '{{basePath}}/app/discover#/viewAlert/{{alertId}}?from={{from}}&to={{to}}'
-      )
-        .replace('{{alertId}}', alertId)
-        .replace('{{basePath}}', core.http.basePath.publicBaseUrl ?? '')
-        .replace('{{from}}', filter?.query.range[timeFieldName].gte ?? '')
-        .replace('{{to}}', filter?.query.range[timeFieldName].lte ?? '');
+      const link = `${publicBaseUrl}/app/discover#/viewAlert/${alertId}?from${from}&to=${to}`;
 
       const conditions = `${nrOfDocs} is ${getHumanReadableComparator(
         params.thresholdComparator
       )} ${params.threshold}`;
 
-      const timestamp = new Date().toISOString();
-      // just for testing
-      const instanceId = timestamp;
       const baseContext: ActionContext = {
         title: name,
         message: `${nrOfDocs} documents found (${conditions})`,
         date: timestamp,
-        group: instanceId,
+        group: ConditionMetAlertInstanceId,
         value: Number(nrOfDocs),
         conditions,
         link,
       };
 
-      const alertInstance = options.services.alertInstanceFactory(instanceId);
-      // store the params we would need to recreate the query that led to this alert instance
-      alertInstance.replaceState({
-        latestTimestamp: timestamp,
-        lastSearchSource: params.searchSourceFields,
-        lastTimeRange: filter!.query.range,
-      });
+      // this is where the notification is scheduled
+      const alertInstance = options.services.alertInstanceFactory(ConditionMetAlertInstanceId);
       alertInstance.scheduleActions(ActionGroupId, baseContext);
-      return {
-        latestTimestamp: timestamp,
-        lastSearchSource: params.searchSourceFields,
-        lastTimeRange: filter!.query.range,
-      };
     }
-
-    return state;
+    // this is the state that we can access in the next execution
+    return {
+      previousTimestamp: timestamp,
+      previousTimeRange: { from, to },
+    };
   }
 }

@@ -15,7 +15,7 @@ import {
   ForLastExpression,
   AlertTypeParamsExpressionProps,
 } from '../../../../triggers_actions_ui/public';
-import { DiscoverThresholdAlertParams } from './types';
+import { SearchThresholdAlertParams } from './types';
 import './expression.scss';
 import {
   Filter,
@@ -37,12 +37,15 @@ export const DEFAULT_VALUES = {
 
 const expressionFieldsWithValidation = ['threshold0', 'threshold1', 'timeWindowSize'];
 
-export const IndexThresholdAlertTypeExpression: React.FunctionComponent<
-  AlertTypeParamsExpressionProps<DiscoverThresholdAlertParams>
+export const SearchThresholdAlertTypeExpression: React.FunctionComponent<
+  AlertTypeParamsExpressionProps<SearchThresholdAlertParams>
 > = ({ alertParams, setAlertParams, setAlertProperty, errors, data }) => {
   const { thresholdComparator, threshold, timeWindowSize, timeWindowUnit, searchSourceFields } =
     alertParams;
   const [usedSearchSource, setUsedSearchSource] = useState<ISearchSource | undefined>();
+
+  // Note that this PR contains a limited way to edit query and filter
+  // But it's out of scope for the MVP
   const [showQueryBar, setShowQueryBar] = useState<boolean>(false);
   const [showFilter, setShowFilter] = useState<boolean>(false);
 
@@ -62,11 +65,11 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<
     (errorKey) =>
       expressionFieldsWithValidation.includes(errorKey) &&
       errors[errorKey].length >= 1 &&
-      alertParams[errorKey as keyof DiscoverThresholdAlertParams] !== undefined
+      alertParams[errorKey as keyof SearchThresholdAlertParams] !== undefined
   );
 
   const expressionErrorMessage = i18n.translate(
-    'xpack.stackAlerts.threshold.ui.alertParams.fixErrorInExpressionBelowValidationMessage',
+    'xpack.stackAlerts.searchThreshold.ui.alertParams.fixErrorInExpressionBelowValidationMessage',
     {
       defaultMessage: 'Expression contains errors.',
     }
@@ -83,15 +86,28 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<
   };
 
   useEffect(() => {
-    setDefaultExpressionValues();
+    if (searchSourceFields) {
+      setDefaultExpressionValues();
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   if (!searchSourceFields) {
-    <EuiCallOut color="danger" size="s" title={`Please go to Discover to create an alert`} />;
+    // of course there should be a link for that
+    return (
+      <div>
+        <EuiCallOut
+          color="danger"
+          size="s"
+          title={`Currently the creation of this rule is just possible in Discover`}
+        />
+        <EuiSpacer size="l" />
+      </div>
+    );
   }
 
   if (!usedSearchSource) {
+    // there should be a loading indicator
     return null;
   }
   const filterArr = usedSearchSource!.getField('filter') as Filter[];
@@ -108,7 +124,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<
       <EuiTitle size="xs">
         <h5>
           <FormattedMessage
-            id="xpack.stackAlerts.threshold.ui.conditionPrompt"
+            id="xpack.stackAlerts.searchThreshold.ui.conditionPrompt"
             defaultMessage="When the number of documents matching"
           />
         </h5>
@@ -144,7 +160,6 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<
         />
       </EuiPopover>
       <EuiSpacer size="s" />
-
       <EuiPopover
         button={
           <EuiExpression
@@ -153,6 +168,8 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<
               filterArr
                 ? filterArr
                     .map((filter: Filter) => {
+                      // currently it's just displaying the filter key
+                      // but of course this needs to be improved
                       return filter.meta.key;
                     })
                     .join(', ')
@@ -179,13 +196,12 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<
           }}
         />
       </EuiPopover>
-
       <EuiSpacer size="s" />
-
+      // this code was copied from search_threshold so it might make sense to share code
       <EuiTitle size="xs">
         <h5>
           <FormattedMessage
-            id="xpack.stackAlerts.threshold.ui.conditionPrompt"
+            id="xpack.stackAlerts.searchThreshold.ui.conditionPrompt"
             defaultMessage="Define the condition"
           />
         </h5>
@@ -226,4 +242,4 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<
 };
 
 // eslint-disable-next-line import/no-default-export
-export { IndexThresholdAlertTypeExpression as default };
+export { SearchThresholdAlertTypeExpression as default };
