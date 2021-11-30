@@ -439,6 +439,7 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
       runtimeMappings: {},
       start: rangeFrom,
       setRefetch,
+      showCheckboxes: false,
       sort: tGridState?.sort ?? [
         {
           columnId: '@timestamp',
