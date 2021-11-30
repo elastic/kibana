@@ -251,6 +251,11 @@ describe('XY Config panels', () => {
   });
 
   describe('Dimension Editor', () => {
+    const savedObjectsClient = {
+      find: jest.fn(() => Promise.resolve({ page: 1, total: 0, savedObjects: [] })),
+      create: jest.fn(() => Promise.resolve({ id: 'testid' })),
+      resolve: jest.fn(),
+    } as unknown as SavedObjectsClientContract;
     test('shows the correct axis side options when in horizontal mode', () => {
       const state = testState();
       const component = mount(
@@ -264,7 +269,7 @@ describe('XY Config panels', () => {
           formatFactory={jest.fn()}
           paletteService={chartPluginMock.createPaletteRegistry()}
           panelRef={React.createRef()}
-          savedObjectsClient={{} as SavedObjectsClientContract}
+          savedObjectsClient={savedObjectsClient}
         />
       );
 
@@ -289,7 +294,7 @@ describe('XY Config panels', () => {
           formatFactory={jest.fn()}
           paletteService={chartPluginMock.createPaletteRegistry()}
           panelRef={React.createRef()}
-          savedObjectsClient={{} as SavedObjectsClientContract}
+          savedObjectsClient={savedObjectsClient}
         />
       );
 
@@ -335,7 +340,7 @@ describe('XY Config panels', () => {
           formatFactory={jest.fn()}
           paletteService={chartPluginMock.createPaletteRegistry()}
           panelRef={React.createRef()}
-          savedObjectsClient={{} as SavedObjectsClientContract}
+          savedObjectsClient={savedObjectsClient}
         />
       );
 
@@ -377,7 +382,7 @@ describe('XY Config panels', () => {
           formatFactory={jest.fn()}
           paletteService={chartPluginMock.createPaletteRegistry()}
           panelRef={React.createRef()}
-          savedObjectsClient={{} as SavedObjectsClientContract}
+          savedObjectsClient={savedObjectsClient}
         />
       );
 
