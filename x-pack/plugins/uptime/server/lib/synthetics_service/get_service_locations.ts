@@ -15,7 +15,7 @@ export async function getServiceLocations({ config }: { config: UptimeConfig }) 
   try {
     const { data } = await axios.get<Record<string, ManifestLocation>>(manifestURL);
 
-    Object.entries(data).forEach(([locationId, location]) => {
+    Object.entries(data.locations).forEach(([locationId, location]) => {
       locations.push({
         id: locationId,
         label: location.geo.name,
