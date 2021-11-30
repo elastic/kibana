@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import path from 'path';
 import { CustomPageSize } from 'pdfmake/interfaces';
 import { LAYOUT_TYPES } from '../../../common/constants';
@@ -37,6 +36,7 @@ export class PreserveLayout extends Layout implements LayoutInstance {
   }
 
   public getCssOverridesPath() {
+    // TODO: Remove this path once we have migrated all plugins away from depending on this hiding page elements.
     return path.join(__dirname, 'preserve_layout.css');
   }
 
