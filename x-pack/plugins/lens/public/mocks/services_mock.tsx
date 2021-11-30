@@ -50,7 +50,9 @@ export const defaultDoc = {
 } as unknown as Document;
 
 export const exactMatchDoc = {
-  ...defaultDoc,
+  attributes: {
+    ...defaultDoc,
+  },
   sharingSavedObjectProps: {
     outcome: 'exactMatch',
   },
