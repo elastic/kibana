@@ -23,6 +23,7 @@ export interface UiState {
   alertFlyoutType?: string;
   basePath: string;
   esKuery: string;
+  initialEsKuerySet: boolean;
   searchText: string;
   integrationsPopoverOpen: PopoverState | null;
   monitorId: string;
@@ -32,6 +33,7 @@ const initialState: UiState = {
   alertFlyoutVisible: false,
   basePath: '',
   esKuery: '',
+  initialEsKuerySet: false,
   searchText: '',
   integrationsPopoverOpen: null,
   monitorId: '',
@@ -57,8 +59,8 @@ export const uiReducer = handleActions<UiState, UiPayload>(
     [String(setEsKueryString)]: (state, action: Action<string>) => ({
       ...state,
       esKuery: action.payload as string,
+      initialEsKuerySet: true,
     }),
-
     [String(setAlertFlyoutType)]: (state, action: Action<string>) => ({
       ...state,
       alertFlyoutType: action.payload,

@@ -9,7 +9,11 @@ import React, { useContext, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { PingHistogramComponent } from '../../common/charts';
 import { getPingHistogram } from '../../../state/actions';
-import { esKuerySelector, selectPingHistogram } from '../../../state/selectors';
+import {
+  esKueryInitialStatusSelector,
+  esKuerySelector,
+  selectPingHistogram,
+} from '../../../state/selectors';
 import { useGetUrlParams } from '../../../hooks';
 import { useMonitorId } from '../../../hooks';
 import { ResponsiveWrapperProps, withResponsiveWrapper } from '../../common/higher_order';
@@ -37,9 +41,12 @@ const Container: React.FC<Props & ResponsiveWrapperProps> = ({ height }) => {
 
   const { loading, pingHistogram: data } = useSelector(selectPingHistogram);
 
+  const esKueryHasLoaded = useSelector(esKueryInitialStatusSelector);
   useEffect(() => {
-    dispatch(getPingHistogram.get({ monitorId, dateStart, dateEnd, query, filters: esKuery }));
-  }, [dateStart, dateEnd, monitorId, lastRefresh, esKuery, dispatch, query]);
+    if (esKueryHasLoaded) {
+      dispatch(getPingHistogram.get({ monitorId, dateStart, dateEnd, query, filters: esKuery }));
+    }
+  }, [esKueryHasLoaded, dateStart, dateEnd, monitorId, lastRefresh, esKuery, dispatch, query]);
   return (
     <PingHistogramComponent
       data={data}
