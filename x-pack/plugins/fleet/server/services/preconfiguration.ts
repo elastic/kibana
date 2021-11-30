@@ -429,8 +429,7 @@ async function addPreconfiguredPolicyPackages(
       defaultOutput,
       name,
       description,
-      (policy) => preconfigurePackageInputs(policy, packageInfo, inputs),
-      bumpAgentPolicyRevison
+      (policy) => preconfigurePackageInputs(policy, packageInfo, inputs)
     );
   }
 }
