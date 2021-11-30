@@ -12,6 +12,7 @@ import { ConfigKeys, Validation } from '../types';
 import { useTCPSimpleFieldsContext } from '../contexts';
 import { ScheduleField } from '../schedule_field';
 import { CommonFields } from '../common/common_fields';
+import { Enabled } from '../common/enabled';
 
 interface Props {
   validate: Validation;
@@ -25,6 +26,7 @@ export const TCPSimpleFields = memo<Props>(({ validate }) => {
 
   return (
     <>
+      <Enabled fields={fields} onChange={handleInputChange} />
       <EuiFormRow
         label={
           <FormattedMessage

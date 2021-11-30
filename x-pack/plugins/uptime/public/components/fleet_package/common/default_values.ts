@@ -9,6 +9,7 @@ import { ICommonFields, ConfigKeys, ScheduleUnit, DataStream } from '../types';
 
 export const defaultValues: ICommonFields = {
   [ConfigKeys.MONITOR_TYPE]: DataStream.HTTP,
+  [ConfigKeys.ENABLED]: true,
   [ConfigKeys.SCHEDULE]: {
     number: '3',
     unit: ScheduleUnit.MINUTES,

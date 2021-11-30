@@ -13,6 +13,7 @@ import { useHTTPSimpleFieldsContext } from '../contexts';
 import { OptionalLabel } from '../optional_label';
 import { ScheduleField } from '../schedule_field';
 import { CommonFields } from '../common/common_fields';
+import { Enabled } from '../common/enabled';
 
 interface Props {
   validate: Validation;
@@ -26,6 +27,7 @@ export const HTTPSimpleFields = memo<Props>(({ validate }) => {
 
   return (
     <>
+      <Enabled fields={fields} onChange={handleInputChange} />
       <EuiFormRow
         label={
           <FormattedMessage

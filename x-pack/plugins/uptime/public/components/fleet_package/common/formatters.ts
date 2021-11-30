@@ -14,6 +14,7 @@ export type CommonFormatMap = Record<keyof ICommonFields | ConfigKeys.NAME, Form
 export const commonFormatters: CommonFormatMap = {
   [ConfigKeys.NAME]: null,
   [ConfigKeys.MONITOR_TYPE]: null,
+  [ConfigKeys.ENABLED]: null,
   [ConfigKeys.SCHEDULE]: (fields) =>
     JSON.stringify(
       `@every ${fields[ConfigKeys.SCHEDULE]?.number}${fields[ConfigKeys.SCHEDULE]?.unit}`

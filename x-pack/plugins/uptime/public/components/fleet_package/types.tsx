@@ -75,6 +75,7 @@ export enum ScreenshotOption {
 // values must match keys in the integration package
 export enum ConfigKeys {
   APM_SERVICE_NAME = 'service.name',
+  ENABLED = 'enabled',
   HOSTS = 'hosts',
   IGNORE_HTTPS_ERRORS = 'ignore_https_errors',
   JOURNEY_FILTERS_MATCH = 'filter_journeys.match',
@@ -137,6 +138,7 @@ export interface Metadata {
 
 export interface ICommonFields {
   [ConfigKeys.MONITOR_TYPE]: DataStream;
+  [ConfigKeys.ENABLED]: boolean;
   [ConfigKeys.SCHEDULE]: { number: string; unit: ScheduleUnit };
   [ConfigKeys.APM_SERVICE_NAME]: string;
   [ConfigKeys.TIMEOUT]: string;

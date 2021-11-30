@@ -21,11 +21,18 @@ import { CustomFields } from './custom_fields';
 import { ConfigKeys, DataStream, ScheduleUnit } from './types';
 import { validate as centralValidation } from './validation';
 import { defaultConfig } from './synthetics_policy_create_extension';
+import { useGeneratedHtmlId } from '@elastic/eui';
 
 // ensures that fields appropriately match to their label
 jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
   ...jest.requireActual('@elastic/eui/lib/services/accessibility/html_id_generator'),
   htmlIdGenerator: () => () => `id-${Math.random()}`,
+}));
+
+// ensures that fields appropriately match to their label
+jest.mock('@elastic/eui/lib/services/accessibility', () => ({
+  ...jest.requireActual('@elastic/eui/lib/services/accessibility'),
+  useGeneratedHtmlId: () => `id-${Math.random()}`,
 }));
 
 jest.mock('../../../../../../src/plugins/kibana_react/public', () => {
@@ -317,6 +324,22 @@ describe('<CustomFields />', () => {
       expect(getByText('TCP')).toBeInTheDocument();
       expect(getByText('ICMP')).toBeInTheDocument();
       expect(queryByText('Browser (Beta)')).not.toBeInTheDocument();
+    });
+  });
+
+  it('allows monitors to be disabled', async () => {
+    const { queryByLabelText } = render(
+      <WrappedComponent dataStreams={[DataStream.HTTP, DataStream.TCP, DataStream.ICMP]} />
+    );
+
+    const enabled = queryByLabelText('Enabled') as HTMLInputElement;
+    expect(enabled).toBeChecked();
+
+    // resolve errors
+    fireEvent.click(enabled);
+
+    await waitFor(() => {
+      expect(enabled).not.toBeChecked();
     });
   });
 });

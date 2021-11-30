@@ -57,6 +57,7 @@ export const getCommonCronToSecondsNormalizer = (key: ConfigKeys) => {
 
 export const commonNormalizers: CommonNormalizerMap = {
   [ConfigKeys.NAME]: (fields) => fields?.[ConfigKeys.NAME]?.value ?? '',
+  [ConfigKeys.ENABLED]: getCommonNormalizer(ConfigKeys.ENABLED),
   [ConfigKeys.MONITOR_TYPE]: getCommonNormalizer(ConfigKeys.MONITOR_TYPE),
   [ConfigKeys.SCHEDULE]: (fields) => {
     const value = fields?.[ConfigKeys.SCHEDULE]?.value;
