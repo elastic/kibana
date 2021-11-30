@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient } from 'kibana/server';
+import type { ElasticsearchClient, Logger } from 'kibana/server';
 
 import type { Field, Fields } from '../../fields/field';
 import type {
@@ -18,6 +18,7 @@ import { appContextService } from '../../../';
 import { getRegistryDataStreamAssetBaseName } from '../index';
 import { FLEET_GLOBAL_COMPONENT_TEMPLATE_NAME } from '../../../../constants';
 import { getESAssetMetadata } from '../meta';
+import { retryTransientEsErrors } from '../retry';
 
 interface Properties {
   [key: string]: any;
@@ -408,13 +409,14 @@ function getBaseTemplate(
 
 export const updateCurrentWriteIndices = async (
   esClient: ElasticsearchClient,
+  logger: Logger,
   templates: IndexTemplateEntry[]
 ): Promise<void> => {
   if (!templates.length) return;
 
   const allIndices = await queryDataStreamsFromTemplates(esClient, templates);
   if (!allIndices.length) return;
-  return updateAllDataStreams(allIndices, esClient);
+  return updateAllDataStreams(allIndices, esClient, logger);
 };
 
 function isCurrentDataStream(item: CurrentDataStream[] | undefined): item is CurrentDataStream[] {
@@ -448,11 +450,12 @@ const getDataStreams = async (
 
 const updateAllDataStreams = async (
   indexNameWithTemplates: CurrentDataStream[],
-  esClient: ElasticsearchClient
+  esClient: ElasticsearchClient,
+  logger: Logger
 ): Promise<void> => {
   const updatedataStreamPromises = indexNameWithTemplates.map(
     ({ dataStreamName, indexTemplate }) => {
-      return updateExistingDataStream({ dataStreamName, esClient, indexTemplate });
+      return updateExistingDataStream({ dataStreamName, esClient, logger, indexTemplate });
     }
   );
   await Promise.all(updatedataStreamPromises);
@@ -460,10 +463,12 @@ const updateAllDataStreams = async (
 const updateExistingDataStream = async ({
   dataStreamName,
   esClient,
+  logger,
   indexTemplate,
 }: {
   dataStreamName: string;
   esClient: ElasticsearchClient;
+  logger: Logger;
   indexTemplate: IndexTemplate;
 }) => {
   const { settings, mappings } = indexTemplate.template;
@@ -476,14 +481,19 @@ const updateExistingDataStream = async ({
 
   // try to update the mappings first
   try {
-    await esClient.indices.putMapping({
-      index: dataStreamName,
-      body: mappings,
-      write_index_only: true,
-    });
+    await retryTransientEsErrors(
+      () =>
+        esClient.indices.putMapping({
+          index: dataStreamName,
+          body: mappings,
+          write_index_only: true,
+        }),
+      { logger }
+    );
     // if update fails, rollover data stream
   } catch (err) {
     try {
+      // Do no wrap rollovers in retryTransientEsErrors since it is not idempotent
       const path = `/${dataStreamName}/_rollover`;
       await esClient.transport.request({
         method: 'POST',
@@ -498,10 +508,14 @@ const updateExistingDataStream = async ({
   // for now, only update the pipeline
   if (!settings.index.default_pipeline) return;
   try {
-    await esClient.indices.putSettings({
-      index: dataStreamName,
-      body: { default_pipeline: settings.index.default_pipeline },
-    });
+    await retryTransientEsErrors(
+      () =>
+        esClient.indices.putSettings({
+          index: dataStreamName,
+          body: { default_pipeline: settings.index.default_pipeline },
+        }),
+      { logger }
+    );
   } catch (err) {
     throw new Error(`could not update index template settings for ${dataStreamName}`);
   }
