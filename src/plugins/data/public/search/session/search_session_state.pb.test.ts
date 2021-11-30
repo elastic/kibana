@@ -15,6 +15,18 @@ import { SearchSessionSavedObjectAttributes, SearchSessionStatus } from 'src/plu
 import { SessionStateContainer, createSessionStateContainer } from './search_session_state';
 import { SearchSessionSavedObject } from './sessions_client';
 
+describe('Search session state', () => {
+  it('should function as expected', () => {
+    fc.assert(
+      fc.property(SearchStateContainerCommands, (commands) => {
+        const { stateContainer: real } = createSessionStateContainer();
+        const model = new SearchSessionStateContainerModel();
+        fc.modelRun(() => ({ real, model }), commands);
+      })
+    );
+  });
+});
+
 const option = <T>(arb: fc.Arbitrary<T>) => fc.option(arb, { nil: undefined });
 
 function arbitrarySearchSessionSavedObjectAttributes(): fc.Arbitrary<SearchSessionSavedObjectAttributes> {
@@ -242,15 +254,3 @@ const SearchStateContainerCommands = fc.commands(
     maxCommands: 1000,
   }
 );
-
-describe('Search session state', () => {
-  it('should function as expected', () => {
-    fc.assert(
-      fc.property(SearchStateContainerCommands, (commands) => {
-        const { stateContainer: real } = createSessionStateContainer();
-        const model = new SearchSessionStateContainerModel();
-        fc.modelRun(() => ({ real, model }), commands);
-      })
-    );
-  });
-});
