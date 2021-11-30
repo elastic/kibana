@@ -12,7 +12,6 @@ import { filter, map } from 'rxjs/operators';
 
 import { Start as InspectorStartContract } from 'src/plugins/inspector/public';
 import { UrlForwardingSetup, UrlForwardingStart } from 'src/plugins/url_forwarding/public';
-import { ScreenshotModePluginStart } from 'src/plugins/screenshot_mode/public';
 import { APP_WRAPPER_CLASS } from '../../../core/public';
 import {
   App,
@@ -37,6 +36,10 @@ import { NavigationPublicPluginStart as NavigationStart } from './services/navig
 import { DataPublicPluginSetup, DataPublicPluginStart, esFilters } from './services/data';
 import { SharePluginSetup, SharePluginStart, UrlGeneratorContract } from './services/share';
 import type { SavedObjectTaggingOssPluginStart } from './services/saved_objects_tagging_oss';
+import type {
+  ScreenshotModePluginSetup,
+  ScreenshotModePluginStart,
+} from './services/screenshot_mode';
 import {
   getSavedObjectFinder,
   SavedObjectLoader,
@@ -102,6 +105,7 @@ export interface DashboardSetupDependencies {
   share?: SharePluginSetup;
   uiActions: UiActionsSetup;
   usageCollection?: UsageCollectionSetup;
+  screenshotMode: ScreenshotModePluginSetup;
 }
 
 export interface DashboardStartDependencies {
@@ -116,9 +120,9 @@ export interface DashboardStartDependencies {
   savedObjects: SavedObjectsStart;
   presentationUtil: PresentationUtilPluginStart;
   savedObjectsTaggingOss?: SavedObjectTaggingOssPluginStart;
-  screenshotMode?: ScreenshotModePluginStart;
   spaces?: SpacesPluginStart;
   visualizations: VisualizationsStart;
+  screenshotMode: ScreenshotModePluginStart;
 }
 
 export interface DashboardSetup {
@@ -162,7 +166,15 @@ export class DashboardPlugin
 
   public setup(
     core: CoreSetup<DashboardStartDependencies, DashboardStart>,
-    { share, embeddable, home, urlForwarding, data, usageCollection }: DashboardSetupDependencies
+    {
+      share,
+      embeddable,
+      home,
+      urlForwarding,
+      data,
+      usageCollection,
+      screenshotMode,
+    }: DashboardSetupDependencies
   ): DashboardSetup {
     this.dashboardFeatureFlagConfig =
       this.initializerContext.config.get<DashboardFeatureFlagConfig>();
@@ -197,6 +209,7 @@ export class DashboardPlugin
         embeddable: deps.embeddable,
         uiActions: deps.uiActions,
         inspector: deps.inspector,
+        screenshotMode: deps.screenshotMode,
         http: coreStart.http,
         ExitFullScreenButton,
         presentationUtil: deps.presentationUtil,
