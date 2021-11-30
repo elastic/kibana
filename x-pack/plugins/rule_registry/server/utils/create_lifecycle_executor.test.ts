@@ -370,7 +370,7 @@ describe('createLifecycleExecutor', () => {
       createDefaultAlertExecutorOptions({
         params: {},
         state: { wrapped: initialRuleState, trackedAlerts: {} },
-        shouldLogAndScheduleActionsForAlerts: false,
+        shouldWriteAlerts: false,
       })
     );
 

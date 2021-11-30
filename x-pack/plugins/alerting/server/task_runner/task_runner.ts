@@ -320,7 +320,7 @@ export class TaskRunner<
               InstanceContext,
               WithoutReservedActionGroups<ActionGroupIds, RecoveryActionGroupId>
             >(alertInstances),
-            shouldLogAndScheduleActionsForAlerts: () => this.shouldLogAndScheduleActionsForAlerts(),
+            shouldWriteAlerts: () => this.shouldLogAndScheduleActionsForAlerts(),
           },
           params,
           state: alertTypeState as State,

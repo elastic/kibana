@@ -75,7 +75,7 @@ export interface AlertServices<
   alertInstanceFactory: (
     id: string
   ) => PublicAlertInstance<InstanceState, InstanceContext, ActionGroupIds>;
-  shouldLogAndScheduleActionsForAlerts: () => boolean;
+  shouldWriteAlerts: () => boolean;
 }
 
 export interface AlertExecutorOptions<

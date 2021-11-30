@@ -21,7 +21,7 @@ import { createLifecycleRuleTypeFactory } from './create_lifecycle_rule_type_fac
 
 type RuleTestHelpers = ReturnType<typeof createRule>;
 
-function createRule(shouldLogAndScheduleActionsForAlerts: boolean = true) {
+function createRule(shouldWriteAlerts: boolean = true) {
   const ruleDataClientMock = createRuleDataClientMock();
 
   const factory = createLifecycleRuleTypeFactory({
@@ -110,7 +110,7 @@ function createRule(shouldLogAndScheduleActionsForAlerts: boolean = true) {
           alertInstanceFactory,
           savedObjectsClient: {} as any,
           scopedClusterClient: {} as any,
-          shouldLogAndScheduleActionsForAlerts: () => shouldLogAndScheduleActionsForAlerts,
+          shouldWriteAlerts: () => shouldWriteAlerts,
         },
         spaceId: 'spaceId',
         state,

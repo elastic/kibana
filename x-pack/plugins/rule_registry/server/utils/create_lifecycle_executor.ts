@@ -140,7 +140,7 @@ export const createLifecycleExecutor =
     >
   ): Promise<WrappedLifecycleRuleState<State>> => {
     const {
-      services: { alertInstanceFactory, shouldLogAndScheduleActionsForAlerts },
+      services: { alertInstanceFactory, shouldWriteAlerts },
       state: previousState,
     } = options;
 
@@ -287,10 +287,9 @@ export const createLifecycleExecutor =
     //   - rule execution has not been cancelled due to timeout
     //     OR
     //   - if execution has been cancelled due to timeout, if feature flags are configured to write alerts anyway
-    const shouldWriteAlerts =
-      ruleDataClient.isWriteEnabled() && shouldLogAndScheduleActionsForAlerts();
+    const writeAlerts = ruleDataClient.isWriteEnabled() && shouldWriteAlerts();
 
-    if (allEventsToIndex.length > 0 && shouldWriteAlerts) {
+    if (allEventsToIndex.length > 0 && writeAlerts) {
       logger.debug(`Preparing to index ${allEventsToIndex.length} alerts.`);
 
       await ruleDataClient.getWriter().bulk({
@@ -316,6 +315,6 @@ export const createLifecycleExecutor =
 
     return {
       wrapped: nextWrappedState ?? ({} as State),
-      trackedAlerts: shouldWriteAlerts ? nextTrackedAlerts : {},
+      trackedAlerts: writeAlerts ? nextTrackedAlerts : {},
     };
   };

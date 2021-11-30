@@ -74,7 +74,7 @@ const createAlertServicesMock = <
       .mockReturnValue(alertInstanceFactoryMock),
     savedObjectsClient: savedObjectsClientMock.create(),
     scopedClusterClient: elasticsearchServiceMock.createScopedClusterClient(),
-    shouldLogAndScheduleActionsForAlerts: () => true,
+    shouldWriteAlerts: () => true,
   };
 };
 export type AlertServicesMock = ReturnType<typeof createAlertServicesMock>;
