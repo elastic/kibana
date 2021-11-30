@@ -63,7 +63,7 @@ const createServicesMock = () => {
     scopedClusterClient: elasticsearchServiceMock.createScopedClusterClient().asCurrentUser,
     connectorTokenClient: new ConnectorTokenClient({
       unsecuredSavedObjectsClient: savedObjectsClientMock.create(),
-      encryptedSavedObjectsClient: encryptedSavedObjectsMock.createStart().getClient(),
+      encryptedSavedObjectsClient: encryptedSavedObjectsMock.createClient(),
       logger,
     }),
   };

@@ -63,19 +63,28 @@ export class ConnectorTokenClient {
   }: CreateOptions): Promise<ConnectorToken> {
     const id = SavedObjectsUtils.generateId();
     const createTime = Date.now();
-    const result = await this.unsecuredSavedObjectsClient.create(
-      CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
-      {
-        connectorId,
-        token,
-        expiresAt,
-        tokenType,
-        createdAt: new Date(createTime).toISOString(),
-      },
-      { id }
-    );
+    try {
+      const result = await this.unsecuredSavedObjectsClient.create(
+        CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
+        {
+          connectorId,
+          token,
+          expiresAt,
+          tokenType,
+          createdAt: new Date(createTime).toISOString(),
+        },
+        { id }
+      );
 
-    return result.attributes as ConnectorToken;
+      return result.attributes as ConnectorToken;
+    } catch (err) {
+      this.logger.error(
+        `Failed to create connector_token for connectorId "${connectorId}" and tokenType: "${
+          tokenType ?? 'access_token'
+        }". Error: ${err.message}`
+      );
+      throw err;
+    }
   }
 
   /**
@@ -89,27 +98,35 @@ export class ConnectorTokenClient {
       );
     const createTime = Date.now();
 
-    const result = await this.unsecuredSavedObjectsClient.create<ConnectorToken>(
-      CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
-      {
-        ...attributes,
-        token,
-        expiresAt,
-        tokenType: tokenType ?? 'access_token',
-        createdAt: new Date(createTime).toISOString(),
-      },
-      omitBy(
+    try {
+      const result = await this.unsecuredSavedObjectsClient.create<ConnectorToken>(
+        CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
         {
-          id,
-          overwrite: true,
-          references,
-          version,
+          ...attributes,
+          token,
+          expiresAt,
+          tokenType: tokenType ?? 'access_token',
+          createdAt: new Date(createTime).toISOString(),
         },
-        isUndefined
-      )
-    );
-
-    return result.attributes as ConnectorToken;
+        omitBy(
+          {
+            id,
+            overwrite: true,
+            references,
+            version,
+          },
+          isUndefined
+        )
+      );
+      return result.attributes as ConnectorToken;
+    } catch (err) {
+      this.logger.error(
+        `Failed to update connector_token for id "${id}" and tokenType: "${
+          tokenType ?? 'access_token'
+        }". Error: ${err.message}`
+      );
+      throw err;
+    }
   }
 
   /**
@@ -143,7 +160,7 @@ export class ConnectorTokenClient {
       this.logger.error(
         `Failed to fetch connector_token for connectorId "${connectorId}" and tokenType: "${
           tokenType ?? 'access_token'
-        }"". Error: ${err.message}`
+        }". Error: ${err.message}`
       );
       return null;
     }
@@ -169,7 +186,7 @@ export class ConnectorTokenClient {
       this.logger.error(
         `Failed to decrypt connector_token for connectorId "${connectorId}" and tokenType: "${
           tokenType ?? 'access_token'
-        }"". Error: ${err.message}`
+        }". Error: ${err.message}`
       );
       return null;
     }

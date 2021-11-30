@@ -33,7 +33,7 @@ const sendMailMockResult = { result: 'does not matter' };
 const sendMailMock = jest.fn();
 const mockLogger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 const savedObjectsClient = savedObjectsClientMock.create();
-const encryptedSavedObjectsClient = encryptedSavedObjectsMock.createStart().getClient();
+const encryptedSavedObjectsClient = encryptedSavedObjectsMock.createClient();
 
 const connectorTokenClient = new ConnectorTokenClient({
   unsecuredSavedObjectsClient: savedObjectsClient,

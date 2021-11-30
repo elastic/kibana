@@ -18,7 +18,7 @@ jest.mock('../../../../src/core/server/saved_objects/service/lib/utils', () => (
 }));
 
 const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
-const encryptedSavedObjectsClient = encryptedSavedObjectsMock.createStart().getClient();
+const encryptedSavedObjectsClient = encryptedSavedObjectsMock.createClient();
 
 let connectorTokenClient: ConnectorTokenClient;
 
@@ -121,6 +121,50 @@ describe('get()', () => {
         referencedByCount: 2,
       },
     ]);
+  });
+
+  test('return null if there is not tokens for connectorId', async () => {
+    const expectedResult = {
+      total: 0,
+      per_page: 10,
+      page: 1,
+      saved_objects: [],
+    };
+    unsecuredSavedObjectsClient.find.mockResolvedValueOnce(expectedResult);
+
+    const result = await connectorTokenClient.get({
+      connectorId: '123',
+      tokenType: 'access_token',
+    });
+    expect(result).toEqual(null);
+  });
+
+  test('return null and log the error if unsecuredSavedObjectsClient thows an error', async () => {
+    unsecuredSavedObjectsClient.find.mockRejectedValueOnce(new Error('Fail'));
+
+    const result = await connectorTokenClient.get({
+      connectorId: '123',
+      tokenType: 'access_token',
+    });
+
+    expect(logger.warn.mock.calls[0]).toMatchInlineSnapshot(
+      `Failed to fetch connector_token for connectorId: "123"  and tokenType: "access_token". Error: "Fail"`
+    );
+    expect(result).toEqual(null);
+  });
+
+  test('return null and log the error if encryptedSavedObjectsClient decrypt method thows an error', async () => {
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockRejectedValueOnce(new Error('Fail'));
+
+    const result = await connectorTokenClient.get({
+      connectorId: '123',
+      tokenType: 'access_token',
+    });
+
+    expect(logger.warn.mock.calls[0]).toMatchInlineSnapshot(
+      `Failed to decrypt connector_token for connectorId: "123"  and tokenType: "access_token". Error: "Fail"`
+    );
+    expect(result).toEqual(null);
   });
 });
 
