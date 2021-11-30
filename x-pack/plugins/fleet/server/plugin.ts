@@ -6,6 +6,7 @@
  */
 
 import type { Observable } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import type {
   CoreSetup,
   CoreStart,
@@ -16,12 +17,17 @@ import type {
   SavedObjectsServiceStart,
   HttpServiceSetup,
   KibanaRequest,
+  ServiceStatus,
 } from 'kibana/server';
 import type { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 
 import type { TelemetryPluginSetup, TelemetryPluginStart } from 'src/plugins/telemetry/server';
 
-import { DEFAULT_APP_CATEGORIES, SavedObjectsClient } from '../../../../src/core/server';
+import {
+  DEFAULT_APP_CATEGORIES,
+  SavedObjectsClient,
+  ServiceStatusLevels,
+} from '../../../../src/core/server';
 import type { PluginStart as DataPluginStart } from '../../../../src/plugins/data/server';
 import type { LicensingPluginSetup, ILicense } from '../../licensing/server';
 import type {
@@ -183,6 +189,7 @@ export class FleetPlugin
   private securitySetup?: SecurityPluginSetup;
   private encryptedSavedObjectsSetup?: EncryptedSavedObjectsPluginSetup;
   private readonly telemetryEventsSender: TelemetryEventsSender;
+  private readonly fleetStatus$: BehaviorSubject<ServiceStatus>;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config$ = this.initializerContext.config.create<FleetConfigType>();
@@ -192,6 +199,11 @@ export class FleetPlugin
     this.logger = this.initializerContext.logger.get();
     this.configInitialValue = this.initializerContext.config.get();
     this.telemetryEventsSender = new TelemetryEventsSender(this.logger.get('telemetry_events'));
+
+    this.fleetStatus$ = new BehaviorSubject<ServiceStatus>({
+      level: ServiceStatusLevels.unavailable,
+      summary: 'Fleet is unavailable',
+    });
   }
 
   public setup(core: CoreSetup, deps: FleetSetupDeps) {
@@ -201,6 +213,8 @@ export class FleetPlugin
     this.cloud = deps.cloud;
     this.securitySetup = deps.security;
     const config = this.configInitialValue;
+
+    core.status.set(this.fleetStatus$);
 
     registerSavedObjects(core.savedObjects, deps.encryptedSavedObjects);
     registerEncryptedSavedObjects(deps.encryptedSavedObjects);
@@ -342,13 +356,30 @@ export class FleetPlugin
 
     const fleetSetupPromise = (async () => {
       try {
+        this.fleetStatus$.next({
+          level: ServiceStatusLevels.degraded,
+          summary: 'Fleet is setting up',
+        });
+
+        throw new Error('Fake error');
+
         await setupFleet(
           new SavedObjectsClient(core.savedObjects.createInternalRepository()),
           core.elasticsearch.client.asInternalUser
         );
+
+        this.fleetStatus$.next({
+          level: ServiceStatusLevels.available,
+          summary: 'Fleet is available',
+        });
       } catch (error) {
         logger.warn('Fleet setup failed');
         logger.warn(error);
+
+        this.fleetStatus$.next({
+          level: ServiceStatusLevels.unavailable,
+          summary: 'Fleet setup failed',
+        });
       }
     })();
 
@@ -389,5 +420,6 @@ export class FleetPlugin
     appContextService.stop();
     licenseService.stop();
     this.telemetryEventsSender.stop();
+    this.fleetStatus$.complete();
   }
 }
