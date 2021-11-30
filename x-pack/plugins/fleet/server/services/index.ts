@@ -43,7 +43,8 @@ export interface AgentPolicyServiceInterface {
 }
 
 // Agent services
-export { AgentClient, AgentService, AgentServiceImpl } from './agents';
+export { AgentServiceImpl } from './agents';
+export type { AgentClient, AgentService } from './agents';
 
 // Saved object services
 export { agentPolicyService } from './agent_policy';

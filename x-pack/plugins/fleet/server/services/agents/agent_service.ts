@@ -14,12 +14,13 @@ import type { Agent, GetAgentStatusResponse } from '../../../common';
 
 import { checkSuperuser } from '../../routes/security';
 
-import { getAgentsByKuery } from './crud';
-import { getAgentById } from './crud';
+import { getAgentsByKuery, getAgentById } from './crud';
 import { getAgentStatusById, getAgentStatusForAgentPolicy } from './status';
 
 /**
- * A service that provides exported functions that return information about an Agent
+ * A service for interacting with Agent data. See {@link AgentClient} for more information.
+ *
+ * @public
  */
 export interface AgentService {
   /**
@@ -28,13 +29,16 @@ export interface AgentService {
   asScoped(req: KibanaRequest): AgentClient;
 
   /**
-   * Only use for server-side usages (eg. telemetry), should not be used for end users.
+   * Only use for server-side usages (eg. telemetry), should not be used for end users unless an explicit authz check is
+   * done.
    */
   asInternalUser: AgentClient;
 }
 
 /**
- * A service that provides exported functions that return information about an Agent
+ * A client for interacting with data about an Agent
+ *
+ * @public
  */
 export interface AgentClient {
   /**
@@ -70,6 +74,9 @@ export interface AgentClient {
   }>;
 }
 
+/**
+ * @internal
+ */
 class AgentClientImpl implements AgentClient {
   constructor(
     private readonly internalEsClient: ElasticsearchClient,
@@ -81,32 +88,35 @@ class AgentClientImpl implements AgentClient {
       showInactive: boolean;
     }
   ) {
-    await this.runPreflight();
+    await this.#runPreflight();
     return getAgentsByKuery(this.internalEsClient, options);
   }
 
   public async getAgent(agentId: string) {
-    await this.runPreflight();
+    await this.#runPreflight();
     return getAgentById(this.internalEsClient, agentId);
   }
 
   public async getAgentStatusById(agentId: string) {
-    await this.runPreflight();
+    await this.#runPreflight();
     return getAgentStatusById(this.internalEsClient, agentId);
   }
 
   public async getAgentStatusForAgentPolicy(agentPolicyId?: string, filterKuery?: string) {
-    await this.runPreflight();
+    await this.#runPreflight();
     return getAgentStatusForAgentPolicy(this.internalEsClient, agentPolicyId, filterKuery);
   }
 
-  private async runPreflight() {
+  #runPreflight = async () => {
     if (this.preflightCheck) {
       return this.preflightCheck();
     }
-  }
+  };
 }
 
+/**
+ * @internal
+ */
 export class AgentServiceImpl implements AgentService {
   constructor(private readonly internalEsClient: ElasticsearchClient) {}
 

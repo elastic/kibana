@@ -19,7 +19,9 @@ import type { AgentClient } from '../services';
 /** @internal */
 export interface FleetRequestHandlerContext extends RequestHandlerContext {
   fleet: {
+    /** {@link FleetAuthz} */
     authz: FleetAuthz;
+    /** {@link AgentClient} */
     agentClient: {
       asCurrentUser: AgentClient;
       asInternalUser: AgentClient;
