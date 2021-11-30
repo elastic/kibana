@@ -789,7 +789,7 @@ describe('Sourcerer integration tests', () => {
   });
 });
 
-describe('No indices exists', () => {
+describe('No data', () => {
   const mockNoIndicesState = {
     ...mockGlobalState,
     sourcerer: {
@@ -804,7 +804,7 @@ describe('No indices exists', () => {
     jest.clearAllMocks();
     jest.restoreAllMocks();
   });
-  test('No render the sourcerer', () => {
+  test('Hide sourcerer', () => {
     const wrapper = mount(
       <TestProviders store={store}>
         <Sourcerer {...defaultProps} />
