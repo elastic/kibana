@@ -9,7 +9,7 @@ import { IndexPatternBase } from '@kbn/es-query';
 import React, { useMemo, useState } from 'react';
 import { SearchBar, TimeHistory } from '../../../../../../../src/plugins/data/public';
 import { Storage } from '../../../../../../../src/plugins/kibana_utils/public';
-import { translations } from '../../config';
+import { translations } from '../../../config';
 
 type QueryLanguageType = 'lucene' | 'kuery';
 
