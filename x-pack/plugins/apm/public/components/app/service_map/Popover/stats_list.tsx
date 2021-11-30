@@ -107,7 +107,7 @@ export function StatsList({ data, isLoading }: StatsListProps) {
         }),
         valueLabel: asPercent(errorRate?.value, 1, ''),
         timeseries: errorRate?.timeseries,
-        color: 'euiColorVis5',
+        color: 'euiColorVis7',
       },
       {
         title: i18n.translate('xpack.apm.serviceMap.avgCpuUsagePopoverStat', {
