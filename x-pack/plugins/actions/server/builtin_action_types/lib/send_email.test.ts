@@ -32,11 +32,11 @@ const createTransportMock = nodemailer.createTransport as jest.Mock;
 const sendMailMockResult = { result: 'does not matter' };
 const sendMailMock = jest.fn();
 const mockLogger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
-const savedObjectsClient = savedObjectsClientMock.create();
+const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
 const encryptedSavedObjectsClient = encryptedSavedObjectsMock.createClient();
 
 const connectorTokenClient = new ConnectorTokenClient({
-  unsecuredSavedObjectsClient: savedObjectsClient,
+  unsecuredSavedObjectsClient: unsecuredSavedObjectsClient,
   encryptedSavedObjectsClient,
   logger: mockLogger,
 });
@@ -100,21 +100,30 @@ describe('send_email module', () => {
       },
     });
     requestOAuthClientCredentialsTokenMock.mockReturnValueOnce({
-      status: 200,
-      data: {
-        tokenType: 'Bearer',
-        accessToken: 'dfjsdfgdjhfgsjdf',
-        expiresIn: 123,
+      tokenType: 'Bearer',
+      accessToken: 'dfjsdfgdjhfgsjdf',
+      expiresIn: 123,
+    });
+    const date = new Date();
+    date.setDate(date.getDate() + 5);
+
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+      id: '1',
+      type: 'connector_token',
+      references: [],
+      attributes: {
+        connectorId: '123',
+        expiresAt: date.toISOString(),
+        tokenType: 'access_token',
+        token: '11111111',
       },
     });
 
     sendEmailGraphApiMock.mockReturnValue({
       status: 202,
     });
-    const date = new Date();
-    date.setDate(date.getDate() + 5);
 
-    savedObjectsClient.find.mockResolvedValueOnce({
+    unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
       total: 0,
       saved_objects: [],
       per_page: 500,
@@ -171,7 +180,7 @@ describe('send_email module', () => {
         Object {
           "graphApiUrl": undefined,
           "headers": Object {
-            "Authorization": "undefined undefined",
+            "Authorization": "Bearer dfjsdfgdjhfgsjdf",
             "Content-Type": "application/json",
           },
           "messageHTML": "<p>a message</p>
@@ -200,6 +209,7 @@ describe('send_email module', () => {
               "isHostnameAllowed": [MockFunction],
               "isUriAllowed": [MockFunction],
             },
+            "connectorId": "1",
             "content": Object {
               "message": "a message",
               "subject": "a subject",
@@ -261,6 +271,8 @@ describe('send_email module', () => {
         },
       ]
     `);
+
+    expect(unsecuredSavedObjectsClient.create.mock.calls.length).toBe(1);
   });
 
   test('uses existing "access_token" from "connector_token" SO for authentication for email using "exchange_server" service', async () => {
@@ -274,12 +286,9 @@ describe('send_email module', () => {
       },
     });
     requestOAuthClientCredentialsTokenMock.mockReturnValueOnce({
-      status: 200,
-      data: {
-        tokenType: 'Bearer',
-        accessToken: 'dfjsdfgdjhfgsjdf',
-        expiresIn: 123,
-      },
+      tokenType: 'Bearer',
+      accessToken: 'dfjsdfgdjhfgsjdf',
+      expiresIn: 123,
     });
 
     sendEmailGraphApiMock.mockReturnValue({
@@ -288,7 +297,7 @@ describe('send_email module', () => {
     const date = new Date();
     date.setDate(date.getDate() + 5);
 
-    savedObjectsClient.find.mockResolvedValueOnce({
+    unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
       total: 2,
       saved_objects: [
         {
@@ -300,13 +309,21 @@ describe('send_email module', () => {
             connectorId: '123',
             expiresAt: date.toISOString(),
             tokenType: 'access_token',
-            token: '11111111',
           },
         },
       ],
       per_page: 500,
       page: 1,
     });
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
+      id: '1',
+      type: 'connector_token',
+      references: [],
+      attributes: {
+        token: '11111111',
+      }
+    });
+
     await sendEmail(mockLogger, sendEmailOptions, connectorTokenClient);
     expect(requestOAuthClientCredentialsTokenMock.mock.calls.length).toBe(0);
 
@@ -344,6 +361,7 @@ describe('send_email module', () => {
               "isHostnameAllowed": [MockFunction],
               "isUriAllowed": [MockFunction],
             },
+            "connectorId": "1",
             "content": Object {
               "message": "a message",
               "subject": "a subject",
@@ -405,6 +423,8 @@ describe('send_email module', () => {
         },
       ]
     `);
+
+    expect(unsecuredSavedObjectsClient.create.mock.calls.length).toBe(0);
   });
 
   test('handles unauthenticated email using not secure host/port', async () => {

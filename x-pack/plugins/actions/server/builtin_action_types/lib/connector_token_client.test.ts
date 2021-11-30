@@ -9,6 +9,7 @@ import { loggingSystemMock, savedObjectsClientMock } from '../../../../../../src
 import { encryptedSavedObjectsMock } from '../../../../encrypted_saved_objects/server/mocks';
 import { ConnectorTokenClient } from './connector_token_client';
 import { Logger } from '../../../../../../src/core/server';
+import { ConnectorToken } from '../../types';
 
 const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 jest.mock('../../../../../../src/core/server/saved_objects/service/lib/utils', () => ({
@@ -53,32 +54,22 @@ describe('create()', () => {
       token: 'testtokenvalue',
     });
     expect(result).toEqual({
-      id: '1',
       connectorId: '123',
       tokenType: 'access_token',
+      token: 'testtokenvalue',
       expiresAt,
     });
     expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledTimes(1);
-    expect(unsecuredSavedObjectsClient.create.mock.calls[0]).toMatchInlineSnapshot(`
-      Array [
-        "connector_token",
-        Object {
-          "connectorId": "123",
-          "tokenType": "access_token",
-          "expiresAt": "${expiresAt}",
-          "createdAt": "my name",
-        },
-        Object {
-          "id": "1",
-        },
-      ]
-    `);
+    expect((unsecuredSavedObjectsClient.create.mock.calls[0][1] as ConnectorToken).token).toBe(
+      'testtokenvalue'
+    );
   });
 });
 
 describe('get()', () => {
   test('calls unsecuredSavedObjectsClient with parameters', async () => {
     const expiresAt = new Date().toISOString();
+    const createdAt = new Date().toISOString();
     const expectedResult = {
       total: 1,
       per_page: 10,
@@ -90,8 +81,7 @@ describe('get()', () => {
           attributes: {
             connectorId: '123',
             tokenType: 'access_token',
-            token: 'testtokenvalue',
-            createdAt: new Date().toISOString(),
+            createdAt,
             expiresAt,
           },
           score: 1,
@@ -100,27 +90,26 @@ describe('get()', () => {
       ],
     };
     unsecuredSavedObjectsClient.find.mockResolvedValueOnce(expectedResult);
-
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
+      id: '1',
+      type: 'connector_token',
+      references: [],
+      attributes: {
+        token: 'testtokenvalue',
+      },
+    });
     const result = await connectorTokenClient.get({
       connectorId: '123',
       tokenType: 'access_token',
     });
-    expect(result).toEqual([
-      {
-        id: '1',
-        connectorId: '123',
-        tokenType: 'access_token',
-        token: 'testtokenvalue',
-        createdAt: new Date().toISOString(),
-      },
-      {
-        id: 'testPreconfigured',
-        actionTypeId: '.slack',
-        isPreconfigured: true,
-        name: 'test',
-        referencedByCount: 2,
-      },
-    ]);
+    expect(result).toEqual({
+      id: '1',
+      connectorId: '123',
+      tokenType: 'access_token',
+      token: 'testtokenvalue',
+      createdAt,
+      expiresAt,
+    });
   });
 
   test('return null if there is not tokens for connectorId', async () => {
@@ -147,13 +136,33 @@ describe('get()', () => {
       tokenType: 'access_token',
     });
 
-    expect(logger.warn.mock.calls[0]).toMatchInlineSnapshot(
-      `Failed to fetch connector_token for connectorId: "123"  and tokenType: "access_token". Error: "Fail"`
-    );
+    expect(logger.error.mock.calls[0]).toMatchObject([
+      `Failed to fetch connector_token for connectorId "123" and tokenType: "access_token". Error: Fail`,
+    ]);
     expect(result).toEqual(null);
   });
 
   test('return null and log the error if encryptedSavedObjectsClient decrypt method thows an error', async () => {
+    const expectedResult = {
+      total: 1,
+      per_page: 10,
+      page: 1,
+      saved_objects: [
+        {
+          id: '1',
+          type: 'connector_token',
+          attributes: {
+            connectorId: '123',
+            tokenType: 'access_token',
+            createdAt: new Date().toISOString(),
+            expiresAt: new Date().toISOString(),
+          },
+          score: 1,
+          references: [],
+        },
+      ],
+    };
+    unsecuredSavedObjectsClient.find.mockResolvedValueOnce(expectedResult);
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockRejectedValueOnce(new Error('Fail'));
 
     const result = await connectorTokenClient.get({
@@ -161,9 +170,9 @@ describe('get()', () => {
       tokenType: 'access_token',
     });
 
-    expect(logger.warn.mock.calls[0]).toMatchInlineSnapshot(
-      `Failed to decrypt connector_token for connectorId: "123"  and tokenType: "access_token". Error: "Fail"`
-    );
+    expect(logger.error.mock.calls[0]).toMatchObject([
+      `Failed to decrypt connector_token for connectorId "123" and tokenType: "access_token". Error: Fail`,
+    ]);
     expect(result).toEqual(null);
   });
 });
@@ -201,23 +210,15 @@ describe('update()', () => {
       expiresAt,
     });
     expect(result).toEqual({
-      id: '1',
       connectorId: '123',
       tokenType: 'access_token',
       token: 'testtokenvalue',
+      expiresAt
     });
     expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledTimes(1);
-    expect(unsecuredSavedObjectsClient.create.mock.calls[0]).toMatchInlineSnapshot(`
-      Array [
-        "connector_token",
-        Object {
-          "connectorId": "123",
-		  "expiresAt": "${expiresAt}",
-		  "token": "testtokenvalue",
-		  "tokenType": "access_token",
-        },
-      ]
-    `);
+    expect((unsecuredSavedObjectsClient.create.mock.calls[0][1] as ConnectorToken).token).toBe(
+      'testtokenvalue'
+    );
     expect(unsecuredSavedObjectsClient.get).toHaveBeenCalledTimes(1);
     expect(unsecuredSavedObjectsClient.get.mock.calls[0]).toMatchInlineSnapshot(`
       Array [

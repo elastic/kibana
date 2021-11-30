@@ -70,7 +70,7 @@ export class ConnectorTokenClient {
           connectorId,
           token,
           expiresAt,
-          tokenType,
+          tokenType: tokenType ?? 'access_token',
           createdAt: new Date(createTime).toISOString(),
         },
         { id }
