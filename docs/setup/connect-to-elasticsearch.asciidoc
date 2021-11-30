@@ -55,7 +55,7 @@ to verify your {es} endpoint and Cloud ID, and create API keys for integestion.
 === Add sample data
 
 Sample data sets come with sample visualizations, dashboards, and more to help you
-explore {kib} before you ingest or upload your own data.
+explore {kib} before you add your own data.
 In the *Integrations* view, search for *sample*, and then add the type of
 data you want.
 
