@@ -6,16 +6,14 @@
  */
 
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiStat } from '@elastic/eui';
-
 import { IndexPatternBase } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import useAsync from 'react-use/lib/useAsync';
 import { AlertStatus } from '@kbn/rule-data-utils/alerts_as_data_status';
 import { ALERT_STATUS } from '@kbn/rule-data-utils/technical_field_names';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import useAsync from 'react-use/lib/useAsync';
 
 import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
-import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import { loadAlertAggregations as loadRuleAggregations } from '../../../../../../../plugins/triggers_actions_ui/public';
 import { AlertStatusFilterButton } from '../../../../../common/typings';
 import { ParsedTechnicalFields } from '../../../../../../rule_registry/common/parse_technical_fields';
@@ -78,13 +76,13 @@ function AlertsPage() {
   const {
     http,
     notifications: { toasts },
-  } = useKibana().services;
+  } = core;
   const [ruleStatsLoading, setRuleStatsLoading] = useState<boolean>(false);
   const [ruleStats, setRuleStats] = useState<RuleStatsState>({
-    total: -1,
-    disabled: -1,
-    muted: -1,
-    errors: -1,
+    total: 0,
+    disabled: 0,
+    muted: 0,
+    errors: 0,
   });
 
   useEffect(() => {
@@ -104,28 +102,20 @@ function AlertsPage() {
     try {
       const response = await loadRuleAggregations({
         http,
-        page: { index: 0, size: 9999 },
-        searchText: undefined,
-        typesFilter: [],
-        actionTypesFilter: [],
-        alertStatusesFilter: [],
-        sort: undefined,
       });
       // Note that the API uses the semantics of 'alerts' instead of 'rules'
-      const status = response?.alertExecutionStatus;
-      if (status) {
+      const { alertExecutionStatus, ruleMutedStatus, ruleEnabledStatus } = response;
+      if (alertExecutionStatus && ruleMutedStatus && ruleEnabledStatus) {
         setRuleStats({
           ...ruleStats,
           // FIXME: this is the active count, while we want the grand total
-          total: status.active,
-          // TODO:
-          // disabled: status.disabled,
-          // TODO:
-          // muted: status.muted,
-          errors: status.error,
+          total: alertExecutionStatus.active,
+          disabled: ruleEnabledStatus.disabled,
+          muted: ruleMutedStatus.muted,
+          errors: alertExecutionStatus.error,
         });
-        setRuleStatsLoading(false);
       }
+      setRuleStatsLoading(false);
     } catch (_e) {
       toasts.addDanger({
         title: i18n.translate('xpack.observability.alerts.ruleStats.loadError', {
