@@ -544,6 +544,7 @@ export const Overview: React.FC = () => {
         </EuiFlexItem>
         <EuiFlexItem grow={7}>
           <EuiFlexGroup gutterSize="m" direction="column">
+            {showSyncTriggerCallout && syncTriggerCallout}
             <EuiFlexItem>{groups.length > 0 && groupsSummary}</EuiFlexItem>
             {details.length > 0 && <EuiFlexItem>{detailsSummary}</EuiFlexItem>}
             {!custom && serviceTypeSupportsPermissions && (
@@ -587,7 +588,6 @@ export const Overview: React.FC = () => {
                 )}
               </>
             )}
-            {showSyncTriggerCallout && syncTriggerCallout}
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
