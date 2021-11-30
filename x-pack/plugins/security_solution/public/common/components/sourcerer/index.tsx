@@ -27,6 +27,7 @@ import * as i18n from './translations';
 import { sourcererActions, sourcererModel, sourcererSelectors } from '../../store/sourcerer';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
 import { SourcererScopeName } from '../../store/sourcerer/model';
+import { checkIfIndicesExist } from '../../store/sourcerer/helpers';
 import { usePickIndexPatterns } from './use_pick_index_patterns';
 import {
   FormRow,
@@ -54,7 +55,13 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
     kibanaDataViews,
     signalIndexName,
     sourcererScope: { selectedDataViewId, selectedPatterns, loading },
+    sourcererDataView,
   } = useDeepEqualSelector((state) => sourcererScopeSelector(state, scopeId));
+  console.log('sourcererDataView---', sourcererDataView);
+  const indicesExist = useMemo(
+    () => checkIfIndicesExist({ scopeId, signalIndexName, sourcererDataView }),
+    [scopeId, signalIndexName, sourcererDataView]
+  );
 
   const [isOnlyDetectionAlertsChecked, setIsOnlyDetectionAlertsChecked] = useState(
     isTimelineSourcerer && selectedPatterns.join() === signalIndexName
@@ -203,7 +210,7 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
     setExpandAdvancedOptions((prevState) => !prevState);
   }, []);
 
-  return (
+  return indicesExist ? (
     <EuiPopover
       data-test-subj={isTimelineSourcerer ? 'timeline-sourcerer-popover' : 'sourcerer-popover'}
       button={buttonWithTooptip}
@@ -312,6 +319,6 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
         </EuiForm>
       </PopoverContent>
     </EuiPopover>
-  );
+  ) : null;
 });
 Sourcerer.displayName = 'Sourcerer';
