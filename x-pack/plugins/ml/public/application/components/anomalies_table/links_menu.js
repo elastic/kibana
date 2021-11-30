@@ -10,13 +10,10 @@ import moment from 'moment';
 import rison from 'rison-node';
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-
 import { EuiButtonIcon, EuiContextMenuPanel, EuiContextMenuItem, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-
 import { withKibana } from '../../../../../../../src/plugins/kibana_react/public';
-
 import { ES_FIELD_TYPES } from '../../../../../../../src/plugins/data/public';
 import { checkPermission } from '../../capabilities/check_capabilities';
 import { SEARCH_QUERY_LANGUAGE } from '../../../../common/constants/search';
@@ -27,7 +24,10 @@ import { getFieldTypeFromMapping } from '../../services/mapping_service';
 import { ml } from '../../services/ml_api_service';
 import { mlJobService } from '../../services/job_service';
 import { getUrlForRecord, openCustomUrlWindow } from '../../util/custom_url_utils';
-import { formatHumanReadableDateTimeSeconds } from '../../../../common/util/date_utils';
+import {
+  formatHumanReadableDateTimeSeconds,
+  timeFormatter,
+} from '../../../../common/util/date_utils';
 import { getDataViewIdFromName } from '../../util/index_utils';
 import { replaceStringTokens } from '../../util/string_utils';
 import { ML_APP_LOCATOR, ML_PAGES } from '../../../../common/constants/locator';
@@ -52,6 +52,51 @@ class LinksMenuUI extends Component {
       toasts: [],
     };
   }
+
+  openInDiscover = async () => {
+    const {
+      services: { share },
+    } = this.props.kibana;
+    const discoverLocator = share.url.locators.get('DISCOVER_APP_LOCATOR');
+    const job = mlJobService.getJob(this.props.anomaly.jobId);
+
+    const index = job.datafeed_config.indices[0];
+    const dataViewId = (await getDataViewIdFromName(index)) || index;
+
+    const record = this.props.anomaly.source;
+    const from = timeFormatter(record.timestamp); // e.g. 2016-02-08T16:00:00.000Z
+    const to = timeFormatter(record.timestamp + record.bucket_span * 1000);
+
+    let luceneQuery = '';
+
+    if (record.influencers) {
+      luceneQuery = record.influencers
+        .map((i) => `${i.influencer_field_name}:${i.influencer_field_values[0]}`)
+        .join(' AND ');
+    }
+
+    const url = await discoverLocator.getUrl({
+      indexPatternId: dataViewId,
+      refreshInterval: {
+        display: 'Off',
+        pause: true,
+        value: 0,
+      },
+      timeRange: {
+        from: from,
+        to: to,
+        mode: 'absolute',
+      },
+      query: {
+        language: 'lucene',
+        query: luceneQuery,
+      },
+      interval: 'auto',
+      sort: [['timestamp, asc']],
+    });
+
+    window.open(url);
+  };
 
   openCustomUrl = (customUrl) => {
     const { anomaly, interval, isAggregatedData } = this.props;
@@ -411,6 +456,22 @@ class LinksMenuUI extends Component {
           </EuiContextMenuItem>
         );
       });
+    } else {
+      items.push(
+        <EuiContextMenuItem
+          key={`auto_raw_data_url`}
+          icon="popout"
+          onClick={() => {
+            this.closePopover();
+            this.openInDiscover();
+          }}
+          data-test-subj={`mlAnomaliesListRowAction_rawDataButton`}
+        >
+          {i18n.translate('xpack.ml.anomaliesTable.linksMenu.rawData', {
+            defaultMessage: 'Raw data',
+          })}
+        </EuiContextMenuItem>
+      );
     }
 
     if (showViewSeriesLink === true && anomaly.isTimeSeriesViewRecord === true) {
