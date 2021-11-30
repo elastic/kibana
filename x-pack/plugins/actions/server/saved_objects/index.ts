@@ -101,7 +101,7 @@ export function setupSavedObjects(
   savedObjects.registerType({
     name: CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
     hidden: true,
-    namespaceType: 'multiple',
+    namespaceType: 'agnostic',
     mappings: mappings.connector_token as SavedObjectsTypeMappingDefinition,
     management: {
       importableAndExportable: false,
