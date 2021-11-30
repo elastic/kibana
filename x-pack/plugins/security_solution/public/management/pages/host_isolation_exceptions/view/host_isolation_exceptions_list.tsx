@@ -14,6 +14,7 @@ import { useHistory } from 'react-router-dom';
 import { Immutable } from '../../../../../common/endpoint/types';
 import { ExceptionItem } from '../../../../common/components/exceptions/viewer/exception_item';
 import { useEndpointPrivileges } from '../../../../common/components/user_privileges/endpoint';
+import { useToasts } from '../../../../common/lib/kibana';
 import {
   MANAGEMENT_DEFAULT_PAGE_SIZE,
   MANAGEMENT_PAGE_SIZE_OPTIONS,
@@ -32,6 +33,7 @@ import { HostIsolationExceptionsFormFlyout } from './components/form_flyout';
 import {
   DELETE_HOST_ISOLATION_EXCEPTION_LABEL,
   EDIT_HOST_ISOLATION_EXCEPTION_LABEL,
+  getLoadPoliciesError,
 } from './components/translations';
 import {
   useFetchHostIsolationExceptionsList,
@@ -54,10 +56,13 @@ export const HostIsolationExceptionsList = () => {
   const [itemToDelete, setItemToDelete] = useState<ExceptionListItemSchema | null>(null);
 
   const { isLoading, data, error, refetch } = useFetchHostIsolationExceptionsList();
+  const toasts = useToasts();
 
   // load the list of policies>
   const policiesRequest = useGetEndpointSpecificPolicies({
-    onError: () => {},
+    onError: (err) => {
+      toasts.addDanger(getLoadPoliciesError(err));
+    },
   });
 
   const pagination = {
