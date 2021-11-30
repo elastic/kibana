@@ -6,30 +6,5 @@
  * Side Public License, v 1.
  */
 
-declare global {
-  type ResizeObserverCallback = (entries: ResizeObserverEntry[], observer: ResizeObserver) => void;
-
-  interface ResizeObserverEntry {
-    readonly target: Element;
-  }
-
-  interface ResizeObserver {
-    observe(target: Element): void;
-    unobserve(target: Element): void;
-    disconnect(): void;
-  }
-}
-
-declare const ResizeObserver: {
-  prototype: ResizeObserver;
-  new (callback: ResizeObserverCallback): ResizeObserver;
-};
-
-interface ResizeObserver {
-  observe(target: Element): void;
-  unobserve(target: Element): void;
-  disconnect(): void;
-}
-
 // eslint-disable-next-line import/no-default-export
 export default ResizeObserver;
