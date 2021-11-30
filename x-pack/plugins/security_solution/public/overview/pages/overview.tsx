@@ -76,7 +76,7 @@ const OverviewComponent = () => {
     endpointPrivileges: { canAccessFleet },
   } = useUserPrivileges();
   const { hasIndexRead, hasKibanaREAD } = useAlertsPrivileges();
-  const { tiDataSources: allTiDataSources, isInitialyLoaded: allTiDataSourcesLoaded } =
+  const { tiDataSources: allTiDataSources, isInitiallyLoaded: allTiDataSourcesLoaded } =
     useAllTiDataSources();
   const tiIntegrationStatus = useTiIntegrations();
   const isTiLoaded = tiIntegrationStatus && allTiDataSourcesLoaded;
