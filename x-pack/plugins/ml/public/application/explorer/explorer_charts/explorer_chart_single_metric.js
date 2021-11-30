@@ -181,8 +181,8 @@ export class ExplorerChartSingleMetric extends React.Component {
 
       drawLineChartAxes();
       drawLineChartHighlightedSpan(vizWidth, chartHeight);
-      drawLineChartPaths(data);
       drawChartAnnotationLine(lineChartGroup, vizWidth, chartHeight, margin);
+      drawLineChartPaths(data);
       drawLineChartDots(data, lineChartGroup, lineChartValuesLine);
       drawLineChartMarkers(data);
     }
@@ -193,28 +193,25 @@ export class ExplorerChartSingleMetric extends React.Component {
         .attr('class', 'mouse-over-effects')
         .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
       mouseG
-        .append('path') // this is the black vertical line to follow mouse
+        .append('path')
         .attr('class', 'mouse-line')
         .style('stroke', 'black')
         .style('stroke-width', '1px');
 
       mouseG
-        .append('svg:rect') // append a rect to catch mouse movements on canvas
-        .attr('width', svgWidth) // can't catch mouse events on a g element
+        .append('svg:rect')
+        .attr('width', svgWidth)
         .attr('height', svgHeight)
         .attr('fill', 'none')
         .attr('opacity', 0)
         .attr('pointer-events', 'all')
         .on('mouseout', function () {
-          // on mouse out hide line, circles and text
           d3.selectAll('.mouse-line').style('opacity', '0');
         })
         .on('mouseover', function () {
-          // on mouse in show line, circles and text
           d3.selectAll('.mouse-line').style('opacity', '1');
         })
         .on('mousemove', function () {
-          // mouse moving over canvas
           const mouse = d3.mouse(this);
           d3.selectAll('.mouse-line').attr('d', function () {
             let d = 'M' + mouse[0] + ',' + svgHeight;
