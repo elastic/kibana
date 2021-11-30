@@ -135,10 +135,10 @@ export function FieldInputs({
                 (!rawValuesLookup.has(key) && !indexPattern.getFieldByName(key)?.scripted) ||
                 key === value
             )
-            .reduce((memo, key) => {
+            .reduce<OperationSupportMatrix['operationByField']>((memo, key) => {
               memo[key] = operationSupportMatrix.operationByField[key];
               return memo;
-            }, {} as OperationSupportMatrix['operationByField']);
+            }, {});
 
           const shouldShowScriptedFieldError = Boolean(
             value && indexPattern.getFieldByName(value)?.scripted && localValuesFilled.length > 1

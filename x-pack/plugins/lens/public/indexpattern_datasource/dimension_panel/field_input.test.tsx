@@ -293,7 +293,7 @@ describe('FieldInput', () => {
     ).toBe('Invalid field. Check your data view or pick another field.');
   });
 
-  it('should render an help message when passed and no errors are found', () => {
+  it('should render a help message when passed and no errors are found', () => {
     const updateLayerSpy = jest.fn();
     const layer = getLayer();
     const existingFields = getExistingFields(layer);
