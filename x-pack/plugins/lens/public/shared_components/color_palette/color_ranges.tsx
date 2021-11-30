@@ -403,7 +403,10 @@ export function ColorRanges(props: ColorRangesProps) {
             return {
               color: colorRange.color,
               start: roundValue(start + (step * 100 * index) / 100),
-              end: roundValue(start + (step * 100 * (index + 1)) / 100),
+              end:
+                index === localColorRanges.length - 1
+                  ? end
+                  : roundValue(start + (step * 100 * (index + 1)) / 100),
             };
           });
           setColorRanges(newRanges);

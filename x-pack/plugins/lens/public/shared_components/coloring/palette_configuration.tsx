@@ -56,6 +56,7 @@ export function CustomizablePalette({
         activePalette={activePalette}
         setPalette={setPalette}
         dataBounds={dataBounds}
+        showRangeTypeSelector={showRangeTypeSelector}
       />
     </>
   );

@@ -72,11 +72,13 @@ export function NewCustomizablePalette({
   activePalette,
   setPalette,
   dataBounds,
+  showRangeTypeSelector = true,
 }: {
   palettes: PaletteRegistry;
   activePalette?: PaletteOutput<CustomPaletteParams>;
   setPalette: (palette: PaletteOutput<CustomPaletteParams>) => void;
   dataBounds?: { min: number; max: number };
+  showRangeTypeSelector?: boolean;
 }) {
   if (!dataBounds || !activePalette) {
     return null;
@@ -137,7 +139,7 @@ export function NewCustomizablePalette({
             showDynamicColorOnly
           />
         </EuiFormRow>
-        <EuiFormRow
+        {showRangeTypeSelector && <EuiFormRow
           label={
             <>
               {i18n.translate('xpack.lens.table.dynamicColoring.rangeType.label', {
@@ -233,7 +235,7 @@ export function NewCustomizablePalette({
               setPalette(mergePaletteParams(activePalette, params));
             }}
           />
-        </EuiFormRow>
+        </EuiFormRow>}
         <ColorRanges
           paletteConfiguration={activePalette?.params}
           colorRanges={colorRangesToShow}
