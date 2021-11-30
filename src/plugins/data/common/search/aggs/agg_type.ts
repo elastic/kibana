@@ -225,6 +225,23 @@ export class AggType<
     return false;
   }
 
+  /**
+   * Returns the key of the object containing the results of the agg in the Elasticsearch response object.
+   * In most cases this returns the `agg.id` property, but in some cases the response object is structured differently.
+   * In the following example of a terms agg, `getResponseId` returns "myAgg":
+   * ```
+   * {
+   *    "aggregations": {
+   *      "myAgg": {
+   *        "doc_count_error_upper_bound": 0,
+   *        "sum_other_doc_count": 0,
+   *        "buckets": [
+   * ...
+   * ```
+   *
+   * @param  {agg} agg - the agg to return the id in the ES reponse object for
+   * @return {string}
+   */
   getResponseId: (agg: TAggConfig) => string;
 
   /**
