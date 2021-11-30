@@ -33,6 +33,7 @@ import { BrowserAdvancedFields } from './browser/advanced_fields';
 interface Props {
   validate: Validation;
   dataStreams?: DataStream[];
+  children?: React.ReactNode;
 }
 
 const dataStreamToString = [
@@ -50,7 +51,7 @@ const dataStreamToString = [
   },
 ];
 
-export const CustomFields = memo<Props>(({ validate, dataStreams = [] }) => {
+export const CustomFields = memo<Props>(({ validate, dataStreams = [], children }) => {
   const { monitorType, setMonitorType, isTLSEnabled, setIsTLSEnabled, isEditable } =
     usePolicyConfigContext();
 
@@ -98,6 +99,7 @@ export const CustomFields = memo<Props>(({ validate, dataStreams = [] }) => {
       >
         <EuiFlexGroup>
           <EuiFlexItem>
+            {children}
             {!isEditable && (
               <EuiFormRow
                 label={
