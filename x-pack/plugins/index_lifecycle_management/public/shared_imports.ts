@@ -54,6 +54,6 @@ export { APP_WRAPPER_CLASS } from '../../../../src/core/public';
 
 export const useKibana = () => _useKibana<AppServicesContext>();
 
-export { CloudSetup } from '../../cloud/public';
+export type { CloudSetup } from '../../cloud/public';
 
-export { ILicense } from '../../licensing/public';
+export type { ILicense } from '../../licensing/public';
