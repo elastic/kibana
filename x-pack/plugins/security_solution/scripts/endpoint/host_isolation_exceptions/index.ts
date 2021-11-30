@@ -74,8 +74,10 @@ const createHostIsolationException: RunFn = async ({ flags, log }) => {
   const exceptionGenerator = new HostIsolationExceptionGenerator();
   const kbn = new KbnClient({ log, url: flags.kibana as string });
 
+  log.info('Setting up fleet');
   await setupFleetForEndpoint(kbn);
 
+  log.info('Creating Host isolation exceptions list');
   await ensureCreateEndpointHostIsolationExceptionList(kbn);
 
   // Setup a list of real endpoint policies and return a method to randomly select one
@@ -101,6 +103,7 @@ const createHostIsolationException: RunFn = async ({ flags, log }) => {
     return () => policyIds[randomN(policyIds.length)];
   })();
 
+  log.info('Generating exceptions....');
   await Promise.all(
     Array.from({ length: flags.count as unknown as number }, async () => {
       const body = exceptionGenerator.generate();
@@ -110,6 +113,7 @@ const createHostIsolationException: RunFn = async ({ flags, log }) => {
           return `policy:${randomPolicyId()}`;
         });
       }
+      log.write(' . ');
       try {
         return kbn.request({
           method: 'POST',
@@ -121,6 +125,7 @@ const createHostIsolationException: RunFn = async ({ flags, log }) => {
       }
     })
   );
+  log.info('Finished.');
 };
 
 const ensureCreateEndpointHostIsolationExceptionList = async (kbn: KbnClient) => {
