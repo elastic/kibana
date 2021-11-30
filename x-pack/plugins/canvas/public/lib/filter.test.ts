@@ -21,6 +21,7 @@ import {
   getFiltersByGroups,
   extractGroupsFromElementsFilters,
   extractUngroupedFromElementsFilters,
+  isExpressionWithFilters,
 } from './filter';
 
 const formatterFactory = (value: unknown) => () => JSON.stringify(value);
@@ -355,5 +356,16 @@ describe('extractUngroupedFromElementsFilters', () => {
       'filters group="10" group="11" | filters group="15" | demodata | plot | render';
     const nextIsUngrouped = extractUngroupedFromElementsFilters(nextExpression);
     expect(nextIsUngrouped).toBeFalsy();
+  });
+});
+
+describe('isExpressionWithFilters', () => {
+  it('checks if the expression is applying filters', () => {
+    const expression =
+      'filters group="10" group="11" | filters group="15" ungrouped=true | demodata | plot | render';
+    expect(isExpressionWithFilters(expression)).toBeTruthy();
+
+    const nextExpression = 'demodata | plot | render';
+    expect(isExpressionWithFilters(nextExpression)).toBeFalsy();
   });
 });

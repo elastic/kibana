@@ -16,6 +16,7 @@ import { Datasource } from '../../datasource';
 import { FunctionFormList } from '../../function_form_list';
 import { PositionedElement } from '../../../../types';
 import { WorkpadFilters } from '../../workpad_filters/workpad_filters';
+import { isExpressionWithFilters } from '../../../lib/filter';
 
 const strings = {
   getDataTabLabel: () =>
@@ -45,7 +46,7 @@ interface Props {
 }
 
 export const ElementSettings: FunctionComponent<Props> = ({ element }) => {
-  const filtersTab = !element.filter && {
+  const filtersTab = isExpressionWithFilters(element.expression) && {
     id: 'filters',
     name: strings.getFiltersTabLabel(),
     content: (

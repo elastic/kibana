@@ -88,3 +88,8 @@ export const extractUngroupedFromElementsFilters = (expr: string) => {
   const filtersFns = ast.chain.filter((expression) => expression.function === 'filters');
   return filtersFns.some((filterFn) => filterFn?.arguments.ungrouped?.[0]);
 };
+
+export const isExpressionWithFilters = (expr: string) => {
+  const ast = fromExpression(expr);
+  return ast.chain.some((expression) => expression.function === 'filters');
+};
