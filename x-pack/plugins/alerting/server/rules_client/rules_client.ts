@@ -709,7 +709,28 @@ export class RulesClient {
       },
     });
 
-    const alertExecutionStatus = resp.aggregations!.status.buckets.map(
+    if (!resp.aggregations) {
+      // Return a placeholder with all zeroes
+      const placeholder: AggregateResult = {
+        alertExecutionStatus: {},
+        ruleEnabledStatus: {
+          enabled: 0,
+          disabled: 0,
+        },
+        ruleMutedStatus: {
+          muted: 0,
+          unmuted: 0,
+        },
+      };
+
+      for (const key of AlertExecutionStatusValues) {
+        placeholder.alertExecutionStatus[key] = 0;
+      }
+
+      return placeholder;
+    }
+
+    const alertExecutionStatus = resp.aggregations.status.buckets.map(
       ({ key, doc_count: docCount }) => ({
         [key]: docCount,
       })
@@ -722,20 +743,20 @@ export class RulesClient {
       ),
     };
 
-    // Fill missing keys
+    // Fill missing keys with zeroes
     for (const key of AlertExecutionStatusValues) {
       if (!ret.alertExecutionStatus.hasOwnProperty(key)) {
         ret.alertExecutionStatus[key] = 0;
       }
     }
 
-    const enabledBuckets = resp.aggregations!.enabled.buckets;
+    const enabledBuckets = resp.aggregations.enabled.buckets;
     ret.ruleEnabledStatus = {
       enabled: enabledBuckets.find((bucket) => bucket.key === 1)?.doc_count ?? 0,
       disabled: enabledBuckets.find((bucket) => bucket.key === 0)?.doc_count ?? 0,
     };
 
-    const mutedBuckets = resp.aggregations!.muted.buckets;
+    const mutedBuckets = resp.aggregations.muted.buckets;
     ret.ruleMutedStatus = {
       muted: mutedBuckets.find((bucket) => bucket.key === 1)?.doc_count ?? 0,
       unmuted: mutedBuckets.find((bucket) => bucket.key === 0)?.doc_count ?? 0,

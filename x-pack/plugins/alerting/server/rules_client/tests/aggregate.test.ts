@@ -14,6 +14,8 @@ import { encryptedSavedObjectsMock } from '../../../../encrypted_saved_objects/s
 import { actionsAuthorizationMock } from '../../../../actions/server/mocks';
 import { AlertingAuthorization } from '../../authorization/alerting_authorization';
 import { ActionsAuthorization } from '../../../../actions/server';
+import { httpServerMock } from '../../../../../../src/core/server/mocks';
+import { auditServiceMock } from '../../../../security/server/audit/index.mock';
 import { getBeforeSetup, setGlobalDate } from './lib';
 import { RecoveredActionGroup } from '../../../common';
 import { RegistryRuleType } from '../../rule_type_registry';
@@ -25,6 +27,7 @@ const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
 const encryptedSavedObjects = encryptedSavedObjectsMock.createClient();
 const authorization = alertingAuthorizationMock.create();
 const actionsAuthorization = actionsAuthorizationMock.create();
+const auditLogger = auditServiceMock.create().asScoped(httpServerMock.createKibanaRequest());
 
 const kibanaVersion = 'v7.10.0';
 const rulesClientParams: jest.Mocked<ConstructorOptions> = {
@@ -46,6 +49,7 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
 
 beforeEach(() => {
   getBeforeSetup(rulesClientParams, taskManager, ruleTypeRegistry);
+  (auditLogger.log as jest.Mock).mockClear();
 });
 
 setGlobalDate();
@@ -190,5 +194,24 @@ describe('aggregate()', () => {
         },
       },
     ]);
+  });
+
+  test('logs audit event when not authorized to aggregate rules', async () => {
+    const rulesClient = new RulesClient({ ...rulesClientParams, auditLogger });
+    authorization.getFindAuthorizationFilter.mockRejectedValue(new Error('Unauthorized'));
+
+    await expect(rulesClient.aggregate()).rejects.toThrow();
+    expect(auditLogger.log).toHaveBeenCalledWith(
+      expect.objectContaining({
+        event: expect.objectContaining({
+          action: 'rule_aggregate',
+          outcome: 'failure',
+        }),
+        error: {
+          code: 'Error',
+          message: 'Unauthorized',
+        },
+      })
+    );
   });
 });
