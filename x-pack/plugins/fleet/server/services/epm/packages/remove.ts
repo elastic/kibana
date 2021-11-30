@@ -88,8 +88,13 @@ async function deleteKibanaAssets(
     installedObjects
   );
 
-  const assetsToDelete = resolvedObjects.map(({ saved_object: { id, type } }) => ({ id, type }));
+  const foundObjects = resolvedObjects.filter(
+    ({ saved_object: savedObject }) => savedObject?.error?.statusCode !== 404
+  );
 
+  // in the case of a partial install, it is expected that some assets will be not found
+  // we filter these out before calling delete
+  const assetsToDelete = foundObjects.map(({ saved_object: { id, type } }) => ({ id, type }));
   const promises = assetsToDelete.map(async ({ id, type }) => {
     return savedObjectsClient.delete(type, id);
   });
