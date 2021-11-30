@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { mount, ReactWrapper } from 'enzyme';
-import { SourcererScopeName } from '../../store/sourcerer/model';
+import { initialSourcererState, SourcererScopeName } from '../../store/sourcerer/model';
 import { Sourcerer } from './index';
 import { sourcererActions, sourcererModel } from '../../store/sourcerer';
 import {
@@ -781,5 +781,31 @@ describe('Sourcerer integration tests', () => {
         selectedPatterns: ['fakebeat-*'],
       })
     );
+  });
+});
+
+describe('No data', () => {
+  const mockNoIndicesState = {
+    ...mockGlobalState,
+    sourcerer: {
+      ...initialSourcererState,
+    },
+  };
+
+  const { storage } = createSecuritySolutionStorageMock();
+
+  beforeEach(() => {
+    store = createStore(mockNoIndicesState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+    jest.clearAllMocks();
+    jest.restoreAllMocks();
+  });
+  test('Hide sourcerer', () => {
+    const wrapper = mount(
+      <TestProviders store={store}>
+        <Sourcerer {...defaultProps} />
+      </TestProviders>
+    );
+
+    expect(wrapper.find(`[data-test-subj="sourcerer-trigger"]`).exists()).toEqual(false);
   });
 });
