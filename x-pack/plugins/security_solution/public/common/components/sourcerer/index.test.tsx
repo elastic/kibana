@@ -7,12 +7,7 @@
 
 import React from 'react';
 import { mount, ReactWrapper } from 'enzyme';
-import {
-  initDataView,
-  initialSourcererState,
-  initSourcererScope,
-  SourcererScopeName,
-} from '../../store/sourcerer/model';
+import { initialSourcererState, SourcererScopeName } from '../../store/sourcerer/model';
 import { Sourcerer } from './index';
 import { sourcererActions, sourcererModel } from '../../store/sourcerer';
 import {

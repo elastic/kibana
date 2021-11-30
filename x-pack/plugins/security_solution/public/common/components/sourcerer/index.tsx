@@ -57,7 +57,6 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
     sourcererScope: { selectedDataViewId, selectedPatterns, loading },
     sourcererDataView,
   } = useDeepEqualSelector((state) => sourcererScopeSelector(state, scopeId));
-  console.log('sourcererDataView---', sourcererDataView);
   const indicesExist = useMemo(
     () => checkIfIndicesExist({ scopeId, signalIndexName, sourcererDataView }),
     [scopeId, signalIndexName, sourcererDataView]
