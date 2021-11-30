@@ -65,7 +65,7 @@ export class ResolutionEditor extends Component<Props, State> {
   };
 
   _onResolutionChange = (event: ChangeEvent<HTMLInputElement> | MouseEvent<HTMLButtonElement>) => {
-    const resolution = sliderValueToResolution(parseInt(event.target.value, 10));
+    const resolution = sliderValueToResolution(parseInt(event.currentTarget.value, 10));
     if (!this.props.isHeatmap && resolution === GRID_RESOLUTION.SUPER_FINE) {
       const hasUnsupportedMetrics = this.props.metrics.find(isUnsupportedVectorTileMetric);
       if (hasUnsupportedMetrics) {
