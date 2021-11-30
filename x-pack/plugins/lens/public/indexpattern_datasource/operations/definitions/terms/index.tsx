@@ -24,7 +24,7 @@ import { OperationDefinition } from '../index';
 import { FieldBasedIndexPatternColumn } from '../column_types';
 import { ValuesInput } from './values_input';
 import { getInvalidFieldMessage } from '../helpers';
-import { FieldInputs } from './field_inputs';
+import { FieldInputs, MAX_MULTI_FIELDS_SIZE } from './field_inputs';
 import {
   FieldInput as FieldInputBase,
   getErrorMessage,
@@ -71,6 +71,12 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
   }),
   priority: 3, // Higher than any metric
   input: 'field',
+  canAddNewField: (column) => {
+    return (column.params?.secondaryFields?.length ?? 0) < MAX_MULTI_FIELDS_SIZE;
+  },
+  getDefaultVisualSettings: (column) => ({
+    truncateText: Boolean(!column.params?.secondaryFields?.length),
+  }),
   getPossibleOperationForField: ({ aggregationRestrictions, aggregatable, type }) => {
     if (
       supportedTypes.has(type) &&

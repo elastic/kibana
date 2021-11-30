@@ -224,7 +224,7 @@ interface BaseOperationDefinitionProps<C extends BaseIndexPatternColumn> {
     changedColumnId: string
   ) => C;
   /**
-   * React component for operation specific settings shown in the popover editor
+   * React component for operation specific settings shown in the flyout editor
    */
   paramEditor?: React.ComponentType<ParamEditorProps<C>>;
   /**
@@ -306,8 +306,18 @@ interface BaseOperationDefinitionProps<C extends BaseIndexPatternColumn> {
     description: string;
     section: 'elasticsearch' | 'calculation';
   };
-
+  /**
+   * React component for operation field specific behaviour
+   */
   renderFieldInput?: React.ComponentType<FieldInputProps<C>>;
+  /**
+   * Verify if the a new field can be added to the column
+   */
+  canAddNewField?: (column: C, field: IndexPatternField) => boolean;
+  /**
+   * Operation can influence some visual default settings. This function is used to collect default values offered
+   */
+  getDefaultVisualSettings?: (column: C) => { truncateText?: boolean };
 }
 
 interface BaseBuildColumnArgs {

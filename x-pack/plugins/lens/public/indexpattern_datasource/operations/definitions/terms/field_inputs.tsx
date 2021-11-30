@@ -23,6 +23,7 @@ import type { IndexPattern, IndexPatternPrivateState } from '../../../types';
 import type { OperationSupportMatrix } from '../../../dimension_panel';
 
 const generateId = htmlIdGenerator();
+export const MAX_MULTI_FIELDS_SIZE = 3;
 
 export interface FieldInputsProps {
   column: TermsIndexPatternColumn;
@@ -226,6 +227,7 @@ export function FieldInputs({
         label={i18n.translate('xpack.lens.indexPattern.terms.addaFilter', {
           defaultMessage: 'Add field',
         })}
+        isDisabled={localValues.length > MAX_MULTI_FIELDS_SIZE}
       />
     </>
   );
