@@ -173,8 +173,8 @@ describe('Telemetry on auth type', () => {
       const request = httpServerMock.createKibanaRequest();
       const response = await routeHandler(mockContext, request, kibanaResponseFactory);
 
-      expect(response.status).toBe(400);
-      expect(response.payload).toEqual({ message: 'Authentication type can not be empty' });
+      expect(response.status).toBe(204);
+      expect(response.payload).toBeUndefined();
       expect(mockUsageCounter.incrementCounter).toHaveBeenCalledTimes(0);
     });
 
