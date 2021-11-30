@@ -45,13 +45,7 @@ function arbitrarySearchSessionSavedObjectAttributes(): fc.Arbitrary<SearchSessi
     expires: fc.date().map((date) => date.toISOString()),
     persisted: fc.boolean(),
     sessionId: fc.string({ minLength: 1 }),
-    status: fc.constantFrom(
-      SearchSessionStatus.CANCELLED,
-      SearchSessionStatus.COMPLETE,
-      SearchSessionStatus.ERROR,
-      SearchSessionStatus.EXPIRED,
-      SearchSessionStatus.IN_PROGRESS
-    ),
+    status: fc.constantFrom(...Object.values(SearchSessionStatus)),
     touched: fc.date().map((date) => date.toISOString()),
     version: fc.string(),
     appId: option(fc.string()),
