@@ -37,7 +37,7 @@ export function addMessages(
   baseContext: BaseActionContext,
   params: Params
 ): ActionContext {
-  const title = i18n.translate('xpack.stackAlerts.indexThreshold.alertTypeContextSubjectTitle', {
+  const title = i18n.translate('xpack.stackAlerts.searchThreshold.alertTypeContextSubjectTitle', {
     defaultMessage: 'alert {name} group {group} met threshold',
     values: {
       name: alertInfo.name,
@@ -47,7 +47,7 @@ export function addMessages(
 
   const window = `${params.timeWindowSize}${params.timeWindowUnit}`;
   const message = i18n.translate(
-    'xpack.stackAlerts.indexThreshold.alertTypeContextMessageDescription',
+    'xpack.stackAlerts.searchThreshold.alertTypeContextMessageDescription',
     {
       defaultMessage: `alert '{name}' is active for group '{group}':
 

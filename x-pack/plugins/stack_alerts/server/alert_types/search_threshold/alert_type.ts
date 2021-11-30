@@ -21,7 +21,7 @@ import {
 import { AlertTypeParams } from '../../../../alerting/common';
 import { SharePluginSetup } from '../../../../../../src/plugins/share/server';
 
-export const ID = '.discover-threshold';
+export const ID = '.search-threshold';
 export const ActionGroupId = 'threshold met';
 
 export interface DiscoverThresholdParams extends AlertTypeParams {
@@ -53,54 +53,54 @@ export function getAlertType(
   share: SharePluginSetup,
   core: CoreSetup
 ): DiscoverAlertType {
-  const alertTypeName = i18n.translate('xpack.stackAlerts.indexThreshold.alertTypeTitle', {
-    defaultMessage: 'Discover threshold',
+  const alertTypeName = i18n.translate('xpack.stackAlerts.searchThreshold.alertTypeTitle', {
+    defaultMessage: 'Search threshold',
   });
 
   const actionGroupName = i18n.translate(
-    'xpack.stackAlerts.indexThreshold.actionGroupThresholdMetTitle',
+    'xpack.stackAlerts.searchThreshold.actionGroupThresholdMetTitle',
     {
       defaultMessage: 'Threshold met',
     }
   );
 
   const actionVariableContextGroupLabel = i18n.translate(
-    'xpack.stackAlerts.indexThreshold.actionVariableContextGroupLabel',
+    'xpack.stackAlerts.searchThreshold.actionVariableContextGroupLabel',
     {
       defaultMessage: 'The group that exceeded the threshold.',
     }
   );
 
   const actionVariableContextDateLabel = i18n.translate(
-    'xpack.stackAlerts.indexThreshold.actionVariableContextDateLabel',
+    'xpack.stackAlerts.searchThreshold.actionVariableContextDateLabel',
     {
       defaultMessage: 'The date the alert exceeded the threshold.',
     }
   );
 
   const actionVariableContextValueLabel = i18n.translate(
-    'xpack.stackAlerts.indexThreshold.actionVariableContextValueLabel',
+    'xpack.stackAlerts.searchThreshold.actionVariableContextValueLabel',
     {
       defaultMessage: 'The value that exceeded the threshold.',
     }
   );
 
   const actionVariableContextMessageLabel = i18n.translate(
-    'xpack.stackAlerts.indexThreshold.actionVariableContextMessageLabel',
+    'xpack.stackAlerts.searchThreshold.actionVariableContextMessageLabel',
     {
       defaultMessage: 'A pre-constructed message for the alert.',
     }
   );
 
   const actionVariableContextTitleLabel = i18n.translate(
-    'xpack.stackAlerts.indexThreshold.actionVariableContextTitleLabel',
+    'xpack.stackAlerts.searchThreshold.actionVariableContextTitleLabel',
     {
       defaultMessage: 'A pre-constructed title for the alert.',
     }
   );
 
   const actionVariableContextThresholdLabel = i18n.translate(
-    'xpack.stackAlerts.indexThreshold.actionVariableContextThresholdLabel',
+    'xpack.stackAlerts.searchThreshold.actionVariableContextThresholdLabel',
     {
       defaultMessage:
         "An array of values to use as the threshold; 'between' and 'notBetween' require two values, the others require one.",
@@ -108,14 +108,14 @@ export function getAlertType(
   );
 
   const actionVariableContextThresholdComparatorLabel = i18n.translate(
-    'xpack.stackAlerts.indexThreshold.actionVariableContextThresholdComparatorLabel',
+    'xpack.stackAlerts.searchThreshold.actionVariableContextThresholdComparatorLabel',
     {
       defaultMessage: 'A comparison function to use to determine if the threshold as been met.',
     }
   );
 
   const actionVariableContextConditionsLabel = i18n.translate(
-    'xpack.stackAlerts.indexThreshold.actionVariableContextConditionsLabel',
+    'xpack.stackAlerts.searchThreshold.actionVariableContextConditionsLabel',
     {
       defaultMessage: 'A string describing the threshold comparator and threshold',
     }
@@ -180,7 +180,7 @@ export function getAlertType(
     const compareFn = ComparatorFns.get(params.thresholdComparator);
     if (compareFn == null) {
       throw new Error(
-        i18n.translate('xpack.stackAlerts.indexThreshold.invalidComparatorErrorMessage', {
+        i18n.translate('xpack.stackAlerts.searchThreshold.invalidComparatorErrorMessage', {
           defaultMessage: 'invalid thresholdComparator specified: {comparator}',
           values: {
             comparator: params.thresholdComparator,
@@ -189,25 +189,33 @@ export function getAlertType(
       );
     }
 
-    try {
-      const searchSourceClient = await services.searchSourceClient;
-      const loadedSearchSource = await searchSourceClient.create(params.searchSourceFields);
-      const index = loadedSearchSource.getField('index');
-      const timeFieldName = index?.timeFieldName;
-      if (!timeFieldName) {
-        throw new Error('Invalid data view without timeFieldName');
-      }
+    // @TODO: this is working but should be solved by not by providing a service in the alerting plugin
+    // The alerting needs to provide a KibanaRequest object that would allow to create
+    // a search source client here like this
+    // data.search.searchSource.asScoped(KibanaRequest)
+    const searchSourceClient = await services.searchSourceClient;
+    const loadedSearchSource = await searchSourceClient.create(params.searchSourceFields);
+    const index = loadedSearchSource.getField('index');
+    const timeFieldName = index?.timeFieldName;
+    if (!timeFieldName) {
+      throw new Error('Invalid data view without timeFieldName');
+    }
 
-      loadedSearchSource.setField('size', 0);
-      const filter = getTime(index, {
-        from: `now-${params.timeWindowSize}${params.timeWindowUnit}`,
-        to: 'now',
-      });
-      const searchSourceChild = loadedSearchSource.createChild();
-      searchSourceChild.setField('filter', filter);
-      const docs = await searchSourceChild.fetch();
-      const nrOfDocs = Number(docs.hits.total);
-      const met = compareFn(nrOfDocs, params.threshold);
+    loadedSearchSource.setField('size', 0);
+    const filter = getTime(index, {
+      from: `now-${params.timeWindowSize}${params.timeWindowUnit}`,
+      to: 'now',
+    });
+    const searchSourceChild = loadedSearchSource.createChild();
+    searchSourceChild.setField('filter', filter);
+    const docs = await searchSourceChild.fetch();
+    const nrOfDocs = Number(docs.hits.total);
+    const met = compareFn(nrOfDocs, params.threshold);
+
+    if (met) {
+      // This code is generating a link to Discover containing the alertId and the time range.
+      // When the user navigates by this link, the query is built by the info provided
+      // by the rule. Which means, that it could have been modified in the meantime
       // @TODO, there should be a checksum addon to verify if the searchSource was changed
       // In this case the user should be notified that the displayed data when opening the link
       // is a might be different to the data that triggered the alert.
@@ -220,41 +228,38 @@ export function getAlertType(
         .replace('{{from}}', filter?.query.range[timeFieldName].gte ?? '')
         .replace('{{to}}', filter?.query.range[timeFieldName].lte ?? '');
 
-      if (met) {
-        const conditions = `${nrOfDocs} is ${getHumanReadableComparator(
-          params.thresholdComparator
-        )} ${params.threshold}`;
+      const conditions = `${nrOfDocs} is ${getHumanReadableComparator(
+        params.thresholdComparator
+      )} ${params.threshold}`;
 
-        const timestamp = new Date().toISOString();
-        // just for testing
-        const instanceId = timestamp;
-        const baseContext: ActionContext = {
-          title: name,
-          message: `${nrOfDocs} documents found (${conditions})`,
-          date: timestamp,
-          group: instanceId,
-          value: Number(nrOfDocs),
-          conditions,
-          link,
-        };
+      const timestamp = new Date().toISOString();
+      // just for testing
+      const instanceId = timestamp;
+      const baseContext: ActionContext = {
+        title: name,
+        message: `${nrOfDocs} documents found (${conditions})`,
+        date: timestamp,
+        group: instanceId,
+        value: Number(nrOfDocs),
+        conditions,
+        link,
+      };
 
-        const alertInstance = options.services.alertInstanceFactory(instanceId);
-        // store the params we would need to recreate the query that led to this alert instance
-        alertInstance.replaceState({
-          latestTimestamp: timestamp,
-          lastSearchSource: params.searchSourceFields,
-          lastTimeRange: filter!.query.range,
-        });
-        alertInstance.scheduleActions(ActionGroupId, baseContext);
-        return {
-          latestTimestamp: timestamp,
-          lastSearchSource: params.searchSourceFields,
-          lastTimeRange: filter!.query.range,
-        };
-      }
-    } catch (e) {
-      logger.error(e);
+      const alertInstance = options.services.alertInstanceFactory(instanceId);
+      // store the params we would need to recreate the query that led to this alert instance
+      alertInstance.replaceState({
+        latestTimestamp: timestamp,
+        lastSearchSource: params.searchSourceFields,
+        lastTimeRange: filter!.query.range,
+      });
+      alertInstance.scheduleActions(ActionGroupId, baseContext);
+      return {
+        latestTimestamp: timestamp,
+        lastSearchSource: params.searchSourceFields,
+        lastTimeRange: filter!.query.range,
+      };
     }
+
     return state;
   }
 }

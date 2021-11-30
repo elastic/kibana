@@ -65,7 +65,7 @@ export function AlertsPopover(props: OptionsPopoverProps) {
       consumer: 'discover',
       onClose: onCloseAlertFlyout,
       canChangeTrigger: false,
-      alertTypeId: '.discover-threshold',
+      alertTypeId: '.search-threshold',
       metadata: {
         isInternal: true,
       },
@@ -89,7 +89,10 @@ export function AlertsPopover(props: OptionsPopoverProps) {
                   setAlertFlyoutVisibility(true);
                 }}
               >
-                <FormattedMessage id="emptyButton" defaultMessage="Create threshold rule" />
+                <FormattedMessage
+                  id="dsc.alerts.createSearchThreshold"
+                  defaultMessage="Create search threshold rule"
+                />
               </EuiLink>
             </>
           ),
@@ -104,7 +107,10 @@ export function AlertsPopover(props: OptionsPopoverProps) {
                 'management/insightsAndAlerting/triggersActions/alerts'
               )}
             >
-              Manage alerts
+              <FormattedMessage
+                id="dsc.alerts.manageRulesAndConnectors"
+                defaultMessage="Manage rules and connectors"
+              />
             </EuiLink>
           ),
           icon: 'tableOfContents',

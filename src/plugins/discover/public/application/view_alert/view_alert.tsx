@@ -66,9 +66,9 @@ export function ViewAlertRoute(props: NotFoundRouteProps) {
             to: query.get('to')!,
           },
         };
-        const filter = searchSource.getOwnField('filter');
-        if (filter) {
-          state.filter = filter as Filter;
+        const filters = searchSource.getField('filter');
+        if (filters) {
+          state.filters = filters as Filter[];
         }
         await locator.navigate(state);
       }

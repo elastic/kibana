@@ -15,7 +15,7 @@ export { DiscoverThresholdAlertParams } from './types';
 
 export function getAlertType(): AlertTypeModel<DiscoverThresholdAlertParams> {
   return {
-    id: '.discover-threshold',
+    id: '.search-threshold',
     description: i18n.translate('xpack.stackAlerts.threshold.ui.alertType.descriptionText', {
       defaultMessage: 'Alert when number of documents meets the threshold.',
     }),

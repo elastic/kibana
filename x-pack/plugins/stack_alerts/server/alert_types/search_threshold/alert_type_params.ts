@@ -21,6 +21,7 @@ export const ParamsSchema = schema.object(
     // the values to use as the threshold; `between` and `notBetween` require
     // two values, the others require one.
     threshold: schema.arrayOf(schema.number(), { minSize: 1, maxSize: 2 }),
+    // @TODO we might call this searchSource
     searchSourceFields: schema.object({}, { unknowns: 'allow' }),
   },
   {
@@ -35,7 +36,7 @@ function validateParams(anyParams: unknown): string | undefined {
   const { thresholdComparator, threshold }: Params = anyParams as Params;
 
   if (betweenComparators.has(thresholdComparator) && threshold.length === 1) {
-    return i18n.translate('xpack.stackAlerts.indexThreshold.invalidThreshold2ErrorMessage', {
+    return i18n.translate('xpack.stackAlerts.searchThreshold.invalidThreshold2ErrorMessage', {
       defaultMessage:
         '[threshold]: must have two elements for the "{thresholdComparator}" comparator',
       values: {
@@ -48,7 +49,7 @@ function validateParams(anyParams: unknown): string | undefined {
 export function validateComparator(comparator: string): string | undefined {
   if (ComparatorFnNames.has(comparator)) return;
 
-  return i18n.translate('xpack.stackAlerts.indexThreshold.invalidComparatorErrorMessage', {
+  return i18n.translate('xpack.stackAlerts.searchThreshold.invalidComparatorErrorMessage', {
     defaultMessage: 'invalid thresholdComparator specified: {comparator}',
     values: {
       comparator,
