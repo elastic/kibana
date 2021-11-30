@@ -8,7 +8,7 @@
 import React, { useMemo } from 'react';
 
 import { EuiButton, EuiTableFieldDataColumnType } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { InnerLinkPanel, LinkPanel, LinkPanelListItem } from '../link_panel';
 import { LinkPanelViewProps } from '../link_panel/types';
 import { Link } from '../link_panel/link';
@@ -30,6 +30,8 @@ const columns: Array<EuiTableFieldDataColumnType<LinkPanelListItem>> = [
     align: 'right',
     field: 'count',
     name: 'Risk Score',
+    render: (riskScore) =>
+      Number.isNaN(riskScore) ? riskScore : Number.parseFloat(riskScore).toFixed(2),
     sortable: true,
     truncateText: true,
     width: '15%',

@@ -13,7 +13,7 @@ import React, { Component } from 'react';
 
 import { EuiButtonIcon, EuiContextMenuPanel, EuiContextMenuItem, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { withKibana } from '../../../../../../../src/plugins/kibana_react/public';
 

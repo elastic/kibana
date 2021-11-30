@@ -7,7 +7,7 @@
 
 import React, { useState, useCallback } from 'react';
 import { EuiHeaderLink, EuiFlyout } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { FlyoutHome } from './flyout_home';
 import { JobSetupScreen } from './job_setup_screen';
 import { useInfraMLCapabilities } from '../../../../../../containers/ml/infra_ml_capabilities';

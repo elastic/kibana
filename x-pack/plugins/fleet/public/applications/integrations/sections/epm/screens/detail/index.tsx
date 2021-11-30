@@ -24,7 +24,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import semverLt from 'semver/functions/lt';
 
 import {
@@ -454,7 +454,7 @@ export function Detail() {
         name: (
           <FormattedMessage
             id="xpack.fleet.epm.packageDetailsNav.packagePoliciesLinkText"
-            defaultMessage="Integration Policies"
+            defaultMessage="Integration policies"
           />
         ),
         isSelected: panel === 'policies',
