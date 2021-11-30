@@ -33,6 +33,15 @@
 .conApp__output {
   display: flex;
   flex: 1 1 1px;
+
+  // Hide inline error markers in editor output
+  .ace_error {
+    background: none;
+
+    &:hover {
+      pointer-events: none;
+    }
+  }
 }
 
 .conApp__editorContent,
