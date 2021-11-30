@@ -15,6 +15,7 @@ import {
   MONITOR_ROUTE,
   MONITOR_ADD_ROUTE,
   MONITOR_EDIT_ROUTE,
+  MONITOR_MANGEMENT,
   OVERVIEW_ROUTE,
   SETTINGS_ROUTE,
   STEP_DETAIL_ROUTE,
@@ -25,6 +26,7 @@ import {
   MonitorPage,
   AddMonitorPage,
   EditMonitorPage,
+  MonitorManagementPage,
   StepDetailPage,
   NotFoundPage,
   SettingsPage,
@@ -215,6 +217,24 @@ const getRoutes = (config: UptimeConfig): RouteProps[] => {
                 <FormattedMessage
                   id="xpack.uptime.editMonitor.pageHeader.title"
                   defaultMessage="Edit Monitor"
+                />
+              ),
+            },
+          },
+          {
+            title: i18n.translate('xpack.uptime.monitorManagementRoute.title', {
+              defaultMessage: 'Manage Monitors | {baseTitle}',
+              values: { baseTitle },
+            }),
+            path: MONITOR_MANGEMENT,
+            component: MonitorManagementPage,
+            dataTestSubj: 'uptimeMonitorManagementListPage',
+            telemetryId: UptimePage.MonitorManagement,
+            pageHeader: {
+              pageTitle: (
+                <FormattedMessage
+                  id="xpack.uptime.monitorManagement.pageHeader.title"
+                  defaultMessage="Manage monitors"
                 />
               ),
             },

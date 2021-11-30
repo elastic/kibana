@@ -6,6 +6,10 @@
  */
 
 import { API_URLS } from '../../../common/constants';
+import {
+  FetchMonitorManagementListQueryArgs,
+  MonitorManagementListResultType,
+} from '../../../common/runtime_types';
 import { apiService } from './utils';
 
 // TODO, change to monitor runtime type
@@ -15,4 +19,14 @@ export const setMonitor = async ({ monitor, id }: { monitor: any; id?: string })
   } else {
     return await apiService.post(API_URLS.SYNTHETICS_MONITORS, monitor);
   }
+};
+
+export const fetchMonitorManagementList = async (
+  params: FetchMonitorManagementListQueryArgs
+): Promise<any> => {
+  return await apiService.get(
+    API_URLS.SYNTHETICS_MONITORS,
+    params,
+    MonitorManagementListResultType
+  );
 };
