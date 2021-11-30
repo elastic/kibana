@@ -11,7 +11,7 @@ import { EuiTitle, EuiFlexItem, EuiFlexGroup, EuiToolTip } from '@elastic/eui';
 
 export const SidebarSectionTitle = ({ title, tip, children }) => {
   const formattedTitle = (
-    <EuiTitle size="xxxs" className="canvasSidebar__panelTitleHeading">
+    <EuiTitle size="xxxs">
       <h4>{title}</h4>
     </EuiTitle>
   );
