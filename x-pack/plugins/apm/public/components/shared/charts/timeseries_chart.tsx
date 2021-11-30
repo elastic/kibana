@@ -108,7 +108,6 @@ export function TimeseriesChart({
   const annotationColor = theme.eui.euiColorSuccess;
   const allSeries = [...timeseries, ...(anomalyTimeseries?.boundaries ?? [])];
   const xDomain = isEmpty ? { min: 0, max: 1 } : { min, max };
-
   return (
     <ChartContainer
       hasData={!isEmpty}

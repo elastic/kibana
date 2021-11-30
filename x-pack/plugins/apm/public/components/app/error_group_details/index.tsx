@@ -16,6 +16,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { Coordinate } from '../../../../../apm/typings/timeseries';
 import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
 import { NOT_AVAILABLE_LABEL } from '../../../../common/i18n';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
@@ -28,7 +29,7 @@ import { useErrorGroupDistributionFetcher } from '../../../hooks/use_error_group
 import { useFetcher } from '../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import type { APIReturnType } from '../../../services/rest/createCallApmApi';
-import { FailedTransactionRateChart } from '../../shared/charts/failed_transaction_rate_chart';
+import { ErrorRateChart } from '../../shared/charts/error_rate_chart';
 import { DetailView } from './detail_view';
 import { ErrorDistribution } from './Distribution';
 
@@ -169,6 +170,36 @@ export function ErrorGroupDetails() {
     return <ErrorGroupHeader groupId={groupId} />;
   }
 
+  function calculateErrorRate(period: Coordinate) {
+    const minutes = Math.floor(period.x / 60000);
+    return period.y && period.y / minutes;
+  }
+
+  function getErrorRate(distribution: ErrorDistributionAPIResponse) {
+    const errorRateCurrentPeriod = distribution.currentPeriod.map((period) => {
+      return {
+        x: period.x,
+        y: calculateErrorRate(period),
+      };
+    });
+
+    const errorRatePreviousPeriod = distribution.previousPeriod.map(
+      (period) => {
+        return {
+          x: period.x,
+          y: calculateErrorRate(period),
+        };
+      }
+    );
+
+    return {
+      errorRateCurrentPeriod,
+      errorRatePreviousPeriod,
+    };
+  }
+
+  const errorRateTimeseries = getErrorRate(errorDistributionData);
+
   // If there are 0 occurrences, show only distribution chart w. empty message
   const showDetails = errorGroupData.occurrencesCount !== 0;
   const logMessage = errorGroupData.error?.error.log?.message;
@@ -239,10 +270,9 @@ export function ErrorGroupDetails() {
               </EuiPanel>
             </EuiFlexItem>
             <EuiFlexItem>
-              <FailedTransactionRateChart
-                groupId={groupId}
-                kuery={kuery}
-                environment={environment}
+              <ErrorRateChart
+                errorRateTimeSeries={errorRateTimeseries}
+                fetchStatus={status}
               />
             </EuiFlexItem>
           </ChartPointerEventContextProvider>

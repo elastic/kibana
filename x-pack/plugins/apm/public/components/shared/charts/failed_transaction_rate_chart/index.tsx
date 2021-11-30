@@ -33,7 +33,6 @@ interface Props {
   showAnnotations?: boolean;
   kuery: string;
   environment: string;
-  groupId?: string;
 }
 
 type ErrorRate =
@@ -55,7 +54,6 @@ export function FailedTransactionRateChart({
   showAnnotations = true,
   environment,
   kuery,
-  groupId,
 }: Props) {
   const theme = useTheme();
   const {
@@ -96,7 +94,6 @@ export function FailedTransactionRateChart({
               transactionName,
               comparisonStart,
               comparisonEnd,
-              groupId,
             },
           },
         });
@@ -112,7 +109,6 @@ export function FailedTransactionRateChart({
       transactionName,
       comparisonStart,
       comparisonEnd,
-      groupId,
     ]
   );
 
@@ -121,9 +117,12 @@ export function FailedTransactionRateChart({
       data: data.currentPeriod.timeseries,
       type: 'linemark',
       color: theme.eui.euiColorVis7,
-      title: i18n.translate('xpack.apm.errorRate.chart.errorRate', {
-        defaultMessage: 'Failed transaction rate (avg.)',
-      }),
+      title: i18n.translate(
+        'xpack.apm.failedTransactionRate.chart.failedTransactionRate',
+        {
+          defaultMessage: 'Failed transaction rate (avg.)',
+        }
+      ),
     },
     ...(comparisonEnabled
       ? [
@@ -132,7 +131,7 @@ export function FailedTransactionRateChart({
             type: 'area',
             color: theme.eui.euiColorMediumShade,
             title: i18n.translate(
-              'xpack.apm.errorRate.chart.errorRate.previousPeriodLabel',
+              'xpack.apm.failedTransactionRate.chart.failedTransactionRate.previousPeriodLabel',
               { defaultMessage: 'Previous period' }
             ),
           },
@@ -144,13 +143,13 @@ export function FailedTransactionRateChart({
     <EuiPanel hasBorder={true}>
       <EuiTitle size="xs">
         <h2>
-          {i18n.translate('xpack.apm.errorRate', {
+          {i18n.translate('xpack.apm.failedTransactionRate', {
             defaultMessage: 'Failed transaction rate',
           })}
         </h2>
       </EuiTitle>
       <TimeseriesChart
-        id="errorRate"
+        id="failedTransactionRate"
         height={height}
         showAnnotations={showAnnotations}
         fetchStatus={status}

@@ -331,9 +331,6 @@ const transactionChartsErrorRateRoute = createApmServerRoute({
       serviceName: t.string,
     }),
     query: t.intersection([
-      t.partial({
-        groupId: t.string,
-      }),
       t.type({ transactionType: t.string }),
       t.partial({ transactionName: t.string }),
       t.intersection([environmentRt, kueryRt, rangeRt, comparisonRangeRt]),
@@ -354,7 +351,6 @@ const transactionChartsErrorRateRoute = createApmServerRoute({
       comparisonEnd,
       start,
       end,
-      groupId,
     } = params.query;
 
     const searchAggregatedTransactions = await getSearchAggregatedTransactions({
@@ -376,7 +372,6 @@ const transactionChartsErrorRateRoute = createApmServerRoute({
       comparisonEnd,
       start,
       end,
-      groupId,
     });
   },
 });

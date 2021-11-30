@@ -10,7 +10,6 @@ import {
   SERVICE_NAME,
   TRANSACTION_NAME,
   TRANSACTION_TYPE,
-  ERROR_GROUP_ID,
 } from '../../../common/elasticsearch_fieldnames';
 import { EventOutcome } from '../../../common/event_outcome';
 import { offsetPreviousPeriodCoordinates } from '../../../common/utils/offset_previous_period_coordinate';
@@ -43,7 +42,6 @@ export async function getFailedTransactionRate({
   searchAggregatedTransactions,
   start,
   end,
-  groupId,
 }: {
   environment: string;
   kuery: string;
@@ -54,7 +52,6 @@ export async function getFailedTransactionRate({
   searchAggregatedTransactions: boolean;
   start: number;
   end: number;
-  groupId?: string;
 }): Promise<{
   timeseries: Coordinate[];
   average: number | null;
@@ -70,7 +67,6 @@ export async function getFailedTransactionRate({
     },
     ...termQuery(TRANSACTION_NAME, transactionName),
     ...termQuery(TRANSACTION_TYPE, transactionType),
-    ...termQuery(ERROR_GROUP_ID, groupId),
     ...getDocumentTypeFilterForTransactions(searchAggregatedTransactions),
     ...rangeQuery(start, end),
     ...environmentQuery(environment),
@@ -135,7 +131,6 @@ export async function getFailedTransactionRatePeriods({
   comparisonEnd,
   start,
   end,
-  groupId,
 }: {
   environment: string;
   kuery: string;
@@ -148,7 +143,6 @@ export async function getFailedTransactionRatePeriods({
   comparisonEnd?: number;
   start: number;
   end: number;
-  groupId?: string;
 }) {
   const commonProps = {
     environment,
@@ -158,7 +152,6 @@ export async function getFailedTransactionRatePeriods({
     transactionName,
     setup,
     searchAggregatedTransactions,
-    groupId,
   };
 
   const currentPeriodPromise = getFailedTransactionRate({
