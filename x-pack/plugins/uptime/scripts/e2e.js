@@ -59,12 +59,22 @@ if (server) {
 const config = './playwright_run.ts';
 
 function executeRunner() {
-  childProcess.execSync(
-    `node ../../../scripts/${ftrScript} --config ${config} --kibana-install-dir '${kibanaInstallDir}' --headless ${headless} --grep ${grep} `,
-    {
-      cwd: e2eDir,
-      stdio: 'inherit',
-    }
-  );
+  if (server) {
+    childProcess.execSync(
+      `node ../../../scripts/${ftrScript} --config ${config} --kibana-install-dir '${kibanaInstallDir}' `,
+      {
+        cwd: e2eDir,
+        stdio: 'inherit',
+      }
+    );
+  } else {
+    childProcess.execSync(
+      `node ../../../scripts/${ftrScript} --config ${config} --kibana-install-dir '${kibanaInstallDir}' --headless ${headless} --grep ${grep}`,
+      {
+        cwd: e2eDir,
+        stdio: 'inherit',
+      }
+    );
+  }
 }
 executeRunner();

@@ -17,7 +17,12 @@ export function playwrightRunTests({ headless, match }: { headless: boolean; mat
   return async ({ getService }: any) => {
     const result = await playwrightStart(getService, headless, match);
 
-    if (result?.uptime && result.uptime.status !== 'succeeded') {
+    if (
+      result?.uptime &&
+      result.uptime.status !== 'succeeded' &&
+      result.StepsDuration &&
+      result.StepsDuration.status !== 'succeeded'
+    ) {
       throw new Error('Tests failed');
     }
   };
@@ -42,7 +47,7 @@ async function playwrightStart(getService: any, headless: boolean, match?: strin
   const res = await playwrightRun({
     params: { kibanaUrl },
     playwrightOptions: { headless, chromiumSandbox: false, timeout: 60 * 1000 },
-    match: match ?? undefined,
+    match: match === 'undefined' ? '' : match,
   });
 
   console.log('Removing esArchiver...');
