@@ -14,10 +14,11 @@ import { AlertTypeParams } from '../../../../../../x-pack/plugins/alerting/commo
 import { Filter, SearchSourceFields } from '../../../../data/common';
 import { DiscoverAppLocatorParams } from '../../locator';
 
-interface DiscoverThresholdAlertParams extends AlertTypeParams {
+interface SearchThresholdAlertParams extends AlertTypeParams {
   searchSourceFields: SearchSourceFields;
 }
 
+// @TODO pretty sure there are better ways to get this endpoint
 const LEGACY_BASE_ALERT_API_PATH = '/api/alerts';
 
 function useQuery() {
@@ -25,9 +26,9 @@ function useQuery() {
   return React.useMemo(() => new URLSearchParams(search), [search]);
 }
 
-export interface NotFoundRouteProps {
+export interface ViewAlertProps {
   /**
-   * Id of an alert
+   * Id of the search rule
    */
   id: string;
   /**
@@ -36,16 +37,16 @@ export interface NotFoundRouteProps {
   services: DiscoverServices;
 }
 
-export function ViewAlertRoute(props: NotFoundRouteProps) {
+export function ViewAlertRoute(props: ViewAlertProps) {
   const query = useQuery();
   const { services } = props;
   const { core, data, locator } = services;
-  const [alert, setAlert] = useState<Alert<DiscoverThresholdAlertParams> | null>(null);
+  const [alert, setAlert] = useState<Alert<SearchThresholdAlertParams> | null>(null);
 
   useEffect(() => {
     if (!alert) {
       core.http
-        .get<Alert<DiscoverThresholdAlertParams> | null>(
+        .get<Alert<SearchThresholdAlertParams> | null>(
           `${LEGACY_BASE_ALERT_API_PATH}/alert/${props.id}`
         )
         .then(setAlert);
@@ -55,7 +56,7 @@ export function ViewAlertRoute(props: NotFoundRouteProps) {
   useEffect(() => {
     const createSearchSource = async () => {
       if (alert) {
-        // Todo, needs a check if the searchSource is still valid or was edited
+        // @TODO, needs a check if the searchSource is still valid or was edited
         const searchSource = await data.search.searchSource.create(alert.params.searchSourceFields);
         const index = searchSource.getField('index');
         const state: DiscoverAppLocatorParams = {
@@ -70,6 +71,7 @@ export function ViewAlertRoute(props: NotFoundRouteProps) {
         if (filters) {
           state.filters = filters as Filter[];
         }
+        // @TODO, failure handling (forward to main view, displaying an error toast)
         await locator.navigate(state);
       }
     };
