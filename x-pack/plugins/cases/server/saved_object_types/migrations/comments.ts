@@ -19,7 +19,6 @@ import {
   SavedObjectMigrationFn,
   SavedObjectMigrationMap,
   SavedObjectMigrationContext,
-  LogMeta,
 } from 'src/core/server';
 import { LensServerPluginSetup } from '../../../../lens/server';
 import { CommentType, AssociationType } from '../../../common';
@@ -31,6 +30,7 @@ import {
   stringifyMarkdownComment,
 } from '../../../common/utils/markdown_plugins/utils';
 import { addOwnerToSO, SanitizedCaseOwner } from '.';
+import { logError } from './utils';
 
 interface UnsanitizedComment {
   comment: string;
@@ -45,10 +45,6 @@ interface SanitizedComment {
 interface SanitizedCommentForSubCases {
   associationType: AssociationType;
   rule?: { id: string | null; name: string | null };
-}
-
-interface CommentLogMeta extends LogMeta {
-  migrations: { comment: { id: string } };
 }
 
 export interface CreateCommentsMigrationsDeps {
@@ -109,12 +105,16 @@ export const createCommentsMigrations = (
   return mergeMigrationFunctionMaps(commentsMigrations, embeddableMigrations);
 };
 
-const migrateByValueLensVisualizations =
-  (migrate: MigrateFunction, version: string): SavedObjectMigrationFn<{ comment?: string }> =>
+export const migrateByValueLensVisualizations =
+  (
+    migrate: MigrateFunction,
+    version: string
+  ): SavedObjectMigrationFn<{ comment?: string }, { comment?: string }> =>
   (doc: SavedObjectUnsanitizedDoc<{ comment?: string }>, context: SavedObjectMigrationContext) => {
     if (doc.attributes.comment == null) {
       return doc;
     }
+
     try {
       const parsedComment = parseCommentString(doc.attributes.comment);
       const migratedComment = parsedComment.children.map((comment) => {
@@ -136,8 +136,10 @@ const migrateByValueLensVisualizations =
           comment: stringifyCommentWithoutTrailingNewline(doc.attributes.comment, migratedMarkdown),
         },
       };
-    } catch (e) {
-      logError(doc.id, context, e);
+    } catch (error) {
+      // TODO: we don't have access to the context (it's always undefined because of the way the migrations are merged)
+      // so we can't log anything
+      // logError({ id: doc.id, context, error, docType: 'comment', docKey: 'comment' });
       return doc;
     }
   };
@@ -157,16 +159,3 @@ export const stringifyCommentWithoutTrailingNewline = (
   // so the comment stays consistent
   return trimEnd(stringifiedComment, '\n');
 };
-
-function logError(id: string, context: SavedObjectMigrationContext, error: Error) {
-  context.log.error<CommentLogMeta>(
-    `Failed to migrate comment with doc id: ${id} version: ${context.migrationVersion} error: ${error.message}`,
-    {
-      migrations: {
-        comment: {
-          id,
-        },
-      },
-    }
-  );
-}
