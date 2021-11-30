@@ -23,8 +23,16 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
       const datePickerInput = await find.byCssSelector(
         `${testSubjSelector('waffleDatePicker')} .euiDatePicker.euiFieldText`
       );
+
+      // explicitly focus to trigger tooltip
+      await datePickerInput.focus();
+
       await datePickerInput.clearValueWithKeyboard();
-      await datePickerInput.type([time, browser.keys.RETURN]);
+      await datePickerInput.type(time);
+
+      // dismiss the tooltip, which won't be hidden because blur doesn't happen reliably
+      await testSubjects.click('waffleDatePickerIntervalTooltip');
+
       await this.waitForLoading();
     },
 
