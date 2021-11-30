@@ -26,12 +26,20 @@ export default function createAggregateTests({ getService }: FtrProviderContext)
 
       expect(response.status).to.eql(200);
       expect(response.body).to.eql({
+        rule_enabled_status: {
+          disabled: 0,
+          enabled: 0,
+        },
         rule_execution_status: {
           ok: 0,
           active: 0,
           error: 0,
           pending: 0,
           unknown: 0,
+        },
+        rule_muted_status: {
+          muted: 0,
+          unmuted: 0,
         },
       });
     });
@@ -93,12 +101,20 @@ export default function createAggregateTests({ getService }: FtrProviderContext)
 
       expect(reponse.status).to.eql(200);
       expect(reponse.body).to.eql({
+        rule_enabled_status: {
+          disabled: 0,
+          enabled: 7,
+        },
         rule_execution_status: {
           ok: NumOkAlerts,
           active: NumActiveAlerts,
           error: NumErrorAlerts,
           pending: 0,
           unknown: 0,
+        },
+        rule_muted_status: {
+          muted: 0,
+          unmuted: 7,
         },
       });
     });
@@ -167,6 +183,14 @@ export default function createAggregateTests({ getService }: FtrProviderContext)
             error: NumErrorAlerts,
             pending: 0,
             unknown: 0,
+          },
+          ruleEnabledStatus: {
+            disabled: 0,
+            enabled: 7,
+          },
+          ruleMutedStatus: {
+            muted: 0,
+            unmuted: 7,
           },
         });
       });
