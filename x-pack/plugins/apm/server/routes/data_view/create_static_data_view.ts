@@ -57,7 +57,13 @@ export async function createStaticDataView({
         savedObjectsClient.create(
           'index-pattern',
           {
+            // required fields (even if empty)
             title: apmDataViewTitle,
+            fieldAttrs: '{}',
+            fields: '[]',
+            runtimeFieldMap: '{}',
+            timeFieldName: '@timestamp',
+            typeMeta: '{}',
 
             // link to APM from Discover
             fieldFormatMap: JSON.stringify({

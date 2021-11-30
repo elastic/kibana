@@ -17,6 +17,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const synthtrace = getService('synthtraceEsClient');
 
+  const dataViewPattern = 'traces-apm*,apm-*,logs-apm*,apm-*,metrics-apm*,apm-*';
+
   function createDataViewViaApmApi() {
     return apmApiClient.readUser({ endpoint: 'POST /internal/apm/data_view/static' });
   }
@@ -31,6 +33,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   function getDataView() {
     return supertest.get(`/api/saved_objects/index-pattern/${APM_STATIC_INDEX_PATTERN_ID}`);
+  }
+
+  function getDataViewSuggestions(field: string) {
+    return supertest
+      .post(`/api/kibana/suggestions/values/${dataViewPattern}`)
+      .set('kbn-xsrf', 'foo')
+      .send({ query: '', field, method: 'terms_agg' });
   }
 
   registry.when('no mappings exist', { config: 'basic', archives: [] }, () => {
@@ -86,9 +95,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           });
 
           it('has correct title', () => {
-            expect(resBody.attributes.title).to.be(
-              'traces-apm*,apm-*,logs-apm*,apm-*,metrics-apm*,apm-*'
-            );
+            expect(resBody.attributes.title).to.be(dataViewPattern);
           });
 
           it('has correct attributes', () => {
@@ -110,6 +117,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 },
               })
             );
+          });
+
+          // this test ensures that the default APM Data View doesn't interfere with suggestions returned in the kuery bar (this has been a problem in the past)
+          it('can get suggestions for `trace.id`', async () => {
+            const suggestions = await getDataViewSuggestions('trace.id');
+            expect(suggestions.body.length).to.be(10);
           });
         });
       });
