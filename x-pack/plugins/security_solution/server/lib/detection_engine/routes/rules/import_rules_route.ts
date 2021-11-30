@@ -32,7 +32,7 @@ import {
 } from '../utils';
 
 import { getTupleDuplicateErrorsAndUniqueRules, getInvalidConnectors } from './utils';
-import { sortRuleImports } from '../../rules/create_rules_stream_from_ndjson';
+import { createRulesAndExceptionsStreamFromNdJson } from '../../rules/create_rules_stream_from_ndjson';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 import { HapiReadableStream } from '../../rules/types';
 import {
@@ -105,7 +105,7 @@ export const importRulesRoute = (
         const objectLimit = config.maxRuleImportExportSize;
 
         // parse file to separate out exceptions from rules
-        const readAllStream = sortRuleImports(objectLimit);
+        const readAllStream = createRulesAndExceptionsStreamFromNdJson(objectLimit);
         const [{ exceptions, rules }] = await createPromiseFromStreams<
           RuleExceptionsPromiseFromStreams[]
         >([request.body.file as HapiReadableStream, ...readAllStream]);

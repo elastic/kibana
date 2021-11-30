@@ -21,9 +21,33 @@ import {
   createExceptionsStreamFromNdjson,
   getTupleErrorsAndUniqueExceptionListItems,
   getTupleErrorsAndUniqueExceptionLists,
+  isImportRegular,
 } from './import_exceptions_utils';
 
 describe('import_exceptions_utils', () => {
+  describe('isImportRegular', () => {
+    it('returns true if it has a status_code but no error', () => {
+      expect(
+        isImportRegular({
+          list_id: '123',
+          status_code: 200,
+        })
+      ).toBeTruthy();
+    });
+
+    it('returns false if it has error', () => {
+      expect(
+        isImportRegular({
+          error: {
+            message: 'error occurred',
+            status_code: 500,
+          },
+          list_id: '123',
+        })
+      ).toBeFalsy();
+    });
+  });
+
   describe('createExceptionsStreamFromNdjson', () => {
     it('filters out empty strings', async () => {
       const ndJsonStream = new Readable({

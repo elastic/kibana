@@ -7,7 +7,7 @@
 
 import { Readable } from 'stream';
 import { createPromiseFromStreams } from '@kbn/utils';
-import { sortRuleImports } from './create_rules_stream_from_ndjson';
+import { createRulesAndExceptionsStreamFromNdJson } from './create_rules_stream_from_ndjson';
 import { BadRequestError } from '@kbn/securitysolution-es-utils';
 import { ImportRulesSchemaDecoded } from '../../../../common/detection_engine/schemas/request/import_rules_schema';
 import {
@@ -35,7 +35,7 @@ export const getSampleAsNdjson = (sample: Partial<ImportRulesSchemaDecoded>): st
 };
 
 describe('create_rules_stream_from_ndjson', () => {
-  describe('sortRuleImports', () => {
+  describe('createRulesAndExceptionsStreamFromNdJson', () => {
     test('transforms an ndjson stream into a stream of rule objects', async () => {
       const sample1 = getOutputSample();
       const sample2 = getOutputSample();
@@ -47,7 +47,7 @@ describe('create_rules_stream_from_ndjson', () => {
           this.push(null);
         },
       });
-      const rulesObjectsStream = sortRuleImports(1000);
+      const rulesObjectsStream = createRulesAndExceptionsStreamFromNdJson(1000);
       const [{ rules: result }] = await createPromiseFromStreams<
         RuleExceptionsPromiseFromStreams[]
       >([ndJsonStream, ...rulesObjectsStream]);
@@ -119,7 +119,7 @@ describe('create_rules_stream_from_ndjson', () => {
           this.push(getSampleAsNdjson(sample2));
         },
       });
-      const rulesObjectsStream = sortRuleImports(1);
+      const rulesObjectsStream = createRulesAndExceptionsStreamFromNdJson(1);
       await expect(
         createPromiseFromStreams<RuleExceptionsPromiseFromStreams[]>([
           ndJsonStream,
@@ -141,7 +141,7 @@ describe('create_rules_stream_from_ndjson', () => {
           this.push(null);
         },
       });
-      const rulesObjectsStream = sortRuleImports(1000);
+      const rulesObjectsStream = createRulesAndExceptionsStreamFromNdJson(1000);
       const [{ rules: result }] = await createPromiseFromStreams<
         RuleExceptionsPromiseFromStreams[]
       >([ndJsonStream, ...rulesObjectsStream]);
@@ -216,7 +216,7 @@ describe('create_rules_stream_from_ndjson', () => {
           this.push(null);
         },
       });
-      const rulesObjectsStream = sortRuleImports(1000);
+      const rulesObjectsStream = createRulesAndExceptionsStreamFromNdJson(1000);
       const [{ rules: result }] = await createPromiseFromStreams<
         RuleExceptionsPromiseFromStreams[]
       >([ndJsonStream, ...rulesObjectsStream]);
@@ -290,7 +290,7 @@ describe('create_rules_stream_from_ndjson', () => {
           this.push(null);
         },
       });
-      const rulesObjectsStream = sortRuleImports(1000);
+      const rulesObjectsStream = createRulesAndExceptionsStreamFromNdJson(1000);
       const [{ rules: result }] = await createPromiseFromStreams<
         RuleExceptionsPromiseFromStreams[]
       >([ndJsonStream, ...rulesObjectsStream]);
@@ -364,7 +364,7 @@ describe('create_rules_stream_from_ndjson', () => {
           this.push(null);
         },
       });
-      const rulesObjectsStream = sortRuleImports(1000);
+      const rulesObjectsStream = createRulesAndExceptionsStreamFromNdJson(1000);
       const [{ rules: result }] = await createPromiseFromStreams<
         RuleExceptionsPromiseFromStreams[]
       >([ndJsonStream, ...rulesObjectsStream]);
@@ -440,7 +440,7 @@ describe('create_rules_stream_from_ndjson', () => {
           this.push(null);
         },
       });
-      const rulesObjectsStream = sortRuleImports(1000);
+      const rulesObjectsStream = createRulesAndExceptionsStreamFromNdJson(1000);
       const [{ rules: result }] = await createPromiseFromStreams<
         RuleExceptionsPromiseFromStreams[]
       >([ndJsonStream, ...rulesObjectsStream]);

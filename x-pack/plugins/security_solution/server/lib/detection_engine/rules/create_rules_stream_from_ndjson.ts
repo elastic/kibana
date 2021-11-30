@@ -101,7 +101,7 @@ export const sortImports = (): Transform => {
 // TODO: Capture both the line number and the rule_id if you have that information for the error message
 // eventually and then pass it down so we can give error messages on the line number
 
-export const sortRuleImports = (ruleLimit: number) => {
+export const createRulesAndExceptionsStreamFromNdJson = (ruleLimit: number) => {
   return [
     createSplitStream('\n'),
     parseNdjsonStrings(),
