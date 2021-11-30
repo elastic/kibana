@@ -20,7 +20,7 @@ import { Coordinate } from '../../../../../typings/timeseries';
 import { SparkPlot, Color } from '../../../shared/charts/spark_plot';
 
 export const ItemRow = euiStyled.tr`
-  line-height: 2;
+  line-height: 2.5;
 `;
 
 export const ItemTitle = euiStyled.td`
