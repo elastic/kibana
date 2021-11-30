@@ -222,11 +222,11 @@ export const Overview: React.FC = () => {
           {activities.map(({ details: activityDetails, event, time, status }, i) => (
             <EuiTableRow key={i}>
               <EuiTableRowCell>
-                <EuiText size="xs">{event}</EuiText>
+                <EuiText size="s">{event}</EuiText>
               </EuiTableRowCell>
               {!custom && (
                 <EuiTableRowCell>
-                  <EuiText size="xs">
+                  <EuiText size="s">
                     <small>
                       {status} {activityDetails && <StatusItem details={activityDetails} />}
                     </small>
@@ -234,7 +234,7 @@ export const Overview: React.FC = () => {
                 </EuiTableRowCell>
               )}
               <EuiTableRowCell align="right">
-                <EuiText size="xs">
+                <EuiText size="s">
                   <small>{time}</small>
                 </EuiText>
               </EuiTableRowCell>
