@@ -6,18 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { i18n } from '@kbn/i18n';
-import { Position } from '@elastic/charts';
-
 import { RangeValues } from '../../../vis_default_editor/public';
-import { AggGroupNames } from '../../../data/public';
-import { ColorSchemas, ColorSchemaParams } from '../../../charts/public';
-import { VIS_EVENT_TO_TRIGGER, VisTypeDefinition } from '../../../visualizations/public';
-import { ValueAxis, ScaleType, AxisType } from '../../xy/public';
+import { heatmapVisType } from '../../heatmap/public';
 
-import { HeatmapOptions } from './editor';
+import { ColorSchemaParams } from '../../../charts/public';
+import { VisTypeDefinition } from '../../../visualizations/public';
+import { ValueAxis } from '../../xy/public';
+
 import { TimeMarker } from './vislib/visualizations/time_marker';
-import { CommonVislibParams, VislibChartType } from './types';
+import { CommonVislibParams } from './types';
 import { toExpressionAst } from './to_ast';
 
 export interface HeatmapVisParams extends CommonVislibParams, ColorSchemaParams {
@@ -33,101 +30,7 @@ export interface HeatmapVisParams extends CommonVislibParams, ColorSchemaParams 
   times: TimeMarker[];
 }
 
-export const heatmapVisTypeDefinition: VisTypeDefinition<HeatmapVisParams> = {
-  name: 'heatmap',
-  title: i18n.translate('visTypeVislib.heatmap.heatmapTitle', { defaultMessage: 'Heat map' }),
-  icon: 'heatmap',
-  description: i18n.translate('visTypeVislib.heatmap.heatmapDescription', {
-    defaultMessage: 'Shade data in cells in a matrix.',
-  }),
+export const heatmapVisTypeDefinition = {
+  ...heatmapVisType({}),
   toExpressionAst,
-  getSupportedTriggers: () => [VIS_EVENT_TO_TRIGGER.filter],
-  visConfig: {
-    defaults: {
-      type: VislibChartType.Heatmap,
-      addTooltip: true,
-      addLegend: true,
-      enableHover: false,
-      legendPosition: Position.Right,
-      times: [],
-      colorsNumber: 4,
-      colorSchema: ColorSchemas.Greens,
-      setColorRange: false,
-      colorsRange: [],
-      invertColors: false,
-      percentageMode: false,
-      valueAxes: [
-        {
-          show: false,
-          id: 'ValueAxis-1',
-          type: AxisType.Value,
-          scale: {
-            type: ScaleType.Linear,
-            defaultYExtents: false,
-          },
-          labels: {
-            show: false,
-            rotate: 0,
-            overwriteColor: false,
-            color: 'black',
-          },
-        },
-      ],
-    },
-  },
-  editorConfig: {
-    optionsTemplate: HeatmapOptions,
-    schemas: [
-      {
-        group: AggGroupNames.Metrics,
-        name: 'metric',
-        title: i18n.translate('visTypeVislib.heatmap.metricTitle', { defaultMessage: 'Value' }),
-        min: 1,
-        max: 1,
-        aggFilter: [
-          'count',
-          'avg',
-          'median',
-          'sum',
-          'min',
-          'max',
-          'cardinality',
-          'std_dev',
-          'top_hits',
-          '!filtered_metric',
-          '!single_percentile',
-        ],
-        defaults: [{ schema: 'metric', type: 'count' }],
-      },
-      {
-        group: AggGroupNames.Buckets,
-        name: 'segment',
-        title: i18n.translate('visTypeVislib.heatmap.segmentTitle', {
-          defaultMessage: 'X-axis',
-        }),
-        min: 0,
-        max: 1,
-        aggFilter: ['!geohash_grid', '!geotile_grid', '!filter', '!multi_terms'],
-      },
-      {
-        group: AggGroupNames.Buckets,
-        name: 'group',
-        title: i18n.translate('visTypeVislib.heatmap.groupTitle', { defaultMessage: 'Y-axis' }),
-        min: 0,
-        max: 1,
-        aggFilter: ['!geohash_grid', '!geotile_grid', '!filter', '!multi_terms'],
-      },
-      {
-        group: AggGroupNames.Buckets,
-        name: 'split',
-        title: i18n.translate('visTypeVislib.heatmap.splitTitle', {
-          defaultMessage: 'Split chart',
-        }),
-        min: 0,
-        max: 1,
-        aggFilter: ['!geohash_grid', '!geotile_grid', '!filter', '!multi_terms'],
-      },
-    ],
-  },
-  requiresSearch: true,
-};
+} as VisTypeDefinition<HeatmapVisParams>;

@@ -1,11 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
-
-import React, { FC, useMemo } from 'react';
+import React, { FC, useMemo, useState, useCallback } from 'react';
 import {
   Chart,
   ElementClickListener,
@@ -16,23 +16,21 @@ import {
   HeatmapSpec,
   ScaleType,
   Settings,
+  TooltipType,
+  TooltipProps,
   ESFixedIntervalUnit,
   ESCalendarIntervalUnit,
 } from '@elastic/charts';
-import type { CustomPaletteState } from 'src/plugins/charts/public';
-import { VisualizationContainer } from '../visualization_container';
-import type { HeatmapRenderProps } from './types';
-import './index.scss';
-import type { LensBrushEvent, LensFilterEvent } from '../types';
-import {
-  applyPaletteParams,
-  defaultPaletteParams,
-  EmptyPlaceholder,
-  findMinMaxByColumnId,
-} from '../shared_components';
-import { LensIconChartHeatmap } from '../assets/chart_heatmap';
-import { DEFAULT_PALETTE_NAME } from './constants';
-import { search } from '../../../../../src/plugins/data/public';
+import type { CustomPaletteState } from '../../../../charts/public';
+import { search } from '../../../../data/public';
+import { LegendToggle, EmptyPlaceholder } from '../../../../charts/public';
+import type { DatatableColumn } from '../../../../expressions/public';
+import { ExpressionValueVisDimension } from '../../../../visualizations/public';
+import type { HeatmapRenderProps, FilterEvent, BrushEvent } from '../../common';
+import { applyPaletteParams, findMinMaxByColumnId, getSortPredicate } from './helpers';
+import { getColorPicker } from '../utils/get_color_picker';
+import { DEFAULT_PALETTE_NAME, defaultPaletteParams } from '../constants';
+import { HeatmapIcon } from './heatmap_icon';
 
 declare global {
   interface Window {
@@ -113,7 +111,18 @@ function computeColorRanges(
   return { colors, ranges };
 }
 
-export const HeatmapComponent: FC<HeatmapRenderProps> = ({
+const getAccessor = (value: string | ExpressionValueVisDimension, columns: DatatableColumn[]) => {
+  if (typeof value === 'string') {
+    return value;
+  }
+  const accessor = value.accessor;
+  if (typeof accessor === 'number') {
+    return columns[accessor].id;
+  }
+  return accessor.id;
+};
+
+const HeatmapComponent: FC<HeatmapRenderProps> = ({
   data,
   args,
   timeZone,
@@ -122,33 +131,73 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = ({
   onClickValue,
   onSelectRange,
   paletteService,
+  uiState,
 }) => {
   const chartTheme = chartsThemeService.useChartsTheme();
   const isDarkTheme = chartsThemeService.useDarkMode();
+  // legacy heatmap legend is handled by the uiState
+  const [showLegend, setShowLegend] = useState<boolean>(() => {
+    const bwcLegendStateDefault = args.legend.isVisible ?? true;
+    return uiState?.get('vis.legendOpen', bwcLegendStateDefault);
+  });
 
-  const tableId = Object.keys(data.tables)[0];
-  const table = data.tables[tableId];
+  const toggleLegend = useCallback(() => {
+    setShowLegend((value) => {
+      const newValue = !value;
+      uiState?.set?.('vis.legendOpen', newValue);
+      return newValue;
+    });
+  }, [uiState]);
+
+  const setColor = useCallback(
+    (newColor: string | null, seriesLabel: string | number) => {
+      const colors = uiState?.get('vis.colors') || {};
+      if (colors[seriesLabel] === newColor || !newColor) {
+        delete colors[seriesLabel];
+      } else {
+        colors[seriesLabel] = newColor;
+      }
+      uiState?.setSilent('vis.colors', null);
+      uiState?.set('vis.colors', colors);
+      uiState?.emit('reload');
+      uiState?.emit('colorChanged');
+    },
+    [uiState]
+  );
+
+  const legendColorPicker = useMemo(
+    () => getColorPicker(args.legend.position, setColor, uiState),
+    [args.legend.position, setColor, uiState]
+  );
+  const table = data;
+  const valueAccessor = args.valueAccessor
+    ? getAccessor(args.valueAccessor, table.columns)
+    : undefined;
+  const minMaxByColumnId = useMemo(
+    () => findMinMaxByColumnId([valueAccessor!], table),
+    [valueAccessor, table]
+  );
 
   const paletteParams = args.palette?.params;
+  const xAccessor = args.xAccessor ? getAccessor(args.xAccessor, table.columns) : undefined;
+  const yAccessor = args.yAccessor ? getAccessor(args.yAccessor, table.columns) : undefined;
 
-  const xAxisColumnIndex = table.columns.findIndex((v) => v.id === args.xAccessor);
-  const yAxisColumnIndex = table.columns.findIndex((v) => v.id === args.yAccessor);
+  const xAxisColumnIndex = table.columns.findIndex((v) => v.id === xAccessor);
+  const yAxisColumnIndex = table.columns.findIndex((v) => v.id === yAccessor);
 
   const xAxisColumn = table.columns[xAxisColumnIndex];
   const yAxisColumn = table.columns[yAxisColumnIndex];
-  const valueColumn = table.columns.find((v) => v.id === args.valueAccessor);
+  const valueColumn = table.columns.find((v) => v.id === valueAccessor);
 
-  const minMaxByColumnId = useMemo(
-    () => findMinMaxByColumnId([args.valueAccessor!], table),
-    [args.valueAccessor, table]
-  );
-
-  if (!xAxisColumn || !valueColumn) {
+  if (!valueColumn) {
     // Chart is not ready
     return null;
   }
 
-  let chartData = table.rows.filter((v) => typeof v[args.valueAccessor!] === 'number');
+  let chartData = table.rows.filter((v) => typeof v[valueAccessor!] === 'number');
+  if (!chartData || !chartData.length) {
+    return <EmptyPlaceholder icon={HeatmapIcon} />;
+  }
 
   if (!yAxisColumn) {
     // required for tooltip
@@ -159,17 +208,23 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = ({
       };
     });
   }
-
-  const xAxisMeta = xAxisColumn.meta;
-  const isTimeBasedSwimLane = xAxisMeta.type === 'date';
+  const { min, max } = minMaxByColumnId[valueAccessor!];
+  // formatters
+  const xAxisMeta = xAxisColumn?.meta;
+  const xValuesFormatter = formatFactory(xAxisMeta?.params);
+  const metricFormatter = formatFactory(
+    typeof args.valueAccessor === 'string' ? valueColumn.meta.params : args?.valueAccessor?.format
+  );
+  const isTimeBasedSwimLane = xAxisMeta?.type === 'date';
+  const dateHistogramMeta = xAxisColumn
+    ? search.aggs.getDateHistogramMetaDataByDatatableColumn(xAxisColumn)
+    : undefined;
 
   // Fallback to the ordinal scale type when a single row of data is provided.
   // Related issue https://github.com/elastic/elastic-charts/issues/1184
-
   let xScale: HeatmapSpec['xScale'] = { type: ScaleType.Ordinal };
   if (isTimeBasedSwimLane && chartData.length > 1) {
-    const dateInterval =
-      search.aggs.getDateHistogramMetaDataByDatatableColumn(xAxisColumn)?.interval;
+    const dateInterval = dateHistogramMeta?.interval;
     const esInterval = dateInterval ? search.aggs.parseEsInterval(dateInterval) : undefined;
     if (esInterval) {
       xScale = {
@@ -190,24 +245,48 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = ({
     }
   }
 
-  const xValuesFormatter = formatFactory(xAxisMeta.params);
-  const valueFormatter = formatFactory(valueColumn.meta.params);
+  const tooltip: TooltipProps = {
+    type: args.showTooltip ? TooltipType.Follow : TooltipType.None,
+  };
+
+  const valueFormatter = (d: number) => {
+    let value = d;
+
+    if (args.percentageMode) {
+      const percentageNumber = (Math.abs(value - min) / (max - min)) * 100;
+      value = parseInt(percentageNumber.toString(), 10) / 100;
+    }
+    return metricFormatter.convert(value);
+  };
 
   const { colors, ranges } = computeColorRanges(
     paletteService,
     paletteParams,
     isDarkTheme ? '#000' : '#fff',
-    minMaxByColumnId[args.valueAccessor!]
+    minMaxByColumnId[valueAccessor!]
   );
 
+  // adds a very small number to the max value to make sure the max value will be included
+  const endValue =
+    paletteParams && paletteParams.range === 'number' ? paletteParams.rangeMax : max + 0.00000001;
+  const overwriteColors = uiState?.get('vis.colors') ?? null;
+
   const bands = ranges.map((start, index, array) => {
+    // by default the last range is right-open
+    let end = index === array.length - 1 ? Infinity : array[index + 1];
+    // if the lastRangeIsRightOpen is set to false, we need to set the last range to the max value
+    if (args.lastRangeIsRightOpen === false) {
+      const lastBand = max === start ? Infinity : endValue;
+      end = index === array.length - 1 ? lastBand : array[index + 1];
+    }
+    const overwriteArrayIdx = `${metricFormatter.convert(start)} - ${metricFormatter.convert(end)}`;
+    const overwriteColor = overwriteColors?.[overwriteArrayIdx];
     return {
       // with the default continuity:above the every range is left-closed
       start,
-      // with the default continuity:above the last range is right-open
-      end: index === array.length - 1 ? Infinity : array[index + 1],
+      end,
       // the current colors array contains a duplicated color at the beginning that we need to skip
-      color: colors[index + 1],
+      color: overwriteColor ?? colors[index + 1],
     };
   });
 
@@ -215,7 +294,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = ({
     const cell = e[0][0];
     const { x, y } = cell.datum;
 
-    const xAxisFieldName = xAxisColumn.meta.field;
+    const xAxisFieldName = xAxisColumn?.meta?.field;
     const timeFieldName = isTimeBasedSwimLane ? xAxisFieldName : '';
 
     const points = [
@@ -235,7 +314,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = ({
         : []),
     ];
 
-    const context: LensFilterEvent['data'] = {
+    const context: FilterEvent['data'] = {
       data: points.map((point) => ({
         row: point.row,
         column: point.column,
@@ -250,11 +329,11 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = ({
   const onBrushEnd = (e: HeatmapBrushEvent) => {
     const { x, y } = e;
 
-    const xAxisFieldName = xAxisColumn.meta.field;
+    const xAxisFieldName = xAxisColumn?.meta?.field;
     const timeFieldName = isTimeBasedSwimLane ? xAxisFieldName : '';
 
     if (isTimeBasedSwimLane) {
-      const context: LensBrushEvent['data'] = {
+      const context: BrushEvent['data'] = {
         range: x as number[],
         table,
         column: xAxisColumnIndex,
@@ -273,16 +352,17 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = ({
           });
         });
       }
-
-      (x as string[]).forEach((v) => {
-        points.push({
-          row: table.rows.findIndex((r) => r[xAxisColumn.id] === v),
-          column: xAxisColumnIndex,
-          value: v,
+      if (xAxisColumn) {
+        (x as string[]).forEach((v) => {
+          points.push({
+            row: table.rows.findIndex((r) => r[xAxisColumn.id] === v),
+            column: xAxisColumnIndex,
+            value: v,
+          });
         });
-      });
+      }
 
-      const context: LensFilterEvent['data'] = {
+      const context: FilterEvent['data'] = {
         data: points.map((point) => ({
           row: point.row,
           column: point.column,
@@ -334,11 +414,12 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = ({
         : {}),
     },
     xAxisLabel: {
-      visible: args.gridConfig.isXAxisLabelVisible,
+      visible: Boolean(args.gridConfig.isXAxisLabelVisible && xAxisColumn),
       // eui color subdued
       textColor: chartTheme.axes?.tickLabel?.fill ?? `#6a717d`,
+      padding: xAxisColumn?.name ? 8 : 0,
       formatter: (v: number | string) => xValuesFormatter.convert(v),
-      name: xAxisColumn.name,
+      name: xAxisColumn?.name ?? '',
     },
     brushMask: {
       fill: isDarkTheme ? 'rgb(30,31,35,80%)' : 'rgb(247,247,247,50%)',
@@ -349,56 +430,65 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = ({
     timeZone,
   };
 
-  if (!chartData || !chartData.length) {
-    return <EmptyPlaceholder icon={LensIconChartHeatmap} />;
-  }
-
   return (
-    <Chart>
-      <Settings
-        onElementClick={onElementClick}
-        showLegend={args.legend.isVisible}
-        legendPosition={args.legend.position}
-        debugState={window._echDebugStateFlag ?? false}
-        theme={{
-          ...chartTheme,
-          legend: {
-            labelOptions: { maxLines: args.legend.shouldTruncate ? args.legend?.maxLines ?? 1 : 0 },
-          },
-        }}
-        xDomain={{
-          min: data.dateRange?.fromDate.getTime() ?? NaN,
-          max: data.dateRange?.toDate.getTime() ?? NaN,
-        }}
-        onBrushEnd={onBrushEnd as BrushEndListener}
-      />
-      <Heatmap
-        id={tableId}
-        name={valueColumn.name}
-        colorScale={{
-          type: 'bands',
-          bands,
-        }}
-        data={chartData}
-        xAccessor={args.xAccessor}
-        yAccessor={args.yAccessor || 'unifiedY'}
-        valueAccessor={args.valueAccessor}
-        valueFormatter={(v: number) => valueFormatter.convert(v)}
-        xScale={xScale}
-        ySortPredicate="dataIndex"
-        config={config}
-        xSortPredicate="dataIndex"
-      />
-    </Chart>
+    <>
+      {showLegend !== undefined && (
+        <LegendToggle
+          onClick={toggleLegend}
+          showLegend={showLegend}
+          legendPosition={args.legend.position}
+        />
+      )}
+      <Chart>
+        <Settings
+          onElementClick={onElementClick}
+          showLegend={showLegend ?? args.legend.isVisible}
+          legendPosition={args.legend.position}
+          legendColorPicker={uiState ? legendColorPicker : undefined}
+          debugState={window._echDebugStateFlag ?? false}
+          tooltip={tooltip}
+          theme={{
+            ...chartTheme,
+            legend: {
+              labelOptions: {
+                maxLines: args.legend.shouldTruncate ? args.legend?.maxLines ?? 1 : 0,
+              },
+            },
+          }}
+          xDomain={{
+            min:
+              dateHistogramMeta && dateHistogramMeta.timeRange
+                ? new Date(dateHistogramMeta.timeRange.from).getTime()
+                : NaN,
+            max:
+              dateHistogramMeta && dateHistogramMeta.timeRange
+                ? new Date(dateHistogramMeta.timeRange.to).getTime()
+                : NaN,
+          }}
+          onBrushEnd={onBrushEnd as BrushEndListener}
+        />
+        <Heatmap
+          id="heatmap"
+          name={valueColumn.name}
+          colorScale={{
+            type: 'bands',
+            bands,
+          }}
+          data={chartData}
+          xAccessor={xAccessor}
+          yAccessor={yAccessor || 'unifiedY'}
+          valueAccessor={valueAccessor}
+          valueFormatter={valueFormatter}
+          xScale={xScale}
+          ySortPredicate={yAxisColumn ? getSortPredicate(yAxisColumn) : 'dataIndex'}
+          config={config}
+          xSortPredicate={xAxisColumn ? getSortPredicate(xAxisColumn) : 'dataIndex'}
+        />
+      </Chart>
+    </>
   );
 };
 
-const MemoizedChart = React.memo(HeatmapComponent);
-
-export function HeatmapChartReportable(props: HeatmapRenderProps) {
-  return (
-    <VisualizationContainer className="lnsHeatmapExpression__container">
-      <MemoizedChart {...props} />
-    </VisualizationContainer>
-  );
-}
+// default export required for React.Lazy
+// eslint-disable-next-line import/no-default-export
+export { HeatmapComponent as default };
