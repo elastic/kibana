@@ -62,6 +62,11 @@ describe('data table dimension editor', () => {
       },
     };
     setState = jest.fn();
+    const savedObjectsClient = {
+      find: jest.fn(() => Promise.resolve({ page: 1, total: 0, savedObjects: [] })),
+      create: jest.fn(() => Promise.resolve({ id: 'testid' })),
+      resolve: jest.fn(),
+    } as unknown as SavedObjectsClientContract;
     props = {
       accessor: 'foo',
       frame,
@@ -71,7 +76,7 @@ describe('data table dimension editor', () => {
       setState,
       paletteService: chartPluginMock.createPaletteRegistry(),
       panelRef: React.createRef(),
-      savedObjectsClient: {} as SavedObjectsClientContract,
+      savedObjectsClient,
     };
   });
 

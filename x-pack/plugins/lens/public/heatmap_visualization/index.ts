@@ -26,7 +26,6 @@ export class HeatmapVisualization {
         theme: core.theme,
         savedObjectsClient: savedObjects.client,
       });
-
     });
   }
 }
