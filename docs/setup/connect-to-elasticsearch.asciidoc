@@ -64,7 +64,7 @@ image::images/add-sample-data.png[eCommerce, flights, and web logs sample data s
 
 [discrete]
 [[upload-data-kibana]]
-=== Upload data
+=== Upload data files
 
 If you have a log file or delimited CSV, TSV, or JSON file, you can upload it,
 view its fields and metrics, and optionally import it into {es}.
