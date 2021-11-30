@@ -6,7 +6,7 @@
  */
 
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
-import { EuiLoadingSpinner, EuiSpacer, EuiText, Pagination, EuiPageTemplate } from '@elastic/eui';
+import { EuiSpacer, EuiText, Pagination } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import {
@@ -16,7 +16,6 @@ import {
 } from '../../../../../components/artifact_card_grid';
 import { usePolicyDetailsSelector, usePolicyDetailsNavigateCallback } from '../../policy_hooks';
 import {
-  doesPolicyHaveTrustedAppsAssignedList,
   getCurrentArtifactsLocation,
   getPolicyTrustedAppList,
   getPolicyTrustedAppListError,
@@ -24,7 +23,6 @@ import {
   getTrustedAppsAllPoliciesById,
   isPolicyTrustedAppListLoading,
   policyIdFromParams,
-  doesTrustedAppExistsLoading,
   getCurrentPolicyArtifactsFilter,
 } from '../../../store/policy_details/selectors';
 import {
@@ -56,11 +54,7 @@ export const PolicyTrustedAppsList = memo<PolicyTrustedAppsListProps>(
     const { getAppUrl } = useAppUrl();
     const { isPlatinumPlus } = useEndpointPrivileges();
     const policyId = usePolicyDetailsSelector(policyIdFromParams);
-    const hasTrustedAppsAssignedList = usePolicyDetailsSelector(
-      doesPolicyHaveTrustedAppsAssignedList
-    );
     const isLoading = usePolicyDetailsSelector(isPolicyTrustedAppListLoading);
-    const isTrustedAppExistsCheckLoading = usePolicyDetailsSelector(doesTrustedAppExistsLoading);
     const defaultFilter = usePolicyDetailsSelector(getCurrentPolicyArtifactsFilter);
     const trustedAppItems = usePolicyDetailsSelector(getPolicyTrustedAppList);
     const pagination = usePolicyDetailsSelector(getPolicyTrustedAppsListPagination);
