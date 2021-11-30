@@ -14,11 +14,6 @@
   animation: sidebarPop $euiAnimSpeedFast $euiAnimSlightResistance;
 }
 
-.canvasSidebar__elementButtons {
-  background: darken($euiColorLightestShade, 5%);
-  margin-bottom: $euiSizeS;
-}
-
 .canvasSidebar__panel-noMinWidth .euiButton {
   min-width: 0;
 }
