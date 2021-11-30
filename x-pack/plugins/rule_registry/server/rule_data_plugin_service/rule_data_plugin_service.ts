@@ -178,8 +178,9 @@ export class RuleDataService implements IRuleDataService {
         if (isLeft(result)) {
           return result;
         }
-
-        await this.resourceInstaller.installIndexLevelResources(indexInfo);
+        if (!this.isRegistrationContextDisabled(registrationContext)) {
+          await this.resourceInstaller.installIndexLevelResources(indexInfo);
+        }
 
         const clusterClient = await this.options.getClusterClient();
         return right(clusterClient);

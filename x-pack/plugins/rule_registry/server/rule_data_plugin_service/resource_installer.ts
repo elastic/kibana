@@ -40,11 +40,8 @@ export class ResourceInstaller {
   ): Promise<void> {
     try {
       const installResources = async (): Promise<void> => {
-        const { logger, isWriteEnabled, disabledRegistrationContexts } = this.options;
-        const isResourceDisabled = disabledRegistrationContexts.some((registrationContext) =>
-          resources.includes(registrationContext)
-        );
-        if (!isWriteEnabled || isResourceDisabled) {
+        const { logger, isWriteEnabled } = this.options;
+        if (!isWriteEnabled) {
           logger.info(`Write is disabled; not installing ${resources}`);
           return;
         }
