@@ -1106,6 +1106,12 @@ export function updatePackageInputs(
       originalInput.keep_enabled = update.keep_enabled;
     }
 
+    // `policy_template` should always be defined, so if we have an older policy here we need
+    // to ensure we set it
+    if (originalInput.policy_template === undefined && update.policy_template !== undefined) {
+      originalInput.policy_template = update.policy_template;
+    }
+
     if (update.vars) {
       const indexOfInput = inputs.indexOf(originalInput);
       inputs[indexOfInput] = deepMergeVars(originalInput, update, true) as NewPackagePolicyInput;
