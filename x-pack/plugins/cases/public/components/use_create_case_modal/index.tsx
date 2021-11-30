@@ -6,13 +6,11 @@
  */
 
 import React, { useState, useCallback, useMemo } from 'react';
-import { Case, CaseType } from '../../../common';
-import { useOwnerContext } from '../owner_context/use_owner_context';
+import { Case } from '../../../common';
 import { CreateCaseModal } from './create_case_modal';
 
 export interface UseCreateCaseModalProps {
   onCaseCreated: (theCase: Case) => void;
-  caseType?: CaseType;
   hideConnectorServiceNowSir?: boolean;
 }
 export interface UseCreateCaseModalReturnedValues {
@@ -23,11 +21,9 @@ export interface UseCreateCaseModalReturnedValues {
 }
 
 export const useCreateCaseModal = ({
-  caseType = CaseType.individual,
   onCaseCreated,
   hideConnectorServiceNowSir = false,
 }: UseCreateCaseModalProps) => {
-  const owner = useOwnerContext();
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const closeModal = useCallback(() => setIsModalOpen(false), []);
   const openModal = useCallback(() => setIsModalOpen(true), []);
@@ -43,18 +39,16 @@ export const useCreateCaseModal = ({
     () => ({
       modal: (
         <CreateCaseModal
-          caseType={caseType}
           hideConnectorServiceNowSir={hideConnectorServiceNowSir}
           isModalOpen={isModalOpen}
           onCloseCaseModal={closeModal}
           onSuccess={onSuccess}
-          owner={owner[0]}
         />
       ),
       isModalOpen,
       closeModal,
       openModal,
     }),
-    [caseType, closeModal, hideConnectorServiceNowSir, isModalOpen, onSuccess, openModal, owner]
+    [closeModal, hideConnectorServiceNowSir, isModalOpen, onSuccess, openModal]
   );
 };

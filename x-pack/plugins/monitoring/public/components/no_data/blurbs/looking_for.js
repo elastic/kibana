@@ -7,7 +7,7 @@
 
 import React, { Fragment } from 'react';
 import { EuiTitle, EuiText, EuiTextColor } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 export const LookingFor = () => {
   return (

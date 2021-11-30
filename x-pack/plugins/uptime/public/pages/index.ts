@@ -10,3 +10,5 @@ export { MonitorPage } from './monitor';
 export { StepDetailPage } from './synthetics/step_detail_page';
 export { SettingsPage } from './settings';
 export { NotFoundPage } from './not_found';
+export { AddMonitorPage } from './add_monitor';
+export { EditMonitorPage } from './edit_monitor';

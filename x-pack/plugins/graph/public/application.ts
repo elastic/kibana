@@ -25,9 +25,9 @@ import { LicensingPluginStart } from '../../licensing/public';
 import { checkLicense } from '../common/check_license';
 import { NavigationPublicPluginStart as NavigationStart } from '../../../../src/plugins/navigation/public';
 import { Storage } from '../../../../src/plugins/kibana_utils/public';
-import { KibanaLegacyStart } from '../../../../src/plugins/kibana_legacy/public';
 
 import './index.scss';
+import('./font_awesome');
 import { SavedObjectsStart } from '../../../../src/plugins/saved_objects/public';
 import { GraphSavePolicy } from './types';
 import { graphRouter } from './router';
@@ -60,18 +60,16 @@ export interface GraphDependencies {
   graphSavePolicy: GraphSavePolicy;
   overlays: OverlayStart;
   savedObjects: SavedObjectsStart;
-  kibanaLegacy: KibanaLegacyStart;
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
   uiSettings: IUiSettingsClient;
   history: ScopedHistory<unknown>;
   spaces?: SpacesApi;
 }
 
-export type GraphServices = Omit<GraphDependencies, 'kibanaLegacy' | 'element' | 'history'>;
+export type GraphServices = Omit<GraphDependencies, 'element' | 'history'>;
 
-export const renderApp = ({ history, kibanaLegacy, element, ...deps }: GraphDependencies) => {
+export const renderApp = ({ history, element, ...deps }: GraphDependencies) => {
   const { chrome, capabilities } = deps;
-  kibanaLegacy.loadFontAwesome();
 
   if (!capabilities.graph.save) {
     chrome.setBadge({

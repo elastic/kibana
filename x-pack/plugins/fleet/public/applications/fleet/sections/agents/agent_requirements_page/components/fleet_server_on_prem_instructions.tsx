@@ -27,7 +27,7 @@ import {
 import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { DownloadStep } from '../../../../components';
 import {
@@ -46,6 +46,7 @@ import {
 import type { PLATFORM_TYPE } from '../../../../hooks';
 import type { PackagePolicy } from '../../../../types';
 import { FLEET_SERVER_PACKAGE } from '../../../../constants';
+import { FleetServerOnPremRequiredCallout } from '../../components';
 
 import { getInstallCommandForPlatform } from './install_command_utils';
 
@@ -720,6 +721,8 @@ export const OnPremInstructions: React.FC = () => {
 
   return (
     <>
+      <FleetServerOnPremRequiredCallout />
+      <EuiSpacer size="xl" />
       <EuiText>
         <h2>
           <FormattedMessage

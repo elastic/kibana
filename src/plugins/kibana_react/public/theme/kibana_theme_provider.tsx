@@ -21,6 +21,9 @@ const defaultTheme: CoreTheme = {
   darkMode: false,
 };
 
+// IMPORTANT: This code has been copied to the `interactive_setup` plugin, any changes here should be applied there too.
+// That copy and this comment can be removed once https://github.com/elastic/kibana/issues/119204 is implemented.
+
 export const KibanaThemeProvider: FC<KibanaThemeProviderProps> = ({ theme$, children }) => {
   const theme = useObservable(theme$, defaultTheme);
   const colorMode = useMemo(() => getColorMode(theme), [theme]);

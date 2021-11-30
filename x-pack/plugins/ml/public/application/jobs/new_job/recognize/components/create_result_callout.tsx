@@ -8,7 +8,7 @@
 import React, { FC, memo } from 'react';
 import { EuiCallOut, EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { SAVE_STATE } from '../page';
 
 interface CreateResultCalloutProps {

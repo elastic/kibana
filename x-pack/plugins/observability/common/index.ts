@@ -21,3 +21,6 @@ export const observabilityAppId = 'observability-overview';
 
 // Used by feature and "solution" registration
 export const observabilityFeatureId = 'observability';
+
+// Used by Cases to install routes
+export const casesPath = '/cases';

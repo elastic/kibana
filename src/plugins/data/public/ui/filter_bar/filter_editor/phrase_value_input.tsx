@@ -7,7 +7,7 @@
  */
 
 import { EuiFormRow } from '@elastic/eui';
-import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
+import { InjectedIntl, injectI18n } from '@kbn/i18n-react';
 import { uniq } from 'lodash';
 import React from 'react';
 import { GenericComboBox, GenericComboBoxProps } from './generic_combo_box';
