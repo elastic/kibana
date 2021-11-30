@@ -7,6 +7,7 @@
 
 /* eslint-disable @typescript-eslint/naming-convention */
 
+import { isString } from 'lodash';
 import { addOwnerToSO, SanitizedCaseOwner } from '.';
 import {
   SavedObjectUnsanitizedDoc,
@@ -21,6 +22,8 @@ import { UserActionFieldType } from '../../services/user_actions/types';
 
 interface UserActions {
   action_field: string[];
+  action_at: string;
+  action_by: { email: string; username: string; full_name: string };
   new_value: string;
   old_value: string;
 }
@@ -111,6 +114,70 @@ function logError(id: string, context: SavedObjectMigrationContext, error: Error
   );
 }
 
+const getSingleFieldPayload = (field: string, value: string | undefined) => {
+  const decodeValue = (v: string | undefined) => (isString(v) ? JSON.parse(v) : value ?? {});
+
+  switch (field) {
+    case 'title':
+      return { title: value ?? '' };
+    case 'tags':
+      return { tags: isString(value) ? value.split(',') : value ?? [] };
+    case 'status':
+      return { status: value ?? '' };
+    case 'description':
+      return { description: value ?? '' };
+    case 'comment':
+      return { comment: decodeValue(value) };
+    case 'connector':
+      return { connector: decodeValue(value) };
+    case 'pushed':
+      return { externalService: decodeValue(value) };
+    case 'settings':
+      return { settings: decodeValue(value) };
+
+    default:
+      return {};
+  }
+};
+
+const getMultipleFieldsPayload = (fields: string[], value: string) => {
+  if (value == null) {
+    return {};
+  }
+
+  const decodedValue = JSON.parse(value);
+
+  return fields.reduce(
+    (payload, field) => ({ ...payload, ...getSingleFieldPayload(field, decodedValue[field]) }),
+    {}
+  );
+};
+
+function payloadMigration(
+  doc: SavedObjectUnsanitizedDoc<UserActions>,
+  context: SavedObjectMigrationContext
+): SavedObjectSanitizedDoc<unknown> {
+  const { new_value, old_value, action_field, action_at, action_by, ...restAttributes } =
+    doc.attributes;
+
+  const payload =
+    action_field.length > 1
+      ? getMultipleFieldsPayload(action_field, new_value ?? old_value)
+      : getSingleFieldPayload(action_field[0], new_value ?? old_value);
+
+  return {
+    ...doc,
+    attributes: {
+      ...restAttributes,
+      fields: action_field,
+      created_at: action_at,
+      created_by: action_by,
+      payload,
+    },
+    references: doc.references ?? [],
+  };
+}
+
 export const userActionsMigrations = {
   '7.10.0': (doc: SavedObjectUnsanitizedDoc<UserActions>): SavedObjectSanitizedDoc<UserActions> => {
     const { action_field, new_value, old_value, ...restAttributes } = doc.attributes;
@@ -156,4 +223,5 @@ export const userActionsMigrations = {
     return addOwnerToSO(doc);
   },
   '7.16.0': userActionsConnectorIdMigration,
+  '8.1.0': payloadMigration,
 };
