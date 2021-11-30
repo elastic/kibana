@@ -13,7 +13,6 @@ import { FIELD_ORIGIN } from '../../../../common/constants';
 export interface IESAggField extends IField {
   getValueAggDsl(indexPattern: IndexPattern): unknown | null;
   getBucketCount(): number;
-  isCount(): boolean;
 }
 
 export interface CountAggFieldParams {
