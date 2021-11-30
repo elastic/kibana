@@ -30,7 +30,7 @@ The following table serves as a quick reference for different logging configurat
 | Allows you to specify a fileName to write log records to disk. To write <<log-to-file-example,all log records to file>>, add the file appender to `root.appenders`. If configured, you also need to specify <<log-to-file-example, `logging.appenders.file.pathName`>>.
 
 | `logging.appenders[].rolling-file:`
-| Similar to Log4j's `RollingFileAppender`, this appender will log to a file and rotate if following a rolling strategy when the configured policy triggers. There are currently two policies supported: `size-limit` and `time-interval`.
+| Similar to https://logging.apache.org/log4j/2.x/[Log4j's] `RollingFileAppender`, this appender will log to a file and rotate if following a rolling strategy when the configured policy triggers. There are currently two policies supported: <<size-limit-triggering-policy, `size-limit`>> and <<time-interval-triggering-policy, `time-interval`>>.
 
 | `logging.appenders[].<appender-name>.type`
 | The appender type determines where the log messages are sent. Options are `console`, `file`, `rewrite`, `rolling-file`. Required.
