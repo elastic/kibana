@@ -16,11 +16,17 @@ import { SeriesAgg } from './_series_agg';
 import type { TableResponseProcessorsFunction } from './types';
 import type { PanelDataArray } from '../../../../../common/types/vis_data';
 
+import { isUIControlEnabled } from '../../../../../common/check_ui_restrictions';
+
 export const seriesAgg: TableResponseProcessorsFunction =
-  ({ series, meta, extractFields }) =>
+  ({ series, meta, extractFields, capabilities }) =>
   (next) =>
   async (results) => {
-    if (series.aggregate_by && series.aggregate_function) {
+    if (
+      series.aggregate_by &&
+      series.aggregate_function &&
+      isUIControlEnabled('aggregate_function', capabilities.uiRestrictions)
+    ) {
       const targetSeries: PanelDataArray[][] = [];
 
       // Filter out the seires with the matching metric and store them
@@ -44,5 +50,6 @@ export const seriesAgg: TableResponseProcessorsFunction =
         data: data[0],
       });
     }
+
     return next(results);
   };

@@ -9,8 +9,8 @@
 import React, { useContext } from 'react';
 import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-// @ts-ignore
-import { isMetricEnabled } from '../../lib/check_ui_restrictions';
+
+import { isMetricEnabled } from '../../../../common/check_ui_restrictions';
 import { TSVB_METRIC_TYPES } from '../../../../common/enums';
 import { getAggsByType, getAggsByPredicate } from '../../../../common/agg_utils';
 import type { Agg } from '../../../../common/agg_utils';
@@ -92,7 +92,7 @@ export function AggSelect(props: AggSelectUiProps) {
       ...agg,
       disabled:
         !enablePipelines ||
-        !isMetricEnabled(agg.value, uiRestrictions) ||
+        !isMetricEnabled(agg.value as string, uiRestrictions) ||
         !isMetricAvailableForPanel(agg.value as string, panelType, panelModel?.time_range_mode),
     });
 

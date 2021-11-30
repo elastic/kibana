@@ -7,16 +7,25 @@
  */
 
 import { get } from 'lodash';
-import { RESTRICTIONS_KEYS, DEFAULT_UI_RESTRICTION } from '../../../common/ui_restrictions';
+import {
+  RESTRICTIONS_KEYS,
+  DEFAULT_UI_RESTRICTION,
+  UIRestrictions,
+  TimeseriesUIRestrictions,
+} from './ui_restrictions';
 
 /**
  * Generic method for checking all types of the UI Restrictions
  * @private
  */
-const checkUIRestrictions = (key, restrictions = DEFAULT_UI_RESTRICTION, type) => {
-  const isAllEnabled = get(restrictions, `${type}.*`, true);
+const checkUIRestrictions = (
+  key: string,
+  restrictions: UIRestrictions | undefined,
+  type: string
+) => {
+  const isAllEnabled = get(restrictions ?? DEFAULT_UI_RESTRICTION, `${type}.*`, true);
 
-  return isAllEnabled || Boolean(get(restrictions, type, {})[key]);
+  return isAllEnabled || Boolean(get(restrictions ?? DEFAULT_UI_RESTRICTION, [type, key], false));
 };
 
 /**
@@ -27,7 +36,10 @@ const checkUIRestrictions = (key, restrictions = DEFAULT_UI_RESTRICTION, type) =
  * @param restrictions - uiRestrictions object. Comes from the /data request.
  * @return {boolean}
  */
-export const isMetricEnabled = (key, restrictions) => {
+export const isMetricEnabled = (
+  key: string,
+  restrictions: TimeseriesUIRestrictions | undefined
+) => {
   return checkUIRestrictions(key, restrictions, RESTRICTIONS_KEYS.WHITE_LISTED_METRICS);
 };
 
@@ -40,11 +52,15 @@ export const isMetricEnabled = (key, restrictions) => {
  * @param restrictions - uiRestrictions object. Comes from the /data request.
  * @return {boolean}
  */
-export const isFieldEnabled = (field, metricType, restrictions = DEFAULT_UI_RESTRICTION) => {
+export const isFieldEnabled = (
+  field: string,
+  metricType: string,
+  restrictions?: TimeseriesUIRestrictions
+) => {
   if (isMetricEnabled(metricType, restrictions)) {
     return checkUIRestrictions(
       field,
-      restrictions[RESTRICTIONS_KEYS.WHITE_LISTED_METRICS],
+      restrictions?.[RESTRICTIONS_KEYS.WHITE_LISTED_METRICS] as UIRestrictions,
       metricType
     );
   }
@@ -60,7 +76,7 @@ export const isFieldEnabled = (field, metricType, restrictions = DEFAULT_UI_REST
  * @param restrictions - uiRestrictions object. Comes from the /data request.
  * @return {boolean}
  */
-export const isGroupByFieldsEnabled = (key, restrictions) => {
+export const isGroupByFieldsEnabled = (key: string, restrictions: TimeseriesUIRestrictions) => {
   return checkUIRestrictions(key, restrictions, RESTRICTIONS_KEYS.WHITE_LISTED_GROUP_BY_FIELDS);
 };
 
@@ -73,6 +89,19 @@ export const isGroupByFieldsEnabled = (key, restrictions) => {
  * @param restrictions - uiRestrictions object. Comes from the /data request.
  * @return {boolean}
  */
-export const isTimerangeModeEnabled = (key, restrictions) => {
+export const isTimerangeModeEnabled = (key: string, restrictions: TimeseriesUIRestrictions) => {
   return checkUIRestrictions(key, restrictions, RESTRICTIONS_KEYS.WHITE_LISTED_TIMERANGE_MODES);
+};
+
+/**
+ * Using this method, you can check whether a specific UI control is allowed
+ *  for current panel configuration or not.
+ * @public
+ * @param key - string value of the time range mode.
+ *  All available mode you can find in the following object TIME_RANGE_DATA_MODES.
+ * @param restrictions - uiRestrictions object. Comes from the /data request.
+ * @return {boolean}
+ */
+export const isUIControlEnabled = (key: string, restrictions: TimeseriesUIRestrictions) => {
+  return checkUIRestrictions(key, restrictions, RESTRICTIONS_KEYS.WHITE_LISTED_UI_CONTROLS);
 };

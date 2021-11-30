@@ -9,16 +9,25 @@
 import { overwrite } from '../../helpers';
 import { esQuery } from '../../../../../../../data/server';
 
+import { isUIControlEnabled } from '../../../../../common/check_ui_restrictions';
+
 import type { TableRequestProcessorsFunction } from './types';
 
 export const splitByEverything: TableRequestProcessorsFunction =
-  ({ panel, esQueryConfig, seriesIndex }) =>
+  ({ panel, esQueryConfig, seriesIndex, capabilities }) =>
   (next) =>
   (doc) => {
     const indexPattern = seriesIndex.indexPattern || undefined;
 
     panel.series
-      .filter((c) => !(c.aggregate_by && c.aggregate_function))
+      .filter(
+        (c) =>
+          !(
+            c.aggregate_by &&
+            c.aggregate_function &&
+            isUIControlEnabled('aggregate_function', capabilities.uiRestrictions)
+          )
+      )
       .forEach((column) => {
         if (column.filter) {
           overwrite(

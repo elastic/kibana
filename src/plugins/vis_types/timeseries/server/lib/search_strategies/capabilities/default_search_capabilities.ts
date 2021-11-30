@@ -12,7 +12,7 @@ import {
   parseInterval,
   getSuitableUnit,
 } from '../../vis_data/helpers/unit_to_seconds';
-import { RESTRICTIONS_KEYS } from '../../../../common/ui_restrictions';
+import { RESTRICTIONS_KEYS, TimeseriesUIRestrictions } from '../../../../common/ui_restrictions';
 import {
   TIME_RANGE_DATA_MODES,
   PANEL_TYPES,
@@ -77,12 +77,17 @@ export class DefaultSearchCapabilities {
     return this.createUiRestriction();
   }
 
+  public get whiteListedUIControls() {
+    return this.createUiRestriction();
+  }
+
   public get uiRestrictions() {
     return {
       [RESTRICTIONS_KEYS.WHITE_LISTED_METRICS]: this.whiteListedMetrics,
       [RESTRICTIONS_KEYS.WHITE_LISTED_GROUP_BY_FIELDS]: this.whiteListedGroupByFields,
       [RESTRICTIONS_KEYS.WHITE_LISTED_TIMERANGE_MODES]: this.whiteListedTimerangeModes,
-    };
+      [RESTRICTIONS_KEYS.WHITE_LISTED_UI_CONTROLS]: this.whiteListedUIControls,
+    } as TimeseriesUIRestrictions;
   }
 
   createUiRestriction(restrictionsObject?: Record<string, any>) {

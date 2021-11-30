@@ -35,6 +35,7 @@ import { getDefaultQueryLanguage } from '../../lib/get_default_query_language';
 import { checkIfNumericMetric } from '../../lib/check_if_numeric_metric';
 import { QueryBarWrapper } from '../../query_bar_wrapper';
 import { DATA_FORMATTERS } from '../../../../../common/enums';
+import { isUIControlEnabled } from '../../../../../common/check_ui_restrictions';
 
 export class TableSeriesConfig extends Component {
   UNSAFE_componentWillMount() {
@@ -122,6 +123,11 @@ export class TableSeriesConfig extends Component {
     );
     const isKibanaIndexPattern =
       this.props.panel.use_kibana_indexes || this.props.indexPatternForQuery === '';
+
+    const isAggregationFunctionsEnabled = isUIControlEnabled(
+      'aggregate_function',
+      this.props.uiRestrictions
+    );
 
     return (
       <div className="tvbAggRow">
@@ -213,6 +219,7 @@ export class TableSeriesConfig extends Component {
               indexPattern={this.props.panel.index_pattern}
               value={model.aggregate_by}
               onChange={handleSelectChange('aggregate_by')}
+              disabled={!isAggregationFunctionsEnabled}
               fullWidth
             />
           </EuiFlexItem>
@@ -232,6 +239,7 @@ export class TableSeriesConfig extends Component {
                 selectedOptions={selectedAggFuncOption ? [selectedAggFuncOption] : []}
                 onChange={handleSelectChange('aggregate_function')}
                 singleSelection={{ asPlainText: true }}
+                isDisabled={!isAggregationFunctionsEnabled}
                 fullWidth
               />
             </EuiFormRow>
@@ -268,4 +276,5 @@ TableSeriesConfig.propTypes = {
   model: PropTypes.object,
   onChange: PropTypes.func,
   indexPatternForQuery: PropTypes.oneOfType([PropTypes.object, PropTypes.string]),
+  uiRestrictions: PropTypes.object,
 };

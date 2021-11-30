@@ -10,6 +10,7 @@ import { processBucket } from './process_bucket';
 
 import type { Panel, Series } from '../../../../common/types';
 import { createFieldsFetcher } from '../../search_strategies/lib/fields_fetcher';
+import type { SearchCapabilities } from '../../search_strategies';
 
 function createValueObject(key: string | number, value: string | number, seriesId: string) {
   return { key_as_string: `${key}`, doc_count: value, key, [seriesId]: { value } };
@@ -62,7 +63,9 @@ function createBuckets(series: string[]) {
           timeField: 'timestamp',
           seriesId,
         },
-        buckets: createBucketsObjects(size, trend, seriesId),
+        timeseries: {
+          buckets: createBucketsObjects(size, trend, seriesId),
+        },
       };
     }
     return baseObj;
@@ -85,6 +88,7 @@ function trendChecker(trend: string, slope: number) {
 describe('processBucket(panel)', () => {
   const extractFields = jest.fn() as ReturnType<typeof createFieldsFetcher>;
   let panel: Panel;
+  let capabilities: SearchCapabilities;
 
   describe('single metric panel', () => {
     const SERIES_ID = 'series-id';
@@ -94,7 +98,7 @@ describe('processBucket(panel)', () => {
     });
 
     test('return the correct trend direction', async () => {
-      const bucketProcessor = processBucket({ panel, extractFields });
+      const bucketProcessor = processBucket({ panel, extractFields, capabilities });
       const buckets = createBuckets([SERIES_ID]);
       for (const bucket of buckets) {
         const result = await bucketProcessor(bucket);
@@ -104,7 +108,7 @@ describe('processBucket(panel)', () => {
     });
 
     test('properly handle 0 values for trend', async () => {
-      const bucketProcessor = processBucket({ panel, extractFields });
+      const bucketProcessor = processBucket({ panel, extractFields, capabilities });
       const bucketforNaNResult = {
         key: 'NaNScenario',
         expectedTrend: 'flat',
@@ -113,11 +117,13 @@ describe('processBucket(panel)', () => {
             timeField: 'timestamp',
             seriesId: SERIES_ID,
           },
-          buckets: [
-            // this is a flat case, but 0/0 has not a valid number result
-            createValueObject(0, 0, SERIES_ID),
-            createValueObject(1, 0, SERIES_ID),
-          ],
+          timeseries: {
+            buckets: [
+              // this is a flat case, but 0/0 has not a valid number result
+              createValueObject(0, 0, SERIES_ID),
+              createValueObject(1, 0, SERIES_ID),
+            ],
+          },
         },
       };
       const result = await bucketProcessor(bucketforNaNResult);
@@ -128,7 +134,7 @@ describe('processBucket(panel)', () => {
     });
 
     test('have the side effect to create the timeseries property if missing on bucket', async () => {
-      const bucketProcessor = processBucket({ panel, extractFields });
+      const bucketProcessor = processBucket({ panel, extractFields, capabilities });
       const buckets = createBuckets([SERIES_ID]);
 
       for (const bucket of buckets) {
@@ -148,7 +154,7 @@ describe('processBucket(panel)', () => {
     });
 
     test('return the correct trend direction', async () => {
-      const bucketProcessor = processBucket({ panel, extractFields });
+      const bucketProcessor = processBucket({ panel, extractFields, capabilities });
       const buckets = createBuckets(SERIES);
 
       for (const bucket of buckets) {
