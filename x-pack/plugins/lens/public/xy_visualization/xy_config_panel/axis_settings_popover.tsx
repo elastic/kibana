@@ -267,6 +267,11 @@ export const AxisSettingsPopover: React.FunctionComponent<AxisSettingsPopoverPro
     value: axisTitle || '',
     onChange: updateTitleState,
   });
+
+  const axisColorLabel = i18n.translate('xpack.lens.xyChart.axisColor.label', {
+    defaultMessage: 'Axis color',
+  });
+
   return (
     <ToolbarPopover
       title={config.popoverTitle}
@@ -311,6 +316,16 @@ export const AxisSettingsPopover: React.FunctionComponent<AxisSettingsPopoverPro
           defaultMessage: 'Overwrite axis title',
         })}
       />
+      <EuiSpacer size="s" />
+      <EuiFormRow display="rowCompressed" fullWidth label={axisColorLabel}>
+        <EuiColorPicker
+          compressed
+          isClearable={false}
+          onChange={(newColor) => updateColor(axis, newColor)}
+          color={color || defaultAxisLineColor}
+          aria-label={axisColorLabel}
+        />
+      </EuiFormRow>
       <EuiSpacer size="m" />
       <EuiSwitch
         compressed
@@ -330,19 +345,6 @@ export const AxisSettingsPopover: React.FunctionComponent<AxisSettingsPopoverPro
         })}
         onChange={() => toggleTickLabelsVisibility(axis)}
         checked={areTickLabelsVisible}
-      />
-      <EuiSpacer size="s" />
-      <EuiColorPicker
-        data-test-subj="indexPattern-dimension-colorPicker"
-        compressed
-        isClearable={false}
-        onChange={(newColor) => updateColor(axis, newColor)}
-        color={color || defaultAxisLineColor}
-        // TODO - is placeholder necessary?
-        placeholder={i18n.translate('xpack.lens.xyChart.seriesColor.auto', {
-          defaultMessage: 'Auto',
-        })}
-        // aria-label={inputLabel} TODO - renable
       />
       <EuiSpacer size="s" />
       <TooltipWrapper
