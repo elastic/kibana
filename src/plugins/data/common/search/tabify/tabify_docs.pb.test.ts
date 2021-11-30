@@ -28,7 +28,7 @@ function arbitraryDataViewInputs() {
 function arbitraryHits(): fc.Arbitrary<estypes.SearchResponse['hits']['hits']> {
   return fc.array(
     fc.record<estypes.SearchHit>({
-      _id: fc.string(),
+      _id: fc.uuid(),
       _index: fc.string(),
       fields: fc.object({
         key: fc.string({ minLength: 1, maxLength: 10 }),
@@ -38,7 +38,7 @@ function arbitraryHits(): fc.Arbitrary<estypes.SearchResponse['hits']['hits']> {
       _type: fc.string(),
       _seq_no: fc.integer(),
     }),
-    { maxLength: 500 }
+    { maxLength: 250 }
   );
 }
 
@@ -87,7 +87,8 @@ describe('Tabify docs', () => {
           const indexPattern = new DataView({ ...dataViewInputs, fieldFormats: fieldFormatsMock });
           expect(() => tabifyDocs(esResponse, indexPattern, options)).not.toThrow();
         }
-      )
+      ),
+      { numRuns: 50 }
     );
   });
 
@@ -104,7 +105,7 @@ describe('Tabify docs', () => {
           );
         }
       ),
-      { numRuns: 10 }
+      { numRuns: 50 }
     );
   });
 });
