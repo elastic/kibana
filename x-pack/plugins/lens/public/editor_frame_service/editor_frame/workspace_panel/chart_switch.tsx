@@ -339,6 +339,16 @@ export const ChartSwitch = memo(function ChartSwitch(props: Props) {
                           alignItems="center"
                           className="lnsChartSwitch__append"
                         >
+                          {v.showExperimentalBadge ? (
+                            <EuiFlexItem grow={false}>
+                              <EuiBadge color="hollow">
+                                <FormattedMessage
+                                  id="xpack.lens.chartSwitch.experimentalLabel"
+                                  defaultMessage="Experimental"
+                                />
+                              </EuiBadge>
+                            </EuiFlexItem>
+                          ) : null}
                           {v.selection.dataLoss !== 'nothing' ? (
                             <EuiFlexItem grow={false}>
                               <EuiIconTip
@@ -359,16 +369,6 @@ export const ChartSwitch = memo(function ChartSwitch(props: Props) {
                                   'data-test-subj': `lnsChartSwitchPopoverAlert_${v.id}`,
                                 }}
                               />
-                            </EuiFlexItem>
-                          ) : null}
-                          {v.showExperimentalBadge ? (
-                            <EuiFlexItem grow={false}>
-                              <EuiBadge color="hollow">
-                                <FormattedMessage
-                                  id="xpack.lens.chartSwitch.experimentalLabel"
-                                  defaultMessage="Experimental"
-                                />
-                              </EuiBadge>
                             </EuiFlexItem>
                           ) : null}
                         </EuiFlexGroup>
