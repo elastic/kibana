@@ -14,6 +14,7 @@ import {
 } from '../../../../../src/plugins/home/server';
 import { CloudSetup } from '../../../cloud/server';
 import { APM_STATIC_INDEX_PATTERN_ID } from '../../common/index_pattern_constants';
+import { getApmDataViewAttributes } from '../routes/data_view/get_apm_data_view_attributes';
 import { getApmDataViewTitle } from '../routes/data_view/get_apm_data_view_title';
 import { ApmIndicesConfig } from '../routes/settings/apm_indices/get_apm_indices';
 import { createElasticCloudInstructions } from './envs/elastic_cloud';
@@ -38,14 +39,12 @@ export const tutorialProvider =
     isFleetPluginEnabled: boolean;
   }) =>
   () => {
-    const indexPatternTitle = getApmDataViewTitle(apmIndices);
-
+    const dataViewTitle = getApmDataViewTitle(apmIndices);
     const savedObjects = [
       {
         id: APM_STATIC_INDEX_PATTERN_ID,
-        attributes: {
-          title: indexPatternTitle,
-        },
+        attributes: getApmDataViewAttributes(dataViewTitle),
+        type: 'index-pattern',
       },
     ];
 

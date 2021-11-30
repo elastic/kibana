@@ -5,10 +5,6 @@
  * 2.0.
  */
 
-import {
-  TRACE_ID,
-  TRANSACTION_ID,
-} from '../../../common/elasticsearch_fieldnames';
 import { SavedObjectsErrorHelpers } from '../../../../../../src/core/server';
 import { APM_STATIC_INDEX_PATTERN_ID } from '../../../common/index_pattern_constants';
 import { hasHistoricalAgentData } from '../../routes/historical_data/has_historical_agent_data';
@@ -17,6 +13,7 @@ import { APMRouteHandlerResources } from '../../routes/typings';
 import { InternalSavedObjectsClient } from '../../lib/helpers/get_internal_saved_objects_client.js';
 import { withApmSpan } from '../../utils/with_apm_span';
 import { getApmDataViewTitle } from './get_apm_data_view_title';
+import { getApmDataViewAttributes } from './get_apm_data_view_attributes';
 
 interface ApmDataViewAttributes {
   title: string;
@@ -56,33 +53,7 @@ export async function createStaticDataView({
       await withApmSpan('create_index_pattern_saved_object', () =>
         savedObjectsClient.create(
           'index-pattern',
-          {
-            // required fields (even if empty)
-            title: apmDataViewTitle,
-            fieldAttrs: '{}',
-            fields: '[]',
-            runtimeFieldMap: '{}',
-            timeFieldName: '@timestamp',
-            typeMeta: '{}',
-
-            // link to APM from Discover
-            fieldFormatMap: JSON.stringify({
-              [TRACE_ID]: {
-                id: 'url',
-                params: {
-                  urlTemplate: 'apm/link-to/trace/{{value}}',
-                  labelTemplate: '{{value}}',
-                },
-              },
-              [TRANSACTION_ID]: {
-                id: 'url',
-                params: {
-                  urlTemplate: 'apm/link-to/transaction/{{value}}',
-                  labelTemplate: '{{value}}',
-                },
-              },
-            }),
-          },
+          getApmDataViewAttributes(apmDataViewTitle),
           {
             id: APM_STATIC_INDEX_PATTERN_ID,
             overwrite: forceOverwrite,
