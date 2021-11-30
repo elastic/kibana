@@ -20,7 +20,7 @@ import { SavedObjectsErrorHelpers } from '../../../../../src/core/server';
 import type { AuthenticatedUser } from '../../../security/server';
 import {
   AGENT_POLICY_SAVED_OBJECT_TYPE,
-  AGENT_SAVED_OBJECT_TYPE,
+  AGENTS_PREFIX,
   PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
 } from '../constants';
 import type {
@@ -626,7 +626,7 @@ class AgentPolicyService {
       showInactive: false,
       perPage: 0,
       page: 1,
-      kuery: `${AGENT_SAVED_OBJECT_TYPE}.policy_id:${id}`,
+      kuery: `${AGENTS_PREFIX}.policy_id:${id}`,
     });
 
     if (total > 0) {
@@ -781,7 +781,8 @@ export async function addPackageToAgentPolicy(
   defaultOutput: Output,
   packagePolicyName?: string,
   packagePolicyDescription?: string,
-  transformPackagePolicy?: (p: NewPackagePolicy) => NewPackagePolicy
+  transformPackagePolicy?: (p: NewPackagePolicy) => NewPackagePolicy,
+  bumpAgentPolicyRevison = false
 ) {
   const packageInfo = await getPackageInfo({
     savedObjectsClient: soClient,
@@ -803,7 +804,10 @@ export async function addPackageToAgentPolicy(
     : basePackagePolicy;
 
   await packagePolicyService.create(soClient, esClient, newPackagePolicy, {
-    bumpRevision: false,
+    bumpRevision: bumpAgentPolicyRevison,
     skipEnsureInstalled: true,
+    skipUniqueNameVerification: true,
+    overwrite: true,
+    force: true, // To add package to managed policy we need the force flag
   });
 }

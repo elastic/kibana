@@ -17,7 +17,7 @@ import {
   EuiLoadingSpinner,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useSeriesStorage } from '../hooks/use_series_storage';
 import { SeriesConfig, SeriesUrl } from '../types';
 import { useAppIndexPatternContext } from '../hooks/use_app_index_pattern';
@@ -127,7 +127,7 @@ export function ReportMetricOptions({ seriesId, series, seriesConfig }: Props) {
         </EuiPopover>
       )}
       {series.selectedMetricField &&
-        (indexPattern && !loading ? (
+        (indexPattern ? (
           <EuiBadge
             iconType="cross"
             iconSide="right"

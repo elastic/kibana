@@ -43,6 +43,7 @@ export class BaseVisType<TVisParams = VisParams> {
   public readonly inspectorAdapters;
   public readonly toExpressionAst;
   public readonly getInfoMessage;
+  public readonly updateVisTypeOnParamsChange;
   public readonly schemas;
 
   constructor(opts: VisTypeDefinition<TVisParams>) {
@@ -71,6 +72,7 @@ export class BaseVisType<TVisParams = VisParams> {
     this.inspectorAdapters = opts.inspectorAdapters;
     this.toExpressionAst = opts.toExpressionAst;
     this.getInfoMessage = opts.getInfoMessage;
+    this.updateVisTypeOnParamsChange = opts.updateVisTypeOnParamsChange;
 
     this.schemas = new Schemas(this.editorConfig?.schemas ?? []);
   }

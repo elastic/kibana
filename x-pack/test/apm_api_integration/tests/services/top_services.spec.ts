@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { sortBy } from 'lodash';
-import { service, timerange } from '@elastic/apm-synthtrace';
+import { apm, timerange } from '@elastic/apm-synthtrace';
 import { APIReturnType } from '../../../../plugins/apm/public/services/rest/createCallApmApi';
 import { PromiseReturnType } from '../../../../plugins/observability/typings/common';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
@@ -65,21 +65,17 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       const transactionInterval = range.interval('1s');
       const metricInterval = range.interval('30s');
 
-      const multipleEnvServiceProdInstance = service(
-        'multiple-env-service',
-        'production',
-        'go'
-      ).instance('multiple-env-service-production');
+      const multipleEnvServiceProdInstance = apm
+        .service('multiple-env-service', 'production', 'go')
+        .instance('multiple-env-service-production');
 
-      const multipleEnvServiceDevInstance = service(
-        'multiple-env-service',
-        'development',
-        'go'
-      ).instance('multiple-env-service-development');
+      const multipleEnvServiceDevInstance = apm
+        .service('multiple-env-service', 'development', 'go')
+        .instance('multiple-env-service-development');
 
-      const metricOnlyInstance = service('metric-only-service', 'production', 'java').instance(
-        'metric-only-production'
-      );
+      const metricOnlyInstance = apm
+        .service('metric-only-service', 'production', 'java')
+        .instance('metric-only-production');
 
       const config = {
         multiple: {

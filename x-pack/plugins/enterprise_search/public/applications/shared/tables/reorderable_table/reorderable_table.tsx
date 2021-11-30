@@ -30,6 +30,7 @@ interface ReorderableTableProps<Item> {
   disableReordering?: boolean;
   onReorder?: (items: Item[], oldItems: Item[]) => void;
   rowProps?: (item: Item) => object;
+  rowErrors?: (item: Item) => string[] | undefined;
 }
 
 export const ReorderableTable = <Item extends object>({
@@ -42,6 +43,7 @@ export const ReorderableTable = <Item extends object>({
   disableReordering = false,
   onReorder = () => undefined,
   rowProps = () => ({}),
+  rowErrors = () => undefined,
 }: ReorderableTableProps<Item>) => {
   return (
     <div className={classNames(className, 'reorderableTable')}>
@@ -67,6 +69,7 @@ export const ReorderableTable = <Item extends object>({
                 additionalProps={rowProps(item)}
                 disableDragging={disableDragging}
                 rowIndex={itemIndex}
+                errors={rowErrors(item)}
               />
             )}
             onReorder={onReorder}
@@ -83,6 +86,7 @@ export const ReorderableTable = <Item extends object>({
               columns={columns}
               item={item}
               additionalProps={rowProps(item)}
+              errors={rowErrors(item)}
             />
           )}
         />
@@ -97,6 +101,7 @@ export const ReorderableTable = <Item extends object>({
               columns={columns}
               item={item}
               additionalProps={rowProps(item)}
+              errors={rowErrors(item)}
               leftAction={<></>}
             />
           )}

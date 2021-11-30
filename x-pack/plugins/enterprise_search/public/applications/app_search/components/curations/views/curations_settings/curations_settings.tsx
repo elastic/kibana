@@ -22,7 +22,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { docLinks } from '../../../../../shared/doc_links';
 import { LicensingLogic } from '../../../../../shared/licensing';
@@ -110,11 +110,7 @@ export const CurationsSettings: React.FC = () => {
           </EuiButtonTo>
         }
       >
-        <EuiButtonEmpty
-          target="_blank"
-          iconType="popout"
-          href={`${docLinks.enterpriseSearchBase}/license-management.html`}
-        >
+        <EuiButtonEmpty target="_blank" iconType="popout" href={docLinks.licenseManagement}>
           {i18n.translate('xpack.enterpriseSearch.curations.settings.licenseUpgradeLink', {
             defaultMessage: 'Learn more about license upgrades',
           })}

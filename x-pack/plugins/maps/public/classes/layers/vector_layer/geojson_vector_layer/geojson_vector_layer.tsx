@@ -28,7 +28,7 @@ import { DataRequestContext } from '../../../../actions';
 import { IVectorStyle, VectorStyle } from '../../../styles/vector/vector_style';
 import { ISource } from '../../../sources/source';
 import { IVectorSource } from '../../../sources/vector_source';
-import { AbstractLayer, CustomIconAndTooltipContent } from '../../layer';
+import { AbstractLayer, LayerIcon } from '../../layer';
 import { InnerJoin } from '../../../joins/inner_join';
 import {
   AbstractVectorLayer,
@@ -39,7 +39,7 @@ import { DataRequestAbortError } from '../../../util/data_request';
 import { canSkipSourceUpdate } from '../../../util/can_skip_fetch';
 import { getFeatureCollectionBounds } from '../../../util/get_feature_collection_bounds';
 import { GEOJSON_FEATURE_ID_PROPERTY_NAME } from './assign_feature_ids';
-import { addGeoJsonMbSource, syncVectorSource } from './utils';
+import { syncGeojsonSourceData } from './geojson_source_data';
 import { JoinState, performInnerJoins } from './perform_inner_joins';
 import { buildVectorRequestMeta } from '../../build_vector_request_meta';
 
@@ -78,7 +78,7 @@ export class GeoJsonVectorLayer extends AbstractVectorLayer {
       : super.getBounds(syncContext);
   }
 
-  getCustomIconAndTooltipContent(): CustomIconAndTooltipContent {
+  getLayerIcon(isTocIcon: boolean): LayerIcon {
     const featureCollection = this._getSourceFeatureCollection();
 
     if (!featureCollection || featureCollection.features.length === 0) {
@@ -101,12 +101,12 @@ export class GeoJsonVectorLayer extends AbstractVectorLayer {
 
     const sourceDataRequest = this.getSourceDataRequest();
     const { tooltipContent, areResultsTrimmed, isDeprecated } =
-      this.getSource().getSourceTooltipContent(sourceDataRequest);
+      this.getSource().getSourceStatus(sourceDataRequest);
     return {
       icon: isDeprecated ? (
         <EuiIcon type="alert" color="danger" />
       ) : (
-        this.getCurrentStyle().getIcon()
+        this.getCurrentStyle().getIcon(isTocIcon && areResultsTrimmed)
       ),
       tooltipContent,
       areResultsTrimmed,
@@ -138,8 +138,26 @@ export class GeoJsonVectorLayer extends AbstractVectorLayer {
     return await style.pluckStyleMetaFromSourceDataRequest(sourceDataRequest);
   }
 
+  _requiresPrevSourceCleanup(mbMap: MbMap) {
+    const mbSource = mbMap.getSource(this.getMbSourceId());
+    if (!mbSource) {
+      return false;
+    }
+
+    return mbSource.type !== 'geojson';
+  }
+
   syncLayerWithMB(mbMap: MbMap, timeslice?: Timeslice) {
-    addGeoJsonMbSource(this._getMbSourceId(), this.getMbLayerIds(), mbMap);
+    this._removeStaleMbSourcesAndLayers(mbMap);
+
+    const mbSourceId = this.getMbSourceId();
+    const mbSource = mbMap.getSource(mbSourceId);
+    if (!mbSource) {
+      mbMap.addSource(mbSourceId, {
+        type: 'geojson',
+        data: EMPTY_FEATURE_COLLECTION,
+      });
+    }
 
     this._syncFeatureCollectionWithMb(mbMap);
 
@@ -211,7 +229,7 @@ export class GeoJsonVectorLayer extends AbstractVectorLayer {
     try {
       await this._syncSourceStyleMeta(syncContext, source, style);
       await this._syncSourceFormatters(syncContext, source, style);
-      const sourceResult = await syncVectorSource({
+      const sourceResult = await syncGeojsonSourceData({
         layerId: this.getId(),
         layerName: await this.getDisplayName(source),
         prevDataRequest: this.getSourceDataRequest(),

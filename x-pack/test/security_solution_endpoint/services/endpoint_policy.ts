@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import uuid from 'uuid';
 import { FtrProviderContext } from '../ftr_provider_context';
 import {
   CreateAgentPolicyRequest,
@@ -23,7 +24,7 @@ import { Immutable } from '../../../plugins/security_solution/common/endpoint/ty
 
 // NOTE: import path below should be the deep path to the actual module - else we get CI errors
 import { pkgKeyFromPackageInfo } from '../../../plugins/fleet/public/services/pkg_key_from_package_info';
-import { EndpointError } from '../../../plugins/security_solution/server';
+import { EndpointError } from '../../../plugins/security_solution/common/endpoint/errors';
 
 const INGEST_API_ROOT = '/api/fleet';
 const INGEST_API_AGENT_POLICIES = `${INGEST_API_ROOT}/agent_policies`;
@@ -161,7 +162,7 @@ export function EndpointPolicyTestResourcesProvider({ getService }: FtrProviderC
       let agentPolicy: CreateAgentPolicyResponse['item'];
       try {
         const newAgentPolicyData: CreateAgentPolicyRequest['body'] = {
-          name: 'East Coast',
+          name: `East Coast ${uuid.v4()}`,
           description: 'East Coast call center',
           namespace: 'default',
         };
@@ -182,7 +183,7 @@ export function EndpointPolicyTestResourcesProvider({ getService }: FtrProviderC
       let packagePolicy: CreatePackagePolicyResponse['item'];
       try {
         const newPackagePolicyData: CreatePackagePolicyRequest['body'] = {
-          name: 'Protect East Coast',
+          name: `Protect East Coast ${uuid.v4()}`,
           description: 'Protect the worlds data - but in the East Coast',
           policy_id: agentPolicy!.id,
           enabled: true,

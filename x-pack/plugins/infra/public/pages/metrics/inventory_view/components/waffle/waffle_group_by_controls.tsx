@@ -13,7 +13,7 @@ import {
   EuiPopover,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import { IFieldType } from 'src/plugins/data/public';
 import { InfraGroupByOptions } from '../../../../../lib/lib';
@@ -134,6 +134,7 @@ export class WaffleGroupByControls extends React.PureComponent<Props, State> {
       <DropdownButton
         label={i18n.translate('xpack.infra.waffle.groupByLabel', { defaultMessage: 'Group by' })}
         onClick={this.handleToggle}
+        data-test-subj={'waffleGroupByDropdown'}
       >
         {buttonBody}
       </DropdownButton>
@@ -147,7 +148,11 @@ export class WaffleGroupByControls extends React.PureComponent<Props, State> {
         panelPaddingSize="none"
         closePopover={this.handleClose}
       >
-        <StyledContextMenu initialPanelId="firstPanel" panels={panels} />
+        <StyledContextMenu
+          initialPanelId="firstPanel"
+          panels={panels}
+          data-test-subj="groupByContextMenu"
+        />
       </EuiPopover>
     );
   }

@@ -26,44 +26,76 @@ endif::[]
 
 ifeval::["{release-state}"!="unreleased"]
 
-To start an {es} container for development or testing, run:
-
+. Start an {es} container for development or testing:
++
 [source,sh,subs="attributes"]
 ----
 docker network create elastic
 docker pull {es-docker-image}
-docker run --name es01-test --net elastic -p 9200:9200 -p 9300:9300 -e "discovery.type=single-node" {es-docker-image}
+docker run --name es-node01 --net elastic -p 9200:9200 -p 9300:9300 -t {es-docker-image}
 ----
++
+When you start {es} for the first time, the following security configuration 
+occurs automatically:
++
+* {ref}/configuring-stack-security.html#stack-security-certificates[Certificates and keys] 
+are generated for the transport and HTTP layers.
+* The Transport Layer Security (TLS) configuration settings are written to
+`elasticsearch.yml`.
+* A password is generated for the `elastic` user.
+* An enrollment token is generated for {kib}.
++
+NOTE: You might need to scroll back a bit in the terminal to view the password 
+and enrollment token.
 
-To start {kib} and connect it to your {es} container, run the following commands
-in a new terminal session:
+. Copy the generated password and enrollment token and save them in a secure 
+location. These values are shown only when you start {es} for the first time.
+You'll use these to enroll {kib} with your {es} cluster and log in.
++
+[NOTE]
+====
+If you need to reset the password for the `elastic` user or other
+built-in users, run the {ref}/reset-password.html[`elasticsearch-reset-password`]
+tool. To generate new enrollment tokens for {kib} or {es} nodes, run the
+{ref}/create-enrollment-token.html[`elasticsearch-create-enrollment-token`] tool.
+These tools are available in the {es} `bin` directory of the Docker container.
 
-[source,sh,subs="attributes"]
-----
-docker pull {docker-image}
-docker run --name kib01-test --net elastic -p 5601:5601 -e "ELASTICSEARCH_HOSTS=http://es01-test:9200" {docker-image}
-----
-
-To access {kib}, go to http://localhost:5601[http://localhost:5601].
-
-[float]
-=== Stop Docker containers
-
-To stop your containers, run:
+For example:
 
 [source,sh]
 ----
-docker stop es01-test
-docker stop kib01-test
+docker exec -it es-node01 /usr/share/elasticsearch/bin/elasticsearch-reset-password -u elastic
 ----
+====
+
+. In a new terminal session, start {kib} and connect it to your {es} container:
++
+[source,sh,subs="attributes"]
+----
+docker pull {docker-image}
+docker run --name kib-01 --net elastic -p 5601:5601 {docker-image}
+----
++
+When you start {kib}, a unique link is output to your terminal.
+
+. To access {kib}, click the generated link in your terminal.
+
+  .. In your browser, paste the enrollment token that you copied when starting
+  {es} and click the button to connect your {kib} instance with {es}.
+
+  .. Log in to {kib} as the `elastic` user with the password that was generated
+  when you started {es}.
+
+[float]
+=== Remove Docker containers
 
 To remove the containers and their network, run:
 
 [source,sh]
 ----
 docker network rm elastic
-docker rm es01-test
-docker rm kib01-test
+docker rm es-node01
+docker rm kib-01
 ----
 
 endif::[]
@@ -81,7 +113,7 @@ environment variables to define settings.
 ==== Bind-mounted configuration
 
 One way to configure Kibana on Docker is to provide `kibana.yml` via bind-mounting.
-With +docker-compose+, the bind-mount can be specified like this:
+With `docker-compose`, the bind-mount can be specified like this:
 
 ["source","yaml",subs="attributes"]
 --------------------------------------------
@@ -97,10 +129,10 @@ services:
 
 By default, {kib] auto-generates a keystore file for secure settings at startup. To persist your {kibana-ref}/secure-settings.html[secure settings], use the `kibana-keystore` utility to bind-mount the parent directory of the keystore to the container. For example:
 
-[source,sh]
+["source","sh",subs="attributes"]
 ----
-docker run -it --rm -v full_path_to/config:/usr/share/kibana/config -v full_path_to/data:/usr/share/kibana/data docker.elastic.co/kibana/kibana:7.14.0 bin/kibana-keystore create
-docker run -it --rm -v full_path_to/config:/usr/share/kibana/config -v full_path_to/data:/usr/share/kibana/data docker.elastic.co/kibana/kibana:7.14.0 bin/kibana-keystore add test_keystore_setting
+docker run -it --rm -v full_path_to/config:/usr/share/kibana/config -v full_path_to/data:/usr/share/kibana/data {docker-image} bin/kibana-keystore create
+docker run -it --rm -v full_path_to/config:/usr/share/kibana/config -v full_path_to/data:/usr/share/kibana/data {docker-image} bin/kibana-keystore add test_keystore_setting
 ----
 
 [float]

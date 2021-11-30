@@ -49,7 +49,7 @@ export const getUiSettings: () => Record<string, UiSettingsParams> = () => ({
     }),
     value: 200,
     description: i18n.translate('discover.advancedSettings.maxDocFieldsDisplayedText', {
-      defaultMessage: 'Maximum number of fields rendered in the document column',
+      defaultMessage: 'Maximum number of fields rendered in the document summary',
     }),
     category: ['discover'],
     schema: schema.number(),
@@ -158,14 +158,14 @@ export const getUiSettings: () => Record<string, UiSettingsParams> = () => ({
     schema: schema.arrayOf(schema.string()),
   },
   [DOC_TABLE_LEGACY]: {
-    name: i18n.translate('discover.advancedSettings.docTableVersionName', {
-      defaultMessage: 'Use classic table',
+    name: i18n.translate('discover.advancedSettings.disableDocumentExplorer', {
+      defaultMessage: 'Document Explorer or classic view',
     }),
     value: true,
-    description: i18n.translate('discover.advancedSettings.docTableVersionDescription', {
+    description: i18n.translate('discover.advancedSettings.disableDocumentExplorerDescription', {
       defaultMessage:
-        'Discover uses a new table layout that includes better data sorting, drag-and-drop columns, and a full screen view. ' +
-        'Turn on this option to use the classic table. Turn off to use the new table. ',
+        'To use the new Document Explorer instead of the classic view, turn off this option. ' +
+        'The Document Explorer offers better data sorting, resizable columns, and a full screen view.',
     }),
     category: ['discover'],
     schema: schema.boolean(),

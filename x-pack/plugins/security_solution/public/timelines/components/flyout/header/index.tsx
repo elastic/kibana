@@ -19,7 +19,7 @@ import React, { MouseEventHandler, MouseEvent, useCallback, useMemo } from 'reac
 import { isEmpty, get, pick } from 'lodash/fp';
 import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
-import { FormattedRelative } from '@kbn/i18n/react';
+import { FormattedRelative } from '@kbn/i18n-react';
 
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import {
@@ -39,7 +39,7 @@ import { SaveTimelineButton } from '../../timeline/header/save_timeline_button';
 import { useGetUserCasesPermissions, useKibana } from '../../../../common/lib/kibana';
 import { InspectButton } from '../../../../common/components/inspect';
 import { useTimelineKpis } from '../../../containers/kpis';
-import { esQuery } from '../../../../../../../../src/plugins/data/public';
+import { getEsQueryConfig } from '../../../../../../../../src/plugins/data/common';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { TimelineModel } from '../../../../timelines/store/timeline/model';
 import {
@@ -78,7 +78,7 @@ const FlyoutHeaderPanelComponent: React.FC<FlyoutHeaderPanelProps> = ({ timeline
   const dispatch = useDispatch();
   const { browserFields, indexPattern } = useSourcererDataView(SourcererScopeName.timeline);
   const { uiSettings } = useKibana().services;
-  const esQueryConfig = useMemo(() => esQuery.getEsQueryConfig(uiSettings), [uiSettings]);
+  const esQueryConfig = useMemo(() => getEsQueryConfig(uiSettings), [uiSettings]);
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
   const {
     activeTab,
@@ -367,7 +367,7 @@ const FlyoutHeaderComponent: React.FC<FlyoutHeaderProps> = ({ timelineId }) => {
     }
   });
   const { uiSettings } = useKibana().services;
-  const esQueryConfig = useMemo(() => esQuery.getEsQueryConfig(uiSettings), [uiSettings]);
+  const esQueryConfig = useMemo(() => getEsQueryConfig(uiSettings), [uiSettings]);
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
   const timeline: TimelineModel = useSelector(
     (state: State) => getTimeline(state, timelineId) ?? timelineDefaults

@@ -9,7 +9,8 @@ import { isEmpty } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { connect, ConnectedProps, useDispatch } from 'react-redux';
 import { Dispatch } from 'redux';
-import { esQuery, Filter } from '../../../../../../../src/plugins/data/public';
+import type { Filter } from '@kbn/es-query';
+import { getEsQueryConfig } from '../../../../../../../src/plugins/data/common';
 import { Status } from '../../../../common/detection_engine/schemas/common/schemas';
 import { RowRendererId, TimelineIdLiteral } from '../../../../common/types/timeline';
 import { StatefulEventsViewer } from '../../../common/components/events_viewer';
@@ -28,6 +29,7 @@ import { inputsModel, inputsSelectors, State } from '../../../common/store';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import * as i18nCommon from '../../../common/translations';
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../../../timelines/components/timeline/body/constants';
+import { getDefaultControlColumn } from '../../../timelines/components/timeline/body/control_columns';
 import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';
 import { combineQueries } from '../../../timelines/components/timeline/helpers';
 import { timelineActions, timelineSelectors } from '../../../timelines/store/timeline';
@@ -106,12 +108,13 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   const { addWarning } = useAppToasts();
   // TODO: Once we are past experimental phase this code should be removed
   const ruleRegistryEnabled = useIsExperimentalFeatureEnabled('ruleRegistryEnabled');
+  const ACTION_BUTTON_COUNT = 4;
 
   const getGlobalQuery = useCallback(
     (customFilters: Filter[]) => {
       if (browserFields != null && indexPatterns != null) {
         return combineQueries({
-          config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
+          config: getEsQueryConfig(kibana.services.uiSettings),
           dataProviders: [],
           indexPattern: indexPatterns,
           browserFields,
@@ -369,6 +372,8 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
     );
   }, [dispatch, defaultTimelineModel, filterManager, tGridEnabled, timelineId]);
 
+  const leadingControlColumns = useMemo(() => getDefaultControlColumn(ACTION_BUTTON_COUNT), []);
+
   if (loading || indexPatternsLoading || isEmpty(selectedPatterns)) {
     return null;
   }
@@ -383,6 +388,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
       entityType="events"
       hasAlertsCrud={hasIndexWrite && hasIndexMaintenance}
       id={timelineId}
+      leadingControlColumns={leadingControlColumns}
       onRuleChange={onRuleChange}
       pageFilters={defaultFiltersMemo}
       renderCellValue={RenderCellValue}
