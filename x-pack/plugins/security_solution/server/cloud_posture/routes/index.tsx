@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export * from './findings';
 export * from './score';
