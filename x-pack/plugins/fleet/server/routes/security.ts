@@ -12,6 +12,7 @@ import type {
   KibanaRequest,
   RequestHandler,
   RequestHandlerContext,
+  OnPostAuthHandler,
 } from 'src/core/server';
 
 import type { FleetAuthz } from '../../common';
@@ -46,52 +47,8 @@ function checkSuperuser(req: KibanaRequest) {
   return true;
 }
 
-function enforceSuperuser<T1, T2, T3, TContext extends RequestHandlerContext>(
-  handler: RequestHandler<T1, T2, T3, TContext>
-): RequestHandler<T1, T2, T3, TContext> {
-  return function enforceSuperHandler(context, req, res) {
-    const isSuperuser = checkSuperuser(req);
-    if (!isSuperuser) {
-      return res.forbidden({
-        body: {
-          message: SUPERUSER_AUTHZ_MESSAGE,
-        },
-      });
-    }
-
-    return handler(context, req, res);
-  };
-}
-
-function makeRouterEnforcingSuperuser<TContext extends RequestHandlerContext>(
-  router: IRouter<TContext>
-): IRouter<TContext> {
-  return {
-    get: (options, handler) => router.get(options, enforceSuperuser(handler)),
-    delete: (options, handler) => router.delete(options, enforceSuperuser(handler)),
-    post: (options, handler) => router.post(options, enforceSuperuser(handler)),
-    put: (options, handler) => router.put(options, enforceSuperuser(handler)),
-    patch: (options, handler) => router.patch(options, enforceSuperuser(handler)),
-    handleLegacyErrors: (handler) => router.handleLegacyErrors(handler),
-    getRoutes: () => router.getRoutes(),
-    routerPath: router.routerPath,
-  };
-}
-
-async function checkFleetSetupPrivilege(req: KibanaRequest) {
-  const security = appContextService.getSecurity();
-
-  if (security.authz.mode.useRbacForRequest(req)) {
-    const checkPrivileges = security.authz.checkPrivilegesDynamicallyWithRequest(req);
-    const { hasAllRequested } = await checkPrivileges(
-      { kibana: [security.authz.actions.api.get('fleet-setup')] },
-      { requireLoginAction: false } // exclude login access requirement
-    );
-
-    return !!hasAllRequested;
-  }
-
-  return true;
+function isSuperuser(req: KibanaRequest) {
+  return checkSuperuser(req);
 }
 
 export async function getAuthzFromRequest(req: KibanaRequest): Promise<FleetAuthz> {
@@ -136,51 +93,47 @@ export async function getAuthzFromRequest(req: KibanaRequest): Promise<FleetAuth
   });
 }
 
-function enforceFleetAuthzPrivilege<P, Q, B, TContext extends FleetRequestHandlerContext>(
-  handler: RequestHandler<P, Q, B, TContext>,
-  authzConfig?: FleetAuthzRouteConfig,
-  allowFleetSetupPrivilege?: boolean
-): RequestHandler<P, Q, B, TContext> {
-  return async (context, req, res) => {
-    if (!checkSecurityEnabled()) {
-      return res.forbidden();
-    }
+function hasRequiredFleetAuthzPrivilege(
+  authz: FleetAuthz,
+  {
+    fleetAuthz,
+    fleetAllowFleetSetupPrivilege,
+  }: { fleetAuthz?: FleetAuthzRouteConfig; fleetAllowFleetSetupPrivilege?: boolean }
+): boolean {
+  if (!checkSecurityEnabled()) {
+    return false;
+  }
 
-    if (allowFleetSetupPrivilege) {
-      const hasFleetSetupPrivilege = await checkFleetSetupPrivilege(req);
-      if (hasFleetSetupPrivilege) {
-        return handler(context, req, res);
+  if (fleetAllowFleetSetupPrivilege) {
+    // Temporary while agent call the setup API
+    if (authz.fleet.setup) {
+      return true;
+    }
+  }
+
+  const missingAuthz = [];
+
+  if (fleetAuthz && typeof fleetAuthz.fleet !== 'undefined') {
+    for (const key of fleetAuthz.fleet) {
+      if (!authz.fleet[key as keyof FleetAuthz['fleet']]) {
+        missingAuthz.push(`fleet.${key}`);
       }
     }
-    if (!context.fleet || !context.fleet.authz) {
-      return res.forbidden();
-    }
-    const { authz } = context.fleet;
+  }
 
-    const missingAuthz = [];
-
-    if (authzConfig && typeof authzConfig.fleet !== 'undefined') {
-      for (const key of authzConfig.fleet) {
-        if (!authz.fleet[key as keyof FleetAuthz['fleet']]) {
-          missingAuthz.push(`fleet.${key}`);
-        }
+  if (fleetAuthz && typeof fleetAuthz.integrations !== 'undefined') {
+    for (const key of fleetAuthz.integrations) {
+      if (!authz.integrations[key as keyof FleetAuthz['integrations']]) {
+        missingAuthz.push(`integrations.${key}`);
       }
     }
+  }
 
-    if (authzConfig && typeof authzConfig.integrations !== 'undefined') {
-      for (const key of authzConfig.integrations) {
-        if (!authz.integrations[key as keyof FleetAuthz['integrations']]) {
-          missingAuthz.push(`integrations.${key}`);
-        }
-      }
-    }
+  if (missingAuthz.length > 0) {
+    return false;
+  }
 
-    if (missingAuthz.length > 0) {
-      return res.forbidden();
-    }
-
-    return handler(context, req, res);
-  };
+  return true;
 }
 
 interface FleetAuthzRouteConfig {
@@ -198,6 +151,7 @@ type FleetAuthzRouteRegistrar<
 
 type FleetRouteConfig<P, Q, B, Method extends RouteMethod> = RouteConfig<P, Q, B, Method> & {
   fleetAuthz?: FleetAuthzRouteConfig;
+  fleetRequireSuperuser?: boolean;
   // TODO temporary required while agents call Fleet setup
   fleetAllowFleetSetupPrivilege?: boolean;
 };
@@ -213,57 +167,125 @@ export interface FleetAuthzRouter<
   patch: FleetAuthzRouteRegistrar<'patch', TContext>;
 }
 
+function shouldHandlePostAuthRequest(req: KibanaRequest) {
+  return req.route.path.match(/^\/api\/fleet/);
+}
+
 export function makeRouterWithFleetAuthz<TContext extends FleetRequestHandlerContext>(
   router: IRouter<TContext>
-): FleetAuthzRouter<TContext> {
-  return {
-    get: ({ fleetAuthz, fleetAllowFleetSetupPrivilege, ...options }, handler) =>
-      router.get(
-        options,
-        enforceFleetAuthzPrivilege(handler, fleetAuthz, fleetAllowFleetSetupPrivilege)
-      ),
-    delete: ({ fleetAuthz, fleetAllowFleetSetupPrivilege, ...options }, handler) =>
-      router.delete(
-        options,
-        enforceFleetAuthzPrivilege(handler, fleetAuthz, fleetAllowFleetSetupPrivilege)
-      ),
-    post: ({ fleetAuthz, fleetAllowFleetSetupPrivilege, ...options }, handler) =>
-      router.post(
-        options,
-        enforceFleetAuthzPrivilege(handler, fleetAuthz, fleetAllowFleetSetupPrivilege)
-      ),
-    put: ({ fleetAuthz, fleetAllowFleetSetupPrivilege, ...options }, handler) =>
-      router.put(
-        options,
-        enforceFleetAuthzPrivilege(handler, fleetAuthz, fleetAllowFleetSetupPrivilege)
-      ),
-    patch: ({ fleetAuthz, fleetAllowFleetSetupPrivilege, ...options }, handler) =>
-      router.patch(
-        options,
-        enforceFleetAuthzPrivilege(handler, fleetAuthz, fleetAllowFleetSetupPrivilege)
-      ),
+): { router: FleetAuthzRouter<TContext>; onPostAuthHandler: OnPostAuthHandler } {
+  const authzMap = new Map<
+    string,
+    {
+      fleetAuthz?: FleetAuthzRouteConfig;
+      fleetAllowFleetSetupPrivilege?: boolean;
+      fleetRequireSuperuser?: boolean;
+    }
+  >();
+
+  function routeKey(routeOptions: { path: string; method: string }) {
+    return `${routeOptions.method}:${routeOptions.path}`;
+  }
+
+  function addRouteAuthz(
+    routeOptions: { path: string; method: string },
+    authConfig: {
+      fleetAuthz?: FleetAuthzRouteConfig;
+      fleetAllowFleetSetupPrivilege?: boolean;
+      fleetRequireSuperuser?: boolean;
+    }
+  ) {
+    authzMap.set(routeKey(routeOptions), authConfig);
+  }
+
+  const fleetAuthzOnPostAuthHandler: OnPostAuthHandler = async (req, res, toolkit) => {
+    if (!shouldHandlePostAuthRequest(req)) {
+      return toolkit.next();
+    }
+
+    if (!checkSecurityEnabled()) {
+      return res.forbidden();
+    }
+
+    const fleetAuthzConfig = authzMap.get(routeKey(req.route));
+
+    if (!fleetAuthzConfig) {
+      return toolkit.next();
+    }
+    if (fleetAuthzConfig.fleetRequireSuperuser) {
+      if (!isSuperuser(req)) {
+        return res.forbidden({
+          body: {
+            message: SUPERUSER_AUTHZ_MESSAGE,
+          },
+        });
+      }
+      return toolkit.next();
+    }
+    const authz = await getAuthzFromRequest(req);
+    if (!hasRequiredFleetAuthzPrivilege(authz, fleetAuthzConfig)) {
+      return res.forbidden();
+    }
+
+    return toolkit.next();
+  };
+
+  const fleetAuthzRouter: FleetAuthzRouter<TContext> = {
+    get: (
+      { fleetAuthz, fleetAllowFleetSetupPrivilege, fleetRequireSuperuser, ...options },
+      handler
+    ) => {
+      addRouteAuthz(
+        { method: 'get', path: options.path },
+        { fleetAuthz, fleetAllowFleetSetupPrivilege, fleetRequireSuperuser }
+      );
+      return router.get({ ...options }, handler);
+    },
+    delete: (
+      { fleetAuthz, fleetAllowFleetSetupPrivilege, fleetRequireSuperuser, ...options },
+      handler
+    ) => {
+      addRouteAuthz(
+        { method: 'delete', path: options.path },
+        { fleetAuthz, fleetAllowFleetSetupPrivilege, fleetRequireSuperuser }
+      );
+      return router.delete(options, handler);
+    },
+    post: (
+      { fleetAuthz, fleetAllowFleetSetupPrivilege, fleetRequireSuperuser, ...options },
+      handler
+    ) => {
+      addRouteAuthz(
+        { method: 'post', path: options.path },
+        { fleetAuthz, fleetAllowFleetSetupPrivilege, fleetRequireSuperuser }
+      );
+      return router.post(options, handler);
+    },
+    put: (
+      { fleetAuthz, fleetAllowFleetSetupPrivilege, fleetRequireSuperuser, ...options },
+      handler
+    ) => {
+      addRouteAuthz(
+        { method: 'put', path: options.path },
+        { fleetAuthz, fleetAllowFleetSetupPrivilege, fleetRequireSuperuser }
+      );
+      return router.put(options, handler);
+    },
+    patch: (
+      { fleetAuthz, fleetAllowFleetSetupPrivilege, fleetRequireSuperuser, ...options },
+      handler
+    ) => {
+      addRouteAuthz(
+        { method: 'patch', path: options.path },
+        { fleetAuthz, fleetAllowFleetSetupPrivilege, fleetRequireSuperuser }
+      );
+
+      return router.patch(options, handler);
+    },
     handleLegacyErrors: (handler) => router.handleLegacyErrors(handler),
     getRoutes: () => router.getRoutes(),
     routerPath: router.routerPath,
   };
+
+  return { router: fleetAuthzRouter, onPostAuthHandler: fleetAuthzOnPostAuthHandler };
 }
-
-export type RouterWrapper = <T extends FleetRequestHandlerContext>(route: IRouter<T>) => IRouter<T>;
-
-interface RouterWrappersSetup {
-  require: {
-    superuser: RouterWrapper;
-    fleetAuthz: <T extends FleetRequestHandlerContext>(route: IRouter<T>) => FleetAuthzRouter<T>;
-  };
-}
-
-export const RouterWrappers: RouterWrappersSetup = {
-  require: {
-    superuser: (router) => {
-      return makeRouterEnforcingSuperuser(router);
-    },
-    fleetAuthz: (router) => {
-      return makeRouterWithFleetAuthz(router);
-    },
-  },
-};

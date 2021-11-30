@@ -18,7 +18,6 @@ import {
   GetStatsRequestSchema,
   UpdatePackageRequestSchema,
 } from '../../types';
-import type { FleetRouter } from '../../types/request_context';
 import type { FleetAuthzRouter } from '../security';
 
 import {
@@ -37,11 +36,8 @@ import {
 
 const MAX_FILE_SIZE_BYTES = 104857600; // 100MB
 
-export const registerRoutes = (routers: {
-  fleetRouter: FleetAuthzRouter;
-  superuser: FleetRouter;
-}) => {
-  routers.fleetRouter.get(
+export const registerRoutes = (router: FleetAuthzRouter) => {
+  router.get(
     {
       path: EPM_API_ROUTES.CATEGORIES_PATTERN,
       validate: GetCategoriesRequestSchema,
@@ -52,7 +48,7 @@ export const registerRoutes = (routers: {
     getCategoriesHandler
   );
 
-  routers.fleetRouter.get(
+  router.get(
     {
       path: EPM_API_ROUTES.LIST_PATTERN,
       validate: GetPackagesRequestSchema,
@@ -63,7 +59,7 @@ export const registerRoutes = (routers: {
     getListHandler
   );
 
-  routers.fleetRouter.get(
+  router.get(
     {
       path: EPM_API_ROUTES.LIMITED_LIST_PATTERN,
       validate: false,
@@ -74,7 +70,7 @@ export const registerRoutes = (routers: {
     getLimitedListHandler
   );
 
-  routers.fleetRouter.get(
+  router.get(
     {
       path: EPM_API_ROUTES.STATS_PATTERN,
       validate: GetStatsRequestSchema,
@@ -85,7 +81,7 @@ export const registerRoutes = (routers: {
     getStatsHandler
   );
 
-  routers.fleetRouter.get(
+  router.get(
     {
       path: EPM_API_ROUTES.FILEPATH_PATTERN,
       validate: GetFileRequestSchema,
@@ -96,7 +92,7 @@ export const registerRoutes = (routers: {
     getFileHandler
   );
 
-  routers.fleetRouter.get(
+  router.get(
     {
       path: EPM_API_ROUTES.INFO_PATTERN,
       validate: GetInfoRequestSchema,
@@ -107,7 +103,7 @@ export const registerRoutes = (routers: {
     getInfoHandler
   );
 
-  routers.fleetRouter.put(
+  router.put(
     {
       path: EPM_API_ROUTES.INFO_PATTERN,
       validate: UpdatePackageRequestSchema,
@@ -118,7 +114,7 @@ export const registerRoutes = (routers: {
     updatePackageHandler
   );
 
-  routers.fleetRouter.post(
+  router.post(
     {
       path: EPM_API_ROUTES.INSTALL_FROM_REGISTRY_PATTERN,
       validate: InstallPackageFromRegistryRequestSchema,
@@ -129,7 +125,7 @@ export const registerRoutes = (routers: {
     installPackageFromRegistryHandler
   );
 
-  routers.fleetRouter.post(
+  router.post(
     {
       path: EPM_API_ROUTES.BULK_INSTALL_PATTERN,
       validate: BulkUpgradePackagesFromRegistryRequestSchema,
@@ -141,7 +137,7 @@ export const registerRoutes = (routers: {
   );
 
   // Only allow upload for superuser
-  routers.superuser.post(
+  router.post(
     {
       path: EPM_API_ROUTES.INSTALL_BY_UPLOAD_PATTERN,
       validate: InstallPackageByUploadRequestSchema,
@@ -153,11 +149,12 @@ export const registerRoutes = (routers: {
           maxBytes: MAX_FILE_SIZE_BYTES,
         },
       },
+      fleetRequireSuperuser: true,
     },
     installPackageByUploadHandler
   );
 
-  routers.fleetRouter.delete(
+  router.delete(
     {
       path: EPM_API_ROUTES.DELETE_PATTERN,
       validate: DeletePackageRequestSchema,

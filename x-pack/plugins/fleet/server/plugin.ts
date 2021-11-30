@@ -80,7 +80,7 @@ import {
 } from './services/agents';
 import { registerFleetUsageCollector } from './collectors/register';
 import { getInstallation, ensureInstalledPackage } from './services/epm/packages';
-import { getAuthzFromRequest, RouterWrappers } from './routes/security';
+import { getAuthzFromRequest, makeRouterWithFleetAuthz } from './routes/security';
 import { FleetArtifactsClient } from './services/artifacts';
 import type { FleetRouter } from './types/request_context';
 import { TelemetryEventsSender } from './telemetry/sender';
@@ -280,14 +280,16 @@ export class FleetPlugin
     // Only some endpoints require superuser so we pass a raw IRouter here
 
     // For all the routes we enforce the user to have role superuser
-    const superuserRouter = RouterWrappers.require.superuser(router);
-    const fleetAuthzRouter = RouterWrappers.require.fleetAuthz(router);
+    const { router: fleetAuthzRouter, onPostAuthHandler: fleetAuthzOnPostAuthHandler } =
+      makeRouterWithFleetAuthz(router);
+
+    core.http.registerOnPostAuth(fleetAuthzOnPostAuthHandler);
 
     // Always register app routes for permissions checking
     registerAppRoutes(fleetAuthzRouter);
 
     // The upload package route is only authorized for the superuser
-    registerEPMRoutes({ fleetRouter: fleetAuthzRouter, superuser: superuserRouter });
+    registerEPMRoutes(fleetAuthzRouter);
 
     // Register rest of routes only if security is enabled
     if (deps.security) {
