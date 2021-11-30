@@ -24,25 +24,30 @@ import { isEmpty } from 'lodash';
 import { ALERTING_EXAMPLE_APP_ID } from '../../common/constants';
 import {
   Alert,
-  AlertTaskState,
-  LEGACY_BASE_ALERT_API_PATH,
+  BASE_ALERTING_API_PATH,
+  INTERNAL_BASE_ALERTING_API_PATH,
 } from '../../../../plugins/alerting/common';
 
 type Props = RouteComponentProps & {
   http: CoreStart['http'];
   id: string;
 };
+
+interface AlertState {
+  alerts: Record<string, { state: { craft: string } }>;
+}
+
 export const ViewAlertPage = withRouter(({ http, id }: Props) => {
   const [alert, setAlert] = useState<Alert | null>(null);
-  const [alertState, setAlertState] = useState<AlertTaskState | null>(null);
+  const [alertState, setAlertState] = useState<AlertState | null>(null);
 
   useEffect(() => {
     if (!alert) {
-      http.get<Alert | null>(`${LEGACY_BASE_ALERT_API_PATH}/alert/${id}`).then(setAlert);
+      http.get<Alert | null>(`${BASE_ALERTING_API_PATH}/rule/${id}`).then(setAlert);
     }
     if (!alertState) {
       http
-        .get<AlertTaskState | null>(`${LEGACY_BASE_ALERT_API_PATH}/alert/${id}/state`)
+        .get<AlertState | null>(`${INTERNAL_BASE_ALERTING_API_PATH}/rule/${id}/state`)
         .then(setAlertState);
     }
   }, [alert, alertState, http, id]);
@@ -69,7 +74,7 @@ export const ViewAlertPage = withRouter(({ http, id }: Props) => {
       <EuiText>
         <h2>Alerts</h2>
       </EuiText>
-      {isEmpty(alertState.alertInstances) ? (
+      {isEmpty(alertState.alerts) ? (
         <EuiCallOut title="No Alerts!" color="warning" iconType="help">
           <p>This Rule doesn&apos;t have any active alerts at the moment.</p>
         </EuiCallOut>
@@ -84,7 +89,7 @@ export const ViewAlertPage = withRouter(({ http, id }: Props) => {
           </EuiCallOut>
           <EuiSpacer size="l" />
           <EuiDescriptionList compressed>
-            {Object.entries(alertState.alertInstances ?? {}).map(([instance, { state }]) => (
+            {Object.entries(alertState.alerts ?? {}).map(([instance, { state }]) => (
               <Fragment>
                 <EuiDescriptionListTitle>{instance}</EuiDescriptionListTitle>
                 <EuiDescriptionListDescription>

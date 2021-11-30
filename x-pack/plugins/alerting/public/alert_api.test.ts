@@ -35,7 +35,7 @@ describe('loadAlertTypes', () => {
     expect(result).toEqual(resolvedValue);
     expect(http.get.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
-        "/api/alerts/list_alert_types",
+        "/api/alerting/list_alert_types",
       ]
     `);
   });
@@ -60,7 +60,7 @@ describe('loadAlertType', () => {
 
     expect(http.get.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
-        "/api/alerts/list_alert_types",
+        "/api/alerting/list_alert_types",
       ]
     `);
   });
@@ -104,6 +104,6 @@ describe('loadAlert', () => {
     http.get.mockResolvedValueOnce(resolvedValue);
 
     expect(await loadAlert({ http, alertId })).toEqual(resolvedValue);
-    expect(http.get).toHaveBeenCalledWith(`/api/alerts/alert/${alertId}`);
+    expect(http.get).toHaveBeenCalledWith(`/api/alerting/rule/${alertId}`);
   });
 });
