@@ -7,12 +7,13 @@
  */
 
 import { ApmError } from './apm_error';
-import { ApplicationMetricFields, Entity } from './entity';
+import { Entity } from '../entity';
 import { Metricset } from './metricset';
 import { Span } from './span';
 import { Transaction } from './transaction';
+import { ApmApplicationMetricFields, ApmFields } from './apm_fields';
 
-export class Instance extends Entity {
+export class Instance extends Entity<ApmFields> {
   transaction(transactionName: string, transactionType = 'request') {
     return new Transaction({
       ...this.fields,
@@ -43,7 +44,7 @@ export class Instance extends Entity {
     return this;
   }
 
-  appMetrics(metrics: ApplicationMetricFields) {
+  appMetrics(metrics: ApmApplicationMetricFields) {
     return new Metricset({
       ...this.fields,
       'metricset.name': 'app',

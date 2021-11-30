@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { Fields } from '../entity';
+import { ApmFields } from '../apm_fields';
 import { aggregate } from './aggregate';
 
-export function getSpanDestinationMetrics(events: Fields[]) {
+export function getSpanDestinationMetrics(events: ApmFields[]) {
   const exitSpans = events.filter((event) => !!event['span.destination.service.resource']);
 
   const metricsets = aggregate(exitSpans, [
