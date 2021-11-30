@@ -498,11 +498,13 @@ export default ({ getService }: FtrProviderContext): void => {
             .set('kbn-xsrf', 'true')
             .attach(
               'file',
-              toNdJsonString([
-                simpleRule,
-                getImportExceptionsListSchemaMock('test_list_id'),
-                getImportExceptionsListItemSchemaMock('test_item_id', 'test_list_id'),
-              ]),
+              Buffer.from(
+                toNdJsonString([
+                  simpleRule,
+                  getImportExceptionsListSchemaMock('test_list_id'),
+                  getImportExceptionsListItemSchemaMock('test_item_id', 'test_list_id'),
+                ])
+              ),
               'rules.ndjson'
             )
             .expect(200);
@@ -593,16 +595,18 @@ export default ({ getService }: FtrProviderContext): void => {
             .set('kbn-xsrf', 'true')
             .attach(
               'file',
-              toNdJsonString([
-                simpleRule,
-                {
-                  ...getImportExceptionsListSchemaMock('i_exist'),
-                  id: 'abc',
-                  type: 'detection',
-                  namespace_type: 'single',
-                },
-                getImportExceptionsListItemSchemaMock('test_item_id', 'i_exist'),
-              ]),
+              Buffer.from(
+                toNdJsonString([
+                  simpleRule,
+                  {
+                    ...getImportExceptionsListSchemaMock('i_exist'),
+                    id: 'abc',
+                    type: 'detection',
+                    namespace_type: 'single',
+                  },
+                  getImportExceptionsListItemSchemaMock('test_item_id', 'i_exist'),
+                ])
+              ),
               'rules.ndjson'
             )
             .expect(200);
