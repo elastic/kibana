@@ -254,7 +254,7 @@ const deprecations: ConfigDeprecationProvider = () => [
         correctiveActions: {
           manualSteps: [
             `Remove Setting [${fromPath}.logQueries] from your kibana configs`,
-            `Set the log level to "debug" for the "elasticsearch.queries" context in "logging.loggers".`,
+            `Set the log level to "debug" for the "elasticsearch.query" context in "logging.loggers".`,
           ],
         },
       });
