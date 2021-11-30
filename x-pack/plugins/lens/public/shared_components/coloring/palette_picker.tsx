@@ -51,7 +51,9 @@ function getCustomPaletteConfig(
     title,
     type: FIXED_PROGRESSION,
     'data-test-subj': `custom-palette`,
-    palette: (activePalette.params.colorStops || activePalette.params.stops).map((colorStop) => colorStop.color)
+    palette: (activePalette.params.colorStops || activePalette.params.stops).map(
+      (colorStop) => colorStop.color
+    ),
   };
 }
 

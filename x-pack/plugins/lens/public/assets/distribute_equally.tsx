@@ -6,8 +6,9 @@
  */
 
 import React from 'react';
+import { EuiIconProps } from '@elastic/eui';
 
-export const DistributeEquallyIcon = (props: any) => (
+export const DistributeEquallyIcon = (props: Omit<EuiIconProps, 'type'>) => (
   <svg
     width="15"
     height="12"

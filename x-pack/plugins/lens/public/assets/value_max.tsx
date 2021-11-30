@@ -6,8 +6,9 @@
  */
 
 import React from 'react';
+import { EuiIconProps } from '@elastic/eui';
 
-export const ValueMaxIcon = (props: any) => (
+export const ValueMaxIcon = (props: Omit<EuiIconProps, 'type'>) => (
   <svg
     width="16"
     height="16"

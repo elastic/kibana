@@ -102,12 +102,11 @@ export function ColorRanges(props: ColorRangesProps) {
             let newColorRanges = [...localColorRanges].sort(
               ({ start: startA }, { start: startB }) => Number(startA) - Number(startB)
             );
-            newColorRanges = newColorRanges.map((colorRange, index) => {
+            newColorRanges = newColorRanges.map((newColorRange, i) => {
               return {
-                color: colorRange.color,
-                start: colorRange.start,
-                end:
-                  index !== newColorRanges.length - 1 ? newColorRanges[index + 1].start : maxValue,
+                color: newColorRange.color,
+                start: newColorRange.start,
+                end: i !== newColorRanges.length - 1 ? newColorRanges[i + 1].start : maxValue,
               };
             });
             const lastRange = newColorRanges[newColorRanges.length - 1];
@@ -242,7 +241,7 @@ export function ColorRanges(props: ColorRangesProps) {
                     }
                   )}
                   onClick={() => {
-                    let value;
+                    let newValue;
                     const { max } = getDataMinMax(rangeType, dataBounds);
                     const colorStops = localColorRanges.map(({ color, start }) => ({
                       color,
@@ -250,16 +249,16 @@ export function ColorRanges(props: ColorRangesProps) {
                     }));
                     const step = roundValue(getStepValue(colorStops, colorStops, max));
                     if (isLast) {
-                      value = localColorRanges[index].start + step;
+                      newValue = localColorRanges[index].start + step;
                     } else {
-                      value = localColorRanges[index].end - step;
+                      newValue = localColorRanges[index].end - step;
                     }
                     if (isLast) {
                       setDisableEnd(false);
                     } else {
                       setDisableStart(false);
                     }
-                    localColorRanges[index][isLast ? 'end' : 'start'] = roundValue(value);
+                    localColorRanges[index][isLast ? 'end' : 'start'] = roundValue(newValue);
                     setColorRanges([...localColorRanges]);
                   }}
                   data-test-subj={`${dataTestPrefix}_dynamicColoring_editValue_${index}`}
@@ -284,18 +283,18 @@ export function ColorRanges(props: ColorRangesProps) {
                     }
                   )}
                   onClick={() => {
-                    let value;
+                    let newValue;
                     if (rangeType !== 'percent') {
-                      value = roundValue(dataBounds[isLast ? 'max' : 'min']);
+                      newValue = roundValue(dataBounds[isLast ? 'max' : 'min']);
                     } else {
-                      value = isLast ? 100 : 0;
+                      newValue = isLast ? 100 : 0;
                     }
                     if (isLast) {
                       setDisableEnd(true);
                     } else {
                       setDisableStart(true);
                     }
-                    localColorRanges[index][isLast ? 'end' : 'start'] = value;
+                    localColorRanges[index][isLast ? 'end' : 'start'] = newValue;
                     setColorRanges([...localColorRanges]);
                   }}
                   data-test-subj={`${dataTestPrefix}_dynamicColoring_removeColorRange_${index}`}

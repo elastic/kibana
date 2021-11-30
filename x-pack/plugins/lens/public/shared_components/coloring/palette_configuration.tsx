@@ -7,12 +7,11 @@
 
 import React from 'react';
 import type { PaletteOutput, PaletteRegistry } from 'src/plugins/charts/public';
-import { NewCustomizablePalette } from '../color_palette/palette_configuration'
+import { NewCustomizablePalette } from '../color_palette/palette_configuration';
 
 import './palette_configuration.scss';
 
 import type { CustomPaletteParams } from '../../../common';
-
 
 /**
  * Some name conventions here:
