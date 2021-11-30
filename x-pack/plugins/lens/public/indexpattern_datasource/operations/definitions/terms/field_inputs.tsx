@@ -167,7 +167,7 @@ export function FieldInputs({
                       data-test-subj={`indexPattern-terms-dragToReorder-${index}`}
                     />
                   </EuiFlexItem>
-                  <EuiFlexItem grow={true}>
+                  <EuiFlexItem grow={true} style={{ minWidth: 0 }}>
                     <FieldSelect
                       fieldIsInvalid={false}
                       currentIndexPattern={indexPattern}
