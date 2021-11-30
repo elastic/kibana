@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import type { TypeOf } from '@kbn/config-schema';
 
 export const GetPolicyResponseSchema = {
   query: schema.object({
@@ -18,4 +19,22 @@ export const GetAgentPolicySummaryRequestSchema = {
     package_name: schema.string(),
     policy_id: schema.nullable(schema.string()),
   }),
+};
+
+const ListWithKuerySchema = schema.object({
+  page: schema.maybe(schema.number({ defaultValue: 1 })),
+  perPage: schema.maybe(schema.number({ defaultValue: 20 })),
+  sortField: schema.maybe(schema.string()),
+  sortOrder: schema.maybe(schema.oneOf([schema.literal('desc'), schema.literal('asc')])),
+  showUpgradeable: schema.maybe(schema.boolean()),
+  kuery: schema.maybe(
+    schema.oneOf([
+      schema.string(),
+      schema.any(), // KueryNode
+    ])
+  ),
+});
+
+export const GetEndpointPackagePolicyRequestSchema = {
+  query: ListWithKuerySchema,
 };
