@@ -17,10 +17,7 @@ import {
   UseMessagesStorage,
 } from '../../common/containers/local_storage/use_messages_storage';
 import { Overview } from './index';
-import {
-  initialUserPrivilegesState,
-  useUserPrivileges,
-} from '../../common/components/user_privileges';
+import { useUserPrivileges } from '../../common/components/user_privileges';
 import { useSourcererDataView } from '../../common/containers/sourcerer';
 import { useFetchIndex } from '../../common/containers/source';
 import { useIsThreatIntelModuleEnabled } from '../containers/overview_cti_links/use_is_threat_intel_module_enabled';
@@ -33,6 +30,7 @@ import { useCtiDashboardLinks } from '../containers/overview_cti_links';
 import { EndpointPrivileges } from '../../common/components/user_privileges/endpoint/use_endpoint_privileges';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { useHostsRiskScore } from '../containers/overview_risky_host_links/use_hosts_risk_score';
+import { initialUserPrivilegesState } from '../../common/components/user_privileges/user_privileges_context';
 
 jest.mock('../../common/lib/kibana');
 jest.mock('../../common/containers/source');
