@@ -11,6 +11,7 @@
     "sourceRoot": "../../../../packages/kbn-ui-shared-deps-src/src",
     "types": [
       "node",
+      "resize-observer-polyfill"
     ]
   },
   "include": [
