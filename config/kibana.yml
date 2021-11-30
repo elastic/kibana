@@ -99,7 +99,7 @@
 
 # Logs queries sent to Elasticsearch.
 #logging.loggers:
-#  - name: elasticsearch.queries
+#  - name: elasticsearch.query
 #    level: debug
 
 # Logs http responses.
