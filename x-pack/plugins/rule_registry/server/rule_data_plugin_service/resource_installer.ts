@@ -315,7 +315,7 @@ export class ResourceInstaller {
               // @ts-expect-error
               rollover_alias: primaryNamespacedAlias,
             },
-            'index.mapping.total_fields.limit': 1100,
+            'index.mapping.total_fields.limit': 1200,
           },
           mappings: {
             dynamic: false,
