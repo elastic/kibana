@@ -105,7 +105,16 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
 
     async enterSearchTerm(query: string) {
       const input = await this.clearSearchTerm();
-      await input.type([query, browser.keys.RETURN]);
+      await input.type(query);
+
+      // wait for input value to echo the input before submitting
+      // this ensures the React state has caught up with the events
+      await retry.try(async () => {
+        const value = await input.getAttribute('value');
+        expect(value).to.eql(query);
+      });
+
+      await input.type(browser.keys.RETURN);
       await this.waitForLoading();
     },
 
