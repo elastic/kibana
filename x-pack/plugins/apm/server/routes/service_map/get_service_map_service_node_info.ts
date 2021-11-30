@@ -16,12 +16,13 @@ import {
   TRANSACTION_TYPE,
 } from '../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../common/processor_event';
+import { NodeStats } from '../../../common/service_map';
 import {
   TRANSACTION_PAGE_LOAD,
   TRANSACTION_REQUEST,
 } from '../../../common/transaction_types';
 import { environmentQuery } from '../../../common/utils/environment_query';
-import { Coordinate } from '../../../typings/timeseries';
+import { calculateThroughputWithRange } from '../../lib/helpers/calculate_throughput';
 import { getBucketSizeForAggregatedTransactions } from '../../lib/helpers/get_bucket_size_for_aggregated_transactions';
 import { Setup } from '../../lib/helpers/setup_request';
 import {
@@ -55,6 +56,7 @@ interface TaskParameters {
   start: number;
   end: number;
   intervalString: string;
+  bucketSize: number;
   numBuckets: number;
 }
 
@@ -65,7 +67,7 @@ export function getServiceMapServiceNodeInfo({
   searchAggregatedTransactions,
   start,
   end,
-}: Options) {
+}: Options): Promise<NodeStats> {
   return withApmSpan('get_service_map_node_stats', async () => {
     const filter: ESFilter[] = [
       { term: { [SERVICE_NAME]: serviceName } },
@@ -75,12 +77,13 @@ export function getServiceMapServiceNodeInfo({
 
     const minutes = Math.abs((end - start) / (1000 * 60));
     const numBuckets = 20;
-    const { intervalString } = getBucketSizeForAggregatedTransactions({
-      start,
-      end,
-      searchAggregatedTransactions,
-      numBuckets,
-    });
+    const { intervalString, bucketSize } =
+      getBucketSizeForAggregatedTransactions({
+        start,
+        end,
+        searchAggregatedTransactions,
+        numBuckets,
+      });
     const taskParams = {
       environment,
       filter,
@@ -91,10 +94,11 @@ export function getServiceMapServiceNodeInfo({
       start,
       end,
       intervalString,
+      bucketSize,
       numBuckets,
     };
 
-    const [errorStats, transactionStats, cpuStats, memoryStats] =
+    const [errorRate, transactionStats, cpuUsage, memoryUsage] =
       await Promise.all([
         getErrorStats(taskParams),
         getTransactionStats(taskParams),
@@ -102,10 +106,10 @@ export function getServiceMapServiceNodeInfo({
         getMemoryStats(taskParams),
       ]);
     return {
-      ...errorStats,
+      errorRate,
       transactionStats,
-      ...cpuStats,
-      ...memoryStats,
+      cpuUsage,
+      memoryUsage,
     };
   });
 }
@@ -118,9 +122,9 @@ async function getErrorStats({
   start,
   end,
   numBuckets,
-}: TaskParameters) {
+}: TaskParameters): Promise<NodeStats['errorRate']> {
   return withApmSpan('get_error_rate_for_service_map_node', async () => {
-    const { average, timeseries: errorRateTimeseries } = await getErrorRate({
+    const { average, timeseries } = await getErrorRate({
       environment,
       setup,
       serviceName,
@@ -130,7 +134,7 @@ async function getErrorStats({
       kuery: '',
       numBuckets,
     });
-    return { avgErrorRate: average, errorRateTimeseries };
+    return { value: average, timeseries };
   });
 }
 
@@ -142,11 +146,7 @@ async function getTransactionStats({
   start,
   end,
   intervalString,
-}: TaskParameters): Promise<{
-  avgTransactionDuration: number | null;
-  avgRequestsPerMinute: number | null;
-  latencyTimeseries?: Coordinate[];
-}> {
+}: TaskParameters): Promise<NodeStats['transactionStats']> {
   const { apmEventClient } = setup;
 
   const field = getTransactionDurationFieldForTransactions(
@@ -202,23 +202,36 @@ async function getTransactionStats({
   const totalRequests = response.hits.total.value;
 
   return {
-    avgTransactionDuration: response.aggregations?.duration.value ?? null,
-    avgRequestsPerMinute: totalRequests > 0 ? totalRequests / minutes : null,
-    latencyTimeseries: response.aggregations?.timeseries.buckets.map(
-      (bucket) => {
+    latency: {
+      value: response.aggregations?.duration.value ?? null,
+      timeseries: response.aggregations?.timeseries.buckets.map((bucket) => ({
+        x: bucket.key,
+        y: bucket.latency.value,
+      })),
+    },
+    throughput: {
+      value: totalRequests > 0 ? totalRequests / minutes : null,
+      timeseries: response.aggregations?.timeseries.buckets.map((bucket) => {
         return {
           x: bucket.key,
-          y: bucket.latency.value,
+          y: calculateThroughputWithRange({
+            start,
+            end,
+            value: bucket.doc_count ?? 0,
+          }),
         };
-      }
-    ),
+      }),
+    },
   };
 }
 
 async function getCpuStats({
   setup,
   filter,
-}: TaskParameters): Promise<{ avgCpuUsage: number | null }> {
+  intervalString,
+  start,
+  end,
+}: TaskParameters): Promise<NodeStats['cpuUsage']> {
   const { apmEventClient } = setup;
 
   const response = await apmEventClient.search(
@@ -237,22 +250,44 @@ async function getCpuStats({
             ],
           },
         },
-        aggs: { avgCpuUsage: { avg: { field: METRIC_SYSTEM_CPU_PERCENT } } },
+        aggs: {
+          avgCpuUsage: { avg: { field: METRIC_SYSTEM_CPU_PERCENT } },
+          timeseries: {
+            date_histogram: {
+              field: '@timestamp',
+              fixed_interval: intervalString,
+              min_doc_count: 0,
+              extended_bounds: { min: start, max: end },
+            },
+            aggs: {
+              cpuAvg: { avg: { field: METRIC_SYSTEM_CPU_PERCENT } },
+            },
+          },
+        },
       },
     }
   );
 
-  return { avgCpuUsage: response.aggregations?.avgCpuUsage.value ?? null };
+  return {
+    value: response.aggregations?.avgCpuUsage.value ?? null,
+    timeseries: response.aggregations?.timeseries.buckets.map((bucket) => ({
+      x: bucket.key,
+      y: bucket.cpuAvg.value,
+    })),
+  };
 }
 
 function getMemoryStats({
   setup,
   filter,
-}: TaskParameters): Promise<{ avgMemoryUsage: number | null }> {
+  intervalString,
+  start,
+  end,
+}: TaskParameters) {
   return withApmSpan('get_memory_stats_for_service_map_node', async () => {
     const { apmEventClient } = setup;
 
-    const getAvgMemoryUsage = async ({
+    const getMemoryUsage = async ({
       additionalFilters,
       script,
     }: {
@@ -260,7 +295,7 @@ function getMemoryStats({
       script:
         | typeof percentCgroupMemoryUsedScript
         | typeof percentSystemMemoryUsedScript;
-    }) => {
+    }): Promise<NodeStats['memoryUsage']> => {
       const response = await apmEventClient.search(
         'get_avg_memory_for_service_map_node',
         {
@@ -276,22 +311,39 @@ function getMemoryStats({
             },
             aggs: {
               avgMemoryUsage: { avg: { script } },
+              timeseries: {
+                date_histogram: {
+                  field: '@timestamp',
+                  fixed_interval: intervalString,
+                  min_doc_count: 0,
+                  extended_bounds: { min: start, max: end },
+                },
+                aggs: {
+                  memoryAvg: { avg: { script } },
+                },
+              },
             },
           },
         }
       );
-      return response.aggregations?.avgMemoryUsage.value ?? null;
+      return {
+        value: response.aggregations?.avgMemoryUsage.value ?? null,
+        timeseries: response.aggregations?.timeseries.buckets.map((bucket) => ({
+          x: bucket.key,
+          y: bucket.memoryAvg.value,
+        })),
+      };
     };
 
-    let avgMemoryUsage = await getAvgMemoryUsage({
+    let memoryUsage = await getMemoryUsage({
       additionalFilters: [
         { exists: { field: METRIC_CGROUP_MEMORY_USAGE_BYTES } },
       ],
       script: percentCgroupMemoryUsedScript,
     });
 
-    if (!avgMemoryUsage) {
-      avgMemoryUsage = await getAvgMemoryUsage({
+    if (!memoryUsage) {
+      memoryUsage = await getMemoryUsage({
         additionalFilters: [
           { exists: { field: METRIC_SYSTEM_FREE_MEMORY } },
           { exists: { field: METRIC_SYSTEM_TOTAL_MEMORY } },
@@ -300,6 +352,6 @@ function getMemoryStats({
       });
     }
 
-    return { avgMemoryUsage };
+    return memoryUsage;
   });
 }

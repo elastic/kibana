@@ -60,15 +60,28 @@ export interface Connection {
 }
 
 export interface NodeStats {
-  avgMemoryUsage?: number | null;
-  avgCpuUsage?: number | null;
-  transactionStats: {
-    avgTransactionDuration: number | null;
-    avgRequestsPerMinute: number | null;
-    latencyTimeseries: Coordinate[];
+  transactionStats?: {
+    latency?: {
+      value: number | null;
+      timeseries?: Coordinate[];
+    };
+    throughput?: {
+      value: number | null;
+      timeseries?: Coordinate[];
+    };
   };
-  avgErrorRate: number | null;
-  errorRateTimeseries: Coordinate[];
+  errorRate?: {
+    value: number | null;
+    timeseries?: Coordinate[];
+  };
+  cpuUsage?: {
+    value?: number | null;
+    timeseries?: Coordinate[];
+  };
+  memoryUsage?: {
+    value?: number | null;
+    timeseries?: Coordinate[];
+  };
 }
 
 export const invalidLicenseMessage = i18n.translate(
