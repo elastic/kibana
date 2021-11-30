@@ -9,7 +9,7 @@ import path from 'path';
 
 import type { TypeOf } from '@kbn/config-schema';
 import mime from 'mime-types';
-import type { ResponseHeaders } from 'src/core/server';
+import type { ResponseHeaders, KnownHeaders } from 'src/core/server';
 
 import type {
   GetInfoResponse,
@@ -163,7 +163,7 @@ export const getFileHandler: FleetRequestHandler<TypeOf<typeof GetFileRequestSch
         });
       } else {
         const registryResponse = await getFile(pkgName, pkgVersion, filePath);
-        const headersToProxy = ['content-type', 'cache-control'] as const;
+        const headersToProxy: KnownHeaders[] = ['content-type', 'cache-control'];
         const proxiedHeaders = headersToProxy.reduce((headers, knownHeader) => {
           const value = registryResponse.headers.get(knownHeader);
           if (value !== null) {

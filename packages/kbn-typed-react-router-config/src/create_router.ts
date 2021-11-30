@@ -23,9 +23,7 @@ function toReactRouterPath(path: string) {
   return path.replace(/(?:{([^\/]+)})/g, ':$1');
 }
 
-export function createRouter<TRoutes extends Route[]>(routes: TRoutes): Router<TRoutes>;
-
-export function createRouter(routes: Route[]) {
+export function createRouter<TRoute extends Route>(routes: TRoute[]): Router<TRoute[]> {
   const routesByReactRouterConfig = new Map<ReactRouterConfig, Route>();
   const reactRouterConfigsByRoute = new Map<Route, ReactRouterConfig>();
 
@@ -205,6 +203,5 @@ export function createRouter(routes: Route[]) {
     },
   };
 
-  // prevent "Type instantation is excessively deep"
-  return router as any;
+  return router;
 }
