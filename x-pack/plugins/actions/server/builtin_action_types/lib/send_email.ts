@@ -104,20 +104,26 @@ async function sendEmailWithExchange(
     );
     accessToken = `${tokenResult.tokenType} ${tokenResult.accessToken}`;
 
-    if (connectorToken === null) {
-      await connectorTokenClient.create({
-        connectorId,
-        token: accessToken,
-        expiresAt: new Date(Date.now() + tokenResult.expiresIn).toISOString(),
-        tokenType: 'access_token',
-      });
-    } else {
-      await connectorTokenClient.update({
-        id: connectorToken.id!.toString(),
-        token: accessToken,
-        expiresAt: new Date(Date.now() + tokenResult.expiresIn).toISOString(),
-        tokenType: 'access_token',
-      });
+    // try to update connector_token SO
+    try {
+      if (connectorToken === null) {
+        await connectorTokenClient.create({
+          connectorId,
+          token: accessToken,
+          expiresAt: new Date(Date.now() + tokenResult.expiresIn).toISOString(),
+          tokenType: 'access_token',
+        });
+      } else {
+
+        await connectorTokenClient.update({
+          id: connectorToken.id!.toString(),
+          token: accessToken,
+          expiresAt: new Date(Date.now() + tokenResult.expiresIn).toISOString(),
+          tokenType: 'access_token',
+        });
+      }
+    } catch (err) {
+      logger.warn(`Not able to update connector token for connectorId: ${connectorId} due to error: ${err.message}`);
     }
   } else {
     // use existing valid token

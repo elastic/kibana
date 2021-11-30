@@ -70,7 +70,7 @@ export class ConnectorTokenClient {
           connectorId,
           token,
           expiresAt,
-          tokenType,
+          tokenType: tokenType ?? 'access_token',
           createdAt: new Date(createTime).toISOString(),
         },
         { id }
@@ -78,7 +78,7 @@ export class ConnectorTokenClient {
 
       return result.attributes as ConnectorToken;
     } catch (err) {
-      this.logger.error(
+      this.logger.warn(
         `Failed to create connector_token for connectorId "${connectorId}" and tokenType: "${
           tokenType ?? 'access_token'
         }". Error: ${err.message}`
@@ -120,7 +120,7 @@ export class ConnectorTokenClient {
       );
       return result.attributes as ConnectorToken;
     } catch (err) {
-      this.logger.error(
+      this.logger.warn(
         `Failed to update connector_token for id "${id}" and tokenType: "${
           tokenType ?? 'access_token'
         }". Error: ${err.message}`
@@ -157,7 +157,7 @@ export class ConnectorTokenClient {
         ).saved_objects
       );
     } catch (err) {
-      this.logger.error(
+      this.logger.warn(
         `Failed to fetch connector_token for connectorId "${connectorId}" and tokenType: "${
           tokenType ?? 'access_token'
         }". Error: ${err.message}`
@@ -183,7 +183,7 @@ export class ConnectorTokenClient {
         token,
       };
     } catch (err) {
-      this.logger.error(
+      this.logger.warn(
         `Failed to decrypt connector_token for connectorId "${connectorId}" and tokenType: "${
           tokenType ?? 'access_token'
         }". Error: ${err.message}`
