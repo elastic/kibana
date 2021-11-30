@@ -10,9 +10,10 @@ import type {
   SavedObjectsBulkCreateObject,
   SavedObjectsClientContract,
 } from 'src/core/server';
-import type { SavedObjectsImportSuccess } from 'src/core/server/types';
+import type { SavedObjectsImportSuccess, SavedObjectsImportFailure } from 'src/core/server/types';
 
 import { createListStream } from '@kbn/utils';
+import { partition } from 'lodash';
 
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../../../common';
 import { getAsset, getPathParts } from '../../archive';
@@ -22,6 +23,10 @@ import { savedObjectTypes } from '../../packages';
 import { indexPatternTypes, getIndexPatternSavedObjects } from '../index_pattern/install';
 import { appContextService } from '../../../../services';
 
+const formatImportErrorsForLog = (errors: SavedObjectsImportFailure[]) =>
+  JSON.stringify(
+    errors.map(({ type, id, error }) => ({ type, id, error })) // discard other fields
+  );
 const validKibanaAssetTypes = new Set(Object.values(KibanaAssetType));
 type SavedObjectToBe = Required<Pick<SavedObjectsBulkCreateObject, keyof ArchiveAsset>> & {
   type: KibanaSavedObjectType;
@@ -168,6 +173,8 @@ async function installKibanaSavedObjects({
     kibanaAssets.map((asset) => createSavedObjectKibanaAsset(asset))
   );
 
+  let allSuccessResults = [];
+
   if (toBeSavedObjects.length === 0) {
     return [];
   } else {
@@ -175,21 +182,66 @@ async function installKibanaSavedObjects({
       .getSavedObjects()
       .createImporter(savedObjectsClient);
 
-    const { successResults, errors } = await savedObjectsImporter.import({
-      overwrite: true,
-      readStream: createListStream(toBeSavedObjects),
-      createNewCopies: false,
-    });
+    const { successResults: importSuccessResults = [], errors: importErrors = [] } =
+      await savedObjectsImporter.import({
+        overwrite: true,
+        readStream: createListStream(toBeSavedObjects),
+        createNewCopies: false,
+      });
 
-    if (errors?.length) {
+    allSuccessResults = importSuccessResults;
+    const [referenceErrors, otherErrors] = partition(
+      importErrors,
+      (e) => e?.error?.type === 'missing_references'
+    );
+
+    if (otherErrors?.length) {
       throw new Error(
-        `Encountered ${errors.length} errors creating saved objects: ${JSON.stringify(
-          errors.map(({ type, id, error }) => ({ type, id, error })) // discard other fields
-        )}`
+        `Encountered ${
+          otherErrors.length
+        } errors creating saved objects: ${formatImportErrorsForLog(otherErrors)}`
       );
     }
 
-    return successResults || [];
+    if (referenceErrors.length) {
+      const logger = appContextService.getLogger();
+
+      logger.debug(
+        `Resolving ${
+          referenceErrors.length
+        } reference errors creating saved objects: ${formatImportErrorsForLog(referenceErrors)}`
+      );
+
+      const idsToResolve = new Set(referenceErrors.map(({ id }) => id));
+
+      const resolveSavedObjects = toBeSavedObjects.filter(({ id }) => idsToResolve.has(id));
+      const retries = referenceErrors.map(({ id, type }) => ({
+        id,
+        type,
+        ignoreMissingReferences: true,
+        replaceReferences: [],
+        overwrite: true,
+      }));
+
+      const { successResults: resolveSuccessResults = [], errors: resolveErrors = [] } =
+        await savedObjectsImporter.resolveImportErrors({
+          readStream: createListStream(resolveSavedObjects),
+          createNewCopies: false,
+          retries,
+        });
+
+      if (resolveErrors?.length) {
+        throw new Error(
+          `Encountered ${
+            resolveErrors.length
+          } errors resolving reference errors: ${formatImportErrorsForLog(resolveErrors)}`
+        );
+      }
+
+      allSuccessResults = [...allSuccessResults, ...resolveSuccessResults];
+    }
+
+    return allSuccessResults;
   }
 }
 
