@@ -78,6 +78,7 @@ export function getDropProps(props: GetDropProps) {
   ) {
     const sourceColumn = state.layers[dragging.layerId].columns[dragging.columnId];
     const targetColumn = state.layers[layerId].columns[columnId];
+    const layerIndexPattern = state.indexPatterns[state.layers[layerId].indexPatternId];
 
     const isSameGroup = groupId === dragging.groupId;
     if (isSameGroup) {
@@ -85,7 +86,7 @@ export function getDropProps(props: GetDropProps) {
     } else if (hasTheSameField(sourceColumn, targetColumn)) {
       return;
     } else if (filterOperations(sourceColumn)) {
-      return getDropPropsForCompatibleGroup(targetColumn);
+      return getDropPropsForCompatibleGroup(targetColumn, layerIndexPattern);
     } else {
       return getDropPropsFromIncompatibleGroup({ ...props, dragging });
     }
@@ -125,7 +126,7 @@ function getDropPropsForField({
       !hasField(targetColumn)
     ) {
       return hasField(targetColumn) &&
-        hasOperationSupportForMultipleFields(targetColumn.operationType)
+        hasOperationSupportForMultipleFields(targetColumn, dragging.field)
         ? {
             dropTypes: ['field_replace', 'field_combine'],
           }
@@ -142,16 +143,26 @@ function getDropPropsForSameGroup(targetColumn?: GenericIndexPatternColumn): Dro
   return targetColumn ? { dropTypes: ['reorder'] } : { dropTypes: ['duplicate_compatible'] };
 }
 
-function getDropPropsForCompatibleGroup(targetColumn?: GenericIndexPatternColumn): DropProps {
+function getDropPropsForCompatibleGroup(
+  targetColumn?: GenericIndexPatternColumn,
+  indexPattern?: IndexPattern
+): DropProps {
+  if (!targetColumn) {
+    return { dropTypes: ['move_compatible', 'duplicate_compatible'] };
+  }
+  if (!indexPattern || !hasField(targetColumn)) {
+    return { dropTypes: ['replace_compatible', 'replace_duplicate_compatible', 'swap_compatible'] };
+  }
+  const targetField = getField(targetColumn, indexPattern);
   return {
-    dropTypes: targetColumn
-      ? [
-          'replace_compatible',
-          'replace_duplicate_compatible',
-          'swap_compatible',
-          'combine_compatible',
-        ]
-      : ['move_compatible', 'duplicate_compatible'],
+    dropTypes: [
+      'replace_compatible',
+      'replace_duplicate_compatible',
+      'swap_compatible',
+      ...(targetField && hasOperationSupportForMultipleFields(targetColumn, targetField)
+        ? 'combine_compatible'
+        : []),
+    ] as DropType[],
   };
 }
 

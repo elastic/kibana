@@ -142,7 +142,7 @@ function onFieldDrop(props: DropHandlerProps<DraggedField>, shouldAddField?: boo
   if (
     !isDraggedField(droppedItem) ||
     !newOperation ||
-    (shouldAddField && !hasOperationSupportForMultipleFields(targetColumn.operationType))
+    (shouldAddField && !hasOperationSupportForMultipleFields(targetColumn, droppedItem.field))
   ) {
     return false;
   }

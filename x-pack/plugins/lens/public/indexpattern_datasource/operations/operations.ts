@@ -13,6 +13,7 @@ import {
   GenericOperationDefinition,
   OperationType,
   renameOperationsMapping,
+  BaseIndexPatternColumn,
 } from './definitions';
 import { IndexPattern, IndexPatternField } from '../types';
 import { documentField } from '../document_field';
@@ -66,9 +67,14 @@ export function getOperationHelperForMultipleFields(operationType: string) {
   return op?.getParamsForMultipleFields;
 }
 
-export function hasOperationSupportForMultipleFields(operationType: string) {
+export function hasOperationSupportForMultipleFields(
+  column: BaseIndexPatternColumn,
+  field: IndexPatternField
+) {
   return Boolean(
-    operationDefinitions.find(({ type }) => operationType === type)?.getParamsForMultipleFields
+    operationDefinitions
+      .find(({ type }) => column.operationType === type)
+      ?.canAddNewField?.(column, field)
   );
 }
 
