@@ -23,7 +23,7 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
       const datePickerInput = await find.byCssSelector(
         `${testSubjSelector('waffleDatePicker')} .euiDatePicker.euiFieldText`
       );
-      await datePickerInput.clearValueWithKeyboard({ charByChar: true });
+      await datePickerInput.clearValueWithKeyboard();
       await datePickerInput.type([time, browser.keys.RETURN]);
       await this.waitForLoading();
     },
@@ -111,7 +111,7 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
 
     async clearSearchTerm() {
       const input = await testSubjects.find('infraSearchField');
-      await input.clearValueWithKeyboard({ charByChar: true });
+      await input.clearValueWithKeyboard();
       return input;
     },
 
