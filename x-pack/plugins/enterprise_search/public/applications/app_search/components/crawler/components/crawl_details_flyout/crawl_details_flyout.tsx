@@ -70,7 +70,7 @@ export const CrawlDetailsFlyout: React.FC = () => {
           <>
             {selectedTab === 'preview' && <CrawlDetailsPreview />}
             {selectedTab === 'json' && (
-              <EuiCodeBlock language="json">
+              <EuiCodeBlock language="json" isCopyable>
                 {JSON.stringify(crawlRequestFromServer, null, 2)}
               </EuiCodeBlock>
             )}
