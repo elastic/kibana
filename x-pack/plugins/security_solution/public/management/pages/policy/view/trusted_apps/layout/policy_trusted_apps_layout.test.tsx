@@ -95,9 +95,6 @@ describe('Policy trusted apps layout', () => {
     await waitForAction('policyArtifactsHasTrustedApps', {
       validate: (action) => isLoadedResourceState(action.payload),
     });
-    await waitForAction('assignedTrustedAppsListStateChanged', {
-      validate: (action) => isLoadedResourceState(action.payload),
-    });
 
     expect(component.getByTestId('policy-trusted-apps-empty-unexisting')).not.toBeNull();
   });
@@ -115,7 +112,6 @@ describe('Policy trusted apps layout', () => {
     await waitForAction('policyArtifactsHasTrustedApps', {
       validate: (action) => isLoadedResourceState(action.payload),
     });
-    await waitForAction('assignedTrustedAppsListStateChanged');
 
     mockedContext.store.dispatch({
       type: 'policyArtifactsDeosAnyTrustedAppExists',
@@ -132,7 +128,6 @@ describe('Policy trusted apps layout', () => {
     await waitForAction('policyArtifactsHasTrustedApps', {
       validate: (action) => isLoadedResourceState(action.payload),
     });
-    await waitForAction('assignedTrustedAppsListStateChanged');
 
     expect(component.getAllByTestId('policyTrustedAppsGrid-card')).toHaveLength(10);
   });
@@ -143,10 +138,9 @@ describe('Policy trusted apps layout', () => {
         const hasAnyQuery =
           'exception-list-agnostic.attributes.tags:"policy:1234" OR exception-list-agnostic.attributes.tags:"policy:all"';
         if (options.query?.filter === hasAnyQuery) {
+          const exceptionsGenerator = new ExceptionsListItemGenerator('seed');
           return {
-            data: Array.from({ length: 10 }, () =>
-              new ExceptionsListItemGenerator('seed').generate()
-            ),
+            data: Array.from({ length: 10 }, () => exceptionsGenerator.generate()),
             total: 10,
             page: 0,
             per_page: 10,
@@ -163,8 +157,6 @@ describe('Policy trusted apps layout', () => {
     await waitForAction('policyArtifactsHasTrustedApps', {
       validate: (action) => isLoadedResourceState(action.payload),
     });
-
-    await waitForAction('assignedTrustedAppsListStateChanged');
 
     expect(component.queryAllByTestId('policyTrustedAppsGrid-card')).toHaveLength(0);
     expect(component.queryByTestId('policy-trusted-apps-empty-unassigned')).toBeNull();

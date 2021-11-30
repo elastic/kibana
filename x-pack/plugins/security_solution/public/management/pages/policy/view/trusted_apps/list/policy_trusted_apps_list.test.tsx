@@ -121,18 +121,6 @@ describe('when rendering the PolicyTrustedAppsList', () => {
     };
   });
 
-  it('should show loading spinner if checking to see if trusted apps exist', async () => {
-    await render();
-    act(() => {
-      appTestContext.store.dispatch({
-        type: 'policyArtifactsDeosAnyTrustedAppExists',
-        payload: createLoadingResourceState(),
-      });
-    });
-
-    expect(renderResult.getByTestId('policyTrustedAppsGrid-loading')).not.toBeNull();
-  });
-
   it('should show total number of of items being displayed', async () => {
     await render();
 

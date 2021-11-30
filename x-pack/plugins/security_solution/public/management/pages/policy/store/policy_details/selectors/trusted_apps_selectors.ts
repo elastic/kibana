@@ -191,13 +191,7 @@ export const getPolicyTrustedAppsListPagination: PolicyDetailsSelector<Paginatio
 export const getTotalPolicyTrustedAppsListPagination = (
   state: Immutable<PolicyDetailsState>
 ): number => {
-  return isLoadedResourceState(state.artifacts.hasTrustedApps)
-    ? state.artifacts.hasTrustedApps.data.total
-    : isLoadingResourceState(state.artifacts.hasTrustedApps) &&
-      state.artifacts.hasTrustedApps.previousState &&
-      isLoadedResourceState(state.artifacts.hasTrustedApps.previousState)
-    ? state.artifacts.hasTrustedApps.previousState.data.total
-    : 0;
+  return getLastLoadedResourceState(state.artifacts.hasTrustedApps)?.data.total || 0;
 };
 
 export const getTrustedAppsPolicyListState: PolicyDetailsSelector<
@@ -221,21 +215,11 @@ export const getTrustedAppsAllPoliciesById: PolicyDetailsSelector<
 });
 
 export const getHasTrustedApps: PolicyDetailsSelector<boolean> = (state) => {
-  return (
-    (isLoadedResourceState(state.artifacts.hasTrustedApps) &&
-      !!state.artifacts.hasTrustedApps.data.total) ||
-    (isLoadingResourceState(state.artifacts.hasTrustedApps) &&
-      !!state.artifacts.hasTrustedApps.previousState &&
-      isLoadedResourceState(state.artifacts.hasTrustedApps.previousState) &&
-      !!state.artifacts.hasTrustedApps.previousState.data.total)
-  );
+  return !!getLastLoadedResourceState(state.artifacts.hasTrustedApps)?.data.total;
 };
 
 export const getIsLoadedHasTrustedApps: PolicyDetailsSelector<boolean> = (state) =>
-  isLoadedResourceState(state.artifacts.hasTrustedApps) ||
-  (isLoadingResourceState(state.artifacts.hasTrustedApps) &&
-    !!state.artifacts.hasTrustedApps.previousState &&
-    isLoadedResourceState(state.artifacts.hasTrustedApps.previousState));
+  !!getLastLoadedResourceState(state.artifacts.hasTrustedApps);
 
 export const getHasTrustedAppsIsLoading: PolicyDetailsSelector<boolean> = (state) =>
   isLoadingResourceState(state.artifacts.hasTrustedApps);

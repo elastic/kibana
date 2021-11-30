@@ -233,21 +233,6 @@ export const PolicyTrustedAppsList = memo<PolicyTrustedAppsListProps>(
       }
     }, [toasts, trustedAppsApiError]);
 
-    const displayLoader = useMemo(
-      () => hasTrustedAppsAssignedList.loading || isTrustedAppExistsCheckLoading,
-      [hasTrustedAppsAssignedList.loading, isTrustedAppExistsCheckLoading]
-    );
-
-    const loader = (
-      <EuiPageTemplate template="centeredContent">
-        <EuiLoadingSpinner
-          className="essentialAnimation"
-          size="xl"
-          data-test-subj={getTestId('loading')}
-        />
-      </EuiPageTemplate>
-    );
-
     return (
       <>
         <SearchExceptions
@@ -264,36 +249,30 @@ export const PolicyTrustedAppsList = memo<PolicyTrustedAppsListProps>(
           }}
         />
         <EuiSpacer size="s" />
-        {displayLoader ? (
-          loader
-        ) : (
-          <>
-            {!hideTotalShowingLabel && (
-              <EuiText color="subdued" size="xs" data-test-subj="policyDetailsTrustedAppsCount">
-                {totalItemsCountLabel}
-              </EuiText>
-            )}
+        {!hideTotalShowingLabel && (
+          <EuiText color="subdued" size="xs" data-test-subj="policyDetailsTrustedAppsCount">
+            {totalItemsCountLabel}
+          </EuiText>
+        )}
 
-            <EuiSpacer size="m" />
+        <EuiSpacer size="m" />
 
-            <ArtifactCardGrid
-              items={trustedAppItems}
-              onPageChange={handlePageChange}
-              onExpandCollapse={handleExpandCollapse}
-              cardComponentProps={provideCardProps}
-              loading={isLoading}
-              error={trustedAppsApiError?.message}
-              pagination={pagination as Pagination}
-              data-test-subj={DATA_TEST_SUBJ}
-            />
+        <ArtifactCardGrid
+          items={trustedAppItems}
+          onPageChange={handlePageChange}
+          onExpandCollapse={handleExpandCollapse}
+          cardComponentProps={provideCardProps}
+          loading={isLoading}
+          error={trustedAppsApiError?.message}
+          pagination={pagination as Pagination}
+          data-test-subj={DATA_TEST_SUBJ}
+        />
 
-            {showRemovalModal && (
-              <RemoveTrustedAppFromPolicyModal
-                trustedApps={trustedAppsForRemoval}
-                onClose={handleRemoveModalClose}
-              />
-            )}
-          </>
+        {showRemovalModal && (
+          <RemoveTrustedAppFromPolicyModal
+            trustedApps={trustedAppsForRemoval}
+            onClose={handleRemoveModalClose}
+          />
         )}
       </>
     );
