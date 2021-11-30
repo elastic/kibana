@@ -8,7 +8,7 @@ All integrations are available in a single view, and
 [role="screenshot"]
 image::images/add-integration.png[Integrations page from which you can choose integrations to start collecting and analyzing data]
 
-NOTE: If an integration is available for both
+NOTE: When an integration is available for
 https://www.elastic.co/guide/en/fleet/master/beats-agent-comparison.html[Elastic Agent and Beats], the *Integrations* view defaults to the
 Elastic Agent integration..
 To switch to a
