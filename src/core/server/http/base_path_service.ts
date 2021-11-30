@@ -7,8 +7,8 @@
  */
 
 import { modifyUrl } from '@kbn/std';
-
-import { ensureRawRequest, KibanaRequest, LegacyRequest } from './router';
+import { Request } from '@hapi/hapi';
+import { ensureRawRequest, KibanaRequest } from './router';
 
 /**
  * Access or manipulate the Kibana base path
@@ -16,7 +16,7 @@ import { ensureRawRequest, KibanaRequest, LegacyRequest } from './router';
  * @public
  */
 export class BasePath {
-  private readonly basePathCache = new WeakMap<LegacyRequest, string>();
+  private readonly basePathCache = new WeakMap<Request, string>();
 
   /**
    * returns the server's basePath
