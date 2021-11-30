@@ -145,7 +145,7 @@ export function DiscoverHistogram({
   if (fetchStatus === FetchStatus.ERROR && error) {
     return (
       <div className="dscHistogram__errorChartContainer">
-        <EuiFlexGroup>
+        <EuiFlexGroup gutterSize="s">
           <EuiFlexItem grow={false} className="dscHistogram__errorChart__icon">
             <EuiIcon type="visBarVertical" color="danger" size="m" />
           </EuiFlexItem>
