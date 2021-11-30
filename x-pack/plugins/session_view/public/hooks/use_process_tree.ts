@@ -64,7 +64,7 @@ export const useProcessTree = ({
   const buildProcessTree = (events: ProcessEvent[], backwardDirection: boolean = false) => {
     events.forEach((event) => {
       const process = processMap[event.process.entity_id];
-      const parentProcess = processMap[event.process.parent.entity_id];
+      const parentProcess = processMap[event.process.parent?.entity_id];
 
       if (parentProcess) {
         process.parent = parentProcess; // handy for recursive operations (like auto expand)
