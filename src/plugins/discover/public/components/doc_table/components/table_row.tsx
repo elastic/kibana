@@ -49,6 +49,7 @@ export const TableRow = ({
   onAddColumn,
   onRemoveColumn,
   filterManager,
+  addBasePath,
 }: TableRowProps) => {
   const [open, setOpen] = useState(false);
   const docTableRowClassName = classNames('kbnDocTable__row', {
@@ -101,6 +102,8 @@ export const TableRow = ({
     indexPatternId: indexPattern.id!,
     rowIndex: row._index,
     rowId: row._id,
+    filterManager,
+    addBasePath,
     columns,
   });
 

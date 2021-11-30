@@ -12,7 +12,6 @@ import { stringify } from 'query-string';
 import rison from 'rison-node';
 import { esFilters, FilterManager } from '../../../data/public';
 import { url } from '../../../kibana_utils/common';
-import { getServices } from '../kibana_services';
 
 export type DiscoverNavigationProps = { onClick: () => void } | { href: string };
 
@@ -41,13 +40,16 @@ export const useBreadcrumbReffs = ({
   rowIndex,
   rowId,
   columns,
+  filterManager,
+  addBasePath,
 }: {
   indexPatternId: string;
   rowIndex: string;
   rowId: string;
   columns: string[];
+  filterManager: FilterManager;
+  addBasePath: (url: string) => string;
 }) => {
-  const { filterManager, addBasePath } = getServices();
   const history = useHistory();
   const prevReferrer = useRef<string | undefined>(history?.location.state?.referrer).current;
   const contextSearchHash = useMemo(

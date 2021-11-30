@@ -105,6 +105,8 @@ export function DiscoverGridFlyout({
     indexPatternId: indexPattern.id!,
     rowIndex: hit._index,
     rowId: hit._id,
+    filterManager: services.filterManager,
+    addBasePath: services.addBasePath,
     columns,
   });
 
