@@ -18,7 +18,7 @@ import type { InternalAuthenticationServiceStart } from '../../authentication';
 import { authenticationServiceMock } from '../../authentication/authentication_service.mock';
 import type { SecurityRequestHandlerContext } from '../../types';
 import { routeDefinitionParamsMock } from '../index.mock';
-import { defineTelemetryOnAuthTypeRoutes } from './authentication_type';
+import { defineRecordUsageCollectionOnAuthTypeRoutes } from './authentication_type';
 
 const FAKE_TIMESTAMP = 1637665318135;
 function getMockContext(
@@ -48,11 +48,11 @@ describe('Telemetry on auth type', () => {
         usageCounter: mockUsageCounter,
       };
       mockRouteDefinitionParams.getAuthenticationService.mockReturnValue(authc);
-      defineTelemetryOnAuthTypeRoutes(mockRouteDefinitionParams);
+      defineRecordUsageCollectionOnAuthTypeRoutes(mockRouteDefinitionParams);
 
       const [, telemetryOnAuthTypeRouteHandler] =
         mockRouteDefinitionParams.router.post.mock.calls.find(
-          ([{ path }]) => path === '/internal/security/telemetry/auth_type'
+          ([{ path }]) => path === '/internal/security/usage_collection/record_auth_type'
         )!;
       routeHandler = telemetryOnAuthTypeRouteHandler;
     });
@@ -140,11 +140,11 @@ describe('Telemetry on auth type', () => {
         usageCounter: mockUsageCounter,
       };
       mockRouteDefinitionParams.getAuthenticationService.mockReturnValue(authc);
-      defineTelemetryOnAuthTypeRoutes(mockRouteDefinitionParams);
+      defineRecordUsageCollectionOnAuthTypeRoutes(mockRouteDefinitionParams);
 
       const [, telemetryOnAuthTypeRouteHandler] =
         mockRouteDefinitionParams.router.post.mock.calls.find(
-          ([{ path }]) => path === '/internal/security/telemetry/auth_type'
+          ([{ path }]) => path === '/internal/security/usage_collection/record_auth_type'
         )!;
       routeHandler = telemetryOnAuthTypeRouteHandler;
     });
@@ -162,11 +162,11 @@ describe('Telemetry on auth type', () => {
         usageCounter: mockUsageCounter,
       };
       mockRouteDefinitionParams.getAuthenticationService.mockReturnValue(authc);
-      defineTelemetryOnAuthTypeRoutes(mockRouteDefinitionParams);
+      defineRecordUsageCollectionOnAuthTypeRoutes(mockRouteDefinitionParams);
 
       const [, telemetryOnAuthTypeRouteHandler] =
         mockRouteDefinitionParams.router.post.mock.calls.find(
-          ([{ path }]) => path === '/internal/security/telemetry/auth_type'
+          ([{ path }]) => path === '/internal/security/usage_collection/record_auth_type'
         )!;
       routeHandler = telemetryOnAuthTypeRouteHandler;
 

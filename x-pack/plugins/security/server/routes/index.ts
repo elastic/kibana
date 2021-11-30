@@ -29,7 +29,7 @@ import { defineIndicesRoutes } from './indices';
 import { defineRoleMappingRoutes } from './role_mapping';
 import { defineSecurityCheckupGetStateRoutes } from './security_checkup';
 import { defineSessionManagementRoutes } from './session_management';
-import { defineTelemetryRoutes } from './telemetry';
+import { defineUsageCollectionRoutes } from './usage_collection';
 import { defineUsersRoutes } from './users';
 import { defineViewRoutes } from './views';
 
@@ -65,5 +65,5 @@ export function defineRoutes(params: RouteDefinitionParams) {
   defineDeprecationsRoutes(params);
   defineAnonymousAccessRoutes(params);
   defineSecurityCheckupGetStateRoutes(params);
-  defineTelemetryRoutes(params);
+  defineUsageCollectionRoutes(params);
 }

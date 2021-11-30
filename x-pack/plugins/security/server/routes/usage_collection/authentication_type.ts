@@ -14,15 +14,16 @@ import { wrapIntoCustomErrorResponse } from '../../errors';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
 
 const COUNTER_TYPE = 'SecurityAuthType';
+const MINIMUM_ELAPSED_TIME_HOURS = 12;
 
-export function defineTelemetryOnAuthTypeRoutes({
+export function defineRecordUsageCollectionOnAuthTypeRoutes({
   getAuthenticationService,
   router,
   usageCounter,
 }: RouteDefinitionParams) {
   router.post(
     {
-      path: '/internal/security/telemetry/auth_type',
+      path: '/internal/security/usage_collection/record_auth_type',
       validate: {
         body: schema.nullable(
           schema.object({
@@ -56,14 +57,12 @@ export function defineTelemetryOnAuthTypeRoutes({
           !authUser?.authentication_type ||
           (authUser?.authentication_type && authUser?.authentication_type === '')
         ) {
-          return response.badRequest({
-            body: { message: `Authentication type can not be empty` },
-          });
+          return response.noContent();
         }
 
         if (
           usageCounter &&
-          (elapsedTimeInHrs >= 12 ||
+          (elapsedTimeInHrs >= MINIMUM_ELAPSED_TIME_HOURS ||
             oldUsernameHash !== usernameHash ||
             oldAuthType !== authUser?.authentication_type)
         ) {

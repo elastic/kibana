@@ -6,8 +6,8 @@
  */
 
 import type { RouteDefinitionParams } from '../';
-import { defineTelemetryOnAuthTypeRoutes } from './authentication_type';
+import { defineRecordUsageCollectionOnAuthTypeRoutes } from './authentication_type';
 
-export function defineTelemetryRoutes(params: RouteDefinitionParams) {
-  defineTelemetryOnAuthTypeRoutes(params);
+export function defineUsageCollectionRoutes(params: RouteDefinitionParams) {
+  defineRecordUsageCollectionOnAuthTypeRoutes(params);
 }

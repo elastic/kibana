@@ -28,9 +28,9 @@ import type { SecurityNavControlServiceStart } from './nav_control';
 import { SecurityNavControlService } from './nav_control';
 import { SecurityCheckupService } from './security_checkup';
 import { SessionExpired, SessionTimeout, UnauthorizedResponseHttpInterceptor } from './session';
-import { SecurityTelemetryService } from './telemetry';
 import type { UiApi } from './ui_api';
 import { getUiApi } from './ui_api';
+import { SecurityUsageCollectionService } from './usage_collection';
 
 export interface PluginSetupDependencies {
   licensing: LicensingPluginSetup;
@@ -64,7 +64,7 @@ export class SecurityPlugin
   private readonly managementService = new ManagementService();
   private readonly securityCheckupService: SecurityCheckupService;
   private readonly anonymousAccessService = new AnonymousAccessService();
-  private readonly securityTelemetryService = new SecurityTelemetryService();
+  private readonly securityUsageCollectionService = new SecurityUsageCollectionService();
   private authc!: AuthenticationServiceSetup;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
@@ -102,6 +102,10 @@ export class SecurityPlugin
       securityLicense: license,
       authc: this.authc,
       logoutUrl,
+    });
+
+    this.securityUsageCollectionService.setup({
+      securityLicense: license,
     });
 
     accountManagementApp.create({
@@ -166,7 +170,7 @@ export class SecurityPlugin
       this.anonymousAccessService.start({ http: core.http });
     }
 
-    this.securityTelemetryService.start({
+    this.securityUsageCollectionService.start({
       http: core.http,
       getCurrentUser: this.authc.getCurrentUser,
     });
@@ -183,6 +187,7 @@ export class SecurityPlugin
     this.navControlService.stop();
     this.securityLicenseService.stop();
     this.managementService.stop();
+    this.securityUsageCollectionService.stop();
   }
 }
 

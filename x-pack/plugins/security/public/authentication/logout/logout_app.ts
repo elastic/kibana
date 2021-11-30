@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import type { CoreSetup, HttpSetup } from 'src/core/public';
 
-import { SecurityTelemetryService } from '../../telemetry';
+import { SecurityTelemetryService } from '../../usage_collection';
 
 interface CreateDeps {
   application: CoreSetup['application'];
