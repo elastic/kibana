@@ -183,7 +183,7 @@ Once you set up the APM infrastructure, you can enable the APM agent and put Kib
 
 [[plain-kibana-logs]]
 ==== Plain Kibana Logs
-*Prerequisites* Kibana logs are configured to be in ECS JSON format to include tracing identifiers.
+*Prerequisites* Kibana logs are configured to be in https://www.elastic.co/guide/en/ecs/master/ecs-reference.html[ECS JSON] format to include tracing identifiers.
 
 Open Kibana Logs and search for an operation you are interested in.
 For example, we want to investigate the response times for queries to the `/api/telemetry/v2/clusters/_stats` Kibana endpoint.
