@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import { css } from '@emotion/react';
 import {
   EuiBadge,
   EuiButton,
@@ -20,7 +20,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { RouteComponentProps, withRouter, useLocation } from 'react-router-dom';
 import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import styled from 'styled-components';
 import { reactRouterNavigate, useKibana } from '../../../../../plugins/kibana_react/public';
 import { IndexPatternManagmentContext } from '../../types';
 import { IndexPatternTableItem } from '../types';
@@ -61,7 +60,7 @@ const securityDataView = i18n.translate(
 
 const securitySolution = 'security-solution';
 
-const StyledFlexItem = styled(EuiFlexItem)`
+const flexItemStyles = css`
   justify-content: center;
 `;
 
@@ -127,21 +126,21 @@ export const IndexPatternTable = ({
       ) => (
         <>
           <EuiFlexGroup gutterSize="s" wrap>
-            <StyledFlexItem grow={false}>
+            <EuiFlexItem grow={false} css={flexItemStyles}>
               <EuiButtonEmpty size="s" {...reactRouterNavigate(history, `patterns/${index.id}`)}>
                 {name}
               </EuiButtonEmpty>
-            </StyledFlexItem>
+            </EuiFlexItem>
             {index.id && index.id.indexOf(securitySolution) === 0 && (
-              <StyledFlexItem grow={false}>
+              <EuiFlexItem grow={false} css={flexItemStyles}>
                 <EuiBadge>{securityDataView}</EuiBadge>
-              </StyledFlexItem>
+              </EuiFlexItem>
             )}
             {index.tags &&
               index.tags.map(({ key: tagKey, name: tagName }) => (
-                <StyledFlexItem grow={false} key={tagKey}>
+                <EuiFlexItem grow={false} css={flexItemStyles} key={tagKey}>
                   <EuiBadge>{tagName}</EuiBadge>
-                </StyledFlexItem>
+                </EuiFlexItem>
               ))}
           </EuiFlexGroup>
         </>
