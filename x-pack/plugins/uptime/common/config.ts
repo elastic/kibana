@@ -9,9 +9,25 @@ import { PluginConfigDescriptor } from 'kibana/server';
 import { schema, TypeOf } from '@kbn/config-schema';
 
 export const config: PluginConfigDescriptor = {
+  exposeToBrowser: {
+    ui: true,
+  },
   schema: schema.maybe(
     schema.object({
       index: schema.maybe(schema.string()),
+      ui: schema.maybe(
+        schema.object({
+          unsafe: schema.maybe(
+            schema.object({
+              monitorManagement: schema.maybe(
+                schema.object({
+                  enabled: schema.boolean(),
+                })
+              ),
+            })
+          ),
+        })
+      ),
       unsafe: schema.maybe(
         schema.object({
           service: schema.maybe(
@@ -20,7 +36,7 @@ export const config: PluginConfigDescriptor = {
               username: schema.string(),
               password: schema.string(),
               manifestUrl: schema.string(),
-              hosts: schema.arrayOf(schema.string()),
+              hosts: schema.maybe(schema.arrayOf(schema.string())),
             })
           ),
         })
@@ -30,3 +46,6 @@ export const config: PluginConfigDescriptor = {
 };
 
 export type UptimeConfig = TypeOf<typeof config.schema>;
+export interface UptimeUiConfig {
+  ui?: TypeOf<typeof config.schema>['ui'];
+}
