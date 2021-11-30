@@ -13,19 +13,18 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { VisEditorOptionsProps } from 'src/plugins/visualizations/public';
-import { SwitchOption } from '../../../../../../vis_default_editor/public';
-import { ValueAxis } from '../../../../../xy/public';
-
-import { HeatmapVisParams } from '../../../heatmap';
+import { SwitchOption } from '../../../../../vis_default_editor/public';
+import { HeatmapVisParams, ValueAxis } from '../../types';
 
 const VERTICAL_ROTATION = 270;
 
 interface LabelsPanelProps {
   valueAxis: ValueAxis;
   setValue: VisEditorOptionsProps<HeatmapVisParams>['setValue'];
+  isNewLibrary?: boolean;
 }
 
-function LabelsPanel({ valueAxis, setValue }: LabelsPanelProps) {
+function LabelsPanel({ valueAxis, setValue, isNewLibrary }: LabelsPanelProps) {
   const rotateLabels = valueAxis.labels.rotate === VERTICAL_ROTATION;
 
   const setValueAxisLabels = useCallback(
@@ -55,7 +54,7 @@ function LabelsPanel({ valueAxis, setValue }: LabelsPanelProps) {
       <EuiTitle size="xs">
         <h3>
           <FormattedMessage
-            id="visTypeVislib.controls.heatmapOptions.labelsTitle"
+            id="visTypeHeatmap.controls.heatmapOptions.labelsTitle"
             defaultMessage="Labels"
           />
         </h3>
@@ -63,48 +62,59 @@ function LabelsPanel({ valueAxis, setValue }: LabelsPanelProps) {
       <EuiSpacer size="s" />
 
       <SwitchOption
-        label={i18n.translate('visTypeVislib.controls.heatmapOptions.showLabelsTitle', {
+        label={i18n.translate('visTypeHeatmap.controls.heatmapOptions.showLabelsTitle', {
           defaultMessage: 'Show labels',
         })}
         paramName="show"
-        value={valueAxis.labels.show}
+        value={Boolean(valueAxis.labels.show)}
         setValue={setValueAxisLabels}
       />
 
       <SwitchOption
-        disabled={!valueAxis.labels.show}
-        label={i18n.translate('visTypeVislib.controls.heatmapOptions.rotateLabel', {
+        disabled={!valueAxis.labels.show || isNewLibrary}
+        label={i18n.translate('visTypeHeatmap.controls.heatmapOptions.rotateLabel', {
           defaultMessage: 'Rotate',
         })}
+        data-test-subj="heatmapLabelsRotate"
         paramName="rotate"
         value={rotateLabels}
         setValue={setRotateLabels}
+        tooltip={i18n.translate('visTypeHeatmap.editors.heatmap.rotateLabelNotAvailable', {
+          defaultMessage:
+            'Rotate label is not supported with the new charts library. Please enable the heatmap legacy charts library advanced setting.',
+        })}
       />
 
       <SwitchOption
-        disabled={!valueAxis.labels.show}
+        disabled={!valueAxis.labels.show || isNewLibrary}
         label={i18n.translate(
-          'visTypeVislib.controls.heatmapOptions.overwriteAutomaticColorLabel',
+          'visTypeHeatmap.controls.heatmapOptions.overwriteAutomaticColorLabel',
           {
             defaultMessage: 'Overwrite automatic color',
           }
         )}
         paramName="overwriteColor"
-        value={valueAxis.labels.overwriteColor}
+        value={Boolean(valueAxis.labels.overwriteColor)}
         setValue={setValueAxisLabels}
+        data-test-subj="heatmapLabelsOverwriteColor"
+        tooltip={i18n.translate('visTypeHeatmap.editors.heatmap.overwriteColorlNotAvailable', {
+          defaultMessage:
+            'Overwrite automatic color is not supported with the new charts library. Please enable the heatmap legacy charts library advanced setting .',
+        })}
       />
 
       <EuiFormRow
         display="rowCompressed"
         fullWidth
-        label={i18n.translate('visTypeVislib.controls.heatmapOptions.colorLabel', {
+        label={i18n.translate('visTypeHeatmap.controls.heatmapOptions.colorLabel', {
           defaultMessage: 'Color',
         })}
       >
         <EuiColorPicker
           compressed
           fullWidth
-          disabled={!valueAxis.labels.show || !valueAxis.labels.overwriteColor}
+          data-test-subj="heatmapLabelsColor"
+          disabled={!valueAxis.labels.show || !valueAxis.labels.overwriteColor || isNewLibrary}
           color={valueAxis.labels.color}
           onChange={setColor}
         />
