@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { FIELD_TYPES } from '../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib/constants';
-
 // eslint-disable-next-line import/no-commonjs
 module.exports = {
-  FIELD_TYPES,
+  // We just globally fake these variables to not pull the entire @elastic/charts package in.
+  Position: {
+    Bottom: 'bottom',
+  },
 };

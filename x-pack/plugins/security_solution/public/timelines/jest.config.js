@@ -23,8 +23,9 @@ module.exports = {
       '<rootDir>/x-pack/plugins/security_solution/server/__mocks__/task_manager.mock.ts',
     'alerting/server$': '<rootDir>/x-pack/plugins/security_solution/server/__mocks__/alert.mock.ts',
     'actions/server$': '<rootDir>/x-pack/plugins/security_solution/server/__mocks__/action.mock.ts',
-
     // front dummy mocks to trim import trees for better memory and performance.
+    '@elastic/charts$':
+      '<rootDir>/x-pack/plugins/security_solution/public/timelines/__mocks__/elastic_charts.ts',
     'data/public$':
       '<rootDir>/x-pack/plugins/security_solution/public/timelines/__mocks__/data.mock.ts',
     'fleet/public$':

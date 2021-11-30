@@ -11,7 +11,6 @@
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { pagePathGetters } from '../../../../fleet/public/constants/page_paths';
 
-// console.trace('--> HERE in fleet mock');
 // eslint-disable-next-line import/no-commonjs
 module.exports = {
   pagePathGetters,

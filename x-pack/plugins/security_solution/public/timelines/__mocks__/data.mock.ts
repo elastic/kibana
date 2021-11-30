@@ -25,7 +25,6 @@ import { SearchBar } from '../../../../../../src/plugins/data/public/ui/search_b
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { isEsError } from '../../../../../../src/plugins/data/public/search/errors/types';
 
-// console.log('--> HERE in public data mock');
 // eslint-disable-next-line import/no-commonjs
 module.exports = {
   FilterManager,

@@ -11,7 +11,6 @@
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { useMlHref } from '../../../../ml/public/locator/use_ml_href';
 
-// console.trace('--> HERE in ml mock');
 // eslint-disable-next-line import/no-commonjs
 module.exports = {
   useMlHref,
