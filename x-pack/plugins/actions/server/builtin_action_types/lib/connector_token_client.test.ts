@@ -136,7 +136,7 @@ describe('get()', () => {
       tokenType: 'access_token',
     });
 
-    expect(logger.error.mock.calls[0]).toMatchObject([
+    expect(logger.warn.mock.calls[0]).toMatchObject([
       `Failed to fetch connector_token for connectorId "123" and tokenType: "access_token". Error: Fail`,
     ]);
     expect(result).toEqual(null);
@@ -170,7 +170,7 @@ describe('get()', () => {
       tokenType: 'access_token',
     });
 
-    expect(logger.error.mock.calls[0]).toMatchObject([
+    expect(logger.warn.mock.calls[0]).toMatchObject([
       `Failed to decrypt connector_token for connectorId "123" and tokenType: "access_token". Error: Fail`,
     ]);
     expect(result).toEqual(null);
