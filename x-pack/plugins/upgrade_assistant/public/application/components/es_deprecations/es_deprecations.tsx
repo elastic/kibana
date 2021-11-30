@@ -46,7 +46,7 @@ const i18nTexts = {
   }),
   pageDescription: i18n.translate('xpack.upgradeAssistant.esDeprecations.pageDescription', {
     defaultMessage:
-      'You can start resolving all critical issues before upgrading to the next major version of Elastic. Before making changes, ensure you have a current snapshot of your cluster. Indices created before 7.0 will have to be reindexed or removed.',
+      'Resolve all critical issues before upgrading to the next major version of Elastic. Before making changes, make sure you have a current snapshot of your cluster. To upgrade to 8.x, you must reindex or remove indices created before 7.0.',
   }),
   isLoading: i18n.translate('xpack.upgradeAssistant.esDeprecations.loadingText', {
     defaultMessage: 'Loading deprecation issues…',

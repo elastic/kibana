@@ -47,8 +47,7 @@ export const EsDeprecationLogs: FunctionComponent = () => {
             defaultMessage: 'Elasticsearch deprecation logs',
           })}
           description={i18n.translate('xpack.upgradeAssistant.esDeprecationLogs.pageDescription', {
-            defaultMessage:
-              'Review the deprecation logs to determine if your applications are using any deprecated APIs. Update your applications to prevent errors or changes in behavior after you upgrade to 8.x.',
+            defaultMessage: `Review the deprecation logs to determine if you're using any deprecated APIs. If so, update your applications before upgrading to the next major version.`,
           })}
           rightSideItems={[
             <EuiButtonEmpty

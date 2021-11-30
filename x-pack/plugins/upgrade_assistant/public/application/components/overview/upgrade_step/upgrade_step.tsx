@@ -16,8 +16,7 @@ const i18nTexts = {
     defaultMessage: 'Get ready for the next version of Elastic',
   }),
   upgradeStepDescription: i18n.translate('xpack.upgradeAssistant.overview.upgradeStepDescription', {
-    defaultMessage:
-      'You can start resolving all critical issues in preparation for the upcoming Elastic 8.x. Be sure to back up your data again before upgrading',
+    defaultMessage: `If you've resolved all critical issues and checked your deprecation logs, you're ready for the next major version of Elastic. Check this page again before upgrading to Elastic 8.x.`,
   }),
 };
 
