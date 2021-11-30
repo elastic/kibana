@@ -7,7 +7,7 @@
 import { omit } from 'lodash';
 import React, { useCallback, useState, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -276,7 +276,7 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
                     }
                   )}
                   iconSize="s"
-                  color={'subdued'}
+                  color="text"
                   iconType={'crossInACircleFilled'}
                   onClick={toggleWarningThreshold}
                 />

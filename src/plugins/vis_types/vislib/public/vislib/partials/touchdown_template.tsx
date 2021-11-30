@@ -9,6 +9,8 @@
 import React from 'react';
 import ReactDOM from 'react-dom/server';
 import { EuiIcon } from '@elastic/eui';
+import { KibanaThemeProvider } from '../../../../../kibana_react/public';
+import { getTheme } from '../../services';
 
 interface Props {
   wholeBucket: boolean;
@@ -16,12 +18,14 @@ interface Props {
 
 export const touchdownTemplate = ({ wholeBucket }: Props) => {
   return ReactDOM.renderToStaticMarkup(
-    <p className="visTooltip__header">
-      <EuiIcon type="iInCircle" className="visTooltip__headerIcon" />
-      <span className="visTooltip__headerText">
-        {wholeBucket ? 'Part of this bucket' : 'This area'} may contain partial data. The selected
-        time range does not fully cover it.
-      </span>
-    </p>
+    <KibanaThemeProvider theme$={getTheme().theme$}>
+      <p className="visTooltip__header">
+        <EuiIcon type="iInCircle" className="visTooltip__headerIcon" />
+        <span className="visTooltip__headerText">
+          {wholeBucket ? 'Part of this bucket' : 'This area'} may contain partial data. The selected
+          time range does not fully cover it.
+        </span>
+      </p>
+    </KibanaThemeProvider>
   );
 };

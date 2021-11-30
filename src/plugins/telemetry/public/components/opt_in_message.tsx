@@ -8,7 +8,7 @@
 
 import * as React from 'react';
 import { EuiLink } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { PRIVACY_STATEMENT_URL } from '../../common/constants';
 
 export class OptInMessage extends React.PureComponent {

@@ -6,7 +6,7 @@
  */
 
 import type React from 'react';
-import { Filter } from '../../../../../../../../../src/plugins/data/public';
+import type { Filter } from '@kbn/es-query';
 import { BrowserFields } from '../../../../../../../timelines/common/search_strategy';
 
 import { ColumnHeaderOptions, RowRenderer } from '../../../../../../common';

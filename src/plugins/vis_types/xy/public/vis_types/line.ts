@@ -26,6 +26,7 @@ import {
 import { toExpressionAst } from '../to_ast';
 import { ChartType } from '../../common';
 import { optionTabs } from '../editor/common_config';
+import { getVisTypeFromParams } from './get_vis_type_from_params';
 
 export const lineVisTypeDefinition = {
   name: 'line',
@@ -36,6 +37,7 @@ export const lineVisTypeDefinition = {
   }),
   toExpressionAst,
   getSupportedTriggers: () => [VIS_EVENT_TO_TRIGGER.filter, VIS_EVENT_TO_TRIGGER.brush],
+  updateVisTypeOnParamsChange: getVisTypeFromParams,
   visConfig: {
     defaults: {
       type: ChartType.Line,
@@ -149,7 +151,7 @@ export const lineVisTypeDefinition = {
         title: i18n.translate('visTypeXy.line.segmentTitle', { defaultMessage: 'X-axis' }),
         min: 0,
         max: 1,
-        aggFilter: ['!geohash_grid', '!geotile_grid', '!filter'],
+        aggFilter: ['!geohash_grid', '!geotile_grid', '!filter', '!multi_terms'],
       },
       {
         group: AggGroupNames.Buckets,
@@ -159,7 +161,7 @@ export const lineVisTypeDefinition = {
         }),
         min: 0,
         max: 3,
-        aggFilter: ['!geohash_grid', '!geotile_grid', '!filter'],
+        aggFilter: ['!geohash_grid', '!geotile_grid', '!filter', '!multi_terms'],
       },
       {
         group: AggGroupNames.Buckets,
@@ -169,7 +171,7 @@ export const lineVisTypeDefinition = {
         }),
         min: 0,
         max: 1,
-        aggFilter: ['!geohash_grid', '!geotile_grid', '!filter'],
+        aggFilter: ['!geohash_grid', '!geotile_grid', '!filter', '!multi_terms'],
       },
     ],
   },

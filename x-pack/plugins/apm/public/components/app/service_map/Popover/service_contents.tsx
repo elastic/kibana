@@ -97,7 +97,7 @@ export function ServiceContents({
         </EuiButton>
       </EuiFlexItem>
       <EuiFlexItem>
-        <EuiButton color="secondary" href={focusUrl} onClick={onFocusClick}>
+        <EuiButton color="success" href={focusUrl} onClick={onFocusClick}>
           {i18n.translate('xpack.apm.serviceMap.focusMapButtonText', {
             defaultMessage: 'Focus map',
           })}

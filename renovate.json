@@ -18,7 +18,8 @@
   "packageRules": [
     {
       "matchPackagePatterns": [".*"],
-      "enabled": false
+      "enabled": false,
+      "prCreation": "not-pending"
     },
     {
       "groupName": "@elastic/charts",
@@ -54,13 +55,22 @@
       "enabled": true
     },
     {
+      "groupName": "APM",
+      "matchPackageNames": ["elastic-apm-node", "@elastic/apm-rum", "@elastic/apm-rum-react"],
+      "reviewers": ["team:kibana-core"],
+      "matchBaseBranches": ["main"],
+      "labels": ["release_note:skip", "Team:Core", "backport:skip"],
+      "enabled": true
+    },
+    {
       "groupName": "babel",
       "matchPackageNames": ["@types/babel__core"],
       "matchPackagePatterns": ["^@babel", "^babel-plugin"],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "labels": ["Team:Operations", "release_note:skip"],
-      "enabled": true
+      "enabled": true,
+      "stabilityDays": 7
     },
     {
       "groupName": "polyfills",
@@ -70,7 +80,8 @@
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "labels": ["Team:Operations", "release_note:skip"],
-      "enabled": true
+      "enabled": true,
+      "stabilityDays": 7
     },
     {
       "groupName": "vega related modules",

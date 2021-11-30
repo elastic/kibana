@@ -7,7 +7,7 @@
 
 import { EuiButton, EuiFlexGrid, EuiFlexItem, EuiText, EuiHorizontalRule } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import { MetricsSourceConfigurationProperties } from '../../../../../common/metrics_sources';
 import { MetricsExplorerResponse } from '../../../../../common/http_api/metrics_explorer';

@@ -52,7 +52,7 @@ import { TimelineModel } from './model';
 import { timelineDefaults } from './defaults';
 import { TimelineById } from './types';
 import { Direction } from '../../../../common/search_strategy';
-import { FilterManager } from '../../../../../../../src/plugins/data/public';
+import type { FilterManager } from '../../../../../../../src/plugins/data/public';
 
 jest.mock('../../../common/components/url_state/normalize_time_range.ts');
 jest.mock('../../../common/utils/default_date_settings', () => {

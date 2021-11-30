@@ -14,9 +14,11 @@ const MAX_NUMBER_OF_HISTORY_ITEMS = 100;
 export const isQuotaExceededError = (e: Error): boolean => e.name === 'QuotaExceededError';
 
 export class History {
-  constructor(private readonly storage: Storage) {}
+  private changeEmitter: BehaviorSubject<any[]>;
 
-  private changeEmitter = new BehaviorSubject<any[]>(this.getHistory() || []);
+  constructor(private readonly storage: Storage) {
+    this.changeEmitter = new BehaviorSubject(this.getHistory() || []);
+  }
 
   getHistoryKeys() {
     return this.storage

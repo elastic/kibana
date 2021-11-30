@@ -7,7 +7,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Router, Switch, Route, Redirect } from 'react-router-dom';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiEmptyPrompt, EuiPageContent, EuiLoadingSpinner } from '@elastic/eui';
 import { ScopedHistory } from 'src/core/public';
 
@@ -17,7 +17,13 @@ import { ClusterUpgradeState } from '../../common/types';
 import { APP_WRAPPER_CLASS, GlobalFlyout, AuthorizationProvider } from '../shared_imports';
 import { AppDependencies } from '../types';
 import { AppContextProvider, useAppContext } from './app_context';
-import { EsDeprecations, ComingSoonPrompt, KibanaDeprecations, Overview } from './components';
+import {
+  EsDeprecations,
+  EsDeprecationLogs,
+  ComingSoonPrompt,
+  KibanaDeprecations,
+  Overview,
+} from './components';
 
 const { GlobalFlyoutProvider } = GlobalFlyout;
 
@@ -112,6 +118,7 @@ const AppHandlingClusterUpgradeState: React.FunctionComponent = () => {
     <Switch>
       <Route exact path="/overview" component={Overview} />
       <Route exact path="/es_deprecations" component={EsDeprecations} />
+      <Route exact path="/es_deprecation_logs" component={EsDeprecationLogs} />
       <Route exact path="/kibana_deprecations" component={KibanaDeprecations} />
       <Redirect from="/" to="/overview" />
     </Switch>

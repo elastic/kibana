@@ -12,7 +12,11 @@ import { useAddToCase } from '../../../../hooks/use_add_to_case';
 import { AddToCaseActionProps } from './add_to_case_action';
 import * as i18n from './translations';
 
-const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
+interface AddToCaseActionButtonProps extends AddToCaseActionProps {
+  ariaLabel?: string;
+}
+
+const AddToCaseActionButtonComponent: React.FC<AddToCaseActionButtonProps> = ({
   ariaLabel = i18n.ACTION_ADD_TO_CASE_ARIA_LABEL,
   event,
   useInsertTimeline,
@@ -47,7 +51,7 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
   );
 };
 
-export const AddToExistingCaseButton = memo(AddToCaseActionComponent);
+export const AddToExistingCaseButton = memo(AddToCaseActionButtonComponent);
 
 // eslint-disable-next-line import/no-default-export
 export default AddToExistingCaseButton;

@@ -178,6 +178,9 @@ const removeUnsettableSettings = (settings: FlatSettings['settings']) =>
     'index.verified_before_close',
     'index.version.created',
 
+    // Ignored since 6.x and forbidden in 7.x
+    'index.mapper.dynamic',
+
     // Deprecated in 9.0
     'index.version.upgraded',
   ]);

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { KueryNode } from '../../../../../src/plugins/data/server';
+import type { KueryNode } from '@kbn/es-query';
 import { SavedObjectFindOptions } from '../../common';
 
 /**

@@ -13,6 +13,7 @@ import { Observable } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
 
 import type { MountPoint } from '../../types';
+import { CoreTheme } from '../../theme';
 import { AppLeaveHandler, AppStatus, Mounter } from '../types';
 import { AppContainer } from './app_container';
 import { ScopedHistory } from '../scoped_history';
@@ -20,6 +21,7 @@ import { ScopedHistory } from '../scoped_history';
 interface Props {
   mounters: Map<string, Mounter>;
   history: History;
+  theme$: Observable<CoreTheme>;
   appStatuses$: Observable<Map<string, AppStatus>>;
   setAppLeaveHandler: (appId: string, handler: AppLeaveHandler) => void;
   setAppActionMenu: (appId: string, mount: MountPoint | undefined) => void;
@@ -33,6 +35,7 @@ interface Params {
 export const AppRouter: FunctionComponent<Props> = ({
   history,
   mounters,
+  theme$,
   setAppLeaveHandler,
   setAppActionMenu,
   appStatuses$,
@@ -57,7 +60,7 @@ export const AppRouter: FunctionComponent<Props> = ({
                 appPath={path}
                 appStatus={appStatuses.get(appId) ?? AppStatus.inaccessible}
                 createScopedHistory={createScopedHistory}
-                {...{ appId, mounter, setAppLeaveHandler, setAppActionMenu, setIsMounting }}
+                {...{ appId, mounter, setAppLeaveHandler, setAppActionMenu, setIsMounting, theme$ }}
               />
             )}
           />
@@ -79,7 +82,7 @@ export const AppRouter: FunctionComponent<Props> = ({
                 appId={id ?? appId}
                 appStatus={appStatuses.get(appId) ?? AppStatus.inaccessible}
                 createScopedHistory={createScopedHistory}
-                {...{ mounter, setAppLeaveHandler, setAppActionMenu, setIsMounting }}
+                {...{ mounter, setAppLeaveHandler, setAppActionMenu, setIsMounting, theme$ }}
               />
             );
           }}

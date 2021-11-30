@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-export * from './get_all_cases';
-export * from './get_create_case';
-export * from './get_case_view';
-export * from './get_configure_cases';
+export * from './get_cases';
 export * from './get_recent_cases';
 export * from './get_all_cases_selector_modal';
+export * from './get_create_case_flyout';

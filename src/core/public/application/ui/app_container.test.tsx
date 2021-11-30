@@ -8,8 +8,9 @@
 
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { mount } from 'enzyme';
+import { mountWithIntl } from '@kbn/test/jest';
 
+import { themeServiceMock } from '../../theme/theme_service.mock';
 import { AppContainer } from './app_container';
 import { Mounter, AppMountParameters, AppStatus } from '../types';
 import { createMemoryHistory } from 'history';
@@ -20,6 +21,7 @@ describe('AppContainer', () => {
   const setAppLeaveHandler = jest.fn();
   const setAppActionMenu = jest.fn();
   const setIsMounting = jest.fn();
+  const theme$ = themeServiceMock.createTheme$();
 
   beforeEach(() => {
     setAppLeaveHandler.mockClear();
@@ -59,11 +61,59 @@ describe('AppContainer', () => {
     },
   });
 
+  it('should call the `mount` function with the correct parameters', async () => {
+    const mounter: Mounter = {
+      appBasePath: '/base-path',
+      appRoute: '/some-route',
+      unmountBeforeMounting: false,
+      exactRoute: false,
+      deepLinkPaths: {},
+      mount: jest.fn().mockImplementation(({ element }) => {
+        const container = document.createElement('div');
+        container.innerHTML = 'some-content';
+        element.appendChild(container);
+        return () => container.remove();
+      }),
+    };
+
+    const wrapper = mountWithIntl(
+      <AppContainer
+        appPath={`/app/${appId}`}
+        appId={appId}
+        appStatus={AppStatus.accessible}
+        mounter={mounter}
+        setAppLeaveHandler={setAppLeaveHandler}
+        setAppActionMenu={setAppActionMenu}
+        setIsMounting={setIsMounting}
+        createScopedHistory={(appPath: string) =>
+          // Create a history using the appPath as the current location
+          new ScopedHistory(createMemoryHistory({ initialEntries: [appPath] }), appPath)
+        }
+        theme$={theme$}
+      />
+    );
+
+    await act(async () => {
+      await flushPromises();
+      wrapper.update();
+    });
+
+    expect(mounter.mount).toHaveBeenCalledTimes(1);
+    expect(mounter.mount).toHaveBeenCalledWith({
+      appBasePath: '/base-path',
+      history: expect.any(ScopedHistory),
+      element: expect.any(HTMLElement),
+      theme$,
+      onAppLeave: expect.any(Function),
+      setHeaderActionMenu: expect.any(Function),
+    });
+  });
+
   it('should hide the "not found" page before mounting the route', async () => {
     const [waitPromise, resolvePromise] = createResolver();
     const mounter = createMounter(waitPromise);
 
-    const wrapper = mount(
+    const wrapper = mountWithIntl(
       <AppContainer
         appPath={`/app/${appId}`}
         appId={appId}
@@ -76,6 +126,7 @@ describe('AppContainer', () => {
           // Create a history using the appPath as the current location
           new ScopedHistory(createMemoryHistory({ initialEntries: [appPath] }), appPath)
         }
+        theme$={theme$}
       />
     );
 
@@ -104,7 +155,7 @@ describe('AppContainer', () => {
     const [waitPromise, resolvePromise] = createResolver();
     const mounter = createMounter(waitPromise);
 
-    const wrapper = mount(
+    const wrapper = mountWithIntl(
       <AppContainer
         appPath={`/app/${appId}`}
         appId={appId}
@@ -117,6 +168,7 @@ describe('AppContainer', () => {
           // Create a history using the appPath as the current location
           new ScopedHistory(createMemoryHistory({ initialEntries: [appPath] }), appPath)
         }
+        theme$={theme$}
       />
     );
 
@@ -147,7 +199,7 @@ describe('AppContainer', () => {
       },
     };
 
-    const wrapper = mount(
+    const wrapper = mountWithIntl(
       <AppContainer
         appPath={`/app/${appId}`}
         appId={appId}
@@ -160,6 +212,7 @@ describe('AppContainer', () => {
           // Create a history using the appPath as the current location
           new ScopedHistory(createMemoryHistory({ initialEntries: [appPath] }), appPath)
         }
+        theme$={theme$}
       />
     );
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import * as React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Observable } from 'rxjs';
