@@ -6,7 +6,7 @@
  */
 
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { useCurrentUser, useHttp } from '../../../lib/kibana';
+import { useCurrentUser, useHttp, useKibana } from '../../../lib/kibana';
 import { appRoutesService, CheckPermissionsResponse } from '../../../../../../fleet/common';
 import { useLicense } from '../../../hooks/use_license';
 import { Immutable } from '../../../../../common/endpoint/types';
@@ -32,45 +32,18 @@ export interface EndpointPrivileges {
  * to keep API calls to a minimum.
  */
 export const useEndpointPrivileges = (): Immutable<EndpointPrivileges> => {
-  const http = useHttp();
   const user = useCurrentUser();
+  const fleetServices = useKibana().services.fleet;
   const isMounted = useRef<boolean>(true);
   const isPlatinumPlusLicense = useLicense().isPlatinumPlus();
   const [canAccessFleet, setCanAccessFleet] = useState<boolean>(false);
   const [fleetCheckDone, setFleetCheckDone] = useState<boolean>(false);
 
-  // Check if user can access fleet
-  useEffect(() => {
-    (async () => {
-      try {
-        const fleetPermissionsResponse = await http.get<CheckPermissionsResponse>(
-          appRoutesService.getCheckPermissionsPath()
-        );
-
-        if (isMounted.current) {
-          setCanAccessFleet(fleetPermissionsResponse.success);
-        }
-      } finally {
-        if (isMounted.current) {
-          setFleetCheckDone(true);
-        }
-      }
-    })();
-  }, [http]);
-
-  // Check if user has `superuser` role
-  const isSuperUser = useMemo(() => {
-    if (user?.roles) {
-      return user.roles.includes('superuser');
-    }
-    return false;
-  }, [user?.roles]);
-
   const privileges = useMemo(() => {
     const privilegeList: EndpointPrivileges = Object.freeze({
       loading: !fleetCheckDone || !user,
       canAccessFleet,
-      canAccessEndpointManagement: canAccessFleet && isSuperUser,
+      canAccessEndpointManagement: canAccessFleet,
       canCreateArtifactsByPolicy: isPlatinumPlusLicense,
       canIsolateHost: isPlatinumPlusLicense,
       // FIXME: Remove usages of the property below
@@ -79,7 +52,23 @@ export const useEndpointPrivileges = (): Immutable<EndpointPrivileges> => {
     });
 
     return privilegeList;
-  }, [canAccessFleet, fleetCheckDone, isSuperUser, user, isPlatinumPlusLicense]);
+  }, [canAccessFleet, fleetCheckDone, user, isPlatinumPlusLicense]);
+
+  // Check if user can access fleet
+  useEffect(() => {
+    (async () => {
+      try {
+        // Fleet is still defined as an optional plugin, thus `fleetServices` might not be defined
+        if (isMounted.current) {
+          setCanAccessFleet(fleetServices?.authz.fleet.all ?? false);
+        }
+      } finally {
+        if (isMounted.current) {
+          setFleetCheckDone(true);
+        }
+      }
+    })();
+  }, [fleetServices?.authz.fleet.all]);
 
   // Capture if component is unmounted
   useEffect(
