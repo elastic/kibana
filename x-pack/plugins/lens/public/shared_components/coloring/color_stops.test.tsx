@@ -38,6 +38,7 @@ describe('Color Stops component', () => {
       dataBounds: { min: 0, max: 200 },
       onChange: jest.fn(),
       'data-test-prefix': 'my-test',
+      enableSave: false,
     };
   });
   it('should display all the color stops passed', () => {
