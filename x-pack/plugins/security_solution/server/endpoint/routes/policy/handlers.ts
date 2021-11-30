@@ -17,6 +17,8 @@ import { getAgentPolicySummary, getPolicyResponseByAgentId } from './service';
 import { GetAgentSummaryResponse } from '../../../../common/endpoint/types';
 import { GetPackagePoliciesRequest } from '../../../../../fleet/common/types/rest_spec';
 import { EndpointError } from '../../../../common/endpoint/errors';
+import { wrapErrorIfNeeded } from '../../utils';
+import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../../../fleet/common';
 
 export const getHostPolicyResponseHandler = function (): RequestHandler<
   undefined,
@@ -72,6 +74,10 @@ export const getPolicyListHandler = function (
   return async (context, request, response) => {
     const soClient = context.core.savedObjects.client;
     const packagePolicyService = endpointAppContext.service.getPackagePolicyService();
+    const endpointFilteredKuery = `${
+      request?.query?.kuery ? `${request.query.kuery} and ` : ''
+    }${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: endpoint`;
+    request.query.kuery = endpointFilteredKuery;
     try {
       const listResponse = await packagePolicyService.list(soClient, request.query);
 
@@ -79,9 +85,7 @@ export const getPolicyListHandler = function (
         body: listResponse,
       });
     } catch (error) {
-      return response.notFound({
-        body: new EndpointError('Failed to retrieve package policy list', error),
-      });
+      throw wrapErrorIfNeeded(error);
     }
   };
 };
