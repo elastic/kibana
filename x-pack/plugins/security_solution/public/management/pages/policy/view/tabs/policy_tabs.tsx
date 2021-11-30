@@ -5,26 +5,31 @@
  * 2.0.
  */
 
+import { EuiSpacer, EuiTabbedContent, EuiTabbedContentTab } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import React, { useCallback, useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
-import { i18n } from '@kbn/i18n';
-import { EuiTabbedContent, EuiSpacer, EuiTabbedContentTab } from '@elastic/eui';
-
-import { usePolicyDetailsSelector } from '../policy_hooks';
 import {
+  getPolicyDetailPath,
+  getPolicyHostIsolationExceptionsPath,
+  getPolicyTrustedAppsPath,
+} from '../../../../common/routing';
+import {
+  isOnHostIsolationExceptionsView,
   isOnPolicyFormView,
   isOnPolicyTrustedAppsView,
   policyIdFromParams,
 } from '../../store/policy_details/selectors';
-
-import { PolicyTrustedAppsLayout } from '../trusted_apps/layout';
+import { PolicyHostIsolationExceptionsTab } from '../host_isolation_exceptions/policy_host_isolation_exceptions_tab';
 import { PolicyFormLayout } from '../policy_forms/components';
-import { getPolicyDetailPath, getPolicyTrustedAppsPath } from '../../../../common/routing';
+import { usePolicyDetailsSelector } from '../policy_hooks';
+import { PolicyTrustedAppsLayout } from '../trusted_apps/layout';
 
 export const PolicyTabs = React.memo(() => {
   const history = useHistory();
   const isInSettingsTab = usePolicyDetailsSelector(isOnPolicyFormView);
   const isInTrustedAppsTab = usePolicyDetailsSelector(isOnPolicyTrustedAppsView);
+  const isInHostIsolationExceptionsTab = usePolicyDetailsSelector(isOnHostIsolationExceptionsView);
   const policyId = usePolicyDetailsSelector(policyIdFromParams);
 
   const tabs = useMemo(
@@ -53,6 +58,21 @@ export const PolicyTabs = React.memo(() => {
           </>
         ),
       },
+      {
+        id: 'hostIsolationExceptions',
+        name: i18n.translate(
+          'xpack.securitySolution.endpoint.policy.details.tabs.isInHostIsolationExceptions',
+          {
+            defaultMessage: 'Host isolation exceptions',
+          }
+        ),
+        content: (
+          <>
+            <EuiSpacer />
+            <PolicyHostIsolationExceptionsTab />
+          </>
+        ),
+      },
     ],
     []
   );
@@ -64,17 +84,26 @@ export const PolicyTabs = React.memo(() => {
       initialTab = tabs[0];
     } else if (isInTrustedAppsTab) {
       initialTab = tabs[1];
+    } else if (isInHostIsolationExceptionsTab) {
+      initialTab = tabs[2];
     }
 
     return initialTab;
-  }, [isInSettingsTab, isInTrustedAppsTab, tabs]);
+  }, [isInHostIsolationExceptionsTab, isInSettingsTab, isInTrustedAppsTab, tabs]);
 
   const onTabClickHandler = useCallback(
     (selectedTab: EuiTabbedContentTab) => {
-      const path =
-        selectedTab.id === 'settings'
-          ? getPolicyDetailPath(policyId)
-          : getPolicyTrustedAppsPath(policyId);
+      let path: string = '';
+      switch (selectedTab.id) {
+        case 'settings':
+          path = getPolicyDetailPath(policyId);
+          break;
+        case 'trustedApps':
+          path = getPolicyTrustedAppsPath(policyId);
+          break;
+        case 'hostIsolationExceptions':
+          path = getPolicyHostIsolationExceptionsPath(policyId);
+      }
       history.push(path);
     },
     [history, policyId]
