@@ -8,6 +8,7 @@
 import { isEmpty } from 'lodash';
 import { SourcererDataView, SourcererModel, SourcererScopeById, SourcererScopeName } from './model';
 import { SelectedDataViewPayload } from './actions';
+import { sourcererModel } from '../model';
 
 export const getScopePatternListSelection = (
   theDataView: SourcererDataView | undefined,
@@ -82,6 +83,22 @@ export const validateSelectedPatterns = (
     },
   };
 };
+
+interface CheckIfIndicesExistParams {
+  patternList: sourcererModel.SourcererScope['selectedPatterns'];
+  scopeId: sourcererModel.SourcererScopeName;
+  signalIndexName: string | null;
+}
+export const checkIfIndicesExist = ({
+  patternList,
+  scopeId,
+  signalIndexName,
+}: CheckIfIndicesExistParams) =>
+  scopeId === SourcererScopeName.detections
+    ? patternList.includes(`${signalIndexName}`)
+    : scopeId === SourcererScopeName.default
+    ? patternList.filter((i) => i !== signalIndexName).length > 0
+    : patternList.length > 0;
 
 /* This is called when no validation involved.
  * This happens when upgrading from legacy index patterns to data view.

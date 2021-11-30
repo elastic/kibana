@@ -27,6 +27,7 @@ import * as i18n from './translations';
 import { sourcererActions, sourcererModel, sourcererSelectors } from '../../store/sourcerer';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
 import { SourcererScopeName } from '../../store/sourcerer/model';
+import { checkIfIndicesExist, ensurePatternFormat } from '../../store/sourcerer/helpers';
 import { usePickIndexPatterns } from './use_pick_index_patterns';
 import {
   FormRow,
@@ -44,7 +45,6 @@ import { useKibana } from '../../lib/kibana';
 import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
 import { useAppToasts } from '../../hooks/use_app_toasts';
 import { toMountPoint } from '../../../../../../../src/plugins/kibana_react/public';
-import { ensurePatternFormat } from '../../store/sourcerer/helpers';
 import { RefreshButton } from './refresh_button';
 
 interface SourcererComponentProps {
@@ -64,6 +64,11 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
     signalIndexName,
     sourcererScope: { selectedDataViewId, selectedPatterns, loading },
   } = useDeepEqualSelector((state) => sourcererScopeSelector(state, scopeId));
+
+  const indicesExist = useMemo(
+    () => checkIfIndicesExist({ scopeId, signalIndexName, patternList: selectedPatterns }),
+    [scopeId, signalIndexName, selectedPatterns]
+  );
 
   const [isOnlyDetectionAlertsChecked, setIsOnlyDetectionAlertsChecked] = useState(
     isTimelineSourcerer && selectedPatterns.join() === signalIndexName
@@ -299,7 +304,8 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
   const onExpandAdvancedOptionsClicked = useCallback(() => {
     setExpandAdvancedOptions((prevState) => !prevState);
   }, []);
-  return (
+
+  return indicesExist ? (
     <EuiPopover
       panelClassName="sourcererPopoverPanel"
       button={buttonWithTooptip}
@@ -429,6 +435,6 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
         </PopoverContent>
       </EuiOutsideClickDetector>
     </EuiPopover>
-  );
+  ) : null;
 });
 Sourcerer.displayName = 'Sourcerer';

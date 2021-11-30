@@ -26,8 +26,6 @@ export const sourcererReducer = reducerWithInitialState(initialSourcererState)
     signalIndexName,
   }))
   .case(setDataViewLoading, (state, { id, loading }) => {
-    console.log('---setDataViewLoading');
-
     return {
       ...state,
       ...(id === state.defaultDataView.id
@@ -39,8 +37,6 @@ export const sourcererReducer = reducerWithInitialState(initialSourcererState)
     };
   })
   .case(setSourcererDataViews, (state, { defaultDataView, kibanaDataViews }) => {
-    console.log('---setSourcererDataViews');
-
     return {
       ...state,
       defaultDataView: {
@@ -54,7 +50,6 @@ export const sourcererReducer = reducerWithInitialState(initialSourcererState)
     };
   })
   .case(setSourcererScopeLoading, (state, { id, loading }) => {
-    console.log('---setSourcererScopeLoading');
     return {
       ...state,
       sourcererScopes: {
@@ -84,8 +79,6 @@ export const sourcererReducer = reducerWithInitialState(initialSourcererState)
     };
   })
   .case(setSelectedDataView, (state, payload) => {
-    console.log('---setSelectedDataView');
-
     const { shouldValidateSelectedPatterns = true, ...patternsInfo } = payload;
     return {
       ...state,
