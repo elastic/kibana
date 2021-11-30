@@ -152,7 +152,7 @@ export const GaugeComponent: FC<GaugeRenderProps> = ({
         icon={icon}
         message={
           <FormattedMessage
-            id="xpack.lens.guageVisualization.chartCannotRender"
+            id="xpack.lens.guageVisualization.chartCannotRenderEqual"
             defaultMessage="Minimum Value is equal to Maximum Value. Chart cannot render."
           />
         }
@@ -164,7 +164,7 @@ export const GaugeComponent: FC<GaugeRenderProps> = ({
         icon={icon}
         message={
           <FormattedMessage
-            id="xpack.lens.guageVisualization.chartCannotRender"
+            id="xpack.lens.guageVisualization.chartCannotRenderMinGreaterMax"
             defaultMessage="Minimum Value is smaller than Maximum Value. Chart cannot render."
           />
         }
