@@ -8,24 +8,24 @@
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['canvas', 'common', 'header']);
+  const PageObjects = getPageObjects(['canvas', 'common', 'header', 'discover']);
+  const testSubjects = getService('testSubjects');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const dashboardAddPanel = getService('dashboardAddPanel');
+  const dashboardPanelActions = getService('dashboardPanelActions');
   const archives = {
     es: 'test/functional/fixtures/es_archiver/dashboard/current/kibana',
-    kbn: 'test/functional/fixtures/kbn_archiver/discover',
   };
 
   describe('saved search in canvas', function () {
     before(async () => {
       await esArchiver.load(archives.es);
-      await kibanaServer.importExport.load(archives.kbn);
-
       // open canvas home
       await PageObjects.common.navigateToApp('canvas');
       // create new workpad
       await PageObjects.canvas.createNewWorkpad();
+      await PageObjects.canvas.setWorkpadName('saved search tests');
     });
 
     after(async () => {
@@ -36,9 +36,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('adds existing saved search embeddable from the visualize library', async () => {
         await PageObjects.canvas.clickAddFromLibrary();
         await dashboardAddPanel.addSavedSearch('Rendering-Test:-saved-search');
+        await testSubjects.existOrFail('embeddablePanelHeading-RenderingTest:savedsearch');
       });
 
-      it('edits saved search by-reference embeddable', async () => {});
+      it('edits saved search by-reference embeddable', async () => {
+        await dashboardPanelActions.editPanelByTitle('Rendering Test: saved search');
+        await PageObjects.discover.saveSearch('Rendering Test: saved search v2');
+        await PageObjects.common.navigateToApp('canvas');
+        await PageObjects.canvas.loadFirstWorkpad('saved search tests');
+        await testSubjects.existOrFail('embeddablePanelHeading-RenderingTest:savedsearchv2');
+      });
     });
   });
 }

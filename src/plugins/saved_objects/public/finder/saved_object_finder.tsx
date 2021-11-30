@@ -136,7 +136,6 @@ class SavedObjectFinderUi extends React.Component<
 
     resp.savedObjects = resp.savedObjects.filter((savedObject) => {
       const metaData = metaDataMap[savedObject.type];
-      console.log({ savedObject });
       if (metaData.showSavedObject) {
         return metaData.showSavedObject(savedObject);
       } else {

@@ -127,5 +127,12 @@ export function CanvasPageProvider({ getService, getPageObjects }: FtrProviderCo
       await testSubjects.click('canvas-add-from-library-button');
       await testSubjects.existOrFail('dashboardAddPanel');
     },
+
+    async setWorkpadName(name: string) {
+      log.debug('CanvasPage.setWorkpadName');
+      await testSubjects.setValue('canvas-workpad-name-text-field', name);
+      const lastBreadcrumb = await testSubjects.getVisibleText('breadcrumb last');
+      expect(lastBreadcrumb).to.eql(name);
+    },
   };
 }
