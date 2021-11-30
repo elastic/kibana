@@ -55,7 +55,7 @@ export const ThreatIntelPanelView: React.FC<LinkPanelViewProps> = ({
         infoPanel: useMemo(
           () => (
             <>
-              {allIntegrationsInstalled === false ? (
+              {!allIntegrationsInstalled ? (
                 <InnerLinkPanel
                   dataTestSubj="cti-inner-panel-info"
                   color={'warning'}

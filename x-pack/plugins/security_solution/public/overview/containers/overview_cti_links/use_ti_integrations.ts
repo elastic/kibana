@@ -29,7 +29,7 @@ export interface Integration {
 }
 
 interface TiIntegrationStatus {
-  isSomeIntegrationsDisabled: boolean;
+  allIntegrationsInstalled: boolean;
 }
 
 export const useTiIntegrations = () => {
@@ -49,17 +49,17 @@ export const useTiIntegrations = () => {
           integration.id.startsWith(TI_INTEGRATION_PREFIX)
         );
 
-        const isSomeIntegrationsDisabled = tiIntegrations.some(
+        const allIntegrationsInstalled = tiIntegrations.every(
           (integration: IntegrationResponse) =>
-            integration.status !== installationStatuses.Installed
+            integration.status === installationStatuses.Installed
         );
 
         setTiIntegrationsStatus({
-          isSomeIntegrationsDisabled,
+          allIntegrationsInstalled,
         });
       } catch (e) {
         setTiIntegrationsStatus({
-          isSomeIntegrationsDisabled: true,
+          allIntegrationsInstalled: false,
         });
       }
     };

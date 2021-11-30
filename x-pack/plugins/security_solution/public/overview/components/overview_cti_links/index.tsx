@@ -16,19 +16,19 @@ export type ThreatIntelLinkPanelProps = Pick<
   GlobalTimeArgs,
   'from' | 'to' | 'deleteQuery' | 'setQuery'
 > & {
-  isSomeIntegrationsDisabled: boolean | undefined;
+  allIntegrationsInstalled: boolean | undefined;
   allTiDataSources: TiDataSources[];
 };
 
 const ThreatIntelLinkPanelComponent: React.FC<ThreatIntelLinkPanelProps> = (props) => {
-  const { isSomeIntegrationsDisabled, allTiDataSources } = props;
+  const { allIntegrationsInstalled, allTiDataSources } = props;
   const isThreatIntelModuleEnabled = allTiDataSources.length > 0;
   return isThreatIntelModuleEnabled ? (
     <div data-test-subj="cti-enabled-module">
       <CtiEnabledModule
         {...props}
         allTiDataSources={allTiDataSources}
-        isSomeIntegrationsDisabled={Boolean(isSomeIntegrationsDisabled)}
+        allIntegrationsInstalled={Boolean(allIntegrationsInstalled)}
       />
     </div>
   ) : (

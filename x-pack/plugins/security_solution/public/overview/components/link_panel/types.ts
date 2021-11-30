@@ -21,5 +21,5 @@ export interface LinkPanelViewProps {
   listItems: LinkPanelListItem[];
   splitPanel?: JSX.Element;
   totalCount?: number;
-  isSomeIntegrationsDisabled?: boolean;
+  allIntegrationsInstalled?: boolean;
 }

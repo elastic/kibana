@@ -12,7 +12,7 @@ import { useCtiDashboardLinks } from '../../containers/overview_cti_links';
 import { ThreatIntelPanelView } from './threat_intel_panel_view';
 
 export const CtiEnabledModuleComponent: React.FC<ThreatIntelLinkPanelProps> = (props) => {
-  const { to, from, isSomeIntegrationsDisabled, allTiDataSources, setQuery, deleteQuery } = props;
+  const { to, from, allIntegrationsInstalled, allTiDataSources, setQuery, deleteQuery } = props;
   const { tiDataSources, totalCount } = useTiDataSources({
     to,
     from,
@@ -26,7 +26,7 @@ export const CtiEnabledModuleComponent: React.FC<ThreatIntelLinkPanelProps> = (p
     <ThreatIntelPanelView
       listItems={listItems}
       totalCount={totalCount}
-      isSomeIntegrationsDisabled={isSomeIntegrationsDisabled}
+      allIntegrationsInstalled={allIntegrationsInstalled}
     />
   );
 };
