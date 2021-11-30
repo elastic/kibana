@@ -6,6 +6,7 @@
  */
 import { elasticsearchServiceMock } from 'src/core/server/mocks';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { loggerMock } from '@kbn/logging/mocks';
 
 import { createAppContextStartContractMock } from '../../../../mocks';
 import { appContextService } from '../../../../services';
@@ -44,6 +45,7 @@ describe('EPM install', () => {
     const templatePriorityDatasetIsPrefixUnset = 200;
     await installTemplate({
       esClient,
+      logger: loggerMock.create(),
       fields,
       dataStream: dataStreamDatasetIsPrefixUnset,
       packageVersion: pkg.version,
@@ -84,6 +86,7 @@ describe('EPM install', () => {
     const templatePriorityDatasetIsPrefixFalse = 200;
     await installTemplate({
       esClient,
+      logger: loggerMock.create(),
       fields,
       dataStream: dataStreamDatasetIsPrefixFalse,
       packageVersion: pkg.version,
@@ -124,6 +127,7 @@ describe('EPM install', () => {
     const templatePriorityDatasetIsPrefixTrue = 150;
     await installTemplate({
       esClient,
+      logger: loggerMock.create(),
       fields,
       dataStream: dataStreamDatasetIsPrefixTrue,
       packageVersion: pkg.version,
@@ -174,6 +178,7 @@ describe('EPM install', () => {
     const templatePriorityDatasetIsPrefixUnset = 200;
     await installTemplate({
       esClient,
+      logger: loggerMock.create(),
       fields,
       dataStream: dataStreamDatasetIsPrefixUnset,
       packageVersion: pkg.version,

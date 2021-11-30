@@ -7,6 +7,7 @@
 
 import type { SavedObjectsClientContract, ElasticsearchClient } from 'src/core/server';
 import { savedObjectsClientMock, elasticsearchServiceMock } from 'src/core/server/mocks';
+import { loggerMock } from '@kbn/logging/mocks';
 
 import { appContextService } from '../../app_context';
 import { createAppContextStartContractMock } from '../../../mocks';
@@ -66,6 +67,7 @@ describe('_installPackage', () => {
     const installationPromise = _installPackage({
       savedObjectsClient: soClient,
       esClient,
+      logger: loggerMock.create(),
       paths: [],
       packageInfo: {
         title: 'title',
