@@ -26,6 +26,8 @@ export const CrawlDetailsPreview: React.FC = () => {
   return (
     <>
       <AccordionList
+        hasBorder
+        initialIsOpen={crawlRequest.crawlConfig.domainAllowlist.length > 0}
         title={i18n.translate(
           'xpack.enterpriseSearch.appSearch.crawler.crawlDetailsPreview.domainsTitle',
           {
@@ -37,6 +39,8 @@ export const CrawlDetailsPreview: React.FC = () => {
       />
       <EuiSpacer size="s" />
       <AccordionList
+        hasBorder
+        initialIsOpen={crawlRequest.crawlConfig.seedUrls.length > 0}
         title={i18n.translate(
           'xpack.enterpriseSearch.appSearch.crawler.crawlDetailsPreview.seedUrlsTitle',
           {
@@ -48,6 +52,8 @@ export const CrawlDetailsPreview: React.FC = () => {
       />
       <EuiSpacer size="s" />
       <AccordionList
+        hasBorder
+        initialIsOpen={crawlRequest.crawlConfig.sitemapUrls.length > 0}
         title={i18n.translate(
           'xpack.enterpriseSearch.appSearch.crawler.crawlDetailsPreview.sitemapUrlsTitle',
           {

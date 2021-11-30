@@ -19,22 +19,28 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 
+import './accordion_list.scss';
+
 interface Props {
   iconType: IconType;
   items: string[];
+  hasBorder?: boolean;
+  initialIsOpen?: boolean;
   title: string;
 }
 
-export const AccordionList: React.FC<Props> = ({ iconType, items, title }) => {
+export const AccordionList: React.FC<Props> = ({ iconType, items, hasBorder, initialIsOpen, title }) => {
   const accordionId = useGeneratedHtmlId({
     prefix: 'accordionList',
   });
 
   return (
     <EuiAccordion
+      initialIsOpen={initialIsOpen}
       arrowProps={{
         isDisabled: items.length === 0,
       }}
+      className={hasBorder ? 'appSearchAccordion--bordered' : 'appSearchAccordion'}
       buttonContent={
         <EuiFlexGroup direction="row" responsive={false} gutterSize="s" alignItems="center">
           <EuiFlexItem grow={false}>
@@ -57,9 +63,9 @@ export const AccordionList: React.FC<Props> = ({ iconType, items, title }) => {
             render: ({ item }: { item: string }) => item,
           },
         ]}
-        pagination={{
+        pagination={ items.length > 10 ? {
           hidePerPageOptions: true,
-        }}
+        } : false}
       />
     </EuiAccordion>
   );
