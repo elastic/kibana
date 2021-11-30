@@ -557,6 +557,7 @@
     "@types/json5": "^0.0.30",
     "@types/kbn__ace": "link:bazel-bin/packages/kbn-ace/npm_module_types",
     "@types/kbn__alerts": "link:bazel-bin/packages/kbn-alerts/npm_module_types",
+    "@types/kbn__analytics": "link:bazel-bin/packages/kbn-analytics/npm_module_types",
     "@types/kbn__i18n": "link:bazel-bin/packages/kbn-i18n/npm_module_types",
     "@types/kbn__i18n-react": "link:bazel-bin/packages/kbn-i18n-react/npm_module_types",
     "@types/license-checker": "15.0.0",

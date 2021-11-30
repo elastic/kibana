@@ -79,6 +79,7 @@ filegroup(
       "//packages/elastic-datemath:build_types",
       "//packages/kbn-ace:build_types",
       "//packages/kbn-alerts:build_types",
+      "//packages/kbn-analytics:build_types",
       "//packages/kbn-i18n:build_types",
       "//packages/kbn-i18n-react:build_types",
   ],
