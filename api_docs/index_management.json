@@ -240,12 +240,12 @@
           {
             "parentPluginId": "indexManagement",
             "id": "def-public.Index.Unnamed",
-            "type": "Any",
+            "type": "IndexSignature",
             "tags": [],
-            "label": "Unnamed",
+            "label": "[key: string]: any",
             "description": [],
             "signature": [
-              "any"
+              "[key: string]:  any"
             ],
             "path": "x-pack/plugins/index_management/common/types/indices.ts",
             "deprecated": false
@@ -503,12 +503,12 @@
           {
             "parentPluginId": "indexManagement",
             "id": "def-server.Index.Unnamed",
-            "type": "Any",
+            "type": "IndexSignature",
             "tags": [],
-            "label": "Unnamed",
+            "label": "[key: string]: any",
             "description": [],
             "signature": [
-              "any"
+              "[key: string]:  any"
             ],
             "path": "x-pack/plugins/index_management/common/types/indices.ts",
             "deprecated": false
@@ -780,12 +780,12 @@
           {
             "parentPluginId": "indexManagement",
             "id": "def-common.Aliases.Unnamed",
-            "type": "Any",
+            "type": "IndexSignature",
             "tags": [],
-            "label": "Unnamed",
+            "label": "[key: string]: any",
             "description": [],
             "signature": [
-              "any"
+              "[key: string]:  any"
             ],
             "path": "x-pack/plugins/index_management/common/types/aliases.ts",
             "deprecated": false
@@ -1566,12 +1566,12 @@
           {
             "parentPluginId": "indexManagement",
             "id": "def-common.Index.Unnamed",
-            "type": "Any",
+            "type": "IndexSignature",
             "tags": [],
-            "label": "Unnamed",
+            "label": "[key: string]: any",
             "description": [],
             "signature": [
-              "any"
+              "[key: string]:  any"
             ],
             "path": "x-pack/plugins/index_management/common/types/indices.ts",
             "deprecated": false
@@ -1618,12 +1618,12 @@
           {
             "parentPluginId": "indexManagement",
             "id": "def-common.IndexSettings.Unnamed",
-            "type": "Any",
+            "type": "IndexSignature",
             "tags": [],
-            "label": "Unnamed",
+            "label": "[key: string]: any",
             "description": [],
             "signature": [
-              "any"
+              "[key: string]:  any"
             ],
             "path": "x-pack/plugins/index_management/common/types/indices.ts",
             "deprecated": false
@@ -1758,12 +1758,12 @@
           {
             "parentPluginId": "indexManagement",
             "id": "def-common.Mappings.Unnamed",
-            "type": "Any",
+            "type": "IndexSignature",
             "tags": [],
-            "label": "Unnamed",
+            "label": "[key: string]: any",
             "description": [],
             "signature": [
-              "any"
+              "[key: string]:  any"
             ],
             "path": "x-pack/plugins/index_management/common/types/mappings.ts",
             "deprecated": false
