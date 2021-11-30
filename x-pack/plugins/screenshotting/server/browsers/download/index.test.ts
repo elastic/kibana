@@ -9,12 +9,12 @@ import path from 'path';
 import mockFs from 'mock-fs';
 import { existsSync, readdirSync } from 'fs';
 import { ChromiumArchivePaths } from '../chromium';
-import { download } from './download';
+import { fetch } from './fetch';
 import { md5 } from './checksum';
-import { ensureDownloaded } from './ensure_downloaded';
+import { download } from '.';
 
 jest.mock('./checksum');
-jest.mock('./download');
+jest.mock('./fetch');
 
 describe('ensureDownloaded', () => {
   let paths: ChromiumArchivePaths;
@@ -28,7 +28,7 @@ describe('ensureDownloaded', () => {
           ?.archiveChecksum ?? 'some-md5'
     );
 
-    (download as jest.MockedFunction<typeof download>).mockImplementation(
+    (fetch as jest.MockedFunction<typeof fetch>).mockImplementation(
       async (_url, packagePath) =>
         paths.packages.find((packageInfo) => paths.resolvePath(packageInfo) === packagePath)
           ?.archiveChecksum ?? 'some-md5'
@@ -51,24 +51,22 @@ describe('ensureDownloaded', () => {
       [unexpectedPath2]: 'test',
     });
 
-    await ensureDownloaded([paths]);
+    await download(paths);
 
     expect(existsSync(unexpectedPath1)).toBe(false);
     expect(existsSync(unexpectedPath2)).toBe(false);
   });
 
   it('should reject when download fails', async () => {
-    (download as jest.MockedFunction<typeof download>).mockRejectedValueOnce(
-      new Error('some error')
-    );
+    (fetch as jest.MockedFunction<typeof fetch>).mockRejectedValueOnce(new Error('some error'));
 
-    await expect(ensureDownloaded([paths])).rejects.toBeInstanceOf(Error);
+    await expect(download(paths)).rejects.toBeInstanceOf(Error);
   });
 
   it('should reject when downloaded md5 hash is different', async () => {
-    (download as jest.MockedFunction<typeof download>).mockResolvedValue('random-md5');
+    (fetch as jest.MockedFunction<typeof fetch>).mockResolvedValue('random-md5');
 
-    await expect(ensureDownloaded([paths])).rejects.toBeInstanceOf(Error);
+    await expect(download(paths)).rejects.toBeInstanceOf(Error);
   });
 
   describe('when archives are already present', () => {
@@ -81,9 +79,9 @@ describe('ensureDownloaded', () => {
     });
 
     it('should not download again', async () => {
-      await ensureDownloaded([paths]);
+      await download(paths);
 
-      expect(download).not.toHaveBeenCalled();
+      expect(fetch).not.toHaveBeenCalled();
       expect(readdirSync(path.resolve(`${paths.archivesPath}/x64`))).toEqual(
         expect.arrayContaining([
           'chrome-win.zip',
@@ -98,9 +96,9 @@ describe('ensureDownloaded', () => {
 
     it('should download again if md5 hash different', async () => {
       (md5 as jest.MockedFunction<typeof md5>).mockResolvedValueOnce('random-md5');
-      await ensureDownloaded([paths]);
+      await download(paths);
 
-      expect(download).toHaveBeenCalledTimes(1);
+      expect(fetch).toHaveBeenCalledTimes(1);
     });
   });
 });

@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+export { download } from './download';
 export { install } from './install';
 export type { ConditionalHeaders } from './chromium';
 export {
   getChromiumDisconnectedError,
+  ChromiumArchivePaths,
   DEFAULT_VIEWPORT,
   HeadlessChromiumDriver,
   HeadlessChromiumDriverFactory,

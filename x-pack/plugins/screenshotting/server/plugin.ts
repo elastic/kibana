@@ -15,7 +15,7 @@ import type {
   PluginInitializerContext,
 } from 'src/core/server';
 import type { ScreenshotModePluginSetup } from 'src/plugins/screenshot_mode/server';
-import { HeadlessChromiumDriverFactory, installBrowser } from './browsers';
+import { ChromiumArchivePaths, HeadlessChromiumDriverFactory, install } from './browsers';
 import { createConfig, ConfigType } from './config';
 import { getScreenshots, ScreenshotOptions } from './screenshots';
 
@@ -43,10 +43,11 @@ export class ScreenshottingPlugin implements Plugin<void, ScreenshottingStart, S
     this.screenshotMode = screenshotMode;
     this.browserDriverFactory = (async () => {
       try {
+        const paths = new ChromiumArchivePaths();
         const logger = this.logger.get('chromium');
         const [config, binaryPath] = await Promise.all([
           createConfig(this.logger, this.config),
-          installBrowser(logger),
+          install(paths, logger),
         ]);
 
         return new HeadlessChromiumDriverFactory(this.screenshotMode, config, logger, binaryPath);

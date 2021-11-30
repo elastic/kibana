@@ -10,7 +10,7 @@ import os from 'os';
 import path from 'path';
 import type { Logger } from 'src/core/server';
 import { ChromiumArchivePaths } from './chromium';
-import { ensureDownloaded } from './download';
+import { download } from './download';
 import { md5 } from './download/checksum';
 import { extract } from './extract';
 
@@ -19,12 +19,12 @@ import { extract } from './extract';
  * archive. If there is an error extracting the archive an `ExtractError` is thrown
  */
 export async function install(
+  paths: ChromiumArchivePaths,
   logger: Logger,
   chromiumPath: string = path.resolve(__dirname, '../../chromium'),
   platform: string = process.platform,
   architecture: string = os.arch()
 ): Promise<string> {
-  const paths = new ChromiumArchivePaths();
   const pkg = paths.find(platform, architecture);
 
   if (!pkg) {
@@ -46,7 +46,7 @@ export async function install(
     }
 
     try {
-      await ensureDownloaded([paths], logger);
+      await download(paths, logger);
       const archive = path.join(paths.archivesPath, pkg.architecture, pkg.archiveFilename);
       logger.info(`Extracting [${archive}] to [${chromiumPath}]`);
       await extract(archive, chromiumPath);

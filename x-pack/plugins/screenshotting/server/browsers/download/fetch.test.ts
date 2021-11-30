@@ -11,12 +11,12 @@ import { createHash } from 'crypto';
 import { readFileSync } from 'fs';
 import { resolve as resolvePath } from 'path';
 import { Readable } from 'stream';
-import { download } from './download';
+import { fetch } from './fetch';
 
 const TEMP_DIR = resolvePath(__dirname, '__tmp__');
 const TEMP_FILE = resolvePath(TEMP_DIR, 'foo/bar/download');
 
-describe('download', () => {
+describe('fetch', () => {
   beforeEach(() => {
     jest.spyOn(axios, 'request').mockResolvedValue({
       data: new Readable({
@@ -36,7 +36,7 @@ describe('download', () => {
   });
 
   test('downloads the url to the path', async () => {
-    await download('url', TEMP_FILE);
+    await fetch('url', TEMP_FILE);
 
     expect(readFileSync(TEMP_FILE, 'utf8')).toEqual('foobar');
   });
@@ -44,7 +44,7 @@ describe('download', () => {
   test('returns the md5 hex hash of the http body', async () => {
     const hash = createHash('md5').update('foobar').digest('hex');
 
-    await expect(download('url', TEMP_FILE)).resolves.toEqual(hash);
+    await expect(fetch('url', TEMP_FILE)).resolves.toEqual(hash);
   });
 
   test('throws if request emits an error', async () => {
@@ -52,6 +52,6 @@ describe('download', () => {
       throw new Error('foo');
     });
 
-    await expect(download('url', TEMP_FILE)).rejects.toThrow('foo');
+    await expect(fetch('url', TEMP_FILE)).rejects.toThrow('foo');
   });
 });

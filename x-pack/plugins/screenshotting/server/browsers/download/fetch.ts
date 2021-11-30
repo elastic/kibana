@@ -16,7 +16,7 @@ import type { Logger } from 'src/core/server';
 /**
  * Download a url and calculate it's checksum
  */
-export async function download(url: string, path: string, logger?: Logger): Promise<string> {
+export async function fetch(url: string, path: string, logger?: Logger): Promise<string> {
   logger?.info(`Downloading ${url} to ${path}`);
 
   const hash = createHash('md5');
