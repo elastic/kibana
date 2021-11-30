@@ -1,23 +1,29 @@
 [[connect-to-elasticsearch]]
 == Add data
 
-The best way to add data to the Elastic Stack is to use one of our many integrations.
+The best way to add data to the Elastic Stack is to use one of our many integrations,
+which are pre-packaged assets that are available for a wide array of popular
+services and platforms. With integrations, you can add monitoring for logs and
+metrics, protect systems from security threats, and more.
+
 All integrations are available in a single view, and
-{kib} guides you there from the Welcome screen, home page, and main menu.
+{kib} guides you there from the *Welcome* screen, home page, and main menu.
 
 [role="screenshot"]
 image::images/add-integration.png[Integrations page from which you can choose integrations to start collecting and analyzing data]
 
-NOTE: When an integration is available for
-https://www.elastic.co/guide/en/fleet/master/beats-agent-comparison.html[Elastic Agent and Beats] and is generally available (GA), the *Integrations* view defaults to the
-Elastic Agent integration..
-To switch to a
-Beats integration, use the filter on the bottom left.
+NOTE: When an integration is available for both
+https://www.elastic.co/guide/en/fleet/master/beats-agent-comparison.html[Elastic Agent and Beats],
+the *Integrations* view defaults to the
+Elastic Agent integration, if it is generally available (GA).
+To show a
+Beats integration, use the filter below the side navigation.
 
 [float]
 === Add data with Elastic solutions
 
-A good place to start is with one of the promoted integrations:
+A good place to start is with one of our Elastic solutions, which
+offer experiences for common use cases.
 
 * *Web site search crawler.*
 Discover, extract, and index your web content into App Search engines using the
@@ -64,12 +70,12 @@ image::images/add-sample-data.png[eCommerce, flights, and web logs sample data s
 
 [discrete]
 [[upload-data-kibana]]
-=== Upload data files
+=== Upload a data file
 
 If you have a log file or delimited CSV, TSV, or JSON file, you can upload it,
 view its fields and metrics, and optionally import it into {es}.
-In the *Integrations* view, search for *upload*, and then
-click *Upload a file*.
+In the *Integrations* view, search for *Upload a file*, and then drop your file on the target.
+
 By default, you can upload a file up to 100 MB. This value is configurable up to 1 GB in
 <<fileupload-maxfilesize,Advanced Settings>>.
 
