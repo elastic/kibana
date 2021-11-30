@@ -34,6 +34,7 @@ describe('Axes Settings', () => {
       areTickLabelsVisible: true,
       areGridlinesVisible: true,
       isAxisTitleVisible: true,
+      updateColor: jest.fn(),
       toggleAxisTitleVisibility: jest.fn(),
       toggleTickLabelsVisibility: jest.fn(),
       toggleGridlinesVisibility: jest.fn(),
@@ -130,16 +131,14 @@ describe('Axes Settings', () => {
     });
 
     it('reports a new color choice', () => {
-      const updateColorMock = jest.fn();
-
-      const component = shallow(<AxisSettingsPopover {...props} updateColor={updateColorMock} />);
+      const component = shallow(<AxisSettingsPopover {...props} />);
 
       const newColor = 'new-color';
 
       component.find(EuiColorPicker).prop('onChange')(newColor, {} as EuiColorPickerOutput);
 
-      expect(updateColorMock).toHaveBeenCalledTimes(1);
-      expect(updateColorMock).toHaveBeenCalledWith(props.axis, newColor);
+      expect(props.updateColor).toHaveBeenCalledTimes(1);
+      expect(props.updateColor).toHaveBeenCalledWith(props.axis, newColor);
     });
   });
 
