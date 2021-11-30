@@ -8,6 +8,7 @@
 import { filter } from 'lodash';
 import type { Node } from 'unist';
 import markdown from 'remark-parse';
+// import remarkGfm from 'remark-gfm';
 import remarkStringify from 'remark-stringify';
 import unified from 'unified';
 
@@ -44,6 +45,7 @@ export const parseCommentString = (comment: string) => {
 
 export const stringifyMarkdownComment = (comment: MarkdownNode) =>
   unified()
+    // .use(remarkGfm)
     .use([
       [
         remarkStringify,

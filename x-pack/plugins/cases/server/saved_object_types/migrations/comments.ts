@@ -8,18 +8,20 @@
 import { mapValues, trimEnd } from 'lodash';
 import { SerializableRecord } from '@kbn/utility-types';
 
-import { LensServerPluginSetup } from '../../../../lens/server';
 import {
   mergeMigrationFunctionMaps,
   MigrateFunction,
   MigrateFunctionsObject,
-} from '../../../../../../src/plugins/kibana_utils/common';
+} from 'src/plugins/kibana_utils/common';
 import {
   SavedObjectUnsanitizedDoc,
   SavedObjectSanitizedDoc,
   SavedObjectMigrationFn,
   SavedObjectMigrationMap,
-} from '../../../../../../src/core/server';
+  SavedObjectMigrationContext,
+  LogMeta,
+} from 'src/core/server';
+import { LensServerPluginSetup } from '../../../../lens/server';
 import { CommentType, AssociationType } from '../../../common';
 import {
   isLensMarkdownNode,
@@ -43,6 +45,10 @@ interface SanitizedComment {
 interface SanitizedCommentForSubCases {
   associationType: AssociationType;
   rule?: { id: string | null; name: string | null };
+}
+
+interface CommentLogMeta extends LogMeta {
+  migrations: { comment: { id: string } };
 }
 
 export interface CreateCommentsMigrationsDeps {
@@ -105,31 +111,35 @@ export const createCommentsMigrations = (
 
 const migrateByValueLensVisualizations =
   (migrate: MigrateFunction, version: string): SavedObjectMigrationFn<{ comment?: string }> =>
-  (doc: SavedObjectUnsanitizedDoc<{ comment?: string }>) => {
+  (doc: SavedObjectUnsanitizedDoc<{ comment?: string }>, context: SavedObjectMigrationContext) => {
     if (doc.attributes.comment == null) {
       return doc;
     }
+    try {
+      const parsedComment = parseCommentString(doc.attributes.comment);
+      const migratedComment = parsedComment.children.map((comment) => {
+        if (isLensMarkdownNode(comment)) {
+          // casting here because ts complains that comment isn't serializable because LensMarkdownNode
+          // extends Node which has fields that conflict with SerializableRecord even though it is serializable
+          return migrate(comment as SerializableRecord) as LensMarkdownNode;
+        }
 
-    const parsedComment = parseCommentString(doc.attributes.comment);
-    const migratedComment = parsedComment.children.map((comment) => {
-      if (isLensMarkdownNode(comment)) {
-        // casting here because ts complains that comment isn't serializable because LensMarkdownNode
-        // extends Node which has fields that conflict with SerializableRecord even though it is serializable
-        return migrate(comment as SerializableRecord) as LensMarkdownNode;
-      }
+        return comment;
+      });
 
-      return comment;
-    });
+      const migratedMarkdown = { ...parsedComment, children: migratedComment };
 
-    const migratedMarkdown = { ...parsedComment, children: migratedComment };
-
-    return {
-      ...doc,
-      attributes: {
-        ...doc.attributes,
-        comment: stringifyCommentWithoutTrailingNewline(doc.attributes.comment, migratedMarkdown),
-      },
-    };
+      return {
+        ...doc,
+        attributes: {
+          ...doc.attributes,
+          comment: stringifyCommentWithoutTrailingNewline(doc.attributes.comment, migratedMarkdown),
+        },
+      };
+    } catch (e) {
+      logError(doc.id, context, e);
+      return doc;
+    }
   };
 
 export const stringifyCommentWithoutTrailingNewline = (
@@ -147,3 +157,16 @@ export const stringifyCommentWithoutTrailingNewline = (
   // so the comment stays consistent
   return trimEnd(stringifiedComment, '\n');
 };
+
+function logError(id: string, context: SavedObjectMigrationContext, error: Error) {
+  context.log.error<CommentLogMeta>(
+    `Failed to migrate comment with doc id: ${id} version: ${context.migrationVersion} error: ${error.message}`,
+    {
+      migrations: {
+        comment: {
+          id,
+        },
+      },
+    }
+  );
+}

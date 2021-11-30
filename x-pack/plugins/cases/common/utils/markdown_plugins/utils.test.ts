@@ -18,5 +18,18 @@ describe('markdown utils', () => {
       const parsed = parseCommentString('hello\n');
       expect(stringifyMarkdownComment(parsed)).toEqual('hello\n');
     });
+
+    it('does not add a newline to¸ if one already exists', () => {
+      const parsed = parseCommentString(`| Tables   |      Are      |  Cool |
+      |----------|:-------------:|------:|
+      | col 1 is |  left-aligned | $1600 |
+      | col 2 is |    centered   |   $12 |
+      | col 3 is | right-aligned |    $1 |`);
+      expect(stringifyMarkdownComment(parsed)).toEqual(`| Tables   |      Are      |  Cool |
+      |----------|:-------------:|------:|
+      | col 1 is |  left-aligned | $1600 |
+      | col 2 is |    centered   |   $12 |
+      | col 3 is | right-aligned |    $1 |`);
+    });
   });
 });
