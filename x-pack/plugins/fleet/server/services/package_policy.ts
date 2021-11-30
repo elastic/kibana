@@ -1066,11 +1066,26 @@ export function updatePackageInputs(
   ];
 
   for (const update of inputsUpdated) {
-    // If update have an undefined policy template
-    // we only match on `type` .
-    let originalInput = update.policy_template
-      ? inputs.find((i) => i.type === update.type && i.policy_template === update.policy_template)
-      : inputs.find((i) => i.type === update.type);
+    let originalInput: NewPackagePolicyInput | undefined;
+
+    if (update.policy_template) {
+      // If the updated value defines a policy template, try to find an original input
+      // with the same policy template value
+      const matchingInput = inputs.find(
+        (i) => i.type === update.type && i.policy_template === update.policy_template
+      );
+
+      // If we didn't find an input with the same policy template, try to look for one
+      // with the same type, but with an undefined policy template. This ensures we catch
+      // cases where we're upgrading an older policy from before policy template was
+      // reliably define on package policy inputs.
+      originalInput =
+        matchingInput || inputs.find((i) => i.type === update.type && !i.policy_template);
+    } else {
+      // For inputs that don't specify a policy template, just grab the first input
+      // that matches its `type`
+      originalInput = inputs.find((i) => i.type === update.type);
+    }
 
     // If there's no corresponding input on the original package policy, just
     // take the override value from the new package as-is. This case typically
