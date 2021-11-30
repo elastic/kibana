@@ -1812,7 +1812,7 @@ export type ResponseError = string | Error | {
 export type ResponseErrorAttributes = Record<string, any>;
 
 // @public
-export type ResponseHeaders = Record<string, string | string[]>;
+export type ResponseHeaders = Record<KnownHeaders, string | string[]> | Record<string, string | string[]>;
 
 // @public
 export interface RouteConfig<P, Q, B, Method extends RouteMethod> {
