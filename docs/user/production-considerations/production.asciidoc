@@ -18,8 +18,7 @@ you can configure {kib} to use a list of {es} hosts.
 
 [WARNING]
 ====
-Running more than one {kib} version against the same {es} index is unsupported.
-Upgrading while older {kib} instances are running can cause data loss or upgrade failures.
+{kib} does not support rolling upgrades, and deploying mixed versions of {kib} can result in data loss or upgrade failures. Please shut down all instances of {kib} before performing an upgrade, and ensure all running {kib} instances have matching versions.
 ====
 
 [float]
