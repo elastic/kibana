@@ -13,11 +13,7 @@ import { getPolicyDetailsArtifactsListPath } from '../../../../../common/routing
 import { PolicyTrustedAppsList, PolicyTrustedAppsListProps } from './policy_trusted_apps_list';
 import React from 'react';
 import { policyDetailsPageAllApiHttpMocks } from '../../../test_utils';
-import {
-  createLoadingResourceState,
-  isFailedResourceState,
-  isLoadedResourceState,
-} from '../../../../../state';
+import { isFailedResourceState, isLoadedResourceState } from '../../../../../state';
 import { fireEvent, within, act, waitFor } from '@testing-library/react';
 import { APP_UI_ID } from '../../../../../../../common/constants';
 import {
