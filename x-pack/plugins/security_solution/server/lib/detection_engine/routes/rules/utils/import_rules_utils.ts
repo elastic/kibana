@@ -263,6 +263,7 @@ export const importRules = async ({
                     threshold,
                     threatFilters,
                     threatIndex,
+                    threatIndicatorPath,
                     threatQuery,
                     threatMapping,
                     threatLanguage,
