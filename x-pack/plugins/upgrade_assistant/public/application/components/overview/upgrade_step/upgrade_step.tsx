@@ -13,7 +13,7 @@ import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 
 const i18nTexts = {
   upgradeStepTitle: i18n.translate('xpack.upgradeAssistant.overview.upgradeStepTitle', {
-    defaultMessage: 'Check back here when it's time to upgrade to 8.x',
+    defaultMessage: `Check back here when it's time to upgrade to 8.x`,
   }),
   upgradeStepDescription: i18n.translate('xpack.upgradeAssistant.overview.upgradeStepDescription', {
     defaultMessage: `If you've resolved all critical issues and checked your deprecation logs, you're ready for the next major version of Elastic. Check this page again before upgrading to Elastic 8.x.`,
