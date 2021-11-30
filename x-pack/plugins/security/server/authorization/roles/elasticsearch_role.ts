@@ -243,10 +243,10 @@ function transformRoleApplicationsToKibanaPrivileges(
         return {
           ...(reservedPrivileges.length
             ? {
-              _reserved: reservedPrivileges.map((privilege) =>
-                PrivilegeSerializer.deserializeReservedPrivilege(privilege)
-              ),
-            }
+                _reserved: reservedPrivileges.map((privilege) =>
+                  PrivilegeSerializer.deserializeReservedPrivilege(privilege)
+                ),
+              }
             : {}),
           base: basePrivileges.map((privilege) =>
             PrivilegeSerializer.serializeGlobalBasePrivilege(privilege)

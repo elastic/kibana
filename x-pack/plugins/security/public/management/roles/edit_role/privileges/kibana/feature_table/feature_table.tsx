@@ -291,6 +291,15 @@ export class FeatureTable extends Component<Props, {}> {
       isDisabled: this.props.disabled ?? false,
     });
 
+    const getSelectedId = () => {
+      const p = primaryFeaturePrivileges.find((privilege) => privilege.id === selectedPrivilegeId);
+      const correctSpacesSelected = p?.requireAllSpaces && !this.props.allSpacesSelected;
+
+      if (!selectedPrivilegeId || p?.disabled || correctSpacesSelected)
+        return `${feature.id}_${NO_PRIVILEGE_VALUE}`;
+      else return `${feature.id}_${selectedPrivilegeId}`;
+    };
+
     let warningIcon = <EuiIconTip type="empty" content={null} />;
     if (
       this.props.privilegeCalculator.hasCustomizedSubFeaturePrivileges(
@@ -329,7 +338,7 @@ export class FeatureTable extends Component<Props, {}> {
         data-test-subj={`primaryFeaturePrivilegeControl`}
         isFullWidth={true}
         options={options}
-        idSelected={`${feature.id}_${selectedPrivilegeId ?? NO_PRIVILEGE_VALUE}`}
+        idSelected={getSelectedId()}
         onChange={this.onChange(feature.id)}
         legend={i18n.translate('xpack.security.management.editRole.featureTable.actionLegendText', {
           defaultMessage: '{featureName} feature privilege',
