@@ -104,7 +104,7 @@ describe('Fields Browser', () => {
         });
     });
 
-    it.skip('displays a count of only the fields in the selected category that match the filter input', () => {
+    it('displays a count of only the fields in the selected category that match the filter input', () => {
       const filterInput = 'host.geo.c';
 
       filterFieldsBrowser(filterInput);
