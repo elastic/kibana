@@ -11,6 +11,7 @@ import {
   axisExtentConfig,
   yAxisConfig,
   axisTitlesVisibilityConfig,
+  axisColorsConfig,
 } from '../common/expressions/xy_chart/axis_config';
 import { gridlinesConfig } from '../common/expressions/xy_chart/grid_lines_config';
 import { labelsOrientationConfig } from '../common/expressions/xy_chart/labels_orientation_config';
@@ -57,6 +58,7 @@ export const setupExpressions = (
     datatableColumn,
     tickLabelsConfig,
     axisTitlesVisibilityConfig,
+    axisColorsConfig,
     heatmap,
     heatmapLegendConfig,
     heatmapGridConfig,

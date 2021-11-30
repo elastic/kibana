@@ -14,7 +14,7 @@ import { getColumnToLabelMap } from './state_helpers';
 import type { ValidLayer, XYLayerConfig } from '../../common/expressions';
 import { layerTypes } from '../../common';
 import { hasIcon } from './xy_config_panel/reference_line_panel';
-import { defaultReferenceLineColor } from './color_assignment';
+import { defaultAxisLineColor, defaultReferenceLineColor } from './color_assignment';
 
 export const getSortedAccessors = (datasource: DatasourcePublicAPI, layer: XYLayerConfig) => {
   const originalOrder = datasource
@@ -237,6 +237,22 @@ export const buildExpression = (
                     x: [state?.axisTitlesVisibilitySettings?.x ?? true],
                     yLeft: [state?.axisTitlesVisibilitySettings?.yLeft ?? true],
                     yRight: [state?.axisTitlesVisibilitySettings?.yRight ?? true],
+                  },
+                },
+              ],
+            },
+          ],
+          axisColorSettings: [
+            {
+              type: 'expression',
+              chain: [
+                {
+                  type: 'function',
+                  function: 'lens_xy_axisColorsConfig',
+                  arguments: {
+                    x: [state?.axisColors?.x ?? defaultAxisLineColor],
+                    yLeft: [state?.axisColors?.yLeft ?? defaultAxisLineColor],
+                    yRight: [state?.axisColors?.yRight ?? defaultAxisLineColor],
                   },
                 },
               ],

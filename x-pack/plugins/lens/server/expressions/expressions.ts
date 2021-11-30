@@ -20,6 +20,7 @@ import {
   datatableColumn,
   tickLabelsConfig,
   axisTitlesVisibilityConfig,
+  axisColorsConfig,
   getTimeScale,
   getDatatable,
   lensMultitable,
@@ -49,6 +50,7 @@ export const setupExpressions = (
     datatableColumn,
     tickLabelsConfig,
     axisTitlesVisibilityConfig,
+    axisColorsConfig,
     getDatatable(getFormatFactory(core)),
     getTimeScale(getTimeZoneFactory(core)),
   ].forEach((expressionFn) => expressions.registerFunction(expressionFn));

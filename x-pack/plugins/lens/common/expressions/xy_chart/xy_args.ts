@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import type { AxisExtentConfigResult, AxisTitlesVisibilityConfigResult } from './axis_config';
+import type {
+  AxisColorsConfigResult,
+  AxisExtentConfigResult,
+  AxisTitlesVisibilityConfigResult,
+} from './axis_config';
 import type { FittingFunction } from './fitting_function';
 import type { GridlinesConfigResult } from './grid_lines_config';
 import type { LayerArgs } from './layer_config';
@@ -30,6 +34,7 @@ export interface XYArgs {
   layers: LayerArgs[];
   fittingFunction?: FittingFunction;
   axisTitlesVisibilitySettings?: AxisTitlesVisibilityConfigResult;
+  axisColorSettings?: AxisColorsConfigResult;
   tickLabelsVisibilitySettings?: TickLabelsConfigResult;
   gridlinesVisibilitySettings?: GridlinesConfigResult;
   labelsOrientation?: LabelsOrientationConfigResult;

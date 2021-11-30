@@ -25,11 +25,12 @@ import { PaletteOutput } from 'src/plugins/charts/public';
 import { calculateMinInterval, XYChart, XYChartRenderProps } from './expression';
 import type { LensMultiTable } from '../../common';
 import { layerTypes } from '../../common';
-import { xyChart } from '../../common/expressions';
+import { AxesSettingsStringConfig, xyChart } from '../../common/expressions';
 import {
   layerConfig,
   legendConfig,
   tickLabelsConfig,
+  axisColorsConfig,
   gridlinesConfig,
   XYArgs,
   LegendConfig,
@@ -47,6 +48,7 @@ import { mountWithIntl } from '@kbn/test/jest';
 import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
 import { EmptyPlaceholder } from '../shared_components/empty_placeholder';
 import { XyEndzones } from './x_domain';
+import { defaultAxisLineColor } from './color_assignment';
 
 const onClickValue = jest.fn();
 const onSelectRange = jest.fn();
@@ -422,6 +424,21 @@ describe('xy_expression', () => {
 
     expect(result).toEqual({
       type: 'lens_xy_tickLabelsConfig',
+      ...args,
+    });
+  });
+
+  test('axisColorsConfig produces the correct arguments', () => {
+    const args: AxesSettingsStringConfig = {
+      x: '#x-color',
+      yLeft: '#yleft-color',
+      yRight: '#yright-color',
+    };
+
+    const result = axisColorsConfig.fn(null, args, createMockExecutionContext());
+
+    expect(result).toEqual({
+      type: 'lens_xy_axisColorsConfig',
       ...args,
     });
   });
@@ -2692,6 +2709,49 @@ describe('xy_expression', () => {
 
       expect(component.find(Axis).at(0).prop('gridLine')).toMatchObject({
         visible: true,
+      });
+    });
+
+    describe('axis colors', () => {
+      test('it should apply default axis colors', () => {
+        const { data, args } = sampleArgs();
+
+        args.axisColorSettings = undefined;
+
+        const component = shallow(
+          <XYChart {...defaultProps} data={{ ...data }} args={{ ...args }} />
+        );
+
+        const axes = component.find(Axis);
+        expect(axes.at(0).prop('style')?.axisLine).toMatchObject({
+          stroke: defaultAxisLineColor,
+        });
+        expect(axes.at(1).prop('style')?.axisLine).toMatchObject({
+          stroke: defaultAxisLineColor,
+        });
+      });
+
+      test('it should apply custom axis colors', () => {
+        const { data, args } = sampleArgs();
+
+        args.axisColorSettings = {
+          x: '#x-axis',
+          yLeft: '#yleft-axis',
+          yRight: '#yright-axis',
+          type: 'lens_xy_axisColorsConfig',
+        };
+
+        const component = shallow(
+          <XYChart {...defaultProps} data={{ ...data }} args={{ ...args }} />
+        );
+
+        const axes = component.find(Axis);
+        expect(axes.at(0).prop('style')?.axisLine).toMatchObject({
+          stroke: args.axisColorSettings.x,
+        });
+        expect(axes.at(1).prop('style')?.axisLine).toMatchObject({
+          stroke: args.axisColorSettings.yLeft,
+        });
       });
     });
 

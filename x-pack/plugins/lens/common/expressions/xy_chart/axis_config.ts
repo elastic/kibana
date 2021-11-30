@@ -50,6 +50,49 @@ export interface YConfig {
   textVisibility?: boolean;
 }
 
+export type AxisColorsConfigResult = AxesSettingsStringConfig & {
+  type: 'lens_xy_axisColorsConfig';
+};
+
+export const axisColorsConfig: ExpressionFunctionDefinition<
+  'lens_xy_axisColorsConfig',
+  null,
+  AxesSettingsStringConfig,
+  AxisColorsConfigResult
+> = {
+  name: 'lens_xy_axisColorsConfig',
+  aliases: [],
+  type: 'lens_xy_axisColorsConfig',
+  help: `Configure the xy chart's axis titles appearance`,
+  inputTypes: ['null'],
+  args: {
+    x: {
+      types: ['string'],
+      help: i18n.translate('xpack.lens.xyChart.xAxisColor.help', {
+        defaultMessage: 'The color of the x-axis.',
+      }),
+    },
+    yLeft: {
+      types: ['string'],
+      help: i18n.translate('xpack.lens.xyChart.yLeftAxisColor.help', {
+        defaultMessage: 'The color of the left y-axis.',
+      }),
+    },
+    yRight: {
+      types: ['string'],
+      help: i18n.translate('xpack.lens.xyChart.yRightAxisColor.help', {
+        defaultMessage: 'The color of the right y-axis.',
+      }),
+    },
+  },
+  fn: function fn(input: unknown, args: AxesSettingsStringConfig) {
+    return {
+      type: 'lens_xy_axisColorsConfig',
+      ...args,
+    };
+  },
+};
+
 export type AxisTitlesVisibilityConfigResult = AxesSettingsConfig & {
   type: 'lens_xy_axisTitlesVisibilityConfig';
 };

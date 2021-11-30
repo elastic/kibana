@@ -5,13 +5,35 @@ Object {
   "chain": Array [
     Object {
       "arguments": Object {
+        "axisColorSettings": Array [
+          Object {
+            "chain": Array [
+              Object {
+                "arguments": Object {
+                  "x": Array [
+                    "#123456",
+                  ],
+                  "yLeft": Array [
+                    "#654321",
+                  ],
+                  "yRight": Array [
+                    "#123456",
+                  ],
+                },
+                "function": "lens_xy_axisColorsConfig",
+                "type": "function",
+              },
+            ],
+            "type": "expression",
+          },
+        ],
         "axisTitlesVisibilitySettings": Array [
           Object {
             "chain": Array [
               Object {
                 "arguments": Object {
                   "x": Array [
-                    true,
+                    false,
                   ],
                   "yLeft": Array [
                     true,

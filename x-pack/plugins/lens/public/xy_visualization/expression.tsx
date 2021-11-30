@@ -64,7 +64,7 @@ import { MULTILAYER_TIME_AXIS_STYLE } from '../../../../../src/plugins/charts/co
 import { EmptyPlaceholder } from '../shared_components';
 import { getFitOptions } from './fitting_functions';
 import { getAxesConfiguration, GroupsConfiguration, validateExtent } from './axes_configuration';
-import { getColorAssignments } from './color_assignment';
+import { defaultAxisLineColor, getColorAssignments } from './color_assignment';
 import { getXDomain, XyEndzones } from './x_domain';
 import { getLegendAction } from './get_legend_action';
 import {
@@ -311,6 +311,15 @@ export function XYChart({
     yRight: 0,
   };
 
+  const axisColorSettings = {
+    ...{
+      x: defaultAxisLineColor,
+      yLeft: defaultAxisLineColor,
+      yRight: defaultAxisLineColor,
+    },
+    ...args.axisColorSettings,
+  };
+
   const filteredBarLayers = filteredLayers.filter((layer) => layer.seriesType.includes('bar'));
 
   const chartHasMoreThanOneBarSeries =
@@ -352,18 +361,14 @@ export function XYChart({
   };
 
   const getYAxesStyle = (groupId: 'left' | 'right') => {
-    const tickVisible =
-      groupId === 'right'
-        ? tickLabelsVisibilitySettings?.yRight
-        : tickLabelsVisibilitySettings?.yLeft;
+    const whichAxis = groupId === 'right' ? 'yRight' : 'yLeft';
+
+    const tickVisible = tickLabelsVisibilitySettings[whichAxis];
 
     const style = {
       tickLabel: {
         visible: tickVisible,
-        rotation:
-          groupId === 'right'
-            ? args.labelsOrientation?.yRight || 0
-            : args.labelsOrientation?.yLeft || 0,
+        rotation: args.labelsOrientation?.[whichAxis] || 0,
         padding:
           referenceLinePaddings[groupId] != null
             ? {
@@ -372,10 +377,7 @@ export function XYChart({
             : undefined,
       },
       axisTitle: {
-        visible:
-          groupId === 'right'
-            ? axisTitlesVisibilitySettings?.yRight
-            : axisTitlesVisibilitySettings?.yLeft,
+        visible: axisTitlesVisibilitySettings[whichAxis],
         // if labels are not visible add the padding to the title
         padding:
           !tickVisible && referenceLinePaddings[groupId] != null
@@ -383,6 +385,9 @@ export function XYChart({
                 inner: referenceLinePaddings[groupId],
               }
             : undefined,
+      },
+      axisLine: {
+        stroke: axisColorSettings[whichAxis],
       },
     };
     return style;
@@ -601,6 +606,11 @@ export function XYChart({
               : undefined,
         },
       };
+
+  xAxisStyle.axisLine = {
+    stroke: axisColorSettings.x,
+  };
+
   return (
     <Chart ref={chartRef}>
       <Settings

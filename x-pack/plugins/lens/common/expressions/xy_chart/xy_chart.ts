@@ -115,6 +115,12 @@ export const xyChart: ExpressionFunctionDefinition<
         defaultMessage: 'Show x and y axes titles',
       }),
     },
+    axisColorSettings: {
+      types: ['lens_xy_axisColorsConfig'],
+      help: i18n.translate('xpack.lens.xyChart.axisColorSettings.help', {
+        defaultMessage: 'Defines axis colors',
+      }),
+    },
     layers: {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       types: ['lens_xy_layer'] as any,

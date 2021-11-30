@@ -13,7 +13,7 @@ import { Operation } from '../types';
 import { createMockDatasource, createMockFramePublicAPI } from '../mocks';
 import { layerTypes } from '../../common';
 import { fieldFormatsServiceMock } from '../../../../../src/plugins/field_formats/public/mocks';
-import { defaultReferenceLineColor } from './color_assignment';
+import { defaultAxisLineColor, defaultReferenceLineColor } from './color_assignment';
 import { themeServiceMock } from '../../../../../src/core/public/mocks';
 
 describe('#toExpression', () => {
@@ -55,6 +55,8 @@ describe('#toExpression', () => {
           preferredSeriesType: 'bar',
           fittingFunction: 'Carry',
           tickLabelsVisibilitySettings: { x: false, yLeft: true, yRight: true },
+          axisTitlesVisibilitySettings: { x: false, yLeft: true, yRight: true },
+          axisColors: { x: '#123456', yLeft: '#654321', yRight: '#123456' },
           labelsOrientation: {
             x: 0,
             yLeft: -90,
@@ -133,6 +135,60 @@ describe('#toExpression', () => {
       x: [true],
       yLeft: [true],
       yRight: [true],
+    });
+  });
+
+  it('should populate axis colors with defaults', () => {
+    const expression = xyVisualization.toExpression(
+      {
+        legend: { position: Position.Bottom, isVisible: true },
+        valueLabels: 'hide',
+        preferredSeriesType: 'bar',
+        layers: [
+          {
+            layerId: 'first',
+            layerType: layerTypes.DATA,
+            seriesType: 'area',
+            splitAccessor: 'd',
+            xAccessor: 'a',
+            accessors: ['b', 'c'],
+          },
+        ],
+      },
+      frame.datasourceLayers
+    ) as Ast;
+    expect((expression.chain[0].arguments.axisColorSettings[0] as Ast).chain[0].arguments).toEqual({
+      x: [defaultAxisLineColor],
+      yLeft: [defaultAxisLineColor],
+      yRight: [defaultAxisLineColor],
+    });
+  });
+
+  it('should respect axis color customizations', () => {
+    const customColor = '#custom-color';
+    const expression = xyVisualization.toExpression(
+      {
+        legend: { position: Position.Bottom, isVisible: true },
+        valueLabels: 'hide',
+        preferredSeriesType: 'bar',
+        axisColors: { x: customColor, yLeft: customColor, yRight: customColor },
+        layers: [
+          {
+            layerId: 'first',
+            layerType: layerTypes.DATA,
+            seriesType: 'area',
+            splitAccessor: 'd',
+            xAccessor: 'a',
+            accessors: ['b', 'c'],
+          },
+        ],
+      },
+      frame.datasourceLayers
+    ) as Ast;
+    expect((expression.chain[0].arguments.axisColorSettings[0] as Ast).chain[0].arguments).toEqual({
+      x: [customColor],
+      yLeft: [customColor],
+      yRight: [customColor],
     });
   });
 
