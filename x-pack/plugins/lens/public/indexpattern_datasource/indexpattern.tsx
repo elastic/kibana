@@ -42,7 +42,7 @@ import {
   getDatasourceSuggestionsForVisualizeField,
 } from './indexpattern_suggestions';
 
-import { isColumnInvalid } from './utils';
+import { getVisualDefaultsForLayer, isColumnInvalid } from './utils';
 import { normalizeOperationDataType, isDraggedField } from './pure_utils';
 import { LayerPanel } from './layerpanel';
 import { GenericIndexPatternColumn, getErrorMessages, insertNewColumn } from './operations';
@@ -447,6 +447,10 @@ export function getIndexPatternDatasource({
             }
           }
           return null;
+        },
+        getVisualDefaults: () => {
+          const layer = state.layers[layerId];
+          return getVisualDefaultsForLayer(layer);
         },
       };
     },
