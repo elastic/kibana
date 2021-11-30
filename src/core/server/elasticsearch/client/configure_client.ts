@@ -18,7 +18,7 @@ import type {
   RequestBody,
 } from '@elastic/elasticsearch';
 
-import { Logger } from '../../logging';
+import { Logger, LogMeta } from '../../logging';
 import { parseClientOptions, ElasticsearchClientConfig } from './client_config';
 import type { ElasticsearchErrorDetails } from './types';
 
@@ -61,7 +61,7 @@ export const configureClient = (
     Transport: KibanaTransport,
     Connection: HttpConnection,
   });
-  addLogging(client, logger.get('query', type));
+  addLogging({ client, logger, type });
 
   return client as KibanaClient;
 };
@@ -128,7 +128,9 @@ export function getRequestDebugMeta(event: DiagnosticResult): {
   };
 }
 
-const addLogging = (client: Client, logger: Logger) => {
+const addLogging = ({ client, type, logger }: { client: Client; type: string; logger: Logger }) => {
+  const queryLogger = logger.get('query', type);
+  const deprecationLogger = logger.get('deprecation', type);
   client.diagnostic.on('response', (error, event) => {
     if (event) {
       const opaqueId = event.meta.request.options.opaqueId;
@@ -137,14 +139,47 @@ const addLogging = (client: Client, logger: Logger) => {
             http: { request: { id: event.meta.request.options.opaqueId } },
           }
         : undefined; // do not clutter logs if opaqueId is not present
+      let queryMessage = '';
       if (error) {
         if (error instanceof errors.ResponseError) {
-          logger.debug(`${getResponseMessage(event)} ${getErrorMessage(error)}`, meta);
+          queryMessage = `${getResponseMessage(event)} ${getErrorMessage(error)}`;
         } else {
-          logger.debug(getErrorMessage(error), meta);
+          queryMessage = getErrorMessage(error);
         }
       } else {
-        logger.debug(getResponseMessage(event), meta);
+        queryMessage = getResponseMessage(event);
+      }
+
+      queryLogger.debug(queryMessage, meta);
+
+      if (event.headers.warning ?? false) {
+        // Plugins can explicitly mark requests as originating from a user by
+        // removing the `'x-elastic-product-origin': 'kibana'` header that's
+        // added by default. User requests will be shown to users in the
+        // upgrade assistant UI as an action item that has to be addressed
+        // before they upgrade.
+        // Kibana requests will be hidden from the upgrade assistant UI and are
+        // only logged to help developers maintain their plugins
+        const requestOrigin =
+          (event.meta.request.params.headers != null &&
+            (event.meta.request.params.headers['x-elastic-product-origin'] as unknown as string)) ??
+          'user';
+
+        const stackTrace = new Error().stack?.split('\n').slice(5).join('\n');
+
+        // Construct a JSON logMeta payload to make it easier for CI tools to consume
+        const logMeta = {
+          deprecation: {
+            message: event.headers.warning ?? 'placeholder',
+            requestOrigin,
+            query: queryMessage,
+            stack: stackTrace,
+          },
+        };
+        deprecationLogger.debug(
+          `ES DEPRECATION: ${event.headers.warning}\nOrigin:${requestOrigin}\nStack trace:\n${stackTrace}\nQuery:\n${queryMessage}`,
+          logMeta as unknown as LogMeta
+        );
       }
     }
   });
