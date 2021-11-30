@@ -2,7 +2,7 @@
   "elasticsearch": {
     "cluster": [],
     "indices": [
-      { "names": [".siem-signals-*"], "privileges": ["read", "write", "maintenance"] },
+      { "names": [".alerts-security*", ".siem-signals-*"], "privileges": ["read", "write", "maintenance"] },
       {
         "names": [
           "apm-*-transaction*",

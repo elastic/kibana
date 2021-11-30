@@ -60,6 +60,10 @@ export const closeAlerts = () => {
     .should('not.be.visible');
 };
 
+export const expandFirstAlertActions = () => {
+  cy.get(TIMELINE_CONTEXT_MENU_BTN).first().click({ force: true });
+};
+
 export const expandFirstAlert = () => {
   cy.get(EXPAND_ALERT_BTN).should('exist');
 

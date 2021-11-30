@@ -23,7 +23,7 @@
         "privileges": ["all"]
       },
       {
-        "names": [".siem-signals-*"],
+        "names": [".alerts-security*", ".siem-signals-*"],
         "privileges": ["all"]
       }
     ]
