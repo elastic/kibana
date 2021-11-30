@@ -76,9 +76,9 @@ describe('Cases', () => {
     filterStatusOpen();
 
     cy.get(ALL_CASES_PAGE_TITLE).should('have.text', 'Cases');
-    cy.get(ALL_CASES_OPEN_CASES_STATS).should('have.text', 'Open cases1');
-    cy.get(ALL_CASES_CLOSED_CASES_STATS).should('have.text', 'Closed cases0');
-    cy.get(ALL_CASES_IN_PROGRESS_CASES_STATS).should('have.text', 'In progress cases0');
+    cy.get(ALL_CASES_OPEN_CASES_STATS).should('have.text', '1');
+    cy.get(ALL_CASES_CLOSED_CASES_STATS).should('have.text', '0');
+    cy.get(ALL_CASES_IN_PROGRESS_CASES_STATS).should('have.text', '0');
     cy.get(ALL_CASES_OPEN_CASES_COUNT).should('have.text', 'Open (1)');
     cy.get(ALL_CASES_REPORTERS_COUNT).should('have.text', 'Reporter1');
     cy.get(ALL_CASES_TAGS_COUNT).should('have.text', 'Tags2');

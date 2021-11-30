@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import React, { useState } from 'react';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { DiscoverGrid, DiscoverGridProps } from '../components/discover_grid/discover_grid';
 import { getServices } from '../kibana_services';

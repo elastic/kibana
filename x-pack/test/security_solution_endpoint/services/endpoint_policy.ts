@@ -24,7 +24,7 @@ import { Immutable } from '../../../plugins/security_solution/common/endpoint/ty
 
 // NOTE: import path below should be the deep path to the actual module - else we get CI errors
 import { pkgKeyFromPackageInfo } from '../../../plugins/fleet/public/services/pkg_key_from_package_info';
-import { EndpointError } from '../../../plugins/security_solution/server';
+import { EndpointError } from '../../../plugins/security_solution/common/endpoint/errors';
 
 const INGEST_API_ROOT = '/api/fleet';
 const INGEST_API_AGENT_POLICIES = `${INGEST_API_ROOT}/agent_policies`;

@@ -3552,7 +3552,13 @@
             "label": "executionDuration",
             "description": [],
             "signature": [
-              "{ average: number; values: number[]; }"
+              {
+                "pluginId": "alerting",
+                "scope": "common",
+                "docId": "kibAlertingPluginApi",
+                "section": "def-common.ExecutionDuration",
+                "text": "ExecutionDuration"
+              }
             ],
             "path": "x-pack/plugins/alerting/common/alert_summary.ts",
             "deprecated": false
@@ -3759,6 +3765,42 @@
             "label": "path",
             "description": [],
             "path": "x-pack/plugins/alerting/common/alert_navigation.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
+        "id": "def-common.ExecutionDuration",
+        "type": "Interface",
+        "tags": [],
+        "label": "ExecutionDuration",
+        "description": [],
+        "path": "x-pack/plugins/alerting/common/alert_summary.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.ExecutionDuration.average",
+            "type": "number",
+            "tags": [],
+            "label": "average",
+            "description": [],
+            "path": "x-pack/plugins/alerting/common/alert_summary.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.ExecutionDuration.valuesWithTimestamp",
+            "type": "Object",
+            "tags": [],
+            "label": "valuesWithTimestamp",
+            "description": [],
+            "signature": [
+              "{ [x: string]: number; }"
+            ],
+            "path": "x-pack/plugins/alerting/common/alert_summary.ts",
             "deprecated": false
           }
         ],

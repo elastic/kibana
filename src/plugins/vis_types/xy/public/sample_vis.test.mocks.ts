@@ -149,7 +149,7 @@ export const sampleAreaVis = {
             title: 'X-axis',
             min: 0,
             max: 1,
-            aggFilter: ['!geohash_grid', '!geotile_grid', '!filter'],
+            aggFilter: ['!geohash_grid', '!geotile_grid', '!filter', '!multi_terms'],
             editor: false,
             params: [],
           },
@@ -159,7 +159,7 @@ export const sampleAreaVis = {
             title: 'Split series',
             min: 0,
             max: 3,
-            aggFilter: ['!geohash_grid', '!geotile_grid', '!filter'],
+            aggFilter: ['!geohash_grid', '!geotile_grid', '!filter', '!multi_terms'],
             editor: false,
             params: [],
           },
@@ -169,7 +169,7 @@ export const sampleAreaVis = {
             title: 'Split chart',
             min: 0,
             max: 1,
-            aggFilter: ['!geohash_grid', '!geotile_grid', '!filter'],
+            aggFilter: ['!geohash_grid', '!geotile_grid', '!filter', '!multi_terms'],
             params: [
               {
                 name: 'row',

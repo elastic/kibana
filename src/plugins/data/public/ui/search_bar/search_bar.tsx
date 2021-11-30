@@ -7,7 +7,7 @@
  */
 
 import { compact } from 'lodash';
-import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
+import { InjectedIntl, injectI18n } from '@kbn/i18n-react';
 import classNames from 'classnames';
 import React, { Component } from 'react';
 import { get, isEqual } from 'lodash';

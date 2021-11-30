@@ -9,7 +9,7 @@
 import React, { lazy, Suspense } from 'react';
 import ReactDOM from 'react-dom';
 import { Router, Switch, Route } from 'react-router-dom';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { CoreSetup } from 'src/core/public';

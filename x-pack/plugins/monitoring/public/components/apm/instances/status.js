@@ -12,7 +12,7 @@ import { ApmStatusIcon } from '../status_icon';
 import { formatMetric } from '../../../lib/format_number';
 import { formatTimestampToDuration } from '../../../../common';
 import { CALCULATE_DURATION_SINCE } from '../../../../common/constants';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
 export function Status({ alerts, stats }) {
