@@ -17,19 +17,19 @@ export enum EventAction {
   output = 'output',
 }
 
-interface EventActionPartition {
+export interface EventActionPartition {
   fork: ProcessEvent[];
   exec: ProcessEvent[];
   exit: ProcessEvent[];
   output: ProcessEvent[];
 }
 
-interface User {
+export interface User {
   id: string;
   name: string;
 }
 
-interface ProcessFields {
+export interface ProcessFields {
   args: string[];
   args_count: number;
   command_line: string;
@@ -52,6 +52,48 @@ export interface ProcessSelf extends ProcessFields {
   last_user_entered?: ProcessFields;
 }
 
+export interface ProcessEventHost {
+  architecture: string;
+  hostname: string;
+  id: string;
+  ip: string;
+  mac: string;
+  name: string;
+  os: {
+    family: string;
+    full: string;
+    kernel: string;
+    name: string;
+    platform: string;
+    type: string;
+    version: string;
+  };
+}
+
+export interface ProcessEventAlertRule {
+  category: string;
+  consumer: string;
+  description: string;
+  enabled: boolean;
+  name: string;
+  query: string;
+  risk_score: number;
+  severity: string;
+  uuid: string;
+}
+
+export interface ProcessEventAlert {
+  uuid: string;
+  reason: string;
+  workflow_status: string;
+  status: string;
+  original_time: Date;
+  original_event: {
+    action: string;
+  };
+  rule: ProcessEventAlertRule;
+}
+
 export interface ProcessEvent {
   '@timestamp': Date;
   event: {
@@ -59,47 +101,11 @@ export interface ProcessEvent {
     category: string;
     action: EventAction;
   };
-  host?: {
-    // optional for now (raw agent output doesn't have server identity)
-    architecture: string;
-    hostname: string;
-    id: string;
-    ip: string;
-    mac: string;
-    name: string;
-    os: {
-      family: string;
-      full: string;
-      kernel: string;
-      name: string;
-      platform: string;
-      type: string;
-      version: string;
-    };
-  };
+  // optional host for now (raw agent output doesn't have server identity)
+  host?: ProcessEventHost;
   process: ProcessSelf;
   kibana?: {
-    alert: {
-      uuid: string;
-      reason: string;
-      workflow_status: string;
-      status: string;
-      original_time: Date;
-      original_event: {
-        action: string;
-      };
-      rule: {
-        category: string;
-        consumer: string;
-        description: string;
-        enabled: boolean;
-        name: string;
-        query: string;
-        risk_score: number;
-        severity: string;
-        uuid: string;
-      };
-    };
+    alert: ProcessEventAlert;
   };
 }
 
