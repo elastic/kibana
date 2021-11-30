@@ -513,7 +513,7 @@ describe('indicator match', () => {
           .should('have.text', getNewThreatIndicatorRule().riskScore);
       });
 
-      it.skip('Investigate alert in timeline', () => {
+      it('Investigate alert in timeline', () => {
         const accessibilityText = `Press enter for options, or press space to begin dragging.`;
 
         loadPrepackagedTimelineTemplates();
