@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import type { CoreSetup, HttpSetup } from 'src/core/public';
 
-import { SecurityTelemetryService } from '../../usage_collection';
+import { SecurityUsageCollectionService } from '../../usage_collection';
 
 interface CreateDeps {
   application: CoreSetup['application'];
@@ -26,7 +26,7 @@ export const logoutApp = Object.freeze({
       appRoute: '/logout',
       async mount() {
         window.sessionStorage.clear();
-        window.localStorage.removeItem(SecurityTelemetryService.KeyAuthType);
+        window.localStorage.removeItem(SecurityUsageCollectionService.KeyAuthType);
 
         // Redirect user to the server logout endpoint to complete logout.
         window.location.href = http.basePath.prepend(
