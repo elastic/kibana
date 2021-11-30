@@ -11,6 +11,8 @@ import React from 'react';
 
 import { shallow, ShallowWrapper } from 'enzyme';
 
+import { docLinks } from '../../../../../shared/doc_links';
+
 import { rerender } from '../../../../../test_helpers';
 
 import { STEP_DESCRIPTIONS } from './constants';
@@ -82,7 +84,7 @@ describe('PrecisionSlider', () => {
   it('contains a documentation link', () => {
     const documentationLink = wrapper.find('[data-test-subj="documentationLink"]');
 
-    expect(documentationLink.prop('href')).toContain('/precision-tuning.html');
+    expect(documentationLink.prop('href')).toContain(docLinks.appSearchPrecision);
     expect(documentationLink.prop('target')).toEqual('_blank');
   });
 });

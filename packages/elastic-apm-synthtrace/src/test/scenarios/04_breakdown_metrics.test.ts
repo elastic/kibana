@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 import { sumBy } from 'lodash';
-import { Fields } from '../../lib/entity';
-import { service } from '../../lib/service';
+import { apm } from '../../lib/apm';
 import { timerange } from '../../lib/timerange';
-import { getBreakdownMetrics } from '../../lib/utils/get_breakdown_metrics';
+import { getBreakdownMetrics } from '../../lib/apm/utils/get_breakdown_metrics';
+import { ApmFields } from '../../lib/apm/apm_fields';
 
 describe('breakdown metrics', () => {
-  let events: Fields[];
+  let events: ApmFields[];
 
   const LIST_RATE = 2;
   const LIST_SPANS = 2;
@@ -21,7 +21,7 @@ describe('breakdown metrics', () => {
   const INTERVALS = 6;
 
   beforeEach(() => {
-    const javaService = service('opbeans-java', 'production', 'java');
+    const javaService = apm.service('opbeans-java', 'production', 'java');
     const javaInstance = javaService.instance('instance-1');
 
     const start = new Date('2021-01-01T00:00:00.000Z').getTime();
