@@ -419,9 +419,9 @@ const mockAlerts = [
   },
 ];
 
-export const sessionViewBasicProcessMock: Process = {
+const processMock: Process = {
   id: '3f44d854-fe8d-5666-abc9-9efe7f970b4b',
-  events: mockEvents,
+  events: [],
   children: [],
   autoExpand: false,
   searchMatched: null,
@@ -429,26 +429,25 @@ export const sessionViewBasicProcessMock: Process = {
   hasOutput: () => false,
   hasAlerts: () => false,
   getAlerts: () => [],
-  hasExec: () => true,
+  hasExec: () => false,
   getOutput: () => '',
   getDetails: () => ({} as ProcessEvent),
-  isUserEntered: () => true,
+  isUserEntered: () => false,
   getMaxAlertLevel: () => null,
 };
 
+export const sessionViewBasicProcessMock: Process = {
+  ...processMock,
+  events: mockEvents,
+  hasExec: () => true,
+  isUserEntered: () => true,
+};
+
 export const sessionViewAlertProcessMock: Process = {
-  id: '3f44d854-fe8d-5666-abc9-9efe7f970b4b',
+  ...processMock,
   events: [...mockEvents, ...mockAlerts],
-  children: [],
-  autoExpand: false,
-  searchMatched: null,
-  parent: undefined,
-  hasOutput: () => false,
   hasAlerts: () => true,
   getAlerts: () => mockEvents,
   hasExec: () => true,
-  getOutput: () => '',
-  getDetails: () => ({} as ProcessEvent),
   isUserEntered: () => true,
-  getMaxAlertLevel: () => null,
 };

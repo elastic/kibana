@@ -6,7 +6,13 @@
  */
 import _ from 'lodash';
 import { useState, useEffect } from 'react';
-import { EventKind, Process, ProcessImpl, ProcessEvent } from '../../common/types/process_tree';
+import {
+  EventAction,
+  EventKind,
+  EventActionPartition,
+  Process,
+  ProcessEvent,
+} from '../../common/types/process_tree';
 
 interface UseProcessTreeDeps {
   sessionEntityId: string;
@@ -18,6 +24,89 @@ interface UseProcessTreeDeps {
 type ProcessMap = {
   [key: string]: Process;
 };
+
+class ProcessImpl implements Process {
+  id: string;
+  events: ProcessEvent[];
+  children: Process[];
+  parent: Process | undefined;
+  autoExpand: boolean;
+  searchMatched: string | null;
+
+  constructor(id: string) {
+    this.id = id;
+    this.events = [];
+    this.children = [];
+    this.autoExpand = false;
+    this.searchMatched = null;
+  }
+
+  hasOutput() {
+    // TODO: schema undecided
+    return !!this.events.find(({ event }) => event.action === EventAction.output);
+  }
+
+  hasAlerts() {
+    return !!this.events.find(({ event }) => event.kind === EventKind.signal);
+  }
+
+  getAlerts() {
+    return this.events.filter(({ event }) => event.kind === EventKind.signal);
+  }
+
+  hasExec() {
+    return !!this.events.find(({ event }) => event.action === EventAction.exec);
+  }
+
+  hasExited() {
+    return !!this.events.find(({ event }) => event.action === EventAction.exit);
+  }
+
+  getDetails() {
+    const eventsPartition = this.events.reduce(
+      (currEventsParition, processEvent) => {
+        currEventsParition[processEvent.event.action]?.push(processEvent);
+        return currEventsParition;
+      },
+      Object.values(EventAction).reduce((currActions, action) => {
+        currActions[action] = [] as ProcessEvent[];
+        return currActions;
+      }, {} as EventActionPartition)
+    );
+
+    if (eventsPartition.exec.length) {
+      return eventsPartition.exec[eventsPartition.exec.length - 1];
+    }
+
+    if (eventsPartition.fork.length) {
+      return eventsPartition.fork[eventsPartition.fork.length - 1];
+    }
+
+    return {} as ProcessEvent;
+  }
+
+  getOutput() {
+    return this.events.reduce((output, event) => {
+      if (event.event.action === EventAction.output) {
+        output += ''; // TODO: schema unknown
+      }
+
+      return output;
+    }, '');
+  }
+
+  isUserEntered() {
+    const event = this.getDetails();
+    const { interactive, pgid, parent } = event?.process || {};
+
+    return interactive && pgid !== parent.pgid;
+  }
+
+  getMaxAlertLevel() {
+    // TODO:
+    return null;
+  }
+}
 
 export const useProcessTree = ({
   sessionEntityId,
