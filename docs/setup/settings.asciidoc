@@ -25,7 +25,7 @@ configuration using `${MY_ENV_VAR}` syntax.
 Set to `false` to disable Console. *Default: `true`*
 
 | `console.ui.enabled:`
-Toggling this causes the server to regenerate assets on the next startup,
+| Toggling this causes the server to regenerate assets on the next startup,
 which may cause a delay before pages start being served.
 Set to `false` to disable Console. *Default: `true`*
 
