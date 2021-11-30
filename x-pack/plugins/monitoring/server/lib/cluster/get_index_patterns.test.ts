@@ -7,7 +7,7 @@
 
 import sinon from 'sinon';
 import { getNewIndexPatterns } from './get_index_patterns';
-import { LegacyRequest, LegacyServer } from '../../types';
+import { LegacyRequest } from '../../types';
 
 const getReqMock = ({ ccsEnabled = true }: { ccsEnabled?: boolean } = {}) => {
   return {

@@ -21,7 +21,6 @@ import {
   PipelineThroughputMetricKey,
   PipelineWithMetrics,
 } from '../../types';
-import { getNewIndexPatterns } from '../cluster/get_index_patterns';
 
 /**
  * This function performs an optimization around the pipeline listing tables in the UI. To avoid
