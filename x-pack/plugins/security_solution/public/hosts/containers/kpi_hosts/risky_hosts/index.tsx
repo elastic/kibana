@@ -27,7 +27,6 @@ type GetHostsRiskScoreProps = RiskyHostsScoreRequestOptions & {
   signal: AbortSignal;
 };
 
-// TODO think/refactor the only differences between this and getHostsRiskScore are factoryQueryType and types
 export const getRiskyHosts = ({
   data,
   defaultIndex,

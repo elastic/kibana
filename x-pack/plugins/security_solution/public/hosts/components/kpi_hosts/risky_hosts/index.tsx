@@ -103,7 +103,7 @@ const RiskyHostsComponent: React.FC<Pick<HostsKpiProps, 'filterQuery' | 'from' |
 
     return (
       <InspectButtonContainer>
-        <EuiPanel hasBorder>
+        <EuiPanel hasBorder data-test-subj="risky-hosts">
           <EuiFlexGroup gutterSize={'none'}>
             <EuiFlexItem>
               <EuiTitle size="xxxs">
