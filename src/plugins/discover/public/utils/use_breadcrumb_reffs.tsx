@@ -12,6 +12,7 @@ import { stringify } from 'query-string';
 import rison from 'rison-node';
 import { esFilters, FilterManager } from '../../../data/public';
 import { url } from '../../../kibana_utils/common';
+import { getServices } from '../kibana_services';
 
 export type DiscoverNavigationProps = { onClick: () => void } | { href: string };
 
@@ -33,6 +34,20 @@ const getContextHash = (columns: string[], filterManager: FilterManager) => {
   );
 
   return hash;
+};
+
+/**
+ * When it's context route, referrer should point to the main discover page anyway.
+ * Otherwise, we are on main page and should create referrer from it.
+ * Current history object should be used in callback, since url state might be changed
+ * after expanded document opened.
+ */
+const getCurrentReferrer = (isContextRoute: boolean, prevReferrer?: string) => {
+  const { history: getHistory } = getServices();
+  const currentHistory = getHistory();
+  return isContextRoute
+    ? prevReferrer
+    : '#' + currentHistory?.location.pathname + currentHistory?.location.search;
 };
 
 export const useBreadcrumbReffs = ({
@@ -66,17 +81,12 @@ export const useBreadcrumbReffs = ({
       path: '/context/:indexPatternId/:id',
       exact: true,
     });
-    // When it's context route, referrer should point to the main discover page anyway.
-    // Otherwise, we are on main page and should create referrer from it.
-    const referrer = isContextRoute
-      ? prevReferrer
-      : '#' + history?.location.pathname + history?.location.search;
 
     const onOpenSingleDoc = () =>
       history.push({
         pathname: `/doc/${indexPatternId}/${rowIndex}`,
         search: `?id=${encodeURIComponent(rowId)}`,
-        state: { referrer },
+        state: { referrer: getCurrentReferrer(!!isContextRoute, prevReferrer) },
       });
 
     const onOpenSurrDocs = () =>
@@ -85,7 +95,7 @@ export const useBreadcrumbReffs = ({
           String(rowId)
         )}`,
         search: `?${contextSearchHash}`,
-        state: { referrer },
+        state: { referrer: getCurrentReferrer(!!isContextRoute, prevReferrer) },
       });
 
     return {
