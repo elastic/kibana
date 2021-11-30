@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import 'jest-canvas-mock';
 import {
   sessionViewBasicProcessMock,
   sessionViewAlertProcessMock,
