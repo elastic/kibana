@@ -71,7 +71,6 @@
       "flot",
       "jest-styled-components",
       "@testing-library/jest-dom",
-      "resize-observer-polyfill",
       "@emotion/react/types/css-prop"
     ]
   }
