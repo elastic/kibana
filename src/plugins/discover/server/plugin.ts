@@ -10,13 +10,13 @@ import { CoreSetup, CoreStart, Plugin } from 'kibana/server';
 import { getUiSettings } from './ui_settings';
 import { capabilitiesProvider } from './capabilities_provider';
 import { searchSavedObjectType } from './saved_objects';
-import { SharePluginSetup } from '../../share/server';
 
 export class DiscoverServerPlugin implements Plugin<object, object> {
-  public setup(core: CoreSetup, plugins: { share: SharePluginSetup }) {
+  public setup(core: CoreSetup) {
     core.capabilities.registerProvider(capabilitiesProvider);
     core.uiSettings.register(getUiSettings());
     core.savedObjects.registerType(searchSavedObjectType);
+
     return {};
   }
 
