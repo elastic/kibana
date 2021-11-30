@@ -25,7 +25,8 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
 
   const retry = getService('retry');
 
-  describe('Observability alerts / Bulk actions', function () {
+  // Hide the WorkFlow filter, but keep its code as required in https://github.com/elastic/kibana/issues/117686
+  describe.skip('Observability alerts / Bulk actions', function () {
     this.tags('includeFirefox');
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/observability/alerts');

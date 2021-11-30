@@ -136,17 +136,19 @@ export function getAccessorColorConfig(
     );
     const customColor =
       currentYConfig?.color ||
-      paletteService.get(currentPalette.name).getCategoricalColor(
-        [
-          {
-            name: columnToLabel[accessor] || accessor,
-            rankAtDepth: rank,
-            totalSeriesAtDepth: totalSeriesCount,
-          },
-        ],
-        { maxDepth: 1, totalSeries: totalSeriesCount },
-        currentPalette.params
-      );
+      (totalSeriesCount != null
+        ? paletteService.get(currentPalette.name).getCategoricalColor(
+            [
+              {
+                name: columnToLabel[accessor] || accessor,
+                rankAtDepth: rank,
+                totalSeriesAtDepth: totalSeriesCount,
+              },
+            ],
+            { maxDepth: 1, totalSeries: totalSeriesCount },
+            currentPalette.params
+          )
+        : undefined);
     return {
       columnId: accessor as string,
       triggerIcon: customColor ? 'color' : 'disabled',

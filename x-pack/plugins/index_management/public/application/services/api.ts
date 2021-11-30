@@ -194,14 +194,17 @@ export async function loadIndexSettings(indexName: string) {
 }
 
 export async function updateIndexSettings(indexName: string, body: object) {
-  const response = await httpService.httpClient.put(
-    `${API_BASE_PATH}/settings/${encodeURIComponent(indexName)}`,
-    {
-      body: JSON.stringify(body),
-    }
-  );
+  const response = await sendRequest({
+    path: `${API_BASE_PATH}/settings/${encodeURIComponent(indexName)}`,
+    method: 'put',
+    body: JSON.stringify(body),
+  });
+
   // Only track successful requests.
-  uiMetricService.trackMetric(METRIC_TYPE.COUNT, UIM_UPDATE_SETTINGS);
+  if (!response.error) {
+    uiMetricService.trackMetric(METRIC_TYPE.COUNT, UIM_UPDATE_SETTINGS);
+  }
+
   return response;
 }
 
