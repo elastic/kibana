@@ -63,6 +63,7 @@ export const GaugeToolbar = memo((props: VisualizationToolbarProps<GaugeVisualiz
                 header={i18n.translate('xpack.lens.label.gauge.title.header', {
                   defaultMessage: 'Title',
                 })}
+                dataTestSubj="lens-toolbar-gauge-title"
                 label={inputValue.visTitle || ''}
                 mode={inputValue.visTitleMode}
                 placeholder={metricDimensionTitle || ''}
@@ -83,11 +84,11 @@ export const GaugeToolbar = memo((props: VisualizationToolbarProps<GaugeVisualiz
                 defaultMessage: 'Subtitle',
               })}
             >
-              {/* <div/> */}
               <VisLabel
                 header={i18n.translate('xpack.lens.label.gauge.subtitle.header', {
                   defaultMessage: 'Subtitle',
                 })}
+                dataTestSubj="lens-toolbar-gauge-subtitle"
                 label={inputValue.subtitle || ''}
                 mode={subtitleMode}
                 handleChange={(value) => {
@@ -120,16 +121,17 @@ export const GaugeToolbar = memo((props: VisualizationToolbarProps<GaugeVisualiz
                   label={i18n.translate('xpack.lens.shared.ticksPositionOptions', {
                     defaultMessage: 'Ticks on color bands',
                   })}
-                  data-test-subj="lens-ticks-position-switch"
+                  data-test-subj="lens-toolbar-gauge-ticks-position-switch"
                   showLabel={false}
                   disabled={state.colorMode !== 'palette'}
                   checked={state.ticksPosition === GaugeTicksPositions.bands}
-                  onChange={(e: EuiSwitchEvent) => {
+                  onChange={() => {
                     handleInputChange({
                       ...inputValue,
-                      ticksPosition: e.target.checked
-                        ? GaugeTicksPositions.bands
-                        : GaugeTicksPositions.auto,
+                      ticksPosition:
+                        state.ticksPosition === GaugeTicksPositions.bands
+                          ? GaugeTicksPositions.auto
+                          : GaugeTicksPositions.bands,
                     });
                   }}
                 />

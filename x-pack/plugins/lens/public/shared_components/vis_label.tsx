@@ -23,6 +23,7 @@ export interface VisLabelProps {
   placeholder?: string;
   hasAutoOption?: boolean;
   header?: string;
+  dataTestSubj?: string;
 }
 
 const defaultHeader = i18n.translate('xpack.lens.label.header', {
@@ -64,13 +65,14 @@ export function VisLabel({
   hasAutoOption = false,
   placeholder = '',
   header = defaultHeader,
+  dataTestSubj,
 }: VisLabelProps) {
   return (
     <EuiFlexGroup gutterSize="s" justifyContent="flexEnd" alignItems="center">
       <EuiFlexItem grow={false}>
         <EuiSelect
           compressed
-          data-test-subj={`lnsShowVisLabelSelect`}
+          data-test-subj={`${dataTestSubj}-select`}
           aria-label="Label"
           onChange={({ target }) => {
             if (target.value === 'custom') {
@@ -85,7 +87,7 @@ export function VisLabel({
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiFieldText
-          data-test-subj={`lnsVisLabel`}
+          data-test-subj={dataTestSubj}
           compressed
           placeholder={mode === 'none' ? '' : placeholder}
           value={label || ''}
