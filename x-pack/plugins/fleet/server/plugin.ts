@@ -361,8 +361,6 @@ export class FleetPlugin
           summary: 'Fleet is setting up',
         });
 
-        throw new Error('Fake error');
-
         await setupFleet(
           new SavedObjectsClient(core.savedObjects.createInternalRepository()),
           core.elasticsearch.client.asInternalUser
