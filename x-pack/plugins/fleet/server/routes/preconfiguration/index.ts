@@ -21,7 +21,7 @@ export const updatePreconfigurationHandler: RequestHandler<
   TypeOf<typeof PutPreconfigurationSchema.body>
 > = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
-  const esClient = context.core.elasticsearch.client.asCurrentUser;
+  const esClient = context.core.elasticsearch.client.asInternalUser;
   const defaultOutput = await outputService.ensureDefaultOutput(soClient);
 
   const { agentPolicies, packages } = request.body;
