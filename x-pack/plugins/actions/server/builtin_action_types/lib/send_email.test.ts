@@ -20,7 +20,7 @@ import { Logger } from '../../../../../../src/core/server';
 import { sendEmail } from './send_email';
 import { loggingSystemMock, savedObjectsClientMock } from '../../../../../../src/core/server/mocks';
 import nodemailer from 'nodemailer';
-import { ConnectorToken, ProxySettings } from '../../types';
+import { ProxySettings } from '../../types';
 import { actionsConfigMock } from '../../actions_config.mock';
 import { CustomHostSettings } from '../../config';
 import { sendEmailGraphApi } from './send_email_graph_api';
@@ -36,8 +36,9 @@ const savedObjectsClient = savedObjectsClientMock.create();
 const encryptedSavedObjectsClient = encryptedSavedObjectsMock.createStart().getClient();
 
 const connectorTokenClient = new ConnectorTokenClient({
-  savedObjectsClient,
+  unsecuredSavedObjectsClient: savedObjectsClient,
   encryptedSavedObjectsClient,
+  logger: mockLogger,
 });
 
 describe('send_email module', () => {

@@ -8,7 +8,11 @@
 import { omitBy, isUndefined } from 'lodash';
 import { ConnectorToken } from '../../types';
 import { EncryptedSavedObjectsClient } from '../../../../encrypted_saved_objects/server';
-import { SavedObjectsClientContract, SavedObjectsUtils } from '../../../../../../src/core/server';
+import {
+  Logger,
+  SavedObjectsClientContract,
+  SavedObjectsUtils,
+} from '../../../../../../src/core/server';
 import { CONNECTOR_TOKEN_SAVED_OBJECT_TYPE } from '../../constants/saved_objects';
 
 export const MAX_TOKENS_RETURNED = 1;
@@ -16,6 +20,7 @@ export const MAX_TOKENS_RETURNED = 1;
 interface ConstructorOptions {
   encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
   unsecuredSavedObjectsClient: SavedObjectsClientContract;
+  logger: Logger;
 }
 
 interface CreateOptions {
@@ -33,12 +38,18 @@ export interface UpdateOptions {
 }
 
 export class ConnectorTokenClient {
+  private readonly logger: Logger;
   private readonly unsecuredSavedObjectsClient: SavedObjectsClientContract;
   private readonly encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
 
-  constructor({ unsecuredSavedObjectsClient, encryptedSavedObjectsClient }: ConstructorOptions) {
+  constructor({
+    unsecuredSavedObjectsClient,
+    encryptedSavedObjectsClient,
+    logger,
+  }: ConstructorOptions) {
     this.encryptedSavedObjectsClient = encryptedSavedObjectsClient;
     this.unsecuredSavedObjectsClient = unsecuredSavedObjectsClient;
+    this.logger = logger;
   }
 
   /**
@@ -76,6 +87,7 @@ export class ConnectorTokenClient {
         CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
         id
       );
+    const createTime = Date.now();
 
     const result = await this.unsecuredSavedObjectsClient.create<ConnectorToken>(
       CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
@@ -84,6 +96,7 @@ export class ConnectorTokenClient {
         token,
         expiresAt,
         tokenType: tokenType ?? 'access_token',
+        createdAt: new Date(createTime).toISOString(),
       },
       omitBy(
         {
@@ -109,34 +122,56 @@ export class ConnectorTokenClient {
     connectorId: string;
     tokenType?: string;
   }): Promise<ConnectorToken | null> {
+    const connectorTokensResult = [];
     const tokenTypeFilter = tokenType
       ? ` AND ${CONNECTOR_TOKEN_SAVED_OBJECT_TYPE}.attributes.tokenType: "${tokenType}"`
       : '';
 
-    const connectorTokensResult = (
-      await this.unsecuredSavedObjectsClient.find<ConnectorToken>({
-        perPage: MAX_TOKENS_RETURNED,
-        type: CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
-        filter: `${CONNECTOR_TOKEN_SAVED_OBJECT_TYPE}.attributes.connectorId: "${connectorId}"${tokenTypeFilter}`,
-        sortField: 'createdAt',
-        sortOrder: 'desc',
-      })
-    ).saved_objects;
+    try {
+      connectorTokensResult.push(
+        ...(
+          await this.unsecuredSavedObjectsClient.find<ConnectorToken>({
+            perPage: MAX_TOKENS_RETURNED,
+            type: CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
+            filter: `${CONNECTOR_TOKEN_SAVED_OBJECT_TYPE}.attributes.connectorId: "${connectorId}"${tokenTypeFilter}`,
+            sortField: 'createdAt',
+            sortOrder: 'desc',
+          })
+        ).saved_objects
+      );
+    } catch (err) {
+      this.logger.error(
+        `Failed to fetch connector_token for connectorId "${connectorId}" and tokenType: "${
+          tokenType ?? 'access_token'
+        }"". Error: ${err.message}`
+      );
+      return null;
+    }
 
     if (connectorTokensResult.length === 0) {
       return null;
     }
-    const {
-      attributes: { token },
-    } = await this.encryptedSavedObjectsClient.getDecryptedAsInternalUser<ConnectorToken>(
-      CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
-      connectorTokensResult[0].id
-    );
 
-    return {
-      id: connectorTokensResult[0].id,
-      ...connectorTokensResult[0].attributes,
-      token,
-    };
+    try {
+      const {
+        attributes: { token },
+      } = await this.encryptedSavedObjectsClient.getDecryptedAsInternalUser<ConnectorToken>(
+        CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
+        connectorTokensResult[0].id
+      );
+
+      return {
+        id: connectorTokensResult[0].id,
+        ...connectorTokensResult[0].attributes,
+        token,
+      };
+    } catch (err) {
+      this.logger.error(
+        `Failed to decrypt connector_token for connectorId "${connectorId}" and tokenType: "${
+          tokenType ?? 'access_token'
+        }"". Error: ${err.message}`
+      );
+      return null;
+    }
   }
 }

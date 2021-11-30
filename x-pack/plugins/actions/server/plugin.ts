@@ -501,6 +501,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
         connectorTokenClient: new ConnectorTokenClient({
           unsecuredSavedObjectsClient: unsecuredSavedObjectsClient(request),
           encryptedSavedObjectsClient,
+          logger: this.logger,
         }),
       };
     };

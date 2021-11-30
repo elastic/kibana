@@ -5,233 +5,71 @@
  * 2.0.
  */
 
-import { ActionTypeRegistry, ActionTypeRegistryOpts } from './action_type_registry';
-import { ActionsClient } from './actions_client';
-import { ExecutorType } from './types';
-import { ActionExecutor, TaskRunnerFactory, ILicenseState } from './lib';
-import { taskManagerMock } from '../../task_manager/server/mocks';
-import { actionsConfigMock } from './actions_config.mock';
-import { licenseStateMock } from './lib/license_state.mock';
-import { licensingMock } from '../../licensing/server/mocks';
-import { httpServerMock } from '../../../../src/core/server/mocks';
-import { auditServiceMock } from '../../security/server/audit/index.mock';
-import { usageCountersServiceMock } from 'src/plugins/usage_collection/server/usage_counters/usage_counters_service.mock';
+import { loggingSystemMock, savedObjectsClientMock } from '../../../../../../src/core/server/mocks';
+import { encryptedSavedObjectsMock } from '../../../../encrypted_saved_objects/server/mocks';
+import { ConnectorTokenClient } from './connector_token_client';
+import { Logger } from '../../../../../../src/core/server';
 
-import {
-  elasticsearchServiceMock,
-  savedObjectsClientMock,
-} from '../../../../src/core/server/mocks';
-import { actionExecutorMock } from './lib/action_executor.mock';
-import { ActionsAuthorization } from './authorization/actions_authorization';
-import { actionsAuthorizationMock } from './authorization/actions_authorization.mock';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { elasticsearchClientMock } from '../../../../src/core/server/elasticsearch/client/mocks';
-
+const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 jest.mock('../../../../src/core/server/saved_objects/service/lib/utils', () => ({
   SavedObjectsUtils: {
     generateId: () => 'mock-saved-object-id',
   },
 }));
 
-jest.mock('./lib/track_legacy_rbac_exemption', () => ({
-  trackLegacyRBACExemption: jest.fn(),
-}));
-
-jest.mock('./authorization/get_authorization_mode_by_source', () => {
-  return {
-    getAuthorizationModeBySource: jest.fn(() => {
-      return 1;
-    }),
-    AuthorizationMode: {
-      Legacy: 0,
-      RBAC: 1,
-    },
-  };
-});
-
-const defaultKibanaIndex = '.kibana';
 const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
-const scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
-const actionExecutor = actionExecutorMock.create();
-const authorization = actionsAuthorizationMock.create();
-const executionEnqueuer = jest.fn();
-const ephemeralExecutionEnqueuer = jest.fn();
-const request = httpServerMock.createKibanaRequest();
-const auditLogger = auditServiceMock.create().asScoped(request);
-const mockUsageCountersSetup = usageCountersServiceMock.createSetupContract();
-const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');
+const encryptedSavedObjectsClient = encryptedSavedObjectsMock.createStart().getClient();
 
-const mockTaskManager = taskManagerMock.createSetup();
-
-let actionsClient: ActionsClient;
-let mockedLicenseState: jest.Mocked<ILicenseState>;
-let actionTypeRegistry: ActionTypeRegistry;
-let actionTypeRegistryParams: ActionTypeRegistryOpts;
-const executor: ExecutorType<{}, {}, {}, void> = async (options) => {
-  return { status: 'ok', actionId: options.actionId };
-};
+let connectorTokenClient: ConnectorTokenClient;
 
 beforeEach(() => {
   jest.resetAllMocks();
-  mockedLicenseState = licenseStateMock.create();
-  actionTypeRegistryParams = {
-    licensing: licensingMock.createSetup(),
-    taskManager: mockTaskManager,
-    taskRunnerFactory: new TaskRunnerFactory(new ActionExecutor({ isESOCanEncrypt: true })),
-    actionsConfigUtils: actionsConfigMock.create(),
-    licenseState: mockedLicenseState,
-    preconfiguredActions: [],
-  };
-  actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
-  actionsClient = new ActionsClient({
-    actionTypeRegistry,
+  connectorTokenClient = new ConnectorTokenClient({
     unsecuredSavedObjectsClient,
-    scopedClusterClient,
-    defaultKibanaIndex,
-    preconfiguredActions: [],
-    actionExecutor,
-    executionEnqueuer,
-    ephemeralExecutionEnqueuer,
-    request,
-    authorization: authorization as unknown as ActionsAuthorization,
-    auditLogger,
-    usageCounter: mockUsageCounter,
+    encryptedSavedObjectsClient,
+    logger,
   });
 });
 
 describe('create()', () => {
-  test('creates an action with all given properties', async () => {
+  test('creates connector_token with all given properties', async () => {
+    const expiresAt = new Date().toISOString();
     const savedObjectCreateResult = {
       id: '1',
-      type: 'type',
+      type: 'connector_token',
       attributes: {
-        name: 'my name',
-        actionTypeId: 'my-action-type',
-        isMissingSecrets: false,
-        config: {},
+        connectorId: '123',
+        tokenType: 'access_token',
+        token: 'testtokenvalue',
+        expiresAt,
       },
       references: [],
     };
-    actionTypeRegistry.register({
-      id: 'my-action-type',
-      name: 'My action type',
-      minimumLicenseRequired: 'basic',
-      executor,
-    });
+
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce(savedObjectCreateResult);
-    const result = await actionsClient.create({
-      action: {
-        name: 'my name',
-        actionTypeId: 'my-action-type',
-        config: {},
-        secrets: {},
-      },
+    const result = await connectorTokenClient.create({
+      connectorId: '123',
+      expiresAt,
+      token: 'testtokenvalue',
     });
     expect(result).toEqual({
       id: '1',
-      isPreconfigured: false,
-      name: 'my name',
-      actionTypeId: 'my-action-type',
-      isMissingSecrets: false,
-      config: {},
+      connectorId: '123',
+      tokenType: 'access_token',
+      expiresAt,
     });
     expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledTimes(1);
     expect(unsecuredSavedObjectsClient.create.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
-        "action",
+        "connector_token",
         Object {
-          "actionTypeId": "my-action-type",
-          "config": Object {},
-          "isMissingSecrets": false,
-          "name": "my name",
-          "secrets": Object {},
-        },
-        Object {
-          "id": "mock-saved-object-id",
-        },
-      ]
-    `);
-  });
-
-  test(`throws an error when an action type doesn't exist`, async () => {
-    await expect(
-      actionsClient.create({
-        action: {
-          name: 'my name',
-          actionTypeId: 'unregistered-action-type',
-          config: {},
-          secrets: {},
-        },
-      })
-    ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Action type \\"unregistered-action-type\\" is not registered."`
-    );
-  });
-
-  test('encrypts action type options unless specified not to', async () => {
-    actionTypeRegistry.register({
-      id: 'my-action-type',
-      name: 'My action type',
-      minimumLicenseRequired: 'basic',
-      executor,
-    });
-    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
-      id: '1',
-      type: 'type',
-      attributes: {
-        name: 'my name',
-        actionTypeId: 'my-action-type',
-        isMissingSecrets: false,
-        config: {
-          a: true,
-          b: true,
-          c: true,
-        },
-        secrets: {},
-      },
-      references: [],
-    });
-    const result = await actionsClient.create({
-      action: {
-        name: 'my name',
-        actionTypeId: 'my-action-type',
-        config: {
-          a: true,
-          b: true,
-          c: true,
-        },
-        secrets: {},
-      },
-    });
-    expect(result).toEqual({
-      id: '1',
-      isPreconfigured: false,
-      name: 'my name',
-      actionTypeId: 'my-action-type',
-      isMissingSecrets: false,
-      config: {
-        a: true,
-        b: true,
-        c: true,
-      },
-    });
-    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledTimes(1);
-    expect(unsecuredSavedObjectsClient.create.mock.calls[0]).toMatchInlineSnapshot(`
-      Array [
-        "action",
-        Object {
-          "actionTypeId": "my-action-type",
-          "config": Object {
-            "a": true,
-            "b": true,
-            "c": true,
-          },
-          "isMissingSecrets": false,
-          "name": "my name",
-          "secrets": Object {},
+          "connectorId": "123",
+          "tokenType": "access_token",
+          "expiresAt": "${expiresAt}",
+          "createdAt": "my name",
         },
         Object {
-          "id": "mock-saved-object-id",
+          "id": "1",
         },
       ]
     `);
@@ -240,6 +78,7 @@ describe('create()', () => {
 
 describe('get()', () => {
   test('calls unsecuredSavedObjectsClient with parameters', async () => {
+    const expiresAt = new Date().toISOString();
     const expectedResult = {
       total: 1,
       per_page: 10,
@@ -247,13 +86,13 @@ describe('get()', () => {
       saved_objects: [
         {
           id: '1',
-          type: 'type',
+          type: 'connector_token',
           attributes: {
-            name: 'test',
-            isMissingSecrets: false,
-            config: {
-              foo: 'bar',
-            },
+            connectorId: '123',
+            tokenType: 'access_token',
+            token: 'testtokenvalue',
+            createdAt: new Date().toISOString(),
+            expiresAt,
           },
           score: 1,
           references: [],
@@ -261,50 +100,18 @@ describe('get()', () => {
       ],
     };
     unsecuredSavedObjectsClient.find.mockResolvedValueOnce(expectedResult);
-    scopedClusterClient.asInternalUser.search.mockResolvedValueOnce(
-      // @ts-expect-error not full search response
-      elasticsearchClientMock.createSuccessTransportRequestPromise({
-        aggregations: {
-          '1': { doc_count: 6 },
-          testPreconfigured: { doc_count: 2 },
-        },
-      })
-    );
 
-    actionsClient = new ActionsClient({
-      actionTypeRegistry,
-      unsecuredSavedObjectsClient,
-      scopedClusterClient,
-      defaultKibanaIndex,
-      actionExecutor,
-      executionEnqueuer,
-      ephemeralExecutionEnqueuer,
-      request,
-      authorization: authorization as unknown as ActionsAuthorization,
-      preconfiguredActions: [
-        {
-          id: 'testPreconfigured',
-          actionTypeId: '.slack',
-          secrets: {},
-          isPreconfigured: true,
-          name: 'test',
-          config: {
-            foo: 'bar',
-          },
-        },
-      ],
+    const result = await connectorTokenClient.get({
+      connectorId: '123',
+      tokenType: 'access_token',
     });
-    const result = await actionsClient.getAll();
     expect(result).toEqual([
       {
         id: '1',
-        isPreconfigured: false,
-        name: 'test',
-        config: {
-          foo: 'bar',
-        },
-        isMissingSecrets: false,
-        referencedByCount: 6,
+        connectorId: '123',
+        tokenType: 'access_token',
+        token: 'testtokenvalue',
+        createdAt: new Date().toISOString(),
       },
       {
         id: 'testPreconfigured',
@@ -318,194 +125,84 @@ describe('get()', () => {
 });
 
 describe('update()', () => {
-  test('updates an action with all given properties', async () => {
-    actionTypeRegistry.register({
-      id: 'my-action-type',
-      name: 'My action type',
-      minimumLicenseRequired: 'basic',
-      executor,
-    });
+  test('updates the connector token with all given properties', async () => {
+    const expiresAt = new Date().toISOString();
+
     unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
       id: '1',
-      type: 'action',
+      type: 'connector_token',
       attributes: {
-        actionTypeId: 'my-action-type',
-        isMissingSecrets: false,
+        connectorId: '123',
+        tokenType: 'access_token',
+        token: 'testtokenvalue',
+        createdAt: new Date().toISOString(),
       },
       references: [],
     });
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
-      id: 'my-action',
-      type: 'action',
+      id: '1',
+      type: 'connector_token',
       attributes: {
-        actionTypeId: 'my-action-type',
-        isMissingSecrets: false,
-        name: 'my name',
-        config: {},
-        secrets: {},
+        connectorId: '123',
+        tokenType: 'access_token',
+        token: 'testtokenvalue',
+        expiresAt,
       },
       references: [],
     });
-    const result = await actionsClient.update({
-      id: 'my-action',
-      action: {
-        name: 'my name',
-        config: {},
-        secrets: {},
-      },
+    const result = await connectorTokenClient.update({
+      id: '1',
+      tokenType: 'access_token',
+      token: 'testtokenvalue',
+      expiresAt,
     });
     expect(result).toEqual({
-      id: 'my-action',
-      isPreconfigured: false,
-      actionTypeId: 'my-action-type',
-      isMissingSecrets: false,
-      name: 'my name',
-      config: {},
+      id: '1',
+      connectorId: '123',
+      tokenType: 'access_token',
+      token: 'testtokenvalue',
     });
     expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledTimes(1);
     expect(unsecuredSavedObjectsClient.create.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
-        "action",
+        "connector_token",
         Object {
-          "actionTypeId": "my-action-type",
-          "config": Object {},
-          "isMissingSecrets": false,
-          "name": "my name",
-          "secrets": Object {},
-        },
-        Object {
-          "id": "my-action",
-          "overwrite": true,
-          "references": Array [],
+          "connectorId": "123",
+		  "expiresAt": "${expiresAt}",
+		  "token": "testtokenvalue",
+		  "tokenType": "access_token",
         },
       ]
     `);
     expect(unsecuredSavedObjectsClient.get).toHaveBeenCalledTimes(1);
     expect(unsecuredSavedObjectsClient.get.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
-        "action",
-        "my-action",
+        "connector_token",
+        "1",
       ]
     `);
   });
 
-  test('encrypts action type options unless specified not to', async () => {
-    actionTypeRegistry.register({
-      id: 'my-action-type',
-      name: 'My action type',
-      minimumLicenseRequired: 'basic',
-      executor,
-    });
-    unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
-      id: 'my-action',
-      type: 'action',
-      attributes: {
-        actionTypeId: 'my-action-type',
-      },
-      references: [],
-    });
-    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
-      id: 'my-action',
-      type: 'action',
-      attributes: {
-        actionTypeId: 'my-action-type',
-        isMissingSecrets: true,
-        name: 'my name',
-        config: {
-          a: true,
-          b: true,
-          c: true,
-        },
-        secrets: {},
-      },
-      references: [],
-    });
-    const result = await actionsClient.update({
-      id: 'my-action',
-      action: {
-        name: 'my name',
-        config: {
-          a: true,
-          b: true,
-          c: true,
-        },
-        secrets: {},
-      },
-    });
-    expect(result).toEqual({
-      id: 'my-action',
-      isPreconfigured: false,
-      actionTypeId: 'my-action-type',
-      isMissingSecrets: true,
-      name: 'my name',
-      config: {
-        a: true,
-        b: true,
-        c: true,
-      },
-    });
-    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledTimes(1);
-    expect(unsecuredSavedObjectsClient.create.mock.calls[0]).toMatchInlineSnapshot(`
-      Array [
-        "action",
-        Object {
-          "actionTypeId": "my-action-type",
-          "config": Object {
-            "a": true,
-            "b": true,
-            "c": true,
-          },
-          "isMissingSecrets": false,
-          "name": "my name",
-          "secrets": Object {},
-        },
-        Object {
-          "id": "my-action",
-          "overwrite": true,
-          "references": Array [],
-        },
-      ]
-    `);
-  });
-
-  test('throws an error when ensureActionTypeEnabled throws', async () => {
-    actionTypeRegistry.register({
-      id: 'my-action-type',
-      name: 'My action type',
-      minimumLicenseRequired: 'basic',
-      executor,
-    });
-    mockedLicenseState.ensureLicenseForActionType.mockImplementation(() => {
-      throw new Error('Fail');
-    });
+  test('throws an error when unsecuredSavedObjectsClient throws', async () => {
+    const expiresAt = new Date().toISOString();
     unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
       id: '1',
-      type: 'action',
+      type: 'connector_token',
       attributes: {
-        actionTypeId: 'my-action-type',
+        connectorId: '123',
+        tokenType: 'access_token',
+        token: 'testtokenvalue',
+        createdAt: new Date().toISOString(),
       },
       references: [],
     });
-    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
-      id: 'my-action',
-      type: 'action',
-      attributes: {
-        actionTypeId: 'my-action-type',
-        isMissingSecrets: false,
-        name: 'my name',
-        config: {},
-        secrets: {},
-      },
-      references: [],
-    });
+    unsecuredSavedObjectsClient.create.mockRejectedValueOnce(new Error('Fail'));
     await expect(
-      actionsClient.update({
+      connectorTokenClient.update({
         id: 'my-action',
-        action: {
-          name: 'my name',
-          config: {},
-          secrets: {},
-        },
+        tokenType: 'access_token',
+        token: 'testtokenvalue',
+        expiresAt,
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(`"Fail"`);
   });
