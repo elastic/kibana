@@ -33,6 +33,7 @@ describe('Color Stops component', () => {
         { color: '#bbb', stop: 40 },
         { color: '#ccc', stop: 60 },
       ],
+      savePalette: jest.fn(),
       paletteConfiguration: {},
       dataBounds: { min: 0, max: 200 },
       onChange: jest.fn(),

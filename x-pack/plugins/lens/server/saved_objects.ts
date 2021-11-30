@@ -54,7 +54,7 @@ export function setupSavedObjects(core: CoreSetup) {
     hidden: false,
     namespaceType: 'multiple-isolated',
     management: {
-      icon: 'lensApp',
+      icon: 'brush',
       defaultSearchField: 'title',
       importableAndExportable: true,
       getTitle: (obj: { attributes: { title: string } }) => obj.attributes.title,

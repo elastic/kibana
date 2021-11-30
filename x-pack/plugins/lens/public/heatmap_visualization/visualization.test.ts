@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import type { SavedObjectsClientContract } from 'kibana/public';
 import {
   filterOperationsAxis,
   getHeatmapVisualization,
@@ -58,7 +58,13 @@ describe('heatmap', () => {
 
   describe('#intialize', () => {
     test('returns a default state', () => {
-      expect(getHeatmapVisualization({ paletteService, theme }).initialize(() => 'l1')).toEqual({
+      expect(
+        getHeatmapVisualization({
+          paletteService,
+          theme,
+          savedObjectsClient: {} as SavedObjectsClientContract,
+        }).initialize(() => 'l1')
+      ).toEqual({
         layerId: 'l1',
         layerType: layerTypes.DATA,
         title: 'Empty Heatmap chart',
@@ -81,10 +87,11 @@ describe('heatmap', () => {
 
     test('returns persisted state', () => {
       expect(
-        getHeatmapVisualization({ paletteService, theme }).initialize(
-          () => 'test-layer',
-          exampleState()
-        )
+        getHeatmapVisualization({
+          paletteService,
+          theme,
+          savedObjectsClient: {} as SavedObjectsClientContract,
+        }).initialize(() => 'test-layer', exampleState())
       ).toEqual(exampleState());
     });
   });
@@ -123,6 +130,7 @@ describe('heatmap', () => {
         getHeatmapVisualization({
           paletteService,
           theme,
+          savedObjectsClient: {} as SavedObjectsClientContract,
         }).getConfiguration({ state, frame, layerId: 'first' })
       ).toEqual({
         groups: [
@@ -181,6 +189,7 @@ describe('heatmap', () => {
         getHeatmapVisualization({
           paletteService,
           theme,
+          savedObjectsClient: {} as SavedObjectsClientContract,
         }).getConfiguration({ state, frame, layerId: 'first' })
       ).toEqual({
         groups: [
@@ -234,6 +243,7 @@ describe('heatmap', () => {
         getHeatmapVisualization({
           paletteService,
           theme,
+          savedObjectsClient: {} as SavedObjectsClientContract,
         }).getConfiguration({ state, frame, layerId: 'first' })
       ).toEqual({
         groups: [
@@ -289,6 +299,7 @@ describe('heatmap', () => {
         getHeatmapVisualization({
           paletteService,
           theme,
+          savedObjectsClient: {} as SavedObjectsClientContract,
         }).setDimension({
           prevState,
           layerId: 'first',
@@ -314,6 +325,7 @@ describe('heatmap', () => {
         getHeatmapVisualization({
           paletteService,
           theme,
+          savedObjectsClient: {} as SavedObjectsClientContract,
         }).removeDimension({
           prevState,
           layerId: 'first',
@@ -333,6 +345,7 @@ describe('heatmap', () => {
         getHeatmapVisualization({
           paletteService,
           theme,
+          savedObjectsClient: {} as SavedObjectsClientContract,
         }).getSupportedLayers()
       ).toHaveLength(1);
     });
@@ -348,6 +361,7 @@ describe('heatmap', () => {
       const instance = getHeatmapVisualization({
         paletteService,
         theme,
+        savedObjectsClient: {} as SavedObjectsClientContract,
       });
       expect(instance.getLayerType('test-layer', state)).toEqual(layerTypes.DATA);
       expect(instance.getLayerType('foo', state)).toBeUndefined();
@@ -385,6 +399,7 @@ describe('heatmap', () => {
         getHeatmapVisualization({
           paletteService,
           theme,
+          savedObjectsClient: {} as SavedObjectsClientContract,
         }).toExpression(state, datasourceLayers, attributes)
       ).toEqual({
         type: 'expression',
@@ -473,6 +488,7 @@ describe('heatmap', () => {
         getHeatmapVisualization({
           paletteService,
           theme,
+          savedObjectsClient: {} as SavedObjectsClientContract,
         }).toExpression(state, datasourceLayers, attributes)
       ).toEqual(null);
     });
@@ -505,6 +521,7 @@ describe('heatmap', () => {
         getHeatmapVisualization({
           paletteService,
           theme,
+          savedObjectsClient: {} as SavedObjectsClientContract,
         }).toPreviewExpression!(state, datasourceLayers)
       ).toEqual({
         type: 'expression',
@@ -584,6 +601,7 @@ describe('heatmap', () => {
         getHeatmapVisualization({
           paletteService,
           theme,
+          savedObjectsClient: {} as SavedObjectsClientContract,
         }).getErrorMessages(mockState)
       ).toEqual(undefined);
     });
@@ -597,6 +615,7 @@ describe('heatmap', () => {
         getHeatmapVisualization({
           paletteService,
           theme,
+          savedObjectsClient: {} as SavedObjectsClientContract,
         }).getErrorMessages(mockState)
       ).toEqual([
         {
@@ -630,6 +649,7 @@ describe('heatmap', () => {
         getHeatmapVisualization({
           paletteService,
           theme,
+          savedObjectsClient: {} as SavedObjectsClientContract,
         }).getWarningMessages!(mockState, frame)
       ).toEqual(undefined);
     });
@@ -651,6 +671,7 @@ describe('heatmap', () => {
         getHeatmapVisualization({
           paletteService,
           theme,
+          savedObjectsClient: {} as SavedObjectsClientContract,
         }).getWarningMessages!(mockState, frame)
       ).toEqual(undefined);
     });
@@ -677,6 +698,7 @@ describe('heatmap', () => {
         getHeatmapVisualization({
           paletteService,
           theme,
+          savedObjectsClient: {} as SavedObjectsClientContract,
         }).getWarningMessages!(mockState, frame)
       ).toHaveLength(1);
     });

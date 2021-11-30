@@ -62,6 +62,7 @@ export class SavedObjectPaletteStore implements SavedPaletteStore {
     const result = await this.client.find({
       type: PALETTE_DOC_TYPE,
       search: title,
+      searchFields: ['title'],
     });
 
     return result.savedObjects.length > 0;
