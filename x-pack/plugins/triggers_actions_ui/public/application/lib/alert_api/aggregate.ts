@@ -12,10 +12,14 @@ import { AsApiContract, RewriteRequestCase } from '../../../../../actions/common
 
 const rewriteBodyRes: RewriteRequestCase<AlertAggregations> = ({
   rule_execution_status: alertExecutionStatus,
+  rule_enabled_status: ruleEnabledStatus,
+  rule_muted_status: ruleMutedStatus,
   ...rest
 }: any) => ({
   ...rest,
   alertExecutionStatus,
+  ruleEnabledStatus,
+  ruleMutedStatus,
 });
 
 export async function loadAlertAggregations({
