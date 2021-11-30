@@ -74,7 +74,10 @@ bin/kibana -c config/instance2.yml
 
 To access multiple load-balanced {kib} clusters from the same browser,
 explicitly set `xpack.security.cookieName` to the same value in the {kib} configuration
-of each {kib} cluster.
+of each {kib} instance.
+
+Each {kib} cluster must have a different value of `xpack.security.cookieName`.
+
 This avoids conflicts between cookies from the different {kib} instances.
 
 This will achieve seamless high availability and keep the session
