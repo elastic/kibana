@@ -96,18 +96,6 @@ export function getMakiSymbolSvg(symbolId) {
   return SYMBOLS[symbolId];
 }
 
-export async function loadMakiIconInMap(symbolId, mbMap) {
-  const pixelRatio = Math.floor(window.devicePixelRatio);
-  if (!mbMap.hasImage(symbolId)) {
-    const svg = getMakiSymbolSvg(symbolId);
-    const imageData = await createSdfIcon(svg);
-    mbMap.addImage(symbolId, imageData, {
-      pixelRatio,
-      sdf: true,
-    });
-  }
-}
-
 export function getMakiSymbolAnchor(symbolId) {
   switch (symbolId) {
     case 'embassy':

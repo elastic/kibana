@@ -13,7 +13,6 @@ import { DynamicStyleProperty } from './dynamic_style_property';
 import {
   getIconPalette,
   getMakiSymbolAnchor,
-  loadMakiIconInMap,
   // @ts-expect-error
 } from '../symbol_utils';
 import { BreakedLegend } from '../components/legend/breaked_legend';
@@ -35,25 +34,14 @@ export class DynamicIconProperty extends DynamicStyleProperty<IconDynamicOptions
     return palette.length;
   }
 
-  syncIconWithMb(symbolLayerId: string, mbMap: MbMap, iconPixelSize: number) {
+  syncIconWithMb(symbolLayerId: string, mbMap: MbMap) {
     if (this._isIconDynamicConfigComplete()) {
-      const { customIconStops, iconPaletteId } = this._options;
-      const icons = [
-        ...(iconPaletteId ? getIconPalette(iconPaletteId) : []),
-        ...(customIconStops ? customIconStops.map(({ icon }) => icon) : []),
-      ];
-      Promise.all(
-        icons.map(async (icon) => {
-          await loadMakiIconInMap(icon, mbMap);
-        })
-      ).then(() => {
         mbMap.setLayoutProperty(
           symbolLayerId,
           'icon-image',
-          this._getMbIconImageExpression(iconPixelSize)
+          this._getMbIconImageExpression()
         );
         mbMap.setLayoutProperty(symbolLayerId, 'icon-anchor', this._getMbIconAnchorExpression());
-      });
     } else {
       mbMap.setLayoutProperty(symbolLayerId, 'icon-image', null);
       mbMap.setLayoutProperty(symbolLayerId, 'icon-anchor', null);
@@ -84,7 +72,7 @@ export class DynamicIconProperty extends DynamicStyleProperty<IconDynamicOptions
     });
   }
 
-  _getMbIconImageExpression(iconPixelSize: number) {
+  _getMbIconImageExpression() {
     const { stops, fallbackSymbolId } = this._getPaletteStops();
 
     if (stops.length < 1 || !fallbackSymbolId) {

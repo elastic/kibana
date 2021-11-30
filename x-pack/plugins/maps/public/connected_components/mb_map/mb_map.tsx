@@ -7,6 +7,8 @@
 
 import _ from 'lodash';
 import React, { Component } from 'react';
+// @ts-expect-error
+import { svgArray } from '@elastic/maki';
 import { Adapters } from 'src/plugins/inspector/public';
 import { Filter } from 'src/plugins/data/public';
 import { Action, ActionExecutionContext } from 'src/plugins/ui_actions/public';
@@ -43,6 +45,8 @@ import { TileStatusTracker } from './tile_status_tracker';
 import { DrawFeatureControl } from './draw_control/draw_feature_control';
 import { MvtVectorLayer } from '../../classes/layers/vector_layer';
 import type { MapExtentState } from '../../reducers/map/types';
+// @ts-expect-error
+import { createSdfIcon, SYMBOLS } from '../../classes/styles/vector/symbol_utils';
 
 export interface Props {
   isMapReady: boolean;
@@ -236,6 +240,7 @@ export class MbMap extends Component<Props, State> {
     }
 
     this.setState({ mbMap }, () => {
+      this._loadMakiSprites(mbMap);
       this._initResizerChecker();
       this._registerMapEventListeners(mbMap);
       this.props.onMapReady(this._getMapExtentState());
@@ -277,6 +282,21 @@ export class MbMap extends Component<Props, State> {
         this.state.mbMap.resize();
       }
     });
+  }
+
+  async _loadMakiSprites(mbMap: MapboxMap) {
+    if (this._isMounted) {
+      const pixelRatio = Math.floor(window.devicePixelRatio);
+      for (const [symbolId, svg] of Object.entries(SYMBOLS)) {
+        if (!mbMap.hasImage(symbolId)) {
+          const imageData = await createSdfIcon(svg, 0.25, 0.25);
+          mbMap.addImage(symbolId, imageData, {
+            pixelRatio,
+            sdf: true,
+          });
+        }
+      }
+    }
   }
 
   _syncMbMapWithMapState = () => {

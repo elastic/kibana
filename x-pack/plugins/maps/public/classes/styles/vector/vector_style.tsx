@@ -902,7 +902,6 @@ export class VectorStyle implements IVectorStyle {
     this._iconStyleProperty.syncIconWithMb(
       symbolLayerId,
       mbMap,
-      this._iconSizeStyleProperty.getIconPixelSize()
     );
     // icon-color is only supported on SDF icons.
     this._fillColorStyleProperty.syncIconColorWithMb(symbolLayerId, mbMap);
