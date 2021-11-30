@@ -7,6 +7,7 @@
 
 import React, { Fragment, useState } from 'react';
 import PropTypes from 'prop-types';
+import { ClassNames } from '@emotion/react';
 import {
   EuiSelect,
   EuiFieldText,
@@ -18,6 +19,7 @@ import {
 } from '@elastic/eui';
 import { templateFromReactComponent } from '../../../public/lib/template_from_react_component';
 import { ArgumentStrings } from '../../../i18n';
+import { sidebarPanelNoMinWidthStyle } from '../../../public/components/shared_styles';
 
 const { FilterGroup: strings } = ArgumentStrings;
 
@@ -49,28 +51,37 @@ const FilterGroupInput = ({ onValueChange, argValue, argId, filterGroups }) => {
   };
 
   const addForm = (
-    <form onSubmit={handleAddGroup}>
-      <EuiFlexGroup gutterSize="s">
-        <EuiFlexItem>
-          <EuiFieldText
-            autoFocus
-            compressed
-            type="text"
-            value={inputValue}
-            onChange={(ev) => setInputValue(ev.target.value)}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false} className="canvasSidebar__panel-noMinWidth">
-          <EuiButton type="submit" size="s" onClick={handleAddGroup}>
-            {strings.getButtonSet()}
-          </EuiButton>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer size="s" />
-      <EuiButtonEmpty color="danger" size="xs" onClick={() => setAddMode(!addMode)} flush="left">
-        {strings.getButtonCancel()}
-      </EuiButtonEmpty>
-    </form>
+    <ClassNames>
+      {({ css }) => (
+        <form onSubmit={handleAddGroup}>
+          <EuiFlexGroup gutterSize="s">
+            <EuiFlexItem>
+              <EuiFieldText
+                autoFocus
+                compressed
+                type="text"
+                value={inputValue}
+                onChange={(ev) => setInputValue(ev.target.value)}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false} className={css(sidebarPanelNoMinWidthStyle)}>
+              <EuiButton type="submit" size="s" onClick={handleAddGroup}>
+                {strings.getButtonSet()}
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer size="s" />
+          <EuiButtonEmpty
+            color="danger"
+            size="xs"
+            onClick={() => setAddMode(!addMode)}
+            flush="left"
+          >
+            {strings.getButtonCancel()}
+          </EuiButtonEmpty>
+        </form>
+      )}
+    </ClassNames>
   );
 
   const selectForm = (

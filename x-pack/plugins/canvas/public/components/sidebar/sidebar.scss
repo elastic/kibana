@@ -14,10 +14,6 @@
   animation: sidebarPop $euiAnimSpeedFast $euiAnimSlightResistance;
 }
 
-.canvasSidebar__panel-noMinWidth .euiButton {
-  min-width: 0;
-}
-
 @keyframes sidebarPop {
   0% {
     opacity: 0;

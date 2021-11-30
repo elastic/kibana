@@ -7,9 +7,11 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
+import { ClassNames } from '@emotion/react';
 import { EuiFlexItem, EuiFlexGroup, EuiFieldText, EuiButton } from '@elastic/eui';
 import { templateFromReactComponent } from '../../../public/lib/template_from_react_component';
 import { ArgumentStrings } from '../../../i18n';
+import { sidebarPanelNoMinWidthStyle } from '../../../public/components/shared_styles';
 
 const { String: strings } = ArgumentStrings;
 
@@ -30,18 +32,22 @@ const StringArgInput = ({ argValue, typeInstance, onValueChange, argId }) => {
   );
 
   return (
-    <EuiFlexGroup gutterSize="s">
-      <EuiFlexItem>
-        <EuiFieldText compressed id={argId} value={value} onChange={onChange} />
-      </EuiFlexItem>
-      {confirm && (
-        <EuiFlexItem grow={false} className="canvasSidebar__panel-noMinWidth">
-          <EuiButton size="s" onClick={() => onValueChange(value)}>
-            {confirm}
-          </EuiButton>
-        </EuiFlexItem>
+    <ClassNames>
+      {({ css }) => (
+        <EuiFlexGroup gutterSize="s">
+          <EuiFlexItem>
+            <EuiFieldText compressed id={argId} value={value} onChange={onChange} />
+          </EuiFlexItem>
+          {confirm && (
+            <EuiFlexItem grow={false} className={css(sidebarPanelNoMinWidthStyle)}>
+              <EuiButton size="s" onClick={() => onValueChange(value)}>
+                {confirm}
+              </EuiButton>
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
       )}
-    </EuiFlexGroup>
+    </ClassNames>
   );
 };
 

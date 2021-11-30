@@ -19,6 +19,8 @@ import {
 import { templateFromReactComponent } from '../../../../public/lib/template_from_react_component';
 import { VALID_IMAGE_TYPES } from '../../../../common/lib/constants';
 import { ArgumentStrings } from '../../../../i18n';
+import { sidebarPanelNoMinWidthStyle } from '../../../../public/components/shared_styles';
+
 import { FileForm, LinkForm } from './forms';
 
 const { ImageUpload: strings } = ArgumentStrings;
@@ -158,7 +160,7 @@ class ImageUpload extends React.Component {
     };
 
     return (
-      <div className="canvasSidebar__panel-noMinWidth" style={{ position: 'relative' }}>
+      <div css={sidebarPanelNoMinWidthStyle} style={{ position: 'relative' }}>
         {selectUrlType}
         <EuiSpacer size="s" />
         {forms[urlType]}

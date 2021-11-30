@@ -82,3 +82,9 @@ export const sidebarPanelStylesFactory = (theme: EuiThemeComputed) => css`
     border-bottom: none;
   }
 `;
+
+export const sidebarPanelNoMinWidthStyle = css`
+  & .euiButton {
+    min-width: 0;
+  }
+`;

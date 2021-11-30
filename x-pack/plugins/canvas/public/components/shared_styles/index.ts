@@ -15,5 +15,6 @@ export {
   sidebarAccordionStylesFactory,
   sidebarAccordionContentStylesFactory,
   sidebarExpandableStyles,
+  sidebarPanelNoMinWidthStyle,
   sidebarPanelStylesFactory,
 } from './sidebar';
