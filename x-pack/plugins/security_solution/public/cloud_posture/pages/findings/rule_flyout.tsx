@@ -20,7 +20,9 @@ import {
   EuiTab,
   EuiCard,
 } from '@elastic/eui';
+import { assertNever } from '@kbn/std';
 import { CSPFinding } from './types';
+import { CSPEvaluationBadge } from '../../components/csp_evaluation_badge';
 
 const tabs = ['resource', 'rule', 'overview'] as const;
 
@@ -45,7 +47,8 @@ export const FindingsRuleFlyOut = ({ onClose, findings }: FindingFlyoutProps) =>
       case 'resource':
         return <ResourceTab data={findings} />;
     }
-    return null;
+
+    assertNever(tab);
   }, [findings, tab]);
 
   return (
@@ -76,12 +79,6 @@ export const FindingsRuleFlyOut = ({ onClose, findings }: FindingFlyoutProps) =>
     </EuiFlyout>
   );
 };
-
-const getEvaluationBadge = (v: string) => (
-  <EuiBadge color={v === 'passed' ? 'success' : v === 'failed' ? 'danger' : 'default'}>
-    {v.toUpperCase()}
-  </EuiBadge>
-);
 
 const getTagsBadges = (v: string[]) => (
   <>
@@ -177,7 +174,10 @@ const ResourceTab = ({ data }: CSPTabProps) => (
         compressed={false}
         type="column"
         listItems={[
-          { title: 'Evaluation', description: getEvaluationBadge(data.result.evaluation) },
+          {
+            title: 'Evaluation',
+            description: <CSPEvaluationBadge type={data.result.evaluation} />,
+          },
           {
             title: 'Evidence',
             description: <EuiCode>{JSON.stringify(data.result.evidence, null, 2)}</EuiCode>,
