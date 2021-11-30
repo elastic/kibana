@@ -20,14 +20,12 @@ import {
 } from '../../../../../state';
 import { fireEvent, within, act, waitFor } from '@testing-library/react';
 import { APP_UI_ID } from '../../../../../../../common/constants';
-import {
-  EndpointPrivileges,
-  useEndpointPrivileges,
-} from '../../../../../../common/components/user_privileges/endpoint/use_endpoint_privileges';
+import { EndpointPrivileges } from '../../../../../../common/components/user_privileges/endpoint/use_endpoint_privileges';
+import { useUserPrivileges } from '../../../../../../common/components/user_privileges';
 import { getEndpointPrivilegesInitialStateMock } from '../../../../../../common/components/user_privileges/endpoint/mocks';
 
-jest.mock('../../../../../../common/components/user_privileges/endpoint/use_endpoint_privileges');
-const mockUseEndpointPrivileges = useEndpointPrivileges as jest.Mock;
+jest.mock('../../../../../../common/components/user_privileges');
+const mockUseUserPrivileges = useUserPrivileges as jest.Mock;
 
 describe('when rendering the PolicyTrustedAppsList', () => {
   // The index (zero based) of the card created by the generator that is policy specific
@@ -82,11 +80,14 @@ describe('when rendering the PolicyTrustedAppsList', () => {
   };
 
   afterAll(() => {
-    mockUseEndpointPrivileges.mockReset();
+    mockUseUserPrivileges.mockReset();
   });
   beforeEach(() => {
     appTestContext = createAppRootMockRenderer();
-    mockUseEndpointPrivileges.mockReturnValue(loadedUserEndpointPrivilegesState());
+    mockUseUserPrivileges.mockReturnValue({
+      ...mockUseUserPrivileges(),
+      endpointPrivileges: loadedUserEndpointPrivilegesState(),
+    });
 
     mockedApis = policyDetailsPageAllApiHttpMocks(appTestContext.coreStart.http);
     appTestContext.setExperimentalFlag({ trustedAppsByPolicyEnabled: true });
@@ -324,11 +325,12 @@ describe('when rendering the PolicyTrustedAppsList', () => {
   });
 
   it('does not show remove option in actions menu if license is downgraded to gold or below', async () => {
-    mockUseEndpointPrivileges.mockReturnValue(
-      loadedUserEndpointPrivilegesState({
+    mockUseUserPrivileges.mockReturnValue({
+      ...mockUseUserPrivileges(),
+      endpointPrivileges: loadedUserEndpointPrivilegesState({
         canCreateArtifactsByPolicy: false,
-      })
-    );
+      }),
+    });
     await render();
     await toggleCardActionMenu(POLICY_SPECIFIC_CARD_INDEX);
 
