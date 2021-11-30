@@ -23,7 +23,7 @@ jest.mock('../../../../kibana_react/public', () => ({
 jest.mock('../../kibana_services', () => ({
   getServices: () => ({
     uiSettings: {
-      get: jest.fn(),
+      get: jest.fn((key) => key === 'discover:maxDocFieldsDisplayed' && 200),
     },
     fieldFormats: {
       getDefaultInstance: jest.fn(() => ({ convert: (value: unknown) => (value ? value : '-') })),
