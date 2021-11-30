@@ -44,3 +44,19 @@ export type SyntheticsMonitorSavedObject = SimpleSavedObject<{
     };
   };
 }>;
+
+interface LocationGeo {
+  lat: number;
+  lon: number;
+}
+
+export interface ManifestLocation {
+  url: string;
+  geo: {
+    name: string;
+    location: LocationGeo;
+  };
+  status: string;
+}
+
+export type ServiceLocations = Array<{ id: string; label: string; geo: LocationGeo }>;
