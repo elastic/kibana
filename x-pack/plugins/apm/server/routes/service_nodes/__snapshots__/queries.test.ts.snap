@@ -17,6 +17,12 @@ Object {
       },
       "host": Object {
         "terms": Object {
+          "field": "host.name",
+          "size": 1,
+        },
+      },
+      "hostname": Object {
+        "terms": Object {
           "field": "host.hostname",
           "size": 1,
         },
@@ -73,6 +79,12 @@ Object {
         },
       },
       "host": Object {
+        "terms": Object {
+          "field": "host.name",
+          "size": 1,
+        },
+      },
+      "hostname": Object {
         "terms": Object {
           "field": "host.hostname",
           "size": 1,
@@ -144,6 +156,9 @@ Object {
           "latest": Object {
             "top_metrics": Object {
               "metrics": Array [
+                Object {
+                  "field": "host.name",
+                },
                 Object {
                   "field": "host.hostname",
                 },

@@ -8,6 +8,7 @@
 import { Setup } from '../../lib/helpers/setup_request';
 import {
   HOST_NAME,
+  HOSTNAME,
   CONTAINER_ID,
 } from '../../../common/elasticsearch_fieldnames';
 import { NOT_AVAILABLE_LABEL } from '../../../common/i18n';
@@ -65,6 +66,12 @@ export async function getServiceNodeMetadata({
         },
         host: {
           terms: {
+            field: HOSTNAME,
+            size: 1,
+          },
+        },
+        hostname: {
+          terms: {
             field: HOST_NAME,
             size: 1,
           },
@@ -85,7 +92,7 @@ export async function getServiceNodeMetadata({
   );
 
   return {
-    host: response.aggregations?.host.buckets[0]?.key || NOT_AVAILABLE_LABEL,
+    host: response.aggregations?.host.buckets[0]?.key || response.aggregations?.hostname.buckets[0]?.key || NOT_AVAILABLE_LABEL,
     containerId:
       response.aggregations?.containerId.buckets[0]?.key || NOT_AVAILABLE_LABEL,
   };
