@@ -90,6 +90,7 @@ export function fetchAll(
     () => sendCompleteMsg(dataSubjects.main$, true),
     (error) => {
       if (error instanceof Error && error.name === 'AbortError') return;
+      if (error instanceof Error && error.name === 'ChartLoadingError') return;
       data.search.showError(error);
       sendErrorMsg(dataSubjects.main$, error);
     }

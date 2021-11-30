@@ -161,6 +161,7 @@ describe('test fetchCharts', () => {
           FetchStatus.UNINITIALIZED,
           FetchStatus.LOADING,
           FetchStatus.ERROR,
+          FetchStatus.ERROR,
         ]);
         expect(stateArrHits).toEqual([
           FetchStatus.UNINITIALIZED,

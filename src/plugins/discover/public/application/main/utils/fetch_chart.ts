@@ -22,6 +22,7 @@ import { SavedSearchData } from './use_saved_search';
 import { AppState } from '../services/discover_state';
 import { ReduxLikeStateContainer } from '../../../../../kibana_utils/common';
 import { sendErrorMsg, sendLoadingMsg } from './use_saved_search_messages';
+import { ChartLoadingError } from './chart_loading_error';
 
 export function fetchChart(
   data$: SavedSearchData,
@@ -106,8 +107,13 @@ export function fetchChart(
       if (error instanceof Error && error.name === 'AbortError') {
         return;
       }
-      sendErrorMsg(charts$, error);
-      sendErrorMsg(totalHits$, error);
+      const chartLoadingError = new ChartLoadingError(error.message);
+      charts$.next({
+        fetchStatus: FetchStatus.ERROR,
+        error: chartLoadingError,
+      });
+      sendErrorMsg(charts$, chartLoadingError);
+      sendErrorMsg(totalHits$, chartLoadingError);
     }
   );
   return fetch$;
