@@ -16,7 +16,6 @@ import { ImportQuerySchemaDecoded, importQuerySchema } from '@kbn/securitysoluti
 
 import type { ListsPluginRouter } from '../types';
 import { ConfigType } from '../config';
-import { HapiReadableStream } from '../services/exception_lists/exception_list_client_types';
 
 import { buildRouteValidation, buildSiemResponse, getExceptionListClient } from './utils';
 
@@ -43,7 +42,7 @@ export const importExceptionsRoute = (router: ListsPluginRouter, config: ConfigT
       const siemResponse = buildSiemResponse(response);
 
       try {
-        const { filename } = (request.body.file as HapiReadableStream).hapi;
+        const { filename } = request.body.file.hapi;
         const fileExtension = extname(filename).toLowerCase();
         if (fileExtension !== '.ndjson') {
           return siemResponse.error({

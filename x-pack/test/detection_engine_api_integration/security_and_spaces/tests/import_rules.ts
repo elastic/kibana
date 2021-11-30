@@ -23,7 +23,7 @@ import {
   ruleToNdjson,
 } from '../../utils';
 import {
-  toNdjsonString,
+  toNdJsonString,
   getImportExceptionsListItemSchemaMock,
   getImportExceptionsListSchemaMock,
 } from '../../../../plugins/lists/common/schemas/request/import_exceptions_schema.mock';
@@ -498,7 +498,7 @@ export default ({ getService }: FtrProviderContext): void => {
             .set('kbn-xsrf', 'true')
             .attach(
               'file',
-              toNdjsonString([
+              toNdJsonString([
                 simpleRule,
                 getImportExceptionsListSchemaMock('test_list_id'),
                 getImportExceptionsListItemSchemaMock('test_item_id', 'test_list_id'),
@@ -593,7 +593,7 @@ export default ({ getService }: FtrProviderContext): void => {
             .set('kbn-xsrf', 'true')
             .attach(
               'file',
-              toNdjsonString([
+              toNdJsonString([
                 simpleRule,
                 {
                   ...getImportExceptionsListSchemaMock('i_exist'),

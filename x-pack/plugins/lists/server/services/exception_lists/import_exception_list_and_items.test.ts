@@ -12,7 +12,6 @@ import { SavedObjectsClientContract } from 'kibana/server';
 import {
   getImportExceptionsListItemSchemaMock,
   getImportExceptionsListSchemaMock,
-  toReadable,
 } from '../../../../lists/common/schemas/request/import_exceptions_schema.mock';
 
 import { importExceptionListItems, importExceptionLists } from './utils/import_exceptions_utils';

@@ -530,7 +530,7 @@ export const createSignalsIndex = async (
 ): Promise<void> => {
   await countDownTest(
     async () => {
-      // await supertest.post(DETECTION_ENGINE_INDEX_URL).set('kbn-xsrf', 'true').send();
+      await supertest.post(DETECTION_ENGINE_INDEX_URL).set('kbn-xsrf', 'true').send();
       return true;
     },
     'createSignalsIndex',
@@ -1308,8 +1308,7 @@ export const waitForRuleSuccessOrStatus = async (
   supertest: SuperTest.SuperTest<SuperTest.Test>,
   log: ToolingLog,
   id: string,
-  status: 'succeeded' | 'failed' | 'partial failure' | 'warning' = 'succeeded',
-  afterDate?: Date
+  status: 'succeeded' | 'failed' | 'partial failure' | 'warning' = 'succeeded'
 ): Promise<void> => {
   await waitFor(
     async () => {
@@ -1325,20 +1324,15 @@ export const waitForRuleSuccessOrStatus = async (
             )}, status: ${JSON.stringify(response.status)}`
           );
         }
-        const currentStatus = response.body[id]?.current_status;
-
-        if (currentStatus?.status !== status) {
+        if (response.body[id]?.current_status?.status !== status) {
           log.debug(
             `Did not get an expected status of ${status} while waiting for a rule success or status for rule id ${id} (waitForRuleSuccessOrStatus). Will continue retrying until status is found. body: ${JSON.stringify(
               response.body
             )}, status: ${JSON.stringify(response.status)}`
           );
         }
-        return (
-          currentStatus != null &&
-          currentStatus.status === status &&
-          (afterDate ? new Date(currentStatus.status_date) > afterDate : true)
-        );
+
+        return response.body[id]?.current_status?.status === status;
       } catch (e) {
         if ((e as Error).message.includes('got 503 "Service Unavailable"')) {
           return false;
