@@ -33,7 +33,12 @@ import {
   getLeadControlColumns,
   getVisibleColumns,
 } from './discover_grid_columns';
-import { defaultPageSize, gridStyle, pageSizeArr, toolbarVisibility } from './constants';
+import {
+  defaultPageSize,
+  gridStyle,
+  pageSizeArr,
+  toolbarVisibility as toolbarVisibilityDefaults,
+} from './constants';
 import { DiscoverServices } from '../../build_services';
 import { getDisplayedColumns } from '../../utils/columns';
 import {
@@ -158,6 +163,8 @@ export const EuiDataGridMemoized = React.memo((props: EuiDataGridProps) => {
   return <EuiDataGrid {...props} />;
 });
 
+const CONTROL_COLUMN_IDS_DEFAULT = ['openDetails', 'select'];
+
 export const DiscoverGrid = ({
   ariaLabelledBy,
   columns,
@@ -182,7 +189,7 @@ export const DiscoverGrid = ({
   useNewFieldsApi,
   isSortEnabled = true,
   isPaginationEnabled = true,
-  controlColumnIds = ['openDetails', 'select'],
+  controlColumnIds = CONTROL_COLUMN_IDS_DEFAULT,
   className,
 }: DiscoverGridProps) => {
   const [selectedDocs, setSelectedDocs] = useState<string[]>([]);
@@ -345,6 +352,23 @@ export const DiscoverGrid = ({
     [usedSelectedDocs, isFilterActive, rows, setIsFilterActive]
   );
 
+  const toolbarVisibility = useMemo(
+    () =>
+      defaultColumns
+        ? {
+            ...toolbarVisibilityDefaults,
+            showColumnSelector: false,
+            showSortSelector: isSortEnabled,
+            additionalControls,
+          }
+        : {
+            ...toolbarVisibilityDefaults,
+            showSortSelector: isSortEnabled,
+            additionalControls,
+          },
+    [defaultColumns, additionalControls, isSortEnabled]
+  );
+
   if (!rowCount && isLoading) {
     return (
       <div className="euiDataGrid__loading">
@@ -404,30 +428,13 @@ export const DiscoverGrid = ({
           data-test-subj="docTable"
           gridStyle={gridStyle as EuiDataGridStyle}
           leadingControlColumns={lead}
-          onColumnResize={(col: { columnId: string; width: number }) => {
-            if (onResize) {
-              onResize(col);
-            }
-          }}
+          onColumnResize={onResize}
           pagination={paginationObj}
           renderCellValue={renderCellValue}
           rowCount={rowCount}
           schemaDetectors={schemaDetectors}
           sorting={sorting as EuiDataGridSorting}
-          toolbarVisibility={
-            defaultColumns
-              ? {
-                  ...toolbarVisibility,
-                  showColumnSelector: false,
-                  showSortSelector: isSortEnabled,
-                  additionalControls,
-                }
-              : {
-                  ...toolbarVisibility,
-                  showSortSelector: isSortEnabled,
-                  additionalControls,
-                }
-          }
+          toolbarVisibility={toolbarVisibility}
         />
 
         {showDisclaimer && (
