@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiLoadingSpinner, EuiText } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLoadingSpinner,
+  EuiText,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isNumber } from 'lodash';
 import React, { useMemo } from 'react';
@@ -19,17 +24,10 @@ import {
 import { Coordinate } from '../../../../../typings/timeseries';
 import { SparkPlot, Color } from '../../../shared/charts/spark_plot';
 
-export const ItemRow = euiStyled.tr`
-  line-height: 2.5;
-`;
-
-export const ItemTitle = euiStyled.td`
+export const ItemTitle = euiStyled(EuiFlexItem)`
   color: ${({ theme }) => theme.eui.euiTextSubduedColor};
-  padding-right: 1rem;
-`;
-
-export const ItemDescription = euiStyled.td`
-  text-align: right;
+  display: flex;
+  justify-content: end;
 `;
 
 function LoadingSpinner() {
@@ -143,28 +141,30 @@ export function StatsList({ data, isLoading }: StatsListProps) {
   }
 
   return (
-    <table>
-      <tbody>
-        {items.map(({ title, valueLabel, timeseries, color }) => {
-          if (!valueLabel) {
-            return null;
-          }
-          return (
-            <ItemRow key={title}>
+    <EuiFlexGroup direction="column" responsive={false} gutterSize="m">
+      {items.map(({ title, valueLabel, timeseries, color }) => {
+        if (!valueLabel) {
+          return null;
+        }
+        return (
+          <EuiFlexItem key={title}>
+            <EuiFlexGroup gutterSize="none" responsive={false}>
               <ItemTitle>{title}</ItemTitle>
-              {timeseries ? (
-                <SparkPlot
-                  series={timeseries}
-                  color={color}
-                  valueLabel={valueLabel}
-                />
-              ) : (
-                <ItemDescription>{valueLabel}</ItemDescription>
-              )}
-            </ItemRow>
-          );
-        })}
-      </tbody>
-    </table>
+              <EuiFlexItem grow={false}>
+                {timeseries ? (
+                  <SparkPlot
+                    series={timeseries}
+                    color={color}
+                    valueLabel={valueLabel}
+                  />
+                ) : (
+                  <div>{valueLabel}</div>
+                )}
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        );
+      })}
+    </EuiFlexGroup>
   );
 }
