@@ -9,16 +9,18 @@
 import {
   EuiBadge,
   EuiButton,
-  EuiBadgeGroup,
   EuiButtonEmpty,
   EuiInMemoryTable,
   EuiPageHeader,
   EuiSpacer,
+  EuiFlexItem,
+  EuiFlexGroup,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { RouteComponentProps, withRouter, useLocation } from 'react-router-dom';
 import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import styled from 'styled-components';
 import { reactRouterNavigate, useKibana } from '../../../../../plugins/kibana_react/public';
 import { IndexPatternManagmentContext } from '../../types';
 import { IndexPatternTableItem } from '../types';
@@ -58,6 +60,10 @@ const securityDataView = i18n.translate(
 );
 
 const securitySolution = 'security-solution';
+
+const StyledFlexItem = styled(EuiFlexItem)`
+  justify-content: center;
+`;
 
 interface Props extends RouteComponentProps {
   canSave: boolean;
@@ -120,19 +126,24 @@ export const IndexPatternTable = ({
         }
       ) => (
         <>
-          <EuiButtonEmpty size="s" {...reactRouterNavigate(history, `patterns/${index.id}`)}>
-            {name}
-          </EuiButtonEmpty>
-          &emsp;
-          <EuiBadgeGroup gutterSize="s">
+          <EuiFlexGroup gutterSize="s" wrap>
+            <StyledFlexItem grow={false}>
+              <EuiButtonEmpty size="s" {...reactRouterNavigate(history, `patterns/${index.id}`)}>
+                {name}
+              </EuiButtonEmpty>
+            </StyledFlexItem>
             {index.id && index.id.indexOf(securitySolution) === 0 && (
-              <EuiBadge>{securityDataView}</EuiBadge>
+              <StyledFlexItem grow={false}>
+                <EuiBadge>{securityDataView}</EuiBadge>
+              </StyledFlexItem>
             )}
             {index.tags &&
               index.tags.map(({ key: tagKey, name: tagName }) => (
-                <EuiBadge key={tagKey}>{tagName}</EuiBadge>
+                <StyledFlexItem grow={false} key={tagKey}>
+                  <EuiBadge>{tagName}</EuiBadge>
+                </StyledFlexItem>
               ))}
-          </EuiBadgeGroup>
+          </EuiFlexGroup>
         </>
       ),
       dataType: 'string' as const,
