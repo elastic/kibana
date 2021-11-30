@@ -195,7 +195,6 @@ describe('Task Runner Cancel', () => {
     expect(eventLogger.logEvent).toHaveBeenCalledTimes(3);
     expect(eventLogger.startTiming).toHaveBeenCalledTimes(1);
     expect(eventLogger.logEvent).toHaveBeenNthCalledWith(1, {
-      '@timestamp': '1970-01-01T00:00:00.000Z',
       event: {
         action: 'execute-start',
         category: ['alerts'],
@@ -224,7 +223,6 @@ describe('Task Runner Cancel', () => {
       },
     });
     expect(eventLogger.logEvent).toHaveBeenNthCalledWith(2, {
-      '@timestamp': '1970-01-01T00:00:00.000Z',
       event: {
         action: 'execute-timeout',
         category: ['alerts'],
@@ -249,7 +247,6 @@ describe('Task Runner Cancel', () => {
       },
     });
     expect(eventLogger.logEvent).toHaveBeenNthCalledWith(3, {
-      '@timestamp': '1970-01-01T00:00:00.000Z',
       event: {
         action: 'execute',
         category: ['alerts'],
@@ -423,7 +420,6 @@ describe('Task Runner Cancel', () => {
     expect(eventLogger.startTiming).toHaveBeenCalledTimes(1);
     expect(eventLogger.logEvent).toHaveBeenCalledTimes(3);
     expect(eventLogger.logEvent).toHaveBeenNthCalledWith(1, {
-      '@timestamp': '1970-01-01T00:00:00.000Z',
       event: {
         action: 'execute-start',
         category: ['alerts'],
@@ -452,7 +448,6 @@ describe('Task Runner Cancel', () => {
       },
     });
     expect(eventLogger.logEvent).toHaveBeenNthCalledWith(2, {
-      '@timestamp': '1970-01-01T00:00:00.000Z',
       event: {
         action: 'execute-timeout',
         category: ['alerts'],
@@ -478,7 +473,6 @@ describe('Task Runner Cancel', () => {
       },
     });
     expect(eventLogger.logEvent).toHaveBeenNthCalledWith(3, {
-      '@timestamp': '1970-01-01T00:00:00.000Z',
       event: {
         action: 'execute',
         category: ['alerts'],
@@ -538,7 +532,6 @@ describe('Task Runner Cancel', () => {
     const eventLogger = taskRunnerFactoryInitializerParams.eventLogger;
     expect(eventLogger.logEvent).toHaveBeenCalledTimes(6);
     expect(eventLogger.logEvent).toHaveBeenNthCalledWith(1, {
-      '@timestamp': '1970-01-01T00:00:00.000Z',
       event: {
         action: 'execute-start',
         category: ['alerts'],
@@ -568,7 +561,6 @@ describe('Task Runner Cancel', () => {
       },
     });
     expect(eventLogger.logEvent).toHaveBeenNthCalledWith(2, {
-      '@timestamp': '1970-01-01T00:00:00.000Z',
       event: {
         action: 'execute-timeout',
         category: ['alerts'],
@@ -688,7 +680,6 @@ describe('Task Runner Cancel', () => {
       },
     });
     expect(eventLogger.logEvent).toHaveBeenNthCalledWith(6, {
-      '@timestamp': '1970-01-01T00:00:00.000Z',
       event: { action: 'execute', category: ['alerts'], kind: 'alert', outcome: 'success' },
       kibana: {
         alerting: {

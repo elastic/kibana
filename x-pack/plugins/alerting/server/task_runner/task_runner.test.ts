@@ -298,7 +298,6 @@ describe('Task Runner', () => {
     expect(eventLogger.startTiming).toHaveBeenCalledTimes(1);
     expect(eventLogger.logEvent.mock.calls[0][0]).toMatchInlineSnapshot(`
       Object {
-        "@timestamp": "1970-01-01T00:00:00.000Z",
         "event": Object {
           "action": "execute-start",
           "category": Array [
@@ -448,7 +447,6 @@ describe('Task Runner', () => {
         const eventLogger = customTaskRunnerFactoryInitializerParams.eventLogger;
         expect(eventLogger.logEvent).toHaveBeenCalledTimes(5);
         expect(eventLogger.logEvent).toHaveBeenNthCalledWith(1, {
-          '@timestamp': '1970-01-01T00:00:00.000Z',
           event: {
             action: 'execute-start',
             category: ['alerts'],
@@ -580,7 +578,6 @@ describe('Task Runner', () => {
           },
         });
         expect(eventLogger.logEvent).toHaveBeenNthCalledWith(5, {
-          '@timestamp': '1970-01-01T00:00:00.000Z',
           event: { action: 'execute', category: ['alerts'], kind: 'alert', outcome: 'success' },
           kibana: {
             alerting: {
@@ -668,7 +665,6 @@ describe('Task Runner', () => {
     expect(eventLogger.startTiming).toHaveBeenCalledTimes(1);
     expect(eventLogger.logEvent).toHaveBeenCalledTimes(4);
     expect(eventLogger.logEvent).toHaveBeenNthCalledWith(1, {
-      '@timestamp': '1970-01-01T00:00:00.000Z',
       event: {
         action: 'execute-start',
         category: ['alerts'],
@@ -764,7 +760,6 @@ describe('Task Runner', () => {
       },
     });
     expect(eventLogger.logEvent).toHaveBeenNthCalledWith(4, {
-      '@timestamp': '1970-01-01T00:00:00.000Z',
       event: {
         action: 'execute',
         category: ['alerts'],
@@ -926,7 +921,6 @@ describe('Task Runner', () => {
       Array [
         Array [
           Object {
-            "@timestamp": "1970-01-01T00:00:00.000Z",
             "event": Object {
               "action": "execute-start",
               "category": Array [
@@ -996,7 +990,6 @@ describe('Task Runner', () => {
         ],
         Array [
           Object {
-            "@timestamp": "1970-01-01T00:00:00.000Z",
             "event": Object {
               "action": "execute",
               "category": Array [
@@ -1264,7 +1257,6 @@ describe('Task Runner', () => {
       Array [
         Array [
           Object {
-            "@timestamp": "1970-01-01T00:00:00.000Z",
             "event": Object {
               "action": "execute-start",
               "category": Array [
@@ -1410,7 +1402,6 @@ describe('Task Runner', () => {
         ],
         Array [
           Object {
-            "@timestamp": "1970-01-01T00:00:00.000Z",
             "event": Object {
               "action": "execute",
               "category": Array [
@@ -1560,7 +1551,6 @@ describe('Task Runner', () => {
       Array [
         Array [
           Object {
-            "@timestamp": "1970-01-01T00:00:00.000Z",
             "event": Object {
               "action": "execute-start",
               "category": Array [
@@ -1746,7 +1736,6 @@ describe('Task Runner', () => {
         ],
         Array [
           Object {
-            "@timestamp": "1970-01-01T00:00:00.000Z",
             "event": Object {
               "action": "execute",
               "category": Array [
@@ -2127,7 +2116,6 @@ describe('Task Runner', () => {
       Array [
         Array [
           Object {
-            "@timestamp": "1970-01-01T00:00:00.000Z",
             "event": Object {
               "action": "execute-start",
               "category": Array [
@@ -2234,7 +2222,6 @@ describe('Task Runner', () => {
         ],
         Array [
           Object {
-            "@timestamp": "1970-01-01T00:00:00.000Z",
             "event": Object {
               "action": "execute",
               "category": Array [
@@ -2463,7 +2450,6 @@ describe('Task Runner', () => {
       Array [
         Array [
           Object {
-            "@timestamp": "1970-01-01T00:00:00.000Z",
             "event": Object {
               "action": "execute-start",
               "category": Array [
@@ -2497,7 +2483,6 @@ describe('Task Runner', () => {
         ],
         Array [
           Object {
-            "@timestamp": "1970-01-01T00:00:00.000Z",
             "error": Object {
               "message": "OMG",
             },
@@ -2572,7 +2557,6 @@ describe('Task Runner', () => {
       Array [
         Array [
           Object {
-            "@timestamp": "1970-01-01T00:00:00.000Z",
             "event": Object {
               "action": "execute-start",
               "category": Array [
@@ -2606,7 +2590,6 @@ describe('Task Runner', () => {
         ],
         Array [
           Object {
-            "@timestamp": "1970-01-01T00:00:00.000Z",
             "error": Object {
               "message": "OMG",
             },
@@ -2689,7 +2672,6 @@ describe('Task Runner', () => {
       Array [
         Array [
           Object {
-            "@timestamp": "1970-01-01T00:00:00.000Z",
             "event": Object {
               "action": "execute-start",
               "category": Array [
@@ -2723,7 +2705,6 @@ describe('Task Runner', () => {
         ],
         Array [
           Object {
-            "@timestamp": "1970-01-01T00:00:00.000Z",
             "error": Object {
               "message": "OMG",
             },
@@ -2806,7 +2787,6 @@ describe('Task Runner', () => {
       Array [
         Array [
           Object {
-            "@timestamp": "1970-01-01T00:00:00.000Z",
             "event": Object {
               "action": "execute-start",
               "category": Array [
@@ -2840,7 +2820,6 @@ describe('Task Runner', () => {
         ],
         Array [
           Object {
-            "@timestamp": "1970-01-01T00:00:00.000Z",
             "error": Object {
               "message": "OMG",
             },
@@ -2922,7 +2901,6 @@ describe('Task Runner', () => {
       Array [
         Array [
           Object {
-            "@timestamp": "1970-01-01T00:00:00.000Z",
             "event": Object {
               "action": "execute-start",
               "category": Array [
@@ -2956,7 +2934,6 @@ describe('Task Runner', () => {
         ],
         Array [
           Object {
-            "@timestamp": "1970-01-01T00:00:00.000Z",
             "error": Object {
               "message": "OMG",
             },
@@ -3212,7 +3189,6 @@ describe('Task Runner', () => {
       Array [
         Array [
           Object {
-            "@timestamp": "1970-01-01T00:00:00.000Z",
             "event": Object {
               "action": "execute-start",
               "category": Array [
@@ -3390,7 +3366,6 @@ describe('Task Runner', () => {
         ],
         Array [
           Object {
-            "@timestamp": "1970-01-01T00:00:00.000Z",
             "event": Object {
               "action": "execute",
               "category": Array [
@@ -3498,7 +3473,6 @@ describe('Task Runner', () => {
       Array [
         Array [
           Object {
-            "@timestamp": "1970-01-01T00:00:00.000Z",
             "event": Object {
               "action": "execute-start",
               "category": Array [
@@ -3604,7 +3578,6 @@ describe('Task Runner', () => {
         ],
         Array [
           Object {
-            "@timestamp": "1970-01-01T00:00:00.000Z",
             "event": Object {
               "action": "execute",
               "category": Array [
@@ -3704,7 +3677,6 @@ describe('Task Runner', () => {
       Array [
         Array [
           Object {
-            "@timestamp": "1970-01-01T00:00:00.000Z",
             "event": Object {
               "action": "execute-start",
               "category": Array [
@@ -3806,7 +3778,6 @@ describe('Task Runner', () => {
         ],
         Array [
           Object {
-            "@timestamp": "1970-01-01T00:00:00.000Z",
             "event": Object {
               "action": "execute",
               "category": Array [
@@ -3901,7 +3872,6 @@ describe('Task Runner', () => {
       Array [
         Array [
           Object {
-            "@timestamp": "1970-01-01T00:00:00.000Z",
             "event": Object {
               "action": "execute-start",
               "category": Array [
@@ -4007,7 +3977,6 @@ describe('Task Runner', () => {
         ],
         Array [
           Object {
-            "@timestamp": "1970-01-01T00:00:00.000Z",
             "event": Object {
               "action": "execute",
               "category": Array [
@@ -4104,7 +4073,6 @@ describe('Task Runner', () => {
       Array [
         Array [
           Object {
-            "@timestamp": "1970-01-01T00:00:00.000Z",
             "event": Object {
               "action": "execute-start",
               "category": Array [
@@ -4204,7 +4172,6 @@ describe('Task Runner', () => {
         ],
         Array [
           Object {
-            "@timestamp": "1970-01-01T00:00:00.000Z",
             "event": Object {
               "action": "execute",
               "category": Array [
@@ -4352,7 +4319,6 @@ describe('Task Runner', () => {
     expect(eventLogger.startTiming).toHaveBeenCalledTimes(1);
     expect(eventLogger.logEvent.mock.calls[0][0]).toMatchInlineSnapshot(`
       Object {
-        "@timestamp": "1970-01-01T00:00:00.000Z",
         "event": Object {
           "action": "execute-start",
           "category": Array [
