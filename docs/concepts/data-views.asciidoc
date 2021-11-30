@@ -87,11 +87,12 @@ For an example, refer to <<rollup-data-tutorial,Create and visualize rolled up d
 ==== Create a data view that searches across clusters
 
 If your {es} clusters are configured for {ref}/modules-cross-cluster-search.html[{ccs}],
-you can create a {data-source} to search across the clusters of your choosing. Use the
-same syntax that you use in a raw {ccs} request in {es}:
+you can create a {data-source} to search across the clusters of your choosing.
+You specify data streams, indices, and aliases in a remote cluster using the
+following syntax:
 
 ```ts
-<cluster-names>:<data-view>
+<remote_cluster_name>:<target>
 ```
 
 To query {ls} indices across two {es} clusters
