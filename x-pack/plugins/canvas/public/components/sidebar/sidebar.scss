@@ -28,11 +28,6 @@
   min-width: 0;
 }
 
-.canvasSidebar__accordionContent {
-  padding-top: $euiSize;
-  padding-left: $euiSizeXS + $euiSizeS + $euiSize;
-}
-
 @keyframes sidebarPop {
   0% {
     opacity: 0;

@@ -34,6 +34,7 @@ import {
   sidebarExpandableStyles,
   sidebarExpandableClassName,
   tooltipStylesFactory,
+  sidebarAccordionContentStylesFactory,
 } from '../shared_styles';
 
 const strings = {
@@ -212,7 +213,7 @@ export const WorkpadConfig: FC<Props> = (props) => {
                 </EuiToolTip>
               }
             >
-              <div className="canvasSidebar__accordionContent">
+              <div css={sidebarAccordionContentStylesFactory(euiTheme)}>
                 <EuiTextArea
                   aria-label={strings.getGlobalCSSTooltip()}
                   value={css}

@@ -13,6 +13,7 @@ export {
   sidebarFiltersClassName,
   sidebarPanelClassName,
   sidebarAccordionStylesFactory,
+  sidebarAccordionContentStylesFactory,
   sidebarExpandableStyles,
   sidebarPanelStylesFactory,
 } from './sidebar';

@@ -62,10 +62,15 @@ export const sidebarAccordionStylesFactory = (theme: EuiThemeComputed) => css`
   }
 `;
 
+export const sidebarAccordionContentStylesFactory = (theme: EuiThemeComputed) => css`
+  padding-top: ${theme.size.base};
+  padding-left: calc(${theme.size.xs} + ${theme.size.s} + ${theme.size.base});
+`;
+
 export const sidebarExpandableStyles = css`
   width: 100%;
   + .${sidebarExpandableClassName} {
-    margin-top: 0px;
+    margin-top: 1px;
   }
 `;
 

@@ -7,6 +7,7 @@
 
 import React, { FC } from 'react';
 import {
+  useEuiTheme,
   EuiIcon,
   EuiFlexGroup,
   EuiFlexItem,
@@ -16,7 +17,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-
+import { sidebarAccordionContentStylesFactory } from '../shared_styles';
 import { CanvasVariable } from '../../../types';
 
 const strings = {
@@ -46,6 +47,7 @@ interface Props {
 }
 
 export const DeleteVar: FC<Props> = ({ selectedVar, onCancel, onDelete }) => {
+  const { euiTheme } = useEuiTheme();
   return (
     <React.Fragment>
       <div className="canvasVarHeader__triggerWrapper">
@@ -58,7 +60,7 @@ export const DeleteVar: FC<Props> = ({ selectedVar, onCancel, onDelete }) => {
           </span>
         </button>
       </div>
-      <div className="canvasSidebar__accordionContent">
+      <div css={sidebarAccordionContentStylesFactory(euiTheme)}>
         <div>
           <EuiFlexGroup>
             <EuiFlexItem grow={false}>

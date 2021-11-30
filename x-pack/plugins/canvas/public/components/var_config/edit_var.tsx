@@ -7,6 +7,7 @@
 
 import React, { useState, FC } from 'react';
 import {
+  useEuiTheme,
   EuiIcon,
   EuiFlexGroup,
   EuiFlexItem,
@@ -21,7 +22,7 @@ import {
   EuiCallOut,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-
+import { sidebarAccordionContentStylesFactory } from '../shared_styles';
 import { CanvasVariable } from '../../../types';
 import { VarValueField } from './var_value_field';
 
@@ -95,6 +96,7 @@ const checkDupeName = (newName: string, oldName: string | null, variables: Canva
 };
 
 export const EditVar: FC<Props> = ({ variables, selectedVar, onCancel, onSave }) => {
+  const { euiTheme } = useEuiTheme();
   // If there isn't a selected variable, we're creating a new var
   const isNew = selectedVar === null;
 
@@ -150,7 +152,7 @@ export const EditVar: FC<Props> = ({ variables, selectedVar, onCancel, onSave })
           </span>
         </button>
       </div>
-      <div className="canvasSidebar__accordionContent">
+      <div css={sidebarAccordionContentStylesFactory(euiTheme)}>
         {!isNew && (
           <div>
             <EuiCallOut

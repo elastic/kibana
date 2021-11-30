@@ -27,6 +27,7 @@ import {
   tooltipStylesFactory,
   sidebarExpandableStyles,
   sidebarExpandableClassName,
+  sidebarAccordionContentStylesFactory,
 } from '../shared_styles';
 import { CanvasVariable } from '../../../types';
 
@@ -224,7 +225,7 @@ export const VarConfig: FC<Props> = ({
               }
             >
               {variables.length !== 0 && (
-                <div className="canvasSidebar__accordionContent">
+                <div css={sidebarAccordionContentStylesFactory(euiTheme)}>
                   <EuiInMemoryTable
                     className="canvasVarConfig__list"
                     items={variables}
@@ -237,7 +238,7 @@ export const VarConfig: FC<Props> = ({
                 </div>
               )}
               {variables.length === 0 && (
-                <div className="canvasSidebar__accordionContent">
+                <div css={sidebarAccordionContentStylesFactory(euiTheme)}>
                   <EuiText color="subdued" size="s">
                     {strings.getEmptyDescription()}
                   </EuiText>

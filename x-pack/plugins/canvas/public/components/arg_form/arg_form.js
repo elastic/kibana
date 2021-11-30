@@ -10,7 +10,7 @@ import PropTypes from 'prop-types';
 import { ClassNames } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
 import { ErrorBoundary } from '../enhance/error_boundary';
-import { sidebarExpandableClassName, sidebarExpandebleStyles } from '../shared_styles';
+import { sidebarExpandableClassName, sidebarExpandableStyles } from '../shared_styles';
 import { ArgSimpleForm } from './arg_simple_form';
 import { ArgTemplateForm } from './arg_template_form';
 import { SimpleFailure } from './simple_failure';
@@ -119,12 +119,11 @@ export const ArgForm = (props) => {
 
             return (
               <div
-                css={argStylesFactory(euiTheme)}
-                className={`${
-                  expandableLabel
-                    ? cx(sidebarExpandableClassName, css(sidebarExpandebleStyles))
-                    : null
-                }`}
+                className={cx(
+                  css(argStylesFactory(euiTheme)),
+                  expandableLabel ? sidebarExpandableClassName : null,
+                  expandableLabel ? css(sidebarExpandableStyles) : null
+                )}
               >
                 <ArgLabel
                   className="resolved"

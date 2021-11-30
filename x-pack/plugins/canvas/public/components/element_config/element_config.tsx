@@ -17,6 +17,7 @@ import {
   sidebarAccordionStylesFactory,
   sidebarExpandableClassName,
   sidebarExpandableStyles,
+  sidebarAccordionContentStylesFactory,
 } from '../shared_styles';
 
 const strings = {
@@ -73,7 +74,7 @@ export const ElementConfig = ({ elementStats }: Props) => {
             initialIsOpen={false}
             className={cx(sidebarAccordionClassName, css(sidebarAccordionStylesFactory(euiTheme)))}
           >
-            <div className="canvasSidebar__accordionContent">
+            <div css={sidebarAccordionContentStylesFactory(euiTheme)}>
               <EuiFlexGroup gutterSize="none">
                 <EuiFlexItem>
                   <EuiStat title={total} description={strings.getTotalLabel()} titleSize="xs" />
