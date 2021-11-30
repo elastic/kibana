@@ -70,6 +70,16 @@ export const policyTrustedAppsReducer: ImmutableReducer<PolicyDetailsState, AppA
       },
     };
   }
+
+  if (action.type === 'policyArtifactsHasTrustedApps') {
+    return {
+      ...state,
+      artifacts: {
+        ...state?.artifacts,
+        hasTrustedApps: action.payload,
+      },
+    };
+  }
   if (action.type === 'assignedTrustedAppsListStateChanged') {
     return {
       ...state,

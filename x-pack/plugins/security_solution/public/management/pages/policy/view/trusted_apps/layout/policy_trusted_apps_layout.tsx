@@ -17,15 +17,17 @@ import {
   EuiText,
   EuiSpacer,
   EuiLink,
+  EuiProgress,
 } from '@elastic/eui';
 import { PolicyTrustedAppsEmptyUnassigned, PolicyTrustedAppsEmptyUnexisting } from '../empty';
 import {
   getCurrentArtifactsLocation,
   getDoesTrustedAppExists,
   policyDetails,
-  doesPolicyHaveTrustedApps,
   doesTrustedAppExistsLoading,
-  getPolicyTrustedAppsListPagination,
+  getTotalPolicyTrustedAppsListPagination,
+  getHasTrustedApps,
+  getIsLoadedHasTrustedApps,
 } from '../../../store/policy_details/selectors';
 import { usePolicyDetailsNavigateCallback, usePolicyDetailsSelector } from '../../policy_hooks';
 import { PolicyTrustedAppsFlyout } from '../flyout';
@@ -42,11 +44,10 @@ export const PolicyTrustedAppsLayout = React.memo(() => {
   const isDoesTrustedAppExistsLoading = usePolicyDetailsSelector(doesTrustedAppExistsLoading);
   const policyItem = usePolicyDetailsSelector(policyDetails);
   const navigateCallback = usePolicyDetailsNavigateCallback();
-  const hasAssignedTrustedApps = usePolicyDetailsSelector(doesPolicyHaveTrustedApps);
   const { isPlatinumPlus } = useEndpointPrivileges();
-  const totalAssignedCount = usePolicyDetailsSelector(
-    getPolicyTrustedAppsListPagination
-  ).totalItemCount;
+  const totalAssignedCount = usePolicyDetailsSelector(getTotalPolicyTrustedAppsListPagination);
+  const hasTrustedApps = usePolicyDetailsSelector(getHasTrustedApps);
+  const isLoadedHasTrustedApps = usePolicyDetailsSelector(getIsLoadedHasTrustedApps);
 
   const showListFlyout = location.show === 'list';
 
@@ -73,21 +74,19 @@ export const PolicyTrustedAppsLayout = React.memo(() => {
     [navigateCallback]
   );
 
-  const displaysEmptyState = useMemo(
-    () =>
-      !isDoesTrustedAppExistsLoading &&
-      !hasAssignedTrustedApps.loading &&
-      !hasAssignedTrustedApps.hasTrustedApps,
-    [
-      hasAssignedTrustedApps.hasTrustedApps,
-      hasAssignedTrustedApps.loading,
-      isDoesTrustedAppExistsLoading,
-    ]
+  const isDisplaysEmptyStateLoading = useMemo(
+    () => !isLoadedHasTrustedApps || isDoesTrustedAppExistsLoading,
+    [isLoadedHasTrustedApps, isDoesTrustedAppExistsLoading]
   );
 
-  const displaysEmptyStateIsLoading = useMemo(
-    () => isDoesTrustedAppExistsLoading || hasAssignedTrustedApps.loading,
-    [hasAssignedTrustedApps.loading, isDoesTrustedAppExistsLoading]
+  const displaysEmptyState = useMemo(
+    () => !isDisplaysEmptyStateLoading && !hasTrustedApps,
+    [isDisplaysEmptyStateLoading, hasTrustedApps]
+  );
+
+  const displayHeaderAndContent = useMemo(
+    () => !isDisplaysEmptyStateLoading && !displaysEmptyState && isLoadedHasTrustedApps,
+    [displaysEmptyState, isDisplaysEmptyStateLoading, isLoadedHasTrustedApps]
   );
 
   const aboutInfo = useMemo(() => {
@@ -117,7 +116,7 @@ export const PolicyTrustedAppsLayout = React.memo(() => {
 
   return policyItem ? (
     <div>
-      {!displaysEmptyStateIsLoading && !displaysEmptyState ? (
+      {displayHeaderAndContent ? (
         <>
           <EuiPageHeader alignItems="center">
             <EuiPageHeaderSection>
@@ -142,7 +141,7 @@ export const PolicyTrustedAppsLayout = React.memo(() => {
             <EuiPageHeaderSection>{isPlatinumPlus && assignTrustedAppButton}</EuiPageHeaderSection>
           </EuiPageHeader>
 
-          <EuiSpacer size="m" />
+          <EuiSpacer size="l" />
         </>
       ) : null}
       <EuiPageContent
@@ -152,7 +151,7 @@ export const PolicyTrustedAppsLayout = React.memo(() => {
         color="transparent"
         borderRadius="none"
       >
-        {displaysEmptyState ? (
+        {displaysEmptyState && !isDoesTrustedAppExistsLoading ? (
           doesTrustedAppExists ? (
             <PolicyTrustedAppsEmptyUnassigned
               policyId={policyItem.id}
@@ -164,8 +163,10 @@ export const PolicyTrustedAppsLayout = React.memo(() => {
               policyName={policyItem.name}
             />
           )
+        ) : displayHeaderAndContent ? (
+          <PolicyTrustedAppsList />
         ) : (
-          <PolicyTrustedAppsList hideTotalShowingLabel={true} />
+          <EuiProgress size="xs" color="primary" />
         )}
       </EuiPageContent>
       {isPlatinumPlus && showListFlyout ? <PolicyTrustedAppsFlyout /> : null}
