@@ -5,13 +5,7 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import { Params } from './alert_type_params';
-import { AlertExecutorOptions, AlertInstanceContext } from '../../../../alerting/server';
-
-// alert type context provided to actions
-
-type AlertInfo = Pick<AlertExecutorOptions, 'name'>;
+import type { AlertInstanceContext } from '../../../../alerting/server';
 
 export interface ActionContext extends BaseActionContext {
   // a short pre-constructed message which may be used in an action field
@@ -21,49 +15,10 @@ export interface ActionContext extends BaseActionContext {
 }
 
 export interface BaseActionContext extends AlertInstanceContext {
-  // the aggType used in the alert
-  // the value of the aggField, if used, otherwise 'all documents'
-  group: string;
   // the date the alert was run as an ISO date
   date: string;
   // the value that met the threshold
   value: number;
   // threshold conditions
   conditions: string;
-}
-
-export function addMessages(
-  alertInfo: AlertInfo,
-  baseContext: BaseActionContext,
-  params: Params
-): ActionContext {
-  const title = i18n.translate('xpack.stackAlerts.searchThreshold.alertTypeContextSubjectTitle', {
-    defaultMessage: 'alert {name} group {group} met threshold',
-    values: {
-      name: alertInfo.name,
-      group: baseContext.group,
-    },
-  });
-
-  const window = `${params.timeWindowSize}${params.timeWindowUnit}`;
-  const message = i18n.translate(
-    'xpack.stackAlerts.searchThreshold.alertTypeContextMessageDescription',
-    {
-      defaultMessage: `alert '{name}' is active for group '{group}':
-
-- Value: {value}
-- Conditions Met: {conditions} over {window}
-- Timestamp: {date}`,
-      values: {
-        name: alertInfo.name,
-        group: baseContext.group,
-        value: baseContext.value,
-        conditions: baseContext.conditions,
-        window,
-        date: baseContext.date,
-      },
-    }
-  );
-
-  return { ...baseContext, title, message };
 }
