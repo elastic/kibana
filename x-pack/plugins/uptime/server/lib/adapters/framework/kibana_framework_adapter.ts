@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { UptimeCoreSetup } from './adapter_types';
+import { UptimeServerSetup } from './adapter_types';
 import { UMBackendFrameworkAdapter } from './adapter_types';
 import { UMKibanaRoute } from '../../../rest_api';
 
 export class UMKibanaBackendFrameworkAdapter implements UMBackendFrameworkAdapter {
-  constructor(private readonly server: UptimeCoreSetup) {
+  constructor(private readonly server: UptimeServerSetup) {
     this.server = server;
   }
 
