@@ -156,9 +156,7 @@ const OverviewComponent = () => {
                       <EuiFlexItem grow={1}>
                         {isTiLoaded && (
                           <ThreatIntelLinkPanel
-                            isSomeIntegrationsDisabled={
-                              tiIntegrationStatus?.isSomeIntegrationsDisabled
-                            }
+                            allIntegrationsInstalled={tiIntegrationStatus?.allIntegrationsInstalled}
                             allTiDataSources={allTiDataSources}
                             deleteQuery={deleteQuery}
                             from={from}
