@@ -51,16 +51,11 @@ function normalizeBands(
     return [min, ...colors.map((_, i) => min + (i + 1) * step)];
   }
   if (range === 'percent') {
-    return [min, ...stops.map((step) => min + step * ((max - min) / 100))];
+    const filteredStops = stops.filter((stop) => stop >= 0 && stop <= 100);
+    return [min, ...filteredStops.map((step) => min + step * ((max - min) / 100)), max];
   }
-
-  if (max >= Math.max(...stops)) {
-    // the max value has changed but the palette has outdated information
-    const updatedStops = [...stops.slice(0, -1), max];
-    return [min, ...updatedStops];
-  } else {
-    return [min, ...stops.slice(0, -1)];
-  }
+  const orderedStops = stops.filter((stop, i) => stop < max);
+  return [min, ...orderedStops, max];
 }
 
 function getTitle(visTitleMode: GaugeTitleMode, visTitle?: string, fallbackTitle?: string) {
@@ -192,9 +187,6 @@ export const GaugeComponent: FC<GaugeRenderProps> = ({
     ? normalizeBands(args.palette?.params as CustomPaletteState, { min, max })
     : [min, max];
 
-  const maxBand = Math.max(...bands);
-  const minBand = Math.min(...bands);
-
   return (
     <Chart>
       <Settings debugState={window._echDebugStateFlag ?? false} theme={chartTheme} />
@@ -202,8 +194,8 @@ export const GaugeComponent: FC<GaugeRenderProps> = ({
         id="spec_1"
         subtype={subtype}
         base={min}
-        target={goal ? Math.min(goal, maxBand) : undefined}
-        actual={Math.min(Math.max(metricValue, minBand), maxBand)}
+        target={goal ? Math.min(Math.max(goal, min), max) : undefined}
+        actual={Math.min(Math.max(metricValue, min), max)}
         tickValueFormatter={({ value: tickValue }) => formatter.convert(tickValue)}
         bands={bands}
         ticks={getTicks(ticksPosition, [min, max], bands)}

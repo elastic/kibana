@@ -518,27 +518,7 @@ describe('gauge', () => {
         }).getWarningMessages!(state, frame)
       ).toHaveLength(1);
     });
-    it('should warn when minimum value is greater than maximum value', () => {
-      frame.activeData = {
-        first: {
-          type: 'datatable',
-          columns: [],
-          rows: [
-            {
-              'min-accessor': 5,
-              'metric-accessor': 2,
-              'max-accessor': 3,
-            },
-          ],
-        },
-      };
 
-      expect(
-        getGaugeVisualization({
-          paletteService,
-        }).getWarningMessages!(state, frame)
-      ).toHaveLength(2);
-    });
     it('should warn when metric value is greater than maximum value', () => {
       frame.activeData = {
         first: {

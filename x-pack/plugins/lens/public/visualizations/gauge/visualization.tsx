@@ -413,15 +413,6 @@ export const getGaugeVisualization = ({
     const minValue = minAccessor && row[minAccessor];
     const goalValue = goalAccessor && row[goalAccessor];
 
-    if (typeof minValue === 'number' && minValue === maxValue) {
-      return [
-        <FormattedMessage
-          id="xpack.lens.gaugeVisualization.minValueEqualMaxShortMessage"
-          defaultMessage="Minimum value equals maximum value. Cannot render chart"
-        />,
-      ];
-    }
-
     const warnings = [];
     if (typeof minValue === 'number') {
       if (minValue > metricValue) {
@@ -448,14 +439,6 @@ export const getGaugeVisualization = ({
           <FormattedMessage
             id="xpack.lens.gaugeVisualization.metricValueGreaterMaximumShortMessage"
             defaultMessage="Metric value is greater than maximum value."
-          />,
-        ]);
-      }
-      if (minValue > maxValue) {
-        warnings.push([
-          <FormattedMessage
-            id="xpack.lens.gaugeVisualization.minValueGreaterMaximumShortMessage"
-            defaultMessage="Minimum value is greater than maximum value."
           />,
         ]);
       }
