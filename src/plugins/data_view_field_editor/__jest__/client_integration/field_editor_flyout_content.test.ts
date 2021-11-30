@@ -150,6 +150,7 @@ describe('<FieldEditorFlyoutContent />', () => {
         name: 'someName',
         type: 'date',
         script: { source: 'echo("hello")' },
+        format: null,
       });
     });
 
