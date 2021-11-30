@@ -35,7 +35,7 @@ export const CrawlDetailsFlyout: React.FC = () => {
   }
 
   return (
-    <EuiFlyout ownFocus onClose={closeFlyout} aria-labelledby="CrawlDetailsFlyoutTitle">
+    <EuiFlyout maxWidth="45rem" ownFocus onClose={closeFlyout} aria-labelledby="CrawlDetailsFlyoutTitle">
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
           <h2 id="CrawlDetailsFlyoutTitle">
