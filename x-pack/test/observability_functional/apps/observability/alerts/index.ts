@@ -239,20 +239,22 @@ export default ({ getService }: FtrProviderContext) => {
 
       describe('Stat counters', () => {
         before(async () => {
+          // TODO: load archive with meaningful data on rules
           await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
           await observability.alerts.common.navigateToTimeWithData();
         });
 
         after(async () => {
+          // TODO: load archive with meaningful data on rules
           await esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs');
         });
 
         it('Exist and display expected values', async () => {
           const subjToValueMap: { [key: string]: number } = {
-            statRuleCount: 254,
-            statDisabled: 120,
+            statRuleCount: 0,
+            statDisabled: 0,
             statMuted: 0,
-            statErrors: 3,
+            statErrors: 0,
           };
           asyncForEach(Object.keys(subjToValueMap), async (subject: string) => {
             const value = await observability.alerts.common.getAlertStatValue(subject);
