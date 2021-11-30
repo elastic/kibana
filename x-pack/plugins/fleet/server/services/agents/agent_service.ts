@@ -14,6 +14,7 @@ import type { Agent, GetAgentStatusResponse } from '../../../common';
 
 import { checkSuperuser } from '../../routes/security';
 
+import { FleetUnauthorizedError } from '../../errors';
 import { getAgentsByKuery, getAgentById } from './crud';
 import { getAgentStatusById, getAgentStatusForAgentPolicy } from './status';
 
@@ -123,7 +124,9 @@ export class AgentServiceImpl implements AgentService {
   public asScoped(req: KibanaRequest) {
     const preflightCheck = () => {
       if (!checkSuperuser(req)) {
-        throw new Error(`User does not have adequate permissions to access Fleet agents.`);
+        throw new FleetUnauthorizedError(
+          `User does not have adequate permissions to access Fleet agents.`
+        );
       }
     };
 

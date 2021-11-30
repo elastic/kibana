@@ -37,7 +37,7 @@ export type {
   PostPackagePolicyCreateCallback,
   FleetRequestHandlerContext,
 } from './types';
-export { AgentNotFoundError } from './errors';
+export { AgentNotFoundError, FleetUnauthorizedError } from './errors';
 
 export const config: PluginConfigDescriptor = {
   exposeToBrowser: {

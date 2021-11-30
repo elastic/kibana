@@ -11,6 +11,7 @@ jest.mock('./status');
 
 import type { ElasticsearchClient } from '../../../../../../src/core/server';
 import { elasticsearchServiceMock, httpServerMock } from '../../../../../../src/core/server/mocks';
+import { FleetUnauthorizedError } from '../../errors';
 
 import { checkSuperuser } from '../../routes/security';
 
@@ -40,25 +41,33 @@ describe('AgentService', () => {
 
       it('rejects on listAgents', async () => {
         await expect(agentClient.listAgents({ showInactive: true })).rejects.toThrowError(
-          `User does not have adequate permissions to access Fleet agents.`
+          new FleetUnauthorizedError(
+            `User does not have adequate permissions to access Fleet agents.`
+          )
         );
       });
 
       it('rejects on getAgent', async () => {
         await expect(agentClient.getAgent('foo')).rejects.toThrowError(
-          `User does not have adequate permissions to access Fleet agents.`
+          new FleetUnauthorizedError(
+            `User does not have adequate permissions to access Fleet agents.`
+          )
         );
       });
 
       it('rejects on getAgentStatusById', async () => {
         await expect(agentClient.getAgentStatusById('foo')).rejects.toThrowError(
-          `User does not have adequate permissions to access Fleet agents.`
+          new FleetUnauthorizedError(
+            `User does not have adequate permissions to access Fleet agents.`
+          )
         );
       });
 
       it('rejects on getAgentStatusForAgentPolicy', async () => {
         await expect(agentClient.getAgentStatusForAgentPolicy()).rejects.toThrowError(
-          `User does not have adequate permissions to access Fleet agents.`
+          new FleetUnauthorizedError(
+            `User does not have adequate permissions to access Fleet agents.`
+          )
         );
       });
     });
