@@ -7,37 +7,45 @@
  */
 
 import { Client } from '@elastic/elasticsearch';
-import { uploadEvents } from '../../scripts/utils/upload_events';
-import { Fields } from '../entity';
-import { cleanWriteTargets } from '../utils/clean_write_targets';
+import { uploadEvents } from '../../../scripts/utils/upload_events';
+import { Fields } from '../../entity';
+import { cleanWriteTargets } from '../../utils/clean_write_targets';
 import { getBreakdownMetrics } from '../utils/get_breakdown_metrics';
 import { getSpanDestinationMetrics } from '../utils/get_span_destination_metrics';
 import { getTransactionMetrics } from '../utils/get_transaction_metrics';
-import { getWriteTargets } from '../utils/get_write_targets';
-import { Logger } from '../utils/logger';
+import { getApmWriteTargets } from '../utils/get_apm_write_targets';
+import { Logger } from '../../utils/create_logger';
+import { apmEventsToElasticsearchOutput } from '../utils/apm_events_to_elasticsearch_output';
 
-export class SynthtraceEsClient {
+export class ApmSynthtraceEsClient {
   constructor(private readonly client: Client, private readonly logger: Logger) {}
 
   private getWriteTargets() {
-    return getWriteTargets({ client: this.client });
+    return getApmWriteTargets({ client: this.client });
   }
 
   clean() {
     return this.getWriteTargets().then((writeTargets) =>
-      cleanWriteTargets({ client: this.client, writeTargets, logger: this.logger })
+      cleanWriteTargets({
+        client: this.client,
+        targets: Object.values(writeTargets),
+        logger: this.logger,
+      })
     );
   }
 
   async index(events: Fields[]) {
-    const eventsToIndex = [
-      ...events,
-      ...getTransactionMetrics(events),
-      ...getSpanDestinationMetrics(events),
-      ...getBreakdownMetrics(events),
-    ];
-
     const writeTargets = await this.getWriteTargets();
+
+    const eventsToIndex = apmEventsToElasticsearchOutput({
+      events: [
+        ...events,
+        ...getTransactionMetrics(events),
+        ...getSpanDestinationMetrics(events),
+        ...getBreakdownMetrics(events),
+      ],
+      writeTargets,
+    });
 
     await uploadEvents({
       batchSize: 1000,
@@ -45,7 +53,6 @@ export class SynthtraceEsClient {
       clientWorkers: 5,
       events: eventsToIndex,
       logger: this.logger,
-      writeTargets,
     });
 
     return this.client.indices.refresh({
