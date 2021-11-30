@@ -5,27 +5,34 @@
  * 2.0.
  */
 
+import { EuiSwitch } from '@elastic/eui';
 import {
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
   EuiSpacer,
   EuiText,
   EuiTitle,
+  EuiToolTip,
   RIGHT_ALIGNMENT,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React from 'react';
+import React, { useState } from 'react';
+import { MLJobsAwaitingNodeWarning } from '../../../../../../ml/public';
+import { AnomalyDetectionSetupState } from '../../../../../common/anomaly_detection/get_anomaly_detection_setup_state';
 import { getEnvironmentLabel } from '../../../../../common/environment_filter_values';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
+import { useMlManageJobsHref } from '../../../../hooks/use_ml_manage_jobs_href';
 import { MLExplorerLink } from '../../../shared/Links/MachineLearningLinks/MLExplorerLink';
 import { MLManageJobsLink } from '../../../shared/Links/MachineLearningLinks/MLManageJobsLink';
 import { LoadingStatePrompt } from '../../../shared/LoadingStatePrompt';
 import { ITableColumn, ManagedTable } from '../../../shared/managed_table';
 import { AnomalyDetectionApiResponse } from './index';
+import { JobsListStatus } from './jobs_list_status';
 import { LegacyJobsCallout } from './legacy_jobs_callout';
-import { MLJobsAwaitingNodeWarning } from '../../../../../../ml/public';
+import { UpdateJobsCallout } from './update_jobs_callout';
 
 type Jobs = AnomalyDetectionApiResponse['jobs'];
 
@@ -36,7 +43,24 @@ const columns: Array<ITableColumn<Jobs[0]>> = [
       'xpack.apm.settings.anomalyDetection.jobList.environmentColumnLabel',
       { defaultMessage: 'Environment' }
     ),
-    render: getEnvironmentLabel,
+    width: '100%',
+    render: (_, { environment, jobId, jobState, datafeedState, version }) => {
+      return (
+        <EuiFlexGroup gutterSize="xl">
+          <EuiFlexItem grow={false}>
+            {getEnvironmentLabel(environment)}
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <JobsListStatus
+              jobId={jobId}
+              version={version}
+              jobState={jobState}
+              datafeedState={datafeedState}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      );
+    },
   },
   {
     field: 'job_id',
@@ -45,30 +69,72 @@ const columns: Array<ITableColumn<Jobs[0]>> = [
       'xpack.apm.settings.anomalyDetection.jobList.actionColumnLabel',
       { defaultMessage: 'Action' }
     ),
-    render: (_, { job_id: jobId }) => (
-      <MLExplorerLink jobId={jobId}>
-        {i18n.translate(
-          'xpack.apm.settings.anomalyDetection.jobList.mlJobLinkText',
-          {
-            defaultMessage: 'View job in ML',
-          }
-        )}
-      </MLExplorerLink>
-    ),
+    render: (_, { jobId }) => {
+      return (
+        <EuiFlexGroup gutterSize="m">
+          <EuiFlexItem grow={false}>
+            <EuiToolTip
+              content={i18n.translate(
+                'xpack.apm.settings.anomalyDetection.jobList.mlJobLinkText',
+                {
+                  defaultMessage: 'Manage job',
+                }
+              )}
+            >
+              {/* setting the key to remount the element as a workaround for https://github.com/elastic/kibana/issues/119951*/}
+              <MLManageJobsLink jobId={jobId} key={jobId}>
+                <EuiIcon type="gear" />
+              </MLManageJobsLink>
+            </EuiToolTip>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiToolTip
+              content={i18n.translate(
+                'xpack.apm.settings.anomalyDetection.jobList.mlJobLinkText',
+                {
+                  defaultMessage: 'Open in Anomaly Explorer',
+                }
+              )}
+            >
+              <MLExplorerLink jobId={jobId}>
+                <EuiIcon type="visTable" />
+              </MLExplorerLink>
+            </EuiToolTip>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      );
+    },
   },
 ];
 
 interface Props {
   data: AnomalyDetectionApiResponse;
+  setupState: AnomalyDetectionSetupState;
   status: FETCH_STATUS;
   onAddEnvironments: () => void;
+  onUpdateComplete: () => void;
 }
-export function JobsList({ data, status, onAddEnvironments }: Props) {
+
+export function JobsList({
+  data,
+  status,
+  onAddEnvironments,
+  setupState,
+  onUpdateComplete,
+}: Props) {
   const { jobs, hasLegacyJobs } = data;
+
+  const [showLegacyJobs, setShowLegacyJobs] = useState(false);
+
+  const mlManageJobsHref = useMlManageJobsHref();
+
+  const filteredJobs = showLegacyJobs
+    ? jobs
+    : jobs.filter((job) => job.version >= 3);
 
   return (
     <>
-      <MLJobsAwaitingNodeWarning jobIds={jobs.map((j) => j.job_id)} />
+      <MLJobsAwaitingNodeWarning jobIds={filteredJobs.map((j) => j.jobId)} />
       <EuiText color="subdued">
         <FormattedMessage
           id="xpack.apm.settings.anomalyDetection.jobList.mlDescriptionText"
@@ -90,7 +156,14 @@ export function JobsList({ data, status, onAddEnvironments }: Props) {
 
       <EuiSpacer size="m" />
 
-      <EuiFlexGroup>
+      {setupState === AnomalyDetectionSetupState.UpgradeableJobs && (
+        <>
+          <UpdateJobsCallout onUpdateComplete={onUpdateComplete} />
+          <EuiSpacer size="m" />
+        </>
+      )}
+
+      <EuiFlexGroup alignItems="center">
         <EuiFlexItem>
           <EuiTitle size="s">
             <h2>
@@ -102,6 +175,30 @@ export function JobsList({ data, status, onAddEnvironments }: Props) {
               )}
             </h2>
           </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiSwitch
+            checked={showLegacyJobs}
+            onChange={(e) => {
+              setShowLegacyJobs(e.target.checked);
+            }}
+            label={i18n.translate(
+              'xpack.apm.settings.anomalyDetection.jobList.showLegacyJobsCheckboxText',
+              {
+                defaultMessage: 'Show legacy jobs',
+              }
+            )}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButton href={mlManageJobsHref} color="primary">
+            {i18n.translate(
+              'xpack.apm.settings.anomalyDetection.jobList.manageMlJobsButtonText',
+              {
+                defaultMessage: 'Manage ML Jobs',
+              }
+            )}
+          </EuiButton>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButton fill iconType="plusInCircle" onClick={onAddEnvironments}>
@@ -120,7 +217,8 @@ export function JobsList({ data, status, onAddEnvironments }: Props) {
       <ManagedTable
         noItemsMessage={getNoItemsMessage({ status })}
         columns={columns}
-        items={jobs}
+        items={filteredJobs}
+        tableLayout="auto"
       />
       <EuiSpacer size="l" />
 
