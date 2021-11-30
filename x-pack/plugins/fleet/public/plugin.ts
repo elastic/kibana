@@ -72,7 +72,7 @@ export interface FleetSetup {}
  */
 export interface FleetStart {
   /** Authorization for the current user */
-  authz: FleetAuthz;
+  authz: Promise<FleetAuthz>;
   registerExtension: UIExtensionRegistrationCallback;
   isInitialized: () => Promise<true>;
 }
@@ -239,6 +239,9 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
   public start(core: CoreStart): FleetStart {
     let successPromise: ReturnType<FleetStart['isInitialized']>;
     const registerExtension = createExtensionRegistrationCallback(this.extensions);
+    const permissionsResponsePromise = core.http.get<CheckPermissionsResponse>(
+      appRoutesService.getCheckPermissionsPath()
+    );
 
     registerExtension({
       package: CUSTOM_LOGS_INTEGRATION_NAME,
@@ -246,29 +249,28 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
       Component: LazyCustomLogsAssetsExtension,
     });
 
-    const { capabilities } = core.application;
-    const authz = calculateAuthz({
-      fleet: {
-        // Once we have a split privilege, this should be using fleetv2
-        // all: capabilities.fleetv2.all as boolean,
-        all: capabilities.fleet.all as boolean,
-        setup: false, // browser users will never have setup privileges
-      },
-
-      integrations: {
-        all: capabilities.fleet.all as boolean,
-        read: capabilities.fleet.read as boolean,
-      },
-    });
-
     return {
-      authz,
+      // Temporarily rely on superuser check to calculate authz. Once Kibana RBAC is in place for Fleet this should
+      // switch to a sync calculation based on `core.application.capabilites` properties.
+      authz: permissionsResponsePromise.then((permissionsResponse) => {
+        if (permissionsResponse.success) {
+          // If superuser, give access to everything
+          return calculateAuthz({
+            fleet: { all: true, setup: true },
+            integrations: { all: true, read: true },
+          });
+        } else {
+          // Otherwise, deny access to everything
+          return calculateAuthz({
+            fleet: { all: false, setup: false },
+            integrations: { all: false, read: false },
+          });
+        }
+      }),
       isInitialized: () => {
         if (!successPromise) {
           successPromise = Promise.resolve().then(async () => {
-            const permissionsResponse = await core.http.get<CheckPermissionsResponse>(
-              appRoutesService.getCheckPermissionsPath()
-            );
+            const permissionsResponse = await permissionsResponsePromise;
 
             if (permissionsResponse?.success) {
               return core.http
