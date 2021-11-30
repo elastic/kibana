@@ -48,6 +48,7 @@ export const createQueryAlertType = (
     isExportable: false,
     producer: SERVER_APP_ID,
     async executor(execOptions) {
+      console.log('START');
       const {
         runOpts: {
           buildRuleMessage,
@@ -80,6 +81,7 @@ export const createQueryAlertType = (
         version,
         wrapHits,
       });
+      console.log('AFTER');
       return { ...result, state };
     },
   };

@@ -97,12 +97,16 @@ export const createRuleTypeMocks = (
     services,
     scheduleActions,
     executor: async ({ params }: { params: Record<string, unknown> }) => {
+      console.log('RUNNING');
       return alertExecutor({
         ...createDefaultAlertExecutorOptions({
           params,
           alertId: v4(),
           state: {},
         }),
+        runOpts: {
+          completeRule: getCompleteRuleMock(params as QueryRuleParams),
+        },
         services,
       });
     },

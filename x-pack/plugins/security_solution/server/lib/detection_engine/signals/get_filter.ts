@@ -53,13 +53,17 @@ export const getFilter = async ({
   query,
   lists,
 }: GetFilterArgs): Promise<QueryFilter> => {
+  console.log('2.1');
   const queryFilter = () => {
     if (query != null && language != null && index != null) {
+      console.log('2.4');
       return getQueryFilter(query, language, filters || [], index, lists);
     } else {
+      console.log('2.5');
       throw new BadRequestError('query, filters, and index parameter should be defined');
     }
   };
+  console.log('2.2');
 
   const savedQueryFilter = async () => {
     if (savedId != null && index != null) {
@@ -91,6 +95,7 @@ export const getFilter = async ({
       throw new BadRequestError('savedId parameter should be defined');
     }
   };
+  console.log('2.3');
 
   switch (type) {
     case 'threat_match':
@@ -110,6 +115,7 @@ export const getFilter = async ({
       throw new BadRequestError('Unsupported Rule of type "eql" supplied to getFilter');
     }
     default: {
+      console.log('2.6');
       return assertUnreachable(type);
     }
   }
