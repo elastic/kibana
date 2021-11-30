@@ -193,6 +193,8 @@ class OutputService {
       type: SAVED_OBJECT_TYPE,
       page: 1,
       perPage: SO_SEARCH_LIMIT,
+      sortField: 'is_default',
+      sortOrder: 'desc',
     });
 
     return {

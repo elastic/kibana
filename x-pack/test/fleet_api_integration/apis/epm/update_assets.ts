@@ -52,7 +52,15 @@ export default function (providerContext: FtrProviderContext) {
         },
         { meta: true }
       );
+
       expect(resPolicy.body.all_assets.policy).eql({
+        _meta: {
+          managed: true,
+          managed_by: 'fleet',
+          package: {
+            name: 'all_assets',
+          },
+        },
         phases: {
           hot: {
             min_age: '1ms',
@@ -265,6 +273,8 @@ export default function (providerContext: FtrProviderContext) {
             name: 'logs-all_assets.test_logs@custom',
             component_template: {
               _meta: {
+                managed: true,
+                managed_by: 'fleet',
                 package: {
                   name: 'all_assets',
                 },

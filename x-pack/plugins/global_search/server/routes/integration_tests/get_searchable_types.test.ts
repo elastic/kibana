@@ -73,7 +73,7 @@ describe('GET /internal/global_search/searchable_types', () => {
 
     expect(response.body).toEqual(
       expect.objectContaining({
-        message: 'An internal server error occurred.',
+        message: 'An internal server error occurred. Check Kibana server logs for details.',
         statusCode: 500,
       })
     );

@@ -18,6 +18,6 @@
     { "path": "../developer_examples/tsconfig.json" },
     { "path": "../../src/plugins/field_formats/tsconfig.json" },
     { "path": "../../src/plugins/data/tsconfig.json" },
-    { "path": "../../src/plugins/index_pattern_field_editor/tsconfig.json" }
+    { "path": "../../src/plugins/data_view_field_editor/tsconfig.json" }
   ]
 }

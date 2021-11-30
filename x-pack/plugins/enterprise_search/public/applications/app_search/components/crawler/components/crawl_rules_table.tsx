@@ -21,13 +21,13 @@ import {
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { clearFlashMessages, flashSuccessToast } from '../../../../shared/flash_messages';
 import { GenericEndpointInlineEditableTable } from '../../../../shared/tables/generic_endpoint_inline_editable_table';
 import { InlineEditableTableColumn } from '../../../../shared/tables/inline_editable_table/types';
 import { ItemWithAnID } from '../../../../shared/tables/types';
-import { DOCS_PREFIX } from '../../../routes';
+import { CRAWL_RULES_DOCS_URL } from '../../../routes';
 import { CrawlerSingleDomainLogic } from '../crawler_single_domain_logic';
 import {
   CrawlerPolicies,
@@ -53,11 +53,7 @@ const DEFAULT_DESCRIPTION = (
       defaultMessage="Create a crawl rule to include or exclude pages whose URL matches the rule. Rules run in sequential order, and each URL is evaluated according to the first match. {link}"
       values={{
         link: (
-          <EuiLink
-            href={`${DOCS_PREFIX}/crawl-web-content.html#crawl-web-content-manage-crawl-rules`}
-            target="_blank"
-            external
-          >
+          <EuiLink href={CRAWL_RULES_DOCS_URL} target="_blank" external>
             {i18n.translate(
               'xpack.enterpriseSearch.appSearch.crawler.crawlRulesTable.descriptionLinkText',
               { defaultMessage: 'Learn more about crawl rules' }

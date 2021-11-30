@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, CoreStart, Plugin } from '../../../../core/public';
+import { CoreSetup, CoreStart, Plugin, ThemeServiceStart } from '../../../../core/public';
 import { ExpressionsStart, ExpressionsSetup } from '../../../expressions/public';
 import { ChartsPluginSetup } from '../../../charts/public';
 import { tagcloudRenderer } from './expression_renderers';
@@ -22,6 +22,7 @@ interface SetupDeps {
 /** @internal  */
 export interface ExpressioTagcloudRendererDependencies {
   palettes: ChartsPluginSetup['palettes'];
+  theme: ThemeServiceStart;
 }
 
 interface StartDeps {
@@ -39,6 +40,7 @@ export class ExpressionTagcloudPlugin
   public setup(core: CoreSetup, { expressions, charts }: SetupDeps): ExpressionTagcloudPluginSetup {
     const rendererDependencies: ExpressioTagcloudRendererDependencies = {
       palettes: charts.palettes,
+      theme: core.theme,
     };
     expressions.registerFunction(tagcloudFunction);
     expressions.registerRenderer(tagcloudRenderer(rendererDependencies));

@@ -5492,12 +5492,12 @@
           {
             "parentPluginId": "embeddable",
             "id": "def-public.Adapters.Unnamed",
-            "type": "Any",
+            "type": "IndexSignature",
             "tags": [],
-            "label": "Unnamed",
+            "label": "[key: string]: any",
             "description": [],
             "signature": [
-              "any"
+              "[key: string]:  any"
             ],
             "path": "src/plugins/inspector/common/adapters/types.ts",
             "deprecated": false
@@ -7804,12 +7804,19 @@
           {
             "parentPluginId": "embeddable",
             "id": "def-public.OutputSpec.Unnamed",
-            "type": "Any",
+            "type": "IndexSignature",
             "tags": [],
-            "label": "Unnamed",
+            "label": "[key: string]: PropertySpec",
             "description": [],
             "signature": [
-              "any"
+              "[key: string]:  ",
+              {
+                "pluginId": "embeddable",
+                "scope": "public",
+                "docId": "kibEmbeddablePluginApi",
+                "section": "def-public.PropertySpec",
+                "text": "PropertySpec"
+              }
             ],
             "path": "src/plugins/embeddable/public/lib/embeddables/embeddable_factory.ts",
             "deprecated": false

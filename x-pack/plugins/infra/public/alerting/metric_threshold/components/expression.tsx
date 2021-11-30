@@ -21,7 +21,7 @@ import {
   EuiPanel,
   EuiLink,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { Comparator, Aggregators } from '../../../../common/alerting/metrics';
 import { ForLastExpression } from '../../../../../triggers_actions_ui/public';

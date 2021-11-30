@@ -22,13 +22,9 @@ export const updateIndexSettings =
   ({ indexName, settings }) =>
   async (dispatch) => {
     if (Object.keys(settings).length !== 0) {
-      try {
-        const { error, message } = await request(indexName, settings);
+      const { error } = await request(indexName, settings);
 
-        if (error) {
-          return dispatch(updateIndexSettingsError({ error: message }));
-        }
-      } catch (error) {
+      if (error) {
         return dispatch(updateIndexSettingsError({ error: error.message }));
       }
     }

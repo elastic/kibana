@@ -10,7 +10,7 @@ import { useDispatch } from 'react-redux';
 import { Dispatch } from 'redux';
 import { useHistory, useLocation } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButton, EuiSpacer, EuiText } from '@elastic/eui';
 import styled from 'styled-components';
 

@@ -63,7 +63,7 @@ export function getActions(
   }
 
   // Allow to edit data view field
-  if (services.indexPatternFieldEditor?.userPermissions.editIndexPattern()) {
+  if (services.dataViewFieldEditor?.userPermissions.editIndexPattern()) {
     actions.push({
       name: i18n.translate('xpack.dataVisualizer.index.dataGrid.editDataViewFieldTitle', {
         defaultMessage: 'Edit data view field',
@@ -77,8 +77,8 @@ export function getActions(
       type: 'icon',
       icon: 'indexEdit',
       onClick: (item: FieldVisConfig) => {
-        actionFlyoutRef.current = services.indexPatternFieldEditor?.openEditor({
-          ctx: { indexPattern },
+        actionFlyoutRef.current = services.dataViewFieldEditor?.openEditor({
+          ctx: { dataView: indexPattern },
           fieldName: item.fieldName,
           onSave: refreshPage,
         });
@@ -101,8 +101,8 @@ export function getActions(
         return item.deletable === true;
       },
       onClick: (item: FieldVisConfig) => {
-        actionFlyoutRef.current = services.indexPatternFieldEditor?.openDeleteModal({
-          ctx: { indexPattern },
+        actionFlyoutRef.current = services.dataViewFieldEditor?.openDeleteModal({
+          ctx: { dataView: indexPattern },
           fieldName: item.fieldName!,
           onDelete: refreshPage,
         });

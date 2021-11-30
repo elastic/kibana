@@ -18,7 +18,18 @@ export const getFieldValues = (
   },
   data: TimelineEventsDetailsItem[] | null
 ) => {
-  return find({ category, field }, data)?.values;
+  const categoryCompat =
+    category === 'signal' ? 'kibana' : category === 'kibana' ? 'signal' : category;
+  const fieldCompat =
+    category === 'signal'
+      ? field.replace('signal', 'kibana.alert').replace('rule.id', 'rule.uuid')
+      : category === 'kibana'
+      ? field.replace('kibana.alert', 'signal').replace('rule.uuid', 'rule.id')
+      : field;
+  return (
+    find({ category, field }, data)?.values ??
+    find({ category: categoryCompat, field: fieldCompat }, data)?.values
+  );
 };
 
 export const getFieldValue = (

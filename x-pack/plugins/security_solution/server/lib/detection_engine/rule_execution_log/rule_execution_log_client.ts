@@ -11,7 +11,6 @@ import { IRuleStatusSOAttributes } from '../rules/types';
 import { EventLogAdapter } from './event_log_adapter/event_log_adapter';
 import { SavedObjectsAdapter } from './saved_objects_adapter/saved_objects_adapter';
 import {
-  LogExecutionMetricsArgs,
   FindBulkExecutionLogArgs,
   FindExecutionLogArgs,
   IRuleExecutionLogClient,
@@ -73,10 +72,6 @@ export class RuleExecutionLogClient implements IRuleExecutionLogClient {
 
   public deleteCurrentStatus(ruleId: string): Promise<void> {
     return this.client.deleteCurrentStatus(ruleId);
-  }
-
-  public async logExecutionMetrics(args: LogExecutionMetricsArgs) {
-    return this.client.logExecutionMetrics(args);
   }
 
   public async logStatusChange(args: LogStatusChangeArgs) {
