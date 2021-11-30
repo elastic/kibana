@@ -154,14 +154,14 @@ describe('buildInlineScriptForPhraseFilter', () => {
   });
 });
 
-describe('getPhraseFilterField', function() {
+describe('getPhraseFilterField', function () {
   const indexPattern: DataViewBase = {
     fields,
     title: 'dataView',
   };
 
   it('should return the name of the field a phrase query is targeting', () => {
-    const field = indexPattern.fields.find(patternField => patternField.name === 'extension');
+    const field = indexPattern.fields.find((patternField) => patternField.name === 'extension');
     const filter = buildPhraseFilter(field!, 'jpg', indexPattern);
     const result = getPhraseFilterField(filter as PhraseFilter);
     expect(result).toBe('extension');
