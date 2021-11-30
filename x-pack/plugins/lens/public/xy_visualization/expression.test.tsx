@@ -2723,12 +2723,8 @@ describe('xy_expression', () => {
         );
 
         const axes = component.find(Axis);
-        expect(axes.at(0).prop('style')?.axisLine).toMatchObject({
-          stroke: defaultAxisLineColor,
-        });
-        expect(axes.at(1).prop('style')?.axisLine).toMatchObject({
-          stroke: defaultAxisLineColor,
-        });
+        expect(axes.at(0).prop('style')?.axisLine?.stroke).toBe(defaultAxisLineColor);
+        expect(axes.at(1).prop('style')?.axisLine?.stroke).toBe(defaultAxisLineColor);
       });
 
       test('it should apply custom axis colors', () => {
@@ -2746,12 +2742,8 @@ describe('xy_expression', () => {
         );
 
         const axes = component.find(Axis);
-        expect(axes.at(0).prop('style')?.axisLine).toMatchObject({
-          stroke: args.axisColorSettings.x,
-        });
-        expect(axes.at(1).prop('style')?.axisLine).toMatchObject({
-          stroke: args.axisColorSettings.yLeft,
-        });
+        expect(axes.at(0).prop('style')?.axisLine?.stroke).toBe(args.axisColorSettings.x);
+        expect(axes.at(1).prop('style')?.axisLine?.stroke).toBe(args.axisColorSettings.yLeft);
       });
     });
 
