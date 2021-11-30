@@ -23,11 +23,11 @@ import {
   EuiIcon,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { parseQueryParams } from '../../../shared/query_params';
 import { EuiCardTo } from '../../../shared/react_router_helpers';
-import { DOCS_PREFIX, ENGINE_CRAWLER_PATH } from '../../routes';
+import { INDEXING_DOCS_URL, ENGINE_CRAWLER_PATH } from '../../routes';
 import { generateEnginePath } from '../engine';
 
 import { DocumentCreationLogic } from './';
@@ -66,7 +66,7 @@ export const DocumentCreationButtons: React.FC<Props> = ({ disabled = false }) =
               jsonCode: <EuiCode>.json</EuiCode>,
               postCode: <EuiCode>POST</EuiCode>,
               documentsApiLink: (
-                <EuiLink target="_blank" href={`${DOCS_PREFIX}/indexing-documents-guide.html`}>
+                <EuiLink target="_blank" href={INDEXING_DOCS_URL}>
                   documents API
                 </EuiLink>
               ),
