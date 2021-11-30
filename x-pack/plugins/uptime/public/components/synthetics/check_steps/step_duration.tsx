@@ -32,7 +32,7 @@ export const StepDuration = ({ step }: Props) => {
   );
 
   if (step.synthetics.step?.status === 'skipped') {
-    return '--';
+    return <span>--</span>;
   }
 
   const button = (

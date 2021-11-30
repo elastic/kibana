@@ -51,6 +51,7 @@ describe('useExpandedROw', () => {
         step: {
           name: 'load page',
           index: 1,
+          status: 'succeeded',
           duration: {
             us: 9999,
           },
@@ -76,6 +77,7 @@ describe('useExpandedROw', () => {
         step: {
           name: 'go to login',
           index: 2,
+          status: 'succeeded',
           duration: {
             us: 9999,
           },

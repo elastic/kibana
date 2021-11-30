@@ -46,8 +46,8 @@ async function playwrightStart(getService: any, headless: boolean, match?: strin
   });
 
   console.log('Removing esArchiver...');
-  // await esArchiverUnload('full_heartbeat');
-  // await esArchiverUnload('browser');
+  await esArchiverUnload('full_heartbeat');
+  await esArchiverUnload('browser');
 
   return res;
 }
