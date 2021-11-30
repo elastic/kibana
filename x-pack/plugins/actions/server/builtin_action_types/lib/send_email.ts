@@ -114,7 +114,6 @@ async function sendEmailWithExchange(
           tokenType: 'access_token',
         });
       } else {
-
         await connectorTokenClient.update({
           id: connectorToken.id!.toString(),
           token: accessToken,
@@ -123,7 +122,9 @@ async function sendEmailWithExchange(
         });
       }
     } catch (err) {
-      logger.warn(`Not able to update connector token for connectorId: ${connectorId} due to error: ${err.message}`);
+      logger.warn(
+        `Not able to update connector token for connectorId: ${connectorId} due to error: ${err.message}`
+      );
     }
   } else {
     // use existing valid token

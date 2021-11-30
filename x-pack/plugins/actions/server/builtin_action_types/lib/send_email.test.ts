@@ -36,7 +36,7 @@ const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
 const encryptedSavedObjectsClient = encryptedSavedObjectsMock.createClient();
 
 const connectorTokenClient = new ConnectorTokenClient({
-  unsecuredSavedObjectsClient: unsecuredSavedObjectsClient,
+  unsecuredSavedObjectsClient,
   encryptedSavedObjectsClient,
   logger: mockLogger,
 });
@@ -321,7 +321,7 @@ describe('send_email module', () => {
       references: [],
       attributes: {
         token: '11111111',
-      }
+      },
     });
 
     await sendEmail(mockLogger, sendEmailOptions, connectorTokenClient);
@@ -579,7 +579,6 @@ describe('send_email module', () => {
         },
       ]
     `);
-
   });
 
   test('handles unauthenticated email using not secure host/port', async () => {

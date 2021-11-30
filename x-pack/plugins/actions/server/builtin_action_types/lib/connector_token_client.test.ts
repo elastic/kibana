@@ -213,7 +213,7 @@ describe('update()', () => {
       connectorId: '123',
       tokenType: 'access_token',
       token: 'testtokenvalue',
-      expiresAt
+      expiresAt,
     });
     expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledTimes(1);
     expect((unsecuredSavedObjectsClient.create.mock.calls[0][1] as ConnectorToken).token).toBe(
