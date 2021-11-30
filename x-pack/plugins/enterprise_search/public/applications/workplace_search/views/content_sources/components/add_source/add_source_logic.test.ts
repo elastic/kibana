@@ -313,7 +313,6 @@ describe('AddSourceLogic', () => {
         expect(http.get).toHaveBeenCalledWith('/internal/workplace_search/sources/create', {
           query: {
             ...params,
-            kibana_host: '',
           },
         });
 
@@ -352,7 +351,6 @@ describe('AddSourceLogic', () => {
         expect(http.get).toHaveBeenCalledWith('/internal/workplace_search/sources/create', {
           query: {
             ...params,
-            kibana_host: '',
           },
         });
 
@@ -435,7 +433,6 @@ describe('AddSourceLogic', () => {
 
           const query = {
             index_permissions: false,
-            kibana_host: '',
           };
 
           expect(clearFlashMessages).toHaveBeenCalled();
@@ -459,7 +456,6 @@ describe('AddSourceLogic', () => {
 
           const query = {
             index_permissions: true,
-            kibana_host: '',
             subdomain: 'subdomain',
           };
 
@@ -489,9 +485,7 @@ describe('AddSourceLogic', () => {
           expect(http.get).toHaveBeenCalledWith(
             '/internal/workplace_search/org/sources/github/reauth_prepare',
             {
-              query: {
-                kibana_host: '',
-              },
+              query: {},
             }
           );
           await nextTick();
@@ -653,16 +647,12 @@ describe('AddSourceLogic', () => {
       });
 
       it('getSourceConnectData', () => {
-        const query = {
-          kibana_host: '',
-        };
-
         AddSourceLogic.actions.getSourceConnectData('github', jest.fn());
 
         expect(http.get).toHaveBeenCalledWith(
           '/internal/workplace_search/account/sources/github/prepare',
           {
-            query,
+            query: {},
           }
         );
       });
@@ -673,9 +663,7 @@ describe('AddSourceLogic', () => {
         expect(http.get).toHaveBeenCalledWith(
           '/internal/workplace_search/account/sources/123/reauth_prepare',
           {
-            query: {
-              kibana_host: '',
-            },
+            query: {},
           }
         );
       });

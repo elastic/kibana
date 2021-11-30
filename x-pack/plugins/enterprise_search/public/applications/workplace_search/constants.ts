@@ -338,8 +338,6 @@ export const GITHUB_LINK_TITLE = i18n.translate(
 
 export const CUSTOM_SERVICE_TYPE = 'custom';
 
-export const WORKPLACE_SEARCH_URL_PREFIX = '/app/enterprise_search/workplace_search';
-
 export const DOCUMENTATION_LINK_TITLE = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.sources.documentation',
   {

@@ -21,7 +21,7 @@ import {
 import { HttpLogic } from '../../../../../shared/http';
 import { KibanaLogic } from '../../../../../shared/kibana';
 import { AppLogic } from '../../../../app_logic';
-import { CUSTOM_SERVICE_TYPE, WORKPLACE_SEARCH_URL_PREFIX } from '../../../../constants';
+import { CUSTOM_SERVICE_TYPE } from '../../../../constants';
 import {
   SOURCES_PATH,
   ADD_GITHUB_PATH,
@@ -162,15 +162,6 @@ interface PreContentSourceResponse {
   serviceType: string;
   githubOrganizations: string[];
 }
-
-/**
- * Workplace Search needs to know the host for the redirect. As of yet, we do not
- * have access to this in Kibana. We parse it from the browser and pass it as a param.
- */
-const {
-  location: { href },
-} = window;
-const kibanaHost = href.substr(0, href.indexOf(WORKPLACE_SEARCH_URL_PREFIX));
 
 export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceActions>>({
   path: ['enterprise_search', 'workplace_search', 'add_source_logic'],
@@ -407,9 +398,7 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
         ? `/internal/workplace_search/org/sources/${serviceType}/prepare`
         : `/internal/workplace_search/account/sources/${serviceType}/prepare`;
 
-      const query = {
-        kibana_host: kibanaHost,
-      } as HttpFetchQuery;
+      const query = {} as HttpFetchQuery;
 
       if (isOrganization) query.index_permissions = indexPermissions;
       if (subdomain) query.subdomain = subdomain;
@@ -430,9 +419,7 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
         ? `/internal/workplace_search/org/sources/${sourceId}/reauth_prepare`
         : `/internal/workplace_search/account/sources/${sourceId}/reauth_prepare`;
 
-      const query = {
-        kibana_host: kibanaHost,
-      } as HttpFetchQuery;
+      const query = {} as HttpFetchQuery;
 
       try {
         const response = await HttpLogic.values.http.get<SourceConnectData>(route, { query });
@@ -507,7 +494,7 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
       const { http } = HttpLogic.values;
       const { navigateToUrl } = KibanaLogic.values;
       const { setAddedSource } = SourcesLogic.actions;
-      const query = { ...params, kibana_host: kibanaHost };
+      const query = { ...params };
       const route = '/internal/workplace_search/sources/create';
 
       /**
