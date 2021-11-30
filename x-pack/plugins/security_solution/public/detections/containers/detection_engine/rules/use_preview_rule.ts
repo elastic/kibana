@@ -8,6 +8,7 @@
 import { useEffect, useState } from 'react';
 
 import { Unit } from '@elastic/datemath';
+import { INVOCATION_COUNT } from '../../../../../common/constants';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import {
   PreviewResponse,
@@ -29,17 +30,17 @@ export const usePreviewRule = (timeframe: Unit = 'h') => {
   const [response, setResponse] = useState<PreviewResponse>(emptyPreviewRule);
   const [isLoading, setIsLoading] = useState(false);
   const { addError } = useAppToasts();
-  let invocationCount = 20; // Defaults to an hour
+  let invocationCount = INVOCATION_COUNT.HOUR;
 
   switch (timeframe) {
     case 'd':
-      invocationCount = 24;
+      invocationCount = INVOCATION_COUNT.DAY;
       break;
     case 'w':
-      invocationCount = 168;
+      invocationCount = INVOCATION_COUNT.WEEK;
       break;
     case 'M':
-      invocationCount = 30;
+      invocationCount = INVOCATION_COUNT.MONTH;
       break;
   }
 

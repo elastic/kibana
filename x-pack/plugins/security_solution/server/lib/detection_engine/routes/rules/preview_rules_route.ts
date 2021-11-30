@@ -19,7 +19,7 @@ import { buildRouteValidation } from '../../../../utils/build_validation/route_v
 import { SetupPlugins } from '../../../../plugin';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { createRuleValidateTypeDependents } from '../../../../../common/detection_engine/schemas/request/create_rules_type_dependents';
-import { DETECTION_ENGINE_RULES_PREVIEW } from '../../../../../common/constants';
+import { DETECTION_ENGINE_RULES_PREVIEW, INVOCATION_COUNT } from '../../../../../common/constants';
 import { previewRulesSchema } from '../../../../../common/detection_engine/schemas/request';
 import { RuleExecutionStatus } from '../../../../../common/detection_engine/schemas/common/schemas';
 
@@ -43,13 +43,6 @@ import {
   createThresholdAlertType,
 } from '../../rule_types';
 import { createSecurityRuleTypeWrapper } from '../../rule_types/create_security_rule_type_wrapper';
-
-enum InvocationCount {
-  HOUR = 20,
-  DAY = 24,
-  WEEK = 168,
-  MONTH = 30,
-}
 
 export const previewRulesRoute = async (
   router: SecuritySolutionPluginRouter,
@@ -86,10 +79,10 @@ export const previewRulesRoute = async (
         let invocationCount = request.body.invocationCount;
         if (
           ![
-            InvocationCount.HOUR,
-            InvocationCount.DAY,
-            InvocationCount.WEEK,
-            InvocationCount.MONTH,
+            INVOCATION_COUNT.HOUR,
+            INVOCATION_COUNT.DAY,
+            INVOCATION_COUNT.WEEK,
+            INVOCATION_COUNT.MONTH,
           ].includes(invocationCount)
         ) {
           return response.ok({ body: { errors: ['Invalid invocation count'] } });

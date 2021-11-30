@@ -60,7 +60,7 @@ export const usePreviewHistogram = ({
       filterQuery,
       histogramType: MatrixHistogramType.preview,
       indexNames: [`${DEFAULT_PREVIEW_INDEX}-${spaceId}`],
-      stackByField: threshold != null ? threshold.field[0] : 'event.category',
+      stackByField: threshold?.field[0] ?? 'event.category',
       startDate,
       threshold,
       includeMissingData: false,
