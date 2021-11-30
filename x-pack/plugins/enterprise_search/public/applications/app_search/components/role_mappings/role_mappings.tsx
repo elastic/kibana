@@ -42,7 +42,6 @@ export const RoleMappings: React.FC = () => {
   const {
     roleMappings,
     singleUserRoleMappings,
-    multipleAuthProvidersConfig,
     dataLoading,
     roleMappingFlyoutOpen,
     singleUserRoleMappingFlyoutOpen,
@@ -75,7 +74,6 @@ export const RoleMappings: React.FC = () => {
         accessItemKey="engines"
         accessHeader={ROLE_MAPPINGS_ENGINE_ACCESS_HEADING}
         initializeRoleMapping={initializeRoleMapping}
-        shouldShowAuthProvider={multipleAuthProvidersConfig}
         handleDeleteMapping={handleDeleteMapping}
       />
     </section>

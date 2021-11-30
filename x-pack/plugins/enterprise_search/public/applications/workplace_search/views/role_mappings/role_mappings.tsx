@@ -43,7 +43,6 @@ export const RoleMappings: React.FC = () => {
     roleMappings,
     singleUserRoleMappings,
     dataLoading,
-    multipleAuthProvidersConfig,
     roleMappingFlyoutOpen,
     singleUserRoleMappingFlyoutOpen,
   } = useValues(RoleMappingsLogic);
@@ -73,7 +72,6 @@ export const RoleMappings: React.FC = () => {
         roleMappings={roleMappings}
         accessItemKey="groups"
         accessHeader={ROLE_MAPPINGS_TABLE_HEADER}
-        shouldShowAuthProvider={multipleAuthProvidersConfig}
         initializeRoleMapping={initializeRoleMapping}
         handleDeleteMapping={handleDeleteMapping}
       />
