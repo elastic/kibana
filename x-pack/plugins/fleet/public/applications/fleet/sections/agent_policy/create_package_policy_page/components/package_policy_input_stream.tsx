@@ -8,7 +8,7 @@
 import React, { useState, Fragment, memo, useMemo } from 'react';
 import ReactMarkdown from 'react-markdown';
 import styled from 'styled-components';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiFlexGrid,
   EuiFlexGroup,

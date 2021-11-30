@@ -8,11 +8,11 @@
 import React, { useMemo } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 
-import { DataViewBase, Filter, Query } from '@kbn/es-query';
+import type { DataViewBase, Filter, Query } from '@kbn/es-query';
 import { useGlobalTime } from '../../containers/use_global_time';
 import { BrowserFields } from '../../containers/source';
 import { useKibana } from '../../lib/kibana';
-import { esQuery } from '../../../../../../../src/plugins/data/public';
+import { getEsQueryConfig } from '../../../../../../../src/plugins/data/common';
 import { inputsModel, inputsSelectors, State } from '../../store';
 import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
 import { timelineSelectors } from '../../../timelines/store/timeline';
@@ -117,7 +117,7 @@ const StatefulTopNComponent: React.FC<Props> = ({
       timelineId === TimelineId.active
         ? combineQueries({
             browserFields,
-            config: esQuery.getEsQueryConfig(uiSettings),
+            config: getEsQueryConfig(uiSettings),
             dataProviders,
             filters: activeTimelineFilters,
             indexPattern,

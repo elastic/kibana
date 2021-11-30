@@ -32,6 +32,7 @@ export const createLogEntryExamplesQuery = (
               [timestampField]: {
                 gte: startTime,
                 lte: endTime,
+                format: 'epoch_millis',
               },
             },
           },

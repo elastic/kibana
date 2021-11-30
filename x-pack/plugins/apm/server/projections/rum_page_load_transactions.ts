@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SetupUX } from '../routes/rum_client';
+import { SetupUX } from '../routes/rum_client/route';
 import {
   AGENT_NAME,
   TRANSACTION_TYPE,
@@ -14,7 +14,7 @@ import {
 import { rangeQuery } from '../../../observability/server';
 import { ProcessorEvent } from '../../common/processor_event';
 import { TRANSACTION_PAGE_LOAD } from '../../common/transaction_types';
-import { getEsFilter } from '../lib/rum_client/ui_filters/get_es_filter';
+import { getEsFilter } from '../routes/rum_client/ui_filters/get_es_filter';
 
 export function getRumPageLoadTransactionsProjection({
   setup,

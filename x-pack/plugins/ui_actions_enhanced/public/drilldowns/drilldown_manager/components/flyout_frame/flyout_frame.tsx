@@ -45,7 +45,7 @@ export const FlyoutFrame: React.FC<FlyoutFrameProps> = ({
             <EuiFlexItem grow={false}>
               <div style={{ marginLeft: '-8px', marginTop: '-4px' }}>
                 <EuiButtonIcon
-                  color={'subdued'}
+                  color="text"
                   onClick={onBack}
                   iconType="arrowLeft"
                   aria-label={txtBack}

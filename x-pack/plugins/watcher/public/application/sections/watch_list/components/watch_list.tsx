@@ -25,7 +25,7 @@ import {
   EuiPageHeader,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { Moment } from 'moment';
 
 import { reactRouterNavigate } from '../../../../../../../../src/plugins/kibana_react/public';

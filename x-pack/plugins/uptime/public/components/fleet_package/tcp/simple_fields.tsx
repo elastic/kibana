@@ -6,7 +6,7 @@
  */
 
 import React, { memo } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFormRow, EuiFieldText } from '@elastic/eui';
 import { ConfigKeys, Validation } from '../types';
 import { useTCPSimpleFieldsContext } from '../contexts';

@@ -18,7 +18,7 @@
     "embeddable",
     "share",
     "presentationUtil",
-    "indexPatternFieldEditor"
+    "dataViewFieldEditor"
   ],
   "optionalPlugins": [
     "usageCollection",

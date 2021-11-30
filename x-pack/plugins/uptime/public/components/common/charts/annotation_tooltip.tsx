@@ -8,7 +8,7 @@
 import React from 'react';
 import moment from 'moment';
 import styled from 'styled-components';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 const Header = styled.div`
   font-weight: bold;

@@ -194,10 +194,22 @@ exports.Artifact = class Artifact {
    * @param {string} dest
    * @return {Promise<void>}
    */
-  async download(dest) {
+  async download(dest, { useCached = false }) {
     await retry(this._log, async () => {
       const cacheMeta = cache.readMeta(dest);
       const tmpPath = `${dest}.tmp`;
+
+      if (useCached) {
+        if (cacheMeta.exists) {
+          this._log.info(
+            'use-cached passed, forcing to use existing snapshot',
+            chalk.bold(cacheMeta.ts)
+          );
+          return;
+        } else {
+          this._log.info('use-cached passed but no cached snapshot found. Continuing to download');
+        }
+      }
 
       const artifactResp = await this._download(tmpPath, cacheMeta.etag, cacheMeta.ts);
       if (artifactResp.cached) {

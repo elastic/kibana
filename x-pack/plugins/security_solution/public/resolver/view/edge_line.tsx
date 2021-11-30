@@ -9,7 +9,7 @@
 
 import React from 'react';
 import styled from 'styled-components';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { applyMatrix3, distance, angle } from '../models/vector2';
 import { Vector2, Matrix3, EdgeLineMetadata } from '../types';
 import { fontSize } from './font_size';
