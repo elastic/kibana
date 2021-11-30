@@ -13,10 +13,12 @@ import type {
   SavedObjectsClientContract,
   IRouter,
 } from '../../../../../src/core/server';
+import type { FleetAuthz } from '../../common/authz';
 
 /** @internal */
 export interface FleetRequestHandlerContext extends RequestHandlerContext {
   fleet: {
+    authz: FleetAuthz;
     epm: {
       /**
        * Saved Objects client configured to use kibana_system privileges instead of end-user privileges. Should only be

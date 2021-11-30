@@ -1308,7 +1308,8 @@ export const waitForRuleSuccessOrStatus = async (
   supertest: SuperTest.SuperTest<SuperTest.Test>,
   log: ToolingLog,
   id: string,
-  status: 'succeeded' | 'failed' | 'partial failure' | 'warning' = 'succeeded'
+  status: 'succeeded' | 'failed' | 'partial failure' | 'warning' = 'succeeded',
+  afterDate?: Date
 ): Promise<void> => {
   await waitFor(
     async () => {
@@ -1324,15 +1325,20 @@ export const waitForRuleSuccessOrStatus = async (
             )}, status: ${JSON.stringify(response.status)}`
           );
         }
-        if (response.body[id]?.current_status?.status !== status) {
+        const currentStatus = response.body[id]?.current_status;
+
+        if (currentStatus?.status !== status) {
           log.debug(
             `Did not get an expected status of ${status} while waiting for a rule success or status for rule id ${id} (waitForRuleSuccessOrStatus). Will continue retrying until status is found. body: ${JSON.stringify(
               response.body
             )}, status: ${JSON.stringify(response.status)}`
           );
         }
-
-        return response.body[id]?.current_status?.status === status;
+        return (
+          currentStatus != null &&
+          currentStatus.status === status &&
+          (afterDate ? new Date(currentStatus.status_date) > afterDate : true)
+        );
       } catch (e) {
         if ((e as Error).message.includes('got 503 "Service Unavailable"')) {
           return false;

@@ -19,7 +19,6 @@ import type {
 import { History } from 'history';
 import { AnyAction, Dispatch } from 'redux';
 import { BehaviorSubject, Subject } from 'rxjs';
-import { ScreenshotModePluginStart } from 'src/plugins/screenshot_mode/public';
 import { Query, Filter, IndexPattern, RefreshInterval, TimeRange } from './services/data';
 import { ContainerInput, EmbeddableInput, ViewMode } from './services/embeddable';
 import { SharePluginStart } from './services/share';
@@ -33,6 +32,7 @@ import { SavedObjectsTaggingApi } from './services/saved_objects_tagging_oss';
 import { DataPublicPluginStart, IndexPatternsContract } from './services/data';
 import { SavedObjectLoader, SavedObjectsStart } from './services/saved_objects';
 import { IKbnUrlStateStorage } from './services/kibana_utils';
+import type { ScreenshotModePluginStart } from './services/screenshot_mode';
 import type { DashboardContainer, DashboardSavedObject } from '.';
 import { VisualizationsStart } from '../../visualizations/public';
 import { DashboardAppLocatorParams } from './locator';
@@ -206,9 +206,9 @@ export interface DashboardAppServices {
   onAppLeave: AppMountParameters['onAppLeave'];
   savedObjectsTagging?: SavedObjectsTaggingApi;
   savedObjectsClient: SavedObjectsClientContract;
+  screenshotModeService: ScreenshotModePluginStart;
   dashboardSessionStorage: DashboardSessionStorage;
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
   savedQueryService: DataPublicPluginStart['query']['savedQueries'];
   spacesService?: SpacesPluginStart;
-  screenshotModeService?: ScreenshotModePluginStart;
 }

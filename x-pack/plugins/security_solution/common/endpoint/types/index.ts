@@ -177,7 +177,7 @@ export interface ResolverPaginatedEvents {
 }
 
 /**
- * Returned by the server via /api/endpoint/metadata
+ * Returned by the server via POST /api/endpoint/metadata
  */
 export interface HostResultList {
   /* the hosts restricted by the page size */
@@ -1231,3 +1231,18 @@ export interface ListPageRouteState {
   /** The label for the button */
   backButtonLabel?: string;
 }
+
+/**
+ * REST API standard base response for list types
+ */
+interface BaseListResponse<D = unknown> {
+  data: D[];
+  page: number;
+  pageSize: number;
+  total: number;
+}
+
+/**
+ * Returned by the server via GET /api/endpoint/metadata
+ */
+export type MetadataListResponse = BaseListResponse<HostInfo>;

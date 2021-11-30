@@ -5,14 +5,17 @@
  * 2.0.
  */
 
+import React, { useCallback } from 'react';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiProgress } from '@elastic/eui';
-import React from 'react';
 import styled, { css } from 'styled-components';
+import { useAllCasesNavigation } from '../../common/navigation';
 
-import { LinkIcon, LinkIconProps } from '../link_icon';
+import { LinkIcon } from '../link_icon';
 import { Subtitle, SubtitleProps } from '../subtitle';
 import { Title } from './title';
 import { BadgeOptions, TitleProp } from './types';
+import * as i18n from './translations';
+
 interface HeaderProps {
   border?: boolean;
   isLoading?: boolean;
@@ -57,17 +60,8 @@ const Badge = styled(EuiBadge)`
 ` as unknown as typeof EuiBadge;
 Badge.displayName = 'Badge';
 
-interface BackOptions {
-  href: LinkIconProps['href'];
-  onClick?: (ev: MouseEvent) => void;
-  text: LinkIconProps['children'];
-  dataTestSubj?: string;
-}
-
 export interface HeaderPageProps extends HeaderProps {
-  backOptions?: BackOptions;
-  /** A component to be displayed as the back button. Used only if `backOption` is not defined */
-  backComponent?: React.ReactNode;
+  showBackButton?: boolean;
   badgeOptions?: BadgeOptions;
   children?: React.ReactNode;
   subtitle?: SubtitleProps['items'];
@@ -77,8 +71,7 @@ export interface HeaderPageProps extends HeaderProps {
 }
 
 const HeaderPageComponent: React.FC<HeaderPageProps> = ({
-  backOptions,
-  backComponent,
+  showBackButton = false,
   badgeOptions,
   border,
   children,
@@ -88,39 +81,51 @@ const HeaderPageComponent: React.FC<HeaderPageProps> = ({
   title,
   titleNode,
   ...rest
-}) => (
-  <Header border={border} {...rest}>
-    <EuiFlexGroup alignItems="center">
-      <FlexItem>
-        {backOptions && (
-          <LinkBack>
-            <LinkIcon
-              dataTestSubj={backOptions.dataTestSubj}
-              onClick={backOptions.onClick}
-              href={backOptions.href}
-              iconType="arrowLeft"
-            >
-              {backOptions.text}
-            </LinkIcon>
-          </LinkBack>
-        )}
+}) => {
+  const { getAllCasesUrl, navigateToAllCases } = useAllCasesNavigation();
 
-        {!backOptions && backComponent && <>{backComponent}</>}
+  const navigateToAllCasesClick = useCallback(
+    (e) => {
+      if (e) {
+        e.preventDefault();
+      }
+      navigateToAllCases();
+    },
+    [navigateToAllCases]
+  );
 
-        {titleNode || <Title title={title} badgeOptions={badgeOptions} />}
+  return (
+    <Header border={border} {...rest}>
+      <EuiFlexGroup alignItems="center">
+        <FlexItem>
+          {showBackButton && (
+            <LinkBack>
+              <LinkIcon
+                dataTestSubj="backToCases"
+                onClick={navigateToAllCasesClick}
+                href={getAllCasesUrl()}
+                iconType="arrowLeft"
+              >
+                {i18n.BACK_TO_ALL}
+              </LinkIcon>
+            </LinkBack>
+          )}
 
-        {subtitle && <Subtitle data-test-subj="header-page-subtitle" items={subtitle} />}
-        {subtitle2 && <Subtitle data-test-subj="header-page-subtitle-2" items={subtitle2} />}
-        {border && isLoading && <EuiProgress size="xs" color="accent" />}
-      </FlexItem>
+          {titleNode || <Title title={title} badgeOptions={badgeOptions} />}
 
-      {children && (
-        <FlexItem data-test-subj="header-page-supplements" grow={false}>
-          {children}
+          {subtitle && <Subtitle data-test-subj="header-page-subtitle" items={subtitle} />}
+          {subtitle2 && <Subtitle data-test-subj="header-page-subtitle-2" items={subtitle2} />}
+          {border && isLoading && <EuiProgress size="xs" color="accent" />}
         </FlexItem>
-      )}
-    </EuiFlexGroup>
-  </Header>
-);
+
+        {children && (
+          <FlexItem data-test-subj="header-page-supplements" grow={false}>
+            {children}
+          </FlexItem>
+        )}
+      </EuiFlexGroup>
+    </Header>
+  );
+};
 
 export const HeaderPage = React.memo(HeaderPageComponent);

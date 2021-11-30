@@ -16,6 +16,7 @@ import { modelsProvider } from '../models/data_frame_analytics';
 import { TrainedModelConfigResponse } from '../../common/types/trained_models';
 import { memoryOverviewServiceProvider } from '../models/memory_overview';
 import { mlLog } from '../lib/log';
+import { forceQuerySchema } from './schemas/anomaly_detectors_schema';
 
 export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization) {
   /**
@@ -198,7 +199,11 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
       path: '/api/ml/trained_models/nodes_overview',
       validate: {},
       options: {
-        tags: ['access:ml:canGetDataFrameAnalytics'],
+        tags: [
+          'access:ml:canViewMlNodes',
+          'access:ml:canGetDataFrameAnalytics',
+          'access:ml:canGetJobs',
+        ],
       },
     },
     routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response }) => {
@@ -262,6 +267,7 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
       path: '/api/ml/trained_models/{modelId}/deployment/_stop',
       validate: {
         params: modelIdSchema,
+        query: forceQuerySchema,
       },
       options: {
         tags: ['access:ml:canGetDataFrameAnalytics'],
@@ -272,38 +278,7 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
         const { modelId } = request.params;
         const { body } = await mlClient.stopTrainedModelDeployment({
           model_id: modelId,
-        });
-        return response.ok({
-          body,
-        });
-      } catch (e) {
-        return response.customError(wrapError(e));
-      }
-    })
-  );
-
-  /**
-   * @apiGroup TrainedModels
-   *
-   * @api {get} /api/ml/trained_models/:modelId/deployment/_stats Get trained model deployment stats
-   * @apiName GetTrainedModelDeploymentStats
-   * @apiDescription Gets trained model deployment stats.
-   */
-  router.get(
-    {
-      path: '/api/ml/trained_models/{modelId}/deployment/_stats',
-      validate: {
-        params: modelIdSchema,
-      },
-      options: {
-        tags: ['access:ml:canGetDataFrameAnalytics'],
-      },
-    },
-    routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
-      try {
-        const { modelId } = request.params;
-        const { body } = await mlClient.getTrainedModelDeploymentStats({
-          model_id: modelId,
+          force: request.query.force ?? false,
         });
         return response.ok({
           body,

@@ -10,7 +10,7 @@ import { withRouter, RouteComponentProps } from 'react-router-dom';
 
 import { EuiPageHeader, EuiSpacer, EuiPageContent, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { DocLinksStart } from 'kibana/public';
 import { METRIC_TYPE } from '@kbn/analytics';
 
@@ -46,7 +46,7 @@ const i18nTexts = {
   }),
   pageDescription: i18n.translate('xpack.upgradeAssistant.esDeprecations.pageDescription', {
     defaultMessage:
-      'Resolve all critical issues before upgrading. Before making changes, ensure you have a current snapshot of your cluster. Indices created before 7.0 must be reindexed or removed. To start multiple reindexing tasks in a single request, use the Kibana batch reindexing API.',
+      'Resolve all critical issues before upgrading. Before making changes, ensure you have a current snapshot of your cluster. Indices created before 7.0 must be reindexed or removed.',
   }),
   isLoading: i18n.translate('xpack.upgradeAssistant.esDeprecations.loadingText', {
     defaultMessage: 'Loading deprecation issues…',
@@ -136,8 +136,7 @@ export const EsDeprecations = withRouter(({ history }: RouteComponentProps) => {
         pageTitle={i18nTexts.pageTitle}
         description={
           <>
-            {i18nTexts.pageDescription}
-            {getBatchReindexLink(docLinks)}
+            {i18nTexts.pageDescription} {getBatchReindexLink(docLinks)}
           </>
         }
       >
