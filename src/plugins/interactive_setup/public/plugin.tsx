@@ -11,7 +11,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import type { Observable } from 'rxjs';
 
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import type { CoreSetup, CoreStart, CoreTheme, Plugin } from 'src/core/public';
 
 import { App } from './app';

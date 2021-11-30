@@ -8,7 +8,7 @@
 import React, { useMemo, useState, useCallback, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { isEmpty, without } from 'lodash/fp';
 import {

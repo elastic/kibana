@@ -43,7 +43,7 @@ export function FieldInput({
       selectedOperationDefinition?.input !== 'managedReference') ||
       (incompleteOperation && operationDefinitionMap[incompleteOperation].input === 'field')) &&
     getErrorMessage(
-      selectedColumn as GenericIndexPatternColumn,
+      selectedColumn,
       Boolean(incompleteOperation),
       selectedOperationDefinition?.input,
       currentFieldIsInvalid

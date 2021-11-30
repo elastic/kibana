@@ -15,7 +15,7 @@ import {
   EuiPanel,
   EuiAccordion,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useMlKibana } from '../../../contexts/kibana';
 import { ModelItem } from '../models_list';
 import { ProcessorsStats } from './expanded_row';

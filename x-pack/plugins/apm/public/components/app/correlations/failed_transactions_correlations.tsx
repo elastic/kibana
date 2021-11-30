@@ -27,7 +27,7 @@ import type { EuiTableSortingType } from '@elastic/eui/src/components/basic_tabl
 import type { Direction } from '@elastic/eui/src/services/sort/sort_direction';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { useUiTracker } from '../../../../../observability/public';
 

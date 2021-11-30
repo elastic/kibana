@@ -16,7 +16,7 @@ import { EuiCodeBlock, EuiFlyout, EuiTab, EuiTabs } from '@elastic/eui';
 import { Loading } from '../../../../../shared/loading';
 
 import { CrawlDetailActions, CrawlDetailValues } from '../../crawl_detail_logic';
-import { CrawlRequestFromServer } from '../../types';
+import { CrawlRequestWithDetailsFromServer } from '../../types';
 
 import { CrawlDetailsPreview } from './crawl_details_preview';
 
@@ -25,7 +25,7 @@ import { CrawlDetailsFlyout } from '.';
 const MOCK_VALUES: Partial<CrawlDetailValues> = {
   dataLoading: false,
   flyoutClosed: false,
-  crawlRequestFromServer: {} as CrawlRequestFromServer,
+  crawlRequestFromServer: {} as CrawlRequestWithDetailsFromServer,
 };
 
 const MOCK_ACTIONS: Partial<CrawlDetailActions> = {

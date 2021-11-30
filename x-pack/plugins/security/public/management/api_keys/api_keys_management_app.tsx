@@ -13,7 +13,7 @@ import { Router } from 'react-router-dom';
 import type { Observable } from 'rxjs';
 
 import { i18n } from '@kbn/i18n';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 
 import type {
   CoreStart,

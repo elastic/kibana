@@ -18,6 +18,7 @@ import {
 } from '../types';
 import { chartPluginMock } from 'src/plugins/charts/public/mocks';
 import { layerTypes } from '../../common';
+import { themeServiceMock } from '../../../../../src/core/public/mocks';
 
 function mockFrame(): FramePublicAPI {
   return {
@@ -28,6 +29,7 @@ function mockFrame(): FramePublicAPI {
 
 const datatableVisualization = getDatatableVisualization({
   paletteService: chartPluginMock.createPaletteRegistry(),
+  theme: themeServiceMock.createStartContract(),
 });
 
 describe('Datatable Visualization', () => {

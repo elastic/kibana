@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { DocLinksStart } from 'kibana/public';
 import { EuiLink, EuiTextColor } from '@elastic/eui';
 
@@ -132,4 +132,21 @@ export function getPrecisionErrorWarningMessages(
   }
 
   return warningMessages;
+}
+
+export function getVisualDefaultsForLayer(layer: IndexPatternLayer) {
+  return Object.keys(layer.columns).reduce<Record<string, Record<string, unknown>>>(
+    (memo, columnId) => {
+      const column = layer.columns[columnId];
+      if (column?.operationType) {
+        const opDefinition = operationDefinitionMap[column.operationType];
+        const params = opDefinition.getDefaultVisualSettings?.(column);
+        if (params) {
+          memo[columnId] = params;
+        }
+      }
+      return memo;
+    },
+    {}
+  );
 }

@@ -11,7 +11,7 @@ import PropTypes from 'prop-types';
 
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiButton } from '@elastic/eui';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 export function Footer({ url, label }) {
   return (

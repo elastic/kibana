@@ -20,7 +20,7 @@ import {
   mountWithProvider,
   mockStoreDeps,
 } from '../mocks';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import {
   SavedObjectSaveModal,
   checkForDuplicateTitle,

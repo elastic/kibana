@@ -37,9 +37,10 @@ export class PieVisualization {
           formatFactory,
           chartsThemeService: charts.theme,
           paletteService: palettes,
+          kibanaTheme: core.theme,
         })
       );
-      return getPieVisualization({ paletteService: palettes });
+      return getPieVisualization({ paletteService: palettes, kibanaTheme: core.theme });
     });
   }
 }

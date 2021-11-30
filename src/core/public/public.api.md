@@ -734,6 +734,7 @@ export interface DocLinksStart {
             datastreams: string;
             datastreamsNamingScheme: string;
             installElasticAgent: string;
+            installElasticAgentStandalone: string;
             upgradeElasticAgent: string;
             upgradeElasticAgent712lower: string;
             learnMoreBlog: string;

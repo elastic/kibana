@@ -9,7 +9,7 @@ import React from 'react';
 
 import { EuiPageContent, EuiSteps, EuiText, EuiLink, EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { docLinks } from '../../doc_links';
 

@@ -23,6 +23,7 @@ import type { IndexPattern, IndexPatternPrivateState } from '../../../types';
 import type { OperationSupportMatrix } from '../../../dimension_panel';
 
 const generateId = htmlIdGenerator();
+export const MAX_MULTI_FIELDS_SIZE = 3;
 
 export interface FieldInputsProps {
   column: TermsIndexPatternColumn;
@@ -135,10 +136,10 @@ export function FieldInputs({
                 (!rawValuesLookup.has(key) && !indexPattern.getFieldByName(key)?.scripted) ||
                 key === value
             )
-            .reduce((memo, key) => {
+            .reduce<OperationSupportMatrix['operationByField']>((memo, key) => {
               memo[key] = operationSupportMatrix.operationByField[key];
               return memo;
-            }, {} as OperationSupportMatrix['operationByField']);
+            }, {});
 
           const shouldShowScriptedFieldError = Boolean(
             value && indexPattern.getFieldByName(value)?.scripted && localValuesFilled.length > 1
@@ -226,6 +227,7 @@ export function FieldInputs({
         label={i18n.translate('xpack.lens.indexPattern.terms.addaFilter', {
           defaultMessage: 'Add field',
         })}
+        isDisabled={localValues.length > MAX_MULTI_FIELDS_SIZE}
       />
     </>
   );

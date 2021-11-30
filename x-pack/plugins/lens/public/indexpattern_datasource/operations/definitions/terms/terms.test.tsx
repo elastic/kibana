@@ -1197,6 +1197,77 @@ describe('terms', () => {
         ])
       );
     });
+
+    it('should limit the number of multiple fields', () => {
+      const updateLayerSpy = jest.fn();
+      const existingFields = getExistingFields();
+      const operationSupportMatrix = getDefaultOperationSupportMatrix('col1', existingFields);
+
+      (layer.columns.col1 as TermsIndexPatternColumn).params.secondaryFields = [
+        'memory',
+        'bytes',
+        'dest',
+      ];
+      let instance = mount(
+        <InlineFieldInput
+          {...defaultFieldInputProps}
+          layer={layer}
+          updateLayer={updateLayerSpy}
+          columnId="col1"
+          existingFields={existingFields}
+          operationSupportMatrix={operationSupportMatrix}
+          selectedColumn={layer.columns.col1 as TermsIndexPatternColumn}
+        />
+      );
+
+      expect(
+        instance.find('[data-test-subj="indexPattern-terms-add-field"]').first().prop('isDisabled')
+      ).toBeTruthy();
+      // clicking again will no increase the number of fields
+      act(() => {
+        instance.find('[data-test-subj="indexPattern-terms-add-field"]').first().simulate('click');
+      });
+      instance = instance.update();
+      expect(
+        instance.find('[data-test-subj="indexPattern-terms-removeField-4"]').exists()
+      ).toBeFalsy();
+    });
+
+    it('should let the user add new empty field up to the limit', () => {
+      const updateLayerSpy = jest.fn();
+      const existingFields = getExistingFields();
+      const operationSupportMatrix = getDefaultOperationSupportMatrix('col1', existingFields);
+
+      let instance = mount(
+        <InlineFieldInput
+          {...defaultFieldInputProps}
+          layer={layer}
+          updateLayer={updateLayerSpy}
+          columnId="col1"
+          existingFields={existingFields}
+          operationSupportMatrix={operationSupportMatrix}
+          selectedColumn={layer.columns.col1 as TermsIndexPatternColumn}
+        />
+      );
+      expect(
+        instance.find('[data-test-subj="indexPattern-terms-add-field"]').first().prop('isDisabled')
+      ).toBeFalsy();
+
+      // click 3 times to add new fields
+      for (const _ of [1, 2, 3]) {
+        act(() => {
+          instance
+            .find('[data-test-subj="indexPattern-terms-add-field"]')
+            .first()
+            .simulate('click');
+        });
+        instance = instance.update();
+      }
+
+      expect(
+        instance.find('[data-test-subj="indexPattern-terms-add-field"]').first().prop('isDisabled')
+      ).toBeTruthy();
+    });
   });
 
   describe('param editor', () => {

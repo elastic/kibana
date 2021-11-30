@@ -13,8 +13,8 @@ import { nextTick } from '@kbn/test/jest';
 import { itShowsServerErrorAsFlashMessage } from '../../../test_helpers';
 
 import { CrawlDetailLogic, CrawlDetailValues } from './crawl_detail_logic';
-import { CrawlerStatus, CrawlRequestFromServer } from './types';
-import { crawlRequestServerToClient } from './utils';
+import { CrawlType, CrawlerStatus, CrawlRequestWithDetailsFromServer } from './types';
+import { crawlRequestWithDetailsServerToClient } from './utils';
 
 const DEFAULT_VALUES: CrawlDetailValues = {
   dataLoading: true,
@@ -24,15 +24,19 @@ const DEFAULT_VALUES: CrawlDetailValues = {
   selectedTab: 'preview',
 };
 
-const crawlRequestResponse: CrawlRequestFromServer = {
+const crawlRequestResponse: CrawlRequestWithDetailsFromServer = {
   id: '12345',
   status: CrawlerStatus.Pending,
   created_at: 'Mon, 31 Aug 2020 17:00:00 +0000',
   began_at: null,
   completed_at: null,
+  type: CrawlType.Full,
+  crawl_config: {
+    domain_allowlist: [],
+  },
 };
 
-const clientCrawlRequest = crawlRequestServerToClient(crawlRequestResponse);
+const clientCrawlRequest = crawlRequestWithDetailsServerToClient(crawlRequestResponse);
 
 describe('CrawlDetailLogic', () => {
   const { mount } = new LogicMounter(CrawlDetailLogic);
