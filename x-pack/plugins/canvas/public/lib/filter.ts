@@ -55,15 +55,36 @@ export const groupFiltersBy = (filters: FilterType[], groupByField: FilterField)
   }));
 };
 
-export const getFiltersByGroups = (filters: string[], groups: string[]) =>
+export const getFiltersByGroups = (
+  filters: string[],
+  groups: string[],
+  ungrouped: boolean = false
+) =>
   filters.filter((filter: string) => {
     const ast = fromExpression(filter);
     const expGroups: string[] = get(ast, 'chain[0].arguments.filterGroup', []);
-    return expGroups.length > 0 && expGroups.every((expGroup) => groups.includes(expGroup));
+    if (!groups?.length && ungrouped) {
+      return expGroups.length === 0;
+    }
+
+    return (
+      !groups.length ||
+      (expGroups.length > 0 && expGroups.every((expGroup) => groups.includes(expGroup)))
+    );
   });
 
 export const extractGroupsFromElementsFilters = (expr: string) => {
   const ast = fromExpression(expr);
-  const filtersFn = ast.chain.filter((expression) => expression.function === 'filters')[0];
-  return filtersFn?.arguments.group?.map((g) => g.toString()) ?? [];
+  const filtersFns = ast.chain.filter((expression) => expression.function === 'filters');
+  const groups = filtersFns.reduce<string[]>((foundGroups, filterFn) => {
+    const filterGroups = filterFn?.arguments.group?.map((g) => g.toString()) ?? [];
+    return [...foundGroups, ...filterGroups];
+  }, []);
+  return [...new Set(groups)];
+};
+
+export const extractUngroupedFromElementsFilters = (expr: string) => {
+  const ast = fromExpression(expr);
+  const filtersFns = ast.chain.filter((expression) => expression.function === 'filters');
+  return filtersFns.some((filterFn) => filterFn?.arguments.ungrouped?.[0]);
 };

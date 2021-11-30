@@ -20,6 +20,7 @@ import {
   groupFiltersBy,
   getFiltersByGroups,
   extractGroupsFromElementsFilters,
+  extractUngroupedFromElementsFilters,
 } from './filter';
 
 const formatterFactory = (value: unknown) => () => JSON.stringify(value);
@@ -304,12 +305,20 @@ describe('getFiltersByGroups', () => {
     expect(getFiltersByGroups(filters, [group2])).toEqual([filters[1], filters[3]]);
   });
 
+  it('returns filters without group if ungrouped is true', () => {
+    expect(getFiltersByGroups(filters, [], true)).toEqual([filters[2]]);
+  });
+
+  it('returns filters with group if ungrouped is true and groups are not empty', () => {
+    expect(getFiltersByGroups(filters, [group1], true)).toEqual([filters[0]]);
+  });
+
   it('returns empty array if not found any filter with a specified group', () => {
     expect(getFiltersByGroups(filters, ['absent group'])).toEqual([]);
   });
 
   it('returns empty array if not groups specified', () => {
-    expect(getFiltersByGroups(filters, [])).toEqual([]);
+    expect(getFiltersByGroups(filters, [])).toEqual(filters);
   });
 });
 
@@ -319,14 +328,32 @@ describe('extractGroupsFromElementsFilters', () => {
 
   it('returns groups which are specified at filters expression', () => {
     const groups = ['group 1', 'group 2', 'group 3', 'group 4'];
+    const additionalGroups = [...groups, 'group 5'];
     const groupsExpr = groups.map((group) => `group="${group}"`).join(' ');
+    const additionalGroupsExpr = additionalGroups.map((group) => `group="${group}"`).join(' ');
 
-    expect(extractGroupsFromElementsFilters(`${exprFilters} ${groupsExpr} | ${exprRest}`)).toEqual(
-      groups
-    );
+    expect(
+      extractGroupsFromElementsFilters(
+        `${exprFilters} ${groupsExpr} | ${exprFilters} ${additionalGroupsExpr} | ${exprRest}`
+      )
+    ).toEqual(additionalGroups);
   });
 
   it('returns empty array if no groups were specified at filters expression', () => {
     expect(extractGroupsFromElementsFilters(`${exprFilters} | ${exprRest}`)).toEqual([]);
+  });
+});
+
+describe('extractUngroupedFromElementsFilters', () => {
+  it('checks if ungrouped filters expression exist at the element', () => {
+    const expression =
+      'filters group="10" group="11" | filters group="15" ungrouped=true | demodata | plot | render';
+    const isUngrouped = extractUngroupedFromElementsFilters(expression);
+    expect(isUngrouped).toBeTruthy();
+
+    const nextExpression =
+      'filters group="10" group="11" | filters group="15" | demodata | plot | render';
+    const nextIsUngrouped = extractUngroupedFromElementsFilters(nextExpression);
+    expect(nextIsUngrouped).toBeFalsy();
   });
 });
