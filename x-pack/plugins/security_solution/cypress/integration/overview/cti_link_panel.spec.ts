@@ -52,56 +52,12 @@ describe('CTI Link Panel', () => {
     });
 
     it('renders dashboard module as expected when there are events in the selected time period', () => {
-      cy.intercept('GET', '/api/fleet/epm/packages*', {
-        response: [
-          {
-            name: 'ti_abusech',
-            title: 'AbuseCH',
-            id: 'ti_abusech',
-            status: 'installed',
-          },
-          {
-            name: 'ti_anomali',
-            title: 'Anomali',
-            id: 'ti_anomali',
-            status: 'not_installed',
-          },
-        ],
-      });
-
       loginAndWaitForPage(OVERVIEW_URL);
       cy.get(`${OVERVIEW_CTI_LINKS} ${OVERVIEW_CTI_LINKS_INFO_INNER_PANEL}`).should('exist');
       cy.get(`${OVERVIEW_CTI_LINKS} ${OVERVIEW_CTI_ENABLE_INTEGRATIONS_BUTTON}`).should('exist');
       cy.get(OVERVIEW_CTI_LINKS).should('not.contain.text', 'Anomali');
       cy.get(OVERVIEW_CTI_LINKS).should('contain.text', 'AbuseCH malware');
       cy.get(`${OVERVIEW_CTI_TOTAL_EVENT_COUNT}`).should('have.text', 'Showing: 1 indicator');
-    });
-  });
-
-  describe('all integrations installed', () => {
-    before(() => {
-      esArchiverLoad('threat_indicator');
-      cy.intercept('GET', '/api/fleet/epm/packages*', {
-        response: [
-          {
-            name: 'ti_abusech',
-            title: 'AbuseCH',
-            id: 'ti_abusech',
-            status: 'installed',
-          },
-        ],
-      });
-    });
-
-    after(() => {
-      esArchiverUnload('threat_indicator');
-    });
-
-    it('render cti dashboard without enable integrations button', () => {
-      loginAndWaitForPage(OVERVIEW_URL);
-      cy.get(`${OVERVIEW_CTI_LINKS} ${OVERVIEW_CTI_ENABLE_INTEGRATIONS_BUTTON}`).should(
-        'not.exist'
-      );
     });
   });
 });
