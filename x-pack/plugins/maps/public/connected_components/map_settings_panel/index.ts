@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { AnyAction, Dispatch } from 'redux';
+import { AnyAction } from 'redux';
 import { connect } from 'react-redux';
+import { ThunkDispatch } from 'redux-thunk';
 import { FLYOUT_STATE } from '../../reducers/ui';
 import { MapStoreState } from '../../reducers/store';
 import { MapSettingsPanel } from './map_settings_panel';
@@ -27,7 +28,7 @@ function mapStateToProps(state: MapStoreState) {
   };
 }
 
-function mapDispatchToProps(dispatch: Dispatch<AnyAction>) {
+function mapDispatchToProps(dispatch: ThunkDispatch<MapStoreState, void, AnyAction>) {
   return {
     cancelChanges: () => {
       dispatch(rollbackMapSettings());

@@ -15228,8 +15228,6 @@
     "xpack.maps.filterEditor.applyGlobalQueryCheckboxLabel": "将全局搜索应用于图层数据",
     "xpack.maps.filterEditor.applyGlobalTimeCheckboxLabel": "将全局时间应用于图层数据",
     "xpack.maps.filterEditor.applyGlobalTimeHelp": "启用后，全局时间会缩减结果",
-    "xpack.maps.fitToData.fitAriaLabel": "适应数据边界",
-    "xpack.maps.fitToData.fitButtonLabel": "适应数据边界",
     "xpack.maps.geoGrid.resolutionLabel": "网格分辨率",
     "xpack.maps.geometryFilterForm.geometryLabelLabel": "几何标签",
     "xpack.maps.geometryFilterForm.relationLabel": "空间关系",
