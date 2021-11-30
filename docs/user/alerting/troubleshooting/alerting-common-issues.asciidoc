@@ -2,7 +2,7 @@
 [[alerting-common-issues]]
 === Common Issues
 
-This page describes how to resolve common problems you might encounter with {kib} Alerting.
+This page describes how to resolve common problems you might encounter with Alerting.
 
 [float]
 [[rules-small-check-interval-run-late]]
