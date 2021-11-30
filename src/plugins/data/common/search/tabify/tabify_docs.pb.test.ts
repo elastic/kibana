@@ -12,6 +12,40 @@ import fc from 'fast-check';
 import { tabifyDocs, TabifyDocsOptions, VALID_META_FIELD_NAMES } from './tabify_docs';
 import { DataViewSpec, DataView } from 'src/plugins/data_views/common';
 
+describe('Tabify docs', () => {
+  it('does not throw for expected inputs', () => {
+    fc.assert(
+      fc.property(
+        arbitraryHits().chain((hits) => arbitraryEsResponse(hits)),
+        arbitraryDataViewInputs(),
+        arbitraryTabifyDocsOptions(),
+        (esResponse, dataViewInputs, options) => {
+          const indexPattern = new DataView({ ...dataViewInputs, fieldFormats: fieldFormatsMock });
+          expect(() => tabifyDocs(esResponse, indexPattern, options)).not.toThrow();
+        }
+      ),
+      { numRuns: 50 }
+    );
+  });
+
+  it('returns the same number of rows as hits', () => {
+    fc.assert(
+      fc.property(
+        arbitraryHits().chain((hits) => arbitraryEsResponse(hits)),
+        arbitraryDataViewInputs(),
+        arbitraryTabifyDocsOptions(),
+        (esResponse, dataViewInputs, options) => {
+          const indexPattern = new DataView({ ...dataViewInputs, fieldFormats: fieldFormatsMock });
+          expect(tabifyDocs(esResponse, indexPattern, options).rows.length).toBe(
+            esResponse.hits.hits.length
+          );
+        }
+      ),
+      { numRuns: 50 }
+    );
+  });
+});
+
 const option = <T>(arb: fc.Arbitrary<T>): fc.Arbitrary<T | undefined> =>
   fc.option(arb, { nil: undefined });
 
@@ -75,37 +109,3 @@ function arbitraryTabifyDocsOptions(): fc.Arbitrary<TabifyDocsOptions> {
     source: option(fc.boolean()),
   });
 }
-
-describe('Tabify docs', () => {
-  it('does not throw for expected inputs', () => {
-    fc.assert(
-      fc.property(
-        arbitraryHits().chain((hits) => arbitraryEsResponse(hits)),
-        arbitraryDataViewInputs(),
-        arbitraryTabifyDocsOptions(),
-        (esResponse, dataViewInputs, options) => {
-          const indexPattern = new DataView({ ...dataViewInputs, fieldFormats: fieldFormatsMock });
-          expect(() => tabifyDocs(esResponse, indexPattern, options)).not.toThrow();
-        }
-      ),
-      { numRuns: 50 }
-    );
-  });
-
-  it('returns the same number of rows as hits', () => {
-    fc.assert(
-      fc.property(
-        arbitraryHits().chain((hits) => arbitraryEsResponse(hits)),
-        arbitraryDataViewInputs(),
-        arbitraryTabifyDocsOptions(),
-        (esResponse, dataViewInputs, options) => {
-          const indexPattern = new DataView({ ...dataViewInputs, fieldFormats: fieldFormatsMock });
-          expect(tabifyDocs(esResponse, indexPattern, options).rows.length).toBe(
-            esResponse.hits.hits.length
-          );
-        }
-      ),
-      { numRuns: 50 }
-    );
-  });
-});
