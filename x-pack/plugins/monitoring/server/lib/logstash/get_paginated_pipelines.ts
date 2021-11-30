@@ -196,15 +196,10 @@ async function getPaginatedNodesData(
 ): Promise<Pipeline[]> {
   const dataset = 'node_stats';
   const moduleType = 'logstash';
-  const indexPatterns = getNewIndexPatterns({
-    req,
-    moduleType,
-    datasets: [dataset],
-  });
   const pipelineWithMetrics = cloneDeep(pipelines);
   const metricSeriesData = await getMetrics(
     req,
-    indexPatterns,
+    moduleType,
     [nodesCountMetric],
     [
       {

@@ -38,7 +38,7 @@ async function getShardCountPerNode(req: LegacyRequest, cluster: ElasticsearchMo
   const indexPattern = getNewIndexPatterns({
     req,
     moduleType,
-    datasets: [dataset],
+    dataset,
   });
 
   const params = {

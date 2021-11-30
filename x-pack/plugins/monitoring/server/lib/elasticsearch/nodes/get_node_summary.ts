@@ -121,7 +121,7 @@ export function getNodeSummary(
   const moduleType = 'elasticsearch';
   const indexPatterns = getNewIndexPatterns({
     req,
-    datasets: [dataset],
+    dataset,
     moduleType,
   });
 

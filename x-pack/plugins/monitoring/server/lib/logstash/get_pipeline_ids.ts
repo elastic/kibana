@@ -37,7 +37,7 @@ export async function getLogstashPipelineIds({
   const indexPatterns = getNewIndexPatterns({
     req,
     moduleType,
-    datasets: [dataset],
+    dataset,
   });
 
   const params = {

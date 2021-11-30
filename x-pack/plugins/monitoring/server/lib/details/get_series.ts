@@ -13,7 +13,11 @@ import { checkParam } from '../error_missing_required';
 import { metrics } from '../metrics';
 import { createQuery } from '../create_query';
 import { formatTimestampToDuration } from '../../../common';
-import { NORMALIZED_DERIVATIVE_UNIT, CALCULATE_DURATION_UNTIL } from '../../../common/constants';
+import {
+  NORMALIZED_DERIVATIVE_UNIT,
+  CALCULATE_DURATION_UNTIL,
+  INDEX_PATTERN_TYPES,
+} from '../../../common/constants';
 import { formatUTCTimestampForTimezone } from '../format_timezone';
 import { getNewIndexPatterns } from '../cluster/get_index_patterns';
 
@@ -114,7 +118,7 @@ function createMetricAggs(metric: Metric) {
 
 async function fetchSeries(
   req: LegacyRequest,
-  moduleType: string,
+  moduleType: INDEX_PATTERN_TYPES,
   metric: Metric,
   metricOptions: any,
   groupBy: string | Record<string, any> | null,
@@ -335,7 +339,7 @@ function handleSeries(
 
 export async function getSeries(
   req: LegacyRequest,
-  moduleType: string,
+  moduleType: INDEX_PATTERN_TYPES,
   metricName: string,
   metricOptions: Record<string, any>,
   filters: Array<Record<string, any>>,

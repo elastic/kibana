@@ -77,7 +77,7 @@ export function getIndexSummary(
   const type = 'index_stats'; // legacy
   const moduleType = 'elasticsearch';
   const indexPatterns = getNewIndexPatterns({
-    datasets: [dataset],
+    dataset,
     moduleType,
     req,
   });

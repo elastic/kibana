@@ -35,7 +35,7 @@ export function getKibanasForClusters(req: LegacyRequest, clusters: Cluster[]) {
   const indexPatterns = getNewIndexPatterns({
     req,
     moduleType,
-    datasets: [dataset],
+    dataset,
   });
 
   return Promise.all(

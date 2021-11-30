@@ -99,7 +99,7 @@ export async function getLastRecovery(req: LegacyRequest, size: number) {
   const indexPattern = getNewIndexPatterns({
     req,
     moduleType,
-    datasets: [dataset],
+    dataset,
   });
 
   const legacyParams = {

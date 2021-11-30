@@ -47,7 +47,7 @@ export function getNodeInfo(
   const indexPatterns = getNewIndexPatterns({
     req,
     moduleType,
-    datasets: [dataset],
+    dataset,
   });
 
   const params = {

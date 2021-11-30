@@ -50,7 +50,7 @@ export function getLogstashForClusters(
   const indexPatterns = getNewIndexPatterns({
     req,
     moduleType,
-    datasets: [dataset],
+    dataset,
   });
 
   return Promise.all(

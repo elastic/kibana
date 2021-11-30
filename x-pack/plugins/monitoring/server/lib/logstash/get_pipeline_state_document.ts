@@ -28,7 +28,7 @@ export async function getPipelineStateDocument({
   const indexPatterns = getNewIndexPatterns({
     req,
     moduleType,
-    datasets: [dataset],
+    dataset,
   });
   const { callWithRequest } = req.server.plugins?.elasticsearch.getCluster('monitoring');
   const filters = [

@@ -26,7 +26,7 @@ function fetchPipelineVersions({
   const indexPatterns = getNewIndexPatterns({
     req,
     moduleType,
-    datasets: [dataset],
+    dataset,
   });
   const config = req.server.config();
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');

@@ -25,7 +25,7 @@ export async function getNodeIds(
   const indexPattern = getNewIndexPatterns({
     req,
     moduleType,
-    datasets: [dataset],
+    dataset,
   });
 
   const params = {

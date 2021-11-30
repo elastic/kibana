@@ -52,7 +52,7 @@ export function getMlJobs(req: LegacyRequest) {
   const indexPatterns = getNewIndexPatterns({
     req,
     moduleType,
-    datasets: [dataset],
+    dataset,
   });
 
   const params = {
@@ -113,7 +113,7 @@ export function getMlJobsForCluster(req: LegacyRequest, cluster: ElasticsearchSo
     const indexPatterns = getNewIndexPatterns({
       req,
       moduleType,
-      datasets: [dataset],
+      dataset,
     });
 
     const params = {

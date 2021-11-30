@@ -11,12 +11,13 @@ import { getSeries } from './get_series';
 import { calculateTimeseriesInterval } from '../calculate_timeseries_interval';
 import { getTimezone } from '../get_timezone';
 import { LegacyRequest } from '../../types';
+import { INDEX_PATTERN_TYPES } from '../../../common/constants';
 
 type Metric = string | { keys: string | string[]; name: string };
 
 export async function getMetrics(
   req: LegacyRequest,
-  moduleType: string,
+  moduleType: INDEX_PATTERN_TYPES,
   metricSet: Metric[] = [],
   filters: Array<Record<string, any>> = [],
   metricOptions = {},

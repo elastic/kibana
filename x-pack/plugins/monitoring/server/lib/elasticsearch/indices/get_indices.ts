@@ -119,7 +119,7 @@ export function buildGetIndicesQuery(
   const moduleType = 'elasticsearch';
   const indexPatterns = getNewIndexPatterns({
     req,
-    datasets: [dataset],
+    dataset,
     moduleType,
   });
 

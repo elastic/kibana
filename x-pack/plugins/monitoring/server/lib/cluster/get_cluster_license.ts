@@ -22,7 +22,7 @@ export function getClusterLicense(req: LegacyRequest, clusterUuid: string) {
   const indexPattern = getNewIndexPatterns({
     req,
     moduleType,
-    datasets: [dataset],
+    dataset,
   });
 
   const params = {

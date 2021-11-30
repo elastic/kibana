@@ -102,7 +102,7 @@ export function ccrShardRoute(server: { route: (p: any) => void; config: () => {
       const shardId = req.params.shardId;
       const moduleType = 'elasticsearch';
       const dataset = 'ccr';
-      const esIndexPattern = getNewIndexPatterns({ req, moduleType, datasets: [dataset] });
+      const esIndexPattern = getNewIndexPatterns({ req, moduleType, dataset });
 
       const filters = [
         {

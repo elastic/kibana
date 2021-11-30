@@ -22,7 +22,7 @@ export async function checkCcrEnabled(req: LegacyRequest) {
   const indexPatterns = getNewIndexPatterns({
     req,
     moduleType,
-    datasets: [dataset],
+    dataset,
   });
 
   const start = moment.utc(req.payload.timeRange.min).valueOf();

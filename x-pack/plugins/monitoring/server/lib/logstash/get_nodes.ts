@@ -72,7 +72,7 @@ export async function getNodes(req: LegacyRequest, { clusterUuid }: { clusterUui
   const indexPatterns = getNewIndexPatterns({
     req,
     moduleType,
-    datasets: [dataset],
+    dataset,
   });
 
   const config = req.server.config();

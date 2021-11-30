@@ -13,7 +13,9 @@ import {
   INDEX_PATTERN_LOGSTASH,
   INDEX_PATTERN_BEATS,
   INDEX_ALERTS,
+  DS_INDEX_PATTERN_TYPES,
   DS_INDEX_PATTERN_METRICS,
+  INDEX_PATTERN_TYPES,
 } from '../../../common/constants';
 
 export function getIndexPatterns(
@@ -45,7 +47,7 @@ export function getIndexPatterns(
   return indexPatterns;
 }
 
-export function getLegacyIndexPattern({ moduleType }: { moduleType: string }) {
+export function getLegacyIndexPattern({ moduleType }: { moduleType: INDEX_PATTERN_TYPES }) {
   let indexPattern = '';
   switch (moduleType) {
     case 'elasticsearch':
@@ -69,20 +71,17 @@ export function getLegacyIndexPattern({ moduleType }: { moduleType: string }) {
 export function getDsIndexPattern({
   type = DS_INDEX_PATTERN_METRICS,
   moduleType,
-  datasets,
+  dataset,
   namespace = '*',
 }: {
   type?: string;
-  datasets?: string[];
-  moduleType: string;
+  dataset?: string;
+  moduleType: INDEX_PATTERN_TYPES;
   namespace?: string;
 }): string {
-  // if there is one dataset, include in the index pattern else use *.
-  // we cannot specify more than one particular dataset in a query because the list
-  // of indices could be too long
   let datasetsPattern = '';
-  if (datasets) {
-    datasetsPattern = datasets.length === 1 ? `${moduleType}.${datasets[0]}` : '*';
+  if (dataset) {
+    datasetsPattern = `${moduleType}.${dataset}`;
   } else {
     datasetsPattern = `${moduleType}.*`;
   }
@@ -93,16 +92,16 @@ export function getNewIndexPatterns({
   req,
   moduleType,
   type = DS_INDEX_PATTERN_METRICS,
-  datasets,
+  dataset,
   namespace = '*',
 }: {
   req: LegacyRequest;
-  moduleType: string;
-  type?: string;
-  datasets?: string[];
+  moduleType: INDEX_PATTERN_TYPES;
+  type?: DS_INDEX_PATTERN_TYPES;
+  dataset?: string;
   namespace?: string;
 }): string {
-  const dsIndexPattern = getDsIndexPattern({ type, moduleType, datasets, namespace });
+  const dsIndexPattern = getDsIndexPattern({ type, moduleType, dataset, namespace });
   const legacyIndexPattern = getLegacyIndexPattern({ moduleType });
   return prefixIndexPattern(
     req.server.config(),

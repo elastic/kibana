@@ -41,7 +41,7 @@ async function getUnassignedShardData(req: LegacyRequest, cluster: Elasticsearch
   const indexPattern = getNewIndexPatterns({
     req,
     moduleType,
-    datasets: [dataset],
+    dataset,
   });
 
   const params = {

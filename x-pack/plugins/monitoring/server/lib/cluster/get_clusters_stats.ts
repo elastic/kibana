@@ -47,7 +47,7 @@ function fetchClusterStats(req: LegacyRequest, clusterUuid: string) {
   const indexPattern = getNewIndexPatterns({
     req,
     moduleType,
-    datasets: [dataset],
+    dataset,
   });
 
   const config = req.server.config();

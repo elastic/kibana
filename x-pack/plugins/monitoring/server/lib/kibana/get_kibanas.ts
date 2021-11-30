@@ -68,7 +68,7 @@ export async function getKibanas(req: LegacyRequest, { clusterUuid }: { clusterU
   const indexPatterns = getNewIndexPatterns({
     req,
     moduleType,
-    datasets: [dataset],
+    dataset,
   });
   const params = {
     index: indexPatterns,

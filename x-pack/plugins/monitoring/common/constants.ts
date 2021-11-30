@@ -130,6 +130,7 @@ export const INDEX_PATTERN_BEATS = '.monitoring-beats-6-*,.monitoring-beats-7-*'
 export const INDEX_ALERTS = '.monitoring-alerts-6*,.monitoring-alerts-7*';
 export const INDEX_PATTERN_ELASTICSEARCH = '.monitoring-es-6-*,.monitoring-es-7-*';
 export const DS_INDEX_PATTERN_METRICS = 'metrics';
+export const DS_INDEX_PATTERN_LOGS = 'logs';
 export const DS_INDEX_PATTERN_ES = 'elasticsearch';
 
 // This is the unique token that exists in monitoring indices collected by metricbeat
@@ -578,3 +579,7 @@ export const ALERT_EMAIL_SERVICES = ['gmail', 'hotmail', 'icloud', 'outlook365',
 export const SAVED_OBJECT_TELEMETRY = 'monitoring-telemetry';
 
 export const TELEMETRY_METRIC_BUTTON_CLICK = 'btnclick__';
+
+export type INDEX_PATTERN_TYPES = 'elasticsearch' | 'kibana' | 'logstash' | 'beats';
+
+export type DS_INDEX_PATTERN_TYPES = typeof DS_INDEX_PATTERN_METRICS | typeof DS_INDEX_PATTERN_LOGS;
