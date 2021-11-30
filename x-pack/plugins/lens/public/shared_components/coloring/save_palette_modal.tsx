@@ -25,7 +25,7 @@ export function SavePaletteModal({
   onSave,
   onCancel,
 }: {
-  onSave: (title: string) => Promise<void>;
+  onSave: (title: string) => Promise<void> | undefined;
   onCancel: () => void;
 }) {
   const [paletteTitle, setPaletteTitle] = useState('');
@@ -90,7 +90,7 @@ export function SavePaletteModal({
                     })
                   );
                 } else {
-                  onSave(paletteTitle).catch((e) => {
+                  onSave?.(paletteTitle)?.catch((e) => {
                     setValidateTitleError(e.message);
                   });
                 }

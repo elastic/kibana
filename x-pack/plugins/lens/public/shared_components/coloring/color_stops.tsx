@@ -44,7 +44,7 @@ function shouldSortStops(colorStops: Array<{ color: string; stop: string | numbe
 export interface CustomStopsProps {
   colorStops: ColorStop[];
   onChange: (colorStops: ColorStop[]) => void;
-  savePalette: (title: string) => Promise<void>;
+  savePalette: (title: string) => Promise<void> | undefined;
   dataBounds: { min: number; max: number };
   paletteConfiguration: CustomPaletteParamsConfig | undefined;
   'data-test-prefix': string;
@@ -71,7 +71,7 @@ export const CustomStops = ({
 
   const onPaletteSave = useCallback(
     (title: string) => {
-      return savePalette(title).then(() => {
+      return savePalette?.(title)?.then(() => {
         setSavePaletteModalOpen(false);
       });
     },

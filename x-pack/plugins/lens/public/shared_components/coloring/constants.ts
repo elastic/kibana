@@ -29,4 +29,5 @@ export const defaultPaletteParams: RequiredPaletteParamTypes = {
   colorTerms: [],
   continuity: DEFAULT_CONTINUITY,
   title: '',
+  paletteType: 'stops',
 };

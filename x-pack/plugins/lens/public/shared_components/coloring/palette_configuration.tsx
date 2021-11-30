@@ -78,20 +78,21 @@ export function CustomizablePalette({
   savePaletteToLibrary,
 }: {
   palettes: PaletteRegistry;
-  libraryPalettes: Array<PaletteOutput<CustomPaletteParams>>;
+  libraryPalettes?: Array<PaletteOutput<CustomPaletteParams>>;
   activePalette?: PaletteOutput<CustomPaletteParams>;
   setPalette: (palette: PaletteOutput<CustomPaletteParams>) => void;
   dataBounds?: { min: number; max: number };
   showContinuity?: boolean;
   showRangeTypeSelector?: boolean;
-  savePaletteToLibrary: (
+  savePaletteToLibrary?: (
     palette: PaletteOutput<CustomPaletteParams>,
     title: string
-  ) => Promise<void>;
+  ) => Promise<void> | undefined;
 }) {
   if (!dataBounds || !activePalette) {
     return null;
   }
+
   const isCurrentPaletteCustom = activePalette.params?.name === CUSTOM_PALETTE;
 
   const colorStopsToShow = roundStopValues(
@@ -99,7 +100,7 @@ export function CustomizablePalette({
   );
 
   const savePalette = (title: string) => {
-    return savePaletteToLibrary(activePalette, title);
+    return savePaletteToLibrary?.(activePalette, title);
   };
 
   return (

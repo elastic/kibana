@@ -278,11 +278,12 @@ export function DimensionEditor(
     };
     getPalettesFromLibrary();
   }, [paletteStore]);
-  const terms = computeTerms(accessor, layerId, activeData, formatFactory);
+  const terms = computeTerms(accessor, layerId, activeData);
   const activePalette = (state.palette as PaletteOutput<CustomPaletteParams>) ?? {
     name: 'default',
     type: 'palette',
   };
+  const column = activeData?.[layerId].columns.find((col) => col.id === accessor);
   const savePaletteToLibrary = (palette: PaletteOutput<CustomPaletteParams>, title: string) => {
     return savePaletteToStore(paletteStore, palette, title, 'terms').then((savedPalette) => {
       setLibraryPalettes([...libraryPalettes, savedPalette]);
@@ -328,6 +329,7 @@ export function DimensionEditor(
           handleClose={() => setIsPaletteOpen(!isPaletteOpen)}
         >
           <CustomizableTermsPalette
+            fieldFormatter={formatFactory(column?.meta.params)}
             libraryPalettes={libraryPalettes}
             palettes={paletteService}
             activePalette={activePalette}

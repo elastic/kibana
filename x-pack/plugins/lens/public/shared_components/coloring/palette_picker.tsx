@@ -41,7 +41,7 @@ function getCustomPaletteConfig(
       };
     }
   }
-  if (activePalette?.params?.colorTerms) {
+  if (activePalette?.params?.colorTerms?.length) {
     return {
       value: id,
       title,

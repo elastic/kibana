@@ -184,12 +184,19 @@ function buildCustomPalette(): PaletteDefinition {
     getCategoricalColor: (
       series: SeriesLayer[],
       chartConfiguration: ChartColorConfiguration = { behindText: false },
-      { colors, gradient }: { colors: string[]; gradient: boolean }
+      { colors, gradient, terms }: { colors: string[]; gradient: boolean; terms: string[] }
     ) => {
       const actualColors = gradient
         ? chroma.scale(colors).colors(series[0].totalSeriesAtDepth)
         : colors;
-      const outputColor = actualColors[series[0].rankAtDepth % actualColors.length];
+      let outputColor = actualColors[series[0].rankAtDepth % actualColors.length];
+
+      if (terms && terms.length > 0) {
+        const idx = terms.findIndex((term) => term === series[0].name);
+        if (idx !== -1) {
+          outputColor = colors[idx];
+        }
+      }
 
       if (!chartConfiguration.maxDepth || chartConfiguration.maxDepth === 1) {
         return outputColor;

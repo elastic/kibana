@@ -7,6 +7,7 @@
 
 import React from 'react';
 import type { PaletteOutput, PaletteRegistry } from 'src/plugins/charts/public';
+import type { IFieldFormat } from 'src/plugins/field_formats/common';
 import { EuiFormRow, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { PalettePicker } from './palette_picker';
@@ -17,8 +18,22 @@ import {
   getTermsPaletteColors,
 } from './utils';
 import { ColorTerms } from './color_terms';
+import type { CustomPaletteParams, ColorTerm } from '../../../common';
 
-import type { CustomPaletteParams } from '../../../common';
+const computeColorTerms = (
+  paletteColorTerms: ColorTerm[] | undefined,
+  updatedColorTerms: ColorTerm[]
+) => {
+  if (!paletteColorTerms) return updatedColorTerms;
+  const colorTerms = updatedColorTerms.map((newColorTerm) => {
+    const paletteColorTerm = paletteColorTerms.find(({ term }) => term === newColorTerm.term);
+    return {
+      ...newColorTerm,
+      color: paletteColorTerm ? paletteColorTerm.color : newColorTerm.color,
+    };
+  });
+  return colorTerms;
+};
 
 export function CustomizableTermsPalette({
   libraryPalettes,
@@ -27,6 +42,7 @@ export function CustomizableTermsPalette({
   setPalette,
   savePaletteToLibrary,
   terms,
+  fieldFormatter,
 }: {
   libraryPalettes?: Array<PaletteOutput<CustomPaletteParams>>;
   palettes: PaletteRegistry;
@@ -37,18 +53,18 @@ export function CustomizableTermsPalette({
     title: string
   ) => Promise<void>;
   terms: string[];
+  fieldFormatter?: IFieldFormat;
 }) {
   let selectedPalette = activePalette ?? {
     name: 'default',
     type: 'palette',
   };
   const colors = getTermsPaletteColors(selectedPalette, palettes, terms);
-  const colorTerms =
-    selectedPalette.params?.colorTerms ??
-    terms.map((term, i) => ({
-      color: colors[i],
-      term,
-    }));
+  const updatedColorTerms = terms.map((term, i) => ({
+    color: colors[i],
+    term,
+  }));
+  const colorTerms = computeColorTerms(selectedPalette.params?.colorTerms, updatedColorTerms);
 
   selectedPalette = {
     ...selectedPalette,
@@ -160,6 +176,7 @@ export function CustomizableTermsPalette({
               });
               return setPalette(newParams);
             }}
+            fieldFormatter={fieldFormatter}
           />
         </EuiFormRow>
       </div>

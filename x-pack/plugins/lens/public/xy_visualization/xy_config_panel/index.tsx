@@ -620,7 +620,8 @@ export function DimensionEditor(
   };
   // compute terms
   const splitAccessor = layer.splitAccessor;
-  const terms = computeTerms(splitAccessor, layerId, activeData, props.formatFactory);
+  const terms = computeTerms(splitAccessor, layerId, activeData);
+  const column = activeData?.[layerId].columns.find((col) => col.id === splitAccessor);
 
   const savePaletteToLibrary = (palette: PaletteOutput<CustomPaletteParams>, title: string) => {
     return savePaletteToStore(paletteStore, palette, title, 'terms').then((savedPalette) => {
@@ -669,6 +670,7 @@ export function DimensionEditor(
             handleClose={() => setIsPaletteOpen(!isPaletteOpen)}
           >
             <CustomizableTermsPalette
+              fieldFormatter={props.formatFactory(column?.meta.params)}
               libraryPalettes={libraryPalettes}
               palettes={props.paletteService}
               activePalette={activePalette}

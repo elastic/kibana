@@ -15,6 +15,7 @@ import {
   EuiSpacer,
   htmlIdGenerator,
 } from '@elastic/eui';
+import type { IFieldFormat } from 'src/plugins/field_formats/common';
 import { isValidColor } from './utils';
 import { TooltipWrapper, useDebouncedValue } from '../index';
 import type { CustomPaletteParamsConfig } from '../../../common';
@@ -36,6 +37,7 @@ export interface ColorTermsProps {
   savePalette: (title: string) => Promise<void>;
   paletteConfiguration: CustomPaletteParamsConfig | undefined;
   'data-test-prefix': string;
+  fieldFormatter?: IFieldFormat;
 }
 export const ColorTerms = ({
   onChange,
@@ -43,6 +45,7 @@ export const ColorTerms = ({
   savePalette,
   colorTerms,
   ['data-test-prefix']: dataTestPrefix,
+  fieldFormatter,
 }: ColorTermsProps) => {
   const [isSavePaletteModalOpen, setSavePaletteModalOpen] = useState(false);
 
@@ -100,7 +103,7 @@ export const ColorTerms = ({
                     compressed
                     disabled
                     data-test-subj={`${dataTestPrefix}_dynamicColoring_term_value_${index}`}
-                    value={term}
+                    value={fieldFormatter?.convert(term) ?? term}
                     onChange={({ target }) => {
                       const newTermString = target.value;
                       const newColorTerms = [...localColorTerms];

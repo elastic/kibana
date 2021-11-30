@@ -29,7 +29,7 @@ function computePaletteParams(params: CustomPaletteParams) {
     ...params,
     // rewrite colors and term as two distinct arguments
     colors: (params?.colorTerms || []).map(({ color }) => color),
-    terms: params?.name === 'custom' ? (params?.colorTerms || []).map(({ term }) => term) : [],
+    terms: (params?.colorTerms || []).map(({ term }) => term) ?? [],
     reverse: false, // managed at UI level
   };
 }
