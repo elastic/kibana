@@ -80,6 +80,9 @@ export interface ThreatIndicatorRule extends CustomRule {
   threatIndicatorPath: string;
   type?: string;
   atomic?: string;
+  matchedType?: string;
+  matchedId?: string;
+  matchedIndex?: string;
 }
 
 export interface MachineLearningRule {
@@ -407,6 +410,9 @@ export const getNewThreatIndicatorRule = (): ThreatIndicatorRule => ({
   timeline: getIndicatorMatchTimelineTemplate(),
   maxSignals: 100,
   threatIndicatorPath: 'threat.indicator',
+  matchedType: 'indicator_match_rule',
+  matchedId: '84cf452c1e0375c3d4412cb550bd1783358468a3b3b777da4829d72c7d6fb74f',
+  matchedIndex: 'logs-ti_abusech.malware',
 });
 
 export const duplicatedRuleName = `${getNewThreatIndicatorRule().name} [Duplicate]`;
