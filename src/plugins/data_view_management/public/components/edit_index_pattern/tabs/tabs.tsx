@@ -80,7 +80,7 @@ export function Tabs({
   location,
   refreshFields,
 }: TabsProps) {
-  const { application, uiSettings, docLinks, dataViewFieldEditor } =
+  const { application, uiSettings, docLinks, dataViewFieldEditor, overlays } =
     useKibana<IndexPatternManagmentContext>().services;
   const [fieldFilter, setFieldFilter] = useState<string>('');
   const [indexedFieldTypeFilter, setIndexedFieldTypeFilter] = useState<string>('');
@@ -93,6 +93,13 @@ export function Tabs({
   const closeEditorHandler = useRef<() => void | undefined>();
   const { DeleteRuntimeFieldProvider } = dataViewFieldEditor;
 
+  const conflict = i18n.translate(
+    'indexPatternManagement.editIndexPattern.fieldTypes.conflictType',
+    {
+      defaultMessage: 'conflict',
+    }
+  );
+
   const refreshFilters = useCallback(() => {
     const tempIndexedFieldTypes: string[] = [];
     const tempScriptedFieldLanguages: string[] = [];
@@ -103,7 +110,7 @@ export function Tabs({
         }
       } else {
         if (field.esTypes) {
-          tempIndexedFieldTypes.push(field.esTypes?.join(', '));
+          tempIndexedFieldTypes.push(field.esTypes.length === 1 ? field.esTypes[0] : conflict);
         }
       }
     });
@@ -112,7 +119,7 @@ export function Tabs({
     setScriptedFieldLanguages(
       convertToEuiSelectOption(tempScriptedFieldLanguages, 'scriptedFieldLanguages')
     );
-  }, [indexPattern]);
+  }, [indexPattern, conflict]);
 
   const closeFieldEditor = useCallback(() => {
     if (closeEditorHandler.current) {
@@ -230,6 +237,7 @@ export function Tabs({
                       deleteField,
                       getFieldInfo,
                     }}
+                    openModal={overlays.openModal}
                   />
                 )}
               </DeleteRuntimeFieldProvider>
@@ -288,6 +296,7 @@ export function Tabs({
       openFieldEditor,
       DeleteRuntimeFieldProvider,
       refreshFields,
+      overlays,
     ]
   );
 

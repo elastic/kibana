@@ -16,7 +16,7 @@ import { orderBy } from 'lodash';
 import React, { useState } from 'react';
 import uuid from 'uuid';
 import { EuiCallOut } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCode } from '@elastic/eui';
 import { APIReturnType } from '../../../services/rest/createCallApmApi';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';

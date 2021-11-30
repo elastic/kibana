@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import { FleetTrustedAppsCardWrapper } from './fleet_trusted_apps_card_wrapper';
 import * as reactTestingLibrary from '@testing-library/react';
 import { TrustedAppsHttpService } from '../../../../../trusted_apps/service';

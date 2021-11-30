@@ -6,7 +6,7 @@
  */
 
 import React, { memo, useMemo } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import styled from 'styled-components';
 import {
   EuiFlexGroup,

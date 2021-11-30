@@ -8,7 +8,7 @@
 import classNames from 'classnames';
 import React, { useState, useEffect, useRef } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiEmptyPrompt, EuiLink, EuiText } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
 import { ComponentTemplateListItem } from '../../../../../common';

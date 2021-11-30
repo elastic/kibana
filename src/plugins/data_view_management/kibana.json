@@ -3,7 +3,7 @@
   "version": "kibana",
   "server": true,
   "ui": true,
-  "requiredPlugins": ["management", "data", "urlForwarding", "dataViewFieldEditor", "indexPatternEditor"],
+  "requiredPlugins": ["management", "data", "urlForwarding", "dataViewFieldEditor", "dataViewEditor"],
   "requiredBundles": ["kibanaReact", "kibanaUtils"],
   "owner": {
     "name": "App Services",

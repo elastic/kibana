@@ -216,6 +216,7 @@ export class LensPlugin {
         usageCollection,
         inspector: plugins.inspector,
         spaces: plugins.spaces,
+        theme: core.theme,
       };
     };
 

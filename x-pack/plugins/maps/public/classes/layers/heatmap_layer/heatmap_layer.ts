@@ -11,7 +11,7 @@ import { HeatmapStyle } from '../../styles/heatmap/heatmap_style';
 import { LAYER_TYPE } from '../../../../common/constants';
 import { HeatmapLayerDescriptor } from '../../../../common/descriptor_types';
 import { ESGeoGridSource } from '../../sources/es_geo_grid_source';
-import { getVectorSourceBounds, MvtSourceData, syncMvtSourceData } from '../vector_layer';
+import { syncBoundsData, MvtSourceData, syncMvtSourceData } from '../vector_layer';
 import { DataRequestContext } from '../../../actions';
 import { buildVectorRequestMeta } from '../build_vector_request_meta';
 import { ITiledSingleLayerVectorSource } from '../../sources/tiled_single_layer_vector_source';
@@ -153,7 +153,8 @@ export class HeatmapLayer extends AbstractLayer {
     }
     const metricField = metricFields[0];
 
-    const tileMetaFeatures = this._getMetaFromTiles();
+    // do not use tile meta features from previous urlTemplate to avoid styling new tiles from previous tile meta features
+    const tileMetaFeatures = this._requiresPrevSourceCleanup(mbMap) ? [] : this._getMetaFromTiles();
     let max = 0;
     for (let i = 0; i < tileMetaFeatures.length; i++) {
       const range = metricField.pluckRangeFromTileMetaFeature(tileMetaFeatures[i]);
@@ -192,7 +193,7 @@ export class HeatmapLayer extends AbstractLayer {
   }
 
   async getBounds(syncContext: DataRequestContext) {
-    return await getVectorSourceBounds({
+    return await syncBoundsData({
       layerId: this.getId(),
       syncContext,
       source: this.getSource(),

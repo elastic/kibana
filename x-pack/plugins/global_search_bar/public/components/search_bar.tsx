@@ -21,7 +21,7 @@ import {
 } from '@elastic/eui';
 import { METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { ApplicationStart } from 'kibana/public';
 import React, { ReactNode, useCallback, useRef, useState, useEffect } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';

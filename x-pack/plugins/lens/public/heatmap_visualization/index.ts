@@ -35,9 +35,10 @@ export class HeatmapVisualization {
           chartsThemeService: charts.theme,
           paletteService: palettes,
           timeZone,
+          kibanaTheme: core.theme,
         })
       );
-      return getHeatmapVisualization({ paletteService: palettes });
+      return getHeatmapVisualization({ paletteService: palettes, theme: core.theme });
     });
   }
 }
