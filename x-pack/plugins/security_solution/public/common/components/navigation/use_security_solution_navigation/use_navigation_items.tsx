@@ -64,7 +64,7 @@ export const usePrimaryNavigationItems = ({
   );
 };
 
-const useIsCloudPosture = () => !!useLocation()?.pathname?.includes('/csp');
+const useIsCloudPosture = () => !!useLocation()?.pathname?.includes(CSP_ROOT_PATH);
 
 function usePrimaryNavigationItemsToDisplay(navTabs: Record<string, NavTab>) {
   const hasCasesReadPermissions = useGetUserCasesPermissions()?.read;

@@ -30,19 +30,21 @@ import {
   SecurityPageName,
   CloudPosturePage,
   APP_HOST_ISOLATION_EXCEPTIONS_PATH,
+  CSP_FINDINGS_PATH,
+  CSP_DASHBOARD_PATH,
 } from '../../../common/constants';
 
 export const cloudPostureNavTabs: Record<CloudPosturePage, NavTab> = {
   [CloudPosturePage.dashboard]: {
     id: CloudPosturePage.dashboard,
     name: 'Dashboard',
-    href: '/csp/dashboard',
+    href: CSP_DASHBOARD_PATH,
     disabled: false,
   },
   [CloudPosturePage.findings]: {
     id: CloudPosturePage.findings,
     name: 'Findings',
-    href: '/csp/findings',
+    href: CSP_FINDINGS_PATH,
     disabled: false,
   },
 };
