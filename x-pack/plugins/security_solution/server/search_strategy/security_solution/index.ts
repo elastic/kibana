@@ -16,7 +16,6 @@ import {
   FactoryQueryTypes,
   StrategyResponseType,
   StrategyRequestType,
-  RequestBasicOptions,
 } from '../../../common/search_strategy/security_solution';
 import { securitySolutionFactory } from './factory';
 import { SecuritySolutionFactory } from './factory/types';
@@ -30,31 +29,30 @@ export const securitySolutionSearchStrategyProvider = <T extends FactoryQueryTyp
 
   return {
     search: (request, options, deps) => {
-      const searchStrategyRequest = request as RequestBasicOptions;
-      if (searchStrategyRequest.factoryQueryType != null) {
-        const queryFactory: SecuritySolutionFactory<T> =
-          securitySolutionFactory[searchStrategyRequest.factoryQueryType];
-        const dsl = queryFactory.buildDsl(request);
-        return es.search({ ...request, params: dsl }, options, deps).pipe(
-          map((response) => {
-            return {
-              ...response,
-              ...{
-                rawResponse: shimHitsTotal(response.rawResponse, options),
-              },
-            };
-          }),
-          mergeMap((esSearchRes) =>
-            queryFactory.parse(request, esSearchRes, {
-              esClient: deps.esClient,
-              savedObjectsClient: deps.savedObjectsClient,
-              endpointContext,
-            })
-          )
-        );
-      } else {
+      if (request.factoryQueryType == null) {
         throw new Error('factoryQueryType is required');
       }
+      const queryFactory: SecuritySolutionFactory<T> =
+        securitySolutionFactory[request.factoryQueryType];
+      const dsl = queryFactory.buildDsl(request);
+      return es.search({ ...request, params: dsl }, options, deps).pipe(
+        map((response) => {
+          return {
+            ...response,
+            ...{
+              rawResponse: shimHitsTotal(response.rawResponse, options),
+            },
+          };
+        }),
+        mergeMap((esSearchRes) =>
+          queryFactory.parse(request, esSearchRes, {
+            esClient: deps.esClient,
+            savedObjectsClient: deps.savedObjectsClient,
+            endpointContext,
+            request: deps.request,
+          })
+        )
+      );
     },
     cancel: async (id, options, deps) => {
       if (es.cancel) {
