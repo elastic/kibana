@@ -24,7 +24,7 @@ import {
 } from '../../../../../common/inventory_models/types';
 
 export function useSnapshot(
-  filterQuery: string | null | undefined,
+  filterQuery: string | null | symbol | undefined,
   metrics: Array<{ type: SnapshotMetricType }>,
   groupBy: SnapshotGroupBy,
   nodeType: InventoryItemType,
