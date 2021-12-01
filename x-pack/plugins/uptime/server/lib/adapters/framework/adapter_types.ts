@@ -6,16 +6,16 @@
  */
 
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import type {
-  SavedObjectsClientContract,
-  ISavedObjectsRepository,
-  IScopedClusterClient,
-} from 'src/core/server';
+import type { SavedObjectsClientContract, IScopedClusterClient } from 'src/core/server';
 import { ObservabilityPluginSetup } from '../../../../../observability/server';
 import {
   EncryptedSavedObjectsPluginSetup,
   EncryptedSavedObjectsPluginStart,
 } from '../../../../../encrypted_saved_objects/server';
+import {
+  TaskManagerSetupContract,
+  TaskManagerStartContract,
+} from '../../../../../task_manager/server';
 import { UMKibanaRoute } from '../../../rest_api';
 import { PluginSetupContract } from '../../../../../features/server';
 import { MlPluginSetup as MlSetup } from '../../../../../ml/server';
@@ -35,16 +35,17 @@ export type UMElasticsearchQueryFn<P, R = any> = (
 ) => Promise<R>;
 
 export type UMSavedObjectsQueryFn<T = any, P = undefined> = (
-  client: SavedObjectsClientContract | ISavedObjectsRepository,
+  client: SavedObjectsClientContract,
   params?: P
 ) => Promise<T> | T;
 
-export interface UptimeCoreSetup {
+export interface UptimeServerSetup {
   router: UptimeRouter;
   config: UptimeConfig;
   cloud?: CloudSetup;
   fleet: FleetStartContract;
   security: SecurityPluginStart;
+  savedObjectsClient: SavedObjectsClientContract;
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
 }
 
@@ -57,12 +58,14 @@ export interface UptimeCorePluginsSetup {
   cloud?: CloudSetup;
   ruleRegistry: RuleRegistryPluginSetupContract;
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
+  taskManager: TaskManagerSetupContract;
 }
 
 export interface UptimeCorePluginsStart {
   security: SecurityPluginStart;
   fleet: FleetStartContract;
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
+  taskManager: TaskManagerStartContract;
 }
 
 export interface UMBackendFrameworkAdapter {

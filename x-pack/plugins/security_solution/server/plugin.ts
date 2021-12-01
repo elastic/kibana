@@ -402,8 +402,6 @@ export class Plugin implements ISecuritySolutionPlugin {
       endpointMetadataService: new EndpointMetadataService(
         core.savedObjects,
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        plugins.fleet?.agentService!,
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         plugins.fleet?.agentPolicyService!,
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         plugins.fleet?.packagePolicyService!,
