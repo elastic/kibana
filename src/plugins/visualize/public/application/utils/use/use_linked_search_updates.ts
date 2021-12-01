@@ -10,7 +10,7 @@ import { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EventEmitter } from 'events';
 
-import { Filter } from 'src/plugins/data/public';
+import { Filter } from '@kbn/es-query';
 import {
   VisualizeServices,
   VisualizeAppStateContainer,
