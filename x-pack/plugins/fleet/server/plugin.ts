@@ -377,6 +377,9 @@ export class FleetPlugin
         this.fleetStatus$.next({
           level: ServiceStatusLevels.unavailable,
           summary: 'Fleet setup failed',
+          meta: {
+            error: error.message,
+          },
         });
       }
     })();
