@@ -50,9 +50,6 @@ jest.mock('../../public/application/lib/api', () => {
 
   return {
     ...original,
-    loadIndexPatterns: async () => {
-      return ['index1', 'index2', 'index3'];
-    },
     getHttpClient: () => mockHttpClient,
   };
 });
