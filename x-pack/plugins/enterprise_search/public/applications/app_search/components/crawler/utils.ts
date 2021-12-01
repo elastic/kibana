@@ -22,6 +22,8 @@ import {
   CrawlEvent,
   CrawlConfigFromServer,
   CrawlConfig,
+  CrawlRequestWithDetailsFromServer,
+  CrawlRequestWithDetails,
 } from './types';
 
 export function crawlerDomainServerToClient(payload: CrawlerDomainFromServer): CrawlerDomain {
@@ -91,15 +93,51 @@ export function crawlConfigServerToClient(crawlConfig: CrawlConfigFromServer): C
 }
 
 export function crawlEventServerToClient(event: CrawlEventFromServer): CrawlEvent {
-  const clientCrawlRequest = crawlRequestServerToClient(event as CrawlRequestFromServer);
-
-  const { stage, type, crawl_config: crawlConfig } = event;
+  const {
+    id,
+    stage,
+    status,
+    created_at: createdAt,
+    began_at: beganAt,
+    completed_at: completedAt,
+    type,
+    crawl_config: crawlConfig,
+  } = event;
 
   return {
-    ...clientCrawlRequest,
+    id,
     stage,
+    status,
+    createdAt,
+    beganAt,
+    completedAt,
     type,
     crawlConfig: crawlConfigServerToClient(crawlConfig),
+  };
+}
+
+export function crawlRequestWithDetailsServerToClient(
+  event: CrawlRequestWithDetailsFromServer
+): CrawlRequestWithDetails {
+  const {
+    id,
+    status,
+    created_at: createdAt,
+    began_at: beganAt,
+    completed_at: completedAt,
+    type,
+    crawl_config: crawlConfig,
+  } = event;
+
+  return {
+    id,
+    status,
+    createdAt,
+    beganAt,
+    completedAt,
+    type,
+    crawlConfig: crawlConfigServerToClient(crawlConfig),
+    // TODO add fields like stats
   };
 }
 

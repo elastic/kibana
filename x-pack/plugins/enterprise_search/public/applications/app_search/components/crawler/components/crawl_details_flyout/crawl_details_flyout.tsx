@@ -27,7 +27,7 @@ import { CrawlDetailsPreview } from './crawl_details_preview';
 
 export const CrawlDetailsFlyout: React.FC = () => {
   const { closeFlyout, setSelectedTab } = useActions(CrawlDetailLogic);
-  const { crawlEventFromServer, dataLoading, flyoutClosed, selectedTab } =
+  const { crawlRequestFromServer, dataLoading, flyoutClosed, selectedTab } =
     useValues(CrawlDetailLogic);
 
   if (flyoutClosed) {
@@ -71,7 +71,7 @@ export const CrawlDetailsFlyout: React.FC = () => {
             {selectedTab === 'preview' && <CrawlDetailsPreview />}
             {selectedTab === 'json' && (
               <EuiCodeBlock language="json">
-                {JSON.stringify(crawlEventFromServer, null, 2)}
+                {JSON.stringify(crawlRequestFromServer, null, 2)}
               </EuiCodeBlock>
             )}
           </>

@@ -31,7 +31,7 @@ export const StopActionModal: FC<StopAction> = ({ closeModal, item, forceStopAnd
           confirmButtonText={i18n.translate(
             'xpack.ml.dataframe.analyticsList.forceStopModalStartButton',
             {
-              defaultMessage: 'Force stop',
+              defaultMessage: 'Stop',
             }
           )}
           defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}

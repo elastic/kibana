@@ -43,10 +43,10 @@ export const CloseJobConfirm: FC<Props> = ({
       confirmButtonText={
         combinedJobState === COMBINED_JOB_STATE.OPEN_AND_RUNNING
           ? i18n.translate('xpack.ml.modelSnapshotTable.closeJobConfirm.stopAndClose.button', {
-              defaultMessage: 'Force stop and close',
+              defaultMessage: 'Stop and close',
             })
           : i18n.translate('xpack.ml.modelSnapshotTable.closeJobConfirm.close.button', {
-              defaultMessage: 'Force close',
+              defaultMessage: 'Close',
             })
       }
       defaultFocusedButton="confirm"
