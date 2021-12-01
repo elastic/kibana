@@ -27,6 +27,7 @@ const initialCaseValue: FormProps = {
   connectorId: 'none',
   fields: null,
   syncAlerts: true,
+  selectedOwner: '',
 };
 
 interface Props {
@@ -62,6 +63,9 @@ export const FormContext: React.FC<Props> = ({
       isValid
     ) => {
       if (isValid) {
+        const selectedOwner = dataWithoutConnectorId.selectedOwner;
+        delete dataWithoutConnectorId.selectedOwner;
+
         const caseConnector = getConnectorById(dataConnectorId, connectors);
 
         const connectorToUpdate = caseConnector
@@ -73,7 +77,7 @@ export const FormContext: React.FC<Props> = ({
           type: caseType,
           connector: connectorToUpdate,
           settings: { syncAlerts },
-          owner: owner[0],
+          owner: selectedOwner ?? owner[0],
         });
 
         if (afterCaseCreated && updatedCase) {

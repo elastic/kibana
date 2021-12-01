@@ -31,6 +31,7 @@ import { UsePostComment } from '../../containers/use_post_comment';
 import { SubmitCaseButton } from './submit_button';
 import { FormContext } from './form_context';
 import { useCasesFeatures } from '../cases_context/use_cases_features';
+import { CaseOwnerSelection } from './case_owner_selection';
 
 interface ContainerProps {
   big?: boolean;
@@ -54,6 +55,7 @@ export interface CreateCaseFormFieldsProps {
   isLoadingConnectors: boolean;
   hideConnectorServiceNowSir: boolean;
   withSteps: boolean;
+  showCaseOwnerSelection?: boolean;
 }
 export interface CreateCaseFormProps
   extends Pick<Partial<CreateCaseFormFieldsProps>, 'hideConnectorServiceNowSir' | 'withSteps'> {
@@ -66,7 +68,13 @@ export interface CreateCaseFormProps
 
 const empty: ActionConnector[] = [];
 export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.memo(
-  ({ connectors, isLoadingConnectors, hideConnectorServiceNowSir, withSteps }) => {
+  ({
+    connectors,
+    isLoadingConnectors,
+    hideConnectorServiceNowSir,
+    showCaseOwnerSelection = false,
+    withSteps,
+  }) => {
     const { isSubmitting } = useFormContext();
     const { isSyncAlertsEnabled } = useCasesFeatures();
 
@@ -79,13 +87,18 @@ export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.m
             <Container>
               <Tags isLoading={isSubmitting} />
             </Container>
+            {showCaseOwnerSelection && (
+              <Container big>
+                <CaseOwnerSelection isLoading={isSubmitting} />
+              </Container>
+            )}
             <Container big>
               <Description isLoading={isSubmitting} />
             </Container>
           </>
         ),
       }),
-      [isSubmitting]
+      [isSubmitting, showCaseOwnerSelection]
     );
 
     const secondStep = useMemo(
