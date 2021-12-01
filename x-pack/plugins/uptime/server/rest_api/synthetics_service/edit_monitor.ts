@@ -28,12 +28,16 @@ export const editSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
 
     const editMonitor = await savedObjectsClient.update(syntheticsMonitorType, monitorId, monitor);
 
-    await syntheticsService.pushConfigs(request, [
+    const errors = await syntheticsService.pushConfigs(request, [
       {
         ...(editMonitor.attributes as SyntheticsMonitorSavedObject['attributes']),
         id: editMonitor.id,
       },
     ]);
+
+    if (errors) {
+      return errors;
+    }
 
     return editMonitor;
   },
