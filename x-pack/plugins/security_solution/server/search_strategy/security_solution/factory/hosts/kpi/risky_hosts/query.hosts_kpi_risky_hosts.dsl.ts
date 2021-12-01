@@ -28,7 +28,7 @@ export const buildHostsKpiRiskyHostsQuery = ({
 
   const dslQuery = {
     index: defaultIndex,
-    allow_no_indices: true,
+    allow_no_indices: false,
     ignore_unavailable: true,
     track_total_hits: false,
     body: {

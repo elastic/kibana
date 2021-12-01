@@ -7,7 +7,7 @@
 
 import type { Observable } from 'rxjs';
 import { filter } from 'rxjs/operators';
-
+import { useEffect, useState } from 'react';
 import { useObservable, withOptionalSignal } from '@kbn/securitysolution-hook-utils';
 import { createFilter } from '../../../../common/containers/helpers';
 
@@ -19,6 +19,9 @@ import {
 } from '../../../../../../../../src/plugins/data/common';
 import type { DataPublicPluginStart } from '../../../../../../../../src/plugins/data/public';
 import type { HostsKpiRiskyHostsStrategyResponse } from '../../../../../common/search_strategy/security_solution/hosts/kpi/risky_hosts';
+import { useKibana } from '../../../../common/lib/kibana';
+import { isIndexNotFoundError } from '../../../../common/utils/exceptions';
+import { getHostRiskIndex } from '../../../../helpers';
 
 export type RiskyHostsScoreRequestOptions = RequestBasicOptions;
 
@@ -59,4 +62,37 @@ export const getRiskyHostsComplete = (
 
 const getRiskyHostsWithOptionalSignal = withOptionalSignal(getRiskyHostsComplete);
 
-export const useRiskyHostsComplete = () => useObservable(getRiskyHostsWithOptionalSignal);
+const useRiskyHostsComplete = () => useObservable(getRiskyHostsWithOptionalSignal);
+
+interface UseRiskyHostProps {
+  filterQuery?: string;
+  from: string;
+  to: string;
+  skip: boolean;
+}
+
+export const useRiskyHosts = ({ filterQuery, from, to, skip }: UseRiskyHostProps) => {
+  const { error, result: response, start, loading } = useRiskyHostsComplete();
+  const { data, spaces } = useKibana().services;
+  const isModuleDisabled = error && isIndexNotFoundError(error);
+  const [spaceId, setSpaceId] = useState<string>();
+
+  useEffect(() => {
+    if (spaces) {
+      spaces.getActiveSpace().then((space) => setSpaceId(space.id));
+    }
+  }, [spaces]);
+
+  useEffect(() => {
+    if (!skip && spaceId) {
+      start({
+        data,
+        timerange: { to, from, interval: '' },
+        filterQuery,
+        defaultIndex: [getHostRiskIndex(spaceId)],
+      });
+    }
+  }, [data, spaceId, start, filterQuery, to, from, skip]);
+
+  return { error, response, loading, isModuleDisabled };
+};

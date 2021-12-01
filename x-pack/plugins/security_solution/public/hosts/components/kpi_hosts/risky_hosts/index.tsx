@@ -16,18 +16,18 @@ import {
   EuiText,
   transparentize,
 } from '@elastic/eui';
-import React, { useEffect } from 'react';
+import React from 'react';
 import styled, { css } from 'styled-components';
 import { euiLightVars } from '@kbn/ui-shared-deps-src/theme';
 import { InspectButtonContainer, InspectButton } from '../../../../common/components/inspect';
 
 import { HostsKpiBaseComponentLoader } from '../common';
-import type { HostsKpiProps } from '../types';
 import * as i18n from './translations';
-import { useRiskyHostsComplete } from '../../../containers/kpi_hosts/risky_hosts';
-import { useKibana } from '../../../../common/lib/kibana';
-import { getHostRiskIndex } from '../../../../helpers';
-import { HostRiskSeverity } from '../../../../../common/search_strategy/security_solution/hosts/kpi/risky_hosts';
+
+import {
+  HostRiskSeverity,
+  HostsKpiRiskyHostsStrategyResponse,
+} from '../../../../../common/search_strategy/security_solution/hosts/kpi/risky_hosts';
 
 import { useInspectQuery } from '../../../../common/hooks/use_inspect_query';
 import { useErrorToast } from '../../../../common/hooks/use_error_toast';
@@ -71,95 +71,84 @@ const StatusTitle = styled(EuiTitle)`
   text-transform: lowercase;
 `;
 
-const RiskyHostsComponent: React.FC<Pick<HostsKpiProps, 'filterQuery' | 'from' | 'to' | 'skip'>> =
-  ({ filterQuery, from, to, skip }) => {
-    const { error, result: response, start, loading } = useRiskyHostsComplete();
-    const { data, spaces } = useKibana().services;
+const RiskyHostsComponent: React.FC<{
+  error: unknown;
+  loading: boolean;
+  data?: HostsKpiRiskyHostsStrategyResponse;
+}> = ({ error, loading, data }) => {
+  useInspectQuery(QUERY_ID, loading, data);
+  useErrorToast(i18n.ERROR_TITLE, error);
 
-    useEffect(() => {
-      if (!skip) {
-        spaces?.getActiveSpace().then((space) => {
-          start({
-            data,
-            timerange: { to, from, interval: '' },
-            filterQuery,
-            defaultIndex: [getHostRiskIndex(space.id)],
-          });
-        });
-      }
-    }, [data, spaces, start, filterQuery, to, from, skip]);
+  if (loading) {
+    return <HostsKpiBaseComponentLoader />;
+  }
 
-    useInspectQuery(QUERY_ID, loading, response);
-    useErrorToast(i18n.ERROR_TITLE, error);
+  const criticalRiskCount = data?.riskyHosts.Critical ?? 0;
+  const hightlRiskCount = data?.riskyHosts.High ?? 0;
 
-    if (loading) {
-      return <HostsKpiBaseComponentLoader />;
-    }
+  const totalCount = criticalRiskCount + hightlRiskCount;
 
-    const criticalRiskCount = response?.riskyHosts.Critical ?? 0;
-    const hightlRiskCount = response?.riskyHosts.High ?? 0;
-
-    const totalCount = criticalRiskCount + hightlRiskCount;
-
-    return (
-      <InspectButtonContainer>
-        <EuiPanel hasBorder data-test-subj="risky-hosts">
-          <EuiFlexGroup gutterSize={'none'}>
-            <EuiFlexItem>
-              <EuiTitle size="xxxs">
-                <h6>{i18n.RISKY_HOSTS}</h6>
-              </EuiTitle>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
+  return (
+    <InspectButtonContainer>
+      <EuiPanel hasBorder data-test-subj="risky-hosts">
+        <EuiFlexGroup gutterSize={'none'}>
+          <EuiFlexItem>
+            <EuiTitle size="xxxs">
+              <h6>{i18n.RISKY_HOSTS}</h6>
+            </EuiTitle>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            {data?.inspect && (
               <InspectButton queryId={QUERY_ID} title={`KPI ${i18n.RISKY_HOSTS}`} />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiFlexGroup>
-            <EuiFlexItem>
-              <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
-                <EuiFlexItem grow={false}>
-                  <EuiIcon type={'alert'} color={euiLightVars.euiColorDarkestShade} size="l" />
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <StatusTitle className="eui-textTruncate" data-test-subj="riskyHostsTotal">
-                    <p>
-                      {(totalCount ?? 0).toLocaleString()} {i18n.RISKY_HOSTS}
-                    </p>
-                  </StatusTitle>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiHorizontalRule />
-          <EuiFlexGroup direction="column" gutterSize="l" responsive={false}>
-            <EuiFlexItem>
-              <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-                <EuiFlexItem style={{ minWidth: '80px' }} grow={false}>
-                  <HostRisk severity={HostRiskSeverity.critical} />
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <HostCount size="m" data-test-subj="riskyHostsCriticalQuantity">
-                    {i18n.HOSTS_COUNT(criticalRiskCount)}
-                  </HostCount>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-                <EuiFlexItem style={{ minWidth: '80px' }} grow={false}>
-                  <HostRisk severity={HostRiskSeverity.high} />
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <HostCount size="m" data-test-subj="riskyHostsHighQuantity">
-                    {i18n.HOSTS_COUNT(hightlRiskCount)}
-                  </HostCount>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiPanel>
-      </InspectButtonContainer>
-    );
-  };
+            )}
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiIcon type={'alert'} color={euiLightVars.euiColorDarkestShade} size="l" />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <StatusTitle className="eui-textTruncate" data-test-subj="riskyHostsTotal">
+                  <p>
+                    {(totalCount ?? 0).toLocaleString()} {i18n.RISKY_HOSTS}
+                  </p>
+                </StatusTitle>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiHorizontalRule />
+        <EuiFlexGroup direction="column" gutterSize="l" responsive={false}>
+          <EuiFlexItem>
+            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+              <EuiFlexItem style={{ minWidth: '80px' }} grow={false}>
+                <HostRisk severity={HostRiskSeverity.critical} />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <HostCount size="m" data-test-subj="riskyHostsCriticalQuantity">
+                  {i18n.HOSTS_COUNT(criticalRiskCount)}
+                </HostCount>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+              <EuiFlexItem style={{ minWidth: '80px' }} grow={false}>
+                <HostRisk severity={HostRiskSeverity.high} />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <HostCount size="m" data-test-subj="riskyHostsHighQuantity">
+                  {i18n.HOSTS_COUNT(hightlRiskCount)}
+                </HostCount>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiPanel>
+    </InspectButtonContainer>
+  );
+};
 
 export const RiskyHosts = React.memo(RiskyHostsComponent);

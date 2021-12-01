@@ -23,7 +23,7 @@ export const useInspectQuery = <T extends FactoryQueryTypes>(
   const { deleteQuery, setQuery, isInitializing } = useGlobalTime();
 
   useEffect(() => {
-    if (!loading && !isInitializing && response && response.inspect) {
+    if (!loading && !isInitializing && response?.inspect) {
       setQuery({
         id,
         inspect: getInspectResponse(response, {

@@ -11,24 +11,16 @@ import { render } from '@testing-library/react';
 
 import { RiskyHosts } from './';
 import { TestProviders } from '../../../../common/mock';
-import { useRiskyHostsComplete } from '../../../containers/kpi_hosts/risky_hosts';
+import { HostsKpiRiskyHostsStrategyResponse } from '../../../../../common';
 
 jest.mock('../../../containers/kpi_hosts/risky_hosts');
 
 describe('RiskyHosts', () => {
-  beforeEach(() => {
-    (useRiskyHostsComplete as jest.Mock).mockImplementation(() => ({
-      start: () => {},
-      loading: false,
-    }));
-  });
-
   const defaultProps = {
-    filterQuery: '',
-    from: '',
-    to: '',
-    skip: false,
+    error: undefined,
+    loading: false,
   };
+
   test('it renders', () => {
     const { queryByText } = render(
       <TestProviders>
@@ -40,14 +32,9 @@ describe('RiskyHosts', () => {
   });
 
   test('it displays loader while API is loading', () => {
-    (useRiskyHostsComplete as jest.Mock).mockImplementation(() => ({
-      start: () => {},
-      loading: true,
-    }));
-
     const { getByTestId } = render(
       <TestProviders>
-        <RiskyHosts {...defaultProps} />
+        <RiskyHosts {...defaultProps} loading />
       </TestProviders>
     );
 
@@ -67,12 +54,24 @@ describe('RiskyHosts', () => {
   });
 
   test('it displays risky hosts quantity returned by the API', () => {
-    const { queryByText } = render(
+    const data: HostsKpiRiskyHostsStrategyResponse = {
+      rawResponse: {} as HostsKpiRiskyHostsStrategyResponse['rawResponse'],
+      riskyHosts: {
+        Critical: 1,
+        High: 1,
+        Unknown: 0,
+        Low: 0,
+        Moderate: 0,
+      },
+    };
+    const { getByTestId } = render(
       <TestProviders>
-        <RiskyHosts {...defaultProps} />
+        <RiskyHosts {...defaultProps} data={data} />
       </TestProviders>
     );
 
-    expect(queryByText('Risky Hosts')).toBeInTheDocument();
+    expect(getByTestId('riskyHostsTotal').textContent).toEqual('2 Risky Hosts');
+    expect(getByTestId('riskyHostsCriticalQuantity').textContent).toEqual('1 hosts');
+    expect(getByTestId('riskyHostsHighQuantity').textContent).toEqual('1 hosts');
   });
 });
