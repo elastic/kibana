@@ -4,17 +4,31 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { reject } from 'lodash';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 
-export function termQuery<T extends string>(field: T, value: string | boolean | undefined) {
-  if (value === undefined || value === 'string') {
+function isUndefinedOrNull(value: any) {
+  return value === undefined || value === null;
+}
+
+export function termQuery<T extends string>(field: T, value: string | boolean | undefined | null) {
+  if (isUndefinedOrNull(value)) {
     return [];
   }
 
   return [{ term: { [field]: value } }] as QueryDslQueryContainer[];
+}
+
+export function termsQuery(field: string, ...values: Array<string | boolean | undefined | null>) {
+  const filtered = reject(values, isUndefinedOrNull);
+
+  if (!filtered.length) {
+    return [];
+  }
+
+  return [{ terms: { [field]: filtered } }];
 }
 
 export function rangeQuery(

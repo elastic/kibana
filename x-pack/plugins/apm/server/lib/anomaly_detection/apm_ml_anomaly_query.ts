@@ -6,7 +6,7 @@
  */
 
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { termQuery } from '../../../../observability/server';
+import { termQuery, termsQuery } from '../../../../observability/server';
 import {
   ApmMlDetectorType,
   getApmMlDetectorIndex,
@@ -45,17 +45,10 @@ export function apmMlAnomalyQuery({
               minimum_should_match: 1,
             },
           },
-          ...(detectorTypes?.length
-            ? [
-                {
-                  terms: {
-                    detector_index: detectorTypes.map((type) =>
-                      getApmMlDetectorIndex(type)
-                    ),
-                  },
-                },
-              ]
-            : []),
+          ...termsQuery(
+            'detector_index',
+            detectorTypes.map((type) => getApmMlDetectorIndex(type))
+          ),
           ...termQuery('partition_field_value', serviceName),
           ...termQuery('by_field_value', transactionType),
         ],
