@@ -9,6 +9,7 @@ import { EuiSpacer, EuiTabbedContent, EuiTabbedContentTab } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
+import { PolicyData } from '../../../../../../common/endpoint/types';
 import {
   getPolicyDetailPath,
   getPolicyHostIsolationExceptionsPath,
@@ -18,6 +19,7 @@ import {
   isOnHostIsolationExceptionsView,
   isOnPolicyFormView,
   isOnPolicyTrustedAppsView,
+  policyDetails,
   policyIdFromParams,
 } from '../../store/policy_details/selectors';
 import { PolicyHostIsolationExceptionsTab } from '../host_isolation_exceptions/host_isolation_exceptions_tab';
@@ -31,6 +33,8 @@ export const PolicyTabs = React.memo(() => {
   const isInTrustedAppsTab = usePolicyDetailsSelector(isOnPolicyTrustedAppsView);
   const isInHostIsolationExceptionsTab = usePolicyDetailsSelector(isOnHostIsolationExceptionsView);
   const policyId = usePolicyDetailsSelector(policyIdFromParams);
+  // casting required to remove the redux Immutable wrapper
+  const policyItem = usePolicyDetailsSelector(policyDetails) as PolicyData;
 
   const tabs = useMemo(
     () => [
@@ -69,12 +73,12 @@ export const PolicyTabs = React.memo(() => {
         content: (
           <>
             <EuiSpacer />
-            <PolicyHostIsolationExceptionsTab />
+            <PolicyHostIsolationExceptionsTab policyId={policyId} policy={policyItem} />
           </>
         ),
       },
     ],
-    []
+    [policyId, policyItem]
   );
 
   const currentSelectedTab = useMemo(() => {

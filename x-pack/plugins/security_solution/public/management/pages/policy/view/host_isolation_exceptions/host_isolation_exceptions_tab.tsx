@@ -16,19 +16,63 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { APP_UI_ID } from '../../../../../../common/constants';
+import { PolicyData } from '../../../../../../common/endpoint/types';
 import { useAppUrl } from '../../../../../common/lib/kibana';
 import { getHostIsolationExceptionsListPath } from '../../../../common/routing';
-import { policyDetails } from '../../store/policy_details/selectors';
+import { useFetchHostIsolationExceptionsList } from '../../../host_isolation_exceptions/view/hooks';
+import { getCurrentArtifactsLocation } from '../../store/policy_details/selectors';
 import { usePolicyDetailsSelector } from '../policy_hooks';
 import { PolicyHostIsolationExceptionsEmptyUnassigned } from './components/empty_unassigned';
+import { PolicyHostIsolationExceptionsList } from './components/list';
 
-export const PolicyHostIsolationExceptionsTab = () => {
+export const PolicyHostIsolationExceptionsTab = ({
+  policyId,
+  policy,
+}: {
+  policyId: string;
+  policy: PolicyData;
+}) => {
   const { getAppUrl } = useAppUrl();
-  const policyItem = usePolicyDetailsSelector(policyDetails);
+
+  const location = usePolicyDetailsSelector(getCurrentArtifactsLocation);
+
+  const exceptionsListRequest = useFetchHostIsolationExceptionsList({
+    filter: location.filter,
+    page: location.page_index,
+    perPage: location.page_size,
+    policies: [policyId],
+  });
+
   const displaysEmptyState = true;
-  return policyItem ? (
+
+  const subTitle = useMemo(() => {
+    const link = (
+      <EuiLink
+        href={getAppUrl({ appId: APP_UI_ID, path: getHostIsolationExceptionsListPath() })}
+        target="_blank"
+      >
+        <FormattedMessage
+          id="xpack.securitySolution.endpoint.policy.hostIsolationExceptions.list.viewAllLinkLabel"
+          defaultMessage="view all host isolation exceptions"
+        />
+      </EuiLink>
+    );
+
+    return exceptionsListRequest.data ? (
+      <FormattedMessage
+        id="xpack.securitySolution.endpoint.policy.hostIsolationExceptions.list.about"
+        defaultMessage="There {count, plural, one {is} other {are}} {count} {count, plural, =1 {exception} other {exceptions}} associated with this policy. Click here to {link}"
+        values={{
+          count: exceptionsListRequest.data?.total,
+          link,
+        }}
+      />
+    ) : null;
+  }, [exceptionsListRequest.data, getAppUrl]);
+
+  return !exceptionsListRequest.isLoading && exceptionsListRequest.data && policy ? (
     <div>
       <EuiPageHeader alignItems="center">
         <EuiPageHeaderSection>
@@ -46,17 +90,7 @@ export const PolicyHostIsolationExceptionsTab = () => {
           <EuiSpacer size="s" />
 
           <EuiText size="xs">
-            <p>
-              <EuiLink
-                href={getAppUrl({ appId: APP_UI_ID, path: getHostIsolationExceptionsListPath() })}
-                target="_blank"
-              >
-                <FormattedMessage
-                  id="xpack.securitySolution.endpoint.policy.hostIsolationExceptions.list.subtitle"
-                  defaultMessage="view all host isolation exceptions"
-                />
-              </EuiLink>
-            </p>
+            <p>{subTitle}</p>
           </EuiText>
         </EuiPageHeaderSection>
       </EuiPageHeader>
@@ -70,12 +104,14 @@ export const PolicyHostIsolationExceptionsTab = () => {
         borderRadius="none"
       >
         {displaysEmptyState ? (
-          <PolicyHostIsolationExceptionsEmptyUnassigned policyName={policyItem.name} />
+          <PolicyHostIsolationExceptionsEmptyUnassigned policyName={policy.name} />
         ) : (
-          <EuiProgress size="xs" color="primary" />
+          <PolicyHostIsolationExceptionsList />
         )}
       </EuiPageContent>
     </div>
-  ) : null;
+  ) : (
+    <EuiProgress size="xs" color="primary" />
+  );
 };
 PolicyHostIsolationExceptionsTab.displayName = 'PolicyHostIsolationExceptionsTab';

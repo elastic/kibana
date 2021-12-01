@@ -99,7 +99,7 @@ export function useFetchHostIsolationExceptionsList({
   const http = useHttp();
 
   return useQuery<FoundExceptionListItemSchema, ServerApiError>(
-    ['hostIsolationExceptions', 'list', filter, perPage, page],
+    ['hostIsolationExceptions', 'list', filter, perPage, page, policies],
     () => {
       const kql = parsePoliciesAndFilterToKql({
         policies,
