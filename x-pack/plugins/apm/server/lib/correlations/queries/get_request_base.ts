@@ -13,6 +13,6 @@ export const getRequestBase = ({
 }: CorrelationsParams) => ({
   index,
   // matches APM's event client settings
-  ignore_throttled: includeFrozen === undefined ? true : !includeFrozen,
+  ...(includeFrozen ? { ignore_throttled: false } : {}),
   ignore_unavailable: true,
 });

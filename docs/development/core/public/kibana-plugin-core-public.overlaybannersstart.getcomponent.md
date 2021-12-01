@@ -11,5 +11,5 @@ getComponent(): JSX.Element;
 ```
 <b>Returns:</b>
 
-`JSX.Element`
+JSX.Element
 

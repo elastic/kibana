@@ -10,7 +10,7 @@ import { resolve } from 'path';
 import Fs from 'fs';
 
 import * as Rx from 'rxjs';
-import { mergeMap, map, takeUntil, catchError } from 'rxjs/operators';
+import { mergeMap, map, takeUntil, catchError, ignoreElements } from 'rxjs/operators';
 import { Lifecycle } from '@kbn/test';
 import { ToolingLog } from '@kbn/dev-utils';
 import chromeDriver from 'chromedriver';
@@ -32,6 +32,7 @@ import { createStdoutSocket } from './create_stdout_stream';
 import { preventParallelCalls } from './prevent_parallel_calls';
 
 import { Browsers } from './browsers';
+import { NETWORK_PROFILES } from './network_profiles';
 
 const throttleOption: string = process.env.TEST_THROTTLE_NETWORK as string;
 const headlessBrowser: string = process.env.TEST_BROWSER_HEADLESS as string;
@@ -52,6 +53,8 @@ const chromiumUserPrefs = {
     },
   },
 };
+
+const sleep$ = (ms: number) => Rx.timer(ms).pipe(ignoreElements());
 
 /**
  * Best we can tell WebDriver locks up sometimes when we send too many
@@ -278,14 +281,30 @@ async function attemptToCreateCommand(
   const { session, consoleLog$ } = await buildDriverInstance();
 
   if (throttleOption === '1' && browserType === 'chrome') {
-    // Only chrome supports this option.
-    log.debug('NETWORK THROTTLED: 768k down, 256k up, 100ms latency.');
+    const { KBN_NETWORK_TEST_PROFILE = 'DEFAULT' } = process.env;
 
-    (session as any).setNetworkConditions({
+    const profile =
+      KBN_NETWORK_TEST_PROFILE in Object.keys(NETWORK_PROFILES)
+        ? KBN_NETWORK_TEST_PROFILE
+        : 'DEFAULT';
+
+    const {
+      DOWNLOAD: downloadThroughput,
+      UPLOAD: uploadThroughput,
+      LATENCY: latency,
+    } = NETWORK_PROFILES[`${profile}`];
+
+    // Only chrome supports this option.
+    log.debug(
+      `NETWORK THROTTLED with profile ${profile}: ${downloadThroughput}kbps down, ${uploadThroughput}kbps up, ${latency} ms latency.`
+    );
+
+    // @ts-expect-error
+    session.setNetworkConditions({
       offline: false,
-      latency: 100, // Additional latency (ms).
-      download_throughput: 768 * 1024, // These speeds are in bites per second, not kilobytes.
-      upload_throughput: 256 * 1024,
+      latency,
+      download_throughput: downloadThroughput,
+      upload_throughput: uploadThroughput,
     });
   }
 
@@ -321,6 +340,7 @@ export async function initWebDriver(
     edgePaths = await installDriver();
   }
 
+  let attempt = 1;
   return await Rx.race(
     Rx.timer(2 * MINUTE).pipe(
       map(() => {
@@ -345,8 +365,14 @@ export async function initWebDriver(
       catchError((error, resubscribe) => {
         log.warning('Failure while creating webdriver instance');
         log.warning(error);
-        log.warning('...retrying...');
-        return resubscribe;
+
+        if (attempt > 5) {
+          throw new Error('out of retry attempts');
+        }
+
+        attempt += 1;
+        log.warning('...retrying in 15 seconds...');
+        return Rx.concat(sleep$(15000), resubscribe);
       })
     )
   ).toPromise();

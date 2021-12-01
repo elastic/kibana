@@ -9,11 +9,12 @@
 ```typescript
 export interface SavedObjectsBulkCreateObject<T = unknown> extends SavedObjectsCreateOptions 
 ```
+<b>Extends:</b> SavedObjectsCreateOptions
 
 ## Properties
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [attributes](./kibana-plugin-core-public.savedobjectsbulkcreateobject.attributes.md) | <code>T</code> |  |
-|  [type](./kibana-plugin-core-public.savedobjectsbulkcreateobject.type.md) | <code>string</code> |  |
+|  [attributes](./kibana-plugin-core-public.savedobjectsbulkcreateobject.attributes.md) | T |  |
+|  [type](./kibana-plugin-core-public.savedobjectsbulkcreateobject.type.md) | string |  |
 

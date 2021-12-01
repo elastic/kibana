@@ -16,7 +16,7 @@ export interface IExternalUrlPolicy
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [allow](./kibana-plugin-core-server.iexternalurlpolicy.allow.md) | <code>boolean</code> | Indicates if this policy allows or denies access to the described destination. |
-|  [host](./kibana-plugin-core-server.iexternalurlpolicy.host.md) | <code>string</code> | Optional host describing the external destination. May be combined with <code>protocol</code>. |
-|  [protocol](./kibana-plugin-core-server.iexternalurlpolicy.protocol.md) | <code>string</code> | Optional protocol describing the external destination. May be combined with <code>host</code>. |
+|  [allow](./kibana-plugin-core-server.iexternalurlpolicy.allow.md) | boolean | Indicates if this policy allows or denies access to the described destination. |
+|  [host?](./kibana-plugin-core-server.iexternalurlpolicy.host.md) | string | <i>(Optional)</i> Optional host describing the external destination. May be combined with <code>protocol</code>. |
+|  [protocol?](./kibana-plugin-core-server.iexternalurlpolicy.protocol.md) | string | <i>(Optional)</i> Optional protocol describing the external destination. May be combined with <code>host</code>. |
 

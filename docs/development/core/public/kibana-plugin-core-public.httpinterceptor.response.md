@@ -16,10 +16,10 @@ response?(httpResponse: HttpResponse, controller: IHttpInterceptController): May
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  httpResponse | <code>HttpResponse</code> |  |
-|  controller | <code>IHttpInterceptController</code> |  |
+|  httpResponse | HttpResponse | [HttpResponse](./kibana-plugin-core-public.httpresponse.md) |
+|  controller | IHttpInterceptController | [IHttpInterceptController](./kibana-plugin-core-public.ihttpinterceptcontroller.md) |
 
 <b>Returns:</b>
 
-`MaybePromise<IHttpResponseInterceptorOverrides> | void`
+MaybePromise&lt;IHttpResponseInterceptorOverrides&gt; \| void
 

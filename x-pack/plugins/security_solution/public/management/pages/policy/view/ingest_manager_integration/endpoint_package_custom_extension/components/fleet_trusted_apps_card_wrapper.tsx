@@ -59,8 +59,8 @@ export const FleetTrustedAppsCardWrapper = memo<PackageCustomExtensionComponentP
           data-test-subj="linkToTrustedApps"
         >
           <FormattedMessage
-            id="xpack.securitySolution.endpoint.fleetCustomExtension.manageTrustedAppLinkLabel"
-            defaultMessage="Manage trusted applications"
+            id="xpack.securitySolution.endpoint.fleetCustomExtension.manageTrustedAppshortLinkLabel"
+            defaultMessage="Manage"
           />
         </LinkWithIcon>
       ),

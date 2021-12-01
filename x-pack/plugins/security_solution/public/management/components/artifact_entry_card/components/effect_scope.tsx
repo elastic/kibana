@@ -107,6 +107,7 @@ export const WithContextMenu = memo<WithContextMenuProps>(
     return (
       <ContextMenuWithRouterSupport
         maxHeight="235px"
+        fixedWidth={true}
         panelPaddingSize="none"
         items={policies}
         anchorPosition={policies.length > 1 ? 'rightCenter' : 'rightUp'}

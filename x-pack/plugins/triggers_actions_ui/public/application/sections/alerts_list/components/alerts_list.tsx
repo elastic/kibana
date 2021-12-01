@@ -438,6 +438,7 @@ export const AlertsList: React.FunctionComponent = () => {
                 color="hollow"
                 iconType="tag"
                 iconSide="left"
+                tabIndex={-1}
                 onClick={() => setTagPopoverOpenIndex(item.index)}
                 onClickAriaLabel="Tags"
                 iconOnClick={() => setTagPopoverOpenIndex(item.index)}

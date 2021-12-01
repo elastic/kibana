@@ -16,8 +16,8 @@ export interface SavedObjectsUpdateObjectsSpacesResponseObject
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [error](./kibana-plugin-core-server.savedobjectsupdateobjectsspacesresponseobject.error.md) | <code>SavedObjectError</code> | Included if there was an error updating this object's spaces |
-|  [id](./kibana-plugin-core-server.savedobjectsupdateobjectsspacesresponseobject.id.md) | <code>string</code> | The ID of the referenced object |
-|  [spaces](./kibana-plugin-core-server.savedobjectsupdateobjectsspacesresponseobject.spaces.md) | <code>string[]</code> | The space(s) that the referenced object exists in |
-|  [type](./kibana-plugin-core-server.savedobjectsupdateobjectsspacesresponseobject.type.md) | <code>string</code> | The type of the referenced object |
+|  [error?](./kibana-plugin-core-server.savedobjectsupdateobjectsspacesresponseobject.error.md) | SavedObjectError | <i>(Optional)</i> Included if there was an error updating this object's spaces |
+|  [id](./kibana-plugin-core-server.savedobjectsupdateobjectsspacesresponseobject.id.md) | string | The ID of the referenced object |
+|  [spaces](./kibana-plugin-core-server.savedobjectsupdateobjectsspacesresponseobject.spaces.md) | string\[\] | The space(s) that the referenced object exists in |
+|  [type](./kibana-plugin-core-server.savedobjectsupdateobjectsspacesresponseobject.type.md) | string | The type of the referenced object |
 

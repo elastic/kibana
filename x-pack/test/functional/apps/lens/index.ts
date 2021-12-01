@@ -16,7 +16,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
   describe('lens app', () => {
     before(async () => {
       log.debug('Starting lens before method');
-      await browser.setWindowSize(1280, 800);
+      await browser.setWindowSize(1280, 1200);
       await esArchiver.load('x-pack/test/functional/es_archives/logstash_functional');
       await esArchiver.load('x-pack/test/functional/es_archives/lens/basic');
       await kibanaServer.importExport.load(
@@ -33,13 +33,14 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     });
 
     describe('', function () {
-      this.tags(['ciGroup4', 'skipFirefox']);
+      this.tags(['ciGroup3', 'skipFirefox']);
       loadTestFile(require.resolve('./smokescreen'));
-      loadTestFile(require.resolve('./add_to_dashboard'));
-      loadTestFile(require.resolve('./table'));
-      loadTestFile(require.resolve('./runtime_fields'));
-      loadTestFile(require.resolve('./dashboard'));
       loadTestFile(require.resolve('./persistent_context'));
+    });
+
+    describe('', function () {
+      this.tags(['ciGroup4', 'skipFirefox']);
+
       loadTestFile(require.resolve('./colors'));
       loadTestFile(require.resolve('./chart_data'));
       loadTestFile(require.resolve('./time_shift'));
@@ -55,6 +56,15 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
 
       // has to be last one in the suite because it overrides saved objects
       loadTestFile(require.resolve('./rollup'));
+    });
+
+    describe('', function () {
+      this.tags(['ciGroup16', 'skipFirefox']);
+
+      loadTestFile(require.resolve('./add_to_dashboard'));
+      loadTestFile(require.resolve('./table'));
+      loadTestFile(require.resolve('./runtime_fields'));
+      loadTestFile(require.resolve('./dashboard'));
     });
   });
 }

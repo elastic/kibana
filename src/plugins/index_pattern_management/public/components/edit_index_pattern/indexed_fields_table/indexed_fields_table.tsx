@@ -7,7 +7,9 @@
  */
 
 import React, { Component } from 'react';
+import { i18n } from '@kbn/i18n';
 import { createSelector } from 'reselect';
+import { OverlayStart } from 'src/core/public';
 import { IndexPatternField, IndexPattern } from '../../../../../../plugins/data/public';
 import { useKibana } from '../../../../../../plugins/kibana_react/public';
 import { Table } from './components/table';
@@ -26,6 +28,7 @@ interface IndexedFieldsTableProps {
   };
   fieldWildcardMatcher: (filters: any[]) => (val: any) => boolean;
   userEditPermission: boolean;
+  openModal: OverlayStart['openModal'];
 }
 
 interface IndexedFieldsTableState {
@@ -65,12 +68,25 @@ class IndexedFields extends Component<IndexedFieldsTableProps, IndexedFieldsTabl
       indexPattern.sourceFilters.map((f: Record<string, any>) => f.value);
     const fieldWildcardMatch = fieldWildcardMatcher(sourceFilters || []);
 
+    const getDisplayEsType = (arr: string[]): string => {
+      const length = arr.length;
+      if (length < 1) {
+        return '';
+      }
+      if (length > 1) {
+        return i18n.translate('indexPatternManagement.editIndexPattern.fields.conflictType', {
+          defaultMessage: 'conflict',
+        });
+      }
+      return arr[0];
+    };
+
     return (
       (fields &&
         fields.map((field) => {
           return {
             ...field.spec,
-            type: field.esTypes?.join(', ') || '',
+            type: getDisplayEsType(field.esTypes || []),
             kbnType: field.type,
             displayName: field.displayName,
             format: indexPattern.getFormatterForFieldNoDefault(field.name)?.type?.title || '',
@@ -119,6 +135,7 @@ class IndexedFields extends Component<IndexedFieldsTableProps, IndexedFieldsTabl
           items={fields}
           editField={(field) => this.props.helpers.editField(field.name)}
           deleteField={(fieldName) => this.props.helpers.deleteField(fieldName)}
+          openModal={this.props.openModal}
         />
       </div>
     );

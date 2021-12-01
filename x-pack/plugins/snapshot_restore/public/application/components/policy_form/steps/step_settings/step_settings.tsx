@@ -191,7 +191,7 @@ export const PolicyStepSettings: React.FunctionComponent<StepProps> = ({
           >
             <FormattedMessage
               id="xpack.snapshotRestore.policyForm.stepSettings.docsButtonLabel"
-              defaultMessage="Snapshot settings docs"
+              defaultMessage="Snapshot docs"
             />
           </EuiButtonEmpty>
         </EuiFlexItem>
