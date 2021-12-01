@@ -152,43 +152,6 @@ export default ({ getService }: FtrProviderContext) => {
     },
     {
       testTitleSuffix:
-        'for apm_nodejs with prefix, startDatafeed true and estimateModelMemory true',
-      sourceDataArchive: 'x-pack/test/functional/es_archives/ml/module_apm',
-      indexPattern: { name: 'ft_module_apm', timeField: '@timestamp' },
-      module: 'apm_nodejs',
-      user: USER.ML_POWERUSER,
-      requestBody: {
-        prefix: 'pf4_',
-        indexPatternName: 'ft_module_apm',
-        startDatafeed: true,
-        end: Date.now(),
-      },
-      expected: {
-        responseCode: 200,
-        jobs: [
-          {
-            jobId: 'pf4_abnormal_span_durations_nodejs',
-            jobState: JOB_STATE.CLOSED,
-            datafeedState: DATAFEED_STATE.STOPPED,
-          },
-          {
-            jobId: 'pf4_abnormal_trace_durations_nodejs',
-            jobState: JOB_STATE.CLOSED,
-            datafeedState: DATAFEED_STATE.STOPPED,
-          },
-          {
-            jobId: 'pf4_decreased_throughput_nodejs',
-            jobState: JOB_STATE.CLOSED,
-            datafeedState: DATAFEED_STATE.STOPPED,
-          },
-        ],
-        searches: [] as string[],
-        visualizations: [] as string[],
-        dashboards: [] as string[],
-      },
-    },
-    {
-      testTitleSuffix:
         'for apm_transaction with prefix, startDatafeed true and estimateModelMemory true',
       sourceDataArchive: 'x-pack/test/functional/es_archives/ml/module_apm_transaction',
       indexPattern: { name: 'ft_module_apm_transaction', timeField: '@timestamp' },
