@@ -64,7 +64,7 @@ describe('credentialStore', () => {
       security: securityStartMock,
     });
 
-    reindexOpMock.attributes.lastCompletedStep = 0;
+    reindexOpMock.attributes.lastCompletedStep = ReindexStep.readonly;
 
     expect(credStore.get(reindexOpMock)).toBeUndefined();
   });
