@@ -97,6 +97,14 @@ export const pie: ExpressionFunctionDefinition<
       help: '',
       types: ['palette'],
     },
+    pieSizeRatio: {
+      types: ['number'],
+      help: '',
+    },
+    donutInnerAreaRatio: {
+      types: ['number'],
+      help: '',
+    },
   },
   inputTypes: ['lens_multitable'],
   fn(data: LensMultiTable, args: PieExpressionArgs) {

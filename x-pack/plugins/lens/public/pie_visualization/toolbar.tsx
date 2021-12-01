@@ -14,10 +14,11 @@ import {
   EuiSuperSelect,
   EuiRange,
   EuiHorizontalRule,
+  EuiButtonGroup,
 } from '@elastic/eui';
 import type { Position } from '@elastic/charts';
 import type { PaletteRegistry } from 'src/plugins/charts/public';
-import { DEFAULT_PERCENT_DECIMALS } from './constants';
+import { DEFAULT_DONUT_INNER_AREA_RATIO, DEFAULT_PERCENT_DECIMALS } from './constants';
 import { PartitionChartsMeta } from './partition_charts_meta';
 import type { PieVisualizationState, SharedPieLayerState } from '../../common/expressions';
 import { VisualizationDimensionEditorProps, VisualizationToolbarProps } from '../types';
@@ -52,6 +53,10 @@ const legendOptions: Array<{
   },
 ];
 
+const sizeLabel = i18n.translate('xpack.lens.pieChart.sizeLabel', {
+  defaultMessage: 'Size',
+});
+
 export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationState>) {
   const { state, setState } = props;
   const layer = state.layers[0];
@@ -61,6 +66,8 @@ export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationStat
   const {
     categoryOptions,
     numberOptions,
+    sizeRatioOptions,
+    hasInnerAreaSizeSetting,
     isDisabled: isToolbarPopoverDisabled,
   } = PartitionChartsMeta[state.shape].toolbarPopover;
 
@@ -129,7 +136,7 @@ export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationStat
           fullWidth
           display="rowCompressed"
         >
-          <DecimalPlaceSlider
+          <DebouncedValueSlider
             value={layer.percentDecimals ?? DEFAULT_PERCENT_DECIMALS}
             setValue={(value) => {
               setState({
@@ -137,8 +144,58 @@ export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationStat
                 layers: [{ ...layer, percentDecimals: value }],
               });
             }}
+            dataTestSubj="indexPattern-dimension-formatDecimals"
           />
         </EuiFormRow>
+      </ToolbarPopover>
+      <ToolbarPopover
+        title={i18n.translate('xpack.lens.pieChart.visualOptionsLabel', {
+          defaultMessage: 'Visual options',
+        })}
+        type="visualOptions"
+        groupPosition="center"
+        buttonDataTestSubj="lnsVisualOptionsButton"
+      >
+        <EuiFormRow label={sizeLabel} display="columnCompressed" fullWidth>
+          <EuiButtonGroup
+            isFullWidth
+            name="pieSizeRatio"
+            buttonSize="compressed"
+            legend={sizeLabel}
+            options={sizeRatioOptions}
+            idSelected={
+              sizeRatioOptions.find(({ value }) => value === layer.pieSizeRatio)?.id ||
+              'pieSizeOption-large'
+            }
+            onChange={(sizeId) => {
+              const pieSizeRatio = sizeRatioOptions.find(({ id }) => id === sizeId)?.value;
+              setState({ ...state, layers: [{ ...layer, pieSizeRatio }] });
+            }}
+          />
+        </EuiFormRow>
+        {hasInnerAreaSizeSetting && (
+          <EuiFormRow
+            label={i18n.translate('xpack.lens.pieChart.donutInnerAreaSize', {
+              defaultMessage: 'Size of inner empty area',
+            })}
+            fullWidth
+            display="rowCompressed"
+          >
+            <DebouncedValueSlider
+              min={20}
+              max={70}
+              step={10}
+              value={(layer.donutInnerAreaRatio ?? DEFAULT_DONUT_INNER_AREA_RATIO) * 100}
+              setValue={(value) => {
+                const donutInnerAreaRatio = value / 100;
+                setState({
+                  ...state,
+                  layers: [{ ...layer, donutInnerAreaRatio }],
+                });
+              }}
+            />
+          </EuiFormRow>
+        )}
       </ToolbarPopover>
       <LegendSettingsPopover
         legendOptions={legendOptions}
@@ -189,12 +246,20 @@ export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationStat
   );
 }
 
-const DecimalPlaceSlider = ({
+const DebouncedValueSlider = ({
   value,
   setValue,
+  dataTestSubj,
+  step,
+  min = 0,
+  max = 10,
 }: {
   value: number;
   setValue: (value: number) => void;
+  dataTestSubj?: string;
+  min?: number;
+  max?: number;
+  step?: number;
 }) => {
   const { inputValue, handleInputChange } = useDebouncedValue(
     {
@@ -205,10 +270,11 @@ const DecimalPlaceSlider = ({
   );
   return (
     <EuiRange
-      data-test-subj="indexPattern-dimension-formatDecimals"
+      data-test-subj={dataTestSubj}
       value={inputValue}
-      min={0}
-      max={10}
+      min={min}
+      max={max}
+      step={step}
       showInput
       compressed
       onChange={(e) => {
