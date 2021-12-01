@@ -30,7 +30,7 @@ export const removePolicyFromArtifacts = async (
 ) => {
   let page = 1;
 
-  const findArtifactsByPolicy = async (currentPage: number) => {
+  const findArtifactsByPolicy = (currentPage: number) => {
     return exceptionsClient.findExceptionListsItem({
       listId: ARTIFACT_LISTS_IDS_TO_REMOVE,
       filter: ARTIFACT_LISTS_IDS_TO_REMOVE.map(
@@ -60,7 +60,7 @@ export const removePolicyFromArtifacts = async (
 
   await pMap(
     artifacts,
-    async (artifact) =>
+    (artifact) =>
       exceptionsClient.updateExceptionListItem({
         ...artifact,
         itemId: artifact.item_id,
@@ -69,6 +69,7 @@ export const removePolicyFromArtifacts = async (
         tags: artifact.tags.filter((currentPolicy) => currentPolicy !== `policy:${policy.id}`),
       }),
     {
+      /** Number of concurrent executions till the end of the artifacts array */
       concurrency: 5,
       /** When set to false, instead of stopping when a promise rejects, it will wait for all the promises to
        * settle and then reject with an aggregated error containing all the errors from the rejected promises. */

@@ -309,7 +309,7 @@ describe('ingest_integration tests ', () => {
         .mockResolvedValueOnce({ ...fakeArtifact, tags: [] });
     });
 
-    it('removes policy from trusted app', async () => {
+    it('removes policy from artifact', async () => {
       await invokeDeleteCallback();
 
       expect(exceptionListClient.findExceptionListsItem).toHaveBeenCalledWith({
