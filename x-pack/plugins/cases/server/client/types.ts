@@ -10,12 +10,12 @@ import { SavedObjectsClientContract, Logger } from 'kibana/server';
 import { User } from '../../common';
 import { Authorization } from '../authorization/authorization';
 import {
-  AlertServiceContract,
   CaseConfigureService,
   CasesService,
   CaseUserActionService,
   ConnectorMappingsService,
   AttachmentService,
+  AlertService,
 } from '../services';
 import { ActionsClient } from '../../../actions/server';
 import { LensServerPluginSetup } from '../../../lens/server';
@@ -30,7 +30,7 @@ export interface CasesClientArgs {
   readonly user: User;
   readonly unsecuredSavedObjectsClient: SavedObjectsClientContract;
   readonly userActionService: CaseUserActionService;
-  readonly alertsService: AlertServiceContract;
+  readonly alertsService: AlertService;
   readonly attachmentService: AttachmentService;
   readonly logger: Logger;
   readonly lensEmbeddableFactory: LensServerPluginSetup['lensEmbeddableFactory'];

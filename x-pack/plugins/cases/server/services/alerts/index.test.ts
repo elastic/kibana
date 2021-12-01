@@ -6,7 +6,7 @@
  */
 
 import { CaseStatuses } from '../../../common';
-import { AlertService, AlertServiceContract } from '.';
+import { AlertService } from '.';
 import { elasticsearchServiceMock, loggingSystemMock } from 'src/core/server/mocks';
 
 describe('updateAlertsStatus', () => {
@@ -14,7 +14,7 @@ describe('updateAlertsStatus', () => {
   const logger = loggingSystemMock.create().get('case');
 
   describe('happy path', () => {
-    let alertService: AlertServiceContract;
+    let alertService: AlertService;
 
     beforeEach(async () => {
       alertService = new AlertService(esClient, logger);

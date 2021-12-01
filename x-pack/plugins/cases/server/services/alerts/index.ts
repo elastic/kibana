@@ -8,8 +8,6 @@
 import pMap from 'p-map';
 import { isEmpty } from 'lodash';
 
-import type { PublicMethodsOf } from '@kbn/utility-types';
-
 import { ElasticsearchClient, Logger } from 'kibana/server';
 import { CaseStatuses, MAX_ALERTS_PER_SUB_CASE, MAX_CONCURRENT_SEARCHES } from '../../../common';
 import { AlertInfo, createCaseError } from '../../common';
@@ -18,8 +16,6 @@ import {
   ALERT_WORKFLOW_STATUS,
   STATUS_VALUES,
 } from '../../../../rule_registry/common/technical_rule_data_field_names';
-
-export type AlertServiceContract = PublicMethodsOf<AlertService>;
 
 interface Alert {
   _id: string;
