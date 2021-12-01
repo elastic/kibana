@@ -37,5 +37,7 @@ export enum API_URLS {
   CONNECTOR_TYPES = '/api/actions/connector_types',
 
   // Service end points
-  INDEX_TEMPLATES = '/api/uptime/service/index_templates',
+  INDEX_TEMPLATES = '/internal/uptime/service/index_templates',
+  SERVICE_LOCATIONS = '/internal/uptime/service/locations',
+  SYNTHETICS_MONITORS = '/internal/uptime/service/monitors',
 }

@@ -1,0 +1,9 @@
+.printViewport {
+  &__vis {
+    height: 600px; // These values might need to be passed in as dimensions for the report. I.e., print should use layout dimensions.
+    width: 975px;
+
+    // Some vertical space between vis, but center horizontally
+    margin: 10px auto;
+  }
+}
