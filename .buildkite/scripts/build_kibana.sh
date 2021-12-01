@@ -28,6 +28,11 @@ if [[ "${GITHUB_PR_LABELS:-}" == *"ci:deploy-cloud"* ]]; then
     --skip-docker-ubi \
     --skip-docker-centos \
     --skip-docker-contexts
+
+  CLOUD_IMAGE=$(docker images --format "{{.Repository}}:{{.Tag}}" docker.elastic.co/kibana-ci/kibana-cloud)
+  cat << EOF | buildkite-agent annotate --style "info" --context cloud-image
+    Cloud image: $CLOUD_IMAGE
+EOF
 fi
 
 echo "--- Archive Kibana Distribution"
