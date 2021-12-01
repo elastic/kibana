@@ -176,7 +176,7 @@ const addLogging = ({ client, type, logger }: { client: Client; type: string; lo
             stack: stackTrace,
           },
         };
-        deprecationLogger.debug(
+        deprecationLogger.error(
           `ES DEPRECATION: ${event.headers.warning}\nOrigin:${requestOrigin}\nStack trace:\n${stackTrace}\nQuery:\n${queryMessage}`,
           logMeta as unknown as LogMeta
         );

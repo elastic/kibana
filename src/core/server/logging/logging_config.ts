@@ -65,7 +65,13 @@ export const config = {
       defaultValue: new Map<string, AppenderConfigType>(),
     }),
     loggers: schema.arrayOf(loggerSchema, {
-      defaultValue: [],
+      defaultValue: [
+        {
+          name: 'elasticsearch.deprecation',
+          level: 'off',
+          appenders: [],
+        },
+      ],
     }),
     root: schema.object({
       appenders: schema.arrayOf(schema.string(), {
