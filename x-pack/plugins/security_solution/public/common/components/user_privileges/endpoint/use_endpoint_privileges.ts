@@ -51,7 +51,6 @@ export const useEndpointPrivileges = (): Immutable<EndpointPrivileges> => {
           // FIXME: adjust once PR #119973 is merged, which has async method
           // const fleetAuthz = await fleetServices.authz();
           await new Promise((r) => setTimeout(r, 0)); // <<<< Emulate promise resolve above. Delete once PR 119973 is available
-          const fleetAuthz = fleetServices.authz;
 
           // Fleet is still defined as an optional plugin, thus `fleetServices` might not be defined
           setCanAccessFleet(true);
