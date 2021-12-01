@@ -21,13 +21,11 @@ class DocLinks {
   public appSearchIndexingDocsSchema: string;
   public appSearchLogSettings: string;
   public appSearchMetaEngines: string;
-  public appSearchNativeAuth: string;
   public appSearchPrecision: string;
   public appSearchRelevance: string;
   public appSearchResultSettings: string;
   public appSearchSearchUI: string;
   public appSearchSecurity: string;
-  public appSearchStandardAuth: string;
   public appSearchSynonyms: string;
   public appSearchWebCrawler: string;
   public appSearchWebCrawlerEventLogs: string;
@@ -59,7 +57,6 @@ class DocLinks {
   public workplaceSearchServiceNow: string;
   public workplaceSearchSharePoint: string;
   public workplaceSearchSlack: string;
-  public workplaceSearchStandardAuth: string;
   public workplaceSearchSynch: string;
   public workplaceSearchZendesk: string;
 
@@ -77,13 +74,11 @@ class DocLinks {
     this.appSearchIndexingDocsSchema = '';
     this.appSearchLogSettings = '';
     this.appSearchMetaEngines = '';
-    this.appSearchNativeAuth = '';
     this.appSearchPrecision = '';
     this.appSearchRelevance = '';
     this.appSearchResultSettings = '';
     this.appSearchSearchUI = '';
     this.appSearchSecurity = '';
-    this.appSearchStandardAuth = '';
     this.appSearchSynonyms = '';
     this.appSearchWebCrawler = '';
     this.appSearchWebCrawlerEventLogs = '';
@@ -115,7 +110,6 @@ class DocLinks {
     this.workplaceSearchServiceNow = '';
     this.workplaceSearchSharePoint = '';
     this.workplaceSearchSlack = '';
-    this.workplaceSearchStandardAuth = '';
     this.workplaceSearchSynch = '';
     this.workplaceSearchZendesk = '';
   }
@@ -134,13 +128,11 @@ class DocLinks {
     this.appSearchIndexingDocsSchema = docLinks.links.appSearch.indexingDocumentsSchema;
     this.appSearchLogSettings = docLinks.links.appSearch.logSettings;
     this.appSearchMetaEngines = docLinks.links.appSearch.metaEngines;
-    this.appSearchNativeAuth = docLinks.links.appSearch.nativeAuth;
     this.appSearchPrecision = docLinks.links.appSearch.precisionTuning;
     this.appSearchRelevance = docLinks.links.appSearch.relevanceTuning;
     this.appSearchResultSettings = docLinks.links.appSearch.resultSettings;
     this.appSearchSearchUI = docLinks.links.appSearch.searchUI;
     this.appSearchSecurity = docLinks.links.appSearch.security;
-    this.appSearchStandardAuth = docLinks.links.appSearch.standardAuth;
     this.appSearchSynonyms = docLinks.links.appSearch.synonyms;
     this.appSearchWebCrawler = docLinks.links.appSearch.webCrawler;
     this.appSearchWebCrawlerEventLogs = docLinks.links.appSearch.webCrawlerEventLogs;
@@ -173,7 +165,6 @@ class DocLinks {
     this.workplaceSearchServiceNow = docLinks.links.workplaceSearch.serviceNow;
     this.workplaceSearchSharePoint = docLinks.links.workplaceSearch.sharePoint;
     this.workplaceSearchSlack = docLinks.links.workplaceSearch.slack;
-    this.workplaceSearchStandardAuth = docLinks.links.workplaceSearch.standardAuth;
     this.workplaceSearchSynch = docLinks.links.workplaceSearch.synch;
     this.workplaceSearchZendesk = docLinks.links.workplaceSearch.zendesk;
   }

@@ -20,17 +20,4 @@ describe('SetupInstructions', () => {
     const wrapper = shallow(<SetupInstructions productName="Workplace Search" />);
     expect(wrapper.find(EuiSteps)).toHaveLength(1);
   });
-
-  it('renders with auth links', () => {
-    const wrapper = mountWithIntl(
-      <SetupInstructions
-        productName="Enterprise Search"
-        standardAuthLink="http://foo.com"
-        elasticsearchNativeAuthLink="http://bar.com"
-      />
-    );
-
-    expect(wrapper.find(EuiLink).first().prop('href')).toEqual('http://bar.com');
-    expect(wrapper.find(EuiLink).last().prop('href')).toEqual('http://foo.com');
-  });
 });
