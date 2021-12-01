@@ -90,20 +90,29 @@ export class Plugin implements PluginType {
   }
 
   public start(coreStart: CoreStart, plugins: UptimeCorePluginsStart) {
-    this.savedObjectsClient = new SavedObjectsClient(
-      coreStart.savedObjects.createInternalRepository([syntheticsServiceApiKey.name])
-    );
+    if (this.server?.config?.unsafe?.service.enabled) {
+      this.savedObjectsClient = new SavedObjectsClient(
+        coreStart.savedObjects.createInternalRepository([syntheticsServiceApiKey.name])
+      );
+    } else {
+      this.savedObjectsClient = new SavedObjectsClient(
+        coreStart.savedObjects.createInternalRepository()
+      );
+    }
+
     if (this.server) {
       this.server.security = plugins.security;
       this.server.fleet = plugins.fleet;
       this.server.encryptedSavedObjects = plugins.encryptedSavedObjects;
       this.server.savedObjectsClient = this.savedObjectsClient;
-      this.server.syntheticsService = this.syntheticService;
     }
 
     if (this.server?.config?.unsafe?.service.enabled) {
       this.syntheticService?.init(coreStart);
       this.syntheticService?.scheduleSyncTask(plugins.taskManager);
+      if (this.server && this.syntheticService) {
+        this.server.syntheticsService = this.syntheticService;
+      }
     }
   }
 
