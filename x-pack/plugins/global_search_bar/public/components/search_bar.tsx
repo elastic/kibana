@@ -212,50 +212,53 @@ export const SearchBar: FC<SearchBarProps> = ({
     [buttonRef, searchRef, trackUiMetric]
   );
 
-  const onChange = (selection: EuiSelectableTemplateSitewideOption[]) => {
-    const selected = selection.find(({ checked }) => checked === 'on');
-    if (!selected) {
-      return;
-    }
-
-    // @ts-ignore - ts error is "union type is too complex to express"
-    const { url, type, suggestion } = selected;
-
-    // if the type is a suggestion, we change the query on the input and trigger a new search
-    // by setting the searchValue (only setting the field value does not trigger a search)
-    if (type === '__suggestion__') {
-      setFieldValue(searchRef!, suggestion);
-      setSearchValue(suggestion);
-      return;
-    }
-
-    // errors in tracking should not prevent selection behavior
-    try {
-      if (type === 'application') {
-        const key = selected.keys ?? 'unknown';
-        trackUiMetric(METRIC_TYPE.CLICK, [
-          'user_navigated_to_application',
-          `user_navigated_to_application_${key.toLowerCase().replaceAll(' ', '_')}`, // which application
-        ]);
-      } else {
-        trackUiMetric(METRIC_TYPE.CLICK, [
-          'user_navigated_to_saved_object',
-          `user_navigated_to_saved_object_${type}`, // which type of saved object
-        ]);
+  const onChange = useCallback(
+    (selection: EuiSelectableTemplateSitewideOption[]) => {
+      const selected = selection.find(({ checked }) => checked === 'on');
+      if (!selected) {
+        return;
       }
-    } catch (e) {
-      // eslint-disable-next-line no-console
-      console.log('Error trying to track searchbar metrics', e);
-    }
 
-    navigateToUrl(url);
+      // @ts-ignore - ts error is "union type is too complex to express"
+      const { url, type, suggestion } = selected;
 
-    (document.activeElement as HTMLElement).blur();
-    if (searchRef) {
-      clearField(searchRef);
-      searchRef.dispatchEvent(blurEvent);
-    }
-  };
+      // if the type is a suggestion, we change the query on the input and trigger a new search
+      // by setting the searchValue (only setting the field value does not trigger a search)
+      if (type === '__suggestion__') {
+        setFieldValue(searchRef!, suggestion);
+        setSearchValue(suggestion);
+        return;
+      }
+
+      // errors in tracking should not prevent selection behavior
+      try {
+        if (type === 'application') {
+          const key = selected.keys ?? 'unknown';
+          trackUiMetric(METRIC_TYPE.CLICK, [
+            'user_navigated_to_application',
+            `user_navigated_to_application_${key.toLowerCase().replaceAll(' ', '_')}`, // which application
+          ]);
+        } else {
+          trackUiMetric(METRIC_TYPE.CLICK, [
+            'user_navigated_to_saved_object',
+            `user_navigated_to_saved_object_${type}`, // which type of saved object
+          ]);
+        }
+      } catch (e) {
+        // eslint-disable-next-line no-console
+        console.log('Error trying to track searchbar metrics', e);
+      }
+
+      navigateToUrl(url);
+
+      (document.activeElement as HTMLElement).blur();
+      if (searchRef) {
+        clearField(searchRef);
+        searchRef.dispatchEvent(blurEvent);
+      }
+    },
+    [trackUiMetric, navigateToUrl, searchRef]
+  );
 
   const emptyMessage = <PopoverPlaceholder darkMode={darkMode} basePath={basePathUrl} />;
   const placeholderText = i18n.translate('xpack.globalSearchBar.searchBar.placeholder', {
