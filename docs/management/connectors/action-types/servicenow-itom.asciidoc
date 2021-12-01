@@ -21,7 +21,7 @@ Create an integration user in {sn} and assign it the following roles.
 
 {sn} ITOM connectors have the following configuration properties.
 
-Name::      The name of the connector. The name is used to identify a  connector in the **Stack Management** UI connector listing, and in the connector list when configuring an action.
+Name::      The name of the connector. The name is used to identify a  connector in the **Stack Management** connector listing, and in the connector list when configuring an action.
 URL::       {sn} instance URL.
 Username::  Username for HTTP Basic authentication.
 Password::  Password for HTTP Basic authentication.
