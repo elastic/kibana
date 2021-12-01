@@ -135,6 +135,21 @@ The Timelion app is no longer supported. For more information, refer to {kibana-
 *Impact* +
 When you upgrade to 7.16.0, you are unable to use the *Timelion* app. The {kibana-ref}timelion.html[*Timelion*] visualization editor is still supported. 
 ====
+
+[discrete]
+[[breaking-107345]]
+.Replaces Osquery scheduled query groups with packs
+[%collapsible]
+====
+*Details* +
+Queries are now scheduled using packs. For more information, refer to {kibana-pull}107345[#107345].
+
+*Impact* +
+When you upgrade to 7.16.0, any existing scheduled query groups are converted to packs. 
+Queries in the updated packs are scheduled for the same agent policy as the original 
+scheduled query group. Action IDs for scheduled queries in a pack have the 
+format `pack_<pack_name>_<query ID>`. 
+====
       
 // end::notable-breaking-changes[]
 
