@@ -22,7 +22,11 @@ import {
   LayerDescriptor,
 } from '../../common/descriptor_types';
 import { MapSavedObject, MapSavedObjectAttributes } from '../../common/map_saved_object_type';
-import { getElasticsearch, getIndexPatternsServiceFactory, getSavedObjectClient } from '../kibana_server_services';
+import {
+  getElasticsearch,
+  getIndexPatternsServiceFactory,
+  getSavedObjectClient,
+} from '../kibana_server_services';
 import { injectReferences } from '././../../common/migrations/references';
 import {
   getBaseMapsPerCluster,
@@ -42,7 +46,7 @@ async function getIndexPatternsService() {
   const factory = getIndexPatternsServiceFactory();
   return factory(
     new SavedObjectsClient(getSavedObjectClient()),
-    getElasticsearch().client.asInternalUser,
+    getElasticsearch().client.asInternalUser
   );
 }
 

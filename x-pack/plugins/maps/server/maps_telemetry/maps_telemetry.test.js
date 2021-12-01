@@ -55,17 +55,17 @@ jest.mock('../kibana_server_services', () => {
   };
   return {
     getSavedObjectClient: () => {
-      return {}
+      return {};
     },
     getElasticsearch: () => {
       return {
         client: {
-          asInternalUser: {}
-        }
-      }
+          asInternalUser: {},
+        },
+      };
     },
     getIndexPatternsServiceFactory() {
-      return function() {
+      return function () {
         return {
           async get(x) {
             return x === testAggIndexPatternId ? testAggIndexPattern : testIndexPatterns[x];
@@ -77,7 +77,7 @@ jest.mock('../kibana_server_services', () => {
             return x.fields;
           },
         };
-      }
+      };
     },
   };
 });
