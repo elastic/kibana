@@ -164,7 +164,7 @@ export const CreateStep: FC<Props> = ({ actions, state, step }) => {
                       )}
                       checked={createIndexPattern === true}
                       onChange={() => setFormState({ createIndexPattern: !createIndexPattern })}
-                      data-test-subj="mlAnalyticsCreateJobWizardCreateIndexPatternSwitch"
+                      data-test-subj="mlAnalyticsCreateJobWizardCreateIndexPatternCheckbox"
                     />
                   </EuiFormRow>
                 </EuiFlexItem>
