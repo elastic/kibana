@@ -267,7 +267,7 @@ export function getAlertType(
       nrOfDocs = Number(docs.hits.total);
       logger.info(`searchThreshold (${alertId}) nrOfDocs: ${nrOfDocs}`);
     } catch (e) {
-      logger.error('Error fetching documents', e);
+      logger.error('Error fetching documents: ' + e.message);
       throw e;
     }
 
@@ -288,7 +288,7 @@ export function getAlertType(
 
       const baseContext: ActionContext = {
         title: name,
-        message: `${nrOfDocs} documents found (${conditions})`,
+        message: `${nrOfDocs} documents found between ${from} and ${to}`,
         date: timestamp,
         value: Number(nrOfDocs),
         conditions,

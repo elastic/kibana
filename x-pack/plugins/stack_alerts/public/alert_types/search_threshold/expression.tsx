@@ -8,7 +8,7 @@
 import React, { useState, Fragment, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiSpacer, EuiCallOut, EuiTitle, EuiExpression, EuiPopover } from '@elastic/eui';
+import { EuiSpacer, EuiCallOut, EuiTitle, EuiExpression, EuiPopover, EuiText } from '@elastic/eui';
 import {
   COMPARATORS,
   ThresholdExpression,
@@ -43,6 +43,7 @@ export const SearchThresholdAlertTypeExpression: React.FunctionComponent<
   const { thresholdComparator, threshold, timeWindowSize, timeWindowUnit, searchSourceFields } =
     alertParams;
   const [usedSearchSource, setUsedSearchSource] = useState<ISearchSource | undefined>();
+  const editable = false;
 
   // Note that this PR contains a limited way to edit query and filter
   // But it's out of scope for the MVP
@@ -143,7 +144,11 @@ export const SearchThresholdAlertTypeExpression: React.FunctionComponent<
             value={usedSearchSource!.getField('query')!.query}
             isActive={true}
             display="columns"
-            onClick={() => setShowQueryBar(!showQueryBar)}
+            onClick={() => {
+              if (editable) {
+                setShowQueryBar(!showQueryBar);
+              }
+            }}
           />
         }
         display="block"
@@ -177,7 +182,11 @@ export const SearchThresholdAlertTypeExpression: React.FunctionComponent<
             }
             isActive={true}
             display="columns"
-            onClick={() => setShowFilter(!showFilter)}
+            onClick={() => {
+              if (editable) {
+                setShowFilter(!showFilter);
+              }
+            }}
           />
         }
         display="block"
@@ -196,6 +205,12 @@ export const SearchThresholdAlertTypeExpression: React.FunctionComponent<
           }}
         />
       </EuiPopover>
+      <EuiText size="xs">
+        <FormattedMessage
+          id="xpack.stackAlerts.searchThreshold.ui.notEditable"
+          defaultMessage="Note that data view, query, filter are currently not editable"
+        />
+      </EuiText>
       <EuiSpacer size="s" />
       <EuiTitle size="xs">
         <h5>
