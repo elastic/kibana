@@ -478,7 +478,7 @@ export type VisualizationDimensionGroupConfig = SharedDimensionProps & {
   requiredMinDimensionCount?: number;
   dataTestSubj?: string;
   prioritizedOperation?: string;
-  suggestedValue?: number;
+  suggestedValue?: () => number;
 
   /**
    * When the dimension editor is enabled for this group, all dimensions in the group
@@ -756,7 +756,7 @@ export interface Visualization<T = unknown> {
    */
   getErrorMessages: (
     state: T,
-    datasourceLayers?: Record<string, DatasourcePublicAPI>
+    frame?: FramePublicAPI
   ) =>
     | Array<{
         shortMessage: string;

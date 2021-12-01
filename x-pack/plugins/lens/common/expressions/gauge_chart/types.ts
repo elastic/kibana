@@ -30,8 +30,13 @@ export const GaugeTitleModes = {
   none: 'none',
 } as const;
 
+export const GaugeColorModes = {
+  palette: 'palette',
+  none: 'none',
+} as const;
+
 export type GaugeType = 'gauge';
-export type GaugeColorMode = 'none' | 'palette';
+export type GaugeColorMode = keyof typeof GaugeColorModes;
 export type GaugeShape = keyof typeof GaugeShapes;
 export type GaugeTitleMode = keyof typeof GaugeTitleModes;
 export type GaugeTicksPosition = keyof typeof GaugeTicksPositions;

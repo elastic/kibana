@@ -21,6 +21,7 @@ import {
   isNumericFieldForDatatable,
   GaugeVisualizationState,
   GaugeTicksPositions,
+  GaugeColorModes,
 } from '../../../common/expressions';
 import {
   applyPaletteParams,
@@ -101,12 +102,12 @@ export function GaugeDimensionEditor(
                       stops: displayStops,
                     },
                   },
-                  ticksPosition: 'bands',
-                  colorMode: 'palette',
+                  ticksPosition: GaugeTicksPositions.bands,
+                  colorMode: GaugeColorModes.palette,
                 }
               : {
-                  ticksPosition: 'bands',
-                  colorMode: 'none',
+                  ticksPosition: GaugeTicksPositions.auto,
+                  colorMode: GaugeColorModes.none,
                 };
 
             setState({

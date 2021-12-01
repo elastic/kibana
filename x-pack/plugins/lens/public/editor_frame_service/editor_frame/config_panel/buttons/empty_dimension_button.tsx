@@ -72,7 +72,7 @@ const SuggestedValueButton = ({ columnId, group, onClick }: EmptyButtonProps) =>
     <FormattedMessage
       id="xpack.lens.configure.suggestedValuee"
       defaultMessage="Suggested value: {value}"
-      values={{ value: group.suggestedValue }}
+      values={{ value: group.suggestedValue?.() }}
     />
   </EuiButtonEmpty>
 );
@@ -162,7 +162,7 @@ export function EmptyDimensionButton({
         getCustomDropTarget={getCustomDropTarget}
       >
         <div className="lnsLayerPanel__dimension lnsLayerPanel__dimension--empty">
-          {typeof group?.suggestedValue === 'number' ? (
+          {typeof group.suggestedValue?.() === 'number' ? (
             <SuggestedValueButton columnId={value.columnId} onClick={onClick} group={group} />
           ) : (
             <DefaultEmptyButton columnId={value.columnId} onClick={onClick} group={group} />

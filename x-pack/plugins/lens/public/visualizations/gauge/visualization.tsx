@@ -232,10 +232,9 @@ export const getGaugeVisualization = ({
           accessors: state.minAccessor ? [{ columnId: state.minAccessor }] : [],
           filterOperations: isNumericMetric,
           supportsMoreColumns: !state.minAccessor,
-          required: true,
           dataTestSubj: 'lnsGauge_minDimensionPanel',
           prioritizedOperation: 'min',
-          suggestedValue: state.metricAccessor ? getMinValue(row, state) : undefined,
+          suggestedValue: () => (state.metricAccessor ? getMinValue(row, state) : undefined),
         },
         {
           supportStaticValue: true,
@@ -249,9 +248,8 @@ export const getGaugeVisualization = ({
           filterOperations: isNumericMetric,
           supportsMoreColumns: !state.maxAccessor,
           dataTestSubj: 'lnsGauge_maxDimensionPanel',
-          required: true,
           prioritizedOperation: 'max',
-          suggestedValue: state.metricAccessor ? getMaxValue(row, state) : undefined,
+          suggestedValue: () => (state.metricAccessor ? getMaxValue(row, state) : undefined),
         },
         {
           supportStaticValue: true,
