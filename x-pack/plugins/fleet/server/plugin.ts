@@ -85,6 +85,7 @@ import { FleetArtifactsClient } from './services/artifacts';
 import type { FleetRouter } from './types/request_context';
 import { TelemetryEventsSender } from './telemetry/sender';
 import { setupFleet } from './services/setup';
+import { fetchFindLatestPackage } from './services/epm/registry';
 
 export interface FleetSetupDeps {
   licensing: LicensingPluginSetup;
@@ -165,6 +166,8 @@ export interface FleetStartContract {
    * @param packageName
    */
   createArtifactsClient: (packageName: string) => FleetArtifactsClient;
+
+  fetchFindLatestPackage: typeof fetchFindLatestPackage;
 }
 
 export class FleetPlugin
@@ -382,6 +385,7 @@ export class FleetPlugin
       createArtifactsClient(packageName: string) {
         return new FleetArtifactsClient(core.elasticsearch.client.asInternalUser, packageName);
       },
+      fetchFindLatestPackage,
     };
   }
 
