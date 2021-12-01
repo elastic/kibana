@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-/// <reference types="cypress" />
+/* eslint-disable */
+
+// / <reference types="cypress" />
 // @ts-check
 
 const dayjs = require('dayjs');
@@ -14,11 +16,12 @@ const duration = require('dayjs/plugin/duration');
 
 dayjs.extend(duration);
 
+
 /**
  * Sends collected code coverage object to the backend code
  * via "cy.task".
  */
-const sendCoverage = (coverage, pathname = '/') => {
+const sendCoverage = (coverage: any, pathname = '/') => {
   logMessage(`Saving code coverage for **${pathname}**`);
 
   // const withoutSpecs = filterSpecsFromCoverage(coverage);
@@ -35,7 +38,7 @@ const sendCoverage = (coverage, pathname = '/') => {
  * so the user knows the log message is coming from this plugin.
  * @param {string} s Message to log.
  */
-const logMessage = (s) => {
+const logMessage = (s: string) => {
   cy.log(`${s} \`[@cypress/code-coverage]\``);
 };
 
@@ -43,7 +46,7 @@ const logMessage = (s) => {
  * Removes support file from the coverage object.
  * If there are more files loaded from support folder, also removes them
  */
-const filterSupportFilesFromCoverage = (totalCoverage) => {
+const filterSupportFilesFromCoverage = (totalCoverage: any) => {
   const integrationFolder = Cypress.config('integrationFolder');
   const supportFile = Cypress.config('supportFile');
 
@@ -51,7 +54,7 @@ const filterSupportFilesFromCoverage = (totalCoverage) => {
   // @ts-ignore
   const supportFolder = Cypress.config('supportFolder');
 
-  const isSupportFile = (filename) => filename === supportFile;
+  const isSupportFile = (filename: string) => filename === supportFile;
 
   let coverage = Cypress._.omitBy(totalCoverage, (fileCoverage, filename) =>
     isSupportFile(filename)
@@ -71,7 +74,7 @@ const filterSupportFilesFromCoverage = (totalCoverage) => {
 };
 
 const registerHooks = () => {
-  let windowCoverageObjects;
+  let windowCoverageObjects: any[];
 
   const hasE2ECoverage = () => Boolean(windowCoverageObjects.length);
 
@@ -104,7 +107,7 @@ const registerHooks = () => {
     // to let the user know the coverage has been collected
     windowCoverageObjects = [];
 
-    const saveCoverageObject = (win) => {
+    const saveCoverageObject = (win: any) => {
       console.log('wwwww', win, win.windows?.__coverage__, win.__coverage__);
       // if application code has been instrumented, the app iframe "window" has an object
       const applicationSourceCoverage = win.__coverage__;

@@ -15,7 +15,6 @@ describe('Add Integration', () => {
 
   before(() => {
     login();
-    // cy.window().should('have.property', '__coverage__');
   });
 
   it.skip('should open Osquery app', () => {
