@@ -17,7 +17,7 @@ import { TableFieldValue } from './table_cell_value';
 export const ACTIONS_COLUMN: EuiBasicTableColumn<FieldRecord> = {
   field: 'action',
   className: 'kbnDocViewer__tableActionsCell',
-  width: '108px',
+  width: '144px',
   mobileOptions: { header: false },
   name: (
     <EuiText size="xs">
@@ -31,8 +31,9 @@ export const ACTIONS_COLUMN: EuiBasicTableColumn<FieldRecord> = {
   ),
   render: (
     { flattenedField, isActive, onFilter, onToggleColumn }: FieldRecord['action'],
-    { field: { field, fieldMapping }, value: { ignored } }: FieldRecord
+    { field: { field, fieldMapping, displayName, onTogglePinned }, value: { ignored } }: FieldRecord
   ) => {
+    const togglePinned = () => onTogglePinned(displayName);
     return (
       <TableActions
         isActive={isActive}
@@ -42,6 +43,7 @@ export const ACTIONS_COLUMN: EuiBasicTableColumn<FieldRecord> = {
         onFilter={onFilter!}
         onToggleColumn={onToggleColumn}
         ignoredValue={!!ignored}
+        onTogglePinned={togglePinned}
       />
     );
   },
@@ -60,6 +62,8 @@ export const MAIN_COLUMNS: Array<EuiBasicTableColumn<FieldRecord>> = [
         </strong>
       </EuiText>
     ),
+    readOnly: true,
+    sortable: ({ field: { pinned } }) => pinned,
     render: ({ field, fieldType, displayName, fieldMapping, scripted }: FieldRecord['field']) => {
       return field ? (
         <FieldName

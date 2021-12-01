@@ -7,8 +7,15 @@
  */
 
 import './table.scss';
-import React, { useCallback, useMemo } from 'react';
-import { EuiInMemoryTable } from '@elastic/eui';
+import React, { useCallback, useMemo, useState } from 'react';
+import {
+  EuiInMemoryTable,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFieldSearch,
+  Direction,
+} from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { IndexPattern, IndexPatternField } from '../../../../../../data/public';
 import { flattenHit } from '../../../../../../data/common';
 import { SHOW_MULTIFIELDS } from '../../../../../common';
@@ -42,12 +49,21 @@ export interface FieldRecord {
     scripted: boolean;
     fieldType?: string;
     fieldMapping?: IndexPatternField;
+    pinned: boolean;
+    onTogglePinned: (displayName: string) => void;
   };
   value: {
     formattedValue: string;
     ignored?: IgnoredReason;
   };
 }
+
+const sorting = {
+  sort: {
+    field: 'field',
+    direction: 'desc' as Direction,
+  },
+};
 
 export const DocViewerTable = ({
   columns,
@@ -57,7 +73,13 @@ export const DocViewerTable = ({
   onAddColumn,
   onRemoveColumn,
 }: DocViewRenderProps) => {
+  const [query, setQuery] = useState('');
   const showMultiFields = getServices().uiSettings.get(SHOW_MULTIFIELDS);
+  const [pinnedFields, setPinnedFields] = useState<string[]>([]);
+
+  const searchPlaceholder = i18n.translate('discover.fieldChooser.searchPlaceHolder', {
+    defaultMessage: 'Search field names',
+  });
 
   const mapping = useCallback(
     (name: string) => indexPattern?.fields.getByName(name),
@@ -82,12 +104,23 @@ export const DocViewerTable = ({
     [onRemoveColumn, onAddColumn, columns]
   );
 
-  const onSetRowProps = useCallback(({ field: { field } }: FieldRecord) => {
+  const onSetRowProps = useCallback(({ field: { field, pinned } }: FieldRecord) => {
+    const key = pinned ? field + '-pinned' : field;
     return {
-      key: field,
+      key,
+      isSelected: pinned,
       className: 'kbnDocViewer__tableRow',
       'data-test-subj': `tableDocViewRow-${field}`,
     };
+  }, []);
+
+  const onTogglePinned = useCallback(
+    (displayName: string) => setPinnedFields([...pinnedFields, displayName]),
+    [pinnedFields]
+  );
+
+  const handleOnChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+    setQuery(event.currentTarget.value);
   }, []);
 
   if (!indexPattern) {
@@ -99,7 +132,9 @@ export const DocViewerTable = ({
 
   const items: FieldRecord[] = Object.keys(flattened)
     .filter((fieldName) => {
-      return fieldsToShow.includes(fieldName);
+      const fieldMapping = mapping(fieldName);
+      const displayName = fieldMapping?.displayName ?? fieldName;
+      return fieldsToShow.includes(fieldName) && displayName.includes(query);
     })
     .sort((fieldA, fieldB) => {
       const mappingA = mapping(fieldA);
@@ -128,6 +163,8 @@ export const DocViewerTable = ({
           fieldMapping,
           fieldType,
           scripted: Boolean(fieldMapping?.scripted),
+          pinned: pinnedFields.includes(displayName),
+          onTogglePinned,
         },
         value: {
           formattedValue: formatFieldValue(flattened[field], hit, indexPattern, fieldMapping),
@@ -137,14 +174,33 @@ export const DocViewerTable = ({
     });
 
   return (
-    <EuiInMemoryTable
-      tableLayout="auto"
+    <EuiFlexGroup
       className="kbnDocViewer__table"
-      items={items}
-      columns={tableColumns}
-      rowProps={onSetRowProps}
-      pagination={false}
+      direction="column"
+      gutterSize="none"
       responsive={false}
-    />
+    >
+      <EuiFlexItem grow={false}>
+        <EuiFieldSearch
+          aria-label={searchPlaceholder}
+          fullWidth
+          onChange={handleOnChange}
+          placeholder={searchPlaceholder}
+          value={query}
+        />
+      </EuiFlexItem>
+
+      <EuiFlexItem grow={false}>
+        <EuiInMemoryTable
+          tableLayout="auto"
+          items={items}
+          columns={tableColumns}
+          rowProps={onSetRowProps}
+          sorting={sorting}
+          pagination={{ pageSizeOptions: [25, 50, 100], initialPageSize: 25 }}
+          responsive={false}
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };
