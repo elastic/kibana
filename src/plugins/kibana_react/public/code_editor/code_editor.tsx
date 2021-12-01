@@ -397,6 +397,10 @@ export const CodeEditor: React.FC<Props> = ({
           },
           scrollbar: {
             useShadows: false,
+            // Scroll events are handled only when there is scrollable content. When there is scrollable content, the
+            // editor should scroll to the bottom then break out of that scroll context and continue scrolling on any
+            // outer scrollbars.
+            alwaysConsumeMouseWheel: false,
           },
           wordBasedSuggestions: false,
           wordWrap: 'on',

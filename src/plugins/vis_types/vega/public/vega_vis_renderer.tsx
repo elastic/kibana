@@ -33,6 +33,7 @@ export const getVegaVisRenderer: (
             deps={deps}
             fireEvent={handlers.event}
             renderComplete={handlers.done}
+            renderMode={handlers.getRenderMode()}
             visData={visData}
           />
         </VisualizationContainer>
