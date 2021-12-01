@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+// / <reference types="cypress" />
+
 // ***********************************************************
 // This example support/index.js is processed and
 // loaded automatically before your test files.
@@ -22,6 +24,21 @@
 
 // Import commands.js using ES2015 syntax:
 import './commands';
+
+declare global {
+  // eslint-disable-next-line @typescript-eslint/no-namespace
+  namespace Cypress {
+    interface Chainable {
+      getBySel(value: string, options?: Record<string, unknown>): Chainable<unknown>;
+    }
+  }
+}
+
+function getBySel(selector: string, options: Record<string, unknown>) {
+  return cy.get(`[data-test-subj=${selector}]`, options);
+}
+
+Cypress.Commands.add('getBySel', getBySel);
 
 // Alternatively you can use CommonJS syntax:
 // require('./commands')
