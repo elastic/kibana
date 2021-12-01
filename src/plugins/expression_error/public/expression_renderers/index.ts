@@ -6,10 +6,5 @@
  * Side Public License, v 1.
  */
 
-import { getErrorRenderer, errorRendererFactory } from './error_renderer';
-import { getDebugRenderer, debugRendererFactory } from './debug_renderer';
-
-export const renderers = [getErrorRenderer, getDebugRenderer];
-export const rendererFactories = [errorRendererFactory, debugRendererFactory];
-
-export { errorRendererFactory, getErrorRenderer, debugRendererFactory, getDebugRenderer };
+export { getErrorRenderer, errorRendererFactory } from './error_renderer';
+export { getDebugRenderer, debugRendererFactory } from './debug_renderer';
