@@ -34,6 +34,16 @@ export enum AlertExecutionStatusErrorReasons {
   Disabled = 'disabled',
 }
 
+export interface RuleExecutionStatus {
+  status: AlertExecutionStatuses;
+  last_execution_date: Date;
+  last_duration?: number;
+  error?: {
+    reason: AlertExecutionStatusErrorReasons;
+    message: string;
+  };
+}
+
 export interface AlertExecutionStatus {
   status: AlertExecutionStatuses;
   lastExecutionDate: Date;
@@ -47,6 +57,13 @@ export interface AlertExecutionStatus {
 export type AlertActionParams = SavedObjectAttributes;
 export type AlertActionParam = SavedObjectAttribute;
 
+export interface RuleAction {
+  group: string;
+  id: string;
+  connector_type_id: string;
+  params: AlertActionParams;
+}
+
 export interface AlertAction {
   group: string;
   id: string;
@@ -56,6 +73,30 @@ export interface AlertAction {
 
 export interface AlertAggregations {
   alertExecutionStatus: { [status: string]: number };
+}
+
+export interface Rule<Params extends AlertTypeParams = never> {
+  id: string;
+  enabled: boolean;
+  name: string;
+  tags: string[];
+  rule_type_id: string;
+  consumer: string;
+  schedule: IntervalSchedule;
+  actions: RuleAction[];
+  params: Params;
+  scheduled_task_id?: string;
+  created_by: string | null;
+  updated_by: string | null;
+  created_at: Date;
+  updated_at: Date;
+  api_key: string | null;
+  api_key_owner: string | null;
+  throttle: string | null;
+  notify_when: AlertNotifyWhenType | null;
+  mute_all: boolean;
+  muted_instance_ids: string[];
+  execution_status: AlertExecutionStatus;
 }
 
 export interface Alert<Params extends AlertTypeParams = never> {
@@ -82,6 +123,7 @@ export interface Alert<Params extends AlertTypeParams = never> {
   executionStatus: AlertExecutionStatus;
 }
 
+export type SanitizedRule<Params extends AlertTypeParams = never> = Omit<Rule<Params>, 'api_key'>;
 export type SanitizedAlert<Params extends AlertTypeParams = never> = Omit<Alert<Params>, 'apiKey'>;
 export type ResolvedSanitizedRule<Params extends AlertTypeParams = never> = SanitizedAlert<Params> &
   Omit<SavedObjectsResolveResponse, 'saved_object'>;

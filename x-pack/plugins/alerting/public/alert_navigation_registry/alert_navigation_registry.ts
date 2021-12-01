@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { AlertType } from '../../common';
+import { RuleType } from '../../common';
 import { AlertNavigationHandler } from './types';
 
 const DEFAULT_HANDLER = Symbol('*');
@@ -14,8 +14,8 @@ export class AlertNavigationRegistry {
   private readonly alertNavigations: Map<string, Map<string | symbol, AlertNavigationHandler>> =
     new Map();
 
-  public has(consumer: string, alertType: AlertType) {
-    return this.hasTypedHandler(consumer, alertType.id) || this.hasDefaultHandler(consumer);
+  public has(consumer: string, ruleType: RuleType) {
+    return this.hasTypedHandler(consumer, ruleType.id) || this.hasDefaultHandler(consumer);
   }
 
   public hasTypedHandler(consumer: string, ruleTypeId: string) {
@@ -70,18 +70,18 @@ export class AlertNavigationRegistry {
     consumerNavigations.set(ruleTypeId, handler);
   }
 
-  public get(consumer: string, alertType: AlertType): AlertNavigationHandler {
-    if (this.has(consumer, alertType)) {
+  public get(consumer: string, ruleType: RuleType): AlertNavigationHandler {
+    if (this.has(consumer, ruleType)) {
       const consumerHandlers = this.alertNavigations.get(consumer)!;
-      return (consumerHandlers.get(alertType.id) ?? consumerHandlers.get(DEFAULT_HANDLER))!;
+      return (consumerHandlers.get(ruleType.id) ?? consumerHandlers.get(DEFAULT_HANDLER))!;
     }
 
     throw new Error(
       i18n.translate('xpack.alerting.alertNavigationRegistry.get.missingNavigationError', {
         defaultMessage:
-          'Navigation for Alert type "{alertType}" within "{consumer}" is not registered.',
+          'Navigation for Alert type "{ruleType}" within "{consumer}" is not registered.',
         values: {
-          alertType: alertType.id,
+          ruleType: ruleType.id,
           consumer,
         },
       })

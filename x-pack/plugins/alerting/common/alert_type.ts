@@ -26,6 +26,24 @@ export interface AlertType<
   minimumScheduleInterval?: string;
 }
 
+export interface RuleType<
+  ActionGroupIds extends Exclude<string, RecoveredActionGroupId> = DefaultActionGroupId,
+  RecoveryActionGroupId extends string = RecoveredActionGroupId
+> {
+  id: string;
+  name: string;
+  action_groups: Array<ActionGroup<ActionGroupIds>>;
+  recovery_action_group: ActionGroup<RecoveryActionGroupId>;
+  action_variables: string[];
+  default_action_group_id: ActionGroupIds;
+  producer: string;
+  minimum_license_required: LicenseType;
+  is_exportable: boolean;
+  rule_task_timeout?: string;
+  default_schedule_interval?: string;
+  minimum_schedule_interval?: string;
+}
+
 export interface ActionGroup<ActionGroupIds extends string> {
   id: ActionGroupIds;
   name: string;

@@ -77,18 +77,18 @@ export class AlertingPublicPlugin implements Plugin<PluginSetupContract, PluginS
     return {
       getNavigation: async (alertId: Alert['id']) => {
         const alert = await loadAlert({ http: core.http, alertId });
-        const alertType = await loadAlertType({ http: core.http, id: alert.alertTypeId });
+        const ruleType = await loadAlertType({ http: core.http, id: alert.rule_type_id });
 
-        if (!alertType) {
+        if (!ruleType) {
           // eslint-disable-next-line no-console
           console.log(
-            `Unable to get navigation for alert type "${alert.alertTypeId}" because it is not registered on the server side.`
+            `Unable to get navigation for alert type "${alert.rule_type_id}" because it is not registered on the server side.`
           );
           return;
         }
 
-        if (this.alertNavigationRegistry!.has(alert.consumer, alertType)) {
-          const navigationHandler = this.alertNavigationRegistry!.get(alert.consumer, alertType);
+        if (this.alertNavigationRegistry!.has(alert.consumer, ruleType)) {
+          const navigationHandler = this.alertNavigationRegistry!.get(alert.consumer, ruleType);
           const state = navigationHandler(alert);
           return typeof state === 'string' ? { path: state } : { state };
         }

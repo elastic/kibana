@@ -35,7 +35,7 @@ describe('loadAlertTypes', () => {
     expect(result).toEqual(resolvedValue);
     expect(http.get.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
-        "/api/alerting/list_alert_types",
+        "/api/alerting/rule_types",
       ]
     `);
   });
@@ -60,7 +60,7 @@ describe('loadAlertType', () => {
 
     expect(http.get.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
-        "/api/alerting/list_alert_types",
+        "/api/alerting/rule_types",
       ]
     `);
   });
