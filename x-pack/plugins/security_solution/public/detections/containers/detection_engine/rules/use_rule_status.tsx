@@ -99,7 +99,6 @@ export const useRulesStatuses = (rules: Rules): ReturnRulesStatuses => {
             rules.map((rule) => ({
               id: rule.id,
               ...ruleStatusesResponse[rule.id],
-              rule,
             }))
           );
         }

@@ -445,12 +445,14 @@ export const RulesTables = React.memo<RulesTableProps>(
     );
 
     const items = useMemo(() => {
-      const rulesMap = new Map(rules.map((item) => [item.id, item]));
+      const rulesStatusesMap = new Map(rulesStatuses.map((item) => [item.id, item]));
 
-      return rulesStatuses.map(({ rule, ...rest }) => ({
-        ...rest,
-        ...(rulesMap.get(rule.id) ?? rule),
-      }));
+      return rules.map((rule) => {
+        return {
+          ...rule,
+          ...rulesStatusesMap.get(rule.id),
+        };
+      });
     }, [rulesStatuses, rules]);
 
     const tableProps =

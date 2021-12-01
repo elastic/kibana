@@ -54,7 +54,7 @@ type HasReadActionsPrivileges =
       [x: string]: boolean;
     }>;
 
-export type TableItem = RuleStatus & Rule;
+export type TableItem = Rule & Partial<RuleStatus>;
 export type TableColumn = EuiBasicTableColumn<TableItem> | EuiTableActionsColumnType<TableItem>;
 
 const extractRuleFromRow = ({ current_status: _, failures, ...rule }: TableItem): Rule => rule;
@@ -129,7 +129,6 @@ export const getActions = (
 
 export type EnhancedRuleStatus = RuleStatus & {
   id: string;
-  rule: Rule;
 };
 
 interface GetColumnsProps {
@@ -258,7 +257,7 @@ const getActionsColumns = ({
     : [];
 
 export const getRulesColumns = (columnsProps: GetColumnsProps): TableColumn[] => {
-  const cols: TableColumn[] = [
+  return [
     getColumnRuleName(columnsProps),
     getColumnTags(),
     {
@@ -339,14 +338,13 @@ export const getRulesColumns = (columnsProps: GetColumnsProps): TableColumn[] =>
       truncateText: true,
     },
     getColumnEnabled(columnsProps),
+    ...getActionsColumns(columnsProps),
   ];
-
-  return [...cols, ...getActionsColumns(columnsProps)];
 };
 
 export const getMonitoringColumns = (columnsProps: GetColumnsProps): TableColumn[] => {
   const { docLinks } = columnsProps;
-  const cols: TableColumn[] = [
+  return [
     { ...getColumnRuleName(columnsProps), width: '28%' },
     getColumnTags(),
     {
@@ -445,7 +443,6 @@ export const getMonitoringColumns = (columnsProps: GetColumnsProps): TableColumn
       truncateText: true,
     },
     getColumnEnabled(columnsProps),
+    ...getActionsColumns(columnsProps),
   ];
-
-  return [...cols, ...getActionsColumns(columnsProps)];
 };
