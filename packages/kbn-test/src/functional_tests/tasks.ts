@@ -108,7 +108,13 @@ export async function runTests(options: RunTestsParams) {
 
         let es;
         try {
+          if (process.env.ES_BOOT_UP_SLOWDOWN) {
+            await new Promise((r) => setTimeout(r, 60 * 1000));
+          }
           es = await runElasticsearch({ config, options: { ...options, log } });
+          if (process.env.KB_BOOT_UP_SLOWDOWN) {
+            await new Promise((r) => setTimeout(r, 60 * 1000));
+          }
           await runKibanaServer({ procs, config, options });
           await runFtr({ configPath, options: { ...options, log } });
         } finally {
