@@ -22,7 +22,6 @@ import {
   DashboardBuildContext,
   DashboardAppServices,
   DashboardAppState,
-  DashboardRedirect,
   DashboardState,
 } from '../../types';
 import { DashboardAppLocatorParams } from '../../locator';
@@ -44,14 +43,12 @@ import {
 export interface UseDashboardStateProps {
   history: History;
   savedDashboardId?: string;
-  redirectTo: DashboardRedirect;
   isEmbeddedExternally: boolean;
   kbnUrlStateStorage: IKbnUrlStateStorage;
 }
 
 export const useDashboardAppState = ({
   history,
-  redirectTo,
   savedDashboardId,
   kbnUrlStateStorage,
   isEmbeddedExternally,
@@ -184,11 +181,19 @@ export const useDashboardAppState = ({
         savedDashboard,
       });
 
+      // Backwards compatible way of detecting that we are taking a screenshot
+      const legacyPrintLayoutDetected =
+        screenshotModeService?.isScreenshotMode() &&
+        screenshotModeService.getScreenshotLayout() === 'print';
+
       const initialDashboardState = {
         ...savedDashboardState,
         ...dashboardSessionStorageState,
         ...initialDashboardStateFromUrl,
         ...forwardedAppState,
+
+        // if we are in legacy print mode, dashboard needs to be in print viewMode
+        ...(legacyPrintLayoutDetected ? { viewMode: ViewMode.PRINT } : {}),
 
         // if there is an incoming embeddable, dashboard always needs to be in edit mode to receive it.
         ...(incomingEmbeddable ? { viewMode: ViewMode.EDIT } : {}),
