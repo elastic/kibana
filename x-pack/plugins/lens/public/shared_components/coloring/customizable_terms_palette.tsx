@@ -100,6 +100,7 @@ export function CustomizableTermsPalette({
               const newParams: CustomPaletteParams = {
                 ...selectedPalette?.params,
                 name: newPalette.name,
+                title: '',
               };
 
               if (isNewPaletteCustom) {
@@ -132,6 +133,7 @@ export function CustomizableTermsPalette({
                   newParams.colorTerms = colorTerms;
                 }
                 newParams.steps = colorTerms.length;
+                newParams.title = savedPalette?.params?.title;
               } else {
                 const newColors = palettes.get(newPalette?.name).getCategoricalColors(terms.length);
                 const newColorTerms = terms.map((term, i) => ({

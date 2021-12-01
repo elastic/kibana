@@ -126,6 +126,7 @@ export function CustomizablePalette({
               const newParams: CustomPaletteParams = {
                 ...activePalette.params,
                 name: newPalette.name,
+                title: '',
                 colorStops: undefined,
                 reverse: false, // restore the reverse flag
               };
@@ -139,6 +140,7 @@ export function CustomizablePalette({
                 );
                 newParams.colorStops = savedPalette?.params?.colorStops;
                 newParams.name = CUSTOM_PALETTE;
+                newParams.title = savedPalette?.params?.title;
                 newParams.rangeType = savedPalette?.params?.rangeType;
               }
 
@@ -155,7 +157,7 @@ export function CustomizablePalette({
               newParams.rangeMax = newColorStops[newColorStops.length - 1].stop;
 
               setPalette({
-                ...newPalette,
+                type: newPalette.type,
                 name: isSavedToLibrary ? CUSTOM_PALETTE : newPalette.name,
                 params: newParams,
               });

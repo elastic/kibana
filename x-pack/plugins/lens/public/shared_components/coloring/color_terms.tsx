@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiFieldText,
@@ -50,6 +50,7 @@ export const ColorTerms = ({
   enableSave,
 }: ColorTermsProps) => {
   const [isSavePaletteModalOpen, setSavePaletteModalOpen] = useState(false);
+  const [shouldDisableSave, setShouldDisableSave] = useState(true);
 
   const onChangeWithValidation = useCallback(
     (newColorTerms: Array<{ color: string; term: string }>) => {
@@ -73,18 +74,22 @@ export const ColorTerms = ({
     onChange: onChangeWithValidation,
     value: memoizedValues,
   });
-  const shouldDisableAdd = Boolean(
-    paletteConfiguration?.maxSteps && localColorTerms.length >= paletteConfiguration?.maxSteps
-  );
 
   const onPaletteSave = useCallback(
     (title: string) => {
       return savePalette(title).then(() => {
         setSavePaletteModalOpen(false);
+        setShouldDisableSave(true);
       });
     },
-    [savePalette]
+    [savePalette, setShouldDisableSave]
   );
+
+  useEffect(() => {
+    if (paletteConfiguration?.name !== 'custom') {
+      setShouldDisableSave(true);
+    }
+  }, [paletteConfiguration]);
 
   return (
     <>
@@ -106,16 +111,6 @@ export const ColorTerms = ({
                     disabled
                     data-test-subj={`${dataTestPrefix}_dynamicColoring_term_value_${index}`}
                     value={fieldFormatter?.convert(term) ?? term}
-                    onChange={({ target }) => {
-                      const newTermString = target.value;
-                      const newColorTerms = [...localColorTerms];
-                      newColorTerms[index] = {
-                        color,
-                        term: newTermString,
-                        id,
-                      };
-                      setLocalColorTerms(newColorTerms);
-                    }}
                     aria-label={i18n.translate(
                       'xpack.lens.dynamicColoring.customPalette.termAriaLabel',
                       {
@@ -137,19 +132,13 @@ export const ColorTerms = ({
                       const newColorTerms = [...localColorTerms];
                       newColorTerms[index] = { color: newColor, term, id };
                       setLocalColorTerms(newColorTerms);
+                      setShouldDisableSave(false);
                     }}
                     secondaryInputDisplay="top"
                     color={color}
                     isInvalid={!isValidColor(color)}
                     showAlpha
                     compressed
-                    onBlur={() => {
-                      if (color === '') {
-                        const newColorTerms = [...localColorTerms];
-                        newColorTerms[index] = { color: colorTerms[index].color, term, id };
-                        setLocalColorTerms(newColorTerms);
-                      }
-                    }}
                     placeholder=" "
                   />
                 </EuiFlexItem>
@@ -162,13 +151,10 @@ export const ColorTerms = ({
       <EuiSpacer size="s" />
       {enableSave && (
         <TooltipWrapper
-          tooltipContent={i18n.translate(
-            'xpack.lens.dynamicColoring.customPalette.maximumStepsApplied',
-            {
-              defaultMessage: `You've applied the maximum number of steps`,
-            }
-          )}
-          condition={shouldDisableAdd}
+          tooltipContent={i18n.translate('xpack.lens.dynamicColoring.customPalette.noChangesMade', {
+            defaultMessage: `You haven't applied any changes`,
+          })}
+          condition={shouldDisableSave}
           position="top"
           delay="regular"
         >
@@ -180,7 +166,7 @@ export const ColorTerms = ({
               defaultMessage: 'Save palette',
             })}
             size="xs"
-            isDisabled={shouldDisableAdd}
+            isDisabled={shouldDisableSave}
             flush="left"
             onClick={() => {
               setSavePaletteModalOpen(true);
@@ -193,7 +179,11 @@ export const ColorTerms = ({
         </TooltipWrapper>
       )}
       {isSavePaletteModalOpen && enableSave && (
-        <SavePaletteModal onCancel={() => setSavePaletteModalOpen(false)} onSave={onPaletteSave} />
+        <SavePaletteModal
+          onCancel={() => setSavePaletteModalOpen(false)}
+          onSave={onPaletteSave}
+          paletteName={paletteConfiguration?.title ?? ''}
+        />
       )}
     </>
   );

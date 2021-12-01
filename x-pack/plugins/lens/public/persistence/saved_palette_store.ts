@@ -41,15 +41,15 @@ export class SavedObjectPaletteStore implements SavedPaletteStore {
     const { type, ...rest } = palette;
     const attributes = rest as CustomPaletteParams as SavedObjectAttributes;
     const duplicate = palette.title ? await this.checkForDuplicateTitle(palette.title) : false;
+    let result;
 
     if (duplicate) {
-      throw new Error('A palette with this title already exists.');
+      result = await this.client.update(PALETTE_DOC_TYPE, duplicate, attributes);
+    } else {
+      result = await this.client.create(PALETTE_DOC_TYPE, attributes, {
+        overwrite: true,
+      });
     }
-
-    const result = await this.client.create(PALETTE_DOC_TYPE, attributes, {
-      overwrite: true,
-    });
-
     return { ...palette, savedObjectId: result.id };
   };
 
@@ -64,8 +64,7 @@ export class SavedObjectPaletteStore implements SavedPaletteStore {
       searchFields: ['title'],
       search: `"${title}"`,
     });
-
-    return result.savedObjects.length > 0;
+    return result.savedObjects.length > 0 ? result.savedObjects[0].id : '';
   };
 
   load = async (savedObjectId: string): Promise<ResolvedSimpleSavedObject> => {

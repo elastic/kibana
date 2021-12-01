@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import type { FocusEvent } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
@@ -60,6 +60,7 @@ export const CustomStops = ({
   enableSave,
 }: CustomStopsProps) => {
   const [isSavePaletteModalOpen, setSavePaletteModalOpen] = useState(false);
+  const [shouldDisableSave, setShouldDisableSave] = useState(true);
   const onChangeWithValidation = useCallback(
     (newColorStops: Array<{ color: string; stop: string }>) => {
       const areStopsValuesValid = areStopsValid(newColorStops);
@@ -75,10 +76,17 @@ export const CustomStops = ({
     (title: string) => {
       return savePalette?.(title)?.then(() => {
         setSavePaletteModalOpen(false);
+        setShouldDisableSave(true);
       });
     },
     [savePalette]
   );
+
+  useEffect(() => {
+    if (paletteConfiguration?.name !== 'custom') {
+      setShouldDisableSave(true);
+    }
+  }, [paletteConfiguration]);
 
   const memoizedValues = useMemo(() => {
     return colorStops.map(({ color, stop }, i) => ({
@@ -182,6 +190,7 @@ export const CustomStops = ({
                         id,
                       };
                       setLocalColorStops(newColorStops);
+                      setShouldDisableSave(false);
                     }}
                     append={rangeType === 'percent' ? '%' : undefined}
                     aria-label={i18n.translate(
@@ -213,6 +222,7 @@ export const CustomStops = ({
                       const newColorStops = [...localColorStops];
                       newColorStops[index] = { color: newColor, stop, id };
                       setLocalColorStops(newColorStops);
+                      setShouldDisableSave(false);
                     }}
                     secondaryInputDisplay="top"
                     color={color}
@@ -330,7 +340,7 @@ export const CustomStops = ({
             defaultMessage: 'Save palette',
           })}
           size="xs"
-          isDisabled={shouldDisableAdd}
+          isDisabled={shouldDisableSave}
           flush="left"
           onClick={() => {
             setSavePaletteModalOpen(true);
@@ -342,7 +352,11 @@ export const CustomStops = ({
         </EuiButtonEmpty>
       )}
       {isSavePaletteModalOpen && enableSave && (
-        <SavePaletteModal onCancel={() => setSavePaletteModalOpen(false)} onSave={onPaletteSave} />
+        <SavePaletteModal
+          onCancel={() => setSavePaletteModalOpen(false)}
+          onSave={onPaletteSave}
+          paletteName={paletteConfiguration?.title ?? ''}
+        />
       )}
     </>
   );

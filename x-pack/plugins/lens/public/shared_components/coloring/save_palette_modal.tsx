@@ -24,11 +24,13 @@ import { i18n } from '@kbn/i18n';
 export function SavePaletteModal({
   onSave,
   onCancel,
+  paletteName,
 }: {
   onSave: (title: string) => Promise<void> | undefined;
   onCancel: () => void;
+  paletteName?: string;
 }) {
-  const [paletteTitle, setPaletteTitle] = useState('');
+  const [paletteTitle, setPaletteTitle] = useState(paletteName ?? '');
   const [validateTitleError, setValidateTitleError] = useState('');
 
   return (
@@ -97,9 +99,13 @@ export function SavePaletteModal({
               }}
               data-test-subj="canvasCustomElementForm-submit"
             >
-              {i18n.translate('xpack.lens.palette.saveModal.saveLabel', {
-                defaultMessage: 'Save',
-              })}
+              {paletteName
+                ? i18n.translate('xpack.lens.palette.saveModal.overwriteLabel', {
+                    defaultMessage: 'Overwrite',
+                  })
+                : i18n.translate('xpack.lens.palette.saveModal.saveLabel', {
+                    defaultMessage: 'Save',
+                  })}
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
