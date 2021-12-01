@@ -281,15 +281,15 @@ export function DimensionEditor(
     getPalettesFromLibrary();
   }, [paletteStore]);
   const terms = computeTerms(accessor, layerId, activeData);
+  const activePalette = (state.palette as PaletteOutput<CustomPaletteParams>) ?? {
+    name: 'default',
+    type: 'palette',
+  };
   if (terms.includes('__other__')) {
     //  Move other to the beginning of the list
     terms.pop();
     terms.unshift('__other__');
   }
-  const activePalette = (state.palette as PaletteOutput<CustomPaletteParams>) ?? {
-    name: 'default',
-    type: 'palette',
-  };
   const column = activeData?.[layerId].columns.find((col) => col.id === accessor);
   const savePaletteToLibrary = (palette: PaletteOutput<CustomPaletteParams>, title: string) => {
     return savePaletteToStore(paletteStore, palette, title, 'terms').then((savedPalette) => {

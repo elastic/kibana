@@ -24,6 +24,7 @@ const xyVisualization = getXyVisualization({
   useLegacyTimeAxis: false,
   kibanaTheme: themeServiceMock.createStartContract(),
   savedObjectsClient: {} as SavedObjectsClientContract,
+  canSavePalettes: true,
 });
 
 describe('xy_suggestions', () => {

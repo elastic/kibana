@@ -110,15 +110,24 @@ export function CustomizableTermsPalette({
                 );
                 if (savedPalette) {
                   const newColors = getTermsPaletteColors(savedPalette, palettes, terms);
-                  const newColorTerms = terms.map((term, i) => ({
-                    color: newColors[i],
-                    term,
-                  }));
-                  const finalColorTerms = computeColorTerms(
-                    savedPalette?.params?.colorTerms,
-                    newColorTerms
-                  );
-                  newParams.colorTerms = finalColorTerms;
+                  const paletteColorTerms = savedPalette.params?.colorTerms;
+                  const currentColorTerms: ColorTerm[] = [];
+                  let newTermsCounter = 0;
+                  terms?.forEach((term, i) => {
+                    const termExistsInPalette = paletteColorTerms?.find(
+                      (colorTerm) => colorTerm.term === term
+                    );
+                    if (termExistsInPalette) {
+                      currentColorTerms.push(termExistsInPalette);
+                      newColors.filter(function (color) {
+                        return color !== termExistsInPalette.color;
+                      });
+                    } else {
+                      currentColorTerms.push({ term, color: newColors[newTermsCounter] });
+                      newTermsCounter++;
+                    }
+                  });
+                  newParams.colorTerms = currentColorTerms;
                 } else {
                   newParams.colorTerms = colorTerms;
                 }

@@ -24,6 +24,7 @@ describe('#toExpression', () => {
     kibanaTheme: themeServiceMock.createStartContract(),
     useLegacyTimeAxis: false,
     savedObjectsClient: {} as SavedObjectsClientContract,
+    canSavePalettes: true,
   });
   let mockDatasource: ReturnType<typeof createMockDatasource>;
   let frame: ReturnType<typeof createMockFramePublicAPI>;

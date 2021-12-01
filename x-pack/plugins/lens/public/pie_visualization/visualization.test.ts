@@ -24,6 +24,7 @@ const pieVisualization = getPieVisualization({
   kibanaTheme: themeServiceMock.createStartContract(),
   formatFactory: fieldFormatsMock.deserialize,
   savedObjectsClient: {} as SavedObjectsClientContract,
+  canSavePalettes: true,
 });
 
 function getExampleState(): PieVisualizationState {
