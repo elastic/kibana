@@ -256,7 +256,7 @@ export default ({ getService }: FtrProviderContext) => {
             statMuted: 0,
             statErrors: 0,
           };
-          asyncForEach(Object.keys(subjToValueMap), async (subject: string) => {
+          await asyncForEach(Object.keys(subjToValueMap), async (subject: string) => {
             const value = await observability.alerts.common.getAlertStatValue(subject);
             expect(value).to.be(subjToValueMap[subject]);
           });
