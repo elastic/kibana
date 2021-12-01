@@ -86,6 +86,31 @@ export const HostsChart = ({ title }: Props) => {
       </EuiFlexItem>
       <EuiFlexItem style={{ height: 200 }}>
         <ExploratoryViewEmbeddable
+          title={'User authentications'}
+          reportConfigMap={reportConfigMap}
+          dataTypesIndexPatterns={indexPatternList}
+          reportType="event_outcome"
+          attributes={[
+            {
+              reportDefinitions: {
+                even_outcome: ['ALL_VALUES'],
+              },
+              name: 'even_outcome',
+              dataType: 'security',
+              selectedMetricField: 'even_outcome',
+              time: { from: 'now-24h', to: 'now' },
+            },
+          ]}
+          legendIsVisible={false}
+          axisTitlesVisibility={{
+            x: false,
+            yLeft: false,
+            yRight: false,
+          }}
+        />
+      </EuiFlexItem>
+      <EuiFlexItem style={{ height: 200 }}>
+        <ExploratoryViewEmbeddable
           title={'Unique IPs'}
           reportConfigMap={reportConfigMap}
           dataTypesIndexPatterns={indexPatternList}
@@ -107,6 +132,31 @@ export const HostsChart = ({ title }: Props) => {
               name: 'destination.ip',
               dataType: 'security',
               selectedMetricField: 'destination.ip',
+              time: { from: 'now-24h', to: 'now' },
+            },
+          ]}
+          legendIsVisible={false}
+          axisTitlesVisibility={{
+            x: false,
+            yLeft: false,
+            yRight: false,
+          }}
+        />
+      </EuiFlexItem>
+      <EuiFlexItem style={{ height: 200 }}>
+        <ExploratoryViewEmbeddable
+          title={'Unique IPs'}
+          reportConfigMap={reportConfigMap}
+          dataTypesIndexPatterns={indexPatternList}
+          reportType="unique_ip"
+          attributes={[
+            {
+              reportDefinitions: {
+                unique_ip: ['ALL_VALUES'],
+              },
+              name: 'unique_ip',
+              dataType: 'security',
+              selectedMetricField: 'unique_ip',
               time: { from: 'now-24h', to: 'now' },
             },
           ]}

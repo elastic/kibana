@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { euiPaletteForStatus } from '@elastic/eui';
 import {
   ConfigProps,
   SeriesConfig,
@@ -95,5 +95,104 @@ export function getSecurityKPIConfig(_config: ConfigProps): SeriesConfig {
       },
     ],
     labels: { 'host.name': 'Hosts', 'url.full': 'URL', 'agent.type': 'Agent type' },
+  };
+}
+export const USE_BREAK_DOWN_COLUMN = 'USE_BREAK_DOWN_COLUMN';
+const statusPallete = euiPaletteForStatus(3);
+export function getSecurityEventOutcomeKPIConfig(_config: ConfigProps): SeriesConfig {
+  return {
+    defaultSeriesType: 'bar_horizontal_percentage_stacked',
+    reportType: 'event_outcome',
+    seriesTypes: ['bar_horizontal_percentage_stacked'],
+    xAxisColumn: {
+      sourceField: USE_BREAK_DOWN_COLUMN,
+    },
+    yAxisColumns: [
+      {
+        sourceField: REPORT_METRIC_FIELD,
+        label: 'success',
+      },
+      {
+        sourceField: REPORT_METRIC_FIELD,
+        label: 'failure',
+      },
+    ],
+    hasOperationType: false,
+    filterFields: [],
+    breakdownFields: ['event.outcome'],
+    baseFilters: [],
+    labels: { 'host.name': 'Hosts', 'url.full': 'URL', 'agent.type': 'Agent type' },
+    definitionFields: ['host.name'],
+    metricOptions: [
+      {
+        id: 'even_outcome',
+        label: 'event outcome',
+        columnType: FILTER_RECORDS,
+        columnFilters: [
+          {
+            language: 'kuery',
+            query: `event.outcome: success`,
+          },
+          {
+            language: 'kuery',
+            query: `event.outcome: failure`,
+          },
+        ],
+      },
+    ],
+    yConfig: [
+      { color: statusPallete[0], forAccessor: 'y-axis-column' },
+      { color: statusPallete[1], forAccessor: 'y-axis-column-1' },
+      { color: statusPallete[2], forAccessor: 'y-axis-column-2' },
+    ],
+  };
+}
+
+export function getSecurityUniqueIpscomeKPIConfig(_config: ConfigProps): SeriesConfig {
+  return {
+    defaultSeriesType: 'bar_horizontal_percentage_stacked',
+    reportType: 'unique_ip',
+    seriesTypes: ['bar_horizontal_percentage_stacked'],
+    xAxisColumn: {
+      sourceField: USE_BREAK_DOWN_COLUMN,
+    },
+    yAxisColumns: [
+      {
+        sourceField: REPORT_METRIC_FIELD,
+        label: 'src',
+      },
+      {
+        sourceField: REPORT_METRIC_FIELD,
+        label: 'dest',
+      },
+    ],
+    hasOperationType: false,
+    filterFields: [],
+    breakdownFields: ['source.ip', 'destination.ip'],
+    baseFilters: [],
+    labels: { 'host.name': 'Hosts', 'url.full': 'URL', 'agent.type': 'Agent type' },
+    definitionFields: ['host.name'],
+    metricOptions: [
+      {
+        id: 'unique_ip',
+        label: 'unique ip',
+        columnType: FILTER_RECORDS,
+        columnFilters: [
+          {
+            language: 'kuery',
+            query: `source.ip: *`,
+          },
+          {
+            language: 'kuery',
+            query: `destination.ip: *`,
+          },
+        ],
+      },
+    ],
+    yConfig: [
+      { color: statusPallete[0], forAccessor: 'y-axis-column' },
+      { color: statusPallete[1], forAccessor: 'y-axis-column-1' },
+      { color: statusPallete[2], forAccessor: 'y-axis-column-2' },
+    ],
   };
 }

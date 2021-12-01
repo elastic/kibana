@@ -7,12 +7,20 @@
 
 import * as React from 'react';
 import { ExploratoryViewContextProvider, ExploratoryView } from '../../../../observability/public';
-import { getSecurityKPIConfig } from './kpi_over_time_config';
+import {
+  getSecurityKPIConfig,
+  getSecurityEventOutcomeKPIConfig,
+  getSecurityUniqueIpscomeKPIConfig,
+} from './kpi_over_time_config';
 import { RenderAppProps } from '../types';
 import { getSecurityAlertsKPIConfig } from './alert_kpi_over_time_config';
 
 export const reportConfigMap = {
-  security: [getSecurityKPIConfig],
+  security: [
+    getSecurityKPIConfig,
+    getSecurityEventOutcomeKPIConfig,
+    getSecurityUniqueIpscomeKPIConfig,
+  ],
   securityAlerts: [getSecurityAlertsKPIConfig],
 };
 
@@ -33,7 +41,11 @@ export const dataTypes: any = [
   },
 ];
 
-export const reportTypes = [{ reportType: 'kpi-over-time', label: 'KPI over time' }];
+export const reportTypes = [
+  { reportType: 'kpi-over-time', label: 'KPI over time' },
+  { reportType: 'event_outcome', label: 'bar' },
+  { reportType: 'unique_ip', label: 'bar' },
+];
 
 export const SecurityExploratoryView = ({
   setHeaderActionMenu,
