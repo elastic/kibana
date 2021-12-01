@@ -375,7 +375,7 @@ export function toEsDoc(
 ) {
   const properties = feature.properties ? feature.properties : {};
   return {
-    coordinates:
+    geometry:
       geoFieldType === ES_FIELD_TYPES.GEO_SHAPE
         ? feature.geometry
         : (feature.geometry as Point).coordinates,
