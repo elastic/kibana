@@ -432,13 +432,7 @@ This content has moved. Refer to <<data-views-runtime-field-api-update>>.
 
 This content has moved. Refer to <<data-views-runtime-field-api-upsert>>.
 
-[role="exclude",id="index-patterns-runtime-field-api-update]
-== Index patterns has been renamed to data views.
-
-This content has moved. Refer to <<data-views-runtime-field-api-update>>.
-
 [role="exclude",id="index-patterns-api-update]
 == Index patterns has been renamed to data views.
 
 This content has moved. Refer to <<data-views-api-update>>.
-
