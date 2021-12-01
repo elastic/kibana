@@ -24,6 +24,8 @@ import type {
 
 import type { SharePluginStart } from 'src/plugins/share/public';
 
+import { once } from 'lodash';
+
 import type { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
 
 import { DEFAULT_APP_CATEGORIES, AppNavLinkStatus } from '../../../../src/core/public';
@@ -139,12 +141,13 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
       euiIconType: 'logoElastic',
       mount: async (params: AppMountParameters) => {
         const [coreStartServices, startDepsServices, fleetStart] = await core.getStartServices();
+        const authz = await fleetStart.authz();
         const startServices: FleetStartServices = {
           ...coreStartServices,
           ...startDepsServices,
           storage: this.storage,
           cloud: deps.cloud,
-          authz: fleetStart.authz,
+          authz,
         };
         const { renderApp, teardownIntegrations } = await import('./applications/integrations');
 
@@ -237,10 +240,9 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
   }
 
   public start(core: CoreStart): FleetStart {
-    let successPromise: ReturnType<FleetStart['isInitialized']>;
     const registerExtension = createExtensionRegistrationCallback(this.extensions);
-    const permissionsResponsePromise = core.http.get<CheckPermissionsResponse>(
-      appRoutesService.getCheckPermissionsPath()
+    const getPermissions = once(() =>
+      core.http.get<CheckPermissionsResponse>(appRoutesService.getCheckPermissionsPath())
     );
 
     registerExtension({
@@ -252,42 +254,46 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
     return {
       // Temporarily rely on superuser check to calculate authz. Once Kibana RBAC is in place for Fleet this should
       // switch to a sync calculation based on `core.application.capabilites` properties.
-      authz: permissionsResponsePromise.then((permissionsResponse) => {
-        if (permissionsResponse.success) {
-          // If superuser, give access to everything
-          return calculateAuthz({
-            fleet: { all: true, setup: true },
-            integrations: { all: true, read: true },
-          });
+      authz: getPermissions()
+        .catch((e) => {
+          // eslint-disable-next-line no-console
+          console.warn(`Could not load Fleet permissions due to error: ${e}`);
+          return { success: false };
+        })
+        .then((permissionsResponse) => {
+          if (permissionsResponse.success) {
+            // If superuser, give access to everything
+            return calculateAuthz({
+              fleet: { all: true, setup: true },
+              integrations: { all: true, read: true },
+            });
+          } else {
+            // All other users only get access to read integrations if they have the read privilege
+            const { capabilities } = core.application;
+            return calculateAuthz({
+              fleet: { all: false, setup: false },
+              integrations: { all: false, read: capabilities.fleet.read as boolean },
+            });
+          }
+        }),
+
+      isInitialized: once(async () => {
+        const permissionsResponse = await getPermissions();
+
+        if (permissionsResponse?.success) {
+          const { isInitialized } = await core.http.post<PostFleetSetupResponse>(
+            setupRouteService.getSetupPath()
+          );
+          if (!isInitialized) {
+            throw new Error('Unknown setup error');
+          }
+
+          return true;
         } else {
-          // Otherwise, deny access to everything
-          return calculateAuthz({
-            fleet: { all: false, setup: false },
-            integrations: { all: false, read: false },
-          });
+          throw new Error(permissionsResponse?.error || 'Unknown permissions error');
         }
       }),
-      isInitialized: () => {
-        if (!successPromise) {
-          successPromise = Promise.resolve().then(async () => {
-            const permissionsResponse = await permissionsResponsePromise;
 
-            if (permissionsResponse?.success) {
-              return core.http
-                .post<PostFleetSetupResponse>(setupRouteService.getSetupPath())
-                .then(({ isInitialized }) =>
-                  isInitialized
-                    ? Promise.resolve(true)
-                    : Promise.reject(new Error('Unknown setup error'))
-                );
-            } else {
-              throw new Error(permissionsResponse?.error || 'Unknown permissions error');
-            }
-          });
-        }
-
-        return successPromise;
-      },
       registerExtension,
     };
   }
