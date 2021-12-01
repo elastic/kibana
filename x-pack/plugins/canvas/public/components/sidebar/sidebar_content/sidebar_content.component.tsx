@@ -65,7 +65,7 @@ const SingleElementSidebar: React.FC<{ selectedElementId: string | null }> = ({
   selectedElementId,
 }) => (
   <Fragment>
-    <SidebarHeader title={strings.getSingleElementSidebarTitle()} />
+    <SidebarHeader title={strings.getSingleElementSidebarTitle()} showLayerControls />
     <ElementSettings selectedElementId={selectedElementId} />
   </Fragment>
 );
