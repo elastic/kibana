@@ -427,7 +427,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
             legend={i18n.translate('xpack.lens.indexPattern.terms.orderDirection', {
               defaultMessage: 'Rank direction',
             })}
-            data-test-subj="indexPattern-terms-orderDirection_groups"
+            data-test-subj="indexPattern-terms-orderDirection-groups"
             name="orderDirection"
             buttonSize="compressed"
             aria-label={i18n.translate('xpack.lens.indexPattern.terms.orderDirection', {
@@ -436,7 +436,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
             options={[
               {
                 id: `${idPrefix}asc`,
-                'data-test-subj': 'indexPattern-terms-orderDirection_groups_asc',
+                'data-test-subj': 'indexPattern-terms-orderDirection-groups-asc',
                 value: 'asc',
                 label: i18n.translate('xpack.lens.indexPattern.terms.orderAscending', {
                   defaultMessage: 'Ascending',
@@ -444,7 +444,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
               },
               {
                 id: `${idPrefix}desc`,
-                'data-test-subj': 'indexPattern-terms-orderDirection_groups_desc',
+                'data-test-subj': 'indexPattern-terms-orderDirection-groups-desc',
                 value: 'desc',
                 label: i18n.translate('xpack.lens.indexPattern.terms.orderDescending', {
                   defaultMessage: 'Descending',

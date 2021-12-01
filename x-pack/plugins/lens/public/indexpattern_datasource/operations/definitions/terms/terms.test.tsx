@@ -8,7 +8,7 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { shallow, mount } from 'enzyme';
-import { EuiFieldNumber, EuiSelect, EuiSwitch } from '@elastic/eui';
+import { EuiButtonGroup, EuiFieldNumber, EuiSelect, EuiSwitch } from '@elastic/eui';
 import type {
   IUiSettingsClient,
   SavedObjectsClientContract,
@@ -24,6 +24,16 @@ import { termsOperation, LastValueIndexPatternColumn } from '../index';
 import { IndexPattern, IndexPatternLayer } from '../../../types';
 import { FrameDatasourceAPI } from '../../../../types';
 import { DateHistogramIndexPatternColumn } from '../date_histogram';
+
+// mocking random id generator function
+jest.mock('@elastic/eui', () => {
+  const original = jest.requireActual('@elastic/eui');
+
+  return {
+    ...original,
+    htmlIdGenerator: () => () => '',
+  };
+});
 
 const uiSettingsMock = {} as IUiSettingsClient;
 
@@ -909,12 +919,10 @@ describe('terms', () => {
         />
       );
 
-      const select = instance
-        .find('[data-test-subj="indexPattern-terms-orderDirection"]')
-        .find(EuiSelect);
+      const selection = instance.find(EuiButtonGroup);
 
-      expect(select.prop('value')).toEqual('asc');
-      expect(select.prop('options')!.map(({ value }) => value)).toEqual(['asc', 'desc']);
+      expect(selection.prop('idSelected')).toEqual('asc');
+      expect(selection.prop('options').map(({ value }) => value)).toEqual(['asc', 'desc']);
     });
 
     it('should update state with the order direction value', () => {
@@ -929,14 +937,7 @@ describe('terms', () => {
         />
       );
 
-      instance
-        .find('[data-test-subj="indexPattern-terms-orderDirection"]')
-        .find(EuiSelect)
-        .simulate('change', {
-          target: {
-            value: 'desc',
-          },
-        });
+      instance.find(EuiButtonGroup).simulate('change', 'desc');
 
       expect(updateLayerSpy).toHaveBeenCalledWith({
         ...layer,
