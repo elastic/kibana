@@ -8,7 +8,8 @@
 import { i18n } from '@kbn/i18n';
 import { uniq } from 'lodash';
 import type { CoreStart } from 'kibana/public';
-import { esQuery } from '../../../../../../../../src/plugins/data/public';
+import { buildEsQuery } from '@kbn/es-query';
+import { getEsQueryConfig } from '../../../../../../../../src/plugins/data/public';
 import { operationDefinitionMap } from '../index';
 import { defaultLabel } from '../filters';
 import { isReferenced } from '../../layer_helpers';
@@ -133,11 +134,11 @@ export function getDisallowedTermsMessage(
               {
                 body: JSON.stringify({
                   fieldName: fieldNames[0],
-                  dslQuery: esQuery.buildEsQuery(
+                  dslQuery: buildEsQuery(
                     indexPattern,
                     frame.query,
                     frame.filters,
-                    esQuery.getEsQueryConfig(core.uiSettings)
+                    getEsQueryConfig(core.uiSettings)
                   ),
                   fromDate: frame.dateRange.fromDate,
                   toDate: frame.dateRange.toDate,
