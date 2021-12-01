@@ -32,6 +32,7 @@ const datatableVisualization = getDatatableVisualization({
   paletteService: chartPluginMock.createPaletteRegistry(),
   theme: themeServiceMock.createStartContract(),
   savedObjectsClient: {} as SavedObjectsClientContract,
+  canSavePalettes: true,
 });
 
 describe('Datatable Visualization', () => {

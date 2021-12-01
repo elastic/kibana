@@ -104,12 +104,14 @@ export const getXyVisualization = ({
   useLegacyTimeAxis,
   savedObjectsClient,
   kibanaTheme,
+  canSavePalettes,
 }: {
   paletteService: PaletteRegistry;
   fieldFormats: FieldFormatsStart;
   useLegacyTimeAxis: boolean;
   savedObjectsClient: SavedObjectsClientContract;
   kibanaTheme: ThemeServiceStart;
+  canSavePalettes: boolean;
 }): Visualization<State> => ({
   id: 'lnsXY',
 
@@ -606,6 +608,7 @@ export const getXyVisualization = ({
             formatFactory={fieldFormats.deserialize}
             paletteService={paletteService}
             savedObjectsClient={savedObjectsClient}
+            canSavePalettes={canSavePalettes}
           />
         </I18nProvider>
       </KibanaThemeProvider>,

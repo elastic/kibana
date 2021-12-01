@@ -130,6 +130,7 @@ export function PieComponent(
   if (shape === 'mosaic') {
     sortingMap = extractUniqTermsMap(firstTable, bucketColumns[0].id);
   }
+  // console.dir(palette);
 
   const layers: PartitionLayer[] = bucketColumns.map((col, layerIndex) => {
     return {

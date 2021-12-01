@@ -40,7 +40,7 @@ import {
   PalettePanelContainer,
   CustomizableTermsPalette,
   FIXED_PROGRESSION,
-  getTermsPaletteColors,
+  getDisplayPaletteColors,
 } from '../../shared_components';
 import { AxisSettingsPopover } from './axis_settings_popover';
 import { getAxesConfiguration, GroupsConfiguration } from '../axes_configuration';
@@ -642,7 +642,7 @@ export function DimensionEditor(
         <EuiFlexItem>
           <EuiColorPaletteDisplay
             data-test-subj="lnsXY_dynamicColoring_palette"
-            palette={getTermsPaletteColors(activePalette, props.paletteService, terms)}
+            palette={getDisplayPaletteColors(activePalette, props.paletteService, terms)}
             type={FIXED_PROGRESSION}
             onClick={() => {
               setIsPaletteOpen(!isPaletteOpen);

@@ -204,6 +204,30 @@ export const getTermsPaletteColors = (
   return activePalette.params?.reverse ? colors.reverse() : colors;
 };
 
+export const getDisplayPaletteColors = (
+  activePalette: PaletteOutput<CustomPaletteParams>,
+  paletteService: PaletteRegistry,
+  terms: string[]
+) => {
+  let colors;
+  if (activePalette.name !== CUSTOM_PALETTE) {
+    colors = paletteService
+      .get(activePalette.name)
+      .getCategoricalColors(
+        activePalette?.params?.steps || DEFAULT_COLOR_STEPS,
+        activePalette?.params
+      );
+  } else {
+    const termsColors = activePalette.params?.colorTerms?.map((colorTerm) => colorTerm.color);
+    colors = paletteService.get(activePalette.name).getCategoricalColors(terms.length, {
+      terms,
+      colors: termsColors,
+      gradient: true,
+    });
+  }
+  return activePalette.params?.reverse ? colors.reverse() : colors;
+};
+
 export function mergePaletteParams(
   activePalette: PaletteOutput<CustomPaletteParams>,
   newParams: CustomPaletteParams

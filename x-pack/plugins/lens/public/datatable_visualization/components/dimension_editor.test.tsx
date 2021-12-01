@@ -26,6 +26,7 @@ describe('data table dimension editor', () => {
   let props: VisualizationDimensionEditorProps<DatatableVisualizationState> & {
     paletteService: PaletteRegistry;
     savedObjectsClient: SavedObjectsClientContract;
+    canSavePalettes: boolean;
   };
 
   function testState(): DatatableVisualizationState {
@@ -77,6 +78,7 @@ describe('data table dimension editor', () => {
       paletteService: chartPluginMock.createPaletteRegistry(),
       panelRef: React.createRef(),
       savedObjectsClient,
+      canSavePalettes: true,
     };
   });
 

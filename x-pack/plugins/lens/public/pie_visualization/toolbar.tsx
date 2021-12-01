@@ -32,7 +32,7 @@ import {
   PalettePanelContainer,
   CustomizableTermsPalette,
   FIXED_PROGRESSION,
-  getTermsPaletteColors,
+  getDisplayPaletteColors,
 } from '../shared_components';
 import { SavedObjectPaletteStore, getPalettesFromStore, savePaletteToStore } from '../persistence';
 import { computeTerms } from '../utils';
@@ -281,6 +281,11 @@ export function DimensionEditor(
     getPalettesFromLibrary();
   }, [paletteStore]);
   const terms = computeTerms(accessor, layerId, activeData);
+  if (terms.includes('__other__')) {
+    //  Move other to the beginning of the list
+    terms.pop();
+    terms.unshift('__other__');
+  }
   const activePalette = (state.palette as PaletteOutput<CustomPaletteParams>) ?? {
     name: 'default',
     type: 'palette',
@@ -301,7 +306,7 @@ export function DimensionEditor(
       <EuiFlexItem>
         <EuiColorPaletteDisplay
           data-test-subj="lnsPie_dynamicColoring_palette"
-          palette={getTermsPaletteColors(activePalette, props.paletteService, terms)}
+          palette={getDisplayPaletteColors(activePalette, props.paletteService, terms)}
           type={FIXED_PROGRESSION}
           onClick={() => {
             setIsPaletteOpen(!isPaletteOpen);

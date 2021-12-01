@@ -66,7 +66,7 @@ function buildRoundRobinCategoricalWithMappedColors(): Omit<PaletteDefinition, '
   return {
     id: 'default',
     getCategoricalColor: getColor,
-    getCategoricalColors: () => colors,
+    getCategoricalColors: (size?: number) => colors.slice(0, size ?? 10),
     toExpression: () => ({
       type: 'expression',
       chain: [

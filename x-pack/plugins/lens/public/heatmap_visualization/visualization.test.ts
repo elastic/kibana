@@ -63,6 +63,7 @@ describe('heatmap', () => {
           paletteService,
           theme,
           savedObjectsClient: {} as SavedObjectsClientContract,
+          canSavePalettes: true,
         }).initialize(() => 'l1')
       ).toEqual({
         layerId: 'l1',
@@ -91,6 +92,7 @@ describe('heatmap', () => {
           paletteService,
           theme,
           savedObjectsClient: {} as SavedObjectsClientContract,
+          canSavePalettes: true,
         }).initialize(() => 'test-layer', exampleState())
       ).toEqual(exampleState());
     });
@@ -131,6 +133,7 @@ describe('heatmap', () => {
           paletteService,
           theme,
           savedObjectsClient: {} as SavedObjectsClientContract,
+          canSavePalettes: true,
         }).getConfiguration({ state, frame, layerId: 'first' })
       ).toEqual({
         groups: [
@@ -190,6 +193,7 @@ describe('heatmap', () => {
           paletteService,
           theme,
           savedObjectsClient: {} as SavedObjectsClientContract,
+          canSavePalettes: true,
         }).getConfiguration({ state, frame, layerId: 'first' })
       ).toEqual({
         groups: [
@@ -244,6 +248,7 @@ describe('heatmap', () => {
           paletteService,
           theme,
           savedObjectsClient: {} as SavedObjectsClientContract,
+          canSavePalettes: true,
         }).getConfiguration({ state, frame, layerId: 'first' })
       ).toEqual({
         groups: [
@@ -300,6 +305,7 @@ describe('heatmap', () => {
           paletteService,
           theme,
           savedObjectsClient: {} as SavedObjectsClientContract,
+          canSavePalettes: true,
         }).setDimension({
           prevState,
           layerId: 'first',
@@ -326,6 +332,7 @@ describe('heatmap', () => {
           paletteService,
           theme,
           savedObjectsClient: {} as SavedObjectsClientContract,
+          canSavePalettes: true,
         }).removeDimension({
           prevState,
           layerId: 'first',
@@ -346,6 +353,7 @@ describe('heatmap', () => {
           paletteService,
           theme,
           savedObjectsClient: {} as SavedObjectsClientContract,
+          canSavePalettes: true,
         }).getSupportedLayers()
       ).toHaveLength(1);
     });
@@ -362,6 +370,7 @@ describe('heatmap', () => {
         paletteService,
         theme,
         savedObjectsClient: {} as SavedObjectsClientContract,
+        canSavePalettes: true,
       });
       expect(instance.getLayerType('test-layer', state)).toEqual(layerTypes.DATA);
       expect(instance.getLayerType('foo', state)).toBeUndefined();
@@ -397,6 +406,7 @@ describe('heatmap', () => {
           paletteService,
           theme,
           savedObjectsClient: {} as SavedObjectsClientContract,
+          canSavePalettes: true,
         }).toExpression(state, datasourceLayers)
       ).toEqual({
         type: 'expression',
@@ -484,6 +494,7 @@ describe('heatmap', () => {
           paletteService,
           theme,
           savedObjectsClient: {} as SavedObjectsClientContract,
+          canSavePalettes: true,
         }).toExpression(state, datasourceLayers, attributes)
       ).toEqual(null);
     });
@@ -517,6 +528,7 @@ describe('heatmap', () => {
           paletteService,
           theme,
           savedObjectsClient: {} as SavedObjectsClientContract,
+          canSavePalettes: true,
         }).toPreviewExpression!(state, datasourceLayers)
       ).toEqual({
         type: 'expression',
@@ -595,6 +607,7 @@ describe('heatmap', () => {
           paletteService,
           theme,
           savedObjectsClient: {} as SavedObjectsClientContract,
+          canSavePalettes: true,
         }).getErrorMessages(mockState)
       ).toEqual(undefined);
     });
@@ -609,6 +622,7 @@ describe('heatmap', () => {
           paletteService,
           theme,
           savedObjectsClient: {} as SavedObjectsClientContract,
+          canSavePalettes: true,
         }).getErrorMessages(mockState)
       ).toEqual([
         {
@@ -643,6 +657,7 @@ describe('heatmap', () => {
           paletteService,
           theme,
           savedObjectsClient: {} as SavedObjectsClientContract,
+          canSavePalettes: true,
         }).getWarningMessages!(mockState, frame)
       ).toEqual(undefined);
     });
@@ -665,6 +680,7 @@ describe('heatmap', () => {
           paletteService,
           theme,
           savedObjectsClient: {} as SavedObjectsClientContract,
+          canSavePalettes: true,
         }).getWarningMessages!(mockState, frame)
       ).toEqual(undefined);
     });
@@ -692,6 +708,7 @@ describe('heatmap', () => {
           paletteService,
           theme,
           savedObjectsClient: {} as SavedObjectsClientContract,
+          canSavePalettes: true,
         }).getWarningMessages!(mockState, frame)
       ).toHaveLength(1);
     });

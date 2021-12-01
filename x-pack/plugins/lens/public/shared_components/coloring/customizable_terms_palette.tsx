@@ -75,7 +75,6 @@ export function CustomizableTermsPalette({
       colorTerms,
     },
   };
-
   const savePalette = (title: string) => {
     return savePaletteToLibrary(selectedPalette, title);
   };
@@ -109,7 +108,20 @@ export function CustomizableTermsPalette({
                 const savedPalette = libraryPalettes?.find(
                   (p) => p.params?.title === newPalette.name
                 );
-                newParams.colorTerms = savedPalette?.params?.colorTerms;
+                if (savedPalette) {
+                  const newColors = getTermsPaletteColors(savedPalette, palettes, terms);
+                  const newColorTerms = terms.map((term, i) => ({
+                    color: newColors[i],
+                    term,
+                  }));
+                  const finalColorTerms = computeColorTerms(
+                    savedPalette?.params?.colorTerms,
+                    newColorTerms
+                  );
+                  newParams.colorTerms = finalColorTerms;
+                } else {
+                  newParams.colorTerms = colorTerms;
+                }
                 newParams.steps = colorTerms.length;
               } else {
                 const newColors = palettes.get(newPalette?.name).getCategoricalColors(terms.length);
