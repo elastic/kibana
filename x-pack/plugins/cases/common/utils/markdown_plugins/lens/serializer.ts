@@ -11,14 +11,12 @@ import { LENS_ID } from './constants';
 
 export interface LensSerializerProps {
   attributes: Record<string, unknown>;
-  editMode: boolean;
   timeRange: TimeRange;
 }
 
-export const serializeLens = ({ timeRange, editMode, attributes }: LensSerializerProps) =>
+const serializeLens = ({ timeRange, attributes }: LensSerializerProps) =>
   `!{${LENS_ID}${JSON.stringify({
     timeRange,
-    editMode,
     attributes,
   })}}`;
 

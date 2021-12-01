@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-import { mapValues, trimEnd } from 'lodash';
-import { SerializableRecord } from '@kbn/utility-types';
-
+import { mapValues, trimEnd, mergeWith } from 'lodash';
+import type { SerializableRecord } from '@kbn/utility-types';
 import {
-  mergeMigrationFunctionMaps,
   MigrateFunction,
   MigrateFunctionsObject,
 } from '../../../../../../src/plugins/kibana_utils/common';
@@ -137,9 +135,7 @@ export const migrateByValueLensVisualizations =
         },
       };
     } catch (error) {
-      // TODO: we don't have access to the context (it's always undefined because of the way the migrations are merged)
-      // so we can't log anything
-      // logError({ id: doc.id, context, error, docType: 'comment', docKey: 'comment' });
+      logError({ id: doc.id, context, error, docType: 'comment', docKey: 'comment' });
       return doc;
     }
   };
@@ -158,4 +154,23 @@ export const stringifyCommentWithoutTrailingNewline = (
   // the original comment did not end with a newline so the markdown library is going to add one, so let's remove it
   // so the comment stays consistent
   return trimEnd(stringifiedComment, '\n');
+};
+
+/**
+ * merge function maps adds the context param from the original implementation at:
+ * src/plugins/kibana_utils/common/persistable_state/merge_migration_function_map.ts
+ *  */
+export const mergeMigrationFunctionMaps = (
+  obj1: MigrateFunctionsObject,
+  obj2: MigrateFunctionsObject
+) => {
+  const customizer = (objValue: SavedObjectMigrationFn, srcValue: SavedObjectMigrationFn) => {
+    if (!srcValue || !objValue) {
+      return srcValue || objValue;
+    }
+    return (doc: SavedObjectUnsanitizedDoc, context: SavedObjectMigrationContext) =>
+      objValue(srcValue(doc, context), context);
+  };
+
+  return mergeWith({ ...obj1 }, obj2, customizer);
 };

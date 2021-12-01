@@ -10,7 +10,7 @@ export interface TimelineSerializerProps {
   match: string;
 }
 
-export const serializeTimeline = ({ match }: TimelineSerializerProps) => match;
+const serializeTimeline = ({ match }: TimelineSerializerProps) => match;
 
 export const TimelineSerializer: Plugin = function () {
   const Compiler = this.Compiler;

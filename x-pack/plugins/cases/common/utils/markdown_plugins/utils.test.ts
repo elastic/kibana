@@ -19,6 +19,7 @@ describe('markdown utils', () => {
       expect(stringifyMarkdownComment(parsed)).toEqual('hello\n');
     });
 
+    // This check ensures the version of remark-stringify supports tables. From version 9+ this is not supported by default.
     it('parses and stringifies github formatted markdown correctly', () => {
       const parsed = parseCommentString(`| Tables   |      Are      |  Cool |
       |----------|:-------------:|------:|
@@ -91,7 +92,7 @@ describe('markdown utils', () => {
 
     it('parses a lens visualization', () => {
       const lensVisualization =
-        '!{lens{"timeRange":{"from":"now-7d","to":"now","mode":"relative"},"editMode":false,"attributes":{"title":"TEst22","type":"lens","visualizationType":"lnsMetric","state":{"datasourceStates":{"indexpattern":{"layers":{"layer1":{"columnOrder":["col2"],"columns":{"col2":{"dataType":"number","isBucketed":false,"label":"Count of records","operationType":"count","scale":"ratio","sourceField":"Records"}}}}}},"visualization":{"layerId":"layer1","accessor":"col2"},"query":{"language":"kuery","query":""},"filters":[]},"references":[{"type":"index-pattern","id":"90943e30-9a47-11e8-b64d-95841ca0b247","name":"indexpattern-datasource-current-indexpattern"},{"type":"index-pattern","id":"90943e30-9a47-11e8-b64d-95841ca0b247","name":"indexpattern-datasource-layer-layer1"}]}}}';
+        '!{lens{"timeRange":{"from":"now-7d","to":"now","mode":"relative"},"attributes":{"title":"TEst22","type":"lens","visualizationType":"lnsMetric","state":{"datasourceStates":{"indexpattern":{"layers":{"layer1":{"columnOrder":["col2"],"columns":{"col2":{"dataType":"number","isBucketed":false,"label":"Count of records","operationType":"count","scale":"ratio","sourceField":"Records"}}}}}},"visualization":{"layerId":"layer1","accessor":"col2"},"query":{"language":"kuery","query":""},"filters":[]},"references":[{"type":"index-pattern","id":"90943e30-9a47-11e8-b64d-95841ca0b247","name":"indexpattern-datasource-current-indexpattern"},{"type":"index-pattern","id":"90943e30-9a47-11e8-b64d-95841ca0b247","name":"indexpattern-datasource-layer-layer1"}]}}}';
 
       const parsedNodes = parseCommentString(lensVisualization);
       expect(parsedNodes.children[0].type).toEqual('lens');
@@ -99,19 +100,11 @@ describe('markdown utils', () => {
 
     it('stringifies a lens visualization', () => {
       const lensVisualization =
-        '!{lens{"timeRange":{"from":"now-7d","to":"now","mode":"relative"},"editMode":false,"attributes":{"title":"TEst22","type":"lens","visualizationType":"lnsMetric","state":{"datasourceStates":{"indexpattern":{"layers":{"layer1":{"columnOrder":["col2"],"columns":{"col2":{"dataType":"number","isBucketed":false,"label":"Count of records","operationType":"count","scale":"ratio","sourceField":"Records"}}}}}},"visualization":{"layerId":"layer1","accessor":"col2"},"query":{"language":"kuery","query":""},"filters":[]},"references":[{"type":"index-pattern","id":"90943e30-9a47-11e8-b64d-95841ca0b247","name":"indexpattern-datasource-current-indexpattern"},{"type":"index-pattern","id":"90943e30-9a47-11e8-b64d-95841ca0b247","name":"indexpattern-datasource-layer-layer1"}]}}}';
+        '!{lens{"timeRange":{"from":"now-7d","to":"now","mode":"relative"},"attributes":{"title":"TEst22","type":"lens","visualizationType":"lnsMetric","state":{"datasourceStates":{"indexpattern":{"layers":{"layer1":{"columnOrder":["col2"],"columns":{"col2":{"dataType":"number","isBucketed":false,"label":"Count of records","operationType":"count","scale":"ratio","sourceField":"Records"}}}}}},"visualization":{"layerId":"layer1","accessor":"col2"},"query":{"language":"kuery","query":""},"filters":[]},"references":[{"type":"index-pattern","id":"90943e30-9a47-11e8-b64d-95841ca0b247","name":"indexpattern-datasource-current-indexpattern"},{"type":"index-pattern","id":"90943e30-9a47-11e8-b64d-95841ca0b247","name":"indexpattern-datasource-layer-layer1"}]}}}';
 
       const parsedNodes = parseCommentString(lensVisualization);
 
       expect(stringifyMarkdownComment(parsedNodes)).toEqual(`${lensVisualization}\n`);
-    });
-
-    it('stringifies a html visualization', () => {
-      const htmlString = `<p id=x></p>`;
-
-      const parsedNodes = parseCommentString(htmlString);
-
-      expect(stringifyMarkdownComment(parsedNodes)).toEqual(`${htmlString}\n`);
     });
   });
 });
