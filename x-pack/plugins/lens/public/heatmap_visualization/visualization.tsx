@@ -43,6 +43,7 @@ interface HeatmapVisualizationDeps {
   paletteService: PaletteRegistry;
   theme: ThemeServiceStart;
   savedObjectsClient: SavedObjectsClientContract;
+  canSavePalettes: boolean;
 }
 
 function getAxisName(axis: 'x' | 'y') {
@@ -101,6 +102,7 @@ export const getHeatmapVisualization = ({
   paletteService,
   theme,
   savedObjectsClient,
+  canSavePalettes,
 }: HeatmapVisualizationDeps): Visualization<HeatmapVisualizationState> => ({
   id: LENS_HEATMAP_ID,
 
@@ -270,6 +272,7 @@ export const getHeatmapVisualization = ({
             {...props}
             paletteService={paletteService}
             savedObjectsClient={savedObjectsClient}
+            canSavePalettes={canSavePalettes}
           />
         </I18nProvider>
       </KibanaThemeProvider>,

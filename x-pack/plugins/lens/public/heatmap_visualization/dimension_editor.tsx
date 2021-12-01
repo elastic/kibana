@@ -33,9 +33,10 @@ export function HeatmapDimensionEditor(
   props: VisualizationDimensionEditorProps<HeatmapVisualizationState> & {
     paletteService: PaletteRegistry;
     savedObjectsClient: SavedObjectsClientContract;
+    canSavePalettes: boolean;
   }
 ) {
-  const { state, setState, frame, accessor, savedObjectsClient } = props;
+  const { state, setState, frame, accessor, savedObjectsClient, canSavePalettes } = props;
   const [isPaletteOpen, setIsPaletteOpen] = useState(false);
   const [libraryPalettes, setLibraryPalettes] = useState<Array<PaletteOutput<CustomPaletteParams>>>(
     []
@@ -145,6 +146,7 @@ export function HeatmapDimensionEditor(
                 });
               }}
               savePaletteToLibrary={savePaletteToLibrary}
+              enableSave={canSavePalettes}
             />
           </PalettePanelContainer>
         </EuiFlexItem>

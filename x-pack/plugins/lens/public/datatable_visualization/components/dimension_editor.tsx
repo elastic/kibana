@@ -74,6 +74,7 @@ export function TableDimensionEditor(
   props: VisualizationDimensionEditorProps<DatatableVisualizationState> & {
     paletteService: PaletteRegistry;
     savedObjectsClient: SavedObjectsClientContract;
+    canSavePalettes: boolean;
   }
 ) {
   const { state, setState, frame, accessor, savedObjectsClient } = props;
@@ -421,6 +422,7 @@ export function TableDimensionEditor(
                         });
                       }}
                       savePaletteToLibrary={savePaletteToLibrary}
+                      enableSave={props.canSavePalettes}
                     />
                   </PalettePanelContainer>
                 </EuiFlexItem>

@@ -583,9 +583,11 @@ export function DimensionEditor(
     formatFactory: FormatFactory;
     paletteService: PaletteRegistry;
     savedObjectsClient: SavedObjectsClientContract;
+    canSavePalettes: boolean;
   }
 ) {
-  const { state, setState, layerId, accessor, activeData, savedObjectsClient } = props;
+  const { state, setState, layerId, accessor, activeData, savedObjectsClient, canSavePalettes } =
+    props;
 
   const index = state.layers.findIndex((l) => l.layerId === layerId);
   const layer = state.layers[index];
@@ -679,6 +681,7 @@ export function DimensionEditor(
                 setState(updateLayer(state, { ...layer, palette: newPalette }, index));
               }}
               savePaletteToLibrary={savePaletteToLibrary}
+              enableSave={canSavePalettes}
             />
           </PalettePanelContainer>
         </EuiFlexItem>

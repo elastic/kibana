@@ -44,10 +44,12 @@ export const getDatatableVisualization = ({
   paletteService,
   theme,
   savedObjectsClient,
+  canSavePalettes,
 }: {
   paletteService: PaletteRegistry;
   theme: ThemeServiceStart;
   savedObjectsClient: SavedObjectsClientContract;
+  canSavePalettes: boolean;
 }): Visualization<DatatableVisualizationState> => ({
   id: 'lnsDatatable',
 
@@ -307,6 +309,7 @@ export const getDatatableVisualization = ({
             {...props}
             paletteService={paletteService}
             savedObjectsClient={savedObjectsClient}
+            canSavePalettes={canSavePalettes}
           />
         </I18nProvider>
       </KibanaThemeProvider>,

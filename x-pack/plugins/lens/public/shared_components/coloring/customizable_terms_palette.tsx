@@ -43,6 +43,7 @@ export function CustomizableTermsPalette({
   savePaletteToLibrary,
   terms,
   fieldFormatter,
+  enableSave = true,
 }: {
   libraryPalettes?: Array<PaletteOutput<CustomPaletteParams>>;
   palettes: PaletteRegistry;
@@ -54,6 +55,7 @@ export function CustomizableTermsPalette({
   ) => Promise<void>;
   terms: string[];
   fieldFormatter?: IFieldFormat;
+  enableSave?: boolean;
 }) {
   let selectedPalette = activePalette ?? {
     name: 'default',
@@ -177,6 +179,7 @@ export function CustomizableTermsPalette({
               return setPalette(newParams);
             }}
             fieldFormatter={fieldFormatter}
+            enableSave={enableSave}
           />
         </EuiFormRow>
       </div>

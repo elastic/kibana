@@ -248,6 +248,7 @@ export function DimensionEditor(
     paletteService: PaletteRegistry;
     formatFactory: FormatFactory;
     savedObjectsClient: SavedObjectsClientContract;
+    canSavePalettes: boolean;
   }
 ) {
   const [isPaletteOpen, setIsPaletteOpen] = useState(false);
@@ -263,6 +264,7 @@ export function DimensionEditor(
     paletteService,
     activeData,
     savedObjectsClient,
+    canSavePalettes,
   } = props;
   const paletteStore = useMemo(
     () => new SavedObjectPaletteStore(savedObjectsClient),
@@ -338,6 +340,7 @@ export function DimensionEditor(
               setState({ ...state, palette: newPalette });
             }}
             savePaletteToLibrary={savePaletteToLibrary}
+            enableSave={canSavePalettes}
           />
         </PalettePanelContainer>
       </EuiFlexItem>

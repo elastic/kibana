@@ -270,6 +270,7 @@ describe('XY Config panels', () => {
           paletteService={chartPluginMock.createPaletteRegistry()}
           panelRef={React.createRef()}
           savedObjectsClient={savedObjectsClient}
+          canSavePalettes={true}
         />
       );
 
@@ -295,6 +296,7 @@ describe('XY Config panels', () => {
           paletteService={chartPluginMock.createPaletteRegistry()}
           panelRef={React.createRef()}
           savedObjectsClient={savedObjectsClient}
+          canSavePalettes={true}
         />
       );
 
@@ -341,6 +343,7 @@ describe('XY Config panels', () => {
           paletteService={chartPluginMock.createPaletteRegistry()}
           panelRef={React.createRef()}
           savedObjectsClient={savedObjectsClient}
+          canSavePalettes={true}
         />
       );
 
@@ -383,6 +386,7 @@ describe('XY Config panels', () => {
           paletteService={chartPluginMock.createPaletteRegistry()}
           panelRef={React.createRef()}
           savedObjectsClient={savedObjectsClient}
+          canSavePalettes={true}
         />
       );
 

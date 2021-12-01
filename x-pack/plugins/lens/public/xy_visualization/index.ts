@@ -28,7 +28,8 @@ export class XyVisualization {
   ) {
     editorFrame.registerVisualization(async () => {
       const { getXyChartRenderer, getXyVisualization } = await import('../async_services');
-      const [{ savedObjects }, { charts, fieldFormats }] = await core.getStartServices();
+      const [{ savedObjects, application }, { charts, fieldFormats }] =
+        await core.getStartServices();
       const palettes = await charts.palettes.getPalettes();
       const useLegacyTimeAxis = core.uiSettings.get(LEGACY_TIME_AXIS);
       expressions.registerRenderer(
@@ -48,6 +49,7 @@ export class XyVisualization {
         useLegacyTimeAxis,
         savedObjectsClient: savedObjects.client,
         kibanaTheme: core.theme,
+        canSavePalettes: Boolean(application.capabilities.visualize.save),
       });
     });
   }

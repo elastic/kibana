@@ -11,6 +11,7 @@ import { schema } from '@kbn/config-schema';
 import { CoreSetup, Plugin } from 'kibana/server';
 import { COLOR_MAPPING_SETTING, LEGACY_TIME_AXIS, palette, systemPalette } from '../common';
 import { ExpressionsServerSetup } from '../../expressions/server';
+import { setupSavedObjects } from './saved_objects';
 
 interface SetupDependencies {
   expressions: ExpressionsServerSetup;
@@ -20,6 +21,8 @@ export class ChartsServerPlugin implements Plugin<object, object> {
   public setup(core: CoreSetup, dependencies: SetupDependencies) {
     dependencies.expressions.registerFunction(palette);
     dependencies.expressions.registerFunction(systemPalette);
+    // setup palette saved objects type
+    setupSavedObjects(core);
     core.uiSettings.register({
       [COLOR_MAPPING_SETTING]: {
         name: i18n.translate('charts.advancedSettings.visualization.colorMappingTitle', {

@@ -19,12 +19,13 @@ export class HeatmapVisualization {
     editorFrame.registerVisualization(async () => {
       const { getHeatmapVisualization } = await import('../async_services');
       const palettes = await charts.palettes.getPalettes();
-      const [{ savedObjects }] = await core.getStartServices();
+      const [{ savedObjects, application }] = await core.getStartServices();
 
       return getHeatmapVisualization({
         paletteService: palettes,
         theme: core.theme,
         savedObjectsClient: savedObjects.client,
+        canSavePalettes: Boolean(application.capabilities.visualize.save),
       });
     });
   }

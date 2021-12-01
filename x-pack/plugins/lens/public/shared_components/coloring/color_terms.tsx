@@ -38,6 +38,7 @@ export interface ColorTermsProps {
   paletteConfiguration: CustomPaletteParamsConfig | undefined;
   'data-test-prefix': string;
   fieldFormatter?: IFieldFormat;
+  enableSave: boolean;
 }
 export const ColorTerms = ({
   onChange,
@@ -46,6 +47,7 @@ export const ColorTerms = ({
   colorTerms,
   ['data-test-prefix']: dataTestPrefix,
   fieldFormatter,
+  enableSave,
 }: ColorTermsProps) => {
   const [isSavePaletteModalOpen, setSavePaletteModalOpen] = useState(false);
 
@@ -158,38 +160,39 @@ export const ColorTerms = ({
       </EuiFlexGroup>
 
       <EuiSpacer size="s" />
-
-      <TooltipWrapper
-        tooltipContent={i18n.translate(
-          'xpack.lens.dynamicColoring.customPalette.maximumStepsApplied',
-          {
-            defaultMessage: `You've applied the maximum number of steps`,
-          }
-        )}
-        condition={shouldDisableAdd}
-        position="top"
-        delay="regular"
-      >
-        <EuiButtonEmpty
-          data-test-subj={`${dataTestPrefix}_dynamicColoring_savePalette`}
-          iconType="save"
-          color="primary"
-          aria-label={i18n.translate('xpack.lens.dynamicColoring.customPalette.save', {
-            defaultMessage: 'Save palette',
-          })}
-          size="xs"
-          isDisabled={shouldDisableAdd}
-          flush="left"
-          onClick={() => {
-            setSavePaletteModalOpen(true);
-          }}
+      {enableSave && (
+        <TooltipWrapper
+          tooltipContent={i18n.translate(
+            'xpack.lens.dynamicColoring.customPalette.maximumStepsApplied',
+            {
+              defaultMessage: `You've applied the maximum number of steps`,
+            }
+          )}
+          condition={shouldDisableAdd}
+          position="top"
+          delay="regular"
         >
-          {i18n.translate('xpack.lens.dynamicColoring.customPalette.save', {
-            defaultMessage: 'Save palette',
-          })}
-        </EuiButtonEmpty>
-      </TooltipWrapper>
-      {isSavePaletteModalOpen && (
+          <EuiButtonEmpty
+            data-test-subj={`${dataTestPrefix}_dynamicColoring_savePalette`}
+            iconType="save"
+            color="primary"
+            aria-label={i18n.translate('xpack.lens.dynamicColoring.customPalette.save', {
+              defaultMessage: 'Save palette',
+            })}
+            size="xs"
+            isDisabled={shouldDisableAdd}
+            flush="left"
+            onClick={() => {
+              setSavePaletteModalOpen(true);
+            }}
+          >
+            {i18n.translate('xpack.lens.dynamicColoring.customPalette.save', {
+              defaultMessage: 'Save palette',
+            })}
+          </EuiButtonEmpty>
+        </TooltipWrapper>
+      )}
+      {isSavePaletteModalOpen && enableSave && (
         <SavePaletteModal onCancel={() => setSavePaletteModalOpen(false)} onSave={onPaletteSave} />
       )}
     </>

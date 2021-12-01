@@ -67,11 +67,13 @@ export const getPieVisualization = ({
   kibanaTheme,
   formatFactory,
   savedObjectsClient,
+  canSavePalettes,
 }: {
   paletteService: PaletteRegistry;
   kibanaTheme: ThemeServiceStart;
   formatFactory: FormatFactory;
   savedObjectsClient: SavedObjectsClientContract;
+  canSavePalettes: boolean;
 }): Visualization<PieVisualizationState> => ({
   id: 'lnsPie',
 
@@ -249,6 +251,7 @@ export const getPieVisualization = ({
             paletteService={paletteService}
             formatFactory={formatFactory}
             savedObjectsClient={savedObjectsClient}
+            canSavePalettes={canSavePalettes}
           />
         </I18nProvider>
       </KibanaThemeProvider>,
