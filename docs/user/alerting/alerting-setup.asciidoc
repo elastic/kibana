@@ -5,7 +5,7 @@
 <titleabbrev>Set up</titleabbrev>
 ++++
 
-The Alerting feature is automatically enabled in {kib}, but might require some additional configuration.
+Alerting is automatically enabled in {kib}, but might require some additional configuration.
 
 [float]
 [[alerting-prerequisites]]
@@ -17,9 +17,9 @@ If you are using an *on-premises* Elastic Stack deployment:
 
 If you are using an *on-premises* Elastic Stack deployment with <<using-kibana-with-security, *security*>>:
 
-* If you are unable to access Alerting, ensure that you have not {ref}/security-settings.html#api-key-service-settings[explicitly disabled API keys].
+* If you are unable to access {kib} Alerting, ensure that you have not {ref}/security-settings.html#api-key-service-settings[explicitly disabled API keys].
 
-The Alerting framework uses queries that require the `search.allow_expensive_queries` setting to be `true`. See the scripts {ref}/query-dsl-script-query.html#_allow_expensive_queries_4[documentation]. 
+The alerting framework uses queries that require the `search.allow_expensive_queries` setting to be `true`. See the scripts {ref}/query-dsl-script-query.html#_allow_expensive_queries_4[documentation]. 
 
 [float]
 [[alerting-setup-production]]
@@ -27,7 +27,7 @@ The Alerting framework uses queries that require the `search.allow_expensive_que
 
 When relying on alerting and actions as mission critical services, make sure you follow the <<alerting-production-considerations,Alerting production considerations>>.
 
-See <<alerting-scaling-guidance>> for more information on the scalability of {kib} alerting.
+See <<alerting-scaling-guidance>> for more information on the scalability of Alerting.
 
 [float]
 [[alerting-security]]
