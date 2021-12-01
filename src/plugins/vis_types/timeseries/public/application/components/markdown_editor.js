@@ -19,7 +19,7 @@ import { CodeEditor, MarkdownLang } from '../../../../../kibana_react/public';
 
 import { EuiText, EuiCodeBlock, EuiSpacer, EuiTitle } from '@elastic/eui';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { getDataStart } from '../../services';
 import { fetchIndexPattern } from '../../../common/index_patterns_utils';
 
@@ -116,7 +116,7 @@ export class MarkdownEditor extends Component {
         <div className="tvbMarkdownEditor__editor">
           <CodeEditor
             editorDidMount={this.handleOnLoad}
-            languageId={MarkdownLang.ID}
+            languageId={MarkdownLang}
             options={{
               fontSize: '14px',
               wordWrap: 'on',

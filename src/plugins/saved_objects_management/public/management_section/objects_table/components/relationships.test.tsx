@@ -9,6 +9,7 @@
 import React from 'react';
 import { shallowWithI18nProvider } from '@kbn/test/jest';
 import { httpServiceMock } from '../../../../../../core/public/mocks';
+import type { SavedObjectManagementTypeInfo } from '../../../../common/types';
 import { Relationships, RelationshipsProps } from './relationships';
 
 jest.mock('../../../lib/fetch_export_by_type_and_search', () => ({
@@ -18,6 +19,15 @@ jest.mock('../../../lib/fetch_export_by_type_and_search', () => ({
 jest.mock('../../../lib/fetch_export_objects', () => ({
   fetchExportObjects: jest.fn(),
 }));
+
+const allowedTypes: SavedObjectManagementTypeInfo[] = [
+  {
+    name: 'index-pattern',
+    displayName: 'index-pattern',
+    namespaceType: 'single',
+    hidden: false,
+  },
+];
 
 describe('Relationships', () => {
   it('should render index patterns normally', async () => {
@@ -64,13 +74,14 @@ describe('Relationships', () => {
         meta: {
           title: 'MyIndexPattern*',
           icon: 'indexPatternApp',
-          editUrl: '#/management/kibana/indexPatterns/patterns/1',
+          editUrl: '#/management/kibana/dataViews/dataView/1',
           inAppUrl: {
-            path: '/management/kibana/indexPatterns/patterns/1',
+            path: '/management/kibana/dataViews/dataView/1',
             uiCapabilitiesPath: 'management.kibana.indexPatterns',
           },
         },
       },
+      allowedTypes,
       close: jest.fn(),
     };
 
@@ -100,10 +111,10 @@ describe('Relationships', () => {
             id: '1',
             relationship: 'child',
             meta: {
-              editUrl: '/management/kibana/indexPatterns/patterns/1',
+              editUrl: '/management/kibana/dataViews/dataView/1',
               icon: 'indexPatternApp',
               inAppUrl: {
-                path: '/app/management/kibana/indexPatterns/patterns/1',
+                path: '/app/management/kibana/dataViews/dataView/1',
                 uiCapabilitiesPath: 'management.kibana.indexPatterns',
               },
               title: 'My Index Pattern',
@@ -139,6 +150,7 @@ describe('Relationships', () => {
           },
         },
       },
+      allowedTypes,
       close: jest.fn(),
     };
 
@@ -206,6 +218,7 @@ describe('Relationships', () => {
           },
         },
       },
+      allowedTypes,
       close: jest.fn(),
     };
 
@@ -273,6 +286,7 @@ describe('Relationships', () => {
           },
         },
       },
+      allowedTypes,
       close: jest.fn(),
     };
 
@@ -312,6 +326,7 @@ describe('Relationships', () => {
           },
         },
       },
+      allowedTypes,
       close: jest.fn(),
     };
 
@@ -350,13 +365,14 @@ describe('Relationships', () => {
         meta: {
           title: 'MyIndexPattern*',
           icon: 'indexPatternApp',
-          editUrl: '#/management/kibana/indexPatterns/patterns/1',
+          editUrl: '#/management/kibana/dataViews/dataView/1',
           inAppUrl: {
-            path: '/management/kibana/indexPatterns/patterns/1',
+            path: '/management/kibana/dataViews/dataView/1',
             uiCapabilitiesPath: 'management.kibana.indexPatterns',
           },
         },
       },
+      allowedTypes,
       close: jest.fn(),
     };
 

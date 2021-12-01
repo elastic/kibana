@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiTokensObject } from '@elastic/eui';
 
 interface EuiValues {
@@ -64,10 +64,13 @@ export const getEuiContextMapping = (): EuiTokensObject => {
       }),
     'euiBasicTable.tablePagination': ({ tableCaption }: EuiValues) =>
       i18n.translate('core.euiBasicTable.tablePagination', {
-        defaultMessage: 'Pagination for preceding table: {tableCaption}',
+        defaultMessage: 'Pagination for table: {tableCaption}',
         values: { tableCaption },
         description: 'Screen reader text to describe the pagination controls',
       }),
+    'euiBasicTable.noItemsMessage': i18n.translate('core.euiBasicTable.noItemsMessage', {
+      defaultMessage: 'No items found',
+    }),
     'euiBottomBar.customScreenReaderAnnouncement': ({ landmarkHeading }: EuiValues) =>
       i18n.translate('core.euiBottomBar.customScreenReaderAnnouncement', {
         defaultMessage:
@@ -123,22 +126,6 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     'euiCodeBlock.fullscreenExpand': i18n.translate('core.euiCodeBlock.fullscreenExpand', {
       defaultMessage: 'Expand',
       description: 'ARIA label for a button that enters fullscreen view',
-    }),
-    'euiCodeEditor.startEditing': i18n.translate('core.euiCodeEditor.startEditing', {
-      defaultMessage: 'Press Enter to start editing.',
-      description: 'Screen reader text to prompt editing',
-    }),
-    'euiCodeEditor.startInteracting': i18n.translate('core.euiCodeEditor.startInteracting', {
-      defaultMessage: 'Press Enter to start interacting with the code.',
-      description: 'Screen reader text to prompt interaction',
-    }),
-    'euiCodeEditor.stopEditing': i18n.translate('core.euiCodeEditor.stopEditing', {
-      defaultMessage: "When you're done, press Escape to stop editing.",
-      description: 'Screen reader text to describe ending editing',
-    }),
-    'euiCodeEditor.stopInteracting': i18n.translate('core.euiCodeEditor.stopInteracting', {
-      defaultMessage: "When you're done, press Escape to stop interacting with the code.",
-      description: 'Screen reader text to describe ending interactions',
     }),
     'euiCollapsedItemActions.allActions': i18n.translate(
       'core.euiCollapsedItemActions.allActions',
@@ -634,17 +621,29 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         defaultMessage: 'Syntax help',
       }
     ),
-    'euiMarkdownEditorFooter.descriptionPrefix': i18n.translate(
-      'core.euiMarkdownEditorFooter.descriptionPrefix',
+    'euiMarkdownEditorFooter.mdSyntaxLink': i18n.translate(
+      'core.euiMarkdownEditorFooter.mdSyntaxLink',
+      {
+        defaultMessage: 'GitHub flavored markdown',
+      }
+    ),
+    'euiMarkdownEditorFooter.syntaxModalDescriptionPrefix': i18n.translate(
+      'core.euiMarkdownEditorFooter.syntaxModalDescriptionPrefix',
       {
         defaultMessage: 'This editor uses',
       }
     ),
-    'euiMarkdownEditorFooter.descriptionSuffix': i18n.translate(
-      'core.euiMarkdownEditorFooter.descriptionSuffix',
+    'euiMarkdownEditorFooter.syntaxModalDescriptionSuffix': i18n.translate(
+      'core.euiMarkdownEditorFooter.syntaxModalDescriptionSuffix',
       {
         defaultMessage:
           'You can also utilize these additional syntax plugins to add rich content to your text.',
+      }
+    ),
+    'euiMarkdownEditorFooter.syntaxPopoverDescription': i18n.translate(
+      'core.euiMarkdownEditorFooter.syntaxPopoverDescription',
+      {
+        defaultMessage: 'This editor uses',
       }
     ),
     'euiMarkdownEditorToolbar.editor': i18n.translate('core.euiMarkdownEditorToolbar.editor', {
@@ -845,6 +844,9 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     }),
     'euiRelativeTab.numberInputLabel': i18n.translate('core.euiRelativeTab.numberInputLabel', {
       defaultMessage: 'Time span amount',
+    }),
+    'euiRelativeTab.dateInputError': i18n.translate('core.euiRelativeTab.dateInputError', {
+      defaultMessage: 'Must be a valid range',
     }),
     'euiResizableButton.horizontalResizerAriaLabel': i18n.translate(
       'core.euiResizableButton.horizontalResizerAriaLabel',

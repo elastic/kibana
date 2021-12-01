@@ -90,7 +90,7 @@ describe('SourceRouter', () => {
     expect(wrapper.find(Overview)).toHaveLength(1);
     expect(wrapper.find(SourceSettings)).toHaveLength(1);
     expect(wrapper.find(SourceContent)).toHaveLength(1);
-    expect(wrapper.find(Route)).toHaveLength(4);
+    expect(wrapper.find(Route)).toHaveLength(5);
   });
 
   it('renders source routes (custom)', () => {

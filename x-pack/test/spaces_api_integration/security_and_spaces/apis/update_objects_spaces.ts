@@ -28,6 +28,8 @@ const { fail404 } = testCaseFailures;
 
 const createTestCases = (spaceId: string): UpdateObjectsSpacesTestCase[] => {
   const eachSpace = [DEFAULT_SPACE_ID, SPACE_1_ID, SPACE_2_ID];
+  // Note: we intentionally exclude ALIAS_DELETION test cases because they are already covered in spaces_only test suite, and there is no
+  // authZ-specific logic that affects alias deletion, all of that happens at the Saved Objects Repository level.
   return [
     // Test case to check adding and removing all spaces ("*") to a saved object
     {
@@ -125,8 +127,10 @@ const calculateSingleSpaceAuthZ = (testCases: UpdateObjectsSpacesTestCase[], spa
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertestWithoutAuth');
   const esArchiver = getService('esArchiver');
+  const es = getService('es');
 
   const { addTests, createTestDefinitions } = updateObjectsSpacesTestSuiteFactory(
+    es,
     esArchiver,
     supertest
   );

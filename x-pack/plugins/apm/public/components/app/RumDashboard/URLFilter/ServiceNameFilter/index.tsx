@@ -9,7 +9,7 @@ import { EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
-import { useUrlParams } from '../../../../../context/url_params_context/use_url_params';
+import { useLegacyUrlParams } from '../../../../../context/url_params_context/use_url_params';
 import { fromQuery, toQuery } from '../../../../shared/Links/url_helpers';
 
 interface Props {
@@ -21,7 +21,7 @@ function ServiceNameFilter({ loading, serviceNames }: Props) {
   const history = useHistory();
   const {
     urlParams: { serviceName: selectedServiceName },
-  } = useUrlParams();
+  } = useLegacyUrlParams();
 
   const options = serviceNames.map((type) => ({
     text: type,
@@ -65,23 +65,22 @@ function ServiceNameFilter({ loading, serviceNames }: Props) {
   }, [serviceNames, selectedServiceName, updateServiceName, loading]);
 
   return (
-    <>
-      <EuiSelect
-        prepend={i18n.translate(
-          'xpack.apm.ux.localFilters.titles.webApplication',
-          {
-            defaultMessage: 'Web application',
-          }
-        )}
-        isLoading={loading}
-        data-cy="serviceNameFilter"
-        options={options}
-        value={selectedServiceName}
-        onChange={(event) => {
-          updateServiceName(event.target.value);
-        }}
-      />
-    </>
+    <EuiSelect
+      fullWidth
+      prepend={i18n.translate(
+        'xpack.apm.ux.localFilters.titles.webApplication',
+        {
+          defaultMessage: 'Web application',
+        }
+      )}
+      isLoading={loading}
+      data-cy="serviceNameFilter"
+      options={options}
+      value={selectedServiceName}
+      onChange={(event) => {
+        updateServiceName(event.target.value);
+      }}
+    />
   );
 }
 

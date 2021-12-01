@@ -7,7 +7,6 @@
 
 import { checkPermission } from '../../../../capabilities/check_capabilities';
 import { mlNodesAvailable } from '../../../../ml_nodes_check/check_ml_nodes';
-import { getIndexPatternNames } from '../../../../util/index_utils';
 import { JOB_ACTION } from '../../../../../../common/constants/job_actions';
 
 import {
@@ -19,7 +18,6 @@ import {
   isClosable,
   isResettable,
 } from '../utils';
-import { getToastNotifications } from '../../../../util/dependency_cache';
 import { i18n } from '@kbn/i18n';
 
 export function actionsMenuContent(
@@ -136,21 +134,7 @@ export function actionsMenuContent(
         return isJobBlocked(item) === false && canCreateJob;
       },
       onClick: (item) => {
-        const indexPatternNames = getIndexPatternNames();
-        const indexPatternTitle = item.datafeedIndices.join(',');
-        const jobIndicesAvailable = indexPatternNames.includes(indexPatternTitle);
-
-        if (!jobIndicesAvailable) {
-          getToastNotifications().addDanger(
-            i18n.translate('xpack.ml.jobsList.managementActions.noSourceIndexPatternForClone', {
-              defaultMessage:
-                'Unable to clone the anomaly detection job {jobId}. No index pattern exists for index {indexPatternTitle}.',
-              values: { jobId: item.id, indexPatternTitle },
-            })
-          );
-        } else {
-          cloneJob(item.id);
-        }
+        cloneJob(item.id);
         closeMenu(true);
       },
       'data-test-subj': 'mlActionButtonCloneJob',

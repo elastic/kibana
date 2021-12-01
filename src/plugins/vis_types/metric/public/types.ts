@@ -36,12 +36,3 @@ export interface VisParams {
   metric: MetricVisParam;
   type: typeof visType;
 }
-
-export interface MetricVisMetric {
-  value: any;
-  label: string;
-  color?: string;
-  bgColor?: string;
-  lightText: boolean;
-  rowIndex: number;
-}

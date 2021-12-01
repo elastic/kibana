@@ -13,7 +13,11 @@ import { agentPolicyService } from '../agent_policy';
 import { agentPolicyUpdateEventHandler } from '../agent_policy_update';
 
 import { getFullAgentPolicy } from './full_agent_policy';
+import { getMonitoringPermissions } from './monitoring_permissions';
 
+const mockedGetElasticAgentMonitoringPermissions = getMonitoringPermissions as jest.Mock<
+  ReturnType<typeof getMonitoringPermissions>
+>;
 const mockedAgentPolicyService = agentPolicyService as jest.Mocked<typeof agentPolicyService>;
 
 function mockAgentPolicy(data: Partial<AgentPolicy>) {
@@ -47,13 +51,15 @@ jest.mock('../agent_policy');
 jest.mock('../output', () => {
   return {
     outputService: {
-      getDefaultOutputId: () => 'test-id',
+      getDefaultDataOutputId: async () => 'test-id',
+      getDefaultMonitoringOutputId: async () => 'test-id',
       get: (soClient: any, id: string): Output => {
         switch (id) {
           case 'data-output-id':
             return {
               id: 'data-output-id',
               is_default: false,
+              is_default_monitoring: false,
               name: 'Data output',
               // @ts-ignore
               type: 'elasticsearch',
@@ -63,6 +69,7 @@ jest.mock('../output', () => {
             return {
               id: 'monitoring-output-id',
               is_default: false,
+              is_default_monitoring: false,
               name: 'Monitoring output',
               // @ts-ignore
               type: 'elasticsearch',
@@ -72,6 +79,7 @@ jest.mock('../output', () => {
             return {
               id: 'test-id',
               is_default: true,
+              is_default_monitoring: true,
               name: 'default',
               // @ts-ignore
               type: 'elasticsearch',
@@ -87,6 +95,8 @@ jest.mock('../agent_policy_update');
 jest.mock('../agents');
 jest.mock('../package_policy');
 
+jest.mock('./monitoring_permissions');
+
 function getAgentPolicyUpdateMock() {
   return agentPolicyUpdateEventHandler as unknown as jest.Mock<
     typeof agentPolicyUpdateEventHandler
@@ -97,6 +107,29 @@ describe('getFullAgentPolicy', () => {
   beforeEach(() => {
     getAgentPolicyUpdateMock().mockClear();
     mockedAgentPolicyService.get.mockReset();
+    mockedGetElasticAgentMonitoringPermissions.mockReset();
+    mockedGetElasticAgentMonitoringPermissions.mockImplementation(
+      async (soClient, { logs, metrics }, namespace) => {
+        const names: string[] = [];
+        if (logs) {
+          names.push(`logs-${namespace}`);
+        }
+        if (metrics) {
+          names.push(`metrics-${namespace}`);
+        }
+
+        return {
+          _elastic_agent_monitoring: {
+            indices: [
+              {
+                names,
+                privileges: [],
+              },
+            ],
+          },
+        };
+      }
+    );
   });
 
   it('should return a policy without monitoring if monitoring is not enabled', async () => {
@@ -198,6 +231,24 @@ describe('getFullAgentPolicy', () => {
         },
       },
     });
+  });
+
+  it('should get the permissions for monitoring', async () => {
+    mockAgentPolicy({
+      namespace: 'testnamespace',
+      revision: 1,
+      monitoring_enabled: ['metrics'],
+    });
+    await getFullAgentPolicy(savedObjectsClientMock.create(), 'agent-policy');
+
+    expect(mockedGetElasticAgentMonitoringPermissions).toHaveBeenCalledWith(
+      expect.anything(),
+      {
+        logs: false,
+        metrics: true,
+      },
+      'testnamespace'
+    );
   });
 
   it('should support a different monitoring output', async () => {

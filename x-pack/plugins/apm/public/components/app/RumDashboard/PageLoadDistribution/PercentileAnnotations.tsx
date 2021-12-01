@@ -13,7 +13,7 @@ import {
   LineAnnotationStyle,
   Position,
 } from '@elastic/charts';
-import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
+import { euiLightVars } from '@kbn/ui-shared-deps-src/theme';
 import { EuiToolTip } from '@elastic/eui';
 
 interface Props {
@@ -35,7 +35,7 @@ export function PercentileAnnotations({ percentiles }: Props) {
   const style: Partial<LineAnnotationStyle> = {
     line: {
       strokeWidth: 1,
-      stroke: euiLightVars.euiColorSecondary,
+      stroke: euiLightVars.euiColorSuccess,
       opacity: 1,
     },
   };

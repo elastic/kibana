@@ -6,16 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { PluginConfigDescriptor, PluginInitializerContext } from 'kibana/server';
+import { PluginInitializerContext } from 'kibana/server';
 
-import { ConfigType, config as configSchema } from './config';
 import { ConsoleServerPlugin } from './plugin';
 
-export { ConsoleSetup, ConsoleStart } from './types';
+export type { ConsoleSetup, ConsoleStart } from './types';
+
+export { config } from './config';
 
 export const plugin = (ctx: PluginInitializerContext) => new ConsoleServerPlugin(ctx);
-
-export const config: PluginConfigDescriptor<ConfigType> = {
-  deprecations: ({ deprecate, unused, rename }) => [deprecate('enabled', '8.0.0'), unused('ssl')],
-  schema: configSchema,
-};

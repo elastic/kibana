@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+export type { Authorization } from './authorization_provider';
 export {
   AuthorizationProvider,
   AuthorizationContext,

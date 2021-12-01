@@ -11,7 +11,7 @@ import React from 'react';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { UserAPIClient } from '..';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';

@@ -143,7 +143,7 @@ export function getActionType({
     }),
     validate: {
       config: schema.object(configSchemaProps, {
-        validate: curry(valdiateActionTypeConfig)(configurationUtilities),
+        validate: curry(validateActionTypeConfig)(configurationUtilities),
       }),
       secrets: SecretsSchema,
       params: ParamsSchema,
@@ -152,7 +152,7 @@ export function getActionType({
   };
 }
 
-function valdiateActionTypeConfig(
+function validateActionTypeConfig(
   configurationUtilities: ActionsConfigurationUtilities,
   configObject: ActionTypeConfigType
 ) {

@@ -135,6 +135,33 @@ describe('UuidService', () => {
         expect(logger.get('process').warn).not.toHaveBeenCalled();
       });
     });
+
+    // TODO: From Nodejs v16 emitting an unhandledRejection will kill the process
+    describe.skip('unhandledRejection warnings', () => {
+      it('logs warn for an unhandeld promise rejected with an Error', async () => {
+        await service.preboot();
+
+        const err = new Error('something went wrong');
+        process.emit('unhandledRejection', err, new Promise((res, rej) => rej(err)));
+
+        expect(logger.get('process').warn).toHaveBeenCalledTimes(1);
+        expect(loggingSystemMock.collect(logger).warn[0][0]).toMatch(
+          /Detected an unhandled Promise rejection: Error: something went wrong\n.*at /
+        );
+      });
+
+      it('logs warn for an unhandeld promise rejected with a string', async () => {
+        await service.preboot();
+
+        const err = 'something went wrong';
+        process.emit('unhandledRejection', err, new Promise((res, rej) => rej(err)));
+
+        expect(logger.get('process').warn).toHaveBeenCalledTimes(1);
+        expect(loggingSystemMock.collect(logger).warn[0][0]).toMatch(
+          /Detected an unhandled Promise rejection: "something went wrong"/
+        );
+      });
+    });
   });
 
   describe('#setup()', () => {

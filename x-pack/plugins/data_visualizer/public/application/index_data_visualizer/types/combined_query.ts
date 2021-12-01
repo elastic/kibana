@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { Query } from '@kbn/es-query';
+
 export const SEARCH_QUERY_LANGUAGE = {
   KUERY: 'kuery',
   LUCENE: 'lucene',
@@ -13,7 +15,7 @@ export const SEARCH_QUERY_LANGUAGE = {
 export type SearchQueryLanguage = typeof SEARCH_QUERY_LANGUAGE[keyof typeof SEARCH_QUERY_LANGUAGE];
 
 export interface CombinedQuery {
-  searchString: string | { [key: string]: any };
+  searchString: Query['query'];
   searchQueryLanguage: string;
 }
 

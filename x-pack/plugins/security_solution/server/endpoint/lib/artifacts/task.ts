@@ -18,7 +18,7 @@ import { isEmptyManifestDiff, Manifest } from './manifest';
 import { InvalidInternalManifestError } from '../../services/artifacts/errors';
 import { ManifestManager } from '../../services';
 import { wrapErrorIfNeeded } from '../../utils';
-import { EndpointError } from '../../errors';
+import { EndpointError } from '../../../../common/endpoint/errors';
 
 export const ManifestTaskConstants = {
   TIMEOUT: '1m',
@@ -135,6 +135,7 @@ export class ManifestTask {
         }
       }
 
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       if (oldManifest! == null) {
         this.logger.debug('Last computed manifest not available yet');
         return;
@@ -174,6 +175,7 @@ export class ManifestTask {
       if (deleteErrors.length) {
         reportErrors(this.logger, deleteErrors);
       }
+      await manifestManager.cleanup(newManifest);
     } catch (err) {
       this.logger.error(wrapErrorIfNeeded(err));
     }

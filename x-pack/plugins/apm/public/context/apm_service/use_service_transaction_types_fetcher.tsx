@@ -22,7 +22,8 @@ export function useServiceTransactionTypesFetcher({
     (callApmApi) => {
       if (serviceName && start && end) {
         return callApmApi({
-          endpoint: 'GET /api/apm/services/{serviceName}/transaction_types',
+          endpoint:
+            'GET /internal/apm/services/{serviceName}/transaction_types',
           params: {
             path: { serviceName },
             query: { start, end },

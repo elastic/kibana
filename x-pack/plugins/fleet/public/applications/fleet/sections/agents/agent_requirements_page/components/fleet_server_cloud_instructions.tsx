@@ -17,7 +17,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { useFleetStatus, useStartServices } from '../../../../hooks';
 
@@ -60,7 +60,7 @@ export const CloudInstructions: React.FC<{ deploymentUrl: string }> = ({ deploym
                 >
                   <FormattedMessage
                     id="xpack.fleet.settings.userGuideLink"
-                    defaultMessage="Fleet User Guide"
+                    defaultMessage="Fleet and Elastic Agent Guide"
                   />
                 </EuiLink>
               ),

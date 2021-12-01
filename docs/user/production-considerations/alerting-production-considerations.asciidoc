@@ -52,7 +52,7 @@ Predicting the buffer required to account for actions depends heavily on the rul
 
 [float]
 [[event-log-ilm]]
-=== Event log index lifecycle managment
+=== Event log index lifecycle management
 
 experimental[]
 

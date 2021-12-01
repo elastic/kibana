@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState, useContext } from 'react';
 import dateMath from '@elastic/datemath';
 import moment from 'moment';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { Source } from '../../../../containers/metrics_source';
 import { InventoryMetric, InventoryItemType } from '../../../../../common/inventory_models/types';
 import { useNodeDetails } from '../hooks/use_node_details';
 import { MetricsSideNav } from './side_nav';
@@ -52,6 +53,7 @@ const parseRange = (range: MetricsTimeInput) => {
 };
 
 export const NodeDetailsPage = (props: Props) => {
+  const { metricIndicesExist } = useContext(Source.Context);
   const [parsedTimeRange, setParsedTimeRange] = useState(parseRange(props.timeRange));
   const { metrics, loading, makeRequest, error } = useNodeDetails(
     props.requiredMetrics,
@@ -80,6 +82,7 @@ export const NodeDetailsPage = (props: Props) => {
 
   return (
     <MetricsPageTemplate
+      hasData={metricIndicesExist}
       pageHeader={{
         pageTitle: props.name,
         rightSideItems: [

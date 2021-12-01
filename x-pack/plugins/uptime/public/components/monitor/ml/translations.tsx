@@ -22,6 +22,14 @@ export const JOB_CREATED_SUCCESS_MESSAGE = i18n.translate(
   }
 );
 
+export const JOB_CREATED_LAZY_SUCCESS_MESSAGE = i18n.translate(
+  'xpack.uptime.ml.enableAnomalyDetectionPanel.jobCreatedLazyNotificationText',
+  {
+    defaultMessage:
+      'The analysis is waiting for an ML node to become available. It might take a while before results are added to the response times graph.',
+  }
+);
+
 export const JOB_CREATION_FAILED = i18n.translate(
   'xpack.uptime.ml.enableAnomalyDetectionPanel.jobCreationFailedNotificationTitle',
   {
@@ -169,5 +177,12 @@ export const ENABLE_MANAGE_JOB = i18n.translate(
   {
     defaultMessage:
       'You can enable anomaly detection job or if job is already there you can manage the job or alert.',
+  }
+);
+
+export const ADD_JOB_PERMISSIONS_NEEDED = i18n.translate(
+  'xpack.uptime.ml.enableAnomalyDetectionPanel.add_job_permissions_needed',
+  {
+    defaultMessage: 'Permissions needed',
   }
 );

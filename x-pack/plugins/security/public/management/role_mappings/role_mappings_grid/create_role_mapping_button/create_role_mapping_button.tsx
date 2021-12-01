@@ -8,7 +8,7 @@
 import { EuiButton } from '@elastic/eui';
 import React from 'react';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { ScopedHistory } from 'src/core/public';
 
 import { reactRouterNavigate } from '../../../../../../../../src/plugins/kibana_react/public';

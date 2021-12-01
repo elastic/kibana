@@ -28,7 +28,7 @@ import { ExplorerChartLabel } from './components/explorer_chart_label';
 
 import { CHART_TYPE } from '../explorer_constants';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { MlTooltipComponent } from '../../components/chart_tooltip';
 import { withKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { ML_JOB_AGGREGATION } from '../../../../common/constants/aggregation_types';

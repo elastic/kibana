@@ -8,15 +8,14 @@
 import React, { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../lib/kibana';
+import { SOLUTION_NAME } from '../../translations';
 
 export const HelpMenu = React.memo(() => {
   const { chrome, docLinks } = useKibana().services;
 
   useEffect(() => {
     chrome.setHelpExtension({
-      appName: i18n.translate('xpack.securitySolution.chrome.help.appName', {
-        defaultMessage: 'Security',
-      }),
+      appName: SOLUTION_NAME,
       links: [
         {
           content: i18n.translate('xpack.securitySolution.chrome.helpMenu.documentation', {

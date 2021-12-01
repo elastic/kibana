@@ -13,11 +13,13 @@ import type { Layout } from './layout';
 export interface LayoutSelectorDictionary {
   screenshot: string;
   renderComplete: string;
+  renderError: string;
+  renderErrorAttribute: string;
   itemsCountAttribute: string;
   timefilterDurationAttribute: string;
 }
 
-export { LayoutParams, PageSizeParams, PdfImageSize, Size } from '../../../common/types';
+export type { LayoutParams, PageSizeParams, PdfImageSize, Size } from '../../../common/types';
 export { CanvasLayout } from './canvas_layout';
 export { createLayout } from './create_layout';
 export type { Layout } from './layout';
@@ -33,6 +35,8 @@ export const LayoutTypes = {
 export const getDefaultLayoutSelectors = (): LayoutSelectorDictionary => ({
   screenshot: '[data-shared-items-container]',
   renderComplete: '[data-shared-item]',
+  renderError: '[data-render-error]',
+  renderErrorAttribute: 'data-render-error',
   itemsCountAttribute: 'data-shared-items-count',
   timefilterDurationAttribute: 'data-shared-timefilter-duration',
 });

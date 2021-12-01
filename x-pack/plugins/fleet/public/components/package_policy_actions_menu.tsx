@@ -8,7 +8,7 @@
 import React, { useMemo, useState } from 'react';
 import { EuiContextMenuItem, EuiPortal } from '@elastic/eui';
 import type { EuiStepProps } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { AgentPolicy, InMemoryPackagePolicy } from '../types';
 
@@ -77,8 +77,7 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
     <EuiContextMenuItem
       disabled={!hasWriteCapabilities}
       icon="pencil"
-      href={getHref('edit_integration', {
-        policyId: agentPolicy.id,
+      href={getHref('integration_policy_edit', {
         packagePolicyId: packagePolicy.id,
       })}
       key="packagePolicyEdit"

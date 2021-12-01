@@ -1,0 +1,34 @@
+post:
+  summary: Package policy - Upgrade
+  operationId: upgrade-package-policy
+  requestBody:
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            packagePolicyIds:
+              type: array
+              items:
+                type: string
+          required:
+            - packagePolicyIds
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              type: object
+              properties:
+                id:
+                  type: string
+                name:
+                  type: string
+                success:
+                  type: boolean
+              required:
+                - id
+                - success

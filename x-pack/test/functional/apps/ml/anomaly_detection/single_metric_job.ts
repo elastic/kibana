@@ -10,6 +10,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
+  const browser = getService('browser');
 
   const jobId = `fq_single_1_${Date.now()}`;
   const jobIdClone = `${jobId}_clone`;
@@ -201,7 +202,26 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.api.assertDetectorResultsExist(jobId, 0);
     });
 
+    it('job cloning fails in the single metric wizard if a matching data view does not exist', async () => {
+      await ml.testExecution.logTestStep('delete data view used by job');
+      await ml.testResources.deleteIndexPatternByTitle('ft_farequote');
+
+      // Refresh page to ensure page has correct cache of data views
+      await browser.refresh();
+
+      await ml.testExecution.logTestStep(
+        'job cloning clicks the clone action and displays an error toast'
+      );
+      await ml.jobTable.clickCloneJobActionWhenNoDataViewExists(jobId);
+    });
+
     it('job cloning opens the existing job in the single metric wizard', async () => {
+      await ml.testExecution.logTestStep('recreate data view used by job');
+      await ml.testResources.createIndexPatternIfNeeded('ft_farequote', '@timestamp');
+
+      // Refresh page to ensure page has correct cache of data views
+      await browser.refresh();
+
       await ml.testExecution.logTestStep(
         'job cloning clicks the clone action and loads the single metric wizard'
       );

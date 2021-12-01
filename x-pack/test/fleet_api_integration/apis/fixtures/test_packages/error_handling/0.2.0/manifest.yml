@@ -17,3 +17,4 @@ requirement:
 icons:
   - src: '/img/logo_overrides_64_color.svg'
     size: '16x16'
+    type: 'image/svg+xml'

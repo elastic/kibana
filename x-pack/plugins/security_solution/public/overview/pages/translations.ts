@@ -18,10 +18,6 @@ export const NEWS_FEED_TITLE = i18n.translate(
   }
 );
 
-export const PAGE_TITLE = i18n.translate('xpack.securitySolution.overview.pageTitle', {
-  defaultMessage: 'Security',
-});
-
 export const PAGE_SUBTITLE = i18n.translate('xpack.securitySolution.overview.pageSubtitle', {
   defaultMessage: 'Security Information & Event Management with the Elastic Stack',
 });

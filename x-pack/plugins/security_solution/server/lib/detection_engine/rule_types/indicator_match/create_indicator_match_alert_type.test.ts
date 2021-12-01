@@ -14,8 +14,9 @@ import { allowedExperimentalValues } from '../../../../../common/experimental_fe
 import { createRuleTypeMocks } from '../__mocks__/rule_type';
 import { createIndicatorMatchAlertType } from './create_indicator_match_alert_type';
 import { sampleDocNoSortId } from '../../signals/__mocks__/es_results';
-import { CountResponse } from 'kibana/server';
 import { RuleParams } from '../../schemas/rule_schemas';
+import { createSecurityRuleTypeWrapper } from '../create_security_rule_type_wrapper';
+import { createMockConfig } from '../../routes/__mocks__';
 
 jest.mock('../utils/get_list_client', () => ({
   getListClient: jest.fn().mockReturnValue({
@@ -40,7 +41,7 @@ describe('Indicator Match Alerts', () => {
           {
             field: 'file.hash.md5',
             type: 'mapping',
-            value: 'threatintel.indicator.file.hash.md5',
+            value: 'threat.indicator.file.hash.md5',
           },
         ],
       },
@@ -48,20 +49,26 @@ describe('Indicator Match Alerts', () => {
     threatQuery: '*:*',
     to: 'now',
     type: 'threat_match',
+    query: '*:*',
+    language: 'kuery',
   };
+  const { services, dependencies, executor } = createRuleTypeMocks('threat_match', params);
+  const securityRuleTypeWrapper = createSecurityRuleTypeWrapper({
+    lists: dependencies.lists,
+    logger: dependencies.logger,
+    config: createMockConfig(),
+    ruleDataClient: dependencies.ruleDataClient,
+    eventLogService: dependencies.eventLogService,
+  });
 
   it('does not send an alert when no events found', async () => {
-    const { services, dependencies, executor } = createRuleTypeMocks('threat_match', params);
-    const indicatorMatchAlertType = createIndicatorMatchAlertType({
-      experimentalFeatures: allowedExperimentalValues,
-      lists: dependencies.lists,
-      logger: dependencies.logger,
-      ignoreFields: [],
-      mergeStrategy: 'allFields',
-      ruleDataClient: dependencies.ruleDataClient,
-      ruleDataService: dependencies.ruleDataService,
-      version: '1.0.0',
-    });
+    const indicatorMatchAlertType = securityRuleTypeWrapper(
+      createIndicatorMatchAlertType({
+        experimentalFeatures: allowedExperimentalValues,
+        logger: dependencies.logger,
+        version: '1.0.0',
+      })
+    );
 
     dependencies.alerting.registerType(indicatorMatchAlertType);
 
@@ -92,17 +99,13 @@ describe('Indicator Match Alerts', () => {
   });
 
   it('does not send an alert when no enrichments are found', async () => {
-    const { services, dependencies, executor } = createRuleTypeMocks('threat_match', params);
-    const indicatorMatchAlertType = createIndicatorMatchAlertType({
-      experimentalFeatures: allowedExperimentalValues,
-      lists: dependencies.lists,
-      logger: dependencies.logger,
-      mergeStrategy: 'allFields',
-      ignoreFields: [],
-      ruleDataClient: dependencies.ruleDataClient,
-      ruleDataService: dependencies.ruleDataService,
-      version: '1.0.0',
-    });
+    const indicatorMatchAlertType = securityRuleTypeWrapper(
+      createIndicatorMatchAlertType({
+        experimentalFeatures: allowedExperimentalValues,
+        logger: dependencies.logger,
+        version: '1.0.0',
+      })
+    );
 
     dependencies.alerting.registerType(indicatorMatchAlertType);
 
@@ -128,126 +131,5 @@ describe('Indicator Match Alerts', () => {
 
     await executor({ params });
     expect(dependencies.ruleDataClient.getWriter).not.toBeCalled();
-  });
-
-  it('sends an alert when enrichments are found', async () => {
-    const { services, dependencies, executor } = createRuleTypeMocks('threat_match', params);
-    const indicatorMatchAlertType = createIndicatorMatchAlertType({
-      experimentalFeatures: allowedExperimentalValues,
-      lists: dependencies.lists,
-      logger: dependencies.logger,
-      mergeStrategy: 'allFields',
-      ignoreFields: [],
-      ruleDataClient: dependencies.ruleDataClient,
-      ruleDataService: dependencies.ruleDataService,
-      version: '1.0.0',
-    });
-
-    dependencies.alerting.registerType(indicatorMatchAlertType);
-
-    // threat list count
-    services.scopedClusterClient.asCurrentUser.count.mockReturnValue(
-      elasticsearchClientMock.createSuccessTransportRequestPromise({ count: 1 } as CountResponse)
-    );
-
-    services.scopedClusterClient.asCurrentUser.search.mockReturnValueOnce(
-      elasticsearchClientMock.createSuccessTransportRequestPromise({
-        hits: {
-          hits: [
-            {
-              ...sampleDocNoSortId(v4()),
-              _source: {
-                ...sampleDocNoSortId(v4())._source,
-                'threatintel.indicator.file.hash.md5': 'a1b2c3',
-              },
-              fields: {
-                ...sampleDocNoSortId(v4()).fields,
-                'threatintel.indicator.file.hash.md5': ['a1b2c3'],
-              },
-            },
-          ],
-          total: {
-            relation: 'eq',
-            value: 1,
-          },
-        },
-        took: 0,
-        timed_out: false,
-        _shards: {
-          failed: 0,
-          skipped: 0,
-          successful: 1,
-          total: 1,
-        },
-      })
-    );
-
-    services.scopedClusterClient.asCurrentUser.search.mockReturnValueOnce(
-      elasticsearchClientMock.createSuccessTransportRequestPromise({
-        hits: {
-          hits: [
-            {
-              ...sampleDocNoSortId(v4()),
-              _source: {
-                ...sampleDocNoSortId(v4())._source,
-                'file.hash.md5': 'a1b2c3',
-              },
-              fields: {
-                ...sampleDocNoSortId(v4()).fields,
-                'file.hash.md5': ['a1b2c3'],
-              },
-            },
-          ],
-          total: {
-            relation: 'eq',
-            value: 1,
-          },
-        },
-        took: 0,
-        timed_out: false,
-        _shards: {
-          failed: 0,
-          skipped: 0,
-          successful: 1,
-          total: 1,
-        },
-      })
-    );
-
-    services.scopedClusterClient.asCurrentUser.search.mockReturnValueOnce(
-      elasticsearchClientMock.createSuccessTransportRequestPromise({
-        hits: {
-          hits: [
-            {
-              ...sampleDocNoSortId(v4()),
-              _source: {
-                ...sampleDocNoSortId(v4())._source,
-                'file.hash.md5': 'a1b2c3',
-              },
-              fields: {
-                ...sampleDocNoSortId(v4()).fields,
-                'file.hash.md5': ['a1b2c3'],
-              },
-            },
-          ],
-          total: {
-            relation: 'eq',
-            value: 1,
-          },
-        },
-        took: 0,
-        timed_out: false,
-        _shards: {
-          failed: 0,
-          skipped: 0,
-          successful: 1,
-          total: 1,
-        },
-      })
-    );
-
-    await executor({ params });
-
-    expect(dependencies.ruleDataClient.getWriter).toBeCalled();
   });
 });

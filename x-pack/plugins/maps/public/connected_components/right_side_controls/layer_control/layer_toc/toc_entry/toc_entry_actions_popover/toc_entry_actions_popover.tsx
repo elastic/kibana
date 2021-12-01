@@ -18,7 +18,7 @@ import {
   getVisibilityToggleLabel,
 } from '../action_labels';
 import { ESSearchSource } from '../../../../../../classes/sources/es_search_source';
-import { VectorLayer } from '../../../../../../classes/layers/vector_layer';
+import { isVectorLayer, IVectorLayer } from '../../../../../../classes/layers/vector_layer';
 import { SCALING_TYPES, VECTOR_SHAPE_TYPE } from '../../../../../../../common/constants';
 
 export interface Props {
@@ -67,10 +67,10 @@ export class TOCEntryActionsPopover extends Component<Props, State> {
   }
 
   async _loadFeatureEditing() {
-    if (!(this.props.layer instanceof VectorLayer)) {
+    if (!isVectorLayer(this.props.layer)) {
       return;
     }
-    const supportsFeatureEditing = this.props.layer.supportsFeatureEditing();
+    const supportsFeatureEditing = (this.props.layer as IVectorLayer).supportsFeatureEditing();
     const isFeatureEditingEnabled = await this._getIsFeatureEditingEnabled();
     if (
       !this._isMounted ||
@@ -83,7 +83,7 @@ export class TOCEntryActionsPopover extends Component<Props, State> {
   }
 
   async _getIsFeatureEditingEnabled(): Promise<boolean> {
-    const vectorLayer = this.props.layer as VectorLayer;
+    const vectorLayer = this.props.layer as IVectorLayer;
     const layerSource = this.props.layer.getSource();
     if (!(layerSource instanceof ESSearchSource)) {
       return false;

@@ -16,7 +16,7 @@ const mockSavedObject: SearchSessionSavedObject = {
   attributes: {
     name: 'my_name',
     appId: 'my_app_id',
-    urlGeneratorId: 'my_url_generator_id',
+    locatorId: 'my_url_generator_id',
     idMapping: {},
     sessionId: 'session_id',
     touched: new Date().toISOString(),

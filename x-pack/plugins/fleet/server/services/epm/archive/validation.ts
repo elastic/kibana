@@ -61,7 +61,6 @@ const optionalArchivePackageProps: readonly OptionalPackageProp[] = [
   'readme',
   'assets',
   'data_streams',
-  'internal',
   'license',
   'type',
   'categories',
@@ -217,7 +216,6 @@ export function parseAndVerifyDataStreams(
     }
     const streams = parseAndVerifyStreams(manifestStreams, dataStreamPath);
 
-    // default ingest pipeline name see https://github.com/elastic/package-registry/blob/master/util/dataset.go#L26
     dataStreams.push(
       Object.entries(restOfProps).reduce(
         (validatedDataStream, [key, value]) => {
@@ -233,7 +231,7 @@ export function parseAndVerifyDataStreams(
           type,
           package: pkgName,
           dataset: dataset || `${pkgName}.${dataStreamPath}`,
-          ingest_pipeline: ingestPipeline || 'default',
+          ingest_pipeline: ingestPipeline,
           path: dataStreamPath,
           streams,
         }

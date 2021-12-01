@@ -8,7 +8,7 @@
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import React, { Fragment, useEffect, useState } from 'react';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { Space } from '../../../../common';
 

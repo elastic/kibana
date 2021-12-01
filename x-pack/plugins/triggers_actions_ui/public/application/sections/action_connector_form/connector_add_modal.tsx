@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useReducer, useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiModal,
   EuiButton,
@@ -33,6 +33,7 @@ import {
   ActionTypeRegistryContract,
   UserConfiguredActionConnector,
   IErrorObject,
+  ActionConnectorFieldsCallbacks,
 } from '../../../types';
 import { useKibana } from '../../../common/lib/kibana';
 import { getConnectorWithInvalidatedFields } from '../../lib/value_validators';
@@ -97,6 +98,7 @@ const ConnectorAddModal = ({
     secretsErrors: {},
   });
 
+  const [callbacks, setCallbacks] = useState<ActionConnectorFieldsCallbacks>(null);
   const actionTypeModel = actionTypeRegistry.get(actionType.id);
 
   useEffect(() => {
@@ -189,6 +191,8 @@ const ConnectorAddModal = ({
             errors={errors.connectorErrors}
             actionTypeRegistry={actionTypeRegistry}
             consumer={consumer}
+            setCallbacks={setCallbacks}
+            isEdit={false}
           />
           {isLoading ? (
             <>
@@ -212,7 +216,7 @@ const ConnectorAddModal = ({
         {canSave ? (
           <EuiButton
             fill
-            color="secondary"
+            color="success"
             data-test-subj="saveActionButtonModal"
             type="submit"
             iconType="check"
@@ -230,9 +234,19 @@ const ConnectorAddModal = ({
                 return;
               }
               setIsSaving(true);
+              // Do not allow to save the connector if there is an error
+              try {
+                await callbacks?.beforeActionConnectorSave?.();
+              } catch (e) {
+                setIsSaving(false);
+                return;
+              }
+
               const savedAction = await onActionConnectorSave();
+
               setIsSaving(false);
               if (savedAction) {
+                await callbacks?.afterActionConnectorSave?.(savedAction);
                 if (postSaveEventHandler) {
                   postSaveEventHandler(savedAction);
                 }

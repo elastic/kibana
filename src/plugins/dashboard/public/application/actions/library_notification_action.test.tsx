@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { DashboardContainer } from '../embeddable';
 import { getSampleDashboardInput } from '../test_helpers';
+import { DashboardContainer } from '../embeddable/dashboard_container';
 
 import { coreMock, uiSettingsServiceMock } from '../../../../../core/public/mocks';
 import { CoreStart } from 'kibana/public';
@@ -28,6 +28,7 @@ import {
   CONTACT_CARD_EMBEDDABLE,
 } from '../../services/embeddable_test_samples';
 import { getStubPluginServices } from '../../../../presentation_util/public';
+import { screenshotModePluginMock } from '../../../../screenshot_mode/public/mocks';
 
 const { setup, doStart } = embeddablePluginMock.createInstance();
 setup.registerEmbeddableFactory(
@@ -62,6 +63,7 @@ beforeEach(async () => {
     uiSettings: uiSettingsServiceMock.createStartContract(),
     http: coreStart.http,
     presentationUtil: getStubPluginServices(),
+    screenshotMode: screenshotModePluginMock.createSetupContract(),
   };
 
   container = new DashboardContainer(getSampleDashboardInput(), containerOptions);

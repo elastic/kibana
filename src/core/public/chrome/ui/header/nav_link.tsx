@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { EuiIcon } from '@elastic/eui';
+import { EuiIcon, EuiListGroupItemProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { ChromeNavLink, ChromeRecentlyAccessedHistoryItem, CoreStart } from '../../..';
@@ -14,17 +14,18 @@ import { HttpStart } from '../../../http';
 import { InternalApplicationStart } from '../../../application/types';
 import { relativeToAbsolute } from '../../nav_links/to_nav_link';
 
-export const isModifiedOrPrevented = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) =>
+export const isModifiedOrPrevented = (event: React.MouseEvent<HTMLElement, MouseEvent>) =>
   event.metaKey || event.altKey || event.ctrlKey || event.shiftKey || event.defaultPrevented;
 
 interface Props {
   link: ChromeNavLink;
   appId?: string;
   basePath?: HttpStart['basePath'];
-  dataTestSubj: string;
+  dataTestSubj?: string;
   onClick?: Function;
   navigateToUrl: CoreStart['application']['navigateToUrl'];
   externalLink?: boolean;
+  iconProps?: EuiListGroupItemProps['iconProps'];
 }
 
 // TODO #64541
@@ -39,7 +40,8 @@ export function createEuiListItem({
   navigateToUrl,
   dataTestSubj,
   externalLink = false,
-}: Props) {
+  iconProps,
+}: Props): EuiListGroupItemProps {
   const { href, id, title, disabled, euiIconType, icon, tooltip, url } = link;
 
   return {
@@ -60,14 +62,61 @@ export function createEuiListItem({
         navigateToUrl(url);
       }
     },
-    isActive: appId === id,
+    isActive: !externalLink && appId === id,
     isDisabled: disabled,
     'data-test-subj': dataTestSubj,
     ...(basePath && {
       iconType: euiIconType,
+      iconProps,
       icon:
         !euiIconType && icon ? <EuiIcon type={basePath.prepend(`/${icon}`)} size="m" /> : undefined,
     }),
+  };
+}
+
+export function createEuiButtonItem({
+  link,
+  onClick = () => {},
+  navigateToUrl,
+  dataTestSubj,
+}: Omit<Props, 'appId' | 'basePath'>) {
+  const { href, disabled, url, id } = link;
+
+  return {
+    href,
+    /* Use href and onClick to support "open in new tab" and SPA navigation in the same link */
+    onClick(event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) {
+      if (!isModifiedOrPrevented(event)) {
+        onClick();
+      }
+      event.preventDefault();
+      navigateToUrl(url);
+    },
+    isDisabled: disabled,
+    dataTestSubj: `collapsibleNavAppButton-${id}`,
+  };
+}
+
+export function createOverviewLink({
+  link,
+  onClick = () => {},
+  navigateToUrl,
+}: Omit<Props, 'appId' | 'basePath'>) {
+  const { href, url } = link;
+
+  return {
+    href,
+    /* Use href and onClick to support "open in new tab" and SPA navigation in the same link */
+    onClick(event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) {
+      // Prevent the accordions from opening or closing when clicking just the link
+      event.stopPropagation();
+      if (!isModifiedOrPrevented(event)) {
+        onClick();
+      }
+      event.preventDefault();
+      navigateToUrl(url);
+    },
+    'data-test-subj': `collapsibleNavAppLink-overview`,
   };
 }
 

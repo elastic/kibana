@@ -9,7 +9,8 @@ import { mockAppIndexPattern, mockIndexPattern } from '../../rtl_helpers';
 import { getDefaultConfigs } from '../default_configs';
 import { LayerConfig, LensAttributes } from '../lens_attributes';
 import { sampleAttributeCoreWebVital } from '../test_data/sample_attribute_cwv';
-import { SERVICE_NAME, USER_AGENT_OS } from '../constants/elasticsearch_fieldnames';
+import { LCP_FIELD, SERVICE_NAME, USER_AGENT_OS } from '../constants/elasticsearch_fieldnames';
+import { obsvReportConfigMap } from '../../obsv_exploratory_view';
 
 describe('Core web vital config test', function () {
   mockAppIndexPattern();
@@ -18,16 +19,20 @@ describe('Core web vital config test', function () {
     reportType: 'core-web-vitals',
     dataType: 'ux',
     indexPattern: mockIndexPattern,
+    reportConfigMap: obsvReportConfigMap,
   });
 
   let lnsAttr: LensAttributes;
 
   const layerConfig: LayerConfig = {
     seriesConfig,
-    indexPattern: mockIndexPattern,
-    reportDefinitions: { [SERVICE_NAME]: ['elastic-co'] },
-    time: { from: 'now-15m', to: 'now' },
+    color: 'green',
+    name: 'test-series',
     breakdown: USER_AGENT_OS,
+    indexPattern: mockIndexPattern,
+    time: { from: 'now-15m', to: 'now' },
+    reportDefinitions: { [SERVICE_NAME]: ['elastic-co'] },
+    selectedMetricField: LCP_FIELD,
   };
 
   beforeEach(() => {

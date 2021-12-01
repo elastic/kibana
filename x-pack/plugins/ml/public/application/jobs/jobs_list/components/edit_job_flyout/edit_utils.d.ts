@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IIndexPattern } from 'src/plugins/data/common';
+import type { DataViewListItem } from 'src/plugins/data_views/common';
 
 export function loadSavedDashboards(maxNumber: number): Promise<any[]>;
-export function loadIndexPatterns(maxNumber: number): Promise<IIndexPattern[]>;
+export function loadDataViewListItems(): Promise<DataViewListItem[]>;

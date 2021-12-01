@@ -9,14 +9,15 @@
 import { buildQueryFromKuery } from './from_kuery';
 import { fromKueryExpression, toElasticsearchQuery } from '../kuery';
 import { fields } from '../filters/stubs';
-import { IndexPatternBase } from './types';
+import { DataViewBase } from './types';
 import { Query } from '..';
 
 jest.mock('../kuery/grammar');
 
 describe('build query', () => {
-  const indexPattern: IndexPatternBase = {
+  const indexPattern: DataViewBase = {
     fields,
+    title: 'dataView',
   };
 
   describe('buildQueryFromKuery', () => {

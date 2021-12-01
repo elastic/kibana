@@ -49,6 +49,42 @@ exports.EcsCustomPropertyMappings = {
           },
         },
       },
+      alert: {
+        properties: {
+          rule: {
+            properties: {
+              execution: {
+                properties: {
+                  uuid: {
+                    type: 'keyword',
+                    ignore_above: 1024,
+                  },
+                  status: {
+                    type: 'keyword',
+                    ignore_above: 1024,
+                  },
+                  status_order: {
+                    type: 'long',
+                  },
+                  metrics: {
+                    properties: {
+                      total_indexing_duration_ms: {
+                        type: 'long',
+                      },
+                      total_search_duration_ms: {
+                        type: 'long',
+                      },
+                      execution_gap_duration_s: {
+                        type: 'long',
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
       // array of saved object references, for "linking" via search
       saved_objects: {
         type: 'nested',
@@ -76,6 +112,10 @@ exports.EcsCustomPropertyMappings = {
             ignore_above: 1024,
           },
         },
+      },
+      space_ids: {
+        type: 'keyword',
+        ignore_above: 1024,
       },
       version: {
         type: 'version',
@@ -105,4 +145,10 @@ exports.EcsPropertiesToGenerate = [
 /**
  * These properties can have multiple values (are arrays in the generated event schema).
  */
-exports.EcsEventLogMultiValuedProperties = ['tags', 'event.category', 'event.type', 'rule.author'];
+exports.EcsEventLogMultiValuedProperties = [
+  'tags',
+  'event.category',
+  'event.type',
+  'rule.author',
+  'kibana.space_ids',
+];

@@ -16,7 +16,7 @@ import { EuiButtonIcon, EuiIcon, EuiInMemoryTable, EuiText, EuiToolTip } from '@
 
 import { formatHumanReadableDateTimeSeconds } from '../../../../../common/util/date_utils';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 function getColumns(viewForecast) {
   return [
@@ -78,6 +78,12 @@ function getColumns(viewForecast) {
 // TODO - add in ml-info-icon to the h3 element,
 //        then remove tooltip and inline style.
 export function ForecastsList({ forecasts, viewForecast }) {
+  const getRowProps = (item) => {
+    return {
+      'data-test-subj': `mlForecastsListRow row-${item.rowId}`,
+    };
+  };
+
   return (
     <EuiText>
       <h3
@@ -105,6 +111,7 @@ export function ForecastsList({ forecasts, viewForecast }) {
         columns={getColumns(viewForecast)}
         pagination={false}
         data-test-subj="mlModalForecastTable"
+        rowProps={getRowProps}
       />
     </EuiText>
   );

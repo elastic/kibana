@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import objectHash from 'object-hash';
 import { getOffsetInMs } from '../../../../common/utils/get_offset_in_ms';
 import { ENVIRONMENT_NOT_DEFINED } from '../../../../common/environment_filter_values';
@@ -111,7 +111,7 @@ export const getDestinationMap = ({
                   ] as const),
                   sort: [
                     {
-                      '@timestamp': 'desc' as const,
+                      '@timestamp': 'asc' as const,
                     },
                   ],
                 },

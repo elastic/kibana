@@ -21,8 +21,6 @@ import { Title } from './title';
 import { DraggableArguments, BadgeOptions, TitleProp } from './types';
 import { useFormatUrl } from '../link_to';
 import { SecurityPageName } from '../../../app/types';
-import { Sourcerer } from '../sourcerer';
-import { SourcererScopeName } from '../../store/sourcerer/model';
 import { useKibana } from '../../lib/kibana';
 interface HeaderProps {
   border?: boolean;
@@ -76,8 +74,6 @@ export interface HeaderPageProps extends HeaderProps {
   badgeOptions?: BadgeOptions;
   children?: React.ReactNode;
   draggableArguments?: DraggableArguments;
-  hideSourcerer?: boolean;
-  sourcererScope?: SourcererScopeName;
   subtitle?: SubtitleProps['items'];
   subtitle2?: SubtitleProps['items'];
   title: TitleProp;
@@ -116,9 +112,7 @@ const HeaderPageComponent: React.FC<HeaderPageProps> = ({
   border,
   children,
   draggableArguments,
-  hideSourcerer = false,
   isLoading,
-  sourcererScope = SourcererScopeName.default,
   subtitle,
   subtitle2,
   title,
@@ -149,7 +143,6 @@ const HeaderPageComponent: React.FC<HeaderPageProps> = ({
           {children}
         </EuiPageHeaderSection>
       )}
-      {!hideSourcerer && <Sourcerer scope={sourcererScope} />}
     </EuiPageHeader>
     {/* Manually add a 'padding-bottom' to header */}
     <EuiSpacer size="l" />

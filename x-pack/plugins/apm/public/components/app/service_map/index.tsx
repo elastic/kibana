@@ -124,7 +124,7 @@ export function ServiceMap({
 
       return callApmApi({
         isCachable: false,
-        endpoint: 'GET /api/apm/service-map',
+        endpoint: 'GET /internal/apm/service-map',
         params: {
           query: {
             start,
@@ -168,8 +168,8 @@ export function ServiceMap({
     status === FETCH_STATUS.FAILURE &&
     error &&
     'body' in error &&
-    error.body.statusCode === 500 &&
-    error.body.message === SERVICE_MAP_TIMEOUT_ERROR
+    error.body?.statusCode === 500 &&
+    error.body?.message === SERVICE_MAP_TIMEOUT_ERROR
   ) {
     return (
       <PromptContainer>

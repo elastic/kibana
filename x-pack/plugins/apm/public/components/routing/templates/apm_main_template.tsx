@@ -5,10 +5,14 @@
  * 2.0.
  */
 
-import { EuiPageHeaderProps, EuiPageTemplateProps } from '@elastic/eui';
+import { EuiPageHeaderProps } from '@elastic/eui';
 import React from 'react';
 import { useLocation } from 'react-router-dom';
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import {
+  useKibana,
+  KibanaPageTemplateProps,
+} from '../../../../../../../src/plugins/kibana_react/public';
+import { EnvironmentsContextProvider } from '../../../context/environments_context/environments_context';
 import { useFetcher } from '../../../hooks/use_fetcher';
 import { ApmPluginStartDeps } from '../../../plugin';
 import { ApmEnvironmentFilter } from '../../shared/EnvironmentFilter';
@@ -30,23 +34,24 @@ export function ApmMainTemplate({
   pageTitle,
   pageHeader,
   children,
+  environmentFilter = true,
   ...pageTemplateProps
 }: {
   pageTitle?: React.ReactNode;
   pageHeader?: EuiPageHeaderProps;
   children: React.ReactNode;
-} & EuiPageTemplateProps) {
+  environmentFilter?: boolean;
+} & KibanaPageTemplateProps) {
   const location = useLocation();
 
   const { services } = useKibana<ApmPluginStartDeps>();
-  const { http, docLinks } = services;
+  const { http, docLinks, observability } = services;
   const basePath = http?.basePath.get();
 
-  const ObservabilityPageTemplate =
-    services.observability.navigation.PageTemplate;
+  const ObservabilityPageTemplate = observability.navigation.PageTemplate;
 
   const { data } = useFetcher((callApmApi) => {
-    return callApmApi({ endpoint: 'GET /api/apm/has_data' });
+    return callApmApi({ endpoint: 'GET /internal/apm/has_data' });
   }, []);
 
   const noDataConfig = getNoDataConfig({
@@ -59,12 +64,14 @@ export function ApmMainTemplate({
     location.pathname.includes(path)
   );
 
-  return (
+  const rightSideItems = environmentFilter ? [<ApmEnvironmentFilter />] : [];
+
+  const pageTemplate = (
     <ObservabilityPageTemplate
       noDataConfig={shouldBypassNoDataScreen ? undefined : noDataConfig}
       pageHeader={{
         pageTitle,
-        rightSideItems: [<ApmEnvironmentFilter />],
+        rightSideItems,
         ...pageHeader,
       }}
       {...pageTemplateProps}
@@ -72,4 +79,12 @@ export function ApmMainTemplate({
       {children}
     </ObservabilityPageTemplate>
   );
+
+  if (environmentFilter) {
+    return (
+      <EnvironmentsContextProvider>{pageTemplate}</EnvironmentsContextProvider>
+    );
+  }
+
+  return pageTemplate;
 }

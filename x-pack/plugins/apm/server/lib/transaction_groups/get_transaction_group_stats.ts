@@ -6,12 +6,15 @@
  */
 
 import { merge } from 'lodash';
-import { estypes } from '@elastic/elasticsearch';
-import { TRANSACTION_TYPE } from '../../../common/elasticsearch_fieldnames';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import {
+  TRANSACTION_TYPE,
+  AGENT_NAME,
+} from '../../../common/elasticsearch_fieldnames';
 import { arrayUnionToCallable } from '../../../common/utils/array_union_to_callable';
 import { TransactionGroupRequestBase, TransactionGroupSetup } from './fetcher';
-import { getTransactionDurationFieldForAggregatedTransactions } from '../helpers/aggregated_transactions';
-
+import { getTransactionDurationFieldForTransactions } from '../helpers/transactions';
+import { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
 interface MetricParams {
   request: TransactionGroupRequestBase;
   setup: TransactionGroupSetup;
@@ -46,7 +49,7 @@ export async function getAverages({
   const params = mergeRequestWithAggs(request, {
     avg: {
       avg: {
-        field: getTransactionDurationFieldForAggregatedTransactions(
+        field: getTransactionDurationFieldForTransactions(
           searchAggregatedTransactions
         ),
       },
@@ -79,6 +82,9 @@ export async function getCounts({ request, setup }: MetricParams) {
           {
             field: TRANSACTION_TYPE,
           } as const,
+          {
+            field: AGENT_NAME,
+          } as const,
         ],
       },
     },
@@ -98,6 +104,9 @@ export async function getCounts({ request, setup }: MetricParams) {
       transactionType: bucket.transaction_type.top[0].metrics[
         TRANSACTION_TYPE
       ] as string,
+      agentName: bucket.transaction_type.top[0].metrics[
+        AGENT_NAME
+      ] as AgentName,
     };
   });
 }
@@ -110,7 +119,7 @@ export async function getSums({
   const params = mergeRequestWithAggs(request, {
     sum: {
       sum: {
-        field: getTransactionDurationFieldForAggregatedTransactions(
+        field: getTransactionDurationFieldForTransactions(
           searchAggregatedTransactions
         ),
       },

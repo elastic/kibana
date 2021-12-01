@@ -43,10 +43,10 @@ import { ServiceLink } from '../../../shared/service_link';
 import { TruncateWithTooltip } from '../../../shared/truncate_with_tooltip';
 import { HealthBadge } from './HealthBadge';
 
-type ServiceListAPIResponse = APIReturnType<'GET /api/apm/services'>;
+type ServiceListAPIResponse = APIReturnType<'GET /internal/apm/services'>;
 type Items = ServiceListAPIResponse['items'];
 type ServicesDetailedStatisticsAPIResponse =
-  APIReturnType<'GET /api/apm/services/detailed_statistics'>;
+  APIReturnType<'GET /internal/apm/services/detailed_statistics'>;
 
 type ServiceListItem = ValuesType<Items>;
 

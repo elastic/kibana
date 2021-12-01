@@ -6,6 +6,7 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
+import { Logger } from 'src/core/server';
 import { findRuleValidateTypeDependents } from '../../../../../common/detection_engine/schemas/request/find_rules_type_dependents';
 import {
   findRulesSchema,
@@ -17,11 +18,13 @@ import { findRules } from '../../rules/find_rules';
 import { buildSiemResponse } from '../utils';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 import { transformFindAlerts } from './utils';
+
 // eslint-disable-next-line no-restricted-imports
 import { legacyGetBulkRuleActionsSavedObject } from '../../rule_actions/legacy_get_bulk_rule_actions_saved_object';
 
 export const findRulesRoute = (
   router: SecuritySolutionPluginRouter,
+  logger: Logger,
   isRuleRegistryEnabled: boolean
 ) => {
   router.get(
@@ -65,15 +68,14 @@ export const findRulesRoute = (
         });
         const alertIds = rules.data.map((rule) => rule.id);
 
-        const [ruleStatuses, ruleActions] = await Promise.all([
-          execLogClient.findBulk({
+        const [currentStatusesByRuleId, ruleActions] = await Promise.all([
+          execLogClient.getCurrentStatusBulk({
             ruleIds: alertIds,
-            logsCount: 1,
             spaceId: context.securitySolution.getSpaceId(),
           }),
-          legacyGetBulkRuleActionsSavedObject({ alertIds, savedObjectsClient }),
+          legacyGetBulkRuleActionsSavedObject({ alertIds, savedObjectsClient, logger }),
         ]);
-        const transformed = transformFindAlerts(rules, ruleStatuses, ruleActions);
+        const transformed = transformFindAlerts(rules, currentStatusesByRuleId, ruleActions);
         if (transformed == null) {
           return siemResponse.error({ statusCode: 500, body: 'Internal error transforming' });
         } else {

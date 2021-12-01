@@ -9,7 +9,7 @@ import { createSelector } from 'reselect';
 import { matchPath } from 'react-router-dom';
 import { ILicense } from '../../../../../../../../licensing/common/types';
 import { unsetPolicyFeaturesAccordingToLicenseLevel } from '../../../../../../../common/license/policy_config';
-import { PolicyDetailsArtifactsPageLocation, PolicyDetailsState } from '../../../types';
+import { PolicyDetailsState } from '../../../types';
 import {
   Immutable,
   NewPolicyData,
@@ -23,7 +23,8 @@ import {
   MANAGEMENT_ROUTING_POLICY_DETAILS_TRUSTED_APPS_PATH,
 } from '../../../../../common/constants';
 import { ManagementRoutePolicyDetailsParams } from '../../../../../types';
-import { getPolicyDataForUpdate } from '../../../../../../../common/endpoint/service/policy/get_policy_data_for_update';
+import { getPolicyDataForUpdate } from '../../../../../../../common/endpoint/service/policy';
+import { isOnPolicyTrustedAppsView, isOnPolicyFormView } from './policy_common_selectors';
 
 /** Returns the policy details */
 export const policyDetails = (state: Immutable<PolicyDetailsState>) => state.policyItem;
@@ -80,36 +81,9 @@ export const needsToRefresh = (state: Immutable<PolicyDetailsState>): boolean =>
   return !state.policyItem && !state.apiError;
 };
 
-/**
- * Returns current artifacts location
- */
-export const getCurrentArtifactsLocation = (
-  state: Immutable<PolicyDetailsState>
-): Immutable<PolicyDetailsArtifactsPageLocation> => state.artifacts.location;
-
-/** Returns a boolean of whether the user is on the policy form page or not */
-export const isOnPolicyFormPage = (state: Immutable<PolicyDetailsState>) => {
-  return (
-    matchPath(state.location?.pathname ?? '', {
-      path: MANAGEMENT_ROUTING_POLICY_DETAILS_FORM_PATH,
-      exact: true,
-    }) !== null
-  );
-};
-
-/** Returns a boolean of whether the user is on the policy details page or not */
-export const isOnPolicyTrustedAppsPage = (state: Immutable<PolicyDetailsState>) => {
-  return (
-    matchPath(state.location?.pathname ?? '', {
-      path: MANAGEMENT_ROUTING_POLICY_DETAILS_TRUSTED_APPS_PATH,
-      exact: true,
-    }) !== null
-  );
-};
-
 /** Returns a boolean of whether the user is on some of the policy details page or not */
 export const isOnPolicyDetailsPage = (state: Immutable<PolicyDetailsState>) =>
-  isOnPolicyFormPage(state) || isOnPolicyTrustedAppsPage(state);
+  isOnPolicyFormView(state) || isOnPolicyTrustedAppsView(state);
 
 /** Returns the license info fetched from the license service */
 export const license = (state: Immutable<PolicyDetailsState>) => {
@@ -180,6 +154,7 @@ export const policyConfig: (s: PolicyDetailsState) => UIPolicyConfig = createSel
         events: mac.events,
         malware: mac.malware,
         behavior_protection: mac.behavior_protection,
+        memory_protection: mac.memory_protection,
         popup: mac.popup,
       },
       linux: {
@@ -187,6 +162,7 @@ export const policyConfig: (s: PolicyDetailsState) => UIPolicyConfig = createSel
         events: linux.events,
         malware: linux.malware,
         behavior_protection: linux.behavior_protection,
+        memory_protection: linux.memory_protection,
         popup: linux.popup,
       },
     };
@@ -246,7 +222,7 @@ export const totalLinuxEvents = (state: PolicyDetailsState): number => {
   return 0;
 };
 
-/** Returns the number of selected liinux eventing configurations */
+/** Returns the number of selected linux eventing configurations */
 export const selectedLinuxEvents = (state: PolicyDetailsState): number => {
   const config = policyConfig(state);
   if (config) {

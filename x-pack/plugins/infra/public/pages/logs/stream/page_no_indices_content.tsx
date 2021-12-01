@@ -22,8 +22,8 @@ export const LogsPageNoIndicesContent = () => {
   const canConfigureSource = application?.capabilities?.logs?.configureSource ? true : false;
 
   const tutorialLinkProps = useLinkProps({
-    app: 'home',
-    hash: '/tutorial_directory/logging',
+    app: 'integrations',
+    hash: '/browse',
   });
 
   return (

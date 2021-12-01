@@ -14,7 +14,6 @@ import { DEFAULT_NUMBER_FORMAT } from '../../../../../common/constants';
 import * as i18n from './translations';
 
 interface BulkActionsProps {
-  timelineId: string;
   totalItems: number;
   selectedCount: number;
   showClearSelection: boolean;

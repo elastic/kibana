@@ -11,18 +11,73 @@
 
 export * from './constants';
 export * from './es_query';
-export * from './data_views';
 export * from './kbn_field_types';
 export * from './query';
 export * from './search';
 export * from './types';
-export * from './utils';
 export * from './exports';
-
-/**
- *
- * @deprecated Use data plugin interface instead
- * @removeBy 8.1
- */
-
-export { IndexPatternAttributes } from './types';
+export type {
+  IFieldType,
+  IIndexPatternFieldList,
+  FieldFormatMap,
+  RuntimeType,
+  RuntimeField,
+  IIndexPattern,
+  DataViewAttributes,
+  IndexPatternAttributes,
+  FieldAttrs,
+  FieldAttrSet,
+  OnNotification,
+  OnError,
+  UiSettingsCommon,
+  SavedObjectsClientCommonFindArgs,
+  SavedObjectsClientCommon,
+  GetFieldsOptions,
+  GetFieldsOptionsTimePattern,
+  IDataViewsApiClient,
+  IIndexPatternsApiClient,
+  SavedObject,
+  AggregationRestrictions,
+  TypeMeta,
+  FieldSpecConflictDescriptions,
+  FieldSpecExportFmt,
+  FieldSpec,
+  DataViewFieldMap,
+  IndexPatternFieldMap,
+  DataViewSpec,
+  IndexPatternSpec,
+  SourceFilter,
+  IndexPatternExpressionType,
+  IndexPatternLoadStartDependencies,
+  IndexPatternLoadExpressionFunctionDefinition,
+} from '../../data_views/common';
+export type {
+  IndexPatternsContract,
+  DataViewsContract,
+  IndexPatternListItem,
+  DataViewListItem,
+} from '../../data_views/common';
+export {
+  RUNTIME_FIELD_TYPES,
+  FLEET_ASSETS_TO_IGNORE,
+  META_FIELDS,
+  DATA_VIEW_SAVED_OBJECT_TYPE,
+  INDEX_PATTERN_SAVED_OBJECT_TYPE,
+  isFilterable,
+  fieldList,
+  DataViewField,
+  IndexPatternField,
+  DataViewType,
+  IndexPatternType,
+  IndexPatternsService,
+  DataViewsService,
+  IndexPattern,
+  DataView,
+  DuplicateDataViewError,
+  DataViewSavedObjectConflictError,
+  getIndexPatternLoadMeta,
+  isNestedField,
+  isMultiField,
+  getFieldSubtypeMulti,
+  getFieldSubtypeNested,
+} from '../../data_views/common';

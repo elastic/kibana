@@ -6,4 +6,3 @@
  */
 
 export { getShareToSpaceFlyoutComponent } from './share_to_space_flyout';
-export { getLegacyUrlConflict } from './legacy_url_conflict';

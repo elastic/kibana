@@ -62,6 +62,12 @@ export const EVENT_FILTERS = i18n.translate(
   }
 );
 
+export const HOST_ISOLATION_EXCEPTIONS = i18n.translate(
+  'xpack.securitySolution.search.administration.hostIsolationExceptions',
+  {
+    defaultMessage: 'Host isolation exceptions',
+  }
+);
 export const DETECT = i18n.translate('xpack.securitySolution.navigation.detect', {
   defaultMessage: 'Detect',
 });
@@ -73,4 +79,22 @@ export const INVESTIGATE = i18n.translate('xpack.securitySolution.navigation.inv
 });
 export const MANAGE = i18n.translate('xpack.securitySolution.navigation.manage', {
   defaultMessage: 'Manage',
+});
+
+export const GO_TO_DOCUMENTATION = i18n.translate(
+  'xpack.securitySolution.goToDocumentationButton',
+  {
+    defaultMessage: 'View documentation',
+  }
+);
+
+export const NO_PERMISSIONS_MSG = (subPluginKey: string) =>
+  i18n.translate('xpack.securitySolution.noPermissionsMessage', {
+    values: { subPluginKey },
+    defaultMessage:
+      'To view {subPluginKey}, you must update privileges. For more information, contact your Kibana administrator.',
+  });
+
+export const NO_PERMISSIONS_TITLE = i18n.translate('xpack.securitySolution.noPermissionsTitle', {
+  defaultMessage: 'Privileges required',
 });

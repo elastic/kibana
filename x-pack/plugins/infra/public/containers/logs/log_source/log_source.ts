@@ -8,7 +8,7 @@
 import createContainer from 'constate';
 import { useCallback, useMemo, useState } from 'react';
 import type { HttpHandler } from 'src/core/public';
-import { IndexPatternsContract } from '../../../../../../../src/plugins/data/common';
+import { DataViewsContract } from '../../../../../../../src/plugins/data_views/public';
 import {
   LogIndexField,
   LogSourceConfigurationPropertiesPatch,
@@ -26,14 +26,14 @@ import { callFetchLogSourceConfigurationAPI } from './api/fetch_log_source_confi
 import { callFetchLogSourceStatusAPI } from './api/fetch_log_source_status';
 import { callPatchLogSourceConfigurationAPI } from './api/patch_log_source_configuration';
 
-export {
+export type {
   LogIndexField,
   LogSourceConfiguration,
   LogSourceConfigurationProperties,
   LogSourceConfigurationPropertiesPatch,
   LogSourceStatus,
-  ResolveLogSourceConfigurationError,
 };
+export { ResolveLogSourceConfigurationError };
 
 export const useLogSource = ({
   sourceId,
@@ -42,7 +42,7 @@ export const useLogSource = ({
 }: {
   sourceId: string;
   fetch: HttpHandler;
-  indexPatternsService: IndexPatternsContract;
+  indexPatternsService: DataViewsContract;
 }) => {
   const [sourceConfiguration, setSourceConfiguration] = useState<
     LogSourceConfiguration | undefined

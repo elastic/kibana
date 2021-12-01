@@ -31,7 +31,7 @@ describe('EventLogger', () => {
     service = new EventLogService({
       esContext,
       systemLogger,
-      config: { enabled: true, logEntries: true, indexEntries: true },
+      config: { logEntries: true, indexEntries: true },
       kibanaUUID: KIBANA_SERVER_UUID,
       savedObjectProviderRegistry: savedObjectProviderRegistryMock.create(),
       kibanaVersion: '1.0.1',

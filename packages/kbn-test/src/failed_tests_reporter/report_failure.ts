@@ -10,7 +10,12 @@ import { TestFailure } from './get_failures';
 import { GithubIssueMini, GithubApi } from './github_api';
 import { getIssueMetadata, updateIssueMetadata } from './issue_metadata';
 
-export async function createFailureIssue(buildUrl: string, failure: TestFailure, api: GithubApi) {
+export async function createFailureIssue(
+  buildUrl: string,
+  failure: TestFailure,
+  api: GithubApi,
+  branch: string
+) {
   const title = `Failing test: ${failure.classname} - ${failure.name}`;
 
   const body = updateIssueMetadata(
@@ -21,7 +26,7 @@ export async function createFailureIssue(buildUrl: string, failure: TestFailure,
       failure.failure,
       '```',
       '',
-      `First failure: [CI Build](${buildUrl})`,
+      `First failure: [CI Build - ${branch}](${buildUrl})`,
     ].join('\n'),
     {
       'test.class': failure.classname,
@@ -33,7 +38,12 @@ export async function createFailureIssue(buildUrl: string, failure: TestFailure,
   return await api.createIssue(title, body, ['failed-test']);
 }
 
-export async function updateFailureIssue(buildUrl: string, issue: GithubIssueMini, api: GithubApi) {
+export async function updateFailureIssue(
+  buildUrl: string,
+  issue: GithubIssueMini,
+  api: GithubApi,
+  branch: string
+) {
   // Increment failCount
   const newCount = getIssueMetadata(issue.body, 'test.failCount', 0) + 1;
   const newBody = updateIssueMetadata(issue.body, {
@@ -41,7 +51,7 @@ export async function updateFailureIssue(buildUrl: string, issue: GithubIssueMin
   });
 
   await api.editIssueBodyAndEnsureOpen(issue.number, newBody);
-  await api.addIssueComment(issue.number, `New failure: [CI Build](${buildUrl})`);
+  await api.addIssueComment(issue.number, `New failure: [CI Build - ${branch}](${buildUrl})`);
 
   return newCount;
 }

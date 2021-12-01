@@ -5,10 +5,5 @@
  * 2.0.
  */
 
-export { getShareToSpaceFlyoutComponent, getLegacyUrlConflict } from './components';
-export { createRedirectLegacyUrl } from './utils';
-export type {
-  LegacyUrlConflictProps,
-  ShareToSpaceFlyoutProps,
-  ShareToSpaceSavedObjectTarget,
-} from './types';
+export { getShareToSpaceFlyoutComponent } from './components';
+export type { ShareToSpaceFlyoutProps, ShareToSpaceSavedObjectTarget } from './types';

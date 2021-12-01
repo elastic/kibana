@@ -7,6 +7,7 @@
 
 import { RouteDependencies } from '../../plugin';
 
+import { registerSearchRelevanceSuggestionsRoutes } from './adaptive_relevance';
 import { registerAnalyticsRoutes } from './analytics';
 import { registerApiLogsRoutes } from './api_logs';
 import { registerCrawlerRoutes } from './crawler';
@@ -50,4 +51,5 @@ export const registerAppSearchRoutes = (dependencies: RouteDependencies) => {
   registerCrawlerEntryPointRoutes(dependencies);
   registerCrawlerCrawlRulesRoutes(dependencies);
   registerCrawlerSitemapRoutes(dependencies);
+  registerSearchRelevanceSuggestionsRoutes(dependencies);
 };

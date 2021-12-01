@@ -44,8 +44,8 @@ export const datasourceSaga = ({
       // in case of errors, reset the datasource and show notification
       yield put(setDatasource({ type: 'none' }));
       notifications.toasts.addDanger(
-        i18n.translate('xpack.graph.loadWorkspace.missingIndexPatternErrorMessage', {
-          defaultMessage: 'Index pattern "{name}" not found',
+        i18n.translate('xpack.graph.loadWorkspace.missingDataViewErrorMessage', {
+          defaultMessage: 'Data view "{name}" not found',
           values: {
             name: action.payload.title,
           },

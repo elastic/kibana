@@ -30,6 +30,14 @@ export class MVTField extends AbstractField implements IField {
     this._type = type;
   }
 
+  supportsFieldMetaFromEs(): boolean {
+    return false;
+  }
+
+  supportsFieldMetaFromLocalData(): boolean {
+    return false;
+  }
+
   getMVTFieldDescriptor(): MVTFieldDescriptor {
     return {
       type: this._type,
@@ -53,13 +61,5 @@ export class MVTField extends AbstractField implements IField {
 
   async getLabel(): Promise<string> {
     return this.getName();
-  }
-
-  supportsAutoDomain() {
-    return false;
-  }
-
-  canReadFromGeoJson(): boolean {
-    return false;
   }
 }

@@ -19,7 +19,7 @@ export interface ExecutorState<Context extends Record<string, unknown> = Record<
   context: Context;
 }
 
-export const defaultState: ExecutorState<any> = {
+export const defaultState: ExecutorState = {
   functions: {},
   types: {},
   context: {},
@@ -61,7 +61,7 @@ export type ExecutorContainer<Context extends Record<string, unknown> = Record<s
 export const createExecutorContainer = <
   Context extends Record<string, unknown> = Record<string, unknown>
 >(
-  state: ExecutorState<Context> = defaultState
+  state = defaultState as ExecutorState<Context>
 ): ExecutorContainer<Context> => {
   const container = createStateContainer<
     ExecutorState<Context>,

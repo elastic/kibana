@@ -3,7 +3,7 @@
 <% } -%>
 
 <a name="top"></a>
-# <%= project.name %> v<%= project.version %>
+v<%= project.version %>
 
 <%= project.description %>
 
@@ -24,7 +24,7 @@
 ```
 <% if (sub.header && sub.header.fields && sub.header.fields.Header.length) { -%>
 
-#### Headers
+##### Headers
 | Name    | Type      | Description                          |
 |---------|-----------|--------------------------------------|
 <% sub.header.fields.Header.forEach(header => { -%>
@@ -33,7 +33,7 @@
 <% } // if parameters -%>
 <% if (sub.header && sub.header.examples && sub.header.examples.length) { -%>
 
-#### Header examples
+##### Header examples
 <% sub.header.examples.forEach(example => { -%>
 <%= example.title %>
 
@@ -45,7 +45,7 @@
 <% if (sub.parameter && sub.parameter.fields) { -%>
 <% Object.keys(sub.parameter.fields).forEach(g => { -%>
 
-#### Parameters - `<%= g -%>`
+##### Parameters - `<%= g -%>`
 | Name     | Type       | Description                           |
 |:---------|:-----------|:--------------------------------------|
 <% sub.parameter.fields[g].forEach(param => { -%>
@@ -61,7 +61,7 @@ _Allowed values: <%- param.allowedValues %>_<% } -%> |
 <% } // if parameters -%>
 <% if (sub.examples && sub.examples.length) { -%>
 
-#### Examples
+##### Examples
 <% sub.examples.forEach(example => { -%>
 <%= example.title %>
 
@@ -72,7 +72,7 @@ _Allowed values: <%- param.allowedValues %>_<% } -%> |
 <% } // if example -%>
 <% if (sub.parameter && sub.parameter.examples && sub.parameter.examples.length) { -%>
 
-#### Parameters examples
+##### Parameters examples
 <% sub.parameter.examples.forEach(exampleParam => { -%>
 `<%= exampleParam.type %>` - <%= exampleParam.title %>
 
@@ -83,10 +83,10 @@ _Allowed values: <%- param.allowedValues %>_<% } -%> |
 <% } // if exampleParam -%>
 <% if (sub.success && sub.success.fields) { -%>
 
-#### Success response
+##### Success response
 <% Object.keys(sub.success.fields).forEach(g => { -%>
 
-##### Success response - `<%= g %>`
+###### Success response - `<%= g %>`
 | Name     | Type       | Description                           |
 |:---------|:-----------|:--------------------------------------|
 <% sub.success.fields[g].forEach(param => { -%>
@@ -102,10 +102,10 @@ _Allowed values: <%- param.allowedValues %>_<% } -%> |
 <% } // if success.fields -%>
 <% if (sub.success && sub.success.examples && sub.success.examples.length) { -%>
 
-#### Success response example
+##### Success response example
 <% sub.success.examples.forEach(example => { -%>
 
-##### Success response example - `<%= example.title %>`
+###### Success response example - `<%= example.title %>`
 
 ```
 <%- example.content %>
@@ -114,10 +114,10 @@ _Allowed values: <%- param.allowedValues %>_<% } -%> |
 <% } // if success.examples -%>
 <% if (sub.error && sub.error.fields) { -%>
 
-#### Error response
+##### Error response
 <% Object.keys(sub.error.fields).forEach(g => { -%>
 
-##### Error response - `<%= g %>`
+###### Error response - `<%= g %>`
 | Name     | Type       | Description                           |
 |:---------|:-----------|:--------------------------------------|
 <% sub.error.fields[g].forEach(param => { -%>
@@ -133,10 +133,10 @@ _Allowed values: <%- param.allowedValues %>_<% } -%> |
 <% } // if error.fields -%>
 <% if (sub.error && sub.error.examples && sub.error.examples.length) { -%>
 
-#### Error response example
+##### Error response example
 <% sub.error.examples.forEach(example => { -%>
 
-##### Error response example - `<%= example.title %>`
+###### Error response example - `<%= example.title %>`
 
 ```
 <%- example.content %>

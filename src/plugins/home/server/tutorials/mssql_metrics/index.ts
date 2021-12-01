@@ -28,7 +28,7 @@ export function mssqlMetricsSpecProvider(context: TutorialContext): TutorialSche
     moduleName,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.mssqlMetrics.shortDescription', {
-      defaultMessage: 'Fetch monitoring metrics from a Microsoft SQL Server instance',
+      defaultMessage: 'Collect metrics from Microsoft SQL Server instances with Metricbeat.',
     }),
     longDescription: i18n.translate('home.tutorials.mssqlMetrics.longDescription', {
       defaultMessage:
@@ -59,5 +59,6 @@ export function mssqlMetricsSpecProvider(context: TutorialContext): TutorialSche
     onPrem: onPremInstructions(moduleName, context),
     elasticCloud: cloudInstructions(moduleName),
     onPremElasticCloud: onPremCloudInstructions(moduleName),
+    integrationBrowserCategories: ['datastore'],
   };
 }

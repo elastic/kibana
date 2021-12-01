@@ -64,24 +64,6 @@ const breadcrumbGetters: {
     },
     { text: policyName },
   ],
-  add_integration_from_policy: ({ policyName, policyId }) => [
-    BASE_BREADCRUMB,
-    {
-      href: pagePathGetters.policies()[1],
-      text: i18n.translate('xpack.fleet.breadcrumbs.policiesPageTitle', {
-        defaultMessage: 'Agent policies',
-      }),
-    },
-    {
-      href: pagePathGetters.policy_details({ policyId })[1],
-      text: policyName,
-    },
-    {
-      text: i18n.translate('xpack.fleet.breadcrumbs.addPackagePolicyPageTitle', {
-        defaultMessage: 'Add integration',
-      }),
-    },
-  ],
   add_integration_to_policy: ({ pkgTitle, pkgkey, integration }) => [
     INTEGRATIONS_BASE_BREADCRUMB,
     {
@@ -162,6 +144,14 @@ const breadcrumbGetters: {
     {
       text: i18n.translate('xpack.fleet.breadcrumbs.datastreamsPageTitle', {
         defaultMessage: 'Data streams',
+      }),
+    },
+  ],
+  settings: () => [
+    BASE_BREADCRUMB,
+    {
+      text: i18n.translate('xpack.fleet.breadcrumbs.settingsPageTitle', {
+        defaultMessage: 'Settings',
       }),
     },
   ],

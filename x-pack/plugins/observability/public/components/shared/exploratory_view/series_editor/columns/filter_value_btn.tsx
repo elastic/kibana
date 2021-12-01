@@ -5,13 +5,15 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
+
 import React, { useMemo } from 'react';
 import { EuiFilterButton, hexToRgb } from '@elastic/eui';
 import { useAppIndexPatternContext } from '../../hooks/use_app_index_pattern';
-import { useSeriesStorage } from '../../hooks/use_series_storage';
 import { useSeriesFilters } from '../../hooks/use_series_filters';
 import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common';
 import FieldValueSuggestions from '../../../field_value_suggestions';
+import { SeriesUrl } from '../../types';
+import { NestedFilterOpen } from './filter_expanded';
 
 interface Props {
   value: string;
@@ -19,12 +21,13 @@ interface Props {
   allSelectedValues?: string[];
   negate: boolean;
   nestedField?: string;
-  seriesId: string;
+  seriesId: number;
+  series: SeriesUrl;
   isNestedOpen: {
     value: string;
     negate: boolean;
   };
-  setIsNestedOpen: (val: { value: string; negate: boolean }) => void;
+  setIsNestedOpen: (val: NestedFilterOpen) => void;
 }
 
 export function FilterValueButton({
@@ -34,16 +37,13 @@ export function FilterValueButton({
   field,
   negate,
   seriesId,
+  series,
   nestedField,
   allSelectedValues,
 }: Props) {
-  const { getSeries } = useSeriesStorage();
-
-  const series = getSeries(seriesId);
-
   const { indexPatterns } = useAppIndexPatternContext(series.dataType);
 
-  const { setFilter, removeFilter } = useSeriesFilters({ seriesId });
+  const { setFilter, removeFilter } = useSeriesFilters({ seriesId, series });
 
   const hasActiveFilters = (allSelectedValues ?? []).includes(value);
 

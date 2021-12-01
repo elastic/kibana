@@ -57,9 +57,10 @@ export interface ExpressionChartData {
 export interface AlertParams {
   criteria: MetricExpression[];
   groupBy?: string | string[];
-  filterQuery?: string;
+  filterQuery?: string | symbol;
   sourceId: string;
   filterQueryText?: string;
   alertOnNoData?: boolean;
+  alertOnGroupDisappear?: boolean;
   shouldDropPartialBuckets?: boolean;
 }

@@ -52,7 +52,7 @@ jest.mock('./index_patterns_missing_prompt', () => {
 describe('EmbeddedMapComponent', () => {
   const setQuery: jest.Mock = jest.fn();
   const mockSelector = {
-    kibanaIndexPatterns: [
+    kibanaDataViews: [
       { id: '6f1eeb50-023d-11eb-bcb6-6ba0578012a9', title: 'filebeat-*' },
       { id: '28995490-023d-11eb-bcb6-6ba0578012a9', title: 'auditbeat-*' },
     ],
@@ -132,7 +132,7 @@ describe('EmbeddedMapComponent', () => {
     const spy = jest.spyOn(redux, 'useSelector');
     spy.mockReturnValue({
       ...mockSelector,
-      kibanaIndexPatterns: [],
+      kibanaDataViews: [],
     });
 
     (createEmbeddable as jest.Mock).mockResolvedValue(mockCreateEmbeddable);

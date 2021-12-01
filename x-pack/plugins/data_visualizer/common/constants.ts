@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import { KBN_FIELD_TYPES } from '../../../../src/plugins/data/common';
 
 export const UI_SETTING_MAX_FILE_SIZE = 'fileUpload:maxFileSize';
@@ -33,22 +34,16 @@ export const JOB_FIELD_TYPES = {
   UNKNOWN: 'unknown',
 } as const;
 
-export const JOB_FIELD_TYPES_OPTIONS = {
-  [JOB_FIELD_TYPES.BOOLEAN]: { name: 'Boolean', icon: 'tokenBoolean' },
-  [JOB_FIELD_TYPES.DATE]: { name: 'Date', icon: 'tokenDate' },
-  [JOB_FIELD_TYPES.GEO_POINT]: { name: 'Geo point', icon: 'tokenGeo' },
-  [JOB_FIELD_TYPES.GEO_SHAPE]: { name: 'Geo shape', icon: 'tokenGeo' },
-  [JOB_FIELD_TYPES.IP]: { name: 'IP address', icon: 'tokenIP' },
-  [JOB_FIELD_TYPES.KEYWORD]: { name: 'Keyword', icon: 'tokenKeyword' },
-  [JOB_FIELD_TYPES.NUMBER]: { name: 'Number', icon: 'tokenNumber' },
-  [JOB_FIELD_TYPES.TEXT]: { name: 'Text', icon: 'tokenString' },
-  [JOB_FIELD_TYPES.HISTOGRAM]: { name: 'Histogram', icon: 'tokenNumber' },
-  [JOB_FIELD_TYPES.UNKNOWN]: { name: 'Unknown' },
-};
-
 export const OMIT_FIELDS: string[] = ['_source', '_type', '_index', '_id', '_version', '_score'];
 
 export const NON_AGGREGATABLE_FIELD_TYPES = new Set<string>([
   KBN_FIELD_TYPES.GEO_SHAPE,
   KBN_FIELD_TYPES.HISTOGRAM,
 ]);
+
+export const FILE_DATA_VIS_TAB_ID = 'fileDataViz';
+export const applicationPath = `/app/home#/tutorial_directory/${FILE_DATA_VIS_TAB_ID}`;
+export const featureTitle = i18n.translate('xpack.dataVisualizer.title', {
+  defaultMessage: 'Upload a file',
+});
+export const featureId = `file_data_visualizer`;

@@ -273,6 +273,45 @@ test('throws an error when config is invalid', async () => {
   });
 });
 
+test('throws an error when connector is invalid', async () => {
+  const actionType: jest.Mocked<ActionType> = {
+    id: 'test',
+    name: 'Test',
+    minimumLicenseRequired: 'basic',
+    validate: {
+      connector: () => {
+        return 'error';
+      },
+    },
+    executor: jest.fn(),
+  };
+  const actionSavedObject = {
+    id: '1',
+    type: 'action',
+    attributes: {
+      actionTypeId: 'test',
+    },
+    references: [],
+  };
+  const actionResult = {
+    id: actionSavedObject.id,
+    name: actionSavedObject.id,
+    actionTypeId: actionSavedObject.attributes.actionTypeId,
+    isPreconfigured: false,
+  };
+  actionsClient.get.mockResolvedValueOnce(actionResult);
+  encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(actionSavedObject);
+  actionTypeRegistry.get.mockReturnValueOnce(actionType);
+
+  const result = await actionExecutor.execute(executeParams);
+  expect(result).toEqual({
+    actionId: '1',
+    status: 'error',
+    retry: false,
+    message: `error validating action type connector: error`,
+  });
+});
+
 test('throws an error when params is invalid', async () => {
   const actionType: jest.Mocked<ActionType> = {
     id: 'test',

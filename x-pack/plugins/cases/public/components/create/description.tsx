@@ -21,7 +21,7 @@ const DescriptionComponent: React.FC<Props> = ({ isLoading }) => {
     useLensDraftComment();
   const { setFieldValue } = useFormContext();
   const [{ title, tags }] = useFormData({ watch: ['title', 'tags'] });
-  const editorRef = useRef<Record<string, any>>();
+  const editorRef = useRef<Record<string, unknown>>();
 
   useEffect(() => {
     if (draftComment?.commentId === fieldName && editorRef.current) {

@@ -7,7 +7,7 @@
 
 import { useCallback, useState } from 'react';
 import { ToastsStart } from 'kibana/public';
-import { IHttpFetchError, CoreStart } from 'kibana/public';
+import { IHttpFetchError, ResponseErrorBody, CoreStart } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import { ExploreRequest, GraphExploreCallback, GraphSearchCallback, SearchRequest } from '../types';
 import { formatHttpError } from './format_http_error';
@@ -21,7 +21,7 @@ export const useGraphLoader = ({ toastNotifications, coreStart }: UseGraphLoader
   const [loading, setLoading] = useState(false);
 
   const handleHttpError = useCallback(
-    (error: IHttpFetchError) => {
+    (error: IHttpFetchError<ResponseErrorBody & { status: number; statusText: string }>) => {
       toastNotifications.addDanger(formatHttpError(error));
     },
     [toastNotifications]
@@ -59,10 +59,10 @@ export const useGraphLoader = ({ toastNotifications, coreStart }: UseGraphLoader
       };
       setLoading(true);
       return coreStart.http
-        .post('../api/graph/graphExplore', request)
+        .post<{ resp: { timed_out: unknown } }>('../api/graph/graphExplore', request)
         .then(function (data) {
           const response = data.resp;
-          if (response.timed_out) {
+          if (response?.timed_out) {
             toastNotifications.addWarning(
               i18n.translate('xpack.graph.exploreGraph.timedOutWarningText', {
                 defaultMessage: 'Exploration timed out',
@@ -88,7 +88,7 @@ export const useGraphLoader = ({ toastNotifications, coreStart }: UseGraphLoader
       };
       setLoading(true);
       coreStart.http
-        .post('../api/graph/searchProxy', request)
+        .post<{ resp: unknown }>('../api/graph/searchProxy', request)
         .then(function (data) {
           const response = data.resp;
           responseHandler(response);

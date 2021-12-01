@@ -12,12 +12,14 @@ import { CustomIntegrationsPluginSetup, CustomIntegrationsPluginStart } from './
 import { CustomIntegration } from '../common';
 import { CustomIntegrationRegistry } from './custom_integration_registry';
 import { defineRoutes } from './routes/define_routes';
+import { registerLanguageClients } from './language_clients';
 
 export class CustomIntegrationsPlugin
   implements Plugin<CustomIntegrationsPluginSetup, CustomIntegrationsPluginStart>
 {
   private readonly logger: Logger;
   private readonly customIngegrationRegistry: CustomIntegrationRegistry;
+  private readonly branch: string;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
@@ -25,6 +27,7 @@ export class CustomIntegrationsPlugin
       this.logger,
       initializerContext.env.mode.dev
     );
+    this.branch = initializerContext.env.packageInfo.branch;
   }
 
   public setup(core: CoreSetup) {
@@ -33,6 +36,8 @@ export class CustomIntegrationsPlugin
     const router = core.http.createRouter();
     defineRoutes(router, this.customIngegrationRegistry);
 
+    registerLanguageClients(core, this.customIngegrationRegistry, this.branch);
+
     return {
       registerCustomIntegration: (integration: Omit<CustomIntegration, 'type'>) => {
         this.customIngegrationRegistry.registerCustomIntegration({
@@ -40,7 +45,7 @@ export class CustomIntegrationsPlugin
           ...integration,
         });
       },
-      getAppendCustomIntegrations: (): CustomIntegration[] => {
+      getAppendCustomIntegrations: () => {
         return this.customIngegrationRegistry.getAppendCustomIntegrations();
       },
     } as CustomIntegrationsPluginSetup;

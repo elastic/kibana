@@ -322,33 +322,6 @@ export default function swimlaneTest({ getService }: FtrProviderContext) {
               expect(Object.keys(resp.body)).to.eql(['status', 'message', 'retry', 'connector_id']);
               expect(resp.body.connector_id).to.eql(simulatedActionId);
               expect(resp.body.status).to.eql('error');
-              expect(resp.body.retry).to.eql(false);
-              // Node.js 12 oddity:
-              //
-              // The first time after the server is booted, the error message will be:
-              //
-              //     undefined is not iterable (cannot read property Symbol(Symbol.iterator))
-              //
-              // After this, the error will be:
-              //
-              //     Cannot destructure property 'value' of 'undefined' as it is undefined.
-              //
-              // The error seems to come from the exact same place in the code based on the
-              // exact same circomstances:
-              //
-              //     https://github.com/elastic/kibana/blob/b0a223ebcbac7e404e8ae6da23b2cc6a4b509ff1/packages/kbn-config-schema/src/types/literal_type.ts#L28
-              //
-              // What triggers the error is that the `handleError` function expects its 2nd
-              // argument to be an object containing a `valids` property of type array.
-              //
-              // In this test the object does not contain a `valids` property, so hence the
-              // error.
-              //
-              // Why the error message isn't the same in all scenarios is unknown to me and
-              // could be a bug in V8.
-              expect(resp.body.message).to.match(
-                /^error validating action params: (undefined is not iterable \(cannot read property Symbol\(Symbol.iterator\)\)|Cannot destructure property 'value' of 'undefined' as it is undefined\.)$/
-              );
             });
         });
 

@@ -47,7 +47,7 @@ export function ServiceContents({
     (callApmApi) => {
       if (serviceName && start && end) {
         return callApmApi({
-          endpoint: 'GET /api/apm/service-map/service/{serviceName}',
+          endpoint: 'GET /internal/apm/service-map/service/{serviceName}',
           params: {
             path: { serviceName },
             query: { environment, start, end },
@@ -97,7 +97,7 @@ export function ServiceContents({
         </EuiButton>
       </EuiFlexItem>
       <EuiFlexItem>
-        <EuiButton color="secondary" href={focusUrl} onClick={onFocusClick}>
+        <EuiButton color="success" href={focusUrl} onClick={onFocusClick}>
           {i18n.translate('xpack.apm.serviceMap.focusMapButtonText', {
             defaultMessage: 'Focus map',
           })}

@@ -16,6 +16,7 @@ import { CoreStart, ChromeBreadcrumb } from 'src/core/public';
 import type { SpacesApi, SpacesContextProps } from '../../../../../x-pack/plugins/spaces/public';
 import { DataPublicPluginStart } from '../../../data/public';
 import { SavedObjectsTaggingApi } from '../../../saved_objects_tagging_oss/public';
+import type { SavedObjectManagementTypeInfo } from '../../common/types';
 import {
   SavedObjectsManagementActionServiceStart,
   SavedObjectsManagementColumnServiceStart,
@@ -38,7 +39,7 @@ const SavedObjectsTablePage = ({
   dataStart: DataPublicPluginStart;
   taggingApi?: SavedObjectsTaggingApi;
   spacesApi?: SpacesApi;
-  allowedTypes: string[];
+  allowedTypes: SavedObjectManagementTypeInfo[];
   actionRegistry: SavedObjectsManagementActionServiceStart;
   columnRegistry: SavedObjectsManagementColumnServiceStart;
   setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
@@ -62,7 +63,6 @@ const SavedObjectsTablePage = ({
         text: i18n.translate('savedObjectsManagement.breadcrumb.index', {
           defaultMessage: 'Saved objects',
         }),
-        href: '/',
       },
     ]);
   }, [setBreadcrumbs]);

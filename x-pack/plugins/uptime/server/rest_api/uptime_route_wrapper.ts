@@ -6,12 +6,13 @@
  */
 
 import { UMKibanaRouteWrapper } from './types';
-import { createUptimeESClient } from '../lib/lib';
+import { createUptimeESClient, inspectableEsQueriesMap } from '../lib/lib';
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { KibanaResponse } from '../../../../../src/core/server/http/router';
+import { enableInspectEsQueries } from '../../../observability/common';
 
-export const uptimeRouteWrapper: UMKibanaRouteWrapper = (uptimeRoute) => ({
+export const uptimeRouteWrapper: UMKibanaRouteWrapper = (uptimeRoute, server) => ({
   ...uptimeRoute,
   options: {
     tags: ['access:uptime-read', ...(uptimeRoute?.writeAccess ? ['access:uptime-write'] : [])],
@@ -20,11 +21,18 @@ export const uptimeRouteWrapper: UMKibanaRouteWrapper = (uptimeRoute) => ({
     const { client: esClient } = context.core.elasticsearch;
     const { client: savedObjectsClient } = context.core.savedObjects;
 
+    const isInspectorEnabled = await context.core.uiSettings.client.get<boolean>(
+      enableInspectEsQueries
+    );
+
     const uptimeEsClient = createUptimeESClient({
       request,
       savedObjectsClient,
       esClient: esClient.asCurrentUser,
     });
+    if (isInspectorEnabled) {
+      inspectableEsQueriesMap.set(request, []);
+    }
 
     const res = await uptimeRoute.handler({
       uptimeEsClient,
@@ -32,6 +40,7 @@ export const uptimeRouteWrapper: UMKibanaRouteWrapper = (uptimeRoute) => ({
       context,
       request,
       response,
+      server,
     });
 
     if (res instanceof KibanaResponse) {
@@ -41,6 +50,7 @@ export const uptimeRouteWrapper: UMKibanaRouteWrapper = (uptimeRoute) => ({
     return response.ok({
       body: {
         ...res,
+        ...(isInspectorEnabled ? { _inspect: inspectableEsQueriesMap.get(request) } : {}),
       },
     });
   },

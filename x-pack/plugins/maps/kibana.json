@@ -25,10 +25,12 @@
     "presentationUtil"
   ],
   "optionalPlugins": [
+    "customIntegrations",
     "home",
     "savedObjectsTagging",
     "charts",
     "security",
+    "spaces",
     "usageCollection"
   ],
   "ui": true,

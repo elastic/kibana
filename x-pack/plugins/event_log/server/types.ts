@@ -8,17 +8,17 @@
 import { schema, TypeOf } from '@kbn/config-schema';
 import type { IRouter, KibanaRequest, RequestHandlerContext } from 'src/core/server';
 
-export { IEvent, IValidatedEvent, EventSchema, ECS_VERSION } from '../generated/schemas';
+export type { IEvent, IValidatedEvent } from '../generated/schemas';
+export { EventSchema, ECS_VERSION } from '../generated/schemas';
 import { IEvent } from '../generated/schemas';
 import { FindOptionsType } from './event_log_client';
 import { QueryEventsBySavedObjectResult } from './es/cluster_client_adapter';
-export { QueryEventsBySavedObjectResult } from './es/cluster_client_adapter';
+export type { QueryEventsBySavedObjectResult } from './es/cluster_client_adapter';
 import { SavedObjectProvider } from './saved_object_provider_registry';
 
 export const SAVED_OBJECT_REL_PRIMARY = 'primary';
 
 export const ConfigSchema = schema.object({
-  enabled: schema.boolean({ defaultValue: true }),
   logEntries: schema.boolean({ defaultValue: false }),
   indexEntries: schema.boolean({ defaultValue: true }),
 });
@@ -27,7 +27,6 @@ export type IEventLogConfig = TypeOf<typeof ConfigSchema>;
 
 // the object exposed by plugin.setup()
 export interface IEventLogService {
-  isEnabled(): boolean;
   isLoggingEntries(): boolean;
   isIndexingEntries(): boolean;
   registerProviderActions(provider: string, actions: string[]): void;
@@ -35,6 +34,7 @@ export interface IEventLogService {
   getProviderActions(): Map<string, Set<string>>;
   registerSavedObjectProvider(type: string, provider: SavedObjectProvider): void;
   getLogger(properties: IEvent): IEventLogger;
+  getIndexPattern(): string;
 }
 
 export interface IEventLogClientService {

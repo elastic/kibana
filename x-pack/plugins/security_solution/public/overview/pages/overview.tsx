@@ -27,9 +27,7 @@ import { SecurityPageName } from '../../app/types';
 import { EndpointNotice } from '../components/endpoint_notice';
 import { useMessagesStorage } from '../../common/containers/local_storage/use_messages_storage';
 import { ENDPOINT_METADATA_INDEX } from '../../../common/constants';
-import { useSourcererScope } from '../../common/containers/sourcerer';
-import { Sourcerer } from '../../common/components/sourcerer';
-import { SourcererScopeName } from '../../common/store/sourcerer/model';
+import { useSourcererDataView } from '../../common/containers/sourcerer';
 import { useDeepEqualSelector } from '../../common/hooks/use_selector';
 import { ThreatIntelLinkPanel } from '../components/overview_cti_links';
 import { useIsThreatIntelModuleEnabled } from '../containers/overview_cti_links/use_is_threat_intel_module_enabled';
@@ -56,7 +54,7 @@ const OverviewComponent = () => {
   const filters = useDeepEqualSelector(getGlobalFiltersQuerySelector);
 
   const { from, deleteQuery, setQuery, to } = useGlobalTime();
-  const { indicesExist, indexPattern, selectedPatterns } = useSourcererScope();
+  const { indicesExist, indexPattern, selectedPatterns } = useSourcererDataView();
 
   const endpointMetadataIndex = useMemo<string[]>(() => {
     return [ENDPOINT_METADATA_INDEX];
@@ -96,7 +94,6 @@ const OverviewComponent = () => {
                 <EuiSpacer size="l" />
               </>
             )}
-            <Sourcerer scope={SourcererScopeName.default} />
             <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween">
               <SidebarFlexItem grow={false}>
                 <StatefulSidebar />
@@ -164,10 +161,10 @@ const OverviewComponent = () => {
                       <EuiFlexItem grow={1}>
                         {riskyHostsEnabled && (
                           <RiskyHostLinks
-                            deleteQuery={deleteQuery}
-                            from={from}
-                            setQuery={setQuery}
-                            to={to}
+                            timerange={{
+                              from,
+                              to,
+                            }}
                           />
                         )}
                       </EuiFlexItem>

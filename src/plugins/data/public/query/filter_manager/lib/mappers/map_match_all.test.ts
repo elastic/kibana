@@ -15,7 +15,7 @@ describe('filter_manager/lib', () => {
 
     beforeEach(() => {
       filter = {
-        match_all: {},
+        query: { match_all: {} },
         meta: {
           alias: null,
           negate: true,

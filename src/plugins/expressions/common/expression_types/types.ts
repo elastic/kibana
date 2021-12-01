@@ -6,6 +6,9 @@
  * Side Public License, v 1.
  */
 
+import type { ExpressionType } from './expression_type';
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type ExpressionValueUnboxed = any;
 
 export type ExpressionValueBoxed<Type extends string = string, Value extends object = object> = {
@@ -16,7 +19,7 @@ export type ExpressionValue = ExpressionValueUnboxed | ExpressionValueBoxed;
 
 export type ExpressionValueConverter<I extends ExpressionValue, O extends ExpressionValue> = (
   input: I,
-  availableTypes: Record<string, any>
+  availableTypes: Record<string, ExpressionType>
 ) => O;
 
 /**
@@ -29,18 +32,19 @@ export interface ExpressionTypeDefinition<
   SerializedType = undefined
 > {
   name: Name;
-  validate?: (type: any) => void | Error;
-  serialize?: (type: Value) => SerializedType;
-  deserialize?: (type: SerializedType) => Value;
+  validate?(type: unknown): void | Error;
+  serialize?(type: Value): SerializedType;
+  deserialize?(type: SerializedType): Value;
   // TODO: Update typings for the `availableTypes` parameter once interfaces for this
   // have been added elsewhere in the interpreter.
   from?: {
-    [type: string]: ExpressionValueConverter<any, Value>;
+    [type: string]: ExpressionValueConverter<ExpressionValue, Value>;
   };
   to?: {
-    [type: string]: ExpressionValueConverter<Value, any>;
+    [type: string]: ExpressionValueConverter<Value, ExpressionValue>;
   };
   help?: string;
 }
 
-export type AnyExpressionTypeDefinition = ExpressionTypeDefinition<any, any, any>;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type AnyExpressionTypeDefinition = ExpressionTypeDefinition<string, any, any>;

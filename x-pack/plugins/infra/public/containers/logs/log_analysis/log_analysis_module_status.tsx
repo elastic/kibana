@@ -99,7 +99,7 @@ const createStatusReducer =
           {} as Record<JobType, JobStatus>
         );
         const nextSetupStatus: SetupStatus = Object.values<JobStatus>(nextJobStatus).every(
-          (jobState) => jobState === 'started'
+          (jobState) => jobState === 'started' || jobState === 'starting'
         )
           ? { type: 'succeeded' }
           : {
@@ -224,9 +224,17 @@ const getJobStatus =
           jobSummary.datafeedState === 'stopped'
         ) {
           return 'stopped';
-        } else if (jobSummary.jobState === 'opening') {
+        } else if (
+          jobSummary.jobState === 'opening' &&
+          jobSummary.awaitingNodeAssignment === false
+        ) {
           return 'initializing';
-        } else if (jobSummary.jobState === 'opened' && jobSummary.datafeedState === 'started') {
+        } else if (
+          (jobSummary.jobState === 'opened' && jobSummary.datafeedState === 'started') ||
+          (jobSummary.jobState === 'opening' &&
+            jobSummary.datafeedState === 'starting' &&
+            jobSummary.awaitingNodeAssignment === true)
+        ) {
           return 'started';
         }
 

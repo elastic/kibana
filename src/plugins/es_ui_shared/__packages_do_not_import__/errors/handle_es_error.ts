@@ -6,13 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { ApiError } from '@elastic/elasticsearch';
-import { ResponseError } from '@elastic/elasticsearch/lib/errors';
+import { errors } from '@elastic/elasticsearch';
 import { IKibanaResponse, KibanaResponseFactory } from 'kibana/server';
 import { getEsCause } from './es_error_parser';
 
 interface EsErrorHandlerParams {
-  error: ApiError;
+  error: errors.ElasticsearchClientError;
   response: KibanaResponseFactory;
   handleCustomError?: () => IKibanaResponse<any>;
 }
@@ -34,9 +33,9 @@ export const handleEsError = ({
       return handleCustomError();
     }
 
-    const { statusCode, body } = error as ResponseError;
+    const { statusCode, body } = error as errors.ResponseError;
     return response.customError({
-      statusCode,
+      statusCode: statusCode!,
       body: {
         message:
           // We use || instead of ?? as the switch here because reason could be an empty string

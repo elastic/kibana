@@ -13,7 +13,7 @@ import {
   TRANSACTION_ID,
 } from '../../../../../../common/elasticsearch_fieldnames';
 import { asDuration } from '../../../../../../common/utils/formatters';
-import { useUrlParams } from '../../../../../context/url_params_context/use_url_params';
+import { useLegacyUrlParams } from '../../../../../context/url_params_context/use_url_params';
 import { useTheme } from '../../../../../hooks/use_theme';
 import { ErrorMark } from '../../../../app/transaction_details/waterfall_with_summary/waterfall_container/Marks/get_error_marks';
 import { ErrorDetailLink } from '../../../Links/apm/ErrorDetailLink';
@@ -55,7 +55,7 @@ function truncateMessage(errorMessage?: string) {
 
 export function ErrorMarker({ mark }: Props) {
   const theme = useTheme();
-  const { urlParams } = useUrlParams();
+  const { urlParams } = useLegacyUrlParams();
   const [isPopoverOpen, showPopover] = useState(false);
 
   const togglePopover = () => showPopover(!isPopoverOpen);
@@ -100,14 +100,13 @@ export function ErrorMarker({ mark }: Props) {
       <Popover>
         <TimeLegend
           text={asDuration(mark.offset)}
-          indicator={() => (
-            <div style={{ marginRight: theme.eui.euiSizeXS }}>@</div>
-          )}
+          indicator={<div style={{ marginRight: theme.eui.euiSizeXS }}>@</div>}
         />
         <Legend
           key={mark.serviceColor}
           color={mark.serviceColor}
           text={error.service.name}
+          indicator={<span />}
         />
         <EuiText size="s">
           <ErrorLink

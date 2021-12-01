@@ -183,7 +183,7 @@ export function getClauseForReference(reference: HasReferenceQueryParams) {
   };
 }
 
-// A de-duplicated set of namespaces makes for a more effecient query.
+// A de-duplicated set of namespaces makes for a more efficient query.
 const uniqNamespaces = (namespacesToNormalize?: string[]) =>
   namespacesToNormalize ? Array.from(new Set(namespacesToNormalize)) : undefined;
 

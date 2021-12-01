@@ -517,10 +517,6 @@
                 "path": "x-pack/plugins/security/common/licensing/license_service.test.ts"
               },
               {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/common/licensing/license_service.test.ts"
-              },
-              {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/common/license/policy_config.test.ts"
               },
@@ -559,6 +555,14 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/isolation.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/endpoint/routes/trusted_apps/handlers.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/endpoint/routes/trusted_apps/handlers.test.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -2254,10 +2258,6 @@
                 "path": "x-pack/plugins/security/common/licensing/license_service.test.ts"
               },
               {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/common/licensing/license_service.test.ts"
-              },
-              {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/common/license/policy_config.test.ts"
               },
@@ -2296,6 +2296,14 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/isolation.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/endpoint/routes/trusted_apps/handlers.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/endpoint/routes/trusted_apps/handlers.test.ts"
               },
               {
                 "plugin": "securitySolution",

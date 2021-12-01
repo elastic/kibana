@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { ResponseError } from '@elastic/elasticsearch/lib/errors';
+import { errors } from '@elastic/elasticsearch';
 
-export function isESClientError(error: unknown): error is ResponseError {
-  return error instanceof ResponseError;
+export function isESClientError(error: unknown): error is errors.ResponseError {
+  return error instanceof errors.ResponseError;
 }
 
 export function isElasticsearchVersionConflictError(error: Error): boolean {

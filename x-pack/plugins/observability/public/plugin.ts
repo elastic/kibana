@@ -24,24 +24,27 @@ import type {
   DataPublicPluginSetup,
   DataPublicPluginStart,
 } from '../../../../src/plugins/data/public';
+import type { DiscoverStart } from '../../../../src/plugins/discover/public';
 import type { EmbeddableStart } from '../../../../src/plugins/embeddable/public';
 import type {
   HomePublicPluginSetup,
   HomePublicPluginStart,
 } from '../../../../src/plugins/home/public';
-import { CasesUiStart } from '../../cases/public';
+import { CasesDeepLinkId, CasesUiStart, getCasesDeepLinks } from '../../cases/public';
 import type { LensPublicStart } from '../../lens/public';
 import {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
 } from '../../triggers_actions_ui/public';
-import { observabilityAppId, observabilityFeatureId } from '../common';
+import { observabilityAppId, observabilityFeatureId, casesPath } from '../common';
 import { createLazyObservabilityPageTemplate } from './components/shared';
 import { registerDataHandler } from './data_handler';
 import { createObservabilityRuleTypeRegistry } from './rules/create_observability_rule_type_registry';
 import { createCallObservabilityApi } from './services/call_observability_api';
 import { createNavigationRegistry, NavigationEntry } from './services/navigation_registry';
 import { updateGlobalNavigation } from './update_global_navigation';
+import { getExploratoryViewEmbeddable } from './components/shared/exploratory_view/embeddable';
+import { createExploratoryViewUrl } from './components/shared/exploratory_view/configurations/utils';
 
 export type ObservabilityPublicSetup = ReturnType<Plugin['setup']>;
 
@@ -58,6 +61,7 @@ export interface ObservabilityPublicPluginsStart {
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   data: DataPublicPluginStart;
   lens: LensPublicStart;
+  discover: DiscoverStart;
 }
 
 export type ObservabilityPublicStart = ReturnType<Plugin['start']>;
@@ -86,15 +90,23 @@ export class Plugin
       path: '/alerts',
       navLinkStatus: AppNavLinkStatus.hidden,
     },
-    {
-      id: 'cases',
-      title: i18n.translate('xpack.observability.casesLinkTitle', {
-        defaultMessage: 'Cases',
-      }),
-      order: 8002,
-      path: '/cases',
-      navLinkStatus: AppNavLinkStatus.hidden,
-    },
+    getCasesDeepLinks({
+      basePath: casesPath,
+      extend: {
+        [CasesDeepLinkId.cases]: {
+          order: 8002,
+          navLinkStatus: AppNavLinkStatus.hidden,
+        },
+        [CasesDeepLinkId.casesCreate]: {
+          navLinkStatus: AppNavLinkStatus.hidden,
+          searchable: false,
+        },
+        [CasesDeepLinkId.casesConfigure]: {
+          navLinkStatus: AppNavLinkStatus.hidden,
+          searchable: false,
+        },
+      },
+    }),
   ];
 
   constructor(private readonly initializerContext: PluginInitializerContext<ConfigSchema>) {
@@ -231,7 +243,9 @@ export class Plugin
     };
   }
 
-  public start({ application }: CoreStart) {
+  public start(coreStart: CoreStart, pluginsStart: ObservabilityPublicPluginsStart) {
+    const { application } = coreStart;
+
     const config = this.initializerContext.config.get();
 
     updateGlobalNavigation({
@@ -252,6 +266,8 @@ export class Plugin
       navigation: {
         PageTemplate,
       },
+      createExploratoryViewUrl,
+      ExploratoryViewEmbeddable: getExploratoryViewEmbeddable(coreStart, pluginsStart),
     };
   }
 }

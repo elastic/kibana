@@ -14,6 +14,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
 
     before(async () => {
       const reportingAPI = getService('reportingAPI');
+      await reportingAPI.logTaskManagerHealth();
       await reportingAPI.createDataAnalystRole();
       await reportingAPI.createTestReportingUserRole();
       await reportingAPI.createDataAnalyst();
@@ -30,6 +31,5 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./spaces'));
     loadTestFile(require.resolve('./usage'));
     loadTestFile(require.resolve('./ilm_migration_apis'));
-    loadTestFile(require.resolve('./search_frozen_indices'));
   });
 }

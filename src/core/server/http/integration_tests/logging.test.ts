@@ -51,7 +51,6 @@ describe('request logging', () => {
       it('logs at the correct level and with the correct context', async () => {
         const root = kbnTestServer.createRoot({
           logging: {
-            silent: true,
             appenders: {
               'test-console': {
                 type: 'console',
@@ -99,7 +98,6 @@ describe('request logging', () => {
       let root: ReturnType<typeof kbnTestServer.createRoot>;
       const config = {
         logging: {
-          silent: true,
           appenders: {
             'test-console': {
               type: 'console',
@@ -300,7 +298,6 @@ describe('request logging', () => {
         it('filters sensitive request headers when RewriteAppender is configured', async () => {
           root = kbnTestServer.createRoot({
             logging: {
-              silent: true,
               appenders: {
                 'test-console': {
                   type: 'console',
@@ -402,7 +399,6 @@ describe('request logging', () => {
         it('filters sensitive response headers when RewriteAppender is configured', async () => {
           root = kbnTestServer.createRoot({
             logging: {
-              silent: true,
               appenders: {
                 'test-console': {
                   type: 'console',

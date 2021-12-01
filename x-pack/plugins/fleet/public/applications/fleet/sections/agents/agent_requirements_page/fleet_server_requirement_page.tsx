@@ -29,7 +29,12 @@ export const FleetServerRequirementPage = () => {
 
   return (
     <>
-      <ContentWrapper gutterSize="l" justifyContent="center" alignItems="center" direction="column">
+      <ContentWrapper
+        gutterSize="none"
+        justifyContent="center"
+        alignItems="center"
+        direction="column"
+      >
         <FlexItemWithMinWidth grow={false}>
           {deploymentUrl ? (
             <CloudInstructions deploymentUrl={deploymentUrl} />

@@ -17,11 +17,12 @@ import {
   createMockAgentPolicyService,
   createMockAgentService,
   createArtifactsClientMock,
+  createFleetAuthzMock,
 } from '../../../fleet/server/mocks';
-import { AppClientFactory } from '../client';
 import { createMockConfig } from '../lib/detection_engine/routes/__mocks__';
 import {
   EndpointAppContextService,
+  EndpointAppContextServiceSetupContract,
   EndpointAppContextServiceStartContract,
 } from './endpoint_app_context_services';
 import { ManifestManager } from './services/artifacts/manifest_manager/manifest_manager';
@@ -37,6 +38,7 @@ import { parseExperimentalConfigValue } from '../../common/experimental_features
 // a restricted path.
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { createCasesClientMock } from '../../../cases/server/client/mocks';
+import { requestContextFactoryMock } from '../request_context_factory.mock';
 import { EndpointMetadataService } from './services/metadata';
 
 /**
@@ -70,32 +72,52 @@ export const createMockEndpointAppContextService = (
 };
 
 /**
+ * Creates a mocked input contract for the `EndpointAppContextService#setup()` method
+ */
+export const createMockEndpointAppContextServiceSetupContract =
+  (): jest.Mocked<EndpointAppContextServiceSetupContract> => {
+    return {
+      securitySolutionRequestContextFactory: requestContextFactoryMock.create(),
+    };
+  };
+
+/**
  * Creates a mocked input contract for the `EndpointAppContextService#start()` method
  */
 export const createMockEndpointAppContextServiceStartContract =
   (): jest.Mocked<EndpointAppContextServiceStartContract> => {
-    const factory = new AppClientFactory();
     const config = createMockConfig();
+
+    const logger = loggingSystemMock.create().get('mock_endpoint_app_context');
     const casesClientMock = createCasesClientMock();
     const savedObjectsStart = savedObjectsServiceMock.createStartContract();
     const agentService = createMockAgentService();
     const agentPolicyService = createMockAgentPolicyService();
+    const packagePolicyService = createPackagePolicyServiceMock();
     const endpointMetadataService = new EndpointMetadataService(
       savedObjectsStart,
-      agentService,
-      agentPolicyService
+      agentPolicyService,
+      packagePolicyService,
+      logger
     );
 
-    factory.setup({ getSpaceId: () => 'mockSpace', config });
+    packagePolicyService.list.mockImplementation(async (_, options) => {
+      return {
+        items: [],
+        total: 0,
+        page: options.page ?? 1,
+        perPage: options.perPage ?? 10,
+      };
+    });
 
     return {
       agentService,
       agentPolicyService,
       endpointMetadataService,
+      packagePolicyService,
+      logger,
       packageService: createMockPackageService(),
-      logger: loggingSystemMock.create().get('mock_endpoint_app_context'),
       manifestManager: getManifestManagerMock(),
-      appClientFactory: factory,
       security: securityMock.createStart(),
       alerting: alertsMock.createStart(),
       config,
@@ -105,7 +127,6 @@ export const createMockEndpointAppContextServiceStartContract =
         Parameters<FleetStartContract['registerExternalCallback']>
       >(),
       exceptionListsClient: listMock.getExceptionListClient(),
-      packagePolicyService: createPackagePolicyServiceMock(),
       cases: {
         getCasesClientWithRequest: jest.fn(async () => casesClientMock),
       },
@@ -119,6 +140,7 @@ export const createMockEndpointAppContextServiceStartContract =
 export const createMockPackageService = (): jest.Mocked<PackageService> => {
   return {
     getInstallation: jest.fn(),
+    ensureInstalledPackage: jest.fn(),
   };
 };
 
@@ -131,6 +153,9 @@ export const createMockPackageService = (): jest.Mocked<PackageService> => {
  */
 export const createMockFleetStartContract = (indexPattern: string): FleetStartContract => {
   return {
+    authz: {
+      fromRequest: jest.fn().mockResolvedValue(createFleetAuthzMock()),
+    },
     fleetSetupCompleted: jest.fn().mockResolvedValue(undefined),
     esIndexPatternService: {
       getESIndexPattern: jest.fn().mockResolvedValue(indexPattern),
@@ -141,6 +166,7 @@ export const createMockFleetStartContract = (indexPattern: string): FleetStartCo
     registerExternalCallback: jest.fn((...args: ExternalCallback) => {}),
     packagePolicyService: createPackagePolicyServiceMock(),
     createArtifactsClient: jest.fn().mockReturnValue(createArtifactsClientMock()),
+    fetchFindLatestPackage: jest.fn().mockReturnValue('8.0.0'),
   };
 };
 

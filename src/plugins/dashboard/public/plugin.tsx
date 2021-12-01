@@ -31,12 +31,15 @@ import { createKbnUrlTracker } from './services/kibana_utils';
 import { UsageCollectionSetup } from './services/usage_collection';
 import { UiActionsSetup, UiActionsStart } from './services/ui_actions';
 import { PresentationUtilPluginStart } from './services/presentation_util';
-import { KibanaLegacySetup, KibanaLegacyStart } from './services/kibana_legacy';
 import { FeatureCatalogueCategory, HomePublicPluginSetup } from './services/home';
 import { NavigationPublicPluginStart as NavigationStart } from './services/navigation';
 import { DataPublicPluginSetup, DataPublicPluginStart, esFilters } from './services/data';
 import { SharePluginSetup, SharePluginStart, UrlGeneratorContract } from './services/share';
 import type { SavedObjectTaggingOssPluginStart } from './services/saved_objects_tagging_oss';
+import type {
+  ScreenshotModePluginSetup,
+  ScreenshotModePluginStart,
+} from './services/screenshot_mode';
 import {
   getSavedObjectFinder,
   SavedObjectLoader,
@@ -98,16 +101,15 @@ export interface DashboardSetupDependencies {
   data: DataPublicPluginSetup;
   embeddable: EmbeddableSetup;
   home?: HomePublicPluginSetup;
-  kibanaLegacy: KibanaLegacySetup;
   urlForwarding: UrlForwardingSetup;
   share?: SharePluginSetup;
   uiActions: UiActionsSetup;
   usageCollection?: UsageCollectionSetup;
+  screenshotMode: ScreenshotModePluginSetup;
 }
 
 export interface DashboardStartDependencies {
   data: DataPublicPluginStart;
-  kibanaLegacy: KibanaLegacyStart;
   urlForwarding: UrlForwardingStart;
   embeddable: EmbeddableStart;
   inspector: InspectorStartContract;
@@ -120,6 +122,7 @@ export interface DashboardStartDependencies {
   savedObjectsTaggingOss?: SavedObjectTaggingOssPluginStart;
   spaces?: SpacesPluginStart;
   visualizations: VisualizationsStart;
+  screenshotMode: ScreenshotModePluginStart;
 }
 
 export interface DashboardSetup {
@@ -163,7 +166,15 @@ export class DashboardPlugin
 
   public setup(
     core: CoreSetup<DashboardStartDependencies, DashboardStart>,
-    { share, embeddable, home, urlForwarding, data, usageCollection }: DashboardSetupDependencies
+    {
+      share,
+      embeddable,
+      home,
+      urlForwarding,
+      data,
+      usageCollection,
+      screenshotMode,
+    }: DashboardSetupDependencies
   ): DashboardSetup {
     this.dashboardFeatureFlagConfig =
       this.initializerContext.config.get<DashboardFeatureFlagConfig>();
@@ -198,6 +209,7 @@ export class DashboardPlugin
         embeddable: deps.embeddable,
         uiActions: deps.uiActions,
         inspector: deps.inspector,
+        screenshotMode: deps.screenshotMode,
         http: coreStart.http,
         ExitFullScreenButton,
         presentationUtil: deps.presentationUtil,

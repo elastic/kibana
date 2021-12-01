@@ -6,28 +6,37 @@
  * Side Public License, v 1.
  */
 
-import { KibanaPlatformPlugin } from '@kbn/dev-utils';
 import Path from 'path';
+import { PluginOrPackage } from '../types';
 
-export function getKibanaPlatformPlugin(id: string, dir?: string): KibanaPlatformPlugin {
+export function getKibanaPlatformPlugin(id: string, dir?: string): PluginOrPackage {
   const directory = dir ?? Path.resolve(__dirname, '__fixtures__/src/plugin_a');
   return {
     manifest: {
       id,
-      ui: true,
-      server: true,
-      kibanaVersion: '1',
-      version: '1',
       owner: {
         name: 'Kibana Core',
       },
       serviceFolders: [],
-      requiredPlugins: [],
-      requiredBundles: [],
-      optionalPlugins: [],
-      extraPublicDirs: [],
     },
     directory,
     manifestPath: Path.resolve(directory, 'kibana.json'),
+    isPlugin: true,
+  };
+}
+
+export function getKibanaPlatformPackage(id: string, importPath?: string): PluginOrPackage {
+  const directory = Path.resolve(__dirname, '__fixtures__/src/plugin_a');
+  return {
+    manifest: {
+      id,
+      owner: {
+        name: 'Kibana Core',
+      },
+      serviceFolders: [],
+    },
+    directory,
+    manifestPath: Path.resolve(directory, 'kibana.json'),
+    isPlugin: false,
   };
 }

@@ -15,7 +15,6 @@ export {
   flushIndices,
   forcemergeIndices,
   clearCacheIndices,
-  freezeIndices,
   unfreezeIndices,
   loadIndexSettings,
   updateIndexSettings,

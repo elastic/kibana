@@ -5,37 +5,43 @@
  * 2.0.
  */
 
-import { SavedObject } from 'src/core/server';
+import { mapValues } from 'lodash';
+import { SavedObject, SavedObjectReference } from 'src/core/server';
 import { SavedObjectsClientContract } from '../../../../../../../../src/core/server';
 import { RuleExecutionStatus } from '../../../../../common/detection_engine/schemas/common/schemas';
+// eslint-disable-next-line no-restricted-imports
+import { legacyGetRuleReference } from '../../rules/legacy_rule_status/legacy_utils';
 import { IRuleStatusSOAttributes } from '../../rules/types';
+import {
+  ExecutionMetrics,
+  FindBulkExecutionLogArgs,
+  FindExecutionLogArgs,
+  GetCurrentStatusArgs,
+  GetCurrentStatusBulkArgs,
+  GetCurrentStatusBulkResult,
+  GetLastFailuresArgs,
+  IRuleExecutionLogClient,
+  LogStatusChangeArgs,
+} from '../types';
 import {
   RuleStatusSavedObjectsClient,
   ruleStatusSavedObjectsClientFactory,
 } from './rule_status_saved_objects_client';
-import {
-  ExecutionMetric,
-  ExecutionMetricArgs,
-  FindBulkExecutionLogArgs,
-  FindExecutionLogArgs,
-  IRuleExecutionLogClient,
-  LegacyMetrics,
-  LogStatusChangeArgs,
-  UpdateExecutionLogArgs,
-} from '../types';
-import { assertUnreachable } from '../../../../../common';
 
+const MAX_ERRORS = 5;
 // 1st is mutable status, followed by 5 most recent failures
-export const MAX_RULE_STATUSES = 6;
+const MAX_RULE_STATUSES = 1 + MAX_ERRORS;
 
-const METRIC_FIELDS = {
-  [ExecutionMetric.executionGap]: 'gap',
-  [ExecutionMetric.searchDurationMax]: 'searchAfterTimeDurations',
-  [ExecutionMetric.indexingDurationMax]: 'bulkCreateTimeDurations',
-  [ExecutionMetric.indexingLookback]: 'lastLookBackDate',
-} as const;
-
-const getMetricField = <T extends ExecutionMetric>(metric: T) => METRIC_FIELDS[metric];
+const convertMetricFields = (
+  metrics: ExecutionMetrics
+): Pick<
+  IRuleStatusSOAttributes,
+  'gap' | 'searchAfterTimeDurations' | 'bulkCreateTimeDurations'
+> => ({
+  gap: metrics.executionGap?.humanize(),
+  searchAfterTimeDurations: metrics.searchDurations,
+  bulkCreateTimeDurations: metrics.indexingDurations,
+});
 
 export class SavedObjectsAdapter implements IRuleExecutionLogClient {
   private ruleStatusClient: RuleStatusSavedObjectsClient;
@@ -44,128 +50,121 @@ export class SavedObjectsAdapter implements IRuleExecutionLogClient {
     this.ruleStatusClient = ruleStatusSavedObjectsClientFactory(savedObjectsClient);
   }
 
-  public find({ ruleId, logsCount = 1 }: FindExecutionLogArgs) {
+  private findRuleStatusSavedObjects(ruleId: string, count: number) {
     return this.ruleStatusClient.find({
-      perPage: logsCount,
+      perPage: count,
       sortField: 'statusDate',
       sortOrder: 'desc',
-      search: ruleId,
-      searchFields: ['alertId'],
+      ruleId,
     });
   }
 
+  /** @deprecated */
+  public find({ ruleId, logsCount = 1 }: FindExecutionLogArgs) {
+    return this.findRuleStatusSavedObjects(ruleId, logsCount);
+  }
+
+  /** @deprecated */
   public findBulk({ ruleIds, logsCount = 1 }: FindBulkExecutionLogArgs) {
     return this.ruleStatusClient.findBulk(ruleIds, logsCount);
   }
 
-  public async update({ id, attributes }: UpdateExecutionLogArgs) {
-    await this.ruleStatusClient.update(id, attributes);
+  public async getLastFailures(args: GetLastFailuresArgs): Promise<IRuleStatusSOAttributes[]> {
+    const result = await this.findRuleStatusSavedObjects(args.ruleId, MAX_RULE_STATUSES);
+
+    // The first status is always the current one followed by 5 last failures.
+    // We skip the current status and return only the failures.
+    return result.map((so) => so.attributes).slice(1);
   }
 
-  public async delete(id: string) {
-    await this.ruleStatusClient.delete(id);
+  public async getCurrentStatus(
+    args: GetCurrentStatusArgs
+  ): Promise<IRuleStatusSOAttributes | undefined> {
+    const result = await this.findRuleStatusSavedObjects(args.ruleId, 1);
+    const currentStatusSavedObject = result[0];
+    return currentStatusSavedObject?.attributes;
   }
 
-  public async logExecutionMetric<T extends ExecutionMetric>({
-    ruleId,
-    metric,
-    value,
-  }: ExecutionMetricArgs<T>) {
-    const [currentStatus] = await this.getOrCreateRuleStatuses(ruleId);
-
-    await this.ruleStatusClient.update(currentStatus.id, {
-      ...currentStatus.attributes,
-      [getMetricField(metric)]: value,
-    });
+  public async getCurrentStatusBulk(
+    args: GetCurrentStatusBulkArgs
+  ): Promise<GetCurrentStatusBulkResult> {
+    const { ruleIds } = args;
+    const result = await this.ruleStatusClient.findBulk(ruleIds, 1);
+    return mapValues(result, (attributes = []) => attributes[0]);
   }
 
-  private createNewRuleStatus = async (
+  public async deleteCurrentStatus(ruleId: string): Promise<void> {
+    const statusSavedObjects = await this.findRuleStatusSavedObjects(ruleId, MAX_RULE_STATUSES);
+    await Promise.all(statusSavedObjects.map((so) => this.ruleStatusClient.delete(so.id)));
+  }
+
+  private findRuleStatuses = async (
     ruleId: string
-  ): Promise<SavedObject<IRuleStatusSOAttributes>> => {
-    const now = new Date().toISOString();
-    return this.ruleStatusClient.create({
-      alertId: ruleId,
-      statusDate: now,
-      status: RuleExecutionStatus['going to run'],
-      lastFailureAt: null,
-      lastSuccessAt: null,
-      lastFailureMessage: null,
-      lastSuccessMessage: null,
-      gap: null,
-      bulkCreateTimeDurations: [],
-      searchAfterTimeDurations: [],
-      lastLookBackDate: null,
-    });
-  };
-
-  private getOrCreateRuleStatuses = async (
-    ruleId: string
-  ): Promise<Array<SavedObject<IRuleStatusSOAttributes>>> => {
-    const ruleStatuses = await this.find({
-      spaceId: '', // spaceId is a required argument but it's not used by savedObjectsClient, any string would work here
-      ruleId,
-      logsCount: MAX_RULE_STATUSES,
-    });
-    if (ruleStatuses.length > 0) {
-      return ruleStatuses;
-    }
-    const newStatus = await this.createNewRuleStatus(ruleId);
-
-    return [newStatus];
-  };
+  ): Promise<Array<SavedObject<IRuleStatusSOAttributes>>> =>
+    this.findRuleStatusSavedObjects(ruleId, MAX_RULE_STATUSES);
 
   public async logStatusChange({ newStatus, ruleId, message, metrics }: LogStatusChangeArgs) {
-    switch (newStatus) {
-      case RuleExecutionStatus['going to run']:
-      case RuleExecutionStatus.succeeded:
-      case RuleExecutionStatus.warning:
-      case RuleExecutionStatus['partial failure']: {
-        const [currentStatus] = await this.getOrCreateRuleStatuses(ruleId);
+    const references: SavedObjectReference[] = [legacyGetRuleReference(ruleId)];
+    const ruleStatuses = await this.findRuleStatuses(ruleId);
+    const [currentStatus] = ruleStatuses;
+    const attributes = buildRuleStatusAttributes({
+      status: newStatus,
+      message,
+      metrics,
+      currentAttributes: currentStatus?.attributes,
+    });
+    // Create or update current status
+    if (currentStatus) {
+      await this.ruleStatusClient.update(currentStatus.id, attributes, { references });
+    } else {
+      await this.ruleStatusClient.create(attributes, { references });
+    }
 
-        await this.ruleStatusClient.update(currentStatus.id, {
-          ...currentStatus.attributes,
-          ...buildRuleStatusAttributes(newStatus, message, metrics),
-        });
-
-        return;
-      }
-
-      case RuleExecutionStatus.failed: {
-        const ruleStatuses = await this.getOrCreateRuleStatuses(ruleId);
-        const [currentStatus] = ruleStatuses;
-
-        const failureAttributes = {
-          ...currentStatus.attributes,
-          ...buildRuleStatusAttributes(RuleExecutionStatus.failed, message, metrics),
-        };
-
-        // We always update the newest status, so to 'persist' a failure we push a copy to the head of the list
-        await this.ruleStatusClient.update(currentStatus.id, failureAttributes);
-        const lastStatus = await this.ruleStatusClient.create(failureAttributes);
-
-        // drop oldest failures
-        const oldStatuses = [lastStatus, ...ruleStatuses].slice(MAX_RULE_STATUSES);
-        await Promise.all(oldStatuses.map((status) => this.delete(status.id)));
-
-        return;
-      }
-      default:
-        assertUnreachable(newStatus, 'Unknown rule execution status supplied to logStatusChange');
+    if (newStatus === RuleExecutionStatus.failed) {
+      await Promise.all([
+        // Persist the current failure in the last five errors list
+        this.ruleStatusClient.create(attributes, { references }),
+        // Drop oldest failures
+        ...ruleStatuses
+          .slice(MAX_RULE_STATUSES - 1)
+          .map((status) => this.ruleStatusClient.delete(status.id)),
+      ]);
     }
   }
 }
 
-const buildRuleStatusAttributes: (
-  status: RuleExecutionStatus,
-  message?: string,
-  metrics?: LegacyMetrics
-) => Partial<IRuleStatusSOAttributes> = (status, message, metrics = {}) => {
+const defaultStatusAttributes: IRuleStatusSOAttributes = {
+  statusDate: '',
+  status: RuleExecutionStatus['going to run'],
+  lastFailureAt: null,
+  lastSuccessAt: null,
+  lastFailureMessage: null,
+  lastSuccessMessage: null,
+  gap: null,
+  bulkCreateTimeDurations: [],
+  searchAfterTimeDurations: [],
+  lastLookBackDate: null,
+};
+
+const buildRuleStatusAttributes = ({
+  status,
+  message,
+  metrics = {},
+  currentAttributes,
+}: {
+  status: RuleExecutionStatus;
+  message?: string;
+  metrics?: ExecutionMetrics;
+  currentAttributes?: IRuleStatusSOAttributes;
+}): IRuleStatusSOAttributes => {
   const now = new Date().toISOString();
-  const baseAttributes: Partial<IRuleStatusSOAttributes> = {
-    ...metrics,
+  const baseAttributes: IRuleStatusSOAttributes = {
+    ...defaultStatusAttributes,
+    ...currentAttributes,
+    statusDate: now,
     status:
       status === RuleExecutionStatus.warning ? RuleExecutionStatus['partial failure'] : status,
-    statusDate: now,
+    ...convertMetricFields(metrics),
   };
 
   switch (status) {

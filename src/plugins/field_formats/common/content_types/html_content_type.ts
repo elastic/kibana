@@ -50,7 +50,7 @@ export const setup = (
   };
 
   const wrap: HtmlContextTypeConvert = (value, options) => {
-    return `<span ng-non-bindable>${recurse(value, options)}</span>`;
+    return recurse(value, options);
   };
 
   return wrap;

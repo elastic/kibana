@@ -78,17 +78,32 @@ PUT _component_template/test-failures-mappings
           "properties": {
             "classname": {
               "type": "keyword",
-              "ignore_above": 256
+              "ignore_above": 256,
+              "fields": {
+                "text": {
+                  "type": "text"
+                }
+              }
             },
             "failure": {
               "type": "keyword",
-              "ignore_above": 256
+              "ignore_above": 256,
+              "fields": {
+                "text": {
+                  "type": "text"
+                }
+              }
             },
             "likelyIrrelevant": {
               "type": "boolean"
             },
             "name": {
-              "type": "keyword"
+              "type": "keyword",
+              "fields": {
+                "text": {
+                  "type": "text"
+                }
+              }
             },
             "system-out": {
               "type": "match_only_text"

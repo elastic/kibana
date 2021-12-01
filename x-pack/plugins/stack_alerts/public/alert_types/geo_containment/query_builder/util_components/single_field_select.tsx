@@ -14,8 +14,8 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
+import { FieldIcon } from '@kbn/react-field/field_icon';
 import { IFieldType } from 'src/plugins/data/public';
-import { FieldIcon } from '../../../../../../../../src/plugins/kibana_react/public';
 
 function fieldsToOptions(fields?: IFieldType[]): Array<EuiComboBoxOptionOption<IFieldType>> {
   if (!fields) {
@@ -34,7 +34,7 @@ function fieldsToOptions(fields?: IFieldType[]): Array<EuiComboBoxOptionOption<I
 
 interface Props {
   placeholder: string;
-  value: string | null; // index pattern field name
+  value: string | null; // data view field name
   onChange: (fieldName?: string) => void;
   fields: IFieldType[];
 }

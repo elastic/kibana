@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { HistogramItem } from '../../../../../common/search_strategies/types';
+import type { HistogramItem } from '../../../../../common/correlations/types';
 
 import { replaceHistogramDotsWithBars } from './index';
 
@@ -29,8 +29,8 @@ describe('TransactionDistributionChart', () => {
         { doc_count: 10 },
         { doc_count: 10 },
         { doc_count: 0.0001 },
-        { doc_count: 0 },
-        { doc_count: 0 },
+        { doc_count: 0.0001 },
+        { doc_count: 0.0001 },
         { doc_count: 10 },
         { doc_count: 10 },
         { doc_count: 0.0001 },

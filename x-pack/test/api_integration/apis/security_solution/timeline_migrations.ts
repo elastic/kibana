@@ -37,6 +37,79 @@ export default function ({ getService }: FtrProviderContext) {
     const esArchiver = getService('esArchiver');
     const es = getService('es');
 
+    describe('8.0 id migration', () => {
+      const resolveWithSpaceApi = '/s/awesome-space/api/timeline/resolve';
+
+      before(async () => {
+        await esArchiver.load(
+          'x-pack/test/functional/es_archives/security_solution/timelines/7.15.0_space'
+        );
+      });
+
+      after(async () => {
+        await esArchiver.unload(
+          'x-pack/test/functional/es_archives/security_solution/timelines/7.15.0_space'
+        );
+      });
+
+      describe('resolve', () => {
+        it('should return an aliasMatch outcome', async () => {
+          const resp = await supertest
+            .get(resolveWithSpaceApi)
+            .query({ id: '1e2e9850-25f8-11ec-a981-b77847c6ef30' });
+
+          expect(resp.body.data.outcome).to.be('aliasMatch');
+          expect(resp.body.data.alias_target_id).to.not.be(undefined);
+          expect(resp.body.data.timeline.title).to.be('An awesome timeline');
+        });
+
+        describe('notes', () => {
+          it('should return the notes with the correct eventId', async () => {
+            const resp = await supertest
+              .get(resolveWithSpaceApi)
+              .query({ id: '1e2e9850-25f8-11ec-a981-b77847c6ef30' });
+
+            expect(resp.body.data.timeline.notes[0].eventId).to.be('StU_UXwBAowmaxx6YdiS');
+          });
+
+          it('should return notes with the timelineId matching the resolved timeline id', async () => {
+            const resp = await supertest
+              .get(resolveWithSpaceApi)
+              .query({ id: '1e2e9850-25f8-11ec-a981-b77847c6ef30' });
+
+            expect(resp.body.data.timeline.notes[0].timelineId).to.be(
+              resp.body.data.timeline.savedObjectId
+            );
+            expect(resp.body.data.timeline.notes[1].timelineId).to.be(
+              resp.body.data.timeline.savedObjectId
+            );
+          });
+        });
+
+        describe('pinned events', () => {
+          it('should pinned events with eventId', async () => {
+            const resp = await supertest
+              .get(resolveWithSpaceApi)
+              .query({ id: '1e2e9850-25f8-11ec-a981-b77847c6ef30' });
+
+            expect(resp.body.data.timeline.pinnedEventsSaveObject[0].eventId).to.be(
+              'StU_UXwBAowmaxx6YdiS'
+            );
+          });
+
+          it('should return pinned events with the timelineId matching request id', async () => {
+            const resp = await supertest
+              .get(resolveWithSpaceApi)
+              .query({ id: '1e2e9850-25f8-11ec-a981-b77847c6ef30' });
+
+            expect(resp.body.data.timeline.pinnedEventsSaveObject[0].timelineId).to.be(
+              resp.body.data.timeline.savedObjectId
+            );
+          });
+        });
+      });
+    });
+
     describe('7.16.0', () => {
       before(async () => {
         await esArchiver.load(
@@ -126,7 +199,6 @@ export default function ({ getService }: FtrProviderContext) {
           expect(resp.body.data.getOneTimeline.savedQueryId).to.be("It's me");
         });
       });
-
       describe('pinned events timelineId', () => {
         it('removes the timelineId in the saved object', async () => {
           const timelines = await getSavedObjectFromES<PinnedEventWithoutTimelineId>(

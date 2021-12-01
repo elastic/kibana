@@ -66,13 +66,11 @@ interface WarmPhaseMetaFields
 
 interface ColdPhaseMetaFields extends DataAllocationMetaFields, MinAgeField {
   enabled: boolean;
-  freezeEnabled: boolean;
   readonlyEnabled: boolean;
 }
 
 interface FrozenPhaseMetaFields extends DataAllocationMetaFields, MinAgeField {
   enabled: boolean;
-  freezeEnabled: boolean;
 }
 
 interface DeletePhaseMetaFields extends MinAgeField {

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import './xy_config_panel.scss';
 import React, { useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { debounce } from 'lodash';
@@ -13,9 +12,13 @@ import { EuiFormRow, EuiColorPicker, EuiColorPickerProps, EuiToolTip, EuiIcon } 
 import type { PaletteRegistry } from 'src/plugins/charts/public';
 import type { VisualizationDimensionEditorProps } from '../../types';
 import { State } from '../types';
-import { FormatFactory } from '../../../common';
+import { FormatFactory, layerTypes } from '../../../common';
 import { getSeriesColor } from '../state_helpers';
-import { getAccessorColorConfig, getColorAssignments } from '../color_assignment';
+import {
+  defaultReferenceLineColor,
+  getAccessorColorConfig,
+  getColorAssignments,
+} from '../color_assignment';
 import { getSortedAccessors } from '../to_expression';
 import { updateLayer } from '.';
 import { TooltipWrapper } from '../../shared_components';
@@ -56,6 +59,9 @@ export const ColorPicker = ({
   const overwriteColor = getSeriesColor(layer, accessor);
   const currentColor = useMemo(() => {
     if (overwriteColor || !frame.activeData) return overwriteColor;
+    if (layer.layerType === layerTypes.REFERENCELINE) {
+      return defaultReferenceLineColor;
+    }
 
     const datasource = frame.datasourceLayers[layer.layerId];
     const sortedAccessors: string[] = getSortedAccessors(datasource, layer);

@@ -8,11 +8,10 @@
 
 import { get, map } from 'lodash';
 import { ElasticsearchClient, SavedObjectsClientContract } from 'kibana/server';
-import { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ConfigSchema } from '../../config';
-import { IFieldType } from '../../common';
+import { IFieldType, getFieldSubtypeNested } from '../../common';
 import { findIndexPatternById, getFieldByName } from '../data_views';
-import { shimAbortSignal } from '../search';
 
 export async function termsAggSuggestions(
   config: ConfigSchema,
@@ -38,8 +37,12 @@ export async function termsAggSuggestions(
 
   const body = await getBody(autocompleteSearchOptions, field ?? fieldName, query, filters);
 
-  const promise = esClient.search({ index, body });
-  const result = await shimAbortSignal(promise, abortSignal);
+  const result = await esClient.search(
+    { index, body },
+    {
+      signal: abortSignal,
+    }
+  );
 
   const buckets =
     get(result.body, 'aggregations.suggestions.buckets') ||
@@ -87,14 +90,14 @@ async function getBody(
       },
     },
   };
-
-  if (isFieldObject(field) && field.subType && field.subType.nested) {
+  const subTypeNested = isFieldObject(field) && getFieldSubtypeNested(field);
+  if (isFieldObject(field) && subTypeNested) {
     return {
       ...body,
       aggs: {
         nestedSuggestions: {
           nested: {
-            path: field.subType.nested.path,
+            path: subTypeNested.nested.path,
           },
           aggs: body.aggs,
         },

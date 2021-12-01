@@ -27,7 +27,8 @@ export const getEnrollmentApiKeysHandler: RequestHandler<
   undefined,
   TypeOf<typeof GetEnrollmentAPIKeysRequestSchema.query>
 > = async (context, request, response) => {
-  const esClient = context.core.elasticsearch.client.asCurrentUser;
+  // Use kibana_system and depend on authz checks on HTTP layer to prevent abuse
+  const esClient = context.core.elasticsearch.client.asInternalUser;
 
   try {
     const { items, total, page, perPage } = await APIKeyService.listEnrollmentApiKeys(esClient, {
@@ -48,7 +49,7 @@ export const postEnrollmentApiKeyHandler: RequestHandler<
   TypeOf<typeof PostEnrollmentAPIKeyRequestSchema.body>
 > = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
-  const esClient = context.core.elasticsearch.client.asCurrentUser;
+  const esClient = context.core.elasticsearch.client.asInternalUser;
   try {
     const apiKey = await APIKeyService.generateEnrollmentAPIKey(soClient, esClient, {
       name: request.body.name,
@@ -67,7 +68,7 @@ export const postEnrollmentApiKeyHandler: RequestHandler<
 export const deleteEnrollmentApiKeyHandler: RequestHandler<
   TypeOf<typeof DeleteEnrollmentAPIKeyRequestSchema.params>
 > = async (context, request, response) => {
-  const esClient = context.core.elasticsearch.client.asCurrentUser;
+  const esClient = context.core.elasticsearch.client.asInternalUser;
   try {
     await APIKeyService.deleteEnrollmentApiKey(esClient, request.params.keyId);
 
@@ -87,7 +88,8 @@ export const deleteEnrollmentApiKeyHandler: RequestHandler<
 export const getOneEnrollmentApiKeyHandler: RequestHandler<
   TypeOf<typeof GetOneEnrollmentAPIKeyRequestSchema.params>
 > = async (context, request, response) => {
-  const esClient = context.core.elasticsearch.client.asCurrentUser;
+  // Use kibana_system and depend on authz checks on HTTP layer to prevent abuse
+  const esClient = context.core.elasticsearch.client.asInternalUser;
   try {
     const apiKey = await APIKeyService.getEnrollmentAPIKey(esClient, request.params.keyId);
     const body: GetOneEnrollmentAPIKeyResponse = { item: apiKey };

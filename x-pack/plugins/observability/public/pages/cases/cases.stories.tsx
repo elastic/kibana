@@ -5,18 +5,20 @@
  * 2.0.
  */
 
-import { EuiPageTemplate } from '@elastic/eui';
 import React, { ComponentType } from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { CoreStart } from '../../../../../../src/core/public';
-import { createKibanaReactContext } from '../../../../../../src/plugins/kibana_react/public';
+import {
+  createKibanaReactContext,
+  KibanaPageTemplate,
+} from '../../../../../../src/plugins/kibana_react/public';
 import { casesFeatureId } from '../../../common';
 import { PluginContext, PluginContextValue } from '../../context/plugin_context';
-import { AllCasesPage } from './all_cases';
+import { CasesPage } from './';
 
 export default {
   title: 'app/Cases',
-  component: AllCasesPage,
+  component: CasesPage,
   decorators: [
     (Story: ComponentType) => {
       const KibanaReactContext = createKibanaReactContext({
@@ -34,7 +36,7 @@ export default {
       } as unknown as Partial<CoreStart>);
 
       const pluginContextValue = {
-        ObservabilityPageTemplate: EuiPageTemplate,
+        ObservabilityPageTemplate: KibanaPageTemplate,
       } as unknown as PluginContextValue;
 
       return (
@@ -51,5 +53,5 @@ export default {
 };
 
 export function EmptyState() {
-  return <AllCasesPage />;
+  return <CasesPage />;
 }

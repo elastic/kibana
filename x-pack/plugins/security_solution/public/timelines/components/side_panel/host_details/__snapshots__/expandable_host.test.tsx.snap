@@ -33,21 +33,6 @@ exports[`Expandable Host Component ExpandableHostDetails: rendering it should re
   opacity: 1;
 }
 
-.c4 {
-  padding: 16px;
-  background: rgba(250,251,253,0.9);
-  bottom: 0;
-  left: 0;
-  position: absolute;
-  right: 0;
-  top: 0;
-  z-index: 1000;
-}
-
-.c5 {
-  height: 100%;
-}
-
 .c2 dt {
   font-size: 12px !important;
 }
@@ -73,6 +58,21 @@ exports[`Expandable Host Component ExpandableHostDetails: rendering it should re
   right: 12px;
   top: 6px;
   z-index: 2;
+}
+
+.c4 {
+  padding: 16px;
+  background: rgba(250,251,253,0.9);
+  bottom: 0;
+  left: 0;
+  position: absolute;
+  right: 0;
+  top: 0;
+  z-index: 1000;
+}
+
+.c5 {
+  height: 100%;
 }
 
 <ExpandableHostDetails
@@ -105,7 +105,15 @@ exports[`Expandable Host Component ExpandableHostDetails: rendering it should re
       id="hostsDetailsQuery"
       indexNames={
         Array [
-          "IShouldBeUsed",
+          "-*elastic-cloud-logs-*",
+          "apm-*-transaction*",
+          "auditbeat-*",
+          "endgame-*",
+          "filebeat-*",
+          "logs-*",
+          "packetbeat-*",
+          "traces-apm*",
+          "winlogbeat-*",
         ]
       }
       isDraggable={false}

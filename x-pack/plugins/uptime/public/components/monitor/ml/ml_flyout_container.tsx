@@ -7,6 +7,8 @@
 
 import React, { useContext, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import type { Observable } from 'rxjs';
+import type { CoreTheme } from 'kibana/public';
 import {
   canCreateMLJobSelector,
   hasMLJobSelector,
@@ -29,7 +31,7 @@ import { useGetUrlParams } from '../../../hooks';
 import { getDynamicSettings } from '../../../state/actions/dynamic_settings';
 import { useMonitorId } from '../../../hooks';
 import { kibanaService } from '../../../state/kibana_service';
-import { toMountPoint } from '../../../../../../../src/plugins/kibana_react/public';
+import { toMountPoint, useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { CLIENT_ALERT_TYPES } from '../../../../common/constants/alerts';
 
 interface Props {
@@ -41,21 +43,27 @@ const showMLJobNotification = (
   basePath: string,
   range: { to: string; from: string },
   success: boolean,
+  awaitingNodeAssignment: boolean,
+  theme$?: Observable<CoreTheme>,
   error?: Error
 ) => {
   if (success) {
     kibanaService.toasts.addSuccess(
       {
         title: toMountPoint(
-          <p data-test-subj="uptimeMLJobSuccessfullyCreated">{labels.JOB_CREATED_SUCCESS_TITLE}</p>
+          <p data-test-subj="uptimeMLJobSuccessfullyCreated">{labels.JOB_CREATED_SUCCESS_TITLE}</p>,
+          { theme$ }
         ),
         text: toMountPoint(
           <p>
-            {labels.JOB_CREATED_SUCCESS_MESSAGE}
+            {awaitingNodeAssignment
+              ? labels.JOB_CREATED_LAZY_SUCCESS_MESSAGE
+              : labels.JOB_CREATED_SUCCESS_MESSAGE}
             <MLJobLink monitorId={monitorId} basePath={basePath} dateRange={range}>
               {labels.VIEW_JOB}
             </MLJobLink>
-          </p>
+          </p>,
+          { theme$ }
         ),
       },
       { toastLifeTimeMs: 10000 }
@@ -70,6 +78,7 @@ const showMLJobNotification = (
 };
 
 export const MachineLearningFlyout: React.FC<Props> = ({ onClose }) => {
+  const core = useKibana();
   const dispatch = useDispatch();
   const { data: hasMLJob, error } = useSelector(hasNewMLJobSelector);
   const isMLJobCreating = useSelector(isMLJobCreatingSelector);
@@ -107,7 +116,9 @@ export const MachineLearningFlyout: React.FC<Props> = ({ onClose }) => {
           monitorId as string,
           basePath,
           { to: dateRangeEnd, from: dateRangeStart },
-          true
+          true,
+          hasMLJob.awaitingNodeAssignment,
+          core.services.theme?.theme$
         );
         const loadMLJob = (jobId: string) =>
           dispatch(getExistingMLJobAction.get({ monitorId: monitorId as string }));
@@ -123,6 +134,8 @@ export const MachineLearningFlyout: React.FC<Props> = ({ onClose }) => {
           basePath,
           { to: dateRangeEnd, from: dateRangeStart },
           false,
+          false,
+          core.services.theme?.theme$,
           error as Error
         );
       }

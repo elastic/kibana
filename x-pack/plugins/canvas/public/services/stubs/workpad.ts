@@ -99,6 +99,8 @@ export const getSomeTemplates = () => ({ templates });
 
 export const workpadServiceFactory: CanvasWorkpadServiceFactory = () => ({
   get: (id: string) => Promise.resolve({ ...getDefaultWorkpad(), id }),
+  resolve: (id: string) =>
+    Promise.resolve({ outcome: 'exactMatch', workpad: { ...getDefaultWorkpad(), id } }),
   findTemplates: findNoTemplates(),
   create: (workpad) => Promise.resolve(workpad),
   createFromTemplate: (_templateId: string) => Promise.resolve(getDefaultWorkpad()),

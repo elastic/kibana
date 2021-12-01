@@ -59,7 +59,7 @@ export const DocumentDetailLogic = kea<DocumentDetailLogicType>({
 
       try {
         const { http } = HttpLogic.values;
-        const response = await http.get(
+        const response = await http.get<{ fields: FieldDetails[] }>(
           `/internal/app_search/engines/${engineName}/documents/${documentId}`
         );
         actions.setFields(response.fields);

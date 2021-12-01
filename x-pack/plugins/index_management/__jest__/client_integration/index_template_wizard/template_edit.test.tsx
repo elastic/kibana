@@ -10,7 +10,7 @@ import { act } from 'react-dom/test-utils';
 
 import '../../../test/global_mocks';
 import * as fixtures from '../../../test/fixtures';
-import { setupEnvironment, BRANCH } from '../helpers';
+import { setupEnvironment, kibanaVersion } from '../helpers';
 
 import { TEMPLATE_NAME, SETTINGS, ALIASES, MAPPINGS as DEFAULT_MAPPING } from './constants';
 import { setup } from './template_edit.helpers';
@@ -263,8 +263,7 @@ describe('<TemplateEdit />', () => {
     });
   });
 
-  // @ts-expect-error
-  if (BRANCH === '7.x') {
+  if (kibanaVersion.major < 8) {
     describe('legacy index templates', () => {
       const legacyTemplateToEdit = fixtures.getTemplate({
         name: 'legacy_index_template',

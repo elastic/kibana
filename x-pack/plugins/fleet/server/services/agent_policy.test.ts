@@ -235,7 +235,7 @@ describe('agent policy', () => {
       const soClient = savedObjectsClientMock.create();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
       mockedAppContextService.getInternalUserESClient.mockReturnValue(esClient);
-      mockedOutputService.getDefaultOutputId.mockResolvedValue('default-output');
+      mockedOutputService.getDefaultDataOutputId.mockResolvedValue('default-output');
       mockedGetFullAgentPolicy.mockResolvedValue(null);
 
       soClient.get.mockResolvedValue({
@@ -253,7 +253,7 @@ describe('agent policy', () => {
       const soClient = savedObjectsClientMock.create();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
       mockedAppContextService.getInternalUserESClient.mockReturnValue(esClient);
-      mockedOutputService.getDefaultOutputId.mockResolvedValue('default-output');
+      mockedOutputService.getDefaultDataOutputId.mockResolvedValue('default-output');
       mockedGetFullAgentPolicy.mockResolvedValue({
         id: 'policy123',
         revision: 1,

@@ -10,7 +10,7 @@ import { FETCH_STATUS, useFetcher } from '../../hooks/use_fetcher';
 import { APIReturnType } from '../../services/rest/createCallApmApi';
 
 export interface AnomalyDetectionJobsContextValue {
-  anomalyDetectionJobsData?: APIReturnType<'GET /api/apm/settings/anomaly-detection/jobs'>;
+  anomalyDetectionJobsData?: APIReturnType<'GET /internal/apm/settings/anomaly-detection/jobs'>;
   anomalyDetectionJobsStatus: FETCH_STATUS;
   anomalyDetectionJobsRefetch: () => void;
 }
@@ -30,7 +30,7 @@ export function AnomalyDetectionJobsContextProvider({
   const { data, status } = useFetcher(
     (callApmApi) =>
       callApmApi({
-        endpoint: `GET /api/apm/settings/anomaly-detection/jobs`,
+        endpoint: `GET /internal/apm/settings/anomaly-detection/jobs`,
       }),
     [fetchId], // eslint-disable-line react-hooks/exhaustive-deps
     { showToastOnError: false }

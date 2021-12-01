@@ -35,7 +35,7 @@ jest.mock(
   } => {
     return {
       packagePolicyService: {
-        compilePackagePolicyInputs: jest.fn((packageInfo, vars, dataInputs) =>
+        _compilePackagePolicyInputs: jest.fn((registryPkgInfo, packageInfo, vars, dataInputs) =>
           Promise.resolve(dataInputs)
         ),
         buildPackagePolicyFromPackage: jest.fn(),

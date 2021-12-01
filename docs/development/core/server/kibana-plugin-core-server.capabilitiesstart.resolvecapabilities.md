@@ -16,10 +16,10 @@ resolveCapabilities(request: KibanaRequest, options?: ResolveCapabilitiesOptions
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  request | <code>KibanaRequest</code> |  |
-|  options | <code>ResolveCapabilitiesOptions</code> |  |
+|  request | KibanaRequest |  |
+|  options | ResolveCapabilitiesOptions |  |
 
 <b>Returns:</b>
 
-`Promise<Capabilities>`
+Promise&lt;Capabilities&gt;
 

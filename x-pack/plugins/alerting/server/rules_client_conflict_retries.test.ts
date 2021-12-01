@@ -325,6 +325,22 @@ beforeEach(() => {
     params: {},
   });
 
+  taskManager.get.mockResolvedValue({
+    id: 'task-123',
+    taskType: 'alerting:123',
+    scheduledAt: new Date(),
+    attempts: 1,
+    status: TaskStatus.Idle,
+    runAt: new Date(),
+    startedAt: null,
+    retryAt: null,
+    state: {},
+    params: {
+      alertId: '1',
+    },
+    ownerId: null,
+  });
+
   const actionsClient = actionsClientMock.create();
   actionsClient.getBulk.mockResolvedValue([]);
   rulesClientParams.getActionsClient.mockResolvedValue(actionsClient);

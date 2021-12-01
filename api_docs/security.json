@@ -333,21 +333,6 @@
           },
           {
             "parentPluginId": "security",
-            "id": "def-public.SecurityLicenseFeatures.allowLegacyAuditLogging",
-            "type": "boolean",
-            "tags": [
-              "deprecated"
-            ],
-            "label": "allowLegacyAuditLogging",
-            "description": [
-              "\nIndicates whether we allow logging of legacy audit events."
-            ],
-            "path": "x-pack/plugins/security/common/licensing/license_features.ts",
-            "deprecated": true,
-            "references": []
-          },
-          {
-            "parentPluginId": "security",
             "id": "def-public.SecurityLicenseFeatures.allowRoleDocumentLevelSecurity",
             "type": "boolean",
             "tags": [],
@@ -737,7 +722,7 @@
         "tags": [],
         "label": "AuditEvent",
         "description": [
-          "\nAudit event schema using ECS format: https://www.elastic.co/guide/en/ecs/1.9/index.html\n\nIf you add additional fields to the schema ensure you update the Kibana Filebeat module:\nhttps://github.com/elastic/beats/tree/master/filebeat/module/kibana\n"
+          "\nAudit event schema using ECS format: https://www.elastic.co/guide/en/ecs/1.12/index.html\n\nIf you add additional fields to the schema ensure you update the Kibana Filebeat module:\nhttps://github.com/elastic/beats/tree/master/filebeat/module/kibana\n"
         ],
         "signature": [
           {
@@ -748,7 +733,13 @@
             "text": "AuditEvent"
           },
           " extends ",
-          "LogMeta"
+          {
+            "pluginId": "@kbn/logging",
+            "scope": "server",
+            "docId": "kibKbnLoggingPluginApi",
+            "section": "def-server.LogMeta",
+            "text": "LogMeta"
+          }
         ],
         "path": "x-pack/plugins/security/server/audit/audit_events.ts",
         "deprecated": false,
@@ -895,43 +886,6 @@
                 "path": "x-pack/plugins/security/server/audit/audit_service.ts",
                 "deprecated": false,
                 "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "security",
-            "id": "def-server.AuditServiceSetup.getLogger",
-            "type": "Function",
-            "tags": [],
-            "label": "getLogger",
-            "description": [],
-            "signature": [
-              "(id?: string | undefined) => ",
-              {
-                "pluginId": "security",
-                "scope": "server",
-                "docId": "kibSecurityPluginApi",
-                "section": "def-server.LegacyAuditLogger",
-                "text": "LegacyAuditLogger"
-              }
-            ],
-            "path": "x-pack/plugins/security/server/audit/audit_service.ts",
-            "deprecated": false,
-            "children": [
-              {
-                "parentPluginId": "security",
-                "id": "def-server.AuditServiceSetup.getLogger.$1",
-                "type": "string",
-                "tags": [],
-                "label": "id",
-                "description": [],
-                "signature": [
-                  "string | undefined"
-                ],
-                "path": "x-pack/plugins/security/server/audit/audit_service.ts",
-                "deprecated": false,
-                "isRequired": false
               }
             ],
             "returnComment": []
@@ -1397,7 +1351,7 @@
               "\nDetails about these errors. This field is not present in the response when error_count is 0."
             ],
             "signature": [
-              "{ type: string; reason: string; caused_by?: { type: string; reason: string; } | undefined; }[] | undefined"
+              "{ type?: string | undefined; reason?: string | undefined; caused_by?: { type?: string | undefined; reason?: string | undefined; } | undefined; }[] | undefined"
             ],
             "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
             "deprecated": false
@@ -1429,121 +1383,6 @@
             ],
             "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
             "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "security",
-        "id": "def-server.LegacyAuditLogger",
-        "type": "Interface",
-        "tags": [
-          "deprecated"
-        ],
-        "label": "LegacyAuditLogger",
-        "description": [],
-        "path": "x-pack/plugins/security/server/audit/audit_service.ts",
-        "deprecated": true,
-        "references": [
-          {
-            "plugin": "encryptedSavedObjects",
-            "path": "x-pack/plugins/encrypted_saved_objects/server/audit/audit_logger.ts"
-          },
-          {
-            "plugin": "encryptedSavedObjects",
-            "path": "x-pack/plugins/encrypted_saved_objects/server/audit/audit_logger.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/plugins/actions/server/authorization/audit_logger.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/plugins/actions/server/authorization/audit_logger.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/plugins/actions/server/authorization/audit_logger.ts"
-          },
-          {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/server/authorization/audit_logger.ts"
-          },
-          {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/server/authorization/audit_logger.ts"
-          },
-          {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/server/authorization/audit_logger.ts"
-          },
-          {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/server/rules_client_factory.test.ts"
-          },
-          {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/server/rules_client_factory.test.ts"
-          }
-        ],
-        "children": [
-          {
-            "parentPluginId": "security",
-            "id": "def-server.LegacyAuditLogger.log",
-            "type": "Function",
-            "tags": [],
-            "label": "log",
-            "description": [],
-            "signature": [
-              "(eventType: string, message: string, data?: Record<string, any> | undefined) => void"
-            ],
-            "path": "x-pack/plugins/security/server/audit/audit_service.ts",
-            "deprecated": false,
-            "children": [
-              {
-                "parentPluginId": "security",
-                "id": "def-server.LegacyAuditLogger.log.$1",
-                "type": "string",
-                "tags": [],
-                "label": "eventType",
-                "description": [],
-                "signature": [
-                  "string"
-                ],
-                "path": "x-pack/plugins/security/server/audit/audit_service.ts",
-                "deprecated": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "security",
-                "id": "def-server.LegacyAuditLogger.log.$2",
-                "type": "string",
-                "tags": [],
-                "label": "message",
-                "description": [],
-                "signature": [
-                  "string"
-                ],
-                "path": "x-pack/plugins/security/server/audit/audit_service.ts",
-                "deprecated": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "security",
-                "id": "def-server.LegacyAuditLogger.log.$3",
-                "type": "Object",
-                "tags": [],
-                "label": "data",
-                "description": [],
-                "signature": [
-                  "Record<string, any> | undefined"
-                ],
-                "path": "x-pack/plugins/security/server/audit/audit_service.ts",
-                "deprecated": false,
-                "isRequired": false
-              }
-            ],
-            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -1653,6 +1492,10 @@
             },
             {
               "plugin": "securitySolution",
+              "path": "x-pack/plugins/security_solution/server/request_context_factory.ts"
+            },
+            {
+              "plugin": "securitySolution",
               "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/signals/create_signals_migration_route.ts"
             },
             {
@@ -1662,6 +1505,14 @@
             {
               "plugin": "securitySolution",
               "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/signals/finalize_signals_migration_route.ts"
+            },
+            {
+              "plugin": "securitySolution",
+              "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/signals/open_close_signals_route.ts"
+            },
+            {
+              "plugin": "securitySolution",
+              "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/rules/preview_rules_route.ts"
             },
             {
               "plugin": "securitySolution",
@@ -1761,6 +1612,27 @@
               "docId": "kibSecurityPluginApi",
               "section": "def-server.AuditServiceSetup",
               "text": "AuditServiceSetup"
+            }
+          ],
+          "path": "x-pack/plugins/security/server/plugin.ts",
+          "deprecated": false
+        },
+        {
+          "parentPluginId": "security",
+          "id": "def-server.SecurityPluginSetup.privilegeDeprecationsService",
+          "type": "Object",
+          "tags": [],
+          "label": "privilegeDeprecationsService",
+          "description": [
+            "\nExposes services to access kibana roles per feature id with the GetDeprecationsContext"
+          ],
+          "signature": [
+            {
+              "pluginId": "security",
+              "scope": "common",
+              "docId": "kibSecurityPluginApi",
+              "section": "def-common.PrivilegeDeprecationsService",
+              "text": "PrivilegeDeprecationsService"
             }
           ],
           "path": "x-pack/plugins/security/server/plugin.ts",
@@ -1912,6 +1784,53 @@
             ],
             "path": "x-pack/plugins/security/common/model/authenticated_user.ts",
             "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "security",
+        "id": "def-common.PrivilegeDeprecationsService",
+        "type": "Interface",
+        "tags": [],
+        "label": "PrivilegeDeprecationsService",
+        "description": [],
+        "path": "x-pack/plugins/security/common/model/deprecations.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "security",
+            "id": "def-common.PrivilegeDeprecationsService.getKibanaRolesByFeatureId",
+            "type": "Function",
+            "tags": [],
+            "label": "getKibanaRolesByFeatureId",
+            "description": [],
+            "signature": [
+              "(args: ",
+              "PrivilegeDeprecationsRolesByFeatureIdRequest",
+              ") => Promise<",
+              "PrivilegeDeprecationsRolesByFeatureIdResponse",
+              ">"
+            ],
+            "path": "x-pack/plugins/security/common/model/deprecations.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "security",
+                "id": "def-common.PrivilegeDeprecationsService.getKibanaRolesByFeatureId.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "args",
+                "description": [],
+                "signature": [
+                  "PrivilegeDeprecationsRolesByFeatureIdRequest"
+                ],
+                "path": "x-pack/plugins/security/common/model/deprecations.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false

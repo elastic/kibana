@@ -66,9 +66,10 @@ export default function buildRequest(config, tlConfig, scriptFields, runtimeFiel
 
   _.assign(aggCursor, createDateAgg(config, tlConfig, scriptFields));
 
+  const includeFrozen = Boolean(tlConfig.settings[UI_SETTINGS.SEARCH_INCLUDE_FROZEN]);
   const request = {
     index: config.index,
-    ignore_throttled: !tlConfig.settings[UI_SETTINGS.SEARCH_INCLUDE_FROZEN],
+    ...(includeFrozen ? { ignore_throttled: false } : {}),
     body: {
       query: {
         bool: bool,

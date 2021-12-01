@@ -6,7 +6,7 @@
  */
 
 import _ from 'lodash';
-import React, { ReactElement } from 'react';
+import React, { CSSProperties, ReactElement } from 'react';
 import { FeatureIdentifier, Map as MbMap } from '@kbn/mapbox-gl';
 import { FeatureCollection } from 'geojson';
 import { StyleProperties, VectorStyleEditor } from './components/vector_style_editor';
@@ -16,7 +16,6 @@ import {
   FIELD_ORIGIN,
   GEO_JSON_TYPE,
   KBN_IS_CENTROID_FEATURE,
-  KBN_VECTOR_SHAPE_TYPE_COUNTS,
   LAYER_STYLE_TYPE,
   SOURCE_FORMATTERS_DATA_REQUEST_ID,
   STYLE_TYPE,
@@ -76,7 +75,6 @@ import { IVectorLayer } from '../../layers/vector_layer';
 import { IVectorSource } from '../../sources/vector_source';
 import { createStyleFieldsHelper, StyleFieldsHelper } from './style_fields_helper';
 import { IESAggField } from '../../fields/agg';
-import { VectorShapeTypeCounts } from '../../../../common/get_geometry_counts';
 
 const POINTS = [GEO_JSON_TYPE.POINT, GEO_JSON_TYPE.MULTI_POINT];
 const LINES = [GEO_JSON_TYPE.LINE_STRING, GEO_JSON_TYPE.MULTI_LINE_STRING];
@@ -92,11 +90,11 @@ export interface IVectorStyle extends IStyle {
     previousFields: IField[],
     mapColors: string[]
   ): Promise<{ hasChanges: boolean; nextStyleDescriptor?: VectorStyleDescriptor }>;
-  isTimeAware: () => boolean;
-  getIcon: () => ReactElement<any>;
-  getIconFromGeometryTypes: (isLinesOnly: boolean, isPointsOnly: boolean) => ReactElement<any>;
+  isTimeAware(): boolean;
+  getPrimaryColor(): string;
+  getIcon(showIncompleteIndicator: boolean): ReactElement;
   hasLegendDetails: () => Promise<boolean>;
-  renderLegendDetails: () => ReactElement<any>;
+  renderLegendDetails: () => ReactElement;
   clearFeatureState: (featureCollection: FeatureCollection, mbMap: MbMap, sourceId: string) => void;
   setFeatureStateAndStyleProps: (
     featureCollection: FeatureCollection,
@@ -492,50 +490,16 @@ export class VectorStyle implements IVectorStyle {
   }
 
   async pluckStyleMetaFromTileMeta(metaFeatures: TileMetaFeature[]): Promise<StyleMetaDescriptor> {
-    const shapeTypeCountMeta: VectorShapeTypeCounts = metaFeatures.reduce(
-      (accumulator: VectorShapeTypeCounts, tileMeta: TileMetaFeature) => {
-        if (
-          !tileMeta ||
-          !tileMeta.properties ||
-          !tileMeta.properties[KBN_VECTOR_SHAPE_TYPE_COUNTS]
-        ) {
-          return accumulator;
-        }
-
-        accumulator[VECTOR_SHAPE_TYPE.POINT] +=
-          tileMeta.properties[KBN_VECTOR_SHAPE_TYPE_COUNTS][VECTOR_SHAPE_TYPE.POINT];
-        accumulator[VECTOR_SHAPE_TYPE.LINE] +=
-          tileMeta.properties[KBN_VECTOR_SHAPE_TYPE_COUNTS][VECTOR_SHAPE_TYPE.LINE];
-        accumulator[VECTOR_SHAPE_TYPE.POLYGON] +=
-          tileMeta.properties[KBN_VECTOR_SHAPE_TYPE_COUNTS][VECTOR_SHAPE_TYPE.POLYGON];
-
-        return accumulator;
-      },
-      {
-        [VECTOR_SHAPE_TYPE.POLYGON]: 0,
-        [VECTOR_SHAPE_TYPE.LINE]: 0,
-        [VECTOR_SHAPE_TYPE.POINT]: 0,
-      }
-    );
-
-    const isLinesOnly =
-      shapeTypeCountMeta[VECTOR_SHAPE_TYPE.LINE] > 0 &&
-      shapeTypeCountMeta[VECTOR_SHAPE_TYPE.POINT] === 0 &&
-      shapeTypeCountMeta[VECTOR_SHAPE_TYPE.POLYGON] === 0;
-    const isPointsOnly =
-      shapeTypeCountMeta[VECTOR_SHAPE_TYPE.LINE] === 0 &&
-      shapeTypeCountMeta[VECTOR_SHAPE_TYPE.POINT] > 0 &&
-      shapeTypeCountMeta[VECTOR_SHAPE_TYPE.POLYGON] === 0;
-    const isPolygonsOnly =
-      shapeTypeCountMeta[VECTOR_SHAPE_TYPE.LINE] === 0 &&
-      shapeTypeCountMeta[VECTOR_SHAPE_TYPE.POINT] === 0 &&
-      shapeTypeCountMeta[VECTOR_SHAPE_TYPE.POLYGON] > 0;
-
+    const supportedShapeTypes = await this._source.getSupportedShapeTypes();
     const styleMeta: StyleMetaDescriptor = {
       geometryTypes: {
-        isPointsOnly,
-        isLinesOnly,
-        isPolygonsOnly,
+        isPointsOnly:
+          supportedShapeTypes.length === 1 && supportedShapeTypes.includes(VECTOR_SHAPE_TYPE.POINT),
+        isLinesOnly:
+          supportedShapeTypes.length === 1 && supportedShapeTypes.includes(VECTOR_SHAPE_TYPE.LINE),
+        isPolygonsOnly:
+          supportedShapeTypes.length === 1 &&
+          supportedShapeTypes.includes(VECTOR_SHAPE_TYPE.POLYGON),
       },
       fieldMeta: {},
     };
@@ -737,7 +701,17 @@ export class VectorStyle implements IVectorStyle {
       : (this._iconStyleProperty as StaticIconProperty).getOptions().value;
   }
 
-  getIconFromGeometryTypes(isLinesOnly: boolean, isPointsOnly: boolean) {
+  getPrimaryColor() {
+    const primaryColorKey = this._getIsLinesOnly()
+      ? VECTOR_STYLES.LINE_COLOR
+      : VECTOR_STYLES.FILL_COLOR;
+    return extractColorFromStyleProperty(this._descriptor.properties[primaryColorKey], 'grey');
+  }
+
+  getIcon(showIncompleteIndicator: boolean) {
+    const isLinesOnly = this._getIsLinesOnly();
+    const isPointsOnly = this._getIsPointsOnly();
+
     let strokeColor;
     if (isLinesOnly) {
       strokeColor = extractColorFromStyleProperty(
@@ -757,8 +731,17 @@ export class VectorStyle implements IVectorStyle {
           'grey'
         );
 
+    const borderStyle: CSSProperties = showIncompleteIndicator
+      ? {
+          borderColor: this.getPrimaryColor(),
+          borderStyle: 'dashed',
+          borderWidth: '1px',
+        }
+      : {};
+
     return (
       <VectorIcon
+        borderStyle={borderStyle}
         isPointsOnly={isPointsOnly}
         isLinesOnly={isLinesOnly}
         symbolId={this._getSymbolId()}
@@ -766,12 +749,6 @@ export class VectorStyle implements IVectorStyle {
         fillColor={fillColor}
       />
     );
-  }
-
-  getIcon() {
-    const isLinesOnly = this._getIsLinesOnly();
-    const isPointsOnly = this._getIsPointsOnly();
-    return this.getIconFromGeometryTypes(isLinesOnly, isPointsOnly);
   }
 
   _getLegendDetailStyleProperties = () => {
@@ -902,8 +879,6 @@ export class VectorStyle implements IVectorStyle {
     mbMap: MbMap;
     textLayerId: string;
   }) {
-    mbMap.setLayoutProperty(textLayerId, 'icon-allow-overlap', true);
-    mbMap.setLayoutProperty(textLayerId, 'text-allow-overlap', true);
     this._labelStyleProperty.syncTextFieldWithMb(textLayerId, mbMap);
     this._labelColorStyleProperty.syncLabelColorWithMb(textLayerId, mbMap, alpha);
     this._labelSizeStyleProperty.syncLabelSizeWithMb(textLayerId, mbMap);
@@ -922,6 +897,7 @@ export class VectorStyle implements IVectorStyle {
   }) {
     mbMap.setLayoutProperty(symbolLayerId, 'icon-ignore-placement', true);
     mbMap.setPaintProperty(symbolLayerId, 'icon-opacity', alpha);
+    mbMap.setLayoutProperty(symbolLayerId, 'icon-allow-overlap', true);
 
     this._iconStyleProperty.syncIconWithMb(
       symbolLayerId,

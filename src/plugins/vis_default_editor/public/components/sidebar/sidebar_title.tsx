@@ -21,22 +21,22 @@ import {
   EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
 import { Vis } from 'src/plugins/visualizations/public';
-import { SavedObject } from 'src/plugins/saved_objects/public';
+import { SavedSearch, getSavedSearchUrl } from '../../../../discover/public';
 import { ApplicationStart } from '../../../../../core/public';
 import { useKibana } from '../../../../kibana_react/public';
 
 interface LinkedSearchProps {
-  savedSearch: SavedObject;
+  savedSearch: SavedSearch;
   eventEmitter: EventEmitter;
 }
 
 interface SidebarTitleProps {
   isLinkedSearch: boolean;
-  savedSearch?: SavedObject;
+  savedSearch?: SavedSearch;
   vis: Vis;
   eventEmitter: EventEmitter;
 }
@@ -55,7 +55,7 @@ export function LinkedSearch({ savedSearch, eventEmitter }: LinkedSearchProps) {
   }, [eventEmitter]);
   const onClickViewInDiscover = useCallback(() => {
     application.navigateToApp('discover', {
-      path: `#/view/${savedSearch.id}`,
+      path: getSavedSearchUrl(savedSearch.id),
     });
   }, [application, savedSearch.id]);
 

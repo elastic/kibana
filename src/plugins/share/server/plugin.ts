@@ -9,25 +9,33 @@
 import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 import { CoreSetup, Plugin, PluginInitializerContext } from 'kibana/server';
-import { createRoutes } from './routes/create_routes';
-import { url } from './saved_objects';
 import { CSV_SEPARATOR_SETTING, CSV_QUOTE_VALUES_SETTING } from '../common/constants';
 import { UrlService } from '../common/url_service';
+import {
+  ServerUrlService,
+  ServerShortUrlClientFactory,
+  registerUrlServiceRoutes,
+  registerUrlServiceSavedObjectType,
+} from './url_service';
+import { LegacyShortUrlLocatorDefinition } from '../common/url_service/locators/legacy_short_url_locator';
 
 /** @public */
 export interface SharePluginSetup {
-  url: UrlService;
+  url: ServerUrlService;
 }
 
 /** @public */
 export interface SharePluginStart {
-  url: UrlService;
+  url: ServerUrlService;
 }
 
 export class SharePlugin implements Plugin<SharePluginSetup, SharePluginStart> {
-  private url?: UrlService;
+  private url?: ServerUrlService;
+  private version: string;
 
-  constructor(private readonly initializerContext: PluginInitializerContext) {}
+  constructor(private readonly initializerContext: PluginInitializerContext) {
+    this.version = initializerContext.env.packageInfo.version;
+  }
 
   public setup(core: CoreSetup) {
     this.url = new UrlService({
@@ -39,10 +47,17 @@ export class SharePlugin implements Plugin<SharePluginSetup, SharePluginStart> {
       getUrl: async () => {
         throw new Error('Locator .getUrl() currently is not supported on the server.');
       },
+      shortUrls: ({ locators }) =>
+        new ServerShortUrlClientFactory({
+          currentVersion: this.version,
+          locators,
+        }),
     });
+    this.url.locators.create(new LegacyShortUrlLocatorDefinition());
 
-    createRoutes(core, this.initializerContext.logger.get());
-    core.savedObjects.registerType(url);
+    registerUrlServiceSavedObjectType(core.savedObjects, this.url);
+    registerUrlServiceRoutes(core, core.http.createRouter(), this.url);
+
     core.uiSettings.register({
       [CSV_SEPARATOR_SETTING]: {
         name: i18n.translate('share.advancedSettings.csv.separatorTitle', {

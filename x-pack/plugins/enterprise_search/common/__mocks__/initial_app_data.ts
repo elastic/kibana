@@ -6,8 +6,9 @@
  */
 
 export const DEFAULT_INITIAL_APP_DATA = {
+  kibanaVersion: '7.16.0',
+  enterpriseSearchVersion: '7.16.0',
   readOnlyMode: false,
-  ilmEnabled: true,
   searchOAuth: {
     clientId: 'someUID',
     redirectUrl: 'http://localhost:3002/ws/search_callback',

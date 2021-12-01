@@ -17,7 +17,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
 import {
@@ -85,7 +85,7 @@ export function ServiceNodeMetrics() {
       if (start && end) {
         return callApmApi({
           endpoint:
-            'GET /api/apm/services/{serviceName}/node/{serviceNodeName}/metadata',
+            'GET /internal/apm/services/{serviceName}/node/{serviceNodeName}/metadata',
           params: {
             path: { serviceName, serviceNodeName },
             query: {

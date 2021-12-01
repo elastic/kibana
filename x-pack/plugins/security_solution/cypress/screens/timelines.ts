@@ -7,15 +7,30 @@
 
 export const BULK_ACTIONS = '[data-test-subj="utility-bar-action-button"]';
 
+export const EXPAND_NOTES_BTN = '[data-test-subj="expand-notes"]';
+
 export const EXPORT_TIMELINE_ACTION = '[data-test-subj="export-timeline-action"]';
 
-export const TIMELINE = (id: string) => {
+export const IMPORT_BTN = '.euiButton.euiButton--primary.euiButton--fill';
+
+export const IMPORT_TIMELINE_BTN = '[data-test-subj="open-import-data-modal-btn"]';
+
+export const INPUT_FILE = 'input[type=file]';
+
+export const NOTE = '[data-test-subj^="note-preview-"]';
+
+export const TIMELINE = (id: string | undefined) => {
+  if (id == null) {
+    throw new TypeError('id should never be null or undefined');
+  }
   return `[data-test-subj="title-${id}"]`;
 };
 
 export const TIMELINE_CHECKBOX = (id: string) => {
   return `[data-test-subj="checkboxSelectRow-${id}"]`;
 };
+
+export const TIMELINE_NAME = '[data-test-subj^=title]';
 
 export const TIMELINES_FAVORITE = '[data-test-subj="favorite-starFilled-star"]';
 

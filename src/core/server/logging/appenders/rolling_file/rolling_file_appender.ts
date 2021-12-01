@@ -144,7 +144,7 @@ export class RollingFileAppender implements DisposableAppender {
     // this would cause a second rollover that would not be awaited
     // and could result in a race with the newly created appender
     // that would also be performing a rollover.
-    // so if we are disposed, we just flush the buffer directly to the file instead to avoid loosing the entries.
+    // so if we are disposed, we just flush the buffer directly to the file instead to avoid losing the entries.
     for (const log of pendingLogs) {
       if (this.disposed) {
         this._writeToFile(log);

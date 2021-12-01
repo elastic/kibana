@@ -46,6 +46,8 @@ export default function (context: FtrProviderContext) {
     this.tags('ciGroup2');
 
     before(async () => {
+      const reportingAPI = context.getService('reportingAPI');
+      await reportingAPI.logTaskManagerHealth();
       await createDataAnalystRole();
       await createDataAnalyst();
       await createReportingUser();

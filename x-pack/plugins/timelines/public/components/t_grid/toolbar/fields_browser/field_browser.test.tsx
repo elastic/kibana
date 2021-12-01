@@ -235,7 +235,7 @@ describe('FieldsBrowser', () => {
 
     expect(
       wrapper.find('[data-test-subj="field-search"]').first().getDOMNode().id ===
-        document.activeElement!.id
+        document.activeElement?.id
     ).toBe(true);
   });
 
@@ -266,9 +266,34 @@ describe('FieldsBrowser', () => {
     const changeEvent: any = { target: { value: inputText } };
     const onChange = searchField.props().onChange;
 
-    onChange!(changeEvent);
+    onChange?.(changeEvent);
     searchField.simulate('change').update();
 
     expect(onSearchInputChange).toBeCalledWith(inputText);
+  });
+
+  test('it renders the CreateField button when createFieldComponent is provided', () => {
+    const MyTestComponent = () => <div>{'test'}</div>;
+
+    const wrapper = mount(
+      <TestProviders>
+        <FieldsBrowser
+          columnHeaders={[]}
+          browserFields={mockBrowserFields}
+          filteredBrowserFields={mockBrowserFields}
+          searchInput={''}
+          isSearching={false}
+          onCategorySelected={jest.fn()}
+          onHide={jest.fn()}
+          onSearchInputChange={jest.fn()}
+          restoreFocusTo={React.createRef<HTMLButtonElement>()}
+          selectedCategoryId={''}
+          timelineId={timelineId}
+          createFieldComponent={MyTestComponent}
+        />
+      </TestProviders>
+    );
+
+    expect(wrapper.find(MyTestComponent).exists()).toBeTruthy();
   });
 });

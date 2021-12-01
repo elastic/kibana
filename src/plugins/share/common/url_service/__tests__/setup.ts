@@ -37,6 +37,22 @@ export const urlServiceTestSetup = (partialDeps: Partial<UrlServiceDependencies>
     getUrl: async () => {
       throw new Error('not implemented');
     },
+    shortUrls: () => ({
+      get: () => ({
+        create: async () => {
+          throw new Error('Not implemented.');
+        },
+        get: async () => {
+          throw new Error('Not implemented.');
+        },
+        delete: async () => {
+          throw new Error('Not implemented.');
+        },
+        resolve: async () => {
+          throw new Error('Not implemented.');
+        },
+      }),
+    }),
     ...partialDeps,
   };
   const service = new UrlService(deps);

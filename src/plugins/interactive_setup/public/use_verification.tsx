@@ -11,7 +11,9 @@ import constate from 'constate';
 import type { FunctionComponent } from 'react';
 import React, { useEffect, useRef, useState } from 'react';
 
-import { useHttp } from './use_http';
+import { euiThemeVars } from '@kbn/ui-shared-deps-src/theme';
+
+import { useKibana } from './use_kibana';
 import { VerificationCodeForm } from './verification_code_form';
 
 export interface VerificationProps {
@@ -37,7 +39,7 @@ const [OuterVerificationProvider, useVerification] = constate(
 );
 
 const InnerVerificationProvider: FunctionComponent = ({ children }) => {
-  const http = useHttp();
+  const { http } = useKibana();
   const { status, setStatus, setCode } = useVerification();
 
   useEffect(() => {
@@ -54,7 +56,7 @@ const InnerVerificationProvider: FunctionComponent = ({ children }) => {
   return (
     <>
       {status === 'unverified' && (
-        <EuiModal onClose={() => setStatus('unknown')}>
+        <EuiModal onClose={() => setStatus('unknown')} maxWidth={euiThemeVars.euiBreakpoints.s}>
           <EuiModalHeader>
             <VerificationCodeForm
               onSuccess={(values) => {

@@ -7,7 +7,7 @@
 
 import React, { useMemo, useState, useEffect, useContext } from 'react';
 import { EuiButtonEmpty } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { generateId } from '../../../../id_generator';
 import { DragDrop, DragDropIdentifier, DragContext } from '../../../../drag_drop';
@@ -114,7 +114,7 @@ export function EmptyDimensionButton({
               className: 'lnsLayerPanel__triggerTextContent',
             }}
             aria-label={i18n.translate('xpack.lens.indexPattern.removeColumnAriaLabel', {
-              defaultMessage: 'Add or drag and drop a field to {groupLabel}',
+              defaultMessage: 'Add or drag-and-drop a field to {groupLabel}',
               values: { groupLabel: group.groupLabel },
             })}
             data-test-subj="lns-empty-dimension"
@@ -124,7 +124,7 @@ export function EmptyDimensionButton({
           >
             <FormattedMessage
               id="xpack.lens.configure.emptyConfig"
-              defaultMessage="Add or drag and drop a field"
+              defaultMessage="Add or drag-and-drop a field"
             />
           </EuiButtonEmpty>
         </div>

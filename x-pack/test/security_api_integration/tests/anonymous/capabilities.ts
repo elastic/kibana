@@ -19,7 +19,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   async function getAnonymousCapabilities(spaceId?: string) {
     const apiResponse = await supertest
-      .get(`${spaceId ? `/s/${spaceId}` : ''}/internal/security_oss/anonymous_access/capabilities`)
+      .get(`${spaceId ? `/s/${spaceId}` : ''}/internal/security/anonymous_access/capabilities`)
       .expect(200);
 
     return Object.fromEntries(

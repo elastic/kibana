@@ -7,11 +7,12 @@
  */
 
 import { Position } from '@elastic/charts';
-import Color from 'color';
+import chroma from 'chroma-js';
 
 import { FtrService } from '../ftr_provider_context';
 
 const pieChartSelector = 'visTypePieChart';
+const heatmapChartSelector = 'heatmapChart';
 
 export class VisualizeChartPageObject extends FtrService {
   private readonly testSubjects = this.ctx.getService('testSubjects');
@@ -23,6 +24,7 @@ export class VisualizeChartPageObject extends FtrService {
   private readonly elasticChart = this.ctx.getService('elasticChart');
   private readonly dataGrid = this.ctx.getService('dataGrid');
   private readonly common = this.ctx.getPageObject('common');
+  private readonly header = this.ctx.getPageObject('header');
 
   private readonly defaultFindTimeout = this.config.get('timeouts.find');
 
@@ -33,11 +35,10 @@ export class VisualizeChartPageObject extends FtrService {
   /**
    * Is new charts library advanced setting enabled
    */
-  public async isNewChartsLibraryEnabled(): Promise<boolean> {
-    const legacyChartsLibrary =
-      Boolean(
-        await this.kibanaServer.uiSettings.get('visualization:visualize:legacyPieChartsLibrary')
-      ) ?? true;
+  public async isNewChartsLibraryEnabled(
+    setting = 'visualization:visualize:legacyPieChartsLibrary'
+  ): Promise<boolean> {
+    const legacyChartsLibrary = Boolean(await this.kibanaServer.uiSettings.get(setting)) ?? true;
     const enabled = !legacyChartsLibrary;
     this.log.debug(`-- isNewChartsLibraryEnabled = ${enabled}`);
 
@@ -180,17 +181,17 @@ export class VisualizeChartPageObject extends FtrService {
     return items.some(({ color: c }) => c === color);
   }
 
-  public async doesSelectedLegendColorExistForPie(color: string) {
+  public async doesSelectedLegendColorExistForPie(matchingColor: string) {
     if (await this.isNewLibraryChart(pieChartSelector)) {
+      const hexMatchingColor = chroma(matchingColor).hex().toUpperCase();
       const slices =
         (await this.getEsChartDebugState(pieChartSelector))?.partition?.[0]?.partitions ?? [];
-      return slices.some(({ color: c }) => {
-        const rgbColor = new Color(color).rgb().toString();
-        return c === rgbColor;
+      return slices.some(({ color }) => {
+        return hexMatchingColor === chroma(color).hex().toUpperCase();
       });
     }
 
-    return await this.testSubjects.exists(`legendSelectedColor-${color}`);
+    return await this.testSubjects.exists(`legendSelectedColor-${matchingColor}`);
   }
 
   public async expectError() {
@@ -218,6 +219,7 @@ export class VisualizeChartPageObject extends FtrService {
   }
 
   public async waitForVisualizationRenderingStabilized() {
+    await this.header.waitUntilLoadingHasFinished();
     // assuming rendering is done when data-rendering-count is constant within 1000 ms
     await this.retry.waitFor('rendering count to stabilize', async () => {
       const firstCount = await this.getVisualizationRenderingCount();
@@ -243,11 +245,18 @@ export class VisualizeChartPageObject extends FtrService {
 
   public async getLegendEntries() {
     const isVisTypePieChart = await this.isNewLibraryChart(pieChartSelector);
+    const isVisTypeHeatmapChart = await this.isNewLibraryChart(heatmapChartSelector);
 
     if (isVisTypePieChart) {
       const slices =
         (await this.getEsChartDebugState(pieChartSelector))?.partition?.[0]?.partitions ?? [];
       return slices.map(({ name }) => name);
+    }
+
+    if (isVisTypeHeatmapChart) {
+      const legendItems =
+        (await this.getEsChartDebugState(heatmapChartSelector))?.legend!.items ?? [];
+      return legendItems.map(({ name }) => name);
     }
 
     const legendEntries = await this.find.allByCssSelector(

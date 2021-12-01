@@ -72,12 +72,6 @@ export function buildDefaultSettings({
           limit: '10000',
         },
       },
-      // This is the default from Beats? So far seems to be a good value
-      refresh_interval: '5s',
-      // Default in the stack now, still good to have it in
-      number_of_shards: '1',
-      // We are setting 30 because it can be devided by several numbers. Useful when shrinking.
-      number_of_routing_shards: '30',
 
       // All the default fields which should be queried have to be added here.
       // So far we add all keyword and text fields here if there are any, otherwise

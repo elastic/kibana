@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
-export { tabifyDocs } from './tabify_docs';
+export { tabifyDocs, flattenHit } from './tabify_docs';
 export { tabifyAggResponse } from './tabify';
 export { tabifyGetColumns } from './get_columns';
+export { checkColumnForPrecisionError } from './utils';

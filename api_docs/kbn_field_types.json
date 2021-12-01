@@ -1,0 +1,342 @@
+{
+  "id": "@kbn/field-types",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [
+      {
+        "parentPluginId": "@kbn/field-types",
+        "id": "def-server.KbnFieldType",
+        "type": "Class",
+        "tags": [],
+        "label": "KbnFieldType",
+        "description": [],
+        "path": "packages/kbn-field-types/src/kbn_field_type.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/field-types",
+            "id": "def-server.KbnFieldType.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "packages/kbn-field-types/src/kbn_field_type.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/field-types",
+            "id": "def-server.KbnFieldType.sortable",
+            "type": "boolean",
+            "tags": [],
+            "label": "sortable",
+            "description": [],
+            "path": "packages/kbn-field-types/src/kbn_field_type.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/field-types",
+            "id": "def-server.KbnFieldType.filterable",
+            "type": "boolean",
+            "tags": [],
+            "label": "filterable",
+            "description": [],
+            "path": "packages/kbn-field-types/src/kbn_field_type.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/field-types",
+            "id": "def-server.KbnFieldType.esTypes",
+            "type": "Object",
+            "tags": [],
+            "label": "esTypes",
+            "description": [],
+            "signature": [
+              "readonly ",
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "server",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-server.ES_FIELD_TYPES",
+                "text": "ES_FIELD_TYPES"
+              },
+              "[]"
+            ],
+            "path": "packages/kbn-field-types/src/kbn_field_type.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/field-types",
+            "id": "def-server.KbnFieldType.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/kbn-field-types/src/kbn_field_type.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/field-types",
+                "id": "def-server.KbnFieldType.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "Partial<",
+                  {
+                    "pluginId": "@kbn/field-types",
+                    "scope": "server",
+                    "docId": "kibKbnFieldTypesPluginApi",
+                    "section": "def-server.KbnFieldTypeOptions",
+                    "text": "KbnFieldTypeOptions"
+                  },
+                  ">"
+                ],
+                "path": "packages/kbn-field-types/src/kbn_field_type.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/field-types",
+        "id": "def-server.castEsToKbnFieldTypeName",
+        "type": "Function",
+        "tags": [
+          "return"
+        ],
+        "label": "castEsToKbnFieldTypeName",
+        "description": [
+          "\n Get the KbnFieldType name for an esType string\n"
+        ],
+        "signature": [
+          "(esType: string) => ",
+          {
+            "pluginId": "@kbn/field-types",
+            "scope": "server",
+            "docId": "kibKbnFieldTypesPluginApi",
+            "section": "def-server.KBN_FIELD_TYPES",
+            "text": "KBN_FIELD_TYPES"
+          }
+        ],
+        "path": "packages/kbn-field-types/src/kbn_field_types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/field-types",
+            "id": "def-server.castEsToKbnFieldTypeName.$1",
+            "type": "string",
+            "tags": [],
+            "label": "esType",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/kbn-field-types/src/kbn_field_types.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/field-types",
+        "id": "def-server.getFilterableKbnTypeNames",
+        "type": "Function",
+        "tags": [
+          "return"
+        ],
+        "label": "getFilterableKbnTypeNames",
+        "description": [
+          "\n Get filterable KbnFieldTypes\n"
+        ],
+        "signature": [
+          "() => string[]"
+        ],
+        "path": "packages/kbn-field-types/src/kbn_field_types.ts",
+        "deprecated": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/field-types",
+        "id": "def-server.getKbnFieldType",
+        "type": "Function",
+        "tags": [
+          "return"
+        ],
+        "label": "getKbnFieldType",
+        "description": [
+          "\n Get a type object by name\n"
+        ],
+        "signature": [
+          "(typeName: string) => ",
+          {
+            "pluginId": "@kbn/field-types",
+            "scope": "server",
+            "docId": "kibKbnFieldTypesPluginApi",
+            "section": "def-server.KbnFieldType",
+            "text": "KbnFieldType"
+          }
+        ],
+        "path": "packages/kbn-field-types/src/kbn_field_types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/field-types",
+            "id": "def-server.getKbnFieldType.$1",
+            "type": "string",
+            "tags": [],
+            "label": "typeName",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/kbn-field-types/src/kbn_field_types.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/field-types",
+        "id": "def-server.getKbnTypeNames",
+        "type": "Function",
+        "tags": [
+          "return"
+        ],
+        "label": "getKbnTypeNames",
+        "description": [
+          "\n Get the esTypes known by all kbnFieldTypes\n"
+        ],
+        "signature": [
+          "() => string[]"
+        ],
+        "path": "packages/kbn-field-types/src/kbn_field_types.ts",
+        "deprecated": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/field-types",
+        "id": "def-server.KbnFieldTypeOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "KbnFieldTypeOptions",
+        "description": [],
+        "path": "packages/kbn-field-types/src/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/field-types",
+            "id": "def-server.KbnFieldTypeOptions.sortable",
+            "type": "boolean",
+            "tags": [],
+            "label": "sortable",
+            "description": [],
+            "path": "packages/kbn-field-types/src/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/field-types",
+            "id": "def-server.KbnFieldTypeOptions.filterable",
+            "type": "boolean",
+            "tags": [],
+            "label": "filterable",
+            "description": [],
+            "path": "packages/kbn-field-types/src/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/field-types",
+            "id": "def-server.KbnFieldTypeOptions.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "packages/kbn-field-types/src/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/field-types",
+            "id": "def-server.KbnFieldTypeOptions.esTypes",
+            "type": "Array",
+            "tags": [],
+            "label": "esTypes",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "server",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-server.ES_FIELD_TYPES",
+                "text": "ES_FIELD_TYPES"
+              },
+              "[]"
+            ],
+            "path": "packages/kbn-field-types/src/types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [
+      {
+        "parentPluginId": "@kbn/field-types",
+        "id": "def-server.ES_FIELD_TYPES",
+        "type": "Enum",
+        "tags": [],
+        "label": "ES_FIELD_TYPES",
+        "description": [],
+        "path": "packages/kbn-field-types/src/types.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/field-types",
+        "id": "def-server.KBN_FIELD_TYPES",
+        "type": "Enum",
+        "tags": [],
+        "label": "KBN_FIELD_TYPES",
+        "description": [],
+        "path": "packages/kbn-field-types/src/types.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      }
+    ],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

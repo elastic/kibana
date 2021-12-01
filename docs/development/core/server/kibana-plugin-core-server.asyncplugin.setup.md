@@ -14,10 +14,10 @@ setup(core: CoreSetup, plugins: TPluginsSetup): TSetup | Promise<TSetup>;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  core | <code>CoreSetup</code> |  |
-|  plugins | <code>TPluginsSetup</code> |  |
+|  core | CoreSetup |  |
+|  plugins | TPluginsSetup |  |
 
 <b>Returns:</b>
 
-`TSetup | Promise<TSetup>`
+TSetup \| Promise&lt;TSetup&gt;
 

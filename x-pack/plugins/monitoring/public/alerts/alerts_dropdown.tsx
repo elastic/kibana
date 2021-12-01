@@ -13,14 +13,13 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { Legacy } from '../legacy_shims';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
 import { MonitoringStartPluginDependencies } from '../types';
+import { useAlertsModal } from '../application/hooks/use_alerts_modal';
 
 export const AlertsDropdown: React.FC<{}> = () => {
-  const $injector = Legacy.shims.getAngularInjector();
-  const alertsEnableModalProvider: any = $injector.get('enableAlertsModal');
+  const alertsEnableModalProvider = useAlertsModal();
   const { navigateToApp } =
     useKibana<MonitoringStartPluginDependencies['core']>().services.application;
 

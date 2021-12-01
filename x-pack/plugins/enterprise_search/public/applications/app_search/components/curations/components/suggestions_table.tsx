@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 
-import { EuiBasicTable, EuiBasicTableColumn } from '@elastic/eui';
+import { useActions, useValues } from 'kea';
+
+import { EuiBadge, EuiBasicTable, EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { VIEW_BUTTON_LABEL } from '../../../../shared/constants';
@@ -22,6 +24,10 @@ import { generateEnginePath } from '../../engine';
 import { CurationSuggestion } from '../types';
 import { convertToDate } from '../utils';
 
+import { SuggestionsLogic } from './suggestions_logic';
+
+import './suggestions_table.scss';
+
 const getSuggestionRoute = (query: string) => {
   return generateEnginePath(ENGINE_CURATION_SUGGESTION_PATH, { query });
 };
@@ -33,7 +39,21 @@ const columns: Array<EuiBasicTableColumn<CurationSuggestion>> = [
       'xpack.enterpriseSearch.appSearch.engine.curations.suggestionsTable.column.queryTableHeader',
       { defaultMessage: 'Query' }
     ),
-    render: (query: string) => <EuiLinkTo to={getSuggestionRoute(query)}>{query}</EuiLinkTo>,
+    render: (query: string, curation: CurationSuggestion) => (
+      <EuiLinkTo to={getSuggestionRoute(query)}>
+        {query}
+        {curation.override_manual_curation && (
+          <>
+            <EuiBadge iconType="alert" color="warning" className="suggestionsTableBadge">
+              {i18n.translate(
+                'xpack.enterpriseSearch.appSearch.engine.curations.suggestionsTable.overridesLabel',
+                { defaultMessage: 'Overrides' }
+              )}
+            </EuiBadge>
+          </>
+        )}
+      </EuiLinkTo>
+    ),
   },
   {
     field: 'updated_at',
@@ -48,7 +68,7 @@ const columns: Array<EuiBasicTableColumn<CurationSuggestion>> = [
     field: 'promoted',
     name: i18n.translate(
       'xpack.enterpriseSearch.appSearch.engine.curations.suggestionsTable.column.promotedDocumentsTableHeader',
-      { defaultMessage: 'Promoted documents' }
+      { defaultMessage: 'Promoted results' }
     ),
     render: (promoted: string[]) => <span>{promoted.length}</span>,
   },
@@ -74,35 +94,18 @@ const columns: Array<EuiBasicTableColumn<CurationSuggestion>> = [
 ];
 
 export const SuggestionsTable: React.FC = () => {
-  // TODO wire up this data
-  const items: CurationSuggestion[] = [
-    {
-      query: 'foo',
-      updated_at: '2021-07-08T14:35:50Z',
-      promoted: ['1', '2'],
-    },
-  ];
-  const meta = {
-    page: {
-      current: 1,
-      size: 10,
-      total_results: 100,
-      total_pages: 10,
-    },
-  };
+  const { loadSuggestions, onPaginate } = useActions(SuggestionsLogic);
+  const { meta, suggestions, dataLoading } = useValues(SuggestionsLogic);
+
+  useEffect(() => {
+    loadSuggestions();
+  }, [meta.page.current]);
+
   const totalSuggestions = meta.page.total_results;
-  // TODO
-  // @ts-ignore
-  const onPaginate = (...params) => {
-    // eslint-disable-next-line no-console
-    console.log('paging...');
-    // eslint-disable-next-line no-console
-    console.log(params);
-  };
-  const isLoading = false;
 
   return (
     <DataPanel
+      className="suggestionsTable"
       iconType={LightbulbIcon}
       title={
         <h2>
@@ -126,10 +129,10 @@ export const SuggestionsTable: React.FC = () => {
     >
       <EuiBasicTable
         columns={columns}
-        items={items}
+        items={suggestions}
         responsive
         hasActions
-        loading={isLoading}
+        loading={dataLoading}
         pagination={{
           ...convertMetaToPagination(meta),
           hidePerPageOptions: true,

@@ -15,7 +15,11 @@ import {
   EuiHorizontalRule,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ALERT_RULE_NAME } from '@kbn/rule-data-utils';
+import {
+  ALERT_REASON,
+  ALERT_RULE_NAME,
+  ALERT_RULE_UUID,
+} from '@kbn/rule-data-utils/technical_field_names';
 import { get } from 'lodash';
 import moment from 'moment';
 import React, { ComponentType, useCallback, useMemo } from 'react';
@@ -115,8 +119,7 @@ const EventRenderedViewComponent = ({
         field: 'actions',
         name: ActionTitle,
         truncateText: false,
-        hideForMobile: false,
-        // eslint-disable-next-line react/display-name
+        mobileOptions: { show: true },
         render: (name: unknown, item: unknown) => {
           const alertId = get(item, '_id');
           const rowIndex = events.findIndex((evt) => evt._id === alertId);
@@ -140,7 +143,7 @@ const EventRenderedViewComponent = ({
             </ActionsContainer>
           );
         },
-        width: '120px',
+        width: '152px',
       },
       {
         field: 'ecs.timestamp',
@@ -148,8 +151,7 @@ const EventRenderedViewComponent = ({
           defaultMessage: 'Timestamp',
         }),
         truncateText: false,
-        hideForMobile: false,
-        // eslint-disable-next-line react/display-name
+        mobileOptions: { show: true },
         render: (name: unknown, item: TimelineItem) => {
           const timestamp = get(item, `ecs.timestamp`);
           return <PreferenceFormattedDate value={timestamp} />;
@@ -161,11 +163,10 @@ const EventRenderedViewComponent = ({
           defaultMessage: 'Rule',
         }),
         truncateText: false,
-        hideForMobile: false,
-        // eslint-disable-next-line react/display-name
+        mobileOptions: { show: true },
         render: (name: unknown, item: TimelineItem) => {
-          const ruleName = get(item, `ecs.signal.rule.name`); /* `ecs.${ALERT_RULE_NAME}`*/
-          const ruleId = get(item, `ecs.signal.rule.id`); /* `ecs.${ALERT_RULE_ID}`*/
+          const ruleName = get(item, `ecs.signal.rule.name`) ?? get(item, `ecs.${ALERT_RULE_NAME}`);
+          const ruleId = get(item, `ecs.signal.rule.id`) ?? get(item, `ecs.${ALERT_RULE_UUID}`);
           return <RuleName name={ruleName} id={ruleId} />;
         },
       },
@@ -175,28 +176,29 @@ const EventRenderedViewComponent = ({
           defaultMessage: 'Event Summary',
         }),
         truncateText: false,
-        hideForMobile: false,
-        // eslint-disable-next-line react/display-name
+        mobileOptions: { show: true },
         render: (name: unknown, item: TimelineItem) => {
           const ecsData = get(item, 'ecs');
-          const reason = get(item, `ecs.signal.reason`); /* `ecs.${ALERT_REASON}`*/
+          const reason = get(item, `ecs.signal.reason`) ?? get(item, `ecs.${ALERT_REASON}`);
           const rowRenderersValid = rowRenderers.filter((rowRenderer) =>
             rowRenderer.isInstance(ecsData)
           );
           return (
-            <EuiFlexGroup gutterSize="none" direction="column">
+            <EuiFlexGroup gutterSize="none" direction="column" className="eui-fullWidth">
               {reason && <EuiFlexItem>{reason}</EuiFlexItem>}
               {rowRenderersValid.length > 0 &&
                 rowRenderersValid.map((rowRenderer) => (
                   <>
                     <EuiHorizontalRule size="half" margin="xs" />
-                    <EventRenderedFlexItem>
-                      {rowRenderer.renderRow({
-                        browserFields,
-                        data: ecsData,
-                        isDraggable: false,
-                        timelineId: 'NONE',
-                      })}
+                    <EventRenderedFlexItem className="eui-xScroll">
+                      <div className="eui-displayInlineBlock">
+                        {rowRenderer.renderRow({
+                          browserFields,
+                          data: ecsData,
+                          isDraggable: false,
+                          timelineId: 'NONE',
+                        })}
+                      </div>
                     </EventRenderedFlexItem>
                   </>
                 ))}

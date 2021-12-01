@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import React, { FC, MouseEventHandler, useRef } from 'react';
+import React, { FC, MouseEventHandler, useRef, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import { Sidebar } from '../../components/sidebar';
 import { Toolbar } from '../../components/toolbar';
-// @ts-expect-error Untyped local
 import { Workpad } from '../workpad';
 import { WorkpadHeader } from '../workpad_header';
 import { CANVAS_LAYOUT_STAGE_CONTENT_SELECTOR } from '../../../common/lib/constants';
@@ -17,7 +16,7 @@ import { CommitFn } from '../../../types';
 
 export const WORKPAD_CONTAINER_ID = 'canvasWorkpadContainer';
 
-interface Props {
+export interface Props {
   deselectElement?: MouseEventHandler;
   isWriteable: boolean;
 }
@@ -25,17 +24,17 @@ interface Props {
 export const WorkpadApp: FC<Props> = ({ deselectElement, isWriteable }) => {
   const interactivePageLayout = useRef<CommitFn | null>(null); // future versions may enable editing on multiple pages => use array then
 
-  const registerLayout = (newLayout: CommitFn) => {
+  const registerLayout = useCallback((newLayout: CommitFn) => {
     if (interactivePageLayout.current !== newLayout) {
       interactivePageLayout.current = newLayout;
     }
-  };
+  }, []);
 
-  const unregisterLayout = (oldLayout: CommitFn) => {
+  const unregisterLayout = useCallback((oldLayout: CommitFn) => {
     if (interactivePageLayout.current === oldLayout) {
       interactivePageLayout.current = null;
     }
-  };
+  }, []);
 
   const commit = interactivePageLayout.current || (() => {});
 

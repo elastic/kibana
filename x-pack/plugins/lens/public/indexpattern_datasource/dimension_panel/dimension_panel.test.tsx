@@ -7,7 +7,7 @@
 
 import { ReactWrapper, ShallowWrapper } from 'enzyme';
 import 'jest-canvas-mock';
-import React, { ChangeEvent, MouseEvent } from 'react';
+import React from 'react';
 import { act } from 'react-dom/test-utils';
 import {
   EuiComboBox,
@@ -27,7 +27,12 @@ import { IUiSettingsClient, SavedObjectsClientContract, HttpSetup, CoreSetup } f
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { generateId } from '../../id_generator';
 import { IndexPatternPrivateState } from '../types';
-import { IndexPatternColumn, replaceColumn } from '../operations';
+import {
+  FiltersIndexPatternColumn,
+  GenericIndexPatternColumn,
+  replaceColumn,
+  TermsIndexPatternColumn,
+} from '../operations';
 import { documentField } from '../document_field';
 import { OperationMetadata } from '../../types';
 import { DateHistogramIndexPatternColumn } from '../operations/definitions/date_histogram';
@@ -108,7 +113,7 @@ const expectedIndexPatterns = {
   },
 };
 
-const bytesColumn: IndexPatternColumn = {
+const bytesColumn: GenericIndexPatternColumn = {
   label: 'Max of bytes',
   dataType: 'number',
   isBucketed: false,
@@ -133,7 +138,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
   let setState: jest.Mock;
   let defaultProps: IndexPatternDimensionEditorProps;
 
-  function getStateWithColumns(columns: Record<string, IndexPatternColumn>) {
+  function getStateWithColumns(columns: Record<string, GenericIndexPatternColumn>) {
     return {
       ...state,
       layers: { first: { ...state.layers.first, columns, columnOrder: Object.keys(columns) } },
@@ -171,7 +176,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
                 interval: '1d',
               },
               sourceField: 'timestamp',
-            },
+            } as DateHistogramIndexPatternColumn,
           },
           incompleteColumns: {},
         },
@@ -264,7 +269,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
             // Private
             operationType: 'filters',
             params: { filters: [] },
-          },
+          } as FiltersIndexPatternColumn,
         })}
       />
     );
@@ -427,7 +432,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
             operationType: 'date_histogram',
             sourceField: '@timestamp',
             params: { interval: 'auto' },
-          },
+          } as DateHistogramIndexPatternColumn,
           col1: {
             label: 'Counter rate',
             dataType: 'number',
@@ -464,7 +469,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
             operationType: 'date_histogram',
             sourceField: '@timestamp',
             params: { interval: 'auto' },
-          },
+          } as DateHistogramIndexPatternColumn,
           col1: {
             label: 'Cumulative sum',
             dataType: 'number',
@@ -513,7 +518,10 @@ describe('IndexPatternDimensionEditorPanel', () => {
       comboBox.prop('onChange')!([option]);
     });
 
-    expect(setState.mock.calls[0]).toEqual([expect.any(Function), { isDimensionComplete: true }]);
+    expect(setState.mock.calls[0]).toEqual([
+      expect.any(Function),
+      { isDimensionComplete: true, forceRender: false },
+    ]);
     expect(setState.mock.calls[0][0](defaultProps.state)).toEqual({
       ...initialState,
       layers: {
@@ -545,7 +553,10 @@ describe('IndexPatternDimensionEditorPanel', () => {
       comboBox.prop('onChange')!([option]);
     });
 
-    expect(setState.mock.calls[0]).toEqual([expect.any(Function), { isDimensionComplete: true }]);
+    expect(setState.mock.calls[0]).toEqual([
+      expect.any(Function),
+      { isDimensionComplete: true, forceRender: false },
+    ]);
     expect(setState.mock.calls[0][0](defaultProps.state)).toEqual({
       ...state,
       layers: {
@@ -833,7 +844,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
               // Private
               operationType: 'filters',
               params: { filters: [] },
-            },
+            } as FiltersIndexPatternColumn,
           })}
         />
       );
@@ -1037,7 +1048,10 @@ describe('IndexPatternDimensionEditorPanel', () => {
       });
 
       expect(setState.mock.calls.length).toEqual(2);
-      expect(setState.mock.calls[1]).toEqual([expect.any(Function), { isDimensionComplete: true }]);
+      expect(setState.mock.calls[1]).toEqual([
+        expect.any(Function),
+        { isDimensionComplete: true, forceRender: false },
+      ]);
       expect(setState.mock.calls[1][0](state)).toEqual({
         ...state,
         layers: {
@@ -1057,7 +1071,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
   });
 
   describe('time scaling', () => {
-    function getProps(colOverrides: Partial<IndexPatternColumn>) {
+    function getProps(colOverrides: Partial<GenericIndexPatternColumn>) {
       return {
         ...defaultProps,
         state: getStateWithColumns({
@@ -1071,7 +1085,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
             params: {
               interval: '1d',
             },
-          },
+          } as DateHistogramIndexPatternColumn,
           col2: {
             dataType: 'number',
             isBucketed: false,
@@ -1079,7 +1093,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
             operationType: 'count',
             sourceField: 'Records',
             ...colOverrides,
-          } as IndexPatternColumn,
+          } as GenericIndexPatternColumn,
         }),
         columnId: 'col2',
       };
@@ -1213,15 +1227,14 @@ describe('IndexPatternDimensionEditorPanel', () => {
       const props = getProps({ timeScale: 's', label: 'Count of records per second' });
       wrapper = mount(<IndexPatternDimensionEditorComponent {...props} />);
       wrapper
-        .find('[data-test-subj="indexPattern-advanced-popover"]')
+        .find('button[data-test-subj="indexPattern-advanced-popover"]')
         .hostNodes()
         .simulate('click');
-      wrapper
-        .find('[data-test-subj="indexPattern-time-scaling-unit"]')
-        .find(EuiSelect)
-        .prop('onChange')!({
+
+      wrapper.find('[data-test-subj="indexPattern-time-scaling-unit"] select').simulate('change', {
         target: { value: 'h' },
-      } as unknown as ChangeEvent<HTMLSelectElement>);
+      });
+
       expect(setState.mock.calls[0]).toEqual([expect.any(Function), { isDimensionComplete: true }]);
       expect(setState.mock.calls[0][0](props.state)).toEqual({
         ...props.state,
@@ -1243,12 +1256,9 @@ describe('IndexPatternDimensionEditorPanel', () => {
     it('should not adjust label if it is custom', () => {
       const props = getProps({ timeScale: 's', customLabel: true, label: 'My label' });
       wrapper = mount(<IndexPatternDimensionEditorComponent {...props} />);
-      wrapper
-        .find('[data-test-subj="indexPattern-time-scaling-unit"]')
-        .find(EuiSelect)
-        .prop('onChange')!({
+      wrapper.find('[data-test-subj="indexPattern-time-scaling-unit"] select').simulate('change', {
         target: { value: 'h' },
-      } as unknown as ChangeEvent<HTMLSelectElement>);
+      });
       expect(setState.mock.calls[0]).toEqual([expect.any(Function), { isDimensionComplete: true }]);
       expect(setState.mock.calls[0][0](props.state)).toEqual({
         ...props.state,
@@ -1270,13 +1280,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
     it('should allow to remove time scaling', () => {
       const props = getProps({ timeScale: 's', label: 'Count of records per second' });
       wrapper = mount(<IndexPatternDimensionEditorComponent {...props} />);
-      wrapper
-        .find('[data-test-subj="indexPattern-time-scaling-remove"]')
-        .find(EuiButtonIcon)
-        .prop('onClick')!(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        {} as any
-      );
+      wrapper.find('[data-test-subj="indexPattern-time-scaling-remove"] button').simulate('click');
       expect(setState.mock.calls[0]).toEqual([expect.any(Function), { isDimensionComplete: true }]);
       expect(setState.mock.calls[0][0](props.state)).toEqual({
         ...props.state,
@@ -1297,7 +1301,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
   });
 
   describe('time shift', () => {
-    function getProps(colOverrides: Partial<IndexPatternColumn>) {
+    function getProps(colOverrides: Partial<GenericIndexPatternColumn>) {
       return {
         ...defaultProps,
         state: getStateWithColumns({
@@ -1311,7 +1315,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
             params: {
               interval: '1d',
             },
-          },
+          } as DateHistogramIndexPatternColumn,
           col2: {
             dataType: 'number',
             isBucketed: false,
@@ -1319,7 +1323,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
             operationType: 'count',
             sourceField: 'Records',
             ...colOverrides,
-          } as IndexPatternColumn,
+          } as GenericIndexPatternColumn,
         }),
         columnId: 'col2',
       };
@@ -1335,7 +1339,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
             label: 'Count of records',
             operationType: 'count',
             sourceField: 'Records',
-          } as IndexPatternColumn,
+          } as GenericIndexPatternColumn,
         }),
         columnId: 'col2',
       };
@@ -1391,7 +1395,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
         .find(AdvancedOptions)
         .dive()
         .find('[data-test-subj="indexPattern-time-shift-enable"]')
-        .prop('onClick')!({} as MouseEvent);
+        .simulate('click');
       expect((props.setState as jest.Mock).mock.calls[0][0](props.state)).toEqual({
         ...props.state,
         layers: {
@@ -1465,10 +1469,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
       wrapper
         .find('[data-test-subj="indexPattern-time-shift-remove"]')
         .find(EuiButtonIcon)
-        .prop('onClick')!(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        {} as any
-      );
+        .simulate('click');
       expect((props.setState as jest.Mock).mock.calls[0][0](props.state)).toEqual({
         ...props.state,
         layers: {
@@ -1487,7 +1488,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
   });
 
   describe('filtering', () => {
-    function getProps(colOverrides: Partial<IndexPatternColumn>) {
+    function getProps(colOverrides: Partial<GenericIndexPatternColumn>) {
       return {
         ...defaultProps,
         state: getStateWithColumns({
@@ -1501,7 +1502,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
             params: {
               interval: '1d',
             },
-          },
+          } as DateHistogramIndexPatternColumn,
           col2: {
             dataType: 'number',
             isBucketed: false,
@@ -1509,7 +1510,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
             operationType: 'count',
             sourceField: 'Records',
             ...colOverrides,
-          } as IndexPatternColumn,
+          } as GenericIndexPatternColumn,
         }),
         columnId: 'col2',
       };
@@ -1526,7 +1527,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
               orderBy: { type: 'alphabetical' },
               size: 5,
             },
-          })}
+          } as TermsIndexPatternColumn)}
         />
       );
       expect(
@@ -1657,10 +1658,8 @@ describe('IndexPatternDimensionEditorPanel', () => {
       wrapper
         .find('[data-test-subj="indexPattern-filter-by-remove"]')
         .find(EuiButtonIcon)
-        .prop('onClick')!(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        {} as any
-      );
+        .simulate('click');
+
       expect(setState.mock.calls[0]).toEqual([expect.any(Function), { isDimensionComplete: true }]);
       expect(setState.mock.calls[0][0](props.state)).toEqual({
         ...props.state,
@@ -1936,7 +1935,10 @@ describe('IndexPatternDimensionEditorPanel', () => {
       comboBox.prop('onChange')!([option]);
     });
 
-    expect(setState.mock.calls[0]).toEqual([expect.any(Function), { isDimensionComplete: true }]);
+    expect(setState.mock.calls[0]).toEqual([
+      expect.any(Function),
+      { isDimensionComplete: true, forceRender: false },
+    ]);
     expect(setState.mock.calls[0][0](defaultProps.state)).toEqual({
       ...state,
       layers: {
@@ -1963,11 +1965,11 @@ describe('IndexPatternDimensionEditorPanel', () => {
     wrapper = mount(
       <IndexPatternDimensionEditorComponent {...defaultProps} state={initialState} />
     );
-
     act(() => {
-      wrapper.find('[data-test-subj="lns-indexPatternDimension-min"]').first().prop('onClick')!(
-        {} as MouseEvent
-      );
+      wrapper
+        .find('button[data-test-subj="lns-indexPatternDimension-min"]')
+        .first()
+        .simulate('click');
     });
 
     expect(replaceColumn).toHaveBeenCalledWith(
@@ -2278,7 +2280,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
     ).toBeTruthy();
   });
 
-  it('should now show the static_value tab when not supported', () => {
+  it('should not show the static_value tab when not supported', () => {
     const stateWithFormulaColumn: IndexPatternPrivateState = getStateWithColumns({
       col1: {
         label: 'Formula',
@@ -2351,5 +2353,29 @@ describe('IndexPatternDimensionEditorPanel', () => {
     expect(
       wrapper.find('[data-test-subj="lens-dimensionTabs-static_value"]').first().prop('isSelected')
     ).toBeTruthy();
+  });
+
+  it('should not show any tab when formula is in full screen mode', () => {
+    const stateWithFormulaColumn: IndexPatternPrivateState = getStateWithColumns({
+      col1: {
+        label: 'Formula',
+        dataType: 'number',
+        isBucketed: false,
+        operationType: 'formula',
+        references: ['ref1'],
+        params: {},
+      },
+    });
+
+    wrapper = mount(
+      <IndexPatternDimensionEditorComponent
+        {...defaultProps}
+        state={stateWithFormulaColumn}
+        supportStaticValue
+        isFullscreen
+      />
+    );
+
+    expect(wrapper.find('[data-test-subj="lens-dimensionTabs"]').exists()).toBeFalsy();
   });
 });

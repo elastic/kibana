@@ -53,11 +53,10 @@ interface VisPickerProps {
 
 export const VisPicker = ({ onChange, currentVisType }: VisPickerProps) => {
   return (
-    <EuiTabs>
+    <EuiTabs size="l">
       {tabs.map(({ label, type }) => (
         <EuiTab
           key={type}
-          className="tvbVisPickerItem"
           isSelected={type === currentVisType}
           onClick={() => onChange({ type })}
           data-test-subj={`${type}TsvbTypeBtn`}

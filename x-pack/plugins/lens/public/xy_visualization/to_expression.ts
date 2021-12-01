@@ -13,6 +13,8 @@ import { OperationMetadata, DatasourcePublicAPI } from '../types';
 import { getColumnToLabelMap } from './state_helpers';
 import type { ValidLayer, XYLayerConfig } from '../../common/expressions';
 import { layerTypes } from '../../common';
+import { hasIcon } from './xy_config_panel/reference_line_panel';
+import { defaultReferenceLineColor } from './color_assignment';
 
 export const getSortedAccessors = (datasource: DatasourcePublicAPI, layer: XYLayerConfig) => {
   const originalOrder = datasource
@@ -54,7 +56,21 @@ export function toPreviewExpression(
   return toExpression(
     {
       ...state,
-      layers: state.layers.map((layer) => ({ ...layer, hide: true })),
+      layers: state.layers.map((layer) =>
+        layer.layerType === layerTypes.DATA
+          ? { ...layer, hide: true }
+          : // cap the reference line to 1px
+            {
+              ...layer,
+              hide: true,
+              yConfig: layer.yConfig?.map(({ lineWidth, ...config }) => ({
+                ...config,
+                lineWidth: 1,
+                icon: undefined,
+                textVisibility: false,
+              })),
+            }
+      ),
       // hide legend for preview
       legend: {
         ...state.legend,
@@ -321,11 +337,21 @@ export const buildExpression = (
                               arguments: {
                                 forAccessor: [yConfig.forAccessor],
                                 axisMode: yConfig.axisMode ? [yConfig.axisMode] : [],
-                                color: yConfig.color ? [yConfig.color] : [],
-                                lineStyle: yConfig.lineStyle ? [yConfig.lineStyle] : [],
-                                lineWidth: yConfig.lineWidth ? [yConfig.lineWidth] : [],
+                                color:
+                                  layer.layerType === layerTypes.REFERENCELINE
+                                    ? [yConfig.color || defaultReferenceLineColor]
+                                    : yConfig.color
+                                    ? [yConfig.color]
+                                    : [],
+                                lineStyle: [yConfig.lineStyle || 'solid'],
+                                lineWidth: [yConfig.lineWidth || 1],
                                 fill: [yConfig.fill || 'none'],
-                                icon: yConfig.icon ? [yConfig.icon] : [],
+                                icon: hasIcon(yConfig.icon) ? [yConfig.icon] : [],
+                                iconPosition:
+                                  hasIcon(yConfig.icon) || yConfig.textVisibility
+                                    ? [yConfig.iconPosition || 'auto']
+                                    : ['auto'],
+                                textVisibility: [yConfig.textVisibility || false],
                               },
                             },
                           ],

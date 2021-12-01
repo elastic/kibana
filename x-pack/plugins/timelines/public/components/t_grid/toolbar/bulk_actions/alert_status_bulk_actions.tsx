@@ -23,7 +23,7 @@ interface OwnProps {
   id: string;
   totalItems: number;
   filterStatus?: AlertStatus;
-  query: string;
+  query?: string;
   indexName: string;
   onActionSuccess?: OnUpdateAlertStatusSuccess;
   onActionFailure?: OnUpdateAlertStatusError;
@@ -126,7 +126,6 @@ export const AlertStatusBulkActionsComponent = React.memo<StatefulAlertStatusBul
     return (
       <BulkActions
         data-test-subj="bulk-actions"
-        timelineId={id}
         selectedCount={Object.keys(selectedEventIds).length}
         totalItems={totalItems}
         showClearSelection={showClearSelection}

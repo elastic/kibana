@@ -60,10 +60,10 @@ import { addLayer, addLayerWithoutDataSync } from './layer_actions';
 import { MapSettings } from '../reducers/map';
 import { DrawState, MapCenterAndZoom, MapExtent, Timeslice } from '../../common/descriptor_types';
 import { INITIAL_LOCATION } from '../../common/constants';
-import { cleanTooltipStateForLayer } from './tooltip_actions';
-import { VectorLayer } from '../classes/layers/vector_layer';
+import { updateTooltipStateForLayer } from './tooltip_actions';
+import { isVectorLayer, IVectorLayer } from '../classes/layers/vector_layer';
 import { SET_DRAW_MODE } from './ui_actions';
-import { expandToTileBoundaries } from '../../common/geo_tile_utils';
+import { expandToTileBoundaries } from '../classes/util/geo_tile_utils';
 import { getToasts } from '../kibana_services';
 
 export function setMapInitError(errorMessage: string) {
@@ -92,10 +92,16 @@ export function updateMapSetting(
   settingKey: string,
   settingValue: string | boolean | number | object
 ) {
-  return {
-    type: UPDATE_MAP_SETTING,
-    settingKey,
-    settingValue,
+  return (dispatch: ThunkDispatch<MapStoreState, void, AnyAction>) => {
+    dispatch({
+      type: UPDATE_MAP_SETTING,
+      settingKey,
+      settingValue,
+    });
+
+    if (settingKey === 'autoFitToDataBounds' && settingValue === true) {
+      dispatch(autoFitToBounds());
+    }
   };
 }
 
@@ -171,7 +177,7 @@ export function mapExtentChanged(mapExtentState: MapExtentState) {
     if (prevZoom !== nextZoom) {
       getLayerList(getState()).map((layer) => {
         if (!layer.showAtZoomLevel(nextZoom)) {
-          dispatch(cleanTooltipStateForLayer(layer.getId()));
+          dispatch(updateTooltipStateForLayer(layer));
         }
       });
     }
@@ -357,12 +363,12 @@ export function addNewFeatureToIndex(geometry: Geometry | Position[]) {
       return;
     }
     const layer = getLayerById(layerId, getState());
-    if (!layer || !(layer instanceof VectorLayer)) {
+    if (!layer || !isVectorLayer(layer)) {
       return;
     }
 
     try {
-      await layer.addFeature(geometry);
+      await (layer as IVectorLayer).addFeature(geometry);
       await dispatch(syncDataForLayerDueToDrawing(layer));
     } catch (e) {
       getToasts().addError(e, {
@@ -385,11 +391,11 @@ export function deleteFeatureFromIndex(featureId: string) {
       return;
     }
     const layer = getLayerById(layerId, getState());
-    if (!layer || !(layer instanceof VectorLayer)) {
+    if (!layer || !isVectorLayer(layer)) {
       return;
     }
     try {
-      await layer.deleteFeature(featureId);
+      await (layer as IVectorLayer).deleteFeature(featureId);
       await dispatch(syncDataForLayerDueToDrawing(layer));
     } catch (e) {
       getToasts().addError(e, {

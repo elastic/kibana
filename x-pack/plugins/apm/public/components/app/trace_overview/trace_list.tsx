@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { EuiIcon, EuiToolTip, RIGHT_ALIGNMENT } from '@elastic/eui';
+import {
+  EuiIcon,
+  EuiToolTip,
+  EuiFlexGroup,
+  EuiFlexItem,
+  RIGHT_ALIGNMENT,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
@@ -19,8 +25,9 @@ import { EmptyMessage } from '../../shared/EmptyMessage';
 import { ImpactBar } from '../../shared/ImpactBar';
 import { TransactionDetailLink } from '../../shared/Links/apm/transaction_detail_link';
 import { ITableColumn, ManagedTable } from '../../shared/managed_table';
+import { AgentIcon } from '../../shared/agent_icon';
 
-type TraceGroup = APIReturnType<'GET /api/apm/traces'>['items'][0];
+type TraceGroup = APIReturnType<'GET /internal/apm/traces'>['items'][0];
 
 const StyledTransactionLink = euiStyled(TransactionDetailLink)`
   font-size: ${({ theme }) => theme.eui.euiFontSizeS};
@@ -65,6 +72,14 @@ const traceListColumns: Array<ITableColumn<TraceGroup>> = [
       }
     ),
     sortable: true,
+    render: (_: string, { serviceName, agentName }) => (
+      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <AgentIcon agentName={agentName} />
+        </EuiFlexItem>
+        <EuiFlexItem>{serviceName}</EuiFlexItem>
+      </EuiFlexGroup>
+    ),
   },
   {
     field: 'averageResponseTime',

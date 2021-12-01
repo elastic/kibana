@@ -6,15 +6,21 @@
  */
 
 import React from 'react';
-import { waitFor, act } from '@testing-library/react';
-import { ReactWrapper } from 'enzyme';
+import { act, render, screen, fireEvent } from '@testing-library/react';
 import { of, BehaviorSubject } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
-import { mountWithIntl } from '@kbn/test/jest';
 import { applicationServiceMock } from '../../../../../src/core/public/mocks';
 import { globalSearchPluginMock } from '../../../global_search/public/mocks';
 import { GlobalSearchBatchedResults, GlobalSearchResult } from '../../../global_search/public';
 import { SearchBar } from './search_bar';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+
+jest.mock(
+  'react-virtualized-auto-sizer',
+  () =>
+    ({ children }: any) =>
+      children({ height: 600, width: 600 })
+);
 
 type Result = { id: string; type: string } | string;
 
@@ -36,9 +42,7 @@ const createResult = (result: Result): GlobalSearchResult => {
 const createBatch = (...results: Result[]): GlobalSearchBatchedResults => ({
   results: results.map(createResult),
 });
-
-const getSelectableProps: any = (component: any) => component.find('EuiSelectable').props();
-const getSearchProps: any = (component: any) => component.find('EuiFieldSearch').props();
+jest.useFakeTimers();
 
 describe('SearchBar', () => {
   let searchService: ReturnType<typeof globalSearchPluginMock.createStartContract>;
@@ -46,31 +50,37 @@ describe('SearchBar', () => {
   const basePathUrl = '/plugins/globalSearchBar/assets/';
   const darkMode = false;
 
-  let component: ReactWrapper<any>;
-
   beforeEach(() => {
     applications = applicationServiceMock.createStartContract();
     searchService = globalSearchPluginMock.createStartContract();
-    jest.useFakeTimers();
   });
-
-  const triggerFocus = () => {
-    component.find('input[data-test-subj="nav-search-input"]').simulate('focus');
-  };
 
   const update = () => {
     act(() => {
       jest.runAllTimers();
     });
-    component.update();
   };
 
-  const simulateTypeChar = async (text: string) => {
-    await waitFor(() => getSearchProps(component).onInput({ currentTarget: { value: text } }));
+  const focusAndUpdate = async () => {
+    await act(async () => {
+      (await screen.findByTestId('nav-search-input')).focus();
+      jest.runAllTimers();
+    });
   };
 
-  const getDisplayedOptionsTitle = () => {
-    return getSelectableProps(component).options.map((option: any) => option.title);
+  const simulateTypeChar = (text: string) => {
+    fireEvent.input(screen.getByTestId('nav-search-input'), { target: { value: text } });
+    act(() => {
+      jest.runAllTimers();
+    });
+  };
+
+  const assertSearchResults = async (list: string[]) => {
+    for (let i = 0; i < list.length; i++) {
+      expect(await screen.findByTitle(list[i])).toBeInTheDocument();
+    }
+
+    expect(await screen.findAllByTestId('nav-search-option')).toHaveLength(list.length);
   };
 
   it('correctly filters and sorts results', async () => {
@@ -83,53 +93,52 @@ describe('SearchBar', () => {
       )
       .mockReturnValueOnce(of(createBatch('Discover', { id: 'My Dashboard', type: 'test' })));
 
-    component = mountWithIntl(
-      <SearchBar
-        globalSearch={searchService}
-        navigateToUrl={applications.navigateToUrl}
-        basePathUrl={basePathUrl}
-        darkMode={darkMode}
-        trackUiMetric={jest.fn()}
-      />
+    render(
+      <IntlProvider locale="en">
+        <SearchBar
+          globalSearch={searchService}
+          navigateToUrl={applications.navigateToUrl}
+          basePathUrl={basePathUrl}
+          darkMode={darkMode}
+          trackUiMetric={jest.fn()}
+        />
+      </IntlProvider>
     );
 
     expect(searchService.find).toHaveBeenCalledTimes(0);
 
-    triggerFocus();
-    update();
+    await focusAndUpdate();
 
     expect(searchService.find).toHaveBeenCalledTimes(1);
     expect(searchService.find).toHaveBeenCalledWith({}, {});
-    expect(getDisplayedOptionsTitle()).toMatchSnapshot();
+    await assertSearchResults(['Canvas • Kibana', 'Discover • Kibana', 'Graph • Kibana']);
 
-    await simulateTypeChar('d');
-    update();
+    simulateTypeChar('d');
 
-    expect(getDisplayedOptionsTitle()).toMatchSnapshot();
+    await assertSearchResults(['Discover • Kibana', 'My Dashboard • Test']);
     expect(searchService.find).toHaveBeenCalledTimes(2);
-    expect(searchService.find).toHaveBeenCalledWith({ term: 'd' }, {});
+    expect(searchService.find).toHaveBeenLastCalledWith({ term: 'd' }, {});
   });
 
-  it('supports keyboard shortcuts', () => {
-    mountWithIntl(
-      <SearchBar
-        globalSearch={searchService}
-        navigateToUrl={applications.navigateToUrl}
-        basePathUrl={basePathUrl}
-        darkMode={darkMode}
-        trackUiMetric={jest.fn()}
-      />,
-      { attachTo: document.body }
+  it('supports keyboard shortcuts', async () => {
+    render(
+      <IntlProvider locale="en">
+        <SearchBar
+          globalSearch={searchService}
+          navigateToUrl={applications.navigateToUrl}
+          basePathUrl={basePathUrl}
+          darkMode={darkMode}
+          trackUiMetric={jest.fn()}
+        />
+      </IntlProvider>
     );
+    act(() => {
+      fireEvent.keyDown(window, { key: '/', ctrlKey: true, metaKey: true });
+    });
 
-    const searchEvent = new KeyboardEvent('keydown', {
-      key: '/',
-      ctrlKey: true,
-      metaKey: true,
-    } as any);
-    window.dispatchEvent(searchEvent);
+    const inputElement = await screen.findByTestId('nav-search-input');
 
-    expect(document.activeElement).toMatchSnapshot();
+    expect(document.activeElement).toEqual(inputElement);
   });
 
   it('only display results from the last search', async () => {
@@ -144,30 +153,29 @@ describe('SearchBar', () => {
 
     searchService.find.mockReturnValueOnce(firstSearch).mockReturnValueOnce(secondSearch);
 
-    component = mountWithIntl(
-      <SearchBar
-        globalSearch={searchService}
-        navigateToUrl={applications.navigateToUrl}
-        basePathUrl={basePathUrl}
-        darkMode={darkMode}
-        trackUiMetric={jest.fn()}
-      />
+    render(
+      <IntlProvider locale="en">
+        <SearchBar
+          globalSearch={searchService}
+          navigateToUrl={applications.navigateToUrl}
+          basePathUrl={basePathUrl}
+          darkMode={darkMode}
+          trackUiMetric={jest.fn()}
+        />
+      </IntlProvider>
     );
 
-    triggerFocus();
-    update();
+    await focusAndUpdate();
 
     expect(searchService.find).toHaveBeenCalledTimes(1);
-
-    await simulateTypeChar('d');
-    update();
-
-    expect(getDisplayedOptionsTitle()).toMatchSnapshot();
+    //
+    simulateTypeChar('d');
+    await assertSearchResults(['Visualize • Kibana', 'Map • Kibana']);
 
     firstSearchTrigger.next(true);
 
     update();
 
-    expect(getDisplayedOptionsTitle()).toMatchSnapshot();
+    await assertSearchResults(['Visualize • Kibana', 'Map • Kibana']);
   });
 });

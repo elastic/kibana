@@ -31,3 +31,14 @@
     opacity: 1; /* 2 */
   }
 }
+
+.ruleDurationWarningIcon {
+  margin-bottom: $euiSizeXS;
+  margin-left: $euiSizeS;
+}
+
+.ruleDisabledQuestionIcon {
+  bottom: $euiSizeXS;
+  margin-left: $euiSizeXS;
+  position: relative;
+}

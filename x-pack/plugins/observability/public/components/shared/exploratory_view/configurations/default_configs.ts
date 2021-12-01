@@ -5,47 +5,32 @@
  * 2.0.
  */
 
-import { AppDataType, ReportViewType } from '../types';
-import { getRumDistributionConfig } from './rum/data_distribution_config';
-import { getSyntheticsDistributionConfig } from './synthetics/data_distribution_config';
-import { getSyntheticsKPIConfig } from './synthetics/kpi_over_time_config';
-import { getKPITrendsLensConfig } from './rum/kpi_over_time_config';
+import { AppDataType, ReportViewType, SeriesConfig } from '../types';
 import { IndexPattern } from '../../../../../../../../src/plugins/data/common';
-import { getCoreWebVitalsConfig } from './rum/core_web_vitals_config';
-import { getMobileKPIConfig } from './mobile/kpi_over_time_config';
-import { getMobileKPIDistributionConfig } from './mobile/distribution_config';
-import { getMobileDeviceDistributionConfig } from './mobile/device_distribution_config';
+import { ReportConfigMap } from '../contexts/exploatory_view_config';
 
 interface Props {
   reportType: ReportViewType;
   indexPattern: IndexPattern;
   dataType: AppDataType;
+  reportConfigMap: ReportConfigMap;
 }
 
-export const getDefaultConfigs = ({ reportType, dataType, indexPattern }: Props) => {
-  switch (dataType) {
-    case 'ux':
-      if (reportType === 'data-distribution') {
-        return getRumDistributionConfig({ indexPattern });
-      }
-      if (reportType === 'core-web-vitals') {
-        return getCoreWebVitalsConfig({ indexPattern });
-      }
-      return getKPITrendsLensConfig({ indexPattern });
-    case 'synthetics':
-      if (reportType === 'data-distribution') {
-        return getSyntheticsDistributionConfig({ indexPattern });
-      }
-      return getSyntheticsKPIConfig({ indexPattern });
-    case 'mobile':
-      if (reportType === 'data-distribution') {
-        return getMobileKPIDistributionConfig({ indexPattern });
-      }
-      if (reportType === 'device-data-distribution') {
-        return getMobileDeviceDistributionConfig({ indexPattern });
-      }
-      return getMobileKPIConfig({ indexPattern });
-    default:
-      return getKPITrendsLensConfig({ indexPattern });
-  }
+export const getDefaultConfigs = ({
+  reportType,
+  dataType,
+  indexPattern,
+  reportConfigMap,
+}: Props): SeriesConfig => {
+  let configResult: SeriesConfig;
+
+  reportConfigMap[dataType].some((fn) => {
+    const config = fn({ indexPattern });
+    if (config.reportType === reportType) {
+      configResult = config;
+    }
+    return config.reportType === reportType;
+  });
+
+  return configResult!;
 };

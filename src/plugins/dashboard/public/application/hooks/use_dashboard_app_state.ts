@@ -22,7 +22,6 @@ import {
   DashboardBuildContext,
   DashboardAppServices,
   DashboardAppState,
-  DashboardRedirect,
   DashboardState,
 } from '../../types';
 import { DashboardAppLocatorParams } from '../../locator';
@@ -38,19 +37,18 @@ import {
   syncDashboardUrlState,
   diffDashboardState,
   areTimeRangesEqual,
+  areRefreshIntervalsEqual,
 } from '../lib';
 
 export interface UseDashboardStateProps {
   history: History;
   savedDashboardId?: string;
-  redirectTo: DashboardRedirect;
   isEmbeddedExternally: boolean;
   kbnUrlStateStorage: IKbnUrlStateStorage;
 }
 
 export const useDashboardAppState = ({
   history,
-  redirectTo,
   savedDashboardId,
   kbnUrlStateStorage,
   isEmbeddedExternally,
@@ -91,6 +89,8 @@ export const useDashboardAppState = ({
     dashboardCapabilities,
     dashboardSessionStorage,
     scopedHistory,
+    spacesService,
+    screenshotModeService,
   } = services;
   const { docTitle } = chrome;
   const { notifications } = core;
@@ -148,6 +148,25 @@ export const useDashboardAppState = ({
       if (canceled || !loadSavedDashboardResult) return;
       const { savedDashboard, savedDashboardState } = loadSavedDashboardResult;
 
+      // If the saved dashboard is an alias match, then we will redirect
+      if (savedDashboard.outcome === 'aliasMatch' && savedDashboard.id && savedDashboard.aliasId) {
+        // We want to keep the "query" params on our redirect.
+        // But, these aren't true query params, they are technically part of the hash
+        // So, to get the new path, we will just replace the current id in the hash
+        // with the alias id
+        const path = scopedHistory().location.hash.replace(
+          savedDashboard.id,
+          savedDashboard.aliasId
+        );
+        if (screenshotModeService?.isScreenshotMode()) {
+          scopedHistory().replace(path);
+        } else {
+          await spacesService?.ui.redirectLegacyUrl(path);
+        }
+        // Return so we don't run any more of the hook and let it rerun after the redirect that just happened
+        return;
+      }
+
       /**
        * Combine initial state from the saved object, session storage, and URL, then dispatch it to Redux.
        */
@@ -162,11 +181,19 @@ export const useDashboardAppState = ({
         savedDashboard,
       });
 
+      // Backwards compatible way of detecting that we are taking a screenshot
+      const legacyPrintLayoutDetected =
+        screenshotModeService?.isScreenshotMode() &&
+        screenshotModeService.getScreenshotLayout() === 'print';
+
       const initialDashboardState = {
         ...savedDashboardState,
         ...dashboardSessionStorageState,
         ...initialDashboardStateFromUrl,
         ...forwardedAppState,
+
+        // if we are in legacy print mode, dashboard needs to be in print viewMode
+        ...(legacyPrintLayoutDetected ? { viewMode: ViewMode.PRINT } : {}),
 
         // if there is an incoming embeddable, dashboard always needs to be in edit mode to receive it.
         ...(incomingEmbeddable ? { viewMode: ViewMode.EDIT } : {}),
@@ -241,13 +268,17 @@ export const useDashboardAppState = ({
 
           const savedTimeChanged =
             lastSaved.timeRestore &&
-            !areTimeRangesEqual(
+            (!areTimeRangesEqual(
               {
                 from: savedDashboard?.timeFrom,
                 to: savedDashboard?.timeTo,
               },
               timefilter.getTime()
-            );
+            ) ||
+              !areRefreshIntervalsEqual(
+                savedDashboard?.refreshInterval,
+                timefilter.getRefreshInterval()
+              ));
 
           /**
            * changes to the dashboard should only be considered 'unsaved changes' when
@@ -335,6 +366,8 @@ export const useDashboardAppState = ({
     search,
     query,
     data,
+    spacesService?.ui,
+    screenshotModeService,
   ]);
 
   /**

@@ -13,7 +13,7 @@ import { StringFormat } from './string';
  * and we're not caring about in these tests.
  */
 function stripSpan(input: string): string {
-  return input.replace(/^\<span ng-non-bindable\>(.*)\<\/span\>$/, '$1');
+  return input.replace(/^\<span\>(.*)\<\/span\>$/, '$1');
 }
 
 describe('String Format', () => {

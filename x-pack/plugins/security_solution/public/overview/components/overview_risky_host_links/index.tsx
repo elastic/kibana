@@ -7,18 +7,25 @@
 
 import React from 'react';
 
-import { GlobalTimeArgs } from '../../../common/containers/use_global_time';
-import { useRiskyHostLinks } from '../../containers/overview_risky_host_links/use_risky_host_links';
 import { RiskyHostsEnabledModule } from './risky_hosts_enabled_module';
 import { RiskyHostsDisabledModule } from './risky_hosts_disabled_module';
-export type RiskyHostLinksProps = Pick<GlobalTimeArgs, 'from' | 'to' | 'deleteQuery' | 'setQuery'>;
+import { useHostsRiskScore } from '../../containers/overview_risky_host_links/use_hosts_risk_score';
+export interface RiskyHostLinksProps {
+  timerange: { to: string; from: string };
+}
 
-const RiskyHostLinksComponent: React.FC<RiskyHostLinksProps> = (props) => {
-  const { listItems, isModuleEnabled } = useRiskyHostLinks(props);
+const RiskyHostLinksComponent: React.FC<RiskyHostLinksProps> = ({ timerange }) => {
+  const hostRiskScore = useHostsRiskScore({ timerange });
 
-  switch (isModuleEnabled) {
+  switch (hostRiskScore?.isModuleEnabled) {
     case true:
-      return <RiskyHostsEnabledModule to={props.to} from={props.from} listItems={listItems} />;
+      return (
+        <RiskyHostsEnabledModule
+          to={timerange.to}
+          from={timerange.from}
+          hostRiskScore={hostRiskScore}
+        />
+      );
     case false:
       return <RiskyHostsDisabledModule />;
     case undefined:

@@ -4,16 +4,17 @@ set -euo pipefail
 
 source .buildkite/scripts/common/util.sh
 
-node .buildkite/scripts/lifecycle/print_agent_links.js
-
-echo '--- Job Environment Setup'
-
-cd '.buildkite'
-yarn install
-cd -
-
 BUILDKITE_TOKEN="$(retry 5 5 vault read -field=buildkite_token_all_jobs secret/kibana-issues/dev/buildkite-ci)"
 export BUILDKITE_TOKEN
+
+echo '--- Install buildkite dependencies'
+cd '.buildkite'
+retry 5 15 yarn install --production --pure-lockfile
+cd -
+
+node .buildkite/scripts/lifecycle/print_agent_links.js || true
+
+echo '--- Job Environment Setup'
 
 # Set up a custom ES Snapshot Manifest if one has been specified for this build
 {
@@ -71,6 +72,12 @@ export GITHUB_TOKEN
 KIBANA_CI_REPORTER_KEY=$(retry 5 5 vault read -field=value secret/kibana-issues/dev/kibanamachine-reporter)
 export KIBANA_CI_REPORTER_KEY
 
+KIBANA_DOCKER_USERNAME="$(retry 5 5 vault read -field=username secret/kibana-issues/dev/container-registry)"
+export KIBANA_DOCKER_USERNAME
+
+KIBANA_DOCKER_PASSWORD="$(retry 5 5 vault read -field=password secret/kibana-issues/dev/container-registry)"
+export KIBANA_DOCKER_PASSWORD
+
 # Setup Failed Test Reporter Elasticsearch credentials
 {
   TEST_FAILURES_ES_CLOUD_ID=$(retry 5 5 vault read -field=cloud_id secret/kibana-issues/dev/failed_tests_reporter_es)
@@ -89,7 +96,6 @@ if [[ "${SKIP_CI_SETUP:-}" != "true" ]]; then
   if [[ -d .buildkite/scripts && "${BUILDKITE_COMMAND:-}" != "buildkite-agent pipeline upload"* ]]; then
     source .buildkite/scripts/common/env.sh
     source .buildkite/scripts/common/setup_node.sh
-    source .buildkite/scripts/common/setup_bazel.sh
   fi
 fi
 

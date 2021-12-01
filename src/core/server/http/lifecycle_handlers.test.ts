@@ -266,7 +266,7 @@ describe('customHeaders pre-response handler', () => {
     });
   });
 
-  it('preserve the kbn-name value from server.name if definied in custom headders ', () => {
+  it('preserve the kbn-name value from server.name if defined in custom headders ', () => {
     const config = createConfig({
       name: 'my-server-name',
       customResponseHeaders: {

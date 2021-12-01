@@ -7,7 +7,9 @@
 
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
-import { EuiFormRow, EuiTextArea, EuiLink, EuiText } from '@elastic/eui';
+import { EsqlLang } from '@kbn/monaco';
+import { EuiFormRow, EuiLink, EuiText } from '@elastic/eui';
+import { CodeEditorField } from '../../../../../../src/plugins/kibana_react/public';
 import { getSimpleArg, setSimpleArg } from '../../../public/lib/arg_helpers';
 import { templateFromReactComponent } from '../../../public/lib/template_from_react_component';
 import { DataSourceStrings, SQL_URL } from '../../../i18n';
@@ -50,10 +52,14 @@ class EssqlDatasource extends PureComponent {
       });
   };
 
-  onChange = (e) => {
-    const { value } = e.target;
+  onChange = (value) => {
     this.props.setInvalid(!value.trim());
     this.setArg(this.getArgName(), value);
+  };
+
+  editorDidMount = (editor) => {
+    const model = editor.getModel();
+    model?.updateOptions({ tabSize: 2 });
   };
 
   render() {
@@ -71,13 +77,24 @@ class EssqlDatasource extends PureComponent {
           </EuiText>
         }
       >
-        <EuiTextArea
-          placeholder={this.defaultQuery}
-          isInvalid={isInvalid}
-          className="canvasTextArea__code"
+        <CodeEditorField
+          languageId={EsqlLang.ID}
           value={this.getQuery()}
           onChange={this.onChange}
-          rows={15}
+          className="canvasTextArea__code"
+          options={{
+            fontSize: 14,
+            scrollBeyondLastLine: false,
+            quickSuggestions: true,
+            minimap: { enabled: false },
+            wordWrap: 'on',
+            wrappingIndent: 'indent',
+            lineNumbers: 'off',
+            glyphMargin: false,
+            folding: false,
+          }}
+          height="350px"
+          editorDidMount={this.editorDidMount}
         />
       </EuiFormRow>
     );

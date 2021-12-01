@@ -8,10 +8,10 @@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { CreateSourceEditor } from './create_source_editor';
-import { LayerWizard, RenderWizardArguments } from '../../../layers/layer_wizard_registry';
-import { VectorLayer } from '../../../layers/vector_layer';
+import { LayerWizard, RenderWizardArguments } from '../../../layers';
+import { GeoJsonVectorLayer } from '../../../layers/vector_layer';
 import { LAYER_WIZARD_CATEGORY } from '../../../../../common/constants';
-import { TopHitsLayerIcon } from '../../../layers/icons/top_hits_layer_icon';
+import { TopHitsLayerIcon } from '../../../layers/wizards/icons/top_hits_layer_icon';
 import { ESSearchSourceDescriptor } from '../../../../../common/descriptor_types';
 import { ESSearchSource } from '../es_search_source';
 
@@ -30,7 +30,7 @@ export const esTopHitsLayerWizardConfig: LayerWizard = {
       }
 
       const sourceDescriptor = ESSearchSource.createDescriptor(sourceConfig);
-      const layerDescriptor = VectorLayer.createDescriptor({ sourceDescriptor }, mapColors);
+      const layerDescriptor = GeoJsonVectorLayer.createDescriptor({ sourceDescriptor }, mapColors);
       previewLayers([layerDescriptor]);
     };
     return <CreateSourceEditor onSourceConfigChange={onSourceConfigChange} />;

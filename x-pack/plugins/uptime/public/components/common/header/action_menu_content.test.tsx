@@ -35,11 +35,11 @@ describe('ActionMenuContent', () => {
     const { getByLabelText, getByText } = render(<ActionMenuContent />);
 
     const analyzeAnchor = getByLabelText(
-      'Navigate to the "Analyze Data" view to visualize Synthetics/User data'
+      'Navigate to the "Explore Data" view to visualize Synthetics/User data'
     );
 
     expect(analyzeAnchor.getAttribute('href')).toContain('/app/observability/exploratory-view');
-    expect(getByText('Analyze data'));
+    expect(getByText('Explore data'));
   });
 
   it('renders Add Data link', () => {

@@ -20,7 +20,7 @@ import {
   EuiModalHeaderTitle,
   EuiModalFooter,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { i18n } from '@kbn/i18n';
 import { CustomUrlEditor, CustomUrlList } from '../../../../components/custom_url_editor';
@@ -33,15 +33,14 @@ import {
   CustomUrlSettings,
 } from '../../../../components/custom_url_editor/utils';
 import { withKibana } from '../../../../../../../../../../src/plugins/kibana_react/public';
-import { loadSavedDashboards, loadIndexPatterns } from '../edit_utils';
+import { loadSavedDashboards, loadDataViewListItems } from '../edit_utils';
 import { openCustomUrlWindow } from '../../../../../util/custom_url_utils';
 import { Job } from '../../../../../../../common/types/anomaly_detection_jobs';
 import { UrlConfig } from '../../../../../../../common/types/custom_urls';
-import { IIndexPattern } from '../../../../../../../../../../src/plugins/data/common';
+import { DataViewListItem } from '../../../../../../../../../../src/plugins/data_views/common';
 import { MlKibanaReactContextValue } from '../../../../../contexts/kibana';
 
 const MAX_NUMBER_DASHBOARDS = 1000;
-const MAX_NUMBER_INDEX_PATTERNS = 1000;
 
 interface CustomUrlsProps {
   job: Job;
@@ -54,7 +53,7 @@ interface CustomUrlsProps {
 interface CustomUrlsState {
   customUrls: UrlConfig[];
   dashboards: any[];
-  indexPatterns: IIndexPattern[];
+  dataViewListItems: DataViewListItem[];
   queryEntityFieldNames: string[];
   editorOpen: boolean;
   editorSettings?: CustomUrlSettings;
@@ -67,7 +66,7 @@ class CustomUrlsUI extends Component<CustomUrlsProps, CustomUrlsState> {
     this.state = {
       customUrls: [],
       dashboards: [],
-      indexPatterns: [],
+      dataViewListItems: [],
       queryEntityFieldNames: [],
       editorOpen: false,
     };
@@ -100,18 +99,18 @@ class CustomUrlsUI extends Component<CustomUrlsProps, CustomUrlsState> {
         );
       });
 
-    loadIndexPatterns(MAX_NUMBER_INDEX_PATTERNS)
-      .then((indexPatterns) => {
-        this.setState({ indexPatterns });
+    loadDataViewListItems()
+      .then((dataViewListItems) => {
+        this.setState({ dataViewListItems });
       })
       .catch((resp) => {
         // eslint-disable-next-line no-console
         console.error('Error loading list of dashboards:', resp);
         toasts.addDanger(
           i18n.translate(
-            'xpack.ml.jobsList.editJobFlyout.customUrls.loadIndexPatternsErrorNotificationMessage',
+            'xpack.ml.jobsList.editJobFlyout.customUrls.loadDataViewsErrorNotificationMessage',
             {
-              defaultMessage: 'An error occurred loading the list of saved index patterns',
+              defaultMessage: 'An error occurred loading the list of saved data views',
             }
           )
         );
@@ -121,11 +120,11 @@ class CustomUrlsUI extends Component<CustomUrlsProps, CustomUrlsState> {
   editNewCustomUrl = () => {
     // Opens the editor for configuring a new custom URL.
     this.setState((prevState) => {
-      const { dashboards, indexPatterns } = prevState;
+      const { dashboards, dataViewListItems } = prevState;
 
       return {
         editorOpen: true,
-        editorSettings: getNewCustomUrlDefaults(this.props.job, dashboards, indexPatterns),
+        editorSettings: getNewCustomUrlDefaults(this.props.job, dashboards, dataViewListItems),
       };
     });
   };
@@ -209,7 +208,7 @@ class CustomUrlsUI extends Component<CustomUrlsProps, CustomUrlsState> {
       editorOpen,
       editorSettings,
       dashboards,
-      indexPatterns,
+      dataViewListItems,
       queryEntityFieldNames,
     } = this.state;
 
@@ -220,7 +219,7 @@ class CustomUrlsUI extends Component<CustomUrlsProps, CustomUrlsState> {
         setEditCustomUrl={this.setEditCustomUrl}
         savedCustomUrls={customUrls}
         dashboards={dashboards}
-        indexPatterns={indexPatterns}
+        dataViewListItems={dataViewListItems}
         queryEntityFieldNames={queryEntityFieldNames}
       />
     );

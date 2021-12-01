@@ -9,7 +9,7 @@ import React from 'react';
 import { Provider } from 'react-redux';
 import { cloneDeep } from 'lodash/fp';
 import { render, screen } from '@testing-library/react';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import { ThemeProvider } from 'styled-components';
 import { createStore, State } from '../../../common/store';
 import {
@@ -52,7 +52,19 @@ describe('RiskyHostsEnabledModule', () => {
         <I18nProvider>
           <ThemeProvider theme={mockTheme}>
             <RiskyHostsEnabledModule
-              listItems={[{ title: 'a', count: 1, path: '' }]}
+              hostRiskScore={{
+                loading: false,
+                isModuleEnabled: true,
+                result: [
+                  {
+                    host: {
+                      name: 'a',
+                    },
+                    risk_score: 1,
+                    risk: '',
+                  },
+                ],
+              }}
               to={'now'}
               from={'now-30d'}
             />

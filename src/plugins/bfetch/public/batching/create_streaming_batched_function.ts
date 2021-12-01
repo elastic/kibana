@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { Observable, of } from 'rxjs';
 import { AbortError, abortSignalToPromise, defer } from '../../../kibana_utils/public';
 import {
   ItemBufferParams,
@@ -51,7 +50,7 @@ export interface StreamingBatchedFunctionParams<Payload, Result> {
   /**
    * Disabled zlib compression of response chunks.
    */
-  compressionDisabled$?: Observable<boolean>;
+  getIsCompressionDisabled?: () => boolean;
 }
 
 /**
@@ -69,7 +68,7 @@ export const createStreamingBatchedFunction = <Payload, Result extends object>(
     fetchStreaming: fetchStreamingInjected = fetchStreaming,
     flushOnMaxItems = 25,
     maxItemAge = 10,
-    compressionDisabled$ = of(false),
+    getIsCompressionDisabled = () => false,
   } = params;
   const [fn] = createBatchedFunction({
     onCall: (payload: Payload, signal?: AbortSignal) => {
@@ -125,7 +124,7 @@ export const createStreamingBatchedFunction = <Payload, Result extends object>(
           body: JSON.stringify({ batch }),
           method: 'POST',
           signal: abortController.signal,
-          compressionDisabled$,
+          getIsCompressionDisabled,
         });
 
         const handleStreamError = (error: any) => {

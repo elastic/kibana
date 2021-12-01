@@ -157,6 +157,7 @@ export class VisualBuilderPageObject extends FtrService {
   }
 
   public async getMarkdownText(): Promise<string> {
+    await this.visChart.waitForVisualizationRenderingStabilized();
     const el = await this.find.byCssSelector('.tvbVis');
     const text = await el.getVisibleText();
     return text;
@@ -444,6 +445,7 @@ export class VisualBuilderPageObject extends FtrService {
    * @memberof VisualBuilderPage
    */
   public async getViewTable(): Promise<string> {
+    await this.visChart.waitForVisualizationRenderingStabilized();
     const tableView = await this.testSubjects.find('tableView', 20000);
     return await tableView.getVisibleText();
   }
@@ -504,12 +506,19 @@ export class VisualBuilderPageObject extends FtrService {
   }
 
   public async toggleIndexPatternSelectionModePopover(shouldOpen: boolean) {
-    const isPopoverOpened = await this.testSubjects.exists(
-      'switchIndexPatternSelectionModePopoverContent'
-    );
-    if ((shouldOpen && !isPopoverOpened) || (!shouldOpen && isPopoverOpened)) {
-      await this.testSubjects.click('switchIndexPatternSelectionModePopoverButton');
-    }
+    await this.retry.try(async () => {
+      const isPopoverOpened = await this.testSubjects.exists(
+        'switchIndexPatternSelectionModePopoverContent'
+      );
+      if ((shouldOpen && !isPopoverOpened) || (!shouldOpen && isPopoverOpened)) {
+        await this.testSubjects.click('switchIndexPatternSelectionModePopoverButton');
+      }
+      if (shouldOpen) {
+        await this.testSubjects.existOrFail('switchIndexPatternSelectionModePopoverContent');
+      } else {
+        await this.testSubjects.missingOrFail('switchIndexPatternSelectionModePopoverContent');
+      }
+    });
   }
 
   public async switchIndexPatternSelectionMode(useKibanaIndices: boolean) {
@@ -655,7 +664,10 @@ export class VisualBuilderPageObject extends FtrService {
   public async setBackgroundColor(colorHex: string): Promise<void> {
     await this.clickColorPicker();
     await this.checkColorPickerPopUpIsPresent();
-    await this.find.setValue('.euiColorPicker input', colorHex);
+    await this.testSubjects.setValue('euiColorPickerInput_top', colorHex, {
+      clearWithKeyboard: true,
+      typeCharByChar: true,
+    });
     await this.clickColorPicker();
     await this.visChart.waitForVisualizationRenderingStabilized();
   }
@@ -668,7 +680,10 @@ export class VisualBuilderPageObject extends FtrService {
   public async setColorPickerValue(colorHex: string, nth: number = 0): Promise<void> {
     await this.clickColorPicker(nth);
     await this.checkColorPickerPopUpIsPresent();
-    await this.find.setValue('.euiColorPicker input', colorHex);
+    await this.testSubjects.setValue('euiColorPickerInput_top', colorHex, {
+      clearWithKeyboard: true,
+      typeCharByChar: true,
+    });
     await this.clickColorPicker(nth);
     await this.visChart.waitForVisualizationRenderingStabilized();
   }
@@ -861,6 +876,10 @@ export class VisualBuilderPageObject extends FtrService {
   public async setFilterRatioOption(optionType: 'Numerator' | 'Denominator', query: string) {
     const optionInput = await this.testSubjects.find(`filterRatio${optionType}Input`);
     await optionInput.type(query);
+  }
+
+  public async clickSeriesLegendItem(name: string) {
+    await this.find.clickByCssSelector(`[data-ech-series-name="${name}"] .echLegendItem__label`);
   }
 
   public async toggleNewChartsLibraryWithDebug(enabled: boolean) {

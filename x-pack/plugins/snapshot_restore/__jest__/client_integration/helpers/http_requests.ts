@@ -6,7 +6,7 @@
  */
 
 import sinon, { SinonFakeServer } from 'sinon';
-import { API_BASE_PATH } from '../../../common/constants';
+import { API_BASE_PATH } from '../../../common';
 
 type HttpResponse = Record<string, any> | any[];
 
@@ -54,7 +54,7 @@ const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
   };
 
   const setLoadSnapshotsResponse = (response: HttpResponse = {}) => {
-    const defaultResponse = { errors: {}, snapshots: [], repositories: [] };
+    const defaultResponse = { errors: {}, snapshots: [], repositories: [], total: 0 };
 
     server.respondWith('GET', `${API_BASE_PATH}snapshots`, mockResponse(defaultResponse, response));
   };
@@ -92,11 +92,12 @@ const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
 
   const setCleanupRepositoryResponse = (response?: HttpResponse, error?: any) => {
     const status = error ? error.status || 503 : 200;
+    const body = error ? JSON.stringify(error) : JSON.stringify(response);
 
     server.respondWith('POST', `${API_BASE_PATH}repositories/:name/cleanup`, [
       status,
       { 'Content-Type': 'application/json' },
-      JSON.stringify(response),
+      body,
     ]);
   };
 

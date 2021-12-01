@@ -246,7 +246,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const isScrollable = await checkScrollable();
         expect(isScrollable).to.be(false);
 
-        await retry.waitFor('container to be scrollable', async () => {
+        await retry.waitForWithTimeout('container to be scrollable', 60 * 1000, async () => {
           await addColumn();
           return await checkScrollable();
         });

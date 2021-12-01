@@ -36,9 +36,6 @@ Date.now = jest.fn(() => testTime.getTime());
 // Mock telemetry service
 jest.mock('../public/lib/ui_metric', () => ({ trackCanvasUiMetric: () => {} }));
 
-// Mock EUI generated ids to be consistently predictable for snapshots.
-jest.mock(`@elastic/eui/lib/components/form/form_row/make_id`, () => () => `generated-id`);
-
 // Mock react-datepicker dep used by eui to avoid rendering the entire large component
 jest.mock('@elastic/eui/packages/react-datepicker', () => {
   return {
@@ -50,13 +47,6 @@ jest.mock('@elastic/eui/packages/react-datepicker', () => {
 // Mock React Portal for components that use modals, tooltips, etc
 // @ts-expect-error Portal mocks are notoriously difficult to type
 ReactDOM.createPortal = jest.fn((element) => element);
-
-// Mock the EUI HTML ID Generator so elements have a predictable ID in snapshots
-jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => {
-  return {
-    htmlIdGenerator: () => () => `generated-id`,
-  };
-});
 
 // To be resolved by EUI team.
 // https://github.com/elastic/eui/issues/3712

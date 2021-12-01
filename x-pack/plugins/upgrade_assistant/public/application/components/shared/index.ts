@@ -6,7 +6,8 @@
  */
 
 export { NoDeprecationsPrompt } from './no_deprecations';
-export { DeprecationHealth } from './health';
-export { SearchBar } from './search_bar';
-export { DeprecationPagination } from './deprecation_pagination';
-export { DeprecationListBar } from './deprecation_list_bar';
+export { DeprecationCount } from './deprecation_count';
+export { DeprecationBadge } from './deprecation_badge';
+export { DeprecationsPageLoadingError } from './deprecations_page_loading_error';
+export { DeprecationFlyoutLearnMoreLink } from './deprecation_flyout_learn_more_link';
+export { LevelInfoTip } from './level_info_tip';

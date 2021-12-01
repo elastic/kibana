@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { castArray } from 'lodash';
 import React, { TableHTMLAttributes } from 'react';
 import {
   EuiTable,
@@ -26,16 +26,32 @@ export function KeyValueTable({
   return (
     <EuiTable compressed {...tableProps}>
       <EuiTableBody>
-        {keyValuePairs.map(({ key, value }) => (
-          <EuiTableRow key={key}>
-            <EuiTableRowCell>
-              <strong data-test-subj="dot-key">{key}</strong>
-            </EuiTableRowCell>
-            <EuiTableRowCell data-test-subj="value">
-              <FormattedValue value={value} />
-            </EuiTableRowCell>
-          </EuiTableRow>
-        ))}
+        {keyValuePairs.map(({ key, value }) => {
+          const asArray = castArray(value);
+          const valueList =
+            asArray.length <= 1 ? (
+              <FormattedValue value={asArray[0]} />
+            ) : (
+              <ul>
+                {asArray.map((val, index) => (
+                  <li>
+                    <FormattedValue key={index} value={val} />
+                  </li>
+                ))}
+              </ul>
+            );
+
+          return (
+            <EuiTableRow key={key}>
+              <EuiTableRowCell>
+                <strong data-test-subj="dot-key">{key}</strong>
+              </EuiTableRowCell>
+              <EuiTableRowCell data-test-subj="value">
+                {valueList}
+              </EuiTableRowCell>
+            </EuiTableRow>
+          );
+        })}
       </EuiTableBody>
     </EuiTable>
   );

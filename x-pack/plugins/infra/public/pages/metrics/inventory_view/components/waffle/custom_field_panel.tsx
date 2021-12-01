@@ -55,6 +55,7 @@ export class CustomFieldPanel extends React.PureComponent<Props, State> {
             fullWidth
           >
             <EuiComboBox
+              data-test-subj="groupByCustomField"
               placeholder={i18n.translate('xpack.infra.waffle.customGroupByDropdownPlacehoder', {
                 defaultMessage: 'Select one',
               })}
@@ -67,6 +68,7 @@ export class CustomFieldPanel extends React.PureComponent<Props, State> {
             />
           </EuiFormRow>
           <EuiButton
+            data-test-subj="groupByCustomFieldAddButton"
             disabled={isSubmitDisabled}
             type="submit"
             size="s"

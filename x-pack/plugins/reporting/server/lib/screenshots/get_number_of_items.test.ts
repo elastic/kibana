@@ -6,6 +6,7 @@
  */
 
 import { set } from 'lodash';
+import { durationToNumber } from '../../../common/schema_utils';
 import { HeadlessChromiumDriver } from '../../browsers';
 import {
   createMockBrowserDriverFactory,
@@ -25,6 +26,7 @@ describe('getNumberOfItems', () => {
   let layout: LayoutInstance;
   let logger: jest.Mocked<LevelLogger>;
   let browser: HeadlessChromiumDriver;
+  let timeout: number;
 
   beforeEach(async () => {
     const schema = createMockConfigSchema(set({}, 'capture.timeouts.waitForElements', 0));
@@ -34,6 +36,7 @@ describe('getNumberOfItems', () => {
     captureConfig = config.get('capture');
     layout = createMockLayoutInstance(captureConfig);
     logger = createMockLevelLogger();
+    timeout = durationToNumber(captureConfig.timeouts.waitForElements);
 
     await createMockBrowserDriverFactory(core, logger, {
       evaluate: jest.fn(
@@ -62,7 +65,7 @@ describe('getNumberOfItems', () => {
       <div itemsSelector="10" />
     `;
 
-    await expect(getNumberOfItems(captureConfig, browser, layout, logger)).resolves.toBe(10);
+    await expect(getNumberOfItems(timeout, browser, layout, logger)).resolves.toBe(10);
   });
 
   it('should determine the number of items by selector ', async () => {
@@ -72,7 +75,7 @@ describe('getNumberOfItems', () => {
       <renderedSelector />
     `;
 
-    await expect(getNumberOfItems(captureConfig, browser, layout, logger)).resolves.toBe(3);
+    await expect(getNumberOfItems(timeout, browser, layout, logger)).resolves.toBe(3);
   });
 
   it('should fall back to the selector when the attribute is empty', async () => {
@@ -82,6 +85,6 @@ describe('getNumberOfItems', () => {
       <renderedSelector />
     `;
 
-    await expect(getNumberOfItems(captureConfig, browser, layout, logger)).resolves.toBe(2);
+    await expect(getNumberOfItems(timeout, browser, layout, logger)).resolves.toBe(2);
   });
 });

@@ -10,9 +10,66 @@ import { ActionStatusRequestSchema, HostIsolationRequestSchema } from '../schema
 
 export type ISOLATION_ACTIONS = 'isolate' | 'unisolate';
 
+export const ActivityLogItemTypes = {
+  ACTION: 'action' as const,
+  RESPONSE: 'response' as const,
+  FLEET_ACTION: 'fleetAction' as const,
+  FLEET_RESPONSE: 'fleetResponse' as const,
+};
+
+interface EcsError {
+  code?: string;
+  id?: string;
+  message: string;
+  stack_trace?: string;
+  type?: string;
+}
+
+interface EndpointActionFields {
+  action_id: string;
+  data: EndpointActionData;
+}
+
+interface ActionRequestFields {
+  expiration: string;
+  type: 'INPUT_ACTION';
+  input_type: 'endpoint';
+}
+
+interface ActionResponseFields {
+  completed_at: string;
+  started_at: string;
+}
+export interface LogsEndpointAction {
+  '@timestamp': string;
+  agent: {
+    id: string | string[];
+  };
+  EndpointActions: EndpointActionFields & ActionRequestFields;
+  error?: EcsError;
+  user: {
+    id: string;
+  };
+}
+
+export interface LogsEndpointActionResponse {
+  '@timestamp': string;
+  agent: {
+    id: string | string[];
+  };
+  EndpointActions: EndpointActionFields & ActionResponseFields;
+  error?: EcsError;
+}
+
 export interface EndpointActionData {
   command: ISOLATION_ACTIONS;
   comment?: string;
+}
+
+export interface FleetActionResponseData {
+  endpoint?: {
+    ack?: boolean;
+  };
 }
 
 export interface EndpointAction {
@@ -41,10 +98,28 @@ export interface EndpointActionResponse {
   completed_at: string;
   error?: string;
   action_data: EndpointActionData;
+  /* Response data from the Endpoint process -- only present in 7.16+ */
+  action_response?: FleetActionResponseData;
+}
+
+export interface EndpointActivityLogAction {
+  type: typeof ActivityLogItemTypes.ACTION;
+  item: {
+    id: string;
+    data: LogsEndpointAction;
+  };
+}
+
+export interface EndpointActivityLogActionResponse {
+  type: typeof ActivityLogItemTypes.RESPONSE;
+  item: {
+    id: string;
+    data: LogsEndpointActionResponse;
+  };
 }
 
 export interface ActivityLogAction {
-  type: 'action';
+  type: typeof ActivityLogItemTypes.FLEET_ACTION;
   item: {
     // document _id
     id: string;
@@ -53,7 +128,7 @@ export interface ActivityLogAction {
   };
 }
 export interface ActivityLogActionResponse {
-  type: 'response';
+  type: typeof ActivityLogItemTypes.FLEET_RESPONSE;
   item: {
     // document id
     id: string;
@@ -61,7 +136,11 @@ export interface ActivityLogActionResponse {
     data: EndpointActionResponse;
   };
 }
-export type ActivityLogEntry = ActivityLogAction | ActivityLogActionResponse;
+export type ActivityLogEntry =
+  | ActivityLogAction
+  | ActivityLogActionResponse
+  | EndpointActivityLogAction
+  | EndpointActivityLogActionResponse;
 export interface ActivityLog {
   page: number;
   pageSize: number;

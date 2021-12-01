@@ -21,6 +21,7 @@ import { MlSharedContext } from '../../../../../app/__mocks__/shared_context';
 import { getMlSharedImports } from '../../../../../shared_imports';
 
 describe('Transform: Transform List <ExpandedRow />', () => {
+  const onAlertEdit = jest.fn();
   // Set timezone to US/Eastern for consistent test results.
   beforeEach(() => {
     moment.tz.setDefault('US/Eastern');
@@ -37,7 +38,7 @@ describe('Transform: Transform List <ExpandedRow />', () => {
 
     render(
       <MlSharedContext.Provider value={mlShared}>
-        <ExpandedRow item={item} />
+        <ExpandedRow item={item} onAlertEdit={onAlertEdit} />
       </MlSharedContext.Provider>
     );
 

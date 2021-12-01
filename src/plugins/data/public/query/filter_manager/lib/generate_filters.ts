@@ -32,7 +32,7 @@ function getExistingFilter(
     if (!filter) return;
 
     if (fieldName === '_exists_' && isExistsFilter(filter)) {
-      return filter.exists!.field === value;
+      return filter.query.exists!.field === value;
     }
 
     if (isPhraseFilter(filter)) {
@@ -40,7 +40,9 @@ function getExistingFilter(
     }
 
     if (isScriptedPhraseFilter(filter)) {
-      return filter.meta.field === fieldName && filter.script.script.params?.value === value;
+      return (
+        filter.meta.field === fieldName && filter.query?.script?.script?.params?.value === value
+      );
     }
   }) as any;
 }

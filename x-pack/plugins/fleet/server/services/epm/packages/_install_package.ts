@@ -5,22 +5,39 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, SavedObject, SavedObjectsClientContract } from 'src/core/server';
+import type {
+  ElasticsearchClient,
+  Logger,
+  SavedObject,
+  SavedObjectsClientContract,
+} from 'src/core/server';
 
-import { MAX_TIME_COMPLETE_INSTALL, ASSETS_SAVED_OBJECT_TYPE } from '../../../../common';
+import {
+  MAX_TIME_COMPLETE_INSTALL,
+  ASSETS_SAVED_OBJECT_TYPE,
+  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+  SO_SEARCH_LIMIT,
+} from '../../../../common';
 import type { InstallablePackage, InstallSource, PackageAssetReference } from '../../../../common';
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../constants';
 import type { AssetReference, Installation, InstallType } from '../../../types';
 import { installTemplates } from '../elasticsearch/template/install';
-import { installPipelines, deletePreviousPipelines } from '../elasticsearch/ingest_pipeline/';
+import {
+  installPipelines,
+  isTopLevelPipeline,
+  deletePreviousPipelines,
+} from '../elasticsearch/ingest_pipeline/';
 import { getAllTemplateRefs } from '../elasticsearch/template/install';
 import { installILMPolicy } from '../elasticsearch/ilm/install';
 import { installKibanaAssets, getKibanaAssets } from '../kibana/assets/install';
 import { updateCurrentWriteIndices } from '../elasticsearch/template/template';
 import { installTransform } from '../elasticsearch/transform/install';
+import { installMlModel } from '../elasticsearch/ml_model/';
 import { installIlmForDataStream } from '../elasticsearch/datastream_ilm/install';
 import { saveArchiveEntries } from '../archive/storage';
 import { ConcurrentInstallOperationError } from '../../../errors';
+
+import { packagePolicyService } from '../..';
 
 import { createInstallation, saveKibanaAssetsRefs, updateVersion } from './install';
 import { deleteKibanaSavedObjectsAssets } from './remove';
@@ -32,6 +49,7 @@ import { deleteKibanaSavedObjectsAssets } from './remove';
 export async function _installPackage({
   savedObjectsClient,
   esClient,
+  logger,
   installedPkg,
   paths,
   packageInfo,
@@ -40,6 +58,7 @@ export async function _installPackage({
 }: {
   savedObjectsClient: SavedObjectsClientContract;
   esClient: ElasticsearchClient;
+  logger: Logger;
   installedPkg?: SavedObject<Installation>;
   paths: string[];
   packageInfo: InstallablePackage;
@@ -47,6 +66,7 @@ export async function _installPackage({
   installSource: InstallSource;
 }): Promise<AssetReference[]> {
   const { name: pkgName, version: pkgVersion } = packageInfo;
+
   try {
     // if some installation already exists
     if (installedPkg) {
@@ -118,13 +138,23 @@ export async function _installPackage({
     // currently only the base package has an ILM policy
     // at some point ILM policies can be installed/modified
     // per data stream and we should then save them
-    await installILMPolicy(paths, esClient);
+    await installILMPolicy(packageInfo, paths, esClient, logger);
 
     const installedDataStreamIlm = await installIlmForDataStream(
       packageInfo,
       paths,
       esClient,
-      savedObjectsClient
+      savedObjectsClient,
+      logger
+    );
+
+    // installs ml models
+    const installedMlModel = await installMlModel(
+      packageInfo,
+      paths,
+      esClient,
+      savedObjectsClient,
+      logger
     );
 
     // installs versionized pipelines without removing currently installed ones
@@ -132,28 +162,37 @@ export async function _installPackage({
       packageInfo,
       paths,
       esClient,
-      savedObjectsClient
+      savedObjectsClient,
+      logger
     );
     // install or update the templates referencing the newly installed pipelines
     const installedTemplates = await installTemplates(
       packageInfo,
       esClient,
+      logger,
       paths,
       savedObjectsClient
     );
 
     // update current backing indices of each data stream
-    await updateCurrentWriteIndices(esClient, installedTemplates);
+    await updateCurrentWriteIndices(esClient, logger, installedTemplates);
 
     const installedTransforms = await installTransform(
       packageInfo,
       paths,
       esClient,
-      savedObjectsClient
+      savedObjectsClient,
+      logger
     );
 
-    // if this is an update or retrying an update, delete the previous version's pipelines
-    if ((installType === 'update' || installType === 'reupdate') && installedPkg) {
+    // If this is an update or retrying an update, delete the previous version's pipelines
+    // Top-level pipeline assets will not be removed on upgrade as of ml model package addition which requires previous
+    // assets to remain installed. This is a temporary solution - more robust solution tracked here https://github.com/elastic/kibana/issues/115035
+    if (
+      paths.filter((path) => isTopLevelPipeline(path)).length === 0 &&
+      (installType === 'update' || installType === 'reupdate') &&
+      installedPkg
+    ) {
       await deletePreviousPipelines(
         esClient,
         savedObjectsClient,
@@ -192,11 +231,27 @@ export async function _installPackage({
     // update to newly installed version when all assets are successfully installed
     if (installedPkg) await updateVersion(savedObjectsClient, pkgName, pkgVersion);
 
-    await savedObjectsClient.update(PACKAGES_SAVED_OBJECT_TYPE, pkgName, {
-      install_version: pkgVersion,
-      install_status: 'installed',
-      package_assets: packageAssetRefs,
-    });
+    const updatedPackage = await savedObjectsClient.update<Installation>(
+      PACKAGES_SAVED_OBJECT_TYPE,
+      pkgName,
+      {
+        install_version: pkgVersion,
+        install_status: 'installed',
+        package_assets: packageAssetRefs,
+      }
+    );
+
+    // If the package is flagged with the `keep_policies_up_to_date` flag, upgrade its
+    // associated package policies after installation
+    if (updatedPackage.attributes.keep_policies_up_to_date) {
+      const policyIdsToUpgrade = await packagePolicyService.listIds(savedObjectsClient, {
+        page: 1,
+        perPage: SO_SEARCH_LIMIT,
+        kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${pkgName}`,
+      });
+
+      await packagePolicyService.upgrade(savedObjectsClient, esClient, policyIdsToUpgrade.items);
+    }
 
     return [
       ...installedKibanaAssetsRefs,
@@ -204,6 +259,7 @@ export async function _installPackage({
       ...installedDataStreamIlm,
       ...installedTemplateRefs,
       ...installedTransforms,
+      ...installedMlModel,
     ];
   } catch (err) {
     if (savedObjectsClient.errors.isConflictError(err)) {

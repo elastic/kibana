@@ -190,12 +190,10 @@ const getUpdateActionIcon = (actionField: string): string => {
 
 export const getUpdateAction = ({
   action,
-  getCaseDetailHrefWithCommentId,
   label,
   handleOutlineComment,
 }: {
   action: CaseUserActions;
-  getCaseDetailHrefWithCommentId: (commentId: string) => string;
   label: string | JSX.Element;
   handleOutlineComment: (id: string) => void;
 }): EuiCommentProps => ({
@@ -213,10 +211,7 @@ export const getUpdateAction = ({
   actions: (
     <EuiFlexGroup responsive={false}>
       <EuiFlexItem grow={false}>
-        <UserActionCopyLink
-          getCaseDetailHrefWithCommentId={getCaseDetailHrefWithCommentId}
-          id={action.actionId}
-        />
+        <UserActionCopyLink id={action.actionId} />
       </EuiFlexItem>
       {action.action === 'update' && action.commentId != null && (
         <EuiFlexItem grow={false}>
@@ -230,7 +225,6 @@ export const getUpdateAction = ({
 export const getAlertAttachment = ({
   action,
   alertId,
-  getCaseDetailHrefWithCommentId,
   getRuleDetailsHref,
   index,
   loadingAlertData,
@@ -241,7 +235,6 @@ export const getAlertAttachment = ({
 }: {
   action: CaseUserActions;
   alertId: string;
-  getCaseDetailHrefWithCommentId: (commentId: string) => string;
   getRuleDetailsHref: RuleDetailsNavigation['href'];
   index: string;
   loadingAlertData: boolean;
@@ -275,10 +268,7 @@ export const getAlertAttachment = ({
   actions: (
     <EuiFlexGroup responsive={false}>
       <EuiFlexItem grow={false}>
-        <UserActionCopyLink
-          id={action.actionId}
-          getCaseDetailHrefWithCommentId={getCaseDetailHrefWithCommentId}
-        />
+        <UserActionCopyLink id={action.actionId} />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <UserActionShowAlert
@@ -330,7 +320,6 @@ export const toStringArray = (value: unknown): string[] => {
 export const getGeneratedAlertsAttachment = ({
   action,
   alertIds,
-  getCaseDetailHrefWithCommentId,
   getRuleDetailsHref,
   onRuleDetailsClick,
   renderInvestigateInTimelineActionComponent,
@@ -339,7 +328,6 @@ export const getGeneratedAlertsAttachment = ({
 }: {
   action: CaseUserActions;
   alertIds: string[];
-  getCaseDetailHrefWithCommentId: (commentId: string) => string;
   getRuleDetailsHref: RuleDetailsNavigation['href'];
   onRuleDetailsClick?: RuleDetailsNavigation['onClick'];
   renderInvestigateInTimelineActionComponent?: (alertIds: string[]) => JSX.Element;
@@ -366,10 +354,7 @@ export const getGeneratedAlertsAttachment = ({
   actions: (
     <EuiFlexGroup responsive={false}>
       <EuiFlexItem grow={false}>
-        <UserActionCopyLink
-          getCaseDetailHrefWithCommentId={getCaseDetailHrefWithCommentId}
-          id={action.actionId}
-        />
+        <UserActionCopyLink id={action.actionId} />
       </EuiFlexItem>
       {renderInvestigateInTimelineActionComponent ? (
         <EuiFlexItem grow={false}>
@@ -396,18 +381,18 @@ const ActionIcon = React.memo<{
   );
 });
 
+ActionIcon.displayName = 'ActionIcon';
+
 export const getActionAttachment = ({
   comment,
   userCanCrud,
   isLoadingIds,
-  getCaseDetailHrefWithCommentId,
   actionsNavigation,
   action,
 }: {
   comment: Comment & CommentRequestActionsType;
   userCanCrud: boolean;
   isLoadingIds: string[];
-  getCaseDetailHrefWithCommentId: (commentId: string) => string;
   actionsNavigation?: ActionsNavigation;
   action: CaseUserActions;
 }): EuiCommentProps => ({
@@ -429,12 +414,7 @@ export const getActionAttachment = ({
   'data-test-subj': 'endpoint-action',
   timestamp: <UserActionTimestamp createdAt={action.actionAt} />,
   timelineIcon: <ActionIcon actionType={comment.actions.type} />,
-  actions: (
-    <UserActionCopyLink
-      id={comment.id}
-      getCaseDetailHrefWithCommentId={getCaseDetailHrefWithCommentId}
-    />
-  ),
+  actions: <UserActionCopyLink id={comment.id} />,
   children: comment.comment.trim().length > 0 && (
     <ContentWrapper data-test-subj="user-action-markdown">
       <MarkdownRenderer>{comment.comment}</MarkdownRenderer>

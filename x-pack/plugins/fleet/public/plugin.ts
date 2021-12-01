@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React from 'react';
 import type {
   AppMountParameters,
   CoreSetup,
@@ -16,8 +17,16 @@ import { i18n } from '@kbn/i18n';
 
 import type { NavigationPublicPluginStart } from 'src/plugins/navigation/public';
 
+import type {
+  CustomIntegrationsStart,
+  CustomIntegrationsSetup,
+} from 'src/plugins/custom_integrations/public';
+
+import type { SharePluginStart } from 'src/plugins/share/public';
+
+import type { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
+
 import { DEFAULT_APP_CATEGORIES, AppNavLinkStatus } from '../../../../src/core/public';
-import type { CustomIntegrationsSetup } from '../../../../src/plugins/custom_integrations/public';
 
 import type {
   DataPublicPluginSetup,
@@ -29,8 +38,14 @@ import { Storage } from '../../../../src/plugins/kibana_utils/public';
 import type { LicensingPluginSetup } from '../../licensing/public';
 import type { CloudSetup } from '../../cloud/public';
 import type { GlobalSearchPluginSetup } from '../../global_search/public';
-import { PLUGIN_ID, INTEGRATIONS_PLUGIN_ID, setupRouteService, appRoutesService } from '../common';
-import type { CheckPermissionsResponse, PostFleetSetupResponse } from '../common';
+import {
+  PLUGIN_ID,
+  INTEGRATIONS_PLUGIN_ID,
+  setupRouteService,
+  appRoutesService,
+  calculateAuthz,
+} from '../common';
+import type { CheckPermissionsResponse, PostFleetSetupResponse, FleetAuthz } from '../common';
 
 import type { FleetConfigType } from '../common/types';
 
@@ -38,16 +53,12 @@ import { CUSTOM_LOGS_INTEGRATION_NAME, INTEGRATIONS_BASE_PATH } from './constant
 import { licenseService } from './hooks';
 import { setHttpClient } from './hooks/use_request';
 import { createPackageSearchProvider } from './search_provider';
-import {
-  TutorialDirectoryNotice,
-  TutorialDirectoryHeaderLink,
-  TutorialModuleNotice,
-} from './components/home_integration';
+import { TutorialDirectoryHeaderLink, TutorialModuleNotice } from './components/home_integration';
 import { createExtensionRegistrationCallback } from './services/ui_extensions';
 import type { UIExtensionRegistrationCallback, UIExtensionsStorage } from './types';
 import { LazyCustomLogsAssetsExtension } from './lazy_custom_logs_assets_extension';
 
-export { FleetConfigType } from '../common/types';
+export type { FleetConfigType } from '../common/types';
 
 import { setCustomIntegrations } from './services/custom_integrations';
 
@@ -60,6 +71,8 @@ export interface FleetSetup {}
  * Describes public Fleet plugin contract returned at the `start` stage.
  */
 export interface FleetStart {
+  /** Authorization for the current user */
+  authz: FleetAuthz;
   registerExtension: UIExtensionRegistrationCallback;
   isInitialized: () => Promise<true>;
 }
@@ -71,16 +84,21 @@ export interface FleetSetupDeps {
   cloud?: CloudSetup;
   globalSearch?: GlobalSearchPluginSetup;
   customIntegrations: CustomIntegrationsSetup;
+  usageCollection?: UsageCollectionSetup;
 }
 
 export interface FleetStartDeps {
   data: DataPublicPluginStart;
   navigation: NavigationPublicPluginStart;
+  customIntegrations: CustomIntegrationsStart;
+  share: SharePluginStart;
 }
 
 export interface FleetStartServices extends CoreStart, FleetStartDeps {
   storage: Storage;
+  share: SharePluginStart;
   cloud?: CloudSetup;
+  authz: FleetAuthz;
 }
 
 export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDeps, FleetStartDeps> {
@@ -94,7 +112,7 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
     this.kibanaVersion = initializerContext.env.packageInfo.version;
   }
 
-  public setup(core: CoreSetup, deps: FleetSetupDeps) {
+  public setup(core: CoreSetup<FleetStartDeps, FleetStart>, deps: FleetSetupDeps) {
     const config = this.config;
     const kibanaVersion = this.kibanaVersion;
     const extensions = this.extensions;
@@ -120,18 +138,26 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
       order: 9019,
       euiIconType: 'logoElastic',
       mount: async (params: AppMountParameters) => {
-        const [coreStartServices, startDepsServices] = (await core.getStartServices()) as [
-          CoreStart,
-          FleetStartDeps,
-          FleetStart
-        ];
+        const [coreStartServices, startDepsServices, fleetStart] = await core.getStartServices();
         const startServices: FleetStartServices = {
           ...coreStartServices,
           ...startDepsServices,
           storage: this.storage,
+          cloud: deps.cloud,
+          authz: fleetStart.authz,
         };
         const { renderApp, teardownIntegrations } = await import('./applications/integrations');
-        const unmount = renderApp(startServices, params, config, kibanaVersion, extensions);
+
+        const Tracker =
+          deps.usageCollection?.components.ApplicationUsageTrackingProvider ?? React.Fragment;
+        const unmount = renderApp(
+          startServices,
+          params,
+          config,
+          kibanaVersion,
+          extensions,
+          Tracker
+        );
 
         return () => {
           unmount();
@@ -149,16 +175,13 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
       euiIconType: 'logoElastic',
       appRoute: '/app/fleet',
       mount: async (params: AppMountParameters) => {
-        const [coreStartServices, startDepsServices] = (await core.getStartServices()) as [
-          CoreStart,
-          FleetStartDeps,
-          FleetStart
-        ];
+        const [coreStartServices, startDepsServices, fleetStart] = await core.getStartServices();
         const startServices: FleetStartServices = {
           ...coreStartServices,
           ...startDepsServices,
           storage: this.storage,
           cloud: deps.cloud,
+          authz: fleetStart.authz,
         };
         const { renderApp, teardownFleet } = await import('./applications/fleet');
         const unmount = renderApp(startServices, params, config, kibanaVersion, extensions);
@@ -187,7 +210,6 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
 
     // Register components for home/add data integration
     if (deps.home) {
-      deps.home.tutorials.registerDirectoryNotice(PLUGIN_ID, TutorialDirectoryNotice);
       deps.home.tutorials.registerDirectoryHeaderLink(PLUGIN_ID, TutorialDirectoryHeaderLink);
       deps.home.tutorials.registerModuleNotice(PLUGIN_ID, TutorialModuleNotice);
 
@@ -224,7 +246,23 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
       Component: LazyCustomLogsAssetsExtension,
     });
 
+    const { capabilities } = core.application;
+    const authz = calculateAuthz({
+      fleet: {
+        // Once we have a split privilege, this should be using fleetv2
+        // all: capabilities.fleetv2.all as boolean,
+        all: capabilities.fleet.all as boolean,
+        setup: false, // browser users will never have setup privileges
+      },
+
+      integrations: {
+        all: capabilities.fleet.all as boolean,
+        read: capabilities.fleet.read as boolean,
+      },
+    });
+
     return {
+      authz,
       isInitialized: () => {
         if (!successPromise) {
           successPromise = Promise.resolve().then(async () => {
