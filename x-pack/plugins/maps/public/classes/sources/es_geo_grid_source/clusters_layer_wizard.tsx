@@ -82,6 +82,7 @@ export const clustersLayerWizardConfig: LayerWizard = {
             type: STYLE_TYPE.DYNAMIC,
             options: {
               ...(defaultDynamicProperties[VECTOR_STYLES.ICON_SIZE].options as SizeDynamicOptions),
+              maxSize: 24,
               field: {
                 name: COUNT_PROP_NAME,
                 origin: FIELD_ORIGIN.SOURCE,
