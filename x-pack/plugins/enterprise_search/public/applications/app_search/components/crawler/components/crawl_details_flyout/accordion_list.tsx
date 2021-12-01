@@ -22,18 +22,20 @@ import {
 import './accordion_list.scss';
 
 interface Props {
-  iconType: IconType;
-  items: string[];
   hasBorder?: boolean;
+  iconType: IconType;
   initialIsOpen?: boolean;
+  items: string[];
+  rowCount?: number;
   title: string;
 }
 
 export const AccordionList: React.FC<Props> = ({
-  iconType,
-  items,
   hasBorder,
+  iconType,
   initialIsOpen,
+  items,
+  rowCount = 10,
   title,
 }) => {
   const accordionId = useGeneratedHtmlId({
@@ -70,7 +72,7 @@ export const AccordionList: React.FC<Props> = ({
           },
         ]}
         pagination={
-          items.length > 10
+          items.length > rowCount
             ? {
                 hidePerPageOptions: true,
               }

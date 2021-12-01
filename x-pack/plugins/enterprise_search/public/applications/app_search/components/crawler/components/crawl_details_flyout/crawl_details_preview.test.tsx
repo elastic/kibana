@@ -60,18 +60,18 @@ describe('CrawlDetailsPreview', () => {
     });
 
     it('contains a list of seed urls', () => {
-      const domainList = wrapper.find(AccordionList).at(1);
+      const seedUrlList = wrapper.find(AccordionList).at(1);
 
-      expect(domainList.prop('items')).toEqual([
+      expect(seedUrlList.prop('items')).toEqual([
         'https://www.elastic.co/docs',
         'https://www.swiftype.com/documentation',
       ]);
     });
 
     it('contains a list of sitemap urls', () => {
-      const domainList = wrapper.find(AccordionList).at(2);
+      const sitemapUrlList = wrapper.find(AccordionList).at(2);
 
-      expect(domainList.prop('items')).toEqual([
+      expect(sitemapUrlList.prop('items')).toEqual([
         'https://www.elastic.co/sitemap.xml',
         'https://www.swiftype.com/sitemap.xml',
       ]);
