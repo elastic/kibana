@@ -18,8 +18,8 @@ import {
 import { repeatImageRenderer as repeatImage } from '../../../../src/plugins/expression_repeat_image/public';
 import { revealImageRenderer as revealImage } from '../../../../src/plugins/expression_reveal_image/public';
 import {
-  shapeRenderer as shape,
-  progressRenderer as progress,
+  getShapeRenderer,
+  getProgressRenderer,
 } from '../../../../src/plugins/expression_shape/public';
 import { metricRenderer as metric } from '../../../../src/plugins/expression_metric/public';
 
@@ -31,6 +31,8 @@ const renderFunctionsFactories = [
   getTableRenderer,
   getErrorRenderer,
   getDebugRenderer,
+  getShapeRenderer,
+  getProgressRenderer,
 ];
 
 /**
@@ -45,8 +47,6 @@ export const renderFunctions = [
   metric,
   pie,
   plot,
-  progress,
-  shape,
   ...renderFunctionsFactories.map(unboxFactory),
 ];
 

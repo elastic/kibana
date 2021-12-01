@@ -14,17 +14,20 @@ import {
 import { repeatImageRenderer } from '../../../../../src/plugins/expression_repeat_image/public';
 import { revealImageRenderer } from '../../../../../src/plugins/expression_reveal_image/public';
 import {
-  shapeRenderer,
-  progressRenderer,
+  shapeRendererFactory,
+  progressRendererFactory,
 } from '../../../../../src/plugins/expression_shape/public';
 
 export const renderFunctions = [
   imageRenderer,
   metricRenderer,
   revealImageRenderer,
-  shapeRenderer,
   repeatImageRenderer,
-  progressRenderer,
 ];
 
-export const renderFunctionFactories = [debugRendererFactory, errorRendererFactory];
+export const renderFunctionFactories = [
+  debugRendererFactory,
+  errorRendererFactory,
+  shapeRendererFactory,
+  progressRendererFactory,
+];
