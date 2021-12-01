@@ -27,6 +27,7 @@ import { mappingFromFieldMap } from '../../rule_registry/common/mapping_from_fie
 import { Dataset } from '../../rule_registry/server';
 import { UptimeConfig } from '../common/config';
 import { SyntheticsService } from './lib/synthetics_service/synthetics_service';
+import { syntheticsServiceApiKey } from './lib/saved_objects/service_api_key';
 
 export type UptimeRuleRegistry = ReturnType<Plugin['setup']>['ruleRegistry'];
 
@@ -90,13 +91,14 @@ export class Plugin implements PluginType {
 
   public start(coreStart: CoreStart, plugins: UptimeCorePluginsStart) {
     this.savedObjectsClient = new SavedObjectsClient(
-      coreStart.savedObjects.createInternalRepository()
+      coreStart.savedObjects.createInternalRepository([syntheticsServiceApiKey.name])
     );
     if (this.server) {
       this.server.security = plugins.security;
       this.server.fleet = plugins.fleet;
       this.server.encryptedSavedObjects = plugins.encryptedSavedObjects;
       this.server.savedObjectsClient = this.savedObjectsClient;
+      this.server.syntheticsService = this.syntheticService;
     }
 
     if (this.server?.config?.unsafe?.service.enabled) {
