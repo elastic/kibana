@@ -26,6 +26,7 @@ import {
 import { toExpressionAst } from '../to_ast';
 import { ChartType } from '../../common';
 import { optionTabs } from '../editor/common_config';
+import { getVisTypeFromParams } from './get_vis_type_from_params';
 
 export const lineVisTypeDefinition = {
   name: 'line',
@@ -36,6 +37,7 @@ export const lineVisTypeDefinition = {
   }),
   toExpressionAst,
   getSupportedTriggers: () => [VIS_EVENT_TO_TRIGGER.filter, VIS_EVENT_TO_TRIGGER.brush],
+  updateVisTypeOnParamsChange: getVisTypeFromParams,
   visConfig: {
     defaults: {
       type: ChartType.Line,
