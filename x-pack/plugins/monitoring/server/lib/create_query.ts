@@ -9,7 +9,7 @@ import { defaults } from 'lodash';
 import moment from 'moment';
 import { MissingRequiredError } from './error_missing_required';
 import { standaloneClusterFilter } from './standalone_clusters';
-import { DS_INDEX_PATTERN_METRICS, STANDALONE_CLUSTER_CLUSTER_UUID } from '../../common/constants';
+import { STANDALONE_CLUSTER_CLUSTER_UUID } from '../../common/constants';
 
 export interface TimerangeFilter {
   range: {
@@ -84,10 +84,7 @@ export function createQuery(options: {
   const terms = [];
   let typeFilter: any;
   if (dsDataset) {
-    terms.push(
-      { term: { 'data_stream.type': DS_INDEX_PATTERN_METRICS } },
-      { term: { 'data_stream.dataset': dsDataset } }
-    );
+    terms.push({ term: { 'data_stream.dataset': dsDataset } });
   }
   if (type) {
     terms.push({ term: { type } });

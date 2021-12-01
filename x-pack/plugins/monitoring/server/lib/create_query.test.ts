@@ -148,10 +148,7 @@ describe('Create Query', () => {
         filter: [
           {
             bool: {
-              should: [
-                { term: { 'data_stream.type': 'metrics' } },
-                { term: { 'data_stream.dataset': 'cluster_stats' } },
-              ],
+              should: [{ term: { 'data_stream.dataset': 'cluster_stats' } }],
             },
           },
           { term: { cluster_uuid: 'cuid123' } },
@@ -179,11 +176,6 @@ describe('Create Query', () => {
           {
             bool: {
               should: [
-                {
-                  term: {
-                    'data_stream.type': 'metrics',
-                  },
-                },
                 {
                   term: {
                     'data_stream.dataset': 'elasticsearch.cluster_stats',
@@ -217,7 +209,6 @@ describe('Create Query', () => {
           {
             bool: {
               should: [
-                { term: { 'data_stream.type': 'metrics' } },
                 { term: { 'data_stream.dataset': 'elasticsearch.cluster_stats' } },
                 { term: { type: 'cluster_stats' } },
               ],
