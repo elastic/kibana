@@ -48,7 +48,7 @@ export const caseTypeField = 'type';
 
 const CaseTypeRt = rt.union([rt.literal(CaseType.collection), rt.literal(CaseType.individual)]);
 
-const SettingsRt = rt.type({
+export const SettingsRt = rt.type({
   syncAlerts: rt.boolean,
 });
 
