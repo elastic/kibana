@@ -66,7 +66,11 @@ const withCore = makeDecorator({
                 setHeaderActionMenu: () => {},
               } as unknown as AppMountParameters,
               config: {
-                unsafe: { alertingExperience: { enabled: true }, cases: { enabled: true } },
+                unsafe: {
+                  alertingExperience: { enabled: true },
+                  cases: { enabled: true },
+                  overviewNext: { enabled: false },
+                },
               },
               core: options as CoreStart,
               plugins: {
