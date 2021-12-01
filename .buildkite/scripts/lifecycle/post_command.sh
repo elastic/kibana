@@ -26,6 +26,10 @@ if [[ "$IS_TEST_EXECUTION_STEP" == "true" ]]; then
   buildkite-agent artifact upload '.es/**/*.hprof'
 
   echo "--- Run Failed Test Reporter"
+  # load the test analytics API key into the env
+  BUILDKITE_TEST_ANALYTICS_API_KEY="$(retry 5 15 gcloud secrets versions access latest --secret=kibana-buildkite-test-analytics-api-key)"
+  export BUILDKITE_TEST_ANALYTICS_API_KEY
+
   node scripts/report_failed_tests --build-url="${BUILDKITE_BUILD_URL}#${BUILDKITE_JOB_ID}" 'target/junit/**/*.xml'
 
   if [[ -d 'target/test_failures' ]]; then

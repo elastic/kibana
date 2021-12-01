@@ -7,7 +7,9 @@
  */
 
 import Path from 'path';
+import Fs from 'fs/promises';
 
+import Axios from 'axios';
 import { REPO_ROOT } from '@kbn/utils';
 import { run, createFailError, createFlagError } from '@kbn/dev-utils';
 import globby from 'globby';
@@ -95,6 +97,22 @@ export function runFailedTestsReporterCli() {
       }> = [];
 
       for (const reportPath of reportPaths) {
+        if (process.env.BUILDKITE_TEST_ANALYTICS_API_KEY) {
+          await Axios.request({
+            url: 'https://analytics-api.buildkite.com/v1/runs',
+            method: 'POST',
+            headers: {
+              Authorization: `Token token=${process.env.BUILDKITE_TEST_ANALYTICS_API_KEY}`,
+              'Content-Type': 'application/json',
+            },
+            data: {
+              format: 'junit',
+              run_env: { key: process.env.BUILDKITE_BUILD_ID },
+              data: await Fs.readFile(reportPath, 'utf-8'),
+            },
+          });
+        }
+
         const report = await readTestReport(reportPath);
         const messages = Array.from(getReportMessageIter(report));
         const failures = await getFailures(report);
