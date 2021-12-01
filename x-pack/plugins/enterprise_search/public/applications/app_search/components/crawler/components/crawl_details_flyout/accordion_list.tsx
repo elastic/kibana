@@ -14,6 +14,7 @@ import {
   EuiIcon,
   EuiInMemoryTable,
   EuiNotificationBadge,
+  EuiSpacer,
   EuiTitle,
   IconType,
   useGeneratedHtmlId,
@@ -41,6 +42,8 @@ export const AccordionList: React.FC<Props> = ({
   const accordionId = useGeneratedHtmlId({
     prefix: 'accordionList',
   });
+
+  const showPagination = items.length > rowCount;
 
   return (
     <EuiAccordion
@@ -72,13 +75,14 @@ export const AccordionList: React.FC<Props> = ({
           },
         ]}
         pagination={
-          items.length > rowCount
+          showPagination
             ? {
                 hidePerPageOptions: true,
               }
             : false
         }
       />
+      {!showPagination && <EuiSpacer size="s" />}
     </EuiAccordion>
   );
 };
