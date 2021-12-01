@@ -25,7 +25,7 @@ import { installPrepackagedRules } from './handlers/install_prepackaged_rules';
 import { createPolicyArtifactManifest } from './handlers/create_policy_artifact_manifest';
 import { createDefaultPolicy } from './handlers/create_default_policy';
 import { validatePolicyAgainstLicense } from './handlers/validate_policy_against_license';
-import { removePolicyFromTrustedApps } from './handlers/remove_policy_from_trusted_apps';
+import { removePolicyFromArtifacts } from './handlers/remove_policy_from_artifacts';
 
 const isEndpointPackagePolicy = <T extends { package?: { name: string } }>(
   packagePolicy: T
@@ -131,8 +131,7 @@ export const getPackagePolicyUpdateCallback = (
 };
 
 export const getPackagePolicyDeleteCallback = (
-  exceptionsClient: ExceptionListClient | undefined,
-  experimentalFeatures: ExperimentalFeatures | undefined
+  exceptionsClient: ExceptionListClient | undefined
 ): PostPackagePolicyDeleteCallback => {
   return async (deletePackagePolicy): Promise<void> => {
     if (!exceptionsClient) {
@@ -140,8 +139,8 @@ export const getPackagePolicyDeleteCallback = (
     }
     const policiesToRemove: Array<Promise<void>> = [];
     for (const policy of deletePackagePolicy) {
-      if (isEndpointPackagePolicy(policy) && experimentalFeatures?.trustedAppsByPolicyEnabled) {
-        policiesToRemove.push(removePolicyFromTrustedApps(exceptionsClient, policy));
+      if (isEndpointPackagePolicy(policy)) {
+        policiesToRemove.push(removePolicyFromArtifacts(exceptionsClient, policy));
       }
     }
     await Promise.all(policiesToRemove);
