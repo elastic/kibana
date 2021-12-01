@@ -71,6 +71,7 @@ export class Plugin implements PluginType {
 
     if (this.server?.config?.unsafe?.service.enabled) {
       this.syntheticService = new SyntheticsService(this.logger, this.server);
+      this.syntheticService.registerSyncTask(plugins.taskManager);
     }
 
     initServerWithKibana(this.server, plugins, ruleDataClient, this.logger);
@@ -100,6 +101,7 @@ export class Plugin implements PluginType {
 
     if (this.server?.config?.unsafe?.service.enabled) {
       this.syntheticService?.init(coreStart);
+      this.syntheticService?.scheduleSyncTask(plugins.taskManager);
     }
   }
 
