@@ -148,55 +148,57 @@ export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationStat
           />
         </EuiFormRow>
       </ToolbarPopover>
-      <ToolbarPopover
-        title={i18n.translate('xpack.lens.pieChart.visualOptionsLabel', {
-          defaultMessage: 'Visual options',
-        })}
-        type="visualOptions"
-        groupPosition="center"
-        buttonDataTestSubj="lnsVisualOptionsButton"
-      >
-        <EuiFormRow label={sizeLabel} display="columnCompressed" fullWidth>
-          <EuiButtonGroup
-            isFullWidth
-            name="pieSizeRatio"
-            buttonSize="compressed"
-            legend={sizeLabel}
-            options={sizeRatioOptions}
-            idSelected={
-              sizeRatioOptions.find(({ value }) => value === layer.pieSizeRatio)?.id ||
-              'pieSizeOption-large'
-            }
-            onChange={(sizeId) => {
-              const pieSizeRatio = sizeRatioOptions.find(({ id }) => id === sizeId)?.value;
-              setState({ ...state, layers: [{ ...layer, pieSizeRatio }] });
-            }}
-          />
-        </EuiFormRow>
-        {hasInnerAreaSizeSetting && (
-          <EuiFormRow
-            label={i18n.translate('xpack.lens.pieChart.donutInnerAreaSize', {
-              defaultMessage: 'Size of inner empty area',
-            })}
-            fullWidth
-            display="rowCompressed"
-          >
-            <DebouncedValueSlider
-              min={20}
-              max={70}
-              step={10}
-              value={(layer.donutInnerAreaRatio ?? DEFAULT_DONUT_INNER_AREA_RATIO) * 100}
-              setValue={(value) => {
-                const donutInnerAreaRatio = value / 100;
-                setState({
-                  ...state,
-                  layers: [{ ...layer, donutInnerAreaRatio }],
-                });
+      {sizeRatioOptions.length ? (
+        <ToolbarPopover
+          title={i18n.translate('xpack.lens.pieChart.visualOptionsLabel', {
+            defaultMessage: 'Visual options',
+          })}
+          type="visualOptions"
+          groupPosition="center"
+          buttonDataTestSubj="lnsVisualOptionsButton"
+        >
+          <EuiFormRow label={sizeLabel} display="columnCompressed" fullWidth>
+            <EuiButtonGroup
+              isFullWidth
+              name="pieSizeRatio"
+              buttonSize="compressed"
+              legend={sizeLabel}
+              options={sizeRatioOptions}
+              idSelected={
+                sizeRatioOptions.find(({ value }) => value === layer.pieSizeRatio)?.id ||
+                'pieSizeOption-large'
+              }
+              onChange={(sizeId) => {
+                const pieSizeRatio = sizeRatioOptions.find(({ id }) => id === sizeId)?.value;
+                setState({ ...state, layers: [{ ...layer, pieSizeRatio }] });
               }}
             />
           </EuiFormRow>
-        )}
-      </ToolbarPopover>
+          {hasInnerAreaSizeSetting && (
+            <EuiFormRow
+              label={i18n.translate('xpack.lens.pieChart.donutInnerAreaSize', {
+                defaultMessage: 'Size of inner empty area',
+              })}
+              fullWidth
+              display="rowCompressed"
+            >
+              <DebouncedValueSlider
+                min={20}
+                max={70}
+                step={10}
+                value={(layer.donutInnerAreaRatio ?? DEFAULT_DONUT_INNER_AREA_RATIO) * 100}
+                setValue={(value) => {
+                  const donutInnerAreaRatio = value / 100;
+                  setState({
+                    ...state,
+                    layers: [{ ...layer, donutInnerAreaRatio }],
+                  });
+                }}
+              />
+            </EuiFormRow>
+          )}
+        </ToolbarPopover>
+      ) : null}
       <LegendSettingsPopover
         legendOptions={legendOptions}
         mode={layer.legendDisplay}
