@@ -115,11 +115,13 @@ export class BookEmbeddableFactoryDefinition
     });
   }
 
-  private async unwrapMethod(savedObjectId: string): Promise<BookSavedObjectAttributes> {
+  private async unwrapMethod(
+    savedObjectId: string
+  ): Promise<{ attributes: BookSavedObjectAttributes }> {
     const { savedObjectsClient } = await this.getStartServices();
     const savedObject: SimpleSavedObject<BookSavedObjectAttributes> =
       await savedObjectsClient.get<BookSavedObjectAttributes>(this.type, savedObjectId);
-    return { ...savedObject.attributes };
+    return { attributes: { ...savedObject.attributes } };
   }
 
   private async saveMethod(attributes: BookSavedObjectAttributes, savedObjectId?: string) {

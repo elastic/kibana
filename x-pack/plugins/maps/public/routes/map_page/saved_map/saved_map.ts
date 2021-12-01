@@ -103,11 +103,13 @@ export class SavedMap {
         description: '',
       };
     } else {
-      const doc = await getMapAttributeService().unwrapAttributes(this._mapEmbeddableInput);
-      const { references, sharingSavedObjectProps, ...savedObjectAttributes } = doc;
+      const { attributes: doc, metaInfo } = await getMapAttributeService().unwrapAttributes(
+        this._mapEmbeddableInput
+      );
+      const { references, ...savedObjectAttributes } = doc;
       this._attributes = savedObjectAttributes;
-      if (sharingSavedObjectProps) {
-        this._sharingSavedObjectProps = sharingSavedObjectProps;
+      if (metaInfo?.sharingSavedObjectProps) {
+        this._sharingSavedObjectProps = metaInfo.sharingSavedObjectProps;
       }
       const savedObjectsTagging = getSavedObjectsTagging();
       if (savedObjectsTagging && references && references.length) {
