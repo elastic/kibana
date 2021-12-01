@@ -51,6 +51,7 @@ export async function createCloudApmPackgePolicy({
   const apmPackagePolicyDefinition = await getApmPackagePolicyDefinition({
     apmServerSchema,
     cloudPluginSetup,
+    fleetPluginStart,
     kibanaVersion,
   });
   const mergedAPMPackagePolicy = await mergePackagePolicyWithApm({
