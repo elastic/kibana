@@ -754,7 +754,7 @@ function migrateProp(
 
   for (const { version, transform, transformType } of applicableTransforms(migrations, doc, prop)) {
     const currentVersion = propVersion(doc, prop);
-    if (currentVersion && Semver.gt(currentVersion, version)) {
+    if (currentVersion && Semver.gt(currentVersion, version) && transformType !== 'reference') {
       // the previous transform function increased the object's migrationVersion; break out of the loop
       break;
     }

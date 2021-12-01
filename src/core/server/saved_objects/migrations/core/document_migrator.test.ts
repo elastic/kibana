@@ -669,6 +669,7 @@ describe('DocumentMigrator', () => {
         ...testOpts(),
         typeRegistry: createRegistry({
           name: 'cat',
+          namespaceType: 'multiple',
           migrations: {
             '1.0.0': setAttr('migrationVersion.cat', '2.9.1'),
             '2.0.0': () => {
@@ -679,6 +680,7 @@ describe('DocumentMigrator', () => {
             },
             '3.0.0': setAttr('attributes.name', 'Shiny'),
           },
+          convertToMultiNamespaceTypeVersion: '2.9.0', // intentionally less than 2.9.1
         }),
       });
       migrator.prepareMigrations();
@@ -687,7 +689,24 @@ describe('DocumentMigrator', () => {
         type: 'cat',
         attributes: { name: 'Boo' },
         migrationVersion: { cat: '0.5.6' },
+        coreMigrationVersion: undefined, // this is intentional
       });
+      // Transforms include, in order:
+      // 1. migration  [1.0.0]
+      // 2. migration  [2.0.0]
+      // 3. reference  [2.9.0]
+      // 4. conversion [2.9.0]
+      // 5. migration  [2.9.1]
+      // 6. migration  [3.0.0]
+      // The outer loop (`applyMigrations`) enumerates all properties on the object to see if the object is outdated, and which transforms
+      // need to be applied for each property.
+      // Initially, all transforms are applicable. An inner loop starts to apply each of them. Transform (1) gets applied, which increases
+      // the document's migrationVersion. We detect this before applying transform (2) and break out of the inner loop.
+      // The outer loop continues, and it sees that the object is still outdated and that transforms (3) and (6) need to be applied. Another
+      // inner loop starts to apply each of these. Transform (3) is correctly applied (there are no references to update, but the
+      // object's coreMigrationVersion is set to 2.9.0). Then transform (6) is applied, and the inner loop ends. The outer loop detects that
+      // the object is no longer outdated, and the outer loop ends, which sets the object's coreMigrationVersion to the current Kibana
+      // version (3.0.0).
       expect(actual).toEqual({
         id: 'smelly',
         type: 'cat',
@@ -1072,7 +1091,8 @@ describe('DocumentMigrator', () => {
               name: 'dog',
               namespaceType: 'single',
               migrations: {
-                '1.0.0': setAttr('migrationVersion.dog', '2.0.0'),
+                '1.1.0': setAttr('attributes.age', '12'),
+                '1.5.0': setAttr('attributes.color', 'tri-color'),
                 '2.0.0': (doc) => doc, // noop
               },
             },
@@ -1083,9 +1103,10 @@ describe('DocumentMigrator', () => {
         const obj = {
           id: 'sleepy',
           type: 'dog',
-          attributes: { name: 'Patches' },
-          migrationVersion: {},
+          attributes: { name: 'Patches', age: '11' },
+          migrationVersion: { dog: '1.1.0' }, // skip the first migration transform, only apply the second and third
           references: [{ id: 'favorite', type: 'toy', name: 'BALL!' }],
+          coreMigrationVersion: undefined, // this is intentional
         };
 
         it('in the default space', () => {
@@ -1095,7 +1116,7 @@ describe('DocumentMigrator', () => {
             {
               id: 'sleepy',
               type: 'dog',
-              attributes: { name: 'Patches' },
+              attributes: { name: 'Patches', age: '11', color: 'tri-color' },
               migrationVersion: { dog: '2.0.0' },
               references: [{ id: 'favorite', type: 'toy', name: 'BALL!' }], // no change
               coreMigrationVersion: kibanaVersion,
@@ -1111,7 +1132,7 @@ describe('DocumentMigrator', () => {
             {
               id: 'sleepy',
               type: 'dog',
-              attributes: { name: 'Patches' },
+              attributes: { name: 'Patches', age: '11', color: 'tri-color' },
               migrationVersion: { dog: '2.0.0' },
               references: [{ id: 'uuidv5', type: 'toy', name: 'BALL!' }], // changed
               coreMigrationVersion: kibanaVersion,
