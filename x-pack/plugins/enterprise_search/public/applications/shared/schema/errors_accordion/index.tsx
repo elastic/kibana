@@ -36,7 +36,7 @@ import './schema_errors_accordion.scss';
 interface Props {
   fieldCoercionErrors: FieldCoercionErrors;
   schema: Schema;
-  generateViewPath?(externalId: string): string;
+  generateViewPath?(id: string): string;
 }
 
 export const SchemaErrorsAccordion: React.FC<Props> = ({
