@@ -120,32 +120,6 @@ export function GaugeDimensionEditor(
       {hasDynamicColoring && (
         <>
           <EuiFormRow
-            fullWidth
-            display="columnCompressedSwitch"
-            label={i18n.translate('xpack.lens.shared.ticksPositionOptions', {
-              defaultMessage: 'Ticks on color bands',
-            })}
-          >
-            <EuiSwitch
-              compressed
-              label={i18n.translate('xpack.lens.shared.ticksPositionOptions', {
-                defaultMessage: 'Ticks on color bands',
-              })}
-              data-test-subj="lens-toolbar-gauge-ticks-position-switch"
-              showLabel={false}
-              checked={state.ticksPosition === GaugeTicksPositions.bands}
-              onChange={() => {
-                setState({
-                  ...state,
-                  ticksPosition:
-                    state.ticksPosition === GaugeTicksPositions.bands
-                      ? GaugeTicksPositions.auto
-                      : GaugeTicksPositions.bands,
-                });
-              }}
-            />
-          </EuiFormRow>
-          <EuiFormRow
             className="lnsDynamicColoringRow"
             display="columnCompressed"
             fullWidth
@@ -214,6 +188,32 @@ export function GaugeDimensionEditor(
                 </PalettePanelContainer>
               </EuiFlexItem>
             </EuiFlexGroup>
+          </EuiFormRow>
+          <EuiFormRow
+            fullWidth
+            display="columnCompressedSwitch"
+            label={i18n.translate('xpack.lens.shared.ticksPositionOptions', {
+              defaultMessage: 'Ticks on bands',
+            })}
+          >
+            <EuiSwitch
+              compressed
+              label={i18n.translate('xpack.lens.shared.ticksPositionOptions', {
+                defaultMessage: 'Ticks on bands',
+              })}
+              data-test-subj="lens-toolbar-gauge-ticks-position-switch"
+              showLabel={false}
+              checked={state.ticksPosition === GaugeTicksPositions.bands}
+              onChange={() => {
+                setState({
+                  ...state,
+                  ticksPosition:
+                    state.ticksPosition === GaugeTicksPositions.bands
+                      ? GaugeTicksPositions.auto
+                      : GaugeTicksPositions.bands,
+                });
+              }}
+            />
           </EuiFormRow>
         </>
       )}

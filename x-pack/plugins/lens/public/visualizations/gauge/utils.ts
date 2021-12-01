@@ -84,7 +84,7 @@ export const getMetricValue = (row?: DatatableRow, state?: GaugeAccessorsType) =
   }
   const minValue = getMinValue(row, state);
   const maxValue = getMaxValue(row, state);
-  return Math.round((maxValue - minValue) * 0.6 + minValue);
+  return Math.round((maxValue - minValue) * 0.5 + minValue);
 };
 
 export const getGoalValue = (row?: DatatableRow, state?: GaugeVisualizationState) => {
@@ -94,7 +94,7 @@ export const getGoalValue = (row?: DatatableRow, state?: GaugeVisualizationState
   }
   const minValue = getMinValue(row, state);
   const maxValue = getMaxValue(row, state);
-  return Math.round((maxValue - minValue) * 0.8 + minValue);
+  return Math.round((maxValue - minValue) * 0.75 + minValue);
 };
 
 export const transparentizePalettes = (palettes: PaletteRegistry) => {
