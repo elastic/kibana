@@ -6,6 +6,7 @@
  */
 
 import { useMemo } from 'react';
+import { useEuiTheme } from '@elastic/eui';
 import { keyframes, CSSObject } from '@emotion/react';
 
 interface StylesDeps {
@@ -13,8 +14,16 @@ interface StylesDeps {
 }
 
 export const useStyles = ({ height = 500 }: StylesDeps) => {
+  const { euiTheme } = useEuiTheme();
+
   const cached = useMemo(() => {
+    const { animation } = euiTheme;
+    const detailPanelSize = '424px';
+
     const slideIn = keyframes({
+      from: {
+        right: `-${detailPanelSize}`,
+      },
       to: {
         right: '0',
       },
@@ -25,34 +34,34 @@ export const useStyles = ({ height = 500 }: StylesDeps) => {
         right: '0',
       },
       to: {
-        right: '-424px',
+        right: `-${detailPanelSize}`,
       },
     });
 
     const detailPanel: CSSObject = {
-      width: '424px',
+      width: detailPanelSize,
       height: `${height}px`,
       overflowY: 'auto',
       position: 'absolute',
       top: '8px',
-      right: '-424px',
+      right: `-${detailPanelSize}`,
     };
 
     const detailPanelIn: CSSObject = {
       ...detailPanel,
-      animation: `${slideIn} 200ms ease forwards`,
+      animation: `${slideIn} ${animation.normal} ease forwards`,
     };
 
     const detailPanelOut: CSSObject = {
       ...detailPanel,
-      animation: `${slideOut} 150ms ease`,
+      animation: `${slideOut} ${animation.fast} ease forwards`,
     };
 
     return {
       detailPanelIn,
       detailPanelOut,
     };
-  }, [height]);
+  }, [height, euiTheme]);
 
   return cached;
 };
