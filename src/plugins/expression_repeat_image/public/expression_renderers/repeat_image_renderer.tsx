@@ -11,6 +11,7 @@ import { Observable } from 'rxjs';
 import { CoreTheme } from 'kibana/public';
 import { ExpressionRenderDefinition, IInterpreterRenderHandlers } from 'src/plugins/expressions';
 import { i18n } from '@kbn/i18n';
+import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaThemeProvider } from '../../../kibana_react/public';
 import { CoreSetup } from '../../../../core/public';
 import {
@@ -60,7 +61,9 @@ export const getRepeatImageRenderer =
 
       render(
         <KibanaThemeProvider theme$={theme$}>
-          <RepeatImageComponent onLoaded={handlers.done} {...settings} parentNode={domNode} />
+          <I18nProvider>
+            <RepeatImageComponent onLoaded={handlers.done} {...settings} parentNode={domNode} />
+          </I18nProvider>
         </KibanaThemeProvider>,
         domNode
       );
