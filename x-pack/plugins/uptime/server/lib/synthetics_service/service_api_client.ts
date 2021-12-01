@@ -5,9 +5,12 @@
  * 2.0.
  */
 
-import axios, { AxiosPromise } from 'axios';
+import axios from 'axios';
+import { forkJoin, from as rxjsFrom, Observable, of } from 'rxjs';
+import { catchError, tap } from 'rxjs/operators';
 import { ServiceLocations, SyntheticsMonitorSavedObject } from '../../../common/types';
 import { getServiceLocations } from './get_service_locations';
+import { Logger } from '../../../../../../src/core/server';
 
 const TEST_SERVICE_USERNAME = 'localKibanaIntegrationTestsUser';
 
@@ -25,11 +28,12 @@ export class ServiceAPIClient {
   private readonly username: string;
   private readonly authorization: string;
   private locations: ServiceLocations;
+  private logger: Logger;
 
-  constructor(manifestUrl: string, username: string, password: string) {
+  constructor(manifestUrl: string, username: string, password: string, logger: Logger) {
     this.username = username;
     this.authorization = 'Basic ' + Buffer.from(`${username}:${password}`).toString('base64');
-
+    this.logger = logger;
     this.locations = [];
 
     getServiceLocations({ manifestUrl }).then((result) => {
@@ -57,7 +61,6 @@ export class ServiceAPIClient {
 
     const callServiceEndpoint = (monitors: ServiceData['monitors'], url: string) => {
       return axios({
-        // service uses the same method for PUT
         method,
         url: url + '/monitors',
         data: { monitors, output },
@@ -67,22 +70,33 @@ export class ServiceAPIClient {
       });
     };
 
-    // TODO: Use rxjs to better handle promises
-    const promises: AxiosPromise[] = [];
+    const pushErrors: Array<{ locationId: string; error: Error }> = [];
+
+    const promises: Array<Observable<unknown>> = [];
 
     this.locations.forEach(({ id, url }) => {
       const locMonitors = allMonitors.filter(
         ({ locations }) => !locations || locations?.includes(id)
       );
       if (locMonitors.length > 0) {
-        promises.push(callServiceEndpoint(locMonitors, url));
+        promises.push(
+          rxjsFrom(callServiceEndpoint(locMonitors, url)).pipe(
+            tap((result) => {
+              this.logger.debug(result.data);
+            }),
+            catchError((err) => {
+              pushErrors.push({ locationId: id, error: err });
+              this.logger.error(err);
+              // we don't want to throw an unhandled exception here
+              return of(true);
+            })
+          )
+        );
       }
     });
 
-    try {
-      return await Promise.all(promises);
-    } catch (err) {
-      throw err;
-    }
+    await forkJoin(promises).toPromise();
+
+    return pushErrors;
   }
 }

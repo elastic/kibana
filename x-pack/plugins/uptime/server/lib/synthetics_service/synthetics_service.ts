@@ -51,7 +51,7 @@ export class SyntheticsService {
 
     const { manifestUrl, username, password } = this.config.unsafe.service;
 
-    this.apiClient = new ServiceAPIClient(manifestUrl, username, password);
+    this.apiClient = new ServiceAPIClient(manifestUrl, username, password, logger);
 
     this.esHosts = getEsHosts({ config: this.config, cloud: server.cloud });
   }
@@ -108,7 +108,7 @@ export class SyntheticsService {
             async run() {
               const { state } = taskInstance;
 
-              // TODO: Push API Key and Monitor Configs to service here
+              await service.pushConfigs();
 
               return { state };
             },
@@ -127,7 +127,7 @@ export class SyntheticsService {
         id: SYNTHETICS_SERVICE_SYNC_MONITORS_TASK_ID,
         taskType: SYNTHETICS_SERVICE_SYNC_MONITORS_TASK_TYPE,
         schedule: {
-          interval: '5m',
+          interval: '1m',
         },
         params: {},
         state: {},
@@ -144,7 +144,7 @@ export class SyntheticsService {
       });
   }
 
-  async getOutput(request: KibanaRequest) {
+  async getOutput(request?: KibanaRequest) {
     if (!this.apiKey) {
       try {
         this.apiKey = await getAPIKeyForSyntheticsService({ server: this.server, request });
@@ -165,7 +165,7 @@ export class SyntheticsService {
     };
   }
 
-  async pushConfigs(request: KibanaRequest, configs?: MonitorConfigs) {
+  async pushConfigs(request?: KibanaRequest, configs?: MonitorConfigs) {
     const monitors = this.formatConfigs(configs || (await this.getMonitorConfigs()));
     const data = {
       monitors,
@@ -204,19 +204,33 @@ export class SyntheticsService {
   }
 
   formatConfigs(configs: MonitorConfigs) {
+    // TODO: Move to dedicated formatter class
     function parseSchedule(schedule: any) {
       return `@every ${schedule.number}${schedule.unit}`;
     }
-    return configs.map(({ id, schedule, type, name, locations, tags, urls, source }) => ({
-      id,
-      type,
-      name,
-      locations,
-      tags,
-      source,
-      urls: [urls],
-      schedule: parseSchedule(schedule),
-    }));
+
+    function parseInlineSource(monAttrs: any) {
+      if (monAttrs['source.inline.script']) {
+        return {
+          inline: {
+            script: monAttrs['source.inline.script'],
+          },
+        };
+      }
+    }
+    return configs.map((monAttrs) => {
+      const { id, schedule, type, name, locations, tags, urls } = monAttrs;
+      return {
+        id,
+        type,
+        name,
+        locations,
+        tags,
+        source: parseInlineSource(monAttrs),
+        urls: [urls],
+        schedule: parseSchedule(schedule),
+      };
+    });
   }
 }
 
