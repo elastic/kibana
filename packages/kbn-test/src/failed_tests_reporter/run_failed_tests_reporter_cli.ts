@@ -99,7 +99,7 @@ export function runFailedTestsReporterCli() {
       for (const reportPath of reportPaths) {
         if (process.env.BUILDKITE_TEST_ANALYTICS_API_KEY) {
           await Axios.request({
-            url: 'https://analytics-api.buildkite.com/v1/runs',
+            url: 'https://analytics-api.buildkite.com/v1/uploads',
             method: 'POST',
             headers: {
               Authorization: `Token token=${process.env.BUILDKITE_TEST_ANALYTICS_API_KEY}`,
