@@ -9,13 +9,11 @@ import React from 'react';
 
 import {
   EuiPageContent,
-  EuiSpacer,
   EuiText,
   EuiSteps,
   EuiCode,
   EuiCodeBlock,
   EuiAccordion,
-  EuiLink,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
