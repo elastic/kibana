@@ -22,19 +22,19 @@ export const useStyles = ({ height = 500 }: StylesDeps) => {
 
     const slideIn = keyframes({
       from: {
-        right: `-${detailPanelSize}`,
+        left: '100%',
       },
       to: {
-        right: '0',
+        left: `calc(100% - ${detailPanelSize})`,
       },
     });
 
     const slideOut = keyframes({
       from: {
-        right: '0',
+        left: `calc(100% - ${detailPanelSize})`,
       },
       to: {
-        right: `-${detailPanelSize}`,
+        left: '100%',
       },
     });
 
@@ -44,7 +44,7 @@ export const useStyles = ({ height = 500 }: StylesDeps) => {
       overflowY: 'auto',
       position: 'absolute',
       top: '8px',
-      right: `-${detailPanelSize}`,
+      left: '100%',
     };
 
     const detailPanelIn: CSSObject = {
