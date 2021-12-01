@@ -48,6 +48,7 @@ describe('EventDetails', () => {
     timelineId: 'test',
     eventView: EventsViewType.summaryView,
     hostRisk: { fields: [], loading: true },
+    indexName: 'test',
     rawEventData,
   };
 
