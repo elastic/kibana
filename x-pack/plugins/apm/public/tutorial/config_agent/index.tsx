@@ -8,9 +8,11 @@ import { EuiCodeBlock, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { HttpStart } from 'kibana/public';
 import React, { useEffect, useMemo, useState } from 'react';
-import semverParse from 'semver/functions/parse';
 import styled from 'styled-components';
-import { SUPPORTED_APM_PACKAGE_VERSION } from '../../../common/fleet';
+import {
+  isPrereleaseVersion,
+  SUPPORTED_APM_PACKAGE_VERSION,
+} from '../../../common/fleet';
 import { APIReturnType } from '../../services/rest/createCallApmApi';
 import { getCommands } from './commands/get_commands';
 import { getPolicyOptions, PolicyOption } from './get_policy_options';
@@ -63,8 +65,6 @@ function getFleetLink({
     return;
   }
 
-  const isPrerelease = semverParse(kibanaVersion)?.prerelease?.length ?? 0 > 0;
-
   return hasFleetAgents
     ? {
         label: MANAGE_FLEET_POLICIES_LABEL,
@@ -72,7 +72,7 @@ function getFleetLink({
       }
     : {
         label: GET_STARTED_WITH_FLEET_LABEL,
-        href: isPrerelease
+        href: isPrereleaseVersion(kibanaVersion)
           ? `${basePath}/app/integrations#/detail/apm/overview`
           : `${basePath}/app/integrations#/detail/apm-${SUPPORTED_APM_PACKAGE_VERSION}/overview`,
       };

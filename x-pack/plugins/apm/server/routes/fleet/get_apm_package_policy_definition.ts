@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import semverParse from 'semver/functions/parse';
 import {
+  isPrereleaseVersion,
   POLICY_ELASTIC_AGENT_ON_CLOUD,
   SUPPORTED_APM_PACKAGE_VERSION,
 } from '../../../common/fleet';
@@ -59,8 +59,7 @@ async function getApmPackageVersion(
   fleetPluginStart: APMPluginStartDependencies['fleet'],
   kibanaVersion: string
 ) {
-  const isPrerelease = semverParse(kibanaVersion)?.prerelease?.length ?? 0 > 0;
-  if (fleetPluginStart && isPrerelease) {
+  if (fleetPluginStart && isPrereleaseVersion(kibanaVersion)) {
     try {
       const latestApmPackage = await fleetPluginStart.fetchFindLatestPackage(
         'apm'

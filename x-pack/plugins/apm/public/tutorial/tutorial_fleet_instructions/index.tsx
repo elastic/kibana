@@ -18,9 +18,11 @@ import {
 import { i18n } from '@kbn/i18n';
 import { HttpStart } from 'kibana/public';
 import React, { useEffect, useState } from 'react';
-import semverParse from 'semver/functions/parse';
 import styled from 'styled-components';
-import { SUPPORTED_APM_PACKAGE_VERSION } from '../../../common/fleet';
+import {
+  isPrereleaseVersion,
+  SUPPORTED_APM_PACKAGE_VERSION,
+} from '../../../common/fleet';
 import { APIReturnType } from '../../services/rest/createCallApmApi';
 
 interface Props {
@@ -46,7 +48,6 @@ function TutorialFleetInstructions({
 }: Props) {
   const [data, setData] = useState<APIResponseType | undefined>();
   const [isLoading, setIsLoading] = useState(false);
-  const isPrerelease = semverParse(kibanaVersion)?.prerelease?.length ?? 0 > 0;
 
   useEffect(() => {
     async function fetchData() {
@@ -77,7 +78,7 @@ function TutorialFleetInstructions({
 
   const apmIntegrationHref = shouldLinkToMigration
     ? `${basePath}/app/apm/settings/schema`
-    : isPrerelease
+    : isPrereleaseVersion(kibanaVersion)
     ? `${basePath}/app/integrations#/detail/apm/overview`
     : `${basePath}/app/integrations/detail/apm-${SUPPORTED_APM_PACKAGE_VERSION}/overview`;
 
