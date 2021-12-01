@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+// / <reference types="cypress" />
+
 // ***********************************************************
 // This example support/index.js is processed and
 // loaded automatically before your test files.
@@ -21,7 +23,26 @@
 // ***********************************************************
 
 // Import commands.js using ES2015 syntax:
+// eslint-disable-next-line import/no-extraneous-dependencies
+// import '@cypress/code-coverage/support';
+import './coverage';
 import './commands';
+
+// declare global {
+//   // eslint-disable-next-line @typescript-eslint/no-namespace
+//   namespace Cypress {
+//     interface Chainable {
+//       getBySel(value: string, ...args: unknown[]): Chainable<unknown>;
+//     }
+//   }
+// }
+
+function getBySel(selector, ...args) {
+  // @ts-expect-error update types
+  return cy.get(`[data-test-subj=${selector}]`, ...args);
+}
+
+Cypress.Commands.add('getBySel', getBySel);
 
 // Alternatively you can use CommonJS syntax:
 // require('./commands')
