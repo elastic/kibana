@@ -483,7 +483,21 @@ export const AlertsList: React.FunctionComponent = () => {
     },
     {
       field: 'executionStatus.lastExecutionDate',
-      name: 'Last run',
+      name: (
+        <EuiToolTip
+          content={i18n.translate(
+            'xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.lastExecutionDateTitle',
+            {
+              defaultMessage: 'Start time of the last execution.',
+            }
+          )}
+        >
+          <span>
+            Last run{' '}
+            <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
+          </span>
+        </EuiToolTip>
+      ),
       sortable: true,
       width: '15%',
       'data-test-subj': 'alertsTableCell-lastExecutionDate',
