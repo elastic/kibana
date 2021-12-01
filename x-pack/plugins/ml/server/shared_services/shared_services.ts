@@ -252,7 +252,8 @@ function getRequestItemsProvider(
     const getDataViewsService = getDataViewsServiceFactory(
       getDataViews,
       savedObjectsClient,
-      scopedClient
+      scopedClient,
+      request
     );
 
     return {

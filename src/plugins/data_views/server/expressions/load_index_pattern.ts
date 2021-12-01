@@ -85,7 +85,8 @@ export function getIndexPatternLoad({
       return {
         indexPatterns: await indexPatternsServiceFactory(
           savedObjects.getScopedClient(request),
-          elasticsearch.client.asScoped(request).asCurrentUser
+          elasticsearch.client.asScoped(request).asCurrentUser,
+          request
         ),
       };
     },

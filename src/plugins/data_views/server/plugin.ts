@@ -53,13 +53,14 @@ export class DataViewsServerPlugin
   }
 
   public start(
-    { uiSettings }: CoreStart,
+    { uiSettings, capabilities }: CoreStart,
     { fieldFormats }: DataViewsServerPluginStartDependencies
   ) {
     const serviceFactory = dataViewsServiceFactory({
       logger: this.logger.get('indexPatterns'),
       uiSettings,
       fieldFormats,
+      capabilities,
     });
 
     return {

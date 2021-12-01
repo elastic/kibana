@@ -6,6 +6,9 @@
  * Side Public License, v 1.
  */
 
-export * from './duplicate_index_pattern';
-export * from './data_view_saved_object_conflict';
-export * from './insufficient_access';
+export class DataViewInsufficientAccessError extends Error {
+  constructor(savedObjectId?: string) {
+    super(`Operation failed due to insufficient access, id: ${savedObjectId}`);
+    this.name = 'DataViewInsufficientAccessError';
+  }
+}

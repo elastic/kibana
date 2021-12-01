@@ -48,6 +48,7 @@ const savedObject = {
 
 describe('IndexPatterns', () => {
   let indexPatterns: DataViewsService;
+  let indexPatternsNoAccess: DataViewsService;
   let savedObjectsClient: SavedObjectsClientCommon;
   let SOClientGetDelay = 0;
   const uiSettings = {
@@ -99,6 +100,18 @@ describe('IndexPatterns', () => {
       onNotification: () => {},
       onError: () => {},
       onRedirectNoIndexPattern: () => {},
+      getCanSave: () => Promise.resolve(true),
+    });
+
+    indexPatternsNoAccess = new DataViewsService({
+      uiSettings,
+      savedObjectsClient: savedObjectsClient as unknown as SavedObjectsClientCommon,
+      apiClient: createFieldsFetcher(),
+      fieldFormats,
+      onNotification: () => {},
+      onError: () => {},
+      onRedirectNoIndexPattern: () => {},
+      getCanSave: () => Promise.resolve(false),
     });
   });
 
@@ -169,6 +182,10 @@ describe('IndexPatterns', () => {
     expect(indexPattern).toBeDefined();
     await indexPatterns.delete(id);
     expect(indexPattern).not.toBe(await indexPatterns.get(id));
+  });
+
+  test('delete will throw if insufficient access', async () => {
+    await expect(indexPatternsNoAccess.delete('1')).rejects.toMatchSnapshot();
   });
 
   test('should handle version conflicts', async () => {
@@ -244,6 +261,18 @@ describe('IndexPatterns', () => {
     await indexPatterns.createAndSave({ title });
     expect(indexPatterns.createSavedObject).toBeCalled();
     expect(indexPatterns.setDefault).toBeCalled();
+  });
+
+  test('createAndSave will throw if insufficient access', async () => {
+    const title = 'kibana-*';
+
+    await expect(indexPatternsNoAccess.createAndSave({ title })).rejects.toMatchSnapshot();
+  });
+
+  test('updateSavedObject will throw if insufficient access', async () => {
+    await expect(
+      indexPatternsNoAccess.updateSavedObject({ id: 'id' } as unknown as DataView)
+    ).rejects.toMatchSnapshot();
   });
 
   test('savedObjectToSpec', () => {
