@@ -6,30 +6,39 @@
  */
 
 import expect from '@kbn/expect';
+import { apm, timerange } from '@elastic/apm-synthtrace';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import archives from '../../common/fixtures/es_archiver/archives_metadata';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const apmApiClient = getService('apmApiClient');
   const registry = getService('registry');
+  const synthtraceEsClient = getService('synthtraceEsClient');
 
-  const archiveName = 'apm_8.0.0';
-  const { start, end } = archives[archiveName];
-  const serviceName = 'opbeans-java';
-  const serviceNodeName = '31651f3c624b81c55dd4633df0b5b9f9ab06b151121b0404ae796632cd1f87ad';
+  const start = new Date('2021-01-01T00:00:00.000Z').getTime();
+  const end = new Date('2021-01-01T00:15:00.000Z').getTime() - 1;
+  const serviceName = 'synth-go';
+  const instanceName = 'instance-a';
+
+  async function callApi() {
+    return await apmApiClient.readUser({
+      endpoint: 'GET /internal/apm/services/{serviceName}/node/{serviceNodeName}/metadata',
+      params: {
+        path: { serviceName, serviceNodeName: instanceName },
+        query: {
+          start: new Date(start).toISOString(),
+          end: new Date(end).toISOString(),
+          kuery: '',
+        },
+      },
+    });
+  }
 
   registry.when(
     'Service node metadata when data is not loaded',
     { config: 'basic', archives: [] },
     () => {
       it('handles the empty state', async () => {
-        const response = await apmApiClient.readUser({
-          endpoint: 'GET /internal/apm/services/{serviceName}/node/{serviceNodeName}/metadata',
-          params: {
-            path: { serviceName, serviceNodeName },
-            query: { start, end, kuery: '' }
-          },
-        });
+        const response = await callApi();
 
         expect(response.status).to.be(200);
 
@@ -45,23 +54,35 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   registry.when(
     'Service node metadata when data is loaded',
-    { config: 'basic', archives: [archiveName] },
+    { config: 'basic', archives: ['apm_mappings_only_8.0.0'] },
     () => {
-      it('returns java service node metadata', async () => {
-        const response = await apmApiClient.readUser({
-          endpoint: 'GET /internal/apm/services/{serviceName}/node/{serviceNodeName}/metadata',
-          params: {
-            path: { serviceName, serviceNodeName },
-            query: { start, end, kuery: '' }
-          },
-        });
+      before(async () => {
+        const instance = apm.service(serviceName, 'production', 'go').instance(instanceName);
+        await synthtraceEsClient.index(
+          timerange(start, end)
+            .interval('1m')
+            .rate(1)
+            .flatMap((timestamp) =>
+              instance
+                .transaction('GET /api/product/list')
+                .timestamp(timestamp)
+                .duration(1000)
+                .success()
+                .serialize()
+            )
+        );
+      });
+      after(() => synthtraceEsClient.clean());
+
+      it('returns service node metadata', async () => {
+        const response = await callApi();
 
         expect(response.status).to.be(200);
 
         expectSnapshot(response.body).toMatchInline(`
           Object {
-            "containerId": "31651f3c624b81c55dd4633df0b5b9f9ab06b151121b0404ae796632cd1f87ad",
-            "host": "N/A",
+            "containerId": "instance-a",
+            "host": "instance-a",
           }
         `);
       });
