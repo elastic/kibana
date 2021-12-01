@@ -16,25 +16,17 @@ import {
   EuiFlexItem,
   EuiFormRow,
   EuiHorizontalRule,
-  EuiIcon,
-  EuiLink,
   EuiPanel,
   EuiSpacer,
-  EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { LicensingLogic } from '../../../../../shared/licensing';
 import { AppLogic } from '../../../../app_logic';
-import { EXPLORE_PLATINUM_FEATURES_LINK } from '../../../../constants';
-import { ENT_SEARCH_LICENSE_MANAGEMENT } from '../../../../routes';
 import { FeatureIds, Configuration, Features } from '../../../../types';
 
 import { AddSourceLogic } from './add_source_logic';
-import {
-  SOURCE_FEATURES_DOCUMENT_LEVEL_PERMISSIONS_FEATURE,
-  SOURCE_FEATURES_DOCUMENT_LEVEL_PERMISSIONS_TITLE,
-} from './constants';
+import { DocumentPermissionsCallout } from './document_permissions_callout';
 import { DocumentPermissionsField } from './document_permissions_field';
 import { SourceFeatures } from './source_features';
 
@@ -145,40 +137,12 @@ export const ConnectInstance: React.FC<ConnectInstanceProps> = ({
     />
   );
 
-  const documentLevelPermissionsCallout = (
-    <>
-      <EuiPanel paddingSize="l" data-test-subj="DocumentLevelPermissionsCallout">
-        <EuiFlexGroup gutterSize="s" alignItems="center">
-          <EuiFlexItem grow={false}>
-            <EuiIcon size="m" type="lock" />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiText size="xs">
-              <strong>{SOURCE_FEATURES_DOCUMENT_LEVEL_PERMISSIONS_TITLE}</strong>
-            </EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer size="s" />
-        <EuiText size="xs">
-          <p>{SOURCE_FEATURES_DOCUMENT_LEVEL_PERMISSIONS_FEATURE}</p>
-        </EuiText>
-        <EuiSpacer size="s" />
-        <EuiText size="xs">
-          <EuiLink external target="_blank" href={ENT_SEARCH_LICENSE_MANAGEMENT}>
-            {EXPLORE_PLATINUM_FEATURES_LINK}
-          </EuiLink>
-        </EuiText>
-      </EuiPanel>
-      <EuiSpacer />
-    </>
-  );
-
   const formFields = (
     <>
       {isOrganization && hasPlatinumLicense && permissionField}
       {!hasOauthRedirect && credentialsFields}
       {needsSubdomain && subdomainField}
-      {permissionsExcluded && !hasPlatinumLicense && documentLevelPermissionsCallout}
+      {permissionsExcluded && !hasPlatinumLicense && <DocumentPermissionsCallout />}
 
       <EuiFormRow>
         <EuiButton color="primary" type="submit" fill isLoading={formLoading}>

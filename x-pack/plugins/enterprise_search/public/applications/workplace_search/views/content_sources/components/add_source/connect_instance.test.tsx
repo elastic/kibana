@@ -15,6 +15,7 @@ import { shallow } from 'enzyme';
 import { staticSourceData } from '../../source_data';
 
 import { ConnectInstance } from './connect_instance';
+import { DocumentPermissionsCallout } from './document_permissions_callout';
 
 describe('ConnectInstance', () => {
   // Needed to mock redirect window.location.replace(oauthUrl)
@@ -140,6 +141,6 @@ describe('ConnectInstance', () => {
     setMockValues({ ...values, hasPlatinumLicense: false });
     const wrapper = shallow(<ConnectInstance {...oauthProps} />);
 
-    expect(wrapper.find('[data-test-subj="DocumentLevelPermissionsCallout"]')).toHaveLength(1);
+    expect(wrapper.find(DocumentPermissionsCallout)).toHaveLength(1);
   });
 });
