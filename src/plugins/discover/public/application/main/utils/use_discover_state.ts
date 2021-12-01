@@ -24,7 +24,7 @@ import { useSearchSession } from './use_search_session';
 import { FetchStatus } from '../../types';
 import { getSwitchIndexPatternAppState } from './get_switch_index_pattern_app_state';
 import { SortPairArr } from '../../../components/doc_table/lib/get_sort';
-import { ElasticSearchHit } from '../../../services/doc_views/doc_views_types';
+import { ElasticSearchHit } from '../../../types';
 
 export function useDiscoverState({
   services,

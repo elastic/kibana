@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { ElasticSearchHit } from 'src/plugins/discover/public/services/doc_views/doc_views_types';
 import {
   IndexPattern,
   IndexPatternAttributes,
@@ -20,6 +19,7 @@ import { DataRefetch$, SavedSearchData } from '../../utils/use_saved_search';
 import { DiscoverServices } from '../../../../build_services';
 import { SavedSearch } from '../../../../services/saved_searches';
 import { RequestAdapter } from '../../../../../../inspector';
+import { ElasticSearchHit } from '../../../../types';
 
 export interface DiscoverLayoutProps {
   indexPattern: IndexPattern;

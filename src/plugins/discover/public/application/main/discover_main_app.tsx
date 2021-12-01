@@ -15,7 +15,7 @@ import { useUrl } from './utils/use_url';
 import { IndexPatternAttributes, SavedObject } from '../../../../data/common';
 import { DiscoverServices } from '../../build_services';
 import { SavedSearch } from '../../services/saved_searches';
-import { ElasticSearchHit } from '../../services/doc_views/doc_views_types';
+import { ElasticSearchHit } from '../../types';
 
 const DiscoverLayoutMemoized = React.memo(DiscoverLayout);
 
