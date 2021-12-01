@@ -18,6 +18,7 @@ import { useUrlParams } from '../../../hooks';
 import { UptimeRefreshContext } from '../../../contexts';
 import { getConnectorsAction, getMonitorAlertsAction } from '../../../state/alerts/alerts';
 import { useMappingCheck } from '../../../hooks/use_mapping_check';
+import { useOverviewFilterCheck } from '../../../hooks/use_overview_filter_check';
 
 export interface MonitorListProps {
   filters?: string;
@@ -35,6 +36,7 @@ const getPageSizeValue = () => {
 
 export const MonitorList: React.FC<MonitorListProps> = (props) => {
   const filters = useSelector(esKuerySelector);
+  const filterCheck = useOverviewFilterCheck();
 
   const [pageSize, setPageSize] = useState<number>(getPageSizeValue);
 
@@ -50,7 +52,7 @@ export const MonitorList: React.FC<MonitorListProps> = (props) => {
   useMappingCheck(monitorList.error);
 
   useEffect(() => {
-    if (esKueryHasLoaded) {
+    filterCheck(() =>
       dispatch(
         getMonitorList({
           dateRangeStart,
@@ -61,13 +63,14 @@ export const MonitorList: React.FC<MonitorListProps> = (props) => {
           statusFilter,
           query,
         })
-      );
-    }
+      )
+    );
   }, [
     dispatch,
     dateRangeStart,
     dateRangeEnd,
     filters,
+    filterCheck,
     lastRefresh,
     pageSize,
     pagination,

@@ -18,6 +18,7 @@ import { useGetUrlParams } from '../../../hooks';
 import { useMonitorId } from '../../../hooks';
 import { ResponsiveWrapperProps, withResponsiveWrapper } from '../../common/higher_order';
 import { UptimeRefreshContext } from '../../../contexts';
+import { useOverviewFilterCheck } from '../../../hooks/use_overview_filter_check';
 
 interface Props {
   height: string;
@@ -31,6 +32,7 @@ const Container: React.FC<Props & ResponsiveWrapperProps> = ({ height }) => {
     dateRangeStart: dateStart,
     dateRangeEnd: dateEnd,
   } = useGetUrlParams();
+  const filterCheck = useOverviewFilterCheck();
 
   const dispatch = useDispatch();
   const monitorId = useMonitorId();
@@ -43,10 +45,20 @@ const Container: React.FC<Props & ResponsiveWrapperProps> = ({ height }) => {
 
   const esKueryHasLoaded = useSelector(esKueryInitialStatusSelector);
   useEffect(() => {
-    if (esKueryHasLoaded) {
-      dispatch(getPingHistogram.get({ monitorId, dateStart, dateEnd, query, filters: esKuery }));
-    }
-  }, [esKueryHasLoaded, dateStart, dateEnd, monitorId, lastRefresh, esKuery, dispatch, query]);
+    filterCheck(() =>
+      dispatch(getPingHistogram.get({ monitorId, dateStart, dateEnd, query, filters: esKuery }))
+    );
+  }, [
+    filterCheck,
+    esKueryHasLoaded,
+    dateStart,
+    dateEnd,
+    monitorId,
+    lastRefresh,
+    esKuery,
+    dispatch,
+    query,
+  ]);
   return (
     <PingHistogramComponent
       data={data}
