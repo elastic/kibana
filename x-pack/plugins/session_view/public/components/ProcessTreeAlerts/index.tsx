@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { useStyles } from './styles';
-import { ProcessEvent } from '../../hooks/use_process_tree';
+import { ProcessEvent } from '../../../common/types/process_tree';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import { CoreStart } from '../../../../../../src/core/public';
 

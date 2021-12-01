@@ -6,7 +6,8 @@
  */
 import React, { useRef, useLayoutEffect, useCallback } from 'react';
 import { ProcessTreeNode } from '../ProcessTreeNode';
-import { useProcessTree, ProcessEvent, Process } from '../../hooks/use_process_tree';
+import { useProcessTree } from '../../hooks/use_process_tree';
+import { ProcessEvent, Process } from '../../../common/types/process_tree';
 import { useScroll } from '../../hooks/use_scroll';
 import { useStyles } from './styles';
 
