@@ -28,7 +28,7 @@ export function playwrightRunTests({ headless, match }: { headless: boolean; mat
   };
 }
 
-async function playwrightStart(getService: any, headless: boolean, match?: string) {
+async function playwrightStart(getService: any, headless = true, match?: string) {
   console.log('Loading esArchiver...');
   const esArchiver = getService('esArchiver');
   await esArchiverLoad('full_heartbeat');

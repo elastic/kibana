@@ -59,7 +59,7 @@ if (server) {
 const config = './playwright_run.ts';
 
 function executeRunner() {
-  if (server) {
+  if (server || ftrScript === 'functional_tests') {
     childProcess.execSync(
       `node ../../../scripts/${ftrScript} --config ${config} --kibana-install-dir '${kibanaInstallDir}' `,
       {
