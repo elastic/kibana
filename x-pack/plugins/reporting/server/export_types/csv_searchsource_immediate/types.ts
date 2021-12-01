@@ -5,4 +5,8 @@
  * 2.0.
  */
 
-export type { JobParamsPDFV2, TaskPayloadPDFV2 } from '../../../common/types';
+export type {
+  FakeRequest,
+  JobParamsDownloadCSV,
+  SavedObjectServiceError,
+} from '../../../common/types';
