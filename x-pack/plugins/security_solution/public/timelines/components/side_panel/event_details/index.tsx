@@ -213,6 +213,7 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
             timelineId={timelineId}
             timelineTabType="flyout"
             hostRisk={hostRisk}
+            handleOnEventClosed={handleOnEventClosed}
           />
         )}
       </StyledEuiFlyoutBody>
@@ -247,6 +248,7 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
         timelineId={timelineId}
         timelineTabType={tabType}
         hostRisk={hostRisk}
+        handleOnEventClosed={handleOnEventClosed}
       />
     </>
   );

@@ -17,7 +17,8 @@ import {
   EuiText,
   IconColor,
 } from '@elastic/eui';
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
+import { useSelector } from 'react-redux';
 import { find } from 'lodash/fp';
 
 import type { BrowserFields } from '../../containers/source';
@@ -151,15 +152,21 @@ interface StatusPopoverButtonProps {
   enrichedFieldInfo: EnrichedDataWithValues;
   indexName: string;
   timelineId: string;
+  handleOnEventClosed: () => void;
 }
+
 const StatusPopoverButton = React.memo<StatusPopoverButtonProps>(
-  ({ eventId, contextId, enrichedFieldInfo, indexName, timelineId }) => {
+  ({ eventId, contextId, enrichedFieldInfo, indexName, timelineId, handleOnEventClosed }) => {
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
     const togglePopover = () => setIsPopoverOpen(!isPopoverOpen);
     const closePopover = () => setIsPopoverOpen(false);
+    const closeAfterAction = () => {
+      closePopover();
+      handleOnEventClosed();
+    };
 
     const { actionItems } = useAlertsActions({
-      closePopover,
+      closePopover: closeAfterAction,
       eventId,
       timelineId,
       indexName,
@@ -203,12 +210,13 @@ interface Props {
   contextId: string;
   data: TimelineEventsDetailsItem[];
   eventId: string;
+  handleOnEventClosed: () => void;
   indexName: string;
   timelineId: string;
 }
 
 export const OverviewCards = React.memo<Props>(
-  ({ browserFields, contextId, data, eventId, indexName, timelineId }) => {
+  ({ browserFields, contextId, data, eventId, handleOnEventClosed, indexName, timelineId }) => {
     const statusData = useMemo(() => {
       const item = find({ field: SIGNAL_STATUS_FIELD_NAME, category: 'kibana' }, data);
       return (
@@ -278,6 +286,7 @@ export const OverviewCards = React.memo<Props>(
                 enrichedFieldInfo={statusData}
                 indexName={indexName}
                 timelineId={timelineId}
+                handleOnEventClosed={handleOnEventClosed}
               />
             </OverviewCard>
           </EuiFlexItem>
