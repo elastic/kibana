@@ -757,7 +757,7 @@ export interface Visualization<T = unknown> {
    */
   getErrorMessages: (
     state: T,
-    frame?: FramePublicAPI
+    datasourceLayers?: Record<string, DatasourcePublicAPI>
   ) =>
     | Array<{
         shortMessage: string;
