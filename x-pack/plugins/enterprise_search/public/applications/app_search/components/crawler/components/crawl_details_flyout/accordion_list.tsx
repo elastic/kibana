@@ -29,7 +29,13 @@ interface Props {
   title: string;
 }
 
-export const AccordionList: React.FC<Props> = ({ iconType, items, hasBorder, initialIsOpen, title }) => {
+export const AccordionList: React.FC<Props> = ({
+  iconType,
+  items,
+  hasBorder,
+  initialIsOpen,
+  title,
+}) => {
   const accordionId = useGeneratedHtmlId({
     prefix: 'accordionList',
   });
@@ -63,9 +69,13 @@ export const AccordionList: React.FC<Props> = ({ iconType, items, hasBorder, ini
             render: ({ item }: { item: string }) => item,
           },
         ]}
-        pagination={ items.length > 10 ? {
-          hidePerPageOptions: true,
-        } : false}
+        pagination={
+          items.length > 10
+            ? {
+                hidePerPageOptions: true,
+              }
+            : false
+        }
       />
     </EuiAccordion>
   );
