@@ -11,7 +11,7 @@ import { EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { DOCS_PREFIX } from '../../routes';
+import { META_ENGINES_DOCS_URL } from '../../routes';
 import {
   META_ENGINE_CREATION_FORM_META_ENGINE_DESCRIPTION,
   META_ENGINE_CREATION_FORM_DOCUMENTATION_LINK,
@@ -40,7 +40,7 @@ export const META_ENGINES_DESCRIPTION = (
       defaultMessage="{readDocumentationLink} for more information or upgrade to a Platinum license to get started."
       values={{
         readDocumentationLink: (
-          <EuiLink href={`${DOCS_PREFIX}/meta-engines-guide.html`} target="_blank">
+          <EuiLink href={META_ENGINES_DOCS_URL} target="_blank">
             {META_ENGINE_CREATION_FORM_DOCUMENTATION_LINK}
           </EuiLink>
         ),
