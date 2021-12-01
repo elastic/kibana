@@ -169,5 +169,3 @@ export const createFleetAuthzMock = (): FleetAuthz => {
     },
   };
 };
-
-export const fleetAuthzMock: FleetAuthz = createFleetAuthzMock();

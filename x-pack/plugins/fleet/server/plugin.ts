@@ -255,8 +255,8 @@ export class FleetPlugin
       });
     }
 
-    core.http.registerRouteHandlerContext<FleetRequestHandlerContext, 'fleet'>(
-      'fleet',
+    core.http.registerRouteHandlerContext<FleetRequestHandlerContext, typeof PLUGIN_ID>(
+      PLUGIN_ID,
       async (context, request) => {
         const plugin = this;
 

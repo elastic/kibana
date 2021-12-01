@@ -15,6 +15,7 @@ import type { Agent, GetAgentStatusResponse } from '../../../common';
 import { checkSuperuser } from '../../routes/security';
 
 import { FleetUnauthorizedError } from '../../errors';
+
 import { getAgentsByKuery, getAgentById } from './crud';
 import { getAgentStatusById, getAgentStatusForAgentPolicy } from './status';
 
