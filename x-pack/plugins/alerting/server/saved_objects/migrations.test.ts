@@ -651,62 +651,6 @@ describe('successful migrations', () => {
     });
   });
 
-  describe('7.12.0', () => {
-    test('Migrates incorrect action group spelling for metrics inventory threshold rules', () => {
-      const migration712 = getMigrations(encryptedSavedObjectsSetup, isPreconfigured)['7.12.0'];
-
-      const actions = [
-        {
-          group: 'metrics.invenotry_threshold.fired',
-          params: {
-            level: 'info',
-            message:
-              '""{{alertName}} - {{context.group}} is in a state of {{context.alertState}} Reason: {{context.reason}}""',
-          },
-          actionRef: 'action_0',
-          actionTypeId: '.server-log',
-        },
-      ];
-
-      const alert = getMockData({ alertTypeId: 'metrics.alert.inventory.threshold', actions });
-
-      expect(migration712(alert, migrationContext)).toMatchObject({
-        ...alert,
-        attributes: {
-          ...alert.attributes,
-          actions: [{ ...actions[0], group: 'metrics.inventory_threshold.fired' }],
-        },
-      });
-    });
-
-    test('Metrics inventory threshold rules work with the correct action group spelling', () => {
-      const migration712 = getMigrations(encryptedSavedObjectsSetup, isPreconfigured)['7.12.0'];
-
-      const actions = [
-        {
-          group: 'metrics.inventory_threshold.fired',
-          params: {
-            level: 'info',
-            message:
-              '""{{alertName}} - {{context.group}} is in a state of {{context.alertState}} Reason: {{context.reason}}""',
-          },
-          actionRef: 'action_0',
-          actionTypeId: '.server-log',
-        },
-      ];
-
-      const alert = getMockData({ alertTypeId: 'metrics.alert.inventory.threshold', actions });
-
-      expect(migration712(alert, migrationContext)).toMatchObject({
-        ...alert,
-        attributes: {
-          ...alert.attributes,
-          actions: [{ ...actions[0], group: 'metrics.inventory_threshold.fired' }],
-        },
-      });
-    });
-  });
-
   describe('7.13.0', () => {
     test('security solution alerts get migrated and remove null values', () => {
       const migration713 = getMigrations(encryptedSavedObjectsSetup, isPreconfigured)['7.13.0'];
@@ -2110,6 +2054,62 @@ describe('successful migrations', () => {
       expect(migration800(alert, migrationContext).attributes.params.threatIndicatorPath).toEqual(
         undefined
       );
+    });
+
+    describe('Metrics Inventory Threshold rule', () => {
+      test('Migrates incorrect action group spelling', () => {
+        const migration800 = getMigrations(encryptedSavedObjectsSetup, isPreconfigured)['8.0.0'];
+
+        const actions = [
+          {
+            group: 'metrics.invenotry_threshold.fired',
+            params: {
+              level: 'info',
+              message:
+                '""{{alertName}} - {{context.group}} is in a state of {{context.alertState}} Reason: {{context.reason}}""',
+            },
+            actionRef: 'action_0',
+            actionTypeId: '.server-log',
+          },
+        ];
+
+        const alert = getMockData({ alertTypeId: 'metrics.alert.inventory.threshold', actions });
+
+        expect(migration800(alert, migrationContext)).toMatchObject({
+          ...alert,
+          attributes: {
+            ...alert.attributes,
+            actions: [{ ...actions[0], group: 'metrics.inventory_threshold.fired' }],
+          },
+        });
+      });
+
+      test('Works with the correct action group spelling', () => {
+        const migration800 = getMigrations(encryptedSavedObjectsSetup, isPreconfigured)['8.0.0'];
+
+        const actions = [
+          {
+            group: 'metrics.inventory_threshold.fired',
+            params: {
+              level: 'info',
+              message:
+                '""{{alertName}} - {{context.group}} is in a state of {{context.alertState}} Reason: {{context.reason}}""',
+            },
+            actionRef: 'action_0',
+            actionTypeId: '.server-log',
+          },
+        ];
+
+        const alert = getMockData({ alertTypeId: 'metrics.alert.inventory.threshold', actions });
+
+        expect(migration800(alert, migrationContext)).toMatchObject({
+          ...alert,
+          attributes: {
+            ...alert.attributes,
+            actions: [{ ...actions[0], group: 'metrics.inventory_threshold.fired' }],
+          },
+        });
+      });
     });
   });
 });

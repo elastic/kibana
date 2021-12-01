@@ -97,13 +97,6 @@ export function getMigrations(
     pipeMigrations(restructureConnectorsThatSupportIncident)
   );
 
-  const migrateRules712 = createEsoMigration(
-    encryptedSavedObjects,
-    (doc: SavedObjectUnsanitizedDoc<RawAlert>): doc is SavedObjectUnsanitizedDoc<RawAlert> =>
-      doc.attributes.alertTypeId === 'metrics.alert.inventory.threshold',
-    pipeMigrations(fixInventoryThresholdGroupId)
-  );
-
   const migrationSecurityRules713 = createEsoMigration(
     encryptedSavedObjects,
     (doc): doc is SavedObjectUnsanitizedDoc<RawAlert> => isSiemSignalsRuleType(doc),
@@ -136,14 +129,17 @@ export function getMigrations(
   const migrationRules800 = createEsoMigration(
     encryptedSavedObjects,
     (doc: SavedObjectUnsanitizedDoc<RawAlert>): doc is SavedObjectUnsanitizedDoc<RawAlert> => true,
-    pipeMigrations(addThreatIndicatorPathToThreatMatchRules, addRACRuleTypes)
+    pipeMigrations(
+      addThreatIndicatorPathToThreatMatchRules,
+      addRACRuleTypes,
+      fixInventoryThresholdGroupId
+    )
   );
 
   return {
     '7.10.0': executeMigrationWithErrorHandling(migrationWhenRBACWasIntroduced, '7.10.0'),
     '7.11.0': executeMigrationWithErrorHandling(migrationAlertUpdatedAtAndNotifyWhen, '7.11.0'),
     '7.11.2': executeMigrationWithErrorHandling(migrationActions7112, '7.11.2'),
-    '7.12.0': executeMigrationWithErrorHandling(migrateRules712, '7.12.0'),
     '7.13.0': executeMigrationWithErrorHandling(migrationSecurityRules713, '7.13.0'),
     '7.14.1': executeMigrationWithErrorHandling(migrationSecurityRules714, '7.14.1'),
     '7.15.0': executeMigrationWithErrorHandling(migrationSecurityRules715, '7.15.0'),
@@ -764,31 +760,35 @@ function removePreconfiguredConnectorsFromReferences(
 function fixInventoryThresholdGroupId(
   doc: SavedObjectUnsanitizedDoc<RawAlert>
 ): SavedObjectUnsanitizedDoc<RawAlert> {
-  const {
-    attributes: { actions },
-  } = doc;
+  if (doc.attributes.alertTypeId === 'metrics.alert.inventory.threshold') {
+    const {
+      attributes: { actions },
+    } = doc;
 
-  const updatedActions = actions
-    ? actions.map((action) => {
-        // Wrong spelling
-        if (action.group === 'metrics.invenotry_threshold.fired') {
-          return {
-            ...action,
-            group: 'metrics.inventory_threshold.fired',
-          };
-        } else {
-          return action;
-        }
-      })
-    : [];
+    const updatedActions = actions
+      ? actions.map((action) => {
+          // Wrong spelling
+          if (action.group === 'metrics.invenotry_threshold.fired') {
+            return {
+              ...action,
+              group: 'metrics.inventory_threshold.fired',
+            };
+          } else {
+            return action;
+          }
+        })
+      : [];
 
-  return {
-    ...doc,
-    attributes: {
-      ...doc.attributes,
-      actions: updatedActions,
-    },
-  };
+    return {
+      ...doc,
+      attributes: {
+        ...doc.attributes,
+        actions: updatedActions,
+      },
+    };
+  } else {
+    return doc;
+  }
 }
 
 function getCorrespondingAction(
