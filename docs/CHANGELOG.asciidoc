@@ -109,7 +109,7 @@ Use the following supported browsers:
 The legacy aggregation-based data table and `vis_type_table.legacyVisEnabled` setting are no longer supported. For more information, refer to {kibana-pull}111339[#111339].
 
 *Impact* +
-To auto-fit the table row height, create an {kibana-ref}add-aggregation-based-visualization-panels.html#create-aggregation-based-panel[aggregation-based data table], click *Options*, then select *Auto fit rows to content*.
+To auto-fit the table row height, create an {kibana-ref}/add-aggregation-based-visualization-panels.html#create-aggregation-based-panel[aggregation-based data table], click *Options*, then select *Auto fit rows to content*.
 ====
       
 [discrete]
@@ -133,7 +133,7 @@ When you upgrade to 7.16.0, you are only able to create area, bar, and line char
 The Timelion app is no longer supported. For more information, refer to {kibana-pull}110255[#110255]
 
 *Impact* +
-When you upgrade to 7.16.0, you are unable to use the *Timelion* app. The {kibana-ref}timelion.html[*Timelion*] visualization editor is still supported. 
+When you upgrade to 7.16.0, you are unable to use the *Timelion* app. The {kibana-ref}/timelion.html[*Timelion*] visualization editor is still supported. 
 ====
 
 [discrete]
