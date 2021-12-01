@@ -46,7 +46,7 @@ export const createActionRoute = (router: IRouter, osqueryContext: OsqueryAppCon
 
       const { agentSelection } = request.body as { agentSelection: AgentSelection };
       const selectedAgents = await parseAgentSelection(
-        esClient,
+        request,
         soClient,
         osqueryContext,
         agentSelection

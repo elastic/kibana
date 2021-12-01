@@ -11,9 +11,14 @@ import { savedObjectsServiceMock } from '../../../../../../../src/core/server/mo
 import {
   createMockAgentPolicyService,
   createMockAgentService,
+  createMockPackageService,
   createPackagePolicyServiceMock,
 } from '../../../../../fleet/server/mocks';
 import { AgentPolicyServiceInterface, AgentService } from '../../../../../fleet/server';
+import {
+  EndpointFleetServicesFactory,
+  EndpointFleetServicesInterface,
+} from '../endpoint_fleet_services';
 
 const createCustomizedPackagePolicyService = () => {
   const service = createPackagePolicyServiceMock();
@@ -38,6 +43,7 @@ export interface EndpointMetadataServiceTestContextMock {
   agentPolicyService: jest.Mocked<AgentPolicyServiceInterface>;
   packagePolicyService: ReturnType<typeof createPackagePolicyServiceMock>;
   endpointMetadataService: EndpointMetadataService;
+  fleetServices: EndpointFleetServicesInterface;
 }
 
 export const createEndpointMetadataServiceTestContextMock = (
@@ -46,11 +52,18 @@ export const createEndpointMetadataServiceTestContextMock = (
   agentPolicyService: jest.Mocked<AgentPolicyServiceInterface> = createMockAgentPolicyService(),
   packagePolicyService: ReturnType<
     typeof createPackagePolicyServiceMock
-  > = createCustomizedPackagePolicyService()
+  > = createCustomizedPackagePolicyService(),
+  packageService: ReturnType<typeof createMockPackageService> = createMockPackageService()
 ): EndpointMetadataServiceTestContextMock => {
+  const fleetServices = new EndpointFleetServicesFactory({
+    agentService,
+    packageService,
+    packagePolicyService,
+    agentPolicyService,
+  }).asInternalUser();
+
   const endpointMetadataService = new EndpointMetadataService(
     savedObjectsStart,
-    agentService,
     agentPolicyService,
     packagePolicyService
   );
@@ -61,5 +74,6 @@ export const createEndpointMetadataServiceTestContextMock = (
     agentPolicyService,
     packagePolicyService,
     endpointMetadataService,
+    fleetServices,
   };
 };

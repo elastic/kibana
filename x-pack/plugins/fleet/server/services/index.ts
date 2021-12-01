@@ -5,13 +5,8 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, SavedObjectsClientContract } from 'kibana/server';
+import type { SavedObjectsClientContract } from 'kibana/server';
 
-import type { AgentStatus } from '../types';
-
-import type { GetAgentStatusResponse } from '../../common';
-
-import type { getAgentById, getAgentsByKuery } from './agents';
 import type { agentPolicyService } from './agent_policy';
 import * as settingsService from './settings';
 import type { getInstallation, ensureInstalledPackage } from './epm/packages';
@@ -39,32 +34,6 @@ export interface PackageService {
   ensureInstalledPackage: typeof ensureInstalledPackage;
 }
 
-/**
- * A service that provides exported functions that return information about an Agent
- */
-export interface AgentService {
-  /**
-   * Get an Agent by id
-   */
-  getAgent: typeof getAgentById;
-  /**
-   * Return the status by the Agent's id
-   */
-  getAgentStatusById(esClient: ElasticsearchClient, agentId: string): Promise<AgentStatus>;
-  /**
-   * Return the status by the Agent's Policy id
-   */
-  getAgentStatusForAgentPolicy(
-    esClient: ElasticsearchClient,
-    agentPolicyId?: string,
-    filterKuery?: string
-  ): Promise<GetAgentStatusResponse['results']>;
-  /**
-   * List agents
-   */
-  listAgents: typeof getAgentsByKuery;
-}
-
 export interface AgentPolicyServiceInterface {
   get: typeof agentPolicyService['get'];
   list: typeof agentPolicyService['list'];
@@ -72,6 +41,10 @@ export interface AgentPolicyServiceInterface {
   getFullAgentPolicy: typeof agentPolicyService['getFullAgentPolicy'];
   getByIds: typeof agentPolicyService['getByIDs'];
 }
+
+// Agent services
+export { AgentServiceImpl } from './agents';
+export type { AgentClient, AgentService } from './agents';
 
 // Saved object services
 export { agentPolicyService } from './agent_policy';

@@ -49,6 +49,7 @@ export const securitySolutionSearchStrategyProvider = <T extends FactoryQueryTyp
             esClient: deps.esClient,
             savedObjectsClient: deps.savedObjectsClient,
             endpointContext,
+            request: deps.request,
           })
         )
       );

@@ -23,6 +23,7 @@ import { formatHostItem, getHostEndpoint } from './helpers';
 import { EndpointAppContext } from '../../../../../endpoint/types';
 import {
   IScopedClusterClient,
+  KibanaRequest,
   SavedObjectsClientContract,
 } from '../../../../../../../../../src/core/server';
 
@@ -35,6 +36,7 @@ export const hostDetails: SecuritySolutionFactory<HostsQueries.details> = {
       esClient: IScopedClusterClient;
       savedObjectsClient: SavedObjectsClientContract;
       endpointContext: EndpointAppContext;
+      request: KibanaRequest;
     }
   ): Promise<HostDetailsStrategyResponse> => {
     const aggregations = get('aggregations', response.rawResponse);
