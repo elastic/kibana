@@ -392,17 +392,53 @@ This content has moved. Refer to <<data-views-api-create>>.
 
 This content has moved. Refer to <<data-views-api-default-get>>.
 
+[role="exclude",id="index-patterns-api-default-set"]
+== Index patterns has been renamed to data views.
 
+This content has moved. Refer to <<data-views-api-default-set>>.
 
+[role="exclude",id="index-patterns-api-delete"]
+== Index patterns has been renamed to data views.
 
-include::data-views/get.asciidoc[]
-include::data-views/update.asciidoc[]
-include::data-views/delete.asciidoc[]
-include::data-views/default-get.asciidoc[]
-include::data-views/default-set.asciidoc[]
-include::data-views/update-fields.asciidoc[]
-include::data-views/runtime-fields/get.asciidoc[]
-include::data-views/runtime-fields/create.asciidoc[]
-include::data-views/runtime-fields/upsert.asciidoc[]
-include::data-views/runtime-fields/update.asciidoc[]
-include::data-views/runtime-fields/delete.asciidoc[]
+This content has moved. Refer to <<data-views-api-delete>>.
+
+[role="exclude",id="index-patterns-api-get"]
+== Index patterns has been renamed to data views.
+
+This content has moved. Refer to <<data-views-api-get>>.
+
+[role="exclude",id="index-patterns-runtime-field-api-create"]
+== Index patterns has been renamed to data views.
+
+This content has moved. Refer to <<data-views-runtime-field-api-create>>.
+
+[role="exclude",id="index-patterns-runtime-field-api-delete]
+== Index patterns has been renamed to data views.
+
+This content has moved. Refer to <<data-views-runtime-field-api-delete>>.
+
+[role="exclude",id="index-patterns-runtime-field-api-get]
+== Index patterns has been renamed to data views.
+
+This content has moved. Refer to <<data-views-runtime-field-api-get>>.
+
+[role="exclude",id="index-patterns-runtime-field-api-update]
+== Index patterns has been renamed to data views.
+
+This content has moved. Refer to <<data-views-runtime-field-api-update>>.
+
+[role="exclude",id="index-patterns-runtime-field-api-upsert]
+== Index patterns has been renamed to data views.
+
+This content has moved. Refer to <<data-views-runtime-field-api-upsert>>.
+
+[role="exclude",id="index-patterns-runtime-field-api-update]
+== Index patterns has been renamed to data views.
+
+This content has moved. Refer to <<data-views-runtime-field-api-update>>.
+
+[role="exclude",id="index-patterns-api-update]
+== Index patterns has been renamed to data views.
+
+This content has moved. Refer to <<data-views-api-update>>.
+
