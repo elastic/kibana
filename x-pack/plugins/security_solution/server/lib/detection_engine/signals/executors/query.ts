@@ -52,7 +52,6 @@ export const queryExecutor = async ({
   bulkCreate: BulkCreate;
   wrapHits: WrapHits;
 }) => {
-  console.log('1');
   const ruleParams = completeRule.ruleParams;
 
   const inputIndex = await getInputIndex({
@@ -61,9 +60,7 @@ export const queryExecutor = async ({
     version,
     index: ruleParams.index,
   });
-  console.log('2');
 
-  console.log(JSON.stringify(ruleParams));
   const esFilter = await getFilter({
     type: ruleParams.type,
     filters: ruleParams.filters,
@@ -74,8 +71,6 @@ export const queryExecutor = async ({
     index: inputIndex,
     lists: exceptionItems,
   });
-
-  console.log('3');
 
   return searchAfterAndBulkCreate({
     tuple,

@@ -89,15 +89,20 @@ export const createRuleTypeMocks = (
       lists: listMock.createSetup(),
       logger: loggerMock,
       ml: mlPluginServerMock.createSetupContract(),
-      ruleDataClient: ruleRegistryMocks.createRuleDataClient(
-        '.alerts-security.alerts'
-      ) as IRuleDataClient,
+      ruleDataClient: {
+        ...(ruleRegistryMocks.createRuleDataClient('.alerts-security.alerts') as IRuleDataClient),
+        getReader: jest.fn((_options?: { namespace?: string }) => ({
+          search: jest.fn().mockResolvedValue({
+            aggregations: undefined,
+          }),
+          getDynamicIndexPattern: jest.fn(),
+        })),
+      },
       eventLogService: eventLogServiceMock.create(),
     },
     services,
     scheduleActions,
     executor: async ({ params }: { params: Record<string, unknown> }) => {
-      console.log('RUNNING');
       return alertExecutor({
         ...createDefaultAlertExecutorOptions({
           params,

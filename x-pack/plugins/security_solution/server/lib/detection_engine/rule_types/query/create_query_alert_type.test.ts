@@ -15,8 +15,12 @@ import { createSecurityRuleTypeWrapper } from '../create_security_rule_type_wrap
 import { createMockConfig } from '../../routes/__mocks__';
 import { createMockTelemetryEventsSender } from '../../../telemetry/__mocks__';
 import { sampleDocNoSortId } from '../../signals/__mocks__/es_results';
-import { createDefaultAlertExecutorOptions } from '../../../../../../rule_registry/server/utils/rule_executor_test_utils';
-import { getCompleteRuleMock, getQueryRuleParams } from '../../schemas/rule_schemas.mock';
+import { getQueryRuleParams } from '../../schemas/rule_schemas.mock';
+
+jest.mock('../../signals/utils', () => ({
+  ...jest.requireActual('../../signals/utils'),
+  getExceptions: () => [],
+}));
 
 jest.mock('../utils/get_list_client', () => ({
   getListClient: jest.fn().mockReturnValue({
@@ -28,25 +32,20 @@ jest.mock('../utils/get_list_client', () => ({
 jest.mock('../../rule_execution_log/rule_execution_log_client');
 
 describe('Custom Query Alerts', () => {
-  let services: ReturnType<typeof createRuleTypeMocks>['services'];
-  let dependencies: ReturnType<typeof createRuleTypeMocks>['dependencies'];
-  let executor: ReturnType<typeof createRuleTypeMocks>['executor'];
-  let securityRuleTypeWrapper: ReturnType<typeof createSecurityRuleTypeWrapper>;
-  let eventsTelemetry: ReturnType<typeof createMockTelemetryEventsSender>;
+  const mocks = createRuleTypeMocks();
+  const { dependencies, executor, services } = mocks;
+  const { alerting, eventLogService, lists, logger, ruleDataClient } = dependencies;
+  const securityRuleTypeWrapper = createSecurityRuleTypeWrapper({
+    lists,
+    logger,
+    config: createMockConfig(),
+    ruleDataClient,
+    eventLogService,
+  });
+  const eventsTelemetry = createMockTelemetryEventsSender(true);
 
-  beforeEach(() => {
-    const mocks = createRuleTypeMocks();
-    services = mocks.services;
-    dependencies = mocks.dependencies;
-    executor = mocks.executor;
-    securityRuleTypeWrapper = createSecurityRuleTypeWrapper({
-      lists: dependencies.lists,
-      logger: dependencies.logger,
-      config: createMockConfig(),
-      ruleDataClient: dependencies.ruleDataClient,
-      eventLogService: dependencies.eventLogService,
-    });
-    eventsTelemetry = createMockTelemetryEventsSender();
+  afterEach(() => {
+    jest.clearAllMocks();
   });
 
   it('does not send an alert when no events found', async () => {
@@ -54,12 +53,12 @@ describe('Custom Query Alerts', () => {
       createQueryAlertType({
         eventsTelemetry,
         experimentalFeatures: allowedExperimentalValues,
-        logger: dependencies.logger,
+        logger,
         version: '1.0.0',
       })
     );
 
-    // dependencies.alerting.registerType(queryAlertType);
+    alerting.registerType(queryAlertType);
 
     services.scopedClusterClient.asCurrentUser.search.mockReturnValue(
       elasticsearchClientMock.createSuccessTransportRequestPromise({
@@ -85,22 +84,12 @@ describe('Custom Query Alerts', () => {
 
     const params = getQueryRuleParams();
 
-    // await executor({ params });
-
-    await queryAlertType.executor({
-      ...createDefaultAlertExecutorOptions({
-        params,
-        state: {},
-      }),
-      ...{
-        runOpts: {
-          completeRule: getCompleteRuleMock(params),
-        },
-      },
+    await executor({
+      params,
     });
 
-    expect(dependencies.ruleDataClient.getWriter).not.toBeCalled();
-    expect(eventsTelemetry.queueTelemetryEvents).not.toBeCalled();
+    expect(ruleDataClient.getWriter().bulk).not.toHaveBeenCalled();
+    expect(eventsTelemetry.queueTelemetryEvents).not.toHaveBeenCalled();
   });
 
   it('sends an alert when events are found', async () => {
@@ -108,12 +97,12 @@ describe('Custom Query Alerts', () => {
       createQueryAlertType({
         eventsTelemetry,
         experimentalFeatures: allowedExperimentalValues,
-        logger: dependencies.logger,
+        logger,
         version: '1.0.0',
       })
     );
 
-    // dependencies.alerting.registerType(queryAlertType);
+    alerting.registerType(queryAlertType);
 
     services.scopedClusterClient.asCurrentUser.search.mockReturnValue(
       elasticsearchClientMock.createSuccessTransportRequestPromise({
@@ -123,7 +112,7 @@ describe('Custom Query Alerts', () => {
           events: [],
           total: {
             relation: 'eq',
-            value: 0,
+            value: 1,
           },
         },
         took: 0,
@@ -139,20 +128,9 @@ describe('Custom Query Alerts', () => {
 
     const params = getQueryRuleParams();
 
-    // await queryAlertType.executor({
-    // await executor({ params });
-    await queryAlertType.executor({
-      ...createDefaultAlertExecutorOptions({
-        params,
-        state: {},
-      }),
-      ...{
-        runOpts: {
-          completeRule: getCompleteRuleMock(params),
-        },
-      },
-    });
-    expect(dependencies.ruleDataClient.getWriter).toBeCalled();
-    expect(eventsTelemetry.queueTelemetryEvents).toBeCalled();
+    await executor({ params });
+
+    expect(ruleDataClient.getWriter().bulk).toHaveBeenCalled();
+    expect(eventsTelemetry.queueTelemetryEvents).toHaveBeenCalled();
   });
 });

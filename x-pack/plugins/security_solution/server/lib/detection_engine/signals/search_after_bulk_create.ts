@@ -81,8 +81,6 @@ export const searchAfterAndBulkCreate = async ({
           trackTotalHits,
           sortOrder,
         });
-        console.log('RESULT');
-        console.log(JSON.stringify(searchResult));
         mergedSearchResults = mergeSearchResults([mergedSearchResults, searchResult]);
         toReturn = mergeReturns([
           toReturn,
