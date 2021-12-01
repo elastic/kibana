@@ -13,7 +13,6 @@ const KIBANA_NAMESPACE = 'kibana' as const;
 const ALERT_NAMESPACE = `${KIBANA_NAMESPACE}.alert` as const;
 const ALERT_RULE_NAMESPACE = `${ALERT_NAMESPACE}.rule` as const;
 
-const CONSUMERS = `${KIBANA_NAMESPACE}.consumers` as const;
 const ECS_VERSION = 'ecs.version' as const;
 const EVENT_ACTION = 'event.action' as const;
 const EVENT_KIND = 'event.kind' as const;
@@ -85,7 +84,6 @@ const namespaces = {
 };
 
 const fields = {
-  CONSUMERS,
   ECS_VERSION,
   EVENT_KIND,
   EVENT_ACTION,
@@ -187,7 +185,6 @@ export {
   ALERT_START,
   ALERT_SYSTEM_STATUS,
   ALERT_UUID,
-  CONSUMERS,
   ECS_VERSION,
   EVENT_ACTION,
   EVENT_KIND,
