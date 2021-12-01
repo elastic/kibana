@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 // / <reference types="cypress" />
 // ***********************************************************
 // This example plugins/index.js can be used to load plugins
@@ -22,6 +21,7 @@
 /**
  * @type {Cypress.PluginConfig}
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 module.exports = (on, config) => {
   // eslint-disable-next-line @typescript-eslint/no-var-requires, import/no-extraneous-dependencies
   require('@cypress/code-coverage/task')(on, config);
