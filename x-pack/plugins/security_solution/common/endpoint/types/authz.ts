@@ -6,11 +6,10 @@
  */
 
 /**
- * Set of Endpoint Specific privileges that control application authrorization. This interface is
+ * Set of Endpoint Specific privileges that control application authorization. This interface is
  * used both on the client and server for consistency
  */
-export interface EndpointPrivileges {
-  loading: boolean;
+export interface EndpointAuthz {
   /** If user has permissions to access Fleet */
   canAccessFleet: boolean;
   /** If user has permissions to access Endpoint management (includes check to ensure they also have access to fleet) */
@@ -19,4 +18,8 @@ export interface EndpointPrivileges {
   canCreateArtifactsByPolicy: boolean;
   /** If user has permissions to use the Host isolation feature */
   canIsolateHost: boolean;
+}
+
+export interface EndpointPrivileges extends EndpointAuthz {
+  loading: boolean;
 }

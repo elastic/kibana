@@ -6,13 +6,11 @@
  */
 
 import { EndpointPrivileges } from '../../../../../common/endpoint/types';
+import { getEndpointAuthzInitialState } from '../../../../../common/endpoint/service/authz';
 
 export const getEndpointPrivilegesInitialState = (): EndpointPrivileges => {
   return {
     loading: true,
-    canAccessFleet: false,
-    canAccessEndpointManagement: false,
-    canIsolateHost: false,
-    canCreateArtifactsByPolicy: false,
+    ...getEndpointAuthzInitialState(),
   };
 };

@@ -54,7 +54,8 @@ export const useEndpointPrivileges = (): Immutable<EndpointPrivileges> => {
           const fleetAuthz = fleetServices.authz;
 
           // Fleet is still defined as an optional plugin, thus `fleetServices` might not be defined
-          setCanAccessFleet(fleetAuthz.fleet.all);
+          setCanAccessFleet(true);
+          // setCanAccessFleet(fleetAuthz.fleet.all);
         }
       } finally {
         if (isMounted.current) {
