@@ -12,8 +12,6 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiSwitch } from '@elastic/eui';
-
 import { staticSourceData } from '../../source_data';
 
 import { ConnectInstance } from './connect_instance';
@@ -126,13 +124,6 @@ describe('ConnectInstance', () => {
     expect(setSourceSubdomainValue).toHaveBeenCalledWith(TEXT);
   });
 
-  it('calls handler on click', () => {
-    const wrapper = shallow(<ConnectInstance {...props} />);
-    wrapper.find(EuiSwitch).simulate('change', { target: { checked: true } });
-
-    expect(setSourceIndexPermissionsValue).toHaveBeenCalledWith(true);
-  });
-
   it('handles form submission with oauth source', () => {
     jest.spyOn(window.location, 'replace').mockImplementationOnce(mockReplace);
     const wrapper = shallow(<ConnectInstance {...oauthProps} />);
@@ -143,19 +134,6 @@ describe('ConnectInstance', () => {
     expect(preventDefault).toHaveBeenCalled();
     expect(getSourceConnectData).toHaveBeenCalled();
     expect(mockReplace).toHaveBeenCalled();
-  });
-
-  it('renders doc-level permissions message when not available', () => {
-    const wrapper = shallow(<ConnectInstance {...props} needsPermissions={false} />);
-
-    expect(wrapper.find('FormattedMessage')).toHaveLength(1);
-  });
-
-  it('renders callout when not synced', () => {
-    setMockValues({ ...values, indexPermissionsValue: false });
-    const wrapper = shallow(<ConnectInstance {...props} />);
-
-    expect(wrapper.find('EuiCallOut')).toHaveLength(1);
   });
 
   it('renders documentLevelPermissionsCallout', () => {
