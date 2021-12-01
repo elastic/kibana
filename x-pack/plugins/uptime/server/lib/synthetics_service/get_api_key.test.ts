@@ -11,12 +11,19 @@ import { securityMock } from '../../../../security/server/mocks';
 import { coreMock } from '../../../../../../src/core/server/mocks';
 import { syntheticsServiceApiKey } from '../saved_objects/service_api_key';
 import { KibanaRequest } from 'kibana/server';
+import { UptimeServerSetup } from '../adapters';
 
 describe('getAPIKeyTest', function () {
   const core = coreMock.createStart();
   const security = securityMock.createStart();
-  const encryptedSavedObject = encryptedSavedObjectsMock.createStart();
+  const encryptedSavedObjects = encryptedSavedObjectsMock.createStart();
   const request = {} as KibanaRequest;
+
+  const server = {
+    security,
+    encryptedSavedObjects,
+    savedObjectsClient: core.savedObjects.getScopedClient(request),
+  } as unknown as UptimeServerSetup;
 
   security.authc.apiKeys.areAPIKeysEnabled = jest.fn().mockReturnValue(true);
   security.authc.apiKeys.create = jest.fn().mockReturnValue({
@@ -29,9 +36,7 @@ describe('getAPIKeyTest', function () {
   it('should generate an api key and return it', async () => {
     const apiKey = await getAPIKeyForSyntheticsService({
       request,
-      security,
-      encryptedSavedObject,
-      savedObjectsClient: core.savedObjects.getScopedClient(request),
+      server,
     });
 
     expect(security.authc.apiKeys.areAPIKeysEnabled).toHaveBeenCalledTimes(1);
@@ -65,21 +70,19 @@ describe('getAPIKeyTest', function () {
       .fn()
       .mockReturnValue({ attributes: { apiKey: 'qwerty', id: 'test', name: 'service-api-key' } });
 
-    encryptedSavedObject.getClient = jest.fn().mockReturnValue({
+    encryptedSavedObjects.getClient = jest.fn().mockReturnValue({
       getDecryptedAsInternalUser: getObject,
     });
     const apiKey = await getAPIKeyForSyntheticsService({
       request,
-      security,
-      encryptedSavedObject,
-      savedObjectsClient: core.savedObjects.getScopedClient(request),
+      server,
     });
 
     expect(apiKey).toEqual({ apiKey: 'qwerty', id: 'test', name: 'service-api-key' });
 
-    expect(encryptedSavedObject.getClient).toHaveBeenCalledTimes(1);
+    expect(encryptedSavedObjects.getClient).toHaveBeenCalledTimes(1);
     expect(getObject).toHaveBeenCalledTimes(1);
-    expect(encryptedSavedObject.getClient).toHaveBeenCalledWith({
+    expect(encryptedSavedObjects.getClient).toHaveBeenCalledWith({
       includedHiddenTypes: [syntheticsServiceApiKey.name],
     });
     expect(getObject).toHaveBeenCalledWith(

@@ -25,6 +25,7 @@ import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plug
 import { ApmServiceContextProvider } from '../../../../context/apm_service/apm_service_context';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { useBreadcrumb } from '../../../../context/breadcrumbs/use_breadcrumb';
+import { ServiceAnomalyTimeseriesContextProvider } from '../../../../context/service_anomaly_timeseries/service_anomaly_timeseries_context';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
 import { useTimeRange } from '../../../../hooks/use_time_range';
@@ -57,7 +58,9 @@ interface Props {
 export function ApmServiceTemplate(props: Props) {
   return (
     <ApmServiceContextProvider>
-      <TemplateWithContext {...props} />
+      <ServiceAnomalyTimeseriesContextProvider>
+        <TemplateWithContext {...props} />
+      </ServiceAnomalyTimeseriesContextProvider>
     </ApmServiceContextProvider>
   );
 }

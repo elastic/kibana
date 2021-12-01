@@ -38,16 +38,6 @@ export default ({ getService }: FtrProviderContext) => {
       },
     },
     {
-      testTitleSuffix: 'for apm dataset',
-      sourceDataArchive: 'x-pack/test/functional/es_archives/ml/module_apm',
-      indexPattern: 'ft_module_apm',
-      user: USER.ML_POWERUSER,
-      expected: {
-        responseCode: 200,
-        moduleIds: ['apm_jsbase', 'apm_nodejs'],
-      },
-    },
-    {
       testTitleSuffix: 'for logs dataset',
       sourceDataArchive: 'x-pack/test/functional/es_archives/ml/module_logs',
       indexPattern: 'ft_module_logs',
