@@ -206,7 +206,10 @@ export class SyntheticsService {
   formatConfigs(configs: MonitorConfigs) {
     // TODO: Move to dedicated formatter class
     function parseSchedule(schedule: any) {
-      return `@every ${schedule.number}${schedule.unit}`;
+      if (schedule?.number) {
+        return `@every ${schedule.number}${schedule.unit}`;
+      }
+      return schedule;
     }
 
     function parseUrl(urls?: string | string[]) {
