@@ -678,6 +678,33 @@ describe('successful migrations', () => {
         },
       });
     });
+
+    test('Metrics inventory threshold rules work with the correct action group spelling', () => {
+      const migration712 = getMigrations(encryptedSavedObjectsSetup, isPreconfigured)['7.12.0'];
+
+      const actions = [
+        {
+          group: 'metrics.inventory_threshold.fired',
+          params: {
+            level: 'info',
+            message:
+              '""{{alertName}} - {{context.group}} is in a state of {{context.alertState}} Reason: {{context.reason}}""',
+          },
+          actionRef: 'action_0',
+          actionTypeId: '.server-log',
+        },
+      ];
+
+      const alert = getMockData({ alertTypeId: 'metrics.alert.inventory.threshold', actions });
+
+      expect(migration712(alert, migrationContext)).toMatchObject({
+        ...alert,
+        attributes: {
+          ...alert.attributes,
+          actions: [{ ...actions[0], group: 'metrics.inventory_threshold.fired' }],
+        },
+      });
+    });
   });
 
   describe('7.13.0', () => {
