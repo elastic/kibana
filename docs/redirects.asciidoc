@@ -376,3 +376,33 @@ This content has moved. Refer to <<data-views>>.
 == Index patterns has been renamed to data views.
 
 This content has moved. Refer to <<managing-data-views>>.
+
+[role="exclude",id="index-patterns-api"]
+== Index patterns has been renamed to data views.
+
+This content has moved. Refer to <<data-views-api>>.
+
+[role="exclude",id="index-patterns-api-create"]
+== Index patterns has been renamed to data views.
+
+This content has moved. Refer to <<data-views-api-create>>.
+
+[role="exclude",id="index-patterns-api-default-get"]
+== Index patterns has been renamed to data views.
+
+This content has moved. Refer to <<data-views-api-default-get>>.
+
+
+
+
+include::data-views/get.asciidoc[]
+include::data-views/update.asciidoc[]
+include::data-views/delete.asciidoc[]
+include::data-views/default-get.asciidoc[]
+include::data-views/default-set.asciidoc[]
+include::data-views/update-fields.asciidoc[]
+include::data-views/runtime-fields/get.asciidoc[]
+include::data-views/runtime-fields/create.asciidoc[]
+include::data-views/runtime-fields/upsert.asciidoc[]
+include::data-views/runtime-fields/update.asciidoc[]
+include::data-views/runtime-fields/delete.asciidoc[]
