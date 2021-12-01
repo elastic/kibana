@@ -25,11 +25,13 @@ export async function registerFleetPolicyCallbacks({
   ruleDataClient,
   config,
   logger,
+  kibanaVersion,
 }: {
   plugins: APMRouteHandlerResources['plugins'];
   ruleDataClient: APMRouteHandlerResources['ruleDataClient'];
   config: NonNullable<APMPlugin['currentConfig']>;
   logger: NonNullable<APMPlugin['logger']>;
+  kibanaVersion: string;
 }) {
   if (!plugins.fleet) {
     return;
@@ -45,6 +47,7 @@ export async function registerFleetPolicyCallbacks({
     ruleDataClient,
     config,
     logger,
+    kibanaVersion,
   });
 
   // Registers a callback invoked when a policy is updated to populate the APM
@@ -56,6 +59,7 @@ export async function registerFleetPolicyCallbacks({
     ruleDataClient,
     config,
     logger,
+    kibanaVersion,
   });
 }
 
@@ -73,6 +77,7 @@ function registerPackagePolicyExternalCallback({
   ruleDataClient,
   config,
   logger,
+  kibanaVersion,
 }: {
   fleetPluginStart: NonNullable<APMPluginStartDependencies['fleet']>;
   callbackName: 'packagePolicyCreate' | 'packagePolicyUpdate';
@@ -80,6 +85,7 @@ function registerPackagePolicyExternalCallback({
   ruleDataClient: APMRouteHandlerResources['ruleDataClient'];
   config: NonNullable<APMPlugin['currentConfig']>;
   logger: NonNullable<APMPlugin['logger']>;
+  kibanaVersion: string;
 }) {
   const callbackFn:
     | PostPackagePolicyCreateCallback
@@ -100,6 +106,7 @@ function registerPackagePolicyExternalCallback({
       config,
       logger,
       ruleDataClient,
+      kibanaVersion,
     });
     return await mergePackagePolicyWithApm({
       setup,

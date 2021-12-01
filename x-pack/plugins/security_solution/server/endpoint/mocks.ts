@@ -167,6 +167,7 @@ export const createMockFleetStartContract = (indexPattern: string): FleetStartCo
     registerExternalCallback: jest.fn((...args: ExternalCallback) => {}),
     packagePolicyService: createPackagePolicyServiceMock(),
     createArtifactsClient: jest.fn().mockReturnValue(createArtifactsClientMock()),
+    fetchFindLatestPackage: jest.fn().mockReturnValue('8.0.0'),
   };
 };
 

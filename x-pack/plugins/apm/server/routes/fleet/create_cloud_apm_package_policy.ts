@@ -30,6 +30,7 @@ export async function createCloudApmPackgePolicy({
   esClient,
   logger,
   setup,
+  kibanaVersion,
 }: {
   cloudPluginSetup: APMPluginSetupDependencies['cloud'];
   fleetPluginStart: NonNullable<APMPluginStartDependencies['fleet']>;
@@ -37,6 +38,7 @@ export async function createCloudApmPackgePolicy({
   esClient: ElasticsearchClient;
   logger: Logger;
   setup: Setup;
+  kibanaVersion: string;
 }): Promise<PackagePolicy> {
   const { attributes } = await savedObjectsClient.get(
     APM_SERVER_SCHEMA_SAVED_OBJECT_TYPE,
@@ -46,9 +48,11 @@ export async function createCloudApmPackgePolicy({
     (attributes as { schemaJson: string }).schemaJson
   );
   // Merges agent config and source maps with the new APM cloud package policy
-  const apmPackagePolicyDefinition = getApmPackagePolicyDefinition({
+  const apmPackagePolicyDefinition = await getApmPackagePolicyDefinition({
     apmServerSchema,
     cloudPluginSetup,
+    fleetPluginStart,
+    kibanaVersion,
   });
   const mergedAPMPackagePolicy = await mergePackagePolicyWithApm({
     setup,

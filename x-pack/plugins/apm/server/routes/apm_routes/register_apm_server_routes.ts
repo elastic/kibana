@@ -50,6 +50,7 @@ export function registerRoutes({
   config,
   ruleDataClient,
   telemetryUsageCounter,
+  kibanaVersion,
 }: {
   core: APMRouteHandlerResources['core'];
   plugins: APMRouteHandlerResources['plugins'];
@@ -58,6 +59,7 @@ export function registerRoutes({
   config: APMRouteHandlerResources['config'];
   ruleDataClient: APMRouteHandlerResources['ruleDataClient'];
   telemetryUsageCounter?: TelemetryUsageCounter;
+  kibanaVersion: string;
 }) {
   const routes = repository.getRoutes();
 
@@ -115,6 +117,7 @@ export function registerRoutes({
                 validatedParams
               ),
               ruleDataClient,
+              kibanaVersion,
             }).then((value) => {
               return {
                 aborted: false,
