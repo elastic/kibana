@@ -81,16 +81,16 @@ export const config: PluginConfigDescriptor<TaskManagerConfig> = {
       if (taskManager?.enabled === false || taskManager?.enabled === true) {
         addDeprecation({
           configPath: 'xpack.task_manager.enabled',
-          title: i18n.translate('xpack.task_manager.deprecations.enabledTitle', {
+          title: i18n.translate('xpack.taskManager.deprecations.enabledTitle', {
             defaultMessage: 'Setting "xpack.task_manager.enabled" is deprecated',
           }),
-          message: i18n.translate('xpack.task_manager.deprecations.enabledMessage', {
+          message: i18n.translate('xpack.taskManager.deprecations.enabledMessage', {
             defaultMessage:
               'This setting will be removed in 8.0 and the Task Manager plugin will always be enabled.',
           }),
           correctiveActions: {
             manualSteps: [
-              i18n.translate('xpack.task_manager.deprecations.enabled.manualStepOneMessage', {
+              i18n.translate('xpack.taskManager.deprecations.enabled.manualStepOneMessage', {
                 defaultMessage: 'Remove "xpack.task_manager.enabled" from kibana.yml.',
               }),
             ],

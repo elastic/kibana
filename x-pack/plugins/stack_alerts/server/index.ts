@@ -21,20 +21,20 @@ export const config: PluginConfigDescriptor<Config> = {
         addDeprecation({
           level: 'critical',
           configPath: 'xpack.stack_alerts.enabled',
-          title: i18n.translate('xpack.stack_alerts.deprecations.enabledTitle', {
+          title: i18n.translate('xpack.stackAlerts.deprecations.enabledTitle', {
             defaultMessage: 'Setting "xpack.stack_alerts.enabled" is deprecated',
           }),
-          message: i18n.translate('xpack.stack_alerts.deprecations.enabledMessage', {
+          message: i18n.translate('xpack.stackAlerts.deprecations.enabledMessage', {
             defaultMessage:
               'This setting will be removed in 8.0 and the Stack Rules plugin will always be enabled.',
           }),
           documentationUrl: `https://www.elastic.co/guide/en/kibana/current/kibana-privileges.html#kibana-feature-privileges`,
           correctiveActions: {
             manualSteps: [
-              i18n.translate('xpack.stack_alerts.deprecations.enabled.manualStepOneMessage', {
+              i18n.translate('xpack.stackAlerts.deprecations.enabled.manualStepOneMessage', {
                 defaultMessage: 'Remove "xpack.stack_alerts.enabled" from kibana.yml.',
               }),
-              i18n.translate('xpack.stack_alerts.deprecations.enabled.manualStepTwoMessage', {
+              i18n.translate('xpack.stackAlerts.deprecations.enabled.manualStepTwoMessage', {
                 defaultMessage: 'Use Kibana feature privileges to restrict access to Stack Rules.',
               }),
             ],
