@@ -85,10 +85,16 @@ export function crawlRequestServerToClient(crawlRequest: CrawlRequestFromServer)
 }
 
 export function crawlConfigServerToClient(crawlConfig: CrawlConfigFromServer): CrawlConfig {
-  const { domain_allowlist: domainAllowlist } = crawlConfig;
+  const {
+    domain_allowlist: domainAllowlist,
+    seed_urls: seedUrls,
+    sitemap_urls: sitemapUrls,
+  } = crawlConfig;
 
   return {
     domainAllowlist,
+    seedUrls,
+    sitemapUrls,
   };
 }
 

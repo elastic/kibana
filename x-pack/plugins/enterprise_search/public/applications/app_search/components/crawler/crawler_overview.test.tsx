@@ -78,6 +78,8 @@ const events: CrawlEventFromServer[] = [
     type: CrawlType.Full,
     crawl_config: {
       domain_allowlist: ['moviedatabase.com', 'swiftype.com'],
+      seed_urls: [],
+      sitemap_urls: [],
     },
   },
   {
@@ -90,6 +92,8 @@ const events: CrawlEventFromServer[] = [
     type: CrawlType.Partial,
     crawl_config: {
       domain_allowlist: ['swiftype.com'],
+      seed_urls: [],
+      sitemap_urls: [],
     },
   },
 ];
