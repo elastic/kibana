@@ -16,5 +16,5 @@ export interface SavedObjectStatusMeta
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [migratedIndices](./kibana-plugin-core-server.savedobjectstatusmeta.migratedindices.md) | <code>{</code><br/><code>        [status: string]: number;</code><br/><code>        skipped: number;</code><br/><code>        migrated: number;</code><br/><code>    }</code> |  |
+|  [migratedIndices](./kibana-plugin-core-server.savedobjectstatusmeta.migratedindices.md) | { \[status: string\]: number; skipped: number; migrated: number; } |  |
 

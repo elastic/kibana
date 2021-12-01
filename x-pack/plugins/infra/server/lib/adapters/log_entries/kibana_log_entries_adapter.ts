@@ -10,8 +10,8 @@ import { fold, map } from 'fp-ts/lib/Either';
 import { constant, identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
 import * as runtimeTypes from 'io-ts';
-import { compact } from 'lodash';
 import { JsonArray } from '@kbn/utility-types';
+import { compact } from 'lodash';
 import type { InfraPluginRequestHandlerContext } from '../../../types';
 import {
   LogEntriesAdapter,
@@ -24,6 +24,7 @@ import {
 import { SortedSearchHit } from '../framework';
 import { KibanaFramework } from '../framework/kibana_framework_adapter';
 import { ResolvedLogSourceConfiguration } from '../../../../common/log_sources';
+import { TIMESTAMP_FIELD, TIEBREAKER_FIELD } from '../../../../common/constants';
 
 const TIMESTAMP_FORMAT = 'epoch_millis';
 
@@ -46,7 +47,7 @@ export class InfraKibanaLogEntriesAdapter implements LogEntriesAdapter {
     const highlightClause = highlightQuery
       ? {
           highlight: {
-            boundary_scanner: 'word',
+            boundary_scanner: 'word' as const,
             fields: fields.reduce(
               (highlightFieldConfigs, fieldName) => ({
                 ...highlightFieldConfigs,
@@ -64,14 +65,14 @@ export class InfraKibanaLogEntriesAdapter implements LogEntriesAdapter {
       : {};
 
     const sort = {
-      [resolvedLogSourceConfiguration.timestampField]: sortDirection,
-      [resolvedLogSourceConfiguration.tiebreakerField]: sortDirection,
+      [TIMESTAMP_FIELD]: sortDirection,
+      [TIEBREAKER_FIELD]: sortDirection,
     };
 
     const esQuery = {
-      allowNoIndices: true,
+      allow_no_indices: true,
       index: resolvedLogSourceConfiguration.indices,
-      ignoreUnavailable: true,
+      ignore_unavailable: true,
       body: {
         size: size + 1, // Extra one to test if it has more before or after
         track_total_hits: false,
@@ -83,7 +84,7 @@ export class InfraKibanaLogEntriesAdapter implements LogEntriesAdapter {
               ...createFilterClauses(query, highlightQuery),
               {
                 range: {
-                  [resolvedLogSourceConfiguration.timestampField]: {
+                  [TIMESTAMP_FIELD]: {
                     gte: startTimestamp,
                     lte: endTimestamp,
                     format: TIMESTAMP_FORMAT,
@@ -139,14 +140,14 @@ export class InfraKibanaLogEntriesAdapter implements LogEntriesAdapter {
     );
 
     const query = {
-      allowNoIndices: true,
+      allow_no_indices: true,
       index: resolvedLogSourceConfiguration.indices,
-      ignoreUnavailable: true,
+      ignore_unavailable: true,
       body: {
         aggregations: {
           count_by_date: {
             date_range: {
-              field: resolvedLogSourceConfiguration.timestampField,
+              field: TIMESTAMP_FIELD,
               format: TIMESTAMP_FORMAT,
               ranges: bucketIntervalStarts.map((bucketIntervalStart) => ({
                 from: bucketIntervalStart.getTime(),
@@ -157,10 +158,7 @@ export class InfraKibanaLogEntriesAdapter implements LogEntriesAdapter {
               top_hits_by_key: {
                 top_hits: {
                   size: 1,
-                  sort: [
-                    { [resolvedLogSourceConfiguration.timestampField]: 'asc' },
-                    { [resolvedLogSourceConfiguration.tiebreakerField]: 'asc' },
-                  ],
+                  sort: [{ [TIMESTAMP_FIELD]: 'asc' }, { [TIEBREAKER_FIELD]: 'asc' }],
                   _source: false,
                 },
               },
@@ -173,7 +171,7 @@ export class InfraKibanaLogEntriesAdapter implements LogEntriesAdapter {
               ...createQueryFilterClauses(filterQuery),
               {
                 range: {
-                  [resolvedLogSourceConfiguration.timestampField]: {
+                  [TIMESTAMP_FIELD]: {
                     gte: startTimestamp,
                     lte: endTimestamp,
                     format: TIMESTAMP_FORMAT,

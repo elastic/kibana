@@ -68,6 +68,7 @@ it('produces the right watch and ignore list', () => {
       <absolute path>/x-pack/plugins/reporting/chromium,
       <absolute path>/x-pack/plugins/security_solution/cypress,
       <absolute path>/x-pack/plugins/apm/scripts,
+      <absolute path>/x-pack/plugins/apm/ftr_e2e,
       <absolute path>/x-pack/plugins/canvas/canvas_plugin_src,
       <absolute path>/x-pack/plugins/cases/server/scripts,
       <absolute path>/x-pack/plugins/lists/scripts,

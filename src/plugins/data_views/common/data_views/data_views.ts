@@ -35,7 +35,7 @@ import { META_FIELDS, SavedObject } from '../../common';
 import { SavedObjectNotFound } from '../../../kibana_utils/common';
 import { DataViewMissingIndices } from '../lib';
 import { findByTitle } from '../utils';
-import { DuplicateDataViewError } from '../errors';
+import { DuplicateDataViewError, DataViewInsufficientAccessError } from '../errors';
 
 const MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS = 3;
 
@@ -67,6 +67,7 @@ interface IndexPatternsServiceDeps {
   onNotification: OnNotification;
   onError: OnError;
   onRedirectNoIndexPattern?: () => void;
+  getCanSave: () => Promise<boolean>;
 }
 
 export class DataViewsService {
@@ -78,6 +79,7 @@ export class DataViewsService {
   private onNotification: OnNotification;
   private onError: OnError;
   private dataViewCache: ReturnType<typeof createDataViewCache>;
+  private getCanSave: () => Promise<boolean>;
 
   /**
    * @deprecated Use `getDefaultDataView` instead (when loading data view) and handle
@@ -93,6 +95,7 @@ export class DataViewsService {
     onNotification,
     onError,
     onRedirectNoIndexPattern = () => {},
+    getCanSave = () => Promise.resolve(false),
   }: IndexPatternsServiceDeps) {
     this.apiClient = apiClient;
     this.config = uiSettings;
@@ -101,6 +104,7 @@ export class DataViewsService {
     this.onNotification = onNotification;
     this.onError = onError;
     this.ensureDefaultDataView = createEnsureDefaultDataView(uiSettings, onRedirectNoIndexPattern);
+    this.getCanSave = getCanSave;
 
     this.dataViewCache = createDataViewCache();
   }
@@ -230,7 +234,7 @@ export class DataViewsService {
    * @param force
    */
   setDefault = async (id: string | null, force = false) => {
-    if (force || !this.config.get('defaultIndex')) {
+    if (force || !(await this.config.get('defaultIndex'))) {
       await this.config.set('defaultIndex', id);
     }
   };
@@ -295,7 +299,7 @@ export class DataViewsService {
 
       this.onError(err, {
         title: i18n.translate('dataViews.fetchFieldErrorTitle', {
-          defaultMessage: 'Error fetching fields for index pattern {title} (ID: {id})',
+          defaultMessage: 'Error fetching fields for data view {title} (ID: {id})',
           values: { id: indexPattern.id, title: indexPattern.title },
         }),
       });
@@ -341,7 +345,7 @@ export class DataViewsService {
 
       this.onError(err, {
         title: i18n.translate('dataViews.fetchFieldErrorTitle', {
-          defaultMessage: 'Error fetching fields for index pattern {title} (ID: {id})',
+          defaultMessage: 'Error fetching fields for data view {title} (ID: {id})',
           values: { id, title },
         }),
       });
@@ -423,11 +427,7 @@ export class DataViewsService {
     );
 
     if (!savedObject.version) {
-      throw new SavedObjectNotFound(
-        DATA_VIEW_SAVED_OBJECT_TYPE,
-        id,
-        'management/kibana/indexPatterns'
-      );
+      throw new SavedObjectNotFound(DATA_VIEW_SAVED_OBJECT_TYPE, id, 'management/kibana/dataViews');
     }
 
     return this.initFromSavedObject(savedObject);
@@ -483,7 +483,7 @@ export class DataViewsService {
       } else {
         this.onError(err, {
           title: i18n.translate('dataViews.fetchFieldErrorTitle', {
-            defaultMessage: 'Error fetching fields for index pattern {title} (ID: {id})',
+            defaultMessage: 'Error fetching fields for data view {title} (ID: {id})',
             values: { id: savedObject.id, title },
           }),
         });
@@ -561,6 +561,9 @@ export class DataViewsService {
    */
 
   async createSavedObject(indexPattern: DataView, override = false) {
+    if (!(await this.getCanSave())) {
+      throw new DataViewInsufficientAccessError();
+    }
     const dupe = await findByTitle(this.savedObjectsClient, indexPattern.title);
     if (dupe) {
       if (override) {
@@ -599,6 +602,9 @@ export class DataViewsService {
     ignoreErrors: boolean = false
   ): Promise<void | Error> {
     if (!indexPattern.id) return;
+    if (!(await this.getCanSave())) {
+      throw new DataViewInsufficientAccessError(indexPattern.id);
+    }
 
     // get the list of attributes
     const body = indexPattern.getAsSavedObjectBody();
@@ -654,7 +660,7 @@ export class DataViewsService {
             }
             const title = i18n.translate('dataViews.unableWriteLabel', {
               defaultMessage:
-                'Unable to write index pattern! Refresh the page to get the most up to date changes for this index pattern.',
+                'Unable to write data view! Refresh the page to get the most up to date changes for this data view.',
             });
 
             this.onNotification({ title, color: 'danger' });
@@ -682,6 +688,9 @@ export class DataViewsService {
    * @param indexPatternId: Id of kibana Index Pattern to delete
    */
   async delete(indexPatternId: string) {
+    if (!(await this.getCanSave())) {
+      throw new DataViewInsufficientAccessError(indexPatternId);
+    }
     this.dataViewCache.clear(indexPatternId);
     return this.savedObjectsClient.delete(DATA_VIEW_SAVED_OBJECT_TYPE, indexPatternId);
   }

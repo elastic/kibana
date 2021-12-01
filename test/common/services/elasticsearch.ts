@@ -8,30 +8,31 @@
 
 import { format as formatUrl } from 'url';
 import fs from 'fs';
-import { Client } from '@elastic/elasticsearch';
+import { Client, HttpConnection } from '@elastic/elasticsearch';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
-import type { KibanaClient } from '@elastic/elasticsearch/api/kibana';
 
 import { FtrProviderContext } from '../ftr_provider_context';
 
 /*
  registers Kibana-specific @elastic/elasticsearch client instance.
  */
-export function ElasticsearchProvider({ getService }: FtrProviderContext): KibanaClient {
+export function ElasticsearchProvider({ getService }: FtrProviderContext): Client {
   const config = getService('config');
 
   if (process.env.TEST_CLOUD) {
     return new Client({
       nodes: [formatUrl(config.get('servers.elasticsearch'))],
       requestTimeout: config.get('timeouts.esRequestTimeout'),
+      Connection: HttpConnection,
     });
   } else {
     return new Client({
-      ssl: {
+      tls: {
         ca: fs.readFileSync(CA_CERT_PATH, 'utf-8'),
       },
       nodes: [formatUrl(config.get('servers.elasticsearch'))],
       requestTimeout: config.get('timeouts.esRequestTimeout'),
+      Connection: HttpConnection,
     });
   }
 }

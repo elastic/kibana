@@ -11,7 +11,7 @@ import { ElasticsearchTemplate } from './elasticsearch_template';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { GlobalStateContext } from '../../contexts/global_state_context';
 // @ts-ignore
-import { ElasticsearchOverviewReact } from '../../../components/elasticsearch';
+import { ElasticsearchOverview } from '../../../components/elasticsearch';
 import { ComponentProps } from '../../route_init';
 import { useCharts } from '../../hooks/use_charts';
 import { BreadcrumbContainer } from '../../hooks/use_breadcrumbs';
@@ -57,7 +57,7 @@ export const ElasticsearchOverviewPage: React.FC<ComponentProps> = ({ clusters }
     const bounds = services.data?.query.timefilter.timefilter.getBounds();
     const url = `../api/monitoring/v1/clusters/${clusterUuid}/elasticsearch`;
 
-    const response = await services.http?.fetch(url, {
+    const response = await services.http?.fetch<any>(url, {
       method: 'POST',
       body: JSON.stringify({
         ccs,
@@ -79,7 +79,7 @@ export const ElasticsearchOverviewPage: React.FC<ComponentProps> = ({ clusters }
     const shardActivityData = shardActivity && filterShardActivityData(shardActivity); // no filter on data = null
 
     return (
-      <ElasticsearchOverviewReact
+      <ElasticsearchOverview
         clusterStatus={clusterStatus}
         metrics={metrics}
         logs={logs}

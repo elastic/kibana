@@ -23,6 +23,13 @@ const value: InspectorContextValue = {
 
 export const InspectorContext = createContext<InspectorContextValue>(value);
 
+export type AddInspectorRequest = (
+  result: FetcherResult<{
+    mainStatisticsData?: { _inspect?: InspectResponse };
+    _inspect?: InspectResponse;
+  }>
+) => void;
+
 export function InspectorContextProvider({ children }: { children: ReactNode }) {
   const history = useHistory();
   const { inspectorAdapters } = value;

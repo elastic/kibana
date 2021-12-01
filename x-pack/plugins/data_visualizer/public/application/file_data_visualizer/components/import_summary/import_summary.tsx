@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React, { FC } from 'react';
 
 import { EuiSpacer, EuiDescriptionList, EuiCallOut } from '@elastic/eui';
@@ -135,8 +135,8 @@ function createDisplayItems(
     items.splice(1, 0, {
       title: (
         <FormattedMessage
-          id="xpack.dataVisualizer.file.importSummary.indexPatternTitle"
-          defaultMessage="Index pattern"
+          id="xpack.dataVisualizer.file.importSummary.dataViewTitle"
+          defaultMessage="Data view"
         />
       ),
       description: indexPattern,

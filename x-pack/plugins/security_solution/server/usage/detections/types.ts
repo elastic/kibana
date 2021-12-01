@@ -17,8 +17,8 @@ interface RuleSearchBody {
 
 export interface RuleSearchParams {
   body: RuleSearchBody;
-  filterPath: string[];
-  ignoreUnavailable: boolean;
+  filter_path: string[];
+  ignore_unavailable: boolean;
   index: string;
   size: number;
 }

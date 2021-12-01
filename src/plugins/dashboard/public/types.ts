@@ -32,11 +32,14 @@ import { SavedObjectsTaggingApi } from './services/saved_objects_tagging_oss';
 import { DataPublicPluginStart, IndexPatternsContract } from './services/data';
 import { SavedObjectLoader, SavedObjectsStart } from './services/saved_objects';
 import { IKbnUrlStateStorage } from './services/kibana_utils';
-import { DashboardContainer, DashboardSavedObject } from '.';
+import type { ScreenshotModePluginStart } from './services/screenshot_mode';
+import type { DashboardContainer, DashboardSavedObject } from '.';
 import { VisualizationsStart } from '../../visualizations/public';
 import { DashboardAppLocatorParams } from './locator';
+import { SpacesPluginStart } from './services/spaces';
+import type { DashboardControlGroupInput } from './application/lib/dashboard_control_group';
 
-export { SavedDashboardPanel };
+export type { SavedDashboardPanel };
 
 export type NavAction = (anchorElement?: any) => void;
 export interface SavedDashboardPanelMap {
@@ -63,6 +66,8 @@ export interface DashboardState {
   expandedPanelId?: string;
   options: DashboardOptions;
   panels: DashboardPanelMap;
+
+  controlGroupInput?: DashboardControlGroupInput;
 }
 
 /**
@@ -72,6 +77,7 @@ export type RawDashboardState = Omit<DashboardState, 'panels'> & { panels: Saved
 
 export interface DashboardContainerInput extends ContainerInput {
   dashboardCapabilities?: DashboardAppCapabilities;
+  controlGroupInput?: DashboardControlGroupInput;
   refreshConfig?: RefreshInterval;
   isEmbeddedExternally?: boolean;
   isFullScreenMode: boolean;
@@ -200,7 +206,9 @@ export interface DashboardAppServices {
   onAppLeave: AppMountParameters['onAppLeave'];
   savedObjectsTagging?: SavedObjectsTaggingApi;
   savedObjectsClient: SavedObjectsClientContract;
+  screenshotModeService: ScreenshotModePluginStart;
   dashboardSessionStorage: DashboardSessionStorage;
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
   savedQueryService: DataPublicPluginStart['query']['savedQueries'];
+  spacesService?: SpacesPluginStart;
 }

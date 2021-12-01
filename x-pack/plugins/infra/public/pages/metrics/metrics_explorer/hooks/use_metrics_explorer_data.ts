@@ -6,9 +6,10 @@
  */
 
 import DateMath from '@elastic/datemath';
-import { isEqual } from 'lodash';
 import { useEffect, useState } from 'react';
 import { DataViewBase } from '@kbn/es-query';
+import { isEqual } from 'lodash';
+
 import { MetricsSourceConfigurationProperties } from '../../../../../common/metrics_sources';
 import {
   MetricsExplorerResponse,
@@ -83,7 +84,6 @@ export function useMetricsExplorerData(
               void 0,
             timerange: {
               ...timerange,
-              field: source.fields.timestamp,
               from: from.valueOf(),
               to: to.valueOf(),
             },

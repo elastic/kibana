@@ -6,15 +6,18 @@
  */
 
 import { createMockedIndexPattern } from '../../../mocks';
-import { formulaOperation, GenericOperationDefinition, IndexPatternColumn } from '../index';
+import { formulaOperation, GenericOperationDefinition, GenericIndexPatternColumn } from '../index';
 import { FormulaIndexPatternColumn } from './formula';
 import { regenerateLayerFromAst } from './parse';
 import type { IndexPattern, IndexPatternField, IndexPatternLayer } from '../../../types';
 import { tinymathFunctions } from './util';
+import { TermsIndexPatternColumn } from '../terms';
+import { MovingAverageIndexPatternColumn } from '../calculations';
+import { StaticValueIndexPatternColumn } from '../static_value';
 
 jest.mock('../../layer_helpers', () => {
   return {
-    getColumnOrder: jest.fn(({ columns }: { columns: Record<string, IndexPatternColumn> }) =>
+    getColumnOrder: jest.fn(({ columns }: { columns: Record<string, GenericIndexPatternColumn> }) =>
       Object.keys(columns)
     ),
     getManagedColumnsFrom: jest.fn().mockReturnValue([]),
@@ -33,11 +36,27 @@ const operationDefinitionMap: Record<string, GenericOperationDefinition> = {
       scale: 'ratio',
       timeScale: false,
     }),
+    getPossibleOperationForField: () => ({ scale: 'ratio' }),
   } as unknown as GenericOperationDefinition,
-  terms: { input: 'field' } as GenericOperationDefinition,
-  sum: { input: 'field', filterable: true } as GenericOperationDefinition,
-  last_value: { input: 'field' } as GenericOperationDefinition,
-  max: { input: 'field' } as GenericOperationDefinition,
+  terms: {
+    input: 'field',
+    getPossibleOperationForField: () => ({ scale: 'ordinal' }),
+  } as unknown as GenericOperationDefinition,
+  sum: {
+    input: 'field',
+    filterable: true,
+    getPossibleOperationForField: () => ({ scale: 'ratio' }),
+  } as unknown as GenericOperationDefinition,
+  last_value: {
+    input: 'field',
+    getPossibleOperationForField: ({ type }) => ({
+      scale: type === 'string' ? 'ordinal' : 'ratio',
+    }),
+  } as GenericOperationDefinition,
+  max: {
+    input: 'field',
+    getPossibleOperationForField: () => ({ scale: 'ratio' }),
+  } as unknown as GenericOperationDefinition,
   count: {
     input: 'field',
     filterable: true,
@@ -50,8 +69,12 @@ const operationDefinitionMap: Record<string, GenericOperationDefinition> = {
       scale: 'ratio',
       timeScale: false,
     }),
+    getPossibleOperationForField: () => ({ scale: 'ratio' }),
   } as unknown as GenericOperationDefinition,
-  derivative: { input: 'fullReference' } as GenericOperationDefinition,
+  derivative: {
+    input: 'fullReference',
+    getPossibleOperationForField: () => ({ scale: 'ratio' }),
+  } as unknown as GenericOperationDefinition,
   moving_average: {
     input: 'fullReference',
     operationParams: [{ name: 'window', type: 'number', required: true }],
@@ -66,8 +89,12 @@ const operationDefinitionMap: Record<string, GenericOperationDefinition> = {
       references,
     }),
     getErrorMessage: () => ['mock error'],
+    getPossibleOperationForField: () => ({ scale: 'ratio' }),
   } as unknown as GenericOperationDefinition,
-  cumulative_sum: { input: 'fullReference' } as GenericOperationDefinition,
+  cumulative_sum: {
+    input: 'fullReference',
+    getPossibleOperationForField: () => ({ scale: 'ratio' }),
+  } as unknown as GenericOperationDefinition,
 };
 
 describe('formula', () => {
@@ -89,7 +116,7 @@ describe('formula', () => {
             orderDirection: 'asc',
           },
           sourceField: 'category',
-        },
+        } as TermsIndexPatternColumn,
       },
     };
   });
@@ -167,7 +194,7 @@ describe('formula', () => {
                 },
               },
             },
-          } as IndexPatternColumn,
+          } as GenericIndexPatternColumn,
           layer,
           indexPattern,
         })
@@ -201,7 +228,7 @@ describe('formula', () => {
               // Need to test with multiple replaces due to string replace
               query: `category.keyword: "Men's Clothing" or category.keyword: "Men's Shoes"`,
             },
-          } as IndexPatternColumn,
+          } as GenericIndexPatternColumn,
           layer,
           indexPattern,
         })
@@ -230,7 +257,7 @@ describe('formula', () => {
               language: 'lucene',
               query: `*`,
             },
-          } as IndexPatternColumn,
+          } as GenericIndexPatternColumn,
           layer,
           indexPattern,
         })
@@ -261,7 +288,7 @@ describe('formula', () => {
               references: ['col2'],
               timeScale: 'd',
               params: { window: 3 },
-            },
+            } as MovingAverageIndexPatternColumn,
             layer: {
               indexPatternId: '1',
               columnOrder: [],
@@ -275,7 +302,7 @@ describe('formula', () => {
                   references: ['col2'],
                   timeScale: 'd',
                   params: { window: 3 },
-                },
+                } as MovingAverageIndexPatternColumn,
                 col2: {
                   dataType: 'number',
                   isBucketed: false,
@@ -321,7 +348,7 @@ describe('formula', () => {
                 orderDirection: 'asc',
               },
               sourceField: 'category',
-            },
+            } as TermsIndexPatternColumn,
             layer: {
               indexPatternId: '1',
               columnOrder: [],
@@ -337,7 +364,7 @@ describe('formula', () => {
                     orderDirection: 'asc',
                   },
                   sourceField: 'category',
-                },
+                } as TermsIndexPatternColumn,
               },
             },
             indexPattern,
@@ -368,7 +395,7 @@ describe('formula', () => {
             params: {
               value: '0',
             },
-          },
+          } as StaticValueIndexPatternColumn,
           layer,
           indexPattern,
         })
@@ -644,7 +671,7 @@ describe('formula', () => {
             scale: 'ratio',
             params: { formula, isFormulaBroken: isBroken },
             references: [],
-          },
+          } as FormulaIndexPatternColumn,
         },
         columnOrder: [],
         indexPatternId: '',
@@ -1227,6 +1254,30 @@ invalid: "
             operationDefinitionMap
           )
         ).toEqual(undefined);
+      }
+    });
+
+    it('returns errors if the returned type of an operation is not supported by Formula', () => {
+      // check only "valid" operations which are strictly not supported by Formula
+      // as for last_value with ordinal data
+      const formulas = [
+        { formula: 'last_value(dest)' },
+        { formula: 'terms(dest)' },
+        { formula: 'moving_average(last_value(dest), window=7)', errorFormula: 'last_value(dest)' },
+      ];
+      for (const { formula, errorFormula } of formulas) {
+        expect(
+          formulaOperation.getErrorMessage!(
+            getNewLayerWithFormula(formula),
+            'col1',
+            indexPattern,
+            operationDefinitionMap
+          )
+        ).toEqual([
+          `The return value type of the operation ${
+            errorFormula ?? formula
+          } is not supported in Formula.`,
+        ]);
       }
     });
 

@@ -7,7 +7,6 @@
 
 import {
   createForceMergeActions,
-  createFreezeActions,
   createMinAgeActions,
   createReadonlyActions,
   createRolloverActions,
@@ -47,7 +46,6 @@ export const setupSearchableSnapshotsTestBed = async (args?: {
       cold: {
         ...createMinAgeActions(testBed, 'cold'),
         ...createSearchableSnapshotActions(testBed, 'cold'),
-        ...createFreezeActions(testBed, 'cold'),
         ...createReadonlyActions(testBed, 'cold'),
       },
       frozen: {

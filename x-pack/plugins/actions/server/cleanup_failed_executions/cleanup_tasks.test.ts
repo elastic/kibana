@@ -10,7 +10,8 @@ import { loggingSystemMock, elasticsearchServiceMock } from '../../../../../src/
 import { spacesMock } from '../../../spaces/server/mocks';
 import { CleanupTasksOpts, cleanupTasks } from './cleanup_tasks';
 import { TaskInstance } from '../../../task_manager/server';
-import { ApiResponse, estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { TransportResult } from '@elastic/elasticsearch';
 
 describe('cleanupTasks', () => {
   const logger = loggingSystemMock.create().get();
@@ -71,7 +72,7 @@ describe('cleanupTasks', () => {
   it('should delete action_task_params and task objects', async () => {
     esClient.bulk.mockResolvedValue({
       body: { items: [], errors: false, took: 1 },
-    } as unknown as ApiResponse<estypes.BulkResponse, unknown>);
+    } as unknown as TransportResult<estypes.BulkResponse, unknown>);
     const result = await cleanupTasks({
       ...cleanupTasksOpts,
       tasks: [taskSO],
@@ -106,7 +107,7 @@ describe('cleanupTasks', () => {
         errors: true,
         took: 1,
       },
-    } as unknown as ApiResponse<estypes.BulkResponse, unknown>);
+    } as unknown as TransportResult<estypes.BulkResponse, unknown>);
     const result = await cleanupTasks({
       ...cleanupTasksOpts,
       tasks: [taskSO],

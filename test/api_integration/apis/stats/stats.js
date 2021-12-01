@@ -15,7 +15,7 @@ const assertStatsAndMetrics = (body) => {
   expect(body.kibana.transport_address).to.be.a('string');
   expect(body.kibana.version).to.be.a('string');
   expect(body.kibana.snapshot).to.be.a('boolean');
-  expect(body.kibana.status).to.be('green');
+  expect(body.kibana.status).to.be.a('string');
 
   expect(body.process.memory.heap.total_bytes).to.be.a('number');
   expect(body.process.memory.heap.used_bytes).to.be.a('number');

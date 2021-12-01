@@ -7,7 +7,7 @@
 
 import React, { FC, Fragment, useState, useEffect } from 'react';
 import { EuiSpacer, EuiText } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { AnalyticsJobType } from '../../../analytics_management/hooks/use_create_analytics_form/state';
 import { ANALYSIS_CONFIG_TYPE } from '../../../../common/analytics';
@@ -46,19 +46,19 @@ const messages: Record<DataFrameAnalysisConfigType, JSX.Element> = {
   [ANALYSIS_CONFIG_TYPE.CLASSIFICATION]: (
     <FormattedMessage
       id="xpack.ml.dataframe.analytics.create.sourceObjectClassificationHelpText"
-      defaultMessage="This index pattern does not contain any supported fields. Classification jobs require categorical, numeric, or boolean fields."
+      defaultMessage="This data view does not contain any supported fields. Classification jobs require categorical, numeric, or boolean fields."
     />
   ),
   [ANALYSIS_CONFIG_TYPE.REGRESSION]: (
     <FormattedMessage
       id="xpack.ml.dataframe.analytics.create.sourceObjectRegressionHelpText"
-      defaultMessage="This index pattern does not contain any supported fields. Regression jobs require numeric fields."
+      defaultMessage="This data view does not contain any supported fields. Regression jobs require numeric fields."
     />
   ),
   [ANALYSIS_CONFIG_TYPE.OUTLIER_DETECTION]: (
     <FormattedMessage
       id="xpack.ml.dataframe.analytics.create.sourceObjectHelpText"
-      defaultMessage="This index pattern does not contain any numeric type fields. The analytics job may not be able to come up with any outliers."
+      defaultMessage="This data view does not contain any numeric type fields. The analytics job may not be able to come up with any outliers."
     />
   ),
 };
@@ -73,7 +73,7 @@ export const SupportedFieldsMessage: FC<Props> = ({ jobType }) => {
   const [sourceIndexFieldsCheckFailed, setSourceIndexFieldsCheckFailed] = useState<boolean>(false);
   const { fields } = newJobCapsServiceAnalytics;
 
-  // Find out if index pattern contains supported fields for job type. Provides a hint in the form
+  // Find out if data view contains supported fields for job type. Provides a hint in the form
   // that job may not run correctly if no supported fields are found.
   const validateFields = () => {
     if (fields && jobType !== undefined) {

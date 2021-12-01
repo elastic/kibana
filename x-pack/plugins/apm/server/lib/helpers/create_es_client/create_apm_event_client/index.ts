@@ -8,7 +8,7 @@
 import type {
   TermsEnumRequest,
   TermsEnumResponse,
-} from '@elastic/elasticsearch/api/types';
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ValuesType } from 'utility-types';
 import { withApmSpan } from '../../../../utils/with_apm_span';
 import { Profile } from '../../../../../typings/es_schemas/ui/profile';
@@ -26,7 +26,7 @@ import { APMError } from '../../../../../typings/es_schemas/ui/apm_error';
 import { Metric } from '../../../../../typings/es_schemas/ui/metric';
 import { Span } from '../../../../../typings/es_schemas/ui/span';
 import { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
-import { ApmIndicesConfig } from '../../../settings/apm_indices/get_apm_indices';
+import { ApmIndicesConfig } from '../../../../routes/settings/apm_indices/get_apm_indices';
 import {
   callAsyncWithDebug,
   getDebugBody,
@@ -100,7 +100,7 @@ export function createApmEventClient({
 
       const searchParams = {
         ...withPossibleLegacyDataFilter,
-        ignore_throttled: !includeFrozen,
+        ...(includeFrozen ? { ignore_throttled: false } : {}),
         ignore_unavailable: true,
         preference: 'any',
       };
@@ -110,9 +110,14 @@ export function createApmEventClient({
 
       return callAsyncWithDebug({
         cb: () => {
-          const searchPromise = withApmSpan(operationName, () =>
-            cancelEsRequestOnAbort(esClient.search(searchParams), request)
-          );
+          const searchPromise = withApmSpan(operationName, () => {
+            const controller = new AbortController();
+            return cancelEsRequestOnAbort(
+              esClient.search(searchParams, { signal: controller.signal }),
+              request,
+              controller
+            );
+          });
 
           return unwrapEsResponse(searchPromise);
         },
@@ -143,15 +148,20 @@ export function createApmEventClient({
       return callAsyncWithDebug({
         cb: () => {
           const { apm, ...rest } = params;
-          const termsEnumPromise = withApmSpan(operationName, () =>
-            cancelEsRequestOnAbort(
-              esClient.termsEnum({
-                index: Array.isArray(index) ? index.join(',') : index,
-                ...rest,
-              }),
-              request
-            )
-          );
+          const termsEnumPromise = withApmSpan(operationName, () => {
+            const controller = new AbortController();
+            return cancelEsRequestOnAbort(
+              esClient.termsEnum(
+                {
+                  index: Array.isArray(index) ? index.join(',') : index,
+                  ...rest,
+                },
+                { signal: controller.signal }
+              ),
+              request,
+              controller
+            );
+          });
 
           return unwrapEsResponse(termsEnumPromise);
         },

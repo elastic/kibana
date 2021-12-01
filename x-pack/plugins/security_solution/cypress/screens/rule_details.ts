@@ -58,13 +58,13 @@ export const FIELDS_BROWSER_BTN =
 
 export const REFRESH_BUTTON = '[data-test-subj="refreshButton"]';
 
-export const RULE_ABOUT_DETAILS_HEADER_TOGGLE = '[data-test-subj="stepAboutDetailsToggle"]';
-
 export const RULE_NAME_HEADER = '[data-test-subj="header-page-title"]';
 
 export const RULE_NAME_OVERRIDE_DETAILS = 'Rule name override';
 
 export const RISK_SCORE_DETAILS = 'Risk score';
+
+export const INDICATOR_PREFIX_OVERRIDE = 'Indicator prefix override';
 
 export const RISK_SCORE_OVERRIDE_DETAILS = 'Risk score override';
 
@@ -82,8 +82,6 @@ export const RUNS_EVERY_DETAILS = 'Runs every';
 
 export const SCHEDULE_DETAILS =
   '[data-test-subj=schedule] [data-test-subj="listItemColumnStepRuleDescription"]';
-
-export const SCHEDULE_STEP = '[data-test-subj="schedule"]  .euiDescriptionList__description';
 
 export const SEVERITY_DETAILS = 'Severity';
 

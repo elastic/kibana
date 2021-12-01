@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "types": [
+      "node"
+    ],
+    "noErrorTruncation": true,
+    "assumeChangesOnlyAffectDirectDependencies": true
+  },
+  "include": [
+    "./apm_api_integration/**/*",
+    "../../packages/kbn-test/types/**/*",
+    "../../typings/**/*"
+  ],
+  "exclude": [
+    "**/__fixtures__/**/*",
+    "**/target/**",
+    "**/node_modules/**"
+  ]
+}

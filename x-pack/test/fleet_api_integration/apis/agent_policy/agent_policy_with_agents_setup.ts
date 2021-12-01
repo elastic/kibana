@@ -50,7 +50,7 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     // @ts-expect-error TotalHit
-    return res.body.hits.total.value !== 0;
+    return res.hits.total.value !== 0;
   }
 
   // Test all the side effect that should occurs when we create|update an agent policy

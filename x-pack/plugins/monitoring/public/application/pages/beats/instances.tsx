@@ -15,7 +15,7 @@ import { useTable } from '../../hooks/use_table';
 import { BeatsTemplate } from './beats_template';
 // @ts-ignore
 import { Listing } from '../../../components/beats/listing';
-import { SetupModeRenderer, SetupModeProps } from '../../setup_mode/setup_mode_renderer';
+import { SetupModeRenderer, SetupModeProps } from '../../../components/renderers/setup_mode';
 import { SetupModeContext } from '../../../components/setup_mode/setup_mode_context';
 import { BreadcrumbContainer } from '../../hooks/use_breadcrumbs';
 import { BEATS_SYSTEM_ID } from '../../../../common/constants';
@@ -49,7 +49,7 @@ export const BeatsInstancesPage: React.FC<ComponentProps> = ({ clusters }) => {
   const getPageData = useCallback(async () => {
     const bounds = services.data?.query.timefilter.timefilter.getBounds();
     const url = `../api/monitoring/v1/clusters/${clusterUuid}/beats/beats`;
-    const response = await services.http?.fetch(url, {
+    const response = await services.http?.fetch<{ stats: { total: number } }>(url, {
       method: 'POST',
       body: JSON.stringify({
         ccs,
@@ -61,7 +61,7 @@ export const BeatsInstancesPage: React.FC<ComponentProps> = ({ clusters }) => {
     });
 
     setData(response);
-    updateTotalItemCount(response.stats.total);
+    updateTotalItemCount(response?.stats.total);
   }, [
     ccs,
     clusterUuid,

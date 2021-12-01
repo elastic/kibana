@@ -24,7 +24,7 @@ export const useHostIpToName = (ipAddress: string | null, indexPattern: string |
           throw new Error('HTTP service is unavailable');
         }
         if (ipAddress && indexPattern) {
-          const response = await fetch('/api/infra/ip_to_host', {
+          const response = await fetch<IpToHostResponse>('/api/infra/ip_to_host', {
             method: 'POST',
             body: JSON.stringify({
               ip: ipAddress,

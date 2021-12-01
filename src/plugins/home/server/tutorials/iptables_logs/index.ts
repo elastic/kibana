@@ -24,12 +24,12 @@ export function iptablesLogsSpecProvider(context: TutorialContext): TutorialSche
   return {
     id: 'iptablesLogs',
     name: i18n.translate('home.tutorials.iptablesLogs.nameTitle', {
-      defaultMessage: 'Iptables logs',
+      defaultMessage: 'Iptables Logs',
     }),
     moduleName,
     category: TutorialsCategory.SECURITY_SOLUTION,
     shortDescription: i18n.translate('home.tutorials.iptablesLogs.shortDescription', {
-      defaultMessage: 'Collect iptables and ip6tables logs.',
+      defaultMessage: 'Collect and parse logs from iptables and ip6tables with Filebeat.',
     }),
     longDescription: i18n.translate('home.tutorials.iptablesLogs.longDescription', {
       defaultMessage:

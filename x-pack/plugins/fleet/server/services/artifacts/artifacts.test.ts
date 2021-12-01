@@ -7,9 +7,9 @@
 
 import { elasticsearchServiceMock } from 'src/core/server/mocks';
 
-import { ResponseError } from '@elastic/elasticsearch/lib/errors';
+import { errors } from '@elastic/elasticsearch';
 
-import type { ApiResponse } from '@elastic/elasticsearch/lib/Transport';
+import type { TransportResult } from '@elastic/elasticsearch';
 
 import { FLEET_SERVER_ARTIFACTS_INDEX } from '../../../common';
 
@@ -43,6 +43,7 @@ describe('When using the artifacts services', () => {
 
   describe('and calling `getArtifact()`', () => {
     it('should get artifact using id', async () => {
+      // @ts-expect-error not full interface
       esClientMock.get.mockImplementation(() => {
         return elasticsearchServiceMock.createSuccessTransportRequestPromise(
           generateArtifactEsGetSingleHitMock()
@@ -64,7 +65,7 @@ describe('When using the artifacts services', () => {
     it('should throw an ArtifactElasticsearchError if one is encountered', async () => {
       esClientMock.get.mockImplementation(() => {
         return elasticsearchServiceMock.createErrorTransportRequestPromise(
-          new ResponseError(generateEsRequestErrorApiResponseMock())
+          new errors.ResponseError(generateEsRequestErrorApiResponseMock())
         );
       });
 
@@ -103,9 +104,8 @@ describe('When using the artifacts services', () => {
     });
 
     it('should ignore 409 errors from elasticsearch', async () => {
-      const error = new ResponseError({ statusCode: 409 } as ApiResponse);
+      const error = new errors.ResponseError({ statusCode: 409 } as TransportResult);
       // Unclear why `mockRejectedValue()` has the params value type set to `never`
-      // @ts-expect-error
       esClientMock.create.mockRejectedValue(error);
       await expect(() => createArtifact(esClientMock, newArtifact)).not.toThrow();
     });
@@ -140,6 +140,7 @@ describe('When using the artifacts services', () => {
 
   describe('and calling `listArtifacts()`', () => {
     beforeEach(() => {
+      // @ts-expect-error not full interface
       esClientMock.search.mockImplementation(() => {
         return elasticsearchServiceMock.createSuccessTransportRequestPromise(
           generateArtifactEsSearchResultHitsMock()
@@ -152,11 +153,13 @@ describe('When using the artifacts services', () => {
 
       expect(esClientMock.search).toHaveBeenCalledWith({
         index: FLEET_SERVER_ARTIFACTS_INDEX,
-        sort: 'created:asc',
         ignore_unavailable: true,
         q: '',
         from: 0,
         size: 20,
+        body: {
+          sort: [{ created: { order: 'asc' } }],
+        },
       });
 
       expect(results).toEqual({
@@ -184,11 +187,13 @@ describe('When using the artifacts services', () => {
 
       expect(esClientMock.search).toHaveBeenCalledWith({
         index: FLEET_SERVER_ARTIFACTS_INDEX,
-        sort: 'identifier:desc',
         q: 'packageName:endpoint',
         ignore_unavailable: true,
         from: 450,
         size: 50,
+        body: {
+          sort: [{ identifier: { order: 'desc' } }],
+        },
       });
 
       expect(listMeta).toEqual({

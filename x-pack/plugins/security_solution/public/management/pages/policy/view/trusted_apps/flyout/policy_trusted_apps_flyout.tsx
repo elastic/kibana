@@ -8,7 +8,7 @@
 import React, { useMemo, useState, useCallback, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { isEmpty, without } from 'lodash/fp';
 import {
@@ -28,7 +28,6 @@ import {
 import { Dispatch } from 'redux';
 import {
   policyDetails,
-  getCurrentArtifactsLocation,
   getAssignableArtifactsList,
   getAssignableArtifactsListIsLoading,
   getUpdateArtifactsIsLoading,
@@ -50,7 +49,6 @@ export const PolicyTrustedAppsFlyout = React.memo(() => {
   usePolicyTrustedAppsNotification();
   const dispatch = useDispatch<Dispatch<AppAction>>();
   const [selectedArtifactIds, setSelectedArtifactIds] = useState<string[]>([]);
-  const location = usePolicyDetailsSelector(getCurrentArtifactsLocation);
   const policyItem = usePolicyDetailsSelector(policyDetails);
   const assignableArtifactsList = usePolicyDetailsSelector(getAssignableArtifactsList);
   const isAssignableArtifactsListLoading = usePolicyDetailsSelector(
@@ -91,6 +89,7 @@ export const PolicyTrustedAppsFlyout = React.memo(() => {
       payload: {
         action: 'assign',
         artifacts: selectedArtifactIds.map<MaybeImmutable<TrustedApp>>((selectedId) => {
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           return assignableArtifactsList?.data?.find((trustedApp) => trustedApp.id === selectedId)!;
         }),
       },
@@ -174,7 +173,6 @@ export const PolicyTrustedAppsFlyout = React.memo(() => {
       <EuiFlyoutBody>
         {(assignableArtifactsList?.total || 0) > 100 ? searchWarningMessage : null}
         <SearchExceptions
-          defaultValue={location.filter}
           onSearch={handleOnSearch}
           placeholder={i18n.translate(
             'xpack.securitySolution.endpoint.policy.trustedApps.layout.searh.label',
@@ -182,6 +180,7 @@ export const PolicyTrustedAppsFlyout = React.memo(() => {
               defaultMessage: 'Search trusted applications',
             }
           )}
+          hideRefreshButton
         />
         <EuiSpacer size="m" />
 
@@ -217,7 +216,7 @@ export const PolicyTrustedAppsFlyout = React.memo(() => {
             title={
               <FormattedMessage
                 id="xpack.securitySolution.endpoint.policy.trustedApps.layout.flyout.noAssignable"
-                defaultMessage="There are no assignable Trused Apps to assign to this policy"
+                defaultMessage="There are no trusted applications that can be assigned to this policy."
               />
             }
           />
@@ -249,7 +248,7 @@ export const PolicyTrustedAppsFlyout = React.memo(() => {
             >
               <FormattedMessage
                 id="xpack.securitySolution.endpoint.policy.trustedApps.layout.flyout.confirm"
-                defaultMessage="Assing to {policyName}"
+                defaultMessage="Assign to {policyName}"
                 values={{
                   policyName,
                 }}

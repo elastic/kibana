@@ -25,6 +25,7 @@
     "presentationUtil"
   ],
   "optionalPlugins": [
+    "customIntegrations",
     "home",
     "savedObjectsTagging",
     "charts",

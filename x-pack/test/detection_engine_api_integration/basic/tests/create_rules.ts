@@ -25,26 +25,11 @@ import {
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
-  const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
+  const supertest = getService('supertest');
+  const log = getService('log');
 
   describe('create_rules', () => {
-    describe('validation errors', () => {
-      it('should give an error that the index must exist first if it does not exist before creating a rule', async () => {
-        const { body } = await supertest
-          .post(DETECTION_ENGINE_RULES_URL)
-          .set('kbn-xsrf', 'true')
-          .send(getSimpleRule())
-          .expect(400);
-
-        expect(body).to.eql({
-          message:
-            'To create a rule, the index must exist first. Index .siem-signals-default does not exist',
-          status_code: 400,
-        });
-      });
-    });
-
     describe('creating rules', () => {
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
@@ -55,12 +40,12 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       beforeEach(async () => {
-        await createSignalsIndex(supertest);
+        await createSignalsIndex(supertest, log);
       });
 
       afterEach(async () => {
-        await deleteSignalsIndex(supertest);
-        await deleteAllAlerts(supertest);
+        await deleteSignalsIndex(supertest, log);
+        await deleteAllAlerts(supertest, log);
       });
 
       it('should create a single rule with a rule_id', async () => {

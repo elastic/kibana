@@ -92,7 +92,7 @@
               },
               " | undefined; sourceMeta: object | null; isForceRefresh: boolean; } & Pick<",
               "VectorSourceRequestMeta",
-              ", \"filters\" | \"query\" | \"searchSessionId\" | \"buffer\" | \"extent\" | \"timeFilters\" | \"timeslice\" | \"zoom\" | \"isReadOnly\" | \"applyGlobalQuery\" | \"applyGlobalTime\" | \"applyForceRefresh\" | \"fieldNames\" | \"timesliceMaskField\" | \"sourceQuery\" | \"sourceMeta\" | \"isForceRefresh\"> & { dynamicStyleFields: string[]; isTimeAware: boolean; sourceQuery: ",
+              ", \"query\" | \"filters\" | \"searchSessionId\" | \"buffer\" | \"extent\" | \"timeFilters\" | \"timeslice\" | \"zoom\" | \"isReadOnly\" | \"applyGlobalQuery\" | \"applyGlobalTime\" | \"applyForceRefresh\" | \"fieldNames\" | \"timesliceMaskField\" | \"sourceQuery\" | \"sourceMeta\" | \"isForceRefresh\"> & { dynamicStyleFields: string[]; isTimeAware: boolean; sourceQuery: ",
               {
                 "pluginId": "@kbn/es-query",
                 "scope": "common",
@@ -1266,6 +1266,21 @@
           },
           {
             "parentPluginId": "maps",
+            "id": "def-public.IField.getMbFieldName",
+            "type": "Function",
+            "tags": [],
+            "label": "getMbFieldName",
+            "description": [],
+            "signature": [
+              "() => string"
+            ],
+            "path": "x-pack/plugins/maps/public/classes/fields/field.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "maps",
             "id": "def-public.IField.getRootName",
             "type": "Function",
             "tags": [],
@@ -1498,10 +1513,10 @@
           },
           {
             "parentPluginId": "maps",
-            "id": "def-public.IField.supportsAutoDomain",
+            "id": "def-public.IField.supportsFieldMetaFromLocalData",
             "type": "Function",
             "tags": [],
-            "label": "supportsAutoDomain",
+            "label": "supportsFieldMetaFromLocalData",
             "description": [],
             "signature": [
               "() => boolean"
@@ -1513,25 +1528,10 @@
           },
           {
             "parentPluginId": "maps",
-            "id": "def-public.IField.supportsFieldMeta",
+            "id": "def-public.IField.supportsFieldMetaFromEs",
             "type": "Function",
             "tags": [],
-            "label": "supportsFieldMeta",
-            "description": [],
-            "signature": [
-              "() => boolean"
-            ],
-            "path": "x-pack/plugins/maps/public/classes/fields/field.ts",
-            "deprecated": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "maps",
-            "id": "def-public.IField.canReadFromGeoJson",
-            "type": "Function",
-            "tags": [],
-            "label": "canReadFromGeoJson",
+            "label": "supportsFieldMetaFromEs",
             "description": [],
             "signature": [
               "() => boolean"
@@ -1577,6 +1577,38 @@
                     "section": "def-public.IField",
                     "text": "IField"
                   }
+                ],
+                "path": "x-pack/plugins/maps/public/classes/fields/field.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "maps",
+            "id": "def-public.IField.pluckRangeFromTileMetaFeature",
+            "type": "Function",
+            "tags": [],
+            "label": "pluckRangeFromTileMetaFeature",
+            "description": [],
+            "signature": [
+              "(metaFeature: ",
+              "TileMetaFeature",
+              ") => { min: number; max: number; } | null"
+            ],
+            "path": "x-pack/plugins/maps/public/classes/fields/field.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "maps",
+                "id": "def-public.IField.pluckRangeFromTileMetaFeature.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "metaFeature",
+                "description": [],
+                "signature": [
+                  "TileMetaFeature"
                 ],
                 "path": "x-pack/plugins/maps/public/classes/fields/field.ts",
                 "deprecated": false,
@@ -1720,6 +1752,21 @@
         "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
         "deprecated": false,
         "children": [
+          {
+            "parentPluginId": "maps",
+            "id": "def-public.IVectorSource.isMvt",
+            "type": "Function",
+            "tags": [],
+            "label": "isMvt",
+            "description": [],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
           {
             "parentPluginId": "maps",
             "id": "def-public.IVectorSource.getTooltipProperties",
@@ -2138,10 +2185,10 @@
           },
           {
             "parentPluginId": "maps",
-            "id": "def-public.IVectorSource.getSourceTooltipContent",
+            "id": "def-public.IVectorSource.getSourceStatus",
             "type": "Function",
             "tags": [],
-            "label": "getSourceTooltipContent",
+            "label": "getSourceStatus",
             "description": [],
             "signature": [
               "(sourceDataRequest?: ",
@@ -2157,8 +2204,8 @@
                 "pluginId": "maps",
                 "scope": "public",
                 "docId": "kibMapsPluginApi",
-                "section": "def-public.SourceTooltipConfig",
-                "text": "SourceTooltipConfig"
+                "section": "def-public.SourceStatus",
+                "text": "SourceStatus"
               }
             ],
             "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
@@ -2166,7 +2213,7 @@
             "children": [
               {
                 "parentPluginId": "maps",
-                "id": "def-public.IVectorSource.getSourceTooltipContent.$1",
+                "id": "def-public.IVectorSource.getSourceStatus.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "sourceDataRequest",
@@ -2712,7 +2759,7 @@
             "label": "sampleValues",
             "description": [],
             "signature": [
-              "React.ReactText[] | undefined"
+              "(string | number)[] | undefined"
             ],
             "path": "x-pack/plugins/maps/public/ems_autosuggest/ems_autosuggest.ts",
             "deprecated": false
@@ -2735,17 +2782,17 @@
       },
       {
         "parentPluginId": "maps",
-        "id": "def-public.SourceTooltipConfig",
+        "id": "def-public.SourceStatus",
         "type": "Interface",
         "tags": [],
-        "label": "SourceTooltipConfig",
+        "label": "SourceStatus",
         "description": [],
         "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
         "deprecated": false,
         "children": [
           {
             "parentPluginId": "maps",
-            "id": "def-public.SourceTooltipConfig.tooltipContent",
+            "id": "def-public.SourceStatus.tooltipContent",
             "type": "CompoundType",
             "tags": [],
             "label": "tooltipContent",
@@ -2758,7 +2805,7 @@
           },
           {
             "parentPluginId": "maps",
-            "id": "def-public.SourceTooltipConfig.areResultsTrimmed",
+            "id": "def-public.SourceStatus.areResultsTrimmed",
             "type": "boolean",
             "tags": [],
             "label": "areResultsTrimmed",
@@ -2768,7 +2815,7 @@
           },
           {
             "parentPluginId": "maps",
-            "id": "def-public.SourceTooltipConfig.isDeprecated",
+            "id": "def-public.SourceStatus.isDeprecated",
             "type": "CompoundType",
             "tags": [],
             "label": "isDeprecated",
@@ -2833,7 +2880,7 @@
           },
           "): React.ReactElement<any, string | ((props: any) => React.ReactElement<any, string | any | (new (props: any) => React.Component<any, any, any>)> | null) | (new (props: any) => React.Component<any, any, any>)>; title: string; showFeatureEditTools?: boolean | undefined; }"
         ],
-        "path": "x-pack/plugins/maps/public/classes/layers/layer_wizard_registry.ts",
+        "path": "x-pack/plugins/maps/public/classes/layers/wizards/layer_wizard_registry.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -2914,7 +2961,7 @@
           },
           "[]) => void; mapColors: string[]; currentStepId: string | null; isOnFinalStep: boolean; enableNextBtn: () => void; disableNextBtn: () => void; startStepLoading: () => void; stopStepLoading: () => void; advanceToNextStep: () => void; }"
         ],
-        "path": "x-pack/plugins/maps/public/classes/layers/layer_wizard_registry.ts",
+        "path": "x-pack/plugins/maps/public/classes/layers/wizards/layer_wizard_registry.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -2926,9 +2973,9 @@
         "label": "SourceEditorArgs",
         "description": [],
         "signature": [
-          "{ onChange: (...args: ",
+          "{ clearJoins: () => void; currentLayerType: string; hasJoins: boolean; onChange: (...args: ",
           "OnSourceChangeArgs",
-          "[]) => void; currentLayerType?: string | undefined; }"
+          "[]) => Promise<void>; }"
         ],
         "path": "x-pack/plugins/maps/public/classes/sources/source.ts",
         "deprecated": false,

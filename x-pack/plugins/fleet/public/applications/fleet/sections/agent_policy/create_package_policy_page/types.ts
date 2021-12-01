@@ -11,5 +11,13 @@ export type EditPackagePolicyFrom =
   | 'policy'
   | 'edit'
   | 'upgrade-from-fleet-policy-list'
-  | 'upgrade-from-integrations-policy-list';
-export type PackagePolicyFormState = 'VALID' | 'INVALID' | 'CONFIRM' | 'LOADING' | 'SUBMITTED';
+  | 'upgrade-from-integrations-policy-list'
+  | 'upgrade-from-extension';
+
+export type PackagePolicyFormState =
+  | 'VALID'
+  | 'INVALID'
+  | 'CONFIRM'
+  | 'LOADING'
+  | 'SUBMITTED'
+  | 'SUBMITTED_NO_AGENTS';

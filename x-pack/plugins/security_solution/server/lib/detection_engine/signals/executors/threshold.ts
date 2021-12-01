@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { SearchHit } from '@elastic/elasticsearch/api/types';
+import { SearchHit } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 
 import { Logger } from 'src/core/server';
-import { SavedObject } from 'src/core/types';
 
 import {
   AlertInstanceContext,
@@ -17,7 +16,7 @@ import {
   AlertServices,
 } from '../../../../../../alerting/server';
 import { hasLargeValueItem } from '../../../../../common/detection_engine/utils';
-import { ThresholdRuleParams } from '../../schemas/rule_schemas';
+import { CompleteRule, ThresholdRuleParams } from '../../schemas/rule_schemas';
 import { getFilter } from '../get_filter';
 import { getInputIndex } from '../get_input_output_index';
 import {
@@ -27,7 +26,6 @@ import {
   getThresholdSignalHistory,
 } from '../threshold';
 import {
-  AlertAttributes,
   BulkCreate,
   RuleRangeTuple,
   SearchAfterAndBulkCreateReturnType,
@@ -44,7 +42,7 @@ import { ExperimentalFeatures } from '../../../../../common/experimental_feature
 import { buildThresholdSignalHistory } from '../threshold/build_signal_history';
 
 export const thresholdExecutor = async ({
-  rule,
+  completeRule,
   tuple,
   exceptionItems,
   experimentalFeatures,
@@ -57,7 +55,7 @@ export const thresholdExecutor = async ({
   bulkCreate,
   wrapHits,
 }: {
-  rule: SavedObject<AlertAttributes<ThresholdRuleParams>>;
+  completeRule: CompleteRule<ThresholdRuleParams>;
   tuple: RuleRangeTuple;
   exceptionItems: ExceptionListItemSchema[];
   experimentalFeatures: ExperimentalFeatures;
@@ -71,7 +69,7 @@ export const thresholdExecutor = async ({
   wrapHits: WrapHits;
 }): Promise<SearchAfterAndBulkCreateReturnType & { state: ThresholdAlertState }> => {
   let result = createSearchAfterReturnType();
-  const ruleParams = rule.attributes.params;
+  const ruleParams = completeRule.ruleParams;
 
   // Get state or build initial state (on upgrade)
   const { signalHistory, searchErrors: previousSearchErrors } = state.initialized
@@ -150,7 +148,7 @@ export const thresholdExecutor = async ({
   const { success, bulkCreateDuration, createdItemsCount, createdItems, errors } =
     await bulkCreateThresholdSignals({
       someResult: thresholdResults,
-      ruleSO: rule,
+      completeRule,
       filter: esFilter,
       services,
       logger,

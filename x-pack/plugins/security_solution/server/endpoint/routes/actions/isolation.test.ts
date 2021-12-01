@@ -18,6 +18,7 @@ import { parseExperimentalConfigValue } from '../../../../common/experimental_fe
 import { SecuritySolutionRequestHandlerContext } from '../../../types';
 import { EndpointAppContextService } from '../../endpoint_app_context_services';
 import {
+  createMockEndpointAppContextServiceSetupContract,
   createMockEndpointAppContextServiceStartContract,
   createMockPackageService,
   createRouteHandlerContext,
@@ -44,7 +45,7 @@ import {
   LogsEndpointAction,
 } from '../../../../common/endpoint/types';
 import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
-import { legacyMetadataSearchResponse } from '../metadata/support/test_support';
+import { legacyMetadataSearchResponseMock } from '../metadata/support/test_support';
 import { AGENT_ACTIONS_INDEX, ElasticsearchAssetType } from '../../../../../fleet/common';
 import { CasesClientMock } from '../../../../../cases/server/client/mocks';
 
@@ -157,9 +158,12 @@ describe('Host Isolation', () => {
           keep_policies_up_to_date: false,
         })
       );
+
       licenseEmitter = new Subject();
       licenseService = new LicenseService();
       licenseService.start(licenseEmitter);
+
+      endpointAppContextService.setup(createMockEndpointAppContextServiceSetupContract());
       endpointAppContextService.start({
         ...startContract,
         licenseService,
@@ -207,7 +211,7 @@ describe('Host Isolation', () => {
         const mockSearchResponse = jest
           .fn()
           .mockImplementation(() =>
-            Promise.resolve({ body: legacyMetadataSearchResponse(searchResponse) })
+            Promise.resolve({ body: legacyMetadataSearchResponseMock(searchResponse) })
           );
         if (indexExists) {
           ctx.core.elasticsearch.client.asInternalUser.index = mockIndexResponse;

@@ -14,7 +14,7 @@ import { getDeleteAction } from './delete';
 import { getEditAction } from './edit';
 import { getAssignAction } from './assign';
 
-export { TagAction } from './types';
+export type { TagAction } from './types';
 
 interface GetActionsOptions {
   core: CoreStart;

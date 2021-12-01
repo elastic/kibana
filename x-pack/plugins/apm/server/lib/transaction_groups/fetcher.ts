@@ -5,12 +5,16 @@
  * 2.0.
  */
 
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { sortBy } from 'lodash';
 import moment from 'moment';
 import { Unionize } from 'utility-types';
 import { AggregationOptionsByType } from '../../../../../../src/core/types/elasticsearch';
-import { kqlQuery, rangeQuery } from '../../../../observability/server';
+import {
+  kqlQuery,
+  rangeQuery,
+  termQuery,
+} from '../../../../observability/server';
 import {
   PARENT_ID,
   SERVICE_NAME,
@@ -22,12 +26,12 @@ import { environmentQuery } from '../../../common/utils/environment_query';
 import { joinByKey } from '../../../common/utils/join_by_key';
 import { withApmSpan } from '../../utils/with_apm_span';
 import {
-  getDocumentTypeFilterForAggregatedTransactions,
-  getProcessorEventForAggregatedTransactions,
-} from '../helpers/aggregated_transactions';
+  getDocumentTypeFilterForTransactions,
+  getProcessorEventForTransactions,
+} from '../helpers/transactions';
 import { Setup } from '../helpers/setup_request';
 import { getAverages, getCounts, getSums } from './get_transaction_group_stats';
-
+import { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
 export interface TopTraceOptions {
   environment: string;
   kuery: string;
@@ -47,6 +51,7 @@ export interface TransactionGroup {
   averageResponseTime: number | null | undefined;
   transactionsPerMinute: number;
   impact: number;
+  agentName: AgentName;
 }
 
 export type ESResponse = Promise<{ items: TransactionGroup[] }>;
@@ -69,25 +74,17 @@ function getRequest(topTraceOptions: TopTraceOptions) {
     end,
   } = topTraceOptions;
 
-  const transactionNameFilter = transactionName
-    ? [{ term: { [TRANSACTION_NAME]: transactionName } }]
-    : [];
-
   return {
     apm: {
-      events: [
-        getProcessorEventForAggregatedTransactions(
-          searchAggregatedTransactions
-        ),
-      ],
+      events: [getProcessorEventForTransactions(searchAggregatedTransactions)],
     },
     body: {
       size: 0,
       query: {
         bool: {
           filter: [
-            ...transactionNameFilter,
-            ...getDocumentTypeFilterForAggregatedTransactions(
+            ...termQuery(TRANSACTION_NAME, transactionName),
+            ...getDocumentTypeFilterForTransactions(
               searchAggregatedTransactions
             ),
             ...rangeQuery(start, end),
@@ -146,6 +143,7 @@ function getItemsWithRelativeImpact(
     avg?: number | null;
     count?: number | null;
     transactionType?: string;
+    agentName?: AgentName;
   }>,
   start: number,
   end: number
@@ -170,6 +168,7 @@ function getItemsWithRelativeImpact(
         item.sum !== null && item.sum !== undefined
           ? ((item.sum - min) / (max - min)) * 100 || 0
           : 0,
+      agentName: item.agentName as AgentName,
     };
   });
 

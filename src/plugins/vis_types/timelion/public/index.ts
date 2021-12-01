@@ -13,4 +13,4 @@ export function plugin(initializerContext: PluginInitializerContext) {
   return new Plugin(initializerContext);
 }
 
-export { VisTypeTimelionPluginStart } from './plugin';
+export type { VisTypeTimelionPluginStart } from './plugin';

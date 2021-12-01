@@ -15,19 +15,20 @@ import type {
   OverlayStart,
   SavedObjectsStart,
   DocLinksStart,
+  ThemeServiceStart,
 } from '../../../core/public';
 import type { TypesStart } from './vis_types';
 import { createGetterSetter } from '../../../plugins/kibana_utils/public';
-import type { DataPublicPluginStart, TimefilterContract } from '../../../plugins/data/public';
-import type { UsageCollectionSetup } from '../../../plugins/usage_collection/public';
-import type { ExpressionsStart } from '../../../plugins/expressions/public';
-import type { UiActionsStart } from '../../../plugins/ui_actions/public';
-import type { SavedVisualizationsLoader } from './saved_visualizations';
-import type { EmbeddableStart } from '../../embeddable/public';
-
+import { DataPublicPluginStart, TimefilterContract } from '../../../plugins/data/public';
+import { UsageCollectionSetup } from '../../../plugins/usage_collection/public';
+import { ExpressionsStart } from '../../../plugins/expressions/public';
+import { UiActionsStart } from '../../../plugins/ui_actions/public';
+import { EmbeddableStart } from '../../embeddable/public';
 import type { SpacesPluginStart } from '../../../../x-pack/plugins/spaces/public';
 
 export const [getUISettings, setUISettings] = createGetterSetter<IUiSettingsClient>('UISettings');
+
+export const [getTheme, setTheme] = createGetterSetter<ThemeServiceStart>('Theme');
 
 export const [getCapabilities, setCapabilities] = createGetterSetter<Capabilities>('Capabilities');
 
@@ -56,9 +57,6 @@ export const [getUsageCollector, setUsageCollector] = createGetterSetter<UsageCo
 export const [getExpressions, setExpressions] = createGetterSetter<ExpressionsStart>('Expressions');
 
 export const [getUiActions, setUiActions] = createGetterSetter<UiActionsStart>('UiActions');
-
-export const [getSavedVisualizationsLoader, setSavedVisualizationsLoader] =
-  createGetterSetter<SavedVisualizationsLoader>('SavedVisualisationsLoader');
 
 export const [getAggs, setAggs] =
   createGetterSetter<DataPublicPluginStart['search']['aggs']>('AggConfigs');

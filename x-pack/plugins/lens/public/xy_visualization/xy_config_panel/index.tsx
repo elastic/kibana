@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import './xy_config_panel.scss';
 import React, { memo, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { Position, ScaleType, VerticalAlignment, HorizontalAlignment } from '@elastic/charts';
@@ -24,7 +23,7 @@ import type {
   FramePublicAPI,
 } from '../../types';
 import { State, visualizationTypes, XYState } from '../types';
-import type { FormatFactory } from '../../../common';
+import { FormatFactory, layerTypes } from '../../../common';
 import {
   SeriesType,
   YAxisMode,
@@ -39,7 +38,7 @@ import { getAxesConfiguration, GroupsConfiguration } from '../axes_configuration
 import { VisualOptionsPopover } from './visual_options_popover';
 import { getScaleType } from '../to_expression';
 import { ColorPicker } from './color_picker';
-import { ThresholdPanel } from './threshold_panel';
+import { ReferenceLinePanel } from './reference_line_panel';
 import { PalettePicker, TooltipWrapper } from '../../shared_components';
 
 type UnwrapArray<T> = T extends Array<infer P> ? P : T;
@@ -177,8 +176,10 @@ function hasPercentageAxis(axisGroups: GroupsConfiguration, groupId: string, sta
   );
 }
 
-export const XyToolbar = memo(function XyToolbar(props: VisualizationToolbarProps<State>) {
-  const { state, setState, frame } = props;
+export const XyToolbar = memo(function XyToolbar(
+  props: VisualizationToolbarProps<State> & { useLegacyTimeAxis?: boolean }
+) {
+  const { state, setState, frame, useLegacyTimeAxis } = props;
 
   const shouldRotate = state?.layers.length ? isHorizontalChart(state.layers) : false;
   const axisGroups = getAxesConfiguration(state?.layers, shouldRotate, frame.activeData);
@@ -326,6 +327,28 @@ export const XyToolbar = memo(function XyToolbar(props: VisualizationToolbarProp
       });
     },
     [setState, state]
+  );
+
+  const filteredBarLayers = state?.layers.filter((layer) => layer.seriesType.includes('bar'));
+  const chartHasMoreThanOneBarSeries =
+    filteredBarLayers.length > 1 ||
+    filteredBarLayers.some((layer) => layer.accessors.length > 1 || layer.splitAccessor);
+
+  const isTimeHistogramModeEnabled = state?.layers.some(
+    ({ xAccessor, layerId, seriesType, splitAccessor }) => {
+      if (!xAccessor) {
+        return false;
+      }
+      const xAccessorOp = props.frame.datasourceLayers[layerId].getOperationForColumnId(xAccessor);
+      return (
+        getScaleType(xAccessorOp, ScaleType.Linear) === ScaleType.Time &&
+        xAccessorOp?.isBucketed &&
+        (seriesType.includes('stacked') || !splitAccessor) &&
+        (seriesType.includes('stacked') ||
+          !seriesType.includes('bar') ||
+          !chartHasMoreThanOneBarSeries)
+      );
+    }
   );
 
   return (
@@ -488,6 +511,9 @@ export const XyToolbar = memo(function XyToolbar(props: VisualizationToolbarProp
             setEndzoneVisibility={onChangeEndzoneVisiblity}
             hasBarOrAreaOnAxis={false}
             hasPercentageAxis={false}
+            useMultilayerTimeAxis={
+              isTimeHistogramModeEnabled && !useLegacyTimeAxis && !shouldRotate
+            }
           />
           <TooltipWrapper
             tooltipContent={
@@ -564,8 +590,8 @@ export function DimensionEditor(
     );
   }
 
-  if (layer.layerType === 'threshold') {
-    return <ThresholdPanel {...props} isHorizontal={isHorizontal} />;
+  if (layer.layerType === layerTypes.REFERENCELINE) {
+    return <ReferenceLinePanel {...props} isHorizontal={isHorizontal} />;
   }
 
   return (

@@ -981,7 +981,7 @@ describe('migration visualization', () => {
       `);
       expect(logMsgArr).toMatchInlineSnapshot(`
         Array [
-          "Exception @ migrateGaugeVerticalSplitToAlignment! TypeError: Cannot read property 'gauge' of undefined",
+          "Exception @ migrateGaugeVerticalSplitToAlignment! TypeError: Cannot read properties of undefined (reading 'gauge')",
           "Exception @ migrateGaugeVerticalSplitToAlignment! Payload: {\\"type\\":\\"gauge\\"}",
         ]
       `);

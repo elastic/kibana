@@ -25,12 +25,14 @@ export const runTaskFnFactory: RunTaskFnFactory<RunTaskFn<TaskPayloadDeprecatedC
       const fakeRequest = reporting.getFakeRequest({ headers }, job.spaceId, logger);
       const uiSettingsClient = await reporting.getUiSettingsClient(fakeRequest, logger);
       const { asCurrentUser: elasticsearchClient } = elasticsearch.asScoped(fakeRequest);
+      const dataViews = await reporting.getDataViewsService(fakeRequest);
 
       const { maxSizeReached, csvContainsFormulas, warnings } = await generateCsv(
         job,
         config,
         uiSettingsClient,
         elasticsearchClient,
+        dataViews,
         cancellationToken,
         stream
       );

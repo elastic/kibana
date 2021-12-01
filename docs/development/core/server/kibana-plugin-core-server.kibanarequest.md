@@ -22,17 +22,17 @@ export declare class KibanaRequest<Params = unknown, Query = unknown, Body = unk
 
 |  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
-|  [auth](./kibana-plugin-core-server.kibanarequest.auth.md) |  | <code>{</code><br/><code>        isAuthenticated: boolean;</code><br/><code>    }</code> |  |
-|  [body](./kibana-plugin-core-server.kibanarequest.body.md) |  | <code>Body</code> |  |
-|  [events](./kibana-plugin-core-server.kibanarequest.events.md) |  | <code>KibanaRequestEvents</code> | Request events [KibanaRequestEvents](./kibana-plugin-core-server.kibanarequestevents.md) |
-|  [headers](./kibana-plugin-core-server.kibanarequest.headers.md) |  | <code>Headers</code> | Readonly copy of incoming request headers. |
-|  [id](./kibana-plugin-core-server.kibanarequest.id.md) |  | <code>string</code> | A identifier to identify this request. |
-|  [isSystemRequest](./kibana-plugin-core-server.kibanarequest.issystemrequest.md) |  | <code>boolean</code> | Whether or not the request is a "system request" rather than an application-level request. Can be set on the client using the <code>HttpFetchOptions#asSystemRequest</code> option. |
-|  [params](./kibana-plugin-core-server.kibanarequest.params.md) |  | <code>Params</code> |  |
-|  [query](./kibana-plugin-core-server.kibanarequest.query.md) |  | <code>Query</code> |  |
-|  [rewrittenUrl](./kibana-plugin-core-server.kibanarequest.rewrittenurl.md) |  | <code>URL</code> | URL rewritten in onPreRouting request interceptor. |
-|  [route](./kibana-plugin-core-server.kibanarequest.route.md) |  | <code>RecursiveReadonly&lt;KibanaRequestRoute&lt;Method&gt;&gt;</code> | matched route details |
-|  [socket](./kibana-plugin-core-server.kibanarequest.socket.md) |  | <code>IKibanaSocket</code> | [IKibanaSocket](./kibana-plugin-core-server.ikibanasocket.md) |
-|  [url](./kibana-plugin-core-server.kibanarequest.url.md) |  | <code>URL</code> | a WHATWG URL standard object. |
-|  [uuid](./kibana-plugin-core-server.kibanarequest.uuid.md) |  | <code>string</code> | A UUID to identify this request. |
+|  [auth](./kibana-plugin-core-server.kibanarequest.auth.md) |  | { isAuthenticated: boolean; } |  |
+|  [body](./kibana-plugin-core-server.kibanarequest.body.md) |  | Body |  |
+|  [events](./kibana-plugin-core-server.kibanarequest.events.md) |  | KibanaRequestEvents | Request events [KibanaRequestEvents](./kibana-plugin-core-server.kibanarequestevents.md) |
+|  [headers](./kibana-plugin-core-server.kibanarequest.headers.md) |  | Headers | Readonly copy of incoming request headers. |
+|  [id](./kibana-plugin-core-server.kibanarequest.id.md) |  | string | A identifier to identify this request. |
+|  [isSystemRequest](./kibana-plugin-core-server.kibanarequest.issystemrequest.md) |  | boolean | Whether or not the request is a "system request" rather than an application-level request. Can be set on the client using the <code>HttpFetchOptions#asSystemRequest</code> option. |
+|  [params](./kibana-plugin-core-server.kibanarequest.params.md) |  | Params |  |
+|  [query](./kibana-plugin-core-server.kibanarequest.query.md) |  | Query |  |
+|  [rewrittenUrl?](./kibana-plugin-core-server.kibanarequest.rewrittenurl.md) |  | URL | <i>(Optional)</i> URL rewritten in onPreRouting request interceptor. |
+|  [route](./kibana-plugin-core-server.kibanarequest.route.md) |  | RecursiveReadonly&lt;KibanaRequestRoute&lt;Method&gt;&gt; | matched route details |
+|  [socket](./kibana-plugin-core-server.kibanarequest.socket.md) |  | IKibanaSocket | [IKibanaSocket](./kibana-plugin-core-server.ikibanasocket.md) |
+|  [url](./kibana-plugin-core-server.kibanarequest.url.md) |  | URL | a WHATWG URL standard object. |
+|  [uuid](./kibana-plugin-core-server.kibanarequest.uuid.md) |  | string | A UUID to identify this request. |
 

@@ -98,7 +98,9 @@ export interface PolicyArtifactsState {
   /** A list of trusted apps going to be updated  */
   trustedAppsToUpdate: AsyncResourceState<PostTrustedAppCreateResponse[]>;
   /** Represents if there is any trusted app existing  */
-  doesAnyTrustedAppExists: AsyncResourceState<boolean>;
+  doesAnyTrustedAppExists: AsyncResourceState<GetTrustedAppsListResponse>;
+  /** Represents if there is any trusted app existing assigned to the policy (without filters)  */
+  hasTrustedApps: AsyncResourceState<GetTrustedAppsListResponse>;
   /** List of artifacts currently assigned to the policy (body specific and global) */
   assignedList: AsyncResourceState<PolicyAssignedTrustedApps>;
   /** A list of all available polices */
@@ -175,8 +177,8 @@ export type PolicyProtection =
       UIPolicyConfig['windows'],
       'malware' | 'ransomware' | 'memory_protection' | 'behavior_protection'
     >
-  | keyof Pick<UIPolicyConfig['mac'], 'malware' | 'behavior_protection'>
-  | keyof Pick<UIPolicyConfig['linux'], 'malware' | 'behavior_protection'>;
+  | keyof Pick<UIPolicyConfig['mac'], 'malware' | 'behavior_protection' | 'memory_protection'>
+  | keyof Pick<UIPolicyConfig['linux'], 'malware' | 'behavior_protection' | 'memory_protection'>;
 
 export type MacPolicyProtection = keyof Pick<UIPolicyConfig['mac'], 'malware'>;
 

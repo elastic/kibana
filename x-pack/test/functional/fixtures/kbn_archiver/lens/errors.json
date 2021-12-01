@@ -1,0 +1,78 @@
+{
+    "attributes": {
+        "fields": "[]",
+        "timeFieldName": "@timestamp",
+        "title": "nonExistingDataView"
+    },
+    "coreMigrationVersion": "8.0.0",
+    "id": "nonExistingDataView",
+    "migrationVersion": {
+        "index-pattern": "7.11.0"
+    },
+    "references": [],
+    "type": "index-pattern",
+    "updated_at": "2021-10-19T12:28:18.765Z",
+    "version": "WzU0ODUsMl0="
+}
+
+{
+    "attributes": {
+        "description": "",
+        "state": {
+            "datasourceStates": {
+                "indexpattern": {
+                    "layers": {
+                        "eba8a330-0b65-46d4-8b1d-1528a0b53261": {
+                            "columnOrder": [
+                                "eb55bd47-20ca-47fd-bf84-f72ac4b924ff"
+                            ],
+                            "columns": {
+                                "eb55bd47-20ca-47fd-bf84-f72ac4b924ff": {
+                                    "dataType": "number",
+                                    "isBucketed": false,
+                                    "label": "Median of AvgTicketPrice",
+                                    "operationType": "median",
+                                    "scale": "ratio",
+                                    "sourceField": "AvgTicketPrice"
+                                }
+                            },
+                            "incompleteColumns": {}
+                        }
+                    }
+                }
+            },
+            "filters": [],
+            "query": {
+                "language": "kuery",
+                "query": ""
+            },
+            "visualization": {
+                "accessor": "eb55bd47-20ca-47fd-bf84-f72ac4b924ff",
+                "layerId": "eba8a330-0b65-46d4-8b1d-1528a0b53261",
+                "layerType": "data"
+            }
+        },
+        "title": "lnsMetricWithNonExistingDataView",
+        "visualizationType": "lnsMetric"
+    },
+    "coreMigrationVersion": "8.0.0",
+    "id": "3454af30-30e2-11ec-8dbc-f13e30d4f8ac",
+    "migrationVersion": {
+        "lens": "8.0.0"
+    },
+    "references": [
+        {
+            "id": "nonExistingDataView",
+            "name": "indexpattern-datasource-current-indexpattern",
+            "type": "index-pattern"
+        },
+        {
+            "id": "nonExistingDataView",
+            "name": "indexpattern-datasource-layer-eba8a330-0b65-46d4-8b1d-1528a0b53261",
+            "type": "index-pattern"
+        }
+    ],
+    "type": "lens",
+    "updated_at": "2021-10-19T13:41:04.038Z",
+    "version": "WzU2NjEsMl0="
+}

@@ -33,12 +33,13 @@ import {
   FieldVisConfig,
   FileBasedFieldVisConfig,
   isIndexBasedFieldVisConfig,
-} from './types/field_vis_config';
+} from '../../../../../common/types/field_vis_config';
 import { FileBasedNumberContentPreview } from '../field_data_row';
 import { BooleanContentPreview } from './components/field_data_row';
 import { calculateTableColumnsDimensions } from './utils';
 import { DistinctValues } from './components/field_data_row/distinct_values';
 import { FieldTypeIcon } from '../field_type_icon';
+import './_index.scss';
 
 const FIELD_NAME = 'fieldName';
 
@@ -54,6 +55,7 @@ interface DataVisualizerTableProps<T> {
   showPreviewByDefault?: boolean;
   /** Callback to receive any updates when table or page state is changed **/
   onChange?: (update: Partial<DataVisualizerTableState>) => void;
+  loading?: boolean;
 }
 
 export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
@@ -64,6 +66,7 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
   extendedColumns,
   showPreviewByDefault,
   onChange,
+  loading,
 }: DataVisualizerTableProps<T>) => {
   const [expandedRowItemIds, setExpandedRowItemIds] = useState<string[]>([]);
   const [expandAll, setExpandAll] = useState<boolean>(false);
@@ -180,7 +183,7 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
           defaultMessage: 'Type',
         }),
         render: (fieldType: JobFieldType) => {
-          return <FieldTypeIcon type={fieldType} tooltipEnabled={true} needsAria={true} />;
+          return <FieldTypeIcon type={fieldType} tooltipEnabled={true} />;
         },
         width: dimensions.type,
         sortable: true,
@@ -322,6 +325,13 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
       {(resizeRef) => (
         <div data-test-subj="dataVisualizerTableContainer" ref={resizeRef}>
           <EuiInMemoryTable<T>
+            message={
+              loading
+                ? i18n.translate('xpack.dataVisualizer.dataGrid.searchingMessage', {
+                    defaultMessage: 'Searching',
+                  })
+                : undefined
+            }
             className={'dvTable'}
             items={items}
             itemId={FIELD_NAME}

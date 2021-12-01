@@ -19,11 +19,23 @@ import { securityMock } from '../../../security/server/mocks';
 import type { PackagePolicyServiceInterface } from '../services/package_policy';
 import type { AgentPolicyServiceInterface, AgentService } from '../services';
 import type { FleetAppContext } from '../plugin';
+import { createMockTelemetryEventsSender } from '../telemetry/__mocks__';
+import type { FleetAuthz } from '../../common';
 
 // Export all mocks from artifacts
 export * from '../services/artifacts/mocks';
 
-export const createAppContextStartContractMock = (): FleetAppContext => {
+export interface MockedFleetAppContext extends FleetAppContext {
+  elasticsearch: ReturnType<typeof elasticsearchServiceMock.createStart>;
+  data: ReturnType<typeof dataPluginMock.createStartContract>;
+  encryptedSavedObjectsStart?: ReturnType<typeof encryptedSavedObjectsMock.createStart>;
+  savedObjects: ReturnType<typeof savedObjectsServiceMock.createStartContract>;
+  securitySetup?: ReturnType<typeof securityMock.createSetup>;
+  securityStart?: ReturnType<typeof securityMock.createStart>;
+  logger: ReturnType<ReturnType<typeof loggingSystemMock.create>['get']>;
+}
+
+export const createAppContextStartContractMock = (): MockedFleetAppContext => {
   const config = {
     agents: { enabled: true, elasticsearch: {} },
     enabled: true,
@@ -47,8 +59,9 @@ export const createAppContextStartContractMock = (): FleetAppContext => {
       agentIdVerificationEnabled: true,
     },
     config$,
-    kibanaVersion: '8.0.0',
-    kibanaBranch: 'master',
+    kibanaVersion: '8.99.0', // Fake version :)
+    kibanaBranch: 'main',
+    telemetryEventsSender: createMockTelemetryEventsSender(),
   };
 };
 
@@ -65,7 +78,7 @@ export const xpackMocks = {
 
 export const createPackagePolicyServiceMock = (): jest.Mocked<PackagePolicyServiceInterface> => {
   return {
-    compilePackagePolicyInputs: jest.fn(),
+    _compilePackagePolicyInputs: jest.fn(),
     buildPackagePolicyFromPackage: jest.fn(),
     bulkCreate: jest.fn(),
     create: jest.fn(),
@@ -104,8 +117,29 @@ export const createMockAgentService = (): jest.Mocked<AgentService> => {
   return {
     getAgentStatusById: jest.fn(),
     getAgentStatusForAgentPolicy: jest.fn(),
-    authenticateAgentWithAccessToken: jest.fn(),
     getAgent: jest.fn(),
     listAgents: jest.fn(),
   };
+};
+
+/**
+ * Creates mock `authz` object
+ */
+export const fleetAuthzMock: FleetAuthz = {
+  fleet: {
+    all: true,
+    setup: true,
+    readEnrollmentTokens: true,
+  },
+  integrations: {
+    readPackageInfo: true,
+    readInstalledPackages: true,
+    installPackages: true,
+    upgradePackages: true,
+    removePackages: true,
+    readPackageSettings: true,
+    writePackageSettings: true,
+    readIntegrationPolicies: true,
+    writeIntegrationPolicies: true,
+  },
 };

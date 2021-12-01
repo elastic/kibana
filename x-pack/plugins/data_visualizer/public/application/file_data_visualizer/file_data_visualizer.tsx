@@ -39,6 +39,7 @@ export const FileDataVisualizer: FC<Props> = ({ additionalLinks }) => {
         http={coreStart.http}
         fileUpload={fileUpload}
         resultsLinks={additionalLinks}
+        capabilities={coreStart.application.capabilities}
       />
     </KibanaContextProvider>
   );

@@ -10,6 +10,7 @@ import {
   EuiAvatar,
   EuiBadgeGroup,
   EuiBadge,
+  EuiButton,
   EuiLink,
   EuiTableActionsColumnType,
   EuiTableComputedColumnType,
@@ -24,6 +25,8 @@ import styled from 'styled-components';
 import {
   CaseStatuses,
   CaseType,
+  CommentType,
+  CommentRequestAlertType,
   DeleteCase,
   Case,
   SubCase,
@@ -31,7 +34,7 @@ import {
 } from '../../../common';
 import { getEmptyTagValue } from '../empty_value';
 import { FormattedRelativePreferenceDate } from '../formatted_date';
-import { CaseDetailsHrefSchema, CaseDetailsLink, CasesNavigation } from '../links';
+import { CaseDetailsLink } from '../links';
 import * as i18n from './translations';
 import { getSubCasesStatusCountsBadges, isSubCase } from './helpers';
 import { ALERTS } from '../../common/translations';
@@ -43,6 +46,7 @@ import { useKibana } from '../../common/lib/kibana';
 import { StatusContextMenu } from '../case_action_bar/status_context_menu';
 import { TruncatedText } from '../truncated_text';
 import { getConnectorIcon } from '../utils';
+import { PostComment } from '../../containers/use_post_comment';
 
 export type CasesColumns =
   | EuiTableActionsColumnType<Case>
@@ -65,7 +69,6 @@ const renderStringField = (field: string, dataTestSubj: string) =>
   field != null ? <span data-test-subj={dataTestSubj}>{field}</span> : getEmptyTagValue();
 
 export interface GetCasesColumn {
-  caseDetailsNavigation?: CasesNavigation<CaseDetailsHrefSchema, 'configurable'>;
   disableAlerts?: boolean;
   dispatchUpdateCaseProperty: (u: UpdateCase) => void;
   filterStatus: string;
@@ -75,9 +78,12 @@ export interface GetCasesColumn {
   isSelectorView: boolean;
   userCanCrud: boolean;
   connectors?: ActionConnector[];
+  onRowClick?: (theCase: Case) => void;
+  alertData?: Omit<CommentRequestAlertType, 'type'>;
+  postComment?: (args: PostComment) => Promise<void>;
+  updateCase?: (newCase: Case) => void;
 }
 export const useCasesColumns = ({
-  caseDetailsNavigation,
   disableAlerts = false,
   dispatchUpdateCaseProperty,
   filterStatus,
@@ -87,6 +93,10 @@ export const useCasesColumns = ({
   isSelectorView,
   userCanCrud,
   connectors = [],
+  onRowClick,
+  alertData,
+  postComment,
+  updateCase,
 }: GetCasesColumn): CasesColumns[] => {
   // Delete case
   const {
@@ -132,6 +142,25 @@ export const useCasesColumns = ({
     [toggleDeleteModal]
   );
 
+  const assignCaseAction = useCallback(
+    async (theCase: Case) => {
+      if (alertData != null) {
+        await postComment?.({
+          caseId: theCase.id,
+          data: {
+            type: CommentType.alert,
+            ...alertData,
+          },
+          updateCase,
+        });
+      }
+      if (onRowClick) {
+        onRowClick(theCase);
+      }
+    },
+    [alertData, onRowClick, postComment, updateCase]
+  );
+
   useEffect(() => {
     handleIsLoading(isDeleting || isLoadingCases.indexOf('caseUpdate') > -1);
   }, [handleIsLoading, isDeleting, isLoadingCases]);
@@ -148,19 +177,17 @@ export const useCasesColumns = ({
       name: i18n.NAME,
       render: (theCase: Case | SubCase) => {
         if (theCase.id != null && theCase.title != null) {
-          const caseDetailsLinkComponent =
-            caseDetailsNavigation != null ? (
-              <CaseDetailsLink
-                caseDetailsNavigation={caseDetailsNavigation}
-                detailName={isSubCase(theCase) ? theCase.caseParentId : theCase.id}
-                subCaseId={isSubCase(theCase) ? theCase.id : undefined}
-                title={theCase.title}
-              >
-                <TruncatedText text={theCase.title} />
-              </CaseDetailsLink>
-            ) : (
+          const caseDetailsLinkComponent = isSelectorView ? (
+            <TruncatedText text={theCase.title} />
+          ) : (
+            <CaseDetailsLink
+              detailName={isSubCase(theCase) ? theCase.caseParentId : theCase.id}
+              subCaseId={isSubCase(theCase) ? theCase.id : undefined}
+              title={theCase.title}
+            >
               <TruncatedText text={theCase.title} />
-            );
+            </CaseDetailsLink>
+          );
           return theCase.status !== CaseStatuses.closed ? (
             caseDetailsLinkComponent
           ) : (
@@ -281,6 +308,30 @@ export const useCasesColumns = ({
         return getEmptyTagValue();
       },
     },
+    ...(isSelectorView
+      ? [
+          {
+            align: RIGHT_ALIGNMENT,
+            render: (theCase: Case) => {
+              if (theCase.id != null) {
+                return (
+                  <EuiButton
+                    data-test-subj={`cases-table-row-select-${theCase.id}`}
+                    onClick={() => {
+                      assignCaseAction(theCase);
+                    }}
+                    size="s"
+                    fill={true}
+                  >
+                    {i18n.SELECT}
+                  </EuiButton>
+                );
+              }
+              return getEmptyTagValue();
+            },
+          },
+        ]
+      : []),
     ...(!isSelectorView
       ? [
           {

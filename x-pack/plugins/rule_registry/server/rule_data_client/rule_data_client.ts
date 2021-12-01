@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { BulkRequest } from '@elastic/elasticsearch/api/types';
-import { ResponseError } from '@elastic/elasticsearch/lib/errors';
+import { errors } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Either, isLeft } from 'fp-ts/lib/Either';
 
 import { ElasticsearchClient } from 'kibana/server';
@@ -25,6 +25,7 @@ interface ConstructorOptions {
   indexInfo: IndexInfo;
   resourceInstaller: ResourceInstaller;
   isWriteEnabled: boolean;
+  isWriterCacheEnabled: boolean;
   waitUntilReadyForReading: Promise<WaitResult>;
   waitUntilReadyForWriting: Promise<WaitResult>;
   logger: Logger;
@@ -34,12 +35,14 @@ export type WaitResult = Either<Error, ElasticsearchClient>;
 
 export class RuleDataClient implements IRuleDataClient {
   private _isWriteEnabled: boolean = false;
+  private _isWriterCacheEnabled: boolean = true;
 
   // Writers cached by namespace
   private writerCache: Map<string, IRuleDataWriter>;
 
   constructor(private readonly options: ConstructorOptions) {
     this.writeEnabled = this.options.isWriteEnabled;
+    this.writerCacheEnabled = this.options.isWriterCacheEnabled;
     this.writerCache = new Map();
   }
 
@@ -61,6 +64,14 @@ export class RuleDataClient implements IRuleDataClient {
 
   public isWriteEnabled(): boolean {
     return this.writeEnabled;
+  }
+
+  private get writerCacheEnabled(): boolean {
+    return this._isWriterCacheEnabled;
+  }
+
+  private set writerCacheEnabled(isEnabled: boolean) {
+    this._isWriterCacheEnabled = isEnabled;
   }
 
   public getReader(options: { namespace?: string } = {}): IRuleDataReader {
@@ -119,9 +130,10 @@ export class RuleDataClient implements IRuleDataClient {
   public getWriter(options: { namespace?: string } = {}): IRuleDataWriter {
     const namespace = options.namespace || 'default';
     const cachedWriter = this.writerCache.get(namespace);
+    const isWriterCacheEnabled = () => this.writerCacheEnabled;
 
     // There is no cached writer, so we'll install / update the namespace specific resources now.
-    if (!cachedWriter) {
+    if (!isWriterCacheEnabled() || !cachedWriter) {
       const writerForNamespace = this.initializeWriter(namespace);
       this.writerCache.set(namespace, writerForNamespace);
       return writerForNamespace;
@@ -168,7 +180,7 @@ export class RuleDataClient implements IRuleDataClient {
     const prepareForWritingResult = prepareForWriting();
 
     return {
-      bulk: async (request: BulkRequest) => {
+      bulk: async (request: estypes.BulkRequest) => {
         return prepareForWritingResult
           .then((clusterClient) => {
             const requestWithDefaultParameters = {
@@ -179,7 +191,7 @@ export class RuleDataClient implements IRuleDataClient {
 
             return clusterClient.bulk(requestWithDefaultParameters).then((response) => {
               if (response.body.errors) {
-                const error = new ResponseError(response);
+                const error = new errors.ResponseError(response);
                 throw error;
               }
               return response;

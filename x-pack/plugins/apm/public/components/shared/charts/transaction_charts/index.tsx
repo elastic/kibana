@@ -12,7 +12,7 @@ import { ChartPointerEventContextProvider } from '../../../../context/chart_poin
 import { ServiceOverviewThroughputChart } from '../../../app/service_overview/service_overview_throughput_chart';
 import { LatencyChart } from '../latency_chart';
 import { TransactionBreakdownChart } from '../transaction_breakdown_chart';
-import { TransactionErrorRateChart } from '../transaction_error_rate_chart/';
+import { FailedTransactionRateChart } from '../failed_transaction_rate_chart';
 
 export function TransactionCharts({
   kuery,
@@ -55,7 +55,7 @@ export function TransactionCharts({
 
           <EuiFlexGrid columns={2} gutterSize="s">
             <EuiFlexItem>
-              <TransactionErrorRateChart
+              <FailedTransactionRateChart
                 kuery={kuery}
                 environment={environment}
               />

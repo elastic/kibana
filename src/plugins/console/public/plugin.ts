@@ -7,77 +7,87 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { SerializableRecord } from '@kbn/utility-types';
-import { Plugin, CoreSetup } from 'src/core/public';
+import { Plugin, CoreSetup, PluginInitializerContext } from 'src/core/public';
 
 import { FeatureCatalogueCategory } from '../../home/public';
-import { AppSetupUIPluginDependencies } from './types';
-
-export interface ConsoleUILocatorParams extends SerializableRecord {
-  loadFrom?: string;
-}
+import {
+  AppSetupUIPluginDependencies,
+  ClientConfigType,
+  ConsolePluginSetup,
+  ConsoleUILocatorParams,
+} from './types';
 
 export class ConsoleUIPlugin implements Plugin<void, void, AppSetupUIPluginDependencies> {
+  constructor(private ctx: PluginInitializerContext) {}
+
   public setup(
     { notifications, getStartServices, http }: CoreSetup,
     { devTools, home, share, usageCollection }: AppSetupUIPluginDependencies
-  ) {
-    if (home) {
-      home.featureCatalogue.register({
+  ): ConsolePluginSetup {
+    const {
+      ui: { enabled: isConsoleUiEnabled },
+    } = this.ctx.config.get<ClientConfigType>();
+
+    if (isConsoleUiEnabled) {
+      if (home) {
+        home.featureCatalogue.register({
+          id: 'console',
+          title: i18n.translate('console.devToolsTitle', {
+            defaultMessage: 'Interact with the Elasticsearch API',
+          }),
+          description: i18n.translate('console.devToolsDescription', {
+            defaultMessage: 'Skip cURL and use a JSON interface to work with your data in Console.',
+          }),
+          icon: 'consoleApp',
+          path: '/app/dev_tools#/console',
+          showOnHomePage: false,
+          category: FeatureCatalogueCategory.ADMIN,
+        });
+      }
+
+      devTools.register({
         id: 'console',
-        title: i18n.translate('console.devToolsTitle', {
-          defaultMessage: 'Interact with the Elasticsearch API',
+        order: 1,
+        title: i18n.translate('console.consoleDisplayName', {
+          defaultMessage: 'Console',
         }),
-        description: i18n.translate('console.devToolsDescription', {
-          defaultMessage: 'Skip cURL and use a JSON interface to work with your data in Console.',
-        }),
-        icon: 'consoleApp',
-        path: '/app/dev_tools#/console',
-        showOnHomePage: false,
-        category: FeatureCatalogueCategory.ADMIN,
+        enableRouting: false,
+        mount: async ({ element }) => {
+          const [core] = await getStartServices();
+
+          const {
+            i18n: { Context: I18nContext },
+            docLinks: { DOC_LINK_VERSION },
+          } = core;
+
+          const { renderApp } = await import('./application');
+
+          return renderApp({
+            http,
+            docLinkVersion: DOC_LINK_VERSION,
+            I18nContext,
+            notifications,
+            usageCollection,
+            element,
+          });
+        },
       });
+
+      const locator = share.url.locators.create<ConsoleUILocatorParams>({
+        id: 'CONSOLE_APP_LOCATOR',
+        getLocation: async ({ loadFrom }) => {
+          return {
+            app: 'dev_tools',
+            path: `#/console${loadFrom ? `?load_from=${loadFrom}` : ''}`,
+            state: { loadFrom },
+          };
+        },
+      });
+
+      return { locator };
     }
 
-    devTools.register({
-      id: 'console',
-      order: 1,
-      title: i18n.translate('console.consoleDisplayName', {
-        defaultMessage: 'Console',
-      }),
-      enableRouting: false,
-      mount: async ({ element }) => {
-        const [core] = await getStartServices();
-
-        const {
-          i18n: { Context: I18nContext },
-          docLinks: { DOC_LINK_VERSION },
-        } = core;
-
-        const { renderApp } = await import('./application');
-
-        return renderApp({
-          http,
-          docLinkVersion: DOC_LINK_VERSION,
-          I18nContext,
-          notifications,
-          usageCollection,
-          element,
-        });
-      },
-    });
-
-    const locator = share.url.locators.create<ConsoleUILocatorParams>({
-      id: 'CONSOLE_APP_LOCATOR',
-      getLocation: async ({ loadFrom }) => {
-        return {
-          app: 'dev_tools',
-          path: `#/console${loadFrom ? `?load_from=${loadFrom}` : ''}`,
-          state: { loadFrom },
-        };
-      },
-    });
-
-    return { locator };
+    return {};
   }
 
   public start() {}

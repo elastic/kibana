@@ -4,11 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { flow, omit } from 'lodash/fp';
 import set from 'set-value';
 
-import { Logger, SavedObject } from '../../../../../../../src/core/server';
+import { Logger } from '../../../../../../../src/core/server';
 import {
   AlertInstanceContext,
   AlertInstanceState,
@@ -17,13 +17,13 @@ import {
 import { GenericBulkCreateResponse } from './bulk_create_factory';
 import { AnomalyResults, Anomaly } from '../../machine_learning';
 import { BuildRuleMessage } from './rule_messages';
-import { AlertAttributes, BulkCreate, WrapHits } from './types';
-import { MachineLearningRuleParams } from '../schemas/rule_schemas';
+import { BulkCreate, WrapHits } from './types';
+import { CompleteRule, MachineLearningRuleParams } from '../schemas/rule_schemas';
 import { buildReasonMessageForMlAlert } from './reason_formatters';
 
 interface BulkCreateMlSignalsParams {
   someResult: AnomalyResults;
-  ruleSO: SavedObject<AlertAttributes<MachineLearningRuleParams>>;
+  completeRule: CompleteRule<MachineLearningRuleParams>;
   services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   logger: Logger;
   id: string;

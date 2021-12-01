@@ -20,7 +20,7 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { ModuleJobUI } from '../page';
 import { usePartialState } from '../../../../components/custom_hooks';
 import { composeValidators, maxLengthValidator } from '../../../../../../common/util/validators';

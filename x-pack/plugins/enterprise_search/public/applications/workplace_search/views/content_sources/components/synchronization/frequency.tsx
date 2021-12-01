@@ -26,10 +26,10 @@ import { ViewContentHeader } from '../../../../components/shared/view_content_he
 import { NAV, RESET_BUTTON } from '../../../../constants';
 import { DIFFERENT_SYNC_TYPES_DOCS_URL } from '../../../../routes';
 import {
+  LEARN_MORE_LINK,
   SOURCE_FREQUENCY_DESCRIPTION,
   SOURCE_SYNC_FREQUENCY_TITLE,
   BLOCKED_TIME_WINDOWS_TITLE,
-  SYNC_FREQUENCY_LINK_LABEL,
   SYNC_UNSAVED_CHANGES_MESSAGE,
 } from '../../constants';
 import { SourceLogic } from '../../source_logic';
@@ -84,16 +84,6 @@ export const Frequency: React.FC<FrequencyProps> = ({ tabId }) => {
     </EuiFlexGroup>
   );
 
-  const docsLinks = (
-    <EuiFlexGroup>
-      <EuiFlexItem grow={false}>
-        <EuiLink href={DIFFERENT_SYNC_TYPES_DOCS_URL} external>
-          {SYNC_FREQUENCY_LINK_LABEL}
-        </EuiLink>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
-
   return (
     <SourceLayout
       pageChrome={[
@@ -109,10 +99,16 @@ export const Frequency: React.FC<FrequencyProps> = ({ tabId }) => {
       />
       <ViewContentHeader
         title={NAV.SYNCHRONIZATION_FREQUENCY}
-        description={SOURCE_FREQUENCY_DESCRIPTION}
+        description={
+          <>
+            {SOURCE_FREQUENCY_DESCRIPTION}{' '}
+            <EuiLink href={DIFFERENT_SYNC_TYPES_DOCS_URL} external>
+              {LEARN_MORE_LINK}
+            </EuiLink>
+          </>
+        }
         action={actions}
       />
-      {docsLinks}
       <EuiSpacer />
       <EuiTabbedContent tabs={tabs} selectedTab={tabs[tabId]} onTabClick={onSelectedTabChanged} />
     </SourceLayout>

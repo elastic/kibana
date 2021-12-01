@@ -16,13 +16,13 @@ get<T = unknown>(type: string, id: string, options?: SavedObjectsBaseOptions): P
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  type | <code>string</code> |  |
-|  id | <code>string</code> |  |
-|  options | <code>SavedObjectsBaseOptions</code> |  |
+|  type | string |  |
+|  id | string |  |
+|  options | SavedObjectsBaseOptions |  {<!-- -->string<!-- -->} \[options.namespace\] |
 
 <b>Returns:</b>
 
-`Promise<SavedObject<T>>`
+Promise&lt;SavedObject&lt;T&gt;&gt;
 
 {<!-- -->promise<!-- -->} - { id, type, version, attributes }
 

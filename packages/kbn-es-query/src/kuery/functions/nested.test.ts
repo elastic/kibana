@@ -8,7 +8,7 @@
 
 import { nodeTypes } from '../node_types';
 import { fields } from '../../filters/stubs';
-import { IndexPatternBase } from '../..';
+import { DataViewBase } from '../..';
 
 import * as ast from '../ast';
 
@@ -20,11 +20,12 @@ const childNode = nodeTypes.function.buildNode('is', 'child', 'foo');
 
 describe('kuery functions', () => {
   describe('nested', () => {
-    let indexPattern: IndexPatternBase;
+    let indexPattern: DataViewBase;
 
     beforeEach(() => {
       indexPattern = {
         fields,
+        title: 'dataView',
       };
     });
 

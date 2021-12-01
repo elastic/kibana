@@ -17,13 +17,20 @@ import {
   CrawlerData,
   CrawlRequest,
   CrawlerDomain,
+  CrawlType,
+  CrawlRequestWithDetailsFromServer,
+  CrawlRequestWithDetails,
+  CrawlEvent,
+  CrawlEventFromServer,
 } from './types';
 
 import {
   crawlerDomainServerToClient,
   crawlerDataServerToClient,
   crawlDomainValidationToResult,
+  crawlEventServerToClient,
   crawlRequestServerToClient,
+  crawlRequestWithDetailsServerToClient,
   getDeleteDomainConfirmationMessage,
   getDeleteDomainSuccessMessage,
   getCrawlRulePathPatternTooltip,
@@ -119,6 +126,98 @@ describe('crawlRequestServerToClient', () => {
   });
 });
 
+describe('crawlRequestWithDetailsServerToClient', () => {
+  it('converts the API payload into properties matching our code style', () => {
+    const id = '507f1f77bcf86cd799439011';
+
+    const defaultServerPayload: CrawlRequestWithDetailsFromServer = {
+      id,
+      status: CrawlerStatus.Pending,
+      created_at: 'Mon, 31 Aug 2020 17:00:00 +0000',
+      began_at: null,
+      completed_at: null,
+      type: CrawlType.Full,
+      crawl_config: {
+        domain_allowlist: [],
+      },
+    };
+
+    const defaultClientPayload: CrawlRequestWithDetails = {
+      id,
+      status: CrawlerStatus.Pending,
+      createdAt: 'Mon, 31 Aug 2020 17:00:00 +0000',
+      beganAt: null,
+      completedAt: null,
+      type: CrawlType.Full,
+      crawlConfig: {
+        domainAllowlist: [],
+      },
+    };
+
+    expect(crawlRequestWithDetailsServerToClient(defaultServerPayload)).toStrictEqual(
+      defaultClientPayload
+    );
+    expect(
+      crawlRequestWithDetailsServerToClient({
+        ...defaultServerPayload,
+        began_at: 'Mon, 31 Aug 2020 17:00:00 +0000',
+      })
+    ).toStrictEqual({ ...defaultClientPayload, beganAt: 'Mon, 31 Aug 2020 17:00:00 +0000' });
+    expect(
+      crawlRequestWithDetailsServerToClient({
+        ...defaultServerPayload,
+        completed_at: 'Mon, 31 Aug 2020 17:00:00 +0000',
+      })
+    ).toStrictEqual({ ...defaultClientPayload, completedAt: 'Mon, 31 Aug 2020 17:00:00 +0000' });
+  });
+});
+
+describe('crawlEventServerToClient', () => {
+  it('converts the API payload into properties matching our code style', () => {
+    const id = '507f1f77bcf86cd799439011';
+
+    const defaultServerPayload: CrawlEventFromServer = {
+      id,
+      status: CrawlerStatus.Pending,
+      created_at: 'Mon, 31 Aug 2020 17:00:00 +0000',
+      began_at: null,
+      completed_at: null,
+      type: CrawlType.Full,
+      crawl_config: {
+        domain_allowlist: [],
+      },
+      stage: 'crawl',
+    };
+
+    const defaultClientPayload: CrawlEvent = {
+      id,
+      status: CrawlerStatus.Pending,
+      createdAt: 'Mon, 31 Aug 2020 17:00:00 +0000',
+      beganAt: null,
+      completedAt: null,
+      type: CrawlType.Full,
+      crawlConfig: {
+        domainAllowlist: [],
+      },
+      stage: 'crawl',
+    };
+
+    expect(crawlEventServerToClient(defaultServerPayload)).toStrictEqual(defaultClientPayload);
+    expect(
+      crawlEventServerToClient({
+        ...defaultServerPayload,
+        began_at: 'Mon, 31 Aug 2020 17:00:00 +0000',
+      })
+    ).toStrictEqual({ ...defaultClientPayload, beganAt: 'Mon, 31 Aug 2020 17:00:00 +0000' });
+    expect(
+      crawlEventServerToClient({
+        ...defaultServerPayload,
+        completed_at: 'Mon, 31 Aug 2020 17:00:00 +0000',
+      })
+    ).toStrictEqual({ ...defaultClientPayload, completedAt: 'Mon, 31 Aug 2020 17:00:00 +0000' });
+  });
+});
+
 describe('crawlerDataServerToClient', () => {
   let output: CrawlerData;
 
@@ -162,6 +261,10 @@ describe('crawlerDataServerToClient', () => {
           created_at: 'Mon, 31 Aug 2020 17:00:00 +0000',
           began_at: null,
           completed_at: null,
+          type: CrawlType.Full,
+          crawl_config: {
+            domain_allowlist: ['https://www.elastic.co'],
+          },
         },
       ],
       most_recent_crawl_request: {
@@ -211,6 +314,10 @@ describe('crawlerDataServerToClient', () => {
         createdAt: 'Mon, 31 Aug 2020 17:00:00 +0000',
         beganAt: null,
         completedAt: null,
+        type: 'full',
+        crawlConfig: {
+          domainAllowlist: ['https://www.elastic.co'],
+        },
       },
     ]);
     expect(output.mostRecentCrawlRequest).toEqual({

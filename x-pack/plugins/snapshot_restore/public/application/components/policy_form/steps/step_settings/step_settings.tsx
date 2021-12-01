@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiDescribedFormGroup,
   EuiTitle,
@@ -191,7 +191,7 @@ export const PolicyStepSettings: React.FunctionComponent<StepProps> = ({
           >
             <FormattedMessage
               id="xpack.snapshotRestore.policyForm.stepSettings.docsButtonLabel"
-              defaultMessage="Snapshot settings docs"
+              defaultMessage="Snapshot docs"
             />
           </EuiButtonEmpty>
         </EuiFlexItem>

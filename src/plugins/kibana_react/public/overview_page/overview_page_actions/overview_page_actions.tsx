@@ -43,8 +43,8 @@ export const overviewPageActions = ({
         href={addDataHref}
         iconType="plusInCircle"
       >
-        {i18n.translate('kibana-react.kbnOverviewPageHeader.addDataButtonLabel', {
-          defaultMessage: 'Add data',
+        {i18n.translate('kibana-react.kbnOverviewPageHeader.addIntegrationsButtonLabel', {
+          defaultMessage: 'Add integrations',
         })}
       </EuiButtonEmpty>
     </RedirectAppLinks>

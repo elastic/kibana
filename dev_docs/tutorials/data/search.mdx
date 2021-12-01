@@ -13,7 +13,7 @@ tags: ['kibana', 'onboarding', 'dev', 'tutorials', 'search', 'sessions', 'search
 
 Searching data stored in Elasticsearch can be done in various ways, for example using the Elasticsearch REST API or using an `Elasticsearch Client` for low level access.
 
-However, the recommended and easist way to search Elasticsearch is by using the low level search service. The service is exposed from the `data` plugin, and by using it, you not only gain access to the data you stored, but also to capabilities, such as Custom Search Strategies, Asynchronous Search, Partial Results, Search Sessions, and more.
+However, the recommended and easiest way to search Elasticsearch is by using the low level search service. The service is exposed from the `data` plugin, and by using it, you not only gain access to the data you stored, but also to capabilities, such as Custom Search Strategies, Asynchronous Search, Partial Results, Search Sessions, and more.
 
 Here is a basic example for using the `data.search` service from a custom plugin:
 
@@ -128,6 +128,12 @@ setTimeout(() => {
   abortController.abort();
 }, 1000);
 ```
+
+<DocCallOut color="danger" title="Cancel your searches if results are no longer needed">
+  Users might no longer be interested in search results. For example, they might start a new search
+  or leave your app without waiting for the results. You should handle such cases by using
+  `AbortController` with search API.
+</DocCallOut>
 
 #### Search strategies
 
@@ -418,11 +424,11 @@ export class MyPlugin implements Plugin {
         // return the name you want to give the saved Search Session
         return `MyApp_${Math.random()}`;
       },
-      getUrlGeneratorData: async () => {
+      getLocatorData: async () => {
         return {
-          urlGeneratorId: MY_URL_GENERATOR,
-          initialState: getUrlGeneratorState({ ...deps, shouldRestoreSearchSession: false }),
-          restoreState: getUrlGeneratorState({ ...deps, shouldRestoreSearchSession: true }),
+          id: MY_LOCATOR,
+          initialState: getLocatorParams({ ...deps, shouldRestoreSearchSession: false }),
+          restoreState: getLocatorParams({ ...deps, shouldRestoreSearchSession: true }),
         };
       },
     });

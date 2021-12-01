@@ -39,7 +39,13 @@ export const jobListRouteFactory = (navigateToPath: NavigateToPath, basePath: st
 });
 
 const PageWrapper: FC<PageProps> = ({ deps }) => {
-  const { context } = useResolver(undefined, undefined, deps.config, basicResolvers(deps));
+  const { context } = useResolver(
+    undefined,
+    undefined,
+    deps.config,
+    deps.dataViewsContract,
+    basicResolvers(deps)
+  );
   const timefilter = useTimefilter({ timeRangeSelector: false, autoRefreshSelector: true });
 
   const [globalState, setGlobalState] = useUrlState('_g');

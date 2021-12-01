@@ -8,7 +8,7 @@
 import React, { FC, useCallback } from 'react';
 import { PreloadedState } from '@reduxjs/toolkit';
 import { AppMountParameters, CoreSetup, CoreStart } from 'kibana/public';
-import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
+import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
 import { HashRouter, Route, RouteComponentProps, Switch } from 'react-router-dom';
 import { History } from 'history';
 import { render, unmountComponentAtNode } from 'react-dom';
@@ -31,7 +31,10 @@ import {
 import { ACTION_VISUALIZE_LENS_FIELD } from '../../../../../src/plugins/ui_actions/public';
 import { LensAttributeService } from '../lens_attribute_service';
 import { LensAppServices, RedirectToOriginProps, HistoryLocationState } from './types';
-import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
+import {
+  KibanaContextProvider,
+  KibanaThemeProvider,
+} from '../../../../../src/plugins/kibana_react/public';
 import {
   makeConfigureStore,
   navigateAway,
@@ -40,7 +43,8 @@ import {
   LensAppState,
   LensState,
 } from '../state_management';
-import { getPreloadedState } from '../state_management/lens_slice';
+import { getPreloadedState, setState } from '../state_management/lens_slice';
+import { getLensInspectorService } from '../lens_inspector_service';
 
 export async function getLensServices(
   coreStart: CoreStart,
@@ -65,7 +69,7 @@ export async function getLensServices(
   return {
     data,
     storage,
-    inspector,
+    inspector: getLensInspectorService(inspector),
     navigation,
     fieldFormats,
     stateTransfer,
@@ -170,13 +174,6 @@ export async function mountApp(
       ? historyLocationState.payload
       : undefined;
 
-  // Clear app-specific filters when navigating to Lens. Necessary because Lens
-  // can be loaded without a full page refresh. If the user navigates to Lens from Discover
-  // we keep the filters
-  if (!initialContext) {
-    data.query.filterManager.setAppFilters([]);
-  }
-
   if (embeddableEditorIncomingState?.searchSessionId) {
     data.search.session.continue(embeddableEditorIncomingState.searchSessionId);
   }
@@ -205,9 +202,14 @@ export async function mountApp(
       trackUiEvent('loaded');
       const initialInput = getInitialInput(props.id, props.editByValue);
 
-      lensStore.dispatch(
-        loadInitial({ redirectCallback, initialInput, emptyState, history: props.history })
-      );
+      // Clear app-specific filters when navigating to Lens. Necessary because Lens
+      // can be loaded without a full page refresh. If the user navigates to Lens from Discover
+      // we keep the filters
+      if (!initialContext) {
+        data.query.filterManager.setAppFilters([]);
+      }
+      lensStore.dispatch(setState(emptyState));
+      lensStore.dispatch(loadInitial({ redirectCallback, initialInput, history: props.history }));
 
       return (
         <Provider store={lensStore}>
@@ -255,29 +257,32 @@ export async function mountApp(
   const PresentationUtilContext = getPresentationUtilContext();
 
   render(
-    <I18nProvider>
-      <KibanaContextProvider services={lensServices}>
-        <PresentationUtilContext>
-          <HashRouter>
-            <Switch>
-              <Route exact path="/edit/:id" component={EditorRoute} />
-              <Route
-                exact
-                path={`/${LENS_EDIT_BY_VALUE}`}
-                render={(routeProps) => <EditorRoute {...routeProps} editByValue />}
-              />
-              <Route exact path="/" component={EditorRoute} />
-              <Route path="/" component={NotFound} />
-            </Switch>
-          </HashRouter>
-        </PresentationUtilContext>
-      </KibanaContextProvider>
-    </I18nProvider>,
+    <KibanaThemeProvider theme$={coreStart.theme.theme$}>
+      <I18nProvider>
+        <KibanaContextProvider services={lensServices}>
+          <PresentationUtilContext>
+            <HashRouter>
+              <Switch>
+                <Route exact path="/edit/:id" component={EditorRoute} />
+                <Route
+                  exact
+                  path={`/${LENS_EDIT_BY_VALUE}`}
+                  render={(routeProps) => <EditorRoute {...routeProps} editByValue />}
+                />
+                <Route exact path="/" component={EditorRoute} />
+                <Route path="/" component={NotFound} />
+              </Switch>
+            </HashRouter>
+          </PresentationUtilContext>
+        </KibanaContextProvider>
+      </I18nProvider>
+    </KibanaThemeProvider>,
     params.element
   );
   return () => {
     data.search.session.clear();
     unmountComponentAtNode(params.element);
+    lensServices.inspector.close();
     unlistenParentHistory();
     lensStore.dispatch(navigateAway());
   };

@@ -8,9 +8,10 @@
 import React, { useCallback, useState } from 'react';
 import { EuiFilterGroup } from '@elastic/eui';
 import styled from 'styled-components';
+import { capitalize } from 'lodash';
 import { useFilterUpdate } from '../../../hooks/use_filter_update';
 import { useSelectedFilters } from '../../../hooks/use_selected_filters';
-import { FieldValueSuggestions } from '../../../../../observability/public';
+import { FieldValueSuggestions, useInspectorContext } from '../../../../../observability/public';
 import { SelectedFilters } from './selected_filters';
 import { useIndexPattern } from '../../../contexts/uptime_index_pattern_context';
 import { useGetUrlParams } from '../../../hooks';
@@ -33,6 +34,8 @@ export const FilterGroup = () => {
   );
 
   const { dateRangeStart, dateRangeEnd } = useGetUrlParams();
+
+  const { inspectorAdapters } = useInspectorContext();
 
   const { filtersList } = useSelectedFilters();
 
@@ -67,6 +70,10 @@ export const FilterGroup = () => {
               filters={[]}
               cardinalityField="monitor.id"
               time={{ from: dateRangeStart, to: dateRangeEnd }}
+              inspector={{
+                adapter: inspectorAdapters.requests,
+                title: 'get' + capitalize(label) + 'FilterValues',
+              }}
             />
           ))}
       </Container>

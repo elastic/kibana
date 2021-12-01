@@ -7,12 +7,11 @@
 
 import { Moment } from 'moment';
 
-import { SearchHit } from '@elastic/elasticsearch/api/types';
+import { SearchHit } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Logger } from '@kbn/logging';
 import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 
 import { AlertExecutorOptions, AlertType } from '../../../../../alerting/server';
-import { SavedObject } from '../../../../../../../src/core/server';
 import {
   AlertInstanceContext,
   AlertInstanceState,
@@ -26,18 +25,17 @@ import { PersistenceServices, IRuleDataClient } from '../../../../../rule_regist
 import { BaseHit } from '../../../../common/detection_engine/types';
 import { ConfigType } from '../../../config';
 import { SetupPlugins } from '../../../plugin';
-import { RuleParams } from '../schemas/rule_schemas';
+import { CompleteRule, RuleParams } from '../schemas/rule_schemas';
 import { BuildRuleMessage } from '../signals/rule_messages';
 import {
-  AlertAttributes,
   BulkCreate,
   SearchAfterAndBulkCreateReturnType,
   WrapHits,
   WrapSequences,
 } from '../signals/types';
-import { AlertsFieldMap, RulesFieldMap } from './field_maps';
 import { ExperimentalFeatures } from '../../../../common/experimental_features';
 import { IEventLogService } from '../../../../../event_log/server';
+import { AlertsFieldMap, RulesFieldMap } from '../../../../common/field_maps';
 
 export interface SecurityAlertTypeReturnValue<TState extends AlertTypeState> {
   bulkCreateTimes: string[];
@@ -57,7 +55,7 @@ export interface RunOpts<TParams extends RuleParams> {
   bulkCreate: BulkCreate;
   exceptionItems: ExceptionListItemSchema[];
   listClient: ListClient;
-  rule: SavedObject<AlertAttributes<TParams>>;
+  completeRule: CompleteRule<RuleParams>;
   searchAfterSize: number;
   tuple: {
     to: Moment;

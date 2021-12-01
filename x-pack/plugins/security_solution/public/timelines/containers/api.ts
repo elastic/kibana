@@ -156,6 +156,7 @@ export const persistTimeline = async ({
   try {
     if (isEmpty(timelineId) && timeline.status === TimelineStatus.draft && timeline) {
       const temp: TimelineResponse | TimelineErrorResponse = await cleanDraftTimeline({
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         timelineType: timeline.timelineType!,
         templateTimelineId: timeline.templateTimelineId ?? undefined,
         templateTimelineVersion: timeline.templateTimelineVersion ?? undefined,
@@ -163,7 +164,7 @@ export const persistTimeline = async ({
 
       const draftTimeline = decodeTimelineResponse(temp);
       const templateTimelineInfo =
-        timeline.timelineType! === TimelineType.template
+        timeline.timelineType === TimelineType.template
           ? {
               templateTimelineId:
                 draftTimeline.data.persistTimeline.timeline.templateTimelineId ??
@@ -335,19 +336,6 @@ export const getTimelineTemplate = async (templateTimelineId: string) => {
   });
 
   return decodeSingleTimelineResponse(response);
-};
-
-export const getResolvedTimelineTemplate = async (templateTimelineId: string) => {
-  const response = await KibanaServices.get().http.get<SingleTimelineResolveResponse>(
-    TIMELINE_RESOLVE_URL,
-    {
-      query: {
-        template_timeline_id: templateTimelineId,
-      },
-    }
-  );
-
-  return decodeResolvedSingleTimelineResponse(response);
 };
 
 export const getAllTimelines = async (args: GetTimelinesArgs, abortSignal: AbortSignal) => {

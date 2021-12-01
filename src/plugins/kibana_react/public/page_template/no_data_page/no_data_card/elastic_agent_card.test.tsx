@@ -14,7 +14,10 @@ jest.mock('../../../context', () => ({
   ...jest.requireActual('../../../context'),
   useKibana: jest.fn().mockReturnValue({
     services: {
-      http: { basePath: { prepend: jest.fn((path: string) => (path ? path : 'path')) } },
+      http: {
+        basePath: { prepend: jest.fn((path: string) => (path ? path : 'path')) },
+      },
+      application: { capabilities: { navLinks: { integrations: true } } },
       uiSettings: { get: jest.fn() },
     },
   }),
@@ -39,6 +42,11 @@ describe('ElasticAgentCard', () => {
 
     test('href', () => {
       const component = shallow(<ElasticAgentCard href="#" button="Button" solution="Solution" />);
+      expect(component).toMatchSnapshot();
+    });
+
+    test('category', () => {
+      const component = shallow(<ElasticAgentCard category="custom" solution="Solution" />);
       expect(component).toMatchSnapshot();
     });
   });

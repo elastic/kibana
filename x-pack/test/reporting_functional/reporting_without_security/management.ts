@@ -53,10 +53,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await PageObjects.common.sleep(3000); // Wait an amount of time for auto-polling to refresh the jobs
 
-      const tableElem = await testSubjects.find('reportJobListing');
-      const tableRow = await tableElem.findByCssSelector('tbody tr td+td'); // find the title cell of the first row
-      const tableCellText = await tableRow.getVisibleText();
-      expect(tableCellText).to.be(`Tiểu thuyết\nvisualization`);
+      const [firstTitleElem] = await testSubjects.findAll('reportingListItemObjectTitle');
+      const tableCellText = await firstTitleElem.getVisibleText();
+      expect(tableCellText).to.be(`Tiểu thuyết`);
     });
   });
 };

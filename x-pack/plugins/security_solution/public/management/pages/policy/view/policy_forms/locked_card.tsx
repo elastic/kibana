@@ -15,7 +15,7 @@ import {
   EuiFlexItem,
   EuiText,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 
@@ -35,9 +35,11 @@ export const LockedPolicyCard = memo(({ title }: { title: string }) => {
     <LockedPolicyDiv>
       <EuiCard
         data-test-subj="lockedPolicyCard"
-        betaBadgeLabel={i18n.translate('xpack.securitySolution.endpoint.policy.details.platinum', {
-          defaultMessage: 'Platinum',
-        })}
+        betaBadgeProps={{
+          label: i18n.translate('xpack.securitySolution.endpoint.policy.details.platinum', {
+            defaultMessage: 'Platinum',
+          }),
+        }}
         isDisabled={true}
         icon={<EuiIcon size="xl" type="lock" />}
         title={

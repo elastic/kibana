@@ -6,4 +6,4 @@
  */
 
 export { GeoJsonUploadForm } from './geojson_upload_form';
-export { OnFileSelectParameters } from './geojson_file_picker';
+export type { OnFileSelectParameters } from './geojson_file_picker';

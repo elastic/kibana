@@ -12,11 +12,11 @@ import React, { useEffect, useRef } from 'react';
 
 import { ControlGroupInput } from '../types';
 import { ControlEditor } from './control_editor';
-import { IEditableControlFactory } from '../../types';
 import { pluginServices } from '../../../../services';
 import { forwardAllContext } from './forward_all_context';
 import { OverlayRef } from '../../../../../../../core/public';
 import { ControlGroupStrings } from '../control_group_strings';
+import { IEditableControlFactory, ControlInput } from '../../types';
 import { controlGroupReducers } from '../state/control_group_reducers';
 import { EmbeddableFactoryNotFoundError } from '../../../../../../embeddable/public';
 import { useReduxContainerContext } from '../../../redux_embeddables/redux_embeddable_context';
@@ -54,13 +54,18 @@ export const EditControlButton = ({ embeddableId }: { embeddableId: string }) =>
     const factory = getControlFactory(panel.type);
     const embeddable = await untilEmbeddableLoaded(embeddableId);
 
+    let inputToReturn: Partial<ControlInput> = {};
+
     if (!factory) throw new EmbeddableFactoryNotFoundError(panel.type);
 
     let removed = false;
     const onCancel = (ref: OverlayRef) => {
       if (
         removed ||
-        (isEqual(latestPanelState.current.explicitInput, panel.explicitInput) &&
+        (isEqual(latestPanelState.current.explicitInput, {
+          ...panel.explicitInput,
+          ...inputToReturn,
+        }) &&
           isEqual(latestPanelState.current.width, panel.width))
       ) {
         ref.close();
@@ -73,18 +78,35 @@ export const EditControlButton = ({ embeddableId }: { embeddableId: string }) =>
         buttonColor: 'danger',
       }).then((confirmed) => {
         if (confirmed) {
-          updateInputForChild(embeddableId, panel.explicitInput);
           dispatch(setControlWidth({ width: panel.width, embeddableId }));
           ref.close();
         }
       });
     };
 
+    const editableFactory = factory as IEditableControlFactory;
+
     const flyoutInstance = openFlyout(
       forwardAllContext(
         <ControlEditor
+          isCreate={false}
           width={panel.width}
+          embeddable={embeddable}
+          factory={editableFactory}
           title={embeddable.getTitle()}
+          onCancel={() => onCancel(flyoutInstance)}
+          updateTitle={(newTitle) => (inputToReturn.title = newTitle)}
+          updateWidth={(newWidth) => dispatch(setControlWidth({ width: newWidth, embeddableId }))}
+          onTypeEditorChange={(partialInput) =>
+            (inputToReturn = { ...inputToReturn, ...partialInput })
+          }
+          onSave={() => {
+            if (editableFactory.presaveTransformFunction) {
+              inputToReturn = editableFactory.presaveTransformFunction(inputToReturn, embeddable);
+            }
+            updateInputForChild(embeddableId, inputToReturn);
+            flyoutInstance.close();
+          }}
           removeControl={() => {
             openConfirm(ControlGroupStrings.management.deleteControls.getSubtitle(), {
               confirmButtonText: ControlGroupStrings.management.deleteControls.getConfirm(),
@@ -99,14 +121,6 @@ export const EditControlButton = ({ embeddableId }: { embeddableId: string }) =>
               }
             });
           }}
-          updateTitle={(newTitle) => updateInputForChild(embeddableId, { title: newTitle })}
-          controlEditorComponent={(factory as IEditableControlFactory).getControlEditor?.({
-            onChange: (partialInput) => updateInputForChild(embeddableId, partialInput),
-            initialInput: embeddable.getInput(),
-          })}
-          onCancel={() => onCancel(flyoutInstance)}
-          onSave={() => flyoutInstance.close()}
-          updateWidth={(newWidth) => dispatch(setControlWidth({ width: newWidth, embeddableId }))}
         />,
         reduxContainerContext
       ),

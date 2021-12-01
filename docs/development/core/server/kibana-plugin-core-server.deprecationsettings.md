@@ -16,6 +16,6 @@ export interface DeprecationSettings
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [docLinksKey](./kibana-plugin-core-server.deprecationsettings.doclinkskey.md) | <code>string</code> | Key to documentation links |
-|  [message](./kibana-plugin-core-server.deprecationsettings.message.md) | <code>string</code> | Deprecation message |
+|  [docLinksKey](./kibana-plugin-core-server.deprecationsettings.doclinkskey.md) | string | Key to documentation links |
+|  [message](./kibana-plugin-core-server.deprecationsettings.message.md) | string | Deprecation message |
 

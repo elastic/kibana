@@ -28,8 +28,9 @@ import {
   AlertAction,
   AlertAggregations,
   AlertTaskState,
-  AlertInstanceSummary,
-  AlertInstanceStatus,
+  AlertSummary,
+  ExecutionDuration,
+  AlertStatus,
   RawAlertInstance,
   AlertingFrameworkHealth,
   AlertNotifyWhenType,
@@ -43,26 +44,26 @@ import {
 type Alert = SanitizedAlert<AlertTypeParams>;
 type ResolvedRule = ResolvedSanitizedRule<AlertTypeParams>;
 
-export {
+export type {
   Alert,
   AlertAction,
   AlertAggregations,
   AlertTaskState,
-  AlertInstanceSummary,
-  AlertInstanceStatus,
+  AlertSummary,
+  ExecutionDuration,
+  AlertStatus,
   RawAlertInstance,
   AlertingFrameworkHealth,
   AlertNotifyWhenType,
   AlertTypeParams,
   ResolvedRule,
 };
+export type { ActionType, AsApiContract };
 export {
-  ActionType,
   AlertHistoryEsIndexConnectorId,
   AlertHistoryDocumentTemplate,
   AlertHistoryDefaultIndexName,
   ALERT_HISTORY_PREFIX,
-  AsApiContract,
 };
 
 export type ActionTypeIndex = Record<string, ActionType>;

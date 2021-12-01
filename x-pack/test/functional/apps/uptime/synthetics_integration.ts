@@ -166,11 +166,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         const saveButton = await uptimePage.syntheticsIntegration.findSaveButton();
         await saveButton.click();
 
-        await testSubjects.missingOrFail('packagePolicyCreateSuccessToast');
+        await testSubjects.missingOrFail('postInstallAddAgentModal');
       });
     });
 
-    describe('create new policy', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/103390
+    describe.skip('create new policy', () => {
       let version: string;
 
       beforeEach(async () => {
@@ -214,6 +215,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
               'service.name': config.apmServiceName,
               tags: [config.tags],
               'check.request.method': 'GET',
+              __ui: {
+                is_tls_enabled: false,
+                is_zip_url_tls_enabled: false,
+              },
             },
           })
         );
@@ -256,6 +261,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
               urls: config.url,
               'service.name': config.apmServiceName,
               tags: [config.tags],
+              __ui: {
+                is_tls_enabled: true,
+                is_zip_url_tls_enabled: false,
+              },
             },
           })
         );
@@ -307,6 +316,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
               urls: config.url,
               'service.name': config.apmServiceName,
               tags: [config.tags],
+              __ui: {
+                is_tls_enabled: true,
+                is_zip_url_tls_enabled: false,
+              },
             },
           })
         );
@@ -380,6 +393,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
               password: advancedConfig.password,
               'service.name': config.apmServiceName,
               tags: [config.tags],
+              __ui: {
+                is_tls_enabled: false,
+                is_zip_url_tls_enabled: false,
+              },
             },
           })
         );
@@ -414,6 +431,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
               hosts: config.host,
               tags: [config.tags],
               'service.name': config.apmServiceName,
+              __ui: {
+                is_tls_enabled: false,
+                is_zip_url_tls_enabled: false,
+              },
             },
           })
         );
@@ -458,6 +479,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
               'check.send': advancedConfig.requestSendCheck,
               'service.name': config.apmServiceName,
               tags: [config.tags],
+              __ui: {
+                is_tls_enabled: false,
+                is_zip_url_tls_enabled: false,
+              },
             },
           })
         );
@@ -492,6 +517,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
               hosts: config.host,
               'service.name': config.apmServiceName,
               tags: [config.tags],
+              __ui: null,
             },
           })
         );
@@ -536,6 +562,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
               'source.zip_url.username': config.username,
               'source.zip_url.password': config.password,
               params: JSON.parse(config.params),
+              __ui: {
+                is_tls_enabled: false,
+                is_zip_url_tls_enabled: false,
+                script_source: {
+                  file_name: '',
+                  is_generated_script: false,
+                },
+              },
             },
           })
         );
@@ -573,6 +607,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
               tags: [config.tags],
               'service.name': config.apmServiceName,
               'source.inline.script': config.inlineScript,
+              __ui: {
+                is_tls_enabled: false,
+                is_zip_url_tls_enabled: false,
+                script_source: {
+                  file_name: '',
+                  is_generated_script: false,
+                },
+              },
             },
           })
         );
@@ -623,6 +665,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
               'source.zip_url.password': config.password,
               params: JSON.parse(config.params),
               synthetics_args: [advancedConfig.syntheticsArgs],
+              __ui: {
+                is_tls_enabled: false,
+                is_zip_url_tls_enabled: false,
+                script_source: {
+                  file_name: '',
+                  is_generated_script: false,
+                },
+              },
             },
           })
         );

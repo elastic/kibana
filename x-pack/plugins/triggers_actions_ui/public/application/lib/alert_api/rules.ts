@@ -38,7 +38,14 @@ export async function loadAlerts({
   data: Alert[];
 }> {
   const filters = mapFiltersToKql({ typesFilter, actionTypesFilter, alertStatusesFilter });
-  const res = await http.get(`${BASE_ALERTING_API_PATH}/rules/_find`, {
+  const res = await http.get<
+    AsApiContract<{
+      page: number;
+      perPage: number;
+      total: number;
+      data: Array<AsApiContract<Alert>>;
+    }>
+  >(`${BASE_ALERTING_API_PATH}/rules/_find`, {
     query: {
       page: page.index + 1,
       per_page: page.size,

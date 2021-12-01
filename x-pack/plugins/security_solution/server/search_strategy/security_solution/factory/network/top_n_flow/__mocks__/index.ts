@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IEsSearchResponse } from '../../../../../../../../../../src/plugins/data/common';
+import type { IEsSearchResponse } from '../../../../../../../../../../src/plugins/data/common';
 
 import {
   Direction,
@@ -810,7 +810,7 @@ export const formattedSearchStrategyResponse: NetworkTopNFlowStrategyResponse = 
     dsl: [
       JSON.stringify(
         {
-          allowNoIndices: true,
+          allow_no_indices: true,
           index: [
             'apm-*-transaction*',
             'traces-apm*',
@@ -821,7 +821,7 @@ export const formattedSearchStrategyResponse: NetworkTopNFlowStrategyResponse = 
             'packetbeat-*',
             'winlogbeat-*',
           ],
-          ignoreUnavailable: true,
+          ignore_unavailable: true,
           body: {
             aggregations: {
               top_n_flow_count: { cardinality: { field: 'source.ip' } },
@@ -878,7 +878,7 @@ export const formattedSearchStrategyResponse: NetworkTopNFlowStrategyResponse = 
 };
 
 export const expectedDsl = {
-  allowNoIndices: true,
+  allow_no_indices: true,
   index: [
     'apm-*-transaction*',
     'traces-apm*',
@@ -889,7 +889,7 @@ export const expectedDsl = {
     'packetbeat-*',
     'winlogbeat-*',
   ],
-  ignoreUnavailable: true,
+  ignore_unavailable: true,
   body: {
     aggregations: {
       top_n_flow_count: { cardinality: { field: 'source.ip' } },

@@ -22,7 +22,7 @@ import {
 } from '../../../../../../maps/common';
 
 import { APM_STATIC_INDEX_PATTERN_ID } from '../../../../../common/index_pattern_constants';
-import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
+import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import {
   SERVICE_NAME,
   TRANSACTION_TYPE,
@@ -84,7 +84,7 @@ interface VectorLayerDescriptor extends BaseVectorLayerDescriptor {
 }
 
 export function useLayerList() {
-  const { urlParams } = useUrlParams();
+  const { urlParams } = useLegacyUrlParams();
 
   const { serviceName } = urlParams;
 

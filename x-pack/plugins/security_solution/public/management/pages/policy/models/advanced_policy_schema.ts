@@ -746,4 +746,48 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       }
     ),
   },
+  {
+    key: 'mac.advanced.memory_protection.memory_scan_collect_sample',
+    first_supported_version: '7.16',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.memory_protection.memory_scan_collect_sample',
+      {
+        defaultMessage:
+          'Collect 4MB of memory surrounding detected malicious memory regions. Default: false. Enabling this value may significantly increase the amount of data stored in Elasticsearch.',
+      }
+    ),
+  },
+  {
+    key: 'mac.advanced.memory_protection.memory_scan',
+    first_supported_version: '7.16',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.memory_protection.memory_scan',
+      {
+        defaultMessage:
+          'Enable scanning for malicious memory regions as a part of memory protection. Default: true.',
+      }
+    ),
+  },
+  {
+    key: 'linux.advanced.memory_protection.memory_scan_collect_sample',
+    first_supported_version: '7.16',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.memory_protection.memory_scan_collect_sample',
+      {
+        defaultMessage:
+          'Collect 4MB of memory surrounding detected malicious memory regions. Default: false. Enabling this value may significantly increase the amount of data stored in Elasticsearch.',
+      }
+    ),
+  },
+  {
+    key: 'linux.advanced.memory_protection.memory_scan',
+    first_supported_version: '7.16',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.memory_protection.memory_scan',
+      {
+        defaultMessage:
+          'Enable scanning for malicious memory regions as a part of memory protection. Default: true.',
+      }
+    ),
+  },
 ];

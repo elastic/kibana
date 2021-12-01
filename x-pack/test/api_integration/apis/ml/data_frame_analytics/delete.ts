@@ -130,7 +130,7 @@ export default ({ getService }: FtrProviderContext) => {
         const destinationIndex = generateDestinationIndex(analyticsId);
 
         before(async () => {
-          await ml.api.createIndices(destinationIndex);
+          await ml.api.createIndex(destinationIndex);
           await ml.api.assertIndicesExist(destinationIndex);
         });
 
@@ -189,7 +189,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         before(async () => {
           // Mimic real job by creating target index & index pattern after DFA job is created
-          await ml.api.createIndices(destinationIndex);
+          await ml.api.createIndex(destinationIndex);
           await ml.api.assertIndicesExist(destinationIndex);
           await ml.testResources.createIndexPatternIfNeeded(destinationIndex);
         });

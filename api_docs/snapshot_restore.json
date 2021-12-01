@@ -107,6 +107,20 @@
       },
       {
         "parentPluginId": "snapshotRestore",
+        "id": "def-common.MAJOR_VERSION",
+        "type": "string",
+        "tags": [],
+        "label": "MAJOR_VERSION",
+        "description": [],
+        "signature": [
+          "\"8.0.0\""
+        ],
+        "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "snapshotRestore",
         "id": "def-common.PLUGIN_REPOSITORY_TYPES",
         "type": "Array",
         "tags": [],
@@ -115,22 +129,6 @@
         "signature": [
           "RepositoryType",
           "[]"
-        ],
-        "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "snapshotRestore",
-        "id": "def-common.SNAPSHOT_LIST_MAX_SIZE",
-        "type": "number",
-        "tags": [],
-        "label": "SNAPSHOT_LIST_MAX_SIZE",
-        "description": [
-          "\n[Temporary workaround] In order to prevent client-side performance issues for users with a large number of snapshots,\nwe set a hard-coded limit on the number of snapshots we return from the ES snapshots API"
-        ],
-        "signature": [
-          "1000"
         ],
         "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
         "deprecated": false,

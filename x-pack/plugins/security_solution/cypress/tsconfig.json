@@ -12,6 +12,7 @@
     "outDir": "target/types",
     "types": [
       "cypress",
+      "cypress-file-upload",
       "cypress-pipe",
       "node",
       "resize-observer-polyfill",

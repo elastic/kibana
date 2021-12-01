@@ -20,7 +20,7 @@ import {
   mountWithProvider,
   mockStoreDeps,
 } from '../mocks';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import {
   SavedObjectSaveModal,
   checkForDuplicateTitle,
@@ -812,7 +812,7 @@ describe('Lens App', () => {
 
       await runInspect(instance);
 
-      expect(services.inspector.open).toHaveBeenCalledTimes(1);
+      expect(services.inspector.inspect).toHaveBeenCalledTimes(1);
     });
   });
 

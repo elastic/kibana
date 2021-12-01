@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { TransportRequestOptions } from '@elastic/elasticsearch/lib/Transport';
+import type { TransportRequestOptions } from '@elastic/elasticsearch';
 
 import { ElasticsearchClient } from '../../../elasticsearch/';
 import { retryCallCluster } from '../../../elasticsearch/client/retry_call_cluster';

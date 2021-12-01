@@ -5,43 +5,17 @@
  * 2.0.
  */
 
-import {
-  CoreStart,
-  DeprecationsServiceStart,
-  DocLinksStart,
-  HttpSetup,
-  NotificationsStart,
-} from 'src/core/public';
 import React, { createContext, useContext } from 'react';
-import { ApiService } from './lib/api';
-import { BreadcrumbService } from './lib/breadcrumbs';
+import { AppDependencies } from '../types';
 
-export interface KibanaVersionContext {
-  currentMajor: number;
-  prevMajor: number;
-  nextMajor: number;
-}
-
-export interface ContextValue {
-  http: HttpSetup;
-  docLinks: DocLinksStart;
-  kibanaVersionInfo: KibanaVersionContext;
-  notifications: NotificationsStart;
-  isReadOnlyMode: boolean;
-  api: ApiService;
-  breadcrumbs: BreadcrumbService;
-  getUrlForApp: CoreStart['application']['getUrlForApp'];
-  deprecations: DeprecationsServiceStart;
-}
-
-export const AppContext = createContext<ContextValue>({} as any);
+export const AppContext = createContext<AppDependencies | undefined>(undefined);
 
 export const AppContextProvider = ({
   children,
   value,
 }: {
   children: React.ReactNode;
-  value: ContextValue;
+  value: AppDependencies;
 }) => {
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
 };

@@ -85,6 +85,7 @@ describe('EMS is enabled', () => {
       source: undefined,
       sourceDescriptor: {
         isAutoSelect: true,
+        lightModeDefault: 'road_map_desaturated',
         type: 'EMS_TMS',
       },
       style: { type: 'TILE' },

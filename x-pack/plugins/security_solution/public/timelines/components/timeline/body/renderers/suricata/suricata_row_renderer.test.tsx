@@ -78,7 +78,7 @@ describe('suricata_row_renderer', () => {
   });
 
   test('should render a suricata row even if it does not have a suricata signature', () => {
-    delete suricata!.suricata!.eve!.alert!.signature;
+    delete suricata?.suricata?.eve?.alert?.signature;
     const children = suricataRowRenderer.renderRow({
       browserFields: mockBrowserFields,
       data: suricata,

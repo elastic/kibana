@@ -5,8 +5,16 @@
  * 2.0.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
+
+export function termQuery<T extends string>(field: T, value: string | undefined) {
+  if (!value) {
+    return [];
+  }
+
+  return [{ term: { [field]: value } as Record<T, string> }];
+}
 
 export function rangeQuery(
   start?: number,

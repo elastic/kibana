@@ -30,7 +30,8 @@ export function getUiSettings(
       }),
       deprecation: {
         message: i18n.translate('timelion.uiSettings.legacyChartsLibraryDeprication', {
-          defaultMessage: 'This setting is deprecated and will not be supported as of 8.0.',
+          defaultMessage:
+            'This setting is deprecated and will not be supported in a future version.',
         }),
         docLinksKey: 'timelionSettings',
       },

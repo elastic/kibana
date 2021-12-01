@@ -36,7 +36,8 @@ Use the <<action-settings, Action configuration settings>> to customize connecto
    name: preconfigured-servicenow-connector-type
    actionTypeId: .servicenow-sir
    config:
-     apiUrl: https://dev94428.service-now.com/
+     apiUrl: https://example.service-now.com/
+     usesTableApi: false
    secrets:
      username: testuser
      password: passwordkeystorevalue
@@ -45,6 +46,9 @@ Use the <<action-settings, Action configuration settings>> to customize connecto
 Config defines information for the connector type.
 
 `apiUrl`:: An address that corresponds to *URL*.
+`usesTableApi`:: A boolean that indicates if the connector uses the Table API or the Import Set API.
+
+Note: If `usesTableApi` is set to false the Elastic application should be installed in ServiceNow.
 
 Secrets defines sensitive information for the connector type.
 
@@ -72,13 +76,11 @@ image::management/connectors/images/servicenow-sir-params-test.png[ServiceNow Se
 ServiceNow SecOps actions have the following configuration properties.
 
 Short description::    A short description for the incident, used for searching the contents of the knowledge base.
-Source Ips::           A list of source IPs related to the incident. The IPs will be added as observables to the security incident.
-Destination Ips::      A list of destination IPs related to the incident. The IPs will be added as observables to the security incident.
-Malware URLs::         A list of malware URLs related to the incident. The URLs will be added as observables to the security incident.
-Malware Hashes::       A list of malware hashes related to the incident. The hashes  will be added as observables to the security incident.
 Priority::             The priority of the incident.
 Category::             The category of the incident.
 Subcategory::          The subcategory of the incident.
+Correlation ID::       All actions sharing this ID will be associated with the same ServiceNow security incident. If an incident exists in ServiceNow with the same correlation ID the security incident will be updated. Default value: `<rule ID>:<alert instance ID>`.
+Correlation Display::  A descriptive label of the alert for correlation purposes in ServiceNow.
 Description::          The details about the incident.
 Additional comments::  Additional information for the client, such as how to troubleshoot the issue.
 

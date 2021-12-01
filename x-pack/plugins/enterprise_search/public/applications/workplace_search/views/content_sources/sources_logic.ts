@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { kea, MakeLogicType } from 'kea';
+import { kea, MakeLogicType, isBreakpoint } from 'kea';
+import type { BreakPointFunction } from 'kea';
 import { cloneDeep, findIndex } from 'lodash';
 
 import { i18n } from '@kbn/i18n';
@@ -155,34 +156,39 @@ export const SourcesLogic = kea<MakeLogicType<ISourcesValues, ISourcesActions>>(
     ],
   }),
   listeners: ({ actions, values }) => ({
-    initializeSources: async () => {
+    initializeSources: async (_, breakpoint) => {
       const { isOrganization } = AppLogic.values;
       const route = isOrganization
         ? '/internal/workplace_search/org/sources'
         : '/internal/workplace_search/account/sources';
 
       try {
-        const response = await HttpLogic.values.http.get(route);
+        const response = await HttpLogic.values.http.get<ISourcesServerResponse>(route);
+        breakpoint(); // Prevents errors if logic unmounts while fetching
         actions.pollForSourceStatusChanges();
         actions.onInitializeSources(response);
       } catch (e) {
-        flashAPIErrors(e);
+        if (isBreakpoint(e)) {
+          return; // do not continue if logic is unmounted
+        } else {
+          flashAPIErrors(e);
+        }
       }
 
       if (isOrganization && !values.serverStatuses) {
         // We want to get the initial statuses from the server to compare our polling results to.
-        const sourceStatuses = await fetchSourceStatuses(isOrganization);
+        const sourceStatuses = await fetchSourceStatuses(isOrganization, breakpoint);
         actions.setServerSourceStatuses(sourceStatuses);
       }
     },
     // We poll the server and if the status update, we trigger a new fetch of the sources.
-    pollForSourceStatusChanges: () => {
+    pollForSourceStatusChanges: (_, breakpoint) => {
       const { isOrganization } = AppLogic.values;
       if (!isOrganization) return;
       const serverStatuses = values.serverStatuses;
 
       pollingInterval = window.setInterval(async () => {
-        const sourceStatuses = await fetchSourceStatuses(isOrganization);
+        const sourceStatuses = await fetchSourceStatuses(isOrganization, breakpoint);
 
         sourceStatuses.some((source: ContentSourceStatus) => {
           if (serverStatuses && serverStatuses[source.id] !== source.status.status) {
@@ -240,20 +246,29 @@ export const SourcesLogic = kea<MakeLogicType<ISourcesValues, ISourcesActions>>(
   }),
 });
 
-export const fetchSourceStatuses = async (isOrganization: boolean) => {
+export const fetchSourceStatuses = async (
+  isOrganization: boolean,
+  breakpoint: BreakPointFunction
+) => {
   const route = isOrganization
     ? '/internal/workplace_search/org/sources/status'
     : '/internal/workplace_search/account/sources/status';
   let response;
 
   try {
-    response = await HttpLogic.values.http.get(route);
+    response = await HttpLogic.values.http.get<ContentSourceStatus[]>(route);
+    breakpoint();
     SourcesLogic.actions.setServerSourceStatuses(response);
   } catch (e) {
-    flashAPIErrors(e);
+    if (isBreakpoint(e)) {
+      // Do nothing, silence the error
+    } else {
+      flashAPIErrors(e);
+    }
   }
 
-  return response;
+  // TODO: remove casting. return type should be ContentSourceStatus[] | undefined
+  return response as ContentSourceStatus[];
 };
 
 const updateSourcesOnToggle = (

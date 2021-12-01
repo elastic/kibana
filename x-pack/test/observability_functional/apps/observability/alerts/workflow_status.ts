@@ -8,12 +8,13 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
-const OPEN_ALERTS_ROWS_COUNT = 12;
+const OPEN_ALERTS_ROWS_COUNT = 33;
 
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
 
-  describe('alert workflow status', function () {
+  // Keep the Workflow status code commented (no delete) as requested: https://github.com/elastic/kibana/issues/117686
+  describe.skip('alert workflow status', function () {
     this.tags('includeFirefox');
 
     const observability = getService('observability');
@@ -21,11 +22,13 @@ export default ({ getService }: FtrProviderContext) => {
 
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/observability/alerts');
+      await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
       await observability.alerts.common.navigateToTimeWithData();
     });
 
     after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/observability/alerts');
+      await esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs');
     });
 
     it('is filtered to only show "open" alerts by default', async () => {
@@ -40,7 +43,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       await retry.try(async () => {
         const tableRows = await observability.alerts.common.getTableCellsInRows();
-        expect(tableRows.length).to.be(11);
+        expect(tableRows.length).to.be(32);
       });
     });
 
@@ -49,7 +52,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       await retry.try(async () => {
         const tableRows = await observability.alerts.common.getTableCellsInRows();
-        expect(tableRows.length).to.be(3);
+        expect(tableRows.length).to.be(6);
       });
     });
 
@@ -58,7 +61,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       await retry.try(async () => {
         const tableRows = await observability.alerts.common.getTableCellsInRows();
-        expect(tableRows.length).to.be(2);
+        expect(tableRows.length).to.be(5);
       });
     });
 
@@ -67,7 +70,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       await retry.try(async () => {
         const tableRows = await observability.alerts.common.getTableCellsInRows();
-        expect(tableRows.length).to.be(4);
+        expect(tableRows.length).to.be(3);
       });
     });
 
@@ -76,7 +79,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       await retry.try(async () => {
         const tableRows = await observability.alerts.common.getTableCellsInRows();
-        expect(tableRows.length).to.be(3);
+        expect(tableRows.length).to.be(2);
       });
     });
 
@@ -85,7 +88,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       await retry.try(async () => {
         const tableRows = await observability.alerts.common.getTableCellsInRows();
-        expect(tableRows.length).to.be(12);
+        expect(tableRows.length).to.be(3);
       });
     });
   });

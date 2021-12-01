@@ -4,8 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import apmAgent from 'elastic-apm-node';
 
-import { Plugin, CoreSetup } from 'kibana/server';
+import type { Plugin, CoreSetup } from 'kibana/server';
 import { PluginSetupContract as AlertingPluginSetup } from '../../../../../../plugins/alerting/server/plugin';
 import { EncryptedSavedObjectsPluginStart } from '../../../../../../plugins/encrypted_saved_objects/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../../../../../plugins/features/server';
@@ -81,6 +82,36 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
         await coreStart.elasticsearch.client.asInternalUser.ping();
       },
     });
+
+    const router = core.http.createRouter();
+    router.get(
+      {
+        path: '/emit_log_with_trace_id',
+        validate: false,
+        options: {
+          authRequired: false,
+        },
+      },
+      async (ctx, req, res) => {
+        // Kibana might set transactiopnSampleRate < 1.0 on CI, so we need to
+        // enforce transaction creation to prevent the test from failing.
+        const transaction = apmAgent.startTransaction();
+        const subscription = req.events.completed$.subscribe(() => {
+          setTimeout(() => {
+            transaction?.end();
+            subscription.unsubscribe();
+          }, 1_000);
+        });
+
+        await ctx.core.elasticsearch.client.asInternalUser.ping();
+
+        return res.ok({
+          body: {
+            traceId: apmAgent.currentTraceIds['trace.id'],
+          },
+        });
+      }
+    );
   }
 
   public start() {}

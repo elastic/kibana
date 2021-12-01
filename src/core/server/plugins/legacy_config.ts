@@ -13,7 +13,6 @@ import { pick, deepFreeze } from '@kbn/std';
 import { IConfigService } from '@kbn/config';
 
 import { SharedGlobalConfig, SharedGlobalConfigKeys } from './types';
-import { KibanaConfigType, config as kibanaConfig } from '../kibana_config';
 import {
   ElasticsearchConfigType,
   config as elasticsearchConfig,
@@ -21,18 +20,15 @@ import {
 import { SavedObjectsConfigType, savedObjectsConfig } from '../saved_objects/saved_objects_config';
 
 const createGlobalConfig = ({
-  kibana,
   elasticsearch,
   path,
   savedObjects,
 }: {
-  kibana: KibanaConfigType;
   elasticsearch: ElasticsearchConfigType;
   path: PathConfigType;
   savedObjects: SavedObjectsConfigType;
 }): SharedGlobalConfig => {
   return deepFreeze({
-    kibana: pick(kibana, SharedGlobalConfigKeys.kibana),
     elasticsearch: pick(elasticsearch, SharedGlobalConfigKeys.elasticsearch),
     path: pick(path, SharedGlobalConfigKeys.path),
     savedObjects: pick(savedObjects, SharedGlobalConfigKeys.savedObjects),
@@ -41,7 +37,6 @@ const createGlobalConfig = ({
 
 export const getGlobalConfig = (configService: IConfigService): SharedGlobalConfig => {
   return createGlobalConfig({
-    kibana: configService.atPathSync<KibanaConfigType>(kibanaConfig.path),
     elasticsearch: configService.atPathSync<ElasticsearchConfigType>(elasticsearchConfig.path),
     path: configService.atPathSync<PathConfigType>(pathConfig.path),
     savedObjects: configService.atPathSync<SavedObjectsConfigType>(savedObjectsConfig.path),
@@ -50,15 +45,13 @@ export const getGlobalConfig = (configService: IConfigService): SharedGlobalConf
 
 export const getGlobalConfig$ = (configService: IConfigService): Observable<SharedGlobalConfig> => {
   return combineLatest([
-    configService.atPath<KibanaConfigType>(kibanaConfig.path),
     configService.atPath<ElasticsearchConfigType>(elasticsearchConfig.path),
     configService.atPath<PathConfigType>(pathConfig.path),
     configService.atPath<SavedObjectsConfigType>(savedObjectsConfig.path),
   ]).pipe(
     map(
-      ([kibana, elasticsearch, path, savedObjects]) =>
+      ([elasticsearch, path, savedObjects]) =>
         createGlobalConfig({
-          kibana,
           elasticsearch,
           path,
           savedObjects,

@@ -7,7 +7,11 @@
 
 import expect from '@kbn/expect';
 import { sortBy } from 'lodash';
-import { TimelineEventsQueries } from '../../../../plugins/security_solution/common/search_strategy';
+import {
+  TimelineEventsQueries,
+  TimelineEventsDetailsStrategyResponse,
+  TimelineKpiStrategyResponse,
+} from '../../../../plugins/security_solution/common/search_strategy';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -668,54 +672,49 @@ const EXPECTED_KPI_COUNTS = {
 };
 
 export default function ({ getService }: FtrProviderContext) {
-  const retry = getService('retry');
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
+  const bsearch = getService('bsearch');
 
   describe('Timeline Details', () => {
-    before(() => esArchiver.load('x-pack/test/functional/es_archives/filebeat/default'));
-    after(() => esArchiver.unload('x-pack/test/functional/es_archives/filebeat/default'));
+    before(
+      async () => await esArchiver.load('x-pack/test/functional/es_archives/filebeat/default')
+    );
+    after(
+      async () => await esArchiver.unload('x-pack/test/functional/es_archives/filebeat/default')
+    );
 
     it('Make sure that we get Event Details data', async () => {
-      await retry.try(async () => {
-        const {
-          body: { data: detailsData },
-        } = await supertest
-          .post('/internal/search/timelineSearchStrategy/')
-          .set('kbn-xsrf', 'true')
-          .send({
-            factoryQueryType: TimelineEventsQueries.details,
-            docValueFields: [],
-            indexName: INDEX_NAME,
-            inspect: false,
-            eventId: ID,
-            wait_for_completion_timeout: '10s',
-          })
-          .expect(200);
-        expect(sortBy(detailsData, 'field')).to.eql(sortBy(EXPECTED_DATA, 'field'));
+      const { data: detailsData } = await bsearch.send<TimelineEventsDetailsStrategyResponse>({
+        supertest,
+        options: {
+          factoryQueryType: TimelineEventsQueries.details,
+          docValueFields: [],
+          indexName: INDEX_NAME,
+          inspect: false,
+          eventId: ID,
+        },
+        strategy: 'timelineSearchStrategy',
       });
+      expect(sortBy(detailsData, 'field')).to.eql(sortBy(EXPECTED_DATA, 'field'));
     });
 
     it('Make sure that we get kpi data', async () => {
-      await retry.try(async () => {
-        const {
-          body: { destinationIpCount, hostCount, processCount, sourceIpCount, userCount },
-        } = await supertest
-          .post('/internal/search/timelineSearchStrategy/')
-          .set('kbn-xsrf', 'true')
-          .send({
+      const { destinationIpCount, hostCount, processCount, sourceIpCount, userCount } =
+        await bsearch.send<TimelineKpiStrategyResponse>({
+          supertest,
+          options: {
             factoryQueryType: TimelineEventsQueries.kpi,
             docValueFields: [],
             indexName: INDEX_NAME,
             inspect: false,
             eventId: ID,
-            wait_for_completion_timeout: '10s',
-          })
-          .expect(200);
-        expect({ destinationIpCount, hostCount, processCount, sourceIpCount, userCount }).to.eql(
-          EXPECTED_KPI_COUNTS
-        );
-      });
+          },
+          strategy: 'timelineSearchStrategy',
+        });
+      expect({ destinationIpCount, hostCount, processCount, sourceIpCount, userCount }).to.eql(
+        EXPECTED_KPI_COUNTS
+      );
     });
   });
 }

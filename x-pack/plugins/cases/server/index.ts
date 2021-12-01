@@ -15,12 +15,11 @@ export const config: PluginConfigDescriptor<ConfigType> = {
   exposeToBrowser: {
     markdownPlugins: true,
   },
-  deprecations: ({ deprecate, renameFromRoot }) => [
-    deprecate('enabled', '8.0.0'),
-    renameFromRoot('xpack.case.enabled', 'xpack.cases.enabled'),
+  deprecations: ({ renameFromRoot }) => [
+    renameFromRoot('xpack.case.enabled', 'xpack.cases.enabled', { level: 'critical' }),
   ],
 };
 export const plugin = (initializerContext: PluginInitializerContext) =>
   new CasePlugin(initializerContext);
 
-export { PluginStartContract } from './plugin';
+export type { PluginStartContract } from './plugin';

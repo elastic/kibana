@@ -107,7 +107,7 @@ export const enrichSignalThreatMatches = async (
     return {
       ...signalHit,
       _source: {
-        ...signalHit._source!,
+        ...signalHit._source,
         threat: {
           ...threat,
           enrichments: [...existingEnrichments, ...enrichments[i]],

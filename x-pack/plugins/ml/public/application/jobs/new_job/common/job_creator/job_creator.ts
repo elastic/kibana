@@ -83,7 +83,7 @@ export class JobCreator {
     this._calendars = [];
     this._datafeed_config = createEmptyDatafeed(this._indexPatternTitle);
     this._detectors = this._job_config.analysis_config.detectors;
-    this._influencers = this._job_config.analysis_config.influencers;
+    this._influencers = this._job_config.analysis_config.influencers!;
 
     if (typeof indexPattern.timeFieldName === 'string') {
       this._job_config.data_description.time_field = indexPattern.timeFieldName;
@@ -502,6 +502,10 @@ export class JobCreator {
     return this._datafeed_config.indices;
   }
 
+  public set indices(indics: string[]) {
+    this._datafeed_config.indices = indics;
+  }
+
   public get scriptFields(): Field[] {
     return this._scriptFields;
   }
@@ -762,7 +766,7 @@ export class JobCreator {
     this._datafeed_config = datafeed;
 
     this._detectors = this._job_config.analysis_config.detectors;
-    this._influencers = this._job_config.analysis_config.influencers;
+    this._influencers = this._job_config.analysis_config.influencers!;
     if (this._job_config.groups === undefined) {
       this._job_config.groups = [];
     }

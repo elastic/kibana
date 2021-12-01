@@ -13,11 +13,11 @@ export const useStateObservable = <T extends {} = {}>(
   stateObservable: Observable<T>,
   initialState: T
 ) => {
+  const [innerState, setInnerState] = useState<T>(initialState);
   useEffect(() => {
     const subscription = stateObservable.subscribe((newState) => setInnerState(newState));
     return () => subscription.unsubscribe();
   }, [stateObservable]);
-  const [innerState, setInnerState] = useState<T>(initialState);
 
   return innerState;
 };

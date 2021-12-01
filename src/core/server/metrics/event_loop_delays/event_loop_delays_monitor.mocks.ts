@@ -9,15 +9,17 @@ import moment from 'moment';
 import type { EventLoopDelaysMonitor } from './event_loop_delays_monitor';
 import type { IntervalHistogram } from '../types';
 
-function createMockHistogram(overwrites: Partial<IntervalHistogram> = {}): IntervalHistogram {
+function createMockRawNsDataHistogram(
+  overwrites: Partial<IntervalHistogram> = {}
+): IntervalHistogram {
   const now = Date.now();
 
-  return {
+  const mockedRawCollectedDataInNs = {
     min: 9093120,
     max: 53247999,
-    mean: 11993238.600747818,
+    mean: 11993238,
     exceeds: 0,
-    stddev: 1168191.9357543814,
+    stddev: 1168191,
     fromTimestamp: moment(now).toISOString(),
     lastUpdatedAt: moment(now).toISOString(),
     percentiles: {
@@ -28,6 +30,31 @@ function createMockHistogram(overwrites: Partial<IntervalHistogram> = {}): Inter
     },
     ...overwrites,
   };
+  return mockedRawCollectedDataInNs;
+}
+
+function createMockMonitorDataMsHistogram(
+  overwrites: Partial<IntervalHistogram> = {}
+): IntervalHistogram {
+  const now = Date.now();
+
+  const mockedRawCollectedDataInMs = {
+    min: 9.09312,
+    max: 53.247999,
+    mean: 11.993238,
+    exceeds: 0,
+    stddev: 1.168191,
+    fromTimestamp: moment(now).toISOString(),
+    lastUpdatedAt: moment(now).toISOString(),
+    percentiles: {
+      '50': 12.607487,
+      '75': 12.615679,
+      '95': 12.648447,
+      '99': 12.713983,
+    },
+    ...overwrites,
+  };
+  return mockedRawCollectedDataInMs;
 }
 
 function createMockEventLoopDelaysMonitor() {
@@ -40,12 +67,12 @@ function createMockEventLoopDelaysMonitor() {
       stop: jest.fn(),
     });
 
-  mockCollect.mockReturnValue(createMockHistogram());
+  mockCollect.mockReturnValue(createMockMonitorDataMsHistogram()); // this must mock the return value of the public collect method from this monitor.
 
   return new MockEventLoopDelaysMonitor();
 }
 
 export const mocked = {
-  createHistogram: createMockHistogram,
+  createHistogram: createMockRawNsDataHistogram, // raw data as received from Node.js perf_hooks.monitorEventLoopDelay([options])
   createEventLoopDelaysMonitor: createMockEventLoopDelaysMonitor,
 };

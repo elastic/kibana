@@ -98,19 +98,19 @@ describe('useCreateAnalyticsForm', () => {
     expect(resetMessageState.requestMessages).toHaveLength(0);
   });
 
-  test('validateAdvancedEditor(): check index pattern variations', () => {
-    // valid single index pattern
+  test('validateAdvancedEditor(): check data view variations', () => {
+    // valid single index
     expect(validateAdvancedEditor(getMockState({ index: 'the-source-index' })).isValid).toBe(true);
-    // valid array with one ES index pattern
+    // valid array with one ES index
     expect(validateAdvancedEditor(getMockState({ index: ['the-source-index'] })).isValid).toBe(
       true
     );
-    // valid array with two ES index patterns
+    // valid array with two ES indices
     expect(
       validateAdvancedEditor(getMockState({ index: ['the-source-index-1', 'the-source-index-2'] }))
         .isValid
     ).toBe(true);
-    // invalid comma-separated index pattern, this is only allowed in the simple form
+    // invalid comma-separated indices, this is only allowed in the simple form
     // but not the advanced editor.
     expect(
       validateAdvancedEditor(getMockState({ index: 'the-source-index-1,the-source-index-2' }))

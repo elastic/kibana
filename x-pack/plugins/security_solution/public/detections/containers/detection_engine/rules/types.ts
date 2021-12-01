@@ -57,6 +57,11 @@ export interface CreateRulesProps {
   signal: AbortSignal;
 }
 
+export interface PreviewRulesProps {
+  rule: CreateRulesSchema & { invocationCount: number };
+  signal: AbortSignal;
+}
+
 export interface UpdateRulesProps {
   rule: UpdateRulesSchema;
   signal: AbortSignal;
@@ -140,6 +145,7 @@ export const RuleSchema = t.intersection([
     timestamp_override,
     note: t.string,
     exceptions_list: listArray,
+    uuid: t.string,
     version: t.number,
   }),
 ]);

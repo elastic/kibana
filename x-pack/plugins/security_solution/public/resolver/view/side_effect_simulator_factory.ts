@@ -41,6 +41,7 @@ export const sideEffectSimulatorFactory: () => SideEffectSimulator = () => {
    */
   const getBoundingClientRect: (target: Element) => DOMRect = (target) => {
     if (contentRects.has(target)) {
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       return contentRects.get(target)!;
     }
     const domRect: DOMRect = {

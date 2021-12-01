@@ -1,8 +1,4 @@
 
-`xpack.infra.enabled`::
-deprecated:[7.16.0,"In 8.0 and later, this setting will no longer be supported."]
-Set to `false` to disable the Logs and Metrics app plugin {kib}. Defaults to `true`.
-
 `xpack.infra.sources.default.logAlias`::
 Index pattern for matching indices that contain log data. Defaults to `filebeat-*,kibana_sample_data_logs*`. To match multiple wildcard patterns, use a comma to separate the names, with no space after the comma. For example, `logstash-app1-*,default-logs-*`.
 

@@ -178,12 +178,19 @@
                   {
                     "parentPluginId": "@kbn/test",
                     "id": "def-server.DockerServersService.Unnamed.$1.Unnamed",
-                    "type": "Any",
+                    "type": "IndexSignature",
                     "tags": [],
-                    "label": "Unnamed",
+                    "label": "[name: string]: DockerServerSpec",
                     "description": [],
                     "signature": [
-                      "any"
+                      "[name: string]:  ",
+                      {
+                        "pluginId": "@kbn/test",
+                        "scope": "server",
+                        "docId": "kibKbnTestPluginApi",
+                        "section": "def-server.DockerServerSpec",
+                        "text": "DockerServerSpec"
+                      }
                     ],
                     "path": "packages/kbn-test/src/functional_test_runner/lib/docker_servers/docker_servers_service.ts",
                     "deprecated": false
@@ -1175,6 +1182,40 @@
       }
     ],
     "functions": [
+      {
+        "parentPluginId": "@kbn/test",
+        "id": "def-server.convertToKibanaClient",
+        "type": "Function",
+        "tags": [],
+        "label": "convertToKibanaClient",
+        "description": [],
+        "signature": [
+          "(esClient: ",
+          "default",
+          ") => ",
+          "KibanaClient"
+        ],
+        "path": "packages/kbn-test/src/es/client_to_kibana_client.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-server.convertToKibanaClient.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "esClient",
+            "description": [],
+            "signature": [
+              "default"
+            ],
+            "path": "packages/kbn-test/src/es/client_to_kibana_client.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "@kbn/test",
         "id": "def-server.createTestEsCluster",
@@ -2869,6 +2910,22 @@
             "type": "Function",
             "tags": [],
             "label": "getClient",
+            "description": [],
+            "signature": [
+              "() => ",
+              "default"
+            ],
+            "path": "packages/kbn-test/src/es/test_es_cluster.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-server.ICluster.getKibanaEsClient",
+            "type": "Function",
+            "tags": [],
+            "label": "getKibanaEsClient",
             "description": [],
             "signature": [
               "() => ",

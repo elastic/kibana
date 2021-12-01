@@ -164,6 +164,7 @@ describe('UPDATE remote clusters', () => {
 
     test('updates v1 proxy cluster', async () => {
       remoteInfoMockFn.mockResolvedValueOnce(
+        // @ts-expect-error not full interface
         createApiResponse({
           body: {
             test: {

@@ -40,8 +40,12 @@ export const INTEGRATION_CATEGORY_DISPLAY = {
   web: 'Web',
 
   // Kibana added
-  upload_file: 'Upload a file',
+  communications: 'Communications',
+  file_storage: 'File storage',
   language_client: 'Language client',
+  upload_file: 'Upload a file',
+  website_search: 'Website search',
+  geo: 'Geo',
 };
 
 /**
@@ -70,6 +74,7 @@ export interface IntegrationCategoryCount {
 // TODO: consider i18n
 export const SHIPPER_DISPLAY = {
   beats: 'Beats',
+  enterprise_search: 'Enterprise Search',
   language_clients: 'Language clients',
   other: 'Other',
   sample_data: 'Sample data',

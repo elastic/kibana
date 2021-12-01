@@ -232,6 +232,56 @@ describe('The metric threshold alert type', () => {
       );
       expect(stateResult3.groups).toEqual(expect.arrayContaining(['a', 'b']));
     });
+
+    const executeWithFilter = (
+      comparator: Comparator,
+      threshold: number[],
+      filterQuery: string,
+      metric?: string,
+      state?: any
+    ) =>
+      executor({
+        ...mockOptions,
+        services,
+        params: {
+          groupBy: ['something'],
+          criteria: [
+            {
+              ...baseNonCountCriterion,
+              comparator,
+              threshold,
+              metric: metric ?? baseNonCountCriterion.metric,
+            },
+          ],
+          filterQuery,
+        },
+        state: state ?? mockOptions.state.wrapped,
+      });
+    test('persists previous groups that go missing, until the filterQuery param changes', async () => {
+      const stateResult1 = await executeWithFilter(
+        Comparator.GT,
+        [0.75],
+        JSON.stringify({ query: 'q' }),
+        'test.metric.2'
+      );
+      expect(stateResult1.groups).toEqual(expect.arrayContaining(['a', 'b', 'c']));
+      const stateResult2 = await executeWithFilter(
+        Comparator.GT,
+        [0.75],
+        JSON.stringify({ query: 'q' }),
+        'test.metric.1',
+        stateResult1
+      );
+      expect(stateResult2.groups).toEqual(expect.arrayContaining(['a', 'b', 'c']));
+      const stateResult3 = await executeWithFilter(
+        Comparator.GT,
+        [0.75],
+        JSON.stringify({ query: 'different' }),
+        'test.metric.1',
+        stateResult2
+      );
+      expect(stateResult3.groups).toEqual(expect.arrayContaining(['a', 'b']));
+    });
   });
 
   describe('querying with multiple criteria', () => {
@@ -666,10 +716,34 @@ describe('The metric threshold alert type', () => {
       expect(action.value.condition0).toBe('100%');
     });
   });
+
+  describe('attempting to use a malformed filterQuery', () => {
+    afterAll(() => clearInstances());
+    const instanceID = '*';
+    const execute = () =>
+      executor({
+        ...mockOptions,
+        services,
+        params: {
+          criteria: [
+            {
+              ...baseNonCountCriterion,
+            },
+          ],
+          sourceId: 'default',
+          filterQuery: '',
+          filterQueryText:
+            'host.name:(look.there.is.no.space.after.these.parentheses)and uh.oh: "wow that is bad"',
+        },
+      });
+    test('reports an error', async () => {
+      await execute();
+      expect(mostRecentAction(instanceID)).toBeErrorAction();
+    });
+  });
 });
 
 const createMockStaticConfiguration = (sources: any) => ({
-  enabled: true,
   inventory: {
     compositeSize: 2000,
   },
@@ -804,6 +878,14 @@ expect.extend({
       pass,
     };
   },
+  toBeErrorAction(action?: Action) {
+    const pass = action?.id === FIRED_ACTIONS.id && action?.action.alertState === 'ERROR';
+    const message = () => `expected ${action} to be an ERROR action`;
+    return {
+      message,
+      pass,
+    };
+  },
 });
 
 declare global {
@@ -812,6 +894,7 @@ declare global {
     interface Matchers<R> {
       toBeAlertAction(action?: Action): R;
       toBeNoDataAction(action?: Action): R;
+      toBeErrorAction(action?: Action): R;
     }
   }
 }

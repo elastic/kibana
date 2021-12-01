@@ -31,7 +31,7 @@ export default function ({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'xxx')
         .expect(204);
 
-      const { body } = await es.security.getUser({ username: mockUserName });
+      const body = await es.security.getUser({ username: mockUserName });
       expect(body[mockUserName].enabled).to.be(false);
     });
 
@@ -41,7 +41,7 @@ export default function ({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'xxx')
         .expect(204);
 
-      const { body } = await es.security.getUser({ username: mockUserName });
+      const body = await es.security.getUser({ username: mockUserName });
       expect(body[mockUserName].enabled).to.be(true);
     });
   });

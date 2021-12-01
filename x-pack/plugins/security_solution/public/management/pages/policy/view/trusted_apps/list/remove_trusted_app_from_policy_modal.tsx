@@ -8,7 +8,7 @@
 import React, { memo, useCallback, useEffect, useMemo } from 'react';
 import { EuiCallOut, EuiConfirmModal, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useDispatch } from 'react-redux';
 import { Dispatch } from 'redux';
 import { Immutable, TrustedApp } from '../../../../../../../common/endpoint/types';
@@ -48,7 +48,8 @@ export const RemoveTrustedAppFromPolicyModal = memo<RemoveTrustedAppFromPolicyMo
         return i18n.translate(
           'xpack.securitySolution.endpoint.policy.trustedApps.list.removeDialog.successMultiplesToastText',
           {
-            defaultMessage: '{count} trusted apps have been removed from {policyName} policy',
+            defaultMessage:
+              '{count} trusted applications have been removed from {policyName} policy',
             values: { count, policyName },
           }
         );
@@ -57,7 +58,7 @@ export const RemoveTrustedAppFromPolicyModal = memo<RemoveTrustedAppFromPolicyMo
       return i18n.translate(
         'xpack.securitySolution.endpoint.policy.trustedApps.list.removeDialog.successToastText',
         {
-          defaultMessage: '"{trustedAppName}" has been removed from "{policyName}" policy',
+          defaultMessage: '"{trustedAppName}" has been removed from {policyName} policy',
           values: { trustedAppName: trustedApps[0].name, policyName },
         }
       );

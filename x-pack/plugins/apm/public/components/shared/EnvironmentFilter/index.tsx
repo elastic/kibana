@@ -137,6 +137,7 @@ export function EnvironmentFilter({
       }}
       isLoading={status === 'loading'}
       style={{ minWidth }}
+      data-test-subj="environmentFilter"
     />
   );
 }

@@ -66,6 +66,8 @@ import {
   numericalRangeFunction,
   queryFilterFunction,
   rangeFilterFunction,
+  removeFilterFunction,
+  selectFilterFunction,
   rangeFunction,
   SearchSourceDependencies,
   searchSourceRequiredUiSettings,
@@ -182,7 +184,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
 
     core.savedObjects.registerType(searchTelemetry);
     if (usageCollection) {
-      registerUsageCollector(usageCollection, this.initializerContext);
+      registerUsageCollector(usageCollection, core.savedObjects.getKibanaIndex());
     }
 
     expressions.registerFunction(getEsaggs({ getStartServices: core.getStartServices }));
@@ -205,6 +207,8 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     expressions.registerFunction(existsFilterFunction);
     expressions.registerFunction(queryFilterFunction);
     expressions.registerFunction(rangeFilterFunction);
+    expressions.registerFunction(removeFilterFunction);
+    expressions.registerFunction(selectFilterFunction);
     expressions.registerFunction(phraseFilterFunction);
     expressions.registerType(kibanaContext);
     expressions.registerType(esRawResponse);

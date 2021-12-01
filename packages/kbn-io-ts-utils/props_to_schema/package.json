@@ -1,0 +1,4 @@
+{
+  "main": "../target_node/props_to_schema",
+  "types": "../target_types/props_to_schema"
+}

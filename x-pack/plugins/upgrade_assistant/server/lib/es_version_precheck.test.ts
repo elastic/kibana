@@ -9,7 +9,7 @@ import { SemVer } from 'semver';
 import { IScopedClusterClient, kibanaResponseFactory } from 'src/core/server';
 import { coreMock } from 'src/core/server/mocks';
 import { licensingMock } from '../../../../plugins/licensing/server/mocks';
-import { mockKibanaVersion } from '../../common/constants';
+import { MAJOR_VERSION } from '../../common/constants';
 import { getMockVersionInfo } from './__fixtures__/version';
 
 import {
@@ -98,7 +98,7 @@ describe('verifyAllMatchKibanaVersion', () => {
 
 describe('EsVersionPrecheck', () => {
   beforeEach(() => {
-    versionService.setup(mockKibanaVersion);
+    versionService.setup(MAJOR_VERSION);
   });
 
   it('returns a 403 when callCluster fails with a 403', async () => {

@@ -19,6 +19,8 @@ export const PLUGIN = {
   minimumLicenseType: platinumLicense,
 };
 
+export const MAJOR_VERSION = '8.0.0';
+
 export const APPS = {
   CCR_APP: 'ccr',
   REMOTE_CLUSTER_APP: 'remote_cluster',

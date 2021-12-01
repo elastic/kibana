@@ -9,22 +9,24 @@ import * as t from 'io-ts';
 
 import {
   id,
-  description,
+  descriptionOrUndefined,
   Description,
-  platform,
+  platformOrUndefined,
   query,
-  version,
+  versionOrUndefined,
   interval,
+  ecsMappingOrUndefined,
 } from '../../common/schemas';
 import { RequiredKeepUndefined } from '../../../types';
 
 export const createSavedQueryRequestSchema = t.type({
   id,
-  description,
-  platform,
+  description: descriptionOrUndefined,
+  platform: platformOrUndefined,
   query,
-  version,
+  version: versionOrUndefined,
   interval,
+  ecs_mapping: ecsMappingOrUndefined,
 });
 
 export type CreateSavedQueryRequestSchema = t.OutputOf<typeof createSavedQueryRequestSchema>;

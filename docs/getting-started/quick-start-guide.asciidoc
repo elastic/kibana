@@ -11,7 +11,7 @@ When you've finished, you'll know how to:
 
 [float]
 === Required privileges
-When security is enabled, you must have `read`, `write`, and `manage` privileges on the `kibana_sample_data_*` indices. 
+You must have `read`, `write`, and `manage` privileges on the `kibana_sample_data_*` indices.
 Learn how to <<tutorial-secure-access-to-kibana, secure access to {kib}>>, or refer to {ref}/security-privileges.html[Security privileges] for more information.
 
 [float]
@@ -37,7 +37,7 @@ image::images/addData_sampleDataCards_7.15.0.png[Add data UI for the sample data
 [[explore-the-data]]
 == Explore the data
 
-*Discover* displays the data in an interactive histogram that shows the distribution of data, or documents, over time, and a table that lists the fields for each document that matches the index pattern. To view a subset of the documents, you can apply filters to the data, and customize the table to display only the fields you want to explore.
+*Discover* displays the data in an interactive histogram that shows the distribution of data, or documents, over time, and a table that lists the fields for each document that matches the {data-source}. To view a subset of the documents, you can apply filters to the data, and customize the table to display only the fields you want to explore.
 
 . Open the main menu, then click *Discover*.
 
@@ -65,7 +65,7 @@ image::images/tutorial-discover-3.png[Discover table that displays only the prod
 
 A dashboard is a collection of panels that you can use to view and analyze the data. Panels contain visualizations, interactive controls, text, and more.
 
-. Open the main menu, then click *Dashboard*. 
+. Open the main menu, then click *Dashboard*.
 
 . Click *[eCommerce] Revenue Dashboard*.
 +
@@ -104,7 +104,7 @@ The treemap appears as the last visualization panel on the dashboard.
 [[interact-with-the-data]]
 === Interact with the data
 
-You can interact with the dashboard data using controls that allow you to apply dashboard-level filters. Interact with the *[eCommerce] Controls* panel to view the women's clothing data from the Gnomehouse manufacturer. 
+You can interact with the dashboard data using controls that allow you to apply dashboard-level filters. Interact with the *[eCommerce] Controls* panel to view the women's clothing data from the Gnomehouse manufacturer.
 
 . From the *Manufacturer* dropdown, select *Gnomehouse*.
 
@@ -138,7 +138,7 @@ image::images/dashboard_sampleDataAddFilter_7.15.0.png[The [eCommerce] Revenue D
 [[quick-start-whats-next]]
 == What's next?
 
-*Add your own data.* Ready to add your own data? Go to {fleet-guide}/fleet-quick-start.html[Quick start: Get logs and metrics into the Elastic Stack] to learn how to ingest your data, or go to <<connect-to-elasticsearch,Add data to {kib}>> and learn about all the other ways you can add data.
+*Add your own data.* Ready to add your own data? Go to {observability-guide}/ingest-logs-metrics-uptime.html[Ingest logs, metrics, and uptime data with {agent}], or go to <<connect-to-elasticsearch,Add data to {kib}>> and learn about all the other ways you can add data.
 
 *Explore your own data in Discover.* Ready to learn more about exploring your data in *Discover*? Go to <<discover, Discover>>.
 

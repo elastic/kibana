@@ -42,13 +42,13 @@ import {
 import { defaultConditionEntry } from '../../store/builders';
 import { OS_TITLES } from '../translations';
 import { LogicalConditionBuilder, LogicalConditionBuilderProps } from './logical_condition';
+import { useTestIdGenerator } from '../../../../components/hooks/use_test_id_generator';
+import { useLicense } from '../../../../../common/hooks/use_license';
 import {
   EffectedPolicySelect,
   EffectedPolicySelection,
   EffectedPolicySelectProps,
-} from './effected_policy_select';
-import { useTestIdGenerator } from '../../../../components/hooks/use_test_id_generator';
-import { useLicense } from '../../../../../common/hooks/use_license';
+} from '../../../../components/effected_policy_select';
 
 const OPERATING_SYSTEMS: readonly OperatingSystem[] = [
   OperatingSystem.MAC,
@@ -86,7 +86,9 @@ const addResultToValidation = (
     };
   }
   const errorMarkup: React.ReactNode = type === 'warnings' ? <div>{resultValue}</div> : resultValue;
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   validation.result[field]![type].push(errorMarkup);
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   validation.result[field]!.isInvalid = true;
 };
 
@@ -476,7 +478,7 @@ export const CreateTrustedAppForm = memo<CreateTrustedAppFormProps>(
             onChange={handleDomChangeEvents}
             onBlur={handleDomBlurEvents}
             fullWidth
-            required
+            required={wasVisited?.name}
             maxLength={256}
             data-test-subj={getTestId('nameTextField')}
           />
@@ -562,6 +564,13 @@ export const CreateTrustedAppForm = memo<CreateTrustedAppFormProps>(
                 options={policies.options}
                 onChange={handlePolicySelectChange}
                 isLoading={policies?.isLoading}
+                description={i18n.translate(
+                  'xpack.securitySolution.trustedApps.assignmentSectionDescription',
+                  {
+                    defaultMessage:
+                      'Assign this trusted application globally across all policies, or assign it to specific policies.',
+                  }
+                )}
                 data-test-subj={getTestId('effectedPolicies')}
               />
             </EuiFormRow>

@@ -32,7 +32,7 @@ export const activatesRule = () => {
   cy.get(RULE_SWITCH).should('be.visible');
   cy.get(RULE_SWITCH).click();
   cy.wait('@bulk_update').then(({ response }) => {
-    cy.wrap(response!.statusCode).should('eql', 200);
+    cy.wrap(response?.statusCode).should('eql', 200);
   });
 };
 
