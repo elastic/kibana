@@ -29,8 +29,6 @@ interface StartDeps {
   application: InternalApplicationStart;
 }
 
-export const APP_CHANGE_TRANSACTION_TYPE = 'app-change';
-
 export class ApmSystem {
   private readonly enabled: boolean;
   private pageLoadTransaction?: Transaction;
@@ -73,7 +71,7 @@ export class ApmSystem {
     start.application.currentAppId$.subscribe((appId) => {
       if (appId && this.apm) {
         this.closePageLoadTransaction();
-        this.apm.startTransaction(appId, APP_CHANGE_TRANSACTION_TYPE, {
+        this.apm.startTransaction(appId, 'app-change', {
           managed: true,
           canReuse: true,
         });
