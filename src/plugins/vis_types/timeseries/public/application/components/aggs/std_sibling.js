@@ -26,7 +26,7 @@ import {
   EuiFormRow,
   EuiSpacer,
 } from '@elastic/eui';
-import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { injectI18n, FormattedMessage } from '@kbn/i18n-react';
 import { getIndexPatternKey } from '../../../../common/index_patterns_utils';
 
 const StandardSiblingAggUi = (props) => {

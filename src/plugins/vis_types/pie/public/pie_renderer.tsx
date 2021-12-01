@@ -8,7 +8,7 @@
 
 import React, { lazy } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import { ExpressionRenderDefinition } from '../../../expressions/public';
 import { VisualizationContainer } from '../../../visualizations/public';
 import type { PersistedState } from '../../../visualizations/public';

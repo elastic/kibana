@@ -105,7 +105,7 @@ export class JsonUploadAndParse extends Component<FileUploadComponentProps, Stat
     } as unknown as Settings;
     const mappings = {
       properties: {
-        coordinates: {
+        geometry: {
           type: this.state.geoFieldType,
         },
       },

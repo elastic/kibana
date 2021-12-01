@@ -8,7 +8,7 @@
 import React from 'react';
 import { render } from 'react-dom';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
+import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
 import { Ast } from '@kbn/interpreter/common';
 import { Position } from '@elastic/charts';
 import { ThemeServiceStart } from 'kibana/public';
@@ -315,8 +315,6 @@ export const getHeatmapVisualization = ({
           type: 'function',
           function: FUNCTION_NAME,
           arguments: {
-            title: [attributes?.title ?? ''],
-            description: [attributes?.description ?? ''],
             xAccessor: [state.xAccessor ?? ''],
             yAccessor: [state.yAccessor ?? ''],
             valueAccessor: [state.valueAccessor ?? ''],
@@ -403,8 +401,6 @@ export const getHeatmapVisualization = ({
           type: 'function',
           function: FUNCTION_NAME,
           arguments: {
-            title: [''],
-            description: [''],
             xAccessor: [state.xAccessor ?? ''],
             yAccessor: [state.yAccessor ?? ''],
             valueAccessor: [state.valueAccessor ?? ''],

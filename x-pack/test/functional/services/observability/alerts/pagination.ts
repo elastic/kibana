@@ -83,6 +83,11 @@ export function ObservabilityAlertsPaginationProvider({ getService }: FtrProvide
     await (await getPaginationButtonOne()).click();
   };
 
+  const goToNthPage = async (page: number) => {
+    const pageButton = await testSubjects.find(`pagination-button-${page - 1}`);
+    await pageButton.click();
+  };
+
   const getPrevButtonDisabledValue = async () => {
     return await (await getPrevPageButton()).getAttribute('disabled');
   };
@@ -105,5 +110,6 @@ export function ObservabilityAlertsPaginationProvider({ getService }: FtrProvide
     goToPrevPage,
     goToFirstPage,
     getPrevButtonDisabledValue,
+    goToNthPage,
   };
 }

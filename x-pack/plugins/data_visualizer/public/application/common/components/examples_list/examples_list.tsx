@@ -9,7 +9,7 @@ import React, { FC } from 'react';
 
 import { EuiListGroup, EuiListGroupItem } from '@elastic/eui';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { ExpandedRowFieldHeader } from '../stats_table/components/expanded_row_field_header';
 import { ExpandedRowPanel } from '../stats_table/components/field_data_expanded_row/expanded_row_panel';
 interface Props {
