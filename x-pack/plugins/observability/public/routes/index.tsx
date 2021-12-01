@@ -8,8 +8,8 @@
 import * as t from 'io-ts';
 import React from 'react';
 import { casesPath } from '../../common';
-import { AlertsPage } from '../pages/alerts';
 import { CasesPage } from '../pages/cases';
+import { AlertsPage } from '../pages/alerts/containers/alerts_page';
 import { HomePage } from '../pages/home';
 import { LandingPage } from '../pages/landing';
 import { OverviewPage } from '../pages/overview';
