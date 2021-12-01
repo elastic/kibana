@@ -9,19 +9,25 @@ import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 
-function isUndefinedOrNull(value: any) {
+function isUndefinedOrNull(value: any): value is undefined | null {
   return value === undefined || value === null;
 }
 
-export function termQuery<T extends string>(field: T, value: string | boolean | undefined | null) {
+export function termQuery<T extends string>(
+  field: T,
+  value: string | boolean | number | undefined | null
+): QueryDslQueryContainer[] {
   if (isUndefinedOrNull(value)) {
     return [];
   }
 
-  return [{ term: { [field]: value } }] as QueryDslQueryContainer[];
+  return [{ term: { [field]: value } }];
 }
 
-export function termsQuery(field: string, ...values: Array<string | boolean | undefined | null>) {
+export function termsQuery(
+  field: string,
+  ...values: Array<string | boolean | undefined | number | null>
+): QueryDslQueryContainer[] {
   const filtered = reject(values, isUndefinedOrNull);
 
   if (!filtered.length) {
