@@ -77,8 +77,6 @@ async function createAnomalyDetectionJob({
   return withApmSpan('create_anomaly_detection_job', async () => {
     const randomToken = uuid().substr(-4);
 
-    console.log('create anomaly detection job', environment);
-
     return ml.modules.setup({
       moduleId: ML_MODULE_ID_APM_TRANSACTION,
       prefix: `${APM_ML_JOB_GROUP}-${snakeCase(environment)}-${randomToken}-`,

@@ -91,7 +91,7 @@ export function JobsListStatus({
   }
 
   return (
-    <EuiFlexGroup gutterSize="s">
+    <EuiFlexGroup gutterSize="s" alignItems="center">
       {statuses.map((status, idx) => (
         <EuiFlexItem grow={false} key={idx}>
           {status}

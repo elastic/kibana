@@ -9,10 +9,11 @@ import expect from '@kbn/expect';
 import { countBy } from 'lodash';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
-export default function apiTest({ getService }: FtrProviderContext) {
+export default async function apiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
   const apmApiClient = getService('apmApiClient');
-  const ml = getService('ml').api;
+  const ml = getService('ml');
+
   const es = getService('es');
 
   function getJobs() {
@@ -86,7 +87,7 @@ export default function apiTest({ getService }: FtrProviderContext) {
         ).to.eql(['development', 'production']);
       });
 
-      after(() => ml.cleanMlIndices());
+      after(() => ml.api.cleanMlIndices());
     });
 
     describe('when there are both v2 and v3 jobs', () => {
@@ -98,7 +99,7 @@ export default function apiTest({ getService }: FtrProviderContext) {
         await createV3Jobs(['production']);
       });
 
-      after(() => ml.cleanMlIndices());
+      after(() => ml.api.cleanMlIndices());
 
       it('only creates new jobs for environments that did not have a v3 job', async () => {
         await callUpdateEndpoint();
