@@ -35,7 +35,12 @@ export const CrawlDetailsFlyout: React.FC = () => {
   }
 
   return (
-    <EuiFlyout ownFocus onClose={closeFlyout} aria-labelledby="CrawlDetailsFlyoutTitle">
+    <EuiFlyout
+      maxWidth="45rem"
+      ownFocus
+      onClose={closeFlyout}
+      aria-labelledby="CrawlDetailsFlyoutTitle"
+    >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
           <h2 id="CrawlDetailsFlyoutTitle">
@@ -70,7 +75,7 @@ export const CrawlDetailsFlyout: React.FC = () => {
           <>
             {selectedTab === 'preview' && <CrawlDetailsPreview />}
             {selectedTab === 'json' && (
-              <EuiCodeBlock language="json">
+              <EuiCodeBlock language="json" isCopyable>
                 {JSON.stringify(crawlRequestFromServer, null, 2)}
               </EuiCodeBlock>
             )}

@@ -21,7 +21,8 @@ type Tab = NonNullable<EuiPageHeaderProps['tabs']>[0] & {
     | 'anomaly-detection'
     | 'apm-indices'
     | 'customize-ui'
-    | 'schema';
+    | 'schema'
+    | 'agent-keys';
   hidden?: boolean;
 };
 
@@ -37,12 +38,12 @@ export function SettingsTemplate({ children, selectedTab }: Props) {
 
   return (
     <ApmMainTemplate
+      environmentFilter={false}
       pageHeader={{
         tabs,
         pageTitle: i18n.translate('xpack.apm.settings.title', {
           defaultMessage: 'Settings',
         }),
-        rightSideItems: [], // hide EnvironmentFilter
       }}
     >
       {children}
@@ -115,6 +116,17 @@ function getTabs({
         defaultMessage: 'Schema',
       }),
       href: getLegacyApmHref({ basePath, path: `/settings/schema`, search }),
+    },
+    {
+      key: 'agent-keys',
+      label: i18n.translate('xpack.apm.settings.agentKeys', {
+        defaultMessage: 'Agent Keys',
+      }),
+      href: getLegacyApmHref({
+        basePath,
+        path: `/settings/agent-keys`,
+        search,
+      }),
     },
   ];
 
