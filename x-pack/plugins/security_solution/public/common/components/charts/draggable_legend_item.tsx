@@ -7,8 +7,10 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiHealth, EuiText } from '@elastic/eui';
 import React from 'react';
+import { isEmpty } from 'lodash/fp';
 
 import { DefaultDraggable } from '../draggables';
+import { EMPTY_VALUE_LABEL } from './translation';
 
 export interface LegendItem {
   color?: string;
@@ -17,6 +19,15 @@ export interface LegendItem {
   timelineId?: string;
   value: string;
 }
+
+/**
+ * Renders the value or a placeholder in case the value is empty
+ */
+const ValueWrapper = React.memo<{ value?: string | null }>(({ value }) =>
+  isEmpty(value) ? <em data-test-subj="value-wrapper-empty">{EMPTY_VALUE_LABEL}</em> : <>{value}</>
+);
+
+ValueWrapper.displayName = 'ValueWrapper';
 
 const DraggableLegendItemComponent: React.FC<{
   legendItem: LegendItem;
@@ -41,7 +52,9 @@ const DraggableLegendItemComponent: React.FC<{
             isDraggable={false}
             timelineId={timelineId}
             value={value}
-          />
+          >
+            <ValueWrapper value={value} />
+          </DefaultDraggable>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiText>

@@ -33,7 +33,7 @@ export const NoDataCard: FunctionComponent<NoDataPageActions> = ({
       description={i18n.translate('kibana-react.noDataPage.noDataCard.description', {
         defaultMessage: `Proceed without collecting data`,
       })}
-      betaBadgeLabel={recommended ? NO_DATA_RECOMMENDED : undefined}
+      betaBadgeProps={{ label: recommended ? NO_DATA_RECOMMENDED : undefined }}
       footer={footer}
       layout={layout as 'vertical' | undefined}
       {...cardRest}

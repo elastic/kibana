@@ -11,7 +11,6 @@ import * as Option from 'fp-ts/lib/Option';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { AliasAction, isLeftTypeof } from '../actions';
-import { MigrationLog } from '../types';
 import { AllActionStates, State } from '../state';
 import type { ResponseType } from '../next';
 import { disableUnknownTypeMappingFields } from '../core';
@@ -352,24 +351,17 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           { add: { index: target, alias: stateP.versionAlias } },
           { remove_index: { index: stateP.tempIndex } },
         ]),
-
-        logs: [
-          ...stateP.logs,
-          ...(res.right.unknownDocs.length > 0
-            ? ([
-                {
-                  level: 'warning',
-                  message: `CHECK_UNKNOWN_DOCUMENTS ${extractUnknownDocFailureReason(
-                    res.right.unknownDocs,
-                    target
-                  )}`,
-                },
-              ] as MigrationLog[])
-            : []),
-        ],
       };
     } else {
-      return throwBadResponse(stateP, res);
+      if (isLeftTypeof(res.left, 'unknown_docs_found')) {
+        return {
+          ...stateP,
+          controlState: 'FATAL',
+          reason: extractUnknownDocFailureReason(res.left.unknownDocs, stateP.sourceIndex.value),
+        };
+      } else {
+        return throwBadResponse(stateP, res.left);
+      }
     }
   } else if (stateP.controlState === 'SET_SOURCE_WRITE_BLOCK') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;

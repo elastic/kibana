@@ -12,6 +12,7 @@
  */
 
 import apm from 'elastic-apm-node';
+import uuid from 'uuid';
 import { withSpan } from '@kbn/apm-utils';
 import { identity } from 'lodash';
 import { Logger, ExecutionContextStart } from '../../../../../src/core/server';
@@ -75,6 +76,7 @@ export class EphemeralTaskManagerRunner implements TaskRunner {
   private beforeRun: Middleware['beforeRun'];
   private beforeMarkRunning: Middleware['beforeMarkRunning'];
   private onTaskEvent: (event: TaskRun | TaskMarkRunning) => void;
+  private uuid: string;
   private readonly executionContext: ExecutionContextStart;
 
   /**
@@ -102,6 +104,7 @@ export class EphemeralTaskManagerRunner implements TaskRunner {
     this.beforeMarkRunning = beforeMarkRunning;
     this.onTaskEvent = onTaskEvent;
     this.executionContext = executionContext;
+    this.uuid = uuid.v4();
   }
 
   /**
@@ -109,6 +112,21 @@ export class EphemeralTaskManagerRunner implements TaskRunner {
    */
   public get id() {
     return this.instance.task.id;
+  }
+
+  /**
+   * Gets the exeuction id of this task instance.
+   */
+  public get taskExecutionId() {
+    return `${this.id}::${this.uuid}`;
+  }
+
+  /**
+   * Test whether given execution ID identifies a different execution of this same task
+   * @param id
+   */
+  public isSameTask(executionId: string) {
+    return executionId.startsWith(this.id);
   }
 
   /**

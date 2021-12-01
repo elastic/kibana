@@ -19,7 +19,7 @@ export const CASE_COMMENT_SAVED_OBJECT = 'cases-comments';
 export const CASE_CONFIGURE_SAVED_OBJECT = 'cases-configure';
 
 /**
- * If more values are added here please also add them here: x-pack/test/case_api_integration/common/fixtures/plugins
+ * If more values are added here please also add them here: x-pack/test/cases_api_integration/common/fixtures/plugins
  */
 export const SAVED_OBJECT_TYPES = [
   CASE_SAVED_OBJECT,
@@ -54,6 +54,8 @@ export const CASE_USER_ACTIONS_URL = `${CASE_DETAILS_URL}/user_actions`;
 
 export const CASE_ALERTS_URL = `${CASES_URL}/alerts/{alert_id}`;
 export const CASE_DETAILS_ALERTS_URL = `${CASE_DETAILS_URL}/alerts`;
+
+export const CASE_METRICS_DETAILS_URL = `${CASES_URL}/metrics/{case_id}`;
 
 /**
  * Action routes

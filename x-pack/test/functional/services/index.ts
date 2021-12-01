@@ -37,6 +37,7 @@ import {
   MonitoringKibanaInstanceProvider,
   MonitoringKibanaSummaryStatusProvider,
   MonitoringSetupModeProvider,
+  MonitoringAlertsProvider,
   MonitoringEnterpriseSearchOverviewProvider,
   MonitoringEnterpriseSearchSummaryStatusProvider,
   // @ts-ignore not ts yet
@@ -105,6 +106,7 @@ export const services = {
   monitoringEnterpriseSearchOverview: MonitoringEnterpriseSearchOverviewProvider,
   monitoringEnterpriseSearchSummaryStatus: MonitoringEnterpriseSearchSummaryStatusProvider,
   monitoringSetupMode: MonitoringSetupModeProvider,
+  monitoringAlerts: MonitoringAlertsProvider,
   pipelineList: PipelineListProvider,
   pipelineEditor: PipelineEditorProvider,
   random: RandomProvider,

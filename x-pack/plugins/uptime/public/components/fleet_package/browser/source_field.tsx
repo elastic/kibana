@@ -6,7 +6,7 @@
  */
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiTabbedContent,
@@ -121,7 +121,7 @@ export const SourceField = ({ onChange, defaultConfig = defaultValues }: Props) 
             label={
               <FormattedMessage
                 id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.brower.proxyURL.label"
-                defaultMessage="Zip Proxy URL"
+                defaultMessage="Proxy Zip URL"
               />
             }
             labelAppend={<OptionalLabel />}

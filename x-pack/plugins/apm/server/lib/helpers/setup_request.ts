@@ -13,7 +13,7 @@ import { APMRouteHandlerResources } from '../../routes/typings';
 import {
   ApmIndicesConfig,
   getApmIndices,
-} from '../settings/apm_indices/get_apm_indices';
+} from '../../routes/settings/apm_indices/get_apm_indices';
 import {
   APMEventClient,
   createApmEventClient,

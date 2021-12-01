@@ -18,6 +18,10 @@ export const REMOVED_TYPES: string[] = [
   'file-upload-telemetry',
   // https://github.com/elastic/kibana/issues/91869
   'fleet-agent-events',
+  // https://github.com/elastic/obs-dc-team/issues/334
+  'fleet-agents',
+  'fleet-agent-actions',
+  'fleet-enrollment-api-keys',
   // Was removed in 7.12
   'ml-telemetry',
   'server',

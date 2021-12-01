@@ -5,11 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import '../../__jest__/jest.mocks'; // Make sure this is the first import
+import '../__jest__/jest.mocks'; // Make sure this is the first import
 
 import { Subscription } from 'rxjs';
 
-import { MockIModel } from '../../__jest__/types';
+import { MockIModel } from '../__jest__/types';
 import { LangValidation } from '../types';
 import { monaco } from '../monaco_imports';
 import { ID } from './constants';

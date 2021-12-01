@@ -7,6 +7,8 @@
 
 export type { SharePluginSetup, SharePluginStart, LocatorPublic } from 'src/plugins/share/public';
 
+export { AppNavLinkStatus } from '../../../../src/core/public';
+
 export type { UseRequestResponse } from '../../../../src/plugins/es_ui_shared/public';
 export { useRequest } from '../../../../src/plugins/es_ui_shared/public';
 

@@ -15,7 +15,7 @@ import { fullContentSources } from '../../../../__mocks__/content_sources.mock';
 
 import { nextTick } from '@kbn/test/jest';
 
-import { expectedAsyncError } from '../../../../../test_helpers';
+import { itShowsServerErrorAsFlashMessage } from '../../../../../test_helpers';
 
 jest.mock('../../source_logic', () => ({
   SourceLogic: { actions: { setContentSource: jest.fn() } },
@@ -34,7 +34,7 @@ import {
 
 describe('SynchronizationLogic', () => {
   const { http } = mockHttpValues;
-  const { flashAPIErrors, flashSuccessToast } = mockFlashMessageHelpers;
+  const { flashSuccessToast } = mockFlashMessageHelpers;
   const { navigateToUrl } = mockKibanaValues;
   const { mount } = new LogicMounter(SynchronizationLogic);
   const contentSource = fullContentSources[0];
@@ -328,19 +328,8 @@ describe('SynchronizationLogic', () => {
         expect(flashSuccessToast).toHaveBeenCalledWith('Source synchronization settings updated.');
       });
 
-      it('handles error', async () => {
-        const error = {
-          response: {
-            error: 'this is an error',
-            status: 400,
-          },
-        };
-        const promise = Promise.reject(error);
-        http.patch.mockReturnValue(promise);
+      itShowsServerErrorAsFlashMessage(http.patch, () => {
         SynchronizationLogic.actions.updateServerSettings(body);
-        await expectedAsyncError(promise);
-
-        expect(flashAPIErrors).toHaveBeenCalledWith(error);
       });
     });
   });

@@ -6,7 +6,7 @@
  */
 
 import React, { Component } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { LicenseDashboard, UploadLicense } from './sections';
 import { Switch, Route } from 'react-router-dom';
 import { APP_PERMISSION } from '../../common/constants';

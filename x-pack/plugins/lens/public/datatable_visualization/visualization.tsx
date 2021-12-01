@@ -8,9 +8,11 @@
 import React from 'react';
 import { render } from 'react-dom';
 import { Ast } from '@kbn/interpreter/common';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import type { PaletteRegistry } from 'src/plugins/charts/public';
+import { ThemeServiceStart } from 'kibana/public';
+import { KibanaThemeProvider } from '../../../../../src/plugins/kibana_react/public';
 import type {
   SuggestionRequest,
   Visualization,
@@ -22,14 +24,16 @@ import { TableDimensionEditor } from './components/dimension_editor';
 import { CUSTOM_PALETTE } from '../shared_components/coloring/constants';
 import { getStopsForFixedMode } from '../shared_components';
 import { LayerType, layerTypes } from '../../common';
-import { getDefaultSummaryLabel } from '../../common/expressions';
+import { getDefaultSummaryLabel, PagingState } from '../../common/expressions';
 import type { ColumnState, SortingState } from '../../common/expressions';
-
+import { DataTableToolbar } from './components/toolbar';
 export interface DatatableVisualizationState {
   columns: ColumnState[];
   layerId: string;
   layerType: LayerType;
   sorting?: SortingState;
+  fitRowToContent?: boolean;
+  paging?: PagingState;
 }
 
 const visualizationLabel = i18n.translate('xpack.lens.datatable.label', {
@@ -38,8 +42,10 @@ const visualizationLabel = i18n.translate('xpack.lens.datatable.label', {
 
 export const getDatatableVisualization = ({
   paletteService,
+  theme,
 }: {
   paletteService: PaletteRegistry;
+  theme: ThemeServiceStart;
 }): Visualization<DatatableVisualizationState> => ({
   id: 'lnsDatatable',
 
@@ -293,9 +299,11 @@ export const getDatatableVisualization = ({
   },
   renderDimensionEditor(domElement, props) {
     render(
-      <I18nProvider>
-        <TableDimensionEditor {...props} paletteService={paletteService} />
-      </I18nProvider>,
+      <KibanaThemeProvider theme$={theme.theme$}>
+        <I18nProvider>
+          <TableDimensionEditor {...props} paletteService={paletteService} />
+        </I18nProvider>
+      </KibanaThemeProvider>,
       domElement
     );
   },
@@ -389,6 +397,8 @@ export const getDatatableVisualization = ({
             }),
             sortingColumnId: [state.sorting?.columnId || ''],
             sortingDirection: [state.sorting?.direction || 'none'],
+            fitRowToContent: [state.fitRowToContent ?? false],
+            pageSize: state.paging?.enabled ? [state.paging.size] : [],
           },
         },
       ],
@@ -397,6 +407,17 @@ export const getDatatableVisualization = ({
 
   getErrorMessages(state) {
     return undefined;
+  },
+
+  renderToolbar(domElement, props) {
+    render(
+      <KibanaThemeProvider theme$={theme.theme$}>
+        <I18nProvider>
+          <DataTableToolbar {...props} />
+        </I18nProvider>
+      </KibanaThemeProvider>,
+      domElement
+    );
   },
 
   onEditAction(state, event) {
@@ -410,10 +431,11 @@ export const getDatatableVisualization = ({
           },
         };
       case 'toggle':
+        const toggleColumnId = event.data.columnId;
         return {
           ...state,
           columns: state.columns.map((column) => {
-            if (column.columnId === event.data.columnId) {
+            if (column.columnId === toggleColumnId) {
               return {
                 ...column,
                 hidden: !column.hidden,
@@ -425,10 +447,11 @@ export const getDatatableVisualization = ({
         };
       case 'resize':
         const targetWidth = event.data.width;
+        const resizeColumnId = event.data.columnId;
         return {
           ...state,
           columns: state.columns.map((column) => {
-            if (column.columnId === event.data.columnId) {
+            if (column.columnId === resizeColumnId) {
               return {
                 ...column,
                 width: targetWidth,
@@ -437,6 +460,14 @@ export const getDatatableVisualization = ({
               return column;
             }
           }),
+        };
+      case 'pagesize':
+        return {
+          ...state,
+          paging: {
+            enabled: state.paging?.enabled || false,
+            size: event.data.size,
+          },
         };
       default:
         return state;

@@ -17,7 +17,6 @@ import {
 
 import { FleetPlugin } from './plugin';
 
-export { default as apm } from 'elastic-apm-node';
 export type {
   AgentService,
   ESIndexPatternService,
@@ -44,52 +43,6 @@ export const config: PluginConfigDescriptor = {
     agents: true,
   },
   deprecations: ({ renameFromRoot, unused, unusedFromRoot }) => [
-    // Fleet plugin was named ingestManager before
-    renameFromRoot('xpack.ingestManager.enabled', 'xpack.fleet.enabled', { level: 'critical' }),
-    renameFromRoot('xpack.ingestManager.registryUrl', 'xpack.fleet.registryUrl', {
-      level: 'critical',
-    }),
-    renameFromRoot('xpack.ingestManager.registryProxyUrl', 'xpack.fleet.registryProxyUrl', {
-      level: 'critical',
-    }),
-    renameFromRoot('xpack.ingestManager.fleet', 'xpack.ingestManager.agents', {
-      level: 'critical',
-    }),
-    renameFromRoot('xpack.ingestManager.agents.enabled', 'xpack.fleet.agents.enabled', {
-      level: 'critical',
-    }),
-    renameFromRoot('xpack.ingestManager.agents.elasticsearch', 'xpack.fleet.agents.elasticsearch', {
-      level: 'critical',
-    }),
-    renameFromRoot(
-      'xpack.ingestManager.agents.tlsCheckDisabled',
-      'xpack.fleet.agents.tlsCheckDisabled',
-      { level: 'critical' }
-    ),
-    renameFromRoot(
-      'xpack.ingestManager.agents.pollingRequestTimeout',
-      'xpack.fleet.agents.pollingRequestTimeout',
-      { level: 'critical' }
-    ),
-    renameFromRoot(
-      'xpack.ingestManager.agents.maxConcurrentConnections',
-      'xpack.fleet.agents.maxConcurrentConnections',
-      { level: 'critical' }
-    ),
-    renameFromRoot('xpack.ingestManager.agents.kibana', 'xpack.fleet.agents.kibana', {
-      level: 'critical',
-    }),
-    renameFromRoot(
-      'xpack.ingestManager.agents.agentPolicyRolloutRateLimitIntervalMs',
-      'xpack.fleet.agents.agentPolicyRolloutRateLimitIntervalMs',
-      { level: 'critical' }
-    ),
-    renameFromRoot(
-      'xpack.ingestManager.agents.agentPolicyRolloutRateLimitRequestPerInterval',
-      'xpack.fleet.agents.agentPolicyRolloutRateLimitRequestPerInterval',
-      { level: 'critical' }
-    ),
-    unusedFromRoot('xpack.ingestManager', { level: 'critical' }),
     // Unused settings before Fleet server exists
     unused('agents.kibana', { level: 'critical' }),
     unused('agents.maxConcurrentConnections', { level: 'critical' }),

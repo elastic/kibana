@@ -6,7 +6,7 @@
  */
 
 import { EcsEventType, KibanaRequest } from 'kibana/server';
-import { KueryNode } from 'src/plugins/data/common';
+import type { KueryNode } from '@kbn/es-query';
 import { Space } from '../../../spaces/server';
 
 /**
@@ -40,6 +40,7 @@ export enum ReadOperations {
   FindConfigurations = 'findConfigurations',
   GetUserActions = 'getUserActions',
   GetAlertsAttachedToCase = 'getAlertsAttachedToCase',
+  GetCaseMetrics = 'getCaseMetrics',
 }
 
 /**

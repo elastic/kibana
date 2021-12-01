@@ -123,7 +123,10 @@ export class EndpointAppContextService {
     return this.startDependencies?.agentService;
   }
 
-  public getPackagePolicyService(): PackagePolicyServiceInterface | undefined {
+  public getPackagePolicyService(): PackagePolicyServiceInterface {
+    if (!this.startDependencies?.packagePolicyService) {
+      throw new EndpointAppContentServicesNotStartedError();
+    }
     return this.startDependencies?.packagePolicyService;
   }
 

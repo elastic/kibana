@@ -9,12 +9,20 @@ import { schema } from '@kbn/config-schema';
 
 import { HostStatus } from '../../../../common/endpoint/types';
 import { EndpointAppContext } from '../../types';
-import { getLogger, getMetadataListRequestHandler, getMetadataRequestHandler } from './handlers';
+import {
+  getLogger,
+  getMetadataListRequestHandler,
+  getMetadataRequestHandler,
+  getMetadataListRequestHandlerV2,
+} from './handlers';
 import type { SecuritySolutionPluginRouter } from '../../../types';
 import {
+  ENDPOINT_DEFAULT_PAGE,
+  ENDPOINT_DEFAULT_PAGE_SIZE,
   HOST_METADATA_GET_ROUTE,
   HOST_METADATA_LIST_ROUTE,
 } from '../../../../common/endpoint/constants';
+import { GetMetadataListRequestSchemaV2 } from '../../../../common/endpoint/schema/metadata';
 
 /* Filters that can be applied to the endpoint fetch route */
 export const endpointFilters = schema.object({
@@ -46,12 +54,18 @@ export const GetMetadataListRequestSchema = {
              * the number of results to return for this request per page
              */
             schema.object({
-              page_size: schema.number({ defaultValue: 10, min: 1, max: 10000 }),
+              page_size: schema.number({
+                defaultValue: ENDPOINT_DEFAULT_PAGE_SIZE,
+                min: 1,
+                max: 10000,
+              }),
             }),
             /**
              * the zero based page index of the the total number of pages of page size
              */
-            schema.object({ page_index: schema.number({ defaultValue: 0, min: 0 }) }),
+            schema.object({
+              page_index: schema.number({ defaultValue: ENDPOINT_DEFAULT_PAGE, min: 0 }),
+            }),
           ])
         )
       ),
@@ -66,21 +80,30 @@ export function registerEndpointRoutes(
 ) {
   const logger = getLogger(endpointAppContext);
 
-  router.post(
+  router.get(
     {
-      path: `${HOST_METADATA_LIST_ROUTE}`,
-      validate: GetMetadataListRequestSchema,
+      path: HOST_METADATA_LIST_ROUTE,
+      validate: GetMetadataListRequestSchemaV2,
       options: { authRequired: true, tags: ['access:securitySolution'] },
     },
-    getMetadataListRequestHandler(endpointAppContext, logger)
+    getMetadataListRequestHandlerV2(endpointAppContext, logger)
   );
 
   router.get(
     {
-      path: `${HOST_METADATA_GET_ROUTE}`,
+      path: HOST_METADATA_GET_ROUTE,
       validate: GetMetadataRequestSchema,
       options: { authRequired: true, tags: ['access:securitySolution'] },
     },
     getMetadataRequestHandler(endpointAppContext, logger)
+  );
+
+  router.post(
+    {
+      path: HOST_METADATA_LIST_ROUTE,
+      validate: GetMetadataListRequestSchema,
+      options: { authRequired: true, tags: ['access:securitySolution'] },
+    },
+    getMetadataListRequestHandler(endpointAppContext, logger)
   );
 }

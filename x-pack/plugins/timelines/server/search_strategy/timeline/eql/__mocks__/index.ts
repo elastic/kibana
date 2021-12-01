@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EqlSearchStrategyResponse } from '../../../../../../../../src/plugins/data/common';
+import type { EqlSearchStrategyResponse } from '../../../../../../../../src/plugins/data/common';
 import { EqlSearchResponse } from '../../../../../common';
 
 export const sequenceResponse = {

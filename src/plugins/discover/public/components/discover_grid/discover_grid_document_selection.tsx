@@ -16,9 +16,11 @@ import {
   EuiCheckbox,
   EuiDataGridCellValueElementProps,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
-import themeDark from '@elastic/eui/dist/eui_theme_dark.json';
-import themeLight from '@elastic/eui/dist/eui_theme_light.json';
+import { FormattedMessage } from '@kbn/i18n-react';
+import {
+  euiLightVars as themeLight,
+  euiDarkVars as themeDark,
+} from '@kbn/ui-shared-deps-src/theme';
 import { ElasticSearchHit } from '../../services/doc_views/doc_views_types';
 import { DiscoverGridContext } from './discover_grid_context';
 

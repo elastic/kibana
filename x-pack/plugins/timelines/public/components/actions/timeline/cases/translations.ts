@@ -73,7 +73,3 @@ export const UNSUPPORTED_EVENTS_MSG = i18n.translate(
     defaultMessage: 'This event cannot be attached to a case',
   }
 );
-
-export const CREATE_TITLE = i18n.translate('xpack.timelines.cases.caseView.create', {
-  defaultMessage: 'Create new case',
-});

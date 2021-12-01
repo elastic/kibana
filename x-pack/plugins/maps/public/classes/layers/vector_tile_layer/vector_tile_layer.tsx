@@ -15,7 +15,6 @@ import { isRetina } from '../../../util';
 import {
   addSpriteSheetToMapFromImageData,
   loadSpriteSheetImageData,
-  // @ts-expect-error
 } from '../../../connected_components/mb_map/utils';
 import { DataRequestContext } from '../../../actions';
 import { EMSTMSSource } from '../../sources/ems_tms_source';
@@ -28,12 +27,13 @@ interface SourceRequestMeta {
 interface EmsSprite {
   height: number;
   pixelRatio: number;
+  sdf?: boolean;
   width: number;
   x: number;
   y: number;
 }
 
-interface EmsSpriteSheet {
+export interface EmsSpriteSheet {
   [spriteName: string]: EmsSprite;
 }
 
@@ -116,7 +116,7 @@ export class VectorTileLayer extends TileLayer {
     return `${this.getId()}${DELIMITTER}${this.getSource().getTileLayerId()}${DELIMITTER}`;
   }
 
-  _generateMbSourceId(name: string) {
+  _generateMbSourceId(name: string | undefined) {
     return `${this._generateMbSourceIdPrefix()}${name}`;
   }
 
@@ -241,10 +241,11 @@ export class VectorTileLayer extends TileLayer {
         }
         const newLayerObject = {
           ...layer,
-          source:
+          source: this._generateMbSourceId(
             typeof (layer as MbLayer).source === 'string'
-              ? this._generateMbSourceId((layer as MbLayer).source as string)
-              : undefined,
+              ? ((layer as MbLayer).source as string)
+              : undefined
+          ),
           id: mbLayerId,
         };
 

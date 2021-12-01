@@ -65,40 +65,11 @@
             "label": "start",
             "description": [],
             "signature": [
-              "({ uiSettings }: ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.CoreStart",
-                "text": "CoreStart"
-              },
-              ") => { loadFontAwesome: () => Promise<void>; }"
+              "() => { loadFontAwesome: () => Promise<void>; }"
             ],
             "path": "src/plugins/kibana_legacy/public/plugin.ts",
             "deprecated": false,
-            "children": [
-              {
-                "parentPluginId": "kibanaLegacy",
-                "id": "def-public.KibanaLegacyPlugin.start.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "{ uiSettings }",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.CoreStart",
-                    "text": "CoreStart"
-                  }
-                ],
-                "path": "src/plugins/kibana_legacy/public/plugin.ts",
-                "deprecated": false,
-                "isRequired": true
-              }
-            ],
+            "children": [],
             "returnComment": []
           }
         ],

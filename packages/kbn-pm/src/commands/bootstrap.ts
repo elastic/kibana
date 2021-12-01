@@ -15,6 +15,7 @@ import { linkProjectExecutables } from '../utils/link_project_executables';
 import { getNonBazelProjectsOnly, topologicallyBatchProjects } from '../utils/projects';
 import { ICommand } from './';
 import { readYarnLock } from '../utils/yarn_lock';
+import { sortPackageJson } from '../utils/sort_package_json';
 import { validateDependencies } from '../utils/validate_dependencies';
 import {
   ensureYarnIntegrityFileExists,
@@ -106,6 +107,8 @@ export const BootstrapCommand: ICommand = {
         }
       }
     }
+
+    await sortPackageJson(kbn);
 
     const yarnLock = await readYarnLock(kbn);
 

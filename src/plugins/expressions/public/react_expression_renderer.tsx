@@ -12,7 +12,7 @@ import { Observable, Subscription } from 'rxjs';
 import { filter } from 'rxjs/operators';
 import useShallowCompareEffect from 'react-use/lib/useShallowCompareEffect';
 import { EuiLoadingChart, EuiProgress } from '@elastic/eui';
-import theme from '@elastic/eui/dist/eui_theme_light.json';
+import { euiLightVars as theme } from '@kbn/ui-shared-deps-src/theme';
 import { IExpressionLoaderParams, ExpressionRenderError, ExpressionRendererEvent } from './types';
 import { ExpressionAstExpression, IInterpreterRenderHandlers } from '../common';
 import { ExpressionLoader } from './loader';
@@ -38,6 +38,7 @@ export interface ReactExpressionRendererProps extends IExpressionLoaderParams {
    * An observable which can be used to re-run the expression without destroying the component
    */
   reload$?: Observable<unknown>;
+  onRender$?: (item: number) => void;
   debounce?: number;
 }
 
@@ -66,6 +67,7 @@ export default function ReactExpressionRenderer({
   expression,
   onEvent,
   onData$,
+  onRender$,
   reload$,
   debounce,
   ...expressionLoaderOptions
@@ -155,6 +157,7 @@ export default function ReactExpressionRenderer({
             ...defaultState,
             isEmpty: false,
           }));
+          onRender$?.(item);
         })
     );
 

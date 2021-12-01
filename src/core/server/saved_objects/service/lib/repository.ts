@@ -1825,7 +1825,7 @@ export class SavedObjectsRepository {
       index: this.getIndexForType(type),
       refresh,
       require_alias: true,
-      _source: 'true',
+      _source: true,
       body: {
         script: {
           source: `

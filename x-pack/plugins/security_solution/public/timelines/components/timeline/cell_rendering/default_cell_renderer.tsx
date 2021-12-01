@@ -13,14 +13,14 @@ import { getColumnRenderer } from '../body/renderers/get_column_renderer';
 
 import { CellValueElementProps } from '.';
 import { getLink } from '../../../../common/lib/cell_actions/helpers';
+import { FIELDS_WITHOUT_CELL_ACTIONS } from '../../../../common/lib/cell_actions/constants';
 import {
   ExpandedCellValueActions,
   StyledContent,
 } from '../../../../common/lib/cell_actions/expanded_cell_value_actions';
 
-const FIELDS_WITHOUT_CELL_ACTIONS = ['@timestamp', 'signal.rule.risk_score', 'signal.reason'];
 const hasCellActions = (columnId?: string) => {
-  return columnId && FIELDS_WITHOUT_CELL_ACTIONS.indexOf(columnId) < 0;
+  return columnId && !FIELDS_WITHOUT_CELL_ACTIONS.includes(columnId);
 };
 
 export const DefaultCellRenderer: React.FC<CellValueElementProps> = ({

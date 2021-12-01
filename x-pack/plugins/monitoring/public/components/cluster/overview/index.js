@@ -13,7 +13,7 @@ import { BeatsPanel } from './beats_panel';
 import { EuiPage, EuiPageBody, EuiScreenReaderOnly } from '@elastic/eui';
 import { ApmPanel } from './apm_panel';
 import { EnterpriseSearchPanel } from './enterprise_search_panel';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { STANDALONE_CLUSTER_CLUSTER_UUID } from '../../../../common/constants';
 
 export function Overview(props) {

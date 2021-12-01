@@ -32,6 +32,10 @@ const minutesFromNow = (mins: number): Date => secondsFromNow(mins * 60);
 
 let fakeTimer: sinon.SinonFakeTimers;
 
+jest.mock('uuid', () => ({
+  v4: () => 'NEW_UUID',
+}));
+
 beforeAll(() => {
   fakeTimer = sinon.useFakeTimers();
 });
@@ -44,6 +48,19 @@ describe('TaskManagerRunner', () => {
   const mockApmTrans = {
     end: jest.fn(),
   };
+
+  test('execution ID', async () => {
+    const { runner } = await pendingStageSetup({
+      instance: {
+        id: 'foo',
+        taskType: 'bar',
+      },
+    });
+
+    expect(runner.taskExecutionId).toEqual(`foo::NEW_UUID`);
+    expect(runner.isSameTask(`foo::ANOTHER_UUID`)).toEqual(true);
+    expect(runner.isSameTask(`bar::ANOTHER_UUID`)).toEqual(false);
+  });
 
   describe('Pending Stage', () => {
     beforeEach(() => {

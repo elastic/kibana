@@ -25,7 +25,6 @@ import { StatusContextMenu } from './status_context_menu';
 import { getStatusDate, getStatusTitle } from './helpers';
 import { SyncAlertsSwitch } from '../case_settings/sync_alerts_switch';
 import { OnUpdateFields } from '../case_view';
-import { CasesNavigation } from '../links';
 
 const MyDescriptionList = styled(EuiDescriptionList)`
   ${({ theme }) => css`
@@ -41,7 +40,6 @@ const MyDescriptionList = styled(EuiDescriptionList)`
 `;
 
 interface CaseActionBarProps {
-  allCasesNavigation: CasesNavigation;
   caseData: Case;
   currentExternalIncident: CaseService | null;
   userCanCrud: boolean;
@@ -51,7 +49,6 @@ interface CaseActionBarProps {
   onUpdateField: (args: OnUpdateFields) => void;
 }
 const CaseActionBarComponent: React.FC<CaseActionBarProps> = ({
-  allCasesNavigation,
   caseData,
   currentExternalIncident,
   disableAlerting,
@@ -86,7 +83,7 @@ const CaseActionBarComponent: React.FC<CaseActionBarProps> = ({
         <MyDescriptionList compressed>
           <EuiFlexGroup responsive={false} justifyContent="spaceBetween">
             {caseData.type !== CaseType.collection && (
-              <EuiFlexItem data-test-subj="case-view-status">
+              <EuiFlexItem grow={false} data-test-subj="case-view-status">
                 <EuiDescriptionListTitle>{i18n.STATUS}</EuiDescriptionListTitle>
                 <EuiDescriptionListDescription>
                   <StatusContextMenu
@@ -97,7 +94,7 @@ const CaseActionBarComponent: React.FC<CaseActionBarProps> = ({
                 </EuiDescriptionListDescription>
               </EuiFlexItem>
             )}
-            <EuiFlexItem>
+            <EuiFlexItem grow={false}>
               <EuiDescriptionListTitle>{title}</EuiDescriptionListTitle>
               <EuiDescriptionListDescription>
                 <FormattedRelativePreferenceDate
@@ -157,11 +154,7 @@ const CaseActionBarComponent: React.FC<CaseActionBarProps> = ({
             </EuiFlexItem>
             {userCanCrud && (
               <EuiFlexItem grow={false} data-test-subj="case-view-actions">
-                <Actions
-                  allCasesNavigation={allCasesNavigation}
-                  caseData={caseData}
-                  currentExternalIncident={currentExternalIncident}
-                />
+                <Actions caseData={caseData} currentExternalIncident={currentExternalIncident} />
               </EuiFlexItem>
             )}
           </EuiFlexGroup>

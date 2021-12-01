@@ -479,6 +479,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         expect(filterWithSlackOnlyResults[0].interval).to.equal('1 min');
         expect(filterWithSlackOnlyResults[0].duration).to.match(/\d{2}:\d{2}:\d{2}.\d{3}/);
       });
+      await testSubjects.click('alertTypeFilterButton');
+
+      // de-select action type filter
+      await testSubjects.click('actionTypeFilterButton');
+      await testSubjects.click('actionType.slackFilterOption');
+
+      await testSubjects.missingOrFail('centerJustifiedSpinner');
     });
   });
 };

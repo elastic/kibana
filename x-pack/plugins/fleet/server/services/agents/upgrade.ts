@@ -7,8 +7,7 @@
 
 import type { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
 
-import type { Agent, AgentAction, AgentActionSOAttributes, BulkActionResult } from '../../types';
-import { AGENT_ACTION_SAVED_OBJECT_TYPE } from '../../constants';
+import type { Agent, BulkActionResult } from '../../types';
 import { agentPolicyService } from '../../services';
 import {
   AgentReassignmentError,
@@ -65,23 +64,6 @@ export async function sendUpgradeAgentAction({
   await updateAgent(esClient, agentId, {
     upgraded_at: null,
     upgrade_started_at: now,
-  });
-}
-
-export async function ackAgentUpgraded(
-  soClient: SavedObjectsClientContract,
-  esClient: ElasticsearchClient,
-  agentAction: AgentAction
-) {
-  const {
-    attributes: { ack_data: ackData },
-  } = await soClient.get<AgentActionSOAttributes>(AGENT_ACTION_SAVED_OBJECT_TYPE, agentAction.id);
-  if (!ackData) throw new Error('data missing from UPGRADE action');
-  const { version } = JSON.parse(ackData);
-  if (!version) throw new Error('version missing from UPGRADE action');
-  await updateAgent(esClient, agentAction.agent_id, {
-    upgraded_at: new Date().toISOString(),
-    upgrade_started_at: null,
   });
 }
 

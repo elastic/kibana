@@ -49,11 +49,12 @@ export const UserActionMarkdown = forwardRef<UserActionMarkdownRefObject, UserAc
 
     const handleSaveAction = useCallback(async () => {
       const { isValid, data } = await submit();
-      if (isValid) {
+
+      if (isValid && data.content !== content) {
         onSaveContent(data.content);
       }
       onChangeEditable(id);
-    }, [id, onChangeEditable, onSaveContent, submit]);
+    }, [content, id, onChangeEditable, onSaveContent, submit]);
 
     const setComment = useCallback(
       (newComment) => {
@@ -78,7 +79,7 @@ export const UserActionMarkdown = forwardRef<UserActionMarkdownRefObject, UserAc
           <EuiFlexItem grow={false}>
             <EuiButton
               data-test-subj="user-action-save-markdown"
-              color="secondary"
+              color="success"
               fill
               iconType="save"
               onClick={handleSaveAction}
