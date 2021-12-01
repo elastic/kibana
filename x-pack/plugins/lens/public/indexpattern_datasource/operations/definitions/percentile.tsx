@@ -197,7 +197,7 @@ export const percentileOperation: OperationDefinition<
           defaultMessage: 'Percentile',
         })}
         data-test-subj="lns-indexPattern-percentile-form"
-        display="columnCompressed"
+        display="rowCompressed"
         fullWidth
         isInvalid={!inputValueIsValid}
         error={

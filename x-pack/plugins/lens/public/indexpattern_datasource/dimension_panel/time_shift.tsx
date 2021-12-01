@@ -127,7 +127,7 @@ export function TimeShift({
       }}
     >
       <EuiFormRow
-        display="columnCompressed"
+        display="rowCompressed"
         fullWidth
         label={i18n.translate('xpack.lens.indexPattern.timeShift.label', {
           defaultMessage: 'Time shift',
