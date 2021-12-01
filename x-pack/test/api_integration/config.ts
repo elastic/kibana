@@ -17,6 +17,7 @@ export async function getApiIntegrationConfig({ readConfigFile }: FtrConfigProvi
     testFiles: [require.resolve('./apis')],
     services,
     servers: xPackFunctionalTestsConfig.get('servers'),
+    dockerServers: kibanaFunctionalConfig.get('dockerServers'),
     security: xPackFunctionalTestsConfig.get('security'),
     junit: {
       reportName: 'X-Pack API Integration Tests',
@@ -27,7 +28,6 @@ export async function getApiIntegrationConfig({ readConfigFile }: FtrConfigProvi
         ...xPackFunctionalTestsConfig.get('kbnTestServer.serverArgs'),
         '--xpack.security.session.idleTimeout=3600000', // 1 hour
         '--telemetry.optIn=true',
-        '--xpack.fleet.agents.pollingRequestTimeout=5000', // 5 seconds
         '--xpack.data_enhanced.search.sessions.enabled=true', // enable WIP send to background UI
         '--xpack.data_enhanced.search.sessions.notTouchedTimeout=15s', // shorten notTouchedTimeout for quicker testing
         '--xpack.data_enhanced.search.sessions.trackingInterval=5s', // shorten trackingInterval for quicker testing
@@ -40,6 +40,7 @@ export async function getApiIntegrationConfig({ readConfigFile }: FtrConfigProvi
         '--xpack.uptime.unsafe.service.manifestUrl=http://test.com',
         '--xpack.uptime.unsafe.service.username=user',
         `--xpack.securitySolution.enableExperimental=${JSON.stringify(['ruleRegistryEnabled'])}`,
+        `--xpack.fleet.registryUrl=http://localhost:${fleetRegistryPort}`, // for using dockerized registry for tests that touch Fleet
       ],
     },
     esTestCluster: {
