@@ -22,7 +22,7 @@ import {
   MANAGEMENT_STORE_HOST_ISOLATION_EXCEPTIONS_NAMESPACE,
 } from '../../../common/constants';
 import { getHostIsolationExceptionsListPath } from '../../../common/routing';
-import { parseQueryFilterToKQL } from '../../../common/utils';
+import { parsePoliciesAndFilterToKql, parseQueryFilterToKQL } from '../../../common/utils';
 import {
   getHostIsolationExceptionItems,
   getHostIsolationExceptionSummary,
@@ -89,21 +89,28 @@ export function useFetchHostIsolationExceptionsList({
   filter,
   page,
   perPage,
+  policies,
 }: {
   filter?: string;
   page: number;
   perPage: number;
+  policies?: string[];
 }): QueryObserverResult<FoundExceptionListItemSchema, ServerApiError> {
   const http = useHttp();
 
   return useQuery<FoundExceptionListItemSchema, ServerApiError>(
     ['hostIsolationExceptions', 'list', filter, perPage, page],
     () => {
+      const kql = parsePoliciesAndFilterToKql({
+        policies,
+        kuery: filter ? parseQueryFilterToKQL(filter, SEARCHABLE_FIELDS) : undefined,
+      });
+
       return getHostIsolationExceptionItems({
         http,
         page: page + 1,
         perPage,
-        filter: filter ? parseQueryFilterToKQL(filter, SEARCHABLE_FIELDS) : undefined,
+        filter: kql,
       });
     }
   );

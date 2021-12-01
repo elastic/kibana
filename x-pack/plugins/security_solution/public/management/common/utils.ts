@@ -49,3 +49,33 @@ export const parsePoliciesToKQL = (includedPolicies: string, excludedPolicies: s
 
   return `(${kuery.join(' AND ')})`;
 };
+
+/**
+ * Takes a list of policies (string[]) and an existing kuery
+ * (string) and returns an unified KQL with and AND
+ * @param policies string[] a list of policies ids
+ * @param kuery string an existing KQL.
+ */
+export const parsePoliciesAndFilterToKql = ({
+  policies,
+  kuery,
+}: {
+  policies?: string[];
+  kuery?: string;
+}): string | undefined => {
+  let kql: string | undefined;
+
+  if (policies && policies.length) {
+    const policiesKQL = parsePoliciesToKQL(policies.join(','), '');
+    kql = `(${policiesKQL})`;
+  }
+
+  if (kuery) {
+    if (kql) {
+      kql += ` AND `;
+    } else {
+      kql = `(${kuery})`;
+    }
+  }
+  return kql;
+};
