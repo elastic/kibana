@@ -89,7 +89,7 @@ export const SchemaErrorsAccordion: React.FC<Props> = ({
             </EuiTableHeader>
             <EuiTableBody>
               {errors.map((error) => {
-                const { external_id: id, error: errorMessage } = error;
+                const { id, error: errorMessage } = error;
                 return (
                   <EuiTableRow key={`schemaErrorDocument-${fieldName}-${id}`}>
                     <EuiTableRowCell truncateText>
