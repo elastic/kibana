@@ -62,6 +62,7 @@ export const createPreviewIndex = async (
 ) => {
   const esClient = context.core.elasticsearch.client.asCurrentUser;
   const index = siemClient.getPreviewIndex();
+  const spaceId = context.securitySolution.getSpaceId();
 
   const indexExists = await getIndexExists(esClient, index);
 
@@ -70,10 +71,13 @@ export const createPreviewIndex = async (
     await setPolicy(esClient, index, previewPolicy);
   }
 
+  const ruleDataService = context.securitySolution.getRuleDataService();
+  const aadIndexAliasName = ruleDataService.getResourceName(`security.alerts-${spaceId}`);
+
   if (await templateNeedsUpdate({ alias: index, esClient })) {
     await esClient.indices.putIndexTemplate({
       name: index,
-      body: getSignalsTemplate(index) as Record<string, unknown>,
+      body: getSignalsTemplate(index, aadIndexAliasName) as Record<string, unknown>,
     });
   }
 
