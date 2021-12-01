@@ -14,7 +14,6 @@ const roleMappingBaseSchema = {
   roleType: schema.string(),
   groups: schema.arrayOf(schema.string()),
   allGroups: schema.boolean(),
-  authProvider: schema.arrayOf(schema.string()),
 };
 
 export function registerOrgEnableRoleMappingsRoute({
