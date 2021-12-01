@@ -5817,6 +5817,10 @@
   version "0.0.0"
   uid ""
 
+"@types/kbn__apm-config-loader@link:bazel-bin/packages/kbn-apm-config-loader/npm_module_types":
+  version "0.0.0"
+  uid ""
+
 "@types/kbn__apm-utils@link:bazel-bin/packages/kbn-apm-utils/npm_module_types":
   version "0.0.0"
   uid ""
