@@ -284,10 +284,10 @@ export class Embeddable
   }
 
   private maybeAddConflictError(
-    errors: ErrorMessage[],
+    errors?: ErrorMessage[],
     sharingSavedObjectProps?: SharingSavedObjectProps
   ) {
-    const ret = [...errors];
+    const ret = [...(errors || [])];
 
     if (sharingSavedObjectProps?.outcome === 'conflict' && !!this.deps.spaces) {
       ret.push({
@@ -303,7 +303,7 @@ export class Embeddable
       });
     }
 
-    return ret;
+    return ret?.length ? ret : undefined;
   }
 
   async initializeSavedVis(input: LensEmbeddableInput) {
@@ -330,7 +330,7 @@ export class Embeddable
       this.deps.documentToExpression
     );
     this.expression = expression;
-    this.errors = errors && this.maybeAddConflictError(errors, metaInfo?.sharingSavedObjectProps);
+    this.errors = this.maybeAddConflictError(errors, metaInfo?.sharingSavedObjectProps);
 
     if (this.errors) {
       this.logError('validation');
