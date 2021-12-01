@@ -18,7 +18,7 @@ import {
   TLSFieldsContextProvider,
 } from './contexts';
 import { CustomFields } from './custom_fields';
-import { ConfigKeys, DataStream, ScheduleUnit } from './types';
+import { ConfigKey, DataStream, ScheduleUnit } from './types';
 import { validate as centralValidation } from './validation';
 import { defaultConfig } from './synthetics_policy_create_extension';
 
@@ -85,20 +85,20 @@ describe('<CustomFields />', () => {
     const timeout = getByLabelText('Timeout in seconds') as HTMLInputElement;
     expect(monitorType).toBeInTheDocument();
     expect(url).toBeInTheDocument();
-    expect(url.value).toEqual(defaultHTTPConfig[ConfigKeys.URLS]);
+    expect(url.value).toEqual(defaultHTTPConfig[ConfigKey.URLS]);
     expect(proxyUrl).toBeInTheDocument();
-    expect(proxyUrl.value).toEqual(defaultHTTPConfig[ConfigKeys.PROXY_URL]);
+    expect(proxyUrl.value).toEqual(defaultHTTPConfig[ConfigKey.PROXY_URL]);
     expect(monitorIntervalNumber).toBeInTheDocument();
-    expect(monitorIntervalNumber.value).toEqual(defaultHTTPConfig[ConfigKeys.SCHEDULE].number);
+    expect(monitorIntervalNumber.value).toEqual(defaultHTTPConfig[ConfigKey.SCHEDULE].number);
     expect(monitorIntervalUnit).toBeInTheDocument();
-    expect(monitorIntervalUnit.value).toEqual(defaultHTTPConfig[ConfigKeys.SCHEDULE].unit);
+    expect(monitorIntervalUnit.value).toEqual(defaultHTTPConfig[ConfigKey.SCHEDULE].unit);
     // expect(tags).toBeInTheDocument();
     expect(apmServiceName).toBeInTheDocument();
-    expect(apmServiceName.value).toEqual(defaultHTTPConfig[ConfigKeys.APM_SERVICE_NAME]);
+    expect(apmServiceName.value).toEqual(defaultHTTPConfig[ConfigKey.APM_SERVICE_NAME]);
     expect(maxRedirects).toBeInTheDocument();
-    expect(maxRedirects.value).toEqual(`${defaultHTTPConfig[ConfigKeys.MAX_REDIRECTS]}`);
+    expect(maxRedirects.value).toEqual(`${defaultHTTPConfig[ConfigKey.MAX_REDIRECTS]}`);
     expect(timeout).toBeInTheDocument();
-    expect(timeout.value).toEqual(`${defaultHTTPConfig[ConfigKeys.TIMEOUT]}`);
+    expect(timeout.value).toEqual(`${defaultHTTPConfig[ConfigKey.TIMEOUT]}`);
 
     // ensure other monitor type options are not in the DOM
     expect(queryByLabelText('Host')).not.toBeInTheDocument();
@@ -145,11 +145,11 @@ describe('<CustomFields />', () => {
     expect(verificationMode).toBeInTheDocument();
 
     await waitFor(() => {
-      expect(ca.value).toEqual(defaultHTTPConfig[ConfigKeys.TLS_CERTIFICATE_AUTHORITIES]);
-      expect(clientKey.value).toEqual(defaultHTTPConfig[ConfigKeys.TLS_KEY]);
-      expect(clientKeyPassphrase.value).toEqual(defaultHTTPConfig[ConfigKeys.TLS_KEY_PASSPHRASE]);
-      expect(clientCertificate.value).toEqual(defaultHTTPConfig[ConfigKeys.TLS_CERTIFICATE]);
-      expect(verificationMode.value).toEqual(defaultHTTPConfig[ConfigKeys.TLS_VERIFICATION_MODE]);
+      expect(ca.value).toEqual(defaultHTTPConfig[ConfigKey.TLS_CERTIFICATE_AUTHORITIES]);
+      expect(clientKey.value).toEqual(defaultHTTPConfig[ConfigKey.TLS_KEY]);
+      expect(clientKeyPassphrase.value).toEqual(defaultHTTPConfig[ConfigKey.TLS_KEY_PASSPHRASE]);
+      expect(clientCertificate.value).toEqual(defaultHTTPConfig[ConfigKey.TLS_CERTIFICATE]);
+      expect(verificationMode.value).toEqual(defaultHTTPConfig[ConfigKey.TLS_VERIFICATION_MODE]);
     });
   });
 
@@ -186,14 +186,14 @@ describe('<CustomFields />', () => {
     );
     const monitorType = getByLabelText('Monitor Type') as HTMLInputElement;
     expect(monitorType).toBeInTheDocument();
-    expect(monitorType.value).toEqual(defaultHTTPConfig[ConfigKeys.MONITOR_TYPE]);
+    expect(monitorType.value).toEqual(defaultHTTPConfig[ConfigKey.MONITOR_TYPE]);
     fireEvent.change(monitorType, { target: { value: DataStream.TCP } });
 
     // expect tcp fields to be in the DOM
     const host = getByLabelText('Host:Port') as HTMLInputElement;
 
     expect(host).toBeInTheDocument();
-    expect(host.value).toEqual(defaultTCPConfig[ConfigKeys.HOSTS]);
+    expect(host.value).toEqual(defaultTCPConfig[ConfigKey.HOSTS]);
 
     // expect HTTP fields not to be in the DOM
     expect(queryByLabelText('URL')).not.toBeInTheDocument();
