@@ -14,6 +14,11 @@ import {
   Logger,
   SavedObjectsClient,
 } from '../../../../../../src/core/server';
+import {
+  ConcreteTaskInstance,
+  TaskManagerSetupContract,
+  TaskManagerStartContract,
+} from '../../../../task_manager/server';
 import { UptimeServerSetup } from '../adapters';
 import { installSyntheticsIndexTemplates } from '../../rest_api/synthetics_service/install_index_templates';
 import { SyntheticsServiceApiKey } from '../../../common/runtime_types/synthetics_service_api_key';
@@ -22,6 +27,10 @@ import { SyntheticsMonitorSavedObject } from '../../../common/types';
 import { syntheticsMonitorType } from '../saved_objects/synthetics_monitor';
 import { getEsHosts } from './get_es_hosts';
 import { UptimeConfig } from '../../../common/config';
+
+const SYNTHETICS_SERVICE_SYNC_MONITORS_TASK_TYPE =
+  'UPTIME:SyntheticsService:Sync-Saved-Monitor-Objects';
+const SYNTHETICS_SERVICE_SYNC_MONITORS_TASK_ID = 'UPTIME:SyntheticsService:sync-task';
 
 export class SyntheticsService {
   private logger: Logger;
@@ -75,12 +84,57 @@ export class SyntheticsService {
     );
   }
 
-  public registerSyncTask() {
-    // handler for registering kibana task manager task
+  public registerSyncTask(taskManager: TaskManagerSetupContract) {
+    const service = this;
+
+    taskManager.registerTaskDefinitions({
+      [SYNTHETICS_SERVICE_SYNC_MONITORS_TASK_TYPE]: {
+        title: 'Synthetics Service - Sync Saved Monitors',
+        description: 'This task periodically pushes saved monitors to Synthetics Service.',
+        timeout: '1m',
+        maxAttempts: 3,
+        maxConcurrency: 1,
+
+        createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
+          return {
+            // Perform the work of the task. The return value should fit the TaskResult interface.
+            async run() {
+              const { state } = taskInstance;
+
+              // TODO: Push API Key and Monitor Configs to service here
+
+              return { state };
+            },
+            async cancel() {
+              service.logger?.warn(`Task ${SYNTHETICS_SERVICE_SYNC_MONITORS_TASK_ID} timed out`);
+            },
+          };
+        },
+      },
+    });
   }
 
-  public scheduleSyncTask() {
-    // handler for scheduling task
+  public scheduleSyncTask(taskManager: TaskManagerStartContract) {
+    taskManager
+      .ensureScheduled({
+        id: SYNTHETICS_SERVICE_SYNC_MONITORS_TASK_ID,
+        taskType: SYNTHETICS_SERVICE_SYNC_MONITORS_TASK_TYPE,
+        schedule: {
+          interval: '5m',
+        },
+        params: {},
+        state: {},
+        scope: ['uptime'],
+      })
+      .then((_result) => {
+        this.logger?.info(`Task ${SYNTHETICS_SERVICE_SYNC_MONITORS_TASK_ID} scheduled. `);
+      })
+      .catch((e) => {
+        this.logger?.error(
+          `Error running task: ${SYNTHETICS_SERVICE_SYNC_MONITORS_TASK_ID}, `,
+          e?.message() ?? e
+        );
+      });
   }
 
   async pushConfigs(request: KibanaRequest) {

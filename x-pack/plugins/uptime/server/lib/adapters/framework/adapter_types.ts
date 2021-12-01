@@ -12,6 +12,10 @@ import {
   EncryptedSavedObjectsPluginSetup,
   EncryptedSavedObjectsPluginStart,
 } from '../../../../../encrypted_saved_objects/server';
+import {
+  TaskManagerSetupContract,
+  TaskManagerStartContract,
+} from '../../../../../task_manager/server';
 import { UMKibanaRoute } from '../../../rest_api';
 import { PluginSetupContract } from '../../../../../features/server';
 import { MlPluginSetup as MlSetup } from '../../../../../ml/server';
@@ -54,12 +58,14 @@ export interface UptimeCorePluginsSetup {
   cloud?: CloudSetup;
   ruleRegistry: RuleRegistryPluginSetupContract;
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
+  taskManager: TaskManagerSetupContract;
 }
 
 export interface UptimeCorePluginsStart {
   security: SecurityPluginStart;
   fleet: FleetStartContract;
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
+  taskManager: TaskManagerStartContract;
 }
 
 export interface UMBackendFrameworkAdapter {
