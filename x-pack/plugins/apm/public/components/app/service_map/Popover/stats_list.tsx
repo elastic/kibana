@@ -8,7 +8,7 @@
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLoadingSpinner,
+  EuiLoadingChart,
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -37,7 +37,7 @@ function LoadingSpinner() {
       justifyContent="spaceAround"
       style={{ height: 170 }}
     >
-      <EuiLoadingSpinner size="xl" />
+      <EuiLoadingChart size="xl" />
     </EuiFlexGroup>
   );
 }
