@@ -141,7 +141,7 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
       euiIconType: 'logoElastic',
       mount: async (params: AppMountParameters) => {
         const [coreStartServices, startDepsServices, fleetStart] = await core.getStartServices();
-        const authz = await fleetStart.authz();
+        const authz = await fleetStart.authz;
         const startServices: FleetStartServices = {
           ...coreStartServices,
           ...startDepsServices,
