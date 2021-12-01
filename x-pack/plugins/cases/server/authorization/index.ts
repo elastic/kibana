@@ -152,6 +152,14 @@ export const Operations: Record<ReadOperations | WriteOperations, OperationDetai
     docType: 'case',
     savedObjectType: CASE_SAVED_OBJECT,
   },
+  [ReadOperations.GetCaseMetrics]: {
+    ecsType: EVENT_TYPES.access,
+    name: ACCESS_CASE_OPERATION,
+    action: 'case_get_metrics',
+    verbs: accessVerbs,
+    docType: 'case',
+    savedObjectType: CASE_SAVED_OBJECT,
+  },
   [ReadOperations.ResolveCase]: {
     ecsType: EVENT_TYPES.access,
     name: ACCESS_CASE_OPERATION,

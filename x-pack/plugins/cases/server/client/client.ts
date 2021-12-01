@@ -14,6 +14,7 @@ import { createSubCasesClient, SubCasesClient } from './sub_cases/client';
 import { ENABLE_CASE_CONNECTOR } from '../../common';
 import { ConfigureSubClient, createConfigurationSubClient } from './configure/client';
 import { createStatsSubClient, StatsSubClient } from './stats/client';
+import { createMetricsSubClient, MetricsSubClient } from './metrics/client';
 
 /**
  * Client wrapper that contains accessor methods for individual entities within the cases system.
@@ -26,6 +27,7 @@ export class CasesClient {
   private readonly _subCases: SubCasesClient;
   private readonly _configure: ConfigureSubClient;
   private readonly _stats: StatsSubClient;
+  private readonly _metrics: MetricsSubClient;
 
   constructor(args: CasesClientArgs) {
     this._casesClientInternal = createCasesClientInternal(args);
@@ -35,6 +37,7 @@ export class CasesClient {
     this._subCases = createSubCasesClient(args, this._casesClientInternal);
     this._configure = createConfigurationSubClient(args, this._casesClientInternal);
     this._stats = createStatsSubClient(args);
+    this._metrics = createMetricsSubClient(args, this);
   }
 
   /**
@@ -82,6 +85,13 @@ export class CasesClient {
    */
   public get stats() {
     return this._stats;
+  }
+
+  /**
+   * Retrieves an interface for retrieving metrics related to the cases entities.
+   */
+  public get metrics() {
+    return this._metrics;
   }
 }
 

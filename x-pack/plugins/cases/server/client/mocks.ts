@@ -12,6 +12,7 @@ import { AttachmentsSubClient } from './attachments/client';
 import { CasesSubClient } from './cases/client';
 import { ConfigureSubClient } from './configure/client';
 import { CasesClientFactory } from './factory';
+import { MetricsSubClient } from './metrics/client';
 import { StatsSubClient } from './stats/client';
 import { SubCasesClient } from './sub_cases/client';
 import { UserActionsSubClient } from './user_actions/client';
@@ -30,6 +31,14 @@ const createCasesSubClientMock = (): CasesSubClientMock => {
     getTags: jest.fn(),
     getReporters: jest.fn(),
     getCasesByAlertID: jest.fn(),
+  };
+};
+
+type MetricsSubClientMock = jest.Mocked<MetricsSubClient>;
+
+const createMetricsSubClientMock = (): MetricsSubClientMock => {
+  return {
+    getCaseMetrics: jest.fn(),
   };
 };
 
@@ -101,6 +110,7 @@ export const createCasesClientMock = (): CasesClientMock => {
     subCases: createSubCasesClientMock(),
     configure: createConfigureSubClientMock(),
     stats: createStatsSubClientMock(),
+    metrics: createMetricsSubClientMock(),
   };
   return client as unknown as CasesClientMock;
 };
