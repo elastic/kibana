@@ -40,6 +40,7 @@ import { useInitialFocus } from '../../../components/use_initial_focus';
 import { RolesAPIClient } from '../../roles/roles_api_client';
 import { APIKeysAPIClient } from '../api_keys_api_client';
 import type { CreateApiKeyRequest, CreateApiKeyResponse } from '../api_keys_api_client';
+import { RichTextEditor } from './rich_text_editor';
 
 export interface ApiKeyFormValues {
   name: string;
@@ -159,8 +160,6 @@ export const CreateApiKeyFlyout: FunctionComponent<CreateApiKeyFlyoutProps> = ({
     }
   }, [currentUser, roles]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const firstFieldRef = useInitialFocus<HTMLInputElement>([isLoading]);
-
   return (
     <FormFlyout
       title={i18n.translate('xpack.security.accountManagement.createApiKey.title', {
@@ -179,6 +178,20 @@ export const CreateApiKeyFlyout: FunctionComponent<CreateApiKeyFlyoutProps> = ({
       isDisabled={isLoading || (form.isSubmitted && form.isInvalid)}
       ownFocus
     >
+      <RichTextEditor />
+      <EuiSpacer />
+      <CodeEditorField
+        value={form.values.metadata!}
+        onChange={(value) => form.setValue('metadata', value)}
+        languageId="markdown"
+        suggestionProvider={new MarkdownCompletionProvider()}
+        options={{
+          lineNumbers: 'off',
+        }}
+        height={200}
+      />
+      <EuiSpacer />
+
       {form.submitError && (
         <>
           <EuiCallOut
@@ -245,22 +258,10 @@ export const CreateApiKeyFlyout: FunctionComponent<CreateApiKeyFlyoutProps> = ({
               name="name"
               defaultValue={form.values.name}
               isInvalid={form.touched.name && !!form.errors.name}
-              inputRef={firstFieldRef}
               fullWidth
               data-test-subj="apiKeyNameInput"
             />
           </EuiFormRow>
-
-          <CodeEditorField
-            value={form.values.metadata!}
-            onChange={(value) => form.setValue('metadata', value)}
-            languageId="markdown"
-            suggestionProvider={new MarkdownCompletionProvider()}
-            options={{
-              lineNumbers: 'off',
-            }}
-            height={200}
-          />
 
           <EuiSpacer />
           <EuiFormFieldset>
