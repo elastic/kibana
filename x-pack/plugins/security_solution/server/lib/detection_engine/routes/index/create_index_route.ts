@@ -97,7 +97,7 @@ export const createDetectionIndex = async (
   if (await templateNeedsUpdate({ alias: index, esClient })) {
     await esClient.indices.putIndexTemplate({
       name: index,
-      body: getSignalsTemplate(index, spaceId, aadIndexAliasName) as Record<string, unknown>,
+      body: getSignalsTemplate(index, aadIndexAliasName) as Record<string, unknown>,
     });
   }
   // Check if the old legacy siem signals template exists and remove it
