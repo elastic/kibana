@@ -6,28 +6,29 @@
  */
 
 import expect from '@kbn/expect';
-import url from 'url';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import archives from '../../common/fixtures/es_archiver/archives_metadata';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
+  const apmApiClient = getService('apmApiClient');
   const registry = getService('registry');
-  const supertest = getService('legacySupertestAsApmReadUser');
 
   const archiveName = 'apm_8.0.0';
   const { start, end } = archives[archiveName];
+  const serviceName = 'opbeans-java';
 
   registry.when(
     'Service nodes when data is not loaded',
     { config: 'basic', archives: [] },
     () => {
       it('handles the empty state', async () => {
-        const response = await supertest.get(
-          url.format({
-            pathname: `/internal/apm/services/opbeans-java/serviceNodes`,
-            query: { start, end, kuery: '', environment: 'ENVIRONMENT_ALL'},
-          })
-        );
+        const response = await apmApiClient.readUser({
+          endpoint: 'GET /internal/apm/services/{serviceName}/serviceNodes',
+          params: {
+            path: { serviceName },
+            query: { start, end, kuery: '', environment: 'ENVIRONMENT_ALL' }
+          },
+        });
 
         expect(response.status).to.be(200);
 
@@ -45,12 +46,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     { config: 'basic', archives: [archiveName] },
     () => {
       it('returns java service nodes', async () => {
-        const response = await supertest.get(
-          url.format({
-            pathname: `/internal/apm/services/opbeans-java/serviceNodes`,
-            query: { start, end, kuery: '', environment: 'ENVIRONMENT_ALL' },
-          })
-        );
+        const response = await apmApiClient.readUser({
+          endpoint: 'GET /internal/apm/services/{serviceName}/serviceNodes',
+          params: {
+            path: { serviceName },
+            query: { start, end, kuery: '', environment: 'ENVIRONMENT_ALL' }
+          },
+        });
 
         expect(response.status).to.be(200);
 
