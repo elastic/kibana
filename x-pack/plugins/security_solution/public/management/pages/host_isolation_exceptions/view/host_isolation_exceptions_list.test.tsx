@@ -142,7 +142,15 @@ describe('When on the host isolation exceptions page', () => {
         userEvent.click(renderResult.getByTestId('searchButton'));
 
         // wait for the page render
-        await waitForApiCall();
+        await waitFor(() =>
+          expect(getHostIsolationExceptionItemsMock).toHaveBeenLastCalledWith({
+            filter:
+              '(exception-list-agnostic.attributes.name:(*this*does*not*exists*) OR exception-list-agnostic.attributes.description:(*this*does*not*exists*) OR exception-list-agnostic.attributes.entries.value:(*this*does*not*exists*))',
+            http: mockedContext.coreStart.http,
+            page: 1,
+            perPage: 10,
+          })
+        );
 
         // check the url changed
         expect(mockedContext.history.location.search).toBe('?filter=this%20does%20not%20exists');
