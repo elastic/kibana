@@ -66,9 +66,6 @@ export function AlertsPopover(props: OptionsPopoverProps) {
       onClose: onCloseAlertFlyout,
       canChangeTrigger: false,
       alertTypeId: '.search-threshold',
-      metadata: {
-        isInternal: true,
-      },
       initialValues: {
         params: getParams(),
       },

@@ -280,7 +280,7 @@ export function getAlertType(
       // @TODO, there should be a checksum addon to verify if the searchSource was changed
       // In this case the user should be notified that the displayed data when opening the link
       // is a might be different to the data that triggered the alert.
-      const link = `${publicBaseUrl}/app/discover#/viewAlert/${alertId}?from${from}&to=${to}`;
+      const link = `${publicBaseUrl}/app/discover#/viewAlert/${alertId}?from=${from}&to=${to}`;
 
       const conditions = `${nrOfDocs} is ${getHumanReadableComparator(
         params.thresholdComparator
@@ -290,7 +290,6 @@ export function getAlertType(
         title: name,
         message: `${nrOfDocs} documents found (${conditions})`,
         date: timestamp,
-        group: ConditionMetAlertInstanceId,
         value: Number(nrOfDocs),
         conditions,
         link,
