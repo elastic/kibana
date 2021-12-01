@@ -14,8 +14,10 @@ import {
   SavedObjectSanitizedDoc,
   SavedObjectMigrationContext,
   LogMeta,
+  SavedObjectReference,
 } from '../../../../../../src/core/server';
 import { ConnectorTypes, isCreateConnector, isPush, isUpdateConnector } from '../../../common';
+import { USER_ACTION_OLD_ID_REF_NAME, USER_ACTION_OLD_PUSH_ID_REF_NAME } from '../../common';
 
 import { extractConnectorIdFromJson } from '../../services/user_actions/transform';
 import { UserActionFieldType } from '../../services/user_actions/types';
@@ -153,6 +155,14 @@ const getMultipleFieldsPayload = (fields: string[], value: string) => {
   );
 };
 
+const removeOldReferences = (
+  references: SavedObjectUnsanitizedDoc<UserActions>['references']
+): SavedObjectReference[] =>
+  (references ?? []).filter(
+    (ref) =>
+      ref.name !== USER_ACTION_OLD_ID_REF_NAME && ref.name !== USER_ACTION_OLD_PUSH_ID_REF_NAME
+  );
+
 function payloadMigration(
   doc: SavedObjectUnsanitizedDoc<UserActions>,
   context: SavedObjectMigrationContext
@@ -165,6 +175,8 @@ function payloadMigration(
       ? getMultipleFieldsPayload(action_field, new_value ?? old_value)
       : getSingleFieldPayload(action_field[0], new_value ?? old_value);
 
+  const references = removeOldReferences(doc.references);
+
   return {
     ...doc,
     attributes: {
@@ -174,7 +186,7 @@ function payloadMigration(
       created_by: action_by,
       payload,
     },
-    references: doc.references ?? [],
+    references,
   };
 }
 
