@@ -44,9 +44,10 @@ export const getMaxValue = (row?: DatatableRow, state?: GaugeAccessorsType): num
     const { metricAccessor, goalAccessor } = state;
     const metricValue = metricAccessor && row[metricAccessor];
     const goalValue = goalAccessor && row[goalAccessor];
+    const minValue = getMinValue(row, state);
     if (metricValue != null) {
-      const minValue = getMinValue(row, state);
-      const biggerValue = goalValue ? Math.max(goalValue, metricValue) : metricValue;
+      const numberValues = [minValue, goalValue, metricValue].filter((v) => typeof v === 'number');
+      const biggerValue = Math.max(...numberValues);
       const nicelyRounded = scaleLinear().domain([minValue, biggerValue]).nice().ticks(4);
       if (nicelyRounded.length > 2) {
         const ticksDifference = Math.abs(nicelyRounded[0] - nicelyRounded[1]);
@@ -68,8 +69,9 @@ export const getMinValue = (row?: DatatableRow, state?: GaugeAccessorsType) => {
     const { metricAccessor, maxAccessor } = state;
     const metricValue = metricAccessor && row[metricAccessor];
     const maxValue = maxAccessor && row[maxAccessor];
-    if (Math.min(metricValue, maxValue) < 0) {
-      return Math.min(metricValue, maxValue) - 10; // TODO: TO THINK THROUGH
+    const numberValues = [metricValue, maxValue].filter((v) => typeof v === 'number');
+    if (Math.min(...numberValues) <= 0) {
+      return Math.min(...numberValues) - 10; // TODO: TO THINK THROUGH
     }
   }
   return FALLBACK_VALUE;

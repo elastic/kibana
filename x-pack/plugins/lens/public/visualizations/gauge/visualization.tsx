@@ -43,14 +43,14 @@ export const CHART_NAMES = {
   horizontalBullet: {
     icon: LensIconChartGaugeHorizontal,
     label: i18n.translate('xpack.lens.gaugeHorizontal.gaugeLabel', {
-      defaultMessage: 'Gauge Horizontal',
+      defaultMessage: 'Gauge horizontal',
     }),
     groupLabel: groupLabelForGauge,
   },
   verticalBullet: {
     icon: LensIconChartGaugeVertical,
     label: i18n.translate('xpack.lens.gaugeVertical.gaugeLabel', {
-      defaultMessage: 'Gauge Vertical',
+      defaultMessage: 'Gauge vertical',
     }),
     groupLabel: groupLabelForGauge,
   },
@@ -227,14 +227,15 @@ export const getGaugeVisualization = ({
           layerId: state.layerId,
           groupId: GROUP_ID.MIN,
           groupLabel: i18n.translate('xpack.lens.gauge.minValueLabel', {
-            defaultMessage: 'Minimum Value',
+            defaultMessage: 'Minimum value',
           }),
           accessors: state.minAccessor ? [{ columnId: state.minAccessor }] : [],
           filterOperations: isNumericMetric,
           supportsMoreColumns: !state.minAccessor,
+          required: true,
           dataTestSubj: 'lnsGauge_minDimensionPanel',
           prioritizedOperation: 'min',
-          suggestedValue: getMinValue(row, state),
+          suggestedValue: state.metricAccessor ? getMinValue(row, state) : undefined,
         },
         {
           supportStaticValue: true,
@@ -242,14 +243,15 @@ export const getGaugeVisualization = ({
           layerId: state.layerId,
           groupId: GROUP_ID.MAX,
           groupLabel: i18n.translate('xpack.lens.gauge.maxValueLabel', {
-            defaultMessage: 'Maximum Value',
+            defaultMessage: 'Maximum value',
           }),
           accessors: state.maxAccessor ? [{ columnId: state.maxAccessor }] : [],
           filterOperations: isNumericMetric,
           supportsMoreColumns: !state.maxAccessor,
           dataTestSubj: 'lnsGauge_maxDimensionPanel',
+          required: true,
           prioritizedOperation: 'max',
-          suggestedValue: getMaxValue(row, state),
+          suggestedValue: state.metricAccessor ? getMaxValue(row, state) : undefined,
         },
         {
           supportStaticValue: true,
@@ -257,7 +259,7 @@ export const getGaugeVisualization = ({
           layerId: state.layerId,
           groupId: GROUP_ID.GOAL,
           groupLabel: i18n.translate('xpack.lens.gauge.goalValueLabel', {
-            defaultMessage: 'Goal Value',
+            defaultMessage: 'Goal value',
           }),
           accessors: state.goalAccessor ? [{ columnId: state.goalAccessor }] : [],
           filterOperations: isNumericMetric,

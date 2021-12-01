@@ -6,21 +6,12 @@
  */
 
 import React, { memo, useState } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSwitch } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { VisualizationToolbarProps } from '../../../types';
-import {
-  ToolbarPopover,
-  TooltipWrapper,
-  useDebouncedValue,
-  VisLabel,
-} from '../../../shared_components';
+import { ToolbarPopover, useDebouncedValue, VisLabel } from '../../../shared_components';
 import './gauge_config_panel.scss';
-import {
-  GaugeTicksPositions,
-  GaugeTitleMode,
-  GaugeVisualizationState,
-} from '../../../../common/expressions';
+import { GaugeTitleMode, GaugeVisualizationState } from '../../../../common/expressions';
 
 export const GaugeToolbar = memo((props: VisualizationToolbarProps<GaugeVisualizationState>) => {
   const { state, setState, frame } = props;
@@ -99,43 +90,6 @@ export const GaugeToolbar = memo((props: VisualizationToolbarProps<GaugeVisualiz
                   setSubtitleMode(value.mode);
                 }}
               />
-            </EuiFormRow>
-            <EuiFormRow
-              fullWidth
-              display="columnCompressedSwitch"
-              label={i18n.translate('xpack.lens.shared.ticksPositionOptions', {
-                defaultMessage: 'Ticks on color bands',
-              })}
-            >
-              <TooltipWrapper
-                tooltipContent={i18n.translate('xpack.lens.gauge.toolbar.colorBandsDisabled', {
-                  defaultMessage: 'Add color bands in metric value settings to enable this setting',
-                })}
-                condition={state.colorMode !== 'palette'}
-                position="top"
-                delay="regular"
-                display="block"
-              >
-                <EuiSwitch
-                  compressed
-                  label={i18n.translate('xpack.lens.shared.ticksPositionOptions', {
-                    defaultMessage: 'Ticks on color bands',
-                  })}
-                  data-test-subj="lens-toolbar-gauge-ticks-position-switch"
-                  showLabel={false}
-                  disabled={state.colorMode !== 'palette'}
-                  checked={state.ticksPosition === GaugeTicksPositions.bands}
-                  onChange={() => {
-                    handleInputChange({
-                      ...inputValue,
-                      ticksPosition:
-                        state.ticksPosition === GaugeTicksPositions.bands
-                          ? GaugeTicksPositions.auto
-                          : GaugeTicksPositions.bands,
-                    });
-                  }}
-                />
-              </TooltipWrapper>
             </EuiFormRow>
           </ToolbarPopover>
         </EuiFlexGroup>

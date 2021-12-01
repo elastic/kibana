@@ -71,6 +71,7 @@ export function VisLabel({
     <EuiFlexGroup gutterSize="s" justifyContent="flexEnd" alignItems="center">
       <EuiFlexItem grow={false}>
         <EuiSelect
+          fullWidth
           compressed
           data-test-subj={`${dataTestSubj}-select`}
           aria-label="Label"

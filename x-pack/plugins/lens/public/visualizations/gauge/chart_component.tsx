@@ -42,6 +42,14 @@ declare global {
   }
 }
 
+function normalizeColors({ colors, stops }: CustomPaletteState, min: number) {
+  if (!colors) {
+    return;
+  }
+  const colorsOutOfRangeSmaller = Math.max(stops.filter((stop, i) => stop < min).length, 0);
+  return colors.slice(colorsOutOfRangeSmaller);
+}
+
 function normalizeBands(
   { colors, stops, range }: CustomPaletteState,
   { min, max }: { min: number; max: number }
@@ -54,7 +62,7 @@ function normalizeBands(
     const filteredStops = stops.filter((stop) => stop >= 0 && stop <= 100);
     return [min, ...filteredStops.map((step) => min + step * ((max - min) / 100)), max];
   }
-  const orderedStops = stops.filter((stop, i) => stop < max);
+  const orderedStops = stops.filter((stop, i) => stop < max && stop > min);
   return [min, ...orderedStops, max];
 }
 
@@ -153,7 +161,7 @@ export const GaugeComponent: FC<GaugeRenderProps> = ({
         message={
           <FormattedMessage
             id="xpack.lens.guageVisualization.chartCannotRenderEqual"
-            defaultMessage="Minimum Value is equal to Maximum Value. Chart cannot render."
+            defaultMessage="Minimum and maximum values may not be equal"
           />
         }
       />
@@ -165,7 +173,7 @@ export const GaugeComponent: FC<GaugeRenderProps> = ({
         message={
           <FormattedMessage
             id="xpack.lens.guageVisualization.chartCannotRenderMinGreaterMax"
-            defaultMessage="Minimum Value is smaller than Maximum Value. Chart cannot render."
+            defaultMessage="Minimum value may not be greater than maximum value"
           />
         }
       />
@@ -182,7 +190,7 @@ export const GaugeComponent: FC<GaugeRenderProps> = ({
           },
         }
   );
-  const colors = (palette?.params as CustomPaletteState)?.colors ?? undefined;
+  const colors = palette?.params?.colors ? normalizeColors(palette.params, min) : undefined;
   const bands: number[] = (palette?.params as CustomPaletteState)
     ? normalizeBands(args.palette?.params as CustomPaletteState, { min, max })
     : [min, max];
@@ -194,7 +202,7 @@ export const GaugeComponent: FC<GaugeRenderProps> = ({
         id="spec_1"
         subtype={subtype}
         base={min}
-        target={goal ? Math.min(Math.max(goal, min), max) : undefined}
+        target={goal && goal >= min && goal <= max ? goal : undefined}
         actual={Math.min(Math.max(metricValue, min), max)}
         tickValueFormatter={({ value: tickValue }) => formatter.convert(tickValue)}
         bands={bands}
