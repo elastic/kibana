@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { documentationService } from '../../../../../services/documentation';
 
@@ -13,10 +14,9 @@ import {
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
+  EuiCallOut,
   EuiLink,
   EuiSpacer,
-  EuiTextColor,
   EuiTitle,
 } from '@elastic/eui';
 import { TAB_SETTINGS } from '../../../../../constants';
@@ -90,16 +90,25 @@ export class EditSettingsJson extends React.PureComponent {
   };
   errorMessage() {
     const { error } = this.props;
+
     if (!error) {
       return null;
     }
+
     return (
-      <div>
+      <>
         <EuiSpacer />
-        <EuiIcon color="danger" type="alert" />
-        <EuiTextColor color="danger">{error}</EuiTextColor>
-        <EuiSpacer />
-      </div>
+        <EuiCallOut
+          title={i18n.translate('xpack.idxMgmt.editSettingsJSON.saveJSONCalloutErrorTitle', {
+            defaultMessage: 'There was an error while trying to save your settings',
+          })}
+          color="danger"
+          iconType="alert"
+          data-test-subj="updateIndexSettingsErrorCallout"
+        >
+          <p>{error}</p>
+        </EuiCallOut>
+      </>
     );
   }
   render() {
@@ -135,6 +144,7 @@ export class EditSettingsJson extends React.PureComponent {
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
+        {this.errorMessage()}
         <EuiSpacer />
         <EuiLink
           href={documentationService.getSettingsDocumentationLink()}
@@ -153,7 +163,6 @@ export class EditSettingsJson extends React.PureComponent {
             this.aceDiv = aceDiv;
           }}
         />
-        {this.errorMessage()}
         <EuiSpacer />
       </div>
     );
