@@ -186,7 +186,7 @@ const agentConfigurationSearchRoute = createApmServerRoute({
   params: t.type({
     body: searchParamsRt,
   }),
-  options: { tags: ['access:apm'] },
+  options: { tags: ['access:apm'], disableTelemetry: true },
   handler: async (resources) => {
     const { params, logger } = resources;
 
