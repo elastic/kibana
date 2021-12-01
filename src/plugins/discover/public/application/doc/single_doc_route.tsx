@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import React, { useEffect } from 'react';
-import { useHistory, useLocation, useParams } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
 import { EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DiscoverServices } from '../../build_services';
@@ -14,6 +14,7 @@ import { getRootBreadcrumbs } from '../../utils/breadcrumbs';
 import { Doc } from './components/doc';
 import { LoadingIndicator } from '../../components/common/loading_indicator';
 import { useIndexPattern } from '../../utils/use_index_pattern';
+import { useMainRouteBreadcrumb } from '../../utils/use_navigation_props';
 
 export interface SingleDocRouteProps {
   /**
@@ -36,19 +37,19 @@ export function SingleDocRoute(props: SingleDocRouteProps) {
   const { chrome, timefilter } = services;
 
   const { indexPatternId, index } = useParams<DocUrlParams>();
-  const referrer = useHistory().location.state?.referrer;
+  const breadcrumb = useMainRouteBreadcrumb();
 
   const query = useQuery();
   const docId = query.get('id') || '';
 
   useEffect(() => {
     chrome.setBreadcrumbs([
-      ...getRootBreadcrumbs(referrer),
+      ...getRootBreadcrumbs(breadcrumb),
       {
         text: `${index}#${docId}`,
       },
     ]);
-  }, [chrome, index, docId, referrer]);
+  }, [chrome, index, docId, breadcrumb]);
 
   useEffect(() => {
     timefilter.disableAutoRefreshSelector();

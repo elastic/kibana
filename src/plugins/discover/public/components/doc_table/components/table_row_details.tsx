@@ -9,7 +9,7 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { DiscoverNavigationProps } from '../../../utils/use_breadcrumb_reffs';
+import { DiscoverNavigationProps } from '../../../utils/use_breadcrumbs';
 interface TableRowDetailsProps {
   open: boolean;
   colLength: number;

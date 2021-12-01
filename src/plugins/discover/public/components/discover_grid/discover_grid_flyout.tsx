@@ -27,7 +27,7 @@ import {
 import { DocViewer } from '../../services/doc_views/components/doc_viewer/doc_viewer';
 import { DocViewFilterFn, ElasticSearchHit } from '../../services/doc_views/doc_views_types';
 import { DiscoverServices } from '../../build_services';
-import { useBreadcrumbReffs } from '../../utils/use_breadcrumb_reffs';
+import { useNavigationProps } from '../../utils/use_navigation_props';
 
 interface Props {
   columns: string[];
@@ -101,7 +101,7 @@ export function DiscoverGridFlyout({
     [activePage, setPage]
   );
 
-  const { singleDocProps, surrDocsProps } = useBreadcrumbReffs({
+  const { singleDocProps, surrDocsProps } = useNavigationProps({
     indexPatternId: indexPattern.id!,
     rowIndex: hit._index,
     rowId: hit._id,

@@ -18,7 +18,7 @@ import { TableCell } from './table_row/table_cell';
 import { ElasticSearchHit, DocViewFilterFn } from '../../../services/doc_views/doc_views_types';
 import { TableRowDetails } from './table_row_details';
 import { formatRow, formatTopLevelObject } from '../lib/row_formatter';
-import { useBreadcrumbReffs } from '../../../utils/use_breadcrumb_reffs';
+import { useNavigationProps } from '../../../utils/use_navigation_props';
 
 export type DocTableRow = ElasticSearchHit & {
   isAnchor?: boolean;
@@ -98,7 +98,7 @@ export const TableRow = ({
     [filter, flattenedRow, indexPattern.fields]
   );
 
-  const { singleDocProps, surrDocsProps } = useBreadcrumbReffs({
+  const { singleDocProps, surrDocsProps } = useNavigationProps({
     indexPatternId: indexPattern.id!,
     rowIndex: row._index,
     rowId: row._id,

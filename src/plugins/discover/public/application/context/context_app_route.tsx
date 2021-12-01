@@ -5,8 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { useEffect, useRef } from 'react';
-import { useHistory, useParams } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -15,6 +15,7 @@ import { ContextApp } from './context_app';
 import { getRootBreadcrumbs } from '../../utils/breadcrumbs';
 import { LoadingIndicator } from '../../components/common/loading_indicator';
 import { useIndexPattern } from '../../utils/use_index_pattern';
+import { useMainRouteBreadcrumb } from '../../utils/use_navigation_props';
 
 export interface ContextAppProps {
   /**
@@ -33,18 +34,18 @@ export function ContextAppRoute(props: ContextAppProps) {
   const { chrome } = services;
 
   const { indexPatternId, id } = useParams<ContextUrlParams>();
-  const referrer = useRef<string | undefined>(useHistory().location.state?.referrer).current;
+  const breadcrumb = useMainRouteBreadcrumb();
 
   useEffect(() => {
     chrome.setBreadcrumbs([
-      ...getRootBreadcrumbs(referrer),
+      ...getRootBreadcrumbs(breadcrumb),
       {
         text: i18n.translate('discover.context.breadcrumb', {
           defaultMessage: 'Surrounding documents',
         }),
       },
     ]);
-  }, [chrome, referrer]);
+  }, [chrome, breadcrumb]);
 
   const { indexPattern, error } = useIndexPattern(services.indexPatterns, indexPatternId);
 

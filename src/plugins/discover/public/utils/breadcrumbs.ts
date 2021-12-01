@@ -10,13 +10,13 @@ import { ChromeStart } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import { SavedSearch } from '../services/saved_searches';
 
-export function getRootBreadcrumbs(referrer?: string) {
+export function getRootBreadcrumbs(breadcrumb?: string) {
   return [
     {
       text: i18n.translate('discover.rootBreadcrumb', {
         defaultMessage: 'Discover',
       }),
-      href: referrer || '#/',
+      href: breadcrumb || '#/',
     },
   ];
 }

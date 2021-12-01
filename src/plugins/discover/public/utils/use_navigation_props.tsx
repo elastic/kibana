@@ -16,7 +16,16 @@ import { getServices } from '../kibana_services';
 
 export type DiscoverNavigationProps = { onClick: () => void } | { href: string };
 
-const getContextHash = (columns: string[], filterManager: FilterManager) => {
+export interface UseNavigationProps {
+  indexPatternId: string;
+  rowIndex: string;
+  rowId: string;
+  columns: string[];
+  filterManager: FilterManager;
+  addBasePath: (url: string) => string;
+}
+
+export const getContextHash = (columns: string[], filterManager: FilterManager) => {
   const globalFilters = filterManager.getGlobalFilters();
   const appFilters = filterManager.getAppFilters();
 
@@ -37,36 +46,34 @@ const getContextHash = (columns: string[], filterManager: FilterManager) => {
 };
 
 /**
- * When it's context route, referrer should point to the main discover page anyway.
- * Otherwise, we are on main page and should create referrer from it.
+ * When it's context route, breadcrumb link should point to the main discover page anyway.
+ * Otherwise, we are on main page and should create breadcrumb link from it.
  * Current history object should be used in callback, since url state might be changed
  * after expanded document opened.
  */
-const getCurrentReferrer = (isContextRoute: boolean, prevReferrer?: string) => {
+const getCurrentBreadcrumbs = (isContextRoute: boolean, prevBreadcrumb?: string) => {
   const { history: getHistory } = getServices();
   const currentHistory = getHistory();
   return isContextRoute
-    ? prevReferrer
+    ? prevBreadcrumb
     : '#' + currentHistory?.location.pathname + currentHistory?.location.search;
 };
 
-export const useBreadcrumbReffs = ({
+export const useMainRouteBreadcrumb = () => {
+  // useRef needed to retrieve initial breadcrumb link from the push state without updates
+  return useRef<string | undefined>(useHistory().location.state?.breadcrumb).current;
+};
+
+export const useNavigationProps = ({
   indexPatternId,
   rowIndex,
   rowId,
   columns,
   filterManager,
   addBasePath,
-}: {
-  indexPatternId: string;
-  rowIndex: string;
-  rowId: string;
-  columns: string[];
-  filterManager: FilterManager;
-  addBasePath: (url: string) => string;
-}) => {
+}: UseNavigationProps) => {
   const history = useHistory();
-  const prevReferrer = useRef<string | undefined>(history?.location.state?.referrer).current;
+  const prevBreadcrumb = useRef<string | undefined>(history?.location.state?.breadcrumb).current;
   const contextSearchHash = useMemo(
     () => getContextHash(columns, filterManager),
     [columns, filterManager]
@@ -74,7 +81,7 @@ export const useBreadcrumbReffs = ({
 
   /**
    * When history can be accessed via hooks,
-   * it is discover main or context route
+   * it is discover main or context route.
    */
   if (!!history) {
     const isContextRoute = matchPath(history.location.pathname, {
@@ -82,12 +89,13 @@ export const useBreadcrumbReffs = ({
       exact: true,
     });
 
-    const onOpenSingleDoc = () =>
+    const onOpenSingleDoc = () => {
       history.push({
         pathname: `/doc/${indexPatternId}/${rowIndex}`,
         search: `?id=${encodeURIComponent(rowId)}`,
-        state: { referrer: getCurrentReferrer(!!isContextRoute, prevReferrer) },
+        state: { breadcrumb: getCurrentBreadcrumbs(!!isContextRoute, prevBreadcrumb) },
       });
+    };
 
     const onOpenSurrDocs = () =>
       history.push({
@@ -95,7 +103,7 @@ export const useBreadcrumbReffs = ({
           String(rowId)
         )}`,
         search: `?${contextSearchHash}`,
-        state: { referrer: getCurrentReferrer(!!isContextRoute, prevReferrer) },
+        state: { breadcrumb: getCurrentBreadcrumbs(!!isContextRoute, prevBreadcrumb) },
       });
 
     return {
