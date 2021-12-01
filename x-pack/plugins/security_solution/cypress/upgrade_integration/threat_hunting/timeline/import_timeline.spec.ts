@@ -28,7 +28,7 @@ import {
   TIMELINE_QUERY,
   TIMELINE_TITLE,
   USER_KPI,
-} from '../screens/timeline';
+} from '../../../screens/timeline';
 import {
   NOTE,
   TIMELINES_USERNAME,
@@ -36,19 +36,19 @@ import {
   TIMELINES_DESCRIPTION,
   TIMELINES_NOTES_COUNT,
   TIMELINES_PINNED_EVENT_COUNT,
-} from '../screens/timelines';
+} from '../../../screens/timelines';
 
-import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
+import { loginAndWaitForPageWithoutDateRange } from '../../../tasks/login';
 import {
   closeTimeline,
   deleteTimeline,
   goToCorrelationTab,
   goToNotesTab,
   goToPinnedTab,
-} from '../tasks/timeline';
-import { expandNotes, importTimeline, openTimeline } from '../tasks/timelines';
+} from '../../../tasks/timeline';
+import { expandNotes, importTimeline, openTimeline } from '../../../tasks/timelines';
 
-import { TIMELINES_URL } from '../urls/navigation';
+import { TIMELINES_URL } from '../../../urls/navigation';
 
 const timeline = '7_15_timeline.ndjson';
 const username = 'elastic';

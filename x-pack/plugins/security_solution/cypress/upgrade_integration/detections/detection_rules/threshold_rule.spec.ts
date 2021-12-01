@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { HOST_NAME, REASON, RISK_SCORE, RULE_NAME, SEVERITY } from '../screens/alerts';
-import { SERVER_SIDE_EVENT_COUNT } from '../screens/alerts_detection_rules';
+import { HOST_NAME, REASON, RISK_SCORE, RULE_NAME, SEVERITY } from '../../../screens/alerts';
+import { SERVER_SIDE_EVENT_COUNT } from '../../../screens/alerts_detection_rules';
 import {
   ADDITIONAL_LOOK_BACK_DETAILS,
   ABOUT_DETAILS,
@@ -23,14 +23,17 @@ import {
   SEVERITY_DETAILS,
   THRESHOLD_DETAILS,
   TIMELINE_TEMPLATE_DETAILS,
-} from '../screens/rule_details';
+} from '../../../screens/rule_details';
 
-import { expandFirstAlert } from '../tasks/alerts';
-import { waitForPageToBeLoaded } from '../tasks/common';
-import { waitForRulesTableToBeLoaded, goToRuleDetails } from '../tasks/alerts_detection_rules';
-import { loginAndWaitForPage } from '../tasks/login';
+import { expandFirstAlert } from '../../../tasks/alerts';
+import { waitForPageToBeLoaded } from '../../../tasks/common';
+import {
+  waitForRulesTableToBeLoaded,
+  goToRuleDetails,
+} from '../../../tasks/alerts_detection_rules';
+import { loginAndWaitForPage } from '../../../tasks/login';
 
-import { DETECTIONS_RULE_MANAGEMENT_URL } from '../urls/navigation';
+import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../../urls/navigation';
 import {
   OVERVIEW_HOST_NAME,
   OVERVIEW_RISK_SCORE,
@@ -40,7 +43,7 @@ import {
   OVERVIEW_THRESHOLD_COUNT,
   OVERVIEW_THRESHOLD_VALUE,
   SUMMARY_VIEW,
-} from '../screens/alerts_details';
+} from '../../../screens/alerts_details';
 
 const EXPECTED_NUMBER_OF_ALERTS = '1';
 

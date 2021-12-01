@@ -14,8 +14,8 @@ import {
   SEVERITY,
   SOURCE_IP,
   USER_NAME,
-} from '../screens/alerts';
-import { SERVER_SIDE_EVENT_COUNT } from '../screens/alerts_detection_rules';
+} from '../../../screens/alerts';
+import { SERVER_SIDE_EVENT_COUNT } from '../../../screens/alerts_detection_rules';
 import {
   ADDITIONAL_LOOK_BACK_DETAILS,
   ABOUT_DETAILS,
@@ -31,13 +31,16 @@ import {
   SCHEDULE_DETAILS,
   SEVERITY_DETAILS,
   TIMELINE_TEMPLATE_DETAILS,
-} from '../screens/rule_details';
+} from '../../../screens/rule_details';
 
-import { waitForPageToBeLoaded } from '../tasks/common';
-import { waitForRulesTableToBeLoaded, goToTheRuleDetailsOf } from '../tasks/alerts_detection_rules';
-import { loginAndWaitForPage } from '../tasks/login';
+import { waitForPageToBeLoaded } from '../../../tasks/common';
+import {
+  waitForRulesTableToBeLoaded,
+  goToTheRuleDetailsOf,
+} from '../../../tasks/alerts_detection_rules';
+import { loginAndWaitForPage } from '../../../tasks/login';
 
-import { DETECTIONS_RULE_MANAGEMENT_URL } from '../urls/navigation';
+import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../../urls/navigation';
 
 const EXPECTED_NUMBER_OF_ALERTS = '1';
 
