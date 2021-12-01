@@ -161,8 +161,9 @@ export const stringifyCommentWithoutTrailingNewline = (
  * src/plugins/kibana_utils/common/persistable_state/merge_migration_function_map.ts
  *  */
 export const mergeMigrationFunctionMaps = (
-  obj1: MigrateFunctionsObject,
-  obj2: MigrateFunctionsObject
+  // using the saved object framework types here because they include the context, this avoids type errors in our tests
+  obj1: SavedObjectMigrationMap,
+  obj2: SavedObjectMigrationMap
 ) => {
   const customizer = (objValue: SavedObjectMigrationFn, srcValue: SavedObjectMigrationFn) => {
     if (!srcValue || !objValue) {

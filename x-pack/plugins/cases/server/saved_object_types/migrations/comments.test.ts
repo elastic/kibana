@@ -7,6 +7,7 @@
 
 import {
   createCommentsMigrations,
+  mergeMigrationFunctionMaps,
   migrateByValueLensVisualizations,
   stringifyCommentWithoutTrailingNewline,
 } from './comments';
@@ -18,8 +19,15 @@ import {
 import { savedObjectsServiceMock } from '../../../../../../src/core/server/mocks';
 import { lensEmbeddableFactory } from '../../../../lens/server/embeddable/lens_embeddable_factory';
 import { LensDocShape715 } from '../../../../lens/server';
-import { SavedObjectReference, SavedObjectsMigrationLogger } from 'kibana/server';
-import { MigrateFunction } from 'src/plugins/kibana_utils/common';
+import {
+  SavedObjectReference,
+  SavedObjectsMigrationLogger,
+  SavedObjectUnsanitizedDoc,
+} from 'kibana/server';
+import {
+  MigrateFunction,
+  MigrateFunctionsObject,
+} from '../../../../../../src/plugins/kibana_utils/common';
 import { SerializableRecord } from '@kbn/utility-types';
 
 describe('comments migrations', () => {
@@ -265,21 +273,21 @@ describe('comments migrations', () => {
       throw new Error('an error');
     };
 
-    const commentMigrationFunction = migrateByValueLensVisualizations(migrationFunction, '1.0.0');
+    const comment = `!{lens{\"timeRange\":{\"from\":\"now-7d\",\"to\":\"now\",\"mode\":\"relative\"},\"editMode\":false,\"attributes\":${JSON.stringify(
+      lensVisualizationToMigrate
+    )}}}\n\n`;
+
+    const caseComment = {
+      type: 'cases-comments',
+      id: '1cefd0d0-e86d-11eb-bae5-3d065cd16a32',
+      attributes: {
+        comment,
+      },
+      references: [],
+    };
 
     it('logs an error when it fails to parse invalid json', () => {
-      const comment = `!{lens{\"timeRange\":{\"from\":\"now-7d\",\"to\":\"now\",\"mode\":\"relative\"},\"editMode\":false,\"attributes\":${JSON.stringify(
-        lensVisualizationToMigrate
-      )}}}\n\n`;
-
-      const caseComment = {
-        type: 'cases-comments',
-        id: '1cefd0d0-e86d-11eb-bae5-3d065cd16a32',
-        attributes: {
-          comment,
-        },
-        references: [],
-      };
+      const commentMigrationFunction = migrateByValueLensVisualizations(migrationFunction, '1.0.0');
 
       const result = commentMigrationFunction(caseComment, contextMock);
       // the comment should remain unchanged when there is an error
@@ -298,6 +306,56 @@ describe('comments migrations', () => {
           },
         ]
       `);
+    });
+
+    describe('mergeMigrationFunctionMaps', () => {
+      it('logs an error when the passed migration functions fails', () => {
+        const migrationObj1 = {
+          '1.0.0': migrateByValueLensVisualizations(migrationFunction, '1.0.0'),
+        } as unknown as MigrateFunctionsObject;
+
+        const migrationObj2 = {
+          '2.0.0': (doc: SavedObjectUnsanitizedDoc<{ comment?: string }>) => {
+            return doc;
+          },
+        };
+
+        const mergedFunctions = mergeMigrationFunctionMaps(migrationObj1, migrationObj2);
+        mergedFunctions['1.0.0'](caseComment, contextMock);
+
+        const log = contextMock.log as jest.Mocked<SavedObjectsMigrationLogger>;
+        expect(log.error.mock.calls[0]).toMatchInlineSnapshot(`
+          Array [
+            "Failed to migrate comment with doc id: 1cefd0d0-e86d-11eb-bae5-3d065cd16a32 version: 8.0.0 error: an error",
+            Object {
+              "migrations": Object {
+                "comment": Object {
+                  "id": "1cefd0d0-e86d-11eb-bae5-3d065cd16a32",
+                },
+              },
+            },
+          ]
+        `);
+      });
+
+      it('it does not log an error when the migration function does not use the context', () => {
+        const migrationObj1 = {
+          '1.0.0': migrateByValueLensVisualizations(migrationFunction, '1.0.0'),
+        } as unknown as MigrateFunctionsObject;
+
+        const migrationObj2 = {
+          '2.0.0': (doc: SavedObjectUnsanitizedDoc<{ comment?: string }>) => {
+            throw new Error('2.0.0 error');
+          },
+        };
+
+        const mergedFunctions = mergeMigrationFunctionMaps(migrationObj1, migrationObj2);
+
+        expect(() => mergedFunctions['2.0.0'](caseComment, contextMock)).toThrow();
+
+        const log = contextMock.log as jest.Mocked<SavedObjectsMigrationLogger>;
+        expect(log.error).not.toHaveBeenCalled();
+      });
     });
   });
 
