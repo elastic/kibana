@@ -7,13 +7,13 @@
 
 import expect from '@kbn/expect';
 import {
+  BytesFormat,
   FieldFormatsGetConfigFn,
   FieldFormatsRegistry,
-  BytesFormat,
-  NumberFormat,
   FORMATS_UI_SETTINGS,
+  NumberFormat,
 } from 'src/plugins/field_formats/common';
-import { IndexPatternSavedObjectDeprecatedCSV } from '../types';
+import { IndexPatternSavedObjectDeprecatedCSV } from '../../../../common/types';
 import { fieldFormatMapFactory } from './field_format_map';
 
 type ConfigValue = { number: { id: string; params: {} } } | string;

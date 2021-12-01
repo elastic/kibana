@@ -38,7 +38,7 @@ export const EventFiltersListEmptyState = memo<{
         body={
           <FormattedMessage
             id="xpack.securitySolution.eventFilters.listEmpty.message"
-            defaultMessage="There are currently no event filters on your endpoint."
+            defaultMessage="Add an event filter to exclude high volume or unwanted events from being written to Elasticsearch."
           />
         }
         actions={

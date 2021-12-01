@@ -406,6 +406,7 @@ export class AggConfigs {
                     .map(([filter, field]) => ({
                       range: {
                         [field]: {
+                          format: 'strict_date_optional_time',
                           gte: moment(filter?.query.range[field].gte).subtract(shift).toISOString(),
                           lte: moment(filter?.query.range[field].lte).subtract(shift).toISOString(),
                         },

@@ -12,6 +12,7 @@ import { RemoveSeries } from './remove_series';
 import { useSeriesStorage } from '../../hooks/use_series_storage';
 import { SeriesConfig, SeriesUrl } from '../../types';
 import { useDiscoverLink } from '../../hooks/use_discover_link';
+import { useAppIndexPatternContext } from '../../hooks/use_app_index_pattern';
 
 interface Props {
   seriesId: number;
@@ -25,12 +26,16 @@ export function SeriesActions({ seriesId, series, seriesConfig, onEditClick }: P
 
   const { href: discoverHref } = useDiscoverLink({ series, seriesConfig });
 
+  const { indexPatterns } = useAppIndexPatternContext();
+
+  const indexPattern = indexPatterns?.[series.dataType];
+
   const copySeries = () => {
     let copySeriesId: string = `${series.name}-copy`;
     if (allSeries.find(({ name }) => name === copySeriesId)) {
       copySeriesId = copySeriesId + allSeries.length;
     }
-    setSeries(allSeries.length, { ...series, name: copySeriesId });
+    setSeries(allSeries.length, { ...series, name: copySeriesId, breakdown: undefined });
   };
 
   const toggleSeries = () => {
@@ -63,7 +68,7 @@ export function SeriesActions({ seriesId, series, seriesConfig, onEditClick }: P
             color="text"
             target="_blank"
             href={discoverHref}
-            isDisabled={!series.dataType || !series.selectedMetricField}
+            isDisabled={!series.dataType || !series.selectedMetricField || !indexPattern}
           />
         </EuiToolTip>
       </EuiFlexItem>

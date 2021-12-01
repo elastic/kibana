@@ -19,7 +19,6 @@ Example of a single-namespace type in 7.12:
   namespaceType: 'single',
   mappings: {...}
 }
-
 ```
 Example after converting to a multi-namespace (isolated) type in 8.0:
 
@@ -31,7 +30,6 @@ Example after converting to a multi-namespace (isolated) type in 8.0:
   mappings: {...},
   convertToMultiNamespaceTypeVersion: '8.0.0'
 }
-
 ```
 Example after converting to a multi-namespace (shareable) type in 8.1:
 
@@ -43,7 +41,6 @@ Example after converting to a multi-namespace (shareable) type in 8.1:
   mappings: {...},
   convertToMultiNamespaceTypeVersion: '8.0.0'
 }
-
 ```
 Note: migration function(s) can be optionally specified for any of these versions and will not interfere with the conversion process.
 

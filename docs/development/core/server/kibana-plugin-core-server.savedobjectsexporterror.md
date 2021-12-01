@@ -10,6 +10,7 @@
 ```typescript
 export declare class SavedObjectsExportError extends Error 
 ```
+<b>Extends:</b> Error
 
 ## Constructors
 
@@ -21,8 +22,8 @@ export declare class SavedObjectsExportError extends Error
 
 |  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
-|  [attributes](./kibana-plugin-core-server.savedobjectsexporterror.attributes.md) |  | <code>Record&lt;string, any&gt; &#124; undefined</code> |  |
-|  [type](./kibana-plugin-core-server.savedobjectsexporterror.type.md) |  | <code>string</code> |  |
+|  [attributes?](./kibana-plugin-core-server.savedobjectsexporterror.attributes.md) |  | Record&lt;string, any&gt; \| undefined | <i>(Optional)</i> |
+|  [type](./kibana-plugin-core-server.savedobjectsexporterror.type.md) |  | string |  |
 
 ## Methods
 

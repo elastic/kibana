@@ -16,9 +16,9 @@ getIndex(type: string): string | undefined;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  type | <code>string</code> |  |
+|  type | string |  |
 
 <b>Returns:</b>
 
-`string | undefined`
+string \| undefined
 

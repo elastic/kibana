@@ -16,6 +16,6 @@ constructor(error: Error | string, path?: string[]);
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  error | <code>Error &#124; string</code> |  |
-|  path | <code>string[]</code> |  |
+|  error | Error \| string |  |
+|  path | string\[\] |  |
 

@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import type { AlertConsumers as AlertConsumersTyped } from '@kbn/rule-data-utils';
-// @ts-expect-error
-import { AlertConsumers as AlertConsumersNonTyped } from '@kbn/rule-data-utils/target_node/alerts_as_data_rbac';
+import { AlertConsumers } from '@kbn/rule-data-utils/alerts_as_data_rbac';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
@@ -52,8 +50,6 @@ import { Sort } from '../body/sort';
 import { InspectButton, InspectButtonContainer } from '../../inspect';
 import { SummaryViewSelector, ViewSelection } from '../event_rendered_view/selector';
 import { TGridLoading, TGridEmpty, TimelineContext } from '../shared';
-
-const AlertConsumers: typeof AlertConsumersTyped = AlertConsumersNonTyped;
 
 const TitleText = styled.span`
   margin-right: 12px;
@@ -106,6 +102,7 @@ export interface TGridIntegratedProps {
   dataProviders: DataProvider[];
   defaultCellActions?: TGridCellAction[];
   deletedEventIds: Readonly<string[]>;
+  disabledCellActions: string[];
   docValueFields: DocValueFields[];
   end: string;
   entityType: EntityType;
@@ -147,6 +144,7 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
   dataProviders,
   defaultCellActions,
   deletedEventIds,
+  disabledCellActions,
   docValueFields,
   end,
   entityType,
@@ -352,6 +350,7 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
                           bulkActions={bulkActions}
                           data={nonDeletedEvents}
                           defaultCellActions={defaultCellActions}
+                          disabledCellActions={disabledCellActions}
                           filterQuery={filterQuery}
                           filters={filters}
                           filterStatus={filterStatus}

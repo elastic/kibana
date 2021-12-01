@@ -15,5 +15,5 @@ export interface SavedObjectsStart
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [client](./kibana-plugin-core-public.savedobjectsstart.client.md) | <code>SavedObjectsClientContract</code> | [SavedObjectsClient](./kibana-plugin-core-public.savedobjectsclient.md) |
+|  [client](./kibana-plugin-core-public.savedobjectsstart.client.md) | SavedObjectsClientContract | [SavedObjectsClient](./kibana-plugin-core-public.savedobjectsclient.md) |
 

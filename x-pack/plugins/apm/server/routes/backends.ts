@@ -6,7 +6,7 @@
  */
 
 import * as t from 'io-ts';
-import { toNumberRt } from '@kbn/io-ts-utils';
+import { toNumberRt } from '@kbn/io-ts-utils/to_number_rt';
 import { setupRequest } from '../lib/helpers/setup_request';
 import { environmentRt, kueryRt, offsetRt, rangeRt } from './default_api_types';
 import { createApmServerRoute } from './create_apm_server_route';

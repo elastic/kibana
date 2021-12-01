@@ -8,6 +8,7 @@
 import { Client } from '@elastic/elasticsearch';
 import { cloneDeep, merge } from 'lodash';
 import { AxiosResponse } from 'axios';
+import uuid from 'uuid';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { KbnClient } from '@kbn/test';
 import { DeleteByQueryResponse } from '@elastic/elasticsearch/api/types';
@@ -139,12 +140,13 @@ export async function indexEndpointHostDocs({
 
     if (enrollFleet) {
       const { id: appliedPolicyId, name: appliedPolicyName } = hostMetadata.Endpoint.policy.applied;
+      const uniqueAppliedPolicyName = `${appliedPolicyName}-${uuid.v4()}`;
 
       // If we don't yet have a "real" policy record, then create it now in ingest (package config)
       if (!realPolicies[appliedPolicyId]) {
         const createdPolicies = await indexFleetEndpointPolicy(
           kbnClient,
-          appliedPolicyName,
+          uniqueAppliedPolicyName,
           epmEndpointPackage.version
         );
 

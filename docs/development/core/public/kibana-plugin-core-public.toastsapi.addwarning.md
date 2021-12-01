@@ -16,12 +16,12 @@ addWarning(toastOrTitle: ToastInput, options?: ToastOptions): Toast;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  toastOrTitle | <code>ToastInput</code> | a [ToastInput](./kibana-plugin-core-public.toastinput.md) |
-|  options | <code>ToastOptions</code> | a [ToastOptions](./kibana-plugin-core-public.toastoptions.md) |
+|  toastOrTitle | ToastInput | a [ToastInput](./kibana-plugin-core-public.toastinput.md) |
+|  options | ToastOptions | a [ToastOptions](./kibana-plugin-core-public.toastoptions.md) |
 
 <b>Returns:</b>
 
-`Toast`
+Toast
 
 a [Toast](./kibana-plugin-core-public.toast.md)
 

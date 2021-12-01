@@ -189,3 +189,34 @@ export async function ensureDefaultEnrollmentAPIKeysExists(
     })
   );
 }
+
+/**
+ * Maps the `nonFatalErrors` object returned by the setup process to a more readable
+ * and predictable format suitable for logging output or UI presentation.
+ */
+export function formatNonFatalErrors(
+  nonFatalErrors: SetupStatus['nonFatalErrors']
+): Array<{ name: string; message: string }> {
+  return nonFatalErrors.flatMap((e) => {
+    if ('error' in e) {
+      return {
+        name: e.error.name,
+        message: e.error.message,
+      };
+    } else if ('errors' in e) {
+      return e.errors.map((upgradePackagePolicyError: any) => {
+        if (typeof upgradePackagePolicyError === 'string') {
+          return {
+            name: 'SetupNonFatalError',
+            message: upgradePackagePolicyError,
+          };
+        }
+
+        return {
+          name: upgradePackagePolicyError.key,
+          message: upgradePackagePolicyError.message,
+        };
+      });
+    }
+  });
+}

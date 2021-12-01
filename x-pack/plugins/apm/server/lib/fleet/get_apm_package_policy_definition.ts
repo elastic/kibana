@@ -68,6 +68,10 @@ export function preprocessLegacyFields({
       key: 'apm-server.auth.secret_token',
       legacyKey: 'apm-server.secret_token',
     },
+    {
+      key: 'apm-server.auth.api_key.enabled',
+      legacyKey: 'apm-server.api_key.enabled',
+    },
   ].forEach(({ key, legacyKey }) => {
     if (!copyOfApmServerSchema[key]) {
       copyOfApmServerSchema[key] = copyOfApmServerSchema[legacyKey];

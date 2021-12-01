@@ -25,7 +25,6 @@ import {
   getPackagePolicyDeleteCallback,
 } from '../fleet_integration/fleet_integration';
 import { ManifestManager } from './services/artifacts';
-import { AppClientFactory } from '../client';
 import { ConfigType } from '../config';
 import { IRequestContextFactory } from '../request_context_factory';
 import { LicenseService } from '../../common/license';
@@ -49,7 +48,6 @@ export type EndpointAppContextServiceStartContract = Partial<
   logger: Logger;
   endpointMetadataService: EndpointMetadataService;
   manifestManager?: ManifestManager;
-  appClientFactory: AppClientFactory;
   security: SecurityPluginStart;
   alerting: AlertsPluginStartContract;
   config: ConfigType;

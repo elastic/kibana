@@ -13,10 +13,19 @@ test --experimental_guard_against_concurrent_changes
 query --experimental_guard_against_concurrent_changes
 
 ## Cache action outputs on disk so they persist across output_base and bazel shutdown (eg. changing branches)
-common --disk_cache=~/.bazel-cache/disk-cache
+build --disk_cache=~/.bazel-cache/disk-cache
+fetch --disk_cache=~/.bazel-cache/disk-cache
+query --disk_cache=~/.bazel-cache/disk-cache
+sync --disk_cache=~/.bazel-cache/disk-cache
+test --disk_cache=~/.bazel-cache/disk-cache
 
 ## Bazel repo cache settings
-common --repository_cache=~/.bazel-cache/repository-cache
+build --repository_cache=~/.bazel-cache/repository-cache
+fetch --repository_cache=~/.bazel-cache/repository-cache
+query --repository_cache=~/.bazel-cache/repository-cache
+run --repository_cache=~/.bazel-cache/repository-cache
+sync --repository_cache=~/.bazel-cache/repository-cache
+test --repository_cache=~/.bazel-cache/repository-cache
 
 # Bazel will create symlinks from the workspace directory to output artifacts.
 # Build results will be placed in a directory called "bazel-bin"

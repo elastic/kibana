@@ -105,7 +105,7 @@ export function CollapsibleNav({
     () =>
       allLinks.filter(
         // Filterting out hidden links and the integrations one in favor of a specific Add Data button at the bottom
-        (link) => !link.hidden && link.id !== 'integrations'
+        (link) => !link.hidden
       ),
     [allLinks]
   );

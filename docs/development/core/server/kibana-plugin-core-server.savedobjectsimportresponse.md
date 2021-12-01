@@ -16,9 +16,9 @@ export interface SavedObjectsImportResponse
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [errors](./kibana-plugin-core-server.savedobjectsimportresponse.errors.md) | <code>SavedObjectsImportFailure[]</code> |  |
-|  [success](./kibana-plugin-core-server.savedobjectsimportresponse.success.md) | <code>boolean</code> |  |
-|  [successCount](./kibana-plugin-core-server.savedobjectsimportresponse.successcount.md) | <code>number</code> |  |
-|  [successResults](./kibana-plugin-core-server.savedobjectsimportresponse.successresults.md) | <code>SavedObjectsImportSuccess[]</code> |  |
-|  [warnings](./kibana-plugin-core-server.savedobjectsimportresponse.warnings.md) | <code>SavedObjectsImportWarning[]</code> |  |
+|  [errors?](./kibana-plugin-core-server.savedobjectsimportresponse.errors.md) | SavedObjectsImportFailure\[\] | <i>(Optional)</i> |
+|  [success](./kibana-plugin-core-server.savedobjectsimportresponse.success.md) | boolean |  |
+|  [successCount](./kibana-plugin-core-server.savedobjectsimportresponse.successcount.md) | number |  |
+|  [successResults?](./kibana-plugin-core-server.savedobjectsimportresponse.successresults.md) | SavedObjectsImportSuccess\[\] | <i>(Optional)</i> |
+|  [warnings](./kibana-plugin-core-server.savedobjectsimportresponse.warnings.md) | SavedObjectsImportWarning\[\] |  |
 
