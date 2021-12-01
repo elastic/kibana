@@ -16,7 +16,6 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { memo, useCallback, useEffect, useMemo } from 'react';
 import { HostMetadata } from '../../../../../../common/endpoint/types';
-import { SecurityPageName } from '../../../../../../common/constants';
 import { PreferenceFormattedDateFromPrimitive } from '../../../../../common/components/formatted_date';
 import { useToasts } from '../../../../../common/lib/kibana';
 import { getEndpointDetailsPath } from '../../../../common/routing';
@@ -44,27 +43,30 @@ import {
   EndpointDetailsFlyoutTabs,
   EndpointDetailsTabsTypes,
 } from './components/endpoint_details_tabs';
-import { NoPermissions } from '../../../no_permissions';
 import { EndpointIsolationFlyoutPanel } from './components/endpoint_isolate_flyout_panel';
 import { FlyoutBodyNoTopPadding } from './components/flyout_body_no_top_padding';
 import { EndpointDetailsFlyoutHeader } from './components/flyout_header';
 import { EndpointActivityLog } from './endpoint_activity_log';
 import { EndpointDetailsContent } from './endpoint_details_content';
 import { PolicyResponse } from './policy_response';
-import { useIsolationPrivileges } from '../../../../../common/hooks/endpoint/use_isolate_privileges';
+import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 
 export const EndpointDetails = memo(() => {
   const toasts = useToasts();
   const queryParams = useEndpointSelector(uiQueryParams);
 
-  const { isViewActivityLogAllowed } = useIsolationPrivileges();
+  const { endpointPrivileges } = useUserPrivileges();
   const activityLog = useEndpointSelector(getActivityLogData);
   const hostDetails = useEndpointSelector(detailsData);
   const hostDetailsError = useEndpointSelector(detailsError);
 
   const policyInfo = useEndpointSelector(policyVersionInfo);
   const hostStatus = useEndpointSelector(hostStatusInfo);
-  const show = useEndpointSelector(showView);
+  let show = useEndpointSelector(showView);
+  // show details view if user force loads activity log via URL
+  if (!endpointPrivileges.canAccessActivityLog) {
+    show = 'details';
+  }
 
   const ContentLoadingMarkup = useMemo(
     () => (
@@ -78,54 +80,43 @@ export const EndpointDetails = memo(() => {
   );
 
   const getTabs = useCallback(
-    (id: string) => [
-      {
-        id: EndpointDetailsTabsTypes.overview,
-        name: i18.OVERVIEW,
-        route: getEndpointDetailsPath({
-          ...queryParams,
-          name: 'endpointDetails',
-          selected_endpoint: id,
-        }),
-        content:
-          hostDetails === undefined ? (
-            ContentLoadingMarkup
-          ) : (
-            <EndpointDetailsContent
-              details={hostDetails}
-              policyInfo={policyInfo}
-              hostStatus={hostStatus}
-            />
-          ),
-      },
-      {
-        id: EndpointDetailsTabsTypes.activityLog,
-        name: i18.ACTIVITY_LOG.tabTitle,
-        route: getEndpointDetailsPath({
-          ...queryParams,
-          name: 'endpointActivityLog',
-          selected_endpoint: id,
-        }),
-        content: isViewActivityLogAllowed ? (
-          <EndpointActivityLog activityLog={activityLog} />
-        ) : (
-          <NoPermissions
-            dataTestSubj="forbiddenActivityLog"
-            titleInfo={{
-              id: 'xpack.securitySolution.endpoint.activityLog.forbiddenTitle',
-              defaultMessage:
-                'You do not have the required Kibana permissions to use Endpoint Activity Log',
-            }}
-            bodyInfo={{
-              id: 'xpack.securitySolution.endpoint.activityLog.forbiddenDescription',
-              defaultMessage:
-                'You require read access on your assigned role to view endpoint isolation activity log.',
-            }}
-            pageName={SecurityPageName.endpoints}
-          />
-        ),
-      },
-    ],
+    (id: string) => {
+      const tabsArray = [
+        {
+          id: EndpointDetailsTabsTypes.overview,
+          name: i18.OVERVIEW,
+          route: getEndpointDetailsPath({
+            ...queryParams,
+            name: 'endpointDetails',
+            selected_endpoint: id,
+          }),
+          content:
+            hostDetails === undefined ? (
+              ContentLoadingMarkup
+            ) : (
+              <EndpointDetailsContent
+                details={hostDetails}
+                policyInfo={policyInfo}
+                hostStatus={hostStatus}
+              />
+            ),
+        },
+      ];
+      // show Activity Log tab only when user has access privilege
+      if (endpointPrivileges.canAccessActivityLog) {
+        tabsArray.push({
+          id: EndpointDetailsTabsTypes.activityLog,
+          name: i18.ACTIVITY_LOG.tabTitle,
+          route: getEndpointDetailsPath({
+            ...queryParams,
+            name: 'endpointActivityLog',
+            selected_endpoint: id,
+          }),
+          content: <EndpointActivityLog activityLog={activityLog} />,
+        });
+      }
+      return tabsArray;
+    },
     [
       ContentLoadingMarkup,
       hostDetails,
@@ -133,7 +124,7 @@ export const EndpointDetails = memo(() => {
       hostStatus,
       activityLog,
       queryParams,
-      isViewActivityLogAllowed,
+      endpointPrivileges,
     ]
   );
 

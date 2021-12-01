@@ -9,7 +9,7 @@ import { EuiContextMenuItem } from '@elastic/eui';
 import type { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
 import { isIsolationSupported } from '../../../../common/endpoint/service/host_isolation/utils';
 import { HostStatus } from '../../../../common/endpoint/types';
-import { useIsolationPrivileges } from '../../../common/hooks/endpoint/use_isolate_privileges';
+import { useUserPrivileges } from '../../../common/components/user_privileges';
 import { isAlertFromEndpointEvent } from '../../../common/utils/endpoint_alert_check';
 import { useHostIsolationStatus } from '../../containers/detection_engine/alerts/use_host_isolation_status';
 import { ISOLATE_HOST, UNISOLATE_HOST } from './translations';
@@ -62,7 +62,7 @@ export const useHostIsolationAction = ({
     capabilities,
   });
 
-  const { isIsolationAllowed } = useIsolationPrivileges();
+  const { endpointPrivileges } = useUserPrivileges();
 
   const isolateHostHandler = useCallback(() => {
     closePopover();
@@ -77,7 +77,7 @@ export const useHostIsolationAction = ({
 
   const hostIsolationAction = useMemo(
     () =>
-      isIsolationAllowed &&
+      endpointPrivileges.canIsolateHost &&
       isEndpointAlert &&
       isolationSupported &&
       isHostIsolationPanelOpen === false &&
@@ -97,7 +97,7 @@ export const useHostIsolationAction = ({
       agentStatus,
       isEndpointAlert,
       isHostIsolationPanelOpen,
-      isIsolationAllowed,
+      endpointPrivileges,
       isolateHostHandler,
       isolateHostTitle,
       isolationSupported,

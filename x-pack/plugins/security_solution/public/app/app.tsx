@@ -57,9 +57,9 @@ const StartAppComponent: FC<StartAppComponent> = ({
           <ReduxStoreProvider store={store}>
             <EuiThemeProvider darkMode={darkMode}>
               <MlCapabilitiesProvider>
-                <UserPrivilegesProvider kibanaCapabilities={capabilities}>
-                  <ManageUserInfo>
-                    <QueryClientProvider client={queryClient}>
+                <QueryClientProvider client={queryClient}>
+                  <UserPrivilegesProvider kibanaCapabilities={capabilities}>
+                    <ManageUserInfo>
                       <PageRouter
                         history={history}
                         onAppLeave={onAppLeave}
@@ -67,9 +67,9 @@ const StartAppComponent: FC<StartAppComponent> = ({
                       >
                         {children}
                       </PageRouter>
-                    </QueryClientProvider>
-                  </ManageUserInfo>
-                </UserPrivilegesProvider>
+                    </ManageUserInfo>
+                  </UserPrivilegesProvider>
+                </QueryClientProvider>
               </MlCapabilitiesProvider>
             </EuiThemeProvider>
             <ErrorToastDispatcher />

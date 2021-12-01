@@ -7,7 +7,8 @@
 
 import React, { memo } from 'react';
 import { Route, Switch, Redirect } from 'react-router-dom';
-import { EuiLoadingSpinner } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiLoadingSpinner, EuiText } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   MANAGEMENT_ROUTING_ENDPOINTS_PATH,
   MANAGEMENT_ROUTING_EVENT_FILTERS_PATH,
@@ -26,7 +27,35 @@ import { EventFiltersContainer } from './event_filters';
 import { getEndpointListPath } from '../common/routing';
 import { useUserPrivileges } from '../../common/components/user_privileges';
 import { HostIsolationExceptionsContainer } from './host_isolation_exceptions';
-import { NoPermissions } from './no_permissions';
+
+const NoPermissions = memo(() => {
+  return (
+    <>
+      <EuiEmptyPrompt
+        iconType="alert"
+        iconColor="danger"
+        titleSize="l"
+        data-test-subj="noIngestPermissions"
+        title={
+          <FormattedMessage
+            id="xpack.securitySolution.endpointManagemnet.noPermissionsText"
+            defaultMessage="You do not have the required Kibana permissions to use Elastic Security Administration"
+          />
+        }
+        body={
+          <EuiText color="subdued">
+            <FormattedMessage
+              id="xpack.securitySolution.endpointManagement.noPermissionsSubText"
+              defaultMessage="It looks like Fleet is disabled. Fleet must be enabled to use this feature. If you do not have permissions to enable Fleet, contact your Kibana administrator."
+            />
+          </EuiText>
+        }
+      />
+      <SpyRoute pageName={SecurityPageName.administration} />
+    </>
+  );
+});
+NoPermissions.displayName = 'NoPermissions';
 
 const EndpointTelemetry = () => (
   <TrackApplicationView viewId={SecurityPageName.endpoints}>
@@ -68,24 +97,7 @@ export const ManagementContainer = memo(() => {
   }
 
   if (!canAccessEndpointManagement) {
-    const component = () => (
-      <NoPermissions
-        dataTestSubj="noIngestPermissions"
-        titleInfo={{
-          id: 'xpack.securitySolution.endpointManagement.noPermissionsText',
-          defaultMessage:
-            'You do not have the required Kibana permissions to use Elastic Security Administration',
-        }}
-        bodyInfo={{
-          id: 'xpack.securitySolution.endpointManagement.noPermissionsSubText',
-          defaultMessage:
-            'It looks like Fleet is disabled. Fleet must be enabled to use this feature. \
-            If you do not have permissions to enable Fleet, contact your Kibana administrator.',
-        }}
-        pageName={SecurityPageName.administration}
-      />
-    );
-    return <Route path="*" component={component} />;
+    return <Route path="*" component={NoPermissions} />;
   }
 
   return (

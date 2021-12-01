@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { useQuery } from 'react-query';
 import moment from 'moment-timezone';
-
-import { useCallback, useEffect, useState, useRef } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { camelCase, isArray, isObject } from 'lodash';
@@ -80,70 +80,42 @@ export const convertToCamelCase = <T, U extends {}>(snakeCase: T): U =>
     return acc;
   }, {} as U);
 
-export const useCurrentUser = (): AuthenticatedElasticUser | null => {
-  const isMounted = useRef(false);
-  const [user, setUser] = useState<AuthenticatedElasticUser | null>(null);
-
+export const useCurrentUser = (): AuthenticatedElasticUser => {
   const [, dispatchToaster] = useStateToaster();
-
   const { security } = useKibana().services;
 
-  const fetchUser = useCallback(
-    () => {
-      let didCancel = false;
-      const fetchData = async () => {
-        try {
-          if (security != null) {
-            const response = await security.authc.getCurrentUser();
-            if (!isMounted.current) return;
-            if (!didCancel) {
-              setUser(convertToCamelCase<AuthenticatedUser, AuthenticatedElasticUser>(response));
-            }
-          } else {
-            setUser({
-              username: i18n.translate('xpack.securitySolution.getCurrentUser.unknownUser', {
-                defaultMessage: 'Unknown',
-              }),
-              email: '',
-              fullName: '',
-              roles: [],
-              enabled: false,
-              authenticationRealm: { name: '', type: '' },
-              lookupRealm: { name: '', type: '' },
-              authenticationProvider: '',
-            });
-          }
-        } catch (error) {
-          if (!didCancel) {
-            errorToToaster({
-              title: i18n.translate('xpack.securitySolution.getCurrentUser.Error', {
-                defaultMessage: 'Error getting user',
-              }),
-              error: error.body && error.body.message ? new Error(error.body.message) : error,
-              dispatchToaster,
-            });
-            setUser(null);
-          }
-        }
-      };
-      fetchData();
-      return () => {
-        didCancel = true;
-      };
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [security]
-  );
+  const {
+    data: user,
+    isFetched,
+    error,
+  } = useQuery<AuthenticatedUser>('authenticatedUserInfo', () => security.authc.getCurrentUser(), {
+    refetchOnMount: true,
+    onError: () =>
+      errorToToaster({
+        title: i18n.translate('xpack.securitySolution.getCurrentUser.Error', {
+          defaultMessage: 'Error getting user',
+        }),
+        error,
+        dispatchToaster,
+      }),
+  });
 
-  useEffect(() => {
-    isMounted.current = true;
-    fetchUser();
-    return () => {
-      isMounted.current = false;
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-  return user;
+  if (isFetched && typeof user !== 'undefined') {
+    return convertToCamelCase<AuthenticatedUser, AuthenticatedElasticUser>(user);
+  }
+
+  return {
+    username: i18n.translate('xpack.securitySolution.getCurrentUser.unknownUser', {
+      defaultMessage: 'Unknown',
+    }),
+    email: '',
+    fullName: '',
+    roles: [],
+    enabled: false,
+    authenticationRealm: { name: '', type: '' },
+    lookupRealm: { name: '', type: '' },
+    authenticationProvider: '',
+  };
 };
 
 export interface UseGetUserCasesPermissions {

@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { useCurrentUser, useHttp } from '../../../lib/kibana';
+import { useQuery } from 'react-query';
+import { useMemo } from 'react';
+import { useCurrentUser, useHttp, useKibana } from '../../../lib/kibana';
 import { appRoutesService, CheckPermissionsResponse } from '../../../../../../fleet/common';
 import { useLicense } from '../../../hooks/use_license';
 import { Immutable } from '../../../../../common/endpoint/types';
@@ -21,6 +22,10 @@ export interface EndpointPrivileges {
   canCreateArtifactsByPolicy: boolean;
   /** If user has permissions to use the Host isolation feature */
   canIsolateHost: boolean;
+  /** If user has permissions to unisolate a host */
+  canUnisolateHost: boolean;
+  /** If user has permission to view/access activity log */
+  canAccessActivityLog: boolean;
   /** @deprecated do not use. instead, use one of the other privileges defined */
   isPlatinumPlus: boolean;
 }
@@ -34,60 +39,56 @@ export interface EndpointPrivileges {
 export const useEndpointPrivileges = (): Immutable<EndpointPrivileges> => {
   const http = useHttp();
   const user = useCurrentUser();
-  const isMounted = useRef<boolean>(true);
   const isPlatinumPlusLicense = useLicense().isPlatinumPlus();
-  const [canAccessFleet, setCanAccessFleet] = useState<boolean>(false);
-  const [fleetCheckDone, setFleetCheckDone] = useState<boolean>(false);
+  let canAccessFleet = false;
+
+  const services = useKibana().services;
+  const pluginUserPrivileges = services.application.capabilities.securitySolutionEndpoint;
+  const hasIsolationPrivilege = !!pluginUserPrivileges.writeIsolationActions;
 
   // Check if user can access fleet
-  useEffect(() => {
-    (async () => {
-      try {
-        const fleetPermissionsResponse = await http.get<CheckPermissionsResponse>(
-          appRoutesService.getCheckPermissionsPath()
-        );
+  const {
+    data: fleetPermissions,
+    isLoading,
+    isFetched,
+  } = useQuery<CheckPermissionsResponse>(
+    'fleetPermissions',
+    async () => http.get<CheckPermissionsResponse>(appRoutesService.getCheckPermissionsPath()),
+    { refetchOnMount: true }
+  );
 
-        if (isMounted.current) {
-          setCanAccessFleet(fleetPermissionsResponse.success);
-        }
-      } finally {
-        if (isMounted.current) {
-          setFleetCheckDone(true);
-        }
-      }
-    })();
-  }, [http]);
+  if (isFetched && typeof fleetPermissions !== 'undefined') {
+    canAccessFleet = fleetPermissions.success;
+  }
 
   // Check if user has `superuser` role
-  const isSuperUser = useMemo(() => {
-    if (user?.roles) {
-      return user.roles.includes('superuser');
-    }
-    return false;
-  }, [user?.roles]);
+  const isSuperUser = useMemo(() => user.roles.includes('superuser'), [user.roles]);
 
   const privileges = useMemo(() => {
     const privilegeList: EndpointPrivileges = Object.freeze({
-      loading: !fleetCheckDone || !user,
+      loading: isLoading,
       canAccessFleet,
       canAccessEndpointManagement: canAccessFleet && isSuperUser,
       canCreateArtifactsByPolicy: isPlatinumPlusLicense,
-      canIsolateHost: isPlatinumPlusLicense,
+      // verify if also has write privileges for isolation/unisolation
+      canIsolateHost: hasIsolationPrivilege && isPlatinumPlusLicense,
+      canUnisolateHost: hasIsolationPrivilege,
+      // verify if can access activity log flyout
+      canAccessActivityLog: !!pluginUserPrivileges.readIsolationActionsAndResponses,
       // FIXME: Remove usages of the property below
       /** @deprecated */
       isPlatinumPlus: isPlatinumPlusLicense,
     });
 
     return privilegeList;
-  }, [canAccessFleet, fleetCheckDone, isSuperUser, user, isPlatinumPlusLicense]);
-
-  // Capture if component is unmounted
-  useEffect(
-    () => () => {
-      isMounted.current = false;
-    },
-    []
-  );
+  }, [
+    canAccessFleet,
+    isLoading,
+    isSuperUser,
+    isPlatinumPlusLicense,
+    hasIsolationPrivilege,
+    pluginUserPrivileges,
+  ]);
 
   return privileges;
 };

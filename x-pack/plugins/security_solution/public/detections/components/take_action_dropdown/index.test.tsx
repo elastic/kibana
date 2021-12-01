@@ -18,8 +18,8 @@ import { mockTimelines } from '../../../common/mock/mock_timelines_plugin';
 import { createStartServicesMock } from '../../../common/lib/kibana/kibana_react.mock';
 import { useKibana } from '../../../common/lib/kibana';
 
-jest.mock('../../../common/hooks/endpoint/use_isolate_privileges', () => ({
-  useIsolationPrivileges: jest.fn().mockReturnValue({ isIsolationAllowed: true }),
+jest.mock('../../../common/components/user_privileges', () => ({
+  useUserPrivileges: jest.fn().mockReturnValue({ endpointPrivileges: { canIsolateHost: true } }),
 }));
 jest.mock('../../../common/lib/kibana', () => ({
   useKibana: jest.fn(),

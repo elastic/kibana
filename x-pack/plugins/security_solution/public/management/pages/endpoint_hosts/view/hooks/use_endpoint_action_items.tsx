@@ -18,7 +18,7 @@ import { ContextMenuItemNavByRouterProps } from '../../../../components/context_
 import { isEndpointHostIsolated } from '../../../../../common/utils/validators';
 import { useLicense } from '../../../../../common/hooks/use_license';
 import { isIsolationSupported } from '../../../../../../common/endpoint/service/host_isolation/utils';
-import { useIsolationPrivileges } from '../../../../../common/hooks/endpoint/use_isolate_privileges';
+import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 
 /**
  * Returns a list (array) of actions for an individual endpoint
@@ -27,7 +27,7 @@ import { useIsolationPrivileges } from '../../../../../common/hooks/endpoint/use
 export const useEndpointActionItems = (
   endpointMetadata: MaybeImmutable<HostMetadata> | undefined
 ): ContextMenuItemNavByRouterProps[] => {
-  const { isIsolationAllowed, isUnisolationAllowed } = useIsolationPrivileges();
+  const { endpointPrivileges } = useUserPrivileges();
 
   const isPlatinumPlus = useLicense().isPlatinumPlus();
   const { getAppUrl } = useAppUrl();
@@ -64,11 +64,10 @@ export const useEndpointActionItems = (
 
       const isolationActions = [];
 
-      if (isIsolated) {
+      if (isIsolated && endpointPrivileges.canUnisolateHost) {
         // Un-isolate is always available to users regardless of license level
         isolationActions.push({
           'data-test-subj': 'unIsolateLink',
-          disabled: !isUnisolationAllowed,
           icon: 'logoSecurity',
           key: 'unIsolateHost',
           navigateAppId: APP_UI_ID,
@@ -83,11 +82,10 @@ export const useEndpointActionItems = (
             />
           ),
         });
-      } else if (isPlatinumPlus && isolationSupported) {
+      } else if (isPlatinumPlus && isolationSupported && endpointPrivileges.canIsolateHost) {
         // For Platinum++ licenses, users also have ability to isolate
         isolationActions.push({
           'data-test-subj': 'isolateLink',
-          disabled: !isIsolationAllowed,
           icon: 'logoSecurity',
           key: 'isolateHost',
           navigateAppId: APP_UI_ID,
@@ -200,10 +198,9 @@ export const useEndpointActionItems = (
   }, [
     allCurrentUrlParams,
     endpointMetadata,
+    endpointPrivileges,
     fleetAgentPolicies,
     getAppUrl,
     isPlatinumPlus,
-    isIsolationAllowed,
-    isUnisolationAllowed,
   ]);
 };

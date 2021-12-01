@@ -13,6 +13,8 @@ export const getEndpointPrivilegesInitialState = (): EndpointPrivileges => {
     canAccessFleet: false,
     canAccessEndpointManagement: false,
     canIsolateHost: false,
+    canUnisolateHost: false,
+    canAccessActivityLog: false,
     canCreateArtifactsByPolicy: false,
     isPlatinumPlus: false,
   };

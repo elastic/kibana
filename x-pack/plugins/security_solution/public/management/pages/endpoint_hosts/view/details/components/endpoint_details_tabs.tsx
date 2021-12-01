@@ -6,13 +6,13 @@
  */
 
 import React, { memo, useMemo } from 'react';
-import { EuiTab, EuiTabs, EuiFlyoutBody, EuiToolTip } from '@elastic/eui';
+import { EuiTab, EuiTabs, EuiFlyoutBody } from '@elastic/eui';
 import { EndpointIndexUIQueryParams } from '../../../types';
 
 import { EndpointDetailsFlyoutHeader } from './flyout_header';
 import { useNavigateByRouterEventHandler } from '../../../../../../common/hooks/endpoint/use_navigate_by_router_event_handler';
 import { useAppUrl } from '../../../../../../common/lib/kibana';
-import { useIsolationPrivileges } from '../../../../../../common/hooks/endpoint/use_isolate_privileges';
+import { useUserPrivileges } from '../../../../../../common/components/user_privileges';
 
 export enum EndpointDetailsTabsTypes {
   overview = 'details',
@@ -31,20 +31,11 @@ interface EndpointDetailsTabs {
 }
 
 const EndpointDetailsTab = memo(
-  ({
-    tab,
-    isSelected,
-    isDisabled,
-  }: {
-    tab: EndpointDetailsTabs;
-    isSelected: boolean;
-    isDisabled: boolean;
-  }) => {
+  ({ tab, isSelected }: { tab: EndpointDetailsTabs; isSelected: boolean }) => {
     const { getAppUrl } = useAppUrl();
     const onClick = useNavigateByRouterEventHandler(tab.route);
-    const TabComponent = (
+    return (
       <EuiTab
-        disabled={isDisabled}
         href={getAppUrl({ path: tab.route })}
         onClick={onClick}
         isSelected={isSelected}
@@ -53,17 +44,6 @@ const EndpointDetailsTab = memo(
       >
         {tab.name}
       </EuiTab>
-    );
-    return isDisabled ? (
-      <EuiToolTip
-        position="right"
-        title="Access denied!"
-        content="Your assigned role does not allow access to Endpoint Activity Log"
-      >
-        {TabComponent}
-      </EuiToolTip>
-    ) : (
-      TabComponent
     );
   }
 );
@@ -80,16 +60,13 @@ export const EndpointDetailsFlyoutTabs = memo(
     show: EndpointIndexUIQueryParams['show'];
     tabs: EndpointDetailsTabs[];
   }) => {
-    const { isViewActivityLogAllowed } = useIsolationPrivileges();
+    const { endpointPrivileges } = useUserPrivileges();
     const selectedTab = useMemo(() => tabs.find((tab) => tab.id === show), [tabs, show]);
-    const renderTabs = tabs.map((tab) => (
-      <EndpointDetailsTab
-        key={tab.id}
-        isDisabled={!isViewActivityLogAllowed && tab.id === 'activity_log'}
-        isSelected={tab.id === selectedTab?.id}
-        tab={tab}
-      />
-    ));
+    const renderTabs = tabs
+      .filter((tab) => tab.id !== 'activity_log' || endpointPrivileges.canAccessActivityLog)
+      .map((tab) => (
+        <EndpointDetailsTab key={tab.id} isSelected={tab.id === selectedTab?.id} tab={tab} />
+      ));
 
     return (
       <>
