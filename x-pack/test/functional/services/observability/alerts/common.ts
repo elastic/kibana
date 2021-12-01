@@ -7,6 +7,11 @@
 
 import expect from '@kbn/expect';
 import { chunk } from 'lodash';
+import {
+  ALERT_STATUS_ACTIVE,
+  ALERT_STATUS_RECOVERED,
+  AlertStatus,
+} from '@kbn/rule-data-utils/alerts_as_data_status';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { WebElementWrapper } from '../../../../../../test/functional/services/lib/web_element_wrapper';
 
@@ -194,7 +199,6 @@ export function ObservabilityAlertsCommonProvider({
   const viewRuleDetailsLinkClick = async () => {
     return await (await testSubjects.find(VIEW_RULE_DETAILS_FLYOUT_SELECTOR)).click();
   };
-
   // Workflow status
   const setWorkflowStatusForRow = async (rowIndex: number, workflowStatus: WorkflowStatus) => {
     await openActionsMenuForRow(rowIndex);
@@ -220,6 +224,30 @@ export function ObservabilityAlertsCommonProvider({
   const getWorkflowStatusFilterValue = async () => {
     const selectedWorkflowStatusButton = await find.byClassName('euiButtonGroupButton-isSelected');
     return await selectedWorkflowStatusButton.getVisibleText();
+  };
+
+  // Alert status
+  const setAlertStatusFilter = async (alertStatus?: AlertStatus) => {
+    let buttonSubject = 'alert-status-filter-show-all-button';
+    if (alertStatus === ALERT_STATUS_ACTIVE) {
+      buttonSubject = 'alert-status-filter-active-button';
+    }
+    if (alertStatus === ALERT_STATUS_RECOVERED) {
+      buttonSubject = 'alert-status-filter-recovered-button';
+    }
+    const buttonGroupButton = await testSubjects.find(buttonSubject);
+    await buttonGroupButton.click();
+  };
+
+  const alertDataIsBeingLoaded = async () => {
+    return testSubjects.existOrFail('events-container-loading-true');
+  };
+
+  const alertDataHasLoaded = async () => {
+    await retry.waitFor(
+      'Alert Table is loaded',
+      async () => await testSubjects.exists('events-container-loading-false', { timeout: 2500 })
+    );
   };
 
   // Date picker
@@ -278,6 +306,9 @@ export function ObservabilityAlertsCommonProvider({
     setWorkflowStatusForRow,
     setWorkflowStatusFilter,
     getWorkflowStatusFilterValue,
+    setAlertStatusFilter,
+    alertDataIsBeingLoaded,
+    alertDataHasLoaded,
     submitQuery,
     typeInQueryBar,
     openActionsMenuForRow,
