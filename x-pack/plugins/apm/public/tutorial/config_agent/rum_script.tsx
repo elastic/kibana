@@ -12,12 +12,14 @@ interface Props {
   http: HttpStart;
   basePath: string;
   isCloudEnabled: boolean;
+  kibanaVersion: string;
 }
 
 function TutorialConfigAgentRumScript({
   http,
   basePath,
   isCloudEnabled,
+  kibanaVersion,
 }: Props) {
   return (
     <TutorialConfigAgent
@@ -25,6 +27,7 @@ function TutorialConfigAgentRumScript({
       http={http}
       basePath={basePath}
       isCloudEnabled={isCloudEnabled}
+      kibanaVersion={kibanaVersion}
     />
   );
 }
