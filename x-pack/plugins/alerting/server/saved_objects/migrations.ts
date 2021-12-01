@@ -768,17 +768,19 @@ function fixInventoryThresholdGroupId(
     attributes: { actions },
   } = doc;
 
-  const updatedActions = actions.map((action) => {
-    // Wrong spelling
-    if (action.group === 'metrics.invenotry_threshold.fired') {
-      return {
-        ...action,
-        group: 'metrics.inventory_threshold.fired',
-      };
-    } else {
-      return action;
-    }
-  });
+  const updatedActions = actions
+    ? actions.map((action) => {
+        // Wrong spelling
+        if (action.group === 'metrics.invenotry_threshold.fired') {
+          return {
+            ...action,
+            group: 'metrics.inventory_threshold.fired',
+          };
+        } else {
+          return action;
+        }
+      })
+    : [];
 
   return {
     ...doc,
