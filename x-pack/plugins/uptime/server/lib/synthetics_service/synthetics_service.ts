@@ -41,11 +41,12 @@ export class SyntheticsService {
   }
 
   public init(coreStart: CoreStart) {
-    getAPIKeyForSyntheticsService({ server: this.server }).then((apiKey) => {
-      if (apiKey) {
-        this.apiKey = apiKey;
-      }
-    });
+    // TODO: Figure out fake kibana requests to handle API keys on start up
+    // getAPIKeyForSyntheticsService({ server: this.server }).then((apiKey) => {
+    //   if (apiKey) {
+    //     this.apiKey = apiKey;
+    //   }
+    // });
 
     this.setupIndexTemplates(coreStart);
   }

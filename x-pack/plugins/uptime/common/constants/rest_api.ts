@@ -38,5 +38,6 @@ export enum API_URLS {
 
   // Service end points
   INDEX_TEMPLATES = '/internal/uptime/service/index_templates',
+  SERVICE_LOCATIONS = '/internal/uptime/service/locations',
   SYNTHETICS_MONITORS = '/internal/uptime/service/monitors',
 }
