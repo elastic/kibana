@@ -44,7 +44,8 @@ interface ESDataStreamStats {
 }
 
 export const getListHandler: RequestHandler = async (context, request, response) => {
-  const esClient = context.core.elasticsearch.client.asInternalUser;
+  // Query datastreams as the current user as the Kibana internal user may not have all the required permission
+  const esClient = context.core.elasticsearch.client.asCurrentUser;
 
   const body: GetDataStreamsResponse = {
     data_streams: [],
