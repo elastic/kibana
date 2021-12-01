@@ -94,7 +94,7 @@ export const ConditionGroup = memo<ConditionGroupProps>(
             ))}
           </div>
           <div>
-            <EuiSpacer size="m" />
+            <EuiSpacer size="s" />
             <EuiButton
               size="s"
               iconType="plusInCircle"

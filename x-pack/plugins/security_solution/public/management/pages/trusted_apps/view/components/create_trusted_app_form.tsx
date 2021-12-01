@@ -17,6 +17,7 @@ import {
   EuiText,
   EuiSpacer,
 } from '@elastic/eui';
+import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import { EuiFormProps } from '@elastic/eui/src/components/form/form';
 import {
@@ -49,6 +50,10 @@ import {
   EffectedPolicySelection,
   EffectedPolicySelectProps,
 } from '../../../../components/effected_policy_select';
+
+const StyledEuiHorizontalRule = styled(EuiHorizontalRule)`
+  margin-top: ${({ theme }) => theme.eui.paddingSizes.xs};
+`;
 
 const OPERATING_SYSTEMS: readonly OperatingSystem[] = [
   OperatingSystem.MAC,
@@ -555,7 +560,7 @@ export const CreateTrustedAppForm = memo<CreateTrustedAppFormProps>(
         </EuiFormRow>
         {isTrustedAppsByPolicyEnabled && !hideAssignmentSection ? (
           <>
-            <EuiHorizontalRule />
+            <StyledEuiHorizontalRule />
             <EuiFormRow fullWidth={fullWidth} data-test-subj={getTestId('policySelection')}>
               <EffectedPolicySelect
                 isGlobal={isGlobal}
