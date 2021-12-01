@@ -665,7 +665,8 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
-      describe('esArchiver', () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/117971
+      describe.skip('esArchiver', () => {
         const defaultSignalsIndex = '.siem-signals-default-000001';
 
         beforeEach(async () => {
