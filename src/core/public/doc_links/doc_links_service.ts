@@ -128,7 +128,6 @@ export class DocLinksService {
           indexingSchedule: `${WORKPLACE_SEARCH_DOCS}workplace-search-customizing-indexing-rules.html#_indexing_schedule`,
           jiraCloud: `${WORKPLACE_SEARCH_DOCS}workplace-search-jira-cloud-connector.html`,
           jiraServer: `${WORKPLACE_SEARCH_DOCS}workplace-search-jira-server-connector.html`,
-          nativeAuth: `${WORKPLACE_SEARCH_DOCS}workplace-search-security.html#elasticsearch-native-realm`,
           oneDrive: `${WORKPLACE_SEARCH_DOCS}workplace-search-onedrive-connector.html`,
           permissions: `${WORKPLACE_SEARCH_DOCS}workplace-search-permissions.html#organizational-sources-private-sources`,
           salesforce: `${WORKPLACE_SEARCH_DOCS}workplace-search-salesforce-connector.html`,
@@ -656,13 +655,11 @@ export interface DocLinksStart {
       readonly indexingDocumentsSchema: string;
       readonly logSettings: string;
       readonly metaEngines: string;
-      readonly nativeAuth: string;
       readonly precisionTuning: string;
       readonly relevanceTuning: string;
       readonly resultSettings: string;
       readonly searchUI: string;
       readonly security: string;
-      readonly standardAuth: string;
       readonly synonyms: string;
       readonly webCrawler: string;
       readonly webCrawlerEventLogs: string;
@@ -689,7 +686,6 @@ export interface DocLinksStart {
       readonly indexingSchedule: string;
       readonly jiraCloud: string;
       readonly jiraServer: string;
-      readonly nativeAuth: string;
       readonly oneDrive: string;
       readonly permissions: string;
       readonly salesforce: string;
@@ -697,7 +693,6 @@ export interface DocLinksStart {
       readonly serviceNow: string;
       readonly sharePoint: string;
       readonly slack: string;
-      readonly standardAuth: string;
       readonly synch: string;
       readonly zendesk: string;
     };

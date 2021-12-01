@@ -49,7 +49,6 @@ class DocLinks {
   public workplaceSearchIndexingSchedule: string;
   public workplaceSearchJiraCloud: string;
   public workplaceSearchJiraServer: string;
-  public workplaceSearchNativeAuth: string;
   public workplaceSearchOneDrive: string;
   public workplaceSearchPermissions: string;
   public workplaceSearchSalesforce: string;
@@ -102,7 +101,6 @@ class DocLinks {
     this.workplaceSearchIndexingSchedule = '';
     this.workplaceSearchJiraCloud = '';
     this.workplaceSearchJiraServer = '';
-    this.workplaceSearchNativeAuth = '';
     this.workplaceSearchOneDrive = '';
     this.workplaceSearchPermissions = '';
     this.workplaceSearchSalesforce = '';
@@ -157,7 +155,6 @@ class DocLinks {
     this.workplaceSearchIndexingSchedule = docLinks.links.workplaceSearch.indexingSchedule;
     this.workplaceSearchJiraCloud = docLinks.links.workplaceSearch.jiraCloud;
     this.workplaceSearchJiraServer = docLinks.links.workplaceSearch.jiraServer;
-    this.workplaceSearchNativeAuth = docLinks.links.workplaceSearch.nativeAuth;
     this.workplaceSearchOneDrive = docLinks.links.workplaceSearch.oneDrive;
     this.workplaceSearchPermissions = docLinks.links.workplaceSearch.permissions;
     this.workplaceSearchSalesforce = docLinks.links.workplaceSearch.salesforce;
