@@ -9,9 +9,9 @@ import { isEqual, uniqBy } from 'lodash';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { render, unmountComponentAtNode } from 'react-dom';
+import { Filter } from '@kbn/es-query';
 import type {
   ExecutionContextSearch,
-  Filter,
   Query,
   TimefilterContract,
   TimeRange,

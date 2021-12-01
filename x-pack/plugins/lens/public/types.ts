@@ -9,6 +9,7 @@ import type { IconType } from '@elastic/eui/src/components/icon/icon';
 import type { CoreSetup, SavedObjectReference } from 'kibana/public';
 import type { PaletteOutput } from 'src/plugins/charts/public';
 import type { MutableRefObject } from 'react';
+import { Filter } from '@kbn/es-query';
 import type {
   ExpressionAstExpression,
   ExpressionRendererEvent,
@@ -17,7 +18,7 @@ import type {
 } from '../../../../src/plugins/expressions/public';
 import { DraggingIdentifier, DragDropIdentifier, DragContextState } from './drag_drop';
 import type { DateRange, LayerType } from '../common';
-import type { Query, Filter } from '../../../../src/plugins/data/public';
+import type { Query } from '../../../../src/plugins/data/public';
 import type {
   RangeSelectContext,
   ValueClickContext,

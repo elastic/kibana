@@ -14,7 +14,8 @@ import {
   ResolvedLensSavedObjectAttributes,
 } from './embeddable';
 import { ReactExpressionRendererProps } from 'src/plugins/expressions/public';
-import { Query, TimeRange, Filter, IndexPatternsContract } from 'src/plugins/data/public';
+import { Filter } from '@kbn/es-query';
+import { Query, TimeRange, IndexPatternsContract } from 'src/plugins/data/public';
 import { Document } from '../persistence';
 import { dataPluginMock } from '../../../../../src/plugins/data/public/mocks';
 import { VIS_EVENT_TO_TRIGGER } from '../../../../../src/plugins/visualizations/public/embeddable';

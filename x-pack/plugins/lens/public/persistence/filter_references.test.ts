@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Filter } from 'src/plugins/data/public';
+import { Filter } from '@kbn/es-query';
 import { extractFilterReferences, injectFilterReferences } from './filter_references';
 import { FilterStateStore } from 'src/plugins/data/common';
 

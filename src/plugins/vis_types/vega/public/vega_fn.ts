@@ -15,7 +15,6 @@ import {
   Render,
 } from '../../../expressions/public';
 import { VegaVisualizationDependencies } from './plugin';
-import { createVegaRequestHandler } from './vega_request_handler';
 import { VegaInspectorAdapters } from './vega_inspector/index';
 import { KibanaContext, TimeRange, Query } from '../../../data/public';
 import { VegaParser } from './data_model/vega_parser';
@@ -60,6 +59,7 @@ export const createVegaFn = (
     },
   },
   async fn(input, args, context) {
+    const { createVegaRequestHandler } = await import('./async_services');
     const vegaRequestHandler = createVegaRequestHandler(dependencies, context);
 
     const response = await vegaRequestHandler({
