@@ -60,17 +60,6 @@ class Harness {
       this.subtitleLabel.prop('onChange')!(e);
     });
   }
-  public get ticksOnColorBandsSwitch() {
-    return this.wrapper.find(
-      'EuiSwitch[data-test-subj="lens-toolbar-gauge-ticks-position-switch"]'
-    );
-  }
-
-  toggleTicksPositionSwitch() {
-    act(() => {
-      this.ticksOnColorBandsSwitch.prop('onChange')!({} as FormEvent);
-    });
-  }
 }
 
 describe('gauge toolbar', () => {
@@ -100,7 +89,6 @@ describe('gauge toolbar', () => {
     harness = new Harness(mountWithIntl(<GaugeToolbar {...defaultProps} />));
     harness.togglePopover();
 
-    expect(harness.ticksOnColorBandsSwitch.prop('checked')).toBe(false);
     expect(harness.titleLabel.prop('value')).toBe('');
     expect(harness.titleSelect.prop('value')).toBe('auto');
     expect(harness.subtitleLabel.prop('value')).toBe('');
@@ -111,7 +99,6 @@ describe('gauge toolbar', () => {
       ...defaultProps,
       state: {
         ...defaultProps.state,
-        colorMode: 'palette' as const,
         ticksPosition: 'bands' as const,
         visTitleMode: 'custom' as const,
         visTitle: 'new title',
@@ -122,45 +109,10 @@ describe('gauge toolbar', () => {
     harness = new Harness(mountWithIntl(<GaugeToolbar {...props} />));
     harness.togglePopover();
 
-    expect(harness.ticksOnColorBandsSwitch.prop('checked')).toBe(true);
     expect(harness.titleLabel.prop('value')).toBe('new title');
     expect(harness.titleSelect.prop('value')).toBe('custom');
     expect(harness.subtitleLabel.prop('value')).toBe('new subtitle');
     expect(harness.subtitleSelect.prop('value')).toBe('custom');
-  });
-  describe('Ticks position switch', () => {
-    it('switch is disabled if colorMode is none', () => {
-      defaultProps.state.colorMode = 'none' as const;
-
-      harness = new Harness(mountWithIntl(<GaugeToolbar {...defaultProps} />));
-      harness.togglePopover();
-
-      expect(harness.ticksOnColorBandsSwitch.prop('disabled')).toBe(true);
-      expect(harness.ticksOnColorBandsSwitch.prop('checked')).toBe(false);
-    });
-    it('switch is enabled if colorMode is not none', () => {
-      defaultProps.state.colorMode = 'palette' as const;
-
-      harness = new Harness(mountWithIntl(<GaugeToolbar {...defaultProps} />));
-      harness.togglePopover();
-
-      expect(harness.ticksOnColorBandsSwitch.prop('disabled')).toBe(false);
-    });
-    it('Ticks position switch updates the state when clicked', () => {
-      defaultProps.state.colorMode = 'palette' as const;
-      harness = new Harness(mountWithIntl(<GaugeToolbar {...defaultProps} />));
-      harness.togglePopover();
-
-      harness.toggleTicksPositionSwitch();
-
-      expect(defaultProps.setState).toHaveBeenCalledTimes(1);
-      expect(defaultProps.setState).toHaveBeenNthCalledWith(
-        1,
-        expect.objectContaining({
-          ticksPosition: 'bands',
-        })
-      );
-    });
   });
 
   describe('title', () => {
