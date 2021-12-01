@@ -416,7 +416,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
 
   const alertDefaultFilters = useMemo(
     () => [
-      ...buildAlertsRuleIdFilter(ruleId),
+      ...buildAlertsRuleIdFilter(rule?.rule_id ?? ''),
       ...(ruleRegistryEnabled
         ? [
             ...buildShowBuildingBlockFilterRuleRegistry(showBuildingBlockAlerts), // TODO: Once we are past experimental phase this code should be removed
@@ -428,18 +428,12 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
           ]),
       ...buildThreatMatchFilter(showOnlyThreatIndicatorAlerts),
     ],
-    [
-      ruleId,
-      ruleRegistryEnabled,
-      showBuildingBlockAlerts,
-      showOnlyThreatIndicatorAlerts,
-      filterGroup,
-    ]
+    [rule, ruleRegistryEnabled, showBuildingBlockAlerts, showOnlyThreatIndicatorAlerts, filterGroup]
   );
 
   const alertsTableDefaultFilters = useMemo(
     () => [
-      ...buildAlertsRuleIdFilter(ruleId),
+      ...buildAlertsRuleIdFilter(rule?.rule_id ?? ''),
       ...(ruleRegistryEnabled
         ? [
             // TODO: Once we are past experimental phase this code should be removed
@@ -448,7 +442,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
         : [...buildShowBuildingBlockFilter(showBuildingBlockAlerts)]),
       ...buildThreatMatchFilter(showOnlyThreatIndicatorAlerts),
     ],
-    [ruleId, ruleRegistryEnabled, showBuildingBlockAlerts, showOnlyThreatIndicatorAlerts]
+    [rule, ruleRegistryEnabled, showBuildingBlockAlerts, showOnlyThreatIndicatorAlerts]
   );
 
   const alertMergedFilters = useMemo(

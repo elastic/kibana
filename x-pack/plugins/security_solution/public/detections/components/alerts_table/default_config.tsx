@@ -16,6 +16,7 @@ import {
   ALERT_RULE_CATEGORY,
   ALERT_RULE_SEVERITY,
   ALERT_RULE_RISK_SCORE,
+  ALERT_RULE_RULE_ID,
 } from '@kbn/rule-data-utils/technical_field_names';
 
 import type { Filter } from '@kbn/es-query';
@@ -103,14 +104,14 @@ export const buildAlertsRuleIdFilter = (ruleId: string | null): Filter[] =>
             negate: false,
             disabled: false,
             type: 'phrase',
-            key: 'kibana.alert.rule.uuid',
+            key: ALERT_RULE_RULE_ID,
             params: {
               query: ruleId,
             },
           },
           query: {
             match_phrase: {
-              'kibana.alert.rule.uuid': ruleId,
+              [ALERT_RULE_RULE_ID]: ruleId,
             },
           },
         },
