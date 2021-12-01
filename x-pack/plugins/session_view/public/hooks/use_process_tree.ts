@@ -6,6 +6,13 @@
  */
 import _ from 'lodash';
 import { useState, useEffect } from 'react';
+import {
+  EventAction,
+  EventKind,
+  EventActionPartition,
+  Process,
+  ProcessEvent,
+} from '../../common/types/process_tree';
 
 interface UseProcessTreeDeps {
   sessionEntityId: string;
@@ -14,120 +21,9 @@ interface UseProcessTreeDeps {
   searchQuery?: string;
 }
 
-export enum EventKind {
-  event = 'event',
-  signal = 'signal',
-}
-
-export enum EventAction {
-  fork = 'fork',
-  exec = 'exec',
-  exit = 'exit',
-  output = 'output',
-}
-
-interface EventActionPartition {
-  fork: ProcessEvent[];
-  exec: ProcessEvent[];
-  exit: ProcessEvent[];
-  output: ProcessEvent[];
-}
-
-interface User {
-  id: string;
-  name: string;
-}
-
-interface ProcessFields {
-  args: string[];
-  args_count: number;
-  command_line: string;
-  entity_id: string;
-  executable: string;
-  interactive: boolean;
-  name: string;
-  working_directory: string;
-  pid: number;
-  pgid: number;
-  user: User;
-  end?: string;
-  exit_code?: number;
-}
-
-export interface ProcessSelf extends ProcessFields {
-  parent: ProcessFields;
-  session: ProcessFields;
-  entry: ProcessFields;
-  last_user_entered?: ProcessFields;
-}
-
-export interface ProcessEvent {
-  '@timestamp': Date;
-  event: {
-    kind: EventKind;
-    category: string;
-    action: EventAction;
-  };
-  host?: {
-    // optional for now (raw agent output doesn't have server identity)
-    architecture: string;
-    hostname: string;
-    id: string;
-    ip: string;
-    mac: string;
-    name: string;
-    os: {
-      family: string;
-      full: string;
-      kernel: string;
-      name: string;
-      platform: string;
-      type: string;
-      version: string;
-    };
-  };
-  process: ProcessSelf;
-  kibana?: {
-    alert: {
-      uuid: string;
-      reason: string;
-      workflow_status: string;
-      status: string;
-      original_time: Date;
-      original_event: {
-        action: string;
-      };
-      rule: {
-        category: string;
-        consumer: string;
-        description: string;
-        enabled: boolean;
-        name: string;
-        query: string;
-        risk_score: number;
-        severity: string;
-        uuid: string;
-      };
-    };
-  };
-}
-
-export interface Process {
-  id: string; // the process entity_id
-  events: ProcessEvent[];
-  children: Process[];
-  parent: Process | undefined;
-  autoExpand: boolean;
-  searchMatched: string | null; // either false, or set to searchQuery
-  hasOutput(): boolean;
-  hasAlerts(): boolean;
-  getAlerts(): ProcessEvent[];
-  hasExec(): boolean;
-  getOutput(): string;
-  getDetails(): ProcessEvent;
-  isUserEntered(): boolean;
-  getMaxAlertLevel(): number | null;
-}
+type ProcessMap = {
+  [key: string]: Process;
+};
 
 class ProcessImpl implements Process {
   id: string;
@@ -212,10 +108,6 @@ class ProcessImpl implements Process {
   }
 }
 
-type ProcessMap = {
-  [key: string]: Process;
-};
-
 export const useProcessTree = ({
   sessionEntityId,
   forward,
@@ -261,7 +153,7 @@ export const useProcessTree = ({
   const buildProcessTree = (events: ProcessEvent[], backwardDirection: boolean = false) => {
     events.forEach((event) => {
       const process = processMap[event.process.entity_id];
-      const parentProcess = processMap[event.process.parent.entity_id];
+      const parentProcess = processMap[event.process.parent?.entity_id];
 
       if (parentProcess) {
         process.parent = parentProcess; // handy for recursive operations (like auto expand)

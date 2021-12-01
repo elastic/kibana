@@ -14,7 +14,7 @@ import { CoreStart } from '../../../../../../src/core/public';
 import { RECENT_SESSION_ROUTE, BASE_PATH } from '../../../common/constants';
 
 import { SessionView } from '../SessionView';
-import { ProcessEvent } from '../../hooks/use_process_tree';
+import { ProcessEvent } from '../../../common/types/process_tree';
 
 interface RecentSessionResults {
   hits: any[];
