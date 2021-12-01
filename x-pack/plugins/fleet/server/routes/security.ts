@@ -98,7 +98,7 @@ function hasRequiredFleetAuthzPrivilege(
   {
     fleetAuthz,
     fleetAllowFleetSetupPrivilege,
-  }: { fleetAuthz?: FleetAuthzRouteConfig; fleetAllowFleetSetupPrivilege?: boolean }
+  }: { fleetAuthz?: FleetAuthzRequirements; fleetAllowFleetSetupPrivilege?: boolean }
 ): boolean {
   if (!checkSecurityEnabled()) {
     return false;
@@ -136,7 +136,7 @@ function hasRequiredFleetAuthzPrivilege(
   return true;
 }
 
-interface FleetAuthzRouteConfig {
+interface FleetAuthzRequirements {
   fleet?: Array<keyof FleetAuthz['fleet']>;
   integrations?: Array<keyof FleetAuthz['integrations']>;
 }
@@ -149,12 +149,15 @@ type FleetAuthzRouteRegistrar<
   handler: RequestHandler<P, Q, B, Context, Method>
 ) => void;
 
-type FleetRouteConfig<P, Q, B, Method extends RouteMethod> = RouteConfig<P, Q, B, Method> & {
-  fleetAuthz?: FleetAuthzRouteConfig;
+interface FleetAuthzRouteConfig {
+  fleetAuthz?: FleetAuthzRequirements;
   fleetRequireSuperuser?: boolean;
   // TODO temporary required while agents call Fleet setup
   fleetAllowFleetSetupPrivilege?: boolean;
-};
+}
+
+type FleetRouteConfig<P, Q, B, Method extends RouteMethod> = RouteConfig<P, Q, B, Method> &
+  FleetAuthzRouteConfig;
 
 // Fleet router that allow to add required access when registering route
 export interface FleetAuthzRouter<
@@ -168,34 +171,102 @@ export interface FleetAuthzRouter<
 }
 
 function shouldHandlePostAuthRequest(req: KibanaRequest) {
-  return req.route.path.match(/^\/api\/fleet/);
+  if (req?.route?.options?.tags) {
+    return req.route.options.tags.some((tag) => tag.match(/^fleet:authz/));
+  }
+  return false;
+}
+function deserializeAuthzConfig(tags: readonly string[]): FleetAuthzRouteConfig {
+  let fleetRequireSuperuser: boolean | undefined;
+  let fleetAllowFleetSetupPrivilege: boolean | undefined;
+  let fleetAuthz: FleetAuthzRequirements | undefined;
+  for (const tag of tags) {
+    if (!tag.match(/^fleet:authz/)) {
+      continue;
+    }
+
+    if (tag === 'fleet:authz:requireSuperuser') {
+      fleetRequireSuperuser = true;
+    }
+
+    if (tag === 'fleet:authz:allowFleetSetupPrivilege') {
+      fleetAllowFleetSetupPrivilege = true;
+    }
+
+    const fleetMatches = tag.match(/^fleet:authz:fleet:([a-zA-Z]*)/);
+    if (fleetMatches) {
+      const role = fleetMatches[1];
+      if (!fleetAuthz) {
+        fleetAuthz = {};
+      }
+      if (!fleetAuthz.fleet) {
+        fleetAuthz.fleet = [];
+      }
+
+      fleetAuthz.fleet.push(role as keyof FleetAuthz['fleet']);
+    }
+    const integrationMatches = tag.match(/^fleet:authz:integrations:([a-zA-Z]*)/);
+    if (integrationMatches) {
+      const role = integrationMatches[1];
+      if (!fleetAuthz) {
+        fleetAuthz = {};
+      }
+      if (!fleetAuthz.integrations) {
+        fleetAuthz.integrations = [];
+      }
+
+      fleetAuthz.integrations.push(role as keyof FleetAuthz['integrations']);
+    }
+  }
+
+  return { fleetRequireSuperuser, fleetAllowFleetSetupPrivilege, fleetAuthz };
+}
+function serializeAuthzConfig(config: FleetAuthzRouteConfig): string[] {
+  const tags = [];
+
+  if (config.fleetRequireSuperuser) {
+    tags.push(`fleet:authz:requireSuperuser`);
+  }
+  if (config.fleetAllowFleetSetupPrivilege) {
+    tags.push(`fleet:authz:allowFleetSetupPrivilege`);
+  }
+  if (config.fleetAuthz?.fleet) {
+    for (const fleetRole of config.fleetAuthz?.fleet) {
+      tags.push(`fleet:authz:fleet:${fleetRole}`);
+    }
+  }
+  if (config.fleetAuthz?.integrations) {
+    for (const integrationRole of config.fleetAuthz?.integrations) {
+      tags.push(`fleet:authz:integrations:${integrationRole}`);
+    }
+  }
+
+  return tags;
 }
 
 export function makeRouterWithFleetAuthz<TContext extends FleetRequestHandlerContext>(
   router: IRouter<TContext>
 ): { router: FleetAuthzRouter<TContext>; onPostAuthHandler: OnPostAuthHandler } {
-  const authzMap = new Map<
-    string,
-    {
-      fleetAuthz?: FleetAuthzRouteConfig;
-      fleetAllowFleetSetupPrivilege?: boolean;
-      fleetRequireSuperuser?: boolean;
-    }
-  >();
-
-  function routeKey(routeOptions: { path: string; method: string }) {
-    return `${routeOptions.method}:${routeOptions.path}`;
-  }
-
-  function addRouteAuthz(
-    routeOptions: { path: string; method: string },
-    authConfig: {
-      fleetAuthz?: FleetAuthzRouteConfig;
-      fleetAllowFleetSetupPrivilege?: boolean;
-      fleetRequireSuperuser?: boolean;
-    }
-  ) {
-    authzMap.set(routeKey(routeOptions), authConfig);
+  function buildFleetAuthzRouteConfig<P, Q, B, Method extends RouteMethod>({
+    fleetAuthz,
+    fleetAllowFleetSetupPrivilege,
+    fleetRequireSuperuser,
+    ...routeConfig
+  }: FleetRouteConfig<P, Q, B, Method>) {
+    return {
+      ...routeConfig,
+      options: {
+        ...routeConfig.options,
+        tags: [
+          ...(routeConfig?.options?.tags ?? []),
+          ...serializeAuthzConfig({
+            fleetAuthz,
+            fleetAllowFleetSetupPrivilege,
+            fleetRequireSuperuser,
+          }),
+        ],
+      },
+    };
   }
 
   const fleetAuthzOnPostAuthHandler: OnPostAuthHandler = async (req, res, toolkit) => {
@@ -207,7 +278,7 @@ export function makeRouterWithFleetAuthz<TContext extends FleetRequestHandlerCon
       return res.forbidden();
     }
 
-    const fleetAuthzConfig = authzMap.get(routeKey(req.route));
+    const fleetAuthzConfig = deserializeAuthzConfig(req.route.options.tags);
 
     if (!fleetAuthzConfig) {
       return toolkit.next();
@@ -231,57 +302,12 @@ export function makeRouterWithFleetAuthz<TContext extends FleetRequestHandlerCon
   };
 
   const fleetAuthzRouter: FleetAuthzRouter<TContext> = {
-    get: (
-      { fleetAuthz, fleetAllowFleetSetupPrivilege, fleetRequireSuperuser, ...options },
-      handler
-    ) => {
-      addRouteAuthz(
-        { method: 'get', path: options.path },
-        { fleetAuthz, fleetAllowFleetSetupPrivilege, fleetRequireSuperuser }
-      );
-      return router.get({ ...options }, handler);
-    },
-    delete: (
-      { fleetAuthz, fleetAllowFleetSetupPrivilege, fleetRequireSuperuser, ...options },
-      handler
-    ) => {
-      addRouteAuthz(
-        { method: 'delete', path: options.path },
-        { fleetAuthz, fleetAllowFleetSetupPrivilege, fleetRequireSuperuser }
-      );
-      return router.delete(options, handler);
-    },
-    post: (
-      { fleetAuthz, fleetAllowFleetSetupPrivilege, fleetRequireSuperuser, ...options },
-      handler
-    ) => {
-      addRouteAuthz(
-        { method: 'post', path: options.path },
-        { fleetAuthz, fleetAllowFleetSetupPrivilege, fleetRequireSuperuser }
-      );
-      return router.post(options, handler);
-    },
-    put: (
-      { fleetAuthz, fleetAllowFleetSetupPrivilege, fleetRequireSuperuser, ...options },
-      handler
-    ) => {
-      addRouteAuthz(
-        { method: 'put', path: options.path },
-        { fleetAuthz, fleetAllowFleetSetupPrivilege, fleetRequireSuperuser }
-      );
-      return router.put(options, handler);
-    },
-    patch: (
-      { fleetAuthz, fleetAllowFleetSetupPrivilege, fleetRequireSuperuser, ...options },
-      handler
-    ) => {
-      addRouteAuthz(
-        { method: 'patch', path: options.path },
-        { fleetAuthz, fleetAllowFleetSetupPrivilege, fleetRequireSuperuser }
-      );
-
-      return router.patch(options, handler);
-    },
+    get: (routeConfig, handler) => router.get(buildFleetAuthzRouteConfig(routeConfig), handler),
+    delete: (routeConfig, handler) =>
+      router.delete(buildFleetAuthzRouteConfig(routeConfig), handler),
+    post: (routeConfig, handler) => router.post(buildFleetAuthzRouteConfig(routeConfig), handler),
+    put: (routeConfig, handler) => router.put(buildFleetAuthzRouteConfig(routeConfig), handler),
+    patch: (routeConfig, handler) => router.patch(buildFleetAuthzRouteConfig(routeConfig), handler),
     handleLegacyErrors: (handler) => router.handleLegacyErrors(handler),
     getRoutes: () => router.getRoutes(),
     routerPath: router.routerPath,
