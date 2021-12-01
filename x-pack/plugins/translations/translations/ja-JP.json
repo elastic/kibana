@@ -1583,7 +1583,6 @@
     "discover.advancedSettings.docTableHideTimeColumnTitle": "「時刻」列を非表示",
     "discover.advancedSettings.fieldsPopularLimitText": "最も頻繁に使用されるフィールドのトップNを表示します",
     "discover.advancedSettings.fieldsPopularLimitTitle": "頻繁に使用されるフィールドの制限",
-    "discover.advancedSettings.maxDocFieldsDisplayedText": "ドキュメント列でレンダリングされたフィールドの最大数",
     "discover.advancedSettings.maxDocFieldsDisplayedTitle": "表示される最大ドキュメントフィールド数",
     "discover.advancedSettings.sampleSizeText": "表に表示する行数です",
     "discover.advancedSettings.sampleSizeTitle": "行数",

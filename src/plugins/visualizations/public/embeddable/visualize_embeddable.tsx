@@ -46,6 +46,7 @@ import { SavedObjectAttributes } from '../../../../core/types';
 import { getSavedVisualization } from '../utils/saved_visualize_utils';
 import { VisSavedObject } from '../types';
 import { toExpressionAst } from './to_ast';
+import type { RenderMode } from '../../../expressions';
 
 const getKeys = <T extends {}>(o: T): Array<keyof T> => Object.keys(o) as Array<keyof T>;
 
@@ -63,6 +64,7 @@ export interface VisualizeInput extends EmbeddableInput {
     colors?: { [key: string]: string };
   };
   savedVis?: SerializedVis;
+  renderMode?: RenderMode;
   table?: unknown;
   query?: Query;
   filters?: Filter[];
@@ -314,6 +316,7 @@ export class VisualizeEmbeddable
 
     const expressions = getExpressions();
     this.handler = await expressions.loader(this.domNode, undefined, {
+      renderMode: this.input.renderMode || 'view',
       onRenderError: (element: HTMLElement, error: ExpressionRenderError) => {
         this.onContainerError(error);
       },
