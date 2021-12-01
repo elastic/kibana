@@ -24,6 +24,6 @@ export const getSearchableTypes = (typeRegistry: ISavedObjectTypeRegistry, types
 };
 
 const isTypeMatching = (list: string[], item: string) =>
-  list.find((e) => toCompareFormat(e) === toCompareFormat(item)) !== undefined;
+  list.some((e) => toCompareFormat(e) === toCompareFormat(item));
 
-const toCompareFormat = (str: string) => str.trim().toLowerCase().replace(/\s/g, '-');
+const toCompareFormat = (str: string) => str.toLowerCase().replace(/\s/g, '-');
