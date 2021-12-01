@@ -140,7 +140,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     const eventLogService = plugins.eventLog;
     registerEventLogProvider(eventLogService);
 
-    const requestContextFactory = new RequestContextFactory({ config, core, plugins });
+    const requestContextFactory = new RequestContextFactory({ config, logger, core, plugins });
     const router = core.http.createRouter<SecuritySolutionRequestHandlerContext>();
     core.http.registerRouteHandlerContext<SecuritySolutionRequestHandlerContext, typeof APP_ID>(
       APP_ID,
