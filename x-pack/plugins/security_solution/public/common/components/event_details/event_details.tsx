@@ -120,8 +120,9 @@ const EventDetailsComponent: React.FC<Props> = ({
   const [selectedTabId, setSelectedTabId] = useState<EventViewId>(EventsViewType.summaryView);
   const handleTabClick = useCallback(
     (tab: EuiTabbedContentTab) => setSelectedTabId(tab.id as EventViewId),
-    [setSelectedTabId]
+    []
   );
+  const goToTableTab = useCallback(() => setSelectedTabId(EventsViewType.tableView), []);
 
   const eventFields = useMemo(() => getEnrichmentFields(data), [data]);
   const existingEnrichments = useMemo(
@@ -178,6 +179,7 @@ const EventDetailsComponent: React.FC<Props> = ({
                     timelineId,
                     title: i18n.DUCOMENT_SUMMARY,
                   }}
+                  goToTable={goToTableTab}
                 />
 
                 {(enrichmentCount > 0 || hostRisk) && (
@@ -215,6 +217,7 @@ const EventDetailsComponent: React.FC<Props> = ({
       allEnrichments,
       isEnrichmentsLoading,
       hostRisk,
+      goToTableTab,
     ]
   );
 
