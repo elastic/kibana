@@ -11,7 +11,7 @@ import { EuiToolTip, EuiIcon, EuiFlexGrid, EuiFlexItem } from '@elastic/eui';
 
 interface Props {
   title: string;
-  tooltip?: string;
+  tooltipContent?: string;
   customTooltip?: React.ReactNode;
 }
 
@@ -19,17 +19,23 @@ interface Props {
  * Table header cell component that includes icon(question mark) tooltip with additional details about column
  * Icon tooltip will never be truncated and always be visible for user interaction
  * @param title string - column header title
- * @param tooltip string - text content of tooltip
+ * @param tooltipContent string - text content of tooltip
  * @param customTooltip React.ReactNode - any custom tooltip
  */
-const TableHeaderTooltipCellComponent = ({ title, tooltip, customTooltip }: Props) => (
+const TableHeaderTooltipCellComponent = ({ title, tooltipContent, customTooltip }: Props) => (
   <EuiFlexGrid gutterSize="none">
     <EuiFlexItem style={{ width: 'calc(100% - 20px)' }}>
       <span className="eui-textTruncate">{title}</span>
     </EuiFlexItem>
     {customTooltip ?? (
-      <EuiToolTip content={tooltip}>
-        <EuiIcon size="m" color="subdued" type="questionInCircle" style={{ marginLeft: 4 }} />
+      <EuiToolTip content={tooltipContent}>
+        <EuiIcon
+          data-test-subj="tableHeaderIcon"
+          size="m"
+          color="subdued"
+          type="questionInCircle"
+          style={{ marginLeft: 4 }}
+        />
       </EuiToolTip>
     )}
   </EuiFlexGrid>

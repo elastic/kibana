@@ -352,10 +352,10 @@ export const getMonitoringColumns = (columnsProps: GetColumnsProps): TableColumn
       name: (
         <TableHeaderTooltipCell
           title={i18n.COLUMN_INDEXING_TIMES}
-          tooltip={i18n.COLUMN_INDEXING_TIMES_TOOLTIP}
+          tooltipContent={i18n.COLUMN_INDEXING_TIMES_TOOLTIP}
         />
       ),
-      render: (value: RuleStatus['current_status']['bulk_create_time_durations']) => (
+      render: (value: RuleStatus['current_status']['bulk_create_time_durations'] | undefined) => (
         <EuiText data-test-subj="bulk_create_time_durations" size="s">
           {value?.length ? sum(value.map(Number)).toFixed() : getEmptyTagValue()}
         </EuiText>
@@ -368,10 +368,10 @@ export const getMonitoringColumns = (columnsProps: GetColumnsProps): TableColumn
       name: (
         <TableHeaderTooltipCell
           title={i18n.COLUMN_QUERY_TIMES}
-          tooltip={i18n.COLUMN_QUERY_TIMES_TOOLTIP}
+          tooltipContent={i18n.COLUMN_QUERY_TIMES_TOOLTIP}
         />
       ),
-      render: (value: RuleStatus['current_status']['search_after_time_durations']) => (
+      render: (value: RuleStatus['current_status']['search_after_time_durations'] | undefined) => (
         <EuiText data-test-subj="search_after_time_durations" size="s">
           {value?.length ? sum(value.map(Number)).toFixed() : getEmptyTagValue()}
         </EuiText>
@@ -407,7 +407,7 @@ export const getMonitoringColumns = (columnsProps: GetColumnsProps): TableColumn
           }
         />
       ),
-      render: (value: RuleStatus['current_status']['gap']) => (
+      render: (value: RuleStatus['current_status']['gap'] | undefined) => (
         <EuiText data-test-subj="gap" size="s">
           {value ?? getEmptyTagValue()}
         </EuiText>
@@ -418,7 +418,7 @@ export const getMonitoringColumns = (columnsProps: GetColumnsProps): TableColumn
     {
       field: 'current_status.status',
       name: i18n.COLUMN_LAST_RESPONSE,
-      render: (value: RuleStatus['current_status']['status']) => (
+      render: (value: RuleStatus['current_status']['status'] | undefined) => (
         <RuleExecutionStatusBadge status={value} />
       ),
       width: '12%',
@@ -427,7 +427,7 @@ export const getMonitoringColumns = (columnsProps: GetColumnsProps): TableColumn
     {
       field: 'current_status.status_date',
       name: i18n.COLUMN_LAST_COMPLETE_RUN,
-      render: (value: RuleStatus['current_status']['status_date']) => {
+      render: (value: RuleStatus['current_status']['status_date'] | undefined) => {
         return value == null ? (
           getEmptyTagValue()
         ) : (
