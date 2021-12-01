@@ -85,21 +85,25 @@ export function useCanSeeHostIsolationExceptionsMenu() {
 
 const SEARCHABLE_FIELDS: Readonly<string[]> = [`name`, `description`, `entries.value`];
 
-export function useFetchHostIsolationExceptionsList(): QueryObserverResult<
-  FoundExceptionListItemSchema,
-  ServerApiError
-> {
+export function useFetchHostIsolationExceptionsList({
+  filter,
+  page,
+  perPage,
+}: {
+  filter?: string;
+  page: number;
+  perPage: number;
+}): QueryObserverResult<FoundExceptionListItemSchema, ServerApiError> {
   const http = useHttp();
-  const location = useHostIsolationExceptionsSelector(getCurrentLocation);
 
   return useQuery<FoundExceptionListItemSchema, ServerApiError>(
-    ['hostIsolationExceptions', 'list', location.filter, location.page_size, location.page_index],
+    ['hostIsolationExceptions', 'list', filter, perPage, page],
     () => {
       return getHostIsolationExceptionItems({
         http,
-        page: location.page_index + 1,
-        perPage: location.page_size,
-        filter: parseQueryFilterToKQL(location.filter, SEARCHABLE_FIELDS) || undefined,
+        page: page + 1,
+        perPage,
+        filter: filter ? parseQueryFilterToKQL(filter, SEARCHABLE_FIELDS) : undefined,
       });
     }
   );
