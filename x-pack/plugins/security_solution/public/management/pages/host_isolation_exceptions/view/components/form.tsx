@@ -245,7 +245,7 @@ export const HostIsolationExceptionsForm: React.FC<{
       <EuiSpacer size="m" />
       {ipInput}
       <EuiHorizontalRule />
-      <EuiFormRow data-test-subj={'effectedPolicies-container'}>
+      <EuiFormRow fullWidth={true} data-test-subj={'effectedPolicies-container'}>
         <EffectedPolicySelect
           isGlobal={isGlobal}
           isPlatinumPlus={true}
