@@ -114,7 +114,8 @@ export class RouteGuard {
         getDataViewsService: getDataViewsServiceFactory(
           this._getDataViews,
           context.core.savedObjects.client,
-          client
+          client,
+          request
         ),
       });
     };
