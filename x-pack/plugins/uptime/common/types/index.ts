@@ -33,7 +33,7 @@ export interface MonitorIdParam {
 
 export type SyntheticsMonitorSavedObject = SimpleSavedObject<{
   name: string;
-  runOnce: boolean;
+  runOnce?: boolean;
   urls?: string[];
   tags?: string[];
   locations: string[];

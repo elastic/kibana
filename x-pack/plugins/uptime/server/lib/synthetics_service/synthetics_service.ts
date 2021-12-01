@@ -209,6 +209,16 @@ export class SyntheticsService {
       return `@every ${schedule.number}${schedule.unit}`;
     }
 
+    function parseUrl(urls?: string | string[]) {
+      if (!urls) {
+        return undefined;
+      }
+      if (urls instanceof Array) {
+        return urls;
+      }
+      return [urls];
+    }
+
     function parseInlineSource(monAttrs: any) {
       if (monAttrs['source.inline.script']) {
         return {
@@ -227,7 +237,7 @@ export class SyntheticsService {
         locations,
         tags,
         source: parseInlineSource(monAttrs),
-        urls: [urls],
+        urls: parseUrl(urls),
         schedule: parseSchedule(schedule),
       };
     });

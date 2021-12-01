@@ -14,7 +14,16 @@ import { Logger } from '../../../../../../src/core/server';
 
 const TEST_SERVICE_USERNAME = 'localKibanaIntegrationTestsUser';
 
-export type MonitorConfigs = Array<SyntheticsMonitorSavedObject['attributes'] & { id: string }>;
+export type MonitorConfigs = Array<
+  SyntheticsMonitorSavedObject['attributes'] & {
+    id: string;
+    source?: {
+      inline: {
+        script: string;
+      };
+    };
+  }
+>;
 
 export interface ServiceData {
   monitors: MonitorConfigs;
