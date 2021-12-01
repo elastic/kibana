@@ -6,9 +6,11 @@
  */
 
 import type { StoryContext } from '@storybook/addons';
-import { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import type { CoreTheme } from '../../../../../src/core/public';
+import { EuiThemeProvider } from '../../../../../src/plugins/kibana_react/common';
+import { KibanaThemeProvider } from '../../../../../src/plugins/kibana_react/public';
 
 export const useGlobalStorybookTheme = ({ globals: { euiTheme } }: StoryContext) => {
   const theme = useMemo(() => euiThemeFromId(euiTheme), [euiTheme]);
@@ -23,6 +25,27 @@ export const useGlobalStorybookTheme = ({ globals: { euiTheme } }: StoryContext)
     theme$,
   };
 };
+
+export const GlobalStorybookThemeProviders: React.FC<{ context: StoryContext }> = ({
+  context,
+  children,
+}) => {
+  const { theme, theme$ } = useGlobalStorybookTheme(context);
+  return (
+    <KibanaThemeProvider theme$={theme$}>
+      <EuiThemeProvider darkMode={theme.darkMode}>{children}</EuiThemeProvider>
+    </KibanaThemeProvider>
+  );
+};
+
+export const decorateWithGlobalStorybookThemeProviders = <
+  StoryFnReactReturnType extends React.ReactNode
+>(
+  wrappedStory: () => StoryFnReactReturnType,
+  context: StoryContext
+) => (
+  <GlobalStorybookThemeProviders context={context}>{wrappedStory()}</GlobalStorybookThemeProviders>
+);
 
 const euiThemeFromId = (themeId: string): CoreTheme => {
   switch (themeId) {

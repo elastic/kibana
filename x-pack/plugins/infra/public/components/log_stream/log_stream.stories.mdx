@@ -4,13 +4,12 @@ import { delay } from 'rxjs/operators';
 
 import { I18nProvider } from '@kbn/i18n-react';
 import { KBN_FIELD_TYPES } from '../../../../../../src/plugins/data/public';
-import { EuiThemeProvider } from '../../../../../../src/plugins/kibana_react/common';
-import { KibanaContextProvider, KibanaThemeProvider } from '../../../../../../src/plugins/kibana_react/public';
+import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
 import { LOG_ENTRIES_SEARCH_STRATEGY } from '../../../common/search_strategies/log_entries/log_entries';
 import { createIndexPatternMock, createIndexPatternsMock } from '../../hooks/use_kibana_index_patterns.mock';
 import { DEFAULT_SOURCE_CONFIGURATION } from '../../test_utils/source_configuration';
 import { generateFakeEntries, ENTRIES_EMPTY } from '../../test_utils/entries';
-import { useGlobalStorybookTheme } from '../../test_utils/use_global_storybook_theme';
+import { decorateWithGlobalStorybookThemeProviders } from '../../test_utils/use_global_storybook_theme';
 
 import { LogStream } from './';
 
@@ -145,18 +144,14 @@ export const Template = (args) => <LogStream {...args} />;
   title="infra/LogStream"
   component={LogStream}
   decorators={[
-    (story, context) => {
-      const { theme, theme$ } = useGlobalStorybookTheme(context);
-      return (
-        <I18nProvider>
-          <EuiThemeProvider darkMode={theme.darkMode}>
-            <KibanaContextProvider services={{ data: dataMock, http: { fetch }, uiSettings }}>
-              {story()}
-            </KibanaContextProvider>
-          </EuiThemeProvider>
-        </I18nProvider>
-      );
-    }
+    (story) => (
+      <I18nProvider>
+        <KibanaContextProvider services={{ data: dataMock, http: { fetch }, uiSettings }}>
+          {story()}
+        </KibanaContextProvider>
+      </I18nProvider>
+    ),
+    decorateWithGlobalStorybookThemeProviders,
   ]}
 />
 
