@@ -9,11 +9,8 @@ import { Page } from '@elastic/synthetics';
 import { byTestId } from './uptime.journey';
 
 export async function waitForLoadingToFinish({ page }: { page: Page }) {
-  let isLoadingVisible = true;
-
-  while (isLoadingVisible) {
-    const loading = await page.$(byTestId('kbnLoadingMessage'));
-    isLoadingVisible = loading !== null;
+  while (true) {
+    if ((await page.$(byTestId('kbnLoadingMessage'))) !== null) break;
     await page.waitForTimeout(5 * 1000);
   }
 }

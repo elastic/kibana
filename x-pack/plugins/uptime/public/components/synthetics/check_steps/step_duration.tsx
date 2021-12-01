@@ -11,7 +11,8 @@ import { useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import numeral from '@elastic/numeral';
 import { JourneyStep } from '../../../../common/runtime_types';
-import { StepFieldTrend } from './waterfall_marker_trend';
+import { StepFieldTrend } from './step_field_trend';
+import { microToSec } from '../../../lib/formatting';
 
 interface Props {
   step: JourneyStep;
@@ -38,9 +39,9 @@ export const StepDuration = ({ step }: Props) => {
   const button = (
     <EuiButtonEmpty onMouseEnter={() => setIsOpen(true)} iconType="visArea">
       {i18n.translate('xpack.uptime.synthetics.step.duration', {
-        defaultMessage: '{value} sec',
+        defaultMessage: '{value} seconds',
         values: {
-          value: numeral(step.synthetics.step?.duration.us! / (1000 * 1000)).format('00.0'),
+          value: numeral(microToSec(step.synthetics.step?.duration.us!)).format('00.0'),
         },
       })}
     </EuiButtonEmpty>
