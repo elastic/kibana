@@ -20,7 +20,7 @@ import {
   isOnPolicyTrustedAppsView,
   policyIdFromParams,
 } from '../../store/policy_details/selectors';
-import { PolicyHostIsolationExceptionsTab } from '../host_isolation_exceptions/policy_host_isolation_exceptions_tab';
+import { PolicyHostIsolationExceptionsTab } from '../host_isolation_exceptions/host_isolation_exceptions_tab';
 import { PolicyFormLayout } from '../policy_forms/components';
 import { usePolicyDetailsSelector } from '../policy_hooks';
 import { PolicyTrustedAppsLayout } from '../trusted_apps/layout';
