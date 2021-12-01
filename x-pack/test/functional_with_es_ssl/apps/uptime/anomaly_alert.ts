@@ -9,7 +9,8 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
-  describe('uptime anomaly alert', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/111667
+  describe.skip('uptime anomaly alert', () => {
     const pageObjects = getPageObjects(['common', 'uptime']);
     const supertest = getService('supertest');
     const retry = getService('retry');
