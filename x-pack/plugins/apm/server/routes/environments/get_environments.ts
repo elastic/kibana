@@ -14,6 +14,7 @@ import { ProcessorEvent } from '../../../common/processor_event';
 import { rangeQuery, termQuery } from '../../../../observability/server';
 import { getProcessorEventForTransactions } from '../../lib/helpers/transactions';
 import { Setup } from '../../lib/helpers/setup_request';
+import { Environment } from '../../../common/environment_rt';
 
 /**
  * This is used for getting the list of environments for the environments selector,
@@ -78,5 +79,5 @@ export async function getEnvironments({
     (environmentBucket) => environmentBucket.key as string
   );
 
-  return environments;
+  return environments as Environment[];
 }

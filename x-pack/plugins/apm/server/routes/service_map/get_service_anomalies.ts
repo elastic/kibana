@@ -22,8 +22,8 @@ import { rangeQuery } from '../../../../observability/server';
 import { withApmSpan } from '../../utils/with_apm_span';
 import { getMlJobsWithAPMGroup } from '../../lib/anomaly_detection/get_ml_jobs_with_apm_group';
 import { Setup } from '../../lib/helpers/setup_request';
-import { apmMlAnomalyQuery } from '../../../common/anomaly_detection/apm_ml_anomaly_query';
-import { ApmMlDetectorIndex } from '../../../common/anomaly_detection/apm_ml_detectors';
+import { apmMlAnomalyQuery } from '../../lib/anomaly_detection/apm_ml_anomaly_query';
+import { ApmMlDetectorType } from '../../../common/anomaly_detection/apm_ml_detectors';
 
 export const DEFAULT_ANOMALIES: ServiceAnomaliesResponse = {
   mlJobIds: [],
@@ -58,7 +58,9 @@ export async function getServiceAnomalies({
         query: {
           bool: {
             filter: [
-              ...apmMlAnomalyQuery(ApmMlDetectorIndex.txLatency),
+              ...apmMlAnomalyQuery({
+                detectorTypes: [ApmMlDetectorType.txLatency],
+              }),
               ...rangeQuery(
                 Math.min(end - 30 * 60 * 1000, start),
                 end,
