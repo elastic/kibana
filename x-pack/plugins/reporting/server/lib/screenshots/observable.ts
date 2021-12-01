@@ -9,6 +9,7 @@ import apm from 'elastic-apm-node';
 import * as Rx from 'rxjs';
 import { catchError, concatMap, first, mergeMap, take, takeUntil, toArray } from 'rxjs/operators';
 import { durationToNumber } from '../../../common/schema_utils';
+import { REPORTING_TRANSACTION_TYPE } from '../../../common/constants';
 import { HeadlessChromiumDriverFactory } from '../../browsers';
 import { CaptureConfig } from '../../types';
 import {
@@ -18,7 +19,6 @@ import {
   ScreenshotObservableOpts,
   ScreenshotResults,
 } from './';
-import { REPORTING_TRANSACTION_TYPE } from '../../export_types/common';
 import { ScreenshotObservableHandler } from './observable_handler';
 
 export type { ElementPosition, ElementsPositionAndAttribute, ScreenshotResults };

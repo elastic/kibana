@@ -8,7 +8,7 @@
 import apm from 'elastic-apm-node';
 import * as Rx from 'rxjs';
 import { catchError, finalize, map, mergeMap, takeUntil, tap } from 'rxjs/operators';
-import { PNG_JOB_TYPE_V2 } from '../../../common/constants';
+import { PNG_JOB_TYPE_V2, REPORTING_TRANSACTION_TYPE } from '../../../common/constants';
 import { TaskRunResult } from '../../lib/tasks';
 import { RunTaskFn, RunTaskFnFactory } from '../../types';
 import {
@@ -16,7 +16,6 @@ import {
   getConditionalHeaders,
   omitBlockedHeaders,
   generatePngObservableFactory,
-  REPORTING_TRANSACTION_TYPE,
 } from '../common';
 import { getFullRedirectAppUrl } from '../common/v2/get_full_redirect_app_url';
 import { TaskPayloadPNGV2 } from './types';

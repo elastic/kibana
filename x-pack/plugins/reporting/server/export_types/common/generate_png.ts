@@ -8,14 +8,13 @@
 import apm from 'elastic-apm-node';
 import * as Rx from 'rxjs';
 import { finalize, map, tap } from 'rxjs/operators';
+import { REPORTING_TRANSACTION_TYPE } from '../../../common/constants';
 import { ReportingCore } from '../../';
 import { UrlOrUrlLocatorTuple } from '../../../common/types';
 import { LevelLogger } from '../../lib';
 import { LayoutParams, LayoutSelectorDictionary, PreserveLayout } from '../../lib/layouts';
 import { getScreenshots$, ScreenshotResults } from '../../lib/screenshots';
 import { ConditionalHeaders } from '../common';
-
-export const REPORTING_TRANSACTION_TYPE = 'reporting';
 
 export async function generatePngObservableFactory(reporting: ReportingCore) {
   const config = reporting.getConfig();

@@ -6,7 +6,7 @@
  */
 
 import apm from 'elastic-apm-node';
-import { REPORTING_TRANSACTION_TYPE } from '../../common';
+import { REPORTING_TRANSACTION_TYPE } from '../../../../common/constants';
 
 interface PdfTracker {
   setByteLength: (byteLength: number) => void;
