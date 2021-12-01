@@ -12,8 +12,19 @@ import type { HeadlessChromiumDriver } from '../browsers';
 import type { ElementsPositionAndAttribute } from './get_element_position_data';
 
 export interface Screenshot {
+  /**
+   * Screenshot PNG image data.
+   */
   data: Buffer;
+
+  /**
+   * Screenshot title.
+   */
   title: string | null;
+
+  /**
+   * Screenshot description.
+   */
   description: string | null;
 }
 

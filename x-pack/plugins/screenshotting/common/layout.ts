@@ -12,7 +12,14 @@ import type { Ensure, SerializableRecord } from '@kbn/utility-types';
  */
 export type Size = Ensure<
   {
+    /**
+     * Layout width.
+     */
     width: number;
+
+    /**
+     * Layout height.
+     */
     height: number;
   },
   SerializableRecord
@@ -30,11 +37,29 @@ export interface LayoutSelectorDictionary {
   timefilterDurationAttribute: string;
 }
 
+/**
+ * Screenshot layout parameters.
+ */
 export type LayoutParams = Ensure<
   {
+    /**
+     * Unique layout name.
+     */
     id?: string;
+
+    /**
+     * Layout sizing.
+     */
     dimensions?: Size;
+
+    /**
+     * Element selectors determining the page state.
+     */
     selectors?: Partial<LayoutSelectorDictionary>;
+
+    /**
+     * Page zoom.
+     */
     zoom?: number;
   },
   SerializableRecord

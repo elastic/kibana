@@ -99,6 +99,9 @@ function getDisallowedOutgoingUrlError(interceptedUrl: string) {
   );
 }
 
+/**
+ * @internal
+ */
 export class HeadlessChromiumDriver {
   private listenersAttached = false;
   private interceptedCount = 0;

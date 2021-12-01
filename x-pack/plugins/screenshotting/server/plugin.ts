@@ -23,8 +23,21 @@ interface SetupDeps {
   screenshotMode: ScreenshotModePluginSetup;
 }
 
+/**
+ * Start public contract.
+ */
 export interface ScreenshottingStart {
+  /**
+   * Runs browser diagnostics.
+   * @returns Observable with output messages.
+   */
   diagnose: HeadlessChromiumDriverFactory['diagnose'];
+
+  /**
+   * Takes screenshots of multiple pages.
+   * @param options Screenshots session options.
+   * @returns Observable with screenshotting results.
+   */
   getScreenshots(options: ScreenshotOptions): ReturnType<typeof getScreenshots>;
 }
 

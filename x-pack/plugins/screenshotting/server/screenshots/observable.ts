@@ -27,22 +27,65 @@ import { waitForRenderComplete } from './wait_for_render';
 import { waitForVisualizations } from './wait_for_visualizations';
 
 export interface PhaseTimeouts {
+  /**
+   * Open URL phase timeout.
+   */
   openUrl: number;
+
+  /**
+   * Timeout of the page readiness phase.
+   */
   waitForElements: number;
+
+  /**
+   * Timeout of the page render phase.
+   */
   renderComplete: number;
+
+  /**
+   * An additional delay to wait until the visualizations are ready.
+   */
   loadDelay: number;
 }
 
 export interface ScreenshotObservableOptions {
+  /**
+   * The browser timezone that will be emulated in the browser instance.
+   * This option should be used to keep timezone on server and client in sync.
+   */
   browserTimezone?: string;
+
+  /**
+   * Custom headers to be sent with each request.
+   */
   conditionalHeaders: ConditionalHeaders;
+
+  /**
+   * Timeouts for each phase of the screenshot.
+   */
   timeouts: PhaseTimeouts;
+
+  /**
+   * The list or URL to take screenshots of.
+   * Every item can either be a string or a tuple containing a URL and a context.
+   */
   urls: UrlOrUrlWithContext[];
 }
 
 export interface ScreenshotObservableResult {
+  /**
+   * Used time range filter.
+   */
   timeRange: string | null;
+
+  /**
+   * Taken screenshots.
+   */
   screenshots: Screenshot[];
+
+  /**
+   * Error that occurred during the screenshotting.
+   */
   error?: Error;
 
   /**
@@ -51,6 +94,10 @@ export interface ScreenshotObservableResult {
    * does no further sanitization on these strings.
    */
   renderErrors?: string[];
+
+  /**
+   * @internal
+   */
   elementsPositionAndAttributes?: ElementsPositionAndAttribute[]; // NOTE: for testing
 }
 

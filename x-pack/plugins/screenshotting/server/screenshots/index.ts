@@ -30,8 +30,19 @@ export interface ScreenshotOptions extends ScreenshotObservableOptions {
 }
 
 export interface ScreenshotResult {
+  /**
+   * Used layout instance constructed from the given options.
+   */
   layout: Layout;
+
+  /**
+   * Collected performance metrics during the screenshotting session.
+   */
   metrics$: Observable<PerformanceMetrics>;
+
+  /**
+   * Screenshotting results.
+   */
   results: ScreenshotObservableResult[];
 }
 

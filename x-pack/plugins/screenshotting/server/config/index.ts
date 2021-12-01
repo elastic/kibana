@@ -8,6 +8,9 @@
 import type { PluginConfigDescriptor } from 'src/core/server';
 import { ConfigSchema, ConfigType } from './schema';
 
+/**
+ * Screenshotting plugin configuration schema.
+ */
 export const config: PluginConfigDescriptor<ConfigType> = {
   schema: ConfigSchema,
   deprecations: ({ renameFromRoot }) => [

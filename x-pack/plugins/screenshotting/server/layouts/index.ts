@@ -11,14 +11,24 @@ import type { HeadlessChromiumDriver } from '../browsers';
 import type { BaseLayout } from './base_layout';
 
 interface LayoutSelectors {
-  // Fields that are not part of Layout: the instances
-  // independently implement these fields on their own
+  /**
+   * Element selectors determining the page state.
+   */
   selectors: LayoutSelectorDictionary;
+
+  /**
+   * A callback to position elements before taking a screenshot.
+   * @param browser Browser adapter instance.
+   * @param logger Message logger.
+   */
   positionElements?(browser: HeadlessChromiumDriver, logger: Logger): Promise<void>;
 }
 
 export type Layout = BaseLayout & LayoutSelectors & Partial<Size>;
 
+/**
+ * Supported layout types.
+ */
 export const LayoutTypes = {
   PRESERVE_LAYOUT: 'preserve_layout',
   PRINT: 'print',

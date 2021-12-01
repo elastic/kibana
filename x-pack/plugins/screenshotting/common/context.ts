@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+/**
+ * Screenshot context.
+ * This is a serializable object that can be passed from the screenshotting backend and then deserialized on the target page.
+ */
 export type Context = Record<string, unknown>;
 
 /**

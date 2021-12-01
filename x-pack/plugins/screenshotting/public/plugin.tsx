@@ -8,10 +8,19 @@
 import type { Plugin } from 'src/core/public';
 import { ContextStorage } from './context_storage';
 
+/**
+ * Setup public contract.
+ */
 export interface ScreenshottingSetup {
+  /**
+   * Gathers screenshot context that has been set on the backend.
+   */
   getContext: ContextStorage['get'];
 }
 
+/**
+ * Start public contract.
+ */
 export type ScreenshottingStart = ScreenshottingSetup;
 
 export class ScreenshottingPlugin implements Plugin<ScreenshottingSetup, ScreenshottingStart> {
