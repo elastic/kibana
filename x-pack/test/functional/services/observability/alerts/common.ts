@@ -6,6 +6,11 @@
  */
 
 import { chunk } from 'lodash';
+import {
+  ALERT_STATUS_ACTIVE,
+  ALERT_STATUS_RECOVERED,
+  AlertStatus,
+} from '@kbn/rule-data-utils/alerts_as_data_status';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { WebElementWrapper } from '../../../../../../test/functional/services/lib/web_element_wrapper';
 
@@ -24,12 +29,6 @@ const VIEW_RULE_DETAILS_FLYOUT_SELECTOR = 'viewRuleDetailsFlyout';
 const ACTION_COLUMN_INDEX = 1;
 
 type WorkflowStatus = 'open' | 'acknowledged' | 'closed';
-
-export enum AlertStatus {
-  all = 'all',
-  active = 'active',
-  recovered = 'recovered',
-}
 
 export function ObservabilityAlertsCommonProvider({
   getPageObjects,
@@ -226,12 +225,12 @@ export function ObservabilityAlertsCommonProvider({
   };
 
   // Alert status
-  const setAlertStatusFilter = async (alertStatus: AlertStatus) => {
+  const setAlertStatusFilter = async (alertStatus?: AlertStatus) => {
     let buttonSubject = 'alert-status-filter-show-all-button';
-    if (alertStatus === AlertStatus.active) {
+    if (alertStatus === ALERT_STATUS_ACTIVE) {
       buttonSubject = 'alert-status-filter-active-button';
     }
-    if (alertStatus === AlertStatus.recovered) {
+    if (alertStatus === ALERT_STATUS_RECOVERED) {
       buttonSubject = 'alert-status-filter-recovered-button';
     }
     const buttonGroupButton = await testSubjects.find(buttonSubject);

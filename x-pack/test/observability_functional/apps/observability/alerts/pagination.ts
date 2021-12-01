@@ -6,8 +6,8 @@
  */
 
 import expect from '@kbn/expect';
+import { ALERT_STATUS_ACTIVE } from '@kbn/rule-data-utils/alerts_as_data_status';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { AlertStatus } from '../../../../functional/services/observability/alerts/common';
 
 const ROWS_NEEDED_FOR_PAGINATION = 10;
 const DEFAULT_ROWS_PER_PAGE = 50;
@@ -37,12 +37,12 @@ export default ({ getService }: FtrProviderContext) => {
     describe(`When less than ${ROWS_NEEDED_FOR_PAGINATION} alerts are found`, () => {
       before(async () => {
         // current archiver has 8 active alerts
-        await observability.alerts.common.setAlertStatusFilter(AlertStatus.active);
+        await observability.alerts.common.setAlertStatusFilter(ALERT_STATUS_ACTIVE);
       });
 
       after(async () => {
         // current archiver has 33 alerts
-        await observability.alerts.common.setAlertStatusFilter(AlertStatus.all);
+        await observability.alerts.common.setAlertStatusFilter();
       });
 
       it('Does not render page size selector', async () => {
