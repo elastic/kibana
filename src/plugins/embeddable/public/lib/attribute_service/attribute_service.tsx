@@ -40,7 +40,7 @@ export interface AttributeServiceUnwrapResult<
   metaInfo?: MetaInfo;
 }
 export interface AttributeServiceOptions<
-  SavedObjectAttributes extends { title: string },
+  SavedObjectAttributes extends GenericAttributes,
   MetaInfo extends unknown = unknown
 > {
   saveMethod: (
