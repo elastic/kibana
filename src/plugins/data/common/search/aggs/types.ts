@@ -90,6 +90,7 @@ import {
   aggFilteredMetric,
   aggSinglePercentile,
 } from './';
+import { AggParamsSampler } from './buckets/sampler';
 
 export type { IAggConfig, AggConfigSerialized } from './agg_config';
 export type { CreateAggConfigParams, IAggConfigs } from './agg_configs';
@@ -166,6 +167,7 @@ export interface AggParamsMapping {
   [BUCKET_TYPES.DATE_HISTOGRAM]: AggParamsDateHistogram;
   [BUCKET_TYPES.TERMS]: AggParamsTerms;
   [BUCKET_TYPES.MULTI_TERMS]: AggParamsMultiTerms;
+  [BUCKET_TYPES.SAMPLER]: AggParamsSampler;
   [METRIC_TYPES.AVG]: AggParamsAvg;
   [METRIC_TYPES.CARDINALITY]: AggParamsCardinality;
   [METRIC_TYPES.COUNT]: BaseAggParams;

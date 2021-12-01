@@ -62,6 +62,7 @@ export const getAggTypes = () => ({
     { name: BUCKET_TYPES.SIGNIFICANT_TERMS, fn: buckets.getSignificantTermsBucketAgg },
     { name: BUCKET_TYPES.GEOHASH_GRID, fn: buckets.getGeoHashBucketAgg },
     { name: BUCKET_TYPES.GEOTILE_GRID, fn: buckets.getGeoTitleBucketAgg },
+    { name: BUCKET_TYPES.SAMPLER, fn: buckets.getSamplerBucketAgg },
   ],
 });
 
@@ -79,6 +80,7 @@ export const getAggTypesFunctions = () => [
   buckets.aggDateHistogram,
   buckets.aggTerms,
   buckets.aggMultiTerms,
+  buckets.aggSampler,
   metrics.aggAvg,
   metrics.aggBucketAvg,
   metrics.aggBucketMax,
