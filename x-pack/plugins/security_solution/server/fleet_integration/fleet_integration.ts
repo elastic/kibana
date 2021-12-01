@@ -17,7 +17,6 @@ import {
 import { NewPackagePolicy, UpdatePackagePolicy } from '../../../fleet/common';
 
 import { NewPolicyData, PolicyConfig } from '../../common/endpoint/types';
-import { ExperimentalFeatures } from '../../common/experimental_features';
 import { LicenseService } from '../../common/license';
 import { ManifestManager } from '../endpoint/services';
 import { IRequestContextFactory } from '../request_context_factory';
