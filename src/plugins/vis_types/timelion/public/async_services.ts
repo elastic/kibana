@@ -6,6 +6,6 @@
  * Side Public License, v 1.
  */
 
-export * from './duplicate_index_pattern';
-export * from './data_view_saved_object_conflict';
-export * from './insufficient_access';
+// re-export async parts from a single file to not create separate asyn bundles
+export { getTimelionRequestHandler } from './helpers/timelion_request_handler';
+export { TimelionVisComponent } from './components/timelion_vis_component';
