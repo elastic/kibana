@@ -3090,7 +3090,7 @@
       ".fleet-agents": {
       }
     },
-    "index": ".fleet-agent-7",
+    "index": ".fleet-agents-7",
     "mappings": {
       "_meta": {
         "migrationHash": "87cab95ac988d78a78d0d66bbf05361b65dcbacf"
