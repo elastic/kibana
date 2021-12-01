@@ -85,7 +85,7 @@ export const SourceField = ({ onChange, defaultConfig = defaultValues }: Props) 
   useEffect(() => {
     const tickTick = setInterval(() => {
       setRefresh(Date.now());
-    }, 5 * 1000);
+    }, 1000);
 
     return () => {
       if (tickTick) clearInterval(tickTick);

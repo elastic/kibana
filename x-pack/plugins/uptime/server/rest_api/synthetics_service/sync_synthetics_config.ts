@@ -6,7 +6,7 @@
  */
 import { UMRestApiRouteFactory } from '../types';
 import { API_URLS } from '../../../common/constants';
-import { getServiceCredentials, pushConfigs } from '../../lib/synthetics_service/push_configs';
+import { pushConfigs } from '../../lib/synthetics_service/push_configs';
 import { generateAPIKey } from './generate_service_api_key';
 import { SyntheticsServiceApiKey } from '../../../common/runtime_types';
 import { savedObjectsAdapter, syntheticsServiceApiKey } from '../../lib/saved_objects';
@@ -17,6 +17,7 @@ export const createSyncSyntheticsConfig: UMRestApiRouteFactory = () => ({
   validate: {},
   handler: async ({ savedObjectsClient, server, request, context }): Promise<any> => {
     const apiKey = await fetchAPIKey({
+      request,
       savedObjects: context.core.savedObjects,
       security: server.security,
     });
@@ -32,7 +33,7 @@ export const createSyncSyntheticsConfig: UMRestApiRouteFactory = () => ({
     });
   },
 });
-export const fetchAPIKey = async ({ savedObjects, server, request }: any) => {
+export const fetchAPIKey = async ({ savedObjects, security, request }: any) => {
   let apiKey: SyntheticsServiceApiKey;
   try {
     const hiddenSavedObjectClient = savedObjects.getClient({
@@ -43,9 +44,9 @@ export const fetchAPIKey = async ({ savedObjects, server, request }: any) => {
     // if no api key, set api key
     if (!apiKey) {
       apiKey = await generateAPIKey({
-        savedObjectsClient: hiddenSavedObjectClient,
         request,
-        security: server.security,
+        security,
+        savedObjectsClient: hiddenSavedObjectClient,
       });
     }
   } catch (e) {

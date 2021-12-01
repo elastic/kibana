@@ -46,7 +46,7 @@ export const pushConfigs = async ({
     // service doesn't currently take api key, but will need to be passed
     await axios({
       method: 'POST',
-      url: serviceUrl + '/cronjob',
+      url: serviceUrl + '/monitors',
       data,
       /* these credentials will come from user input, most likely in the form of a saved object when the admin
        * enables the synthetics service */

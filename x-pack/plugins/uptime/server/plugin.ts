@@ -131,8 +131,7 @@ export class Plugin implements PluginType {
             // Perform the work of the task. The return value should fit the TaskResult interface, documented
             // below. Invalid return values will result in a logged warning.
             async run() {
-              const { params, state, id } = taskInstance;
-              const prevState = state || { count: 0 };
+              const { state } = taskInstance;
 
               const [coreStart] = await core.getStartServices();
               await syncSyntheticsConfig({
@@ -172,7 +171,7 @@ export class Plugin implements PluginType {
         id: 'syntheticsService:sync-task-id',
         taskType: `syntheticsService:sync`,
         schedule: {
-          interval: '5m',
+          interval: '1m',
         },
         params: {},
         state: {},

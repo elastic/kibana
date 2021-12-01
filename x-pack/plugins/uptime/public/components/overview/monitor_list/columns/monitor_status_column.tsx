@@ -197,7 +197,7 @@ export const MonitorListStatusColumn = ({
         <EuiFlexItem grow={false} style={{ flexBasis: 40 }}>
           <EuiBadge
             className="eui-textCenter"
-            color={!objMonitor ? 'default' : status === STATUS.UP ? 'secondary' : dangerBehindText}
+            color={!objMonitor ? 'default' : status === STATUS.UP ? 'success' : dangerBehindText}
           >
             {getHealthMessage(status)}
           </EuiBadge>

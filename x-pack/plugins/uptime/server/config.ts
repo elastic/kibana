@@ -20,6 +20,7 @@ export const config: PluginConfigDescriptor = {
               password: schema.maybe(schema.string()),
               url: schema.maybe(schema.string()),
               hosts: schema.arrayOf(schema.string()),
+              enabled: schema.maybe(schema.boolean()),
             })
           ),
         })
