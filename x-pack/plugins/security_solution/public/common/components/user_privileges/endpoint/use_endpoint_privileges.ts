@@ -50,11 +50,23 @@ export const useEndpointPrivileges = (): Immutable<EndpointPrivileges> => {
 
   // Check if user can access fleet
   useEffect(() => {
+    if (!fleetServices) {
+      setFleetCheckDone(true);
+      return;
+    }
+
+    setFleetCheckDone(false);
+
     (async () => {
       try {
-        // Fleet is still defined as an optional plugin, thus `fleetServices` might not be defined
         if (isMounted.current) {
-          setCanAccessFleet(fleetServices?.authz.fleet.all ?? false);
+          // FIXME: adjust once PR #119973 is merged, which has async method
+          // const fleetAuthz = await fleetServices.authz();
+          await new Promise((r) => setTimeout(r, 0)); // <<<< Emulate promise resolve above. Delete once PR 119973 is available
+          const fleetAuthz = fleetServices.authz;
+
+          // Fleet is still defined as an optional plugin, thus `fleetServices` might not be defined
+          setCanAccessFleet(fleetAuthz.fleet.all);
         }
       } finally {
         if (isMounted.current) {
@@ -62,7 +74,7 @@ export const useEndpointPrivileges = (): Immutable<EndpointPrivileges> => {
         }
       }
     })();
-  }, [fleetServices?.authz.fleet.all]);
+  }, [fleetServices]);
 
   // Capture if component is unmounted
   useEffect(

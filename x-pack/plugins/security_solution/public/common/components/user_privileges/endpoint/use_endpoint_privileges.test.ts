@@ -93,48 +93,14 @@ describe('When using useEndpointPrivileges hook', () => {
 
     // Release the API response
     await act(async () => {
-      fleetApiMock.waitForApi();
+      await fleetApiMock.waitForApi();
       releaseApiResponse!();
     });
     expect(result.current).toEqual(getEndpointPrivilegesInitialStateMock());
   });
 
-  it('should call Fleet permissions api to determine user privilege to fleet', async () => {
-    render();
-    await waitForNextUpdate();
-    await fleetApiMock.waitForApi();
-    expect(useHttp().get as jest.Mock).toHaveBeenCalledWith(
-      appRoutesService.getCheckPermissionsPath()
-    );
-  });
-
-  it('should set privileges to false if user does not have superuser role', async () => {
-    authenticatedUser.roles = [];
-    render();
-    await waitForNextUpdate();
-    await fleetApiMock.waitForApi();
-    expect(result.current).toEqual(
-      getEndpointPrivilegesInitialStateMock({
-        canAccessEndpointManagement: false,
-      })
-    );
-  });
-
-  it('should set privileges to false if fleet api check returns failure', async () => {
-    fleetApiMock.responseProvider.checkPermissions.mockReturnValue({
-      error: 'MISSING_SECURITY',
-      success: false,
-    });
-
-    render();
-    await waitForNextUpdate();
-    await fleetApiMock.waitForApi();
-    expect(result.current).toEqual(
-      getEndpointPrivilegesInitialStateMock({
-        canAccessEndpointManagement: false,
-        canAccessFleet: false,
-      })
-    );
+  it('should set privileges to false if user does not have `all` fleet privileges', async () => {
+    expect(true).toBe(false);
   });
 
   it.each([['canIsolateHost'], ['canCreateArtifactsByPolicy']])(
