@@ -65,7 +65,11 @@ export const AccordionList: React.FC<Props> = ({
         </EuiFlexGroup>
       }
       id={accordionId}
-      extraAction={<EuiNotificationBadge size="m">{items.length}</EuiNotificationBadge>}
+      extraAction={
+        <EuiNotificationBadge color={items.length > 0 ? 'accent' : 'subdued'} size="m">
+          {items.length}
+        </EuiNotificationBadge>
+      }
     >
       <EuiInMemoryTable
         items={items.map((item) => ({ item }))}
