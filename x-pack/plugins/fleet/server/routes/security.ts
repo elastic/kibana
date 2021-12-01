@@ -103,34 +103,25 @@ function hasRequiredFleetAuthzPrivilege(
   if (!checkSecurityEnabled()) {
     return false;
   }
-
   if (fleetAllowFleetSetupPrivilege) {
     // Temporary while agent call the setup API
     if (authz.fleet.setup) {
       return true;
     }
   }
-
-  const missingAuthz = [];
-
   if (fleetAuthz && typeof fleetAuthz.fleet !== 'undefined') {
     for (const key of fleetAuthz.fleet) {
       if (!authz.fleet[key as keyof FleetAuthz['fleet']]) {
-        missingAuthz.push(`fleet.${key}`);
+        return false;
       }
     }
   }
-
   if (fleetAuthz && typeof fleetAuthz.integrations !== 'undefined') {
     for (const key of fleetAuthz.integrations) {
       if (!authz.integrations[key as keyof FleetAuthz['integrations']]) {
-        missingAuthz.push(`integrations.${key}`);
+        return false;
       }
     }
-  }
-
-  if (missingAuthz.length > 0) {
-    return false;
   }
 
   return true;
