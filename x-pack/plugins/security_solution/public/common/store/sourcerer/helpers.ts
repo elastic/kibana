@@ -62,14 +62,15 @@ export const validateSelectedPatterns = (
         )
       : // 7.16 -> 8.0 this will get hit because dataView == null
         dedupePatterns;
-
   return {
     [id]: {
       ...state.sourcererScopes[id],
       ...rest,
       selectedDataViewId: dataView?.id ?? null,
       selectedPatterns,
-      ...(isEmpty(selectedPatterns)
+      // if in timeline, allow for empty in case pattern was deleted
+      // need flow for this
+      ...(isEmpty(selectedPatterns) && id !== SourcererScopeName.timeline
         ? {
             selectedPatterns: getScopePatternListSelection(
               dataView ?? state.defaultDataView,
@@ -85,7 +86,7 @@ export const validateSelectedPatterns = (
 };
 
 interface CheckIfIndicesExistParams {
-  patternList: sourcererModel.SourcererScope['selectedPatterns'];
+  patternList: sourcererModel.SourcererDataView['patternList'];
   scopeId: sourcererModel.SourcererScopeName;
   signalIndexName: string | null;
 }

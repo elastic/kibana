@@ -23,9 +23,11 @@ import { waitFor } from '@testing-library/dom';
 import { useAppToasts } from '../../hooks/use_app_toasts';
 import { toMountPoint } from '../../../../../../../src/plugins/kibana_react/public';
 import { RefreshButton } from './refresh_button';
+import { useSourcererDataView } from '../../containers/sourcerer';
 
 const mockDispatch = jest.fn();
 
+jest.mock('../../containers/sourcerer');
 jest.mock('../../lib/kibana', () => {
   const original = jest.requireActual('../../lib/kibana');
   return {
@@ -110,7 +112,11 @@ const patternListNoSignals = patternList
 let store: ReturnType<typeof createStore>;
 describe('Sourcerer component', () => {
   const { storage } = createSecuritySolutionStorageMock();
-
+  beforeAll(() => {
+    (useSourcererDataView as jest.Mock).mockReturnValue({
+      indicesExist: true,
+    });
+  });
   beforeEach(() => {
     store = createStore(mockGlobalState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
     jest.clearAllMocks();
@@ -849,6 +855,9 @@ describe('No data', () => {
   const { storage } = createSecuritySolutionStorageMock();
 
   beforeEach(() => {
+    (useSourcererDataView as jest.Mock).mockReturnValue({
+      indicesExist: false,
+    });
     store = createStore(mockNoIndicesState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
     jest.clearAllMocks();
     jest.restoreAllMocks();
@@ -910,6 +919,9 @@ describe('Update available', () => {
     (useAppToasts as jest.Mock).mockReturnValue({
       addSuccess: mockAddSuccess,
       addError: mockAddError,
+    });
+    (useSourcererDataView as jest.Mock).mockReturnValue({
+      indicesExist: true,
     });
     store = createStore(state2, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
 

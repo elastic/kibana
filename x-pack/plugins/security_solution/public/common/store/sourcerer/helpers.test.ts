@@ -150,7 +150,7 @@ describe('sourcerer store helpers', () => {
         const result = validateSelectedPatterns(mockGlobalState.sourcerer, {
           ...payload,
           id: SourcererScopeName.timeline,
-          selectedDataViewId: '',
+          selectedDataViewId: null,
           selectedPatterns: [
             mockGlobalState.sourcerer.defaultDataView.patternList[3],
             mockGlobalState.sourcerer.defaultDataView.patternList[4],
@@ -159,7 +159,7 @@ describe('sourcerer store helpers', () => {
         expect(result).toEqual({
           [SourcererScopeName.timeline]: {
             ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.timeline],
-            selectedDataViewId: dataView.id,
+            selectedDataViewId: null,
             selectedPatterns: [
               mockGlobalState.sourcerer.defaultDataView.patternList[3],
               mockGlobalState.sourcerer.defaultDataView.patternList[4],
@@ -167,11 +167,11 @@ describe('sourcerer store helpers', () => {
           },
         });
       });
-      it('selectedPatterns.length > 0 & a pattern in selectedPatterns does not exist in defaultDataView, set dataViewId to null', () => {
+      it('selectedPatterns.length > 0 & some selectedPatterns do not exist in defaultDataView, set dataViewId to null', () => {
         const result = validateSelectedPatterns(mockGlobalState.sourcerer, {
           ...payload,
           id: SourcererScopeName.timeline,
-          selectedDataViewId: '',
+          selectedDataViewId: null,
           selectedPatterns: [
             mockGlobalState.sourcerer.defaultDataView.patternList[3],
             'journalbeat-*',

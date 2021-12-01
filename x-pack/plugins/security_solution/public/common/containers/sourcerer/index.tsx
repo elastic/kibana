@@ -303,13 +303,19 @@ export const useSourcererDataView = (
     }
   }, [selectedDataView, selectedPatterns]);
 
-  const sourcererDataView = useMemo(() => {
-    return selectedDataView == null ? legacyDataView : selectedDataView;
-  }, [legacyDataView, selectedDataView]);
+  const sourcererDataView = useMemo(
+    () => (selectedDataView == null ? legacyDataView : selectedDataView),
+    [legacyDataView, selectedDataView]
+  );
 
   const indicesExist = useMemo(
-    () => checkIfIndicesExist({ scopeId, signalIndexName, patternList: selectedPatterns }),
-    [scopeId, signalIndexName, selectedPatterns]
+    () =>
+      checkIfIndicesExist({
+        scopeId,
+        signalIndexName,
+        patternList: sourcererDataView.patternList,
+      }),
+    [scopeId, signalIndexName, sourcererDataView]
   );
 
   return useMemo(

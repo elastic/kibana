@@ -50,10 +50,15 @@ export const PopoverContent = styled.div`
 
 export const StyledBadge = styled(EuiBadge)`
   margin-left: 8px;
+  &,
+  .euiBadge__text {
+    cursor: pointer;
+  }
 `;
 
-export const Blockquote = styled.div`
+export const Blockquote = styled.span`
   ${({ theme }) => css`
+    display: block;
     border-color: ${theme.eui.euiColorDarkShade};
     border-left: ${theme.eui.euiBorderThick};
     margin: ${theme.eui.euiSizeS} 0 ${theme.eui.euiSizeS} ${theme.eui.euiSizeS};

@@ -27,7 +27,7 @@ import * as i18n from './translations';
 import { sourcererActions, sourcererModel, sourcererSelectors } from '../../store/sourcerer';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
 import { SourcererScopeName } from '../../store/sourcerer/model';
-import { checkIfIndicesExist, ensurePatternFormat } from '../../store/sourcerer/helpers';
+import { ensurePatternFormat } from '../../store/sourcerer/helpers';
 import { usePickIndexPatterns } from './use_pick_index_patterns';
 import {
   FormRow,
@@ -46,6 +46,7 @@ import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
 import { useAppToasts } from '../../hooks/use_app_toasts';
 import { toMountPoint } from '../../../../../../../src/plugins/kibana_react/public';
 import { RefreshButton } from './refresh_button';
+import { useSourcererDataView } from '../../containers/sourcerer';
 
 interface SourcererComponentProps {
   scope: sourcererModel.SourcererScopeName;
@@ -58,17 +59,16 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
   const { uiSettings } = useKibana().services;
 
   const sourcererScopeSelector = useMemo(() => sourcererSelectors.getSourcererScopeSelector(), []);
-  const {
-    defaultDataView,
-    kibanaDataViews,
-    signalIndexName,
-    sourcererScope: { selectedDataViewId, selectedPatterns, loading },
-  } = useDeepEqualSelector((state) => sourcererScopeSelector(state, scopeId));
-
-  const indicesExist = useMemo(
-    () => checkIfIndicesExist({ scopeId, signalIndexName, patternList: selectedPatterns }),
-    [scopeId, signalIndexName, selectedPatterns]
+  const { defaultDataView, kibanaDataViews, signalIndexName } = useDeepEqualSelector((state) =>
+    sourcererScopeSelector(state, scopeId)
   );
+
+  const {
+    dataViewId: selectedDataViewId,
+    indicesExist,
+    selectedPatterns,
+    loading,
+  } = useSourcererDataView(scopeId);
 
   const [isOnlyDetectionAlertsChecked, setIsOnlyDetectionAlertsChecked] = useState(
     isTimelineSourcerer && selectedPatterns.join() === signalIndexName
@@ -184,12 +184,6 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
   }, [missingPatterns, onContinueUpdateDeprecated]);
 
   const onUpdateDataView = useCallback(async () => {
-    // @Angela this is where your work is for "Add index pattern"
-    // update ui settings string
-    // uiSetttings.get(DEFAULT_INDEX_KEY)
-    // uiSettings.set(DEFAULT_INDEX_KEY, [...old, ...new])
-    // close modal and sourcerer
-
     const defaultIndex = await uiSettings.get<string[]>(DEFAULT_INDEX_KEY);
     const newSelectedOptions = [...defaultIndex, ...missingIndexPatterns];
     const isUiSettingsSuccess = await uiSettings.set(
@@ -199,14 +193,9 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
 
     setIsShowingUpdateModal(false);
     setPopoverIsOpen(false);
-    // make alternate onChangeDataView/setSelectedDataView that does NOT validate, validation will happen after refresh
-    // but technically sourcerer is in a "wrong" state until the refresh happens.
-    if (isUiSettingsSuccess) {
-      onChangeDataView(defaultDataView.id, newSelectedOptions, false);
-      // openToast() to refresh page
-      // show toaster to refresh page when confirmed
-      // that ui settings update was successful
 
+    if (isUiSettingsSuccess) {
+      onChangeDataView(defaultDataView.id, selectedPatterns, false);
       addSuccess({
         color: 'success',
         title: toMountPoint(i18n.SUCCESS_TOAST_TITLE),
@@ -226,6 +215,7 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
     defaultDataView.id,
     missingIndexPatterns,
     onChangeDataView,
+    selectedPatterns,
     uiSettings,
   ]);
 
@@ -305,7 +295,7 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
     setExpandAdvancedOptions((prevState) => !prevState);
   }, []);
 
-  return indicesExist ? (
+  return indicesExist || dataViewId === null ? (
     <EuiPopover
       panelClassName="sourcererPopoverPanel"
       button={buttonWithTooptip}
