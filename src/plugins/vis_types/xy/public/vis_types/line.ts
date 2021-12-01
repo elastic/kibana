@@ -149,7 +149,7 @@ export const lineVisTypeDefinition = {
         title: i18n.translate('visTypeXy.line.segmentTitle', { defaultMessage: 'X-axis' }),
         min: 0,
         max: 1,
-        aggFilter: ['!geohash_grid', '!geotile_grid', '!filter'],
+        aggFilter: ['!geohash_grid', '!geotile_grid', '!filter', '!multi_terms'],
       },
       {
         group: AggGroupNames.Buckets,
@@ -159,7 +159,7 @@ export const lineVisTypeDefinition = {
         }),
         min: 0,
         max: 3,
-        aggFilter: ['!geohash_grid', '!geotile_grid', '!filter'],
+        aggFilter: ['!geohash_grid', '!geotile_grid', '!filter', '!multi_terms'],
       },
       {
         group: AggGroupNames.Buckets,
@@ -169,7 +169,7 @@ export const lineVisTypeDefinition = {
         }),
         min: 0,
         max: 1,
-        aggFilter: ['!geohash_grid', '!geotile_grid', '!filter'],
+        aggFilter: ['!geohash_grid', '!geotile_grid', '!filter', '!multi_terms'],
       },
     ],
   },

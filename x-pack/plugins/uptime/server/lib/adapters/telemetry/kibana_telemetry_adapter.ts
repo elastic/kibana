@@ -9,7 +9,7 @@ import moment from 'moment';
 import { ISavedObjectsRepository, SavedObjectsClientContract } from 'kibana/server';
 import { CollectorFetchContext, UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { PageViewParams, UptimeTelemetry, Usage } from './types';
-import { savedObjectsAdapter } from '../../saved_objects';
+import { savedObjectsAdapter } from '../../saved_objects/saved_objects';
 import { UptimeESClient, createUptimeESClient } from '../../lib';
 
 interface UptimeTelemetryCollector {

@@ -31,8 +31,10 @@ import { savedObjectsClientMock } from '../../../../../../../../src/core/server/
 import { elasticsearchClientMock } from '../../../../../../../../src/core/server/elasticsearch/client/mocks';
 import { appContextService } from '../../../app_context';
 
-import { getAsset } from './common';
+import { getESAssetMetadata } from '../meta';
+
 import { installTransform } from './install';
+import { getAsset } from './common';
 
 describe('test transform install', () => {
   let esClient: DeeplyMockedKeys<ElasticsearchClient>;
@@ -195,19 +197,21 @@ describe('test transform install', () => {
       ],
     ]);
 
+    const meta = getESAssetMetadata({ packageName: 'endpoint' });
+
     expect(esClient.transform.putTransform.mock.calls).toEqual([
       [
         {
           transform_id: 'endpoint.metadata-default-0.16.0-dev.0',
           defer_validation: true,
-          body: '{"content": "data"}',
+          body: { content: 'data', _meta: meta },
         },
       ],
       [
         {
           transform_id: 'endpoint.metadata_current-default-0.16.0-dev.0',
           defer_validation: true,
-          body: '{"content": "data"}',
+          body: { content: 'data', _meta: meta },
         },
       ],
     ]);
@@ -328,12 +332,14 @@ describe('test transform install', () => {
       savedObjectsClient
     );
 
+    const meta = getESAssetMetadata({ packageName: 'endpoint' });
+
     expect(esClient.transform.putTransform.mock.calls).toEqual([
       [
         {
           transform_id: 'endpoint.metadata_current-default-0.16.0-dev.0',
           defer_validation: true,
-          body: '{"content": "data"}',
+          body: { content: 'data', _meta: meta },
         },
       ],
     ]);
@@ -553,12 +559,14 @@ describe('test transform install', () => {
       savedObjectsClient
     );
 
+    const meta = getESAssetMetadata({ packageName: 'endpoint' });
+
     expect(esClient.transform.putTransform.mock.calls).toEqual([
       [
         {
           transform_id: 'endpoint.metadata_current-default-0.16.0-dev.0',
           defer_validation: true,
-          body: '{"content": "data"}',
+          body: { content: 'data', _meta: meta },
         },
       ],
     ]);

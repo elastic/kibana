@@ -15,7 +15,7 @@ import {
 } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
 import React, { useCallback, useMemo, useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useParams } from 'react-router-dom';
 
 import { useKibana, useRouterNavigate } from '../../../common/lib/kibana';

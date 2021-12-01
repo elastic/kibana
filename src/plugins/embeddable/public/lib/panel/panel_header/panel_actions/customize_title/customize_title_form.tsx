@@ -9,7 +9,7 @@
 import React, { ChangeEvent } from 'react';
 
 import { EuiButtonEmpty, EuiFieldText, EuiFormRow } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
 export interface PanelOptionsMenuFormProps {

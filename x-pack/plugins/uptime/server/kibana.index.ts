@@ -11,8 +11,8 @@ import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
 import { PLUGIN } from '../common/constants/plugin';
 import { compose } from './lib/compose/kibana';
 import { initUptimeServer } from './uptime_server';
-import { UptimeCorePlugins, UptimeCoreSetup } from './lib/adapters/framework';
-import { umDynamicSettings } from './lib/saved_objects';
+import { UptimeCorePluginsSetup, UptimeCoreSetup } from './lib/adapters/framework';
+import { umDynamicSettings } from './lib/saved_objects/uptime_settings';
 import { UptimeRuleRegistry } from './plugin';
 
 export interface KibanaRouteOptions {
@@ -29,7 +29,7 @@ export interface KibanaServer extends Server {
 
 export const initServerWithKibana = (
   server: UptimeCoreSetup,
-  plugins: UptimeCorePlugins,
+  plugins: UptimeCorePluginsSetup,
   ruleRegistry: UptimeRuleRegistry,
   logger: Logger
 ) => {

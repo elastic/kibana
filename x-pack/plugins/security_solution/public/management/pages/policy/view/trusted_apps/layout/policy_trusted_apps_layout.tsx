@@ -7,7 +7,7 @@
 
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiButton,
   EuiTitle,
@@ -32,7 +32,7 @@ import { PolicyTrustedAppsFlyout } from '../flyout';
 import { PolicyTrustedAppsList } from '../list/policy_trusted_apps_list';
 import { useEndpointPrivileges } from '../../../../../../common/components/user_privileges/endpoint/use_endpoint_privileges';
 import { useAppUrl } from '../../../../../../common/lib/kibana';
-import { APP_ID } from '../../../../../../../common/constants';
+import { APP_UI_ID } from '../../../../../../../common/constants';
 import { getTrustedAppsListPath } from '../../../../../common/routing';
 
 export const PolicyTrustedAppsLayout = React.memo(() => {
@@ -92,7 +92,10 @@ export const PolicyTrustedAppsLayout = React.memo(() => {
 
   const aboutInfo = useMemo(() => {
     const link = (
-      <EuiLink href={getAppUrl({ appId: APP_ID, path: getTrustedAppsListPath() })} target="_blank">
+      <EuiLink
+        href={getAppUrl({ appId: APP_UI_ID, path: getTrustedAppsListPath() })}
+        target="_blank"
+      >
         <FormattedMessage
           id="xpack.securitySolution.endpoint.policy.trustedApps.layout.about.viewAllLinkLabel"
           defaultMessage="view all trusted applications"

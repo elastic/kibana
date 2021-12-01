@@ -17,6 +17,7 @@ import type {
 import { appContextService } from '../../../';
 import { getRegistryDataStreamAssetBaseName } from '../index';
 import { FLEET_GLOBAL_COMPONENT_TEMPLATE_NAME } from '../../../../constants';
+import { getESAssetMetadata } from '../meta';
 
 interface Properties {
   [key: string]: any;
@@ -367,13 +368,7 @@ function getBaseTemplate(
   hidden?: boolean
 ): IndexTemplate {
   // Meta information to identify Ingest Manager's managed templates and indices
-  const _meta = {
-    package: {
-      name: packageName,
-    },
-    managed_by: 'ingest-manager',
-    managed: true,
-  };
+  const _meta = getESAssetMetadata({ packageName });
 
   return {
     priority: templatePriority,

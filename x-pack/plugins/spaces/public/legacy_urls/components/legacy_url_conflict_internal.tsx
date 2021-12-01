@@ -20,7 +20,7 @@ import useAsync from 'react-use/lib/useAsync';
 import { first } from 'rxjs/operators';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { StartServicesAccessor } from 'src/core/public';
 
 import { DEFAULT_OBJECT_NOUN } from '../../constants';

@@ -27,6 +27,9 @@ import {
   FLEET_GLOBAL_COMPONENT_TEMPLATE_CONTENT,
 } from '../../../../constants';
 
+import type { ESAssetMetadata } from '../meta';
+import { getESAssetMetadata } from '../meta';
+
 import {
   generateMappings,
   generateTemplateName,
@@ -171,7 +174,7 @@ export async function installTemplateForDataStream({
 }
 
 interface TemplateMapEntry {
-  _meta: { package?: { name: string } };
+  _meta: ESAssetMetadata;
   template:
     | {
         mappings: NonNullable<RegistryElasticsearch['index_template.mappings']>;
@@ -220,7 +223,7 @@ function buildComponentTemplates(params: {
   const userSettingsTemplateName = `${templateName}${userSettingsSuffix}`;
 
   const templatesMap: TemplateMap = {};
-  const _meta = { package: { name: packageName } };
+  const _meta = getESAssetMetadata({ packageName });
 
   if (registryElasticsearch && registryElasticsearch['index_template.mappings']) {
     templatesMap[mappingsTemplateName] = {

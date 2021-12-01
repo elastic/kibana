@@ -17,9 +17,12 @@ import {
 } from './handlers';
 import type { SecuritySolutionPluginRouter } from '../../../types';
 import {
+  ENDPOINT_DEFAULT_PAGE,
+  ENDPOINT_DEFAULT_PAGE_SIZE,
   HOST_METADATA_GET_ROUTE,
   HOST_METADATA_LIST_ROUTE,
 } from '../../../../common/endpoint/constants';
+import { GetMetadataListRequestSchemaV2 } from '../../../../common/endpoint/schema/metadata';
 
 /* Filters that can be applied to the endpoint fetch route */
 export const endpointFilters = schema.object({
@@ -51,36 +54,24 @@ export const GetMetadataListRequestSchema = {
              * the number of results to return for this request per page
              */
             schema.object({
-              page_size: schema.number({ defaultValue: 10, min: 1, max: 10000 }),
+              page_size: schema.number({
+                defaultValue: ENDPOINT_DEFAULT_PAGE_SIZE,
+                min: 1,
+                max: 10000,
+              }),
             }),
             /**
              * the zero based page index of the the total number of pages of page size
              */
-            schema.object({ page_index: schema.number({ defaultValue: 0, min: 0 }) }),
+            schema.object({
+              page_index: schema.number({ defaultValue: ENDPOINT_DEFAULT_PAGE, min: 0 }),
+            }),
           ])
         )
       ),
       filters: endpointFilters,
     })
   ),
-};
-
-export const GetMetadataListRequestSchemaV2 = {
-  query: schema.object({
-    page: schema.number({ defaultValue: 0 }),
-    pageSize: schema.number({ defaultValue: 10, min: 1, max: 10000 }),
-    kuery: schema.maybe(schema.string()),
-    hostStatuses: schema.arrayOf(
-      schema.oneOf([
-        schema.literal(HostStatus.HEALTHY.toString()),
-        schema.literal(HostStatus.OFFLINE.toString()),
-        schema.literal(HostStatus.UPDATING.toString()),
-        schema.literal(HostStatus.UNHEALTHY.toString()),
-        schema.literal(HostStatus.INACTIVE.toString()),
-      ]),
-      { defaultValue: [] }
-    ),
-  }),
 };
 
 export function registerEndpointRoutes(
