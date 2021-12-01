@@ -52,6 +52,10 @@ function hasCustomSuggestionsExists(shape: PieChartTypes | string | undefined) {
   return shape ? ['treemap', 'waffle', 'mosaic'].includes(shape) : false;
 }
 
+const maximumGroupLength = Math.max(
+  ...Object.values(PartitionChartsMeta).map(({ maxBuckets }) => maxBuckets)
+);
+
 export function suggestions({
   table,
   state,
@@ -67,11 +71,7 @@ export function suggestions({
 
   const [groups, metrics] = partition(table.columns, (col) => col.operation.isBucketed);
 
-  if (
-    metrics.length > 1 ||
-    groups.length >
-      Math.max(...Object.values(PartitionChartsMeta).map(({ maxBuckets }) => maxBuckets))
-  ) {
+  if (metrics.length > 1 || groups.length > maximumGroupLength) {
     return [];
   }
 

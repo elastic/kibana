@@ -127,7 +127,7 @@ export function PieComponent(
     );
   }
 
-  let sortingMap: Record<string, number>;
+  let sortingMap: Record<string, number> = {};
   if (shape === 'mosaic') {
     sortingMap = extractUniqTermsMap(firstTable, bucketColumns[0].id);
   }
@@ -146,17 +146,7 @@ export function PieComponent(
         return String(d);
       },
       fillLabel,
-      sortPredicate:
-        shape === 'mosaic'
-          ? ([name1, node1], [, node2]) => {
-              // Sorting for first group
-              if (bucketColumns.length === 1 || (node1.children.length && name1 in sortingMap)) {
-                return sortingMap[name1];
-              }
-              // Sorting for second group
-              return node2.value - node1.value;
-            }
-          : undefined,
+      sortPredicate: PartitionChartsMeta[shape].sortPredicate?.(bucketColumns, sortingMap),
       shape: {
         fillColor: (d) => {
           const seriesLayers: SeriesLayer[] = [];

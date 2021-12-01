@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { PartitionLayout } from '@elastic/charts';
+import { ArrayEntry, PartitionLayout } from '@elastic/charts';
 import type { EuiIconProps } from '@elastic/eui';
 
 import { LensIconChartDonut } from '../assets/chart_donut';
@@ -43,6 +43,10 @@ interface PartitionChartMeta {
     showValues?: boolean;
     getShowLegendDefault?: (bucketColumns: DatatableColumn[]) => boolean;
   };
+  sortPredicate?: (
+    bucketColumns: DatatableColumn[],
+    sortingMap: Record<string, number>
+  ) => (node1: ArrayEntry, node2: ArrayEntry) => number;
 }
 
 const groupLabel = i18n.translate('xpack.lens.pie.groupLabel', {
@@ -172,6 +176,16 @@ export const PartitionChartsMeta: Record<PieChartTypes, PartitionChartMeta> = {
       getShowLegendDefault: () => false,
     },
     requiredMinDimensionCount: 2,
+    sortPredicate:
+      (bucketColumns, sortingMap) =>
+      ([name1, node1], [, node2]) => {
+        // Sorting for first group
+        if (bucketColumns.length === 1 || (node1.children.length && name1 in sortingMap)) {
+          return sortingMap[name1];
+        }
+        // Sorting for second group
+        return node2.value - node1.value;
+      },
   },
   waffle: {
     icon: LensIconChartWaffle,
@@ -192,5 +206,9 @@ export const PartitionChartsMeta: Record<PieChartTypes, PartitionChartMeta> = {
       showValues: true,
       getShowLegendDefault: () => true,
     },
+    sortPredicate:
+      () =>
+      ([, node1], [, node2]) =>
+        node2.value - node1.value,
   },
 };
