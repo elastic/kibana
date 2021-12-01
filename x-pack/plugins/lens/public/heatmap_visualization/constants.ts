@@ -38,8 +38,8 @@ export const GROUP_ID = {
   CELL: 'cell',
 } as const;
 
-export const FUNCTION_NAME = 'lens_heatmap';
+export const FUNCTION_NAME = 'heatmap';
 
-export const LEGEND_FUNCTION = 'lens_heatmap_legendConfig';
+export const LEGEND_FUNCTION = 'heatmap_legend';
 
-export const HEATMAP_GRID_FUNCTION = 'lens_heatmap_grid';
+export const HEATMAP_GRID_FUNCTION = 'heatmap_grid';
