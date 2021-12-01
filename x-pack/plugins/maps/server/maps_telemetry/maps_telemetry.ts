@@ -22,7 +22,7 @@ import {
   LayerDescriptor,
 } from '../../common/descriptor_types';
 import { MapSavedObject, MapSavedObjectAttributes } from '../../common/map_saved_object_type';
-import { getIndexPatternsService, getInternalRepository } from '../kibana_server_services';
+import { getElasticsearch, getIndexPatternsServiceFactory, getSavedObjectClient } from '../kibana_server_services';
 import { injectReferences } from '././../../common/migrations/references';
 import {
   getBaseMapsPerCluster,
@@ -36,6 +36,15 @@ import {
   TELEMETRY_SCALING_OPTION_COUNTS_PER_CLUSTER,
   TELEMETRY_TERM_JOIN_COUNTS_PER_CLUSTER,
 } from './util';
+import { SavedObjectsClient } from '../../../../../src/core/server';
+
+async function getIndexPatternsService() {
+  const factory = getIndexPatternsServiceFactory();
+  return factory(
+    new SavedObjectsClient(getSavedObjectClient()),
+    getElasticsearch().client.asInternalUser,
+  );
+}
 
 interface IStats {
   [key: string]: {
@@ -302,7 +311,7 @@ export async function execTransformOverMultipleSavedObjectPages<T>(
   savedObjectType: string,
   transform: (savedObjects: Array<SavedObject<T>>) => void
 ) {
-  const savedObjectsClient = getInternalRepository();
+  const savedObjectsClient = getSavedObjectClient();
 
   let currentPage = 1;
   // Seed values
