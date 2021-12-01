@@ -7,7 +7,7 @@
 
 export const PLUGIN_ID = 'reporting';
 
-export const REPORTING_TRANSACTION_TYPE = PLUGIN_ID + 1;
+export const REPORTING_TRANSACTION_TYPE = PLUGIN_ID;
 
 export const REPORTING_SYSTEM_INDEX = '.reporting';
 
