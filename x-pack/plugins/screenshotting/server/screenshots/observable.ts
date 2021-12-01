@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import apm from 'elastic-apm-node';
+import type { Transaction } from 'elastic-apm-node';
 import { defer, forkJoin, throwError, Observable } from 'rxjs';
 import { catchError, mergeMap, switchMapTo, timeoutWith } from 'rxjs/operators';
 import type { Logger } from 'src/core/server';
@@ -146,7 +146,7 @@ export class ScreenshotObservableHandler {
     );
   }
 
-  private completeRender(apmTrans: apm.Transaction | null) {
+  private completeRender(apmTrans: Transaction | null) {
     const driver = this.driver;
     const layout = this.layout;
     const logger = this.logger;
@@ -174,7 +174,7 @@ export class ScreenshotObservableHandler {
     );
   }
 
-  public setupPage(index: number, url: UrlOrUrlWithContext, apmTrans: apm.Transaction | null) {
+  public setupPage(index: number, url: UrlOrUrlWithContext, apmTrans: Transaction | null) {
     return this.openUrl(index, url).pipe(
       switchMapTo(this.waitForElements()),
       switchMapTo(this.completeRender(apmTrans))

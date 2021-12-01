@@ -19,7 +19,7 @@ import {
 } from 'rxjs/operators';
 import type { Logger } from 'src/core/server';
 import { LayoutParams } from '../../common';
-import type { HeadlessChromiumDriverFactory } from '../browsers';
+import type { HeadlessChromiumDriverFactory, PerformanceMetrics } from '../browsers';
 import { createLayout } from '../layouts';
 import type { Layout } from '../layouts';
 import { ScreenshotObservableHandler } from './observable';
@@ -31,6 +31,7 @@ export interface ScreenshotOptions extends ScreenshotObservableOptions {
 
 export interface ScreenshotResult {
   layout: Layout;
+  metrics$: Observable<PerformanceMetrics>;
   results: ScreenshotObservableResult[];
 }
 
@@ -44,7 +45,7 @@ export function getScreenshots(
   logger: Logger,
   options: ScreenshotOptions
 ): Observable<ScreenshotResult> {
-  const apmTrans = apm.startTransaction('screenshot-pipeline', 'reporting');
+  const apmTrans = apm.startTransaction('screenshot-pipeline', 'screenshotting');
   const apmCreateLayout = apmTrans?.startSpan('create-layout', 'setup');
   const layout = createLayout(options.layout);
   logger.debug(`Layout: width=${layout.width} height=${layout.height}`);
@@ -57,8 +58,12 @@ export function getScreenshots(
   } = options;
 
   return browserDriverFactory.createPage({ browserTimezone, openUrlTimeout }, logger).pipe(
-    mergeMap(({ driver, exit$ }) => {
+    mergeMap(({ driver, exit$, metrics$ }) => {
       apmCreatePage?.end();
+      metrics$.subscribe(({ cpu, memory }) => {
+        apmTrans?.setLabel('cpu', cpu, false);
+        apmTrans?.setLabel('memory', memory, false);
+      });
       exit$.subscribe({ error: () => apmTrans?.end() });
 
       const screen = new ScreenshotObservableHandler(driver, logger, layout, options);
@@ -78,7 +83,7 @@ export function getScreenshots(
         ),
         take(options.urls.length),
         toArray(),
-        map((results) => ({ layout, results }))
+        map((results) => ({ layout, metrics$, results }))
       );
     }),
     first()

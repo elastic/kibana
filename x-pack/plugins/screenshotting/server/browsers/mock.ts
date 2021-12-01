@@ -83,8 +83,13 @@ export function createMockBrowserDriver(): jest.Mocked<HeadlessChromiumDriver> {
   } as unknown as ReturnType<typeof createMockBrowserDriver>;
 }
 
-export function createMockBrowserDriverFactory(): jest.Mocked<HeadlessChromiumDriverFactory> {
+export function createMockBrowserDriverFactory(
+  driver?: HeadlessChromiumDriver
+): jest.Mocked<HeadlessChromiumDriverFactory> {
   return {
+    createPage: jest.fn(() =>
+      of({ driver: driver ?? createMockBrowserDriver(), exit$: NEVER, metrics$: NEVER })
+    ),
     diagnose: jest.fn(() => of('message')),
   } as unknown as ReturnType<typeof createMockBrowserDriverFactory>;
 }

@@ -35,7 +35,11 @@ export function generatePngObservable(
   let apmBuffer: typeof apm.currentSpan;
 
   return reporting.getScreenshots({ ...options, layout }).pipe(
-    tap(() => {
+    tap(({ metrics$ }) => {
+      metrics$.subscribe(({ cpu, memory }) => {
+        apmTrans?.setLabel('cpu', cpu, false);
+        apmTrans?.setLabel('memory', memory, false);
+      });
       apmScreenshots?.end();
       apmBuffer = apmTrans?.startSpan('get-buffer', 'output') ?? null;
     }),

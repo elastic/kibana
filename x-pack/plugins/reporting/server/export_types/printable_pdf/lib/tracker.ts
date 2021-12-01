@@ -10,6 +10,8 @@ import { REPORTING_TRANSACTION_TYPE } from '../../../../common/constants';
 
 interface PdfTracker {
   setByteLength: (byteLength: number) => void;
+  setCpuUsage: (cpu: number) => void;
+  setMemoryUsage: (memory: number) => void;
   startScreenshots: () => void;
   endScreenshots: () => void;
   startSetup: () => void;
@@ -72,6 +74,12 @@ export function getTracker(): PdfTracker {
     },
     setByteLength(byteLength: number) {
       apmTrans?.setLabel('byte-length', byteLength, false);
+    },
+    setCpuUsage(cpu: number) {
+      apmTrans?.setLabel('cpu', cpu, false);
+    },
+    setMemoryUsage(memory: number) {
+      apmTrans?.setLabel('memory', memory, false);
     },
     end() {
       if (apmTrans) apmTrans.end();

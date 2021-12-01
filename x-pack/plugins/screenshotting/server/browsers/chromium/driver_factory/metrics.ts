@@ -29,7 +29,7 @@ interface NormalizedMetrics extends Required<PuppeteerMetrics> {
   ProcessTime: number;
 }
 
-interface PerformanceMetrics {
+export interface PerformanceMetrics {
   cpu: number;
   cpuInPercentage: number;
   memory: number;

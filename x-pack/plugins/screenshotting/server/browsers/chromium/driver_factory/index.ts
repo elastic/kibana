@@ -9,7 +9,6 @@ import { i18n } from '@kbn/i18n';
 import { getDataPath } from '@kbn/utils';
 import { spawn } from 'child_process';
 import del from 'del';
-import apm from 'elastic-apm-node';
 import fs from 'fs';
 import { uniq } from 'lodash';
 import path from 'path';
@@ -25,11 +24,17 @@ import { getChromiumDisconnectedError } from '../';
 import { safeChildProcess } from '../../safe_child_process';
 import { HeadlessChromiumDriver } from '../driver';
 import { args } from './args';
-import { getMetrics } from './metrics';
+import { getMetrics, PerformanceMetrics } from './metrics';
 
 interface CreatePageOptions {
   browserTimezone?: string;
   openUrlTimeout: number;
+}
+
+interface CreatePageResult {
+  driver: HeadlessChromiumDriver;
+  exit$: Rx.Observable<never>;
+  metrics$: Rx.Observable<PerformanceMetrics>;
 }
 
 export const DEFAULT_VIEWPORT = {
@@ -99,7 +104,7 @@ export class HeadlessChromiumDriverFactory {
   createPage(
     { browserTimezone, openUrlTimeout }: CreatePageOptions,
     pLogger = this.logger
-  ): Rx.Observable<{ driver: HeadlessChromiumDriver; exit$: Rx.Observable<never> }> {
+  ): Rx.Observable<CreatePageResult> {
     // FIXME: 'create' is deprecated
     return Rx.Observable.create(async (observer: InnerSubscriber<unknown, unknown>) => {
       const logger = pLogger.get('browser-driver');
@@ -132,6 +137,7 @@ export class HeadlessChromiumDriverFactory {
 
       await devTools.send('Performance.enable', { timeDomain: 'timeTicks' });
       const startMetrics = await devTools.send('Performance.getMetrics');
+      const metrics$ = new Rx.Subject<PerformanceMetrics>();
 
       // Log version info for debugging / maintenance
       const versionInfo = await devTools.send('Browser.getVersion');
@@ -150,19 +156,18 @@ export class HeadlessChromiumDriverFactory {
           try {
             if (devTools && startMetrics) {
               const endMetrics = await devTools.send('Performance.getMetrics');
-              const { cpu, cpuInPercentage, memory, memoryInMegabytes } = getMetrics(
-                startMetrics,
-                endMetrics
-              );
+              const metrics = getMetrics(startMetrics, endMetrics);
+              const { cpuInPercentage, memoryInMegabytes } = metrics;
 
-              apm.currentTransaction?.setLabel('cpu', cpu, false);
-              apm.currentTransaction?.setLabel('memory', memory, false);
+              metrics$.next(metrics);
               logger.debug(
                 `Chromium consumed CPU ${cpuInPercentage}% Memory ${memoryInMegabytes}MB`
               );
             }
           } catch (error) {
             logger.error(error);
+          } finally {
+            metrics$.complete();
           }
 
           try {
@@ -204,7 +209,7 @@ export class HeadlessChromiumDriverFactory {
       // Rx.Observable<never>: stream to interrupt page capture
       const exit$ = this.getPageExit(browser, page);
 
-      observer.next({ driver, exit$ });
+      observer.next({ driver, exit$, metrics$: metrics$.asObservable() });
 
       // unsubscribe logic makes a best-effort attempt to delete the user data directory used by chromium
       observer.add(() => {
@@ -370,3 +375,5 @@ export class HeadlessChromiumDriverFactory {
     );
   }
 }
+
+export type { PerformanceMetrics };

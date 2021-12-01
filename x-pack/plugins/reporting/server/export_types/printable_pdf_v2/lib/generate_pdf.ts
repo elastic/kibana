@@ -49,10 +49,14 @@ export function generatePdfObservable(
   ]) as UrlOrUrlLocatorTuple[];
 
   const screenshots$ = reporting.getScreenshots({ ...options, urls }).pipe(
-    mergeMap(async ({ layout, results }) => {
+    mergeMap(async ({ layout, metrics$, results }) => {
+      metrics$.subscribe(({ cpu, memory }) => {
+        tracker.setCpuUsage(cpu);
+        tracker.setMemoryUsage(memory);
+      });
       tracker.endScreenshots();
-
       tracker.startSetup();
+
       const pdfOutput = new PdfMaker(layout, logo);
       if (title) {
         const timeRange = getTimeRange(results);

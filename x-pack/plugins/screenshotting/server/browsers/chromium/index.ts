@@ -17,4 +17,5 @@ export const getChromiumDisconnectedError = () =>
 export { ChromiumArchivePaths } from './paths';
 export type { ConditionalHeaders } from './driver';
 export { HeadlessChromiumDriver } from './driver';
+export type { PerformanceMetrics } from './driver_factory';
 export { DEFAULT_VIEWPORT, HeadlessChromiumDriverFactory } from './driver_factory';

@@ -36,10 +36,14 @@ export function generatePdfObservable(
   tracker.startScreenshots();
 
   return reporting.getScreenshots(options).pipe(
-    mergeMap(async ({ layout, results }) => {
+    mergeMap(async ({ layout, metrics$, results }) => {
+      metrics$.subscribe(({ cpu, memory }) => {
+        tracker.setCpuUsage(cpu);
+        tracker.setMemoryUsage(memory);
+      });
       tracker.endScreenshots();
-
       tracker.startSetup();
+
       const pdfOutput = new PdfMaker(layout, logo);
       if (title) {
         const timeRange = getTimeRange(results);
