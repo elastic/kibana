@@ -25,7 +25,7 @@ export interface TableArguments {
   datatable: Datatable;
 }
 
-export const getTableFn =
+export const getTableRenderer =
   (theme$: Observable<CoreTheme> = defaultTheme$): RendererFactory<TableArguments> =>
   () => ({
     name: 'table',
@@ -53,4 +53,4 @@ export const getTableFn =
   });
 
 export const tableFactory: StartInitializer<RendererFactory<TableArguments>> = (core, plugins) =>
-  getTableFn(core.theme.theme$);
+  getTableRenderer(core.theme.theme$);

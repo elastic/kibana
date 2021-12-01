@@ -17,7 +17,7 @@ import { defaultTheme$ } from '../../public/lib/default_theme';
 
 const { text: strings } = RendererStrings;
 
-export const getTextFn =
+export const getTextRenderer =
   (theme$: Observable<CoreTheme> = defaultTheme$): RendererFactory<{ text: string }> =>
   () => ({
     name: 'text',
@@ -37,4 +37,4 @@ export const getTextFn =
   });
 
 export const textFactory: StartInitializer<RendererFactory<{ text: string }>> = (core, plugins) =>
-  getTextFn(core.theme.theme$);
+  getTextRenderer(core.theme.theme$);

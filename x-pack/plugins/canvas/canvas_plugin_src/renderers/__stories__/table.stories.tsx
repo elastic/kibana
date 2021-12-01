@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { storiesOf } from '@storybook/react';
-import { getTableFn } from '../table';
+import { getTableRenderer } from '../table';
 import { Render } from './render';
 
 storiesOf('renderers/table', module).add('default', () => {
@@ -42,5 +42,5 @@ storiesOf('renderers/table', module).add('default', () => {
       ],
     },
   };
-  return <Render renderer={getTableFn()} config={config} width="400px" />;
+  return <Render renderer={getTableRenderer()} config={config} width="400px" />;
 });

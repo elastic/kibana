@@ -19,7 +19,7 @@ import { defaultTheme$ } from '../../../public/lib/default_theme';
 
 const { markdown: strings } = RendererStrings;
 
-export const getMarkdownFn =
+export const getMarkdownRenderer =
   (theme$: Observable<CoreTheme> = defaultTheme$): RendererFactory<Config> =>
   () => ({
     name: 'markdown',
@@ -47,4 +47,4 @@ export const getMarkdownFn =
   });
 
 export const markdownFactory: StartInitializer<RendererFactory<Config>> = (core, plugins) =>
-  getMarkdownFn(core.theme.theme$);
+  getMarkdownRenderer(core.theme.theme$);
