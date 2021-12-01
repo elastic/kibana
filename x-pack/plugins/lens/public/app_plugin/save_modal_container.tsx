@@ -19,7 +19,7 @@ import type { LensByReferenceInput, LensEmbeddableInput } from '../embeddable';
 import { esFilters } from '../../../../../src/plugins/data/public';
 import { APP_ID, getFullPath, LENS_EMBEDDABLE_TYPE } from '../../common';
 import { trackUiEvent } from '../lens_ui_telemetry';
-import { checkForDuplicateTitle } from '../saved_visualize_helpers';
+import { checkForDuplicateTitle } from '../saved_objects_utils';
 import type { LensAppState } from '../state_management';
 import { getPersisted } from '../state_management/init_middleware/load_initial';
 

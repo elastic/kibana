@@ -9,8 +9,8 @@
 import { i18n } from '@kbn/i18n';
 import type { OverlayStart } from 'kibana/public';
 import type { SavedObject } from '../../../../saved_objects/public';
-import { SAVE_DUPLICATE_REJECTED } from '../../../../visualizations/public/utils/saved_visualize_helpers/constants';
-import { confirmModalPromise } from '../../../../visualizations/public/utils/saved_visualize_helpers/confirm_modal_promise';
+import { SAVE_DUPLICATE_REJECTED } from './constants';
+import { confirmModalPromise } from './confirm_modal_promise';
 
 export function displayDuplicateTitleConfirmModal(
   savedObject: Pick<SavedObject, 'title' | 'getDisplayName'>,

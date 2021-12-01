@@ -8,9 +8,9 @@
 
 import type { SavedObjectAttributes, SavedObjectsCreateOptions, OverlayStart } from 'kibana/public';
 import type { SavedObjectsClientContract } from 'kibana/public';
-import { saveWithConfirmation } from '../../../../visualizations/public/utils/saved_visualize_helpers/save_with_confirmation';
-import * as deps from '../../../../visualizations/public/utils/saved_visualize_helpers/confirm_modal_promise';
-import { OVERWRITE_REJECTED } from '../../../../visualizations/public/utils/saved_visualize_helpers/constants';
+import { saveWithConfirmation } from './save_with_confirmation';
+import * as deps from './confirm_modal_promise';
+import { OVERWRITE_REJECTED } from './constants';
 
 describe('saveWithConfirmation', () => {
   const savedObjectsClient: SavedObjectsClientContract = {} as SavedObjectsClientContract;

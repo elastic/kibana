@@ -7,7 +7,6 @@
  */
 
 import _ from 'lodash';
-import { i18n } from '@kbn/i18n';
 import type {
   SavedObjectsFindOptionsReference,
   SavedObjectsFindOptions,
@@ -23,7 +22,7 @@ import {
   parseSearchSourceJSON,
   DataPublicPluginStart,
 } from '../../../../plugins/data/public';
-import { saveWithConfirmation, checkForDuplicateTitle } from './saved_visualize_helpers';
+import { saveWithConfirmation, checkForDuplicateTitle } from './saved_objects_utils';
 import type { SavedObjectsTaggingApi } from '../../../saved_objects_tagging_oss/public';
 import type { SpacesPluginStart } from '../../../../../x-pack/plugins/spaces/public';
 import { VisualizationsAppExtension } from '../vis_types/vis_type_alias_registry';
@@ -38,19 +37,7 @@ import type { TypesStart, BaseVisType } from '../vis_types';
 // @ts-ignore
 import { updateOldState } from '../legacy/vis_update_state';
 import { injectReferences, extractReferences } from './saved_visualization_references';
-
-/** An error message to be used when the user rejects a confirm overwrite. */
-export const OVERWRITE_REJECTED = i18n.translate('visualizations.overwriteRejectedDescription', {
-  defaultMessage: 'Overwrite confirmation was rejected',
-});
-
-/** An error message to be used when the user rejects a confirm save with duplicate title. */
-export const SAVE_DUPLICATE_REJECTED = i18n.translate(
-  'visualizations.saveDuplicateRejectedDescription',
-  {
-    defaultMessage: 'Save with duplicate title confirmation was rejected',
-  }
-);
+import { OVERWRITE_REJECTED, SAVE_DUPLICATE_REJECTED } from './saved_objects_utils/constants';
 
 export const SAVED_VIS_TYPE = 'visualization';
 

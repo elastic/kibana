@@ -56,10 +56,10 @@ const mockCheckForDuplicateTitle = jest.fn(() => {
   }
 });
 const mockSaveWithConfirmation = jest.fn(() => ({ id: 'test-after-confirm' }));
-jest.mock('./saved_visualize_helpers/check_for_duplicate_title', () => ({
+jest.mock('./saved_objects_utils/check_for_duplicate_title', () => ({
   checkForDuplicateTitle: jest.fn(() => mockCheckForDuplicateTitle()),
 }));
-jest.mock('./saved_visualize_helpers/save_with_confirmation', () => ({
+jest.mock('./saved_objects_utils/save_with_confirmation', () => ({
   saveWithConfirmation: jest.fn(() => mockSaveWithConfirmation()),
 }));
 

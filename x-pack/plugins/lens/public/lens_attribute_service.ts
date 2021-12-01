@@ -14,7 +14,7 @@ import type {
   LensByReferenceInput,
 } from './embeddable/embeddable';
 import { SavedObjectIndexStore } from './persistence';
-import { checkForDuplicateTitle } from './saved_visualize_helpers';
+import { checkForDuplicateTitle } from './saved_objects_utils';
 import { OnSaveProps } from '../../../../src/plugins/saved_objects/public';
 import { DOC_TYPE } from '../common/constants';
 
