@@ -82,7 +82,7 @@ const allFailureResultChanges: CrawlerDomainValidationResultChange = {
       'xpack.enterpriseSearch.appSearch.crawler.addDomainForm.networkConnectivityFalureMessage',
       {
         defaultMessage:
-          'Unable to establish a network connection because the "Initial Validation" check failed.',
+          'Unable to establish a network connection because the "Initial validation" check failed.',
       }
     ),
   },
@@ -92,7 +92,7 @@ const allFailureResultChanges: CrawlerDomainValidationResultChange = {
       'xpack.enterpriseSearch.appSearch.crawler.addDomainForm.indexingRestrictionsFalureMessage',
       {
         defaultMessage:
-          'Unable to determine indexing restrictions because the "Network Connectivity" check failed.',
+          'Unable to determine indexing restrictions because the "Network connectivity" check failed.',
       }
     ),
   },
@@ -102,7 +102,7 @@ const allFailureResultChanges: CrawlerDomainValidationResultChange = {
       'xpack.enterpriseSearch.appSearch.crawler.addDomainForm.contentVerificationFalureMessage',
       {
         defaultMessage:
-          'Unable to verify content because the "Indexing Restrictions" check failed.',
+          'Unable to verify content because the "Indexing restrictions" check failed.',
       }
     ),
   },
