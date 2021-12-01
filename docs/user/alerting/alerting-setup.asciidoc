@@ -27,7 +27,7 @@ The alerting framework uses queries that require the `search.allow_expensive_que
 
 When relying on alerting and actions as mission critical services, make sure you follow the <<alerting-production-considerations,Alerting production considerations>>.
 
-See <<alerting-scaling-guidance>> for more information on the scalability of {kib} Alerting.
+See <<alerting-scaling-guidance>> for more information on the scalability of Alerting.
 
 [float]
 [[alerting-security]]
