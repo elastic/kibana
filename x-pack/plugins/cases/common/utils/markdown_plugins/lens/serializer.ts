@@ -5,16 +5,24 @@
  * 2.0.
  */
 
+import { Plugin } from 'unified';
 import type { TimeRange } from 'src/plugins/data/common';
 import { LENS_ID } from './constants';
 
 export interface LensSerializerProps {
   attributes: Record<string, unknown>;
+  editMode: boolean;
   timeRange: TimeRange;
 }
 
-export const LensSerializer = ({ timeRange, attributes }: LensSerializerProps) =>
+export const serializeLens = ({ timeRange, editMode, attributes }: LensSerializerProps) =>
   `!{${LENS_ID}${JSON.stringify({
     timeRange,
+    editMode,
     attributes,
   })}}`;
+
+export const LensSerializer: Plugin = function () {
+  const Compiler = this.Compiler;
+  Compiler.prototype.visitors.lens = serializeLens;
+};

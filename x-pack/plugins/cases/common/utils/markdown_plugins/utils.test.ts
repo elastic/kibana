@@ -86,7 +86,7 @@ describe('markdown utils', () => {
 
       const parsedNodes = parseCommentString(timelineUrl);
 
-      expect(stringifyMarkdownComment(parsedNodes)).toEqual(timelineUrl);
+      expect(stringifyMarkdownComment(parsedNodes)).toEqual(`${timelineUrl}\n`);
     });
 
     it('parses a lens visualization', () => {
@@ -103,7 +103,15 @@ describe('markdown utils', () => {
 
       const parsedNodes = parseCommentString(lensVisualization);
 
-      expect(stringifyMarkdownComment(parsedNodes)).toEqual(lensVisualization);
+      expect(stringifyMarkdownComment(parsedNodes)).toEqual(`${lensVisualization}\n`);
+    });
+
+    it('stringifies a html visualization', () => {
+      const htmlString = `<p id=x></p>`;
+
+      const parsedNodes = parseCommentString(htmlString);
+
+      expect(stringifyMarkdownComment(parsedNodes)).toEqual(`${htmlString}\n`);
     });
   });
 });
