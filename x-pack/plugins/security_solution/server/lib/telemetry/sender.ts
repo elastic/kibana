@@ -21,7 +21,7 @@ import { TelemetryReceiver } from './receiver';
 import { allowlistEventFields, copyAllowlistedFields } from './filters';
 import { createTelemetryTaskConfigs } from './tasks';
 import { createUsageCounterLabel } from './helpers';
-import { TelemetryEvent } from './types';
+import { TelemetryEvent, ESClusterInfo } from './types';
 import { TELEMETRY_MAX_BUFFER_SIZE } from './constants';
 import { SecurityTelemetryTask, SecurityTelemetryTaskConfig } from './task';
 
@@ -173,14 +173,7 @@ export class TelemetryEventsSender {
       }));
       this.queue = [];
 
-      await this.sendEvents(
-        toSend,
-        telemetryUrl,
-        'alerts-endpoint',
-        clusterInfo?.cluster_uuid,
-        clusterInfo?.version?.number,
-        licenseInfo?.uid
-      );
+      await this.sendEvents(toSend, telemetryUrl, 'alerts-endpoint', clusterInfo, licenseInfo?.uid);
     } catch (err) {
       this.logger.warn(`Error sending telemetry events data: ${err}`);
       this.queue = [];
@@ -215,14 +208,7 @@ export class TelemetryEventsSender {
         `cluster_uuid: ${clusterInfo?.cluster_uuid} cluster_name: ${clusterInfo?.cluster_name}`
       );
 
-      await this.sendEvents(
-        toSend,
-        telemetryUrl,
-        channel,
-        clusterInfo?.cluster_uuid,
-        clusterInfo?.version?.number,
-        licenseInfo?.uid
-      );
+      await this.sendEvents(toSend, telemetryUrl, channel, clusterInfo, licenseInfo?.uid);
     } catch (err) {
       this.logger.warn(`Error sending telemetry events data: ${err}`);
     }
@@ -253,8 +239,7 @@ export class TelemetryEventsSender {
     events: unknown[],
     telemetryUrl: string,
     channel: string,
-    clusterUuid: string | undefined,
-    clusterVersionNumber: string | undefined,
+    clusterInfo: ESClusterInfo | undefined,
     licenseId: string | undefined
   ) {
     const ndjson = transformDataToNdjson(events);
@@ -264,8 +249,11 @@ export class TelemetryEventsSender {
       const resp = await axios.post(telemetryUrl, ndjson, {
         headers: {
           'Content-Type': 'application/x-ndjson',
-          'X-Elastic-Cluster-ID': clusterUuid,
-          'X-Elastic-Stack-Version': clusterVersionNumber ? clusterVersionNumber : '8.0.0',
+          'X-Elastic-Cluster-ID': clusterInfo?.cluster_uuid,
+          'X-Elastic-Cluster-Name': clusterInfo?.cluster_name,
+          'X-Elastic-Stack-Version': clusterInfo?.version?.number
+            ? clusterInfo?.version?.number
+            : '8.0.0',
           ...(licenseId ? { 'X-Elastic-License-ID': licenseId } : {}),
         },
       });
