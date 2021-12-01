@@ -7,7 +7,7 @@
 
 import { EuiBasicTable, EuiBasicTableColumn, EuiButtonIcon, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { MouseEvent } from 'react';
+import React, { MouseEvent, useState } from 'react';
 import styled from 'styled-components';
 import { JourneyStep } from '../../../../common/runtime_types';
 import { STATUS_LABEL } from '../../monitor/ping_list/translations';
@@ -80,6 +80,8 @@ export const StepsList = ({ data, error, loading }: Props) => {
 
   const { expandedRows, toggleExpand } = useExpandedRow({ steps, allSteps: data, loading });
 
+  const [durationPopoverOpenIndex, setDurationPopoverOpenIndex] = useState<number | null>(null);
+
   const columns: Array<EuiBasicTableColumn<JourneyStep>> = [
     {
       field: 'synthetics.payload.status',
@@ -97,7 +99,13 @@ export const StepsList = ({ data, error, loading }: Props) => {
     {
       name: 'Step duration',
       render: (item: JourneyStep) => {
-        return <StepDuration step={item} />;
+        return (
+          <StepDuration
+            step={item}
+            durationPopoverOpenIndex={durationPopoverOpenIndex}
+            setDurationPopoverOpenIndex={setDurationPopoverOpenIndex}
+          />
+        );
       },
     },
     {

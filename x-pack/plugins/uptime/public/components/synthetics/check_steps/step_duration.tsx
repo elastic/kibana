@@ -7,20 +7,23 @@
 
 import * as React from 'react';
 import { EuiButtonEmpty, EuiPopover } from '@elastic/eui';
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import numeral from '@elastic/numeral';
 import { JourneyStep } from '../../../../common/runtime_types';
 import { StepFieldTrend } from './step_field_trend';
 import { microToSec } from '../../../lib/formatting';
 
 interface Props {
   step: JourneyStep;
+  durationPopoverOpenIndex: number | null;
+  setDurationPopoverOpenIndex: (val: number | null) => void;
 }
 
-export const StepDuration = ({ step }: Props) => {
-  const [isOpen, setIsOpen] = useState(false);
-
+export const StepDuration = ({
+  step,
+  durationPopoverOpenIndex,
+  setDurationPopoverOpenIndex,
+}: Props) => {
   const component = useMemo(
     () => (
       <StepFieldTrend
@@ -37,11 +40,14 @@ export const StepDuration = ({ step }: Props) => {
   }
 
   const button = (
-    <EuiButtonEmpty onMouseEnter={() => setIsOpen(true)} iconType="visArea">
+    <EuiButtonEmpty
+      onMouseEnter={() => setDurationPopoverOpenIndex(step.synthetics.step?.index ?? null)}
+      iconType="visArea"
+    >
       {i18n.translate('xpack.uptime.synthetics.step.duration', {
         defaultMessage: '{value} seconds',
         values: {
-          value: numeral(microToSec(step.synthetics.step?.duration.us!)).format('00.0'),
+          value: microToSec(step.synthetics.step?.duration.us!, 1),
         },
       })}
     </EuiButtonEmpty>
@@ -49,9 +55,9 @@ export const StepDuration = ({ step }: Props) => {
 
   return (
     <EuiPopover
-      isOpen={isOpen}
+      isOpen={durationPopoverOpenIndex === step.synthetics.step?.index}
       button={button}
-      closePopover={() => setIsOpen(false)}
+      closePopover={() => setDurationPopoverOpenIndex(null)}
       zIndex={100}
       ownFocus={false}
     >
