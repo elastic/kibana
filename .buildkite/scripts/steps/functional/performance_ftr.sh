@@ -1,18 +1,22 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
-set -euo pipefail
+set -uo pipefail
 
-source .buildkite/scripts/common/util.sh
+if [ -z "${ITERATION_COUNT_ENV+x}" ]; then
+  ITERATION_COUNT="$(buildkite-agent meta-data get performance-test-iteration-count)"
+else
+  ITERATION_COUNT=$ITERATION_COUNT_ENV
+fi
 
-.buildkite/scripts/bootstrap.sh
-.buildkite/scripts/download_build_artifacts.sh
+tput setab 2; tput setaf 0; echo "Performance test will be run at ${BUILDKITE_BRANCH} ${ITERATION_COUNT} times"
 
-cd "$XPACK_DIR"
+cat << EOF | buildkite-agent pipeline upload
+steps:
+  - command: .buildkite/scripts/steps/functional/performance_sub_ftr.sh
+    parallelism: "$ITERATION_COUNT"
+    concurrency: 20
+    concurrency_group: 'performance-test-group'
+EOF
 
-echo --- Run Performance Tests with FTR config
 
-checks-reporter-with-killswitch "Run Performance Tests with FTR Config" \
-  node scripts/functional_tests \
-    --debug --bail \
-    --kibana-install-dir "$KIBANA_BUILD_LOCATION" \
-    --config "test/performance/config.ftr.ts";
+
