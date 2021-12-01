@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { countBy } from 'lodash';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
-export default async function apiTest({ getService }: FtrProviderContext) {
+export default function apiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
   const apmApiClient = getService('apmApiClient');
   const ml = getService('ml');
