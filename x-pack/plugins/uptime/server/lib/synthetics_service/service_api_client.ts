@@ -65,7 +65,7 @@ export class ServiceAPIClient {
   async callAPI(method: 'POST' | 'PUT' | 'DELETE', { monitors: allMonitors, output }: ServiceData) {
     if (this.username === TEST_SERVICE_USERNAME) {
       // we don't want to call service while local integration tests are running
-      return true;
+      return;
     }
 
     const callServiceEndpoint = (monitors: ServiceData['monitors'], url: string) => {
