@@ -36,8 +36,8 @@ export interface IRuleDataService {
   getResourceName(relativeName: string): string;
 
   /**
-   * If write is enabled, everything works as usual.
-   * If it's disabled, writing to all alerts-as-data indices will be disabled,
+   * If write is enabled for the specified registration context, everything works as usual.
+   * If it's disabled, writing to the registration context's alerts-as-data indices will be disabled,
    * and also Elasticsearch resources associated with the indices will not be
    * installed.
    */
