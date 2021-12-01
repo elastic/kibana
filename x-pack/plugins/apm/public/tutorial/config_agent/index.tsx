@@ -8,7 +8,7 @@ import { EuiCodeBlock, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { HttpStart } from 'kibana/public';
 import React, { useEffect, useMemo, useState } from 'react';
-import { SemVer } from 'semver';
+import semverParse from 'semver/functions/parse';
 import styled from 'styled-components';
 import { SUPPORTED_APM_PACKAGE_VERSION } from '../../../common/fleet';
 import { APIReturnType } from '../../services/rest/createCallApmApi';
@@ -63,7 +63,7 @@ function getFleetLink({
     return;
   }
 
-  const isPrerelease = new SemVer(kibanaVersion).prerelease.length > 0;
+  const isPrerelease = semverParse(kibanaVersion)?.prerelease?.length ?? 0 > 0;
 
   return hasFleetAgents
     ? {

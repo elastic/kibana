@@ -18,7 +18,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { HttpStart } from 'kibana/public';
 import React, { useEffect, useState } from 'react';
-import { SemVer } from 'semver';
+import semverParse from 'semver/functions/parse';
 import styled from 'styled-components';
 import { SUPPORTED_APM_PACKAGE_VERSION } from '../../../common/fleet';
 import { APIReturnType } from '../../services/rest/createCallApmApi';
@@ -46,7 +46,7 @@ function TutorialFleetInstructions({
 }: Props) {
   const [data, setData] = useState<APIResponseType | undefined>();
   const [isLoading, setIsLoading] = useState(false);
-  const isPrerelease = new SemVer(kibanaVersion).prerelease.length > 0;
+  const isPrerelease = semverParse(kibanaVersion)?.prerelease?.length ?? 0 > 0;
 
   useEffect(() => {
     async function fetchData() {
@@ -128,7 +128,7 @@ function TutorialFleetInstructions({
               <>
                 <EuiButton
                   iconType="analyzeEvent"
-                  color="secondary"
+                  color="success"
                   href={apmIntegrationHref}
                 >
                   {i18n.translate(

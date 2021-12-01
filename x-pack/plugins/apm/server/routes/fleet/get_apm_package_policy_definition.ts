@@ -5,24 +5,28 @@
  * 2.0.
  */
 
-import { SemVer } from 'semver';
+import semverParse from 'semver/functions/parse';
 import {
   POLICY_ELASTIC_AGENT_ON_CLOUD,
   SUPPORTED_APM_PACKAGE_VERSION,
 } from '../../../common/fleet';
-import { fetchFindLatestPackage } from '../../../../fleet/server/services/epm/registry';
-import { APMPluginSetupDependencies } from '../../types';
+import {
+  APMPluginSetupDependencies,
+  APMPluginStartDependencies,
+} from '../../types';
 import { APM_PACKAGE_NAME } from './get_cloud_apm_package_policy';
 
 interface GetApmPackagePolicyDefinitionOptions {
   apmServerSchema: Record<string, any>;
   cloudPluginSetup: APMPluginSetupDependencies['cloud'];
+  fleetPluginStart: APMPluginStartDependencies['fleet'];
   kibanaVersion: string;
 }
 export async function getApmPackagePolicyDefinition(
   options: GetApmPackagePolicyDefinitionOptions
 ) {
-  const { apmServerSchema, cloudPluginSetup, kibanaVersion } = options;
+  const { apmServerSchema, cloudPluginSetup, fleetPluginStart, kibanaVersion } =
+    options;
 
   return {
     name: 'Elastic APM',
@@ -37,6 +41,7 @@ export async function getApmPackagePolicyDefinition(
         streams: [],
         vars: getApmPackageInputVars({
           cloudPluginSetup,
+          fleetPluginStart,
           apmServerSchema: preprocessLegacyFields({ apmServerSchema }),
           kibanaVersion,
         }),
@@ -44,17 +49,22 @@ export async function getApmPackagePolicyDefinition(
     ],
     package: {
       name: APM_PACKAGE_NAME,
-      version: await getApmPackageVersion(kibanaVersion),
+      version: await getApmPackageVersion(fleetPluginStart, kibanaVersion),
       title: 'Elastic APM',
     },
   };
 }
 
-async function getApmPackageVersion(kibanaVersion: string) {
-  const isPrerelease = new SemVer(kibanaVersion).prerelease.length > 0;
-  if (isPrerelease) {
+async function getApmPackageVersion(
+  fleetPluginStart: APMPluginStartDependencies['fleet'],
+  kibanaVersion: string
+) {
+  const isPrerelease = semverParse(kibanaVersion)?.prerelease?.length ?? 0 > 0;
+  if (fleetPluginStart && isPrerelease) {
     try {
-      const latestApmPackage = await fetchFindLatestPackage('apm');
+      const latestApmPackage = await fleetPluginStart.fetchFindLatestPackage(
+        'apm'
+      );
       return latestApmPackage.version;
     } catch (error) {
       return SUPPORTED_APM_PACKAGE_VERSION;
