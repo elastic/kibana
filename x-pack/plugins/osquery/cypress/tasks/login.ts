@@ -7,6 +7,7 @@
 
 import * as yaml from 'js-yaml';
 import Url, { UrlObject } from 'url';
+import { ROLES } from '../test';
 
 /**
  * Credentials in the `kibana.dev.yml` config file will be used to authenticate
@@ -135,7 +136,7 @@ export const loginWithUser = (user: User) => {
   cy.request({
     body: {
       providerType: 'basic',
-      providerName: !url.includes('localhost') ? 'cloud-basic' : 'basic',
+      providerName: !url?.includes('localhost') ? 'cloud-basic' : 'basic',
       currentURL: '/',
       params: {
         username: user.username,
@@ -217,7 +218,7 @@ const loginViaEnvironmentCredentials = () => {
   cy.request({
     body: {
       providerType: 'basic',
-      providerName: !url.includes('localhost') ? 'cloud-basic' : 'basic',
+      providerName: !url?.includes('localhost') ? 'cloud-basic' : 'basic',
       currentURL: '/',
       params: {
         username: Cypress.env(ELASTICSEARCH_USERNAME),

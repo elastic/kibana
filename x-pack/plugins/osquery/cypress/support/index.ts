@@ -23,22 +23,20 @@
 // ***********************************************************
 
 // Import commands.js using ES2015 syntax:
-// eslint-disable-next-line import/no-extraneous-dependencies
-// import '@cypress/code-coverage/support';
-import './coverage';
 import './commands';
+import './coverage';
 
-// declare global {
-//   // eslint-disable-next-line @typescript-eslint/no-namespace
-//   namespace Cypress {
-//     interface Chainable {
-//       getBySel(value: string, ...args: unknown[]): Chainable<unknown>;
-//     }
-//   }
-// }
+declare global {
+  // eslint-disable-next-line @typescript-eslint/no-namespace
+  namespace Cypress {
+    interface Chainable {
+      getBySel: typeof cy.get;
+    }
+  }
+}
 
-function getBySel(selector, ...args) {
-  // @ts-expect-error update types
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function getBySel(selector: string, ...args: any[]) {
   return cy.get(`[data-test-subj=${selector}]`, ...args);
 }
 
