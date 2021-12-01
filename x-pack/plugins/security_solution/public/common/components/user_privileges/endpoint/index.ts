@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { useEndpointPrivileges, EndpointPrivileges } from './use_endpoint_privileges';
+export { useEndpointPrivileges } from './use_endpoint_privileges';
 export { getEndpointPrivilegesInitialState } from './utils';

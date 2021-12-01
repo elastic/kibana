@@ -8,7 +8,6 @@
 import React from 'react';
 import { act, fireEvent } from '@testing-library/react';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../../common/mock/endpoint';
-import { EndpointPrivileges } from '../../../common/components/user_privileges/endpoint/use_endpoint_privileges';
 import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
 
@@ -18,6 +17,7 @@ import {
   initialUserPrivilegesState,
   UserPrivilegesState,
 } from '../../../common/components/user_privileges/user_privileges_context';
+import { EndpointPrivileges } from '../../../../common/endpoint/types';
 
 jest.mock('../../../common/components/user_privileges');
 

@@ -16,9 +16,9 @@ import { policyDetailsPageAllApiHttpMocks } from '../../../test_utils';
 import { isFailedResourceState, isLoadedResourceState } from '../../../../../state';
 import { fireEvent, within, act, waitFor } from '@testing-library/react';
 import { APP_UI_ID } from '../../../../../../../common/constants';
-import { EndpointPrivileges } from '../../../../../../common/components/user_privileges/endpoint/use_endpoint_privileges';
 import { useUserPrivileges } from '../../../../../../common/components/user_privileges';
 import { getEndpointPrivilegesInitialStateMock } from '../../../../../../common/components/user_privileges/endpoint/mocks';
+import { EndpointPrivileges } from '../../../../../../../common/endpoint/types';
 
 jest.mock('../../../../../../common/components/user_privileges');
 const mockUseUserPrivileges = useUserPrivileges as jest.Mock;

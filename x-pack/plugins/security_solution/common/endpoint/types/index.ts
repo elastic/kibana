@@ -1246,3 +1246,4 @@ interface BaseListResponse<D = unknown> {
  * Returned by the server via GET /api/endpoint/metadata
  */
 export type MetadataListResponse = BaseListResponse<HostInfo>;
+export { EndpointPrivileges } from './authz';

@@ -13,8 +13,8 @@ import { HOST_ISOLATION_EXCEPTIONS_PATH } from '../../../../../common/constants'
 import { AppContextTestRender, createAppRootMockRenderer } from '../../../../common/mock/endpoint';
 import { getHostIsolationExceptionItems } from '../service';
 import { HostIsolationExceptionsList } from './host_isolation_exceptions_list';
-import { EndpointPrivileges } from '../../../../common/components/user_privileges/endpoint';
 import { useUserPrivileges as _useUserPrivileges } from '../../../../common/components/user_privileges';
+import { EndpointPrivileges } from '../../../../../common/endpoint/types';
 
 jest.mock('../service');
 jest.mock('../../../../common/hooks/use_license');

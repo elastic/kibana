@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EndpointPrivileges } from './use_endpoint_privileges';
+import { EndpointPrivileges } from '../../../../../common/endpoint/types';
 
 export const getEndpointPrivilegesInitialState = (): EndpointPrivileges => {
   return {

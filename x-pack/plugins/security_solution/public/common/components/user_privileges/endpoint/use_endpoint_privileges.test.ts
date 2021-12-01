@@ -7,13 +7,14 @@
 
 import { act, renderHook, RenderHookResult, RenderResult } from '@testing-library/react-hooks';
 import { useHttp, useCurrentUser } from '../../../lib/kibana';
-import { EndpointPrivileges, useEndpointPrivileges } from './use_endpoint_privileges';
+import { useEndpointPrivileges } from './use_endpoint_privileges';
 import { securityMock } from '../../../../../../security/public/mocks';
 import { appRoutesService } from '../../../../../../fleet/common';
 import { AuthenticatedUser } from '../../../../../../security/common';
 import { licenseService } from '../../../hooks/use_license';
 import { fleetGetCheckPermissionsHttpMock } from '../../../../management/pages/mocks';
 import { getEndpointPrivilegesInitialStateMock } from './mocks';
+import { EndpointPrivileges } from '../../../../../common/endpoint/types';
 
 jest.mock('../../../lib/kibana');
 jest.mock('../../../hooks/use_license', () => {

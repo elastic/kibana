@@ -8,19 +8,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useCurrentUser, useKibana } from '../../../lib/kibana';
 import { useLicense } from '../../../hooks/use_license';
-import { Immutable } from '../../../../../common/endpoint/types';
-
-export interface EndpointPrivileges {
-  loading: boolean;
-  /** If user has permissions to access Fleet */
-  canAccessFleet: boolean;
-  /** If user has permissions to access Endpoint management (includes check to ensure they also have access to fleet) */
-  canAccessEndpointManagement: boolean;
-  /** if user has permissions to create Artifacts by Policy */
-  canCreateArtifactsByPolicy: boolean;
-  /** If user has permissions to use the Host isolation feature */
-  canIsolateHost: boolean;
-}
+import { EndpointPrivileges, Immutable } from '../../../../../common/endpoint/types';
 
 /**
  * Retrieve the endpoint privileges for the current user.
