@@ -31,7 +31,7 @@ const PopoverTooltipComponent = ({ columnName, children }: PopoverTooltipProps) 
         <EuiButtonIcon
           aria-label={i18n.POPOVER_TOOLTIP_ARIA_LABEL(columnName)}
           onClick={() => setIsPopoverOpen(!isPopoverOpen)}
-          size="s"
+          size="xs"
           color="primary"
           iconType="questionInCircle"
           style={{ height: 'auto' }}
