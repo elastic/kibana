@@ -29,9 +29,10 @@ export const securitySolutionSearchStrategyProvider = <T extends FactoryQueryTyp
 
   return {
     search: (request, options, deps) => {
-      if (request.factoryQueryType == null) {
+      if (!('factoryQueryType' in request) || request.factoryQueryType == null) {
         throw new Error('factoryQueryType is required');
       }
+
       const queryFactory: SecuritySolutionFactory<T> =
         securitySolutionFactory[request.factoryQueryType];
       const dsl = queryFactory.buildDsl(request);
