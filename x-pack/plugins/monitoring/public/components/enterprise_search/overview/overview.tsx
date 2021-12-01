@@ -78,7 +78,6 @@ export class EnterpriseSearchOverview extends PureComponent {
             <EuiFlexGrid columns={2} gutterSize="s">
               {networkMetrics.map((metric, index) => (
                 <EuiFlexItem key={index}>
-                  {/* FIXME: Figure out if we can limit the values on the graph to positive only */}
                   <MonitoringTimeseriesContainer series={metric} {...props} />
                   <EuiSpacer />
                 </EuiFlexItem>
@@ -102,7 +101,6 @@ export class EnterpriseSearchOverview extends PureComponent {
             <EuiFlexGrid columns={2} gutterSize="s">
               {lowLevelUsageMetrics.map((metric, index) => (
                 <EuiFlexItem key={index}>
-                  {/* FIXME: Figure out if we can limit the values on the graph to positive only */}
                   <MonitoringTimeseriesContainer series={metric} {...props} />
                   <EuiSpacer />
                 </EuiFlexItem>
@@ -124,7 +122,6 @@ export class EnterpriseSearchOverview extends PureComponent {
             <EuiFlexGrid columns={2} gutterSize="s">
               {appSearchUsageMetrics.map((metric, index) => (
                 <EuiFlexItem key={index}>
-                  {/* FIXME: Figure out if we can limit the values on the graph to positive only */}
                   <MonitoringTimeseriesContainer series={metric} {...props} />
                   <EuiSpacer />
                 </EuiFlexItem>
@@ -146,7 +143,6 @@ export class EnterpriseSearchOverview extends PureComponent {
             <EuiFlexGrid columns={2} gutterSize="s">
               {workplaceSearchUsageMetrics.map((metric, index) => (
                 <EuiFlexItem key={index}>
-                  {/* FIXME: Figure out if we can limit the values on the graph to positive only */}
                   <MonitoringTimeseriesContainer series={metric} {...props} />
                   <EuiSpacer />
                 </EuiFlexItem>
