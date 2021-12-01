@@ -214,7 +214,7 @@ export class FleetPlugin
     this.securitySetup = deps.security;
     const config = this.configInitialValue;
 
-    core.status.set(this.fleetStatus$);
+    core.status.set(this.fleetStatus$.asObservable());
 
     registerSavedObjects(core.savedObjects, deps.encryptedSavedObjects);
     registerEncryptedSavedObjects(deps.encryptedSavedObjects);
