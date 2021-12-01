@@ -1,34 +1,34 @@
-[[index-patterns-api-default-get]]
-=== Get default index pattern API
+[[data-views-api-default-get]]
+=== Get default data view API
 ++++
-<titleabbrev>Get default index pattern</titleabbrev>
+<titleabbrev>Get default data view</titleabbrev>
 ++++
 
-experimental[] Retrieve a default index pattern ID. Kibana UI uses default index pattern unless user picks a different one.
+experimental[] Retrieve a default data view ID. Kibana UI uses the default data view unless user picks a different one.
 
-[[index-patterns-api-default-get-request]]
+[[data-views-api-default-get-request]]
 ==== Request
 
 `GET <kibana host>:<port>/api/index_patterns/default`
 
 `GET <kibana host>:<port>/s/<space_id>/api/index_patterns/default`
 
-[[index-patterns-api-default-get-params]]
+[[data-views-api-default-get-params]]
 ==== Path parameters
 
 `space_id`::
 (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
 
-[[index-patterns-api-default-get-codes]]
+[[data-views-api-default-get-codes]]
 ==== Response code
 
 `200`::
 Indicates a successful call.
 
-[[index-patterns-api-default-get-example]]
+[[data-views-api-default-get-example]]
 ==== Example
 
-Retrieve the default index pattern id:
+Retrieve the default data view id:
 
 [source,sh]
 --------------------------------------------------
@@ -36,7 +36,7 @@ $ curl -X GET api/index_patterns/default
 --------------------------------------------------
 // KIBANA
 
-The API returns an ID of a default index pattern:
+The API returns an ID of a default data view:
 
 [source,sh]
 --------------------------------------------------
@@ -45,7 +45,7 @@ The API returns an ID of a default index pattern:
 }
 --------------------------------------------------
 
-In case there is no default index pattern, the API returns:
+In case there is no default data view, the API returns:
 
 [source,sh]
 --------------------------------------------------
