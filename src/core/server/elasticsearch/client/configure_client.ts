@@ -144,7 +144,7 @@ const addLogging = ({ client, type, logger }: { client: Client; type: string; lo
 
       queryLogger.debug(queryMessage, meta);
 
-      if (event.headers.warning ?? false) {
+      if (event.headers!.warning ?? false) {
         // Plugins can explicitly mark requests as originating from a user by
         // removing the `'x-elastic-product-origin': 'kibana'` header that's
         // added by default. User requests will be shown to users in the
@@ -153,8 +153,10 @@ const addLogging = ({ client, type, logger }: { client: Client; type: string; lo
         // Kibana requests will be hidden from the upgrade assistant UI and are
         // only logged to help developers maintain their plugins
         const requestOrigin =
-          (event.meta.request.params.headers != null &&
-            (event.meta.request.params.headers['x-elastic-product-origin'] as unknown as string)) ??
+          (event.meta.request.options.headers != null &&
+            (event.meta.request.options.headers[
+              'x-elastic-product-origin'
+            ] as unknown as string)) ??
           'user';
 
         const stackTrace = new Error().stack?.split('\n').slice(5).join('\n');
@@ -162,14 +164,16 @@ const addLogging = ({ client, type, logger }: { client: Client; type: string; lo
         // Construct a JSON logMeta payload to make it easier for CI tools to consume
         const logMeta = {
           deprecation: {
-            message: event.headers.warning ?? 'placeholder',
+            message: event.headers!.warning ?? 'placeholder',
             requestOrigin,
             query: queryMessage,
             stack: stackTrace,
           },
         };
-        deprecationLogger.debug(
-          `ES DEPRECATION: ${event.headers.warning}\nOrigin:${requestOrigin}\nStack trace:\n${stackTrace}\nQuery:\n${queryMessage}`,
+        deprecationLogger.error(
+          `ES DEPRECATION: ${
+            event.headers!.warning
+          }\nOrigin:${requestOrigin}\nStack trace:\n${stackTrace}\nQuery:\n${queryMessage}`,
           logMeta as unknown as LogMeta
         );
       }
