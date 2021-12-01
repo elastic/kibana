@@ -11,7 +11,7 @@ import {
   errorRendererFactory,
   debugRendererFactory,
 } from '../../../../../src/plugins/expression_error/public';
-import { repeatImageRenderer } from '../../../../../src/plugins/expression_repeat_image/public';
+import { repeatImageRendererFactory } from '../../../../../src/plugins/expression_repeat_image/public';
 import { revealImageRenderer } from '../../../../../src/plugins/expression_reveal_image/public';
 import {
   shapeRenderer,
@@ -23,8 +23,11 @@ export const renderFunctions = [
   metricRenderer,
   revealImageRenderer,
   shapeRenderer,
-  repeatImageRenderer,
   progressRenderer,
 ];
 
-export const renderFunctionFactories = [debugRendererFactory, errorRendererFactory];
+export const renderFunctionFactories = [
+  debugRendererFactory,
+  errorRendererFactory,
+  repeatImageRendererFactory,
+];
