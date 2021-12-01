@@ -208,7 +208,7 @@ export const GaugeComponent: FC<GaugeRenderProps> = ({
         bands={bands}
         ticks={getTicks(ticksPosition, [min, max], bands)}
         bandFillColor={
-          colorMode === 'palette'
+          colorMode === 'palette' && colors
             ? (val) => {
                 const index = bands && bands.indexOf(val.value) - 1;
                 return colors && index >= 0 && colors[index]

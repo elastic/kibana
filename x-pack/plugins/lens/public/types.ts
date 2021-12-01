@@ -478,7 +478,7 @@ export type VisualizationDimensionGroupConfig = SharedDimensionProps & {
   requiredMinDimensionCount?: number;
   dataTestSubj?: string;
   prioritizedOperation?: string;
-  suggestedValue?: () => number;
+  suggestedValue?: () => number | undefined;
 
   /**
    * When the dimension editor is enabled for this group, all dimensions in the group
