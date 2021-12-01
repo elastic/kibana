@@ -79,11 +79,10 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
   const [isPopoverOpen, setPopoverIsOpen] = useState(false);
   const [dataViewId, setDataViewId] = useState<string | null>(selectedDataViewId);
   const { addSuccess, addError } = useAppToasts();
-  const missingPatterns = selectedPatterns.filter(
-    (pattern) => defaultDataView.title.indexOf(pattern) === -1
-  );
+
   const {
     isModified,
+    missingPatterns,
     onChangeCombo,
     renderOption,
     selectableOptions,
@@ -94,7 +93,6 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
     defaultDataViewId: defaultDataView.id,
     isOnlyDetectionAlerts,
     kibanaDataViews,
-    missingPatterns,
     scopeId,
     selectedPatterns,
     signalIndexName,
@@ -111,7 +109,7 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
   const isSavingDisabled = useMemo(() => selectedOptions.length === 0, [selectedOptions]);
   const [expandAdvancedOptions, setExpandAdvancedOptions] = useState(false);
   const [isShowingUpdateModal, setIsShowingUpdateModal] = useState(false);
-  const [missingIndexPatterns, setMissingIndexPatterns] = useState<string[]>([]);
+
   const setPopoverIsOpenCb = useCallback(() => {
     setPopoverIsOpen((prevState) => !prevState);
     setExpandAdvancedOptions(false); // we always want setExpandAdvancedOptions collapsed by default when popover opened
@@ -179,13 +177,12 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
     } else {
       // open modal
       setIsShowingUpdateModal(true);
-      setMissingIndexPatterns(missingPatterns);
     }
   }, [missingPatterns, onContinueUpdateDeprecated]);
 
-  const onUpdateDataView = useCallback(async () => {
+  const onUpdateUiSettings = useCallback(async () => {
     const defaultIndex = await uiSettings.get<string[]>(DEFAULT_INDEX_KEY);
-    const newSelectedOptions = [...defaultIndex, ...missingIndexPatterns];
+    const newSelectedOptions = [...defaultIndex, ...missingPatterns];
     const isUiSettingsSuccess = await uiSettings.set(
       DEFAULT_INDEX_KEY,
       ensurePatternFormat(newSelectedOptions)
@@ -213,7 +210,7 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
     addError,
     addSuccess,
     defaultDataView.id,
-    missingIndexPatterns,
+    missingPatterns,
     onChangeDataView,
     selectedPatterns,
     uiSettings,
@@ -263,6 +260,7 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
   );
 
   useEffect(() => {
+    console.log('setDataViewId', selectedDataViewId);
     setDataViewId(selectedDataViewId);
   }, [selectedDataViewId]);
 
@@ -281,7 +279,7 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
     [isPopoverOpen, isOnlyDetectionAlerts, signalIndexName, selectedPatterns]
   );
 
-  const buttonWithTooptip = useMemo(() => {
+  const buttonWithTooltip = useMemo(() => {
     return tooltipContent ? (
       <EuiToolTip position="top" content={tooltipContent} data-test-subj="sourcerer-tooltip">
         {trigger}
@@ -295,10 +293,11 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
     setExpandAdvancedOptions((prevState) => !prevState);
   }, []);
 
+  // dataViewId can only be null in timeline
   return indicesExist || dataViewId === null ? (
     <EuiPopover
       panelClassName="sourcererPopoverPanel"
-      button={buttonWithTooptip}
+      button={buttonWithTooltip}
       closePopover={handleClosePopOver}
       data-test-subj={isTimelineSourcerer ? 'timeline-sourcerer-popover' : 'sourcerer-popover'}
       display="block"
@@ -415,10 +414,10 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
               />
               <UpdateDefaultDataViewModal
                 isShowing={isShowingUpdateModal}
-                missingPatterns={missingIndexPatterns}
+                missingPatterns={missingPatterns}
                 onClose={() => setIsShowingUpdateModal(false)}
                 onContinue={onContinueUpdateDeprecated}
-                onUpdate={onUpdateDataView}
+                onUpdate={onUpdateUiSettings}
               />
             </>
           )}

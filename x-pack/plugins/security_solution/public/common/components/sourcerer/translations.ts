@@ -50,7 +50,7 @@ export const CONTINUE_WITHOUT_ADDING = i18n.translate(
     defaultMessage: 'Continue without adding',
   }
 );
-export const ADD_INDEX_PATTERN = i18n.translate('xpack.securitySolution.indexPatterns.continue', {
+export const ADD_INDEX_PATTERN = i18n.translate('xpack.securitySolution.indexPatterns.add', {
   defaultMessage: 'Add index pattern',
 });
 

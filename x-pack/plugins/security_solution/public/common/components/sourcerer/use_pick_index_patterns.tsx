@@ -17,7 +17,6 @@ interface UsePickIndexPatternsProps {
   defaultDataViewId: string;
   isOnlyDetectionAlerts: boolean;
   kibanaDataViews: sourcererModel.SourcererModel['kibanaDataViews'];
-  missingPatterns: string[];
   scopeId: sourcererModel.SourcererScopeName;
   selectedPatterns: string[];
   signalIndexName: string | null;
@@ -27,6 +26,7 @@ export type ModifiedTypes = 'modified' | 'alerts' | 'deprecated' | '';
 
 interface UsePickIndexPatterns {
   isModified: ModifiedTypes;
+  missingPatterns: string[];
   onChangeCombo: (newSelectedDataViewId: Array<EuiComboBoxOptionOption<string>>) => void;
   renderOption: ({ value }: EuiComboBoxOptionOption<string>) => React.ReactElement;
   selectableOptions: Array<EuiComboBoxOptionOption<string>>;
@@ -46,7 +46,6 @@ export const usePickIndexPatterns = ({
   defaultDataViewId,
   isOnlyDetectionAlerts,
   kibanaDataViews,
-  missingPatterns,
   scopeId,
   selectedPatterns,
   signalIndexName,
@@ -55,44 +54,116 @@ export const usePickIndexPatterns = ({
     () => (signalIndexName ? patternListToOptions([signalIndexName]) : []),
     [signalIndexName]
   );
-  const { patternList, selectablePatterns } = useMemo(() => {
+  // const { patternList, selectablePatterns, missingPatterns } = useMemo(() => {
+  //   if (isOnlyDetectionAlerts && signalIndexName) {
+  //     return {
+  //       missingPatterns: [],
+  //       patternList: [signalIndexName],
+  //       selectablePatterns: [signalIndexName],
+  //     };
+  //   }
+  //   const theDataView = kibanaDataViews.find((dataView) => dataView.id === dataViewId);
+  //   if (theDataView == null) {
+  //     return { missingPatterns: [], patternList: [], selectablePatterns: [] };
+  //   }
+  //
+  //   const titleAsList = [...new Set(theDataView.title.split(','))];
+  //   console.log('here we go', {
+  //     selectedPatterns,
+  //     missingPatterns: selectedPatterns.filter((pattern) => !titleAsList.includes(pattern)),
+  //     patternList: titleAsList,
+  //     selectablePatterns: theDataView.patternList,
+  //     dataViewId,
+  //   });
+  //   return scopeId === sourcererModel.SourcererScopeName.default
+  //     ? {
+  //         missingPatterns: [],
+  //         patternList: getPatternListWithoutSignals(titleAsList, signalIndexName),
+  //         selectablePatterns: getPatternListWithoutSignals(
+  //           theDataView.patternList,
+  //           signalIndexName
+  //         ),
+  //       }
+  //     : {
+  //         missingPatterns: selectedPatterns.filter((pattern) => !titleAsList.includes(pattern)),
+  //         patternList: titleAsList,
+  //         selectablePatterns: theDataView.patternList,
+  //       };
+  // }, [
+  //   dataViewId,
+  //   isOnlyDetectionAlerts,
+  //   kibanaDataViews,
+  //   scopeId,
+  //   selectedPatterns,
+  //   signalIndexName,
+  // ]);
+  const [{ missingPatterns, patternList, selectablePatterns }, setPatterns] = useState<{
+    missingPatterns: string[];
+    patternList: string[];
+    selectablePatterns: string[];
+  }>({
+    missingPatterns: [],
+    patternList: [],
+    selectablePatterns: [],
+  });
+
+  const onSetPatterns = useCallback(() => {
     if (isOnlyDetectionAlerts && signalIndexName) {
-      return {
+      return setPatterns({
+        missingPatterns: [],
         patternList: [signalIndexName],
         selectablePatterns: [signalIndexName],
-      };
+      });
     }
     const theDataView = kibanaDataViews.find((dataView) => dataView.id === dataViewId);
+
     if (theDataView == null) {
-      return { patternList: [], selectablePatterns: [] };
+      const defaultDataView = kibanaDataViews.find((dataView) => dataView.id === defaultDataViewId);
+      const titleAsList = [...new Set((defaultDataView ?? { title: '' }).title.split(','))];
+      return setPatterns({
+        missingPatterns: selectedPatterns.filter((pattern) => !titleAsList.includes(pattern)),
+        patternList: [],
+        selectablePatterns: [],
+      });
     }
+
+    const titleAsList = [...new Set(theDataView.title.split(','))];
+    console.log('here we go', {
+      selectedPatterns,
+      missingPatterns: selectedPatterns.filter((pattern) => !titleAsList.includes(pattern)),
+      patternList: titleAsList,
+      selectablePatterns: theDataView.patternList,
+      dataViewId,
+    });
     return scopeId === sourcererModel.SourcererScopeName.default
-      ? {
-          patternList: getPatternListWithoutSignals(
-            [...theDataView.title.split(','), ...missingPatterns]
-              // remove duplicates patterns from selector
-              .filter((pattern, i, self) => self.indexOf(pattern) === i),
-            signalIndexName
-          ),
+      ? setPatterns({
+          missingPatterns: [],
+          patternList: getPatternListWithoutSignals(titleAsList, signalIndexName),
           selectablePatterns: getPatternListWithoutSignals(
-            [...theDataView.patternList, ...missingPatterns],
+            theDataView.patternList,
             signalIndexName
           ),
-        }
-      : {
-          patternList: [...theDataView.title.split(','), ...missingPatterns]
-            // remove duplicates patterns from selector
-            .filter((pattern, i, self) => self.indexOf(pattern) === i),
-          selectablePatterns: [...theDataView.patternList, ...missingPatterns],
-        };
+        })
+      : setPatterns({
+          missingPatterns: selectedPatterns.filter((pattern) => !titleAsList.includes(pattern)),
+          patternList: titleAsList,
+          selectablePatterns: theDataView.patternList,
+        });
   }, [
     dataViewId,
+    defaultDataViewId,
     isOnlyDetectionAlerts,
     kibanaDataViews,
-    missingPatterns,
     scopeId,
+    selectedPatterns,
     signalIndexName,
   ]);
+
+  useEffect(() => {
+    console.log('useEffect dataViewId', dataViewId);
+    onSetPatterns();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dataViewId]);
 
   const selectableOptions = useMemo(
     () => patternListToOptions(patternList, selectablePatterns),
@@ -175,6 +246,7 @@ export const usePickIndexPatterns = ({
 
   return {
     isModified,
+    missingPatterns,
     onChangeCombo,
     renderOption,
     selectableOptions,

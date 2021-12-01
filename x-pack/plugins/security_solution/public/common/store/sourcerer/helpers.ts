@@ -43,25 +43,53 @@ export const ensurePatternFormat = (patternList: string[]): string[] =>
 
 export const validateSelectedPatterns = (
   state: SourcererModel,
-  payload: SelectedDataViewPayload
+  payload: SelectedDataViewPayload,
+  shouldValidateSelectedPatterns: boolean
 ): Partial<SourcererScopeById> => {
   const { id, ...rest } = payload;
   const dataView = state.kibanaDataViews.find((p) => p.id === rest.selectedDataViewId);
   // dedupe because these could come from a silly url or pre 8.0 timeline
   const dedupePatterns = ensurePatternFormat(rest.selectedPatterns);
   const selectedPatterns =
-    dataView != null
+    // shouldValidateSelectedPatterns is false when upgrading from
+    // legacy pre-8.0 timeline index patterns to data view.
+    shouldValidateSelectedPatterns && dataView != null
       ? dedupePatterns.filter(
           (pattern) =>
-            // Typescript is being mean and telling me dataView could be undefined here
-            // so redoing the dataView != null check
             (dataView != null && dataView.patternList.includes(pattern)) ||
             // this is a hack, but sometimes signal index is deleted and is getting regenerated. it gets set before it is put in the dataView
             state.signalIndexName == null ||
             state.signalIndexName === pattern
         )
-      : // 7.16 -> 8.0 this will get hit because dataView == null
+      : // don't remove non-existing patterns, they were saved in the first place in timeline
+        // but removed from the security data view
+        // or its a legacy pre-8.0 timeline
         dedupePatterns;
+  console.log('validateSelectedPatterns', {
+    payload,
+    state,
+    dataView,
+    selectedPatterns,
+    returned: {
+      ...state.sourcererScopes[id],
+      ...rest,
+      selectedDataViewId: dataView?.id ?? null,
+      selectedPatterns,
+      // if in timeline, allow for empty in case pattern was deleted
+      // need flow for this
+      ...(isEmpty(selectedPatterns) && id !== SourcererScopeName.timeline
+        ? {
+            selectedPatterns: getScopePatternListSelection(
+              dataView ?? state.defaultDataView,
+              id,
+              state.signalIndexName,
+              (dataView ?? state.defaultDataView).id === state.defaultDataView.id
+            ),
+          }
+        : {}),
+      loading: false,
+    },
+  });
   return {
     [id]: {
       ...state.sourcererScopes[id],
@@ -101,10 +129,6 @@ export const checkIfIndicesExist = ({
     ? patternList.filter((i) => i !== signalIndexName).length > 0
     : patternList.length > 0;
 
-/* This is called when no validation involved.
- * This happens when upgrading from legacy index patterns to data view.
- */
-
 export const getSelectedPatterns = (
   state: SourcererModel,
   payload: SelectedDataViewPayload
@@ -114,7 +138,29 @@ export const getSelectedPatterns = (
   const dataView = state.kibanaDataViews.find((p) => p.id === rest.selectedDataViewId);
   // dedupe because these could come from a silly url or pre 8.0 timeline
   const newSelectedPatterns = ensurePatternFormat(rest.selectedPatterns);
-
+  console.log('getSelectedPatterns', {
+    payload,
+    state,
+    dataView,
+    newSelectedPatterns,
+    returned: {
+      ...state.sourcererScopes[id],
+      ...rest,
+      selectedDataViewId: dataView?.id ?? null,
+      selectedPatterns: newSelectedPatterns,
+      ...(isEmpty(newSelectedPatterns)
+        ? {
+            selectedPatterns: getScopePatternListSelection(
+              dataView ?? state.defaultDataView,
+              id,
+              state.signalIndexName,
+              (dataView ?? state.defaultDataView).id === state.defaultDataView.id
+            ),
+          }
+        : {}),
+      loading: false,
+    },
+  });
   return {
     [id]: {
       ...state.sourcererScopes[id],
