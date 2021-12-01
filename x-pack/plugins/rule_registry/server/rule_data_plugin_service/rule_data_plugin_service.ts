@@ -41,7 +41,7 @@ export interface IRuleDataService {
    * and also Elasticsearch resources associated with the indices will not be
    * installed.
    */
-  isWriteEnabled(): boolean;
+  isWriteEnabled(registrationContext: string): boolean;
 
   /**
    * If writer cache is enabled (the default), the writer will be cached
@@ -116,8 +116,8 @@ export class RuleDataService implements IRuleDataService {
     return joinWithDash(this.getResourcePrefix(), relativeName);
   }
 
-  public isWriteEnabled(): boolean {
-    return this.options.isWriteEnabled;
+  public isWriteEnabled(registrationContext: string): boolean {
+    return this.options.isWriteEnabled && !this.isRegistrationContextDisabled(registrationContext);
   }
 
   public isRegistrationContextDisabled(registrationContext: string): boolean {
@@ -201,8 +201,7 @@ export class RuleDataService implements IRuleDataService {
     return new RuleDataClient({
       indexInfo,
       resourceInstaller: this.resourceInstaller,
-      isWriteEnabled:
-        this.isWriteEnabled() && !this.isRegistrationContextDisabled(registrationContext),
+      isWriteEnabled: this.isWriteEnabled(registrationContext),
       isWriterCacheEnabled: this.isWriterCacheEnabled(),
       waitUntilReadyForReading,
       waitUntilReadyForWriting,
