@@ -10,7 +10,7 @@ import { pie } from '../canvas_plugin_src/renderers/pie';
 import { plot } from '../canvas_plugin_src/renderers/plot';
 import { getTableRenderer } from '../canvas_plugin_src/renderers/table';
 import { getTextRenderer } from '../canvas_plugin_src/renderers/text';
-import { imageRenderer as image } from '../../../../src/plugins/expression_image/public';
+import { getImageRenderer } from '../../../../src/plugins/expression_image/public';
 import {
   getErrorRenderer,
   getDebugRenderer,
@@ -31,6 +31,7 @@ const renderFunctionsFactories = [
   getTableRenderer,
   getErrorRenderer,
   getDebugRenderer,
+  getImageRenderer,
 ];
 
 /**
@@ -39,7 +40,6 @@ const renderFunctionsFactories = [
  * not render.  This includes any plugins.
  */
 export const renderFunctions = [
-  image,
   repeatImage,
   revealImage,
   metric,
