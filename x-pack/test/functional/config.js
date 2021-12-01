@@ -5,23 +5,10 @@
  * 2.0.
  */
 
-import { resolve, join, dirname } from 'path';
+import { resolve } from 'path';
 
 import { services } from './services';
 import { pageObjects } from './page_objects';
-import { defineDockerServersConfig } from '@kbn/test';
-import { dockerImage as fleetDockerImage } from '../fleet_api_integration/config';
-
-export const fleetRegistryPort = process.env.FLEET_PACKAGE_REGISTRY_PORT || 1234;
-export const fleetRegistryOverride = process.env.PACKAGE_REGISTRY_URL_OVERRIDE || null;
-
-const fleetDockerArgs = [
-  '-v',
-  `${join(
-    dirname(__filename),
-    '../fleet_api_integration/apis/fixtures/package_registry_config.yml'
-  )}:/package-registry/config.yml`,
-];
 
 // the default export of config files must be a config provider
 // that returns an object with the projects config values
@@ -80,17 +67,6 @@ export default async function ({ readConfigFile }) {
 
     servers: kibanaFunctionalConfig.get('servers'),
 
-    dockerServers: defineDockerServersConfig({
-      registry: {
-        enabled: true,
-        image: fleetDockerImage,
-        portInContainer: 8080,
-        port: fleetRegistryPort,
-        args: fleetDockerArgs,
-        waitForLogLine: 'package manifests loaded',
-      },
-    }),
-
     esTestCluster: {
       license: 'trial',
       from: 'snapshot',
@@ -110,7 +86,6 @@ export default async function ({ readConfigFile }) {
         '--xpack.encryptedSavedObjects.encryptionKey="DkdXazszSCYexXqz4YktBGHCRkV6hyNK"',
         '--xpack.discoverEnhanced.actions.exploreDataInContextMenu.enabled=true',
         '--savedObjects.maxImportPayloadBytes=10485760', // for OSS test management/_import_objects
-        `--xpack.fleet.registryUrl=http://localhost:${fleetRegistryPort}`, // for using dockerized registry for tests that touch Fleet
       ],
     },
     uiSettings: {
