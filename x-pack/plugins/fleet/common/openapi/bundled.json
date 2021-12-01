@@ -495,6 +495,13 @@
                 "schema": {
                   "type": "object",
                   "properties": {
+                    "list": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/agent"
+                      },
+                      "deprecated": true
+                    },
                     "items": {
                       "type": "array",
                       "items": {
@@ -1305,6 +1312,13 @@
                 "schema": {
                   "type": "object",
                   "properties": {
+                    "list": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/enrollment_api_key"
+                      },
+                      "deprecated": true
+                    },
                     "items": {
                       "type": "array",
                       "items": {
@@ -2519,10 +2533,6 @@
           },
           "unenrollment_started_at": {
             "type": "string"
-          },
-          "shared_id": {
-            "type": "string",
-            "deprecated": true
           },
           "access_api_key_id": {
             "type": "string"

@@ -18,6 +18,8 @@ export interface GetAgentsRequest {
 
 export interface GetAgentsResponse extends ListResult<Agent> {
   totalInactive: number;
+  // deprecated in 8.x
+  list?: Agent[];
 }
 
 export interface GetOneAgentRequest {

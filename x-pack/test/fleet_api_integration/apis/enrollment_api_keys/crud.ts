@@ -39,6 +39,7 @@ export default function (providerContext: FtrProviderContext) {
 
         expect(apiResponse.total).to.be(3);
         expect(apiResponse.items[0]).to.have.keys('id', 'api_key_id', 'name');
+        expect(apiResponse).to.have.keys('list');
       });
     });
 

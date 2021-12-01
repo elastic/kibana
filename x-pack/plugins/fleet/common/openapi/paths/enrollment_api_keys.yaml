@@ -9,6 +9,11 @@ get:
           schema:
             type: object
             properties:
+              list:
+                type: array
+                items:
+                  $ref: ../components/schemas/enrollment_api_key.yaml
+                deprecated: true
               items:
                 type: array
                 items:
