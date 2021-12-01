@@ -21,7 +21,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import type { FunctionComponent } from 'react';
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 
 import { i18n } from '@kbn/i18n';
@@ -36,7 +36,6 @@ import { FormFlyout } from '../../../components/form_flyout';
 import { useCurrentUser } from '../../../components/use_current_user';
 import { useForm } from '../../../components/use_form';
 import type { ValidationErrors } from '../../../components/use_form';
-import { useInitialFocus } from '../../../components/use_initial_focus';
 import { RolesAPIClient } from '../../roles/roles_api_client';
 import { APIKeysAPIClient } from '../api_keys_api_client';
 import type { CreateApiKeyRequest, CreateApiKeyResponse } from '../api_keys_api_client';
@@ -83,12 +82,6 @@ class MarkdownCompletionProvider implements monaco.languages.CompletionItemProvi
     context: monaco.languages.CompletionContext,
     token: monaco.CancellationToken
   ) {
-    const textUntilPosition = model.getValueInRange({
-      startLineNumber: 1,
-      startColumn: 1,
-      endLineNumber: position.lineNumber,
-      endColumn: position.column,
-    });
     const word = model.getWordUntilPosition(position);
     const range = {
       startLineNumber: position.lineNumber,
@@ -96,9 +89,9 @@ class MarkdownCompletionProvider implements monaco.languages.CompletionItemProvi
       startColumn: word.startColumn,
       endColumn: word.endColumn,
     };
-    console.log('provideCompletionItems', textUntilPosition, word);
+    const users = ['Thom', 'Larry', 'Joe', 'Oleg', 'Thomas', 'Xavier'];
     return {
-      suggestions: ['Thom', 'Larry', 'Joe', 'Oleg', 'Thomas', 'Xavier'].map((label) => ({
+      suggestions: users.map((label) => ({
         label,
         insertText: `!{user{id:${label}}}`,
         range,
@@ -160,6 +153,8 @@ export const CreateApiKeyFlyout: FunctionComponent<CreateApiKeyFlyoutProps> = ({
     }
   }, [currentUser, roles]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  const suggestionProvider = useMemo(() => new MarkdownCompletionProvider(), []);
+
   return (
     <FormFlyout
       title={i18n.translate('xpack.security.accountManagement.createApiKey.title', {
@@ -180,14 +175,12 @@ export const CreateApiKeyFlyout: FunctionComponent<CreateApiKeyFlyoutProps> = ({
     >
       <RichTextEditor />
       <EuiSpacer />
+
       <CodeEditorField
         value={form.values.metadata!}
         onChange={(value) => form.setValue('metadata', value)}
         languageId="markdown"
-        suggestionProvider={new MarkdownCompletionProvider()}
-        options={{
-          lineNumbers: 'off',
-        }}
+        suggestionProvider={suggestionProvider}
         height={200}
       />
       <EuiSpacer />
