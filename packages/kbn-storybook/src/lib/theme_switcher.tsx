@@ -27,7 +27,7 @@ export function ThemeSwitcher() {
   );
 
   useEffect(() => {
-    if (!selectedTheme || selectedTheme === defaultTheme) {
+    if (!selectedTheme) {
       selectTheme(defaultTheme);
     }
   }, [selectTheme, selectedTheme]);
