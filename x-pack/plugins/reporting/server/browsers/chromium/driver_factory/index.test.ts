@@ -55,11 +55,12 @@ describe('class HeadlessChromiumDriverFactory', () => {
     );
   });
 
-  it('createPage returns browser driver and process exit observable', async () => {
+  it('createPage returns browser driver, unexpected process exit observable, and close callback', async () => {
     const factory = mock(new HeadlessChromiumDriverFactory(reporting, path, logger));
     const utils = await factory.createPage({}).pipe(take(1)).toPromise();
     expect(utils).toHaveProperty('driver');
-    expect(utils).toHaveProperty('exit$');
+    expect(utils).toHaveProperty('unexpectedExit$');
+    expect(utils).toHaveProperty('close');
   });
 
   it('createPage rejects if Puppeteer launch fails', async () => {
