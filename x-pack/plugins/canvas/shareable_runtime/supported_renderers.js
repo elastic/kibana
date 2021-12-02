@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { markdown } from '../canvas_plugin_src/renderers/markdown';
+import { getMarkdownRenderer } from '../canvas_plugin_src/renderers/markdown';
 import { pie } from '../canvas_plugin_src/renderers/pie';
 import { plot } from '../canvas_plugin_src/renderers/plot';
-import { table } from '../canvas_plugin_src/renderers/table';
-import { text } from '../canvas_plugin_src/renderers/text';
+import { getTableRenderer } from '../canvas_plugin_src/renderers/table';
+import { getTextRenderer } from '../canvas_plugin_src/renderers/text';
 import { imageRenderer as image } from '../../../../src/plugins/expression_image/public';
 import {
   errorRenderer as error,
@@ -23,6 +23,10 @@ import {
 } from '../../../../src/plugins/expression_shape/public';
 import { metricRenderer as metric } from '../../../../src/plugins/expression_metric/public';
 
+const unboxFactory = (factory) => factory();
+
+const renderFunctionsFactories = [getMarkdownRenderer, getTextRenderer, getTableRenderer];
+
 /**
  * This is a collection of renderers which are bundled with the runtime.  If
  * a renderer is not listed here, but is used by the Shared Workpad, it will
@@ -34,14 +38,12 @@ export const renderFunctions = [
   image,
   repeatImage,
   revealImage,
-  markdown,
   metric,
   pie,
   plot,
   progress,
   shape,
-  table,
-  text,
+  ...renderFunctionsFactories.map(unboxFactory),
 ];
 
-export const renderFunctionNames = renderFunctions.map((fn) => fn.name);
+export const renderFunctionNames = [...renderFunctions.map((fn) => fn().name)];
