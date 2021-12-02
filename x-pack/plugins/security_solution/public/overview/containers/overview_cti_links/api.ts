@@ -20,7 +20,7 @@ export interface IntegrationResponse {
   };
 }
 
-export const fetchIntegrations = () =>
+export const fetchFleetIntegrations = () =>
   KibanaServices.get().http.fetch<{
     response: IntegrationResponse[];
   }>(EPM_API_ROUTES.LIST_PATTERN, {

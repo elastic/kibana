@@ -9,7 +9,7 @@ import { useEffect, useState } from 'react';
 
 import { installationStatuses } from '../../../../../fleet/common';
 import { TI_INTEGRATION_PREFIX } from '../../../../common/cti/constants';
-import { fetchIntegrations, IntegrationResponse } from './api';
+import { fetchFleetIntegrations, IntegrationResponse } from './api';
 
 export interface Integration {
   id: string;
@@ -28,7 +28,7 @@ export const useTiIntegrations = () => {
   useEffect(() => {
     const getPackages = async () => {
       try {
-        const { response: integrations } = await fetchIntegrations();
+        const { response: integrations } = await fetchFleetIntegrations();
         const tiIntegrations = integrations.filter((integration: IntegrationResponse) =>
           integration.id.startsWith(TI_INTEGRATION_PREFIX)
         );
