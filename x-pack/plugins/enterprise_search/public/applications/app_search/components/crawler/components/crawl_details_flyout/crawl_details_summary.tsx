@@ -52,11 +52,25 @@ export const CrawlDetailsSummary: React.FC<ICrawlerSummaryProps> = ({
             title={`${
               crawlType[0].toUpperCase() + crawlType.substring(1)
             } crawl on ${domainCount} ${domainCount === 1 ? 'domain' : 'domains'}`}
-            description="Crawl Type"
+            description={i18n.translate(
+              'xpack.enterpriseSearch.appSearch.crawler.components.crawlDetailsSummary.crawlType',
+              {
+                defaultMessage: 'Crawl type',
+              }
+            )}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={1}>
-          <EuiStat titleSize="s" title={crawlDepth} description="Max Crawl Depth" />
+          <EuiStat
+            titleSize="s"
+            title={crawlDepth}
+            description={i18n.translate(
+              'xpack.enterpriseSearch.appSearch.crawler.components.crawlDetailsSummary.crawlDepth',
+              {
+                defaultMessage: 'Max crawl depth',
+              }
+            )}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiHorizontalRule margin="s" />
@@ -96,7 +110,13 @@ export const CrawlDetailsSummary: React.FC<ICrawlerSummaryProps> = ({
             title={stats.status.pagesVisited}
             description={
               <EuiText size="s">
-                Pages{' '}
+                {i18n.translate(
+                  'xpack.enterpriseSearch.appSearch.crawler.crawlDetailsSummary.pagesVisitedTooltipTitle',
+                  {
+                    defaultMessage: 'Pages',
+                  }
+                )}
+                {' '}
                 <EuiIconTip
                   type="iInCircle"
                   color="primary"
@@ -126,11 +146,25 @@ export const CrawlDetailsSummary: React.FC<ICrawlerSummaryProps> = ({
                 ? `${Math.round(stats.status.avgResponseTimeMSec)}ms`
                 : 'N/A'
             }
-            description="Avg. Response"
+            description={i18n.translate(
+              'xpack.enterpriseSearch.appSearch.crawler.crawlDetailsSummary.avgResponseTimeTooltipTitle',
+              {
+                defaultMessage: 'Avg. response',
+              }
+            )}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiStat titleSize="s" title={duration()} description="Duration" />
+          <EuiStat
+            titleSize="s"
+            title={duration()}
+            description={i18n.translate(
+              'xpack.enterpriseSearch.appSearch.crawler.crawlDetailsSummary.durationTooltipTitle',
+              {
+                defaultMessage: 'Duration',
+              }
+            )}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>
