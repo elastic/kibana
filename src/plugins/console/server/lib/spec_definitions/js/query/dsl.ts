@@ -697,11 +697,11 @@ export const query = (specService: SpecDefinitionsService) => {
     },
     script_score: {
       __template: {
-        query: "",
-        script: {}
+        query: '',
+        script: {},
       },
       script: {
-        source: "",
+        source: '',
         params: {
           origin: '',
           scale: '',
