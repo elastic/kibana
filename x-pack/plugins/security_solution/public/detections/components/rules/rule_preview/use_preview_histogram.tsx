@@ -53,8 +53,6 @@ export const usePreviewHistogram = ({
     filters,
   });
 
-  // put size filter on??
-
   const matrixHistogramRequest = useMemo(() => {
     return {
       endDate,
