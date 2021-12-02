@@ -906,7 +906,6 @@ describe('SearchSource', () => {
         { index: '123', filter },
         `
         Object {
-          "aggs": undefined,
           "filter": Array [
             Object {
               "meta": Object {
@@ -923,8 +922,6 @@ describe('SearchSource', () => {
             },
           ],
           "index": "123",
-          "parent": undefined,
-          "sort": undefined,
         }
       `
       );
@@ -947,18 +944,10 @@ describe('SearchSource', () => {
         },
         `
         Object {
-          "aggs": undefined,
-          "filter": undefined,
-          "index": undefined,
           "parent": Object {
-            "aggs": undefined,
-            "filter": undefined,
             "from": 123,
             "index": "123",
-            "parent": undefined,
-            "sort": undefined,
           },
-          "sort": undefined,
           "timeout": "100",
         }
       `

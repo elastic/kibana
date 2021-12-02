@@ -32,11 +32,10 @@ export const createSearchSource = (
   indexPatterns: IndexPatternsContract,
   searchSourceDependencies: SearchSourceDependencies
 ) => {
-  const createSearchSourceFn = async (searchSourceFields: SerializedSearchSourceFields = {}) => {
+  const createFields = async (searchSourceFields: SerializedSearchSourceFields = {}) => {
+    const { index, parent, ...restOfFields } = searchSourceFields;
     const fields: SearchSourceFields = {
-      ...searchSourceFields,
-      index: undefined,
-      parent: undefined,
+      ...restOfFields,
     };
 
     // hydrating index pattern
@@ -45,9 +44,14 @@ export const createSearchSource = (
     }
 
     if (searchSourceFields.parent) {
-      fields.parent = (await createSearchSourceFn(searchSourceFields.parent)).getFields();
+      fields.parent = await createFields(searchSourceFields.parent);
     }
 
+    return fields;
+  };
+
+  const createSearchSourceFn = async (searchSourceFields: SerializedSearchSourceFields = {}) => {
+    const fields = await createFields(searchSourceFields);
     const searchSource = new SearchSource(fields, searchSourceDependencies);
 
     // todo: move to migration script .. create issue

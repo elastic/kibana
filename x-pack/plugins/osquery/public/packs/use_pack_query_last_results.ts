@@ -31,7 +31,7 @@ export const usePackQueryLastResults = ({
     async () => {
       const lastResultsSearchSource = await data.search.searchSource.create({
         size: 1,
-        sort: { '@timestamp': SortDirection.desc },
+        sort: [{ '@timestamp': SortDirection.desc }],
         query: {
           // @ts-expect-error update types
           bool: {

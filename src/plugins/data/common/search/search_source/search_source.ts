@@ -853,18 +853,25 @@ export class SearchSource {
    * serializes search source fields (which can later be passed to {@link ISearchStartSearchSource})
    */
   public getSerializedFields(recurse = false): SerializedSearchSourceFields {
-    const { filter: originalFilters, size: omit, ...searchSourceFields } = this.getFields();
+    const {
+      filter: originalFilters,
+      aggs: searchSourceAggs,
+      parent,
+      size: omit,
+      sort,
+      index,
+      ...searchSourceFields
+    } = this.getFields();
+
     let serializedSearchSourceFields: SerializedSearchSourceFields = {
       ...searchSourceFields,
-      filter: undefined,
-      aggs: undefined,
-      parent: undefined,
-      sort:
-        searchSourceFields.sort && !Array.isArray(searchSourceFields.sort)
-          ? [searchSourceFields.sort]
-          : searchSourceFields.sort,
-      index: (searchSourceFields.index ? searchSourceFields.index.id : undefined) as any,
     };
+    if (index) {
+      serializedSearchSourceFields.index = index.id;
+    }
+    if (sort) {
+      serializedSearchSourceFields.sort = !Array.isArray(sort) ? [sort] : sort;
+    }
     if (originalFilters) {
       const filters = this.getFilters(originalFilters);
       serializedSearchSourceFields = {
@@ -872,10 +879,10 @@ export class SearchSource {
         filter: filters,
       };
     }
-    if (searchSourceFields.aggs) {
-      let aggs = searchSourceFields.aggs;
+    if (searchSourceAggs) {
+      let aggs = searchSourceAggs;
       if (typeof aggs === 'function') {
-        aggs = (searchSourceFields.aggs as Function)();
+        aggs = (searchSourceAggs as Function)();
       }
       if (aggs instanceof AggConfigs) {
         serializedSearchSourceFields.aggs = aggs.getAll().map((agg) => agg.serialize());
