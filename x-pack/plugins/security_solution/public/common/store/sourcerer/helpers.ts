@@ -8,6 +8,7 @@
 import { isEmpty } from 'lodash';
 import { SourcererDataView, SourcererModel, SourcererScopeById, SourcererScopeName } from './model';
 import { SelectedDataViewPayload } from './actions';
+import { sourcererModel } from '../model';
 
 export const getScopePatternListSelection = (
   theDataView: SourcererDataView | undefined,
@@ -94,3 +95,19 @@ export const validateSelectedPatterns = (
     },
   };
 };
+
+interface CheckIfIndicesExistParams {
+  scopeId: sourcererModel.SourcererScopeName;
+  signalIndexName: string | null;
+  sourcererDataView: sourcererModel.SourcererDataView;
+}
+export const checkIfIndicesExist = ({
+  scopeId,
+  signalIndexName,
+  sourcererDataView,
+}: CheckIfIndicesExistParams) =>
+  scopeId === SourcererScopeName.detections
+    ? sourcererDataView.patternList.includes(`${signalIndexName}`)
+    : scopeId === SourcererScopeName.default
+    ? sourcererDataView.patternList.filter((i) => i !== signalIndexName).length > 0
+    : sourcererDataView.patternList.length > 0;
