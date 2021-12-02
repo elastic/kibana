@@ -16,6 +16,7 @@
 
   @include euiBreakpoint('xs', 's', 'm') {
     @include euiFlyout;
+    left: 10vw;
   }
 
   .lnsFrameLayout__sidebar-isFullscreen & {
