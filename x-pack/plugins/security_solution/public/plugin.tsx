@@ -122,10 +122,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     const startServices: Promise<StartServices> = (async () => {
       const [coreStart, startPlugins] = await core.getStartServices();
 
-      const demo_data = coreStart.http.get('/api/csp/stats');
-
-      console.log({ demo_data });
-
       const services: StartServices = {
         ...coreStart,
         ...startPlugins,
