@@ -7,7 +7,7 @@
 
 import React, { memo, useMemo, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
-import { CaseStatuses, StatusAll } from '../../../../../../cases/common';
+import { CaseStatuses, StatusAll, CasesContextValue } from '../../../../../../cases/common';
 import { TimelineItem } from '../../../../../common/';
 import { useAddToCase, normalizedEventFields } from '../../../../hooks/use_add_to_case';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
@@ -24,7 +24,7 @@ export interface AddToCaseActionProps {
   appId: string;
   owner: string;
   onClose?: Function;
-  disableAlerts?: boolean;
+  casesFeatures?: CasesContextValue['features'];
 }
 
 const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
@@ -34,7 +34,7 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
   appId,
   owner,
   onClose,
-  disableAlerts,
+  casesFeatures,
 }) => {
   const eventId = event?.ecs._id ?? '';
   const eventIndex = event?.ecs._index ?? '';
@@ -94,8 +94,8 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
       onSuccess: onCaseSuccess,
       useInsertTimeline,
       owner: [owner],
-      disableAlerts,
       userCanCrud: casePermissions?.crud ?? false,
+      features: casesFeatures,
     };
   }, [
     attachAlertToCase,
@@ -103,8 +103,8 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
     onCaseSuccess,
     useInsertTimeline,
     owner,
-    disableAlerts,
     casePermissions,
+    casesFeatures,
   ]);
 
   return (
