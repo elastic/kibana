@@ -61,13 +61,6 @@ export const EntSearchOverviewPage: React.FC<ComponentProps> = ({ clusters }) =>
     setData(response);
   }, [ccs, clusterUuid, services.data?.query.timefilter.timefilter, services.http]);
 
-  const renderOverview = (overviewData: any) => {
-    if (overviewData === null) {
-      return null;
-    }
-    return <EnterpriseSearchOverview {...overviewData} onBrush={onBrush} zoomInfo={zoomInfo} />;
-  };
-
   return (
     <EntSearchTemplate
       title={title}
@@ -75,7 +68,9 @@ export const EntSearchOverviewPage: React.FC<ComponentProps> = ({ clusters }) =>
       getPageData={getPageData}
       data-test-subj="entSearchOverviewPage"
     >
-      <div data-test-subj="entSearchOverviewPage">{renderOverview(data)}</div>
+      <div data-test-subj="entSearchOverviewPage">
+        {data && <EnterpriseSearchOverview {...data} onBrush={onBrush} zoomInfo={zoomInfo} />}
+      </div>
     </EntSearchTemplate>
   );
 };
