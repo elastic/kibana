@@ -72,6 +72,7 @@ const optionsAreEqual = (optionsA: DashboardOptions, optionsB: DashboardOptions)
 const panelsAreEqual = (panelsA: DashboardPanelMap, panelsB: DashboardPanelMap): boolean => {
   const embeddableIdsA = Object.keys(panelsA);
   const embeddableIdsB = Object.keys(panelsB);
+  console.log('Checking if dashboards are different...');
   if (
     embeddableIdsA.length !== embeddableIdsB.length ||
     _.xor(embeddableIdsA, embeddableIdsB).length > 0
@@ -80,18 +81,22 @@ const panelsAreEqual = (panelsA: DashboardPanelMap, panelsB: DashboardPanelMap):
   }
   // embeddable ids are equal so let's compare individual panels.
   for (const id of embeddableIdsA) {
-    const obj = commonDiff<DashboardPanelState>(
+    const panelCommonDiff = commonDiff<DashboardPanelState>(
       panelsA[id] as unknown as DashboardDiffCommon,
       panelsB[id] as unknown as DashboardDiffCommon,
       ['panelRefName', 'explicitInput']
     );
+    console.log('-------> Old panel: ', panelsA[id]);
+    console.log('-------> New panel: ', panelsA[id]);
     if (
-      Object.keys(obj).length > 0 ||
+      Object.keys(panelCommonDiff).length > 0 ||
       !explicitInputIsEqual(panelsA[id].explicitInput, panelsB[id].explicitInput)
     ) {
+      console.log('---> Dashboards are NOT equal');
       return false;
     }
   }
+  console.log('---> Dashboards ARE equal');
   return true;
 };
 
