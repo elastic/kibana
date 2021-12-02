@@ -23,7 +23,8 @@
     "ruleRegistry",
     "security",
     "triggersActionsUi",
-    "usageCollection"
+    "usageCollection",
+    "taskManager"
   ],
   "server": true,
   "ui": true,
