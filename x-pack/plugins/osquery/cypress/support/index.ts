@@ -24,7 +24,7 @@
 
 // Import commands.js using ES2015 syntax:
 import './commands';
-import './coverage';
+// import './coverage';
 
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
