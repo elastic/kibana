@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { memo, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiAccordion,
@@ -20,11 +20,16 @@ import { ComboBox } from '../combo_box';
 
 import { useBrowserAdvancedFieldsContext, useBrowserSimpleFieldsContext } from '../contexts';
 
-import { ConfigKeys, ScreenshotOption } from '../types';
+import { ConfigKeys, Validation, ScreenshotOption } from '../types';
 
 import { OptionalLabel } from '../optional_label';
+import { ThrottlingFields } from './throttling_fields';
 
-export const BrowserAdvancedFields = () => {
+interface Props {
+  validate: Validation;
+}
+
+export const BrowserAdvancedFields = memo<Props>(({ validate }) => {
   const { fields, setFields } = useBrowserAdvancedFieldsContext();
   const { fields: simpleFields } = useBrowserSimpleFieldsContext();
 
@@ -156,6 +161,7 @@ export const BrowserAdvancedFields = () => {
             }
           />
         </EuiFormRow>
+
         <EuiFormRow
           label={
             <FormattedMessage
@@ -207,9 +213,11 @@ export const BrowserAdvancedFields = () => {
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>
+
+      <ThrottlingFields validate={validate} />
     </EuiAccordion>
   );
-};
+});
 
 const requestMethodOptions = Object.values(ScreenshotOption).map((option) => ({
   value: option,

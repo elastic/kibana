@@ -72,6 +72,12 @@ export enum ScreenshotOption {
   ONLY_ON_FAILURE = 'only-on-failure',
 }
 
+export enum ThrottlingSuffix {
+  DOWNLOAD = 'd',
+  UPLOAD = 'u',
+  LATENCY = 'l',
+}
+
 // values must match keys in the integration package
 export enum ConfigKeys {
   APM_SERVICE_NAME = 'service.name',
@@ -115,6 +121,11 @@ export enum ConfigKeys {
   TLS_VERSION = 'ssl.supported_protocols',
   TAGS = 'tags',
   TIMEOUT = 'timeout',
+  THROTTLING_CONFIG = 'throttling.config',
+  IS_THROTTLING_ENABLED = 'throttling.is_enabled',
+  DOWNLOAD_SPEED = 'throttling.download_speed',
+  UPLOAD_SPEED = 'throttling.upload_speed',
+  LATENCY = 'throttling.latency',
   URLS = 'urls',
   USERNAME = 'username',
   WAIT = 'wait',
@@ -217,6 +228,11 @@ export interface IBrowserAdvancedFields {
   [ConfigKeys.JOURNEY_FILTERS_MATCH]: string;
   [ConfigKeys.JOURNEY_FILTERS_TAGS]: string[];
   [ConfigKeys.IGNORE_HTTPS_ERRORS]: boolean;
+  [ConfigKeys.IS_THROTTLING_ENABLED]: boolean;
+  [ConfigKeys.DOWNLOAD_SPEED]: string;
+  [ConfigKeys.UPLOAD_SPEED]: string;
+  [ConfigKeys.LATENCY]: string;
+  [ConfigKeys.THROTTLING_CONFIG]: string;
 }
 
 export type HTTPFields = IHTTPSimpleFields & IHTTPAdvancedFields & ITLSFields;
@@ -249,4 +265,15 @@ export const contentTypesToMode = {
   [ContentType.JSON]: Mode.JSON,
   [ContentType.TEXT]: Mode.PLAINTEXT,
   [ContentType.XML]: Mode.XML,
+};
+
+export type ThrottlingConfigKey =
+  | ConfigKeys.DOWNLOAD_SPEED
+  | ConfigKeys.UPLOAD_SPEED
+  | ConfigKeys.LATENCY;
+
+export const configKeyToThrottlingSuffix: Record<ThrottlingConfigKey, ThrottlingSuffix> = {
+  [ConfigKeys.DOWNLOAD_SPEED]: ThrottlingSuffix.DOWNLOAD,
+  [ConfigKeys.UPLOAD_SPEED]: ThrottlingSuffix.UPLOAD,
+  [ConfigKeys.LATENCY]: ThrottlingSuffix.LATENCY,
 };
