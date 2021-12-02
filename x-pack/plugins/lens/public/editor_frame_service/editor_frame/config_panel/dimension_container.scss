@@ -17,6 +17,7 @@
   @include euiBreakpoint('xs', 's', 'm') {
     @include euiFlyout;
     left: 10vw;
+    z-index: $euiZContentMenu;
   }
 
   .lnsFrameLayout__sidebar-isFullscreen & {
