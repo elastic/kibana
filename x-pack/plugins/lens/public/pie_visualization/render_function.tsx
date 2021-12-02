@@ -25,7 +25,7 @@ import {
 import { RenderMode } from 'src/plugins/expressions';
 import type { LensFilterEvent } from '../types';
 import { VisualizationContainer } from '../visualization_container';
-import { DEFAULT_PERCENT_DECIMALS } from './constants';
+import { DEFAULT_PERCENT_DECIMALS, PIE_SIZE_RATIO } from './constants';
 import { PartitionChartsMeta } from './partition_charts_meta';
 import type { FormatFactory } from '../../common';
 import type { PieExpressionProps } from '../../common/expressions';
@@ -246,7 +246,8 @@ export function PieComponent(
       const smallSlices = slices.filter((value) => value < 0.02).length;
       if (smallSlices) {
         // shrink up to 20% to give some room for the linked values
-        config.outerSizeRatio = 1 / (1 + Math.min(smallSlices * 0.05, 0.2));
+        config.outerSizeRatio =
+          (pieSizeRatio ?? PIE_SIZE_RATIO.LARGE) / (1 + Math.min(smallSlices * 0.05, 0.2));
       }
     }
   }
