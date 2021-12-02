@@ -9,7 +9,9 @@ import { API_URLS } from '../../../common/constants';
 import {
   FetchMonitorManagementListQueryArgs,
   MonitorManagementListResultType,
+  MonitorManagementListResult,
 } from '../../../common/runtime_types';
+import { SyntheticsMonitorSavedObject } from '../../../common/types';
 import { apiService } from './utils';
 
 // TODO, change to monitor runtime type
@@ -21,9 +23,18 @@ export const setMonitor = async ({ monitor, id }: { monitor: any; id?: string })
   }
 };
 
+// TODO, change to monitor runtime type
+export const getMonitor = async ({ id }: { id: string }): Promise<SyntheticsMonitorSavedObject> => {
+  return await apiService.get(`${API_URLS.SYNTHETICS_MONITORS}/${id}`);
+};
+
+export const deleteMonitor = async ({ id }: { id: string }): Promise<void> => {
+  return await apiService.delete(`${API_URLS.SYNTHETICS_MONITORS}/${id}`);
+};
+
 export const fetchMonitorManagementList = async (
   params: FetchMonitorManagementListQueryArgs
-): Promise<any> => {
+): Promise<MonitorManagementListResult> => {
   return await apiService.get(
     API_URLS.SYNTHETICS_MONITORS,
     params,

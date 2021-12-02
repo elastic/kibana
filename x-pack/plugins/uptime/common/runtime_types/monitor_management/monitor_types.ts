@@ -8,7 +8,6 @@
 import * as t from 'io-ts';
 import { ConfigKey } from './config_key';
 import {
-  DataStream,
   DataStreamCodec,
   ModeCodec,
   ResponseBodyIndexPolicyCodec,
@@ -60,7 +59,6 @@ export type CommonFields = t.TypeOf<typeof CommonFieldsCodec>;
 // TCP Simple Fields
 export const TCPSimpleFieldsCodec = t.intersection([
   t.interface({
-    [ConfigKey.METADATA]: MetadataCodec,
     [ConfigKey.HOSTS]: t.string,
   }),
   CommonFieldsCodec,
@@ -181,3 +179,20 @@ export const MonitorFieldsCodec = t.intersection([
 ]);
 
 export type MonitorFields = t.TypeOf<typeof MonitorFieldsCodec>;
+
+export const MonitorManagementListResultType = t.type({
+  monitors: t.array(t.interface({ id: t.string, attributes: t.array(MonitorFieldsCodec) })),
+  page: t.union([t.number, t.null]),
+  perPage: t.union([t.number, t.null]),
+  total: t.union([t.number, t.null]),
+});
+
+export type MonitorManagementListResult = Omit<
+  t.TypeOf<typeof MonitorManagementListResultType>,
+  'monitors'
+> & {
+  monitors: Array<{
+    id: string;
+    attributes: MonitorFields;
+  }>;
+};
