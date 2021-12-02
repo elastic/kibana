@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   EuiFormRow,
   EuiFlexGroup,
@@ -20,18 +20,27 @@ import {
   EuiFieldText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { PaletteOutput } from 'src/plugins/charts/public';
+import type { CustomPaletteParams } from '../../../common';
 
 export function SavePaletteModal({
   onSave,
   onCancel,
   paletteName,
+  libraryPalettes,
 }: {
   onSave: (title: string) => Promise<void> | undefined;
   onCancel: () => void;
   paletteName?: string;
+  libraryPalettes?: Array<PaletteOutput<CustomPaletteParams>>;
 }) {
   const [paletteTitle, setPaletteTitle] = useState(paletteName ?? '');
   const [validateTitleError, setValidateTitleError] = useState('');
+  const [isPaletteOverwritten, setIsPaletteOverwritten] = useState(false);
+
+  useEffect(() => {
+    setIsPaletteOverwritten(Boolean(paletteName && paletteName === paletteTitle));
+  }, [paletteName, paletteTitle]);
 
   return (
     <EuiModal
@@ -83,12 +92,18 @@ export function SavePaletteModal({
           <EuiFlexItem grow={false}>
             <EuiButton
               fill
+              disabled={!paletteTitle}
               onClick={() => {
-                // palette title is required
-                if (paletteTitle === '') {
+                // check for duplicates
+                const paletteExistsInLibrary = libraryPalettes?.some(
+                  ({ params }) => params?.title === paletteTitle
+                );
+                if (paletteExistsInLibrary) {
+                  setIsPaletteOverwritten(true);
                   setValidateTitleError(
-                    i18n.translate('xpack.lens.palette.saveModal.titleRequiredError', {
-                      defaultMessage: 'Title is required',
+                    i18n.translate('xpack.lens.palette.saveModal.paletteExists', {
+                      defaultMessage:
+                        'This palette already exists in the library. Do you want to overwrite it?',
                     })
                   );
                 } else {
@@ -99,7 +114,7 @@ export function SavePaletteModal({
               }}
               data-test-subj="canvasCustomElementForm-submit"
             >
-              {paletteName
+              {isPaletteOverwritten
                 ? i18n.translate('xpack.lens.palette.saveModal.overwriteLabel', {
                     defaultMessage: 'Overwrite',
                   })

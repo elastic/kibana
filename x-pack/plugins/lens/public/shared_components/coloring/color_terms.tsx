@@ -16,15 +16,11 @@ import {
   htmlIdGenerator,
 } from '@elastic/eui';
 import type { IFieldFormat } from 'src/plugins/field_formats/common';
+import type { PaletteOutput } from 'src/plugins/charts/public';
 import { isValidColor } from './utils';
 import { TooltipWrapper, useDebouncedValue } from '../index';
-import type { CustomPaletteParamsConfig } from '../../../common';
+import type { CustomPaletteParamsConfig, ColorTerm, CustomPaletteParams } from '../../../common';
 import { SavePaletteModal } from './save_palette_modal';
-
-export interface ColorTerm {
-  color: string;
-  term: string;
-}
 
 const idGeneratorFn = htmlIdGenerator();
 function areColorsValid(colorTerms: Array<{ color: string; term: string }>) {
@@ -33,6 +29,7 @@ function areColorsValid(colorTerms: Array<{ color: string; term: string }>) {
 
 export interface ColorTermsProps {
   colorTerms: ColorTerm[];
+  libraryPalettes?: Array<PaletteOutput<CustomPaletteParams>>;
   onChange: (colorTerms: ColorTerm[]) => void;
   savePalette: (title: string) => Promise<void>;
   paletteConfiguration: CustomPaletteParamsConfig | undefined;
@@ -41,6 +38,7 @@ export interface ColorTermsProps {
   enableSave: boolean;
 }
 export const ColorTerms = ({
+  libraryPalettes,
   onChange,
   paletteConfiguration,
   savePalette,
@@ -183,6 +181,7 @@ export const ColorTerms = ({
           onCancel={() => setSavePaletteModalOpen(false)}
           onSave={onPaletteSave}
           paletteName={paletteConfiguration?.title ?? ''}
+          libraryPalettes={libraryPalettes}
         />
       )}
     </>

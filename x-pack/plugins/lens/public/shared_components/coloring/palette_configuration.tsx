@@ -390,6 +390,7 @@ export function CustomizablePalette({
             dataBounds={dataBounds}
             savePalette={savePalette}
             enableSave={enableSave}
+            libraryPalettes={libraryPalettes}
             onChange={(colorStops) => {
               const newParams = getSwitchToCustomParams(
                 palettes,

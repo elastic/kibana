@@ -135,7 +135,7 @@ export function CustomizableTermsPalette({
                 newParams.steps = colorTerms.length;
                 newParams.title = savedPalette?.params?.title;
               } else {
-                const newColors = palettes.get(newPalette?.name).getCategoricalColors(terms.length);
+                const newColors = getTermsPaletteColors(newPalette, palettes, terms);
                 const newColorTerms = terms.map((term, i) => ({
                   color: newColors[i],
                   term,
@@ -191,6 +191,7 @@ export function CustomizableTermsPalette({
           }
         >
           <ColorTerms
+            libraryPalettes={libraryPalettes}
             paletteConfiguration={selectedPalette?.params}
             data-test-prefix="lnsPalettePanel"
             colorTerms={selectedPalette?.params?.colorTerms ?? colorTerms}

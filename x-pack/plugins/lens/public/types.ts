@@ -18,7 +18,7 @@ import type {
 } from '../../../../src/plugins/expressions/public';
 import { DraggingIdentifier, DragDropIdentifier, DragContextState } from './drag_drop';
 import type { CustomPaletteParams, DateRange, LayerType } from '../common';
-import type { Query, Filter } from '../../../../src/plugins/data/public';
+import type { Query } from '../../../../src/plugins/data/public';
 import type {
   RangeSelectContext,
   ValueClickContext,

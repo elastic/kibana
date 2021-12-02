@@ -19,10 +19,11 @@ import {
   htmlIdGenerator,
 } from '@elastic/eui';
 import useUnmount from 'react-use/lib/useUnmount';
+import type { PaletteOutput } from 'src/plugins/charts/public';
 import { DEFAULT_COLOR } from './constants';
 import { getDataMinMax, getStepValue, isValidColor } from './utils';
 import { TooltipWrapper, useDebouncedValue } from '../index';
-import type { ColorStop, CustomPaletteParamsConfig } from '../../../common';
+import type { ColorStop, CustomPaletteParamsConfig, CustomPaletteParams } from '../../../common';
 import { SavePaletteModal } from './save_palette_modal';
 
 const idGeneratorFn = htmlIdGenerator();
@@ -49,6 +50,7 @@ export interface CustomStopsProps {
   paletteConfiguration: CustomPaletteParamsConfig | undefined;
   'data-test-prefix': string;
   enableSave: boolean;
+  libraryPalettes?: Array<PaletteOutput<CustomPaletteParams>>;
 }
 export const CustomStops = ({
   colorStops,
@@ -58,6 +60,7 @@ export const CustomStops = ({
   dataBounds,
   ['data-test-prefix']: dataTestPrefix,
   enableSave,
+  libraryPalettes,
 }: CustomStopsProps) => {
   const [isSavePaletteModalOpen, setSavePaletteModalOpen] = useState(false);
   const [shouldDisableSave, setShouldDisableSave] = useState(true);
@@ -356,6 +359,7 @@ export const CustomStops = ({
           onCancel={() => setSavePaletteModalOpen(false)}
           onSave={onPaletteSave}
           paletteName={paletteConfiguration?.title ?? ''}
+          libraryPalettes={libraryPalettes}
         />
       )}
     </>
