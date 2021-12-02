@@ -16,7 +16,7 @@ jest.mock('../common/lib/kibana');
 
 describe('useGetCaseMetrics', () => {
   const abortCtrl = new AbortController();
-  const features: CaseMetricsFeature[] = ['alertsCount'];
+  const features: CaseMetricsFeature[] = ['alerts.count'];
 
   beforeEach(() => {
     jest.clearAllMocks();

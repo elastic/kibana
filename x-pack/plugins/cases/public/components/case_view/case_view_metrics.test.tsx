@@ -26,6 +26,8 @@ const renderCaseMetrics = ({
   );
 };
 
+const alertsMetrics = basicCaseMetrics.alerts!;
+
 describe('CaseViewMetrics', () => {
   it('should render', () => {
     const { getByTestId } = renderCaseMetrics();
@@ -46,17 +48,20 @@ describe('CaseViewMetrics', () => {
   });
 
   it('should render total alerts metrics only', () => {
-    const alertsCount = basicCaseMetrics.alertsCount! + 4321;
-    const metrics = { alertsCount };
+    const alertsCount = alertsMetrics.count! + 4321;
+    const metrics = { alerts: { ...alertsMetrics, count: alertsCount } };
     const { getByText } = renderCaseMetrics({ metrics });
     expect(getByText('Total Alerts')).toBeInTheDocument();
     expect(getByText(alertsCount)).toBeInTheDocument();
   });
 
   it('should render associated users metrics only', () => {
-    const totalAlertUsers = basicCaseMetrics.alertUsers!.total + 4321;
+    const totalAlertUsers = alertsMetrics.users!.total + 4321;
     const metrics = {
-      alertUsers: { ...basicCaseMetrics.alertUsers!, total: totalAlertUsers },
+      alerts: {
+        ...alertsMetrics,
+        users: { ...alertsMetrics.users!, total: totalAlertUsers },
+      },
     };
     const { getByText } = renderCaseMetrics({ metrics });
     expect(getByText('Associated Users')).toBeInTheDocument();
@@ -64,9 +69,12 @@ describe('CaseViewMetrics', () => {
   });
 
   it('should render associated hosts metrics only', () => {
-    const totalAlertHosts = basicCaseMetrics.alertHosts!.total + 4321;
+    const totalAlertHosts = alertsMetrics.hosts!.total + 4321;
     const metrics = {
-      alertHosts: { ...basicCaseMetrics.alertHosts!, total: totalAlertHosts },
+      alerts: {
+        ...alertsMetrics,
+        hosts: { ...alertsMetrics.hosts!, total: totalAlertHosts },
+      },
     };
     const { getByText } = renderCaseMetrics({ metrics });
     expect(getByText('Associated Hosts')).toBeInTheDocument();

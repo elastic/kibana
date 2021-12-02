@@ -173,17 +173,19 @@ export const basicResolvedCase: ResolvedCase = {
 };
 
 export const basicCaseMetrics: CaseMetrics = {
-  alertsCount: 12,
-  alertHosts: {
-    total: 2,
-    values: [
-      { name: 'foo', count: 2 },
-      { name: 'bar', count: 10 },
-    ],
-  },
-  alertUsers: {
-    total: 1,
-    values: [{ name: 'Jon', count: 12 }],
+  alerts: {
+    count: 12,
+    hosts: {
+      total: 2,
+      values: [
+        { name: 'foo', count: 2 },
+        { name: 'bar', count: 10 },
+      ],
+    },
+    users: {
+      total: 1,
+      values: [{ name: 'Jon', count: 12 }],
+    },
   },
   connectors: [{ id: 'none', name: 'My Connector', pushCount: 3 }],
   lifespan: { creationDate: basicCreatedAt, closeDate: basicClosedAt },

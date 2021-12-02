@@ -24,7 +24,7 @@ export const getManualAlertIdsWithNoRuleId = (comments: Comment[]): string[] => 
 // TODO: temporary function to get metrics features, this needs to come from top level optional props with a default value
 export const getAllowedMetricFeatures = ({ owner }: { owner: string[] }): CaseMetricsFeature[] => {
   if (owner.includes('securitySolution')) {
-    return ['alertsCount', 'connectors', 'alertHosts', 'alertUsers', 'lifespan'];
+    return ['alerts.count', 'connectors', 'alerts.hosts', 'alerts.users', 'lifespan'];
   }
-  return ['alertsCount', 'connectors', 'lifespan'];
+  return ['alerts.count', 'connectors', 'lifespan'];
 };

@@ -17,7 +17,7 @@ import {
   UserAction,
   UserActionField,
   ActionConnector,
-  MetricsResponse,
+  CaseMetricsResponse,
 } from '../api';
 
 export interface CasesUiConfigType {
@@ -147,8 +147,13 @@ export interface AllCases extends CasesStatus {
   total: number;
 }
 
-export type CaseMetrics = MetricsResponse;
-export type CaseMetricsFeature = keyof MetricsResponse;
+export type CaseMetrics = CaseMetricsResponse;
+export type CaseMetricsFeature =
+  | 'alerts.count'
+  | 'alerts.users'
+  | 'alerts.hosts'
+  | 'connectors'
+  | 'lifespan';
 
 export enum SortFieldCase {
   createdAt = 'createdAt',

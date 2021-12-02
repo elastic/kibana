@@ -176,6 +176,7 @@ export class APMPlugin
       ruleDataClient,
       plugins: resourcePlugins,
       telemetryUsageCounter,
+      kibanaVersion: this.initContext.env.packageInfo.version,
     });
 
     if (plugins.alerting) {
@@ -193,6 +194,7 @@ export class APMPlugin
       ruleDataClient,
       config: currentConfig,
       logger: this.logger,
+      kibanaVersion: this.initContext.env.packageInfo.version,
     });
 
     core.deprecations.registerDeprecations({

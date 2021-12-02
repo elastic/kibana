@@ -13,7 +13,6 @@ import {
   AllTagsFindRequest,
   AllReportersFindRequest,
   CasesByAlertId,
-  MetricsResponse,
 } from '../../../common';
 import { CasesClient } from '../client';
 import { CasesClientInternal } from '../client_internal';
@@ -92,10 +91,6 @@ export interface CasesSubClient {
    * Retrieves the cases ID and title that have the requested alert attached to them
    */
   getCasesByAlertID(params: CasesByAlertIDParams): Promise<CasesByAlertId>;
-  /**
-   * Retrieves the KPI metrics for a case
-   */
-  getMetrics(params: MetricsParams): Promise<MetricsResponse>;
 }
 
 /**
@@ -119,7 +114,6 @@ export const createCasesSubClient = (
     getTags: (params: AllTagsFindRequest) => getTags(params, clientArgs),
     getReporters: (params: AllReportersFindRequest) => getReporters(params, clientArgs),
     getCasesByAlertID: (params: CasesByAlertIDParams) => getCasesByAlertID(params, clientArgs),
-    getMetrics: (params: MetricsParams) => getMetrics(params, casesClient, clientArgs),
   };
 
   return Object.freeze(casesSubClient);

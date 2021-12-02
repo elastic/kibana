@@ -38,7 +38,7 @@ import {
   SubCasesResponse,
   User,
   ResolvedCase,
-  MetricsResponse,
+  CaseMetricsResponse,
 } from '../../common';
 
 import { getAllConnectorTypesUrl } from '../../common/utils/connectors_api';
@@ -167,7 +167,7 @@ export const getCaseMetrics = async (
   features: CaseMetricsFeature[],
   signal: AbortSignal
 ): Promise<CaseMetrics> => {
-  const response = await KibanaServices.get().http.fetch<MetricsResponse>(
+  const response = await KibanaServices.get().http.fetch<CaseMetricsResponse>(
     getCaseDetailsMetricsUrl(caseId),
     {
       method: 'GET',

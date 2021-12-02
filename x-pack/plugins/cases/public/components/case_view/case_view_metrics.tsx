@@ -29,10 +29,11 @@ export interface CaseViewMetricsProps {
 type MetricItems = Array<{ title: string; value: number }>;
 
 const useMetricItems = (metrics: CaseMetrics | null): MetricItems => {
-  const { alertsCount, alertUsers, alertHosts, connectors } = metrics ?? {};
+  const { alerts, connectors } = metrics ?? {};
   const totalConnectors = connectors?.length;
-  const totalAlertUsers = alertUsers?.total;
-  const totalAlertHosts = alertHosts?.total;
+  const alertsCount = alerts?.count;
+  const totalAlertUsers = alerts?.users?.total;
+  const totalAlertHosts = alerts?.hosts?.total;
 
   const metricItems = useMemo<MetricItems>(() => {
     const items = [];
