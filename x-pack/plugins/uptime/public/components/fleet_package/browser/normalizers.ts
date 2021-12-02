@@ -52,7 +52,7 @@ export function throttlingToParameterNormalizer(
 export const isThrottlingEnabledNormalizer: Normalizer = function isThrottlingEnabledNormalizer(
   fields
 ) {
-  const throttlingEnabled = fields?.[ConfigKeys.THROTTLING_CONFIG]?.value;
+  const throttlingEnabled = fields?.[ConfigKey.THROTTLING_CONFIG]?.value;
 
   // If we have any value that's not an explicit "false" it means throttling is "on"
   return throttlingEnabled !== 'false';
@@ -61,7 +61,7 @@ export const isThrottlingEnabledNormalizer: Normalizer = function isThrottlingEn
 export function getThrottlingParamNormalizer(key: ThrottlingConfigKey): Normalizer {
   const paramSuffix = configKeyToThrottlingSuffix[key];
   return (fields) =>
-    throttlingToParameterNormalizer(paramSuffix, fields?.[ConfigKeys.THROTTLING_CONFIG]?.value) ??
+    throttlingToParameterNormalizer(paramSuffix, fields?.[ConfigKey.THROTTLING_CONFIG]?.value) ??
     defaultBrowserFields[key];
 }
 
@@ -77,10 +77,10 @@ export const browserNormalizers: BrowserNormalizerMap = {
   [ConfigKey.SCREENSHOTS]: getBrowserNormalizer(ConfigKey.SCREENSHOTS),
   [ConfigKey.SYNTHETICS_ARGS]: getBrowserJsonToJavascriptNormalizer(ConfigKey.SYNTHETICS_ARGS),
   [ConfigKey.IS_THROTTLING_ENABLED]: isThrottlingEnabledNormalizer,
-  [ConfigKey.DOWNLOAD_SPEED]: getThrottlingParamNormalizer(ConfigKeys.DOWNLOAD_SPEED),
-  [ConfigKey.UPLOAD_SPEED]: getThrottlingParamNormalizer(ConfigKeys.UPLOAD_SPEED),
-  [ConfigKey.LATENCY]: getThrottlingParamNormalizer(ConfigKeys.LATENCY),
-  [ConfigKey.THROTTLING_CONFIG]: getBrowserNormalizer(ConfigKeys.THROTTLING_CONFIG),
+  [ConfigKey.DOWNLOAD_SPEED]: getThrottlingParamNormalizer(ConfigKey.DOWNLOAD_SPEED),
+  [ConfigKey.UPLOAD_SPEED]: getThrottlingParamNormalizer(ConfigKey.UPLOAD_SPEED),
+  [ConfigKey.LATENCY]: getThrottlingParamNormalizer(ConfigKey.LATENCY),
+  [ConfigKey.THROTTLING_CONFIG]: getBrowserNormalizer(ConfigKey.THROTTLING_CONFIG),
   [ConfigKey.ZIP_URL_TLS_CERTIFICATE_AUTHORITIES]: getBrowserJsonToJavascriptNormalizer(
     ConfigKey.ZIP_URL_TLS_CERTIFICATE_AUTHORITIES
   ),

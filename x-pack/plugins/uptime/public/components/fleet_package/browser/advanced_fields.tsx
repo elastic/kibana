@@ -20,7 +20,7 @@ import { ComboBox } from '../combo_box';
 
 import { useBrowserAdvancedFieldsContext, useBrowserSimpleFieldsContext } from '../contexts';
 
-import { ConfigKey, ScreenshotOption, Validation } from '../types';
+import { ConfigKey, Validation, ScreenshotOption } from '../types';
 
 import { OptionalLabel } from '../optional_label';
 import { ThrottlingFields } from './throttling_fields';

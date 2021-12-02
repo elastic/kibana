@@ -14,16 +14,13 @@ import {
   DataStream,
   MonitorFields,
   Mode,
+  ThrottlingConfigKey,
+  ThrottlingSuffix,
+  ThrottlingSuffixType,
 } from '../../../common/runtime_types/monitor_management';
 export * from '../../../common/runtime_types/monitor_management';
 
 export type Monitor = Partial<MonitorFields>;
-
-export enum ThrottlingSuffix {
-  DOWNLOAD = 'd',
-  UPLOAD = 'u',
-  LATENCY = 'l',
-}
 
 export interface PolicyConfig {
   [DataStream.HTTP]: HTTPFields;
@@ -43,12 +40,7 @@ export const contentTypesToMode = {
   [ContentType.XML]: Mode.XML,
 };
 
-export type ThrottlingConfigKey =
-  | ConfigKey.DOWNLOAD_SPEED
-  | ConfigKey.UPLOAD_SPEED
-  | ConfigKey.LATENCY;
-
-export const configKeyToThrottlingSuffix: Record<ThrottlingConfigKey, ThrottlingSuffix> = {
+export const configKeyToThrottlingSuffix: Record<ThrottlingConfigKey, ThrottlingSuffixType> = {
   [ConfigKey.DOWNLOAD_SPEED]: ThrottlingSuffix.DOWNLOAD,
   [ConfigKey.UPLOAD_SPEED]: ThrottlingSuffix.UPLOAD,
   [ConfigKey.LATENCY]: ThrottlingSuffix.LATENCY,

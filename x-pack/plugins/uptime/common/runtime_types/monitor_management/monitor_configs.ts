@@ -110,3 +110,12 @@ export enum ScreenshotOption {
 
 export const ScreenshotOptionCodec = tEnum<ScreenshotOption>('ScreenshotOption', ScreenshotOption);
 export type ScreenshotOptionType = t.TypeOf<typeof ScreenshotOptionCodec>;
+
+export enum ThrottlingSuffix {
+  DOWNLOAD = 'd',
+  UPLOAD = 'u',
+  LATENCY = 'l',
+}
+
+export const ThrottlingSuffixCodec = tEnum<ThrottlingSuffix>('ThrottlingSuffix', ThrottlingSuffix);
+export type ThrottlingSuffixType = t.TypeOf<typeof ThrottlingSuffixCodec>;

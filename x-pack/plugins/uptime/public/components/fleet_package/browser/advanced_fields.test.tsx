@@ -11,10 +11,10 @@ import { render } from '../../../lib/helper/rtl_helpers';
 import { BrowserAdvancedFields } from './advanced_fields';
 import {
   ConfigKey,
-  DataStream,
   BrowserAdvancedFields as BrowserAdvancedFieldsType,
   BrowserSimpleFields,
   Validation,
+  DataStream,
 } from '../types';
 import {
   BrowserAdvancedFieldsContextProvider,

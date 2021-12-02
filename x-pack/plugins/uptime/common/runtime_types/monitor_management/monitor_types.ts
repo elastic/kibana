@@ -59,6 +59,7 @@ export type CommonFields = t.TypeOf<typeof CommonFieldsCodec>;
 // TCP Simple Fields
 export const TCPSimpleFieldsCodec = t.intersection([
   t.interface({
+    [ConfigKey.METADATA]: MetadataCodec,
     [ConfigKey.HOSTS]: t.string,
   }),
   CommonFieldsCodec,
@@ -136,6 +137,14 @@ export const HTTPFieldsCodec = t.intersection([
 export type HTTPFields = t.TypeOf<typeof HTTPFieldsCodec>;
 
 // Browser Fields
+export const ThrottlingConfigKeyCodec = t.union([
+  t.literal(ConfigKey.DOWNLOAD_SPEED),
+  t.literal(ConfigKey.UPLOAD_SPEED),
+  t.literal(ConfigKey.LATENCY),
+]);
+
+export type ThrottlingConfigKey = t.TypeOf<typeof ThrottlingConfigKeyCodec>;
+
 export const BrowserSimpleFieldsCodec = t.intersection([
   t.interface({
     [ConfigKey.METADATA]: MetadataCodec,
@@ -157,6 +166,11 @@ export const BrowserAdvancedFieldsCodec = t.interface({
   [ConfigKey.JOURNEY_FILTERS_MATCH]: t.string,
   [ConfigKey.JOURNEY_FILTERS_TAGS]: t.array(t.string),
   [ConfigKey.IGNORE_HTTPS_ERRORS]: t.boolean,
+  [ConfigKey.IS_THROTTLING_ENABLED]: t.boolean,
+  [ConfigKey.DOWNLOAD_SPEED]: t.string,
+  [ConfigKey.UPLOAD_SPEED]: t.string,
+  [ConfigKey.LATENCY]: t.string,
+  [ConfigKey.THROTTLING_CONFIG]: t.string,
 });
 
 export const BrowserFieldsCodec = t.intersection([

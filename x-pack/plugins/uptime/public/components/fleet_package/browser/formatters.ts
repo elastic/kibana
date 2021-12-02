@@ -22,15 +22,15 @@ import {
 export type BrowserFormatMap = Record<keyof BrowserFields, Formatter>;
 
 const throttlingFormatter: Formatter = (fields) => {
-  if (!fields[ConfigKeys.IS_THROTTLING_ENABLED]) return 'false';
+  if (!fields[ConfigKey.IS_THROTTLING_ENABLED]) return 'false';
 
   const getThrottlingValue = (v: string | undefined, suffix: 'd' | 'u' | 'l') =>
     v !== '' && v !== undefined ? `${v}${suffix}` : null;
 
   return [
-    getThrottlingValue(fields[ConfigKeys.DOWNLOAD_SPEED], 'd'),
-    getThrottlingValue(fields[ConfigKeys.UPLOAD_SPEED], 'u'),
-    getThrottlingValue(fields[ConfigKeys.LATENCY], 'l'),
+    getThrottlingValue(fields[ConfigKey.DOWNLOAD_SPEED], 'd'),
+    getThrottlingValue(fields[ConfigKey.UPLOAD_SPEED], 'u'),
+    getThrottlingValue(fields[ConfigKey.LATENCY], 'l'),
   ]
     .filter((v) => v !== null)
     .join('/');
@@ -67,7 +67,7 @@ export const browserFormatters: BrowserFormatMap = {
     stringToJsonFormatter(fields[ConfigKey.JOURNEY_FILTERS_MATCH]),
   [ConfigKey.JOURNEY_FILTERS_TAGS]: (fields) =>
     arrayToJsonFormatter(fields[ConfigKey.JOURNEY_FILTERS_TAGS]),
-  [ConfigKeys.THROTTLING_CONFIG]: throttlingFormatter,
+  [ConfigKey.THROTTLING_CONFIG]: throttlingFormatter,
   [ConfigKey.IGNORE_HTTPS_ERRORS]: null,
   ...commonFormatters,
 };

@@ -662,7 +662,6 @@ describe('useBarChartsHooks', () => {
       );
       expect(vars?.[ConfigKey.APM_SERVICE_NAME].value).toEqual(config[ConfigKey.APM_SERVICE_NAME]);
       expect(vars?.[ConfigKey.TIMEOUT].value).toEqual(`${config[ConfigKey.TIMEOUT]}s`);
-
       expect(vars?.[ConfigKey.THROTTLING_CONFIG].value).toEqual(
         `${config[ConfigKey.DOWNLOAD_SPEED]}d/${config[ConfigKey.UPLOAD_SPEED]}u/${
           config[ConfigKey.LATENCY]
