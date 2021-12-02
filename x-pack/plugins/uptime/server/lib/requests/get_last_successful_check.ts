@@ -32,18 +32,6 @@ export const getLastSuccessfulStepParams = ({
     ],
     query: {
       bool: {
-        must_not: [
-          ...REMOVE_NON_SUMMARY_BROWSER_CHECKS.must_not,
-          ...(!location
-            ? [
-                {
-                  exists: {
-                    field: 'observer.geo.name',
-                  },
-                },
-              ]
-            : []),
-        ],
         filter: [
           {
             range: {
@@ -59,7 +47,14 @@ export const getLastSuccessfulStepParams = ({
           },
           {
             term: {
-              'monitor.status': 'up',
+              'synthetics.type': 'heartbeat/summary',
+            },
+          },
+          {
+            range: {
+              'summary.down': {
+                lte: '0',
+              },
             },
           },
           ...(location
@@ -72,6 +67,15 @@ export const getLastSuccessfulStepParams = ({
               ]
             : []),
         ],
+        ...(!location
+          ? {
+              must_not: {
+                exists: {
+                  field: 'observer.geo.name',
+                },
+              },
+            }
+          : {}),
       },
     },
   };

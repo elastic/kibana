@@ -37,36 +37,19 @@ describe('getLastSuccessfulStep', () => {
               },
               {
                 term: {
-                  'monitor.status': 'up',
+                  'synthetics.type': 'heartbeat/summary',
+                },
+              },
+              {
+                range: {
+                  'summary.down': {
+                    lte: '0',
+                  },
                 },
               },
               {
                 term: {
                   'observer.geo.name': 'au-heartbeat',
-                },
-              },
-            ],
-            must_not: [
-              {
-                bool: {
-                  filter: [
-                    {
-                      term: {
-                        'monitor.type': 'browser',
-                      },
-                    },
-                    {
-                      bool: {
-                        must_not: [
-                          {
-                            exists: {
-                              field: 'summary',
-                            },
-                          },
-                        ],
-                      },
-                    },
-                  ],
                 },
               },
             ],
@@ -108,39 +91,22 @@ describe('getLastSuccessfulStep', () => {
               },
               {
                 term: {
-                  'monitor.status': 'up',
-                },
-              },
-            ],
-            must_not: [
-              {
-                bool: {
-                  filter: [
-                    {
-                      term: {
-                        'monitor.type': 'browser',
-                      },
-                    },
-                    {
-                      bool: {
-                        must_not: [
-                          {
-                            exists: {
-                              field: 'summary',
-                            },
-                          },
-                        ],
-                      },
-                    },
-                  ],
+                  'synthetics.type': 'heartbeat/summary',
                 },
               },
               {
-                exists: {
-                  field: 'observer.geo.name',
+                range: {
+                  'summary.down': {
+                    lte: '0',
+                  },
                 },
               },
             ],
+            must_not: {
+              exists: {
+                field: 'observer.geo.name',
+              },
+            },
           },
         },
         size: 1,
