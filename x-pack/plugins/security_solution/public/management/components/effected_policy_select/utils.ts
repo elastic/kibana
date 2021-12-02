@@ -21,6 +21,13 @@ export function getArtifactTagsByEffectedPolicySelection(
   });
 }
 
+/**
+ * Given a list of an Exception item tags it will return
+ * the parsed policies from it.
+ *
+ * Policy tags follow the pattern `policy:id`
+ * non policy tags will be ignored.
+ */
 export function getEffectedPolicySelectionByTags(
   tags: string[],
   policies: PolicyData[]
