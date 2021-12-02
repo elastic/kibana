@@ -87,10 +87,11 @@ export function useChangePointDetection(
           query: fetchParams,
         },
       });
+      console.log('fieldCandidates', fieldCandidates);
 
-      if (abortCtrl.current.signal.aborted) {
-        return;
-      }
+      // if (abortCtrl.current.signal.aborted) {
+      //   return;
+      // }
 
       setResponse({
         loaded: LOADED_FIELD_CANDIDATES,
@@ -103,15 +104,18 @@ export function useChangePointDetection(
       let chunkLoadCounter = 0;
 
       const fieldCandidatesChunks = chunk(fieldCandidates, chunkSize);
+      console.log('fieldCandidatesChunks', fieldCandidatesChunks);
 
       for (const fieldCandidatesChunk of fieldCandidatesChunks) {
-        const pValues = await callApmApi({
+        console.log('RUN CHUNK');
+        const { changePoints: pValues } = await callApmApi({
           endpoint: 'POST /internal/apm/correlations/change_point_p_values',
           signal: abortCtrl.current.signal,
           params: {
             body: { ...fetchParams, fieldCandidates: fieldCandidatesChunk },
           },
         });
+        console.log('pValues', pValues);
 
         if (pValues.length > 0) {
           pValues.forEach((d) => {

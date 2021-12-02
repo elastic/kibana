@@ -99,6 +99,6 @@ export const fetchTransactionDurationFieldCandidates = async (
   });
 
   return {
-    fieldCandidates: [...finalFieldCandidates],
+    fieldCandidates: [...finalFieldCandidates, 'http.request.method'],
   };
 };

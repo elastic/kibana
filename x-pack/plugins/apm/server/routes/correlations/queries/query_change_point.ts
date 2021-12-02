@@ -99,10 +99,11 @@ export const fetchChangePointPValues = async (
   const result = [];
 
   for (const fieldName of fieldNames) {
-    const resp = await esClient.search(
-      getChangePointRequest(params, fieldName)
-    );
+    const request = getChangePointRequest(params, fieldName);
+    console.log('request.body.query', JSON.stringify(request.body));
+    const resp = await esClient.search(request);
 
+    console.log('resp.body.aggregations', resp.body.aggregations);
     if (resp.body.aggregations === undefined) {
       throw new Error('fetchChangePoint failed, did not return aggregations.');
     }
@@ -140,5 +141,7 @@ export const fetchChangePointPValues = async (
     }
   }
 
-  return uniqBy(result, (d) => `${d.fieldName},${d.fieldValue}`);
+  return {
+    changePoints: uniqBy(result, (d) => `${d.fieldName},${d.fieldValue}`),
+  };
 };

@@ -539,7 +539,7 @@ export function TimeseriesChart({
   }
 
   return (
-    <EuiFlyout onClose={closeModalHandler}>
+    <EuiFlyout onClose={closeModalHandler} size="l">
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
           <h2>Change point</h2>
