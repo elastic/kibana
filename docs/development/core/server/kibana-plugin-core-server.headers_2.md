@@ -2,12 +2,16 @@
 
 [Home](./index.md) &gt; [kibana-plugin-core-server](./kibana-plugin-core-server.md) &gt; [Headers\_2](./kibana-plugin-core-server.headers_2.md)
 
-## Headers\_2 interface
+## Headers\_2 type
 
 Http request headers to read.
 
 <b>Signature:</b>
 
 ```typescript
-export interface Headers 
+export declare type Headers = {
+    [header in KnownHeaders]?: string | string[] | undefined;
+} & {
+    [header: string]: string | string[] | undefined;
+};
 ```

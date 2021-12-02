@@ -22,6 +22,7 @@ import { EuiOverlayMaskProps } from '@elastic/eui';
 import { History as History_2 } from 'history';
 import { Href } from 'history';
 import { IconType } from '@elastic/eui';
+import { IncomingHttpHeaders } from 'http';
 import type { KibanaClient } from '@elastic/elasticsearch/lib/api/kibana';
 import { Location as Location_2 } from 'history';
 import { LocationDescriptorObject } from 'history';

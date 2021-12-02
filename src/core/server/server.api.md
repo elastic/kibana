@@ -1047,10 +1047,11 @@ export type HandlerFunction<T extends object> = (context: T, ...args: any[]) => 
 export type HandlerParameters<T extends HandlerFunction<any>> = T extends (context: any, ...args: infer U) => any ? U : never;
 
 // @public
-interface Headers_2 {
-    // (undocumented)
+type Headers_2 = {
+    [header in KnownHeaders]?: string | string[] | undefined;
+} & {
     [header: string]: string | string[] | undefined;
-}
+};
 export { Headers_2 as Headers }
 
 // @public (undocumented)
