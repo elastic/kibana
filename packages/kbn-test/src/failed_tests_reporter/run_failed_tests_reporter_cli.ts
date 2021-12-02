@@ -107,7 +107,15 @@ export function runFailedTestsReporterCli() {
             },
             data: {
               format: 'junit',
-              run_env: { key: process.env.BUILDKITE_BUILD_ID },
+              run_env: {
+                CI: 'buildkite',
+                key: process.env.BUILDKITE_BUILD_ID,
+                job_id: process.env.BUILDKITE_JOB_ID,
+                branch: process.env.BUILDKITE_BRANCH_NAME,
+                commit_sha: process.env.BUILDKITE_COMMIT,
+                message: process.env.BUILDKITE_MESSAGE,
+                url: process.env.BUILDKITE_BUILD_URL,
+              },
               data: await Fs.readFile(reportPath, 'utf-8'),
             },
           });
