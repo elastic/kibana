@@ -93,7 +93,7 @@ const renderYAxis = (series: Series[]) => {
   return yAxis.length ? yAxis : <DefaultYAxis />;
 };
 
-const TimelionVisComponent = ({
+export const TimelionVisComponent = ({
   interval,
   seriesList,
   renderComplete,
@@ -238,7 +238,3 @@ const TimelionVisComponent = ({
     </div>
   );
 };
-
-// default export required for React.Lazy
-// eslint-disable-next-line import/no-default-export
-export { TimelionVisComponent as default };

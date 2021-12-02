@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { shallow, mount } from 'enzyme';
+import { shallowWithIntl, mountWithIntl } from '@kbn/test/jest';
 import { VisualizeEditorCommon } from './visualize_editor_common';
 import { VisualizeEditorVisInstance } from '../types';
 
@@ -39,9 +39,15 @@ jest.mock('../../../../kibana_react/public', () => ({
   withKibana: jest.fn((comp) => comp),
 }));
 
+jest.mock('../../services', () => ({
+  getUISettings: jest.fn(() => ({
+    get: jest.fn(),
+  })),
+}));
+
 describe('VisualizeEditorCommon', () => {
   it('should display a conflict callout if saved object conflicts', async () => {
-    shallow(
+    shallowWithIntl(
       <VisualizeEditorCommon
         appState={null}
         hasUnsavedChanges={false}
@@ -77,7 +83,7 @@ describe('VisualizeEditorCommon', () => {
   });
 
   it('should redirect to new id if saved object aliasMatch', async () => {
-    mount(
+    mountWithIntl(
       <VisualizeEditorCommon
         appState={null}
         hasUnsavedChanges={false}

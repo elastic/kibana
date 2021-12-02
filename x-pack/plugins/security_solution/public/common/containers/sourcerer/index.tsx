@@ -24,7 +24,7 @@ import {
 } from '../../../../common/constants';
 import { TimelineId } from '../../../../common';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
-import { getScopePatternListSelection } from '../../store/sourcerer/helpers';
+import { checkIfIndicesExist, getScopePatternListSelection } from '../../store/sourcerer/helpers';
 import { useAppToasts } from '../../hooks/use_app_toasts';
 import { postSourcererDataView } from './api';
 import { useDataView } from '../source/use_data_view';
@@ -273,6 +273,11 @@ export const useSourcererDataView = (
     [scopeSelectedPatterns]
   );
 
+  const indicesExist = useMemo(
+    () => checkIfIndicesExist({ scopeId, signalIndexName, sourcererDataView: selectedDataView }),
+    [scopeId, signalIndexName, selectedDataView]
+  );
+
   return useMemo(
     () => ({
       browserFields: selectedDataView.browserFields,
@@ -282,12 +287,7 @@ export const useSourcererDataView = (
         fields: selectedDataView.indexFields,
         title: selectedPatterns.join(','),
       },
-      indicesExist:
-        scopeId === SourcererScopeName.detections
-          ? selectedDataView.patternList.includes(`${signalIndexName}`)
-          : scopeId === SourcererScopeName.default
-          ? selectedDataView.patternList.filter((i) => i !== signalIndexName).length > 0
-          : selectedDataView.patternList.length > 0,
+      indicesExist,
       loading: loading || selectedDataView.loading,
       runtimeMappings: selectedDataView.runtimeMappings,
       // all active & inactive patterns in DATA_VIEW
@@ -295,7 +295,18 @@ export const useSourcererDataView = (
       // selected patterns in DATA_VIEW
       selectedPatterns: selectedPatterns.sort(),
     }),
-    [loading, selectedPatterns, signalIndexName, scopeId, selectedDataView]
+    [
+      selectedDataView.browserFields,
+      selectedDataView.id,
+      selectedDataView.docValueFields,
+      selectedDataView.indexFields,
+      selectedDataView.loading,
+      selectedDataView.runtimeMappings,
+      selectedDataView.title,
+      selectedPatterns,
+      indicesExist,
+      loading,
+    ]
   );
 };
 

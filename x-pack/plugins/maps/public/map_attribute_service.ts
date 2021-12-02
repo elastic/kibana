@@ -22,11 +22,18 @@ export interface SharingSavedObjectProps {
 }
 
 type MapDoc = MapSavedObjectAttributes & {
-  sharingSavedObjectProps?: SharingSavedObjectProps;
   references?: SavedObjectReference[];
 };
+export interface MapUnwrapMetaInfo {
+  sharingSavedObjectProps: SharingSavedObjectProps;
+}
 
-export type MapAttributeService = AttributeService<MapDoc, MapByValueInput, MapByReferenceInput>;
+export type MapAttributeService = AttributeService<
+  MapDoc,
+  MapByValueInput,
+  MapByReferenceInput,
+  MapUnwrapMetaInfo
+>;
 
 let mapAttributeService: MapAttributeService | null = null;
 
@@ -38,7 +45,8 @@ export function getMapAttributeService(): MapAttributeService {
   mapAttributeService = getEmbeddableService().getAttributeService<
     MapDoc,
     MapByValueInput,
-    MapByReferenceInput
+    MapByReferenceInput,
+    MapUnwrapMetaInfo
   >(MAP_SAVED_OBJECT_TYPE, {
     saveMethod: async (attributes: MapDoc, savedObjectId?: string) => {
       // AttributeService "attributes" contains "references" as a child.
@@ -66,7 +74,12 @@ export function getMapAttributeService(): MapAttributeService {
           ));
       return { id: savedObject.id };
     },
-    unwrapMethod: async (savedObjectId: string): Promise<MapDoc> => {
+    unwrapMethod: async (
+      savedObjectId: string
+    ): Promise<{
+      attributes: MapDoc;
+      metaInfo: MapUnwrapMetaInfo;
+    }> => {
       const {
         saved_object: savedObject,
         outcome,
@@ -82,12 +95,16 @@ export function getMapAttributeService(): MapAttributeService {
 
       const { attributes } = injectReferences(savedObject);
       return {
-        ...attributes,
-        references: savedObject.references,
-        sharingSavedObjectProps: {
-          aliasTargetId,
-          outcome,
-          sourceId: savedObjectId,
+        attributes: {
+          ...attributes,
+          references: savedObject.references,
+        },
+        metaInfo: {
+          sharingSavedObjectProps: {
+            aliasTargetId,
+            outcome,
+            sourceId: savedObjectId,
+          },
         },
       };
     },
