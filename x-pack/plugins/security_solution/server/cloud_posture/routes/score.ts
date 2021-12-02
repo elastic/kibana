@@ -15,7 +15,7 @@ import {
   AggregationsKeyedBucketKeys,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { SecuritySolutionPluginRouter } from '../../types';
-import type { CloudPostureStats, PostureScore, EvaluationStats } from '../types';
+import type { CloudPostureStats, BenchmarkStats, EvaluationStats } from '../types';
 
 const FINDINGS_INDEX = `kubebeat*`;
 
@@ -26,11 +26,11 @@ const getFindingsEsQuery = (
 ): CountRequest => {
   const filter: QueryDslQueryContainer[] = [{ term: { 'run_id.keyword': cycleId } }];
 
-  if (!!benchmark) {
+  if (benchmark) {
     filter.push({ term: { 'rule.benchmark.keyword': benchmark } });
   }
 
-  if (!!evaluationResult) {
+  if (evaluationResult) {
     filter.push({ term: { 'result.evaluation.keyword': evaluationResult } });
   }
 
@@ -71,13 +71,13 @@ const getEvaluationPerFilenameEsQuery = (
       ],
     },
   };
-  if (!!resources) {
+  if (resources) {
     query.bool!.must = { terms: { 'resource.filename.keyword': resources } };
   }
   return {
     index: FINDINGS_INDEX,
-    size: size,
-    query: query,
+    size,
+    query,
     aggs: {
       group: {
         terms: { field: 'resource.filename.keyword' },
@@ -115,7 +115,7 @@ const getBenchmarks = async (esClient: ElasticsearchClient) => {
 };
 
 interface GroupFilename {
-  //TODO find the 'key', 'doc_count' interface
+  // TODO find the 'key', 'doc_count' interface
   key: string;
   doc_count: number;
   group_docs: AggregationsTermsAggregate<AggregationsKeyedBucketKeys>;
@@ -159,7 +159,7 @@ const getEvaluationPerFilename = async (
 const getAllFindingsStats = async (
   esClient: ElasticsearchClient,
   cycleId: string
-): Promise<PostureScore> => {
+): Promise<BenchmarkStats> => {
   const findings = await esClient.count(getFindingsEsQuery(cycleId));
   const passedFindings = await esClient.count(getFindingsEsQuery(cycleId, 'passed'));
   const failedFindings = await esClient.count(getFindingsEsQuery(cycleId, 'failed'));
@@ -179,7 +179,7 @@ const getScorePerBenchmark = async (
   esClient: ElasticsearchClient,
   cycleId: string,
   benchmarks: string[]
-): Promise<PostureScore[]> => {
+): Promise<BenchmarkStats[]> => {
   const benchmarkScores = Promise.all(
     benchmarks.map(async (benchmark) => {
       const benchmarkFindings = await esClient.count(getFindingsEsQuery(benchmark, cycleId));
