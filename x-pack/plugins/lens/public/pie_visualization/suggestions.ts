@@ -18,7 +18,16 @@ function hasIntervalScale(columns: TableSuggestionColumn[]) {
   return columns.some((col) => col.operation.scale === 'interval');
 }
 
-function shouldReject({ table, keptLayerIds, state }: SuggestionRequest<PieVisualizationState>) {
+function shouldReject({
+  table,
+  keptLayerIds,
+  state,
+  subVisualizationId,
+}: SuggestionRequest<PieVisualizationState>) {
+  // usecase for dropping a field - state doesn't exist yet and subVisualizationId doesn't exist
+  if (!subVisualizationId && !state) {
+    return hasIntervalScale(table.columns);
+  }
   // Histograms are not good for pi. But we should not reject them on switching between partition charts.
   const shouldRejectIntervals =
     state?.shape && isPartitionShape(state.shape) ? false : hasIntervalScale(table.columns);
@@ -65,7 +74,7 @@ export function suggestions({
 }: SuggestionRequest<PieVisualizationState>): Array<
   VisualizationSuggestion<PieVisualizationState>
 > {
-  if (shouldReject({ table, state, keptLayerIds })) {
+  if (shouldReject({ table, state, keptLayerIds, subVisualizationId })) {
     return [];
   }
 
@@ -78,12 +87,13 @@ export function suggestions({
   const incompleteConfiguration = metrics.length === 0 || groups.length === 0;
   const metricColumnId = metrics.length > 0 ? metrics[0].columnId : undefined;
 
-  if (incompleteConfiguration && state && !subVisualizationId) {
-    // reject incomplete configurations if the sub visualization isn't specifically requested
-    // this allows to switch chart types via switcher with incomplete configurations, but won't
-    // cause incomplete suggestions getting auto applied on dropped fields
-    return [];
-  }
+  // we need to comment it because now we want to support incompleteConfigurations
+  // if (incompleteConfiguration && state && !subVisualizationId) {
+  //   // reject incomplete configurations if the sub visualization isn't specifically requested
+  //   // this allows to switch chart types via switcher with incomplete configurations, but won't
+  //   // cause incomplete suggestions getting auto applied on dropped fields
+  //   return [];
+  // }
 
   const results: Array<VisualizationSuggestion<PieVisualizationState>> = [];
 
