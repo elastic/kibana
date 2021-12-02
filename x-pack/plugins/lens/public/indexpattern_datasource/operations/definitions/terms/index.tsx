@@ -34,7 +34,6 @@ import {
   getDisallowedTermsMessage,
   getMultiTermsScriptedFieldErrorMessage,
   isSortableByColumn,
-  MULTI_KEY_VISUAL_SEPARATOR,
 } from './helpers';
 
 export type { TermsIndexPatternColumn } from './types';
@@ -155,7 +154,6 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
         otherBucketLabel: i18n.translate('xpack.lens.indexPattern.terms.otherLabel', {
           defaultMessage: 'Other',
         }),
-        separatorLabel: MULTI_KEY_VISUAL_SEPARATOR,
       }).toAst();
     }
     return buildExpressionFunction<AggFunctionsMapping['aggTerms']>('aggTerms', {
