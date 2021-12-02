@@ -64,7 +64,6 @@ const timelineDetails = {
 };
 
 const detectionAlert = {
-  timestamp: 'Nov 17, 2021 @ 09:36:25.499',
   message: '—',
   eventCategory: 'file',
   eventAction: 'initial_scan',
@@ -149,7 +148,6 @@ describe('Import timeline after upgrade', () => {
       cy.get(NOTES_TAB_BUTTON).should('have.text', timelineDetails.notesTab);
       cy.get(PINNED_TAB_BUTTON).should('have.text', timelineDetails.pinnedTab);
 
-      cy.get(QUERY_EVENT_TABLE_CELL).eq(0).should('contain', detectionAlert.timestamp);
       cy.get(QUERY_EVENT_TABLE_CELL).eq(1).should('contain', detectionAlert.message);
       cy.get(QUERY_EVENT_TABLE_CELL).eq(2).should('contain', detectionAlert.eventCategory);
       cy.get(QUERY_EVENT_TABLE_CELL).eq(3).should('contain', detectionAlert.eventAction);
@@ -196,7 +194,6 @@ describe('Import timeline after upgrade', () => {
   it('Displays the correct timeline details inside the pinned tab', () => {
     goToPinnedTab();
 
-    cy.get(PINNED_EVENT_TABLE_CELL).eq(0).should('contain', detectionAlert.timestamp);
     cy.get(PINNED_EVENT_TABLE_CELL).eq(1).should('contain', detectionAlert.message);
     cy.get(PINNED_EVENT_TABLE_CELL).eq(2).should('contain', detectionAlert.eventCategory);
     cy.get(PINNED_EVENT_TABLE_CELL).eq(3).should('contain', detectionAlert.eventAction);
