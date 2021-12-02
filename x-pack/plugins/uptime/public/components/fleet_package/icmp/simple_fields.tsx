@@ -12,7 +12,7 @@ import { ConfigKey, Validation } from '../types';
 import { useICMPSimpleFieldsContext } from '../contexts';
 import { OptionalLabel } from '../optional_label';
 import { ScheduleField } from '../schedule_field';
-import { CommonFields } from '../common/common_fields';
+import { SimpleFieldsWrapper } from '../common/simple_fields_wrapper';
 import { Enabled } from '../common/enabled';
 
 interface Props {
@@ -26,8 +26,7 @@ export const ICMPSimpleFields = memo<Props>(({ validate }) => {
   };
 
   return (
-    <>
-      <Enabled fields={fields} onChange={handleInputChange} />
+    <SimpleFieldsWrapper fields={fields} validate={validate} onInputChange={handleInputChange}>
       <EuiFormRow
         label={
           <FormattedMessage
@@ -115,7 +114,6 @@ export const ICMPSimpleFields = memo<Props>(({ validate }) => {
           step={'any'}
         />
       </EuiFormRow>
-      <CommonFields fields={fields} onChange={handleInputChange} validate={validate} />
-    </>
+    </SimpleFieldsWrapper>
   );
 });

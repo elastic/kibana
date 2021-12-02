@@ -12,8 +12,7 @@ import { ConfigKey, Validation } from '../types';
 import { useHTTPSimpleFieldsContext } from '../contexts';
 import { OptionalLabel } from '../optional_label';
 import { ScheduleField } from '../schedule_field';
-import { CommonFields } from '../common/common_fields';
-import { Enabled } from '../common/enabled';
+import { SimpleFieldsWrapper } from '../common/simple_fields_wrapper';
 
 interface Props {
   validate: Validation;
@@ -26,8 +25,7 @@ export const HTTPSimpleFields = memo<Props>(({ validate }) => {
   };
 
   return (
-    <>
-      <Enabled fields={fields} onChange={handleInputChange} />
+    <SimpleFieldsWrapper fields={fields} validate={validate} onInputChange={handleInputChange}>
       <EuiFormRow
         label={
           <FormattedMessage
@@ -111,7 +109,6 @@ export const HTTPSimpleFields = memo<Props>(({ validate }) => {
           }
         />
       </EuiFormRow>
-      <CommonFields fields={fields} onChange={handleInputChange} validate={validate} />
-    </>
+    </SimpleFieldsWrapper>
   );
 });

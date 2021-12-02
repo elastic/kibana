@@ -13,8 +13,7 @@ import { ConfigKey } from '../types';
 import { useBrowserSimpleFieldsContext } from '../contexts';
 import { ScheduleField } from '../schedule_field';
 import { SourceField } from './source_field';
-import { CommonFields } from '../common/common_fields';
-import { Enabled } from '../common/enabled';
+import { SimpleFieldsWrapper } from '../common/simple_fields_wrapper';
 
 interface Props {
   validate: Validation;
@@ -59,8 +58,7 @@ export const BrowserSimpleFields = memo<Props>(({ validate }) => {
   );
 
   return (
-    <>
-      <Enabled fields={fields} onChange={handleInputChange} />
+    <SimpleFieldsWrapper fields={fields} validate={validate} onInputChange={handleInputChange}>
       <EuiFormRow
         id="syntheticsFleetScheduleField--number syntheticsFleetScheduleField--unit"
         label={
@@ -115,7 +113,6 @@ export const BrowserSimpleFields = memo<Props>(({ validate }) => {
           )}
         />
       </EuiFormRow>
-      <CommonFields fields={fields} onChange={handleInputChange} validate={validate} />
-    </>
+    </SimpleFieldsWrapper>
   );
 });
