@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { DropResult } from '@elastic/eui';
 import {
   EuiCallOut,
   EuiSpacer,
@@ -18,6 +17,10 @@ import {
   EuiDroppable,
   EuiDraggable,
   EuiIcon,
+  DropResult,
+  EuiComboBox,
+  EuiComboBoxProps,
+  EuiFormRow,
 } from '@elastic/eui';
 import React, { ReactNode } from 'react';
 import { DiscoveryRule } from './discovery_rule';
@@ -47,6 +50,11 @@ interface Props {
   discoveryRulesDescription: ReactNode;
   showUnsavedWarning?: boolean;
   onDragEnd: (dropResult: DropResult) => void;
+  selectedVersion: string;
+  versions: string[];
+  onChangeVersion: EuiComboBoxProps<string>['onChange'];
+  onCreateNewVersion: EuiComboBoxProps<string>['onCreateOption'];
+  isValidVersion: boolean;
 }
 
 export function RuntimeAttachment({
@@ -71,6 +79,11 @@ export function RuntimeAttachment({
   discoveryRulesDescription,
   showUnsavedWarning,
   onDragEnd,
+  selectedVersion,
+  versions,
+  onChangeVersion,
+  onCreateNewVersion,
+  isValidVersion,
 }: Props) {
   return (
     <div>
@@ -87,15 +100,38 @@ export function RuntimeAttachment({
           <EuiSpacer />
         </>
       )}
-      <EuiSwitch
-        label="Enable runtime attachment"
-        checked={isEnabled}
-        onChange={onToggleEnable}
-      />
-      <EuiSpacer size="s" />
-      <EuiText color="subdued" size="s">
-        <p>{toggleDescription}</p>
-      </EuiText>
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <EuiSwitch
+            label="Enable runtime attachment"
+            checked={isEnabled}
+            onChange={onToggleEnable}
+          />
+          <EuiSpacer size="s" />
+          <EuiText color="subdued" size="s">
+            <p>{toggleDescription}</p>
+          </EuiText>
+        </EuiFlexItem>
+        {isEnabled && versions && (
+          <EuiFlexItem>
+            <EuiFormRow
+              label="Version"
+              isInvalid={!isValidVersion}
+              error="Invalid version"
+            >
+              <EuiComboBox
+                selectedOptions={[{ label: selectedVersion }]}
+                placeholder="Select or add a version"
+                options={versions.map((_version) => ({ label: _version }))}
+                onChange={onChangeVersion}
+                onCreateOption={onCreateNewVersion}
+                singleSelection
+                isClearable={false}
+              />
+            </EuiFormRow>
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
       {isEnabled && (
         <>
           <EuiSpacer size="l" />

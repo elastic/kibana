@@ -1,4 +1,16 @@
-import { htmlIdGenerator, euiDragDropReorder, DropResult } from '@elastic/eui';
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import {
+  htmlIdGenerator,
+  euiDragDropReorder,
+  DropResult,
+  EuiComboBoxOptionOption,
+} from '@elastic/eui';
 import React, { useState, useCallback, ReactNode } from 'react';
 import { RuntimeAttachment as RuntimeAttachmentStateless } from './runtime_attachment';
 
@@ -19,6 +31,7 @@ export type IDiscoveryRuleList = Array<{
 export interface RuntimeAttachmentSettings {
   enabled: boolean;
   discoveryRules: IDiscoveryRule[];
+  version: string;
 }
 
 interface Props {
@@ -29,6 +42,8 @@ interface Props {
   initialIsEnabled?: boolean;
   initialDiscoveryRules?: IDiscoveryRule[];
   operationTypes: Operation[];
+  selectedVersion: string;
+  versions: string[];
 }
 
 interface Option {
@@ -40,6 +55,11 @@ interface Option {
 export interface Operation {
   operation: Option;
   types: Option[];
+}
+
+const versionRegex = new RegExp(/^\d+\.\d+\.\d+$/);
+function validateVersion(version: string) {
+  return versionRegex.test(version);
 }
 
 export function RuntimeAttachment(props: Props) {
@@ -55,6 +75,11 @@ export function RuntimeAttachment(props: Props) {
   const [editDiscoveryRuleId, setEditDiscoveryRuleId] = useState<null | string>(
     null
   );
+  const [version, setVersion] = useState(props.selectedVersion);
+  const [versions, setVersions] = useState(props.versions);
+  const [isValidVersion, setIsValidVersion] = useState(
+    validateVersion(version)
+  );
 
   const onToggleEnable = useCallback(() => {
     const nextIsEnabled = !isEnabled;
@@ -64,8 +89,9 @@ export function RuntimeAttachment(props: Props) {
       discoveryRules: nextIsEnabled
         ? discoveryRuleList.map(({ discoveryRule }) => discoveryRule)
         : [],
+      version,
     });
-  }, [isEnabled, onChange, discoveryRuleList]);
+  }, [isEnabled, onChange, discoveryRuleList, version]);
 
   const onDelete = useCallback(
     (discoveryRuleId: string) => {
@@ -78,9 +104,10 @@ export function RuntimeAttachment(props: Props) {
         discoveryRules: filteredDiscoveryRuleList.map(
           ({ discoveryRule }) => discoveryRule
         ),
+        version,
       });
     },
-    [isEnabled, discoveryRuleList, onChange]
+    [isEnabled, discoveryRuleList, onChange, version]
   );
 
   const onEdit = useCallback(
@@ -166,6 +193,7 @@ export function RuntimeAttachment(props: Props) {
       discoveryRules: nextDiscoveryRuleList.map(
         ({ discoveryRule }) => discoveryRule
       ),
+      version,
     });
   }, [
     isEnabled,
@@ -175,6 +203,7 @@ export function RuntimeAttachment(props: Props) {
     stagedProbeText,
     discoveryRuleList,
     onChange,
+    version,
   ]);
 
   const onAddRule = useCallback(() => {
@@ -214,11 +243,49 @@ export function RuntimeAttachment(props: Props) {
           discoveryRules: nextDiscoveryRuleList.map(
             ({ discoveryRule }) => discoveryRule
           ),
+          version,
         });
       }
     },
-    [isEnabled, discoveryRuleList, onChange]
+    [isEnabled, discoveryRuleList, onChange, version]
   );
+
+  function onChangeVersion(nextVersion?: string) {
+    if (!nextVersion) {
+      return;
+    }
+    setVersion(nextVersion);
+    onChange({
+      enabled: isEnabled,
+      discoveryRules: isEnabled
+        ? discoveryRuleList.map(({ discoveryRule }) => discoveryRule)
+        : [],
+      version: nextVersion,
+    });
+  }
+
+  function onCreateNewVersion(
+    newVersion: string,
+    flattenedOptions: Array<EuiComboBoxOptionOption<string>>
+  ) {
+    const normalizedNewVersion = newVersion.trim().toLowerCase();
+    const isNextVersionValid = validateVersion(normalizedNewVersion);
+    setIsValidVersion(isNextVersionValid);
+    if (!normalizedNewVersion || !isNextVersionValid) {
+      return;
+    }
+
+    // Create the option if it doesn't exist.
+    if (
+      flattenedOptions.findIndex(
+        (option) => option.label.trim().toLowerCase() === normalizedNewVersion
+      ) === -1
+    ) {
+      setVersions([...versions, newVersion]);
+    }
+
+    onChangeVersion(newVersion);
+  }
 
   return (
     <RuntimeAttachmentStateless
@@ -243,6 +310,16 @@ export function RuntimeAttachment(props: Props) {
       discoveryRulesDescription={props.discoveryRulesDescription}
       showUnsavedWarning={props.showUnsavedWarning}
       onDragEnd={onDragEnd}
+      selectedVersion={version}
+      versions={versions}
+      onChangeVersion={(selectedVersions) => {
+        const nextVersion: string | undefined = selectedVersions[0]?.label;
+        const isNextVersionValid = validateVersion(nextVersion);
+        setIsValidVersion(isNextVersionValid);
+        onChangeVersion(nextVersion);
+      }}
+      onCreateNewVersion={onCreateNewVersion}
+      isValidVersion={isValidVersion}
     />
   );
 }
