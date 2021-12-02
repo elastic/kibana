@@ -389,8 +389,6 @@ export default function ({ getService }: FtrProviderContext) {
 
     for (const testData of testDataList) {
       describe(`${testData.suiteTitle}`, function () {
-        this.tags(['pete']);
-
         after(async () => {
           await transform.api.deleteIndices(testData.destinationIndex);
           await transform.testResources.deleteIndexPatternByTitle(testData.destinationIndex);
