@@ -370,7 +370,7 @@ export const exampleResult = {
       myLink: 'http://foo',
       otherTitle: 'foo',
       content_source_id: '60e85e7ea2564c265a88a4f0',
-      external_id: 'doc-60e85eb7a2564c937a88a4f3',
+      id: 'doc-60e85eb7a2564c937a88a4f3',
       last_updated: '2021-07-09T14:35:35+00:00',
       updated_at: '2021-07-09T14:35:35+00:00',
       source: 'custom',
