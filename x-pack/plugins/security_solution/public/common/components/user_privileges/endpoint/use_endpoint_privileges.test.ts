@@ -9,7 +9,6 @@ import { act, renderHook, RenderHookResult, RenderResult } from '@testing-librar
 import { useHttp, useCurrentUser } from '../../../lib/kibana';
 import { useEndpointPrivileges } from './use_endpoint_privileges';
 import { securityMock } from '../../../../../../security/public/mocks';
-import { appRoutesService } from '../../../../../../fleet/common';
 import { AuthenticatedUser } from '../../../../../../security/common';
 import { licenseService } from '../../../hooks/use_license';
 import { fleetGetCheckPermissionsHttpMock } from '../../../../management/pages/mocks';
