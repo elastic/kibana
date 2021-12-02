@@ -91,7 +91,7 @@ export const GithubViaAppLogic = kea<MakeLogicType<GithubViaAppValues, GithubVia
         app_id: githubAppId,
         base_url: githubEnterpriseServerUrl,
         private_key: stagedPrivateKey,
-        indexPermissions: values.indexPermissionsValue,
+        index_permissions: values.indexPermissionsValue,
       };
 
       try {
