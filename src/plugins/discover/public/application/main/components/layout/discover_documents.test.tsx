@@ -17,8 +17,8 @@ import { DataDocuments$ } from '../../utils/use_saved_search';
 import { discoverServiceMock } from '../../../../__mocks__/services';
 import { FetchStatus } from '../../../types';
 import { DiscoverDocuments } from './discover_documents';
-import { ElasticSearchHit } from '../../../../services/doc_views/doc_views_types';
 import { indexPatternMock } from '../../../../__mocks__/index_pattern';
+import { ElasticSearchHit } from 'src/plugins/discover/public/types';
 
 jest.mock('../../../../kibana_services', () => ({
   ...jest.requireActual('../../../../kibana_services'),

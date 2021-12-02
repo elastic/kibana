@@ -15,7 +15,7 @@ import { SortDirection } from '../../../../data/public';
 import { LoadingStatus } from './services/context_query_state';
 import { ActionBar } from './components/action_bar/action_bar';
 import { DiscoverGrid } from '../../components/discover_grid/discover_grid';
-import { DocViewFilterFn, ElasticSearchHit } from '../../services/doc_views/doc_views_types';
+import { DocViewFilterFn } from '../../services/doc_views/doc_views_types';
 import { AppState } from './services/context_state';
 import { SurrDocType } from './services/context';
 import { DiscoverServices } from '../../build_services';
@@ -23,6 +23,7 @@ import { MAX_CONTEXT_SIZE, MIN_CONTEXT_SIZE } from './services/constants';
 import { DocTableContext } from '../../components/doc_table/doc_table_context';
 import { EsHitRecordList } from '../types';
 import { SortPairArr } from '../../components/doc_table/lib/get_sort';
+import { ElasticSearchHit } from '../../types';
 
 export interface ContextAppContentProps {
   columns: string[];

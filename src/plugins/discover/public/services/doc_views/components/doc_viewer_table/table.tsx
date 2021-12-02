@@ -13,12 +13,13 @@ import { IndexPattern, IndexPatternField } from '../../../../../../data/public';
 import { flattenHit } from '../../../../../../data/common';
 import { SHOW_MULTIFIELDS } from '../../../../../common';
 import { getServices } from '../../../../kibana_services';
-import { DocViewFilterFn, ElasticSearchHit, DocViewRenderProps } from '../../doc_views_types';
+import { DocViewFilterFn, DocViewRenderProps } from '../../doc_views_types';
 import { ACTIONS_COLUMN, MAIN_COLUMNS } from './table_columns';
 import { getFieldsToShow } from '../../../../utils/get_fields_to_show';
 import { getIgnoredReason, IgnoredReason } from '../../../../utils/get_ignored_reason';
 import { formatFieldValue } from '../../../../utils/format_value';
 import { isNestedFieldParent } from '../../../../application/main/utils/nested_fields';
+import { ElasticSearchHit } from '../../../../types';
 
 export interface DocViewerTableProps {
   columns?: string[];

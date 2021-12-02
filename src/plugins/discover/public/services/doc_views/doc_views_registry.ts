@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { DocView, DocViewInput, ElasticSearchHit, DocViewInputFn } from './doc_views_types';
+import { ElasticSearchHit } from '../../types';
+import { DocView, DocViewInput, DocViewInputFn } from './doc_views_types';
 
 export class DocViewsRegistry {
   private docViews: DocView[] = [];

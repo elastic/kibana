@@ -9,8 +9,8 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 import { DocViewerTab } from './doc_viewer_tab';
-import { ElasticSearchHit } from '../../doc_views_types';
 import { indexPatternMock } from '../../../../__mocks__/index_pattern';
+import { ElasticSearchHit } from 'src/plugins/discover/public/types';
 
 describe('DocViewerTab', () => {
   test('changing columns triggers an update', () => {

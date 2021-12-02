@@ -15,11 +15,12 @@ import { flattenHit } from '../../../../../data/common';
 import { DocViewer } from '../../../services/doc_views/components/doc_viewer/doc_viewer';
 import { FilterManager, IndexPattern } from '../../../../../data/public';
 import { TableCell } from './table_row/table_cell';
-import { ElasticSearchHit, DocViewFilterFn } from '../../../services/doc_views/doc_views_types';
+import { DocViewFilterFn } from '../../../services/doc_views/doc_views_types';
 import { getContextUrl } from '../../../utils/get_context_url';
 import { getSingleDocUrl } from '../../../utils/get_single_doc_url';
 import { TableRowDetails } from './table_row_details';
 import { formatRow, formatTopLevelObject } from '../lib/row_formatter';
+import { ElasticSearchHit } from '../../../types';
 
 export type DocTableRow = ElasticSearchHit & {
   isAnchor?: boolean;

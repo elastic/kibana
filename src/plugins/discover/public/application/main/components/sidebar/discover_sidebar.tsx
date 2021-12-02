@@ -39,8 +39,8 @@ import { FieldFilterState, getDefaultFieldFilter, setFieldFilterProp } from './l
 import { getIndexPatternFieldList } from './lib/get_index_pattern_field_list';
 import { DiscoverSidebarResponsiveProps } from './discover_sidebar_responsive';
 import { DiscoverIndexPatternManagement } from './discover_index_pattern_management';
-import { ElasticSearchHit } from '../../../../services/doc_views/doc_views_types';
 import { VIEW_MODE } from '../../../../components/view_mode_toggle';
+import { ElasticSearchHit } from '../../../../types';
 
 /**
  * Default number of available fields displayed and added on scroll
