@@ -6,6 +6,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import { merge } from 'lodash';
 import { CasesContextValue, DEFAULT_FEATURES } from '../../../common';
 import { DEFAULT_BASE_PATH } from '../../common/navigation';
 import { useApplication } from './use_application';
@@ -28,7 +29,11 @@ export const CasesProvider: React.FC<{ value: CasesContextProps }> = ({
   value: { owner, userCanCrud, basePath = DEFAULT_BASE_PATH, features = {} },
 }) => {
   const { appId, appTitle } = useApplication();
-  const featuresOptions = { ...DEFAULT_FEATURES, ...features };
+  /**
+   * The empty object at the beginning avoids the mutation
+   * of the DEFAULT_FEATURES object
+   */
+  const featuresOptions = merge({}, DEFAULT_FEATURES, features);
   const [value, setValue] = useState<CasesContextStateValue>({
     owner,
     userCanCrud,

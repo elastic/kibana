@@ -5,9 +5,10 @@
  * 2.0.
  */
 
+import React from 'react';
+import { merge } from 'lodash';
 import { euiDarkVars } from '@kbn/ui-shared-deps-src/theme';
 import { I18nProvider } from '@kbn/i18n-react';
-import React from 'react';
 import { ThemeProvider } from 'styled-components';
 import { CasesContextValue, DEFAULT_FEATURES, SECURITY_SOLUTION_OWNER } from '../../../common';
 import { CasesProvider } from '../../components/cases_context';
@@ -29,7 +30,7 @@ const TestProvidersComponent: React.FC<Props> = ({
   userCanCrud = true,
   features = {},
 }) => {
-  const featuresOptions = { ...DEFAULT_FEATURES, ...features };
+  const featuresOptions = merge(DEFAULT_FEATURES, features);
   return (
     <I18nProvider>
       <MockKibanaContextProvider>

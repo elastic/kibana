@@ -110,4 +110,6 @@ export const MAX_TITLE_LENGTH = 64;
  * Cases features
  */
 
-export const DEFAULT_FEATURES: CasesContextValue['features'] = { alerts: { sync: true } };
+export const DEFAULT_FEATURES: CasesContextValue['features'] = Object.freeze({
+  alerts: { sync: true },
+});
