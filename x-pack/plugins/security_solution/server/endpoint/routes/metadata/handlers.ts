@@ -23,11 +23,11 @@ import {
 } from '../../../../common/endpoint/types';
 import type { SecuritySolutionRequestHandlerContext } from '../../../types';
 
-import { getPagingProperties, kibanaRequestToMetadataListESQuery } from './query_builders';
+import { kibanaRequestToMetadataListESQuery } from './query_builders';
 import { PackagePolicy } from '../../../../../fleet/common/types/models';
 import { AgentNotFoundError } from '../../../../../fleet/server';
 import { EndpointAppContext, HostListQueryResult } from '../../types';
-import { GetMetadataListRequestSchema, GetMetadataRequestSchema } from './index';
+import { GetMetadataRequestSchema } from './index';
 import { findAllUnenrolledAgentIds } from './support/unenroll';
 import { getAllEndpointPackagePolicies } from './support/endpoint_package_policies';
 import { findAgentIdsByStatus } from './support/agent_status';
@@ -82,91 +82,7 @@ const errorHandler = <E extends Error>(
   throw error;
 };
 
-export const getMetadataListRequestHandler = function (
-  endpointAppContext: EndpointAppContext,
-  logger: Logger
-): RequestHandler<
-  unknown,
-  unknown,
-  TypeOf<typeof GetMetadataListRequestSchema.body>,
-  SecuritySolutionRequestHandlerContext
-> {
-  return async (context, request, response) => {
-    const endpointMetadataService = endpointAppContext.service.getEndpointMetadataService();
-    const fleetServices = endpointAppContext.service.getScopedFleetServices(request);
-
-    let doesUnitedIndexExist = false;
-    let didUnitedIndexError = false;
-    let body: HostResultList = {
-      hosts: [],
-      total: 0,
-      request_page_size: 0,
-      request_page_index: 0,
-    };
-
-    try {
-      doesUnitedIndexExist = await endpointMetadataService.doesUnitedIndexExist(
-        context.core.elasticsearch.client.asCurrentUser
-      );
-    } catch (error) {
-      // for better UX, try legacy query instead of immediately failing on united index error
-      didUnitedIndexError = true;
-    }
-
-    // If no unified Index present, then perform a search using the legacy approach
-    if (!doesUnitedIndexExist || didUnitedIndexError) {
-      const endpointPolicies = await getAllEndpointPackagePolicies(
-        fleetServices.packagePolicy,
-        context.core.savedObjects.client
-      );
-
-      const pagingProperties = await getPagingProperties(request, endpointAppContext);
-
-      body = await legacyListMetadataQuery(
-        context,
-        endpointAppContext,
-        fleetServices,
-        logger,
-        endpointPolicies,
-        {
-          page: pagingProperties.pageIndex,
-          pageSize: pagingProperties.pageSize,
-          kuery: request?.body?.filters?.kql || '',
-          hostStatuses: request?.body?.filters?.host_status || [],
-        }
-      );
-      return response.ok({ body });
-    }
-
-    // Unified index is installed and being used - perform search using new approach
-    try {
-      const pagingProperties = await getPagingProperties(request, endpointAppContext);
-      const { data, total } = await endpointMetadataService.getHostMetadataList(
-        context.core.elasticsearch.client.asCurrentUser,
-        fleetServices,
-        {
-          page: pagingProperties.pageIndex,
-          pageSize: pagingProperties.pageSize,
-          hostStatuses: request.body?.filters.host_status || [],
-          kuery: request.body?.filters.kql || '',
-        }
-      );
-
-      body = {
-        hosts: data,
-        total,
-        request_page_index: pagingProperties.pageIndex * pagingProperties.pageSize,
-        request_page_size: pagingProperties.pageSize,
-      };
-    } catch (error) {
-      return errorHandler(logger, response, error);
-    }
-
-    return response.ok({ body });
-  };
-};
-
-export function getMetadataListRequestHandlerV2(
+export function getMetadataListRequestHandler(
   endpointAppContext: EndpointAppContext,
   logger: Logger
 ): RequestHandler<
