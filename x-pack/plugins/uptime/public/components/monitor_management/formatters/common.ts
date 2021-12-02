@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import { ICommonFields, ICustomFields, ConfigKeys } from '../../fleet_package/types';
+import { CommonFields, MonitorFields, ConfigKey } from '../../fleet_package/types';
 
 export type Formatter =
   | null
-  | ((fields: Partial<ICustomFields>) => string | string[] | Record<string, string> | null);
+  | ((fields: Partial<MonitorFields>) => string | string[] | Record<string, string> | null);
 
-export type CommonFormatMap = Record<keyof ICommonFields | ConfigKeys.NAME, Formatter>;
+export type CommonFormatMap = Record<keyof CommonFields | ConfigKey.NAME, Formatter>;
 
 export const commonFormatters: CommonFormatMap = {
-  [ConfigKeys.NAME]: null,
-  [ConfigKeys.MONITOR_TYPE]: null,
-  [ConfigKeys.SCHEDULE]: (fields) =>
-    `@every ${fields[ConfigKeys.SCHEDULE]?.number}${fields[ConfigKeys.SCHEDULE]?.unit}`,
-  [ConfigKeys.APM_SERVICE_NAME]: null,
-  [ConfigKeys.TAGS]: null,
-  [ConfigKeys.TIMEOUT]: (fields) => secondsToCronFormatter(fields[ConfigKeys.TIMEOUT]),
+  [ConfigKey.NAME]: null,
+  [ConfigKey.MONITOR_TYPE]: null,
+  [ConfigKey.SCHEDULE]: (fields) =>
+    `@every ${fields[ConfigKey.SCHEDULE]?.number}${fields[ConfigKey.SCHEDULE]?.unit}`,
+  [ConfigKey.APM_SERVICE_NAME]: null,
+  [ConfigKey.TAGS]: null,
+  [ConfigKey.TIMEOUT]: (fields) => secondsToCronFormatter(fields[ConfigKey.TIMEOUT]),
 };
 
 export const arrayFormatter = (value: string[] = []) => (value.length ? value : null);

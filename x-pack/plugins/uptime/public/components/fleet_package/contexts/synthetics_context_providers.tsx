@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { HTTPFields, TCPFields, ICMPFields, BrowserFields, ITLSFields, DataStream } from '../types';
+import { HTTPFields, TCPFields, ICMPFields, BrowserFields, TLSFields, DataStream } from '../types';
 import {
   PolicyConfigContextProvider,
   TCPContextProvider,
@@ -22,7 +22,7 @@ interface Props {
   tcpDefaultValues?: TCPFields;
   icmpDefaultValues?: ICMPFields;
   browserDefaultValues?: BrowserFields;
-  tlsDefaultValues?: ITLSFields;
+  tlsDefaultValues?: TLSFields;
   policyDefaultValues?: {
     defaultMonitorType: DataStream;
     defaultIsTLSEnabled: boolean;

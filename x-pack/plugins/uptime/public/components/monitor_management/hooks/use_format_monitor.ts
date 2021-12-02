@@ -6,18 +6,18 @@
  */
 import { useEffect, useRef, useState } from 'react';
 import { omitBy, isNil } from 'lodash';
-import { ConfigKeys, DataStream, Validation, ICustomFields } from '../../fleet_package/types';
+import { ConfigKey, DataStream, Validation, MonitorFields } from '../../fleet_package/types';
 import { formatters } from '../formatters';
 
 interface Props {
   monitorType: DataStream;
-  defaultConfig: Partial<ICustomFields>;
-  config: Partial<ICustomFields>;
+  defaultConfig: Partial<MonitorFields>;
+  config: Partial<MonitorFields>;
   validate: Record<DataStream, Validation>;
 }
 
-const formatMonitorConfig = (configKeys: ConfigKeys[], config: Partial<ICustomFields>) => {
-  const formattedMonitor = {} as Record<ConfigKeys, any>;
+const formatMonitorConfig = (configKeys: ConfigKey[], config: Partial<MonitorFields>) => {
+  const formattedMonitor = {} as Record<ConfigKey, any>;
 
   configKeys.forEach((key) => {
     const value = config[key] ?? null;
@@ -28,19 +28,19 @@ const formatMonitorConfig = (configKeys: ConfigKeys[], config: Partial<ICustomFi
     }
   });
 
-  return omitBy(formattedMonitor, isNil) as Partial<ICustomFields>;
+  return omitBy(formattedMonitor, isNil) as Partial<MonitorFields>;
 };
 
 export const useFormatMonitor = ({ monitorType, defaultConfig, config, validate }: Props) => {
-  const [formattedMonitor, setFormattedMonitor] = useState<Partial<ICustomFields>>(
-    formatMonitorConfig(Object.keys(config) as ConfigKeys[], config)
+  const [formattedMonitor, setFormattedMonitor] = useState<Partial<MonitorFields>>(
+    formatMonitorConfig(Object.keys(config) as ConfigKey[], config)
   );
   const [isValid, setIsValid] = useState(false);
-  const currentConfig = useRef<Partial<ICustomFields>>(defaultConfig);
+  const currentConfig = useRef<Partial<MonitorFields>>(defaultConfig);
 
   useEffect(() => {
-    const configKeys = Object.keys(config) as ConfigKeys[];
-    const validationKeys = Object.keys(validate[monitorType]) as ConfigKeys[];
+    const configKeys = Object.keys(config) as ConfigKey[];
+    const validationKeys = Object.keys(validate[monitorType]) as ConfigKey[];
     const configDidUpdate = configKeys.some((key) => config[key] !== currentConfig.current[key]);
     const isValidT =
       !!config.name && !validationKeys.find((key) => validate[monitorType]?.[key]?.(config));

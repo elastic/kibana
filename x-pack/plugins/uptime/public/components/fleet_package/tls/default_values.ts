@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { ITLSFields, ConfigKeys, VerificationMode, TLSVersion } from '../types';
+import { TLSFields, ConfigKey, VerificationMode, TLSVersion } from '../types';
 
-export const defaultValues: ITLSFields = {
-  [ConfigKeys.TLS_CERTIFICATE_AUTHORITIES]: '',
-  [ConfigKeys.TLS_CERTIFICATE]: '',
-  [ConfigKeys.TLS_KEY]: '',
-  [ConfigKeys.TLS_KEY_PASSPHRASE]: '',
-  [ConfigKeys.TLS_VERIFICATION_MODE]: VerificationMode.FULL,
-  [ConfigKeys.TLS_VERSION]: [TLSVersion.ONE_ONE, TLSVersion.ONE_TWO, TLSVersion.ONE_THREE],
+export const defaultValues: TLSFields = {
+  [ConfigKey.TLS_CERTIFICATE_AUTHORITIES]: '',
+  [ConfigKey.TLS_CERTIFICATE]: '',
+  [ConfigKey.TLS_KEY]: '',
+  [ConfigKey.TLS_KEY_PASSPHRASE]: '',
+  [ConfigKey.TLS_VERIFICATION_MODE]: VerificationMode.FULL,
+  [ConfigKey.TLS_VERSION]: [TLSVersion.ONE_ONE, TLSVersion.ONE_TWO, TLSVersion.ONE_THREE],
 };

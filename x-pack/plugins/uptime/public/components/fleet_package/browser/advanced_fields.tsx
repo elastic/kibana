@@ -20,7 +20,7 @@ import { ComboBox } from '../combo_box';
 
 import { useBrowserAdvancedFieldsContext, useBrowserSimpleFieldsContext } from '../contexts';
 
-import { ConfigKeys, Validation, ScreenshotOption } from '../types';
+import { ConfigKey, Validation, ScreenshotOption } from '../types';
 
 import { OptionalLabel } from '../optional_label';
 import { ThrottlingFields } from './throttling_fields';
@@ -34,7 +34,7 @@ export const BrowserAdvancedFields = memo<Props>(({ validate }) => {
   const { fields: simpleFields } = useBrowserSimpleFieldsContext();
 
   const handleInputChange = useCallback(
-    ({ value, configKey }: { value: unknown; configKey: ConfigKeys }) => {
+    ({ value, configKey }: { value: unknown; configKey: ConfigKey }) => {
       setFields((prevFields) => ({ ...prevFields, [configKey]: value }));
     },
     [setFields]
@@ -47,7 +47,7 @@ export const BrowserAdvancedFields = memo<Props>(({ validate }) => {
       data-test-subj="syntheticsBrowserAdvancedFieldsAccordion"
     >
       <EuiSpacer size="m" />
-      {simpleFields[ConfigKeys.SOURCE_ZIP_URL] && (
+      {simpleFields[ConfigKey.SOURCE_ZIP_URL] && (
         <EuiDescribedFormGroup
           title={
             <h4>
@@ -81,11 +81,11 @@ export const BrowserAdvancedFields = memo<Props>(({ validate }) => {
             }
           >
             <EuiFieldText
-              value={fields[ConfigKeys.JOURNEY_FILTERS_MATCH]}
+              value={fields[ConfigKey.JOURNEY_FILTERS_MATCH]}
               onChange={(event) =>
                 handleInputChange({
                   value: event.target.value,
-                  configKey: ConfigKeys.JOURNEY_FILTERS_MATCH,
+                  configKey: ConfigKey.JOURNEY_FILTERS_MATCH,
                 })
               }
               data-test-subj="syntheticsBrowserJourneyFiltersMatch"
@@ -107,9 +107,9 @@ export const BrowserAdvancedFields = memo<Props>(({ validate }) => {
             }
           >
             <ComboBox
-              selectedOptions={fields[ConfigKeys.JOURNEY_FILTERS_TAGS]}
+              selectedOptions={fields[ConfigKey.JOURNEY_FILTERS_TAGS]}
               onChange={(value) =>
-                handleInputChange({ value, configKey: ConfigKeys.JOURNEY_FILTERS_TAGS })
+                handleInputChange({ value, configKey: ConfigKey.JOURNEY_FILTERS_TAGS })
               }
               data-test-subj="syntheticsBrowserJourneyFiltersTags"
             />
@@ -146,7 +146,7 @@ export const BrowserAdvancedFields = memo<Props>(({ validate }) => {
         >
           <EuiCheckbox
             id="syntheticsBrowserIgnoreHttpsErrorsCheckbox"
-            checked={fields[ConfigKeys.IGNORE_HTTPS_ERRORS]}
+            checked={fields[ConfigKey.IGNORE_HTTPS_ERRORS]}
             label={
               <FormattedMessage
                 id="xpack.uptime.createPackagePolicy.stepConfigure.browserAdvancedSettings.ignoreHttpsErrors.label"
@@ -156,7 +156,7 @@ export const BrowserAdvancedFields = memo<Props>(({ validate }) => {
             onChange={(event) =>
               handleInputChange({
                 value: event.target.checked,
-                configKey: ConfigKeys.IGNORE_HTTPS_ERRORS,
+                configKey: ConfigKey.IGNORE_HTTPS_ERRORS,
               })
             }
           />
@@ -179,11 +179,11 @@ export const BrowserAdvancedFields = memo<Props>(({ validate }) => {
         >
           <EuiSelect
             options={requestMethodOptions}
-            value={fields[ConfigKeys.SCREENSHOTS]}
+            value={fields[ConfigKey.SCREENSHOTS]}
             onChange={(event) =>
               handleInputChange({
                 value: event.target.value,
-                configKey: ConfigKeys.SCREENSHOTS,
+                configKey: ConfigKey.SCREENSHOTS,
               })
             }
             data-test-subj="syntheticsBrowserScreenshots"
@@ -205,10 +205,8 @@ export const BrowserAdvancedFields = memo<Props>(({ validate }) => {
           }
         >
           <ComboBox
-            selectedOptions={fields[ConfigKeys.SYNTHETICS_ARGS]}
-            onChange={(value) =>
-              handleInputChange({ value, configKey: ConfigKeys.SYNTHETICS_ARGS })
-            }
+            selectedOptions={fields[ConfigKey.SYNTHETICS_ARGS]}
+            onChange={(value) => handleInputChange({ value, configKey: ConfigKey.SYNTHETICS_ARGS })}
             data-test-subj="syntheticsBrowserSyntheticsArgs"
           />
         </EuiFormRow>

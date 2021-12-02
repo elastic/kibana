@@ -9,11 +9,11 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { EuiFieldNumber, EuiFlexGroup, EuiFlexItem, EuiSelect } from '@elastic/eui';
-import { ConfigKeys, ICustomFields, ScheduleUnit } from './types';
+import { ConfigKey, MonitorFields, ScheduleUnit } from './types';
 
 interface Props {
   number: string;
-  onChange: (schedule: ICustomFields[ConfigKeys.SCHEDULE]) => void;
+  onChange: (schedule: MonitorFields[ConfigKey.SCHEDULE]) => void;
   unit: ScheduleUnit;
 }
 
