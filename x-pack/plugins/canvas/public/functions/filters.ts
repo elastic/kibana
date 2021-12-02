@@ -8,9 +8,6 @@
 import { fromExpression } from '@kbn/interpreter/common';
 import { get } from 'lodash';
 import { pluginServices } from '../services';
-// @ts-expect-error untyped local
-import { getState } from '../state/store';
-import { getWorkpadVariablesAsObject } from '../state/selectors/workpad';
 import type { FiltersFunction } from '../../common/functions';
 import { buildFiltersFunction } from '../../common/functions';
 import { InitializeArguments } from '.';
@@ -50,7 +47,8 @@ export function filtersFunctionFactory(initialize: InitializeArguments): () => F
     if (filterList && filterList.length) {
       const filterExpression = filterList.join(' | ');
       const filterAST = fromExpression(filterExpression);
-      return expressions.interpretAst(filterAST, getWorkpadVariablesAsObject(getState()));
+      const { variables } = filtersService.getFiltersContext();
+      return expressions.interpretAst(filterAST, variables);
     } else {
       const filterType = initialize.types.filter;
       return filterType?.from(null, {});

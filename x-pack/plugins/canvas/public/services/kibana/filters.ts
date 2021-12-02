@@ -14,6 +14,7 @@
 import { KibanaPluginServiceFactory } from '../../../../../../src/plugins/presentation_util/public';
 // @ts-expect-error untyped local
 import { getState, getStore } from '../../state/store';
+import { State } from '../../../types';
 import { getGlobalFilters, getWorkpadVariablesAsObject } from '../../state/selectors/workpad';
 import { CanvasStartDeps } from '../../plugin';
 // @ts-expect-error untyped local
@@ -22,8 +23,8 @@ import { setFilter } from '../../state/actions/elements';
 export class FiltersService {
   constructor() {}
 
-  getFilters() {
-    return getGlobalFilters(getState());
+  getFilters(state: State = getState()) {
+    return getGlobalFilters(state);
   }
 
   updateFilter(filterId: string, filterExpression: string) {
@@ -31,8 +32,8 @@ export class FiltersService {
     dispatch(setFilter(filterExpression, filterId, true));
   }
 
-  getFiltersContext() {
-    const variables = getWorkpadVariablesAsObject(getState());
+  getFiltersContext(state: State = getState()) {
+    const variables = getWorkpadVariablesAsObject(state);
     return { variables };
   }
 }

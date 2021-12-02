@@ -9,13 +9,17 @@ import { fromExpression } from '@kbn/interpreter/common';
 import { shallowEqual, useSelector } from 'react-redux';
 import { State } from '../../../../types';
 import { adaptCanvasFilter } from '../../../lib/filter_adapters';
-import { getGlobalFilters } from '../../../state/selectors/workpad';
+import { useFiltersService } from '../../../services';
 
 const extractExpressionAST = (filtersExpressions: string[]) =>
   fromExpression(filtersExpressions.join(' | '));
 
 export function useCanvasFilters() {
-  const filterExpressions = useSelector((state: State) => getGlobalFilters(state), shallowEqual);
+  const filtersService = useFiltersService();
+  const filterExpressions = useSelector(
+    (state: State) => filtersService.getFilters(state),
+    shallowEqual
+  );
   const expression = extractExpressionAST(filterExpressions);
   const filters = expression.chain.map(adaptCanvasFilter);
 
