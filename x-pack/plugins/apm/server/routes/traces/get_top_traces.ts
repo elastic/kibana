@@ -29,10 +29,8 @@ export interface TransactionGroup {
   agentName: AgentName;
 }
 
-export type TransactionGroupSetup = Setup;
-
 function getItemsWithRelativeImpact(
-  setup: TransactionGroupSetup,
+  setup: Setup,
   items: Array<{
     sum?: number | null;
     key: Key;

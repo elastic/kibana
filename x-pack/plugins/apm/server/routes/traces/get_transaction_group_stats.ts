@@ -5,22 +5,30 @@
  * 2.0.
  */
 
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
+import { Setup } from '../../lib/helpers/setup_request';
 import {
   AGENT_NAME,
+  PARENT_ID,
+  SERVICE_NAME,
   TRANSACTION_TYPE,
   TRANSACTION_NAME,
-  SERVICE_NAME,
+  TRANSACTION_ROOT,
 } from '../../../common/elasticsearch_fieldnames';
-import { asMutableArray } from '../../../common/utils/as_mutable_array';
-import { environmentQuery } from '../../../common/utils/environment_query';
-import { arrayUnionToCallable } from '../../../common/utils/array_union_to_callable';
-import { getDurationFieldForTransactions } from '../../lib/helpers/transactions';
-import { TransactionGroupSetup } from './get_top_traces';
-import { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
 import {
+  kqlQuery,
+  rangeQuery,
+  termQuery,
+} from '../../../../observability/server';
+import {
+  getDurationFieldForTransactions,
   getDocumentTypeFilterForTransactions,
   getProcessorEventForTransactions,
 } from '../../lib/helpers/transactions';
+import { asMutableArray } from '../../../common/utils/as_mutable_array';
+import { environmentQuery } from '../../../common/utils/environment_query';
+import { arrayUnionToCallable } from '../../../common/utils/array_union_to_callable';
 export interface TopTracesParams {
   environment: string;
   kuery: string;
@@ -28,13 +36,16 @@ export interface TopTracesParams {
   searchAggregatedTransactions: boolean;
   start: number;
   end: number;
-  setup: TransactionGroupSetup;
+  setup: Setup;
 }
 
 type BucketKey = Record<typeof TRANSACTION_NAME | typeof SERVICE_NAME, string>;
 
 function getESParams<
-  TAggregationMap extends Record<string, AggregationsAggregationContainer>
+  TAggregationMap extends Record<
+    string,
+    estypes.AggregationsAggregationContainer
+  >
 >(TopTracesParams: TopTracesParams, aggs: TAggregationMap) {
   const {
     searchAggregatedTransactions,
@@ -70,7 +81,7 @@ function getESParams<
                   },
                 ]
               : []),
-          ] as QueryDslQueryContainer[],
+          ] as estypes.QueryDslQueryContainer[],
           must_not: [
             ...(!searchAggregatedTransactions
               ? [
