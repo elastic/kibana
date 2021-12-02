@@ -48,4 +48,4 @@ export interface ManifestLocation {
   status: string;
 }
 
-export type ServiceLocations = Array<{ id: string; label: string; geo: LocationGeo }>;
+export type ServiceLocations = Array<{ id: string; label: string; geo: LocationGeo; url: string }>;

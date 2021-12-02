@@ -308,6 +308,22 @@ describe('useBarChartsHooks', () => {
               tags: {
                 type: 'yaml',
               },
+              'throttling.download_speed': {
+                type: 'text',
+                value: '""',
+              },
+              'throttling.upload_speed': {
+                type: 'text',
+                value: '""',
+              },
+              'throttling.latency': {
+                type: 'text',
+                value: '""',
+              },
+              'throttling.config': {
+                type: 'text',
+                value: '""',
+              },
             },
           },
         ],
@@ -593,6 +609,7 @@ describe('useBarChartsHooks', () => {
       validate,
       monitorType: DataStream.BROWSER,
     };
+
     const { result, rerender, waitFor } = renderHook((props) => useUpdatePolicy(props), {
       initialProps,
     });
@@ -613,6 +630,9 @@ describe('useBarChartsHooks', () => {
       [ConfigKey.SOURCE_ZIP_PASSWORD]: 'password',
       [ConfigKey.SCREENSHOTS]: 'off',
       [ConfigKey.SYNTHETICS_ARGS]: ['args'],
+      [ConfigKey.DOWNLOAD_SPEED]: '13',
+      [ConfigKey.UPLOAD_SPEED]: '3',
+      [ConfigKey.LATENCY]: '7',
     };
 
     rerender({
@@ -642,6 +662,12 @@ describe('useBarChartsHooks', () => {
       );
       expect(vars?.[ConfigKey.APM_SERVICE_NAME].value).toEqual(config[ConfigKey.APM_SERVICE_NAME]);
       expect(vars?.[ConfigKey.TIMEOUT].value).toEqual(`${config[ConfigKey.TIMEOUT]}s`);
+
+      expect(vars?.[ConfigKey.THROTTLING_CONFIG].value).toEqual(
+        `${config[ConfigKey.DOWNLOAD_SPEED]}d/${config[ConfigKey.UPLOAD_SPEED]}u/${
+          config[ConfigKey.LATENCY]
+        }l`
+      );
 
       expect(onChange).toBeCalledWith({
         isValid: false,

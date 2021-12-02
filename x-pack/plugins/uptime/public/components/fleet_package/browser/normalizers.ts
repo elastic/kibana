@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { BrowserFields, ConfigKey } from '../types';
+import {
+  BrowserFields,
+  ConfigKey,
+  ThrottlingSuffix,
+  ThrottlingConfigKey,
+  configKeyToThrottlingSuffix,
+} from '../types';
 import {
   Normalizer,
   commonNormalizers,
@@ -30,6 +36,35 @@ export const getBrowserJsonToJavascriptNormalizer = (key: ConfigKey) => {
   return getJsonToJavascriptNormalizer(key, defaultBrowserFields);
 };
 
+export function throttlingToParameterNormalizer(
+  suffix: ThrottlingSuffix,
+  throttlingConfigValue?: string
+): unknown {
+  if (!throttlingConfigValue || throttlingConfigValue === 'false') return null;
+  return (
+    throttlingConfigValue
+      .split('/')
+      .filter((p) => p.endsWith(suffix))[0]
+      ?.slice(0, -1) ?? null
+  );
+}
+
+export const isThrottlingEnabledNormalizer: Normalizer = function isThrottlingEnabledNormalizer(
+  fields
+) {
+  const throttlingEnabled = fields?.[ConfigKeys.THROTTLING_CONFIG]?.value;
+
+  // If we have any value that's not an explicit "false" it means throttling is "on"
+  return throttlingEnabled !== 'false';
+};
+
+export function getThrottlingParamNormalizer(key: ThrottlingConfigKey): Normalizer {
+  const paramSuffix = configKeyToThrottlingSuffix[key];
+  return (fields) =>
+    throttlingToParameterNormalizer(paramSuffix, fields?.[ConfigKeys.THROTTLING_CONFIG]?.value) ??
+    defaultBrowserFields[key];
+}
+
 export const browserNormalizers: BrowserNormalizerMap = {
   [ConfigKey.METADATA]: getBrowserJsonToJavascriptNormalizer(ConfigKey.METADATA),
   [ConfigKey.SOURCE_ZIP_URL]: getBrowserNormalizer(ConfigKey.SOURCE_ZIP_URL),
@@ -41,6 +76,11 @@ export const browserNormalizers: BrowserNormalizerMap = {
   [ConfigKey.PARAMS]: getBrowserNormalizer(ConfigKey.PARAMS),
   [ConfigKey.SCREENSHOTS]: getBrowserNormalizer(ConfigKey.SCREENSHOTS),
   [ConfigKey.SYNTHETICS_ARGS]: getBrowserJsonToJavascriptNormalizer(ConfigKey.SYNTHETICS_ARGS),
+  [ConfigKey.IS_THROTTLING_ENABLED]: isThrottlingEnabledNormalizer,
+  [ConfigKey.DOWNLOAD_SPEED]: getThrottlingParamNormalizer(ConfigKeys.DOWNLOAD_SPEED),
+  [ConfigKey.UPLOAD_SPEED]: getThrottlingParamNormalizer(ConfigKeys.UPLOAD_SPEED),
+  [ConfigKey.LATENCY]: getThrottlingParamNormalizer(ConfigKeys.LATENCY),
+  [ConfigKey.THROTTLING_CONFIG]: getBrowserNormalizer(ConfigKeys.THROTTLING_CONFIG),
   [ConfigKey.ZIP_URL_TLS_CERTIFICATE_AUTHORITIES]: getBrowserJsonToJavascriptNormalizer(
     ConfigKey.ZIP_URL_TLS_CERTIFICATE_AUTHORITIES
   ),

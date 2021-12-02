@@ -6,13 +6,15 @@
  */
 
 import React from 'react';
-import { fireEvent } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { render } from '../../../lib/helper/rtl_helpers';
 import { BrowserAdvancedFields } from './advanced_fields';
 import {
   ConfigKey,
+  DataStream,
   BrowserAdvancedFields as BrowserAdvancedFieldsType,
   BrowserSimpleFields,
+  Validation,
 } from '../types';
 import {
   BrowserAdvancedFieldsContextProvider,
@@ -20,8 +22,13 @@ import {
   defaultBrowserAdvancedFields as defaultConfig,
   defaultBrowserSimpleFields,
 } from '../contexts';
+import { validate as centralValidation } from '../validation';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+
+const defaultValidation = centralValidation[DataStream.BROWSER];
 
 jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
+  ...jest.requireActual('@elastic/eui/lib/services/accessibility/html_id_generator'),
   htmlIdGenerator: () => () => `id-${Math.random()}`,
 }));
 
@@ -29,16 +36,20 @@ describe('<BrowserAdvancedFields />', () => {
   const WrappedComponent = ({
     defaultValues = defaultConfig,
     defaultSimpleFields = defaultBrowserSimpleFields,
+    validate = defaultValidation,
   }: {
     defaultValues?: BrowserAdvancedFieldsType;
     defaultSimpleFields?: BrowserSimpleFields;
+    validate?: Validation;
   }) => {
     return (
-      <BrowserSimpleFieldsContextProvider defaultValues={defaultSimpleFields}>
-        <BrowserAdvancedFieldsContextProvider defaultValues={defaultValues}>
-          <BrowserAdvancedFields />
-        </BrowserAdvancedFieldsContextProvider>
-      </BrowserSimpleFieldsContextProvider>
+      <IntlProvider locale="en">
+        <BrowserSimpleFieldsContextProvider defaultValues={defaultSimpleFields}>
+          <BrowserAdvancedFieldsContextProvider defaultValues={defaultValues}>
+            <BrowserAdvancedFields validate={validate} />
+          </BrowserAdvancedFieldsContextProvider>
+        </BrowserSimpleFieldsContextProvider>
+      </IntlProvider>
     );
   };
 
@@ -51,14 +62,14 @@ describe('<BrowserAdvancedFields />', () => {
     expect(syntheticsArgs).toBeInTheDocument();
   });
 
-  it('handles changing fields', () => {
-    const { getByLabelText } = render(<WrappedComponent />);
+  describe('handles changing fields', () => {
+    it('for screenshot options', () => {
+      const { getByLabelText } = render(<WrappedComponent />);
 
-    const screenshots = getByLabelText('Screenshot options') as HTMLInputElement;
-
-    fireEvent.change(screenshots, { target: { value: 'off' } });
-
-    expect(screenshots.value).toEqual('off');
+      const screenshots = getByLabelText('Screenshot options') as HTMLInputElement;
+      userEvent.selectOptions(screenshots, ['off']);
+      expect(screenshots.value).toEqual('off');
+    });
   });
 
   it('only displayed filter options when zip url is truthy', () => {

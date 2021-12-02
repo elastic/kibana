@@ -26,6 +26,11 @@ export const browserFormatters: BrowserFormatMap = {
   [ConfigKey.ZIP_URL_TLS_KEY]: null,
   [ConfigKey.ZIP_URL_TLS_KEY_PASSPHRASE]: null,
   [ConfigKey.ZIP_URL_TLS_VERIFICATION_MODE]: null,
+  [ConfigKey.IS_THROTTLING_ENABLED]: null,
+  [ConfigKey.THROTTLING_CONFIG]: null,
+  [ConfigKey.DOWNLOAD_SPEED]: null,
+  [ConfigKey.UPLOAD_SPEED]: null,
+  [ConfigKey.LATENCY]: null,
   [ConfigKey.ZIP_URL_TLS_VERSION]: (fields) =>
     arrayFormatter(fields[ConfigKey.ZIP_URL_TLS_VERSION]),
   [ConfigKey.JOURNEY_FILTERS_MATCH]: null,

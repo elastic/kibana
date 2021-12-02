@@ -36,3 +36,14 @@ export const contentTypesToMode = {
   [ContentType.TEXT]: Mode.PLAINTEXT,
   [ContentType.XML]: Mode.XML,
 };
+
+export type ThrottlingConfigKey =
+  | ConfigKeys.DOWNLOAD_SPEED
+  | ConfigKeys.UPLOAD_SPEED
+  | ConfigKeys.LATENCY;
+
+export const configKeyToThrottlingSuffix: Record<ThrottlingConfigKey, ThrottlingSuffix> = {
+  [ConfigKeys.DOWNLOAD_SPEED]: ThrottlingSuffix.DOWNLOAD,
+  [ConfigKeys.UPLOAD_SPEED]: ThrottlingSuffix.UPLOAD,
+  [ConfigKeys.LATENCY]: ThrottlingSuffix.LATENCY,
+};
