@@ -30,7 +30,6 @@ import { EuiIconAxisRight } from '../../assets/axis_right';
 import { EuiIconAxisTop } from '../../assets/axis_top';
 import { ToolbarButtonProps } from '../../../../../../src/plugins/kibana_react/public';
 import { validateExtent } from '../axes_configuration';
-import { defaultAxisLineColor } from '../color_assignment';
 
 type AxesSettingsConfigKeys = keyof AxesSettingsConfig;
 
@@ -322,7 +321,10 @@ export const AxisSettingsPopover: React.FunctionComponent<AxisSettingsPopoverPro
           compressed
           isClearable={true}
           onChange={(newColor) => updateColor(axis, newColor)}
-          color={color || defaultAxisLineColor}
+          placeholder={i18n.translate('xpack.lens.xyChart.axisColor.auto', {
+            defaultMessage: 'Auto',
+          })}
+          color={color}
           aria-label={axisColorLabel}
         />
       </EuiFormRow>

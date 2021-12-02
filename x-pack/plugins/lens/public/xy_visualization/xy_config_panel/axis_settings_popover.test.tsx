@@ -127,7 +127,7 @@ describe('Axes Settings', () => {
   describe('manipulating axis color', () => {
     it('starts on default axis color', () => {
       const component = shallow(<AxisSettingsPopover {...props} />);
-      expect(component.find(EuiColorPicker).prop('color')).toBe(defaultAxisLineColor);
+      expect(component.find(EuiColorPicker).prop('color')).toBeUndefined();
     });
 
     it('reports a new color choice', () => {

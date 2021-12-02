@@ -9,7 +9,6 @@ import { uniq, mapValues } from 'lodash';
 import type { PaletteOutput, PaletteRegistry } from 'src/plugins/charts/public';
 import type { Datatable } from 'src/plugins/expressions';
 import { euiLightVars } from '@kbn/ui-shared-deps-src/theme';
-import { LIGHT_THEME } from '@elastic/charts';
 import type { AccessorConfig, FramePublicAPI } from '../types';
 import { getColumnToLabelMap } from './state_helpers';
 import { FormatFactory, LayerType, layerTypes } from '../../common';
@@ -26,11 +25,6 @@ interface LayerColorConfig {
 }
 
 export const defaultReferenceLineColor = euiLightVars.euiColorDarkShade;
-export const {
-  axes: {
-    axisLine: { stroke: defaultAxisLineColor },
-  },
-} = LIGHT_THEME;
 
 export type ColorAssignments = Record<
   string,
