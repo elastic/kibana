@@ -28,8 +28,8 @@ import {
 import { expandFirstAlert } from '../../../tasks/alerts';
 import { waitForPageToBeLoaded } from '../../../tasks/common';
 import {
+  goToTheRuleDetailsOf,
   waitForRulesTableToBeLoaded,
-  goToRuleDetails,
 } from '../../../tasks/alerts_detection_rules';
 import { loginAndWaitForPage } from '../../../tasks/login';
 
@@ -75,7 +75,7 @@ describe('After an upgrade, the threshold rule', () => {
   before(() => {
     loginAndWaitForPage(DETECTIONS_RULE_MANAGEMENT_URL);
     waitForRulesTableToBeLoaded();
-    goToRuleDetails();
+    goToTheRuleDetailsOf(rule.name);
     waitForPageToBeLoaded();
   });
 
