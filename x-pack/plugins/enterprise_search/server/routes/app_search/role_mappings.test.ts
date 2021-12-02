@@ -19,7 +19,6 @@ const roleMappingBaseSchema = {
   roleType: 'owner',
   engines: ['e1', 'e2'],
   accessAllEngines: false,
-  authProvider: ['*'],
 };
 
 describe('role mappings routes', () => {

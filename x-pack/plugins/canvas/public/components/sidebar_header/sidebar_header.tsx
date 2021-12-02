@@ -48,6 +48,7 @@ const createHandlers = function <T>(
 
 interface Props {
   title: string;
+  showLayerControls?: boolean;
 }
 
 export const SidebarHeader: React.FC<Props> = (props) => {
