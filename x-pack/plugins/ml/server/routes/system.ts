@@ -247,4 +247,41 @@ export function systemRoutes(
       }
     })
   );
+
+  /**
+   * @apiGroup SystemRoutes
+   *
+   * @api {get} /api/ml/index_exists/<indexName> check if index exists
+   * @apiName MlSpecificIndexExists
+   * @apiDescription Returns boolean for if index exists
+   */
+  router.get(
+    {
+      path: '/api/ml/index_exists/{indexName}',
+      validate: {
+        params: schema.object({
+          /**
+           * index name
+           */
+          indexName: schema.string(),
+        }),
+      },
+      options: {
+        tags: ['access:ml:canAccessML'],
+      },
+    },
+    routeGuard.basicLicenseAPIGuard(async ({ client, request, response }) => {
+      try {
+        const { indexName } = request.params;
+        const { body } = await client.asCurrentUser.indices.exists({
+          index: indexName,
+        });
+        return response.ok({
+          body: { exists: body },
+        });
+      } catch (error) {
+        return response.customError(wrapError(error));
+      }
+    })
+  );
 }

@@ -125,25 +125,63 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
 
   const createKibanaIndexPattern = async () => {
     const dataViewName = destinationIndex;
+    let retryCount = 5;
 
     try {
-      await mlContext.dataViewsContract.createAndSave(
-        {
-          title: dataViewName,
-        },
-        false,
-        true
-      );
+      const interval = setInterval(async () => {
+        // Ran out of retry attempts
+        if (retryCount === 0) {
+          clearInterval(interval);
+          addRequestMessage({
+            error: 'No destination index check attempts left.',
+            message: i18n.translate(
+              'xpack.ml.dataframe.analytics.create.unableToCreateDataViewForDataFrameAnalyticsJob',
+              {
+                defaultMessage: 'Unable to create data view for:',
+              }
+            ),
+          });
+        }
 
-      addRequestMessage({
-        message: i18n.translate(
-          'xpack.ml.dataframe.analytics.create.createDataViewSuccessMessage',
-          {
-            defaultMessage: 'Kibana data view {dataViewName} created.',
-            values: { dataViewName },
+        try {
+          const resp = await ml.checkIndexExists(destinationIndex);
+          // Index exists - clear interval and create index pattern
+          if (resp && resp.exists) {
+            clearInterval(interval);
+            await mlContext.dataViewsContract.createAndSave(
+              {
+                title: dataViewName,
+              },
+              false,
+              true
+            );
+
+            addRequestMessage({
+              message: i18n.translate(
+                'xpack.ml.dataframe.analytics.create.createDataViewSuccessMessage',
+                {
+                  defaultMessage: 'Kibana data view {dataViewName} created.',
+                  values: { dataViewName },
+                }
+              ),
+            });
+          } else {
+            // Retry - index might not be created yet
+            retryCount -= 1;
           }
-        ),
-      });
+        } catch (e) {
+          clearInterval(interval);
+          addRequestMessage({
+            error: extractErrorMessage(e),
+            message: i18n.translate(
+              'xpack.ml.dataframe.analytics.create.errorCreatingDataViewForDataFrameAnalyticsJob',
+              {
+                defaultMessage: 'An error occurred creating the data view for:',
+              }
+            ),
+          });
+        }
+      }, 300);
     } catch (e) {
       if (e instanceof DuplicateDataViewError) {
         addRequestMessage({
