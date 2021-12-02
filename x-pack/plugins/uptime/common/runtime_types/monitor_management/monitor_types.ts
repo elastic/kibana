@@ -8,7 +8,6 @@
 import * as t from 'io-ts';
 import { ConfigKey } from './config_key';
 import {
-  DataStream,
   DataStreamCodec,
   ModeCodec,
   ResponseBodyIndexPolicyCodec,
