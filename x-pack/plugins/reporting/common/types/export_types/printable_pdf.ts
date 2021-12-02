@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { LayoutParams } from '../../lib/layouts';
-import { BaseParams, BasePayload } from '../../types';
+import type { LayoutParams } from '../layout';
+import type { BaseParams, BasePayload } from '../base';
 
 interface BaseParamsPDF {
   layout: LayoutParams;
@@ -17,6 +17,8 @@ interface BaseParamsPDF {
 // Job params: structure of incoming user request data, after being parsed from RISON
 export type JobParamsPDF = BaseParamsPDF & BaseParams;
 
+export type JobAppParamsPDF = Omit<JobParamsPDF, 'browserTimezone' | 'version'>;
+
 // Job payload: structure of stored job data provided by create_job
 export interface TaskPayloadPDF extends BasePayload {
   layout: LayoutParams;
@@ -24,8 +26,7 @@ export interface TaskPayloadPDF extends BasePayload {
   objects: Array<{ relativeUrl: string }>;
 }
 
-type Legacy = Omit<JobParamsPDF, 'relativeUrls'>;
-export interface JobParamsPDFLegacy extends Legacy {
+export interface JobParamsPDFLegacy extends Omit<JobParamsPDF, 'relativeUrls'> {
   savedObjectId: string;
   queryString: string;
 }

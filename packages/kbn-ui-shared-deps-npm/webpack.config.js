@@ -56,6 +56,7 @@ module.exports = (_, argv) => {
         '@babel/runtime/helpers/interopRequireDefault',
         '@babel/runtime/helpers/interopRequireWildcard',
         '@babel/runtime/helpers/objectSpread2',
+        '@babel/runtime/helpers/objectWithoutProperties',
         '@babel/runtime/helpers/objectWithoutPropertiesLoose',
         '@babel/runtime/helpers/slicedToArray',
         '@babel/runtime/helpers/toArray',
