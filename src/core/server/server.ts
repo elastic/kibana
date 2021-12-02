@@ -294,7 +294,7 @@ export class Server {
 
   public async start() {
     this.log.debug('starting server');
-    const startTransaction = apm.startTransaction('server-start', kibana-platform);
+    const startTransaction = apm.startTransaction('server-start', 'kibana-platform');
 
     const executionContextStart = this.executionContext.start();
     const elasticsearchStart = await this.elasticsearch.start();
