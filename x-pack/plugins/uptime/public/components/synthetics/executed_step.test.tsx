@@ -82,4 +82,19 @@ describe('ExecutedStep', () => {
     expect(getByText('Console output'));
     expect(getByText(browserConsole[0]));
   });
+
+  it('renders multi-line console output', () => {
+    const browserConsole = ['line1', 'line2', 'line3'];
+
+    const { getByText } = render(
+      <ExecutedStep browserConsoles={browserConsole} index={3} step={step} loading={false} />
+    );
+
+    expect(getByText('Console output'));
+
+    const codeBlock = getByText('line1 line2', { exact: false });
+    expect(codeBlock.innerHTML).toEqual(`line1
+line2
+line3`);
+  });
 });

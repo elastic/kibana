@@ -33,6 +33,8 @@ const values: { events: CrawlEvent[] } = {
       type: CrawlType.Full,
       crawlConfig: {
         domainAllowlist: ['https://www.elastic.co'],
+        seedUrls: [],
+        sitemapUrls: [],
       },
     },
     {
@@ -45,13 +47,15 @@ const values: { events: CrawlEvent[] } = {
       type: CrawlType.Full,
       crawlConfig: {
         domainAllowlist: ['https://www.elastic.co'],
+        seedUrls: [],
+        sitemapUrls: [],
       },
     },
   ],
 };
 
 const actions = {
-  fetchCrawlEvent: jest.fn(),
+  fetchCrawlRequest: jest.fn(),
   openFlyout: jest.fn(),
 };
 
@@ -83,7 +87,7 @@ describe('CrawlRequestsTable', () => {
       expect(crawlID.text()).toContain('618d0e66abe97bc688328900');
 
       crawlID.simulate('click');
-      expect(actions.fetchCrawlEvent).toHaveBeenCalledWith('618d0e66abe97bc688328900');
+      expect(actions.fetchCrawlRequest).toHaveBeenCalledWith('618d0e66abe97bc688328900');
       expect(actions.openFlyout).toHaveBeenCalled();
 
       const processCrawlID = shallow(columns[0].render('54325423aef7890543', { stage: 'process' }));

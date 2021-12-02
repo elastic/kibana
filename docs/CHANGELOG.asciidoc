@@ -404,7 +404,7 @@ Use spaces, cross-cluster replication, or cross-cluster search. To migrate to <<
 The logging configuration and log output format has changed. For more information, refer to {kibana-pull}112305[#112305].
 
 *Impact* +
-Use the new <<logging-configuration-migration,logging system>>. 
+Use the new <<logging-configuration, logging system configuration>>. 
 ====
 
 [float]

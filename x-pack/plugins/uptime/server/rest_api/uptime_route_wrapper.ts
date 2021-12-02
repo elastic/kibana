@@ -12,7 +12,7 @@ import { createUptimeESClient, inspectableEsQueriesMap } from '../lib/lib';
 import { KibanaResponse } from '../../../../../src/core/server/http/router';
 import { enableInspectEsQueries } from '../../../observability/common';
 
-export const uptimeRouteWrapper: UMKibanaRouteWrapper = (uptimeRoute) => ({
+export const uptimeRouteWrapper: UMKibanaRouteWrapper = (uptimeRoute, server) => ({
   ...uptimeRoute,
   options: {
     tags: ['access:uptime-read', ...(uptimeRoute?.writeAccess ? ['access:uptime-write'] : [])],
@@ -40,6 +40,7 @@ export const uptimeRouteWrapper: UMKibanaRouteWrapper = (uptimeRoute) => ({
       context,
       request,
       response,
+      server,
     });
 
     if (res instanceof KibanaResponse) {

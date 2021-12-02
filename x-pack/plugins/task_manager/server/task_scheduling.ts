@@ -99,9 +99,15 @@ export class TaskScheduling {
       ...options,
       taskInstance: ensureDeprecatedFieldsAreCorrected(taskInstance, this.logger),
     });
+
+    const traceparent =
+      agent.currentTransaction && agent.currentTransaction.type !== 'request'
+        ? agent.currentTraceparent
+        : '';
+
     return await this.store.schedule({
       ...modifiedTask,
-      traceparent: agent.currentTraceparent ?? '',
+      traceparent: traceparent || '',
     });
   }
 
