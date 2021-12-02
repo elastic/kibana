@@ -71,7 +71,7 @@ describe('RiskyHosts', () => {
     );
 
     expect(getByTestId('riskyHostsTotal').textContent).toEqual('2 Risky Hosts');
-    expect(getByTestId('riskyHostsCriticalQuantity').textContent).toEqual('1 hosts');
-    expect(getByTestId('riskyHostsHighQuantity').textContent).toEqual('1 hosts');
+    expect(getByTestId('riskyHostsCriticalQuantity').textContent).toEqual('1 host');
+    expect(getByTestId('riskyHostsHighQuantity').textContent).toEqual('1 host');
   });
 });

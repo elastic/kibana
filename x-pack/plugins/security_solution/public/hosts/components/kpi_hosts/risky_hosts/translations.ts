@@ -9,15 +9,34 @@ import { i18n } from '@kbn/i18n';
 
 export const HOSTS_COUNT = (quantity: number) =>
   i18n.translate('xpack.securitySolution.kpiHosts.riskyHosts.hostsCount', {
-    defaultMessage: '{quantity} hosts',
+    defaultMessage: '{quantity} {quantity, plural, =1 {host} other {hosts}}',
     values: {
       quantity,
     },
   });
 
-export const RISKY_HOSTS = i18n.translate('xpack.securitySolution.kpiHosts.riskyHosts.label', {
-  defaultMessage: 'Risky Hosts',
-});
+export const RISKY_HOSTS_DESCRIPTION = (quantity: number, formattedQuantity: string) =>
+  i18n.translate('xpack.securitySolution.kpiHosts.riskyHosts.description', {
+    defaultMessage: '{formattedQuantity} Risky {quantity, plural, =1 {Host} other {Hosts}}',
+    values: {
+      formattedQuantity,
+      quantity,
+    },
+  });
+
+export const RISKY_HOSTS_TITLE = i18n.translate(
+  'xpack.securitySolution.kpiHosts.riskyHosts.title',
+  {
+    defaultMessage: 'Risky Hosts',
+  }
+);
+
+export const INSPECT_RISKY_HOSTS = i18n.translate(
+  'xpack.securitySolution.kpiHosts.riskyHosts.inspectTitle',
+  {
+    defaultMessage: 'KPI Risky Hosts',
+  }
+);
 
 export const ERROR_TITLE = i18n.translate(
   'xpack.securitySolution.kpiHosts.riskyHosts.errorMessage',

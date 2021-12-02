@@ -71,6 +71,10 @@ const StatusTitle = styled(EuiTitle)`
   text-transform: lowercase;
 `;
 
+const RiskScoreContainer = styled(EuiFlexItem)`
+  min-width: 80px;
+`;
+
 const RiskyHostsComponent: React.FC<{
   error: unknown;
   loading: boolean;
@@ -94,26 +98,22 @@ const RiskyHostsComponent: React.FC<{
         <EuiFlexGroup gutterSize={'none'}>
           <EuiFlexItem>
             <EuiTitle size="xxxs">
-              <h6>{i18n.RISKY_HOSTS}</h6>
+              <h6>{i18n.RISKY_HOSTS_TITLE}</h6>
             </EuiTitle>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            {data?.inspect && (
-              <InspectButton queryId={QUERY_ID} title={`KPI ${i18n.RISKY_HOSTS}`} />
-            )}
+            {data?.inspect && <InspectButton queryId={QUERY_ID} title={i18n.INSPECT_RISKY_HOSTS} />}
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiFlexGroup>
           <EuiFlexItem>
             <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
               <EuiFlexItem grow={false}>
-                <EuiIcon type={'alert'} color={euiLightVars.euiColorDarkestShade} size="l" />
+                <EuiIcon type="alert" color={euiLightVars.euiColorDarkestShade} size="l" />
               </EuiFlexItem>
               <EuiFlexItem>
                 <StatusTitle className="eui-textTruncate" data-test-subj="riskyHostsTotal">
-                  <p>
-                    {(totalCount ?? 0).toLocaleString()} {i18n.RISKY_HOSTS}
-                  </p>
+                  <p>{i18n.RISKY_HOSTS_DESCRIPTION(totalCount, totalCount.toLocaleString())}</p>
                 </StatusTitle>
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -123,9 +123,9 @@ const RiskyHostsComponent: React.FC<{
         <EuiFlexGroup direction="column" gutterSize="l" responsive={false}>
           <EuiFlexItem>
             <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-              <EuiFlexItem style={{ minWidth: '80px' }} grow={false}>
+              <RiskScoreContainer grow={false}>
                 <HostRisk severity={HostRiskSeverity.critical} />
-              </EuiFlexItem>
+              </RiskScoreContainer>
               <EuiFlexItem>
                 <HostCount size="m" data-test-subj="riskyHostsCriticalQuantity">
                   {i18n.HOSTS_COUNT(criticalRiskCount)}
@@ -135,9 +135,9 @@ const RiskyHostsComponent: React.FC<{
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-              <EuiFlexItem style={{ minWidth: '80px' }} grow={false}>
+              <RiskScoreContainer grow={false}>
                 <HostRisk severity={HostRiskSeverity.high} />
-              </EuiFlexItem>
+              </RiskScoreContainer>
               <EuiFlexItem>
                 <HostCount size="m" data-test-subj="riskyHostsHighQuantity">
                   {i18n.HOSTS_COUNT(hightlRiskCount)}
