@@ -343,7 +343,7 @@ const destLoggingDeprecation: ConfigDeprecation = (
     addDeprecation({
       configPath: 'logging.dest',
       level: 'critical',
-      documentationUrl: `https://www.elastic.co/guide/en/kibana/7.16/logging-settings.html#log-to-file-example`,
+      documentationUrl: `https://www.elastic.co/guide/en/kibana/${branch}/logging-settings.html#log-to-file-example`,
       title: i18n.translate('core.deprecations.loggingDest.deprecationTitle', {
         defaultMessage: `Setting "logging.dest" is deprecated`,
       }),
@@ -375,7 +375,7 @@ const quietLoggingDeprecation: ConfigDeprecation = (
     addDeprecation({
       configPath: 'logging.quiet',
       level: 'critical',
-      documentationUrl: `https://www.elastic.co/guide/en/kibana/7.16/logging-service.html#log-level`,
+      documentationUrl: `https://www.elastic.co/guide/en/kibana/${branch}/logging-service.html#log-level`,
       title: i18n.translate('core.deprecations.loggingQuiet.deprecationTitle', {
         defaultMessage: `Setting "logging.quiet" is deprecated`,
       }),
@@ -406,7 +406,7 @@ const silentLoggingDeprecation: ConfigDeprecation = (
     addDeprecation({
       configPath: 'logging.silent',
       level: 'critical',
-      documentationUrl: `https://www.elastic.co/guide/en/kibana/7.16/logging-service.html#log-level`,
+      documentationUrl: `https://www.elastic.co/guide/en/kibana/${branch}/logging-service.html#log-level`,
       title: i18n.translate('core.deprecations.loggingSilent.deprecationTitle', {
         defaultMessage: `Setting "logging.silent" is deprecated`,
       }),
@@ -437,7 +437,7 @@ const verboseLoggingDeprecation: ConfigDeprecation = (
     addDeprecation({
       configPath: 'logging.verbose',
       level: 'critical',
-      documentationUrl: `https://www.elastic.co/guide/en/kibana/7.16/logging-service.html#log-level`,
+      documentationUrl: `https://www.elastic.co/guide/en/kibana/${branch}/logging-service.html#log-level`,
       title: i18n.translate('core.deprecations.loggingVerbose.deprecationTitle', {
         defaultMessage: `Setting "logging.verbose" is deprecated`,
       }),
@@ -472,7 +472,7 @@ const jsonLoggingDeprecation: ConfigDeprecation = (
     addDeprecation({
       configPath: 'logging.json',
       level: 'critical',
-      documentationUrl: `https://www.elastic.co/guide/en/kibana/7.16/logging-service.html#json-layout`,
+      documentationUrl: `https://www.elastic.co/guide/en/kibana/${branch}/logging-service.html#json-layout`,
       title: i18n.translate('core.deprecations.loggingJson.deprecationTitle', {
         defaultMessage: `Setting "logging.json" is deprecated`,
       }),
@@ -505,7 +505,7 @@ const logRotateDeprecation: ConfigDeprecation = (
     addDeprecation({
       configPath: 'logging.rotate',
       level: 'critical',
-      documentationUrl: `https://www.elastic.co/guide/en/kibana/7.16/logging-service.html#rolling-file-appender`,
+      documentationUrl: `https://www.elastic.co/guide/en/kibana/${branch}/logging-service.html#rolling-file-appender`,
       title: i18n.translate('core.deprecations.loggingRotate.deprecationTitle', {
         defaultMessage: `Setting "logging.rotate" is deprecated`,
       }),
@@ -537,7 +537,7 @@ const logEventsLogDeprecation: ConfigDeprecation = (
     addDeprecation({
       configPath: 'logging.events.log',
       level: 'critical',
-      documentationUrl: `https://www.elastic.co/guide/en/kibana/7.16/logging-service.html#log-level`,
+      documentationUrl: `https://www.elastic.co/guide/en/kibana/${branch}/logging-service.html#log-level`,
       title: i18n.translate('core.deprecations.loggingEventsLog.deprecationTitle', {
         defaultMessage: `Setting "logging.events.log" is deprecated`,
       }),
@@ -568,7 +568,7 @@ const logEventsErrorDeprecation: ConfigDeprecation = (
     addDeprecation({
       configPath: 'logging.events.error',
       level: 'critical',
-      documentationUrl: `https://www.elastic.co/guide/en/kibana/7.16/logging-service.html#log-level`,
+      documentationUrl: `https://www.elastic.co/guide/en/kibana/${branch}/logging-service.html#log-level`,
       title: i18n.translate('core.deprecations.loggingEventsError.deprecationTitle', {
         defaultMessage: `Setting "logging.events.error" is deprecated`,
       }),
