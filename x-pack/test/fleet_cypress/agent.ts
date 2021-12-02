@@ -50,7 +50,7 @@ export class AgentManager extends Manager {
   public async startAgent() {
     this.log.info('Getting agent enrollment key');
     const { data: apiKeys } = await axios.get(
-      this.params.kibanaUrl + '/api/fleet/enrollment-api-keys',
+      this.params.kibanaUrl + '/api/fleet/enrollment_api_keys',
       this.requestOptions
     );
     const policy = apiKeys.items[1];

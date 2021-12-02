@@ -79,7 +79,9 @@ export const SETTINGS_API_ROUTES = {
 // App API routes
 export const APP_API_ROUTES = {
   CHECK_PERMISSIONS_PATTERN: `${API_ROOT}/check-permissions`,
-  GENERATE_SERVICE_TOKEN_PATTERN: `${API_ROOT}/service-tokens`,
+  GENERATE_SERVICE_TOKEN_PATTERN: `${API_ROOT}/service_tokens`,
+  // deprecated since 8.0
+  GENERATE_SERVICE_TOKEN_PATTERN_DEPRECATED: `${API_ROOT}/service-tokens`,
 };
 
 // Agent API routes
@@ -95,16 +97,23 @@ export const AGENT_API_ROUTES = {
   BULK_UNENROLL_PATTERN: `${API_ROOT}/agents/bulk_unenroll`,
   REASSIGN_PATTERN: `${API_ROOT}/agents/{agentId}/reassign`,
   BULK_REASSIGN_PATTERN: `${API_ROOT}/agents/bulk_reassign`,
-  STATUS_PATTERN: `${API_ROOT}/agent-status`,
+  STATUS_PATTERN: `${API_ROOT}/agent_status`,
+  // deprecated since 8.0
+  STATUS_PATTERN_DEPRECATED: `${API_ROOT}/agent-status`,
   UPGRADE_PATTERN: `${API_ROOT}/agents/{agentId}/upgrade`,
   BULK_UPGRADE_PATTERN: `${API_ROOT}/agents/bulk_upgrade`,
 };
 
 export const ENROLLMENT_API_KEY_ROUTES = {
-  CREATE_PATTERN: `${API_ROOT}/enrollment-api-keys`,
-  LIST_PATTERN: `${API_ROOT}/enrollment-api-keys`,
-  INFO_PATTERN: `${API_ROOT}/enrollment-api-keys/{keyId}`,
-  DELETE_PATTERN: `${API_ROOT}/enrollment-api-keys/{keyId}`,
+  CREATE_PATTERN: `${API_ROOT}/enrollment_api_keys`,
+  LIST_PATTERN: `${API_ROOT}/enrollment_api_keys`,
+  INFO_PATTERN: `${API_ROOT}/enrollment_api_keys/{keyId}`,
+  DELETE_PATTERN: `${API_ROOT}/enrollment_api_keys/{keyId}`,
+  // deprecated since 8.0
+  CREATE_PATTERN_DEPRECATED: `${API_ROOT}/enrollment-api-keys`,
+  LIST_PATTERN_DEPRECATED: `${API_ROOT}/enrollment-api-keys`,
+  INFO_PATTERN_DEPRECATED: `${API_ROOT}/enrollment-api-keys/{keyId}`,
+  DELETE_PATTERN_DEPRECATED: `${API_ROOT}/enrollment-api-keys/{keyId}`,
 };
 
 // Agents setup API routes
