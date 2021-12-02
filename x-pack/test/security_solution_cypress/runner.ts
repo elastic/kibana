@@ -120,7 +120,7 @@ export async function SecuritySolutionCypressUpgradeCliTestRunner({
   const log = getService('log');
   let command = '';
 
-  if (semver.gt(process.env.ORIGINAL_VERSION!, '7.10')) {
+  if (semver.gt(process.env.ORIGINAL_VERSION!, '7.10.0')) {
     command = 'cypress:run:upgrade';
   } else {
     command = 'cypress:run:upgrade:old';
