@@ -27,6 +27,7 @@ export const mockState: AppState = {
     alertFlyoutVisible: false,
     basePath: 'yyz',
     esKuery: '',
+    initialEsKuerySet: false,
     integrationsPopoverOpen: null,
     searchText: '',
     monitorId: '',

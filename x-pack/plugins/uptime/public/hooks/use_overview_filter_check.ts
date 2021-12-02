@@ -8,7 +8,7 @@
 import { useCallback } from 'react';
 import { useSelector } from 'react-redux';
 import { useLocation } from 'react-router-dom';
-import { getParsedParams } from '../lib/helper/parse_helpers';
+import { getParsedParams } from '../lib/helper/parse_search';
 import { esKueryInitialStatusSelector } from '../state/selectors';
 
 function hasFilters(search: string) {
@@ -16,6 +16,12 @@ function hasFilters(search: string) {
   return typeof parsed.filters !== 'undefined' && parsed.filters !== '';
 }
 
+/**
+ * Specifically designed for the overview page, this hook will create
+ * a function that the caller can use to run code only once the filter
+ * index pattern has been initialized. In the case where no filters are
+ * defined in the URL path, the check will pass and call the function.
+ */
 export function useOverviewFilterCheck() {
   const esKueryHasLoaded = useSelector(esKueryInitialStatusSelector);
   const { search } = useLocation();

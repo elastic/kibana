@@ -13,7 +13,7 @@ import { UptimeUrlParams, getSupportedUrlParams } from '../lib/helper';
 import { selectedFiltersSelector } from '../state/selectors';
 import { setSelectedFilters } from '../state/actions/selected_filters';
 import { getFiltersFromMap } from './use_selected_filters';
-import { getParsedParams } from '../lib/helper/parse_helpers';
+import { getParsedParams } from '../lib/helper/parse_search';
 
 export type GetUrlParams = () => UptimeUrlParams;
 export type UpdateUrlParams = (updatedParams: {
