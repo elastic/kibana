@@ -17,6 +17,7 @@ import { getClustersState } from './get_clusters_state';
 import { ElasticsearchResponse, ElasticsearchModifiedSource } from '../../../common/types/es';
 import { LegacyRequest } from '../../types';
 import { getNewIndexPatterns } from './get_index_patterns';
+import { Globals } from '../../static_globals';
 
 /**
  * This will fetch the cluster stats and cluster state as a single object per cluster.
@@ -45,9 +46,10 @@ function fetchClusterStats(req: LegacyRequest, clusterUuid: string) {
   const dataset = 'cluster_stats';
   const moduleType = 'elasticsearch';
   const indexPattern = getNewIndexPatterns({
-    req,
+    config: Globals.app.config,
     moduleType,
     dataset,
+    ccs: req.payload.ccs,
   });
 
   const config = req.server.config();

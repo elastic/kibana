@@ -10,6 +10,7 @@ import { LegacyRequest, Cluster, Bucket } from '../../types';
 import { createQuery } from '../create_query';
 import { KibanaClusterMetric } from '../metrics';
 import { getNewIndexPatterns } from '../cluster/get_index_patterns';
+import { Globals } from '../../static_globals';
 
 /*
  * Get high-level info for Kibanas in a set of clusters
@@ -33,7 +34,8 @@ export function getKibanasForClusters(req: LegacyRequest, clusters: Cluster[]) {
   const type = 'kibana_stats';
   const dataset = 'stats';
   const indexPatterns = getNewIndexPatterns({
-    req,
+    config: Globals.app.config,
+    ccs: req.payload.ccs,
     moduleType,
     dataset,
   });

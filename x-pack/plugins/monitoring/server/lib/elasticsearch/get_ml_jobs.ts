@@ -16,6 +16,7 @@ import { ML_SUPPORTED_LICENSES } from '../../../common/constants';
 import { ElasticsearchResponse, ElasticsearchSource } from '../../../common/types/es';
 import { LegacyRequest } from '../../types';
 import { getNewIndexPatterns } from '../cluster/get_index_patterns';
+import { Globals } from '../../static_globals';
 
 /*
  * Get a listing of jobs along with some metric data to use for the listing
@@ -50,7 +51,8 @@ export function getMlJobs(req: LegacyRequest) {
   const type = 'job_stats';
   const moduleType = 'elasticsearch';
   const indexPatterns = getNewIndexPatterns({
-    req,
+    config: Globals.app.config,
+    ccs: req.payload.ccs,
     moduleType,
     dataset,
   });
@@ -111,7 +113,8 @@ export function getMlJobsForCluster(req: LegacyRequest, cluster: ElasticsearchSo
     const dataset = 'ml_job';
     const moduleType = 'elasticsearch';
     const indexPatterns = getNewIndexPatterns({
-      req,
+      ccs: req.payload.ccs,
+      config: Globals.app.config,
       moduleType,
       dataset,
     });

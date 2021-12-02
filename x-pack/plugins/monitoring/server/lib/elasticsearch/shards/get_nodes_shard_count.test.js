@@ -7,6 +7,18 @@
 
 import { getNodesShardCount } from './get_nodes_shard_count';
 
+jest.mock('../../../static_globals', () => ({
+  Globals: {
+    app: {
+      config: {
+        ui: {
+          ccs: { enabled: true },
+        },
+      },
+    },
+  },
+}));
+
 describe('getNodeShardCount', () => {
   it('should return the shard count per node', async () => {
     const nodes = {

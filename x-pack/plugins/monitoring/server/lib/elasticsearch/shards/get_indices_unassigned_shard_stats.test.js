@@ -7,6 +7,18 @@
 
 import { getIndicesUnassignedShardStats } from './get_indices_unassigned_shard_stats';
 
+jest.mock('../../../static_globals', () => ({
+  Globals: {
+    app: {
+      config: {
+        ui: {
+          ccs: { enabled: true },
+        },
+      },
+    },
+  },
+}));
+
 describe('getIndicesUnassignedShardStats', () => {
   it('should return the unassigned shard stats for indices', async () => {
     const indices = {

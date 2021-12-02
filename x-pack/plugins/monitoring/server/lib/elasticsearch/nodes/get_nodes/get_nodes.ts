@@ -15,6 +15,7 @@ import { LISTING_METRICS_NAMES, LISTING_METRICS_PATHS } from './nodes_listing_me
 import { LegacyRequest } from '../../../../types';
 import { ElasticsearchModifiedSource } from '../../../../../common/types/es';
 import { getNewIndexPatterns } from '../../../cluster/get_index_patterns';
+import { Globals } from '../../../../static_globals';
 
 /* Run an aggregation on node_stats to get stat data for the selected time
  * range for all the active nodes.  Every option is a key to a configuration
@@ -67,7 +68,8 @@ export async function getNodes(
   const dataset = 'node_stats';
   const moduleType = 'elasticsearch';
   const indexPatterns = getNewIndexPatterns({
-    req,
+    config: Globals.app.config,
+    ccs: req.payload.ccs,
     moduleType,
     dataset,
   });

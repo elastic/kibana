@@ -11,6 +11,7 @@ import { ElasticsearchMetric } from '../../../metrics';
 import { createQuery } from '../../../create_query';
 import { LegacyRequest, Bucket } from '../../../../types';
 import { getNewIndexPatterns } from '../../../cluster/get_index_patterns';
+import { Globals } from '../../../../static_globals';
 
 export async function getNodeIds(
   req: LegacyRequest,
@@ -23,7 +24,8 @@ export async function getNodeIds(
   const dataset = 'node_stats';
   const moduleType = 'elasticsearch';
   const indexPattern = getNewIndexPatterns({
-    req,
+    config: Globals.app.config,
+    ccs: req.payload.ccs,
     moduleType,
     dataset,
   });

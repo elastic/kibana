@@ -14,15 +14,17 @@ import { ElasticsearchMetric } from '../metrics';
 import { ElasticsearchResponse } from '../../../common/types/es';
 import { LegacyRequest } from '../../types';
 import { getNewIndexPatterns } from './get_index_patterns';
+import { Globals } from '../../static_globals';
 
 // is this being used anywhere?  not called within the app
 export function getClusterLicense(req: LegacyRequest, clusterUuid: string) {
   const dataset = 'cluster_stats';
   const moduleType = 'elasticsearch';
   const indexPattern = getNewIndexPatterns({
-    req,
+    config: Globals.app.config,
     moduleType,
     dataset,
+    ccs: req.payload.ccs,
   });
 
   const params = {

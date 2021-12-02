@@ -13,6 +13,7 @@ import { calculateAvailability } from '../calculate_availability';
 import { LegacyRequest } from '../../types';
 import { ElasticsearchResponse } from '../../../common/types/es';
 import { getNewIndexPatterns } from '../cluster/get_index_patterns';
+import { Globals } from '../../static_globals';
 
 export function handleResponse(resp: ElasticsearchResponse) {
   const legacySource = resp.hits?.hits[0]?._source.kibana_stats;
@@ -36,7 +37,8 @@ export function getKibanaInfo(
 ) {
   const moduleType = 'kibana';
   const indexPatterns = getNewIndexPatterns({
-    req,
+    config: Globals.app.config,
+    ccs: req.payload.ccs,
     moduleType,
   });
   const params = {

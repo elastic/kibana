@@ -15,6 +15,7 @@ import { ElasticsearchMetric } from '../../metrics';
 import { LegacyRequest } from '../../../types';
 import { ElasticsearchModifiedSource } from '../../../../common/types/es';
 import { getNewIndexPatterns } from '../../cluster/get_index_patterns';
+import { Globals } from '../../../static_globals';
 
 async function getShardCountPerNode(req: LegacyRequest, cluster: ElasticsearchModifiedSource) {
   const config = req.server.config();
@@ -36,7 +37,8 @@ async function getShardCountPerNode(req: LegacyRequest, cluster: ElasticsearchMo
   const type = 'shards'; // legacy
   const moduleType = 'elasticsearch';
   const indexPattern = getNewIndexPatterns({
-    req,
+    config: Globals.app.config,
+    ccs: req.payload.ccs,
     moduleType,
     dataset,
   });

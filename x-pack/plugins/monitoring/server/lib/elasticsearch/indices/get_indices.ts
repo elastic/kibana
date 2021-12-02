@@ -20,6 +20,7 @@ import { getUnassignedShards } from '../shards';
 import { ElasticsearchResponse } from '../../../../common/types/es';
 import { LegacyRequest } from '../../../types';
 import { getNewIndexPatterns } from '../../cluster/get_index_patterns';
+import { Globals } from '../../../static_globals';
 
 export function handleResponse(
   resp: ElasticsearchResponse,
@@ -118,7 +119,8 @@ export function buildGetIndicesQuery(
   const type = 'index_stats'; // legacy
   const moduleType = 'elasticsearch';
   const indexPatterns = getNewIndexPatterns({
-    req,
+    config: Globals.app.config,
+    ccs: req.payload.ccs,
     dataset,
     moduleType,
   });

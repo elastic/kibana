@@ -21,6 +21,7 @@ import { calculateIndicesTotals } from './calculate_shard_stat_indices_totals';
 import { LegacyRequest } from '../../../types';
 import { ElasticsearchResponse, ElasticsearchModifiedSource } from '../../../../common/types/es';
 import { getNewIndexPatterns } from '../../cluster/get_index_patterns';
+import { Globals } from '../../../static_globals';
 
 export function handleResponse(
   resp: ElasticsearchResponse,
@@ -63,7 +64,8 @@ export function getShardStats(
   const type = 'shards'; // legacy
   const moduleType = 'elasticsearch';
   const indexPatterns = getNewIndexPatterns({
-    req,
+    config: Globals.app.config,
+    ccs: req.payload.ccs,
     moduleType,
     dataset,
   });

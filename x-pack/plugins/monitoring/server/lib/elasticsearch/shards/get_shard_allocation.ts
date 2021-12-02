@@ -14,6 +14,8 @@ import { ElasticsearchMetric } from '../../metrics';
 import { ElasticsearchResponse, ElasticsearchLegacySource } from '../../../../common/types/es';
 import { LegacyRequest } from '../../../types';
 import { getNewIndexPatterns } from '../../cluster/get_index_patterns';
+import { Globals } from '../../../static_globals';
+
 export function handleResponse(response: ElasticsearchResponse) {
   const hits = response.hits?.hits;
   if (!hits) {
@@ -103,7 +105,8 @@ export function getShardAllocation(
   const type = 'shards'; // legacy
   const moduleType = 'elasticsearch';
   const indexPatterns = getNewIndexPatterns({
-    req,
+    config: Globals.app.config,
+    ccs: req.payload.ccs,
     dataset,
     moduleType,
   });

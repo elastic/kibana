@@ -16,6 +16,7 @@ import { ElasticsearchMetric } from '../../metrics';
 import { ElasticsearchResponse } from '../../../../common/types/es';
 import { LegacyRequest } from '../../../types';
 import { getNewIndexPatterns } from '../../cluster/get_index_patterns';
+import { Globals } from '../../../static_globals';
 
 export function handleResponse(shardStats: any, indexUuid: string) {
   return (response: ElasticsearchResponse) => {
@@ -77,9 +78,10 @@ export function getIndexSummary(
   const type = 'index_stats'; // legacy
   const moduleType = 'elasticsearch';
   const indexPatterns = getNewIndexPatterns({
+    config: Globals.app.config,
     dataset,
     moduleType,
-    req,
+    ccs: req.payload.ccs,
   });
 
   const metric = ElasticsearchMetric.getMetricFields();

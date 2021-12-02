@@ -10,6 +10,7 @@ import { LogstashMetric } from '../metrics';
 import { LegacyRequest, PipelineVersion } from '../../types';
 import { ElasticsearchResponse } from '../../../common/types/es';
 import { getNewIndexPatterns } from '../cluster/get_index_patterns';
+import { Globals } from '../../static_globals';
 
 export async function getPipelineStateDocument({
   req,
@@ -26,7 +27,8 @@ export async function getPipelineStateDocument({
   const type = 'logstash_state';
   const moduleType = 'logstash';
   const indexPatterns = getNewIndexPatterns({
-    req,
+    config: Globals.app.config,
+    ccs: req.payload.ccs,
     moduleType,
     dataset,
   });

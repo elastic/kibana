@@ -17,6 +17,7 @@ import { KibanaMetric } from '../metrics';
 import { LegacyRequest } from '../../types';
 import { ElasticsearchResponse } from '../../../common/types/es';
 import { getNewIndexPatterns } from '../cluster/get_index_patterns';
+import { Globals } from '../../static_globals';
 
 interface Kibana {
   process?: {
@@ -66,7 +67,8 @@ export async function getKibanas(req: LegacyRequest, { clusterUuid }: { clusterU
   const type = 'kibana_stats';
   const dataset = 'stats';
   const indexPatterns = getNewIndexPatterns({
-    req,
+    config: Globals.app.config,
+    ccs: req.payload.ccs,
     moduleType,
     dataset,
   });

@@ -13,6 +13,7 @@ import { ElasticsearchResponse } from '../../../common/types/es';
 import { STANDALONE_CLUSTER_CLUSTER_UUID } from '../../../common/constants';
 import { standaloneClusterFilter } from '../standalone_clusters/standalone_cluster_query_filter';
 import { getNewIndexPatterns } from '../cluster/get_index_patterns';
+import { Globals } from '../../static_globals';
 
 export function handleResponse(resp: ElasticsearchResponse) {
   const legacyStats = resp.hits?.hits[0]?._source?.logstash_stats;
@@ -45,7 +46,8 @@ export function getNodeInfo(
   const dataset = 'node_stats';
   const moduleType = 'logstash';
   const indexPatterns = getNewIndexPatterns({
-    req,
+    config: Globals.app.config,
+    ccs: req.payload.ccs,
     moduleType,
     dataset,
   });

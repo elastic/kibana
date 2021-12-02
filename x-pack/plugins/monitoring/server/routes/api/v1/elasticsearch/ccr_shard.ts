@@ -16,6 +16,7 @@ import { getMetrics } from '../../../../lib/details/get_metrics';
 import { ElasticsearchResponse } from '../../../../../common/types/es';
 import { LegacyRequest } from '../../../../types';
 import { getNewIndexPatterns } from '../../../../lib/cluster/get_index_patterns';
+import { Globals } from '../../../../static_globals';
 
 function getFormattedLeaderIndex(leaderIndex: string) {
   let leader = leaderIndex;
@@ -102,7 +103,12 @@ export function ccrShardRoute(server: { route: (p: any) => void; config: () => {
       const shardId = req.params.shardId;
       const moduleType = 'elasticsearch';
       const dataset = 'ccr';
-      const esIndexPattern = getNewIndexPatterns({ req, moduleType, dataset });
+      const esIndexPattern = getNewIndexPatterns({
+        config: Globals.app.config,
+        ccs: req.payload.ccs,
+        moduleType,
+        dataset,
+      });
 
       const filters = [
         {

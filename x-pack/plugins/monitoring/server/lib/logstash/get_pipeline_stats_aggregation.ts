@@ -9,6 +9,7 @@ import { LegacyRequest, PipelineVersion } from '../../types';
 import { getNewIndexPatterns } from '../cluster/get_index_patterns';
 import { createQuery } from '../create_query';
 import { LogstashMetric } from '../metrics';
+import { Globals } from '../../static_globals';
 
 function scalarCounterAggregation(
   field: string,
@@ -112,7 +113,8 @@ function fetchPipelineLatestStats(
   const dataset = 'node_stats';
   const moduleType = 'logstash';
   const indexPatterns = getNewIndexPatterns({
-    req,
+    config: Globals.app.config,
+    ccs: req.payload.ccs,
     moduleType,
     dataset,
   });

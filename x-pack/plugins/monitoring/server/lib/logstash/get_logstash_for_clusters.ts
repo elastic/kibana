@@ -11,6 +11,7 @@ import { LOGSTASH } from '../../../common/constants';
 import { createQuery } from '../create_query';
 import { LogstashClusterMetric } from '../metrics';
 import { getNewIndexPatterns } from '../cluster/get_index_patterns';
+import { Globals } from '../../static_globals';
 
 const { MEMORY, PERSISTED } = LOGSTASH.QUEUE_TYPES;
 
@@ -48,7 +49,8 @@ export function getLogstashForClusters(
   const type = 'logstash_stats';
   const moduleType = 'logstash';
   const indexPatterns = getNewIndexPatterns({
-    req,
+    config: Globals.app.config,
+    ccs: req.payload.ccs,
     moduleType,
     dataset,
   });

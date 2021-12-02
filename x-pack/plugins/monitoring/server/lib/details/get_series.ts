@@ -20,6 +20,7 @@ import {
 } from '../../../common/constants';
 import { formatUTCTimestampForTimezone } from '../format_timezone';
 import { getNewIndexPatterns } from '../cluster/get_index_patterns';
+import { Globals } from '../../static_globals';
 
 type SeriesBucket = Bucket & { metric_mb_deriv?: { normalized_value: number } };
 
@@ -177,8 +178,9 @@ async function fetchSeries(
   }
 
   const indexPatterns = getNewIndexPatterns({
-    req,
+    config: Globals.app.config,
     moduleType,
+    ccs: req.payload.ccs,
   });
 
   const params = {

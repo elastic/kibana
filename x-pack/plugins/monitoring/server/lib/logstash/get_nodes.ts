@@ -12,6 +12,7 @@ import { LogstashMetric } from '../metrics';
 import { LegacyRequest } from '../../types';
 import { ElasticsearchResponse } from '../../../common/types/es';
 import { getNewIndexPatterns } from '../cluster/get_index_patterns';
+import { Globals } from '../../static_globals';
 
 interface Logstash {
   jvm?: {
@@ -70,7 +71,8 @@ export async function getNodes(req: LegacyRequest, { clusterUuid }: { clusterUui
   const moduleType = 'logstash';
 
   const indexPatterns = getNewIndexPatterns({
-    req,
+    config: Globals.app.config,
+    ccs: req.payload.ccs,
     moduleType,
     dataset,
   });

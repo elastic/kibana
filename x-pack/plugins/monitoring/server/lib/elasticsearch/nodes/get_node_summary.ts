@@ -25,6 +25,7 @@ import {
 } from '../../../../common/types/es';
 import { LegacyRequest } from '../../../types';
 import { getNewIndexPatterns } from '../../cluster/get_index_patterns';
+import { Globals } from '../../../static_globals';
 
 export function handleResponse(
   clusterState: ElasticsearchSource['cluster_state'],
@@ -120,7 +121,8 @@ export function getNodeSummary(
   const dataset = 'node_stats';
   const moduleType = 'elasticsearch';
   const indexPatterns = getNewIndexPatterns({
-    req,
+    config: Globals.app.config,
+    ccs: req.payload.ccs,
     dataset,
     moduleType,
   });
