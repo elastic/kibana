@@ -38,7 +38,7 @@ export async function getApiIntegrationConfig({ readConfigFile }: FtrConfigProvi
         '--xpack.uptime.unsafe.service.enabled=true',
         '--xpack.uptime.unsafe.service.password=test',
         '--xpack.uptime.unsafe.service.manifestUrl=http://test.com',
-        '--xpack.uptime.unsafe.service.username=user',
+        '--xpack.uptime.unsafe.service.username=localKibanaIntegrationTestsUser',
         `--xpack.securitySolution.enableExperimental=${JSON.stringify(['ruleRegistryEnabled'])}`,
       ],
     },

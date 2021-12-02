@@ -20,6 +20,7 @@ import {
   ScopedHistory,
 } from 'kibana/public';
 import ReactDOM from 'react-dom';
+import React from 'react';
 import { DataPlugin, IndexPatternsContract } from '../../../../src/plugins/data/public';
 import { LicensingPluginStart } from '../../licensing/public';
 import { checkLicense } from '../common/check_license';
@@ -32,6 +33,7 @@ import { SavedObjectsStart } from '../../../../src/plugins/saved_objects/public'
 import { GraphSavePolicy } from './types';
 import { graphRouter } from './router';
 import { SpacesApi } from '../../spaces/public';
+import { KibanaThemeProvider } from '../../../../src/plugins/kibana_react/public';
 
 /**
  * These are dependencies of the Graph app besides the base dependencies
@@ -69,7 +71,8 @@ export interface GraphDependencies {
 export type GraphServices = Omit<GraphDependencies, 'element' | 'history'>;
 
 export const renderApp = ({ history, element, ...deps }: GraphDependencies) => {
-  const { chrome, capabilities } = deps;
+  const { chrome, capabilities, core } = deps;
+  const { theme$ } = core.theme;
 
   if (!capabilities.graph.save) {
     chrome.setBadge({
@@ -107,7 +110,7 @@ export const renderApp = ({ history, element, ...deps }: GraphDependencies) => {
     window.dispatchEvent(new HashChangeEvent('hashchange'));
   });
 
-  const app = graphRouter(deps);
+  const app = <KibanaThemeProvider theme$={theme$}>{graphRouter(deps)}</KibanaThemeProvider>;
   ReactDOM.render(app, element);
   element.setAttribute('class', 'gphAppWrapper');
 
