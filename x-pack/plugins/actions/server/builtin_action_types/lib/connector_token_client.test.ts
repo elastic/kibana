@@ -50,7 +50,7 @@ describe('create()', () => {
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce(savedObjectCreateResult);
     const result = await connectorTokenClient.create({
       connectorId: '123',
-      expiresAt,
+      expiresAtMillis: expiresAt,
       token: 'testtokenvalue',
     });
     expect(result).toEqual({
@@ -207,7 +207,7 @@ describe('update()', () => {
       id: '1',
       tokenType: 'access_token',
       token: 'testtokenvalue',
-      expiresAt,
+      expiresAtMillis: expiresAt,
     });
     expect(result).toEqual({
       connectorId: '123',
@@ -247,7 +247,7 @@ describe('update()', () => {
         id: 'my-action',
         tokenType: 'access_token',
         token: 'testtokenvalue',
-        expiresAt,
+        expiresAtMillis: expiresAt,
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(`"Fail"`);
   });

@@ -58,6 +58,9 @@
       },
       "createdAt": {
         "type": "date"
+      },
+      "updatedAt": {
+        "type": "date"
       }
     }
   }

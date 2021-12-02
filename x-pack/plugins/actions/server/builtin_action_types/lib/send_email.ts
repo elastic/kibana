@@ -110,14 +110,16 @@ async function sendEmailWithExchange(
         await connectorTokenClient.create({
           connectorId,
           token: accessToken,
-          expiresAt: new Date(Date.now() + tokenResult.expiresIn).toISOString(),
+          // convert MS Exchange expiresIn from seconds to milliseconds
+          expiresAtMillis: new Date(Date.now() + tokenResult.expiresIn * 1000).toISOString(),
           tokenType: 'access_token',
         });
       } else {
         await connectorTokenClient.update({
           id: connectorToken.id!.toString(),
           token: accessToken,
-          expiresAt: new Date(Date.now() + tokenResult.expiresIn).toISOString(),
+          // convert MS Exchange expiresIn from seconds to milliseconds
+          expiresAtMillis: new Date(Date.now() + tokenResult.expiresIn * 1000).toISOString(),
           tokenType: 'access_token',
         });
       }

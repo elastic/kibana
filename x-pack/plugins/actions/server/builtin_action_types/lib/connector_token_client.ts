@@ -26,14 +26,14 @@ interface ConstructorOptions {
 interface CreateOptions {
   connectorId: string;
   token: string;
-  expiresAt: string;
+  expiresAtMillis: string;
   tokenType?: string;
 }
 
 export interface UpdateOptions {
   id: string;
   token: string;
-  expiresAt: string;
+  expiresAtMillis: string;
   tokenType?: string;
 }
 
@@ -58,7 +58,7 @@ export class ConnectorTokenClient {
   public async create({
     connectorId,
     token,
-    expiresAt,
+    expiresAtMillis,
     tokenType,
   }: CreateOptions): Promise<ConnectorToken> {
     const id = SavedObjectsUtils.generateId();
@@ -69,9 +69,10 @@ export class ConnectorTokenClient {
         {
           connectorId,
           token,
-          expiresAt,
+          expiresAt: expiresAtMillis,
           tokenType: tokenType ?? 'access_token',
           createdAt: new Date(createTime).toISOString(),
+          updatedAt: new Date(createTime).toISOString(),
         },
         { id }
       );
@@ -90,7 +91,12 @@ export class ConnectorTokenClient {
   /**
    * Update connector token
    */
-  public async update({ id, token, expiresAt, tokenType }: UpdateOptions): Promise<ConnectorToken> {
+  public async update({
+    id,
+    token,
+    expiresAtMillis,
+    tokenType,
+  }: UpdateOptions): Promise<ConnectorToken> {
     const { attributes, references, version } =
       await this.unsecuredSavedObjectsClient.get<ConnectorToken>(
         CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
@@ -104,9 +110,9 @@ export class ConnectorTokenClient {
         {
           ...attributes,
           token,
-          expiresAt,
+          expiresAt: expiresAtMillis,
           tokenType: tokenType ?? 'access_token',
-          createdAt: new Date(createTime).toISOString(),
+          updatedAt: new Date(createTime).toISOString(),
         },
         omitBy(
           {
@@ -151,7 +157,7 @@ export class ConnectorTokenClient {
             perPage: MAX_TOKENS_RETURNED,
             type: CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
             filter: `${CONNECTOR_TOKEN_SAVED_OBJECT_TYPE}.attributes.connectorId: "${connectorId}"${tokenTypeFilter}`,
-            sortField: 'createdAt',
+            sortField: 'updatedAt',
             sortOrder: 'desc',
           })
         ).saved_objects
