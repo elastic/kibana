@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import expect from '@kbn/expect';
 import { chunk } from 'lodash';
 import {
   ALERT_STATUS_ACTIVE,
@@ -270,6 +271,15 @@ export function ObservabilityAlertsCommonProvider({
     return actionsOverflowButtons[index] || null;
   };
 
+  const getAlertStatValue = async (testSubj: string) => {
+    const stat = await testSubjects.find(testSubj);
+    const title = await stat.findByCssSelector('.euiStat__title');
+    const count = await title.getVisibleText();
+    const value = Number.parseInt(count, 10);
+    expect(Number.isNaN(value)).to.be(false);
+    return value;
+  };
+
   return {
     getQueryBar,
     clearQueryBar,
@@ -307,5 +317,6 @@ export function ObservabilityAlertsCommonProvider({
     viewRuleDetailsButtonClick,
     viewRuleDetailsLinkClick,
     getAlertsFlyoutViewRuleDetailsLinkOrFail,
+    getAlertStatValue,
   };
 }
