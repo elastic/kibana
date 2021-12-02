@@ -43,20 +43,14 @@ export const selectExecutionContextSearch = createSelector(selectExecutionContex
   filters: res.filters,
 }));
 
-const selectDatasourceMap = (state: LensState, datasourceMap: DatasourceMap) => datasourceMap;
-
-const selectVisualizationMap = (
-  state: LensState,
-  datasourceMap: DatasourceMap,
-  visualizationMap: VisualizationMap
-) => visualizationMap;
-
-const selectExtractFilterReferences = (
-  state: LensState,
-  datasourceMap: DatasourceMap,
-  visualizationMap: VisualizationMap,
-  extractFilterReferences: FilterManager['extract']
-) => extractFilterReferences;
+const selectDependencies = (
+  _state: LensState,
+  dependencies: {
+    datasourceMap: DatasourceMap;
+    visualizationMap: VisualizationMap;
+    extractFilterReferences: FilterManager['extract'];
+  }
+) => dependencies;
 
 export const selectSavedObjectFormat = createSelector(
   [
@@ -66,9 +60,7 @@ export const selectSavedObjectFormat = createSelector(
     selectQuery,
     selectFilters,
     selectActiveDatasourceId,
-    selectDatasourceMap,
-    selectVisualizationMap,
-    selectExtractFilterReferences,
+    selectDependencies,
   ],
   (
     persistedDoc,
@@ -77,9 +69,7 @@ export const selectSavedObjectFormat = createSelector(
     query,
     filters,
     activeDatasourceId,
-    datasourceMap,
-    visualizationMap,
-    extractFilterReferences
+    { datasourceMap, visualizationMap, extractFilterReferences }
   ) => {
     const activeVisualization =
       visualization.state && visualization.activeId && visualizationMap[visualization.activeId];

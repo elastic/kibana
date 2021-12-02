@@ -208,6 +208,7 @@ export class LensPlugin {
         capabilities: coreStart.application.capabilities,
         coreHttp: coreStart.http,
         timefilter: plugins.data.query.timefilter.timefilter,
+        injectFilterReferences: plugins.data.query.filterManager.inject,
         expressionRenderer: plugins.expressions.ReactExpressionRenderer,
         documentToExpression: this.editorFrameService!.documentToExpression,
         visualizationMap,
