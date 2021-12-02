@@ -10,7 +10,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n-react';
-import { CoreSetup } from '../../services/core';
+import { CoreStart } from 'src/core/public';
 import { DashboardCloneModal } from './clone_modal';
 import { KibanaThemeProvider } from '../../services/kibana_react';
 
@@ -21,7 +21,7 @@ export interface ShowCloneModalProps {
     onTitleDuplicate: () => void
   ) => Promise<{ id?: string } | { error: Error }>;
   title: string;
-  theme$: CoreSetup['theme']['theme$'];
+  theme$: CoreStart['theme']['theme$'];
 }
 
 export function showCloneModal({ onClone, title, theme$ }: ShowCloneModalProps) {

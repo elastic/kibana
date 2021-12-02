@@ -398,9 +398,10 @@ export function DashboardTopNav({
         onHidePanelTitlesChange: (isChecked: boolean) => {
           dispatchDashboardStateChange(setHidePanelTitles(isChecked));
         },
+        theme$,
       });
     },
-    [dashboardAppState, dispatchDashboardStateChange]
+    [dashboardAppState, dispatchDashboardStateChange, theme$]
   );
 
   const showShare = useCallback(
