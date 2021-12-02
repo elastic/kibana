@@ -9,6 +9,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { CoreStart } from '../../../../../../src/core/public';
 import { StartDeps } from '../../plugin';
+import { KibanaThemeProvider } from '../../../../../../src/plugins/kibana_react/public';
 import {
   IEmbeddable,
   EmbeddableFactory,
@@ -43,10 +44,12 @@ const renderEmbeddableFactory = (core: CoreStart, plugins: StartDeps) => {
         style={{ width: '100%', height: '100%', cursor: 'auto' }}
       >
         <I18nContext>
-          <plugins.embeddable.EmbeddablePanel
-            embeddable={embeddableObject}
-            containerContext={embeddableContainerContext}
-          />
+          <KibanaThemeProvider theme$={core.theme.theme$}>
+            <plugins.embeddable.EmbeddablePanel
+              embeddable={embeddableObject}
+              containerContext={embeddableContainerContext}
+            />
+          </KibanaThemeProvider>
         </I18nContext>
       </div>
     );
