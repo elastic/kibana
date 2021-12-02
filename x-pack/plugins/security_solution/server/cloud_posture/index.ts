@@ -10,5 +10,6 @@ import * as routes from './routes';
 import type { SecuritySolutionPluginRouter } from '../types';
 
 export const createCSPRoutes = (router: SecuritySolutionPluginRouter, logger: Logger): void => {
+  routes.createFindingsRoute(router, logger);
   routes.getScoreRoute(router, logger);
 };
