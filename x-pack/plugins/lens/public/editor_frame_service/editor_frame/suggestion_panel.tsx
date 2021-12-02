@@ -53,7 +53,6 @@ import {
   selectIsFullscreenDatasource,
   selectSearchSessionId,
   selectActiveDatasourceId,
-  selectActiveData,
   selectDatasourceStates,
 } from '../../state_management';
 
@@ -185,7 +184,6 @@ export function SuggestionPanel({
 }: SuggestionPanelProps) {
   const dispatchLens = useLensDispatch();
   const activeDatasourceId = useLensSelector(selectActiveDatasourceId);
-  const activeData = useLensSelector(selectActiveData);
   const datasourceStates = useLensSelector(selectDatasourceStates);
   const existsStagedPreview = useLensSelector((state) => Boolean(state.lens.stagedPreview));
   const currentVisualization = useLensSelector(selectCurrentVisualization);
@@ -215,7 +213,7 @@ export function SuggestionPanel({
             ? visualizationMap[currentVisualization.activeId]
             : undefined,
           visualizationState: currentVisualization.state,
-          activeData,
+          activeData: frame.activeData,
         })
           .filter(
             ({
@@ -273,14 +271,15 @@ export function SuggestionPanel({
       currentStateExpression: newStateExpression,
       currentStateError: validationErrors,
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
+    frame,
     currentDatasourceStates,
     currentVisualization.state,
     currentVisualization.activeId,
     activeDatasourceId,
     datasourceMap,
     visualizationMap,
+    missingIndexPatterns.length,
   ]);
 
   const context: ExecutionContextSearch = useLensSelector(selectExecutionContextSearch);

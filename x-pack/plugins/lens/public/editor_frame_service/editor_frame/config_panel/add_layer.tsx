@@ -23,7 +23,7 @@ interface AddLayerButtonProps {
   visualization: Visualization;
   visualizationState: unknown;
   onAddLayerClick: (layerType: LayerType) => void;
-  layersMeta: Pick<FramePublicAPI, 'datasourceLayers' | 'activeData'>;
+  layersMeta: FramePublicAPI;
 }
 
 export function getLayerType(visualization: Visualization, state: unknown, layerId: string) {

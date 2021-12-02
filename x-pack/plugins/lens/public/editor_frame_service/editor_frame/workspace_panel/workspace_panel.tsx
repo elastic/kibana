@@ -132,7 +132,6 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   const activeDatasourceId = useLensSelector(selectActiveDatasourceId);
   const datasourceStates = useLensSelector(selectDatasourceStates);
 
-  const { datasourceLayers } = framePublicAPI;
   const [localState, setLocalState] = useState<WorkspaceState>({
     expressionBuildError: undefined,
     expandError: false,
@@ -175,8 +174,14 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
         visualization.state,
         framePublicAPI
       ),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [activeVisualization, visualization.state, activeDatasourceId, datasourceMap, datasourceStates]
+    [
+      framePublicAPI,
+      activeVisualization,
+      visualization.state,
+      activeDatasourceId,
+      datasourceMap,
+      datasourceStates,
+    ]
   );
 
   const expression = useMemo(() => {
@@ -187,7 +192,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
           visualizationState: visualization.state,
           datasourceMap,
           datasourceStates,
-          datasourceLayers,
+          datasourceLayers: framePublicAPI.datasourceLayers,
         });
 
         if (ast) {
@@ -199,7 +204,10 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
           return null;
         }
       } catch (e) {
-        const buildMessages = activeVisualization?.getErrorMessages(visualization.state);
+        const buildMessages = activeVisualization?.getErrorMessages(
+          visualization.state,
+          framePublicAPI
+        );
         const defaultMessage = {
           shortMessage: i18n.translate('xpack.lens.editorFrame.buildExpressionError', {
             defaultMessage: 'An unexpected error occurred while preparing the chart',
@@ -214,11 +222,11 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
       }
     }
   }, [
+    framePublicAPI,
     activeVisualization,
     visualization.state,
     datasourceMap,
     datasourceStates,
-    datasourceLayers,
     configurationValidationError?.length,
     missingRefsErrors.length,
   ]);
@@ -592,6 +600,8 @@ export const VisualizationWrapper = ({
     );
   }
 
+  console.log(localState)
+
   if (localState.expressionBuildError?.length) {
     const firstError = localState.expressionBuildError[0];
     return (
@@ -617,6 +627,7 @@ export const VisualizationWrapper = ({
       </EuiFlexGroup>
     );
   }
+  
 
   return (
     <div className="lnsExpressionRenderer">

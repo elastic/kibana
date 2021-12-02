@@ -187,7 +187,7 @@ export const validateDatasourceAndVisualization = (
   currentDatasourceState: unknown | null,
   currentVisualization: Visualization | null,
   currentVisualizationState: unknown | undefined,
-  frameAPI: Pick<FramePublicAPI, 'datasourceLayers'>
+  frameAPI: FramePublicAPI
 ): ErrorMessage[] | undefined => {
   const layersGroups = currentVisualizationState
     ? currentVisualization
@@ -210,7 +210,7 @@ export const validateDatasourceAndVisualization = (
     : undefined;
 
   const visualizationValidationErrors = currentVisualizationState
-    ? currentVisualization?.getErrorMessages(currentVisualizationState, frameAPI.datasourceLayers)
+    ? currentVisualization?.getErrorMessages(currentVisualizationState, frameAPI)
     : undefined;
 
   if (datasourceValidationErrors?.length || visualizationValidationErrors?.length) {

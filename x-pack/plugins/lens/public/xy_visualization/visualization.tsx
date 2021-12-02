@@ -608,12 +608,20 @@ export const getXyVisualization = ({
     toExpression(state, layers, paletteService, attributes),
   toPreviewExpression: (state, layers) => toPreviewExpression(state, layers, paletteService),
 
-  getErrorMessages(state, datasourceLayers) {
+  getErrorMessages(state, frame) {
+    const { datasourceLayers } = frame || {};
     // Data error handling below here
     const hasNoAccessors = ({ accessors }: XYLayerConfig) =>
       accessors == null || accessors.length === 0;
     const hasNoSplitAccessor = ({ splitAccessor, seriesType }: XYLayerConfig) =>
       seriesType.includes('percentage') && splitAccessor == null;
+    if (
+      frame?.activeData?.['5c14c18d-f01c-4a4b-bd25-e67b04ad33a1']?.rows?.[0]?.[
+        '29c8b6ae-3452-4d8b-9ebd-61f0808878b8X0'
+      ] == 1
+    ) {
+      return [{ shortMessage: 'what', longMessage: 'omg static value 1' }];
+    }
 
     const errors: Array<{
       shortMessage: string;

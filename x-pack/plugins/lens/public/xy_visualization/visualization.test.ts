@@ -1460,7 +1460,7 @@ describe('xy_visualization', () => {
               },
             ],
           },
-          frame.datasourceLayers
+          frame
         )
       ).toEqual([
         {
@@ -1516,7 +1516,7 @@ describe('xy_visualization', () => {
               },
             ],
           },
-          datasourceLayers
+          { ...frame, datasourceLayers }
         )
       ).toEqual([
         {
@@ -1572,7 +1572,7 @@ describe('xy_visualization', () => {
               },
             ],
           },
-          datasourceLayers
+          { ...frame, datasourceLayers }
         )
       ).toEqual([
         {

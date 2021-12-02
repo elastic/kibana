@@ -435,7 +435,7 @@ export interface OperationMetadata {
 
 export interface VisualizationConfigProps<T = unknown> {
   layerId: string;
-  frame: Pick<FramePublicAPI, 'datasourceLayers' | 'activeData'>;
+  frame: FramePublicAPI;
   state: T;
 }
 
@@ -499,7 +499,7 @@ interface VisualizationDimensionChangeProps<T> {
   layerId: string;
   columnId: string;
   prevState: T;
-  frame: Pick<FramePublicAPI, 'datasourceLayers' | 'activeData'>;
+  frame: FramePublicAPI;
 }
 
 /**
@@ -657,7 +657,7 @@ export interface Visualization<T = unknown> {
   /** Retrieve a list of supported layer types with initialization data */
   getSupportedLayers: (
     state?: T,
-    frame?: Pick<FramePublicAPI, 'datasourceLayers' | 'activeData'>
+    frame?: FramePublicAPI
   ) => Array<{
     type: LayerType;
     label: string;
@@ -752,7 +752,7 @@ export interface Visualization<T = unknown> {
    */
   getErrorMessages: (
     state: T,
-    datasourceLayers?: Record<string, DatasourcePublicAPI>
+    frame?: FramePublicAPI
   ) =>
     | Array<{
         shortMessage: string;
