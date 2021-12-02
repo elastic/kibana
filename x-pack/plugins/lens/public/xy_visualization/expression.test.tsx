@@ -2713,7 +2713,7 @@ describe('xy_expression', () => {
     });
 
     describe('axis colors', () => {
-      test('it should apply default axis colors', () => {
+      test('it should default axis colors to undefined', () => {
         const { data, args } = sampleArgs();
 
         args.axisColorSettings = undefined;
@@ -2723,8 +2723,11 @@ describe('xy_expression', () => {
         );
 
         const axes = component.find(Axis);
-        expect(axes.at(0).prop('style')?.axisLine?.stroke).toBe(defaultAxisLineColor);
-        expect(axes.at(1).prop('style')?.axisLine?.stroke).toBe(defaultAxisLineColor);
+        const [xAxisStyle, yLeftAxisStyle] = [axes.at(0).prop('style'), axes.at(1).prop('style')];
+        expect(xAxisStyle?.axisLine?.stroke).toBeUndefined();
+        expect(xAxisStyle?.axisTitle?.fill).toBeUndefined();
+        expect(yLeftAxisStyle?.axisLine?.stroke).toBeUndefined();
+        expect(yLeftAxisStyle?.axisTitle?.fill).toBeUndefined();
       });
 
       test('it should apply custom axis colors', () => {
@@ -2742,8 +2745,11 @@ describe('xy_expression', () => {
         );
 
         const axes = component.find(Axis);
-        expect(axes.at(0).prop('style')?.axisLine?.stroke).toBe(args.axisColorSettings.x);
-        expect(axes.at(1).prop('style')?.axisLine?.stroke).toBe(args.axisColorSettings.yLeft);
+        const [xAxisStyle, yLeftAxisStyle] = [axes.at(0).prop('style'), axes.at(1).prop('style')];
+        expect(xAxisStyle?.axisLine?.stroke).toBe(args.axisColorSettings.x);
+        expect(xAxisStyle?.axisTitle?.fill).toBe(args.axisColorSettings.x);
+        expect(yLeftAxisStyle?.axisLine?.stroke).toBe(args.axisColorSettings.yLeft);
+        expect(yLeftAxisStyle?.axisTitle?.fill).toBe(args.axisColorSettings.yLeft);
       });
     });
 

@@ -64,7 +64,7 @@ import { MULTILAYER_TIME_AXIS_STYLE } from '../../../../../src/plugins/charts/co
 import { EmptyPlaceholder } from '../shared_components';
 import { getFitOptions } from './fitting_functions';
 import { getAxesConfiguration, GroupsConfiguration, validateExtent } from './axes_configuration';
-import { defaultAxisLineColor, getColorAssignments } from './color_assignment';
+import { getColorAssignments } from './color_assignment';
 import { getXDomain, XyEndzones } from './x_domain';
 import { getLegendAction } from './get_legend_action';
 import {
@@ -239,6 +239,7 @@ export function XYChart({
     layers,
     fittingFunction,
     gridlinesVisibilitySettings,
+    axisColorSettings,
     valueLabels,
     hideEndzones,
     yLeftExtent,
@@ -311,15 +312,6 @@ export function XYChart({
     yRight: 0,
   };
 
-  const axisColorSettings = {
-    ...{
-      x: defaultAxisLineColor,
-      yLeft: defaultAxisLineColor,
-      yRight: defaultAxisLineColor,
-    },
-    ...args.axisColorSettings,
-  };
-
   const filteredBarLayers = filteredLayers.filter((layer) => layer.seriesType.includes('bar'));
 
   const chartHasMoreThanOneBarSeries =
@@ -385,9 +377,10 @@ export function XYChart({
                 inner: referenceLinePaddings[groupId],
               }
             : undefined,
+        fill: axisColorSettings?.[whichAxis],
       },
       axisLine: {
-        stroke: axisColorSettings[whichAxis],
+        stroke: axisColorSettings?.[whichAxis],
       },
     };
     return style;
@@ -587,6 +580,10 @@ export function XYChart({
         },
         axisTitle: {
           visible: axisTitlesVisibilitySettings.x,
+          fill: axisColorSettings?.x,
+        },
+        axisLine: {
+          stroke: axisColorSettings?.x,
         },
       }
     : {
@@ -604,12 +601,12 @@ export function XYChart({
             !tickLabelsVisibilitySettings?.x && referenceLinePaddings.bottom != null
               ? { inner: referenceLinePaddings.bottom }
               : undefined,
+          fill: axisColorSettings?.x,
+        },
+        axisLine: {
+          stroke: axisColorSettings?.x,
         },
       };
-
-  xAxisStyle.axisLine = {
-    stroke: axisColorSettings.x,
-  };
 
   return (
     <Chart ref={chartRef}>

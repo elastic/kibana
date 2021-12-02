@@ -138,7 +138,7 @@ describe('#toExpression', () => {
     });
   });
 
-  it('should populate axis colors with defaults', () => {
+  it('should populate axis colors with empty defaults', () => {
     const expression = xyVisualization.toExpression(
       {
         legend: { position: Position.Bottom, isVisible: true },
@@ -158,9 +158,9 @@ describe('#toExpression', () => {
       frame.datasourceLayers
     ) as Ast;
     expect((expression.chain[0].arguments.axisColorSettings[0] as Ast).chain[0].arguments).toEqual({
-      x: [defaultAxisLineColor],
-      yLeft: [defaultAxisLineColor],
-      yRight: [defaultAxisLineColor],
+      x: [],
+      yLeft: [],
+      yRight: [],
     });
   });
 

@@ -20,7 +20,6 @@ import { State, XYState, visualizationTypes } from './types';
 import type { SeriesType, XYLayerConfig } from '../../common/expressions';
 import { layerTypes } from '../../common';
 import { getIconForSeries } from './state_helpers';
-import { defaultAxisLineColor } from './color_assignment';
 
 const columnSortOrder = {
   document: 0,
@@ -541,11 +540,7 @@ function buildSuggestion({
       yLeft: true,
       yRight: true,
     },
-    axisColors: currentState?.axisColors || {
-      x: defaultAxisLineColor,
-      yLeft: defaultAxisLineColor,
-      yRight: defaultAxisLineColor,
-    },
+    axisColors: currentState?.axisColors,
     tickLabelsVisibilitySettings: currentState?.tickLabelsVisibilitySettings || {
       x: true,
       yLeft: true,

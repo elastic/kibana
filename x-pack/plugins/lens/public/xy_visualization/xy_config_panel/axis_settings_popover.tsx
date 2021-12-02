@@ -320,7 +320,7 @@ export const AxisSettingsPopover: React.FunctionComponent<AxisSettingsPopoverPro
       <EuiFormRow display="rowCompressed" fullWidth label={axisColorLabel}>
         <EuiColorPicker
           compressed
-          isClearable={false}
+          isClearable={true}
           onChange={(newColor) => updateColor(axis, newColor)}
           color={color || defaultAxisLineColor}
           aria-label={axisColorLabel}

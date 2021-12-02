@@ -17,9 +17,9 @@ export interface AxesSettingsConfig {
 }
 
 export interface AxesSettingsStringConfig {
-  x: string;
-  yLeft: string;
-  yRight: string;
+  x?: string;
+  yLeft?: string;
+  yRight?: string;
 }
 
 export interface AxisExtentConfig {

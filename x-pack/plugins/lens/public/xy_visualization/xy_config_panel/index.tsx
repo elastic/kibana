@@ -29,6 +29,7 @@ import {
   YAxisMode,
   AxesSettingsConfig,
   AxisExtentConfig,
+  AxesSettingsStringConfig,
 } from '../../../common/expressions';
 import { isHorizontalChart, isHorizontalSeries } from '../state_helpers';
 import { trackUiEvent } from '../../lens_ui_telemetry';
@@ -40,7 +41,6 @@ import { getScaleType } from '../to_expression';
 import { ColorPicker } from './color_picker';
 import { ReferenceLinePanel } from './reference_line_panel';
 import { PalettePicker, TooltipWrapper } from '../../shared_components';
-import { defaultAxisLineColor } from '../color_assignment';
 
 type UnwrapArray<T> = T extends Array<infer P> ? P : T;
 type AxesSettingsConfigKeys = keyof AxesSettingsConfig;
@@ -264,19 +264,18 @@ export const XyToolbar = memo(function XyToolbar(
     });
   };
 
-  const axisColors = {
-    x: state?.axisColors?.x ?? defaultAxisLineColor,
-    yLeft: state?.axisColors?.yLeft ?? defaultAxisLineColor,
-    yRight: state?.axisColors?.yRight ?? defaultAxisLineColor,
-  };
-
   const onAxisColorChanged = (axis: AxesSettingsConfigKeys, color: string): void => {
-    const newAxisColors = {
-      ...axisColors,
+    let newAxisColors: AxesSettingsStringConfig | undefined = {
+      ...state.axisColors,
       ...{
         [axis]: color,
       },
     };
+
+    if (!Object.values(newAxisColors).some(Boolean)) {
+      newAxisColors = undefined; // clean up
+    }
+
     setState({
       ...state,
       axisColors: newAxisColors,

@@ -56,9 +56,10 @@ exports[`xy_expression XYChart component it renders area 1`] = `
     style={
       Object {
         "axisLine": Object {
-          "stroke": "#eaeaea",
+          "stroke": undefined,
         },
         "axisTitle": Object {
+          "fill": undefined,
           "padding": undefined,
           "visible": true,
         },
@@ -93,9 +94,10 @@ exports[`xy_expression XYChart component it renders area 1`] = `
     style={
       Object {
         "axisLine": Object {
-          "stroke": "#eaeaea",
+          "stroke": undefined,
         },
         "axisTitle": Object {
+          "fill": undefined,
           "padding": undefined,
           "visible": true,
         },
@@ -293,9 +295,10 @@ exports[`xy_expression XYChart component it renders bar 1`] = `
     style={
       Object {
         "axisLine": Object {
-          "stroke": "#eaeaea",
+          "stroke": undefined,
         },
         "axisTitle": Object {
+          "fill": undefined,
           "padding": undefined,
           "visible": true,
         },
@@ -330,9 +333,10 @@ exports[`xy_expression XYChart component it renders bar 1`] = `
     style={
       Object {
         "axisLine": Object {
-          "stroke": "#eaeaea",
+          "stroke": undefined,
         },
         "axisTitle": Object {
+          "fill": undefined,
           "padding": undefined,
           "visible": true,
         },
@@ -544,9 +548,10 @@ exports[`xy_expression XYChart component it renders horizontal bar 1`] = `
     style={
       Object {
         "axisLine": Object {
-          "stroke": "#eaeaea",
+          "stroke": undefined,
         },
         "axisTitle": Object {
+          "fill": undefined,
           "padding": undefined,
           "visible": true,
         },
@@ -581,9 +586,10 @@ exports[`xy_expression XYChart component it renders horizontal bar 1`] = `
     style={
       Object {
         "axisLine": Object {
-          "stroke": "#eaeaea",
+          "stroke": undefined,
         },
         "axisTitle": Object {
+          "fill": undefined,
           "padding": undefined,
           "visible": true,
         },
@@ -795,9 +801,10 @@ exports[`xy_expression XYChart component it renders line 1`] = `
     style={
       Object {
         "axisLine": Object {
-          "stroke": "#eaeaea",
+          "stroke": undefined,
         },
         "axisTitle": Object {
+          "fill": undefined,
           "padding": undefined,
           "visible": true,
         },
@@ -832,9 +839,10 @@ exports[`xy_expression XYChart component it renders line 1`] = `
     style={
       Object {
         "axisLine": Object {
-          "stroke": "#eaeaea",
+          "stroke": undefined,
         },
         "axisTitle": Object {
+          "fill": undefined,
           "padding": undefined,
           "visible": true,
         },
@@ -1032,9 +1040,10 @@ exports[`xy_expression XYChart component it renders stacked area 1`] = `
     style={
       Object {
         "axisLine": Object {
-          "stroke": "#eaeaea",
+          "stroke": undefined,
         },
         "axisTitle": Object {
+          "fill": undefined,
           "padding": undefined,
           "visible": true,
         },
@@ -1069,9 +1078,10 @@ exports[`xy_expression XYChart component it renders stacked area 1`] = `
     style={
       Object {
         "axisLine": Object {
-          "stroke": "#eaeaea",
+          "stroke": undefined,
         },
         "axisTitle": Object {
+          "fill": undefined,
           "padding": undefined,
           "visible": true,
         },
@@ -1277,9 +1287,10 @@ exports[`xy_expression XYChart component it renders stacked bar 1`] = `
     style={
       Object {
         "axisLine": Object {
-          "stroke": "#eaeaea",
+          "stroke": undefined,
         },
         "axisTitle": Object {
+          "fill": undefined,
           "padding": undefined,
           "visible": true,
         },
@@ -1314,9 +1325,10 @@ exports[`xy_expression XYChart component it renders stacked bar 1`] = `
     style={
       Object {
         "axisLine": Object {
-          "stroke": "#eaeaea",
+          "stroke": undefined,
         },
         "axisTitle": Object {
+          "fill": undefined,
           "padding": undefined,
           "visible": true,
         },
@@ -1536,9 +1548,10 @@ exports[`xy_expression XYChart component it renders stacked horizontal bar 1`] =
     style={
       Object {
         "axisLine": Object {
-          "stroke": "#eaeaea",
+          "stroke": undefined,
         },
         "axisTitle": Object {
+          "fill": undefined,
           "padding": undefined,
           "visible": true,
         },
@@ -1573,9 +1586,10 @@ exports[`xy_expression XYChart component it renders stacked horizontal bar 1`] =
     style={
       Object {
         "axisLine": Object {
-          "stroke": "#eaeaea",
+          "stroke": undefined,
         },
         "axisTitle": Object {
+          "fill": undefined,
           "padding": undefined,
           "visible": true,
         },
