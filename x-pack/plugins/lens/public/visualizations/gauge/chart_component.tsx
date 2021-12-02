@@ -42,11 +42,14 @@ declare global {
   }
 }
 
-function normalizeColors({ colors, stops }: CustomPaletteState, min: number) {
+function normalizeColors({ colors, stops, range }: CustomPaletteState, min: number) {
   if (!colors) {
     return;
   }
-  const colorsOutOfRangeSmaller = Math.max(stops.filter((stop, i) => stop < min).length, 0);
+  const colorsOutOfRangeSmaller = Math.max(
+    stops.filter((stop, i) => (range === 'percent' ? stop < 0 : stop < min)).length,
+    0
+  );
   return colors.slice(colorsOutOfRangeSmaller);
 }
 
@@ -99,20 +102,19 @@ function getTicks(
   range: [number, number],
   colorBands?: number[]
 ) {
-  if (ticksPosition === GaugeTicksPositions.auto) {
-    const TICKS_NO = 3;
-    const min = Math.min(...(colorBands || []), ...range);
-    const max = Math.max(...(colorBands || []), ...range);
-    const step = (max - min) / TICKS_NO;
-    return [
-      ...Array(TICKS_NO)
-        .fill(null)
-        .map((_, i) => Number((min + step * i).toFixed(2))),
-      max,
-    ];
-  } else {
+  if (ticksPosition === GaugeTicksPositions.bands && colorBands) {
     return colorBands && getTicksLabels(colorBands);
   }
+  const TICKS_NO = 3;
+  const min = Math.min(...(colorBands || []), ...range);
+  const max = Math.max(...(colorBands || []), ...range);
+  const step = (max - min) / TICKS_NO;
+  return [
+    ...Array(TICKS_NO)
+      .fill(null)
+      .map((_, i) => Number((min + step * i).toFixed(2))),
+    max,
+  ];
 }
 
 export const GaugeComponent: FC<GaugeRenderProps> = ({

@@ -305,6 +305,7 @@ export const getGaugeVisualization = ({
       delete update.metricAccessor;
       delete update.palette;
       delete update.colorMode;
+      update.ticksPosition = 'auto';
     }
 
     return update;

@@ -317,6 +317,7 @@ describe('gauge', () => {
       minAccessor: 'min-accessor',
       palette: [] as unknown as PaletteOutput<CustomPaletteParams>,
       colorMode: 'palette',
+      ticksPosition: 'bands',
     };
     test('removes metricAccessor correctly', () => {
       expect(
@@ -348,6 +349,7 @@ describe('gauge', () => {
         metricAccessor: 'metric-accessor',
         palette: [] as unknown as PaletteOutput<CustomPaletteParams>,
         colorMode: 'palette',
+        ticksPosition: 'bands',
       });
     });
   });

@@ -255,6 +255,62 @@ describe('GaugeComponent', function () {
       expect(goal.prop('ticks')).toEqual([0, 1, 2, 3, 10]);
       expect(goal.prop('bands')).toEqual([0, 1, 2, 3, 10]);
     });
+    it('sets proper color bands and ticks on color bands if palette steps are smaller than minimum', () => {
+      const palette = {
+        type: 'palette' as const,
+        name: 'custom',
+        params: {
+          colors: ['#aaa', '#bbb', '#ccc'],
+          gradient: false,
+          stops: [-10, -5, 0] as unknown as ColorStop[],
+          range: 'number',
+          rangeMin: 0,
+          rangeMax: 4,
+        },
+      };
+      const customProps = {
+        ...wrapperProps,
+        args: {
+          ...wrapperProps.args,
+          metricAccessor: 'metric-accessor',
+          minAccessor: 'min-accessor',
+          maxAccessor: 'max-accessor',
+          palette,
+          ticksPosition: 'bands',
+        },
+      } as GaugeRenderProps;
+      const goal = shallowWithIntl(<GaugeComponent {...customProps} />).find(Goal);
+      expect(goal.prop('ticks')).toEqual([0, 10]);
+      expect(goal.prop('bands')).toEqual([0, 10]);
+    });
+    it('sets proper color bands and ticks on color bands if percent palette steps are smaller than 0', () => {
+      const palette = {
+        type: 'palette' as const,
+        name: 'custom',
+        params: {
+          colors: ['#aaa', '#bbb', '#ccc'],
+          gradient: false,
+          stops: [-20, -60, 80],
+          range: 'percent',
+          rangeMin: 0,
+          rangeMax: 4,
+        },
+      };
+      const customProps = {
+        ...wrapperProps,
+        args: {
+          ...wrapperProps.args,
+          metricAccessor: 'metric-accessor',
+          minAccessor: 'min-accessor',
+          maxAccessor: 'max-accessor',
+          palette,
+          ticksPosition: 'bands',
+        },
+      } as GaugeRenderProps;
+      const goal = shallowWithIntl(<GaugeComponent {...customProps} />).find(Goal);
+      expect(goal.prop('ticks')).toEqual([0, 8, 10]);
+      expect(goal.prop('bands')).toEqual([0, 8, 10]);
+    });
     it('doesnt set ticks for values differing <10%', () => {
       const palette = {
         type: 'palette' as const,
