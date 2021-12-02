@@ -23,7 +23,7 @@ import {
 } from '../../../../common/components/exceptions/add_exception_modal';
 import * as i18n from '../translations';
 import { inputsModel, inputsSelectors, State } from '../../../../common/store';
-import { TimelineId } from '../../../../../common';
+import { TimelineId } from '../../../../../common/types';
 import { AlertData, EcsHit } from '../../../../common/components/exceptions/types';
 import { useQueryAlerts } from '../../../containers/detection_engine/alerts/use_query';
 import { useSignalIndex } from '../../../containers/detection_engine/alerts/use_signal_index';

@@ -11,7 +11,7 @@ import {
   HostTacticsEdges,
   HostTacticsFields,
   HostTechniqueHit,
-} from '../../../../../../common';
+} from '../../../../../../common/search_strategy';
 
 export const formatHostTacticsData = (buckets: HostTacticsHit[]): HostTacticsEdges[] =>
   buckets.reduce((acc: HostTacticsEdges[], bucket) => {

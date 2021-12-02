@@ -12,7 +12,7 @@ import {
   ALERT_STATUS,
 } from '@kbn/rule-data-utils/technical_field_names';
 
-import { ColumnHeaderOptions } from '../../../../../common';
+import { ColumnHeaderOptions } from '../../../../../common/types';
 import { defaultColumnHeaderType } from '../../../../timelines/components/timeline/body/column_headers/default_headers';
 import { DEFAULT_DATE_COLUMN_MIN_WIDTH } from '../../../../timelines/components/timeline/body/constants';
 

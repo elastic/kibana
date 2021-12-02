@@ -14,7 +14,7 @@ import { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
 import { useRuleWithFallback } from '../../../detections/containers/detection_engine/rules/use_rule_with_fallback';
 
 import { TestProviders, TestProvidersComponent } from '../../mock';
-import { TimelineId } from '../../../../common';
+import { TimelineId } from '../../../../common/types';
 import { mockBrowserFields } from '../../containers/source/mock';
 
 jest.mock('../../lib/kibana');

@@ -16,7 +16,11 @@ import { getEnrichmentIdentifiers, isInvestigationTimeEnrichment } from './helpe
 
 import { FieldsData } from '../types';
 import { ActionCell } from '../table/action_cell';
-import { BrowserField, BrowserFields, TimelineEventsDetailsItem } from '../../../../../common';
+import {
+  BrowserField,
+  BrowserFields,
+  TimelineEventsDetailsItem,
+} from '../../../../../common/search_strategy';
 import { FormattedFieldValue } from '../../../../timelines/components/timeline/body/renderers/formatted_field';
 import { EnrichedDataRow, ThreatSummaryPanelHeader } from './threat_summary_view';
 

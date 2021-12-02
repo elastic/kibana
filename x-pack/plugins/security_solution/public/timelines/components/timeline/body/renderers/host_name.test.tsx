@@ -10,7 +10,7 @@ import { waitFor } from '@testing-library/react';
 
 import { HostName } from './host_name';
 import { TestProviders } from '../../../../../common/mock';
-import { TimelineId, TimelineTabs } from '../../../../../../common';
+import { TimelineId, TimelineTabs } from '../../../../../../common/types';
 import { StatefulEventContext } from '../../../../../../../timelines/public';
 import { timelineActions } from '../../../../store/timeline';
 import { activeTimeline } from '../../../../containers/active_timeline_context';

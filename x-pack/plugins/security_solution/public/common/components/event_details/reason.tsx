@@ -13,7 +13,7 @@ import React, { useMemo } from 'react';
 import styled from 'styled-components';
 import { getRuleDetailsUrl, useFormatUrl } from '../link_to';
 import * as i18n from './translations';
-import { TimelineEventsDetailsItem } from '../../../../common';
+import { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
 import { LinkAnchor } from '../links';
 import { useKibana } from '../../lib/kibana';
 import { APP_UI_ID, SecurityPageName } from '../../../../common/constants';

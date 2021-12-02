@@ -13,7 +13,7 @@ import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import { useKibana } from '../../../common/lib/kibana';
 import { inputsActions } from '../../../common/store/actions';
 import { isIndexNotFoundError } from '../../../common/utils/exceptions';
-import { HostsRiskScore } from '../../../../common';
+import { HostsRiskScore } from '../../../../common/search_strategy';
 import { useHostsRiskScoreComplete } from './use_hosts_risk_score_complete';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { getHostRiskIndex } from '../../../helpers';
