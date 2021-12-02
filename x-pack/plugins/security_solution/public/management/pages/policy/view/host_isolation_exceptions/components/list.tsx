@@ -5,8 +5,11 @@
  * 2.0.
  */
 
+import { EuiSpacer, EuiText } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FoundExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import React, { useCallback, useState } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useHistory } from 'react-router-dom';
 import {
   MANAGEMENT_DEFAULT_PAGE_SIZE,
@@ -18,6 +21,7 @@ import {
   ArtifactCardGridProps,
 } from '../../../../../components/artifact_card_grid';
 import { useEndpointPoliciesToArtifactPolicies } from '../../../../../components/artifact_entry_card/hooks/use_endpoint_policies_to_artifact_policies';
+import { SearchExceptions } from '../../../../../components/search_exceptions';
 import { useGetEndpointSpecificPolicies } from '../../../../../services/policies/hooks';
 import { getCurrentArtifactsLocation } from '../../../store/policy_details/selectors';
 import { usePolicyDetailsSelector } from '../../policy_hooks';
@@ -57,6 +61,18 @@ export const PolicyHostIsolationExceptionsList = ({
     [history, pagination.pageSize, policyId, urlParams]
   );
 
+  const handleSearchInput = useCallback(
+    (filter: string) => {
+      history.push(
+        getPolicyHostIsolationExceptionsPath(policyId, {
+          ...urlParams,
+          filter,
+        })
+      );
+    },
+    [history, policyId, urlParams]
+  );
+
   const artifactCardPolicies = useEndpointPoliciesToArtifactPolicies(policiesRequest.data?.items);
 
   const provideCardProps: ArtifactCardGridProps['cardComponentProps'] = (item) => {
@@ -80,17 +96,44 @@ export const PolicyHostIsolationExceptionsList = ({
     }
     setExpandedItemsMap(newExpandedMap);
   };
-
   return (
-    <ArtifactCardGrid
-      items={exceptions.data}
-      onPageChange={handlePageChange}
-      onExpandCollapse={handleExpandCollapse}
-      cardComponentProps={provideCardProps}
-      pagination={pagination}
-      loading={policiesRequest.isLoading}
-      data-test-subj={'hostIsolationExceptions-collapsed-list'}
-    />
+    <>
+      <SearchExceptions
+        placeholder={i18n.translate(
+          'xpack.securitySolution.endpoint.policy.hostIsolationExceptions.list.search.placeholder',
+          {
+            defaultMessage: 'Search on the fields below: name, description, value, ip',
+          }
+        )}
+        defaultValue={urlParams.filter}
+        hideRefreshButton
+        onSearch={handleSearchInput}
+      />
+      <EuiSpacer size="s" />
+      <EuiText
+        color="subdued"
+        size="xs"
+        data-test-subj="policyDetailsHostIsolationExceptionsSearchCount"
+      >
+        <FormattedMessage
+          id="xpack.securitySolution.endpoint.policy.hostIsolationExceptions.list.totalItemCount"
+          defaultMessage={
+            'Showing {totalItemsCount, plural, one {# trusted application} other {# trusted applications}}'
+          }
+          values={{ totalItemsCount: pagination.totalItemCount }}
+        />
+      </EuiText>
+      <EuiSpacer size="m" />
+      <ArtifactCardGrid
+        items={exceptions.data}
+        onPageChange={handlePageChange}
+        onExpandCollapse={handleExpandCollapse}
+        cardComponentProps={provideCardProps}
+        pagination={pagination}
+        loading={policiesRequest.isLoading}
+        data-test-subj={'hostIsolationExceptions-collapsed-list'}
+      />
+    </>
   );
 };
 PolicyHostIsolationExceptionsList.displayName = 'PolicyHostIsolationExceptionsList';

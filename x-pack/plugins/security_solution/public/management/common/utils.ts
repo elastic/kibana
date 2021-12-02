@@ -72,7 +72,7 @@ export const parsePoliciesAndFilterToKql = ({
 
   if (kuery) {
     if (kql) {
-      kql += ` AND `;
+      kql += ` AND (${kuery})`;
     } else {
       kql = `(${kuery})`;
     }
