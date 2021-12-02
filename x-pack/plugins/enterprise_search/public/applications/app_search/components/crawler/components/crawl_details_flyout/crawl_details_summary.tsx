@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 
 import moment from 'moment';
 
@@ -35,6 +35,8 @@ export const CrawlDetailsSummary: React.FC<ICrawlerSummaryProps> = ({
   domainCount,
   stats,
 }) => {
+  const [statusCounts, setStatusCounts] = useState<{ [code: string]: number }>({});
+
   const duration = () => {
     const duration = moment.duration(stats.status.crawlDurationMSec, 'milliseconds');
     const hours = duration.hours();
@@ -42,6 +44,25 @@ export const CrawlDetailsSummary: React.FC<ICrawlerSummaryProps> = ({
     const seconds = duration.seconds();
     return `${hours}h ${minutes}m ${seconds}s`;
   };
+
+  const getStatusCount = (code: string, codes: any) => {
+    let count = 0;
+    Object.keys(codes).filter((key) => {
+      if (key[0] === code) {
+        count += codes[key];
+      }
+    })
+    return count;
+  }
+
+  useEffect(() => {
+    if (stats.status.statusCodes) {
+      setStatusCounts({
+        client_error_count: getStatusCount('4', stats.status.statusCodes),
+        server_error_count: getStatusCount('5', stats.status.statusCodes),
+      })
+    }
+  }, [])
 
   return (
     <EuiPanel paddingSize="l" color="primary">
@@ -68,6 +89,18 @@ export const CrawlDetailsSummary: React.FC<ICrawlerSummaryProps> = ({
               'xpack.enterpriseSearch.appSearch.crawler.components.crawlDetailsSummary.crawlDepth',
               {
                 defaultMessage: 'Max crawl depth',
+              }
+            )}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiStat
+            titleSize="s"
+            title={duration()}
+            description={i18n.translate(
+              'xpack.enterpriseSearch.appSearch.crawler.crawlDetailsSummary.durationTooltipTitle',
+              {
+                defaultMessage: 'Duration',
               }
             )}
           />
@@ -157,13 +190,25 @@ export const CrawlDetailsSummary: React.FC<ICrawlerSummaryProps> = ({
         <EuiFlexItem grow={false}>
           <EuiStat
             titleSize="s"
-            title={duration()}
-            description={i18n.translate(
-              'xpack.enterpriseSearch.appSearch.crawler.crawlDetailsSummary.durationTooltipTitle',
+            title={statusCounts.client_error_count ? statusCounts.client_error_count : 0}
+            description={`4xx ${i18n.translate(
+              'xpack.enterpriseSearch.appSearch.crawler.crawlDetailsSummary.serverErrors',
               {
-                defaultMessage: 'Duration',
+                defaultMessage: 'Errors',
               }
-            )}
+            )}`}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiStat
+            titleSize="s"
+            title={statusCounts.server_error_count ? statusCounts.server_error_count : 0}
+            description={`5xx ${i18n.translate(
+              'xpack.enterpriseSearch.appSearch.crawler.crawlDetailsSummary.serverErrors',
+              {
+                defaultMessage: 'Errors',
+              }
+            )}`}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
