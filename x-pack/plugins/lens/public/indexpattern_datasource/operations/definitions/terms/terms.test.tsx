@@ -188,6 +188,30 @@ describe('terms', () => {
       expect(column).toHaveProperty('sourceField', 'source');
       expect(column.params.format).toBeUndefined();
     });
+
+    it('should remove secondary fields when a new field is passed', () => {
+      const oldColumn: TermsIndexPatternColumn = {
+        operationType: 'terms',
+        sourceField: 'bytes',
+        label: 'Top values of bytes',
+        isBucketed: true,
+        dataType: 'number',
+        params: {
+          size: 5,
+          orderBy: {
+            type: 'alphabetical',
+          },
+          orderDirection: 'asc',
+          format: { id: 'number', params: { decimals: 0 } },
+          secondaryFields: ['dest'],
+        },
+      };
+      const indexPattern = createMockedIndexPattern();
+      const newStringField = indexPattern.fields.find((i) => i.name === 'source')!;
+
+      const column = termsOperation.onFieldChange(oldColumn, newStringField);
+      expect(column.params.secondaryFields).toBeUndefined();
+    });
   });
 
   describe('getPossibleOperationForField', () => {

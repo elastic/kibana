@@ -192,7 +192,11 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
       column.params.secondaryFields?.length
     ),
   onFieldChange: (oldColumn, field, params) => {
-    const newParams = { ...oldColumn.params, ...params };
+    const newParams = {
+      ...oldColumn.params,
+      secondaryFields: undefined,
+      ...(params as Partial<TermsIndexPatternColumn['params']>),
+    };
     if ('format' in newParams && field.type !== 'number') {
       delete newParams.format;
     }
