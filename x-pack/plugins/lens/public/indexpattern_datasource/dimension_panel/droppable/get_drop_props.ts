@@ -160,7 +160,7 @@ function getDropPropsForCompatibleGroup(
       'replace_duplicate_compatible',
       'swap_compatible',
       ...(targetField && hasOperationSupportForMultipleFields(targetColumn, targetField)
-        ? 'combine_compatible'
+        ? ['combine_compatible']
         : []),
     ] as DropType[],
   };
