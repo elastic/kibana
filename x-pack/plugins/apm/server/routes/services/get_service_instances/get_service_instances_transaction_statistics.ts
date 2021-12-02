@@ -18,7 +18,7 @@ import { kqlQuery, rangeQuery } from '../../../../../observability/server';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import {
   getDocumentTypeFilterForTransactions,
-  getTransactionDurationFieldForTransactions,
+  getDurationFieldForTransactions,
   getProcessorEventForTransactions,
 } from '../../../lib/helpers/transactions';
 import { calculateThroughput } from '../../../lib/helpers/calculate_throughput';
@@ -89,9 +89,7 @@ export async function getServiceInstancesTransactionStatistics<
     }
   );
 
-  const field = getTransactionDurationFieldForTransactions(
-    searchAggregatedTransactions
-  );
+  const field = getDurationFieldForTransactions(searchAggregatedTransactions);
 
   const subAggs = {
     ...getLatencyAggregation(latencyAggregationType, field),

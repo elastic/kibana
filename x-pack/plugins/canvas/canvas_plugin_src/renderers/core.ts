@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { markdown } from './markdown';
+import { markdownFactory } from './markdown';
 import { pie } from './pie';
 import { plot } from './plot';
-import { text } from './text';
-import { table } from './table';
+import { textFactory } from './text';
+import { tableFactory } from './table';
 
-export const renderFunctions = [markdown, pie, plot, table, text];
+export const renderFunctions = [pie, plot];
 
-export const renderFunctionFactories = [];
+export const renderFunctionFactories = [markdownFactory, tableFactory, textFactory];
