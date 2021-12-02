@@ -14,7 +14,9 @@ import { KibanaThemeProvider } from '../../../kibana_react/public';
 import { VisualizationContainer } from '../../../visualizations/public';
 import { VegaVisualizationDependencies } from './plugin';
 import { RenderValue } from './vega_fn';
-const VegaVisComponent = lazy(() => import('./components/vega_vis_component'));
+const LazyVegaVisComponent = lazy(() =>
+  import('./async_services').then(({ VegaVisComponent }) => ({ default: VegaVisComponent }))
+);
 
 export const getVegaVisRenderer: (
   deps: VegaVisualizationDependencies
@@ -29,10 +31,11 @@ export const getVegaVisRenderer: (
     render(
       <KibanaThemeProvider theme$={deps.core.theme.theme$}>
         <VisualizationContainer handlers={handlers}>
-          <VegaVisComponent
+          <LazyVegaVisComponent
             deps={deps}
             fireEvent={handlers.event}
             renderComplete={handlers.done}
+            renderMode={handlers.getRenderMode()}
             visData={visData}
           />
         </VisualizationContainer>
