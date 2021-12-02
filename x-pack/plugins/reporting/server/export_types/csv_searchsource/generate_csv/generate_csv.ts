@@ -242,7 +242,7 @@ export class CsvGenerator {
   /*
    * Format a Datatable into rows of CSV content
    */
-  private generateRows(
+  private async generateRows(
     columns: string[],
     table: Datatable,
     builder: MaxSizeStringBuilder,
@@ -250,18 +250,27 @@ export class CsvGenerator {
     settings: CsvExportSettings
   ) {
     this.logger.debug(`Building ${table.rows.length} CSV data rows...`);
+
+    const asyncGenerateRow = async (dataTableRow: Record<string, any>): Promise<string> => {
+      return new Promise((resolve) => {
+        setImmediate(() => {
+          resolve(
+            columns
+              .map((f) => ({ column: f, data: dataTableRow[f] }))
+              .map(this.formatCellValues(formatters))
+              .map(this.escapeValues(settings))
+              .join(settings.separator) + '\n'
+          );
+        });
+      });
+    };
+
     for (const dataTableRow of table.rows) {
       if (this.cancellationToken.isCancelled()) {
         break;
       }
 
-      const row =
-        columns
-          .map((f) => ({ column: f, data: dataTableRow[f] }))
-          .map(this.formatCellValues(formatters))
-          .map(this.escapeValues(settings))
-          .join(settings.separator) + '\n';
-
+      const row = await asyncGenerateRow(dataTableRow);
       if (!builder.tryAppend(row)) {
         this.logger.warn(`Max Size Reached after ${this.csvRowCount} rows.`);
         this.maxSizeReached = true;
@@ -377,7 +386,7 @@ export class CsvGenerator {
         }
 
         const formatters = this.getFormatters(table);
-        this.generateRows(columns, table, builder, formatters, settings);
+        await this.generateRows(columns, table, builder, formatters, settings);
 
         // update iterator
         currentRecord += table.rows.length;
