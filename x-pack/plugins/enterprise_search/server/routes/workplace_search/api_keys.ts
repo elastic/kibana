@@ -39,15 +39,15 @@ export function registerApiKeysRoute({
 
   router.delete(
     {
-      path: '/internal/workplace_search/api_keys/{id}',
+      path: '/internal/workplace_search/api_keys/{tokenName}',
       validate: {
         params: schema.object({
-          id: schema.string(),
+          tokenName: schema.string(),
         }),
       },
     },
     enterpriseSearchRequestHandler.createRequest({
-      path: '/ws/org/api_tokens/:id',
+      path: '/ws/org/api_tokens/:tokenName',
     })
   );
 }

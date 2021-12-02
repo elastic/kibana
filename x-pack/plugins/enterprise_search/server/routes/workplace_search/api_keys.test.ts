@@ -67,14 +67,14 @@ describe('api keys routes', () => {
     });
   });
 
-  describe('DELETE /internal/workplace_search/api_keys/{id}', () => {
+  describe('DELETE /internal/workplace_search/api_keys/{tokenName}', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'delete',
-        path: '/internal/workplace_search/api_keys/{id}',
+        path: '/internal/workplace_search/api_keys/{tokenName}',
       });
 
       registerApiKeysRoute({
@@ -85,7 +85,7 @@ describe('api keys routes', () => {
 
     it('creates a request handler', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/ws/org/api_tokens/:id',
+        path: '/ws/org/api_tokens/:tokenName',
       });
     });
   });
