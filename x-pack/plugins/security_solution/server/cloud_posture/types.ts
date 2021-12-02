@@ -5,4 +5,19 @@
  * 2.0.
  */
 
-export {};
+export interface PostureScore {
+  name: string;
+  totalFindings?: number;
+  postureScore: number | undefined;
+  totalPassed: number | undefined;
+  totalFailed: number | undefined;
+}
+export interface CloudPostureStats extends PostureScore {
+  statsPerBenchmark: PostureScore[];
+  evaluationsPerResource: EvaluationStats[];
+}
+export interface EvaluationStats {
+  resource: string;
+  value: number;
+  evaluation: 'passed' | 'failed' | 'NA';
+}
