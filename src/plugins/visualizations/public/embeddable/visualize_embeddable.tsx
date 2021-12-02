@@ -12,6 +12,7 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { render } from 'react-dom';
 import { EuiLoadingChart } from '@elastic/eui';
+import { Filter } from '@kbn/es-query';
 import { KibanaThemeProvider } from '../../../kibana_react/public';
 import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
 import {
@@ -19,7 +20,6 @@ import {
   TimeRange,
   Query,
   esFilters,
-  Filter,
   TimefilterContract,
 } from '../../../../plugins/data/public';
 import {
@@ -46,6 +46,7 @@ import { SavedObjectAttributes } from '../../../../core/types';
 import { getSavedVisualization } from '../utils/saved_visualize_utils';
 import { VisSavedObject } from '../types';
 import { toExpressionAst } from './to_ast';
+import type { RenderMode } from '../../../expressions';
 
 const getKeys = <T extends {}>(o: T): Array<keyof T> => Object.keys(o) as Array<keyof T>;
 
@@ -63,6 +64,7 @@ export interface VisualizeInput extends EmbeddableInput {
     colors?: { [key: string]: string };
   };
   savedVis?: SerializedVis;
+  renderMode?: RenderMode;
   table?: unknown;
   query?: Query;
   filters?: Filter[];
@@ -314,6 +316,7 @@ export class VisualizeEmbeddable
 
     const expressions = getExpressions();
     this.handler = await expressions.loader(this.domNode, undefined, {
+      renderMode: this.input.renderMode || 'view',
       onRenderError: (element: HTMLElement, error: ExpressionRenderError) => {
         this.onContainerError(error);
       },

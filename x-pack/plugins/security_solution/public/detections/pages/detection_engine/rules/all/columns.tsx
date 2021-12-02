@@ -189,7 +189,7 @@ export const getColumns = ({
       align: 'center',
       render: (tags: Rule['tags']) => {
         if (tags.length === 0) {
-          return getEmptyTagValue();
+          return null;
         }
 
         const renderItem = (tag: string, i: number) => (

@@ -6,10 +6,11 @@
   "id": "uptime",
   "kibanaVersion": "kibana",
   "optionalPlugins": [
+    "cloud",
     "data",
+    "fleet",
     "home",
-    "ml",
-    "fleet"
+    "ml"
   ],
   "requiredPlugins": [
     "alerting",
@@ -22,7 +23,8 @@
     "ruleRegistry",
     "security",
     "triggersActionsUi",
-    "usageCollection"
+    "usageCollection",
+    "taskManager"
   ],
   "server": true,
   "ui": true,
