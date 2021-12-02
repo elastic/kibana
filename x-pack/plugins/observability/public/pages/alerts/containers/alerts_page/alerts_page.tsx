@@ -39,7 +39,7 @@ interface RuleStatsState {
   total: number;
   disabled: number;
   muted: number;
-  errors: number;
+  error: number;
 }
 export interface TopAlert {
   fields: ParsedTechnicalFields;
@@ -82,7 +82,7 @@ function AlertsPage() {
     total: 0,
     disabled: 0,
     muted: 0,
-    errors: 0,
+    error: 0,
   });
 
   useEffect(() => {
@@ -106,13 +106,21 @@ function AlertsPage() {
       // Note that the API uses the semantics of 'alerts' instead of 'rules'
       const { alertExecutionStatus, ruleMutedStatus, ruleEnabledStatus } = response;
       if (alertExecutionStatus && ruleMutedStatus && ruleEnabledStatus) {
+        const total = Object.entries(alertExecutionStatus).reduce((acc, [key, value]) => {
+          if (key !== 'error') {
+            acc = acc + value;
+          }
+          return acc;
+        }, 0);
+        const { error } = alertExecutionStatus;
+        const { muted } = ruleMutedStatus;
+        const { disabled } = ruleEnabledStatus;
         setRuleStats({
           ...ruleStats,
-          // FIXME: this is the active count, while we want the grand total
-          total: alertExecutionStatus.active,
-          disabled: ruleEnabledStatus.disabled,
-          muted: ruleMutedStatus.muted,
-          errors: alertExecutionStatus.error,
+          total,
+          disabled,
+          muted,
+          error,
         });
       }
       setRuleStatsLoading(false);
@@ -287,7 +295,7 @@ function AlertsPage() {
             data-test-subj="statMuted"
           />,
           <EuiStat
-            title={ruleStats.errors}
+            title={ruleStats.error}
             description={i18n.translate('xpack.observability.alerts.ruleStats.errors', {
               defaultMessage: 'Errors',
             })}

@@ -7,6 +7,12 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
+import { ObjectRemover } from '../../../../functional_with_es_ssl/lib/object_remover';
+import {
+  generateUniqueKey,
+  getTestAlertData,
+  getTestActionData,
+} from '../../../../functional_with_es_ssl/lib/get_test_data';
 
 async function asyncForEach<T>(array: T[], callback: (item: T, index: number) => void) {
   for (let index = 0; index < array.length; index++) {
@@ -21,6 +27,8 @@ const TOTAL_ALERTS_CELL_COUNT = 165;
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const find = getService('find');
+  const supertest = getService('supertest');
+  const objectRemover = new ObjectRemover(supertest);
 
   describe('Observability alerts', function () {
     this.tags('includeFirefox');
@@ -238,22 +246,70 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       describe('Stat counters', () => {
-        before(async () => {
-          // TODO: load archive with meaningful data on rules
-          await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
+        async function createAlertManualCleanup(overwrites: Record<string, any> = {}) {
+          const { body: createdAlert } = await supertest
+            .post(`/api/alerting/rule`)
+            .set('kbn-xsrf', 'foo')
+            .send(getTestAlertData(overwrites))
+            .expect(200);
+          return createdAlert;
+        }
+
+        async function createFailingAlert() {
+          return await createAlert({
+            rule_type_id: 'test.failing',
+            schedule: { interval: '30s' },
+          });
+        }
+
+        async function createAlert(overwrites: Record<string, any> = {}) {
+          const createdAlert = await createAlertManualCleanup(overwrites);
+          objectRemover.add(createdAlert.id, 'alert', 'alerts');
+          return createdAlert;
+        }
+
+        async function muteAlert(alertId: string) {
+          const { body: alert } = await supertest
+            .post(`/api/alerting/rule/${alertId}/_mute_all`)
+            .set('kbn-xsrf', 'foo');
+          return alert;
+        }
+
+        async function disableAlert(alertId: string) {
+          const { body: alert } = await supertest
+            .post(`/api/alerting/rule/${alertId}/_disable`)
+            .set('kbn-xsrf', 'foo');
+          return alert;
+        }
+
+        beforeEach(async () => {
+          const uniqueKey = generateUniqueKey();
+
+          const alertToDisable = await createAlert({ name: 'b', tags: [uniqueKey] });
+          await createAlert({ name: 'c', tags: [uniqueKey] });
+          await createAlert({ name: 'a', tags: [uniqueKey] });
+          await createAlert({ name: 'd', tags: [uniqueKey] });
+          await createAlert({ name: 'e', tags: [uniqueKey] });
+          const alertToMute = await createAlert({ name: 'f', tags: [uniqueKey] });
+
+          await disableAlert(alertToDisable.id);
+          await muteAlert(alertToMute.id);
+
+          // await esArchiver.load('x-pack/test/functional/es_archives/observability/rules');
+          // await esArchiver.load('x-pack/test/functional/es_archives/alerts');
           await observability.alerts.common.navigateToTimeWithData();
         });
 
-        after(async () => {
-          // TODO: load archive with meaningful data on rules
-          await esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs');
+        afterEach(async () => {
+          await objectRemover.removeAll();
+          // await esArchiver.unload('x-pack/test/functional/es_archives/observability/rules');
         });
 
         it('Exist and display expected values', async () => {
           const subjToValueMap: { [key: string]: number } = {
-            statRuleCount: 0,
-            statDisabled: 0,
-            statMuted: 0,
+            statRuleCount: 6,
+            statDisabled: 1,
+            statMuted: 1,
             statErrors: 0,
           };
           await asyncForEach(Object.keys(subjToValueMap), async (subject: string) => {
