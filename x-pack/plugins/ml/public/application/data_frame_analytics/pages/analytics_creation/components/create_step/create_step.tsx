@@ -42,7 +42,13 @@ export const CreateStep: FC<Props> = ({ actions, state, step }) => {
 
   const { createAnalyticsJob, setFormState, startAnalyticsJob } = actions;
   const { isAdvancedEditorValidJson, isJobCreated, isJobStarted, isValid, requestMessages } = state;
-  const { createIndexPattern, destinationIndexPatternTitleExists, jobId, jobType } = state.form;
+  const {
+    createIndexPattern,
+    destinationIndex,
+    destinationIndexPatternTitleExists,
+    jobId,
+    jobType,
+  } = state.form;
 
   const [startChecked, setStartChecked] = useState<boolean>(true);
   const [creationTriggered, setCreationTriggered] = useState<boolean>(false);
@@ -132,7 +138,9 @@ export const CreateStep: FC<Props> = ({ actions, state, step }) => {
                             i18n.translate(
                               'xpack.ml.dataframe.analytics.create.dataViewExistsError',
                               {
-                                defaultMessage: 'A data view with this title already exists.',
+                                defaultMessage:
+                                  'A data view with the title {title} already exists.',
+                                values: { title: destinationIndex },
                               }
                             ),
                           ]
@@ -174,7 +182,11 @@ export const CreateStep: FC<Props> = ({ actions, state, step }) => {
           <EuiFlexItem grow={false}>
             <EuiButton
               className="mlAnalyticsCreateWizard__footerButton"
-              disabled={!isValid || !isAdvancedEditorValidJson}
+              disabled={
+                !isValid ||
+                !isAdvancedEditorValidJson ||
+                (destinationIndexPatternTitleExists === true && createIndexPattern === true)
+              }
               onClick={handleCreation}
               fill
               isLoading={creationTriggered}

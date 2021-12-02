@@ -40,13 +40,11 @@ export const DetailsStepForm: FC<CreateAnalyticsStepProps> = ({
   const { setFormState } = actions;
   const { form, cloneJob, hasSwitchedToEditor, isJobCreated } = state;
   const {
-    createIndexPattern,
     description,
     destinationIndex,
     destinationIndexNameEmpty,
     destinationIndexNameExists,
     destinationIndexNameValid,
-    destinationIndexPatternTitleExists,
     jobId,
     jobIdEmpty,
     jobIdExists,
@@ -70,8 +68,7 @@ export const DetailsStepForm: FC<CreateAnalyticsStepProps> = ({
     jobIdExists === true ||
     jobIdValid === false ||
     destinationIndexNameEmpty === true ||
-    destinationIndexNameValid === false ||
-    (destinationIndexPatternTitleExists === true && createIndexPattern === true);
+    destinationIndexNameValid === false;
 
   const debouncedIndexCheck = debounce(async () => {
     try {
