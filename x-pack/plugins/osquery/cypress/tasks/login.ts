@@ -136,7 +136,7 @@ export const loginWithUser = (user: User) => {
   cy.request({
     body: {
       providerType: 'basic',
-      providerName: !url?.includes('localhost') ? 'cloud-basic' : 'basic',
+      providerName: url && !url.includes('localhost') ? 'cloud-basic' : 'basic',
       currentURL: '/',
       params: {
         username: user.username,
@@ -218,7 +218,7 @@ const loginViaEnvironmentCredentials = () => {
   cy.request({
     body: {
       providerType: 'basic',
-      providerName: !url?.includes('localhost') ? 'cloud-basic' : 'basic',
+      providerName: url && !url.includes('localhost') ? 'cloud-basic' : 'basic',
       currentURL: '/',
       params: {
         username: Cypress.env(ELASTICSEARCH_USERNAME),
