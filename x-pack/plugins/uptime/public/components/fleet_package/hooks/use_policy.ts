@@ -9,7 +9,7 @@ import { useMemo } from 'react';
 import {
   PolicyConfig,
   DataStream,
-  ConfigKeys,
+  ConfigKey,
   HTTPFields,
   TCPFields,
   ICMPFields,
@@ -84,34 +84,34 @@ export const usePolicy = (fleetPolicyName: string = '') => {
         ...httpSimpleFields,
         ...httpAdvancedFields,
         ...tlsFields,
-        [ConfigKeys.METADATA]: {
-          ...httpSimpleFields[ConfigKeys.METADATA],
+        [ConfigKey.METADATA]: {
+          ...httpSimpleFields[ConfigKey.METADATA],
           ...metadata,
         },
-        [ConfigKeys.NAME]: fleetPolicyName || monitorName,
+        [ConfigKey.NAME]: fleetPolicyName || monitorName,
       } as HTTPFields,
       [DataStream.TCP]: {
         ...tcpSimpleFields,
         ...tcpAdvancedFields,
         ...tlsFields,
-        [ConfigKeys.METADATA]: {
-          ...tcpSimpleFields[ConfigKeys.METADATA],
+        [ConfigKey.METADATA]: {
+          ...tcpSimpleFields[ConfigKey.METADATA],
           ...metadata,
         },
-        [ConfigKeys.NAME]: fleetPolicyName || monitorName,
+        [ConfigKey.NAME]: fleetPolicyName || monitorName,
       } as TCPFields,
       [DataStream.ICMP]: {
         ...icmpSimpleFields,
-        [ConfigKeys.NAME]: fleetPolicyName || monitorName,
+        [ConfigKey.NAME]: fleetPolicyName || monitorName,
       } as ICMPFields,
       [DataStream.BROWSER]: {
         ...browserSimpleFields,
         ...browserAdvancedFields,
-        [ConfigKeys.METADATA]: {
-          ...browserSimpleFields[ConfigKeys.METADATA],
+        [ConfigKey.METADATA]: {
+          ...browserSimpleFields[ConfigKey.METADATA],
           ...metadata,
         },
-        [ConfigKeys.NAME]: fleetPolicyName || monitorName,
+        [ConfigKey.NAME]: fleetPolicyName || monitorName,
       } as BrowserFields,
     }),
     [
