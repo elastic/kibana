@@ -81,7 +81,7 @@ export interface SourceDataItem {
   features?: Features;
   objTypes?: string[];
   addPath: string;
-  editPath: string;
+  editPath?: string; // undefined for GitHub apps, as they are configured on a source level, and don't use a connector where you can edit the configuration
   accountContextOnly: boolean;
 }
 
