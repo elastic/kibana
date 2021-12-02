@@ -211,7 +211,7 @@ export class EphemeralTaskManagerRunner implements TaskRunner {
     }
     this.logger.debug(`Running ephemeral task ${this}`);
     const apmTrans = apm.startTransaction(
-      TASK_MANAGER_TRANSATION_RUN_EPHEMERAL,
+      TASK_MANAGER_TRANSACTION_RUN_EPHEMERAL,
       TASK_MANAGER_TRANSACTION_TYPE,
       {
         childOf: this.instance.task.traceparent,
