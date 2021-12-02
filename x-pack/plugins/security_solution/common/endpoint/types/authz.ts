@@ -16,8 +16,10 @@ export interface EndpointAuthz {
   canAccessEndpointManagement: boolean;
   /** if user has permissions to create Artifacts by Policy */
   canCreateArtifactsByPolicy: boolean;
-  /** If user has permissions to use the Host isolation feature */
+  /** If user has permissions to isolate hosts */
   canIsolateHost: boolean;
+  /** If user has permissions to un-isolate (release) hosts */
+  canUnIsolateHost: boolean;
 }
 
 export interface EndpointPrivileges extends EndpointAuthz {

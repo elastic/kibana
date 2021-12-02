@@ -99,8 +99,10 @@ export const isolationRequestHandler = function (
   SecuritySolutionRequestHandlerContext
 > {
   return async (context, req, res) => {
+    const { canIsolateHost, canUnIsolateHost } = context.securitySolution.endpointAuthz;
+
     // Ensure user has authorization to use this api
-    if (!context.securitySolution.endpointAuthz.canIsolateHost) {
+    if ((!canIsolateHost && isolate) || (!canUnIsolateHost && !isolate)) {
       return res.forbidden({
         body: {
           message:

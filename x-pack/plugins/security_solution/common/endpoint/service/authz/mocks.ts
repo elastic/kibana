@@ -15,11 +15,13 @@ export const getEndpointAuthzInitialStateMock = (
     ...(
       Object.entries(getEndpointAuthzInitialState()) as Array<[keyof EndpointAuthz, boolean]>
     ).reduce((mockPrivileges, [key, value]) => {
-      // Invert the initial values (from `false` to `true`)
+      // Invert the initial values (from `false` to `true`) so that everything is authorized
       mockPrivileges[key] = !value;
 
       return mockPrivileges;
     }, {} as EndpointAuthz),
+    // this one is currently treated special in that everyone can un-isolate
+    canUnIsolateHost: true,
     ...overrides,
   };
 

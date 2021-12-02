@@ -21,6 +21,7 @@ export const calculateEndpointAuthz = (
     canAccessEndpointManagement: hasAllAccessToFleet,
     canCreateArtifactsByPolicy: isPlatinumPlusLicense,
     canIsolateHost: isPlatinumPlusLicense,
+    canUnIsolateHost: true,
   };
 };
 
@@ -29,6 +30,7 @@ export const getEndpointAuthzInitialState = (): EndpointAuthz => {
     canAccessFleet: false,
     canAccessEndpointManagement: false,
     canIsolateHost: false,
+    canUnIsolateHost: true,
     canCreateArtifactsByPolicy: false,
   };
 };
