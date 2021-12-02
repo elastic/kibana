@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { KibanaRequest, RequestHandlerContext } from 'kibana/server';
+import { Logger, KibanaRequest, RequestHandlerContext } from 'kibana/server';
 import { ExceptionListClient } from '../../lists/server';
 
 import { DEFAULT_SPACE_ID } from '../common/constants';
@@ -28,6 +28,7 @@ export interface IRequestContextFactory {
 
 interface ConstructorOptions {
   config: ConfigType;
+  logger: Logger;
   core: SecuritySolutionPluginCoreSetupDependencies;
   plugins: SecuritySolutionPluginSetupDependencies;
 }
@@ -44,7 +45,7 @@ export class RequestContextFactory implements IRequestContextFactory {
     request: KibanaRequest
   ): Promise<SecuritySolutionApiRequestHandlerContext> {
     const { options, appClientFactory } = this;
-    const { config, core, plugins } = options;
+    const { config, logger, core, plugins } = options;
     const { lists, ruleRegistry, security } = plugins;
 
     const [, startPlugins] = await core.getStartServices();
@@ -73,6 +74,7 @@ export class RequestContextFactory implements IRequestContextFactory {
           savedObjectsClient: context.core.savedObjects.client,
           eventLogService: plugins.eventLog,
           eventLogClient: startPlugins.eventLog.getClient(request),
+          logger,
         }),
 
       getExceptionListClient: () => {
