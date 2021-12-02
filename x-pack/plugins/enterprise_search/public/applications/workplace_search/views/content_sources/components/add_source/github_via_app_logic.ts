@@ -11,6 +11,10 @@ import { flashAPIErrors, flashSuccessToast } from '../../../../../shared/flash_m
 import { HttpLogic } from '../../../../../shared/http';
 import { KibanaLogic } from '../../../../../shared/kibana';
 import { AppLogic } from '../../../../app_logic';
+import {
+  GITHUB_VIA_APP_SERVICE_TYPE,
+  GITHUB_ENTERPRISE_SERVER_VIA_APP_SERVICE_TYPE,
+} from '../../../../constants';
 import { SOURCES_PATH, getSourcesPath } from '../../../../routes';
 import { ContentSourceFullData } from '../../../../types';
 
@@ -86,8 +90,8 @@ export const GithubViaAppLogic = kea<MakeLogicType<GithubViaAppValues, GithubVia
 
       const params = {
         service_type: githubEnterpriseServerUrl
-          ? 'github_enterprise_server_via_app'
-          : 'github_via_app',
+          ? GITHUB_ENTERPRISE_SERVER_VIA_APP_SERVICE_TYPE
+          : GITHUB_VIA_APP_SERVICE_TYPE,
         app_id: githubAppId,
         base_url: githubEnterpriseServerUrl,
         private_key: stagedPrivateKey,

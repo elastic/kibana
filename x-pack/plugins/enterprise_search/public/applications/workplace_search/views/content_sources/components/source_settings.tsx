@@ -29,7 +29,11 @@ import { AppLogic } from '../../../app_logic';
 import { ContentSection } from '../../../components/shared/content_section';
 import { SourceConfigFields } from '../../../components/shared/source_config_fields';
 import { ViewContentHeader } from '../../../components/shared/view_content_header';
-import { NAV } from '../../../constants';
+import {
+  NAV,
+  GITHUB_VIA_APP_SERVICE_TYPE,
+  GITHUB_ENTERPRISE_SERVER_VIA_APP_SERVICE_TYPE,
+} from '../../../constants';
 
 import {
   CANCEL_BUTTON,
@@ -88,7 +92,8 @@ export const SourceSettings: React.FC = () => {
   }, []);
 
   const isGithubApp =
-    serviceType === 'github_via_app' || serviceType === 'github_enterprise_server_via_app';
+    serviceType === GITHUB_VIA_APP_SERVICE_TYPE ||
+    serviceType === GITHUB_ENTERPRISE_SERVER_VIA_APP_SERVICE_TYPE;
 
   const editPath = isGithubApp
     ? undefined // undefined for GitHub apps, as they are configured source-wide, and don't use a connector where you can edit the configuration
