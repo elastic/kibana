@@ -31,6 +31,6 @@ export const createStartMock = (extensionsStorage: UIExtensionsStorage = {}): Mo
         readIntegrationPolicies: true,
         writeIntegrationPolicies: true,
       },
-    },
-  });
+    }),
+  };
 };
