@@ -54,6 +54,7 @@ import { UptimePageTemplateComponent } from './apps/uptime_page_template';
 import { apiService } from './state/api/utils';
 import { useInspectorContext } from '../../observability/public';
 import { UptimeConfig } from '../common/config';
+import { AddMonitorBtn } from './components/monitor_management/add_monitor_btn';
 
 interface PageRouterProps {
   config: UptimeConfig;
@@ -237,6 +238,7 @@ const getRoutes = (config: UptimeConfig): RouteProps[] => {
                   defaultMessage="Manage monitors"
                 />
               ),
+              rightSideItems: [<AddMonitorBtn />],
             },
           },
         ]

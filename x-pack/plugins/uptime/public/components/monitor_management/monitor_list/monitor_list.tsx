@@ -11,6 +11,7 @@ import { MonitorFields } from '../../../../common/runtime_types/monitor_manageme
 import { UptimeSettingsContext } from '../../../contexts';
 import { Actions } from './actions';
 import { MonitorTags } from '../../common/monitor_tags';
+import * as labels from '../../overview/monitor_list/translations';
 
 interface Props {
   pageSize: number;
@@ -92,6 +93,7 @@ export const MonitorManagementList: ({
         items={items}
         columns={columns}
         tableLayout={'auto'}
+        noItemsMessage={loading ? labels.LOADING : labels.NO_DATA_MESSAGE}
       />
     </EuiPanel>
   );
