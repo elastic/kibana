@@ -48,6 +48,7 @@ import {
   TaskRunner,
   TaskRunningInstance,
   TaskRunResult,
+  TASK_MANAGER_RUN_TRANSACTION_TYPE,
   TASK_MANAGER_TRANSACTION_TYPE,
   TASK_MANAGER_TRANSACTION_TYPE_MARK_AS_RUNNING,
 } from './task_runner';
@@ -210,14 +211,10 @@ export class EphemeralTaskManagerRunner implements TaskRunner {
       );
     }
     this.logger.debug(`Running ephemeral task ${this}`);
-    const apmTrans = apm.startTransaction(
-      TASK_MANAGER_TRANSATION_RUN_EPHEMERAL,
-      TASK_MANAGER_TRANSACTION_TYPE,
-      {
-        childOf: this.instance.task.traceparent,
-      }
-    );
-    apmTrans?.addLabels({ entityId: this.taskType });
+    const apmTrans = apm.startTransaction(this.taskType, TASK_MANAGER_RUN_TRANSACTION_TYPE, {
+      childOf: this.instance.task.traceparent,
+    });
+    apmTrans?.addLabels({ ephemeral: true });
 
     const modifiedContext = await this.beforeRun({
       taskInstance: asConcreteInstance(this.instance.task),
