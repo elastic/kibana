@@ -229,6 +229,7 @@ export type {
   SignalEcsAAD,
   Ecs,
   CaseActionConnector,
+  CasesContextValue,
 } from './ui/types';
 
 export { StatusAll, SortFieldCase } from './ui/types';
