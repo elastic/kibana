@@ -1404,4 +1404,128 @@ describe('Lens migrations', () => {
       ]);
     });
   });
+
+  describe('8.1.0 update filter reference schema', () => {
+    const context = { log: { warning: () => {} } } as unknown as SavedObjectMigrationContext;
+    const example = {
+      type: 'lens',
+      id: 'mocked-saved-object-id',
+      attributes: {
+        savedObjectId: '1',
+        title: 'MyRenamedOps',
+        description: '',
+        visualizationType: null,
+        state: {
+          datasourceMetaData: {
+            filterableIndexPatterns: [],
+          },
+          datasourceStates: {
+            indexpattern: {
+              currentIndexPatternId: 'logstash-*',
+              layers: {
+                '2': {
+                  columns: {
+                    '3': {
+                      label: '@timestamp',
+                      dataType: 'date',
+                      operationType: 'date_histogram',
+                      sourceField: '@timestamp',
+                      isBucketed: true,
+                      scale: 'interval',
+                      params: { interval: 'auto', timeZone: 'Europe/Berlin' },
+                    },
+                    '4': {
+                      label: '@timestamp',
+                      dataType: 'date',
+                      operationType: 'date_histogram',
+                      sourceField: '@timestamp',
+                      isBucketed: true,
+                      scale: 'interval',
+                      params: { interval: 'auto' },
+                    },
+                    '5': {
+                      label: '@timestamp',
+                      dataType: 'date',
+                      operationType: 'my_unexpected_operation',
+                      isBucketed: true,
+                      scale: 'interval',
+                      params: { timeZone: 'do not delete' },
+                    },
+                  },
+                  columnOrder: ['3', '4', '5'],
+                },
+              },
+            },
+          },
+          visualization: {},
+          query: { query: '', language: 'kuery' },
+          filters: [
+            {
+              meta: {
+                alias: null,
+                negate: false,
+                disabled: false,
+                type: 'phrase',
+                key: 'geo.src',
+                params: { query: 'US' },
+                indexRefName: 'filter-index-pattern-0',
+              },
+              query: { match_phrase: { 'geo.src': 'US' } },
+              $state: { store: 'appState' },
+            },
+            {
+              meta: {
+                alias: null,
+                negate: false,
+                disabled: false,
+                type: 'phrase',
+                key: 'client_ip',
+                params: { query: '1234.5344.2243.3245' },
+                indexRefName: 'filter-index-pattern-2',
+              },
+              query: { match_phrase: { client_ip: '1234.5344.2243.3245' } },
+              $state: { store: 'appState' },
+            },
+          ],
+        },
+      },
+    } as unknown as SavedObjectUnsanitizedDoc<LensDocShape715<VisState716>>;
+
+    it('should migrate filters schema', () => {
+      const expectedFilters = [
+        {
+          meta: {
+            alias: null,
+            negate: false,
+            disabled: false,
+            type: 'phrase',
+            key: 'geo.src',
+            params: { query: 'US' },
+            index: 'filter-index-pattern-0',
+          },
+          query: { match_phrase: { 'geo.src': 'US' } },
+          $state: { store: 'appState' },
+        },
+        {
+          meta: {
+            alias: null,
+            negate: false,
+            disabled: false,
+            type: 'phrase',
+            key: 'client_ip',
+            params: { query: '1234.5344.2243.3245' },
+            index: 'filter-index-pattern-2',
+          },
+          query: { match_phrase: { client_ip: '1234.5344.2243.3245' } },
+          $state: { store: 'appState' },
+        },
+      ];
+
+      const result = migrations['8.1.0'](example, context) as ReturnType<
+        SavedObjectMigrationFn<LensDocShape, LensDocShape>
+      >;
+
+      expect(result.attributes.state.filters).toEqual(expectedFilters);
+    });
+  });
 });

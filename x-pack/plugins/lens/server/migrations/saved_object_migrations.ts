@@ -25,6 +25,7 @@ import {
   VisStatePost715,
   VisStatePre715,
   VisState716,
+  LensDocShape810,
 } from './types';
 import {
   commonRenameOperationsForFormula,
@@ -438,6 +439,21 @@ const moveDefaultReversedPaletteToCustom: SavedObjectMigrationFn<
   return { ...newDoc, attributes: commonMakeReversePaletteAsCustom(newDoc.attributes) };
 };
 
+const renameFilterReferences: SavedObjectMigrationFn<
+  LensDocShape715<VisState716>,
+  LensDocShape715<VisState716>
+> = (doc) => {
+  const newDoc = cloneDeep(doc);
+  const newFilters = newDoc.attributes.state.filters.map((filter) => {
+    const ret = cloneDeep(filter);
+    ret.meta.index = ret.meta.indexRefName;
+    delete ret.meta.indexRefName;
+    return ret as Filter;
+  });
+  newDoc.attributes.state.filters = newFilters;
+  return newDoc;
+};
+
 export const migrations: SavedObjectMigrationMap = {
   '7.7.0': removeInvalidAccessors,
   // The order of these migrations matter, since the timefield migration relies on the aggConfigs
@@ -451,4 +467,5 @@ export const migrations: SavedObjectMigrationMap = {
   '7.14.0': removeTimezoneDateHistogramParam,
   '7.15.0': addLayerTypeToVisualization,
   '7.16.0': moveDefaultReversedPaletteToCustom,
+  '8.1.0': renameFilterReferences,
 };
