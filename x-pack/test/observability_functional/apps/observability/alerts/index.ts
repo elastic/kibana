@@ -284,14 +284,11 @@ export default ({ getService }: FtrProviderContext) => {
           await disableAlert({ supertest, alertId: alertToDisable.id });
           await muteAlert({ supertest, alertId: alertToMute.id });
 
-          // await esArchiver.load('x-pack/test/functional/es_archives/observability/rules');
-          // await esArchiver.load('x-pack/test/functional/es_archives/alerts');
           await observability.alerts.common.navigateToTimeWithData();
         });
 
         afterEach(async () => {
           await objectRemover.removeAll();
-          // await esArchiver.unload('x-pack/test/functional/es_archives/observability/rules');
         });
 
         it('Exist and display expected values', async () => {
