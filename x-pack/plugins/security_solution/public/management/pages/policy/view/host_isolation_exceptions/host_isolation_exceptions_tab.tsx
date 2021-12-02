@@ -42,7 +42,7 @@ export const PolicyHostIsolationExceptionsTab = ({
     filter: location.filter,
     page: location.page_index,
     perPage: location.page_size,
-    policies: [policyId],
+    policies: [policyId, 'all'],
   });
 
   // TODO hasNoDefinedExceptions
