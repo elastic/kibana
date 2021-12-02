@@ -13,7 +13,6 @@ import { useICMPSimpleFieldsContext } from '../contexts';
 import { OptionalLabel } from '../optional_label';
 import { ScheduleField } from '../schedule_field';
 import { SimpleFieldsWrapper } from '../common/simple_fields_wrapper';
-import { Enabled } from '../common/enabled';
 
 interface Props {
   validate: Validation;
