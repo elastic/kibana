@@ -9,6 +9,7 @@ import type { IconType } from '@elastic/eui/src/components/icon/icon';
 import type { CoreSetup, SavedObjectReference } from 'kibana/public';
 import type { PaletteOutput } from 'src/plugins/charts/public';
 import type { MutableRefObject } from 'react';
+import { Filter } from '@kbn/es-query';
 import type {
   ExpressionAstExpression,
   ExpressionRendererEvent,
