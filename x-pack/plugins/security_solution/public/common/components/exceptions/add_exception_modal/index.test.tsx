@@ -12,7 +12,7 @@ import { waitFor } from '@testing-library/react';
 
 import { AddExceptionModal } from './';
 import { useCurrentUser } from '../../../../common/lib/kibana';
-import { ExceptionBuilder } from '../../../../shared_imports';
+import { getExceptionBuilderComponentLazy } from '../../../../../../lists/public';
 import { useAsync } from '@kbn/securitysolution-hook-utils';
 import { getExceptionListSchemaMock } from '../../../../../../lists/common/schemas/response/exception_list_schema.mock';
 import { useFetchIndex } from '../../../containers/source';
@@ -54,47 +54,58 @@ jest.mock('@kbn/securitysolution-hook-utils', () => ({
   useAsync: jest.fn(),
 }));
 jest.mock('../../../../detections/containers/detection_engine/rules/use_rule_async');
+jest.mock('../../../../../../lists/public');
+
+const mockGetExceptionBuilderComponentLazy = getExceptionBuilderComponentLazy as jest.Mock<
+  ReturnType<typeof getExceptionBuilderComponentLazy>
+>;
+const mockUseAsync = useAsync as jest.Mock<ReturnType<typeof useAsync>>;
+const mockUseAddOrUpdateException = useAddOrUpdateException as jest.Mock<
+  ReturnType<typeof useAddOrUpdateException>
+>;
+const mockUseFetchOrCreateRuleExceptionList = useFetchOrCreateRuleExceptionList as jest.Mock<
+  ReturnType<typeof useFetchOrCreateRuleExceptionList>
+>;
+const mockUseSignalIndex = useSignalIndex as jest.Mock<Partial<ReturnType<typeof useSignalIndex>>>;
+const mockUseFetchIndex = useFetchIndex as jest.Mock;
+const mockUseCurrentUser = useCurrentUser as jest.Mock<Partial<ReturnType<typeof useCurrentUser>>>;
+const mockUseRuleAsync = useRuleAsync as jest.Mock;
 
 describe('When the add exception modal is opened', () => {
   const ruleName = 'test rule';
   let defaultEndpointItems: jest.SpyInstance<
     ReturnType<typeof helpers.defaultEndpointExceptionItems>
   >;
-  let ExceptionBuilderComponent: jest.SpyInstance<
-    ReturnType<typeof ExceptionBuilder.getExceptionBuilderComponentLazy>
-  >;
   beforeEach(() => {
-    const emptyComp = <span data-test-subj="alert-exception-builder" />;
+    mockGetExceptionBuilderComponentLazy.mockReturnValue(
+      <span data-test-subj="alert-exception-builder" />
+    );
     defaultEndpointItems = jest.spyOn(helpers, 'defaultEndpointExceptionItems');
-    ExceptionBuilderComponent = jest
-      .spyOn(ExceptionBuilder, 'getExceptionBuilderComponentLazy')
-      .mockReturnValue(emptyComp);
 
-    (useAsync as jest.Mock).mockImplementation(() => ({
+    mockUseAsync.mockImplementation(() => ({
       start: jest.fn(),
       loading: false,
+      error: {},
+      result: true,
     }));
 
-    (useAddOrUpdateException as jest.Mock).mockImplementation(() => [
-      { isLoading: false },
-      jest.fn(),
-    ]);
-    (useFetchOrCreateRuleExceptionList as jest.Mock).mockImplementation(() => [
+    mockUseAddOrUpdateException.mockImplementation(() => [{ isLoading: false }, jest.fn()]);
+    mockUseFetchOrCreateRuleExceptionList.mockImplementation(() => [
       false,
       getExceptionListSchemaMock(),
     ]);
-    (useSignalIndex as jest.Mock).mockImplementation(() => ({
+    mockUseSignalIndex.mockImplementation(() => ({
       loading: false,
       signalIndexName: 'mock-siem-signals-index',
     }));
-    (useFetchIndex as jest.Mock).mockImplementation(() => [
+    mockUseFetchIndex.mockImplementation(() => [
       false,
       {
         indexPatterns: stubIndexPattern,
       },
     ]);
-    (useCurrentUser as jest.Mock).mockReturnValue({ username: 'test-username' });
-    (useRuleAsync as jest.Mock).mockImplementation(() => ({
+    mockUseCurrentUser.mockReturnValue({ username: 'test-username' });
+    mockUseRuleAsync.mockImplementation(() => ({
       rule: getRulesSchemaMock(),
     }));
   });
@@ -108,7 +119,7 @@ describe('When the add exception modal is opened', () => {
     let wrapper: ReactWrapper;
     beforeEach(() => {
       // Mocks one of the hooks as loading
-      (useFetchIndex as jest.Mock).mockImplementation(() => [
+      mockUseFetchIndex.mockImplementation(() => [
         true,
         {
           indexPatterns: stubIndexPattern,
@@ -147,7 +158,7 @@ describe('When the add exception modal is opened', () => {
           />
         </ThemeProvider>
       );
-      const callProps = ExceptionBuilderComponent.mock.calls[0][0];
+      const callProps = mockGetExceptionBuilderComponentLazy.mock.calls[0][0];
       await waitFor(() => callProps.onChange({ exceptionItems: [] }));
     });
     it('has the add exception button disabled', () => {
@@ -192,7 +203,7 @@ describe('When the add exception modal is opened', () => {
           />
         </ThemeProvider>
       );
-      const callProps = ExceptionBuilderComponent.mock.calls[0][0];
+      const callProps = mockGetExceptionBuilderComponentLazy.mock.calls[0][0];
       await waitFor(() =>
         callProps.onChange({ exceptionItems: [...callProps.exceptionListItems] })
       );
@@ -252,7 +263,7 @@ describe('When the add exception modal is opened', () => {
           />
         </ThemeProvider>
       );
-      const callProps = ExceptionBuilderComponent.mock.calls[0][0];
+      const callProps = mockGetExceptionBuilderComponentLazy.mock.calls[0][0];
       await waitFor(() =>
         callProps.onChange({ exceptionItems: [getExceptionListItemSchemaMock()] })
       );
@@ -288,7 +299,7 @@ describe('When the add exception modal is opened', () => {
   describe('when there is an exception being created on a sequence eql rule type', () => {
     let wrapper: ReactWrapper;
     beforeEach(async () => {
-      (useRuleAsync as jest.Mock).mockImplementation(() => ({
+      mockUseRuleAsync.mockImplementation(() => ({
         rule: {
           ...getRulesEqlSchemaMock(),
           query:
@@ -313,7 +324,7 @@ describe('When the add exception modal is opened', () => {
           />
         </ThemeProvider>
       );
-      const callProps = ExceptionBuilderComponent.mock.calls[0][0];
+      const callProps = mockGetExceptionBuilderComponentLazy.mock.calls[0][0];
       await waitFor(() =>
         callProps.onChange({ exceptionItems: [getExceptionListItemSchemaMock()] })
       );
@@ -354,7 +365,7 @@ describe('When the add exception modal is opened', () => {
     };
     beforeEach(async () => {
       // Mocks the index patterns to contain the pre-populated endpoint fields so that the exception qualifies as bulk closable
-      (useFetchIndex as jest.Mock).mockImplementation(() => [
+      mockUseFetchIndex.mockImplementation(() => [
         false,
         {
           indexPatterns: {
@@ -387,7 +398,7 @@ describe('When the add exception modal is opened', () => {
           />
         </ThemeProvider>
       );
-      callProps = ExceptionBuilderComponent.mock.calls[0][0];
+      callProps = mockGetExceptionBuilderComponentLazy.mock.calls[0][0];
       await waitFor(() =>
         callProps.onChange({ exceptionItems: [...callProps.exceptionListItems] })
       );
@@ -456,7 +467,7 @@ describe('When the add exception modal is opened', () => {
         />
       </ThemeProvider>
     );
-    const callProps = ExceptionBuilderComponent.mock.calls[0][0];
+    const callProps = mockGetExceptionBuilderComponentLazy.mock.calls[0][0];
     await waitFor(() => callProps.onChange({ exceptionItems: [], errorExists: true }));
     expect(
       wrapper.find('button[data-test-subj="add-exception-confirm-button"]').getDOMNode()

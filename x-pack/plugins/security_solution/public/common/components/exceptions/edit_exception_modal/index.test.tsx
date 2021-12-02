@@ -24,7 +24,7 @@ import {
 } from '../../../../../common/detection_engine/schemas/response/rules_schema.mocks';
 import { useRuleAsync } from '../../../../detections/containers/detection_engine/rules/use_rule_async';
 import { getMockTheme } from '../../../lib/kibana/kibana_react.mock';
-import { ExceptionBuilder } from '../../../../shared_imports';
+import { getExceptionBuilderComponentLazy } from '../../../../../../lists/public';
 
 const mockTheme = getMockTheme({
   eui: {
@@ -44,39 +44,31 @@ jest.mock('../../../containers/source');
 jest.mock('../use_fetch_or_create_rule_exception_list');
 jest.mock('../../../../detections/containers/detection_engine/alerts/use_signal_index');
 jest.mock('../../../../detections/containers/detection_engine/rules/use_rule_async');
-jest.mock('../../../../shared_imports', () => {
-  const originalModule = jest.requireActual('../../../../shared_imports');
-  const emptyComp = <span data-test-subj="edit-exception-modal-builder" />;
-  return {
-    ...originalModule,
-    ExceptionBuilder: {
-      getExceptionBuilderComponentLazy: () => emptyComp,
-    },
-  };
-});
+jest.mock('../../../../../../lists/public');
+
+const mockGetExceptionBuilderComponentLazy = getExceptionBuilderComponentLazy as jest.Mock<
+  ReturnType<typeof getExceptionBuilderComponentLazy>
+>;
+const mockUseSignalIndex = useSignalIndex as jest.Mock<Partial<ReturnType<typeof useSignalIndex>>>;
+const mockUseAddOrUpdateException = useAddOrUpdateException as jest.Mock<
+  ReturnType<typeof useAddOrUpdateException>
+>;
+const mockUseFetchIndex = useFetchIndex as jest.Mock;
+const mockUseCurrentUser = useCurrentUser as jest.Mock<Partial<ReturnType<typeof useCurrentUser>>>;
+const mockUseRuleAsync = useRuleAsync as jest.Mock;
 
 describe('When the edit exception modal is opened', () => {
   const ruleName = 'test rule';
 
-  let ExceptionBuilderComponent: jest.SpyInstance<
-    ReturnType<typeof ExceptionBuilder.getExceptionBuilderComponentLazy>
-  >;
-
   beforeEach(() => {
     const emptyComp = <span data-test-subj="edit-exception-modal-builder" />;
-    ExceptionBuilderComponent = jest
-      .spyOn(ExceptionBuilder, 'getExceptionBuilderComponentLazy')
-      .mockReturnValue(emptyComp);
-
-    (useSignalIndex as jest.Mock).mockReturnValue({
+    mockGetExceptionBuilderComponentLazy.mockReturnValue(emptyComp);
+    mockUseSignalIndex.mockReturnValue({
       loading: false,
       signalIndexName: 'test-signal',
     });
-    (useAddOrUpdateException as jest.Mock).mockImplementation(() => [
-      { isLoading: false },
-      jest.fn(),
-    ]);
-    (useFetchIndex as jest.Mock).mockImplementation(() => [
+    mockUseAddOrUpdateException.mockImplementation(() => [{ isLoading: false }, jest.fn()]);
+    mockUseFetchIndex.mockImplementation(() => [
       false,
       {
         indexPatterns: createStubIndexPattern({
@@ -96,8 +88,8 @@ describe('When the edit exception modal is opened', () => {
         }),
       },
     ]);
-    (useCurrentUser as jest.Mock).mockReturnValue({ username: 'test-username' });
-    (useRuleAsync as jest.Mock).mockImplementation(() => ({
+    mockUseCurrentUser.mockReturnValue({ username: 'test-username' });
+    mockUseRuleAsync.mockImplementation(() => ({
       rule: getRulesSchemaMock(),
     }));
   });
@@ -109,7 +101,7 @@ describe('When the edit exception modal is opened', () => {
 
   describe('when the modal is loading', () => {
     it('renders the loading spinner', async () => {
-      (useFetchIndex as jest.Mock).mockImplementation(() => [
+      mockUseFetchIndex.mockImplementation(() => [
         true,
         {
           indexPatterns: stubIndexPattern,
@@ -157,7 +149,7 @@ describe('When the edit exception modal is opened', () => {
             />
           </ThemeProvider>
         );
-        const callProps = ExceptionBuilderComponent.mock.calls[0][0];
+        const callProps = mockGetExceptionBuilderComponentLazy.mock.calls[0][0];
         await waitFor(() => {
           callProps.onChange({ exceptionItems: [...callProps.exceptionListItems] });
         });
@@ -202,7 +194,7 @@ describe('When the edit exception modal is opened', () => {
             />
           </ThemeProvider>
         );
-        const callProps = ExceptionBuilderComponent.mock.calls[0][0];
+        const callProps = mockGetExceptionBuilderComponentLazy.mock.calls[0][0];
         await waitFor(() => {
           callProps.onChange({ exceptionItems: [...callProps.exceptionListItems] });
         });
@@ -255,7 +247,7 @@ describe('When the edit exception modal is opened', () => {
           />
         </ThemeProvider>
       );
-      const callProps = ExceptionBuilderComponent.mock.calls[0][0];
+      const callProps = (getExceptionBuilderComponentLazy as jest.Mock).mock.calls[0][0];
       await waitFor(() => {
         callProps.onChange({ exceptionItems: [...callProps.exceptionListItems] });
       });
@@ -299,7 +291,7 @@ describe('When the edit exception modal is opened', () => {
           />
         </ThemeProvider>
       );
-      const callProps = ExceptionBuilderComponent.mock.calls[0][0];
+      const callProps = mockGetExceptionBuilderComponentLazy.mock.calls[0][0];
       await waitFor(() => {
         callProps.onChange({ exceptionItems: [...callProps.exceptionListItems] });
       });
@@ -344,7 +336,7 @@ describe('When the edit exception modal is opened', () => {
           />
         </ThemeProvider>
       );
-      const callProps = ExceptionBuilderComponent.mock.calls[0][0];
+      const callProps = mockGetExceptionBuilderComponentLazy.mock.calls[0][0];
       await waitFor(() => {
         callProps.onChange({ exceptionItems: [...callProps.exceptionListItems] });
       });
@@ -380,7 +372,7 @@ describe('When the edit exception modal is opened', () => {
         />
       </ThemeProvider>
     );
-    const callProps = ExceptionBuilderComponent.mock.calls[0][0];
+    const callProps = mockGetExceptionBuilderComponentLazy.mock.calls[0][0];
     await waitFor(() => callProps.onChange({ exceptionItems: [], errorExists: true }));
 
     expect(
