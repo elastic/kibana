@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiText, EuiTextColor, EuiLink } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { Legacy } from '../../../legacy_shims';
 
 export const CloudDeployment = () => {

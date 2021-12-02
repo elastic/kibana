@@ -59,7 +59,7 @@ const CallOutComponent = ({
       {!isCaseClosed && !hasLicenseError && (
         <EuiButton
           data-test-subj={`callout-onclick-${id}`}
-          color={type === 'success' ? 'secondary' : type}
+          color={type === 'success' ? 'success' : type}
           onClick={handleCallOut}
         >
           {i18n.ADD_CONNECTOR}

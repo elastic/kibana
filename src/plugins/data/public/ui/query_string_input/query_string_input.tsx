@@ -24,7 +24,7 @@ import {
   EuiIconProps,
 } from '@elastic/eui';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { debounce, compact, isEqual, isFunction } from 'lodash';
 import { Toast } from 'src/core/public';
 import { METRIC_TYPE } from '@kbn/analytics';

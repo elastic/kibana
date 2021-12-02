@@ -14,11 +14,10 @@ import { useGetTags } from '../../containers/use_get_tags';
 import { useConnectors } from '../../containers/configure/use_connectors';
 import { connectorsMock } from '../../containers/mock';
 import { schema, FormProps } from './schema';
-import { CreateCaseForm } from './form';
-import { OwnerProvider } from '../owner_context';
-import { SECURITY_SOLUTION_OWNER } from '../../../common';
+import { CreateCaseForm, CreateCaseFormFields, CreateCaseFormProps } from './form';
 import { useCaseConfigure } from '../../containers/configure/use_configure';
 import { useCaseConfigureResponse } from '../configure_cases/__mock__';
+import { TestProviders } from '../../common/mock';
 
 jest.mock('../../containers/use_get_tags');
 jest.mock('../../containers/configure/use_connectors');
@@ -38,6 +37,11 @@ const initialCaseValue: FormProps = {
   syncAlerts: true,
 };
 
+const casesFormProps: CreateCaseFormProps = {
+  onCancel: jest.fn(),
+  onSuccess: jest.fn(),
+};
+
 describe('CreateCaseForm', () => {
   let globalForm: FormHook;
   const MockHookWrapperComponent: React.FC = ({ children }) => {
@@ -50,9 +54,9 @@ describe('CreateCaseForm', () => {
     globalForm = form;
 
     return (
-      <OwnerProvider owner={[SECURITY_SOLUTION_OWNER]}>
+      <TestProviders>
         <Form form={form}>{children}</Form>
-      </OwnerProvider>
+      </TestProviders>
     );
   };
 
@@ -66,7 +70,7 @@ describe('CreateCaseForm', () => {
   it('it renders with steps', async () => {
     const wrapper = mount(
       <MockHookWrapperComponent>
-        <CreateCaseForm />
+        <CreateCaseForm {...casesFormProps} />
       </MockHookWrapperComponent>
     );
 
@@ -76,7 +80,7 @@ describe('CreateCaseForm', () => {
   it('it renders without steps', async () => {
     const wrapper = mount(
       <MockHookWrapperComponent>
-        <CreateCaseForm withSteps={false} />
+        <CreateCaseForm {...casesFormProps} withSteps={false} />
       </MockHookWrapperComponent>
     );
 
@@ -86,7 +90,7 @@ describe('CreateCaseForm', () => {
   it('it renders all form fields', async () => {
     const wrapper = mount(
       <MockHookWrapperComponent>
-        <CreateCaseForm />
+        <CreateCaseForm {...casesFormProps} />
       </MockHookWrapperComponent>
     );
 
@@ -97,36 +101,45 @@ describe('CreateCaseForm', () => {
     expect(wrapper.find(`[data-test-subj="caseConnectors"]`).exists()).toBeTruthy();
   });
 
-  it('should render spinner when loading', async () => {
-    const wrapper = mount(
+  it('hides the sync alerts toggle', () => {
+    const { queryByText } = render(
       <MockHookWrapperComponent>
-        <CreateCaseForm />
+        <CreateCaseForm {...casesFormProps} disableAlerts />
       </MockHookWrapperComponent>
     );
 
-    await act(async () => {
-      globalForm.setFieldValue('title', 'title');
-      globalForm.setFieldValue('description', 'description');
-      globalForm.submit();
-      // For some weird reason this is needed to pass the test.
-      // It does not do anything useful
-      await wrapper.find(`[data-test-subj="caseTitle"]`);
-      await wrapper.update();
+    expect(queryByText('Sync alert')).not.toBeInTheDocument();
+  });
+
+  describe('CreateCaseFormFields', () => {
+    it('should render spinner when loading', async () => {
+      const wrapper = mount(
+        <MockHookWrapperComponent>
+          <CreateCaseFormFields
+            connectors={[]}
+            isLoadingConnectors={false}
+            disableAlerts={false}
+            hideConnectorServiceNowSir={false}
+            withSteps={true}
+          />
+        </MockHookWrapperComponent>
+      );
+
+      await act(async () => {
+        globalForm.setFieldValue('title', 'title');
+        globalForm.setFieldValue('description', 'description');
+        globalForm.submit();
+        // For some weird reason this is needed to pass the test.
+        // It does not do anything useful
+        await wrapper.find(`[data-test-subj="caseTitle"]`);
+        await wrapper.update();
+      });
+
       await waitFor(() => {
         expect(
           wrapper.find(`[data-test-subj="create-case-loading-spinner"]`).exists()
         ).toBeTruthy();
       });
     });
-  });
-
-  it('hides the sync alerts toggle', () => {
-    const { queryByText } = render(
-      <MockHookWrapperComponent>
-        <CreateCaseForm disableAlerts />
-      </MockHookWrapperComponent>
-    );
-
-    expect(queryByText('Sync alert')).not.toBeInTheDocument();
   });
 });

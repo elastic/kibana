@@ -21,10 +21,10 @@ import {
 
 import { CreateTrustedAppForm, CreateTrustedAppFormProps } from './create_trusted_app_form';
 import { defaultNewTrustedApp } from '../../store/builders';
-import { forceHTMLElementOffsetWidth } from './effected_policy_select/test_utils';
 import { EndpointDocGenerator } from '../../../../../../common/endpoint/generate_data';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { licenseService } from '../../../../../common/hooks/use_license';
+import { forceHTMLElementOffsetWidth } from '../../../../components/effected_policy_select/test_utils';
 
 jest.mock('../../../../../common/hooks/use_experimental_features');
 const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as jest.Mock;

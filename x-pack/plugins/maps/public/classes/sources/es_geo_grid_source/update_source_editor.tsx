@@ -8,7 +8,7 @@
 import React, { Fragment, Component } from 'react';
 
 import uuid from 'uuid/v4';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiPanel, EuiSpacer, EuiComboBoxOptionOption, EuiTitle } from '@elastic/eui';
 import { getDataViewNotFoundMessage } from '../../../../common/i18n_getters';
 import { AGG_TYPE, GRID_RESOLUTION, LAYER_TYPE, RENDER_AS } from '../../../../common/constants';
@@ -20,6 +20,7 @@ import { IndexPatternField, indexPatterns } from '../../../../../../../src/plugi
 import { RenderAsSelect } from './render_as_select';
 import { AggDescriptor } from '../../../../common/descriptor_types';
 import { OnSourceChangeArgs } from '../source';
+import { clustersTitle, heatmapTitle } from './es_geo_grid_source';
 
 interface Props {
   currentLayerType?: string;
@@ -86,14 +87,6 @@ export class UpdateSourceEditor extends Component<Props, State> {
     ) {
       newLayerType =
         resolution === GRID_RESOLUTION.SUPER_FINE ? LAYER_TYPE.TILED_VECTOR : LAYER_TYPE.VECTOR;
-    } else if (this.props.currentLayerType === LAYER_TYPE.HEATMAP) {
-      if (resolution === GRID_RESOLUTION.SUPER_FINE) {
-        throw new Error('Heatmap does not support SUPER_FINE resolution');
-      } else {
-        newLayerType = LAYER_TYPE.HEATMAP;
-      }
-    } else {
-      throw new Error('Unexpected layer-type');
     }
 
     await this.props.onChange(
@@ -155,15 +148,12 @@ export class UpdateSourceEditor extends Component<Props, State> {
         <EuiPanel>
           <EuiTitle size="xs">
             <h6>
-              <FormattedMessage
-                id="xpack.maps.source.esGrid.geoTileGridLabel"
-                defaultMessage="Grid parameters"
-              />
+              {this.props.currentLayerType === LAYER_TYPE.HEATMAP ? heatmapTitle : clustersTitle}
             </h6>
           </EuiTitle>
           <EuiSpacer size="m" />
           <ResolutionEditor
-            includeSuperFine={this.props.currentLayerType !== LAYER_TYPE.HEATMAP}
+            isHeatmap={this.props.currentLayerType === LAYER_TYPE.HEATMAP}
             resolution={this.props.resolution}
             onChange={this._onResolutionChange}
             metrics={this.props.metrics}

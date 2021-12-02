@@ -23,6 +23,7 @@ export function readCliArgs(argv: string[]) {
       'rpm',
       'deb',
       'docker-images',
+      'docker-push',
       'skip-docker-contexts',
       'skip-docker-ubi',
       'skip-docker-centos',
@@ -50,6 +51,8 @@ export function readCliArgs(argv: string[]) {
       rpm: null,
       deb: null,
       'docker-images': null,
+      'docker-push': false,
+      'docker-tag-qualifier': null,
       'version-qualifier': '',
     },
     unknown: (flag) => {
@@ -95,6 +98,8 @@ export function readCliArgs(argv: string[]) {
   const buildOptions: BuildOptions = {
     isRelease: Boolean(flags.release),
     versionQualifier: flags['version-qualifier'],
+    dockerPush: Boolean(flags['docker-push']),
+    dockerTagQualifier: flags['docker-tag-qualifier'],
     initialize: !Boolean(flags['skip-initialize']),
     downloadFreshNode: !Boolean(flags['skip-node-download']),
     downloadCloudDependencies: !Boolean(flags['skip-cloud-dependencies-download']),

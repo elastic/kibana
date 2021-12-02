@@ -7,11 +7,11 @@
  */
 
 import agent from 'elastic-apm-node';
-import { getConfiguration } from '@kbn/apm-config-loader';
+import { getConfiguration, shouldInstrumentClient } from '@kbn/apm-config-loader';
 
 export const getApmConfig = (requestPath: string) => {
   const baseConfig = getConfiguration('kibana-frontend');
-  if (!baseConfig?.active) {
+  if (!shouldInstrumentClient(baseConfig)) {
     return null;
   }
 

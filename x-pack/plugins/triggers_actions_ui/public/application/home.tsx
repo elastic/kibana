@@ -7,7 +7,7 @@
 
 import React, { lazy, useEffect } from 'react';
 import { Route, RouteComponentProps, Switch } from 'react-router-dom';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSpacer, EuiButtonEmpty, EuiPageHeader } from '@elastic/eui';
 
 import { Section, routeToConnectors, routeToRules } from './constants';

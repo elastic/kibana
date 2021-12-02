@@ -12,6 +12,7 @@ export const DEFAULT_PALETTE_NAME = 'status';
 export const DEFAULT_COLOR_STEPS = 3;
 export const defaultPaletteParams: RequiredPaletteParamTypes = {
   ...sharedDefaultParams,
+  maxSteps: 5,
   name: DEFAULT_PALETTE_NAME,
   rangeType: 'number',
   steps: DEFAULT_COLOR_STEPS,

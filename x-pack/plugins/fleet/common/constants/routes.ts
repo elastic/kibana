@@ -46,6 +46,7 @@ export const PACKAGE_POLICY_API_ROUTES = {
   UPDATE_PATTERN: `${PACKAGE_POLICY_API_ROOT}/{packagePolicyId}`,
   DELETE_PATTERN: `${PACKAGE_POLICY_API_ROOT}/delete`,
   UPGRADE_PATTERN: `${PACKAGE_POLICY_API_ROOT}/upgrade`,
+  DRYRUN_PATTERN: `${PACKAGE_POLICY_API_ROOT}/upgrade/dryrun`,
 };
 
 // Agent policy API routes

@@ -17,7 +17,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import styled from 'styled-components';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import type {
   AssetsGroupedByServiceByType,

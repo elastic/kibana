@@ -40,6 +40,10 @@ jest.mock('../../../../common/lib/kibana', () => {
             siem: { crud_alerts: true, read_alerts: true },
           },
         },
+        data: {
+          search: jest.fn(),
+          query: jest.fn(),
+        },
         uiSettings: {
           get: jest.fn(),
         },

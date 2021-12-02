@@ -11,7 +11,7 @@ import {
   HostsQueries,
   HostsRiskScoreStrategyResponse,
 } from '../../../../../../common';
-import { IEsSearchResponse } from '../../../../../../../../../src/plugins/data/common';
+import type { IEsSearchResponse } from '../../../../../../../../../src/plugins/data/common';
 import { inspectStringifyObject } from '../../../../../utils/build_query';
 import { buildHostsRiskScoreQuery } from './query.hosts_risk.dsl';
 
