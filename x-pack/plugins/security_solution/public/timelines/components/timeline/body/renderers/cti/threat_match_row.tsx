@@ -47,7 +47,7 @@ export const ThreatMatchRow = ({
     contextId,
     eventId,
     indicatorReference: get(data, REFERENCE)[0] as string | undefined,
-    indicatorProvider: (get(data, FEED_NAME)[0] ?? get(data, PROVIDER)[0]) as string | undefined,
+    indicatorProvider: get(data, FEED_NAME)[0] as string | undefined,
     indicatorType: get(data, MATCHED_TYPE)[0] as string | undefined,
     isDraggable,
     sourceField: get(data, MATCHED_FIELD)[0] as string,

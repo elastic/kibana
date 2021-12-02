@@ -1108,7 +1108,7 @@ export const mockTimelineData: TimelineItem[] = [
               type: ['ip'],
             },
             feed: {
-              name: ['indicator_provider'],
+              name: ['feed_name'],
             },
           },
         ],

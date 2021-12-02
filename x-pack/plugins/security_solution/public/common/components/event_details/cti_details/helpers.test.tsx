@@ -377,22 +377,4 @@ describe('getEnrichmentIdentifiers', () => {
       provider: 'feed name',
     });
   });
-
-  it(`return provider if feed name isn't present in enrichment`, () => {
-    expect(
-      getEnrichmentIdentifiers({
-        'matched.id': [1],
-        'matched.field': ['matched field'],
-        'matched.atomic': ['matched atomic'],
-        'matched.type': ['matched type'],
-        'indicator.provider': ['provider name'],
-      })
-    ).toEqual({
-      id: 1,
-      field: 'matched field',
-      value: 'matched atomic',
-      type: 'matched type',
-      provider: 'provider name',
-    });
-  });
 });
