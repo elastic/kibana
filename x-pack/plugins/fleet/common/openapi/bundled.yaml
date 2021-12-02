@@ -253,6 +253,51 @@ paths:
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
   /agent-status:
+    deprecated: true
+    get:
+      summary: Agents - Summary stats
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: integer
+                  events:
+                    type: integer
+                  inactive:
+                    type: integer
+                  offline:
+                    type: integer
+                  online:
+                    type: integer
+                  other:
+                    type: integer
+                  total:
+                    type: integer
+                  updating:
+                    type: integer
+                required:
+                  - error
+                  - events
+                  - inactive
+                  - offline
+                  - online
+                  - other
+                  - total
+                  - updating
+      operationId: get-agent-status
+      parameters:
+        - schema:
+            type: string
+          name: policyId
+          in: query
+          required: false
+  /agent_status:
     get:
       summary: Agents - Summary stats
       tags: []
@@ -789,6 +834,7 @@ paths:
         - $ref: '#/components/parameters/kbn_xsrf'
     parameters: []
   /enrollment-api-keys:
+    deprecated: true
     get:
       summary: Enrollment API Keys - List
       tags: []
@@ -843,6 +889,104 @@ paths:
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
   /enrollment-api-keys/{keyId}:
+    deprecated: true
+    parameters:
+      - schema:
+          type: string
+        name: keyId
+        in: path
+        required: true
+    get:
+      summary: Enrollment API Key - Info
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  item:
+                    $ref: '#/components/schemas/enrollment_api_key'
+                required:
+                  - item
+      operationId: get-enrollment-api-key
+    delete:
+      summary: Enrollment API Key - Delete
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  action:
+                    type: string
+                    enum:
+                      - deleted
+                required:
+                  - action
+      operationId: delete-enrollment-api-key
+      parameters:
+        - $ref: '#/components/parameters/kbn_xsrf'
+  /enrollment_api_keys:
+    get:
+      summary: Enrollment API Keys - List
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  list:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/enrollment_api_key'
+                    deprecated: true
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/enrollment_api_key'
+                  page:
+                    type: number
+                  perPage:
+                    type: number
+                  total:
+                    type: number
+                required:
+                  - items
+                  - page
+                  - perPage
+                  - total
+      operationId: get-enrollment-api-keys
+      parameters: []
+    post:
+      summary: Enrollment API Key - Create
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  item:
+                    $ref: '#/components/schemas/enrollment_api_key'
+                  action:
+                    type: string
+                    enum:
+                      - created
+      operationId: create-enrollment-api-keys
+      parameters:
+        - $ref: '#/components/parameters/kbn_xsrf'
+  /enrollment_api_keys/{keyId}:
     parameters:
       - schema:
           type: string
