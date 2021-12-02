@@ -21,7 +21,7 @@ import { buildExpressionFunction } from '../../../../../../../../src/plugins/exp
 import { updateColumnParam } from '../../layer_helpers';
 import type { DataType } from '../../../../types';
 import { OperationDefinition } from '../index';
-import { FieldBasedIndexPatternColumn } from '../column_types';
+import { FieldBasedIndexPatternColumn, GenericIndexPatternColumn } from '../column_types';
 import { ValuesInput } from './values_input';
 import { getInvalidFieldMessage } from '../helpers';
 import { FieldInputs, MAX_MULTI_FIELDS_SIZE } from './field_inputs';
@@ -63,6 +63,12 @@ function ofName(name?: string, count: number = 0) {
 const DEFAULT_SIZE = 3;
 const supportedTypes = new Set(['string', 'boolean', 'number', 'ip']);
 
+function isTermsColumn(
+  column: GenericIndexPatternColumn | undefined
+): column is TermsIndexPatternColumn {
+  return column?.operationType === 'terms';
+}
+
 export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field'> = {
   type: 'terms',
   displayName: i18n.translate('xpack.lens.indexPattern.terms', {
@@ -70,11 +76,46 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
   }),
   priority: 3, // Higher than any metric
   input: 'field',
-  getParamsForMultipleFields: (oldColumn, field) => {
-    return { secondaryFields: [...(oldColumn.params?.secondaryFields || []), field.name] };
+  getParamsForMultipleFields: ({ targetColumn, sourceColumn, field }) => {
+    const secondaryFields = new Set<string>();
+    if (targetColumn.params?.secondaryFields?.length) {
+      targetColumn.params.secondaryFields.forEach(secondaryFields.add, secondaryFields);
+    }
+    if (sourceColumn?.sourceField) {
+      secondaryFields.add(sourceColumn.sourceField);
+    }
+    if (sourceColumn?.params?.secondaryFields?.length) {
+      sourceColumn.params.secondaryFields.forEach(secondaryFields.add, secondaryFields);
+    }
+    if (field) {
+      secondaryFields.add(field.name);
+    }
+    return {
+      secondaryFields: [...secondaryFields.keys()].filter((f) => targetColumn.sourceField !== f),
+    };
   },
-  canAddNewField: (column) => {
-    return (column.params?.secondaryFields?.length ?? 0) < MAX_MULTI_FIELDS_SIZE;
+  canAddNewField: ({ targetColumn, sourceColumn, field }) => {
+    // first step: collect the fields from the targetColumn
+    const originalTerms = new Set([
+      targetColumn.sourceField,
+      ...(targetColumn.params?.secondaryFields ?? []),
+    ]);
+    // now check how many fields can be added
+    let counter = field && !originalTerms.has(field.name) ? 1 : 0;
+    if (sourceColumn) {
+      if ('sourceField' in sourceColumn) {
+        counter += !originalTerms.has(sourceColumn.sourceField) ? 1 : 0;
+        if (isTermsColumn(sourceColumn)) {
+          counter +=
+            sourceColumn.params.secondaryFields?.filter((f) => !originalTerms.has(f)).length ?? 0;
+        }
+      }
+    }
+    // reject when there are no new fields to add
+    if (!counter) {
+      return false;
+    }
+    return counter + (targetColumn.params?.secondaryFields?.length ?? 0) <= MAX_MULTI_FIELDS_SIZE;
   },
   getDefaultVisualSettings: (column) => ({
     truncateText: Boolean(!column.params?.secondaryFields?.length),

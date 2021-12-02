@@ -86,7 +86,7 @@ export function getDropProps(props: GetDropProps) {
     } else if (hasTheSameField(sourceColumn, targetColumn)) {
       return;
     } else if (filterOperations(sourceColumn)) {
-      return getDropPropsForCompatibleGroup(targetColumn, layerIndexPattern);
+      return getDropPropsForCompatibleGroup(targetColumn, sourceColumn, layerIndexPattern);
     } else {
       return getDropPropsFromIncompatibleGroup({ ...props, dragging });
     }
@@ -126,7 +126,7 @@ function getDropPropsForField({
       !hasField(targetColumn)
     ) {
       return hasField(targetColumn) &&
-        hasOperationSupportForMultipleFields(targetColumn, dragging.field)
+        hasOperationSupportForMultipleFields(targetColumn, undefined, dragging.field)
         ? {
             dropTypes: ['field_replace', 'field_combine'],
           }
@@ -145,6 +145,7 @@ function getDropPropsForSameGroup(targetColumn?: GenericIndexPatternColumn): Dro
 
 function getDropPropsForCompatibleGroup(
   targetColumn?: GenericIndexPatternColumn,
+  sourceColumn?: GenericIndexPatternColumn,
   indexPattern?: IndexPattern
 ): DropProps {
   if (!targetColumn) {
@@ -153,13 +154,12 @@ function getDropPropsForCompatibleGroup(
   if (!indexPattern || !hasField(targetColumn)) {
     return { dropTypes: ['replace_compatible', 'replace_duplicate_compatible', 'swap_compatible'] };
   }
-  const targetField = getField(targetColumn, indexPattern);
   return {
     dropTypes: [
       'replace_compatible',
       'replace_duplicate_compatible',
       'swap_compatible',
-      ...(targetField && hasOperationSupportForMultipleFields(targetColumn, targetField)
+      ...(hasOperationSupportForMultipleFields(targetColumn, sourceColumn)
         ? ['combine_compatible']
         : []),
     ] as DropType[],

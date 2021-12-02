@@ -313,11 +313,19 @@ interface BaseOperationDefinitionProps<C extends BaseIndexPatternColumn, P = {}>
   /**
    * Builds the correct parameter for field additions
    */
-  getParamsForMultipleFields?: (oldColumn: C, field: IndexPatternField) => Partial<P>;
+  getParamsForMultipleFields?: (props: {
+    targetColumn: C;
+    sourceColumn?: C;
+    field?: IndexPatternField;
+  }) => Partial<P>;
   /**
    * Verify if the a new field can be added to the column
    */
-  canAddNewField?: (column: C, field: IndexPatternField) => boolean;
+  canAddNewField?: (props: {
+    targetColumn: C;
+    sourceColumn?: GenericIndexPatternColumn;
+    field?: IndexPatternField;
+  }) => boolean;
   /**
    * Operation can influence some visual default settings. This function is used to collect default values offered
    */

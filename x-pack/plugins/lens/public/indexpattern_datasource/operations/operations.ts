@@ -68,13 +68,14 @@ export function getOperationHelperForMultipleFields(operationType: string) {
 }
 
 export function hasOperationSupportForMultipleFields(
-  column: BaseIndexPatternColumn,
-  field: IndexPatternField
+  targetColumn: BaseIndexPatternColumn,
+  sourceColumn?: BaseIndexPatternColumn,
+  field?: IndexPatternField
 ) {
   return Boolean(
     operationDefinitions
-      .find(({ type }) => column.operationType === type)
-      ?.canAddNewField?.(column, field)
+      .find(({ type }) => targetColumn.operationType === type)
+      ?.canAddNewField?.({ targetColumn, sourceColumn, field })
   );
 }
 

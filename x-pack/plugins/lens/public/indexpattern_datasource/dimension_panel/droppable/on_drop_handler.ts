@@ -86,10 +86,10 @@ function onCombineCompatible({
     return false;
   }
   // pass it to the target column and delete the source column
-  const incompleteParams = getOperationHelperForMultipleFields(targetColumn.operationType)?.(
+  const incompleteParams = getOperationHelperForMultipleFields(targetColumn.operationType)?.({
     targetColumn,
-    sourceField
-  );
+    sourceColumn,
+  });
 
   const modifiedLayer = replaceColumn({
     layer,
@@ -142,16 +142,17 @@ function onFieldDrop(props: DropHandlerProps<DraggedField>, shouldAddField?: boo
   if (
     !isDraggedField(droppedItem) ||
     !newOperation ||
-    (shouldAddField && !hasOperationSupportForMultipleFields(targetColumn, droppedItem.field))
+    (shouldAddField &&
+      !hasOperationSupportForMultipleFields(targetColumn, undefined, droppedItem.field))
   ) {
     return false;
   }
   const field = shouldAddField ? getField(targetColumn, indexPattern) : droppedItem.field;
   const incompleteParams = shouldAddField
-    ? getOperationHelperForMultipleFields(targetColumn.operationType)?.(
+    ? getOperationHelperForMultipleFields(targetColumn.operationType)?.({
         targetColumn,
-        droppedItem.field
-      ) || {}
+        field: droppedItem.field,
+      }) || {}
     : {};
 
   const newLayer = insertOrReplaceColumn({
