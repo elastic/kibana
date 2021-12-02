@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { buildEsQuery } from '@kbn/es-query';
 import { overwrite } from '../../helpers';
-import { esQuery } from '../../../../../../../data/server';
 
 import type { TableRequestProcessorsFunction } from './types';
 
@@ -24,7 +24,7 @@ export const splitByEverything: TableRequestProcessorsFunction =
           overwrite(
             doc,
             `aggs.pivot.aggs.${column.id}.filter`,
-            esQuery.buildEsQuery(indexPattern, [column.filter], [], esQueryConfig)
+            buildEsQuery(indexPattern, [column.filter], [], esQueryConfig)
           );
         } else {
           overwrite(doc, `aggs.pivot.aggs.${column.id}.filter.match_all`, {});

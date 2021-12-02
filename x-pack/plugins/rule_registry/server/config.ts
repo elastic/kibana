@@ -12,6 +12,7 @@ export const config: PluginConfigDescriptor = {
   deprecations: ({ deprecate, unused }) => [unused('unsafe.indexUpgrade.enabled')],
   schema: schema.object({
     write: schema.object({
+      disabledRegistrationContexts: schema.arrayOf(schema.string(), { defaultValue: [] }),
       enabled: schema.boolean({ defaultValue: true }),
       cache: schema.object({
         enabled: schema.boolean({ defaultValue: true }),

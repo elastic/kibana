@@ -72,6 +72,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               underlyingClient: config.ruleExecutionLog.underlyingClient,
               savedObjectsClient,
               eventLogService,
+              logger,
             });
 
         const completeRule = {
