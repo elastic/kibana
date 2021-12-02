@@ -86,6 +86,7 @@ export const PolicyHostIsolationExceptionsTab = ({
   const isLoading =
     policyExceptionsListRequest.isLoading || allExceptionsListRequest.isLoading || !policy;
 
+  // render non-existent or non-assigned messages
   if (!isLoading && (hasNoAssignedPolicies || hasNoExistingExceptions)) {
     if (hasNoExistingExceptions) {
       return <PolicyHostIsolationExceptionsEmptyUnexisting />;
@@ -95,6 +96,7 @@ export const PolicyHostIsolationExceptionsTab = ({
     }
   }
 
+  // render header and list
   return !isLoading && policyExceptionsListRequest.data ? (
     <div>
       <EuiPageHeader alignItems="center">
