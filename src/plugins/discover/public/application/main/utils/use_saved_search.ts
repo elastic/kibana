@@ -11,7 +11,6 @@ import { DiscoverServices } from '../../../build_services';
 import { DiscoverSearchSessionManager } from '../services/discover_search_session';
 import { ISearchSource } from '../../../../../data/common';
 import { GetStateReturn } from '../services/discover_state';
-import { ElasticSearchHit } from '../../../services/doc_views/doc_views_types';
 import { RequestAdapter } from '../../../../../inspector/public';
 import type { AutoRefreshDoneFn } from '../../../../../data/public';
 import { validateTimeRange } from './validate_time_range';
@@ -23,6 +22,7 @@ import { fetchAll } from './fetch_all';
 import { useBehaviorSubject } from './use_behavior_subject';
 import { sendResetMsg } from './use_saved_search_messages';
 import { getFetch$ } from './get_fetch_observable';
+import { ElasticSearchHit } from '../../../types';
 
 export interface SavedSearchData {
   main$: DataMain$;
