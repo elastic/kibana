@@ -107,7 +107,10 @@ export const PolicyHostIsolationExceptionsTab = ({
         {hasNoAssignedPolicies ? (
           <PolicyHostIsolationExceptionsEmptyUnassigned policyName={policy.name} />
         ) : (
-          <PolicyHostIsolationExceptionsList exceptions={policyExceptionsListRequest.data} />
+          <PolicyHostIsolationExceptionsList
+            exceptions={policyExceptionsListRequest.data}
+            policyId={policyId}
+          />
         )}
       </EuiPageContent>
     </div>

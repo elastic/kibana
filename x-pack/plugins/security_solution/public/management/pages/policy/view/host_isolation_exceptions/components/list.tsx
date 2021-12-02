@@ -12,30 +12,29 @@ import {
   MANAGEMENT_DEFAULT_PAGE_SIZE,
   MANAGEMENT_PAGE_SIZE_OPTIONS,
 } from '../../../../../common/constants';
+import { getPolicyHostIsolationExceptionsPath } from '../../../../../common/routing';
 import {
   ArtifactCardGrid,
   ArtifactCardGridProps,
 } from '../../../../../components/artifact_card_grid';
 import { useEndpointPoliciesToArtifactPolicies } from '../../../../../components/artifact_entry_card/hooks/use_endpoint_policies_to_artifact_policies';
 import { useGetEndpointSpecificPolicies } from '../../../../../services/policies/hooks';
+import { getCurrentArtifactsLocation } from '../../../store/policy_details/selectors';
+import { usePolicyDetailsSelector } from '../../policy_hooks';
 
 export const PolicyHostIsolationExceptionsList = ({
   exceptions,
+  policyId,
 }: {
   exceptions: FoundExceptionListItemSchema;
+  policyId: string;
 }) => {
   const history = useHistory();
   // load the list of policies>
   const policiesRequest = useGetEndpointSpecificPolicies({});
+  const urlParams = usePolicyDetailsSelector(getCurrentArtifactsLocation);
 
   const [expandedItemsMap, setExpandedItemsMap] = useState<Map<string, boolean>>(new Map());
-
-  const handlePageChange = useCallback<ArtifactCardGridProps['onPageChange']>(
-    ({ pageIndex, pageSize }) => {
-      history.push('');
-    },
-    [history]
-  );
 
   const pagination = {
     totalItemCount: exceptions?.total ?? 0,
@@ -43,6 +42,20 @@ export const PolicyHostIsolationExceptionsList = ({
     pageSizeOptions: [...MANAGEMENT_PAGE_SIZE_OPTIONS],
     pageIndex: (exceptions?.page ?? 1) - 1,
   };
+
+  const handlePageChange = useCallback<ArtifactCardGridProps['onPageChange']>(
+    ({ pageIndex, pageSize }) => {
+      history.push(
+        getPolicyHostIsolationExceptionsPath(policyId, {
+          ...urlParams,
+          // If user changed page size, then reset page index back to the first page
+          page_index: pageSize !== pagination.pageSize ? 0 : pageIndex,
+          page_size: pageSize,
+        })
+      );
+    },
+    [history, pagination.pageSize, policyId, urlParams]
+  );
 
   const artifactCardPolicies = useEndpointPoliciesToArtifactPolicies(policiesRequest.data?.items);
 

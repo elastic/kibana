@@ -378,9 +378,15 @@ export const getHostIsolationExceptionsListPath = (
   )}`;
 };
 
-export const getPolicyHostIsolationExceptionsPath = (policyId: string, search?: string) => {
-  return `${generatePath(MANAGEMENT_ROUTING_POLICY_DETAILS_HOST_ISOLATION_EXCEPTIONS_PATH, {
+export const getPolicyHostIsolationExceptionsPath = (
+  policyId: string,
+  location?: Partial<PolicyDetailsArtifactsPageLocation>
+) => {
+  const path = generatePath(MANAGEMENT_ROUTING_POLICY_DETAILS_HOST_ISOLATION_EXCEPTIONS_PATH, {
     tabName: AdministrationSubTab.policies,
     policyId,
-  })}${appendSearch(search)}`;
+  });
+  return `${path}${appendSearch(
+    querystring.stringify(normalizePolicyDetailsArtifactsListPageLocation(location))
+  )}`;
 };
