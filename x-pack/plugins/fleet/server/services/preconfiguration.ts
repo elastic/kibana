@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { groupBy, omit, pick, isEqual } from 'lodash';
 import { safeDump } from 'js-yaml';
 
+import { DEFAULT_SPACE_ID } from '../../../spaces/common/constants';
 import type {
   NewPackagePolicy,
   AgentPolicy,
@@ -144,7 +145,8 @@ export async function ensurePreconfiguredPackagesAndPolicies(
   esClient: ElasticsearchClient,
   policies: PreconfiguredAgentPolicy[] = [],
   packages: PreconfiguredPackage[] = [],
-  defaultOutput: Output
+  defaultOutput: Output,
+  spaceId: string = DEFAULT_SPACE_ID
 ): Promise<PreconfigurationResult> {
   const logger = appContextService.getLogger();
 
@@ -179,6 +181,7 @@ export async function ensurePreconfiguredPackagesAndPolicies(
       pkg.version === PRECONFIGURATION_LATEST_KEYWORD ? pkg.name : pkg
     ),
     force: true, // Always force outdated packages to be installed if a later version isn't installed
+    spaceId,
   });
 
   const fulfilledPackages = [];

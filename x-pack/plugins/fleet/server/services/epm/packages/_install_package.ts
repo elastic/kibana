@@ -56,6 +56,7 @@ export async function _installPackage({
   packageInfo,
   installType,
   installSource,
+  spaceId,
 }: {
   savedObjectsClient: SavedObjectsClientContract;
   savedObjectsImporter: Pick<SavedObjectsImporter, 'import' | 'resolveImportErrors'>;
@@ -66,6 +67,7 @@ export async function _installPackage({
   packageInfo: InstallablePackage;
   installType: InstallType;
   installSource: InstallSource;
+  spaceId: string;
 }): Promise<AssetReference[]> {
   const { name: pkgName, version: pkgVersion } = packageInfo;
 
@@ -99,6 +101,7 @@ export async function _installPackage({
         savedObjectsClient,
         packageInfo,
         installSource,
+        spaceId,
       });
     }
 
@@ -120,6 +123,7 @@ export async function _installPackage({
       savedObjectsImporter,
       pkgName,
       kibanaAssets,
+      spaceId,
     });
 
     // the rest of the installation must happen in sequential order

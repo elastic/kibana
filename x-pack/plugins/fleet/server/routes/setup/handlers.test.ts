@@ -45,6 +45,7 @@ describe('FleetSetupHandler', () => {
         epm: {
           internalSoClient: savedObjectsClientMock.create(),
         },
+        getSpaceId: jest.fn(),
       },
     };
     response = httpServerMock.createResponseFactory();

@@ -17,6 +17,7 @@ import type { SavedObjectsImportSuccess, SavedObjectsImportFailure } from 'src/c
 import { createListStream } from '@kbn/utils';
 import { partition } from 'lodash';
 
+import { SavedObjectsUtils } from '../../../../../../../../src/core/server';
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../../../common';
 import { getAsset, getPathParts } from '../../archive';
 import { KibanaAssetType, KibanaSavedObjectType } from '../../../../types';
@@ -80,9 +81,10 @@ export async function installKibanaAssets(options: {
   savedObjectsImporter: SavedObjectsImporterContract;
   logger: Logger;
   pkgName: string;
+  spaceId: string;
   kibanaAssets: Record<KibanaAssetType, ArchiveAsset[]>;
 }): Promise<SavedObjectsImportSuccess[]> {
-  const { kibanaAssets, savedObjectsImporter, logger } = options;
+  const { kibanaAssets, savedObjectsImporter, logger, spaceId } = options;
   const assetsToInstall = Object.entries(kibanaAssets).flatMap(([assetType, assets]) => {
     if (!validKibanaAssetTypes.has(assetType as KibanaAssetType)) {
       return [];
@@ -112,6 +114,7 @@ export async function installKibanaAssets(options: {
   const installedAssets = await installKibanaSavedObjects({
     logger,
     savedObjectsImporter,
+    spaceId,
     kibanaAssets: [...indexPatternSavedObjects, ...assetsToInstall],
   });
 
@@ -170,11 +173,14 @@ async function installKibanaSavedObjects({
   savedObjectsImporter,
   kibanaAssets,
   logger,
+  spaceId,
 }: {
   kibanaAssets: ArchiveAsset[];
   savedObjectsImporter: SavedObjectsImporterContract;
   logger: Logger;
+  spaceId: string;
 }) {
+  const namespace = SavedObjectsUtils.namespaceStringToId(spaceId);
   const toBeSavedObjects = await Promise.all(
     kibanaAssets.map((asset) => createSavedObjectKibanaAsset(asset))
   );
@@ -186,6 +192,7 @@ async function installKibanaSavedObjects({
   } else {
     const { successResults: importSuccessResults = [], errors: importErrors = [] } =
       await savedObjectsImporter.import({
+        namespace,
         overwrite: true,
         readStream: createListStream(toBeSavedObjects),
         createNewCopies: false,
@@ -227,6 +234,7 @@ async function installKibanaSavedObjects({
         ignoreMissingReferences: true,
         replaceReferences: [],
         overwrite: true,
+        namespace,
       }));
 
       const { successResults: resolveSuccessResults = [], errors: resolveErrors = [] } =

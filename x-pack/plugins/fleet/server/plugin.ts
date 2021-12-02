@@ -29,6 +29,7 @@ import {
   SavedObjectsClient,
   ServiceStatusLevels,
 } from '../../../../src/core/server';
+import { DEFAULT_SPACE_ID } from '../../spaces/common/constants';
 import type { PluginStart as DataPluginStart } from '../../../../src/plugins/data/server';
 import type { LicensingPluginSetup, ILicense } from '../../licensing/server';
 import type {
@@ -40,6 +41,7 @@ import type { PluginSetupContract as FeaturesPluginSetup } from '../../features/
 import type { FleetConfigType, FleetAuthz } from '../common';
 import { INTEGRATIONS_PLUGIN_ID } from '../common';
 import type { CloudSetup } from '../../cloud/server';
+import type { SpacesPluginStart } from '../../spaces/server';
 
 import {
   PLUGIN_ID,
@@ -96,6 +98,7 @@ export interface FleetSetupDeps {
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
   cloud?: CloudSetup;
   usageCollection?: UsageCollectionSetup;
+  spaces?: SpacesPluginStart;
   telemetry?: TelemetryPluginSetup;
 }
 
@@ -296,6 +299,11 @@ export class FleetPlugin
                 .getSavedObjects()
                 .getScopedClient(request, { excludedWrappers: ['security'] });
             },
+          },
+          async getSpaceId() {
+            const spaceId = await deps.spaces?.spacesService.getSpaceId(request);
+
+            return spaceId || DEFAULT_SPACE_ID;
           },
         };
       }
