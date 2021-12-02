@@ -80,7 +80,6 @@ const defaultPostCase = {
 const defaultCreateCaseForm: CreateCaseFormFieldsProps = {
   isLoadingConnectors: false,
   connectors: [],
-  disableAlerts: false,
   withSteps: true,
   hideConnectorServiceNowSir: false,
 };
@@ -243,16 +242,16 @@ describe('Create case', () => {
       );
     });
 
-    it('should set sync alerts to false when the sync setting is passed in as false and alerts are disabled', async () => {
+    it('should set sync alerts to false when the sync feature setting is false', async () => {
       useConnectorsMock.mockReturnValue({
         ...sampleConnectorData,
         connectors: connectorsMock,
       });
 
       const wrapper = mount(
-        <TestProviders>
-          <FormContext onSuccess={onFormSubmitSuccess} syncAlertsDefaultValue={false}>
-            <CreateCaseFormFields {...defaultCreateCaseForm} disableAlerts={true} />
+        <TestProviders features={{ alerts: { sync: false } }}>
+          <FormContext onSuccess={onFormSubmitSuccess}>
+            <CreateCaseFormFields {...defaultCreateCaseForm} />
             <SubmitCaseButton />
           </FormContext>
         </TestProviders>

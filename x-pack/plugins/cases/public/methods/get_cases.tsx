@@ -17,27 +17,24 @@ export const getCasesLazy = ({
   owner,
   userCanCrud,
   basePath,
-  disableAlerts,
   onComponentInitialized,
   actionsNavigation,
   ruleDetailsNavigation,
   showAlertDetails,
   useFetchAlertData,
   refreshRef,
-  hideSyncAlerts,
   timelineIntegration,
+  features,
 }: GetCasesProps) => (
-  <CasesProvider value={{ owner, userCanCrud, basePath }}>
+  <CasesProvider value={{ owner, userCanCrud, basePath, features }}>
     <Suspense fallback={<EuiLoadingSpinner />}>
       <CasesLazy
-        disableAlerts={disableAlerts}
         onComponentInitialized={onComponentInitialized}
         actionsNavigation={actionsNavigation}
         ruleDetailsNavigation={ruleDetailsNavigation}
         showAlertDetails={showAlertDetails}
         useFetchAlertData={useFetchAlertData}
         refreshRef={refreshRef}
-        hideSyncAlerts={hideSyncAlerts}
         timelineIntegration={timelineIntegration}
       />
     </Suspense>

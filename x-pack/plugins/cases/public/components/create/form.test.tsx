@@ -44,7 +44,10 @@ const casesFormProps: CreateCaseFormProps = {
 
 describe('CreateCaseForm', () => {
   let globalForm: FormHook;
-  const MockHookWrapperComponent: React.FC = ({ children }) => {
+  const MockHookWrapperComponent: React.FC<{ testProviderProps?: unknown }> = ({
+    children,
+    testProviderProps = {},
+  }) => {
     const { form } = useForm<FormProps>({
       defaultValue: initialCaseValue,
       options: { stripEmptyFields: false },
@@ -54,7 +57,7 @@ describe('CreateCaseForm', () => {
     globalForm = form;
 
     return (
-      <TestProviders>
+      <TestProviders {...testProviderProps}>
         <Form form={form}>{children}</Form>
       </TestProviders>
     );
@@ -103,8 +106,8 @@ describe('CreateCaseForm', () => {
 
   it('hides the sync alerts toggle', () => {
     const { queryByText } = render(
-      <MockHookWrapperComponent>
-        <CreateCaseForm {...casesFormProps} disableAlerts />
+      <MockHookWrapperComponent testProviderProps={{ features: { alerts: { sync: false } } }}>
+        <CreateCaseForm {...casesFormProps} />
       </MockHookWrapperComponent>
     );
 
@@ -118,7 +121,6 @@ describe('CreateCaseForm', () => {
           <CreateCaseFormFields
             connectors={[]}
             isLoadingConnectors={false}
-            disableAlerts={false}
             hideConnectorServiceNowSir={false}
             withSteps={true}
           />

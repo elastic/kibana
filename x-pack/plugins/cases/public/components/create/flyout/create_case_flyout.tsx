@@ -17,7 +17,6 @@ export interface CreateCaseFlyoutProps {
   afterCaseCreated?: (theCase: Case) => Promise<void>;
   onClose: () => void;
   onSuccess: (theCase: Case) => Promise<void>;
-  disableAlerts?: boolean;
 }
 
 const StyledFlyout = styled(EuiFlyout)`
@@ -50,7 +49,7 @@ const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
         overflow-y: auto;
         overflow-x: hidden;
       }
-  
+
       && .euiFlyoutBody__overflowContent {
         display: block;
         padding: ${theme.eui.paddingSizes.l} ${theme.eui.paddingSizes.l} 70px;
@@ -64,7 +63,7 @@ const FormWrapper = styled.div`
 `;
 
 export const CreateCaseFlyout = React.memo<CreateCaseFlyoutProps>(
-  ({ afterCaseCreated, onClose, onSuccess, disableAlerts }) => (
+  ({ afterCaseCreated, onClose, onSuccess }) => (
     <>
       <GlobalStyle />
       <StyledFlyout
@@ -85,7 +84,6 @@ export const CreateCaseFlyout = React.memo<CreateCaseFlyoutProps>(
               onCancel={onClose}
               onSuccess={onSuccess}
               withSteps={false}
-              disableAlerts={disableAlerts}
             />
           </FormWrapper>
         </StyledEuiFlyoutBody>
