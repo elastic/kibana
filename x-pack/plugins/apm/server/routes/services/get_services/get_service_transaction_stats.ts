@@ -20,7 +20,7 @@ import { environmentQuery } from '../../../../common/utils/environment_query';
 import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
 import {
   getDocumentTypeFilterForTransactions,
-  getTransactionDurationFieldForTransactions,
+  getDurationFieldForTransactions,
   getProcessorEventForTransactions,
 } from '../../../lib/helpers/transactions';
 import { calculateThroughput } from '../../../lib/helpers/calculate_throughput';
@@ -56,9 +56,7 @@ export async function getServiceTransactionStats({
   const metrics = {
     avg_duration: {
       avg: {
-        field: getTransactionDurationFieldForTransactions(
-          searchAggregatedTransactions
-        ),
+        field: getDurationFieldForTransactions(searchAggregatedTransactions),
       },
     },
     outcomes,

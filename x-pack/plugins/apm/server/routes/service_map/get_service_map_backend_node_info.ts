@@ -16,8 +16,11 @@ import { EventOutcome } from '../../../common/event_outcome';
 import { ProcessorEvent } from '../../../common/processor_event';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { withApmSpan } from '../../utils/with_apm_span';
-import { calculateThroughput } from '../../lib/helpers/calculate_throughput';
+import { calculateThroughputWithRange } from '../../lib/helpers/calculate_throughput';
 import { Setup } from '../../lib/helpers/setup_request';
+import { getBucketSize } from '../../lib/helpers/get_bucket_size';
+import { getFailedTransactionRateTimeSeries } from '../../lib/helpers/transaction_error_rate';
+import { NodeStats } from '../../../common/service_map';
 
 interface Options {
   setup: Setup;
@@ -33,9 +36,23 @@ export function getServiceMapBackendNodeInfo({
   setup,
   start,
   end,
-}: Options) {
+}: Options): Promise<NodeStats> {
   return withApmSpan('get_service_map_backend_node_stats', async () => {
     const { apmEventClient } = setup;
+
+    const { intervalString } = getBucketSize({ start, end, numBuckets: 20 });
+
+    const subAggs = {
+      latency_sum: {
+        sum: { field: SPAN_DESTINATION_SERVICE_RESPONSE_TIME_SUM },
+      },
+      count: {
+        sum: { field: SPAN_DESTINATION_SERVICE_RESPONSE_TIME_COUNT },
+      },
+      outcomes: {
+        terms: { field: EVENT_OUTCOME, include: [EventOutcome.failure] },
+      },
+    };
 
     const response = await apmEventClient.search(
       'get_service_map_backend_node_stats',
@@ -55,18 +72,15 @@ export function getServiceMapBackendNodeInfo({
             },
           },
           aggs: {
-            latency_sum: {
-              sum: {
-                field: SPAN_DESTINATION_SERVICE_RESPONSE_TIME_SUM,
+            ...subAggs,
+            timeseries: {
+              date_histogram: {
+                field: '@timestamp',
+                fixed_interval: intervalString,
+                min_doc_count: 0,
+                extended_bounds: { min: start, max: end },
               },
-            },
-            count: {
-              sum: {
-                field: SPAN_DESTINATION_SERVICE_RESPONSE_TIME_COUNT,
-              },
-            },
-            [EVENT_OUTCOME]: {
-              terms: { field: EVENT_OUTCOME, include: [EventOutcome.failure] },
+              aggs: subAggs,
             },
           },
         },
@@ -74,13 +88,13 @@ export function getServiceMapBackendNodeInfo({
     );
 
     const count = response.aggregations?.count.value ?? 0;
-    const errorCount =
-      response.aggregations?.[EVENT_OUTCOME].buckets[0]?.doc_count ?? 0;
+    const failedTransactionsRateCount =
+      response.aggregations?.outcomes.buckets[0]?.doc_count ?? 0;
     const latencySum = response.aggregations?.latency_sum.value ?? 0;
 
-    const avgErrorRate = errorCount / count;
-    const avgTransactionDuration = latencySum / count;
-    const avgRequestsPerMinute = calculateThroughput({
+    const avgFailedTransactionsRate = failedTransactionsRateCount / count;
+    const latency = latencySum / count;
+    const throughput = calculateThroughputWithRange({
       start,
       end,
       value: count,
@@ -88,19 +102,48 @@ export function getServiceMapBackendNodeInfo({
 
     if (count === 0) {
       return {
-        avgErrorRate: null,
+        failedTransactionsRate: undefined,
         transactionStats: {
-          avgRequestsPerMinute: null,
-          avgTransactionDuration: null,
+          throughput: undefined,
+          latency: undefined,
         },
       };
     }
 
     return {
-      avgErrorRate,
+      failedTransactionsRate: {
+        value: avgFailedTransactionsRate,
+        timeseries: response.aggregations?.timeseries
+          ? getFailedTransactionRateTimeSeries(
+              response.aggregations.timeseries.buckets
+            )
+          : undefined,
+      },
       transactionStats: {
-        avgRequestsPerMinute,
-        avgTransactionDuration,
+        throughput: {
+          value: throughput,
+          timeseries: response.aggregations?.timeseries.buckets.map(
+            (bucket) => {
+              return {
+                x: bucket.key,
+                y: calculateThroughputWithRange({
+                  start,
+                  end,
+                  value: bucket.doc_count ?? 0,
+                }),
+              };
+            }
+          ),
+        },
+        latency: {
+          value: latency,
+          timeseries: response.aggregations?.timeseries.buckets.map(
+            (bucket) => ({
+              x: bucket.key,
+              y: bucket.latency_sum.value,
+            })
+          ),
+        },
       },
     };
   });

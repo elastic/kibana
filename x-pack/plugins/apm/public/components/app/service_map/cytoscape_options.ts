@@ -20,7 +20,7 @@ import {
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { iconForNode } from './icons';
 
-export const popoverWidth = 280;
+export const popoverWidth = 350;
 
 function getServiceAnomalyStats(el: cytoscape.NodeSingular) {
   const serviceAnomalyStats: ServiceAnomalyStats | undefined = el.data(

@@ -5,30 +5,23 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiLoadingSpinner, EuiText } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLoadingChart,
+  EuiText,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isNumber } from 'lodash';
-import React from 'react';
-import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
+import React, { useMemo } from 'react';
 import { NodeStats } from '../../../../../common/service_map';
 import {
   asDuration,
   asPercent,
   asTransactionRate,
 } from '../../../../../common/utils/formatters';
-
-export const ItemRow = euiStyled.tr`
-  line-height: 2;
-`;
-
-export const ItemTitle = euiStyled.td`
-  color: ${({ theme }) => theme.eui.euiTextSubduedColor};
-  padding-right: 1rem;
-`;
-
-export const ItemDescription = euiStyled.td`
-  text-align: right;
-`;
+import { Coordinate } from '../../../../../typings/timeseries';
+import { SparkPlot, Color } from '../../../shared/charts/spark_plot';
 
 function LoadingSpinner() {
   return (
@@ -37,7 +30,7 @@ function LoadingSpinner() {
       justifyContent="spaceAround"
       style={{ height: 170 }}
     >
-      <EuiLoadingSpinner size="xl" />
+      <EuiLoadingChart size="xl" />
     </EuiFlexGroup>
   );
 }
@@ -57,21 +50,81 @@ interface StatsListProps {
   data: NodeStats;
 }
 
+interface Item {
+  title: string;
+  valueLabel: string | null;
+  timeseries?: Coordinate[];
+  color: Color;
+}
+
 export function StatsList({ data, isLoading }: StatsListProps) {
-  const {
-    avgCpuUsage,
-    avgErrorRate,
-    avgMemoryUsage,
-    transactionStats: { avgRequestsPerMinute, avgTransactionDuration },
-  } = data;
+  const { cpuUsage, failedTransactionsRate, memoryUsage, transactionStats } =
+    data;
 
   const hasData = [
-    avgCpuUsage,
-    avgErrorRate,
-    avgMemoryUsage,
-    avgRequestsPerMinute,
-    avgTransactionDuration,
+    cpuUsage?.value,
+    failedTransactionsRate?.value,
+    memoryUsage?.value,
+    transactionStats?.throughput?.value,
+    transactionStats?.latency?.value,
   ].some((stat) => isNumber(stat));
+
+  const items: Item[] = useMemo(
+    () => [
+      {
+        title: i18n.translate(
+          'xpack.apm.serviceMap.avgTransDurationPopoverStat',
+          {
+            defaultMessage: 'Latency (avg.)',
+          }
+        ),
+        valueLabel: isNumber(transactionStats?.latency?.value)
+          ? asDuration(transactionStats?.latency?.value)
+          : null,
+        timeseries: transactionStats?.latency?.timeseries,
+        color: 'euiColorVis1',
+      },
+      {
+        title: i18n.translate(
+          'xpack.apm.serviceMap.avgReqPerMinutePopoverMetric',
+          {
+            defaultMessage: 'Throughput (avg.)',
+          }
+        ),
+        valueLabel: asTransactionRate(transactionStats?.throughput?.value),
+        timeseries: transactionStats?.throughput?.timeseries,
+        color: 'euiColorVis0',
+      },
+      {
+        title: i18n.translate('xpack.apm.serviceMap.errorRatePopoverStat', {
+          defaultMessage: 'Failed transaction rate (avg.)',
+        }),
+        valueLabel: asPercent(failedTransactionsRate?.value, 1, ''),
+        timeseries: failedTransactionsRate?.timeseries,
+        color: 'euiColorVis7',
+      },
+      {
+        title: i18n.translate('xpack.apm.serviceMap.avgCpuUsagePopoverStat', {
+          defaultMessage: 'CPU usage (avg.)',
+        }),
+        valueLabel: asPercent(cpuUsage?.value, 1, ''),
+        timeseries: cpuUsage?.timeseries,
+        color: 'euiColorVis3',
+      },
+      {
+        title: i18n.translate(
+          'xpack.apm.serviceMap.avgMemoryUsagePopoverStat',
+          {
+            defaultMessage: 'Memory usage (avg.)',
+          }
+        ),
+        valueLabel: asPercent(memoryUsage?.value, 1, ''),
+        timeseries: memoryUsage?.timeseries,
+        color: 'euiColorVis8',
+      },
+    ],
+    [cpuUsage, failedTransactionsRate, memoryUsage, transactionStats]
+  );
 
   if (isLoading) {
     return <LoadingSpinner />;
@@ -81,59 +134,40 @@ export function StatsList({ data, isLoading }: StatsListProps) {
     return <NoDataMessage />;
   }
 
-  const items = [
-    {
-      title: i18n.translate(
-        'xpack.apm.serviceMap.avgTransDurationPopoverStat',
-        {
-          defaultMessage: 'Latency (avg.)',
-        }
-      ),
-      description: isNumber(avgTransactionDuration)
-        ? asDuration(avgTransactionDuration)
-        : null,
-    },
-    {
-      title: i18n.translate(
-        'xpack.apm.serviceMap.avgReqPerMinutePopoverMetric',
-        {
-          defaultMessage: 'Throughput (avg.)',
-        }
-      ),
-      description: asTransactionRate(avgRequestsPerMinute),
-    },
-    {
-      title: i18n.translate('xpack.apm.serviceMap.errorRatePopoverStat', {
-        defaultMessage: 'Failed transaction rate (avg.)',
-      }),
-      description: asPercent(avgErrorRate, 1, ''),
-    },
-    {
-      title: i18n.translate('xpack.apm.serviceMap.avgCpuUsagePopoverStat', {
-        defaultMessage: 'CPU usage (avg.)',
-      }),
-      description: asPercent(avgCpuUsage, 1, ''),
-    },
-    {
-      title: i18n.translate('xpack.apm.serviceMap.avgMemoryUsagePopoverStat', {
-        defaultMessage: 'Memory usage (avg.)',
-      }),
-      description: asPercent(avgMemoryUsage, 1, ''),
-    },
-  ];
-
   return (
-    <table>
-      <tbody>
-        {items.map(({ title, description }) => {
-          return description ? (
-            <ItemRow key={title}>
-              <ItemTitle>{title}</ItemTitle>
-              <ItemDescription>{description}</ItemDescription>
-            </ItemRow>
-          ) : null;
-        })}
-      </tbody>
-    </table>
+    <EuiFlexGroup direction="column" responsive={false} gutterSize="m">
+      {items.map(({ title, valueLabel, timeseries, color }) => {
+        if (!valueLabel) {
+          return null;
+        }
+        return (
+          <EuiFlexItem key={title}>
+            <EuiFlexGroup gutterSize="none" responsive={false}>
+              <EuiFlexItem
+                style={{
+                  display: 'flex',
+                  justifyContent: 'end',
+                }}
+              >
+                <EuiText color="subdued" size="s">
+                  {title}
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                {timeseries ? (
+                  <SparkPlot
+                    series={timeseries}
+                    color={color}
+                    valueLabel={valueLabel}
+                  />
+                ) : (
+                  <div>{valueLabel}</div>
+                )}
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        );
+      })}
+    </EuiFlexGroup>
   );
 }

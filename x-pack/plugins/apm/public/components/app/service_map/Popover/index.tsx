@@ -173,7 +173,7 @@ export function Popover({
       <EuiFlexGroup
         direction="column"
         gutterSize="s"
-        style={{ width: popoverWidth }}
+        style={{ minWidth: popoverWidth }}
       >
         <EuiFlexItem>
           <EuiTitle size="xxs">

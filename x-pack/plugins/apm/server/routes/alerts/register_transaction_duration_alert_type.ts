@@ -36,7 +36,7 @@ import { environmentQuery } from '../../../common/utils/environment_query';
 import { getDurationFormatter } from '../../../common/utils/formatters';
 import {
   getDocumentTypeFilterForTransactions,
-  getTransactionDurationFieldForTransactions,
+  getDurationFieldForTransactions,
 } from '../../lib/helpers/transactions';
 import { getApmIndices } from '../../routes/settings/apm_indices/get_apm_indices';
 import { apmActionVariables } from './action_variables';
@@ -110,7 +110,7 @@ export function registerTransactionDurationAlertType({
         ? indices.metric
         : indices.transaction;
 
-      const field = getTransactionDurationFieldForTransactions(
+      const field = getDurationFieldForTransactions(
         searchAggregatedTransactions
       );
 
