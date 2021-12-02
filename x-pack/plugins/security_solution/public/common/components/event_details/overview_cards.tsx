@@ -17,8 +17,7 @@ import {
   EuiText,
   IconColor,
 } from '@elastic/eui';
-import React, { useCallback, useMemo, useState } from 'react';
-import { useSelector } from 'react-redux';
+import React, { useMemo, useState } from 'react';
 import { find } from 'lodash/fp';
 
 import type { BrowserFields } from '../../containers/source';
