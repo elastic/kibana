@@ -26,7 +26,6 @@ import {
   Query,
   TimeRange,
 } from '../../../data/common';
-import { ElasticSearchHit } from '../services/doc_views/doc_views_types';
 import { SavedSearchEmbeddableComponent } from './saved_search_embeddable_component';
 import { UiActionsStart } from '../../../ui_actions/public';
 import { getServices } from '../kibana_services';
@@ -48,6 +47,7 @@ import { SortOrder } from '../components/doc_table/components/table_header/helpe
 import { VIEW_MODE } from '../components/view_mode_toggle';
 import { updateSearchSource } from './utils/update_search_source';
 import { FieldStatsTableSavedSearchEmbeddable } from '../application/main/components/field_stats_table';
+import { ElasticSearchHit } from '../types';
 
 export type SearchProps = Partial<DiscoverGridProps> &
   Partial<DocTableProps> & {

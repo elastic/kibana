@@ -13,7 +13,7 @@ import {
 } from '../../../common/elasticsearch_fieldnames';
 import { arrayUnionToCallable } from '../../../common/utils/array_union_to_callable';
 import { TransactionGroupRequestBase, TransactionGroupSetup } from './fetcher';
-import { getTransactionDurationFieldForTransactions } from '../helpers/transactions';
+import { getDurationFieldForTransactions } from '../helpers/transactions';
 import { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
 interface MetricParams {
   request: TransactionGroupRequestBase;
@@ -49,9 +49,7 @@ export async function getAverages({
   const params = mergeRequestWithAggs(request, {
     avg: {
       avg: {
-        field: getTransactionDurationFieldForTransactions(
-          searchAggregatedTransactions
-        ),
+        field: getDurationFieldForTransactions(searchAggregatedTransactions),
       },
     },
   });
@@ -119,9 +117,7 @@ export async function getSums({
   const params = mergeRequestWithAggs(request, {
     sum: {
       sum: {
-        field: getTransactionDurationFieldForTransactions(
-          searchAggregatedTransactions
-        ),
+        field: getDurationFieldForTransactions(searchAggregatedTransactions),
       },
     },
   });
