@@ -90,7 +90,7 @@
     "**/trim": "1.0.1",
     "**/typescript": "4.3.5",
     "**/underscore": "^1.13.1",
-    "globby/fast-glob": "3.2.5"
+    "globby/fast-glob": "3.2.7"
   },
   "dependencies": {
     "@babel/runtime": "^7.16.3",
