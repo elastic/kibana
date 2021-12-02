@@ -74,6 +74,7 @@ describe('Aggs service', () => {
           "geohash_grid",
           "geotile_grid",
           "sampler",
+          "sampler",
           "foo",
         ]
       `);
@@ -123,6 +124,7 @@ describe('Aggs service', () => {
           "significant_terms",
           "geohash_grid",
           "geotile_grid",
+          "sampler",
           "sampler",
         ]
       `);

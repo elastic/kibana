@@ -91,6 +91,7 @@ import {
   aggSinglePercentile,
 } from './';
 import { AggParamsSampler } from './buckets/sampler';
+import { AggParamsDiversifiedSampler } from './buckets/diversified_sampler';
 
 export type { IAggConfig, AggConfigSerialized } from './agg_config';
 export type { CreateAggConfigParams, IAggConfigs } from './agg_configs';
@@ -168,6 +169,7 @@ export interface AggParamsMapping {
   [BUCKET_TYPES.TERMS]: AggParamsTerms;
   [BUCKET_TYPES.MULTI_TERMS]: AggParamsMultiTerms;
   [BUCKET_TYPES.SAMPLER]: AggParamsSampler;
+  [BUCKET_TYPES.DIVERSIFIED_SAMPLER]: AggParamsDiversifiedSampler;
   [METRIC_TYPES.AVG]: AggParamsAvg;
   [METRIC_TYPES.CARDINALITY]: AggParamsCardinality;
   [METRIC_TYPES.COUNT]: BaseAggParams;

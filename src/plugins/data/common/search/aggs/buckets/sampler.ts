@@ -25,6 +25,9 @@ export interface AggParamsSampler extends BaseAggParams {
   shard_size?: number;
 }
 
+/**
+ * A filtering aggregation used to limit any sub aggregations' processing to a sample of the top-scoring documents.
+ */
 export const getSamplerBucketAgg = () =>
   new BucketAggType({
     name: SAMPLER_AGG_NAME,
@@ -35,11 +38,6 @@ export const getSamplerBucketAgg = () =>
       {
         name: 'shard_size',
         type: 'number',
-        write(aggConfig, output) {
-          if (typeof aggConfig.params.shard_size === 'number') {
-            output.params.shard_size = aggConfig.params.shard_size;
-          }
-        },
       },
     ],
   });

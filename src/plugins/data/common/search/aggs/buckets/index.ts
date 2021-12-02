@@ -40,3 +40,5 @@ export * from './multi_terms_fn';
 export * from './multi_terms';
 export * from './sampler_fn';
 export * from './sampler';
+export * from './diversified_sampler_fn';
+export * from './diversified_sampler';
