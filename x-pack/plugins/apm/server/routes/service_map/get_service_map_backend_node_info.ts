@@ -88,11 +88,11 @@ export function getServiceMapBackendNodeInfo({
     );
 
     const count = response.aggregations?.count.value ?? 0;
-    const errorCount =
+    const failedTransactionsRateCount =
       response.aggregations?.outcomes.buckets[0]?.doc_count ?? 0;
     const latencySum = response.aggregations?.latency_sum.value ?? 0;
 
-    const avgErrorRate = errorCount / count;
+    const avgFailedTransactionsRate = failedTransactionsRateCount / count;
     const latency = latencySum / count;
     const throughput = calculateThroughputWithRange({
       start,
@@ -102,7 +102,7 @@ export function getServiceMapBackendNodeInfo({
 
     if (count === 0) {
       return {
-        errorRate: undefined,
+        failedTransactionsRate: undefined,
         transactionStats: {
           throughput: undefined,
           latency: undefined,
@@ -111,8 +111,8 @@ export function getServiceMapBackendNodeInfo({
     }
 
     return {
-      errorRate: {
-        value: avgErrorRate,
+      failedTransactionsRate: {
+        value: avgFailedTransactionsRate,
         timeseries: response.aggregations?.timeseries
           ? getFailedTransactionRateTimeSeries(
               response.aggregations.timeseries.buckets

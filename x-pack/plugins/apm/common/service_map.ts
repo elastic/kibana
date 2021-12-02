@@ -70,7 +70,7 @@ export interface NodeStats {
       timeseries?: Coordinate[];
     };
   };
-  errorRate?: {
+  failedTransactionsRate?: {
     value: number | null;
     timeseries?: Coordinate[];
   };

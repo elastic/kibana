@@ -14,7 +14,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import { isNumber } from 'lodash';
 import React, { useMemo } from 'react';
-import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
 import { NodeStats } from '../../../../../common/service_map';
 import {
   asDuration,
@@ -23,12 +22,6 @@ import {
 } from '../../../../../common/utils/formatters';
 import { Coordinate } from '../../../../../typings/timeseries';
 import { SparkPlot, Color } from '../../../shared/charts/spark_plot';
-
-export const ItemTitle = euiStyled(EuiFlexItem)`
-  color: ${({ theme }) => theme.eui.euiTextSubduedColor};
-  display: flex;
-  justify-content: end;
-`;
 
 function LoadingSpinner() {
   return (
@@ -65,11 +58,12 @@ interface Item {
 }
 
 export function StatsList({ data, isLoading }: StatsListProps) {
-  const { cpuUsage, errorRate, memoryUsage, transactionStats } = data;
+  const { cpuUsage, failedTransactionsRate, memoryUsage, transactionStats } =
+    data;
 
   const hasData = [
     cpuUsage?.value,
-    errorRate?.value,
+    failedTransactionsRate?.value,
     memoryUsage?.value,
     transactionStats?.throughput?.value,
     transactionStats?.latency?.value,
@@ -105,8 +99,8 @@ export function StatsList({ data, isLoading }: StatsListProps) {
         title: i18n.translate('xpack.apm.serviceMap.errorRatePopoverStat', {
           defaultMessage: 'Failed transaction rate (avg.)',
         }),
-        valueLabel: asPercent(errorRate?.value, 1, ''),
-        timeseries: errorRate?.timeseries,
+        valueLabel: asPercent(failedTransactionsRate?.value, 1, ''),
+        timeseries: failedTransactionsRate?.timeseries,
         color: 'euiColorVis7',
       },
       {
@@ -129,7 +123,7 @@ export function StatsList({ data, isLoading }: StatsListProps) {
         color: 'euiColorVis8',
       },
     ],
-    [cpuUsage, errorRate, memoryUsage, transactionStats]
+    [cpuUsage, failedTransactionsRate, memoryUsage, transactionStats]
   );
 
   if (isLoading) {
@@ -149,7 +143,16 @@ export function StatsList({ data, isLoading }: StatsListProps) {
         return (
           <EuiFlexItem key={title}>
             <EuiFlexGroup gutterSize="none" responsive={false}>
-              <ItemTitle>{title}</ItemTitle>
+              <EuiFlexItem
+                style={{
+                  display: 'flex',
+                  justifyContent: 'end',
+                }}
+              >
+                <EuiText color="subdued" size="s">
+                  {title}
+                </EuiText>
+              </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 {timeseries ? (
                   <SparkPlot

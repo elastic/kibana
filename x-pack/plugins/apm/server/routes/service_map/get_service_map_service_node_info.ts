@@ -28,7 +28,7 @@ import { Setup } from '../../lib/helpers/setup_request';
 import {
   getDocumentTypeFilterForTransactions,
   getProcessorEventForTransactions,
-  getTransactionDurationFieldForTransactions,
+  getDurationFieldForTransactions,
 } from '../../lib/helpers/transactions';
 import { getErrorRate } from '../../lib/transaction_groups/get_error_rate';
 import { withApmSpan } from '../../utils/with_apm_span';
@@ -98,15 +98,15 @@ export function getServiceMapServiceNodeInfo({
       numBuckets,
     };
 
-    const [errorRate, transactionStats, cpuUsage, memoryUsage] =
+    const [failedTransactionsRate, transactionStats, cpuUsage, memoryUsage] =
       await Promise.all([
-        getErrorStats(taskParams),
+        getFailedTransactionsRateStats(taskParams),
         getTransactionStats(taskParams),
         getCpuStats(taskParams),
         getMemoryStats(taskParams),
       ]);
     return {
-      errorRate,
+      failedTransactionsRate,
       transactionStats,
       cpuUsage,
       memoryUsage,
@@ -114,7 +114,7 @@ export function getServiceMapServiceNodeInfo({
   });
 }
 
-async function getErrorStats({
+async function getFailedTransactionsRateStats({
   setup,
   serviceName,
   environment,
@@ -122,7 +122,7 @@ async function getErrorStats({
   start,
   end,
   numBuckets,
-}: TaskParameters): Promise<NodeStats['errorRate']> {
+}: TaskParameters): Promise<NodeStats['failedTransactionsRate']> {
   return withApmSpan('get_error_rate_for_service_map_node', async () => {
     const { average, timeseries } = await getErrorRate({
       environment,
@@ -149,7 +149,7 @@ async function getTransactionStats({
 }: TaskParameters): Promise<NodeStats['transactionStats']> {
   const { apmEventClient } = setup;
 
-  const field = getTransactionDurationFieldForTransactions(
+  const durationField = getDurationFieldForTransactions(
     searchAggregatedTransactions
   );
 
@@ -179,7 +179,7 @@ async function getTransactionStats({
       },
       track_total_hits: true,
       aggs: {
-        duration: { avg: { field } },
+        duration: { avg: { field: durationField } },
         timeseries: {
           date_histogram: {
             field: '@timestamp',
@@ -188,7 +188,7 @@ async function getTransactionStats({
             extended_bounds: { min: start, max: end },
           },
           aggs: {
-            latency: { avg: { field } },
+            latency: { avg: { field: durationField } },
           },
         },
       },
@@ -214,11 +214,7 @@ async function getTransactionStats({
       timeseries: response.aggregations?.timeseries.buckets.map((bucket) => {
         return {
           x: bucket.key,
-          y: calculateThroughputWithRange({
-            start,
-            end,
-            value: bucket.doc_count ?? 0,
-          }),
+          y: bucket.doc_count ?? 0,
         };
       }),
     },
