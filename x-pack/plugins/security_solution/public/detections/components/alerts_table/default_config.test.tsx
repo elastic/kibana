@@ -25,14 +25,14 @@ describe('alerts default_config', () => {
           negate: false,
           disabled: false,
           type: 'phrase',
-          key: 'kibana.alert.rule.uuid',
+          key: 'kibana.alert.rule.rule_id',
           params: {
             query: 'rule-id-1',
           },
         },
         query: {
           match_phrase: {
-            'kibana.alert.rule.uuid': 'rule-id-1',
+            'kibana.alert.rule.rule_id': 'rule-id-1',
           },
         },
       };

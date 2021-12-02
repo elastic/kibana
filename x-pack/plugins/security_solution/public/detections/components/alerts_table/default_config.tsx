@@ -95,7 +95,8 @@ export const buildAlertStatusesFilter = (statuses: Status[]): Filter[] => {
   ];
 };
 
-export const buildAlertsRuleIdFilter = (ruleId: string | null): Filter[] =>
+// TODO: Separate between rule.id and rule.rule_id
+export const buildAlertsRuleIdFilter = (ruleId: string | null, useRuleSOId = false): Filter[] =>
   ruleId
     ? [
         {
@@ -104,14 +105,14 @@ export const buildAlertsRuleIdFilter = (ruleId: string | null): Filter[] =>
             negate: false,
             disabled: false,
             type: 'phrase',
-            key: ALERT_RULE_RULE_ID,
+            key: useRuleSOId ? ALERT_RULE_UUID : ALERT_RULE_RULE_ID,
             params: {
               query: ruleId,
             },
           },
           query: {
             match_phrase: {
-              [ALERT_RULE_RULE_ID]: ruleId,
+              [useRuleSOId ? ALERT_RULE_UUID : ALERT_RULE_RULE_ID]: ruleId,
             },
           },
         },

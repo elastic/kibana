@@ -10,6 +10,7 @@ import {
   ruleStatusRequest,
   getAlertMock,
   getFindBulkResultStatus,
+  resolveAlertMock,
 } from '../__mocks__/request_responses';
 import { serverMock, requestContextMock, requestMock } from '../__mocks__';
 import { findRulesStatusesRoute } from './find_rules_status_route';
@@ -32,6 +33,9 @@ describe.each([
     ); // successful status search
     clients.rulesClient.get.mockResolvedValue(
       getAlertMock(isRuleRegistryEnabled, getQueryRuleParams())
+    );
+    clients.rulesClient.resolve.mockResolvedValue(
+      resolveAlertMock(isRuleRegistryEnabled, getQueryRuleParams())
     );
     findRulesStatusesRoute(server.router);
   });
@@ -64,7 +68,7 @@ describe.each([
     test('returns success if rule status client writes an error status', async () => {
       // 0. task manager tried to run the rule but couldn't, so the alerting framework
       // wrote an error to the executionStatus.
-      const failingExecutionRule = getAlertMock(isRuleRegistryEnabled, getQueryRuleParams());
+      const failingExecutionRule = resolveAlertMock(isRuleRegistryEnabled, getQueryRuleParams());
       failingExecutionRule.executionStatus = {
         status: 'error',
         lastExecutionDate: failingExecutionRule.executionStatus.lastExecutionDate,
@@ -75,7 +79,7 @@ describe.each([
       };
 
       // 1. getFailingRules api found a rule where the executionStatus was 'error'
-      clients.rulesClient.get.mockResolvedValue({
+      clients.rulesClient.resolve.mockResolvedValue({
         ...failingExecutionRule,
       });
 
