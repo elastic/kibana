@@ -18,7 +18,7 @@ import {
 } from '@elastic/charts';
 import { EuiText, euiPaletteForStatus } from '@elastic/eui';
 import { CspData } from './charts_data_types';
-import { useNavigateToCSPFindings } from '../../../common/api/useNavigateToCSPFindings';
+import { useNavigateToCSPFindings } from '../../../common/hooks/use_navigate_to_csp_findings';
 
 const mock = {
   totalPassed: 800,

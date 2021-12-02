@@ -10,7 +10,7 @@ import { Axis, BarSeries, Chart, Settings } from '@elastic/charts';
 import { euiPaletteForStatus } from '@elastic/eui/lib/services';
 import { CspData } from './charts_data_types';
 import { useCloudPostureStatsApi } from '../../../common/api/use_cloud_posture_stats_api';
-import { useNavigateToCSPFindings } from '../../../common/api/useNavigateToCSPFindings';
+import { useNavigateToCSPFindings } from '../../../common/hooks/use_navigate_to_csp_findings';
 
 const mockData = [
   { id: '1', name: 'AWS S3 Buckets', value: 303, evaluation: 'pass' },
