@@ -13,7 +13,7 @@ import { sendGetEndpointSpecificPackagePolicies } from './policies';
 export function useGetEndpointSpecificPolicies({
   onError,
 }: {
-  onError: (error: ServerApiError) => void;
+  onError?: (error: ServerApiError) => void;
 }): QueryObserverResult<GetPolicyListResponse> {
   const http = useHttp();
   return useQuery<GetPolicyListResponse, ServerApiError>(

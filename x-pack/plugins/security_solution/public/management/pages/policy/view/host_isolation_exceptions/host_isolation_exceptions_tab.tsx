@@ -38,14 +38,15 @@ export const PolicyHostIsolationExceptionsTab = ({
 
   const location = usePolicyDetailsSelector(getCurrentArtifactsLocation);
 
-  const exceptionsListRequest = useFetchHostIsolationExceptionsList({
+  const policyExceptionsListRequest = useFetchHostIsolationExceptionsList({
     filter: location.filter,
     page: location.page_index,
     perPage: location.page_size,
     policies: [policyId],
   });
 
-  const displaysEmptyState = true;
+  // TODO hasNoDefinedExceptions
+  const hasNoAssignedPolicies = policyExceptionsListRequest.data?.total === 0;
 
   const subTitle = useMemo(() => {
     const link = (
@@ -60,19 +61,19 @@ export const PolicyHostIsolationExceptionsTab = ({
       </EuiLink>
     );
 
-    return exceptionsListRequest.data ? (
+    return policyExceptionsListRequest.data ? (
       <FormattedMessage
         id="xpack.securitySolution.endpoint.policy.hostIsolationExceptions.list.about"
         defaultMessage="There {count, plural, one {is} other {are}} {count} {count, plural, =1 {exception} other {exceptions}} associated with this policy. Click here to {link}"
         values={{
-          count: exceptionsListRequest.data?.total,
+          count: policyExceptionsListRequest.data?.total,
           link,
         }}
       />
     ) : null;
-  }, [exceptionsListRequest.data, getAppUrl]);
+  }, [policyExceptionsListRequest.data, getAppUrl]);
 
-  return !exceptionsListRequest.isLoading && exceptionsListRequest.data && policy ? (
+  return !policyExceptionsListRequest.isLoading && policyExceptionsListRequest.data && policy ? (
     <div>
       <EuiPageHeader alignItems="center">
         <EuiPageHeaderSection>
@@ -103,10 +104,10 @@ export const PolicyHostIsolationExceptionsTab = ({
         color="transparent"
         borderRadius="none"
       >
-        {displaysEmptyState ? (
+        {hasNoAssignedPolicies ? (
           <PolicyHostIsolationExceptionsEmptyUnassigned policyName={policy.name} />
         ) : (
-          <PolicyHostIsolationExceptionsList />
+          <PolicyHostIsolationExceptionsList exceptions={policyExceptionsListRequest.data} />
         )}
       </EuiPageContent>
     </div>
