@@ -73,12 +73,14 @@ export const heatmapFunction = (): HeatmapExpressionFunctionDefinition => ({
       help: i18n.translate('expressionHeatmap.function.legendConfig.help', {
         defaultMessage: 'Configure the chart legend.',
       }),
+      default: `{${EXPRESSION_HEATMAP_LEGEND_NAME}}`,
     },
     gridConfig: {
       types: [EXPRESSION_HEATMAP_GRID_NAME],
       help: i18n.translate('expressionHeatmap.function.gridConfig.help', {
         defaultMessage: 'Configure the heatmap layout.',
       }),
+      default: `{${EXPRESSION_HEATMAP_GRID_NAME}}`,
     },
     showTooltip: {
       types: ['boolean'],
