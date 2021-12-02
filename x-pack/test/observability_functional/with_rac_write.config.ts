@@ -38,7 +38,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     },
   };
 
-  const returnedObject = {
+  return {
     // default to the xpack functional config
     ...xpackFunctionalConfig.getAll(),
     servers,
@@ -102,23 +102,5 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       ...xpackFunctionalConfig.get('junit'),
       reportName: 'Chrome X-Pack Observability UI Functional Tests',
     },
-    security: {
-      roles: {
-        alerts_and_actions_role: {
-          kibana: [
-            {
-              feature: {
-                actions: ['all'],
-                stackAlerts: ['all'],
-              },
-              spaces: ['*'],
-            },
-          ],
-        },
-      },
-      defaultRoles: ['superuser'],
-    },
   };
-
-  return returnedObject;
 }
