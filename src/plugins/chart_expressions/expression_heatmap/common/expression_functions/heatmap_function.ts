@@ -17,7 +17,10 @@ import {
   EXPRESSION_HEATMAP_LEGEND_NAME,
 } from '../constants';
 
-const convertToVisDimension = (columns: DatatableColumn[], accessor: string) => {
+const convertToVisDimension = (
+  columns: DatatableColumn[],
+  accessor: string
+): ExpressionValueVisDimension | undefined => {
   const column = columns.find((c) => c.id === accessor);
   if (!column) return;
   return {
@@ -27,7 +30,7 @@ const convertToVisDimension = (columns: DatatableColumn[], accessor: string) => 
       params: { ...column.meta.params?.params },
     },
     type: 'vis_dimension',
-  } as ExpressionValueVisDimension;
+  };
 };
 
 const prepareHeatmapLogTable = (
