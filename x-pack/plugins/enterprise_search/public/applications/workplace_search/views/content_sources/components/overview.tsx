@@ -257,6 +257,7 @@ export const Overview: React.FC = () => {
 
   const groupsSummary = (
     <>
+      <EuiSpacer />
       <EuiTitle size="xs">
         <h5>{GROUP_ACCESS_TITLE}</h5>
       </EuiTitle>
@@ -479,7 +480,6 @@ export const Overview: React.FC = () => {
 
   const syncTriggerCallout = (
     <EuiFlexItem>
-      <EuiSpacer />
       <EuiTitle size="xs">
         <h5>{SOURCE_SYNCHRONIZATION_TITLE}</h5>
       </EuiTitle>
