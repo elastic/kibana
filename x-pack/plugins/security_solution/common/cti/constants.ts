@@ -19,10 +19,13 @@ export const INDICATOR_MATCHED_TYPE = `${ENRICHMENT_DESTINATION_PATH}.${MATCHED_
 
 export const EVENT_DATASET = 'event.dataset';
 
+export const FEED_PATH = 'threat.feed';
+
 export const FIRST_SEEN = 'indicator.first_seen';
 export const LAST_SEEN = 'indicator.last_seen';
 export const PROVIDER = 'indicator.provider';
 export const REFERENCE = 'indicator.reference';
+export const FEED_NAME = 'feed.name';
 
 export const INDICATOR_FIRSTSEEN = `${ENRICHMENT_DESTINATION_PATH}.${FIRST_SEEN}`;
 export const INDICATOR_LASTSEEN = `${ENRICHMENT_DESTINATION_PATH}.${LAST_SEEN}`;
