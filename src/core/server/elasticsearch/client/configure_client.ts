@@ -18,7 +18,7 @@ import type {
   RequestBody,
 } from '@elastic/elasticsearch';
 
-import { Logger, LogMeta } from '../../logging';
+import { Logger } from '../../logging';
 import { parseClientOptions, ElasticsearchClientConfig } from './client_config';
 import type { ElasticsearchErrorDetails } from './types';
 
@@ -152,7 +152,7 @@ const addLogging = ({ client, type, logger }: { client: Client; type: string; lo
 
       queryLogger.debug(queryMessage, meta);
 
-      if (event.headers.warning ?? false) {
+      if (event.warnings && event.warnings.length > 0) {
         // Plugins can explicitly mark requests as originating from a user by
         // removing the `'x-elastic-product-origin': 'kibana'` header that's
         // added by default. User requests will be shown to users in the
@@ -161,25 +161,24 @@ const addLogging = ({ client, type, logger }: { client: Client; type: string; lo
         // Kibana requests will be hidden from the upgrade assistant UI and are
         // only logged to help developers maintain their plugins
         const requestOrigin =
-          (event.meta.request.params.headers != null &&
-            (event.meta.request.params.headers['x-elastic-product-origin'] as unknown as string)) ??
-          'user';
+          (event.meta.request.options.headers != null &&
+            (event.meta.request.options.headers[
+              'x-elastic-product-origin'
+            ] as unknown as string)) === 'kibana'
+            ? 'kibana'
+            : 'user';
 
         const stackTrace = new Error().stack?.split('\n').slice(5).join('\n');
 
-        // Construct a JSON logMeta payload to make it easier for CI tools to consume
-        const logMeta = {
-          deprecation: {
-            message: event.headers.warning ?? 'placeholder',
-            requestOrigin,
-            query: queryMessage,
-            stack: stackTrace,
-          },
-        };
-        deprecationLogger.error(
-          `ES DEPRECATION: ${event.headers.warning}\nOrigin:${requestOrigin}\nStack trace:\n${stackTrace}\nQuery:\n${queryMessage}`,
-          logMeta as unknown as LogMeta
-        );
+        if (requestOrigin === 'kibana') {
+          deprecationLogger.info(
+            `ES DEPRECATION: ${event.warnings}\nOrigin:${requestOrigin}\nStack trace:\n${stackTrace}\nQuery:\n${queryMessage}`
+          );
+        } else {
+          deprecationLogger.error(
+            `ES DEPRECATION: ${event.warnings}\nOrigin:${requestOrigin}\nStack trace:\n${stackTrace}\nQuery:\n${queryMessage}`
+          );
+        }
       }
     }
   });
