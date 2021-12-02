@@ -31,6 +31,7 @@ export const useEndpointPrivileges = (): Immutable<EndpointPrivileges> => {
       canAccessEndpointManagement: canAccessFleet,
       canCreateArtifactsByPolicy: isPlatinumPlusLicense,
       canIsolateHost: isPlatinumPlusLicense,
+      canUnIsolateHost: true,
     });
 
     return privilegeList;
