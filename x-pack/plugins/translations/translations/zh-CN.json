@@ -15270,7 +15270,6 @@
     "xpack.maps.layerPanel.joinEditor.addJoinAriaLabel": "添加联接",
     "xpack.maps.layerPanel.joinEditor.addJoinButtonLabel": "添加联接",
     "xpack.maps.layerPanel.joinEditor.termJoinsTitle": "词联接",
-    "xpack.maps.layerPanel.joinEditor.termJoinTooltip": "使用词联接及属性增强此图层，以实现数据驱动的样式。",
     "xpack.maps.layerPanel.joinExpression.helpText": "配置共享密钥。",
     "xpack.maps.layerPanel.joinExpression.joinPopoverTitle": "联接",
     "xpack.maps.layerPanel.joinExpression.leftFieldLabel": "左字段",

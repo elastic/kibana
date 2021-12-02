@@ -15073,7 +15073,6 @@
     "xpack.maps.layerPanel.joinEditor.addJoinAriaLabel": "結合を追加",
     "xpack.maps.layerPanel.joinEditor.addJoinButtonLabel": "結合を追加",
     "xpack.maps.layerPanel.joinEditor.termJoinsTitle": "用語結合",
-    "xpack.maps.layerPanel.joinEditor.termJoinTooltip": "用語結合を使用すると、データに基づくスタイル設定のプロパティでこのレイヤーを強化します。",
     "xpack.maps.layerPanel.joinExpression.helpText": "共有キーを構成します。",
     "xpack.maps.layerPanel.joinExpression.joinPopoverTitle": "結合",
     "xpack.maps.layerPanel.joinExpression.leftFieldLabel": "左のフィールド",
