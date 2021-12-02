@@ -8,11 +8,7 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { getMonitorList } from '../../../state/actions';
-import {
-  esKueryInitialStatusSelector,
-  esKuerySelector,
-  monitorListSelector,
-} from '../../../state/selectors';
+import { esKuerySelector, monitorListSelector } from '../../../state/selectors';
 import { MonitorListComponent } from './monitor_list';
 import { useUrlParams } from '../../../hooks';
 import { UptimeRefreshContext } from '../../../contexts';
@@ -41,7 +37,6 @@ export const MonitorList: React.FC<MonitorListProps> = (props) => {
   const [pageSize, setPageSize] = useState<number>(getPageSizeValue);
 
   const dispatch = useDispatch();
-  const esKueryHasLoaded = useSelector(esKueryInitialStatusSelector);
 
   const [getUrlValues] = useUrlParams();
   const { dateRangeStart, dateRangeEnd, pagination, statusFilter, query } = getUrlValues();
@@ -76,7 +71,6 @@ export const MonitorList: React.FC<MonitorListProps> = (props) => {
     pagination,
     statusFilter,
     query,
-    esKueryHasLoaded,
   ]);
 
   useEffect(() => {
