@@ -181,7 +181,7 @@ export default function ({ getService }: FtrProviderContext) {
               legend: 'top 20 of 46 categories',
               colorStats: [
                 { color: '#000000', percentage: 60 },
-                { color: '#54B399', percentage: 35 },
+                { color: '#54B399', percentage: 33 },
               ],
             },
             {
@@ -207,7 +207,7 @@ export default function ({ getService }: FtrProviderContext) {
               id: 'customer_id',
               legend: 'top 20 of 46 categories',
               colorStats: [
-                { color: '#54B399', percentage: 35 },
+                { color: '#54B399', percentage: 33 },
                 { color: '#000000', percentage: 60 },
               ],
             },
@@ -389,6 +389,8 @@ export default function ({ getService }: FtrProviderContext) {
 
     for (const testData of testDataList) {
       describe(`${testData.suiteTitle}`, function () {
+        this.tags(['pete']);
+
         after(async () => {
           await transform.api.deleteIndices(testData.destinationIndex);
           await transform.testResources.deleteIndexPatternByTitle(testData.destinationIndex);
