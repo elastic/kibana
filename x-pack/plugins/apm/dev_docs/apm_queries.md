@@ -461,6 +461,7 @@ GET apm-*-metric-*,metrics-apm*/_search?terminate_after=1000
       "aggs": {
         "throughput": {
           "rate": {
+            "field": "span.destination.service.response_time.count",
             "unit": "minute"
           }
         }

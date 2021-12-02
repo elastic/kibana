@@ -24,7 +24,7 @@ export function Instruction({
   variantId,
   isCloudEnabled,
 }) {
-  const { tutorialService, http, uiSettings, getBasePath } = getServices();
+  const { tutorialService, http, uiSettings, getBasePath, kibanaVersion } = getServices();
 
   let pre;
   if (textPre) {
@@ -82,6 +82,7 @@ export function Instruction({
               http={http}
               variantId={variantId}
               isCloudEnabled={isCloudEnabled}
+              kibanaVersion={kibanaVersion}
             />
           </EuiErrorBoundary>
         </Suspense>
