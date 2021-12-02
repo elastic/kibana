@@ -10,6 +10,7 @@ import React from 'react';
 import { shallowWithIntl, mountWithIntl } from '@kbn/test/jest';
 import { VisualizeEditorCommon } from './visualize_editor_common';
 import { VisualizeEditorVisInstance } from '../types';
+import { SplitChartWarning } from './split_chart_warning';
 
 const mockGetLegacyUrlConflict = jest.fn();
 const mockRedirectLegacyUrl = jest.fn(() => Promise.resolve());
@@ -114,5 +115,87 @@ describe('VisualizeEditorCommon', () => {
       '#/edit/alias_id?_g=test',
       'TSVB visualization'
     );
+  });
+
+  it('should display a warning callout for new heatmap implementation with split aggs', async () => {
+    const wrapper = shallowWithIntl(
+      <VisualizeEditorCommon
+        appState={null}
+        hasUnsavedChanges={false}
+        setHasUnsavedChanges={() => {}}
+        hasUnappliedChanges={false}
+        isEmbeddableRendered={false}
+        onAppLeave={() => {}}
+        visEditorRef={React.createRef()}
+        visInstance={
+          {
+            savedVis: {
+              id: 'test',
+              sharingSavedObjectProps: {
+                outcome: 'conflict',
+                aliasTargetId: 'alias_id',
+              },
+            },
+            vis: {
+              type: {
+                title: 'Heatmap',
+                name: 'heatmap',
+              },
+              data: {
+                aggs: {
+                  aggs: [
+                    {
+                      schema: 'split',
+                    },
+                  ],
+                },
+              },
+            },
+          } as unknown as VisualizeEditorVisInstance
+        }
+      />
+    );
+    expect(wrapper.find(SplitChartWarning).length).toBe(1);
+  });
+
+  it('should not display a warning callout for XY charts with split aggs', async () => {
+    const wrapper = shallowWithIntl(
+      <VisualizeEditorCommon
+        appState={null}
+        hasUnsavedChanges={false}
+        setHasUnsavedChanges={() => {}}
+        hasUnappliedChanges={false}
+        isEmbeddableRendered={false}
+        onAppLeave={() => {}}
+        visEditorRef={React.createRef()}
+        visInstance={
+          {
+            savedVis: {
+              id: 'test',
+              sharingSavedObjectProps: {
+                outcome: 'conflict',
+                aliasTargetId: 'alias_id',
+              },
+            },
+            vis: {
+              type: {
+                title: 'XY',
+                name: 'line',
+              },
+              data: {
+                aggs: {
+                  aggs: [
+                    {
+                      schema: 'split',
+                    },
+                  ],
+                },
+              },
+            },
+          } as unknown as VisualizeEditorVisInstance
+        }
+      />
+    );
+    expect(wrapper.find(SplitChartWarning).length).toBe(0);
   });
 });
