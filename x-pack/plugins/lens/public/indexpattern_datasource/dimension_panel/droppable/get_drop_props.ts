@@ -101,7 +101,8 @@ function hasTheSameField(
     targetColumn &&
     hasField(targetColumn) &&
     hasField(sourceColumn) &&
-    targetColumn.sourceField === sourceColumn.sourceField
+    targetColumn.sourceField === sourceColumn.sourceField &&
+    !hasOperationSupportForMultipleFields(targetColumn, sourceColumn)
   );
 }
 
