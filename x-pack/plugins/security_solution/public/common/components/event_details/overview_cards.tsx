@@ -190,9 +190,10 @@ const StatusPopoverButton = React.memo<StatusPopoverButtonProps>(
         }
         isOpen={isPopoverOpen}
         closePopover={closePopover}
+        panelPaddingSize="none"
       >
-        <EuiPopoverTitle>{CHANGE_ALERT_STATUS}</EuiPopoverTitle>
-        <EuiContextMenuPanel size="s" items={actionItems} />
+        <EuiPopoverTitle paddingSize="m">{CHANGE_ALERT_STATUS}</EuiPopoverTitle>
+        <EuiContextMenuPanel items={actionItems} />
       </EuiPopover>
     );
   }
