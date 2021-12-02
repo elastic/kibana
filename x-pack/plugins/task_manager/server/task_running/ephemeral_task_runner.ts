@@ -65,8 +65,6 @@ type Opts = {
 type EphemeralSuccessfulRunResult = Omit<SuccessfulRunResult, 'runAt' | 'schedule'>;
 type EphemeralFailedRunResult = Omit<FailedRunResult, 'runAt' | 'schedule'>;
 
-const TASK_MANAGER_TRANSACTION_RUN_EPHEMERAL = 'run-ephemeral';
-
 /**
  *
  * @export
