@@ -56,13 +56,15 @@ export function RuntimeAttachment(props: Props) {
   );
 
   const onToggleEnable = useCallback(() => {
-    setIsEnabled(!isEnabled);
-    setDiscoveryRuleList([]);
+    const nextIsEnabled = !isEnabled;
+    setIsEnabled(nextIsEnabled);
     onChange({
-      enabled: !isEnabled,
-      discoveryRules: [],
+      enabled: nextIsEnabled,
+      discoveryRules: nextIsEnabled
+        ? discoveryRuleList.map(({ discoveryRule }) => discoveryRule)
+        : [],
     });
-  }, [isEnabled, onChange]);
+  }, [isEnabled, onChange, discoveryRuleList]);
 
   const onDelete = useCallback(
     (discoveryRuleId: string) => {

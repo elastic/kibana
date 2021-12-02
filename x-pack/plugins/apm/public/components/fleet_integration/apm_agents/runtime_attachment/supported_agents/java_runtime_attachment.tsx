@@ -80,7 +80,7 @@ export function JavaRuntimeAttachment({ newPolicy, onChange }: Props) {
       }
       initialDiscoveryRules={(
         newPolicy.inputs.find(({ type }) => type === 'apm')?.vars
-          ?.java_attacher_discovery_rules?.value ?? []
+          ?.java_attacher_discovery_rules?.value ?? [initialDiscoveryRule]
       ).map((discoveryRuleMap: Record<string, string>) => {
         const [operationType, probe] = Object.entries(discoveryRuleMap)[0];
         return {
@@ -92,3 +92,5 @@ export function JavaRuntimeAttachment({ newPolicy, onChange }: Props) {
     />
   );
 }
+
+const initialDiscoveryRule = { 'include-vmarg': 'elastic.apm.attach=true' };
