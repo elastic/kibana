@@ -9,6 +9,11 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useCurrentUser, useKibana } from '../../../lib/kibana';
 import { useLicense } from '../../../hooks/use_license';
 import { EndpointPrivileges, Immutable } from '../../../../../common/endpoint/types';
+import {
+  calculateEndpointAuthz,
+  getEndpointAuthzInitialState,
+} from '../../../../../common/endpoint/service/authz';
+import { FleetAuthz } from '../../../../../../fleet/common';
 
 /**
  * Retrieve the endpoint privileges for the current user.
@@ -20,22 +25,20 @@ export const useEndpointPrivileges = (): Immutable<EndpointPrivileges> => {
   const user = useCurrentUser();
   const fleetServices = useKibana().services.fleet;
   const isMounted = useRef<boolean>(true);
-  const isPlatinumPlusLicense = useLicense().isPlatinumPlus();
-  const [canAccessFleet, setCanAccessFleet] = useState<boolean>(false);
+  const licenseService = useLicense();
   const [fleetCheckDone, setFleetCheckDone] = useState<boolean>(false);
+  const [fleetAuthz, setFleetAuthz] = useState<FleetAuthz | null>(null);
 
   const privileges = useMemo(() => {
     const privilegeList: EndpointPrivileges = Object.freeze({
       loading: !fleetCheckDone || !user,
-      canAccessFleet,
-      canAccessEndpointManagement: canAccessFleet,
-      canCreateArtifactsByPolicy: isPlatinumPlusLicense,
-      canIsolateHost: isPlatinumPlusLicense,
-      canUnIsolateHost: true,
+      ...(fleetAuthz
+        ? calculateEndpointAuthz(licenseService, fleetAuthz)
+        : getEndpointAuthzInitialState()),
     });
 
     return privilegeList;
-  }, [canAccessFleet, fleetCheckDone, user, isPlatinumPlusLicense]);
+  }, [fleetCheckDone, user, fleetAuthz, licenseService]);
 
   // Check if user can access fleet
   useEffect(() => {
@@ -48,10 +51,10 @@ export const useEndpointPrivileges = (): Immutable<EndpointPrivileges> => {
 
     (async () => {
       try {
-        const fleetAuthz = await fleetServices.authz;
+        const fleetAuthzForCurrentUser = await fleetServices.authz;
 
         if (isMounted.current) {
-          setCanAccessFleet(fleetAuthz.fleet.all);
+          setFleetAuthz(fleetAuthzForCurrentUser);
         }
       } finally {
         if (isMounted.current) {

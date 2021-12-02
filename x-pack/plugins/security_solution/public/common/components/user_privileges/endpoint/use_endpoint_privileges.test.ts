@@ -6,14 +6,14 @@
  */
 
 import { act, renderHook, RenderHookResult, RenderResult } from '@testing-library/react-hooks';
-import { useHttp, useCurrentUser } from '../../../lib/kibana';
+import { useCurrentUser, useKibana } from '../../../lib/kibana';
 import { useEndpointPrivileges } from './use_endpoint_privileges';
 import { securityMock } from '../../../../../../security/public/mocks';
 import { AuthenticatedUser } from '../../../../../../security/common';
 import { licenseService } from '../../../hooks/use_license';
-import { fleetGetCheckPermissionsHttpMock } from '../../../../management/pages/mocks';
 import { getEndpointPrivilegesInitialStateMock } from './mocks';
 import { EndpointPrivileges } from '../../../../../common/endpoint/types';
+import { getEndpointPrivilegesInitialState } from './utils';
 
 jest.mock('../../../lib/kibana');
 jest.mock('../../../hooks/use_license', () => {
@@ -32,10 +32,9 @@ const licenseServiceMock = licenseService as jest.Mocked<typeof licenseService>;
 
 describe('When using useEndpointPrivileges hook', () => {
   let authenticatedUser: AuthenticatedUser;
-  let fleetApiMock: ReturnType<typeof fleetGetCheckPermissionsHttpMock>;
   let result: RenderResult<EndpointPrivileges>;
   let unmount: ReturnType<typeof renderHook>['unmount'];
-  let waitForNextUpdate: ReturnType<typeof renderHook>['waitForNextUpdate'];
+  let releaseFleetAuthz: () => void;
   let render: () => RenderHookResult<void, EndpointPrivileges>;
 
   beforeEach(() => {
@@ -45,14 +44,19 @@ describe('When using useEndpointPrivileges hook', () => {
 
     (useCurrentUser as jest.Mock).mockReturnValue(authenticatedUser);
 
-    fleetApiMock = fleetGetCheckPermissionsHttpMock(
-      useHttp() as Parameters<typeof fleetGetCheckPermissionsHttpMock>[0]
-    );
     licenseServiceMock.isPlatinumPlus.mockReturnValue(true);
+
+    // Add a daly to fleet service that provides authz information
+    const fleetAuthz = useKibana().services.fleet!.authz;
+
+    // Add a delay to the fleet Authz promise to test out the `loading` property
+    useKibana().services.fleet!.authz = new Promise((resolve) => {
+      releaseFleetAuthz = () => resolve(fleetAuthz);
+    });
 
     render = () => {
       const hookRenderResponse = renderHook(() => useEndpointPrivileges());
-      ({ result, unmount, waitForNextUpdate } = hookRenderResponse);
+      ({ result, unmount } = hookRenderResponse);
       return hookRenderResponse;
     };
   });
@@ -62,54 +66,22 @@ describe('When using useEndpointPrivileges hook', () => {
   });
 
   it('should return `loading: true` while retrieving privileges', async () => {
-    // Add a daly to the API response that we can control from the test
-    let releaseApiResponse: () => void;
-    fleetApiMock.responseProvider.checkPermissions.mockDelay.mockReturnValue(
-      new Promise<void>((resolve) => {
-        releaseApiResponse = () => resolve();
-      })
-    );
     (useCurrentUser as jest.Mock).mockReturnValue(null);
 
     const { rerender } = render();
-    expect(result.current).toEqual(
-      getEndpointPrivilegesInitialStateMock({
-        canAccessEndpointManagement: false,
-        canAccessFleet: false,
-        loading: true,
-      })
-    );
+    expect(result.current).toEqual(getEndpointPrivilegesInitialState());
 
     // Make user service available
     (useCurrentUser as jest.Mock).mockReturnValue(authenticatedUser);
     rerender();
-    expect(result.current).toEqual(
-      getEndpointPrivilegesInitialStateMock({
-        canAccessEndpointManagement: false,
-        canAccessFleet: false,
-        loading: true,
-      })
-    );
+    expect(result.current).toEqual(getEndpointPrivilegesInitialState());
 
     // Release the API response
     await act(async () => {
-      await fleetApiMock.waitForApi();
-      releaseApiResponse!();
+      releaseFleetAuthz();
+      await useKibana().services.fleet!.authz;
     });
+
     expect(result.current).toEqual(getEndpointPrivilegesInitialStateMock());
   });
-
-  it('should set privileges to false if user does not have `all` fleet privileges', async () => {
-    expect(true).toBe(false);
-  });
-
-  it.each([['canIsolateHost'], ['canCreateArtifactsByPolicy']])(
-    'should set %s to false if license is not PlatinumPlus',
-    async (privilege) => {
-      licenseServiceMock.isPlatinumPlus.mockReturnValue(false);
-      render();
-      await waitForNextUpdate();
-      expect(result.current).toEqual(expect.objectContaining({ [privilege]: false }));
-    }
-  );
 });
