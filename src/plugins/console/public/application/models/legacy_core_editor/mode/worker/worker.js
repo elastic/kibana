@@ -2022,6 +2022,9 @@ ace.define(
       },
       // parses and returns the method
       method = function () {
+        text = text.toUpperCase()
+        ch = ch.toUpperCase()
+
         switch (ch) {
           case 'G':
             next('G');
