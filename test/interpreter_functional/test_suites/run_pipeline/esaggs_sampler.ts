@@ -41,7 +41,11 @@ export default function ({
         expect(samplerColumn.name).to.be('sampler');
         expect(samplerColumn.meta.sourceParams.params).to.eql({});
 
-        expect(result.rows).to.eql([{ 'col-1-1': 5853.3942307692305 }]);
+        expect(result.rows.length).to.be(1);
+        expect(Object.keys(result.rows[0]).length).to.be(1);
+        const resultFromSample = result.rows[0]['col-1-1']; // check that sampler bucket doesn't produce columns
+        expect(typeof resultFromSample).to.be('number');
+        expect(resultFromSample).to.greaterThan(0); //  can't check exact metric using sample
       });
 
       it('can execute aggSampler with custom shard_size', async () => {
@@ -58,7 +62,11 @@ export default function ({
         expect(samplerColumn.name).to.be('sampler');
         expect(samplerColumn.meta.sourceParams.params).to.eql({ shard_size: 20 });
 
-        expect(result.rows).to.eql([{ 'col-1-1': 5922.666666666667 }]);
+        expect(result.rows.length).to.be(1);
+        expect(Object.keys(result.rows[0]).length).to.be(1); // check that sampler bucket doesn't produce columns
+        const resultFromSample = result.rows[0]['col-1-1'];
+        expect(typeof resultFromSample).to.be('number');
+        expect(resultFromSample).to.greaterThan(0); // can't check exact metric using sample
       });
     });
   });

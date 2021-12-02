@@ -73,6 +73,7 @@ describe('Aggs service', () => {
           "significant_terms",
           "geohash_grid",
           "geotile_grid",
+          "sampler",
           "foo",
         ]
       `);
@@ -122,6 +123,7 @@ describe('Aggs service', () => {
           "significant_terms",
           "geohash_grid",
           "geotile_grid",
+          "sampler",
         ]
       `);
       expect(bStart.types.getAll().metrics.map((t) => t(aggTypesDependencies).name))
