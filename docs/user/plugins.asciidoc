@@ -65,6 +65,7 @@ We are unable to evaluate or maintain the known plugins, so care should be taken
 * https://github.com/dlumbrer/kbn_radar[Radar] (dlumbrer)
 * https://github.com/dlumbrer/kbn_searchtables[Search-Tables] (dlumbrer)
 * https://github.com/Smeds/status_light_visualization[Status Light] (smeds)
+* https://github.com/uniberg/kbn_sankey_vis[Sankey-Visualization] (uniberg)
 * https://github.com/prelert/kibana-swimlane-vis[Swimlanes] (prelert)
 * https://github.com/sbeyn/kibana-plugin-traffic-sg[Traffic] (sbeyn)
 * https://github.com/PhaedrusTheGreek/transform_vis[Transform Visualization] (PhaedrusTheGreek)
