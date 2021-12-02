@@ -169,9 +169,8 @@ them in bulk operations.
 === Secure {kib}
 
 {kib} offers a range of security features for you to control who has access to what.
-The security features are automatically turned on when
-{ref}/security-minimal-setup.html[security is enabled in
-{es}]. For a description of all available configuration options,
+{ref}/configuring-stack-security.html[Security is enabled automatically] when you enroll {kib} with a secured {es} cluster.
+For a description of all available configuration options,
 refer to <<security-settings-kb,Security settings in {kib}>>.
 
 [float]
