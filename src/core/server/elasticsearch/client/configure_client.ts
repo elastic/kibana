@@ -163,7 +163,7 @@ const addLogging = ({ client, type, logger }: { client: Client; type: string; lo
         const stackTrace = new Error().stack?.split('\n').slice(5).join('\n');
 
         if (requestOrigin === 'kibana') {
-          deprecationLogger.info(
+          deprecationLogger.warn(
             `ES DEPRECATION: ${event.warnings}\nOrigin:${requestOrigin}\nStack trace:\n${stackTrace}\nQuery:\n${queryMessage}`
           );
         } else {
