@@ -20,7 +20,7 @@ export function ThemeSwitcher() {
   const [globals, updateGlobals] = useGlobals();
   const selectedTheme = globals.euiTheme;
 
-  if (!selectedTheme || selectedTheme === defaultTheme) {
+  if (!selectedTheme) {
     updateGlobals({ euiTheme: defaultTheme });
   }
 
