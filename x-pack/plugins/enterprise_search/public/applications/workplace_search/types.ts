@@ -181,6 +181,13 @@ export interface IndexingConfig {
   schedule: IndexingSchedule;
 }
 
+// GitHub apps only
+interface Secret {
+  app_id: string;
+  fingerprint: string;
+  base_url?: string;
+}
+
 export interface ContentSourceFullData extends ContentSourceDetails {
   activities: SourceActivity[];
   details: DescriptionList[];
@@ -201,6 +208,7 @@ export interface ContentSourceFullData extends ContentSourceDetails {
   urlFieldIsLinkable: boolean;
   createdAt: string;
   serviceName: string;
+  secret?: Secret; // undefined for all content sources except GitHub apps
 }
 
 export interface ContentSourceStatus {

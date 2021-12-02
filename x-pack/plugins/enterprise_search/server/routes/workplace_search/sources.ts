@@ -60,6 +60,7 @@ const displaySettingsSchema = schema.object({
 const sourceSettingsSchema = schema.object({
   content_source: schema.object({
     name: schema.maybe(schema.string()),
+    private_key: schema.maybe(schema.nullable(schema.string())),
     indexing: schema.maybe(
       schema.object({
         enabled: schema.maybe(schema.boolean()),
