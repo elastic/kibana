@@ -466,7 +466,7 @@ describe('Host Isolation', () => {
           body: { endpoint_ids: ['XYZ'] },
           mockUser: superU,
         });
-        expect(mockResponse.forbidden).toBeCalled();
+        expect(mockResponse.forbidden).not.toBeCalled();
       });
       it('prohibits non-admin user from performing unisolation', async () => {
         const superU = { username: 'foo', roles: ['user'] };
@@ -474,7 +474,7 @@ describe('Host Isolation', () => {
           body: { endpoint_ids: ['XYZ'] },
           mockUser: superU,
         });
-        expect(mockResponse.forbidden).toBeCalled();
+        expect(mockResponse.forbidden).not.toBeCalled();
       });
     });
 

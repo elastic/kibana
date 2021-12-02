@@ -49,9 +49,10 @@ export default function catalogueTests({ getService }: FtrProviderContext) {
             // everything except monitoring, and ES features are enabled
             const expected = mapValues(
               uiCapabilities.value!.catalogue,
-              (enabled, catalogueId) =>
+              (_enabled, catalogueId) =>
                 catalogueId !== 'monitoring' &&
                 catalogueId !== 'osquery' &&
+                catalogueId !== 'securitySolutionEndpoint' &&
                 !esFeatureExceptions.includes(catalogueId)
             );
             expect(uiCapabilities.value!.catalogue).to.eql(expected);
@@ -68,12 +69,13 @@ export default function catalogueTests({ getService }: FtrProviderContext) {
               'appSearch',
               'workplaceSearch',
               'spaces',
+              'securitySolutionEndpoint',
               'osquery',
               ...esFeatureExceptions,
             ];
             const expected = mapValues(
               uiCapabilities.value!.catalogue,
-              (enabled, catalogueId) => !exceptions.includes(catalogueId)
+              (_enabled, catalogueId) => !exceptions.includes(catalogueId)
             );
             expect(uiCapabilities.value!.catalogue).to.eql(expected);
             break;
@@ -92,12 +94,13 @@ export default function catalogueTests({ getService }: FtrProviderContext) {
               'appSearch',
               'workplaceSearch',
               'spaces',
+              'securitySolutionEndpoint',
               'osquery',
               ...esFeatureExceptions,
             ];
             const expected = mapValues(
               uiCapabilities.value!.catalogue,
-              (enabled, catalogueId) => !exceptions.includes(catalogueId)
+              (_enabled, catalogueId) => !exceptions.includes(catalogueId)
             );
             expect(uiCapabilities.value!.catalogue).to.eql(expected);
             break;
