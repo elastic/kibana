@@ -188,30 +188,6 @@ function ObservabilityActions({
     };
   }, [data, eventId, ecsData]);
 
-  // Hide the WorkFlow filter, but keep its code as required in https://github.com/elastic/kibana/issues/117686
-
-  // const onAlertStatusUpdated = useCallback(() => {
-  //   setActionsPopover(null);
-  //   if (refetch) {
-  //     refetch();
-  //   }
-  // }, [setActionsPopover, refetch]);
-
-  // const alertPermissions = useGetUserAlertsPermissions(
-  //   capabilities,
-  //   alertDataConsumer === 'alerts' ? alertDataProducer : alertDataConsumer
-  // );
-
-  // const statusActionItems = useStatusBulkActionItems({
-  //   eventIds: [eventId],
-  //   currentStatus,
-  //   indexName: ecsData._index ?? '',
-  //   setEventsLoading,
-  //   setEventsDeleted,
-  //   onUpdateSuccess: onAlertStatusUpdated,
-  //   onUpdateFailure: onAlertStatusUpdated,
-  // });
-
   const ruleId = alert.fields['kibana.alert.rule.uuid'] ?? null;
   const linkToRule = ruleId ? prepend(paths.management.ruleDetails(ruleId)) : null;
 
@@ -235,8 +211,7 @@ function ObservabilityActions({
             }),
           ]
         : []),
-      // Hide the WorkFlow filter, but keep its code as required in https://github.com/elastic/kibana/issues/117686
-      // ...(alertPermissions.crud ? statusActionItems : []),
+
       ...(!!linkToRule
         ? [
             <EuiContextMenuItem
@@ -309,8 +284,6 @@ function ObservabilityActions({
     </>
   );
 }
-// Hide the WorkFlow filter, but keep its code as required in https://github.com/elastic/kibana/issues/117686
-
 const FIELDS_WITHOUT_CELL_ACTIONS = [
   '@timestamp',
   'signal.rule.risk_score',
@@ -418,8 +391,6 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
       type,
       columns: tGridState?.columns ?? columns,
       deletedEventIds,
-      // Hide the WorkFlow filter, but keep its code as required in https://github.com/elastic/kibana/issues/117686
-      // defaultCellActions: getDefaultCellActions({ addToQuery }),
       disabledCellActions: FIELDS_WITHOUT_CELL_ACTIONS,
       end: rangeTo,
       filters: [],
