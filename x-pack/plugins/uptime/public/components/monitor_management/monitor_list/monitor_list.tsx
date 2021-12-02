@@ -9,8 +9,8 @@ import { EuiBasicTable, EuiPanel, EuiSpacer, EuiLink } from '@elastic/eui';
 import { MonitorManagementList as MonitorManagementListState } from '../../../state/reducers/monitor_management';
 import { MonitorFields } from '../../../../common/runtime_types/monitor_management';
 import { UptimeSettingsContext } from '../../../contexts';
-import { MonitorTags } from './tags';
 import { Actions } from './actions';
+import { MonitorTags } from '../../common/monitor_tags';
 
 interface Props {
   pageSize: number;
