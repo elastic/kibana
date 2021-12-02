@@ -187,7 +187,7 @@ export class Server {
 
   public async setup() {
     this.log.debug('setting up server');
-    const setupTransaction = apm.startTransaction('server-setup', kibana-platform);
+    const setupTransaction = apm.startTransaction('server-setup', 'kibana-platform');
 
     const environmentSetup = this.environment.setup();
 
