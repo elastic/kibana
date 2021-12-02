@@ -23,6 +23,7 @@ import {
   COUNT_PROP_NAME,
   COLOR_MAP_TYPE,
   FIELD_ORIGIN,
+  GRID_RESOLUTION,
   LAYER_WIZARD_CATEGORY,
   RENDER_AS,
   VECTOR_STYLES,
@@ -46,7 +47,10 @@ export const clustersLayerWizardConfig: LayerWizard = {
 
       const defaultDynamicProperties = getDefaultDynamicProperties();
       const layerDescriptor = GeoJsonVectorLayer.createDescriptor({
-        sourceDescriptor: ESGeoGridSource.createDescriptor(sourceConfig),
+        sourceDescriptor: ESGeoGridSource.createDescriptor({
+          ...sourceConfig,
+          resolution: GRID_RESOLUTION.FINE,
+        }),
         style: VectorStyle.createDescriptor({
           // @ts-ignore
           [VECTOR_STYLES.FILL_COLOR]: {
@@ -78,6 +82,7 @@ export const clustersLayerWizardConfig: LayerWizard = {
             type: STYLE_TYPE.DYNAMIC,
             options: {
               ...(defaultDynamicProperties[VECTOR_STYLES.ICON_SIZE].options as SizeDynamicOptions),
+              maxSize: 24,
               field: {
                 name: COUNT_PROP_NAME,
                 origin: FIELD_ORIGIN.SOURCE,
