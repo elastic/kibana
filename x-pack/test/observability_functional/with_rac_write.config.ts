@@ -42,12 +42,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     // default to the xpack functional config
     ...xpackFunctionalConfig.getAll(),
     servers,
-    apps: {
-      ...xpackFunctionalConfig.get('apps'),
-      triggersActions: {
-        pathname: '/app/management/insightsAndAlerting/triggersActions',
-      },
-    },
     esTestCluster: {
       ...xpackFunctionalConfig.get('esTestCluster'),
       ssl: true,
