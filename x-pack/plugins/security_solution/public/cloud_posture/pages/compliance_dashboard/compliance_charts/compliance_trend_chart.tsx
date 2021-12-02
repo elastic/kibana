@@ -10,12 +10,10 @@ import {
   Chart,
   Settings,
   Axis,
-  LineSeries,
   timeFormatter,
   niceTimeFormatByDay,
   AreaSeries,
 } from '@elastic/charts';
-import { CspData } from './charts_data_types';
 import { dateValueToTuple } from '../index';
 
 export const ComplianceTrendChart = ({ postureScore }) => {

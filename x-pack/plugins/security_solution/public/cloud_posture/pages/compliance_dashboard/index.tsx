@@ -5,16 +5,15 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
-import { EuiSpacer, EuiTitle, EuiLoadingChart } from '@elastic/eui';
+import React from 'react';
+import { EuiSpacer, EuiTitle } from '@elastic/eui';
+import { DateValue } from '@elastic/eui/src/components/search_bar/query/date_value';
 import { SummarySection } from './dashboard_sections/summary_section';
 import { AccumulatedSection } from './dashboard_sections/accumulated_section';
 import { BenchmarksSection } from './dashboard_sections/benchmarks_section';
-import { DateValue } from './compliance_charts/charts_data_types';
 import { SecuritySolutionPageWrapper } from '../../../common/components/page_wrapper';
 import { HeaderPage } from '../../../common/components/header_page';
-import { SpyRoute } from '../../../common/utils/route/spy_routes';
-import { useCloudPostureStatsApi } from '../../common/api/use_cloud_posture_stats_api';
+import { useCloudPostureStatsApi } from '../../common/api';
 
 export const dateValueToTuple = ({ date, value }: DateValue) => [date, value];
 
