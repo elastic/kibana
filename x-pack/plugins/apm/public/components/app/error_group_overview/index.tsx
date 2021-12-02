@@ -14,24 +14,60 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import uuid from 'uuid';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { ChartPointerEventContextProvider } from '../../../context/chart_pointer_event/chart_pointer_event_context';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { useErrorGroupDistributionFetcher } from '../../../hooks/use_error_group_distribution_fetcher';
 import { useFetcher } from '../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../hooks/use_time_range';
+import { APIReturnType } from '../../../services/rest/createCallApmApi';
 import { FailedTransactionRateChart } from '../../shared/charts/failed_transaction_rate_chart';
+import { getTimeRangeComparison } from '../../shared/time_comparison/get_time_range_comparison';
 import { ErrorDistribution } from '../error_group_details/Distribution';
 import { ErrorGroupList } from './error_group_list';
 
+type ErrorGroupMainStatistics =
+  APIReturnType<'GET /internal/apm/services/{serviceName}/errors/groups/main_statistics'>;
+type ErrorGroupDetailedStatistics =
+  APIReturnType<'GET /internal/apm/services/{serviceName}/errors/groups/detailed_statistics'>;
+
+const INITIAL_STATE_MAIN_STATISTICS: {
+  errorGroupMainStatistics: ErrorGroupMainStatistics['errorGroups'];
+  requestId?: string;
+} = {
+  errorGroupMainStatistics: [],
+  requestId: undefined,
+};
+
+const INITIAL_STATE_DETAILED_STATISTICS: ErrorGroupDetailedStatistics = {
+  currentPeriod: {},
+  previousPeriod: {},
+};
+
 export function ErrorGroupOverview() {
-  const { serviceName } = useApmServiceContext();
+  const { serviceName, transactionType } = useApmServiceContext();
 
   const {
-    query: { environment, kuery, sortField, sortDirection, rangeFrom, rangeTo },
+    query: {
+      environment,
+      kuery,
+      sortField,
+      sortDirection,
+      rangeFrom,
+      rangeTo,
+      comparisonType,
+      comparisonEnabled,
+    },
   } = useApmParams('/services/{serviceName}/errors');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
+  const { comparisonStart, comparisonEnd } = getTimeRangeComparison({
+    start,
+    end,
+    comparisonType,
+    comparisonEnabled,
+  });
 
   const { errorDistributionData, status } = useErrorGroupDistributionFetcher({
     serviceName,
@@ -40,30 +76,90 @@ export function ErrorGroupOverview() {
     kuery,
   });
 
-  const { data: errorGroupListData } = useFetcher(
-    (callApmApi) => {
-      const normalizedSortDirection = sortDirection === 'asc' ? 'asc' : 'desc';
+  const { data: errorGroupListData = INITIAL_STATE_MAIN_STATISTICS } =
+    useFetcher(
+      (callApmApi) => {
+        const normalizedSortDirection =
+          sortDirection === 'asc' ? 'asc' : 'desc';
 
-      if (start && end) {
-        return callApmApi({
-          endpoint: 'GET /internal/apm/services/{serviceName}/errors',
-          params: {
-            path: {
-              serviceName,
+        if (start && end && transactionType) {
+          return callApmApi({
+            endpoint:
+              'GET /internal/apm/services/{serviceName}/errors/groups/main_statistics',
+            params: {
+              path: {
+                serviceName,
+              },
+              query: {
+                environment,
+                transactionType,
+                kuery,
+                start,
+                end,
+                sortField,
+                sortDirection: normalizedSortDirection,
+              },
             },
+          }).then((response) => {
+            return {
+              // Everytime the main statistics is refetched, updates the requestId making the comparison API to be refetched.
+              requestId: uuid(),
+              errorGroupMainStatistics: response.errorGroups,
+            };
+          });
+        }
+      },
+      [
+        environment,
+        kuery,
+        serviceName,
+        transactionType,
+        start,
+        end,
+        sortField,
+        sortDirection,
+      ]
+    );
+
+  const { requestId, errorGroupMainStatistics } = errorGroupListData;
+
+  const {
+    data: errorGroupDetailedStatistics = INITIAL_STATE_DETAILED_STATISTICS,
+  } = useFetcher(
+    (callApmApi) => {
+      if (
+        requestId &&
+        errorGroupMainStatistics.length &&
+        start &&
+        end &&
+        transactionType
+      ) {
+        return callApmApi({
+          endpoint:
+            'GET /internal/apm/services/{serviceName}/errors/groups/detailed_statistics',
+          params: {
+            path: { serviceName },
             query: {
               environment,
               kuery,
               start,
               end,
-              sortField,
-              sortDirection: normalizedSortDirection,
+              numBuckets: 20,
+              transactionType,
+              groupIds: JSON.stringify(
+                errorGroupMainStatistics.map(({ groupId }) => groupId).sort()
+              ),
+              comparisonStart,
+              comparisonEnd,
             },
           },
         });
       }
     },
-    [environment, kuery, serviceName, start, end, sortField, sortDirection]
+    // only fetches agg results when requestId changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [requestId],
+    { preservePreviousData: false }
   );
 
   if (!errorDistributionData || !errorGroupListData) {
@@ -88,10 +184,7 @@ export function ErrorGroupOverview() {
               </EuiPanel>
             </EuiFlexItem>
             <EuiFlexItem>
-              <FailedTransactionRateChart
-                kuery={kuery}
-                environment={environment}
-              />
+              <FailedTransactionRateChart kuery={kuery} />
             </EuiFlexItem>
           </ChartPointerEventContextProvider>
         </EuiFlexGroup>
@@ -110,8 +203,10 @@ export function ErrorGroupOverview() {
           <EuiSpacer size="s" />
 
           <ErrorGroupList
-            items={errorGroupListData.errorGroups}
+            mainStatistics={errorGroupMainStatistics}
             serviceName={serviceName}
+            detailedStatistics={errorGroupDetailedStatistics}
+            comparisonEnabled={comparisonEnabled}
           />
         </EuiPanel>
       </EuiFlexItem>

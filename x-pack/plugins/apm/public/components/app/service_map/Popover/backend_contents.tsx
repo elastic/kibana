@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButton, EuiFlexItem } from '@elastic/eui';
+import { EuiButton, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { TypeOf } from '@kbn/typed-react-router-config';
 import { METRIC_TYPE } from '@kbn/analytics';
@@ -57,12 +57,14 @@ export function BackendContents({
   );
 
   const isLoading = status === FETCH_STATUS.LOADING;
-  const detailsUrl = apmRouter.link('/backends/overview', {
-    query: {
-      ...query,
-      backendName,
-    } as TypeOf<ApmRoutes, '/backends/overview'>['query'],
-  });
+  const detailsUrl = backendName
+    ? apmRouter.link('/backends/overview', {
+        query: {
+          ...query,
+          backendName,
+        } as TypeOf<ApmRoutes, '/backends/overview'>['query'],
+      })
+    : undefined;
 
   const trackEvent = useUiTracker();
 
@@ -71,6 +73,7 @@ export function BackendContents({
       <EuiFlexItem>
         <StatsList data={data} isLoading={isLoading} />
       </EuiFlexItem>
+      <EuiSpacer size="s" />
       <EuiFlexItem>
         {/* eslint-disable-next-line @elastic/eui/href-or-on-click*/}
         <EuiButton

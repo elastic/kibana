@@ -25,6 +25,7 @@ export const useDeleteIndexAndTargetIndex = (items: TransformListRow[]) => {
     http,
     savedObjects,
     ml: { extractErrorMessage },
+    application: { capabilities },
   } = useAppDependencies();
   const toastNotifications = useToastNotifications();
 
@@ -32,6 +33,7 @@ export const useDeleteIndexAndTargetIndex = (items: TransformListRow[]) => {
   const [deleteIndexPattern, setDeleteIndexPattern] = useState<boolean>(true);
   const [userCanDeleteIndex, setUserCanDeleteIndex] = useState<boolean>(false);
   const [indexPatternExists, setIndexPatternExists] = useState<boolean>(false);
+  const [userCanDeleteDataView, setUserCanDeleteDataView] = useState<boolean>(false);
 
   const toggleDeleteIndex = useCallback(
     () => setDeleteDestIndex(!deleteDestIndex),
@@ -70,6 +72,13 @@ export const useDeleteIndexAndTargetIndex = (items: TransformListRow[]) => {
       if (userCanDelete) {
         setUserCanDeleteIndex(true);
       }
+      const canDeleteDataView =
+        capabilities.savedObjectsManagement.delete === true ||
+        capabilities.indexPatterns.save === true;
+      setUserCanDeleteDataView(canDeleteDataView);
+      if (canDeleteDataView === false) {
+        setDeleteIndexPattern(false);
+      }
     } catch (e) {
       toastNotifications.addDanger(
         i18n.translate(
@@ -80,7 +89,7 @@ export const useDeleteIndexAndTargetIndex = (items: TransformListRow[]) => {
         )
       );
     }
-  }, [http, toastNotifications]);
+  }, [http, toastNotifications, capabilities]);
 
   useEffect(() => {
     checkUserIndexPermission();
@@ -99,6 +108,7 @@ export const useDeleteIndexAndTargetIndex = (items: TransformListRow[]) => {
 
   return {
     userCanDeleteIndex,
+    userCanDeleteDataView,
     deleteDestIndex,
     indexPatternExists,
     deleteIndexPattern,

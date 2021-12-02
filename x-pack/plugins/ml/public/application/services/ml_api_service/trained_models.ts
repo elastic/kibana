@@ -15,7 +15,6 @@ import {
   ModelPipelines,
   TrainedModelStat,
   NodesOverviewResponse,
-  TrainedModelDeploymentStatsResponse,
 } from '../../../../common/types/trained_models';
 
 export interface InferenceQueryParams {
@@ -122,21 +121,6 @@ export function trainedModelsApiProvider(httpService: HttpService) {
       });
     },
 
-    getTrainedModelDeploymentStats(modelId?: string | string[]) {
-      let model = modelId ?? '*';
-      if (Array.isArray(modelId)) {
-        model = modelId.join(',');
-      }
-
-      return httpService.http<{
-        count: number;
-        deployment_stats: TrainedModelDeploymentStatsResponse[];
-      }>({
-        path: `${apiBasePath}/trained_models/${model}/deployment/_stats`,
-        method: 'GET',
-      });
-    },
-
     getTrainedModelsNodesOverview() {
       return httpService.http<NodesOverviewResponse>({
         path: `${apiBasePath}/trained_models/nodes_overview`,
@@ -151,10 +135,13 @@ export function trainedModelsApiProvider(httpService: HttpService) {
       });
     },
 
-    stopModelAllocation(modelId: string) {
+    stopModelAllocation(modelId: string, options: { force: boolean } = { force: false }) {
+      const force = options?.force;
+
       return httpService.http<{ acknowledge: boolean }>({
         path: `${apiBasePath}/trained_models/${modelId}/deployment/_stop`,
         method: 'POST',
+        query: { force },
       });
     },
   };

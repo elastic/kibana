@@ -9,7 +9,7 @@ import type { CoreSetup } from 'kibana/public';
 import { createStartServicesGetter, Storage } from '../../../../../src/plugins/kibana_utils/public';
 import type { ExpressionsSetup } from '../../../../../src/plugins/expressions/public';
 import type { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
-import type { IndexPatternFieldEditorStart } from '../../../../../src/plugins/index_pattern_field_editor/public';
+import type { IndexPatternFieldEditorStart } from '../../../../../src/plugins/data_view_field_editor/public';
 import type {
   DataPublicPluginSetup,
   DataPublicPluginStart,
@@ -32,7 +32,7 @@ export interface IndexPatternDatasourceSetupPlugins {
 export interface IndexPatternDatasourceStartPlugins {
   data: DataPublicPluginStart;
   fieldFormats: FieldFormatsStart;
-  indexPatternFieldEditor: IndexPatternFieldEditorStart;
+  dataViewFieldEditor: IndexPatternFieldEditorStart;
   uiActions: UiActionsStart;
 }
 
@@ -60,7 +60,7 @@ export class IndexPatternDatasource {
         fieldFormatsSetup.register([suffixFormatter]);
       }
 
-      const [coreStart, { indexPatternFieldEditor, uiActions, data, fieldFormats }] =
+      const [coreStart, { dataViewFieldEditor, uiActions, data, fieldFormats }] =
         await core.getStartServices();
 
       return getIndexPatternDatasource({
@@ -69,7 +69,7 @@ export class IndexPatternDatasource {
         storage: new Storage(localStorage),
         data,
         charts,
-        indexPatternFieldEditor,
+        dataViewFieldEditor,
         uiActions,
       });
     });

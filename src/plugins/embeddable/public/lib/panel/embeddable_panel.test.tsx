@@ -11,7 +11,7 @@ import { mount } from 'enzyme';
 import { mountWithIntl, nextTick } from '@kbn/test/jest';
 
 import { findTestSubject } from '@elastic/eui/lib/test';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import { CONTEXT_MENU_TRIGGER } from '../triggers';
 import { Action, UiActionsStart } from '../../../../ui_actions/public';
 import { Trigger, ViewMode } from '../types';

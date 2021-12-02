@@ -13,7 +13,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React, { memo, useCallback, useEffect, useMemo } from 'react';
 import { HostMetadata } from '../../../../../../common/endpoint/types';
 import { PreferenceFormattedDateFromPrimitive } from '../../../../../common/components/formatted_date';

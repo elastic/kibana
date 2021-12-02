@@ -19,7 +19,7 @@ import {
 import React, { Component } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { DocLinksStart, NotificationsStart, ScopedHistory } from 'src/core/public';
 
@@ -51,6 +51,7 @@ interface State {
 }
 
 interface Props {
+  action: 'edit' | 'clone';
   name?: string;
   roleMappingsAPI: PublicMethodsOf<RoleMappingsAPIClient>;
   rolesAPIClient: PublicMethodsOf<RolesAPIClient>;
@@ -295,13 +296,17 @@ export class EditRoleMappingPage extends Component<Props, State> {
       });
   };
 
-  private editingExistingRoleMapping = () => typeof this.props.name === 'string';
+  private editingExistingRoleMapping = () =>
+    typeof this.props.name === 'string' && this.props.action === 'edit';
+
+  private cloningExistingRoleMapping = () =>
+    typeof this.props.name === 'string' && this.props.action === 'clone';
 
   private async loadAppData() {
     try {
       const [features, roleMapping] = await Promise.all([
         this.props.roleMappingsAPI.checkRoleMappingFeatures(),
-        this.editingExistingRoleMapping()
+        this.editingExistingRoleMapping() || this.cloningExistingRoleMapping()
           ? this.props.roleMappingsAPI.getRoleMapping(this.props.name!)
           : Promise.resolve({
               name: '',
@@ -327,7 +332,10 @@ export class EditRoleMappingPage extends Component<Props, State> {
         hasCompatibleRealms,
         canUseStoredScripts,
         canUseInlineScripts,
-        roleMapping,
+        roleMapping: {
+          ...roleMapping,
+          name: this.cloningExistingRoleMapping() ? '' : roleMapping.name,
+        },
       });
     } catch (e) {
       this.props.notifications.toasts.addDanger({

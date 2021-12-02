@@ -6,7 +6,7 @@
  */
 
 import { EuiButton, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
 import { useVisibilityState } from '../../../utils/use_visibility_state';
 import { getApmTraceUrl } from '../../../../../observability/public';

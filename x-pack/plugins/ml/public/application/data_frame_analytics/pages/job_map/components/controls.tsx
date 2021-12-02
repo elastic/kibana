@@ -7,7 +7,7 @@
 
 import React, { FC, useEffect, useState, useContext, useCallback } from 'react';
 import cytoscape from 'cytoscape';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment-timezone';
 import {
