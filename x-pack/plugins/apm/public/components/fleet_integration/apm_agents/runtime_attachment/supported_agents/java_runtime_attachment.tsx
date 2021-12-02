@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useState } from 'react';
 import { RuntimeAttachment, RuntimeAttachmentSettings } from '..';
 import {
@@ -138,7 +140,25 @@ export function JavaRuntimeAttachment({ newPolicy, onChange }: Props) {
       ]}
       onChange={onChangePolicy}
       toggleDescription="Attach the Java agent to running and starting Java applications."
-      discoveryRulesDescription="For every running JVM, the discovery rules are evaluated in the order they are provided. The first matching rule determines the outcome. Learn more in the docs."
+      discoveryRulesDescription={
+        <FormattedMessage
+          id="xpack.apm.fleetIntegration.javaRuntime.discoveryRulesDescription"
+          defaultMessage="For every running JVM, the discovery rules are evaluated in the order they are provided. The first matching rule determines the outcome. Learn more in the {docLink}."
+          values={{
+            docLink: (
+              <a
+                href="https://www.elastic.co/guide/en/apm/agent/java/current/setup-attach-cli.html"
+                target="_blank"
+              >
+                {i18n.translate(
+                  'xpack.apm.fleetIntegration.javaRuntime.discoveryRulesDescription.docLink',
+                  { defaultMessage: 'docs' }
+                )}
+              </a>
+            ),
+          }}
+        />
+      }
       showUnsavedWarning={isDirty}
       initialIsEnabled={
         newPolicy.inputs.find(({ type }) => type === 'apm')?.vars
