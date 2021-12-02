@@ -98,8 +98,12 @@ export const CustomStops = ({
       id: idGeneratorFn(),
     }));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [paletteConfiguration?.name, paletteConfiguration?.reverse, paletteConfiguration?.rangeType]);
-
+  }, [
+    paletteConfiguration?.name,
+    paletteConfiguration?.title,
+    paletteConfiguration?.reverse,
+    paletteConfiguration?.rangeType,
+  ]);
   const { inputValue: localColorStops, handleInputChange: setLocalColorStops } = useDebouncedValue({
     onChange: onChangeWithValidation,
     value: memoizedValues,
