@@ -11,14 +11,15 @@ import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 
 import { CasesClientArgs } from '..';
-import { CasesStatusRequest, CasesStatusResponse } from '../../../common/api';
 import {
+  CasesStatusRequest,
+  CasesStatusResponse,
   CasesStatusResponseRt,
   caseStatuses,
   throwErrors,
   excess,
   CasesStatusRequestRt,
-} from '../../../common';
+} from '../../../common/api';
 import { Operations } from '../../authorization';
 import { createCaseError } from '../../common';
 import { constructQueryOptions } from '../utils';
