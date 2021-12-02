@@ -33,10 +33,14 @@ const tracesRoute = createApmServerRoute({
       end,
     });
 
-    return await getTopTraces(
-      { environment, kuery, searchAggregatedTransactions, start, end },
-      setup
-    );
+    return await getTopTraces({
+      environment,
+      kuery,
+      setup,
+      searchAggregatedTransactions,
+      start,
+      end,
+    });
   },
 });
 

@@ -5,53 +5,110 @@
  * 2.0.
  */
 
-import { merge } from 'lodash';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   AGENT_NAME,
   TRANSACTION_TYPE,
   TRANSACTION_NAME,
   SERVICE_NAME,
 } from '../../../common/elasticsearch_fieldnames';
+import { asMutableArray } from '../../../common/utils/as_mutable_array';
+import { environmentQuery } from '../../../common/utils/environment_query';
 import { arrayUnionToCallable } from '../../../common/utils/array_union_to_callable';
-import {
-  TransactionGroupRequestBase,
-  TransactionGroupSetup,
-} from './get_top_traces';
 import { getDurationFieldForTransactions } from '../../lib/helpers/transactions';
+import { TransactionGroupSetup } from './get_top_traces';
 import { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
-interface MetricParams {
-  request: TransactionGroupRequestBase;
-  setup: TransactionGroupSetup;
+import {
+  getDocumentTypeFilterForTransactions,
+  getProcessorEventForTransactions,
+} from '../../lib/helpers/transactions';
+export interface TopTracesParams {
+  environment: string;
+  kuery: string;
+  transactionName?: string;
   searchAggregatedTransactions: boolean;
+  start: number;
+  end: number;
+  setup: TransactionGroupSetup;
 }
 
 type BucketKey = Record<typeof TRANSACTION_NAME | typeof SERVICE_NAME, string>;
 
-function mergeRequestWithAggs<
-  TRequestBase extends TransactionGroupRequestBase,
-  TAggregationMap extends Record<
-    string,
-    estypes.AggregationsAggregationContainer
-  >
->(request: TRequestBase, aggs: TAggregationMap) {
-  return merge({}, request, {
+function getESParams<
+  TAggregationMap extends Record<string, AggregationsAggregationContainer>
+>(TopTracesParams: TopTracesParams, aggs: TAggregationMap) {
+  const {
+    searchAggregatedTransactions,
+    environment,
+    kuery,
+    transactionName,
+    start,
+    end,
+  } = TopTracesParams;
+
+  return {
+    apm: {
+      events: [getProcessorEventForTransactions(searchAggregatedTransactions)],
+    },
     body: {
+      size: 0,
+      query: {
+        bool: {
+          filter: [
+            ...termQuery(TRANSACTION_NAME, transactionName),
+            ...getDocumentTypeFilterForTransactions(
+              searchAggregatedTransactions
+            ),
+            ...rangeQuery(start, end),
+            ...environmentQuery(environment),
+            ...kqlQuery(kuery),
+            ...(searchAggregatedTransactions
+              ? [
+                  {
+                    term: {
+                      [TRANSACTION_ROOT]: true,
+                    },
+                  },
+                ]
+              : []),
+          ] as QueryDslQueryContainer[],
+          must_not: [
+            ...(!searchAggregatedTransactions
+              ? [
+                  {
+                    exists: {
+                      field: PARENT_ID,
+                    },
+                  },
+                ]
+              : []),
+          ],
+        },
+      },
       aggs: {
         transaction_groups: {
+          composite: {
+            sources: asMutableArray([
+              { [SERVICE_NAME]: { terms: { field: SERVICE_NAME } } },
+              {
+                [TRANSACTION_NAME]: {
+                  terms: { field: TRANSACTION_NAME },
+                },
+              },
+            ] as const),
+            // traces overview is hardcoded to 10000
+            size: 10000,
+          },
           aggs,
         },
       },
     },
-  });
+  };
 }
 
-export async function getAverages({
-  request,
-  setup,
-  searchAggregatedTransactions,
-}: MetricParams) {
-  const params = mergeRequestWithAggs(request, {
+export async function getAverages(topTracesParams: TopTracesParams) {
+  const { setup, searchAggregatedTransactions } = topTracesParams;
+
+  const params = getESParams(topTracesParams, {
     avg: {
       avg: {
         field: getDurationFieldForTransactions(searchAggregatedTransactions),
@@ -74,8 +131,10 @@ export async function getAverages({
   });
 }
 
-export async function getCounts({ request, setup }: MetricParams) {
-  const params = mergeRequestWithAggs(request, {
+export async function getCounts(topTracesParams: TopTracesParams) {
+  const { setup } = topTracesParams;
+
+  const params = getESParams(topTracesParams, {
     transaction_type: {
       top_metrics: {
         sort: {
@@ -114,12 +173,10 @@ export async function getCounts({ request, setup }: MetricParams) {
   });
 }
 
-export async function getSums({
-  request,
-  setup,
-  searchAggregatedTransactions,
-}: MetricParams) {
-  const params = mergeRequestWithAggs(request, {
+export async function getSums(topTracesParams: TopTracesParams) {
+  const { setup, searchAggregatedTransactions } = topTracesParams;
+
+  const params = getESParams(topTracesParams, {
     sum: {
       sum: {
         field: getDurationFieldForTransactions(searchAggregatedTransactions),
