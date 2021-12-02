@@ -246,6 +246,7 @@ export class DocLinksService {
           ilmWaitForSnapshot: `${ELASTICSEARCH_DOCS}ilm-wait-for-snapshot.html`,
           indexModules: `${ELASTICSEARCH_DOCS}index-modules.html`,
           indexSettings: `${ELASTICSEARCH_DOCS}index-modules.html#index-modules-settings`,
+          dynamicIndexSettings: `${ELASTICSEARCH_DOCS}index-modules.html#dynamic-index-settings`,
           indexTemplates: `${ELASTICSEARCH_DOCS}index-templates.html`,
           mapping: `${ELASTICSEARCH_DOCS}mapping.html`,
           mappingAnalyzer: `${ELASTICSEARCH_DOCS}analyzer.html`,
