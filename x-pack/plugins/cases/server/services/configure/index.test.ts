@@ -9,10 +9,9 @@ import {
   CaseConnector,
   CasesConfigureAttributes,
   CasesConfigurePatch,
-  CASE_CONFIGURE_SAVED_OBJECT,
   ConnectorTypes,
-  SECURITY_SOLUTION_OWNER,
-} from '../../../common';
+} from '../../../common/api';
+import { CASE_CONFIGURE_SAVED_OBJECT, SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import { savedObjectsClientMock } from '../../../../../../src/core/server/mocks';
 import {
   SavedObject,

@@ -9,7 +9,7 @@ import { euiDarkVars } from '@kbn/ui-shared-deps-src/theme';
 import { I18nProvider } from '@kbn/i18n-react';
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
-import { SECURITY_SOLUTION_OWNER } from '../../../common';
+import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import { CasesProvider } from '../../components/cases_context';
 import { createKibanaContextProviderMock } from '../lib/kibana/kibana_react.mock';
 import { FieldHook } from '../shared_imports';
