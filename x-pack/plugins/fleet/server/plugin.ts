@@ -390,7 +390,9 @@ export class FleetPlugin
         logger.warn(error);
 
         this.fleetStatus$.next({
-          level: ServiceStatusLevels.unavailable,
+          // As long as Fleet has a dependency on EPR, we can't reliably set Kibana status to `unavailable` here.
+          // See https://github.com/elastic/kibana/issues/120237
+          level: ServiceStatusLevels.available,
           summary: 'Fleet setup failed',
           meta: {
             error: error.message,
