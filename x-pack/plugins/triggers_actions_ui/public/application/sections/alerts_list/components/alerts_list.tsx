@@ -485,6 +485,7 @@ export const AlertsList: React.FunctionComponent = () => {
       field: 'executionStatus.lastExecutionDate',
       name: (
         <EuiToolTip
+          data-test-subj="alertsTableCell-lastExecutionDateTooltip"
           content={i18n.translate(
             'xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.lastExecutionDateTitle',
             {
@@ -537,6 +538,7 @@ export const AlertsList: React.FunctionComponent = () => {
       width: '12%',
       name: (
         <EuiToolTip
+          data-test-subj="alertsTableCell-durationTooltip"
           content={i18n.translate(
             'xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.durationTitle',
             {
