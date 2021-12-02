@@ -47,8 +47,9 @@ export const useEndpointPrivileges = (): Immutable<EndpointPrivileges> => {
 
     (async () => {
       try {
+        const fleetAuthz = await fleetServices.authz;
+
         if (isMounted.current) {
-          const fleetAuthz = await fleetServices.authz;
           setCanAccessFleet(fleetAuthz.fleet.all);
         }
       } finally {
