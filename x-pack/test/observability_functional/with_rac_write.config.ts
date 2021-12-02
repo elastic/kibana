@@ -58,7 +58,14 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         ...xpackFunctionalConfig.get('kbnTestServer.serverArgs'),
         `--elasticsearch.hosts=https://${servers.elasticsearch.hostname}:${servers.elasticsearch.port}`,
         `--elasticsearch.ssl.certificateAuthorities=${CA_CERT_PATH}`,
-        `--plugin-path=${join(__dirname, 'fixtures', 'plugins', 'alerts')}`,
+        `--plugin-path=${join(
+          __dirname,
+          '..',
+          'functional_with_es_ssl',
+          'fixtures',
+          'plugins',
+          'alerts'
+        )}`,
         `--xpack.actions.enabledActionTypes=${JSON.stringify(enabledActionTypes)}`,
         `--xpack.actions.preconfiguredAlertHistoryEsIndex=false`,
         `--xpack.actions.preconfigured=${JSON.stringify({
