@@ -185,14 +185,15 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
       column.params.secondaryFields?.length
     ),
   onFieldChange: (oldColumn, field) => {
-    const newParams = { ...oldColumn.params };
+    // reset the secondary fields
+    const newParams = { ...oldColumn.params, secondaryFields: undefined };
     if ('format' in newParams && field.type !== 'number') {
       delete newParams.format;
     }
     return {
       ...oldColumn,
       dataType: field.type as DataType,
-      label: ofName(field.displayName, newParams.secondaryFields?.length),
+      label: ofName(field.displayName),
       sourceField: field.name,
       params: newParams,
     };
