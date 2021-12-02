@@ -22,13 +22,12 @@ import {
   TRANSACTION_REQUEST,
 } from '../../../common/transaction_types';
 import { environmentQuery } from '../../../common/utils/environment_query';
-import { calculateThroughputWithRange } from '../../lib/helpers/calculate_throughput';
 import { getBucketSizeForAggregatedTransactions } from '../../lib/helpers/get_bucket_size_for_aggregated_transactions';
 import { Setup } from '../../lib/helpers/setup_request';
 import {
   getDocumentTypeFilterForTransactions,
-  getProcessorEventForTransactions,
   getDurationFieldForTransactions,
+  getProcessorEventForTransactions,
 } from '../../lib/helpers/transactions';
 import { getErrorRate } from '../../lib/transaction_groups/get_error_rate';
 import { withApmSpan } from '../../utils/with_apm_span';

@@ -90,7 +90,7 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
 
       it('returns an object with nulls', async () => {
         [
-          response.body.errorRate?.value,
+          response.body.failedTransactionsRate?.value,
           response.body.memoryUsage?.value,
           response.body.cpuUsage?.value,
           response.body.transactionStats?.latency?.value,
@@ -343,8 +343,8 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
       });
 
       it('returns some error rate', () => {
-        expect(response.body.errorRate?.value).to.eql(0);
-        expect(response.body.errorRate?.timeseries?.length).to.be.greaterThan(0);
+        expect(response.body.failedTransactionsRate?.value).to.eql(0);
+        expect(response.body.failedTransactionsRate?.timeseries?.length).to.be.greaterThan(0);
       });
 
       it('returns some latency', () => {
@@ -384,8 +384,8 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
       });
 
       it('returns some error rate', () => {
-        expect(response.body.errorRate?.value).to.eql(0);
-        expect(response.body.errorRate?.timeseries?.length).to.be.greaterThan(0);
+        expect(response.body.failedTransactionsRate?.value).to.eql(0);
+        expect(response.body.failedTransactionsRate?.timeseries?.length).to.be.greaterThan(0);
       });
 
       it('returns some latency', () => {
