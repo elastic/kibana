@@ -29,6 +29,7 @@ import {
 } from '../../../../components/effected_policy_select';
 import {
   getArtifactTagsByEffectedPolicySelection,
+  getArtifactTagsWithoutPolicies,
   getEffectedPolicySelectionByTags,
   isGlobalPolicyEffected,
 } from '../../../../components/effected_policy_select/utils';
@@ -126,10 +127,13 @@ export const HostIsolationExceptionsForm: React.FC<{
         setSelectedPolicies(() => selection);
       }
       onChange({
-        tags: getArtifactTagsByEffectedPolicySelection(selection),
+        tags: getArtifactTagsByEffectedPolicySelection(
+          selection,
+          getArtifactTagsWithoutPolicies(exception.tags)
+        ),
       });
     },
-    [onChange]
+    [exception.tags, onChange]
   );
 
   const handleOnDescriptionChange = useCallback(
