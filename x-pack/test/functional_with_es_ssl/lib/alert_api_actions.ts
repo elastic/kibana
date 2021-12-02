@@ -16,7 +16,7 @@ export async function createAlertManualCleanup({
   overwrites?: Record<string, any>;
 }) {
   const { body: createdAlert } = await supertest
-    .post(`/api/alerting/rule`)
+    .post('/api/alerting/rule')
     .set('kbn-xsrf', 'foo')
     .send(getTestAlertData(overwrites))
     .expect(200);
@@ -64,7 +64,7 @@ export async function createAction({
   overwrites?: Record<string, any>;
 }) {
   const { body: createdAction } = await supertest
-    .post(`/api/actions/connector`)
+    .post('/api/actions/connector')
     .set('kbn-xsrf', 'foo')
     .send(getTestActionData(overwrites))
     .expect(200);
