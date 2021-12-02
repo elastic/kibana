@@ -69,7 +69,7 @@ describe('AggsService - public', () => {
       );
 
       const start = service.start(startDeps);
-      expect(start.types.getAll().buckets.length).toBe(14);
+      expect(start.types.getAll().buckets.length).toBe(15);
       expect(start.types.getAll().buckets.some(({ name }) => name === 'foo')).toBe(true);
       expect(start.types.getAll().metrics.length).toBe(24);
       expect(start.types.getAll().metrics.some(({ name }) => name === 'bar')).toBe(true);

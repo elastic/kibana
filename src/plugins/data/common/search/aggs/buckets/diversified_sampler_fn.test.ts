@@ -46,10 +46,12 @@ describe('aggDiversifiedSampler', () => {
         "enabled": true,
         "id": "sampler",
         "params": Object {
+          "field": "author",
+          "max_docs_per_value": 3,
           "shard_size": 300,
         },
         "schema": "bucket",
-        "type": "sampler",
+        "type": "diversified_sampler",
       }
     `);
   });

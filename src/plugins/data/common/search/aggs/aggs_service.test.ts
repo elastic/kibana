@@ -74,7 +74,7 @@ describe('Aggs service', () => {
           "geohash_grid",
           "geotile_grid",
           "sampler",
-          "sampler",
+          "diversified_sampler",
           "foo",
         ]
       `);
@@ -125,7 +125,7 @@ describe('Aggs service', () => {
           "geohash_grid",
           "geotile_grid",
           "sampler",
-          "sampler",
+          "diversified_sampler",
         ]
       `);
       expect(bStart.types.getAll().metrics.map((t) => t(aggTypesDependencies).name))
