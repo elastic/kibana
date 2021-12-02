@@ -118,7 +118,7 @@ export const PolicyHostIsolationExceptionsList = ({
         <FormattedMessage
           id="xpack.securitySolution.endpoint.policy.hostIsolationExceptions.list.totalItemCount"
           defaultMessage={
-            'Showing {totalItemsCount, plural, one {# trusted application} other {# trusted applications}}'
+            'Showing {totalItemsCount, plural, one {# exception} other {# exceptions}}'
           }
           values={{ totalItemsCount: pagination.totalItemCount }}
         />
