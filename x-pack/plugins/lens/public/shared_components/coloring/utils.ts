@@ -88,6 +88,47 @@ export function remapStopsByNewInterval(
   });
 }
 
+// Utility to remap color stops within new domain
+export function getStopsFromColorRangesByNewInterval(
+  colorRanges: any[],
+  {
+    newInterval,
+    oldInterval,
+    newMin,
+    oldMin,
+  }: { newInterval: number; oldInterval: number; newMin: number; oldMin: number }
+) {
+  return (colorRanges || []).map(({ color, start }) => {
+    let stop = newMin + ((start - oldMin) * 100 * newInterval) / 100 / oldInterval;
+    if (oldInterval === 0) {
+      stop = newInterval + newMin;
+    }
+    return {
+      color,
+      stop,
+    };
+  });
+}
+
+export function getColorPaletteParams(params: any) {
+  let continuity = 'none';
+  switch (params.autoValue) {
+    case 'all':
+      continuity = 'all';
+      break;
+    case 'max':
+      continuity = 'above';
+      break;
+    case 'min':
+      continuity = 'below';
+      break;
+  }
+  return {
+    ...params,
+    continuity,
+  };
+}
+
 function getOverallMinMax(
   params: CustomPaletteParams | undefined,
   dataBounds: { min: number; max: number }

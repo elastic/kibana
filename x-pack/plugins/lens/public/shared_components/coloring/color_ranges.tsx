@@ -24,7 +24,7 @@ import { ValueMaxIcon } from '../../assets/value_max';
 import { ValueMinIcon } from '../../assets/value_min';
 import { RelatedIcon } from '../../assets/related';
 import { DistributeEquallyIcon } from '../../assets/distribute_equally';
-import { getDataMinMax, getStepValue, isValidColor, roundValue } from '../coloring/utils';
+import { getDataMinMax, getStepValue, isValidColor, roundValue } from './utils';
 import type { CustomPaletteParamsConfig, ColorStop } from '../../../common';
 import { useDebouncedValue } from '../index';
 
@@ -39,7 +39,11 @@ interface ColorRanges {
 interface ColorRangesProps {
   colorRanges: ColorRanges[];
   paletteConfiguration: CustomPaletteParamsConfig | undefined;
-  onChange: (colorStops: ColorStop[], upperMax: number) => void;
+  onChange: (
+    colorStops: ColorStop[],
+    upperMax: number,
+    autoValue: CustomPaletteParamsConfig['autoValue']
+  ) => void;
   dataBounds: { min: number; max: number };
 }
 
@@ -60,18 +64,26 @@ function reversePalette(colorRanges: ColorRanges[]) {
 export function ColorRanges(props: ColorRangesProps) {
   const { colorRanges, onChange, dataBounds, paletteConfiguration } = props;
   const [isValid, setValid] = useState(true);
-  const [isDisabledStart, setDisableStart] = useState(false);
-  const [isDisabledEnd, setDisableEnd] = useState(false);
+  const [autoValue, setAutoValue] = useState<CustomPaletteParamsConfig['autoValue']>(
+    paletteConfiguration?.autoValue ?? 'none'
+  );
+  const isDisabledStart = ['min', 'all'].includes(autoValue!);
+  const isDisabledEnd = ['max', 'all'].includes(autoValue!);
   const onChangeWithValidation = (newColorRanges: ColorRanges[]) => {
-    const colorStops = newColorRanges.map((colorRange) => {
+    const upperMin = ['min', 'all'].includes(autoValue!)
+      ? -Infinity
+      : Number(newColorRanges[0].start);
+    const colorStops = newColorRanges.map((colorRange, i) => {
       return {
         color: colorRange.color,
-        stop: colorRange.start && Number(colorRange.start),
+        stop: i === 0 ? upperMin : colorRange.start && Number(colorRange.start),
       };
     });
-    const upperMax = Number(newColorRanges[newColorRanges.length - 1].end);
+    const upperMax = ['max', 'all'].includes(autoValue!)
+      ? Infinity
+      : Number(newColorRanges[newColorRanges.length - 1].end);
     if (areStopsValid(colorStops)) {
-      onChange(colorStops, upperMax);
+      onChange(colorStops, upperMax, autoValue);
     }
   };
   const { inputValue: localColorRanges, handleInputChange: setColorRanges } = useDebouncedValue({
@@ -254,9 +266,9 @@ export function ColorRanges(props: ColorRangesProps) {
                       newValue = localColorRanges[index].end - step;
                     }
                     if (isLast) {
-                      setDisableEnd(false);
+                      setAutoValue(autoValue === 'all' ? 'min' : 'none');
                     } else {
-                      setDisableStart(false);
+                      setAutoValue(autoValue === 'all' ? 'max' : 'none');
                     }
                     localColorRanges[index][isLast ? 'end' : 'start'] = roundValue(newValue);
                     setColorRanges([...localColorRanges]);
@@ -290,9 +302,9 @@ export function ColorRanges(props: ColorRangesProps) {
                       newValue = isLast ? 100 : 0;
                     }
                     if (isLast) {
-                      setDisableEnd(true);
+                      setAutoValue(autoValue === 'none' ? 'max' : 'all');
                     } else {
-                      setDisableStart(true);
+                      setAutoValue(autoValue === 'none' ? 'min' : 'all');
                     }
                     localColorRanges[index][isLast ? 'end' : 'start'] = newValue;
                     setColorRanges([...localColorRanges]);

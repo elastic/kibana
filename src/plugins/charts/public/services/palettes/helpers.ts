@@ -77,13 +77,13 @@ export function workoutColorForValue(
   const minRange = stops.length ? rangeMin : dataRangeArguments[0];
 
   // in case of shorter rangers, extends the steps on the sides to cover the whole set
-  if (comparisonFn(normalizedValue, maxRange) > 0) {
+  if (comparisonFn(normalizedValue, isFinite(maxRange) ? maxRange : stops[stops.length - 1]) > 0) {
     if (continuity === 'above' || continuity === 'all') {
       return colors[colors.length - 1];
     }
     return;
   }
-  if (comparisonFn(normalizedValue, minRange) < 0) {
+  if (comparisonFn(normalizedValue, isFinite(minRange) ? minRange : stops[0]) < 0) {
     if (continuity === 'below' || continuity === 'all') {
       return colors[0];
     }
