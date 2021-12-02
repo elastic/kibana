@@ -193,6 +193,11 @@ export class DashboardPlugin
       );
     }
 
+    const getPlaceholderEmbeddableStartServices = async () => {
+      const [coreStart] = await core.getStartServices();
+      return { theme: coreStart.theme };
+    };
+
     const getStartServices = async () => {
       const [coreStart, deps] = await core.getStartServices();
 
@@ -280,10 +285,12 @@ export class DashboardPlugin
         dashboardContainerFactory.type,
         dashboardContainerFactory
       );
-    });
 
-    const placeholderFactory = new PlaceholderEmbeddableFactory();
-    embeddable.registerEmbeddableFactory(placeholderFactory.type, placeholderFactory);
+      const placeholderFactory = new PlaceholderEmbeddableFactory(
+        getPlaceholderEmbeddableStartServices
+      );
+      embeddable.registerEmbeddableFactory(placeholderFactory.type, placeholderFactory);
+    });
 
     this.stopUrlTracking = () => {
       stopUrlTracker();
