@@ -64,46 +64,46 @@ export const dropdownFilterFactory: StartInitializer<RendererFactory<Config>> =
         if (changed) {
           handlers.event({ name: 'applyFilterAction', data: toExpression(newAst) });
         }
-
-        const commit = (commitValue: string) => {
-          if (commitValue === '%%CANVAS_MATCH_ALL%%') {
-            handlers.event({ name: 'applyFilterAction', data: '' });
-          } else {
-            const newFilterAST: Ast = {
-              type: 'expression',
-              chain: [
-                {
-                  type: 'function',
-                  function: 'exactly',
-                  arguments: {
-                    value: [commitValue],
-                    column: [config.column],
-                    filterGroup: [config.filterGroup],
-                  },
-                },
-              ],
-            };
-
-            const newFilter = toExpression(newFilterAST);
-            handlers.event({ name: 'applyFilterAction', data: newFilter });
-          }
-        };
-
-        ReactDOM.render(
-          <KibanaThemeProvider theme$={core.theme.theme$}>
-            <DropdownFilter
-              commit={commit}
-              choices={config.choices || []}
-              initialValue={getFilterValue(filterExpression)}
-            />
-          </KibanaThemeProvider>,
-          domNode,
-          () => handlers.done()
-        );
-
-        handlers.onDestroy(() => {
-          ReactDOM.unmountComponentAtNode(domNode);
-        });
       }
+      const commit = (commitValue: string) => {
+        if (commitValue === '%%CANVAS_MATCH_ALL%%') {
+          handlers.event({ name: 'applyFilterAction', data: '' });
+        } else {
+          const newFilterAST: Ast = {
+            type: 'expression',
+            chain: [
+              {
+                type: 'function',
+                function: 'exactly',
+                arguments: {
+                  value: [commitValue],
+                  column: [config.column],
+                  filterGroup: [config.filterGroup],
+                },
+              },
+            ],
+          };
+
+          const newFilter = toExpression(newFilterAST);
+          handlers.event({ name: 'applyFilterAction', data: newFilter });
+        }
+      };
+      const filter = (
+        <DropdownFilter
+          commit={commit}
+          choices={config.choices || []}
+          initialValue={getFilterValue(filterExpression)}
+        />
+      );
+
+      ReactDOM.render(
+        <KibanaThemeProvider theme$={core.theme.theme$}>{filter}</KibanaThemeProvider>,
+        domNode,
+        () => handlers.done()
+      );
+
+      handlers.onDestroy(() => {
+        ReactDOM.unmountComponentAtNode(domNode);
+      });
     },
   });
