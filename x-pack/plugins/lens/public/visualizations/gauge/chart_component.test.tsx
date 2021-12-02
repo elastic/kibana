@@ -11,7 +11,7 @@ import { shallowWithIntl } from '@kbn/test/jest';
 import { chartPluginMock } from 'src/plugins/charts/public/mocks';
 import type { ColorStop, LensMultiTable } from '../../../common';
 import { fieldFormatsServiceMock } from '../../../../../../src/plugins/field_formats/public/mocks';
-import { GaugeExpressionArgs, GaugeTitleMode } from '../../../common/expressions/gauge_chart';
+import { GaugeExpressionArgs, GaugeLabelMajorMode } from '../../../common/expressions/gauge_chart';
 import { GaugeComponent, GaugeRenderProps } from './chart_component';
 import { DatatableColumn, DatatableRow } from 'src/plugins/expressions/common';
 import { VisualizationContainer } from '../../visualization_container';
@@ -56,7 +56,7 @@ const chartsThemeService = chartPluginMock.createSetupContract().theme;
 const palettesRegistry = chartPluginMock.createPaletteRegistry();
 const formatService = fieldFormatsServiceMock.createStartContract();
 const args: GaugeExpressionArgs = {
-  title: 'Gauge',
+  labelMajor: 'Gauge',
   description: 'vis description',
   metricAccessor: 'metric-accessor',
   minAccessor: '',
@@ -65,7 +65,7 @@ const args: GaugeExpressionArgs = {
   shape: 'verticalBullet',
   colorMode: 'none',
   ticksPosition: 'auto',
-  visTitleMode: 'auto',
+  labelMajorMode: 'auto',
 };
 
 describe('GaugeComponent', function () {
@@ -145,41 +145,41 @@ describe('GaugeComponent', function () {
     expect(goal.prop('actual')).toEqual(10);
   });
 
-  describe('title and subtitle settings', () => {
-    it('displays no title and no subtitle when no passed', () => {
+  describe('labelMajor and labelMinor settings', () => {
+    it('displays no labelMajor and no labelMinor when no passed', () => {
       const customProps = {
         ...wrapperProps,
         args: {
           ...wrapperProps.args,
-          visTitleMode: 'none' as GaugeTitleMode,
-          subtitle: '',
+          labelMajorMode: 'none' as GaugeLabelMajorMode,
+          labelMinor: '',
         },
       };
       const goal = shallowWithIntl(<GaugeComponent {...customProps} />).find(Goal);
       expect(goal.prop('labelMajor')).toEqual('');
       expect(goal.prop('labelMinor')).toEqual('');
     });
-    it('displays custom title and subtitle when passed', () => {
+    it('displays custom labelMajor and labelMinor when passed', () => {
       const customProps = {
         ...wrapperProps,
         args: {
           ...wrapperProps.args,
-          visTitleMode: 'custom' as GaugeTitleMode,
-          visTitle: 'custom title',
-          subtitle: 'custom subtitle',
+          labelMajorMode: 'custom' as GaugeLabelMajorMode,
+          labelMajor: 'custom labelMajor',
+          labelMinor: 'custom labelMinor',
         },
       };
       const goal = shallowWithIntl(<GaugeComponent {...customProps} />).find(Goal);
-      expect(goal.prop('labelMajor')).toEqual('custom title   ');
-      expect(goal.prop('labelMinor')).toEqual('custom subtitle  ');
+      expect(goal.prop('labelMajor')).toEqual('custom labelMajor   ');
+      expect(goal.prop('labelMinor')).toEqual('custom labelMinor  ');
     });
-    it('displays auto title', () => {
+    it('displays auto labelMajor', () => {
       const customProps = {
         ...wrapperProps,
         args: {
           ...wrapperProps.args,
-          visTitleMode: 'auto' as GaugeTitleMode,
-          visTitle: '',
+          labelMajorMode: 'auto' as GaugeLabelMajorMode,
+          labelMajor: '',
         },
       };
       const goal = shallowWithIntl(<GaugeComponent {...customProps} />).find(Goal);

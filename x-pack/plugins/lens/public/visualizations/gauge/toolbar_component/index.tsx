@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import type { VisualizationToolbarProps } from '../../../types';
 import { ToolbarPopover, useDebouncedValue, VisLabel } from '../../../shared_components';
 import './gauge_config_panel.scss';
-import { GaugeTitleMode, GaugeVisualizationState } from '../../../../common/expressions';
+import { GaugeLabelMajorMode, GaugeVisualizationState } from '../../../../common/expressions';
 
 export const GaugeToolbar = memo((props: VisualizationToolbarProps<GaugeVisualizationState>) => {
   const { state, setState, frame } = props;
@@ -19,8 +19,8 @@ export const GaugeToolbar = memo((props: VisualizationToolbarProps<GaugeVisualiz
     state.layerId &&
     frame.activeData?.[state.layerId]?.columns.find((col) => col.id === state.metricAccessor)?.name;
 
-  const [subtitleMode, setSubtitleMode] = useState<GaugeTitleMode>(() =>
-    state.subtitle ? 'custom' : 'none'
+  const [subtitleMode, setSubtitleMode] = useState<GaugeLabelMajorMode>(() =>
+    state.labelMinor ? 'custom' : 'none'
   );
 
   const { inputValue, handleInputChange } = useDebouncedValue({
@@ -34,7 +34,7 @@ export const GaugeToolbar = memo((props: VisualizationToolbarProps<GaugeVisualiz
         <EuiFlexGroup gutterSize="none" responsive={false}>
           <ToolbarPopover
             handleClose={() => {
-              setSubtitleMode(inputValue.subtitle ? 'custom' : 'none');
+              setSubtitleMode(inputValue.labelMinor ? 'custom' : 'none');
             }}
             title={i18n.translate('xpack.lens.gauge.appearanceLabel', {
               defaultMessage: 'Appearance',
@@ -45,25 +45,25 @@ export const GaugeToolbar = memo((props: VisualizationToolbarProps<GaugeVisualiz
           >
             <EuiFormRow
               display="columnCompressed"
-              label={i18n.translate('xpack.lens.label.gauge.title.header', {
+              label={i18n.translate('xpack.lens.label.gauge.labelMajor.header', {
                 defaultMessage: 'Title',
               })}
               fullWidth
             >
               <VisLabel
-                header={i18n.translate('xpack.lens.label.gauge.title.header', {
+                header={i18n.translate('xpack.lens.label.gauge.labelMajor.header', {
                   defaultMessage: 'Title',
                 })}
-                dataTestSubj="lens-toolbar-gauge-title"
-                label={inputValue.visTitle || ''}
-                mode={inputValue.visTitleMode}
+                dataTestSubj="lens-toolbar-gauge-labelMajor"
+                label={inputValue.labelMajor || ''}
+                mode={inputValue.labelMajorMode}
                 placeholder={metricDimensionTitle || ''}
                 hasAutoOption={true}
                 handleChange={(value) => {
                   handleInputChange({
                     ...inputValue,
-                    visTitle: value.label,
-                    visTitleMode: value.mode,
+                    labelMajor: value.label,
+                    labelMajorMode: value.mode,
                   });
                 }}
               />
@@ -71,21 +71,21 @@ export const GaugeToolbar = memo((props: VisualizationToolbarProps<GaugeVisualiz
             <EuiFormRow
               fullWidth
               display="columnCompressed"
-              label={i18n.translate('xpack.lens.label.gauge.subtitle.header', {
+              label={i18n.translate('xpack.lens.label.gauge.labelMinor.header', {
                 defaultMessage: 'Subtitle',
               })}
             >
               <VisLabel
-                header={i18n.translate('xpack.lens.label.gauge.subtitle.header', {
+                header={i18n.translate('xpack.lens.label.gauge.labelMinor.header', {
                   defaultMessage: 'Subtitle',
                 })}
-                dataTestSubj="lens-toolbar-gauge-subtitle"
-                label={inputValue.subtitle || ''}
+                dataTestSubj="lens-toolbar-gauge-labelMinor"
+                label={inputValue.labelMinor || ''}
                 mode={subtitleMode}
                 handleChange={(value) => {
                   handleInputChange({
                     ...inputValue,
-                    subtitle: value.label,
+                    labelMinor: value.label,
                   });
                   setSubtitleMode(value.mode);
                 }}

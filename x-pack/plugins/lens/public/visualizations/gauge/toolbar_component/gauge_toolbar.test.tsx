@@ -35,10 +35,10 @@ class Harness {
   }
 
   public get titleLabel() {
-    return this.wrapper.find('EuiFieldText[data-test-subj="lens-toolbar-gauge-title"]');
+    return this.wrapper.find('EuiFieldText[data-test-subj="lens-toolbar-gauge-labelMajor"]');
   }
   public get titleSelect() {
-    return this.wrapper.find('EuiSelect[data-test-subj="lens-toolbar-gauge-title-select"]');
+    return this.wrapper.find('EuiSelect[data-test-subj="lens-toolbar-gauge-labelMajor-select"]');
   }
 
   modifyTitle(e: FormEvent) {
@@ -48,11 +48,11 @@ class Harness {
   }
 
   public get subtitleSelect() {
-    return this.wrapper.find('EuiSelect[data-test-subj="lens-toolbar-gauge-subtitle-select"]');
+    return this.wrapper.find('EuiSelect[data-test-subj="lens-toolbar-gauge-labelMinor-select"]');
   }
 
   public get subtitleLabel() {
-    return this.wrapper.find('EuiFieldText[data-test-subj="lens-toolbar-gauge-subtitle"]');
+    return this.wrapper.find('EuiFieldText[data-test-subj="lens-toolbar-gauge-labelMinor"]');
   }
 
   modifySubtitle(e: FormEvent) {
@@ -80,7 +80,7 @@ describe('gauge toolbar', () => {
         shape: 'verticalBullet',
         colorMode: 'none',
         ticksPosition: 'auto',
-        visTitleMode: 'auto',
+        labelMajorMode: 'auto',
       },
     };
   });
@@ -100,24 +100,24 @@ describe('gauge toolbar', () => {
       state: {
         ...defaultProps.state,
         ticksPosition: 'bands' as const,
-        visTitleMode: 'custom' as const,
-        visTitle: 'new title',
-        subtitle: 'new subtitle',
+        labelMajorMode: 'custom' as const,
+        labelMajor: 'new labelMajor',
+        labelMinor: 'new labelMinor',
       },
     };
 
     harness = new Harness(mountWithIntl(<GaugeToolbar {...props} />));
     harness.togglePopover();
 
-    expect(harness.titleLabel.prop('value')).toBe('new title');
+    expect(harness.titleLabel.prop('value')).toBe('new labelMajor');
     expect(harness.titleSelect.prop('value')).toBe('custom');
-    expect(harness.subtitleLabel.prop('value')).toBe('new subtitle');
+    expect(harness.subtitleLabel.prop('value')).toBe('new labelMinor');
     expect(harness.subtitleSelect.prop('value')).toBe('custom');
   });
 
-  describe('title', () => {
-    it('title label is disabled if title is selected to be none', () => {
-      defaultProps.state.visTitleMode = 'none' as const;
+  describe('labelMajor', () => {
+    it('labelMajor label is disabled if labelMajor is selected to be none', () => {
+      defaultProps.state.labelMajorMode = 'none' as const;
 
       harness = new Harness(mountWithIntl(<GaugeToolbar {...defaultProps} />));
       harness.togglePopover();
@@ -126,8 +126,8 @@ describe('gauge toolbar', () => {
       expect(harness.titleLabel.prop('disabled')).toBe(true);
       expect(harness.titleLabel.prop('value')).toBe('');
     });
-    it('title mode switches to custom when user starts typing', () => {
-      defaultProps.state.visTitleMode = 'auto' as const;
+    it('labelMajor mode switches to custom when user starts typing', () => {
+      defaultProps.state.labelMajorMode = 'auto' as const;
 
       harness = new Harness(mountWithIntl(<GaugeToolbar {...defaultProps} />));
       harness.togglePopover();
@@ -135,30 +135,30 @@ describe('gauge toolbar', () => {
       expect(harness.titleSelect.prop('value')).toBe('auto');
       expect(harness.titleLabel.prop('disabled')).toBe(false);
       expect(harness.titleLabel.prop('value')).toBe('');
-      harness.modifyTitle({ target: { value: 'title' } } as unknown as FormEvent);
+      harness.modifyTitle({ target: { value: 'labelMajor' } } as unknown as FormEvent);
       expect(defaultProps.setState).toHaveBeenCalledTimes(1);
       expect(defaultProps.setState).toHaveBeenNthCalledWith(
         1,
         expect.objectContaining({
-          visTitleMode: 'custom',
-          visTitle: 'title',
+          labelMajorMode: 'custom',
+          labelMajor: 'labelMajor',
         })
       );
     });
   });
-  describe('subtitle', () => {
-    it('subtitle label is enabled if subtitle is string', () => {
-      defaultProps.state.subtitle = 'subtitle label';
+  describe('labelMinor', () => {
+    it('labelMinor label is enabled if labelMinor is string', () => {
+      defaultProps.state.labelMinor = 'labelMinor label';
 
       harness = new Harness(mountWithIntl(<GaugeToolbar {...defaultProps} />));
       harness.togglePopover();
 
       expect(harness.subtitleSelect.prop('value')).toBe('custom');
       expect(harness.subtitleLabel.prop('disabled')).toBe(false);
-      expect(harness.subtitleLabel.prop('value')).toBe('subtitle label');
+      expect(harness.subtitleLabel.prop('value')).toBe('labelMinor label');
     });
-    it('title mode can switch to custom', () => {
-      defaultProps.state.subtitle = '';
+    it('labelMajor mode can switch to custom', () => {
+      defaultProps.state.labelMinor = '';
 
       harness = new Harness(mountWithIntl(<GaugeToolbar {...defaultProps} />));
       harness.togglePopover();
@@ -166,12 +166,12 @@ describe('gauge toolbar', () => {
       expect(harness.subtitleSelect.prop('value')).toBe('none');
       expect(harness.subtitleLabel.prop('disabled')).toBe(true);
       expect(harness.subtitleLabel.prop('value')).toBe('');
-      harness.modifySubtitle({ target: { value: 'subtitle label' } } as unknown as FormEvent);
+      harness.modifySubtitle({ target: { value: 'labelMinor label' } } as unknown as FormEvent);
       expect(defaultProps.setState).toHaveBeenCalledTimes(1);
       expect(defaultProps.setState).toHaveBeenNthCalledWith(
         1,
         expect.objectContaining({
-          subtitle: 'subtitle label',
+          labelMinor: 'labelMinor label',
         })
       );
     });

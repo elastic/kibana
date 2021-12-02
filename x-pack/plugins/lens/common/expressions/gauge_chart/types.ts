@@ -24,7 +24,7 @@ export const GaugeTicksPositions = {
   bands: 'bands',
 } as const;
 
-export const GaugeTitleModes = {
+export const GaugeLabelMajorModes = {
   auto: 'auto',
   custom: 'custom',
   none: 'none',
@@ -38,7 +38,7 @@ export const GaugeColorModes = {
 export type GaugeType = 'gauge';
 export type GaugeColorMode = keyof typeof GaugeColorModes;
 export type GaugeShape = keyof typeof GaugeShapes;
-export type GaugeTitleMode = keyof typeof GaugeTitleModes;
+export type GaugeLabelMajorMode = keyof typeof GaugeLabelMajorModes;
 export type GaugeTicksPosition = keyof typeof GaugeTicksPositions;
 
 export interface SharedGaugeLayerState {
@@ -47,9 +47,9 @@ export interface SharedGaugeLayerState {
   maxAccessor?: string;
   goalAccessor?: string;
   ticksPosition: GaugeTicksPosition;
-  visTitleMode: GaugeTitleMode;
-  visTitle?: string;
-  subtitle?: string;
+  labelMajorMode: GaugeLabelMajorMode;
+  labelMajor?: string;
+  labelMinor?: string;
   colorMode?: GaugeColorMode;
   palette?: PaletteOutput<CustomPaletteParams>;
   shape: GaugeShape;

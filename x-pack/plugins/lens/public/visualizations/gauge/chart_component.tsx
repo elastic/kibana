@@ -23,7 +23,7 @@ import {
   GaugeShapes,
   GaugeTicksPosition,
   GaugeTicksPositions,
-  GaugeTitleMode,
+  GaugeLabelMajorMode,
 } from '../../../common/expressions/gauge_chart';
 import type { FormatFactory } from '../../../common';
 
@@ -66,13 +66,17 @@ function normalizeBands(
   return [min, ...orderedStops, max];
 }
 
-function getTitle(visTitleMode: GaugeTitleMode, visTitle?: string, fallbackTitle?: string) {
-  if (visTitleMode === 'none') {
+function getTitle(
+  labelMajorMode: GaugeLabelMajorMode,
+  labelMajor?: string,
+  fallbackTitle?: string
+) {
+  if (labelMajorMode === 'none') {
     return '';
-  } else if (visTitleMode === 'auto') {
+  } else if (labelMajorMode === 'auto') {
     return `${fallbackTitle || ''}   `;
   }
-  return `${visTitle || fallbackTitle || ''}   `;
+  return `${labelMajor || fallbackTitle || ''}   `;
 }
 
 // TODO: once charts handle not displaying labels when there's no space for them, it's safe to remove this
@@ -122,9 +126,9 @@ export const GaugeComponent: FC<GaugeRenderProps> = ({
     metricAccessor,
     palette,
     colorMode,
-    subtitle,
-    visTitle,
-    visTitleMode,
+    labelMinor,
+    labelMajor,
+    labelMajorMode,
     ticksPosition,
   } = args;
   if (!metricAccessor) {
@@ -199,7 +203,7 @@ export const GaugeComponent: FC<GaugeRenderProps> = ({
     <Chart>
       <Settings debugState={window._echDebugStateFlag ?? false} theme={chartTheme} />
       <Goal
-        id="spec_1"
+        id="goal"
         subtype={subtype}
         base={min}
         target={goal && goal >= min && goal <= max ? goal : undefined}
@@ -217,8 +221,8 @@ export const GaugeComponent: FC<GaugeRenderProps> = ({
               }
             : () => `rgba(255,255,255,0)`
         }
-        labelMajor={getTitle(visTitleMode, visTitle, metricColumn?.name)}
-        labelMinor={subtitle ? subtitle + '  ' : ''}
+        labelMajor={getTitle(labelMajorMode, labelMajor, metricColumn?.name)}
+        labelMinor={labelMinor ? labelMinor + '  ' : ''}
       />
     </Chart>
   );

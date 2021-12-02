@@ -18,7 +18,7 @@ function exampleState(): GaugeVisualizationState {
   return {
     layerId: 'test-layer',
     layerType: layerTypes.DATA,
-    visTitleMode: 'auto',
+    labelMajorMode: 'auto',
     ticksPosition: 'auto',
     shape: 'horizontalBullet',
   };
@@ -40,7 +40,7 @@ describe('gauge', () => {
         layerType: layerTypes.DATA,
         title: 'Empty Gauge chart',
         shape: 'horizontalBullet',
-        visTitleMode: 'auto',
+        labelMajorMode: 'auto',
         ticksPosition: 'auto',
       });
     });
@@ -395,7 +395,7 @@ describe('gauge', () => {
         goalAccessor: 'goal-accessor',
         metricAccessor: 'metric-accessor',
         maxAccessor: 'max-accessor',
-        subtitle: 'Subtitle',
+        labelMinor: 'Subtitle',
       };
       const attributes = {
         title: 'Test',
@@ -419,9 +419,9 @@ describe('gauge', () => {
               goalAccessor: ['goal-accessor'],
               colorMode: ['none'],
               ticksPosition: ['auto'],
-              visTitleMode: ['auto'],
-              subtitle: ['Subtitle'],
-              visTitle: [],
+              labelMajorMode: ['auto'],
+              labelMinor: ['Subtitle'],
+              labelMajor: [],
               palette: [],
               shape: ['horizontalBullet'],
             },

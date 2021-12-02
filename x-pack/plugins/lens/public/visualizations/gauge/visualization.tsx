@@ -104,9 +104,9 @@ const toExpression = (
               ]
             : [],
           ticksPosition: state.ticksPosition ? [state.ticksPosition] : ['auto'],
-          subtitle: state.subtitle ? [state.subtitle] : [],
-          visTitle: state.visTitle ? [state.visTitle] : [],
-          visTitleMode: state.visTitleMode ? [state.visTitleMode] : ['auto'],
+          labelMinor: state.labelMinor ? [state.labelMinor] : [],
+          labelMajor: state.labelMajor ? [state.labelMajor] : [],
+          labelMajorMode: state.labelMajorMode ? [state.labelMajorMode] : ['auto'],
         },
       },
     ],
@@ -173,7 +173,7 @@ export const getGaugeVisualization = ({
         shape: GaugeShapes.horizontalBullet,
         palette: mainPalette,
         ticksPosition: 'auto',
-        visTitleMode: 'auto',
+        labelMajorMode: 'auto',
       }
     );
   },

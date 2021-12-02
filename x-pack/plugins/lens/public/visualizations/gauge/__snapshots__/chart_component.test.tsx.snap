@@ -18,7 +18,7 @@ exports[`GaugeComponent renders the chart 1`] = `
       ]
     }
     base={0}
-    id="spec_1"
+    id="goal"
     labelMajor="Count of records   "
     labelMinor=""
     subtype="verticalBullet"

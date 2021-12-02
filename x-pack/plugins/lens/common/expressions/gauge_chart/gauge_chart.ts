@@ -97,25 +97,25 @@ export const gauge: ExpressionFunctionDefinition<
       }),
       required: true,
     },
-    visTitle: {
+    labelMajor: {
       types: ['string'],
-      help: i18n.translate('xpack.lens.gaugeChart.config.title.help', {
-        defaultMessage: 'Specifies the title of the gauge chart displayed inside the chart.',
+      help: i18n.translate('xpack.lens.gaugeChart.config.labelMajor.help', {
+        defaultMessage: 'Specifies the labelMajor of the gauge chart displayed inside the chart.',
       }),
       required: false,
     },
-    visTitleMode: {
+    labelMajorMode: {
       types: ['string'],
       options: ['none', 'auto', 'custom'],
-      help: i18n.translate('xpack.lens.gaugeChart.config.visTitleMode.help', {
-        defaultMessage: 'Specifies the mode of title',
+      help: i18n.translate('xpack.lens.gaugeChart.config.labelMajorMode.help', {
+        defaultMessage: 'Specifies the mode of labelMajor',
       }),
       required: true,
     },
-    subtitle: {
+    labelMinor: {
       types: ['string'],
-      help: i18n.translate('xpack.lens.gaugeChart.config.subtitle.help', {
-        defaultMessage: 'Specifies the Subtitle of the gauge chart',
+      help: i18n.translate('xpack.lens.gaugeChart.config.labelMinor.help', {
+        defaultMessage: 'Specifies the labelMinor of the gauge chart',
       }),
       required: false,
     },

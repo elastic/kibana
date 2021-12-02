@@ -12,7 +12,7 @@ import {
   GaugeShape,
   GaugeShapes,
   GaugeTicksPositions,
-  GaugeTitleModes,
+  GaugeLabelMajorModes,
   GaugeVisualizationState,
 } from '../../../common/expressions/gauge_chart';
 
@@ -66,7 +66,7 @@ export const getSuggestions: Visualization<GaugeVisualizationState>['getSuggesti
       layerId: table.layerId,
       layerType: layerTypes.DATA,
       ticksPosition: GaugeTicksPositions.auto,
-      visTitleMode: GaugeTitleModes.auto,
+      labelMajorMode: GaugeLabelMajorModes.auto,
     },
     title: i18n.translate('xpack.lens.gauge.gaugeLabel', {
       defaultMessage: 'Gauge',
