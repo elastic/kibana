@@ -308,6 +308,7 @@ async function installPackageFromRegistry({
     return _installPackage({
       savedObjectsClient,
       esClient,
+      logger,
       installedPkg,
       paths,
       packageInfo,
@@ -367,6 +368,7 @@ async function installPackageByUpload({
   archiveBuffer,
   contentType,
 }: InstallUploadedArchiveParams): Promise<InstallResult> {
+  const logger = appContextService.getLogger();
   // if an error happens during getInstallType, report that we don't know
   let installType: InstallType = 'unknown';
   const telemetryEvent: PackageUpdateEvent = getTelemetryEvent('', '');
@@ -409,6 +411,7 @@ async function installPackageByUpload({
     return _installPackage({
       savedObjectsClient,
       esClient,
+      logger,
       installedPkg,
       paths,
       packageInfo,

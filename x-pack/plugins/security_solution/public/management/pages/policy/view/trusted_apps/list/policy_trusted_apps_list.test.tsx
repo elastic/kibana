@@ -13,11 +13,7 @@ import { getPolicyDetailsArtifactsListPath } from '../../../../../common/routing
 import { PolicyTrustedAppsList, PolicyTrustedAppsListProps } from './policy_trusted_apps_list';
 import React from 'react';
 import { policyDetailsPageAllApiHttpMocks } from '../../../test_utils';
-import {
-  createLoadingResourceState,
-  isFailedResourceState,
-  isLoadedResourceState,
-} from '../../../../../state';
+import { isFailedResourceState, isLoadedResourceState } from '../../../../../state';
 import { fireEvent, within, act, waitFor } from '@testing-library/react';
 import { APP_UI_ID } from '../../../../../../../common/constants';
 import {
@@ -105,23 +101,20 @@ describe('when rendering the PolicyTrustedAppsList', () => {
           })
         : Promise.resolve();
 
+      const checkTrustedAppDataAssignedReceived = waitForLoadedState
+        ? waitForAction('policyArtifactsHasTrustedApps', {
+            validate({ payload }) {
+              return isLoadedResourceState(payload);
+            },
+          })
+        : Promise.resolve();
+
       renderResult = appTestContext.render(<PolicyTrustedAppsList {...componentRenderProps} />);
+      await checkTrustedAppDataAssignedReceived;
       await trustedAppDataReceived;
 
       return renderResult;
     };
-  });
-
-  it('should show loading spinner if checking to see if trusted apps exist', async () => {
-    await render();
-    act(() => {
-      appTestContext.store.dispatch({
-        type: 'policyArtifactsDeosAnyTrustedAppExists',
-        payload: createLoadingResourceState(),
-      });
-    });
-
-    expect(renderResult.getByTestId('policyTrustedAppsGrid-loading')).not.toBeNull();
   });
 
   it('should show total number of of items being displayed', async () => {
@@ -333,5 +326,20 @@ describe('when rendering the PolicyTrustedAppsList', () => {
     await toggleCardActionMenu(POLICY_SPECIFIC_CARD_INDEX);
 
     expect(renderResult.queryByTestId('policyTrustedAppsGrid-removeAction')).toBeNull();
+  });
+
+  it('should handle search changes', async () => {
+    await render();
+
+    expect(appTestContext.history.location.search).not.toBeTruthy();
+
+    act(() => {
+      fireEvent.change(renderResult.getByTestId('searchField'), {
+        target: { value: 'search' },
+      });
+      fireEvent.submit(renderResult.getByTestId('searchField'));
+    });
+
+    expect(appTestContext.history.location.search).toMatch('?filter=search');
   });
 });
