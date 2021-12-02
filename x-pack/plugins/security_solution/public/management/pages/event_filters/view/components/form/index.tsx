@@ -28,8 +28,8 @@ import { Loader } from '../../../../../../common/components/loader';
 import { useKibana } from '../../../../../../common/lib/kibana';
 import { useFetchIndex } from '../../../../../../common/containers/source';
 import { AppAction } from '../../../../../../common/store/actions';
-import { ExceptionBuilder } from '../../../../../../shared_imports';
-
+import { getExceptionBuilderComponentLazy } from '../../../../../../../../lists/public';
+import type { OnChangeProps } from '../../../../../../../../lists/public';
 import { useEventFiltersSelector } from '../../hooks';
 import { getFormEntryStateMutable, getHasNameError, getNewComment } from '../../../store/selector';
 import { NAME_LABEL, NAME_ERROR, NAME_PLACEHOLDER, OS_LABEL, RULE_NAME } from './translations';
@@ -65,7 +65,7 @@ export const EventFiltersForm: React.FC<EventFiltersFormProps> = memo(
     );
 
     const handleOnBuilderChange = useCallback(
-      (arg: ExceptionBuilder.OnChangeProps) => {
+      (arg: OnChangeProps) => {
         dispatch({
           type: 'eventFiltersChangeForm',
           payload: {
@@ -119,7 +119,7 @@ export const EventFiltersForm: React.FC<EventFiltersFormProps> = memo(
 
     const exceptionBuilderComponentMemo = useMemo(
       () =>
-        ExceptionBuilder.getExceptionBuilderComponentLazy({
+        getExceptionBuilderComponentLazy({
           allowLargeValueLists: false,
           httpService: http,
           autocompleteService: data.autocomplete,
