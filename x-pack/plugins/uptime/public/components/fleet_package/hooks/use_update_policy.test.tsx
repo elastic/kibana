@@ -399,9 +399,7 @@ describe('useBarChartsHooks', () => {
         )
       );
       expect(vars?.[ConfigKey.PROXY_URL].value).toEqual(config[ConfigKey.PROXY_URL]);
-      expect(vars?.[ConfigKey.APM_SERVICE_NAME].value).toEqual(
-        config[ConfigKey.APM_SERVICE_NAME]
-      );
+      expect(vars?.[ConfigKey.APM_SERVICE_NAME].value).toEqual(config[ConfigKey.APM_SERVICE_NAME]);
       expect(vars?.[ConfigKey.TIMEOUT].value).toEqual(`${config[ConfigKey.TIMEOUT]}s`);
       expect(vars?.[ConfigKey.RESPONSE_BODY_CHECK_POSITIVE].value).toEqual(null);
       expect(vars?.[ConfigKey.RESPONSE_BODY_CHECK_NEGATIVE].value).toEqual(null);
@@ -534,9 +532,7 @@ describe('useBarChartsHooks', () => {
         )
       );
       expect(vars?.[ConfigKey.PROXY_URL].value).toEqual(config[ConfigKey.PROXY_URL]);
-      expect(vars?.[ConfigKey.APM_SERVICE_NAME].value).toEqual(
-        config[ConfigKey.APM_SERVICE_NAME]
-      );
+      expect(vars?.[ConfigKey.APM_SERVICE_NAME].value).toEqual(config[ConfigKey.APM_SERVICE_NAME]);
       expect(vars?.[ConfigKey.TIMEOUT].value).toEqual(`${config[ConfigKey.TIMEOUT]}s`);
       expect(vars?.[ConfigKey.PROXY_USE_LOCAL_RESOLVER].value).toEqual(
         config[ConfigKey.PROXY_USE_LOCAL_RESOLVER]
@@ -592,9 +588,7 @@ describe('useBarChartsHooks', () => {
           `@every ${config[ConfigKey.SCHEDULE].number}${config[ConfigKey.SCHEDULE].unit}`
         )
       );
-      expect(vars?.[ConfigKey.APM_SERVICE_NAME].value).toEqual(
-        config[ConfigKey.APM_SERVICE_NAME]
-      );
+      expect(vars?.[ConfigKey.APM_SERVICE_NAME].value).toEqual(config[ConfigKey.APM_SERVICE_NAME]);
       expect(vars?.[ConfigKey.TIMEOUT].value).toEqual(`${config[ConfigKey.TIMEOUT]}s`);
       expect(vars?.[ConfigKey.WAIT].value).toEqual(`${config[ConfigKey.WAIT]}s`);
 
@@ -666,9 +660,7 @@ describe('useBarChartsHooks', () => {
       expect(vars?.[ConfigKey.SYNTHETICS_ARGS].value).toEqual(
         JSON.stringify(config[ConfigKey.SYNTHETICS_ARGS])
       );
-      expect(vars?.[ConfigKey.APM_SERVICE_NAME].value).toEqual(
-        config[ConfigKey.APM_SERVICE_NAME]
-      );
+      expect(vars?.[ConfigKey.APM_SERVICE_NAME].value).toEqual(config[ConfigKey.APM_SERVICE_NAME]);
       expect(vars?.[ConfigKey.TIMEOUT].value).toEqual(`${config[ConfigKey.TIMEOUT]}s`);
       expect(vars?.[ConfigKey.THROTTLING_CONFIG].value).toEqual(
         `${config[ConfigKey.DOWNLOAD_SPEED]}d/${config[ConfigKey.UPLOAD_SPEED]}u/${

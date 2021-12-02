@@ -14,6 +14,9 @@ import {
   DataStream,
   MonitorFields,
   Mode,
+  ThrottlingConfigKey,
+  ThrottlingSuffix,
+  ThrottlingSuffixType,
 } from '../../../common/runtime_types/monitor_management';
 export * from '../../../common/runtime_types/monitor_management';
 
@@ -37,13 +40,8 @@ export const contentTypesToMode = {
   [ContentType.XML]: Mode.XML,
 };
 
-export type ThrottlingConfigKey =
-  | ConfigKeys.DOWNLOAD_SPEED
-  | ConfigKeys.UPLOAD_SPEED
-  | ConfigKeys.LATENCY;
-
-export const configKeyToThrottlingSuffix: Record<ThrottlingConfigKey, ThrottlingSuffix> = {
-  [ConfigKeys.DOWNLOAD_SPEED]: ThrottlingSuffix.DOWNLOAD,
-  [ConfigKeys.UPLOAD_SPEED]: ThrottlingSuffix.UPLOAD,
-  [ConfigKeys.LATENCY]: ThrottlingSuffix.LATENCY,
+export const configKeyToThrottlingSuffix: Record<ThrottlingConfigKey, ThrottlingSuffixType> = {
+  [ConfigKey.DOWNLOAD_SPEED]: ThrottlingSuffix.DOWNLOAD,
+  [ConfigKey.UPLOAD_SPEED]: ThrottlingSuffix.UPLOAD,
+  [ConfigKey.LATENCY]: ThrottlingSuffix.LATENCY,
 };

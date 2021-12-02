@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { BrowserFields, ConfigKey } from '../types';
 import {
   BrowserFields,
   ConfigKey,

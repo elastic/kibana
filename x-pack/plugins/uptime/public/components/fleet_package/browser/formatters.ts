@@ -50,8 +50,7 @@ export const browserFormatters: BrowserFormatMap = {
   [ConfigKey.DOWNLOAD_SPEED]: null,
   [ConfigKey.UPLOAD_SPEED]: null,
   [ConfigKey.LATENCY]: null,
-  [ConfigKey.SYNTHETICS_ARGS]: (fields) =>
-    arrayToJsonFormatter(fields[ConfigKey.SYNTHETICS_ARGS]),
+  [ConfigKey.SYNTHETICS_ARGS]: (fields) => arrayToJsonFormatter(fields[ConfigKey.SYNTHETICS_ARGS]),
   [ConfigKey.ZIP_URL_TLS_CERTIFICATE_AUTHORITIES]: (fields) =>
     tlsValueToYamlFormatter(fields[ConfigKey.ZIP_URL_TLS_CERTIFICATE_AUTHORITIES]),
   [ConfigKey.ZIP_URL_TLS_CERTIFICATE]: (fields) =>

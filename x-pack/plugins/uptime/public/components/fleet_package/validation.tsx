@@ -122,11 +122,11 @@ const validateBrowser: ValidationLibrary = {
     [ConfigKey.SOURCE_ZIP_URL]: zipUrl,
     [ConfigKey.SOURCE_INLINE]: inlineScript,
   }) => !zipUrl && !inlineScript,
-  [ConfigKeys.DOWNLOAD_SPEED]: ({ [ConfigKeys.DOWNLOAD_SPEED]: downloadSpeed }) =>
+  [ConfigKey.DOWNLOAD_SPEED]: ({ [ConfigKey.DOWNLOAD_SPEED]: downloadSpeed }) =>
     validateThrottleValue(downloadSpeed),
-  [ConfigKeys.UPLOAD_SPEED]: ({ [ConfigKeys.UPLOAD_SPEED]: uploadSpeed }) =>
+  [ConfigKey.UPLOAD_SPEED]: ({ [ConfigKey.UPLOAD_SPEED]: uploadSpeed }) =>
     validateThrottleValue(uploadSpeed),
-  [ConfigKeys.LATENCY]: ({ [ConfigKeys.LATENCY]: latency }) => validateThrottleValue(latency, true),
+  [ConfigKey.LATENCY]: ({ [ConfigKey.LATENCY]: latency }) => validateThrottleValue(latency, true),
 };
 
 export type ValidateDictionary = Record<DataStream, Validation>;

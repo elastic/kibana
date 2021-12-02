@@ -14,6 +14,7 @@ import {
   BrowserAdvancedFields as BrowserAdvancedFieldsType,
   BrowserSimpleFields,
   Validation,
+  DataStream,
 } from '../types';
 import {
   BrowserAdvancedFieldsContextProvider,
