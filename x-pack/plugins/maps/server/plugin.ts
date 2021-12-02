@@ -25,8 +25,7 @@ import { registerMapsUsageCollector } from './maps_telemetry/collectors/register
 import { APP_ID, APP_ICON, MAP_SAVED_OBJECT_TYPE, getFullPath } from '../common/constants';
 import { mapSavedObjects, mapsTelemetrySavedObjects } from './saved_objects';
 import { MapsXPackConfig } from '../config';
-// @ts-ignore
-import { setIndexPatternsService, setInternalRepository } from './kibana_server_services';
+import { setStartServices } from './kibana_server_services';
 import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/server';
 import { emsBoundariesSpecProvider } from './tutorials/ems';
 // @ts-ignore
@@ -160,7 +159,6 @@ export class MapsPlugin implements Plugin {
     );
   }
 
-  // @ts-ignore
   setup(core: CoreSetup, plugins: SetupDeps) {
     const { usageCollection, home, licensing, features, mapsEms, customIntegrations } = plugins;
     const mapsEmsConfig = mapsEms.config;
@@ -230,12 +228,7 @@ export class MapsPlugin implements Plugin {
     };
   }
 
-  // @ts-ignore
   start(core: CoreStart, plugins: StartDeps) {
-    setInternalRepository(core.savedObjects.createInternalRepository);
-    setIndexPatternsService(
-      plugins.data.indexPatterns.indexPatternsServiceFactory,
-      core.elasticsearch.client.asInternalUser
-    );
+    setStartServices(core, plugins);
   }
 }
