@@ -6,37 +6,19 @@
  */
 
 import React from 'react';
-import maki from '@elastic/maki';
 import xml2js from 'xml2js';
 import { Canvg } from 'canvg';
 import calcSDF from 'bitmap-sdf';
 import { parseXmlString } from '../../../../common/parse_xml_string';
 import { SymbolIcon } from './components/legend/symbol_icon';
 import { getIsDarkMode } from '../../../kibana_services';
+import { MAKI_ICONS } from './maki_icons';
 
 export const LARGE_MAKI_ICON_SIZE = 15;
-const LARGE_MAKI_ICON_SIZE_AS_STRING = LARGE_MAKI_ICON_SIZE.toString();
 export const SMALL_MAKI_ICON_SIZE = 11;
 export const HALF_LARGE_MAKI_ICON_SIZE = Math.ceil(LARGE_MAKI_ICON_SIZE);
 
-export const SYMBOLS = {};
-maki.svgArray.forEach((svgString) => {
-  const ID_FRAG = 'id="';
-  const index = svgString.indexOf(ID_FRAG);
-  if (index !== -1) {
-    const idStartIndex = index + ID_FRAG.length;
-    const idEndIndex = svgString.substring(idStartIndex).indexOf('"') + idStartIndex;
-    const fullSymbolId = svgString.substring(idStartIndex, idEndIndex);
-    const symbolId = fullSymbolId.substring(0, fullSymbolId.length - 3); // remove '-15' or '-11' from id
-    const symbolSize = fullSymbolId.substring(fullSymbolId.length - 2); // grab last 2 chars from id
-    // only show large icons, small/large icon selection will based on configured size style
-    if (symbolSize === LARGE_MAKI_ICON_SIZE_AS_STRING) {
-      SYMBOLS[symbolId] = svgString;
-    }
-  }
-});
-
-export const SYMBOL_OPTIONS = Object.keys(SYMBOLS).map((symbolId) => {
+export const SYMBOL_OPTIONS = Object.keys(MAKI_ICONS).map((symbolId) => {
   return {
     value: symbolId,
     label: symbolId,
@@ -90,10 +72,11 @@ export async function createSdfIcon(svgString, cutoff = 0.25, radius = 0.25) {
 }
 
 export function getMakiSymbolSvg(symbolId) {
-  if (!SYMBOLS[symbolId]) {
+  const svg = MAKI_ICONS?.[symbolId]?.svg;
+  if (!svg) {
     throw new Error(`Unable to find symbol: ${symbolId}`);
   }
-  return SYMBOLS[symbolId];
+  return svg;
 }
 
 export function getMakiSymbolAnchor(symbolId) {

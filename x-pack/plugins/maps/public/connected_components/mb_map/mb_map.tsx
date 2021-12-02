@@ -7,8 +7,6 @@
 
 import _ from 'lodash';
 import React, { Component } from 'react';
-// @ts-expect-error
-import { svgArray } from '@elastic/maki';
 import { Adapters } from 'src/plugins/inspector/public';
 import { Filter } from 'src/plugins/data/public';
 import { Action, ActionExecutionContext } from 'src/plugins/ui_actions/public';
@@ -45,7 +43,8 @@ import { TileStatusTracker } from './tile_status_tracker';
 import { DrawFeatureControl } from './draw_control/draw_feature_control';
 import type { MapExtentState } from '../../reducers/map/types';
 // @ts-expect-error
-import { createSdfIcon, SYMBOLS } from '../../classes/styles/vector/symbol_utils';
+import { createSdfIcon } from '../../classes/styles/vector/symbol_utils';
+import { MAKI_ICONS } from '../../classes/styles/vector/maki_icons';
 
 export interface Props {
   isMapReady: boolean;
@@ -291,7 +290,7 @@ export class MbMap extends Component<Props, State> {
   async _loadMakiSprites(mbMap: MapboxMap) {
     if (this._isMounted) {
       const pixelRatio = Math.floor(window.devicePixelRatio);
-      for (const [symbolId, svg] of Object.entries(SYMBOLS)) {
+      for (const [symbolId, { svg }] of Object.entries(MAKI_ICONS)) {
         if (!mbMap.hasImage(symbolId)) {
           const imageData = await createSdfIcon(svg, 0.25, 0.25);
           mbMap.addImage(symbolId, imageData, {
