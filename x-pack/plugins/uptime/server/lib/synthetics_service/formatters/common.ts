@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { CommonFields, MonitorFields, ConfigKey } from '../../fleet_package/types';
+import {
+  CommonFields,
+  ConfigKey,
+  MonitorFields,
+} from '../../../../common/runtime_types/monitor_management';
 
 export type Formatter =
   | null
