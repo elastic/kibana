@@ -66,9 +66,8 @@ export const HostIsolationExceptionsForm: React.FC<{
   const [hasNameError, setHasNameError] = useState(!exception.name);
   const [hasIpError, setHasIpError] = useState(!ipEntry.value);
 
-  const [isGlobal, setIsGlobal] = useState(isGlobalPolicyEffected(exception.tags));
   const [selectedPolicies, setSelectedPolicies] = useState<EffectedPolicySelection>({
-    isGlobal,
+    isGlobal: isGlobalPolicyEffected(exception.tags),
     selected: [],
   });
 
@@ -120,12 +119,13 @@ export const HostIsolationExceptionsForm: React.FC<{
 
   const handlePolicySelectChange: EffectedPolicySelectProps['onChange'] = useCallback(
     (selection) => {
-      setIsGlobal(selection.isGlobal);
-
       // preseve the previous selection between global and not global toggle
-      if (!selection.isGlobal) {
-        setSelectedPolicies(() => selection);
+      if (selection.isGlobal) {
+        setSelectedPolicies({ isGlobal: true, selected: selection.selected });
+      } else {
+        setSelectedPolicies(selection);
       }
+
       onChange({
         tags: getArtifactTagsByEffectedPolicySelection(
           selection,
@@ -251,7 +251,7 @@ export const HostIsolationExceptionsForm: React.FC<{
       <EuiHorizontalRule />
       <EuiFormRow fullWidth={true} data-test-subj={'effectedPolicies-container'}>
         <EffectedPolicySelect
-          isGlobal={isGlobal}
+          isGlobal={selectedPolicies.isGlobal}
           isPlatinumPlus={true}
           selected={selectedPolicies.selected}
           options={policies}
