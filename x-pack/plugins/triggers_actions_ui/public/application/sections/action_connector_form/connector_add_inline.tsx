@@ -99,45 +99,41 @@ export const AddConnectorInline = ({
   }, []);
 
   const connectorsDropdown = (
-    <EuiFlexGroup component="div">
-      <EuiFlexItem>
-        <EuiFormRow
-          fullWidth
-          label={
-            <FormattedMessage
-              id="xpack.triggersActionsUI.sections.connectorAddInline.connectorAddInline.actionIdLabel"
-              defaultMessage="Use another {connectorInstance} connector"
-              values={{
-                connectorInstance: actionTypeName,
-              }}
-            />
-          }
-          labelAppend={
-            <EuiButtonEmpty
-              size="xs"
-              data-test-subj={`addNewActionConnectorButton-${actionItem.actionTypeId}`}
-              onClick={onAddConnector}
-            >
-              <FormattedMessage
-                defaultMessage="Add connector"
-                id="xpack.triggersActionsUI.sections.connectorAddInline.connectorAddInline.addNewConnectorEmptyButton"
-              />
-            </EuiButtonEmpty>
-          }
-          error={connectorDropdownErrors}
-          isInvalid
+    <EuiFormRow
+      fullWidth
+      label={
+        <FormattedMessage
+          id="xpack.triggersActionsUI.sections.connectorAddInline.connectorAddInline.actionIdLabel"
+          defaultMessage="Use another {connectorInstance} connector"
+          values={{
+            connectorInstance: actionTypeName,
+          }}
+        />
+      }
+      labelAppend={
+        <EuiButtonEmpty
+          size="xs"
+          data-test-subj={`addNewActionConnectorButton-${actionItem.actionTypeId}`}
+          onClick={onAddConnector}
         >
-          <ConnectorsSelection
-            actionItem={actionItem}
-            accordionIndex={index}
-            actionTypesIndex={actionTypesIndex}
-            actionTypeRegistered={actionTypeRegistered}
-            connectors={connectors}
-            onConnectorSelected={onSelectConnector}
+          <FormattedMessage
+            defaultMessage="Add connector"
+            id="xpack.triggersActionsUI.sections.connectorAddInline.connectorAddInline.addNewConnectorEmptyButton"
           />
-        </EuiFormRow>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+        </EuiButtonEmpty>
+      }
+      error={connectorDropdownErrors}
+      isInvalid
+    >
+      <ConnectorsSelection
+        actionItem={actionItem}
+        accordionIndex={index}
+        actionTypesIndex={actionTypesIndex}
+        actionTypeRegistered={actionTypeRegistered}
+        connectors={connectors}
+        onConnectorSelected={onSelectConnector}
+      />
+    </EuiFormRow>
   );
 
   return (

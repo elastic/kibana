@@ -88,7 +88,7 @@ describe('connectors_selection', () => {
 
   beforeEach(() => {});
 
-  it('renders a super selector', () => {
+  it('renders a selector', () => {
     const wrapper = mountWithIntl(
       <EuiThemeProvider>
         <ConnectorsSelection
@@ -121,8 +121,6 @@ describe('connectors_selection', () => {
       </EuiThemeProvider>
     );
 
-    // there should be two, the first is because it is the default selected row, and then another
-    // as the row option
-    expect(screen.queryAllByText('test pagerduty')).toHaveLength(2);
+    expect(screen.queryAllByText('test pagerduty')).toHaveLength(1);
   });
 });

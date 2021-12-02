@@ -497,25 +497,23 @@ describe('action_form', () => {
         Array [
           Object {
             "data-test-subj": "dropdown-connector-test",
-            "inputDisplay": <EuiFlexGroup
-              alignItems="center"
-              gutterSize="s"
-              responsive={false}
-            >
-              <ConnectorRow />
-            </EuiFlexGroup>,
-            "value": "test",
+            "key": "test",
+            "label": "Test connector",
+            "value": Object {
+              "id": "test",
+              "prependComponent": undefined,
+              "title": "Test connector",
+            },
           },
           Object {
             "data-test-subj": "dropdown-connector-test2",
-            "inputDisplay": <EuiFlexGroup
-              alignItems="center"
-              gutterSize="s"
-              responsive={false}
-            >
-              <ConnectorRow />
-            </EuiFlexGroup>,
-            "value": "test2",
+            "key": "test2",
+            "label": "Test connector 2",
+            "value": Object {
+              "id": "test2",
+              "prependComponent": undefined,
+              "title": "Test connector 2",
+            },
           },
         ]
       `);
@@ -530,14 +528,13 @@ describe('action_form', () => {
         Array [
           Object {
             "data-test-subj": "dropdown-connector-test3",
-            "inputDisplay": <EuiFlexGroup
-              alignItems="center"
-              gutterSize="s"
-              responsive={false}
-            >
-              <ConnectorRow />
-            </EuiFlexGroup>,
-            "value": "test3",
+            "key": "test3",
+            "label": "Preconfigured Only",
+            "value": Object {
+              "id": "test3",
+              "prependComponent": undefined,
+              "title": "Preconfigured Only",
+            },
           },
         ]
       `);

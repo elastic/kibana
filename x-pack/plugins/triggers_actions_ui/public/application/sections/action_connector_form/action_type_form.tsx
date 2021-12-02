@@ -20,7 +20,6 @@ import {
   EuiIconTip,
   EuiText,
   EuiFormLabel,
-  EuiFormControlLayout,
   EuiSuperSelect,
   EuiBadge,
   EuiErrorBoundary,
@@ -176,86 +175,73 @@ export const ActionTypeForm = ({
     <>
       {actionGroups && selectedActionGroup && setActionGroupIdByIndex && (
         <>
-          <EuiFlexGroup component="div">
-            <EuiFlexItem grow={true}>
-              <EuiFormControlLayout
-                fullWidth
-                prepend={
-                  <EuiFormLabel
-                    htmlFor={`addNewActionConnectorActionGroup-${actionItem.actionTypeId}`}
-                  >
-                    <FormattedMessage
-                      id="xpack.triggersActionsUI.sections.actionTypeForm.actionRunWhenInActionGroup"
-                      defaultMessage="Run when"
-                    />
-                  </EuiFormLabel>
-                }
-              >
-                <EuiSuperSelect
-                  fullWidth
-                  id={`addNewActionConnectorActionGroup-${actionItem.actionTypeId}`}
-                  data-test-subj={`addNewActionConnectorActionGroup-${index}`}
-                  options={actionGroups.map(({ id: value, name }) => ({
-                    value,
-                    inputDisplay: actionGroupDisplay(value, name, actionItem.actionTypeId),
-                    disabled: isActionGroupDisabled(value, actionItem.actionTypeId),
-                    'data-test-subj': `addNewActionConnectorActionGroup-${index}-option-${value}`,
-                  }))}
-                  valueOfSelected={selectedActionGroup.id}
-                  onChange={(group) => {
-                    setActionGroupIdByIndex(group, index);
-                    setActionGroup(group);
-                  }}
+          <EuiSuperSelect
+            prepend={
+              <EuiFormLabel htmlFor={`addNewActionConnectorActionGroup-${actionItem.actionTypeId}`}>
+                <FormattedMessage
+                  id="xpack.triggersActionsUI.sections.actionTypeForm.actionRunWhenInActionGroup"
+                  defaultMessage="Run when"
                 />
-              </EuiFormControlLayout>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+              </EuiFormLabel>
+            }
+            fullWidth
+            id={`addNewActionConnectorActionGroup-${actionItem.actionTypeId}`}
+            data-test-subj={`addNewActionConnectorActionGroup-${index}`}
+            options={actionGroups.map(({ id: value, name }) => ({
+              value,
+              inputDisplay: actionGroupDisplay(value, name, actionItem.actionTypeId),
+              disabled: isActionGroupDisabled(value, actionItem.actionTypeId),
+              'data-test-subj': `addNewActionConnectorActionGroup-${index}-option-${value}`,
+            }))}
+            valueOfSelected={selectedActionGroup.id}
+            onChange={(group) => {
+              setActionGroupIdByIndex(group, index);
+              setActionGroup(group);
+            }}
+          />
+
           <EuiSpacer size="l" />
         </>
       )}
-      <EuiFlexGroup component="div">
-        <EuiFlexItem>
-          <EuiFormRow
-            fullWidth
-            label={
+      <EuiFormRow
+        fullWidth
+        label={
+          <FormattedMessage
+            id="xpack.triggersActionsUI.sections.actionTypeForm.actionIdLabel"
+            defaultMessage="{connectorInstance} connector"
+            values={{
+              connectorInstance: actionTypesIndex
+                ? actionTypesIndex[actionConnector.actionTypeId].name
+                : actionConnector.actionTypeId,
+            }}
+          />
+        }
+        labelAppend={
+          canSave &&
+          actionTypesIndex &&
+          actionTypesIndex[actionConnector.actionTypeId].enabledInConfig ? (
+            <EuiButtonEmpty
+              size="xs"
+              data-test-subj={`addNewActionConnectorButton-${actionItem.actionTypeId}`}
+              onClick={onAddConnector}
+            >
               <FormattedMessage
-                id="xpack.triggersActionsUI.sections.actionTypeForm.actionIdLabel"
-                defaultMessage="{connectorInstance} connector"
-                values={{
-                  connectorInstance: actionTypesIndex
-                    ? actionTypesIndex[actionConnector.actionTypeId].name
-                    : actionConnector.actionTypeId,
-                }}
+                defaultMessage="Add connector"
+                id="xpack.triggersActionsUI.sections.actionTypeForm.addNewConnectorEmptyButton"
               />
-            }
-            labelAppend={
-              canSave &&
-              actionTypesIndex &&
-              actionTypesIndex[actionConnector.actionTypeId].enabledInConfig ? (
-                <EuiButtonEmpty
-                  size="xs"
-                  data-test-subj={`addNewActionConnectorButton-${actionItem.actionTypeId}`}
-                  onClick={onAddConnector}
-                >
-                  <FormattedMessage
-                    defaultMessage="Add connector"
-                    id="xpack.triggersActionsUI.sections.actionTypeForm.addNewConnectorEmptyButton"
-                  />
-                </EuiButtonEmpty>
-              ) : null
-            }
-          >
-            <ConnectorsSelection
-              actionItem={actionItem}
-              accordionIndex={index}
-              actionTypesIndex={actionTypesIndex}
-              actionTypeRegistered={actionTypeRegistered}
-              connectors={connectors}
-              onConnectorSelected={onConnectorSelected}
-            />
-          </EuiFormRow>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+            </EuiButtonEmpty>
+          ) : null
+        }
+      >
+        <ConnectorsSelection
+          actionItem={actionItem}
+          accordionIndex={index}
+          actionTypesIndex={actionTypesIndex}
+          actionTypeRegistered={actionTypeRegistered}
+          connectors={connectors}
+          onConnectorSelected={onConnectorSelected}
+        />
+      </EuiFormRow>
       <EuiSpacer size="xl" />
       {ParamsFieldsComponent ? (
         <EuiErrorBoundary>

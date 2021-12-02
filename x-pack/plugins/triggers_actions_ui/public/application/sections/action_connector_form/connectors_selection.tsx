@@ -5,13 +5,18 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiSuperSelect } from '@elastic/eui';
-import React, { useCallback, useMemo } from 'react';
+import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
+import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { ActionConnector, ActionTypeIndex, ActionTypeModel, AlertAction } from '../../../types';
 import { getValidConnectors } from '../common/connectors';
-import { preconfiguredMessage } from '../../../common/connectors_selection';
+
+interface ConnectorOption {
+  title: string;
+  id: string;
+  prependComponent?: JSX.Element;
+}
 
 interface SelectionProps {
   actionItem: AlertAction;
@@ -37,9 +42,9 @@ function ConnectorsSelectionComponent({
     [actionItem, actionTypesIndex, connectors]
   );
 
-  const valueOfSelected = useMemo(
-    () => getValueOfSelectedConnector(actionItem.id, validConnectors),
-    [actionItem.id, validConnectors]
+  const selectedConnectors = useMemo(
+    () => getValueOfSelectedConnector(actionItem.id, validConnectors, actionTypeRegistered),
+    [actionItem.id, validConnectors, actionTypeRegistered]
   );
 
   const options = useMemo(
@@ -47,68 +52,85 @@ function ConnectorsSelectionComponent({
     [validConnectors, actionTypeRegistered]
   );
 
-  const onChange = useCallback((id: string) => onConnectorSelected(id), [onConnectorSelected]);
+  const [selectedOption, setSelectedOption] = useState<
+    EuiComboBoxOptionOption<ConnectorOption> | undefined
+  >(selectedConnectors.length > 0 ? selectedConnectors[0] : undefined);
+
+  const onChange = useCallback(
+    (connectorOptions: Array<EuiComboBoxOptionOption<ConnectorOption>>) => {
+      setSelectedOption(connectorOptions[0]);
+      onConnectorSelected(connectorOptions[0].value?.id ?? '');
+    },
+    [onConnectorSelected]
+  );
 
   return (
-    <EuiSuperSelect
+    <EuiComboBox
       aria-label={incidentManagemSystem}
       data-test-subj={`selectActionConnector-${actionItem.actionTypeId}-${accordionIndex}`}
       fullWidth
-      options={options}
+      singleSelection={{ asPlainText: true }}
+      id={`selectActionConnector-${actionItem.id}`}
+      isClearable={false}
       onChange={onChange}
-      valueOfSelected={valueOfSelected}
+      options={options}
+      selectedOptions={selectedConnectors}
+      prepend={selectedOption?.value?.prependComponent}
     />
   );
 }
 
 const getValueOfSelectedConnector = (
   actionItemId: string,
-  connectors: ActionConnector[]
-): string | undefined => {
+  connectors: ActionConnector[],
+  actionTypeRegistered: ActionTypeModel
+): Array<EuiComboBoxOptionOption<ConnectorOption>> => {
   const selectedConnector = connectors.find((connector) => connector.id === actionItemId);
 
   if (!selectedConnector) {
-    return;
+    return [];
   }
 
-  return actionItemId;
+  return [createOption(selectedConnector, actionTypeRegistered)];
 };
 
 const createConnectorOptions = (
   connectors: ActionConnector[],
   actionTypeRegistered: ActionTypeModel
-) =>
-  connectors.map((connector) => {
-    const title = getTitle(connector);
+): Array<EuiComboBoxOptionOption<ConnectorOption>> =>
+  connectors.map((connector) => createOption(connector, actionTypeRegistered));
 
-    const ConnectorRow = () =>
-      actionTypeRegistered.customConnectorSelectItemComponent != null ? (
-        <actionTypeRegistered.customConnectorSelectItemComponent actionConnector={connector} />
-      ) : (
-        <EuiFlexItem grow={false}>
-          <span>{title}</span>
-        </EuiFlexItem>
-      );
+const createOption = (connector: ActionConnector, actionTypeRegistered: ActionTypeModel) => {
+  const title = getTitle(connector, actionTypeRegistered);
 
-    return {
-      value: connector.id,
-      inputDisplay: (
-        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-          <ConnectorRow />
-        </EuiFlexGroup>
-      ),
-      'data-test-subj': `dropdown-connector-${connector.id}`,
-    };
-  });
+  let prependComponent: JSX.Element | undefined;
 
-const getTitle = (connector: ActionConnector) => {
-  let title = connector.name;
-
-  if (connector.isPreconfigured) {
-    title += ` ${preconfiguredMessage}`;
+  if (actionTypeRegistered.customConnectorSelectItem != null) {
+    const CustomPrependComponent =
+      actionTypeRegistered.customConnectorSelectItem.getComponent(connector);
+    if (CustomPrependComponent) {
+      prependComponent = <CustomPrependComponent actionConnector={connector} />;
+    }
   }
 
-  return title;
+  return {
+    label: title,
+    value: {
+      title,
+      id: connector.id,
+      prependComponent,
+    },
+    key: connector.id,
+    'data-test-subj': `dropdown-connector-${connector.id}`,
+  };
+};
+
+const getTitle = (connector: ActionConnector, actionTypeRegistered: ActionTypeModel) => {
+  if (actionTypeRegistered.customConnectorSelectItem != null) {
+    return actionTypeRegistered.customConnectorSelectItem.getText(connector);
+  }
+
+  return connector.name;
 };
 
 const incidentManagemSystem = i18n.translate(

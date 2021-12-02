@@ -135,9 +135,12 @@ export interface ActionTypeModel<ActionConfig = any, ActionSecrets = any, Action
     >
   > | null;
   actionParamsFields: React.LazyExoticComponent<ComponentType<ActionParamsProps<ActionParams>>>;
-  customConnectorSelectItemComponent?: React.LazyExoticComponent<
-    ComponentType<{ actionConnector: ActionConnector }>
-  >;
+  customConnectorSelectItem?: {
+    getText: (actionConnector: ActionConnector) => string;
+    getComponent: (
+      actionConnector: ActionConnector
+    ) => React.LazyExoticComponent<ComponentType<{ actionConnector: ActionConnector }>> | undefined;
+  };
 }
 
 export interface GenericValidationResult<T> {
