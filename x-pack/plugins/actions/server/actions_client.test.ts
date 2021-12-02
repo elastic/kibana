@@ -18,7 +18,7 @@ import { actionsConfigMock } from './actions_config.mock';
 import { getActionsConfigurationUtilities } from './actions_config';
 import { licenseStateMock } from './lib/license_state.mock';
 import { licensingMock } from '../../licensing/server/mocks';
-import { httpServerMock } from '../../../../src/core/server/mocks';
+import { httpServerMock, loggingSystemMock } from '../../../../src/core/server/mocks';
 import { auditServiceMock } from '../../security/server/audit/index.mock';
 import { usageCountersServiceMock } from 'src/plugins/usage_collection/server/usage_counters/usage_counters_service.mock';
 
@@ -37,6 +37,9 @@ import { actionsAuthorizationMock } from './authorization/actions_authorization.
 import { trackLegacyRBACExemption } from './lib/track_legacy_rbac_exemption';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { elasticsearchClientMock } from '../../../../src/core/server/elasticsearch/client/mocks';
+import { ConnectorTokenClient } from './builtin_action_types/lib/connector_token_client';
+import { encryptedSavedObjectsMock } from '../../encrypted_saved_objects/server/mocks';
+import { Logger } from 'kibana/server';
 
 jest.mock('../../../../src/core/server/saved_objects/service/lib/utils', () => ({
   SavedObjectsUtils: {
@@ -71,7 +74,7 @@ const request = httpServerMock.createKibanaRequest();
 const auditLogger = auditServiceMock.create().asScoped(request);
 const mockUsageCountersSetup = usageCountersServiceMock.createSetupContract();
 const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');
-
+const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 const mockTaskManager = taskManagerMock.createSetup();
 
 let actionsClient: ActionsClient;
@@ -107,6 +110,11 @@ beforeEach(() => {
     authorization: authorization as unknown as ActionsAuthorization,
     auditLogger,
     usageCounter: mockUsageCounter,
+    connectorTokenClient: new ConnectorTokenClient({
+      unsecuredSavedObjectsClient: savedObjectsClientMock.create(),
+      encryptedSavedObjectsClient: encryptedSavedObjectsMock.createClient(),
+      logger,
+    }),
   });
 });
 
@@ -512,6 +520,11 @@ describe('create()', () => {
       ephemeralExecutionEnqueuer,
       request,
       authorization: authorization as unknown as ActionsAuthorization,
+      connectorTokenClient: new ConnectorTokenClient({
+        unsecuredSavedObjectsClient: savedObjectsClientMock.create(),
+        encryptedSavedObjectsClient: encryptedSavedObjectsMock.createClient(),
+        logger,
+      }),
     });
 
     const savedObjectCreateResult = {
@@ -627,6 +640,11 @@ describe('get()', () => {
             },
           },
         ],
+        connectorTokenClient: new ConnectorTokenClient({
+          unsecuredSavedObjectsClient: savedObjectsClientMock.create(),
+          encryptedSavedObjectsClient: encryptedSavedObjectsMock.createClient(),
+          logger,
+        }),
       });
 
       await actionsClient.get({ id: 'testPreconfigured' });
@@ -683,6 +701,11 @@ describe('get()', () => {
             },
           },
         ],
+        connectorTokenClient: new ConnectorTokenClient({
+          unsecuredSavedObjectsClient: savedObjectsClientMock.create(),
+          encryptedSavedObjectsClient: encryptedSavedObjectsMock.createClient(),
+          logger,
+        }),
       });
 
       authorization.ensureAuthorized.mockRejectedValue(
@@ -800,6 +823,11 @@ describe('get()', () => {
           },
         },
       ],
+      connectorTokenClient: new ConnectorTokenClient({
+        unsecuredSavedObjectsClient: savedObjectsClientMock.create(),
+        encryptedSavedObjectsClient: encryptedSavedObjectsMock.createClient(),
+        logger,
+      }),
     });
 
     const result = await actionsClient.get({ id: 'testPreconfigured' });
@@ -868,6 +896,11 @@ describe('getAll()', () => {
             },
           },
         ],
+        connectorTokenClient: new ConnectorTokenClient({
+          unsecuredSavedObjectsClient: savedObjectsClientMock.create(),
+          encryptedSavedObjectsClient: encryptedSavedObjectsMock.createClient(),
+          logger,
+        }),
       });
       return actionsClient.getAll();
     }
@@ -1006,6 +1039,11 @@ describe('getAll()', () => {
           },
         },
       ],
+      connectorTokenClient: new ConnectorTokenClient({
+        unsecuredSavedObjectsClient: savedObjectsClientMock.create(),
+        encryptedSavedObjectsClient: encryptedSavedObjectsMock.createClient(),
+        logger,
+      }),
     });
     const result = await actionsClient.getAll();
     expect(result).toEqual([
@@ -1082,6 +1120,11 @@ describe('getBulk()', () => {
             },
           },
         ],
+        connectorTokenClient: new ConnectorTokenClient({
+          unsecuredSavedObjectsClient: savedObjectsClientMock.create(),
+          encryptedSavedObjectsClient: encryptedSavedObjectsMock.createClient(),
+          logger,
+        }),
       });
       return actionsClient.getBulk(['1', 'testPreconfigured']);
     }
@@ -1214,6 +1257,11 @@ describe('getBulk()', () => {
           },
         },
       ],
+      connectorTokenClient: new ConnectorTokenClient({
+        unsecuredSavedObjectsClient: savedObjectsClientMock.create(),
+        encryptedSavedObjectsClient: encryptedSavedObjectsMock.createClient(),
+        logger,
+      }),
     });
     const result = await actionsClient.getBulk(['1', 'testPreconfigured']);
     expect(result).toEqual([
@@ -1983,6 +2031,11 @@ describe('isPreconfigured()', () => {
           },
         },
       ],
+      connectorTokenClient: new ConnectorTokenClient({
+        unsecuredSavedObjectsClient: savedObjectsClientMock.create(),
+        encryptedSavedObjectsClient: encryptedSavedObjectsMock.createClient(),
+        logger,
+      }),
     });
 
     expect(actionsClient.isPreconfigured('testPreconfigured')).toEqual(true);
@@ -2013,6 +2066,11 @@ describe('isPreconfigured()', () => {
           },
         },
       ],
+      connectorTokenClient: new ConnectorTokenClient({
+        unsecuredSavedObjectsClient: savedObjectsClientMock.create(),
+        encryptedSavedObjectsClient: encryptedSavedObjectsMock.createClient(),
+        logger,
+      }),
     });
 
     expect(actionsClient.isPreconfigured(uuid.v4())).toEqual(false);

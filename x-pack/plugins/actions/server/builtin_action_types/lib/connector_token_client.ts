@@ -78,7 +78,7 @@ export class ConnectorTokenClient {
 
       return result.attributes as ConnectorToken;
     } catch (err) {
-      this.logger.warn(
+      this.logger.error(
         `Failed to create connector_token for connectorId "${connectorId}" and tokenType: "${
           tokenType ?? 'access_token'
         }". Error: ${err.message}`
@@ -120,7 +120,7 @@ export class ConnectorTokenClient {
       );
       return result.attributes as ConnectorToken;
     } catch (err) {
-      this.logger.warn(
+      this.logger.error(
         `Failed to update connector_token for id "${id}" and tokenType: "${
           tokenType ?? 'access_token'
         }". Error: ${err.message}`
@@ -157,7 +157,7 @@ export class ConnectorTokenClient {
         ).saved_objects
       );
     } catch (err) {
-      this.logger.warn(
+      this.logger.error(
         `Failed to fetch connector_token for connectorId "${connectorId}" and tokenType: "${
           tokenType ?? 'access_token'
         }". Error: ${err.message}`
@@ -183,12 +183,38 @@ export class ConnectorTokenClient {
         token,
       };
     } catch (err) {
-      this.logger.warn(
+      this.logger.error(
         `Failed to decrypt connector_token for connectorId "${connectorId}" and tokenType: "${
           tokenType ?? 'access_token'
         }". Error: ${err.message}`
       );
       return null;
+    }
+  }
+
+  /**
+   * Delete connector token
+   */
+  public async delete({ connectorId }: { connectorId: string }) {
+    try {
+      const result = await this.unsecuredSavedObjectsClient.find<ConnectorToken>({
+        type: CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
+        filter: `${CONNECTOR_TOKEN_SAVED_OBJECT_TYPE}.attributes.connectorId: "${connectorId}"`,
+      });
+      return Promise.all(
+        result.saved_objects.map(
+          async (obj) =>
+            await this.unsecuredSavedObjectsClient.delete(
+              CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
+              obj.attributes.connectorId
+            )
+        )
+      );
+    } catch (err) {
+      this.logger.error(
+        `Failed to delete connector_token records for connectorId "${connectorId}". Error: ${err.message}`
+      );
+      throw err;
     }
   }
 }

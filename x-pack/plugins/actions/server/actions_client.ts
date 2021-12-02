@@ -44,6 +44,7 @@ import {
 import { connectorAuditEvent, ConnectorAuditAction } from './lib/audit_events';
 import { RunNowResult } from '../../task_manager/server';
 import { trackLegacyRBACExemption } from './lib/track_legacy_rbac_exemption';
+import { ConnectorTokenClient } from './builtin_action_types/lib/connector_token_client';
 
 // We are assuming there won't be many actions. This is why we will load
 // all the actions in advance and assume the total count to not go over 10000.
@@ -77,6 +78,7 @@ interface ConstructorOptions {
   authorization: ActionsAuthorization;
   auditLogger?: AuditLogger;
   usageCounter?: UsageCounter;
+  connectorTokenClient: ConnectorTokenClient;
 }
 
 export interface UpdateOptions {
@@ -97,6 +99,7 @@ export class ActionsClient {
   private readonly ephemeralExecutionEnqueuer: ExecutionEnqueuer<RunNowResult>;
   private readonly auditLogger?: AuditLogger;
   private readonly usageCounter?: UsageCounter;
+  private readonly connectorTokenClient: ConnectorTokenClient;
 
   constructor({
     actionTypeRegistry,
@@ -111,6 +114,7 @@ export class ActionsClient {
     authorization,
     auditLogger,
     usageCounter,
+    connectorTokenClient,
   }: ConstructorOptions) {
     this.actionTypeRegistry = actionTypeRegistry;
     this.unsecuredSavedObjectsClient = unsecuredSavedObjectsClient;
@@ -124,6 +128,7 @@ export class ActionsClient {
     this.authorization = authorization;
     this.auditLogger = auditLogger;
     this.usageCounter = usageCounter;
+    this.connectorTokenClient = connectorTokenClient;
   }
 
   /**
@@ -475,6 +480,17 @@ export class ActionsClient {
       })
     );
 
+    try {
+      await this.connectorTokenClient.delete({ connectorId: id });
+    } catch (error) {
+      this.auditLogger?.log(
+        connectorAuditEvent({
+          action: ConnectorAuditAction.DELETE,
+          savedObject: { type: 'action', id },
+          error,
+        })
+      );
+    }
     return await this.unsecuredSavedObjectsClient.delete('action', id);
   }
 

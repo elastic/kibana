@@ -136,7 +136,7 @@ describe('get()', () => {
       tokenType: 'access_token',
     });
 
-    expect(logger.warn.mock.calls[0]).toMatchObject([
+    expect(logger.error.mock.calls[0]).toMatchObject([
       `Failed to fetch connector_token for connectorId "123" and tokenType: "access_token". Error: Fail`,
     ]);
     expect(result).toEqual(null);
@@ -170,7 +170,7 @@ describe('get()', () => {
       tokenType: 'access_token',
     });
 
-    expect(logger.warn.mock.calls[0]).toMatchObject([
+    expect(logger.error.mock.calls[0]).toMatchObject([
       `Failed to decrypt connector_token for connectorId "123" and tokenType: "access_token". Error: Fail`,
     ]);
     expect(result).toEqual(null);
@@ -250,5 +250,54 @@ describe('update()', () => {
         expiresAt,
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(`"Fail"`);
+  });
+});
+
+describe('delete()', () => {
+  test('calls unsecuredSavedObjectsClient delete for all connector token records by connectorId', async () => {
+    const expectedResult = Symbol();
+    unsecuredSavedObjectsClient.delete.mockResolvedValue(expectedResult);
+
+    const findResult = {
+      total: 2,
+      per_page: 10,
+      page: 1,
+      saved_objects: [
+        {
+          id: 'token1',
+          type: 'connector_token',
+          attributes: {
+            connectorId: '1',
+            tokenType: 'access_token',
+            createdAt: new Date().toISOString(),
+            expiresAt: new Date().toISOString(),
+          },
+          score: 1,
+          references: [],
+        },
+        {
+          id: 'token2',
+          type: 'connector_token',
+          attributes: {
+            connectorId: '1',
+            tokenType: 'refresh_token',
+            createdAt: new Date().toISOString(),
+            expiresAt: new Date().toISOString(),
+          },
+          score: 1,
+          references: [],
+        },
+      ],
+    };
+    unsecuredSavedObjectsClient.find.mockResolvedValueOnce(findResult);
+    const result = await connectorTokenClient.delete({ connectorId: '1' });
+    expect(result).toEqual(expectedResult);
+    expect(unsecuredSavedObjectsClient.delete).toHaveBeenCalledTimes(2);
+    expect(unsecuredSavedObjectsClient.delete.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        "connector_token",
+        "token1",
+      ]
+    `);
   });
 });

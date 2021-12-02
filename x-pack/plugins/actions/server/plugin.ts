@@ -380,6 +380,11 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
         }),
         auditLogger: this.security?.audit.asScoped(request),
         usageCounter: this.usageCounter,
+        connectorTokenClient: new ConnectorTokenClient({
+          unsecuredSavedObjectsClient,
+          encryptedSavedObjectsClient,
+          logger: this.logger,
+        }),
       });
     };
 
@@ -519,10 +524,12 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       instantiateAuthorization,
       security,
       usageCounter,
+      logger,
     } = this;
 
     return async function actionsRouteHandlerContext(context, request) {
-      const [{ savedObjects }, { taskManager }] = await core.getStartServices();
+      const [{ savedObjects }, { taskManager, encryptedSavedObjects }] =
+        await core.getStartServices();
       return {
         getActionsClient: () => {
           if (isESOCanEncrypt !== true) {
@@ -530,11 +537,12 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
               `Unable to create actions client because the Encrypted Saved Objects plugin is missing encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.`
             );
           }
+          const unsecuredSavedObjectsClient = savedObjects.getScopedClient(request, {
+            excludedWrappers: ['security'],
+            includedHiddenTypes,
+          });
           return new ActionsClient({
-            unsecuredSavedObjectsClient: savedObjects.getScopedClient(request, {
-              excludedWrappers: ['security'],
-              includedHiddenTypes,
-            }),
+            unsecuredSavedObjectsClient,
             actionTypeRegistry: actionTypeRegistry!,
             defaultKibanaIndex,
             scopedClusterClient: context.core.elasticsearch.client,
@@ -556,6 +564,13 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
             }),
             auditLogger: security?.audit.asScoped(request),
             usageCounter,
+            connectorTokenClient: new ConnectorTokenClient({
+              unsecuredSavedObjectsClient,
+              encryptedSavedObjectsClient: encryptedSavedObjects.getClient({
+                includedHiddenTypes,
+              }),
+              logger,
+            }),
           });
         },
         listTypes: actionTypeRegistry!.list.bind(actionTypeRegistry!),
