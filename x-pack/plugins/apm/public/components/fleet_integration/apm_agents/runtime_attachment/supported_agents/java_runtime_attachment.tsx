@@ -122,7 +122,7 @@ export function JavaRuntimeAttachment({ newPolicy, onChange }: Props) {
       });
       setIsDirty(true);
     },
-    [newPolicy]
+    [newPolicy, onChange]
   );
   return (
     <RuntimeAttachment

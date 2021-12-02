@@ -1,3 +1,10 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -49,9 +56,9 @@ export function EditDiscoveryRule({
         <EuiFlexItem grow={false}>
           <EuiFormFieldset legend={{ children: 'Operation' }}>
             <EuiSelect
-              options={operationTypes.map(({ operation }) => ({
-                text: operation.label,
-                value: operation.value,
+              options={operationTypes.map((item) => ({
+                text: item.operation.label,
+                value: item.operation.value,
               }))}
               value={operation}
               onChange={(e) => {
@@ -74,14 +81,14 @@ export function EditDiscoveryRule({
                       ({ operation: definedOperation }) =>
                         definedOperation.value === operation
                     )
-                    ?.types.map((type) => ({
-                      inputDisplay: type.label,
-                      value: type.value,
+                    ?.types.map((item) => ({
+                      inputDisplay: item.label,
+                      value: item.value,
                       dropdownDisplay: (
                         <>
-                          <strong>{type.label}</strong>
+                          <strong>{item.label}</strong>
                           <EuiText size="s" color="subdued">
-                            <p>{type.description}</p>
+                            <p>{item.description}</p>
                           </EuiText>
                         </>
                       ),

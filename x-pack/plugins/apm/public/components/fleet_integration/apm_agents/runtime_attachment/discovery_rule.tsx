@@ -1,3 +1,10 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
 import {
   EuiText,
   EuiFlexGroup,
@@ -34,12 +41,12 @@ export function DiscoveryRule({
   operationTypes,
 }: Props) {
   const operationTypesLabels = useMemo(() => {
-    return operationTypes.reduce((acc, { operation, types }) => {
+    return operationTypes.reduce((acc, current) => {
       return {
         ...acc,
-        [operation.value]: {
-          label: operation.label,
-          types: types.reduce((memo, { value, label }) => {
+        [current.operation.value]: {
+          label: current.operation.label,
+          types: current.types.reduce((memo, { value, label }) => {
             return { ...memo, [value]: label };
           }, {}),
         },

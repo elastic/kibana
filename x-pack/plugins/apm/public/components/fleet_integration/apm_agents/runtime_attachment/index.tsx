@@ -89,9 +89,9 @@ export function RuntimeAttachment(props: Props) {
       discoveryRules: nextIsEnabled
         ? discoveryRuleList.map(({ discoveryRule }) => discoveryRule)
         : [],
-      version,
+      version: nextIsEnabled ? version : props.selectedVersion,
     });
-  }, [isEnabled, onChange, discoveryRuleList, version]);
+  }, [isEnabled, onChange, discoveryRuleList, version, props.selectedVersion]);
 
   const onDelete = useCallback(
     (discoveryRuleId: string) => {
@@ -227,7 +227,7 @@ export function RuntimeAttachment(props: Props) {
     ];
     setDiscoveryRuleList(nextDiscoveryRuleList);
     setEditDiscoveryRuleId(STAGED_DISCOVERY_RULE_ID);
-  }, [discoveryRuleList]);
+  }, [discoveryRuleList, props.operationTypes]);
 
   const onDragEnd = useCallback(
     ({ source, destination }: DropResult) => {
