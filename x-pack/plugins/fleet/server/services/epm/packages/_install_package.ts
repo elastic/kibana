@@ -106,11 +106,7 @@ export async function _installPackage({
     }
 
     const kibanaAssets = await getKibanaAssets(paths);
-    if (installedPkg)
-      await deleteKibanaSavedObjectsAssets(
-        savedObjectsClient,
-        installedPkg.attributes.installed_kibana
-      );
+    if (installedPkg) await deleteKibanaSavedObjectsAssets({ savedObjectsClient, installedPkg });
     // save new kibana refs before installing the assets
     const installedKibanaAssetsRefs = await saveKibanaAssetsRefs(
       savedObjectsClient,
