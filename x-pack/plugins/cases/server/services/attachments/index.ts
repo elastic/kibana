@@ -12,6 +12,7 @@ import {
   SavedObjectsUpdateOptions,
 } from 'kibana/server';
 
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { KueryNode } from '@kbn/es-query';
 import {
   AttributesTypeAlerts,
@@ -21,14 +22,18 @@ import {
   CASE_SAVED_OBJECT,
   MAX_DOCS_PER_PAGE,
   CommentType,
+  CommentAttributes,
 } from '../../../common';
 import { ClientArgs } from '..';
 import { buildFilter, combineFilters } from '../../client/utils';
+import { defaultSortField } from '../../common';
 
 interface GetAllAlertsAttachToCaseArgs extends ClientArgs {
   caseId: string;
   filter?: KueryNode;
 }
+
+type CountAlertsAttachedToCaseArgs = GetAllAlertsAttachToCaseArgs;
 
 interface GetAttachmentArgs extends ClientArgs {
   attachmentId: string;
@@ -54,6 +59,51 @@ interface BulkUpdateAttachmentArgs extends ClientArgs {
 
 export class AttachmentService {
   constructor(private readonly log: Logger) {}
+
+  public async countAlertsAttachedToCase({
+    unsecuredSavedObjectsClient,
+    caseId,
+    filter,
+  }: CountAlertsAttachedToCaseArgs): Promise<number | undefined> {
+    try {
+      this.log.debug(`Attempting to count alerts for case id ${caseId}`);
+      const alertsFilter = buildFilter({
+        filters: [CommentType.alert, CommentType.generatedAlert],
+        field: 'type',
+        operator: 'or',
+        type: CASE_COMMENT_SAVED_OBJECT,
+      });
+
+      const combinedFilter = combineFilters([alertsFilter, filter]);
+
+      const response = await unsecuredSavedObjectsClient.find<
+        CommentAttributes,
+        { alerts: { value: number } }
+      >({
+        type: CASE_COMMENT_SAVED_OBJECT,
+        page: 1,
+        perPage: 1,
+        sortField: defaultSortField,
+        aggs: this.buildCountAlertsAggs(),
+        filter: combinedFilter,
+      });
+
+      return response.aggregations?.alerts?.value;
+    } catch (error) {
+      this.log.error(`Error while counting alerts for case id ${caseId}: ${error}`);
+      throw error;
+    }
+  }
+
+  private buildCountAlertsAggs(): Record<string, estypes.AggregationsAggregationContainer> {
+    return {
+      alerts: {
+        cardinality: {
+          field: `${CASE_COMMENT_SAVED_OBJECT}.attributes.alertId`,
+        },
+      },
+    };
+  }
 
   /**
    * Retrieves all the alerts attached to a case.

@@ -6,17 +6,22 @@
  */
 
 import { CaseMetricsResponse } from '../../../common';
+import { CasesClient } from '../client';
 import { MetricsHandler } from './types';
 
 export class AlertsCount implements MetricsHandler {
+  constructor(private readonly caseId: string, private readonly casesClient: CasesClient) {}
+
   public getFeatures(): Set<string> {
     return new Set(['alertsCount']);
   }
 
   public async compute(): Promise<CaseMetricsResponse> {
+    const { count } = await this.casesClient.attachments.countAlertsAttachedToCase(this.caseId);
+
     return {
       alerts: {
-        count: 0,
+        count,
       },
     };
   }

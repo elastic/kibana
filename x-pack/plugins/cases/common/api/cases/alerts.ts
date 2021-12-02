@@ -14,5 +14,10 @@ const AlertRt = rt.type({
 });
 
 export const AlertResponseRt = rt.array(AlertRt);
-
 export type AlertResponse = rt.TypeOf<typeof AlertResponseRt>;
+
+export const AlertsCountRt = rt.type({
+  count: rt.number,
+});
+
+export type AlertsCount = rt.TypeOf<typeof AlertsCountRt>;

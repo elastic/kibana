@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AlertResponse, CommentResponse } from '../../../common';
+import { AlertResponse, AlertsCount, CommentResponse } from '../../../common';
 import { CasesClient } from '../client';
 
 import { CasesClientInternal } from '../client_internal';
@@ -14,6 +14,7 @@ import { CasesClientArgs } from '../types';
 import { AddArgs, addComment } from './add';
 import { DeleteAllArgs, deleteAll, DeleteArgs, deleteComment } from './delete';
 import {
+  countAlertsAttachedToCase,
   find,
   FindArgs,
   get,
@@ -33,6 +34,10 @@ export interface AttachmentsSubClient {
    * Adds an attachment to a case.
    */
   add(params: AddArgs): Promise<ICaseResponse>;
+  /**
+   * Retrieves the number of alerts attached to a case.
+   */
+  countAlertsAttachedToCase(caseId: string): Promise<AlertsCount>;
   /**
    * Deletes all attachments associated with a single case.
    */
@@ -77,6 +82,8 @@ export const createAttachmentsSubClient = (
 ): AttachmentsSubClient => {
   const attachmentSubClient: AttachmentsSubClient = {
     add: (params: AddArgs) => addComment(params, clientArgs, casesClientInternal),
+    countAlertsAttachedToCase: (caseId: string) =>
+      countAlertsAttachedToCase(caseId, clientArgs, casesClient),
     deleteAll: (deleteAllArgs: DeleteAllArgs) => deleteAll(deleteAllArgs, clientArgs),
     delete: (deleteArgs: DeleteArgs) => deleteComment(deleteArgs, clientArgs),
     find: (findArgs: FindArgs) => find(findArgs, clientArgs),
