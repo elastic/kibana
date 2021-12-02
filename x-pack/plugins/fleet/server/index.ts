@@ -19,6 +19,7 @@ import { FleetPlugin } from './plugin';
 
 export type {
   AgentService,
+  AgentClient,
   ESIndexPatternService,
   PackageService,
   AgentPolicyServiceInterface,
@@ -34,8 +35,9 @@ export type {
   PutPackagePolicyUpdateCallback,
   PostPackagePolicyDeleteCallback,
   PostPackagePolicyCreateCallback,
+  FleetRequestHandlerContext,
 } from './types';
-export { AgentNotFoundError } from './errors';
+export { AgentNotFoundError, FleetUnauthorizedError } from './errors';
 
 export const config: PluginConfigDescriptor = {
   exposeToBrowser: {
