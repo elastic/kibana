@@ -9,8 +9,10 @@ import type { CoreStart } from '../../../../src/core/public';
 import type { LensPluginStartDependencies } from './plugin';
 import type { AttributeService } from '../../../../src/plugins/embeddable/public';
 import type {
-  ResolvedLensSavedObjectAttributes,
+  LensSavedObjectAttributes,
   LensByValueInput,
+  LensUnwrapMetaInfo,
+  LensUnwrapResult,
   LensByReferenceInput,
 } from './embeddable/embeddable';
 import { SavedObjectIndexStore } from './persistence';
@@ -19,9 +21,10 @@ import { OnSaveProps } from '../../../../src/plugins/saved_objects/public';
 import { DOC_TYPE } from '../common/constants';
 
 export type LensAttributeService = AttributeService<
-  ResolvedLensSavedObjectAttributes,
+  LensSavedObjectAttributes,
   LensByValueInput,
-  LensByReferenceInput
+  LensByReferenceInput,
+  LensUnwrapMetaInfo
 >;
 
 export function getLensAttributeService(
@@ -30,20 +33,20 @@ export function getLensAttributeService(
 ): LensAttributeService {
   const savedObjectStore = new SavedObjectIndexStore(core.savedObjects.client);
   return startDependencies.embeddable.getAttributeService<
-    ResolvedLensSavedObjectAttributes,
+    LensSavedObjectAttributes,
     LensByValueInput,
-    LensByReferenceInput
+    LensByReferenceInput,
+    LensUnwrapMetaInfo
   >(DOC_TYPE, {
-    saveMethod: async (attributes: ResolvedLensSavedObjectAttributes, savedObjectId?: string) => {
-      const { sharingSavedObjectProps, ...attributesToSave } = attributes;
+    saveMethod: async (attributes: LensSavedObjectAttributes, savedObjectId?: string) => {
       const savedDoc = await savedObjectStore.save({
-        ...attributesToSave,
+        ...attributes,
         savedObjectId,
         type: DOC_TYPE,
       });
       return { id: savedDoc.savedObjectId };
     },
-    unwrapMethod: async (savedObjectId: string): Promise<ResolvedLensSavedObjectAttributes> => {
+    unwrapMethod: async (savedObjectId: string): Promise<LensUnwrapResult> => {
       const {
         saved_object: savedObject,
         outcome,
@@ -62,8 +65,12 @@ export function getLensAttributeService(
       };
 
       return {
-        sharingSavedObjectProps,
-        ...document,
+        attributes: {
+          ...document,
+        },
+        metaInfo: {
+          sharingSavedObjectProps,
+        },
       };
     },
     checkForDuplicateTitle: (props: OnSaveProps) => {
