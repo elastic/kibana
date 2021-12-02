@@ -796,6 +796,12 @@
                   "type": "keyword"
                 }
               }
+            },
+            "feed": {
+              "properties": {
+                "name": {
+                  "type": "keyword"
+              }
             }
           }
         }
