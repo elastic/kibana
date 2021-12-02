@@ -8,11 +8,11 @@
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFormRow, EuiSwitch } from '@elastic/eui';
-import { ConfigKeys, ICommonFields } from '../types';
+import { ConfigKey, CommonFields } from '../types';
 
 interface Props {
-  fields: ICommonFields;
-  onChange: ({ value, configKey }: { value: boolean; configKey: ConfigKeys }) => void;
+  fields: CommonFields;
+  onChange: ({ value, configKey }: { value: boolean; configKey: ConfigKey }) => void;
 }
 
 export function Enabled({ fields, onChange }: Props) {
@@ -34,11 +34,11 @@ export function Enabled({ fields, onChange }: Props) {
             />
           }
           data-test-subj="syntheticsEnabled"
-          checked={fields[ConfigKeys.ENABLED]}
+          checked={fields[ConfigKey.ENABLED]}
           onChange={(event) =>
             onChange({
               value: event.target.checked,
-              configKey: ConfigKeys.ENABLED,
+              configKey: ConfigKey.ENABLED,
             })
           }
         />
