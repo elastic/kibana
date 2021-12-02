@@ -39,7 +39,7 @@ export function getFilterContext(
 }
 
 export const isPartitionShape = (shape: PieChartTypes | string) =>
-  ['donut', 'pie', 'treemap', 'mosaic'].includes(shape);
+  ['donut', 'pie', 'treemap', 'mosaic', 'waffle'].includes(shape);
 
 export const isTreemapOrMosaicShape = (shape: PieChartTypes | string) =>
   ['treemap', 'mosaic'].includes(shape);
@@ -94,4 +94,16 @@ export const byDataColorPaletteMap = (
       }
     },
   };
+};
+
+export const checkTableForContainsSmallValues = (
+  dataTable: Datatable,
+  columnId: string,
+  minPercentage: number
+) => {
+  const overallSum = dataTable.rows.reduce(
+    (partialSum, row) => Number(row[columnId]) + partialSum,
+    0
+  );
+  return dataTable.rows.some((row) => (row[columnId] / overallSum) * 100 < minPercentage);
 };

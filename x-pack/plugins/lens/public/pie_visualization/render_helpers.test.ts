@@ -13,6 +13,7 @@ import {
   getFilterContext,
   byDataColorPaletteMap,
   extractUniqTermsMap,
+  checkTableForContainsSmallValues,
 } from './render_helpers';
 import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
 
@@ -315,6 +316,62 @@ describe('render helpers', () => {
         { behindText: false },
         undefined
       );
+    });
+  });
+
+  describe('#checkTableForContainsSmallValues', () => {
+    let datatable: Datatable;
+    const columnId = 'foo';
+
+    beforeEach(() => {
+      datatable = {
+        rows: [],
+      } as unknown as Datatable;
+    });
+
+    it('should return true if the data contains values less than the target percentage (1)', () => {
+      datatable.rows = [
+        {
+          [columnId]: 80,
+        },
+        {
+          [columnId]: 20,
+        },
+        {
+          [columnId]: 1,
+        },
+      ];
+      expect(checkTableForContainsSmallValues(datatable, columnId, 1)).toBeTruthy();
+    });
+
+    it('should return true if the data contains values less than the target percentage (42)', () => {
+      datatable.rows = [
+        {
+          [columnId]: 58,
+        },
+        {
+          [columnId]: 42,
+        },
+        {
+          [columnId]: 1,
+        },
+      ];
+      expect(checkTableForContainsSmallValues(datatable, columnId, 42)).toBeTruthy();
+    });
+
+    it('should return false if the data contains values greater than the target percentage', () => {
+      datatable.rows = [
+        {
+          [columnId]: 22,
+        },
+        {
+          [columnId]: 56,
+        },
+        {
+          [columnId]: 12,
+        },
+      ];
+      expect(checkTableForContainsSmallValues(datatable, columnId, 1)).toBeFalsy();
     });
   });
 });
