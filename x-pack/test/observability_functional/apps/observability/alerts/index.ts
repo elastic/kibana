@@ -9,10 +9,11 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { ObjectRemover } from '../../../../functional_with_es_ssl/lib/object_remover';
 import {
-  generateUniqueKey,
-  getTestAlertData,
-  getTestActionData,
-} from '../../../../functional_with_es_ssl/lib/get_test_data';
+  createAlert,
+  disableAlert,
+  muteAlert,
+} from '../../../../functional_with_es_ssl/lib/alert_api_actions';
+import { generateUniqueKey } from '../../../../functional_with_es_ssl/lib/get_test_data';
 
 async function asyncForEach<T>(array: T[], callback: (item: T, index: number) => void) {
   for (let index = 0; index < array.length; index++) {
@@ -246,54 +247,42 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       describe('Stat counters', () => {
-        async function createAlertManualCleanup(overwrites: Record<string, any> = {}) {
-          const { body: createdAlert } = await supertest
-            .post(`/api/alerting/rule`)
-            .set('kbn-xsrf', 'foo')
-            .send(getTestAlertData(overwrites))
-            .expect(200);
-          return createdAlert;
-        }
-
-        async function createFailingAlert() {
-          return await createAlert({
-            rule_type_id: 'test.failing',
-            schedule: { interval: '30s' },
-          });
-        }
-
-        async function createAlert(overwrites: Record<string, any> = {}) {
-          const createdAlert = await createAlertManualCleanup(overwrites);
-          objectRemover.add(createdAlert.id, 'alert', 'alerts');
-          return createdAlert;
-        }
-
-        async function muteAlert(alertId: string) {
-          const { body: alert } = await supertest
-            .post(`/api/alerting/rule/${alertId}/_mute_all`)
-            .set('kbn-xsrf', 'foo');
-          return alert;
-        }
-
-        async function disableAlert(alertId: string) {
-          const { body: alert } = await supertest
-            .post(`/api/alerting/rule/${alertId}/_disable`)
-            .set('kbn-xsrf', 'foo');
-          return alert;
-        }
-
         beforeEach(async () => {
           const uniqueKey = generateUniqueKey();
 
-          const alertToDisable = await createAlert({ name: 'b', tags: [uniqueKey] });
-          await createAlert({ name: 'c', tags: [uniqueKey] });
-          await createAlert({ name: 'a', tags: [uniqueKey] });
-          await createAlert({ name: 'd', tags: [uniqueKey] });
-          await createAlert({ name: 'e', tags: [uniqueKey] });
-          const alertToMute = await createAlert({ name: 'f', tags: [uniqueKey] });
+          const alertToDisable = await createAlert({
+            supertest,
+            objectRemover,
+            overwrites: { name: 'b', tags: [uniqueKey] },
+          });
+          await createAlert({
+            supertest,
+            objectRemover,
+            overwrites: { name: 'c', tags: [uniqueKey] },
+          });
+          await createAlert({
+            supertest,
+            objectRemover,
+            overwrites: { name: 'a', tags: [uniqueKey] },
+          });
+          await createAlert({
+            supertest,
+            objectRemover,
+            overwrites: { name: 'd', tags: [uniqueKey] },
+          });
+          await createAlert({
+            supertest,
+            objectRemover,
+            overwrites: { name: 'e', tags: [uniqueKey] },
+          });
+          const alertToMute = await createAlert({
+            supertest,
+            objectRemover,
+            overwrites: { name: 'f', tags: [uniqueKey] },
+          });
 
-          await disableAlert(alertToDisable.id);
-          await muteAlert(alertToMute.id);
+          await disableAlert({ supertest, alertId: alertToDisable.id });
+          await muteAlert({ supertest, alertId: alertToMute.id });
 
           // await esArchiver.load('x-pack/test/functional/es_archives/observability/rules');
           // await esArchiver.load('x-pack/test/functional/es_archives/alerts');
