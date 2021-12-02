@@ -6,9 +6,8 @@
  */
 
 import { FoundExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import { useEndpointPoliciesToArtifactPolicies } from '../../../../../components/artifact_entry_card/hooks/use_endpoint_policies_to_artifact_policies';
 import {
   MANAGEMENT_DEFAULT_PAGE_SIZE,
   MANAGEMENT_PAGE_SIZE_OPTIONS,
@@ -17,6 +16,7 @@ import {
   ArtifactCardGrid,
   ArtifactCardGridProps,
 } from '../../../../../components/artifact_card_grid';
+import { useEndpointPoliciesToArtifactPolicies } from '../../../../../components/artifact_entry_card/hooks/use_endpoint_policies_to_artifact_policies';
 import { useGetEndpointSpecificPolicies } from '../../../../../services/policies/hooks';
 
 export const PolicyHostIsolationExceptionsList = ({
@@ -27,6 +27,8 @@ export const PolicyHostIsolationExceptionsList = ({
   const history = useHistory();
   // load the list of policies>
   const policiesRequest = useGetEndpointSpecificPolicies({});
+
+  const [expandedItemsMap, setExpandedItemsMap] = useState<Map<string, boolean>>(new Map());
 
   const handlePageChange = useCallback<ArtifactCardGridProps['onPageChange']>(
     ({ pageIndex, pageSize }) => {
@@ -44,14 +46,28 @@ export const PolicyHostIsolationExceptionsList = ({
 
   const artifactCardPolicies = useEndpointPoliciesToArtifactPolicies(policiesRequest.data?.items);
 
-  const provideCardProps = () => {
+  const provideCardProps: ArtifactCardGridProps['cardComponentProps'] = (item) => {
     return {
-      expanded: false,
+      expanded: expandedItemsMap.get(item.id) || false,
       actions: [],
       policies: artifactCardPolicies,
     };
   };
-  const handleExpandCollapse = () => {};
+
+  const handleExpandCollapse: ArtifactCardGridProps['onExpandCollapse'] = ({
+    expanded,
+    collapsed,
+  }) => {
+    const newExpandedMap = new Map(expandedItemsMap);
+    for (const item of expanded) {
+      newExpandedMap.set(item.id, true);
+    }
+    for (const item of collapsed) {
+      newExpandedMap.set(item.id, false);
+    }
+    setExpandedItemsMap(newExpandedMap);
+  };
+
   return (
     <ArtifactCardGrid
       items={exceptions.data}
