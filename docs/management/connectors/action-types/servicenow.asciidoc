@@ -48,7 +48,7 @@ A CORS rule is required for communication between Elastic and {sn}. To create a 
 [[servicenow-itsm-connector-update]]
 ==== Update a deprecated {sn} ITSM connector
 
-{sn} ITSM connectors created in {stack} version \<=7.15.0 are marked as deprecated after upgrading to version >=7.16.0. Deprecated connectors have a yellow icon after their name and display a warning message when selected.
+{sn} ITSM connectors created in {stack} version 7.15.0 or earlier are marked as deprecated after you upgrade to version 7.16.0 or later. Deprecated connectors have a yellow icon after their name and display a warning message when selected.
 
 [role="screenshot"]
 image::management/connectors/images/servicenow-sir-update-connector.png[Shows deprecated ServiceNow connectors]
