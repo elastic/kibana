@@ -7,8 +7,8 @@
 
 import { createSelector } from '@reduxjs/toolkit';
 import { SavedObjectReference } from 'kibana/server';
+import { FilterManager } from 'src/plugins/data/public';
 import { LensState } from './types';
-import { extractFilterReferences } from '../persistence';
 import { Datasource, DatasourceMap, VisualizationMap } from '../types';
 import { getDatasourceLayers } from '../editor_frame_service/editor_frame';
 
@@ -51,6 +51,13 @@ const selectVisualizationMap = (
   visualizationMap: VisualizationMap
 ) => visualizationMap;
 
+const selectExtractFilterReferences = (
+  state: LensState,
+  datasourceMap: DatasourceMap,
+  visualizationMap: VisualizationMap,
+  extractFilterReferences: FilterManager['extract']
+) => extractFilterReferences;
+
 export const selectSavedObjectFormat = createSelector(
   [
     selectPersistedDoc,
@@ -61,6 +68,7 @@ export const selectSavedObjectFormat = createSelector(
     selectActiveDatasourceId,
     selectDatasourceMap,
     selectVisualizationMap,
+    selectExtractFilterReferences,
   ],
   (
     persistedDoc,
@@ -70,7 +78,8 @@ export const selectSavedObjectFormat = createSelector(
     filters,
     activeDatasourceId,
     datasourceMap,
-    visualizationMap
+    visualizationMap,
+    extractFilterReferences
   ) => {
     const activeVisualization =
       visualization.state && visualization.activeId && visualizationMap[visualization.activeId];
@@ -101,7 +110,8 @@ export const selectSavedObjectFormat = createSelector(
       references.push(...savedObjectReferences);
     });
 
-    const { persistableFilters, references: filterReferences } = extractFilterReferences(filters);
+    const { state: persistableFilters, references: filterReferences } =
+      extractFilterReferences(filters);
 
     references.push(...filterReferences);
 
