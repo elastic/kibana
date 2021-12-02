@@ -7,7 +7,7 @@
 
 import React, { FC } from 'react';
 import { EuiConfirmModal } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { OverlayStart } from 'kibana/public';
 import type { ModelItem } from './models_list';
 import { toMountPoint } from '../../../../../../../src/plugins/kibana_react/public';
