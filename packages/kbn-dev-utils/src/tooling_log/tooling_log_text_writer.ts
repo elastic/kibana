@@ -91,8 +91,18 @@ export class ToolingLogTextWriter implements Writer {
       return false;
     }
 
-    if (this.ignoreSources && msg.source && this.ignoreSources.includes(msg.source)) {
-      return false;
+    if (
+      this.ignoreSources &&
+      msg.source &&
+      this.ignoreSources.includes(msg.source) &&
+      msg.type === 'write'
+    ) {
+      const txt = format(msg.args[0], ...msg.args.slice(1));
+      if (/\] \[error\]\[/.test(txt)) {
+        return true;
+      } else {
+        return false;
+      }
     }
 
     const prefix = has(MSG_PREFIXES, msg.type) ? MSG_PREFIXES[msg.type] : '';
