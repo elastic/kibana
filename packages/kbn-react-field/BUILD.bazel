@@ -42,7 +42,6 @@ RUNTIME_DEPS = [
 ]
 
 TYPES_DEPS = [
-  "//packages/kbn-babel-preset",
   "//packages/kbn-i18n",
   "@npm//tslib",
   "@npm//@types/jest",
