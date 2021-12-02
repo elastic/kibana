@@ -30,7 +30,11 @@ const TestProvidersComponent: React.FC<Props> = ({
   userCanCrud = true,
   features = {},
 }) => {
-  const featuresOptions = merge(DEFAULT_FEATURES, features);
+  /**
+   * The empty object at the beginning avoids the mutation
+   * of the DEFAULT_FEATURES object
+   */
+  const featuresOptions = merge({}, DEFAULT_FEATURES, features);
   return (
     <I18nProvider>
       <MockKibanaContextProvider>
