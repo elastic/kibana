@@ -18,10 +18,24 @@ export const CALL_OUT_DEPRECATED_TITLE = i18n.translate(
   }
 );
 
+export const CALL_OUT_MISSING_PATTERNS_TITLE = i18n.translate(
+  'xpack.securitySolution.indexPatterns.callOutMissingPatternsTitle',
+  {
+    defaultMessage: 'This timeline is out of date with the Security Data View',
+  }
+);
+
 export const CALL_OUT_TIMELINE_TITLE = i18n.translate(
   'xpack.securitySolution.indexPatterns.callOutTimelineTitle',
   {
     defaultMessage: 'Data view cannot be modified when show only detection alerts is selected',
+  }
+);
+
+export const TOGGLE_TO_NEW_SOURCERER = i18n.translate(
+  'xpack.securitySolution.indexPatterns.toggleToNewSourcerer.link',
+  {
+    defaultMessage: 'here',
   }
 );
 
@@ -137,6 +151,10 @@ export const DISABLED_INDEX_PATTERNS = i18n.translate(
   }
 );
 
+export const DISABLED_SOURCERER = i18n.translate('xpack.securitySolution.sourcerer.disabled', {
+  defaultMessage: 'The updates to the Data view require a page reload to take effect.',
+});
+
 export const UPDATE_INDEX_PATTERNS = i18n.translate('xpack.securitySolution.indexPatterns.update', {
   defaultMessage: 'Update and recreate data view',
 });
@@ -154,6 +172,11 @@ export const INDEX_PATTERNS_CLOSE = i18n.translate(
     defaultMessage: 'Close',
   }
 );
+
+export const NO_DATA = i18n.translate('xpack.securitySolution.indexPatterns.noData', {
+  defaultMessage:
+    "The index pattern on this timeline doesn't match any data streams, indices, or index aliases.",
+});
 
 export const PICK_INDEX_PATTERNS = i18n.translate(
   'xpack.securitySolution.indexPatterns.pickIndexPatternsCombo',

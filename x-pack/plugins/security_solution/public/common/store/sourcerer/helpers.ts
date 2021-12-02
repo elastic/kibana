@@ -50,10 +50,20 @@ export const validateSelectedPatterns = (
   const dataView = state.kibanaDataViews.find((p) => p.id === rest.selectedDataViewId);
   // dedupe because these could come from a silly url or pre 8.0 timeline
   const dedupePatterns = ensurePatternFormat(rest.selectedPatterns);
+  let missingPatterns: string[] = [];
+  // check for missing patterns against default data view only
+  if (dataView == null || dataView.id === state.defaultDataView.id) {
+    const dedupeAllDefaultPatterns = ensurePatternFormat(
+      (dataView ?? state.defaultDataView).title.split(',')
+    );
+    missingPatterns = dedupePatterns.filter(
+      (pattern) => !dedupeAllDefaultPatterns.includes(pattern)
+    );
+  }
   const selectedPatterns =
     // shouldValidateSelectedPatterns is false when upgrading from
     // legacy pre-8.0 timeline index patterns to data view.
-    shouldValidateSelectedPatterns && dataView != null
+    shouldValidateSelectedPatterns && dataView != null && missingPatterns.length === 0
       ? dedupePatterns.filter(
           (pattern) =>
             (dataView != null && dataView.patternList.includes(pattern)) ||
@@ -65,37 +75,14 @@ export const validateSelectedPatterns = (
         // but removed from the security data view
         // or its a legacy pre-8.0 timeline
         dedupePatterns;
-  console.log('validateSelectedPatterns', {
-    payload,
-    state,
-    dataView,
-    selectedPatterns,
-    returned: {
-      ...state.sourcererScopes[id],
-      ...rest,
-      selectedDataViewId: dataView?.id ?? null,
-      selectedPatterns,
-      // if in timeline, allow for empty in case pattern was deleted
-      // need flow for this
-      ...(isEmpty(selectedPatterns) && id !== SourcererScopeName.timeline
-        ? {
-            selectedPatterns: getScopePatternListSelection(
-              dataView ?? state.defaultDataView,
-              id,
-              state.signalIndexName,
-              (dataView ?? state.defaultDataView).id === state.defaultDataView.id
-            ),
-          }
-        : {}),
-      loading: false,
-    },
-  });
+
   return {
     [id]: {
       ...state.sourcererScopes[id],
       ...rest,
       selectedDataViewId: dataView?.id ?? null,
       selectedPatterns,
+      missingPatterns,
       // if in timeline, allow for empty in case pattern was deleted
       // need flow for this
       ...(isEmpty(selectedPatterns) && id !== SourcererScopeName.timeline
@@ -128,56 +115,3 @@ export const checkIfIndicesExist = ({
     : scopeId === SourcererScopeName.default
     ? patternList.filter((i) => i !== signalIndexName).length > 0
     : patternList.length > 0;
-
-export const getSelectedPatterns = (
-  state: SourcererModel,
-  payload: SelectedDataViewPayload
-): Partial<SourcererScopeById> => {
-  const { id, ...rest } = payload;
-
-  const dataView = state.kibanaDataViews.find((p) => p.id === rest.selectedDataViewId);
-  // dedupe because these could come from a silly url or pre 8.0 timeline
-  const newSelectedPatterns = ensurePatternFormat(rest.selectedPatterns);
-  console.log('getSelectedPatterns', {
-    payload,
-    state,
-    dataView,
-    newSelectedPatterns,
-    returned: {
-      ...state.sourcererScopes[id],
-      ...rest,
-      selectedDataViewId: dataView?.id ?? null,
-      selectedPatterns: newSelectedPatterns,
-      ...(isEmpty(newSelectedPatterns)
-        ? {
-            selectedPatterns: getScopePatternListSelection(
-              dataView ?? state.defaultDataView,
-              id,
-              state.signalIndexName,
-              (dataView ?? state.defaultDataView).id === state.defaultDataView.id
-            ),
-          }
-        : {}),
-      loading: false,
-    },
-  });
-  return {
-    [id]: {
-      ...state.sourcererScopes[id],
-      ...rest,
-      selectedDataViewId: dataView?.id ?? null,
-      selectedPatterns: newSelectedPatterns,
-      ...(isEmpty(newSelectedPatterns)
-        ? {
-            selectedPatterns: getScopePatternListSelection(
-              dataView ?? state.defaultDataView,
-              id,
-              state.signalIndexName,
-              (dataView ?? state.defaultDataView).id === state.defaultDataView.id
-            ),
-          }
-        : {}),
-      loading: false,
-    },
-  };
-};

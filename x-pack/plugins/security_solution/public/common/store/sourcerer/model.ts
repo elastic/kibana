@@ -33,6 +33,11 @@ export interface SourcererScope {
   selectedDataViewId: string | null;
   /** selected patterns within the data view */
   selectedPatterns: string[];
+  /** if has length,
+   * id === SourcererScopeName.timeline
+   * selectedDataViewId === null OR defaultDataView.id
+   * saved timeline has pattern that is not in the default */
+  missingPatterns: string[];
 }
 
 export type SourcererScopeById = Record<SourcererScopeName, SourcererScope>;
@@ -90,7 +95,8 @@ export interface SelectedDataView {
   patternList: string[];
   runtimeMappings: SourcererDataView['runtimeMappings'];
   /** all selected patterns from SourcererScope['selectedPatterns']  */
-  selectedPatterns: string[];
+  selectedPatterns: SourcererScope['selectedPatterns'];
+  missingPatterns: SourcererScope['missingPatterns'];
 }
 
 /**
@@ -118,6 +124,7 @@ export const initSourcererScope: Omit<SourcererScope, 'id'> = {
   loading: false,
   selectedDataViewId: '',
   selectedPatterns: [],
+  missingPatterns: [],
 };
 export const initDataView = {
   browserFields: EMPTY_BROWSER_FIELDS,

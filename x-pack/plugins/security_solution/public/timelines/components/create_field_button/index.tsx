@@ -114,12 +114,12 @@ export const useCreateFieldButton = (
   timelineId: TimelineId
 ) => {
   const scopeIdSelector = useMemo(() => sourcererSelectors.scopeIdSelector(), []);
-  const { selectedDataViewId } = useDeepEqualSelector((state) =>
+  const { missingPatterns, selectedDataViewId } = useDeepEqualSelector((state) =>
     scopeIdSelector(state, sourcererScope)
   );
 
   return useMemo(() => {
-    if (selectedDataViewId == null) {
+    if (selectedDataViewId == null || missingPatterns.length > 0) {
       return;
     }
     // It receives onClick props from field browser in order to close the modal.
@@ -132,5 +132,5 @@ export const useCreateFieldButton = (
     );
 
     return CreateFieldButtonComponent;
-  }, [selectedDataViewId, timelineId]);
+  }, [missingPatterns.length, selectedDataViewId, timelineId]);
 };

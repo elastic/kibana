@@ -265,7 +265,7 @@ export const useSourcererDataView = (
   const {
     signalIndexName,
     selectedDataView,
-    sourcererScope: { selectedPatterns: scopeSelectedPatterns, loading },
+    sourcererScope: { missingPatterns, selectedPatterns: scopeSelectedPatterns, loading },
   }: sourcererSelectors.SourcererScopeSelector = useDeepEqualSelector((state) =>
     sourcererScopeSelector(state, scopeId)
   );
@@ -282,30 +282,31 @@ export const useSourcererDataView = (
 
   const [indexPatternsLoading, fetchIndexReturn] = useFetchIndex(legacyPatterns);
 
-  const legacyDataView: Omit<SourcererDataView, 'id'> & { id: null } = useMemo(
+  const legacyDataView: Omit<SourcererDataView, 'id'> & { id: string | null } = useMemo(
     () => ({
       ...fetchIndexReturn,
       runtimeMappings: {},
       title: '',
-      id: null,
+      id: selectedDataView?.id ?? null,
       loading: indexPatternsLoading,
       patternList: fetchIndexReturn.indexes,
       indexFields: fetchIndexReturn.indexPatterns
         .fields as SelectedDataView['indexPattern']['fields'],
     }),
-    [fetchIndexReturn, indexPatternsLoading]
+    [fetchIndexReturn, indexPatternsLoading, selectedDataView]
   );
 
   useEffect(() => {
-    if (selectedDataView == null) {
+    if (selectedDataView == null || missingPatterns.length > 0) {
       // old way of fetching indices, legacy timeline
       setLegacyPatterns(selectedPatterns);
     }
-  }, [selectedDataView, selectedPatterns]);
+  }, [missingPatterns.length, selectedDataView, selectedPatterns]);
 
   const sourcererDataView = useMemo(
-    () => (selectedDataView == null ? legacyDataView : selectedDataView),
-    [legacyDataView, selectedDataView]
+    () =>
+      selectedDataView == null || missingPatterns.length > 0 ? legacyDataView : selectedDataView,
+    [legacyDataView, missingPatterns.length, selectedDataView]
   );
 
   const indicesExist = useMemo(
@@ -328,6 +329,7 @@ export const useSourcererDataView = (
         title: selectedPatterns.join(','),
       },
       indicesExist,
+      missingPatterns: missingPatterns.sort(),
       loading: loading || sourcererDataView.loading,
       runtimeMappings: sourcererDataView.runtimeMappings,
       // all active & inactive patterns in DATA_VIEW
@@ -335,7 +337,7 @@ export const useSourcererDataView = (
       // selected patterns in DATA_VIEW
       selectedPatterns: selectedPatterns.sort(),
     }),
-    [sourcererDataView, selectedPatterns, indicesExist, loading]
+    [missingPatterns, sourcererDataView, selectedPatterns, indicesExist, loading]
   );
 };
 

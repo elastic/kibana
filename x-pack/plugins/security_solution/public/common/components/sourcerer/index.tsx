@@ -39,7 +39,7 @@ import {
   StyledButton,
   StyledFormRow,
 } from './helpers';
-import { DeprecatedSourcerer } from './deprecated';
+import { TemporarySourcerer } from './temporary';
 import { UpdateDefaultDataViewModal } from './update_default_data_view_modal';
 import { useKibana } from '../../lib/kibana';
 import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
@@ -47,6 +47,7 @@ import { useAppToasts } from '../../hooks/use_app_toasts';
 import { toMountPoint } from '../../../../../../../src/plugins/kibana_react/public';
 import { RefreshButton } from './refresh_button';
 import { useSourcererDataView } from '../../containers/sourcerer';
+import { DISABLED_SOURCERER } from './translations';
 
 interface SourcererComponentProps {
   scope: sourcererModel.SourcererScopeName;
@@ -66,9 +67,14 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
   const {
     dataViewId: selectedDataViewId,
     indicesExist,
+    missingPatterns: sourcererMissingPatterns,
     selectedPatterns,
     loading,
   } = useSourcererDataView(scopeId);
+  const [missingPatterns, setMissingPatterns] = useState<string[]>(sourcererMissingPatterns);
+  useEffect(() => {
+    setMissingPatterns(sourcererMissingPatterns);
+  }, [sourcererMissingPatterns]);
 
   const [isOnlyDetectionAlertsChecked, setIsOnlyDetectionAlertsChecked] = useState(
     isTimelineSourcerer && selectedPatterns.join() === signalIndexName
@@ -82,10 +88,9 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
 
   const {
     isModified,
-    missingPatterns,
     onChangeCombo,
     renderOption,
-    selectableOptions,
+    allOptions,
     selectedOptions,
     setIndexPatternsByDataView,
   } = usePickIndexPatterns({
@@ -93,6 +98,7 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
     defaultDataViewId: defaultDataView.id,
     isOnlyDetectionAlerts,
     kibanaDataViews,
+    missingPatterns,
     scopeId,
     selectedPatterns,
     signalIndexName,
@@ -144,6 +150,7 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
     setDataViewId(defaultDataView.id);
     setIndexPatternsByDataView(defaultDataView.id);
     setIsOnlyDetectionAlertsChecked(false);
+    setMissingPatterns([]);
   }, [defaultDataView.id, setIndexPatternsByDataView]);
 
   const handleSaveIndices = useCallback(() => {
@@ -160,7 +167,6 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
   }, []);
 
   // deprecated timeline index pattern handlers
-
   const onContinueUpdateDeprecated = useCallback(() => {
     setIsShowingUpdateModal(false);
     const patterns = selectedPatterns.filter((pattern) =>
@@ -180,6 +186,7 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
     }
   }, [missingPatterns, onContinueUpdateDeprecated]);
 
+  const [isTriggerDisabled, setIsTriggerDisabled] = useState(false);
   const onUpdateUiSettings = useCallback(async () => {
     const defaultIndex = await uiSettings.get<string[]>(DEFAULT_INDEX_KEY);
     const newSelectedOptions = [...defaultIndex, ...missingPatterns];
@@ -200,6 +207,8 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
         iconType: undefined,
         toastLifeTimeMs: 600000,
       });
+      setMissingPatterns([]);
+      setIsTriggerDisabled(true);
     } else {
       addError(new Error(i18n.FAILURE_TOAST_TITLE), {
         title: i18n.FAILURE_TOAST_TITLE,
@@ -215,7 +224,6 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
     selectedPatterns,
     uiSettings,
   ]);
-
   const trigger = useMemo(
     () => (
       <StyledButton
@@ -224,25 +232,35 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
         flush="left"
         iconSide="right"
         iconType="arrowDown"
+        disabled={isTriggerDisabled}
         isLoading={loading}
         onClick={setPopoverIsOpenCb}
         title={i18n.DATA_VIEW}
       >
         {i18n.DATA_VIEW}
-        {isModified === 'modified' && <StyledBadge>{i18n.MODIFIED_BADGE_TITLE}</StyledBadge>}
-        {isModified === 'alerts' && (
-          <StyledBadge data-test-subj="sourcerer-alerts-badge">
-            {i18n.ALERTS_BADGE_TITLE}
-          </StyledBadge>
-        )}
-        {isModified === 'deprecated' && (
-          <StyledBadge color="warning" data-test-subj="sourcerer-deprecated-badge">
-            {i18n.DEPRECATED_BADGE_TITLE}
-          </StyledBadge>
+        {!isTriggerDisabled && (
+          <>
+            {isModified === 'modified' && <StyledBadge>{i18n.MODIFIED_BADGE_TITLE}</StyledBadge>}
+            {isModified === 'alerts' && (
+              <StyledBadge data-test-subj="sourcerer-alerts-badge">
+                {i18n.ALERTS_BADGE_TITLE}
+              </StyledBadge>
+            )}
+            {isModified === 'deprecated' && (
+              <StyledBadge color="warning" data-test-subj="sourcerer-deprecated-badge">
+                {i18n.DEPRECATED_BADGE_TITLE}
+              </StyledBadge>
+            )}
+            {isModified === 'missingPatterns' && (
+              <StyledBadge color="accent" data-test-subj="sourcerer-missingPatterns-badge">
+                {i18n.DEPRECATED_BADGE_TITLE}
+              </StyledBadge>
+            )}
+          </>
         )}
       </StyledButton>
     ),
-    [isTimelineSourcerer, loading, setPopoverIsOpenCb, isModified]
+    [isTimelineSourcerer, isTriggerDisabled, loading, setPopoverIsOpenCb, isModified]
   );
 
   const dataViewSelectOptions = useMemo(
@@ -260,41 +278,45 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
   );
 
   useEffect(() => {
-    console.log('setDataViewId', selectedDataViewId);
     setDataViewId(selectedDataViewId);
   }, [selectedDataViewId]);
 
   const onOutsideClick = useCallback(() => {
     setDataViewId(selectedDataViewId);
-  }, [selectedDataViewId]);
+    setMissingPatterns(sourcererMissingPatterns);
+  }, [selectedDataViewId, sourcererMissingPatterns]);
 
   const tooltipContent = useMemo(
     () =>
-      getTooltipContent({
-        isOnlyDetectionAlerts,
-        isPopoverOpen,
-        selectedPatterns,
-        signalIndexName,
-      }),
-    [isPopoverOpen, isOnlyDetectionAlerts, signalIndexName, selectedPatterns]
+      isTriggerDisabled
+        ? i18n.DISABLED_SOURCERER
+        : getTooltipContent({
+            isOnlyDetectionAlerts,
+            isPopoverOpen,
+            selectedPatterns,
+            signalIndexName,
+          }),
+    [isTriggerDisabled, isOnlyDetectionAlerts, isPopoverOpen, selectedPatterns, signalIndexName]
   );
 
-  const buttonWithTooltip = useMemo(() => {
-    return tooltipContent ? (
-      <EuiToolTip position="top" content={tooltipContent} data-test-subj="sourcerer-tooltip">
-        {trigger}
-      </EuiToolTip>
-    ) : (
-      trigger
-    );
-  }, [trigger, tooltipContent]);
+  const buttonWithTooltip = useMemo(
+    () =>
+      tooltipContent ? (
+        <EuiToolTip position="top" content={tooltipContent} data-test-subj="sourcerer-tooltip">
+          {trigger}
+        </EuiToolTip>
+      ) : (
+        trigger
+      ),
+    [trigger, tooltipContent]
+  );
 
   const onExpandAdvancedOptionsClicked = useCallback(() => {
     setExpandAdvancedOptions((prevState) => !prevState);
   }, []);
 
-  // dataViewId can only be null in timeline
-  return indicesExist || dataViewId === null ? (
+  // always show sourcerer in timeline
+  return indicesExist || scopeId === SourcererScopeName.timeline ? (
     <EuiPopover
       panelClassName="sourcererPopoverPanel"
       button={buttonWithTooltip}
@@ -319,7 +341,26 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
             />
           )}
           <EuiSpacer size="s" />
-          {isModified !== 'deprecated' && dataViewId != null ? (
+          {isModified === 'deprecated' || isModified === 'missingPatterns' ? (
+            <>
+              <TemporarySourcerer
+                indicesExist={indicesExist}
+                isModified={isModified}
+                missingPatterns={missingPatterns}
+                onClick={resetDataSources}
+                onClose={setPopoverIsOpenCb}
+                onUpdate={isModified === 'deprecated' ? onUpdateDeprecated : onUpdateUiSettings}
+                selectedPatterns={selectedPatterns}
+              />
+              <UpdateDefaultDataViewModal
+                isShowing={isShowingUpdateModal}
+                missingPatterns={missingPatterns}
+                onClose={() => setIsShowingUpdateModal(false)}
+                onContinue={onContinueUpdateDeprecated}
+                onUpdate={onUpdateUiSettings}
+              />
+            </>
+          ) : (
             <EuiForm component="form">
               <>
                 {isTimelineSourcerer && (
@@ -333,17 +374,19 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
                     />
                   </StyledFormRow>
                 )}
-                <StyledFormRow label={i18n.INDEX_PATTERNS_CHOOSE_DATA_VIEW_LABEL}>
-                  <EuiSuperSelect
-                    data-test-subj="sourcerer-select"
-                    disabled={isOnlyDetectionAlerts}
-                    fullWidth
-                    onChange={onChangeSuper}
-                    options={dataViewSelectOptions}
-                    placeholder={i18n.INDEX_PATTERNS_CHOOSE_DATA_VIEW_LABEL}
-                    valueOfSelected={dataViewId}
-                  />
-                </StyledFormRow>
+                {dataViewId && (
+                  <StyledFormRow label={i18n.INDEX_PATTERNS_CHOOSE_DATA_VIEW_LABEL}>
+                    <EuiSuperSelect
+                      data-test-subj="sourcerer-select"
+                      disabled={isOnlyDetectionAlerts}
+                      fullWidth
+                      onChange={onChangeSuper}
+                      options={dataViewSelectOptions}
+                      placeholder={i18n.INDEX_PATTERNS_CHOOSE_DATA_VIEW_LABEL}
+                      valueOfSelected={dataViewId}
+                    />
+                  </StyledFormRow>
+                )}
 
                 <EuiSpacer size="m" />
                 <StyledButton
@@ -365,7 +408,7 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
                     fullWidth
                     isDisabled={isOnlyDetectionAlerts}
                     onChange={onChangeCombo}
-                    options={selectableOptions}
+                    options={allOptions}
                     placeholder={i18n.PICK_INDEX_PATTERNS}
                     renderOption={renderOption}
                     selectedOptions={selectedOptions}
@@ -404,22 +447,6 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
               </>
               <EuiSpacer size="s" />
             </EuiForm>
-          ) : (
-            <>
-              <DeprecatedSourcerer
-                onClick={resetDataSources}
-                onClose={setPopoverIsOpenCb}
-                onUpdate={onUpdateDeprecated}
-                selectedPatterns={selectedPatterns}
-              />
-              <UpdateDefaultDataViewModal
-                isShowing={isShowingUpdateModal}
-                missingPatterns={missingPatterns}
-                onClose={() => setIsShowingUpdateModal(false)}
-                onContinue={onContinueUpdateDeprecated}
-                onUpdate={onUpdateUiSettings}
-              />
-            </>
           )}
         </PopoverContent>
       </EuiOutsideClickDetector>
