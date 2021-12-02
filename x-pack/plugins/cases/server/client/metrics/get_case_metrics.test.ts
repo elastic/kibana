@@ -28,6 +28,12 @@ describe('getMetrics', () => {
     } as unknown as CaseResponse;
   });
 
+  client.attachments.countAlertsAttachedToCase.mockImplementation(async () => {
+    return {
+      count: 5,
+    };
+  });
+
   const authorization = createAuthorizationMock();
   const soClient = savedObjectsClientMock.create();
   const caseService = createCaseServiceMock();
@@ -100,7 +106,7 @@ describe('getMetrics', () => {
       clientArgs
     );
 
-    expect(metrics.alerts?.count).toBeDefined();
+    expect(metrics.alerts?.count).toEqual(5);
     expect(metrics.alerts?.hosts).toBeDefined();
   });
 
