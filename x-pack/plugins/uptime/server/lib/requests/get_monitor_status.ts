@@ -189,7 +189,7 @@ export const getMonitorStatus: UMElasticsearchQueryFn<
     monitors = monitors.concat(monitorRes);
   } while (afterKey !== undefined);
 
-  // @ts-expect-error 4.3.5 upgrade
+  // @ts-ignore 4.3.5 upgrade - Expression produces a union type that is too complex to represent.ts(2590)
   return monitors
     .filter((monitor) => monitor?.doc_count >= numTimes)
     .map(({ key, doc_count: count, fields }) => ({
