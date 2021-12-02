@@ -10,7 +10,7 @@ import { MonitorManagementList as MonitorManagementListState } from '../../../st
 import { MonitorFields } from '../../../../common/runtime_types/monitor_management';
 import { UptimeSettingsContext } from '../../../contexts';
 import { Actions } from './actions';
-import { MonitorTags } from '../../common/monitor_tags';
+import { MonitorTags } from './tags';
 import * as labels from '../../overview/monitor_list/translations';
 
 interface Props {
