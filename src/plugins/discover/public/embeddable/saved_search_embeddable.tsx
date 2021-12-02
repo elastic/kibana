@@ -413,7 +413,14 @@ export class SavedSearchEmbeddable
       useLegacyTable,
       refs: domNode,
     };
-    ReactDOM.render(<SavedSearchEmbeddableComponent {...props} />, domNode);
+    if (searchProps.services) {
+      ReactDOM.render(
+        <KibanaThemeProvider theme$={searchProps.services.core.theme.theme$}>
+          <SavedSearchEmbeddableComponent {...props} />
+        </KibanaThemeProvider>,
+        domNode
+      );
+    }
   }
 
   public reload() {
