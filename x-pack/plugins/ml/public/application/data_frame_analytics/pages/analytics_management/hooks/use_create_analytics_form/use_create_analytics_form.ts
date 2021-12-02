@@ -125,7 +125,7 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
 
   const createKibanaIndexPattern = async () => {
     const dataViewName = destinationIndex;
-    let retryCount = 5;
+    let retryCount = 15;
 
     try {
       const interval = setInterval(async () => {
@@ -133,11 +133,16 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
         if (retryCount === 0) {
           clearInterval(interval);
           addRequestMessage({
-            error: 'No destination index check attempts left.',
+            error: i18n.translate(
+              'xpack.ml.dataframe.analytics.create.destinationIndexNotCreatedForDataFrameAnalyticsJob',
+              {
+                defaultMessage: 'Destination index has not yet been created.',
+              }
+            ),
             message: i18n.translate(
               'xpack.ml.dataframe.analytics.create.unableToCreateDataViewForDataFrameAnalyticsJob',
               {
-                defaultMessage: 'Unable to create data view for:',
+                defaultMessage: 'Unable to create data view.',
               }
             ),
           });
@@ -176,12 +181,12 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
             message: i18n.translate(
               'xpack.ml.dataframe.analytics.create.errorCreatingDataViewForDataFrameAnalyticsJob',
               {
-                defaultMessage: 'An error occurred creating the data view for:',
+                defaultMessage: 'An error occurred creating the data view.',
               }
             ),
           });
         }
-      }, 300);
+      }, 1000);
     } catch (e) {
       if (e instanceof DuplicateDataViewError) {
         addRequestMessage({
