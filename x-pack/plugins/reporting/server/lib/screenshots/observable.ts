@@ -7,7 +7,16 @@
 
 import apm from 'elastic-apm-node';
 import * as Rx from 'rxjs';
-import { catchError, concatMap, first, mergeMap, take, takeUntil, toArray } from 'rxjs/operators';
+import {
+  catchError,
+  concatMap,
+  first,
+  mergeMap,
+  take,
+  takeUntil,
+  toArray,
+  mapTo,
+} from 'rxjs/operators';
 import { durationToNumber } from '../../../common/schema_utils';
 import { HeadlessChromiumDriverFactory } from '../../browsers';
 import { CaptureConfig } from '../../types';
@@ -51,9 +60,9 @@ export function getScreenshots$(
   const { browserTimezone, logger } = opts;
 
   return browserDriverFactory.createPage({ browserTimezone }, logger).pipe(
-    mergeMap(({ driver, exit$ }) => {
+    mergeMap(({ driver, unexpectedExit$, close }) => {
       apmCreatePage?.end();
-      exit$.subscribe({ error: () => apmTrans?.end() });
+      unexpectedExit$.subscribe({ error: () => apmTrans?.end() });
 
       const screen = new ScreenshotObservableHandler(driver, opts, getTimeouts(captureConfig));
 
@@ -66,12 +75,13 @@ export function getScreenshots$(
               logger.error(err);
               return Rx.of({ ...defaultSetupResult, error: err }); // allow failover screenshot capture
             }),
-            takeUntil(exit$),
+            takeUntil(unexpectedExit$),
             screen.getScreenshots()
           )
         ),
         take(opts.urlsOrUrlLocatorTuples.length),
-        toArray()
+        toArray(),
+        mergeMap((results) => close().pipe(mapTo(results)))
       );
     }),
     first()

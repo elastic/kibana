@@ -27,6 +27,15 @@ import { getMetrics } from './metrics';
 
 type BrowserConfig = CaptureConfig['browser']['chromium'];
 
+interface HeadlessChromiumDriverFactoryValue {
+  driver: HeadlessChromiumDriver;
+  unexpectedExit$: Rx.Observable<never>;
+  /**
+   * Call this and wait for the observable to complete to clean up the browser
+   */
+  close: () => Rx.Observable<void>;
+}
+
 export class HeadlessChromiumDriverFactory {
   private binaryPath: string;
   private captureConfig: CaptureConfig;
@@ -63,7 +72,7 @@ export class HeadlessChromiumDriverFactory {
   createPage(
     { browserTimezone }: { browserTimezone?: string },
     pLogger = this.logger
-  ): Rx.Observable<{ driver: HeadlessChromiumDriver; exit$: Rx.Observable<never> }> {
+  ): Rx.Observable<HeadlessChromiumDriverFactoryValue> {
     // FIXME: 'create' is deprecated
     return Rx.Observable.create(async (observer: InnerSubscriber<unknown, unknown>) => {
       const logger = pLogger.clone(['browser-driver']);
@@ -109,8 +118,10 @@ export class HeadlessChromiumDriverFactory {
 
       logger.debug(`Browser page driver created`);
 
+      let isClosed = false;
       const childProcess = {
         async kill() {
+          if (isClosed) return;
           try {
             if (devTools && startMetrics) {
               const endMetrics = await devTools.send('Performance.getMetrics');
@@ -130,7 +141,10 @@ export class HeadlessChromiumDriverFactory {
           }
 
           try {
+            logger.debug('Attempting to close browser...');
             await browser?.close();
+            isClosed = true;
+            logger.debug('Browser closed.');
           } catch (err) {
             // do not throw
             logger.error(err);
@@ -169,9 +183,13 @@ export class HeadlessChromiumDriverFactory {
       });
 
       // Rx.Observable<never>: stream to interrupt page capture
-      const exit$ = this.getPageExit(browser, page);
+      const unexpectedExit$ = this.getPageExit(browser, page);
 
-      observer.next({ driver, exit$ });
+      observer.next({
+        driver,
+        unexpectedExit$,
+        close: () => Rx.from(childProcess.kill()),
+      });
 
       // unsubscribe logic makes a best-effort attempt to delete the user data directory used by chromium
       observer.add(() => {

@@ -387,7 +387,7 @@ describe('Screenshot Observable Pipeline', () => {
         jest
           .fn()
           .mockImplementation(() =>
-            Rx.of({ driver, exit$: Rx.throwError('Instant timeout has fired!') })
+            Rx.of({ driver, unexpectedExit$: Rx.throwError('Instant timeout has fired!') })
           );
 
       const mockWaitForSelector = jest.fn().mockImplementation((selectorArg: string) => {

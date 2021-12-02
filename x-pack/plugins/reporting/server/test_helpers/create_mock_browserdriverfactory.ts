@@ -85,7 +85,11 @@ mockBrowserEvaluate.mockImplementation(() => {
 });
 const mockScreenshot = jest.fn(async () => Buffer.from('screenshot'));
 const getCreatePage = (driver: HeadlessChromiumDriver) =>
-  jest.fn().mockImplementation(() => Rx.of({ driver, exit$: Rx.never() }));
+  jest
+    .fn()
+    .mockImplementation(() =>
+      Rx.of({ driver, unexpectedExit$: Rx.never(), close: () => Rx.of(undefined) })
+    );
 
 const defaultOpts: CreateMockBrowserDriverFactoryOpts = {
   evaluate: mockBrowserEvaluate,
