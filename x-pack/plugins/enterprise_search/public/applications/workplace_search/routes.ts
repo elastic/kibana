@@ -35,7 +35,6 @@ export const GMAIL_DOCS_URL = docLinks.workplaceSearchGmail;
 export const GOOGLE_DRIVE_DOCS_URL = docLinks.workplaceSearchGoogleDrive;
 export const JIRA_DOCS_URL = docLinks.workplaceSearchJiraCloud;
 export const JIRA_SERVER_DOCS_URL = docLinks.workplaceSearchJiraServer;
-export const NATIVE_AUTH_DOCS_URL = docLinks.workplaceSearchNativeAuth;
 export const OBJECTS_AND_ASSETS_DOCS_URL = docLinks.workplaceSearchSynch;
 export const ONEDRIVE_DOCS_URL = docLinks.workplaceSearchOneDrive;
 export const PRIVATE_SOURCES_DOCS_URL = docLinks.workplaceSearchPermissions;
@@ -44,7 +43,6 @@ export const SECURITY_DOCS_URL = docLinks.workplaceSearchSecurity;
 export const SERVICENOW_DOCS_URL = docLinks.workplaceSearchServiceNow;
 export const SHAREPOINT_DOCS_URL = docLinks.workplaceSearchSharePoint;
 export const SLACK_DOCS_URL = docLinks.workplaceSearchSlack;
-export const STANDARD_AUTH_DOCS_URL = docLinks.workplaceSearchStandardAuth;
 export const SYNCHRONIZATION_DOCS_URL = docLinks.workplaceSearchSynch;
 export const ZENDESK_DOCS_URL = docLinks.workplaceSearchZendesk;
 
