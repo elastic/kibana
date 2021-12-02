@@ -17,7 +17,6 @@ import {
   createMockAgentPolicyService,
   createMockAgentService,
   createArtifactsClientMock,
-  createFleetAuthzMock,
 } from '../../../fleet/server/mocks';
 import { createMockConfig, requestContextMock } from '../lib/detection_engine/routes/__mocks__';
 import {
@@ -40,6 +39,7 @@ import { parseExperimentalConfigValue } from '../../common/experimental_features
 import { createCasesClientMock } from '../../../cases/server/client/mocks';
 import { requestContextFactoryMock } from '../request_context_factory.mock';
 import { EndpointMetadataService } from './services/metadata';
+import { createFleetAuthzMock } from '../../../fleet/common';
 
 /**
  * Creates a mocked EndpointAppContext.
