@@ -89,12 +89,16 @@ export function crawlConfigServerToClient(crawlConfig: CrawlConfigFromServer): C
     domain_allowlist: domainAllowlist,
     seed_urls: seedUrls,
     sitemap_urls: sitemapUrls,
+    max_crawl_depth: maxCrawlDepth,
+    stats,
   } = crawlConfig;
 
   return {
     domainAllowlist,
     seedUrls,
     sitemapUrls,
+    maxCrawlDepth,
+    stats,
   };
 }
 
@@ -126,24 +130,25 @@ export function crawlRequestWithDetailsServerToClient(
   event: CrawlRequestWithDetailsFromServer
 ): CrawlRequestWithDetails {
   const {
-    id,
-    status,
-    created_at: createdAt,
     began_at: beganAt,
     completed_at: completedAt,
-    type,
     crawl_config: crawlConfig,
+    created_at: createdAt,
+    id,
+    stats,
+    status,
+    type,
   } = event;
 
   return {
-    id,
-    status,
-    createdAt,
     beganAt,
     completedAt,
-    type,
     crawlConfig: crawlConfigServerToClient(crawlConfig),
-    // TODO add fields like stats
+    createdAt,
+    id,
+    stats,
+    status,
+    type,
   };
 }
 

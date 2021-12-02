@@ -203,24 +203,37 @@ export interface CrawlConfig {
   domainAllowlist: string[];
   seedUrls: string[];
   sitemapUrls: string[];
+  maxCrawlDepth: number;
+  stats: CrawlRequestStats;
+}
+
+export interface CrawlRequestStats {
+  pagesVisited: number;
+  avgResponseTimeMSec: number;
+  urlsAllowed: number;
 }
 
 export interface CrawlConfigFromServer {
   domain_allowlist: string[];
   seed_urls: string[];
   sitemap_urls: string[];
+  max_crawl_depth: number;
+  stats: CrawlRequestStats;
 }
 
 export type CrawlRequestWithDetailsFromServer = CrawlRequestFromServer & {
   type: CrawlType;
   crawl_config: CrawlConfigFromServer;
-  // TODO add other properties like stats
+  stats: CrawlRequestStats;
 };
 
 export type CrawlRequestWithDetails = CrawlRequest & {
   type: CrawlType;
   crawlConfig: CrawlConfig;
-  // TODO add other properties like stats
+  pagesVisited: number;
+  avgResponseTimeMSec: number;
+  urlsAllowed: number;
+  stats: CrawlRequestStats;
 };
 
 export type CrawlEventStage = 'crawl' | 'process';
