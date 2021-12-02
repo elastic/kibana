@@ -43,9 +43,9 @@ export type KnownHeaders = KnownKeys<IncomingHttpHeaders>;
  * Http request headers to read.
  * @public
  */
-export interface Headers {
+export type Headers = { [header in KnownHeaders]?: string | string[] | undefined } & {
   [header: string]: string | string[] | undefined;
-}
+};
 
 /**
  * Http response headers to set.
