@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { CasesContextValue } from '../../../common';
+import { useMemo } from 'react';
 import { useCasesContext } from './use_cases_context';
 
 interface UseCasesFeaturesReturn {
-  features: CasesContextValue['features'];
   syncAlerts: boolean;
 }
 
 export const useCasesFeatures = (): UseCasesFeaturesReturn => {
   const { features } = useCasesContext();
-  return { features, syncAlerts: features.alerts.sync };
+  const memoizedReturnValue = useMemo(() => ({ syncAlerts: features.alerts.sync }), [features]);
+  return memoizedReturnValue;
 };
