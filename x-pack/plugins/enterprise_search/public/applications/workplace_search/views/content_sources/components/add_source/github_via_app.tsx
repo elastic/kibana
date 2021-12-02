@@ -28,7 +28,7 @@ import {
   PersonalDashboardLayout,
 } from '../../../../components/layout';
 import { NAV, SOURCE_NAMES } from '../../../../constants';
-import { readUploadedFileAsText } from '../../../../utils';
+import { handlePrivateKeyUpload } from '../../../../utils';
 
 import { staticSourceData } from '../../source_data';
 
@@ -58,16 +58,6 @@ export const GitHubViaApp: React.FC<GithubViaAppProps> = ({ isGithubEnterpriseSe
   const name = isGithubEnterpriseServer ? SOURCE_NAMES.GITHUB_ENTERPRISE : SOURCE_NAMES.GITHUB;
   const data = staticSourceData.find((source) => source.name === name);
   const Layout = isOrganization ? WorkplaceSearchPageTemplate : PersonalDashboardLayout;
-
-  const handlePrivateKeyUpload = async (files: FileList | null) => {
-    if (!files || files.length < 1) {
-      return null;
-    }
-    const file = files[0];
-    const text = await readUploadedFileAsText(file);
-
-    setStagedPrivateKey(text);
-  };
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
@@ -114,7 +104,10 @@ export const GitHubViaApp: React.FC<GithubViaAppProps> = ({ isGithubEnterpriseSe
           </EuiFormRow>
         )}
         <EuiFormRow label="Private key" helpText="Upload private key (.pem) to authenticate GitHub">
-          <EuiFilePicker onChange={handlePrivateKeyUpload} accept=".pem" />
+          <EuiFilePicker
+            onChange={(files) => handlePrivateKeyUpload(files, setStagedPrivateKey)}
+            accept=".pem"
+          />
         </EuiFormRow>
         <EuiButton fill type="submit" isLoading={isSubmitButtonLoading}>
           {isSubmitButtonLoading

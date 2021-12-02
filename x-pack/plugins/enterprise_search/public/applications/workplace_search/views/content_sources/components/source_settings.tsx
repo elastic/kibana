@@ -39,7 +39,7 @@ import {
   REMOVE_BUTTON,
 } from '../../../constants';
 import { SourceDataItem } from '../../../types';
-import { readUploadedFileAsText } from '../../../utils';
+import { handlePrivateKeyUpload } from '../../../utils';
 import { AddSourceLogic } from '../components/add_source/add_source_logic';
 import {
   SOURCE_SETTINGS_HEADING,
@@ -121,16 +121,6 @@ export const SourceSettings: React.FC = () => {
   const submitConfigurationChange = (e: FormEvent) => {
     e.preventDefault();
     updateContentSourceConfiguration(id, { private_key: stagedPrivateKey });
-  };
-
-  const handlePrivateKeyUpload = async (files: FileList | null) => {
-    if (!files || files.length < 1) {
-      return null;
-    }
-    const file = files[0];
-    const text = await readUploadedFileAsText(file);
-
-    setStagedPrivateKey(text);
   };
 
   const handleSourceRemoval = () => {
@@ -229,7 +219,7 @@ export const SourceSettings: React.FC = () => {
                 <EuiSpacer size="s" />
                 <EuiFilePicker
                   key={secret!.fingerprint} // clear staged file by rerendering the file picker each time the fingerprint changes
-                  onChange={handlePrivateKeyUpload}
+                  onChange={(files) => handlePrivateKeyUpload(files, setStagedPrivateKey)}
                   initialPromptText="Upload a new .pem file to rotate the private key"
                   accept=".pem"
                 />
