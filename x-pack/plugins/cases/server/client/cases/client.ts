@@ -38,7 +38,6 @@ import {
   getReporters,
   getTags,
 } from './get';
-import { getMetrics, MetricsParams } from './metrics';
 import { push, PushParams } from './push';
 import { update } from './update';
 
