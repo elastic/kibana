@@ -9,6 +9,13 @@ import { LicenseService } from '../../../license';
 import { FleetAuthz } from '../../../../../fleet/common';
 import { EndpointAuthz } from '../../types/authz';
 
+/**
+ * Used by both the server and the UI to generate the Authorization for access to Endpoint related
+ * functionality
+ *
+ * @param licenseService
+ * @param fleetAuthz
+ */
 export const calculateEndpointAuthz = (
   licenseService: LicenseService,
   fleetAuthz: FleetAuthz
@@ -20,7 +27,7 @@ export const calculateEndpointAuthz = (
     canAccessFleet: hasAllAccessToFleet,
     canAccessEndpointManagement: hasAllAccessToFleet,
     canCreateArtifactsByPolicy: isPlatinumPlusLicense,
-    canIsolateHost: isPlatinumPlusLicense,
+    canIsolateHost: isPlatinumPlusLicense && hasAllAccessToFleet,
     canUnIsolateHost: true,
   };
 };
@@ -29,8 +36,8 @@ export const getEndpointAuthzInitialState = (): EndpointAuthz => {
   return {
     canAccessFleet: false,
     canAccessEndpointManagement: false,
+    canCreateArtifactsByPolicy: false,
     canIsolateHost: false,
     canUnIsolateHost: true,
-    canCreateArtifactsByPolicy: false,
   };
 };
