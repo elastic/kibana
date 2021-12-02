@@ -26,6 +26,8 @@ export interface EnrichedFieldInfo {
   linkValue?: string;
 }
 
+export type EnrichedFieldInfoWithValues = EnrichedFieldInfo & { values: string[] };
+
 export interface EventSummaryField {
   id: string;
   label?: string;
