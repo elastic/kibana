@@ -29,16 +29,15 @@ export const CasesProvider: React.FC<{ value: CasesContextProps }> = ({
   value: { owner, userCanCrud, basePath = DEFAULT_BASE_PATH, features = {} },
 }) => {
   const { appId, appTitle } = useApplication();
-  /**
-   * The empty object at the beginning avoids the mutation
-   * of the DEFAULT_FEATURES object
-   */
-  const featuresOptions = merge({}, DEFAULT_FEATURES, features);
   const [value, setValue] = useState<CasesContextStateValue>({
     owner,
     userCanCrud,
     basePath,
-    features: featuresOptions,
+    /**
+     * The empty object at the beginning avoids the mutation
+     * of the DEFAULT_FEATURES object
+     */
+    features: merge({}, DEFAULT_FEATURES, features),
   });
 
   /**

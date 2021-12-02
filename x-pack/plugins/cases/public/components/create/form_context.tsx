@@ -46,7 +46,7 @@ export const FormContext: React.FC<Props> = ({
 }) => {
   const { connectors, loading: isLoadingConnectors } = useConnectors();
   const { owner } = useCasesContext();
-  const { syncAlerts: syncAlertsFeatureOption } = useCasesFeatures();
+  const { isSyncAlertsEnabled } = useCasesFeatures();
   const { postCase } = usePostCase();
   const { postComment } = usePostComment();
   const { pushCaseToExternalService } = usePostPushToService();
@@ -56,7 +56,7 @@ export const FormContext: React.FC<Props> = ({
       {
         connectorId: dataConnectorId,
         fields,
-        syncAlerts = syncAlertsFeatureOption,
+        syncAlerts = isSyncAlertsEnabled,
         ...dataWithoutConnectorId
       },
       isValid
@@ -93,7 +93,7 @@ export const FormContext: React.FC<Props> = ({
       }
     },
     [
-      syncAlertsFeatureOption,
+      isSyncAlertsEnabled,
       connectors,
       postCase,
       caseType,

@@ -9,11 +9,14 @@ import { useMemo } from 'react';
 import { useCasesContext } from './use_cases_context';
 
 interface UseCasesFeaturesReturn {
-  syncAlerts: boolean;
+  isSyncAlertsEnabled: boolean;
 }
 
 export const useCasesFeatures = (): UseCasesFeaturesReturn => {
   const { features } = useCasesContext();
-  const memoizedReturnValue = useMemo(() => ({ syncAlerts: features.alerts.sync }), [features]);
+  const memoizedReturnValue = useMemo(
+    () => ({ isSyncAlertsEnabled: features.alerts.sync }),
+    [features]
+  );
   return memoizedReturnValue;
 };

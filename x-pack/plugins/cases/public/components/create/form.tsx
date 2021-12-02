@@ -68,7 +68,7 @@ const empty: ActionConnector[] = [];
 export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.memo(
   ({ connectors, isLoadingConnectors, hideConnectorServiceNowSir, withSteps }) => {
     const { isSubmitting } = useFormContext();
-    const { syncAlerts } = useCasesFeatures();
+    const { isSyncAlertsEnabled } = useCasesFeatures();
 
     const firstStep = useMemo(
       () => ({
@@ -118,8 +118,8 @@ export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.m
     );
 
     const allSteps = useMemo(
-      () => [firstStep, ...(syncAlerts ? [secondStep] : []), thirdStep],
-      [syncAlerts, firstStep, secondStep, thirdStep]
+      () => [firstStep, ...(isSyncAlertsEnabled ? [secondStep] : []), thirdStep],
+      [isSyncAlertsEnabled, firstStep, secondStep, thirdStep]
     );
 
     return (
@@ -134,7 +134,7 @@ export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.m
         ) : (
           <>
             {firstStep.children}
-            {syncAlerts && secondStep.children}
+            {isSyncAlertsEnabled && secondStep.children}
             {thirdStep.children}
           </>
         )}

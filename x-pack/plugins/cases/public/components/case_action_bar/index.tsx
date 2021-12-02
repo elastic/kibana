@@ -56,7 +56,7 @@ const CaseActionBarComponent: React.FC<CaseActionBarProps> = ({
   onRefresh,
   onUpdateField,
 }) => {
-  const { syncAlerts: syncAlertsFeatureOption } = useCasesFeatures();
+  const { isSyncAlertsEnabled } = useCasesFeatures();
   const date = useMemo(() => getStatusDate(caseData), [caseData]);
   const title = useMemo(() => getStatusTitle(caseData.status), [caseData.status]);
   const onStatusChanged = useCallback(
@@ -114,7 +114,7 @@ const CaseActionBarComponent: React.FC<CaseActionBarProps> = ({
             responsive={false}
             justifyContent="spaceBetween"
           >
-            {userCanCrud && syncAlertsFeatureOption && (
+            {userCanCrud && isSyncAlertsEnabled && (
               <EuiFlexItem grow={false}>
                 <EuiDescriptionListTitle>
                   <EuiFlexGroup
