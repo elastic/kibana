@@ -88,6 +88,10 @@ export const previewRulesRoute = async (
           return response.ok({ body: { errors: ['Invalid invocation count'] } });
         }
 
+        if (request.body.type === 'threat_match' || request.body.type === 'machine_learning') {
+          return response.ok({ body: { errors: ['Preview for rule type not supported'] } });
+        }
+
         const internalRule = convertCreateAPIToInternalSchema(request.body, siemClient, false);
         const previewRuleParams = internalRule.params;
 

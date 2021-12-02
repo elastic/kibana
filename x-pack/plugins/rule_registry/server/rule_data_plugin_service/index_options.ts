@@ -100,8 +100,10 @@ export interface IndexOptions {
    * Optional prefix name that will be prepended to indices in addition to
    * primary dataset and context naming convention.
    *
-   * Currently only set to `.preview` for preview rule execution, able to be expanded
-   * later with more reason
+   * Currently used only for creating a preview index for the purpose of
+   * previewing alerts from a rule. The documents are identical to alerts, but
+   * shouldn't exist on an alert index and shouldn't be queried together with
+   * real alerts in any way, because the rule that created them doesn't exist
    */
   additionalPrefix?: '.preview';
 }

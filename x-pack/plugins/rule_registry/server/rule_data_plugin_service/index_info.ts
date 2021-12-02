@@ -7,7 +7,7 @@
 
 import { INDEX_PREFIX } from '../config';
 import { IndexOptions } from './index_options';
-import { joinWithDash, joinWith } from './utils';
+import { joinWithDash } from './utils';
 
 interface ConstructorOptions {
   indexOptions: IndexOptions;
@@ -27,14 +27,12 @@ export class IndexInfo {
 
     this.indexOptions = indexOptions;
     this.kibanaVersion = kibanaVersion;
-    this.baseName = additionalPrefix
-      ? joinWith('')(
-          additionalPrefix,
-          joinWithDash(INDEX_PREFIX, `${registrationContext}.${dataset}`)
-        )
-      : joinWithDash(INDEX_PREFIX, `${registrationContext}.${dataset}`);
+    this.baseName = joinWithDash(
+      `${additionalPrefix ?? ''}${INDEX_PREFIX}`,
+      `${registrationContext}.${dataset}`
+    );
     this.basePattern = joinWithDash(this.baseName, '*');
-    this.baseNameForBackingIndices = joinWith('')(`.internal`, this.baseName);
+    this.baseNameForBackingIndices = `.internal${this.baseName}`;
   }
 
   /**
