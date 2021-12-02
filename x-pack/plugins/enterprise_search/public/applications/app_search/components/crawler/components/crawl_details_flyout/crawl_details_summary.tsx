@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 
 import moment from 'moment';
 
@@ -35,14 +35,16 @@ export const CrawlDetailsSummary: React.FC<ICrawlerSummaryProps> = ({
   domainCount,
   stats,
 }) => {
-  const [statusCounts, setStatusCounts] = useState<{ [code: string]: number }>({});
-
   const duration = () => {
-    const duration = moment.duration(stats.status.crawlDurationMSec, 'milliseconds');
-    const hours = duration.hours();
-    const minutes = duration.minutes();
-    const seconds = duration.seconds();
-    return `${hours}h ${minutes}m ${seconds}s`;
+    if (stats.status && stats.status.crawlDurationMSec) {
+      const milliseconds = moment.duration(stats.status.crawlDurationMSec, 'milliseconds');
+      const hours = milliseconds.hours();
+      const minutes = milliseconds.minutes();
+      const seconds = milliseconds.seconds();
+      return `${hours}h ${minutes}m ${seconds}s`;
+    } else {
+      return '--';
+    }
   };
 
   const getStatusCount = (code: string, codes: any) => {
@@ -51,24 +53,23 @@ export const CrawlDetailsSummary: React.FC<ICrawlerSummaryProps> = ({
       if (key[0] === code) {
         count += codes[key];
       }
-    })
+    });
     return count;
-  }
+  };
 
-  useEffect(() => {
-    if (stats.status.statusCodes) {
-      setStatusCounts({
-        client_error_count: getStatusCount('4', stats.status.statusCodes),
-        server_error_count: getStatusCount('5', stats.status.statusCodes),
-      })
-    }
-  }, [])
+  const [statusCounts] = useState<{ [code: string]: number }>({
+    client_error_count:
+      stats.status && stats.status.statusCodes ? getStatusCount('4', stats.status.statusCodes) : 0,
+    server_error_count:
+      stats.status && stats.status.statusCodes ? getStatusCount('5', stats.status.statusCodes) : 0,
+  });
 
   return (
     <EuiPanel paddingSize="l" color="primary">
       <EuiFlexGroup>
         <EuiFlexItem grow={2}>
           <EuiStat
+            data-test-subjet="crawlType"
             titleSize="s"
             title={`${
               crawlType[0].toUpperCase() + crawlType.substring(1)
@@ -83,6 +84,7 @@ export const CrawlDetailsSummary: React.FC<ICrawlerSummaryProps> = ({
         </EuiFlexItem>
         <EuiFlexItem grow={1}>
           <EuiStat
+            data-test-subj="crawlDepth"
             titleSize="s"
             title={crawlDepth}
             description={i18n.translate(
@@ -95,6 +97,7 @@ export const CrawlDetailsSummary: React.FC<ICrawlerSummaryProps> = ({
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiStat
+            data-test-subj="crawlDuration"
             titleSize="s"
             title={duration()}
             description={i18n.translate(
@@ -110,8 +113,9 @@ export const CrawlDetailsSummary: React.FC<ICrawlerSummaryProps> = ({
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
           <EuiStat
+            data-test-subj="urlsAllowed"
             titleSize="s"
-            title={stats.status.urlsAllowed}
+            title={stats.status && stats.status.urlsAllowed ? stats.status.urlsAllowed : '--'}
             description={
               <EuiText size="s">
                 URLs{' '}
@@ -139,8 +143,9 @@ export const CrawlDetailsSummary: React.FC<ICrawlerSummaryProps> = ({
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiStat
+            data-test-subj="pagesVisited"
             titleSize="s"
-            title={stats.status.pagesVisited}
+            title={stats.status && stats.status.pagesVisited ? stats.status.pagesVisited : '--'}
             description={
               <EuiText size="s">
                 {i18n.translate(
@@ -148,8 +153,7 @@ export const CrawlDetailsSummary: React.FC<ICrawlerSummaryProps> = ({
                   {
                     defaultMessage: 'Pages',
                   }
-                )}
-                {' '}
+                )}{' '}
                 <EuiIconTip
                   type="iInCircle"
                   color="primary"
@@ -173,11 +177,12 @@ export const CrawlDetailsSummary: React.FC<ICrawlerSummaryProps> = ({
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiStat
+            data-test-subj="avgResponseTime"
             titleSize="s"
             title={
-              stats.status.avgResponseTimeMSec
+              stats.status && stats.status.avgResponseTimeMSec
                 ? `${Math.round(stats.status.avgResponseTimeMSec)}ms`
-                : 'N/A'
+                : '--'
             }
             description={i18n.translate(
               'xpack.enterpriseSearch.appSearch.crawler.crawlDetailsSummary.avgResponseTimeTooltipTitle',
@@ -189,8 +194,9 @@ export const CrawlDetailsSummary: React.FC<ICrawlerSummaryProps> = ({
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiStat
+            data-test-subj="clientErrors"
             titleSize="s"
-            title={statusCounts.client_error_count ? statusCounts.client_error_count : 0}
+            title={statusCounts.client_error_count}
             description={`4xx ${i18n.translate(
               'xpack.enterpriseSearch.appSearch.crawler.crawlDetailsSummary.serverErrors',
               {
@@ -201,8 +207,9 @@ export const CrawlDetailsSummary: React.FC<ICrawlerSummaryProps> = ({
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiStat
+            data-test-subj="serverErrors"
             titleSize="s"
-            title={statusCounts.server_error_count ? statusCounts.server_error_count : 0}
+            title={statusCounts.server_error_count}
             description={`5xx ${i18n.translate(
               'xpack.enterpriseSearch.appSearch.crawler.crawlDetailsSummary.serverErrors',
               {
