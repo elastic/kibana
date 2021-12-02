@@ -11,6 +11,7 @@ import { DOC_TYPE } from '../../common';
 import {
   commonMakeReversePaletteAsCustom,
   commonRemoveTimezoneDateHistogramParam,
+  commonRenameFilterReferences,
   commonRenameOperationsForFormula,
   commonUpdateVisLayerType,
 } from '../migrations/common_migrations';
@@ -55,6 +56,14 @@ export const lensEmbeddableFactory = (): EmbeddableRegistryDefinition => {
       '7.16.0': (state) => {
         const lensState = state as unknown as { attributes: LensDocShape715<VisState716> };
         const migratedLensState = commonMakeReversePaletteAsCustom(lensState.attributes);
+        return {
+          ...lensState,
+          attributes: migratedLensState,
+        } as unknown as SerializableRecord;
+      },
+      '8.1.0': (state) => {
+        const lensState = state as unknown as { attributes: LensDocShape715<VisState716> };
+        const migratedLensState = commonRenameFilterReferences(lensState.attributes);
         return {
           ...lensState,
           attributes: migratedLensState,

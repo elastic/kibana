@@ -1491,35 +1491,17 @@ describe('Lens migrations', () => {
       },
     } as unknown as SavedObjectUnsanitizedDoc<LensDocShape715<VisState716>>;
 
-    it('should migrate filters schema', () => {
-      const expectedFilters = [
-        {
+    it('should rename indexRefName to index in filters metadata', () => {
+      const expectedFilters = example.attributes.state.filters.map((filter) => {
+        return {
+          ...filter,
           meta: {
-            alias: null,
-            negate: false,
-            disabled: false,
-            type: 'phrase',
-            key: 'geo.src',
-            params: { query: 'US' },
-            index: 'filter-index-pattern-0',
+            ...filter.meta,
+            index: filter.meta.indexRefName,
+            indexRefName: undefined,
           },
-          query: { match_phrase: { 'geo.src': 'US' } },
-          $state: { store: 'appState' },
-        },
-        {
-          meta: {
-            alias: null,
-            negate: false,
-            disabled: false,
-            type: 'phrase',
-            key: 'client_ip',
-            params: { query: '1234.5344.2243.3245' },
-            index: 'filter-index-pattern-2',
-          },
-          query: { match_phrase: { client_ip: '1234.5344.2243.3245' } },
-          $state: { store: 'appState' },
-        },
-      ];
+        };
+      });
 
       const result = migrations['8.1.0'](example, context) as ReturnType<
         SavedObjectMigrationFn<LensDocShape, LensDocShape>

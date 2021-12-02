@@ -25,13 +25,13 @@ import {
   VisStatePost715,
   VisStatePre715,
   VisState716,
-  LensDocShape810,
 } from './types';
 import {
   commonRenameOperationsForFormula,
   commonRemoveTimezoneDateHistogramParam,
   commonUpdateVisLayerType,
   commonMakeReversePaletteAsCustom,
+  commonRenameFilterReferences,
 } from './common_migrations';
 
 interface LensDocShapePre710<VisualizationState = unknown> {
@@ -444,14 +444,7 @@ const renameFilterReferences: SavedObjectMigrationFn<
   LensDocShape715<VisState716>
 > = (doc) => {
   const newDoc = cloneDeep(doc);
-  const newFilters = newDoc.attributes.state.filters.map((filter) => {
-    const ret = cloneDeep(filter);
-    ret.meta.index = ret.meta.indexRefName;
-    delete ret.meta.indexRefName;
-    return ret as Filter;
-  });
-  newDoc.attributes.state.filters = newFilters;
-  return newDoc;
+  return { ...newDoc, attributes: commonRenameFilterReferences(newDoc.attributes) };
 };
 
 export const migrations: SavedObjectMigrationMap = {

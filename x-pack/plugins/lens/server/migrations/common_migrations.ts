@@ -155,3 +155,12 @@ export const commonMakeReversePaletteAsCustom = (
   }
   return newAttributes;
 };
+
+export const commonRenameFilterReferences = (attributes: LensDocShape715<VisState716>) => {
+  const newAttributes = cloneDeep(attributes);
+  for (const filter of newAttributes.state.filters) {
+    filter.meta.index = filter.meta.indexRefName;
+    delete filter.meta.indexRefName;
+  }
+  return newAttributes;
+};
