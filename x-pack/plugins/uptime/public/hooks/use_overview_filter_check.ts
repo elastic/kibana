@@ -26,12 +26,14 @@ export function useOverviewFilterCheck() {
   const esKueryHasLoaded = useSelector(esKueryInitialStatusSelector);
   const { search } = useLocation();
 
+  const shouldRun = esKueryHasLoaded || !hasFilters(search);
+
   return useCallback(
     (fn: () => void) => {
-      if (esKueryHasLoaded || !hasFilters(search)) {
+      if (shouldRun) {
         fn();
       }
     },
-    [esKueryHasLoaded, search]
+    [shouldRun]
   );
 }
