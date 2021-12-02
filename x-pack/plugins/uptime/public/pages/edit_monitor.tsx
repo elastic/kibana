@@ -7,9 +7,9 @@
 
 import React, { useMemo } from 'react';
 import {
-  ConfigKeys,
-  ICustomFields,
-  ITLSFields,
+  ConfigKey,
+  MonitorFields,
+  TLSFields,
   PolicyConfig,
   DataStream,
 } from '../components/fleet_package/types';
@@ -30,40 +30,40 @@ export const EditMonitorPage: React.FC = () => {
     tlsConfig: defaultTLSConfig,
   } = useMemo(() => {
     /* TODO: fetch current monitor to be edited from saved objects based on url param */
-    const monitor = {} as Record<ConfigKeys, any>; // fetch
+    const monitor = {} as Record<ConfigKey, any>; // fetch
 
     let enableTLS = false;
     let enableZipUrlTLS = false;
     const getDefaultConfig = () => {
-      const type: DataStream = monitor[ConfigKeys.MONITOR_TYPE] as DataStream;
+      const type: DataStream = monitor[ConfigKey.MONITOR_TYPE] as DataStream;
 
-      const configKeys: ConfigKeys[] = Object.values(ConfigKeys) || ([] as ConfigKeys[]);
-      const formattedDefaultConfigForMonitorType: ICustomFields = configKeys.reduce<ICustomFields>(
-        (acc: ICustomFields, key: ConfigKeys) => {
+      const configKeys: ConfigKey[] = Object.values(ConfigKey) || ([] as ConfigKey[]);
+      const formattedDefaultConfigForMonitorType: MonitorFields = configKeys.reduce<MonitorFields>(
+        (acc: MonitorFields, key: ConfigKey) => {
           return {
             ...acc,
             key,
           };
         },
-        {} as ICustomFields
+        {} as MonitorFields
       );
 
-      const tlsConfig: ITLSFields = {
-        [ConfigKeys.TLS_CERTIFICATE_AUTHORITIES]:
-          formattedDefaultConfigForMonitorType[ConfigKeys.TLS_CERTIFICATE_AUTHORITIES],
-        [ConfigKeys.TLS_CERTIFICATE]:
-          formattedDefaultConfigForMonitorType[ConfigKeys.TLS_CERTIFICATE],
-        [ConfigKeys.TLS_KEY]: formattedDefaultConfigForMonitorType[ConfigKeys.TLS_KEY],
-        [ConfigKeys.TLS_KEY_PASSPHRASE]:
-          formattedDefaultConfigForMonitorType[ConfigKeys.TLS_KEY_PASSPHRASE],
-        [ConfigKeys.TLS_VERIFICATION_MODE]:
-          formattedDefaultConfigForMonitorType[ConfigKeys.TLS_VERIFICATION_MODE],
-        [ConfigKeys.TLS_VERSION]: formattedDefaultConfigForMonitorType[ConfigKeys.TLS_VERSION],
+      const tlsConfig: TLSFields = {
+        [ConfigKey.TLS_CERTIFICATE_AUTHORITIES]:
+          formattedDefaultConfigForMonitorType[ConfigKey.TLS_CERTIFICATE_AUTHORITIES],
+        [ConfigKey.TLS_CERTIFICATE]:
+          formattedDefaultConfigForMonitorType[ConfigKey.TLS_CERTIFICATE],
+        [ConfigKey.TLS_KEY]: formattedDefaultConfigForMonitorType[ConfigKey.TLS_KEY],
+        [ConfigKey.TLS_KEY_PASSPHRASE]:
+          formattedDefaultConfigForMonitorType[ConfigKey.TLS_KEY_PASSPHRASE],
+        [ConfigKey.TLS_VERIFICATION_MODE]:
+          formattedDefaultConfigForMonitorType[ConfigKey.TLS_VERIFICATION_MODE],
+        [ConfigKey.TLS_VERSION]: formattedDefaultConfigForMonitorType[ConfigKey.TLS_VERSION],
       };
 
-      enableTLS = Boolean(formattedDefaultConfigForMonitorType[ConfigKeys.TLS_VERIFICATION_MODE]);
+      enableTLS = Boolean(formattedDefaultConfigForMonitorType[ConfigKey.TLS_VERIFICATION_MODE]);
       enableZipUrlTLS = Boolean(
-        formattedDefaultConfigForMonitorType[ConfigKeys.ZIP_URL_TLS_VERIFICATION_MODE]
+        formattedDefaultConfigForMonitorType[ConfigKey.ZIP_URL_TLS_VERIFICATION_MODE]
       );
 
       const formattedDefaultConfig: Partial<PolicyConfig> = {
