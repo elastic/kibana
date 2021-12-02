@@ -26,15 +26,14 @@ export const CrawlDetailsPreview: React.FC = () => {
 
   return (
     <>
-      <CrawlDetailsSummary
-        crawl_type={crawlRequest.type}
-        domain_count={crawlRequest.crawlConfig.domainAllowlist.length}
-        crawl_depth={crawlRequest.crawlConfig.maxCrawlDepth}
-        url_count={crawlRequest.stats.status.urls_allowed}
-        page_count={crawlRequest.stats.status.pages_visited}
-        response_time={crawlRequest.stats.status.avg_response_time_msec}
-        crawl_duration={crawlRequest.stats.status.crawl_duration_msec}
-      />
+      {crawlRequest.stats && (
+        <CrawlDetailsSummary
+          crawlType={crawlRequest.type}
+          domainCount={crawlRequest.crawlConfig.domainAllowlist.length}
+          crawlDepth={crawlRequest.crawlConfig.maxCrawlDepth}
+          stats={crawlRequest.stats}
+        />
+      )}
       <EuiSpacer />
       <AccordionList
         hasBorder

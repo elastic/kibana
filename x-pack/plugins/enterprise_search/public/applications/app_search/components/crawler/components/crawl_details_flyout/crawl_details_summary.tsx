@@ -20,27 +20,23 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { CrawlRequestStats } from '../../types';
+
 interface ICrawlerSummaryProps {
-  crawl_type: string;
-  crawl_depth: number;
-  domain_count: number;
-  url_count?: number;
-  page_count: number;
-  response_time: number;
-  crawl_duration: number;
+  stats: CrawlRequestStats;
+  crawlType: string;
+  domainCount: number;
+  crawlDepth: number;
 }
 
 export const CrawlDetailsSummary: React.FC<ICrawlerSummaryProps> = ({
-  crawl_type,
-  crawl_depth,
-  domain_count,
-  url_count,
-  page_count,
-  response_time,
-  crawl_duration,
+  crawlDepth,
+  crawlType,
+  domainCount,
+  stats,
 }) => {
   const duration = () => {
-    const duration = moment.duration(crawl_duration, 'milliseconds');
+    const duration = moment.duration(stats.status.crawlDurationMSec, 'milliseconds');
     const hours = duration.hours();
     const minutes = duration.minutes();
     const seconds = duration.seconds();
@@ -54,13 +50,13 @@ export const CrawlDetailsSummary: React.FC<ICrawlerSummaryProps> = ({
           <EuiStat
             titleSize="s"
             title={`${
-              crawl_type[0].toUpperCase() + crawl_type.substring(1)
-            } crawl on ${domain_count} ${domain_count === 1 ? 'domain' : 'domains'}`}
+              crawlType[0].toUpperCase() + crawlType.substring(1)
+            } crawl on ${domainCount} ${domainCount === 1 ? 'domain' : 'domains'}`}
             description="Crawl Type"
           />
         </EuiFlexItem>
         <EuiFlexItem grow={1}>
-          <EuiStat titleSize="s" title={crawl_depth} description="Max Crawl Depth" />
+          <EuiStat titleSize="s" title={crawlDepth} description="Max Crawl Depth" />
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiHorizontalRule margin="s" />
@@ -68,7 +64,7 @@ export const CrawlDetailsSummary: React.FC<ICrawlerSummaryProps> = ({
         <EuiFlexItem grow={false}>
           <EuiStat
             titleSize="s"
-            title={url_count}
+            title={stats.status.urlsAllowed}
             description={
               <EuiText size="s">
                 URLs{' '}
@@ -97,7 +93,7 @@ export const CrawlDetailsSummary: React.FC<ICrawlerSummaryProps> = ({
         <EuiFlexItem grow={false}>
           <EuiStat
             titleSize="s"
-            title={page_count}
+            title={stats.status.pagesVisited}
             description={
               <EuiText size="s">
                 Pages{' '}
@@ -125,7 +121,11 @@ export const CrawlDetailsSummary: React.FC<ICrawlerSummaryProps> = ({
         <EuiFlexItem grow={false}>
           <EuiStat
             titleSize="s"
-            title={`${Math.round(response_time)}ms`}
+            title={
+              stats.status.avgResponseTimeMSec
+                ? `${Math.round(stats.status.avgResponseTimeMSec)}ms`
+                : 'N/A'
+            }
             description="Avg. Response"
           />
         </EuiFlexItem>

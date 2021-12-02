@@ -16,6 +16,8 @@ import {
   CrawlerDomainValidationStep,
   CrawlRequestFromServer,
   CrawlRequest,
+  CrawlRequestStats,
+  CrawlRequestStatsFromServer,
   CrawlRule,
   CrawlerRules,
   CrawlEventFromServer,
@@ -66,6 +68,28 @@ export function crawlerDomainServerToClient(payload: CrawlerDomainFromServer): C
   return clientPayload;
 }
 
+export function crawlRequestStatsServerToClient(crawlStats: CrawlRequestStatsFromServer): CrawlRequestStats {
+  const {
+    status: {
+      avg_response_time_msec: avgResponseTimeMSec,
+      crawl_duration_msec: crawlDurationMSec,
+      pages_visited: pagesVisited,
+      urls_allowed: urlsAllowed,
+      status_codes: statusCodes,
+    },
+  } = crawlStats;
+
+  return {
+    status: {
+      urlsAllowed,
+      pagesVisited,
+      avgResponseTimeMSec,
+      crawlDurationMSec,
+      statusCodes,
+    },
+  }
+}
+
 export function crawlRequestServerToClient(crawlRequest: CrawlRequestFromServer): CrawlRequest {
   const {
     id,
@@ -90,7 +114,6 @@ export function crawlConfigServerToClient(crawlConfig: CrawlConfigFromServer): C
     seed_urls: seedUrls,
     sitemap_urls: sitemapUrls,
     max_crawl_depth: maxCrawlDepth,
-    stats,
   } = crawlConfig;
 
   return {
@@ -98,7 +121,6 @@ export function crawlConfigServerToClient(crawlConfig: CrawlConfigFromServer): C
     seedUrls,
     sitemapUrls,
     maxCrawlDepth,
-    stats,
   };
 }
 
@@ -135,7 +157,7 @@ export function crawlRequestWithDetailsServerToClient(
     crawl_config: crawlConfig,
     created_at: createdAt,
     id,
-    stats,
+    stats: crawlStats,
     status,
     type,
   } = event;
@@ -146,7 +168,7 @@ export function crawlRequestWithDetailsServerToClient(
     crawlConfig: crawlConfigServerToClient(crawlConfig),
     createdAt,
     id,
-    stats,
+    stats: crawlRequestStatsServerToClient(crawlStats),
     status,
     type,
   };

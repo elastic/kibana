@@ -199,18 +199,35 @@ export interface CrawlRequest {
   completedAt: string | null;
 }
 
+export interface CrawlRequestStats {
+  status: {
+    avgResponseTimeMSec?: number;
+    crawlDurationMSec?: number;
+    pagesVisited?: number;
+    urlsAllowed?: number;
+    statusCodes?: {
+      [code: string]: number;
+    };
+  };
+}
+
+export interface CrawlRequestStatsFromServer {
+  status: {
+    avg_response_time_msec?: number;
+    crawl_duration_msec?: number;
+    pages_visited?: number;
+    urls_allowed?: number;
+    status_codes?: {
+      [code: string]: number;
+    };
+  };
+}
+
 export interface CrawlConfig {
   domainAllowlist: string[];
   seedUrls: string[];
   sitemapUrls: string[];
   maxCrawlDepth: number;
-  stats: CrawlRequestStats;
-}
-
-export interface CrawlRequestStats {
-  pagesVisited: number;
-  avgResponseTimeMSec: number;
-  urlsAllowed: number;
 }
 
 export interface CrawlConfigFromServer {
@@ -218,22 +235,18 @@ export interface CrawlConfigFromServer {
   seed_urls: string[];
   sitemap_urls: string[];
   max_crawl_depth: number;
-  stats: CrawlRequestStats;
 }
 
 export type CrawlRequestWithDetailsFromServer = CrawlRequestFromServer & {
   type: CrawlType;
   crawl_config: CrawlConfigFromServer;
-  stats: CrawlRequestStats;
+  stats: CrawlRequestStatsFromServer;
 };
 
 export type CrawlRequestWithDetails = CrawlRequest & {
   type: CrawlType;
   crawlConfig: CrawlConfig;
-  pagesVisited: number;
-  avgResponseTimeMSec: number;
-  urlsAllowed: number;
-  stats: CrawlRequestStats;
+  stats: CrawlRequestStats | null;
 };
 
 export type CrawlEventStage = 'crawl' | 'process';
