@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import semver from 'semver';
 import { HOST_NAME, REASON, RISK_SCORE, RULE_NAME, SEVERITY } from '../../../screens/alerts';
 import { SERVER_SIDE_EVENT_COUNT } from '../../../screens/alerts_detection_rules';
 import {
@@ -107,10 +107,16 @@ describe('After an upgrade, the threshold rule', () => {
   });
 
   it('Displays the alert details in the TGrid', () => {
+    let expectedReason;
+    if (semver.gt(Cypress.env('ORIGINAL_VERSION'), '7.15.0')) {
+      expectedReason = alert.reason;
+    } else {
+      expectedReason = '-';
+    }
     cy.get(RULE_NAME).should('have.text', alert.rule);
     cy.get(SEVERITY).should('have.text', alert.severity);
     cy.get(RISK_SCORE).should('have.text', alert.riskScore);
-    cy.get(REASON).should('have.text', alert.reason);
+    cy.get(REASON).should('have.text', expectedReason);
     cy.get(HOST_NAME).should('have.text', alert.hostName);
   });
 

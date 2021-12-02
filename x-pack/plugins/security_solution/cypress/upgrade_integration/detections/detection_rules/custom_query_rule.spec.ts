@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import semver from 'semver';
 import {
   DESTINATION_IP,
   HOST_NAME,
@@ -103,10 +104,16 @@ describe('After an upgrade, the custom query rule', () => {
   });
 
   it('Displays the alert details at the tgrid', () => {
+    let expectedReason;
+    if (semver.gt(Cypress.env('ORIGINAL_VERSION'), '7.15.0')) {
+      expectedReason = alert.reason;
+    } else {
+      expectedReason = '-';
+    }
     cy.get(RULE_NAME).should('have.text', alert.rule);
     cy.get(SEVERITY).should('have.text', alert.severity);
     cy.get(RISK_SCORE).should('have.text', alert.riskScore);
-    cy.get(REASON).should('have.text', alert.reason).type('{rightarrow}');
+    cy.get(REASON).should('have.text', expectedReason).type('{rightarrow}');
     cy.get(HOST_NAME).should('have.text', alert.hostName);
     cy.get(USER_NAME).should('have.text', alert.username);
     cy.get(PROCESS_NAME).should('have.text', alert.processName);
