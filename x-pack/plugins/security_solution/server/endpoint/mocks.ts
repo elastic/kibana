@@ -19,7 +19,7 @@ import {
   createArtifactsClientMock,
   createFleetAuthzMock,
 } from '../../../fleet/server/mocks';
-import { createMockConfig } from '../lib/detection_engine/routes/__mocks__';
+import { createMockConfig, requestContextMock } from '../lib/detection_engine/routes/__mocks__';
 import {
   EndpointAppContextService,
   EndpointAppContextServiceSetupContract,
@@ -183,8 +183,7 @@ export function createRouteHandlerContext(
   dataClient: jest.Mocked<IScopedClusterClient>,
   savedObjectsClient: jest.Mocked<SavedObjectsClientContract>
 ) {
-  const context =
-    xpackMocks.createRequestHandlerContext() as unknown as jest.Mocked<SecuritySolutionRequestHandlerContext>;
+  const context = requestContextMock.create() as jest.Mocked<SecuritySolutionRequestHandlerContext>;
   context.core.elasticsearch.client = dataClient;
   context.core.savedObjects.client = savedObjectsClient;
   return context;
