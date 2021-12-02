@@ -27,13 +27,7 @@ describe('getServiceLocations', function () {
   });
   it('should return parsed locations', async () => {
     const locations = await getServiceLocations({
-      config: {
-        unsafe: {
-          service: {
-            manifestUrl: 'http://local.dev',
-          },
-        },
-      },
+      manifestUrl: 'http://local.dev',
     });
 
     expect(locations).toEqual([
@@ -44,6 +38,7 @@ describe('getServiceLocations', function () {
         },
         id: 'us_central',
         label: 'US Central',
+        url: 'https://local.dev',
       },
     ]);
   });

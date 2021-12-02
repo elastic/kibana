@@ -9,6 +9,7 @@ import { SavedObjectsErrorHelpers } from '../../../../../../src/core/server';
 import { UMRestApiRouteFactory } from '../types';
 import { API_URLS } from '../../../common/constants';
 import { syntheticsMonitorType } from '../../lib/saved_objects/synthetics_monitor';
+import { SyntheticsMonitorSavedObject } from '../../../common/types';
 
 export const deleteSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
   method: 'DELETE',
@@ -18,17 +19,30 @@ export const deleteSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
       monitorId: schema.string(),
     }),
   },
-  handler: async ({ request, savedObjectsClient }): Promise<any> => {
+  handler: async ({ request, savedObjectsClient, server }): Promise<any> => {
     const { monitorId } = request.params;
 
+    const { syntheticsService } = server;
+
     try {
+      const monitor = await savedObjectsClient.get<SyntheticsMonitorSavedObject['attributes']>(
+        syntheticsMonitorType,
+        monitorId
+      );
+
       await savedObjectsClient.delete(syntheticsMonitorType, monitorId);
-      // TODO: call to service sync
+      const errors = await syntheticsService.deleteConfigs(request, [
+        { ...monitor.attributes, id: monitorId },
+      ]);
+      if (errors) {
+        return errors;
+      }
       return monitorId;
     } catch (getErr) {
       if (SavedObjectsErrorHelpers.isNotFoundError(getErr)) {
         return 'Not found';
       }
+      throw getErr;
     }
   },
 });

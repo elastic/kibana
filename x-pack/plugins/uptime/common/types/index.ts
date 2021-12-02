@@ -33,9 +33,10 @@ export interface MonitorIdParam {
 
 export type SyntheticsMonitorSavedObject = SimpleSavedObject<{
   name: string;
-  runOnce: boolean;
+  runOnce?: boolean;
   urls?: string[];
   tags?: string[];
+  locations: string[];
   schedule: string;
   type: 'http' | 'tcp' | 'icmp' | 'browser';
   source?: {
@@ -59,4 +60,4 @@ export interface ManifestLocation {
   status: string;
 }
 
-export type ServiceLocations = Array<{ id: string; label: string; geo: LocationGeo }>;
+export type ServiceLocations = Array<{ id: string; label: string; geo: LocationGeo; url: string }>;
