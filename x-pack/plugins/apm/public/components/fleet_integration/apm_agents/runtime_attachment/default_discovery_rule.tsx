@@ -11,14 +11,11 @@ export function DefaultDiscoveryRule() {
   return (
     <EuiPanel paddingSize="m" style={{ margin: 4 }}>
       <EuiFlexGroup alignItems="center">
-        <EuiFlexItem grow={false}>
-          <EuiText size="s">Everything else</EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem grow={false} style={{ marginLeft: 100 }}>
           <EuiBadge color="danger">Exclude</EuiBadge>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiBadge color="hollow">All</EuiBadge>
+          <EuiText size="s">Everything else</EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>

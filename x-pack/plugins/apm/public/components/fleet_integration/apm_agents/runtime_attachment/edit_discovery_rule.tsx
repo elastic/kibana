@@ -8,6 +8,8 @@ import {
   EuiSelect,
   EuiFieldText,
   EuiFormRow,
+  EuiSuperSelect,
+  EuiText,
 } from '@elastic/eui';
 import React from 'react';
 import {
@@ -44,7 +46,7 @@ export function EditDiscoveryRule({
   return (
     <EuiPanel paddingSize="m">
       <EuiFlexGroup>
-        <EuiFlexItem>
+        <EuiFlexItem grow={false}>
           <EuiFormFieldset legend={{ children: 'Operation' }}>
             <EuiSelect
               options={operationTypes.map(({ operation }) => ({
@@ -58,44 +60,57 @@ export function EditDiscoveryRule({
             />
           </EuiFormFieldset>
         </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiFlexGroup>
         <EuiFlexItem>
           <EuiFormFieldset legend={{ children: 'Type' }}>
-            <EuiFormRow helpText="Choose from allowed params">
-              <EuiSelect
-                options={operationTypes
-                  .find(
-                    ({ operation: definedOperation }) =>
-                      definedOperation.value === operation
-                  )
-                  ?.types.map((type) => ({
-                    text: type.label,
-                    value: type.value,
-                  }))}
-                value={type}
-                onChange={(e) => {
-                  onChangeType(e.target.value);
+            <EuiFormRow fullWidth helpText="Choose from allowed params">
+              <EuiSuperSelect
+                hasDividers
+                fullWidth
+                options={
+                  operationTypes
+                    .find(
+                      ({ operation: definedOperation }) =>
+                        definedOperation.value === operation
+                    )
+                    ?.types.map((type) => ({
+                      inputDisplay: type.label,
+                      value: type.value,
+                      dropdownDisplay: (
+                        <>
+                          <strong>{type.label}</strong>
+                          <EuiText size="s" color="subdued">
+                            <p>{type.description}</p>
+                          </EuiText>
+                        </>
+                      ),
+                    })) ?? []
+                }
+                valueOfSelected={type}
+                onChange={(value) => {
+                  onChangeType(value);
                 }}
               />
             </EuiFormRow>
           </EuiFormFieldset>
         </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiFormFieldset
-            legend={{ children: 'Probe' }}
-            style={{
-              visibility:
-                type === DISCOVERY_RULE_TYPE_ALL ? 'hidden' : undefined,
-            }}
-          >
-            <EuiFormRow helpText="Enter the probe value">
-              <EuiFieldText
-                value={probe}
-                onChange={(e) => onChangeProbe(e.target.value)}
-              />
-            </EuiFormRow>
-          </EuiFormFieldset>
-        </EuiFlexItem>
       </EuiFlexGroup>
+      {type !== DISCOVERY_RULE_TYPE_ALL && (
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <EuiFormFieldset legend={{ children: 'Probe' }}>
+              <EuiFormRow fullWidth helpText="Enter the probe value">
+                <EuiFieldText
+                  fullWidth
+                  value={probe}
+                  onChange={(e) => onChangeProbe(e.target.value)}
+                />
+              </EuiFormRow>
+            </EuiFormFieldset>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      )}
       <EuiFlexGroup justifyContent="flexEnd">
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty onClick={onCancel}>Cancel</EuiButtonEmpty>

@@ -34,6 +34,7 @@ interface Props {
 interface Option {
   value: string;
   label: string;
+  description?: string;
 }
 
 export interface Operation {

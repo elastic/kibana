@@ -13,11 +13,33 @@ interface Props {
 }
 
 const excludeOptions = [
-  { value: 'main', label: 'main class / jar name' },
-  { value: 'vmarg', label: 'vmarg' },
-  { value: 'user', label: 'user' },
+  {
+    value: 'main',
+    label: 'main',
+    description:
+      'A regular expression of fully qualified main class names or paths to JARs of applications the java agent should be attached to. Performs a partial match so that foo matches /bin/foo.jar.',
+  },
+  {
+    value: 'vmarg',
+    label: 'vmarg',
+    description:
+      'A regular expression matched against the arguments passed to the JVM, such as system properties. Performs a partial match so that attach=true matches the system property -Dattach=true.',
+  },
+  {
+    value: 'user',
+    label: 'user',
+    description:
+      'A username that is matched against the operating system user that runs the JVM. For included users, make sure that the Elastic Agent user is either the same user or has permissions to switch to the user that runs the target JVM.',
+  },
 ];
-const includeOptions = [{ value: 'all', label: 'All' }, ...excludeOptions];
+const includeOptions = [
+  {
+    value: 'all',
+    label: 'All',
+    description: 'Includes all JVMs for attachment.',
+  },
+  ...excludeOptions,
+];
 
 export function JavaRuntimeAttachment({ newPolicy, onChange }: Props) {
   const [isDirty, setIsDirty] = useState(false);
