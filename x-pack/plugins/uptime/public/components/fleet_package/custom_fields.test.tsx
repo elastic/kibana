@@ -338,7 +338,6 @@ describe('<CustomFields />', () => {
     const enabled = queryByLabelText('Enabled') as HTMLInputElement;
     expect(enabled).toBeChecked();
 
-    // resolve errors
     fireEvent.click(enabled);
 
     await waitFor(() => {
