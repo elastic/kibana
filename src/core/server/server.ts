@@ -128,10 +128,7 @@ export class Server {
 
   public async preboot() {
     this.log.debug('prebooting server');
-    const prebootTransaction = apm.startTransaction(
-      'server-preboot',
-      'kibana-platform'
-    );
+    const prebootTransaction = apm.startTransaction('server-preboot', 'kibana-platform');
 
     const environmentPreboot = await this.environment.preboot();
 
