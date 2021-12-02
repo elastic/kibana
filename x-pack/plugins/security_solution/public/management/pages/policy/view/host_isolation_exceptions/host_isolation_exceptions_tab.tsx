@@ -20,10 +20,15 @@ import React, { useMemo } from 'react';
 import { APP_UI_ID } from '../../../../../../common/constants';
 import { PolicyData } from '../../../../../../common/endpoint/types';
 import { useAppUrl } from '../../../../../common/lib/kibana';
+import {
+  MANAGEMENT_DEFAULT_PAGE,
+  MANAGEMENT_DEFAULT_PAGE_SIZE,
+} from '../../../../common/constants';
 import { getHostIsolationExceptionsListPath } from '../../../../common/routing';
 import { useFetchHostIsolationExceptionsList } from '../../../host_isolation_exceptions/view/hooks';
 import { getCurrentArtifactsLocation } from '../../store/policy_details/selectors';
 import { usePolicyDetailsSelector } from '../policy_hooks';
+import { PolicyHostIsolationExceptionsEmptyUnexisting } from './components/empty_non_existent';
 import { PolicyHostIsolationExceptionsEmptyUnassigned } from './components/empty_unassigned';
 import { PolicyHostIsolationExceptionsList } from './components/list';
 
@@ -38,6 +43,11 @@ export const PolicyHostIsolationExceptionsTab = ({
 
   const location = usePolicyDetailsSelector(getCurrentArtifactsLocation);
 
+  const allExceptionsListRequest = useFetchHostIsolationExceptionsList({
+    page: MANAGEMENT_DEFAULT_PAGE,
+    perPage: MANAGEMENT_DEFAULT_PAGE_SIZE,
+  });
+
   const policyExceptionsListRequest = useFetchHostIsolationExceptionsList({
     filter: location.filter,
     page: location.page_index,
@@ -45,8 +55,8 @@ export const PolicyHostIsolationExceptionsTab = ({
     policies: [policyId, 'all'],
   });
 
-  // TODO hasNoDefinedExceptions
   const hasNoAssignedPolicies = policyExceptionsListRequest.data?.total === 0;
+  const hasNoExistingExceptions = allExceptionsListRequest.data?.total === 0;
 
   const subTitle = useMemo(() => {
     const link = (
@@ -66,14 +76,26 @@ export const PolicyHostIsolationExceptionsTab = ({
         id="xpack.securitySolution.endpoint.policy.hostIsolationExceptions.list.about"
         defaultMessage="There {count, plural, one {is} other {are}} {count} {count, plural, =1 {exception} other {exceptions}} associated with this policy. Click here to {link}"
         values={{
-          count: policyExceptionsListRequest.data?.total,
+          count: allExceptionsListRequest.data?.total,
           link,
         }}
       />
     ) : null;
-  }, [policyExceptionsListRequest.data, getAppUrl]);
+  }, [getAppUrl, policyExceptionsListRequest.data, allExceptionsListRequest.data?.total]);
 
-  return !policyExceptionsListRequest.isLoading && policyExceptionsListRequest.data && policy ? (
+  const isLoading =
+    policyExceptionsListRequest.isLoading || allExceptionsListRequest.isLoading || !policy;
+
+  if (!isLoading && (hasNoAssignedPolicies || hasNoExistingExceptions)) {
+    if (hasNoExistingExceptions) {
+      return <PolicyHostIsolationExceptionsEmptyUnexisting />;
+    }
+    if (hasNoAssignedPolicies) {
+      return <PolicyHostIsolationExceptionsEmptyUnassigned policyName={policy.name} />;
+    }
+  }
+
+  return !isLoading && policyExceptionsListRequest.data ? (
     <div>
       <EuiPageHeader alignItems="center">
         <EuiPageHeaderSection>
@@ -104,14 +126,10 @@ export const PolicyHostIsolationExceptionsTab = ({
         color="transparent"
         borderRadius="none"
       >
-        {hasNoAssignedPolicies ? (
-          <PolicyHostIsolationExceptionsEmptyUnassigned policyName={policy.name} />
-        ) : (
-          <PolicyHostIsolationExceptionsList
-            exceptions={policyExceptionsListRequest.data}
-            policyId={policyId}
-          />
-        )}
+        <PolicyHostIsolationExceptionsList
+          exceptions={policyExceptionsListRequest.data}
+          policyId={policyId}
+        />
       </EuiPageContent>
     </div>
   ) : (

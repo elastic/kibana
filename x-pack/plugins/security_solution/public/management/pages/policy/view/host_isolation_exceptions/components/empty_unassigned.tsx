@@ -5,29 +5,23 @@
  * 2.0.
  */
 
-import { EuiButton, EuiEmptyPrompt, EuiLink, EuiPageTemplate } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiLink, EuiPageTemplate } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import { APP_UI_ID } from '../../../../../../../common/constants';
 import { useAppUrl } from '../../../../../../common/lib/kibana';
 import { getHostIsolationExceptionsListPath } from '../../../../../common/routing';
-import { useUserPrivileges } from '../../../../../../common/components/user_privileges';
 
 export const PolicyHostIsolationExceptionsEmptyUnassigned = ({
   policyName,
 }: {
   policyName: string;
 }) => {
-  const { canIsolateHost } = useUserPrivileges().endpointPrivileges;
   const { getAppUrl } = useAppUrl();
   const toHostIsolationList = getAppUrl({
     appId: APP_UI_ID,
     path: getHostIsolationExceptionsListPath(),
   });
-  const onClickPrimaryButtonHandler = () => {
-    // TODO button handler to assign
-    // WIP
-  };
   return (
     <EuiPageTemplate template="centeredContent">
       <EuiEmptyPrompt
@@ -49,21 +43,6 @@ export const PolicyHostIsolationExceptionsEmptyUnassigned = ({
           />
         }
         actions={[
-          ...(canIsolateHost
-            ? [
-                <EuiButton
-                  color="primary"
-                  fill
-                  onClick={onClickPrimaryButtonHandler}
-                  data-test-subj="assign-ta-button"
-                >
-                  <FormattedMessage
-                    id="xpack.securitySolution.endpoint.policy.hostIsolationExceptions.empty.unassigned.primaryAction"
-                    defaultMessage="Assign host isolation exceptions"
-                  />
-                </EuiButton>,
-              ]
-            : []),
           <EuiLink href={toHostIsolationList}>
             <FormattedMessage
               id="xpack.securitySolution.endpoint.policy.hostIsolationExceptions.empty.unassigned.secondaryAction"
