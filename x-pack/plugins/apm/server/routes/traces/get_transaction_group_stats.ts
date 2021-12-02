@@ -14,8 +14,11 @@ import {
   SERVICE_NAME,
 } from '../../../common/elasticsearch_fieldnames';
 import { arrayUnionToCallable } from '../../../common/utils/array_union_to_callable';
-import { TransactionGroupRequestBase, TransactionGroupSetup } from './fetcher';
-import { getDurationFieldForTransactions } from '../helpers/transactions';
+import {
+  TransactionGroupRequestBase,
+  TransactionGroupSetup,
+} from './get_top_traces';
+import { getDurationFieldForTransactions } from '../../lib/helpers/transactions';
 import { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
 interface MetricParams {
   request: TransactionGroupRequestBase;

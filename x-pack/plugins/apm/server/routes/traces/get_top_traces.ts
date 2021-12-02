@@ -28,8 +28,8 @@ import { withApmSpan } from '../../utils/with_apm_span';
 import {
   getDocumentTypeFilterForTransactions,
   getProcessorEventForTransactions,
-} from '../helpers/transactions';
-import { Setup } from '../helpers/setup_request';
+} from '../../lib/helpers/transactions';
+import { Setup } from '../../lib/helpers/setup_request';
 import { getAverages, getCounts, getSums } from './get_transaction_group_stats';
 import { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
 export interface TopTraceOptions {
@@ -56,7 +56,7 @@ export interface TransactionGroup {
 
 export type ESResponse = Promise<{ items: TransactionGroup[] }>;
 
-export type TransactionGroupRequestBase = ReturnType<typeof getRequest> & {
+export type TransactionGroupRequestBase = ReturnType<typeof getESParams> & {
   body: {
     aggs: {
       transaction_groups: Unionize<Pick<AggregationOptionsByType, 'composite'>>;
@@ -64,7 +64,7 @@ export type TransactionGroupRequestBase = ReturnType<typeof getRequest> & {
   };
 };
 
-function getRequest(topTraceOptions: TopTraceOptions) {
+function getESParams(topTraceOptions: TopTraceOptions) {
   const {
     searchAggregatedTransactions,
     environment,
@@ -175,12 +175,12 @@ function getItemsWithRelativeImpact(
   return itemsWithRelativeImpact;
 }
 
-export function topTransactionGroupsFetcher(
+export function getTopTraces(
   topTraceOptions: TopTraceOptions,
   setup: TransactionGroupSetup
 ): Promise<{ items: TransactionGroup[] }> {
   return withApmSpan('get_top_traces', async () => {
-    const request = getRequest(topTraceOptions);
+    const request = getESParams(topTraceOptions);
 
     const params = {
       request,
