@@ -6,3 +6,11 @@
  */
 
 export const TEST = '[data-test-subj="sessionViewTestPage"]';
+
+export const DETAILS_PANEL = 'span.euiTitle.euiTitle--small';
+
+export const DETAILS_PANEL_TOGGLE = 'span.euiButton__text';
+
+//export const SEARCH_BAR = '[aria-label="This is a search bar. After typing your query, hit enter to filter the results lower in the page."]'
+
+export const SEARCH_BAR = 'input.euiFieldSearch.euiFieldSearch--fullWidth'
