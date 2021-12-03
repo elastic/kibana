@@ -2022,8 +2022,9 @@ ace.define(
       },
       // parses and returns the method
       method = function () {
-        text = text.toUpperCase()
-        ch = ch.toUpperCase()
+        const [first, ...rest] = text.split(' ');
+        text = first.toUpperCase() + rest.join(' ');
+        ch = ch.toUpperCase();
 
         switch (ch) {
           case 'G':
