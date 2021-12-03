@@ -7,6 +7,13 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
+import { ObjectRemover } from '../../../../functional_with_es_ssl/lib/object_remover';
+import {
+  createAlert,
+  disableAlert,
+  muteAlert,
+} from '../../../../functional_with_es_ssl/lib/alert_api_actions';
+import { generateUniqueKey } from '../../../../functional_with_es_ssl/lib/get_test_data';
 
 async function asyncForEach<T>(array: T[], callback: (item: T, index: number) => void) {
   for (let index = 0; index < array.length; index++) {
@@ -21,6 +28,8 @@ const TOTAL_ALERTS_CELL_COUNT = 165;
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const find = getService('find');
+  const supertest = getService('supertest');
+  const objectRemover = new ObjectRemover(supertest);
 
   describe('Observability alerts', function () {
     this.tags('includeFirefox');
@@ -234,6 +243,65 @@ export default ({ getService }: FtrProviderContext) => {
           await actionsButton.click();
           await observability.alerts.common.viewRuleDetailsButtonClick();
           expect(await find.existsByCssSelector('[title="Rules and Connectors"]')).to.eql(true);
+        });
+      });
+
+      describe('Stat counters', () => {
+        beforeEach(async () => {
+          const uniqueKey = generateUniqueKey();
+
+          const alertToDisable = await createAlert({
+            supertest,
+            objectRemover,
+            overwrites: { name: 'b', tags: [uniqueKey] },
+          });
+          await createAlert({
+            supertest,
+            objectRemover,
+            overwrites: { name: 'c', tags: [uniqueKey] },
+          });
+          await createAlert({
+            supertest,
+            objectRemover,
+            overwrites: { name: 'a', tags: [uniqueKey] },
+          });
+          await createAlert({
+            supertest,
+            objectRemover,
+            overwrites: { name: 'd', tags: [uniqueKey] },
+          });
+          await createAlert({
+            supertest,
+            objectRemover,
+            overwrites: { name: 'e', tags: [uniqueKey] },
+          });
+          const alertToMute = await createAlert({
+            supertest,
+            objectRemover,
+            overwrites: { name: 'f', tags: [uniqueKey] },
+          });
+
+          await disableAlert({ supertest, alertId: alertToDisable.id });
+          await muteAlert({ supertest, alertId: alertToMute.id });
+
+          await observability.alerts.common.navigateToTimeWithData();
+        });
+
+        afterEach(async () => {
+          await objectRemover.removeAll();
+        });
+
+        it('Exist and display expected values', async () => {
+          const subjToValueMap: { [key: string]: number } = {
+            statRuleCount: 6,
+            statDisabled: 1,
+            statMuted: 1,
+            statErrors: 0,
+          };
+          await asyncForEach(Object.keys(subjToValueMap), async (subject: string) => {
+            const value = await observability.alerts.common.getAlertStatValue(subject);
+            expect(value).to.be(subjToValueMap[subject]);
+          });
         });
       });
     });
