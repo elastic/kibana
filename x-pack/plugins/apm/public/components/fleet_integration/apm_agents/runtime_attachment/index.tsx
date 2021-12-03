@@ -17,7 +17,7 @@ import { RuntimeAttachment as RuntimeAttachmentStateless } from './runtime_attac
 export const STAGED_DISCOVERY_RULE_ID = 'STAGED_DISCOVERY_RULE_ID';
 export const DISCOVERY_RULE_TYPE_ALL = 'all';
 
-interface IDiscoveryRule {
+export interface IDiscoveryRule {
   operation: string;
   type: string;
   probe: string;

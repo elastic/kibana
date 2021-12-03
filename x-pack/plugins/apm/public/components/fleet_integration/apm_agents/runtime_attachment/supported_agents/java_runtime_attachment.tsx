@@ -5,10 +5,15 @@
  * 2.0.
  */
 
+import yaml from 'js-yaml';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useState, useMemo } from 'react';
-import { RuntimeAttachment, RuntimeAttachmentSettings } from '..';
+import {
+  RuntimeAttachment,
+  RuntimeAttachmentSettings,
+  IDiscoveryRule,
+} from '..';
 import {
   NewPackagePolicy,
   PackagePolicy,
@@ -140,10 +145,8 @@ export function JavaRuntimeAttachment({ newPolicy, onChange }: Props) {
                 },
                 java_attacher_discovery_rules: {
                   type: 'yaml',
-                  value: runtimeAttachmentSettings.discoveryRules.map(
-                    ({ operation, type, probe }) => ({
-                      [`${operation}-${type}`]: probe,
-                    })
+                  value: encodeDiscoveryRulesYaml(
+                    runtimeAttachmentSettings.discoveryRules
                   ),
                 },
                 java_attacher_agent_version: {
@@ -216,16 +219,10 @@ export function JavaRuntimeAttachment({ newPolicy, onChange }: Props) {
       }
       showUnsavedWarning={isDirty}
       initialIsEnabled={apmVars?.java_attacher_enabled?.value}
-      initialDiscoveryRules={(
-        apmVars?.java_attacher_discovery_rules?.value ?? [initialDiscoveryRule]
-      ).map((discoveryRuleMap: Record<string, string>) => {
-        const [operationType, probe] = Object.entries(discoveryRuleMap)[0];
-        return {
-          operation: operationType.split('-')[0],
-          type: operationType.split('-')[1],
-          probe,
-        };
-      })}
+      initialDiscoveryRules={decodeDiscoveryRulesYaml(
+        apmVars?.java_attacher_discovery_rules?.value ?? '[]\n',
+        [initialDiscoveryRule]
+      )}
       selectedVersion={
         apmVars?.java_attacher_agent_version?.value || versions[0]
       }
@@ -234,4 +231,46 @@ export function JavaRuntimeAttachment({ newPolicy, onChange }: Props) {
   );
 }
 
-const initialDiscoveryRule = { 'include-vmarg': 'elastic.apm.attach=true' };
+const initialDiscoveryRule = {
+  operation: 'include',
+  type: 'vmarg',
+  probe: 'elastic.apm.attach=true',
+};
+
+type DiscoveryRulesParsedYaml = Array<{ [operationType: string]: string }>;
+
+function decodeDiscoveryRulesYaml(
+  discoveryRulesYaml: string,
+  defaultDiscoveryRules: IDiscoveryRule[] = []
+): IDiscoveryRule[] {
+  try {
+    const parsedYaml: DiscoveryRulesParsedYaml =
+      yaml.load(discoveryRulesYaml) ?? [];
+
+    if (parsedYaml.length === 0) {
+      return defaultDiscoveryRules;
+    }
+
+    // transform into array of discovery rules
+    return parsedYaml.map((discoveryRuleMap) => {
+      const [operationType, probe] = Object.entries(discoveryRuleMap)[0];
+      return {
+        operation: operationType.split('-')[0],
+        type: operationType.split('-')[1],
+        probe,
+      };
+    });
+  } catch (error) {
+    return defaultDiscoveryRules;
+  }
+}
+
+function encodeDiscoveryRulesYaml(discoveryRules: IDiscoveryRule[]): string {
+  // transform into list of key,value objects for expected yaml result
+  const mappedDiscoveryRules: DiscoveryRulesParsedYaml = discoveryRules.map(
+    ({ operation, type, probe }) => ({
+      [`${operation}-${type}`]: probe,
+    })
+  );
+  return yaml.dump(mappedDiscoveryRules);
+}
