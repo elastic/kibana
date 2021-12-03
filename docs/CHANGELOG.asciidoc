@@ -340,7 +340,6 @@ Machine Learning::
 * Adds KQL filter bar, filtering functionality, and compact design to Index data visualizer {kibana-pull}112870[#112870]
 * Job sync usability improvements {kibana-pull}112693[#112693]
 * Auto-scalable ML node integrations improvements {kibana-pull}112264[#112264]
-* Convert APM transaction anomaly detection job to analyze metric data {kibana-pull}111957[#111957]
 * Datafeed preview based job validation check {kibana-pull}109080[#109080]
 Management::
 * Adds alerting rules management to Transform UI {kibana-pull}115363[#115363]
@@ -349,7 +348,7 @@ Management::
 * Allow fields that start with an underscore in the field list {kibana-pull}111238[#111238]
 * In Snapshot & Restore, the performance of snapshots list is improved to handle a large number of snapshots {kibana-pull}110266[#110266]
 * Open in dev tools button for request inspector {kibana-pull}109923[#109923]
-* Populate date fields for Transform {kibana-pull}108804[#108804]
+* Use date field dropdown for edit transform retention policy setting {kibana-pull}108804[#108804]
 * Adds tooltip help text for Transform filter query control {kibana-pull}108720[#108720]
 Maps::
 * Adds support for UTM and MGRS coordinates in Maps "Go To" button {kibana-pull}107835[#107835]
@@ -455,7 +454,6 @@ Machine Learning::
 * Data Frame Analytics: Fix legend text colors for Vega based charts in dark mode {kibana-pull}115911[#115911]
 * Deletes annotation directly from the index it is stored in {kibana-pull}115328[#115328]
 * Fixes deletion of models that are not used by pipelines {kibana-pull}114107[#114107]
-* Auto-scalable ML node integrations improvements {kibana-pull}112264[#112264]
 Management::
 * Space privilege "Index pattern management" read still shows delete button {kibana-pull}115390[#115390]
 * Pass `compress` flag in query instead of headers {kibana-pull}113929[#113929]
