@@ -382,7 +382,7 @@ const quietLoggingDeprecation: ConfigDeprecation = (
       message: i18n.translate('core.deprecations.loggingQuiet.deprecationMessage', {
         defaultMessage:
           '"logging.quiet" has been deprecated and will be removed ' +
-          'in 8.0. Moving forward, you can use "logging.root.level:error" in your logging configuration. ',
+          'in 8.0. Moving forward, you can use "logging.root.level:error" in your logging configuration.',
       }),
       correctiveActions: {
         manualSteps: [
@@ -413,7 +413,7 @@ const silentLoggingDeprecation: ConfigDeprecation = (
       message: i18n.translate('core.deprecations.loggingSilent.deprecationMessage', {
         defaultMessage:
           '"logging.silent" has been deprecated and will be removed ' +
-          'in 8.0. Moving forward, you can use "logging.root.level:off" in your logging configuration. ',
+          'in 8.0. Moving forward, you can use "logging.root.level:off" in your logging configuration.',
       }),
       correctiveActions: {
         manualSteps: [
@@ -444,7 +444,7 @@ const verboseLoggingDeprecation: ConfigDeprecation = (
       message: i18n.translate('core.deprecations.loggingVerbose.deprecationMessage', {
         defaultMessage:
           '"logging.verbose" has been deprecated and will be removed ' +
-          'in 8.0. Moving forward, you can use "logging.root.level:all" in your logging configuration. ',
+          'in 8.0. Moving forward, you can use "logging.root.level:all" in your logging configuration.',
       }),
       correctiveActions: {
         manualSteps: [
@@ -612,6 +612,50 @@ const logFilterDeprecation: ConfigDeprecation = (
   }
 };
 
+const logFormatDeprecation: ConfigDeprecation = (
+  settings,
+  fromPath,
+  addDeprecation,
+  { branch }
+) => {
+  addDeprecation({
+    configPath: 'logging',
+    level: 'warning',
+    documentationUrl: `https://www.elastic.co/guide/en/kibana/${branch}/logging-configuration-migration.html`,
+    title: i18n.translate('core.deprecations.loggingFormat.deprecationTitle', {
+      defaultMessage: `Kibana's logging format is changing in 8.0`,
+    }),
+    message: i18n.translate('core.deprecations.loggingFormat.deprecationMessage', {
+      defaultMessage:
+        'Starting in 8.0, the Kibana logging format will be changing. ' +
+        'This may affect you if you are doing any special handling of your Kibana logs, ' +
+        'such as ingesting logs into Elasticsearch for further analysis. ' +
+        'If you are using the new logging configuration, you are already receiving logs in both ' +
+        'old and new formats, and the old format will simply be going away. ' +
+        'If you are not yet using the new logging configuration, the log format will change ' +
+        'upon upgrade to 8.0. Beginning in 8.0, the format of JSON logs will be ECS-compatible JSON, ' +
+        'and the default pattern log format will be configurable with our new logging system. ' +
+        'Please refer to the documentation for more information about the new logging format.',
+    }),
+    correctiveActions: {
+      manualSteps: [
+        i18n.translate('core.deprecations.loggingFormat.manualSteps1', {
+          defaultMessage: `Determine whether your infrastructure is relying on Kibana's legacy log format.`,
+        }),
+        i18n.translate('core.deprecations.loggingFormat.manualSteps2', {
+          defaultMessage: `Learn more about our new logging system by checking out the documentation.`,
+        }),
+        i18n.translate('core.deprecations.loggingFormat.manualSteps3', {
+          defaultMessage: `Learn more about ECS at https://www.elastic.co/guide/en/ecs/8.0/ecs-reference.html.`,
+        }),
+        i18n.translate('core.deprecations.loggingFormat.manualSteps4', {
+          defaultMessage: `Update your ingest tooling to use the new logging format.`,
+        }),
+      ],
+    },
+  });
+};
+
 export const coreDeprecationProvider: ConfigDeprecationProvider = ({
   unusedFromRoot,
   renameFromRoot,
@@ -673,4 +717,5 @@ export const coreDeprecationProvider: ConfigDeprecationProvider = ({
   logEventsLogDeprecation,
   logEventsErrorDeprecation,
   logFilterDeprecation,
+  logFormatDeprecation,
 ];
