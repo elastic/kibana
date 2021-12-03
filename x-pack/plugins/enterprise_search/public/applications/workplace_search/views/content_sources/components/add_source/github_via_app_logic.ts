@@ -40,9 +40,9 @@ export const GithubViaAppLogic = kea<MakeLogicType<GithubViaAppValues, GithubVia
   actions: {
     setGithubAppId: (githubAppId: string) => githubAppId,
     setGithubEnterpriseServerUrl: (githubEnterpriseServerUrl: string) => githubEnterpriseServerUrl,
-    createContentSource: () => true,
+    createContentSource: true,
     setStagedPrivateKey: (stagedPrivateKey: string) => stagedPrivateKey,
-    setButtonNotLoading: () => false,
+    setButtonNotLoading: false,
     setSourceIndexPermissionsValue: (indexPermissionsValue: boolean) => indexPermissionsValue,
   },
   reducers: {
@@ -86,7 +86,8 @@ export const GithubViaAppLogic = kea<MakeLogicType<GithubViaAppValues, GithubVia
         ? '/internal/workplace_search/org/create_source'
         : '/internal/workplace_search/account/create_source';
 
-      const { githubAppId, githubEnterpriseServerUrl, stagedPrivateKey } = values;
+      const { githubAppId, githubEnterpriseServerUrl, stagedPrivateKey, indexPermissionsValue } =
+        values;
 
       const params = {
         service_type: githubEnterpriseServerUrl
@@ -95,7 +96,7 @@ export const GithubViaAppLogic = kea<MakeLogicType<GithubViaAppValues, GithubVia
         app_id: githubAppId,
         base_url: githubEnterpriseServerUrl,
         private_key: stagedPrivateKey,
-        index_permissions: values.indexPermissionsValue,
+        index_permissions: indexPermissionsValue,
       };
 
       try {

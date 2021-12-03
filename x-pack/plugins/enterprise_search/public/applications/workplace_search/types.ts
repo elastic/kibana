@@ -181,8 +181,7 @@ export interface IndexingConfig {
   schedule: IndexingSchedule;
 }
 
-// GitHub apps only
-interface Secret {
+interface AppSecret {
   app_id: string;
   fingerprint: string;
   base_url?: string;
@@ -208,7 +207,7 @@ export interface ContentSourceFullData extends ContentSourceDetails {
   urlFieldIsLinkable: boolean;
   createdAt: string;
   serviceName: string;
-  secret?: Secret; // undefined for all content sources except GitHub apps
+  secret?: AppSecret; // undefined for all content sources except GitHub apps
 }
 
 export interface ContentSourceStatus {

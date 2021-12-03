@@ -115,9 +115,7 @@ export const GitHubViaApp: React.FC<GithubViaAppProps> = ({ isGithubEnterpriseSe
           isLoading={isSubmitButtonLoading}
           isDisabled={!githubAppId || (isGithubEnterpriseServer && !githubEnterpriseServerUrl)}
         >
-          {isSubmitButtonLoading
-            ? 'Connecting…'
-            : `Connect ${isGithubEnterpriseServer ? 'GitHub Enterprise Server' : 'GitHub'}`}
+          {isSubmitButtonLoading ? 'Connecting…' : `Connect ${name}`}
         </EuiButton>
       </form>
     </Layout>
