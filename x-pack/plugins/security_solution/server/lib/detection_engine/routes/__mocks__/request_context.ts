@@ -30,6 +30,7 @@ import type {
   SecuritySolutionApiRequestHandlerContext,
   SecuritySolutionRequestHandlerContext,
 } from '../../../../types';
+import { getEndpointAuthzInitialStateMock } from '../../../../../common/endpoint/service/authz';
 
 const createMockClients = () => {
   const core = coreMock.createRequestHandlerContext();
@@ -93,6 +94,7 @@ const createSecuritySolutionRequestContextMock = (
 
   return {
     core,
+    endpointAuthz: getEndpointAuthzInitialStateMock(),
     getConfig: jest.fn(() => clients.config),
     getFrameworkRequest: jest.fn(() => {
       return {
