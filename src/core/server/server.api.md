@@ -11,7 +11,7 @@ import Boom from '@hapi/boom';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { CliArgs } from '@kbn/config';
 import type { ClientOptions } from '@elastic/elasticsearch/lib/client';
-import { ConditionalType } from '@kbn/config-schema/target_types/types';
+import { ConditionalType } from '@kbn/config-schema';
 import { ConfigDeprecation } from '@kbn/config';
 import { ConfigDeprecationContext } from '@kbn/config';
 import { ConfigDeprecationFactory } from '@kbn/config';

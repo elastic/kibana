@@ -32,7 +32,6 @@ NPM_MODULE_EXTRA_FILES = [
 
 RUNTIME_DEPS = [
   "//packages/kbn-utility-types",
-  "//packages/kbn-config-schema",
   "//packages/kbn-i18n",
   "@npm//@elastic/elasticsearch",
   "@npm//load-json-file",
