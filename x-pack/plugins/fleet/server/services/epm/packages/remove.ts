@@ -6,9 +6,12 @@
  */
 
 import type { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
+
 import Boom from '@hapi/boom';
 
 import type { SavedObject } from 'src/core/server';
+
+import { SavedObjectsClient } from '../../../../../../../src/core/server';
 
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE, PACKAGES_SAVED_OBJECT_TYPE } from '../../../constants';
 import { DEFAULT_SPACE_ID } from '../../../../../spaces/common/constants';
@@ -84,9 +87,11 @@ export async function removeInstallation(options: {
 
 async function deleteKibanaAssets(
   installedObjects: KibanaAssetReference[],
-  savedObjectsClient: SavedObjectsClientContract,
   spaceId: string = DEFAULT_SPACE_ID
 ) {
+  const savedObjectsClient = new SavedObjectsClient(
+    appContextService.getSavedObjects().createInternalRepository()
+  );
   const namespace = SavedObjectsUtils.namespaceStringToId(spaceId);
   const { resolved_objects: resolvedObjects } = await savedObjectsClient.bulkResolve(
     installedObjects,
@@ -165,7 +170,7 @@ async function deleteAssets(
     // then the other asset types
     await Promise.all([
       ...deleteESAssets(otherAssets, esClient),
-      deleteKibanaAssets(installedKibana, savedObjectsClient, spaceId),
+      deleteKibanaAssets(installedKibana, spaceId),
     ]);
   } catch (err) {
     // in the rollback case, partial installs are likely, so missing assets are not an error
@@ -214,7 +219,7 @@ export async function deleteKibanaSavedObjectsAssets({
     .map(({ id, type }) => ({ id, type } as KibanaAssetReference));
 
   try {
-    await deleteKibanaAssets(assetsToDelete, savedObjectsClient, spaceId);
+    await deleteKibanaAssets(assetsToDelete, spaceId);
   } catch (err) {
     // in the rollback case, partial installs are likely, so missing assets are not an error
     if (!savedObjectsClient.errors.isNotFoundError(err)) {

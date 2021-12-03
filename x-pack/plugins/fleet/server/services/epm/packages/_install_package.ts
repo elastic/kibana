@@ -119,7 +119,6 @@ export async function _installPackage({
       savedObjectsImporter,
       pkgName,
       kibanaAssets,
-      spaceId,
     });
 
     // the rest of the installation must happen in sequential order
