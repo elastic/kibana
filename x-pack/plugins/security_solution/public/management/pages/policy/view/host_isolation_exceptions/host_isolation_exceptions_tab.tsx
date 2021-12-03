@@ -137,7 +137,7 @@ export const PolicyHostIsolationExceptionsTab = ({
 
           <EuiSpacer size="s" />
 
-          <EuiText size="xs">
+          <EuiText size="xs" data-test-subj="policyHostIsolationExceptionsTabSubtitle">
             <p>{subTitle}</p>
           </EuiText>
         </EuiPageHeaderSection>
@@ -158,7 +158,11 @@ export const PolicyHostIsolationExceptionsTab = ({
       </EuiPageContent>
     </div>
   ) : (
-    <EuiProgress size="xs" color="primary" />
+    <EuiProgress
+      size="xs"
+      color="primary"
+      data-test-subj="policyHostIsolationExceptionsTabLoading"
+    />
   );
 };
 PolicyHostIsolationExceptionsTab.displayName = 'PolicyHostIsolationExceptionsTab';
