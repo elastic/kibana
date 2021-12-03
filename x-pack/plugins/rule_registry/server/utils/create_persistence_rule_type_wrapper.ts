@@ -25,7 +25,16 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
               const numAlerts = alerts.length;
               logger.debug(`Found ${numAlerts} alerts.`);
 
-              if (ruleDataClient.isWriteEnabled() && numAlerts) {
+              // Only write alerts if:
+              // - writing is enabled
+              //   AND
+              //   - rule execution has not been cancelled due to timeout
+              //     OR
+              //   - if execution has been cancelled due to timeout, if feature flags are configured to write alerts anyway
+              const writeAlerts =
+                ruleDataClient.isWriteEnabled() && options.services.shouldWriteAlerts();
+
+              if (writeAlerts && numAlerts) {
                 const commonRuleFields = getCommonAlertFields(options);
 
                 const CHUNK_SIZE = 10000;
