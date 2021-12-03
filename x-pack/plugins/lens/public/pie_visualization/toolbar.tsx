@@ -22,7 +22,7 @@ import type { Position } from '@elastic/charts';
 import type { SavedObjectsClientContract } from 'kibana/public';
 import type { PaletteRegistry, PaletteOutput } from 'src/plugins/charts/public';
 import type { FormatFactory, CustomPaletteParams } from '../../common';
-import { DEFAULT_PERCENT_DECIMALS, CHART_NAMES } from './constants';
+import { DEFAULT_PERCENT_DECIMALS } from './constants';
 import { PartitionChartsMeta } from './partition_charts_meta';
 import type { PieVisualizationState, SharedPieLayerState } from '../../common/expressions';
 import { VisualizationDimensionEditorProps, VisualizationToolbarProps } from '../types';
