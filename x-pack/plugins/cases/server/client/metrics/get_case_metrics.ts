@@ -71,7 +71,7 @@ const buildHandlers = (
   const handlers = [
     new Lifespan(params.caseId, casesClient),
     new AlertsCount(params.caseId, casesClient),
-    new AlertDetails(),
+    new AlertDetails(params.caseId, casesClient, clientArgs),
     new Connectors(),
   ];
 

@@ -6,8 +6,9 @@
  */
 
 import pMap from 'p-map';
-import { isEmpty } from 'lodash';
+import { isEmpty, uniq } from 'lodash';
 
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ElasticsearchClient, Logger } from 'kibana/server';
 import { CaseStatuses, MAX_ALERTS_PER_SUB_CASE, MAX_CONCURRENT_SEARCHES } from '../../../common';
 import { AlertInfo, createCaseError } from '../../common';
@@ -16,6 +17,11 @@ import {
   ALERT_WORKFLOW_STATUS,
   STATUS_VALUES,
 } from '../../../../rule_registry/common/technical_rule_data_field_names';
+
+export enum AggregationFields {
+  Users = 'users',
+  Hosts = 'hosts',
+}
 
 interface Alert {
   _id: string;
@@ -36,6 +42,78 @@ export class AlertService {
     private readonly scopedClusterClient: ElasticsearchClient,
     private readonly logger: Logger
   ) {}
+
+  public async aggregateFields({
+    fields,
+    ids,
+    indices,
+    size,
+  }: {
+    fields: AggregationFields[];
+    ids: string[];
+    indices: [];
+    size: number;
+  }) {
+    try {
+      const uniqueIds = uniq(ids);
+      const uniqueIndices = uniq(indices);
+
+      const res = this.scopedClusterClient.search({
+        index: uniqueIndices,
+        query: { ids: { values: uniqueIds } },
+        aggregations: this.buildFieldAggregations(fields, size),
+      });
+    } catch (error) {
+      // TODO: do it
+    }
+  }
+
+  private buildFieldAggregations(fields: AggregationFields[], size: number) {
+    const topHits: estypes.AggregationsAggregationContainer = {
+      aggs: {
+        top_hosts: {
+          top_hits: {
+            sort: [
+              {
+                '@timestamp': {
+                  order: 'desc',
+                },
+              },
+            ],
+          },
+        },
+      },
+    };
+
+    return fields.reduce<Record<string, estypes.AggregationsAggregationContainer>>((acc, field) => {
+      switch (field) {
+        case AggregationFields.Hosts:
+          return {
+            ...acc,
+            hosts: {
+              terms: {
+                field: 'host.id',
+                size,
+              },
+              ...topHits,
+            },
+          };
+        case AggregationFields.Users:
+          return {
+            ...acc,
+            users: {
+              terms: {
+                field: 'user.name',
+                size,
+              },
+              ...topHits,
+            },
+          };
+        default:
+          return acc;
+      }
+    }, {});
+  }
 
   public async updateAlertsStatus(alerts: UpdateAlertRequest[]) {
     try {
