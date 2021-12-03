@@ -8,12 +8,14 @@
 import { merge } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
-  TRANSACTION_TYPE,
   AGENT_NAME,
+  TRANSACTION_TYPE,
+  TRANSACTION_NAME,
+  SERVICE_NAME,
 } from '../../../common/elasticsearch_fieldnames';
 import { arrayUnionToCallable } from '../../../common/utils/array_union_to_callable';
 import { TransactionGroupRequestBase, TransactionGroupSetup } from './fetcher';
-import { getTransactionDurationFieldForTransactions } from '../helpers/transactions';
+import { getDurationFieldForTransactions } from '../helpers/transactions';
 import { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
 interface MetricParams {
   request: TransactionGroupRequestBase;
@@ -21,7 +23,7 @@ interface MetricParams {
   searchAggregatedTransactions: boolean;
 }
 
-type BucketKey = Record<string, string>;
+type BucketKey = Record<typeof TRANSACTION_NAME | typeof SERVICE_NAME, string>;
 
 function mergeRequestWithAggs<
   TRequestBase extends TransactionGroupRequestBase,
@@ -49,9 +51,7 @@ export async function getAverages({
   const params = mergeRequestWithAggs(request, {
     avg: {
       avg: {
-        field: getTransactionDurationFieldForTransactions(
-          searchAggregatedTransactions
-        ),
+        field: getDurationFieldForTransactions(searchAggregatedTransactions),
       },
     },
   });
@@ -119,9 +119,7 @@ export async function getSums({
   const params = mergeRequestWithAggs(request, {
     sum: {
       sum: {
-        field: getTransactionDurationFieldForTransactions(
-          searchAggregatedTransactions
-        ),
+        field: getDurationFieldForTransactions(searchAggregatedTransactions),
       },
     },
   });
