@@ -18,21 +18,17 @@ function hasIntervalScale(columns: TableSuggestionColumn[]) {
   return columns.some((col) => col.operation.scale === 'interval');
 }
 
-function shouldReject({
-  table,
-  keptLayerIds,
-  state,
-}: SuggestionRequest<PieVisualizationState>) {
+function shouldReject({ table, keptLayerIds, state }: SuggestionRequest<PieVisualizationState>) {
   // usecase for dropping a field - state doesn't exist yet and subVisualizationId doesn't exist
-  const isPartitionChart = state?.shape && isPartitionShape(state.shape)
+  const isPartitionChart = state?.shape && isPartitionShape(state.shape);
   const isEmptyPartition =
-    isPartitionLike &&
+    isPartitionChart &&
     state?.layers?.[0]?.metric === undefined &&
     state?.layers?.[0]?.groups.length === 0;
 
   // Histograms are not good for pi. But we should not reject them on switching between partition charts.
   const shouldRejectIntervals =
-    isPartitionChart || isEmptyPartition ? false : hasIntervalScale(table.columns);
+    isPartitionChart && !isEmptyPartition ? false : hasIntervalScale(table.columns);
 
   return (
     keptLayerIds.length > 1 ||
@@ -76,7 +72,6 @@ export function suggestions({
 }: SuggestionRequest<PieVisualizationState>): Array<
   VisualizationSuggestion<PieVisualizationState>
 > {
-
   if (shouldReject({ table, state, keptLayerIds })) {
     return [];
   }
