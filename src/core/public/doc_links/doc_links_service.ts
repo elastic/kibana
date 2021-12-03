@@ -9,7 +9,7 @@
 import { deepFreeze } from '@kbn/std';
 import { InjectedMetadataSetup } from '../injected_metadata';
 
-interface StartDeps {
+export interface StartDeps {
   injectedMetadata: InjectedMetadataSetup;
 }
 
@@ -97,13 +97,11 @@ export class DocLinksService {
           indexingDocumentsSchema: `${APP_SEARCH_DOCS}indexing-documents-guide.html#indexing-documents-guide-schema`,
           logSettings: `${APP_SEARCH_DOCS}logs.html`,
           metaEngines: `${APP_SEARCH_DOCS}meta-engines-guide.html`,
-          nativeAuth: `${APP_SEARCH_DOCS}security-and-users.html#app-search-self-managed-security-and-user-management-elasticsearch-native-realm`,
           precisionTuning: `${APP_SEARCH_DOCS}precision-tuning.html`,
           relevanceTuning: `${APP_SEARCH_DOCS}relevance-tuning-guide.html`,
           resultSettings: `${APP_SEARCH_DOCS}result-settings-guide.html`,
           searchUI: `${APP_SEARCH_DOCS}reference-ui-guide.html`,
           security: `${APP_SEARCH_DOCS}security-and-users.html`,
-          standardAuth: `${APP_SEARCH_DOCS}security-and-users.html#app-search-self-managed-security-and-user-management-standard`,
           synonyms: `${APP_SEARCH_DOCS}synonyms-guide.html`,
           webCrawler: `${APP_SEARCH_DOCS}web-crawler.html`,
           webCrawlerEventLogs: `${APP_SEARCH_DOCS}view-web-crawler-events-logs.html`,
@@ -130,7 +128,6 @@ export class DocLinksService {
           indexingSchedule: `${WORKPLACE_SEARCH_DOCS}workplace-search-customizing-indexing-rules.html#_indexing_schedule`,
           jiraCloud: `${WORKPLACE_SEARCH_DOCS}workplace-search-jira-cloud-connector.html`,
           jiraServer: `${WORKPLACE_SEARCH_DOCS}workplace-search-jira-server-connector.html`,
-          nativeAuth: `${WORKPLACE_SEARCH_DOCS}workplace-search-security.html#elasticsearch-native-realm`,
           oneDrive: `${WORKPLACE_SEARCH_DOCS}workplace-search-onedrive-connector.html`,
           permissions: `${WORKPLACE_SEARCH_DOCS}workplace-search-permissions.html#organizational-sources-private-sources`,
           salesforce: `${WORKPLACE_SEARCH_DOCS}workplace-search-salesforce-connector.html`,
@@ -138,7 +135,6 @@ export class DocLinksService {
           serviceNow: `${WORKPLACE_SEARCH_DOCS}workplace-search-servicenow-connector.html`,
           sharePoint: `${WORKPLACE_SEARCH_DOCS}workplace-search-sharepoint-online-connector.html`,
           slack: `${WORKPLACE_SEARCH_DOCS}workplace-search-slack-connector.html`,
-          standardAuth: `${WORKPLACE_SEARCH_DOCS}workplace-search-security.html#standard`,
           synch: `${WORKPLACE_SEARCH_DOCS}workplace-search-customizing-indexing-rules.html`,
           zendesk: `${WORKPLACE_SEARCH_DOCS}workplace-search-zendesk-connector.html`,
         },
@@ -246,6 +242,7 @@ export class DocLinksService {
           ilmWaitForSnapshot: `${ELASTICSEARCH_DOCS}ilm-wait-for-snapshot.html`,
           indexModules: `${ELASTICSEARCH_DOCS}index-modules.html`,
           indexSettings: `${ELASTICSEARCH_DOCS}index-modules.html#index-modules-settings`,
+          dynamicIndexSettings: `${ELASTICSEARCH_DOCS}index-modules.html#dynamic-index-settings`,
           indexTemplates: `${ELASTICSEARCH_DOCS}index-templates.html`,
           mapping: `${ELASTICSEARCH_DOCS}mapping.html`,
           mappingAnalyzer: `${ELASTICSEARCH_DOCS}analyzer.html`,
@@ -658,13 +655,11 @@ export interface DocLinksStart {
       readonly indexingDocumentsSchema: string;
       readonly logSettings: string;
       readonly metaEngines: string;
-      readonly nativeAuth: string;
       readonly precisionTuning: string;
       readonly relevanceTuning: string;
       readonly resultSettings: string;
       readonly searchUI: string;
       readonly security: string;
-      readonly standardAuth: string;
       readonly synonyms: string;
       readonly webCrawler: string;
       readonly webCrawlerEventLogs: string;
@@ -691,7 +686,6 @@ export interface DocLinksStart {
       readonly indexingSchedule: string;
       readonly jiraCloud: string;
       readonly jiraServer: string;
-      readonly nativeAuth: string;
       readonly oneDrive: string;
       readonly permissions: string;
       readonly salesforce: string;
@@ -699,7 +693,6 @@ export interface DocLinksStart {
       readonly serviceNow: string;
       readonly sharePoint: string;
       readonly slack: string;
-      readonly standardAuth: string;
       readonly synch: string;
       readonly zendesk: string;
     };
