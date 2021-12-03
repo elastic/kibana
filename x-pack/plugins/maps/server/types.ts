@@ -10,8 +10,7 @@ import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/s
 import { HomeServerPluginSetup } from '../../../../src/plugins/home/server';
 import { LicensingPluginSetup } from '../../licensing/server';
 import { MapsEmsPluginSetup } from '../../../../src/plugins/maps_ems/server';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { EmbeddableSetup } from '../../../../src/plugins/embeddable/server/plugin';
+import { EmbeddableSetup } from '../../../../src/plugins/embeddable/server';
 import { PluginStart as DataPluginStart } from '../../../../src/plugins/data/server';
 import { CustomIntegrationsPluginSetup } from '../../../../src/plugins/custom_integrations/server';
 
