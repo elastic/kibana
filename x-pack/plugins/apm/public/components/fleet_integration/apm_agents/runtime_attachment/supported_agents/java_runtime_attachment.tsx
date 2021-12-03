@@ -24,28 +24,58 @@ interface Props {
 const excludeOptions = [
   {
     value: 'main',
-    label: 'main',
-    description:
-      'A regular expression of fully qualified main class names or paths to JARs of applications the java agent should be attached to. Performs a partial match so that foo matches /bin/foo.jar.',
+    label: i18n.translate(
+      'xpack.apm.fleetIntegration.javaRuntime.operationType.exclude.options.main',
+      { defaultMessage: 'main' }
+    ),
+    description: i18n.translate(
+      'xpack.apm.fleetIntegration.javaRuntime.operationType.exclude.options.mainDescription',
+      {
+        defaultMessage:
+          'A regular expression of fully qualified main class names or paths to JARs of applications the java agent should be attached to. Performs a partial match so that foo matches /bin/foo.jar.',
+      }
+    ),
   },
   {
     value: 'vmarg',
-    label: 'vmarg',
-    description:
-      'A regular expression matched against the arguments passed to the JVM, such as system properties. Performs a partial match so that attach=true matches the system property -Dattach=true.',
+    label: i18n.translate(
+      'xpack.apm.fleetIntegration.javaRuntime.operationType.exclude.options.vmarg',
+      { defaultMessage: 'vmarg' }
+    ),
+    description: i18n.translate(
+      'xpack.apm.fleetIntegration.javaRuntime.operationType.exclude.options.vmargDescription',
+      {
+        defaultMessage:
+          'A regular expression matched against the arguments passed to the JVM, such as system properties. Performs a partial match so that attach=true matches the system property -Dattach=true.',
+      }
+    ),
   },
   {
     value: 'user',
-    label: 'user',
-    description:
-      'A username that is matched against the operating system user that runs the JVM. For included users, make sure that the Elastic Agent user is either the same user or has permissions to switch to the user that runs the target JVM.',
+    label: i18n.translate(
+      'xpack.apm.fleetIntegration.javaRuntime.operationType.exclude.options.user',
+      { defaultMessage: 'user' }
+    ),
+    description: i18n.translate(
+      'xpack.apm.fleetIntegration.javaRuntime.operationType.exclude.options.vmargDescription',
+      {
+        defaultMessage:
+          'A username that is matched against the operating system user that runs the JVM. For included users, make sure that the Elastic Agent user is either the same user or has permissions to switch to the user that runs the target JVM.',
+      }
+    ),
   },
 ];
 const includeOptions = [
   {
     value: 'all',
-    label: 'All',
-    description: 'Includes all JVMs for attachment.',
+    label: i18n.translate(
+      'xpack.apm.fleetIntegration.javaRuntime.operationType.include.options.all',
+      { defaultMessage: 'All' }
+    ),
+    description: i18n.translate(
+      'xpack.apm.fleetIntegration.javaRuntime.operationType.include.options.allDescription',
+      { defaultMessage: 'Includes all JVMs for attachment.' }
+    ),
   },
   ...excludeOptions,
 ];
@@ -130,16 +160,34 @@ export function JavaRuntimeAttachment({ newPolicy, onChange }: Props) {
     <RuntimeAttachment
       operationTypes={[
         {
-          operation: { value: 'include', label: 'Include' },
+          operation: {
+            value: 'include',
+            label: i18n.translate(
+              'xpack.apm.fleetIntegration.javaRuntime.operationType.include',
+              { defaultMessage: 'Include' }
+            ),
+          },
           types: includeOptions,
         },
         {
-          operation: { value: 'exclude', label: 'Exclude' },
+          operation: {
+            value: 'exclude',
+            label: i18n.translate(
+              'xpack.apm.fleetIntegration.javaRuntime.operationType.exclude',
+              { defaultMessage: 'Exclude' }
+            ),
+          },
           types: excludeOptions,
         },
       ]}
       onChange={onChangePolicy}
-      toggleDescription="Attach the Java agent to running and starting Java applications."
+      toggleDescription={i18n.translate(
+        'xpack.apm.fleetIntegration.javaRuntime.toggleDescription',
+        {
+          defaultMessage:
+            'Attach the Java agent to running and starting Java applications.',
+        }
+      )}
       discoveryRulesDescription={
         <FormattedMessage
           id="xpack.apm.fleetIntegration.javaRuntime.discoveryRulesDescription"

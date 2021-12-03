@@ -23,6 +23,7 @@ import {
   EuiFormRow,
 } from '@elastic/eui';
 import React, { ReactNode } from 'react';
+import { i18n } from '@kbn/i18n';
 import { DiscoveryRule } from './discovery_rule';
 import { DefaultDiscoveryRule } from './default_discovery_rule';
 import { EditDiscoveryRule } from './edit_discovery_rule';
@@ -90,9 +91,13 @@ export function RuntimeAttachment({
       {showUnsavedWarning && (
         <>
           <EuiCallOut
-            title={
-              'You have unsaved changes. Click "Save integration" to sync changes to the integration.'
-            }
+            title={i18n.translate(
+              'xpack.apm.fleetIntegration.apmAgent.runtimeAttachment.unsavedRules',
+              {
+                defaultMessage:
+                  'You have unsaved changes. Click "Save integration" to sync changes to the integration.',
+              }
+            )}
             color="warning"
             iconType="iInCircle"
             size="s"
@@ -103,7 +108,10 @@ export function RuntimeAttachment({
       <EuiFlexGroup>
         <EuiFlexItem>
           <EuiSwitch
-            label="Enable runtime attachment"
+            label={i18n.translate(
+              'xpack.apm.fleetIntegration.apmAgent.runtimeAttachment.enableRuntimeAttachement',
+              { defaultMessage: 'Enable runtime attachment' }
+            )}
             checked={isEnabled}
             onChange={onToggleEnable}
           />
@@ -117,11 +125,17 @@ export function RuntimeAttachment({
             <EuiFormRow
               label="Version"
               isInvalid={!isValidVersion}
-              error="Invalid version"
+              error={i18n.translate(
+                'xpack.apm.fleetIntegration.apmAgent.runtimeAttachment.version.invalid',
+                { defaultMessage: 'Invalid version' }
+              )}
             >
               <EuiComboBox
                 selectedOptions={[{ label: selectedVersion }]}
-                placeholder="Select or add a version"
+                placeholder={i18n.translate(
+                  'xpack.apm.fleetIntegration.apmAgent.runtimeAttachment.version.placeHolder',
+                  { defaultMessage: 'Select or add a version' }
+                )}
                 options={versions.map((_version) => ({ label: _version }))}
                 onChange={onChangeVersion}
                 onCreateOption={onCreateNewVersion}
@@ -136,7 +150,12 @@ export function RuntimeAttachment({
         <>
           <EuiSpacer size="l" />
           <EuiText size="s">
-            <h3>Discovery rules</h3>
+            <h3>
+              {i18n.translate(
+                'xpack.apm.fleetIntegration.apmAgent.runtimeAttachment.discoveryRules',
+                { defaultMessage: 'Discovery rules' }
+              )}
+            </h3>
           </EuiText>
           <EuiSpacer size="s" />
           <EuiFlexGroup alignItems="center" gutterSize="m">

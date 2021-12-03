@@ -18,6 +18,7 @@ import {
   EuiSuperSelect,
   EuiText,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import React from 'react';
 import {
   Operation,
@@ -71,7 +72,15 @@ export function EditDiscoveryRule({
       <EuiFlexGroup>
         <EuiFlexItem>
           <EuiFormFieldset legend={{ children: 'Type' }}>
-            <EuiFormRow fullWidth helpText="Choose from allowed params">
+            <EuiFormRow
+              fullWidth
+              helpText={i18n.translate(
+                'xpack.apm.fleetIntegration.apmAgent.runtimeAttachment.editRule.helpText',
+                {
+                  defaultMessage: 'Choose from allowed params',
+                }
+              )}
+            >
               <EuiSuperSelect
                 hasDividers
                 fullWidth
@@ -107,7 +116,15 @@ export function EditDiscoveryRule({
         <EuiFlexGroup>
           <EuiFlexItem>
             <EuiFormFieldset legend={{ children: 'Probe' }}>
-              <EuiFormRow fullWidth helpText="Enter the probe value">
+              <EuiFormRow
+                fullWidth
+                helpText={i18n.translate(
+                  'xpack.apm.fleetIntegration.apmAgent.runtimeAttachment.editRule.probeValue',
+                  {
+                    defaultMessage: 'Enter the probe value',
+                  }
+                )}
+              >
                 <EuiFieldText
                   fullWidth
                   value={probe}
@@ -128,7 +145,15 @@ export function EditDiscoveryRule({
             fill
             disabled={type === DISCOVERY_RULE_TYPE_ALL ? false : probe === ''}
           >
-            {id === STAGED_DISCOVERY_RULE_ID ? 'Add' : 'Save'}
+            {id === STAGED_DISCOVERY_RULE_ID
+              ? i18n.translate(
+                  'xpack.apm.fleetIntegration.apmAgent.runtimeAttachment.editRule.add',
+                  { defaultMessage: 'Add' }
+                )
+              : i18n.translate(
+                  'xpack.apm.fleetIntegration.apmAgent.runtimeAttachment.editRule.save',
+                  { defaultMessage: 'Save' }
+                )}
           </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>
