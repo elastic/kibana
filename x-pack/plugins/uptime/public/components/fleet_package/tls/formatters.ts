@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import { ITLSFields, ConfigKeys } from '../types';
+import { TLSFields, ConfigKey } from '../types';
 import { Formatter } from '../common/formatters';
 
-type TLSFormatMap = Record<keyof ITLSFields, Formatter>;
+type TLSFormatMap = Record<keyof TLSFields, Formatter>;
 
 export const tlsFormatters: TLSFormatMap = {
-  [ConfigKeys.TLS_CERTIFICATE_AUTHORITIES]: (fields) =>
-    tlsValueToYamlFormatter(fields[ConfigKeys.TLS_CERTIFICATE_AUTHORITIES]),
-  [ConfigKeys.TLS_CERTIFICATE]: (fields) =>
-    tlsValueToYamlFormatter(fields[ConfigKeys.TLS_CERTIFICATE]),
-  [ConfigKeys.TLS_KEY]: (fields) => tlsValueToYamlFormatter(fields[ConfigKeys.TLS_KEY]),
-  [ConfigKeys.TLS_KEY_PASSPHRASE]: (fields) =>
-    tlsValueToStringFormatter(fields[ConfigKeys.TLS_KEY_PASSPHRASE]),
-  [ConfigKeys.TLS_VERIFICATION_MODE]: (fields) =>
-    tlsValueToStringFormatter(fields[ConfigKeys.TLS_VERIFICATION_MODE]),
-  [ConfigKeys.TLS_VERSION]: (fields) => tlsArrayToYamlFormatter(fields[ConfigKeys.TLS_VERSION]),
+  [ConfigKey.TLS_CERTIFICATE_AUTHORITIES]: (fields) =>
+    tlsValueToYamlFormatter(fields[ConfigKey.TLS_CERTIFICATE_AUTHORITIES]),
+  [ConfigKey.TLS_CERTIFICATE]: (fields) =>
+    tlsValueToYamlFormatter(fields[ConfigKey.TLS_CERTIFICATE]),
+  [ConfigKey.TLS_KEY]: (fields) => tlsValueToYamlFormatter(fields[ConfigKey.TLS_KEY]),
+  [ConfigKey.TLS_KEY_PASSPHRASE]: (fields) =>
+    tlsValueToStringFormatter(fields[ConfigKey.TLS_KEY_PASSPHRASE]),
+  [ConfigKey.TLS_VERIFICATION_MODE]: (fields) =>
+    tlsValueToStringFormatter(fields[ConfigKey.TLS_VERIFICATION_MODE]),
+  [ConfigKey.TLS_VERSION]: (fields) => tlsArrayToYamlFormatter(fields[ConfigKey.TLS_VERSION]),
 };
 
 // only add tls settings if they are enabled by the user and isEnabled is true

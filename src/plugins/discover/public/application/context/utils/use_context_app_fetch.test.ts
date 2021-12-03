@@ -21,6 +21,7 @@ import {
 import { indexPatternWithTimefieldMock } from '../../../__mocks__/index_pattern_with_timefield';
 import { createContextSearchSourceStub } from '../services/_stubs';
 import { IndexPattern } from '../../../../../data_views/common';
+import { themeServiceMock } from '../../../../../../core/public/mocks';
 
 const mockFilterManager = createFilterManagerMock();
 
@@ -60,7 +61,10 @@ const initDefaults = (tieBreakerFields: string[], indexPatternId = 'the-index-pa
       },
     },
     toastNotifications: { addDanger: dangerNotification },
-    core: { notifications: { toasts: [] } },
+    core: {
+      notifications: { toasts: [] },
+      theme: { theme$: themeServiceMock.createStartContract().theme$ },
+    },
     history: () => {},
     filterManager: mockFilterManager,
     uiSettings: {
