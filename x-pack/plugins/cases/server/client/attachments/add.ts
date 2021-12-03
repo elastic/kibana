@@ -10,6 +10,7 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 
+import { nodeBuilder } from '@kbn/es-query';
 import {
   SavedObject,
   SavedObjectsClientContract,
@@ -17,7 +18,6 @@ import {
   SavedObjectsUtils,
 } from '../../../../../../src/core/server';
 import { LensServerPluginSetup } from '../../../../lens/server';
-import { nodeBuilder } from '../../../../../../src/plugins/data/common';
 
 import {
   AlertCommentRequestRt,
@@ -127,6 +127,7 @@ const addGeneratedAlerts = async (
     logger,
     lensEmbeddableFactory,
     authorization,
+    alertsService,
   } = clientArgs;
 
   const query = pipe(
@@ -204,9 +205,7 @@ const addGeneratedAlerts = async (
         comment: query,
         status: subCase.attributes.status,
       });
-      await casesClientInternal.alerts.updateStatus({
-        alerts: alertsToUpdate,
-      });
+      await alertsService.updateAlertsStatus(alertsToUpdate);
     }
 
     await userActionService.bulkCreate({
@@ -339,6 +338,7 @@ export const addComment = async (
     logger,
     lensEmbeddableFactory,
     authorization,
+    alertsService,
   } = clientArgs;
 
   if (isCommentRequestTypeGenAlert(comment)) {
@@ -392,9 +392,7 @@ export const addComment = async (
         status: updatedCase.status,
       });
 
-      await casesClientInternal.alerts.updateStatus({
-        alerts: alertsToUpdate,
-      });
+      await alertsService.updateAlertsStatus(alertsToUpdate);
     }
 
     await userActionService.bulkCreate({

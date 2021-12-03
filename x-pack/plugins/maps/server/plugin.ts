@@ -24,14 +24,16 @@ import { registerMapsUsageCollector } from './maps_telemetry/collectors/register
 import { APP_ID, APP_ICON, MAP_SAVED_OBJECT_TYPE, getFullPath } from '../common/constants';
 import { mapSavedObjects, mapsTelemetrySavedObjects } from './saved_objects';
 import { MapsXPackConfig } from '../config';
-// @ts-ignore
-import { setIndexPatternsService, setInternalRepository } from './kibana_server_services';
+import { setStartServices } from './kibana_server_services';
+import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/server';
 import { emsBoundariesSpecProvider } from './tutorials/ems';
 import { initRoutes } from './routes';
 import { ILicense } from '../../licensing/common/types';
 import { HomeServerPluginSetup } from '../../../../src/plugins/home/server';
 import type { EMSSettings } from '../../../../src/plugins/maps_ems/server';
 import { embeddableMigrations } from './embeddable_migrations';
+import { CustomIntegrationsPluginSetup } from '../../../../src/plugins/custom_integrations/server';
+import { registerIntegrations } from './register_integrations';
 import { StartDeps, SetupDeps } from './types';
 
 export class MapsPlugin implements Plugin {
@@ -136,9 +138,8 @@ export class MapsPlugin implements Plugin {
     );
   }
 
-  // @ts-ignore
   setup(core: CoreSetup, plugins: SetupDeps) {
-    const { usageCollection, home, licensing, features, mapsEms } = plugins;
+    const { usageCollection, home, licensing, features, mapsEms, customIntegrations } = plugins;
     const config$ = this._initializerContext.config.create();
 
     let isEnterprisePlus = false;
@@ -152,6 +153,10 @@ export class MapsPlugin implements Plugin {
 
     if (home) {
       this._initHomeData(home, core.http.basePath.prepend, emsSettings);
+    }
+
+    if (customIntegrations) {
+      registerIntegrations(core, customIntegrations);
     }
 
     features.registerKibanaFeature({
@@ -199,12 +204,7 @@ export class MapsPlugin implements Plugin {
     };
   }
 
-  // @ts-ignore
   start(core: CoreStart, plugins: StartDeps) {
-    setInternalRepository(core.savedObjects.createInternalRepository);
-    setIndexPatternsService(
-      plugins.data.indexPatterns.indexPatternsServiceFactory,
-      core.elasticsearch.client.asInternalUser
-    );
+    setStartServices(core, plugins);
   }
 }

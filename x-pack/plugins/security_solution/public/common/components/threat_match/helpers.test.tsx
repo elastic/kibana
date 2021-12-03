@@ -7,8 +7,8 @@
 
 import { fields, getField } from '../../../../../../../src/plugins/data/common/mocks';
 import { Entry, EmptyEntry, ThreatMapEntries, FormattedEntry } from './types';
-import { FieldSpec } from '../../../../../../../src/plugins/data/common';
-import { DataViewBase } from '@kbn/es-query';
+import type { FieldSpec } from '../../../../../../../src/plugins/data/common';
+import type { DataViewBase } from '@kbn/es-query';
 import moment from 'moment-timezone';
 
 import {

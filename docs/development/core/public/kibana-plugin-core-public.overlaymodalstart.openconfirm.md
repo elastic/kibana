@@ -16,10 +16,10 @@ openConfirm(message: MountPoint | string, options?: OverlayModalConfirmOptions):
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  message | <code>MountPoint &#124; string</code> |  |
-|  options | <code>OverlayModalConfirmOptions</code> |  |
+|  message | MountPoint \| string | [MountPoint](./kibana-plugin-core-public.mountpoint.md) - string or mountpoint to be used a the confirm message body |
+|  options | OverlayModalConfirmOptions | [OverlayModalConfirmOptions](./kibana-plugin-core-public.overlaymodalconfirmoptions.md) - options for the confirm modal |
 
 <b>Returns:</b>
 
-`Promise<boolean>`
+Promise&lt;boolean&gt;
 

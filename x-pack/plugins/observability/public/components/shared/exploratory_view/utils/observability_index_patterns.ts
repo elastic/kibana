@@ -16,6 +16,7 @@ import { rumFieldFormats } from '../configurations/rum/field_formats';
 import { syntheticsFieldFormats } from '../configurations/synthetics/field_formats';
 import { AppDataType, FieldFormat, FieldFormatParams } from '../types';
 import { apmFieldFormats } from '../configurations/apm/field_formats';
+import { getDataHandler } from '../../../../data_handler';
 
 const appFieldFormats: Record<AppDataType, FieldFormat[] | null> = {
   infra_logs: null,
@@ -49,14 +50,14 @@ const appToPatternMap: Record<AppDataType, string> = {
 };
 
 const getAppIndicesWithPattern = (app: AppDataType, indices: string) => {
-  return `${appToPatternMap[app]},${indices}`;
+  return `${appToPatternMap?.[app] ?? app},${indices}`;
 };
 
 const getAppIndexPatternId = (app: AppDataType, indices: string) => {
   // Replace characters / ? , " < > | * with _
   const postfix = indices.replace(/[^A-Z0-9]+/gi, '_').toLowerCase();
 
-  return `${indexPatternList[app]}_${postfix}`;
+  return `${indexPatternList?.[app] ?? app}_${postfix}`;
 };
 
 export function isParamsSame(param1: IFieldFormat['_params'], param2: FieldFormatParams) {
@@ -125,28 +126,47 @@ export class ObservabilityIndexPatterns {
     return fieldFormatMap;
   }
 
-  async getIndexPattern(app: AppDataType, indices: string): Promise<IndexPattern | undefined> {
+  async getDataTypeIndices(dataType: AppDataType) {
+    switch (dataType) {
+      case 'ux':
+      case 'synthetics':
+        const resultUx = await getDataHandler(dataType)?.hasData();
+        return resultUx?.indices;
+      case 'apm':
+      case 'mobile':
+        const resultApm = await getDataHandler('apm')?.hasData();
+        return resultApm?.indices.transaction;
+    }
+  }
+
+  async getIndexPattern(app: AppDataType, indices?: string): Promise<IndexPattern | undefined> {
     if (!this.data) {
       throw new Error('data is not defined');
     }
+    let appIndices = indices;
+    if (!appIndices) {
+      appIndices = await this.getDataTypeIndices(app);
+    }
 
-    try {
-      const indexPatternId = getAppIndexPatternId(app, indices);
-      const indexPatternTitle = getAppIndicesWithPattern(app, indices);
-      // we will get index pattern by id
-      const indexPattern = await this.data?.indexPatterns.get(indexPatternId);
+    if (appIndices) {
+      try {
+        const indexPatternId = getAppIndexPatternId(app, appIndices);
+        const indexPatternTitle = getAppIndicesWithPattern(app, appIndices);
+        // we will get index pattern by id
+        const indexPattern = await this.data?.indexPatterns.get(indexPatternId);
 
-      // and make sure title matches, otherwise, we will need to create it
-      if (indexPattern.title !== indexPatternTitle) {
-        return await this.createIndexPattern(app, indices);
-      }
+        // and make sure title matches, otherwise, we will need to create it
+        if (indexPattern.title !== indexPatternTitle) {
+          return await this.createIndexPattern(app, appIndices);
+        }
 
-      // this is intentional a non blocking call, so no await clause
-      this.validateFieldFormats(app, indexPattern);
-      return indexPattern;
-    } catch (e: unknown) {
-      if (e instanceof SavedObjectNotFound) {
-        return await this.createIndexPattern(app, indices);
+        // this is intentional a non blocking call, so no await clause
+        this.validateFieldFormats(app, indexPattern);
+        return indexPattern;
+      } catch (e: unknown) {
+        if (e instanceof SavedObjectNotFound) {
+          return await this.createIndexPattern(app, appIndices);
+        }
       }
     }
   }

@@ -99,7 +99,7 @@ export const ComponentTemplatesListItem = ({
 
       {/* Check icon when selected */}
       {isSelectedValue && (
-        <EuiIcon className="componentTemplatesListItem__checkIcon" type="check" color="secondary" />
+        <EuiIcon className="componentTemplatesListItem__checkIcon" type="check" color="success" />
       )}
     </div>
   );

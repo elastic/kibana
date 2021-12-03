@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { isEmpty } from 'lodash/fp';
 import moment from 'moment';
 
-import { isEmpty } from 'lodash/fp';
 import type { HistogramData, AlertsAggregation, AlertsBucket, AlertsGroupBucket } from './types';
 import type { AlertSearchResponse } from '../../../containers/detection_engine/alerts/types';
 import type { AlertsStackByField } from '../common/types';

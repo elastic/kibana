@@ -5,7 +5,13 @@
  * 2.0.
  */
 
+import expect from '@kbn/expect';
 import { chunk } from 'lodash';
+import {
+  ALERT_STATUS_ACTIVE,
+  ALERT_STATUS_RECOVERED,
+  AlertStatus,
+} from '@kbn/rule-data-utils/alerts_as_data_status';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { WebElementWrapper } from '../../../../../../test/functional/services/lib/web_element_wrapper';
 
@@ -18,6 +24,9 @@ const DATE_WITH_DATA = {
 const ALERTS_FLYOUT_SELECTOR = 'alertsFlyout';
 const FILTER_FOR_VALUE_BUTTON_SELECTOR = 'filterForValue';
 const ALERTS_TABLE_CONTAINER_SELECTOR = 'events-viewer-panel';
+const VIEW_RULE_DETAILS_SELECTOR = 'viewRuleDetails';
+const VIEW_RULE_DETAILS_FLYOUT_SELECTOR = 'viewRuleDetailsFlyout';
+
 const ACTION_COLUMN_INDEX = 1;
 
 type WorkflowStatus = 'open' | 'acknowledged' | 'closed';
@@ -150,6 +159,10 @@ export function ObservabilityAlertsCommonProvider({
     return await testSubjects.existOrFail('alertsFlyoutViewInAppButton');
   };
 
+  const getAlertsFlyoutViewRuleDetailsLinkOrFail = async () => {
+    return await testSubjects.existOrFail('viewRuleDetailsFlyout');
+  };
+
   const getAlertsFlyoutDescriptionListTitles = async (): Promise<WebElementWrapper[]> => {
     const flyout = await getAlertsFlyout();
     return await testSubjects.findAllDescendant('alertsFlyoutDescriptionListTitle', flyout);
@@ -179,6 +192,12 @@ export function ObservabilityAlertsCommonProvider({
     await actionsOverflowButton.click();
   };
 
+  const viewRuleDetailsButtonClick = async () => {
+    return await (await testSubjects.find(VIEW_RULE_DETAILS_SELECTOR)).click();
+  };
+  const viewRuleDetailsLinkClick = async () => {
+    return await (await testSubjects.find(VIEW_RULE_DETAILS_FLYOUT_SELECTOR)).click();
+  };
   // Workflow status
   const setWorkflowStatusForRow = async (rowIndex: number, workflowStatus: WorkflowStatus) => {
     await openActionsMenuForRow(rowIndex);
@@ -206,6 +225,30 @@ export function ObservabilityAlertsCommonProvider({
     return await selectedWorkflowStatusButton.getVisibleText();
   };
 
+  // Alert status
+  const setAlertStatusFilter = async (alertStatus?: AlertStatus) => {
+    let buttonSubject = 'alert-status-filter-show-all-button';
+    if (alertStatus === ALERT_STATUS_ACTIVE) {
+      buttonSubject = 'alert-status-filter-active-button';
+    }
+    if (alertStatus === ALERT_STATUS_RECOVERED) {
+      buttonSubject = 'alert-status-filter-recovered-button';
+    }
+    const buttonGroupButton = await testSubjects.find(buttonSubject);
+    await buttonGroupButton.click();
+  };
+
+  const alertDataIsBeingLoaded = async () => {
+    return testSubjects.existOrFail('events-container-loading-true');
+  };
+
+  const alertDataHasLoaded = async () => {
+    await retry.waitFor(
+      'Alert Table is loaded',
+      async () => await testSubjects.exists('events-container-loading-false', { timeout: 2500 })
+    );
+  };
+
   // Date picker
   const getTimeRange = async () => {
     const isAbsoluteRange = await testSubjects.exists('superDatePickerstartDatePopoverButton');
@@ -226,6 +269,15 @@ export function ObservabilityAlertsCommonProvider({
       '[data-test-subj="alertsTableRowActionMore"]'
     );
     return actionsOverflowButtons[index] || null;
+  };
+
+  const getRuleStatValue = async (testSubj: string) => {
+    const stat = await testSubjects.find(testSubj);
+    const title = await stat.findByCssSelector('.euiStat__title');
+    const count = await title.getVisibleText();
+    const value = Number.parseInt(count, 10);
+    expect(Number.isNaN(value)).to.be(false);
+    return value;
   };
 
   return {
@@ -252,6 +304,9 @@ export function ObservabilityAlertsCommonProvider({
     setWorkflowStatusForRow,
     setWorkflowStatusFilter,
     getWorkflowStatusFilterValue,
+    setAlertStatusFilter,
+    alertDataIsBeingLoaded,
+    alertDataHasLoaded,
     submitQuery,
     typeInQueryBar,
     openActionsMenuForRow,
@@ -259,5 +314,9 @@ export function ObservabilityAlertsCommonProvider({
     navigateWithoutFilter,
     getExperimentalDisclaimer,
     getActionsButtonByIndex,
+    viewRuleDetailsButtonClick,
+    viewRuleDetailsLinkClick,
+    getAlertsFlyoutViewRuleDetailsLinkOrFail,
+    getRuleStatValue,
   };
 }

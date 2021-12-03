@@ -95,7 +95,8 @@ export const InlineEditableTableContents = <Item extends ItemWithAnID>({
   uneditableItems,
   ...rest
 }: InlineEditableTableProps<Item>) => {
-  const { editingItemId, isEditing, isEditingUnsavedItem } = useValues(InlineEditableTableLogic);
+  const { editingItemId, isEditing, isEditingUnsavedItem, rowErrors } =
+    useValues(InlineEditableTableLogic);
   const { editNewItem, reorderItems } = useActions(InlineEditableTableLogic);
 
   // TODO These two things shoud just be selectors
@@ -168,6 +169,7 @@ export const InlineEditableTableContents = <Item extends ItemWithAnID>({
             'is-being-edited': isActivelyEditing(item),
           }),
         })}
+        rowErrors={(item) => (isActivelyEditing(item) ? rowErrors : undefined)}
         noItemsMessage={noItemsMessage(editNewItem)}
         onReorder={reorderItems}
         disableDragging={isEditing}

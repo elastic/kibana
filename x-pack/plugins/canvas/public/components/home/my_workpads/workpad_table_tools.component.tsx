@@ -47,7 +47,7 @@ export const WorkpadTableTools = ({
 
   const downloadButton = (
     <EuiButton
-      color="secondary"
+      color="success"
       onClick={() => onExportWorkpads(selectedWorkpadIds)}
       iconType="exportAction"
       aria-label={strings.getExportButtonAriaLabel(selectedWorkpadIds.length)}

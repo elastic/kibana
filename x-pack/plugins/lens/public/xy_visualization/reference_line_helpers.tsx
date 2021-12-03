@@ -104,15 +104,14 @@ export function getStaticValue(
   ) {
     return fallbackValue;
   }
-  return (
-    computeStaticValueForGroup(
-      filteredLayers,
-      accessors,
-      activeData,
-      groupId !== 'x', // histogram axis should compute the min based on the current data
-      groupId !== 'x'
-    ) || fallbackValue
+  const computedValue = computeStaticValueForGroup(
+    filteredLayers,
+    accessors,
+    activeData,
+    groupId !== 'x', // histogram axis should compute the min based on the current data
+    groupId !== 'x'
   );
+  return computedValue ?? fallbackValue;
 }
 
 function getAccessorCriteriaForGroup(

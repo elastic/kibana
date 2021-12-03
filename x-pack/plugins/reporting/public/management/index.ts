@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { InjectedIntl } from '@kbn/i18n/react';
 import { ApplicationStart, ToastsSetup } from 'src/core/public';
 import { LicensingPluginSetup } from '../../../licensing/public';
 import { UseIlmPolicyStatusReturn } from '../lib/ilm_policy_status_context';
@@ -14,7 +13,6 @@ import { ClientConfigType } from '../plugin';
 import type { SharePluginSetup } from '../shared_imports';
 
 export interface ListingProps {
-  intl: InjectedIntl;
   apiClient: ReportingAPIClient;
   capabilities: ApplicationStart['capabilities'];
   license$: LicensingPluginSetup['license$']; // FIXME: license$ is deprecated

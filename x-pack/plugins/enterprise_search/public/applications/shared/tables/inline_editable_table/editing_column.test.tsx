@@ -28,8 +28,9 @@ describe('EditingColumn', () => {
   };
 
   const mockValues = {
-    formErrors: [],
     editingItemValue: { id: 1 },
+    fieldErrors: {},
+    rowErrors: [],
   };
 
   const mockActions = {
@@ -52,7 +53,7 @@ describe('EditingColumn', () => {
     beforeEach(() => {
       setMockValues({
         ...mockValues,
-        formErrors: {
+        fieldErrors: {
           foo: 'I am an error for foo and should be displayed',
         },
       });
@@ -70,10 +71,26 @@ describe('EditingColumn', () => {
       );
     });
 
-    it('renders form errors for this field if any are present', () => {
+    it('renders field errors for this field if any are present', () => {
       expect(shallow(wrapper.find(EuiFormRow).prop('helpText') as any).html()).toContain(
         'I am an error for foo and should be displayed'
       );
+    });
+
+    it('renders as invalid', () => {
+      expect(wrapper.find(EuiFormRow).prop('isInvalid')).toBe(true);
+    });
+  });
+
+  describe('when there is a form error for this row', () => {
+    let wrapper: ShallowWrapper;
+    beforeEach(() => {
+      setMockValues({
+        ...mockValues,
+        rowErrors: ['I am an error for this row'],
+      });
+
+      wrapper = shallow(<EditingColumn {...requiredProps} />);
     });
 
     it('renders as invalid', () => {
@@ -95,7 +112,7 @@ describe('EditingColumn', () => {
     setMockValues({
       ...mockValues,
       editingItemValue: { id: 1, foo: 'foo', bar: 'bar' },
-      formErrors: { foo: ['I am an error for foo'] },
+      fieldErrors: { foo: ['I am an error for foo'] },
     });
 
     const wrapper = shallow(

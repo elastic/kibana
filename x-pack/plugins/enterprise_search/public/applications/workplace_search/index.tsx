@@ -10,9 +10,11 @@ import { Route, Redirect, Switch, useRouteMatch } from 'react-router-dom';
 
 import { useActions, useValues } from 'kea';
 
+import { isVersionMismatch } from '../../../common/is_version_mismatch';
 import { InitialAppData } from '../../../common/types';
 import { HttpLogic } from '../shared/http';
 import { KibanaLogic } from '../shared/kibana';
+import { VersionMismatchPage } from '../shared/version_mismatch';
 
 import { AppLogic } from './app_logic';
 import { WorkplaceSearchHeaderActions } from './components/layout';
@@ -47,13 +49,23 @@ import { SetupGuide } from './views/setup_guide';
 export const WorkplaceSearch: React.FC<InitialAppData> = (props) => {
   const { config } = useValues(KibanaLogic);
   const { errorConnecting } = useValues(HttpLogic);
-  return !config.host ? (
-    <WorkplaceSearchUnconfigured />
-  ) : errorConnecting ? (
-    <ErrorState />
-  ) : (
-    <WorkplaceSearchConfigured {...props} />
-  );
+  const { enterpriseSearchVersion, kibanaVersion } = props;
+  const incompatibleVersions = isVersionMismatch(enterpriseSearchVersion, kibanaVersion);
+
+  if (!config.host) {
+    return <WorkplaceSearchUnconfigured />;
+  } else if (incompatibleVersions) {
+    return (
+      <VersionMismatchPage
+        enterpriseSearchVersion={enterpriseSearchVersion}
+        kibanaVersion={kibanaVersion}
+      />
+    );
+  } else if (errorConnecting) {
+    return <ErrorState />;
+  }
+
+  return <WorkplaceSearchConfigured {...props} />;
 };
 
 export const WorkplaceSearchConfigured: React.FC<InitialAppData> = (props) => {

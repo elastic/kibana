@@ -34,7 +34,7 @@ export function UXMetrics() {
     (callApmApi) => {
       if (uxQuery) {
         return callApmApi({
-          endpoint: 'GET /api/apm/rum-client/web-core-vitals',
+          endpoint: 'GET /internal/apm/ux/web-core-vitals',
           params: {
             query: uxQuery,
           },

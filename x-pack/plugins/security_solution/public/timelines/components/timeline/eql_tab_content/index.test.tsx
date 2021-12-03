@@ -91,12 +91,11 @@ describe('Timeline', () => {
     (useSourcererDataView as jest.Mock).mockReturnValue(mockSourcererScope);
 
     props = {
+      activeTab: TimelineTabs.eql,
       columns: defaultHeaders,
       end: endDate,
       eqlOptions: {},
       expandedDetail: {},
-      eventType: 'all',
-      timelineId: TimelineId.test,
       isLive: false,
       itemsPerPage: 5,
       itemsPerPageOptions: [5, 10, 20],
@@ -105,9 +104,8 @@ describe('Timeline', () => {
       rowRenderers: defaultRowRenderers,
       showExpandedDetails: false,
       start: startDate,
+      timelineId: TimelineId.test,
       timerangeKind: 'absolute',
-      updateEventTypeAndIndexesName: jest.fn(),
-      activeTab: TimelineTabs.eql,
     };
   });
 

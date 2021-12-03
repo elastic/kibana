@@ -16,18 +16,21 @@ import { deleteIndex } from './delete_index';
 import { ES_CLIENT_HEADERS } from '../../client_headers';
 
 /**
- * Deletes all indices that start with `.kibana`
+ * Deletes all indices that start with `.kibana`, or if onlyTaskManager==true, all indices that start with `.kibana_task_manager`
  */
 export async function deleteKibanaIndices({
   client,
   stats,
+  onlyTaskManager = false,
   log,
 }: {
   client: Client;
   stats: Stats;
+  onlyTaskManager?: boolean;
   log: ToolingLog;
 }) {
-  const indexNames = await fetchKibanaIndices(client);
+  const indexPattern = onlyTaskManager ? '.kibana_task_manager*' : '.kibana*';
+  const indexNames = await fetchKibanaIndices(client, indexPattern);
   if (!indexNames.length) {
     return;
   }
@@ -75,9 +78,9 @@ function isKibanaIndex(index?: string): index is string {
   );
 }
 
-async function fetchKibanaIndices(client: Client) {
+async function fetchKibanaIndices(client: Client, indexPattern: string) {
   const resp = await client.cat.indices(
-    { index: '.kibana*', format: 'json' },
+    { index: indexPattern, format: 'json' },
     {
       headers: ES_CLIENT_HEADERS,
     }

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ApmIndicesConfig } from '../../settings/apm_indices/get_apm_indices';
+import { ApmIndicesConfig } from '../../../routes/settings/apm_indices/get_apm_indices';
 import { tasks } from './tasks';
 import {
   SERVICE_NAME,

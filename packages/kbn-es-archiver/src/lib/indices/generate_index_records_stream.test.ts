@@ -21,7 +21,7 @@ describe('esArchiver: createGenerateIndexRecordsStream()', () => {
 
     await createPromiseFromStreams([
       createListStream(indices),
-      createGenerateIndexRecordsStream(client, stats),
+      createGenerateIndexRecordsStream({ client, stats }),
     ]);
 
     expect(stats.getTestSummary()).toEqual({
@@ -40,7 +40,7 @@ describe('esArchiver: createGenerateIndexRecordsStream()', () => {
 
     await createPromiseFromStreams([
       createListStream(['index1']),
-      createGenerateIndexRecordsStream(client, stats),
+      createGenerateIndexRecordsStream({ client, stats }),
     ]);
 
     const params = (client.indices.get as sinon.SinonSpy).args[0][0];
@@ -58,7 +58,7 @@ describe('esArchiver: createGenerateIndexRecordsStream()', () => {
 
     const indexRecords = await createPromiseFromStreams<any[]>([
       createListStream(['index1', 'index2', 'index3']),
-      createGenerateIndexRecordsStream(client, stats),
+      createGenerateIndexRecordsStream({ client, stats }),
       createConcatStream([]),
     ]);
 
@@ -83,7 +83,7 @@ describe('esArchiver: createGenerateIndexRecordsStream()', () => {
 
     const indexRecords = await createPromiseFromStreams([
       createListStream(['index1']),
-      createGenerateIndexRecordsStream(client, stats),
+      createGenerateIndexRecordsStream({ client, stats }),
       createConcatStream([]),
     ]);
 
@@ -98,5 +98,52 @@ describe('esArchiver: createGenerateIndexRecordsStream()', () => {
         },
       },
     ]);
+  });
+
+  describe('change index names', () => {
+    it('changes .kibana* index names if keepIndexNames is not enabled', async () => {
+      const stats = createStubStats();
+      const client = createStubClient(['.kibana_7.16.0_001']);
+
+      const indexRecords = await createPromiseFromStreams([
+        createListStream(['.kibana_7.16.0_001']),
+        createGenerateIndexRecordsStream({ client, stats }),
+        createConcatStream([]),
+      ]);
+
+      expect(indexRecords).toEqual([
+        { type: 'index', value: expect.objectContaining({ index: '.kibana_1' }) },
+      ]);
+    });
+
+    it('does not change non-.kibana* index names if keepIndexNames is not enabled', async () => {
+      const stats = createStubStats();
+      const client = createStubClient(['.foo']);
+
+      const indexRecords = await createPromiseFromStreams([
+        createListStream(['.foo']),
+        createGenerateIndexRecordsStream({ client, stats }),
+        createConcatStream([]),
+      ]);
+
+      expect(indexRecords).toEqual([
+        { type: 'index', value: expect.objectContaining({ index: '.foo' }) },
+      ]);
+    });
+
+    it('does not change .kibana* index names if keepIndexNames is enabled', async () => {
+      const stats = createStubStats();
+      const client = createStubClient(['.kibana_7.16.0_001']);
+
+      const indexRecords = await createPromiseFromStreams([
+        createListStream(['.kibana_7.16.0_001']),
+        createGenerateIndexRecordsStream({ client, stats, keepIndexNames: true }),
+        createConcatStream([]),
+      ]);
+
+      expect(indexRecords).toEqual([
+        { type: 'index', value: expect.objectContaining({ index: '.kibana_7.16.0_001' }) },
+      ]);
+    });
   });
 });

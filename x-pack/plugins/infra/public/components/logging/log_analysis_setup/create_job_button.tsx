@@ -6,7 +6,7 @@
  */
 
 import { EuiButton, PropsOf } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import { MissingSetupPrivilegesToolTip } from './missing_setup_privileges_tooltip';
 

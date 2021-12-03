@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { PackagePolicyUpgradeUsage } from '../services/upgrade_usage';
+import type { PackageUpdateEvent } from '../services/upgrade_sender';
 
 export interface FleetTelemetryChannelEvents {
   // channel name => event type
-  'fleet-upgrades': PackagePolicyUpgradeUsage;
+  'fleet-upgrades': PackageUpdateEvent;
 }
 
 export type FleetTelemetryChannel = keyof FleetTelemetryChannelEvents;
