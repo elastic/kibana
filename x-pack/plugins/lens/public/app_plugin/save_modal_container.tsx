@@ -11,12 +11,13 @@ import { METRIC_TYPE } from '@kbn/analytics';
 import { partition } from 'lodash';
 
 import type { SavedObjectReference } from 'kibana/public';
+import { inject as injectFilterReferences } from '../../../../../src/plugins/data/common';
 import { SaveModal } from './save_modal';
 import type { LensAppProps, LensAppServices } from './types';
 import type { SaveProps } from './app';
 import { Document } from '../persistence';
 import type { LensByReferenceInput, LensEmbeddableInput } from '../embeddable';
-import { esFilters, FilterManager } from '../../../../../src/plugins/data/public';
+import { esFilters } from '../../../../../src/plugins/data/public';
 import { APP_ID, getFullPath, LENS_EMBEDDABLE_TYPE } from '../../common';
 import { trackUiEvent } from '../lens_ui_telemetry';
 import { checkForDuplicateTitle } from '../../../../../src/plugins/saved_objects/public';
@@ -170,11 +171,10 @@ const redirectToDashboard = ({
 const getDocToSave = (
   lastKnownDoc: Document,
   saveProps: SaveProps,
-  references: SavedObjectReference[],
-  injectFilterReferences: FilterManager['inject']
+  references: SavedObjectReference[]
 ) => {
   const docToSave = {
-    ...getLastKnownDocWithoutPinnedFilters(injectFilterReferences, lastKnownDoc)!,
+    ...getLastKnownDocWithoutPinnedFilters(lastKnownDoc)!,
     references,
   };
 
@@ -243,12 +243,7 @@ export const runSaveLensVisualization = async (
     );
   }
 
-  const docToSave = getDocToSave(
-    lastKnownDoc,
-    saveProps,
-    references,
-    data.query.filterManager.inject
-  );
+  const docToSave = getDocToSave(lastKnownDoc, saveProps, references);
 
   // Required to serialize filters in by value mode until
   // https://github.com/elastic/kibana/issues/77588 is fixed
@@ -359,10 +354,7 @@ export const runSaveLensVisualization = async (
   }
 };
 
-export function getLastKnownDocWithoutPinnedFilters(
-  injectFilterReferences: FilterManager['inject'],
-  doc?: Document
-) {
+export function getLastKnownDocWithoutPinnedFilters(doc?: Document) {
   if (!doc) return undefined;
   const [pinnedFilters, appFilters] = partition(
     injectFilterReferences(doc.state?.filters || [], doc.references),

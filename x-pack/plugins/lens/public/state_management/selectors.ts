@@ -7,7 +7,7 @@
 
 import { createSelector } from '@reduxjs/toolkit';
 import { SavedObjectReference } from 'kibana/server';
-import { FilterManager } from 'src/plugins/data/public';
+import { extract as extractFilterReferences } from '../../../../../src/plugins/data/common';
 import { LensState } from './types';
 import { Datasource, DatasourceMap, VisualizationMap } from '../types';
 import { getDatasourceLayers } from '../editor_frame_service/editor_frame';
@@ -59,7 +59,6 @@ export const selectSavedObjectFormat = createSelector(
     selectInjectedDependencies as SelectInjectedDependenciesFunction<{
       datasourceMap: DatasourceMap;
       visualizationMap: VisualizationMap;
-      extractFilterReferences: FilterManager['extract'];
     }>,
   ],
   (
@@ -69,7 +68,7 @@ export const selectSavedObjectFormat = createSelector(
     query,
     filters,
     activeDatasourceId,
-    { datasourceMap, visualizationMap, extractFilterReferences }
+    { datasourceMap, visualizationMap }
   ) => {
     const activeVisualization =
       visualization.state && visualization.activeId && visualizationMap[visualization.activeId];
