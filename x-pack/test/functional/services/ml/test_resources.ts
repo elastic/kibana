@@ -474,7 +474,6 @@ export function MachineLearningTestResourcesProvider({ getService }: FtrProvider
       log.debug(`Installing Fleet package '${packageName}'`);
 
       const version = await this.getFleetPackageVersion(packageName);
-      const packageWithVersion = `${packageName}-${version}`;
 
       await retry.tryForTime(30 * 1000, async () => {
         await supertest
@@ -484,11 +483,11 @@ export function MachineLearningTestResourcesProvider({ getService }: FtrProvider
       });
 
       log.debug(` > Installed`);
-      return packageWithVersion;
+      return version;
     },
 
-    async removeFleetPackage(packageWithVersion: string) {
-      log.debug(`Removing Fleet package '${packageWithVersion}'`);
+    async removeFleetPackage(packageName: string, version: string) {
+      log.debug(`Removing Fleet package '${packageName}-${version}'`);
 
       await retry.tryForTime(30 * 1000, async () => {
         await supertest

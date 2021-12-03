@@ -35,7 +35,7 @@ export default function (providerContext: FtrProviderContext) {
 
     it('should install the overrides package correctly', async function () {
       let { body } = await supertest
-        .post(`/api/fleet/epm/packages/${mappingsPackage}/${mappingPackageVersion}`)
+        .post(`/api/fleet/epm/packages/${mappingsPackage}/${mappingsPackageVersion}`)
         .set('kbn-xsrf', 'xxxx')
         .expect(200);
 
