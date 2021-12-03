@@ -26,8 +26,6 @@ import {
 } from '../../../timelines/components/timeline/body/renderers/constants';
 import { FormattedFieldValue } from '../../../timelines/components/timeline/body/renderers/formatted_field';
 import { OverviewCard, OverviewCardWithActions } from './overview/overview_card';
-import { OverviewRiskScore } from './overview/overview_risk_score';
-import { OverviewSeverity } from './overview/overview_severity';
 import { StatusPopoverButton } from './overview/status_popover_button';
 import { SeverityBadge } from '../../../../public/detections/components/rules/severity_badge';
 
@@ -141,7 +139,7 @@ export const OverviewCards = React.memo<Props>(
               enrichedFieldInfo={riskScoreData}
               contextId={contextId}
             >
-              <OverviewRiskScore riskScore={riskScoreData.values[0]} />
+              {riskScoreData.values[0]}
             </OverviewCardWithActions>
           </EuiFlexItem>
         )}
