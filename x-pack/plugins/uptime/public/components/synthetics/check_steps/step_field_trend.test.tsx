@@ -36,7 +36,7 @@ const step: JourneyStep = {
     },
     type: 'step/end',
   },
-  '@timestamp': 'timestamp',
+  '@timestamp': '2021-12-03T15:23:41.072Z',
 };
 
 describe('StepFieldTrend', () => {
@@ -51,21 +51,39 @@ describe('StepFieldTrend', () => {
 
 describe('getLast48Intervals', () => {
   it('it returns expected values', () => {
-    expect(getLast48Intervals(step)).toEqual({ from: 'now-48m', to: 'now' });
+    // 48 minutes difference
+    expect(getLast48Intervals(step)).toEqual({
+      from: '2021-12-03T14:35:41.072Z',
+      to: '2021-12-03T15:23:41.072Z',
+    });
     step.monitor.timespan = {
       gte: '2021-12-01T12:55:38.098Z',
       lt: '2021-12-01T12:55:48.098Z',
     };
-    expect(getLast48Intervals(step)).toEqual({ from: 'now-480s', to: 'now' });
+    // 8 minutes difference
+    expect(getLast48Intervals(step)).toEqual({
+      from: '2021-12-03T15:15:41.072Z',
+      to: '2021-12-03T15:23:41.072Z',
+    });
     step.monitor.timespan = {
       gte: '2021-12-01T12:54:28.098Z',
       lt: '2021-12-01T13:55:28.098Z',
     };
-    expect(getLast48Intervals(step)).toEqual({ from: 'now-48h', to: 'now' });
+
+    // 48h difference
+    expect(getLast48Intervals(step)).toEqual({
+      from: '2021-12-01T14:35:41.072Z',
+      to: '2021-12-03T15:23:41.072Z',
+    });
     step.monitor.timespan = {
       gte: '2021-12-01T12:54:28.098Z',
       lt: '2021-12-02T12:55:28.098Z',
     };
-    expect(getLast48Intervals(step)).toEqual({ from: 'now-48d', to: 'now' });
+
+    // 48d difference
+    expect(getLast48Intervals(step)).toEqual({
+      from: '2021-10-16T14:35:41.072Z',
+      to: '2021-12-03T15:23:41.072Z',
+    });
   });
 });

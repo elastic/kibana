@@ -18,24 +18,14 @@ import { useKibana } from '../../../../../../../src/plugins/kibana_react/public'
 import { selectDynamicSettings } from '../../../state/selectors';
 
 export const getLast48Intervals = (activeStep: JourneyStep) => {
+  const timestamp = activeStep['@timestamp'];
   const { lt, gte } = activeStep.monitor.timespan!;
-  const inDays = moment(lt).diff(moment(gte), 'days');
-  if (inDays > 0) {
-    return { to: 'now', from: `now-${inDays * 48}d` };
-  }
+  const difference = moment(lt).diff(moment(gte), 'millisecond') * 48;
 
-  const inHours = moment(lt).diff(moment(gte), 'hours');
-  if (inHours > 0) {
-    return { to: 'now', from: `now-${inHours * 48}h` };
-  }
-
-  const inMinutes = moment(lt).diff(moment(gte), 'minutes');
-  if (inMinutes > 0) {
-    return { to: 'now', from: `now-${inMinutes * 48}m` };
-  }
-
-  const inSeconds = moment(lt).diff(moment(gte), 'seconds');
-  return { to: 'now', from: `now-${inSeconds * 48}s` };
+  return {
+    to: timestamp,
+    from: moment(timestamp).subtract(difference, 'millisecond').toISOString(),
+  };
 };
 
 export function StepFieldTrend({
