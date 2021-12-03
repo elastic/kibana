@@ -23,6 +23,7 @@ import type { SavedObjectsClientContract } from 'kibana/public';
 import type { PaletteRegistry, PaletteOutput } from 'src/plugins/charts/public';
 import type { FormatFactory, CustomPaletteParams } from '../../common';
 import { DEFAULT_PERCENT_DECIMALS, CHART_NAMES } from './constants';
+import { PartitionChartsMeta } from './partition_charts_meta';
 import type { PieVisualizationState, SharedPieLayerState } from '../../common/expressions';
 import { VisualizationDimensionEditorProps, VisualizationToolbarProps } from '../types';
 import {
@@ -36,30 +37,6 @@ import {
 } from '../shared_components';
 import { SavedObjectPaletteStore, getPalettesFromStore, savePaletteToStore } from '../persistence';
 import { computeTerms } from '../utils';
-
-const numberOptions: Array<{
-  value: SharedPieLayerState['numberDisplay'];
-  inputDisplay: string;
-}> = [
-  {
-    value: 'hidden',
-    inputDisplay: i18n.translate('xpack.lens.pieChart.hiddenNumbersLabel', {
-      defaultMessage: 'Hide from chart',
-    }),
-  },
-  {
-    value: 'percent',
-    inputDisplay: i18n.translate('xpack.lens.pieChart.showPercentValuesLabel', {
-      defaultMessage: 'Show percent',
-    }),
-  },
-  {
-    value: 'value',
-    inputDisplay: i18n.translate('xpack.lens.pieChart.showFormatterValuesLabel', {
-      defaultMessage: 'Show value',
-    }),
-  },
-];
 
 const legendOptions: Array<{
   value: SharedPieLayerState['legendDisplay'];
@@ -95,17 +72,24 @@ export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationStat
   if (!layer) {
     return null;
   }
+  const {
+    categoryOptions,
+    numberOptions,
+    isDisabled: isToolbarPopoverDisabled,
+  } = PartitionChartsMeta[state.shape].toolbarPopover;
+
   return (
     <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween" responsive={false}>
       <ToolbarPopover
         title={i18n.translate('xpack.lens.pieChart.valuesLabel', {
           defaultMessage: 'Labels',
         })}
+        isDisabled={Boolean(isToolbarPopoverDisabled)}
         type="labels"
         groupPosition="left"
         buttonDataTestSubj="lnsLabelsButton"
       >
-        {state.shape && CHART_NAMES[state.shape].categoryOptions.length ? (
+        {categoryOptions.length ? (
           <EuiFormRow
             label={i18n.translate('xpack.lens.pieChart.labelPositionLabel', {
               defaultMessage: 'Position',
@@ -116,7 +100,7 @@ export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationStat
             <EuiSuperSelect
               compressed
               valueOfSelected={layer.categoryDisplay}
-              options={CHART_NAMES[state.shape].categoryOptions}
+              options={categoryOptions}
               onChange={(option) => {
                 setState({
                   ...state,
@@ -126,27 +110,32 @@ export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationStat
             />
           </EuiFormRow>
         ) : null}
-        <EuiFormRow
-          label={i18n.translate('xpack.lens.pieChart.numberLabels', {
-            defaultMessage: 'Values',
-          })}
-          fullWidth
-          display="columnCompressed"
-        >
-          <EuiSuperSelect
-            compressed
-            disabled={layer.categoryDisplay === 'hide'}
-            valueOfSelected={layer.categoryDisplay === 'hide' ? 'hidden' : layer.numberDisplay}
-            options={numberOptions}
-            onChange={(option) => {
-              setState({
-                ...state,
-                layers: [{ ...layer, numberDisplay: option }],
-              });
-            }}
-          />
-        </EuiFormRow>
-        <EuiHorizontalRule margin="s" />
+
+        {numberOptions.length ? (
+          <EuiFormRow
+            label={i18n.translate('xpack.lens.pieChart.numberLabels', {
+              defaultMessage: 'Values',
+            })}
+            fullWidth
+            display="columnCompressed"
+          >
+            <EuiSuperSelect
+              compressed
+              disabled={layer.categoryDisplay === 'hide'}
+              valueOfSelected={layer.categoryDisplay === 'hide' ? 'hidden' : layer.numberDisplay}
+              options={numberOptions}
+              onChange={(option) => {
+                setState({
+                  ...state,
+                  layers: [{ ...layer, numberDisplay: option }],
+                });
+              }}
+            />
+          </EuiFormRow>
+        ) : null}
+
+        {numberOptions.length + categoryOptions.length ? <EuiHorizontalRule margin="s" /> : null}
+
         <EuiFormRow
           label={i18n.translate('xpack.lens.pieChart.percentDecimalsLabel', {
             defaultMessage: 'Maximum decimal places for percent',
