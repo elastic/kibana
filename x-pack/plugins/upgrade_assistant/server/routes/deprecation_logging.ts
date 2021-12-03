@@ -6,7 +6,11 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { API_BASE_PATH } from '../../common/constants';
+import {
+  API_BASE_PATH,
+  APPS_WITH_DEPRECATION_LOGS,
+  DEPRECATION_LOGS_ORIGIN_FIELD,
+} from '../../common/constants';
 
 import {
   getDeprecationLoggingStatus,
@@ -108,9 +112,18 @@ export function registerDeprecationLoggingRoutes({
             index: DEPRECATION_LOGS_INDEX,
             body: {
               query: {
-                range: {
-                  '@timestamp': {
-                    gte: request.query.from,
+                bool: {
+                  must: {
+                    range: {
+                      '@timestamp': {
+                        gte: request.query.from,
+                      },
+                    },
+                  },
+                  must_not: {
+                    terms: {
+                      [DEPRECATION_LOGS_ORIGIN_FIELD]: [...APPS_WITH_DEPRECATION_LOGS],
+                    },
                   },
                 },
               },
