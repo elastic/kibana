@@ -23,7 +23,7 @@ const MOCK_PROPS = {
   stats: {
     status: {
       urlsAllowed: 108,
-      crawlDuration: 748382,
+      crawlDurationMSec: 748382,
       pagesVisited: 108,
       avgResponseTimeMSec: 42,
       statusCodes: {
@@ -62,11 +62,21 @@ describe('CrawlDetailsSummary', () => {
     expect(wrapper.find({ 'data-test-subj': 'avgResponseTime' }).prop('title')).toEqual('--');
   });
 
-  it('renders a message to enable logs', () => {
+  it('renders the stat object when logs are disabled but stats are not null', () => {
     wrapper.setProps({ crawlerLogsEnabled: false });
+    expect(wrapper.find({ 'data-test-subj': 'crawlDuration' })).toHaveLength(1);
+    expect(wrapper.find({ 'data-test-subj': 'pagesVisited' })).toHaveLength(1);
+    expect(wrapper.find({ 'data-test-subj': 'avgResponseTime' })).toHaveLength(1);
+    expect(wrapper.find({ 'data-test-subj': 'urlsAllowed' })).toHaveLength(1);
+    expect(wrapper.find({ 'data-test-subj': 'logsDisabledMessage' })).toHaveLength(0);
+  });
+
+  it('renders a message to enable logs when crawler logs are disabled and stats are null', () => {
+    wrapper.setProps({ crawlerLogsEnabled: false, stats: undefined });
     expect(wrapper.find({ 'data-test-subj': 'crawlDuration' })).toHaveLength(0);
     expect(wrapper.find({ 'data-test-subj': 'pagesVisited' })).toHaveLength(0);
     expect(wrapper.find({ 'data-test-subj': 'avgResponseTime' })).toHaveLength(0);
     expect(wrapper.find({ 'data-test-subj': 'urlsAllowed' })).toHaveLength(0);
+    expect(wrapper.find({ 'data-test-subj': 'logsDisabledMessage' })).toHaveLength(1);
   });
 });

@@ -39,7 +39,7 @@ export const CrawlDetailsSummary: React.FC<ICrawlerSummaryProps> = ({
   stats,
 }) => {
   const duration = () => {
-    if (stats.status && stats.status.crawlDurationMSec) {
+    if (stats && stats.status && stats.status.crawlDurationMSec) {
       const milliseconds = moment.duration(stats.status.crawlDurationMSec, 'milliseconds');
       const hours = milliseconds.hours();
       const minutes = milliseconds.minutes();
@@ -62,10 +62,16 @@ export const CrawlDetailsSummary: React.FC<ICrawlerSummaryProps> = ({
 
   const [statusCounts] = useState<{ [code: string]: number }>({
     clientErrorCount:
-      stats.status && stats.status.statusCodes ? getStatusCount('4', stats.status.statusCodes) : 0,
+      stats && stats.status && stats.status.statusCodes
+        ? getStatusCount('4', stats.status.statusCodes)
+        : 0,
     serverErrorCount:
-      stats.status && stats.status.statusCodes ? getStatusCount('5', stats.status.statusCodes) : 0,
+      stats && stats.status && stats.status.statusCodes
+        ? getStatusCount('5', stats.status.statusCodes)
+        : 0,
   });
+
+  const shouldHideStats = !crawlerLogsEnabled && !stats;
 
   return (
     <EuiPanel paddingSize="l" color="primary">
@@ -98,7 +104,7 @@ export const CrawlDetailsSummary: React.FC<ICrawlerSummaryProps> = ({
             )}
           />
         </EuiFlexItem>
-        {crawlerLogsEnabled && (
+        {!shouldHideStats && (
           <EuiFlexItem grow={false}>
             <EuiStat
               data-test-subj="crawlDuration"
@@ -115,13 +121,15 @@ export const CrawlDetailsSummary: React.FC<ICrawlerSummaryProps> = ({
         )}
       </EuiFlexGroup>
       <EuiHorizontalRule margin="s" />
-      {crawlerLogsEnabled ? (
+      {!shouldHideStats ? (
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
             <EuiStat
               data-test-subj="urlsAllowed"
               titleSize="s"
-              title={stats.status && stats.status.urlsAllowed ? stats.status.urlsAllowed : '--'}
+              title={
+                stats && stats.status && stats.status.urlsAllowed ? stats.status.urlsAllowed : '--'
+              }
               description={
                 <EuiText size="s">
                   URLs{' '}
@@ -151,7 +159,11 @@ export const CrawlDetailsSummary: React.FC<ICrawlerSummaryProps> = ({
             <EuiStat
               data-test-subj="pagesVisited"
               titleSize="s"
-              title={stats.status && stats.status.pagesVisited ? stats.status.pagesVisited : '--'}
+              title={
+                stats && stats.status && stats.status.pagesVisited
+                  ? stats.status.pagesVisited
+                  : '--'
+              }
               description={
                 <EuiText size="s">
                   {i18n.translate(
@@ -186,7 +198,7 @@ export const CrawlDetailsSummary: React.FC<ICrawlerSummaryProps> = ({
               data-test-subj="avgResponseTime"
               titleSize="s"
               title={
-                stats.status && stats.status.avgResponseTimeMSec
+                stats && stats.status && stats.status.avgResponseTimeMSec
                   ? `${Math.round(stats.status.avgResponseTimeMSec)}ms`
                   : '--'
               }
@@ -226,7 +238,7 @@ export const CrawlDetailsSummary: React.FC<ICrawlerSummaryProps> = ({
           </EuiFlexItem>
         </EuiFlexGroup>
       ) : (
-        <EuiText size="xs" textAlign="center">
+        <EuiText size="xs" textAlign="center" data-test-subj="logsDisabledMessage">
           <EuiSpacer size="m" />
           <p>Enable Web Crawler logs in settings for more detailed crawl statistics.</p>
         </EuiText>
