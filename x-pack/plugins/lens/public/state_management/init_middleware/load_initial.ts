@@ -29,7 +29,7 @@ export const getPersisted = async ({
 }): Promise<
   { doc: Document; sharingSavedObjectProps: Omit<SharingSavedObjectProps, 'sourceId'> } | undefined
 > => {
-  const { notifications, spaces, attributeService, data } = lensServices;
+  const { notifications, spaces, attributeService } = lensServices;
   let doc: Document;
 
   try {

@@ -43,14 +43,10 @@ export const selectExecutionContextSearch = createSelector(selectExecutionContex
   filters: res.filters,
 }));
 
-const selectDependencies = (
-  _state: LensState,
-  dependencies: {
-    datasourceMap: DatasourceMap;
-    visualizationMap: VisualizationMap;
-    extractFilterReferences: FilterManager['extract'];
-  }
-) => dependencies;
+const selectInjectedDependencies = (_state: LensState, dependencies: unknown) => dependencies;
+
+// use this type to cast selectInjectedDependencies to require whatever outside dependencies the selector needs
+type SelectInjectedDependenciesFunction<T> = (state: LensState, dependencies: T) => T;
 
 export const selectSavedObjectFormat = createSelector(
   [
@@ -60,7 +56,11 @@ export const selectSavedObjectFormat = createSelector(
     selectQuery,
     selectFilters,
     selectActiveDatasourceId,
-    selectDependencies,
+    selectInjectedDependencies as SelectInjectedDependenciesFunction<{
+      datasourceMap: DatasourceMap;
+      visualizationMap: VisualizationMap;
+      extractFilterReferences: FilterManager['extract'];
+    }>,
   ],
   (
     persistedDoc,
@@ -140,12 +140,19 @@ export const selectAreDatasourcesLoaded = createSelector(
 );
 
 export const selectDatasourceLayers = createSelector(
-  [selectDatasourceStates, selectDatasourceMap],
+  [
+    selectDatasourceStates,
+    selectInjectedDependencies as SelectInjectedDependenciesFunction<DatasourceMap>,
+  ],
   (datasourceStates, datasourceMap) => getDatasourceLayers(datasourceStates, datasourceMap)
 );
 
 export const selectFramePublicAPI = createSelector(
-  [selectDatasourceStates, selectActiveData, selectDatasourceMap],
+  [
+    selectDatasourceStates,
+    selectActiveData,
+    selectInjectedDependencies as SelectInjectedDependenciesFunction<DatasourceMap>,
+  ],
   (datasourceStates, activeData, datasourceMap) => {
     return {
       datasourceLayers: getDatasourceLayers(datasourceStates, datasourceMap),

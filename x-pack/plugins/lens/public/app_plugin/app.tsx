@@ -155,7 +155,10 @@ export function App({
 
       if (
         application.capabilities.visualize.save &&
-        !isEqual(persistedDoc?.state, getLastKnownDocWithoutPinnedFilters(lastKnownDoc)?.state) &&
+        !isEqual(
+          persistedDoc?.state,
+          getLastKnownDocWithoutPinnedFilters(data.query.filterManager.inject, lastKnownDoc)?.state
+        ) &&
         (isSaveable || persistedDoc)
       ) {
         return actions.confirm(
@@ -170,7 +173,14 @@ export function App({
         return actions.default();
       }
     });
-  }, [onAppLeave, lastKnownDoc, isSaveable, persistedDoc, application.capabilities.visualize.save]);
+  }, [
+    onAppLeave,
+    lastKnownDoc,
+    isSaveable,
+    persistedDoc,
+    application.capabilities.visualize.save,
+    data.query.filterManager.inject,
+  ]);
 
   const getLegacyUrlConflictCallout = useCallback(() => {
     // This function returns a callout component *if* we have encountered a "legacy URL conflict" scenario
