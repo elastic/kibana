@@ -9,6 +9,7 @@ import apm from 'elastic-apm-node';
 import * as Rx from 'rxjs';
 import { catchError, concatMap, first, mergeMap, take, takeUntil, toArray } from 'rxjs/operators';
 import { durationToNumber } from '../../../common/schema_utils';
+import { REPORTING_TRANSACTION_TYPE } from '../../../common/constants';
 import { HeadlessChromiumDriverFactory } from '../../browsers';
 import { CaptureConfig } from '../../types';
 import {
@@ -46,8 +47,8 @@ export function getScreenshots$(
   browserDriverFactory: HeadlessChromiumDriverFactory,
   opts: ScreenshotObservableOpts
 ): Rx.Observable<ScreenshotResults[]> {
-  const apmTrans = apm.startTransaction(`reporting screenshot pipeline`, 'reporting');
-  const apmCreatePage = apmTrans?.startSpan('create_page', 'wait');
+  const apmTrans = apm.startTransaction('screenshot-pipeline', REPORTING_TRANSACTION_TYPE);
+  const apmCreatePage = apmTrans?.startSpan('create-page', 'wait');
   const { browserTimezone, logger } = opts;
 
   return browserDriverFactory.createPage({ browserTimezone }, logger).pipe(
