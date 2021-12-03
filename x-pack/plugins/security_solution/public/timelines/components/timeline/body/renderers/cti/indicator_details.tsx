@@ -68,7 +68,7 @@ export const IndicatorDetails: React.FC<IndicatorDetailsProps> = ({
         <EuiFlexItem grow={false}>
           <DraggableBadge
             contextId={contextId}
-            data-test-subj="threat-match-indicator-details-indicator-provider"
+            data-test-subj="threat-match-indicator-details-indicator-feedName"
             eventId={eventId}
             field={FEED_NAME}
             isDraggable={isDraggable}
