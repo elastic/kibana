@@ -919,7 +919,7 @@
     "title": "MVT documents",
     "uiStateJSON": "{\"isLayerTOCOpen\":true,\"openTOCDetails\":[]}"
   },
-  "coreMigrationVersion": "8.1.0",
+  "coreMigrationVersion": "8.0.0",
   "id": "2aff3160-3d78-11ec-9b35-f52e723e8a71",
   "migrationVersion": {
     "map": "8.0.0"
