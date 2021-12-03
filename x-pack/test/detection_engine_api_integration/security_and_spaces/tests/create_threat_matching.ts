@@ -555,6 +555,7 @@ export default ({ getService }: FtrProviderContext) => {
             {
               enrichments: [
                 {
+                  feed: {},
                   indicator: {
                     description: "domain should match the auditbeat hosts' data's source.ip",
                     domain: '159.89.119.67',
@@ -579,6 +580,7 @@ export default ({ getService }: FtrProviderContext) => {
             {
               enrichments: [
                 {
+                  feed: {},
                   indicator: {
                     description: "domain should match the auditbeat hosts' data's source.ip",
                     domain: '159.89.119.67',

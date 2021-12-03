@@ -22,7 +22,7 @@ describe('ThreatMatchRowView', () => {
       <ThreatMatchRowView
         contextId="contextId"
         eventId="eventId"
-        indicatorProvider="provider"
+        feedName="feedName"
         indicatorReference="http://example.com"
         indicatorType="domain"
         sourceField="host.name"
@@ -38,7 +38,7 @@ describe('ThreatMatchRowView', () => {
       <ThreatMatchRowView
         contextId="contextId"
         eventId="eventId"
-        indicatorProvider="provider"
+        feedName="feedName"
         indicatorReference="http://example.com"
         indicatorType="domain"
         sourceField="host.name"
