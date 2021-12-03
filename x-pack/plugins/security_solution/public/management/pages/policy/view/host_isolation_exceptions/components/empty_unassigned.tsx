@@ -5,12 +5,9 @@
  * 2.0.
  */
 
-import { EuiEmptyPrompt, EuiLink, EuiPageTemplate } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
-import { APP_UI_ID } from '../../../../../../../common/constants';
-import { useAppUrl } from '../../../../../../common/lib/kibana';
-import { getHostIsolationExceptionsListPath } from '../../../../../common/routing';
 
 export const PolicyHostIsolationExceptionsEmptyUnassigned = ({
   policyName,
