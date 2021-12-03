@@ -6,7 +6,7 @@
  */
 import React, { useCallback, useMemo } from 'react';
 import { EuiContextMenuItem } from '@elastic/eui';
-import type { TimelineEventsDetailsItem } from '../../../../common';
+import type { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
 import { isIsolationSupported } from '../../../../common/endpoint/service/host_isolation/utils';
 import { HostStatus } from '../../../../common/endpoint/types';
 import { useIsolationPrivileges } from '../../../common/hooks/endpoint/use_isolate_privileges';
