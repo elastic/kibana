@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObject, SavedObjectsFindResult } from 'src/core/server';
+import { SavedObjectsFindResult } from 'src/core/server';
 import { RouteDependencies } from '../../../types';
 
 export function registerGetIndexPatternsRoute({
@@ -26,7 +26,7 @@ export function registerGetIndexPatternsRoute({
           perPage: 1000,
         });
 
-        const responses: SavedObject[] = [];
+        const responses: string[] = [];
 
         for await (const result of finder.find()) {
           responses.push(
