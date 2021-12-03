@@ -44,7 +44,7 @@ describe('useAddOrUpdateException', () => {
   let updateExceptionListItem: jest.SpyInstance<Promise<ExceptionListItemSchema>>;
   let getQueryFilter: jest.SpyInstance<ReturnType<typeof getQueryFilterHelper.getQueryFilter>>;
   let buildAlertStatusesFilter: jest.SpyInstance<
-    ReturnType<typeof buildFilterHelpers.buildAlertStatusesFilterRuleRegistry>
+    ReturnType<typeof buildFilterHelpers.buildAlertStatusesFilter>
   >;
   let buildAlertsRuleIdFilter: jest.SpyInstance<
     ReturnType<typeof buildFilterHelpers.buildAlertsRuleIdFilter>
@@ -128,10 +128,7 @@ describe('useAddOrUpdateException', () => {
 
     getQueryFilter = jest.spyOn(getQueryFilterHelper, 'getQueryFilter');
 
-    buildAlertStatusesFilter = jest.spyOn(
-      buildFilterHelpers,
-      'buildAlertStatusesFilterRuleRegistry'
-    );
+    buildAlertStatusesFilter = jest.spyOn(buildFilterHelpers, 'buildAlertStatusesFilter');
 
     buildAlertsRuleIdFilter = jest.spyOn(buildFilterHelpers, 'buildAlertsRuleIdFilter');
 

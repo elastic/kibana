@@ -19,11 +19,9 @@ import { getUpdateAlertsQuery } from '../../../detections/components/alerts_tabl
 import {
   buildAlertsRuleIdFilter,
   buildAlertStatusesFilter,
-  buildAlertStatusesFilterRuleRegistry,
 } from '../../../detections/components/alerts_table/default_config';
 import { getQueryFilter } from '../../../../common/detection_engine/get_query_filter';
 import { Index } from '../../../../common/detection_engine/schemas/common/schemas';
-import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 import { formatExceptionItemForUpdate, prepareExceptionItemsForBulkClose } from './helpers';
 import { useKibana } from '../../lib/kibana';
 
@@ -84,8 +82,6 @@ export const useAddOrUpdateException = ({
     },
     []
   );
-  // TODO: Once we are past experimental phase this code should be removed
-  const ruleRegistryEnabled = useIsExperimentalFeatureEnabled('ruleRegistryEnabled');
 
   useEffect(() => {
     let isSubscribed = true;
@@ -131,10 +127,11 @@ export const useAddOrUpdateException = ({
         }
 
         if (bulkCloseIndex != null) {
-          // TODO: Once we are past experimental phase this code should be removed
-          const alertStatusFilter = ruleRegistryEnabled
-            ? buildAlertStatusesFilterRuleRegistry(['open', 'acknowledged', 'in-progress'])
-            : buildAlertStatusesFilter(['open', 'acknowledged', 'in-progress']);
+          const alertStatusFilter = buildAlertStatusesFilter([
+            'open',
+            'acknowledged',
+            'in-progress',
+          ]);
 
           const filter = getQueryFilter(
             '',
@@ -185,14 +182,7 @@ export const useAddOrUpdateException = ({
       isSubscribed = false;
       abortCtrl.abort();
     };
-  }, [
-    addExceptionListItem,
-    http,
-    onSuccess,
-    onError,
-    ruleRegistryEnabled,
-    updateExceptionListItem,
-  ]);
+  }, [addExceptionListItem, http, onSuccess, onError, updateExceptionListItem]);
 
   return [{ isLoading }, addOrUpdateException];
 };

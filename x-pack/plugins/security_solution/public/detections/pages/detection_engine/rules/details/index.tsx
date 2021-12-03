@@ -65,9 +65,7 @@ import { StepScheduleRule } from '../../../../components/rules/step_schedule_rul
 import {
   buildAlertsRuleIdFilter,
   buildAlertStatusFilter,
-  buildAlertStatusFilterRuleRegistry,
   buildShowBuildingBlockFilter,
-  buildShowBuildingBlockFilterRuleRegistry,
   buildThreatMatchFilter,
 } from '../../../../components/alerts_table/default_config';
 import { RuleSwitch } from '../../../../components/rules/rule_switch';
@@ -250,9 +248,6 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   const { globalFullScreen } = useGlobalFullScreen();
   const [filterGroup, setFilterGroup] = useState<Status>(FILTER_OPEN);
 
-  // TODO: Once we are past experimental phase this code should be removed
-  const ruleRegistryEnabled = useIsExperimentalFeatureEnabled('ruleRegistryEnabled');
-
   // TODO: Steph/ueba remove when past experimental
   const uebaEnabled = useIsExperimentalFeatureEnabled('uebaEnabled');
 
@@ -417,32 +412,20 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   const alertDefaultFilters = useMemo(
     () => [
       ...buildAlertsRuleIdFilter(rule?.rule_id ?? ''),
-      ...(ruleRegistryEnabled
-        ? [
-            ...buildShowBuildingBlockFilterRuleRegistry(showBuildingBlockAlerts), // TODO: Once we are past experimental phase this code should be removed
-            ...buildAlertStatusFilterRuleRegistry(filterGroup),
-          ]
-        : [
-            ...buildShowBuildingBlockFilter(showBuildingBlockAlerts),
-            ...buildAlertStatusFilter(filterGroup),
-          ]),
+      ...buildShowBuildingBlockFilter(showBuildingBlockAlerts),
+      ...buildAlertStatusFilter(filterGroup),
       ...buildThreatMatchFilter(showOnlyThreatIndicatorAlerts),
     ],
-    [rule, ruleRegistryEnabled, showBuildingBlockAlerts, showOnlyThreatIndicatorAlerts, filterGroup]
+    [rule, showBuildingBlockAlerts, showOnlyThreatIndicatorAlerts, filterGroup]
   );
 
   const alertsTableDefaultFilters = useMemo(
     () => [
       ...buildAlertsRuleIdFilter(rule?.rule_id ?? ''),
-      ...(ruleRegistryEnabled
-        ? [
-            // TODO: Once we are past experimental phase this code should be removed
-            ...buildShowBuildingBlockFilterRuleRegistry(showBuildingBlockAlerts),
-          ]
-        : [...buildShowBuildingBlockFilter(showBuildingBlockAlerts)]),
+      ...buildShowBuildingBlockFilter(showBuildingBlockAlerts),
       ...buildThreatMatchFilter(showOnlyThreatIndicatorAlerts),
     ],
-    [rule, ruleRegistryEnabled, showBuildingBlockAlerts, showOnlyThreatIndicatorAlerts]
+    [rule, showBuildingBlockAlerts, showOnlyThreatIndicatorAlerts]
   );
 
   const alertMergedFilters = useMemo(
