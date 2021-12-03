@@ -136,7 +136,6 @@ export const ApiKeysLogic = kea<MakeLogicType<ApiKeysLogicValues, ApiKeysLogicAc
       {
         showDeleteModal: () => true,
         hideDeleteModal: () => false,
-        fetchApiKeys: () => false,
       },
     ],
     apiTokenNameToDelete: [
@@ -144,7 +143,6 @@ export const ApiKeysLogic = kea<MakeLogicType<ApiKeysLogicValues, ApiKeysLogicAc
       {
         showDeleteModal: (_, tokenName) => tokenName,
         hideDeleteModal: () => '',
-        fetchApiKeys: () => '',
       },
     ],
     formErrors: [
@@ -189,6 +187,8 @@ export const ApiKeysLogic = kea<MakeLogicType<ApiKeysLogicValues, ApiKeysLogicAc
         flashSuccessToast(DELETE_MESSAGE(apiTokenNameToDelete));
       } catch (e) {
         flashAPIErrors(e);
+      } finally {
+        actions.hideDeleteModal();
       }
     },
     onApiFormSubmit: async () => {
