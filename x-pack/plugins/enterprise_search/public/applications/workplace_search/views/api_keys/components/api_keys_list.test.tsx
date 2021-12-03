@@ -11,7 +11,7 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiBasicTable, EuiCopy } from '@elastic/eui';
+import { EuiBasicTable, EuiCopy, EuiConfirmModal } from '@elastic/eui';
 
 import { HiddenText } from '../../../../shared/hidden_text';
 
@@ -19,6 +19,8 @@ import { ApiKey } from './api_key';
 import { ApiKeysList } from './api_keys_list';
 
 describe('ApiKeysList', () => {
+  const showDeleteModal = jest.fn();
+  const hideDeleteModal = jest.fn();
   const deleteApiKey = jest.fn();
   const onPaginate = jest.fn();
   const apiToken = {
@@ -40,7 +42,7 @@ describe('ApiKeysList', () => {
 
   beforeEach(() => {
     setMockValues(values);
-    setMockActions({ deleteApiKey, onPaginate });
+    setMockActions({ deleteApiKey, onPaginate, showDeleteModal, hideDeleteModal });
   });
 
   it('renders', () => {
@@ -84,6 +86,18 @@ describe('ApiKeysList', () => {
         hidePerPageOptions: true,
       });
     });
+  });
+
+  it('handles confirmModal submission', () => {
+    setMockValues({
+      ...values,
+      deleteModalVisible: true,
+    });
+    const wrapper = shallow(<ApiKeysList />);
+    const modal = wrapper.find(EuiConfirmModal);
+    modal.prop('onConfirm')!({} as any);
+
+    expect(deleteApiKey).toHaveBeenCalled();
   });
 
   describe('columns', () => {
@@ -168,11 +182,11 @@ describe('ApiKeysList', () => {
         name: 'some-name',
       };
 
-      it('calls deleteApiKey when clicked', () => {
+      it('calls showDeleteModal when clicked', () => {
         const action = columns[2].actions[0];
         action.onClick(token);
 
-        expect(deleteApiKey).toHaveBeenCalledWith('some-name');
+        expect(showDeleteModal).toHaveBeenCalledWith('some-name');
       });
     });
   });

@@ -9,9 +9,9 @@ import React from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import { EuiBasicTable, EuiBasicTableColumn, EuiCopy } from '@elastic/eui';
+import { EuiBasicTable, EuiBasicTableColumn, EuiCopy, EuiConfirmModal } from '@elastic/eui';
 
-import { DELETE_BUTTON_LABEL } from '../../../../shared/constants';
+import { DELETE_BUTTON_LABEL, CANCEL_BUTTON_LABEL } from '../../../../shared/constants';
 import { HiddenText } from '../../../../shared/hidden_text';
 import { convertMetaToPagination, handlePageChange } from '../../../../shared/table_pagination';
 import { ApiToken } from '../../../types';
@@ -22,13 +22,29 @@ import {
   COPIED_TOOLTIP,
   NAME_TITLE,
   KEY_TITLE,
+  API_KEYS_CONFIRM_DELETE_TITLE,
+  API_KEYS_CONFIRM_DELETE_LABEL,
 } from '../constants';
 
 import { ApiKey } from './api_key';
 
 export const ApiKeysList: React.FC = () => {
-  const { deleteApiKey, onPaginate } = useActions(ApiKeysLogic);
-  const { apiTokens, meta, dataLoading } = useValues(ApiKeysLogic);
+  const { deleteApiKey, onPaginate, showDeleteModal, hideDeleteModal } = useActions(ApiKeysLogic);
+  const { apiTokens, meta, dataLoading, deleteModalVisible } = useValues(ApiKeysLogic);
+
+  const deleteModal = (
+    <EuiConfirmModal
+      title={API_KEYS_CONFIRM_DELETE_TITLE}
+      onCancel={hideDeleteModal}
+      onConfirm={deleteApiKey}
+      cancelButtonText={CANCEL_BUTTON_LABEL}
+      confirmButtonText={DELETE_BUTTON_LABEL}
+      buttonColor="danger"
+      defaultFocusedButton="confirm"
+    >
+      <p>{API_KEYS_CONFIRM_DELETE_LABEL}</p>
+    </EuiConfirmModal>
+  );
 
   const columns: Array<EuiBasicTableColumn<ApiToken>> = [
     {
@@ -71,22 +87,25 @@ export const ApiKeysList: React.FC = () => {
           type: 'icon',
           icon: 'trash',
           color: 'danger',
-          onClick: (token: ApiToken) => deleteApiKey(token.name),
+          onClick: (token: ApiToken) => showDeleteModal(token.name),
         },
       ],
     },
   ];
 
   return (
-    <EuiBasicTable
-      columns={columns}
-      items={apiTokens}
-      loading={dataLoading}
-      pagination={{
-        ...convertMetaToPagination(meta),
-        hidePerPageOptions: true,
-      }}
-      onChange={handlePageChange(onPaginate)}
-    />
+    <>
+      {deleteModalVisible && deleteModal}
+      <EuiBasicTable
+        columns={columns}
+        items={apiTokens}
+        loading={dataLoading}
+        pagination={{
+          ...convertMetaToPagination(meta),
+          hidePerPageOptions: true,
+        }}
+        onChange={handlePageChange(onPaginate)}
+      />
+    </>
   );
 };

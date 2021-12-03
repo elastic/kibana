@@ -133,3 +133,17 @@ export const API_KEYS_EMPTY_BUTTON_LABEL = i18n.translate(
     defaultMessage: 'Learn about API keys',
   }
 );
+
+export const API_KEYS_CONFIRM_DELETE_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.apiKeys.confirmDeleteTitle',
+  {
+    defaultMessage: 'Delete API key',
+  }
+);
+
+export const API_KEYS_CONFIRM_DELETE_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.apiKeys.confirmDeleteLabel',
+  {
+    defaultMessage: 'Are you sure you want to delete this API key? This action cannot be undone.',
+  }
+);

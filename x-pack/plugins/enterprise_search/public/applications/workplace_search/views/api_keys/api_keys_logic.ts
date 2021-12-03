@@ -43,8 +43,10 @@ interface ApiKeysLogicActions {
   resetApiKeys(): { value: boolean };
   fetchApiKeys(): void;
   onPaginate(newPageIndex: number): { newPageIndex: number };
-  deleteApiKey(tokenName: string): string;
+  deleteApiKey(): void;
   onApiFormSubmit(): void;
+  showDeleteModal(tokenName: string): string;
+  hideDeleteModal(): void;
 }
 
 interface ApiKeysLogicValues {
@@ -56,6 +58,8 @@ interface ApiKeysLogicValues {
   meta: Meta;
   nameInputBlurred: boolean;
   apiKeyFormVisible: boolean;
+  deleteModalVisible: boolean;
+  apiTokenNameToDelete: string;
 }
 
 export const ApiKeysLogic = kea<MakeLogicType<ApiKeysLogicValues, ApiKeysLogicActions>>({
@@ -71,7 +75,9 @@ export const ApiKeysLogic = kea<MakeLogicType<ApiKeysLogicValues, ApiKeysLogicAc
     resetApiKeys: false,
     fetchApiKeys: true,
     onPaginate: (newPageIndex) => ({ newPageIndex }),
-    deleteApiKey: (tokenName) => tokenName,
+    deleteApiKey: true,
+    showDeleteModal: (tokenName) => tokenName,
+    hideDeleteModal: true,
     onApiFormSubmit: () => null,
   }),
   reducers: () => ({
@@ -125,6 +131,22 @@ export const ApiKeysLogic = kea<MakeLogicType<ApiKeysLogicValues, ApiKeysLogicAc
         onApiTokenCreateSuccess: () => false,
       },
     ],
+    deleteModalVisible: [
+      false,
+      {
+        showDeleteModal: () => true,
+        hideDeleteModal: () => false,
+        fetchApiKeys: () => false,
+      },
+    ],
+    apiTokenNameToDelete: [
+      '',
+      {
+        showDeleteModal: (_, tokenName) => tokenName,
+        hideDeleteModal: () => '',
+        fetchApiKeys: () => '',
+      },
+    ],
     formErrors: [
       [],
       {
@@ -156,13 +178,15 @@ export const ApiKeysLogic = kea<MakeLogicType<ApiKeysLogicValues, ApiKeysLogicAc
         flashAPIErrors(e);
       }
     },
-    deleteApiKey: async (tokenName) => {
+    deleteApiKey: async () => {
+      const { apiTokenNameToDelete } = values;
+
       try {
         const { http } = HttpLogic.values;
-        await http.delete(`/internal/workplace_search/api_keys/${tokenName}`);
+        await http.delete(`/internal/workplace_search/api_keys/${apiTokenNameToDelete}`);
 
         actions.fetchApiKeys();
-        flashSuccessToast(DELETE_MESSAGE(tokenName));
+        flashSuccessToast(DELETE_MESSAGE(apiTokenNameToDelete));
       } catch (e) {
         flashAPIErrors(e);
       }

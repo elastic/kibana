@@ -33,6 +33,8 @@ describe('ApiKeysLogic', () => {
     },
     activeApiTokenRawName: '',
     apiKeyFormVisible: false,
+    apiTokenNameToDelete: '',
+    deleteModalVisible: false,
     formErrors: [],
   };
 
@@ -118,6 +120,30 @@ describe('ApiKeysLogic', () => {
             ...values,
             apiKeyFormVisible: false,
           });
+        });
+      });
+
+      describe('deleteModalVisible', () => {
+        const tokenName = 'my-token';
+
+        it('should set deleteModalVisible to true and set apiTokenNameToDelete', () => {
+          ApiKeysLogic.actions.showDeleteModal(tokenName);
+
+          expect(ApiKeysLogic.values).toEqual({
+            ...values,
+            deleteModalVisible: true,
+            apiTokenNameToDelete: tokenName,
+          });
+        });
+
+        it('should set deleteModalVisible to false and reset apiTokenNameToDelete', () => {
+          mount({
+            deleteModalVisible: true,
+            apiTokenNameToDelete: tokenName,
+          });
+          ApiKeysLogic.actions.hideDeleteModal();
+
+          expect(ApiKeysLogic.values).toEqual(values);
         });
       });
 
@@ -419,7 +445,8 @@ describe('ApiKeysLogic', () => {
         jest.spyOn(ApiKeysLogic.actions, 'fetchApiKeys').mockImplementationOnce(() => {});
         http.delete.mockReturnValue(Promise.resolve());
 
-        ApiKeysLogic.actions.deleteApiKey(tokenName);
+        ApiKeysLogic.actions.showDeleteModal(tokenName);
+        ApiKeysLogic.actions.deleteApiKey();
         expect(http.delete).toHaveBeenCalledWith(
           `/internal/workplace_search/api_keys/${tokenName}`
         );
@@ -431,7 +458,7 @@ describe('ApiKeysLogic', () => {
 
       itShowsServerErrorAsFlashMessage(http.delete, () => {
         mount();
-        ApiKeysLogic.actions.deleteApiKey(tokenName);
+        ApiKeysLogic.actions.deleteApiKey();
       });
     });
 
