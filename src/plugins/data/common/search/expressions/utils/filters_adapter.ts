@@ -48,7 +48,7 @@ function luceneQueryString(filter: Filter): ExpressionValueFilter {
 function term(filter: Filter): ExpressionValueFilter {
   const { query } = filter;
   const { term: termQuery } = query ?? {};
-  const column = Object.keys(term)[0];
+  const column = Object.keys(termQuery)[0];
   const { value } = termQuery[column] ?? {};
 
   return {
