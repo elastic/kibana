@@ -30,8 +30,7 @@ import { ENDPOINT_METADATA_INDEX } from '../../../common/constants';
 import { useSourcererDataView } from '../../common/containers/sourcerer';
 import { useDeepEqualSelector } from '../../common/hooks/use_selector';
 import { ThreatIntelLinkPanel } from '../components/overview_cti_links';
-import { useAllTiDataSources } from '../containers/overview_cti_links/use_all_ti_data_sources';
-import { useTiIntegrations } from '../containers/overview_cti_links/use_ti_integrations';
+import { useIsThreatIntelModuleEnabled } from '../containers/overview_cti_links/use_is_threat_intel_module_enabled';
 import { useUserPrivileges } from '../../common/components/user_privileges';
 import { RiskyHostLinks } from '../components/overview_risky_host_links';
 import { useAlertsPrivileges } from '../../detections/containers/detection_engine/alerts/use_alerts_privileges';
@@ -76,10 +75,7 @@ const OverviewComponent = () => {
     endpointPrivileges: { canAccessFleet },
   } = useUserPrivileges();
   const { hasIndexRead, hasKibanaREAD } = useAlertsPrivileges();
-  const { tiDataSources: allTiDataSources, isInitiallyLoaded: allTiDataSourcesLoaded } =
-    useAllTiDataSources();
-  const tiIntegrationStatus = useTiIntegrations();
-  const isTiLoaded = tiIntegrationStatus && allTiDataSourcesLoaded;
+  const isThreatIntelModuleEnabled = useIsThreatIntelModuleEnabled();
 
   const riskyHostsEnabled = useIsExperimentalFeatureEnabled('riskyHostsEnabled');
 
@@ -154,16 +150,13 @@ const OverviewComponent = () => {
                   <EuiFlexItem grow={false}>
                     <EuiFlexGroup direction="row">
                       <EuiFlexItem grow={1}>
-                        {isTiLoaded && (
-                          <ThreatIntelLinkPanel
-                            allIntegrationsInstalled={tiIntegrationStatus?.allIntegrationsInstalled}
-                            allTiDataSources={allTiDataSources}
-                            deleteQuery={deleteQuery}
-                            from={from}
-                            setQuery={setQuery}
-                            to={to}
-                          />
-                        )}
+                        <ThreatIntelLinkPanel
+                          isThreatIntelModuleEnabled={isThreatIntelModuleEnabled}
+                          deleteQuery={deleteQuery}
+                          from={from}
+                          setQuery={setQuery}
+                          to={to}
+                        />
                       </EuiFlexItem>
                       <EuiFlexItem grow={1}>
                         {riskyHostsEnabled && (

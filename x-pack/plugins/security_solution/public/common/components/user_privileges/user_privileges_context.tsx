@@ -5,16 +5,14 @@
  * 2.0.
  */
 
-import React, { createContext, useContext, useEffect, useState } from 'react';
-import { DeepReadonly } from 'utility-types';
-
-import { Capabilities } from '../../../../../../../src/core/public';
-import { useFetchDetectionEnginePrivileges } from '../../../detections/components/user_privileges/use_fetch_detection_engine_privileges';
-import { useFetchListPrivileges } from '../../../detections/components/user_privileges/use_fetch_list_privileges';
-import { EndpointPrivileges, useEndpointPrivileges } from './endpoint';
-
+import React, { createContext, useEffect, useState } from 'react';
+import { Capabilities } from '../../../../../../../src/core/types';
 import { SERVER_APP_ID } from '../../../../common/constants';
-import { getEndpointPrivilegesInitialState } from './endpoint/utils';
+import { useFetchListPrivileges } from '../../../detections/components/user_privileges/use_fetch_list_privileges';
+import { useFetchDetectionEnginePrivileges } from '../../../detections/components/user_privileges/use_fetch_detection_engine_privileges';
+import { getEndpointPrivilegesInitialState, useEndpointPrivileges } from './endpoint';
+import { EndpointPrivileges } from '../../../../common/endpoint/types';
+
 export interface UserPrivilegesState {
   listPrivileges: ReturnType<typeof useFetchListPrivileges>;
   detectionEnginePrivileges: ReturnType<typeof useFetchDetectionEnginePrivileges>;
@@ -28,8 +26,9 @@ export const initialUserPrivilegesState = (): UserPrivilegesState => ({
   endpointPrivileges: getEndpointPrivilegesInitialState(),
   kibanaSecuritySolutionsPrivileges: { crud: false, read: false },
 });
-
-const UserPrivilegesContext = createContext<UserPrivilegesState>(initialUserPrivilegesState());
+export const UserPrivilegesContext = createContext<UserPrivilegesState>(
+  initialUserPrivilegesState()
+);
 
 interface UserPrivilegesProviderProps {
   kibanaCapabilities: Capabilities;
@@ -73,6 +72,3 @@ export const UserPrivilegesProvider = ({
     </UserPrivilegesContext.Provider>
   );
 };
-
-export const useUserPrivileges = (): DeepReadonly<UserPrivilegesState> =>
-  useContext(UserPrivilegesContext);
