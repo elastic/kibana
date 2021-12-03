@@ -22,7 +22,6 @@ function shouldReject({
   table,
   keptLayerIds,
   state,
-  emptyConfiguration,
 }: SuggestionRequest<PieVisualizationState>) {
   // usecase for dropping a field - state doesn't exist yet and subVisualizationId doesn't exist
   const emptyConfiguration =
