@@ -29,6 +29,7 @@ import { syntheticsMonitorType } from '../saved_objects/synthetics_monitor';
 import { getEsHosts } from './get_es_hosts';
 import { UptimeConfig } from '../../../common/config';
 import { MonitorConfigs, ServiceAPIClient } from './service_api_client';
+import { formatUIConfigtoDataStreamConfig } from './formatters';
 
 const SYNTHETICS_SERVICE_SYNC_MONITORS_TASK_TYPE =
   'UPTIME:SyntheticsService:Sync-Saved-Monitor-Objects';
@@ -204,46 +205,7 @@ export class SyntheticsService {
   }
 
   formatConfigs(configs: MonitorConfigs) {
-    // TODO: Move to dedicated formatter class
-    function parseSchedule(schedule: any) {
-      if (schedule?.number) {
-        return `@every ${schedule.number}${schedule.unit}`;
-      }
-      return schedule;
-    }
-
-    function parseUrl(urls?: string | string[]) {
-      if (!urls) {
-        return undefined;
-      }
-      if (urls instanceof Array) {
-        return urls;
-      }
-      return [urls];
-    }
-
-    function parseInlineSource(monAttrs: any) {
-      if (monAttrs['source.inline.script']) {
-        return {
-          inline: {
-            script: monAttrs['source.inline.script'],
-          },
-        };
-      }
-    }
-    return configs.map((monAttrs) => {
-      const { id, schedule, type, name, locations, tags, urls } = monAttrs;
-      return {
-        id,
-        type,
-        name,
-        locations,
-        tags,
-        source: parseInlineSource(monAttrs),
-        urls: parseUrl(urls),
-        schedule: parseSchedule(schedule),
-      };
-    });
+    return configs.map((monAttrs) => formatUIConfigtoDataStreamConfig(monAttrs));
   }
 }
 
