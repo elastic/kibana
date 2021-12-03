@@ -30,7 +30,8 @@ import {
   CasesByAlertIdRt,
   CaseAttributes,
 } from '../../../common';
-import { countAlertsForID, createCaseError, flattenCaseSavedObject } from '../../common';
+import { createCaseError } from '../../common/error';
+import { countAlertsForID, flattenCaseSavedObject } from '../../common/utils';
 import { CasesClientArgs } from '..';
 import { Operations } from '../../authorization';
 import { combineAuthorizedAndOwnerFilter } from '../utils';

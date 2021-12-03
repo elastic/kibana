@@ -30,7 +30,8 @@ import {
 } from 'kibana/server';
 import { ACTION_SAVED_OBJECT_TYPE } from '../../../../actions/server';
 import { loggerMock } from '@kbn/logging/mocks';
-import { getNoneCaseConnector, CONNECTOR_ID_REFERENCE_NAME } from '../../common';
+import { CONNECTOR_ID_REFERENCE_NAME } from '../../common/constants';
+import { getNoneCaseConnector } from '../../common/utils';
 import { CasesService } from '.';
 import {
   createESJiraConnector,

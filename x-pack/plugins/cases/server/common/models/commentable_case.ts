@@ -34,11 +34,15 @@ import {
   CommentRequestUserType,
   CaseAttributes,
 } from '../../../common';
-import { flattenCommentSavedObjects, flattenSubCaseSavedObject, transformNewComment } from '..';
 import { AttachmentService, CasesService } from '../../services';
 import { createCaseError } from '../error';
-import { countAlertsForID } from '../index';
-import { getOrUpdateLensReferences } from '../utils';
+import {
+  countAlertsForID,
+  flattenCommentSavedObjects,
+  flattenSubCaseSavedObject,
+  transformNewComment,
+  getOrUpdateLensReferences,
+} from '../utils';
 
 interface UpdateCommentResp {
   comment: SavedObjectsUpdateResponse<CommentAttributes>;

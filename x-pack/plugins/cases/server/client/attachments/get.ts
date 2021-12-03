@@ -21,15 +21,15 @@ import {
   ENABLE_CASE_CONNECTOR,
   FindQueryParams,
 } from '../../../common';
+import { createCaseError } from '../../common/error';
 import {
-  createCaseError,
   checkEnabledCaseConnectorOrThrow,
   defaultSortField,
   transformComments,
   flattenCommentSavedObject,
   flattenCommentSavedObjects,
   getIDsAndIndicesAsArrays,
-} from '../../common';
+} from '../../common/utils';
 import { defaultPage, defaultPerPage } from '../../routes/api';
 import { CasesClientArgs } from '../types';
 import { combineFilters, stringToKueryNode } from '../utils';

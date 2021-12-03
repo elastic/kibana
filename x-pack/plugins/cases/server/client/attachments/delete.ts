@@ -18,7 +18,8 @@ import {
 } from '../../../common';
 import { CasesClientArgs } from '../types';
 import { buildCommentUserActionItem } from '../../services/user_actions/helpers';
-import { createCaseError, checkEnabledCaseConnectorOrThrow } from '../../common';
+import { createCaseError } from '../../common/error';
+import { checkEnabledCaseConnectorOrThrow } from '../../common/utils';
 import { Operations } from '../../authorization';
 
 /**

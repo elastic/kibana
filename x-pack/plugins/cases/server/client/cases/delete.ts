@@ -16,7 +16,7 @@ import {
   SubCaseAttributes,
 } from '../../../common';
 import { CasesClientArgs } from '..';
-import { createCaseError } from '../../common';
+import { createCaseError } from '../../common/error';
 import { AttachmentService, CasesService } from '../../services';
 import { buildCaseUserActionItem } from '../../services/user_actions/helpers';
 import { Operations, OwnerEntity } from '../../authorization';

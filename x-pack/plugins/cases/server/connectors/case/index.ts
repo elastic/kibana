@@ -25,7 +25,7 @@ import {
 import * as i18n from './translations';
 
 import { GetActionTypeParams, isCommentGeneratedAlert, separator } from '..';
-import { createCaseError } from '../../common';
+import { createCaseError } from '../../common/error';
 import { CasesClient } from '../../client';
 
 const supportedSubActions: string[] = ['create', 'update', 'addComment'];

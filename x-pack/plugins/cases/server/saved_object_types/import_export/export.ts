@@ -21,7 +21,8 @@ import {
   MAX_DOCS_PER_PAGE,
   SAVED_OBJECT_TYPES,
 } from '../../../common';
-import { createCaseError, defaultSortField } from '../../common';
+import { createCaseError } from '../../common/error';
+import { defaultSortField } from '../../common/utils';
 import { ESCaseAttributes } from '../../services/cases/types';
 
 export async function handleExport({

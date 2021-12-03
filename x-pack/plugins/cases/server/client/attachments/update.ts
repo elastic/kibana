@@ -10,7 +10,9 @@ import Boom from '@hapi/boom';
 
 import { SavedObjectsClientContract, Logger } from 'kibana/server';
 import { LensServerPluginSetup } from '../../../../lens/server';
-import { checkEnabledCaseConnectorOrThrow, CommentableCase, createCaseError } from '../../common';
+import { CommentableCase } from '../../common/models';
+import { createCaseError } from '../../common/error';
+import { checkEnabledCaseConnectorOrThrow } from '../../common/utils';
 import { buildCommentUserActionItem } from '../../services/user_actions/helpers';
 import {
   CASE_SAVED_OBJECT,

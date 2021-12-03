@@ -34,7 +34,7 @@ import {
   SUPPORTED_CONNECTORS,
   throwErrors,
 } from '../../../common';
-import { createCaseError } from '../../common';
+import { createCaseError } from '../../common/error';
 import { CasesClientInternal } from '../client_internal';
 import { CasesClientArgs } from '../types';
 import { getMappings } from './get_mappings';
