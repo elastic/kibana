@@ -38,6 +38,11 @@ import { NAME_LABEL, NAME_ERROR, NAME_PLACEHOLDER, OS_LABEL, RULE_NAME } from '.
 import { OS_TITLES } from '../../../../../common/translations';
 import { ENDPOINT_EVENT_FILTERS_LIST_ID, EVENT_FILTER_LIST_TYPE } from '../../../constants';
 import { ABOUT_EVENT_FILTERS } from '../../translations';
+import {
+  EffectedPolicySelect,
+  EffectedPolicySelection,
+  EffectedPolicySelectProps,
+} from '../../../../../components/effected_policy_select';
 
 const OPERATING_SYSTEMS: readonly OperatingSystem[] = [
   OperatingSystem.MAC,
@@ -60,6 +65,11 @@ export const EventFiltersForm: React.FC<EventFiltersFormProps> = memo(
     // This value has to be memoized to avoid infinite useEffect loop on useFetchIndex
     const indexNames = useMemo(() => ['logs-endpoint.events.*'], []);
     const [isIndexPatternLoading, { indexPatterns }] = useFetchIndex(indexNames);
+
+    const [selection, setSelection] = useState<EffectedPolicySelection>({
+      selected: [],
+      isGlobal: true,
+    });
 
     const osOptions: Array<EuiSuperSelectOption<OperatingSystem>> = useMemo(
       () => OPERATING_SYSTEMS.map((os) => ({ value: os, inputDisplay: OS_TITLES[os] })),
@@ -262,6 +272,25 @@ export const EventFiltersForm: React.FC<EventFiltersFormProps> = memo(
       [allowSelectOs, exceptionBuilderComponentMemo, osInputMemo]
     );
 
+    const policiesSection = useMemo(
+      () => (
+        <EffectedPolicySelect
+          options={[]}
+          isGlobal={selection.isGlobal}
+          isPlatinumPlus={true}
+          onChange={(currentSelection) => {
+            if (currentSelection.isGlobal) {
+              // Preserve last selection inputs
+              setSelection({ ...selection, isGlobal: true });
+            } else {
+              setSelection(currentSelection);
+            }
+          }}
+        />
+      ),
+      [selection]
+    );
+
     const commentsSection = useMemo(
       () => (
         <>
@@ -294,6 +323,8 @@ export const EventFiltersForm: React.FC<EventFiltersFormProps> = memo(
         {detailsSection}
         <EuiHorizontalRule />
         {criteriaSection}
+        <EuiHorizontalRule />
+        {policiesSection}
         <EuiHorizontalRule />
         {commentsSection}
       </EuiForm>
