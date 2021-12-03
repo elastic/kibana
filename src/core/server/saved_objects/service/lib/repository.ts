@@ -370,7 +370,7 @@ export class SavedObjectsRepository {
      * migration to fail, but it's the best we can do without devising a way to run validations
      * inside the migration algorithm itself.
      */
-    this.validateObjectAttributes<T>(type, migrated as SavedObjectSanitizedDoc<T>);
+    this.validateObjectAttributes(type, migrated as SavedObjectSanitizedDoc<T>);
 
     const raw = this._serializer.savedObjectToRaw(migrated as SavedObjectSanitizedDoc<T>);
 
@@ -542,7 +542,7 @@ export class SavedObjectsRepository {
        * inside the migration algorithm itself.
        */
       try {
-        this.validateObjectAttributes<T>(object.type, migrated);
+        this.validateObjectAttributes(object.type, migrated);
       } catch (error) {
         return {
           tag: 'Left',
@@ -2226,19 +2226,20 @@ export class SavedObjectsRepository {
   }
 
   /** Validate a migrated doc against the registered saved object type's schema. */
-  private validateObjectAttributes<T>(type: string, doc: SavedObjectSanitizedDoc<T>) {
+  private validateObjectAttributes(type: string, doc: SavedObjectSanitizedDoc) {
     const savedObjectType = this._registry.getType(type);
     if (!savedObjectType?.schemas) {
       return;
     }
 
     const validator = new SavedObjectsTypeValidator({
+      logger: this._logger.get('type-validator'),
       type,
       validationMap: savedObjectType.schemas,
     });
 
     try {
-      validator.validate(this._migrator.kibanaVersion, doc.attributes);
+      validator.validate(this._migrator.kibanaVersion, doc);
     } catch (error) {
       throw SavedObjectsErrorHelpers.createBadRequestError(error.message);
     }

@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-export { SavedObjectsTypeValidator } from './validator';
 export type {
   SavedObjectsValidationMap,
   SavedObjectsValidationSpec,
   SavedObjectsValidationFunction,
-} from './validator';
+} from './types';
+export { SavedObjectsTypeValidator } from './validator';
 export { SavedObjectsValidationError } from './validator_error';

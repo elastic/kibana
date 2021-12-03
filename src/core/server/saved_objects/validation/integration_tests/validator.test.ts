@@ -59,6 +59,10 @@ function createRoot() {
   );
 }
 
+function isRecord(obj: unknown): obj is Record<string, unknown> {
+  return typeof obj === 'object' && obj !== null && !Array.isArray(obj);
+}
+
 // To keep this suite from running too long, we are only setting up ES once and registering
 // a handful of SO types to test different scenarios. This means we need to take care when
 // adding new tests, as ES will not be cleaned up in between each test run.
@@ -97,12 +101,12 @@ const savedObjectTypes: SavedObjectsType[] = [
     },
     namespaceType: 'agnostic',
     schemas: {
-      [kibanaVersion]: (data) => {
-        if (typeof data.a !== 'number') {
-          throw new Error(`[a]: expected value of type [number] but got [${typeof data.a}]`);
+      [kibanaVersion]: ({ attributes }) => {
+        if (isRecord(attributes) && typeof attributes.a !== 'number') {
+          throw new Error(`[a]: expected value of type [number] but got [${typeof attributes.a}]`);
         }
-        if (typeof data.b !== 'string') {
-          throw new Error(`[b]: expected value of type [string] but got [${typeof data.b}]`);
+        if (isRecord(attributes) && typeof attributes.b !== 'string') {
+          throw new Error(`[b]: expected value of type [string] but got [${typeof attributes.b}]`);
         }
       },
     },

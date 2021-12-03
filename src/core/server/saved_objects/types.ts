@@ -29,7 +29,7 @@ export type {
   SavedObjectsImportWarning,
 } from './import/types';
 
-import { SavedObject, SavedObjectAttributes } from '../../types';
+import { SavedObject } from '../../types';
 import { ElasticsearchClient } from '../elasticsearch';
 
 type KueryNode = any;
@@ -253,7 +253,7 @@ export type SavedObjectsNamespaceType = 'single' | 'multiple' | 'multiple-isolat
 /**
  * @public
  */
-export interface SavedObjectsType<Attributes extends SavedObjectAttributes = any> {
+export interface SavedObjectsType<Attributes = any> {
   /**
    * The name of the type, which is also used as the internal id.
    */
@@ -297,7 +297,7 @@ export interface SavedObjectsType<Attributes extends SavedObjectAttributes = any
    *
    * See {@link SavedObjectsValidationMap} for more details.
    */
-  schemas?: SavedObjectsValidationMap<Attributes> | (() => SavedObjectsValidationMap<Attributes>);
+  schemas?: SavedObjectsValidationMap | (() => SavedObjectsValidationMap);
   /**
    * If defined, objects of this type will be converted to a 'multiple' or 'multiple-isolated' namespace type when migrating to this
    * version.
