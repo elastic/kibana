@@ -46,5 +46,6 @@
     "TLSv1.1",
     "TLSv1.2"
   ],
-  "name": "test-monitor-name"
+  "name": "test-monitor-name",
+  "locations": ["EMEA", "NA"]
 }
