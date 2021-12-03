@@ -7,7 +7,11 @@
 
 import moment from 'moment';
 import { schema, ByteSizeValue } from '@kbn/config-schema';
-import { PluginInitializerContext, RequestHandlerContext } from '../../../../src/core/server';
+import {
+  CoreStart,
+  PluginInitializerContext,
+  RequestHandlerContext,
+} from '../../../../src/core/server';
 import { coreMock, httpServerMock } from '../../../../src/core/server/mocks';
 import { usageCollectionPluginMock } from '../../../../src/plugins/usage_collection/server/mocks';
 import { licensingMock } from '../../licensing/server/mocks';
@@ -60,6 +64,14 @@ describe('Actions Plugin', () => {
         usageCollection: usageCollectionPluginMock.createSetupContract(),
         features: featuresPluginMock.createSetup(),
       };
+      coreSetup.getStartServices.mockResolvedValue([
+        coreMock.createStart(),
+        {
+          ...pluginsSetup,
+          encryptedSavedObjects: encryptedSavedObjectsMock.createStart(),
+        },
+        {},
+      ]);
     });
 
     it('should log warning when Encrypted Saved Objects plugin is missing encryption key', async () => {

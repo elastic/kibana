@@ -476,6 +476,18 @@ describe('send_email module', () => {
       },
     });
 
+    unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
+      id: '1',
+      type: 'connector_token',
+      references: [],
+      attributes: {
+        connectorId: '123',
+        expiresAt: date.toISOString(),
+        tokenType: 'access_token',
+        token: '11111111',
+      },
+    });
+
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
       type: 'connector_token',
@@ -624,7 +636,7 @@ describe('send_email module', () => {
     await sendEmail(mockLogger, sendEmailOptions, connectorTokenClient);
     expect(requestOAuthClientCredentialsTokenMock.mock.calls.length).toBe(1);
     expect(unsecuredSavedObjectsClient.create.mock.calls.length).toBe(1);
-    expect(mockLogger.warn.mock.calls[1]).toMatchObject([
+    expect(mockLogger.warn.mock.calls[0]).toMatchObject([
       `Not able to update connector token for connectorId: 1 due to error: Fail`,
     ]);
 
@@ -691,7 +703,19 @@ describe('send_email module', () => {
         Object {
           "context": Array [],
           "debug": [MockFunction],
-          "error": [MockFunction],
+          "error": [MockFunction] {
+            "calls": Array [
+              Array [
+                "Failed to create connector_token for connectorId \\"1\\" and tokenType: \\"access_token\\". Error: Fail",
+              ],
+            ],
+            "results": Array [
+              Object {
+                "type": "return",
+                "value": undefined,
+              },
+            ],
+          },
           "fatal": [MockFunction],
           "get": [MockFunction],
           "info": [MockFunction],
@@ -700,17 +724,10 @@ describe('send_email module', () => {
           "warn": [MockFunction] {
             "calls": Array [
               Array [
-                "Failed to create connector_token for connectorId \\"1\\" and tokenType: \\"access_token\\". Error: Fail",
-              ],
-              Array [
                 "Not able to update connector token for connectorId: 1 due to error: Fail",
               ],
             ],
             "results": Array [
-              Object {
-                "type": "return",
-                "value": undefined,
-              },
               Object {
                 "type": "return",
                 "value": undefined,

@@ -212,7 +212,7 @@ export class ConnectorTokenClient {
           async (obj) =>
             await this.unsecuredSavedObjectsClient.delete(
               CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
-              obj.attributes.connectorId
+              obj.id
             )
         )
       );
