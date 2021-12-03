@@ -138,7 +138,11 @@ export function AgentKeys() {
             </p>
           }
           actions={
-            <EuiButton fill={true} iconType="plusInCircleFilled">
+            <EuiButton
+              onClick={() => setIsFlyoutVisible(true)}
+              fill={true}
+              iconType="plusInCircleFilled"
+            >
               {i18n.translate(
                 'xpack.apm.settings.agentKeys.createAgentKeyButton',
                 {
