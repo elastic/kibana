@@ -62,9 +62,9 @@ export const CrawlDetailsSummary: React.FC<ICrawlerSummaryProps> = ({
   };
 
   const [statusCounts] = useState<{ [code: string]: number }>({
-    client_error_count:
+    clientErrorCount:
       stats.status && stats.status.statusCodes ? getStatusCount('4', stats.status.statusCodes) : 0,
-    server_error_count:
+    serverErrorCount:
       stats.status && stats.status.statusCodes ? getStatusCount('5', stats.status.statusCodes) : 0,
   });
 
@@ -203,7 +203,7 @@ export const CrawlDetailsSummary: React.FC<ICrawlerSummaryProps> = ({
             <EuiStat
               data-test-subj="clientErrors"
               titleSize="s"
-              title={statusCounts.client_error_count}
+              title={statusCounts.clientErrorCount}
               description={`4xx ${i18n.translate(
                 'xpack.enterpriseSearch.appSearch.crawler.crawlDetailsSummary.serverErrors',
                 {
@@ -216,7 +216,7 @@ export const CrawlDetailsSummary: React.FC<ICrawlerSummaryProps> = ({
             <EuiStat
               data-test-subj="serverErrors"
               titleSize="s"
-              title={statusCounts.server_error_count}
+              title={statusCounts.serverErrorCount}
               description={`5xx ${i18n.translate(
                 'xpack.enterpriseSearch.appSearch.crawler.crawlDetailsSummary.serverErrors',
                 {
