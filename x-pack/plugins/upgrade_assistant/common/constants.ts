@@ -41,3 +41,13 @@ export const CLUSTER_UPGRADE_STATUS_POLL_INTERVAL_MS = 45000;
 export const CLOUD_BACKUP_STATUS_POLL_INTERVAL_MS = 60000;
 export const DEPRECATION_LOGS_COUNT_POLL_INTERVAL_MS = 15000;
 export const SYSTEM_INDICES_MIGRATION_POLL_INTERVAL_MS = 15000;
+
+/**
+ * List of Elastic apps that potentially can generate deprecation logs.
+ * We want to filter those out for our users so they only see deprecation logs
+ * that _they_ are generating.
+ */
+export const APPS_WITH_DEPRECATION_LOGS = ['1.6', '1.7'];
+
+// The field that will indicate which elastic product generated the deprecation log
+export const DEPRECATION_LOGS_ORIGIN_FIELD = 'ecs.version';
