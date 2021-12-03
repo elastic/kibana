@@ -13,6 +13,8 @@ import {
   RULES_EMPTY_PROMPT,
   RULE_SWITCH,
   SHOWING_RULES_TEXT,
+  RULES_MONIROTING_TABLE,
+  SELECT_ALL_RULES_ON_PAGE_CHECKBOX,
 } from '../../screens/alerts_detection_rules';
 
 import { goToManageAlertsDetectionRules, waitForAlertsIndexToBeCreated } from '../../tasks/alerts';
@@ -92,6 +94,19 @@ describe('Actions with prebuilt rules', () => {
     deactivateSelectedRules();
     waitForRuleToChangeStatus();
     cy.get(RULE_SWITCH).should('have.attr', 'aria-checked', 'false');
+  });
+
+  it('Allows to activate all rules on a page and deactivate single one at monitoring table', () => {
+    cy.get(RULES_MONIROTING_TABLE).click();
+    cy.get(SELECT_ALL_RULES_ON_PAGE_CHECKBOX).click();
+    activateSelectedRules();
+    waitForRuleToChangeStatus();
+    cy.get(RULE_SWITCH).should('have.attr', 'aria-checked', 'true');
+
+    selectNumberOfRules(1);
+    cy.get(RULE_SWITCH).first().click();
+    waitForRuleToChangeStatus();
+    cy.get(RULE_SWITCH).first().should('have.attr', 'aria-checked', 'false');
   });
 
   it('Allows to delete all rules at once', () => {

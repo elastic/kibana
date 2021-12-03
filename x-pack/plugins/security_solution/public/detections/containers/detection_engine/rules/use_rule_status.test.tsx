@@ -178,8 +178,6 @@ describe('useRuleStatus', () => {
               },
               failures: [],
               id: '12345678987654321',
-              activate: true,
-              name: 'Test rule',
             },
           ],
         });
