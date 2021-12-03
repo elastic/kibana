@@ -474,5 +474,152 @@ describe('configureClient', () => {
         `);
       });
     });
+
+    describe('deprecation warnings from response headers', () => {
+      it('does not log when no deprecation warning header is returned', () => {
+        const client = configureClient(createFakeConfig(), { logger, type: 'test', scoped: false });
+
+        const response = createResponseWithBody({
+          seq_no_primary_term: true,
+          query: {
+            term: { user: 'kimchy' },
+          },
+        });
+        client.diagnostic.emit('response', new errors.ResponseError(response), response);
+
+        expect(loggingSystemMock.collect(logger).warn).toEqual([]);
+        expect(loggingSystemMock.collect(logger).error).toEqual([]);
+      });
+
+      it('logs when the client receives an Elasticsearch error response for a deprecated request originating from a user', () => {
+        const client = configureClient(createFakeConfig(), { logger, type: 'test', scoped: false });
+
+        const response = createApiResponse({
+          statusCode: 400,
+          warnings: ['GET /_path is deprecated'],
+          params: {
+            method: 'GET',
+            path: '/_path',
+            querystring: { hello: 'dolly' },
+          },
+          body: {
+            error: {
+              type: 'illegal_argument_exception',
+              reason: 'request [/_path] contains unrecognized parameter: [name]',
+            },
+          },
+        });
+        client.diagnostic.emit('response', new errors.ResponseError(response), response);
+
+        expect(loggingSystemMock.collect(logger).warn).toEqual([]);
+        expect(loggingSystemMock.collect(logger).error[0][0]).toMatch(
+          'ES DEPRECATION: GET /_path is deprecated'
+        );
+        expect(loggingSystemMock.collect(logger).error[0][0]).toMatch('Origin:user');
+        expect(loggingSystemMock.collect(logger).error[0][0]).toMatch(/Stack trace:\n.*at/);
+        expect(loggingSystemMock.collect(logger).error[0][0]).toMatch(
+          /Query:\n.*400\n.*GET \/_path\?hello\=dolly \[illegal_argument_exception\]: request \[\/_path\] contains unrecognized parameter: \[name\]/
+        );
+      });
+
+      it('logs when the client receives an Elasticsearch error response for a deprecated request originating from kibana', () => {
+        const client = configureClient(createFakeConfig(), { logger, type: 'test', scoped: false });
+
+        const response = createApiResponse({
+          statusCode: 400,
+          warnings: ['GET /_path is deprecated'],
+          // Set the request header to indicate to Elasticsearch that this is a request over which users have no control
+          requestOptions: { headers: { 'x-elastic-product-origin': 'kibana' } },
+          params: {
+            method: 'GET',
+            path: '/_path',
+            querystring: { hello: 'dolly' },
+          },
+          body: {
+            error: {
+              type: 'illegal_argument_exception',
+              reason: 'request [/_path] contains unrecognized parameter: [name]',
+            },
+          },
+        });
+        client.diagnostic.emit('response', new errors.ResponseError(response), response);
+
+        expect(loggingSystemMock.collect(logger).error).toEqual([]);
+        expect(loggingSystemMock.collect(logger).warn[0][0]).toMatch(
+          'ES DEPRECATION: GET /_path is deprecated'
+        );
+        expect(loggingSystemMock.collect(logger).warn[0][0]).toMatch('Origin:kibana');
+        expect(loggingSystemMock.collect(logger).warn[0][0]).toMatch(/Stack trace:\n.*at/);
+        expect(loggingSystemMock.collect(logger).warn[0][0]).toMatch(
+          /Query:\n.*400\n.*GET \/_path\?hello\=dolly \[illegal_argument_exception\]: request \[\/_path\] contains unrecognized parameter: \[name\]/
+        );
+      });
+
+      it('logs when the client receives an Elasticsearch success response for a deprecated request originating from a user', () => {
+        const client = configureClient(createFakeConfig(), { logger, type: 'test', scoped: false });
+
+        const response = createApiResponse({
+          statusCode: 200,
+          warnings: ['GET /_path is deprecated'],
+          params: {
+            method: 'GET',
+            path: '/_path',
+            querystring: { hello: 'dolly' },
+          },
+          body: {
+            hits: [
+              {
+                _source: 'may the source be with you',
+              },
+            ],
+          },
+        });
+        client.diagnostic.emit('response', null, response);
+
+        expect(loggingSystemMock.collect(logger).warn).toEqual([]);
+        expect(loggingSystemMock.collect(logger).error[0][0]).toMatch(
+          'ES DEPRECATION: GET /_path is deprecated'
+        );
+        expect(loggingSystemMock.collect(logger).error[0][0]).toMatch('Origin:user');
+        expect(loggingSystemMock.collect(logger).error[0][0]).toMatch(/Stack trace:\n.*at/);
+        expect(loggingSystemMock.collect(logger).error[0][0]).toMatch(
+          /Query:\n.*200\n.*GET \/_path\?hello\=dolly/
+        );
+      });
+
+      it('logs when the client receives an Elasticsearch success response for a deprecated request originating from kibana', () => {
+        const client = configureClient(createFakeConfig(), { logger, type: 'test', scoped: false });
+
+        const response = createApiResponse({
+          statusCode: 200,
+          warnings: ['GET /_path is deprecated'],
+          // Set the request header to indicate to Elasticsearch that this is a request over which users have no control
+          requestOptions: { headers: { 'x-elastic-product-origin': 'kibana' } },
+          params: {
+            method: 'GET',
+            path: '/_path',
+            querystring: { hello: 'dolly' },
+          },
+          body: {
+            hits: [
+              {
+                _source: 'may the source be with you',
+              },
+            ],
+          },
+        });
+        client.diagnostic.emit('response', null, response);
+
+        expect(loggingSystemMock.collect(logger).error).toEqual([]);
+        expect(loggingSystemMock.collect(logger).warn[0][0]).toMatch(
+          'ES DEPRECATION: GET /_path is deprecated'
+        );
+        expect(loggingSystemMock.collect(logger).warn[0][0]).toMatch('Origin:kibana');
+        expect(loggingSystemMock.collect(logger).warn[0][0]).toMatch(/Stack trace:\n.*at/);
+        expect(loggingSystemMock.collect(logger).warn[0][0]).toMatch(
+          /Query:\n.*200\n.*GET \/_path\?hello\=dolly/
+        );
+      });
+    });
   });
 });
