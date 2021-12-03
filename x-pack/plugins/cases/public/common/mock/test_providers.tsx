@@ -14,7 +14,6 @@ import { DEFAULT_FEATURES, SECURITY_SOLUTION_OWNER } from '../../../common/const
 import { CasesFeatures } from '../../../common/ui/types';
 import { CasesProvider } from '../../components/cases_context';
 import { createKibanaContextProviderMock } from '../lib/kibana/kibana_react.mock';
-
 import { FieldHook } from '../shared_imports';
 interface Props {
   children: React.ReactNode;

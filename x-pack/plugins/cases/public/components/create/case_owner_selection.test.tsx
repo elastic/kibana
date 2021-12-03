@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { mount } from 'enzyme';
-import { act } from '@testing-library/react';
+import { act, waitFor } from '@testing-library/react';
 
 import { useForm, Form, FormHook } from '../../common/shared_imports';
 import { CaseOwnerSelection } from './case_owner_selection';
@@ -64,7 +64,7 @@ describe('Case Owner Selection', () => {
     ).toBeFalsy();
   });
 
-  it.skip('it changes the selection', async () => {
+  it('it changes the selection', async () => {
     const wrapper = mount(
       <MockHookWrapperComponent>
         <CaseOwnerSelection
@@ -75,9 +75,41 @@ describe('Case Owner Selection', () => {
     );
 
     await act(async () => {
-      wrapper.find(`[data-test-subj="observabilityRadioButton"]`).first().simulate('click');
+      wrapper
+        .find(`[data-test-subj="observabilityRadioButton"] input`)
+        .first()
+        .simulate('change', 'observability');
+    });
+
+    await waitFor(() => {
+      wrapper.update();
+      expect(
+        wrapper.find(`[data-test-subj="observabilityRadioButton"] input`).first().props().checked
+      ).toBeTruthy();
+      expect(
+        wrapper.find(`[data-test-subj="securitySolutionRadioButton"] input`).first().props().checked
+      ).toBeFalsy();
     });
 
     expect(globalForm.getFormData()).toEqual({ selectedOwner: 'observability' });
+
+    await act(async () => {
+      wrapper
+        .find(`[data-test-subj="securitySolutionRadioButton"] input`)
+        .first()
+        .simulate('change', 'securitySolution');
+    });
+
+    await waitFor(() => {
+      wrapper.update();
+      expect(
+        wrapper.find(`[data-test-subj="securitySolutionRadioButton"] input`).first().props().checked
+      ).toBeTruthy();
+      expect(
+        wrapper.find(`[data-test-subj="observabilityRadioButton"] input`).first().props().checked
+      ).toBeFalsy();
+    });
+
+    expect(globalForm.getFormData()).toEqual({ selectedOwner: 'securitySolution' });
   });
 });
