@@ -6,10 +6,14 @@
  */
 
 import { CoreSetup } from 'kibana/server';
+import {
+  mergeMigrationFunctionMaps,
+  MigrateFunctionsObject,
+} from 'src/plugins/kibana_utils/common';
 import { getEditPath } from '../common';
 import { migrations } from './migrations/saved_object_migrations';
 
-export function setupSavedObjects(core: CoreSetup) {
+export function setupSavedObjects(core: CoreSetup, filterMigrations: MigrateFunctionsObject) {
   core.savedObjects.registerType({
     name: 'lens',
     hidden: false,
@@ -25,7 +29,10 @@ export function setupSavedObjects(core: CoreSetup) {
         uiCapabilitiesPath: 'visualize.show',
       }),
     },
-    migrations,
+    migrations: mergeMigrationFunctionMaps(
+      migrations as unknown as MigrateFunctionsObject,
+      filterMigrations
+    ),
     mappings: {
       properties: {
         title: {
