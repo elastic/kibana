@@ -60,7 +60,7 @@ const excludeOptions = [
       'xpack.apm.fleetIntegration.javaRuntime.operationType.exclude.options.vmargDescription',
       {
         defaultMessage:
-          'A username that is matched against the operating system user that runs the JVM. For included users, make sure that the Elastic Agent user is either the same user or has permissions to switch to the user that runs the target JVM.',
+          'A username that is matched against the operating system user that runs the JVM.',
       }
     ),
   },
