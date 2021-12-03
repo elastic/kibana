@@ -9,7 +9,8 @@
 import { ComponentType } from 'react';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { IndexPattern } from '../../../../data/public';
+import { IndexPattern, IndexPatternField } from '../../../../data/public';
+import { IgnoredReason } from '../../utils/get_ignored_reason';
 
 export type ElasticSearchHit<T = unknown> = estypes.SearchHit<T>;
 
@@ -67,3 +68,23 @@ export type DocView = DocViewInput & {
 };
 
 export type DocViewInputFn = () => DocViewInput;
+
+export interface FieldRecordLegacy {
+  action: {
+    isActive: boolean;
+    onFilter?: DocViewFilterFn;
+    onToggleColumn: (field: string) => void;
+    flattenedField: unknown;
+  };
+  field: {
+    displayName: string;
+    field: string;
+    scripted: boolean;
+    fieldType?: string;
+    fieldMapping?: IndexPatternField;
+  };
+  value: {
+    formattedValue: string;
+    ignored?: IgnoredReason;
+  };
+}

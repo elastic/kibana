@@ -7,65 +7,55 @@
  */
 
 import './table.scss';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import {
-  EuiInMemoryTable,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFieldSearch,
-  Direction,
+  EuiSpacer,
+  EuiTable,
+  EuiTableBody,
+  EuiTableRowCell,
+  EuiTableRow,
+  EuiTableHeader,
+  EuiTableHeaderCell,
+  EuiText,
+  EuiTablePagination,
+  EuiSelectableMessage,
+  EuiI18n,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { IndexPattern, IndexPatternField } from '../../../../../../data/public';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { usePager } from '../../../../utils/use_pager';
+import { FieldName } from '../../../../components/field_name/field_name';
 import { flattenHit } from '../../../../../../data/common';
 import { SHOW_MULTIFIELDS } from '../../../../../common';
 import { getServices } from '../../../../kibana_services';
-import { DocViewFilterFn, ElasticSearchHit, DocViewRenderProps } from '../../doc_views_types';
-import { ACTIONS_COLUMN, MAIN_COLUMNS } from './table_columns';
+import { DocViewRenderProps, FieldRecordLegacy } from '../../doc_views_types';
 import { getFieldsToShow } from '../../../../utils/get_fields_to_show';
-import { getIgnoredReason, IgnoredReason } from '../../../../utils/get_ignored_reason';
+import { getIgnoredReason } from '../../../../utils/get_ignored_reason';
 import { formatFieldValue } from '../../../../utils/format_value';
 import { isNestedFieldParent } from '../../../../application/main/utils/nested_fields';
+import { TableActions } from './table_actions';
+import { TableFieldValue } from './table_cell_value';
 
-export interface DocViewerTableProps {
-  columns?: string[];
-  filter?: DocViewFilterFn;
-  hit: ElasticSearchHit;
-  indexPattern: IndexPattern;
-  onAddColumn?: (columnName: string) => void;
-  onRemoveColumn?: (columnName: string) => void;
-}
-
-export interface FieldRecord {
-  action: {
-    isActive: boolean;
-    onFilter?: DocViewFilterFn;
-    onToggleColumn: (field: string) => void;
-    flattenedField: unknown;
-  };
+export interface FieldRecord extends FieldRecordLegacy {
   field: {
-    displayName: string;
-    field: string;
-    scripted: boolean;
-    fieldType?: string;
-    fieldMapping?: IndexPatternField;
     pinned: boolean;
-    onTogglePinned: (displayName: string) => void;
-  };
-  value: {
-    formattedValue: string;
-    ignored?: IgnoredReason;
-  };
+    onTogglePinned: (field: string) => void;
+  } & FieldRecordLegacy['field'];
 }
 
-const sorting = {
-  sort: {
-    field: 'field',
-    direction: 'desc' as Direction,
-  },
-};
+interface ItemsEntry {
+  pinnedItems: FieldRecord[];
+  restItems: FieldRecord[];
+}
 
-export const DocViewerTable = ({
+const MOBILE_OPTIONS = { show: false };
+const PINNED_FIELDS_KEY = 'discover:pinnedFields';
+
+// eslint-disable-next-line import/no-default-export
+export default ({
   columns,
   hit,
   indexPattern,
@@ -74,10 +64,17 @@ export const DocViewerTable = ({
   onRemoveColumn,
 }: DocViewRenderProps) => {
   const [query, setQuery] = useState('');
-  const showMultiFields = getServices().uiSettings.get(SHOW_MULTIFIELDS);
-  const [pinnedFields, setPinnedFields] = useState<string[]>([]);
+  const { storage, uiSettings } = getServices();
+  const showMultiFields = uiSettings.get(SHOW_MULTIFIELDS);
+  const storedPinnedFields = storage.get(PINNED_FIELDS_KEY);
+  const [pinnedFields, setPinnedFields] = useState<string[]>(
+    (storedPinnedFields && JSON.parse(storedPinnedFields)[indexPattern.id!]) || []
+  );
+  const flattened = flattenHit(hit, indexPattern, { source: true, includeIgnoredValues: true });
+  const fieldsToShow = getFieldsToShow(Object.keys(flattened), indexPattern, showMultiFields);
+  const showActionsColumn = !!filter;
 
-  const searchPlaceholder = i18n.translate('discover.fieldChooser.searchPlaceHolder', {
+  const searchPlaceholder = i18n.translate('discover.docView.table.searchPlaceHolder', {
     defaultMessage: 'Search field names',
   });
 
@@ -85,10 +82,6 @@ export const DocViewerTable = ({
     (name: string) => indexPattern?.fields.getByName(name),
     [indexPattern?.fields]
   );
-
-  const tableColumns = useMemo(() => {
-    return filter ? [ACTIONS_COLUMN, ...MAIN_COLUMNS] : MAIN_COLUMNS;
-  }, [filter]);
 
   const onToggleColumn = useCallback(
     (field: string) => {
@@ -104,46 +97,27 @@ export const DocViewerTable = ({
     [onRemoveColumn, onAddColumn, columns]
   );
 
-  const onSetRowProps = useCallback(({ field: { field, pinned } }: FieldRecord) => {
-    const key = pinned ? field + '-pinned' : field;
-    return {
-      key,
-      isSelected: pinned,
-      className: 'kbnDocViewer__tableRow',
-      'data-test-subj': `tableDocViewRow-${field}`,
-    };
-  }, []);
-
   const onTogglePinned = useCallback(
-    (displayName: string) => setPinnedFields([...pinnedFields, displayName]),
-    [pinnedFields]
+    (field: string) => {
+      const newPinned = pinnedFields.includes(field)
+        ? pinnedFields.filter((curField) => curField !== field)
+        : [...pinnedFields, field];
+
+      const curStoredPinnedFields = storage.get(PINNED_FIELDS_KEY);
+      const newStoredPinnedFields = Object.assign(
+        (curStoredPinnedFields && JSON.parse(curStoredPinnedFields)) || {},
+        {
+          [indexPattern.id!]: newPinned,
+        }
+      );
+      storage.set(PINNED_FIELDS_KEY, JSON.stringify(newStoredPinnedFields));
+      setPinnedFields(newPinned);
+    },
+    [indexPattern.id, pinnedFields, storage]
   );
 
-  const handleOnChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-    setQuery(event.currentTarget.value);
-  }, []);
-
-  if (!indexPattern) {
-    return null;
-  }
-
-  const flattened = flattenHit(hit, indexPattern, { source: true, includeIgnoredValues: true });
-  const fieldsToShow = getFieldsToShow(Object.keys(flattened), indexPattern, showMultiFields);
-
-  const items: FieldRecord[] = Object.keys(flattened)
-    .filter((fieldName) => {
-      const fieldMapping = mapping(fieldName);
-      const displayName = fieldMapping?.displayName ?? fieldName;
-      return fieldsToShow.includes(fieldName) && displayName.includes(query);
-    })
-    .sort((fieldA, fieldB) => {
-      const mappingA = mapping(fieldA);
-      const mappingB = mapping(fieldB);
-      const nameA = !mappingA || !mappingA.displayName ? fieldA : mappingA.displayName;
-      const nameB = !mappingB || !mappingB.displayName ? fieldB : mappingB.displayName;
-      return nameA.localeCompare(nameB);
-    })
-    .map((field) => {
+  const fieldToItem = useCallback(
+    (field: string) => {
       const fieldMapping = mapping(field);
       const displayName = fieldMapping?.displayName ?? field;
       const fieldType = isNestedFieldParent(field, indexPattern) ? 'nested' : fieldMapping?.type;
@@ -171,15 +145,170 @@ export const DocViewerTable = ({
           ignored,
         },
       };
-    });
+    },
+    [
+      columns,
+      filter,
+      flattened,
+      hit,
+      indexPattern,
+      mapping,
+      onToggleColumn,
+      onTogglePinned,
+      pinnedFields,
+    ]
+  );
+
+  const handleOnChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+    setQuery(event.currentTarget.value);
+  }, []);
+
+  const { pinnedItems, restItems } = Object.keys(flattened)
+    .sort((fieldA, fieldB) => {
+      const mappingA = mapping(fieldA);
+      const mappingB = mapping(fieldB);
+      const nameA = !mappingA || !mappingA.displayName ? fieldA : mappingA.displayName;
+      const nameB = !mappingB || !mappingB.displayName ? fieldB : mappingB.displayName;
+      return nameA.localeCompare(nameB);
+    })
+    .reduce<ItemsEntry>(
+      (acc, curFieldName) => {
+        if (!fieldsToShow.includes(curFieldName)) {
+          return acc;
+        }
+
+        if (pinnedFields.includes(curFieldName)) {
+          acc.pinnedItems.push(fieldToItem(curFieldName));
+        } else {
+          const fieldMapping = mapping(curFieldName);
+          const displayName = fieldMapping?.displayName ?? curFieldName;
+          if (displayName.includes(query)) {
+            acc.restItems.push(fieldToItem(curFieldName));
+          }
+        }
+
+        return acc;
+      },
+      {
+        pinnedItems: [],
+        restItems: [],
+      }
+    );
+
+  const { currentPage, pageSize, totalPages, startIndex, changePage, changePageSize } = usePager({
+    totalItems: restItems.length,
+  });
+  const showPagination = totalPages !== 0;
+
+  const headers = [
+    showActionsColumn && (
+      <EuiTableHeaderCell align="left" width={62} isSorted={false} mobileOptions={MOBILE_OPTIONS}>
+        <EuiText size="xs">
+          <strong>
+            <FormattedMessage
+              id="discover.fieldChooser.discoverField.actions"
+              defaultMessage="Actions"
+            />
+          </strong>
+        </EuiText>
+      </EuiTableHeaderCell>
+    ),
+    <EuiTableHeaderCell align="left" width="30%" isSorted={false} mobileOptions={MOBILE_OPTIONS}>
+      <EuiText size="xs">
+        <strong>
+          <FormattedMessage id="discover.fieldChooser.discoverField.name" defaultMessage="Field" />
+        </strong>
+      </EuiText>
+    </EuiTableHeaderCell>,
+    <EuiTableHeaderCell align="left" isSorted={false} mobileOptions={MOBILE_OPTIONS}>
+      <EuiText size="xs">
+        <strong>
+          <FormattedMessage id="discover.fieldChooser.discoverField.value" defaultMessage="Value" />
+        </strong>
+      </EuiText>
+    </EuiTableHeaderCell>,
+  ];
+
+  const renderRows = useCallback(
+    (items: FieldRecord[]) => {
+      return items.map(
+        ({
+          action: { flattenedField, isActive, onFilter },
+          field: { field, fieldMapping, displayName, fieldType, scripted, pinned },
+          value: { formattedValue, ignored },
+        }: FieldRecord) => {
+          return (
+            <EuiTableRow key={field} className="kbnDocViewer__tableRow" isSelected={pinned}>
+              {showActionsColumn && (
+                <EuiTableRowCell
+                  key={field + '-actions'}
+                  align="center"
+                  width={62}
+                  className="kbnDocViewer__tableActionsCell"
+                  textOnly={false}
+                  mobileOptions={{ show: false }}
+                >
+                  <TableActions
+                    isActive={isActive}
+                    field={field}
+                    pinned={pinned}
+                    fieldMapping={fieldMapping}
+                    flattenedField={flattenedField}
+                    onFilter={onFilter!}
+                    onToggleColumn={onToggleColumn}
+                    ignoredValue={!!ignored}
+                    onTogglePinned={onTogglePinned}
+                  />
+                </EuiTableRowCell>
+              )}
+              <EuiTableRowCell
+                key={field + '-field-name'}
+                align="left"
+                width="30%"
+                className="kbnDocViewer__tableFieldNameCell"
+                textOnly={false}
+                mobileOptions={{ show: false }}
+              >
+                <FieldName
+                  fieldName={displayName}
+                  fieldType={fieldType}
+                  fieldMapping={fieldMapping}
+                  scripted={scripted}
+                />
+              </EuiTableRowCell>
+              <EuiTableRowCell
+                key={field + '-value'}
+                align="left"
+                className="kbnDocViewer__tableValueCell"
+                textOnly={false}
+                mobileOptions={{ show: false }}
+              >
+                <TableFieldValue
+                  field={field}
+                  formattedValue={formattedValue}
+                  rawValue={flattenedField}
+                  ignoreReason={ignored}
+                />
+              </EuiTableRowCell>
+            </EuiTableRow>
+          );
+        }
+      );
+    },
+    [onToggleColumn, onTogglePinned, showActionsColumn]
+  );
+
+  const rowElements = [
+    ...renderRows(pinnedItems),
+    ...renderRows(restItems.slice(startIndex, pageSize + startIndex)),
+  ];
 
   return (
-    <EuiFlexGroup
-      className="kbnDocViewer__table"
-      direction="column"
-      gutterSize="none"
-      responsive={false}
-    >
+    <EuiFlexGroup direction="column" gutterSize="none" responsive={false}>
+      <EuiFlexItem grow={false}>
+        <EuiSpacer size="s" />
+      </EuiFlexItem>
+
       <EuiFlexItem grow={false}>
         <EuiFieldSearch
           aria-label={searchPlaceholder}
@@ -190,17 +319,37 @@ export const DocViewerTable = ({
         />
       </EuiFlexItem>
 
+      {rowElements.length === 0 ? (
+        <EuiSelectableMessage style={{ minHeight: 300 }}>
+          <p>
+            <EuiI18n token="discover.docViews.table.noFieldFound" default="No fields found" />
+          </p>
+        </EuiSelectableMessage>
+      ) : (
+        <EuiFlexItem grow={false}>
+          <EuiTable>
+            <EuiTableHeader>{headers}</EuiTableHeader>
+            <EuiTableBody>{rowElements}</EuiTableBody>
+          </EuiTable>
+        </EuiFlexItem>
+      )}
+
       <EuiFlexItem grow={false}>
-        <EuiInMemoryTable
-          tableLayout="auto"
-          items={items}
-          columns={tableColumns}
-          rowProps={onSetRowProps}
-          sorting={sorting}
-          pagination={{ pageSizeOptions: [25, 50, 100], initialPageSize: 25 }}
-          responsive={false}
-        />
+        <EuiSpacer size="m" />
       </EuiFlexItem>
+
+      {showPagination && (
+        <EuiFlexItem grow={false}>
+          <EuiTablePagination
+            activePage={currentPage}
+            itemsPerPage={pageSize}
+            itemsPerPageOptions={[25, 50, 100]}
+            pageCount={totalPages}
+            onChangeItemsPerPage={changePageSize}
+            onChangePage={changePage}
+          />
+        </EuiFlexItem>
+      )}
     </EuiFlexGroup>
   );
 };

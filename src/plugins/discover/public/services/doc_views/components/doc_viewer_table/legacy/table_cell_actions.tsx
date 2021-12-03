@@ -7,13 +7,12 @@
  */
 
 import React from 'react';
-import { EuiButtonIcon } from '@elastic/eui';
 import { DocViewTableRowBtnFilterRemove } from './table_row_btn_filter_remove';
 import { DocViewTableRowBtnFilterExists } from './table_row_btn_filter_exists';
 import { DocViewTableRowBtnToggleColumn } from './table_row_btn_toggle_column';
 import { DocViewTableRowBtnFilterAdd } from './table_row_btn_filter_add';
-import { IndexPatternField } from '../../../../../../data/public';
-import { DocViewFilterFn } from '../../doc_views_types';
+import { IndexPatternField } from '../../../../../../../data/public';
+import { DocViewFilterFn } from '../../../doc_views_types';
 
 interface TableActionsProps {
   field: string;
@@ -23,7 +22,6 @@ interface TableActionsProps {
   onFilter: DocViewFilterFn;
   onToggleColumn: (field: string) => void;
   ignoredValue: boolean;
-  onTogglePinned: () => void;
 }
 
 export const TableActions = ({
@@ -34,7 +32,6 @@ export const TableActions = ({
   onToggleColumn,
   onFilter,
   ignoredValue,
-  onTogglePinned,
 }: TableActionsProps) => {
   return (
     <div className="kbnDocViewer__buttons">
@@ -55,12 +52,6 @@ export const TableActions = ({
         disabled={!fieldMapping || !fieldMapping.filterable}
         onClick={() => onFilter('_exists_', field, '+')}
         scripted={fieldMapping && fieldMapping.scripted}
-      />
-      <EuiButtonIcon
-        className="kbnDocViewer__actionButton"
-        onClick={onTogglePinned}
-        iconType="pinFilled"
-        iconSize="s"
       />
     </div>
   );

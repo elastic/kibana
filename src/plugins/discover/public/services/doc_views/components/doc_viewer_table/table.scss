@@ -4,17 +4,6 @@
   }
 }
 
-// needs to remove sorting icon of table column
-.euiTableHeaderCell:nth-child(2) > .euiTableCellContent {
-   .euiIcon {
-     display: none;
-   }
-}
-
-.kbnDocViewer__table {
-  padding-top: $euiSizeM;
-}
-
 .kbnDocViewer__tableRow {
   font-size: $euiFontSizeXS;
   font-family: $euiCodeFontFamily;
@@ -36,9 +25,6 @@
   &:hover {
     .kbnDocViewer__actionButton {
       opacity: 1;
-    }
-    .kbnDocViewer__tableFieldNameCell {
-      cursor: pointer;
     }
   }
 

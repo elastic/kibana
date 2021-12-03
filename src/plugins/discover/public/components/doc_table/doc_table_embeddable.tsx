@@ -11,7 +11,7 @@ import './index.scss';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { SAMPLE_SIZE_SETTING } from '../../../common';
-import { usePager } from './lib/use_pager';
+import { usePager } from '../../utils/use_pager';
 import { ToolBarPagination } from './components/pager/tool_bar_pagination';
 import { DocTableProps, DocTableRenderProps, DocTableWrapper } from './doc_table_wrapper';
 import { TotalDocuments } from '../../application/main/components/total_documents/total_documents';

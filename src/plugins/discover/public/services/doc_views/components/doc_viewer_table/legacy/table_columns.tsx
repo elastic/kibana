@@ -9,15 +9,15 @@
 import { EuiBasicTableColumn, EuiText } from '@elastic/eui';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { FieldName } from '../../../../components/field_name/field_name';
-import { FieldRecord } from './table';
+import { FieldName } from '../../../../../components/field_name/field_name';
 import { TableActions } from './table_cell_actions';
-import { TableFieldValue } from './table_cell_value';
+import { TableFieldValue } from '../table_cell_value';
+import { FieldRecordLegacy } from '../../../doc_views_types';
 
-export const ACTIONS_COLUMN: EuiBasicTableColumn<FieldRecord> = {
+export const ACTIONS_COLUMN: EuiBasicTableColumn<FieldRecordLegacy> = {
   field: 'action',
   className: 'kbnDocViewer__tableActionsCell',
-  width: '144px',
+  width: '108px',
   mobileOptions: { header: false },
   name: (
     <EuiText size="xs">
@@ -30,10 +30,9 @@ export const ACTIONS_COLUMN: EuiBasicTableColumn<FieldRecord> = {
     </EuiText>
   ),
   render: (
-    { flattenedField, isActive, onFilter, onToggleColumn }: FieldRecord['action'],
-    { field: { field, fieldMapping, displayName, onTogglePinned }, value: { ignored } }: FieldRecord
+    { flattenedField, isActive, onFilter, onToggleColumn }: FieldRecordLegacy['action'],
+    { field: { field, fieldMapping }, value: { ignored } }: FieldRecordLegacy
   ) => {
-    const togglePinned = () => onTogglePinned(displayName);
     return (
       <TableActions
         isActive={isActive}
@@ -43,13 +42,11 @@ export const ACTIONS_COLUMN: EuiBasicTableColumn<FieldRecord> = {
         onFilter={onFilter!}
         onToggleColumn={onToggleColumn}
         ignoredValue={!!ignored}
-        onTogglePinned={togglePinned}
       />
     );
   },
 };
-
-export const MAIN_COLUMNS: Array<EuiBasicTableColumn<FieldRecord>> = [
+export const MAIN_COLUMNS: Array<EuiBasicTableColumn<FieldRecordLegacy>> = [
   {
     field: 'field',
     className: 'kbnDocViewer__tableFieldNameCell',
@@ -62,9 +59,13 @@ export const MAIN_COLUMNS: Array<EuiBasicTableColumn<FieldRecord>> = [
         </strong>
       </EuiText>
     ),
-    readOnly: true,
-    sortable: ({ field: { pinned } }) => pinned,
-    render: ({ field, fieldType, displayName, fieldMapping, scripted }: FieldRecord['field']) => {
+    render: ({
+      field,
+      fieldType,
+      displayName,
+      fieldMapping,
+      scripted,
+    }: FieldRecordLegacy['field']) => {
       return field ? (
         <FieldName
           fieldName={displayName}
@@ -89,8 +90,8 @@ export const MAIN_COLUMNS: Array<EuiBasicTableColumn<FieldRecord>> = [
       </EuiText>
     ),
     render: (
-      { formattedValue, ignored }: FieldRecord['value'],
-      { field: { field }, action: { flattenedField } }: FieldRecord
+      { formattedValue, ignored }: FieldRecordLegacy['value'],
+      { field: { field }, action: { flattenedField } }: FieldRecordLegacy
     ) => {
       return (
         <TableFieldValue

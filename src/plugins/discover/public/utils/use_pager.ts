@@ -33,11 +33,14 @@ export const usePager = ({ totalItems }: { totalItems: number }) => {
 
   const changePageSize = useCallback((newPageSize: number) => setPageSize(newPageSize), []);
 
-  return {
-    ...meta,
-    currentPage,
-    pageSize,
-    changePage,
-    changePageSize,
-  };
+  return useMemo(
+    () => ({
+      ...meta,
+      currentPage,
+      pageSize,
+      changePage,
+      changePageSize,
+    }),
+    [changePage, changePageSize, currentPage, meta, pageSize]
+  );
 };

@@ -63,6 +63,7 @@ import type { SpacesPluginStart } from '../../../../x-pack/plugins/spaces/public
 import { FieldFormatsStart } from '../../field_formats/public';
 import { injectTruncateStyles } from './utils/truncate_styles';
 import { TRUNCATE_MAX_HEIGHT } from '../common';
+import { ResolvedDocViewerTable } from './services/doc_views/components/doc_viewer_table/resolved_doc_viewer_table';
 
 declare module '../../share/public' {
   export interface UrlGeneratorStateMapping {
@@ -70,7 +71,6 @@ declare module '../../share/public' {
   }
 }
 
-const DocViewerTable = React.lazy(() => import('./services/doc_views/components/doc_viewer_table'));
 const SourceViewer = React.lazy(() => import('./services/doc_views/components/doc_viewer_source'));
 
 /**
@@ -245,7 +245,7 @@ export class DiscoverPlugin
             </DeferredSpinner>
           }
         >
-          <DocViewerTable {...props} />
+          <ResolvedDocViewerTable {...props} />
         </React.Suspense>
       ),
     });
