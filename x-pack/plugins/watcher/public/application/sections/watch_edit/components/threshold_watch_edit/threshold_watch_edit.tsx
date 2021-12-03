@@ -182,9 +182,8 @@ export const ThresholdWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
 
   useEffect(() => {
     const getIndexPatterns = async () => {
-      const indexPatternObjects = await loadIndexPatterns();
-      const titles = indexPatternObjects.map((indexPattern: any) => indexPattern.attributes.title);
-      setIndexPatterns(titles);
+      const { data: indexPatternTitles } = await loadIndexPatterns();
+      setIndexPatterns(indexPatternTitles);
     };
 
     const loadData = async () => {
