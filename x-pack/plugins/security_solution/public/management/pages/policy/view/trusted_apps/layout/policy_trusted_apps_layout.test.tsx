@@ -136,7 +136,7 @@ describe('Policy trusted apps layout', () => {
     mockedApis.responseProvider.trustedAppsList.mockImplementation(
       (options: HttpFetchOptionsWithPath) => {
         const hasAnyQuery =
-          'exception-list-agnostic.attributes.tags:"policy:1234" OR exception-list-agnostic.attributes.tags:"policy:all"';
+          '(exception-list-agnostic.attributes.tags:"policy:1234" OR exception-list-agnostic.attributes.tags:"policy:all")';
         if (options.query?.filter === hasAnyQuery) {
           const exceptionsGenerator = new ExceptionsListItemGenerator('seed');
           return {

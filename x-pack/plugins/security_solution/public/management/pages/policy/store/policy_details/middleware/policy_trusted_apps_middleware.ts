@@ -157,7 +157,7 @@ const checkIfPolicyHasTrustedAppsAssigned = async (
   }
   try {
     const policyId = policyIdFromParams(state);
-    const kuery = `exception-list-agnostic.attributes.tags:"policy:${policyId}" OR exception-list-agnostic.attributes.tags:"policy:all"`;
+    const kuery = `(exception-list-agnostic.attributes.tags:"policy:${policyId}" OR exception-list-agnostic.attributes.tags:"policy:all")`;
     const trustedApps = await trustedAppsService.getTrustedAppsList({
       page: 1,
       per_page: 100,
