@@ -20,7 +20,7 @@ import { applyPaletteParams, CUSTOM_PALETTE, getStopsForFixedMode } from '../../
 import { GaugeDimensionEditor } from './dimension_editor';
 import { CustomPaletteParams, layerTypes } from '../../../common';
 import { generateId } from '../../id_generator';
-import { getGoalValue, getMaxValue, getMetricValue, getMinValue } from './utils';
+import { getGoalValue, getMaxValue, getMinValue } from './utils';
 import {
   GaugeExpressionArgs,
   GaugeShapes,
@@ -194,7 +194,6 @@ export const getGaugeVisualization = ({
     return {
       groups: [
         {
-          supportStaticValue: true,
           supportFieldFormat: true,
           layerId: state.layerId,
           groupId: GROUP_ID.METRIC,
@@ -334,7 +333,6 @@ export const getGaugeVisualization = ({
 
     const minAccessorValue = getMinValue(row, state);
     const maxAccessorValue = getMaxValue(row, state);
-    const metricAccessorValue = getMetricValue(row, state);
     const goalAccessorValue = getGoalValue(row, state);
 
     return [
@@ -345,13 +343,6 @@ export const getGaugeVisualization = ({
         }),
         initialDimensions: state
           ? [
-              {
-                groupId: 'metric',
-                columnId: generateId(),
-                dataType: 'number',
-                label: 'metricAccessor',
-                staticValue: metricAccessorValue,
-              },
               {
                 groupId: 'min',
                 columnId: generateId(),

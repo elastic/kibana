@@ -77,16 +77,6 @@ export const getMinValue = (row?: DatatableRow, state?: GaugeAccessorsType) => {
   return FALLBACK_VALUE;
 };
 
-export const getMetricValue = (row?: DatatableRow, state?: GaugeAccessorsType) => {
-  const currentValue = getValueFromAccessor('metricAccessor', row, state);
-  if (currentValue != null) {
-    return currentValue;
-  }
-  const minValue = getMinValue(row, state);
-  const maxValue = getMaxValue(row, state);
-  return Math.round((maxValue - minValue) * 0.5 + minValue);
-};
-
 export const getGoalValue = (row?: DatatableRow, state?: GaugeVisualizationState) => {
   const currentValue = getValueFromAccessor('goalAccessor', row, state);
   if (currentValue != null) {

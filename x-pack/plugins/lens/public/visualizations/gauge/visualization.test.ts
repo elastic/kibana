@@ -101,7 +101,6 @@ describe('gauge', () => {
             dataTestSubj: 'lnsGauge_metricDimensionPanel',
             enableDimensionEditor: true,
             supportFieldFormat: true,
-            supportStaticValue: true,
           },
           {
             layerId: 'first',
@@ -168,7 +167,6 @@ describe('gauge', () => {
             dataTestSubj: 'lnsGauge_metricDimensionPanel',
             enableDimensionEditor: true,
             supportFieldFormat: true,
-            supportStaticValue: true,
           },
           {
             layerId: 'first',
@@ -241,7 +239,6 @@ describe('gauge', () => {
             dataTestSubj: 'lnsGauge_metricDimensionPanel',
             enableDimensionEditor: true,
             supportFieldFormat: true,
-            supportStaticValue: true,
           },
           {
             layerId: 'first',
