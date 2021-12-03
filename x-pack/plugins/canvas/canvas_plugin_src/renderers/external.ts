@@ -6,13 +6,13 @@
  */
 
 import { imageRenderer } from '../../../../../src/plugins/expression_image/public';
-import { metricRenderer } from '../../../../../src/plugins/expression_metric/public';
+import { metricRendererFactory } from '../../../../../src/plugins/expression_metric/public';
 import {
   errorRendererFactory,
   debugRendererFactory,
 } from '../../../../../src/plugins/expression_error/public';
-import { repeatImageRenderer } from '../../../../../src/plugins/expression_repeat_image/public';
 import { revealImageRendererFactory } from '../../../../../src/plugins/expression_reveal_image/public';
+import { repeatImageRendererFactory } from '../../../../../src/plugins/expression_repeat_image/public';
 import {
   shapeRenderer,
   progressRenderer,
@@ -20,9 +20,7 @@ import {
 
 export const renderFunctions = [
   imageRenderer,
-  metricRenderer,
   shapeRenderer,
-  repeatImageRenderer,
   progressRenderer,
 ];
 
@@ -30,4 +28,6 @@ export const renderFunctionFactories = [
   debugRendererFactory,
   errorRendererFactory,
   revealImageRendererFactory,
+  repeatImageRendererFactory,
+  metricRendererFactory,
 ];

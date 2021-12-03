@@ -11,7 +11,7 @@ import { shareReplay, takeUntil } from 'rxjs/operators';
 import { InjectedMetadataSetup } from '../injected_metadata';
 import type { CoreTheme, ThemeServiceSetup, ThemeServiceStart } from './types';
 
-interface SetupDeps {
+export interface SetupDeps {
   injectedMetadata: InjectedMetadataSetup;
 }
 
