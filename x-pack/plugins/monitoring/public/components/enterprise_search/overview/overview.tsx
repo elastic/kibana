@@ -21,7 +21,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { MonitoringTimeseriesContainer } from '../../chart';
 import { Status } from './status';
 
-export const EnterpriseSearchOverview: React.FC = ({ metrics, stats, ...rest }) => {
+export const EnterpriseSearchOverview: React.FC<any> = ({ metrics, stats, ...rest }) => {
   const lowLevelUsageMetrics = [
     metrics.enterprise_search_heap,
     metrics.enterprise_search_jvm_finalizer_queue,
