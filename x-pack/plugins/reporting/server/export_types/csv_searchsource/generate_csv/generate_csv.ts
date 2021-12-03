@@ -254,13 +254,15 @@ export class CsvGenerator {
     const asyncGenerateRow = async (dataTableRow: Record<string, any>): Promise<string> => {
       return new Promise((resolve) => {
         setImmediate(() => {
-          resolve(
-            columns
-              .map((f) => ({ column: f, data: dataTableRow[f] }))
-              .map(this.formatCellValues(formatters))
-              .map(this.escapeValues(settings))
-              .join(settings.separator) + '\n'
-          );
+          const row: string[] = [];
+          const format = this.formatCellValues(formatters);
+          const escape = this.escapeValues(settings);
+
+          for (const column of columns) {
+            row.push(escape(format({ column, data: dataTableRow[column] })));
+          }
+
+          resolve(row.join(settings.separator) + '\n');
         });
       });
     };
