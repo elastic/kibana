@@ -11,7 +11,7 @@ type Schema = PublicMethodsOf<ResourceInstaller>;
 export type ResourceInstallerMock = jest.Mocked<Schema>;
 const createResourceInstallerMock = () => {
   return {
-    installCommonResources: jest.fn(() => Promise.resolve()),
+    installCommonResources: jest.fn(),
     installIndexLevelResources: jest.fn(),
     installAndUpdateNamespaceLevelResources: jest.fn(),
   };

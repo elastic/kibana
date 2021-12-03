@@ -11,9 +11,14 @@ import { elasticsearchServiceMock } from 'src/core/server/mocks';
 import { AlertConsumers } from '@kbn/rule-data-utils/alerts_as_data_rbac';
 import { Dataset } from './index_options';
 import { RuleDataClient } from '../rule_data_client/rule_data_client';
+import { ResourceInstaller } from './resource_installer';
+import { resourceInstallerMock as mockResourceInstaller } from './resource_installer.mock';
 import { createRuleDataClientMock as mockCreateRuleDataClient } from '../rule_data_client/rule_data_client.mock';
 jest.mock('../rule_data_client/rule_data_client', () => ({
   RuleDataClient: jest.fn().mockImplementation(() => mockCreateRuleDataClient()),
+}));
+jest.mock('./resource_installer', () => ({
+  ResourceInstaller: jest.fn().mockImplementation(() => mockResourceInstaller.create()),
 }));
 
 describe('ruleDataPluginService', () => {
@@ -68,6 +73,24 @@ describe('ruleDataPluginService', () => {
       });
 
       expect(ruleDataService.isWriteEnabled('observability.logs')).toBe(false);
+    });
+  });
+
+  describe('initializeService', () => {
+    it('calls ResourceInstaller', async () => {
+      const mockClusterClient = elasticsearchServiceMock.createElasticsearchClient();
+      const getClusterClient = jest.fn(() => Promise.resolve(mockClusterClient));
+
+      new RuleDataService({
+        logger: loggerMock.create(),
+        getClusterClient,
+        kibanaVersion: '8.1.0',
+        isWriteEnabled: true,
+        disabledRegistrationContexts: ['observability.logs'],
+        isWriterCacheEnabled: true,
+      });
+
+      expect(ResourceInstaller).toHaveBeenCalled();
     });
   });
 
