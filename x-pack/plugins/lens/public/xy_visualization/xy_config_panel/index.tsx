@@ -40,7 +40,7 @@ import { getScaleType } from '../to_expression';
 import { ColorPicker } from './color_picker';
 import { ReferenceLinePanel } from './reference_line_panel';
 import { PalettePicker, TooltipWrapper } from '../../shared_components';
-import { getDefaultVisualValuesForLayer } from '../visualization_helpers';
+import { getDefaultVisualValuesForLayer } from '../../shared_components/datasource_default_values';
 
 type UnwrapArray<T> = T extends Array<infer P> ? P : T;
 type AxesSettingsConfigKeys = keyof AxesSettingsConfig;
@@ -356,7 +356,7 @@ export const XyToolbar = memo(function XyToolbar(
   const defaultParamsFromDatasources = getDefaultVisualValuesForLayer(
     state,
     props.frame.datasourceLayers
-  );
+  ).truncateText;
 
   return (
     <EuiFlexGroup gutterSize="m" justifyContent="spaceBetween" responsive={false}>

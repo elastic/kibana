@@ -74,7 +74,6 @@ function getInitialState(): Omit<HeatmapVisualizationState, 'layerId' | 'layerTy
       isVisible: true,
       position: Position.Right,
       maxLines: 1,
-      shouldTruncate: true,
       type: LEGEND_FUNCTION,
     },
     gridConfig: {

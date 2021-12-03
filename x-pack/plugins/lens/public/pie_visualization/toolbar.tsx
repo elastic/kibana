@@ -23,6 +23,7 @@ import type { PieVisualizationState, SharedPieLayerState } from '../../common/ex
 import { VisualizationDimensionEditorProps, VisualizationToolbarProps } from '../types';
 import { ToolbarPopover, LegendSettingsPopover, useDebouncedValue } from '../shared_components';
 import { PalettePicker } from '../shared_components';
+import { getDefaultVisualValuesForLayer } from '../shared_components/datasource_default_values';
 
 const legendOptions: Array<{
   value: SharedPieLayerState['legendDisplay'];
@@ -53,7 +54,7 @@ const legendOptions: Array<{
 ];
 
 export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationState>) {
-  const { state, setState } = props;
+  const { state, setState, frame } = props;
   const layer = state.layers[0];
   if (!layer) {
     return null;
@@ -63,6 +64,11 @@ export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationStat
     numberOptions,
     isDisabled: isToolbarPopoverDisabled,
   } = PartitionChartsMeta[state.shape].toolbarPopover;
+
+  const defaultTruncationValue = getDefaultVisualValuesForLayer(
+    state,
+    frame.datasourceLayers
+  ).truncateText;
 
   return (
     <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween" responsive={false}>
@@ -169,9 +175,9 @@ export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationStat
             layers: [{ ...layer, nestedLegend: !layer.nestedLegend }],
           });
         }}
-        shouldTruncate={layer.truncateLegend ?? true}
+        shouldTruncate={layer.truncateLegend ?? defaultTruncationValue}
         onTruncateLegendChange={() => {
-          const current = layer.truncateLegend ?? true;
+          const current = layer.truncateLegend ?? defaultTruncationValue;
           setState({
             ...state,
             layers: [{ ...layer, truncateLegend: !current }],

@@ -15,7 +15,7 @@ import type { ValidLayer, XYLayerConfig } from '../../common/expressions';
 import { layerTypes } from '../../common';
 import { hasIcon } from './xy_config_panel/reference_line_panel';
 import { defaultReferenceLineColor } from './color_assignment';
-import { getDefaultVisualValuesForLayer } from './visualization_helpers';
+import { getDefaultVisualValuesForLayer } from '../shared_components/datasource_default_values';
 
 export const getSortedAccessors = (datasource: DatasourcePublicAPI, layer: XYLayerConfig) => {
   const originalOrder = datasource
@@ -176,7 +176,7 @@ export const buildExpression = (
                     maxLines: state.legend.maxLines ? [state.legend.maxLines] : [],
                     shouldTruncate: [
                       state.legend.shouldTruncate ??
-                        getDefaultVisualValuesForLayer(state, datasourceLayers),
+                        getDefaultVisualValuesForLayer(state, datasourceLayers).truncateText,
                     ],
                   },
                 },
