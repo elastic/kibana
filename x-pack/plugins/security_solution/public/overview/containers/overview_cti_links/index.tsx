@@ -6,29 +6,34 @@
  */
 import { useState, useEffect, useCallback } from 'react';
 import { SavedObjectAttributes } from '@kbn/securitysolution-io-ts-alerting-types';
-import { TiDataSources } from '../../containers/overview_cti_links/use_ti_data_sources';
-import { LinkPanelListItem } from '../../components/link_panel';
 import { useKibana } from '../../../common/lib/kibana';
+import {
+  TAG_REQUEST_BODY,
+  createLinkFromDashboardSO,
+  getCtiListItemsWithoutLinks,
+  isOverviewItem,
+  EMPTY_LIST_ITEMS,
+} from './helpers';
+import { LinkPanelListItem, isLinkPanelListItem } from '../../components/link_panel';
 
-const TAG_REQUEST_BODY_SEARCH = 'threat intel';
-export const TAG_REQUEST_BODY = {
-  type: 'tag',
-  search: TAG_REQUEST_BODY_SEARCH,
-  searchFields: ['name'],
-};
-
-export const useCtiDashboardLinks = ({
-  to,
-  from,
-  tiDataSources = [],
-}: {
-  to: string;
-  from: string;
-  tiDataSources?: TiDataSources[];
-}) => {
-  const [installedDashboardIds, setInstalledDashboardIds] = useState<string[]>([]);
-  const dashboardLocator = useKibana().services.dashboard?.locator;
+export const useCtiDashboardLinks = (
+  eventCountsByDataset: { [key: string]: number },
+  to: string,
+  from: string
+) => {
+  const createDashboardUrl = useKibana().services.dashboard?.dashboardUrlGenerator?.createUrl;
   const savedObjectsClient = useKibana().services.savedObjects.client;
+
+  const [buttonHref, setButtonHref] = useState<string | undefined>();
+  const [listItems, setListItems] = useState<LinkPanelListItem[]>(EMPTY_LIST_ITEMS);
+
+  const [isPluginDisabled, setIsDashboardPluginDisabled] = useState(false);
+  const handleDisabledPlugin = useCallback(() => {
+    if (!isPluginDisabled) {
+      setIsDashboardPluginDisabled(true);
+    }
+    setListItems(getCtiListItemsWithoutLinks(eventCountsByDataset));
+  }, [setIsDashboardPluginDisabled, setListItems, eventCountsByDataset, isPluginDisabled]);
 
   const handleTagsReceived = useCallback(
     (TagsSO?) => {
@@ -44,7 +49,9 @@ export const useCtiDashboardLinks = ({
   );
 
   useEffect(() => {
-    if (savedObjectsClient) {
+    if (!createDashboardUrl || !savedObjectsClient) {
+      handleDisabledPlugin();
+    } else {
       savedObjectsClient
         .find<SavedObjectAttributes>(TAG_REQUEST_BODY)
         .then(handleTagsReceived)
@@ -56,40 +63,53 @@ export const useCtiDashboardLinks = ({
             }>;
           }) => {
             if (DashboardsSO?.savedObjects?.length) {
-              setInstalledDashboardIds(
-                DashboardsSO.savedObjects.map((SO) => SO.id ?? '').filter(Boolean)
+              const dashboardUrls = await Promise.all(
+                DashboardsSO.savedObjects.map((SO) =>
+                  createDashboardUrl({
+                    dashboardId: SO.id,
+                    timeRange: {
+                      to,
+                      from,
+                    },
+                  })
+                )
               );
+              const items = DashboardsSO.savedObjects
+                ?.reduce((acc: LinkPanelListItem[], dashboardSO, i) => {
+                  const item = createLinkFromDashboardSO(
+                    dashboardSO,
+                    eventCountsByDataset,
+                    dashboardUrls[i]
+                  );
+                  if (isOverviewItem(item)) {
+                    setButtonHref(item.path);
+                  } else if (isLinkPanelListItem(item)) {
+                    acc.push(item);
+                  }
+                  return acc;
+                }, [])
+                .sort((a, b) => (a.title > b.title ? 1 : -1));
+              setListItems(items);
+            } else {
+              handleDisabledPlugin();
             }
           }
         );
     }
-  }, [handleTagsReceived, savedObjectsClient]);
-
-  const listItems = tiDataSources.map((tiDataSource) => {
-    const listItem: LinkPanelListItem = {
-      title: tiDataSource.name,
-      count: tiDataSource.count,
-      path: '',
-    };
-
-    if (
-      tiDataSource.dashboardId &&
-      installedDashboardIds.includes(tiDataSource.dashboardId) &&
-      dashboardLocator
-    ) {
-      listItem.path = dashboardLocator.getRedirectUrl({
-        dashboardId: tiDataSource.dashboardId,
-        timeRange: {
-          to,
-          from,
-        },
-      });
-    }
-
-    return listItem;
-  });
+  }, [
+    createDashboardUrl,
+    eventCountsByDataset,
+    from,
+    handleDisabledPlugin,
+    handleTagsReceived,
+    isPluginDisabled,
+    savedObjectsClient,
+    to,
+  ]);
 
   return {
+    buttonHref,
+    isPluginDisabled,
     listItems,
   };
 };

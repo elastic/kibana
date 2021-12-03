@@ -71,7 +71,7 @@ const LinkPanelComponent = ({
   splitPanel,
   subtitle,
 }: {
-  button?: React.ReactNode;
+  button: React.ReactNode;
   columns: Array<EuiTableFieldDataColumnType<LinkPanelListItem>>;
   dataTestSubj: string;
   defaultSortField?: string;
@@ -134,16 +134,14 @@ const LinkPanelComponent = ({
               </HeaderSection>
               {splitPanel}
               {infoPanel}
-              {chunkedItems.length > 0 && (
-                <StyledTable
-                  columns={columns}
-                  itemId="id"
-                  items={chunkedItems[pageIndex] || []}
-                  onChange={onTableChange}
-                  pagination={pagination}
-                  sorting={sorting}
-                />
-              )}
+              <StyledTable
+                columns={columns}
+                itemId="id"
+                items={chunkedItems[pageIndex] || []}
+                onChange={onTableChange}
+                pagination={pagination}
+                sorting={sorting}
+              />
             </EuiPanel>
           </InspectButtonContainer>
         </EuiFlexItem>

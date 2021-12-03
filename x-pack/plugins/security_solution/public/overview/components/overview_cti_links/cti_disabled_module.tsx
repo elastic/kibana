@@ -6,21 +6,24 @@
  */
 
 import React from 'react';
+import { EMPTY_LIST_ITEMS } from '../../containers/overview_cti_links/helpers';
+import { useKibana } from '../../../common/lib/kibana';
 import * as i18n from './translations';
 import { DisabledLinkPanel } from '../link_panel/disabled_link_panel';
 import { ThreatIntelPanelView } from './threat_intel_panel_view';
-import { useIntegrationsPageLink } from './use_integrations_page_link';
 
 export const CtiDisabledModuleComponent = () => {
-  const integrationsLink = useIntegrationsPageLink();
+  const threatIntelDocLink = `${
+    useKibana().services.docLinks.links.filebeat.base
+  }/filebeat-module-threatintel.html`;
 
   return (
     <DisabledLinkPanel
       bodyCopy={i18n.DANGER_BODY}
       buttonCopy={i18n.DANGER_BUTTON}
       dataTestSubjPrefix="cti"
-      docLink={integrationsLink}
-      listItems={[]}
+      docLink={threatIntelDocLink}
+      listItems={EMPTY_LIST_ITEMS}
       titleCopy={i18n.DANGER_TITLE}
       LinkPanelViewComponent={ThreatIntelPanelView}
     />
