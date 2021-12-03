@@ -6,7 +6,7 @@
  */
 
 import { imageRenderer } from '../../../../../src/plugins/expression_image/public';
-import { metricRenderer } from '../../../../../src/plugins/expression_metric/public';
+import { metricRendererFactory } from '../../../../../src/plugins/expression_metric/public';
 import {
   errorRendererFactory,
   debugRendererFactory,
@@ -20,11 +20,14 @@ import {
 
 export const renderFunctions = [
   imageRenderer,
-  metricRenderer,
   revealImageRenderer,
   shapeRenderer,
   repeatImageRenderer,
   progressRenderer,
 ];
 
-export const renderFunctionFactories = [debugRendererFactory, errorRendererFactory];
+export const renderFunctionFactories = [
+  debugRendererFactory,
+  errorRendererFactory,
+  metricRendererFactory,
+];
