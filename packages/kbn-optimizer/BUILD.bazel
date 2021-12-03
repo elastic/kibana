@@ -46,6 +46,7 @@ RUNTIME_DEPS = [
   "@npm//execa",
   "@npm//jest-diff",
   "@npm//json-stable-stringify",
+  "@npm//js-yaml",
   "@npm//lmdb-store",
   "@npm//loader-utils",
   "@npm//node-sass",
@@ -61,7 +62,7 @@ RUNTIME_DEPS = [
 ]
 
 TYPES_DEPS = [
-  "//packages/kbn-config",
+  "//packages/kbn-config:npm_module_types",
   "//packages/kbn-config-schema",
   "//packages/kbn-dev-utils",
   "//packages/kbn-std",
@@ -81,6 +82,7 @@ TYPES_DEPS = [
   "@npm//@types/compression-webpack-plugin",
   "@npm//@types/jest",
   "@npm//@types/json-stable-stringify",
+  "@npm//@types/js-yaml",
   "@npm//@types/loader-utils",
   "@npm//@types/node",
   "@npm//@types/normalize-path",
