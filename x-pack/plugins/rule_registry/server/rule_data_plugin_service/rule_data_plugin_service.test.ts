@@ -98,6 +98,11 @@ describe('ruleDataPluginService', () => {
       await ruleDataService.initializeService();
       await ruleDataService.initializeIndex(indexOptions);
       expect(RuleDataClient).toHaveBeenCalled();
+      expect(RuleDataClient).toHaveBeenCalledWith(
+        expect.objectContaining({
+          indexInfo: expect.objectContaining({ baseName: '.alerts-observability.logs.alerts' }),
+        })
+      );
     });
   });
 });
