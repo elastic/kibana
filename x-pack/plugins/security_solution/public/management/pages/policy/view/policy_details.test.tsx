@@ -143,5 +143,11 @@ describe('Policy Details', () => {
       expect(agentsSummary).toHaveLength(1);
       expect(agentsSummary.text()).toBe('Total agents5Healthy3Unhealthy1Offline1');
     });
+
+    it('should display the host isolation exceptions tab', async () => {
+      await asyncActions;
+      policyView.update();
+      expect(policyView.find('#hostIsolationExceptions')).toBeTruthy();
+    });
   });
 });

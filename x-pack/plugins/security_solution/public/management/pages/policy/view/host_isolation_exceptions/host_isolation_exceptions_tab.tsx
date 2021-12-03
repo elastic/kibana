@@ -121,7 +121,7 @@ export const PolicyHostIsolationExceptionsTab = ({
 
   // render header and list
   return !isLoading && policySearchedExceptionsListRequest.data ? (
-    <div>
+    <div data-test-subj={'policyHostIsolationExceptionsTab'}>
       <EuiPageHeader alignItems="center">
         <EuiPageHeaderSection>
           <EuiTitle size="m">

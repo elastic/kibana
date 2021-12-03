@@ -117,9 +117,7 @@ export const PolicyHostIsolationExceptionsList = ({
       >
         <FormattedMessage
           id="xpack.securitySolution.endpoint.policy.hostIsolationExceptions.list.totalItemCount"
-          defaultMessage={
-            'Showing {totalItemsCount, plural, one {# exception} other {# exceptions}}'
-          }
+          defaultMessage={`Showing {totalItemsCount, plural, one {# exception} other {# exceptions}}`}
           values={{ totalItemsCount: pagination.totalItemCount }}
         />
       </EuiText>
