@@ -15,7 +15,7 @@ export default function ({ getService }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const SPACE_ID = 'ftr-so-find';
 
-  describe.only('find', () => {
+  describe('find', () => {
     before(async () => {
       await kibanaServer.spaces.create({ id: SPACE_ID, name: SPACE_ID });
       await kibanaServer.importExport.load(

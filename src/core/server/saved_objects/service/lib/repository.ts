@@ -962,7 +962,6 @@ export class SavedObjectsRepository {
       esOptions,
       {
         ignore: [404],
-        headers: { 'x-elastic-product-origin': 'make deprecation' },
       }
     );
     if (statusCode === 404) {
