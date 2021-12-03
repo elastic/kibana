@@ -37,6 +37,7 @@ describe('test useDiscoverState', () => {
         services: discoverServiceMock,
         history,
         savedSearch: savedSearchMock,
+        setExpandedDoc: jest.fn(),
       });
     });
     expect(result.current.state.index).toBe(indexPatternMock.id);
@@ -53,6 +54,7 @@ describe('test useDiscoverState', () => {
         services: discoverServiceMock,
         history,
         savedSearch: savedSearchMock,
+        setExpandedDoc: jest.fn(),
       });
     });
     await act(async () => {
@@ -69,6 +71,7 @@ describe('test useDiscoverState', () => {
         services: discoverServiceMock,
         history,
         savedSearch: savedSearchMock,
+        setExpandedDoc: jest.fn(),
       });
     });
 
