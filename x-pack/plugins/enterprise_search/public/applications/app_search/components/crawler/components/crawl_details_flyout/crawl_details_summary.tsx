@@ -10,31 +10,35 @@ import React, { useState } from 'react';
 import moment from 'moment';
 
 import {
-  EuiPanel,
-  EuiHorizontalRule,
-  EuiIconTip,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiText,
+  EuiHorizontalRule,
+  EuiIconTip,
+  EuiPanel,
+  EuiSpacer,
   EuiStat,
+  EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { CrawlRequestStats } from '../../types';
 
 interface ICrawlerSummaryProps {
-  stats: CrawlRequestStats;
-  crawlType: string;
-  domainCount: number;
   crawlDepth: number;
+  crawlType: string;
+  crawlerLogsEnabled: boolean | undefined;
+  domainCount: number;
+  stats: CrawlRequestStats;
 }
 
 export const CrawlDetailsSummary: React.FC<ICrawlerSummaryProps> = ({
   crawlDepth,
   crawlType,
+  crawlerLogsEnabled,
   domainCount,
   stats,
 }) => {
+
   const duration = () => {
     if (stats.status && stats.status.crawlDurationMSec) {
       const milliseconds = moment.duration(stats.status.crawlDurationMSec, 'milliseconds');
@@ -95,130 +99,139 @@ export const CrawlDetailsSummary: React.FC<ICrawlerSummaryProps> = ({
             )}
           />
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiStat
-            data-test-subj="crawlDuration"
-            titleSize="s"
-            title={duration()}
-            description={i18n.translate(
-              'xpack.enterpriseSearch.appSearch.crawler.crawlDetailsSummary.durationTooltipTitle',
-              {
-                defaultMessage: 'Duration',
-              }
-            )}
-          />
-        </EuiFlexItem>
+        {crawlerLogsEnabled && (
+          <EuiFlexItem grow={false}>
+            <EuiStat
+              data-test-subj="crawlDuration"
+              titleSize="s"
+              title={duration()}
+              description={i18n.translate(
+                'xpack.enterpriseSearch.appSearch.crawler.crawlDetailsSummary.durationTooltipTitle',
+                {
+                  defaultMessage: 'Duration',
+                }
+              )}
+            />
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
       <EuiHorizontalRule margin="s" />
-      <EuiFlexGroup justifyContent="spaceBetween">
-        <EuiFlexItem grow={false}>
-          <EuiStat
-            data-test-subj="urlsAllowed"
-            titleSize="s"
-            title={stats.status && stats.status.urlsAllowed ? stats.status.urlsAllowed : '--'}
-            description={
-              <EuiText size="s">
-                URLs{' '}
-                <EuiIconTip
-                  type="iInCircle"
-                  color="primary"
-                  size="m"
-                  title={i18n.translate(
-                    'xpack.enterpriseSearch.appSearch.crawler.crawlDetailsSummary.urlsTooltipTitle',
-                    {
-                      defaultMessage: 'URLs Seen',
-                    }
-                  )}
-                  content={i18n.translate(
-                    'xpack.enterpriseSearch.appSearch.crawler.crawlDetailsSummary.urlsTooltip',
-                    {
-                      defaultMessage:
-                        'URLs found by the crawler during the crawl, including those not followed due to the crawl configuration.',
-                    }
-                  )}
-                />
-              </EuiText>
-            }
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiStat
-            data-test-subj="pagesVisited"
-            titleSize="s"
-            title={stats.status && stats.status.pagesVisited ? stats.status.pagesVisited : '--'}
-            description={
-              <EuiText size="s">
-                {i18n.translate(
-                  'xpack.enterpriseSearch.appSearch.crawler.crawlDetailsSummary.pagesVisitedTooltipTitle',
-                  {
-                    defaultMessage: 'Pages',
-                  }
-                )}{' '}
-                <EuiIconTip
-                  type="iInCircle"
-                  color="primary"
-                  size="m"
-                  title={i18n.translate(
-                    'xpack.enterpriseSearch.appSearch.crawler.crawlDetailsSummary.pagesTooltipTitle',
-                    {
-                      defaultMessage: 'Pages visited',
-                    }
-                  )}
-                  content={i18n.translate(
-                    'xpack.enterpriseSearch.appSearch.crawler.crawlDetailsSummary.pagesTooltip',
-                    {
-                      defaultMessage: 'URLs visited and extracted during the crawl.',
-                    }
-                  )}
-                />
-              </EuiText>
-            }
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiStat
-            data-test-subj="avgResponseTime"
-            titleSize="s"
-            title={
-              stats.status && stats.status.avgResponseTimeMSec
-                ? `${Math.round(stats.status.avgResponseTimeMSec)}ms`
-                : '--'
-            }
-            description={i18n.translate(
-              'xpack.enterpriseSearch.appSearch.crawler.crawlDetailsSummary.avgResponseTimeTooltipTitle',
-              {
-                defaultMessage: 'Avg. response',
+      {crawlerLogsEnabled ? (
+        <EuiFlexGroup justifyContent="spaceBetween">
+          <EuiFlexItem grow={false}>
+            <EuiStat
+              data-test-subj="urlsAllowed"
+              titleSize="s"
+              title={stats.status && stats.status.urlsAllowed ? stats.status.urlsAllowed : '--'}
+              description={
+                <EuiText size="s">
+                  URLs{' '}
+                  <EuiIconTip
+                    type="iInCircle"
+                    color="primary"
+                    size="m"
+                    title={i18n.translate(
+                      'xpack.enterpriseSearch.appSearch.crawler.crawlDetailsSummary.urlsTooltipTitle',
+                      {
+                        defaultMessage: 'URLs Seen',
+                      }
+                    )}
+                    content={i18n.translate(
+                      'xpack.enterpriseSearch.appSearch.crawler.crawlDetailsSummary.urlsTooltip',
+                      {
+                        defaultMessage:
+                          'URLs found by the crawler during the crawl, including those not followed due to the crawl configuration.',
+                      }
+                    )}
+                  />
+                </EuiText>
               }
-            )}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiStat
-            data-test-subj="clientErrors"
-            titleSize="s"
-            title={statusCounts.client_error_count}
-            description={`4xx ${i18n.translate(
-              'xpack.enterpriseSearch.appSearch.crawler.crawlDetailsSummary.serverErrors',
-              {
-                defaultMessage: 'Errors',
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiStat
+              data-test-subj="pagesVisited"
+              titleSize="s"
+              title={stats.status && stats.status.pagesVisited ? stats.status.pagesVisited : '--'}
+              description={
+                <EuiText size="s">
+                  {i18n.translate(
+                    'xpack.enterpriseSearch.appSearch.crawler.crawlDetailsSummary.pagesVisitedTooltipTitle',
+                    {
+                      defaultMessage: 'Pages',
+                    }
+                  )}{' '}
+                  <EuiIconTip
+                    type="iInCircle"
+                    color="primary"
+                    size="m"
+                    title={i18n.translate(
+                      'xpack.enterpriseSearch.appSearch.crawler.crawlDetailsSummary.pagesTooltipTitle',
+                      {
+                        defaultMessage: 'Pages visited',
+                      }
+                    )}
+                    content={i18n.translate(
+                      'xpack.enterpriseSearch.appSearch.crawler.crawlDetailsSummary.pagesTooltip',
+                      {
+                        defaultMessage: 'URLs visited and extracted during the crawl.',
+                      }
+                    )}
+                  />
+                </EuiText>
               }
-            )}`}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiStat
-            data-test-subj="serverErrors"
-            titleSize="s"
-            title={statusCounts.server_error_count}
-            description={`5xx ${i18n.translate(
-              'xpack.enterpriseSearch.appSearch.crawler.crawlDetailsSummary.serverErrors',
-              {
-                defaultMessage: 'Errors',
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiStat
+              data-test-subj="avgResponseTime"
+              titleSize="s"
+              title={
+                stats.status && stats.status.avgResponseTimeMSec
+                  ? `${Math.round(stats.status.avgResponseTimeMSec)}ms`
+                  : '--'
               }
-            )}`}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+              description={i18n.translate(
+                'xpack.enterpriseSearch.appSearch.crawler.crawlDetailsSummary.avgResponseTimeTooltipTitle',
+                {
+                  defaultMessage: 'Avg. response',
+                }
+              )}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiStat
+              data-test-subj="clientErrors"
+              titleSize="s"
+              title={statusCounts.client_error_count}
+              description={`4xx ${i18n.translate(
+                'xpack.enterpriseSearch.appSearch.crawler.crawlDetailsSummary.serverErrors',
+                {
+                  defaultMessage: 'Errors',
+                }
+              )}`}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiStat
+              data-test-subj="serverErrors"
+              titleSize="s"
+              title={statusCounts.server_error_count}
+              description={`5xx ${i18n.translate(
+                'xpack.enterpriseSearch.appSearch.crawler.crawlDetailsSummary.serverErrors',
+                {
+                  defaultMessage: 'Errors',
+                }
+              )}`}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      ) : (
+        <EuiText size="xs" textAlign="center">
+          <EuiSpacer size="m" />
+          <p>Enable Web Crawler logs in settings for more detailed crawl statistics.</p>
+        </EuiText>
+      )}
     </EuiPanel>
   );
 };

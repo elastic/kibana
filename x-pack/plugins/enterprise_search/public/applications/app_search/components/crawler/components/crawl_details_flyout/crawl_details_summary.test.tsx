@@ -17,6 +17,7 @@ import { CrawlDetailsSummary } from './crawl_details_summary';
 
 const MOCK_PROPS = {
   crawlDepth: 8,
+  crawlerLogsEnabled: true,
   crawlType: 'full',
   domainCount: 15,
   stats: {
@@ -60,4 +61,12 @@ describe('CrawlDetailsSummary', () => {
     expect(wrapper.find({ 'data-test-subj': 'pagesVisited' }).prop('title')).toEqual('--');
     expect(wrapper.find({ 'data-test-subj': 'avgResponseTime' }).prop('title')).toEqual('--');
   });
+
+  it('renders a message to enable logs', () => {
+    wrapper.setProps({ crawlerLogsEnabled: false });
+    expect(wrapper.find({ 'data-test-subj': 'crawlDuration' })).toHaveLength(0);
+    expect(wrapper.find({ 'data-test-subj': 'pagesVisited' })).toHaveLength(0);
+    expect(wrapper.find({ 'data-test-subj': 'avgResponseTime' })).toHaveLength(0);
+    expect(wrapper.find({ 'data-test-subj': 'urlsAllowed' })).toHaveLength(0);
+  })
 });

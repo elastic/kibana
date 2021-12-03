@@ -17,7 +17,11 @@ import { CrawlDetailLogic } from '../../crawl_detail_logic';
 import { AccordionList } from './accordion_list';
 import { CrawlDetailsSummary } from './crawl_details_summary';
 
-export const CrawlDetailsPreview: React.FC = () => {
+interface CrawlDetailsPreviewProps {
+  crawlerLogsEnabled: boolean | undefined;
+}
+
+export const CrawlDetailsPreview: React.FC<CrawlDetailsPreviewProps> = ({ crawlerLogsEnabled }) => {
   const { crawlRequest } = useValues(CrawlDetailLogic);
 
   if (crawlRequest === null) {
@@ -28,6 +32,7 @@ export const CrawlDetailsPreview: React.FC = () => {
     <>
       {crawlRequest.stats && (
         <CrawlDetailsSummary
+          crawlerLogsEnabled={crawlerLogsEnabled}
           crawlType={crawlRequest.type}
           domainCount={crawlRequest.crawlConfig.domainAllowlist.length}
           crawlDepth={crawlRequest.crawlConfig.maxCrawlDepth}
