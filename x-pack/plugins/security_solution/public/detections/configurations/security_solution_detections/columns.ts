@@ -6,7 +6,7 @@
  */
 
 import { EuiDataGridColumn } from '@elastic/eui';
-import { ColumnHeaderOptions } from '../../../../common';
+import { ColumnHeaderOptions } from '../../../../common/types';
 
 import { defaultColumnHeaderType } from '../../../timelines/components/timeline/body/column_headers/default_headers';
 import {
