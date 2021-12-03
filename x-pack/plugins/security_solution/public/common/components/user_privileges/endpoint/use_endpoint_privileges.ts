@@ -71,10 +71,10 @@ export const useEndpointPrivileges = (): Immutable<EndpointPrivileges> => {
       canAccessEndpointManagement: canAccessFleet && isSuperUser,
       canCreateArtifactsByPolicy: isPlatinumPlusLicense,
       // verify if also has write privileges for isolation/unisolation
-      canIsolateHost: hasIsolationPrivilege && isPlatinumPlusLicense,
-      canUnisolateHost: hasIsolationPrivilege,
+      canIsolateHost: !(hasIsolationPrivilege && isPlatinumPlusLicense),
+      canUnisolateHost: !hasIsolationPrivilege,
       // verify if can access activity log flyout
-      canAccessActivityLog: !!pluginUserPrivileges.readIsolationActionsAndResponses,
+      canAccessActivityLog: !pluginUserPrivileges.readIsolationActionsAndResponses,
       // FIXME: Remove usages of the property below
       /** @deprecated */
       isPlatinumPlus: isPlatinumPlusLicense,
