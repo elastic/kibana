@@ -107,13 +107,10 @@ function AlertsPage() {
       // Note that the API uses the semantics of 'alerts' instead of 'rules'
       const { alertExecutionStatus, ruleMutedStatus, ruleEnabledStatus } = response;
       if (alertExecutionStatus && ruleMutedStatus && ruleEnabledStatus) {
-        const total = Object.values(alertExecutionStatus).reduce((acc, value) => {
-          acc = acc + value;
-          return acc;
-        }, 0);
-        const { error } = alertExecutionStatus;
-        const { muted } = ruleMutedStatus;
+        const total = Object.values(alertExecutionStatus).reduce((acc, value) => acc + value, 0);
         const { disabled } = ruleEnabledStatus;
+        const { muted } = ruleMutedStatus;
+        const { error } = alertExecutionStatus;
         setRuleStats({
           ...ruleStats,
           total,

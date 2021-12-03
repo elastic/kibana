@@ -14,12 +14,7 @@ import {
   muteAlert as muteRule,
 } from '../../../../functional_with_es_ssl/lib/alert_api_actions';
 import { generateUniqueKey } from '../../../../functional_with_es_ssl/lib/get_test_data';
-
-async function asyncForEach<T>(array: T[], callback: (item: T, index: number) => void) {
-  for (let index = 0; index < array.length; index++) {
-    await callback(array[index], index);
-  }
-}
+import { asyncForEach } from '../helpers';
 
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
@@ -29,8 +24,6 @@ export default ({ getService }: FtrProviderContext) => {
   describe('Observability rules', function () {
     this.tags('includeFirefox');
 
-    const testSubjects = getService('testSubjects');
-    const retry = getService('retry');
     const observability = getService('observability');
 
     before(async () => {
