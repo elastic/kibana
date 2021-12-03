@@ -26,7 +26,6 @@ import {
 export class ControlGroupContainerFactory implements EmbeddableFactoryDefinition {
   public readonly isContainerType = true;
   public readonly type = CONTROL_GROUP_TYPE;
-
   public inject: EmbeddablePersistableStateService['inject'];
   public extract: EmbeddablePersistableStateService['extract'];
 

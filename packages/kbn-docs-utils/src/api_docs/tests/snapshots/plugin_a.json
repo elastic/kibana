@@ -76,7 +76,7 @@
             "label": "component",
             "description": [],
             "signature": [
-              "React.ComponentClass<{}, any> | React.FunctionComponent<{}> | undefined"
+              "React.ComponentType<{}> | undefined"
             ],
             "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/classes.ts",
             "deprecated": false
@@ -1241,7 +1241,7 @@
             "section": "def-public.MyProps",
             "text": "MyProps"
           },
-          ">"
+          ", string | React.JSXElementConstructor<any>>"
         ],
         "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/types.ts",
         "deprecated": false,
@@ -2356,7 +2356,7 @@
           "deprecated": false,
           "children": [],
           "returnComment": [
-            "The currently selected {@link SearchLanguage}"
+            "The currently selected {@link SearchLanguage }"
           ]
         }
       ],

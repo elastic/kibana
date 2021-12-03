@@ -491,8 +491,7 @@ export function alertingServiceProvider(
             .filter((v) => v.doc_count > 0 && v[resultsLabel.aggGroupLabel].doc_count > 0)
             // Map response
             .map(formatter)
-        : // @ts-expect-error
-          [formatter(result as AggResultsResponse)]
+        : [formatter(result as unknown as AggResultsResponse)]
     ).filter(isDefined);
   };
 

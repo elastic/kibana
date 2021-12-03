@@ -30,6 +30,7 @@ export const createRuleDataClientMock = (
     kibanaVersion: '7.16.0',
     isWriteEnabled: jest.fn(() => true),
 
+    // @ts-ignore 4.3.5 upgrade
     getReader: jest.fn((_options?: { namespace?: string }) => ({
       search,
       getDynamicIndexPattern,

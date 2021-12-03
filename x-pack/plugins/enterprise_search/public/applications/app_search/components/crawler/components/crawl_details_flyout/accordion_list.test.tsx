@@ -48,7 +48,9 @@ describe('AccordionList', () => {
 
     expect(table.prop('items')).toEqual([{ item: 'first item' }, { item: 'second item' }]);
 
-    expect(table.prop('columns')[0].render({ item: 'first item' })).toEqual('first item');
+    // columns from accordion_list.tsx always have a render function, so avoid type errors and just convert to any
+    const column: any = table.prop('columns')[0];
+    expect(column.render({ item: 'first item' })).toEqual('first item');
   });
 
   it('is disabled when there are no items', () => {

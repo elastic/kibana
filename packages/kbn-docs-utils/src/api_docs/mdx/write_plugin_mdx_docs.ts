@@ -98,7 +98,7 @@ ${
 
 **Code health stats**
 
-| Public API count  | Any count | Items lacking comments | Missing exports | 
+| Public API count  | Any count | Items lacking comments | Missing exports |
 |-------------------|-----------|------------------------|-----------------|
 | ${pluginStats.apiCount} | ${pluginStats.isAnyType.length} | ${
       pluginStats.missingComments.length

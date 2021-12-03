@@ -69,11 +69,15 @@ interface IReportingAPI {
 }
 
 export class ReportingAPIClient implements IReportingAPI {
+  private http: HttpSetup;
+
   constructor(
-    private http: HttpSetup,
+    http: HttpSetup,
     private uiSettings: IUiSettingsClient,
     private kibanaVersion: string
-  ) {}
+  ) {
+    this.http = http;
+  }
 
   public getKibanaAppHref(job: Job): string {
     const searchParams = stringify({ jobId: job.id });

@@ -36,8 +36,7 @@ declare global {
     interface Global {}
     interface InspectOptions {}
 
-    interface ConsoleConstructor
-      extends console.ConsoleConstructor {}
+    interface ConsoleConstructor extends console.ConsoleConstructor {}
   }
 }
 /* eslint-enable */
@@ -59,7 +58,7 @@ export function runJest(configName = 'jest.config.js') {
   const cwd: string = process.env.INIT_CWD || process.cwd();
 
   if (!argv.config) {
-    testFiles = argv._.splice(2).map((p) => resolve(cwd, p));
+    testFiles = argv._.splice(2).map((p) => resolve(cwd, p.toString()));
     const commonTestFiles = commonBasePath(testFiles);
     const testFilesProvided = testFiles.length > 0;
 
