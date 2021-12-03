@@ -41,7 +41,7 @@ journey('StepsDuration', async ({ page, params }) => {
   step('Check for monitor duration', async () => {
     await page.hover('text=8.9 sec');
     await page.waitForSelector('text=Explore');
-    const explore = await page.$('text=Explore');
-    expect(explore).toBeTruthy();
+    expect(await page.$('text=Explore')).toBeTruthy();
+    expect(await page.$('text=area chart')).toBeTruthy();
   });
 });
