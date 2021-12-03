@@ -23,11 +23,11 @@ import {
 } from '../../../../common/endpoint/types';
 import type { SecuritySolutionRequestHandlerContext } from '../../../types';
 
-import { getPagingProperties, kibanaRequestToMetadataListESQuery } from './query_builders';
+import { kibanaRequestToMetadataListESQuery } from './query_builders';
 import { PackagePolicy } from '../../../../../fleet/common/types/models';
 import { AgentNotFoundError } from '../../../../../fleet/server';
 import { EndpointAppContext, HostListQueryResult } from '../../types';
-import { GetMetadataListRequestSchema, GetMetadataRequestSchema } from './index';
+import { GetMetadataRequestSchema } from './index';
 import { findAllUnenrolledAgentIds } from './support/unenroll';
 import { getAllEndpointPackagePolicies } from './support/endpoint_package_policies';
 import { findAgentIdsByStatus } from './support/agent_status';
@@ -35,7 +35,6 @@ import { EndpointAppContextService } from '../../endpoint_app_context_services';
 import { fleetAgentStatusToEndpointHostStatus } from '../../utils';
 import { queryResponseToHostListResult } from './support/query_strategies';
 import { NotFoundError } from '../../errors';
-import { EndpointError } from '../../../../common/endpoint/errors';
 import { EndpointHostUnEnrolledError } from '../../services/metadata';
 import { CustomHttpRequestError } from '../../../utils/custom_http_request_error';
 import { GetMetadataListRequestQuery } from '../../../../common/endpoint/schema/metadata';
@@ -43,6 +42,7 @@ import {
   ENDPOINT_DEFAULT_PAGE,
   ENDPOINT_DEFAULT_PAGE_SIZE,
 } from '../../../../common/endpoint/constants';
+import { EndpointFleetServicesInterface } from '../../services/endpoint_fleet_services';
 
 export interface MetadataRequestContext {
   esClient?: IScopedClusterClient;
@@ -82,85 +82,7 @@ const errorHandler = <E extends Error>(
   throw error;
 };
 
-export const getMetadataListRequestHandler = function (
-  endpointAppContext: EndpointAppContext,
-  logger: Logger
-): RequestHandler<
-  unknown,
-  unknown,
-  TypeOf<typeof GetMetadataListRequestSchema.body>,
-  SecuritySolutionRequestHandlerContext
-> {
-  return async (context, request, response) => {
-    const endpointMetadataService = endpointAppContext.service.getEndpointMetadataService();
-    if (!endpointMetadataService) {
-      throw new EndpointError('endpoint metadata service not available');
-    }
-
-    let doesUnitedIndexExist = false;
-    let didUnitedIndexError = false;
-    let body: HostResultList = {
-      hosts: [],
-      total: 0,
-      request_page_size: 0,
-      request_page_index: 0,
-    };
-
-    try {
-      doesUnitedIndexExist = await endpointMetadataService.doesUnitedIndexExist(
-        context.core.elasticsearch.client.asCurrentUser
-      );
-    } catch (error) {
-      // for better UX, try legacy query instead of immediately failing on united index error
-      didUnitedIndexError = true;
-    }
-
-    // If no unified Index present, then perform a search using the legacy approach
-    if (!doesUnitedIndexExist || didUnitedIndexError) {
-      const endpointPolicies = await getAllEndpointPackagePolicies(
-        endpointAppContext.service.getPackagePolicyService(),
-        context.core.savedObjects.client
-      );
-
-      const pagingProperties = await getPagingProperties(request, endpointAppContext);
-
-      body = await legacyListMetadataQuery(context, endpointAppContext, logger, endpointPolicies, {
-        page: pagingProperties.pageIndex,
-        pageSize: pagingProperties.pageSize,
-        kuery: request?.body?.filters?.kql || '',
-        hostStatuses: request?.body?.filters?.host_status || [],
-      });
-      return response.ok({ body });
-    }
-
-    // Unified index is installed and being used - perform search using new approach
-    try {
-      const pagingProperties = await getPagingProperties(request, endpointAppContext);
-      const { data, total } = await endpointMetadataService.getHostMetadataList(
-        context.core.elasticsearch.client.asCurrentUser,
-        {
-          page: pagingProperties.pageIndex,
-          pageSize: pagingProperties.pageSize,
-          hostStatuses: request.body?.filters.host_status || [],
-          kuery: request.body?.filters.kql || '',
-        }
-      );
-
-      body = {
-        hosts: data,
-        total,
-        request_page_index: pagingProperties.pageIndex * pagingProperties.pageSize,
-        request_page_size: pagingProperties.pageSize,
-      };
-    } catch (error) {
-      return errorHandler(logger, response, error);
-    }
-
-    return response.ok({ body });
-  };
-};
-
-export function getMetadataListRequestHandlerV2(
+export function getMetadataListRequestHandler(
   endpointAppContext: EndpointAppContext,
   logger: Logger
 ): RequestHandler<
@@ -171,6 +93,7 @@ export function getMetadataListRequestHandlerV2(
 > {
   return async (context, request, response) => {
     const endpointMetadataService = endpointAppContext.service.getEndpointMetadataService();
+    const fleetServices = endpointAppContext.service.getScopedFleetServices(request);
 
     let doesUnitedIndexExist = false;
     let didUnitedIndexError = false;
@@ -193,13 +116,14 @@ export function getMetadataListRequestHandlerV2(
     // If no unified Index present, then perform a search using the legacy approach
     if (!doesUnitedIndexExist || didUnitedIndexError) {
       const endpointPolicies = await getAllEndpointPackagePolicies(
-        endpointAppContext.service.getPackagePolicyService(),
+        fleetServices.packagePolicy,
         context.core.savedObjects.client
       );
 
       const legacyResponse = await legacyListMetadataQuery(
         context,
         endpointAppContext,
+        fleetServices,
         logger,
         endpointPolicies,
         request.query
@@ -217,6 +141,7 @@ export function getMetadataListRequestHandlerV2(
     try {
       const { data, total } = await endpointMetadataService.getHostMetadataList(
         context.core.elasticsearch.client.asCurrentUser,
+        fleetServices,
         request.query
       );
 
@@ -250,6 +175,7 @@ export const getMetadataRequestHandler = function (
       return response.ok({
         body: await endpointMetadataService.getEnrichedHostMetadata(
           context.core.elasticsearch.client.asCurrentUser,
+          endpointAppContext.service.getScopedFleetServices(request),
           request.params.id
         ),
       });
@@ -314,10 +240,6 @@ export async function enrichHostMetadata(
     throw e;
   }
 
-  const esClient = (metadataRequestContext?.esClient ??
-    metadataRequestContext.requestHandlerContext?.core.elasticsearch
-      .client) as IScopedClusterClient;
-
   const esSavedObjectClient =
     metadataRequestContext?.savedObjectsClient ??
     (metadataRequestContext.requestHandlerContext?.core.savedObjects
@@ -333,9 +255,10 @@ export async function enrichHostMetadata(
       log.warn(`Missing elastic agent id, using host id instead ${elasticAgentId}`);
     }
 
-    const status = await metadataRequestContext.endpointAppContextService
-      ?.getAgentService()
-      ?.getAgentStatusById(esClient.asCurrentUser, elasticAgentId);
+    const status =
+      await metadataRequestContext.requestHandlerContext?.fleet?.agentClient.asCurrentUser.getAgentStatusById(
+        elasticAgentId
+      );
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     hostStatus = fleetAgentStatusToEndpointHostStatus(status!);
   } catch (e) {
@@ -349,9 +272,10 @@ export async function enrichHostMetadata(
 
   let policyInfo: HostInfo['policy_info'];
   try {
-    const agent = await metadataRequestContext.endpointAppContextService
-      ?.getAgentService()
-      ?.getAgent(esClient.asCurrentUser, elasticAgentId);
+    const agent =
+      await metadataRequestContext.requestHandlerContext?.fleet?.agentClient.asCurrentUser.getAgent(
+        elasticAgentId
+      );
     const agentPolicy = await metadataRequestContext.endpointAppContextService
       .getAgentPolicyService()
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -393,15 +317,12 @@ export async function enrichHostMetadata(
 async function legacyListMetadataQuery(
   context: SecuritySolutionRequestHandlerContext,
   endpointAppContext: EndpointAppContext,
+  fleetServices: EndpointFleetServicesInterface,
   logger: Logger,
   endpointPolicies: PackagePolicy[],
   queryOptions: GetMetadataListRequestQuery
 ): Promise<HostResultList> {
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-  const agentService = endpointAppContext.service.getAgentService()!;
-  if (agentService === undefined) {
-    throw new Error('agentService not available');
-  }
+  const fleetAgentClient = fleetServices.agent;
 
   const metadataRequestContext: MetadataRequestContext = {
     esClient: context.core.elasticsearch.client,
@@ -412,14 +333,15 @@ async function legacyListMetadataQuery(
   };
 
   const endpointPolicyIds = endpointPolicies.map((policy) => policy.policy_id);
+
   const unenrolledAgentIds = await findAllUnenrolledAgentIds(
-    agentService,
+    fleetAgentClient,
     context.core.elasticsearch.client.asCurrentUser,
     endpointPolicyIds
   );
 
   const statusAgentIds = await findAgentIdsByStatus(
-    agentService,
+    fleetAgentClient,
     context.core.elasticsearch.client.asCurrentUser,
     queryOptions?.hostStatuses || []
   );
