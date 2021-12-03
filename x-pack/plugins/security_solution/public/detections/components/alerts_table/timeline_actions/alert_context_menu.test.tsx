@@ -7,7 +7,7 @@
 
 import { mount } from 'enzyme';
 import { AlertContextMenu } from './alert_context_menu';
-import { TimelineId } from '../../../../../common';
+import { TimelineId } from '../../../../../common/types';
 import { TestProviders } from '../../../../common/mock';
 import React from 'react';
 import { Ecs } from '../../../../../common/ecs';
