@@ -27,7 +27,7 @@ class FileWrapper {
     } catch (err) {
       const contentString = content.join('\n');
       throw new Error(
-        `Failed to parse audit log JSON, error: "${err.message}", audit.log contents: ${contentString}`
+        `Failed to parse audit log JSON, error: "${err.message}", audit.log contents:\n${contentString}`
       );
     }
   }
