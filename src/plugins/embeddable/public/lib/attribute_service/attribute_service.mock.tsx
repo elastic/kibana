@@ -17,14 +17,15 @@ export const mockAttributeService = <
   V extends EmbeddableInput & { [ATTRIBUTE_SERVICE_KEY]: A } = EmbeddableInput & {
     [ATTRIBUTE_SERVICE_KEY]: A;
   },
-  R extends SavedObjectEmbeddableInput = SavedObjectEmbeddableInput
+  R extends SavedObjectEmbeddableInput = SavedObjectEmbeddableInput,
+  M extends unknown = unknown
 >(
   type: string,
-  options: AttributeServiceOptions<A>,
+  options: AttributeServiceOptions<A, M>,
   customCore?: jest.Mocked<CoreStart>
-): AttributeService<A, V, R> => {
+): AttributeService<A, V, R, M> => {
   const core = customCore ? customCore : coreMock.createStart();
-  return new AttributeService<A, V, R>(
+  return new AttributeService<A, V, R, M>(
     type,
     jest.fn(),
     core.i18n.Context,
