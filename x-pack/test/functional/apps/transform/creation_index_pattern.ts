@@ -216,8 +216,8 @@ export default function ({ getService }: FtrProviderContext) {
               id: 'customer_last_name',
               legend: 'top 20 of 183 categories',
               colorStats: [
-                { color: '#000000', percentage: 25 },
-                { color: '#54B399', percentage: 73 },
+                { color: '#000000', percentage: 23 },
+                { color: '#54B399', percentage: 77 },
               ],
             },
             {
