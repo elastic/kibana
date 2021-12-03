@@ -40,6 +40,7 @@ import {
   CasePostRequest,
   noneConnectorId,
   CaseExternalServiceBasic,
+  CommentRequest,
 } from '../../../common';
 import { ClientArgs } from '..';
 import {
@@ -104,6 +105,17 @@ interface BulkCreateBulkUpdateCaseUserActions extends ClientArgs {
   user: User;
 }
 
+interface CreateAttachmentUserAction extends CommonUserActionArgs {
+  // TODO: use enum
+  action: 'create' | 'delete' | 'update';
+  attachmentId: string;
+  attachment: CommentRequest;
+}
+
+interface BulkCreateAttachmentDeletionUserAction extends Omit<CommonUserActionArgs, 'owner'> {
+  attachments: Array<{ id: string; owner: string }>;
+}
+
 export class CaseUserActionService {
   constructor(private readonly log: Logger) {}
 
@@ -123,6 +135,16 @@ export class CaseUserActionService {
             },
           ]
         : []),
+    ];
+  }
+
+  private createCommentReferences(commentId: string): SavedObjectReference[] {
+    return [
+      {
+        type: CASE_COMMENT_SAVED_OBJECT,
+        name: COMMENT_REF_NAME,
+        id: commentId,
+      },
     ];
   }
 
@@ -253,6 +275,41 @@ export class CaseUserActionService {
     return this.createActionReference(id, PUSH_CONNECTOR_ID_REFERENCE_NAME);
   }
 
+  private async createAttachmentUserAction({
+    action,
+    unsecuredSavedObjectsClient,
+    caseId,
+    subCaseId,
+    attachmentId,
+    user,
+    attachment,
+    owner,
+  }: CreateAttachmentUserAction): Promise<void> {
+    try {
+      this.log.debug(`Attempting to create a create case user action`);
+      const userAction = {
+        ...this.getCommonUserActionAttributes({ user, owner }),
+        // TODO: Take action from enum
+        action: [action],
+        fields: ['comment'],
+        payload: { comment: attachment },
+      };
+
+      const references = this.createCaseReferences(caseId, subCaseId);
+
+      await unsecuredSavedObjectsClient.create<CaseUserActionAttributes>(
+        CASE_USER_ACTION_SAVED_OBJECT,
+        userAction,
+        {
+          references: [...references, ...this.createCommentReferences(attachmentId)],
+        }
+      );
+    } catch (error) {
+      this.log.error(`Error on create a create case user action: ${error}`);
+      throw error;
+    }
+  }
+
   public async createCaseCreationUserAction({
     unsecuredSavedObjectsClient,
     caseId,
@@ -270,7 +327,7 @@ export class CaseUserActionService {
         // TODO: Take action from enum
         action: 'create',
         fields: ['description', 'status', 'tags', 'title', 'connector', 'settings', OWNER_FIELD],
-        payload: { ...payload, ...connectorWithoutId },
+        payload: { ...payload, connector: connectorWithoutId },
       };
 
       const references = [
@@ -493,6 +550,56 @@ export class CaseUserActionService {
 
       return [...acc, ...userActions];
     }, []);
+
+    await this.bulkCreate({ unsecuredSavedObjectsClient, actions: userActionsWithReferences });
+  }
+
+  public async createAttachmentCreationUserAction(
+    args: Omit<CreateAttachmentUserAction, 'action'>
+  ): Promise<void> {
+    return this.createAttachmentUserAction({ ...args, action: 'create' });
+  }
+
+  public async createAttachmentDeletionUserAction(
+    args: Omit<CreateAttachmentUserAction, 'action'>
+  ): Promise<void> {
+    return this.createAttachmentUserAction({ ...args, action: 'delete' });
+  }
+
+  public async createAttachmentUpdateUserAction(
+    args: Omit<CreateAttachmentUserAction, 'action'>
+  ): Promise<void> {
+    return this.createAttachmentUserAction({ ...args, action: 'update' });
+  }
+
+  public async bulkCreateAttachmentDeletionUserAction({
+    unsecuredSavedObjectsClient,
+    caseId,
+    subCaseId,
+    attachments,
+    user,
+  }: BulkCreateAttachmentDeletionUserAction): Promise<void> {
+    this.log.debug(`Attempting to create a create case user action`);
+    const userActionsWithReferences = attachments.reduce(
+      (acc, attachment) => [
+        ...acc,
+        {
+          attributes: {
+            ...this.getCommonUserActionAttributes({ user, owner: attachment.owner }),
+            // TODO: Take action from enum
+            action: ['delete'],
+            fields: ['comment'],
+            payload: {},
+          },
+          references: [
+            ...this.createCaseReferences(caseId, subCaseId),
+            ...this.createCommentReferences(attachment.id),
+          ],
+          // TODO: Fix type
+        } as unknown as UserActionItem,
+      ],
+      [] as UserActionItem[]
+    );
 
     await this.bulkCreate({ unsecuredSavedObjectsClient, actions: userActionsWithReferences });
   }

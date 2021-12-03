@@ -17,7 +17,6 @@ import {
   SUB_CASE_SAVED_OBJECT,
 } from '../../../common';
 import { CasesClientArgs } from '../types';
-import { buildCommentUserActionItem } from '../../services/user_actions/helpers';
 import { createCaseError, checkEnabledCaseConnectorOrThrow } from '../../common';
 import { Operations } from '../../authorization';
 
@@ -105,22 +104,15 @@ export async function deleteAll(
       concurrency: MAX_CONCURRENT_SEARCHES,
     });
 
-    const deleteDate = new Date().toISOString();
-
-    await userActionService.bulkCreate({
+    await userActionService.bulkCreateAttachmentDeletionUserAction({
       unsecuredSavedObjectsClient,
-      actions: comments.saved_objects.map((comment) =>
-        buildCommentUserActionItem({
-          action: 'delete',
-          actionAt: deleteDate,
-          actionBy: user,
-          caseId: caseID,
-          subCaseId: subCaseID,
-          commentId: comment.id,
-          fields: ['comment'],
-          owner: comment.attributes.owner,
-        })
-      ),
+      caseId: caseID,
+      subCaseId: subCaseID,
+      attachments: comments.saved_objects.map((comment) => ({
+        id: comment.id,
+        owner: comment.attributes.owner,
+      })),
+      user,
     });
   } catch (error) {
     throw createCaseError({
@@ -181,20 +173,14 @@ export async function deleteComment(
       attachmentId: attachmentID,
     });
 
-    await userActionService.bulkCreate({
+    await userActionService.createAttachmentDeletionUserAction({
       unsecuredSavedObjectsClient,
-      actions: [
-        buildCommentUserActionItem({
-          action: 'delete',
-          actionAt: deleteDate,
-          actionBy: user,
-          caseId: id,
-          subCaseId: subCaseID,
-          commentId: attachmentID,
-          fields: ['comment'],
-          owner: myComment.attributes.owner,
-        }),
-      ],
+      caseId: id,
+      subCaseId: subCaseID,
+      attachmentId: attachmentID,
+      attachment: {},
+      user,
+      owner: myComment.attributes.owner,
     });
   } catch (error) {
     throw createCaseError({

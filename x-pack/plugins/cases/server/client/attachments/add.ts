@@ -34,7 +34,6 @@ import {
   throwErrors,
   User,
 } from '../../../common';
-import { buildCommentUserActionItem } from '../../services/user_actions/helpers';
 
 import { AttachmentService, CasesService, CaseUserActionService } from '../../services';
 import {
@@ -119,6 +118,7 @@ const addGeneratedAlerts = async (
     logger,
     lensEmbeddableFactory,
     authorization,
+    user,
   } = clientArgs;
 
   const query = pipe(
@@ -201,21 +201,14 @@ const addGeneratedAlerts = async (
       });
     }
 
-    await userActionService.bulkCreate({
+    await userActionService.createAttachmentCreationUserAction({
       unsecuredSavedObjectsClient,
-      actions: [
-        buildCommentUserActionItem({
-          action: 'create',
-          createdAt: createdDate,
-          createdBy: { ...userDetails },
-          caseId: updatedCase.caseId,
-          subCaseId: updatedCase.subCaseId,
-          commentId: newComment.id,
-          fields: ['comment'],
-          payload: { comment: query },
-          owner: newComment.attributes.owner,
-        }),
-      ],
+      caseId: updatedCase.caseId,
+      subCaseId: updatedCase.subCaseId,
+      attachmentId: newComment.id,
+      attachment: query,
+      user,
+      owner: newComment.attributes.owner,
     });
 
     return updatedCase.encode();
@@ -389,21 +382,14 @@ export const addComment = async (
       });
     }
 
-    await userActionService.bulkCreate({
+    await userActionService.createAttachmentCreationUserAction({
       unsecuredSavedObjectsClient,
-      actions: [
-        buildCommentUserActionItem({
-          action: 'create',
-          createdAt: createdDate,
-          createdBy: { username, full_name, email },
-          caseId: updatedCase.caseId,
-          subCaseId: updatedCase.subCaseId,
-          commentId: newComment.id,
-          fields: ['comment'],
-          payload: { comment: query },
-          owner: newComment.attributes.owner,
-        }),
-      ],
+      caseId,
+      subCaseId: updatedCase.subCaseId,
+      attachmentId: newComment.id,
+      attachment: query,
+      user,
+      owner: newComment.attributes.owner,
     });
 
     return updatedCase.encode();
