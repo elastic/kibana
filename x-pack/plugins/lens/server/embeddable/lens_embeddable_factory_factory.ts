@@ -10,7 +10,7 @@ import type { SerializableRecord } from '@kbn/utility-types';
 import {
   mergeMigrationFunctionMaps,
   MigrateFunctionsObject,
-} from 'src/plugins/kibana_utils/common';
+} from '../../../../../src/plugins/kibana_utils/common';
 import { DOC_TYPE } from '../../common';
 import {
   commonMakeReversePaletteAsCustom,

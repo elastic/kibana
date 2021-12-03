@@ -9,7 +9,7 @@ import { CoreSetup } from 'kibana/server';
 import {
   mergeMigrationFunctionMaps,
   MigrateFunctionsObject,
-} from 'src/plugins/kibana_utils/common';
+} from '../../../../src/plugins/kibana_utils/common';
 import { getEditPath } from '../common';
 import { migrations } from './migrations/saved_object_migrations';
 
