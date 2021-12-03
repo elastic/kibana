@@ -408,7 +408,6 @@ export const announcements: CustomAnnouncementsType = {
           dropLabel,
           dropGroupLabel,
           dropPosition,
-          nextLabel,
         },
       }),
     combine_incompatible: (
