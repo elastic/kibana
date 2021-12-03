@@ -24,8 +24,6 @@ NOTE: No Docker images are currently available for {kib} {version}.
 
 endif::[]
 
-ifeval::["{release-state}"!="unreleased"]
-
 . Start an {es} container for development or testing:
 +
 [source,sh,subs="attributes"]
@@ -98,7 +96,6 @@ docker rm es-node01
 docker rm kib-01
 ----
 
-endif::[]
 [float]
 [[configuring-kibana-docker]]
 === Configure Kibana on Docker
