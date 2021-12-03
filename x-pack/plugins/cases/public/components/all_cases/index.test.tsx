@@ -9,7 +9,7 @@ import React from 'react';
 import { mount } from 'enzyme';
 import { waitFor } from '@testing-library/react';
 
-import { AllCases, AllCasesProps } from '.';
+import { AllCases } from '.';
 import { TestProviders } from '../../common/mock';
 import { useGetTags } from '../../containers/use_get_tags';
 import { useGetReporters } from '../../containers/use_get_reporters';
@@ -30,10 +30,6 @@ jest.mock('../../containers/api');
 jest.mock('../../common/lib/kibana');
 jest.mock('../../containers/use_get_cases');
 jest.mock('../../containers/use_get_cases_status');
-
-const defaultAllCasesProps: AllCasesProps = {
-  disableAlerts: false,
-};
 
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 const useConnectorsMock = useConnectors as jest.Mock;
@@ -105,7 +101,7 @@ describe('AllCases', () => {
 
     const wrapper = mount(
       <TestProviders>
-        <AllCases {...defaultAllCasesProps} />
+        <AllCases />
       </TestProviders>
     );
 
@@ -141,7 +137,7 @@ describe('AllCases', () => {
 
     const wrapper = mount(
       <TestProviders>
-        <AllCases {...defaultAllCasesProps} />
+        <AllCases />
       </TestProviders>
     );
 
@@ -173,7 +169,7 @@ describe('AllCases', () => {
 
     const wrapper = mount(
       <TestProviders>
-        <AllCases {...defaultAllCasesProps} />
+        <AllCases />
       </TestProviders>
     );
 
@@ -199,7 +195,7 @@ describe('AllCases', () => {
 
     const wrapper = mount(
       <TestProviders>
-        <AllCases {...defaultAllCasesProps} />
+        <AllCases />
       </TestProviders>
     );
 
