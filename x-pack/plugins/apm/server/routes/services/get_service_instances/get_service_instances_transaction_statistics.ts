@@ -18,7 +18,7 @@ import { kqlQuery, rangeQuery } from '../../../../../observability/server';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import {
   getDocumentTypeFilterForTransactions,
-  getTransactionDurationFieldForTransactions,
+  getDurationFieldForTransactions,
   getProcessorEventForTransactions,
 } from '../../../lib/helpers/transactions';
 import { calculateThroughput } from '../../../lib/helpers/calculate_throughput';
@@ -89,9 +89,7 @@ export async function getServiceInstancesTransactionStatistics<
     }
   );
 
-  const field = getTransactionDurationFieldForTransactions(
-    searchAggregatedTransactions
-  );
+  const field = getDurationFieldForTransactions(searchAggregatedTransactions);
 
   const subAggs = {
     ...getLatencyAggregation(latencyAggregationType, field),
@@ -170,6 +168,7 @@ export async function getServiceInstancesTransactionStatistics<
           const { timeseries } = serviceNodeBucket;
           return {
             serviceNodeName,
+            // @ts-ignore 4.3.5 upgrade - Expression produces a union type that is too complex to represent.
             errorRate: timeseries.buckets.map((dateBucket) => ({
               x: dateBucket.key,
               y: dateBucket.failures.doc_count / dateBucket.doc_count,

@@ -27,7 +27,7 @@ interface VegaVisComponentProps {
 
 type VegaVisController = InstanceType<ReturnType<typeof createVegaVisualization>>;
 
-const VegaVisComponent = ({
+export const VegaVisComponent = ({
   visData,
   fireEvent,
   renderComplete,
@@ -75,7 +75,3 @@ const VegaVisComponent = ({
     </EuiResizeObserver>
   );
 };
-
-// default export required for React.Lazy
-// eslint-disable-next-line import/no-default-export
-export { VegaVisComponent as default };
