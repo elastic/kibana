@@ -17,6 +17,8 @@ import {
   IUiSettingsClient,
   PluginInitializerContext,
   HttpStart,
+  NotificationsStart,
+  ApplicationStart,
 } from 'kibana/public';
 import {
   FilterManager,
@@ -39,8 +41,10 @@ import { FieldFormatsStart } from '../../field_formats/public';
 import { EmbeddableStart } from '../../embeddable/public';
 
 import type { SpacesApi } from '../../../../x-pack/plugins/spaces/public';
+import type { TriggersAndActionsUIPublicPluginStart } from '../../../../x-pack/plugins/triggers_actions_ui/public';
 
 export interface DiscoverServices {
+  application: ApplicationStart;
   addBasePath: (path: string) => string;
   capabilities: Capabilities;
   chrome: ChromeStart;
@@ -60,8 +64,10 @@ export interface DiscoverServices {
   urlForwarding: UrlForwardingStart;
   timefilter: TimefilterContract;
   toastNotifications: ToastsStart;
+  notifications: NotificationsStart;
   uiSettings: IUiSettingsClient;
   trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
+  triggersActionsUi?: TriggersAndActionsUIPublicPluginStart;
   indexPatternFieldEditor: IndexPatternFieldEditorStart;
   http: HttpStart;
   storage: Storage;
@@ -77,6 +83,7 @@ export function buildServices(
   const storage = new Storage(localStorage);
 
   return {
+    application: core.application,
     addBasePath: core.http.basePath.prepend,
     capabilities: core.application.capabilities,
     chrome: core.chrome,
@@ -98,9 +105,11 @@ export function buildServices(
     urlForwarding: plugins.urlForwarding,
     timefilter: plugins.data.query.timefilter.timefilter,
     toastNotifications: core.notifications.toasts,
+    notifications: core.notifications,
     uiSettings: core.uiSettings,
     storage,
     trackUiMetric: usageCollection?.reportUiCounter.bind(usageCollection, 'discover'),
+    triggersActionsUi: plugins.triggersActionsUi,
     indexPatternFieldEditor: plugins.dataViewFieldEditor,
     http: core.http,
     spaces: plugins.spaces,
