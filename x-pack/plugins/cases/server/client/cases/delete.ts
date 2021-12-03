@@ -12,13 +12,11 @@ import {
   CommentAttributes,
   ENABLE_CASE_CONNECTOR,
   MAX_CONCURRENT_SEARCHES,
-  OWNER_FIELD,
   SubCaseAttributes,
 } from '../../../common';
 import { CasesClientArgs } from '..';
 import { createCaseError } from '../../common';
 import { AttachmentService, CasesService } from '../../services';
-import { buildCaseUserActionItem } from '../../services/user_actions/helpers';
 import { Operations, OwnerEntity } from '../../authorization';
 
 async function deleteSubCases({
@@ -149,30 +147,14 @@ export async function deleteCases(ids: string[], clientArgs: CasesClientArgs): P
       });
     }
 
-    const deleteDate = new Date().toISOString();
-
-    await userActionService.bulkCreate({
+    await userActionService.bulkCreateCaseDeletionUserAction({
       unsecuredSavedObjectsClient,
-      actions: cases.saved_objects.map((caseInfo) =>
-        buildCaseUserActionItem({
-          action: 'delete',
-          actionAt: deleteDate,
-          actionBy: user,
-          caseId: caseInfo.id,
-          fields: [
-            'description',
-            'status',
-            'tags',
-            'title',
-            'connector',
-            'settings',
-            OWNER_FIELD,
-            'comment',
-            ...(ENABLE_CASE_CONNECTOR ? ['sub_case' as const] : []),
-          ],
-          owner: caseInfo.attributes.owner,
-        })
-      ),
+      cases: cases.saved_objects.map((caseInfo) => ({
+        id: caseInfo.id,
+        owner: caseInfo.attributes.owner,
+        connectorId: caseInfo.attributes.connector.id,
+      })),
+      user,
     });
   } catch (error) {
     throw createCaseError({

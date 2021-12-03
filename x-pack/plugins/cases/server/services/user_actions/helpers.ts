@@ -29,89 +29,59 @@ import { CASE_REF_NAME, COMMENT_REF_NAME, SUB_CASE_REF_NAME } from '../../common
 
 interface BuildCaseUserActionParams {
   action: UserAction;
-  actionAt: string;
-  actionBy: User;
+  createdAt: string;
+  createdBy: User;
   caseId: string;
   owner: string;
   fields: UserActionField;
-  newValue?: Record<string, unknown> | string | null;
-  oldValue?: Record<string, unknown> | string | null;
+  payload?: Record<string, unknown>;
   subCaseId?: string;
 }
 
 export const buildCaseUserActionItem = ({
   action,
-  actionAt,
-  actionBy,
+  createdAt,
+  createdBy,
   caseId,
   fields,
-  newValue,
-  oldValue,
   subCaseId,
   owner,
+  payload = {},
 }: BuildCaseUserActionParams): UserActionItem => {
-  const { transformedActionDetails: transformedNewValue, references: newValueReferences } =
+  const { transformedActionDetails: transformedPayload, references: newValueReferences } =
     extractConnectorId({
       action,
       actionFields: fields,
-      actionDetails: newValue,
+      actionDetails: payload,
       fieldType: UserActionFieldType.New,
-    });
-
-  const { transformedActionDetails: transformedOldValue, references: oldValueReferences } =
-    extractConnectorId({
-      action,
-      actionFields: fields,
-      actionDetails: oldValue,
-      fieldType: UserActionFieldType.Old,
     });
 
   return {
     attributes: transformNewUserAction({
-      actionField: fields,
+      fields,
       action,
-      actionAt,
+      createdAt,
       owner,
-      ...actionBy,
-      newValue: transformedNewValue,
-      oldValue: transformedOldValue,
+      createdBy,
+      payload: transformedPayload,
     }),
-    references: [
-      ...createCaseReferences(caseId, subCaseId),
-      ...newValueReferences,
-      ...oldValueReferences,
-    ],
+    references: [...createCaseReferences(caseId, subCaseId), ...newValueReferences],
   };
 };
 
 const transformNewUserAction = ({
-  actionField,
   action,
-  actionAt,
-  email,
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  full_name,
+  createdAt,
+  createdBy,
+  fields,
   owner,
-  newValue = null,
-  oldValue = null,
-  username,
-}: {
-  actionField: UserActionField;
-  action: UserAction;
-  actionAt: string;
-  owner: string;
-  email?: string | null;
-  full_name?: string | null;
-  newValue?: string | null;
-  oldValue?: string | null;
-  username?: string | null;
-}): CaseUserActionAttributes => ({
-  action_field: actionField,
+  payload,
+}: BuildCaseUserActionParams): CaseUserActionAttributes => ({
+  fields,
   action,
-  action_at: actionAt,
-  action_by: { email, full_name, username },
-  new_value: newValue,
-  old_value: oldValue,
+  created_at: createdAt,
+  created_by: createdBy,
+  payload,
   owner,
 });
 
@@ -188,15 +158,15 @@ interface OwnerEntity {
  * The entity associated with the user action must contain an owner field
  */
 const buildGenericCaseUserActions = <T extends OwnerEntity>({
-  actionDate,
-  actionBy,
+  createdAt,
+  createdBy,
   originalCases,
   updatedCases,
   allowedFields,
   getters,
 }: {
-  actionDate: string;
-  actionBy: User;
+  createdAt: string;
+  createdBy: User;
   originalCases: Array<SavedObject<T>>;
   updatedCases: Array<SavedObjectsUpdateResponse<T>>;
   allowedFields: UserActionField;
@@ -221,13 +191,12 @@ const buildGenericCaseUserActions = <T extends OwnerEntity>({
               ...userActions,
               buildCaseUserActionItem({
                 action: 'update',
-                actionAt: actionDate,
-                actionBy,
+                createdAt,
+                createdBy,
                 caseId,
                 subCaseId,
                 fields: [field],
-                newValue: updatedValue,
-                oldValue: origValue,
+                payload: { [field]: updatedValue },
                 owner: originalItem.attributes.owner,
               }),
             ];
@@ -238,12 +207,12 @@ const buildGenericCaseUserActions = <T extends OwnerEntity>({
                 ...userActions,
                 buildCaseUserActionItem({
                   action: 'add',
-                  actionAt: actionDate,
-                  actionBy,
+                  createdAt,
+                  createdBy,
                   caseId,
                   subCaseId,
                   fields: [field],
-                  newValue: compareValues.addedItems.join(', '),
+                  payload: { [field]: compareValues.addedItems },
                   owner: originalItem.attributes.owner,
                 }),
               ];
@@ -254,12 +223,12 @@ const buildGenericCaseUserActions = <T extends OwnerEntity>({
                 ...userActions,
                 buildCaseUserActionItem({
                   action: 'delete',
-                  actionAt: actionDate,
-                  actionBy,
+                  createdAt,
+                  createdBy,
                   caseId,
                   subCaseId,
                   fields: [field],
-                  newValue: compareValues.deletedItems.join(', '),
+                  payload: { [field]: compareValues.deletedItems },
                   owner: originalItem.attributes.owner,
                 }),
               ];
@@ -273,13 +242,12 @@ const buildGenericCaseUserActions = <T extends OwnerEntity>({
               ...userActions,
               buildCaseUserActionItem({
                 action: 'update',
-                actionAt: actionDate,
-                actionBy,
+                createdAt,
+                createdBy,
                 caseId,
                 subCaseId,
                 fields: [field],
-                newValue: updatedValue,
-                oldValue: origValue,
+                payload: { [field]: updatedValue },
                 owner: originalItem.attributes.owner,
               }),
             ];
@@ -296,8 +264,8 @@ const buildGenericCaseUserActions = <T extends OwnerEntity>({
  * Create a user action for an updated sub case.
  */
 export const buildSubCaseUserActions = (args: {
-  actionDate: string;
-  actionBy: User;
+  createdAt: string;
+  createdBy: User;
   originalSubCases: Array<SavedObject<SubCaseAttributes>>;
   updatedSubCases: Array<SavedObjectsUpdateResponse<SubCaseAttributes>>;
 }): UserActionItem[] => {
@@ -311,8 +279,8 @@ export const buildSubCaseUserActions = (args: {
   };
 
   return buildGenericCaseUserActions({
-    actionDate: args.actionDate,
-    actionBy: args.actionBy,
+    createdAt: args.createdAt,
+    createdBy: args.createdBy,
     originalCases: args.originalSubCases,
     updatedCases: args.updatedSubCases,
     allowedFields: ['status'],
@@ -324,8 +292,8 @@ export const buildSubCaseUserActions = (args: {
  * Create a user action for an updated case.
  */
 export const buildCaseUserActions = (args: {
-  actionDate: string;
-  actionBy: User;
+  createdAt: string;
+  createdBy: User;
   originalCases: Array<SavedObject<CaseAttributes>>;
   updatedCases: Array<SavedObjectsUpdateResponse<CaseAttributes>>;
 }): UserActionItem[] => {

@@ -19,7 +19,6 @@ import {
   CasesConfigureAttributes,
   CaseAttributes,
 } from '../../../common';
-import { buildCaseUserActionItem } from '../../services/user_actions/helpers';
 
 import { createIncident, getCommentContextFromAttributes } from './utils';
 import { createCaseError, flattenCaseSavedObject, getAlertInfoFromComments } from '../../common';
@@ -217,36 +216,25 @@ export const push = async (
             version: comment.version,
           })),
       }),
-
-      userActionService.bulkCreate({
-        unsecuredSavedObjectsClient,
-        actions: [
-          ...(shouldMarkAsClosed
-            ? [
-                buildCaseUserActionItem({
-                  action: 'update',
-                  actionAt: pushedDate,
-                  actionBy: { username, full_name, email },
-                  caseId,
-                  fields: ['status'],
-                  newValue: CaseStatuses.closed,
-                  oldValue: myCase.attributes.status,
-                  owner: myCase.attributes.owner,
-                }),
-              ]
-            : []),
-          buildCaseUserActionItem({
-            action: 'push-to-service',
-            actionAt: pushedDate,
-            actionBy: { username, full_name, email },
-            caseId,
-            fields: ['pushed'],
-            newValue: externalService,
-            owner: myCase.attributes.owner,
-          }),
-        ],
-      }),
     ]);
+
+    if (shouldMarkAsClosed) {
+      await userActionService.createStatusUpdateUserAction({
+        unsecuredSavedObjectsClient,
+        status: CaseStatuses.closed,
+        user,
+        caseId,
+        owner: myCase.attributes.owner,
+      });
+    }
+
+    await userActionService.createPushToServiceUserAction({
+      unsecuredSavedObjectsClient,
+      externalService,
+      user,
+      caseId,
+      owner: myCase.attributes.owner,
+    });
 
     /* End of update case with push information */
 

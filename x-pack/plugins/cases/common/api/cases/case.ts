@@ -339,6 +339,7 @@ export type CasesPatchRequest = rt.TypeOf<typeof CasesPatchRequestRt>;
 export type CaseFullExternalService = rt.TypeOf<typeof CaseFullExternalServiceRt>;
 export type CaseSettings = rt.TypeOf<typeof SettingsRt>;
 export type ExternalServiceResponse = rt.TypeOf<typeof ExternalServiceResponseRt>;
+export type CaseExternalServiceBasic = rt.TypeOf<typeof CaseExternalServiceBasicRt>;
 
 export type AllTagsFindRequest = rt.TypeOf<typeof AllTagsFindRequestRt>;
 export type AllReportersFindRequest = AllTagsFindRequest;

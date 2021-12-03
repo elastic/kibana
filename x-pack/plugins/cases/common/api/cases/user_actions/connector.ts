@@ -10,6 +10,7 @@ import { ConnectorTypeFieldsRt } from '../../connectors';
 import { Fields, Actions } from './common';
 
 export const ConnectorUserActionPayloadRt = rt.type({
+  // TODO: Make it work with name, id
   connector: ConnectorTypeFieldsRt,
 });
 

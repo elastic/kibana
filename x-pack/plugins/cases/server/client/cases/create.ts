@@ -20,11 +20,9 @@ import {
   CasesClientPostRequestRt,
   CasePostRequest,
   CaseType,
-  OWNER_FIELD,
   ENABLE_CASE_CONNECTOR,
   MAX_TITLE_LENGTH,
 } from '../../../common';
-import { buildCaseUserActionItem } from '../../services/user_actions/helpers';
 
 import { Operations } from '../../authorization';
 import { createCaseError, flattenCaseSavedObject, transformNewCase } from '../../common';
@@ -97,19 +95,12 @@ export const create = async (
       id: savedObjectID,
     });
 
-    await userActionService.bulkCreate({
+    await userActionService.createCaseCreationUserAction({
       unsecuredSavedObjectsClient,
-      actions: [
-        buildCaseUserActionItem({
-          action: 'create',
-          actionAt: createdDate,
-          actionBy: { username, full_name, email },
-          caseId: newCase.id,
-          fields: ['description', 'status', 'tags', 'title', 'connector', 'settings', OWNER_FIELD],
-          newValue: query,
-          owner: newCase.attributes.owner,
-        }),
-      ],
+      caseId: newCase.id,
+      user,
+      payload: query,
+      owner: newCase.attributes.owner,
     });
 
     return CaseResponseRt.encode(

@@ -34,10 +34,7 @@ import {
   throwErrors,
   User,
 } from '../../../common';
-import {
-  buildCaseUserActionItem,
-  buildCommentUserActionItem,
-} from '../../services/user_actions/helpers';
+import { buildCommentUserActionItem } from '../../services/user_actions/helpers';
 
 import { AttachmentService, CasesService, CaseUserActionService } from '../../services';
 import {
@@ -96,21 +93,16 @@ async function getSubCase({
     caseId,
     createdBy: user,
   });
-  await userActionService.bulkCreate({
+
+  await userActionService.createSubCaseCreationUserAction({
     unsecuredSavedObjectsClient,
-    actions: [
-      buildCaseUserActionItem({
-        action: 'create',
-        actionAt: createdAt,
-        actionBy: user,
-        caseId,
-        subCaseId: newSubCase.id,
-        fields: ['status', 'sub_case'],
-        newValue: { status: newSubCase.attributes.status },
-        owner: newSubCase.attributes.owner,
-      }),
-    ],
+    caseId,
+    subCaseId: newSubCase.id,
+    status: newSubCase.attributes.status,
+    owner: newSubCase.attributes.owner,
+    user,
   });
+
   return newSubCase;
 }
 
@@ -214,13 +206,13 @@ const addGeneratedAlerts = async (
       actions: [
         buildCommentUserActionItem({
           action: 'create',
-          actionAt: createdDate,
-          actionBy: { ...userDetails },
+          createdAt: createdDate,
+          createdBy: { ...userDetails },
           caseId: updatedCase.caseId,
           subCaseId: updatedCase.subCaseId,
           commentId: newComment.id,
           fields: ['comment'],
-          newValue: query,
+          payload: { comment: query },
           owner: newComment.attributes.owner,
         }),
       ],
@@ -402,13 +394,13 @@ export const addComment = async (
       actions: [
         buildCommentUserActionItem({
           action: 'create',
-          actionAt: createdDate,
-          actionBy: { username, full_name, email },
+          createdAt: createdDate,
+          createdBy: { username, full_name, email },
           caseId: updatedCase.caseId,
           subCaseId: updatedCase.subCaseId,
           commentId: newComment.id,
           fields: ['comment'],
-          newValue: query,
+          payload: { comment: query },
           owner: newComment.attributes.owner,
         }),
       ],

@@ -28,7 +28,6 @@ import {
   flattenSubCaseSavedObject,
   transformSubCases,
 } from '../../common';
-import { buildCaseUserActionItem } from '../../services/user_actions/helpers';
 import { constructQueryOptions } from '../utils';
 import { defaultPage, defaultPerPage } from '../../routes/api';
 import { update } from './update';
@@ -139,23 +138,16 @@ async function deleteSubCase(ids: string[], clientArgs: CasesClientArgs): Promis
       concurrency: MAX_CONCURRENT_SEARCHES,
     });
 
-    const deleteDate = new Date().toISOString();
-
-    await userActionService.bulkCreate({
+    await userActionService.bulkCreateSubCaseDeletionUserAction({
       unsecuredSavedObjectsClient,
-      actions: subCases.saved_objects.map((subCase) =>
-        buildCaseUserActionItem({
-          action: 'delete',
-          actionAt: deleteDate,
-          actionBy: user,
-          // if for some reason the sub case didn't have a reference to its parent, we'll still log a user action
-          // but we won't have the case ID
-          caseId: subCaseIDToParentID.get(subCase.id) ?? '',
-          subCaseId: subCase.id,
-          fields: ['sub_case', 'comment', 'status'],
-          owner: subCase.attributes.owner,
-        })
-      ),
+      cases: subCases.saved_objects.map((subCase) => ({
+        // if for some reason the sub case didn't have a reference to its parent, we'll still log a user action
+        // but we won't have the case ID
+        id: subCaseIDToParentID.get(subCase.id) ?? '',
+        subCaseId: subCase.id,
+        owner: subCase.attributes.owner,
+      })),
+      user,
     });
   } catch (error) {
     throw createCaseError({
