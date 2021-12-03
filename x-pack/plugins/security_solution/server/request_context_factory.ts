@@ -17,7 +17,18 @@ import {
   SecuritySolutionPluginCoreSetupDependencies,
   SecuritySolutionPluginSetupDependencies,
 } from './plugin_contract';
-import { SecuritySolutionApiRequestHandlerContext } from './types';
+import {
+  SecuritySolutionApiRequestHandlerContext,
+  SecuritySolutionRequestHandlerContext,
+} from './types';
+import { Immutable } from '../common/endpoint/types';
+import { EndpointAuthz } from '../common/endpoint/types/authz';
+import {
+  calculateEndpointAuthz,
+  getEndpointAuthzInitialState,
+} from '../common/endpoint/service/authz';
+import { licenseService } from './lib/license';
+import { FleetAuthz } from '../../fleet/common';
 
 export interface IRequestContextFactory {
   create(
@@ -41,7 +52,7 @@ export class RequestContextFactory implements IRequestContextFactory {
   }
 
   public async create(
-    context: RequestHandlerContext,
+    context: Omit<SecuritySolutionRequestHandlerContext, 'securitySolution'>,
     request: KibanaRequest
   ): Promise<SecuritySolutionApiRequestHandlerContext> {
     const { options, appClientFactory } = this;
@@ -55,8 +66,30 @@ export class RequestContextFactory implements IRequestContextFactory {
       config,
     });
 
+    let endpointAuthz: Immutable<EndpointAuthz>;
+    let fleetAuthz: FleetAuthz;
+
+    // If Fleet is enabled, then get its Authz
+    if (startPlugins.fleet) {
+      fleetAuthz = context.fleet?.authz ?? (await startPlugins.fleet?.authz.fromRequest(request));
+    }
+
     return {
       core: context.core,
+
+      get endpointAuthz(): Immutable<EndpointAuthz> {
+        // Lazy getter of endpoint Authz. No point in defining it if it is never used.
+        if (!endpointAuthz) {
+          // If no fleet (fleet plugin is optional in the configuration), then just turn off all permissions
+          if (!startPlugins.fleet) {
+            endpointAuthz = getEndpointAuthzInitialState();
+          } else {
+            endpointAuthz = calculateEndpointAuthz(licenseService, fleetAuthz);
+          }
+        }
+
+        return endpointAuthz;
+      },
 
       getConfig: () => config,
 
