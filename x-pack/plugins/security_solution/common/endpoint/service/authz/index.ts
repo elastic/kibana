@@ -5,7 +5,5 @@
  * 2.0.
  */
 
-import { useBasePath } from '../../../common/lib/kibana';
-
-export const useIntegrationsPageLink = () =>
-  `${useBasePath()}/app/integrations/browse?q=threat%20intelligence`;
+export { getEndpointAuthzInitialState, calculateEndpointAuthz } from './authz';
+export { getEndpointAuthzInitialStateMock } from './mocks';

@@ -48,6 +48,7 @@ import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data'
 import { legacyMetadataSearchResponseMock } from '../metadata/support/test_support';
 import { AGENT_ACTIONS_INDEX, ElasticsearchAssetType } from '../../../../../fleet/common';
 import { CasesClientMock } from '../../../../../cases/server/client/mocks';
+import { EndpointAuthz } from '../../../../common/endpoint/types/authz';
 
 interface CallRouteInterface {
   body?: HostIsolationRequestBody;
@@ -55,6 +56,7 @@ interface CallRouteInterface {
   searchResponse?: HostMetadata;
   mockUser?: any;
   license?: License;
+  authz?: Partial<EndpointAuthz>;
 }
 
 const Platinum = licenseMock.createLicense({ license: { type: 'platinum', mode: 'platinum' } });
@@ -182,7 +184,7 @@ describe('Host Isolation', () => {
       // it returns the requestContext mock used in the call, to assert internal calls (e.g. the indexed document)
       callRoute = async (
         routePrefix: string,
-        { body, idxResponse, searchResponse, mockUser, license }: CallRouteInterface,
+        { body, idxResponse, searchResponse, mockUser, license, authz = {} }: CallRouteInterface,
         indexExists?: { endpointDsExists: boolean }
       ): Promise<jest.Mocked<SecuritySolutionRequestHandlerContext>> => {
         const asUser = mockUser ? mockUser : superUser;
@@ -191,6 +193,12 @@ describe('Host Isolation', () => {
         );
 
         const ctx = createRouteHandlerContext(mockScopedClient, mockSavedObjectClient);
+
+        ctx.securitySolution.endpointAuthz = {
+          ...ctx.securitySolution.endpointAuthz,
+          ...authz,
+        };
+
         // mock _index_template
         ctx.core.elasticsearch.client.asInternalUser.indices.existsIndexTemplate = jest
           .fn()
@@ -206,6 +214,7 @@ describe('Host Isolation', () => {
               statusCode: 404,
             });
           });
+
         const withIdxResp = idxResponse ? idxResponse : { statusCode: 201 };
         const mockIndexResponse = jest.fn().mockImplementation(() => Promise.resolve(withIdxResp));
         const mockSearchResponse = jest
@@ -213,19 +222,25 @@ describe('Host Isolation', () => {
           .mockImplementation(() =>
             Promise.resolve({ body: legacyMetadataSearchResponseMock(searchResponse) })
           );
+
         if (indexExists) {
           ctx.core.elasticsearch.client.asInternalUser.index = mockIndexResponse;
         }
+
         ctx.core.elasticsearch.client.asCurrentUser.index = mockIndexResponse;
         ctx.core.elasticsearch.client.asCurrentUser.search = mockSearchResponse;
+
         const withLicense = license ? license : Platinum;
         licenseEmitter.next(withLicense);
+
         const mockRequest = httpServerMock.createKibanaRequest({ body });
         const [, routeHandler]: [
           RouteConfig<any, any, any, any>,
           RequestHandler<any, any, any, any>
         ] = routerMock.post.mock.calls.find(([{ path }]) => path.startsWith(routePrefix))!;
+
         await routeHandler(ctx, mockRequest, mockResponse);
+
         return ctx as unknown as jest.Mocked<SecuritySolutionRequestHandlerContext>;
       };
     });
@@ -424,14 +439,17 @@ describe('Host Isolation', () => {
         });
         expect(mockResponse.ok).toBeCalled();
       });
-      it('prohibits license levels less than platinum from isolating hosts', async () => {
-        licenseEmitter.next(Gold);
+
+      it('prohibits isolating hosts if no authz for it', async () => {
         await callRoute(ISOLATE_HOST_ROUTE, {
           body: { endpoint_ids: ['XYZ'] },
+          authz: { canIsolateHost: false },
           license: Gold,
         });
+
         expect(mockResponse.forbidden).toBeCalled();
       });
+
       it('allows any license level to unisolate', async () => {
         licenseEmitter.next(Gold);
         await callRoute(UNISOLATE_HOST_ROUTE, {
@@ -442,37 +460,33 @@ describe('Host Isolation', () => {
       });
     });
 
-    describe('User Level', () => {
-      it('allows superuser to perform isolation', async () => {
-        const superU = { username: 'foo', roles: ['superuser'] };
+    describe('User Authorization Level', () => {
+      it('allows user to perform isolation when canIsolateHost is true', async () => {
         await callRoute(ISOLATE_HOST_ROUTE, {
           body: { endpoint_ids: ['XYZ'] },
-          mockUser: superU,
-        });
-        expect(mockResponse.ok).toBeCalled();
-      });
-      it('allows superuser to perform unisolation', async () => {
-        const superU = { username: 'foo', roles: ['superuser'] };
-        await callRoute(UNISOLATE_HOST_ROUTE, {
-          body: { endpoint_ids: ['XYZ'] },
-          mockUser: superU,
         });
         expect(mockResponse.ok).toBeCalled();
       });
 
-      it('prohibits non-admin user from performing isolation', async () => {
-        const superU = { username: 'foo', roles: ['user'] };
+      it('allows user to perform unisolation when canUnIsolateHost is true', async () => {
+        await callRoute(UNISOLATE_HOST_ROUTE, {
+          body: { endpoint_ids: ['XYZ'] },
+        });
+        expect(mockResponse.ok).toBeCalled();
+      });
+
+      it('prohibits user from performing isolation if canIsolateHost is false', async () => {
         await callRoute(ISOLATE_HOST_ROUTE, {
           body: { endpoint_ids: ['XYZ'] },
-          mockUser: superU,
+          authz: { canIsolateHost: false },
         });
         expect(mockResponse.forbidden).toBeCalled();
       });
-      it('prohibits non-admin user from performing unisolation', async () => {
-        const superU = { username: 'foo', roles: ['user'] };
+
+      it('prohibits user from performing un-isolation if canUnIsolateHost is false', async () => {
         await callRoute(UNISOLATE_HOST_ROUTE, {
           body: { endpoint_ids: ['XYZ'] },
-          mockUser: superU,
+          authz: { canUnIsolateHost: false },
         });
         expect(mockResponse.forbidden).toBeCalled();
       });
