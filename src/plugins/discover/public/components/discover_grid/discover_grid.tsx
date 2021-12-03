@@ -22,7 +22,7 @@ import {
   EuiIcon,
 } from '@elastic/eui';
 import { flattenHit, IndexPattern } from '../../../../data/common';
-import { DocViewFilterFn, ElasticSearchHit } from '../../services/doc_views/doc_views_types';
+import { DocViewFilterFn } from '../../services/doc_views/doc_views_types';
 import { getSchemaDetectors } from './discover_grid_schema';
 import { DiscoverGridFlyout } from './discover_grid_flyout';
 import { DiscoverGridContext } from './discover_grid_context';
@@ -49,6 +49,7 @@ import {
 import { DiscoverGridDocumentToolbarBtn, getDocId } from './discover_grid_document_selection';
 import { SortPairArr } from '../doc_table/lib/get_sort';
 import { getFieldsToShow } from '../../utils/get_fields_to_show';
+import { ElasticSearchHit } from '../../types';
 
 interface SortObj {
   id: string;
@@ -116,7 +117,7 @@ export interface DiscoverGridProps {
   /**
    * Function to set the expanded document, which is displayed in a flyout
    */
-  setExpandedDoc: (doc: ElasticSearchHit | undefined) => void;
+  setExpandedDoc: (doc?: ElasticSearchHit) => void;
   /**
    * Grid display settings persisted in Elasticsearch (e.g. column width)
    */

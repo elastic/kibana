@@ -6,9 +6,6 @@
  * Side Public License, v 1.
  */
 
-// TODO: https://github.com/elastic/kibana/issues/110893
-/* eslint-disable @kbn/eslint/no_export_all */
-
 import { ExpressionErrorPlugin } from './plugin';
 
 export type { ExpressionErrorPluginSetup, ExpressionErrorPluginStart } from './plugin';
@@ -17,5 +14,11 @@ export function plugin() {
   return new ExpressionErrorPlugin();
 }
 
-export * from './expression_renderers';
+export {
+  getErrorRenderer,
+  getDebugRenderer,
+  errorRendererFactory,
+  debugRendererFactory,
+} from './expression_renderers';
+
 export { LazyDebugComponent, LazyErrorComponent } from './components';

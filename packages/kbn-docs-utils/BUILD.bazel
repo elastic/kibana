@@ -36,7 +36,7 @@ RUNTIME_DEPS = [
 ]
 
 TYPES_DEPS = [
-  "//packages/kbn-config",
+  "//packages/kbn-config:npm_module_types",
   "//packages/kbn-dev-utils",
   "//packages/kbn-utils",
   "@npm//ts-morph",
