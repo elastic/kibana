@@ -4,9 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { CoreTheme } from 'kibana/public';
-import { Observable } from 'rxjs';
 
-export const defaultTheme$: Observable<CoreTheme> = new Observable((subscriber) =>
-  subscriber.next({ darkMode: false })
-);
+export * from './config_key';
+export * from './monitor_configs';
+export * from './monitor_meta_data';
+export * from './monitor_types';
