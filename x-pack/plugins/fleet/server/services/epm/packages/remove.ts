@@ -27,7 +27,7 @@ import { deletePackageCache } from '../archive';
 import { deleteIlms } from '../elasticsearch/datastream_ilm/remove';
 import { removeArchiveEntries } from '../archive/storage';
 
-import { getInstallation, savedObjectTypes } from './index';
+import { getInstallation, kibanaSavedObjectTypes } from './index';
 
 export async function removeInstallation(options: {
   savedObjectsClient: SavedObjectsClientContract;
@@ -191,14 +191,14 @@ async function deleteComponentTemplate(esClient: ElasticsearchClient, name: stri
 
 export async function deleteKibanaSavedObjectsAssets(
   savedObjectsClient: SavedObjectsClientContract,
-  installedRefs: AssetReference[]
+  installedRefs: KibanaAssetReference[]
 ) {
   if (!installedRefs.length) return;
 
   const logger = appContextService.getLogger();
   const assetsToDelete = installedRefs
-    .filter(({ type }) => savedObjectTypes.includes(type as AssetType))
-    .map(({ id, type }) => ({ id, type } as KibanaAssetReference));
+    .filter(({ type }) => kibanaSavedObjectTypes.includes(type))
+    .map(({ id, type }) => ({ id, type }));
 
   try {
     await deleteKibanaAssets(assetsToDelete, savedObjectsClient);
