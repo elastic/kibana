@@ -75,9 +75,7 @@ export function suggestions({
 }: SuggestionRequest<PieVisualizationState>): Array<
   VisualizationSuggestion<PieVisualizationState>
 > {
-  const [groups, metrics] = partition(table.columns, (col) => col.operation.isBucketed);
-
-  console.log('empty');
+   console.log('empty');
   const emptyConfiguration =
     state?.shape &&
     isPartitionShape(state.shape) &&
@@ -87,6 +85,8 @@ export function suggestions({
   if (shouldReject({ table, state, keptLayerIds, emptyConfiguration })) {
     return [];
   }
+  const [groups, metrics] = partition(table.columns, (col) => col.operation.isBucketed);
+
   if (metrics.length > 1 || groups.length > maximumGroupLength) {
     return [];
   }
