@@ -142,7 +142,9 @@ export const GaugeComponent: FC<GaugeRenderProps> = ({
   const table = Object.values(data.tables)[0];
   const metricColumn = table.columns.find((col) => col.id === metricAccessor);
 
-  const chartData = table.rows.filter((v) => typeof v[metricAccessor!] === 'number');
+  const chartData = table.rows.filter(
+    (v) => typeof v[metricAccessor!] === 'number' || Array.isArray(v[metricAccessor!])
+  );
   const row = chartData?.[0];
 
   const metricValue = getValueFromAccessor('metricAccessor', row, args);
@@ -186,17 +188,6 @@ export const GaugeComponent: FC<GaugeRenderProps> = ({
     );
   }
 
-  const metricFormatter = formatFactory(
-    metricColumn?.meta?.params?.id === 'number'
-      ? metricColumn?.meta?.params
-      : {
-          id: 'number',
-          params: {
-            pattern: `0,0.000`,
-          },
-        }
-  );
-
   const tickFormatter = formatFactory(
     metricColumn?.meta?.params?.params
       ? metricColumn?.meta?.params
@@ -207,13 +198,14 @@ export const GaugeComponent: FC<GaugeRenderProps> = ({
           },
         }
   );
-
   const colors = palette?.params?.colors ? normalizeColors(palette.params, min) : undefined;
   const bands: number[] = (palette?.params as CustomPaletteState)
     ? normalizeBands(args.palette?.params as CustomPaletteState, { min, max })
     : [min, max];
 
-  const target = Number(metricFormatter.convert(Math.min(Math.max(metricValue, min), max)));
+  // TODO: format in charts
+  const formattedActual = Math.round(Math.min(Math.max(metricValue, min), max) * 1000) / 1000;
+
   return (
     <Chart>
       <Settings debugState={window._echDebugStateFlag ?? false} theme={chartTheme} />
@@ -222,7 +214,7 @@ export const GaugeComponent: FC<GaugeRenderProps> = ({
         subtype={subtype}
         base={min}
         target={goal && goal >= min && goal <= max ? goal : undefined}
-        actual={target}
+        actual={formattedActual}
         tickValueFormatter={({ value: tickValue }) => tickFormatter.convert(tickValue)}
         bands={bands}
         ticks={getTicks(ticksPosition, [min, max], bands)}

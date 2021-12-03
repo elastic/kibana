@@ -31,6 +31,11 @@ export const getValueFromAccessor = (
     if (typeof value === 'number') {
       return value;
     }
+    if (value?.length) {
+      if (typeof value[value.length - 1] === 'number') {
+        return value[value.length - 1];
+      }
+    }
   }
 };
 
