@@ -24,17 +24,15 @@ function shouldReject({
   state,
 }: SuggestionRequest<PieVisualizationState>) {
   // usecase for dropping a field - state doesn't exist yet and subVisualizationId doesn't exist
-  const emptyConfiguration =
-    state?.shape &&
-    isPartitionShape(state.shape) &&
+  const isPartitionChart = state?.shape && isPartitionShape(state.shape)
+  const isEmptyPartition =
+    isPartitionLike &&
     state?.layers?.[0]?.metric === undefined &&
     state?.layers?.[0]?.groups.length === 0;
-  if (emptyConfiguration) {
-    return hasIntervalScale(table.columns);
-  }
+
   // Histograms are not good for pi. But we should not reject them on switching between partition charts.
   const shouldRejectIntervals =
-    state?.shape && isPartitionShape(state.shape) ? false : hasIntervalScale(table.columns);
+    isPartitionChart || isEmptyPartition ? false : hasIntervalScale(table.columns);
 
   return (
     keptLayerIds.length > 1 ||
