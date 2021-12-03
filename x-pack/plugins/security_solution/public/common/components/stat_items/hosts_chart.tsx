@@ -27,6 +27,7 @@ export const HostsChart = ({ title }: Props) => {
     <EuiFlexGroup>
       <EuiFlexItem style={{ height: 200 }}>
         <ExploratoryViewEmbeddable
+          appId="security"
           title={'Hosts'}
           reportConfigMap={reportConfigMap}
           dataTypesIndexPatterns={indexPatternList}
@@ -52,6 +53,48 @@ export const HostsChart = ({ title }: Props) => {
       </EuiFlexItem>
       <EuiFlexItem style={{ height: 200 }}>
         <ExploratoryViewEmbeddable
+          appId="security"
+          title={'User authentications'}
+          reportConfigMap={reportConfigMap}
+          dataTypesIndexPatterns={indexPatternList}
+          reportType="event_outcome"
+          attributes={[
+            {
+              dataType: 'security',
+              selectedMetricField: 'even_outcome_success',
+              name: 'security-series-1',
+              reportDefinitions: {
+                'host.name': ['ALL_VALUES'],
+              },
+              time: {
+                from: 'now-1h',
+                to: 'now',
+              },
+            },
+            {
+              dataType: 'security',
+              selectedMetricField: 'even_outcome_failure',
+              name: 'security-series-2',
+              reportDefinitions: {
+                'host.name': ['ALL_VALUES'],
+              },
+              time: {
+                from: 'now-1h',
+                to: 'now',
+              },
+            },
+          ]}
+          legendIsVisible={false}
+          axisTitlesVisibility={{
+            x: false,
+            yLeft: false,
+            yRight: false,
+          }}
+        />
+      </EuiFlexItem>
+      <EuiFlexItem style={{ height: 200 }}>
+        <ExploratoryViewEmbeddable
+          appId="security"
           title={'User authentications'}
           reportConfigMap={reportConfigMap}
           dataTypesIndexPatterns={indexPatternList}
@@ -86,19 +129,31 @@ export const HostsChart = ({ title }: Props) => {
       </EuiFlexItem>
       <EuiFlexItem style={{ height: 200 }}>
         <ExploratoryViewEmbeddable
-          title={'User authentications'}
+          appId="security"
+          title={'Unique IPs'}
           reportConfigMap={reportConfigMap}
           dataTypesIndexPatterns={indexPatternList}
-          reportType="event_outcome"
+          reportType="unique_ip"
           attributes={[
             {
               reportDefinitions: {
-                even_outcome: ['ALL_VALUES'],
+                unique_ip: ['ALL_VALUES'],
               },
-              name: 'even_outcome',
+              name: 'Unique source',
               dataType: 'security',
-              selectedMetricField: 'even_outcome',
+              selectedMetricField: 'source.ip',
               time: { from: 'now-24h', to: 'now' },
+              color: '#D36086',
+            },
+            {
+              reportDefinitions: {
+                unique_ip: ['ALL_VALUES'],
+              },
+              name: 'Unique Destination',
+              dataType: 'security',
+              selectedMetricField: 'destination.ip',
+              time: { from: 'now-24h', to: 'now' },
+              color: '#9170B8',
             },
           ]}
           legendIsVisible={false}
@@ -111,6 +166,7 @@ export const HostsChart = ({ title }: Props) => {
       </EuiFlexItem>
       <EuiFlexItem style={{ height: 200 }}>
         <ExploratoryViewEmbeddable
+          appId="security"
           title={'Unique IPs'}
           reportConfigMap={reportConfigMap}
           dataTypesIndexPatterns={indexPatternList}
@@ -132,31 +188,6 @@ export const HostsChart = ({ title }: Props) => {
               name: 'destination.ip',
               dataType: 'security',
               selectedMetricField: 'destination.ip',
-              time: { from: 'now-24h', to: 'now' },
-            },
-          ]}
-          legendIsVisible={false}
-          axisTitlesVisibility={{
-            x: false,
-            yLeft: false,
-            yRight: false,
-          }}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem style={{ height: 200 }}>
-        <ExploratoryViewEmbeddable
-          title={'Unique IPs'}
-          reportConfigMap={reportConfigMap}
-          dataTypesIndexPatterns={indexPatternList}
-          reportType="unique_ip"
-          attributes={[
-            {
-              reportDefinitions: {
-                unique_ip: ['ALL_VALUES'],
-              },
-              name: 'unique_ip',
-              dataType: 'security',
-              selectedMetricField: 'unique_ip',
               time: { from: 'now-24h', to: 'now' },
             },
           ]}

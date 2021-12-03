@@ -6,9 +6,9 @@
  */
 
 import React, { useState } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle } from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle } from '@elastic/eui';
 import styled from 'styled-components';
-import { AllSeries, useTheme } from '../../../..';
+import { AllSeries, createExploratoryViewUrl, useTheme } from '../../../..';
 import { LayerConfig, LensAttributes } from '../configurations/lens_attributes';
 import { AppDataType, ReportViewType } from '../types';
 import { getLayerConfigs } from '../hooks/use_lens_attributes';
@@ -17,6 +17,7 @@ import { OperationTypeComponent } from '../series_editor/columns/operation_type_
 import { IndexPatternState } from '../hooks/use_app_index_pattern';
 import { ReportConfigMap } from '../contexts/exploatory_view_config';
 import { obsvReportConfigMap } from '../obsv_exploratory_view';
+import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 
 export interface ExploratoryEmbeddableProps {
   reportType: ReportViewType;
@@ -24,10 +25,12 @@ export interface ExploratoryEmbeddableProps {
   appendTitle?: JSX.Element;
   title: string | JSX.Element;
   showCalculationMethod?: boolean;
+  showExploreButton?: boolean;
   axisTitlesVisibility?: XYState['axisTitlesVisibilitySettings'];
   legendIsVisible?: boolean;
   dataTypesIndexPatterns?: Record<AppDataType, string>;
   reportConfigMap?: ReportConfigMap;
+  appId?: 'security' | 'observability';
 }
 
 export interface ExploratoryEmbeddableComponentProps extends ExploratoryEmbeddableProps {
@@ -37,6 +40,7 @@ export interface ExploratoryEmbeddableComponentProps extends ExploratoryEmbeddab
 
 // eslint-disable-next-line import/no-default-export
 export default function Embeddable({
+  appId,
   reportType,
   attributes,
   title,
@@ -47,8 +51,11 @@ export default function Embeddable({
   legendIsVisible,
   reportConfigMap = {},
   showCalculationMethod = false,
+  showExploreButton = true,
 }: ExploratoryEmbeddableComponentProps) {
   const LensComponent = lens?.EmbeddableComponent;
+
+  const { http } = useKibana().services;
 
   const series = Object.entries(attributes)[0][1];
 
@@ -81,6 +88,12 @@ export default function Embeddable({
     (attributesJSON.state.visualization as XYState).legend.isVisible = legendIsVisible;
   }
 
+  const href = createExploratoryViewUrl(
+    { reportType, allSeries: attributes },
+    http?.basePath.get(),
+    appId
+  );
+
   return (
     <Wrapper>
       <EuiFlexGroup alignItems="center">
@@ -99,19 +112,40 @@ export default function Embeddable({
             />
           </EuiFlexItem>
         )}
+        {showExploreButton && (
+          <EuiFlexItem grow={false}>
+            <EuiButtonIcon href={href} size="s" iconType="visBarVerticalStacked" />
+          </EuiFlexItem>
+        )}
         {appendTitle}
       </EuiFlexGroup>
-      <LensComponent
-        id="exploratoryView"
-        style={{ height: '100%' }}
-        timeRange={series?.time}
-        attributes={attributesJSON}
-        onBrushEnd={({ range }) => {}}
-        withActions={true}
-      />
+      <LensWrapper>
+        <LensComponent
+          id="exploratoryView"
+          style={{ height: '100%' }}
+          timeRange={series?.time}
+          attributes={attributesJSON}
+          onBrushEnd={({ range }) => {}}
+          withActions={true}
+        />
+      </LensWrapper>
     </Wrapper>
   );
 }
+
+const LensWrapper = styled.div`
+  .embPanel__optionsMenuPopover {
+    visibility: collapse;
+  }
+  &&&:hover {
+    .embPanel__optionsMenuPopover {
+      visibility: visible;
+    }
+  }
+  .embPanel__title {
+    display: none;
+  }
+`;
 
 const Wrapper = styled.div`
   height: 100%;

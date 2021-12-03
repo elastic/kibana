@@ -37,6 +37,11 @@ export interface ColumnFilter {
   query: string;
 }
 
+export interface ParamFilter {
+  label: string;
+  input: ColumnFilter;
+}
+
 export interface MetricOption {
   id: string;
   field?: string;
@@ -44,11 +49,12 @@ export interface MetricOption {
   description?: string;
   columnType?: 'range' | 'operation' | 'FILTER_RECORDS' | 'TERMS_COLUMN' | 'unique_count';
   columnFilters?: ColumnFilter[];
+  paramFilters?: ParamFilter[];
   timeScale?: string;
 }
 
 export interface SeriesConfig {
-  reportType: ReportViewType;
+  reportType: ReportViewType | string;
   xAxisColumn: Partial<LastValueIndexPatternColumn> | Partial<DateHistogramIndexPatternColumn>;
   yAxisColumns: Array<Partial<FieldBasedIndexPatternColumn>>;
   breakdownFields: string[];

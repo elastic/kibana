@@ -11,6 +11,8 @@ import {
   ReportTypes,
   FILTER_RECORDS,
   REPORT_METRIC_FIELD,
+  RECORDS_FIELD,
+  UNIQUE_COUNT_COLUMN,
 } from '../../../../observability/public';
 
 export function getSecurityKPIConfig(_config: ConfigProps): SeriesConfig {
@@ -68,7 +70,7 @@ export function getSecurityKPIConfig(_config: ConfigProps): SeriesConfig {
         columnFilters: [
           {
             language: 'kuery',
-            query: `event.outcome: success`,
+            query: `event.outcome: success and event.category: "authentication"`,
           },
         ],
       },
@@ -79,7 +81,7 @@ export function getSecurityKPIConfig(_config: ConfigProps): SeriesConfig {
         columnFilters: [
           {
             language: 'kuery',
-            query: `event.outcome: failure`,
+            query: `event.outcome: failure and event.category: "authentication"`,
           },
         ],
       },
@@ -98,23 +100,19 @@ export function getSecurityKPIConfig(_config: ConfigProps): SeriesConfig {
   };
 }
 export const USE_BREAK_DOWN_COLUMN = 'USE_BREAK_DOWN_COLUMN';
-const statusPallete = euiPaletteForStatus(3);
+const statusPallet = euiPaletteForStatus(2);
+
 export function getSecurityEventOutcomeKPIConfig(_config: ConfigProps): SeriesConfig {
   return {
-    defaultSeriesType: 'bar_horizontal_percentage_stacked',
+    defaultSeriesType: 'bar_horizontal_stacked',
     reportType: 'event_outcome',
-    seriesTypes: ['bar_horizontal_percentage_stacked'],
+    seriesTypes: ['bar_horizontal_stacked'],
     xAxisColumn: {
-      sourceField: USE_BREAK_DOWN_COLUMN,
+      sourceField: REPORT_METRIC_FIELD,
     },
     yAxisColumns: [
       {
         sourceField: REPORT_METRIC_FIELD,
-        label: 'success',
-      },
-      {
-        sourceField: REPORT_METRIC_FIELD,
-        label: 'failure',
       },
     ],
     hasOperationType: false,
@@ -125,14 +123,27 @@ export function getSecurityEventOutcomeKPIConfig(_config: ConfigProps): SeriesCo
     definitionFields: ['host.name'],
     metricOptions: [
       {
-        id: 'even_outcome',
-        label: 'event outcome',
+        id: 'even_outcome_success',
+        label: 'authenticationsSuccess',
         columnType: FILTER_RECORDS,
+        paramFilters: [
+          { label: 'Succ', input: { query: 'event.outcome: success', language: 'kuery' } },
+        ],
         columnFilters: [
           {
             language: 'kuery',
             query: `event.outcome: success`,
           },
+        ],
+      },
+      {
+        id: 'even_outcome_failure',
+        label: 'authenticationsFailure',
+        columnType: FILTER_RECORDS,
+        paramFilters: [
+          { label: 'Fail', input: { query: 'event.outcome: failure', language: 'kuery' } },
+        ],
+        columnFilters: [
           {
             language: 'kuery',
             query: `event.outcome: failure`,
@@ -141,58 +152,52 @@ export function getSecurityEventOutcomeKPIConfig(_config: ConfigProps): SeriesCo
       },
     ],
     yConfig: [
-      { color: statusPallete[0], forAccessor: 'y-axis-column' },
-      { color: statusPallete[1], forAccessor: 'y-axis-column-1' },
-      { color: statusPallete[2], forAccessor: 'y-axis-column-2' },
+      { color: statusPallet[0], forAccessor: 'y-axis-column' },
+      { color: statusPallet[1], forAccessor: 'y-axis-column-1' },
     ],
+    query: {
+      language: 'kuery',
+      query:
+        '(event.outcome: "success" or event.outcome : "failure") and event.category: "authentication"',
+    },
   };
 }
 
-export function getSecurityUniqueIpscomeKPIConfig(_config: ConfigProps): SeriesConfig {
+export function getSecurityUniqueIpsKPIConfig(_config: ConfigProps): SeriesConfig {
   return {
-    defaultSeriesType: 'bar_horizontal_percentage_stacked',
+    defaultSeriesType: 'bar_horizontal_stacked',
     reportType: 'unique_ip',
-    seriesTypes: ['bar_horizontal_percentage_stacked'],
+    seriesTypes: ['bar_horizontal_stacked'],
     xAxisColumn: {
-      sourceField: USE_BREAK_DOWN_COLUMN,
+      sourceField: REPORT_METRIC_FIELD,
     },
     yAxisColumns: [
       {
         sourceField: REPORT_METRIC_FIELD,
-        label: 'src',
-      },
-      {
-        sourceField: REPORT_METRIC_FIELD,
-        label: 'dest',
+        operationType: 'unique_count',
       },
     ],
     hasOperationType: false,
     filterFields: [],
-    breakdownFields: ['source.ip', 'destination.ip'],
+    breakdownFields: [],
     baseFilters: [],
     labels: { 'host.name': 'Hosts', 'url.full': 'URL', 'agent.type': 'Agent type' },
     definitionFields: ['host.name'],
     metricOptions: [
       {
-        id: 'unique_ip',
-        label: 'unique ip',
-        columnType: FILTER_RECORDS,
-        columnFilters: [
-          {
-            language: 'kuery',
-            query: `source.ip: *`,
-          },
-          {
-            language: 'kuery',
-            query: `destination.ip: *`,
-          },
+        id: 'source_ip',
+        field: 'source.ip',
+        label: 'Unique source IPs',
+        paramFilters: [{ label: 'Src', input: { query: 'source.ip : *', language: 'kuery' } }],
+      },
+      {
+        id: 'destination_ip',
+        field: 'destination.ip',
+        label: 'Unique destination IPs',
+        paramFilters: [
+          { label: 'Dest', input: { query: 'destination.ip : *', language: 'kuery' } },
         ],
       },
-    ],
-    yConfig: [
-      { color: statusPallete[0], forAccessor: 'y-axis-column' },
-      { color: statusPallete[1], forAccessor: 'y-axis-column-1' },
-      { color: statusPallete[2], forAccessor: 'y-axis-column-2' },
     ],
   };
 }

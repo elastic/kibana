@@ -42,7 +42,7 @@ import {
   PERCENTILE_RANKS,
   ReportTypes,
 } from './constants';
-import { ColumnFilter, SeriesConfig, UrlFilter, URLReportDefinition } from '../types';
+import { ColumnFilter, ParamFilter, SeriesConfig, UrlFilter, URLReportDefinition } from '../types';
 import { PersistableFilter } from '../../../../../../lens/common';
 import { parseRelativeDate } from '../components/date_range_picker';
 import { getDistributionInPercentageColumn } from './lens_columns/overall_column';
@@ -63,6 +63,7 @@ function buildNumberColumn(sourceField: string) {
 export const parseCustomFieldName = (seriesConfig: SeriesConfig, selectedMetricField?: string) => {
   let columnType;
   let columnFilters;
+  let paramFilters;
   let timeScale;
   let columnLabel;
 
@@ -77,10 +78,18 @@ export const parseCustomFieldName = (seriesConfig: SeriesConfig, selectedMetricF
       columnFilters = currField?.columnFilters;
       timeScale = currField?.timeScale;
       columnLabel = currField?.label;
+      paramFilters = currField?.paramFilters;
     }
   }
 
-  return { fieldName: selectedMetricField!, columnType, columnFilters, timeScale, columnLabel };
+  return {
+    fieldName: selectedMetricField!,
+    columnType,
+    columnFilters,
+    paramFilters,
+    timeScale,
+    columnLabel,
+  };
 };
 
 export interface LayerConfig {
@@ -188,6 +197,19 @@ export class LensAttributes {
       label,
       seriesConfig,
     });
+  }
+
+  getFiltersColumn({ label, paramFilters }: { paramFilters: ParamFilter[]; label?: string }) {
+    return {
+      label: label ?? 'Filters',
+      dataType: 'string',
+      operationType: 'filters',
+      scale: 'ordinal',
+      isBucketed: true,
+      params: {
+        filters: paramFilters,
+      },
+    };
   }
 
   getNumberColumn({
@@ -371,6 +393,10 @@ export class LensAttributes {
   getXAxis(layerConfig: LayerConfig, layerId: string) {
     const { xAxisColumn } = layerConfig.seriesConfig;
 
+    if (!xAxisColumn.sourceField) {
+      return xAxisColumn;
+    }
+
     if (xAxisColumn?.sourceField === USE_BREAK_DOWN_COLUMN) {
       return this.getBreakdownColumn({
         layerId,
@@ -380,10 +406,17 @@ export class LensAttributes {
       });
     }
 
+    if (xAxisColumn.sourceField === REPORT_METRIC_FIELD) {
+      const { paramFilters } = this.getFieldMeta(xAxisColumn.sourceField, layerConfig);
+      if (paramFilters) {
+        return this.getFiltersColumn({ paramFilters });
+      }
+    }
+
     return this.getColumnBasedOnType({
       layerConfig,
       label: xAxisColumn.label,
-      sourceField: xAxisColumn.sourceField!,
+      sourceField: xAxisColumn.sourceField,
     });
   }
 
@@ -467,12 +500,18 @@ export class LensAttributes {
 
   getFieldMeta(sourceField: string, layerConfig: LayerConfig) {
     if (sourceField === REPORT_METRIC_FIELD) {
-      const { fieldName, columnType, columnLabel, columnFilters, timeScale } = parseCustomFieldName(
-        layerConfig.seriesConfig,
-        layerConfig.selectedMetricField
-      );
+      const { fieldName, columnType, columnLabel, columnFilters, timeScale, paramFilters } =
+        parseCustomFieldName(layerConfig.seriesConfig, layerConfig.selectedMetricField);
       const fieldMeta = layerConfig.indexPattern.getFieldByName(fieldName!);
-      return { fieldMeta, fieldName, columnType, columnLabel, columnFilters, timeScale };
+      return {
+        fieldMeta,
+        fieldName,
+        columnType,
+        columnLabel,
+        columnFilters,
+        timeScale,
+        paramFilters,
+      };
     } else {
       const fieldMeta = layerConfig.indexPattern.getFieldByName(sourceField);
 

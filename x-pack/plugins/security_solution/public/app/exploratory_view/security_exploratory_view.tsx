@@ -10,23 +10,19 @@ import { ExploratoryViewContextProvider, ExploratoryView } from '../../../../obs
 import {
   getSecurityKPIConfig,
   getSecurityEventOutcomeKPIConfig,
-  getSecurityUniqueIpscomeKPIConfig,
+  getSecurityUniqueIpsKPIConfig,
 } from './kpi_over_time_config';
 import { RenderAppProps } from '../types';
 import { getSecurityAlertsKPIConfig } from './alert_kpi_over_time_config';
 
 export const reportConfigMap = {
-  security: [
-    getSecurityKPIConfig,
-    getSecurityEventOutcomeKPIConfig,
-    getSecurityUniqueIpscomeKPIConfig,
-  ],
+  security: [getSecurityKPIConfig, getSecurityEventOutcomeKPIConfig, getSecurityUniqueIpsKPIConfig],
   securityAlerts: [getSecurityAlertsKPIConfig],
 };
 
 export const indexPatternList = {
   security:
-    'apm-*-transaction*,traces-apm*,auditbeat-*,endgame-*,filebeat-*,logs-*,packetbeat-*,winlogbeat-*,.alerts-security.alerts-default',
+    'apm-*-transaction*,traces-apm*,remote_cluster:auditbeat-*,endgame-*,remote_cluster:filebeat-*,remote_cluster:logs-*,packetbeat-*,winlogbeat-*,.alerts-security.alerts-default',
   securityAlerts: '.alerts-security.alerts-default-*',
 };
 
@@ -44,7 +40,7 @@ export const dataTypes: any = [
 export const reportTypes = [
   { reportType: 'kpi-over-time', label: 'KPI over time' },
   { reportType: 'event_outcome', label: 'bar' },
-  { reportType: 'unique_ip', label: 'bar' },
+  { reportType: 'unique_ip', label: 'Unique IPs' },
 ];
 
 export const SecurityExploratoryView = ({
