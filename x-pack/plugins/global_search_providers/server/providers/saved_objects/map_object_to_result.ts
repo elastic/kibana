@@ -56,6 +56,7 @@ export const mapToResult = (
     score: object.score,
     meta: {
       tagIds: object.references.filter((ref) => ref.type === 'tag').map(({ id }) => id),
+      displayName: type.management?.displayName ?? object.type,
     },
   };
 };

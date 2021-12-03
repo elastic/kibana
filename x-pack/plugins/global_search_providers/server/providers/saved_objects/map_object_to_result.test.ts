@@ -44,6 +44,7 @@ describe('mapToResult', () => {
     const type = createType({
       name: 'dashboard',
       management: {
+        displayName: 'dashDisplayName',
         defaultSearchField: 'title',
         icon: 'dashboardApp',
         getInAppUrl: (obj) => ({ path: `/dashboard/${obj.id}`, uiCapabilitiesPath: '' }),
@@ -68,7 +69,7 @@ describe('mapToResult', () => {
       url: '/dashboard/dash1',
       icon: 'dashboardApp',
       score: 42,
-      meta: { tagIds: [] },
+      meta: { tagIds: [], displayName: 'dashDisplayName' },
     });
   });
 
@@ -140,6 +141,7 @@ describe('mapToResults', () => {
       createType({
         name: 'typeB',
         management: {
+          displayName: 'typeBDisplayName',
           defaultSearchField: 'description',
           getInAppUrl: (obj) => ({ path: `/type-b/${obj.id}`, uiCapabilitiesPath: 'test.typeB' }),
         },
@@ -229,7 +231,7 @@ describe('mapToResults', () => {
         type: 'typeA',
         url: '/type-a/resultA',
         score: 100,
-        meta: { tagIds: [] },
+        meta: { tagIds: [], displayName: 'typeA' },
       },
       {
         id: 'resultC',
@@ -237,7 +239,7 @@ describe('mapToResults', () => {
         type: 'typeC',
         url: '/type-c/resultC',
         score: 42,
-        meta: { tagIds: ['1', '2'] },
+        meta: { tagIds: ['1', '2'], displayName: 'typeC' },
       },
       {
         id: 'resultB',
@@ -245,7 +247,7 @@ describe('mapToResults', () => {
         type: 'typeB',
         url: '/type-b/resultB',
         score: 69,
-        meta: { tagIds: [] },
+        meta: { tagIds: [], displayName: 'typeBDisplayName' },
       },
     ]);
   });
@@ -283,7 +285,7 @@ describe('mapToResults', () => {
         type: 'typeA',
         url: '/type-a/resultA',
         score: 100,
-        meta: { tagIds: [] },
+        meta: { tagIds: [], displayName: 'typeA' },
       },
     ]);
   });
