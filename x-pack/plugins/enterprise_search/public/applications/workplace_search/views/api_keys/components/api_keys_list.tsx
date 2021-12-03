@@ -29,7 +29,8 @@ import {
 import { ApiKey } from './api_key';
 
 export const ApiKeysList: React.FC = () => {
-  const { deleteApiKey, onPaginate, showDeleteModal, hideDeleteModal } = useActions(ApiKeysLogic);
+  const { deleteApiKey, onPaginate, stageTokenNameForDeletion, hideDeleteModal } =
+    useActions(ApiKeysLogic);
   const { apiTokens, meta, dataLoading, deleteModalVisible } = useValues(ApiKeysLogic);
 
   const deleteModal = (
@@ -87,7 +88,7 @@ export const ApiKeysList: React.FC = () => {
           type: 'icon',
           icon: 'trash',
           color: 'danger',
-          onClick: (token: ApiToken) => showDeleteModal(token.name),
+          onClick: (token: ApiToken) => stageTokenNameForDeletion(token.name),
         },
       ],
     },

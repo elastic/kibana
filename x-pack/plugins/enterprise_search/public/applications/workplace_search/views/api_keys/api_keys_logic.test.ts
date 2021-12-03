@@ -127,7 +127,7 @@ describe('ApiKeysLogic', () => {
         const tokenName = 'my-token';
 
         it('should set deleteModalVisible to true and set apiTokenNameToDelete', () => {
-          ApiKeysLogic.actions.showDeleteModal(tokenName);
+          ApiKeysLogic.actions.stageTokenNameForDeletion(tokenName);
 
           expect(ApiKeysLogic.values).toEqual({
             ...values,
@@ -445,7 +445,7 @@ describe('ApiKeysLogic', () => {
         jest.spyOn(ApiKeysLogic.actions, 'fetchApiKeys').mockImplementationOnce(() => {});
         http.delete.mockReturnValue(Promise.resolve());
 
-        ApiKeysLogic.actions.showDeleteModal(tokenName);
+        ApiKeysLogic.actions.stageTokenNameForDeletion(tokenName);
         ApiKeysLogic.actions.deleteApiKey();
         expect(http.delete).toHaveBeenCalledWith(
           `/internal/workplace_search/api_keys/${tokenName}`

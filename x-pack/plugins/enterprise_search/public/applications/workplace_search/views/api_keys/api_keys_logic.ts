@@ -45,7 +45,7 @@ interface ApiKeysLogicActions {
   onPaginate(newPageIndex: number): { newPageIndex: number };
   deleteApiKey(): void;
   onApiFormSubmit(): void;
-  showDeleteModal(tokenName: string): string;
+  stageTokenNameForDeletion(tokenName: string): string;
   hideDeleteModal(): void;
 }
 
@@ -76,7 +76,7 @@ export const ApiKeysLogic = kea<MakeLogicType<ApiKeysLogicValues, ApiKeysLogicAc
     fetchApiKeys: true,
     onPaginate: (newPageIndex) => ({ newPageIndex }),
     deleteApiKey: true,
-    showDeleteModal: (tokenName) => tokenName,
+    stageTokenNameForDeletion: (tokenName) => tokenName,
     hideDeleteModal: true,
     onApiFormSubmit: () => null,
   }),
@@ -134,14 +134,14 @@ export const ApiKeysLogic = kea<MakeLogicType<ApiKeysLogicValues, ApiKeysLogicAc
     deleteModalVisible: [
       false,
       {
-        showDeleteModal: () => true,
+        stageTokenNameForDeletion: () => true,
         hideDeleteModal: () => false,
       },
     ],
     apiTokenNameToDelete: [
       '',
       {
-        showDeleteModal: (_, tokenName) => tokenName,
+        stageTokenNameForDeletion: (_, tokenName) => tokenName,
         hideDeleteModal: () => '',
       },
     ],

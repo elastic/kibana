@@ -19,7 +19,7 @@ import { ApiKey } from './api_key';
 import { ApiKeysList } from './api_keys_list';
 
 describe('ApiKeysList', () => {
-  const showDeleteModal = jest.fn();
+  const stageTokenNameForDeletion = jest.fn();
   const hideDeleteModal = jest.fn();
   const deleteApiKey = jest.fn();
   const onPaginate = jest.fn();
@@ -42,7 +42,7 @@ describe('ApiKeysList', () => {
 
   beforeEach(() => {
     setMockValues(values);
-    setMockActions({ deleteApiKey, onPaginate, showDeleteModal, hideDeleteModal });
+    setMockActions({ deleteApiKey, onPaginate, stageTokenNameForDeletion, hideDeleteModal });
   });
 
   it('renders', () => {
@@ -182,11 +182,11 @@ describe('ApiKeysList', () => {
         name: 'some-name',
       };
 
-      it('calls showDeleteModal when clicked', () => {
+      it('calls stageTokenNameForDeletion when clicked', () => {
         const action = columns[2].actions[0];
         action.onClick(token);
 
-        expect(showDeleteModal).toHaveBeenCalledWith('some-name');
+        expect(stageTokenNameForDeletion).toHaveBeenCalledWith('some-name');
       });
     });
   });
