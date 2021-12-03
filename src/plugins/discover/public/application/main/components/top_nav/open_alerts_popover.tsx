@@ -19,13 +19,13 @@ import { updateSearchSource } from '../../utils/update_search_source';
 const container = document.createElement('div');
 let isOpen = false;
 
-interface OptionsPopoverProps {
+interface AlertsPopoverProps {
   onClose: () => void;
   anchorElement: HTMLElement;
   searchSource: ISearchSource;
 }
 
-export function AlertsPopover(props: OptionsPopoverProps) {
+export function AlertsPopover(props: AlertsPopoverProps) {
   const dataView = props.searchSource.getField('index')!;
   const searchSource = props.searchSource;
   const index = dataView.title;
