@@ -133,6 +133,7 @@ export const previewRulesRoute = async (
           ruleTypeId: string,
           ruleTypeName: string,
           params: TParams,
+          shouldWriteAlerts: () => boolean,
           alertInstanceFactory: (
             id: string
           ) => Pick<
@@ -168,6 +169,7 @@ export const previewRulesRoute = async (
               previousStartedAt,
               rule,
               services: {
+                shouldWriteAlerts,
                 alertInstanceFactory,
                 savedObjectsClient: context.core.savedObjects.client,
                 scopedClusterClient: context.core.elasticsearch.client,
@@ -192,6 +194,7 @@ export const previewRulesRoute = async (
               queryAlertType.id,
               queryAlertType.name,
               previewRuleParams,
+              () => true,
               alertInstanceFactoryStub
             );
             break;
@@ -204,6 +207,7 @@ export const previewRulesRoute = async (
               thresholdAlertType.id,
               thresholdAlertType.name,
               previewRuleParams,
+              () => true,
               alertInstanceFactoryStub
             );
             break;
@@ -216,6 +220,7 @@ export const previewRulesRoute = async (
               threatMatchAlertType.id,
               threatMatchAlertType.name,
               previewRuleParams,
+              () => true,
               alertInstanceFactoryStub
             );
             break;
@@ -226,6 +231,7 @@ export const previewRulesRoute = async (
               eqlAlertType.id,
               eqlAlertType.name,
               previewRuleParams,
+              () => true,
               alertInstanceFactoryStub
             );
             break;
@@ -236,6 +242,7 @@ export const previewRulesRoute = async (
               mlAlertType.id,
               mlAlertType.name,
               previewRuleParams,
+              () => true,
               alertInstanceFactoryStub
             );
             break;
