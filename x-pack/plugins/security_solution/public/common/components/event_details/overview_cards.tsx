@@ -29,6 +29,7 @@ import { OverviewCard, OverviewCardWithActions } from './overview/overview_card'
 import { OverviewRiskScore } from './overview/overview_risk_score';
 import { OverviewSeverity } from './overview/overview_severity';
 import { StatusPopoverButton } from './overview/status_popover_button';
+import { SeverityBadge } from '../../../../public/detections/components/rules/severity_badge';
 
 export const NotGrowingFlexGroup = euiStyled(EuiFlexGroup)`
   flex-grow: 0;
@@ -128,7 +129,7 @@ export const OverviewCards = React.memo<Props>(
               enrichedFieldInfo={severityData}
               contextId={contextId}
             >
-              <OverviewSeverity severity={severityData.values[0]} />
+              <SeverityBadge value={severityData.values[0]} />
             </OverviewCardWithActions>
           </EuiFlexItem>
         )}
