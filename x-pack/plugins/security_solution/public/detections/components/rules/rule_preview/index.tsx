@@ -84,6 +84,11 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
     threshold,
   });
 
+  // Resets the timeFrame to default when rule type is changed
+  useEffect(() => {
+    setTimeFrame('h');
+  }, [ruleType]);
+
   return (
     <>
       <EuiFormRow
