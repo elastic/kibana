@@ -60,7 +60,7 @@ export class MissingMonitoringDataRule extends BaseRule {
     esClient: ElasticsearchClient,
     clusters: AlertCluster[]
   ): Promise<AlertData[]> {
-    // changing this to only search ES because of changes here https://github.com/elastic/kibana/issues/83309
+    // changing this to only search ES because of changes related to https://github.com/elastic/kibana/issues/83309
     const indexPatterns = getNewIndexPatterns({
       config: Globals.app.config,
       moduleType: 'elasticsearch',
