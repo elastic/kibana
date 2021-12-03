@@ -22,7 +22,7 @@ import { EmsFileParser } from './ems_file_parser';
 import { UrlParser } from './url_parser';
 import { SearchAPI } from './search_api';
 import { TimeCache } from './time_cache';
-import { IServiceSettings } from '../../../../maps_ems/public';
+import { IEMSKbnMapsSettings } from '../../../../maps_ems/public';
 import {
   Bool,
   Data,

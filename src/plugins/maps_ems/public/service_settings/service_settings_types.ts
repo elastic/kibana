@@ -42,7 +42,7 @@ export interface VectorLayer extends FileLayer {
   isEMS: boolean;
 }
 
-export interface IServiceSettings {
+export interface IEMSKbnMapsSettings {
   getTMSServices(): Promise<TmsLayer[]>;
   getFileLayers(): Promise<FileLayer[]>;
   getUrlForRegionLayer(layer: FileLayer): Promise<string | undefined>;

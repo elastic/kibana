@@ -23,7 +23,7 @@ import {
 
 import { createVegaFn } from './vega_fn';
 import { createVegaTypeDefinition } from './vega_type';
-import { IServiceSettings, MapsEmsPluginSetup } from '../../../maps_ems/public';
+import { IEMSKbnMapsSettings, MapsEmsPluginSetup } from '../../../maps_ems/public';
 import { ConfigSchema } from '../config';
 
 import { getVegaInspectorView } from './vega_inspector';

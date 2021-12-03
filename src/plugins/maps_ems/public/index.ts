@@ -8,7 +8,7 @@
 
 import { PluginInitializerContext } from 'kibana/public';
 import { MapsEmsPlugin } from './plugin';
-import { IServiceSettings } from './service_settings';
+import { IEMSKbnMapsSettings } from './service_settings';
 import type { MapsEmsConfig } from '../config';
 import { EMSSettings } from '../common';
 import { IEMSConfig } from '../common/ems_settings';
@@ -19,7 +19,7 @@ export type {
   FileLayerField,
   FileLayer,
   TmsLayer,
-  IServiceSettings,
+  IEMSKbnMapsSettings,
 } from './service_settings';
 
 export function plugin(initializerContext: PluginInitializerContext) {
@@ -32,7 +32,7 @@ export type { MapsEmsConfig } from '../config';
 
 export interface MapsEmsPluginSetup {
   config: MapsEmsConfig;
-  getServiceSettings(): Promise<IServiceSettings>;
+  getServiceSettings(): Promise<IEMSKbnMapsSettings>;
   createEMSSettings(config: IEMSConfig, getIsEnterPrisePlus: () => boolean): EMSSettings;
 }
 export type MapsEmsPluginStart = ReturnType<MapsEmsPlugin['start']>;

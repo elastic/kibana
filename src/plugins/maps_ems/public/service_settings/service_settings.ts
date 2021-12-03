@@ -11,7 +11,7 @@ import MarkdownIt from 'markdown-it';
 import { EMSClient, FileLayer as EMSFileLayer, TMSService } from '@elastic/ems-client';
 import { i18n } from '@kbn/i18n';
 import { getIsEnterprisePlus, getKibanaVersion } from '../kibana_services';
-import { FileLayer, IServiceSettings, TmsLayer } from './service_settings_types';
+import { FileLayer, IEMSKbnMapsSettings, TmsLayer } from './service_settings_types';
 import { ORIGIN, TMS_IN_YML_ID } from '../../common';
 import { EMSSettings } from '../../common';
 import type { MapsEmsConfig, TileMapConfig } from '../../config';
@@ -19,7 +19,7 @@ import type { MapsEmsConfig, TileMapConfig } from '../../config';
 /**
  * This class provides access to the EMS-layers and the kibana.yml configured layers through a single interface.
  */
-export class ServiceSettings implements IServiceSettings {
+export class KbnMapsSettings implements IEMSKbnMapsSettings {
   private readonly _mapConfig: MapsEmsConfig;
   private readonly _tilemapsConfig: TileMapConfig;
   private readonly _hasTmsConfigured: boolean;

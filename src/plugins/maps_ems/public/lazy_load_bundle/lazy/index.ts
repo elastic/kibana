@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { ServiceSettings } from '../../service_settings/service_settings';
+export { KbnMapsSettings } from '../../service_settings/service_settings';

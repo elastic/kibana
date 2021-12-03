@@ -17,7 +17,7 @@ import { SearchAPI } from '../../data_model/search_api';
 import vegaMap from '../../test_utils/vega_map_test.json';
 import { coreMock } from '../../../../../../core/public/mocks';
 import { dataPluginMock } from '../../../../../data/public/mocks';
-import type { IServiceSettings } from '../../../../../maps_ems/public';
+import type { IEMSKbnMapsSettings } from '../../../../../maps_ems/public';
 import { setInjectedVars, setData, setNotifications, setUISettings } from '../../services';
 import { initVegaLayer, initTmsRasterLayer } from './layers';
 
