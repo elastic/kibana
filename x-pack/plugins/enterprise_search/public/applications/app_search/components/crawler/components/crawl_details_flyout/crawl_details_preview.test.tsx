@@ -28,7 +28,16 @@ const MOCK_VALUES: Partial<CrawlDetailValues> = {
       domainAllowlist: ['https://www.elastic.co', 'https://www.swiftype.com'],
       seedUrls: ['https://www.elastic.co/docs', 'https://www.swiftype.com/documentation'],
       sitemapUrls: ['https://www.elastic.co/sitemap.xml', 'https://www.swiftype.com/sitemap.xml'],
+      maxCrawlDepth: 10,
     },
+    stats: {
+      status: {
+        urlsAllowed: 10,
+        pagesVisited: 10,
+        crawlDurationMSec: 36000,
+        avgResponseTimeMSec: 100,
+      }
+    }
   },
 };
 
@@ -38,7 +47,7 @@ describe('CrawlDetailsPreview', () => {
       crawlRequest: null,
     });
 
-    const wrapper = shallow(<CrawlDetailsPreview />);
+    const wrapper = shallow(<CrawlDetailsPreview crawlerLogsEnabled />);
     expect(wrapper.isEmptyRender()).toBe(true);
   });
 
@@ -47,7 +56,7 @@ describe('CrawlDetailsPreview', () => {
 
     beforeAll(() => {
       setMockValues(MOCK_VALUES);
-      wrapper = shallow(<CrawlDetailsPreview />);
+      wrapper = shallow(<CrawlDetailsPreview crawlerLogsEnabled />);
     });
 
     it('contains a list of domains', () => {
