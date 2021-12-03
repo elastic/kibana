@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, CoreStart } from 'src/core/server';
+import { CoreSetup, CoreStart, PluginInitializerContext } from 'src/core/server';
 import {
   TutorialProvider,
   TutorialContextFactory,
@@ -71,12 +71,14 @@ export class TutorialsRegistry {
   private tutorialProviders: TutorialProvider[] = []; // pre-register all the tutorials we know we want in here
   private readonly scopedTutorialContextFactories: TutorialContextFactory[] = [];
 
+  constructor(private readonly initContext: PluginInitializerContext) {}
+
   public setup(core: CoreSetup, customIntegrations?: CustomIntegrationsPluginSetup) {
     const router = core.http.createRouter();
     router.get(
       { path: '/api/kibana/home/tutorials', validate: false },
       async (context, req, res) => {
-        const initialContext = {};
+        const initialContext = { kibanaBranch: this.initContext.env.packageInfo.branch };
         const scopedContext = this.scopedTutorialContextFactories.reduce(
           (accumulatedContext, contextFactory) => {
             return { ...accumulatedContext, ...contextFactory(req) };
@@ -92,7 +94,7 @@ export class TutorialsRegistry {
     );
     return {
       registerTutorial: (specProvider: TutorialProvider) => {
-        const emptyContext = {};
+        const emptyContext = { kibanaBranch: this.initContext.env.packageInfo.branch };
         let tutorial: TutorialSchema;
         try {
           tutorial = tutorialSchema.validate(specProvider(emptyContext));
@@ -132,7 +134,7 @@ export class TutorialsRegistry {
 
     if (customIntegrations) {
       builtInTutorials.forEach((provider) => {
-        const tutorial = provider({});
+        const tutorial = provider({ kibanaBranch: this.initContext.env.packageInfo.branch });
         registerBeatsTutorialsWithCustomIntegrations(core, customIntegrations, tutorial);
       });
     }
