@@ -9,7 +9,6 @@ import { EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FoundExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import React, { useCallback, useMemo, useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { useHistory } from 'react-router-dom';
 import {
   MANAGEMENT_DEFAULT_PAGE_SIZE,
