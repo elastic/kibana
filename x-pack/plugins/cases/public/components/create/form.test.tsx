@@ -17,12 +17,21 @@ import { schema, FormProps } from './schema';
 import { CreateCaseForm, CreateCaseFormProps } from './form';
 import { useCaseConfigure } from '../../containers/configure/use_configure';
 import { useCaseConfigureResponse } from '../configure_cases/__mock__';
-import { TestProviders } from '../../common/mock';
+import { CaseContextConfig, TestProviders } from '../../common/mock';
+import { CasesContextValue } from '../../containers/types';
+
+interface MockWrapper {
+  children: React.ReactNode;
+  owner?: string[];
+}
 
 jest.mock('../../containers/use_get_tags');
 jest.mock('../../containers/configure/use_connectors');
 jest.mock('../../containers/configure/use_configure');
 jest.mock('../markdown_editor/plugins/lens/use_lens_draft_comment');
+jest.mock('../app/use_available_owners', () => ({
+  useAvailableCasesOwners: () => ['securitySolution', 'observability'],
+}));
 
 const useGetTagsMock = useGetTags as jest.Mock;
 const useConnectorsMock = useConnectors as jest.Mock;
@@ -44,9 +53,9 @@ const casesFormProps: CreateCaseFormProps = {
 
 describe('CreateCaseForm', () => {
   let globalForm: FormHook;
-  const MockHookWrapperComponent: React.FC<{ testProviderProps?: unknown }> = ({
+  const MockHookWrapperComponent: React.FC<Partial<CasesContextValue>> = ({
     children,
-    testProviderProps = {},
+    ...props
   }) => {
     const { form } = useForm<FormProps>({
       defaultValue: initialCaseValue,
@@ -57,7 +66,7 @@ describe('CreateCaseForm', () => {
     globalForm = form;
 
     return (
-      <TestProviders {...testProviderProps}>
+      <TestProviders caseConfig={{ ...props }}>
         <Form form={form}>{children}</Form>
       </TestProviders>
     );
@@ -90,7 +99,7 @@ describe('CreateCaseForm', () => {
     expect(wrapper.find(`[data-test-subj="case-creation-form-steps"]`).exists()).toBeFalsy();
   });
 
-  it('it renders all form fields', async () => {
+  it('it renders all form fields except case selection', async () => {
     const wrapper = mount(
       <MockHookWrapperComponent>
         <CreateCaseForm {...casesFormProps} />
@@ -102,11 +111,27 @@ describe('CreateCaseForm', () => {
     expect(wrapper.find(`[data-test-subj="caseDescription"]`).exists()).toBeTruthy();
     expect(wrapper.find(`[data-test-subj="caseSyncAlerts"]`).exists()).toBeTruthy();
     expect(wrapper.find(`[data-test-subj="caseConnectors"]`).exists()).toBeTruthy();
+    expect(wrapper.find(`[data-test-subj="caseOwnerSelection"]`).exists()).toBeFalsy();
+  });
+
+  it('renders all form fields including case selection if has permissions and no owner', async () => {
+    const wrapper = mount(
+      <MockHookWrapperComponent owner={[]}>
+        <CreateCaseForm {...casesFormProps} />
+      </MockHookWrapperComponent>
+    );
+
+    expect(wrapper.find(`[data-test-subj="caseTitle"]`).exists()).toBeTruthy();
+    expect(wrapper.find(`[data-test-subj="caseTags"]`).exists()).toBeTruthy();
+    expect(wrapper.find(`[data-test-subj="caseDescription"]`).exists()).toBeTruthy();
+    expect(wrapper.find(`[data-test-subj="caseSyncAlerts"]`).exists()).toBeTruthy();
+    expect(wrapper.find(`[data-test-subj="caseConnectors"]`).exists()).toBeTruthy();
+    expect(wrapper.find(`[data-test-subj="caseOwnerSelection"]`).exists()).toBeTruthy();
   });
 
   it('hides the sync alerts toggle', () => {
     const { queryByText } = render(
-      <MockHookWrapperComponent testProviderProps={{ features: { alerts: { sync: false } } }}>
+      <MockHookWrapperComponent features={{ alerts: { sync: false } }}>
         <CreateCaseForm {...casesFormProps} />
       </MockHookWrapperComponent>
     );

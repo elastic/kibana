@@ -14,42 +14,32 @@ import { DEFAULT_FEATURES, SECURITY_SOLUTION_OWNER } from '../../../common/const
 import { CasesFeatures } from '../../../common/ui/types';
 import { CasesProvider } from '../../components/cases_context';
 import { createKibanaContextProviderMock } from '../lib/kibana/kibana_react.mock';
-import { FieldHook } from '../shared_imports';
 
+import { FieldHook } from '../shared_imports';
 interface Props {
   children: React.ReactNode;
-  userCanCrud?: boolean;
-  features?: CasesFeatures;
+  caseConfig?: Partial<CasesContextValue>;
 }
 
 window.scrollTo = jest.fn();
 const MockKibanaContextProvider = createKibanaContextProviderMock();
 
-/** A utility for wrapping children in the providers required to run most tests */
-const TestProvidersComponent: React.FC<Props> = ({
-  children,
-  userCanCrud = true,
-  features = {},
-}) => {
-  /**
-   * The empty object at the beginning avoids the mutation
-   * of the DEFAULT_FEATURES object
-   */
-  const featuresOptions = merge({}, DEFAULT_FEATURES, features);
-  return (
-    <I18nProvider>
-      <MockKibanaContextProvider>
-        <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
-          <CasesProvider
-            value={{ owner: [SECURITY_SOLUTION_OWNER], userCanCrud, features: featuresOptions }}
-          >
-            {children}
-          </CasesProvider>
-        </ThemeProvider>
-      </MockKibanaContextProvider>
-    </I18nProvider>
-  );
+const defaultCaseConfig = {
+  userCanCrud: true,
+  owner: [SECURITY_SOLUTION_OWNER],
+  features: DEFAULT_FEATURES,
 };
+
+/** A utility for wrapping children in the providers required to run most tests */
+const TestProvidersComponent: React.FC<Props> = ({ children, caseConfig }) => (
+  <I18nProvider>
+    <MockKibanaContextProvider>
+      <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
+        <CasesProvider value={merge(defaultCaseConfig, caseConfig)}>{children}</CasesProvider>
+      </ThemeProvider>
+    </MockKibanaContextProvider>
+  </I18nProvider>
+);
 
 export const TestProviders = React.memo(TestProvidersComponent);
 

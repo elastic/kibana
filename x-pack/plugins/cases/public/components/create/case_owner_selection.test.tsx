@@ -13,13 +13,10 @@ import { useForm, Form, FormHook } from '../../common/shared_imports';
 import { CaseOwnerSelection } from './case_owner_selection';
 import { schema, FormProps } from './schema';
 
-// const useAvailableCasesOwners = jest.fn(() => ['securitySolution']);
+const OBSERVABILITY = 'observability';
+const SECURITY_SOLUTION = 'securitySolution';
 
-jest.mock('../app/use_available_owners', () => ({
-  useAvailableCasesOwners: () => ['securitySolution', 'observability'],
-}));
-
-describe('Description', () => {
+describe('Case Owner Selection', () => {
   let globalForm: FormHook;
 
   const MockHookWrapperComponent: React.FC = ({ children }) => {
@@ -39,25 +36,46 @@ describe('Description', () => {
     jest.resetAllMocks();
   });
 
-  it('renders', async () => {
+  it('renders', () => {
     const wrapper = mount(
       <MockHookWrapperComponent>
-        <CaseOwnerSelection isLoading={false} />
+        <CaseOwnerSelection availableOwners={[SECURITY_SOLUTION]} isLoading={false} />
       </MockHookWrapperComponent>
     );
 
     expect(wrapper.find(`[data-test-subj="caseOwnerSelection"]`).exists()).toBeTruthy();
   });
 
+  it.each([
+    [OBSERVABILITY, SECURITY_SOLUTION],
+    [SECURITY_SOLUTION, OBSERVABILITY],
+  ])('disables %s button if user only has %j', (disabledButton, permission) => {
+    const wrapper = mount(
+      <MockHookWrapperComponent>
+        <CaseOwnerSelection availableOwners={[permission]} isLoading={false} />
+      </MockHookWrapperComponent>
+    );
+
+    expect(
+      wrapper.find(`[data-test-subj="${disabledButton}RadioButton"] input`).first().props().disabled
+    ).toBeTruthy();
+    expect(
+      wrapper.find(`[data-test-subj="${permission}RadioButton"] input`).first().props().disabled
+    ).toBeFalsy();
+  });
+
   it.skip('it changes the selection', async () => {
     const wrapper = mount(
       <MockHookWrapperComponent>
-        <CaseOwnerSelection isLoading={false} />
+        <CaseOwnerSelection
+          availableOwners={[OBSERVABILITY, SECURITY_SOLUTION]}
+          isLoading={false}
+        />
       </MockHookWrapperComponent>
     );
 
     await act(async () => {
-      wrapper.find(`[data-test-subj="observabilityRadioButton"] input`).simulate('click');
+      wrapper.find(`[data-test-subj="observabilityRadioButton"]`).first().simulate('click');
     });
 
     expect(globalForm.getFormData()).toEqual({ selectedOwner: 'observability' });

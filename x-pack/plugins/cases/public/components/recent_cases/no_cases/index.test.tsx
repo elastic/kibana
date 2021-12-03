@@ -27,7 +27,7 @@ describe('NoCases', () => {
 
   it('displays a message without a link to create a case when the user does not have write permissions', () => {
     const wrapper = mount(
-      <TestProviders userCanCrud={false}>
+      <TestProviders caseConfig={{ userCanCrud: false }}>
         <NoCases />
       </TestProviders>
     );

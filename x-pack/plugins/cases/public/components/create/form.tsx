@@ -32,6 +32,8 @@ import { SubmitCaseButton } from './submit_button';
 import { FormContext } from './form_context';
 import { useCasesFeatures } from '../cases_context/use_cases_features';
 import { CaseOwnerSelection } from './case_owner_selection';
+import { useCasesContext } from '../cases_context/use_cases_context';
+import { useAvailableCasesOwners } from '../app/use_available_owners';
 
 interface ContainerProps {
   big?: boolean;
@@ -78,6 +80,10 @@ export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.m
     const { isSubmitting } = useFormContext();
     const { isSyncAlertsEnabled } = useCasesFeatures();
 
+    const { owner } = useCasesContext();
+    const availableOwners = useAvailableCasesOwners();
+    const canShowCaseTypeSelection = !owner.length && availableOwners.length;
+
     const firstStep = useMemo(
       () => ({
         title: i18n.STEP_ONE_TITLE,
@@ -87,9 +93,9 @@ export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.m
             <Container>
               <Tags isLoading={isSubmitting} />
             </Container>
-            {showCaseOwnerSelection && (
+            {canShowCaseTypeSelection && (
               <Container big>
-                <CaseOwnerSelection isLoading={isSubmitting} />
+                <CaseOwnerSelection availableOwners={availableOwners} isLoading={isSubmitting} />
               </Container>
             )}
             <Container big>
@@ -98,7 +104,7 @@ export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.m
           </>
         ),
       }),
-      [isSubmitting, showCaseOwnerSelection]
+      [isSubmitting, canShowCaseTypeSelection, availableOwners]
     );
 
     const secondStep = useMemo(

@@ -8,6 +8,8 @@
 import React, { memo, useCallback } from 'react';
 
 import {
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiFormRow,
   EuiIcon,
   EuiKeyPadMenu,
@@ -15,15 +17,17 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 
+import { euiStyled } from '../../../../../../src/plugins/kibana_react/common';
 import { FieldHook, getFieldValidityAndErrorMessage, UseField } from '../../common/shared_imports';
-import { useAvailableCasesOwners } from '../app/use_available_owners';
 
 interface MenuSelectionProps {
   field: FieldHook<string>;
   isLoading: boolean;
+  availableOwners: string[];
 }
 
 interface Props {
+  availableOwners: string[];
   isLoading: boolean;
 }
 
@@ -31,12 +35,29 @@ const SECURITY_SOLUTION = 'securitySolution';
 const OBSERVABILITY = 'observability';
 const FIELD_NAME = 'selectedOwner';
 
-const CaseOwnerSelectionComponent: React.FC<Props> = ({ isLoading }) => {
-  return <UseField path={FIELD_NAME} component={MenuSelection} componentProps={{ isLoading }} />;
+const FullWidthKeyPadMenu = euiStyled(EuiKeyPadMenu)`
+  width: 100%;
+`;
+
+const FullWidthKeyPadItem = euiStyled(EuiKeyPadMenuItem)`
+  width: 100%
+`;
+
+const CaseOwnerSelectionComponent: React.FC<Props> = ({ availableOwners, isLoading }) => {
+  return (
+    <UseField
+      path={FIELD_NAME}
+      component={MenuSelection}
+      componentProps={{ availableOwners, isLoading }}
+    />
+  );
 };
 
-function MenuSelection({ field, isLoading = false }: MenuSelectionProps): JSX.Element {
-  const availableOwners = useAvailableCasesOwners();
+function MenuSelection({
+  availableOwners,
+  field,
+  isLoading = false,
+}: MenuSelectionProps): JSX.Element {
   const radioGroupName = useGeneratedHtmlId({ prefix: 'caseOwnerRadioGroup' });
   const { errorMessage, isInvalid } = getFieldValidityAndErrorMessage(field);
 
@@ -52,32 +73,38 @@ function MenuSelection({ field, isLoading = false }: MenuSelectionProps): JSX.El
       label={field.label}
       labelAppend={field.labelAppend}
     >
-      <EuiKeyPadMenu checkable={{ ariaLegend: 'Single select as radios' }}>
-        <EuiKeyPadMenuItem
-          data-test-subj="securityRadioButton"
-          onChange={onChange}
-          checkable="single"
-          name={radioGroupName}
-          id={SECURITY_SOLUTION}
-          label="Security"
-          isSelected={field.value === SECURITY_SOLUTION}
-          isDisabled={isLoading || !availableOwners.includes(SECURITY_SOLUTION)}
-        >
-          <EuiIcon type="logoSecurity" size="xl" />
-        </EuiKeyPadMenuItem>
-        <EuiKeyPadMenuItem
-          data-test-subj="observabilityRadioButton"
-          onChange={onChange}
-          checkable="single"
-          name={radioGroupName}
-          id={OBSERVABILITY}
-          label="Observability"
-          isSelected={field.value === OBSERVABILITY}
-          isDisabled={isLoading || !availableOwners.includes(OBSERVABILITY)}
-        >
-          <EuiIcon type="logoObservability" size="xl" />
-        </EuiKeyPadMenuItem>
-      </EuiKeyPadMenu>
+      <FullWidthKeyPadMenu checkable={{ ariaLegend: 'Single case type select' }}>
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <FullWidthKeyPadItem
+              data-test-subj="securitySolutionRadioButton"
+              onChange={onChange}
+              checkable="single"
+              name={radioGroupName}
+              id={SECURITY_SOLUTION}
+              label="Security"
+              isSelected={field.value === SECURITY_SOLUTION}
+              isDisabled={isLoading || !availableOwners.includes(SECURITY_SOLUTION)}
+            >
+              <EuiIcon type="logoSecurity" size="xl" />
+            </FullWidthKeyPadItem>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <FullWidthKeyPadItem
+              data-test-subj="observabilityRadioButton"
+              onChange={onChange}
+              checkable="single"
+              name={radioGroupName}
+              id={OBSERVABILITY}
+              label="Observability"
+              isSelected={field.value === OBSERVABILITY}
+              isDisabled={isLoading || !availableOwners.includes(OBSERVABILITY)}
+            >
+              <EuiIcon type="logoObservability" size="xl" />
+            </FullWidthKeyPadItem>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </FullWidthKeyPadMenu>
     </EuiFormRow>
   );
 }
