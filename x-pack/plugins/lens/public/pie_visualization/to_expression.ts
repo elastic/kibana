@@ -10,6 +10,7 @@ import { PaletteRegistry } from 'src/plugins/charts/public';
 import { Operation, DatasourcePublicAPI } from '../types';
 import { DEFAULT_PERCENT_DECIMALS } from './constants';
 import type { PieVisualizationState } from '../../common/expressions';
+import { getDefaultVisualValuesForLayer } from '../shared_components/datasource_default_values';
 
 export function toExpression(
   state: PieVisualizationState,
@@ -61,7 +62,10 @@ function expressionHelper(
               : layer.percentDecimals ?? DEFAULT_PERCENT_DECIMALS,
           ],
           legendMaxLines: [layer.legendMaxLines ?? 1],
-          truncateLegend: [layer.truncateLegend ?? true],
+          truncateLegend: [
+            layer.truncateLegend ??
+              getDefaultVisualValuesForLayer(state, datasourceLayers).truncateText,
+          ],
           nestedLegend: [!!layer.nestedLegend],
           ...(state.palette
             ? {

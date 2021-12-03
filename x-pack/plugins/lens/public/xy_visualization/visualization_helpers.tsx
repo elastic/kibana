@@ -114,22 +114,3 @@ export function checkScaleOperation(
     );
   };
 }
-
-export function getDefaultVisualValuesForLayer(
-  state: XYState | undefined,
-  datasourceLayers: Record<string, DatasourcePublicAPI>
-) {
-  return Boolean(
-    state?.layers
-      .flatMap(({ layerId }) => {
-        const datasource = datasourceLayers[layerId];
-        const paramsByColumnId = datasource?.getVisualDefaults();
-        if (paramsByColumnId) {
-          return Object.values(paramsByColumnId).map(({ truncateText }) => truncateText);
-        }
-        return;
-      })
-      // as for now pick only the first column value
-      .filter((v) => v != null)[0] ?? true
-  );
-}
