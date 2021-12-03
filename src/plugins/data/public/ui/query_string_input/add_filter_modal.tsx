@@ -30,6 +30,8 @@ import {
   EuiTab,
   EuiForm,
   EuiSpacer,
+  EuiHorizontalRule,
+  EuiPanel,
 } from '@elastic/eui';
 import { XJsonLang } from '@kbn/monaco';
 import { i18n } from '@kbn/i18n';
@@ -139,6 +141,7 @@ export function AddFilterModal({
       >
         <GenericComboBox
           fullWidth
+          compressed
           placeholder={i18n.translate('data.filter.filterEditor.selectIndexPatternLabel', {
             defaultMessage: 'Select an index pattern',
           })}
@@ -166,6 +169,7 @@ export function AddFilterModal({
       >
         <GenericComboBox
           fullWidth
+          compressed
           id="fieldInput"
           isDisabled={!selectedIndexPattern}
           placeholder={i18n.translate('data.filter.filterEditor.fieldSelectPlaceholder', {
@@ -195,6 +199,7 @@ export function AddFilterModal({
       >
         <GenericComboBox
           fullWidth
+          compressed
           isDisabled={!selectedField}
           placeholder={
             selectedField
@@ -219,24 +224,12 @@ export function AddFilterModal({
 
   const renderParamsEditor = () => {
     if (!selectedIndexPattern || !selectedOperator) {
-      return '';
+      // return '';
     }
 
-    switch (selectedOperator.type) {
+    switch (selectedOperator?.type) {
       case 'exists':
         return '';
-      case 'phrase':
-        return (
-          <PhraseValueInput
-            indexPattern={selectedIndexPattern}
-            field={selectedField}
-            value={filterParams}
-            onChange={setFilterParams}
-            data-test-subj="phraseValueInput"
-            timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
-            fullWidth
-          />
-        );
       case 'phrases':
         return (
           <PhrasesValuesInput
@@ -246,6 +239,7 @@ export function AddFilterModal({
             onChange={setFilterParams}
             timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
             fullWidth
+            compressed
           />
         );
       case 'range':
@@ -255,8 +249,22 @@ export function AddFilterModal({
             value={filterParams}
             onChange={setFilterParams}
             fullWidth
+            compressed
           />
         );
+      default:
+        return (
+          <PhraseValueInput
+            disabled={!selectedIndexPattern || !selectedOperator}
+            indexPattern={selectedIndexPattern}
+            field={selectedField}
+            value={filterParams}
+            onChange={setFilterParams}
+            data-test-subj="phraseValueInput"
+            timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
+            fullWidth
+            compressed
+          />)
     }
   };
 
@@ -328,9 +336,11 @@ export function AddFilterModal({
             })}
           </h3>
         </EuiModalHeaderTitle>
+        {renderIndexPatternInput()}
       </EuiModalHeader>
-      <EuiModalBody>
-        <EuiTabs size="l">
+
+      <EuiModalHeader style={{ paddingBottom: 0, paddingTop: 0 }}>
+        <EuiTabs size="m" bottomBorder={false}>
           {tabs.map(({ label, type }) => (
             <EuiTab
               key={type}
@@ -342,20 +352,24 @@ export function AddFilterModal({
             </EuiTab>
           ))}
         </EuiTabs>
-        <EuiSpacer size="m" />
+      </EuiModalHeader>
+
+      <EuiHorizontalRule margin="none" />
+
+      <EuiModalBody>
         <EuiForm>
           {addFilterMode === 'quick_form' && (
-            <>
-              {renderIndexPatternInput()}
+            <EuiPanel color="subdued">
               {renderFieldInput()}
               {renderOperatorInput()}
               <EuiSpacer size="s" />
               <div data-test-subj="filterParams">{renderParamsEditor()}</div>
-            </>
+            </EuiPanel>
           )}
           {addFilterMode === 'query_builder' && renderCustomEditor()}
         </EuiForm>
       </EuiModalBody>
+      <EuiHorizontalRule margin="none" />
       <EuiModalFooter>
         <EuiFlexGroup justifyContent="flexEnd">
           <EuiFlexItem grow={false}>
@@ -366,7 +380,7 @@ export function AddFilterModal({
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton fill onClick={onAddFilter} data-test-subj="canvasCustomElementForm-submit">
+            <EuiButton iconType="plusInCircleFilled" fill onClick={onAddFilter} data-test-subj="canvasCustomElementForm-submit">
               {i18n.translate('data.filter.addFilterModal.addFilterBtnLabel', {
                 defaultMessage: 'Add filter',
               })}

@@ -22,6 +22,8 @@ interface Props {
   controlOnly?: boolean;
   className?: string;
   fullWidth?: boolean;
+  disabled?: boolean;
+  compressed?: boolean;
 }
 
 class ValueInputTypeUI extends Component<Props> {
@@ -32,7 +34,9 @@ class ValueInputTypeUI extends Component<Props> {
       case 'string':
         inputElement = (
           <EuiFieldText
+            compressed={this.props.compressed}
             fullWidth={this.props.fullWidth}
+            disabled={this.props.disabled}
             placeholder={this.props.placeholder}
             value={value}
             onChange={this.onChange}
@@ -45,7 +49,9 @@ class ValueInputTypeUI extends Component<Props> {
       case 'number_range':
         inputElement = (
           <EuiFieldNumber
+          compressed={this.props.compressed}
             fullWidth={this.props.fullWidth}
+            disabled={this.props.disabled}
             placeholder={this.props.placeholder}
             value={typeof value === 'string' ? parseFloat(value) : value}
             onChange={this.onChange}
@@ -58,7 +64,9 @@ class ValueInputTypeUI extends Component<Props> {
       case 'date_range':
         inputElement = (
           <EuiFieldText
+          compressed={this.props.compressed}
             fullWidth={this.props.fullWidth}
+            disabled={this.props.disabled}
             placeholder={this.props.placeholder}
             value={value}
             onChange={this.onChange}
@@ -74,6 +82,7 @@ class ValueInputTypeUI extends Component<Props> {
         inputElement = (
           <EuiFieldText
             fullWidth={this.props.fullWidth}
+            disabled={this.props.disabled}
             placeholder={this.props.placeholder}
             value={value}
             onChange={this.onChange}
@@ -107,6 +116,8 @@ class ValueInputTypeUI extends Component<Props> {
             onChange={this.onBoolChange}
             className={this.props.className}
             fullWidth={this.props.fullWidth}
+            disabled={this.props.disabled}
+            compressed={this.props.compressed}
           />
         );
         break;

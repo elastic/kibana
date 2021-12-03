@@ -20,6 +20,8 @@ interface Props extends PhraseSuggestorProps {
   onChange: (value: string | number | boolean) => void;
   intl: InjectedIntl;
   fullWidth?: boolean;
+  disabled?: boolean;
+  compressed?: boolean;
 }
 
 class PhraseValueInputUI extends PhraseSuggestorUI<Props> {
@@ -37,7 +39,9 @@ class PhraseValueInputUI extends PhraseSuggestorUI<Props> {
           this.renderWithSuggestions()
         ) : (
           <ValueInputType
+            compressed
             fullWidth={this.props.fullWidth}
+            disabled={this.props.disabled}
             placeholder={this.props.intl.formatMessage({
               id: 'data.filter.filterEditor.valueInputPlaceholder',
               defaultMessage: 'Enter a value',
@@ -53,13 +57,15 @@ class PhraseValueInputUI extends PhraseSuggestorUI<Props> {
 
   private renderWithSuggestions() {
     const { suggestions } = this.state;
-    const { value, intl, onChange, fullWidth } = this.props;
+    const { value, intl, onChange, fullWidth, disabled, compressed } = this.props;
     // there are cases when the value is a number, this would cause an exception
     const valueAsStr = String(value);
     const options = value ? uniq([valueAsStr, ...suggestions]) : suggestions;
     return (
       <StringComboBox
+      compressed={compressed}
         fullWidth={fullWidth}
+        disabled={disabled}
         placeholder={intl.formatMessage({
           id: 'data.filter.filterEditor.valueSelectPlaceholder',
           defaultMessage: 'Select a value',
