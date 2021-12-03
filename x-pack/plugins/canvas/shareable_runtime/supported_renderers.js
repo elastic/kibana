@@ -15,7 +15,7 @@ import {
   getErrorRenderer,
   getDebugRenderer,
 } from '../../../../src/plugins/expression_error/public';
-import { repeatImageRenderer as repeatImage } from '../../../../src/plugins/expression_repeat_image/public';
+import { getRepeatImageRenderer } from '../../../../src/plugins/expression_repeat_image/public';
 import { revealImageRenderer as revealImage } from '../../../../src/plugins/expression_reveal_image/public';
 import {
   shapeRenderer as shape,
@@ -31,6 +31,7 @@ const renderFunctionsFactories = [
   getTableRenderer,
   getErrorRenderer,
   getDebugRenderer,
+  getRepeatImageRenderer,
   getMetricRenderer,
 ];
 
@@ -41,7 +42,6 @@ const renderFunctionsFactories = [
  */
 export const renderFunctions = [
   image,
-  repeatImage,
   revealImage,
   pie,
   plot,
