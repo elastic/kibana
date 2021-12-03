@@ -26,7 +26,6 @@ export function AdvancedOptions(props: {
     <>
       {popoverOptions.length > 0 && (
         <EuiText textAlign="right">
-          {/* <EuiSpacer size="s" /> */}
           <EuiPopover
             ownFocus
             button={
