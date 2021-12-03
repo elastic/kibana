@@ -54,7 +54,7 @@ export const GaugeToolbar = memo((props: VisualizationToolbarProps<GaugeVisualiz
                 header={i18n.translate('xpack.lens.label.gauge.labelMajor.header', {
                   defaultMessage: 'Title',
                 })}
-                dataTestSubj="lens-toolbar-gauge-labelMajor"
+                dataTestSubj="lnsToolbarGaugeLabelMajor"
                 label={inputValue.labelMajor || ''}
                 mode={inputValue.labelMajorMode}
                 placeholder={metricDimensionTitle || ''}
@@ -79,7 +79,7 @@ export const GaugeToolbar = memo((props: VisualizationToolbarProps<GaugeVisualiz
                 header={i18n.translate('xpack.lens.label.gauge.labelMinor.header', {
                   defaultMessage: 'Subtitle',
                 })}
-                dataTestSubj="lens-toolbar-gauge-labelMinor"
+                dataTestSubj="lnsToolbarGaugeLabelMinor"
                 label={inputValue.labelMinor || ''}
                 mode={subtitleMode}
                 handleChange={(value) => {

@@ -35,10 +35,10 @@ class Harness {
   }
 
   public get titleLabel() {
-    return this.wrapper.find('EuiFieldText[data-test-subj="lens-toolbar-gauge-labelMajor"]');
+    return this.wrapper.find('EuiFieldText[data-test-subj="lnsToolbarGaugeLabelMajor"]');
   }
   public get titleSelect() {
-    return this.wrapper.find('EuiSelect[data-test-subj="lens-toolbar-gauge-labelMajor-select"]');
+    return this.wrapper.find('EuiSelect[data-test-subj="lnsToolbarGaugeLabelMajor-select"]');
   }
 
   modifyTitle(e: FormEvent) {
@@ -48,11 +48,11 @@ class Harness {
   }
 
   public get subtitleSelect() {
-    return this.wrapper.find('EuiSelect[data-test-subj="lens-toolbar-gauge-labelMinor-select"]');
+    return this.wrapper.find('EuiSelect[data-test-subj="lnsToolbarGaugeLabelMinor-select"]');
   }
 
   public get subtitleLabel() {
-    return this.wrapper.find('EuiFieldText[data-test-subj="lens-toolbar-gauge-labelMinor"]');
+    return this.wrapper.find('EuiFieldText[data-test-subj="lnsToolbarGaugeLabelMinor"]');
   }
 
   modifySubtitle(e: FormEvent) {

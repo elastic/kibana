@@ -87,6 +87,7 @@ export function GaugeDimensionEditor(
         className="lnsDynamicColoringRow"
       >
         <EuiSwitch
+          data-test-subj="lnsDynamicColoringGaugeSwitch"
           compressed
           label=""
           showLabel={false}

@@ -218,7 +218,7 @@ export const getGaugeVisualization = ({
           filterOperations: isNumericMetric,
           supportsMoreColumns: !state.metricAccessor,
           required: true,
-          dataTestSubj: 'lnsGauge_maxDimensionPanel',
+          dataTestSubj: 'lnsGauge_metricDimensionPanel',
           enableDimensionEditor: true,
         },
         {
