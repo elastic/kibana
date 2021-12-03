@@ -75,11 +75,6 @@ describe('ruleDataPluginService', () => {
     it('calls RuleDataClient', async () => {
       const mockClusterClient = elasticsearchServiceMock.createElasticsearchClient();
       const getClusterClient = jest.fn(() => Promise.resolve(mockClusterClient));
-      jest.mock('./resource_installer', () => {
-        return function () {
-          return { installCommonResources: () => {} };
-        };
-      });
 
       const ruleDataService = new RuleDataService({
         logger: loggerMock.create(),
