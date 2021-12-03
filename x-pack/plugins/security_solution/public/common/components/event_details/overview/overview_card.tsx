@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexGroupProps,
+  EuiFlexItem,
+  EuiPanel,
+  EuiSpacer,
+  EuiText,
+} from '@elastic/eui';
 import React from 'react';
 
 import { ActionCell } from '../table/action_cell';
@@ -62,6 +69,7 @@ ClampedContent.displayName = 'ClampedContent';
 type OverviewCardWithActionsProps = OverviewCardProps & {
   contextId: string;
   enrichedFieldInfo: EnrichedFieldInfo;
+  alignItems?: EuiFlexGroupProps['alignItems'];
 };
 
 export const OverviewCardWithActions: React.FC<OverviewCardWithActionsProps> = ({
@@ -69,10 +77,11 @@ export const OverviewCardWithActions: React.FC<OverviewCardWithActionsProps> = (
   children,
   contextId,
   enrichedFieldInfo,
+  alignItems = 'center',
 }) => {
   return (
     <OverviewCard title={title}>
-      <EuiFlexGroup alignItems="flexEnd" gutterSize="s">
+      <EuiFlexGroup alignItems={alignItems} gutterSize="s">
         <EuiFlexItem grow={false}>
           <ClampedContent>{children}</ClampedContent>
         </EuiFlexItem>
