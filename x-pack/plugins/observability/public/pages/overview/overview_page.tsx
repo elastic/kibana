@@ -36,7 +36,7 @@ export function OverviewPage({ routeParams }: Props) {
 
   const { relativeStart, relativeEnd } = useTimeRange();
 
-  const relativeTime = { start: relativeStart, end: relativeEnd };
+  const relativeTime = { from: relativeStart, to: relativeEnd };
 
   const { hasAnyData, isAllRequestsComplete } = useHasData();
 
@@ -63,8 +63,8 @@ export function OverviewPage({ routeParams }: Props) {
               pageTitle: overviewPageTitle,
               rightSideItems: [
                 <DatePicker
-                  rangeFrom={relativeTime.start}
-                  rangeTo={relativeTime.end}
+                  rangeFrom={relativeTime.from}
+                  rangeTo={relativeTime.to}
                   refreshInterval={refreshInterval}
                   refreshPaused={refreshPaused}
                 />,
@@ -73,7 +73,12 @@ export function OverviewPage({ routeParams }: Props) {
           : undefined
       }
     >
-      {hasData && <OverviewDashboard />}
+      {hasData && (
+        <OverviewDashboard
+          timeRange={relativeTime}
+          refreshConfig={{ pause: refreshPaused, value: refreshInterval }}
+        />
+      )}
     </ObservabilityPageTemplate>
   );
 }
