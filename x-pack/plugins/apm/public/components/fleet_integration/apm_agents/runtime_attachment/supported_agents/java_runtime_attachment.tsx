@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, useMemo } from 'react';
 import { RuntimeAttachment, RuntimeAttachmentSettings } from '..';
 import {
   NewPackagePolicy,
@@ -113,6 +113,10 @@ const versions = [
   '1.2.0',
 ];
 
+function getApmVars(newPolicy: NewPackagePolicy) {
+  return newPolicy.inputs.find(({ type }) => type === 'apm')?.vars;
+}
+
 export function JavaRuntimeAttachment({ newPolicy, onChange }: Props) {
   const [isDirty, setIsDirty] = useState(false);
   const onChangePolicy = useCallback(
@@ -156,6 +160,9 @@ export function JavaRuntimeAttachment({ newPolicy, onChange }: Props) {
     },
     [newPolicy, onChange]
   );
+
+  const apmVars = useMemo(() => getApmVars(newPolicy), [newPolicy]);
+
   return (
     <RuntimeAttachment
       operationTypes={[
@@ -208,13 +215,9 @@ export function JavaRuntimeAttachment({ newPolicy, onChange }: Props) {
         />
       }
       showUnsavedWarning={isDirty}
-      initialIsEnabled={
-        newPolicy.inputs.find(({ type }) => type === 'apm')?.vars
-          ?.java_attacher_enabled?.value
-      }
+      initialIsEnabled={apmVars?.java_attacher_enabled?.value}
       initialDiscoveryRules={(
-        newPolicy.inputs.find(({ type }) => type === 'apm')?.vars
-          ?.java_attacher_discovery_rules?.value ?? [initialDiscoveryRule]
+        apmVars?.java_attacher_discovery_rules?.value ?? [initialDiscoveryRule]
       ).map((discoveryRuleMap: Record<string, string>) => {
         const [operationType, probe] = Object.entries(discoveryRuleMap)[0];
         return {
@@ -223,7 +226,9 @@ export function JavaRuntimeAttachment({ newPolicy, onChange }: Props) {
           probe,
         };
       })}
-      selectedVersion={versions[0]}
+      selectedVersion={
+        apmVars?.java_attacher_agent_version?.value || versions[0]
+      }
       versions={versions}
     />
   );
