@@ -12,6 +12,7 @@ import {
   SavedObjectsClientContract,
 } from 'src/core/server';
 import { SearchRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { ENDPOINT_TRUSTED_APPS_LIST_ID } from '@kbn/securitysolution-list-constants';
 import { AgentClient, AgentPolicyServiceInterface } from '../../../../fleet/server';
 import { ExceptionListClient } from '../../../../lists/server';
 import { EndpointAppContextService } from '../../endpoint/endpoint_app_context_services';
@@ -28,7 +29,6 @@ import {
   GetEndpointListResponse,
   RuleSearchResult,
 } from './types';
-import { ENDPOINT_TRUSTED_APPS_LIST_ID } from '../../../../../../../../../../private/var/tmp/_bazel_ptavares/a4a237a05d507fc23e0818d3647eedfe/execroot/kibana/bazel-out/darwin-fastbuild/bin/packages/kbn-securitysolution-list-constants';
 
 export class TelemetryReceiver {
   private readonly logger: Logger;
