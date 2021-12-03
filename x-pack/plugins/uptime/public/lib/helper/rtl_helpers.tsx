@@ -15,6 +15,7 @@ import {
   Nullish,
 } from '@testing-library/react';
 import { Router } from 'react-router-dom';
+import { merge } from 'lodash';
 import { createMemoryHistory, History } from 'history';
 import { CoreStart } from 'kibana/public';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -37,12 +38,16 @@ import { triggersActionsUiMock } from '../../../../triggers_actions_ui/public/mo
 import { dataPluginMock } from '../../../../../../src/plugins/data/public/mocks';
 import { UptimeRefreshContextProvider, UptimeStartupPluginsContextProvider } from '../../contexts';
 
+type DeepPartial<T> = {
+  [P in keyof T]?: DeepPartial<T[P]>;
+};
+
 interface KibanaProps {
   services?: KibanaServices;
 }
 
 export interface KibanaProviderOptions<ExtraCore> {
-  core?: Partial<CoreStart> & ExtraCore;
+  core?: DeepPartial<CoreStart> & Partial<ExtraCore>;
   kibanaProps?: KibanaProps;
 }
 
@@ -137,10 +142,8 @@ export function MockKibanaProvider<ExtraCore>({
   core,
   kibanaProps,
 }: MockKibanaProviderProps<ExtraCore>) {
-  const coreOptions = {
-    ...mockCore(),
-    ...core,
-  };
+  const coreOptions = merge(mockCore(), core);
+
   return (
     <KibanaContextProvider services={{ ...coreOptions }} {...kibanaProps}>
       <UptimeRefreshContextProvider>
