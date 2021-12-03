@@ -464,6 +464,11 @@ export class TaskManagerRunner implements TaskRunner {
       return true;
     }
 
+    if (this.isExpired) {
+      this.logger.warn(`Skipping reschedule for task ${this} due to the task expiring`);
+      return false;
+    }
+
     const maxAttempts = this.definition.maxAttempts || this.defaultMaxAttempts;
     return this.instance.task.attempts < maxAttempts;
   }

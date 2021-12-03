@@ -1485,7 +1485,7 @@ describe('TaskManagerRunner', () => {
       const id = _.random(1, 20).toString();
       const onTaskEvent = jest.fn();
       const error = new Error('Dangit!');
-      const { runner, store, usageCounter } = await readyToRunStageSetup({
+      const { runner, store, usageCounter, logger } = await readyToRunStageSetup({
         onTaskEvent,
         instance: {
           id,
@@ -1513,6 +1513,9 @@ describe('TaskManagerRunner', () => {
         counterType: 'taskManagerTaskRunner',
         incrementBy: 1,
       });
+      expect(logger.warn).toHaveBeenCalledWith(
+        `Skipping reschedule for task bar \"${id}\" due to the task expiring`
+      );
     });
   });
 
