@@ -255,7 +255,27 @@ export class CsvGenerator {
         break;
       }
 
-      // comment about why this is here
+      /*
+       * Intrinsically, generating the rows is a synchronous process. Awaiting
+       * on a setImmediate call here partititions what could be a very long and
+       * CPU-intenstive synchronous process into an asychronous process. This
+       * give NodeJS to process other asychronous events that wait on the Event
+       * Loop.
+       *
+       * See: https://nodejs.org/en/docs/guides/dont-block-the-event-loop/
+       *
+       * It's likely this creates a lot of context switching, and adds to the
+       * time it would take to generate the CSV. There are alternatives to the
+       * chosen performance solution:
+       *
+       * 1. Partition the synchronous process with fewer partitions, by using
+       * the loop counter to call setImmediate only every N amount of rows.
+       * Testing is required to see what the best N value for most data will
+       * be.
+       *
+       * 2. Use a C++ add-on to generate the CSV using the Node Worker Pool
+       * instead of using the Event Loop
+       */
       await new Promise(setImmediate);
 
       const rowDefinition: string[] = [];
