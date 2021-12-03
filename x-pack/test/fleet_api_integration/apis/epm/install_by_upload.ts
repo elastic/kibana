@@ -49,11 +49,12 @@ export default function (providerContext: FtrProviderContext) {
     '../fixtures/direct_upload_packages/apache_invalid_toplevel_mismatch_0.1.4.zip'
   );
 
-  const testPkgKey = 'apache-0.1.4';
+  const testPkgName = 'apache';
+  const testPkgVersion = '0.1.4';
   const server = dockerServers.get('registry');
 
-  const deletePackage = async (pkgkey: string) => {
-    await supertest.delete(`/api/fleet/epm/packages/${pkgkey}`).set('kbn-xsrf', 'xxxx');
+  const deletePackage = async (name: string, version: string) => {
+    await supertest.delete(`/api/fleet/epm/packages/${name}/${version}`).set('kbn-xsrf', 'xxxx');
   };
 
   describe('installs packages from direct upload', async () => {
@@ -62,7 +63,7 @@ export default function (providerContext: FtrProviderContext) {
     afterEach(async () => {
       if (server) {
         // remove the packages just in case it being installed will affect other tests
-        await deletePackage(testPkgKey);
+        await deletePackage(testPkgName, testPkgVersion);
       }
     });
 
@@ -88,7 +89,7 @@ export default function (providerContext: FtrProviderContext) {
       expect(res.body.response.length).to.be(27);
 
       const packageInfoRes = await supertest
-        .get(`/api/fleet/epm/packages/${testPkgKey}`)
+        .get(`/api/fleet/epm/packages/${testPkgName}/${testPkgVersion}`)
         .set('kbn-xsrf', 'xxxx')
         .expect(200);
 

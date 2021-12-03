@@ -21,8 +21,8 @@ export default function (providerContext: FtrProviderContext) {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
-  const deletePackage = async (pkgkey: string) => {
-    await supertest.delete(`/api/fleet/epm/packages/${pkgkey}`).set('kbn-xsrf', 'xxxx');
+  const deletePackage = async (name: string, version: string) => {
+    await supertest.delete(`/api/fleet/epm/packages/${name}/${version}`).set('kbn-xsrf', 'xxxx');
   };
 
   describe('bulk package upgrade api', async () => {
@@ -32,15 +32,15 @@ export default function (providerContext: FtrProviderContext) {
     describe('bulk package upgrade with a package already installed', async () => {
       beforeEach(async () => {
         await supertest
-          .post(`/api/fleet/epm/packages/multiple_versions-0.1.0`)
+          .post(`/api/fleet/epm/packages/multiple_versions/0.1.0`)
           .set('kbn-xsrf', 'xxxx')
           .send({ force: true })
           .expect(200);
       });
       afterEach(async () => {
-        await deletePackage('multiple_versions-0.1.0');
-        await deletePackage('multiple_versions-0.3.0');
-        await deletePackage('overrides-0.1.0');
+        await deletePackage('multiple_versions', '0.1.0');
+        await deletePackage('multiple_versions', '0.3.0');
+        await deletePackage('overrides', '0.1.0');
       });
 
       it('should return 400 if no packages are requested for upgrade', async function () {
@@ -98,7 +98,7 @@ export default function (providerContext: FtrProviderContext) {
 
     describe('bulk upgrade without package already installed', async () => {
       afterEach(async () => {
-        await deletePackage('multiple_versions-0.3.0');
+        await deletePackage('multiple_versions', '0.3.0');
       });
 
       it('should return 200 and an array for upgrading a package', async function () {
@@ -107,9 +107,9 @@ export default function (providerContext: FtrProviderContext) {
           .set('kbn-xsrf', 'xxxx')
           .send({ packages: ['multiple_versions'] })
           .expect(200);
-        expect(body.response.length).equal(1);
-        expect(body.response[0].name).equal('multiple_versions');
-        const entry = body.response[0] as BulkInstallPackageInfo;
+        expect(body.items.length).equal(1);
+        expect(body.items[0].name).equal('multiple_versions');
+        const entry = body.items[0] as BulkInstallPackageInfo;
         expect(entry.version).equal('0.3.0');
       });
     });

@@ -16,7 +16,7 @@ const FINAL_PIPELINE_ID = '.fleet_final_pipeline-1';
 
 const FINAL_PIPELINE_VERSION = 1;
 
-let pkgKey: string;
+let pkgVersion: string;
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
@@ -50,17 +50,17 @@ export default function (providerContext: FtrProviderContext) {
         throw new Error('No log package');
       }
 
-      pkgKey = `log-${logPackage.version}`;
+      pkgVersion = logPackage.version;
 
       await supertest
-        .post(`/api/fleet/epm/packages/${pkgKey}`)
+        .post(`/api/fleet/epm/packages/log/${pkgVersion}`)
         .set('kbn-xsrf', 'xxxx')
         .send({ force: true })
         .expect(200);
     });
     after(async () => {
       await supertest
-        .delete(`/api/fleet/epm/packages/${pkgKey}`)
+        .delete(`/api/fleet/epm/packages/log/${pkgVersion}`)
         .set('kbn-xsrf', 'xxxx')
         .send({ force: true })
         .expect(200);

@@ -20,13 +20,11 @@ export default function (providerContext: FtrProviderContext) {
   const server = dockerServers.get('registry');
   const pkgName = 'all_assets';
   const pkgVersion = '0.1.0';
-  const pkgKey = `${pkgName}-${pkgVersion}`;
   const experimentalPkgName = 'experimental';
-  const experimentalPkgKey = `${experimentalPkgName}-${pkgVersion}`;
   const experimental2PkgName = 'experimental2';
-  const experimental2PkgKey = `${experimental2PkgName}-${pkgVersion}`;
 
-  const uploadPkgKey = 'apache-0.1.4';
+  const uploadPkgName = 'apache';
+  const uploadPkgVersion = '0.1.4';
 
   const installUploadPackage = async (pkg: string) => {
     const buf = fs.readFileSync(testPkgArchiveZip);
@@ -43,22 +41,22 @@ export default function (providerContext: FtrProviderContext) {
     '../fixtures/direct_upload_packages/apache_0.1.4.zip'
   );
 
-  const uninstallPackage = async (pkg: string) => {
-    await supertest.delete(`/api/fleet/epm/packages/${pkg}`).set('kbn-xsrf', 'xxxx');
+  const uninstallPackage = async (pkg: string, version: string) => {
+    await supertest.delete(`/api/fleet/epm/packages/${pkg}/${version}`).set('kbn-xsrf', 'xxxx');
   };
-  const installPackage = async (pkg: string) => {
+  const installPackage = async (pkg: string, version: string) => {
     await supertest
-      .post(`/api/fleet/epm/packages/${pkg}`)
+      .post(`/api/fleet/epm/packages/${pkg}/${version}`)
       .set('kbn-xsrf', 'xxxx')
       .send({ force: true });
   };
 
-  const installPackages = async (pkgs: string[]) => {
-    const installingPackagesPromise = pkgs.map((pkg) => installPackage(pkg));
+  const installPackages = async (pkgs: Array<{ name: string; version: string }>) => {
+    const installingPackagesPromise = pkgs.map((pkg) => installPackage(pkg.name, pkg.version));
     return Promise.all(installingPackagesPromise);
   };
-  const uninstallPackages = async (pkgs: string[]) => {
-    const uninstallingPackagesPromise = pkgs.map((pkg) => uninstallPackage(pkg));
+  const uninstallPackages = async (pkgs: Array<{ name: string; version: string }>) => {
+    const uninstallingPackagesPromise = pkgs.map((pkg) => uninstallPackage(pkg.name, pkg.version));
     return Promise.all(uninstallingPackagesPromise);
   };
   const expectPkgFieldToExist = (fields: any[], fieldName: string, exists: boolean = true) => {
@@ -74,12 +72,19 @@ export default function (providerContext: FtrProviderContext) {
     setupFleetAndAgents(providerContext);
     before(async () => {
       if (!server.enabled) return;
-      await installPackages([pkgKey, experimentalPkgKey, experimental2PkgKey]);
-      await installUploadPackage(uploadPkgKey);
+      await installPackages([
+        { name: pkgName, version: pkgVersion },
+        { name: experimentalPkgName, version: pkgVersion },
+        { name: experimental2PkgName, version: pkgVersion },
+      ]);
+      await installUploadPackage(uploadPkgName);
     });
     after(async () => {
       if (!server.enabled) return;
-      await uninstallPackages([pkgKey, experimentalPkgKey]);
+      await uninstallPackages([
+        { name: pkgName, version: pkgVersion },
+        { name: experimentalPkgName, version: pkgVersion },
+      ]);
     });
     it('should create index patterns from all installed packages: uploaded, experimental, beta', async () => {
       const resIndexPatternLogs = await kibanaServer.savedObjects.get({
@@ -104,7 +109,7 @@ export default function (providerContext: FtrProviderContext) {
       expectPkgFieldToExist(fieldsMetrics, 'apache.status.uploadtest');
     });
     it('should correctly recreate index patterns when a package is uninstalled', async () => {
-      await uninstallPackage(experimental2PkgKey);
+      await uninstallPackage(experimental2PkgName, pkgVersion);
       const resIndexPatternLogs = await kibanaServer.savedObjects.get({
         type: 'index-pattern',
         id: 'logs-*',
@@ -126,7 +131,7 @@ export default function (providerContext: FtrProviderContext) {
       expectPkgFieldToExist(fieldsMetrics, 'apache.status.uploadtest');
     });
     it('should correctly recreate index patterns when an uploaded package is uninstalled', async () => {
-      await uninstallPackage(uploadPkgKey);
+      await uninstallPackage(uploadPkgName, uploadPkgVersion);
       const resIndexPatternLogs = await kibanaServer.savedObjects.get({
         type: 'index-pattern',
         id: 'logs-*',

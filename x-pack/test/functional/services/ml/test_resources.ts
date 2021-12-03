@@ -478,7 +478,7 @@ export function MachineLearningTestResourcesProvider({ getService }: FtrProvider
 
       await retry.tryForTime(30 * 1000, async () => {
         await supertest
-          .post(`/api/fleet/epm/packages/${packageWithVersion}`)
+          .post(`/api/fleet/epm/packages/${packageName}/${version}`)
           .set(COMMON_REQUEST_HEADERS)
           .expect(200);
       });
@@ -492,7 +492,7 @@ export function MachineLearningTestResourcesProvider({ getService }: FtrProvider
 
       await retry.tryForTime(30 * 1000, async () => {
         await supertest
-          .delete(`/api/fleet/epm/packages/${packageWithVersion}`)
+          .delete(`/api/fleet/epm/packages/${packageName}/${version}`)
           .set(COMMON_REQUEST_HEADERS)
           .expect(200);
       });
