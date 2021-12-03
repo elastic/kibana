@@ -257,7 +257,7 @@ export type CustomAPIFieldValue =
 export interface Result {
   content_source_id: string;
   last_updated: string;
-  external_id: string;
+  id: string;
   updated_at: string;
   source: string;
   [key: string]: CustomAPIFieldValue;
