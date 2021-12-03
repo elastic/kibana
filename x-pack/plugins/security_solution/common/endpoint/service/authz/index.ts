@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { useEndpointPrivileges } from './use_endpoint_privileges';
-export { getEndpointPrivilegesInitialState } from './utils';
+export { getEndpointAuthzInitialState, calculateEndpointAuthz } from './authz';
+export { getEndpointAuthzInitialStateMock } from './mocks';
