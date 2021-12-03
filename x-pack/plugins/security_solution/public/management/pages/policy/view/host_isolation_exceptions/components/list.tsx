@@ -8,7 +8,7 @@
 import { EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FoundExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useHistory } from 'react-router-dom';
 import {
@@ -96,6 +96,17 @@ export const PolicyHostIsolationExceptionsList = ({
     }
     setExpandedItemsMap(newExpandedMap);
   };
+
+  const totalItemsCountLabel = useMemo<string>(() => {
+    return i18n.translate(
+      'xpack.securitySolution.endpoint.policy.hostIsolationExceptions.list.totalItemCount',
+      {
+        defaultMessage: 'Showing {totalItemsCount, plural, one {# exception} other {# exceptions}}',
+        values: { totalItemsCount: pagination.totalItemCount },
+      }
+    );
+  }, [pagination.totalItemCount]);
+
   return (
     <>
       <SearchExceptions
@@ -115,11 +126,7 @@ export const PolicyHostIsolationExceptionsList = ({
         size="xs"
         data-test-subj="policyDetailsHostIsolationExceptionsSearchCount"
       >
-        <FormattedMessage
-          id="xpack.securitySolution.endpoint.policy.hostIsolationExceptions.list.totalItemCount"
-          defaultMessage={`Showing {totalItemsCount, plural, one {# exception} other {# exceptions}}`}
-          values={{ totalItemsCount: pagination.totalItemCount }}
-        />
+        {totalItemsCountLabel}
       </EuiText>
       <EuiSpacer size="m" />
       <ArtifactCardGrid
