@@ -68,7 +68,9 @@ export function crawlerDomainServerToClient(payload: CrawlerDomainFromServer): C
   return clientPayload;
 }
 
-export function crawlRequestStatsServerToClient(crawlStats: CrawlRequestStatsFromServer): CrawlRequestStats {
+export function crawlRequestStatsServerToClient(
+  crawlStats: CrawlRequestStatsFromServer
+): CrawlRequestStats {
   const {
     status: {
       avg_response_time_msec: avgResponseTimeMSec,
@@ -87,7 +89,7 @@ export function crawlRequestStatsServerToClient(crawlStats: CrawlRequestStatsFro
       crawlDurationMSec,
       statusCodes,
     },
-  }
+  };
 }
 
 export function crawlRequestServerToClient(crawlRequest: CrawlRequestFromServer): CrawlRequest {
