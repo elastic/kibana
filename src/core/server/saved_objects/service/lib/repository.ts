@@ -305,6 +305,7 @@ export class SavedObjectsRepository {
     const {
       id = SavedObjectsUtils.generateId(),
       migrationVersion,
+      coreMigrationVersion,
       overwrite = false,
       references = [],
       refresh = DEFAULT_REFRESH_SETTING,
@@ -359,6 +360,7 @@ export class SavedObjectsRepository {
       originId,
       attributes,
       migrationVersion,
+      coreMigrationVersion,
       updated_at: time,
       ...(Array.isArray(references) && { references }),
     });
@@ -523,6 +525,7 @@ export class SavedObjectsRepository {
             type: object.type,
             attributes: object.attributes,
             migrationVersion: object.migrationVersion,
+            coreMigrationVersion: object.coreMigrationVersion,
             ...(savedObjectNamespace && { namespace: savedObjectNamespace }),
             ...(savedObjectNamespaces && { namespaces: savedObjectNamespaces }),
             updated_at: time,
