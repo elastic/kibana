@@ -9,6 +9,7 @@
 import dateMath from '@elastic/datemath';
 import classNames from 'classnames';
 import React, { useState } from 'react';
+import { buildEmptyFilter, Filter } from '@kbn/es-query';
 
 import {
   EuiFlexGroup,
@@ -17,6 +18,8 @@ import {
   EuiFieldText,
   prettyDuration,
   EuiIconProps,
+  EuiButtonIcon,
+  EuiPopover,
 } from '@elastic/eui';
 // @ts-ignore
 import { EuiSuperUpdateButton, OnRefreshProps } from '@elastic/eui';
@@ -26,19 +29,24 @@ import QueryStringInputUI from './query_string_input';
 import { UI_SETTINGS } from '../../../common';
 import { PersistedLog, getQueryLog } from '../../query';
 import { NoDataPopover } from './no_data_popover';
+import { FilterEditor } from '../filter_bar/filter_editor';
+import { FILTER_EDITOR_WIDTH } from '../filter_bar/filter_item';
+import { AddFilterModal } from './add_filter_modal';
 
 const QueryStringInput = withKibana(QueryStringInputUI);
 
 // @internal
 export interface QueryBarTopRowProps {
   query?: Query;
+  filters: Filter[];
+  onFiltersUpdated?: (filters: Filter[]) => void;
   onSubmit: (payload: { dateRange: TimeRange; query?: Query }) => void;
   onChange: (payload: { dateRange: TimeRange; query?: Query }) => void;
   onRefresh?: (payload: { dateRange: TimeRange }) => void;
   dataTestSubj?: string;
   disableAutoFocus?: boolean;
   screenTitle?: string;
-  indexPatterns?: Array<IIndexPattern | string>;
+  indexPatterns?: IIndexPattern[];
   isLoading?: boolean;
   prepend?: React.ComponentProps<typeof EuiFieldText>['prepend'];
   showQueryInput?: boolean;
@@ -66,6 +74,8 @@ export interface QueryBarTopRowProps {
 export default function QueryBarTopRow(props: QueryBarTopRowProps) {
   const [isDateRangeInvalid, setIsDateRangeInvalid] = useState(false);
   const [isQueryInputFocused, setIsQueryInputFocused] = useState(false);
+  const [isAddFilterPopoverOpen, setIsAddFilterPopoverOpen] = useState(false);
+  const [isAddFilterModalOpen, setIsAddFilterModalOpen] = useState(false);
 
   const kibana = useKibana<IDataPluginServices>();
   const { uiSettings, storage, appName } = kibana.services;
@@ -104,6 +114,16 @@ export default function QueryBarTopRow(props: QueryBarTopRowProps) {
 
   function onChangeQueryInputFocus(isFocused: boolean) {
     setIsQueryInputFocused(isFocused);
+  }
+
+  // const onAddFilterClick = () => setIsAddFilterPopoverOpen(!isAddFilterPopoverOpen);
+  const onAddFilterClick = () => setIsAddFilterModalOpen(!isAddFilterModalOpen);
+  function onAdd(filter: Filter) {
+    // setIsAddFilterPopoverOpen(false);
+    setIsAddFilterModalOpen(false);
+
+    const filters = [...props.filters, filter];
+    props?.onFiltersUpdated?.(filters);
   }
 
   function onTimeChange({
@@ -195,6 +215,64 @@ export default function QueryBarTopRow(props: QueryBarTopRowProps) {
     );
   }
 
+  function renderAddFilter() {
+    const isPinned = uiSettings!.get(UI_SETTINGS.FILTERS_PINNED_BY_DEFAULT);
+    const [indexPattern] = props?.indexPatterns || [];
+    const index = indexPattern && indexPattern.id;
+    const newFilter = buildEmptyFilter(isPinned, index);
+
+    const button = (
+      <EuiButtonIcon
+        display="fill"
+        iconType="plusInCircleFilled"
+        aria-label="Add filter"
+        data-test-subj="addFilter"
+        onClick={onAddFilterClick}
+        size="m"
+        color="text"
+      />
+    );
+
+    return (
+      <EuiFlexItem grow={false}>
+        {button}
+        {isAddFilterModalOpen && (
+          <AddFilterModal
+            onCancel={() => setIsAddFilterModalOpen(false)}
+            filter={newFilter}
+            indexPatterns={props.indexPatterns!}
+            onSubmit={onAdd}
+            timeRangeForSuggestionsOverride={props.timeRangeForSuggestionsOverride}
+          />
+        )}
+        {/* <EuiPopover
+          id="addFilterPopover"
+          button={button}
+          isOpen={isAddFilterPopoverOpen}
+          closePopover={() => setIsAddFilterPopoverOpen(false)}
+          anchorPosition="downLeft"
+          panelPaddingSize="none"
+          initialFocus=".filterEditor__hiddenItem"
+          ownFocus
+          repositionOnScroll
+        >
+          <EuiFlexItem grow={false}>
+            <div style={{ width: FILTER_EDITOR_WIDTH, maxWidth: '100%' }}>
+              <FilterEditor
+                filter={newFilter}
+                indexPatterns={props.indexPatterns!}
+                onSubmit={onAdd}
+                onCancel={() => setIsAddFilterPopoverOpen(false)}
+                key={JSON.stringify(newFilter)}
+                timeRangeForSuggestionsOverride={props.timeRangeForSuggestionsOverride}
+              />
+            </div>
+          </EuiFlexItem>
+        </EuiPopover> */}
+      </EuiFlexItem>
+    );
+  }
+
   function renderSharingMetaFields() {
     const { from, to } = getDateRange();
     const dateRangePretty = prettyDuration(
@@ -223,13 +301,23 @@ export default function QueryBarTopRow(props: QueryBarTopRowProps) {
     const button = props.customSubmitButton ? (
       React.cloneElement(props.customSubmitButton, { onClick: onClickSubmitButton })
     ) : (
-      <EuiSuperUpdateButton
-        needsUpdate={props.isDirty}
+      // <EuiSuperUpdateButton
+      //   needsUpdate={props.isDirty}
+      //   isDisabled={isDateRangeInvalid}
+      //   isLoading={props.isLoading}
+      //   onClick={onClickSubmitButton}
+      //   fill={false}
+      //   data-test-subj="querySubmitButton"
+      // />
+      <EuiButtonIcon
+        display="fill"
         isDisabled={isDateRangeInvalid}
-        isLoading={props.isLoading}
-        onClick={onClickSubmitButton}
-        fill={false}
+        iconType={props.isDirty ? 'push' : 'refresh'}
+        aria-label="Update"
         data-test-subj="querySubmitButton"
+        onClick={onClickSubmitButton}
+        size="m"
+        color={props.isDirty ? 'success' : 'primary'}
       />
     );
 
@@ -312,6 +400,7 @@ export default function QueryBarTopRow(props: QueryBarTopRowProps) {
       justifyContent="flexEnd"
     >
       {renderQueryInput()}
+      {renderAddFilter()}
       {renderSharingMetaFields()}
       <EuiFlexItem grow={false}>{renderUpdateButton()}</EuiFlexItem>
     </EuiFlexGroup>

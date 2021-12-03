@@ -29,6 +29,7 @@ class PhrasesValuesInputUI extends PhraseSuggestorUI<Props> {
     return (
       <EuiFormRow
         fullWidth={fullWidth}
+        display="columnCompressed"
         label={intl.formatMessage({
           id: 'data.filter.filterEditor.valuesSelectLabel',
           defaultMessage: 'Values',

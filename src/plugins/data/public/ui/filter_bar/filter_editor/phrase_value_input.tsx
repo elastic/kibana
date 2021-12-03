@@ -27,6 +27,7 @@ class PhraseValueInputUI extends PhraseSuggestorUI<Props> {
     return (
       <EuiFormRow
         fullWidth={this.props.fullWidth}
+        display="columnCompressed"
         label={this.props.intl.formatMessage({
           id: 'data.filter.filterEditor.valueInputLabel',
           defaultMessage: 'Value',

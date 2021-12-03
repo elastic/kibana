@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 
 import classNames from 'classnames';
 import {
-  EuiTextArea,
+  // EuiTextArea,
   EuiOutsideClickDetector,
   PopoverAnchorPosition,
   EuiFlexGroup,
@@ -22,6 +22,7 @@ import {
   EuiPortal,
   EuiIcon,
   EuiIconProps,
+  EuiFieldSearch,
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -282,7 +283,7 @@ export default class QueryStringInputUI extends Component<Props, State> {
     this.onChange({ query: value, language: this.props.query.language });
   };
 
-  private onInputChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
+  private onInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = this.formatTextAreaValue(event.target.value);
     this.onQueryStringChange(value);
     if (event.target.value === '') {
@@ -727,11 +728,32 @@ export default class QueryStringInputUI extends Component<Props, State> {
               className={inputWrapClassName}
               ref={this.queryBarInputDivRefInstance}
             >
-              <EuiTextArea
+              <EuiFieldSearch
                 placeholder={
                   this.props.placeholder ||
                   i18n.translate('data.query.queryBar.searchInputPlaceholder', {
-                    defaultMessage: 'Search',
+                    defaultMessage: 'Start typing to search or filter...',
+                  })
+                }
+                value={this.forwardNewValueIfNeeded(this.getQueryString())}
+                inputRef={(node: any) => {
+                  if (node) {
+                    this.inputRef = node;
+                  }
+                }}
+                data-test-subj={this.props.dataTestSubj || 'queryInput'}
+                isInvalid={this.props.isInvalid}
+                onChange={this.onInputChange}
+                fullWidth
+                autoFocus={
+                  this.props.onChangeQueryInputFocus ? false : !this.props.disableAutoFocus
+                }
+              />
+              {/* <EuiTextArea
+                placeholder={
+                  this.props.placeholder ||
+                  i18n.translate('data.query.queryBar.searchInputPlaceholder', {
+                    defaultMessage: 'Start typing to search or filter...',
                   })
                 }
                 value={this.forwardNewValueIfNeeded(this.getQueryString())}
@@ -771,7 +793,7 @@ export default class QueryStringInputUI extends Component<Props, State> {
                 isInvalid={this.props.isInvalid}
               >
                 {this.forwardNewValueIfNeeded(this.getQueryString())}
-              </EuiTextArea>
+              </EuiTextArea> */}
               {this.props.iconType ? (
                 <div className="euiFormControlLayoutIcons">
                   <EuiIcon

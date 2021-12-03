@@ -11,12 +11,12 @@ import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n-react';
 import {
   buildEmptyFilter,
   Filter,
-  enableFilter,
-  disableFilter,
-  pinFilter,
-  toggleFilterDisabled,
-  toggleFilterNegated,
-  unpinFilter,
+  // enableFilter,
+  // disableFilter,
+  // pinFilter,
+  // toggleFilterDisabled,
+  // toggleFilterNegated,
+  // unpinFilter,
 } from '@kbn/es-query';
 import classNames from 'classnames';
 import React, { useState, useRef } from 'react';
@@ -24,7 +24,7 @@ import React, { useState, useRef } from 'react';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { FilterEditor } from './filter_editor';
 import { FILTER_EDITOR_WIDTH, FilterItem } from './filter_item';
-import { FilterOptions } from './filter_options';
+// import { FilterOptions } from './filter_options';
 import { useKibana } from '../../../../kibana_react/public';
 import { IDataPluginServices, IIndexPattern } from '../..';
 
@@ -148,46 +148,46 @@ function FilterBarUI(props: Props) {
     onFiltersUpdated(filters);
   }
 
-  function onEnableAll() {
-    reportUiCounter?.(METRIC_TYPE.CLICK, `filter:enable_all`);
-    const filters = props.filters.map(enableFilter);
-    onFiltersUpdated(filters);
-  }
+  // function onEnableAll() {
+  //   reportUiCounter?.(METRIC_TYPE.CLICK, `filter:enable_all`);
+  //   const filters = props.filters.map(enableFilter);
+  //   onFiltersUpdated(filters);
+  // }
 
-  function onDisableAll() {
-    reportUiCounter?.(METRIC_TYPE.CLICK, `filter:disable_all`);
-    const filters = props.filters.map(disableFilter);
-    onFiltersUpdated(filters);
-  }
+  // function onDisableAll() {
+  //   reportUiCounter?.(METRIC_TYPE.CLICK, `filter:disable_all`);
+  //   const filters = props.filters.map(disableFilter);
+  //   onFiltersUpdated(filters);
+  // }
 
-  function onPinAll() {
-    reportUiCounter?.(METRIC_TYPE.CLICK, `filter:pin_all`);
-    const filters = props.filters.map(pinFilter);
-    onFiltersUpdated(filters);
-  }
+  // function onPinAll() {
+  //   reportUiCounter?.(METRIC_TYPE.CLICK, `filter:pin_all`);
+  //   const filters = props.filters.map(pinFilter);
+  //   onFiltersUpdated(filters);
+  // }
 
-  function onUnpinAll() {
-    reportUiCounter?.(METRIC_TYPE.CLICK, `filter:unpin_all`);
-    const filters = props.filters.map(unpinFilter);
-    onFiltersUpdated(filters);
-  }
+  // function onUnpinAll() {
+  //   reportUiCounter?.(METRIC_TYPE.CLICK, `filter:unpin_all`);
+  //   const filters = props.filters.map(unpinFilter);
+  //   onFiltersUpdated(filters);
+  // }
 
-  function onToggleAllNegated() {
-    reportUiCounter?.(METRIC_TYPE.CLICK, `filter:invert_all`);
-    const filters = props.filters.map(toggleFilterNegated);
-    onFiltersUpdated(filters);
-  }
+  // function onToggleAllNegated() {
+  //   reportUiCounter?.(METRIC_TYPE.CLICK, `filter:invert_all`);
+  //   const filters = props.filters.map(toggleFilterNegated);
+  //   onFiltersUpdated(filters);
+  // }
 
-  function onToggleAllDisabled() {
-    reportUiCounter?.(METRIC_TYPE.CLICK, `filter:toggle_all`);
-    const filters = props.filters.map(toggleFilterDisabled);
-    onFiltersUpdated(filters);
-  }
+  // function onToggleAllDisabled() {
+  //   reportUiCounter?.(METRIC_TYPE.CLICK, `filter:toggle_all`);
+  //   const filters = props.filters.map(toggleFilterDisabled);
+  //   onFiltersUpdated(filters);
+  // }
 
-  function onRemoveAll() {
-    reportUiCounter?.(METRIC_TYPE.CLICK, `filter:remove_all`);
-    onFiltersUpdated([]);
-  }
+  // function onRemoveAll() {
+  //   reportUiCounter?.(METRIC_TYPE.CLICK, `filter:remove_all`);
+  //   onFiltersUpdated([]);
+  // }
 
   const classes = classNames('globalFilterBar', props.className);
 
@@ -198,7 +198,7 @@ function FilterBarUI(props: Props) {
       alignItems="flexStart"
       responsive={false}
     >
-      <EuiFlexItem className="globalFilterGroup__branch" grow={false}>
+      {/* <EuiFlexItem className="globalFilterGroup__branch" grow={false}>
         <FilterOptions
           onEnableAll={onEnableAll}
           onDisableAll={onDisableAll}
@@ -208,7 +208,7 @@ function FilterBarUI(props: Props) {
           onToggleAllDisabled={onToggleAllDisabled}
           onRemoveAll={onRemoveAll}
         />
-      </EuiFlexItem>
+      </EuiFlexItem> */}
 
       <EuiFlexItem className="globalFilterGroup__filterFlexItem">
         <EuiFlexGroup
@@ -221,7 +221,7 @@ function FilterBarUI(props: Props) {
           tabIndex={-1}
         >
           {renderItems()}
-          {renderAddFilter()}
+          {/* {renderAddFilter()} */}
         </EuiFlexGroup>
       </EuiFlexItem>
     </EuiFlexGroup>

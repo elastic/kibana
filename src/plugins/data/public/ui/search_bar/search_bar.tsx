@@ -14,7 +14,16 @@ import { get, isEqual } from 'lodash';
 import { EuiIconProps } from '@elastic/eui';
 
 import { METRIC_TYPE } from '@kbn/analytics';
-import { Query, Filter } from '@kbn/es-query';
+import {
+  Query,
+  Filter,
+  enableFilter,
+  disableFilter,
+  pinFilter,
+  toggleFilterDisabled,
+  toggleFilterNegated,
+  unpinFilter,
+} from '@kbn/es-query';
 import { withKibana, KibanaReactContextValue } from '../../../../kibana_react/public';
 
 import QueryBarTopRow from '../query_string_input/query_bar_top_row';
@@ -22,6 +31,7 @@ import { SavedQueryAttributes, TimeHistoryContract, SavedQuery } from '../../que
 import { IDataPluginServices } from '../../types';
 import { TimeRange, IIndexPattern } from '../../../common';
 import { FilterBar } from '../filter_bar/filter_bar';
+import { FilterOptions } from '../filter_bar/filter_options';
 import { SavedQueryMeta, SaveQueryForm } from '../saved_query_form';
 import { SavedQueryManagementComponent } from '../saved_query_management';
 
@@ -340,6 +350,40 @@ class SearchBarUI extends Component<SearchBarProps, State> {
     }
   };
 
+  public onEnableAll = () => {
+    const filters = this.props?.filters?.map(enableFilter);
+    this.props?.onFiltersUpdated?.(filters!);
+  };
+
+  public onDisableAll = () => {
+    const filters = this.props?.filters?.map(disableFilter);
+    this.props?.onFiltersUpdated?.(filters!);
+  };
+
+  public onPinAll = () => {
+    const filters = this.props?.filters?.map(pinFilter);
+    this.props.onFiltersUpdated?.(filters!);
+  };
+
+  public onUnpinAll = () => {
+    const filters = this.props?.filters?.map(unpinFilter);
+    this.props.onFiltersUpdated?.(filters!);
+  };
+
+  public onToggleAllNegated = () => {
+    const filters = this.props?.filters?.map(toggleFilterNegated);
+    this.props.onFiltersUpdated?.(filters!);
+  };
+
+  public onToggleAllDisabled = () => {
+    const filters = this.props?.filters?.map(toggleFilterDisabled);
+    this.props.onFiltersUpdated?.(filters!);
+  };
+
+  public onRemoveAll = () => {
+    this.props.onFiltersUpdated?.([]);
+  };
+
   public render() {
     const savedQueryManagement = this.state.query && this.props.onClearSavedQuery && (
       <SavedQueryManagementComponent
@@ -353,6 +397,18 @@ class SearchBarUI extends Component<SearchBarProps, State> {
       />
     );
 
+    const filterOptions = this.shouldRenderFilterBar() ? (
+      <FilterOptions
+        onEnableAll={this.onEnableAll}
+        onDisableAll={this.onDisableAll}
+        onPinAll={this.onPinAll}
+        onUnpinAll={this.onUnpinAll}
+        onToggleAllNegated={this.onToggleAllNegated}
+        onToggleAllDisabled={this.onToggleAllDisabled}
+        onRemoveAll={this.onRemoveAll}
+      />
+    ) : undefined;
+
     const timeRangeForSuggestionsOverride = this.props.showDatePicker ? undefined : false;
 
     let queryBar;
@@ -361,11 +417,13 @@ class SearchBarUI extends Component<SearchBarProps, State> {
         <QueryBarTopRow
           timeHistory={this.props.timeHistory}
           query={this.state.query}
+          filters={this.props.filters!}
+          onFiltersUpdated={this.props.onFiltersUpdated}
           screenTitle={this.props.screenTitle}
           onSubmit={this.onQueryBarSubmit}
           indexPatterns={this.props.indexPatterns}
           isLoading={this.props.isLoading}
-          prepend={this.props.showFilterBar ? savedQueryManagement : undefined}
+          prepend={this.props.showFilterBar ? filterOptions : undefined}
           showDatePicker={this.props.showDatePicker}
           dateRangeFrom={this.state.dateRangeFrom}
           dateRangeTo={this.state.dateRangeTo}
