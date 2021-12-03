@@ -481,7 +481,7 @@ export class ActionsClient {
     );
 
     try {
-      await this.connectorTokenClient.delete({ connectorId: id });
+      await this.connectorTokenClient.deleteConnectorTokens({ connectorId: id });
     } catch (error) {
       this.auditLogger?.log(
         connectorAuditEvent({

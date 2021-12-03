@@ -194,14 +194,15 @@ export class ConnectorTokenClient {
           tokenType ?? 'access_token'
         }". Error: ${err.message}`
       );
+      await this.deleteConnectorTokens({ connectorId });
       return null;
     }
   }
 
   /**
-   * Delete connector token
+   * Delete all connector tokens
    */
-  public async delete({ connectorId }: { connectorId: string }) {
+  public async deleteConnectorTokens({ connectorId }: { connectorId: string }) {
     try {
       const result = await this.unsecuredSavedObjectsClient.find<ConnectorToken>({
         type: CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,

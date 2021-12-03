@@ -290,7 +290,7 @@ describe('delete()', () => {
       ],
     };
     unsecuredSavedObjectsClient.find.mockResolvedValueOnce(findResult);
-    const result = await connectorTokenClient.delete({ connectorId: '1' });
+    const result = await connectorTokenClient.deleteConnectorTokens({ connectorId: '1' });
     expect(JSON.stringify(result)).toEqual(JSON.stringify([Symbol(), Symbol()]));
     expect(unsecuredSavedObjectsClient.delete).toHaveBeenCalledTimes(2);
     expect(unsecuredSavedObjectsClient.delete.mock.calls[0]).toMatchInlineSnapshot(`
