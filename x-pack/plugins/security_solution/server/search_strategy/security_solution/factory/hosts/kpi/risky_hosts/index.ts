@@ -8,7 +8,8 @@
 import { getOr } from 'lodash/fp';
 
 import type { IEsSearchResponse } from '../../../../../../../../../../src/plugins/data/common';
-import type { HostsKpiQueries } from '../../../../../../../common/search_strategy/security_solution/hosts';
+import type { HostsKpiQueries } from '../../../../../../../common/search_strategy';
+
 import type {
   HostsKpiRiskyHostsRequestOptions,
   HostsKpiRiskyHostsStrategyResponse,

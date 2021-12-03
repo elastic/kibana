@@ -6,7 +6,7 @@
  */
 import { noop } from 'lodash';
 import { useEffect } from 'react';
-import type { FactoryQueryTypes, StrategyResponseType } from '../../../common';
+import type { FactoryQueryTypes, StrategyResponseType } from '../../../common/search_strategy';
 import { getInspectResponse } from '../../helpers';
 import { useGlobalTime } from '../containers/use_global_time';
 import type { Refetch, RefetchKql } from '../store/inputs/model';

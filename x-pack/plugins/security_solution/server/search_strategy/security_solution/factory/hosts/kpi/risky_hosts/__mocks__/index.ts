@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import { HostsKpiQueries } from '../../../../../../../../common';
-import { HostsKpiRiskyHostsRequestOptions } from '../../../../../../../../common/search_strategy';
+import {
+  HostsKpiQueries,
+  HostsKpiRiskyHostsRequestOptions,
+} from '../../../../../../../../common/search_strategy';
 
 export const mockOptions: HostsKpiRiskyHostsRequestOptions = {
   defaultIndex: [

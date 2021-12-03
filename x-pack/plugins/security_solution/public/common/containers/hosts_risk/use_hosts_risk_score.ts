@@ -13,7 +13,7 @@ import { useAppToasts } from '../../hooks/use_app_toasts';
 import { useKibana } from '../../lib/kibana';
 import { inputsActions } from '../../store/actions';
 import { isIndexNotFoundError } from '../../utils/exceptions';
-import type { HostsRiskScore } from '../../../../common';
+import { HostsRiskScore } from '../../../../common/search_strategy';
 import { useHostsRiskScoreComplete } from './use_hosts_risk_score_complete';
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 import { getHostRiskIndex } from '../../../helpers';

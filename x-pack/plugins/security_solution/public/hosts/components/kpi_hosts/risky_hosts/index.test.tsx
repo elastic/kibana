@@ -11,7 +11,7 @@ import { render } from '@testing-library/react';
 
 import { RiskyHosts } from './';
 import { TestProviders } from '../../../../common/mock';
-import { HostsKpiRiskyHostsStrategyResponse } from '../../../../../common';
+import { HostsKpiRiskyHostsStrategyResponse } from '../../../../../common/search_strategy';
 
 jest.mock('../../../containers/kpi_hosts/risky_hosts');
 
