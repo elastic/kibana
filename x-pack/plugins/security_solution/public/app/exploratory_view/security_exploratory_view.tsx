@@ -11,18 +11,25 @@ import {
   getSecurityKPIConfig,
   getSecurityEventOutcomeKPIConfig,
   getSecurityUniqueIpsKPIConfig,
+  getSingleMetricConfig,
 } from './kpi_over_time_config';
 import { RenderAppProps } from '../types';
 import { getSecurityAlertsKPIConfig } from './alert_kpi_over_time_config';
 
 export const reportConfigMap = {
-  security: [getSecurityKPIConfig, getSecurityEventOutcomeKPIConfig, getSecurityUniqueIpsKPIConfig],
+  security: [
+    getSecurityKPIConfig,
+    getSecurityEventOutcomeKPIConfig,
+    getSecurityUniqueIpsKPIConfig,
+    getSingleMetricConfig,
+  ],
   securityAlerts: [getSecurityAlertsKPIConfig],
 };
 
 export const indexPatternList = {
   security:
-    'apm-*-transaction*,traces-apm*,auditbeat-*,endgame-*,filebeat-*,logs-*,packetbeat-*,winlogbeat-*,.alerts-security.alerts-default',
+    'security,apm-*-transaction*,traces-apm*,remote_cluster:auditbeat-*,endgame-*,remote_cluster:filebeat-*,remote_cluster:logs-*,packetbeat-*,winlogbeat-*,.alerts-security.alerts-default',
+  // 'apm-*-transaction*,traces-apm*,auditbeat-*,endgame-*,filebeat-*,logs-*,packetbeat-*,winlogbeat-*,.alerts-security.alerts-default',
   securityAlerts: '.alerts-security.alerts-default-*',
 };
 

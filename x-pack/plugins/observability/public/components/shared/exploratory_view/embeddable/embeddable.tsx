@@ -73,7 +73,7 @@ export default function Embeddable({
   if (layerConfigs.length < 1) {
     return null;
   }
-  const lensAttributes = new LensAttributes(layerConfigs);
+  const lensAttributes = new LensAttributes(layerConfigs, reportType);
 
   if (!LensComponent) {
     return <EuiText>No lens component</EuiText>;

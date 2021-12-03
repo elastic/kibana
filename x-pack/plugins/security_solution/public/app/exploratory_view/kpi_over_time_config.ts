@@ -70,7 +70,7 @@ export function getSecurityKPIConfig(_config: ConfigProps): SeriesConfig {
         columnFilters: [
           {
             language: 'kuery',
-            query: `event.outcome: success and event.category: "authentication"`,
+            query: `event.outcome: "success" and event.category: "authentication"`,
           },
         ],
       },
@@ -81,7 +81,7 @@ export function getSecurityKPIConfig(_config: ConfigProps): SeriesConfig {
         columnFilters: [
           {
             language: 'kuery',
-            query: `event.outcome: failure and event.category: "authentication"`,
+            query: `event.outcome: "failure" and event.category: "authentication"`,
           },
         ],
       },
@@ -197,6 +197,37 @@ export function getSecurityUniqueIpsKPIConfig(_config: ConfigProps): SeriesConfi
         paramFilters: [
           { label: 'Dest', input: { query: 'destination.ip : *', language: 'kuery' } },
         ],
+      },
+    ],
+  };
+}
+
+export function getSingleMetricConfig(_config: ConfigProps): SeriesConfig {
+  return {
+    reportType: 'singleMetric',
+    metricOptions: [
+      {
+        id: 'unique_host',
+        field: 'host.name',
+        label: 'Hosts',
+      },
+      {
+        id: 'auth_success',
+        field: 'Records_auth_success',
+        label: 'Success',
+        columnFilter: {
+          language: 'kuery',
+          query: `event.outcome: "success" and event.category: "authentication"`,
+        },
+      },
+      {
+        id: 'auth_failure',
+        field: 'Records_auth_failure',
+        label: 'Failure',
+        columnFilter: {
+          language: 'kuery',
+          query: `event.outcome: "failure" and event.category: "authentication"`,
+        },
       },
     ],
   };

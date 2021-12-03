@@ -63,6 +63,7 @@ function buildNumberColumn(sourceField: string) {
 export const parseCustomFieldName = (seriesConfig: SeriesConfig, selectedMetricField?: string) => {
   let columnType;
   let columnFilters;
+  let columnFilter;
   let paramFilters;
   let timeScale;
   let columnLabel;
@@ -76,6 +77,7 @@ export const parseCustomFieldName = (seriesConfig: SeriesConfig, selectedMetricF
       );
       columnType = currField?.columnType;
       columnFilters = currField?.columnFilters;
+      columnFilter = currField?.columnFilter;
       timeScale = currField?.timeScale;
       columnLabel = currField?.label;
       paramFilters = currField?.paramFilters;
@@ -89,6 +91,7 @@ export const parseCustomFieldName = (seriesConfig: SeriesConfig, selectedMetricF
     paramFilters,
     timeScale,
     columnLabel,
+    columnFilter,
   };
 };
 
@@ -111,12 +114,14 @@ export class LensAttributes {
   visualization: XYState;
   layerConfigs: LayerConfig[];
   isMultiSeries: boolean;
+  reportType: string;
 
-  constructor(layerConfigs: LayerConfig[]) {
+  constructor(layerConfigs: LayerConfig[], reportType: string) {
     this.layers = {};
+    this.reportType = reportType;
 
     layerConfigs.forEach(({ seriesConfig, operationType }) => {
-      if (operationType) {
+      if (operationType && reportType !== 'singleMetric') {
         seriesConfig.yAxisColumns.forEach((yAxisColumn) => {
           if (typeof yAxisColumn.operationType !== undefined) {
             yAxisColumn.operationType =
@@ -128,7 +133,11 @@ export class LensAttributes {
 
     this.layerConfigs = layerConfigs;
     this.isMultiSeries = layerConfigs.length > 1;
-    this.layers = this.getLayers();
+    if (reportType === 'singleMetric') {
+      this.layers = this.getSingleMetricLayer();
+    } else {
+      this.layers = this.getLayers();
+    }
     this.visualization = this.getXyState();
   }
 
@@ -747,7 +756,49 @@ export class LensAttributes {
     return layers;
   }
 
+  getSingleMetricLayer() {
+    const layerConfig = this.layerConfigs[0];
+    const { columnFilter } = parseCustomFieldName(
+      layerConfig.seriesConfig,
+      layerConfig.selectedMetricField
+    );
+
+    const getSourceField = () => {
+      if (layerConfig.selectedMetricField.startsWith('Records')) {
+        return 'Records';
+      }
+      return layerConfig.selectedMetricField;
+    };
+
+    return {
+      layer0: {
+        columns: {
+          'layer-0-column-1': {
+            label: '',
+            dataType: 'number',
+            operationType: layerConfig.operationType,
+            scale: 'ratio',
+            sourceField: getSourceField(),
+            isBucketed: false,
+            filter: columnFilter,
+          },
+        },
+        columnOrder: ['layer-0-column-1'],
+        incompleteColumns: {},
+      },
+    };
+  }
+
   getXyState(): XYState {
+    if (this.reportType === 'singleMetric') {
+      return {
+        accessor: 'layer-0-column-1',
+        layerId: 'layer0',
+        layerType: 'data',
+        layers: [],
+      };
+    }
+
     return {
       legend: { isVisible: true, showSingleSeries: true, position: 'right' },
       valueLabels: 'hide',
@@ -808,7 +859,7 @@ export class LensAttributes {
     return {
       title: 'Prefilled from exploratory view app',
       description: String(refresh),
-      visualizationType: 'lnsXY',
+      visualizationType: this.reportType === 'singleMetric' ? 'lnsMetric' : 'lnsXY',
       references: [
         ...uniqueIndexPatternsIds.map((patternId) => ({
           id: patternId!,

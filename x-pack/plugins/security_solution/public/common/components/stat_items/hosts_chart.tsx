@@ -25,7 +25,26 @@ export const HostsChart = ({ title }: Props) => {
 
   return (
     <EuiFlexGroup>
-      <EuiFlexItem style={{ height: 200 }}>
+      <EuiFlexItem style={{ height: 400 }}>
+        <ExploratoryViewEmbeddable
+          appId="security"
+          title={'Hosts'}
+          reportConfigMap={reportConfigMap}
+          dataTypesIndexPatterns={indexPatternList}
+          reportType="singleMetric"
+          attributes={[
+            {
+              reportDefinitions: {
+                'host.name': ['ALL_VALUES'],
+              },
+              name: 'hosts',
+              dataType: 'security',
+              selectedMetricField: 'host.name',
+              operationType: 'unique_count',
+              time: { from: 'now-24h', to: 'now' },
+            },
+          ]}
+        />
         <ExploratoryViewEmbeddable
           appId="security"
           title={'Hosts'}
@@ -51,7 +70,26 @@ export const HostsChart = ({ title }: Props) => {
           }}
         />
       </EuiFlexItem>
-      <EuiFlexItem style={{ height: 200 }}>
+      <EuiFlexItem style={{ height: 400 }}>
+        <ExploratoryViewEmbeddable
+          appId="security"
+          title={'Success'}
+          reportConfigMap={reportConfigMap}
+          dataTypesIndexPatterns={indexPatternList}
+          reportType="singleMetric"
+          attributes={[
+            {
+              reportDefinitions: {
+                'host.name': ['ALL_VALUES'],
+              },
+              name: 'Success',
+              dataType: 'security',
+              selectedMetricField: 'Records_auth_success',
+              time: { from: 'now-24h', to: 'now' },
+              operationType: 'count',
+            },
+          ]}
+        />
         <ExploratoryViewEmbeddable
           appId="security"
           title={'User authentications'}
