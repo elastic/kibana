@@ -18,6 +18,7 @@ import { setDefaultAutoFitToBounds } from '../../common/migrations/set_default_a
 import { addTypeToTermJoin } from '../../common/migrations/add_type_to_termjoin';
 import { moveAttribution } from '../../common/migrations/move_attribution';
 import { setEmsTmsDefaultModes } from '../../common/migrations/set_ems_tms_default_modes';
+import { renameLayerTypes } from '../../common/migrations/rename_layer_types';
 
 function logMigrationWarning(context, errorMsg, doc) {
   context.log.warning(
@@ -171,6 +172,19 @@ export const savedObjectMigrations = {
   '8.0.0': (doc, context) => {
     try {
       const attributes = setEmsTmsDefaultModes(doc);
+
+      return {
+        ...doc,
+        attributes,
+      };
+    } catch (e) {
+      logMigrationWarning(context, e.message, doc);
+      return doc;
+    }
+  },
+  '8.1.0': (doc, context) => {
+    try {
+      const attributes = renameLayerTypes(doc);
 
       return {
         ...doc,

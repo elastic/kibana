@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ITileLayerArguments, TileLayer } from './tile_layer';
+import { RasterTileLayer } from './raster_tile_layer';
 import { SOURCE_TYPES } from '../../../../common/constants';
 import { XYZTMSSourceDescriptor } from '../../../../common/descriptor_types';
 import { AbstractSource } from '../../sources/source';
@@ -34,22 +34,20 @@ class MockTileSource extends AbstractSource implements ITMSSource {
   }
 }
 
-describe('TileLayer', () => {
+describe('RasterTileLayer', () => {
   it('should use display-label from source', async () => {
     const source = new MockTileSource(sourceDescriptor);
 
-    const args: ITileLayerArguments = {
+    const layer: ILayer = new RasterTileLayer({
       source,
       layerDescriptor: { id: 'layerid', sourceDescriptor },
-    };
-
-    const layer: ILayer = new TileLayer(args);
+    });
     expect(await source.getDisplayName()).toEqual(await layer.getDisplayName());
   });
 
   it('should override with custom display-label if present', async () => {
     const source = new MockTileSource(sourceDescriptor);
-    const layer: ILayer = new TileLayer({
+    const layer: ILayer = new RasterTileLayer({
       source,
       layerDescriptor: { id: 'layerid', sourceDescriptor, label: 'custom' },
     });

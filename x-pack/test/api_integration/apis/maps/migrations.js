@@ -44,7 +44,7 @@ export default function ({ getService }) {
             type: 'index-pattern',
           },
         ]);
-        expect(resp.body.migrationVersion).to.eql({ map: '8.0.0' }); // migrtionVersion is derived from both "migrations" and "convertToMultiNamespaceVersion" fields when the object is registered
+        expect(resp.body.migrationVersion).to.eql({ map: '8.1.0' }); // migrtionVersion is derived from both "migrations" and "convertToMultiNamespaceVersion" fields when the object is registered
         expect(resp.body.attributes.layerListJSON.includes('indexPatternRefName')).to.be(true);
       });
 
@@ -90,7 +90,7 @@ export default function ({ getService }) {
         }
         expect(panels.length).to.be(1);
         expect(panels[0].type).to.be('map');
-        expect(panels[0].version).to.be('8.0.0');
+        expect(panels[0].version).to.be('8.1.0');
       });
     });
   });

@@ -126,7 +126,7 @@ export const getChoroplethAnomaliesLayer = (
       isTimeAware: true,
     },
     visible: false,
-    type: LAYER_TYPE.VECTOR,
+    type: LAYER_TYPE.GEOJSON_VECTOR,
   };
 };
 

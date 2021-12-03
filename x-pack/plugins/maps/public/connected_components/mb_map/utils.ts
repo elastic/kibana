@@ -11,7 +11,7 @@ import { TileMetaFeature } from '../../../common/descriptor_types';
 import { RGBAImage } from './image_utils';
 import { isGlDrawLayer } from './sort_layers';
 import { ILayer } from '../../classes/layers/layer';
-import { EmsSpriteSheet } from '../../classes/layers/vector_tile_layer/vector_tile_layer';
+import { EmsSpriteSheet } from '../../classes/layers/ems_vector_tile_layer/ems_vector_tile_layer';
 import { ES_MVT_META_LAYER_NAME } from '../../classes/layers/vector_layer/mvt_vector_layer/mvt_vector_layer';
 
 export function removeOrphanedSourcesAndLayers(

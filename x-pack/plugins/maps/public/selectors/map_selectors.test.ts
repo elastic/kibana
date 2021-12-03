@@ -8,7 +8,7 @@
 import { LAYER_STYLE_TYPE, LAYER_TYPE, SOURCE_TYPES } from '../../common/constants';
 
 jest.mock('../classes/layers/heatmap_layer', () => {});
-jest.mock('../classes/layers/vector_tile_layer/vector_tile_layer', () => {});
+jest.mock('../classes/layers/ems_vector_tile_layer/ems_vector_tile_layer', () => {});
 jest.mock('../classes/joins/inner_join', () => {});
 jest.mock('../kibana_services', () => ({
   getTimeFilter: () => ({
@@ -232,7 +232,7 @@ describe('getQueryableUniqueIndexPatternIds', () => {
     indexPatternId: string;
   }) {
     return {
-      type: LAYER_TYPE.VECTOR,
+      type: LAYER_TYPE.GEOJSON_VECTOR,
       style: {
         type: LAYER_STYLE_TYPE.VECTOR,
       },

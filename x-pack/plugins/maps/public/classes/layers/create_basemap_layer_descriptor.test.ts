@@ -53,7 +53,7 @@ describe('kibana.yml configured with map.tilemap.url', () => {
         type: 'KIBANA_TILEMAP',
       },
       style: { type: 'TILE' },
-      type: 'TILE',
+      type: 'RASTER_TILE',
       visible: true,
     });
   });
@@ -89,7 +89,7 @@ describe('EMS is enabled', () => {
         type: 'EMS_TMS',
       },
       style: { type: 'TILE' },
-      type: 'VECTOR_TILE',
+      type: 'EMS_VECTOR_TILE',
       visible: true,
     });
   });
