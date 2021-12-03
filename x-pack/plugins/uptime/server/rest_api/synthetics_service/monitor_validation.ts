@@ -1,0 +1,89 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { isLeft } from 'fp-ts/lib/Either';
+import { PathReporter } from 'io-ts/lib/PathReporter';
+
+import {
+  BrowserFields,
+  BrowserFieldsCodec,
+  ConfigKey,
+  DataStream,
+  DataStreamCodec,
+  HTTPFields,
+  HTTPFieldsCodec,
+  ICMPFields,
+  ICMPSimpleFieldsCodec,
+  MonitorFields,
+  TCPFields,
+  TCPFieldsCodec,
+} from '../../../common/runtime_types/monitor_management';
+
+type MonitorCodecType =
+  | typeof ICMPSimpleFieldsCodec
+  | typeof TCPFieldsCodec
+  | typeof HTTPFieldsCodec
+  | typeof BrowserFieldsCodec;
+
+const monitorTypeToCodecMap: Record<DataStream, MonitorCodecType> = {
+  [DataStream.ICMP]: ICMPSimpleFieldsCodec,
+  [DataStream.TCP]: TCPFieldsCodec,
+  [DataStream.HTTP]: HTTPFieldsCodec,
+  [DataStream.BROWSER]: BrowserFieldsCodec,
+};
+
+export type SyntheticsMonitor = ICMPFields | TCPFields | HTTPFields | BrowserFields;
+export type SyntheticsMonitorWithName = SyntheticsMonitor & { [ConfigKey.NAME]: string };
+
+/**
+ * Validates monitor fields with respect to the relevant Codec identified by object's 'type' property.
+ * @param monitorFields {MonitorFields} The mixed type representing the possible monitor payload from UI.
+ */
+export function validateMonitor(monitorFields: MonitorFields): {
+  valid: boolean;
+  reason: string;
+  details: string;
+  payload: object;
+} {
+  const { [ConfigKey.MONITOR_TYPE]: monitorType } = monitorFields;
+  const { [ConfigKey.NAME]: monitorName, ...monitor } = monitorFields;
+
+  const decodedType = DataStreamCodec.decode(monitorType);
+  if (isLeft(decodedType)) {
+    return {
+      valid: false,
+      reason: `Monitor type is invalid`,
+      details: PathReporter.report(decodedType).join(' | '),
+      payload: monitorFields,
+    };
+  }
+
+  const codec = monitorTypeToCodecMap[monitorType];
+
+  if (!codec) {
+    return {
+      valid: false,
+      reason: `Payload is not a valid monitor object`,
+      details: '',
+      payload: monitorFields,
+    };
+  }
+
+  // Cast it to ICMPCodec to satisfy typing. During runtime, correct codec will be used to decode.
+  const decodedMonitor = (codec as typeof ICMPSimpleFieldsCodec).decode(monitor);
+
+  if (isLeft(decodedMonitor)) {
+    return {
+      valid: false,
+      reason: `Monitor is not a valid monitor of type ${monitorType}`,
+      details: PathReporter.report(decodedMonitor).join(' | '),
+      payload: monitorFields,
+    };
+  }
+
+  return { valid: true, reason: '', details: '', payload: monitorFields };
+}
