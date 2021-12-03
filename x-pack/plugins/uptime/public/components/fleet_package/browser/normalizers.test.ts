@@ -5,62 +5,62 @@
  * 2.0.
  */
 
-import { ConfigKeys } from '../types';
+import { ConfigKey } from '../types';
 import { getThrottlingParamNormalizer, isThrottlingEnabledNormalizer } from './normalizers';
 import { defaultBrowserAdvancedFields } from '../contexts';
 
 describe('browser normalizers', () => {
   const makeThrottlingConfig = (value: string) => ({
-    [ConfigKeys.THROTTLING_CONFIG]: { value },
+    [ConfigKey.THROTTLING_CONFIG]: { value },
   });
 
   describe('throttlingToParameterNormalizer', () => {
     it('can extract download values', () => {
       const fields = makeThrottlingConfig('10d/5u/2.5l');
 
-      expect(getThrottlingParamNormalizer(ConfigKeys.DOWNLOAD_SPEED)(fields)).toEqual('10');
+      expect(getThrottlingParamNormalizer(ConfigKey.DOWNLOAD_SPEED)(fields)).toEqual('10');
     });
 
     it('can extract upload values', () => {
       const fields = makeThrottlingConfig('10d/5u/2.5l');
 
-      expect(getThrottlingParamNormalizer(ConfigKeys.UPLOAD_SPEED)(fields)).toEqual('5');
+      expect(getThrottlingParamNormalizer(ConfigKey.UPLOAD_SPEED)(fields)).toEqual('5');
     });
 
     it('can extract latency values', () => {
       const fields = makeThrottlingConfig('10d/5u/2.5l');
 
-      expect(getThrottlingParamNormalizer(ConfigKeys.LATENCY)(fields)).toEqual('2.5');
+      expect(getThrottlingParamNormalizer(ConfigKey.LATENCY)(fields)).toEqual('2.5');
     });
 
     it('returns default values when throttling is disabled', () => {
       const fields = makeThrottlingConfig('false');
 
-      expect(getThrottlingParamNormalizer(ConfigKeys.DOWNLOAD_SPEED)(fields)).toEqual(
-        defaultBrowserAdvancedFields[ConfigKeys.DOWNLOAD_SPEED]
+      expect(getThrottlingParamNormalizer(ConfigKey.DOWNLOAD_SPEED)(fields)).toEqual(
+        defaultBrowserAdvancedFields[ConfigKey.DOWNLOAD_SPEED]
       );
-      expect(getThrottlingParamNormalizer(ConfigKeys.UPLOAD_SPEED)(fields)).toEqual(
-        defaultBrowserAdvancedFields[ConfigKeys.UPLOAD_SPEED]
+      expect(getThrottlingParamNormalizer(ConfigKey.UPLOAD_SPEED)(fields)).toEqual(
+        defaultBrowserAdvancedFields[ConfigKey.UPLOAD_SPEED]
       );
-      expect(getThrottlingParamNormalizer(ConfigKeys.LATENCY)(fields)).toEqual(
-        defaultBrowserAdvancedFields[ConfigKeys.LATENCY]
+      expect(getThrottlingParamNormalizer(ConfigKey.LATENCY)(fields)).toEqual(
+        defaultBrowserAdvancedFields[ConfigKey.LATENCY]
       );
     });
 
     it("returns default values when the desired suffix doesn't exist", () => {
       const noUploadFields = makeThrottlingConfig('10d/2.5l');
-      expect(getThrottlingParamNormalizer(ConfigKeys.UPLOAD_SPEED)(noUploadFields)).toEqual(
-        defaultBrowserAdvancedFields[ConfigKeys.UPLOAD_SPEED]
+      expect(getThrottlingParamNormalizer(ConfigKey.UPLOAD_SPEED)(noUploadFields)).toEqual(
+        defaultBrowserAdvancedFields[ConfigKey.UPLOAD_SPEED]
       );
 
       const noDownloadFields = makeThrottlingConfig('10u/2.5l');
-      expect(getThrottlingParamNormalizer(ConfigKeys.DOWNLOAD_SPEED)(noDownloadFields)).toEqual(
-        defaultBrowserAdvancedFields[ConfigKeys.DOWNLOAD_SPEED]
+      expect(getThrottlingParamNormalizer(ConfigKey.DOWNLOAD_SPEED)(noDownloadFields)).toEqual(
+        defaultBrowserAdvancedFields[ConfigKey.DOWNLOAD_SPEED]
       );
 
       const noLatencyFields = makeThrottlingConfig('10d/5u');
-      expect(getThrottlingParamNormalizer(ConfigKeys.LATENCY)(noLatencyFields)).toEqual(
-        defaultBrowserAdvancedFields[ConfigKeys.LATENCY]
+      expect(getThrottlingParamNormalizer(ConfigKey.LATENCY)(noLatencyFields)).toEqual(
+        defaultBrowserAdvancedFields[ConfigKey.LATENCY]
       );
     });
   });
