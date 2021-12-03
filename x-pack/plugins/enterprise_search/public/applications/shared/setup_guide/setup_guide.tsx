@@ -37,17 +37,9 @@ interface Props {
   children: React.ReactNode;
   productName: string;
   productEuiIcon: 'logoAppSearch' | 'logoWorkplaceSearch' | 'logoEnterpriseSearch';
-  standardAuthLink?: string;
-  elasticsearchNativeAuthLink?: string;
 }
 
-export const SetupGuideLayout: React.FC<Props> = ({
-  children,
-  productName,
-  productEuiIcon,
-  standardAuthLink,
-  elasticsearchNativeAuthLink,
-}) => {
+export const SetupGuideLayout: React.FC<Props> = ({ children, productName, productEuiIcon }) => {
   const { cloud } = useValues(KibanaLogic);
   const isCloudEnabled = Boolean(cloud.isCloudEnabled);
   const cloudDeploymentLink = cloud.deploymentUrl || '';
@@ -81,11 +73,7 @@ export const SetupGuideLayout: React.FC<Props> = ({
             cloudDeploymentLink={cloudDeploymentLink}
           />
         ) : (
-          <SetupInstructions
-            productName={productName}
-            standardAuthLink={standardAuthLink}
-            elasticsearchNativeAuthLink={elasticsearchNativeAuthLink}
-          />
+          <SetupInstructions productName={productName} />
         )}
       </EuiPageBody>
     </EuiPage>
