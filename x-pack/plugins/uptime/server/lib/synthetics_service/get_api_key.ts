@@ -28,10 +28,15 @@ export const getAPIKeyForSyntheticsService = async ({
     includedHiddenTypes: [syntheticsServiceApiKey.name],
   });
 
-  const apiKey = await getSyntheticsServiceAPIKey(encryptedClient);
-  if (apiKey) {
-    return apiKey;
+  try {
+    const apiKey = await getSyntheticsServiceAPIKey(encryptedClient);
+    if (apiKey) {
+      return apiKey;
+    }
+  } catch (err) {
+    // TODO: figure out how to handle decryption errors
   }
+
   return await generateAndSaveAPIKey({ request, security, savedObjectsClient });
 };
 
@@ -61,7 +66,7 @@ export const generateAndSaveAPIKey = async ({
         cluster: ['monitor', 'read_ilm', 'read_pipeline'],
         index: [
           {
-            names: ['synthetics-*'],
+            names: ['synthetics-*', 'heartbeat-*'],
             privileges: ['view_index_metadata', 'create_doc', 'auto_configure'],
           },
         ],
