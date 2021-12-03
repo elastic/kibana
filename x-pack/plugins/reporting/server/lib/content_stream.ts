@@ -276,16 +276,18 @@ export class ContentStream extends Duplex {
     }
   }
 
-  private appendToBuffer(chunk: string | Buffer, encoding: BufferEncoding) {
-    const buffer = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk, encoding);
-    const tmp = Buffer.alloc(this.buffer.byteLength + buffer.byteLength);
-    tmp.set(this.buffer, 0);
-    tmp.set(buffer, this.buffer.byteLength);
-    return tmp;
+  private appendToCurrentBuffer(chunk: string | Buffer, encoding: BufferEncoding) {
+    const currentBuffer = this.buffer;
+    const bufferToAppend = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk, encoding);
+    const nextBuffer = Buffer.alloc(currentBuffer.byteLength + bufferToAppend.byteLength);
+    nextBuffer.set(currentBuffer, 0);
+    nextBuffer.set(bufferToAppend, currentBuffer.byteLength);
+
+    this.buffer = nextBuffer;
   }
 
   _write(chunk: Buffer | string, encoding: BufferEncoding, callback: Callback) {
-    this.appendToBuffer(chunk, encoding);
+    this.appendToCurrentBuffer(chunk, encoding);
 
     this.flushAllFullChunks()
       .then(() => callback())
