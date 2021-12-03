@@ -17,8 +17,11 @@ const APM_PUBLIC_TOKEN = 'Q5q5rWQEw6tKeirBpw';
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const functionalConfig = await readConfigFile(require.resolve('../functional/config'));
 
+  const homeTest = require.resolve('./tests/ftr/home.ts');
+  const testFiles = new Array(10).fill(homeTest);
+
   return {
-    testFiles: [require.resolve('./tests/ftr/home.ts')],
+    testFiles,
     services,
     pageObjects,
     servers: functionalConfig.get('servers'),

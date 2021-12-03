@@ -12,6 +12,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
 
   describe('Login', () => {
+    after(async () => {
+      await PageObjects.security.forceLogout();
+    });
+
     it('login and navigate to homepage', async () => {
       await PageObjects.common.navigateToApp('login');
 
