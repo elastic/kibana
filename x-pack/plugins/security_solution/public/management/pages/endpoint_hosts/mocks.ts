@@ -51,30 +51,6 @@ export const endpointMetadataHttpMocks = httpHandlerMockFactory<EndpointMetadata
     {
       id: 'metadataList',
       path: HOST_METADATA_LIST_ROUTE,
-      method: 'post',
-      handler: () => {
-        const generator = new EndpointDocGenerator('seed');
-
-        return {
-          hosts: Array.from({ length: 10 }, () => {
-            const endpoint = {
-              metadata: generator.generateHostMetadata(),
-              host_status: HostStatus.UNHEALTHY,
-            };
-
-            generator.updateCommonInfo();
-
-            return endpoint;
-          }),
-          total: 10,
-          request_page_size: 10,
-          request_page_index: 0,
-        };
-      },
-    },
-    {
-      id: 'metadataList',
-      path: HOST_METADATA_LIST_ROUTE,
       method: 'get',
       handler: () => {
         const generator = new EndpointDocGenerator('seed');

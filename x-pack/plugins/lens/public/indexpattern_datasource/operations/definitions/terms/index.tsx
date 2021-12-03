@@ -20,8 +20,12 @@ import {
 } from '@elastic/eui';
 import { uniq } from 'lodash';
 import { CoreStart } from 'kibana/public';
+import { buildEsQuery } from '@kbn/es-query';
 import { FieldStatsResponse } from '../../../../../common';
-import { AggFunctionsMapping, esQuery } from '../../../../../../../../src/plugins/data/public';
+import {
+  AggFunctionsMapping,
+  getEsQueryConfig,
+} from '../../../../../../../../src/plugins/data/public';
 import { buildExpressionFunction } from '../../../../../../../../src/plugins/expressions/public';
 import { updateColumnParam, isReferenced } from '../../layer_helpers';
 import { DataType, FrameDatasourceAPI } from '../../../../types';
@@ -96,11 +100,11 @@ function getDisallowedTermsMessage(
             {
               body: JSON.stringify({
                 fieldName,
-                dslQuery: esQuery.buildEsQuery(
+                dslQuery: buildEsQuery(
                   indexPattern,
                   frame.query,
                   frame.filters,
-                  esQuery.getEsQueryConfig(core.uiSettings)
+                  getEsQueryConfig(core.uiSettings)
                 ),
                 fromDate: frame.dateRange.fromDate,
                 toDate: frame.dateRange.toDate,

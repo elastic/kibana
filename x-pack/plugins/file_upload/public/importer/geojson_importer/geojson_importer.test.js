@@ -225,7 +225,7 @@ describe('toEsDoc', () => {
   test('should convert feature to geo_point ES document', () => {
     const esDoc = toEsDoc(FEATURE_COLLECTION.features[0], ES_FIELD_TYPES.GEO_POINT);
     expect(esDoc).toEqual({
-      coordinates: [-112.0372, 46.608058],
+      geometry: [-112.0372, 46.608058],
       population: 200,
     });
   });
@@ -233,7 +233,7 @@ describe('toEsDoc', () => {
   test('should convert feature to geo_shape ES document', () => {
     const esDoc = toEsDoc(FEATURE_COLLECTION.features[0], ES_FIELD_TYPES.GEO_SHAPE);
     expect(esDoc).toEqual({
-      coordinates: {
+      geometry: {
         type: 'Point',
         coordinates: [-112.0372, 46.608058],
       },
@@ -244,7 +244,7 @@ describe('toEsDoc', () => {
   test('should convert GeometryCollection feature to geo_shape ES document', () => {
     const esDoc = toEsDoc(GEOMETRY_COLLECTION_FEATURE, ES_FIELD_TYPES.GEO_SHAPE);
     expect(esDoc).toEqual({
-      coordinates: {
+      geometry: {
         type: 'GeometryCollection',
         geometries: [
           {
