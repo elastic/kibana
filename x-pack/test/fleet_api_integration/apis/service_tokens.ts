@@ -46,10 +46,7 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     it('should work with deprecated api', async () => {
-      const { body: apiResponse } = await supertest
-        .post(`/api/fleet/service-tokens`)
-        .set('kbn-xsrf', 'xxxx')
-        .expect(200);
+      await supertest.post(`/api/fleet/service-tokens`).set('kbn-xsrf', 'xxxx').expect(200);
     });
   });
 }

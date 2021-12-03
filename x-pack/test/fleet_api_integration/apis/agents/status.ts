@@ -85,7 +85,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('should work with deprecated api', async () => {
-      const { body: apiResponse } = await supertest.get(`/api/fleet/agent-status`).expect(200);
+      await supertest.get(`/api/fleet/agent-status`).expect(200);
     });
   });
 }
