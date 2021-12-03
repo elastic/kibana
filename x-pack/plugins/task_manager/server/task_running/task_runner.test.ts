@@ -1513,9 +1513,6 @@ describe('TaskManagerRunner', () => {
         counterType: 'taskManagerTaskRunner',
         incrementBy: 1,
       });
-      expect(logger.warn).toHaveBeenCalledWith(
-        `Skipping reschedule for task bar \"${id}\" due to the task expiring`
-      );
     });
   });
 
