@@ -93,6 +93,28 @@ export async function getAuthzFromRequest(req: KibanaRequest): Promise<FleetAuth
   });
 }
 
+interface Authz {
+  [k: string]: Authz | boolean;
+}
+
+function containsRequirement(authz: Authz, requirements: DeepPartialTruthy<Authz>) {
+  if (!authz) {
+    return false;
+  }
+  for (const key of Object.keys(requirements)) {
+    if (typeof requirements[key] !== 'undefined' && typeof requirements[key] === 'boolean') {
+      if (!authz[key]) {
+        return false;
+      }
+    } else if (
+      !containsRequirement(authz[key] as Authz, requirements[key] as DeepPartialTruthy<Authz>)
+    ) {
+      return false;
+    }
+  }
+  return true;
+}
+
 function hasRequiredFleetAuthzPrivilege(
   authz: FleetAuthz,
   {
@@ -109,28 +131,18 @@ function hasRequiredFleetAuthzPrivilege(
       return true;
     }
   }
-  if (fleetAuthz && typeof fleetAuthz.fleet !== 'undefined') {
-    for (const key of fleetAuthz.fleet) {
-      if (!authz.fleet[key as keyof FleetAuthz['fleet']]) {
-        return false;
-      }
-    }
-  }
-  if (fleetAuthz && typeof fleetAuthz.integrations !== 'undefined') {
-    for (const key of fleetAuthz.integrations) {
-      if (!authz.integrations[key as keyof FleetAuthz['integrations']]) {
-        return false;
-      }
-    }
+  if (fleetAuthz && !containsRequirement(authz as unknown as Authz, fleetAuthz)) {
+    return false;
   }
 
   return true;
 }
 
-interface FleetAuthzRequirements {
-  fleet?: Array<keyof FleetAuthz['fleet']>;
-  integrations?: Array<keyof FleetAuthz['integrations']>;
-}
+type DeepPartialTruthy<T> = {
+  [P in keyof T]?: T[P] extends boolean ? true : DeepPartialTruthy<T[P]>;
+};
+
+type FleetAuthzRequirements = DeepPartialTruthy<FleetAuthz>;
 
 type FleetAuthzRouteRegistrar<
   Method extends RouteMethod,
@@ -184,30 +196,26 @@ function deserializeAuthzConfig(tags: readonly string[]): FleetAuthzRouteConfig 
       fleetAllowFleetSetupPrivilege = true;
     }
 
-    const fleetMatches = tag.match(/^fleet:authz:fleet:([a-zA-Z]*)/);
-    if (fleetMatches) {
-      const role = fleetMatches[1];
-      if (!fleetAuthz) {
-        fleetAuthz = {};
-      }
-      if (!fleetAuthz.fleet) {
-        fleetAuthz.fleet = [];
-      }
-
-      fleetAuthz.fleet.push(role as keyof FleetAuthz['fleet']);
+    if (!fleetAuthz) {
+      fleetAuthz = {};
     }
-    const integrationMatches = tag.match(/^fleet:authz:integrations:([a-zA-Z]*)/);
-    if (integrationMatches) {
-      const role = integrationMatches[1];
-      if (!fleetAuthz) {
-        fleetAuthz = {};
-      }
-      if (!fleetAuthz.integrations) {
-        fleetAuthz.integrations = [];
-      }
 
-      fleetAuthz.integrations.push(role as keyof FleetAuthz['integrations']);
-    }
+    tag
+      .replace(/^fleet:authz:/, '')
+      .split(':')
+      .reduce((acc: any, key, idx, keys) => {
+        if (idx === keys.length + 1) {
+          acc[key] = true;
+
+          return acc;
+        }
+
+        if (!acc[key]) {
+          acc[key] = {};
+        }
+
+        return acc[key];
+      }, fleetAuthz);
   }
 
   return { fleetRequireSuperuser, fleetAllowFleetSetupPrivilege, fleetAuthz };
@@ -221,15 +229,19 @@ function serializeAuthzConfig(config: FleetAuthzRouteConfig): string[] {
   if (config.fleetAllowFleetSetupPrivilege) {
     tags.push(`fleet:authz:allowFleetSetupPrivilege`);
   }
-  if (config.fleetAuthz?.fleet) {
-    for (const fleetRole of config.fleetAuthz?.fleet) {
-      tags.push(`fleet:authz:fleet:${fleetRole}`);
+
+  if (config.fleetAuthz) {
+    function fleetAuthzToTags(requirements: DeepPartialTruthy<Authz>, prefix: string = '') {
+      for (const key of Object.keys(requirements)) {
+        if (typeof requirements[key] === 'boolean') {
+          tags.push(`fleet:authz:${prefix}${key}`);
+        } else if (typeof requirements[key] !== 'undefined') {
+          fleetAuthzToTags(requirements[key] as DeepPartialTruthy<Authz>, `${key}:`);
+        }
+      }
     }
-  }
-  if (config.fleetAuthz?.integrations) {
-    for (const integrationRole of config.fleetAuthz?.integrations) {
-      tags.push(`fleet:authz:integrations:${integrationRole}`);
-    }
+
+    fleetAuthzToTags(config.fleetAuthz);
   }
 
   return tags;

@@ -34,7 +34,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       path: PACKAGE_POLICY_API_ROUTES.LIST_PATTERN,
       validate: GetPackagePoliciesRequestSchema,
       fleetAuthz: {
-        integrations: ['readIntegrationPolicies'],
+        integrations: { readIntegrationPolicies: true },
       },
     },
     getPackagePoliciesHandler
@@ -46,7 +46,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       path: PACKAGE_POLICY_API_ROUTES.INFO_PATTERN,
       validate: GetOnePackagePolicyRequestSchema,
       fleetAuthz: {
-        integrations: ['readIntegrationPolicies'],
+        integrations: { readIntegrationPolicies: true },
       },
     },
     getOnePackagePolicyHandler
@@ -58,7 +58,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       path: PACKAGE_POLICY_API_ROUTES.CREATE_PATTERN,
       validate: CreatePackagePolicyRequestSchema,
       fleetAuthz: {
-        integrations: ['writeIntegrationPolicies'],
+        integrations: { writeIntegrationPolicies: true },
       },
     },
     createPackagePolicyHandler
@@ -70,7 +70,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       path: PACKAGE_POLICY_API_ROUTES.UPDATE_PATTERN,
       validate: UpdatePackagePolicyRequestSchema,
       fleetAuthz: {
-        integrations: ['writeIntegrationPolicies'],
+        integrations: { writeIntegrationPolicies: true },
       },
     },
     updatePackagePolicyHandler
@@ -82,7 +82,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       path: PACKAGE_POLICY_API_ROUTES.DELETE_PATTERN,
       validate: DeletePackagePoliciesRequestSchema,
       fleetAuthz: {
-        integrations: ['writeIntegrationPolicies'],
+        integrations: { writeIntegrationPolicies: true },
       },
     },
     deletePackagePolicyHandler
@@ -94,7 +94,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       path: PACKAGE_POLICY_API_ROUTES.UPGRADE_PATTERN,
       validate: UpgradePackagePoliciesRequestSchema,
       fleetAuthz: {
-        integrations: ['writeIntegrationPolicies'],
+        integrations: { writeIntegrationPolicies: true },
       },
     },
     upgradePackagePolicyHandler
@@ -106,7 +106,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       path: PACKAGE_POLICY_API_ROUTES.DRYRUN_PATTERN,
       validate: DryRunPackagePoliciesRequestSchema,
       fleetAuthz: {
-        integrations: ['writeIntegrationPolicies'],
+        integrations: { writeIntegrationPolicies: true },
       },
     },
     dryRunUpgradePackagePolicyHandler

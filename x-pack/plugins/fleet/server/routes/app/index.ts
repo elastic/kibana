@@ -89,7 +89,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       path: APP_API_ROUTES.GENERATE_SERVICE_TOKEN_PATTERN,
       validate: {},
       fleetAuthz: {
-        fleet: ['all'],
+        fleet: { all: true },
       },
     },
     generateServiceTokenHandler

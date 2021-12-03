@@ -44,7 +44,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
       path: AGENT_API_ROUTES.INFO_PATTERN,
       validate: GetOneAgentRequestSchema,
       fleetAuthz: {
-        fleet: ['all'],
+        fleet: { all: true },
       },
     },
     getAgentHandler
@@ -55,7 +55,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
       path: AGENT_API_ROUTES.UPDATE_PATTERN,
       validate: UpdateAgentRequestSchema,
       fleetAuthz: {
-        fleet: ['all'],
+        fleet: { all: true },
       },
     },
     updateAgentHandler
@@ -66,7 +66,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
       path: AGENT_API_ROUTES.DELETE_PATTERN,
       validate: DeleteAgentRequestSchema,
       fleetAuthz: {
-        fleet: ['all'],
+        fleet: { all: true },
       },
     },
     deleteAgentHandler
@@ -77,7 +77,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
       path: AGENT_API_ROUTES.LIST_PATTERN,
       validate: GetAgentsRequestSchema,
       fleetAuthz: {
-        fleet: ['all'],
+        fleet: { all: true },
       },
     },
     getAgentsHandler
@@ -89,7 +89,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
       path: AGENT_API_ROUTES.ACTIONS_PATTERN,
       validate: PostNewAgentActionRequestSchema,
       fleetAuthz: {
-        fleet: ['all'],
+        fleet: { all: true },
       },
     },
     postNewAgentActionHandlerBuilder({
@@ -103,7 +103,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
       path: AGENT_API_ROUTES.UNENROLL_PATTERN,
       validate: PostAgentUnenrollRequestSchema,
       fleetAuthz: {
-        fleet: ['all'],
+        fleet: { all: true },
       },
     },
     postAgentUnenrollHandler
@@ -114,7 +114,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
       path: AGENT_API_ROUTES.REASSIGN_PATTERN,
       validate: PutAgentReassignRequestSchema,
       fleetAuthz: {
-        fleet: ['all'],
+        fleet: { all: true },
       },
     },
     putAgentsReassignHandler
@@ -126,7 +126,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
       path: AGENT_API_ROUTES.STATUS_PATTERN,
       validate: GetAgentStatusRequestSchema,
       fleetAuthz: {
-        fleet: ['all'],
+        fleet: { all: true },
       },
     },
     getAgentStatusForAgentPolicyHandler
@@ -137,7 +137,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
       path: AGENT_API_ROUTES.UPGRADE_PATTERN,
       validate: PostAgentUpgradeRequestSchema,
       fleetAuthz: {
-        fleet: ['all'],
+        fleet: { all: true },
       },
     },
     postAgentUpgradeHandler
@@ -148,7 +148,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
       path: AGENT_API_ROUTES.BULK_UPGRADE_PATTERN,
       validate: PostBulkAgentUpgradeRequestSchema,
       fleetAuthz: {
-        fleet: ['all'],
+        fleet: { all: true },
       },
     },
     postBulkAgentsUpgradeHandler
@@ -159,7 +159,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
       path: AGENT_API_ROUTES.BULK_REASSIGN_PATTERN,
       validate: PostBulkAgentReassignRequestSchema,
       fleetAuthz: {
-        fleet: ['all'],
+        fleet: { all: true },
       },
     },
     postBulkAgentsReassignHandler
@@ -171,7 +171,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
       path: AGENT_API_ROUTES.BULK_UNENROLL_PATTERN,
       validate: PostBulkAgentUnenrollRequestSchema,
       fleetAuthz: {
-        fleet: ['all'],
+        fleet: { all: true },
       },
     },
     postBulkAgentsUnenrollHandler

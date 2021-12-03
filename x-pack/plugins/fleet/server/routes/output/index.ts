@@ -29,7 +29,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       path: OUTPUT_API_ROUTES.LIST_PATTERN,
       validate: GetOutputsRequestSchema,
       fleetAuthz: {
-        fleet: ['all'],
+        fleet: { all: true },
       },
     },
     getOutputsHandler
@@ -39,7 +39,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       path: OUTPUT_API_ROUTES.INFO_PATTERN,
       validate: GetOneOutputRequestSchema,
       fleetAuthz: {
-        fleet: ['all'],
+        fleet: { all: true },
       },
     },
     getOneOuputHandler
@@ -49,7 +49,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       path: OUTPUT_API_ROUTES.UPDATE_PATTERN,
       validate: PutOutputRequestSchema,
       fleetAuthz: {
-        fleet: ['all'],
+        fleet: { all: true },
       },
     },
     putOuputHandler
@@ -60,7 +60,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       path: OUTPUT_API_ROUTES.CREATE_PATTERN,
       validate: PostOutputRequestSchema,
       fleetAuthz: {
-        fleet: ['all'],
+        fleet: { all: true },
       },
     },
     postOuputHandler
@@ -71,7 +71,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       path: OUTPUT_API_ROUTES.DELETE_PATTERN,
       validate: DeleteOutputRequestSchema,
       fleetAuthz: {
-        fleet: ['all'],
+        fleet: { all: true },
       },
     },
     deleteOutputHandler

@@ -47,7 +47,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       path: PRECONFIGURATION_API_ROUTES.UPDATE_PATTERN,
       validate: PutPreconfigurationSchema,
       fleetAuthz: {
-        fleet: ['all'],
+        fleet: { all: true },
       },
     },
     updatePreconfigurationHandler

@@ -17,7 +17,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       path: DATA_STREAM_API_ROUTES.LIST_PATTERN,
       validate: false,
       fleetAuthz: {
-        fleet: ['all'],
+        fleet: { all: true },
       },
     },
     getListHandler

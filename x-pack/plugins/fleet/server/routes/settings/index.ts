@@ -69,7 +69,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       path: SETTINGS_API_ROUTES.INFO_PATTERN,
       validate: GetSettingsRequestSchema,
       fleetAuthz: {
-        fleet: ['all'],
+        fleet: { all: true },
       },
     },
     getSettingsHandler
@@ -79,7 +79,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       path: SETTINGS_API_ROUTES.UPDATE_PATTERN,
       validate: PutSettingsRequestSchema,
       fleetAuthz: {
-        fleet: ['all'],
+        fleet: { all: true },
       },
     },
     putSettingsHandler

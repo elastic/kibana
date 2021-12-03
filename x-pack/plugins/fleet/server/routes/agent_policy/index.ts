@@ -36,7 +36,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       validate: GetAgentPoliciesRequestSchema,
       fleetAllowFleetSetupPrivilege: true,
       fleetAuthz: {
-        fleet: ['all'],
+        fleet: { all: true },
       },
     },
     getAgentPoliciesHandler
@@ -48,7 +48,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       path: AGENT_POLICY_API_ROUTES.INFO_PATTERN,
       validate: GetOneAgentPolicyRequestSchema,
       fleetAuthz: {
-        fleet: ['all'],
+        fleet: { all: true },
       },
     },
     getOneAgentPolicyHandler
@@ -60,7 +60,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       path: AGENT_POLICY_API_ROUTES.CREATE_PATTERN,
       validate: CreateAgentPolicyRequestSchema,
       fleetAuthz: {
-        fleet: ['all'],
+        fleet: { all: true },
       },
     },
     createAgentPolicyHandler
@@ -72,7 +72,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       path: AGENT_POLICY_API_ROUTES.UPDATE_PATTERN,
       validate: UpdateAgentPolicyRequestSchema,
       fleetAuthz: {
-        fleet: ['all'],
+        fleet: { all: true },
       },
     },
     updateAgentPolicyHandler
@@ -84,7 +84,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       path: AGENT_POLICY_API_ROUTES.COPY_PATTERN,
       validate: CopyAgentPolicyRequestSchema,
       fleetAuthz: {
-        fleet: ['all'],
+        fleet: { all: true },
       },
     },
     copyAgentPolicyHandler
@@ -96,7 +96,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       path: AGENT_POLICY_API_ROUTES.DELETE_PATTERN,
       validate: DeleteAgentPolicyRequestSchema,
       fleetAuthz: {
-        fleet: ['all'],
+        fleet: { all: true },
       },
     },
     deleteAgentPoliciesHandler
@@ -108,7 +108,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       path: AGENT_POLICY_API_ROUTES.FULL_INFO_PATTERN,
       validate: GetFullAgentPolicyRequestSchema,
       fleetAuthz: {
-        fleet: ['all'],
+        fleet: { all: true },
       },
     },
     getFullAgentPolicy
@@ -120,7 +120,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       path: AGENT_POLICY_API_ROUTES.FULL_INFO_DOWNLOAD_PATTERN,
       validate: GetFullAgentPolicyRequestSchema,
       fleetAuthz: {
-        fleet: ['all'],
+        fleet: { all: true },
       },
     },
     downloadFullAgentPolicy

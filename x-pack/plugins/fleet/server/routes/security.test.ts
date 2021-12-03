@@ -186,7 +186,7 @@ describe('RouterWrappers', () => {
         await runTest({
           security: { pluginEnabled: false },
           routeConfig: {
-            fleetAuthz: { fleet: ['all'] },
+            fleetAuthz: { fleet: { all: true } },
           },
         })
       ).toEqual('forbidden');
@@ -197,7 +197,7 @@ describe('RouterWrappers', () => {
         await runTest({
           security: { licenseEnabled: false },
           routeConfig: {
-            fleetAuthz: { fleet: ['all'] },
+            fleetAuthz: { fleet: { all: true } },
           },
         })
       ).toEqual('forbidden');
@@ -207,7 +207,7 @@ describe('RouterWrappers', () => {
       const routeConfig = {
         path: '/api/fleet/test',
         fleetAllowFleetSetupPrivilege: true,
-        fleetAuthz: { fleet: ['all'] },
+        fleetAuthz: { fleet: { all: true } },
       };
       it('allow users with required privileges', async () => {
         mockCheckPrivileges.mockResolvedValueOnce(
@@ -252,7 +252,7 @@ describe('RouterWrappers', () => {
       const routeConfig = {
         path: '/api/fleet/test',
         fleetAllowFleetSetupPrivilege: false,
-        fleetAuthz: { fleet: ['all'] },
+        fleetAuthz: { fleet: { all: true } },
       };
       it('allow users with required privileges', async () => {
         mockCheckPrivileges.mockResolvedValueOnce(
@@ -300,7 +300,7 @@ describe('RouterWrappers', () => {
     describe('with fleetAuthz', () => {
       const routeConfig = {
         path: '/api/fleet/test',
-        fleetAuthz: { fleet: ['all'], integrations: ['installPackages'] },
+        fleetAuthz: { fleet: { all: true }, integrations: { installPackages: true } },
       };
       it('allow users with all required fleet authz role', async () => {
         mockCheckPrivileges.mockResolvedValueOnce(
