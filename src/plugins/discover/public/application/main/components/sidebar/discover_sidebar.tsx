@@ -109,9 +109,8 @@ export function DiscoverSidebarComponent({
 }: DiscoverSidebarProps) {
   const [fields, setFields] = useState<IndexPatternField[] | null>(null);
 
-  const { indexPatternFieldEditor } = services;
-  const indexPatternFieldEditPermission =
-    indexPatternFieldEditor?.userPermissions.editIndexPattern();
+  const { dataViewFieldEditor } = services;
+  const indexPatternFieldEditPermission = dataViewFieldEditor?.userPermissions.editIndexPattern();
   const canEditIndexPatternField = !!indexPatternFieldEditPermission && useNewFieldsApi;
   const [scrollContainer, setScrollContainer] = useState<Element | null>(null);
   const [fieldsToRender, setFieldsToRender] = useState(FIELDS_PER_PAGE);
@@ -245,7 +244,7 @@ export function DiscoverSidebarComponent({
     () =>
       canEditIndexPatternField && selectedIndexPattern
         ? async (fieldName: string) => {
-            const ref = indexPatternFieldEditor.openDeleteModal({
+            const ref = dataViewFieldEditor.openDeleteModal({
               ctx: {
                 dataView: selectedIndexPattern,
               },
@@ -268,7 +267,7 @@ export function DiscoverSidebarComponent({
       setFieldEditorRef,
       closeFlyout,
       onEditRuntimeField,
-      indexPatternFieldEditor,
+      dataViewFieldEditor,
     ]
   );
 

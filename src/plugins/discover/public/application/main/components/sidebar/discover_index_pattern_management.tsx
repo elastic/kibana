@@ -33,10 +33,9 @@ export interface DiscoverIndexPatternManagementProps {
 }
 
 export function DiscoverIndexPatternManagement(props: DiscoverIndexPatternManagementProps) {
-  const { indexPatternFieldEditor, core } = props.services;
+  const { dataViewFieldEditor, core } = props.services;
   const { useNewFieldsApi, selectedIndexPattern, editField } = props;
-  const indexPatternFieldEditPermission =
-    indexPatternFieldEditor?.userPermissions.editIndexPattern();
+  const indexPatternFieldEditPermission = dataViewFieldEditor?.userPermissions.editIndexPattern();
   const canEditIndexPatternField = !!indexPatternFieldEditPermission && useNewFieldsApi;
   const [isAddIndexPatternFieldPopoverOpen, setIsAddIndexPatternFieldPopoverOpen] = useState(false);
 
