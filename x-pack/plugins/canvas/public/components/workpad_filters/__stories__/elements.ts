@@ -6,7 +6,7 @@
  */
 
 import moment from 'moment';
-import { CanvasElement } from '../../../../types';
+import { CanvasElement, PositionedElement } from '../../../../types';
 
 const timeFormat = 'MM.dd.YYYY HH:mm';
 
@@ -31,6 +31,14 @@ const time2 = {
 };
 const group2 = 'Group 2';
 
+export const element: CanvasElement = {
+  id: '0',
+  position: generatePosition(0),
+  type: 'element',
+  expression: `filters group="${group2}"`,
+  filter: '',
+};
+
 const element1: CanvasElement = {
   id: '1',
   position: generatePosition(1),
@@ -44,7 +52,7 @@ const element2: CanvasElement = {
   position: generatePosition(2),
   type: 'element',
   expression: '',
-  filter: `exactly value="machine-learning" column="project1" filterGroup="${group1}"`,
+  filter: `exactly value="machine-learning" column="project1" filterGroup="${group2}"`,
 };
 
 const element3: CanvasElement = {
@@ -63,4 +71,9 @@ const element4: CanvasElement = {
   filter: `exactly value="kibana" column="project2" filterGroup="${group2}"`,
 };
 
-export const elements = [element1, element2, element3, element4];
+export const elementWithGroup: PositionedElement = {
+  ...element,
+  ast: { type: 'expression', chain: [] },
+};
+
+export const elements = [element, element1, element2, element3, element4];
