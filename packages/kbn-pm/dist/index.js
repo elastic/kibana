@@ -6642,9 +6642,7 @@ class ToolingLogTextWriter {
       if (msg.type === 'write') {
         const txt = (0, _util.format)(msg.args[0], ...msg.args.slice(1)); // Ensure that Elasticsearch deprecation log messages from Kibana aren't ignored
 
-        if (/\[deprecation\]\[elasticsearch\]/.test(txt)) {
-          return true;
-        } else {
+        if (!/\[deprecation\]\[elasticsearch\]/.test(txt)) {
           return false;
         }
       } else {
