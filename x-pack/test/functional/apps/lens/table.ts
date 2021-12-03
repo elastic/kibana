@@ -144,11 +144,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.changePaletteTo('temperature');
       await testSubjects.click('lnsPalettePanel_dynamicColoring_rangeType_groups_percent');
       // now tweak the value
-      await testSubjects.setValue('lnsPalettePanel_dynamicColoring_stop_value_0', '30', {
+      await testSubjects.setValue('lnsPalettePanel_dynamicColoring_range_value_0', '30', {
         clearWithKeyboard: true,
       });
       // when clicking on another row will trigger a sorting + update
-      await testSubjects.click('lnsPalettePanel_dynamicColoring_stop_value_1');
+      await testSubjects.click('lnsPalettePanel_dynamicColoring_range_value_1');
       await PageObjects.header.waitUntilLoadingHasFinished();
       // pick a cell without color as is below the range
       const styleObj = await PageObjects.lens.getDatatableCellStyle(3, 3);

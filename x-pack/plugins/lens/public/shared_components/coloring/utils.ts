@@ -17,6 +17,7 @@ import {
   DEFAULT_MAX_STOP,
   DEFAULT_MIN_STOP,
 } from './constants';
+import type { ColorRanges } from './color_ranges';
 import type { CustomPaletteParams, ColorStop } from '../../../common';
 
 /**
@@ -90,7 +91,7 @@ export function remapStopsByNewInterval(
 
 // Utility to remap color stops within new domain
 export function getStopsFromColorRangesByNewInterval(
-  colorRanges: any[],
+  colorRanges: ColorRanges[],
   {
     newInterval,
     oldInterval,
@@ -110,6 +111,7 @@ export function getStopsFromColorRangesByNewInterval(
   });
 }
 
+ // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function getColorPaletteParams(params: any) {
   let continuity = 'none';
   switch (params.autoValue) {

@@ -348,7 +348,7 @@ export const getDatatableVisualization = ({
             title: [title || ''],
             description: [description || ''],
             columns: columns.map((column) => {
-              const paletteParams = {
+              const paletteParams  = {
                 ...column.palette?.params,
                 // rewrite colors and stops as two distinct arguments
                 colors: (column.palette?.params?.stops || []).map(({ color }) => color),
@@ -378,7 +378,11 @@ export const getDatatableVisualization = ({
                       ],
                       alignment: typeof column.alignment === 'undefined' ? [] : [column.alignment],
                       colorMode: [column.colorMode ?? 'none'],
-                      palette: [paletteService.get(CUSTOM_PALETTE).toExpression(getColorPaletteParams(paletteParams))],
+                      palette: [
+                        paletteService
+                          .get(CUSTOM_PALETTE)
+                          .toExpression(getColorPaletteParams(paletteParams)),
+                      ],
                       summaryRow: hasNoSummaryRow ? [] : [column.summaryRow!],
                       summaryLabel: hasNoSummaryRow
                         ? []

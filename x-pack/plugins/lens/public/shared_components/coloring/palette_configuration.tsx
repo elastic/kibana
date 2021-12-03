@@ -264,6 +264,7 @@ export function CustomizablePalette({
         paletteConfiguration={activePalette?.params}
         colorRanges={colorRangesToShow}
         dataBounds={dataBounds}
+        data-test-prefix="lnsPalettePanel"
         onChange={(colorStops, upperMax, autoValue) => {
           const newParams = getSwitchToCustomParams(
             palettes,

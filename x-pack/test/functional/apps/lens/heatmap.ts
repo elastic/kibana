@@ -73,7 +73,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.openDimensionEditor('lnsHeatmap_cellPanel > lns-dimensionTrigger');
       await PageObjects.lens.openPalettePanel('lnsHeatmap');
       await retry.try(async () => {
-        await testSubjects.setValue('lnsPalettePanel_dynamicColoring_stop_value_0', '10', {
+        await testSubjects.setValue('lnsPalettePanel_dynamicColoring_range_value_0', '10', {
           clearWithKeyboard: true,
           typeCharByChar: true,
         });

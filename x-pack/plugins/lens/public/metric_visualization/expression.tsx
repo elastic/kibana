@@ -76,7 +76,7 @@ function getColorStyling(
   const cssProp = colorMode === ColorMode.Background ? 'backgroundColor' : 'color';
   const rawIndex = stops.findIndex((v) => v > value);
 
-  let colorIndex = rawIndex;
+  const colorIndex = rawIndex;
 
   const color = colors[colorIndex];
   const styling = {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import type { FocusEvent } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
@@ -27,16 +27,14 @@ import { DistributeEquallyIcon } from '../../assets/distribute_equally';
 import { getDataMinMax, getStepValue, isValidColor, roundValue } from './utils';
 import type { CustomPaletteParamsConfig, ColorStop } from '../../../common';
 import { useDebouncedValue } from '../index';
-
-const DEFAULT_COLOR = '#6092C0';
-
-interface ColorRanges {
+import { DEFAULT_COLOR } from './constants';
+export interface ColorRanges {
   color: string;
   start: number;
   end: number;
 }
 
-interface ColorRangesProps {
+export interface ColorRangesProps {
   colorRanges: ColorRanges[];
   paletteConfiguration: CustomPaletteParamsConfig | undefined;
   onChange: (
@@ -45,6 +43,7 @@ interface ColorRangesProps {
     autoValue: CustomPaletteParamsConfig['autoValue']
   ) => void;
   dataBounds: { min: number; max: number };
+  'data-test-prefix': string;
 }
 
 function areStopsValid(colorStops: Array<{ color: string; stop: number }>) {
@@ -63,7 +62,9 @@ function reversePalette(colorRanges: ColorRanges[]) {
 
 export function ColorRanges(props: ColorRangesProps) {
   const { colorRanges, onChange, dataBounds, paletteConfiguration } = props;
+  const dataTestPrefix = props['data-test-prefix'];
   const [isValid, setValid] = useState(true);
+  const [popoverInFocus, setPopoverInFocus] = useState<boolean>(false);
   const [autoValue, setAutoValue] = useState<CustomPaletteParamsConfig['autoValue']>(
     paletteConfiguration?.autoValue ?? 'none'
   );
@@ -86,9 +87,18 @@ export function ColorRanges(props: ColorRangesProps) {
       onChange(colorStops, upperMax, autoValue);
     }
   };
+  const memoizedValues = useMemo(() => {
+    return colorRanges.map(({ color, start, end }, i) => ({
+      color,
+      start,
+      end,
+    }));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [paletteConfiguration?.name, paletteConfiguration?.reverse, paletteConfiguration?.rangeType]);
+
   const { inputValue: localColorRanges, handleInputChange: setColorRanges } = useDebouncedValue({
     onChange: onChangeWithValidation,
-    value: colorRanges,
+    value: memoizedValues,
   });
   const rangeType = paletteConfiguration?.rangeType || 'percent';
   const shouldDisableAdd = Boolean(
@@ -98,17 +108,17 @@ export function ColorRanges(props: ColorRangesProps) {
   const getColorRangeElem = (colorRange: ColorRanges, index: number, isLast = false) => {
     const value = isLast ? colorRange.end : colorRange.start;
     const showDelete = index !== 0 && !isLast;
+    const indexPostfix = isLast ? index + 1 : index;
     const showEdit = !showDelete && isLast ? isDisabledEnd : isDisabledStart;
-    const dataTestPrefix = 'lnsPalettePanel';
     const isDisabled = isLast ? isDisabledEnd : index === 0 ? isDisabledStart : false;
     const isInvalid = (!isValid && isLast) || value === undefined || Number.isNaN(value);
+
     return (
       <EuiFlexItem
-        data-test-subj={`${dataTestPrefix}_dynamicColoring_range_row_${index}`}
+        data-test-subj={`${dataTestPrefix}_dynamicColoring_range_row_${indexPostfix}`}
         onBlur={(e: FocusEvent<HTMLDivElement>) => {
-          const isFocusStillInContent = (e.currentTarget as Node)?.contains(
-            e.relatedTarget as Node
-          );
+          const isFocusStillInContent =
+            (e.currentTarget as Node)?.contains(e.relatedTarget as Node) || popoverInFocus;
           if (!isFocusStillInContent) {
             const maxValue = localColorRanges[localColorRanges.length - 1].end;
             let newColorRanges = [...localColorRanges].sort(
@@ -143,7 +153,15 @@ export function ColorRanges(props: ColorRangesProps) {
         <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
           <EuiFlexItem
             grow={false}
-            data-test-subj={`${dataTestPrefix}_dynamicColoring_range_color_${index}`}
+            onBlur={() => {
+              // make sure that the popover is closed
+              if (!colorRange.color && !popoverInFocus) {
+                const newColorRanges = [...localColorRanges];
+                newColorRanges[index].color = colorRanges[index].color;
+                setColorRanges(newColorRanges);
+              }
+            }}
+            data-test-subj={`${dataTestPrefix}_dynamicColoring_range_color_${indexPostfix}`}
           >
             {isLast ? (
               <EuiIcon type={RelatedIcon} />
@@ -159,6 +177,15 @@ export function ColorRanges(props: ColorRangesProps) {
                 }
                 secondaryInputDisplay="top"
                 color={colorRange.color}
+                onFocus={() => setPopoverInFocus(true)}
+                onBlur={() => {
+                  setPopoverInFocus(false);
+                  if (colorRange.color === '') {
+                    const newColorRanges = [...localColorRanges];
+                    newColorRanges[index].color = colorRanges[index].color;
+                    setColorRanges(newColorRanges);
+                  }
+                }}
                 isInvalid={!isValidColor(colorRange.color)}
               />
             )}
@@ -167,7 +194,7 @@ export function ColorRanges(props: ColorRangesProps) {
             <EuiFieldNumber
               compressed
               isInvalid={isInvalid}
-              data-test-subj={`${dataTestPrefix}_dynamicColoring_range_value_${index}`}
+              data-test-subj={`${dataTestPrefix}_dynamicColoring_range_value_${indexPostfix}`}
               value={value}
               disabled={isDisabled}
               min={-Infinity}
@@ -201,7 +228,7 @@ export function ColorRanges(props: ColorRangesProps) {
                 {
                   defaultMessage: 'Range {index}',
                   values: {
-                    index: index + 1,
+                    index: indexPostfix + 1,
                   },
                 }
               )}
@@ -233,7 +260,7 @@ export function ColorRanges(props: ColorRangesProps) {
                   const newColorRanges = localColorRanges.filter((_, i) => i !== index);
                   setColorRanges(newColorRanges);
                 }}
-                data-test-subj={`${dataTestPrefix}_dynamicColoring_removeColorRange_${index}`}
+                data-test-subj={`${dataTestPrefix}_dynamicColoring_removeColorRange_${indexPostfix}`}
               />
             )}
             {!showDelete &&
@@ -273,7 +300,7 @@ export function ColorRanges(props: ColorRangesProps) {
                     localColorRanges[index][isLast ? 'end' : 'start'] = roundValue(newValue);
                     setColorRanges([...localColorRanges]);
                   }}
-                  data-test-subj={`${dataTestPrefix}_dynamicColoring_editValue_${index}`}
+                  data-test-subj={`${dataTestPrefix}_dynamicColoring_editValue_${indexPostfix}`}
                 />
               ) : (
                 <EuiButtonIcon
@@ -306,10 +333,13 @@ export function ColorRanges(props: ColorRangesProps) {
                     } else {
                       setAutoValue(autoValue === 'none' ? 'min' : 'all');
                     }
+
                     localColorRanges[index][isLast ? 'end' : 'start'] = newValue;
                     setColorRanges([...localColorRanges]);
                   }}
-                  data-test-subj={`${dataTestPrefix}_dynamicColoring_removeColorRange_${index}`}
+                  data-test-subj={`${dataTestPrefix}_dynamicColoring_autoDetect_${
+                    isLast ? 'maximum' : 'minimum'
+                  }`}
                 />
               ))}
           </EuiFlexItem>
@@ -331,17 +361,23 @@ export function ColorRanges(props: ColorRangesProps) {
   return (
     <>
       <EuiSpacer size="s" />
-      {localColorRanges.map((colorRange, index) => {
-        return getColorRangeElem(colorRange, index, false);
-      })}
-      {getColorRangeElem(
-        localColorRanges[localColorRanges.length - 1],
-        localColorRanges.length - 1,
-        true
-      )}
+      <EuiFlexGroup
+        data-test-subj={`${dataTestPrefix}_dynamicColoring_custom_color_ranges`}
+        direction="column"
+        gutterSize="s"
+      >
+        {localColorRanges.map((colorRange, index) => {
+          return getColorRangeElem(colorRange, index, false);
+        })}
+        {getColorRangeElem(
+          localColorRanges[localColorRanges.length - 1],
+          localColorRanges.length - 1,
+          true
+        )}
+      </EuiFlexGroup>
       <EuiSpacer size="s" />
       <EuiButtonEmpty
-        data-test-subj={`lnsPalettePanel_dynamicColoring_addColorRange`}
+        data-test-subj={`${dataTestPrefix}_dynamicColoring_addColorRange`}
         iconType="plusInCircle"
         color="primary"
         aria-label={i18n.translate('xpack.lens.dynamicColoring.customPalette.addColorRange', {
@@ -381,7 +417,7 @@ export function ColorRanges(props: ColorRangesProps) {
         })}
       </EuiButtonEmpty>
       <EuiButtonEmpty
-        data-test-subj={`lnsPalettePanel_dynamicColoring_reverseColors`}
+        data-test-subj={`${dataTestPrefix}_dynamicColoring_reverseColors`}
         iconType="sortable"
         color="primary"
         aria-label={i18n.translate('xpack.lens.dynamicColoring.customPalette.reverseColors', {
@@ -398,7 +434,7 @@ export function ColorRanges(props: ColorRangesProps) {
         })}
       </EuiButtonEmpty>
       <EuiButtonEmpty
-        data-test-subj={`lnsPalettePanel_dynamicColoring_distributeEqually`}
+        data-test-subj={`${dataTestPrefix}_dynamicColoring_distributeEqually`}
         iconType={DistributeEquallyIcon}
         color="primary"
         aria-label={i18n.translate('xpack.lens.dynamicColoring.customPalette.distributeEqually', {

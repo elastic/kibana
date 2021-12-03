@@ -30,41 +30,6 @@ jest.mock('@elastic/eui', () => {
   };
 });
 
-describe('palette utilities', () => {
-  const paletteRegistry = chartPluginMock.createPaletteRegistry();
-  describe('applyPaletteParams', () => {
-    it('should return a set of colors for a basic configuration', () => {
-      expect(
-        applyPaletteParams(
-          paletteRegistry,
-          { type: 'palette', name: 'positive' },
-          { min: 0, max: 100 }
-        )
-      ).toEqual([
-        { color: 'blue', stop: 20 },
-        { color: 'yellow', stop: 70 },
-      ]);
-    });
-
-    it('should reverse the palette color stops correctly', () => {
-      expect(
-        applyPaletteParams(
-          paletteRegistry,
-          {
-            type: 'palette',
-            name: 'positive',
-            params: { reverse: true },
-          },
-          { min: 0, max: 100 }
-        )
-      ).toEqual([
-        { color: 'yellow', stop: 20 },
-        { color: 'blue', stop: 70 },
-      ]);
-    });
-  });
-});
-
 describe('palette panel', () => {
   const paletteRegistry = chartPluginMock.createPaletteRegistry();
   let props: {
@@ -163,52 +128,6 @@ describe('palette panel', () => {
     });
   });
 
-  describe('reverse option', () => {
-    beforeEach(() => {
-      props = {
-        activePalette: { type: 'palette', name: 'positive' },
-        palettes: paletteRegistry,
-        setPalette: jest.fn(),
-        dataBounds: { min: 0, max: 100 },
-      };
-    });
-
-    function toggleReverse(instance: ReactWrapper, checked: boolean) {
-      return instance
-        .find('[data-test-subj="lnsPalettePanel_dynamicColoring_reverse"]')
-        .first()
-        .prop('onClick')!({} as React.MouseEvent);
-    }
-
-    it('should reverse the colorStops on click', () => {
-      const instance = mountWithIntl(<CustomizablePalette {...props} />);
-
-      toggleReverse(instance, true);
-
-      expect(props.setPalette).toHaveBeenCalledWith(
-        expect.objectContaining({
-          params: expect.objectContaining({
-            reverse: true,
-          }),
-        })
-      );
-    });
-
-    it('should transition a predefined palette to a custom one on reverse click', () => {
-      const instance = mountWithIntl(<CustomizablePalette {...props} />);
-
-      toggleReverse(instance, true);
-
-      expect(props.setPalette).toHaveBeenCalledWith(
-        expect.objectContaining({
-          params: expect.objectContaining({
-            name: CUSTOM_PALETTE,
-          }),
-        })
-      );
-    });
-  });
-
   describe('percentage / number modes', () => {
     beforeEach(() => {
       props = {
@@ -241,7 +160,7 @@ describe('palette panel', () => {
           params: expect.objectContaining({
             rangeType: 'number',
             rangeMin: 5,
-            rangeMax: 102.5 /* (200 - (200-5)/ colors.length: 2) */,
+            rangeMax: 200,
           }),
         })
       );
@@ -252,7 +171,7 @@ describe('palette panel', () => {
           params: expect.objectContaining({
             rangeType: 'percent',
             rangeMin: 0,
-            rangeMax: 50 /* 100 - (100-0)/ colors.length: 2 */,
+            rangeMax: 100,
           }),
         })
       );
@@ -282,7 +201,7 @@ describe('palette panel', () => {
     it('should be visible for predefined palettes', () => {
       const instance = mountWithIntl(<CustomizablePalette {...props} />);
       expect(
-        instance.find('[data-test-subj="lnsPalettePanel_dynamicColoring_custom_stops"]').exists()
+        instance.find('[data-test-subj="lnsPalettePanel_dynamicColoring_custom_color_ranges"]').exists()
       ).toEqual(true);
     });
 
@@ -300,7 +219,7 @@ describe('palette panel', () => {
         />
       );
       expect(
-        instance.find('[data-test-subj="lnsPalettePanel_dynamicColoring_custom_stops"]').exists()
+        instance.find('[data-test-subj="lnsPalettePanel_dynamicColoring_custom_color_ranges"]').exists()
       ).toEqual(true);
     });
   });
