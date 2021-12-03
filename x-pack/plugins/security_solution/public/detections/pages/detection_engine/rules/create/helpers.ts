@@ -429,7 +429,7 @@ export const formatPreviewRule = ({
     description: 'Preview Rule',
   };
   const scheduleStepData = {
-    from: `now-${timeFrame === 'w' ? '604830' : timeFrame === 'd' ? '86420' : '3610'}s`,
+    from: `now-${timeFrame === 'M' ? '25h' : timeFrame === 'd' ? '65m' : '6m'}`,
     interval: `${timeFrame === 'M' ? '1d' : timeFrame === 'd' ? '1h' : '5m'}`,
   };
   return {

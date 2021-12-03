@@ -144,7 +144,7 @@ export const previewRulesRoute = async (
 
           const startedAt = moment();
           const parsedDuration = parseDuration(internalRule.schedule.interval) ?? 0;
-          startedAt.subtract(moment.duration(parsedDuration * invocationCount));
+          startedAt.subtract(moment.duration(parsedDuration * (invocationCount - 1)));
 
           let previousStartedAt = null;
 
