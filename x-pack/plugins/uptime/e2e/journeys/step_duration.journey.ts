@@ -42,6 +42,7 @@ journey('StepsDuration', async ({ page, params }) => {
     await page.hover('text=8.9 sec');
     await page.waitForSelector('text=Explore');
     expect(await page.$('text=Explore')).toBeTruthy();
+    await page.waitForSelector('text=area chart');
     expect(await page.$('text=area chart')).toBeTruthy();
   });
 });
