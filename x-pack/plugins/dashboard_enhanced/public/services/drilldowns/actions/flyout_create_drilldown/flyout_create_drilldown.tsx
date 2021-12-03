@@ -48,10 +48,27 @@ export class FlyoutCreateDrilldownAction implements Action<EmbeddableContext> {
     return 'plusInCircle';
   }
 
-  private isEmbeddableCompatible(context: EmbeddableContext) {
+  private isEmbeddableCompatible(context: EmbeddableContext): boolean {
     if (!isEnhancedEmbeddable(context.embeddable)) return false;
     if (context.embeddable.getRoot().type !== 'dashboard') return false;
-    return true;
+    const supportedTriggers = [
+      CONTEXT_MENU_TRIGGER,
+      ...(context.embeddable.supportedTriggers() || []),
+    ];
+
+    /**
+     * Check if there is an intersection between all registered drilldowns possible triggers that they could be attached to
+     * and triggers that current embeddable supports
+     */
+    const allPossibleTriggers = this.params
+      .start()
+      .plugins.uiActionsEnhanced.getActionFactories()
+      .map((factory) => factory.supportedTriggers())
+      .reduce((res, next) => res.concat(next), []);
+
+    return ensureNestedTriggers(supportedTriggers).some((trigger) =>
+      allPossibleTriggers.includes(trigger)
+    );
   }
 
   public async isCompatible(context: EmbeddableContext) {
