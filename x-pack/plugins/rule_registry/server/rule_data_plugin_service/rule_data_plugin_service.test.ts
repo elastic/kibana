@@ -9,9 +9,12 @@ import { loggerMock } from '@kbn/logging/mocks';
 import { RuleDataService } from './rule_data_plugin_service';
 import { elasticsearchServiceMock } from 'src/core/server/mocks';
 import { AlertConsumers } from '@kbn/rule-data-utils/alerts_as_data_rbac';
-
 import { Dataset } from './index_options';
-jest.mock('../rule_data_client/rule_data_client');
+import { RuleDataClient } from '../rule_data_client/rule_data_client';
+import { createRuleDataClientMock as mockCreateRuleDataClient } from '../rule_data_client/rule_data_client.mock';
+jest.mock('../rule_data_client/rule_data_client', () => ({
+  RuleDataClient: jest.fn().mockImplementation(() => mockCreateRuleDataClient()),
+}));
 
 describe('ruleDataPluginService', () => {
   beforeEach(() => {
@@ -99,9 +102,7 @@ describe('ruleDataPluginService', () => {
       };
       await ruleDataService.initializeService();
       await ruleDataService.initializeIndex(indexOptions);
-      expect(
-        jest.requireMock('../rule_data_client/rule_data_client').RuleDataClient
-      ).toHaveBeenCalled();
+      expect(RuleDataClient).toHaveBeenCalled();
     });
   });
 });
