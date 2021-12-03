@@ -1,8 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { uniq } from 'lodash';
@@ -15,19 +16,14 @@ import {
   ExpressionFunction,
   ExpressionFunctionParameter,
   getByAlias,
-} from '../../../../../src/plugins/expressions/common';
+} from '../../../../expressions/common';
 
-const MARKER = 'CANVAS_SUGGESTION_MARKER';
+const MARKER = 'EXPRESSIONS_SUGGESTION_MARKER';
 
 interface BaseSuggestion {
   text: string;
   start: number;
   end: number;
-}
-
-export interface FunctionSuggestion extends BaseSuggestion {
-  type: 'function';
-  fnDef: ExpressionFunction;
 }
 
 interface ArgSuggestionValue extends Omit<ExpressionFunctionParameter, 'accepts'> {
@@ -43,8 +39,6 @@ interface ValueSuggestion extends BaseSuggestion {
   type: 'value';
 }
 
-export type AutocompleteSuggestion = FunctionSuggestion | ArgSuggestion | ValueSuggestion;
-
 interface FnArgAtPosition {
   ast: ExpressionASTWithMeta;
   fnIndex: number;
@@ -57,6 +51,7 @@ interface FnArgAtPosition {
   // If this function is a sub-expression function, we need the parent function and argument
   // name to determine the return type of the function
   parentFn?: string;
+
   // If this function is a sub-expression function, the context could either be local or it
   // could be the parent's previous function.
   contextFn?: string | null;
@@ -100,6 +95,13 @@ type ExpressionASTWithMeta = ASTMetaInformation<
     }
   >
 >;
+
+export interface FunctionSuggestion extends BaseSuggestion {
+  type: 'function';
+  fnDef: ExpressionFunction;
+}
+
+export type AutocompleteSuggestion = FunctionSuggestion | ArgSuggestion | ValueSuggestion;
 
 // Typeguard for checking if ExpressionArg is a new expression
 function isExpression(

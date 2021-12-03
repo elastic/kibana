@@ -1,21 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { monaco } from '@kbn/monaco';
-import { ExpressionFunction } from '../../types';
-
-export const LANGUAGE_ID = 'canvas-expression';
+import { ExpressionFunction } from 'src/plugins/expressions/common';
+import { EXPRESSIONS_LANGUAGE_ID } from '../../../common';
 
 /**
  * Extends the default type for a Monarch language so we can use
  * attribute references (like @keywords to reference the keywords list)
  * in the defined tokenizer
  */
-interface Language extends monaco.languages.IMonarchLanguage {
+interface ExpressionsLanguage extends monaco.languages.IMonarchLanguage {
   keywords: string[];
   symbols: RegExp;
   escapes: RegExp;
@@ -28,10 +28,11 @@ interface Language extends monaco.languages.IMonarchLanguage {
  * Defines the Monarch tokenizer for syntax highlighting in Monaco of the
  * expression language. The tokenizer defines a set of regexes and actions/tokens
  * to mark the detected words/characters.
+ *
  * For more information, the Monarch documentation can be found here:
  * https://microsoft.github.io/monaco-editor/monarch.html
  */
-export const language: Language = {
+const expressionsLanguage: ExpressionsLanguage = {
   keywords: [],
 
   symbols: /[=|]/,
@@ -95,8 +96,8 @@ export const language: Language = {
   },
 };
 
-export function registerLanguage(functions: ExpressionFunction[]) {
-  language.keywords = functions.map((fn) => fn.name);
-  monaco.languages.register({ id: LANGUAGE_ID });
-  monaco.languages.setMonarchTokensProvider(LANGUAGE_ID, language);
+export function registerExpressionsLanguage(functions: ExpressionFunction[]) {
+  expressionsLanguage.keywords = functions.map((fn) => fn.name);
+  monaco.languages.register({ id: EXPRESSIONS_LANGUAGE_ID });
+  monaco.languages.setMonarchTokensProvider(EXPRESSIONS_LANGUAGE_ID, expressionsLanguage);
 }
