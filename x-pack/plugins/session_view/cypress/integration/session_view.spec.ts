@@ -7,6 +7,8 @@
 
 import { loginAndWaitForPage } from '../tasks/login';
 
+import { resolverGenerator } from '../tasks/resolver_generator';
+
 import { SESSION_VIEW_URL } from '../urls/navigation';
 
 import { cleanKibana } from '../tasks/common';
@@ -16,6 +18,7 @@ import { TEST, DETAILS_PANEL, DETAILS_PANEL_TOGGLE, SEARCH_BAR  } from '../scree
 describe('Display session view test page', () => {
   before(() => {
     cleanKibana();
+    resolverGenerator()
   });
 
   it('Navigates to session view home page', () => {
