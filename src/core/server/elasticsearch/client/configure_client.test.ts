@@ -491,7 +491,7 @@ describe('configureClient', () => {
         expect(loggingSystemMock.collect(logger).error).toEqual([]);
       });
 
-      it('logs when the client receives an Elasticsearch error response for a deprecated request originating from a user', () => {
+      it('logs error when the client receives an Elasticsearch error response for a deprecated request originating from a user', () => {
         const client = configureClient(createFakeConfig(), { logger, type: 'test', scoped: false });
 
         const response = createApiResponse({
@@ -522,7 +522,7 @@ describe('configureClient', () => {
         );
       });
 
-      it('logs when the client receives an Elasticsearch error response for a deprecated request originating from kibana', () => {
+      it('logs warning when the client receives an Elasticsearch error response for a deprecated request originating from kibana', () => {
         const client = configureClient(createFakeConfig(), { logger, type: 'test', scoped: false });
 
         const response = createApiResponse({
@@ -555,7 +555,7 @@ describe('configureClient', () => {
         );
       });
 
-      it('logs when the client receives an Elasticsearch success response for a deprecated request originating from a user', () => {
+      it('logs error when the client receives an Elasticsearch success response for a deprecated request originating from a user', () => {
         const client = configureClient(createFakeConfig(), { logger, type: 'test', scoped: false });
 
         const response = createApiResponse({
@@ -587,7 +587,7 @@ describe('configureClient', () => {
         );
       });
 
-      it('logs when the client receives an Elasticsearch success response for a deprecated request originating from kibana', () => {
+      it('logs warning when the client receives an Elasticsearch success response for a deprecated request originating from kibana', () => {
         const client = configureClient(createFakeConfig(), { logger, type: 'test', scoped: false });
 
         const response = createApiResponse({
