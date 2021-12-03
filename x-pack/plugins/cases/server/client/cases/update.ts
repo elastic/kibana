@@ -44,7 +44,7 @@ import {
 import { buildCaseUserActions } from '../../services/user_actions/helpers';
 import { getCaseToUpdate } from '../utils';
 
-import { CasesService } from '../../services';
+import { AlertService, CasesService } from '../../services';
 import {
   createAlertUpdateRequest,
   createCaseError,
@@ -52,7 +52,6 @@ import {
   isCommentRequestTypeAlertOrGenAlert,
 } from '../../common';
 import { UpdateAlertRequest } from '../alerts/types';
-import { CasesClientInternal } from '../client_internal';
 import { CasesClientArgs } from '..';
 import { Operations, OwnerEntity } from '../../authorization';
 
@@ -306,13 +305,13 @@ async function updateAlerts({
   casesWithStatusChangedAndSynced,
   caseService,
   unsecuredSavedObjectsClient,
-  casesClientInternal,
+  alertsService,
 }: {
   casesWithSyncSettingChangedToOn: UpdateRequestWithOriginalCase[];
   casesWithStatusChangedAndSynced: UpdateRequestWithOriginalCase[];
   caseService: CasesService;
   unsecuredSavedObjectsClient: SavedObjectsClientContract;
-  casesClientInternal: CasesClientInternal;
+  alertsService: AlertService;
 }) {
   /**
    * It's possible that a case ID can appear multiple times in each array. I'm intentionally placing the status changes
@@ -361,7 +360,7 @@ async function updateAlerts({
     []
   );
 
-  await casesClientInternal.alerts.updateStatus({ alerts: alertsToUpdate });
+  await alertsService.updateAlertsStatus(alertsToUpdate);
 }
 
 function partitionPatchRequest(
@@ -410,8 +409,7 @@ interface UpdateRequestWithOriginalCase {
  */
 export const update = async (
   cases: CasesPatchRequest,
-  clientArgs: CasesClientArgs,
-  casesClientInternal: CasesClientInternal
+  clientArgs: CasesClientArgs
 ): Promise<CasesResponse> => {
   const {
     unsecuredSavedObjectsClient,
@@ -420,6 +418,7 @@ export const update = async (
     user,
     logger,
     authorization,
+    alertsService,
   } = clientArgs;
   const query = pipe(
     excess(CasesPatchRequestRt).decode(cases),
@@ -568,7 +567,7 @@ export const update = async (
       casesWithSyncSettingChangedToOn,
       caseService,
       unsecuredSavedObjectsClient,
-      casesClientInternal,
+      alertsService,
     });
 
     const returnUpdatedCase = myCases.saved_objects
