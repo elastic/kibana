@@ -61,24 +61,41 @@ export interface SourcererScopeSelector extends Omit<SourcererModel, 'sourcererS
   sourcererScope: SourcererScope;
 }
 
-export const getSourcererScopeSelector = () => {
+/**
+ * Attn Future Developer
+ * Please do not access sourcererScope directly from redux state
+ * instead use the hook useSourcererDataView in `common/containers/sourcerer/index`
+ * */
+export const getSourcererDataViewsSelector = () => {
   const getKibanaDataViewsSelector = kibanaDataViewsSelector();
   const getDefaultDataViewSelector = defaultDataViewSelector();
   const getSignalIndexNameSelector = signalIndexNameSelector();
-  const getSourcererDataViewSelector = sourcererDataViewSelector();
-  const getScopeSelector = scopeIdSelector();
-
-  return (state: State, scopeId: SourcererScopeName): SourcererScopeSelector => {
+  return (state: State): Omit<SourcererModel, 'sourcererScopes'> => {
     const kibanaDataViews = getKibanaDataViewsSelector(state);
     const defaultDataView = getDefaultDataViewSelector(state);
     const signalIndexName = getSignalIndexNameSelector(state);
-    const scope = getScopeSelector(state, scopeId);
-    const selectedDataView = getSourcererDataViewSelector(state, scope.selectedDataViewId);
 
     return {
       defaultDataView,
       kibanaDataViews,
       signalIndexName,
+    };
+  };
+};
+
+// should only be used by
+export const getSourcererScopeSelector = () => {
+  const getDataViewsSelector = getSourcererDataViewsSelector();
+  const getSourcererDataViewSelector = sourcererDataViewSelector();
+  const getScopeSelector = scopeIdSelector();
+
+  return (state: State, scopeId: SourcererScopeName): SourcererScopeSelector => {
+    const dataViews = getDataViewsSelector(state);
+    const scope = getScopeSelector(state, scopeId);
+    const selectedDataView = getSourcererDataViewSelector(state, scope.selectedDataViewId);
+
+    return {
+      ...dataViews,
       selectedDataView,
       sourcererScope: scope,
     };

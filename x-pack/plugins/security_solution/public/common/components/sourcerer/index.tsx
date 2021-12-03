@@ -47,7 +47,6 @@ import { useAppToasts } from '../../hooks/use_app_toasts';
 import { toMountPoint } from '../../../../../../../src/plugins/kibana_react/public';
 import { RefreshButton } from './refresh_button';
 import { useSourcererDataView } from '../../containers/sourcerer';
-import { DISABLED_SOURCERER } from './translations';
 
 interface SourcererComponentProps {
   scope: sourcererModel.SourcererScopeName;
@@ -59,9 +58,12 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
   const isTimelineSourcerer = scopeId === SourcererScopeName.timeline;
   const { uiSettings } = useKibana().services;
 
-  const sourcererScopeSelector = useMemo(() => sourcererSelectors.getSourcererScopeSelector(), []);
+  const getDataViewsSelector = useMemo(
+    () => sourcererSelectors.getSourcererDataViewsSelector(),
+    []
+  );
   const { defaultDataView, kibanaDataViews, signalIndexName } = useDeepEqualSelector((state) =>
-    sourcererScopeSelector(state, scopeId)
+    getDataViewsSelector(state)
   );
 
   const {

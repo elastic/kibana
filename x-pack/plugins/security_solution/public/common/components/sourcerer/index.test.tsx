@@ -110,15 +110,20 @@ const patternListNoSignals = patternList
   .filter((p) => p !== mockGlobalState.sourcerer.signalIndexName)
   .sort();
 let store: ReturnType<typeof createStore>;
+const sourcererDataView = {
+  indicesExist: true,
+  dataViewId: id,
+  selectedPatterns: patternListNoSignals,
+  loading: false,
+  missingPatterns: [],
+};
+
 describe('Sourcerer component', () => {
   const { storage } = createSecuritySolutionStorageMock();
-  beforeAll(() => {
-    (useSourcererDataView as jest.Mock).mockReturnValue({
-      indicesExist: true,
-    });
-  });
+
   beforeEach(() => {
     store = createStore(mockGlobalState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+    (useSourcererDataView as jest.Mock).mockReturnValue(sourcererDataView);
     jest.clearAllMocks();
   });
 
@@ -201,6 +206,11 @@ describe('Sourcerer component', () => {
     );
   });
   it('Removes duplicate options from title', () => {
+    (useSourcererDataView as jest.Mock).mockReturnValue({
+      ...sourcererDataView,
+      dataViewId: '1234',
+      selectedPatterns: ['filebeat-*'],
+    });
     store = createStore(
       {
         ...mockGlobalState,
@@ -220,15 +230,6 @@ describe('Sourcerer component', () => {
               patternList: ['filebeat-*', 'auditbeat-*'],
             },
           ],
-          sourcererScopes: {
-            ...mockGlobalState.sourcerer.sourcererScopes,
-            [SourcererScopeName.default]: {
-              ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.default],
-              loading: false,
-              selectedDataViewId: '1234',
-              selectedPatterns: ['filebeat-*'],
-            },
-          },
         },
       },
       SUB_PLUGINS_REDUCER,
@@ -252,6 +253,11 @@ describe('Sourcerer component', () => {
     expect(options.length).toEqual(2);
   });
   it('Disables options with no data', () => {
+    (useSourcererDataView as jest.Mock).mockReturnValue({
+      ...sourcererDataView,
+      dataViewId: '1234',
+      selectedPatterns: ['filebeat-*'],
+    });
     store = createStore(
       {
         ...mockGlobalState,
@@ -271,15 +277,6 @@ describe('Sourcerer component', () => {
               patternList: ['filebeat-*', 'auditbeat-*'],
             },
           ],
-          sourcererScopes: {
-            ...mockGlobalState.sourcerer.sourcererScopes,
-            [SourcererScopeName.default]: {
-              ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.default],
-              loading: false,
-              selectedDataViewId: '1234',
-              selectedPatterns: ['filebeat-*'],
-            },
-          },
         },
       },
       SUB_PLUGINS_REDUCER,
@@ -304,6 +301,10 @@ describe('Sourcerer component', () => {
     expect(disabledOption?.value).toEqual('fakebeat-*');
   });
   it('Mounts with multiple options selected - default', () => {
+    (useSourcererDataView as jest.Mock).mockReturnValue({
+      ...sourcererDataView,
+      selectedPatterns: patternListNoSignals.slice(0, 2),
+    });
     const state2 = {
       ...mockGlobalState,
       sourcerer: {
@@ -323,15 +324,6 @@ describe('Sourcerer component', () => {
             patternList: ['packetbeat-*'],
           },
         ],
-        sourcererScopes: {
-          ...mockGlobalState.sourcerer.sourcererScopes,
-          [SourcererScopeName.default]: {
-            ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.default],
-            loading: false,
-            selectedDataViewId: id,
-            selectedPatterns: patternListNoSignals.slice(0, 2),
-          },
-        },
       },
     };
 
@@ -350,6 +342,10 @@ describe('Sourcerer component', () => {
     });
   });
   it('Mounts with multiple options selected - timeline', () => {
+    (useSourcererDataView as jest.Mock).mockReturnValue({
+      ...sourcererDataView,
+      selectedPatterns: patternList.slice(0, 2),
+    });
     const state2 = {
       ...mockGlobalState,
       sourcerer: {
@@ -369,16 +365,6 @@ describe('Sourcerer component', () => {
             patternList: ['packetbeat-*'],
           },
         ],
-        sourcererScopes: {
-          ...mockGlobalState.sourcerer.sourcererScopes,
-          [SourcererScopeName.timeline]: {
-            ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.timeline],
-            loading: false,
-            patternList,
-            selectedDataViewId: id,
-            selectedPatterns: patternList.slice(0, 2),
-          },
-        },
       },
     };
 
@@ -397,6 +383,10 @@ describe('Sourcerer component', () => {
     });
   });
   it('onSave dispatches setSelectedDataView', async () => {
+    (useSourcererDataView as jest.Mock).mockReturnValue({
+      ...sourcererDataView,
+      selectedPatterns: patternListNoSignals.slice(0, 2),
+    });
     store = createStore(
       {
         ...mockGlobalState,
@@ -411,15 +401,6 @@ describe('Sourcerer component', () => {
               patternList: ['filebeat-*'],
             },
           ],
-          sourcererScopes: {
-            ...mockGlobalState.sourcerer.sourcererScopes,
-            [SourcererScopeName.default]: {
-              ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.default],
-              loading: false,
-              selectedDataViewId: id,
-              selectedPatterns: patternListNoSignals.slice(0, 2),
-            },
-          },
         },
       },
       SUB_PLUGINS_REDUCER,
@@ -689,6 +670,7 @@ describe('timeline sourcerer', () => {
   };
 
   beforeAll(() => {
+    (useSourcererDataView as jest.Mock).mockReturnValue(sourcererDataView);
     wrapper = mount(
       <TestProviders store={store}>
         <Sourcerer {...testProps} />
@@ -756,23 +738,11 @@ describe('timeline sourcerer', () => {
   });
 
   it('Checks box when only alerts index is selected in timeline', () => {
-    const state2 = {
-      ...mockGlobalState,
-      sourcerer: {
-        ...mockGlobalState.sourcerer,
-        sourcererScopes: {
-          ...mockGlobalState.sourcerer.sourcererScopes,
-          [SourcererScopeName.timeline]: {
-            ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.timeline],
-            loading: false,
-            selectedDataViewId: id,
-            selectedPatterns: [`${mockGlobalState.sourcerer.signalIndexName}`],
-          },
-        },
-      },
-    };
+    (useSourcererDataView as jest.Mock).mockReturnValue({
+      ...sourcererDataView,
+      selectedPatterns: [`${mockGlobalState.sourcerer.signalIndexName}`],
+    });
 
-    store = createStore(state2, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
     wrapper = mount(
       <TestProviders store={store}>
         <Sourcerer scope={sourcererModel.SourcererScopeName.timeline} />
@@ -814,6 +784,7 @@ describe('Sourcerer integration tests', () => {
   const { storage } = createSecuritySolutionStorageMock();
 
   beforeEach(() => {
+    (useSourcererDataView as jest.Mock).mockReturnValue(sourcererDataView);
     store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
     jest.clearAllMocks();
     jest.restoreAllMocks();
@@ -856,13 +827,14 @@ describe('No data', () => {
 
   beforeEach(() => {
     (useSourcererDataView as jest.Mock).mockReturnValue({
+      ...sourcererDataView,
       indicesExist: false,
     });
     store = createStore(mockNoIndicesState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
     jest.clearAllMocks();
     jest.restoreAllMocks();
   });
-  test('Hide sourcerer', () => {
+  test('Hide sourcerer - default ', () => {
     const wrapper = mount(
       <TestProviders store={store}>
         <Sourcerer {...defaultProps} />
@@ -870,6 +842,24 @@ describe('No data', () => {
     );
 
     expect(wrapper.find(`[data-test-subj="sourcerer-trigger"]`).exists()).toEqual(false);
+  });
+  test('Hide sourcerer - detections ', () => {
+    const wrapper = mount(
+      <TestProviders store={store}>
+        <Sourcerer scope={sourcererModel.SourcererScopeName.detections} />
+      </TestProviders>
+    );
+
+    expect(wrapper.find(`[data-test-subj="sourcerer-trigger"]`).exists()).toEqual(false);
+  });
+  test('Hide sourcerer - timeline ', () => {
+    const wrapper = mount(
+      <TestProviders store={store}>
+        <Sourcerer scope={sourcererModel.SourcererScopeName.timeline} />
+      </TestProviders>
+    );
+
+    expect(wrapper.find(`[data-test-subj="timeline-sourcerer-trigger"]`).exists()).toEqual(true);
   });
 });
 
@@ -912,16 +902,15 @@ describe('Update available', () => {
   let wrapper: ReactWrapper;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
-  beforeAll(() => {
+    (useSourcererDataView as jest.Mock).mockReturnValue({
+      ...sourcererDataView,
+      dataViewId: null,
+      selectedPatterns: ['myFakebeat-*'],
+      missingPatterns: ['myFakebeat-*'],
+    });
     (useAppToasts as jest.Mock).mockReturnValue({
       addSuccess: mockAddSuccess,
       addError: mockAddError,
-    });
-    (useSourcererDataView as jest.Mock).mockReturnValue({
-      indicesExist: true,
     });
     store = createStore(state2, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
 
@@ -930,6 +919,9 @@ describe('Update available', () => {
         <Sourcerer scope={sourcererModel.SourcererScopeName.timeline} />
       </TestProviders>
     );
+  });
+  afterEach(() => {
+    jest.clearAllMocks();
   });
 
   test('Show Update available label', () => {
@@ -972,17 +964,7 @@ describe('Update available', () => {
       sourcererActions.setSelectedDataView({
         id: SourcererScopeName.timeline,
         selectedDataViewId: 'security-solution',
-        selectedPatterns: [
-          'apm-*-transaction*',
-          'traces-apm*',
-          'auditbeat-*',
-          'endgame-*',
-          'filebeat-*',
-          'logs-*',
-          'packetbeat-*',
-          'winlogbeat-*',
-          'myFakebeat-*',
-        ],
+        selectedPatterns: ['myFakebeat-*'],
         shouldValidateSelectedPatterns: false,
       })
     );

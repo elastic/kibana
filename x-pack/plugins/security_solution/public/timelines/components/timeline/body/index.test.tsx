@@ -24,6 +24,7 @@ import { useMountAppended } from '../../../../common/utils/use_mount_appended';
 import { timelineActions } from '../../../store/timeline';
 import { TimelineTabs } from '../../../../../common/types/timeline';
 import { defaultRowRenderers } from './renderers';
+import { useCreateFieldButton } from '../../create_field_button';
 
 jest.mock('../../../../common/lib/kibana/hooks');
 jest.mock('../../../../common/hooks/use_app_toasts');
@@ -110,6 +111,10 @@ jest.mock('../../../../common/lib/helpers/scheduler', () => ({
     callback();
   },
   maxDelay: () => 3000,
+}));
+
+jest.mock('../../create_field_button', () => ({
+  useCreateFieldButton: () => <></>,
 }));
 
 describe('Body', () => {

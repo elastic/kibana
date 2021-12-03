@@ -261,14 +261,26 @@ export const EXCLUDE_ELASTIC_CLOUD_INDEX = '-*elastic-cloud-logs-*';
 export const useSourcererDataView = (
   scopeId: SourcererScopeName = SourcererScopeName.default
 ): SelectedDataView => {
-  const sourcererScopeSelector = useMemo(() => sourcererSelectors.getSourcererScopeSelector(), []);
+  const { getDataViewsSelector, getSourcererDataViewSelector, getScopeSelector } = useMemo(
+    () => ({
+      getDataViewsSelector: sourcererSelectors.getSourcererDataViewsSelector(),
+      getSourcererDataViewSelector: sourcererSelectors.sourcererDataViewSelector(),
+      getScopeSelector: sourcererSelectors.scopeIdSelector(),
+    }),
+    []
+  );
   const {
     signalIndexName,
     selectedDataView,
     sourcererScope: { missingPatterns, selectedPatterns: scopeSelectedPatterns, loading },
-  }: sourcererSelectors.SourcererScopeSelector = useDeepEqualSelector((state) =>
-    sourcererScopeSelector(state, scopeId)
-  );
+  }: sourcererSelectors.SourcererScopeSelector = useDeepEqualSelector((state) => {
+    const sourcererScope = getScopeSelector(state, scopeId);
+    return {
+      ...getDataViewsSelector(state),
+      selectedDataView: getSourcererDataViewSelector(state, sourcererScope.selectedDataViewId),
+      sourcererScope,
+    };
+  });
 
   const selectedPatterns = useMemo(
     () =>
