@@ -236,20 +236,28 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
 
-    it('should work with deprecated API', async () => {
-      await supertest.get(`/api/fleet/enrollment-api-keys`).expect(200);
-      await supertest.get(`/api/fleet/enrollment-api-keys/${ENROLLMENT_KEY_ID}`).expect(200);
-      const { body: apiResponse } = await supertest
-        .post(`/api/fleet/enrollment-api-keys`)
-        .set('kbn-xsrf', 'xxx')
-        .send({
-          policy_id: 'policy1',
-        })
-        .expect(200);
-      await supertest
-        .delete(`/api/fleet/enrollment-api-keys/${apiResponse.item.id}`)
-        .set('kbn-xsrf', 'xxx')
-        .expect(200);
+    describe('deprecated API', () => {
+      let keyId: string;
+      before(async () => {
+        const { body: apiResponse } = await supertest
+          .post(`/api/fleet/enrollment-api-keys`)
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            policy_id: 'policy1',
+          })
+          .expect(200);
+        keyId = apiResponse.item.id;
+      });
+
+      it('should get and delete with deprecated API', async () => {
+        await supertest.get(`/api/fleet/enrollment-api-keys`).expect(200);
+        await supertest.get(`/api/fleet/enrollment-api-keys/${ENROLLMENT_KEY_ID}`).expect(200);
+
+        await supertest
+          .delete(`/api/fleet/enrollment-api-keys/${keyId}`)
+          .set('kbn-xsrf', 'xxx')
+          .expect(200);
+      });
     });
   });
 }
