@@ -12,20 +12,29 @@ import { getTableRenderer } from '../canvas_plugin_src/renderers/table';
 import { getTextRenderer } from '../canvas_plugin_src/renderers/text';
 import { imageRenderer as image } from '../../../../src/plugins/expression_image/public';
 import {
-  errorRenderer as error,
-  debugRenderer as debug,
+  getErrorRenderer,
+  getDebugRenderer,
 } from '../../../../src/plugins/expression_error/public';
-import { repeatImageRenderer as repeatImage } from '../../../../src/plugins/expression_repeat_image/public';
-import { revealImageRenderer as revealImage } from '../../../../src/plugins/expression_reveal_image/public';
+import { getRevealImageRenderer } from '../../../../src/plugins/expression_reveal_image/public';
+import { getRepeatImageRenderer } from '../../../../src/plugins/expression_repeat_image/public';
 import {
   shapeRenderer as shape,
   progressRenderer as progress,
 } from '../../../../src/plugins/expression_shape/public';
-import { metricRenderer as metric } from '../../../../src/plugins/expression_metric/public';
+import { getMetricRenderer } from '../../../../src/plugins/expression_metric/public';
 
 const unboxFactory = (factory) => factory();
 
-const renderFunctionsFactories = [getMarkdownRenderer, getTextRenderer, getTableRenderer];
+const renderFunctionsFactories = [
+  getMarkdownRenderer,
+  getTextRenderer,
+  getTableRenderer,
+  getErrorRenderer,
+  getDebugRenderer,
+  getRevealImageRenderer,
+  getRepeatImageRenderer,
+  getMetricRenderer,
+];
 
 /**
  * This is a collection of renderers which are bundled with the runtime.  If
@@ -33,12 +42,7 @@ const renderFunctionsFactories = [getMarkdownRenderer, getTextRenderer, getTable
  * not render.  This includes any plugins.
  */
 export const renderFunctions = [
-  debug,
-  error,
   image,
-  repeatImage,
-  revealImage,
-  metric,
   pie,
   plot,
   progress,
