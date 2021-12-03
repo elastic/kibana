@@ -139,7 +139,9 @@ const ObservabilityAppLink: FunctionComponent<Props> = ({ checkpoint }) => {
   const sourceId = DEPRECATION_LOGS_SOURCE_ID;
   const logPosition = `(end:now,start:${encode(checkpoint)})`;
   const logFilter = encodeURI(
-    `(language:kuery,query:'not ecs.version : (${APPS_WITH_DEPRECATION_LOGS.join(' or ')})')`
+    `(language:kuery,query:'not ${DEPRECATION_LOGS_ORIGIN_FIELD} : (${APPS_WITH_DEPRECATION_LOGS.join(
+      ' or '
+    )})')`
   );
   const queryParams = `sourceId=${sourceId}&logPosition=${logPosition}&logFilter=${logFilter}`;
 

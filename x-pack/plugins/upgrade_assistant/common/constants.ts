@@ -47,7 +47,17 @@ export const SYSTEM_INDICES_MIGRATION_POLL_INTERVAL_MS = 15000;
  * We want to filter those out for our users so they only see deprecation logs
  * that _they_ are generating.
  */
-export const APPS_WITH_DEPRECATION_LOGS = ['1.6', '1.7'];
+export const APPS_WITH_DEPRECATION_LOGS = [
+  'kibana',
+  'cloud',
+  'logstash',
+  'beats',
+  'fleet',
+  'ml',
+  'security',
+  'observability',
+  'enterprise-search',
+];
 
 // The field that will indicate which elastic product generated the deprecation log
-export const DEPRECATION_LOGS_ORIGIN_FIELD = 'ecs.version';
+export const DEPRECATION_LOGS_ORIGIN_FIELD = 'elastic_product_origin';
