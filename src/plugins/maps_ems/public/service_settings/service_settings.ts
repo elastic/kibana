@@ -163,16 +163,6 @@ export class KbnMapsSettings implements IEMSKbnMapsSettings {
     return isDarkMode ? dark : desaturated;
   }
 
-  // /**
-  //  * Set optional query-parameters for all requests
-  //  *
-  //  * @param additionalQueryParams
-  //  */
-  // setQueryParams(additionalQueryParams: { [p: string]: string }) {
-  //   // Functions more as a "set" than an "add" in ems-client
-  //   this._emsClient.addQueryParams(additionalQueryParams);
-  // }
-
   async _getAttributesForEMSTMSLayer(isDesaturated: boolean, isDarkMode: boolean) {
     const tmsServices = await this._emsClient.getTMSServices();
     const emsTileLayerId = this._mapConfig.emsTileLayerId;
