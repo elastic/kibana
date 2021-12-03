@@ -11,7 +11,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
   INDICATOR_MATCHED_TYPE,
-  INDICATOR_PROVIDER,
+  FEED_NAME,
   INDICATOR_REFERENCE,
 } from '../../../../../../../common/cti/constants';
 import { DraggableBadge } from '../../../../../../common/components/draggables';
@@ -21,7 +21,7 @@ import { HorizontalSpacer } from './helpers';
 interface IndicatorDetailsProps {
   contextId: string;
   eventId: string;
-  indicatorProvider: string | undefined;
+  feedName: string | undefined;
   indicatorReference: string | undefined;
   indicatorType: string | undefined;
   isDraggable?: boolean;
@@ -30,7 +30,7 @@ interface IndicatorDetailsProps {
 export const IndicatorDetails: React.FC<IndicatorDetailsProps> = ({
   contextId,
   eventId,
-  indicatorProvider,
+  feedName,
   indicatorReference,
   indicatorType,
   isDraggable,
@@ -55,7 +55,7 @@ export const IndicatorDetails: React.FC<IndicatorDetailsProps> = ({
         />
       </EuiFlexItem>
     )}
-    {indicatorProvider && (
+    {feedName && (
       <>
         <EuiFlexItem grow={false} component="span">
           <HorizontalSpacer>
@@ -70,9 +70,9 @@ export const IndicatorDetails: React.FC<IndicatorDetailsProps> = ({
             contextId={contextId}
             data-test-subj="threat-match-indicator-details-indicator-provider"
             eventId={eventId}
-            field={INDICATOR_PROVIDER}
+            field={FEED_NAME}
             isDraggable={isDraggable}
-            value={indicatorProvider}
+            value={feedName}
           />
         </EuiFlexItem>
       </>

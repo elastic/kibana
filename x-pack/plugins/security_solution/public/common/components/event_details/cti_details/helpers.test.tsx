@@ -359,7 +359,7 @@ describe('getEnrichmentFields', () => {
 });
 
 describe('getEnrichmentIdentifiers', () => {
-  it(`return feed name as provider if it's present in enrichment`, () => {
+  it(`return feed name as feedName if it's present in enrichment`, () => {
     expect(
       getEnrichmentIdentifiers({
         'matched.id': [1],
@@ -374,7 +374,7 @@ describe('getEnrichmentIdentifiers', () => {
       field: 'matched field',
       value: 'matched atomic',
       type: 'matched type',
-      provider: 'feed name',
+      feedName: 'feed name',
     });
   });
 });

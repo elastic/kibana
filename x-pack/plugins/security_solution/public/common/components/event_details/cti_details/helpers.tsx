@@ -81,7 +81,7 @@ export const getEnrichmentIdentifiers = (enrichment: CtiEnrichment): CtiEnrichme
   field: getEnrichmentValue(enrichment, MATCHED_FIELD),
   value: getEnrichmentValue(enrichment, MATCHED_ATOMIC),
   type: getEnrichmentValue(enrichment, MATCHED_TYPE),
-  provider: getShimmedIndicatorValue(enrichment, FEED_NAME),
+  feedName: getShimmedIndicatorValue(enrichment, FEED_NAME),
 });
 
 const buildEnrichmentId = (enrichment: CtiEnrichment): string => {
