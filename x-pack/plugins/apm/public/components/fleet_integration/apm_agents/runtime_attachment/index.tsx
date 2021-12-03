@@ -31,7 +31,7 @@ export type IDiscoveryRuleList = Array<{
 export interface RuntimeAttachmentSettings {
   enabled: boolean;
   discoveryRules: IDiscoveryRule[];
-  version: string;
+  version: string | null;
 }
 
 interface Props {
@@ -89,9 +89,9 @@ export function RuntimeAttachment(props: Props) {
       discoveryRules: nextIsEnabled
         ? discoveryRuleList.map(({ discoveryRule }) => discoveryRule)
         : [],
-      version: nextIsEnabled ? version : props.selectedVersion,
+      version: nextIsEnabled ? version : null,
     });
-  }, [isEnabled, onChange, discoveryRuleList, version, props.selectedVersion]);
+  }, [isEnabled, onChange, discoveryRuleList, version]);
 
   const onDelete = useCallback(
     (discoveryRuleId: string) => {
