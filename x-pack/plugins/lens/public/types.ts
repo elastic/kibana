@@ -149,7 +149,8 @@ export type DropType =
   | 'duplicate_incompatible'
   | 'swap_incompatible'
   | 'field_combine'
-  | 'combine_compatible';
+  | 'combine_compatible'
+  | 'combine_incompatible';
 
 export interface DatasourceSuggestion<T = unknown> {
   state: T;

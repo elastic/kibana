@@ -188,12 +188,21 @@ function getDropPropsFromIncompatibleGroup({
     const targetField = getField(targetColumn, layerIndexPattern);
     const canSwap = !!getNewOperation(targetField, dragging.filterOperations, sourceColumn);
 
+    const dropTypes: DropType[] = [];
+    if (targetColumn) {
+      dropTypes.push('replace_incompatible', 'replace_duplicate_incompatible');
+      if (canSwap) {
+        dropTypes.push('swap_incompatible');
+      }
+      if (hasOperationSupportForMultipleFields(targetColumn, sourceColumn)) {
+        dropTypes.push('combine_incompatible');
+      }
+    } else {
+      dropTypes.push('move_incompatible', 'duplicate_incompatible');
+    }
+
     return {
-      dropTypes: targetColumn
-        ? canSwap
-          ? ['replace_incompatible', 'replace_duplicate_incompatible', 'swap_incompatible']
-          : ['replace_incompatible', 'replace_duplicate_incompatible']
-        : ['move_incompatible', 'duplicate_incompatible'],
+      dropTypes,
       nextLabel: operationLabels[newOperationForSource].displayName,
     };
   }

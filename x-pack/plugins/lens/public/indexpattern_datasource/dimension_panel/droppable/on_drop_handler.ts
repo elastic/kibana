@@ -61,6 +61,7 @@ const operationOnDropMap = {
   swap_compatible: onSwapCompatible,
   swap_incompatible: onSwapIncompatible,
   combine_compatible: onCombineCompatible,
+  combine_incompatible: onCombineCompatible,
 };
 
 function onCombineCompatible({

@@ -315,7 +315,7 @@ interface BaseOperationDefinitionProps<C extends BaseIndexPatternColumn, P = {}>
    */
   getParamsForMultipleFields?: (props: {
     targetColumn: C;
-    sourceColumn?: C;
+    sourceColumn?: GenericIndexPatternColumn;
     field?: IndexPatternField;
   }) => Partial<P>;
   /**

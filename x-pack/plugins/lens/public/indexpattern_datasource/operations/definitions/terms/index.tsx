@@ -81,11 +81,13 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
     if (targetColumn.params?.secondaryFields?.length) {
       targetColumn.params.secondaryFields.forEach(secondaryFields.add, secondaryFields);
     }
-    if (sourceColumn?.sourceField) {
+    if (sourceColumn && 'sourceField' in sourceColumn && sourceColumn?.sourceField) {
       secondaryFields.add(sourceColumn.sourceField);
     }
-    if (sourceColumn?.params?.secondaryFields?.length) {
-      sourceColumn.params.secondaryFields.forEach(secondaryFields.add, secondaryFields);
+    if (isTermsColumn(sourceColumn)) {
+      if (sourceColumn?.params?.secondaryFields?.length) {
+        sourceColumn.params.secondaryFields.forEach(secondaryFields.add, secondaryFields);
+      }
     }
     if (field) {
       secondaryFields.add(field.name);

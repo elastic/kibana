@@ -94,6 +94,7 @@ const customDropTargetsMap: Partial<{ [dropType in DropType]: React.ReactElement
   swap_compatible: getExtraDrop({ type: 'swap' }),
   field_combine: getExtraDrop({ type: 'combine' }),
   combine_compatible: getExtraDrop({ type: 'combine' }),
+  combine_incompatible: getExtraDrop({ type: 'combine', isIncompatible: true }),
 };
 
 export const getCustomDropTarget = (dropType: DropType) => customDropTargetsMap?.[dropType] || null;
@@ -122,6 +123,7 @@ export const getAdditionalClassesOnDroppable = (dropType?: string) => {
       'swap_incompatible',
       'duplicate_incompatible',
       'replace_duplicate_incompatible',
+      'combine_incompatible',
     ].includes(dropType)
   ) {
     return 'lnsDragDrop-notCompatible';
