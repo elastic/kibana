@@ -90,11 +90,13 @@ export function useFetchHostIsolationExceptionsList({
   page,
   perPage,
   policies,
+  enabled = true,
 }: {
   filter?: string;
   page: number;
   perPage: number;
   policies?: string[];
+  enabled?: boolean;
 }): QueryObserverResult<FoundExceptionListItemSchema, ServerApiError> {
   const http = useHttp();
 
@@ -112,7 +114,8 @@ export function useFetchHostIsolationExceptionsList({
         perPage,
         filter: kql,
       });
-    }
+    },
+    { enabled }
   );
 }
 

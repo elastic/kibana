@@ -28,7 +28,8 @@ import { getHostIsolationExceptionsListPath } from '../../../../common/routing';
 import { useFetchHostIsolationExceptionsList } from '../../../host_isolation_exceptions/view/hooks';
 import { getCurrentArtifactsLocation } from '../../store/policy_details/selectors';
 import { usePolicyDetailsSelector } from '../policy_hooks';
-import { PolicyHostIsolationExceptionsEmpty } from './components/empty';
+import { PolicyHostIsolationExceptionsEmptyUnexisting } from './components/empty_non_existent';
+import { PolicyHostIsolationExceptionsEmptyUnassigned } from './components/empty_unassigned';
 import { PolicyHostIsolationExceptionsList } from './components/list';
 
 export const PolicyHostIsolationExceptionsTab = ({
@@ -41,6 +42,10 @@ export const PolicyHostIsolationExceptionsTab = ({
   const { getAppUrl } = useAppUrl();
 
   const location = usePolicyDetailsSelector(getCurrentArtifactsLocation);
+  const toHostIsolationList = getAppUrl({
+    appId: APP_UI_ID,
+    path: getHostIsolationExceptionsListPath(),
+  });
 
   const allPolicyExceptionsListRequest = useFetchHostIsolationExceptionsList({
     page: MANAGEMENT_DEFAULT_PAGE,
@@ -55,14 +60,19 @@ export const PolicyHostIsolationExceptionsTab = ({
     policies: [policyId, 'all'],
   });
 
+  const allExceptionsListRequest = useFetchHostIsolationExceptionsList({
+    page: MANAGEMENT_DEFAULT_PAGE,
+    perPage: MANAGEMENT_DEFAULT_PAGE_SIZE,
+    // only do this request if no assigned policies found
+    enabled: allPolicyExceptionsListRequest.data?.total === 0,
+  });
+
   const hasNoAssignedOrExistingExceptions = allPolicyExceptionsListRequest.data?.total === 0;
+  const hasNoExistingExceptions = allExceptionsListRequest.data?.total === 0;
 
   const subTitle = useMemo(() => {
     const link = (
-      <EuiLink
-        href={getAppUrl({ appId: APP_UI_ID, path: getHostIsolationExceptionsListPath() })}
-        target="_blank"
-      >
+      <EuiLink href={getAppUrl({ appId: APP_UI_ID, path: toHostIsolationList })} target="_blank">
         <FormattedMessage
           id="xpack.securitySolution.endpoint.policy.hostIsolationExceptions.list.viewAllLinkLabel"
           defaultMessage="view all host isolation exceptions"
@@ -81,19 +91,32 @@ export const PolicyHostIsolationExceptionsTab = ({
       />
     ) : null;
   }, [
+    allPolicyExceptionsListRequest.data?.total,
     getAppUrl,
     policySearchedExceptionsListRequest.data,
-    allPolicyExceptionsListRequest.data?.total,
+    toHostIsolationList,
   ]);
 
   const isLoading =
     policySearchedExceptionsListRequest.isLoading ||
     allPolicyExceptionsListRequest.isLoading ||
+    allExceptionsListRequest.isLoading ||
     !policy;
 
   // render non-existent or non-assigned messages
-  if (!isLoading && hasNoAssignedOrExistingExceptions) {
-    return <PolicyHostIsolationExceptionsEmpty policyName={policy.name} />;
+  if (!isLoading && (hasNoAssignedOrExistingExceptions || hasNoExistingExceptions)) {
+    if (hasNoExistingExceptions) {
+      return (
+        <PolicyHostIsolationExceptionsEmptyUnexisting toHostIsolationList={toHostIsolationList} />
+      );
+    } else {
+      return (
+        <PolicyHostIsolationExceptionsEmptyUnassigned
+          policyName={policy.name}
+          toHostIsolationList={toHostIsolationList}
+        />
+      );
+    }
   }
 
   // render header and list
