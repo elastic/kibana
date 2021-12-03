@@ -8,7 +8,6 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { UMElasticsearchQueryFn } from '../adapters/framework';
 import { Ping } from '../../../common/runtime_types/ping';
-import { REMOVE_NON_SUMMARY_BROWSER_CHECKS } from '../helper/filter_heartbeat_summary';
 
 export interface GetStepScreenshotParams {
   monitorId: string;
