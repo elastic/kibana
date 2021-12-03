@@ -25,7 +25,11 @@ function shouldReject({
   emptyConfiguration,
 }: SuggestionRequest<PieVisualizationState>) {
   // usecase for dropping a field - state doesn't exist yet and subVisualizationId doesn't exist
-  console.log(table, state, emptyConfiguration);
+  const emptyConfiguration =
+    state?.shape &&
+    isPartitionShape(state.shape) &&
+    state?.layers?.[0]?.metric === undefined &&
+    state?.layers?.[0]?.groups.length === 0;
   if (emptyConfiguration) {
     return hasIntervalScale(table.columns);
   }
@@ -75,14 +79,8 @@ export function suggestions({
 }: SuggestionRequest<PieVisualizationState>): Array<
   VisualizationSuggestion<PieVisualizationState>
 > {
-   console.log('empty');
-  const emptyConfiguration =
-    state?.shape &&
-    isPartitionShape(state.shape) &&
-    state?.layers?.[0]?.metric === undefined &&
-    state?.layers?.[0]?.groups.length === 0;
 
-  if (shouldReject({ table, state, keptLayerIds, emptyConfiguration })) {
+  if (shouldReject({ table, state, keptLayerIds })) {
     return [];
   }
   const [groups, metrics] = partition(table.columns, (col) => col.operation.isBucketed);
