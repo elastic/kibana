@@ -51,7 +51,19 @@ export type StartServices = CoreStart &
     security: SecurityPluginSetup;
   };
 
+type CaseOwnerTypes = 'securitySolutionCases' | 'observabilityCases';
+export interface CasePermissionOptions {
+  owners?: CaseOwnerTypes[];
+  crudLevel: 'crud' | 'read';
+}
+
 export interface CasesUiStart {
+  /**
+   * Determines whether the current user has the ability to use Cases.
+   * @param options CasePermissionOptions
+   * @return A Boolean defining whether based on the given options, the user can access cases.
+   */
+  canUseCases: (options: CasePermissionOptions) => boolean;
   /**
    * Get cases
    * @param props GetCasesProps
