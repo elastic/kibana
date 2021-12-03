@@ -19,8 +19,8 @@ import { EndpointAuthorizationError } from '../errors';
  */
 export const withEndpointAuthz = <T>(
   requiredAuthz: Array<keyof EndpointAuthz>,
-  routeHandler: T,
-  logger?: Logger
+  logger: Logger,
+  routeHandler: T
 ): T => {
   const enforceAuthz = requiredAuthz.length > 0;
 
