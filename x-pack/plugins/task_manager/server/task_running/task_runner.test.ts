@@ -1485,7 +1485,7 @@ describe('TaskManagerRunner', () => {
       const id = _.random(1, 20).toString();
       const onTaskEvent = jest.fn();
       const error = new Error('Dangit!');
-      const { runner, store, usageCounter, logger } = await readyToRunStageSetup({
+      const { runner, store, usageCounter } = await readyToRunStageSetup({
         onTaskEvent,
         instance: {
           id,
