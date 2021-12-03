@@ -144,7 +144,7 @@ function buildSyncedKibanaPalette(
   return {
     id: 'kibana_palette',
     getCategoricalColor: getColor,
-    getCategoricalColors: () => colors.seedColors,
+    getCategoricalColors: (size?: number) => staticColors.slice(0, size ?? 10),
     toExpression: () => ({
       type: 'expression',
       chain: [
