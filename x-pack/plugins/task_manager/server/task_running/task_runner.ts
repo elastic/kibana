@@ -56,10 +56,13 @@ import {
 } from '../task';
 import { TaskTypeDictionary } from '../task_type_dictionary';
 import { isUnrecoverableError } from './errors';
-import { UsageCounter } from '../../../../../src/plugins/usage_collection/server';
 
 const defaultBackoffPerFailure = 5 * 60 * 1000;
 export const EMPTY_RUN_RESULT: SuccessfulRunResult = { state: {} };
+
+export const TASK_MANAGER_RUN_TRANSACTION_TYPE = 'task-run';
+export const TASK_MANAGER_TRANSACTION_TYPE = 'task-manager';
+export const TASK_MANAGER_TRANSACTION_TYPE_MARK_AS_RUNNING = 'mark-task-as-running';
 
 export interface TaskRunner {
   isExpired: boolean;
@@ -101,7 +104,6 @@ type Opts = {
   onTaskEvent?: (event: TaskRun | TaskMarkRunning) => void;
   defaultMaxAttempts: number;
   executionContext: ExecutionContextStart;
-  usageCounter?: UsageCounter;
 } & Pick<Middleware, 'beforeRun' | 'beforeMarkRunning'>;
 
 export enum TaskRunResult {
@@ -148,7 +150,6 @@ export class TaskManagerRunner implements TaskRunner {
   private defaultMaxAttempts: number;
   private uuid: string;
   private readonly executionContext: ExecutionContextStart;
-  private usageCounter?: UsageCounter;
 
   /**
    * Creates an instance of TaskManagerRunner.
@@ -170,7 +171,6 @@ export class TaskManagerRunner implements TaskRunner {
     defaultMaxAttempts,
     onTaskEvent = identity,
     executionContext,
-    usageCounter,
   }: Opts) {
     this.instance = asPending(sanitizeInstance(instance));
     this.definitions = definitions;
@@ -181,7 +181,6 @@ export class TaskManagerRunner implements TaskRunner {
     this.onTaskEvent = onTaskEvent;
     this.defaultMaxAttempts = defaultMaxAttempts;
     this.executionContext = executionContext;
-    this.usageCounter = usageCounter;
     this.uuid = uuid.v4();
   }
 
@@ -281,7 +280,7 @@ export class TaskManagerRunner implements TaskRunner {
     }
     this.logger.debug(`Running task ${this}`);
 
-    const apmTrans = apm.startTransaction(this.taskType, 'taskManager run', {
+    const apmTrans = apm.startTransaction(this.taskType, TASK_MANAGER_RUN_TRANSACTION_TYPE, {
       childOf: this.instance.task.traceparent,
     });
 
@@ -338,7 +337,11 @@ export class TaskManagerRunner implements TaskRunner {
       );
     }
 
-    const apmTrans = apm.startTransaction('taskManager', 'taskManager markTaskAsRunning');
+    const apmTrans = apm.startTransaction(
+      TASK_MANAGER_TRANSACTION_TYPE_MARK_AS_RUNNING,
+      TASK_MANAGER_TRANSACTION_TYPE
+    );
+    apmTrans?.addLabels({ entityId: this.taskType });
 
     const now = new Date();
     try {
@@ -457,11 +460,6 @@ export class TaskManagerRunner implements TaskRunner {
       return true;
     }
 
-    if (this.isExpired) {
-      this.logger.warn(`Skipping reschedule for task ${this} due to the task expiring`);
-      return false;
-    }
-
     const maxAttempts = this.definition.maxAttempts || this.defaultMaxAttempts;
     return this.instance.task.attempts < maxAttempts;
   }
@@ -524,28 +522,20 @@ export class TaskManagerRunner implements TaskRunner {
       unwrap
     )(result);
 
-    if (!this.isExpired) {
-      this.instance = asRan(
-        await this.bufferedTaskStore.update(
-          defaults(
-            {
-              ...fieldUpdates,
-              // reset fields that track the lifecycle of the concluded `task run`
-              startedAt: null,
-              retryAt: null,
-              ownerId: null,
-            },
-            this.instance.task
-          )
+    this.instance = asRan(
+      await this.bufferedTaskStore.update(
+        defaults(
+          {
+            ...fieldUpdates,
+            // reset fields that track the lifecycle of the concluded `task run`
+            startedAt: null,
+            retryAt: null,
+            ownerId: null,
+          },
+          this.instance.task
         )
-      );
-    } else {
-      this.usageCounter?.incrementCounter({
-        counterName: `taskManagerUpdateSkippedDueToTaskExpiration`,
-        counterType: 'taskManagerTaskRunner',
-        incrementBy: 1,
-      });
-    }
+      )
+    );
 
     return fieldUpdates.status === TaskStatus.Failed
       ? TaskRunResult.Failed
