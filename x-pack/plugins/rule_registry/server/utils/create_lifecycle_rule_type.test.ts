@@ -272,6 +272,7 @@ describe('createLifecycleRuleTypeFactory', () => {
             (doc: any) => !('index' in doc) && doc['service.name'] === 'opbeans-node'
           ) as Record<string, any>;
 
+        // @ts-ignore 4.3.5 upgrade
         helpers.ruleDataClientMock.getReader().search.mockResolvedValueOnce({
           hits: {
             hits: [{ _source: lastOpbeansNodeDoc } as any],

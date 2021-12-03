@@ -17,7 +17,7 @@ import classNames from 'classnames';
 import _ from 'lodash';
 import React from 'react';
 import { Subscription } from 'rxjs';
-import ReactGridLayout, { Layout } from 'react-grid-layout';
+import ReactGridLayout, { Layout, ReactGridLayoutProps } from 'react-grid-layout';
 import { GridData } from '../../../../common';
 import { ViewMode } from '../../../services/embeddable';
 import { DASHBOARD_GRID_COLUMN_COUNT, DASHBOARD_GRID_HEIGHT } from '../dashboard_constants';
@@ -54,9 +54,9 @@ function ResponsiveGrid({
   size: { width: number };
   isViewMode: boolean;
   layout: Layout[];
-  onLayoutChange: () => void;
+  onLayoutChange: ReactGridLayoutProps['onLayoutChange'];
   children: JSX.Element[];
-  maximizedPanelId: string;
+  maximizedPanelId?: string;
   useMargins: boolean;
 }) {
   // This is to prevent a bug where view mode changes when the panel is expanded.  View mode changes will trigger

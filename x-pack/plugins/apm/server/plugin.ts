@@ -23,7 +23,7 @@ import { APM_FEATURE, registerFeaturesUsage } from './feature';
 import { registerApmAlerts } from './lib/alerts/register_apm_alerts';
 import { registerFleetPolicyCallbacks } from './lib/fleet/register_fleet_policy_callbacks';
 import { createApmTelemetry } from './lib/apm_telemetry';
-import { createApmEventClient } from './lib/helpers/create_es_client/create_apm_event_client';
+import { APMEventClient } from './lib/helpers/create_es_client/create_apm_event_client';
 import { getInternalSavedObjectsClient } from './lib/helpers/get_internal_saved_objects_client';
 import { createApmAgentConfigurationIndex } from './lib/settings/agent_configuration/create_agent_config_index';
 import { getApmIndices } from './lib/settings/apm_indices/get_apm_indices';
@@ -65,7 +65,7 @@ export class APMPlugin
 
   public setup(
     core: CoreSetup<APMPluginStartDependencies>,
-    plugins: Omit<APMPluginSetupDependencies, 'core'>
+    plugins: APMPluginSetupDependencies
   ) {
     this.logger = this.initContext.logger.get();
     const config$ = this.initContext.config.create<APMConfig>();
@@ -213,7 +213,7 @@ export class APMPlugin
 
         const esClient = context.core.elasticsearch.client.asCurrentUser;
 
-        return createApmEventClient({
+        return new APMEventClient({
           debug: debug ?? false,
           esClient,
           request,

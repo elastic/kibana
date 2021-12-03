@@ -8,7 +8,7 @@
 import { KibanaRequest } from 'src/core/server';
 import { loggingSystemMock, httpServerMock } from 'src/core/server/mocks';
 import { securityMock } from '../../../../security/server/mocks';
-import { ReindexSavedObject } from '../../../common/types';
+import { ReindexStep, ReindexStatus, ReindexSavedObject } from '../../../common/types';
 import { credentialStoreFactory } from './credential_store';
 
 const basicAuthHeader = 'Basic abc';
@@ -25,7 +25,19 @@ const securityStartMock = securityMock.createStart();
 
 const reindexOpMock = {
   id: 'asdf',
-  attributes: { indexName: 'test', lastCompletedStep: 1, locked: null },
+  type: 'type',
+  references: [],
+  attributes: {
+    indexName: 'test',
+    newIndexName: 'new-index',
+    status: ReindexStatus.inProgress,
+    lastCompletedStep: ReindexStep.created,
+    locked: null,
+    reindexTaskId: null,
+    reindexTaskPercComplete: null,
+    errorMessage: null,
+    runningReindexCount: null,
+  },
 } as ReindexSavedObject;
 
 describe('credentialStore', () => {
@@ -52,7 +64,7 @@ describe('credentialStore', () => {
       security: securityStartMock,
     });
 
-    reindexOpMock.attributes.lastCompletedStep = 0;
+    reindexOpMock.attributes.lastCompletedStep = ReindexStep.readonly;
 
     expect(credStore.get(reindexOpMock)).toBeUndefined();
   });

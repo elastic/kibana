@@ -138,6 +138,7 @@ function UnoptimizedManagedTable<T>(props: Props<T>) {
   }, [isLoading, noItemsMessage]);
 
   return (
+    // @ts-expect-error TS thinks pagination should be non-nullable, but it's not
     <EuiBasicTable
       loading={isLoading}
       error={

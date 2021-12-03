@@ -159,7 +159,7 @@ export const UserForm: FunctionComponent<UserFormProps> = ({
         } else {
           try {
             const users = await getUsersThrottled();
-            if (users.some((user) => user.username === values.username)) {
+            if (users?.some((user) => user.username === values.username)) {
               errors.username = i18n.translate(
                 'xpack.security.management.users.userForm.usernameTakenError',
                 {
