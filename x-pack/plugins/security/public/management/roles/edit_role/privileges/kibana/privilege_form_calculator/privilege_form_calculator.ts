@@ -49,8 +49,13 @@ export class PrivilegeFormCalculator {
    * @param featureId the feature id to get the Primary Feature KibanaPrivilege for.
    * @param privilegeIndex the index of the kibana privileges role component
    */
-  public getDisplayedPrimaryFeaturePrivilegeId(featureId: string, privilegeIndex: number) {
-    return this.getDisplayedPrimaryFeaturePrivilege(featureId, privilegeIndex)?.id;
+  public getDisplayedPrimaryFeaturePrivilegeId(
+    featureId: string,
+    privilegeIndex: number,
+    allSpacesSelected?: boolean
+  ) {
+    return this.getDisplayedPrimaryFeaturePrivilege(featureId, privilegeIndex, allSpacesSelected)
+      ?.id;
   }
 
   /**
@@ -59,10 +64,18 @@ export class PrivilegeFormCalculator {
    * @param featureId the feature id
    * @param privilegeIndex the index of the kibana privileges role component
    */
-  public hasCustomizedSubFeaturePrivileges(featureId: string, privilegeIndex: number) {
+  public hasCustomizedSubFeaturePrivileges(
+    featureId: string,
+    privilegeIndex: number,
+    allSpacesSelected?: boolean
+  ) {
     const feature = this.kibanaPrivileges.getSecuredFeature(featureId);
 
-    const displayedPrimary = this.getDisplayedPrimaryFeaturePrivilege(featureId, privilegeIndex);
+    const displayedPrimary = this.getDisplayedPrimaryFeaturePrivilege(
+      featureId,
+      privilegeIndex,
+      allSpacesSelected
+    );
 
     const formPrivileges = this.kibanaPrivileges.createCollectionFromRoleKibanaPrivileges([
       this.role.kibana[privilegeIndex],
@@ -264,25 +277,30 @@ export class PrivilegeFormCalculator {
    * @param featureId the feature id to get the Primary Feature KibanaPrivilege for.
    * @param privilegeIndex the index of the kibana privileges role component
    */
-  private getDisplayedPrimaryFeaturePrivilege(featureId: string, privilegeIndex: number) {
+  private getDisplayedPrimaryFeaturePrivilege(
+    featureId: string,
+    privilegeIndex: number,
+    allSpacesSelected?: boolean
+  ) {
     const feature = this.kibanaPrivileges.getSecuredFeature(featureId);
 
     const basePrivilege = this.getBasePrivilege(privilegeIndex);
 
     const selectedFeaturePrivileges = this.getSelectedFeaturePrivileges(featureId, privilegeIndex);
 
-    return feature.getPrimaryFeaturePrivileges().find((fp) => {
+    const displayedPrivilege = feature.getPrimaryFeaturePrivileges().find((fp) => {
       const correspondingMinimalPrivilegeId = fp.getMinimalPrivilegeId();
 
-      const correspendingMinimalPrivilege = feature
+      const correspondingMinimalPrivilege = feature
         .getMinimalFeaturePrivileges()
         .find((mp) => mp.id === correspondingMinimalPrivilegeId)!;
 
       // There is only one case where the minimal privileges aren't available:
       // 1. Sub-feature privileges cannot be customized. When this is the case, the minimal privileges aren't registered with ES,
       // so they end up represented in the UI as an empty privilege. Empty privileges cannot be granted other privileges, so if we
-      // encounter a minimal privilege that isn't granted by it's correspending primary, then we know we've encountered this scenario.
-      const hasMinimalPrivileges = fp.grantsPrivilege(correspendingMinimalPrivilege);
+      // encounter a minimal privilege that isn't granted by it's corresponding primary, then we know we've encountered this scenario.
+      const hasMinimalPrivileges = fp.grantsPrivilege(correspondingMinimalPrivilege);
+
       return (
         selectedFeaturePrivileges.includes(fp.id) ||
         (hasMinimalPrivileges &&
@@ -290,6 +308,13 @@ export class PrivilegeFormCalculator {
         basePrivilege?.grantsPrivilege(fp)
       );
     });
+
+    const correctSpacesSelected = displayedPrivilege?.requireAllSpaces
+      ? displayedPrivilege?.requireAllSpaces && allSpacesSelected
+      : true;
+    const availablePrivileges = correctSpacesSelected && !displayedPrivilege?.disabled;
+
+    if (availablePrivileges) return displayedPrivilege;
   }
 
   private getSelectedFeaturePrivileges(featureId: string, privilegeIndex: number) {
