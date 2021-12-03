@@ -885,11 +885,12 @@ export class SavedObjectsRepository {
       );
     }
 
-    const types = type
-      ? Array.isArray(type)
-        ? type
-        : [type]
-      : Array.from(typeToNamespacesMap!.keys());
+    const types =
+      type && type.length > 0
+        ? Array.isArray(type)
+          ? type
+          : [type]
+        : Array.from(typeToNamespacesMap!.keys());
     const allowedTypes = types.filter((t) => this._allowedTypes.includes(t));
     if (allowedTypes.length === 0) {
       return SavedObjectsUtils.createEmptyFindResponse<T, A>(options);
@@ -930,7 +931,7 @@ export class SavedObjectsRepository {
       index: pit ? undefined : this.getIndicesForTypes(allowedTypes),
       // If `searchAfter` is provided, we drop `from` as it will not be used for pagination.
       from: searchAfter ? undefined : perPage * (page - 1),
-      _source: includedFields(type, fields),
+      _source: includedFields(allowedTypes, fields),
       preference,
       rest_total_hits_as_int: true,
       size: perPage,
@@ -938,7 +939,7 @@ export class SavedObjectsRepository {
         size: perPage,
         seq_no_primary_term: true,
         from: perPage * (page - 1),
-        _source: includedFields(type, fields),
+        _source: includedFields(allowedTypes, fields),
         ...(aggsObject ? { aggs: aggsObject } : {}),
         ...getSearchDsl(this._mappings, this._registry, {
           search,
