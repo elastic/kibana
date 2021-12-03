@@ -199,8 +199,7 @@ export default function (providerContext: FtrProviderContext) {
         .expect(400);
     });
 
-    // https://github.com/elastic/kibana/issues/118257
-    it.skip('should not allow multiple limited packages on the same agent policy', async function () {
+    it('should not allow multiple limited packages on the same agent policy', async function () {
       await supertest
         .post(`/api/fleet/package_policies`)
         .set('kbn-xsrf', 'xxxx')
@@ -215,7 +214,7 @@ export default function (providerContext: FtrProviderContext) {
           package: {
             name: 'endpoint',
             title: 'Endpoint',
-            version: '0.13.0',
+            version: '1.3.0-dev.0',
           },
         })
         .expect(200);
@@ -233,7 +232,7 @@ export default function (providerContext: FtrProviderContext) {
           package: {
             name: 'endpoint',
             title: 'Endpoint',
-            version: '0.13.0',
+            version: '1.3.0-dev.0',
           },
         })
         .expect(400);
