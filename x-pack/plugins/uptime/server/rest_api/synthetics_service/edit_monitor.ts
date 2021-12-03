@@ -19,13 +19,26 @@ export const editSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
     }),
     body: schema.any(),
   },
-  handler: async ({ request, savedObjectsClient }): Promise<any> => {
+  handler: async ({ request, savedObjectsClient, server }): Promise<any> => {
     const monitor = request.body as SyntheticsMonitorSavedObject['attributes'];
 
     const { monitorId } = request.params;
 
+    const { syntheticsService } = server;
+
     const editMonitor = await savedObjectsClient.update(syntheticsMonitorType, monitorId, monitor);
-    // TODO: call to service sync
+
+    const errors = await syntheticsService.pushConfigs(request, [
+      {
+        ...(editMonitor.attributes as SyntheticsMonitorSavedObject['attributes']),
+        id: editMonitor.id,
+      },
+    ]);
+
+    if (errors) {
+      return errors;
+    }
+
     return editMonitor;
   },
 });

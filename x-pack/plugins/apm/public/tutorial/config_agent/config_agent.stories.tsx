@@ -72,6 +72,7 @@ function Wrapper({
       basePath="http://localhost:5601"
       isCloudEnabled={!onPrem}
       variantId={apmAgent}
+      kibanaVersion="8.0.0"
     />
   );
 }

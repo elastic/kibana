@@ -6,7 +6,7 @@
  */
 
 import { getOr } from 'lodash/fp';
-import { RiskScoreHit, RiskScoreEdges } from '../../../../../../common';
+import { RiskScoreHit, RiskScoreEdges } from '../../../../../../common/search_strategy';
 
 export const formatRiskScoreData = (buckets: RiskScoreHit[]): RiskScoreEdges[] =>
   buckets.map((bucket) => ({
