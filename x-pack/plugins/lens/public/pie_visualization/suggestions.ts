@@ -22,10 +22,11 @@ function shouldReject({
   table,
   keptLayerIds,
   state,
-  subVisualizationId,
+  emptyConfiguration,
 }: SuggestionRequest<PieVisualizationState>) {
   // usecase for dropping a field - state doesn't exist yet and subVisualizationId doesn't exist
-  if (!subVisualizationId && !state) {
+  console.log(table, state, emptyConfiguration);
+  if (emptyConfiguration) {
     return hasIntervalScale(table.columns);
   }
   // Histograms are not good for pi. But we should not reject them on switching between partition charts.
@@ -36,7 +37,8 @@ function shouldReject({
     keptLayerIds.length > 1 ||
     (keptLayerIds.length && table.layerId !== keptLayerIds[0]) ||
     table.changeType === 'reorder' ||
-    shouldRejectIntervals
+    shouldRejectIntervals ||
+    table.columns.some((col) => col.operation.isStaticValue)
   );
 }
 
@@ -74,12 +76,18 @@ export function suggestions({
 }: SuggestionRequest<PieVisualizationState>): Array<
   VisualizationSuggestion<PieVisualizationState>
 > {
-  if (shouldReject({ table, state, keptLayerIds, subVisualizationId })) {
-    return [];
-  }
-
   const [groups, metrics] = partition(table.columns, (col) => col.operation.isBucketed);
 
+  console.log('empty');
+  const emptyConfiguration =
+    state?.shape &&
+    isPartitionShape(state.shape) &&
+    state?.layers?.[0]?.metric === undefined &&
+    state?.layers?.[0]?.groups.length === 0;
+
+  if (shouldReject({ table, state, keptLayerIds, emptyConfiguration })) {
+    return [];
+  }
   if (metrics.length > 1 || groups.length > maximumGroupLength) {
     return [];
   }
