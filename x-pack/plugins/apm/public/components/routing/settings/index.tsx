@@ -95,8 +95,8 @@ export const settings = {
       }),
       params: t.partial({
         query: t.partial({
-          name: t.string,
           environment: t.string,
+          name: t.string,
           pageStep: agentConfigurationPageStepRt,
         }),
       }),
