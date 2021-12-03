@@ -61,7 +61,7 @@ export const GitHubViaApp: React.FC<GithubViaAppProps> = ({ isGithubEnterpriseSe
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
-    createContentSource();
+    createContentSource(isGithubEnterpriseServer);
   };
 
   return (

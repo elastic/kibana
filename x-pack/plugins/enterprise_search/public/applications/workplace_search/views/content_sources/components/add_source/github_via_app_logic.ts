@@ -31,7 +31,7 @@ interface GithubViaAppActions {
   setGithubEnterpriseServerUrl(githubEnterpriseServerUrl: string): string;
   setStagedPrivateKey(stagedPrivateKey: string | null): string | null;
   setButtonNotLoading(): void;
-  createContentSource(): void;
+  createContentSource(isGithubEnterpriseServer: boolean): boolean;
   setSourceIndexPermissionsValue(indexPermissionsValue: boolean): boolean;
 }
 
@@ -40,7 +40,7 @@ export const GithubViaAppLogic = kea<MakeLogicType<GithubViaAppValues, GithubVia
   actions: {
     setGithubAppId: (githubAppId: string) => githubAppId,
     setGithubEnterpriseServerUrl: (githubEnterpriseServerUrl: string) => githubEnterpriseServerUrl,
-    createContentSource: true,
+    createContentSource: (isGithubEnterpriseServer: boolean) => isGithubEnterpriseServer,
     setStagedPrivateKey: (stagedPrivateKey: string) => stagedPrivateKey,
     setButtonNotLoading: false,
     setSourceIndexPermissionsValue: (indexPermissionsValue: boolean) => indexPermissionsValue,
@@ -80,7 +80,7 @@ export const GithubViaAppLogic = kea<MakeLogicType<GithubViaAppValues, GithubVia
     ],
   },
   listeners: ({ actions, values }) => ({
-    createContentSource: async () => {
+    createContentSource: async (isGithubEnterpriseServer) => {
       const { isOrganization } = AppLogic.values;
       const route = isOrganization
         ? '/internal/workplace_search/org/create_source'
@@ -90,7 +90,7 @@ export const GithubViaAppLogic = kea<MakeLogicType<GithubViaAppValues, GithubVia
         values;
 
       const params = {
-        service_type: githubEnterpriseServerUrl
+        service_type: isGithubEnterpriseServer
           ? GITHUB_ENTERPRISE_SERVER_VIA_APP_SERVICE_TYPE
           : GITHUB_VIA_APP_SERVICE_TYPE,
         app_id: githubAppId,
