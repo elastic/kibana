@@ -34,6 +34,11 @@ export async function fetchMemoryUsageNodeStats(
             },
             {
               term: {
+                'data_stream.dataset': 'elasticsearch.node_stats',
+              },
+            },
+            {
+              term: {
                 type: 'node_stats',
               },
             },

@@ -34,6 +34,11 @@ export async function fetchLogstashVersions(
             },
             {
               term: {
+                'data_stream.dataset': 'logstash.node_stats',
+              },
+            },
+            {
+              term: {
                 type: 'logstash_stats',
               },
             },

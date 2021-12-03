@@ -13,32 +13,6 @@ type Config = Partial<MonitoringConfig> & {
   get?: (key: string) => any;
 };
 
-export function appendMetricbeatIndex(
-  config: Config,
-  indexPattern: string,
-  ccs?: string,
-  bypass: boolean = false
-) {
-  if (bypass) {
-    return indexPattern;
-  }
-  // Leverage this function to also append the dynamic metricbeat index too
-  let mbIndex = null;
-  // TODO: NP
-  // This function is called with both NP config and LP config
-  if (isFunction(config.get)) {
-    mbIndex = config.get('monitoring.ui.metricbeat.index');
-  } else {
-    mbIndex = get(config, 'ui.metricbeat.index');
-  }
-
-  if (ccs) {
-    mbIndex = `${mbIndex},${ccs}:${mbIndex}`;
-  }
-
-  return `${indexPattern},${mbIndex}`;
-}
-
 export function getConfigCcs(config: Config): boolean | string {
   let ccsEnabled = false;
   // TODO: NP

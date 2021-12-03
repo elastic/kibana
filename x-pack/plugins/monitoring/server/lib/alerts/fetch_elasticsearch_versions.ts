@@ -42,6 +42,11 @@ export async function fetchElasticsearchVersions(
             },
             {
               term: {
+                'data_stream.dataset': 'elasticsearch.cluster_stats',
+              },
+            },
+            {
+              term: {
                 type: 'cluster_stats',
               },
             },

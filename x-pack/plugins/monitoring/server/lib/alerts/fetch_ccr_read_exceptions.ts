@@ -37,6 +37,11 @@ export async function fetchCCRReadExceptions(
             },
             {
               term: {
+                'data_stream.dataset': 'elasticsearch.ccr',
+              },
+            },
+            {
+              term: {
                 type: 'ccr_stats',
               },
             },

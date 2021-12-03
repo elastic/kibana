@@ -51,6 +51,11 @@ export async function fetchNodesFromClusterStats(
               },
             },
             {
+              term: {
+                'data_stream.dataset': 'elasticsearch.cluster_stats',
+              },
+            },
+            {
               range: {
                 timestamp: {
                   gte: 'now-2m',

@@ -23,17 +23,16 @@ import {
   CommonAlertFilter,
 } from '../../common/types/alerts';
 import { AlertInstance } from '../../../alerting/server';
-import { INDEX_PATTERN_ELASTICSEARCH, RULE_CPU_USAGE, RULE_DETAILS } from '../../common/constants';
+import { RULE_CPU_USAGE, RULE_DETAILS } from '../../common/constants';
 // @ts-ignore
 import { ROUNDED_FLOAT } from '../../common/formatting';
 import { fetchCpuUsageNodeStats } from '../lib/alerts/fetch_cpu_usage_node_stats';
-import { getCcsIndexPattern } from '../lib/alerts/get_ccs_index_pattern';
 import { AlertMessageTokenType, AlertSeverity } from '../../common/enums';
 import { RawAlertInstance, SanitizedAlert } from '../../../alerting/common';
 import { parseDuration } from '../../../alerting/common/parse_duration';
 import { AlertingDefaults, createLink } from './alert_helpers';
-import { appendMetricbeatIndex } from '../lib/alerts/append_mb_index';
 import { Globals } from '../static_globals';
+import { getNewIndexPatterns } from '../lib/cluster/get_index_patterns';
 
 export class CpuUsageRule extends BaseRule {
   constructor(public sanitizedRule?: SanitizedAlert) {
@@ -60,20 +59,20 @@ export class CpuUsageRule extends BaseRule {
   protected async fetchData(
     params: CommonAlertParams,
     esClient: ElasticsearchClient,
-    clusters: AlertCluster[],
-    availableCcs: boolean
+    clusters: AlertCluster[]
   ): Promise<AlertData[]> {
-    let esIndexPattern = appendMetricbeatIndex(Globals.app.config, INDEX_PATTERN_ELASTICSEARCH);
-    if (availableCcs) {
-      esIndexPattern = getCcsIndexPattern(esIndexPattern, availableCcs);
-    }
+    const indexPatterns = getNewIndexPatterns({
+      config: Globals.app.config,
+      moduleType: 'elasticsearch',
+      dataset: 'node_stats',
+    });
     const duration = parseDuration(params.duration);
     const endMs = +new Date();
     const startMs = endMs - duration;
     const stats = await fetchCpuUsageNodeStats(
       esClient,
       clusters,
-      esIndexPattern,
+      indexPatterns,
       startMs,
       endMs,
       Globals.app.config.ui.max_bucket_size,

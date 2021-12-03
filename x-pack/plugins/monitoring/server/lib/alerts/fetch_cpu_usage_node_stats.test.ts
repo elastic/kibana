@@ -213,6 +213,7 @@ describe('fetchCpuUsageNodeStats', () => {
           bool: {
             filter: [
               { terms: { cluster_uuid: ['abc123'] } },
+              { term: { 'data_stream.dataset': 'elasticsearch.node_stats' } },
               { term: { type: 'node_stats' } },
               { range: { timestamp: { format: 'epoch_millis', gte: 0, lte: 0 } } },
               {

@@ -34,6 +34,11 @@ export async function fetchKibanaVersions(
             },
             {
               term: {
+                'data_stream.dataset': 'kibana.stats',
+              },
+            },
+            {
+              term: {
                 type: 'kibana_stats',
               },
             },

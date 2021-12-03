@@ -20,15 +20,14 @@ import {
   AlertNodeState,
 } from '../../common/types/alerts';
 import { AlertInstance } from '../../../alerting/server';
-import { INDEX_PATTERN, RULE_MISSING_MONITORING_DATA, RULE_DETAILS } from '../../common/constants';
-import { getCcsIndexPattern } from '../lib/alerts/get_ccs_index_pattern';
+import { RULE_MISSING_MONITORING_DATA, RULE_DETAILS } from '../../common/constants';
 import { AlertMessageTokenType, AlertSeverity } from '../../common/enums';
 import { RawAlertInstance, SanitizedAlert } from '../../../alerting/common';
 import { parseDuration } from '../../../alerting/common/parse_duration';
-import { appendMetricbeatIndex } from '../lib/alerts/append_mb_index';
 import { fetchMissingMonitoringData } from '../lib/alerts/fetch_missing_monitoring_data';
 import { AlertingDefaults, createLink } from './alert_helpers';
 import { Globals } from '../static_globals';
+import { getNewIndexPatterns } from '../lib/cluster/get_index_patterns';
 
 // Go a bit farther back because we need to detect the difference between seeing the monitoring data versus just not looking far enough back
 const LIMIT_BUFFER = 3 * 60 * 1000;
@@ -59,20 +58,21 @@ export class MissingMonitoringDataRule extends BaseRule {
   protected async fetchData(
     params: CommonAlertParams,
     esClient: ElasticsearchClient,
-    clusters: AlertCluster[],
-    availableCcs: boolean
+    clusters: AlertCluster[]
   ): Promise<AlertData[]> {
-    let indexPattern = appendMetricbeatIndex(Globals.app.config, INDEX_PATTERN);
-    if (availableCcs) {
-      indexPattern = getCcsIndexPattern(indexPattern, availableCcs);
-    }
+    // changing this to only search ES because of changes here https://github.com/elastic/kibana/issues/83309
+    const indexPatterns = getNewIndexPatterns({
+      config: Globals.app.config,
+      moduleType: 'elasticsearch',
+      dataset: 'node_stats',
+    });
     const duration = parseDuration(params.duration);
     const limit = parseDuration(params.limit!);
     const now = +new Date();
     const missingData = await fetchMissingMonitoringData(
       esClient,
       clusters,
-      indexPattern,
+      indexPatterns,
       Globals.app.config.ui.max_bucket_size,
       now,
       now - limit - LIMIT_BUFFER,

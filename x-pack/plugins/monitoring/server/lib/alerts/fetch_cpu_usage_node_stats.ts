@@ -50,6 +50,11 @@ export async function fetchCpuUsageNodeStats(
             },
             {
               term: {
+                'data_stream.dataset': 'elasticsearch.node_stats',
+              },
+            },
+            {
+              term: {
                 type: 'node_stats',
               },
             },

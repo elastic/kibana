@@ -33,6 +33,11 @@ export async function fetchDiskUsageNodeStats(
             },
             {
               term: {
+                'data_stream.dataset': 'elasticsearch.node_stats',
+              },
+            },
+            {
+              term: {
                 type: 'node_stats',
               },
             },
