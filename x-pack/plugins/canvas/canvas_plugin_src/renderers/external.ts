@@ -18,11 +18,7 @@ import {
   progressRenderer,
 } from '../../../../../src/plugins/expression_shape/public';
 
-export const renderFunctions = [
-  imageRenderer,
-  shapeRenderer,
-  progressRenderer,
-];
+export const renderFunctions = [imageRenderer, shapeRenderer, progressRenderer];
 
 export const renderFunctionFactories = [
   debugRendererFactory,
