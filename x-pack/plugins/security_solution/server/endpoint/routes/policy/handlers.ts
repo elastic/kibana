@@ -11,12 +11,11 @@ import { policyIndexPattern } from '../../../../common/endpoint/constants';
 import {
   GetPolicyResponseSchema,
   GetAgentPolicySummaryRequestSchema,
+  GetEndpointPackagePolicyRequestSchema,
 } from '../../../../common/endpoint/schema/policy';
 import { EndpointAppContext } from '../../types';
 import { getAgentPolicySummary, getPolicyResponseByAgentId } from './service';
 import { GetAgentSummaryResponse } from '../../../../common/endpoint/types';
-import { GetPackagePoliciesRequest } from '../../../../../fleet/common/types/rest_spec';
-import { EndpointError } from '../../../../common/endpoint/errors';
 import { wrapErrorIfNeeded } from '../../utils';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../../../fleet/common';
 
@@ -71,16 +70,24 @@ export const getAgentPolicySummaryHandler = function (
 
 export const getPolicyListHandler = function (
   endpointAppContext: EndpointAppContext
-): RequestHandler<undefined, GetPackagePoliciesRequest['query'], undefined> {
+): RequestHandler<
+  undefined,
+  TypeOf<typeof GetEndpointPackagePolicyRequestSchema.query>,
+  undefined
+> {
   return async (context, request, response) => {
     const soClient = context.core.savedObjects.client;
-    const packagePolicyService = endpointAppContext.service.getPackagePolicyService();
+    const fleetServices = endpointAppContext.service.getScopedFleetServices(request);
     const endpointFilteredKuery = `${
       request?.query?.kuery ? `${request.query.kuery} and ` : ''
     }${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: endpoint`;
-    request.query.kuery = endpointFilteredKuery;
     try {
-      const listResponse = await packagePolicyService.list(soClient, request.query);
+      const listResponse = await fleetServices.packagePolicy.list(soClient, {
+        ...request.query,
+        perPage: request.query.pageSize,
+        sortField: request.query.sort,
+        keury: endpointFilteredKuery,
+      });
 
       return response.ok({
         body: listResponse,
