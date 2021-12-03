@@ -250,30 +250,23 @@ export class CsvGenerator {
     settings: CsvExportSettings
   ) {
     this.logger.debug(`Building ${table.rows.length} CSV data rows...`);
-
-    const asyncGenerateRow = async (dataTableRow: Record<string, any>): Promise<string> => {
-      return new Promise((resolve) => {
-        setImmediate(() => {
-          const row: string[] = [];
-          const format = this.formatCellValues(formatters);
-          const escape = this.escapeValues(settings);
-
-          for (const column of columns) {
-            row.push(escape(format({ column, data: dataTableRow[column] })));
-          }
-
-          resolve(row.join(settings.separator) + '\n');
-        });
-      });
-    };
-
     for (const dataTableRow of table.rows) {
       if (this.cancellationToken.isCancelled()) {
         break;
       }
 
-      const row = await asyncGenerateRow(dataTableRow);
-      if (!builder.tryAppend(row)) {
+      // comment about why this is here
+      await new Promise(setImmediate);
+
+      const rowDefinition: string[] = [];
+      const format = this.formatCellValues(formatters);
+      const escape = this.escapeValues(settings);
+
+      for (const column of columns) {
+        rowDefinition.push(escape(format({ column, data: dataTableRow[column] })));
+      }
+
+      if (!builder.tryAppend(rowDefinition.join(settings.separator) + '\n')) {
         this.logger.warn(`Max Size Reached after ${this.csvRowCount} rows.`);
         this.maxSizeReached = true;
         if (this.cancellationToken) {
