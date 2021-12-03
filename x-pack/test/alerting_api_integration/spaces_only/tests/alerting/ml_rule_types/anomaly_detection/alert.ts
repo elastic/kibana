@@ -104,6 +104,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
       await objectRemover.removeAll();
       await esTestIndexTool.destroy();
       await esTestIndexToolOutput.destroy();
+      await ml.api.deleteAnomalyDetectionJobES(AD_JOB_ID);
       await ml.api.cleanMlIndices();
       await ml.api.deleteIndices(BASIC_TEST_DATA_INDEX);
     });
