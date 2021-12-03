@@ -29,6 +29,7 @@ import type { AssetSavedObject } from './types';
 import { allowedAssetTypes } from './constants';
 import { AssetsAccordion } from './assets_accordion';
 
+const allowedAssetTypesLookup = new Set<string>(allowedAssetTypes);
 interface AssetsPanelProps {
   packageInfo: PackageInfo;
 }
@@ -91,9 +92,13 @@ export const AssetsPage = ({ packageInfo }: AssetsPanelProps) => {
                   }: {
                     resolved_objects: ResolvedSimpleSavedObject[];
                   }) => {
-                    return resolvedObjects.map(
-                      (resolvedObject: ResolvedSimpleSavedObject) => resolvedObject.saved_object
-                    ) as AssetSavedObject[];
+                    return resolvedObjects
+                      .map(({ saved_object: savedObject }) => savedObject)
+                      .filter(
+                        (savedObject) =>
+                          savedObject?.error?.statusCode !== 404 &&
+                          allowedAssetTypesLookup.has(savedObject.type)
+                      ) as AssetSavedObject[];
                   }
                 )
             )
@@ -118,7 +123,6 @@ export const AssetsPage = ({ packageInfo }: AssetsPanelProps) => {
   }
 
   let content: JSX.Element | Array<JSX.Element | null>;
-
   if (isLoading) {
     content = <Loading />;
   } else if (fetchError) {
@@ -133,7 +137,7 @@ export const AssetsPage = ({ packageInfo }: AssetsPanelProps) => {
         error={fetchError}
       />
     );
-  } else if (assetSavedObjects === undefined) {
+  } else if (assetSavedObjects === undefined || assetSavedObjects.length === 0) {
     if (customAssetsExtension) {
       // If a UI extension for custom asset entries is defined, render the custom component here depisite
       // there being no saved objects found
