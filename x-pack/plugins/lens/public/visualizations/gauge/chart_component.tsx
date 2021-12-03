@@ -186,7 +186,18 @@ export const GaugeComponent: FC<GaugeRenderProps> = ({
     );
   }
 
-  const formatter = formatFactory(
+  const metricFormatter = formatFactory(
+    metricColumn?.meta?.params?.id === 'number'
+      ? metricColumn?.meta?.params
+      : {
+          id: 'number',
+          params: {
+            pattern: `0,0.000`,
+          },
+        }
+  );
+
+  const tickFormatter = formatFactory(
     metricColumn?.meta?.params?.params
       ? metricColumn?.meta?.params
       : {
@@ -196,11 +207,13 @@ export const GaugeComponent: FC<GaugeRenderProps> = ({
           },
         }
   );
+
   const colors = palette?.params?.colors ? normalizeColors(palette.params, min) : undefined;
   const bands: number[] = (palette?.params as CustomPaletteState)
     ? normalizeBands(args.palette?.params as CustomPaletteState, { min, max })
     : [min, max];
 
+  const target = Number(metricFormatter.convert(Math.min(Math.max(metricValue, min), max)));
   return (
     <Chart>
       <Settings debugState={window._echDebugStateFlag ?? false} theme={chartTheme} />
@@ -209,8 +222,8 @@ export const GaugeComponent: FC<GaugeRenderProps> = ({
         subtype={subtype}
         base={min}
         target={goal && goal >= min && goal <= max ? goal : undefined}
-        actual={Math.min(Math.max(metricValue, min), max)}
-        tickValueFormatter={({ value: tickValue }) => formatter.convert(tickValue)}
+        actual={target}
+        tickValueFormatter={({ value: tickValue }) => tickFormatter.convert(tickValue)}
         bands={bands}
         ticks={getTicks(ticksPosition, [min, max], bands)}
         bandFillColor={
