@@ -70,7 +70,7 @@ export const PolicyEventFiltersLayout = React.memo(() => {
   return policyItem && !isGlobalLoading ? (
     isEmptyState ? (
       // TODO: Display empty state when needed
-      <>{'This is an empty state'}</>
+      <></>
     ) : (
       <div>
         <EuiPageHeader alignItems="center">
