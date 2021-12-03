@@ -22,7 +22,7 @@ export const reportConfigMap = {
 
 export const indexPatternList = {
   security:
-    'apm-*-transaction*,traces-apm*,remote_cluster:auditbeat-*,endgame-*,remote_cluster:filebeat-*,remote_cluster:logs-*,packetbeat-*,winlogbeat-*,.alerts-security.alerts-default',
+    'apm-*-transaction*,traces-apm*,auditbeat-*,endgame-*,filebeat-*,logs-*,packetbeat-*,winlogbeat-*,.alerts-security.alerts-default',
   securityAlerts: '.alerts-security.alerts-default-*',
 };
 
