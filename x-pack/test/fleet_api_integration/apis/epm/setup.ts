@@ -36,7 +36,7 @@ export default function (providerContext: FtrProviderContext) {
         let { body }: { body: GetInfoResponse } = await supertest
           .get(`/api/fleet/epm/packages/endpoint-${oldEndpointVersion}`)
           .expect(200);
-        const latestEndpointVersion = body.response.latestVersion;
+        const latestEndpointVersion = body.item.latestVersion;
         log.info(`Endpoint package latest version: ${latestEndpointVersion}`);
         // make sure we're actually doing an upgrade
         expect(latestEndpointVersion).not.eql(oldEndpointVersion);

@@ -215,7 +215,7 @@ export const AvailablePackages: React.FC = memo(() => {
     category: '',
   });
   const eprIntegrationList = useMemo(
-    () => packageListToIntegrationsList(eprPackages?.response || []),
+    () => packageListToIntegrationsList(eprPackages?.items || []),
     [eprPackages]
   );
 

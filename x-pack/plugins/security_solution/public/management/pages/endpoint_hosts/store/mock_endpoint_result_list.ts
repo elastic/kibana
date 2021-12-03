@@ -103,7 +103,7 @@ const endpointListApiPathHandlerMocks = ({
     // endpoint package info
     [INGEST_API_EPM_PACKAGES]: (): GetPackagesResponse => {
       return {
-        response: epmPackages,
+        items: epmPackages,
       };
     },
 

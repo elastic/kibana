@@ -25,6 +25,9 @@ paths:
     $ref: paths/epm@packages.yaml
   '/epm/packages/{pkgkey}':
     $ref: 'paths/epm@packages@{pkgkey}.yaml'
+    deprecated: true
+  '/epm/packages/{pkgName}/{pkgVersion}':
+    $ref: 'paths/epm@packages@{pkg_name}@{pkg_version}.yaml'  
   # Agent-related endpoints
   /agents/setup:
     $ref: paths/agents@setup.yaml

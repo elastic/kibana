@@ -132,26 +132,27 @@ export function Detail() {
     packageInfo.savedObject &&
     semverLt(packageInfo.savedObject.attributes.version, packageInfo.latestVersion);
 
+  const [pkgName, pkgVersion] = pkgkey.split('-');
   // Fetch package info
   const {
     data: packageInfoData,
     error: packageInfoError,
     isLoading: packageInfoLoading,
-  } = useGetPackageInfoByKey(pkgkey);
+  } = useGetPackageInfoByKey(pkgName, pkgVersion);
 
   const isLoading = packageInfoLoading || permissionCheck.isLoading;
 
   const showCustomTab =
-    useUIExtension(packageInfoData?.response.name ?? '', 'package-detail-custom') !== undefined;
+    useUIExtension(packageInfoData?.item.name ?? '', 'package-detail-custom') !== undefined;
 
   // Track install status state
   useEffect(() => {
-    if (packageInfoData?.response) {
-      const packageInfoResponse = packageInfoData.response;
+    if (packageInfoData?.item) {
+      const packageInfoResponse = packageInfoData.item;
       setPackageInfo(packageInfoResponse);
 
       let installedVersion;
-      const { name } = packageInfoData.response;
+      const { name } = packageInfoData.item;
       if ('savedObject' in packageInfoResponse) {
         installedVersion = packageInfoResponse.savedObject.attributes.version;
       }

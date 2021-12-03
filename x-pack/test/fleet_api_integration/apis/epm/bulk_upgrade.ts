@@ -59,9 +59,9 @@ export default function (providerContext: FtrProviderContext) {
           .set('kbn-xsrf', 'xxxx')
           .send({ packages: ['multiple_versions'] })
           .expect(200);
-        expect(body.response.length).equal(1);
-        expect(body.response[0].name).equal('multiple_versions');
-        const entry = body.response[0] as BulkInstallPackageInfo;
+        expect(body.items.length).equal(1);
+        expect(body.items[0].name).equal('multiple_versions');
+        const entry = body.items[0] as BulkInstallPackageInfo;
         expect(entry.version).equal('0.3.0');
       });
       it('should return an error for packages that do not exist', async function () {
@@ -70,14 +70,14 @@ export default function (providerContext: FtrProviderContext) {
           .set('kbn-xsrf', 'xxxx')
           .send({ packages: ['multiple_versions', 'blahblah'] })
           .expect(200);
-        expect(body.response.length).equal(2);
-        expect(body.response[0].name).equal('multiple_versions');
-        const entry = body.response[0] as BulkInstallPackageInfo;
+        expect(body.items.length).equal(2);
+        expect(body.items[0].name).equal('multiple_versions');
+        const entry = body.items[0] as BulkInstallPackageInfo;
         expect(entry.version).equal('0.3.0');
 
-        const err = body.response[1] as IBulkInstallPackageHTTPError;
+        const err = body.items[1] as IBulkInstallPackageHTTPError;
         expect(err.statusCode).equal(404);
-        expect(body.response[1].name).equal('blahblah');
+        expect(body.items[1].name).equal('blahblah');
       });
       it('should upgrade multiple packages', async function () {
         const { body }: { body: BulkInstallPackagesResponse } = await supertest
@@ -85,12 +85,12 @@ export default function (providerContext: FtrProviderContext) {
           .set('kbn-xsrf', 'xxxx')
           .send({ packages: ['multiple_versions', 'overrides'] })
           .expect(200);
-        expect(body.response.length).equal(2);
-        expect(body.response[0].name).equal('multiple_versions');
-        let entry = body.response[0] as BulkInstallPackageInfo;
+        expect(body.items.length).equal(2);
+        expect(body.items[0].name).equal('multiple_versions');
+        let entry = body.items[0] as BulkInstallPackageInfo;
         expect(entry.version).equal('0.3.0');
 
-        entry = body.response[1] as BulkInstallPackageInfo;
+        entry = body.items[1] as BulkInstallPackageInfo;
         expect(entry.version).equal('0.1.0');
         expect(entry.name).equal('overrides');
       });
