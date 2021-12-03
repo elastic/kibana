@@ -36,12 +36,8 @@ export class DynamicIconProperty extends DynamicStyleProperty<IconDynamicOptions
 
   syncIconWithMb(symbolLayerId: string, mbMap: MbMap) {
     if (this._isIconDynamicConfigComplete()) {
-        mbMap.setLayoutProperty(
-          symbolLayerId,
-          'icon-image',
-          this._getMbIconImageExpression()
-        );
-        mbMap.setLayoutProperty(symbolLayerId, 'icon-anchor', this._getMbIconAnchorExpression());
+      mbMap.setLayoutProperty(symbolLayerId, 'icon-image', this._getMbIconImageExpression());
+      mbMap.setLayoutProperty(symbolLayerId, 'icon-anchor', this._getMbIconAnchorExpression());
     } else {
       mbMap.setLayoutProperty(symbolLayerId, 'icon-image', null);
       mbMap.setLayoutProperty(symbolLayerId, 'icon-anchor', null);

@@ -28,11 +28,7 @@ import {
   TileMetaFeature,
   Timeslice,
 } from '../../../common/descriptor_types';
-import {
-  DECIMAL_DEGREES_PRECISION,
-  RawValue,
-  ZOOM_PRECISION,
-} from '../../../common/constants';
+import { DECIMAL_DEGREES_PRECISION, RawValue, ZOOM_PRECISION } from '../../../common/constants';
 import { getGlyphUrl } from '../../util';
 import { syncLayerOrder } from './sort_layers';
 

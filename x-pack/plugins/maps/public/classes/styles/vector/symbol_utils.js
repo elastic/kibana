@@ -14,9 +14,8 @@ import { SymbolIcon } from './components/legend/symbol_icon';
 import { getIsDarkMode } from '../../../kibana_services';
 import { MAKI_ICONS } from './maki_icons';
 
-export const LARGE_MAKI_ICON_SIZE = 15;
-export const SMALL_MAKI_ICON_SIZE = 11;
-export const HALF_LARGE_MAKI_ICON_SIZE = Math.ceil(LARGE_MAKI_ICON_SIZE);
+const MAKI_ICON_SIZE = 16;
+export const HALF_MAKI_ICON_SIZE = MAKI_ICON_SIZE / 2;
 
 export const SYMBOL_OPTIONS = Object.keys(MAKI_ICONS).map((symbolId) => {
   return {
@@ -35,7 +34,7 @@ export const SYMBOL_OPTIONS = Object.keys(MAKI_ICONS).map((symbolId) => {
  */
 export async function createSdfIcon(svgString, cutoff = 0.25, radius = 0.25) {
   const buffer = 3;
-  const size = 16 + buffer * 4;
+  const size = MAKI_ICON_SIZE + buffer * 4;
   const svgCanvas = document.createElement('canvas');
   svgCanvas.width = size;
   svgCanvas.height = size;
