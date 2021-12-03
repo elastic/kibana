@@ -109,7 +109,12 @@ export const GitHubViaApp: React.FC<GithubViaAppProps> = ({ isGithubEnterpriseSe
             accept=".pem"
           />
         </EuiFormRow>
-        <EuiButton fill type="submit" isLoading={isSubmitButtonLoading}>
+        <EuiButton
+          fill
+          type="submit"
+          isLoading={isSubmitButtonLoading}
+          isDisabled={!githubAppId || (isGithubEnterpriseServer && !githubEnterpriseServerUrl)}
+        >
           {isSubmitButtonLoading
             ? 'Connecting…'
             : `Connect ${isGithubEnterpriseServer ? 'GitHub Enterprise Server' : 'GitHub'}`}
