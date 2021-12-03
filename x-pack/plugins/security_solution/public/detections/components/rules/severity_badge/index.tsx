@@ -7,24 +7,25 @@
 
 import { upperFirst } from 'lodash/fp';
 import React from 'react';
-
 import { euiLightVars } from '@kbn/ui-shared-deps-src/theme';
+import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
 import { HealthTruncateText } from '../../../../common/components/health_truncate_text';
 
 const { euiColorVis0, euiColorVis5, euiColorVis7, euiColorVis9 } = euiLightVars;
-const severityToColorMap: Record<string, string> = {
+const severityToColorMap: Record<Severity, string> = {
   low: euiColorVis0,
   medium: euiColorVis5,
-  height: euiColorVis7,
+  high: euiColorVis7,
+  critical: euiColorVis9,
 };
 
 interface Props {
-  value: string;
+  value: Severity;
 }
 
 const SeverityBadgeComponent: React.FC<Props> = ({ value }) => {
   const displayValue = upperFirst(value);
-  const color = severityToColorMap[value] ?? euiColorVis9;
+  const color = severityToColorMap[value] ?? 'subdued';
 
   return (
     <HealthTruncateText healthColor={color} tooltipContent={displayValue} dataTestSubj="severity">
