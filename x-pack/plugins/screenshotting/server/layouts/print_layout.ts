@@ -7,8 +7,9 @@
 
 import { PageOrientation, PredefinedPageSize } from 'pdfmake/interfaces';
 import type { LayoutParams, LayoutSelectorDictionary } from '../../common/layout';
+import { LayoutTypes } from '../../common';
 import type { Layout } from '.';
-import { DEFAULT_SELECTORS, LayoutTypes } from '.';
+import { DEFAULT_SELECTORS } from '.';
 import { DEFAULT_VIEWPORT } from '../browsers';
 import { BaseLayout } from './base_layout';
 

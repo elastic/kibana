@@ -6,8 +6,8 @@
  */
 
 import type { LayoutParams } from '../../common/layout';
+import { LayoutTypes } from '../../common';
 import type { Layout } from '.';
-import { LayoutTypes } from '.';
 import { CanvasLayout } from './canvas_layout';
 import { PreserveLayout } from './preserve_layout';
 import { PrintLayout } from './print_layout';

@@ -14,4 +14,5 @@ export function plugin(...args: ConstructorParameters<typeof ScreenshottingPlugi
   return new ScreenshottingPlugin(...args);
 }
 
+export { LayoutTypes } from '../common';
 export type { ScreenshottingSetup, ScreenshottingStart } from './plugin';

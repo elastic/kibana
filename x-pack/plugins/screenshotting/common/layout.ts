@@ -64,3 +64,12 @@ export type LayoutParams = Ensure<
   },
   SerializableRecord
 >;
+
+/**
+ * Supported layout types.
+ */
+export const LayoutTypes = {
+  PRESERVE_LAYOUT: 'preserve_layout',
+  PRINT: 'print',
+  CANVAS: 'canvas', // no margins or branding in the layout
+};

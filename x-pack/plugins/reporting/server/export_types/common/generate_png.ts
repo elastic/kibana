@@ -8,7 +8,7 @@
 import apm from 'elastic-apm-node';
 import * as Rx from 'rxjs';
 import { finalize, map, tap } from 'rxjs/operators';
-import { LayoutTypes } from '../../../../screenshotting/server';
+import { LayoutTypes } from '../../../../screenshotting/common';
 import { REPORTING_TRANSACTION_TYPE } from '../../../common/constants';
 import { ReportingCore } from '../../';
 import { ScreenshotOptions } from '../../types';

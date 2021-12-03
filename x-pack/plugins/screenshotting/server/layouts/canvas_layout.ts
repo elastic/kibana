@@ -6,7 +6,8 @@
  */
 
 import type { LayoutSelectorDictionary, Size } from '../../common/layout';
-import { DEFAULT_SELECTORS, LayoutTypes } from '.';
+import { LayoutTypes } from '../../common';
+import { DEFAULT_SELECTORS } from '.';
 import type { Layout } from '.';
 import { BaseLayout } from './base_layout';
 
