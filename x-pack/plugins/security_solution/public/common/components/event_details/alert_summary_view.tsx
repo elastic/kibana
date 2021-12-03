@@ -14,7 +14,8 @@ import { AlertSummaryRow, getSummaryColumns, SummaryRow } from './helpers';
 
 import { ActionCell } from './table/action_cell';
 import { FieldValueCell } from './table/field_value_cell';
-import { TimelineEventsDetailsItem, TimelineId } from '../../../../common';
+import { TimelineId } from '../../../../common/types';
+import { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
 
 import { getSummaryRows } from './get_alert_summary_rows';
 

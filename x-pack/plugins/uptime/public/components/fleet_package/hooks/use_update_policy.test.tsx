@@ -9,14 +9,14 @@ import { useUpdatePolicy } from './use_update_policy';
 import { NewPackagePolicy } from '../../../../../fleet/public';
 import { validate } from '../validation';
 import {
-  ConfigKeys,
+  ConfigKey,
   DataStream,
   TLSVersion,
-  ICommonFields,
+  CommonFields,
   ScheduleUnit,
   ICMPFields,
   TCPFields,
-  ITLSFields,
+  TLSFields,
   HTTPFields,
   BrowserFields,
 } from '../types';
@@ -308,6 +308,22 @@ describe('useBarChartsHooks', () => {
               tags: {
                 type: 'yaml',
               },
+              'throttling.download_speed': {
+                type: 'text',
+                value: '""',
+              },
+              'throttling.upload_speed': {
+                type: 'text',
+                value: '""',
+              },
+              'throttling.latency': {
+                type: 'text',
+                value: '""',
+              },
+              'throttling.config': {
+                type: 'text',
+                value: '""',
+              },
             },
           },
         ],
@@ -320,21 +336,21 @@ describe('useBarChartsHooks', () => {
     },
   };
 
-  const defaultCommonFields: Partial<ICommonFields> = {
-    [ConfigKeys.APM_SERVICE_NAME]: 'APM Service name',
-    [ConfigKeys.TAGS]: ['some', 'tags'],
-    [ConfigKeys.SCHEDULE]: {
+  const defaultCommonFields: Partial<CommonFields> = {
+    [ConfigKey.APM_SERVICE_NAME]: 'APM Service name',
+    [ConfigKey.TAGS]: ['some', 'tags'],
+    [ConfigKey.SCHEDULE]: {
       number: '5',
       unit: ScheduleUnit.MINUTES,
     },
-    [ConfigKeys.TIMEOUT]: '17',
+    [ConfigKey.TIMEOUT]: '17',
   };
 
-  const defaultTLSFields: Partial<ITLSFields> = {
-    [ConfigKeys.TLS_CERTIFICATE_AUTHORITIES]: 'ca',
-    [ConfigKeys.TLS_CERTIFICATE]: 'cert',
-    [ConfigKeys.TLS_KEY]: 'key',
-    [ConfigKeys.TLS_KEY_PASSPHRASE]: 'password',
+  const defaultTLSFields: Partial<TLSFields> = {
+    [ConfigKey.TLS_CERTIFICATE_AUTHORITIES]: 'ca',
+    [ConfigKey.TLS_CERTIFICATE]: 'cert',
+    [ConfigKey.TLS_KEY]: 'key',
+    [ConfigKey.TLS_KEY_PASSPHRASE]: 'password',
   };
 
   it('handles http data stream', async () => {
@@ -357,8 +373,8 @@ describe('useBarChartsHooks', () => {
       ...defaultConfig[DataStream.HTTP],
       ...defaultCommonFields,
       ...defaultTLSFields,
-      [ConfigKeys.URLS]: 'url',
-      [ConfigKeys.PROXY_URL]: 'proxyUrl',
+      [ConfigKey.URLS]: 'url',
+      [ConfigKey.PROXY_URL]: 'proxyUrl',
     };
 
     // expect only http to be enabled
@@ -375,28 +391,26 @@ describe('useBarChartsHooks', () => {
     await waitFor(() => {
       const vars = result.current.updatedPolicy.inputs[0]?.streams[0]?.vars;
 
-      expect(vars?.[ConfigKeys.MONITOR_TYPE].value).toEqual(config[ConfigKeys.MONITOR_TYPE]);
-      expect(vars?.[ConfigKeys.URLS].value).toEqual(config[ConfigKeys.URLS]);
-      expect(vars?.[ConfigKeys.SCHEDULE].value).toEqual(
+      expect(vars?.[ConfigKey.MONITOR_TYPE].value).toEqual(config[ConfigKey.MONITOR_TYPE]);
+      expect(vars?.[ConfigKey.URLS].value).toEqual(config[ConfigKey.URLS]);
+      expect(vars?.[ConfigKey.SCHEDULE].value).toEqual(
         JSON.stringify(
-          `@every ${config[ConfigKeys.SCHEDULE].number}${config[ConfigKeys.SCHEDULE].unit}`
+          `@every ${config[ConfigKey.SCHEDULE].number}${config[ConfigKey.SCHEDULE].unit}`
         )
       );
-      expect(vars?.[ConfigKeys.PROXY_URL].value).toEqual(config[ConfigKeys.PROXY_URL]);
-      expect(vars?.[ConfigKeys.APM_SERVICE_NAME].value).toEqual(
-        config[ConfigKeys.APM_SERVICE_NAME]
+      expect(vars?.[ConfigKey.PROXY_URL].value).toEqual(config[ConfigKey.PROXY_URL]);
+      expect(vars?.[ConfigKey.APM_SERVICE_NAME].value).toEqual(config[ConfigKey.APM_SERVICE_NAME]);
+      expect(vars?.[ConfigKey.TIMEOUT].value).toEqual(`${config[ConfigKey.TIMEOUT]}s`);
+      expect(vars?.[ConfigKey.RESPONSE_BODY_CHECK_POSITIVE].value).toEqual(null);
+      expect(vars?.[ConfigKey.RESPONSE_BODY_CHECK_NEGATIVE].value).toEqual(null);
+      expect(vars?.[ConfigKey.RESPONSE_STATUS_CHECK].value).toEqual(null);
+      expect(vars?.[ConfigKey.REQUEST_HEADERS_CHECK].value).toEqual(null);
+      expect(vars?.[ConfigKey.RESPONSE_HEADERS_CHECK].value).toEqual(null);
+      expect(vars?.[ConfigKey.RESPONSE_BODY_INDEX].value).toEqual(
+        config[ConfigKey.RESPONSE_BODY_INDEX]
       );
-      expect(vars?.[ConfigKeys.TIMEOUT].value).toEqual(`${config[ConfigKeys.TIMEOUT]}s`);
-      expect(vars?.[ConfigKeys.RESPONSE_BODY_CHECK_POSITIVE].value).toEqual(null);
-      expect(vars?.[ConfigKeys.RESPONSE_BODY_CHECK_NEGATIVE].value).toEqual(null);
-      expect(vars?.[ConfigKeys.RESPONSE_STATUS_CHECK].value).toEqual(null);
-      expect(vars?.[ConfigKeys.REQUEST_HEADERS_CHECK].value).toEqual(null);
-      expect(vars?.[ConfigKeys.RESPONSE_HEADERS_CHECK].value).toEqual(null);
-      expect(vars?.[ConfigKeys.RESPONSE_BODY_INDEX].value).toEqual(
-        config[ConfigKeys.RESPONSE_BODY_INDEX]
-      );
-      expect(vars?.[ConfigKeys.RESPONSE_HEADERS_INDEX].value).toEqual(
-        config[ConfigKeys.RESPONSE_HEADERS_INDEX]
+      expect(vars?.[ConfigKey.RESPONSE_HEADERS_INDEX].value).toEqual(
+        config[ConfigKey.RESPONSE_HEADERS_INDEX]
       );
     });
   });
@@ -419,11 +433,11 @@ describe('useBarChartsHooks', () => {
       ...initialProps,
       config: {
         ...defaultConfig[DataStream.HTTP],
-        [ConfigKeys.RESPONSE_BODY_CHECK_POSITIVE]: ['test'],
-        [ConfigKeys.RESPONSE_BODY_CHECK_NEGATIVE]: ['test'],
-        [ConfigKeys.RESPONSE_STATUS_CHECK]: ['test'],
-        [ConfigKeys.TAGS]: ['test'],
-        [ConfigKeys.TLS_VERSION]: [TLSVersion.ONE_ONE],
+        [ConfigKey.RESPONSE_BODY_CHECK_POSITIVE]: ['test'],
+        [ConfigKey.RESPONSE_BODY_CHECK_NEGATIVE]: ['test'],
+        [ConfigKey.RESPONSE_STATUS_CHECK]: ['test'],
+        [ConfigKey.TAGS]: ['test'],
+        [ConfigKey.TLS_VERSION]: [TLSVersion.ONE_ONE],
       },
     });
 
@@ -436,33 +450,33 @@ describe('useBarChartsHooks', () => {
 
       const vars = result.current.updatedPolicy.inputs[0]?.streams[0]?.vars;
 
-      expect(vars?.[ConfigKeys.RESPONSE_BODY_CHECK_POSITIVE].value).toEqual('["test"]');
-      expect(vars?.[ConfigKeys.RESPONSE_BODY_CHECK_NEGATIVE].value).toEqual('["test"]');
-      expect(vars?.[ConfigKeys.RESPONSE_STATUS_CHECK].value).toEqual('["test"]');
-      expect(vars?.[ConfigKeys.TAGS].value).toEqual('["test"]');
-      expect(vars?.[ConfigKeys.TLS_VERSION].value).toEqual('["TLSv1.1"]');
+      expect(vars?.[ConfigKey.RESPONSE_BODY_CHECK_POSITIVE].value).toEqual('["test"]');
+      expect(vars?.[ConfigKey.RESPONSE_BODY_CHECK_NEGATIVE].value).toEqual('["test"]');
+      expect(vars?.[ConfigKey.RESPONSE_STATUS_CHECK].value).toEqual('["test"]');
+      expect(vars?.[ConfigKey.TAGS].value).toEqual('["test"]');
+      expect(vars?.[ConfigKey.TLS_VERSION].value).toEqual('["TLSv1.1"]');
     });
 
     rerender({
       ...initialProps,
       config: {
         ...defaultConfig[DataStream.HTTP],
-        [ConfigKeys.RESPONSE_BODY_CHECK_POSITIVE]: [],
-        [ConfigKeys.RESPONSE_BODY_CHECK_NEGATIVE]: [],
-        [ConfigKeys.RESPONSE_STATUS_CHECK]: [],
-        [ConfigKeys.TAGS]: [],
-        [ConfigKeys.TLS_VERSION]: [],
+        [ConfigKey.RESPONSE_BODY_CHECK_POSITIVE]: [],
+        [ConfigKey.RESPONSE_BODY_CHECK_NEGATIVE]: [],
+        [ConfigKey.RESPONSE_STATUS_CHECK]: [],
+        [ConfigKey.TAGS]: [],
+        [ConfigKey.TLS_VERSION]: [],
       },
     });
 
     await waitFor(() => {
       const vars = result.current.updatedPolicy.inputs[0]?.streams[0]?.vars;
 
-      expect(vars?.[ConfigKeys.RESPONSE_BODY_CHECK_POSITIVE].value).toEqual(null);
-      expect(vars?.[ConfigKeys.RESPONSE_BODY_CHECK_NEGATIVE].value).toEqual(null);
-      expect(vars?.[ConfigKeys.RESPONSE_STATUS_CHECK].value).toEqual(null);
-      expect(vars?.[ConfigKeys.TAGS].value).toEqual(null);
-      expect(vars?.[ConfigKeys.TLS_VERSION].value).toEqual(null);
+      expect(vars?.[ConfigKey.RESPONSE_BODY_CHECK_POSITIVE].value).toEqual(null);
+      expect(vars?.[ConfigKey.RESPONSE_BODY_CHECK_NEGATIVE].value).toEqual(null);
+      expect(vars?.[ConfigKey.RESPONSE_STATUS_CHECK].value).toEqual(null);
+      expect(vars?.[ConfigKey.TAGS].value).toEqual(null);
+      expect(vars?.[ConfigKey.TLS_VERSION].value).toEqual(null);
     });
   });
 
@@ -490,11 +504,11 @@ describe('useBarChartsHooks', () => {
       ...defaultConfig[DataStream.TCP],
       ...defaultCommonFields,
       ...defaultTLSFields,
-      [ConfigKeys.HOSTS]: 'sampleHost',
-      [ConfigKeys.PROXY_URL]: 'proxyUrl',
-      [ConfigKeys.PROXY_USE_LOCAL_RESOLVER]: true,
-      [ConfigKeys.RESPONSE_RECEIVE_CHECK]: 'response',
-      [ConfigKeys.REQUEST_SEND_CHECK]: 'request',
+      [ConfigKey.HOSTS]: 'sampleHost',
+      [ConfigKey.PROXY_URL]: 'proxyUrl',
+      [ConfigKey.PROXY_USE_LOCAL_RESOLVER]: true,
+      [ConfigKey.RESPONSE_RECEIVE_CHECK]: 'response',
+      [ConfigKey.REQUEST_SEND_CHECK]: 'request',
     };
 
     rerender({
@@ -510,26 +524,24 @@ describe('useBarChartsHooks', () => {
         updatedPolicy: result.current.updatedPolicy,
       });
 
-      expect(vars?.[ConfigKeys.MONITOR_TYPE].value).toEqual(config[ConfigKeys.MONITOR_TYPE]);
-      expect(vars?.[ConfigKeys.HOSTS].value).toEqual(config[ConfigKeys.HOSTS]);
-      expect(vars?.[ConfigKeys.SCHEDULE].value).toEqual(
+      expect(vars?.[ConfigKey.MONITOR_TYPE].value).toEqual(config[ConfigKey.MONITOR_TYPE]);
+      expect(vars?.[ConfigKey.HOSTS].value).toEqual(config[ConfigKey.HOSTS]);
+      expect(vars?.[ConfigKey.SCHEDULE].value).toEqual(
         JSON.stringify(
-          `@every ${config[ConfigKeys.SCHEDULE].number}${config[ConfigKeys.SCHEDULE].unit}`
+          `@every ${config[ConfigKey.SCHEDULE].number}${config[ConfigKey.SCHEDULE].unit}`
         )
       );
-      expect(vars?.[ConfigKeys.PROXY_URL].value).toEqual(config[ConfigKeys.PROXY_URL]);
-      expect(vars?.[ConfigKeys.APM_SERVICE_NAME].value).toEqual(
-        config[ConfigKeys.APM_SERVICE_NAME]
+      expect(vars?.[ConfigKey.PROXY_URL].value).toEqual(config[ConfigKey.PROXY_URL]);
+      expect(vars?.[ConfigKey.APM_SERVICE_NAME].value).toEqual(config[ConfigKey.APM_SERVICE_NAME]);
+      expect(vars?.[ConfigKey.TIMEOUT].value).toEqual(`${config[ConfigKey.TIMEOUT]}s`);
+      expect(vars?.[ConfigKey.PROXY_USE_LOCAL_RESOLVER].value).toEqual(
+        config[ConfigKey.PROXY_USE_LOCAL_RESOLVER]
       );
-      expect(vars?.[ConfigKeys.TIMEOUT].value).toEqual(`${config[ConfigKeys.TIMEOUT]}s`);
-      expect(vars?.[ConfigKeys.PROXY_USE_LOCAL_RESOLVER].value).toEqual(
-        config[ConfigKeys.PROXY_USE_LOCAL_RESOLVER]
+      expect(vars?.[ConfigKey.RESPONSE_RECEIVE_CHECK].value).toEqual(
+        config[ConfigKey.RESPONSE_RECEIVE_CHECK]
       );
-      expect(vars?.[ConfigKeys.RESPONSE_RECEIVE_CHECK].value).toEqual(
-        config[ConfigKeys.RESPONSE_RECEIVE_CHECK]
-      );
-      expect(vars?.[ConfigKeys.REQUEST_SEND_CHECK].value).toEqual(
-        config[ConfigKeys.REQUEST_SEND_CHECK]
+      expect(vars?.[ConfigKey.REQUEST_SEND_CHECK].value).toEqual(
+        config[ConfigKey.REQUEST_SEND_CHECK]
       );
     });
   });
@@ -550,8 +562,8 @@ describe('useBarChartsHooks', () => {
     const config: ICMPFields = {
       ...defaultConfig[DataStream.ICMP],
       ...defaultCommonFields,
-      [ConfigKeys.WAIT]: '2',
-      [ConfigKeys.HOSTS]: 'sampleHost',
+      [ConfigKey.WAIT]: '2',
+      [ConfigKey.HOSTS]: 'sampleHost',
     };
 
     // expect only icmp to be enabled
@@ -569,18 +581,16 @@ describe('useBarChartsHooks', () => {
     await waitFor(() => {
       const vars = result.current.updatedPolicy.inputs[2]?.streams[0]?.vars;
 
-      expect(vars?.[ConfigKeys.MONITOR_TYPE].value).toEqual(config[ConfigKeys.MONITOR_TYPE]);
-      expect(vars?.[ConfigKeys.HOSTS].value).toEqual(config[ConfigKeys.HOSTS]);
-      expect(vars?.[ConfigKeys.SCHEDULE].value).toEqual(
+      expect(vars?.[ConfigKey.MONITOR_TYPE].value).toEqual(config[ConfigKey.MONITOR_TYPE]);
+      expect(vars?.[ConfigKey.HOSTS].value).toEqual(config[ConfigKey.HOSTS]);
+      expect(vars?.[ConfigKey.SCHEDULE].value).toEqual(
         JSON.stringify(
-          `@every ${config[ConfigKeys.SCHEDULE].number}${config[ConfigKeys.SCHEDULE].unit}`
+          `@every ${config[ConfigKey.SCHEDULE].number}${config[ConfigKey.SCHEDULE].unit}`
         )
       );
-      expect(vars?.[ConfigKeys.APM_SERVICE_NAME].value).toEqual(
-        config[ConfigKeys.APM_SERVICE_NAME]
-      );
-      expect(vars?.[ConfigKeys.TIMEOUT].value).toEqual(`${config[ConfigKeys.TIMEOUT]}s`);
-      expect(vars?.[ConfigKeys.WAIT].value).toEqual(`${config[ConfigKeys.WAIT]}s`);
+      expect(vars?.[ConfigKey.APM_SERVICE_NAME].value).toEqual(config[ConfigKey.APM_SERVICE_NAME]);
+      expect(vars?.[ConfigKey.TIMEOUT].value).toEqual(`${config[ConfigKey.TIMEOUT]}s`);
+      expect(vars?.[ConfigKey.WAIT].value).toEqual(`${config[ConfigKey.WAIT]}s`);
 
       expect(onChange).toBeCalledWith({
         isValid: false,
@@ -599,6 +609,7 @@ describe('useBarChartsHooks', () => {
       validate,
       monitorType: DataStream.BROWSER,
     };
+
     const { result, rerender, waitFor } = renderHook((props) => useUpdatePolicy(props), {
       initialProps,
     });
@@ -612,13 +623,16 @@ describe('useBarChartsHooks', () => {
     const config: BrowserFields = {
       ...defaultConfig[DataStream.BROWSER],
       ...defaultCommonFields,
-      [ConfigKeys.SOURCE_INLINE]: 'inlineScript',
-      [ConfigKeys.SOURCE_ZIP_URL]: 'zipFolder',
-      [ConfigKeys.SOURCE_ZIP_FOLDER]: 'zipFolder',
-      [ConfigKeys.SOURCE_ZIP_USERNAME]: 'username',
-      [ConfigKeys.SOURCE_ZIP_PASSWORD]: 'password',
-      [ConfigKeys.SCREENSHOTS]: 'off',
-      [ConfigKeys.SYNTHETICS_ARGS]: ['args'],
+      [ConfigKey.SOURCE_INLINE]: 'inlineScript',
+      [ConfigKey.SOURCE_ZIP_URL]: 'zipFolder',
+      [ConfigKey.SOURCE_ZIP_FOLDER]: 'zipFolder',
+      [ConfigKey.SOURCE_ZIP_USERNAME]: 'username',
+      [ConfigKey.SOURCE_ZIP_PASSWORD]: 'password',
+      [ConfigKey.SCREENSHOTS]: 'off',
+      [ConfigKey.SYNTHETICS_ARGS]: ['args'],
+      [ConfigKey.DOWNLOAD_SPEED]: '13',
+      [ConfigKey.UPLOAD_SPEED]: '3',
+      [ConfigKey.LATENCY]: '7',
     };
 
     rerender({
@@ -629,27 +643,30 @@ describe('useBarChartsHooks', () => {
     await waitFor(() => {
       const vars = result.current.updatedPolicy.inputs[3]?.streams[0]?.vars;
 
-      expect(vars?.[ConfigKeys.SOURCE_ZIP_FOLDER].value).toEqual(
-        config[ConfigKeys.SOURCE_ZIP_FOLDER]
+      expect(vars?.[ConfigKey.SOURCE_ZIP_FOLDER].value).toEqual(
+        config[ConfigKey.SOURCE_ZIP_FOLDER]
       );
-      expect(vars?.[ConfigKeys.SOURCE_ZIP_PASSWORD].value).toEqual(
-        config[ConfigKeys.SOURCE_ZIP_PASSWORD]
+      expect(vars?.[ConfigKey.SOURCE_ZIP_PASSWORD].value).toEqual(
+        config[ConfigKey.SOURCE_ZIP_PASSWORD]
       );
-      expect(vars?.[ConfigKeys.SOURCE_ZIP_URL].value).toEqual(config[ConfigKeys.SOURCE_ZIP_URL]);
-      expect(vars?.[ConfigKeys.SOURCE_INLINE].value).toEqual(
-        JSON.stringify(config[ConfigKeys.SOURCE_INLINE])
+      expect(vars?.[ConfigKey.SOURCE_ZIP_URL].value).toEqual(config[ConfigKey.SOURCE_ZIP_URL]);
+      expect(vars?.[ConfigKey.SOURCE_INLINE].value).toEqual(
+        JSON.stringify(config[ConfigKey.SOURCE_INLINE])
       );
-      expect(vars?.[ConfigKeys.SOURCE_ZIP_PASSWORD].value).toEqual(
-        config[ConfigKeys.SOURCE_ZIP_PASSWORD]
+      expect(vars?.[ConfigKey.SOURCE_ZIP_PASSWORD].value).toEqual(
+        config[ConfigKey.SOURCE_ZIP_PASSWORD]
       );
-      expect(vars?.[ConfigKeys.SCREENSHOTS].value).toEqual(config[ConfigKeys.SCREENSHOTS]);
-      expect(vars?.[ConfigKeys.SYNTHETICS_ARGS].value).toEqual(
-        JSON.stringify(config[ConfigKeys.SYNTHETICS_ARGS])
+      expect(vars?.[ConfigKey.SCREENSHOTS].value).toEqual(config[ConfigKey.SCREENSHOTS]);
+      expect(vars?.[ConfigKey.SYNTHETICS_ARGS].value).toEqual(
+        JSON.stringify(config[ConfigKey.SYNTHETICS_ARGS])
       );
-      expect(vars?.[ConfigKeys.APM_SERVICE_NAME].value).toEqual(
-        config[ConfigKeys.APM_SERVICE_NAME]
+      expect(vars?.[ConfigKey.APM_SERVICE_NAME].value).toEqual(config[ConfigKey.APM_SERVICE_NAME]);
+      expect(vars?.[ConfigKey.TIMEOUT].value).toEqual(`${config[ConfigKey.TIMEOUT]}s`);
+      expect(vars?.[ConfigKey.THROTTLING_CONFIG].value).toEqual(
+        `${config[ConfigKey.DOWNLOAD_SPEED]}d/${config[ConfigKey.UPLOAD_SPEED]}u/${
+          config[ConfigKey.LATENCY]
+        }l`
       );
-      expect(vars?.[ConfigKeys.TIMEOUT].value).toEqual(`${config[ConfigKeys.TIMEOUT]}s`);
 
       expect(onChange).toBeCalledWith({
         isValid: false,
