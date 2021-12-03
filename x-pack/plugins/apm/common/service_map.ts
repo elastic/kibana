@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import cytoscape from 'cytoscape';
+import { Coordinate } from '../typings/timeseries';
 import { ServiceAnomalyStats } from './anomaly_detection';
 
 // These should be imported, but until TypeScript 4.2 we're inlining them here.
@@ -59,13 +60,28 @@ export interface Connection {
 }
 
 export interface NodeStats {
-  avgMemoryUsage?: number | null;
-  avgCpuUsage?: number | null;
-  transactionStats: {
-    avgTransactionDuration: number | null;
-    avgRequestsPerMinute: number | null;
+  transactionStats?: {
+    latency?: {
+      value: number | null;
+      timeseries?: Coordinate[];
+    };
+    throughput?: {
+      value: number | null;
+      timeseries?: Coordinate[];
+    };
   };
-  avgErrorRate: number | null;
+  failedTransactionsRate?: {
+    value: number | null;
+    timeseries?: Coordinate[];
+  };
+  cpuUsage?: {
+    value?: number | null;
+    timeseries?: Coordinate[];
+  };
+  memoryUsage?: {
+    value?: number | null;
+    timeseries?: Coordinate[];
+  };
 }
 
 export const invalidLicenseMessage = i18n.translate(

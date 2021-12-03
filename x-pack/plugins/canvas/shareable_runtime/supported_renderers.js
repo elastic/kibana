@@ -21,7 +21,7 @@ import {
   shapeRenderer as shape,
   progressRenderer as progress,
 } from '../../../../src/plugins/expression_shape/public';
-import { metricRenderer as metric } from '../../../../src/plugins/expression_metric/public';
+import { getMetricRenderer } from '../../../../src/plugins/expression_metric/public';
 
 const unboxFactory = (factory) => factory();
 
@@ -32,6 +32,7 @@ const renderFunctionsFactories = [
   getErrorRenderer,
   getDebugRenderer,
   getRepeatImageRenderer,
+  getMetricRenderer,
 ];
 
 /**
@@ -42,7 +43,6 @@ const renderFunctionsFactories = [
 export const renderFunctions = [
   image,
   revealImage,
-  metric,
   pie,
   plot,
   progress,
