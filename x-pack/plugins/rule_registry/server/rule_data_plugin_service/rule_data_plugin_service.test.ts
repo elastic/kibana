@@ -67,23 +67,6 @@ describe('ruleDataPluginService', () => {
       expect(ruleDataService.isWriteEnabled('observability.logs')).toBe(false);
     });
   });
-  describe('initializeService', () => {
-    it('calls ResourceInstaller', async () => {
-      const mockClusterClient = elasticsearchServiceMock.createElasticsearchClient();
-      const getClusterClient = jest.fn(() => Promise.resolve(mockClusterClient));
-
-      new RuleDataService({
-        logger: loggerMock.create(),
-        getClusterClient,
-        kibanaVersion: '8.1.0',
-        isWriteEnabled: true,
-        disabledRegistrationContexts: ['observability.logs'],
-        isWriterCacheEnabled: true,
-      });
-
-      expect(jest.requireMock('./resource_installer').ResourceInstaller).toHaveBeenCalled();
-    });
-  });
 
   describe('initializeIndex', () => {
     it('calls RuleDataClient', async () => {
