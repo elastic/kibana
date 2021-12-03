@@ -210,10 +210,7 @@ export class ConnectorTokenClient {
       return Promise.all(
         result.saved_objects.map(
           async (obj) =>
-            await this.unsecuredSavedObjectsClient.delete(
-              CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
-              obj.id
-            )
+            await this.unsecuredSavedObjectsClient.delete(CONNECTOR_TOKEN_SAVED_OBJECT_TYPE, obj.id)
         )
       );
     } catch (err) {
