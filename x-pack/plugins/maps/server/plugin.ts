@@ -25,14 +25,12 @@ import { APP_ID, APP_ICON, MAP_SAVED_OBJECT_TYPE, getFullPath } from '../common/
 import { mapSavedObjects, mapsTelemetrySavedObjects } from './saved_objects';
 import { MapsXPackConfig } from '../config';
 import { setStartServices } from './kibana_server_services';
-import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/server';
 import { emsBoundariesSpecProvider } from './tutorials/ems';
 import { initRoutes } from './routes';
 import { ILicense } from '../../licensing/common/types';
 import { HomeServerPluginSetup } from '../../../../src/plugins/home/server';
 import type { EMSSettings } from '../../../../src/plugins/maps_ems/server';
 import { embeddableMigrations } from './embeddable_migrations';
-import { CustomIntegrationsPluginSetup } from '../../../../src/plugins/custom_integrations/server';
 import { registerIntegrations } from './register_integrations';
 import { StartDeps, SetupDeps } from './types';
 

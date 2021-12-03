@@ -13,6 +13,7 @@ import { MapsEmsPluginSetup } from '../../../../src/plugins/maps_ems/server';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { EmbeddableSetup } from '../../../../src/plugins/embeddable/server/plugin';
 import { PluginStart as DataPluginStart } from '../../../../src/plugins/data/server';
+import { CustomIntegrationsPluginSetup } from '../../../../src/plugins/custom_integrations/server';
 
 export interface SetupDeps {
   features: FeaturesPluginSetupContract;
@@ -21,6 +22,7 @@ export interface SetupDeps {
   licensing: LicensingPluginSetup;
   mapsEms: MapsEmsPluginSetup;
   embeddable: EmbeddableSetup;
+  customIntegrations: CustomIntegrationsPluginSetup;
 }
 
 export interface StartDeps {
