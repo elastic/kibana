@@ -68,5 +68,5 @@ describe('CrawlDetailsSummary', () => {
     expect(wrapper.find({ 'data-test-subj': 'pagesVisited' })).toHaveLength(0);
     expect(wrapper.find({ 'data-test-subj': 'avgResponseTime' })).toHaveLength(0);
     expect(wrapper.find({ 'data-test-subj': 'urlsAllowed' })).toHaveLength(0);
-  })
+  });
 });

@@ -38,7 +38,6 @@ export const CrawlDetailsSummary: React.FC<ICrawlerSummaryProps> = ({
   domainCount,
   stats,
 }) => {
-
   const duration = () => {
     if (stats.status && stats.status.crawlDurationMSec) {
       const milliseconds = moment.duration(stats.status.crawlDurationMSec, 'milliseconds');
@@ -51,7 +50,7 @@ export const CrawlDetailsSummary: React.FC<ICrawlerSummaryProps> = ({
     }
   };
 
-  const getStatusCount = (code: string, codes: any) => {
+  const getStatusCount = (code: string, codes: { [code: string]: number }) => {
     let count = 0;
     Object.keys(codes).filter((key) => {
       if (key[0] === code) {
