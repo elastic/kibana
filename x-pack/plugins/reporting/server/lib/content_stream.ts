@@ -66,7 +66,9 @@ export class ContentStream extends Duplex {
     return Math.floor(max / 2);
   }
 
-  private buffer = Buffer.from('');
+  private buffers: Buffer[] = [];
+  private currentByteLength = 0;
+
   private bytesRead = 0;
   private chunksRead = 0;
   private chunksWritten = 0;
@@ -249,8 +251,20 @@ export class ContentStream extends Duplex {
     });
   }
 
-  private async flush(size = this.buffer.byteLength) {
-    const chunk = this.buffer.slice(0, size);
+  private async flush(size = this.currentByteLength) {
+    const buffersToConsume: Buffer[] = [];
+    let totalBytesConsumed = 0;
+
+    for (const buffer of this.buffers) {
+      if (totalBytesConsumed + buffer.byteLength <= size) {
+        buffersToConsume.push(buffer);
+        totalBytesConsumed += buffer.byteLength;
+      } else {
+        break;
+      }
+    }
+
+    const chunk = Buffer.concat(buffersToConsume);
     const content = this.encode(chunk);
 
     if (!this.chunksWritten) {
@@ -265,29 +279,23 @@ export class ContentStream extends Duplex {
     }
 
     this.bytesWritten += chunk.byteLength;
-    this.buffer = this.buffer.slice(size);
+
+    this.buffers = this.buffers.slice(buffersToConsume.length - 1);
+    this.currentByteLength -= totalBytesConsumed;
   }
 
   private async flushAllFullChunks() {
     const maxChunkSize = await this.getMaxChunkSize();
 
-    while (this.buffer.byteLength >= maxChunkSize) {
+    while (this.currentByteLength >= maxChunkSize) {
       await this.flush(maxChunkSize);
     }
   }
 
-  private appendToCurrentBuffer(chunk: string | Buffer, encoding: BufferEncoding) {
-    const currentBuffer = this.buffer;
-    const bufferToAppend = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk, encoding);
-    const nextBuffer = Buffer.alloc(currentBuffer.byteLength + bufferToAppend.byteLength);
-    nextBuffer.set(currentBuffer, 0);
-    nextBuffer.set(bufferToAppend, currentBuffer.byteLength);
-
-    this.buffer = nextBuffer;
-  }
-
   _write(chunk: Buffer | string, encoding: BufferEncoding, callback: Callback) {
-    this.appendToCurrentBuffer(chunk, encoding);
+    const buffer = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk, encoding);
+    this.currentByteLength += buffer.byteLength;
+    this.buffers.push(buffer);
 
     this.flushAllFullChunks()
       .then(() => callback())
