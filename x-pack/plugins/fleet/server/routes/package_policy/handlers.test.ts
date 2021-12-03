@@ -341,6 +341,7 @@ describe('When calling package policy', () => {
         inputs: [
           {
             ...existingPolicy.inputs[0],
+            compiled_input: '',
             streams: [
               {
                 ...existingPolicy.inputs[0].streams[0],

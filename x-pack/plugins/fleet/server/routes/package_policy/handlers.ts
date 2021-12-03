@@ -137,16 +137,20 @@ export const updatePackagePolicyHandler: RequestHandler<
   }
 
   const body = { ...request.body };
-  // removed compiled_stream as not recognized by schema
-  const packagePolicyInputs = packagePolicy.inputs.map((input) => ({
-    ...input,
-    streams: input.streams.map((stream) => {
-      const newStream = { ...stream };
-      delete newStream.compiled_stream;
-      return newStream;
-    }),
-  }));
-  // listing down accepted properties, because loaded packagePolicy contains some that are not accepted in update e.g. inputs.compiled_input
+  // removed fields not recognized by schema
+  const packagePolicyInputs = packagePolicy.inputs.map((input) => {
+    const newInput = {
+      ...input,
+      streams: input.streams.map((stream) => {
+        const newStream = { ...stream };
+        delete newStream.compiled_stream;
+        return newStream;
+      }),
+    };
+    delete newInput.compiled_input;
+    return newInput;
+  });
+  // listing down accepted properties, because loaded packagePolicy contains some that are not accepted in update
   let newData = {
     ...body,
     name: body.name ?? packagePolicy.name,
