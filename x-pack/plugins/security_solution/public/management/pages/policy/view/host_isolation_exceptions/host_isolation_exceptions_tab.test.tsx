@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { act } from '@testing-library/react';
 import React from 'react';
 import { getFoundExceptionListItemSchemaMock } from '../../../../../../../lists/common/schemas/response/found_exception_list_item_schema.mock';
 import { EndpointDocGenerator } from '../../../../../../common/endpoint/generate_data';
@@ -41,6 +40,7 @@ describe('Policy details host isolation exceptions tab', () => {
   let mockedContext: AppContextTestRender;
 
   beforeEach(() => {
+    getHostIsolationExceptionItemsMock.mockClear();
     policy = endpointGenerator.generatePolicyPackagePolicy();
     policyId = policy.id;
     mockedContext = createAppRootMockRenderer();
@@ -50,9 +50,7 @@ describe('Policy details host isolation exceptions tab', () => {
         <PolicyHostIsolationExceptionsTab policyId={policyId} policy={policy} />
       ));
 
-    act(() => {
-      history.push(getPolicyHostIsolationExceptionsPath(policyId));
-    });
+    history.push(getPolicyHostIsolationExceptionsPath(policyId));
   });
 
   it('should display display a "loading" state while requests happen', async () => {
@@ -99,14 +97,25 @@ describe('Policy details host isolation exceptions tab', () => {
 
   it('Should display the count of total assigned policies', async () => {
     getHostIsolationExceptionItemsMock.mockImplementation(() => {
-      return {
-        ...getFoundExceptionListItemSchemaMock(),
-        total: 4,
-      };
+      return getFoundExceptionListItemSchemaMock(4);
     });
     render();
     expect(
       await renderResult.findByTestId('policyHostIsolationExceptionsTabSubtitle')
     ).toHaveTextContent('There are 4 exceptions associated with this policy');
+  });
+
+  it('should apply a filter when requested from location search params', async () => {
+    history.push(getPolicyHostIsolationExceptionsPath(policyId, { filter: 'my filter' }));
+    getHostIsolationExceptionItemsMock.mockImplementation(() => {
+      return getFoundExceptionListItemSchemaMock(4);
+    });
+    render();
+    expect(getHostIsolationExceptionItemsMock).toHaveBeenLastCalledWith({
+      filter: `((exception-list-agnostic.attributes.tags:"policy:${policyId}" OR exception-list-agnostic.attributes.tags:"policy:all")) AND ((exception-list-agnostic.attributes.name:(*my*filter*) OR exception-list-agnostic.attributes.description:(*my*filter*) OR exception-list-agnostic.attributes.entries.value:(*my*filter*)))`,
+      http: mockedContext.coreStart.http,
+      page: 1,
+      perPage: 10,
+    });
   });
 });
