@@ -7,13 +7,21 @@
 
 import { createReducer, PayloadAction } from '@reduxjs/toolkit';
 import { WritableDraft } from 'immer/dist/types/types-external';
-import { getMonitors, getMonitorsSuccess, getMonitorsFailure } from '../actions';
-import { MonitorManagementListResult } from '../../../common/runtime_types';
+import {
+  getMonitors,
+  getMonitorsSuccess,
+  getMonitorsFailure,
+  getServiceLocations,
+  getServiceLocationsSuccess,
+  getServiceLocationsFailure,
+} from '../actions';
+import { MonitorManagementListResult, ServiceLocations } from '../../../common/runtime_types';
 
 export interface MonitorManagementList {
-  error?: Error;
-  loading: boolean;
+  error: Record<'monitorList' | 'serviceLocations', Error | null>;
+  loading: Record<'monitorList' | 'serviceLocations', boolean>;
   list: MonitorManagementListResult;
+  locations: ServiceLocations;
 }
 
 export const initialState: MonitorManagementList = {
@@ -23,14 +31,25 @@ export const initialState: MonitorManagementList = {
     total: null,
     monitors: [],
   },
-  loading: false,
+  locations: [],
+  loading: {
+    monitorList: false,
+    serviceLocations: false,
+  },
+  error: {
+    monitorList: null,
+    serviceLocations: null,
+  },
 };
 
 export const monitorManagementListReducer = createReducer(initialState, (builder) => {
   builder
     .addCase(getMonitors, (state: WritableDraft<MonitorManagementList>) => ({
       ...state,
-      loading: true,
+      loading: {
+        ...state.loading,
+        monitorList: true,
+      },
     }))
     .addCase(
       getMonitorsSuccess,
@@ -39,8 +58,14 @@ export const monitorManagementListReducer = createReducer(initialState, (builder
         action: PayloadAction<MonitorManagementListResult>
       ) => ({
         ...state,
-        loading: false,
-        error: undefined,
+        loading: {
+          ...state.loading,
+          monitorList: false,
+        },
+        error: {
+          ...state.error,
+          monitorList: null,
+        },
         list: { ...action.payload },
       })
     )
@@ -48,8 +73,50 @@ export const monitorManagementListReducer = createReducer(initialState, (builder
       getMonitorsFailure,
       (state: WritableDraft<MonitorManagementList>, action: PayloadAction<Error>) => ({
         ...state,
-        loading: false,
-        error: action.payload,
+        loading: {
+          ...state.loading,
+          monitorList: false,
+        },
+        error: {
+          ...state.error,
+          monitorList: action.payload,
+        },
+      })
+    )
+    .addCase(getServiceLocations, (state: WritableDraft<MonitorManagementList>) => ({
+      ...state,
+      loading: {
+        ...state.loading,
+        serviceLocations: true,
+      },
+    }))
+    .addCase(
+      getServiceLocationsSuccess,
+      (state: WritableDraft<MonitorManagementList>, action: PayloadAction<ServiceLocations>) => ({
+        ...state,
+        loading: {
+          ...state.loading,
+          serviceLocations: false,
+        },
+        error: {
+          ...state.error,
+          serviceLocations: null,
+        },
+        locations: action.payload,
+      })
+    )
+    .addCase(
+      getServiceLocationsFailure,
+      (state: WritableDraft<MonitorManagementList>, action: PayloadAction<Error>) => ({
+        ...state,
+        loading: {
+          ...state.loading,
+          serviceLocations: false,
+        },
+        error: {
+          ...state.error,
+          serviceLocations: action.payload,
+        },
       })
     );
 });

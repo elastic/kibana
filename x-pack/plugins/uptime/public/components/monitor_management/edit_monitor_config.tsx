@@ -15,7 +15,7 @@ import {
 } from '../fleet_package/types';
 import { useTrackPageview } from '../../../../observability/public';
 import { SyntheticsProviders } from '../fleet_package/contexts';
-import { MonitorConfig } from './monitor_config';
+import { MonitorConfig } from './monitor_config/monitor_config';
 
 interface Props {
   monitor: MonitorFields;

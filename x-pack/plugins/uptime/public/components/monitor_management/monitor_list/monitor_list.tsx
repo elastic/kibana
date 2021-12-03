@@ -20,16 +20,16 @@ interface Props {
   monitorList: MonitorManagementListState;
 }
 
-export const MonitorManagementList: ({
-  monitorList: { list, error, loading },
-  pageSize,
-  setPageSize,
-}: Props) => any = ({
-  monitorList: { list, error, loading },
+export const MonitorManagementList = ({
+  monitorList: {
+    list,
+    error: { monitorList: error },
+    loading: { monitorList: loading },
+  },
   setRefresh,
   pageSize,
   setPageSize,
-}) => {
+}: Props) => {
   const items = list.monitors as MonitorManagementListState['list']['monitors'];
   const { basePath } = useContext(UptimeSettingsContext);
 

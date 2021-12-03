@@ -8,6 +8,7 @@
 import { createAction } from '@reduxjs/toolkit';
 import {
   MonitorManagementListResult,
+  ServiceLocations,
   FetchMonitorManagementListQueryArgs,
 } from '../../../common/runtime_types';
 
@@ -18,3 +19,9 @@ export const getMonitorsSuccess = createAction<MonitorManagementListResult>(
   'GET_MONITOR_MANAGEMENT_LIST_SUCCESS'
 );
 export const getMonitorsFailure = createAction<Error>('GET_MONITOR_MANAGEMENT_LIST_FAILURE');
+
+export const getServiceLocations = createAction('GET_SERVICE_LOCATIONS_LIST');
+export const getServiceLocationsSuccess = createAction<ServiceLocations>(
+  'GET_SERVICE_LOCATIONS_LIST_SUCCESS'
+);
+export const getServiceLocationsFailure = createAction<Error>('GET_SERVICE_LOCATIONS_LIST_FAILURE');

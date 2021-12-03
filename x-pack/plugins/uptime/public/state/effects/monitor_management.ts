@@ -6,13 +6,28 @@
  */
 
 import { takeLatest } from 'redux-saga/effects';
-import { getMonitors, getMonitorsSuccess, getMonitorsFailure } from '../actions';
-import { fetchMonitorManagementList } from '../api';
+import {
+  getMonitors,
+  getMonitorsSuccess,
+  getMonitorsFailure,
+  getServiceLocations,
+  getServiceLocationsSuccess,
+  getServiceLocationsFailure,
+} from '../actions';
+import { fetchMonitorManagementList, fetchServiceLocations } from '../api';
 import { fetchEffectFactory } from './fetch_effect';
 
-export function* fetchMonitorManagementListEffect() {
+export function* fetchMonitorManagementEffect() {
   yield takeLatest(
     getMonitors,
     fetchEffectFactory(fetchMonitorManagementList, getMonitorsSuccess, getMonitorsFailure)
+  );
+  yield takeLatest(
+    getServiceLocations,
+    fetchEffectFactory(
+      fetchServiceLocations,
+      getServiceLocationsSuccess,
+      getServiceLocationsFailure
+    )
   );
 }

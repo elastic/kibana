@@ -8,8 +8,10 @@
 import { API_URLS } from '../../../common/constants';
 import {
   FetchMonitorManagementListQueryArgs,
-  MonitorManagementListResultType,
+  MonitorManagementListResultCodec,
   MonitorManagementListResult,
+  ServiceLocations,
+  ServiceLocationsCodec,
 } from '../../../common/runtime_types';
 import { SyntheticsMonitorSavedObject } from '../../../common/types';
 import { apiService } from './utils';
@@ -38,6 +40,15 @@ export const fetchMonitorManagementList = async (
   return await apiService.get(
     API_URLS.SYNTHETICS_MONITORS,
     params,
-    MonitorManagementListResultType
+    MonitorManagementListResultCodec
   );
+};
+
+export const fetchServiceLocations = async (): Promise<ServiceLocations> => {
+  const { locations } = await apiService.get(
+    API_URLS.SERVICE_LOCATIONS,
+    undefined,
+    ServiceLocationsCodec
+  );
+  return locations;
 };

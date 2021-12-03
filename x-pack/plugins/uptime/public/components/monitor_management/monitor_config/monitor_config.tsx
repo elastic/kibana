@@ -7,13 +7,13 @@
 
 import React from 'react';
 
-import { defaultConfig, usePolicyConfigContext } from '../fleet_package/contexts';
+import { defaultConfig, usePolicyConfigContext } from '../../fleet_package/contexts';
 
-import { usePolicy } from '../fleet_package/hooks/use_policy';
-import { validate } from '../fleet_package/validation';
+import { usePolicy } from '../../fleet_package/hooks/use_policy';
+import { validate } from '../../fleet_package/validation';
+import { ActionBar } from '../action_bar/action_bar';
+import { useFormatMonitor } from '../hooks/use_format_monitor';
 import { MonitorFields } from './monitor_fields';
-import { ActionBar } from './action_bar/action_bar';
-import { useFormatMonitor } from './hooks/use_format_monitor';
 
 interface Props {
   id?: string;
