@@ -67,16 +67,23 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
   );
 
   const {
+    activePatterns,
     dataViewId: selectedDataViewId,
     indicesExist,
     missingPatterns: sourcererMissingPatterns,
-    selectedPatterns,
+    selectedPatternsDisplay: selectedPatterns, // get display which excludes a filter we want to keep hidden from the UI
     loading,
   } = useSourcererDataView(scopeId);
-  const [missingPatterns, setMissingPatterns] = useState<string[]>(sourcererMissingPatterns);
+  const [missingPatterns, setMissingPatterns] = useState<string[]>(
+    activePatterns && activePatterns.length > 0
+      ? sourcererMissingPatterns.filter((p) => activePatterns.includes(p))
+      : []
+  );
   useEffect(() => {
-    setMissingPatterns(sourcererMissingPatterns);
-  }, [sourcererMissingPatterns]);
+    if (activePatterns && activePatterns.length > 0) {
+      setMissingPatterns(sourcererMissingPatterns.filter((p) => activePatterns.includes(p)));
+    }
+  }, [activePatterns, sourcererMissingPatterns]);
 
   const [isOnlyDetectionAlertsChecked, setIsOnlyDetectionAlertsChecked] = useState(
     isTimelineSourcerer && selectedPatterns.join() === signalIndexName
@@ -346,6 +353,7 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
           {isModified === 'deprecated' || isModified === 'missingPatterns' ? (
             <>
               <TemporarySourcerer
+                activePatterns={activePatterns}
                 indicesExist={indicesExist}
                 isModified={isModified}
                 missingPatterns={missingPatterns}

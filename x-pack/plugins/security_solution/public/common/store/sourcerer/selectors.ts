@@ -61,11 +61,6 @@ export interface SourcererScopeSelector extends Omit<SourcererModel, 'sourcererS
   sourcererScope: SourcererScope;
 }
 
-/**
- * Attn Future Developer
- * Please do not access sourcererScope directly from redux state
- * instead use the hook useSourcererDataView in `common/containers/sourcerer/index`
- * */
 export const getSourcererDataViewsSelector = () => {
   const getKibanaDataViewsSelector = kibanaDataViewsSelector();
   const getDefaultDataViewSelector = defaultDataViewSelector();
@@ -83,7 +78,6 @@ export const getSourcererDataViewsSelector = () => {
   };
 };
 
-// should only be used by
 export const getSourcererScopeSelector = () => {
   const getDataViewsSelector = getSourcererDataViewsSelector();
   const getSourcererDataViewSelector = sourcererDataViewSelector();

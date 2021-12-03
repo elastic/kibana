@@ -42,11 +42,14 @@ export const useInitSourcerer = (
   const initialTimelineSourcerer = useRef(true);
   const initialDetectionSourcerer = useRef(true);
   const { loading: loadingSignalIndex, isSignalIndexExists, signalIndexName } = useUserInfo();
-  const getDefaultDataViewSelector = useMemo(
-    () => sourcererSelectors.defaultDataViewSelector(),
+
+  const getDataViewsSelector = useMemo(
+    () => sourcererSelectors.getSourcererDataViewsSelector(),
     []
   );
-  const defaultDataView = useDeepEqualSelector(getDefaultDataViewSelector);
+  const { defaultDataView, signalIndexName: signalIndexNameSourcerer } = useDeepEqualSelector(
+    (state) => getDataViewsSelector(state)
+  );
 
   const { addError } = useAppToasts();
 
@@ -63,12 +66,6 @@ export const useInitSourcerer = (
       });
     }
   }, [addError, defaultDataView.error]);
-
-  const getSignalIndexNameSelector = useMemo(
-    () => sourcererSelectors.signalIndexNameSelector(),
-    []
-  );
-  const signalIndexNameSourcerer = useDeepEqualSelector(getSignalIndexNameSelector);
 
   const getTimelineSelector = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
   const activeTimeline = useDeepEqualSelector((state) =>
@@ -346,10 +343,22 @@ export const useSourcererDataView = (
       runtimeMappings: sourcererDataView.runtimeMappings,
       // all active & inactive patterns in DATA_VIEW
       patternList: sourcererDataView.title.split(','),
-      // selected patterns in DATA_VIEW
+      // selected patterns in DATA_VIEW including filter
       selectedPatterns: selectedPatterns.sort(),
+      // selected patterns in DATA_VIEW excluding filter for display
+      selectedPatternsDisplay: scopeSelectedPatterns.sort(),
+      // if we have to do an update to data view, tell us which patterns are active
+      ...(legacyPatterns.length > 0 ? { activePatterns: sourcererDataView.patternList } : {}),
     }),
-    [missingPatterns, sourcererDataView, selectedPatterns, indicesExist, loading]
+    [
+      sourcererDataView,
+      selectedPatterns,
+      indicesExist,
+      missingPatterns,
+      loading,
+      scopeSelectedPatterns,
+      legacyPatterns.length,
+    ]
   );
 };
 

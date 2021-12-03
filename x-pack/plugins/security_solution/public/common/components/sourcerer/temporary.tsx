@@ -16,12 +16,14 @@ import {
   EuiFlexItem,
   EuiButton,
   EuiToolTip,
+  EuiIcon,
 } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import * as i18n from './translations';
 import { Blockquote, ResetButton } from './helpers';
 
 interface Props {
+  activePatterns?: string[];
   indicesExist: boolean;
   isModified: 'deprecated' | 'missingPatterns';
   missingPatterns: string[];
@@ -43,7 +45,16 @@ const translations = {
 };
 
 export const TemporarySourcerer = React.memo<Props>(
-  ({ indicesExist, isModified, onClose, onClick, onUpdate, selectedPatterns, missingPatterns }) => {
+  ({
+    activePatterns,
+    indicesExist,
+    isModified,
+    onClose,
+    onClick,
+    onUpdate,
+    selectedPatterns,
+    missingPatterns,
+  }) => {
     const trigger = useMemo(
       () => (
         <EuiButton
@@ -70,6 +81,12 @@ export const TemporarySourcerer = React.memo<Props>(
         ),
       [indicesExist, trigger]
     );
+
+    const deadPatterns =
+      activePatterns && activePatterns.length > 0
+        ? selectedPatterns.filter((p) => !activePatterns.includes(p))
+        : [];
+
     return (
       <>
         <EuiCallOut
@@ -83,13 +100,34 @@ export const TemporarySourcerer = React.memo<Props>(
         <EuiText size="s">
           <EuiTextColor color="subdued">
             <p>
-              <FormattedMessage
-                id="xpack.securitySolution.indexPatterns.currentPatterns"
-                defaultMessage="The current index patterns in this timeline are: {callout}"
-                values={{
-                  callout: <Blockquote>{selectedPatterns.join(', ')}</Blockquote>,
-                }}
-              />
+              {activePatterns && activePatterns.length > 0 ? (
+                <FormattedMessage
+                  id="xpack.securitySolution.indexPatterns.currentPatterns"
+                  defaultMessage="The active index patterns in this timeline are{tooltip}: {callout}"
+                  values={{
+                    tooltip:
+                      deadPatterns.length > 0 ? (
+                        <EuiToolTip
+                          content={`The following index patterns are saved to this timeline but do not match any data streams, indices, or index aliases: ${selectedPatterns
+                            .filter((p) => !activePatterns.includes(p))
+                            .join(', ')}`}
+                        >
+                          <EuiIcon type="questionInCircle" title="Inactive index patterns" />
+                        </EuiToolTip>
+                      ) : null,
+                    callout: <Blockquote>{activePatterns.join(', ')}</Blockquote>,
+                  }}
+                />
+              ) : (
+                <FormattedMessage
+                  id="xpack.securitySolution.indexPatterns.currentPatternsBad"
+                  defaultMessage="The current index patterns in this timeline are: {callout}"
+                  values={{
+                    callout: <Blockquote>{selectedPatterns.join(', ')}</Blockquote>,
+                  }}
+                />
+              )}
+
               {isModified === 'deprecated' && (
                 <FormattedMessage
                   id="xpack.securitySolution.indexPatterns.toggleToNewSourcerer"
