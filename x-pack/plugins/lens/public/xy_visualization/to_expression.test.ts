@@ -13,7 +13,7 @@ import { Operation } from '../types';
 import { createMockDatasource, createMockFramePublicAPI } from '../mocks';
 import { layerTypes } from '../../common';
 import { fieldFormatsServiceMock } from '../../../../../src/plugins/field_formats/public/mocks';
-import { defaultAxisLineColor, defaultReferenceLineColor } from './color_assignment';
+import { defaultReferenceLineColor } from './color_assignment';
 import { themeServiceMock } from '../../../../../src/core/public/mocks';
 
 describe('#toExpression', () => {

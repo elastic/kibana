@@ -11,7 +11,6 @@ import { AxisSettingsPopover, AxisSettingsPopoverProps } from './axis_settings_p
 import { ToolbarPopover } from '../../shared_components';
 import { layerTypes } from '../../../common';
 import { EuiColorPicker } from '@elastic/eui';
-import { defaultAxisLineColor } from '../color_assignment';
 import { EuiColorPickerOutput } from '@elastic/eui/src/components/color_picker/color_picker';
 
 describe('Axes Settings', () => {

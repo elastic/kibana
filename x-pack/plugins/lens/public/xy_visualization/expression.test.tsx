@@ -48,7 +48,6 @@ import { mountWithIntl } from '@kbn/test/jest';
 import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
 import { EmptyPlaceholder } from '../shared_components/empty_placeholder';
 import { XyEndzones } from './x_domain';
-import { defaultAxisLineColor } from './color_assignment';
 
 const onClickValue = jest.fn();
 const onSelectRange = jest.fn();
