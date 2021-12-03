@@ -1,5 +1,5 @@
 [[search-sessions]]
-== Run a search session in the background
+== Run a search in the background
 
 Sometimes you might need to search through large amounts of data, no matter
 how long the search takes.

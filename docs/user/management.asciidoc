@@ -173,29 +173,17 @@ next major version of {es}, and then reindex, if needed.
 
 |===
 
-
-
 --
-
-include::{kib-repo-dir}/management/advanced-options.asciidoc[]
 
 include::{kib-repo-dir}/management/action-types.asciidoc[]
 
 include::{kib-repo-dir}/management/managing-licenses.asciidoc[]
 
-include::{kib-repo-dir}/management/manage-data-views.asciidoc[]
-
 include::{kib-repo-dir}/management/numeral.asciidoc[]
 
 include::{kib-repo-dir}/management/rollups/create_and_manage_rollups.asciidoc[]
 
-include::{kib-repo-dir}/management/managing-saved-objects.asciidoc[]
-
 include::security/index.asciidoc[]
-
-include::{kib-repo-dir}/spaces/index.asciidoc[]
-
-include::{kib-repo-dir}/management/managing-tags.asciidoc[]
 
 include::{kib-repo-dir}/management/upgrade-assistant/index.asciidoc[]
 

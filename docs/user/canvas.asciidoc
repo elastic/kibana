@@ -180,12 +180,6 @@ Organize and separate your ideas by adding more pages.
 image::images/canvas-add-pages.gif[Add pages]
 
 [float]
-[[workpad-share-options]]
-== Share your workpad
-
-To share workpads with a larger audience, click *Share* in the toolbar. For detailed information about the sharing options, refer to <<reporting-getting-started,Reporting>>.
-
-[float]
 [[export-single-workpad]]
 == Export workpads
 

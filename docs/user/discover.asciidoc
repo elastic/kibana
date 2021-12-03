@@ -1,5 +1,5 @@
 [[discover]]
-= Discover
+= Explore your data
 
 [partintro]
 --
@@ -15,9 +15,97 @@ You can also customize and save your searches and place them on a dashboard.
 [role="screenshot"]
 image::images/discover.png[A view of the Discover app]
 
+Once you've found a document of interest in *Discover*, you have two more ways to
+view it: in a view by itself or in context with surrounding documents.
 
 [float]
-=== Explore and query your data
+[[discover-view-single-document]]
+=== View a single document
+
+Access a single document so you can bookmark it and share the link.
+
+. In the document table, click the expand icon (>).
+. In the expanded view, click **View single document**.
++
+You can view the document in two ways. The **Table** view displays the document fields row-by-row.
+The **JSON** (JavaScript Object Notation) view allows you to look at how {es} returns the document.
++
+[role="screenshot"]
+image::images/discover-view-single-document.png[Discover single document view]
++
+The link is valid for the time the document is available in Elasticsearch. To create a customized view of the document,
+you can create <<external-plugin-development, your own plugin>>.
+
+[float]
+[[discover-view-surrounding-documents]]
+=== View surrounding documents
+
+To inspect the documents that occurred immediately before and after a document,
+your {data-source} must contain time-based events.
+
+. In the document table, click the expand icon (>).
+. In the expanded view, click **View surrounding documents**.
++
+Documents are displayed using the same set of columns as the *Discover* view from which
+the context was opened. The anchor document is highlighted in blue.
++
+[role="screenshot"]
+image::images/discover-context.png[Image showing context view feature, with anchor documents highlighted in blue]
++
+The filters you applied in *Discover* are carried over to the context view. Pinned
+filters remain active, while normal filters are copied in a disabled state.
++
+[role="screenshot"]
+image::images/discover-context-filters-inactive.png[Filter in context view]
+
+. To find the documents of interest, add filters.
+
+. To increase the number of documents that surround the anchor document, click *Load*.
+By default, five documents are added with each click.
++
+[role="screenshot"]
+image::images/discover-context-load-newer-documents.png[Load button and the number of documents to load, width=50%]
+. To configure the number of documents to display and
+the number of documents to load with each button click, go to *Stack Management > Advanced Settings*
+and edit the <<kibana-discover-settings, context settings>>.
+
+[[discover-search-for-relevance]]
+== Search for relevance
+
+{es} assigns a relevancy, or score to each document, so you can
+can narrow your search to the documents with the most relevant results.
+The higher the score, the better it matches your query.
+
+This example shows how to use *Discover* to list
+your documents from most relevant to least relevant. This example uses
+the <<gs-get-data-into-kibana, sample flights data set>>, or you can use your own data.
+
+.  In *Discover*, open the {data-source} dropdown, and select that data you want to work with.
++
+For the sample flights data, set the {data-source} to *kibana_sample_data_flights*.
+
+.  Run your search.  For the sample data, try:
++
+```ts
+Warsaw OR Venice OR Clear
+```
+. If you don't see any results, expand the <<set-time-filter,time range>>, for example to *Last 7 days*.
+. From the list of *Available fields*, add `_score` and any other fields you want to the document table.
+. To sort the `_score` column in descending order, hover over its header, and set
+the sort icon to
+image:images/downward-arrow.png[Downward pointing arrow to indicate descending sorting].
++
+At this point, you're doing a multi-column sort: first by `Time`, and then by `_score`.
+. To turn off sorting for the `Time` field, hover over its header, and set the sort icon to
+image:images/double-arrow.png[Arrow on both ends of the icon indicates sorting is off].
++
+Your table now sorts documents from most to least relevant.
++
+[role="screenshot"]
+image::images/discover-search-for-relevance.png["Documents are sorted from most relevant to least relevant."]
+
+[float]
+=== Tutorial: Explore and query your data
 
 This tutorial shows you how to use *Discover* to quickly search large amounts of
 data and understand what’s going on at any given time.
@@ -40,7 +128,6 @@ data in *Discover*.
 <<gs-get-data-into-kibana,ecommerce sample data set>>, but you can use your own data.
 - You should have an understanding of {ref}/documents-indices.html[{es} documents and indices]
 and <<kibana-concepts-analysts, {kib} concepts>>.
-
 
 [float]
 [[find-the-data-you-want-to-use]]
@@ -101,103 +188,8 @@ column header, and then use the move control.
 . To view more of the document table, click *Chart options > Hide chart*.
 
 [float]
-[[add-field-in-discover]]
-=== Add a field to your {data-source}
-
-What happens if you forgot to define an important value as a separate field? Or, what if you
-want to combine two fields and treat them as one? This is where {ref}/runtime.html[runtime fields] come into play.
-You can add a runtime field to your {data-source} from inside of **Discover**,
-and then use that field for analysis and visualizations,
-the same way you do with other fields.
-
-. Click the ellipsis icon (...), and then click *Add field to data view*.
-+
-[role="screenshot"]
-image:images/add-field-to-data-view.png[Dropdown menu located next to {data-source} field with item for adding a field to a {data-source}, width=50%]
-
-. In the *Create field* form, enter `hello` for the name.
-
-. Turn on *Set value*.
-
-. Define the script using the Painless scripting language.  Runtime fields require an `emit()`.
-+
-```ts
-emit("Hello World!");
-```
-
-. Click *Save*.
-
-. In the fields list, search for the *hello* field, and then add it to the table to view it's value.
-+
-[role="screenshot"]
-image:images/hello-field.png[hello field in the document table]
-
-. Create a second field named `customer` that combines customer last name and first initial.
-+
-```ts
-String str = doc['customer_first_name.keyword'].value;
-char ch1 = str.charAt(0);
-emit(doc['customer_last_name.keyword'].value + ", " + ch1);
-```
-. Simplify the the document table by removing `customer_first_name` and `customer_last_name` and adding `customer` in their place.
-+
-[role="screenshot"]
-image:images/customer.png[Customer last name, first initial in the document table]
-+
-For more information on adding fields and Painless scripting language examples,
-refer to <<runtime-fields, Explore your data with runtime fields>>.
-
-
-[float]
-[[search-in-discover]]
-=== Search your data
-
-One of the unique capabilities of **Discover** is the ability to combine
-free text search with filtering based on structured data.
-To search all fields, enter a simple string in the query bar.
-
-[role="screenshot"]
-image:images/discover-search-field.png[Search field in Discover]
-
-
-To search particular fields and
-build more complex queries, use the <<kuery-query,Kibana Query language>>.
-As you type, KQL prompts you with the fields you can search and the operators
-you can use to build a structured query.
-
-Search the ecommerce data for documents where the country matches US:
-
-. Enter `g`, and then select *geoip.country_iso_code*.
-. Select *equals some value* and *US*, and then click *Update*.
-. For a more complex search, try:
-+
-`geoip.country_iso_code : US and products.taxless_price >= 75`
-
-[float]
-[[filter-in-discover]]
-=== Filter your data
-
-Whereas the query defines the set of documents you are interested in,
-filters enable you to zero in on different subsets of those documents.
-You can filter results to include or exclude specific fields, filter for a value in a range,
-and more.
-
-Exclude documents where day of week is not Wednesday:
-
-. Click **Add filter**.
-. Set **Field** to *day_of_week*, **Operator** to *is not*, and **Value** to *Wednesday*.
-+
-[role="screenshot"]
-image:images/discover-add-filter.png[Add filter dialog in Discover]
-
-. Save the filter.
-. Continue your exploration by adding more filters.
-. To remove a filter,
-click the close icon (x) next to its name in the filter bar.
-
-[float]
 [[look-inside-a-document]]
-=== Look inside a document
+=== View data fields
 
 Dive into an individual document to view its fields and the documents
 that occurred before and after it.
@@ -217,18 +209,29 @@ hover over its name for filters and other controls.
 +
 You can bookmark this document and share the link.
 
+[[save-open-search]]
+== Save a search for reuse
 
+A saved search is a convenient way to reuse a search
+that you've created in *Discover*.
+Saved searches are good for adding search results to a dashboard,
+and can also serve as a foundation for building visualizations.
+
+A saved search stores the query text, filters, and
+current view of *Discover*&mdash;the columns selected in the document table,
+the sort order, and the {data-source}.
+Saved searches are different from <<save-load-delete-query,saved queries>>, which
+are primarily used for storing query text and are available in any app with a query bar.
+
+[role="xpack"]
+[[discover-read-only-access]]
 [float]
-[[save-your-search]]
-=== Save your search for later use
+=== Read-only access
+If you don't have sufficient privileges to save searches, the following indicator is
+displayed and the *Save* button is not visible. For more information, refer to <<xpack-security-authorization>>.
 
-Save your search so you can repeat it later, generate a CSV report, or use it in visualizations, dashboards, and Canvas workpads.
-Saving a search saves the query text, filters,
-and current view of *Discover*&mdash;the columns selected in the document table, the sort order, and the {data-source}.
-
-. In the toolbar, click **Save**.
-
-. Give your search a title, and then click **Save**.
+[role="screenshot"]
+image::discover/images/read-only-badge.png[Example of Discover's read only access indicator in Kibana's header]
 
 [float]
 === Visualize your findings
@@ -262,7 +265,6 @@ image:images/discover-maps.png[Map containing documents]
 
 To share your findings with a larger audience, click *Share* in the *Discover* toolbar. For detailed information about the sharing options, refer to <<reporting-getting-started,Reporting>>.
 
-
 [float]
 === What’s next?
 
@@ -276,10 +278,6 @@ the table columns that display by default, and more.
 
 --
 
-include::{kib-repo-dir}/discover/view-document.asciidoc[]
-
 include::{kib-repo-dir}/discover/search-for-relevance.asciidoc[]
 
-include::{kib-repo-dir}/discover/save-search.asciidoc[]
-
-include::{kib-repo-dir}/discover/search-sessions.asciidoc[]
+include::{kib-repo-dir}/discover/view-document.asciidoc[]

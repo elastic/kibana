@@ -388,12 +388,6 @@ When you download visualization panels with multiple layers, each layer produces
 .. To view the requests in *Console*, click *Request*, then click *Open in Console*.
 
 [float]
-[[share-the-dashboard]]
-== Share dashboards
-
-To share the dashboard with a larger audience, click *Share* in the toolbar. For detailed information about the sharing options, refer to <<reporting-getting-started,Reporting>>.
-
-[float]
 [[import-dashboards]]
 == Export dashboards
 

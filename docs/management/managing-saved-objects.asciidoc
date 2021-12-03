@@ -1,5 +1,5 @@
 [[managing-saved-objects]]
-== Saved Objects
+== Manage saved objects
 
 The *Saved Objects* UI helps you keep track of and manage your saved objects. These objects
 store data for later use, including dashboards, visualizations, maps, data views,

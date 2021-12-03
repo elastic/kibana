@@ -1,5 +1,5 @@
 [[discover-view-document]]
-== View a document
+== View document fields
 
 Once you've found a document of interest in *Discover*, you have two more ways to
 view it: in a view by itself or in context with surrounding documents.

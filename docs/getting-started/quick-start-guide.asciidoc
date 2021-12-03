@@ -1,7 +1,40 @@
 [[get-started]]
 == Quick start
 
-To quickly get up and running with {kib}, set up on Cloud, then add a sample data set that you can explore and analyze.
+With {kib} <<get-started,*Analytics*>>, you can quickly search through large amounts
+of data, explore fields and values,
+and then use the drag-and-drop interface to rapidly build charts, tables, metrics, and more.
+
+[role="screenshot"]
+image::images/visualization-journey.png[User data analysis journey]
+
+[[get-data-into-kibana]]
+[cols=2*]
+|===
+
+| *1*
+| *Add data.* The best way to add data to the Elastic Stack is to use one of our many <<connect-to-elasticsearch,integrations>>.
+Alternatively, you can add a sample data set or upload a file. All three options are available
+on the home page.
+
+| *2*
+| *Explore.* With <<discover,*Discover*>>, you can search your data for hidden
+insights and relationships. Ask your questions, and then filter the results to just the data you want.
+You can limit your results to the most recent documents added to {es}.
+
+| *3*
+| *Visualize.* {kib} provides many options to create visualizations of your data, from
+aggregation-based data to time series data to geo data.
+<<dashboard, *Dashboard*>> is your starting point to create visualizations,
+and then pulling them together to show your data from multiple perspectives.
+Use <<canvas, *Canvas*>>,
+to give your data
+the “wow” factor for display on a big screen. Use *Graph* to explore patterns and relationships.
+
+| *5*
+| *Share.* Ready to <<reporting-getting-started, share>> your findings with a larger audience? {kib} offers many options&mdash;embed
+a dashboard, share a link, export to PDF, and more.
+|===
 
 When you've finished, you'll know how to:
 
@@ -16,13 +49,13 @@ Learn how to <<tutorial-secure-access-to-kibana, secure access to {kib}>>, or re
 
 [float]
 [[set-up-on-cloud]]
-== Set up on cloud
+=== Set up on cloud
 
 include::{docs-root}/shared/cloud/ess-getting-started.asciidoc[]
 
 [float]
 [[gs-get-data-into-kibana]]
-== Add the sample data
+=== Add the sample data
 
 Sample data sets come with sample visualizations, dashboards, and more to help you explore {kib} before you ingest or add your own data.
 
@@ -32,32 +65,6 @@ Sample data sets come with sample visualizations, dashboards, and more to help y
 +
 [role="screenshot"]
 image::images/addData_sampleDataCards_7.15.0.png[Add data UI for the sample data sets]
-
-[float]
-[[explore-the-data]]
-== Explore the data
-
-*Discover* displays the data in an interactive histogram that shows the distribution of data, or documents, over time, and a table that lists the fields for each document that matches the {data-source}. To view a subset of the documents, you can apply filters to the data, and customize the table to display only the fields you want to explore.
-
-. Open the main menu, then click *Discover*.
-
-. Change the <<set-time-filter, time filter>> to *Last 7 days*.
-+
-[role="screenshot"]
-image::images/tutorial-discover-2.png[Time filter menu with Last 7 days filter configured]
-
-. To view the sales orders for women's clothing that are $60 or more, use the <<kuery-query,*KQL*>> search field:
-+
-[source,text]
-products.taxless_price >= 60 and category : Women's Clothing
-+
-[role="screenshot"]
-image::images/tutorial-discover-4.png[Discover tables that displays only the orders for women's clothing that are $60 or more]
-
-. To view only the product categories that contain sales orders, hover over the *category* field, then click *+*.
-+
-[role="screenshot"]
-image::images/tutorial-discover-3.png[Discover table that displays only the product categories that contain orders]
 
 [float]
 [[view-and-analyze-the-data]]
@@ -101,38 +108,30 @@ image::getting-started/images/tutorial-visualization-treemap.png[Treemap that di
 The treemap appears as the last visualization panel on the dashboard.
 
 [float]
-[[interact-with-the-data]]
-=== Interact with the data
+[[explore-the-data]]
+=== Explore the data
 
-You can interact with the dashboard data using controls that allow you to apply dashboard-level filters. Interact with the *[eCommerce] Controls* panel to view the women's clothing data from the Gnomehouse manufacturer.
+*Discover* displays the data in an interactive histogram that shows the distribution of data, or documents, over time, and a table that lists the fields for each document that matches the {data-source}. To view a subset of the documents, you can apply filters to the data, and customize the table to display only the fields you want to explore.
 
-. From the *Manufacturer* dropdown, select *Gnomehouse*.
+. Open the main menu, then click *Discover*.
 
-. From the *Category* dropdown, select *Women's Clothing*.
-
-. Click *Apply changes*.
+. Change the <<set-time-filter, time filter>> to *Last 7 days*.
 +
 [role="screenshot"]
-image::images/dashboard_sampleDataFilter_7.15.0.png[The [eCommerce] Revenue Dashboard that shows only the women's clothing data from the Gnomehouse manufacturer]
+image::images/tutorial-discover-2.png[Time filter menu with Last 7 days filter configured]
 
-[float]
-[[filter-and-query-the-data]]
-=== Filter the data
-
-To view a subset of the data, you can apply filters to the dashboard panels. Apply a filter to view the women's clothing data generated on Wednesday from the Gnomehouse manufacturer.
-
-. Click *Add filter*.
-
-. From the *Field* dropdown, select *day_of_week*.
-
-. From the *Operator* dropdown, select *is*.
-
-. From the *Value* dropdown, select *Wednesday*.
-
-. Click *Save*.
+. To view the sales orders for women's clothing that are $60 or more, use the <<kuery-query,*KQL*>> search field:
++
+[source,text]
+products.taxless_price >= 60 and category : Women's Clothing
 +
 [role="screenshot"]
-image::images/dashboard_sampleDataAddFilter_7.15.0.png[The [eCommerce] Revenue Dashboard that shows only the women's clothing data generated on Wednesday from the Gnomehouse manufacturer]
+image::images/tutorial-discover-4.png[Discover tables that displays only the orders for women's clothing that are $60 or more]
+
+. To view only the product categories that contain sales orders, hover over the *category* field, then click *+*.
++
+[role="screenshot"]
+image::images/tutorial-discover-3.png[Discover table that displays only the product categories that contain orders]
 
 [float]
 [[quick-start-whats-next]]
