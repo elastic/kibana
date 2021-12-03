@@ -8,10 +8,6 @@
 
 import React, { PureComponent, Fragment } from 'react';
 import classNames from 'classnames';
-import 'react-ace';
-import 'brace/theme/textmate';
-import 'brace/mode/markdown';
-import 'brace/mode/json';
 
 import {
   EuiBadge,
@@ -130,7 +126,7 @@ export class Field extends PureComponent<FieldProps> {
     switch (type) {
       case 'json':
         const isJsonArray = Array.isArray(JSON.parse((defVal as string) || '{}'));
-        newUnsavedValue = value.trim() || (isJsonArray ? '[]' : '{}');
+        newUnsavedValue = value || (isJsonArray ? '[]' : '{}');
         try {
           JSON.parse(newUnsavedValue);
         } catch (e) {

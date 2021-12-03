@@ -21,9 +21,6 @@ jest.mock('../../../../../kibana_react/public/ui_settings/use_ui_setting', () =>
   useUiSetting: jest.fn(),
 }));
 
-jest.mock('brace/theme/textmate', () => 'brace/theme/textmate');
-jest.mock('brace/mode/markdown', () => 'brace/mode/markdown');
-
 const defaults = {
   requiresPageReload: false,
   readOnly: false,

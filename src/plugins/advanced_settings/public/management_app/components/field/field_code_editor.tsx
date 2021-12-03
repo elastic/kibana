@@ -15,7 +15,7 @@ interface FieldCodeEditorProps {
   onChange: (value: string) => void;
   type: 'markdown' | 'json';
   isReadOnly: boolean;
-  a11yProps: { [key: string]: string };
+  a11yProps: Record<string, string>;
   name: string;
 }
 
@@ -55,6 +55,16 @@ export const FieldCodeEditor = ({
     [name]
   );
 
+  const trimEditorBlankLines = useCallback((editor: monaco.editor.IStandaloneCodeEditor) => {
+    const editorModel = editor.getModel();
+
+    if (!editorModel) {
+      return;
+    }
+    const trimmedValue = editorModel.getValue().trim();
+    editorModel.setValue(trimmedValue);
+  }, []);
+
   const editorDidMount = useCallback(
     (editor) => {
       setEditorCalculatedHeight(editor);
@@ -62,8 +72,12 @@ export const FieldCodeEditor = ({
       editor.onDidChangeModelContent(() => {
         setEditorCalculatedHeight(editor);
       });
+
+      editor.onDidBlurEditorWidget(() => {
+        trimEditorBlankLines(editor);
+      });
     },
-    [setEditorCalculatedHeight]
+    [setEditorCalculatedHeight, trimEditorBlankLines]
   );
 
   return (
@@ -73,7 +87,7 @@ export const FieldCodeEditor = ({
       value={value}
       onChange={onChange}
       editorDidMount={editorDidMount}
-      width="99%"
+      width="100%"
       options={{
         readOnly: isReadOnly,
         lineNumbers: 'off',
