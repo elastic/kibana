@@ -20,7 +20,7 @@ import {
   SavedObjectsErrorHelpers,
   ExecutionContextStart,
 } from '../../../../../src/core/server';
-
+import { UsageCounter } from '../../../../../src/plugins/usage_collection/server';
 import { Middleware } from '../lib/middleware';
 import {
   asOk,
@@ -104,6 +104,7 @@ type Opts = {
   onTaskEvent?: (event: TaskRun | TaskMarkRunning) => void;
   defaultMaxAttempts: number;
   executionContext: ExecutionContextStart;
+  usageCounter?: UsageCounter;
 } & Pick<Middleware, 'beforeRun' | 'beforeMarkRunning'>;
 
 export enum TaskRunResult {
