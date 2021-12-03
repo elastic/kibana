@@ -30,8 +30,8 @@ export function setupSavedObjects(core: CoreSetup, filterMigrations: MigrateFunc
       }),
     },
     migrations: mergeMigrationFunctionMaps(
-      migrations as unknown as MigrateFunctionsObject,
-      filterMigrations
+      filterMigrations,
+      migrations as unknown as MigrateFunctionsObject
     ),
     mappings: {
       properties: {
