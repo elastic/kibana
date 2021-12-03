@@ -54,17 +54,29 @@ jest.mock('../kibana_server_services', () => {
     },
   };
   return {
-    getIndexPatternsService() {
+    getSavedObjectClient: () => {
+      return {};
+    },
+    getElasticsearch: () => {
       return {
-        async get(x) {
-          return x === testAggIndexPatternId ? testAggIndexPattern : testIndexPatterns[x];
+        client: {
+          asInternalUser: {},
         },
-        async getIds() {
-          return Object.values(testIndexPatterns).map((x) => x.id);
-        },
-        async getFieldsForIndexPattern(x) {
-          return x.fields;
-        },
+      };
+    },
+    getIndexPatternsServiceFactory() {
+      return function () {
+        return {
+          async get(x) {
+            return x === testAggIndexPatternId ? testAggIndexPattern : testIndexPatterns[x];
+          },
+          async getIds() {
+            return Object.values(testIndexPatterns).map((x) => x.id);
+          },
+          async getFieldsForIndexPattern(x) {
+            return x.fields;
+          },
+        };
       };
     },
   };
