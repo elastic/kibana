@@ -10,7 +10,7 @@ import { byTestId } from './uptime.journey';
 
 export async function waitForLoadingToFinish({ page }: { page: Page }) {
   while (true) {
-    if ((await page.$(byTestId('kbnLoadingMessage'))) !== null) break;
+    if ((await page.$(byTestId('kbnLoadingMessage'))) === null) break;
     await page.waitForTimeout(5 * 1000);
   }
 }

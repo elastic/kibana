@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { journey, step } from '@elastic/synthetics';
-import { beforeEach } from 'jest-circus';
+import { journey, step, before } from '@elastic/synthetics';
 import { waitForLoadingToFinish } from './utils';
 
 export const byTestId = (testId: string) => {
@@ -14,7 +13,7 @@ export const byTestId = (testId: string) => {
 };
 
 journey('uptime', ({ page, params }) => {
-  beforeEach(async () => {
+  before(async () => {
     await waitForLoadingToFinish({ page });
   });
 

@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import { journey, step, expect } from '@elastic/synthetics';
-import { beforeEach } from 'jest-circus';
+import { journey, step, expect, before } from '@elastic/synthetics';
 import { loginToKibana, waitForLoadingToFinish } from './utils';
 
 journey('StepsDuration', async ({ page, params }) => {
-  beforeEach(async () => {
+  before(async () => {
     await waitForLoadingToFinish({ page });
   });
 

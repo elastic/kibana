@@ -29,10 +29,12 @@ export function playwrightRunTests({ headless, match }: { headless: boolean; mat
 }
 
 async function playwrightStart(getService: any, headless = true, match?: string) {
+  console.log('headless is', headless);
   console.log('Loading esArchiver...');
   const esArchiver = getService('esArchiver');
-  await esArchiverLoad('full_heartbeat');
-  await esArchiverLoad('browser');
+
+  esArchiverLoad('full_heartbeat');
+  esArchiverLoad('browser');
 
   const config = getService('config');
 
@@ -51,8 +53,8 @@ async function playwrightStart(getService: any, headless = true, match?: string)
   });
 
   console.log('Removing esArchiver...');
-  await esArchiverUnload('full_heartbeat');
-  await esArchiverUnload('browser');
+  esArchiverUnload('full_heartbeat');
+  esArchiverUnload('browser');
 
   return res;
 }
