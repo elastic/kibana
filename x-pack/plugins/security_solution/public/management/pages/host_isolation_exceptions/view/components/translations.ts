@@ -127,3 +127,10 @@ export const getCreationSuccessMessage = (name: string) => {
     }
   );
 };
+
+export const getLoadPoliciesError = (error: ServerApiError) => {
+  return i18n.translate('xpack.securitySolution.hostIsolationExceptions.failedLoadPolicies', {
+    defaultMessage: 'There was an error loading policies: "{error}"',
+    values: { error: error.message },
+  });
+};
