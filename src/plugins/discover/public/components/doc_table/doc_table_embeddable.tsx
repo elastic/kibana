@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { memo, useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { memo, useCallback, useMemo, useRef } from 'react';
 import './index.scss';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
@@ -27,6 +27,7 @@ export const DocTableEmbeddable = (props: DocTableEmbeddableProps) => {
   const tableWrapperRef = useRef<HTMLDivElement>(null);
   const { currentPage, pageSize, totalPages, startIndex, hasNextPage, changePage, changePageSize } =
     usePager({
+      initialPageSize: 50,
       totalItems: props.rows.length,
     });
   const showPagination = totalPages !== 0;
@@ -57,15 +58,6 @@ export const DocTableEmbeddable = (props: DocTableEmbeddableProps) => {
     },
     [changePageSize, scrollTop]
   );
-
-  /**
-   * Go to the first page if the current is no longer available
-   */
-  useEffect(() => {
-    if (totalPages < currentPage + 1) {
-      onPageChange(0);
-    }
-  }, [currentPage, totalPages, onPageChange]);
 
   const shouldShowLimitedResultsWarning = useMemo(
     () => !hasNextPage && props.rows.length < props.totalHitCount,

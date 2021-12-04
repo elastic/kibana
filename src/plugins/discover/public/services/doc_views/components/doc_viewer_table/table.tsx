@@ -54,8 +54,7 @@ interface ItemsEntry {
 const MOBILE_OPTIONS = { show: false };
 const PINNED_FIELDS_KEY = 'discover:pinnedFields';
 
-// eslint-disable-next-line import/no-default-export
-export default ({
+export const DocViewerTable = ({
   columns,
   hit,
   indexPattern,
@@ -196,6 +195,7 @@ export default ({
     );
 
   const { currentPage, pageSize, totalPages, startIndex, changePage, changePageSize } = usePager({
+    initialPageSize: 25,
     totalItems: restItems.length,
   });
   const showPagination = totalPages !== 0;

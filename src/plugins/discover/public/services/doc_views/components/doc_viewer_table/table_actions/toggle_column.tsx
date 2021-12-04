@@ -24,7 +24,7 @@ export const ToggleColumn = ({ onClick, active, disabled = false, fieldname = ''
       size="s"
       showToolTip={false}
       iconType="listAdd"
-      data-test-subj={`toggleColumnButton_${fieldname}`}
+      data-test-subj={`toggleColumnButton-${fieldname}`}
       aria-label={i18n.translate('discover.docViews.table.toggleColumnInTableButtonAriaLabel', {
         defaultMessage: 'Toggle column in table',
       })}

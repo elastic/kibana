@@ -48,11 +48,19 @@ export const TableActions = ({
   const openPopover = useCallback(() => setIsOpen(true), [setIsOpen]);
   const closePopover = useCallback(() => setIsOpen(false), [setIsOpen]);
   const togglePinned = useCallback(() => onTogglePinned(field), [field, onTogglePinned]);
+  const onClickAction = useCallback(
+    (callback: () => void) => () => {
+      callback();
+      closePopover();
+    },
+    [closePopover]
+  );
 
   return (
     <EuiPopover
       button={
         <EuiButtonIcon
+          data-test-subj={`openFieldActionsButton-${field}`}
           aria-label={pinFieldLabel}
           onClick={openPopover}
           iconType="boxesHorizontal"
@@ -67,23 +75,27 @@ export const TableActions = ({
       <EuiListGroup maxWidth={200} flush={true} size="s">
         <FilterAdd
           disabled={!fieldMapping || !fieldMapping.filterable || ignoredValue}
-          onClick={() => onFilter(fieldMapping, flattenedField, '+')}
+          onClick={onClickAction(onFilter.bind({}, fieldMapping, flattenedField, '+'))}
         />
 
         <FilterRemove
           disabled={!fieldMapping || !fieldMapping.filterable || ignoredValue}
-          onClick={() => onFilter(fieldMapping, flattenedField, '-')}
+          onClick={onClickAction(onFilter.bind({}, fieldMapping, flattenedField, '-'))}
         />
 
-        <ToggleColumn active={isActive} fieldname={field} onClick={() => onToggleColumn(field)} />
+        <ToggleColumn
+          active={isActive}
+          fieldname={field}
+          onClick={onClickAction(onToggleColumn.bind({}, field))}
+        />
 
         <FilterExists
           scripted={fieldMapping && fieldMapping.scripted}
           disabled={!fieldMapping || !fieldMapping.filterable}
-          onClick={() => onFilter(fieldMapping, flattenedField, '-')}
+          onClick={onClickAction(onFilter.bind({}, fieldMapping, flattenedField, '-'))}
         />
 
-        <PinField pinned={pinned} onClick={togglePinned} />
+        <PinField pinned={pinned} onClick={onClickAction(togglePinned)} />
       </EuiListGroup>
     </EuiPopover>
   );

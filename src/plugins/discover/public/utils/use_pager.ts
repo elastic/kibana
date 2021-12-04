@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 interface MetaParams {
   totalPages: number;
@@ -14,10 +14,14 @@ interface MetaParams {
   hasNextPage: boolean;
 }
 
-const INITIAL_PAGE_SIZE = 50;
-
-export const usePager = ({ totalItems }: { totalItems: number }) => {
-  const [pageSize, setPageSize] = useState(INITIAL_PAGE_SIZE);
+export const usePager = ({
+  initialPageSize,
+  totalItems,
+}: {
+  totalItems: number;
+  initialPageSize: number;
+}) => {
+  const [pageSize, setPageSize] = useState(initialPageSize);
   const [currentPage, setCurrentPage] = useState(0);
 
   const meta: MetaParams = useMemo(() => {
@@ -32,6 +36,15 @@ export const usePager = ({ totalItems }: { totalItems: number }) => {
   const changePage = useCallback((pageIndex: number) => setCurrentPage(pageIndex), []);
 
   const changePageSize = useCallback((newPageSize: number) => setPageSize(newPageSize), []);
+
+  /**
+   * Go to the first page if the current is no longer available
+   */
+  useEffect(() => {
+    if (meta.totalPages < currentPage + 1) {
+      changePage(0);
+    }
+  }, [currentPage, meta.totalPages, changePage]);
 
   return useMemo(
     () => ({
