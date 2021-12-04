@@ -131,10 +131,12 @@ export const deleteRoleAndUser = (role: ROLES) => {
 };
 
 export const loginWithUser = (user: User) => {
+  const url = Cypress.config().baseUrl;
+
   cy.request({
     body: {
       providerType: 'basic',
-      providerName: 'cloud-basic',
+      providerName: url && !url.includes('localhost') ? 'cloud-basic' : 'basic',
       currentURL: '/',
       params: {
         username: user.username,
@@ -206,6 +208,8 @@ const credentialsProvidedByEnvironment = (): boolean =>
  * Kibana's `/internal/security/login` endpoint, bypassing the login page (for speed).
  */
 const loginViaEnvironmentCredentials = () => {
+  const url = Cypress.config().baseUrl;
+
   cy.log(
     `Authenticating via environment credentials from the \`CYPRESS_${ELASTICSEARCH_USERNAME}\` and \`CYPRESS_${ELASTICSEARCH_PASSWORD}\` environment variables`
   );
@@ -214,7 +218,7 @@ const loginViaEnvironmentCredentials = () => {
   cy.request({
     body: {
       providerType: 'basic',
-      providerName: 'cloud-basic',
+      providerName: url && !url.includes('localhost') ? 'cloud-basic' : 'basic',
       currentURL: '/',
       params: {
         username: Cypress.env(ELASTICSEARCH_USERNAME),
