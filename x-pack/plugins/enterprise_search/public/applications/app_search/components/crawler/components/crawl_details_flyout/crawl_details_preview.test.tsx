@@ -36,8 +36,8 @@ const MOCK_VALUES: Partial<CrawlDetailValues> = {
         pagesVisited: 10,
         crawlDurationMSec: 36000,
         avgResponseTimeMSec: 100,
-      }
-    }
+      },
+    },
   },
 };
 

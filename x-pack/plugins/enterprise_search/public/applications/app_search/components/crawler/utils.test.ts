@@ -358,6 +358,7 @@ describe('crawlerDataServerToClient', () => {
           domainAllowlist: ['https://www.elastic.co'],
           seedUrls: [],
           sitemapUrls: [],
+          maxCrawlDepth: 10,
         },
       },
     ]);
