@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, ReactNode } from 'react';
 import {
   Filter,
   FieldFilter,
@@ -83,12 +83,14 @@ export function AddFilterModal({
   filter,
   indexPatterns,
   timeRangeForSuggestionsOverride,
+  savedQueryManagement,
 }: {
   onSubmit: (filter: Filter) => void;
   onCancel: () => void;
   filter: Filter;
   indexPatterns: IIndexPattern[];
   timeRangeForSuggestionsOverride?: boolean;
+  savedQueryManagement?: ReactNode;
 }) {
   const [selectedIndexPattern, setSelectedIndexPattern] = useState(
     getIndexPatternFromFilter(filter, indexPatterns)
@@ -367,6 +369,7 @@ export function AddFilterModal({
             </EuiPanel>
           )}
           {addFilterMode === 'query_builder' && renderCustomEditor()}
+          {addFilterMode === 'saved_filters' && savedQueryManagement}
         </EuiForm>
       </EuiModalBody>
       <EuiHorizontalRule margin="none" />

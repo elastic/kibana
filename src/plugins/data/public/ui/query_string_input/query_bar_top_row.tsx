@@ -67,6 +67,7 @@ export interface QueryBarTopRowProps {
   nonKqlMode?: 'lucene' | 'text';
   nonKqlModeHelpText?: string;
   timeRangeForSuggestionsOverride?: boolean;
+  savedQueryManagement?: any;
 }
 
 // Needed for React.lazy
@@ -243,6 +244,7 @@ export default function QueryBarTopRow(props: QueryBarTopRowProps) {
             indexPatterns={props.indexPatterns!}
             onSubmit={onAdd}
             timeRangeForSuggestionsOverride={props.timeRangeForSuggestionsOverride}
+            savedQueryManagement={props.savedQueryManagement}
           />
         )}
         {/* <EuiPopover

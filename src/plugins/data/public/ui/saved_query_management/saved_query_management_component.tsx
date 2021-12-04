@@ -47,7 +47,7 @@ export function SavedQueryManagementComponent({
   onClearSavedQuery,
   savedQueryService,
 }: Props) {
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(true);
   const [savedQueries, setSavedQueries] = useState([] as SavedQuery[]);
   const [count, setTotalCount] = useState(0);
   const [activePage, setActivePage] = useState(0);
@@ -172,7 +172,8 @@ export function SavedQueryManagementComponent({
       loadedSavedQuery && savedQueriesWithoutCurrent.length !== savedQueries.length
         ? [loadedSavedQuery, ...savedQueriesWithoutCurrent]
         : [...savedQueriesWithoutCurrent];
-    return savedQueriesReordered.map((savedQuery) => (
+    // DON'T SORT
+    return savedQueries.map((savedQuery) => (
       <SavedQueryListItem
         key={savedQuery.id}
         savedQuery={savedQuery}
@@ -184,6 +185,22 @@ export function SavedQueryManagementComponent({
     ));
   };
 
+  // NEW RETURN : Just the list
+  return (
+    <>
+      <EuiListGroup
+        maxWidth="none"
+        bordered
+        size="s"
+        className="kbnSavedQueryManagement__list"
+        aria-labelledby={'savedQueryManagementPopoverTitle'}
+      >
+        {savedQueryRows()}
+      </EuiListGroup>
+    </>
+  )
+
+  // OLD RETURN
   return (
     <Fragment>
       <EuiPopover

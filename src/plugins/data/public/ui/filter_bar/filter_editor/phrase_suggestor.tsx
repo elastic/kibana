@@ -15,7 +15,7 @@ import { UI_SETTINGS } from '../../../../common';
 
 export interface PhraseSuggestorProps {
   kibana: KibanaReactContextValue<IDataPluginServices>;
-  indexPattern: IIndexPattern;
+  indexPattern?: IIndexPattern;
   field?: IFieldType;
   timeRangeForSuggestionsOverride?: boolean;
 }
