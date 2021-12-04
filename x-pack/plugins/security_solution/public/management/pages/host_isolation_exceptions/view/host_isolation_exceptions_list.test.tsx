@@ -16,10 +16,12 @@ import { sendGetEndpointSpecificPackagePolicies } from '../../../services/polici
 import { sendGetEndpointSpecificPackagePoliciesMock } from '../../../services/policies/test_mock_utilts';
 import { getHostIsolationExceptionItems } from '../service';
 import { HostIsolationExceptionsList } from './host_isolation_exceptions_list';
+import { useUserPrivileges as _useUserPrivileges } from '../../../../common/components/user_privileges';
+import { EndpointPrivileges } from '../../../../../common/endpoint/types';
 
 jest.mock('../service');
 jest.mock('../../../../common/hooks/use_license');
-jest.mock('../../../../common/components/user_privileges/endpoint/use_endpoint_privileges');
+jest.mock('../../../../common/components/user_privileges');
 jest.mock('../../../services/policies/policies');
 
 const getHostIsolationExceptionItemsMock = getHostIsolationExceptionItems as jest.Mock;
@@ -33,7 +35,20 @@ describe('When on the host isolation exceptions page', () => {
   let history: AppContextTestRender['history'];
   let mockedContext: AppContextTestRender;
 
-  const useEndpointPrivilegesMock = useEndpointPrivileges as jest.Mock;
+  const useUserPrivilegesMock = _useUserPrivileges as jest.Mock;
+
+  const setEndpointPrivileges = (overrides: Partial<EndpointPrivileges> = {}) => {
+    const newPrivileges = _useUserPrivileges();
+
+    useUserPrivilegesMock.mockReturnValue({
+      ...newPrivileges,
+      endpointPrivileges: {
+        ...newPrivileges.endpointPrivileges,
+        ...overrides,
+      },
+    });
+  };
+
   const waitForApiCall = () => {
     return waitFor(() => {
       expect(getHostIsolationExceptionItemsMock).toHaveBeenCalled();
@@ -170,7 +185,7 @@ describe('When on the host isolation exceptions page', () => {
 
     describe('has canIsolateHost privileges', () => {
       beforeEach(async () => {
-        useEndpointPrivilegesMock.mockReturnValue({ canIsolateHost: true });
+        setEndpointPrivileges({ canIsolateHost: true });
         getHostIsolationExceptionItemsMock.mockImplementation(getFoundExceptionListItemSchemaMock);
       });
 
@@ -199,7 +214,7 @@ describe('When on the host isolation exceptions page', () => {
 
     describe('does not have canIsolateHost privileges', () => {
       beforeEach(() => {
-        useEndpointPrivilegesMock.mockReturnValue({ canIsolateHost: false });
+        setEndpointPrivileges({ canIsolateHost: false });
       });
 
       it('should not show the create flyout if the user navigates to the create url', () => {

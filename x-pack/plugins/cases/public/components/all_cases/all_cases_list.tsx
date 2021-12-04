@@ -53,7 +53,6 @@ const getSortField = (field: string): SortFieldCase =>
 
 export interface AllCasesListProps {
   alertData?: Omit<CommentRequestAlertType, 'type'>;
-  disableAlerts?: boolean;
   hiddenStatuses?: CaseStatusWithAllStatus[];
   isSelectorView?: boolean;
   onRowClick?: (theCase?: Case | SubCase) => void;
@@ -64,7 +63,6 @@ export interface AllCasesListProps {
 export const AllCasesList = React.memo<AllCasesListProps>(
   ({
     alertData,
-    disableAlerts,
     hiddenStatuses = [],
     isSelectorView = false,
     onRowClick,
@@ -168,7 +166,6 @@ export const AllCasesList = React.memo<AllCasesListProps>(
     const showActions = userCanCrud && !isSelectorView;
 
     const columns = useCasesColumns({
-      disableAlerts,
       dispatchUpdateCaseProperty,
       filterStatus: filterOptions.status,
       handleIsLoading,
