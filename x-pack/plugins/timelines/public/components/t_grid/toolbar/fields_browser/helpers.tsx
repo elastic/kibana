@@ -15,7 +15,7 @@ import {
   stopPropagationAndPreventDefault,
 } from '../../../../../public';
 import { TimelineId } from '../../../../../public/types';
-import type { BrowserField, BrowserFields } from '../../../../../common';
+import type { BrowserField, BrowserFields } from '../../../../../common/search_strategy';
 import { defaultHeaders } from '../../../../store/t_grid/defaults';
 import { DEFAULT_CATEGORY_NAME } from '../../body/column_headers/default_headers';
 

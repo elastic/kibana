@@ -11,7 +11,8 @@ import { DraggableId } from 'react-beautiful-dnd';
 import { useDispatch } from 'react-redux';
 
 import { isEmpty } from 'lodash';
-import { DataProvider, stopPropagationAndPreventDefault, TimelineId } from '../../../../common';
+import { stopPropagationAndPreventDefault } from '../../../../common/utils/accessibility';
+import { DataProvider, TimelineId } from '../../../../common/types';
 import { TooltipWithKeyboardShortcut } from '../../tooltip_with_keyboard_shortcut';
 import { getAdditionalScreenReaderOnlyContext } from '../utils';
 import { useAddToTimeline } from '../../../hooks/use_add_to_timeline';

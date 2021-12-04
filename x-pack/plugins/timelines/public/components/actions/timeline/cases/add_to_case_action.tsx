@@ -8,7 +8,7 @@
 import React, { memo, useMemo, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 import { CaseStatuses, StatusAll, CasesContextValue } from '../../../../../../cases/common';
-import { TimelineItem } from '../../../../../common/';
+import { TimelineItem } from '../../../../../common/search_strategy';
 import { useAddToCase, normalizedEventFields } from '../../../../hooks/use_add_to_case';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import { TimelinesStartServices } from '../../../../types';
