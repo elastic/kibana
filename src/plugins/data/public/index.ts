@@ -187,6 +187,7 @@ export type {
   ISearchSource,
   SearchRequest,
   SearchSourceFields,
+  SerializedSearchSourceFields,
   // errors
   IEsError,
   Reason,

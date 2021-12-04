@@ -5,8 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { IAggConfigs } from 'src/plugins/data/public';
+import { AggConfigSerialized, IAggConfigs } from 'src/plugins/data/public';
+import { SerializableRecord } from '@kbn/utility-types';
 import { Query } from '../..';
 import { Filter } from '../../es_query';
 import { IndexPattern } from '../..';
@@ -27,7 +29,7 @@ export interface ISearchStartSearchSource {
    * creates {@link SearchSource} based on provided serialized {@link SearchSourceFields}
    * @param fields
    */
-  create: (fields?: SearchSourceFields) => Promise<ISearchSource>;
+  create: (fields?: SerializedSearchSourceFields) => Promise<ISearchSource>;
   /**
    * creates empty {@link SearchSource}
    */
@@ -110,6 +112,53 @@ export interface SearchSourceFields {
   terminate_after?: number;
 
   parent?: SearchSourceFields;
+}
+
+export interface SerializedSearchSourceFields {
+  type?: string;
+  /**
+   * {@link Query}
+   */
+  query?: Query;
+  /**
+   * {@link Filter}
+   */
+  filter?: Filter[];
+  /**
+   * {@link EsQuerySortValue}
+   */
+  sort?: EsQuerySortValue[];
+  highlight?: SerializableRecord;
+  highlightAll?: boolean;
+  trackTotalHits?: boolean | number;
+  // todo: needs aggconfigs serializable type
+  /**
+   * {@link AggConfigs}
+   */
+  aggs?: AggConfigSerialized[];
+  from?: number;
+  size?: number;
+  source?: boolean | estypes.Fields;
+  version?: boolean;
+  /**
+   * Retrieve fields via the search Fields API
+   */
+  fields?: SearchFieldValue[];
+  /**
+   * Retreive fields directly from _source (legacy behavior)
+   *
+   * @deprecated It is recommended to use `fields` wherever possible.
+   */
+  fieldsFromSource?: estypes.Fields;
+  /**
+   * {@link IndexPatternService}
+   */
+  index?: string;
+  searchAfter?: EsQuerySearchAfter;
+  timeout?: string;
+  terminate_after?: number;
+
+  parent?: SerializedSearchSourceFields;
 }
 
 export interface SearchSourceOptions {

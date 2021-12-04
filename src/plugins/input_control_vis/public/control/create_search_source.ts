@@ -8,7 +8,7 @@
 
 import { Filter } from '@kbn/es-query';
 import {
-  SearchSourceFields,
+  SerializedSearchSourceFields,
   IndexPattern,
   TimefilterContract,
   DataPublicPluginStart,
@@ -16,7 +16,7 @@ import {
 
 export async function createSearchSource(
   { create }: DataPublicPluginStart['search']['searchSource'],
-  initialState: SearchSourceFields | null,
+  initialState: SerializedSearchSourceFields | null,
   indexPattern: IndexPattern,
   aggs: any,
   useTimeFilter: boolean,
