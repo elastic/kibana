@@ -15,15 +15,16 @@ export type Formatter =
   | null
   | ((fields: Partial<MonitorFields>) => string | string[] | Record<string, string> | null);
 
-export type CommonFormatMap = Record<keyof CommonFields | ConfigKey.NAME, Formatter>;
+export type CommonFormatMap = Record<keyof CommonFields, Formatter>;
 
 export const commonFormatters: CommonFormatMap = {
   [ConfigKey.NAME]: null,
+  [ConfigKey.LOCATIONS]: null,
   [ConfigKey.MONITOR_TYPE]: null,
   [ConfigKey.SCHEDULE]: (fields) =>
     `@every ${fields[ConfigKey.SCHEDULE]?.number}${fields[ConfigKey.SCHEDULE]?.unit}`,
   [ConfigKey.APM_SERVICE_NAME]: null,
-  [ConfigKey.TAGS]: null,
+  [ConfigKey.TAGS]: (fields) => arrayFormatter(fields[ConfigKey.TAGS]),
   [ConfigKey.TIMEOUT]: (fields) => secondsToCronFormatter(fields[ConfigKey.TIMEOUT]),
 };
 

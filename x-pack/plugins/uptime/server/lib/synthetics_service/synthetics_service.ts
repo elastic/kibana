@@ -28,8 +28,9 @@ import { SyntheticsMonitorSavedObject } from '../../../common/types';
 import { syntheticsMonitorType } from '../saved_objects/synthetics_monitor';
 import { getEsHosts } from './get_es_hosts';
 import { UptimeConfig } from '../../../common/config';
-import { MonitorConfigs, ServiceAPIClient } from './service_api_client';
-import { formatUIConfigtoDataStreamConfig } from './formatters';
+import { ServiceAPIClient } from './service_api_client';
+import { formatMonitorConfig } from './formatters/format_configs';
+import { ConfigKey, MonitorFields } from '../../../common/runtime_types/monitor_management';
 
 const SYNTHETICS_SERVICE_SYNC_MONITORS_TASK_TYPE =
   'UPTIME:SyntheticsService:Sync-Saved-Monitor-Objects';
@@ -166,7 +167,7 @@ export class SyntheticsService {
     };
   }
 
-  async pushConfigs(request?: KibanaRequest, configs?: MonitorConfigs) {
+  async pushConfigs(request?: KibanaRequest, configs?: MonitorFields[]) {
     const monitors = this.formatConfigs(configs || (await this.getMonitorConfigs()));
     const data = {
       monitors,
@@ -181,7 +182,7 @@ export class SyntheticsService {
     }
   }
 
-  async deleteConfigs(request: KibanaRequest, configs: MonitorConfigs) {
+  async deleteConfigs(request: KibanaRequest, configs: MonitorFields[]) {
     const data = {
       monitors: configs,
       output: await this.getOutput(request),
@@ -198,14 +199,16 @@ export class SyntheticsService {
     });
 
     const savedObjectsList = monitorsSavedObjects.saved_objects;
-    return savedObjectsList.map<ValuesType<MonitorConfigs>>(({ attributes, id }) => ({
+    return savedObjectsList.map<ValuesType<MonitorFields[]>>(({ attributes, id }) => ({
       ...attributes,
       id,
     }));
   }
 
-  formatConfigs(configs: MonitorConfigs) {
-    return configs.map((monAttrs) => formatUIConfigtoDataStreamConfig(monAttrs));
+  formatConfigs(configs: MonitorFields[]) {
+    return configs.map((config: Partial<MonitorFields>) =>
+      formatMonitorConfig(Object.keys(config) as ConfigKey[], config)
+    );
   }
 }
 

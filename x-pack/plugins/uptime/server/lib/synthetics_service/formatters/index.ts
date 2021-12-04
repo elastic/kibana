@@ -10,7 +10,7 @@ import { tcpFormatters, TCPFormatMap } from './tcp';
 import { icmpFormatters, ICMPFormatMap } from './icmp';
 import { browserFormatters, BrowserFormatMap } from './browser';
 import { commonFormatters, CommonFormatMap } from './common';
-import { DataStream, MonitorFields } from '../../../../common/runtime_types/monitor_management';
+import { DataStream } from '../../../../common/runtime_types/monitor_management';
 
 type Formatters = HTTPFormatMap & TCPFormatMap & ICMPFormatMap & BrowserFormatMap & CommonFormatMap;
 
@@ -34,46 +34,4 @@ export const formatters: Formatters = {
   ...tcpFormatters,
   ...browserFormatters,
   ...commonFormatters,
-};
-
-export const formatUIConfigtoDataStreamConfig = (monAttrs: MonitorFields) => {
-  // TODO: Move to dedicated formatter class
-  function parseSchedule(schedule: any) {
-    if (schedule?.number) {
-      return `@every ${schedule.number}${schedule.unit}`;
-    }
-    return schedule;
-  }
-
-  function parseUrl(urls?: string | string[]) {
-    if (!urls) {
-      return undefined;
-    }
-    if (urls instanceof Array) {
-      return urls;
-    }
-    return [urls];
-  }
-
-  function parseInlineSource(monAttrs: any) {
-    if (monAttrs['source.inline.script']) {
-      return {
-        inline: {
-          script: monAttrs['source.inline.script'],
-        },
-      };
-    }
-  }
-
-  const { id, schedule, type, name, locations, tags, urls } = monAttrs;
-  return {
-    id,
-    type,
-    name,
-    locations,
-    tags,
-    source: parseInlineSource(monAttrs),
-    urls: parseUrl(urls),
-    schedule: parseSchedule(schedule),
-  };
 };
