@@ -194,10 +194,11 @@ export const DocViewerTable = ({
       }
     );
 
-  const { currentPage, pageSize, totalPages, startIndex, changePage, changePageSize } = usePager({
-    initialPageSize: 25,
-    totalItems: restItems.length,
-  });
+  const { curPageIndex, pageSize, totalPages, startIndex, changePageIndex, changePageSize } =
+    usePager({
+      initialPageSize: 25,
+      totalItems: restItems.length,
+    });
   const showPagination = totalPages !== 0;
 
   const headers = [
@@ -341,12 +342,12 @@ export const DocViewerTable = ({
       {showPagination && (
         <EuiFlexItem grow={false}>
           <EuiTablePagination
-            activePage={currentPage}
+            activePage={curPageIndex}
             itemsPerPage={pageSize}
             itemsPerPageOptions={[25, 50, 100]}
             pageCount={totalPages}
             onChangeItemsPerPage={changePageSize}
-            onChangePage={changePage}
+            onChangePage={changePageIndex}
           />
         </EuiFlexItem>
       )}

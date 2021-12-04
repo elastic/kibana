@@ -25,11 +25,18 @@ const DocTableWrapperMemoized = memo(DocTableWrapper);
 
 export const DocTableEmbeddable = (props: DocTableEmbeddableProps) => {
   const tableWrapperRef = useRef<HTMLDivElement>(null);
-  const { currentPage, pageSize, totalPages, startIndex, hasNextPage, changePage, changePageSize } =
-    usePager({
-      initialPageSize: 50,
-      totalItems: props.rows.length,
-    });
+  const {
+    curPageIndex,
+    pageSize,
+    totalPages,
+    startIndex,
+    hasNextPage,
+    changePageIndex,
+    changePageSize,
+  } = usePager({
+    initialPageSize: 50,
+    totalItems: props.rows.length,
+  });
   const showPagination = totalPages !== 0;
 
   const scrollTop = useCallback(() => {
@@ -46,9 +53,9 @@ export const DocTableEmbeddable = (props: DocTableEmbeddableProps) => {
   const onPageChange = useCallback(
     (page: number) => {
       scrollTop();
-      changePage(page);
+      changePageIndex(page);
     },
-    [changePage, scrollTop]
+    [changePageIndex, scrollTop]
   );
 
   const onPageSizeChange = useCallback(
@@ -120,7 +127,7 @@ export const DocTableEmbeddable = (props: DocTableEmbeddableProps) => {
           <ToolBarPagination
             pageSize={pageSize}
             pageCount={totalPages}
-            activePage={currentPage}
+            activePage={curPageIndex}
             onPageClick={onPageChange}
             onPageSizeChange={onPageSizeChange}
           />

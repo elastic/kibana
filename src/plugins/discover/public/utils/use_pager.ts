@@ -22,18 +22,19 @@ export const usePager = ({
   initialPageSize: number;
 }) => {
   const [pageSize, setPageSize] = useState(initialPageSize);
-  const [currentPage, setCurrentPage] = useState(0);
+  // zero based index, if curPageIndex is set to 1, it will represent the second page.
+  const [curPageIndex, setCurPageIndex] = useState(0);
 
   const meta: MetaParams = useMemo(() => {
     const totalPages = Math.ceil(totalItems / pageSize);
     return {
       totalPages,
-      startIndex: pageSize * currentPage,
-      hasNextPage: currentPage + 1 < totalPages,
+      startIndex: pageSize * curPageIndex,
+      hasNextPage: curPageIndex + 1 < totalPages,
     };
-  }, [currentPage, pageSize, totalItems]);
+  }, [curPageIndex, pageSize, totalItems]);
 
-  const changePage = useCallback((pageIndex: number) => setCurrentPage(pageIndex), []);
+  const changePageIndex = useCallback((pageIndex: number) => setCurPageIndex(pageIndex), []);
 
   const changePageSize = useCallback((newPageSize: number) => setPageSize(newPageSize), []);
 
@@ -41,19 +42,19 @@ export const usePager = ({
    * Go to the first page if the current is no longer available
    */
   useEffect(() => {
-    if (meta.totalPages < currentPage + 1) {
-      changePage(0);
+    if (meta.totalPages < curPageIndex + 1) {
+      changePageIndex(0);
     }
-  }, [currentPage, meta.totalPages, changePage]);
+  }, [curPageIndex, meta.totalPages, changePageIndex]);
 
   return useMemo(
     () => ({
       ...meta,
-      currentPage,
+      curPageIndex,
       pageSize,
-      changePage,
+      changePageIndex,
       changePageSize,
     }),
-    [changePage, changePageSize, currentPage, meta, pageSize]
+    [changePageIndex, changePageSize, curPageIndex, meta, pageSize]
   );
 };
