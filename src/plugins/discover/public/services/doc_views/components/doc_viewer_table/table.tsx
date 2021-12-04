@@ -51,7 +51,7 @@ interface ItemsEntry {
   restItems: FieldRecord[];
 }
 
-const MOBILE_OPTIONS = { show: false };
+const MOBILE_OPTIONS = { header: false };
 const PINNED_FIELDS_KEY = 'discover:pinnedFields';
 
 export const DocViewerTable = ({
@@ -202,7 +202,7 @@ export const DocViewerTable = ({
 
   const headers = [
     showActionsColumn && (
-      <EuiTableHeaderCell align="left" width={62} isSorted={false} mobileOptions={MOBILE_OPTIONS}>
+      <EuiTableHeaderCell align="left" width={62} isSorted={false}>
         <EuiText size="xs">
           <strong>
             <FormattedMessage
@@ -213,14 +213,14 @@ export const DocViewerTable = ({
         </EuiText>
       </EuiTableHeaderCell>
     ),
-    <EuiTableHeaderCell align="left" width="30%" isSorted={false} mobileOptions={MOBILE_OPTIONS}>
+    <EuiTableHeaderCell align="left" width="30%" isSorted={false}>
       <EuiText size="xs">
         <strong>
           <FormattedMessage id="discover.fieldChooser.discoverField.name" defaultMessage="Field" />
         </strong>
       </EuiText>
     </EuiTableHeaderCell>,
-    <EuiTableHeaderCell align="left" isSorted={false} mobileOptions={MOBILE_OPTIONS}>
+    <EuiTableHeaderCell align="left" isSorted={false}>
       <EuiText size="xs">
         <strong>
           <FormattedMessage id="discover.fieldChooser.discoverField.value" defaultMessage="Value" />
@@ -246,7 +246,7 @@ export const DocViewerTable = ({
                   width={62}
                   className="kbnDocViewer__tableActionsCell"
                   textOnly={false}
-                  mobileOptions={{ show: false }}
+                  mobileOptions={MOBILE_OPTIONS}
                 >
                   <TableActions
                     isActive={isActive}
@@ -267,7 +267,7 @@ export const DocViewerTable = ({
                 width="30%"
                 className="kbnDocViewer__tableFieldNameCell"
                 textOnly={false}
-                mobileOptions={{ show: false }}
+                mobileOptions={MOBILE_OPTIONS}
               >
                 <FieldName
                   fieldName={displayName}
@@ -281,7 +281,7 @@ export const DocViewerTable = ({
                 align="left"
                 className="kbnDocViewer__tableValueCell"
                 textOnly={false}
-                mobileOptions={{ show: false }}
+                mobileOptions={MOBILE_OPTIONS}
               >
                 <TableFieldValue
                   field={field}
@@ -327,7 +327,7 @@ export const DocViewerTable = ({
         </EuiSelectableMessage>
       ) : (
         <EuiFlexItem grow={false}>
-          <EuiTable>
+          <EuiTable responsive={false}>
             <EuiTableHeader>{headers}</EuiTableHeader>
             <EuiTableBody>{rowElements}</EuiTableBody>
           </EuiTable>
