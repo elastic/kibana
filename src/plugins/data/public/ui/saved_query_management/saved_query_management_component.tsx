@@ -22,7 +22,7 @@ import {
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import React, { useCallback, useEffect, useState, Fragment, useRef } from 'react';
+import React, { useCallback, useEffect, useState, Fragment, useRef, ReactElement, ReactNode } from 'react';
 import { sortBy } from 'lodash';
 import { SavedQuery, SavedQueryService } from '../..';
 import { SavedQueryListItem } from './saved_query_list_item';
@@ -36,6 +36,14 @@ interface Props {
   onSaveAsNew: () => void;
   onLoad: (savedQuery: SavedQuery) => void;
   onClearSavedQuery: () => void;
+  /**
+   * Function that takes the `list` node and then
+   * the `search` node (if `searchable` is applied)
+   */
+  children: (
+    list: ReactElement,
+    // search: ReactElement<EuiSelectableSearch<T>> | undefined
+  ) => ReactNode;
 }
 
 export function SavedQueryManagementComponent({
@@ -46,6 +54,7 @@ export function SavedQueryManagementComponent({
   onLoad,
   onClearSavedQuery,
   savedQueryService,
+  children,
 }: Props) {
   const [isOpen, setIsOpen] = useState(true);
   const [savedQueries, setSavedQueries] = useState([] as SavedQuery[]);
@@ -185,9 +194,7 @@ export function SavedQueryManagementComponent({
     ));
   };
 
-  // NEW RETURN : Just the list
-  return (
-    <>
+  const list =
       <EuiListGroup
         maxWidth="none"
         bordered
@@ -196,9 +203,10 @@ export function SavedQueryManagementComponent({
         aria-labelledby={'savedQueryManagementPopoverTitle'}
       >
         {savedQueryRows()}
-      </EuiListGroup>
-    </>
-  )
+      </EuiListGroup>;
+
+  // NEW RETURN : Just the list
+  return children && children(list);
 
   // OLD RETURN
   return (

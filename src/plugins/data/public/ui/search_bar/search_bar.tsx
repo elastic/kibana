@@ -34,6 +34,7 @@ import { FilterBar } from '../filter_bar/filter_bar';
 import { FilterOptions } from '../filter_bar/filter_options';
 import { SavedQueryMeta, SaveQueryForm } from '../saved_query_form';
 import { SavedQueryManagementComponent } from '../saved_query_management';
+import { FilterSetMenu } from '../saved_query_management/filter_set_menu';
 
 export interface SearchBarInjectedDeps {
   kibana: KibanaReactContextValue<IDataPluginServices>;
@@ -394,7 +395,9 @@ class SearchBarUI extends Component<SearchBarProps, State> {
         onLoad={this.onLoadSavedQuery}
         savedQueryService={this.savedQueryService}
         onClearSavedQuery={this.props.onClearSavedQuery}
-      />
+      >
+        {(list) => list}
+      </SavedQueryManagementComponent>
     );
 
     const filterOptions = this.shouldRenderFilterBar() ? (
@@ -408,6 +411,8 @@ class SearchBarUI extends Component<SearchBarProps, State> {
         onRemoveAll={this.onRemoveAll}
       />
     ) : undefined;
+
+    const filterMenu = <FilterSetMenu language={this.props.nonKqlMode || 'KQL'} />;
 
     const timeRangeForSuggestionsOverride = this.props.showDatePicker ? undefined : false;
 
@@ -423,7 +428,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
           onSubmit={this.onQueryBarSubmit}
           indexPatterns={this.props.indexPatterns}
           isLoading={this.props.isLoading}
-          prepend={this.props.showFilterBar ? filterOptions : undefined}
+          prepend={this.props.showFilterBar ? filterMenu : undefined}
           savedQueryManagement={savedQueryManagement}
           showDatePicker={this.props.showDatePicker}
           dateRangeFrom={this.state.dateRangeFrom}
