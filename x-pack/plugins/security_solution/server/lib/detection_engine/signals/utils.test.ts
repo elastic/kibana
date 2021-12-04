@@ -17,7 +17,7 @@ import { ExceptionListClient } from '../../../../../lists/server';
 import { getListArrayMock } from '../../../../common/detection_engine/schemas/types/lists.mock';
 import { getExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
 
-// @ts-expect-error
+// @ts-expect-error 4.3.5 upgrade - likely requires moment upgrade
 moment.suppressDeprecationWarnings = true;
 
 import {

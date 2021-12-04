@@ -171,6 +171,7 @@ describe('Task Runner Cancel', () => {
       type: 'alert',
       attributes: {
         apiKey: Buffer.from('123:abc').toString('base64'),
+        enabled: true,
       },
       references: [],
     });

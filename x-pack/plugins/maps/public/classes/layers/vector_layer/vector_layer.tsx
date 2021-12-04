@@ -58,7 +58,7 @@ import { IESSource } from '../../sources/es_source';
 import { ITermJoinSource } from '../../sources/term_join_source';
 import { buildVectorRequestMeta } from '../build_vector_request_meta';
 import { getJoinAggKey } from '../../../../common/get_agg_key';
-import { getVectorSourceBounds } from './geojson_vector_layer/utils';
+import { syncBoundsData } from './bounds_data';
 
 export function isVectorLayer(layer: ILayer) {
   return (layer as IVectorLayer).canShowTooltip !== undefined;
@@ -113,7 +113,7 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
     mapColors?: string[]
   ): VectorLayerDescriptor {
     const layerDescriptor = super.createDescriptor(options) as VectorLayerDescriptor;
-    layerDescriptor.type = LAYER_TYPE.VECTOR;
+    layerDescriptor.type = LAYER_TYPE.GEOJSON_VECTOR;
 
     if (!options.style) {
       const styleProperties = VectorStyle.createDefaultStyleProperties(mapColors ? mapColors : []);
@@ -287,7 +287,7 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
   }
 
   async getBounds(syncContext: DataRequestContext) {
-    return getVectorSourceBounds({
+    return syncBoundsData({
       layerId: this.getId(),
       syncContext,
       source: this.getSource(),

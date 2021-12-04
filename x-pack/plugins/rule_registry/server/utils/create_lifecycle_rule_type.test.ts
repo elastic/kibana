@@ -21,7 +21,7 @@ import { createLifecycleRuleTypeFactory } from './create_lifecycle_rule_type_fac
 
 type RuleTestHelpers = ReturnType<typeof createRule>;
 
-function createRule() {
+function createRule(shouldWriteAlerts: boolean = true) {
   const ruleDataClientMock = createRuleDataClientMock();
 
   const factory = createLifecycleRuleTypeFactory({
@@ -110,6 +110,7 @@ function createRule() {
           alertInstanceFactory,
           savedObjectsClient: {} as any,
           scopedClusterClient: {} as any,
+          shouldWriteAlerts: () => shouldWriteAlerts,
         },
         spaceId: 'spaceId',
         state,
@@ -137,6 +138,26 @@ describe('createLifecycleRuleTypeFactory', () => {
     describe('when writing is disabled', () => {
       beforeEach(() => {
         helpers.ruleDataClientMock.isWriteEnabled.mockReturnValue(false);
+      });
+
+      it("doesn't persist anything", async () => {
+        await helpers.alertWithLifecycle([
+          {
+            id: 'opbeans-java',
+            fields: {
+              'service.name': 'opbeans-java',
+            },
+          },
+        ]);
+
+        expect(helpers.ruleDataClientMock.getWriter().bulk).toHaveBeenCalledTimes(0);
+      });
+    });
+
+    describe('when rule is cancelled due to timeout and config flags indicate to skip actions', () => {
+      beforeEach(() => {
+        helpers = createRule(false);
+        helpers.ruleDataClientMock.isWriteEnabled.mockReturnValue(true);
       });
 
       it("doesn't persist anything", async () => {
@@ -277,6 +298,7 @@ describe('createLifecycleRuleTypeFactory', () => {
           return castArray(val);
         });
 
+        // @ts-ignore 4.3.5 upgrade
         helpers.ruleDataClientMock.getReader().search.mockResolvedValueOnce({
           hits: {
             hits: [{ fields: stored } as any],

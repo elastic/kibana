@@ -150,6 +150,7 @@ export const signalRulesAlertType = ({
             underlyingClient: config.ruleExecutionLog.underlyingClient,
             savedObjectsClient: services.savedObjectsClient,
             eventLogService,
+            logger,
           });
 
       const completeRule: CompleteRule<RuleParams> = {

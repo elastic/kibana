@@ -79,7 +79,33 @@ export class EventLogAdapter implements IRuleExecutionLogClient {
     // EventLog execution events are immutable, nothing to do here
   }
 
-  private async logExecutionMetrics(args: LogExecutionMetricsArgs) {
+  public async logStatusChange(args: LogStatusChangeArgs): Promise<void> {
+    await Promise.all([
+      this.logStatusChangeToSavedObjects(args),
+      this.logStatusChangeToEventLog(args),
+    ]);
+  }
+
+  private async logStatusChangeToSavedObjects(args: LogStatusChangeArgs): Promise<void> {
+    await this.savedObjectsAdapter.logStatusChange(args);
+  }
+
+  private async logStatusChangeToEventLog(args: LogStatusChangeArgs): Promise<void> {
+    if (args.metrics) {
+      this.logExecutionMetrics({
+        executionId: args.executionId,
+        ruleId: args.ruleId,
+        ruleName: args.ruleName,
+        ruleType: args.ruleType,
+        spaceId: args.spaceId,
+        metrics: args.metrics,
+      });
+    }
+
+    this.eventLogClient.logStatusChange(args);
+  }
+
+  private logExecutionMetrics(args: LogExecutionMetricsArgs): void {
     const { executionId, ruleId, spaceId, ruleType, ruleName, metrics } = args;
 
     this.eventLogClient.logExecutionMetrics({
@@ -98,22 +124,5 @@ export class EventLogAdapter implements IRuleExecutionLogClient {
           : undefined,
       },
     });
-  }
-
-  public async logStatusChange(args: LogStatusChangeArgs) {
-    await this.savedObjectsAdapter.logStatusChange(args);
-
-    if (args.metrics) {
-      await this.logExecutionMetrics({
-        executionId: args.executionId,
-        ruleId: args.ruleId,
-        ruleName: args.ruleName,
-        ruleType: args.ruleType,
-        spaceId: args.spaceId,
-        metrics: args.metrics,
-      });
-    }
-
-    this.eventLogClient.logStatusChange(args);
   }
 }
