@@ -86,6 +86,16 @@ const uploadPipeline = (pipelineContent) => {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/fleet_cypress.yml'));
     }
 
+    if (
+      (await doAnyChangesMatch([
+        /^x-pack\/plugins\/osquery/,
+        /^x-pack\/test\/osquery_cypress/,
+      ])) ||
+      process.env.GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
+    ) {
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/osquery_cypress.yml'));
+    }
+
     if (await doAnyChangesMatch([/^x-pack\/plugins\/uptime/])) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/uptime.yml'));
     }
