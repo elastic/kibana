@@ -5824,7 +5824,15 @@
   version "0.0.0"
   uid ""
 
+"@types/kbn__config-schema@link:bazel-bin/packages/kbn-config-schema/npm_module_types":
+  version "0.0.0"
+  uid ""
+
 "@types/kbn__config@link:bazel-bin/packages/kbn-config/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__crypto@link:bazel-bin/packages/kbn-crypto/npm_module_types":
   version "0.0.0"
   uid ""
 
