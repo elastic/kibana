@@ -23,7 +23,7 @@ import { EuiProgress, EuiLoadingSpinner } from '@elastic/eui';
 import { documentField } from './document_field';
 import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
 import { fieldFormatsServiceMock } from '../../../../../src/plugins/field_formats/public/mocks';
-import { indexPatternFieldEditorPluginMock } from '../../../../../src/plugins/index_pattern_field_editor/public/mocks';
+import { indexPatternFieldEditorPluginMock } from '../../../../../src/plugins/data_view_field_editor/public/mocks';
 import { getFieldByNameFactory } from './pure_helpers';
 import { uiActionsPluginMock } from '../../../../../src/plugins/ui_actions/public/mocks';
 import { TermsIndexPatternColumn } from './operations';
@@ -876,7 +876,7 @@ describe('IndexPattern Data Panel', () => {
           expect(props.indexPatternFieldEditor.openEditor).toHaveBeenCalledWith(
             expect.objectContaining({
               ctx: expect.objectContaining({
-                indexPattern: mockIndexPattern,
+                dataView: mockIndexPattern,
               }),
             })
           );

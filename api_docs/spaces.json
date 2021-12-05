@@ -2582,9 +2582,7 @@
             "parentPluginId": "spaces",
             "id": "def-server.SpacesServiceSetup.getSpaceId",
             "type": "Function",
-            "tags": [
-              "deprecated"
-            ],
+            "tags": [],
             "label": "getSpaceId",
             "description": [
               "\nRetrieves the space id associated with the provided request."
@@ -2601,46 +2599,7 @@
               "<unknown, unknown, unknown, any>) => string"
             ],
             "path": "x-pack/plugins/spaces/server/spaces_service/spaces_service.ts",
-            "deprecated": true,
-            "removeBy": "7.16",
-            "references": [
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/server/audit/audit_service.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/server/authorization/check_privileges_dynamically.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/server/plugin.ts"
-              },
-              {
-                "plugin": "reporting",
-                "path": "x-pack/plugins/reporting/server/core.ts"
-              },
-              {
-                "plugin": "apm",
-                "path": "x-pack/plugins/apm/server/routes/data_view/route.ts"
-              },
-              {
-                "plugin": "infra",
-                "path": "x-pack/plugins/infra/server/lib/adapters/framework/kibana_framework_adapter.ts"
-              },
-              {
-                "plugin": "infra",
-                "path": "x-pack/plugins/infra/server/lib/adapters/framework/kibana_framework_adapter.ts"
-              },
-              {
-                "plugin": "infra",
-                "path": "x-pack/plugins/infra/server/plugin.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/server/authorization/check_privileges_dynamically.test.ts"
-              }
-            ],
+            "deprecated": false,
             "children": [
               {
                 "parentPluginId": "spaces",
@@ -2672,9 +2631,7 @@
             "parentPluginId": "spaces",
             "id": "def-server.SpacesServiceSetup.spaceIdToNamespace",
             "type": "Function",
-            "tags": [
-              "deprecated"
-            ],
+            "tags": [],
             "label": "spaceIdToNamespace",
             "description": [
               "\nConverts the provided space id into the corresponding Saved Objects `namespace` id."
@@ -2683,9 +2640,7 @@
               "(spaceId: string) => string | undefined"
             ],
             "path": "x-pack/plugins/spaces/server/spaces_service/spaces_service.ts",
-            "deprecated": true,
-            "removeBy": "7.16",
-            "references": [],
+            "deprecated": false,
             "children": [
               {
                 "parentPluginId": "spaces",
@@ -2710,9 +2665,7 @@
             "parentPluginId": "spaces",
             "id": "def-server.SpacesServiceSetup.namespaceToSpaceId",
             "type": "Function",
-            "tags": [
-              "deprecated"
-            ],
+            "tags": [],
             "label": "namespaceToSpaceId",
             "description": [
               "\nConverts the provided namespace into the corresponding space id."
@@ -2721,90 +2674,7 @@
               "(namespace: string | undefined) => string"
             ],
             "path": "x-pack/plugins/spaces/server/spaces_service/spaces_service.ts",
-            "deprecated": true,
-            "removeBy": "7.16",
-            "references": [
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/server/authorization/check_saved_objects_privileges.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/server/authorization/check_saved_objects_privileges.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/server/saved_objects/secure_saved_objects_client_wrapper.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/server/saved_objects/secure_saved_objects_client_wrapper.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/server/saved_objects/secure_saved_objects_client_wrapper.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/server/authorization/check_privileges_dynamically.test.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/server/authorization/check_saved_objects_privileges.test.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/server/authorization/check_saved_objects_privileges.test.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/server/authorization/check_saved_objects_privileges.test.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/server/authorization/check_saved_objects_privileges.test.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/server/authorization/check_saved_objects_privileges.test.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/server/authorization/check_saved_objects_privileges.test.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/server/authorization/check_saved_objects_privileges.test.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/server/authorization/check_saved_objects_privileges.test.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/server/authorization/check_saved_objects_privileges.test.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/server/authorization/check_saved_objects_privileges.test.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/server/authorization/check_saved_objects_privileges.test.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/server/authorization/check_saved_objects_privileges.test.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/server/authorization/check_saved_objects_privileges.test.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/server/authorization/check_saved_objects_privileges.test.ts"
-              }
-            ],
+            "deprecated": false,
             "children": [
               {
                 "parentPluginId": "spaces",
@@ -3326,12 +3196,10 @@
           "parentPluginId": "spaces",
           "id": "def-server.SpacesPluginSetup.spacesService",
           "type": "Object",
-          "tags": [
-            "deprecated"
-          ],
+          "tags": [],
           "label": "spacesService",
           "description": [
-            "\nService for interacting with spaces.\n"
+            "\nService for interacting with spaces."
           ],
           "signature": [
             {
@@ -3343,58 +3211,7 @@
             }
           ],
           "path": "x-pack/plugins/spaces/server/plugin.ts",
-          "deprecated": true,
-          "removeBy": "7.16",
-          "references": [
-            {
-              "plugin": "security",
-              "path": "x-pack/plugins/security/server/plugin.ts"
-            },
-            {
-              "plugin": "security",
-              "path": "x-pack/plugins/security/server/plugin.ts"
-            },
-            {
-              "plugin": "security",
-              "path": "x-pack/plugins/security/server/plugin.ts"
-            },
-            {
-              "plugin": "security",
-              "path": "x-pack/plugins/security/server/plugin.ts"
-            },
-            {
-              "plugin": "reporting",
-              "path": "x-pack/plugins/reporting/server/core.ts"
-            },
-            {
-              "plugin": "reporting",
-              "path": "x-pack/plugins/reporting/server/core.ts"
-            },
-            {
-              "plugin": "reporting",
-              "path": "x-pack/plugins/reporting/server/core.ts"
-            },
-            {
-              "plugin": "apm",
-              "path": "x-pack/plugins/apm/server/routes/data_view/route.ts"
-            },
-            {
-              "plugin": "infra",
-              "path": "x-pack/plugins/infra/server/lib/adapters/framework/kibana_framework_adapter.ts"
-            },
-            {
-              "plugin": "infra",
-              "path": "x-pack/plugins/infra/server/lib/adapters/framework/kibana_framework_adapter.ts"
-            },
-            {
-              "plugin": "infra",
-              "path": "x-pack/plugins/infra/server/lib/adapters/framework/kibana_framework_adapter.ts"
-            },
-            {
-              "plugin": "infra",
-              "path": "x-pack/plugins/infra/server/plugin.ts"
-            }
-          ]
+          "deprecated": false
         },
         {
           "parentPluginId": "spaces",

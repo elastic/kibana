@@ -13,7 +13,7 @@ import useObservable from 'react-use/lib/useObservable';
 import { EuiEmptyPrompt, EuiIcon, EuiSpacer, EuiText } from '@elastic/eui';
 import { Filter } from '@kbn/es-query';
 import { Required } from 'utility-types';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   Embeddable,
   EmbeddableInput,

@@ -4,172 +4,86 @@
 <titleabbrev>Logging settings</titleabbrev>
 ++++
 
-{kib} relies on three high-level entities to set the logging service: appenders, loggers, and root.
+You do not need to configure any additional settings to use the logging features in {kib}. Logging is enabled by default and will log at `info` level using the `pattern` layout, which outputs logs to `stdout`.
+
+However, if you are planning to ingest your logs using Elasticsearch or another tool, we recommend using the `json` layout, which produces logs in ECS format. In general, `pattern` layout is recommended when raw logs will be read by a human, and `json` layout when logs will be read by a machine.
+
+NOTE: The logging configuration is validated against the predefined schema and if there are any issues with it, {kib} will fail to start with the detailed error message.
+
+{kib} relies on three high-level entities to set the logging service: appenders, loggers, and root. These can be configured in the `logging` namespace in `kibana.yml`.
 
 - Appenders define where log messages are displayed (stdout or console) and their layout (`pattern` or `json`). They also allow you to specify if you want the logs stored and, if so, where (file on the disk).
 - Loggers define what logging settings, such as the level of verbosity and the appenders, to apply to a particular context. Each log entry context provides information about the service or plugin that emits it and any of its sub-parts, for example, `metrics.ops` or `elasticsearch.query`.
 - Root is a logger that applies to all the log entries in {kib}.
 
-Refer to the <<log-settings-examples, examples>> for common configuration use cases. To learn more about possible configuration values, go to {kibana-ref}/logging-service.html[{kib}'s Logging service].
+The following table serves as a quick reference for different logging configuration keys. Note that these are not stand-alone settings and may require additional logging configuration. See the <<logging-configuration, Configure Logging in {kib}>> guide and complete <<log-settings-examples, examples>> for common configuration use cases. 
 
-[[log-settings-examples]]
-==== Examples
-Here are some configuration examples for the most common logging use cases:
-
-[[log-to-file-example]]
-===== Log to a file
-
-Log the default log format to a file instead of to stdout (the default).
-
-[source,yaml]
-----
-logging:
-  appenders:
-    file:
-      type: file
-      fileName: /var/log/kibana.log
-      layout:
-        type: pattern
-  root:
-    appenders: [file]
-----
-
-[[log-in-json-ECS-example]]
-===== Log in JSON format
-
-Log the default log format to JSON layout instead of pattern (the default).
-With `json` layout, log messages will be formatted as JSON strings in https://www.elastic.co/guide/en/ecs/current/ecs-reference.html[ECS format] that includes a timestamp, log level, logger, message text and any other metadata that may be associated with the log message itself.
-
-[source,yaml]
-----
-logging:
-  appenders:
-    json-layout:
-      type: console
-      layout:
-        type: json
-  root:
-    appenders: [json-layout]
-----
-
-[[log-with-meta-to-stdout]]
-===== Log with meta to stdout
-
-Include `%meta` in your pattern layout:
-
-[source,yaml]
-----
-logging:
-  appenders:
-    console-meta:
-      type: console
-      layout:
-        type: pattern
-        pattern: "[%date] [%level] [%logger] [%meta] %message"
-  root:
-    appenders: [console-meta]
-----
-
-[[log-elasticsearch-queries]]
-===== Log {es} queries
-
-[source,yaml]
---
-logging:
-  appenders:
-    console_appender:
-      type: console
-      layout:
-        type: pattern
-        highlight: true
-  root:
-    appenders: [console_appender]
-    level: warn
-  loggers:
-    - name: elasticsearch.query
-      level: debug
---
-
-[[change-overall-log-level]]
-===== Change overall log level
-
-[source,yaml]
-----
-logging:
-  root:
-    level: debug
-----
-
-[[customize-specific-log-records]]
-===== Customize specific log records
-Here is a detailed configuration example that can be used to configure _loggers_, _appenders_ and _layouts_:
-
-[source,yaml]
-----
-logging:
-  appenders:
-    console:
-      type: console
-      layout:
-        type: pattern
-        highlight: true
-    file:
-      type: file
-      fileName: /var/log/kibana.log
-    custom:
-      type: console
-      layout:
-        type: pattern
-        pattern: "[%date][%level] %message"
-    json-file-appender:
-      type: file
-      fileName: /var/log/kibana-json.log
-      layout:
-        type: json
-
-  root:
-    appenders: [console, file]
-    level: error
-
-  loggers:
-    - name: plugins
-      appenders: [custom]
-      level: warn
-    - name: plugins.myPlugin
-      level: info
-    - name: server
-      level: fatal
-    - name: optimize
-      appenders: [console]
-    - name: telemetry
-      appenders: [json-file-appender]
-      level: all
-    - name: metrics.ops
-      appenders: [console]
-      level: debug
-----
-
-Here is what we get with the config above:
-[options="header"]
+[cols="2*<"]
 |===
+| `logging.appenders[].<appender-name>`
+| Unique appender identifier.
 
-| Context name | Appenders | Level
+| `logging.appenders[].console:`
+| Appender to use for logging records to *stdout*. By default, uses the `[%date][%level][%logger] %message` **pattern** layout. To use a **json**, set the <<log-in-json-ECS-example,layout type to `json`>>.
 
-| root | console, file | error
+| `logging.appenders[].file:`
+| Allows you to specify a fileName to write log records to disk. To write <<log-to-file-example,all log records to file>>, add the file appender to `root.appenders`. If configured, you also need to specify <<log-to-file-example, `logging.appenders.file.pathName`>>.
 
-| plugins | custom | warn
+| `logging.appenders[].rolling-file:`
+| Similar to https://logging.apache.org/log4j/2.x/[Log4j's] `RollingFileAppender`, this appender will log to a file and rotate if following a rolling strategy when the configured policy triggers. There are currently two policies supported: <<size-limit-triggering-policy, `size-limit`>> and <<time-interval-triggering-policy, `time-interval`>>.
 
-| plugins.myPlugin | custom | info
+| `logging.appenders[].<appender-name>.type`
+| The appender type determines where the log messages are sent. Options are `console`, `file`, `rewrite`, `rolling-file`. Required.
 
-| server | console, file | fatal
+| `logging.appenders[].<appender-name>.fileName`
+| Determines the filepath where the log messages are written to for file and rolling-file appender types. Required for appenders that write to file.
 
-| optimize | console | error
+| `logging.appenders[].<appender-name>.policy.type`
+| Specify the triggering policy for when a rollover should occur for the `rolling-file` type appender. 
 
-| telemetry | json-file-appender | all
+| `logging.appenders[].<appender-name>.policy.interval`
+| Specify the time interval for rotating a log file for a `time-interval` type `rolling-file` appender. *Default 24h*
 
-| metrics.ops | console | debug
+| `logging.appenders[].<appender-name>.policy.size`
+| Specify the size limit at which the policy should trigger a rollover for a `size-limit` type `rolling-file` appender. *Default 100mb*. 
+
+| `logging.appenders[].<appender-name>.policy.interval`
+| Specify the time interval at which the policy should trigger a rollover for a time-interval type `rolling-file` appender. 
+
+| `logging.appenders[].<appender-name>.policy.modulate`
+| Whether the interval should be adjusted to cause the next rollover to occur on the interval boundary. Boolean. Default `true`.
+
+| `logging.appenders[].<appender-name>.strategy.type`
+| Rolling file strategy type. Only `numeric` is currently supported.
+
+| `logging.appenders[].<appender-name>.strategy.pattern`
+| The suffix to append to the file path when rolling. Must include `%i`.
+
+| `logging.appenders[].<appender-name>.strategy.max`
+| The maximum number of files to keep. Optional. Default is `7`.
+
+| `logging.appenders[].<appender-name>.layout.type`
+| Determines how the log messages are displayed. Options are `pattern`, which provides human-readable output, or `json`, which provides ECS-compliant output. Required.
+
+| `logging.appenders[].<appender-name>.layout.highlight`
+| Optional boolean to highlight log messages in color. Applies to `pattern` layout only. Default is `false`.
+
+| `logging.appenders[].<appender-name>.layout.pattern`
+| Optional <<pattern-layout, string pattern>> for placeholders that will be replaced with data from the actual log message. Applicable to pattern type layout only.
+
+| `logging.root.appenders[]`
+| List of specific appenders to apply to `root`. Defaults to `console` with `pattern` layout.
+
+| `logging.root.level`
+| Specify default verbosity for all log messages to fall back to if not specifically configured at the individual logger level. Options are `all`, `fatal`, `error`, `warn`, `info`, `debug`, `trace`, `off`. The `all` and `off` levels can be used only in configuration and are just handy shortcuts that allow you to log every log record or disable logging entirely or for a specific logger. Default is `info`.
+
+| `logging.loggers[].<logger>.name:`
+| Specific logger instance.
+
+| `logging.loggers[].<logger>.level`
+| Specify verbosity of log messages for <logger> context. Optional and inherits the verbosity of any ancestor logger, up to the `root` logger `level`.
+
+| `logging.loggers[].<logger>.appenders`
+| Determines the appender to apply to a specific logger context as an array. Optional and falls back to the appender(s) of the `root` logger if not specified.
+
 |===
-
-NOTE: If you modify `root.appenders`, make sure to include `default`.
-
-// For more details about logging configuration, refer to the logging system documentation (update to include a link).

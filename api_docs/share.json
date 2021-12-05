@@ -693,10 +693,6 @@
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/trained_models/models_management/expanded_row.tsx"
-              },
-              {
-                "plugin": "ml",
                 "path": "x-pack/plugins/ml/public/application/trained_models/models_management/models_list.tsx"
               },
               {
@@ -729,7 +725,7 @@
               },
               {
                 "plugin": "upgradeAssistant",
-                "path": "x-pack/plugins/upgrade_assistant/public/application/components/overview/fix_logs_step/external_links.tsx"
+                "path": "x-pack/plugins/upgrade_assistant/public/application/components/es_deprecation_logs/fix_deprecation_logs/external_links.tsx"
               },
               {
                 "plugin": "upgradeAssistant",
@@ -1686,12 +1682,20 @@
           {
             "parentPluginId": "share",
             "id": "def-public.UrlGeneratorStateMapping.Unnamed",
-            "type": "Any",
+            "type": "IndexSignature",
             "tags": [],
-            "label": "Unnamed",
+            "label": "[key: string]: UrlGeneratorState<any, string | undefined, object | undefined>",
             "description": [],
             "signature": [
-              "any"
+              "[key: string]:  ",
+              {
+                "pluginId": "share",
+                "scope": "public",
+                "docId": "kibSharePluginApi",
+                "section": "def-public.UrlGeneratorState",
+                "text": "UrlGeneratorState"
+              },
+              "<any, string | undefined, object | undefined>"
             ],
             "path": "src/plugins/share/public/url_generators/url_generator_definition.ts",
             "deprecated": false
@@ -2399,10 +2403,6 @@
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/trained_models/models_management/expanded_row.tsx"
-              },
-              {
-                "plugin": "ml",
                 "path": "x-pack/plugins/ml/public/application/trained_models/models_management/models_list.tsx"
               },
               {
@@ -2435,7 +2435,7 @@
               },
               {
                 "plugin": "upgradeAssistant",
-                "path": "x-pack/plugins/upgrade_assistant/public/application/components/overview/fix_logs_step/external_links.tsx"
+                "path": "x-pack/plugins/upgrade_assistant/public/application/components/es_deprecation_logs/fix_deprecation_logs/external_links.tsx"
               },
               {
                 "plugin": "upgradeAssistant",

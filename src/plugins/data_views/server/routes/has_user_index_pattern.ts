@@ -32,7 +32,8 @@ const hasUserDataViewRouteFactory =
           const [, , { dataViewsServiceFactory }] = await getStartServices();
           const indexPatternsService = await dataViewsServiceFactory(
             savedObjectsClient,
-            elasticsearchClient
+            elasticsearchClient,
+            req
           );
 
           return res.ok({

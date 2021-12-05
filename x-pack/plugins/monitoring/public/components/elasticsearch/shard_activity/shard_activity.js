@@ -14,7 +14,7 @@ import { SourceDestination } from './source_destination';
 import { FilesProgress, BytesProgress, TranslogProgress } from './progress';
 import { parseProps } from './parse_props';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 
 const columns = [

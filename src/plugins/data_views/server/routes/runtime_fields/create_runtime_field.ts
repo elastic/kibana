@@ -44,14 +44,14 @@ const runtimeCreateFieldRouteFactory =
           }),
         },
       },
-
       handleErrors(async (ctx, req, res) => {
         const savedObjectsClient = ctx.core.savedObjects.client;
         const elasticsearchClient = ctx.core.elasticsearch.client.asCurrentUser;
         const [, , { indexPatternsServiceFactory }] = await getStartServices();
         const indexPatternsService = await indexPatternsServiceFactory(
           savedObjectsClient,
-          elasticsearchClient
+          elasticsearchClient,
+          req
         );
         const id = req.params.id;
         const { name, runtimeField } = req.body;

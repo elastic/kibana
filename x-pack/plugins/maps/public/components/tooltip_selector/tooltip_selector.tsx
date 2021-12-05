@@ -17,7 +17,7 @@ import {
   EuiTextColor,
   EuiSpacer,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { AddTooltipFieldPopover, FieldProps } from './add_tooltip_field_popover';
 import { IField } from '../../classes/fields/field';
@@ -116,6 +116,8 @@ export class TooltipSelector extends Component<Props, State> {
     const prop: FieldProps | undefined = this.state.fieldProps.find((field: FieldProps) => {
       return field.name === propertyName;
     });
+
+    // @ts-expect-error 4.3.5 upgrade
     return prop ? prop!.label : propertyName;
   };
 

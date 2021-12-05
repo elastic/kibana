@@ -16,7 +16,7 @@ import {
   EuiSwitch,
   EuiToolTip,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { JobsHealthRuleTestsConfig, JobsHealthTests } from '../../../common/types/alerts';
 import { getResultJobsHealthRuleConfig } from '../../../common/util/alerts';
 import { HEALTH_CHECK_NAMES } from '../../../common/constants/alerts';

@@ -34,7 +34,10 @@ function getTitleFromBreadCrumbs(breadcrumbs: ChromeBreadcrumb[]) {
   return breadcrumbs.map(({ text }) => text?.toString() ?? '').reverse();
 }
 
-export const useBreadcrumbs = (extraCrumbs: ChromeBreadcrumb[]) => {
+export const useBreadcrumbs = (
+  extraCrumbs: ChromeBreadcrumb[],
+  app?: { id: string; label: string }
+) => {
   const params = useQueryParams();
 
   const {
@@ -44,14 +47,16 @@ export const useBreadcrumbs = (extraCrumbs: ChromeBreadcrumb[]) => {
     },
   } = useKibana();
   const setTitle = docTitle.change;
-  const appPath = getUrlForApp('observability-overview') ?? '';
+  const appPath = getUrlForApp(app?.id ?? 'observability-overview') ?? '';
 
   useEffect(() => {
     const breadcrumbs = [
       {
-        text: i18n.translate('xpack.observability.breadcrumbs.observabilityLinkText', {
-          defaultMessage: 'Observability',
-        }),
+        text:
+          app?.label ??
+          i18n.translate('xpack.observability.breadcrumbs.observabilityLinkText', {
+            defaultMessage: 'Observability',
+          }),
         href: appPath + '/overview',
       },
       ...extraCrumbs,
@@ -62,5 +67,5 @@ export const useBreadcrumbs = (extraCrumbs: ChromeBreadcrumb[]) => {
     if (setTitle) {
       setTitle(getTitleFromBreadCrumbs(breadcrumbs));
     }
-  }, [appPath, extraCrumbs, navigateToUrl, params, setBreadcrumbs, setTitle]);
+  }, [app?.label, appPath, extraCrumbs, navigateToUrl, params, setBreadcrumbs, setTitle]);
 };

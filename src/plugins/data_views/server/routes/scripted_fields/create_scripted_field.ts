@@ -50,7 +50,8 @@ const createScriptedFieldRouteFactory =
           const [, , { dataViewsServiceFactory }] = await getStartServices();
           const indexPatternsService = await dataViewsServiceFactory(
             savedObjectsClient,
-            elasticsearchClient
+            elasticsearchClient,
+            req
           );
           const id = req.params.id;
           const { field } = req.body;

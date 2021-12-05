@@ -66,7 +66,8 @@ const updateFieldsActionRouteFactory = (path: string) => {
           const [, , { dataViewsServiceFactory }] = await getStartServices();
           const indexPatternsService = await dataViewsServiceFactory(
             savedObjectsClient,
-            elasticsearchClient
+            elasticsearchClient,
+            req
           );
           const id = req.params.id;
           const { fields } = req.body;

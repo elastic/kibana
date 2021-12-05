@@ -7,7 +7,6 @@
 
 import {
   ALERT_DURATION,
-  ALERT_INSTANCE_ID,
   ALERT_RULE_PRODUCER,
   ALERT_START,
   ALERT_WORKFLOW_STATUS,
@@ -15,6 +14,8 @@ import {
   ALERT_RULE_UUID,
   ALERT_RULE_NAME,
   ALERT_RULE_CATEGORY,
+  ALERT_RULE_SEVERITY,
+  ALERT_RULE_RISK_SCORE,
 } from '@kbn/rule-data-utils/technical_field_names';
 
 import type { Filter } from '@kbn/es-query';
@@ -271,10 +272,11 @@ export const buildShowBuildingBlockFilterRuleRegistry = (
 
 export const requiredFieldMappingsForActionsRuleRegistry = {
   '@timestamp': '@timestamp',
-  'alert.instance.id': ALERT_INSTANCE_ID,
   'event.kind': 'event.kind',
-  'alert.start': ALERT_START,
+  'rule.severity': ALERT_RULE_SEVERITY,
+  'rule.risk_score': ALERT_RULE_RISK_SCORE,
   'alert.uuid': ALERT_UUID,
+  'alert.start': ALERT_START,
   'event.action': 'event.action',
   'alert.workflow_status': ALERT_WORKFLOW_STATUS,
   'alert.duration.us': ALERT_DURATION,

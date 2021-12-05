@@ -53,7 +53,6 @@ ruleTester.run('@kbn/eslint/no_constructor_args_in_property_initializers', rule,
   ],
 
   invalid: [
-    // no catch
     {
       code: dedent`
         class Foo {
@@ -93,6 +92,26 @@ ruleTester.run('@kbn/eslint/no_constructor_args_in_property_initializers', rule,
         {
           line: 2,
           message: `The constructor argument "foo" can't be used in a class property intializer, define the property in the constructor instead`,
+        },
+      ],
+    },
+    {
+      code: dedent`
+        class Foo {
+          readonly bar = y(this.deps.history).x(
+            () => {
+              this.deps.usage()
+            }
+          );
+
+
+          constructor(private readonly deps: unknown) {}
+        }
+      `,
+      errors: [
+        {
+          line: 2,
+          message: `The constructor argument "deps" can't be used in a class property intializer, define the property in the constructor instead`,
         },
       ],
     },
