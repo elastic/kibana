@@ -8,13 +8,8 @@
 
 import numeral from '@elastic/numeral';
 import { LogMeta } from '@kbn/logging';
-import { IntervalHistogram, OpsMetrics } from '..';
+import { OpsMetrics } from '..';
 
-function getMessageParts(percentiles: IntervalHistogram['percentiles']) {
-  return `{ 50: ${numeral(percentiles['50']).format('0.000')}; 95: ${numeral(
-    percentiles['95']
-  ).format('0.000')}; 99: ${numeral(percentiles['99']).format('0.000')} }`;
-}
 /**
  * Converts ops metrics into ECS-compliant `LogMeta` for logging
  *
