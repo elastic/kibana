@@ -7,25 +7,19 @@
 
 import React from 'react';
 import styled from 'styled-components';
-import {
-  EuiStat,
-  EuiFlexItem,
-  EuiPanel,
-  EuiIcon,
-  EuiFlexGrid,
-  euiPaletteForStatus,
-} from '@elastic/eui';
+import { EuiStat, EuiFlexItem, EuiPanel, EuiIcon, EuiFlexGrid } from '@elastic/eui';
 import { Chart, Settings, LineSeries } from '@elastic/charts';
 import { useCloudPostureStatsApi } from '../../../common/api';
+import { statusColors } from '../../../common/constants';
 
 type Trend = Array<[time: number, value: number]>;
 
-const [green, yellow, red] = euiPaletteForStatus(3);
+// TODO: this is the warning color hash listen in EUI's docs. need to find where to import it from.
 const warningColor = '#F5A700';
 
 const getTitleColor = (value: number) => {
   if (value <= 65) return 'danger';
-  if (value <= 86) return warningColor;
+  if (value <= 95) return warningColor;
   if (value <= 100) return 'success';
   return 'default';
 };
@@ -97,7 +91,7 @@ export const ComplianceStats = () => {
               data={scoreTrend}
               xAccessor={0}
               yAccessors={[1]}
-              color={isPositiveChange ? green : red}
+              color={isPositiveChange ? statusColors.success : statusColors.danger}
             />
           </Chart>
         </>

@@ -14,24 +14,15 @@ import {
   EuiTitle,
   IconType,
   EuiSpacer,
-  EuiBadge,
   EuiDescriptionList,
-  EuiDescriptionListTitle,
-  EuiDescriptionListDescription,
 } from '@elastic/eui';
 import { CloudPostureScoreChart } from '../compliance_charts/cloud_posture_score_chart';
 import { ComplianceTrendChart } from '../compliance_charts/compliance_trend_chart';
 import { useCloudPostureStatsApi } from '../../../common/api/use_cloud_posture_stats_api';
+import { CSPHealthBadge } from '../../../components/csp_health_badge';
 
 const logoMap: Record<string, IconType> = {
   'CIS Kubernetes': 'logoKubernetes',
-};
-
-const getHealthBadge = (value: number) => {
-  if (value <= 65) return <EuiBadge color="danger">Critical</EuiBadge>;
-  if (value <= 86) return <EuiBadge color="warning">Warning</EuiBadge>;
-  if (value <= 100) return <EuiBadge color="success">Healthy</EuiBadge>;
-  return 'error';
 };
 
 export const BenchmarksSection = () => {
@@ -59,37 +50,47 @@ export const BenchmarksSection = () => {
               </EuiTitle>
             </EuiFlexItem>
             <EuiFlexItem style={{ flexBasis: '20%' }}>
-              <EuiDescriptionList>
-                <EuiDescriptionListTitle>Compliance Score</EuiDescriptionListTitle>
-                <EuiDescriptionListDescription>
-                  <CloudPostureScoreChart {...benchmark} />
-                </EuiDescriptionListDescription>
-              </EuiDescriptionList>
+              <EuiDescriptionList
+                listItems={[
+                  {
+                    title: 'Compliance Score',
+                    description: <CloudPostureScoreChart {...benchmark} />,
+                  },
+                ]}
+              />
             </EuiFlexItem>
             <EuiFlexItem style={{ flexBasis: '40%' }}>
-              <EuiDescriptionList>
-                <EuiDescriptionListTitle>Compliance Trend</EuiDescriptionListTitle>
-                <EuiDescriptionListDescription>
-                  <ComplianceTrendChart {...benchmark} />
-                </EuiDescriptionListDescription>
-              </EuiDescriptionList>
+              <EuiDescriptionList
+                listItems={[
+                  {
+                    title: 'Compliance Trend',
+                    description: <ComplianceTrendChart {...benchmark} />,
+                  },
+                ]}
+              />
             </EuiFlexItem>
             <EuiFlexItem style={{ flexBasis: '10%' }}>
-              <EuiDescriptionList>
-                <EuiDescriptionListTitle>Posture Score</EuiDescriptionListTitle>
-                <EuiDescriptionListDescription>
-                  {benchmark.postureScore}
-                </EuiDescriptionListDescription>
-                <EuiDescriptionListTitle>Status</EuiDescriptionListTitle>
-                <EuiDescriptionListDescription>
-                  {getHealthBadge(benchmark.postureScore)}
-                </EuiDescriptionListDescription>
-                <EuiDescriptionListTitle>Total Failures</EuiDescriptionListTitle>
-                <EuiDescriptionListDescription>
-                  {benchmark.totalFailed}
-                </EuiDescriptionListDescription>
-              </EuiDescriptionList>
-              {/* <MiniCPSGoalChart />*/}
+              <EuiDescriptionList
+                listItems={[
+                  {
+                    title: 'Posture Score',
+                    description: benchmark.postureScore || 'error',
+                  },
+                  {
+                    title: 'Status',
+                    description:
+                      benchmark.postureScore !== undefined ? (
+                        <CSPHealthBadge value={benchmark.postureScore} />
+                      ) : (
+                        'error'
+                      ),
+                  },
+                  {
+                    title: 'Total Failures',
+                    description: benchmark.totalFailed || 'error',
+                  },
+                ]}
+              />
             </EuiFlexItem>
           </EuiFlexGrid>
         </EuiPanel>

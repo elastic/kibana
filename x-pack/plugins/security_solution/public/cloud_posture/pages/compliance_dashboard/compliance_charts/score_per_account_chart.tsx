@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { Axis, BarSeries, Chart, Settings } from '@elastic/charts';
-import { euiPaletteForStatus } from '@elastic/eui/lib/services';
+import { statusColors } from '../../../common/constants';
 
 const mockData = [
   { id: '1', name: 'e836f61f0', value: 303, evaluation: 'pass' },
@@ -25,24 +25,14 @@ const mockData = [
 export const ScorePerAccountChart = () => {
   const accountEvaluations = mockData;
 
-  const handleElementClick = (e) => {
-    // eslint-disable-next-line no-console
-    console.log(e);
-  };
-
   return (
     <Chart size={{ height: 200 }}>
-      <Settings
-        theme={theme}
-        rotation={90}
-        showLegend={false}
-        onElementClick={handleElementClick}
-      />
+      <Settings theme={theme} rotation={90} showLegend={false} />
       <Axis id="left" position="left" />
       <BarSeries
         displayValueSettings={{
           showValueLabel: true,
-          valueFormatter: (d: any) => `${Number(d * 100).toFixed(0)} %`,
+          valueFormatter: (v) => `${Number(v * 100).toFixed(0)}%`,
         }}
         id="bars"
         name="0"
@@ -58,7 +48,7 @@ export const ScorePerAccountChart = () => {
 };
 
 const theme = {
-  colors: { vizColors: euiPaletteForStatus(2) },
+  colors: { vizColors: [statusColors.success, statusColors.danger] },
   barSeriesStyle: {
     displayValue: {
       fontSize: 14,

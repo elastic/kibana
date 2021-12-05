@@ -7,13 +7,12 @@
 
 import React from 'react';
 import { Chart, Datum, Partition, PartitionLayout, Settings } from '@elastic/charts';
-import { EuiText, euiPaletteForStatus } from '@elastic/eui';
+import { EuiText } from '@elastic/eui';
 import { useNavigateToCSPFindings } from '../../../common/hooks/use_navigate_to_csp_findings';
 // TODO: find out how to import from the server folder without warnings
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { BenchmarkStats } from '../../../../../server/cloud_posture/types';
-
-const [green, , red] = euiPaletteForStatus(3);
+import { statusColors } from '../../../common/constants';
 
 export const CloudPostureScoreChart = ({
   totalPassed,
@@ -23,6 +22,8 @@ export const CloudPostureScoreChart = ({
   const { navigate } = useNavigateToCSPFindings();
   if (totalPassed === undefined || totalFailed === undefined || name === undefined) return null;
 
+  // TODO: add type
+  // @ts-ignore
   const handleElementClick = (e) => {
     const [data] = e;
     const [groupsData] = data;
@@ -53,7 +54,8 @@ export const CloudPostureScoreChart = ({
             {
               groupByRollup: (d: Datum) => d.label,
               shape: {
-                fillColor: (d, index) => (d.dataName === 'Passed' ? green : red),
+                fillColor: (d, index) =>
+                  d.dataName === 'Passed' ? statusColors.success : statusColors.danger,
               },
             },
           ]}
