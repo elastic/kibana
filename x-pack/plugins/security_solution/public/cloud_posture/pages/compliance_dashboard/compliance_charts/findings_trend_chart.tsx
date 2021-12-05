@@ -1,9 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -17,7 +16,6 @@ import {
 } from '@elastic/charts';
 import { formatDate, dateFormatAliases } from '@elastic/eui';
 import { dateValueToTuple } from '../index';
-import { CspData } from './charts_data_types';
 
 const mockData = [
   {
@@ -53,30 +51,30 @@ const mockData = [
   },
 ];
 
-export const FindingsTrendChart = ({ resourcesFindings = mockData }: CspData) => (
-  <Chart size={{ height: 200 }}>
-    <Settings
-      // theme={isDarkTheme ? EUI_CHARTS_THEME_DARK.theme : EUI_CHARTS_THEME_LIGHT.theme}
-      showLegend={true}
-      legendPosition="right"
-    />
-    {resourcesFindings.map((resource) => (
-      <BarSeries
-        data={resource.data.map(dateValueToTuple)}
-        id={resource.id}
-        name={resource.name}
-        xScaleType="time"
-        xAccessor={0}
-        yAccessors={[1]}
-        stackAccessors={[0]}
+export const FindingsTrendChart = () => {
+  const resourcesFindings = mockData;
+
+  return (
+    <Chart size={{ height: 200 }}>
+      <Settings showLegend={true} legendPosition="right" />
+      {resourcesFindings.map((resource) => (
+        <BarSeries
+          data={resource.data.map(dateValueToTuple)}
+          id={resource.id}
+          name={resource.name}
+          xScaleType="time"
+          xAccessor={0}
+          yAccessors={[1]}
+          stackAccessors={[0]}
+        />
+      ))}
+      <Axis
+        title={formatDate(Date.now(), dateFormatAliases.date)}
+        id="bottom-axis"
+        position="bottom"
+        tickFormat={timeFormatter(niceTimeFormatByDay(1))}
       />
-    ))}
-    <Axis
-      title={formatDate(Date.now(), dateFormatAliases.date)}
-      id="bottom-axis"
-      position="bottom"
-      tickFormat={timeFormatter(niceTimeFormatByDay(1))}
-    />
-    <Axis id="left-axis" position="left" showGridLines tickFormat={(d) => Number(d).toFixed(2)} />
-  </Chart>
-);
+      <Axis id="left-axis" position="left" showGridLines tickFormat={(d) => Number(d).toFixed(2)} />
+    </Chart>
+  );
+};

@@ -7,7 +7,6 @@
 
 import React from 'react';
 import { EuiSpacer, EuiTitle } from '@elastic/eui';
-import { DateValue } from '@elastic/eui/src/components/search_bar/query/date_value';
 import { SummarySection } from './dashboard_sections/summary_section';
 import { AccumulatedSection } from './dashboard_sections/accumulated_section';
 import { BenchmarksSection } from './dashboard_sections/benchmarks_section';
@@ -15,7 +14,7 @@ import { SecuritySolutionPageWrapper } from '../../../common/components/page_wra
 import { HeaderPage } from '../../../common/components/header_page';
 import { useCloudPostureStatsApi } from '../../common/api';
 
-export const dateValueToTuple = ({ date, value }: DateValue) => [date, value];
+export const dateValueToTuple = ({ date, value }: { date: number; value: number }) => [date, value];
 
 const CompliancePage = () => {
   const getStats = useCloudPostureStatsApi();

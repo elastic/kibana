@@ -1,15 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
 import { Axis, BarSeries, Chart, Settings } from '@elastic/charts';
 import { euiPaletteForStatus } from '@elastic/eui/lib/services';
-import { CspData } from './charts_data_types';
 
 const mockData = [
   { id: '1', name: 'e836f61f0', value: 303, evaluation: 'pass' },
@@ -24,7 +22,9 @@ const mockData = [
   { id: '10', name: 'f04f0fa90', value: 130, evaluation: 'fail' },
 ];
 
-export const ScorePerAccountChart = ({ accountEvaluations = mockData }: CspData) => {
+export const ScorePerAccountChart = () => {
+  const accountEvaluations = mockData;
+
   const handleElementClick = (e) => {
     // eslint-disable-next-line no-console
     console.log(e);
@@ -35,20 +35,10 @@ export const ScorePerAccountChart = ({ accountEvaluations = mockData }: CspData)
       <Settings
         theme={theme}
         rotation={90}
-        // theme={[
-        //   { colors: { vizColors: euiPaletteForStatus(2) } },
-        //   // true ? EUI_CHARTS_THEME_DARK.theme : EUI_CHARTS_THEME_LIGHT.theme,
-        // ]}
         showLegend={false}
         onElementClick={handleElementClick}
       />
-      <Axis
-        id="left"
-        position="left"
-        // showOverlappingTicks
-        // labelFormat={(d: any) => `${Number(d * 100).toFixed(0)} %`}
-      />
-      {/* <Axis id="left-axis" position="left" showGridLines />*/}
+      <Axis id="left" position="left" />
       <BarSeries
         displayValueSettings={{
           showValueLabel: true,
@@ -73,24 +63,9 @@ const theme = {
     displayValue: {
       fontSize: 14,
       fontFamily: "'Open Sans', Helvetica, Arial, sans-serif",
-      // fontStyle: 'normal',
       fill: { color: 'white', borderColor: 'blue', borderWidth: 0 },
       offsetX: 5,
       offsetY: -5,
-      // alignment: {
-      //   horizontal: {
-      //     Default: undefined,
-      //     Left: 'center',
-      //     Center: 'start',
-      //     Right: 'left',
-      //   },
-      //   vertical: {
-      //     Default: undefined,
-      //     Top: 'top',
-      //     Middle: 'middle',
-      //     Bottom: 'bottom',
-      //   },
-      // },
     },
   },
 };

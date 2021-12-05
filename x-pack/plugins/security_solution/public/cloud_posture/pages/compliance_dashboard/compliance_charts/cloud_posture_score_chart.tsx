@@ -5,39 +5,27 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
-import {
-  Axis,
-  BarSeries,
-  Chart,
-  Datum,
-  Goal,
-  Partition,
-  PartitionLayout,
-  Settings,
-} from '@elastic/charts';
+import React from 'react';
+import { Chart, Datum, Partition, PartitionLayout, Settings } from '@elastic/charts';
 import { EuiText, euiPaletteForStatus } from '@elastic/eui';
-import { CspData } from './charts_data_types';
 import { useNavigateToCSPFindings } from '../../../common/hooks/use_navigate_to_csp_findings';
+// TODO: find out how to import from the server folder without warnings
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { BenchmarkStats } from '../../../../../server/cloud_posture/types';
 
-const mock = {
-  totalPassed: 800,
-  totalFailed: 300,
-};
 const [green, , red] = euiPaletteForStatus(3);
 
 export const CloudPostureScoreChart = ({
-  totalPassed = mock.totalPassed,
-  totalFailed = mock.totalFailed,
-  name: benchmarkName = 'benchmark_mock',
-}: CspData & { name: string }) => {
+  totalPassed,
+  totalFailed,
+  name: benchmarkName,
+}: BenchmarkStats) => {
   const { navigate } = useNavigateToCSPFindings();
+  if (totalPassed === undefined || totalFailed === undefined || name === undefined) return null;
 
   const handleElementClick = (e) => {
     const [data] = e;
-    const [groupsData, chartData] = data;
-    // const query = `rule.benchmark : ${benchmarkName} and result.evaluation : ${groupsData[0].groupByRollup.toLowerCase()}`;
-    // console.log(query);
+    const [groupsData] = data;
 
     navigate(
       `(language:kuery,query:'rule.benchmark : "${benchmarkName}" and result.evaluation : ${groupsData[0].groupByRollup.toLowerCase()}')`
@@ -47,13 +35,10 @@ export const CloudPostureScoreChart = ({
   const total = totalPassed + totalFailed;
   const percentage = `${((totalPassed / total) * 100).toFixed(1)}%`;
 
-  const data = useMemo(
-    () => [
-      { label: 'Passed', value: totalPassed },
-      { label: 'Failed', value: totalFailed },
-    ],
-    [totalFailed, totalPassed]
-  );
+  const data = [
+    { label: 'Passed', value: totalPassed },
+    { label: 'Failed', value: totalFailed },
+  ];
 
   return (
     <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
@@ -75,10 +60,8 @@ export const CloudPostureScoreChart = ({
           config={{
             partitionLayout: PartitionLayout.sunburst,
             linkLabel: { maximumSection: Infinity, maxCount: 0 },
-            outerSizeRatio: 0.9, // - 0.5 * Math.random(),
+            outerSizeRatio: 0.9,
             emptySizeRatio: 0.8,
-            // circlePadding: 4,
-            // fontFamily: 'Arial',
           }}
         />
       </Chart>
