@@ -47,6 +47,7 @@ export const getExpectedQuery = (aggs: any) => {
     },
     index: 'apm-*',
     size: 0,
+    track_total_hits: false,
   };
 };
 
@@ -56,21 +57,16 @@ describe('field_stats', () => {
       const req = getNumericFieldStatsRequest(params, 'url.path');
 
       const expectedAggs = {
-        sample: {
-          aggs: {
-            sampled_field_stats: {
-              aggs: { actual_stats: { stats: { field: 'url.path' } } },
-              filter: { exists: { field: 'url.path' } },
-            },
-            sampled_top: {
-              terms: {
-                field: 'url.path',
-                order: { _count: 'desc' },
-                size: 10,
-              },
-            },
+        sampled_field_stats: {
+          aggs: { actual_stats: { stats: { field: 'url.path' } } },
+          filter: { exists: { field: 'url.path' } },
+        },
+        sampled_top: {
+          terms: {
+            field: 'url.path',
+            order: { _count: 'desc' },
+            size: 10,
           },
-          sampler: { shard_size: SAMPLER_SHARD_SIZE },
         },
       };
       expect(req).toEqual(getExpectedQuery(expectedAggs));
@@ -81,13 +77,8 @@ describe('field_stats', () => {
       const req = getKeywordFieldStatsRequest(params, 'url.path');
 
       const expectedAggs = {
-        sample: {
-          sampler: { shard_size: SAMPLER_SHARD_SIZE },
-          aggs: {
-            sampled_top: {
-              terms: { field: 'url.path', size: 10, order: { _count: 'desc' } },
-            },
-          },
+        sampled_top: {
+          terms: { field: 'url.path', size: 10 },
         },
       };
       expect(req).toEqual(getExpectedQuery(expectedAggs));
@@ -98,15 +89,10 @@ describe('field_stats', () => {
       const req = getBooleanFieldStatsRequest(params, 'url.path');
 
       const expectedAggs = {
-        sample: {
-          sampler: { shard_size: SAMPLER_SHARD_SIZE },
-          aggs: {
-            sampled_value_count: {
-              filter: { exists: { field: 'url.path' } },
-            },
-            sampled_values: { terms: { field: 'url.path', size: 2 } },
-          },
+        sampled_value_count: {
+          filter: { exists: { field: 'url.path' } },
         },
+        sampled_values: { terms: { field: 'url.path', size: 2 } },
       };
       expect(req).toEqual(getExpectedQuery(expectedAggs));
     });
