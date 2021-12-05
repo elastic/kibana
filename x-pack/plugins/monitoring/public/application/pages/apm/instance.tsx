@@ -59,7 +59,7 @@ export const ApmInstancePage: React.FC<ComponentProps> = ({ clusters }) => {
   const getPageData = useCallback(async () => {
     const bounds = services.data?.query.timefilter.timefilter.getBounds();
     const url = `../api/monitoring/v1/clusters/${clusterUuid}/apm/${instance}`;
-    const response = await services.http?.fetch(url, {
+    const response = await services.http?.fetch<{ apmSummary: { name: string } }>(url, {
       method: 'POST',
       body: JSON.stringify({
         ccs,
@@ -71,7 +71,7 @@ export const ApmInstancePage: React.FC<ComponentProps> = ({ clusters }) => {
     });
 
     setData(response);
-    setInstanceName(response.apmSummary.name);
+    setInstanceName(response?.apmSummary.name || '');
   }, [ccs, clusterUuid, instance, services.data?.query.timefilter.timefilter, services.http]);
 
   return (

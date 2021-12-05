@@ -25,9 +25,15 @@ export interface CategoryAxisPanelProps {
   axis: CategoryAxis;
   onPositionChanged: (position: Position) => void;
   setCategoryAxis: (value: CategoryAxis) => void;
+  useMultiLayerAxis: boolean;
 }
 
-function CategoryAxisPanel({ axis, onPositionChanged, setCategoryAxis }: CategoryAxisPanelProps) {
+function CategoryAxisPanel({
+  axis,
+  onPositionChanged,
+  setCategoryAxis,
+  useMultiLayerAxis,
+}: CategoryAxisPanelProps) {
   const setAxis = useCallback(
     <T extends keyof CategoryAxis>(paramName: T, value: CategoryAxis[T]) => {
       const updatedAxis = {
@@ -95,6 +101,7 @@ function CategoryAxisPanel({ axis, onPositionChanged, setCategoryAxis }: Categor
           axisLabels={axis.labels}
           axisFilterCheckboxName={`xAxisFilterLabelsCheckbox${axis.id}`}
           setAxisLabel={setAxisLabel}
+          disableSingleLayerAxisControls={useMultiLayerAxis}
         />
       )}
     </EuiPanel>

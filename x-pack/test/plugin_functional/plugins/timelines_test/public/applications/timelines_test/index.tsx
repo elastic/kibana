@@ -66,6 +66,7 @@ const AppRoot = React.memo(
                 timelinesPluginSetup.getTGrid &&
                 timelinesPluginSetup.getTGrid<'standalone'>({
                   appId: 'securitySolution',
+                  casesOwner: 'securitySolutionUI',
                   type: 'standalone',
                   casePermissions: {
                     read: true,
@@ -74,6 +75,7 @@ const AppRoot = React.memo(
                   columns: [],
                   indexNames: [],
                   deletedEventIds: [],
+                  disabledCellActions: [],
                   end: '',
                   footerText: 'Events',
                   filters: [],
@@ -91,6 +93,7 @@ const AppRoot = React.memo(
                   setRefetch,
                   start: '',
                   rowRenderers: [],
+                  runtimeMappings: {},
                   filterStatus: 'open',
                   unit: (n: number) => `${n}`,
                 })) ??

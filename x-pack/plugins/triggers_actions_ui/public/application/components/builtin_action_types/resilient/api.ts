@@ -7,7 +7,7 @@
 
 import { HttpSetup } from 'kibana/public';
 import { BASE_ACTION_API_PATH } from '../../../constants';
-import { rewriteResponseToCamelCase } from '../rewrite_response_body';
+import { ConnectorExecutorResult, rewriteResponseToCamelCase } from '../rewrite_response_body';
 
 export async function getIncidentTypes({
   http,
@@ -18,7 +18,7 @@ export async function getIncidentTypes({
   signal: AbortSignal;
   connectorId: string;
 }): Promise<Record<string, any>> {
-  const res = await http.post(
+  const res = await http.post<ConnectorExecutorResult<unknown>>(
     `${BASE_ACTION_API_PATH}/connector/${encodeURIComponent(connectorId)}/_execute`,
     {
       body: JSON.stringify({
@@ -39,7 +39,7 @@ export async function getSeverity({
   signal: AbortSignal;
   connectorId: string;
 }): Promise<Record<string, any>> {
-  const res = await http.post(
+  const res = await http.post<ConnectorExecutorResult<unknown>>(
     `${BASE_ACTION_API_PATH}/connector/${encodeURIComponent(connectorId)}/_execute`,
     {
       body: JSON.stringify({

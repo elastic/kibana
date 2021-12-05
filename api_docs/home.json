@@ -1,7 +1,171 @@
 {
   "id": "home",
   "client": {
-    "classes": [],
+    "classes": [
+      {
+        "parentPluginId": "home",
+        "id": "def-public.FeatureCatalogueRegistry",
+        "type": "Class",
+        "tags": [],
+        "label": "FeatureCatalogueRegistry",
+        "description": [],
+        "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "home",
+            "id": "def-public.FeatureCatalogueRegistry.setup",
+            "type": "Function",
+            "tags": [],
+            "label": "setup",
+            "description": [],
+            "signature": [
+              "() => { register: (feature: ",
+              {
+                "pluginId": "home",
+                "scope": "public",
+                "docId": "kibHomePluginApi",
+                "section": "def-public.FeatureCatalogueEntry",
+                "text": "FeatureCatalogueEntry"
+              },
+              ") => void; registerSolution: (solution: ",
+              {
+                "pluginId": "home",
+                "scope": "public",
+                "docId": "kibHomePluginApi",
+                "section": "def-public.FeatureCatalogueSolution",
+                "text": "FeatureCatalogueSolution"
+              },
+              ") => void; }"
+            ],
+            "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "home",
+            "id": "def-public.FeatureCatalogueRegistry.start",
+            "type": "Function",
+            "tags": [],
+            "label": "start",
+            "description": [],
+            "signature": [
+              "({ capabilities }: { capabilities: ",
+              "Capabilities",
+              "; }) => void"
+            ],
+            "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "home",
+                "id": "def-public.FeatureCatalogueRegistry.start.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "{ capabilities }",
+                "description": [],
+                "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
+                "deprecated": false,
+                "children": [
+                  {
+                    "parentPluginId": "home",
+                    "id": "def-public.FeatureCatalogueRegistry.start.$1.capabilities",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "capabilities",
+                    "description": [],
+                    "signature": [
+                      "Capabilities"
+                    ],
+                    "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
+                    "deprecated": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "home",
+            "id": "def-public.FeatureCatalogueRegistry.get",
+            "type": "Function",
+            "tags": [],
+            "label": "get",
+            "description": [],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "home",
+                "scope": "public",
+                "docId": "kibHomePluginApi",
+                "section": "def-public.FeatureCatalogueEntry",
+                "text": "FeatureCatalogueEntry"
+              },
+              "[]"
+            ],
+            "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "home",
+            "id": "def-public.FeatureCatalogueRegistry.getSolutions",
+            "type": "Function",
+            "tags": [],
+            "label": "getSolutions",
+            "description": [],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "home",
+                "scope": "public",
+                "docId": "kibHomePluginApi",
+                "section": "def-public.FeatureCatalogueSolution",
+                "text": "FeatureCatalogueSolution"
+              },
+              "[]"
+            ],
+            "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "home",
+            "id": "def-public.FeatureCatalogueRegistry.removeFeature",
+            "type": "Function",
+            "tags": [],
+            "label": "removeFeature",
+            "description": [],
+            "signature": [
+              "(appId: string) => void"
+            ],
+            "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "home",
+                "id": "def-public.FeatureCatalogueRegistry.removeFeature.$1",
+                "type": "string",
+                "tags": [],
+                "label": "appId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "functions": [
       {
         "parentPluginId": "home",
@@ -43,6 +207,81 @@
       }
     ],
     "interfaces": [
+      {
+        "parentPluginId": "home",
+        "id": "def-public.AddDataTab",
+        "type": "Interface",
+        "tags": [],
+        "label": "AddDataTab",
+        "description": [],
+        "path": "src/plugins/home/public/services/add_data/add_data_service.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "home",
+            "id": "def-public.AddDataTab.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "src/plugins/home/public/services/add_data/add_data_service.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "home",
+            "id": "def-public.AddDataTab.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "src/plugins/home/public/services/add_data/add_data_service.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "home",
+            "id": "def-public.AddDataTab.component",
+            "type": "Function",
+            "tags": [],
+            "label": "component",
+            "description": [],
+            "signature": [
+              "React.FunctionComponent<{}>"
+            ],
+            "path": "src/plugins/home/public/services/add_data/add_data_service.ts",
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "home",
+                "id": "def-public.AddDataTab.component.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "props",
+                "description": [],
+                "signature": [
+                  "P & { children?: React.ReactNode; }"
+                ],
+                "path": "node_modules/@types/react/index.d.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "home",
+                "id": "def-public.AddDataTab.component.$2",
+                "type": "Any",
+                "tags": [],
+                "label": "context",
+                "description": [],
+                "signature": [
+                  "any"
+                ],
+                "path": "node_modules/@types/react/index.d.ts",
+                "deprecated": false
+              }
+            ]
+          }
+        ],
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "home",
         "id": "def-public.Environment",
@@ -463,49 +702,6 @@
       },
       {
         "parentPluginId": "home",
-        "id": "def-public.TutorialDirectoryNoticeComponent",
-        "type": "Type",
-        "tags": [],
-        "label": "TutorialDirectoryNoticeComponent",
-        "description": [],
-        "signature": [
-          "React.FunctionComponent<{}>"
-        ],
-        "path": "src/plugins/home/public/services/tutorials/tutorial_service.ts",
-        "deprecated": false,
-        "returnComment": [],
-        "children": [
-          {
-            "parentPluginId": "home",
-            "id": "def-public.TutorialDirectoryNoticeComponent.$1",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "props",
-            "description": [],
-            "signature": [
-              "P & { children?: React.ReactNode; }"
-            ],
-            "path": "node_modules/@types/react/index.d.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "home",
-            "id": "def-public.TutorialDirectoryNoticeComponent.$2",
-            "type": "Any",
-            "tags": [],
-            "label": "context",
-            "description": [],
-            "signature": [
-              "any"
-            ],
-            "path": "node_modules/@types/react/index.d.ts",
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "home",
         "id": "def-public.TutorialModuleNoticeComponent",
         "type": "Type",
         "tags": [],
@@ -555,7 +751,7 @@
         "label": "TutorialSetup",
         "description": [],
         "signature": [
-          "{ setVariable: (key: string, value: unknown) => void; registerDirectoryNotice: (id: string, component: React.FC<{}>) => void; registerDirectoryHeaderLink: (id: string, component: React.FC<{}>) => void; registerModuleNotice: (id: string, component: React.FC<{ moduleName: string; }>) => void; registerCustomStatusCheck: (name: string, fnCallback: CustomStatusCheckCallback) => void; registerCustomComponent: (name: string, component: CustomComponent) => void; }"
+          "{ setVariable: (key: string, value: unknown) => void; registerDirectoryHeaderLink: (id: string, component: React.FC<{}>) => void; registerModuleNotice: (id: string, component: React.FC<{ moduleName: string; }>) => void; registerCustomStatusCheck: (name: string, fnCallback: CustomStatusCheckCallback) => void; registerCustomComponent: (name: string, component: CustomComponent) => void; }"
         ],
         "path": "src/plugins/home/public/plugin.ts",
         "deprecated": false,
@@ -789,7 +985,7 @@
           "label": "tutorials",
           "description": [],
           "signature": [
-            "{ setVariable: (key: string, value: unknown) => void; registerDirectoryNotice: (id: string, component: React.FC<{}>) => void; registerDirectoryHeaderLink: (id: string, component: React.FC<{}>) => void; registerModuleNotice: (id: string, component: React.FC<{ moduleName: string; }>) => void; registerCustomStatusCheck: (name: string, fnCallback: CustomStatusCheckCallback) => void; registerCustomComponent: (name: string, component: CustomComponent) => void; }"
+            "{ setVariable: (key: string, value: unknown) => void; registerDirectoryHeaderLink: (id: string, component: React.FC<{}>) => void; registerModuleNotice: (id: string, component: React.FC<{ moduleName: string; }>) => void; registerCustomStatusCheck: (name: string, fnCallback: CustomStatusCheckCallback) => void; registerCustomComponent: (name: string, component: CustomComponent) => void; }"
           ],
           "path": "src/plugins/home/public/plugin.ts",
           "deprecated": false
@@ -803,7 +999,13 @@
           "description": [],
           "signature": [
             "{ registerAddDataTab: (tab: ",
-            "AddDataTab",
+            {
+              "pluginId": "home",
+              "scope": "public",
+              "docId": "kibHomePluginApi",
+              "section": "def-public.AddDataTab",
+              "text": "AddDataTab"
+            },
             ") => void; }"
           ],
           "path": "src/plugins/home/public/plugin.ts",
@@ -895,7 +1097,13 @@
           "label": "featureCatalogue",
           "description": [],
           "signature": [
-            "FeatureCatalogueRegistry"
+            {
+              "pluginId": "home",
+              "scope": "public",
+              "docId": "kibHomePluginApi",
+              "section": "def-public.FeatureCatalogueRegistry",
+              "text": "FeatureCatalogueRegistry"
+            }
           ],
           "path": "src/plugins/home/public/plugin.ts",
           "deprecated": false
@@ -908,8 +1116,263 @@
   "server": {
     "classes": [],
     "functions": [],
-    "interfaces": [],
+    "interfaces": [
+      {
+        "parentPluginId": "home",
+        "id": "def-server.AppLinkData",
+        "type": "Interface",
+        "tags": [],
+        "label": "AppLinkData",
+        "description": [
+          "\nThis type is used by consumers to register a new app link for a sample dataset."
+        ],
+        "path": "src/plugins/home/server/services/sample_data/lib/sample_dataset_registry_types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "home",
+            "id": "def-server.AppLinkData.sampleObject",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "sampleObject",
+            "description": [
+              "\nThe sample object that is used for this app link's path; if the path does not use an object ID, set this to null."
+            ],
+            "signature": [
+              {
+                "pluginId": "home",
+                "scope": "server",
+                "docId": "kibHomePluginApi",
+                "section": "def-server.SampleObject",
+                "text": "SampleObject"
+              },
+              " | null"
+            ],
+            "path": "src/plugins/home/server/services/sample_data/lib/sample_dataset_registry_types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "home",
+            "id": "def-server.AppLinkData.getPath",
+            "type": "Function",
+            "tags": [],
+            "label": "getPath",
+            "description": [
+              "\nFunction that returns the path for this app link. Note that the `objectId` can be different than the given `sampleObject.id`, depending\non how the sample data was installed. If the `sampleObject` is null, the `objectId` argument will be an empty string."
+            ],
+            "signature": [
+              "(objectId: string) => string"
+            ],
+            "path": "src/plugins/home/server/services/sample_data/lib/sample_dataset_registry_types.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "home",
+                "id": "def-server.AppLinkData.getPath.$1",
+                "type": "string",
+                "tags": [],
+                "label": "objectId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/plugins/home/server/services/sample_data/lib/sample_dataset_registry_types.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "home",
+            "id": "def-server.AppLinkData.label",
+            "type": "string",
+            "tags": [],
+            "label": "label",
+            "description": [
+              "\nThe label for this app link."
+            ],
+            "path": "src/plugins/home/server/services/sample_data/lib/sample_dataset_registry_types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "home",
+            "id": "def-server.AppLinkData.icon",
+            "type": "string",
+            "tags": [],
+            "label": "icon",
+            "description": [
+              "\nThe icon for this app link."
+            ],
+            "path": "src/plugins/home/server/services/sample_data/lib/sample_dataset_registry_types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "home",
+        "id": "def-server.SampleDatasetDashboardPanel",
+        "type": "Interface",
+        "tags": [],
+        "label": "SampleDatasetDashboardPanel",
+        "description": [],
+        "path": "src/plugins/home/server/services/sample_data/lib/sample_dataset_registry_types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "home",
+            "id": "def-server.SampleDatasetDashboardPanel.sampleDataId",
+            "type": "string",
+            "tags": [],
+            "label": "sampleDataId",
+            "description": [],
+            "path": "src/plugins/home/server/services/sample_data/lib/sample_dataset_registry_types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "home",
+            "id": "def-server.SampleDatasetDashboardPanel.dashboardId",
+            "type": "string",
+            "tags": [],
+            "label": "dashboardId",
+            "description": [],
+            "path": "src/plugins/home/server/services/sample_data/lib/sample_dataset_registry_types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "home",
+            "id": "def-server.SampleDatasetDashboardPanel.oldEmbeddableId",
+            "type": "string",
+            "tags": [],
+            "label": "oldEmbeddableId",
+            "description": [],
+            "path": "src/plugins/home/server/services/sample_data/lib/sample_dataset_registry_types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "home",
+            "id": "def-server.SampleDatasetDashboardPanel.embeddableId",
+            "type": "string",
+            "tags": [],
+            "label": "embeddableId",
+            "description": [],
+            "path": "src/plugins/home/server/services/sample_data/lib/sample_dataset_registry_types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "home",
+            "id": "def-server.SampleDatasetDashboardPanel.embeddableType",
+            "type": "Enum",
+            "tags": [],
+            "label": "embeddableType",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "home",
+                "scope": "server",
+                "docId": "kibHomePluginApi",
+                "section": "def-server.EmbeddableTypes",
+                "text": "EmbeddableTypes"
+              }
+            ],
+            "path": "src/plugins/home/server/services/sample_data/lib/sample_dataset_registry_types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "home",
+            "id": "def-server.SampleDatasetDashboardPanel.embeddableConfig",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "embeddableConfig",
+            "description": [],
+            "signature": [
+              "object"
+            ],
+            "path": "src/plugins/home/server/services/sample_data/lib/sample_dataset_registry_types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "home",
+        "id": "def-server.SampleObject",
+        "type": "Interface",
+        "tags": [],
+        "label": "SampleObject",
+        "description": [
+          "This type is used to identify an object in a sample dataset."
+        ],
+        "path": "src/plugins/home/server/services/sample_data/lib/sample_dataset_registry_types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "home",
+            "id": "def-server.SampleObject.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [
+              "The type of the sample object."
+            ],
+            "path": "src/plugins/home/server/services/sample_data/lib/sample_dataset_registry_types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "home",
+            "id": "def-server.SampleObject.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [
+              "The ID of the sample object."
+            ],
+            "path": "src/plugins/home/server/services/sample_data/lib/sample_dataset_registry_types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "home",
+        "id": "def-server.TutorialContext",
+        "type": "Interface",
+        "tags": [],
+        "label": "TutorialContext",
+        "description": [],
+        "path": "src/plugins/home/server/services/tutorials/lib/tutorials_registry_types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "home",
+            "id": "def-server.TutorialContext.Unnamed",
+            "type": "Any",
+            "tags": [],
+            "label": "Unnamed",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "src/plugins/home/server/services/tutorials/lib/tutorials_registry_types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "enums": [
+      {
+        "parentPluginId": "home",
+        "id": "def-server.EmbeddableTypes",
+        "type": "Enum",
+        "tags": [],
+        "label": "EmbeddableTypes",
+        "description": [],
+        "path": "src/plugins/home/server/services/sample_data/lib/sample_dataset_registry_types.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "home",
         "id": "def-server.TutorialsCategory",
@@ -931,7 +1394,7 @@
         "label": "ArtifactsSchema",
         "description": [],
         "signature": [
-          "{ readonly application?: Readonly<{} & { label: string; path: string; }> | undefined; readonly exportedFields?: Readonly<{} & { documentationUrl: string; }> | undefined; readonly dashboards: Readonly<{ linkLabel?: string | undefined; } & { id: string; isOverview: boolean; }>[]; }"
+          "{ readonly application?: Readonly<{} & { path: string; label: string; }> | undefined; readonly exportedFields?: Readonly<{} & { documentationUrl: string; }> | undefined; readonly dashboards: Readonly<{ linkLabel?: string | undefined; } & { id: string; isOverview: boolean; }>[]; }"
         ],
         "path": "src/plugins/home/server/services/tutorials/lib/tutorial_schema.ts",
         "deprecated": false,
@@ -959,7 +1422,7 @@
         "label": "InstructionsSchema",
         "description": [],
         "signature": [
-          "{ readonly params?: Readonly<{ defaultValue?: any; } & { label: string; type: \"string\" | \"number\"; id: string; }>[] | undefined; readonly instructionSets: Readonly<{ title?: string | undefined; callOut?: Readonly<{ iconType?: string | undefined; message?: string | undefined; } & { title: string; }> | undefined; statusCheck?: Readonly<{ title?: string | undefined; text?: string | undefined; error?: string | undefined; success?: string | undefined; btnLabel?: string | undefined; } & { esHitsCheck: Readonly<{} & { query: Record<string, any>; index: string | string[]; }>; }> | undefined; } & { instructionVariants: Readonly<{} & { id: string; instructions: Readonly<{ title?: string | undefined; commands?: string[] | undefined; textPre?: string | undefined; textPost?: string | undefined; customComponentName?: string | undefined; } & {}>[]; }>[]; }>[]; }"
+          "{ readonly params?: Readonly<{ defaultValue?: any; } & { type: \"string\" | \"number\"; id: string; label: string; }>[] | undefined; readonly instructionSets: Readonly<{ title?: string | undefined; callOut?: Readonly<{ iconType?: string | undefined; message?: string | undefined; } & { title: string; }> | undefined; statusCheck?: Readonly<{ title?: string | undefined; text?: string | undefined; error?: string | undefined; success?: string | undefined; btnLabel?: string | undefined; } & { esHitsCheck: Readonly<{} & { query: Record<string, any>; index: string | string[]; }>; }> | undefined; } & { instructionVariants: Readonly<{} & { id: string; instructions: Readonly<{ title?: string | undefined; commands?: string[] | undefined; textPre?: string | undefined; textPost?: string | undefined; customComponentName?: string | undefined; } & {}>[]; }>[]; }>[]; }"
         ],
         "path": "src/plugins/home/server/services/tutorials/lib/tutorial_schema.ts",
         "deprecated": false,
@@ -981,10 +1444,24 @@
             "section": "def-server.Writable",
             "text": "Writable"
           },
-          "<Readonly<{ status?: string | undefined; darkPreviewImagePath?: string | undefined; iconPath?: string | undefined; statusMsg?: string | undefined; } & { id: string; description: string; name: string; defaultIndex: string; savedObjects: Readonly<{ version?: any; attributes?: any; } & { type: string; id: string; references: any[]; }>[]; previewImagePath: string; overviewDashboard: string; appLinks: Readonly<{} & { label: string; path: string; icon: string; }>[]; dataIndices: Readonly<{} & { id: string; fields: Record<string, any>; timeFields: string[]; dataPath: string; currentTimeMarker: string; preserveDayOfWeekTimeOfDay: boolean; }>[]; }>>[]; addSavedObjectsToSampleDataset: (id: string, savedObjects: ",
+          "<Readonly<{ status?: string | undefined; darkPreviewImagePath?: string | undefined; iconPath?: string | undefined; statusMsg?: string | undefined; } & { name: string; description: string; id: string; defaultIndex: string; savedObjects: Readonly<{ version?: any; attributes?: any; } & { type: string; id: string; references: any[]; }>[]; previewImagePath: string; overviewDashboard: string; dataIndices: Readonly<{} & { fields: Record<string, any>; id: string; timeFields: string[]; dataPath: string; currentTimeMarker: string; preserveDayOfWeekTimeOfDay: boolean; }>[]; }>>[]; addSavedObjectsToSampleDataset: (id: string, savedObjects: ",
           "SavedObject",
-          "<unknown>[]) => void; addAppLinksToSampleDataset: (id: string, appLinks: Readonly<{} & { label: string; path: string; icon: string; }>[]) => void; replacePanelInSampleDatasetDashboard: ({ sampleDataId, dashboardId, oldEmbeddableId, embeddableId, embeddableType, embeddableConfig, }: ",
-          "SampleDatasetDashboardPanel",
+          "<unknown>[]) => void; addAppLinksToSampleDataset: (id: string, appLinks: ",
+          {
+            "pluginId": "home",
+            "scope": "server",
+            "docId": "kibHomePluginApi",
+            "section": "def-server.AppLinkData",
+            "text": "AppLinkData"
+          },
+          "[]) => void; replacePanelInSampleDatasetDashboard: ({ sampleDataId, dashboardId, oldEmbeddableId, embeddableId, embeddableType, embeddableConfig, }: ",
+          {
+            "pluginId": "home",
+            "scope": "server",
+            "docId": "kibHomePluginApi",
+            "section": "def-server.SampleDatasetDashboardPanel",
+            "text": "SampleDatasetDashboardPanel"
+          },
           ") => void; }"
         ],
         "path": "src/plugins/home/server/services/sample_data/sample_data_registry.ts",
@@ -1007,12 +1484,42 @@
             "section": "def-server.Writable",
             "text": "Writable"
           },
-          "<Readonly<{ status?: string | undefined; darkPreviewImagePath?: string | undefined; iconPath?: string | undefined; statusMsg?: string | undefined; } & { id: string; description: string; name: string; defaultIndex: string; savedObjects: Readonly<{ version?: any; attributes?: any; } & { type: string; id: string; references: any[]; }>[]; previewImagePath: string; overviewDashboard: string; appLinks: Readonly<{} & { label: string; path: string; icon: string; }>[]; dataIndices: Readonly<{} & { id: string; fields: Record<string, any>; timeFields: string[]; dataPath: string; currentTimeMarker: string; preserveDayOfWeekTimeOfDay: boolean; }>[]; }>>"
+          "<Readonly<{ status?: string | undefined; darkPreviewImagePath?: string | undefined; iconPath?: string | undefined; statusMsg?: string | undefined; } & { name: string; description: string; id: string; defaultIndex: string; savedObjects: Readonly<{ version?: any; attributes?: any; } & { type: string; id: string; references: any[]; }>[]; previewImagePath: string; overviewDashboard: string; dataIndices: Readonly<{} & { fields: Record<string, any>; id: string; timeFields: string[]; dataPath: string; currentTimeMarker: string; preserveDayOfWeekTimeOfDay: boolean; }>[]; }>>"
         ],
         "path": "src/plugins/home/server/services/sample_data/lib/sample_dataset_registry_types.ts",
         "deprecated": false,
         "returnComment": [],
         "children": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "home",
+        "id": "def-server.ScopedTutorialContextFactory",
+        "type": "Type",
+        "tags": [],
+        "label": "ScopedTutorialContextFactory",
+        "description": [],
+        "signature": [
+          "(...args: any[]) => any"
+        ],
+        "path": "src/plugins/home/server/services/tutorials/lib/tutorials_registry_types.ts",
+        "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "home",
+            "id": "def-server.ScopedTutorialContextFactory.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "args",
+            "description": [],
+            "signature": [
+              "any[]"
+            ],
+            "path": "src/plugins/home/server/services/tutorials/lib/tutorials_registry_types.ts",
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -1024,8 +1531,14 @@
         "description": [],
         "signature": [
           "(context: ",
-          "TutorialContext",
-          ") => Readonly<{ isBeta?: boolean | undefined; savedObjects?: any[] | undefined; euiIconType?: string | undefined; previewImagePath?: string | undefined; moduleName?: string | undefined; completionTimeMinutes?: number | undefined; elasticCloud?: Readonly<{ params?: Readonly<{ defaultValue?: any; } & { label: string; type: \"string\" | \"number\"; id: string; }>[] | undefined; } & { instructionSets: Readonly<{ title?: string | undefined; callOut?: Readonly<{ iconType?: string | undefined; message?: string | undefined; } & { title: string; }> | undefined; statusCheck?: Readonly<{ title?: string | undefined; text?: string | undefined; error?: string | undefined; success?: string | undefined; btnLabel?: string | undefined; } & { esHitsCheck: Readonly<{} & { query: Record<string, any>; index: string | string[]; }>; }> | undefined; } & { instructionVariants: Readonly<{} & { id: string; instructions: Readonly<{ title?: string | undefined; commands?: string[] | undefined; textPre?: string | undefined; textPost?: string | undefined; customComponentName?: string | undefined; } & {}>[]; }>[]; }>[]; }> | undefined; onPremElasticCloud?: Readonly<{ params?: Readonly<{ defaultValue?: any; } & { label: string; type: \"string\" | \"number\"; id: string; }>[] | undefined; } & { instructionSets: Readonly<{ title?: string | undefined; callOut?: Readonly<{ iconType?: string | undefined; message?: string | undefined; } & { title: string; }> | undefined; statusCheck?: Readonly<{ title?: string | undefined; text?: string | undefined; error?: string | undefined; success?: string | undefined; btnLabel?: string | undefined; } & { esHitsCheck: Readonly<{} & { query: Record<string, any>; index: string | string[]; }>; }> | undefined; } & { instructionVariants: Readonly<{} & { id: string; instructions: Readonly<{ title?: string | undefined; commands?: string[] | undefined; textPre?: string | undefined; textPost?: string | undefined; customComponentName?: string | undefined; } & {}>[]; }>[]; }>[]; }> | undefined; artifacts?: Readonly<{ application?: Readonly<{} & { label: string; path: string; }> | undefined; exportedFields?: Readonly<{} & { documentationUrl: string; }> | undefined; } & { dashboards: Readonly<{ linkLabel?: string | undefined; } & { id: string; isOverview: boolean; }>[]; }> | undefined; savedObjectsInstallMsg?: string | undefined; customStatusCheckName?: string | undefined; integrationBrowserCategories?: string[] | undefined; eprPackageOverlap?: string | undefined; } & { id: string; name: string; category: \"other\" | \"security\" | \"metrics\" | \"logging\"; shortDescription: string; longDescription: string; onPrem: Readonly<{ params?: Readonly<{ defaultValue?: any; } & { label: string; type: \"string\" | \"number\"; id: string; }>[] | undefined; } & { instructionSets: Readonly<{ title?: string | undefined; callOut?: Readonly<{ iconType?: string | undefined; message?: string | undefined; } & { title: string; }> | undefined; statusCheck?: Readonly<{ title?: string | undefined; text?: string | undefined; error?: string | undefined; success?: string | undefined; btnLabel?: string | undefined; } & { esHitsCheck: Readonly<{} & { query: Record<string, any>; index: string | string[]; }>; }> | undefined; } & { instructionVariants: Readonly<{} & { id: string; instructions: Readonly<{ title?: string | undefined; commands?: string[] | undefined; textPre?: string | undefined; textPost?: string | undefined; customComponentName?: string | undefined; } & {}>[]; }>[]; }>[]; }>; }>"
+          {
+            "pluginId": "home",
+            "scope": "server",
+            "docId": "kibHomePluginApi",
+            "section": "def-server.TutorialContext",
+            "text": "TutorialContext"
+          },
+          ") => Readonly<{ savedObjects?: any[] | undefined; isBeta?: boolean | undefined; euiIconType?: string | undefined; previewImagePath?: string | undefined; moduleName?: string | undefined; completionTimeMinutes?: number | undefined; elasticCloud?: Readonly<{ params?: Readonly<{ defaultValue?: any; } & { type: \"string\" | \"number\"; id: string; label: string; }>[] | undefined; } & { instructionSets: Readonly<{ title?: string | undefined; callOut?: Readonly<{ iconType?: string | undefined; message?: string | undefined; } & { title: string; }> | undefined; statusCheck?: Readonly<{ title?: string | undefined; text?: string | undefined; error?: string | undefined; success?: string | undefined; btnLabel?: string | undefined; } & { esHitsCheck: Readonly<{} & { query: Record<string, any>; index: string | string[]; }>; }> | undefined; } & { instructionVariants: Readonly<{} & { id: string; instructions: Readonly<{ title?: string | undefined; commands?: string[] | undefined; textPre?: string | undefined; textPost?: string | undefined; customComponentName?: string | undefined; } & {}>[]; }>[]; }>[]; }> | undefined; onPremElasticCloud?: Readonly<{ params?: Readonly<{ defaultValue?: any; } & { type: \"string\" | \"number\"; id: string; label: string; }>[] | undefined; } & { instructionSets: Readonly<{ title?: string | undefined; callOut?: Readonly<{ iconType?: string | undefined; message?: string | undefined; } & { title: string; }> | undefined; statusCheck?: Readonly<{ title?: string | undefined; text?: string | undefined; error?: string | undefined; success?: string | undefined; btnLabel?: string | undefined; } & { esHitsCheck: Readonly<{} & { query: Record<string, any>; index: string | string[]; }>; }> | undefined; } & { instructionVariants: Readonly<{} & { id: string; instructions: Readonly<{ title?: string | undefined; commands?: string[] | undefined; textPre?: string | undefined; textPost?: string | undefined; customComponentName?: string | undefined; } & {}>[]; }>[]; }>[]; }> | undefined; artifacts?: Readonly<{ application?: Readonly<{} & { path: string; label: string; }> | undefined; exportedFields?: Readonly<{} & { documentationUrl: string; }> | undefined; } & { dashboards: Readonly<{ linkLabel?: string | undefined; } & { id: string; isOverview: boolean; }>[]; }> | undefined; savedObjectsInstallMsg?: string | undefined; customStatusCheckName?: string | undefined; integrationBrowserCategories?: string[] | undefined; eprPackageOverlap?: string | undefined; } & { name: string; id: string; category: \"metrics\" | \"security\" | \"other\" | \"logging\"; shortDescription: string; longDescription: string; onPrem: Readonly<{ params?: Readonly<{ defaultValue?: any; } & { type: \"string\" | \"number\"; id: string; label: string; }>[] | undefined; } & { instructionSets: Readonly<{ title?: string | undefined; callOut?: Readonly<{ iconType?: string | undefined; message?: string | undefined; } & { title: string; }> | undefined; statusCheck?: Readonly<{ title?: string | undefined; text?: string | undefined; error?: string | undefined; success?: string | undefined; btnLabel?: string | undefined; } & { esHitsCheck: Readonly<{} & { query: Record<string, any>; index: string | string[]; }>; }> | undefined; } & { instructionVariants: Readonly<{} & { id: string; instructions: Readonly<{ title?: string | undefined; commands?: string[] | undefined; textPre?: string | undefined; textPost?: string | undefined; customComponentName?: string | undefined; } & {}>[]; }>[]; }>[]; }>; }>"
         ],
         "path": "src/plugins/home/server/services/tutorials/lib/tutorials_registry_types.ts",
         "deprecated": false,
@@ -1039,7 +1552,13 @@
             "label": "context",
             "description": [],
             "signature": [
-              "TutorialContext"
+              {
+                "pluginId": "home",
+                "scope": "server",
+                "docId": "kibHomePluginApi",
+                "section": "def-server.TutorialContext",
+                "text": "TutorialContext"
+              }
             ],
             "path": "src/plugins/home/server/services/tutorials/lib/tutorials_registry_types.ts",
             "deprecated": false
@@ -1055,7 +1574,7 @@
         "label": "TutorialSchema",
         "description": [],
         "signature": [
-          "{ readonly isBeta?: boolean | undefined; readonly savedObjects?: any[] | undefined; readonly euiIconType?: string | undefined; readonly previewImagePath?: string | undefined; readonly moduleName?: string | undefined; readonly completionTimeMinutes?: number | undefined; readonly elasticCloud?: Readonly<{ params?: Readonly<{ defaultValue?: any; } & { label: string; type: \"string\" | \"number\"; id: string; }>[] | undefined; } & { instructionSets: Readonly<{ title?: string | undefined; callOut?: Readonly<{ iconType?: string | undefined; message?: string | undefined; } & { title: string; }> | undefined; statusCheck?: Readonly<{ title?: string | undefined; text?: string | undefined; error?: string | undefined; success?: string | undefined; btnLabel?: string | undefined; } & { esHitsCheck: Readonly<{} & { query: Record<string, any>; index: string | string[]; }>; }> | undefined; } & { instructionVariants: Readonly<{} & { id: string; instructions: Readonly<{ title?: string | undefined; commands?: string[] | undefined; textPre?: string | undefined; textPost?: string | undefined; customComponentName?: string | undefined; } & {}>[]; }>[]; }>[]; }> | undefined; readonly onPremElasticCloud?: Readonly<{ params?: Readonly<{ defaultValue?: any; } & { label: string; type: \"string\" | \"number\"; id: string; }>[] | undefined; } & { instructionSets: Readonly<{ title?: string | undefined; callOut?: Readonly<{ iconType?: string | undefined; message?: string | undefined; } & { title: string; }> | undefined; statusCheck?: Readonly<{ title?: string | undefined; text?: string | undefined; error?: string | undefined; success?: string | undefined; btnLabel?: string | undefined; } & { esHitsCheck: Readonly<{} & { query: Record<string, any>; index: string | string[]; }>; }> | undefined; } & { instructionVariants: Readonly<{} & { id: string; instructions: Readonly<{ title?: string | undefined; commands?: string[] | undefined; textPre?: string | undefined; textPost?: string | undefined; customComponentName?: string | undefined; } & {}>[]; }>[]; }>[]; }> | undefined; readonly artifacts?: Readonly<{ application?: Readonly<{} & { label: string; path: string; }> | undefined; exportedFields?: Readonly<{} & { documentationUrl: string; }> | undefined; } & { dashboards: Readonly<{ linkLabel?: string | undefined; } & { id: string; isOverview: boolean; }>[]; }> | undefined; readonly savedObjectsInstallMsg?: string | undefined; readonly customStatusCheckName?: string | undefined; readonly integrationBrowserCategories?: string[] | undefined; readonly eprPackageOverlap?: string | undefined; readonly id: string; readonly name: string; readonly category: \"other\" | \"security\" | \"metrics\" | \"logging\"; readonly shortDescription: string; readonly longDescription: string; readonly onPrem: Readonly<{ params?: Readonly<{ defaultValue?: any; } & { label: string; type: \"string\" | \"number\"; id: string; }>[] | undefined; } & { instructionSets: Readonly<{ title?: string | undefined; callOut?: Readonly<{ iconType?: string | undefined; message?: string | undefined; } & { title: string; }> | undefined; statusCheck?: Readonly<{ title?: string | undefined; text?: string | undefined; error?: string | undefined; success?: string | undefined; btnLabel?: string | undefined; } & { esHitsCheck: Readonly<{} & { query: Record<string, any>; index: string | string[]; }>; }> | undefined; } & { instructionVariants: Readonly<{} & { id: string; instructions: Readonly<{ title?: string | undefined; commands?: string[] | undefined; textPre?: string | undefined; textPost?: string | undefined; customComponentName?: string | undefined; } & {}>[]; }>[]; }>[]; }>; }"
+          "{ readonly savedObjects?: any[] | undefined; readonly isBeta?: boolean | undefined; readonly euiIconType?: string | undefined; readonly previewImagePath?: string | undefined; readonly moduleName?: string | undefined; readonly completionTimeMinutes?: number | undefined; readonly elasticCloud?: Readonly<{ params?: Readonly<{ defaultValue?: any; } & { type: \"string\" | \"number\"; id: string; label: string; }>[] | undefined; } & { instructionSets: Readonly<{ title?: string | undefined; callOut?: Readonly<{ iconType?: string | undefined; message?: string | undefined; } & { title: string; }> | undefined; statusCheck?: Readonly<{ title?: string | undefined; text?: string | undefined; error?: string | undefined; success?: string | undefined; btnLabel?: string | undefined; } & { esHitsCheck: Readonly<{} & { query: Record<string, any>; index: string | string[]; }>; }> | undefined; } & { instructionVariants: Readonly<{} & { id: string; instructions: Readonly<{ title?: string | undefined; commands?: string[] | undefined; textPre?: string | undefined; textPost?: string | undefined; customComponentName?: string | undefined; } & {}>[]; }>[]; }>[]; }> | undefined; readonly onPremElasticCloud?: Readonly<{ params?: Readonly<{ defaultValue?: any; } & { type: \"string\" | \"number\"; id: string; label: string; }>[] | undefined; } & { instructionSets: Readonly<{ title?: string | undefined; callOut?: Readonly<{ iconType?: string | undefined; message?: string | undefined; } & { title: string; }> | undefined; statusCheck?: Readonly<{ title?: string | undefined; text?: string | undefined; error?: string | undefined; success?: string | undefined; btnLabel?: string | undefined; } & { esHitsCheck: Readonly<{} & { query: Record<string, any>; index: string | string[]; }>; }> | undefined; } & { instructionVariants: Readonly<{} & { id: string; instructions: Readonly<{ title?: string | undefined; commands?: string[] | undefined; textPre?: string | undefined; textPost?: string | undefined; customComponentName?: string | undefined; } & {}>[]; }>[]; }>[]; }> | undefined; readonly artifacts?: Readonly<{ application?: Readonly<{} & { path: string; label: string; }> | undefined; exportedFields?: Readonly<{} & { documentationUrl: string; }> | undefined; } & { dashboards: Readonly<{ linkLabel?: string | undefined; } & { id: string; isOverview: boolean; }>[]; }> | undefined; readonly savedObjectsInstallMsg?: string | undefined; readonly customStatusCheckName?: string | undefined; readonly integrationBrowserCategories?: string[] | undefined; readonly eprPackageOverlap?: string | undefined; readonly name: string; readonly id: string; readonly category: \"metrics\" | \"security\" | \"other\" | \"logging\"; readonly shortDescription: string; readonly longDescription: string; readonly onPrem: Readonly<{ params?: Readonly<{ defaultValue?: any; } & { type: \"string\" | \"number\"; id: string; label: string; }>[] | undefined; } & { instructionSets: Readonly<{ title?: string | undefined; callOut?: Readonly<{ iconType?: string | undefined; message?: string | undefined; } & { title: string; }> | undefined; statusCheck?: Readonly<{ title?: string | undefined; text?: string | undefined; error?: string | undefined; success?: string | undefined; btnLabel?: string | undefined; } & { esHitsCheck: Readonly<{} & { query: Record<string, any>; index: string | string[]; }>; }> | undefined; } & { instructionVariants: Readonly<{} & { id: string; instructions: Readonly<{ title?: string | undefined; commands?: string[] | undefined; textPre?: string | undefined; textPost?: string | undefined; customComponentName?: string | undefined; } & {}>[]; }>[]; }>[]; }>; }"
         ],
         "path": "src/plugins/home/server/services/tutorials/lib/tutorial_schema.ts",
         "deprecated": false,
@@ -1292,7 +1811,13 @@
               "text": "TutorialProvider"
             },
             ") => void; addScopedTutorialContextFactory: (scopedTutorialContextFactory: ",
-            "ScopedTutorialContextFactory",
+            {
+              "pluginId": "home",
+              "scope": "server",
+              "docId": "kibHomePluginApi",
+              "section": "def-server.ScopedTutorialContextFactory",
+              "text": "ScopedTutorialContextFactory"
+            },
             ") => void; }"
           ],
           "path": "src/plugins/home/server/plugin.ts",
@@ -1314,10 +1839,24 @@
               "section": "def-server.Writable",
               "text": "Writable"
             },
-            "<Readonly<{ status?: string | undefined; darkPreviewImagePath?: string | undefined; iconPath?: string | undefined; statusMsg?: string | undefined; } & { id: string; description: string; name: string; defaultIndex: string; savedObjects: Readonly<{ version?: any; attributes?: any; } & { type: string; id: string; references: any[]; }>[]; previewImagePath: string; overviewDashboard: string; appLinks: Readonly<{} & { label: string; path: string; icon: string; }>[]; dataIndices: Readonly<{} & { id: string; fields: Record<string, any>; timeFields: string[]; dataPath: string; currentTimeMarker: string; preserveDayOfWeekTimeOfDay: boolean; }>[]; }>>[]; addSavedObjectsToSampleDataset: (id: string, savedObjects: ",
+            "<Readonly<{ status?: string | undefined; darkPreviewImagePath?: string | undefined; iconPath?: string | undefined; statusMsg?: string | undefined; } & { name: string; description: string; id: string; defaultIndex: string; savedObjects: Readonly<{ version?: any; attributes?: any; } & { type: string; id: string; references: any[]; }>[]; previewImagePath: string; overviewDashboard: string; dataIndices: Readonly<{} & { fields: Record<string, any>; id: string; timeFields: string[]; dataPath: string; currentTimeMarker: string; preserveDayOfWeekTimeOfDay: boolean; }>[]; }>>[]; addSavedObjectsToSampleDataset: (id: string, savedObjects: ",
             "SavedObject",
-            "<unknown>[]) => void; addAppLinksToSampleDataset: (id: string, appLinks: Readonly<{} & { label: string; path: string; icon: string; }>[]) => void; replacePanelInSampleDatasetDashboard: ({ sampleDataId, dashboardId, oldEmbeddableId, embeddableId, embeddableType, embeddableConfig, }: ",
-            "SampleDatasetDashboardPanel",
+            "<unknown>[]) => void; addAppLinksToSampleDataset: (id: string, appLinks: ",
+            {
+              "pluginId": "home",
+              "scope": "server",
+              "docId": "kibHomePluginApi",
+              "section": "def-server.AppLinkData",
+              "text": "AppLinkData"
+            },
+            "[]) => void; replacePanelInSampleDatasetDashboard: ({ sampleDataId, dashboardId, oldEmbeddableId, embeddableId, embeddableType, embeddableConfig, }: ",
+            {
+              "pluginId": "home",
+              "scope": "server",
+              "docId": "kibHomePluginApi",
+              "section": "def-server.SampleDatasetDashboardPanel",
+              "text": "SampleDatasetDashboardPanel"
+            },
             ") => void; }"
           ],
           "path": "src/plugins/home/server/plugin.ts",

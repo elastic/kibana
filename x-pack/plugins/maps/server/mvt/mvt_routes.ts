@@ -10,8 +10,6 @@ import { schema } from '@kbn/config-schema';
 import { KibanaRequest, KibanaResponseFactory, Logger } from 'src/core/server';
 import { IRouter } from 'src/core/server';
 import type { DataRequestHandlerContext } from 'src/plugins/data/server';
-// @ts-ignore not typed
-import { AbortController } from 'abortcontroller-polyfill/dist/cjs-ponyfill';
 import {
   MVT_GETTILE_API_PATH,
   API_ROOT_PATH,
@@ -54,11 +52,10 @@ export function initMVTRoutes({
     ) => {
       const { query, params } = request;
 
-      // todo - replace with direct abortion of raw transport request
-      // const abortController = new AbortController();
-      // request.events.aborted$.subscribe(() => {
-      //   abortController.abort();
-      // });
+      const abortController = new AbortController();
+      request.events.aborted$.subscribe(() => {
+        abortController.abort();
+      });
 
       const requestBodyDSL = rison.decode(query.requestBody as string);
 
@@ -71,6 +68,7 @@ export function initMVTRoutes({
         z: parseInt((params as any).z, 10) as number,
         index: query.index as string,
         requestBody: requestBodyDSL as any,
+        abortController,
       });
 
       return sendResponse(response, tile);
@@ -102,11 +100,10 @@ export function initMVTRoutes({
     ) => {
       const { query, params } = request;
 
-      // todo - replace with direct abortion of raw transport request
-      // const abortController = new AbortController();
-      // request.events.aborted$.subscribe(() => {
-      //   abortController.abort();
-      // });
+      const abortController = new AbortController();
+      request.events.aborted$.subscribe(() => {
+        abortController.abort();
+      });
 
       const requestBodyDSL = rison.decode(query.requestBody as string);
 
@@ -120,6 +117,7 @@ export function initMVTRoutes({
         index: query.index as string,
         requestBody: requestBodyDSL as any,
         requestType: query.requestType as RENDER_AS.POINT | RENDER_AS.GRID,
+        abortController,
       });
 
       return sendResponse(response, tile);

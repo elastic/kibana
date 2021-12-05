@@ -13,7 +13,11 @@ import {
 } from '../../../common/elasticsearch_fieldnames';
 import { EventOutcome } from '../../../common/event_outcome';
 import { offsetPreviousPeriodCoordinates } from '../../../common/utils/offset_previous_period_coordinate';
-import { kqlQuery, rangeQuery } from '../../../../observability/server';
+import {
+  kqlQuery,
+  rangeQuery,
+  termQuery,
+} from '../../../../observability/server';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { Coordinate } from '../../../typings/timeseries';
 import {
@@ -49,18 +53,10 @@ export async function getErrorRate({
   start: number;
   end: number;
 }): Promise<{
-  noHits: boolean;
-  transactionErrorRate: Coordinate[];
+  timeseries: Coordinate[];
   average: number | null;
 }> {
   const { apmEventClient } = setup;
-
-  const transactionNamefilter = transactionName
-    ? [{ term: { [TRANSACTION_NAME]: transactionName } }]
-    : [];
-  const transactionTypefilter = transactionType
-    ? [{ term: { [TRANSACTION_TYPE]: transactionType } }]
-    : [];
 
   const filter = [
     { term: { [SERVICE_NAME]: serviceName } },
@@ -69,8 +65,8 @@ export async function getErrorRate({
         [EVENT_OUTCOME]: [EventOutcome.failure, EventOutcome.success],
       },
     },
-    ...transactionNamefilter,
-    ...transactionTypefilter,
+    ...termQuery(TRANSACTION_NAME, transactionName),
+    ...termQuery(TRANSACTION_TYPE, transactionType),
     ...getDocumentTypeFilterForTransactions(searchAggregatedTransactions),
     ...rangeQuery(start, end),
     ...environmentQuery(environment),
@@ -111,20 +107,16 @@ export async function getErrorRate({
     'get_transaction_group_error_rate',
     params
   );
-
-  const noHits = resp.hits.total.value === 0;
-
   if (!resp.aggregations) {
-    return { noHits, transactionErrorRate: [], average: null };
+    return { timeseries: [], average: null };
   }
 
-  const transactionErrorRate = getFailedTransactionRateTimeSeries(
+  const timeseries = getFailedTransactionRateTimeSeries(
     resp.aggregations.timeseries.buckets
   );
-
   const average = calculateFailedTransactionRate(resp.aggregations.outcomes);
 
-  return { noHits, transactionErrorRate, average };
+  return { timeseries, average };
 }
 
 export async function getErrorRatePeriods({
@@ -171,22 +163,22 @@ export async function getErrorRatePeriods({
           start: comparisonStart,
           end: comparisonEnd,
         })
-      : { noHits: true, transactionErrorRate: [], average: null };
+      : { timeseries: [], average: null };
 
   const [currentPeriod, previousPeriod] = await Promise.all([
     currentPeriodPromise,
     previousPeriodPromise,
   ]);
 
-  const firstCurrentPeriod = currentPeriod.transactionErrorRate;
+  const currentPeriodTimeseries = currentPeriod.timeseries;
 
   return {
     currentPeriod,
     previousPeriod: {
       ...previousPeriod,
-      transactionErrorRate: offsetPreviousPeriodCoordinates({
-        currentPeriodTimeseries: firstCurrentPeriod,
-        previousPeriodTimeseries: previousPeriod.transactionErrorRate,
+      timeseries: offsetPreviousPeriodCoordinates({
+        currentPeriodTimeseries,
+        previousPeriodTimeseries: previousPeriod.timeseries,
       }),
     },
   };

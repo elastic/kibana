@@ -20,6 +20,8 @@ import {
   CrawlerRules,
   CrawlEventFromServer,
   CrawlEvent,
+  CrawlConfigFromServer,
+  CrawlConfig,
 } from './types';
 
 export function crawlerDomainServerToClient(payload: CrawlerDomainFromServer): CrawlerDomain {
@@ -80,6 +82,14 @@ export function crawlRequestServerToClient(crawlRequest: CrawlRequestFromServer)
   };
 }
 
+export function crawlConfigServerToClient(crawlConfig: CrawlConfigFromServer): CrawlConfig {
+  const { domain_allowlist: domainAllowlist } = crawlConfig;
+
+  return {
+    domainAllowlist,
+  };
+}
+
 export function crawlerEventServerToClient(event: CrawlEventFromServer): CrawlEvent {
   const {
     id,
@@ -88,6 +98,8 @@ export function crawlerEventServerToClient(event: CrawlEventFromServer): CrawlEv
     created_at: createdAt,
     began_at: beganAt,
     completed_at: completedAt,
+    type,
+    crawl_config: crawlConfig,
   } = event;
 
   return {
@@ -97,6 +109,8 @@ export function crawlerEventServerToClient(event: CrawlEventFromServer): CrawlEv
     createdAt,
     beganAt,
     completedAt,
+    type,
+    crawlConfig: crawlConfigServerToClient(crawlConfig),
   };
 }
 

@@ -44,7 +44,7 @@ export default ({ getService }: FtrProviderContext) => {
       user: USER.ML_POWERUSER,
       expected: {
         responseCode: 200,
-        moduleIds: ['apm_jsbase', 'apm_transaction', 'apm_nodejs'],
+        moduleIds: ['apm_jsbase', 'apm_nodejs'],
       },
     },
     {
@@ -200,6 +200,16 @@ export default ({ getService }: FtrProviderContext) => {
       expected: {
         responseCode: 200,
         moduleIds: ['nginx_data_stream'],
+      },
+    },
+    {
+      testTitleSuffix: 'for apm transaction dataset',
+      sourceDataArchive: 'x-pack/test/functional/es_archives/ml/module_apm_transaction',
+      indexPattern: 'ft_module_apm_transaction',
+      user: USER.ML_POWERUSER,
+      expected: {
+        responseCode: 200,
+        moduleIds: ['apm_transaction'],
       },
     },
   ];

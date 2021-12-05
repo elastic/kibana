@@ -341,7 +341,7 @@ exports[`UrlFormatEditor should render normally 1`] = `
                 class="euiTableRow"
               >
                 <td
-                  class="euiTableRowCell"
+                  class="euiTableRowCell euiTableRowCell--middle"
                 >
                   <div
                     class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -355,7 +355,7 @@ exports[`UrlFormatEditor should render normally 1`] = `
                   </div>
                 </td>
                 <td
-                  class="euiTableRowCell"
+                  class="euiTableRowCell euiTableRowCell--middle"
                 >
                   <div
                     class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -377,7 +377,7 @@ exports[`UrlFormatEditor should render normally 1`] = `
                 class="euiTableRow"
               >
                 <td
-                  class="euiTableRowCell"
+                  class="euiTableRowCell euiTableRowCell--middle"
                 >
                   <div
                     class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -391,7 +391,7 @@ exports[`UrlFormatEditor should render normally 1`] = `
                   </div>
                 </td>
                 <td
-                  class="euiTableRowCell"
+                  class="euiTableRowCell euiTableRowCell--middle"
                 >
                   <div
                     class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -413,7 +413,7 @@ exports[`UrlFormatEditor should render normally 1`] = `
                 class="euiTableRow"
               >
                 <td
-                  class="euiTableRowCell"
+                  class="euiTableRowCell euiTableRowCell--middle"
                 >
                   <div
                     class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -427,7 +427,7 @@ exports[`UrlFormatEditor should render normally 1`] = `
                   </div>
                 </td>
                 <td
-                  class="euiTableRowCell"
+                  class="euiTableRowCell euiTableRowCell--middle"
                 >
                   <div
                     class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"

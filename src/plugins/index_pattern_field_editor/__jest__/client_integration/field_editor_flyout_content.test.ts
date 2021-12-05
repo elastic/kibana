@@ -7,21 +7,28 @@
  */
 import { act } from 'react-dom/test-utils';
 
-import type { Props } from '../../public/components/field_editor_flyout_content';
+// This import needs to come first as it contains the jest.mocks
 import { setupEnvironment } from './helpers';
+import type { Props } from '../../public/components/field_editor_flyout_content';
+import { setSearchResponse } from './field_editor_flyout_preview.helpers';
 import { setup } from './field_editor_flyout_content.helpers';
+import { mockDocuments, createPreviewError } from './helpers/mocks';
 
 describe('<FieldEditorFlyoutContent />', () => {
   const { server, httpRequestsMockHelpers } = setupEnvironment();
 
   beforeAll(() => {
-    httpRequestsMockHelpers.setFieldPreviewResponse({ values: ['foo'] });
     jest.useFakeTimers();
   });
 
   afterAll(() => {
     jest.useRealTimers();
     server.restore();
+  });
+
+  beforeEach(async () => {
+    setSearchResponse(mockDocuments);
+    httpRequestsMockHelpers.setFieldPreviewResponse({ values: ['mockedScriptValue'] });
   });
 
   test('should have the correct title', async () => {
@@ -55,17 +62,13 @@ describe('<FieldEditorFlyoutContent />', () => {
     };
     const onSave: jest.Mock<Props['onSave']> = jest.fn();
 
-    const { find } = await setup({ onSave, field });
+    const { find, actions } = await setup({ onSave, field });
 
     await act(async () => {
       find('fieldSaveButton').simulate('click');
     });
 
-    await act(async () => {
-      // The painless syntax validation has a timeout set to 600ms
-      // we give it a bit more time just to be on the safe side
-      jest.advanceTimersByTime(1000);
-    });
+    await actions.waitForUpdates(); // Run the validations
 
     expect(onSave).toHaveBeenCalled();
     const fieldReturned = onSave.mock.calls[onSave.mock.calls.length - 1][0];
@@ -85,7 +88,11 @@ describe('<FieldEditorFlyoutContent />', () => {
     test('should validate the fields and prevent saving invalid form', async () => {
       const onSave: jest.Mock<Props['onSave']> = jest.fn();
 
-      const { find, exists, form, component } = await setup({ onSave });
+      const {
+        find,
+        form,
+        actions: { waitForUpdates },
+      } = await setup({ onSave });
 
       expect(find('fieldSaveButton').props().disabled).toBe(false);
 
@@ -93,17 +100,11 @@ describe('<FieldEditorFlyoutContent />', () => {
         find('fieldSaveButton').simulate('click');
       });
 
-      await act(async () => {
-        jest.advanceTimersByTime(1000);
-      });
-
-      component.update();
+      await waitForUpdates();
 
       expect(onSave).toHaveBeenCalledTimes(0);
       expect(find('fieldSaveButton').props().disabled).toBe(true);
       expect(form.getErrorsMessages()).toEqual(['A name is required.']);
-      expect(exists('formError')).toBe(true);
-      expect(find('formError').text()).toBe('Fix errors in form before continuing.');
     });
 
     test('should forward values from the form', async () => {
@@ -111,17 +112,14 @@ describe('<FieldEditorFlyoutContent />', () => {
 
       const {
         find,
-        actions: { toggleFormRow, fields },
+        actions: { toggleFormRow, fields, waitForUpdates },
       } = await setup({ onSave });
 
       await fields.updateName('someName');
       await toggleFormRow('value');
       await fields.updateScript('echo("hello")');
 
-      await act(async () => {
-        // Let's make sure that validation has finished running
-        jest.advanceTimersByTime(1000);
-      });
+      await waitForUpdates();
 
       await act(async () => {
         find('fieldSaveButton').simulate('click');
@@ -138,7 +136,8 @@ describe('<FieldEditorFlyoutContent />', () => {
       });
 
       // Change the type and make sure it is forwarded
-      await fields.updateType('other_type', 'Other type');
+      await fields.updateType('date');
+      await waitForUpdates();
 
       await act(async () => {
         find('fieldSaveButton').simulate('click');
@@ -148,7 +147,44 @@ describe('<FieldEditorFlyoutContent />', () => {
 
       expect(fieldReturned).toEqual({
         name: 'someName',
-        type: 'other_type',
+        type: 'date',
+        script: { source: 'echo("hello")' },
+      });
+    });
+
+    test('should not block validation if no documents could be fetched from server', async () => {
+      // If no documents can be fetched from the cluster (either because there are none or because
+      // the request failed), we still need to be able to resolve the painless script validation.
+      // In this test we will make sure that the validation for the script does not block saving the
+      // field even when no documentes where returned from the search query.
+      // successfully even though the script is invalid.
+      const error = createPreviewError({ reason: 'Houston we got a problem' });
+      httpRequestsMockHelpers.setFieldPreviewResponse({ values: [], error, status: 400 });
+      setSearchResponse([]);
+
+      const onSave: jest.Mock<Props['onSave']> = jest.fn();
+
+      const {
+        find,
+        actions: { toggleFormRow, fields, waitForUpdates },
+      } = await setup({ onSave });
+
+      await fields.updateName('someName');
+      await toggleFormRow('value');
+      await fields.updateScript('echo("hello")');
+
+      await waitForUpdates(); // Wait for validation... it should not block and wait for preview response
+
+      await act(async () => {
+        find('fieldSaveButton').simulate('click');
+      });
+
+      expect(onSave).toBeCalled();
+      const fieldReturned = onSave.mock.calls[onSave.mock.calls.length - 1][0];
+
+      expect(fieldReturned).toEqual({
+        name: 'someName',
+        type: 'keyword',
         script: { source: 'echo("hello")' },
       });
     });

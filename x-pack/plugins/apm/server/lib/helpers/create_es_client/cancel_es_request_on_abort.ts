@@ -16,7 +16,5 @@ export function cancelEsRequestOnAbort<T extends Promise<any>>(
     controller.abort();
   });
 
-  promise.finally(() => subscription.unsubscribe());
-
-  return promise;
+  return promise.finally(() => subscription.unsubscribe());
 }

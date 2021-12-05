@@ -268,7 +268,8 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
         plugins.taskManager,
         core,
         this.kibanaIndex,
-        this.preconfiguredActions
+        this.preconfiguredActions,
+        this.eventLogService
       );
     }
 

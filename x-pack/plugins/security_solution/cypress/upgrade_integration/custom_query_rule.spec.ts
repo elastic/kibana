@@ -4,8 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { ALERT_DETAILS_CELLS, SERVER_SIDE_EVENT_COUNT } from '../screens/alerts_detection_rules';
+import {
+  DESTINATION_IP,
+  HOST_NAME,
+  PROCESS_NAME,
+  REASON,
+  RISK_SCORE,
+  RULE_NAME,
+  SEVERITY,
+  SOURCE_IP,
+  USER_NAME,
+} from '../screens/alerts';
+import { SERVER_SIDE_EVENT_COUNT } from '../screens/alerts_detection_rules';
 import {
   ADDITIONAL_LOOK_BACK_DETAILS,
   ABOUT_DETAILS,
@@ -24,7 +34,7 @@ import {
 } from '../screens/rule_details';
 
 import { waitForPageToBeLoaded } from '../tasks/common';
-import { waitForRulesTableToBeLoaded, goToRuleDetails } from '../tasks/alerts_detection_rules';
+import { waitForRulesTableToBeLoaded, goToTheRuleDetailsOf } from '../tasks/alerts_detection_rules';
 import { loginAndWaitForPage } from '../tasks/login';
 
 import { DETECTIONS_RULE_MANAGEMENT_URL } from '../urls/navigation';
@@ -38,8 +48,8 @@ const alert = {
   reason:
     'file event with process test, file The file to test, by Security Solution on security-solution.local created low alert Custom query rule for upgrade.',
   hostName: 'security-solution.local',
-  username: 'test',
-  processName: 'The file to test',
+  username: 'Security Solution',
+  processName: 'test',
   fileName: 'The file to test',
   sourceIp: '127.0.0.1',
   destinationIp: '127.0.0.2',
@@ -49,7 +59,7 @@ const rule = {
   customQuery: '*:*',
   name: 'Custom query rule for upgrade',
   description: 'My description',
-  index: ['auditbeat-*'],
+  index: ['auditbeat-custom*'],
   severity: 'Low',
   riskScore: '7',
   timelineTemplate: 'none',
@@ -62,7 +72,7 @@ describe('After an upgrade, the custom query rule', () => {
   before(() => {
     loginAndWaitForPage(DETECTIONS_RULE_MANAGEMENT_URL);
     waitForRulesTableToBeLoaded();
-    goToRuleDetails();
+    goToTheRuleDetailsOf(rule.name);
     waitForPageToBeLoaded();
   });
 
@@ -89,54 +99,15 @@ describe('After an upgrade, the custom query rule', () => {
     });
   });
 
-  it('Displays the alert details', () => {
-    cy.get(ALERT_DETAILS_CELLS).first().focus();
-    cy.get(ALERT_DETAILS_CELLS).first().type('{rightarrow}');
-    cy.get(ALERT_DETAILS_CELLS)
-      .contains(alert.rule)
-      .then(($el) => {
-        cy.wrap($el).type('{rightarrow}');
-      });
-    cy.get(ALERT_DETAILS_CELLS)
-      .contains(alert.severity)
-      .then(($el) => {
-        cy.wrap($el).type('{rightarrow}');
-      });
-    cy.get(ALERT_DETAILS_CELLS)
-      .contains(alert.riskScore)
-      .then(($el) => {
-        cy.wrap($el).type('{rightarrow}');
-      });
-    cy.get(ALERT_DETAILS_CELLS)
-      .contains(alert.reason)
-      .then(($el) => {
-        cy.wrap($el).type('{rightarrow}');
-      });
-    cy.get(ALERT_DETAILS_CELLS)
-      .contains(alert.hostName)
-      .then(($el) => {
-        cy.wrap($el).type('{rightarrow}');
-      });
-    cy.get(ALERT_DETAILS_CELLS)
-      .contains(alert.username)
-      .then(($el) => {
-        cy.wrap($el).type('{rightarrow}');
-      });
-    cy.get(ALERT_DETAILS_CELLS)
-      .contains(alert.processName)
-      .then(($el) => {
-        cy.wrap($el).type('{rightarrow}');
-      });
-    cy.get(ALERT_DETAILS_CELLS)
-      .contains(alert.fileName)
-      .then(($el) => {
-        cy.wrap($el).type('{rightarrow}');
-      });
-    cy.get(ALERT_DETAILS_CELLS)
-      .contains(alert.sourceIp)
-      .then(($el) => {
-        cy.wrap($el).type('{rightarrow}');
-      });
-    cy.get(ALERT_DETAILS_CELLS).contains(alert.destinationIp);
+  it('Displays the alert details at the tgrid', () => {
+    cy.get(RULE_NAME).should('have.text', alert.rule);
+    cy.get(SEVERITY).should('have.text', alert.severity);
+    cy.get(RISK_SCORE).should('have.text', alert.riskScore);
+    cy.get(REASON).should('have.text', alert.reason).type('{rightarrow}');
+    cy.get(HOST_NAME).should('have.text', alert.hostName);
+    cy.get(USER_NAME).should('have.text', alert.username);
+    cy.get(PROCESS_NAME).should('have.text', alert.processName);
+    cy.get(SOURCE_IP).should('have.text', alert.sourceIp);
+    cy.get(DESTINATION_IP).should('have.text', alert.destinationIp);
   });
 });

@@ -11,7 +11,7 @@ import { Client } from '@elastic/elasticsearch';
 import { workerData } from 'worker_threads';
 import { ElasticsearchOutputWriteTargets } from '../../lib/output/to_elasticsearch_output';
 import { getScenario } from './get_scenario';
-import { createLogger, LogLevel } from './logger';
+import { createLogger, LogLevel } from '../../lib/utils/create_logger';
 import { uploadEvents } from './upload_events';
 
 const { bucketFrom, bucketTo, file, logLevel, target, writeTargets, clientWorkers, batchSize } =

@@ -16,13 +16,13 @@ resolve<T = unknown>(type: string, id: string, options?: SavedObjectsBaseOptions
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  type | <code>string</code> |  |
-|  id | <code>string</code> |  |
-|  options | <code>SavedObjectsBaseOptions</code> |  |
+|  type | string |  |
+|  id | string |  |
+|  options | SavedObjectsBaseOptions |  {<!-- -->string<!-- -->} \[options.namespace\] |
 
 <b>Returns:</b>
 
-`Promise<SavedObjectsResolveResponse<T>>`
+Promise&lt;SavedObjectsResolveResponse&lt;T&gt;&gt;
 
 {<!-- -->promise<!-- -->} - { saved\_object, outcome }
 

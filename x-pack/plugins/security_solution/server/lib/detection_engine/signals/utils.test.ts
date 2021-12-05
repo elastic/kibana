@@ -8,6 +8,7 @@
 import moment from 'moment';
 import sinon from 'sinon';
 import { TransportResult } from '@elastic/elasticsearch';
+import { ALERT_UUID } from '@kbn/rule-data-utils';
 
 import { alertsMock, AlertServicesMock } from '../../../../../alerting/server/mocks';
 import { listMock } from '../../../../../lists/server/mocks';
@@ -41,6 +42,7 @@ import {
   getValidDateFromDoc,
   calculateTotal,
   getTotalHitsValue,
+  isRACAlert,
 } from './utils';
 import { BulkResponseErrorAggregation, SearchAfterAndBulkCreateReturnType } from './types';
 import {
@@ -1517,6 +1519,54 @@ describe('utils', () => {
 
     test('should return -1 if totalHits is undefined', () => {
       expect(calculateTotal(undefined, 2)).toBe(-1);
+    });
+  });
+
+  describe('isRACAlert', () => {
+    test('alert with dotted fields returns true', () => {
+      expect(
+        isRACAlert({
+          [ALERT_UUID]: '123',
+        })
+      ).toEqual(true);
+    });
+
+    test('alert with nested fields returns true', () => {
+      expect(
+        isRACAlert({
+          kibana: {
+            alert: { uuid: '123' },
+          },
+        })
+      ).toEqual(true);
+    });
+
+    test('undefined returns false', () => {
+      expect(isRACAlert(undefined)).toEqual(false);
+    });
+
+    test('null returns false', () => {
+      expect(isRACAlert(null)).toEqual(false);
+    });
+
+    test('number returns false', () => {
+      expect(isRACAlert(5)).toEqual(false);
+    });
+
+    test('string returns false', () => {
+      expect(isRACAlert('a')).toEqual(false);
+    });
+
+    test('array returns false', () => {
+      expect(isRACAlert([])).toEqual(false);
+    });
+
+    test('empty object returns false', () => {
+      expect(isRACAlert({})).toEqual(false);
+    });
+
+    test('alert with null value returns false', () => {
+      expect(isRACAlert({ 'kibana.alert.uuid': null })).toEqual(false);
     });
   });
 });

@@ -143,7 +143,7 @@ export const RepositoryFormStepTwo: React.FunctionComponent<Props> = ({
         )}
         <EuiFlexItem grow={false}>
           <EuiButton
-            color={isManagedRepository ? 'warning' : 'secondary'}
+            color={isManagedRepository ? 'warning' : 'success'}
             iconType="check"
             onClick={onSave}
             fill={isManagedRepository ? false : true}

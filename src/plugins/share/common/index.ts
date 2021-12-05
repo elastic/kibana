@@ -6,5 +6,6 @@
  * Side Public License, v 1.
  */
 
-export { LocatorDefinition, LocatorPublic, useLocatorUrl, formatSearchParams } from './url_service';
+export type { LocatorDefinition, LocatorPublic } from './url_service';
+export { useLocatorUrl } from './url_service';
 export type { AnonymousAccessServiceContract, AnonymousAccessState } from './anonymous_access';

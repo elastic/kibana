@@ -13,7 +13,7 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiEmptyPrompt,
-  EuiLoadingKibana,
+  EuiLoadingLogo,
   EuiOverlayMask,
   EuiPageContent,
   EuiSpacer,
@@ -80,7 +80,7 @@ export class RemoteClusterList extends Component {
     if (isCopyingCluster || isRemovingCluster) {
       return (
         <EuiOverlayMask>
-          <EuiLoadingKibana size="xl" />
+          <EuiLoadingLogo logo="logoKibana" size="xl" />
         </EuiOverlayMask>
       );
     }

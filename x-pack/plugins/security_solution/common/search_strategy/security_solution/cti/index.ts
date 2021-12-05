@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IEsSearchResponse } from 'src/plugins/data/public';
+import type { IEsSearchResponse } from 'src/plugins/data/public';
 import { EVENT_ENRICHMENT_INDICATOR_FIELD_MAP } from '../../../cti/constants';
 import { Inspect } from '../../common';
 import { RequestBasicOptions } from '..';

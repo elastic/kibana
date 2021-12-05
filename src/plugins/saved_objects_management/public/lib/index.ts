@@ -14,14 +14,12 @@ export { getSavedObjectLabel } from './get_saved_object_label';
 export { importFile } from './import_file';
 export { parseQuery } from './parse_query';
 export { resolveImportErrors } from './resolve_import_errors';
-export {
-  processImportResponse,
-  ProcessedImportResponse,
-  FailedImport,
-} from './process_import_response';
+export type { ProcessedImportResponse, FailedImport } from './process_import_response';
+export { processImportResponse } from './process_import_response';
 export { getDefaultTitle } from './get_default_title';
 export { findObjects } from './find_objects';
 export { bulkGetObjects } from './bulk_get_objects';
-export { extractExportDetails, SavedObjectsExportResultDetails } from './extract_export_details';
+export type { SavedObjectsExportResultDetails } from './extract_export_details';
+export { extractExportDetails } from './extract_export_details';
 export { getAllowedTypes } from './get_allowed_types';
 export { getTagFindReferences } from './get_tag_references';

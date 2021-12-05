@@ -52,12 +52,12 @@ export const IndexNamesConfigurationPanel: React.FC<{
         <FormattedMessage
           tagName="p"
           id="xpack.infra.logSourceConfiguration.indexPatternInformationCalloutDescription"
-          defaultMessage="The Logs UI can now integrate with Kibana index patterns to configure the used indices."
+          defaultMessage="The Logs UI can now integrate with data views to configure the used indices."
         />
         <EuiButton onClick={onSwitchToIndexPatternReference}>
           <FormattedMessage
-            id="xpack.infra.logSourceConfiguration.switchToIndexPatternReferenceButtonLabel"
-            defaultMessage="Use Kibana index patterns"
+            id="xpack.infra.logSourceConfiguration.switchToDataViewReferenceButtonLabel"
+            defaultMessage="Use data views"
           />
         </EuiButton>
       </EuiCallOut>

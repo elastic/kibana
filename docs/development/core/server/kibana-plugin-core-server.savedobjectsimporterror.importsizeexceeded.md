@@ -14,9 +14,9 @@ static importSizeExceeded(limit: number): SavedObjectsImportError;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  limit | <code>number</code> |  |
+|  limit | number |  |
 
 <b>Returns:</b>
 
-`SavedObjectsImportError`
+SavedObjectsImportError
 

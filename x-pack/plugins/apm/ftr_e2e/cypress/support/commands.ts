@@ -43,6 +43,22 @@ Cypress.Commands.add('changeTimeRange', (value: string) => {
 });
 
 Cypress.Commands.add(
+  'selectAbsoluteTimeRange',
+  (start: string, end: string) => {
+    cy.get('[data-test-subj="superDatePickerstartDatePopoverButton"]').click();
+    cy.get('[data-test-subj="superDatePickerAbsoluteDateInput"]')
+      .eq(0)
+      .clear()
+      .type(start, { force: true });
+    cy.get('[data-test-subj="superDatePickerendDatePopoverButton"]').click();
+    cy.get('[data-test-subj="superDatePickerAbsoluteDateInput"]')
+      .eq(1)
+      .clear()
+      .type(end, { force: true });
+  }
+);
+
+Cypress.Commands.add(
   'expectAPIsToHaveBeenCalledWith',
   ({
     apisIntercepted,

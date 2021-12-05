@@ -18,6 +18,14 @@ const {
 
 const isProd = process.env.NODE_ENV === 'production';
 
+const nodeModulesButNotKbnPackages = (_path) => {
+  if (!_path.includes('node_modules')) {
+    return false;
+  }
+
+  return !_path.includes(`node_modules${path.sep}@kbn${path.sep}`);
+};
+
 module.exports = {
   context: KIBANA_ROOT,
   entry: {
@@ -124,7 +132,7 @@ module.exports = {
       },
       {
         test: /\.scss$/,
-        exclude: [/node_modules/, /\.module\.s(a|c)ss$/],
+        exclude: [nodeModulesButNotKbnPackages, /\.module\.s(a|c)ss$/],
         use: [
           {
             loader: 'style-loader',
@@ -179,7 +187,6 @@ module.exports = {
       },
       {
         test: [
-          require.resolve('@elastic/eui/es/components/code_editor'),
           require.resolve('@elastic/eui/es/components/drag_and_drop'),
           require.resolve('@elastic/eui/packages/react-datepicker'),
           require.resolve('highlight.js'),

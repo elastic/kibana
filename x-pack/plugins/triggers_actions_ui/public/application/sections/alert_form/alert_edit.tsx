@@ -228,7 +228,7 @@ export const AlertEdit = ({
                 <EuiFlexItem grow={false}>
                   <EuiButton
                     fill
-                    color="secondary"
+                    color="success"
                     data-test-subj="saveEditedAlertButton"
                     type="submit"
                     iconType="check"

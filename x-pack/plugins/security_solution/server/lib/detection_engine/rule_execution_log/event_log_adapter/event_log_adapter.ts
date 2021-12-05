@@ -104,7 +104,7 @@ export class EventLogAdapter implements IRuleExecutionLogClient {
     await this.savedObjectsAdapter.logStatusChange(args);
 
     if (args.metrics) {
-      this.logExecutionMetrics({
+      await this.logExecutionMetrics({
         ruleId: args.ruleId,
         ruleName: args.ruleName,
         ruleType: args.ruleType,

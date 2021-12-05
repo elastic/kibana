@@ -259,7 +259,7 @@
             "section": "def-public.Presentable",
             "text": "Presentable"
           },
-          "<FactoryContext>, \"id\" | \"getDisplayName\" | \"grouping\" | \"getIconType\" | \"order\" | \"MenuItem\" | \"getDisplayNameTooltip\" | \"isCompatible\">,",
+          "<FactoryContext>, \"id\" | \"order\" | \"getDisplayName\" | \"grouping\" | \"getIconType\" | \"MenuItem\" | \"getDisplayNameTooltip\" | \"isCompatible\">,",
           {
             "pluginId": "kibanaUtils",
             "scope": "public",
@@ -2267,7 +2267,7 @@
             "section": "def-public.Presentable",
             "text": "Presentable"
           },
-          "<FactoryContext>, \"id\" | \"getDisplayName\" | \"grouping\" | \"getIconType\" | \"order\" | \"MenuItem\" | \"getDisplayNameTooltip\" | \"isCompatible\">>,",
+          "<FactoryContext>, \"id\" | \"order\" | \"getDisplayName\" | \"grouping\" | \"getIconType\" | \"MenuItem\" | \"getDisplayNameTooltip\" | \"isCompatible\">>,",
           {
             "pluginId": "kibanaUtils",
             "scope": "public",

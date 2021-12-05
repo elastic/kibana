@@ -65,7 +65,7 @@ export const Table = (props: Props) => {
                     )}
                   >
                     <EuiButtonIcon
-                      color="subdued"
+                      color="text"
                       size="s"
                       iconType="filter"
                       aria-label={i18n.translate(

@@ -28,7 +28,7 @@ export function ObservabilityPageProvider({ getService, getPageObjects }: FtrPro
     },
 
     async expectNoReadOnlyCallout() {
-      await testSubjects.missingOrFail('case-callout-e41900b01c9ef0fa81dd6ff326083fb3');
+      await testSubjects.missingOrFail('caseCallout-e41900b01c9ef0fa81dd6ff326083fb3');
     },
 
     async expectNoDataPage() {
@@ -50,7 +50,7 @@ export function ObservabilityPageProvider({ getService, getPageObjects }: FtrPro
     },
 
     async expectForbidden() {
-      const h2 = await testSubjects.find('no_feature_permissions', 20000);
+      const h2 = await testSubjects.find('noFeaturePermissions', 20000);
       const text = await h2.getVisibleText();
       expect(text).to.contain('Kibana feature privileges required');
     },

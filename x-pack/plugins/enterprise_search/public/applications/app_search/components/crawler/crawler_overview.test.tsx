@@ -29,6 +29,7 @@ import {
   CrawlerRules,
   CrawlerStatus,
   CrawlEventFromServer,
+  CrawlType,
 } from './types';
 
 const domains: CrawlerDomainFromServer[] = [
@@ -73,6 +74,10 @@ const events: CrawlEventFromServer[] = [
     created_at: 'Mon, 31 Aug 2020 11:00:00 +0000',
     began_at: 'Mon, 31 Aug 2020 12:00:00 +0000',
     completed_at: 'Mon, 31 Aug 2020 13:00:00 +0000',
+    type: CrawlType.Full,
+    crawl_config: {
+      domain_allowlist: ['moviedatabase.com', 'swiftype.com'],
+    },
   },
   {
     id: 'b',
@@ -81,6 +86,10 @@ const events: CrawlEventFromServer[] = [
     created_at: 'Mon, 31 Aug 2020 14:00:00 +0000',
     began_at: 'Mon, 31 Aug 2020 15:00:00 +0000',
     completed_at: 'Mon, 31 Aug 2020 16:00:00 +0000',
+    type: CrawlType.Partial,
+    crawl_config: {
+      domain_allowlist: ['swiftype.com'],
+    },
   },
 ];
 

@@ -100,7 +100,7 @@
             "label": "textConvert",
             "description": [],
             "signature": [
-              "(val: React.ReactText) => any"
+              "(val: string | number) => any"
             ],
             "path": "src/plugins/field_formats/public/lib/converters/date.ts",
             "deprecated": false,
@@ -113,7 +113,7 @@
                 "label": "val",
                 "description": [],
                 "signature": [
-                  "React.ReactText"
+                  "string | number"
                 ],
                 "path": "src/plugins/field_formats/public/lib/converters/date.ts",
                 "deprecated": false,
@@ -250,7 +250,7 @@
             "label": "textConvert",
             "description": [],
             "signature": [
-              "(val: React.ReactText) => any"
+              "(val: string | number) => any"
             ],
             "path": "src/plugins/field_formats/common/converters/date_nanos_shared.ts",
             "deprecated": false,
@@ -263,7 +263,7 @@
                 "label": "val",
                 "description": [],
                 "signature": [
-                  "React.ReactText"
+                  "string | number"
                 ],
                 "path": "src/plugins/field_formats/common/converters/date_nanos_shared.ts",
                 "deprecated": false,
@@ -503,7 +503,7 @@
             "label": "textConvert",
             "description": [],
             "signature": [
-              "(val: React.ReactText) => any"
+              "(val: string | number) => any"
             ],
             "path": "src/plugins/field_formats/server/lib/converters/date_server.ts",
             "deprecated": false,
@@ -516,7 +516,7 @@
                 "label": "val",
                 "description": [],
                 "signature": [
-                  "React.ReactText"
+                  "string | number"
                 ],
                 "path": "src/plugins/field_formats/server/lib/converters/date_server.ts",
                 "deprecated": false,
@@ -551,7 +551,7 @@
             "label": "textConvert",
             "description": [],
             "signature": [
-              "(val: React.ReactText) => any"
+              "(val: string | number) => any"
             ],
             "path": "src/plugins/field_formats/server/lib/converters/date_nanos_server.ts",
             "deprecated": false,
@@ -564,7 +564,7 @@
                 "label": "val",
                 "description": [],
                 "signature": [
-                  "React.ReactText"
+                  "string | number"
                 ],
                 "path": "src/plugins/field_formats/server/lib/converters/date_nanos_server.ts",
                 "deprecated": false,
@@ -1017,7 +1017,7 @@
             "label": "findColorRuleForVal",
             "description": [],
             "signature": [
-              "(val: React.ReactText) => any"
+              "(val: string | number) => any"
             ],
             "path": "src/plugins/field_formats/common/converters/color.tsx",
             "deprecated": false,
@@ -1030,7 +1030,7 @@
                 "label": "val",
                 "description": [],
                 "signature": [
-                  "React.ReactText"
+                  "string | number"
                 ],
                 "path": "src/plugins/field_formats/common/converters/color.tsx",
                 "deprecated": false,
@@ -1047,7 +1047,7 @@
             "label": "htmlConvert",
             "description": [],
             "signature": [
-              "(val: React.ReactText) => string"
+              "(val: string | number) => string"
             ],
             "path": "src/plugins/field_formats/common/converters/color.tsx",
             "deprecated": false,
@@ -1060,7 +1060,7 @@
                 "label": "val",
                 "description": [],
                 "signature": [
-                  "React.ReactText"
+                  "string | number"
                 ],
                 "path": "src/plugins/field_formats/common/converters/color.tsx",
                 "deprecated": false,
@@ -3623,7 +3623,7 @@
             "label": "textConvert",
             "description": [],
             "signature": [
-              "(val: React.ReactText) => string"
+              "(val: string | number) => string"
             ],
             "path": "src/plugins/field_formats/common/converters/percent.ts",
             "deprecated": false,
@@ -3636,7 +3636,7 @@
                 "label": "val",
                 "description": [],
                 "signature": [
-                  "React.ReactText"
+                  "string | number"
                 ],
                 "path": "src/plugins/field_formats/common/converters/percent.ts",
                 "deprecated": false,
@@ -3731,7 +3731,7 @@
             "label": "textConvert",
             "description": [],
             "signature": [
-              "(val: React.ReactText) => string"
+              "(val: string | number) => string"
             ],
             "path": "src/plugins/field_formats/common/converters/relative_date.ts",
             "deprecated": false,
@@ -3744,178 +3744,11 @@
                 "label": "val",
                 "description": [],
                 "signature": [
-                  "React.ReactText"
+                  "string | number"
                 ],
                 "path": "src/plugins/field_formats/common/converters/relative_date.ts",
                 "deprecated": false,
                 "isRequired": true
-              }
-            ],
-            "returnComment": []
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "fieldFormats",
-        "id": "def-common.SourceFormat",
-        "type": "Class",
-        "tags": [],
-        "label": "SourceFormat",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "fieldFormats",
-            "scope": "common",
-            "docId": "kibFieldFormatsPluginApi",
-            "section": "def-common.SourceFormat",
-            "text": "SourceFormat"
-          },
-          " extends ",
-          {
-            "pluginId": "fieldFormats",
-            "scope": "common",
-            "docId": "kibFieldFormatsPluginApi",
-            "section": "def-common.FieldFormat",
-            "text": "FieldFormat"
-          }
-        ],
-        "path": "src/plugins/field_formats/common/converters/source.tsx",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "fieldFormats",
-            "id": "def-common.SourceFormat.id",
-            "type": "Enum",
-            "tags": [],
-            "label": "id",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "fieldFormats",
-                "scope": "common",
-                "docId": "kibFieldFormatsPluginApi",
-                "section": "def-common.FIELD_FORMAT_IDS",
-                "text": "FIELD_FORMAT_IDS"
-              }
-            ],
-            "path": "src/plugins/field_formats/common/converters/source.tsx",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "fieldFormats",
-            "id": "def-common.SourceFormat.title",
-            "type": "string",
-            "tags": [],
-            "label": "title",
-            "description": [],
-            "path": "src/plugins/field_formats/common/converters/source.tsx",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "fieldFormats",
-            "id": "def-common.SourceFormat.fieldType",
-            "type": "Enum",
-            "tags": [],
-            "label": "fieldType",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/field-types",
-                "scope": "server",
-                "docId": "kibKbnFieldTypesPluginApi",
-                "section": "def-server.KBN_FIELD_TYPES",
-                "text": "KBN_FIELD_TYPES"
-              }
-            ],
-            "path": "src/plugins/field_formats/common/converters/source.tsx",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "fieldFormats",
-            "id": "def-common.SourceFormat.textConvert",
-            "type": "Function",
-            "tags": [],
-            "label": "textConvert",
-            "description": [],
-            "signature": [
-              "(value: string) => string"
-            ],
-            "path": "src/plugins/field_formats/common/converters/source.tsx",
-            "deprecated": false,
-            "children": [
-              {
-                "parentPluginId": "fieldFormats",
-                "id": "def-common.SourceFormat.textConvert.$1",
-                "type": "string",
-                "tags": [],
-                "label": "value",
-                "description": [],
-                "signature": [
-                  "string"
-                ],
-                "path": "src/plugins/field_formats/common/converters/source.tsx",
-                "deprecated": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "fieldFormats",
-            "id": "def-common.SourceFormat.htmlConvert",
-            "type": "Function",
-            "tags": [],
-            "label": "htmlConvert",
-            "description": [],
-            "signature": [
-              "(value: string, options?: ",
-              {
-                "pluginId": "fieldFormats",
-                "scope": "common",
-                "docId": "kibFieldFormatsPluginApi",
-                "section": "def-common.HtmlContextTypeOptions",
-                "text": "HtmlContextTypeOptions"
-              },
-              " | undefined) => string"
-            ],
-            "path": "src/plugins/field_formats/common/converters/source.tsx",
-            "deprecated": false,
-            "children": [
-              {
-                "parentPluginId": "fieldFormats",
-                "id": "def-common.SourceFormat.htmlConvert.$1",
-                "type": "string",
-                "tags": [],
-                "label": "value",
-                "description": [],
-                "signature": [
-                  "string"
-                ],
-                "path": "src/plugins/field_formats/common/converters/source.tsx",
-                "deprecated": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "fieldFormats",
-                "id": "def-common.SourceFormat.htmlConvert.$2",
-                "type": "Object",
-                "tags": [],
-                "label": "options",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "fieldFormats",
-                    "scope": "common",
-                    "docId": "kibFieldFormatsPluginApi",
-                    "section": "def-common.HtmlContextTypeOptions",
-                    "text": "HtmlContextTypeOptions"
-                  },
-                  " | undefined"
-                ],
-                "path": "src/plugins/field_formats/common/converters/source.tsx",
-                "deprecated": false,
-                "isRequired": false
               }
             ],
             "returnComment": []
@@ -4159,7 +3992,7 @@
             "label": "textConvert",
             "description": [],
             "signature": [
-              "(val: React.ReactText) => string"
+              "(val: string | number) => string"
             ],
             "path": "src/plugins/field_formats/common/converters/string.ts",
             "deprecated": false,
@@ -4172,7 +4005,7 @@
                 "label": "val",
                 "description": [],
                 "signature": [
-                  "React.ReactText"
+                  "string | number"
                 ],
                 "path": "src/plugins/field_formats/common/converters/string.ts",
                 "deprecated": false,
@@ -4870,19 +4703,6 @@
             "description": [],
             "signature": [
               "{ name: string; } | undefined"
-            ],
-            "path": "src/plugins/field_formats/common/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "fieldFormats",
-            "id": "def-common.HtmlContextTypeOptions.indexPattern",
-            "type": "Object",
-            "tags": [],
-            "label": "indexPattern",
-            "description": [],
-            "signature": [
-              "{ formatHit: (hit: { highlight: Record<string, string[]>; }) => Record<string, string>; } | undefined"
             ],
             "path": "src/plugins/field_formats/common/types.ts",
             "deprecated": false
@@ -5592,7 +5412,15 @@
         "label": "IFieldFormatsRegistry",
         "description": [],
         "signature": [
-          "{ init: (getConfig: ",
+          "{ deserialize: ",
+          {
+            "pluginId": "fieldFormats",
+            "scope": "common",
+            "docId": "kibFieldFormatsPluginApi",
+            "section": "def-common.FormatFactory",
+            "text": "FormatFactory"
+          },
+          "; init: (getConfig: ",
           {
             "pluginId": "fieldFormats",
             "scope": "common",
@@ -5616,15 +5444,7 @@
             "section": "def-common.FieldFormatInstanceType",
             "text": "FieldFormatInstanceType"
           },
-          "[]) => void; deserialize: ",
-          {
-            "pluginId": "fieldFormats",
-            "scope": "common",
-            "docId": "kibFieldFormatsPluginApi",
-            "section": "def-common.FormatFactory",
-            "text": "FormatFactory"
-          },
-          "; register: (fieldFormats: ",
+          "[]) => void; register: (fieldFormats: ",
           {
             "pluginId": "fieldFormats",
             "scope": "common",

@@ -6,5 +6,5 @@
  * Side Public License, v 1.
  */
 
-export { FieldMappingSpec, MappingObject } from './types';
+export type { FieldMappingSpec, MappingObject } from './types';
 export { expandShorthand } from './mapping_setup';

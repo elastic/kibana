@@ -78,6 +78,17 @@ export const DefaultLayout: React.FunctionComponent<Props> = ({
           href: getHref('data_streams'),
           'data-test-subj': 'fleet-datastreams-tab',
         },
+        {
+          name: (
+            <FormattedMessage
+              id="xpack.fleet.appNavigation.settingsLinkText"
+              defaultMessage="Settings"
+            />
+          ),
+          isSelected: section === 'settings',
+          href: getHref('settings'),
+          'data-test-subj': 'fleet-settings-tab',
+        },
       ]}
     >
       {children}

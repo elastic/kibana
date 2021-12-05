@@ -13,16 +13,37 @@ export const GetOneOutputRequestSchema = {
   }),
 };
 
+export const DeleteOutputRequestSchema = {
+  params: schema.object({
+    outputId: schema.string(),
+  }),
+};
+
 export const GetOutputsRequestSchema = {};
+
+export const PostOutputRequestSchema = {
+  body: schema.object({
+    id: schema.maybe(schema.string()),
+    name: schema.string(),
+    type: schema.oneOf([schema.literal('elasticsearch')]),
+    is_default: schema.boolean({ defaultValue: false }),
+    is_default_monitoring: schema.boolean({ defaultValue: false }),
+    hosts: schema.maybe(schema.arrayOf(schema.uri({ scheme: ['http', 'https'] }))),
+    ca_sha256: schema.maybe(schema.string()),
+    config_yaml: schema.maybe(schema.string()),
+  }),
+};
 
 export const PutOutputRequestSchema = {
   params: schema.object({
     outputId: schema.string(),
   }),
   body: schema.object({
+    name: schema.maybe(schema.string()),
+    is_default: schema.maybe(schema.boolean()),
+    is_default_monitoring: schema.maybe(schema.boolean()),
     hosts: schema.maybe(schema.arrayOf(schema.uri({ scheme: ['http', 'https'] }))),
     ca_sha256: schema.maybe(schema.string()),
-    config: schema.maybe(schema.recordOf(schema.string(), schema.any())),
     config_yaml: schema.maybe(schema.string()),
   }),
 };

@@ -27,6 +27,8 @@ const rewriteBodyReq: RewriteRequestCase<ActionType> = ({
 });
 
 export async function loadActionTypes({ http }: { http: HttpSetup }): Promise<ActionType[]> {
-  const res = await http.get(`${BASE_ACTION_API_PATH}/connector_types`);
+  const res = await http.get<Parameters<typeof rewriteResponseRes>[0]>(
+    `${BASE_ACTION_API_PATH}/connector_types`
+  );
   return rewriteResponseRes(res);
 }

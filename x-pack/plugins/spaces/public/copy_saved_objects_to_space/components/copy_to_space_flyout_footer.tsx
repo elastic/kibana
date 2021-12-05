@@ -173,7 +173,7 @@ export const CopyToSpaceFlyoutFooter = (props: Props) => {
             data-test-subj={`cts-summary-success-count`}
             title={summarizedResults.successCount}
             titleSize="s"
-            titleColor={initialCopyFinished ? 'secondary' : 'subdued'}
+            titleColor={initialCopyFinished ? 'success' : 'subdued'}
             isLoading={!initialCopyFinished}
             textAlign="center"
             description={

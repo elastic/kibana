@@ -9,21 +9,17 @@ import React from 'react';
 
 import { useValues } from 'kea';
 
-import {
-  EuiBasicTable,
-  EuiEmptyPrompt,
-  EuiIconTip,
-  EuiTableFieldDataColumnType,
-} from '@elastic/eui';
+import { EuiBadge, EuiBasicTable, EuiBasicTableColumn, EuiEmptyPrompt } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
 import { CrawlerLogic } from '../crawler_logic';
 import { CrawlEvent, readableCrawlerStatuses } from '../types';
 
+import { CrawlEventTypeBadge } from './crawl_event_type_badge';
 import { CustomFormattedTimestamp } from './custom_formatted_timestamp';
 
-const columns: Array<EuiTableFieldDataColumnType<CrawlEvent>> = [
+const columns: Array<EuiBasicTableColumn<CrawlEvent>> = [
   {
     field: 'id',
     name: i18n.translate(
@@ -46,6 +42,25 @@ const columns: Array<EuiTableFieldDataColumnType<CrawlEvent>> = [
     ),
   },
   {
+    field: 'type',
+    name: i18n.translate(
+      'xpack.enterpriseSearch.appSearch.crawler.crawlRequestsTable.column.crawlType',
+      {
+        defaultMessage: 'Crawl type',
+      }
+    ),
+    render: (_, event: CrawlEvent) => <CrawlEventTypeBadge event={event} />,
+  },
+  {
+    name: i18n.translate(
+      'xpack.enterpriseSearch.appSearch.crawler.crawlRequestsTable.column.domains',
+      {
+        defaultMessage: 'Domains',
+      }
+    ),
+    render: (event: CrawlEvent) => <EuiBadge>{event.crawlConfig.domainAllowlist.length}</EuiBadge>,
+  },
+  {
     field: 'status',
     name: i18n.translate(
       'xpack.enterpriseSearch.appSearch.crawler.crawlRequestsTable.column.status',
@@ -53,22 +68,7 @@ const columns: Array<EuiTableFieldDataColumnType<CrawlEvent>> = [
         defaultMessage: 'Status',
       }
     ),
-    align: 'right',
-    render: (status: CrawlEvent['status'], event: CrawlEvent) => (
-      <>
-        {event.stage === 'process' && (
-          <EuiIconTip
-            aria-label="Process crawl"
-            size="m"
-            type="iInCircle"
-            color="primary"
-            position="top"
-            content="Re-applied crawl rules"
-          />
-        )}
-        {readableCrawlerStatuses[status]}
-      </>
-    ),
+    render: (status: CrawlEvent['status']) => readableCrawlerStatuses[status],
   },
 ];
 

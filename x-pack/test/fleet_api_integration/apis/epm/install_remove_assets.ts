@@ -668,7 +668,6 @@ const expectAssetsInstalled = ({
       ],
       name: 'all_assets',
       version: '0.1.0',
-      internal: false,
       removable: true,
       install_version: '0.1.0',
       install_status: 'installed',

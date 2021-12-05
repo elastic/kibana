@@ -9,6 +9,7 @@ import { IndexPattern } from 'src/plugins/data/public';
 import { IESAggSource } from '../../sources/es_agg_source';
 import { IVectorSource } from '../../sources/vector_source';
 import { AGG_TYPE, FIELD_ORIGIN } from '../../../../common/constants';
+import { TileMetaFeature } from '../../../../common/descriptor_types';
 import { ITooltipProperty, TooltipProperty } from '../../tooltips/tooltip_property';
 import { ESAggTooltipProperty } from '../../tooltips/es_agg_tooltip_property';
 import { IESAggField, CountAggFieldParams } from './agg_field_types';
@@ -108,5 +109,18 @@ export class CountAggField implements IESAggField {
 
   isEqual(field: IESAggField) {
     return field.getName() === this.getName();
+  }
+
+  pluckRangeFromTileMetaFeature(metaFeature: TileMetaFeature) {
+    const minField = `aggregations._count.min`;
+    const maxField = `aggregations._count.max`;
+    return metaFeature.properties &&
+      typeof metaFeature.properties[minField] === 'number' &&
+      typeof metaFeature.properties[maxField] === 'number'
+      ? {
+          min: metaFeature.properties[minField] as number,
+          max: metaFeature.properties[maxField] as number,
+        }
+      : null;
   }
 }

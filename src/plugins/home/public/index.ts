@@ -19,7 +19,9 @@ export type {
 export { FeatureCatalogueCategory } from './services';
 
 export type {
+  AddDataTab,
   FeatureCatalogueEntry,
+  FeatureCatalogueRegistry,
   FeatureCatalogueSolution,
   Environment,
   TutorialVariables,

@@ -29,7 +29,7 @@ import { inputsSelectors } from '../../common/store';
 import { setAbsoluteRangeDatePicker } from '../../common/store/inputs/actions';
 
 import { SpyRoute } from '../../common/utils/route/spy_routes';
-import { esQuery } from '../../../../../../src/plugins/data/public';
+import { getEsQueryConfig } from '../../../../../../src/plugins/data/common';
 import { OverviewEmpty } from '../../overview/components/overview_empty';
 import { Display } from './display';
 import { UebaTabs } from './ueba_tabs';
@@ -43,7 +43,7 @@ import {
 } from '../../timelines/components/timeline/helpers';
 import { timelineSelectors } from '../../timelines/store/timeline';
 import { timelineDefaults } from '../../timelines/store/timeline/defaults';
-import { useSourcererScope } from '../../common/containers/sourcerer';
+import { useSourcererDataView } from '../../common/containers/sourcerer';
 import { useDeepEqualSelector, useShallowEqualSelector } from '../../common/hooks/use_selector';
 import { useInvalidFilterQuery } from '../../common/hooks/use_invalid_filter_query';
 
@@ -78,11 +78,11 @@ const UebaComponent = () => {
   const { uiSettings } = useKibana().services;
   const tabsFilters = filters;
 
-  const { docValueFields, indicesExist, indexPattern, selectedPatterns } = useSourcererScope();
+  const { docValueFields, indicesExist, indexPattern, selectedPatterns } = useSourcererDataView();
   const [filterQuery, kqlError] = useMemo(
     () =>
       convertToBuildEsQuery({
-        config: esQuery.getEsQueryConfig(uiSettings),
+        config: getEsQueryConfig(uiSettings),
         indexPattern,
         queries: [query],
         filters,
@@ -92,7 +92,7 @@ const UebaComponent = () => {
   const [tabsFilterQuery] = useMemo(
     () =>
       convertToBuildEsQuery({
-        config: esQuery.getEsQueryConfig(uiSettings),
+        config: getEsQueryConfig(uiSettings),
         indexPattern,
         queries: [query],
         filters: tabsFilters,

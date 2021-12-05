@@ -9,7 +9,7 @@ jest.mock('./account_management_page');
 
 import type { AppMount } from 'src/core/public';
 import { AppNavLinkStatus } from 'src/core/public';
-import { coreMock, scopedHistoryMock } from 'src/core/public/mocks';
+import { coreMock, scopedHistoryMock, themeServiceMock } from 'src/core/public/mocks';
 
 import { UserAPIClient } from '../management';
 import { securityMock } from '../mocks';
@@ -58,6 +58,7 @@ describe('accountManagementApp', () => {
       onAppLeave: jest.fn(),
       setHeaderActionMenu: jest.fn(),
       history: scopedHistoryMock.create(),
+      theme$: themeServiceMock.createTheme$(),
     });
 
     expect(coreStartMock.chrome.setBreadcrumbs).toHaveBeenCalledTimes(1);

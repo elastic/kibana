@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { TileMetaFeature } from '../../../common/descriptor_types';
 import { FIELD_ORIGIN } from '../../../common/constants';
 import { IVectorSource } from '../sources/vector_source';
 import { ITooltipProperty, TooltipProperty } from '../tooltips/tooltip_property';
@@ -39,6 +40,8 @@ export interface IField {
   supportsFieldMetaFromEs(): boolean;
 
   isEqual(field: IField): boolean;
+
+  pluckRangeFromTileMetaFeature(metaFeature: TileMetaFeature): { min: number; max: number } | null;
 }
 
 export class AbstractField implements IField {
@@ -113,5 +116,9 @@ export class AbstractField implements IField {
 
   isEqual(field: IField) {
     return this._origin === field.getOrigin() && this._fieldName === field.getName();
+  }
+
+  pluckRangeFromTileMetaFeature(metaFeature: TileMetaFeature) {
+    return null;
   }
 }

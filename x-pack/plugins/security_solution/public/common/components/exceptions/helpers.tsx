@@ -33,7 +33,7 @@ import {
   addIdToEntries,
   ExceptionsBuilderExceptionItem,
 } from '@kbn/securitysolution-list-utils';
-import { IndexPatternBase } from '@kbn/es-query';
+import type { DataViewBase } from '@kbn/es-query';
 import * as i18n from './translations';
 import { AlertData, Flattened } from './types';
 
@@ -46,10 +46,10 @@ import exceptionableEndpointFields from './exceptionable_endpoint_fields.json';
 import exceptionableEndpointEventFields from './exceptionable_endpoint_event_fields.json';
 
 export const filterIndexPatterns = (
-  patterns: IndexPatternBase,
+  patterns: DataViewBase,
   type: ExceptionListType,
   osTypes?: OsTypeArray
-): IndexPatternBase => {
+): DataViewBase => {
   switch (type) {
     case 'endpoint':
       const osFilterForEndpoint: (name: string) => boolean = osTypes?.includes('linux')
@@ -752,7 +752,7 @@ export const getPrepopulatedBehaviorException = ({
  */
 export const entryHasNonEcsType = (
   exceptionItems: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>,
-  indexPatterns: IndexPatternBase
+  indexPatterns: DataViewBase
 ): boolean => {
   const doesFieldNameExist = (exceptionEntry: Entry): boolean => {
     return indexPatterns.fields.some(({ name }) => name === exceptionEntry.field);

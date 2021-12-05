@@ -48,8 +48,6 @@ function isEmptyAlert(alert: AlertInfo): boolean {
 }
 
 export class AlertService {
-  constructor() {}
-
   public async updateAlertsStatus({ alerts, scopedClusterClient, logger }: UpdateAlertsStatusArgs) {
     try {
       const bucketedAlerts = bucketAlertsByIndexAndStatus(alerts, logger);

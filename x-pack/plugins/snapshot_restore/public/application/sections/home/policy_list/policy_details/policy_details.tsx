@@ -307,7 +307,7 @@ export const PolicyDetails: React.FunctionComponent<Props> = ({
             {policyName}{' '}
             <EuiButtonIcon
               iconType="refresh"
-              color="subdued"
+              color="text"
               aria-label={i18n.translate(
                 'xpack.snapshotRestore.policyDetails.reloadButtonAriaLabel',
                 { defaultMessage: 'Reload' }

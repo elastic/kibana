@@ -12,6 +12,7 @@ import moment from 'moment';
 import React from 'react';
 import { JOB_STATUSES } from '../../common/constants';
 import {
+  BaseParamsV2,
   JobId,
   ReportApiJSON,
   ReportOutput,
@@ -34,6 +35,7 @@ export class Job {
   public objectType: ReportPayload['objectType'];
   public title: ReportPayload['title'];
   public isDeprecated: ReportPayload['isDeprecated'];
+  public spaceId: ReportPayload['spaceId'];
   public browserTimezone?: ReportPayload['browserTimezone'];
   public layout: ReportPayload['layout'];
 
@@ -56,6 +58,8 @@ export class Job {
   public csv_contains_formulas?: TaskRunResult['csv_contains_formulas'];
   public max_size_reached?: TaskRunResult['max_size_reached'];
   public warnings?: TaskRunResult['warnings'];
+
+  public locatorParams?: BaseParamsV2['locatorParams'];
 
   constructor(report: ReportApiJSON) {
     this.id = report.id;
@@ -82,9 +86,11 @@ export class Job {
     this.content_type = report.output?.content_type;
 
     this.isDeprecated = report.payload.isDeprecated || false;
+    this.spaceId = report.payload.spaceId;
     this.csv_contains_formulas = report.output?.csv_contains_formulas;
     this.max_size_reached = report.output?.max_size_reached;
     this.warnings = report.output?.warnings;
+    this.locatorParams = (report.payload as BaseParamsV2).locatorParams;
   }
 
   getStatusMessage() {
@@ -167,6 +173,25 @@ export class Job {
     );
   }
 
+  /**
+   * Returns a user friendly version of the report job creation date
+   */
+  getCreatedAtDate(): string {
+    return this.formatDate(this.created_at);
+  }
+
+  /**
+   * Returns a user friendly version of the user that created the report job
+   */
+  getCreatedBy(): string {
+    return (
+      this.created_by ||
+      i18n.translate('xpack.reporting.jobCreatedBy.unknownUserPlaceholderText', {
+        defaultMessage: 'Unknown',
+      })
+    );
+  }
+
   getCreatedAtLabel() {
     if (this.created_by) {
       return (
@@ -191,15 +216,20 @@ export class Job {
     }
   }
 
+  getDeprecatedMessage(): undefined | string {
+    if (this.isDeprecated) {
+      return i18n.translate('xpack.reporting.jobWarning.exportTypeDeprecated', {
+        defaultMessage:
+          'This is a deprecated export type. Automation of this report will need to be re-created for compatibility with future versions of Kibana.',
+      });
+    }
+  }
+
   getWarnings() {
     const warnings: string[] = [];
-    if (this.isDeprecated) {
-      warnings.push(
-        i18n.translate('xpack.reporting.jobWarning.exportTypeDeprecated', {
-          defaultMessage:
-            'This is a deprecated export type. Automation of this report will need to be re-created for compatibility with future versions of Kibana.',
-        })
-      );
+    const deprecatedMessage = this.getDeprecatedMessage();
+    if (deprecatedMessage) {
+      warnings.push(deprecatedMessage);
     }
 
     if (this.csv_contains_formulas) {
@@ -232,6 +262,10 @@ export class Job {
         </ul>
       );
     }
+  }
+
+  getPrettyStatusTimestamp() {
+    return this.formatDate(this.getStatusTimestamp());
   }
 
   private formatDate(timestamp: string) {

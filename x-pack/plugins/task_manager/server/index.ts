@@ -30,7 +30,7 @@ export {
   throwUnrecoverableError,
   isEphemeralTaskRejectedDueToCapacityError,
 } from './task_running';
-export { RunNowResult } from './task_scheduling';
+export type { RunNowResult } from './task_scheduling';
 export { getOldestIdleActionTask } from './queries/oldest_idle_action_task';
 
 export type {
@@ -65,7 +65,7 @@ export const config: PluginConfigDescriptor<TaskManagerConfig> = {
         addDeprecation({
           level: 'critical',
           configPath: `${fromPath}.max_workers`,
-          message: `setting "${fromPath}.max_workers" (${taskManager?.max_workers}) greater than ${MAX_WORKERS_LIMIT} is deprecated. Values greater than ${MAX_WORKERS_LIMIT} will not be supported starting in 8.0.`,
+          message: `setting "${fromPath}.max_workers" (${taskManager?.max_workers}) greater than ${MAX_WORKERS_LIMIT} is deprecated.`,
           correctiveActions: {
             manualSteps: [
               `Maximum allowed value of "${fromPath}.max_workers" is ${MAX_WORKERS_LIMIT}.` +

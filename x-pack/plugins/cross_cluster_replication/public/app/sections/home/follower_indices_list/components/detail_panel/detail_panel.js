@@ -30,6 +30,7 @@ import {
   EuiTextColor,
   EuiTitle,
 } from '@elastic/eui';
+import 'react-ace';
 import 'brace/theme/textmate';
 
 import { getIndexListUri } from '../../../../../../../../../plugins/index_management/public';

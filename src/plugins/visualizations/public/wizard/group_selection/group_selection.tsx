@@ -110,7 +110,7 @@ function GroupSelection(props: GroupSelectionProps) {
                         'Use our classic visualize library to create charts based on aggregations.',
                     }
                   )}
-                  icon={<EuiIcon type="heatmap" size="xl" color="secondary" />}
+                  icon={<EuiIcon type="heatmap" size="xl" color="success" />}
                   className="visNewVisDialog__groupsCard"
                 >
                   <EuiLink
@@ -203,7 +203,7 @@ const VisGroup = ({ visType, onVisTypeSelected }: VisCardProps) => {
           </>
         }
         layout="horizontal"
-        icon={<EuiIcon type={visType.icon || 'empty'} size="xl" color="secondary" />}
+        icon={<EuiIcon type={visType.icon || 'empty'} size="xl" color="success" />}
         className="visNewVisDialog__groupsCard"
       />
     </EuiFlexItem>

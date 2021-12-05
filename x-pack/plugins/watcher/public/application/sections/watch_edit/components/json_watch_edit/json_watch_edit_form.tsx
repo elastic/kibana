@@ -197,7 +197,7 @@ export const JsonWatchEditForm = () => {
               <EuiButton
                 data-test-subj="saveWatchButton"
                 fill
-                color="secondary"
+                color="success"
                 type="submit"
                 iconType="check"
                 isLoading={isSaving}

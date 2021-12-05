@@ -25,7 +25,6 @@ import {
   getPackagePolicyDeleteCallback,
 } from '../fleet_integration/fleet_integration';
 import { ManifestManager } from './services/artifacts';
-import { AppClientFactory } from '../client';
 import { ConfigType } from '../config';
 import { IRequestContextFactory } from '../request_context_factory';
 import { LicenseService } from '../../common/license';
@@ -49,7 +48,6 @@ export type EndpointAppContextServiceStartContract = Partial<
   logger: Logger;
   endpointMetadataService: EndpointMetadataService;
   manifestManager?: ManifestManager;
-  appClientFactory: AppClientFactory;
   security: SecurityPluginStart;
   alerting: AlertsPluginStartContract;
   config: ConfigType;
@@ -125,7 +123,10 @@ export class EndpointAppContextService {
     return this.startDependencies?.agentService;
   }
 
-  public getPackagePolicyService(): PackagePolicyServiceInterface | undefined {
+  public getPackagePolicyService(): PackagePolicyServiceInterface {
+    if (!this.startDependencies?.packagePolicyService) {
+      throw new EndpointAppContentServicesNotStartedError();
+    }
     return this.startDependencies?.packagePolicyService;
   }
 

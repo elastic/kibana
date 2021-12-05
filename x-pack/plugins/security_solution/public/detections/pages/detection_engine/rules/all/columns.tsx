@@ -14,7 +14,7 @@ import {
   EuiIcon,
   EuiLink,
 } from '@elastic/eui';
-import { FormattedMessage, FormattedRelative } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import * as H from 'history';
 import { sum } from 'lodash';
 import React, { Dispatch } from 'react';
@@ -22,7 +22,7 @@ import React, { Dispatch } from 'react';
 import { isMlRule } from '../../../../../../common/machine_learning/helpers';
 import { Rule, RuleStatus } from '../../../../containers/detection_engine/rules';
 import { getEmptyTagValue } from '../../../../../common/components/empty_value';
-import { FormattedDate } from '../../../../../common/components/formatted_date';
+import { FormattedRelativePreferenceDate } from '../../../../../common/components/formatted_date';
 import { getRuleDetailsUrl } from '../../../../../common/components/link_to/redirect_to_detection_engine';
 import { ActionToaster } from '../../../../../common/components/toasters';
 import { getStatusColor } from '../../../../components/rules/rule_status/helpers';
@@ -36,13 +36,16 @@ import {
   exportRulesAction,
 } from './actions';
 import { RulesTableAction } from '../../../../containers/detection_engine/rules/rules_table';
-import { LocalizedDateTooltip } from '../../../../../common/components/localized_date_tooltip';
 import { LinkAnchor } from '../../../../../common/components/links';
 import { getToolTipContent, canEditRuleWithActions } from '../../../../../common/utils/privileges';
 import { PopoverTooltip } from './popover_tooltip';
 import { TagsDisplay } from './tag_display';
 import { getRuleStatusText } from '../../../../../../common/detection_engine/utils';
-import { APP_UI_ID, SecurityPageName } from '../../../../../../common/constants';
+import {
+  APP_UI_ID,
+  SecurityPageName,
+  DEFAULT_RELATIVE_DATE_THRESHOLD,
+} from '../../../../../../common/constants';
 import { DocLinksStart, NavigateToAppOptions } from '../../../../../../../../../src/core/public';
 
 export const getActions = (
@@ -200,9 +203,12 @@ export const getColumns = ({
         return value == null ? (
           getEmptyTagValue()
         ) : (
-          <LocalizedDateTooltip fieldName={i18n.COLUMN_LAST_COMPLETE_RUN} date={new Date(value)}>
-            <FormattedRelative value={value} />
-          </LocalizedDateTooltip>
+          <FormattedRelativePreferenceDate
+            tooltipFieldName={i18n.COLUMN_LAST_COMPLETE_RUN}
+            relativeThresholdInHrs={DEFAULT_RELATIVE_DATE_THRESHOLD}
+            value={value}
+            tooltipAnchorClassName="eui-textTruncate"
+          />
         );
       },
       width: '14%',
@@ -228,9 +234,12 @@ export const getColumns = ({
         return value == null ? (
           getEmptyTagValue()
         ) : (
-          <LocalizedDateTooltip fieldName={i18n.COLUMN_LAST_UPDATE} date={new Date(value)}>
-            <FormattedDate value={value} fieldName={'last rule update date'} />
-          </LocalizedDateTooltip>
+          <FormattedRelativePreferenceDate
+            tooltipFieldName={i18n.COLUMN_LAST_UPDATE}
+            relativeThresholdInHrs={DEFAULT_RELATIVE_DATE_THRESHOLD}
+            value={value}
+            tooltipAnchorClassName="eui-textTruncate"
+          />
         );
       },
       sortable: true,
@@ -410,9 +419,12 @@ export const getMonitoringColumns = (
         return value == null ? (
           getEmptyTagValue()
         ) : (
-          <LocalizedDateTooltip fieldName={i18n.COLUMN_LAST_COMPLETE_RUN} date={new Date(value)}>
-            <FormattedRelative value={value} />
-          </LocalizedDateTooltip>
+          <FormattedRelativePreferenceDate
+            tooltipFieldName={i18n.COLUMN_LAST_COMPLETE_RUN}
+            relativeThresholdInHrs={DEFAULT_RELATIVE_DATE_THRESHOLD}
+            value={value}
+            tooltipAnchorClassName="eui-textTruncate"
+          />
         );
       },
       width: '20%',

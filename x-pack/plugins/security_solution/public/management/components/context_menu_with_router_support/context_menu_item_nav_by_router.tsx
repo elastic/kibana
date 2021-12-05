@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
+import React, { memo, useMemo } from 'react';
 import {
   EuiContextMenuItem,
   EuiContextMenuItemProps,
@@ -36,6 +36,7 @@ export interface ContextMenuItemNavByRouterProps extends EuiContextMenuItemProps
 const StyledEuiContextMenuItem = styled(EuiContextMenuItem)`
   .additional-info {
     display: none;
+    max-width: 50%;
   }
   &:hover {
     .additional-info {
@@ -69,6 +70,18 @@ export const ContextMenuItemNavByRouter = memo<ContextMenuItemNavByRouterProps>(
       onClick,
     });
     const getTestId = useTestIdGenerator(otherMenuItemProps['data-test-subj']);
+    const hoverComponentInstance = useMemo(() => {
+      // If the `hoverInfo` is not an object (ex. text, number), then auto-add the text truncation className.
+      // Adding this when the `hoverInfo` is a react component could cause issue, thus in htose cases, we
+      // assume the componet will handle how the data is truncated (if applicable)
+      const cssClassNames = `additional-info ${
+        'object' !== typeof hoverInfo ? 'eui-textTruncate' : ''
+      }`;
+
+      return hoverInfo ? (
+        <StyledEuiFlexItem className={cssClassNames}>{hoverInfo}</StyledEuiFlexItem>
+      ) : null;
+    }, [hoverInfo]);
 
     return (
       <StyledEuiContextMenuItem
@@ -88,16 +101,12 @@ export const ContextMenuItemNavByRouter = memo<ContextMenuItemNavByRouterProps>(
               >
                 {children}
               </div>
-              {hoverInfo && (
-                <StyledEuiFlexItem className="additional-info">{hoverInfo}</StyledEuiFlexItem>
-              )}
+              {hoverComponentInstance}
             </>
           ) : (
             <>
               <EuiFlexItem>{children}</EuiFlexItem>
-              {hoverInfo && (
-                <StyledEuiFlexItem className="additional-info">{hoverInfo}</StyledEuiFlexItem>
-              )}
+              {hoverComponentInstance}
             </>
           )}
         </EuiFlexGroup>

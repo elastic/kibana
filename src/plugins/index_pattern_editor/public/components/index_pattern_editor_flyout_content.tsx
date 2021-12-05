@@ -167,7 +167,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
   useEffect(() => {
     const getRollups = async () => {
       try {
-        const response = await http.get('/api/rollup/indices');
+        const response = await http.get<RollupIndicesCapsResponse>('/api/rollup/indices');
         if (response) {
           setRollupIndicesCapabilities(response);
         }

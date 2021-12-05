@@ -74,7 +74,7 @@ export class StepLogistics extends Component {
 
     if (!isValidatingIndexPattern && hasMatchingIndices) {
       return (
-        <EuiTextColor color="secondary" data-test-subj="fieldIndexPatternSuccessMessage">
+        <EuiTextColor color="success" data-test-subj="fieldIndexPatternSuccessMessage">
           <p>
             <FormattedMessage
               id="xpack.rollupJobs.create.stepLogistics.fieldIndexPattern.helpHasMatchesLabel"

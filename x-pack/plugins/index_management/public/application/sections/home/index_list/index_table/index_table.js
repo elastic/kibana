@@ -603,7 +603,7 @@ export class IndexTable extends Component {
                     <EuiFlexItem grow={false}>
                       <EuiButton
                         isLoading={indicesLoading}
-                        color="secondary"
+                        color="success"
                         onClick={() => {
                           loadIndices();
                         }}

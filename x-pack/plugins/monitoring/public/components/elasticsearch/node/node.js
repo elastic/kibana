@@ -43,7 +43,6 @@ export const Node = ({ nodeSummary, metrics, logs, alerts, nodeId, clusterUuid, 
  */
   const metricsToShow = [
     metrics.node_jvm_mem,
-    metrics.node_mem,
     metrics.node_total_io,
     metrics.node_cpu_metric,
     metrics.node_load_average,

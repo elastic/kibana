@@ -16,7 +16,7 @@ import './dimension_editor.scss';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiFieldText, EuiTabs, EuiTab, EuiCallOut } from '@elastic/eui';
-import { IndexPatternColumn, operationDefinitionMap } from '../operations';
+import { GenericIndexPatternColumn, operationDefinitionMap } from '../operations';
 import { useDebouncedValue } from '../../shared_components';
 
 export const formulaOperationName = 'formula';
@@ -144,63 +144,39 @@ export const CalloutWarning = ({
   );
 };
 
-type DimensionEditorTabsType =
-  | typeof quickFunctionsName
-  | typeof staticValueOperationName
-  | typeof formulaOperationName;
+export interface DimensionEditorTab {
+  enabled: boolean;
+  state: boolean;
+  onClick: () => void;
+  id: typeof quickFunctionsName | typeof staticValueOperationName | typeof formulaOperationName;
+  label: string;
+}
 
-export const DimensionEditorTabs = ({
-  tabsEnabled,
-  tabsState,
-  onClick,
-}: {
-  tabsEnabled: Record<DimensionEditorTabsType, boolean>;
-  tabsState: Record<DimensionEditorTabsType, boolean>;
-  onClick: (tabClicked: DimensionEditorTabsType) => void;
-}) => {
+export const DimensionEditorTabs = ({ tabs }: { tabs: DimensionEditorTab[] }) => {
   return (
     <EuiTabs
       size="s"
       className="lnsIndexPatternDimensionEditor__header"
       data-test-subj="lens-dimensionTabs"
     >
-      {tabsEnabled.static_value ? (
-        <EuiTab
-          isSelected={tabsState.static_value}
-          data-test-subj="lens-dimensionTabs-static_value"
-          onClick={() => onClick(staticValueOperationName)}
-        >
-          {i18n.translate('xpack.lens.indexPattern.staticValueLabel', {
-            defaultMessage: 'Static value',
-          })}
-        </EuiTab>
-      ) : null}
-      <EuiTab
-        isSelected={tabsState.quickFunctions}
-        data-test-subj="lens-dimensionTabs-quickFunctions"
-        onClick={() => onClick(quickFunctionsName)}
-      >
-        {i18n.translate('xpack.lens.indexPattern.quickFunctionsLabel', {
-          defaultMessage: 'Quick functions',
-        })}
-      </EuiTab>
-      {tabsEnabled.formula ? (
-        <EuiTab
-          isSelected={tabsState.formula}
-          data-test-subj="lens-dimensionTabs-formula"
-          onClick={() => onClick(formulaOperationName)}
-        >
-          {i18n.translate('xpack.lens.indexPattern.formulaLabel', {
-            defaultMessage: 'Formula',
-          })}
-        </EuiTab>
-      ) : null}
+      {tabs.map(({ id, enabled, state, onClick, label }) => {
+        return enabled ? (
+          <EuiTab
+            key={id}
+            isSelected={state}
+            data-test-subj={`lens-dimensionTabs-${id}`}
+            onClick={onClick}
+          >
+            {label}
+          </EuiTab>
+        ) : null;
+      })}
     </EuiTabs>
   );
 };
 
 export function getErrorMessage(
-  selectedColumn: IndexPatternColumn | undefined,
+  selectedColumn: GenericIndexPatternColumn | undefined,
   incompleteOperation: boolean,
   input: 'none' | 'field' | 'fullReference' | 'managedReference' | undefined,
   fieldInvalid: boolean

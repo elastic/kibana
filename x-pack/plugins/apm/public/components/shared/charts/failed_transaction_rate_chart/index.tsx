@@ -14,7 +14,7 @@ import { APIReturnType } from '../../../../services/rest/createCallApmApi';
 import { asPercent } from '../../../../../common/utils/formatters';
 import { useFetcher } from '../../../../hooks/use_fetcher';
 import { useTheme } from '../../../../hooks/use_theme';
-import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
+import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { TimeseriesChart } from '../timeseries_chart';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import {
@@ -40,13 +40,11 @@ type ErrorRate =
 
 const INITIAL_STATE: ErrorRate = {
   currentPeriod: {
-    noHits: true,
-    transactionErrorRate: [],
+    timeseries: [],
     average: null,
   },
   previousPeriod: {
-    noHits: true,
-    transactionErrorRate: [],
+    timeseries: [],
     average: null,
   },
 };
@@ -60,7 +58,7 @@ export function FailedTransactionRateChart({
   const theme = useTheme();
   const {
     urlParams: { transactionName, comparisonEnabled, comparisonType },
-  } = useUrlParams();
+  } = useLegacyUrlParams();
 
   const {
     query: { rangeFrom, rangeTo },
@@ -116,7 +114,7 @@ export function FailedTransactionRateChart({
 
   const timeseries = [
     {
-      data: data.currentPeriod.transactionErrorRate,
+      data: data.currentPeriod.timeseries,
       type: 'linemark',
       color: theme.eui.euiColorVis7,
       title: i18n.translate('xpack.apm.errorRate.chart.errorRate', {
@@ -126,7 +124,7 @@ export function FailedTransactionRateChart({
     ...(comparisonEnabled
       ? [
           {
-            data: data.previousPeriod.transactionErrorRate,
+            data: data.previousPeriod.timeseries,
             type: 'area',
             color: theme.eui.euiColorMediumShade,
             title: i18n.translate(

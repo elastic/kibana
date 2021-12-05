@@ -33,9 +33,9 @@ import {
   WrapHits,
   WrapSequences,
 } from '../signals/types';
-import { AlertsFieldMap, RulesFieldMap } from './field_maps';
 import { ExperimentalFeatures } from '../../../../common/experimental_features';
 import { IEventLogService } from '../../../../../event_log/server';
+import { AlertsFieldMap, RulesFieldMap } from '../../../../common/field_maps';
 
 export interface SecurityAlertTypeReturnValue<TState extends AlertTypeState> {
   bulkCreateTimes: string[];

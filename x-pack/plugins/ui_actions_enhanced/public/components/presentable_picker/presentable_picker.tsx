@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiFlexGroup } from '@elastic/eui';
 import { PresentablePickerItem, Item } from './presentable_picker_item';
 
-export { Item } from './presentable_picker_item';
+export type { Item } from './presentable_picker_item';
 
 export interface PresentablePickerProps {
   items: Item[];

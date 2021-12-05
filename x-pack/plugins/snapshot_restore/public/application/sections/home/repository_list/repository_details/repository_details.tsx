@@ -25,8 +25,6 @@ import {
   EuiText,
 } from '@elastic/eui';
 
-import 'brace/theme/textmate';
-
 import { SectionError, Error } from '../../../../../shared_imports';
 
 import { useCore, useServices } from '../../../../app_context';
@@ -356,21 +354,16 @@ export const RepositoryDetails: React.FunctionComponent<Props> = ({
               </EuiCodeBlock>
             </div>
           ) : (
-            <EuiCallOut
-              color="danger"
-              iconType="alert"
-              title={i18n.translate('xpack.snapshotRestore.repositoryDetails.cleanupErrorTitle', {
-                defaultMessage: 'Sorry, there was an error cleaning the repository.',
-              })}
-            >
-              <p>
-                {cleanup.error
-                  ? JSON.stringify(cleanup.error)
-                  : i18n.translate('xpack.snapshotRestore.repositoryDetails.cleanupUnknownError', {
-                      defaultMessage: '503: Unknown error',
-                    })}
-              </p>
-            </EuiCallOut>
+            <SectionError
+              title={
+                <FormattedMessage
+                  id="xpack.snapshotRestore.repositoryDetails.cleanupErrorTitle"
+                  defaultMessage="Error cleaning repository"
+                />
+              }
+              error={cleanup.error as Error}
+              data-test-subj="cleanupError"
+            />
           )}
         </>
       ) : null}

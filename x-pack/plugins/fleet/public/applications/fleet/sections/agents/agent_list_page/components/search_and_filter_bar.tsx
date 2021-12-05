@@ -224,6 +224,7 @@ export const SearchAndFilterBar: React.FunctionComponent<{
                 fill
                 iconType="plusInCircle"
                 onClick={() => setIsEnrollmentFlyoutOpen(true)}
+                data-test-subj="addAgentButton"
               >
                 <FormattedMessage id="xpack.fleet.agentList.addButton" defaultMessage="Add agent" />
               </EuiButton>

@@ -387,7 +387,7 @@ export const FooterComponent = ({
               <b>
                 {i18n.AUTO_REFRESH_ACTIVE}{' '}
                 <EuiIconTip
-                  color="subdued"
+                  color="text"
                   content={
                     <FormattedMessage
                       id="xpack.securitySolution.footer.autoRefreshActiveTooltip"

@@ -44,13 +44,12 @@ import {
   addSpriteSheetToMapFromImageData,
   loadSpriteSheetImageData,
   removeOrphanedSourcesAndLayers,
-  // @ts-expect-error
 } from './utils';
 import { ResizeChecker } from '../../../../../../src/plugins/kibana_utils/public';
 import { RenderToolTipContent } from '../../classes/tooltips/tooltip_property';
 import { TileStatusTracker } from './tile_status_tracker';
 import { DrawFeatureControl } from './draw_control/draw_feature_control';
-import { TiledVectorLayer } from '../../classes/layers/tiled_vector_layer/tiled_vector_layer';
+import { MvtVectorLayer } from '../../classes/layers/vector_layer';
 import type { MapExtentState } from '../../reducers/map/types';
 
 export interface Props {
@@ -127,7 +126,7 @@ export class MbMap extends Component<Props, State> {
   // This keeps track of the latest update calls, per layerId
   _queryForMeta = (layer: ILayer) => {
     if (this.state.mbMap && layer.isVisible() && layer.getType() === LAYER_TYPE.TILED_VECTOR) {
-      const mbFeatures = (layer as TiledVectorLayer).queryTileMetaFeatures(this.state.mbMap);
+      const mbFeatures = (layer as MvtVectorLayer).queryTileMetaFeatures(this.state.mbMap);
       if (mbFeatures !== null) {
         this.props.updateMetaFromTiles(layer.getId(), mbFeatures);
       }

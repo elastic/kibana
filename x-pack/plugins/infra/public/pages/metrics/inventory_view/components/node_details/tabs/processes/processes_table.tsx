@@ -202,7 +202,7 @@ const ProcessesTableBody = ({ items, currentTime }: TableBodyProps) => (
       const cells = columns.map((column) => (
         <EuiTableRowCell
           key={`${String(column.field)}-${i}`}
-          header={column.name}
+          mobileOptions={{ header: column.name }}
           align={column.align ?? LEFT_ALIGNMENT}
           textOnly={column.textOnly ?? true}
         >

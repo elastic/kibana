@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-export { AuditService, AuditServiceSetup, AuditLogger } from './audit_service';
+export type { AuditServiceSetup, AuditLogger } from './audit_service';
+export { AuditService } from './audit_service';
+export type { AuditEvent } from './audit_events';
 export {
-  AuditEvent,
   userLoginEvent,
   accessAgreementAcknowledgedEvent,
   httpRequestEvent,

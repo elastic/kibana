@@ -37,6 +37,7 @@ export interface UsageStats {
   'securitySolution:rulesTableRefresh': string;
   'observability:enableInspectEsQueries': boolean;
   'observability:maxSuggestions': number;
+  'observability:enableComparisonByDefault': boolean;
   'visualize:enableLabs': boolean;
   'visualization:heatmap:maxBuckets': number;
   'visualization:colorMapping': string;
@@ -121,6 +122,7 @@ export interface UsageStats {
   'banners:textColor': string;
   'banners:backgroundColor': string;
   'labs:canvas:enable_ui': boolean;
+  'labs:canvas:byValueEmbeddable': boolean;
   'labs:canvas:useDataService': boolean;
   'labs:presentation:timeToPresent': boolean;
   'labs:dashboard:enable_ui': boolean;

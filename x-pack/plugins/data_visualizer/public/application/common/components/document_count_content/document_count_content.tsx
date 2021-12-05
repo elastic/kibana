@@ -7,30 +7,25 @@
 
 import React, { FC } from 'react';
 import { DocumentCountChart, DocumentCountChartPoint } from './document_count_chart';
-import { FieldVisConfig, FileBasedFieldVisConfig } from '../stats_table/types';
 import { TotalCountHeader } from './total_count_header';
+import { DocumentCountStats } from '../../../../../common/types/field_stats';
 
 export interface Props {
-  config?: FieldVisConfig | FileBasedFieldVisConfig;
+  documentCountStats?: DocumentCountStats;
   totalCount: number;
 }
 
-export const DocumentCountContent: FC<Props> = ({ config, totalCount }) => {
-  if (config?.stats === undefined) {
+export const DocumentCountContent: FC<Props> = ({ documentCountStats, totalCount }) => {
+  if (documentCountStats === undefined) {
     return totalCount !== undefined ? <TotalCountHeader totalCount={totalCount} /> : null;
   }
 
-  const { documentCounts, timeRangeEarliest, timeRangeLatest } = config.stats;
-  if (
-    documentCounts === undefined ||
-    timeRangeEarliest === undefined ||
-    timeRangeLatest === undefined
-  )
-    return null;
+  const { timeRangeEarliest, timeRangeLatest } = documentCountStats;
+  if (timeRangeEarliest === undefined || timeRangeLatest === undefined) return null;
 
   let chartPoints: DocumentCountChartPoint[] = [];
-  if (documentCounts.buckets !== undefined) {
-    const buckets: Record<string, number> = documentCounts?.buckets;
+  if (documentCountStats.buckets !== undefined) {
+    const buckets: Record<string, number> = documentCountStats?.buckets;
     chartPoints = Object.entries(buckets).map(([time, value]) => ({ time: +time, value }));
   }
 
@@ -41,7 +36,7 @@ export const DocumentCountContent: FC<Props> = ({ config, totalCount }) => {
         chartPoints={chartPoints}
         timeRangeEarliest={timeRangeEarliest}
         timeRangeLatest={timeRangeLatest}
-        interval={documentCounts.interval}
+        interval={documentCountStats.interval}
       />
     </>
   );

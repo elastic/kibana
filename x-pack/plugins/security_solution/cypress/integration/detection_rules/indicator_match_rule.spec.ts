@@ -40,6 +40,7 @@ import {
   INDICATOR_INDEX_PATTERNS,
   INDICATOR_INDEX_QUERY,
   INDICATOR_MAPPING,
+  INDICATOR_PREFIX_OVERRIDE,
   INVESTIGATION_NOTES_MARKDOWN,
   INVESTIGATION_NOTES_TOGGLE,
   MITRE_ATTACK_DETAILS,
@@ -114,7 +115,7 @@ import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
 import { goBackToAllRulesTable } from '../../tasks/rule_details';
 
 import { ALERTS_URL, RULE_CREATION } from '../../urls/navigation';
-import { DEFAULT_THREAT_MATCH_QUERY } from '../../../common/constants';
+const DEFAULT_THREAT_MATCH_QUERY = '@timestamp >= "now-30d"';
 
 describe('indicator match', () => {
   describe('Detection rules, Indicator Match', () => {
@@ -448,6 +449,10 @@ describe('indicator match', () => {
         cy.get(ABOUT_DETAILS).within(() => {
           getDetails(SEVERITY_DETAILS).should('have.text', getNewThreatIndicatorRule().severity);
           getDetails(RISK_SCORE_DETAILS).should('have.text', getNewThreatIndicatorRule().riskScore);
+          getDetails(INDICATOR_PREFIX_OVERRIDE).should(
+            'have.text',
+            getNewThreatIndicatorRule().threatIndicatorPath
+          );
           getDetails(REFERENCE_URLS_DETAILS).should((details) => {
             expect(removeExternalLinkText(details.text())).equal(expectedUrls);
           });

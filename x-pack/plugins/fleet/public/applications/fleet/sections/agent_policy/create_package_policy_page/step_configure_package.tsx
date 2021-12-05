@@ -106,7 +106,7 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
     ) : (
       <EuiEmptyPrompt
         iconType="checkInCircleFilled"
-        iconColor="secondary"
+        iconColor="success"
         body={
           <EuiText>
             <p>

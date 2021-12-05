@@ -138,7 +138,7 @@ export const SecurityLogic = kea<MakeLogicType<SecurityValues, SecurityActions>>
       const { http } = HttpLogic.values;
 
       try {
-        const response = await http.get(route);
+        const response = await http.get<SecurityServerProps>(route);
         actions.setServerProps(response);
       } catch (e) {
         flashAPIErrors(e);
@@ -151,7 +151,7 @@ export const SecurityLogic = kea<MakeLogicType<SecurityValues, SecurityActions>>
       const { http } = HttpLogic.values;
 
       try {
-        const response = await http.patch(route, { body });
+        const response = await http.patch<SecurityServerProps>(route, { body });
         actions.setSourceRestrictionsUpdated(response);
         flashSuccessToast(SOURCE_RESTRICTIONS_SUCCESS_MESSAGE);
         AppLogic.actions.setSourceRestriction(isEnabled);

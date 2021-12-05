@@ -8,7 +8,7 @@
 import { HttpSetup } from 'src/core/public';
 import { API_BASE_PATH } from '../../common/constants';
 import { sendRequest } from '../shared_imports';
-import { FieldPreviewContext, FieldPreviewResponse } from '../types';
+import { PainlessExecuteContext, FieldPreviewResponse } from '../components/preview';
 
 export const initApi = (httpClient: HttpSetup) => {
   const getFieldPreview = ({
@@ -19,7 +19,7 @@ export const initApi = (httpClient: HttpSetup) => {
     documentId,
   }: {
     index: string;
-    context: FieldPreviewContext;
+    context: PainlessExecuteContext;
     script: { source: string } | null;
     document: Record<string, any>;
     documentId: string;

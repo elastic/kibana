@@ -2160,6 +2160,147 @@
       },
       {
         "parentPluginId": "charts",
+        "id": "def-public.MULTILAYER_TIME_AXIS_STYLE",
+        "type": "Object",
+        "tags": [],
+        "label": "MULTILAYER_TIME_AXIS_STYLE",
+        "description": [],
+        "path": "src/plugins/charts/common/static/styles/multilayer_timeaxis.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "charts",
+            "id": "def-public.MULTILAYER_TIME_AXIS_STYLE.tickLabel",
+            "type": "Object",
+            "tags": [],
+            "label": "tickLabel",
+            "description": [],
+            "path": "src/plugins/charts/common/static/styles/multilayer_timeaxis.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "charts",
+                "id": "def-public.MULTILAYER_TIME_AXIS_STYLE.tickLabel.visible",
+                "type": "boolean",
+                "tags": [],
+                "label": "visible",
+                "description": [],
+                "signature": [
+                  "true"
+                ],
+                "path": "src/plugins/charts/common/static/styles/multilayer_timeaxis.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "charts",
+                "id": "def-public.MULTILAYER_TIME_AXIS_STYLE.tickLabel.padding",
+                "type": "number",
+                "tags": [],
+                "label": "padding",
+                "description": [],
+                "path": "src/plugins/charts/common/static/styles/multilayer_timeaxis.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "charts",
+                "id": "def-public.MULTILAYER_TIME_AXIS_STYLE.tickLabel.rotation",
+                "type": "number",
+                "tags": [],
+                "label": "rotation",
+                "description": [],
+                "path": "src/plugins/charts/common/static/styles/multilayer_timeaxis.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "charts",
+                "id": "def-public.MULTILAYER_TIME_AXIS_STYLE.tickLabel.alignment",
+                "type": "Object",
+                "tags": [],
+                "label": "alignment",
+                "description": [],
+                "path": "src/plugins/charts/common/static/styles/multilayer_timeaxis.ts",
+                "deprecated": false,
+                "children": [
+                  {
+                    "parentPluginId": "charts",
+                    "id": "def-public.MULTILAYER_TIME_AXIS_STYLE.tickLabel.alignment.vertical",
+                    "type": "string",
+                    "tags": [],
+                    "label": "vertical",
+                    "description": [],
+                    "signature": [
+                      "\"bottom\""
+                    ],
+                    "path": "src/plugins/charts/common/static/styles/multilayer_timeaxis.ts",
+                    "deprecated": false
+                  },
+                  {
+                    "parentPluginId": "charts",
+                    "id": "def-public.MULTILAYER_TIME_AXIS_STYLE.tickLabel.alignment.horizontal",
+                    "type": "string",
+                    "tags": [],
+                    "label": "horizontal",
+                    "description": [],
+                    "signature": [
+                      "\"left\""
+                    ],
+                    "path": "src/plugins/charts/common/static/styles/multilayer_timeaxis.ts",
+                    "deprecated": false
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "parentPluginId": "charts",
+            "id": "def-public.MULTILAYER_TIME_AXIS_STYLE.tickLine",
+            "type": "Object",
+            "tags": [],
+            "label": "tickLine",
+            "description": [],
+            "path": "src/plugins/charts/common/static/styles/multilayer_timeaxis.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "charts",
+                "id": "def-public.MULTILAYER_TIME_AXIS_STYLE.tickLine.visible",
+                "type": "boolean",
+                "tags": [],
+                "label": "visible",
+                "description": [],
+                "signature": [
+                  "true"
+                ],
+                "path": "src/plugins/charts/common/static/styles/multilayer_timeaxis.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "charts",
+                "id": "def-public.MULTILAYER_TIME_AXIS_STYLE.tickLine.size",
+                "type": "number",
+                "tags": [],
+                "label": "size",
+                "description": [],
+                "path": "src/plugins/charts/common/static/styles/multilayer_timeaxis.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "charts",
+                "id": "def-public.MULTILAYER_TIME_AXIS_STYLE.tickLine.padding",
+                "type": "number",
+                "tags": [],
+                "label": "padding",
+                "description": [],
+                "path": "src/plugins/charts/common/static/styles/multilayer_timeaxis.ts",
+                "deprecated": false
+              }
+            ]
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "charts",
         "id": "def-public.truncatedColorMaps",
         "type": "Object",
         "tags": [],
@@ -3844,6 +3985,20 @@
       },
       {
         "parentPluginId": "charts",
+        "id": "def-common.LEGACY_TIME_AXIS",
+        "type": "string",
+        "tags": [],
+        "label": "LEGACY_TIME_AXIS",
+        "description": [],
+        "signature": [
+          "\"visualization:useLegacyTimeAxis\""
+        ],
+        "path": "src/plugins/charts/common/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "charts",
         "id": "def-common.paletteIds",
         "type": "Array",
         "tags": [],
@@ -3905,6 +4060,147 @@
         ],
         "path": "src/plugins/charts/common/static/components/collections.ts",
         "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "charts",
+        "id": "def-common.MULTILAYER_TIME_AXIS_STYLE",
+        "type": "Object",
+        "tags": [],
+        "label": "MULTILAYER_TIME_AXIS_STYLE",
+        "description": [],
+        "path": "src/plugins/charts/common/static/styles/multilayer_timeaxis.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "charts",
+            "id": "def-common.MULTILAYER_TIME_AXIS_STYLE.tickLabel",
+            "type": "Object",
+            "tags": [],
+            "label": "tickLabel",
+            "description": [],
+            "path": "src/plugins/charts/common/static/styles/multilayer_timeaxis.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "charts",
+                "id": "def-common.MULTILAYER_TIME_AXIS_STYLE.tickLabel.visible",
+                "type": "boolean",
+                "tags": [],
+                "label": "visible",
+                "description": [],
+                "signature": [
+                  "true"
+                ],
+                "path": "src/plugins/charts/common/static/styles/multilayer_timeaxis.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "charts",
+                "id": "def-common.MULTILAYER_TIME_AXIS_STYLE.tickLabel.padding",
+                "type": "number",
+                "tags": [],
+                "label": "padding",
+                "description": [],
+                "path": "src/plugins/charts/common/static/styles/multilayer_timeaxis.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "charts",
+                "id": "def-common.MULTILAYER_TIME_AXIS_STYLE.tickLabel.rotation",
+                "type": "number",
+                "tags": [],
+                "label": "rotation",
+                "description": [],
+                "path": "src/plugins/charts/common/static/styles/multilayer_timeaxis.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "charts",
+                "id": "def-common.MULTILAYER_TIME_AXIS_STYLE.tickLabel.alignment",
+                "type": "Object",
+                "tags": [],
+                "label": "alignment",
+                "description": [],
+                "path": "src/plugins/charts/common/static/styles/multilayer_timeaxis.ts",
+                "deprecated": false,
+                "children": [
+                  {
+                    "parentPluginId": "charts",
+                    "id": "def-common.MULTILAYER_TIME_AXIS_STYLE.tickLabel.alignment.vertical",
+                    "type": "string",
+                    "tags": [],
+                    "label": "vertical",
+                    "description": [],
+                    "signature": [
+                      "\"bottom\""
+                    ],
+                    "path": "src/plugins/charts/common/static/styles/multilayer_timeaxis.ts",
+                    "deprecated": false
+                  },
+                  {
+                    "parentPluginId": "charts",
+                    "id": "def-common.MULTILAYER_TIME_AXIS_STYLE.tickLabel.alignment.horizontal",
+                    "type": "string",
+                    "tags": [],
+                    "label": "horizontal",
+                    "description": [],
+                    "signature": [
+                      "\"left\""
+                    ],
+                    "path": "src/plugins/charts/common/static/styles/multilayer_timeaxis.ts",
+                    "deprecated": false
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "parentPluginId": "charts",
+            "id": "def-common.MULTILAYER_TIME_AXIS_STYLE.tickLine",
+            "type": "Object",
+            "tags": [],
+            "label": "tickLine",
+            "description": [],
+            "path": "src/plugins/charts/common/static/styles/multilayer_timeaxis.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "charts",
+                "id": "def-common.MULTILAYER_TIME_AXIS_STYLE.tickLine.visible",
+                "type": "boolean",
+                "tags": [],
+                "label": "visible",
+                "description": [],
+                "signature": [
+                  "true"
+                ],
+                "path": "src/plugins/charts/common/static/styles/multilayer_timeaxis.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "charts",
+                "id": "def-common.MULTILAYER_TIME_AXIS_STYLE.tickLine.size",
+                "type": "number",
+                "tags": [],
+                "label": "size",
+                "description": [],
+                "path": "src/plugins/charts/common/static/styles/multilayer_timeaxis.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "charts",
+                "id": "def-common.MULTILAYER_TIME_AXIS_STYLE.tickLine.padding",
+                "type": "number",
+                "tags": [],
+                "label": "padding",
+                "description": [],
+                "path": "src/plugins/charts/common/static/styles/multilayer_timeaxis.ts",
+                "deprecated": false
+              }
+            ]
+          }
+        ],
         "initialIsOpen": false
       },
       {

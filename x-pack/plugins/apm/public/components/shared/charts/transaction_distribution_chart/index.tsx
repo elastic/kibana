@@ -32,7 +32,7 @@ import { i18n } from '@kbn/i18n';
 import { useChartTheme } from '../../../../../../observability/public';
 
 import { getDurationFormatter } from '../../../../../common/utils/formatters';
-import type { HistogramItem } from '../../../../../common/search_strategies/types';
+import type { HistogramItem } from '../../../../../common/correlations/types';
 
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { useTheme } from '../../../../hooks/use_theme';

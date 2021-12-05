@@ -21,31 +21,37 @@ export const config: PluginConfigDescriptor<ConfigSchema> = {
   },
   schema: configSchema,
   deprecations: ({ renameFromRoot }) => [
-    renameFromRoot('xpack.siem.enabled', 'xpack.securitySolution.enabled'),
+    renameFromRoot('xpack.siem.enabled', 'xpack.securitySolution.enabled', { level: 'critical' }),
     renameFromRoot(
       'xpack.siem.maxRuleImportExportSize',
-      'xpack.securitySolution.maxRuleImportExportSize'
+      'xpack.securitySolution.maxRuleImportExportSize',
+      { level: 'critical' }
     ),
     renameFromRoot(
       'xpack.siem.maxRuleImportPayloadBytes',
-      'xpack.securitySolution.maxRuleImportPayloadBytes'
+      'xpack.securitySolution.maxRuleImportPayloadBytes',
+      { level: 'critical' }
     ),
     renameFromRoot(
       'xpack.siem.maxTimelineImportExportSize',
-      'xpack.securitySolution.maxTimelineImportExportSize'
+      'xpack.securitySolution.maxTimelineImportExportSize',
+      { level: 'critical' }
     ),
     renameFromRoot(
       'xpack.siem.maxTimelineImportPayloadBytes',
-      'xpack.securitySolution.maxTimelineImportPayloadBytes'
+      'xpack.securitySolution.maxTimelineImportPayloadBytes',
+      { level: 'critical' }
     ),
     renameFromRoot(
       `xpack.siem.${SIGNALS_INDEX_KEY}`,
-      `xpack.securitySolution.${SIGNALS_INDEX_KEY}`
+      `xpack.securitySolution.${SIGNALS_INDEX_KEY}`,
+      { level: 'critical' }
     ),
   ],
 };
 
-export { ConfigType, Plugin, PluginSetup, PluginStart };
+export type { ConfigType, PluginSetup, PluginStart };
+export { Plugin };
 export { AppClient };
 export type { SecuritySolutionApiRequestHandlerContext } from './types';
 export { EndpointError } from './endpoint/errors';

@@ -145,4 +145,4 @@ export interface EditorRenderProps {
   linked: boolean;
 }
 
-export { PureVisState };
+export type { PureVisState };

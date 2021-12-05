@@ -9,7 +9,17 @@
 
 import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiTabs, EuiTab } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiTabs,
+  EuiTab,
+  EuiLoadingElastic,
+  EuiPage,
+  EuiPageBody,
+  EuiPageContent,
+} from '@elastic/eui';
 import { useLocation } from 'react-router-dom';
 
 import { Container, Nav, Wrapper } from './layouts';
@@ -24,7 +34,25 @@ const OsqueryAppComponent = () => {
   const section = useMemo(() => location.pathname.split('/')[1] ?? 'overview', [location.pathname]);
   const { data: osqueryIntegration, isFetched } = useOsqueryIntegrationStatus();
 
-  if (isFetched && osqueryIntegration.install_status !== 'installed') {
+  if (!isFetched) {
+    return (
+      <EuiPage paddingSize="none">
+        <EuiPageBody>
+          <EuiPageContent
+            verticalPosition="center"
+            horizontalPosition="center"
+            paddingSize="none"
+            color="subdued"
+            hasShadow={false}
+          >
+            <EuiLoadingElastic size="xxl" />
+          </EuiPageContent>
+        </EuiPageBody>
+      </EuiPage>
+    );
+  }
+
+  if (isFetched && osqueryIntegration?.install_status !== 'installed') {
     return <OsqueryAppEmptyState />;
   }
 

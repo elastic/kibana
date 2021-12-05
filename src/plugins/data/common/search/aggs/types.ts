@@ -89,14 +89,14 @@ import {
   aggSinglePercentile,
 } from './';
 
-export { IAggConfig, AggConfigSerialized } from './agg_config';
-export { CreateAggConfigParams, IAggConfigs } from './agg_configs';
-export { IAggType } from './agg_type';
-export { AggParam, AggParamOption } from './agg_params';
-export { IFieldParamType } from './param_types';
-export { IMetricAggType } from './metrics/metric_agg_type';
-export { IpRangeKey } from './buckets/lib/ip_range';
-export { OptionedValueProp } from './param_types/optioned';
+export type { IAggConfig, AggConfigSerialized } from './agg_config';
+export type { CreateAggConfigParams, IAggConfigs } from './agg_configs';
+export type { IAggType } from './agg_type';
+export type { AggParam, AggParamOption } from './agg_params';
+export type { IFieldParamType } from './param_types';
+export type { IMetricAggType } from './metrics/metric_agg_type';
+export type { IpRangeKey } from './buckets/lib/ip_range';
+export type { OptionedValueProp } from './param_types/optioned';
 
 /** @internal */
 export interface AggsCommonSetup {

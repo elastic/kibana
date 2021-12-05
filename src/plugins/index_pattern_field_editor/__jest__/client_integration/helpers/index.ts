@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-export { findTestSubject, TestBed } from '@kbn/test/jest';
+export type { TestBed } from '@kbn/test/jest';
+export { findTestSubject } from '@kbn/test/jest';
 
 export {
   setupEnvironment,
@@ -16,6 +17,14 @@ export {
   spyIndexPatternGetAllFields,
   fieldFormatsOptions,
   indexPatternNameForTest,
+  setSearchResponseLatency,
 } from './setup_environment';
 
-export { getCommonActions } from './common_actions';
+export {
+  getCommonActions,
+  waitForUpdates,
+  waitForDocumentsAndPreviewUpdate,
+} from './common_actions';
+
+export type { EsDoc, TestDoc } from './mocks';
+export { mockDocuments } from './mocks';

@@ -6,10 +6,8 @@
  * Side Public License, v 1.
  */
 
-export {
-  IndexPatternEditorFlyoutContent,
-  Props as IndexPatternEditorFlyoutContentProps,
-} from './index_pattern_editor_flyout_content';
+export type { Props as IndexPatternEditorFlyoutContentProps } from './index_pattern_editor_flyout_content';
+export { IndexPatternEditorFlyoutContent } from './index_pattern_editor_flyout_content';
 
 export { IndexPatternEditor } from './index_pattern_editor';
 

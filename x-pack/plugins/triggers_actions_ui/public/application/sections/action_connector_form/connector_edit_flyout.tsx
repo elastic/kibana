@@ -392,7 +392,7 @@ const ConnectorEditFlyout = ({
                 <>
                   <EuiFlexItem grow={false}>
                     <EuiButton
-                      color="secondary"
+                      color="success"
                       data-test-subj="saveEditedActionButton"
                       isLoading={isSaving || isExecutingAction}
                       onClick={async () => {
@@ -408,7 +408,7 @@ const ConnectorEditFlyout = ({
                   <EuiFlexItem grow={false}>
                     <EuiButton
                       fill
-                      color="secondary"
+                      color="success"
                       data-test-subj="saveAndCloseEditedActionButton"
                       type="submit"
                       isLoading={isSaving || isExecutingAction}

@@ -389,7 +389,7 @@ export const getVis = (bucketType: string) => {
               labels: {
                 show: true,
                 rotate: 0,
-                filter: false,
+                filter: true,
                 truncate: 100,
               },
               title: {
@@ -822,7 +822,7 @@ export const getStateParams = (type: string, thresholdPanelOn: boolean) => {
         labels: {
           show: true,
           rotate: 0,
-          filter: false,
+          filter: true,
           truncate: 100,
         },
         title: {

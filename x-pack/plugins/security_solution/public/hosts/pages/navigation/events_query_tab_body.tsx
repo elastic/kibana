@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { TimelineId } from '../../../../common/types/timeline';
@@ -21,6 +21,7 @@ import { MatrixHistogram } from '../../../common/components/matrix_histogram';
 import { useGlobalFullScreen } from '../../../common/containers/use_full_screen';
 import * as i18n from '../translations';
 import { MatrixHistogramType } from '../../../../common/search_strategy/security_solution';
+import { getDefaultControlColumn } from '../../../timelines/components/timeline/body/control_columns';
 import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';
 import { DefaultCellRenderer } from '../../../timelines/components/timeline/cell_rendering/default_cell_renderer';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
@@ -69,7 +70,7 @@ const EventsQueryTabBodyComponent: React.FC<HostsComponentsQueryProps> = ({
 }) => {
   const dispatch = useDispatch();
   const { globalFullScreen } = useGlobalFullScreen();
-
+  const ACTION_BUTTON_COUNT = 3;
   const tGridEnabled = useIsExperimentalFeatureEnabled('tGridEnabled');
 
   useEffect(() => {
@@ -96,6 +97,8 @@ const EventsQueryTabBodyComponent: React.FC<HostsComponentsQueryProps> = ({
     };
   }, [deleteQuery]);
 
+  const leadingControlColumns = useMemo(() => getDefaultControlColumn(ACTION_BUTTON_COUNT), []);
+
   return (
     <>
       {!globalFullScreen && (
@@ -115,6 +118,7 @@ const EventsQueryTabBodyComponent: React.FC<HostsComponentsQueryProps> = ({
         end={endDate}
         entityType="events"
         id={TimelineId.hostsPageEvents}
+        leadingControlColumns={leadingControlColumns}
         pageFilters={pageFilters}
         renderCellValue={DefaultCellRenderer}
         rowRenderers={defaultRowRenderers}

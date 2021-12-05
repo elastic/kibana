@@ -11,7 +11,7 @@ import type { EuiLinkAnchorProps } from '@elastic/eui';
 import { EuiLink } from '@elastic/eui';
 
 import { useLink } from '../hooks';
-import { AGENT_SAVED_OBJECT_TYPE } from '../constants';
+import { AGENTS_PREFIX } from '../constants';
 
 /**
  * Displays the provided `count` number as a link to the Agents list if it is greater than zero
@@ -37,7 +37,7 @@ export const LinkedAgentCount = memo<
     <EuiLink
       {...otherEuiLinkProps}
       href={getHref('agent_list', {
-        kuery: `${AGENT_SAVED_OBJECT_TYPE}.policy_id : ${agentPolicyId}`,
+        kuery: `${AGENTS_PREFIX}.policy_id : ${agentPolicyId}`,
       })}
     >
       {displayValue}

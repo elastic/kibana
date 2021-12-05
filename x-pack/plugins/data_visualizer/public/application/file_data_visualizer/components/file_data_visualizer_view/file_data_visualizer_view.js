@@ -295,12 +295,7 @@ export class FileDataVisualizerView extends Component {
       <div>
         {mode === MODE.READ && (
           <>
-            {!loading && !loaded && (
-              <AboutPanel
-                onFilePickerChange={this.onFilePickerChange}
-                disabled={!fileCouldNotBeReadPermissionError}
-              />
-            )}
+            {!loading && !loaded && <AboutPanel onFilePickerChange={this.onFilePickerChange} />}
 
             {loading && <LoadingPanel />}
 
@@ -373,6 +368,7 @@ export class FileDataVisualizerView extends Component {
               savedObjectsClient={this.savedObjectsClient}
               fileUpload={this.props.fileUpload}
               resultsLinks={this.props.resultsLinks}
+              capabilities={this.props.capabilities}
             />
 
             {bottomBarVisible && (

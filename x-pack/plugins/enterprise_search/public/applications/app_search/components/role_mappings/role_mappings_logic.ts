@@ -356,7 +356,7 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
       const route = '/internal/app_search/role_mappings/enable_role_based_access';
 
       try {
-        const response = await http.post(route);
+        const response = await http.post<{ roleMappings: ASRoleMapping[] }>(route);
         actions.setRoleMappings(response);
       } catch (e) {
         flashAPIErrors(e);
@@ -367,7 +367,7 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
       const route = '/internal/app_search/role_mappings';
 
       try {
-        const response = await http.get(route);
+        const response = await http.get<RoleMappingsServerDetails>(route);
         actions.setRoleMappingsData(response);
       } catch (e) {
         flashAPIErrors(e);
@@ -466,7 +466,10 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
       });
 
       try {
-        const response = await http.post('/internal/app_search/single_user_role_mapping', { body });
+        const response = await http.post<UserMapping | undefined>(
+          '/internal/app_search/single_user_role_mapping',
+          { body }
+        );
         actions.setSingleUserRoleMapping(response);
         actions.setUserCreated();
         actions.initializeRoleMappings();

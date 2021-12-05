@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import { act } from '@testing-library/react';
+import { act, waitFor, waitForElementToBeRemoved } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { getFoundExceptionListItemSchemaMock } from '../../../../../../lists/common/schemas/response/found_exception_list_item_schema.mock';
 import { HOST_ISOLATION_EXCEPTIONS_PATH } from '../../../../../common/constants';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../../../common/mock/endpoint';
-import { isFailedResourceState, isLoadedResourceState } from '../../../state';
 import { getHostIsolationExceptionItems } from '../service';
 import { HostIsolationExceptionsList } from './host_isolation_exceptions_list';
 import { useEndpointPrivileges } from '../../../../common/components/user_privileges/endpoint';
@@ -26,31 +25,25 @@ describe('When on the host isolation exceptions page', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;
   let renderResult: ReturnType<typeof render>;
   let history: AppContextTestRender['history'];
-  let waitForAction: AppContextTestRender['middlewareSpy']['waitForAction'];
   let mockedContext: AppContextTestRender;
 
   const useEndpointPrivilegesMock = useEndpointPrivileges as jest.Mock;
+  const waitForApiCall = () => {
+    return waitFor(() => expect(getHostIsolationExceptionItemsMock).toHaveBeenCalled());
+  };
 
   beforeEach(() => {
-    getHostIsolationExceptionItemsMock.mockReset();
+    getHostIsolationExceptionItemsMock.mockClear();
     mockedContext = createAppRootMockRenderer();
     ({ history } = mockedContext);
     render = () => (renderResult = mockedContext.render(<HostIsolationExceptionsList />));
-    waitForAction = mockedContext.middlewareSpy.waitForAction;
 
     act(() => {
       history.push(HOST_ISOLATION_EXCEPTIONS_PATH);
     });
   });
+
   describe('When on the host isolation list page', () => {
-    const dataReceived = () =>
-      act(async () => {
-        await waitForAction('hostIsolationExceptionsPageDataChanged', {
-          validate(action) {
-            return isLoadedResourceState(action.payload);
-          },
-        });
-      });
     describe('And no data exists', () => {
       beforeEach(async () => {
         getHostIsolationExceptionItemsMock.mockReturnValue({
@@ -63,40 +56,47 @@ describe('When on the host isolation exceptions page', () => {
 
       it('should show the Empty message', async () => {
         render();
-        await dataReceived();
+        await waitForApiCall();
         expect(renderResult.getByTestId('hostIsolationExceptionsEmpty')).toBeTruthy();
       });
 
       it('should not display the search bar', async () => {
         render();
-        await dataReceived();
+        await waitForApiCall();
         expect(renderResult.queryByTestId('searchExceptions')).toBeFalsy();
       });
     });
+
     describe('And data exists', () => {
       beforeEach(async () => {
         getHostIsolationExceptionItemsMock.mockImplementation(getFoundExceptionListItemSchemaMock);
       });
 
-      it('should show loading indicator while retrieving data', async () => {
+      it('should show loading indicator while retrieving data and hide it when it gets it', async () => {
         let releaseApiResponse: (value?: unknown) => void;
 
+        // make the request wait
         getHostIsolationExceptionItemsMock.mockReturnValue(
           new Promise((resolve) => (releaseApiResponse = resolve))
         );
         render();
+        await waitForApiCall();
 
+        // see if loader is present
         expect(renderResult.getByTestId('hostIsolationExceptionsContent-loader')).toBeTruthy();
 
-        const wasReceived = dataReceived();
-        releaseApiResponse!();
-        await wasReceived;
-        expect(renderResult.container.querySelector('.euiProgress')).toBeNull();
+        // release the request
+        releaseApiResponse!(getFoundExceptionListItemSchemaMock());
+
+        //  check the loader is gone
+        await waitForElementToBeRemoved(
+          renderResult.getByTestId('hostIsolationExceptionsContent-loader')
+        );
       });
 
       it('should display the search bar and item count', async () => {
         render();
-        await dataReceived();
+        await waitForApiCall();
         expect(renderResult.getByTestId('searchExceptions')).toBeTruthy();
         expect(renderResult.getByTestId('hostIsolationExceptions-totalCount').textContent).toBe(
           'Showing 1 exception'
@@ -105,7 +105,7 @@ describe('When on the host isolation exceptions page', () => {
 
       it('should show items on the list', async () => {
         render();
-        await dataReceived();
+        await waitForApiCall();
 
         expect(renderResult.getByTestId('hostIsolationExceptionsCard')).toBeTruthy();
       });
@@ -114,15 +114,8 @@ describe('When on the host isolation exceptions page', () => {
         getHostIsolationExceptionItemsMock.mockImplementation(() => {
           throw new Error('Server is too far away');
         });
-        const errorDispatched = act(async () => {
-          await waitForAction('hostIsolationExceptionsPageDataChanged', {
-            validate(action) {
-              return isFailedResourceState(action.payload);
-            },
-          });
-        });
         render();
-        await errorDispatched;
+        await waitForApiCall();
         expect(
           renderResult.getByTestId('hostIsolationExceptionsContent-error').textContent
         ).toEqual(' Server is too far away');
@@ -131,7 +124,7 @@ describe('When on the host isolation exceptions page', () => {
       it('should show the searchbar when no results from search', async () => {
         // render the page with data
         render();
-        await dataReceived();
+        await waitForApiCall();
 
         // check if the searchbar is there
         expect(renderResult.getByTestId('searchExceptions')).toBeTruthy();
@@ -149,7 +142,7 @@ describe('When on the host isolation exceptions page', () => {
         userEvent.click(renderResult.getByTestId('searchButton'));
 
         // wait for the page render
-        await dataReceived();
+        await waitForApiCall();
 
         // check the url changed
         expect(mockedContext.history.location.search).toBe('?filter=this%20does%20not%20exists');
@@ -167,17 +160,16 @@ describe('When on the host isolation exceptions page', () => {
 
       it('should show the create flyout when the add button is pressed', async () => {
         render();
-        await dataReceived();
-        act(() => {
-          userEvent.click(renderResult.getByTestId('hostIsolationExceptionsListAddButton'));
-        });
+        await waitForApiCall();
+        userEvent.click(renderResult.getByTestId('hostIsolationExceptionsListAddButton'));
+        await waitForApiCall();
         expect(renderResult.getByTestId('hostIsolationExceptionsCreateEditFlyout')).toBeTruthy();
       });
 
       it('should show the create flyout when the show location is create', async () => {
         history.push(`${HOST_ISOLATION_EXCEPTIONS_PATH}?show=create`);
         render();
-        await dataReceived();
+        await waitForApiCall();
         expect(renderResult.getByTestId('hostIsolationExceptionsCreateEditFlyout')).toBeTruthy();
         expect(renderResult.queryByTestId('hostIsolationExceptionsCreateEditFlyout')).toBeTruthy();
       });

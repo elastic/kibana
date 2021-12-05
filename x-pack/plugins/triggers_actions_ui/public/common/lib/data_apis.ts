@@ -22,9 +22,10 @@ export async function getMatchingIndices({
   if (!pattern.endsWith('*')) {
     pattern = `${pattern}*`;
   }
-  const { indices } = await http.post(`${DATA_API_ROOT}/_indices`, {
-    body: JSON.stringify({ pattern }),
-  });
+  const { indices } = await http.post<ReturnType<typeof getMatchingIndices>>(
+    `${DATA_API_ROOT}/_indices`,
+    { body: JSON.stringify({ pattern }) }
+  );
   return indices;
 }
 
@@ -43,9 +44,10 @@ export async function getESIndexFields({
     aggregatable: boolean;
   }>
 > {
-  const { fields } = await http.post(`${DATA_API_ROOT}/_fields`, {
-    body: JSON.stringify({ indexPatterns: indexes }),
-  });
+  const { fields } = await http.post<{ fields: ReturnType<typeof getESIndexFields> }>(
+    `${DATA_API_ROOT}/_fields`,
+    { body: JSON.stringify({ indexPatterns: indexes }) }
+  );
   return fields;
 }
 

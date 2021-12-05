@@ -63,7 +63,6 @@ import {
   editItemId,
   editingTrustedApp,
   getListItems,
-  editItemState,
   getCurrentLocationIncludedPolicies,
   getCurrentLocationExcludedPolicies,
 } from './selectors';
@@ -413,10 +412,7 @@ const fetchEditTrustedAppIfNeeded = async (
         dispatch({
           type: 'trustedAppCreationEditItemStateChanged',
           payload: {
-            // @ts-expect-error-next-line will be fixed with when AsyncResourceState is refactored (#830)
             type: 'LoadingResourceState',
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            previousState: editItemState(currentState)!,
           },
         });
 

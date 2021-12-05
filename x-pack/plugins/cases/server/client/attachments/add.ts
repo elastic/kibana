@@ -10,6 +10,7 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 
+import { nodeBuilder } from '@kbn/es-query';
 import {
   SavedObject,
   SavedObjectsClientContract,
@@ -17,7 +18,6 @@ import {
   SavedObjectsUtils,
 } from '../../../../../../src/core/server';
 import { LensServerPluginSetup } from '../../../../lens/server';
-import { nodeBuilder } from '../../../../../../src/plugins/data/common';
 
 import {
   AlertCommentRequestRt,
@@ -263,7 +263,7 @@ async function getCombinedCase({
             id,
           }),
         ]
-      : [Promise.reject('case connector feature is disabled')]),
+      : [Promise.reject(new Error('case connector feature is disabled'))]),
   ]);
 
   if (subCasePromise.status === 'fulfilled') {

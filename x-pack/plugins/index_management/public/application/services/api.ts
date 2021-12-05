@@ -76,7 +76,7 @@ export async function deleteDataStreams(dataStreams: string[]) {
 }
 
 export async function loadIndices() {
-  const response = await httpService.httpClient.get(`${API_BASE_PATH}/indices`);
+  const response = await httpService.httpClient.get<any>(`${API_BASE_PATH}/indices`);
   return response.data ? response.data : response;
 }
 
@@ -87,7 +87,7 @@ export async function reloadIndices(
   const body = JSON.stringify({
     indexNames,
   });
-  const response = await httpService.httpClient.post(`${API_BASE_PATH}/indices/reload`, {
+  const response = await httpService.httpClient.post<any>(`${API_BASE_PATH}/indices/reload`, {
     body,
     asSystemRequest,
   });

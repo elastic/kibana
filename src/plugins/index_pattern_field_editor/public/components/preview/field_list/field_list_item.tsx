@@ -9,34 +9,103 @@
 import React, { useState } from 'react';
 import classnames from 'classnames';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexGroup, EuiFlexItem, EuiToolTip, EuiButtonIcon, EuiButtonEmpty } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiToolTip,
+  EuiButtonIcon,
+  EuiButtonEmpty,
+  EuiBadge,
+  EuiTextColor,
+} from '@elastic/eui';
 
+import { useFieldPreviewContext } from '../field_preview_context';
+import { IsUpdatingIndicator } from '../is_updating_indicator';
 import { ImagePreviewModal } from '../image_preview_modal';
 import type { DocumentField } from './field_list';
 
 interface Props {
   field: DocumentField;
   toggleIsPinned?: (name: string) => void;
-  highlighted?: boolean;
+  hasScriptError?: boolean;
+  /** Indicates whether the field list item comes from the Painless script */
+  isFromScript?: boolean;
 }
 
 export const PreviewListItem: React.FC<Props> = ({
   field: { key, value, formattedValue, isPinned = false },
-  highlighted,
   toggleIsPinned,
+  hasScriptError,
+  isFromScript = false,
 }) => {
+  const { isLoadingPreview } = useFieldPreviewContext();
+
   const [isPreviewImageModalVisible, setIsPreviewImageModalVisible] = useState(false);
 
   /* eslint-disable @typescript-eslint/naming-convention */
   const classes = classnames('indexPatternFieldEditor__previewFieldList__item', {
-    'indexPatternFieldEditor__previewFieldList__item--highlighted': highlighted,
+    'indexPatternFieldEditor__previewFieldList__item--highlighted': isFromScript,
     'indexPatternFieldEditor__previewFieldList__item--pinned': isPinned,
   });
   /* eslint-enable @typescript-eslint/naming-convention */
 
   const doesContainImage = formattedValue?.includes('<img');
 
+  const renderName = () => {
+    if (isFromScript && !Boolean(key)) {
+      return (
+        <span className="indexPatternFieldEditor__previewFieldList--ligthWeight">
+          <EuiTextColor color="subdued">
+            {i18n.translate('indexPatternFieldEditor.fieldPreview.fieldNameNotSetLabel', {
+              defaultMessage: 'Field name not set',
+            })}
+          </EuiTextColor>
+        </span>
+      );
+    }
+
+    return key;
+  };
+
+  const withTooltip = (content: JSX.Element) => (
+    <EuiToolTip position="top" content={typeof value !== 'string' ? JSON.stringify(value) : value}>
+      {content}
+    </EuiToolTip>
+  );
+
   const renderValue = () => {
+    if (isFromScript && isLoadingPreview) {
+      return (
+        <span className="indexPatternFieldEditor__previewFieldList--ligthWeight">
+          <IsUpdatingIndicator />
+        </span>
+      );
+    }
+
+    if (hasScriptError) {
+      return (
+        <div>
+          <EuiBadge iconType="alert" color="danger" data-test-subj="scriptErrorBadge">
+            {i18n.translate('indexPatternFieldEditor.fieldPreview.scriptErrorBadgeLabel', {
+              defaultMessage: 'Script error',
+            })}
+          </EuiBadge>
+        </div>
+      );
+    }
+
+    if (isFromScript && value === undefined) {
+      return (
+        <span className="indexPatternFieldEditor__previewFieldList--ligthWeight">
+          <EuiTextColor color="subdued">
+            {i18n.translate('indexPatternFieldEditor.fieldPreview.valueNotSetLabel', {
+              defaultMessage: 'Value not set',
+            })}
+          </EuiTextColor>
+        </span>
+      );
+    }
+
     if (doesContainImage) {
       return (
         <EuiButtonEmpty
@@ -52,7 +121,7 @@ export const PreviewListItem: React.FC<Props> = ({
     }
 
     if (formattedValue !== undefined) {
-      return (
+      return withTooltip(
         <span
           className="indexPatternFieldEditor__previewFieldList__item__value__wrapper"
           // We  can dangerously set HTML here because this content is guaranteed to have been run through a valid field formatter first.
@@ -61,7 +130,7 @@ export const PreviewListItem: React.FC<Props> = ({
       );
     }
 
-    return (
+    return withTooltip(
       <span className="indexPatternFieldEditor__previewFieldList__item__value__wrapper">
         {JSON.stringify(value)}
       </span>
@@ -76,19 +145,14 @@ export const PreviewListItem: React.FC<Props> = ({
             className="indexPatternFieldEditor__previewFieldList__item__key__wrapper"
             data-test-subj="key"
           >
-            {key}
+            {renderName()}
           </div>
         </EuiFlexItem>
         <EuiFlexItem
           className="indexPatternFieldEditor__previewFieldList__item__value"
           data-test-subj="value"
         >
-          <EuiToolTip
-            position="top"
-            content={typeof value !== 'string' ? JSON.stringify(value) : value}
-          >
-            {renderValue()}
-          </EuiToolTip>
+          {renderValue()}
         </EuiFlexItem>
 
         <EuiFlexItem

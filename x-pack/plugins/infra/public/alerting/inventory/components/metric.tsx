@@ -186,7 +186,7 @@ export const MetricExpression = ({
           onClick={() => {
             setPopoverOpen(true);
           }}
-          color={errors.metric?.length ? 'danger' : 'secondary'}
+          color={errors.metric?.length ? 'danger' : 'success'}
         />
       }
       isOpen={popoverOpen}

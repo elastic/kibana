@@ -11,16 +11,17 @@ import { get } from 'lodash';
 import { ConfigSchema, ReportingConfigType } from './schema';
 export { buildConfig } from './config';
 export { registerUiSettings } from './ui_settings';
-export { ConfigSchema, ReportingConfigType };
+export type { ReportingConfigType };
+export { ConfigSchema };
 
 export const config: PluginConfigDescriptor<ReportingConfigType> = {
   exposeToBrowser: { poll: true, roles: true },
   schema: ConfigSchema,
   deprecations: ({ unused }) => [
-    unused('capture.browser.chromium.maxScreenshotDimension'), // unused since 7.8
-    unused('poll.jobCompletionNotifier.intervalErrorMultiplier'), // unused since 7.10
-    unused('poll.jobsRefresh.intervalErrorMultiplier'), // unused since 7.10
-    unused('capture.viewport'), // deprecated as unused since 7.16
+    unused('capture.browser.chromium.maxScreenshotDimension', { level: 'warning' }), // unused since 7.8
+    unused('poll.jobCompletionNotifier.intervalErrorMultiplier', { level: 'warning' }), // unused since 7.10
+    unused('poll.jobsRefresh.intervalErrorMultiplier', { level: 'warning' }), // unused since 7.10
+    unused('capture.viewport', { level: 'warning' }), // deprecated as unused since 7.16
     (settings, fromPath, addDeprecation) => {
       const reporting = get(settings, fromPath);
       if (reporting?.roles?.enabled !== false) {

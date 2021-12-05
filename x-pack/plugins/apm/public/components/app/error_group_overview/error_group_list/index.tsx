@@ -16,7 +16,7 @@ import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
-import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
+import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { APIReturnType } from '../../../../services/rest/createCallApmApi';
 import { truncate, unit } from '../../../../utils/style';
 import { ErrorDetailLink } from '../../../shared/Links/apm/ErrorDetailLink';
@@ -56,7 +56,7 @@ interface Props {
 }
 
 function ErrorGroupList({ items, serviceName }: Props) {
-  const { urlParams } = useUrlParams();
+  const { urlParams } = useLegacyUrlParams();
 
   const columns = useMemo(() => {
     return [

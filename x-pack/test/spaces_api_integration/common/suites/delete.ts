@@ -53,8 +53,8 @@ export function deleteTestSuiteFactory(es: Client, esArchiver: any, supertest: S
     // @ts-expect-error @elastic/elasticsearch doesn't defined `count.buckets`.
     const buckets = response.aggregations?.count.buckets;
 
-    // The test fixture contains three legacy URL aliases:
-    // (1) one for "space_1", (2) one for "space_2", and (3) one for "other_space", which is a non-existent space.
+    // The test fixture contains six legacy URL aliases:
+    // (1) two for "space_1", (2) two for "space_2", and (3) two for "other_space", which is a non-existent space.
     // Each test deletes "space_2", so the agg buckets should reflect that aliases (1) and (3) still exist afterwards.
 
     // Space 2 deleted, all others should exist
@@ -75,26 +75,26 @@ export function deleteTestSuiteFactory(es: Client, esArchiver: any, supertest: S
         },
       },
       {
-        doc_count: 6,
+        doc_count: 7,
         key: 'space_1',
         countByType: {
           doc_count_error_upper_bound: 0,
           sum_other_doc_count: 0,
           buckets: [
             { key: 'visualization', doc_count: 3 },
+            { key: 'legacy-url-alias', doc_count: 2 }, // aliases (1)
             { key: 'dashboard', doc_count: 1 },
             { key: 'index-pattern', doc_count: 1 },
-            { key: 'legacy-url-alias', doc_count: 1 }, // alias (1)
           ],
         },
       },
       {
-        doc_count: 1,
+        doc_count: 2,
         key: 'other_space',
         countByType: {
           doc_count_error_upper_bound: 0,
           sum_other_doc_count: 0,
-          buckets: [{ key: 'legacy-url-alias', doc_count: 1 }], // alias (3)
+          buckets: [{ key: 'legacy-url-alias', doc_count: 2 }], // aliases (3)
         },
       },
     ];
@@ -110,8 +110,8 @@ export function deleteTestSuiteFactory(es: Client, esArchiver: any, supertest: S
       body: { query: { terms: { type: ['sharedtype'] } } },
     });
     const docs = multiNamespaceResponse.hits.hits;
-    // Just 12 results, since spaces_2_only, conflict_1_space_2 and conflict_2_space_2 got deleted.
-    expect(docs).length(12);
+    // Just 14 results, since spaces_2_only, conflict_1_space_2 and conflict_2_space_2 got deleted.
+    expect(docs).length(14);
     docs.forEach((doc) => () => {
       const containsSpace2 = doc?._source?.namespaces.includes('space_2');
       expect(containsSpace2).to.eql(false);

@@ -18,7 +18,10 @@ export const executeScript = async ({
   http,
 }: ExecuteScriptParams): Promise<ExecuteScriptResult> => {
   return http
-    .post('/internal/index-pattern-management/preview_scripted_field', {
+    .post<{
+      statusCode: ExecuteScriptResult['status'];
+      body: { hits: ExecuteScriptResult['hits'] };
+    }>('/internal/index-pattern-management/preview_scripted_field', {
       body: JSON.stringify({
         index: indexPatternTitle,
         name,

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-export { TypeToString, KnownTypeToString, TypeString, UnmappedTypeStrings } from './common';
+export type { TypeToString, KnownTypeToString, TypeString, UnmappedTypeStrings } from './common';
 
 export * from './style';
 export * from './registry';

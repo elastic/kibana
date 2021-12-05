@@ -16,7 +16,7 @@ import { EuiBasicTable, EuiEmptyPrompt } from '@elastic/eui';
 
 import { mountWithIntl } from '../../../../test_helpers';
 
-import { CrawlEvent, CrawlerStatus } from '../types';
+import { CrawlEvent, CrawlerStatus, CrawlType } from '../types';
 
 import { CrawlRequestsTable } from './crawl_requests_table';
 
@@ -30,6 +30,10 @@ const values: { events: CrawlEvent[] } = {
       createdAt: 'Mon, 31 Aug 2020 17:00:00 +0000',
       beganAt: null,
       completedAt: null,
+      type: CrawlType.Full,
+      crawlConfig: {
+        domainAllowlist: ['https://www.elastic.co'],
+      },
     },
   ],
 };
@@ -58,6 +62,16 @@ describe('CrawlRequestsTable', () => {
     it('renders a created at column', () => {
       expect(tableContent).toContain('Created');
       expect(tableContent).toContain('Aug 31, 2020');
+    });
+
+    it('renders a type column', () => {
+      expect(tableContent).toContain('Crawl type');
+      expect(tableContent).toContain('Full');
+    });
+
+    it('renders a domains column', () => {
+      expect(tableContent).toContain('Domains');
+      // TODO How to test for the contents of this badge?
     });
 
     it('renders a status column', () => {

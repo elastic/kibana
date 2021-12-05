@@ -118,6 +118,7 @@ test('`format()` correctly formats record with meta data.', () => {
       timestamp,
       pid: 5355,
       meta: {
+        // @ts-expect-error not valid ECS field
         from: 'v7',
         to: 'v8',
       },
@@ -177,6 +178,7 @@ test('`format()` allows specifying pattern with meta.', () => {
       to: 'v8',
     },
   };
+  // @ts-expect-error not valid ECS field
   expect(layout.format(record)).toBe('context-{"from":"v7","to":"v8"}-message');
 });
 

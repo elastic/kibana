@@ -7,7 +7,7 @@
  */
 import datemath from '@elastic/datemath';
 import yargs from 'yargs/yargs';
-import { cleanWriteTargets } from './utils/clean_write_targets';
+import { cleanWriteTargets } from '../lib/utils/clean_write_targets';
 import { intervalToMs } from './utils/interval_to_ms';
 import { getCommonResources } from './utils/get_common_resources';
 import { startHistoricalDataUpload } from './utils/start_historical_data_upload';

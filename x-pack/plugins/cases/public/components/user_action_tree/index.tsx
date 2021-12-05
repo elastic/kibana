@@ -12,10 +12,11 @@ import {
   EuiCommentList,
   EuiCommentProps,
 } from '@elastic/eui';
+import { ALERT_RULE_NAME, ALERT_RULE_UUID } from '@kbn/rule-data-utils/technical_field_names';
+
 import classNames from 'classnames';
-import { isEmpty } from 'lodash';
+import { get, isEmpty } from 'lodash';
 import React, { useCallback, useMemo, useRef, useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import { isRight } from 'fp-ts/Either';
 
@@ -23,7 +24,7 @@ import * as i18n from './translations';
 
 import { useUpdateComment } from '../../containers/use_update_comment';
 import { useCurrentUser } from '../../common/lib/kibana';
-import { AddComment } from '../add_comment';
+import { AddComment, AddCommentRefObject } from '../add_comment';
 import {
   ActionConnector,
   ActionsCommentRequestRt,
@@ -50,12 +51,13 @@ import {
   getActionAttachment,
 } from './helpers';
 import { UserActionAvatar } from './user_action_avatar';
-import { UserActionMarkdown } from './user_action_markdown';
+import { UserActionMarkdown, UserActionMarkdownRefObject } from './user_action_markdown';
 import { UserActionTimestamp } from './user_action_timestamp';
 import { UserActionUsername } from './user_action_username';
 import { UserActionContentToolbar } from './user_action_content_toolbar';
 import { getManualAlertIdsWithNoRuleId } from '../case_view/helpers';
 import { useLensDraftComment } from '../markdown_editor/plugins/lens/use_lens_draft_comment';
+import { useCaseViewParams } from '../../common/navigation';
 
 export interface UserActionTreeProps {
   caseServices: CaseServices;
@@ -63,7 +65,6 @@ export interface UserActionTreeProps {
   connectors: ActionConnector[];
   data: Case;
   fetchUserActions: () => void;
-  getCaseDetailHrefWithCommentId: (commentId: string) => string;
   getRuleDetailsHref?: RuleDetailsNavigation['href'];
   actionsNavigation?: ActionsNavigation;
   isLoadingDescription: boolean;
@@ -129,6 +130,17 @@ const MyEuiCommentList = styled(EuiCommentList)`
 const DESCRIPTION_ID = 'description';
 const NEW_ID = 'newComment';
 
+const isAddCommentRef = (
+  ref: AddCommentRefObject | UserActionMarkdownRefObject | null | undefined
+): ref is AddCommentRefObject => {
+  const commentRef = ref as AddCommentRefObject;
+  if (commentRef?.addQuote != null) {
+    return true;
+  }
+
+  return false;
+};
+
 export const UserActionTree = React.memo(
   ({
     caseServices,
@@ -136,7 +148,6 @@ export const UserActionTree = React.memo(
     connectors,
     data: caseData,
     fetchUserActions,
-    getCaseDetailHrefWithCommentId,
     getRuleDetailsHref,
     actionsNavigation,
     isLoadingDescription,
@@ -150,22 +161,16 @@ export const UserActionTree = React.memo(
     useFetchAlertData,
     userCanCrud,
   }: UserActionTreeProps) => {
-    const {
-      detailName: caseId,
-      commentId,
-      subCaseId,
-    } = useParams<{
-      detailName: string;
-      commentId?: string;
-      subCaseId?: string;
-    }>();
+    const { detailName: caseId, subCaseId, commentId } = useCaseViewParams();
     const handlerTimeoutId = useRef(0);
     const [initLoading, setInitLoading] = useState(true);
     const [selectedOutlineCommentId, setSelectedOutlineCommentId] = useState('');
     const { isLoadingIds, patchComment } = useUpdateComment();
     const currentUser = useCurrentUser();
     const [manageMarkdownEditIds, setManageMarkdownEditIds] = useState<string[]>([]);
-    const commentRefs = useRef<Record<string, any>>({});
+    const commentRefs = useRef<
+      Record<string, AddCommentRefObject | UserActionMarkdownRefObject | undefined | null>
+    >({});
     const { clearDraftComment, draftComment, hasIncomingLensState, openLensModal } =
       useLensDraftComment();
 
@@ -226,8 +231,9 @@ export const UserActionTree = React.memo(
 
     const handleManageQuote = useCallback(
       (quote: string) => {
-        if (commentRefs.current[NEW_ID]) {
-          commentRefs.current[NEW_ID].addQuote(quote);
+        const ref = commentRefs?.current[NEW_ID];
+        if (isAddCommentRef(ref)) {
+          ref.addQuote(quote);
         }
 
         handleOutlineComment('add-comment');
@@ -309,7 +315,6 @@ export const UserActionTree = React.memo(
         actions: (
           <UserActionContentToolbar
             commentMarkdown={caseData.description}
-            getCaseDetailHrefWithCommentId={getCaseDetailHrefWithCommentId}
             id={DESCRIPTION_ID}
             editLabel={i18n.EDIT_DESCRIPTION}
             quoteLabel={i18n.QUOTE}
@@ -323,7 +328,6 @@ export const UserActionTree = React.memo(
       [
         MarkdownDescription,
         caseData,
-        getCaseDetailHrefWithCommentId,
         handleManageMarkdownEditId,
         handleManageQuote,
         isLoadingDescription,
@@ -335,6 +339,8 @@ export const UserActionTree = React.memo(
     const userActions: EuiCommentProps[] = useMemo(
       () =>
         caseUserActions.reduce<EuiCommentProps[]>(
+          // TODO: Decrease complexity. https://github.com/elastic/kibana/issues/115730
+          // eslint-disable-next-line complexity
           (comments, action, index) => {
             // Comment creation
             if (action.commentId != null && action.action === 'create') {
@@ -385,7 +391,6 @@ export const UserActionTree = React.memo(
                     ),
                     actions: (
                       <UserActionContentToolbar
-                        getCaseDetailHrefWithCommentId={getCaseDetailHrefWithCommentId}
                         id={comment.id}
                         commentMarkdown={comment.comment}
                         editLabel={i18n.EDIT_COMMENT}
@@ -421,9 +426,15 @@ export const UserActionTree = React.memo(
                 }
 
                 const ruleId =
-                  comment?.rule?.id ?? manualAlertsData[alertId]?.signal?.rule?.id?.[0] ?? null;
+                  comment?.rule?.id ??
+                  manualAlertsData[alertId]?.signal?.rule?.id?.[0] ??
+                  get(manualAlertsData[alertId], ALERT_RULE_UUID)[0] ??
+                  null;
                 const ruleName =
-                  comment?.rule?.name ?? manualAlertsData[alertId]?.signal?.rule?.name?.[0] ?? null;
+                  comment?.rule?.name ??
+                  manualAlertsData[alertId]?.signal?.rule?.name?.[0] ??
+                  get(manualAlertsData[alertId], ALERT_RULE_NAME)[0] ??
+                  null;
 
                 return [
                   ...comments,
@@ -432,7 +443,6 @@ export const UserActionTree = React.memo(
                         getAlertAttachment({
                           action,
                           alertId,
-                          getCaseDetailHrefWithCommentId,
                           getRuleDetailsHref,
                           index: alertIndex,
                           loadingAlertData,
@@ -461,7 +471,6 @@ export const UserActionTree = React.memo(
                         getGeneratedAlertsAttachment({
                           action,
                           alertIds,
-                          getCaseDetailHrefWithCommentId,
                           getRuleDetailsHref,
                           onRuleDetailsClick,
                           renderInvestigateInTimelineActionComponent,
@@ -484,7 +493,6 @@ export const UserActionTree = React.memo(
                           comment,
                           userCanCrud,
                           isLoadingIds,
-                          getCaseDetailHrefWithCommentId,
                           actionsNavigation,
                           action,
                         }),
@@ -502,7 +510,6 @@ export const UserActionTree = React.memo(
                 getUpdateAction({
                   action,
                   label,
-                  getCaseDetailHrefWithCommentId,
                   handleOutlineComment,
                 }),
               ];
@@ -565,7 +572,6 @@ export const UserActionTree = React.memo(
                 getUpdateAction({
                   action,
                   label,
-                  getCaseDetailHrefWithCommentId,
                   handleOutlineComment,
                 }),
                 ...footers,
@@ -588,7 +594,6 @@ export const UserActionTree = React.memo(
                 getUpdateAction({
                   action,
                   label,
-                  getCaseDetailHrefWithCommentId,
                   handleOutlineComment,
                 }),
               ];
@@ -606,7 +611,6 @@ export const UserActionTree = React.memo(
         manageMarkdownEditIds,
         handleManageMarkdownEditId,
         handleSaveComment,
-        getCaseDetailHrefWithCommentId,
         actionsNavigation,
         userCanCrud,
         isLoadingIds,
@@ -656,15 +660,12 @@ export const UserActionTree = React.memo(
           return prevManageMarkdownEditIds;
         });
 
-        if (
-          commentRefs.current &&
-          commentRefs.current[draftComment.commentId] &&
-          commentRefs.current[draftComment.commentId].editor?.textarea &&
-          commentRefs.current[draftComment.commentId].editor?.toolbar
-        ) {
-          commentRefs.current[draftComment.commentId].setComment(draftComment.comment);
+        const ref = commentRefs?.current?.[draftComment.commentId];
+
+        if (isAddCommentRef(ref) && ref.editor?.textarea) {
+          ref.setComment(draftComment.comment);
           if (hasIncomingLensState) {
-            openLensModal({ editorRef: commentRefs.current[draftComment.commentId].editor });
+            openLensModal({ editorRef: ref.editor });
           } else {
             clearDraftComment();
           }

@@ -104,7 +104,8 @@ async function patchModule(
     log,
     url: archive.url,
     destination: downloadPath,
-    sha256: archive.sha256,
+    shaChecksum: archive.sha256,
+    shaAlgorithm: 'sha256',
     retries: 3,
   });
   switch (pkg.extractMethod) {

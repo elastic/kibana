@@ -20,6 +20,7 @@ jest.mock('../id_generator');
 const xyVisualization = getXyVisualization({
   paletteService: chartPluginMock.createPaletteRegistry(),
   fieldFormats: fieldFormatsServiceMock.createStartContract(),
+  useLegacyTimeAxis: false,
 });
 
 describe('xy_suggestions', () => {

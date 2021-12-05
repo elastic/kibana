@@ -39,8 +39,8 @@ import { SaveTimelineButton } from '../../timeline/header/save_timeline_button';
 import { useGetUserCasesPermissions, useKibana } from '../../../../common/lib/kibana';
 import { InspectButton } from '../../../../common/components/inspect';
 import { useTimelineKpis } from '../../../containers/kpis';
-import { esQuery } from '../../../../../../../../src/plugins/data/public';
-import { useSourcererScope } from '../../../../common/containers/sourcerer';
+import { getEsQueryConfig } from '../../../../../../../../src/plugins/data/common';
+import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { TimelineModel } from '../../../../timelines/store/timeline/model';
 import {
   startSelector,
@@ -76,9 +76,9 @@ const ActiveTimelinesContainer = styled(EuiFlexItem)`
 
 const FlyoutHeaderPanelComponent: React.FC<FlyoutHeaderPanelProps> = ({ timelineId }) => {
   const dispatch = useDispatch();
-  const { indexPattern, browserFields } = useSourcererScope(SourcererScopeName.timeline);
+  const { browserFields, indexPattern } = useSourcererDataView(SourcererScopeName.timeline);
   const { uiSettings } = useKibana().services;
-  const esQueryConfig = useMemo(() => esQuery.getEsQueryConfig(uiSettings), [uiSettings]);
+  const esQueryConfig = useMemo(() => getEsQueryConfig(uiSettings), [uiSettings]);
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
   const {
     activeTab,
@@ -345,7 +345,7 @@ const TimelineStatusInfoComponent: React.FC<FlyoutHeaderProps> = ({ timelineId }
 const TimelineStatusInfo = React.memo(TimelineStatusInfoComponent);
 
 const FlyoutHeaderComponent: React.FC<FlyoutHeaderProps> = ({ timelineId }) => {
-  const { selectedPatterns, indexPattern, docValueFields, browserFields } = useSourcererScope(
+  const { selectedPatterns, indexPattern, docValueFields, browserFields } = useSourcererDataView(
     SourcererScopeName.timeline
   );
   const getStartSelector = useMemo(() => startSelector(), []);
@@ -367,7 +367,7 @@ const FlyoutHeaderComponent: React.FC<FlyoutHeaderProps> = ({ timelineId }) => {
     }
   });
   const { uiSettings } = useKibana().services;
-  const esQueryConfig = useMemo(() => esQuery.getEsQueryConfig(uiSettings), [uiSettings]);
+  const esQueryConfig = useMemo(() => getEsQueryConfig(uiSettings), [uiSettings]);
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
   const timeline: TimelineModel = useSelector(
     (state: State) => getTimeline(state, timelineId) ?? timelineDefaults

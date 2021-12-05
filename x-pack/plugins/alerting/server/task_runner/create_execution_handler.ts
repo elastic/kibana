@@ -56,7 +56,7 @@ export interface CreateExecutionHandlerOptions<
   request: KibanaRequest;
   alertParams: AlertTypeParams;
   supportsEphemeralTasks: boolean;
-  maxEphemeralActionsPerAlert: Promise<number>;
+  maxEphemeralActionsPerAlert: number;
 }
 
 interface ExecutionHandlerOptions<ActionGroupIds extends string> {
@@ -157,7 +157,7 @@ export function createExecutionHandler<
     const alertLabel = `${alertType.id}:${alertId}: '${alertName}'`;
 
     const actionsClient = await actionsPlugin.getActionsClientWithRequest(request);
-    let ephemeralActionsToSchedule = await maxEphemeralActionsPerAlert;
+    let ephemeralActionsToSchedule = maxEphemeralActionsPerAlert;
     for (const action of actions) {
       if (
         !actionsPlugin.isActionExecutable(action.id, action.actionTypeId, { notifyUsage: true })

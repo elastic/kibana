@@ -145,7 +145,7 @@ export const MiddleTruncatedText = ({
                   <SecureIcon
                     type="lock"
                     size="s"
-                    color="secondary"
+                    color="success"
                     aria-label={i18n.translate('xpack.uptime.waterfallChart.sidebar.url.https', {
                       defaultMessage: 'https',
                     })}

@@ -168,7 +168,7 @@ export default function ({
           await PageObjects.header.waitUntilLoadingHasFinished();
           await PageObjects.maps.waitForLayersToLoad();
           await PageObjects.maps.toggleLayerVisibility('Road map - desaturated');
-          await PageObjects.maps.toggleLayerVisibility('Total Requests by Destination');
+          await PageObjects.maps.toggleLayerVisibility('Total Requests by Country');
           await PageObjects.timePicker.setCommonlyUsedTime('sample_data range');
           await PageObjects.maps.enterFullScreen();
           await PageObjects.maps.closeLegend();

@@ -16,7 +16,7 @@ export interface IHttpInterceptController
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [halted](./kibana-plugin-core-public.ihttpinterceptcontroller.halted.md) | <code>boolean</code> | Whether or not this chain has been halted. |
+|  [halted](./kibana-plugin-core-public.ihttpinterceptcontroller.halted.md) | boolean | Whether or not this chain has been halted. |
 
 ## Methods
 
