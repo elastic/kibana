@@ -23,4 +23,4 @@ export const SPECIFIC_SCRIPTED_FIELD_PATH = `${SCRIPTED_FIELD_PATH}/{name}`;
 export const SPECIFIC_SCRIPTED_FIELD_PATH_LEGACY = `${SCRIPTED_FIELD_PATH_LEGACY}/{name}`;
 
 export const SERVICE_KEY = 'data_view';
-export const SERVICE_KEY_LEGACY = 'index-pattern';
+export const SERVICE_KEY_LEGACY = 'index_pattern';
