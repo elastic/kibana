@@ -169,6 +169,9 @@ export class SyntheticsService {
 
   async pushConfigs(request?: KibanaRequest, configs?: MonitorFields[]) {
     const monitors = this.formatConfigs(configs || (await this.getMonitorConfigs()));
+    if (monitors.length === 0) {
+      return;
+    }
     const data = {
       monitors,
       output: await this.getOutput(request),
