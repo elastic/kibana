@@ -94,11 +94,8 @@ export interface SelectedDataView {
   /** all active & inactive patterns from SourcererDataView['title']  */
   patternList: string[];
   runtimeMappings: SourcererDataView['runtimeMappings'];
-  /** all selected patterns from SourcererScope['selectedPatterns'] + filter  */
+  /** all selected patterns from SourcererScope['selectedPatterns'] */
   selectedPatterns: SourcererScope['selectedPatterns'];
-  /** all selected patterns from SourcererScope['selectedPatterns'] without filter  */
-  selectedPatternsDisplay: SourcererScope['selectedPatterns'];
-  missingPatterns: SourcererScope['missingPatterns'];
   // active patterns when dataViewId == null
   activePatterns?: string[];
 }

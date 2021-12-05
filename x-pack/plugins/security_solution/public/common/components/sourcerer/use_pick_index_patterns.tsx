@@ -157,7 +157,7 @@ export const usePickIndexPatterns = ({
       dataViewId
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dataViewId, scopeId, selectedOptions]);
+  }, [dataViewId, missingPatterns, scopeId, selectedOptions]);
 
   const onChangeCombo = useCallback((newSelectedOptions) => {
     setSelectedOptions(newSelectedOptions);

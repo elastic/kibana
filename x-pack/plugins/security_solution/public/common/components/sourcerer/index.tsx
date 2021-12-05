@@ -58,22 +58,19 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
   const isTimelineSourcerer = scopeId === SourcererScopeName.timeline;
   const { uiSettings } = useKibana().services;
 
-  const getDataViewsSelector = useMemo(
-    () => sourcererSelectors.getSourcererDataViewsSelector(),
-    []
-  );
-  const { defaultDataView, kibanaDataViews, signalIndexName } = useDeepEqualSelector((state) =>
-    getDataViewsSelector(state)
-  );
-
+  const sourcererScopeSelector = useMemo(() => sourcererSelectors.getSourcererScopeSelector(), []);
   const {
-    activePatterns,
-    dataViewId: selectedDataViewId,
-    indicesExist,
-    missingPatterns: sourcererMissingPatterns,
-    selectedPatternsDisplay: selectedPatterns, // get display which excludes a filter we want to keep hidden from the UI
-    loading,
-  } = useSourcererDataView(scopeId);
+    defaultDataView,
+    kibanaDataViews,
+    signalIndexName,
+    sourcererScope: {
+      selectedDataViewId,
+      selectedPatterns,
+      missingPatterns: sourcererMissingPatterns,
+    },
+  } = useDeepEqualSelector((state) => sourcererScopeSelector(state, scopeId));
+
+  const { activePatterns, indicesExist, loading } = useSourcererDataView(scopeId);
   const [missingPatterns, setMissingPatterns] = useState<string[]>(
     activePatterns && activePatterns.length > 0
       ? sourcererMissingPatterns.filter((p) => activePatterns.includes(p))
@@ -198,17 +195,22 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
   const [isTriggerDisabled, setIsTriggerDisabled] = useState(false);
   const onUpdateUiSettings = useCallback(async () => {
     const defaultIndex = await uiSettings.get<string[]>(DEFAULT_INDEX_KEY);
-    const newSelectedOptions = [...defaultIndex, ...missingPatterns];
+    const uiSettingsIndexPattern = [...defaultIndex, ...missingPatterns];
     const isUiSettingsSuccess = await uiSettings.set(
       DEFAULT_INDEX_KEY,
-      ensurePatternFormat(newSelectedOptions)
+      ensurePatternFormat(uiSettingsIndexPattern)
     );
 
     setIsShowingUpdateModal(false);
     setPopoverIsOpen(false);
 
     if (isUiSettingsSuccess) {
-      onChangeDataView(defaultDataView.id, selectedPatterns, false);
+      onChangeDataView(
+        defaultDataView.id,
+        // to be at this stage, activePatterns is defined, the ?? selectedPatterns is to make TS happy
+        activePatterns ?? selectedPatterns,
+        false
+      );
       addSuccess({
         color: 'success',
         title: toMountPoint(i18n.SUCCESS_TOAST_TITLE),
@@ -225,6 +227,7 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
       });
     }
   }, [
+    activePatterns,
     addError,
     addSuccess,
     defaultDataView.id,
@@ -261,7 +264,7 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
               </StyledBadge>
             )}
             {isModified === 'missingPatterns' && (
-              <StyledBadge color="accent" data-test-subj="sourcerer-missingPatterns-badge">
+              <StyledBadge color="warning" data-test-subj="sourcerer-missingPatterns-badge">
                 {i18n.DEPRECATED_BADGE_TITLE}
               </StyledBadge>
             )}
@@ -302,10 +305,18 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
         : getTooltipContent({
             isOnlyDetectionAlerts,
             isPopoverOpen,
-            selectedPatterns,
+            // if activePatterns, use because we are in the temporary sourcerer state
+            selectedPatterns: activePatterns ?? selectedPatterns,
             signalIndexName,
           }),
-    [isTriggerDisabled, isOnlyDetectionAlerts, isPopoverOpen, selectedPatterns, signalIndexName]
+    [
+      isTriggerDisabled,
+      isOnlyDetectionAlerts,
+      isPopoverOpen,
+      activePatterns,
+      selectedPatterns,
+      signalIndexName,
+    ]
   );
 
   const buttonWithTooltip = useMemo(

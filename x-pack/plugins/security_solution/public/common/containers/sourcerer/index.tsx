@@ -309,8 +309,10 @@ export const useSourcererDataView = (
     if (selectedDataView == null || missingPatterns.length > 0) {
       // old way of fetching indices, legacy timeline
       setLegacyPatterns(selectedPatterns);
+    } else {
+      setLegacyPatterns([]);
     }
-  }, [missingPatterns.length, selectedDataView, selectedPatterns]);
+  }, [missingPatterns, selectedDataView, selectedPatterns]);
 
   const sourcererDataView = useMemo(
     () =>
@@ -338,27 +340,16 @@ export const useSourcererDataView = (
         title: selectedPatterns.join(','),
       },
       indicesExist,
-      missingPatterns: missingPatterns.sort(),
       loading: loading || sourcererDataView.loading,
       runtimeMappings: sourcererDataView.runtimeMappings,
       // all active & inactive patterns in DATA_VIEW
       patternList: sourcererDataView.title.split(','),
       // selected patterns in DATA_VIEW including filter
       selectedPatterns: selectedPatterns.sort(),
-      // selected patterns in DATA_VIEW excluding filter for display
-      selectedPatternsDisplay: scopeSelectedPatterns.sort(),
       // if we have to do an update to data view, tell us which patterns are active
       ...(legacyPatterns.length > 0 ? { activePatterns: sourcererDataView.patternList } : {}),
     }),
-    [
-      sourcererDataView,
-      selectedPatterns,
-      indicesExist,
-      missingPatterns,
-      loading,
-      scopeSelectedPatterns,
-      legacyPatterns.length,
-    ]
+    [sourcererDataView, selectedPatterns, indicesExist, loading, legacyPatterns.length]
   );
 };
 

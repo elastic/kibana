@@ -78,6 +78,14 @@ export const getSourcererDataViewsSelector = () => {
   };
 };
 
+/**
+ * Attn Future Developer
+ * Access sourcererScope.selectedPatterns from
+ * hook useSourcererDataView in `common/containers/sourcerer/index`
+ * in order to get exclude patterns for searches
+ * Access sourcererScope.selectedPatterns
+ * from this function for display purposes only
+ * */
 export const getSourcererScopeSelector = () => {
   const getDataViewsSelector = getSourcererDataViewsSelector();
   const getSourcererDataViewSelector = sourcererDataViewSelector();

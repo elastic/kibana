@@ -209,13 +209,13 @@ export const RELOAD_PAGE_TITLE = i18n.translate(
 export const FAILURE_TOAST_TITLE = i18n.translate(
   'xpack.securitySolution.indexPatterns.failureToastTitle',
   {
-    defaultMessage: 'Unable to add index pattern',
+    defaultMessage: 'Unable to update data view',
   }
 );
 
 export const FAILURE_TOAST_TEXT = i18n.translate(
   'xpack.securitySolution.indexPatterns.failureToastText',
   {
-    defaultMessage: 'Something goes wrong here',
+    defaultMessage: 'Unexpected error occurred on update. Please refresh and try again.',
   }
 );

@@ -16,7 +16,6 @@ import { timelineActions, timelineSelectors } from '../../store/timeline';
 import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
 import { defaultHeaders } from './body/column_headers/default_headers';
 import { CellValueElementProps } from './cell_rendering';
-import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { FlyoutHeader, FlyoutHeaderPanel } from '../flyout/header';
 import { TimelineType, TimelineId, RowRenderer } from '../../../../common/types/timeline';
@@ -29,6 +28,7 @@ import { HideShowContainer, TimelineContainer } from './styles';
 import { useTimelineFullScreen } from '../../../common/containers/use_full_screen';
 import { EXIT_FULL_SCREEN_CLASS_NAME } from '../../../common/components/exit_full_screen';
 import { useResolveConflict } from '../../../common/hooks/use_resolve_conflict';
+import { sourcererSelectors } from '../../../common/store';
 
 const TimelineTemplateBadge = styled.div`
   background: ${({ theme }) => theme.eui.euiColorVis3_behindText};
@@ -62,8 +62,10 @@ const StatefulTimelineComponent: React.FC<Props> = ({
   const dispatch = useDispatch();
   const containerElement = useRef<HTMLDivElement | null>(null);
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
-  const { dataViewId, selectedPatterns } = useSourcererDataView(SourcererScopeName.timeline);
-
+  const scopeIdSelector = useMemo(() => sourcererSelectors.scopeIdSelector(), []);
+  const { selectedPatterns, selectedDataViewId: dataViewId } = useDeepEqualSelector((state) =>
+    scopeIdSelector(state, SourcererScopeName.timeline)
+  );
   const {
     dataViewId: dataViewIdCurrent,
     indexNames: selectedPatternsCurrent,
