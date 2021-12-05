@@ -63,9 +63,7 @@ export const FormContext: React.FC<Props> = ({
       isValid
     ) => {
       if (isValid) {
-        const selectedOwner = dataWithoutConnectorId.selectedOwner;
-        delete dataWithoutConnectorId.selectedOwner;
-
+        const { selectedOwner, ...userFormData } = dataWithoutConnectorId;
         const caseConnector = getConnectorById(dataConnectorId, connectors);
 
         const connectorToUpdate = caseConnector
@@ -73,7 +71,7 @@ export const FormContext: React.FC<Props> = ({
           : getNoneConnector();
 
         const updatedCase = await postCase({
-          ...dataWithoutConnectorId,
+          ...userFormData,
           type: caseType,
           connector: connectorToUpdate,
           settings: { syncAlerts },
