@@ -7,7 +7,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IndexPatternSpec } from 'src/plugins/data_views/common';
+import { DataViewSpec } from 'src/plugins/data_views/common';
 import { handleErrors } from './util/handle_errors';
 import {
   fieldSpecSchema,
@@ -16,7 +16,12 @@ import {
 } from './util/schemas';
 import { IRouter, StartServicesAccessor } from '../../../../core/server';
 import type { DataViewsServerPluginStartDependencies, DataViewsServerPluginStart } from '../types';
-import { DATA_VIEW_PATH, DATA_VIEW_PATH_LEGACY } from '../constants';
+import {
+  DATA_VIEW_PATH,
+  DATA_VIEW_PATH_LEGACY,
+  SERVICE_KEY,
+  SERVICE_KEY_LEGACY,
+} from '../constants';
 
 const indexPatternSpecSchema = schema.object({
   title: schema.string(),
@@ -48,7 +53,7 @@ const indexPatternSpecSchema = schema.object({
 });
 
 const registerCreateDataViewRouteFactory =
-  (path: string) =>
+  (path: string, serviceKey: string) =>
   (
     router: IRouter,
     getStartServices: StartServicesAccessor<
@@ -63,7 +68,7 @@ const registerCreateDataViewRouteFactory =
           body: schema.object({
             override: schema.maybe(schema.boolean({ defaultValue: false })),
             refresh_fields: schema.maybe(schema.boolean({ defaultValue: false })),
-            index_pattern: indexPatternSpecSchema,
+            [serviceKey]: indexPatternSpecSchema,
           }),
         },
       },
@@ -80,8 +85,8 @@ const registerCreateDataViewRouteFactory =
           const body = req.body;
 
           const indexPattern = await indexPatternsService.createAndSave(
-            body.index_pattern as IndexPatternSpec,
-            body.override,
+            body[serviceKey] as DataViewSpec,
+            body.override as boolean,
             !body.refresh_fields
           );
 
@@ -90,7 +95,7 @@ const registerCreateDataViewRouteFactory =
               'content-type': 'application/json',
             },
             body: JSON.stringify({
-              index_pattern: indexPattern.toSpec(),
+              [serviceKey]: indexPattern.toSpec(),
             }),
           });
         })
@@ -98,7 +103,12 @@ const registerCreateDataViewRouteFactory =
     );
   };
 
-export const registerCreateDataViewRoute = registerCreateDataViewRouteFactory(DATA_VIEW_PATH);
+export const registerCreateDataViewRoute = registerCreateDataViewRouteFactory(
+  DATA_VIEW_PATH,
+  SERVICE_KEY
+);
 
-export const registerCreateDataViewRouteLegacy =
-  registerCreateDataViewRouteFactory(DATA_VIEW_PATH_LEGACY);
+export const registerCreateDataViewRouteLegacy = registerCreateDataViewRouteFactory(
+  DATA_VIEW_PATH_LEGACY,
+  SERVICE_KEY_LEGACY
+);

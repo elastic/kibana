@@ -10,10 +10,15 @@ import { schema } from '@kbn/config-schema';
 import { handleErrors } from './util/handle_errors';
 import { IRouter, StartServicesAccessor } from '../../../../core/server';
 import type { DataViewsServerPluginStartDependencies, DataViewsServerPluginStart } from '../types';
-import { SPECIFIC_DATA_VIEW_PATH, SPECIFIC_DATA_VIEW_PATH_LEGACY } from '../constants';
+import {
+  SPECIFIC_DATA_VIEW_PATH,
+  SPECIFIC_DATA_VIEW_PATH_LEGACY,
+  SERVICE_KEY,
+  SERVICE_KEY_LEGACY,
+} from '../constants';
 
 const getDataViewRouteFactory =
-  (path: string) =>
+  (path: string, serviceKey: string) =>
   (
     router: IRouter,
     getStartServices: StartServicesAccessor<
@@ -54,7 +59,7 @@ const getDataViewRouteFactory =
               'content-type': 'application/json',
             },
             body: JSON.stringify({
-              index_pattern: indexPattern.toSpec(),
+              [serviceKey]: indexPattern.toSpec(),
             }),
           });
         })
@@ -62,8 +67,12 @@ const getDataViewRouteFactory =
     );
   };
 
-export const registerGetDataViewRoute = getDataViewRouteFactory(SPECIFIC_DATA_VIEW_PATH);
+export const registerGetDataViewRoute = getDataViewRouteFactory(
+  SPECIFIC_DATA_VIEW_PATH,
+  SERVICE_KEY
+);
 
 export const registerGetDataViewRouteLegacy = getDataViewRouteFactory(
-  SPECIFIC_DATA_VIEW_PATH_LEGACY
+  SPECIFIC_DATA_VIEW_PATH_LEGACY,
+  SERVICE_KEY_LEGACY
 );

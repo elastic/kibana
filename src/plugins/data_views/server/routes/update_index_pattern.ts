@@ -7,6 +7,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { DataViewSpec } from 'src/plugins/data_views/common';
 import { handleErrors } from './util/handle_errors';
 import {
   fieldSpecSchema,
@@ -15,7 +16,12 @@ import {
 } from './util/schemas';
 import { IRouter, StartServicesAccessor } from '../../../../core/server';
 import type { DataViewsServerPluginStartDependencies, DataViewsServerPluginStart } from '../types';
-import { SPECIFIC_DATA_VIEW_PATH, SPECIFIC_DATA_VIEW_PATH_LEGACY } from '../constants';
+import {
+  SPECIFIC_DATA_VIEW_PATH,
+  SPECIFIC_DATA_VIEW_PATH_LEGACY,
+  SERVICE_KEY,
+  SERVICE_KEY_LEGACY,
+} from '../constants';
 
 const indexPatternUpdateSchema = schema.object({
   title: schema.maybe(schema.string()),
@@ -37,7 +43,7 @@ const indexPatternUpdateSchema = schema.object({
 });
 
 const updateDataViewRouteFactory =
-  (path: string) =>
+  (path: string, serviceKey: string) =>
   (
     router: IRouter,
     getStartServices: StartServicesAccessor<
@@ -60,7 +66,7 @@ const updateDataViewRouteFactory =
           ),
           body: schema.object({
             refresh_fields: schema.maybe(schema.boolean({ defaultValue: false })),
-            index_pattern: indexPatternUpdateSchema,
+            [serviceKey]: indexPatternUpdateSchema,
           }),
         },
       },
@@ -81,18 +87,20 @@ const updateDataViewRouteFactory =
           const {
             // eslint-disable-next-line @typescript-eslint/naming-convention
             refresh_fields = true,
-            index_pattern: {
-              title,
-              timeFieldName,
-              intervalName,
-              sourceFilters,
-              fieldFormats,
-              type,
-              typeMeta,
-              fields,
-              runtimeFieldMap,
-            },
           } = req.body;
+          const indexPatternSpec = req.body[serviceKey] as DataViewSpec;
+
+          const {
+            title,
+            timeFieldName,
+            intervalName,
+            sourceFilters,
+            fieldFormats,
+            type,
+            typeMeta,
+            fields,
+            runtimeFieldMap,
+          } = indexPatternSpec;
 
           let changeCount = 0;
           let doRefreshFields = false;
@@ -164,7 +172,7 @@ const updateDataViewRouteFactory =
               'content-type': 'application/json',
             },
             body: JSON.stringify({
-              index_pattern: indexPattern.toSpec(),
+              [serviceKey]: indexPattern.toSpec(),
             }),
           });
         })
@@ -172,8 +180,12 @@ const updateDataViewRouteFactory =
     );
   };
 
-export const registerUpdateDataViewRoute = updateDataViewRouteFactory(SPECIFIC_DATA_VIEW_PATH);
+export const registerUpdateDataViewRoute = updateDataViewRouteFactory(
+  SPECIFIC_DATA_VIEW_PATH,
+  SERVICE_KEY
+);
 
 export const registerUpdateDataViewRouteLegacy = updateDataViewRouteFactory(
-  SPECIFIC_DATA_VIEW_PATH_LEGACY
+  SPECIFIC_DATA_VIEW_PATH_LEGACY,
+  SERVICE_KEY_LEGACY
 );

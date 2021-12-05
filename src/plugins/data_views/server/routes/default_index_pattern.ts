@@ -10,10 +10,10 @@ import { schema } from '@kbn/config-schema';
 import { IRouter, StartServicesAccessor } from '../../../../core/server';
 import type { DataViewsServerPluginStartDependencies, DataViewsServerPluginStart } from '../types';
 import { handleErrors } from './util/handle_errors';
-import { SERVICE_PATH, SERVICE_PATH_LEGACY } from '../constants';
+import { SERVICE_PATH, SERVICE_PATH_LEGACY, SERVICE_KEY, SERVICE_KEY_LEGACY } from '../constants';
 
 const manageDefaultIndexPatternRoutesFactory =
-  (path: string) =>
+  (path: string, serviceKey: string) =>
   (
     router: IRouter,
     getStartServices: StartServicesAccessor<
@@ -51,7 +51,7 @@ const manageDefaultIndexPatternRoutesFactory =
         path,
         validate: {
           body: schema.object({
-            index_pattern_id: schema.nullable(
+            [`${serviceKey}_id`]: schema.nullable(
               schema.string({
                 minLength: 1,
                 maxLength: 1_000,
@@ -71,8 +71,8 @@ const manageDefaultIndexPatternRoutesFactory =
           req
         );
 
-        const newDefaultId = req.body.index_pattern_id;
-        const force = req.body.force;
+        const newDefaultId = req.body[`${serviceKey}_id`] as string;
+        const force = req.body.force as boolean;
 
         await indexPatternsService.setDefault(newDefaultId, force);
 
@@ -86,9 +86,11 @@ const manageDefaultIndexPatternRoutesFactory =
   };
 
 export const registerManageDefaultDataViewRoute = manageDefaultIndexPatternRoutesFactory(
-  `${SERVICE_PATH}/default`
+  `${SERVICE_PATH}/default`,
+  SERVICE_KEY
 );
 
 export const registerManageDefaultDataViewRouteLegacy = manageDefaultIndexPatternRoutesFactory(
-  `${SERVICE_PATH_LEGACY}/default`
+  `${SERVICE_PATH_LEGACY}/default`,
+  SERVICE_KEY_LEGACY
 );

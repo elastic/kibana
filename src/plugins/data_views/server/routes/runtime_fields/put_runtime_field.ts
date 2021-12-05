@@ -14,10 +14,15 @@ import type {
   DataViewsServerPluginStart,
   DataViewsServerPluginStartDependencies,
 } from '../../types';
-import { RUNTIME_FIELD_PATH, RUNTIME_FIELD_PATH_LEGACY } from '../../constants';
+import {
+  RUNTIME_FIELD_PATH,
+  RUNTIME_FIELD_PATH_LEGACY,
+  SERVICE_KEY,
+  SERVICE_KEY_LEGACY,
+} from '../../constants';
 
 const putRuntimeFieldRouteFactory =
-  (path: string) =>
+  (path: string, serviceKey: string) =>
   (
     router: IRouter,
     getStartServices: StartServicesAccessor<
@@ -78,14 +83,19 @@ const putRuntimeFieldRouteFactory =
         return res.ok({
           body: {
             field: fieldObject.toSpec(),
-            index_pattern: indexPattern.toSpec(),
+            [serviceKey]: indexPattern.toSpec(),
           },
         });
       })
     );
   };
 
-export const registerPutRuntimeFieldRoute = putRuntimeFieldRouteFactory(RUNTIME_FIELD_PATH);
+export const registerPutRuntimeFieldRoute = putRuntimeFieldRouteFactory(
+  RUNTIME_FIELD_PATH,
+  SERVICE_KEY
+);
 
-export const registerPutRuntimeFieldRouteLegacy =
-  putRuntimeFieldRouteFactory(RUNTIME_FIELD_PATH_LEGACY);
+export const registerPutRuntimeFieldRouteLegacy = putRuntimeFieldRouteFactory(
+  RUNTIME_FIELD_PATH_LEGACY,
+  SERVICE_KEY_LEGACY
+);

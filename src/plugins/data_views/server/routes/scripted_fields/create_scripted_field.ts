@@ -14,10 +14,15 @@ import type {
   DataViewsServerPluginStartDependencies,
   DataViewsServerPluginStart,
 } from '../../types';
-import { SCRIPTED_FIELD_PATH, SCRIPTED_FIELD_PATH_LEGACY } from '../../constants';
+import {
+  SCRIPTED_FIELD_PATH,
+  SCRIPTED_FIELD_PATH_LEGACY,
+  SERVICE_KEY,
+  SERVICE_KEY_LEGACY,
+} from '../../constants';
 
 const createScriptedFieldRouteFactory =
-  (path: string) =>
+  (path: string, serviceKey: string) =>
   (
     router: IRouter,
     getStartServices: StartServicesAccessor<
@@ -82,7 +87,7 @@ const createScriptedFieldRouteFactory =
             },
             body: JSON.stringify({
               field: fieldObject.toSpec(),
-              index_pattern: indexPattern.toSpec(),
+              [serviceKey]: indexPattern.toSpec(),
             }),
           });
         })
@@ -90,9 +95,12 @@ const createScriptedFieldRouteFactory =
     );
   };
 
-export const registerCreateScriptedFieldRoute =
-  createScriptedFieldRouteFactory(SCRIPTED_FIELD_PATH);
+export const registerCreateScriptedFieldRoute = createScriptedFieldRouteFactory(
+  SCRIPTED_FIELD_PATH,
+  SERVICE_KEY
+);
 
 export const registerCreateScriptedFieldRouteLegacy = createScriptedFieldRouteFactory(
-  SCRIPTED_FIELD_PATH_LEGACY
+  SCRIPTED_FIELD_PATH_LEGACY,
+  SERVICE_KEY_LEGACY
 );

@@ -14,9 +14,14 @@ import type {
   DataViewsServerPluginStartDependencies,
   DataViewsServerPluginStart,
 } from '../../types';
-import { SPECIFIC_DATA_VIEW_PATH, SPECIFIC_DATA_VIEW_PATH_LEGACY } from '../../constants';
+import {
+  SPECIFIC_DATA_VIEW_PATH,
+  SPECIFIC_DATA_VIEW_PATH_LEGACY,
+  SERVICE_KEY,
+  SERVICE_KEY_LEGACY,
+} from '../../constants';
 
-const updateFieldsActionRouteFactory = (path: string) => {
+const updateFieldsActionRouteFactory = (path: string, serviceKey: string) => {
   return (
     router: IRouter,
     getStartServices: StartServicesAccessor<
@@ -114,7 +119,7 @@ const updateFieldsActionRouteFactory = (path: string) => {
               'content-type': 'application/json',
             },
             body: JSON.stringify({
-              index_pattern: indexPattern.toSpec(),
+              [serviceKey]: indexPattern.toSpec(),
             }),
           });
         })
@@ -124,9 +129,11 @@ const updateFieldsActionRouteFactory = (path: string) => {
 };
 
 export const registerUpdateFieldsRouteLegacy = updateFieldsActionRouteFactory(
-  `${SPECIFIC_DATA_VIEW_PATH}/fields`
+  `${SPECIFIC_DATA_VIEW_PATH}/fields`,
+  SERVICE_KEY
 );
 
 export const registerUpdateFieldsRoute = updateFieldsActionRouteFactory(
-  `${SPECIFIC_DATA_VIEW_PATH_LEGACY}/fields`
+  `${SPECIFIC_DATA_VIEW_PATH_LEGACY}/fields`,
+  SERVICE_KEY_LEGACY
 );
