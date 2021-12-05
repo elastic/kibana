@@ -15,7 +15,6 @@ import {
   niceTimeFormatByDay,
 } from '@elastic/charts';
 import { formatDate, dateFormatAliases } from '@elastic/eui';
-import { CspData } from './charts_data_types';
 import { dateValueToTuple } from '../index';
 
 const mock = [
@@ -54,7 +53,9 @@ const mock = [
   },
 ];
 
-export const TotalResourcesChart = ({ totalResourcesCompliance = mock }: CspData) => {
+export const TotalResourcesChart = () => {
+  const totalResourcesCompliance = mock;
+
   return (
     <Chart size={{ height: 200 }}>
       <Settings

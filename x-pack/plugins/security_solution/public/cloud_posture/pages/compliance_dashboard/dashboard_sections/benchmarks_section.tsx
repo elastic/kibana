@@ -20,10 +20,8 @@ import {
   EuiDescriptionListDescription,
 } from '@elastic/eui';
 import { CloudPostureScoreChart } from '../compliance_charts/cloud_posture_score_chart';
-import { MiniCPSGoalChart } from '../compliance_charts/mini_cps_goal_chart';
 import { ComplianceTrendChart } from '../compliance_charts/compliance_trend_chart';
 import { useCloudPostureStatsApi } from '../../../common/api/use_cloud_posture_stats_api';
-import { TotalResourcesChart } from '../compliance_charts/total_resources_chart';
 
 const logoMap: Record<string, IconType> = {
   'CIS Kubernetes': 'logoKubernetes',
@@ -38,13 +36,12 @@ const getHealthBadge = (value: number) => {
 
 export const BenchmarksSection = () => {
   const getStats = useCloudPostureStatsApi();
-  const { benchmarks } = getStats.isSuccess && getStats.data;
-
-  if (!benchmarks.length) return null;
+  const benchmarks = getStats.isSuccess && getStats.data.benchmarksStats;
+  if (!benchmarks) return null;
 
   return (
     <>
-      {benchmarks.map((benchmark: { name: string; totalPassed: number; totalFailed: number }) => (
+      {benchmarks.map((benchmark) => (
         <EuiPanel hasBorder hasShadow={false}>
           <EuiFlexGrid columns={4}>
             <EuiFlexItem

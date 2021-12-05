@@ -7,8 +7,11 @@
 
 import { useQuery } from 'react-query';
 import { useKibana } from '../../../common/lib/kibana';
+// TODO: find out how to import from the server folder without warnings
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { CloudPostureStats } from '../../../../server/cloud_posture/types';
 
 export const useCloudPostureStatsApi = () => {
   const { http } = useKibana().services;
-  return useQuery(['csp_dashboard_stats'], () => http.get('/api/csp/stats'));
+  return useQuery(['csp_dashboard_stats'], () => http.get<CloudPostureStats>('/api/csp/stats'));
 };

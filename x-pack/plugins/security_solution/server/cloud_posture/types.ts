@@ -9,10 +9,10 @@ export type Evaluation = 'passed' | 'failed' | 'NA';
 
 export interface BenchmarkStats {
   name: string;
-  postureScore: number | undefined;
+  postureScore?: number;
   totalFindings?: number;
-  totalPassed: number | undefined;
-  totalFailed: number | undefined;
+  totalPassed?: number;
+  totalFailed?: number;
 }
 
 export interface EvaluationStats {
@@ -22,6 +22,6 @@ export interface EvaluationStats {
 }
 
 export interface CloudPostureStats extends BenchmarkStats {
-  statsPerBenchmark: BenchmarkStats[];
-  evaluationsPerResource: EvaluationStats[];
+  benchmarksStats: BenchmarkStats[];
+  resourcesEvaluations: EvaluationStats[];
 }

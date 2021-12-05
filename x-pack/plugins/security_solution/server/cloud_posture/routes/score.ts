@@ -57,7 +57,7 @@ const getLatestFinding = (): SearchRequest => ({
   },
 });
 
-const getEvaluationPerFilenameEsQuery = (
+const getResourcesEvaluationEsQuery = (
   cycleId: string,
   result: 'passed' | 'failed',
   size: number,
@@ -121,12 +121,12 @@ interface GroupFilename {
   group_docs: AggregationsTermsAggregate<AggregationsKeyedBucketKeys>;
 }
 
-const getEvaluationPerFilename = async (
+const getResourcesEvaluation = async (
   esClient: ElasticsearchClient,
   cycleId: string
 ): Promise<EvaluationStats[]> => {
   const failedEvaluationsPerResourceResult = await esClient.search(
-    getEvaluationPerFilenameEsQuery(cycleId, 'failed', 5)
+    getResourcesEvaluationEsQuery(cycleId, 'failed', 5)
   );
 
   const failedResourcesGroup = failedEvaluationsPerResourceResult.body.aggregations
@@ -141,7 +141,7 @@ const getEvaluationPerFilename = async (
   });
 
   const passedEvaluationsPerResourceResult = await esClient.search(
-    getEvaluationPerFilenameEsQuery(cycleId, 'passed', 5, topFailedResources)
+    getResourcesEvaluationEsQuery(cycleId, 'passed', 5, topFailedResources)
   );
   const passedResourcesGroup = passedEvaluationsPerResourceResult.body.aggregations
     ?.group as AggregationsTermsAggregate<GroupFilename>;
@@ -175,7 +175,7 @@ const getAllFindingsStats = async (
   };
 };
 
-const getScorePerBenchmark = async (
+const getBenchmarksStats = async (
   esClient: ElasticsearchClient,
   cycleId: string,
   benchmarks: string[]
@@ -219,15 +219,15 @@ export const getScoreRoute = (router: SecuritySolutionPluginRouter, logger: Logg
         if (latestCycleID === undefined) {
           throw new Error('cycle id is missing');
         }
-        const [allFindingsStats, statsPerBenchmark, evaluationsPerResource] = await Promise.all([
+        const [allFindingsStats, benchmarksStats, resourcesEvaluations] = await Promise.all([
           getAllFindingsStats(esClient, latestCycleID),
-          getScorePerBenchmark(esClient, latestCycleID, benchmarks),
-          getEvaluationPerFilename(esClient, latestCycleID),
+          getBenchmarksStats(esClient, latestCycleID, benchmarks),
+          getResourcesEvaluation(esClient, latestCycleID),
         ]);
         const body: CloudPostureStats = {
           ...allFindingsStats,
-          statsPerBenchmark,
-          evaluationsPerResource,
+          benchmarksStats,
+          resourcesEvaluations,
         };
         return response.ok({
           body,
