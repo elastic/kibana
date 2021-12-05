@@ -6,10 +6,12 @@
  */
 
 export type Evaluation = 'passed' | 'failed' | 'NA';
+/** number between 1-100 */
+export type Score = number;
 
 export interface BenchmarkStats {
   name: string;
-  postureScore?: number;
+  postureScore?: Score;
   totalFindings?: number;
   totalPassed?: number;
   totalFailed?: number;
