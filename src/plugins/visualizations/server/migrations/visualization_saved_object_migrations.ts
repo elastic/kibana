@@ -868,14 +868,14 @@ const decorateAxes = <T extends { labels: { filter?: boolean } }>(
   }));
 
 /**
- * Decorate axes with default label filter value
+ * Defaults circlesRadius to 1 if it is not configured
  */
 const addCirclesRadius = <T extends { circlesRadius: number }>(axes: T[]): T[] =>
   axes.map((axis) => {
-    const hasCircleRadiusAttribute = axis?.circlesRadius;
+    const hasCircleRadiusAttribute = Number.isFinite(axis?.circlesRadius);
     return {
       ...axis,
-      ...(!Number.isFinite(axis?.circlesRadius) && {
+      ...(!hasCircleRadiusAttribute && {
         circlesRadius: 1,
       }),
     };
