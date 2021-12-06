@@ -57,6 +57,12 @@ export function SeriesName({ series, seriesId }: Props) {
     }
   };
 
+  const onKeyDown = (event: KeyboardEvent) => {
+    if (event.key === 'Enter') {
+      setIsEditingEnabled(false);
+    }
+  };
+
   useEffect(() => {
     setValue(series.name);
   }, [series.name]);
@@ -75,12 +81,14 @@ export function SeriesName({ series, seriesId }: Props) {
             <EuiFieldText
               value={value}
               onChange={onChange}
-              fullWidth
               onBlur={onSave}
+              onKeyDown={onKeyDown}
+              fullWidth
               inputRef={inputRef}
               aria-label={i18n.translate('xpack.observability.expView.seriesEditor.seriesName', {
                 defaultMessage: 'Series name',
               })}
+              data-test-subj="exploratoryViewSeriesNameInput"
             />
           </EuiOutsideClickDetector>
         </EuiFlexItem>
