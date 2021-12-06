@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 const TEST_FILTER_COLUMN_NAMES = [
@@ -22,9 +23,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const docTable = getService('docTable');
   const PageObjects = getPageObjects(['common', 'context', 'discover', 'timePicker']);
   const kibanaServer = getService('kibanaServer');
+  const testSubjects = getService('testSubjects');
+  const filterBar = getService('filterBar');
 
   describe('discover - context - back navigation', function contextSize() {
-    before(async function () {
+    beforeEach(async function () {
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await kibanaServer.uiSettings.update({ 'doc_table:legacy': true });
       await PageObjects.common.navigateToApp('discover');
@@ -54,6 +57,23 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.discover.waitForDocTableLoadingComplete();
         const hitCount = await PageObjects.discover.getHitCount();
         return initialHitCount === hitCount;
+      });
+    });
+
+    it('should go back via breadcrumbs with preserved state', async function () {
+      await docTable.clickRowToggle({ rowIndex: 0 });
+      const rowActions = await docTable.getRowActions({ rowIndex: 0 });
+      await rowActions[0].click();
+      await PageObjects.context.waitUntilContextLoadingHasFinished();
+
+      await testSubjects.click('breadcrumb first');
+
+      for (const [columnName, value] of TEST_FILTER_COLUMN_NAMES) {
+        expect(await filterBar.hasFilter(columnName, value)).to.eql(true);
+      }
+      expect(await PageObjects.timePicker.getTimeConfigAsAbsoluteTimes()).to.eql({
+        start: 'Sep 18, 2015 @ 06:31:44.000',
+        end: 'Sep 23, 2015 @ 18:31:44.000',
       });
     });
   });
