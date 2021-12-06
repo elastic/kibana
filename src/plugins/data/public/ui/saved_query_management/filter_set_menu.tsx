@@ -120,6 +120,7 @@ export function FilterSetMenu({
         {
           name: 'Inspect current filter set...',
           icon: 'inspect',
+          disabled: true,
           onClick: () => {
             closePopover();
           },
@@ -202,14 +203,12 @@ export function FilterSetMenu({
       id: 3,
       title: 'Filter language',
       content: (
-        <div style={{ padding: 16 }}>
-          <QueryLanguageSwitcher
-            language={language}
-            onSelectLanguage={onSelectLanguage}
-            nonKqlMode={nonKqlMode}
-            nonKqlModeHelpText={nonKqlModeHelpText}
-          />
-        </div>
+        <QueryLanguageSwitcher
+          language={language}
+          onSelectLanguage={onSelectLanguage}
+          nonKqlMode={nonKqlMode}
+          nonKqlModeHelpText={nonKqlModeHelpText}
+        />
       ),
     },
   ] as EuiContextMenuPanelDescriptor[];
