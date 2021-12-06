@@ -15,11 +15,11 @@ import {
 } from 'src/core/server';
 import { Filter } from '@kbn/es-query';
 import { Query } from 'src/plugins/data/public';
+import { getAllMigrations } from '../../../../../src/plugins/data/common';
 import {
   mergeMigrationFunctionMaps,
   MigrateFunctionsObject,
-} from 'src/plugins/kibana_utils/common';
-import { getAllMigrations } from 'src/plugins/data/common';
+} from '../../../../../src/plugins/kibana_utils/common';
 import { PersistableFilter } from '../../common';
 import {
   LensDocShapePost712,

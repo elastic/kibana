@@ -7,7 +7,7 @@
 
 import { EmbeddableRegistryDefinition } from 'src/plugins/embeddable/server';
 import type { SerializableRecord } from '@kbn/utility-types';
-import { getAllMigrations } from 'src/plugins/data/common';
+import { getAllMigrations } from '../../../../../src/plugins/data/common';
 import { mergeMigrationFunctionMaps } from '../../../../../src/plugins/kibana_utils/common';
 import { DOC_TYPE } from '../../common';
 import {
