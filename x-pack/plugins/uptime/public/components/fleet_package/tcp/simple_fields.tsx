@@ -11,7 +11,7 @@ import { EuiFormRow, EuiFieldText } from '@elastic/eui';
 import { ConfigKey, Validation } from '../types';
 import { useTCPSimpleFieldsContext } from '../contexts';
 import { ScheduleField } from '../schedule_field';
-import { CommonFields } from '../common/common_fields';
+import { SimpleFieldsWrapper } from '../common/simple_fields_wrapper';
 
 interface Props {
   validate: Validation;
@@ -24,7 +24,7 @@ export const TCPSimpleFields = memo<Props>(({ validate }) => {
   };
 
   return (
-    <>
+    <SimpleFieldsWrapper fields={fields} validate={validate} onInputChange={handleInputChange}>
       <EuiFormRow
         label={
           <FormattedMessage
@@ -79,7 +79,6 @@ export const TCPSimpleFields = memo<Props>(({ validate }) => {
           unit={fields[ConfigKey.SCHEDULE].unit}
         />
       </EuiFormRow>
-      <CommonFields fields={fields} onChange={handleInputChange} validate={validate} />
-    </>
+    </SimpleFieldsWrapper>
   );
 });
