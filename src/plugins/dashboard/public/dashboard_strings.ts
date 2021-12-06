@@ -361,7 +361,7 @@ export const panelStorageErrorStrings = {
 
 export const dashboardLoadingErrorStrings = {
   getDashboardLoadError: (message: string) =>
-    i18n.translate('dashboard.panelStorageError.getError', {
+    i18n.translate('dashboard.loadingError.errorMessage', {
       defaultMessage: 'Error encountered while loading saved dashboard: {message}',
       values: { message },
     }),
