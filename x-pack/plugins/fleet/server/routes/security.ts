@@ -127,41 +127,39 @@ export async function getAuthzFromRequest(req: KibanaRequest): Promise<FleetAuth
   const security = appContextService.getSecurity();
 
   if (security.authz.mode.useRbacForRequest(req)) {
-    const checkPrivileges = security.authz.checkPrivilegesDynamicallyWithRequest(req);
-    const { privileges } = await checkPrivileges({
-      kibana: [
-        security.authz.actions.api.get('fleet-all'),
-        security.authz.actions.api.get('fleet-setup'),
-        security.authz.actions.api.get('integrations-all'),
-        security.authz.actions.api.get('integrations-read'),
-      ],
-    });
+    if (checkSuperuser(req)) {
+      // Superusers get access to everything
+      // Once we implement Kibana RBAC, remove this and use `checkPrivileges` exclusively
+      return calculateAuthz({
+        fleet: { all: true, setup: true },
+        integrations: { all: true, read: true },
+      });
+    } else if (await checkFleetSetupPrivilege(req)) {
+      // fleet-setup privilege only gets access to setup actions
+      return calculateAuthz({
+        fleet: { all: false, setup: true },
+        integrations: { all: false, read: false },
+      });
+    } else {
+      // All other users only get access to read integrations if they have the read privilege
+      const checkPrivileges = security.authz.checkPrivilegesDynamicallyWithRequest(req);
+      const { privileges } = await checkPrivileges({
+        kibana: [security.authz.actions.api.get('integrations-read')],
+      });
 
-    const [fleetAll, fleetSetup, intAll, intRead] = privileges.kibana;
+      const [intRead] = privileges.kibana;
 
-    return calculateAuthz({
-      fleet: {
-        all: fleetAll.authorized,
-        setup: fleetSetup.authorized,
-      },
-
-      integrations: {
-        all: intAll.authorized,
-        read: intRead.authorized,
-      },
-    });
+      // Once we implement Kibana RBAC, use `checkPrivileges` for all privileges instead of only integrations.read
+      return calculateAuthz({
+        fleet: { all: true, setup: true },
+        integrations: { all: true, read: intRead.authorized },
+      });
+    }
   }
 
   return calculateAuthz({
-    fleet: {
-      all: true,
-      setup: true,
-    },
-
-    integrations: {
-      all: true,
-      read: true,
-    },
+    fleet: { all: false, setup: false },
+    integrations: { all: false, read: false },
   });
 }
 
