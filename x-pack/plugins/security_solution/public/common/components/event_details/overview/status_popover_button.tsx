@@ -6,7 +6,7 @@
  */
 
 import { EuiContextMenuPanel, EuiPopover, EuiPopoverTitle } from '@elastic/eui';
-import React, { useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 
 import { useAlertsActions } from '../../../../detections/components/alerts_table/timeline_actions/use_alerts_actions';
 import { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
@@ -26,12 +26,12 @@ interface StatusPopoverButtonProps {
 export const StatusPopoverButton = React.memo<StatusPopoverButtonProps>(
   ({ eventId, contextId, enrichedFieldInfo, indexName, timelineId, handleOnEventClosed }) => {
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-    const togglePopover = () => setIsPopoverOpen(!isPopoverOpen);
-    const closePopover = () => setIsPopoverOpen(false);
-    const closeAfterAction = () => {
+    const togglePopover = useCallback(() => setIsPopoverOpen(!isPopoverOpen), [isPopoverOpen]);
+    const closePopover = useCallback(() => setIsPopoverOpen(false), []);
+    const closeAfterAction = useCallback(() => {
       closePopover();
       handleOnEventClosed();
-    };
+    }, [closePopover, handleOnEventClosed]);
 
     const { actionItems } = useAlertsActions({
       closePopover: closeAfterAction,
@@ -41,22 +41,27 @@ export const StatusPopoverButton = React.memo<StatusPopoverButtonProps>(
       alertStatus: enrichedFieldInfo.values[0] as Status,
     });
 
+    const button = useMemo(
+      () => (
+        <FormattedFieldValue
+          contextId={contextId}
+          eventId={eventId}
+          value={enrichedFieldInfo.values[0]}
+          fieldName={enrichedFieldInfo.data.field}
+          linkValue={enrichedFieldInfo.linkValue}
+          fieldType={enrichedFieldInfo.data.type}
+          fieldFormat={enrichedFieldInfo.data.format}
+          isDraggable={false}
+          truncate={false}
+          onClick={togglePopover}
+        />
+      ),
+      [contextId, eventId, enrichedFieldInfo, togglePopover]
+    );
+
     return (
       <EuiPopover
-        button={
-          <FormattedFieldValue
-            contextId={contextId}
-            eventId={eventId}
-            value={enrichedFieldInfo.values[0]}
-            fieldName={enrichedFieldInfo.data.field}
-            linkValue={enrichedFieldInfo.linkValue}
-            fieldType={enrichedFieldInfo.data.type}
-            fieldFormat={enrichedFieldInfo.data.format}
-            isDraggable={false}
-            truncate={false}
-            onClick={togglePopover}
-          />
-        }
+        button={button}
         isOpen={isPopoverOpen}
         closePopover={closePopover}
         panelPaddingSize="none"
