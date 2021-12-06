@@ -41,17 +41,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should able to configure a regular metric', async () => {
       await PageObjects.lens.configureDimension({
-        dimension: 'lnsDatatable_rows > lns-empty-dimension',
-        operation: 'date_histogram',
-        field: '@timestamp',
-      });
-      await PageObjects.lens.configureDimension({
         dimension: 'lnsDatatable_metrics > lns-empty-dimension',
         operation: 'count',
         field: 'Records',
       });
       await PageObjects.lens.waitForVisualization();
-      expect(await PageObjects.lens.getDatatableCellText(0, 1)).to.eql('1');
+      expect(await PageObjects.lens.getDatatableCellText(0, 0)).to.eql('1');
     });
 
     it('should able to configure a shifted metric', async () => {
@@ -60,7 +55,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.setTimeShift('3d');
 
       await PageObjects.lens.waitForVisualization();
-      expect(await PageObjects.lens.getDatatableCellText(0, 1)).to.eql('2');
+      expect(await PageObjects.lens.getDatatableCellText(0, 0)).to.eql('2');
     });
   });
 }
