@@ -26,8 +26,12 @@ export const SyntheticsDataType = t.partial({
   }),
   package_version: t.string,
   step: t.type({
+    status: t.string,
     index: t.number,
     name: t.string,
+    duration: t.type({
+      us: t.number,
+    }),
   }),
   type: t.string,
   blob: t.string,
