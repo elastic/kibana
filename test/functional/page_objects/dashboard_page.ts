@@ -672,17 +672,6 @@ export class DashboardPageObject extends FtrService {
     return await this.testSubjects.click('dashboardPanelTitlesCheckbox');
   }
 
-  // public async checkHiddenTitleInViewMode() {
-  //   this.log.debug('ensure a title is hidden in view mode');
-  //   // await PageObjects.dashboard.clickCancelOutOfEditMode();
-  //   const inViewMode = await this.getIsInViewMode();
-  //   if (!inViewMode) {
-  //     await this.clickCancelOutOfEditMode();
-  //   }
-
-  //   return;
-  // }
-
   public async expectMissingSaveOption() {
     await this.testSubjects.missingOrFail('dashboardSaveMenuItem');
   }

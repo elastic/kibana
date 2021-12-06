@@ -290,17 +290,6 @@ export class DashboardPanelActionsService extends FtrService {
     await this.testSubjects.click('customizePanelHideTitle');
   }
 
-  // async expectHiddenTitleInViewMode(panelIndex: number = 0) {
-  //   this.log.debug('checkHiddenTitleInViewMode');
-  //   const inViewMode = await this.dashboard.getIsInViewMode();
-  //   if (!inViewMode) {
-  //     await this.dashboard.clickCancelOutOfEditMode();
-  //   }
-  //   const panels = await this.testSubjects.findAll('embeddablePanel');
-  //   this.log.debug('Panels:', panels);
-  //   return;
-  // }
-
   async toggleHidePanelTitle(originalTitle?: string) {
     this.log.debug(`hidePanelTitle(${originalTitle})`);
     if (originalTitle) {
@@ -327,15 +316,7 @@ export class DashboardPanelActionsService extends FtrService {
     } else {
       await this.customizePanel();
     }
-    // if (customTitle === '') {
-    //   this.log.debug('--- SETTING EMPTY TITLE');
-    //   await this.common.sleep(10000);
-    // }
     await this.testSubjects.setValue('customEmbeddablePanelTitleInput', customTitle);
-    // if (customTitle === '') {
-    //   this.log.debug('--- AFTER SETTING EMPTY TITLE');
-    //   await this.common.sleep(10000);
-    // }
     await this.testSubjects.click('saveNewTitleButton');
   }
 

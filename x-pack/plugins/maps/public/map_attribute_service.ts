@@ -92,6 +92,7 @@ export function getMapAttributeService(): MapAttributeService {
       if (savedObject.error) {
         throw savedObject.error;
       }
+
       const { attributes } = injectReferences(savedObject);
       return {
         attributes: {
