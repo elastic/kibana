@@ -8,12 +8,12 @@
 import { action } from '@storybook/addon-actions';
 import { storiesOf } from '@storybook/react';
 import React from 'react';
-import { EuiThemeProvider } from '../../../../../../../src/plugins/kibana_react/common';
 import { QualityWarning } from '../../../../common/log_analysis';
+import { decorateWithGlobalStorybookThemeProviders } from '../../../test_utils/use_global_storybook_theme';
 import { CategoryQualityWarnings } from './quality_warning_notices';
 
 storiesOf('infra/logAnalysis/CategoryQualityWarnings', module)
-  .addDecorator((renderStory) => <EuiThemeProvider>{renderStory()}</EuiThemeProvider>)
+  .addDecorator(decorateWithGlobalStorybookThemeProviders)
   .add('Partitioned warnings', () => {
     return (
       <CategoryQualityWarnings
