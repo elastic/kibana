@@ -7,6 +7,7 @@
  */
 
 jest.mock('fs/promises');
+jest.mock('crypto');
 import { constants } from 'fs';
 
 import { loggingSystemMock } from 'src/core/server/mocks';
@@ -27,6 +28,16 @@ describe('KibanaConfigWriter', () => {
     mockReadFile = fsMocks.readFile;
 
     mockReadFile.mockResolvedValue('');
+
+    const mockCrypto = jest.requireMock('crypto');
+    mockCrypto.X509Certificate = function (cert: string) {
+      if (cert === 'invalid-cert') {
+        throw new Error('Invalid certificate');
+      }
+      return {
+        fingerprint256: 'fingerprint256',
+      };
+    };
 
     kibanaConfigWriter = new KibanaConfigWriter(
       '/some/path/kibana.yml',
@@ -120,6 +131,7 @@ describe('KibanaConfigWriter', () => {
         elasticsearch.hosts: [some-host]
         elasticsearch.serviceAccountToken: some-value
         elasticsearch.ssl.certificateAuthorities: [/data/ca_1234.crt]
+        xpack.fleet.outputs: [{id: fleet-default-output, name: default, is_default: true, is_default_monitoring: true, type: elasticsearch, hosts: [some-host], ca_sha256: fingerprint256}]
 
         ",
           ],
@@ -186,11 +198,24 @@ describe('KibanaConfigWriter', () => {
         elasticsearch.username: username
         elasticsearch.password: password
         elasticsearch.ssl.certificateAuthorities: [/data/ca_1234.crt]
+        xpack.fleet.outputs: [{id: fleet-default-output, name: default, is_default: true, is_default_monitoring: true, type: elasticsearch, hosts: [some-host], ca_sha256: fingerprint256}]
 
         ",
           ],
         ]
       `);
+    });
+
+    it('throws if it cannot parse CA certificate', async () => {
+      await expect(
+        kibanaConfigWriter.writeConfig({
+          caCert: 'invalid-cert',
+          host: 'some-host',
+          serviceAccountToken: { name: 'some-token', value: 'some-value' },
+        })
+      ).rejects.toMatchInlineSnapshot(`[Error: Invalid certificate]`);
+
+      expect(mockWriteFile).not.toHaveBeenCalled();
     });
 
     it('can successfully write elasticsearch config without CA certificate', async () => {
@@ -250,6 +275,7 @@ describe('KibanaConfigWriter', () => {
         elasticsearch.hosts: [some-host]
         elasticsearch.serviceAccountToken: some-value
         elasticsearch.ssl.certificateAuthorities: [/data/ca_1234.crt]
+        xpack.fleet.outputs: [{id: fleet-default-output, name: default, is_default: true, is_default_monitoring: true, type: elasticsearch, hosts: [some-host], ca_sha256: fingerprint256}]
 
         ",
           ],
@@ -303,6 +329,7 @@ describe('KibanaConfigWriter', () => {
           monitoring.ui.container.elasticsearch.enabled: true
           elasticsearch.serviceAccountToken: some-value
           elasticsearch.ssl.certificateAuthorities: [/data/ca_1234.crt]
+          xpack.fleet.outputs: [{id: fleet-default-output, name: default, is_default: true, is_default_monitoring: true, type: elasticsearch, hosts: [some-host], ca_sha256: fingerprint256}]
 
           ",
             ],
