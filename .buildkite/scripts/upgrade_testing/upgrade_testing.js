@@ -131,8 +131,9 @@ const upgradeInstance = async ({ deploymentId }) => {
       }
     );
   } catch (error) {
+    console.error('error', error)
     await execa.command(
-      `buildkite-agent artifact upload target/kibana-cypress/**/*`
+      `buildkite-agent artifact upload target/kibana-osquery/**/*`
     );
   }
 
@@ -151,8 +152,9 @@ const upgradeInstance = async ({ deploymentId }) => {
       }
     );
   } catch (error) {
+    console.error('error', error)
     await execa.command(
-      `buildkite-agent artifact upload target/kibana-cypress/**/*`
+      `buildkite-agent artifact upload target/kibana-osquery/**/*`
     );
   }
 })();

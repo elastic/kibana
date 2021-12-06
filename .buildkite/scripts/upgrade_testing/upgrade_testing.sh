@@ -7,4 +7,4 @@ set -euo pipefail
 
 node .buildkite/scripts/upgrade_testing/upgrade_testing.js
 
-buildkite-agent artifact upload target/kibana-cypress/**/*
+buildkite-agent artifact upload target/kibana-osquery/**/*
