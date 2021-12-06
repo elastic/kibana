@@ -282,10 +282,7 @@ export const getPieVisualization = ({
         warningMessages.push(
           <FormattedMessage
             id="xpack.lens.pie.smallValuesWarningMessage"
-            defaultMessage="The received data contains too small values that can be incorrectly visualized in the {shape} chart"
-            values={{
-              shape: <strong>{state.shape}</strong>,
-            }}
+            defaultMessage="The data contains small category values that could be incorrectly represented by the waffle chart. Try switching to table or treemap to better represent these values"
           />
         );
       }
