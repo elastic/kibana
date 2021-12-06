@@ -51,7 +51,7 @@ export function getDeprecations({
         }),
         message: i18n.translate('xpack.apm.deprecations.message', {
           defaultMessage:
-            'Running the APM Server binary directly is considered a legacy option and is deprecated since 7.16. Switch to APM Server managed by an Elastic Agent instead. Read our documentation to learn more.',
+            'Running the APM Server binary directly is considered a legacy option and will be deprecated and removed in the future.',
         }),
         documentationUrl: `https://www.elastic.co/guide/en/apm/server/${docBranch}/apm-integration.html`,
         level: 'warning',
@@ -68,7 +68,7 @@ export function getDeprecations({
             }),
             i18n.translate('xpack.apm.deprecations.steps.switch', {
               defaultMessage:
-                'Click "Switch to data streams". You will be guided through the process',
+                'Click "Switch to Elastic Agent". You will be guided through the process',
             }),
           ],
         },
