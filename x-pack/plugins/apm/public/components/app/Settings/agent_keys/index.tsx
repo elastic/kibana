@@ -157,7 +157,10 @@ export function AgentKeys() {
       content = (
         <AgentKeysTable
           agentKeys={agentKeys ?? []}
-          refetchAgentKeys={refetchAgentKeys}
+          onKeyDelete={() => {
+            setCreatedAgentKey(undefined);
+            refetchAgentKeys();
+          }}
         />
       );
     }
@@ -182,7 +185,7 @@ export function AgentKeys() {
             </h2>
           </EuiTitle>
         </EuiFlexItem>
-        {areApiKeysEnabled && canManage && (
+        {areApiKeysEnabled && canManage && !isEmpty(agentKeys) && (
           <EuiFlexItem grow={false}>
             <EuiButton
               onClick={() => setIsFlyoutVisible(true)}
