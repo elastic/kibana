@@ -299,9 +299,9 @@ and https://osquery.readthedocs.io/en/stable/deployment/configuration/#configura
 
 * Take caution when editing this configuration. The changes you make are distributed to all agents in the policy.
 
-* Do not edit any `packs` configuration using this field. 
-When you add a pack from the Osquery *Packs* page in {kib}, this adds the definition to the *Osquery config* JSON field. 
-However, once a pack is added, it should only be edited from the Osquery *Packs* page.
+* Take caution when editing `packs` using the Advanced *Osquery config* field. 
+Any changes you make to `packs` from this field are not reflected in the UI on the Osquery *Packs* page in {kib}, however, these changes are deployed to agents in the policy. 
+While this allows you to use advanced Osquery functionality like pack discovery queries, you do lose the ability to manage packs defined this way from the Osquery *Packs* page.
 =========================
 
 . From the {kib} main menu, click *Fleet*, then the *Agent policies* tab.
