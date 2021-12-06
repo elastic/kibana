@@ -18,7 +18,6 @@ import {
   ISOLATE_HOST_ROUTE,
   UNISOLATE_HOST_ROUTE,
   failedFleetActionErrorCode,
-  FORBIDDEN_MESSAGE,
 } from '../../../../common/endpoint/constants';
 import { AGENT_ACTIONS_INDEX } from '../../../../../fleet/common';
 import {
@@ -111,17 +110,6 @@ export const isolationRequestHandler = function (
   SecuritySolutionRequestHandlerContext
 > {
   return async (context, req, res) => {
-    const { canIsolateHost, canUnIsolateHost } = context.securitySolution.endpointAuthz;
-
-    // Ensure user has authorization to use this api
-    if ((!canIsolateHost && isolate) || (!canUnIsolateHost && !isolate)) {
-      return res.forbidden({
-        body: {
-          message: FORBIDDEN_MESSAGE,
-        },
-      });
-    }
-
     const user = endpointContext.service.security?.authc.getCurrentUser(req);
 
     // fetch the Agent IDs to send the commands to

@@ -62,6 +62,3 @@ export const failedFleetActionErrorCode = '424';
 
 export const ENDPOINT_DEFAULT_PAGE = 0;
 export const ENDPOINT_DEFAULT_PAGE_SIZE = 10;
-
-export const FORBIDDEN_MESSAGE =
-  'You do not have permission to perform this action or license level does not allow for this action';

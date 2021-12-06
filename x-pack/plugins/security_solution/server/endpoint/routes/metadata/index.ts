@@ -82,6 +82,10 @@ export function registerEndpointRoutes(
       validate: false,
       options: { authRequired: true, tags: ['access:securitySolution'] },
     },
-    getMetadataTransformStatsHandler(logger)
+    withEndpointAuthz(
+      { all: ['canAccessEndpointManagement'] },
+      logger,
+      getMetadataTransformStatsHandler(logger)
+    )
   );
 }
