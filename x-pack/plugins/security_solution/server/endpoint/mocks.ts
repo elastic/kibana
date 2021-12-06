@@ -40,6 +40,8 @@ import { createCasesClientMock } from '../../../cases/server/client/mocks';
 import { requestContextFactoryMock } from '../request_context_factory.mock';
 import { EndpointMetadataService } from './services/metadata';
 import { createFleetAuthzMock } from '../../../fleet/common';
+import { createMockClients } from '../lib/detection_engine/routes/__mocks__/request_context';
+import type { EndpointAuthz } from '../../common/endpoint/types/authz';
 
 /**
  * Creates a mocked EndpointAppContext.
@@ -181,9 +183,13 @@ export const createMockMetadataRequestContext = (): jest.Mocked<MetadataRequestC
 
 export function createRouteHandlerContext(
   dataClient: jest.Mocked<IScopedClusterClient>,
-  savedObjectsClient: jest.Mocked<SavedObjectsClientContract>
+  savedObjectsClient: jest.Mocked<SavedObjectsClientContract>,
+  overrides: { endpointAuthz?: Partial<EndpointAuthz> } = {}
 ) {
-  const context = requestContextMock.create() as jest.Mocked<SecuritySolutionRequestHandlerContext>;
+  const context = requestContextMock.create(
+    createMockClients(),
+    overrides
+  ) as jest.Mocked<SecuritySolutionRequestHandlerContext>;
   context.core.elasticsearch.client = dataClient;
   context.core.savedObjects.client = savedObjectsClient;
   return context;
