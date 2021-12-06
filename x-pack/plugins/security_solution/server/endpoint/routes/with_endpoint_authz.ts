@@ -18,7 +18,7 @@ export interface EndpointApiNeededAuthz {
   /* A list of authorization keys that ALL needed to be allowed */
   all?: EndpointAuthzKeyList;
 
-  /* A list of authorization keys where at least one must allowed */
+  /* A list of authorization keys where at least one must be allowed */
   any?: EndpointAuthzKeyList;
 }
 
