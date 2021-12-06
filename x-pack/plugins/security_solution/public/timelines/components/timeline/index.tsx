@@ -101,6 +101,8 @@ const StatefulTimelineComponent: React.FC<Props> = ({
 
   const onSourcererChange = useCallback(() => {
     if (
+      // timeline not initialized, so this must be initial state and not user change
+      !savedObjectId ||
       selectedDataViewIdSourcerer == null ||
       selectedDataViewIdSourcerer === '' ||
       // initial state will get set on create
@@ -113,15 +115,16 @@ const StatefulTimelineComponent: React.FC<Props> = ({
     }
     dispatch(
       timelineActions.updateDataView({
-        id: timelineId,
         dataViewId: selectedDataViewIdSourcerer,
+        id: timelineId,
         indexNames: selectedPatternsSourcerer,
       })
     );
   }, [
+    dispatch,
+    savedObjectId,
     selectedDataViewIdSourcerer,
     selectedDataViewIdTimeline,
-    dispatch,
     selectedPatternsSourcerer,
     selectedPatternsTimeline,
     timelineId,
