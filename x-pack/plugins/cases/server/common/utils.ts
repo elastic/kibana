@@ -32,12 +32,12 @@ import {
   CommentsResponse,
   CommentType,
   ConnectorTypes,
-  ENABLE_CASE_CONNECTOR,
   SubCaseAttributes,
   SubCaseResponse,
   SubCasesFindResponse,
   User,
-} from '../../common';
+} from '../../common/api';
+import { ENABLE_CASE_CONNECTOR } from '../../common/constants';
 import { UpdateAlertRequest } from '../client/alerts/types';
 import {
   parseCommentString,

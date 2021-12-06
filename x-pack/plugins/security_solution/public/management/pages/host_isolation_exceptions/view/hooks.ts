@@ -57,7 +57,7 @@ export function useHostIsolationExceptionsNavigateCallback() {
  * Checks if the current user should be able to see the host isolation exceptions
  * menu item based on their current privileges
  */
-export function useCanSeeHostIsolationExceptionsMenu() {
+export function useCanSeeHostIsolationExceptionsMenu(): boolean {
   const http = useHttp();
   const privileges = useEndpointPrivileges();
 
@@ -77,6 +77,8 @@ export function useCanSeeHostIsolationExceptionsMenu() {
     }
     if (!privileges.canIsolateHost) {
       checkIfHasExceptions();
+    } else {
+      setCanSeeMenu(true);
     }
   }, [http, privileges.canIsolateHost]);
 

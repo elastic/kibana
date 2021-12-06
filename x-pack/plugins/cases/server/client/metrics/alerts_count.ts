@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CaseMetricsResponse } from '../../../common';
+import { CaseMetricsResponse } from '../../../common/api';
 import { Operations } from '../../authorization';
 import { createCaseError } from '../../common';
 import { CasesClient } from '../client';

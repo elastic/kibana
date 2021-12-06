@@ -7,7 +7,7 @@
 import { merge } from 'lodash';
 import Boom from '@hapi/boom';
 
-import { CaseMetricsResponseRt, CaseMetricsResponse } from '../../../common';
+import { CaseMetricsResponseRt, CaseMetricsResponse } from '../../../common/api';
 import { Operations } from '../../authorization';
 import { createCaseError } from '../../common';
 import { CasesClient } from '../client';

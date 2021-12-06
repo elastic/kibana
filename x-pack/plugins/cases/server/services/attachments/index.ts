@@ -16,14 +16,15 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { KueryNode } from '@kbn/es-query';
 import {
   AttributesTypeAlerts,
-  CASE_COMMENT_SAVED_OBJECT,
   CommentAttributes as AttachmentAttributes,
   CommentPatchAttributes as AttachmentPatchAttributes,
+  CommentType,
+} from '../../../common/api';
+import {
+  CASE_COMMENT_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
   MAX_DOCS_PER_PAGE,
-  CommentType,
-  CommentAttributes,
-} from '../../../common';
+} from '../../../common/constants';
 import { ClientArgs } from '..';
 import { buildFilter, combineFilters } from '../../client/utils';
 import { defaultSortField } from '../../common';
@@ -77,7 +78,7 @@ export class AttachmentService {
       const combinedFilter = combineFilters([alertsFilter, filter]);
 
       const response = await unsecuredSavedObjectsClient.find<
-        CommentAttributes,
+        AttachmentAttributes,
         { alerts: { value: number } }
       >({
         type: CASE_COMMENT_SAVED_OBJECT,
