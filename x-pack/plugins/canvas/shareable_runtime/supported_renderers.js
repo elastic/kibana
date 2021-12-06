@@ -43,11 +43,6 @@ const renderFunctionsFactories = [
  * a renderer is not listed here, but is used by the Shared Workpad, it will
  * not render.  This includes any plugins.
  */
-export const renderFunctions = [
-  image,
-  pie,
-  plot,
-  ...renderFunctionsFactories.map(unboxFactory),
-];
+export const renderFunctions = [image, pie, plot, ...renderFunctionsFactories.map(unboxFactory)];
 
 export const renderFunctionNames = [...renderFunctions.map((fn) => fn().name)];
