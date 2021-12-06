@@ -155,7 +155,7 @@ describe('healthRoute', () => {
 
     expect(await handler(context, req, res)).toStrictEqual({
       body: {
-        alerting_framework_heath: {
+        alerting_framework_health: {
           decryption_health: {
             status: HealthStatus.OK,
             timestamp: currentDate,
@@ -197,7 +197,7 @@ describe('healthRoute', () => {
 
     expect(await handler(context, req, res)).toStrictEqual({
       body: {
-        alerting_framework_heath: {
+        alerting_framework_health: {
           decryption_health: {
             status: HealthStatus.OK,
             timestamp: currentDate,
@@ -239,7 +239,7 @@ describe('healthRoute', () => {
 
     expect(await handler(context, req, res)).toStrictEqual({
       body: {
-        alerting_framework_heath: {
+        alerting_framework_health: {
           decryption_health: {
             status: HealthStatus.OK,
             timestamp: currentDate,
@@ -281,7 +281,7 @@ describe('healthRoute', () => {
 
     expect(await handler(context, req, res)).toStrictEqual({
       body: {
-        alerting_framework_heath: {
+        alerting_framework_health: {
           decryption_health: {
             status: HealthStatus.OK,
             timestamp: currentDate,
@@ -323,7 +323,7 @@ describe('healthRoute', () => {
 
     expect(await handler(context, req, res)).toStrictEqual({
       body: {
-        alerting_framework_heath: {
+        alerting_framework_health: {
           decryption_health: {
             status: HealthStatus.OK,
             timestamp: currentDate,

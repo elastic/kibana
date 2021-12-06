@@ -19,16 +19,16 @@ import { getSecurityHealth } from '../lib/get_security_health';
 const rewriteBodyRes: RewriteResponseCase<AlertingFrameworkHealth> = ({
   isSufficientlySecure,
   hasPermanentEncryptionKey,
-  alertingFrameworkHeath,
+  alertingFrameworkHealth,
   ...rest
 }) => ({
   ...rest,
   is_sufficiently_secure: isSufficientlySecure,
   has_permanent_encryption_key: hasPermanentEncryptionKey,
-  alerting_framework_heath: {
-    decryption_health: alertingFrameworkHeath.decryptionHealth,
-    execution_health: alertingFrameworkHeath.executionHealth,
-    read_health: alertingFrameworkHeath.readHealth,
+  alerting_framework_health: {
+    decryption_health: alertingFrameworkHealth.decryptionHealth,
+    execution_health: alertingFrameworkHealth.executionHealth,
+    read_health: alertingFrameworkHealth.readHealth,
   },
 });
 
@@ -48,7 +48,7 @@ export const healthRoute = (
           // Verify that user has access to at least one rule type
           const ruleTypes = Array.from(await context.alerting.getRulesClient().listAlertTypes());
           if (ruleTypes.length > 0) {
-            const alertingFrameworkHeath = await context.alerting.getFrameworkHealth();
+            const alertingFrameworkHealth = await context.alerting.getFrameworkHealth();
 
             const securityHealth = await getSecurityHealth(
               async () => (licenseState ? licenseState.getIsSecurityEnabled() : null),
@@ -58,7 +58,7 @@ export const healthRoute = (
 
             const frameworkHealth: AlertingFrameworkHealth = {
               ...securityHealth,
-              alertingFrameworkHeath,
+              alertingFrameworkHealth,
             };
 
             return res.ok({

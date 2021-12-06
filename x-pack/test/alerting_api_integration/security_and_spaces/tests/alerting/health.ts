@@ -89,9 +89,9 @@ export default function createFindTests({ getService }: FtrProviderContext) {
             default:
               expect(health.is_sufficiently_secure).to.eql(true);
               expect(health.has_permanent_encryption_key).to.eql(true);
-              expect(health.alerting_framework_heath.decryption_health.status).to.eql('ok');
-              expect(health.alerting_framework_heath.execution_health.status).to.eql('ok');
-              expect(health.alerting_framework_heath.read_health.status).to.eql('ok');
+              expect(health.alerting_framework_health.decryption_health.status).to.eql('ok');
+              expect(health.alerting_framework_health.execution_health.status).to.eql('ok');
+              expect(health.alerting_framework_health.read_health.status).to.eql('ok');
           }
         });
 
@@ -138,8 +138,8 @@ export default function createFindTests({ getService }: FtrProviderContext) {
                 });
                 break;
               default:
-                expect(health.alerting_framework_heath.execution_health.status).to.eql('warn');
-                expect(health.alerting_framework_heath.execution_health.timestamp).to.eql(
+                expect(health.alerting_framework_health.execution_health.status).to.eql('warn');
+                expect(health.alerting_framework_health.execution_health.timestamp).to.eql(
                   ruleInErrorStatus.execution_status.last_execution_date
                 );
             }

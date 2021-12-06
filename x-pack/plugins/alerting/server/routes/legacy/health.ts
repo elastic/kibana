@@ -35,7 +35,7 @@ export function healthRoute(
         // Verify that user has access to at least one rule type
         const ruleTypes = Array.from(await context.alerting.getRulesClient().listAlertTypes());
         if (ruleTypes.length > 0) {
-          const alertingFrameworkHeath = await context.alerting.getFrameworkHealth();
+          const alertingFrameworkHealth = await context.alerting.getFrameworkHealth();
 
           const securityHealth = await getSecurityHealth(
             async () => (licenseState ? licenseState.getIsSecurityEnabled() : null),
@@ -45,7 +45,7 @@ export function healthRoute(
 
           const frameworkHealth: AlertingFrameworkHealth = {
             ...securityHealth,
-            alertingFrameworkHeath,
+            alertingFrameworkHealth,
           };
 
           return res.ok({
