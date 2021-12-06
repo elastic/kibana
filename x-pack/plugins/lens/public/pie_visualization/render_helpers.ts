@@ -46,8 +46,8 @@ export const isTreemapOrMosaicShape = (shape: PieChartTypes | string) =>
   ['treemap', 'mosaic'].includes(shape);
 
 export const shouldShowValuesInLegend = (layer: PieLayerState, shape: PieChartTypes) =>
-  'showValuesInLegend' in layer
-    ? layer.showValuesInLegend!
+  layer.showValuesInLegend !== undefined
+    ? layer.showValuesInLegend
     : Boolean(PartitionChartsMeta[shape]?.legend?.showValues);
 
 export const extractUniqTermsMap = (dataTable: Datatable, columnId: string) =>
