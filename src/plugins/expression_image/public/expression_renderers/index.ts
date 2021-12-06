@@ -6,8 +6,4 @@
  * Side Public License, v 1.
  */
 
-import { imageRenderer } from './image_renderer';
-
-export const renderers = [imageRenderer];
-
-export { imageRenderer };
+export { imageRendererFactory, getImageRenderer } from './image_renderer';
