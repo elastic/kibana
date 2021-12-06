@@ -69,7 +69,7 @@ describe('allHosts search strategy', () => {
 
   describe('parse', () => {
     test('should parse data correctly', async () => {
-      const result = await allHosts.parse(mockOptions, mockSearchStrategyResponse, mockDeps());
+      const result = await allHosts.parse(mockOptions, mockSearchStrategyResponse, mockDeps(false));
       expect(result).toMatchObject(formattedSearchStrategyResponse);
     });
 

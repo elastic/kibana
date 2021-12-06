@@ -92,7 +92,7 @@ describe('Hosts Table', () => {
         </TestProviders>
       );
 
-      expect(queryByTestId('tableHeaderCell_node.riskScore_4')).toBeInTheDocument();
+      expect(queryByTestId('tableHeaderCell_node.risk_4')).toBeInTheDocument();
     });
 
     test("it doesn't renders 'Host Risk classfication' column when 'riskyHostsEnabled' feature flag is disabled", () => {
