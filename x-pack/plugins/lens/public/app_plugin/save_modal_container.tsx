@@ -202,7 +202,6 @@ export const runSaveLensVisualization = async (
 ): Promise<Partial<LensAppState> | undefined> => {
   const {
     chrome,
-    data,
     initialInput,
     originatingApp,
     lastKnownDoc,
