@@ -346,5 +346,19 @@ export default function createGetTests({ getService }: FtrProviderContext) {
         FILEBEAT_7X_INDICATOR_PATH
       );
     });
+
+    it('8.0 migrates incorrect action group spellings on the Metrics Inventory Threshold rule type', async () => {
+      const response = await es.get<{ alert: RawAlert }>(
+        {
+          index: '.kibana',
+          id: 'alert:92237b30-4e03-11ec-9ab9-d980518a2d28',
+        },
+        { meta: true }
+      );
+      expect(response.statusCode).to.eql(200);
+      expect(response.body._source?.alert?.actions?.[0].group).to.be(
+        'metrics.inventory_threshold.fired'
+      );
+    });
   });
 }

@@ -129,7 +129,11 @@ export function getMigrations(
   const migrationRules800 = createEsoMigration(
     encryptedSavedObjects,
     (doc: SavedObjectUnsanitizedDoc<RawAlert>): doc is SavedObjectUnsanitizedDoc<RawAlert> => true,
-    pipeMigrations(addThreatIndicatorPathToThreatMatchRules, addRACRuleTypes)
+    pipeMigrations(
+      addThreatIndicatorPathToThreatMatchRules,
+      addRACRuleTypes,
+      fixInventoryThresholdGroupId
+    )
   );
 
   return {
@@ -749,6 +753,42 @@ function removePreconfiguredConnectorsFromReferences(
     };
   }
   return doc;
+}
+
+// This fixes an issue whereby metrics.alert.inventory.threshold rules had the
+// group for actions incorrectly spelt as metrics.invenotry_threshold.fired vs metrics.inventory_threshold.fired
+function fixInventoryThresholdGroupId(
+  doc: SavedObjectUnsanitizedDoc<RawAlert>
+): SavedObjectUnsanitizedDoc<RawAlert> {
+  if (doc.attributes.alertTypeId === 'metrics.alert.inventory.threshold') {
+    const {
+      attributes: { actions },
+    } = doc;
+
+    const updatedActions = actions
+      ? actions.map((action) => {
+          // Wrong spelling
+          if (action.group === 'metrics.invenotry_threshold.fired') {
+            return {
+              ...action,
+              group: 'metrics.inventory_threshold.fired',
+            };
+          } else {
+            return action;
+          }
+        })
+      : [];
+
+    return {
+      ...doc,
+      attributes: {
+        ...doc.attributes,
+        actions: updatedActions,
+      },
+    };
+  } else {
+    return doc;
+  }
 }
 
 function getCorrespondingAction(
