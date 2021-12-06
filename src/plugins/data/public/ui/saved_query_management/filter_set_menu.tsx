@@ -92,6 +92,13 @@ export function FilterSetMenu({
     });
   };
 
+  const luceneLabel = i18n.translate('data.query.queryBar.luceneLanguageName', {
+    defaultMessage: 'Lucene',
+  });
+  const kqlLabel = i18n.translate('data.query.queryBar.kqlLanguageName', {
+    defaultMessage: 'KQL',
+  });
+
   const panels = [
     {
       id: 0,
@@ -136,7 +143,7 @@ export function FilterSetMenu({
         },
         { isSeparator: true },
         {
-          name: `Language: ${toSentenceCase(language)}`,
+          name: `Language: ${language === 'kuery' ? kqlLabel : luceneLabel}`,
           panel: 3,
         },
       ],
