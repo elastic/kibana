@@ -7,6 +7,7 @@
 
 import type { SavedObjectsClientContract, ElasticsearchClient } from 'src/core/server';
 import { savedObjectsClientMock, elasticsearchServiceMock } from 'src/core/server/mocks';
+import { loggerMock } from '@kbn/logging/mocks';
 
 import { appContextService } from '../../app_context';
 import { createAppContextStartContractMock } from '../../../mocks';
@@ -19,7 +20,6 @@ jest.mock('./get');
 
 import { updateCurrentWriteIndices } from '../elasticsearch/template/template';
 import { installKibanaAssets } from '../kibana/assets/install';
-import { installIndexPatterns } from '../kibana/index_pattern/install';
 
 import { _installPackage } from './_install_package';
 
@@ -28,9 +28,6 @@ const mockedUpdateCurrentWriteIndices = updateCurrentWriteIndices as jest.Mocked
 >;
 const mockedGetKibanaAssets = installKibanaAssets as jest.MockedFunction<
   typeof installKibanaAssets
->;
-const mockedInstallIndexPatterns = installIndexPatterns as jest.MockedFunction<
-  typeof installIndexPatterns
 >;
 
 function sleep(millis: number) {
@@ -49,13 +46,10 @@ describe('_installPackage', () => {
   afterEach(async () => {
     appContextService.stop();
   });
-  it('handles errors from installIndexPatterns or installKibanaAssets', async () => {
-    // force errors from either/both these functions
+  it('handles errors from  installKibanaAssets', async () => {
+    // force errors from this function
     mockedGetKibanaAssets.mockImplementation(async () => {
       throw new Error('mocked async error A: should be caught');
-    });
-    mockedInstallIndexPatterns.mockImplementation(async () => {
-      throw new Error('mocked async error B: should be caught');
     });
 
     // pick any function between when those are called and when await Promise.all is defined later
@@ -65,7 +59,10 @@ describe('_installPackage', () => {
 
     const installationPromise = _installPackage({
       savedObjectsClient: soClient,
+      // @ts-ignore
+      savedObjectsImporter: jest.fn(),
       esClient,
+      logger: loggerMock.create(),
       paths: [],
       packageInfo: {
         title: 'title',
