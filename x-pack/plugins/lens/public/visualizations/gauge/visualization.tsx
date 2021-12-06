@@ -214,7 +214,8 @@ export const getGaugeVisualization = ({
                     },
               ]
             : [],
-          filterOperations: isNumericMetric,
+          filterOperations: (op: OperationMetadata) =>
+            !op.isBucketed && op.dataType === 'number' && !op.isStaticValue,
           supportsMoreColumns: !state.metricAccessor,
           required: true,
           dataTestSubj: 'lnsGauge_metricDimensionPanel',

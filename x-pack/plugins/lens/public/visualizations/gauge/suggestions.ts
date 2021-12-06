@@ -38,12 +38,6 @@ export const getSuggestions: Visualization<GaugeVisualizationState>['getSuggesti
     [state.minAccessor, state.maxAccessor, state.goalAccessor, state.metricAccessor].filter(Boolean)
       .length;
 
-  const isShapeChange =
-    (subVisualizationId === GaugeShapes.horizontalBullet ||
-      subVisualizationId === GaugeShapes.verticalBullet) &&
-    isGauge &&
-    subVisualizationId !== state?.shape;
-
   if (
     hasLayerMismatch(keptLayerIds, table) ||
     isNotNumericMetric(table) ||
@@ -61,7 +55,6 @@ export const getSuggestions: Visualization<GaugeVisualizationState>['getSuggesti
   const baseSuggestion = {
     state: {
       ...state,
-      metricAccessor: table.columns[0].columnId,
       shape,
       layerId: table.layerId,
       layerType: layerTypes.DATA,
@@ -73,10 +66,10 @@ export const getSuggestions: Visualization<GaugeVisualizationState>['getSuggesti
     }),
     previewIcon: 'empty',
     score: 0.5,
-    hide: !isGauge, // only display for gauges for beta
+    hide: !isGauge && state?.metricAccessor === undefined, // only display for gauges for beta
   };
 
-  const suggestions = isShapeChange
+  const suggestions = isGauge
     ? [
         {
           ...baseSuggestion,
@@ -84,18 +77,25 @@ export const getSuggestions: Visualization<GaugeVisualizationState>['getSuggesti
             ...baseSuggestion.state,
             ...state,
             shape:
-              subVisualizationId === GaugeShapes.verticalBullet
-                ? GaugeShapes.verticalBullet
-                : GaugeShapes.horizontalBullet,
+              state?.shape === GaugeShapes.verticalBullet
+                ? GaugeShapes.horizontalBullet
+                : GaugeShapes.verticalBullet,
           },
         },
       ]
     : [
-        { ...baseSuggestion, hide: true },
         {
           ...baseSuggestion,
           state: {
             ...baseSuggestion.state,
+            metricAccessor: table.columns[0].columnId,
+          },
+        },
+        {
+          ...baseSuggestion,
+          state: {
+            ...baseSuggestion.state,
+            metricAccessor: table.columns[0].columnId,
             shape:
               state?.shape === GaugeShapes.verticalBullet
                 ? GaugeShapes.horizontalBullet

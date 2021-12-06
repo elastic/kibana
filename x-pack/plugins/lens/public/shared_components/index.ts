@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-export * from './empty_placeholder';
 export type { ToolbarPopoverProps } from './toolbar_popover';
 export { ToolbarPopover } from './toolbar_popover';
 export { LegendSettingsPopover } from './legend_settings_popover';

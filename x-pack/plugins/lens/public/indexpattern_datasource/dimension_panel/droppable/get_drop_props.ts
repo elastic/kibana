@@ -10,6 +10,7 @@ import {
   isDraggedOperation,
   DraggedOperation,
   DropType,
+  VisualizationDimensionGroupConfig,
 } from '../../../types';
 import { getOperationDisplay } from '../../operations';
 import { hasField, isDraggedField } from '../../utils';
@@ -91,7 +92,7 @@ export function getDropProps(props: GetDropProps) {
     } else if (hasTheSameField(sourceColumn, targetColumn)) {
       return;
     } else if (filterOperations(sourceColumn)) {
-      return getDropPropsForCompatibleGroup(targetColumn);
+      return getDropPropsForCompatibleGroup(props.dimensionGroups, dragging.columnId, targetColumn);
     } else {
       return getDropPropsFromIncompatibleGroup({ ...props, dragging });
     }
@@ -143,12 +144,26 @@ function getDropPropsForSameGroup(targetColumn?: GenericIndexPatternColumn): Dro
   return targetColumn ? { dropTypes: ['reorder'] } : { dropTypes: ['duplicate_compatible'] };
 }
 
-function getDropPropsForCompatibleGroup(targetColumn?: GenericIndexPatternColumn): DropProps {
-  return {
+function getDropPropsForCompatibleGroup(
+  dimensionGroups: VisualizationDimensionGroupConfig[],
+  sourceId: string,
+  targetColumn?: GenericIndexPatternColumn
+): DropProps {
+  const canSwap =
+    targetColumn &&
+    dimensionGroups
+      .find((group) => group.accessors.some((accessor) => accessor.columnId === sourceId))
+      ?.filterOperations(targetColumn);
+
+  const dropTypes: DropProps = {
     dropTypes: targetColumn
-      ? ['replace_compatible', 'replace_duplicate_compatible', 'swap_compatible']
+      ? ['replace_compatible', 'replace_duplicate_compatible']
       : ['move_compatible', 'duplicate_compatible'],
   };
+  if (canSwap) {
+    dropTypes.dropTypes.push('swap_compatible');
+  }
+  return dropTypes;
 }
 
 function getDropPropsFromIncompatibleGroup({

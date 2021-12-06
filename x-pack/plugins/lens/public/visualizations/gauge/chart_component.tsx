@@ -15,8 +15,8 @@ import type {
 } from 'src/plugins/charts/public';
 import { VisualizationContainer } from '../../visualization_container';
 import './index.scss';
-import { EmptyPlaceholder } from '../../shared_components';
 import { LensIconChartGaugeHorizontal, LensIconChartGaugeVertical } from '../../assets/chart_gauge';
+import { EmptyPlaceholder } from '../../../../../../src/plugins/charts/public';
 import { getMaxValue, getMinValue, getValueFromAccessor } from './utils';
 import {
   GaugeExpressionProps,
