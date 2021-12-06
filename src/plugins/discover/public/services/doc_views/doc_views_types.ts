@@ -7,12 +7,9 @@
  */
 
 import { ComponentType } from 'react';
-
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { IndexPattern, IndexPatternField } from '../../../../data/public';
+import { ElasticSearchHit } from '../../types';
 import { IgnoredReason } from '../../utils/get_ignored_reason';
-
-export type ElasticSearchHit<T = unknown> = estypes.SearchHit<T>;
 
 export interface FieldMapping {
   filterable?: boolean;

@@ -138,9 +138,8 @@ export async function fetchFile(filePath: string): Promise<Response> {
 }
 
 function setKibanaVersion(url: URL) {
-  // TODO: change default to false as soon as EPR issue fixed. Blocker for 8.0.
   const disableVersionCheck =
-    appContextService.getConfig()?.developer?.disableRegistryVersionCheck ?? true;
+    appContextService.getConfig()?.developer?.disableRegistryVersionCheck ?? false;
   if (disableVersionCheck) {
     return;
   }

@@ -36,8 +36,8 @@ import { getFieldsToShow } from '../../../../utils/get_fields_to_show';
 import { getIgnoredReason } from '../../../../utils/get_ignored_reason';
 import { formatFieldValue } from '../../../../utils/format_value';
 import { isNestedFieldParent } from '../../../../application/main/utils/nested_fields';
-import { TableActions } from './table_actions';
 import { TableFieldValue } from './table_cell_value';
+import { TableActions } from './table_actions';
 
 export interface FieldRecord extends FieldRecordLegacy {
   field: {

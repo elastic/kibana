@@ -29,6 +29,8 @@ const MOCK_EVENT: CrawlEvent = {
   type: CrawlType.Full,
   crawlConfig: {
     domainAllowlist: ['https://www.elastic.co'],
+    seedUrls: [],
+    sitemapUrls: [],
   },
 };
 

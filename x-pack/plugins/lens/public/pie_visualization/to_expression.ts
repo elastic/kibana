@@ -55,7 +55,11 @@ function expressionHelper(
           categoryDisplay: [layer.categoryDisplay],
           legendDisplay: [layer.legendDisplay],
           legendPosition: [layer.legendPosition || 'right'],
-          percentDecimals: [layer.percentDecimals ?? DEFAULT_PERCENT_DECIMALS],
+          percentDecimals: [
+            state.shape === 'waffle'
+              ? DEFAULT_PERCENT_DECIMALS
+              : layer.percentDecimals ?? DEFAULT_PERCENT_DECIMALS,
+          ],
           legendMaxLines: [layer.legendMaxLines ?? 1],
           truncateLegend: [layer.truncateLegend ?? true],
           nestedLegend: [!!layer.nestedLegend],
