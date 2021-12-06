@@ -87,7 +87,7 @@ export function AlertsPopover(props: AlertsPopoverProps) {
                 }}
               >
                 <FormattedMessage
-                  id="dsc.alerts.createSearchThreshold"
+                  id="discover.alerts.createSearchThreshold"
                   defaultMessage="Create search threshold rule"
                 />
               </EuiLink>
@@ -105,7 +105,7 @@ export function AlertsPopover(props: AlertsPopoverProps) {
               )}
             >
               <FormattedMessage
-                id="dsc.alerts.manageRulesAndConnectors"
+                id="discover.alerts.manageRulesAndConnectors"
                 defaultMessage="Manage rules and connectors"
               />
             </EuiLink>

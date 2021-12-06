@@ -62,7 +62,7 @@ export const getTopNavLinks = ({
     label: i18n.translate('discover.localMenu.localMenu.alertsTitle', {
       defaultMessage: 'Alerts',
     }),
-    description: i18n.translate('discover.localMenu.optionsDescription', {
+    description: i18n.translate('discover.localMenu.alertsDescription', {
       defaultMessage: 'Alerts',
     }),
     run: (anchorElement: HTMLElement) =>
