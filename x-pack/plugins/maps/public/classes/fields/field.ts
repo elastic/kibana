@@ -42,6 +42,11 @@ export interface IField {
   isEqual(field: IField): boolean;
 
   pluckRangeFromTileMetaFeature(metaFeature: TileMetaFeature): { min: number; max: number } | null;
+
+  /*
+   * IField.isCount returns true when field is a value determining the size of a set
+   */
+  isCount(): boolean;
 }
 
 export class AbstractField implements IField {
@@ -120,5 +125,9 @@ export class AbstractField implements IField {
 
   pluckRangeFromTileMetaFeature(metaFeature: TileMetaFeature) {
     return null;
+  }
+
+  isCount() {
+    return false;
   }
 }

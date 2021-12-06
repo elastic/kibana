@@ -9,7 +9,9 @@ import { fromExpression, toExpression, Ast } from '@kbn/interpreter/common';
 import { get } from 'lodash';
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { KibanaThemeProvider } from '../../../../../../../src/plugins/kibana_react/public';
 import { RendererFactory } from '../../../../types';
+import { StartInitializer } from '../../../plugin';
 import { DropdownFilter } from './component';
 import { RendererStrings } from '../../../../i18n';
 
@@ -37,59 +39,62 @@ const getFilterValue = (filterExpression: string) => {
   return get(filterAST, 'chain[0].arguments.value[0]', MATCH_ALL) as string;
 };
 
-export const dropdownFilter: RendererFactory<Config> = () => ({
-  name: 'dropdown_filter',
-  displayName: strings.getDisplayName(),
-  help: strings.getHelpDescription(),
-  reuseDomNode: true,
-  height: 50,
-  render(domNode, config, handlers) {
-    let filterExpression = handlers.getFilter();
+export const dropdownFilterFactory: StartInitializer<RendererFactory<Config>> =
+  (core, plugins) => () => ({
+    name: 'dropdown_filter',
+    displayName: strings.getDisplayName(),
+    help: strings.getHelpDescription(),
+    reuseDomNode: true,
+    height: 50,
+    render(domNode, config, handlers) {
+      let filterExpression = handlers.getFilter();
 
-    if (
-      filterExpression !== '' &&
-      (filterExpression === undefined || !filterExpression.includes('exactly'))
-    ) {
-      filterExpression = '';
-      handlers.setFilter(filterExpression);
-    }
-
-    const commit = (commitValue: string) => {
-      if (commitValue === '%%CANVAS_MATCH_ALL%%') {
-        handlers.setFilter('');
-      } else {
-        const newFilterAST: Ast = {
-          type: 'expression',
-          chain: [
-            {
-              type: 'function',
-              function: 'exactly',
-              arguments: {
-                value: [commitValue],
-                column: [config.column],
-                ...(config.filterGroup ? { filterGroup: [config.filterGroup] } : {}),
-              },
-            },
-          ],
-        };
-
-        const newFilter = toExpression(newFilterAST);
-        handlers.setFilter(newFilter);
+      if (
+        filterExpression !== '' &&
+        (filterExpression === undefined || !filterExpression.includes('exactly'))
+      ) {
+        filterExpression = '';
+        handlers.setFilter(filterExpression);
       }
-    };
 
-    ReactDOM.render(
-      <DropdownFilter
-        commit={commit}
-        choices={config.choices || []}
-        initialValue={getFilterValue(filterExpression)}
-      />,
-      domNode,
-      () => handlers.done()
-    );
+      const commit = (commitValue: string) => {
+        if (commitValue === '%%CANVAS_MATCH_ALL%%') {
+          handlers.setFilter('');
+        } else {
+          const newFilterAST: Ast = {
+            type: 'expression',
+            chain: [
+              {
+                type: 'function',
+                function: 'exactly',
+                arguments: {
+                  value: [commitValue],
+                  column: [config.column],
+                  ...(config.filterGroup ? { filterGroup: [config.filterGroup] } : {}),
+                },
+              },
+            ],
+          };
 
-    handlers.onDestroy(() => {
-      ReactDOM.unmountComponentAtNode(domNode);
-    });
-  },
-});
+          const newFilter = toExpression(newFilterAST);
+          handlers.setFilter(newFilter);
+        }
+      };
+
+      ReactDOM.render(
+        <KibanaThemeProvider theme$={core.theme.theme$}>
+          <DropdownFilter
+            commit={commit}
+            choices={config.choices || []}
+            initialValue={getFilterValue(filterExpression)}
+          />
+        </KibanaThemeProvider>,
+        domNode,
+        () => handlers.done()
+      );
+
+      handlers.onDestroy(() => {
+        ReactDOM.unmountComponentAtNode(domNode);
+      });
+    },
+  });

@@ -19,15 +19,12 @@ import { setFilter } from '../../../state/actions/elements';
 const extractExpressionAST = (filtersExpressions: string[]) =>
   fromExpression(filtersExpressions.join(' | '));
 
-export function useCanvasFilters(groups?: string[]) {
+export function useCanvasFilters(groups: string[] = [], ungrouped: boolean = false) {
   const filterExpressions = useSelector(
     (state: State) => getGlobalFiltersWithIds(state),
     deepEqual
   );
-
-  const filtersByGroups = groups?.length
-    ? getFiltersByGroups(filterExpressions, groups)
-    : filterExpressions;
+  const filtersByGroups = getFiltersByGroups(filterExpressions, groups, ungrouped);
 
   const expression = extractExpressionAST(filtersByGroups.map(({ filter }) => filter));
   const filters = expression.chain.map((filter, index) =>
