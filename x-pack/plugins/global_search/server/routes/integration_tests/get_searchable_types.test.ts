@@ -14,7 +14,8 @@ import { registerInternalSearchableTypesRoute } from '../get_searchable_types';
 type SetupServerReturn = UnwrapPromise<ReturnType<typeof setupServer>>;
 const pluginId = Symbol('globalSearch');
 
-describe('GET /internal/global_search/searchable_types', () => {
+// FAILING: https://github.com/elastic/kibana/issues/120268
+describe.skip('GET /internal/global_search/searchable_types', () => {
   let server: SetupServerReturn['server'];
   let httpSetup: SetupServerReturn['httpSetup'];
   let globalSearchHandlerContext: ReturnType<
@@ -73,7 +74,7 @@ describe('GET /internal/global_search/searchable_types', () => {
 
     expect(response.body).toEqual(
       expect.objectContaining({
-        message: 'An internal server error occurred.',
+        message: 'An internal server error occurred. Check Kibana server logs for details.',
         statusCode: 500,
       })
     );

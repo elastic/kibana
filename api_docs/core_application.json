@@ -1611,6 +1611,30 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.AppMountParameters.theme$",
+            "type": "Object",
+            "tags": [],
+            "label": "theme$",
+            "description": [
+              "\nAn observable emitting {@link CoreTheme | Core's theme}.\nShould be used when mounting the application to include theme information.\n"
+            ],
+            "signature": [
+              "Observable",
+              "<",
+              {
+                "pluginId": "core",
+                "scope": "public",
+                "docId": "kibCorePluginApi",
+                "section": "def-public.CoreTheme",
+                "text": "CoreTheme"
+              },
+              ">"
+            ],
+            "path": "src/core/public/application/types.ts",
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -2120,15 +2144,7 @@
           "\nDefines the list of fields that can be updated via an {@link AppUpdater}."
         ],
         "signature": [
-          "{ status?: ",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCoreApplicationPluginApi",
-            "section": "def-public.AppStatus",
-            "text": "AppStatus"
-          },
-          " | undefined; deepLinks?: ",
+          "{ deepLinks?: ",
           {
             "pluginId": "core",
             "scope": "public",
@@ -2136,7 +2152,15 @@
             "section": "def-public.AppDeepLink",
             "text": "AppDeepLink"
           },
-          "[] | undefined; searchable?: boolean | undefined; navLinkStatus?: ",
+          "[] | undefined; searchable?: boolean | undefined; status?: ",
+          {
+            "pluginId": "core",
+            "scope": "public",
+            "docId": "kibCoreApplicationPluginApi",
+            "section": "def-public.AppStatus",
+            "text": "AppStatus"
+          },
+          " | undefined; navLinkStatus?: ",
           {
             "pluginId": "core",
             "scope": "public",
@@ -2176,7 +2200,7 @@
             "section": "def-public.App",
             "text": "App"
           },
-          "<unknown>, \"status\" | \"deepLinks\" | \"searchable\" | \"navLinkStatus\" | \"defaultPath\" | \"tooltip\">> | undefined"
+          "<unknown>, \"deepLinks\" | \"searchable\" | \"status\" | \"navLinkStatus\" | \"defaultPath\" | \"tooltip\">> | undefined"
         ],
         "path": "src/core/public/application/types.ts",
         "deprecated": false,
@@ -2223,7 +2247,7 @@
             "section": "def-public.AppDeepLink",
             "text": "AppDeepLink"
           },
-          ", \"id\" | \"title\" | \"order\" | \"path\" | \"tooltip\" | \"euiIconType\" | \"icon\"> & { deepLinks: ",
+          ", \"title\" | \"id\" | \"order\" | \"path\" | \"tooltip\" | \"euiIconType\" | \"icon\"> & { deepLinks: ",
           {
             "pluginId": "core",
             "scope": "public",
@@ -2263,7 +2287,7 @@
             "section": "def-public.App",
             "text": "App"
           },
-          "<unknown>, \"status\" | \"id\" | \"title\" | \"order\" | \"capabilities\" | \"category\" | \"navLinkStatus\" | \"defaultPath\" | \"chromeless\" | \"appRoute\" | \"exactRoute\" | \"tooltip\" | \"euiIconType\" | \"icon\"> & { status: ",
+          "<unknown>, \"title\" | \"id\" | \"order\" | \"capabilities\" | \"category\" | \"status\" | \"navLinkStatus\" | \"defaultPath\" | \"chromeless\" | \"appRoute\" | \"exactRoute\" | \"tooltip\" | \"euiIconType\" | \"icon\"> & { status: ",
           {
             "pluginId": "core",
             "scope": "public",

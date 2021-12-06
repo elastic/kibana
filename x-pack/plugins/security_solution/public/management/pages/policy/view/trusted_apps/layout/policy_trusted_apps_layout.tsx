@@ -7,7 +7,7 @@
 
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiButton,
   EuiTitle,
@@ -17,22 +17,24 @@ import {
   EuiText,
   EuiSpacer,
   EuiLink,
+  EuiProgress,
 } from '@elastic/eui';
 import { PolicyTrustedAppsEmptyUnassigned, PolicyTrustedAppsEmptyUnexisting } from '../empty';
 import {
   getCurrentArtifactsLocation,
   getDoesTrustedAppExists,
   policyDetails,
-  doesPolicyHaveTrustedApps,
   doesTrustedAppExistsLoading,
-  getPolicyTrustedAppsListPagination,
+  getTotalPolicyTrustedAppsListPagination,
+  getHasTrustedApps,
+  getIsLoadedHasTrustedApps,
 } from '../../../store/policy_details/selectors';
 import { usePolicyDetailsNavigateCallback, usePolicyDetailsSelector } from '../../policy_hooks';
 import { PolicyTrustedAppsFlyout } from '../flyout';
 import { PolicyTrustedAppsList } from '../list/policy_trusted_apps_list';
 import { useEndpointPrivileges } from '../../../../../../common/components/user_privileges/endpoint/use_endpoint_privileges';
 import { useAppUrl } from '../../../../../../common/lib/kibana';
-import { APP_ID } from '../../../../../../../common/constants';
+import { APP_UI_ID } from '../../../../../../../common/constants';
 import { getTrustedAppsListPath } from '../../../../../common/routing';
 
 export const PolicyTrustedAppsLayout = React.memo(() => {
@@ -42,11 +44,10 @@ export const PolicyTrustedAppsLayout = React.memo(() => {
   const isDoesTrustedAppExistsLoading = usePolicyDetailsSelector(doesTrustedAppExistsLoading);
   const policyItem = usePolicyDetailsSelector(policyDetails);
   const navigateCallback = usePolicyDetailsNavigateCallback();
-  const hasAssignedTrustedApps = usePolicyDetailsSelector(doesPolicyHaveTrustedApps);
   const { isPlatinumPlus } = useEndpointPrivileges();
-  const totalAssignedCount = usePolicyDetailsSelector(
-    getPolicyTrustedAppsListPagination
-  ).totalItemCount;
+  const totalAssignedCount = usePolicyDetailsSelector(getTotalPolicyTrustedAppsListPagination);
+  const hasTrustedApps = usePolicyDetailsSelector(getHasTrustedApps);
+  const isLoadedHasTrustedApps = usePolicyDetailsSelector(getIsLoadedHasTrustedApps);
 
   const showListFlyout = location.show === 'list';
 
@@ -73,26 +74,27 @@ export const PolicyTrustedAppsLayout = React.memo(() => {
     [navigateCallback]
   );
 
-  const displaysEmptyState = useMemo(
-    () =>
-      !isDoesTrustedAppExistsLoading &&
-      !hasAssignedTrustedApps.loading &&
-      !hasAssignedTrustedApps.hasTrustedApps,
-    [
-      hasAssignedTrustedApps.hasTrustedApps,
-      hasAssignedTrustedApps.loading,
-      isDoesTrustedAppExistsLoading,
-    ]
+  const isDisplaysEmptyStateLoading = useMemo(
+    () => !isLoadedHasTrustedApps || isDoesTrustedAppExistsLoading,
+    [isLoadedHasTrustedApps, isDoesTrustedAppExistsLoading]
   );
 
-  const displaysEmptyStateIsLoading = useMemo(
-    () => isDoesTrustedAppExistsLoading || hasAssignedTrustedApps.loading,
-    [hasAssignedTrustedApps.loading, isDoesTrustedAppExistsLoading]
+  const displaysEmptyState = useMemo(
+    () => !isDisplaysEmptyStateLoading && !hasTrustedApps,
+    [isDisplaysEmptyStateLoading, hasTrustedApps]
+  );
+
+  const displayHeaderAndContent = useMemo(
+    () => !isDisplaysEmptyStateLoading && !displaysEmptyState && isLoadedHasTrustedApps,
+    [displaysEmptyState, isDisplaysEmptyStateLoading, isLoadedHasTrustedApps]
   );
 
   const aboutInfo = useMemo(() => {
     const link = (
-      <EuiLink href={getAppUrl({ appId: APP_ID, path: getTrustedAppsListPath() })} target="_blank">
+      <EuiLink
+        href={getAppUrl({ appId: APP_UI_ID, path: getTrustedAppsListPath() })}
+        target="_blank"
+      >
         <FormattedMessage
           id="xpack.securitySolution.endpoint.policy.trustedApps.layout.about.viewAllLinkLabel"
           defaultMessage="view all trusted applications"
@@ -114,7 +116,7 @@ export const PolicyTrustedAppsLayout = React.memo(() => {
 
   return policyItem ? (
     <div>
-      {!displaysEmptyStateIsLoading && !displaysEmptyState ? (
+      {displayHeaderAndContent ? (
         <>
           <EuiPageHeader alignItems="center">
             <EuiPageHeaderSection>
@@ -139,7 +141,7 @@ export const PolicyTrustedAppsLayout = React.memo(() => {
             <EuiPageHeaderSection>{isPlatinumPlus && assignTrustedAppButton}</EuiPageHeaderSection>
           </EuiPageHeader>
 
-          <EuiSpacer size="m" />
+          <EuiSpacer size="l" />
         </>
       ) : null}
       <EuiPageContent
@@ -149,7 +151,7 @@ export const PolicyTrustedAppsLayout = React.memo(() => {
         color="transparent"
         borderRadius="none"
       >
-        {displaysEmptyState ? (
+        {displaysEmptyState && !isDoesTrustedAppExistsLoading ? (
           doesTrustedAppExists ? (
             <PolicyTrustedAppsEmptyUnassigned
               policyId={policyItem.id}
@@ -161,8 +163,10 @@ export const PolicyTrustedAppsLayout = React.memo(() => {
               policyName={policyItem.name}
             />
           )
+        ) : displayHeaderAndContent ? (
+          <PolicyTrustedAppsList />
         ) : (
-          <PolicyTrustedAppsList hideTotalShowingLabel={true} />
+          <EuiProgress size="xs" color="primary" />
         )}
       </EuiPageContent>
       {isPlatinumPlus && showListFlyout ? <PolicyTrustedAppsFlyout /> : null}

@@ -7,6 +7,8 @@
 
 export const PLUGIN_ID = 'reporting';
 
+export const REPORTING_TRANSACTION_TYPE = PLUGIN_ID;
+
 export const REPORTING_SYSTEM_INDEX = '.reporting';
 
 export const JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY =
@@ -121,7 +123,7 @@ export const REPORTING_REDIRECT_LOCATOR_STORE_KEY = '__REPORTING_REDIRECT_LOCATO
  * be injected to the page
  */
 export const getRedirectAppPath = () => {
-  return '/app/management/insightsAndAlerting/reporting/r';
+  return '/app/reportingRedirect';
 };
 
 // Statuses

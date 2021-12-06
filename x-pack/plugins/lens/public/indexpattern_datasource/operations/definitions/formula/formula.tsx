@@ -15,6 +15,7 @@ import { regenerateLayerFromAst } from './parse';
 import { generateFormula } from './generate';
 import { filterByVisibleOperation } from './util';
 import { getManagedColumnsFrom } from '../../layer_helpers';
+import { isColumnFormatted } from '../helpers';
 
 const defaultLabel = i18n.translate('xpack.lens.indexPattern.formulaLabel', {
   defaultMessage: 'Formula',
@@ -120,8 +121,8 @@ export const formulaOperation: OperationDefinition<FormulaIndexPatternColumn, 'm
       // carry over the format settings from previous operation for seamless transfer
       // NOTE: this works only for non-default formatters set in Lens
       let prevFormat = {};
-      if (previousColumn?.params && 'format' in previousColumn.params) {
-        prevFormat = { format: previousColumn.params.format };
+      if (previousColumn && isColumnFormatted(previousColumn)) {
+        prevFormat = { format: previousColumn.params?.format };
       }
       return {
         label: previousFormula || defaultLabel,

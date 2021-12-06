@@ -8,7 +8,7 @@
 jest.mock('./login_page');
 
 import type { AppMount } from 'src/core/public';
-import { coreMock, scopedHistoryMock } from 'src/core/public/mocks';
+import { coreMock, scopedHistoryMock, themeServiceMock } from 'src/core/public/mocks';
 
 import { loginApp } from './login_app';
 
@@ -40,7 +40,6 @@ describe('loginApp', () => {
     const coreSetupMock = coreMock.createSetup();
     const coreStartMock = coreMock.createStart();
     coreSetupMock.getStartServices.mockResolvedValue([coreStartMock, {}, {}]);
-    const containerMock = document.createElement('div');
 
     loginApp.create({
       ...coreSetupMock,
@@ -48,21 +47,27 @@ describe('loginApp', () => {
     });
 
     const [[{ mount }]] = coreSetupMock.application.register.mock.calls;
-    await (mount as AppMount)({
-      element: containerMock,
+    const appMountParams = {
+      element: document.createElement('div'),
       appBasePath: '',
       onAppLeave: jest.fn(),
       setHeaderActionMenu: jest.fn(),
       history: scopedHistoryMock.create(),
-    });
+      theme$: themeServiceMock.createTheme$(),
+    };
+    await (mount as AppMount)(appMountParams);
 
     const mockRenderApp = jest.requireMock('./login_page').renderLoginPage;
     expect(mockRenderApp).toHaveBeenCalledTimes(1);
-    expect(mockRenderApp).toHaveBeenCalledWith(coreStartMock.i18n, containerMock, {
-      http: coreStartMock.http,
-      notifications: coreStartMock.notifications,
-      fatalErrors: coreStartMock.fatalErrors,
-      loginAssistanceMessage: 'some-message',
-    });
+    expect(mockRenderApp).toHaveBeenCalledWith(
+      coreStartMock.i18n,
+      { element: appMountParams.element, theme$: appMountParams.theme$ },
+      {
+        http: coreStartMock.http,
+        notifications: coreStartMock.notifications,
+        fatalErrors: coreStartMock.fatalErrors,
+        loginAssistanceMessage: 'some-message',
+      }
+    );
   });
 });

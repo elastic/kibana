@@ -7,7 +7,7 @@
  */
 
 import React, { Fragment } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiButton,
   EuiCallOut,
@@ -22,7 +22,7 @@ import './_no_results.scss';
 import { NoResultsIllustration } from './assets/no_results_illustration';
 
 export interface DiscoverNoResultsProps {
-  timeFieldName?: string;
+  isTimeBased?: boolean;
   error?: Error;
   data?: DataPublicPluginStart;
   hasQuery?: boolean;
@@ -31,7 +31,7 @@ export interface DiscoverNoResultsProps {
 }
 
 export function DiscoverNoResults({
-  timeFieldName,
+  isTimeBased,
   error,
   data,
   hasFilters,
@@ -54,7 +54,7 @@ export function DiscoverNoResults({
           <NoResultsIllustration />
         </EuiFlexItem>
         <EuiFlexItem grow={2}>
-          {!!timeFieldName && getTimeFieldMessage()}
+          {isTimeBased && getTimeFieldMessage()}
           {(hasFilters || hasQuery) && (
             <AdjustSearch
               hasFilters={hasFilters}

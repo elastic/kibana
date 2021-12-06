@@ -7,7 +7,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { Redirect } from 'react-router-dom';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiSpacer } from '@elastic/eui';
 import { groupBy } from 'lodash';
 

@@ -16,6 +16,9 @@ const getIndexPattern = (id: string, timeFieldName: string, fields: string[]) =>
   return {
     id,
     timeFieldName,
+    isTimeBased() {
+      return !!timeFieldName;
+    },
     getFieldByName(name) {
       return this.fields.getByName(name);
     },
@@ -97,5 +100,13 @@ describe('Discover getSwitchIndexPatternAppState', () => {
     const result = getSwitchIndexPatternAppState(current, next, [], []);
     expect(result.columns).toEqual([]);
     expect(result.sort).toEqual([['timeFieldA', 'desc']]);
+  });
+  test('should change sorting for similar index patterns', async () => {
+    const current = getIndexPattern('timebased', 'timefield', ['timefield']);
+    const next = getIndexPattern('timebased2', 'timefield2', ['timefield', 'timefield2']);
+
+    const result = getSwitchIndexPatternAppState(current, next, [], [['timefield', 'desc']]);
+    expect(result.columns).toEqual([]);
+    expect(result.sort).toEqual([['timefield2', 'desc']]);
   });
 });

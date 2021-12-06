@@ -15,7 +15,8 @@ import {
   sampleLogTestData,
 } from './index_test_data';
 
-export default function ({ getService }: FtrProviderContext) {
+export default function ({ getPageObject, getService }: FtrProviderContext) {
+  const headerPage = getPageObject('header');
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
 
@@ -42,6 +43,7 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.dataVisualizerIndexBased.clickUseFullDataButton(
         testData.expected.totalDocCountFormatted
       );
+      await headerPage.waitUntilLoadingHasFinished();
 
       await ml.testExecution.logTestStep(
         `${testData.suiteTitle} displays elements in the doc count panel correctly`

@@ -10,7 +10,7 @@ import { render, unmountComponentAtNode } from 'react-dom';
 
 import { GrokDebugger } from './components/grok_debugger';
 import { GrokdebuggerService } from './services/grokdebugger/grokdebugger_service';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '../../../../src/plugins/kibana_react/public';
 import { InactiveLicenseSlate } from './components/inactive_license';
 

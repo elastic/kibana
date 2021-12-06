@@ -8,16 +8,15 @@ import { Observable } from 'rxjs';
 import { filter } from 'rxjs/operators';
 
 import { useObservable, withOptionalSignal } from '@kbn/securitysolution-hook-utils';
-import {
-  DataPublicPluginStart,
-  isCompleteResponse,
-  isErrorResponse,
-} from '../../../../../../../src/plugins/data/public';
+import type { DataPublicPluginStart } from '../../../../../../../src/plugins/data/public';
+
+import { isCompleteResponse, isErrorResponse } from '../../../../../../../src/plugins/data/common';
+
 import {
   HostsQueries,
   HostsRiskScoreRequestOptions,
   HostsRiskScoreStrategyResponse,
-} from '../../../../common';
+} from '../../../../common/search_strategy';
 
 type GetHostsRiskScoreProps = HostsRiskScoreRequestOptions & {
   data: DataPublicPluginStart;

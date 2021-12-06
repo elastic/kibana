@@ -10,7 +10,7 @@ import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data'
 import { DescriptiveName } from './descriptive_name';
 import { SafeResolverEvent } from '../../../../common/endpoint/types';
 import { mount, ReactWrapper } from 'enzyme';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 
 describe('DescriptiveName', () => {
   let generator: EndpointDocGenerator;

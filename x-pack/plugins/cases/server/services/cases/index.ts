@@ -20,7 +20,7 @@ import {
 } from 'kibana/server';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { nodeBuilder, KueryNode } from '../../../../../../src/plugins/data/common';
+import { nodeBuilder, KueryNode } from '@kbn/es-query';
 
 import { SecurityPluginSetup } from '../../../../security/server';
 import {

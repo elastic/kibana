@@ -71,6 +71,9 @@ export async function runDockerGenerator(
       : []),
   ];
 
+  const dockerPush = config.getDockerPush();
+  const dockerTagQualifier = config.getDockerTagQualfiier();
+
   const scope: TemplateContext = {
     artifactPrefix,
     artifactTarball,
@@ -82,6 +85,8 @@ export async function runDockerGenerator(
     imageTag,
     dockerBuildDir,
     dockerTargetFilename,
+    dockerPush,
+    dockerTagQualifier,
     baseOSImage,
     dockerBuildDate,
     ubi: flags.ubi,

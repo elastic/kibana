@@ -48,7 +48,7 @@ import {
   VectorStyleRequestMeta,
 } from '../../../../common/descriptor_types';
 import { IVectorSource } from '../../sources/vector_source';
-import { CustomIconAndTooltipContent, ILayer } from '../layer';
+import { LayerIcon, ILayer } from '../layer';
 import { InnerJoin } from '../../joins/inner_join';
 import { IField } from '../../fields/field';
 import { DataRequestContext } from '../../../actions';
@@ -58,7 +58,7 @@ import { IESSource } from '../../sources/es_source';
 import { ITermJoinSource } from '../../sources/term_join_source';
 import { buildVectorRequestMeta } from '../build_vector_request_meta';
 import { getJoinAggKey } from '../../../../common/get_agg_key';
-import { getVectorSourceBounds } from './geojson_vector_layer/utils';
+import { syncBoundsData } from './bounds_data';
 
 export function isVectorLayer(layer: ILayer) {
   return (layer as IVectorLayer).canShowTooltip !== undefined;
@@ -270,8 +270,8 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
     return true;
   }
 
-  getCustomIconAndTooltipContent(): CustomIconAndTooltipContent {
-    throw new Error('Should implement AbstractVectorLayer#getCustomIconAndTooltipContent');
+  getLayerIcon(isTocIcon: boolean): LayerIcon {
+    throw new Error('Should implement AbstractVectorLayer#getLayerIcon');
   }
 
   getLayerTypeIconName() {
@@ -287,7 +287,7 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
   }
 
   async getBounds(syncContext: DataRequestContext) {
-    return getVectorSourceBounds({
+    return syncBoundsData({
       layerId: this.getId(),
       syncContext,
       source: this.getSource(),

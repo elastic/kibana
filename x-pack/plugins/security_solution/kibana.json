@@ -40,7 +40,7 @@
     "lists",
     "home",
     "telemetry",
-    "indexPatternFieldEditor"
+    "dataViewFieldEditor"
   ],
   "server": true,
   "ui": true,

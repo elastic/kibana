@@ -121,7 +121,7 @@ describe('esArchiver: createGenerateDocRecordsStream()', () => {
       "calls": Array [
         Array [
           Object {
-            "_source": "true",
+            "_source": true,
             "index": "bar",
             "query": undefined,
             "rest_total_hits_as_int": true,
@@ -136,7 +136,7 @@ describe('esArchiver: createGenerateDocRecordsStream()', () => {
         ],
         Array [
           Object {
-            "_source": "true",
+            "_source": true,
             "index": "foo",
             "query": undefined,
             "rest_total_hits_as_int": true,

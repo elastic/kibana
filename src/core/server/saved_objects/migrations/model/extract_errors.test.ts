@@ -25,7 +25,7 @@ describe('extractUnknownDocFailureReason', () => {
         '.kibana_15'
       )
     ).toMatchInlineSnapshot(`
-      "Upgrades will fail for 8.0+ because documents were found for unknown saved object types. To ensure that upgrades will succeed in the future, either re-enable plugins or delete these documents from the \\".kibana_15\\" index after the current upgrade completes.
+      "Migration failed because documents were found for unknown saved object types. To proceed with the migration, please delete these documents from the \\".kibana_15\\" index.
       The documents with unknown types are:
       - \\"unknownType:12\\" (type: \\"unknownType\\")
       - \\"anotherUnknownType:42\\" (type: \\"anotherUnknownType\\")

@@ -18,7 +18,7 @@ import {
 } from 'src/plugins/expressions';
 import { Datasource, Model, Transform, View } from '../public/expression_types';
 import { AssetType } from './assets';
-import { CanvasWorkpad } from './canvas';
+import { CanvasWorkpad, Sidebar } from './canvas';
 
 export enum AppStateKeys {
   FULLSCREEN = '__fullscreen',
@@ -75,7 +75,7 @@ export interface ResolvedArgType {
   expressionContext: ExpressionContext;
 }
 
-interface TransientState {
+export interface TransientState {
   canUserWrite: boolean;
   zoomScale: number;
   elementStats: ElementStatsType;
@@ -90,6 +90,7 @@ interface TransientState {
     interval: number;
   };
   inFlight: boolean;
+  sidebar: Sidebar;
 }
 
 interface PersistentState {

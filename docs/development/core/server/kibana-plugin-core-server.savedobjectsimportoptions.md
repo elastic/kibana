@@ -16,8 +16,8 @@ export interface SavedObjectsImportOptions
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [createNewCopies](./kibana-plugin-core-server.savedobjectsimportoptions.createnewcopies.md) | <code>boolean</code> | If true, will create new copies of import objects, each with a random <code>id</code> and undefined <code>originId</code>. |
-|  [namespace](./kibana-plugin-core-server.savedobjectsimportoptions.namespace.md) | <code>string</code> | if specified, will import in given namespace, else will import as global object |
-|  [overwrite](./kibana-plugin-core-server.savedobjectsimportoptions.overwrite.md) | <code>boolean</code> | If true, will override existing object if present. Note: this has no effect when used with the <code>createNewCopies</code> option. |
-|  [readStream](./kibana-plugin-core-server.savedobjectsimportoptions.readstream.md) | <code>Readable</code> | The stream of [saved objects](./kibana-plugin-core-server.savedobject.md) to import |
+|  [createNewCopies](./kibana-plugin-core-server.savedobjectsimportoptions.createnewcopies.md) | boolean | If true, will create new copies of import objects, each with a random <code>id</code> and undefined <code>originId</code>. |
+|  [namespace?](./kibana-plugin-core-server.savedobjectsimportoptions.namespace.md) | string | <i>(Optional)</i> if specified, will import in given namespace, else will import as global object |
+|  [overwrite](./kibana-plugin-core-server.savedobjectsimportoptions.overwrite.md) | boolean | If true, will override existing object if present. Note: this has no effect when used with the <code>createNewCopies</code> option. |
+|  [readStream](./kibana-plugin-core-server.savedobjectsimportoptions.readstream.md) | Readable | The stream of [saved objects](./kibana-plugin-core-server.savedobject.md) to import |
 

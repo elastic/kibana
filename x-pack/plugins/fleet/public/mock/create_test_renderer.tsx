@@ -10,7 +10,10 @@ import { createMemoryHistory } from 'history';
 import React, { memo } from 'react';
 import type { RenderOptions, RenderResult } from '@testing-library/react';
 import { render as reactRender, act } from '@testing-library/react';
+import { renderHook } from '@testing-library/react-hooks';
+import type { RenderHookResult } from '@testing-library/react-hooks';
 
+import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
 import { ScopedHistory } from '../../../../../src/core/public';
 import { FleetAppContext } from '../applications/fleet/app';
 import { IntegrationsAppContext } from '../applications/integrations/app';
@@ -40,7 +43,11 @@ export interface TestRenderer {
   startInterface: MockedFleetStart;
   kibanaVersion: string;
   AppWrapper: React.FC<any>;
+  HookWrapper: React.FC<any>;
   render: UiRender;
+  renderHook: <TProps, TResult>(
+    callback: (props: TProps) => TResult
+  ) => RenderHookResult<TProps, TResult>;
   setHeaderActionMenu: Function;
 }
 
@@ -49,6 +56,15 @@ export const createFleetTestRendererMock = (): TestRenderer => {
   const extensions: UIExtensionsStorage = {};
   const startServices = createStartServices(basePath);
   const history = createMemoryHistory({ initialEntries: [basePath] });
+
+  const HookWrapper = memo(({ children }) => {
+    return (
+      <startServices.i18n.Context>
+        <KibanaContextProvider services={{ ...startServices }}>{children}</KibanaContextProvider>
+      </startServices.i18n.Context>
+    );
+  });
+
   const testRendererMocks: TestRenderer = {
     history,
     mountHistory: new ScopedHistory(history, basePath),
@@ -72,6 +88,12 @@ export const createFleetTestRendererMock = (): TestRenderer => {
         </FleetAppContext>
       );
     }),
+    HookWrapper,
+    renderHook: (callback) => {
+      return renderHook(callback, {
+        wrapper: testRendererMocks.HookWrapper,
+      });
+    },
     render: (ui, options) => {
       let renderResponse: RenderResult;
       act(() => {
@@ -91,6 +113,13 @@ export const createIntegrationsTestRendererMock = (): TestRenderer => {
   const basePath = '/mock';
   const extensions: UIExtensionsStorage = {};
   const startServices = createStartServices(basePath);
+  const HookWrapper = memo(({ children }) => {
+    return (
+      <startServices.i18n.Context>
+        <KibanaContextProvider services={{ ...startServices }}>{children}</KibanaContextProvider>
+      </startServices.i18n.Context>
+    );
+  });
   const testRendererMocks: TestRenderer = {
     history: createMemoryHistory(),
     mountHistory: new ScopedHistory(createMemoryHistory({ initialEntries: [basePath] }), basePath),
@@ -115,6 +144,7 @@ export const createIntegrationsTestRendererMock = (): TestRenderer => {
         </IntegrationsAppContext>
       );
     }),
+    HookWrapper,
     render: (ui, options) => {
       let renderResponse: RenderResult;
       act(() => {
@@ -124,6 +154,11 @@ export const createIntegrationsTestRendererMock = (): TestRenderer => {
         });
       });
       return renderResponse!;
+    },
+    renderHook: (callback) => {
+      return renderHook(callback, {
+        wrapper: testRendererMocks.HookWrapper,
+      });
     },
   };
 

@@ -17,19 +17,59 @@ export function loadTemplates() {
 }
 
 export async function initializeTemplates(
-  client: Pick<SavedObjectsRepository, 'bulkCreate' | 'create' | 'find'>
+  client: Pick<SavedObjectsRepository, 'bulkCreate' | 'create' | 'find' | 'get'>
 ) {
-  const existingTemplates = await client.find({ type: MATRIX_HISTOGRAM_TEMPLATE_TYPE, perPage: 1 });
-  if (existingTemplates.total === 0) {
-    // Some devs were seeing timeouts that would cause an unhandled promise rejection
-    // likely because the pitch template is so huge.
-    // So, rather than doing a bulk create of templates, we're going to fire off individual
-    // creates and catch and throw-away any errors that happen.
-    // Once packages are ready, we should probably move that pitch that is so large to a package
-    for (const template of loadTemplates()) {
-      client.create(MATRIX_HISTOGRAM_TEMPLATE_TYPE, template, { id: template.id }).catch((err) => {
-        return undefined;
-      });
+  const hardCodedTagId = '6853a880-5451-11ec-b0fd-2f7a10a18ba6';
+  const hardCodedTemplateId = '6853a880-5451-99ec-b0fd-2f7a10a18ba6';
+  let existingTag = null;
+  let existingTemplate = null;
+  try {
+    existingTag = await client.get('tag', hardCodedTagId);
+  } catch (e) {
+    if (existingTag == null) {
+      const tagTemplate = require('./tag.security_solution').securitySolution;
+      client.create('tag', tagTemplate, { id: hardCodedTagId }).catch((err) => {});
+    }
+  }
+
+  // if (existingTemplates.total === 0) {
+  // Some devs were seeing timeouts that would cause an unhandled promise rejection
+  // likely because the pitch template is so huge.
+  // So, rather than doing a bulk create of templates, we're going to fire off individual
+  // creates and catch and throw-away any errors that happen.
+  // Once packages are ready, we should probably move that pitch that is so large to a package
+  for (const template of loadTemplates()) {
+    try {
+      existingTemplate = await client.get('lens', hardCodedTemplateId);
+    } catch (e) {
+      console.log(e);
+      if (existingTemplate == null) {
+        const existingTemplate = require('./host.name').securitySolution;
+        client
+          .create('lens', template, {
+            references: [
+              {
+                type: 'index-pattern',
+                id: 'ac110810-5681-11ec-9502-0d66506dd741',
+                name: 'indexpattern-datasource-current-indexpattern',
+              },
+              {
+                type: 'index-pattern',
+                id: 'ac110810-5681-11ec-9502-0d66506dd741',
+                name: 'indexpattern-datasource-layer-f6172bed-07e8-48fc-b9e4-2291fe061aed',
+              },
+              {
+                type: 'tag',
+                id: '6853a880-5451-11ec-b0fd-2f7a10a18ba6',
+                name: 'my tag',
+              },
+            ],
+            id: hardCodedTemplateId,
+          })
+          .catch((err) => {
+            console.log('creattion error----', err);
+          });
+      }
     }
   }
 }

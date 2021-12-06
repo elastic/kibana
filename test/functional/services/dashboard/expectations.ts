@@ -155,30 +155,34 @@ export class DashboardExpectService extends FtrService {
   async emptyTagCloudFound() {
     this.log.debug(`DashboardExpect.emptyTagCloudFound()`);
     const tagCloudVisualizations = await this.testSubjects.findAll('tagCloudVisualization');
-    const tagCloudsHaveContent = await Promise.all(
-      tagCloudVisualizations.map(async (tagCloud) => {
-        return await this.find.descendantExistsByCssSelector('text', tagCloud);
-      })
-    );
-    expect(tagCloudsHaveContent.indexOf(false)).to.be.greaterThan(-1);
+    if (tagCloudVisualizations.length > 0) {
+      const tagCloudsHaveContent = await Promise.all(
+        tagCloudVisualizations.map(async (tagCloud) => {
+          return await this.find.descendantExistsByCssSelector('text', tagCloud);
+        })
+      );
+      expect(tagCloudsHaveContent.indexOf(false)).to.be.greaterThan(-1);
+    }
   }
 
   async tagCloudWithValuesFound(values: string[]) {
     this.log.debug(`DashboardExpect.tagCloudWithValuesFound(${values})`);
     const tagCloudVisualizations = await this.testSubjects.findAll('tagCloudVisualization');
-    const matches = await Promise.all(
-      tagCloudVisualizations.map(async (tagCloud) => {
-        const tagCloudData = await this.tagCloud.getTextTagByElement(tagCloud);
-        for (let i = 0; i < values.length; i++) {
-          const valueExists = tagCloudData.includes(values[i]);
-          if (!valueExists) {
-            return false;
+    if (tagCloudVisualizations.length > 0) {
+      const matches = await Promise.all(
+        tagCloudVisualizations.map(async (tagCloud) => {
+          const tagCloudData = await this.tagCloud.getTextTagByElement(tagCloud);
+          for (let i = 0; i < values.length; i++) {
+            const valueExists = tagCloudData.includes(values[i]);
+            if (!valueExists) {
+              return false;
+            }
           }
-        }
-        return true;
-      })
-    );
-    expect(matches.indexOf(true)).to.be.greaterThan(-1);
+          return true;
+        })
+      );
+      expect(matches.indexOf(true)).to.be.greaterThan(-1);
+    }
   }
 
   async goalAndGuageLabelsExist(labels: string[]) {
@@ -230,6 +234,14 @@ export class DashboardExpectService extends FtrService {
       );
       expect(savedSearchRows.length).to.be.above(expectedMinCount);
     });
+  }
+
+  async savedSearchRowsExist() {
+    this.testSubjects.existOrFail('docTableExpandToggleColumn');
+  }
+
+  async savedSearchRowsMissing() {
+    this.testSubjects.missingOrFail('docTableExpandToggleColumn');
   }
 
   async dataTableRowCount(expectedCount: number) {

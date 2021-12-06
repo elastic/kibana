@@ -13,13 +13,12 @@ get$(): Observable<ChromeRecentlyAccessedHistoryItem[]>;
 ```
 <b>Returns:</b>
 
-`Observable<ChromeRecentlyAccessedHistoryItem[]>`
+Observable&lt;ChromeRecentlyAccessedHistoryItem\[\]&gt;
 
 ## Example
 
 
 ```js
 chrome.recentlyAccessed.get$().subscribe(console.log);
-
 ```
 

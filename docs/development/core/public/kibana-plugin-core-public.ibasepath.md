@@ -16,9 +16,9 @@ export interface IBasePath
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [get](./kibana-plugin-core-public.ibasepath.get.md) | <code>() =&gt; string</code> | Gets the <code>basePath</code> string. |
-|  [prepend](./kibana-plugin-core-public.ibasepath.prepend.md) | <code>(url: string) =&gt; string</code> | Prepends <code>path</code> with the basePath. |
-|  [publicBaseUrl](./kibana-plugin-core-public.ibasepath.publicbaseurl.md) | <code>string</code> | The server's publicly exposed base URL, if configured. Includes protocol, host, port (optional) and the [IBasePath.serverBasePath](./kibana-plugin-core-public.ibasepath.serverbasepath.md)<!-- -->. |
-|  [remove](./kibana-plugin-core-public.ibasepath.remove.md) | <code>(url: string) =&gt; string</code> | Removes the prepended basePath from the <code>path</code>. |
-|  [serverBasePath](./kibana-plugin-core-public.ibasepath.serverbasepath.md) | <code>string</code> | Returns the server's root basePath as configured, without any namespace prefix.<!-- -->See  for getting the basePath value for a specific request |
+|  [get](./kibana-plugin-core-public.ibasepath.get.md) | () =&gt; string | Gets the <code>basePath</code> string. |
+|  [prepend](./kibana-plugin-core-public.ibasepath.prepend.md) | (url: string) =&gt; string | Prepends <code>path</code> with the basePath. |
+|  [publicBaseUrl?](./kibana-plugin-core-public.ibasepath.publicbaseurl.md) | string | <i>(Optional)</i> The server's publicly exposed base URL, if configured. Includes protocol, host, port (optional) and the [IBasePath.serverBasePath](./kibana-plugin-core-public.ibasepath.serverbasepath.md)<!-- -->. |
+|  [remove](./kibana-plugin-core-public.ibasepath.remove.md) | (url: string) =&gt; string | Removes the prepended basePath from the <code>path</code>. |
+|  [serverBasePath](./kibana-plugin-core-public.ibasepath.serverbasepath.md) | string | Returns the server's root basePath as configured, without any namespace prefix.<!-- -->See  for getting the basePath value for a specific request |
 

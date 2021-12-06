@@ -5,6 +5,16 @@
  * 2.0.
  */
 
+const MOCK_SET_ROW_ERRORS = jest.fn();
+
+jest.mock('../inline_editable_table/inline_editable_table_logic', () => ({
+  InlineEditableTableLogic: () => ({
+    actions: {
+      setRowErrors: MOCK_SET_ROW_ERRORS,
+    },
+  }),
+}));
+
 import {
   LogicMounter,
   mockFlashMessageHelpers,
@@ -13,14 +23,12 @@ import {
 
 import { nextTick } from '@kbn/test/jest';
 
-import { itShowsServerErrorAsFlashMessage } from '../../../test_helpers';
-
 import { GenericEndpointInlineEditableTableLogic } from './generic_endpoint_inline_editable_table_logic';
 
 describe('GenericEndpointInlineEditableTableLogic', () => {
   const { mount } = new LogicMounter(GenericEndpointInlineEditableTableLogic);
   const { http } = mockHttpValues;
-  const { flashAPIErrors } = mockFlashMessageHelpers;
+  const { toastAPIErrors } = mockFlashMessageHelpers;
 
   const DEFAULT_VALUES = {
     isLoading: false,
@@ -121,9 +129,13 @@ describe('GenericEndpointInlineEditableTableLogic', () => {
         expect(logic.actions.clearLoading).toHaveBeenCalled();
       });
 
-      itShowsServerErrorAsFlashMessage(http.post, () => {
+      it('passes API errors to the nested inline editable table', async () => {
+        http.post.mockReturnValueOnce(Promise.reject('error'));
         const logic = mountLogic();
         logic.actions.addItem(item, onSuccess);
+        await nextTick();
+
+        expect(MOCK_SET_ROW_ERRORS).toHaveBeenCalledWith(['An unexpected error occurred']);
       });
     });
 
@@ -164,9 +176,13 @@ describe('GenericEndpointInlineEditableTableLogic', () => {
         expect(logic.actions.clearLoading).toHaveBeenCalled();
       });
 
-      itShowsServerErrorAsFlashMessage(http.delete, () => {
+      it('passes errors to the nested inline editable table', async () => {
+        http.delete.mockReturnValueOnce(Promise.reject('error'));
         const logic = mountLogic();
         logic.actions.deleteItem(item, onSuccess);
+        await nextTick();
+
+        expect(MOCK_SET_ROW_ERRORS).toHaveBeenCalledWith(['An unexpected error occurred']);
       });
     });
 
@@ -213,9 +229,13 @@ describe('GenericEndpointInlineEditableTableLogic', () => {
         expect(logic.actions.clearLoading).toHaveBeenCalled();
       });
 
-      itShowsServerErrorAsFlashMessage(http.put, () => {
+      it('passes errors to the nested inline editable table', async () => {
+        http.put.mockReturnValueOnce(Promise.reject('error'));
         const logic = mountLogic();
         logic.actions.updateItem(item, onSuccess);
+        await nextTick();
+
+        expect(MOCK_SET_ROW_ERRORS).toHaveBeenCalledWith(['An unexpected error occurred']);
       });
     });
 
@@ -281,7 +301,7 @@ describe('GenericEndpointInlineEditableTableLogic', () => {
 
         // It again calls back to the configured 'onReorder' to reset the order
         expect(DEFAULT_LOGIC_PARAMS.onReorder).toHaveBeenCalledWith(oldItems);
-        expect(flashAPIErrors).toHaveBeenCalledWith('error');
+        expect(toastAPIErrors).toHaveBeenCalledWith('error');
       });
 
       it('does nothing if there are no reorder props', async () => {

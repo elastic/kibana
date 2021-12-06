@@ -14,9 +14,13 @@ export default function rumJsErrorsApiTests({ getService }: FtrProviderContext) 
 
   registry.when('CSM JS errors with data', { config: 'trial', archives: [] }, () => {
     it('returns no js errors', async () => {
-      const response = await supertest.get(
-        '/api/apm/rum-client/js-errors?pageSize=5&pageIndex=0&start=2020-09-07T20%3A35%3A54.654Z&end=2020-09-14T20%3A35%3A54.654Z&uiFilters=%7B%22serviceName%22%3A%5B%22elastic-co-rum-test%22%5D%7D'
-      );
+      const response = await supertest.get('/internal/apm/ux/js-errors').query({
+        pageSize: 5,
+        pageIndex: 0,
+        start: '2020-09-07T20:35:54.654Z',
+        end: '2020-09-14T20:35:54.654Z',
+        uiFilters: '{"serviceName":["elastic-co-rum-test"]}',
+      });
 
       expect(response.status).to.be(200);
       expectSnapshot(response.body).toMatchInline(`
@@ -34,9 +38,13 @@ export default function rumJsErrorsApiTests({ getService }: FtrProviderContext) 
     { config: 'trial', archives: ['8.0.0', 'rum_test_data'] },
     () => {
       it('returns js errors', async () => {
-        const response = await supertest.get(
-          '/api/apm/rum-client/js-errors?start=2021-01-18T12%3A20%3A17.202Z&end=2021-01-18T12%3A25%3A17.203Z&uiFilters=%7B%22environment%22%3A%22ENVIRONMENT_ALL%22%2C%22serviceName%22%3A%5B%22elastic-co-frontend%22%5D%7D&pageSize=5&pageIndex=0'
-        );
+        const response = await supertest.get('/internal/apm/ux/js-errors').query({
+          start: '2021-01-18T12:20:17.202Z',
+          end: '2021-01-18T12:25:17.203Z',
+          uiFilters: '{"environment":"ENVIRONMENT_ALL","serviceName":["elastic-co-frontend"]}',
+          pageSize: 5,
+          pageIndex: 0,
+        });
 
         expect(response.status).to.be(200);
 

@@ -12,6 +12,7 @@
  */
 
 import apm from 'elastic-apm-node';
+import uuid from 'uuid';
 import { withSpan } from '@kbn/apm-utils';
 import { identity, defaults, flow } from 'lodash';
 import {
@@ -59,6 +60,10 @@ import { isUnrecoverableError } from './errors';
 const defaultBackoffPerFailure = 5 * 60 * 1000;
 export const EMPTY_RUN_RESULT: SuccessfulRunResult = { state: {} };
 
+export const TASK_MANAGER_RUN_TRANSACTION_TYPE = 'task-run';
+export const TASK_MANAGER_TRANSACTION_TYPE = 'task-manager';
+export const TASK_MANAGER_TRANSACTION_TYPE_MARK_AS_RUNNING = 'mark-task-as-running';
+
 export interface TaskRunner {
   isExpired: boolean;
   expiration: Date;
@@ -68,9 +73,11 @@ export interface TaskRunner {
   markTaskAsRunning: () => Promise<boolean>;
   run: () => Promise<Result<SuccessfulRunResult, FailedRunResult>>;
   id: string;
+  taskExecutionId: string;
   stage: string;
   isEphemeral?: boolean;
   toString: () => string;
+  isSameTask: (executionId: string) => boolean;
 }
 
 export enum TaskRunningStage {
@@ -141,6 +148,7 @@ export class TaskManagerRunner implements TaskRunner {
   private beforeMarkRunning: Middleware['beforeMarkRunning'];
   private onTaskEvent: (event: TaskRun | TaskMarkRunning) => void;
   private defaultMaxAttempts: number;
+  private uuid: string;
   private readonly executionContext: ExecutionContextStart;
 
   /**
@@ -173,6 +181,7 @@ export class TaskManagerRunner implements TaskRunner {
     this.onTaskEvent = onTaskEvent;
     this.defaultMaxAttempts = defaultMaxAttempts;
     this.executionContext = executionContext;
+    this.uuid = uuid.v4();
   }
 
   /**
@@ -180,6 +189,21 @@ export class TaskManagerRunner implements TaskRunner {
    */
   public get id() {
     return this.instance.task.id;
+  }
+
+  /**
+   * Gets the execution id of this task instance.
+   */
+  public get taskExecutionId() {
+    return `${this.id}::${this.uuid}`;
+  }
+
+  /**
+   * Test whether given execution ID identifies a different execution of this same task
+   * @param id
+   */
+  public isSameTask(executionId: string) {
+    return executionId.startsWith(this.id);
   }
 
   /**
@@ -256,7 +280,7 @@ export class TaskManagerRunner implements TaskRunner {
     }
     this.logger.debug(`Running task ${this}`);
 
-    const apmTrans = apm.startTransaction(this.taskType, 'taskManager run', {
+    const apmTrans = apm.startTransaction(this.taskType, TASK_MANAGER_RUN_TRANSACTION_TYPE, {
       childOf: this.instance.task.traceparent,
     });
 
@@ -313,7 +337,11 @@ export class TaskManagerRunner implements TaskRunner {
       );
     }
 
-    const apmTrans = apm.startTransaction('taskManager', 'taskManager markTaskAsRunning');
+    const apmTrans = apm.startTransaction(
+      TASK_MANAGER_TRANSACTION_TYPE_MARK_AS_RUNNING,
+      TASK_MANAGER_TRANSACTION_TYPE
+    );
+    apmTrans?.addLabels({ entityId: this.taskType });
 
     const now = new Date();
     try {

@@ -33,7 +33,7 @@ program
   .description(
     'This command walks you through all required steps to securely connect Kibana with Elasticsearch'
   )
-  .option('-t, --token <token>', 'Elasticsearch enrollment token')
+  .option('-t, --enrollment-token <token>', 'Elasticsearch enrollment token')
   .option('-s, --silent', 'Prevent all logging');
 
 program.parse(process.argv);
@@ -82,9 +82,9 @@ async function initCommand() {
   } catch (error) {
     if (!options.silent) {
       spinner.fail(
-        `${chalk.bold('Unable to enroll with Elasticsearch:')} ${chalk.red(
-          `${getDetailedErrorMessage(error)}`
-        )}`
+        `${chalk.bold(
+          'Unable to connect to Elasticsearch with the provided enrollment token:'
+        )} ${chalk.red(`${getDetailedErrorMessage(error)}`)}`
       );
     }
     logger.error('');

@@ -14,10 +14,10 @@ import {
   UserRulesRequestOptions,
   UserRulesStrategyResponse,
   UsersRulesHit,
-} from '../../../../../../common';
+} from '../../../../../../common/search_strategy';
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../../../common/constants';
 import { buildUserRulesQuery } from './query.user_rules.dsl';
-import { IEsSearchResponse } from '../../../../../../../../../src/plugins/data/common';
+import type { IEsSearchResponse } from '../../../../../../../../../src/plugins/data/common';
 import { formatUserRulesData } from './helpers';
 import { inspectStringifyObject } from '../../../../../utils/build_query';
 

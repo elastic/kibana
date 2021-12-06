@@ -105,6 +105,11 @@ describe('getMonitorStatus', () => {
                 "fields": Object {
                   "top_hits": Object {
                     "size": 1,
+                    "sort": Array [
+                      Object {
+                        "@timestamp": "desc",
+                      },
+                    ],
                   },
                 },
               },
@@ -141,8 +146,15 @@ describe('getMonitorStatus', () => {
             "bool": Object {
               "filter": Array [
                 Object {
-                  "term": Object {
-                    "monitor.status": "down",
+                  "exists": Object {
+                    "field": "summary",
+                  },
+                },
+                Object {
+                  "range": Object {
+                    "summary.down": Object {
+                      "gt": "0",
+                    },
                   },
                 },
                 Object {
@@ -197,7 +209,7 @@ describe('getMonitorStatus', () => {
           },
           "size": 0,
         },
-        "index": "heartbeat-8*,synthetics-*",
+        "index": "heartbeat-8*,heartbeat-7*,synthetics-*",
       }
     `);
   });
@@ -234,6 +246,11 @@ describe('getMonitorStatus', () => {
                 "fields": Object {
                   "top_hits": Object {
                     "size": 1,
+                    "sort": Array [
+                      Object {
+                        "@timestamp": "desc",
+                      },
+                    ],
                   },
                 },
               },
@@ -270,8 +287,15 @@ describe('getMonitorStatus', () => {
             "bool": Object {
               "filter": Array [
                 Object {
-                  "term": Object {
-                    "monitor.status": "down",
+                  "exists": Object {
+                    "field": "summary",
+                  },
+                },
+                Object {
+                  "range": Object {
+                    "summary.down": Object {
+                      "gt": "0",
+                    },
                   },
                 },
                 Object {
@@ -311,7 +335,7 @@ describe('getMonitorStatus', () => {
           },
           "size": 0,
         },
-        "index": "heartbeat-8*,synthetics-*",
+        "index": "heartbeat-8*,heartbeat-7*,synthetics-*",
       }
     `);
   });
@@ -400,6 +424,11 @@ describe('getMonitorStatus', () => {
                 "fields": Object {
                   "top_hits": Object {
                     "size": 1,
+                    "sort": Array [
+                      Object {
+                        "@timestamp": "desc",
+                      },
+                    ],
                   },
                 },
               },
@@ -436,8 +465,15 @@ describe('getMonitorStatus', () => {
             "bool": Object {
               "filter": Array [
                 Object {
-                  "term": Object {
-                    "monitor.status": "down",
+                  "exists": Object {
+                    "field": "summary",
+                  },
+                },
+                Object {
+                  "range": Object {
+                    "summary.down": Object {
+                      "gt": "0",
+                    },
                   },
                 },
                 Object {
@@ -510,7 +546,7 @@ describe('getMonitorStatus', () => {
           },
           "size": 0,
         },
-        "index": "heartbeat-8*,synthetics-*",
+        "index": "heartbeat-8*,heartbeat-7*,synthetics-*",
       }
     `);
   });
@@ -559,6 +595,11 @@ describe('getMonitorStatus', () => {
                 "fields": Object {
                   "top_hits": Object {
                     "size": 1,
+                    "sort": Array [
+                      Object {
+                        "@timestamp": "desc",
+                      },
+                    ],
                   },
                 },
               },
@@ -595,8 +636,15 @@ describe('getMonitorStatus', () => {
             "bool": Object {
               "filter": Array [
                 Object {
-                  "term": Object {
-                    "monitor.status": "down",
+                  "exists": Object {
+                    "field": "summary",
+                  },
+                },
+                Object {
+                  "range": Object {
+                    "summary.down": Object {
+                      "gt": "0",
+                    },
                   },
                 },
                 Object {
@@ -629,7 +677,7 @@ describe('getMonitorStatus', () => {
           },
           "size": 0,
         },
-        "index": "heartbeat-8*,synthetics-*",
+        "index": "heartbeat-8*,heartbeat-7*,synthetics-*",
       }
     `);
   });
@@ -693,6 +741,11 @@ describe('getMonitorStatus', () => {
                 "fields": Object {
                   "top_hits": Object {
                     "size": 1,
+                    "sort": Array [
+                      Object {
+                        "@timestamp": "desc",
+                      },
+                    ],
                   },
                 },
               },
@@ -729,8 +782,15 @@ describe('getMonitorStatus', () => {
             "bool": Object {
               "filter": Array [
                 Object {
-                  "term": Object {
-                    "monitor.status": "down",
+                  "exists": Object {
+                    "field": "summary",
+                  },
+                },
+                Object {
+                  "range": Object {
+                    "summary.down": Object {
+                      "gt": "0",
+                    },
                   },
                 },
                 Object {
@@ -754,7 +814,7 @@ describe('getMonitorStatus', () => {
           },
           "size": 0,
         },
-        "index": "heartbeat-8*,synthetics-*",
+        "index": "heartbeat-8*,heartbeat-7*,synthetics-*",
       }
     `);
     expect(result.length).toBe(3);

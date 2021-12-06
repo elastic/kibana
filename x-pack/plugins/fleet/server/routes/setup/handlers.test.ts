@@ -9,7 +9,8 @@ import { httpServerMock, savedObjectsClientMock } from 'src/core/server/mocks';
 
 import type { PostFleetSetupResponse } from '../../../common';
 import { RegistryError } from '../../errors';
-import { createAppContextStartContractMock, xpackMocks } from '../../mocks';
+import { createAppContextStartContractMock, xpackMocks, createFleetAuthzMock } from '../../mocks';
+import { agentServiceMock } from '../../services/agents/agent_service.mock';
 import { appContextService } from '../../services/app_context';
 import { setupFleet } from '../../services/setup';
 import type { FleetRequestHandlerContext } from '../../types';
@@ -18,6 +19,7 @@ import { fleetSetupHandler } from './handlers';
 
 jest.mock('../../services/setup', () => {
   return {
+    ...jest.requireActual('../../services/setup'),
     setupFleet: jest.fn(),
   };
 });
@@ -33,6 +35,11 @@ describe('FleetSetupHandler', () => {
     context = {
       ...xpackMocks.createRequestHandlerContext(),
       fleet: {
+        agentClient: {
+          asCurrentUser: agentServiceMock.createClient(),
+          asInternalUser: agentServiceMock.createClient(),
+        },
+        authz: createFleetAuthzMock(),
         epm: {
           internalSoClient: savedObjectsClientMock.create(),
         },

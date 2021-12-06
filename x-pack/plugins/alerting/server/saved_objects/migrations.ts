@@ -25,6 +25,7 @@ import { extractRefsFromGeoContainmentAlert } from './geo_containment/migrations
 const SIEM_APP_ID = 'securitySolution';
 const SIEM_SERVER_APP_ID = 'siem';
 export const LEGACY_LAST_MODIFIED_VERSION = 'pre-7.10.0';
+export const FILEBEAT_7X_INDICATOR_PATH = 'threatintel.indicator';
 
 interface AlertLogMeta extends LogMeta {
   migrations: { alertDocument: SavedObjectUnsanitizedDoc<RawAlert> };
@@ -128,7 +129,7 @@ export function getMigrations(
   const migrationRules800 = createEsoMigration(
     encryptedSavedObjects,
     (doc: SavedObjectUnsanitizedDoc<RawAlert>): doc is SavedObjectUnsanitizedDoc<RawAlert> => true,
-    pipeMigrations(addRACRuleTypes)
+    pipeMigrations(addThreatIndicatorPathToThreatMatchRules, addRACRuleTypes)
   );
 
   return {
@@ -662,6 +663,25 @@ function addRACRuleTypes(
           params: {
             ...doc.attributes.params,
             outputIndex: '',
+          },
+        },
+      }
+    : doc;
+}
+
+function addThreatIndicatorPathToThreatMatchRules(
+  doc: SavedObjectUnsanitizedDoc<RawAlert>
+): SavedObjectUnsanitizedDoc<RawAlert> {
+  return isSiemSignalsRuleType(doc) &&
+    doc.attributes.params?.type === 'threat_match' &&
+    !doc.attributes.params.threatIndicatorPath
+    ? {
+        ...doc,
+        attributes: {
+          ...doc.attributes,
+          params: {
+            ...doc.attributes.params,
+            threatIndicatorPath: FILEBEAT_7X_INDICATOR_PATH,
           },
         },
       }
