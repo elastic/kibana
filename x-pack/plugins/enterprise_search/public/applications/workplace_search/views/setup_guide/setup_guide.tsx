@@ -15,11 +15,7 @@ import { WORKPLACE_SEARCH_PLUGIN } from '../../../../../common/constants';
 import { SetWorkplaceSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 import { SetupGuideLayout, SETUP_GUIDE_TITLE } from '../../../shared/setup_guide';
 import { SendWorkplaceSearchTelemetry as SendTelemetry } from '../../../shared/telemetry';
-import {
-  GETTING_STARTED_DOCS_URL,
-  NATIVE_AUTH_DOCS_URL,
-  STANDARD_AUTH_DOCS_URL,
-} from '../../routes';
+import { GETTING_STARTED_DOCS_URL } from '../../routes';
 
 import GettingStarted from './assets/getting_started.png';
 
@@ -30,8 +26,6 @@ export const SetupGuide: React.FC = () => {
     <SetupGuideLayout
       productName={WORKPLACE_SEARCH_PLUGIN.NAME}
       productEuiIcon="logoWorkplaceSearch"
-      standardAuthLink={STANDARD_AUTH_DOCS_URL}
-      elasticsearchNativeAuthLink={NATIVE_AUTH_DOCS_URL}
     >
       <SetPageChrome trail={[SETUP_GUIDE_TITLE]} />
       <SendTelemetry action="viewed" metric="setup_guide" />
