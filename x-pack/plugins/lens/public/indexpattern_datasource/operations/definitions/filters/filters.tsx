@@ -105,9 +105,11 @@ export const filtersOperation: OperationDefinition<FiltersIndexPatternColumn, 'n
       };
     }
 
-    if (columnParams) {
+    const filterColumnsParams = columnParams as FiltersIndexPatternColumn['params'];
+
+    if (filterColumnsParams) {
       params = {
-        filters: columnParams.filters,
+        filters: filterColumnsParams.filters,
       };
     }
 

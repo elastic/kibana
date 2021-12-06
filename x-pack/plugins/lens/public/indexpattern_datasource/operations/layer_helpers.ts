@@ -31,7 +31,6 @@ import type {
   IndexPatternPrivateState,
 } from '../types';
 import { getSortScoreByPriority } from './operations';
-import type { Filter } from './definitions';
 import { generateId } from '../../id_generator';
 import {
   GenericIndexPatternColumn,
@@ -61,7 +60,6 @@ interface ColumnChange {
   incompleteParams?: ColumnAdvancedParams;
   incompleteFieldName?: string;
   columnParams?: Record<string, unknown>;
-  filterParams?: Filter[];
   initialParams?: { params: Record<string, unknown> }; // TODO: bind this to the op parameter
 }
 
@@ -197,7 +195,6 @@ export function insertNewColumn({
   incompleteParams,
   incompleteFieldName,
   columnParams,
-  filterParams,
   initialParams,
 }: ColumnChange): IndexPatternLayer {
   const operationDefinition = operationDefinitionMap[op];
@@ -226,12 +223,11 @@ export function insertNewColumn({
     const possibleOperation = operationDefinition.getPossibleOperation();
     const isBucketed = Boolean(possibleOperation?.isBucketed);
     const addOperationFn = isBucketed ? addBucket : addMetric;
+
     return updateDefaultLabels(
       addOperationFn(
         layer,
-        filterParams?.length
-          ? operationDefinition.buildColumn({ ...baseOptions, layer }, { filters: filterParams })
-          : operationDefinition.buildColumn({ ...baseOptions, layer }),
+        operationDefinition.buildColumn({ ...baseOptions, layer }, columnParams),
         columnId,
         visualizationGroups,
         targetGroup
@@ -1644,7 +1640,7 @@ export function getSplitByFiltersLayer(
     }),
     columnId: generateId(),
     field: undefined,
-    filterParams,
+    columnParams: filterParams ? { filters: filterParams } : undefined,
     indexPattern,
     visualizationGroups: [],
   });

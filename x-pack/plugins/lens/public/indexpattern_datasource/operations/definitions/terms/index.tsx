@@ -224,6 +224,8 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
       (col) => col && col.isBucketed
     ).length;
 
+    const termsColumnParams = params as TermsIndexPatternColumn['params'];
+
     return {
       label: ofName(field.displayName),
       dataType: field.type as DataType,
@@ -232,7 +234,11 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
       sourceField: field.name,
       isBucketed: true,
       params: {
-        size: params ? params.size : previousBucketsLength === 0 ? 5 : DEFAULT_SIZE,
+        size: termsColumnParams
+          ? termsColumnParams.size
+          : previousBucketsLength === 0
+          ? 5
+          : DEFAULT_SIZE,
         orderBy: existingMetricColumn
           ? {
               type: 'column',
@@ -240,7 +246,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
             }
           : { type: 'alphabetical', fallback: true },
         orderDirection: existingMetricColumn ? 'desc' : 'asc',
-        otherBucket: params ? params.otherBucket : !indexPattern.hasRestrictions,
+        otherBucket: params ? termsColumnParams.otherBucket : !indexPattern.hasRestrictions,
         missingBucket: false,
       },
     };
