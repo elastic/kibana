@@ -16,7 +16,7 @@ import {
   SerializedSearchSourceFields,
 } from './';
 import { IndexPatternsContract } from '../..';
-import { mergeMigrationFunctionMaps } from '../../../../kibana_utils/common/persistable_state';
+import { mergeMigrationFunctionMaps } from '../../../../kibana_utils/common';
 import { getAllMigrations as filtersGetAllMigrations } from '../../query/persistable_state';
 
 export class SearchSourceService {
