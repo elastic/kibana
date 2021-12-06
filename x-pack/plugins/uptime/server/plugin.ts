@@ -104,6 +104,7 @@ export class Plugin implements PluginType {
       this.server.security = plugins.security;
       this.server.fleet = plugins.fleet;
       this.server.encryptedSavedObjects = plugins.encryptedSavedObjects;
+      this.server.savedObjectsClient = this.savedObjectsClient;
     }
 
     if (this.server?.config?.unsafe?.service.enabled) {
