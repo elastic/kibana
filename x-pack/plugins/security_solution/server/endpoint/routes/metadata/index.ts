@@ -16,6 +16,7 @@ import {
   HOST_METADATA_LIST_ROUTE,
 } from '../../../../common/endpoint/constants';
 import { GetMetadataListRequestSchema } from '../../../../common/endpoint/schema/metadata';
+import { withEndpointAuthz } from '../with_endpoint_authz';
 
 /* Filters that can be applied to the endpoint fetch route */
 export const endpointFilters = schema.object({
@@ -49,7 +50,11 @@ export function registerEndpointRoutes(
       validate: GetMetadataListRequestSchema,
       options: { authRequired: true, tags: ['access:securitySolution'] },
     },
-    getMetadataListRequestHandler(endpointAppContext, logger)
+    withEndpointAuthz(
+      { all: ['canAccessEndpointManagement'] },
+      logger,
+      getMetadataListRequestHandler(endpointAppContext, logger)
+    )
   );
 
   router.get(
@@ -58,6 +63,10 @@ export function registerEndpointRoutes(
       validate: GetMetadataRequestSchema,
       options: { authRequired: true, tags: ['access:securitySolution'] },
     },
-    getMetadataRequestHandler(endpointAppContext, logger)
+    withEndpointAuthz(
+      { all: ['canAccessEndpointManagement'] },
+      logger,
+      getMetadataRequestHandler(endpointAppContext, logger)
+    )
   );
 }
