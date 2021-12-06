@@ -79,7 +79,6 @@ export default function (providerContext: FtrProviderContext) {
         { name: experimentalPkgName, version: pkgVersion },
       ]);
     });
-    
     it('should create index patterns (without fields)', async () => {
       const resIndexPatternLogs = await kibanaServer.savedObjects.get({
         type: 'index-pattern',
