@@ -7,12 +7,11 @@
  */
 
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'kibana/public';
-import { setKibanaVersion, setLicensingPluginStart, setMapsEmsConfig } from './kibana_services';
+import { setKibanaVersion, setLicensingPluginStart, setMapConfig } from './kibana_services';
 import { MapsEmsPluginSetup, MapsEmsPluginStart } from './index';
-import type { MapsEmsConfig } from '../config';
+import type { MapConfig } from '../config';
 import { getServiceSettings } from './lazy_load_bundle/get_service_settings';
-import { EMSSettings } from '../common';
-import { IEMSConfig } from '../common/ems_settings';
+import { createEMSSettings, IEMSConfig } from '../common/ems_settings';
 import {
   LicensingPluginSetup,
   LicensingPluginStart,
@@ -32,24 +31,24 @@ export interface MapsEmsSetupDependencies {
 }
 
 export class MapsEmsPlugin implements Plugin<MapsEmsPluginSetup, MapsEmsPluginStart> {
-  readonly _initializerContext: PluginInitializerContext<MapsEmsConfig>;
+  readonly _initializerContext: PluginInitializerContext<MapConfig>;
 
-  constructor(initializerContext: PluginInitializerContext<MapsEmsConfig>) {
+  constructor(initializerContext: PluginInitializerContext<MapConfig>) {
     this._initializerContext = initializerContext;
   }
 
   public setup(core: CoreSetup, plugins: MapsEmsSetupDependencies) {
-    const config = this._initializerContext.config.get<MapsEmsConfig>();
+    const mapConfig = this._initializerContext.config.get<MapConfig>();
     const kibanaVersion = this._initializerContext.env.packageInfo.version;
 
     setKibanaVersion(kibanaVersion);
-    setMapsEmsConfig(config);
+    setMapConfig(mapConfig);
 
     return {
-      config,
+      config: mapConfig,
       getServiceSettings,
       createEMSSettings: (emsConfig: IEMSConfig, getIsEnterPrisePlus: () => boolean) => {
-        return new EMSSettings(emsConfig, getIsEnterPrisePlus);
+        return createEMSSettings(emsConfig, getIsEnterPrisePlus);
       },
     };
   }

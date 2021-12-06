@@ -69,7 +69,7 @@ export class VegaParser {
   containerDir?: ControlsLocation | ControlsDirection;
   controlsDir?: ControlsLocation;
   searchAPI: SearchAPI;
-  getServiceSettings: () => Promise<IServiceSettings>;
+  getServiceSettings: () => Promise<IEMSKbnMapsSettings>;
   filters: Bool;
   timeCache: TimeCache;
 
@@ -78,7 +78,7 @@ export class VegaParser {
     searchAPI: SearchAPI,
     timeCache: TimeCache,
     filters: Bool,
-    getServiceSettings: () => Promise<IServiceSettings>
+    getServiceSettings: () => Promise<IEMSKbnMapsSettings>
   ) {
     this.spec = spec as VegaSpec;
     this.hideWarnings = false;

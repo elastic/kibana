@@ -12,12 +12,12 @@ import {
   Plugin,
   PluginConfigDescriptor,
 } from 'src/core/server';
-import { MapsEmsConfig, emsConfigSchema } from '../config';
+import { MapConfig, mapConfigSchema } from '../config';
 import { EMSSettings } from '../common';
 import { IEMSConfig } from '../common/ems_settings';
 export type { EMSSettings } from '../common';
 
-export const config: PluginConfigDescriptor<MapsEmsConfig> = {
+export const config: PluginConfigDescriptor<MapConfig> = {
   exposeToBrowser: {
     tilemap: true,
     includeElasticMapsService: true,
@@ -28,18 +28,18 @@ export const config: PluginConfigDescriptor<MapsEmsConfig> = {
     emsFontLibraryUrl: true,
     emsTileLayerId: true,
   },
-  schema: emsConfigSchema,
+  schema: mapConfigSchema,
 };
 
 export interface MapsEmsPluginSetup {
-  config: MapsEmsConfig;
+  config: MapConfig;
   createEMSSettings: (config: IEMSConfig, getIsEnterPrisePlus: () => boolean) => EMSSettings;
 }
 
 export class MapsEmsPlugin implements Plugin<MapsEmsPluginSetup> {
-  readonly _initializerContext: PluginInitializerContext<MapsEmsConfig>;
+  readonly _initializerContext: PluginInitializerContext<MapConfig>;
 
-  constructor(initializerContext: PluginInitializerContext<MapsEmsConfig>) {
+  constructor(initializerContext: PluginInitializerContext<MapConfig>) {
     this._initializerContext = initializerContext;
   }
 

@@ -9,7 +9,7 @@
 import { PluginInitializerContext } from 'kibana/public';
 import { MapsEmsPlugin } from './plugin';
 import { IEMSKbnMapsSettings } from './service_settings';
-import type { MapsEmsConfig } from '../config';
+import type { MapConfig } from '../config';
 import { EMSSettings } from '../common';
 import { IEMSConfig } from '../common/ems_settings';
 
@@ -28,10 +28,10 @@ export function plugin(initializerContext: PluginInitializerContext) {
 
 export { TMS_IN_YML_ID } from '../common';
 
-export type { MapsEmsConfig } from '../config';
+export type { MapConfig } from '../config';
 
 export interface MapsEmsPluginSetup {
-  config: MapsEmsConfig;
+  config: MapConfig;
   getServiceSettings(): Promise<IEMSKbnMapsSettings>;
   createEMSSettings(config: IEMSConfig, getIsEnterPrisePlus: () => boolean): EMSSettings;
 }

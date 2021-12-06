@@ -23,6 +23,10 @@ export interface IEMSConfig {
   isEMSEnabled?: boolean;
 }
 
+export function createEMSSettings(emsConfig: IEMSConfig, getIsEnterPrisePlus: () => boolean) {
+  return new EMSSettings(emsConfig, getIsEnterPrisePlus);
+}
+
 export class EMSSettings {
   private readonly _config: IEMSConfig;
   private readonly _getIsEnterprisePlus: () => boolean;

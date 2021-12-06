@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import { TMSService } from '@elastic/ems-client';
-import { MapsEmsConfig } from '../../config';
+import { MapConfig, TileMapConfig } from '../../config';
 
 export interface TmsLayer {
   id: string;
@@ -54,6 +54,7 @@ export interface IEMSKbnMapsSettings {
 
   getDefaultTmsLayer(isDarkMode: boolean): Promise<string>;
   getTmsService(id: string): Promise<TMSService | undefined>;
-  getMapConfig(): MapsEmsConfig;
+  getMapConfig(): MapConfig;
+  getTileMapConfig(): TileMapConfig;
   getAttributionsFromTMSServce(tmsService: TMSService): string;
 }

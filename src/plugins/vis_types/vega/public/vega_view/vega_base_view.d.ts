@@ -12,12 +12,13 @@ import { IInterpreterRenderHandlers } from 'src/plugins/expressions';
 import { IEMSKbnMapsSettings } from 'src/plugins/maps_ems/public';
 import { VegaParser } from '../data_model/vega_parser';
 import { createVegaStateRestorer } from '../lib/vega_state_restorer';
+import { IEMSKbnMapsSettings } from '../../../../maps_ems/public';
 
 interface VegaViewParams {
   parentEl: HTMLDivElement;
   fireEvent: IInterpreterRenderHandlers['event'];
   vegaParser: VegaParser;
-  serviceSettings: IServiceSettings;
+  serviceSettings: IEMSKbnMapsSettings;
   filterManager: DataPublicPluginStart['query']['filterManager'];
   timefilter: DataPublicPluginStart['query']['timefilter']['timefilter'];
   vegaStateRestorer: ReturnType<typeof createVegaStateRestorer>;

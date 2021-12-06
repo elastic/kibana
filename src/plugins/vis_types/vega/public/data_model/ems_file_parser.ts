@@ -17,10 +17,10 @@ import { Data, UrlObject, EmsQueryRequest } from './types';
  * converting url object parameters into query results.
  */
 export class EmsFileParser {
-  _serviceSettings: IServiceSettings;
+  _serviceSettings: IEMSKbnMapsSettings;
   _fileLayersP?: Promise<FileLayer[]>;
 
-  constructor(serviceSettings: IServiceSettings) {
+  constructor(serviceSettings: IEMSKbnMapsSettings) {
     this._serviceSettings = serviceSettings;
   }
 

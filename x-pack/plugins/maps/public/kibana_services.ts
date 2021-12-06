@@ -6,7 +6,7 @@
  */
 
 import type { CoreStart } from 'kibana/public';
-import type { MapsEmsConfig } from '../../../../src/plugins/maps_ems/public';
+import type { MapConfig } from '../../../../src/plugins/maps_ems/public';
 import type { MapsConfigType } from '../config';
 import type { MapsPluginStartDependencies } from './plugin';
 import type { EMSSettings } from '../../../../src/plugins/maps_ems/common/ems_settings';

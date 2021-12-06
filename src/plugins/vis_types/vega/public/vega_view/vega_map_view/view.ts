@@ -105,8 +105,8 @@ export class VegaMapView extends VegaBaseView {
       customAttribution = this._serviceSettings.getAttributionsFromTMSServce(tmsService);
       style = (await tmsService.getVectorStyleSheet()) as Style;
     } else {
-      const config = this._serviceSettings.getMapConfig();
-      customAttribution = config.tilemap.options.attribution;
+      const config = this._serviceSettings.getTileMapConfig();
+      customAttribution = config.options.attribution;
     }
 
     // In some cases, Vega may be initialized twice, e.g. after awaiting...
@@ -158,7 +158,7 @@ export class VegaMapView extends VegaBaseView {
     const shouldShowUserConfiguredLayer = emsTileLayer === TMS_IN_YML_ID;
 
     if (shouldShowUserConfiguredLayer) {
-      const { url, options } = this._serviceSettings.getMapConfig().tilemap;
+      const { url, options } = this._serviceSettings.getTileMapConfig();
 
       initTmsRasterLayer({
         id: TMS_IN_YML_ID,

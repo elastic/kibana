@@ -13,25 +13,25 @@ import { i18n } from '@kbn/i18n';
 import { getIsEnterprisePlus, getKibanaVersion } from '../kibana_services';
 import { FileLayer, IEMSKbnMapsSettings, TmsLayer } from './service_settings_types';
 import { ORIGIN, TMS_IN_YML_ID } from '../../common';
-import { EMSSettings } from '../../common';
-import type { MapsEmsConfig, TileMapConfig } from '../../config';
+import type { MapConfig, TileMapConfig } from '../../config';
+import { createEMSSettings } from '../../common/ems_settings';
 
 /**
  * This class provides access to the EMS-layers and the kibana.yml configured layers through a single interface.
  */
 export class KbnMapsSettings implements IEMSKbnMapsSettings {
-  private readonly _mapConfig: MapsEmsConfig;
+  private readonly _mapConfig: MapConfig;
   private readonly _tilemapsConfig: TileMapConfig;
   private readonly _hasTmsConfigured: boolean;
   private readonly _emsClient: EMSClient;
   private readonly tmsOptionsFromConfig: any;
 
-  constructor(mapConfig: MapsEmsConfig, tilemapsConfig: TileMapConfig) {
+  constructor(mapConfig: MapConfig, tilemapsConfig: TileMapConfig) {
     this._mapConfig = mapConfig;
     this._tilemapsConfig = tilemapsConfig;
     this._hasTmsConfigured = typeof tilemapsConfig.url === 'string' && tilemapsConfig.url !== '';
 
-    const emsSettings = new EMSSettings(mapConfig, getIsEnterprisePlus);
+    const emsSettings = createEMSSettings(mapConfig, getIsEnterprisePlus);
 
     this._emsClient = new EMSClient({
       language: i18n.getLocale(),
@@ -62,9 +62,14 @@ export class KbnMapsSettings implements IEMSKbnMapsSettings {
     });
   }
 
-  getMapConfig(): MapsEmsConfig {
+  getMapConfig(): MapConfig {
     return this._mapConfig;
   }
+
+  getTileMapConfig(): TileMapConfig {
+    return this._tilemapsConfig;
+  }
+
   __debugStubManifestCalls(manifestRetrieval: () => Promise<unknown>): { removeStub: () => void } {
     const oldGetManifest = this._emsClient.getManifest;
 
@@ -264,6 +269,6 @@ function getAttributionString(emsService: EMSFileLayer | TMSService): string {
   return attributionSnippets.join(' | '); // !!!this is the current convention used in Kibana
 }
 
-function hasUserConfiguredTmsLayer(config: MapsEmsConfig) {
+function hasUserConfiguredTmsLayer(config: MapConfig) {
   return Boolean(config.tilemap?.url);
 }

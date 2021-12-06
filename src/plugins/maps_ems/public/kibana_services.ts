@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { MapsEmsConfig } from '../config';
+import type { MapConfig } from '../config';
 import { LicensingPluginStart } from '../../../../x-pack/plugins/licensing/public';
 import { ILicense } from '../../../../x-pack/plugins/licensing/common/types';
 
@@ -14,9 +14,11 @@ let kibanaVersion: string;
 export const setKibanaVersion = (version: string) => (kibanaVersion = version);
 export const getKibanaVersion = (): string => kibanaVersion;
 
-let mapsEmsConfig: MapsEmsConfig;
-export const setMapsEmsConfig = (config: MapsEmsConfig) => (mapsEmsConfig = config);
-export const getMapsEmsConfig = () => mapsEmsConfig;
+let mapsEmsConfig: MapConfig;
+export const setMapConfig = (mapsEms: MapConfig) => {
+  mapsEmsConfig = mapsEms;
+};
+export const getMapConfig = () => mapsEmsConfig;
 
 let isEnterprisePlus: boolean = false;
 function updateLicenseState(license: ILicense) {
