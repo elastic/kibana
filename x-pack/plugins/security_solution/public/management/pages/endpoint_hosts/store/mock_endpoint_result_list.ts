@@ -92,7 +92,7 @@ const endpointListApiPathHandlerMocks = ({
 }: {
   /** route handlers will be setup for each individual host in this array */
   endpointsResults?: MetadataListResponse['data'];
-  epmPackages?: GetPackagesResponse['response'];
+  epmPackages?: GetPackagesResponse['items'];
   endpointPackagePolicies?: GetPolicyListResponse['items'];
   policyResponse?: HostPolicyResponse;
   agentPolicy?: GetAgentPoliciesResponseItem;
