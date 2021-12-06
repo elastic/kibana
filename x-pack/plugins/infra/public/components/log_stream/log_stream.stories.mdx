@@ -109,7 +109,6 @@ export const dataMock = {
 
 
 export const fetch = async function (url, params) {
-  console.log('fetch', url, params);
   switch (url) {
     case '/api/infra/log_source_configurations/default':
       return DEFAULT_SOURCE_CONFIGURATION;

@@ -26,11 +26,11 @@ export const useGlobalStorybookTheme = ({ globals: { euiTheme } }: StoryContext)
   };
 };
 
-export const GlobalStorybookThemeProviders: React.FC<{ context: StoryContext }> = ({
-  context,
+export const GlobalStorybookThemeProviders: React.FC<{ storyContext: StoryContext }> = ({
   children,
+  storyContext,
 }) => {
-  const { theme, theme$ } = useGlobalStorybookTheme(context);
+  const { theme, theme$ } = useGlobalStorybookTheme(storyContext);
   return (
     <KibanaThemeProvider theme$={theme$}>
       <EuiThemeProvider darkMode={theme.darkMode}>{children}</EuiThemeProvider>
@@ -42,9 +42,11 @@ export const decorateWithGlobalStorybookThemeProviders = <
   StoryFnReactReturnType extends React.ReactNode
 >(
   wrappedStory: () => StoryFnReactReturnType,
-  context: StoryContext
+  storyContext: StoryContext
 ) => (
-  <GlobalStorybookThemeProviders context={context}>{wrappedStory()}</GlobalStorybookThemeProviders>
+  <GlobalStorybookThemeProviders storyContext={storyContext}>
+    {wrappedStory()}
+  </GlobalStorybookThemeProviders>
 );
 
 const euiThemeFromId = (themeId: string): CoreTheme => {
