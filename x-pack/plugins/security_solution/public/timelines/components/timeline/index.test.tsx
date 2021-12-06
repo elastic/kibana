@@ -14,9 +14,12 @@ import '../../../common/mock/match_media';
 import { mockBrowserFields, mockDocValueFields } from '../../../common/containers/source/mock';
 import { TimelineId } from '../../../../common/types/timeline';
 import {
+  createSecuritySolutionStorageMock,
+  kibanaObservable,
   mockGlobalState,
   mockIndexNames,
   mockIndexPattern,
+  SUB_PLUGINS_REDUCER,
   TestProviders,
 } from '../../../common/mock';
 
@@ -26,6 +29,8 @@ import { DefaultCellRenderer } from './cell_rendering/default_cell_renderer';
 import { SELECTOR_TIMELINE_GLOBAL_CONTAINER } from './styles';
 import { defaultRowRenderers } from './body/renderers';
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
+import { createStore } from '../../../common/store';
+import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 
 jest.mock('../../containers/index', () => ({
   useTimelineEvents: jest.fn(),
@@ -91,6 +96,27 @@ describe('StatefulTimeline', () => {
     rowRenderers: defaultRowRenderers,
     timelineId: TimelineId.test,
   };
+  const { storage } = createSecuritySolutionStorageMock();
+
+  const store = createStore(
+    {
+      ...mockGlobalState,
+      sourcerer: {
+        ...mockGlobalState.sourcerer,
+        sourcererScopes: {
+          ...mockGlobalState.sourcerer.sourcererScopes,
+          [SourcererScopeName.timeline]: {
+            ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.timeline],
+            selectedDataViewId: null,
+            selectedPatterns: [],
+          },
+        },
+      },
+    },
+    SUB_PLUGINS_REDUCER,
+    kibanaObservable,
+    storage
+  );
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -109,7 +135,7 @@ describe('StatefulTimeline', () => {
 
   test('renders ', () => {
     const wrapper = mount(
-      <TestProviders>
+      <TestProviders store={store}>
         <StatefulTimeline {...props} />
       </TestProviders>
     );
@@ -118,9 +144,27 @@ describe('StatefulTimeline', () => {
   });
 
   test('data view updates, updates timeline', () => {
-    mockUseSourcererDataView.mockReturnValue({ ...mockDataView, selectedPatterns: mockIndexNames });
     mount(
-      <TestProviders>
+      <TestProviders
+        store={createStore(
+          {
+            ...mockGlobalState,
+            sourcerer: {
+              ...mockGlobalState.sourcerer,
+              sourcererScopes: {
+                ...mockGlobalState.sourcerer.sourcererScopes,
+                [SourcererScopeName.timeline]: {
+                  ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.timeline],
+                  selectedPatterns: mockIndexNames,
+                },
+              },
+            },
+          },
+          SUB_PLUGINS_REDUCER,
+          kibanaObservable,
+          storage
+        )}
+      >
         <StatefulTimeline {...props} />
       </TestProviders>
     );
@@ -137,7 +181,7 @@ describe('StatefulTimeline', () => {
 
   test(`it add attribute data-timeline-id in ${SELECTOR_TIMELINE_GLOBAL_CONTAINER}`, () => {
     const wrapper = mount(
-      <TestProviders>
+      <TestProviders store={store}>
         <DragDropContextWrapper browserFields={mockBrowserFields}>
           <StatefulTimeline {...props} />
         </DragDropContextWrapper>
