@@ -5,24 +5,25 @@
  * 2.0.
  */
 
-import {
-  EuiFlexGroup,
-  EuiFlexGroupProps,
-  EuiFlexItem,
-  EuiPanel,
-  EuiSpacer,
-  EuiText,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexGroupProps, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
 import React from 'react';
 
 import { ActionCell } from '../table/action_cell';
 import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
 import { EnrichedFieldInfo } from '../types';
 
+const ActionWrapper = euiStyled.div`
+  width: 0;
+  transform: translate(6px);
+  transition: transform 50ms ease-in-out;
+  margin-left: ${({ theme }) => theme.eui.paddingSizes.s};
+`;
+
 const OverviewPanel = euiStyled(EuiPanel)`
   &&& {
     background-color: ${({ theme }) => theme.eui.euiColorLightestShade};
-    max-height: 87px;
+    padding: ${({ theme }) => theme.eui.paddingSizes.s};
+    height: 87px;
   }
 
   & {
@@ -37,6 +38,11 @@ const OverviewPanel = euiStyled(EuiPanel)`
       .timelines__hoverActionButton,
       .securitySolution__hoverActionButton {
         opacity: 1;
+      }
+
+      ${ActionWrapper} {
+        width: auto;
+        transform: translate(0);
       }
     }
   }
@@ -81,13 +87,12 @@ export const OverviewCardWithActions: React.FC<OverviewCardWithActionsProps> = (
 }) => {
   return (
     <OverviewCard title={title}>
-      <EuiFlexGroup alignItems={alignItems} gutterSize="s">
-        <EuiFlexItem grow={false}>
-          <ClampedContent>{children}</ClampedContent>
-        </EuiFlexItem>
-        <EuiFlexItem>
+      <EuiFlexGroup alignItems={alignItems} gutterSize="none">
+        <ClampedContent>{children}</ClampedContent>
+
+        <ActionWrapper>
           <ActionCell {...enrichedFieldInfo} contextId={contextId} applyWidthAndPadding={false} />
-        </EuiFlexItem>
+        </ActionWrapper>
       </EuiFlexGroup>
     </OverviewCard>
   );
