@@ -46,6 +46,8 @@ const PreviewButton = styled(EuiButton)`
   margin-left: 0;
 `;
 
+const defaultTimeRange: Unit = 'h';
+
 const RulePreviewComponent: React.FC<RulePreviewProps> = ({
   index,
   isDisabled,
@@ -64,7 +66,7 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
     }
   }, [spaces]);
 
-  const [timeFrame, setTimeFrame] = useState<Unit>('h');
+  const [timeFrame, setTimeFrame] = useState<Unit>(defaultTimeRange);
   const {
     addNoiseWarning,
     createPreview,
@@ -84,9 +86,9 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
     threshold,
   });
 
-  // Resets the timeFrame to default when rule type is changed
+  // Resets the timeFrame to default when rule type is changed because not all time frames are supported by all rule types
   useEffect(() => {
-    setTimeFrame('h');
+    setTimeFrame(defaultTimeRange);
   }, [ruleType]);
 
   return (

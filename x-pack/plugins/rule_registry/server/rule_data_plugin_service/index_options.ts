@@ -105,7 +105,7 @@ export interface IndexOptions {
    * shouldn't exist on an alert index and shouldn't be queried together with
    * real alerts in any way, because the rule that created them doesn't exist
    */
-  additionalPrefix?: '.preview';
+  additionalPrefix?: string;
 }
 
 /**

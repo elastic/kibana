@@ -45,7 +45,6 @@ import {
   DETECTION_ENGINE_INDEX_URL,
   DETECTION_ENGINE_PREPACKAGED_URL,
   DETECTION_ENGINE_QUERY_SIGNALS_URL,
-  DETECTION_ENGINE_RULES_PREVIEW_INDEX_URL,
   DETECTION_ENGINE_RULES_URL,
   DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL,
   DETECTION_ENGINE_SIGNALS_MIGRATION_URL,
@@ -579,25 +578,6 @@ export const createSignalsIndex = async (
   );
 };
 
-/**
- * Creates the preview signals index for use inside of beforeEach blocks of tests
- * This will retry 20 times before giving up and hopefully still not interfere with other tests
- * @param supertest The supertest client library
- */
-export const createPreviewSignalsIndex = async (
-  supertest: SuperTest.SuperTest<SuperTest.Test>,
-  log: ToolingLog
-): Promise<void> => {
-  await countDownTest(
-    async () => {
-      await supertest.post(DETECTION_ENGINE_RULES_PREVIEW_INDEX_URL).set('kbn-xsrf', 'true').send();
-      return true;
-    },
-    'createPreviewSignalsIndex',
-    log
-  );
-};
-
 export const createLegacyRuleAction = async (
   supertest: SuperTest.SuperTest<SuperTest.Test>,
   alertId: string,
@@ -632,27 +612,6 @@ export const deleteSignalsIndex = async (
   await countDownTest(
     async () => {
       await supertest.delete(DETECTION_ENGINE_INDEX_URL).set('kbn-xsrf', 'true').send();
-      return true;
-    },
-    'deleteSignalsIndex',
-    log
-  );
-};
-
-/**
- * Deletes the signals index for use inside of afterEach blocks of tests
- * @param supertest The supertest client library
- */
-export const deletePreviewSignalsIndex = async (
-  supertest: SuperTest.SuperTest<SuperTest.Test>,
-  log: ToolingLog
-): Promise<void> => {
-  await countDownTest(
-    async () => {
-      await supertest
-        .delete(DETECTION_ENGINE_RULES_PREVIEW_INDEX_URL)
-        .set('kbn-xsrf', 'true')
-        .send();
       return true;
     },
     'deleteSignalsIndex',

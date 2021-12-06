@@ -259,8 +259,6 @@ export const DETECTION_ENGINE_PREPACKAGED_RULES_STATUS_URL =
 export const DETECTION_ENGINE_RULES_BULK_ACTION =
   `${DETECTION_ENGINE_RULES_URL}/_bulk_action` as const;
 export const DETECTION_ENGINE_RULES_PREVIEW = `${DETECTION_ENGINE_RULES_URL}/preview` as const;
-export const DETECTION_ENGINE_RULES_PREVIEW_INDEX_URL =
-  `${DETECTION_ENGINE_RULES_PREVIEW}/index` as const;
 
 /**
  * Internal detection engine routes
@@ -382,10 +380,3 @@ export const WARNING_TRANSFORM_STATES = new Set([
   TRANSFORM_STATES.STOPPED,
   TRANSFORM_STATES.STOPPING,
 ]);
-
-export enum INVOCATION_COUNT {
-  HOUR = 20,
-  DAY = 24,
-  WEEK = 168,
-  MONTH = 30,
-}

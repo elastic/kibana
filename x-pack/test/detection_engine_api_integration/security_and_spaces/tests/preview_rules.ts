@@ -9,13 +9,7 @@ import expect from '@kbn/expect';
 
 import { DETECTION_ENGINE_RULES_PREVIEW } from '../../../../plugins/security_solution/common/constants';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import {
-  deleteAllAlerts,
-  createPreviewSignalsIndex,
-  deletePreviewSignalsIndex,
-  getSimplePreviewRule,
-  getSimpleRulePreviewOutput,
-} from '../../utils';
+import { deleteAllAlerts, getSimplePreviewRule, getSimpleRulePreviewOutput } from '../../utils';
 import { ROLES } from '../../../../plugins/security_solution/common/test';
 import { createUserAndRole, deleteUserAndRole } from '../../../common/services/security_solution';
 
@@ -36,12 +30,7 @@ export default ({ getService }: FtrProviderContext) => {
         await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
       });
 
-      beforeEach(async () => {
-        await createPreviewSignalsIndex(supertest, log);
-      });
-
       afterEach(async () => {
-        await deletePreviewSignalsIndex(supertest, log);
         await deleteAllAlerts(supertest, log);
       });
 
