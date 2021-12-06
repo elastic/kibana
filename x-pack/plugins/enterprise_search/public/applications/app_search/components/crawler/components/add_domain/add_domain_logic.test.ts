@@ -507,16 +507,16 @@ describe('AddDomainLogic', () => {
             networkConnectivity: {
               state: 'invalid',
               message:
-                'Unable to establish a network connection because the "Initial Validation" check failed.',
+                'Unable to establish a network connection because the "Initial validation" check failed.',
             },
             indexingRestrictions: {
               state: 'invalid',
               message:
-                'Unable to determine indexing restrictions because the "Network Connectivity" check failed.',
+                'Unable to determine indexing restrictions because the "Network connectivity" check failed.',
             },
             contentVerification: {
               state: 'invalid',
-              message: 'Unable to verify content because the "Indexing Restrictions" check failed.',
+              message: 'Unable to verify content because the "Indexing restrictions" check failed.',
             },
           });
         });
@@ -602,16 +602,16 @@ describe('AddDomainLogic', () => {
             networkConnectivity: {
               state: 'invalid',
               message:
-                'Unable to establish a network connection because the "Initial Validation" check failed.',
+                'Unable to establish a network connection because the "Initial validation" check failed.',
             },
             indexingRestrictions: {
               state: 'invalid',
               message:
-                'Unable to determine indexing restrictions because the "Network Connectivity" check failed.',
+                'Unable to determine indexing restrictions because the "Network connectivity" check failed.',
             },
             contentVerification: {
               state: 'invalid',
-              message: 'Unable to verify content because the "Indexing Restrictions" check failed.',
+              message: 'Unable to verify content because the "Indexing restrictions" check failed.',
             },
           });
         });
