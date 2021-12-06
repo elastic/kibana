@@ -4,68 +4,33 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   Criteria,
   EuiLink,
   EuiTableFieldDataColumnType,
   EuiBadge,
   EuiBasicTable,
+  PropsOf,
+  EuiBasicTableProps,
 } from '@elastic/eui';
 import { orderBy } from 'lodash';
-import { CSPFinding } from './types';
-import { FindingsRuleFlyout } from './rule_flyout';
+import { CSPFinding, FetchState } from './types';
+import { FindingsRuleFlyout } from './findings_flyout';
 import { CSPEvaluationBadge } from '../../components/csp_evaluation_badge';
 
-const getTagsBadges = (v: string[]) => (
-  <>
-    {v.map((x) => (
-      <EuiBadge color="default">{x}</EuiBadge>
-    ))}
-  </>
-);
+type FindingsTableProps = FetchState<CSPFinding[]>;
 
-const RuleName = (v: string) => <EuiLink href="#">{v}</EuiLink>;
-
-const columns: Array<EuiTableFieldDataColumnType<CSPFinding>> = [
-  {
-    field: 'resource.filename',
-    name: 'Resource',
-    truncateText: true,
-  },
-  {
-    field: 'rule.name',
-    name: 'Rule Name',
-    width: '50%',
-    truncateText: true,
-    render: RuleName,
-  },
-  {
-    field: 'result.evaluation',
-    name: 'Evaluation',
-    width: '80px',
-    render: (v) => <CSPEvaluationBadge type={v} />,
-  },
-  {
-    field: 'rule.tags',
-    name: 'Tags',
-    truncateText: true,
-    render: getTagsBadges,
-  },
-];
-
-interface FindingsTableProps {
-  data: CSPFinding[];
-  isLoading: boolean;
-  error?: string;
-}
-
-export const FindingsTable = ({ data, isLoading, error }: FindingsTableProps) => {
+/**
+ * Temporary findings table
+ */
+export const FindingsTable = ({ data, loading, error }: FindingsTableProps) => {
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(25);
   const [sortField, setSortField] = useState<keyof CSPFinding>('resource');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const [selectedFinding, setSelectedFinding] = useState<CSPFinding | undefined>();
+  const columns = useMemo(getColumns, []);
 
   const getCellProps = (item: CSPFinding, column: EuiTableFieldDataColumnType<CSPFinding>) => ({
     onClick: column.field === 'rule.name' ? () => setSelectedFinding(item) : undefined,
@@ -82,7 +47,11 @@ export const FindingsTable = ({ data, isLoading, error }: FindingsTableProps) =>
     setSortDirection(direction);
   };
 
-  const pagination = {
+  // TODO: add empty/error/loading views
+  if (!data) return null;
+
+  // TODO: async pagination?
+  const pagination: EuiBasicTableProps<CSPFinding>['pagination'] = {
     pageIndex,
     pageSize,
     totalItemCount: data.length,
@@ -90,7 +59,8 @@ export const FindingsTable = ({ data, isLoading, error }: FindingsTableProps) =>
     hidePerPageOptions: false,
   };
 
-  const sorting = {
+  // TODO: async sorting?
+  const sorting: EuiBasicTableProps<CSPFinding>['sorting'] = {
     sort: {
       field: sortField,
       direction: sortDirection,
@@ -104,8 +74,8 @@ export const FindingsTable = ({ data, isLoading, error }: FindingsTableProps) =>
   return (
     <>
       <EuiBasicTable
-        loading={isLoading}
-        error={error}
+        loading={loading}
+        error={error ? error : undefined}
         items={page}
         columns={columns}
         tableLayout={'auto'}
@@ -123,3 +93,44 @@ export const FindingsTable = ({ data, isLoading, error }: FindingsTableProps) =>
     </>
   );
 };
+
+const RuleName = (v: string) => <EuiLink href="#">{v}</EuiLink>;
+const RuleTags = (v: string[]) => v.map((x) => <EuiBadge color="default">{x}</EuiBadge>);
+const ResultEvaluation = (v: PropsOf<typeof CSPEvaluationBadge>['type']) => (
+  <CSPEvaluationBadge type={v} />
+);
+
+const getColumns = (): Array<EuiTableFieldDataColumnType<CSPFinding>> => [
+  {
+    field: 'resource.filename',
+    name: 'Resource',
+    truncateText: true,
+  },
+  {
+    field: 'rule.name',
+    name: 'Rule Name',
+    width: '50%',
+    truncateText: true,
+    render: RuleName,
+  },
+  {
+    field: 'result.evaluation',
+    name: 'Evaluation',
+    width: '80px',
+    render: ResultEvaluation,
+  },
+  {
+    field: 'rule.tags',
+    name: 'Tags',
+    truncateText: true,
+    // TODO: tags need to be truncated (as they are components, not texts)
+    // and on hover they should show the full tags
+    // currently causes the table to overflow its parent
+    render: RuleTags,
+  },
+  {
+    field: '@timestamp',
+    name: 'Timestamp',
+    truncateText: true,
+  },
+];

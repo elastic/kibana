@@ -5,24 +5,33 @@
  * 2.0.
  */
 
+export type FetchState<T> =
+  | { loading: false; error: false; data: undefined } // idle
+  | { loading: false; error: false; data: T } // data
+  | { loading: false; error: string; data: undefined } // error
+  | { loading: true; error: false; data: undefined }; // loading
+
 export interface CSPFinding {
   '@timestamp': string;
   run_id: string;
   result: CSPFindingResult;
   resource: CSPFindingResource;
-  rule: {
-    benchmark: string;
-    description: string;
-    impact: string;
-    name: string;
-    remediation: string;
-    tags: string[];
-  };
+  rule: CSPRule;
   host: CSPFindingHost;
   agent: CSPFindingAgent;
   ecs: {
     version: string;
   };
+}
+
+// TODO: rename
+interface CSPRule {
+  benchmark: string;
+  description: string;
+  impact: string;
+  name: string;
+  remediation: string;
+  tags: string[];
 }
 
 // TODO: rename

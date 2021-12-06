@@ -79,6 +79,12 @@ export const DEFAULT_THREAT_INDEX_VALUE = ['logs-ti_*'] as const;
 export const DEFAULT_THREAT_MATCH_QUERY = '@timestamp >= "now-30d"' as const;
 
 /**
+ * Cloud Posture indicies
+ */
+
+export const CSP_KUBEBEAT_INDEX = 'kubebeat';
+
+/**
  * Cloud Posture Routes
  */
 export const CSP_ROOT_PATH = `/csp`;
