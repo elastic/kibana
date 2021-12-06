@@ -7,6 +7,7 @@
 
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { Logger } from 'src/core/server';
+import { set } from '@elastic/safer-lodash-set';
 
 import { DETECTION_ENGINE_RULES_BULK_ACTION } from '../../../../../common/constants';
 import {
@@ -153,25 +154,34 @@ export const performBulkActionRoute = (
               body: responseBody,
             });
           case BulkAction.update:
+            const isArrProp = (
+              field: 'index' | 'tags' | 'timeline_id'
+            ): field is 'tags' | 'index' => {
+              return field === 'index' || field === 'tags';
+            };
             await Promise.all(
               rules.data.map(async (existingRule) => {
                 const transformedRule = transformAlertToRule(existingRule);
                 body?.updates?.map?.(({ type, field, value }) => {
                   switch (type) {
                     case BulkActionUpdateType.add:
-                      transformedRule[field] = Array.from(
-                        new Set([...(transformedRule[field] ?? []), ...value])
-                      );
+                      if (isArrProp(field)) {
+                        transformedRule[field] = Array.from(
+                          new Set([...(transformedRule[field] ?? []), ...value])
+                        );
+                      }
                       break;
 
                     case BulkActionUpdateType.delete:
-                      const valueSet = new Set(value ?? []);
-                      transformedRule[field] =
-                        transformedRule[field]?.filter((item) => !valueSet.has(item)) ?? [];
+                      if (isArrProp(field)) {
+                        const valueSet = new Set(value ?? []);
+                        transformedRule[field] =
+                          transformedRule[field]?.filter((item) => !valueSet.has(item)) ?? [];
+                      }
                       break;
 
                     case BulkActionUpdateType.set:
-                      transformedRule[field] = value;
+                      set(transformedRule, field, value);
                   }
 
                   return transformedRule;

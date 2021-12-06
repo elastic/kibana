@@ -478,5 +478,5 @@ const actionUpdatesTimelineId = t.type({
 export const bulkActionUpdate = t.union([
   actionUpdatesTags,
   actionUpdatesIndex,
-  //  actionUpdatesTimelineId,
+  actionUpdatesTimelineId,
 ]);
