@@ -21,19 +21,21 @@ import { LensServerPluginSetup } from '../../../../lens/server';
 
 import {
   AlertCommentRequestRt,
-  CASE_COMMENT_SAVED_OBJECT,
   CaseResponse,
   CaseStatuses,
   CaseType,
   CommentRequest,
   CommentRequestRt,
   CommentType,
-  ENABLE_CASE_CONNECTOR,
-  MAX_GENERATED_ALERTS_PER_SUB_CASE,
   SubCaseAttributes,
   throwErrors,
   User,
-} from '../../../common';
+} from '../../../common/api';
+import {
+  CASE_COMMENT_SAVED_OBJECT,
+  ENABLE_CASE_CONNECTOR,
+  MAX_GENERATED_ALERTS_PER_SUB_CASE,
+} from '../../../common/constants';
 import {
   buildCaseUserActionItem,
   buildCommentUserActionItem,
@@ -127,6 +129,7 @@ const addGeneratedAlerts = async (
     logger,
     lensEmbeddableFactory,
     authorization,
+    alertsService,
   } = clientArgs;
 
   const query = pipe(
@@ -204,9 +207,7 @@ const addGeneratedAlerts = async (
         comment: query,
         status: subCase.attributes.status,
       });
-      await casesClientInternal.alerts.updateStatus({
-        alerts: alertsToUpdate,
-      });
+      await alertsService.updateAlertsStatus(alertsToUpdate);
     }
 
     await userActionService.bulkCreate({
@@ -339,6 +340,7 @@ export const addComment = async (
     logger,
     lensEmbeddableFactory,
     authorization,
+    alertsService,
   } = clientArgs;
 
   if (isCommentRequestTypeGenAlert(comment)) {
@@ -392,9 +394,7 @@ export const addComment = async (
         status: updatedCase.status,
       });
 
-      await casesClientInternal.alerts.updateStatus({
-        alerts: alertsToUpdate,
-      });
+      await alertsService.updateAlertsStatus(alertsToUpdate);
     }
 
     await userActionService.bulkCreate({
