@@ -875,7 +875,7 @@ const addCirclesRadius = <T extends { circlesRadius: number }>(axes: T[]): T[] =
     const hasCircleRadiusAttribute = axis?.circlesRadius;
     return {
       ...axis,
-      ...(!hasCircleRadiusAttribute && {
+      ...(!Number.isFinite(axis?.circlesRadius) && {
         circlesRadius: 1,
       }),
     };
