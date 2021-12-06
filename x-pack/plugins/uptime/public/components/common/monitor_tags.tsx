@@ -24,9 +24,9 @@ import { SyntheticsMonitorSavedObject } from '../../../common/types';
 
 interface Props {
   ping?: Ping | null;
-  monitorId: string;
+  monitorId?: string;
   summary?: MonitorSummary;
-  allSavedMonitors: SyntheticsMonitorSavedObject[];
+  allSavedMonitors?: SyntheticsMonitorSavedObject[];
 }
 
 const getTagsFromSummary = (summary: MonitorSummary) => {

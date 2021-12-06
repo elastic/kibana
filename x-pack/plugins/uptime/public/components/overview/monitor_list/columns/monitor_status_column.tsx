@@ -9,15 +9,8 @@ import React, { useContext } from 'react';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiText,
-  EuiToolTip,
-  EuiBadge,
-  EuiSpacer,
-  EuiIcon,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip, EuiBadge, EuiSpacer } from '@elastic/eui';
+import { useSelector } from 'react-redux';
 import { parseTimestamp } from '../parse_timestamp';
 import { Ping } from '../../../../../common/runtime_types';
 import {
@@ -31,13 +24,15 @@ import { UptimeThemeContext } from '../../../../contexts';
 import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
 import { STATUS_DOWN_LABEL, STATUS_UP_LABEL } from '../../../common/translations';
 import { getMonitorObject } from './monitor_name_col';
+import { monitorListSelector } from '../../../../state/selectors';
+import { SyntheticsMonitorSavedObject } from '../../../../../common/types';
 
 interface MonitorListStatusColumnProps {
   status: string;
-  monitorId: string;
+  monitorId?: string;
   timestamp: string;
   summaryPings: Ping[];
-  monitorListObjects: object[];
+  monitorListObjects?: SyntheticsMonitorSavedObject[];
 }
 
 const StatusColumnFlexG = styled(EuiFlexGroup)`
@@ -161,6 +156,8 @@ export const MonitorListStatusColumn = ({
   timestamp: tsString,
   monitorListObjects,
 }: MonitorListStatusColumnProps) => {
+  const { loading } = useSelector(monitorListSelector);
+
   const objMonitor = getMonitorObject(monitorId, monitorListObjects);
 
   const timestamp = parseTimestamp(tsString);
@@ -177,15 +174,21 @@ export const MonitorListStatusColumn = ({
         <EuiFlexItem grow={false} style={{ flexBasis: 40 }}>
           <EuiBadge
             className="eui-textCenter"
-            color={!objMonitor ? 'default' : status === STATUS.UP ? 'success' : dangerBehindText}
+            color={
+              !objMonitor && !loading
+                ? 'default'
+                : status === STATUS.UP
+                ? 'success'
+                : dangerBehindText
+            }
           >
             {getHealthMessage(status)}
           </EuiBadge>
         </EuiFlexItem>
-        {!objMonitor && (
+        {!objMonitor && !loading && (
           <EuiFlexItem style={{ flexBasis: 40 }} grow={false}>
             <EuiBadge className="eui-textCenter" color={'warning'}>
-              STALE
+              {STALE_LABEL}
             </EuiBadge>
           </EuiFlexItem>
         )}
@@ -211,7 +214,10 @@ export const MonitorListStatusColumn = ({
           }
         >
           <EuiText size="xs" color="subdued" className="eui-textNoWrap">
-            Checked {getShortTimeStamp(timestamp)}
+            {i18n.translate('xpack.uptime.monitorList.statusColumn.checkedLabel', {
+              defaultMessage: 'Checked {value}',
+              values: { value: getShortTimeStamp(timestamp) },
+            })}
           </EuiText>
         </EuiToolTip>
       </EuiText>
@@ -222,3 +228,7 @@ export const MonitorListStatusColumn = ({
 const PaddedText = euiStyled(EuiText)`
   padding-right: ${(props) => props.theme.eui.paddingSizes.xs};
 `;
+
+const STALE_LABEL = i18n.translate('xpack.uptime.monitorList.statusColumn.staleLabel', {
+  defaultMessage: 'STALE',
+});

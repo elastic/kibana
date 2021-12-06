@@ -7,6 +7,7 @@
 import React, { useState } from 'react';
 import useWindowSize from 'react-use/lib/useWindowSize';
 import useDebounce from 'react-use/lib/useDebounce';
+import { i18n } from '@kbn/i18n';
 import {
   EuiButtonIcon,
   EuiBasicTable,
@@ -43,8 +44,8 @@ interface Props extends MonitorListProps {
   pageSize: number;
   setPageSize: (val: number) => void;
   monitorList: MonitorList;
-  pendingMonitors: SyntheticsMonitorSavedObject[];
-  allSavedMonitors: SyntheticsMonitorSavedObject[];
+  pendingMonitors?: SyntheticsMonitorSavedObject[];
+  allSavedMonitors?: SyntheticsMonitorSavedObject[];
 }
 
 export type SummaryOrMonitor = SyntheticsMonitorSavedObject | MonitorSummary;
@@ -127,7 +128,13 @@ export const MonitorListComponent = ({
               />
             );
           } else {
-            return <EuiBadge color="primary">PENDING</EuiBadge>;
+            return (
+              <EuiBadge color="primary">
+                {i18n.translate('xpack.uptime.monitorList.statusColumn.pendingLabel', {
+                  defaultMessage: 'PENDING',
+                })}
+              </EuiBadge>
+            );
           }
         },
       },
@@ -140,8 +147,6 @@ export const MonitorListComponent = ({
         },
         render: (_name: string, summaryOrMonitor: SummaryOrMonitor) => {
           const summary = 'state' in summaryOrMonitor ? summaryOrMonitor : undefined;
-          const monitorSavedObject =
-            'attributes' in summaryOrMonitor ? summaryOrMonitor : undefined;
 
           return (
             <MonitorNameColumn
@@ -150,7 +155,6 @@ export const MonitorListComponent = ({
               }
               summary={summary}
               allSavedMonitors={allSavedMonitors}
-              monitorSavedObject={monitorSavedObject}
             />
           );
         },

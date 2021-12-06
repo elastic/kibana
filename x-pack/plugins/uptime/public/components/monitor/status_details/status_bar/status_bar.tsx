@@ -107,7 +107,7 @@ export const MonitorStatusBar: React.FC = () => {
         )}
         <MonListTitle>{TAGS_LABEL}</MonListTitle>
         <MonListDescription>
-          <MonitorTags ping={monitorStatus} />
+          <MonitorTags ping={monitorStatus} monitorId={monitorId} />
         </MonListDescription>
         <MonitorSSLCertificate tls={monitorStatus?.tls} />
         <MonitorRedirects monitorStatus={monitorStatus} />

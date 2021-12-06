@@ -18,8 +18,7 @@ import { SyntheticsMonitorSavedObject } from '../../../../../common/types';
 interface Props {
   monitorId: string;
   summary?: MonitorSummary;
-  allSavedMonitors: SyntheticsMonitorSavedObject[];
-  monitorSavedObject?: SyntheticsMonitorSavedObject;
+  allSavedMonitors?: SyntheticsMonitorSavedObject[];
 }
 
 export const parseCurrentFilters = (filters: string) => {
@@ -40,18 +39,16 @@ const MONITOR_TYPES: Record<string, string> = {
 };
 
 export const getMonitorObject = (
-  monitorId: string,
-  monitorListObjects: SyntheticsMonitorSavedObject[]
+  monitorId?: string,
+  monitorListObjects?: SyntheticsMonitorSavedObject[]
 ) => {
+  if (!monitorId) {
+    return;
+  }
   return monitorListObjects?.find(({ id }) => monitorId.includes(id));
 };
 
-export const MonitorNameColumn = ({
-  monitorId,
-  summary,
-  monitorSavedObject,
-  allSavedMonitors,
-}: Props) => {
+export const MonitorNameColumn = ({ monitorId, summary, allSavedMonitors }: Props) => {
   const objMonitor = getMonitorObject(monitorId, allSavedMonitors);
 
   let monitorName: string | undefined = '';
