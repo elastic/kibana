@@ -34,7 +34,7 @@ import {
   PackagePolicyEditExtensionComponentProps,
 } from '../apm_policy_form/typings';
 import { getCommands } from '../../../tutorial/config_agent/commands/get_commands';
-import { replaceTemplateStrings } from './replace_template_strings';
+import { renderMustache } from './render_mustache';
 
 function AccordionButtonContent({
   agentName,
@@ -145,10 +145,13 @@ export function AgentInstructionsAccordion({
       { title: stepTitle, textPre, textPost, customComponentName, commands },
       index
     ) => {
-      const commandBlock = replaceTemplateStrings(
-        Array.isArray(commands) ? commands.join('\n') : commands || '',
-        docLinks
-      );
+      const commandBlock = commands
+        ? renderMustache({
+            text: commands,
+            docLinks,
+          })
+        : '';
+
       return (
         <section key={index}>
           <EuiText>
@@ -158,7 +161,7 @@ export function AgentInstructionsAccordion({
           <EuiText color="subdued" size="s">
             {textPre && (
               <InstructionsContent
-                markdown={replaceTemplateStrings(textPre, docLinks)}
+                markdown={renderMustache({ text: textPre, docLinks })}
               />
             )}
             {commandBlock && (
@@ -187,7 +190,7 @@ export function AgentInstructionsAccordion({
               <>
                 <EuiSpacer />
                 <InstructionsContent
-                  markdown={replaceTemplateStrings(textPost, docLinks)}
+                  markdown={renderMustache({ text: textPost, docLinks })}
                 />
               </>
             )}
