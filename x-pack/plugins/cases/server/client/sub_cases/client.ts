@@ -19,13 +19,10 @@ import {
   SubCasesFindResponseRt,
   SubCasesPatchRequest,
 } from '../../../common/api';
+import { MAX_CONCURRENT_SEARCHES, CASE_SAVED_OBJECT } from '../../../common/constants';
 import { CasesClientArgs, CasesClientInternal } from '..';
-import {
-  countAlertsForID,
-  createCaseError,
-  flattenSubCaseSavedObject,
-  transformSubCases,
-} from '../../common/utils';
+import { createCaseError } from '../../common/error';
+import { countAlertsForID, flattenSubCaseSavedObject, transformSubCases } from '../../common/utils';
 import { buildCaseUserActionItem } from '../../services/user_actions/helpers';
 import { constructQueryOptions } from '../utils';
 import { defaultPage, defaultPerPage } from '../../routes/api';

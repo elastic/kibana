@@ -18,9 +18,11 @@ import styled from 'styled-components';
 import {
   Case,
   CaseStatusWithAllStatus,
-  CommentRequestAlertType,
   SubCase,
-} from '../../../../common';
+} from '../../../../common/ui';
+import {
+  CommentRequestAlertType,
+} from '../../../../common/api';
 import { CasesNavigation } from '../../links';
 import * as i18n from '../../../common/translations';
 import { AllCasesGeneric } from '../all_cases_generic';

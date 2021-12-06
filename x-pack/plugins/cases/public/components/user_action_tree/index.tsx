@@ -26,6 +26,8 @@ import * as i18n from './translations';
 import { useUpdateComment } from '../../containers/use_update_comment';
 import { useCurrentUser } from '../../common/lib/kibana';
 import { AddComment } from '../add_comment';
+import { Case, Ecs } from '../../../common/ui/types';
+import { CaseUserActions } from '../../../common/ui';
 import {
   ActionConnector,
   ActionsCommentRequestRt,
