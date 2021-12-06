@@ -144,7 +144,6 @@ export const patchRulesBulkRoute = (
             const rule = await patchRules({
               rule: migratedRule,
               rulesClient,
-              savedObjectsClient,
               author,
               buildingBlockType,
               description,
@@ -157,8 +156,6 @@ export const patchRulesBulkRoute = (
               license,
               outputIndex,
               savedId,
-              spaceId: context.securitySolution.getSpaceId(),
-              ruleStatusClient,
               timelineId,
               timelineTitle,
               meta,

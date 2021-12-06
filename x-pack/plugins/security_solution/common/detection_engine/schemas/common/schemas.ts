@@ -444,6 +444,39 @@ export enum BulkAction {
   'export' = 'export',
   'delete' = 'delete',
   'duplicate' = 'duplicate',
+  'update' = 'update',
 }
 
 export const bulkAction = enumeration('BulkAction', BulkAction);
+
+export enum BulkActionUpdateType {
+  'add' = 'add',
+  'delete' = 'delete',
+  'set' = 'set',
+}
+
+export const bulkActionUpdateType = enumeration('BulkActionUpdateType', BulkActionUpdateType);
+
+const actionUpdatesTags = t.type({
+  type: bulkActionUpdateType,
+  field: t.literal('tags'),
+  value: tags,
+});
+
+const actionUpdatesIndex = t.type({
+  type: bulkActionUpdateType,
+  field: t.literal('index'),
+  value: index,
+});
+
+const actionUpdatesTimelineId = t.type({
+  type: t.literal('overwrite'),
+  field: t.literal('timeline_id'),
+  value: timeline_id,
+});
+
+export const bulkActionUpdate = t.union([
+  actionUpdatesTags,
+  actionUpdatesIndex,
+  //  actionUpdatesTimelineId,
+]);

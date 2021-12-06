@@ -9,7 +9,11 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import { Logger } from 'src/core/server';
 
 import { DETECTION_ENGINE_RULES_BULK_ACTION } from '../../../../../common/constants';
-import { BulkAction } from '../../../../../common/detection_engine/schemas/common/schemas';
+import {
+  BulkAction,
+  BulkActionUpdateType,
+} from '../../../../../common/detection_engine/schemas/common/schemas';
+import { RulesSchema } from '../../../../../common/detection_engine/schemas/response/rules_schema';
 import { performBulkActionSchema } from '../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema';
 import { SetupPlugins } from '../../../../plugin';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
@@ -20,8 +24,11 @@ import { deleteRules } from '../../rules/delete_rules';
 import { duplicateRule } from '../../rules/duplicate_rule';
 import { enableRule } from '../../rules/enable_rule';
 import { findRules } from '../../rules/find_rules';
+import { patchRules } from '../../rules/patch_rules';
 import { getExportByObjectIds } from '../../rules/get_export_by_object_ids';
 import { buildSiemResponse } from '../utils';
+import { transformAlertToRule } from './utils';
+import { PartialFilter } from '../../types';
 
 const BULK_ACTION_RULES_LIMIT = 10000;
 
@@ -145,6 +152,134 @@ export const performBulkActionRoute = (
               },
               body: responseBody,
             });
+          case BulkAction.update:
+            await Promise.all(
+              rules.data.map(async (existingRule) => {
+                const transformedRule = transformAlertToRule(existingRule);
+                body?.updates?.map?.(({ type, field, value }) => {
+                  switch (type) {
+                    case BulkActionUpdateType.add:
+                      transformedRule[field] = Array.from(
+                        new Set([...(transformedRule[field] ?? []), ...value])
+                      );
+                      break;
+
+                    case BulkActionUpdateType.delete:
+                      const valueSet = new Set(value ?? []);
+                      transformedRule[field] =
+                        transformedRule[field]?.filter((item) => !valueSet.has(item)) ?? [];
+                      break;
+
+                    case BulkActionUpdateType.set:
+                      transformedRule[field] = value;
+                  }
+
+                  return transformedRule;
+                });
+
+                const {
+                  actions: actionsRest,
+                  author,
+                  building_block_type: buildingBlockType,
+                  description,
+                  enabled,
+                  event_category_override: eventCategoryOverride,
+                  false_positives: falsePositives,
+                  from,
+                  query,
+                  language,
+                  license,
+                  output_index: outputIndex,
+                  saved_id: savedId,
+                  timeline_id: timelineId,
+                  timeline_title: timelineTitle,
+                  meta,
+                  filters,
+                  index,
+                  interval,
+                  max_signals: maxSignals,
+                  risk_score: riskScore,
+                  risk_score_mapping: riskScoreMapping,
+                  rule_name_override: ruleNameOverride,
+                  name,
+                  severity,
+                  severity_mapping: severityMapping,
+                  tags,
+                  to,
+                  type,
+                  threat,
+                  threshold,
+                  threat_filters: threatFilters,
+                  threat_index: threatIndex,
+                  threat_indicator_path: threatIndicatorPath,
+                  threat_query: threatQuery,
+                  threat_mapping: threatMapping,
+                  threat_language: threatLanguage,
+                  concurrent_searches: concurrentSearches,
+                  items_per_search: itemsPerSearch,
+                  timestamp_override: timestampOverride,
+                  throttle,
+                  references,
+                  note,
+                  version,
+                  anomaly_threshold: anomalyThreshold,
+                  machine_learning_job_id: machineLearningJobId,
+                  exceptions_list: exceptionsList,
+                } = transformedRule;
+
+                await patchRules({
+                  rulesClient,
+                  rule: existingRule,
+                  author,
+                  buildingBlockType,
+                  description,
+                  enabled,
+                  eventCategoryOverride,
+                  falsePositives,
+                  from,
+                  query,
+                  language,
+                  license,
+                  outputIndex,
+                  savedId,
+                  timelineId,
+                  timelineTitle,
+                  meta,
+                  filters: filters as PartialFilter[],
+                  index,
+                  interval,
+                  maxSignals,
+                  riskScore,
+                  riskScoreMapping,
+                  ruleNameOverride,
+                  name,
+                  severity,
+                  severityMapping,
+                  tags,
+                  to,
+                  type,
+                  threat,
+                  threshold,
+                  threatFilters,
+                  threatIndex,
+                  threatIndicatorPath,
+                  threatQuery,
+                  threatMapping,
+                  threatLanguage,
+                  throttle,
+                  concurrentSearches,
+                  itemsPerSearch,
+                  timestampOverride,
+                  references,
+                  note,
+                  version,
+                  anomalyThreshold,
+                  machineLearningJobId,
+                  actions: actionsRest,
+                  exceptionsList,
+                });
+              })
+            );
         }
 
         return response.ok({ body: { success: true, rules_count: rules.data.length } });
