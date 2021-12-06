@@ -79,6 +79,7 @@ export interface AlertServices<
     getRecoveredAlertIds: () => string[];
     setRecoveryContext: (id: string, context: InstanceContext) => void;
   };
+  shouldWriteAlerts: () => boolean;
 }
 
 export interface AlertExecutorOptions<

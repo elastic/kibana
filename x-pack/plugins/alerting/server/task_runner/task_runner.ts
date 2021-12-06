@@ -333,6 +333,7 @@ export class TaskRunner<
                 recoveryContext[id] = context;
               },
             },
+            shouldWriteAlerts: () => this.shouldLogAndScheduleActionsForAlerts(),
           },
           params,
           state: alertTypeState as State,

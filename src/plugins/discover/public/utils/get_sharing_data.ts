@@ -9,7 +9,7 @@
 import type { Capabilities } from 'kibana/public';
 import type { IUiSettingsClient } from 'kibana/public';
 import type { DataPublicPluginStart } from 'src/plugins/data/public';
-import type { ISearchSource, SearchSourceFields } from 'src/plugins/data/common';
+import type { Filter, ISearchSource, SerializedSearchSourceFields } from 'src/plugins/data/common';
 import { DOC_HIDE_TIME_COLUMN_SETTING, SORT_DEFAULT_ORDER_SETTING } from '../../common';
 import type { SavedSearch, SortOrder } from '../services/saved_searches';
 import { getSortForSearchSource } from '../components/doc_table';
@@ -26,6 +26,7 @@ export async function getSharingData(
   const { uiSettings: config, data } = services;
   const searchSource = currentSearchSource.createCopy();
   const index = searchSource.getField('index')!;
+  const existingFilter = searchSource.getField('filter');
 
   searchSource.setField(
     'sort',
@@ -54,12 +55,22 @@ export async function getSharingData(
   }
 
   return {
-    getSearchSource: (absoluteTime?: boolean): SearchSourceFields => {
-      const filter = absoluteTime
+    getSearchSource: (absoluteTime?: boolean): SerializedSearchSourceFields => {
+      const timeFilter = absoluteTime
         ? data.query.timefilter.timefilter.createFilter(index)
         : data.query.timefilter.timefilter.createRelativeFilter(index);
 
-      searchSource.setField('filter', filter);
+      if (existingFilter && timeFilter) {
+        searchSource.setField(
+          'filter',
+          Array.isArray(existingFilter)
+            ? [timeFilter, ...existingFilter]
+            : ([timeFilter, existingFilter] as Filter[])
+        );
+      } else {
+        const filter = timeFilter || existingFilter;
+        searchSource.setField('filter', filter);
+      }
 
       return searchSource.getSerializedFields(true);
     },

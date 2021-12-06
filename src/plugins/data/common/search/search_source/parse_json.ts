@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { SearchSourceFields } from './types';
+import { SerializedSearchSourceFields } from './types';
 import { InvalidJSONProperty } from '../../../../kibana_utils/common';
 
 export const parseSearchSourceJSON = (searchSourceJSON: string) => {
   // if we have a searchSource, set its values based on the searchSourceJson field
-  let searchSourceValues: SearchSourceFields;
+  let searchSourceValues: SerializedSearchSourceFields;
   try {
     searchSourceValues = JSON.parse(searchSourceJSON);
   } catch (e) {
