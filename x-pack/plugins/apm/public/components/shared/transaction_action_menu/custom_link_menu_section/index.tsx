@@ -32,7 +32,7 @@ import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plug
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { CreateEditCustomLinkFlyout } from '../../../app/settings/customize_ui/custom_link/create_edit_custom_link_flyout';
 import { convertFiltersToQuery } from '../../../app/settings/customize_ui/custom_link/create_edit_custom_link_flyout/helper';
-import { LoadingStatePrompt } from '../../LoadingStatePrompt';
+import { LoadingStatePrompt } from '../../loading_state_prompt';
 import { CustomLinkToolbar } from './CustomLinkToolbar';
 import { CustomLinkList } from './custom_link_list';
 

@@ -18,7 +18,7 @@ import {
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { APIReturnType } from '../../../services/rest/createCallApmApi';
 import { truncate } from '../../../utils/style';
-import { EmptyMessage } from '../../shared/EmptyMessage';
+import { EmptyMessage } from '../../shared/empty_message';
 import { ImpactBar } from '../../shared/ImpactBar';
 import { TransactionDetailLink } from '../../shared/links/apm/transaction_detail_link';
 import { ITableColumn, ManagedTable } from '../../shared/managed_table';

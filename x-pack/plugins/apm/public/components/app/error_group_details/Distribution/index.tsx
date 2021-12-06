@@ -19,7 +19,7 @@ import React, { Suspense, useState } from 'react';
 import { ALERT_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { i18n } from '@kbn/i18n';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
-import { APIReturnType } from '../../../../services/rest/createCallApmApi';
+import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { useTheme } from '../../../../hooks/use_theme';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { AlertType } from '../../../../../common/alert_types';

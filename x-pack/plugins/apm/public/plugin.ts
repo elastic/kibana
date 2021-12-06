@@ -185,7 +185,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       );
 
       const { createCallApmApi } = await import(
-        './services/rest/createCallApmApi'
+        './services/rest/create_call_apm_api'
       );
 
       // have to do this here as well in case app isn't mounted yet
@@ -240,7 +240,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
         './components/app/rum_dashboard/ux_overview_fetchers'
       );
       const { createCallApmApi } = await import(
-        './services/rest/createCallApmApi'
+        './services/rest/create_call_apm_api'
       );
       // have to do this here as well in case app isn't mounted yet
       createCallApmApi(core);

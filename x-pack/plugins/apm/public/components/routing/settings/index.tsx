@@ -19,6 +19,7 @@ import { CustomLinkOverview } from '../../app/Settings/custom_link';
 import { AgentKeys } from '../../app/Settings/agent_keys';
 import { ApmIndices } from '../../app/settings/ApmIndices';
 import { CustomizeUI } from '../../app/settings/customize_ui';
+import { AgentKeys } from '../../app/settings/agent_keys';
 import { Schema } from '../../app/settings/schema';
 import { AnomalyDetection } from '../../app/settings/anomaly_detection';
 

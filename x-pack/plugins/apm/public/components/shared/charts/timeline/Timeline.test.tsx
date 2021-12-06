@@ -11,7 +11,7 @@ import {
   mountWithTheme,
   mockMoment,
   toJson,
-} from '../../../../utils/testHelpers';
+} from '../../../../utils/test_helpers';
 import { Timeline } from '.';
 
 describe('Timeline', () => {

@@ -8,7 +8,7 @@
 import { fireEvent, render, RenderResult } from '@testing-library/react';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { getCallApmApiSpy } from '../../../../services/rest/callApmApiSpy';
+import { getCallApmApiSpy } from '../../../../../services/rest/call_apm_api_spyspy';
 import { CustomLinkOverview } from '.';
 import { License } from '../../../../../../licensing/common/license';
 import { ApmPluginContextValue } from '../../../../context/apm_plugin/apm_plugin_context';
@@ -21,7 +21,7 @@ import * as hooks from '../../../../hooks/use_fetcher';
 import {
   expectTextsInDocument,
   expectTextsNotInDocument,
-} from '../../../../utils/testHelpers';
+} from '../../../../../utils/test_helpers';
 import * as saveCustomLink from './create_edit_custom_link_flyout/saveCustomLink';
 
 const data = {

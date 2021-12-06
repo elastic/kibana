@@ -10,7 +10,7 @@ import cytoscape from 'cytoscape';
 import React, { ReactNode } from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { MockApmPluginContextWrapper } from '../../../context/apm_plugin/mock_apm_plugin_context';
-import { renderWithTheme } from '../../../utils/testHelpers';
+import { renderWithTheme } from '../../../utils/test_helpers';
 import { CytoscapeContext } from './Cytoscape';
 import { EmptyBanner } from './EmptyBanner';
 

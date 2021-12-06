@@ -13,7 +13,7 @@ import { getOptionLabel } from '../../../../../../common/agent_configuration/all
 import {
   APIReturnType,
   callApmApi,
-} from '../../../../../services/rest/createCallApmApi';
+} from '../../../../../services/rest/create_call_apm_api';
 import { useApmPluginContext } from '../../../../../context/apm_plugin/use_apm_plugin_context';
 
 type Config =

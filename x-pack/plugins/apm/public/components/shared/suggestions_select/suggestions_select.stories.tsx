@@ -10,7 +10,7 @@ import { Meta, Story } from '@storybook/react';
 import React from 'react';
 import { CoreStart } from '../../../../../../../src/core/public';
 import { createKibanaReactContext } from '../../../../../../../src/plugins/kibana_react/public';
-import { createCallApmApi } from '../../../services/rest/createCallApmApi';
+import { createCallApmApi } from '../../../services/rest/create_call_apm_api';
 import { SuggestionsSelect } from './';
 
 interface Args {

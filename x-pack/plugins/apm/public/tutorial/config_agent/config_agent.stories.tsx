@@ -10,7 +10,7 @@ import { HttpStart } from 'kibana/public';
 import React from 'react';
 import { POLICY_ELASTIC_AGENT_ON_CLOUD } from '../../../common/fleet';
 import TutorialConfigAgent from './';
-import { APIReturnType } from '../../services/rest/createCallApmApi';
+import { APIReturnType } from '../../services/rest/create_call_apm_api';
 
 export type APIResponseType = APIReturnType<'GET /internal/apm/fleet/agents'>;
 

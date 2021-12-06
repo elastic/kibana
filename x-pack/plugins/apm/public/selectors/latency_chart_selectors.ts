@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiTheme } from '../../../../../src/plugins/kibana_react/common';
 import { asDuration } from '../../common/utils/formatters';
 import { APMChartSpec, Coordinate } from '../../typings/timeseries';
-import { APIReturnType } from '../services/rest/createCallApmApi';
+import { APIReturnType } from '../services/rest/create_call_apm_api';
 
 export type LatencyChartsResponse =
   APIReturnType<'GET /internal/apm/services/{serviceName}/transactions/charts/latency'>;

@@ -6,7 +6,7 @@
  */
 
 import { mockNow } from '../utils/testHelpers';
-import { clearCache, callApi } from './rest/callApi';
+import { clearCache, callApi } from './rest/call_api';
 import { CoreStart, HttpSetup } from 'kibana/public';
 
 type CoreMock = CoreStart & {

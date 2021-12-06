@@ -26,10 +26,10 @@ import { getEnvironmentLabel } from '../../../../../common/environment_filter_va
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { useMlManageJobsHref } from '../../../../hooks/use_ml_manage_jobs_href';
-import { callApmApi } from '../../../../services/rest/createCallApmApi';
-import { MLExplorerLink } from '../../../shared/Links/MachineLearningLinks/MLExplorerLink';
-import { MLManageJobsLink } from '../../../shared/Links/MachineLearningLinks/MLManageJobsLink';
-import { LoadingStatePrompt } from '../../../shared/LoadingStatePrompt';
+import { callApmApi } from '../../../../services/rest/create_call_apm_api';
+import { MLExplorerLink } from '../../../shared/links/MachineLearningLinks/MLExplorerLink';
+import { MLManageJobsLink } from '../../../shared/links/MachineLearningLinks/MLManageJobsLink';
+import { LoadingStatePrompt } from '../../../shared/loading_state_prompt';
 import { ITableColumn, ManagedTable } from '../../../shared/managed_table';
 import { MLCallout, shouldDisplayMlCallout } from '../../../shared/ml_callout';
 import { AnomalyDetectionApiResponse } from './index';

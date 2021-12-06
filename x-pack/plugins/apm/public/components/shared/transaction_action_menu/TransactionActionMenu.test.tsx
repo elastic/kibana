@@ -17,11 +17,11 @@ import {
 } from '../../../context/apm_plugin/mock_apm_plugin_context';
 import { LicenseContext } from '../../../context/license/license_context';
 import * as hooks from '../../../hooks/use_fetcher';
-import * as apmApi from '../../../services/rest/createCallApmApi';
+import * as apmApi from '../../../services/rest/create_call_apm_api';
 import {
   expectTextsInDocument,
   expectTextsNotInDocument,
-} from '../../../utils/testHelpers';
+} from '../../../utils/test_helpers';
 import { TransactionActionMenu } from './TransactionActionMenu';
 import * as Transactions from './__fixtures__/mockData';
 

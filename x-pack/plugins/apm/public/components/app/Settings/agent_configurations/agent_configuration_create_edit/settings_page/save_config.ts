@@ -12,7 +12,7 @@ import {
   getOptionLabel,
   omitAllOption,
 } from '../../../../../../../common/agent_configuration/all_option';
-import { callApmApi } from '../../../../../../services/rest/createCallApmApi';
+import { callApmApi } from '../../../../../../services/rest/create_call_apm_api';
 
 export async function saveConfig({
   config,

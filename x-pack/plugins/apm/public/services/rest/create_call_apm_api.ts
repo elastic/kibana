@@ -21,7 +21,7 @@ import type {
 // an error is expected here
 import { formatRequest } from '@kbn/server-route-repository/target_node/format_request';
 import { FetchOptions } from '../../../common/fetch_options';
-import { callApi } from './callApi';
+import { callApi } from './call_api';
 import type {
   APMServerRouteRepository,
   APMRouteHandlerResources,

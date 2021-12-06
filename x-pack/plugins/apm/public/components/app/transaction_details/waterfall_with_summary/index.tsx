@@ -18,7 +18,7 @@ import React, { useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import type { ApmUrlParams } from '../../../../context/url_params_context/types';
 import { fromQuery, toQuery } from '../../../shared/links/url_helpers';
-import { LoadingStatePrompt } from '../../../shared/LoadingStatePrompt';
+import { LoadingStatePrompt } from '../../../shared/loading_state_prompt';
 import { TransactionSummary } from '../../../shared/Summary/TransactionSummary';
 import { TransactionActionMenu } from '../../../shared/transaction_action_menu/TransactionActionMenu';
 import type { TraceSample } from '../../../../hooks/use_transaction_trace_samples_fetcher';

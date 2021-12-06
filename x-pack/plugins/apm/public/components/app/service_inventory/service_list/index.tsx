@@ -32,7 +32,7 @@ import {
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { Breakpoints, useBreakpoints } from '../../../../hooks/use_breakpoints';
 import { useFallbackToTransactionsFetcher } from '../../../../hooks/use_fallback_to_transactions_fetcher';
-import { APIReturnType } from '../../../../services/rest/createCallApmApi';
+import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { unit } from '../../../../utils/style';
 import { ApmRoutes } from '../../../routing/apm_route_config';
 import { AggregatedTransactionsBadge } from '../../../shared/aggregated_transactions_badge';

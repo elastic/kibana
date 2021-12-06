@@ -22,11 +22,11 @@ import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { useFetcher } from '../../../../hooks/use_fetcher';
-import { clearCache } from '../../../../services/rest/callApi';
+import { clearCache } from '../../../../services/rest/call_api';
 import {
   APIReturnType,
   callApmApi,
-} from '../../../../services/rest/createCallApmApi';
+} from '../../../../services/rest/create_call_apm_api';
 
 const APM_INDEX_LABELS = [
   {

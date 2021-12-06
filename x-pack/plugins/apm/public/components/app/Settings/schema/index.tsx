@@ -16,7 +16,7 @@ import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import {
   callApmApi,
   APIReturnType,
-} from '../../../../services/rest/createCallApmApi';
+} from '../../../../services/rest/create_call_apm_api';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 
 type FleetMigrationCheckResponse =

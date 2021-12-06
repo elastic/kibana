@@ -12,6 +12,7 @@ interface LastTickValueProps {
   marginTop: number;
   value: string;
 }
+
 export function LastTickValue({ x, marginTop, value }: LastTickValueProps) {
   return (
     <g transform={`translate(${x}, ${marginTop})`}>

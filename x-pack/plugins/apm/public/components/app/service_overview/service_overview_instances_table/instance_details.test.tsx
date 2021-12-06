@@ -6,12 +6,12 @@
  */
 import React from 'react';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
-import { APIReturnType } from '../../../../services/rest/createCallApmApi';
+import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import {
   expectTextsInDocument,
   expectTextsNotInDocument,
   renderWithTheme,
-} from '../../../../utils/testHelpers';
+} from '../../../../utils/test_helpers';
 import { InstanceDetails } from './intance_details';
 import * as useInstanceDetailsFetcher from './use_instance_details_fetcher';
 

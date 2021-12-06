@@ -13,9 +13,9 @@ import {
 import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
 import { useApmParams } from '../../hooks/use_apm_params';
 import { FETCH_STATUS, useFetcher } from '../../hooks/use_fetcher';
-import { APIReturnType } from '../../services/rest/createCallApmApi';
 import { useApmPluginContext } from '../apm_plugin/use_apm_plugin_context';
 import { useLicenseContext } from '../license/use_license_context';
+import { APIReturnType } from '../../services/rest/create_call_apm_api';
 
 export interface AnomalyDetectionJobsContextValue {
   anomalyDetectionJobsData?: APIReturnType<'GET /internal/apm/settings/anomaly-detection/jobs'>;

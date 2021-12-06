@@ -19,6 +19,7 @@ import { useAnomalyDetectionJobsContext } from '../../../context/anomaly_detecti
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { useTheme } from '../../../hooks/use_theme';
+import { APIReturnType } from '../../../services/rest/create_call_apm_api';
 import { getLegacyApmHref } from '../links/apm/APMLink';
 
 export function AnomalyDetectionSetupLink() {

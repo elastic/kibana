@@ -13,7 +13,7 @@ import { MockApmPluginContextWrapper } from '../../../../../context/apm_plugin/m
 import {
   expectTextsInDocument,
   renderWithTheme,
-} from '../../../../../utils/testHelpers';
+} from '../../../../../utils/test_helpers';
 import { ErrorMark } from '../../../../app/transaction_details/waterfall_with_summary/waterfall_container/marks/get_error_marks';
 import { ErrorMarker } from './error_marker';
 

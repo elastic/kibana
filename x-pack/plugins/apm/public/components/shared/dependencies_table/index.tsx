@@ -21,7 +21,7 @@ import {
 } from '../../../../common/utils/formatters';
 import { useBreakpoints } from '../../../hooks/use_breakpoints';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
-import { EmptyMessage } from '../EmptyMessage';
+import { EmptyMessage } from '../empty_message';
 import { ImpactBar } from '../ImpactBar';
 import { ListMetric } from '../list_metric';
 import { ITableColumn, ManagedTable } from '../managed_table';

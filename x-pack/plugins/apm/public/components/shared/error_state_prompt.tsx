@@ -9,6 +9,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiEmptyPrompt } from '@elastic/eui';
 
+// TODO: can we remove it? ErrorStatePrompt not used in apm
 export function ErrorStatePrompt() {
   return (
     <EuiEmptyPrompt

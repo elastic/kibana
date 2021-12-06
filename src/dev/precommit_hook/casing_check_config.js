@@ -59,7 +59,7 @@ export const IGNORE_FILE_GLOBS = [
   'packages/elastic-safer-lodash-set/**/*',
 
   // TODO fix file names in APM to remove these
-  //'x-pack/plugins/apm/public/**/*',
+  'x-pack/plugins/apm/public/**/*',
 
   'x-pack/plugins/maps/server/fonts/**/*',
 
