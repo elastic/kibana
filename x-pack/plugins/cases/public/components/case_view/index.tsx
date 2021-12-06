@@ -9,15 +9,8 @@ import React, { useCallback, useEffect, useMemo, useState, useRef, MutableRefObj
 import styled from 'styled-components';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingContent, EuiLoadingSpinner } from '@elastic/eui';
 
-import {
-  CaseStatuses,
-  CaseAttributes,
-  CaseType,
-  Case,
-  CaseConnector,
-  Ecs,
-  CaseViewRefreshPropInterface,
-} from '../../../common';
+import { Case, Ecs, CaseViewRefreshPropInterface } from '../../../common/ui/types';
+import { CaseStatuses, CaseAttributes, CaseType, CaseConnector } from '../../../common/api';
 import { HeaderPage } from '../header_page';
 import { EditableTitle } from '../header_page/editable_title';
 import { TagList } from '../tag_list';
@@ -61,7 +54,6 @@ export interface CaseViewComponentProps {
    * **NOTE**: Do not hold on to the `.current` object, as it could become stale
    */
   refreshRef?: MutableRefObject<CaseViewRefreshPropInterface>;
-  hideSyncAlerts?: boolean;
 }
 
 export interface CaseViewProps extends Omit<CaseViewComponentProps, 'caseId' | 'subCaseId'> {
@@ -98,7 +90,6 @@ export const CaseComponent = React.memo<CaseComponentProps>(
     updateCase,
     useFetchAlertData,
     refreshRef,
-    hideSyncAlerts = false,
   }) => {
     const { userCanCrud } = useCasesContext();
     const { getCaseViewUrl } = useCaseViewNavigation();
@@ -388,7 +379,6 @@ export const CaseComponent = React.memo<CaseComponentProps>(
             caseData={caseData}
             currentExternalIncident={currentExternalIncident}
             userCanCrud={userCanCrud}
-            disableAlerting={ruleDetailsNavigation == null || hideSyncAlerts}
             isLoading={isLoading && (updateKey === 'status' || updateKey === 'settings')}
             onRefresh={handleRefresh}
             onUpdateField={onUpdateField}
@@ -506,7 +496,6 @@ export const CaseView = React.memo(
     timelineIntegration,
     useFetchAlertData,
     refreshRef,
-    hideSyncAlerts,
   }: CaseViewProps) => {
     const { spaces: spacesApi } = useKibana().services;
     const { detailName: caseId, subCaseId } = useCaseViewParams();
@@ -562,7 +551,6 @@ export const CaseView = React.memo(
             updateCase={updateCase}
             useFetchAlertData={useFetchAlertData}
             refreshRef={refreshRef}
-            hideSyncAlerts={hideSyncAlerts}
           />
         </CasesTimelineIntegrationProvider>
       )

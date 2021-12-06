@@ -11,7 +11,7 @@ import styled from 'styled-components';
 
 import { OnUpdateColumns } from '../timeline/events';
 import { WithHoverActions } from '../../../common/components/with_hover_actions';
-import { ColumnHeaderOptions } from '../../../../common';
+import { ColumnHeaderOptions } from '../../../../common/types';
 import { HoverActions } from '../../../common/components/hover_actions';
 import { TimelineContext } from '../../../../../timelines/public';
 
