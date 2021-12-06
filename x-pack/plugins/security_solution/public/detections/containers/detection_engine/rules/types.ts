@@ -19,6 +19,7 @@ import {
   threats,
   type,
   severity_mapping,
+  severity,
 } from '@kbn/securitysolution-io-ts-alerting-types';
 import {
   SortOrder,
@@ -101,7 +102,7 @@ export const RuleSchema = t.intersection([
     risk_score: t.number,
     risk_score_mapping,
     rule_id: t.string,
-    severity: t.string,
+    severity,
     severity_mapping,
     tags: t.array(t.string),
     type,
