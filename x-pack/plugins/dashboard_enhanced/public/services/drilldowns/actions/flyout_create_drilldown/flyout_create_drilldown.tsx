@@ -63,7 +63,7 @@ export class FlyoutCreateDrilldownAction implements Action<EmbeddableContext> {
     const allPossibleTriggers = this.params
       .start()
       .plugins.uiActionsEnhanced.getActionFactories()
-      .map((factory) => factory.supportedTriggers())
+      .map((factory) => (factory.isCompatibleLicense() ? factory.supportedTriggers() : []))
       .reduce((res, next) => res.concat(next), []);
 
     return ensureNestedTriggers(supportedTriggers).some((trigger) =>
