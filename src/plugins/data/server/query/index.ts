@@ -6,5 +6,4 @@
  * Side Public License, v 1.
  */
 
-export type { QuerySetup } from './query_service';
 export { QueryService } from './query_service';
