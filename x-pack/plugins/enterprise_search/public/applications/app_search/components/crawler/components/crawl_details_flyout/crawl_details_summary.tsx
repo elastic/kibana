@@ -28,7 +28,7 @@ interface ICrawlerSummaryProps {
   crawlType: string;
   crawlerLogsEnabled: boolean | undefined;
   domainCount: number;
-  stats: CrawlRequestStats;
+  stats: CrawlRequestStats | null;
 }
 
 export const CrawlDetailsSummary: React.FC<ICrawlerSummaryProps> = ({

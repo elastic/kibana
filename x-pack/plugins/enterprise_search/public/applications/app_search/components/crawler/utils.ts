@@ -170,7 +170,7 @@ export function crawlRequestWithDetailsServerToClient(
     crawlConfig: crawlConfigServerToClient(crawlConfig),
     createdAt,
     id,
-    stats: crawlRequestStatsServerToClient(crawlStats),
+    stats: crawlStats && crawlRequestStatsServerToClient(crawlStats),
     status,
     type,
   };

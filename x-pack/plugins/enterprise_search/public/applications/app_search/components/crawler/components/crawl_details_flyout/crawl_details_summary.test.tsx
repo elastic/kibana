@@ -72,7 +72,7 @@ describe('CrawlDetailsSummary', () => {
   });
 
   it('renders a message to enable logs when crawler logs are disabled and stats are null', () => {
-    wrapper.setProps({ crawlerLogsEnabled: false, stats: undefined });
+    wrapper.setProps({ crawlerLogsEnabled: false, stats: null });
     expect(wrapper.find({ 'data-test-subj': 'crawlDuration' })).toHaveLength(0);
     expect(wrapper.find({ 'data-test-subj': 'pagesVisited' })).toHaveLength(0);
     expect(wrapper.find({ 'data-test-subj': 'avgResponseTime' })).toHaveLength(0);

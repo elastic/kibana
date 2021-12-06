@@ -30,15 +30,13 @@ export const CrawlDetailsPreview: React.FC<CrawlDetailsPreviewProps> = ({ crawle
 
   return (
     <>
-      {crawlRequest.stats && (
-        <CrawlDetailsSummary
-          crawlerLogsEnabled={crawlerLogsEnabled}
-          crawlType={crawlRequest.type}
-          domainCount={crawlRequest.crawlConfig.domainAllowlist.length}
-          crawlDepth={crawlRequest.crawlConfig.maxCrawlDepth}
-          stats={crawlRequest.stats}
-        />
-      )}
+      <CrawlDetailsSummary
+        crawlerLogsEnabled={crawlerLogsEnabled}
+        crawlType={crawlRequest.type}
+        domainCount={crawlRequest.crawlConfig.domainAllowlist.length}
+        crawlDepth={crawlRequest.crawlConfig.maxCrawlDepth}
+        stats={crawlRequest.stats || null}
+      />
       <EuiSpacer />
       <AccordionList
         hasBorder
