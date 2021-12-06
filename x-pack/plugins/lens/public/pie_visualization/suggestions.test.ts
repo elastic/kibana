@@ -784,7 +784,8 @@ describe('suggestions', () => {
       ).toHaveLength(0);
     });
 
-    it('mosaic type should be added only in case of 2 groups', () => {
+    /** The following test should be activated when Experimental flag will be removed from the Waffle chart **/
+    it.skip('mosaic type should be added only in case of 2 groups', () => {
       expect(
         suggestions({
           table: {
@@ -952,7 +953,8 @@ describe('suggestions', () => {
       ).toHaveLength(0);
     });
 
-    it('waffle type should be added only in case of 1 group', () => {
+    /** The following test should be activated when Experimental flag will be removed from the Mosaic chart **/
+    it.skip('waffle type should be added only in case of 1 group', () => {
       expect(
         suggestions({
           table: {
@@ -971,14 +973,13 @@ describe('suggestions', () => {
             changeType: 'unchanged',
           },
           state: {
-            shape: 'waffle',
+            shape: 'pie',
             layers: [
               {
                 layerId: 'first',
                 layerType: layerTypes.DATA,
                 groups: ['a', 'b'],
                 metric: 'c',
-
                 numberDisplay: 'hidden',
                 categoryDisplay: 'inside',
                 legendDisplay: 'show',
@@ -1031,7 +1032,7 @@ describe('suggestions', () => {
 
       // test with no group
       expect(
-        suggestions(meta).filter(({ hide, state }) => !hide && state.shape === 'waffle')
+        suggestions(meta).filter(({ hide, state }) => state.shape === 'waffle')
       ).toMatchInlineSnapshot(`Array []`);
 
       meta.table.columns.push({

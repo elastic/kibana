@@ -232,11 +232,12 @@ export function suggestions({
         ],
       },
       previewIcon: 'bullseye',
-      hide:
-        groups.length !== 2 ||
-        table.changeType === 'reduced' ||
-        hasIntervalScale(groups) ||
-        (state && state.shape === 'mosaic'),
+      hide: true,
+      /** The following code should be uncomment when Experimental flag will be removed from Mosaic chart **/
+      // groups.length !== 2 ||
+      // table.changeType === 'reduced' ||
+      // hasIntervalScale(groups) ||
+      // (state && state.shape === 'mosaic'),
     });
   }
 
@@ -275,11 +276,12 @@ export function suggestions({
         ],
       },
       previewIcon: 'bullseye',
-      hide:
-        groups.length !== 1 ||
-        table.changeType === 'reduced' ||
-        hasIntervalScale(groups) ||
-        (state && state.shape === 'waffle'),
+      hide: true,
+      /** The following code should be uncomment when Experimental flag will be removed from Waffle chart **/
+      // groups.length !== 1 ||
+      // table.changeType === 'reduced' ||
+      // hasIntervalScale(groups) ||
+      // (state && state.shape === 'waffle'),
     });
   }
 
