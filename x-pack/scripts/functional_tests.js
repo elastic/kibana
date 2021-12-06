@@ -45,6 +45,7 @@ const onlyNotInCoverageTests = [
   require.resolve('../test/plugin_api_integration/config.ts'),
   require.resolve('../test/rule_registry/security_and_spaces/config_basic.ts'),
   require.resolve('../test/rule_registry/security_and_spaces/config_trial.ts'),
+  require.resolve('../test/rule_registry/spaces_only/config_basic.ts'),
   require.resolve('../test/rule_registry/spaces_only/config_trial.ts'),
   require.resolve('../test/security_api_integration/saml.config.ts'),
   require.resolve('../test/security_api_integration/session_idle.config.ts'),
