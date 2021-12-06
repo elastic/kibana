@@ -12,7 +12,6 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { ENTERPRISE_SEARCH_PLUGIN } from '../../../../../common/constants';
-import { DOCS_PREFIX } from '../../../app_search/routes';
 import { SetEnterpriseSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 import { SetupGuideLayout, SETUP_GUIDE_TITLE } from '../../../shared/setup_guide';
 import { SendEnterpriseSearchTelemetry as SendTelemetry } from '../../../shared/telemetry';
@@ -23,8 +22,6 @@ export const SetupGuide: React.FC = () => (
   <SetupGuideLayout
     productName={ENTERPRISE_SEARCH_PLUGIN.NAME}
     productEuiIcon="logoEnterpriseSearch"
-    standardAuthLink={`${DOCS_PREFIX}/security-and-users.html#app-search-self-managed-security-and-user-management-standard`}
-    elasticsearchNativeAuthLink={`${DOCS_PREFIX}/security-and-users.html#app-search-self-managed-security-and-user-management-elasticsearch-native-realm`}
   >
     <SetPageChrome trail={[SETUP_GUIDE_TITLE]} />
     <SendTelemetry action="viewed" metric="setup_guide" />
