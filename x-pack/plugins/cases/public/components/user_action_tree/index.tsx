@@ -30,12 +30,9 @@ import {
   ActionConnector,
   ActionsCommentRequestRt,
   AlertCommentRequestRt,
-  Case,
-  CaseUserActions,
   CommentType,
   ContextTypeUserRt,
-  Ecs,
-} from '../../../common';
+} from '../../../common/api';
 import { CaseServices } from '../../containers/use_get_case_user_actions';
 import { parseStringAsExternalService } from '../../common/user_actions';
 import { OnUpdateFields } from '../case_view';

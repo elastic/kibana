@@ -6,7 +6,7 @@
  */
 
 import React, { useState, useCallback, useMemo } from 'react';
-import { Case, CaseType } from '../../../common';
+import { Case, CaseType } from '../../../common/ui/types';
 import { useOwnerContext } from '../owner_context/use_owner_context';
 import { CreateCaseModal } from './create_case_modal';
 
