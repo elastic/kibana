@@ -124,6 +124,7 @@ const mockCore: () => Partial<CoreStart> = () => {
         // @ts-ignore
         PageTemplate: EuiPageTemplate,
       },
+      ExploratoryViewEmbeddable: () => <div>Embeddable exploratory view</div>,
     },
   };
 
@@ -143,7 +144,10 @@ export function MockKibanaProvider<ExtraCore>({
   return (
     <KibanaContextProvider services={{ ...coreOptions }} {...kibanaProps}>
       <UptimeRefreshContextProvider>
-        <UptimeStartupPluginsContextProvider data={(coreOptions as any).data}>
+        <UptimeStartupPluginsContextProvider
+          data={(coreOptions as any).data}
+          observability={(coreOptions as any).observability}
+        >
           <EuiThemeProvider darkMode={false}>
             <I18nProvider>{children}</I18nProvider>
           </EuiThemeProvider>
