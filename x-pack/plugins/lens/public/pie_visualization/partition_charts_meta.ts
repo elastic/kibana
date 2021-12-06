@@ -14,7 +14,7 @@ import { LensIconChartPie } from '../assets/chart_pie';
 import { LensIconChartTreemap } from '../assets/chart_treemap';
 import { LensIconChartMosaic } from '../assets/chart_mosaic';
 import { LensIconChartWaffle } from '../assets/chart_waffle';
-import { PIE_SIZE_RATIO } from './constants';
+import { DONUT_INNER_AREA_SIZE } from './constants';
 
 import type { SharedPieLayerState } from '../../common/expressions';
 import type { PieChartTypes } from '../../common/expressions/pie_chart/types';
@@ -30,7 +30,6 @@ interface PartitionChartMeta {
   requiredMinDimensionCount?: number;
   toolbarPopover: {
     isDisabled?: boolean;
-    hasInnerAreaSizeSetting?: boolean;
     categoryOptions: Array<{
       value: SharedPieLayerState['categoryDisplay'];
       inputDisplay: string;
@@ -39,9 +38,9 @@ interface PartitionChartMeta {
       value: SharedPieLayerState['numberDisplay'];
       inputDisplay: string;
     }>;
-    sizeRatioOptions: Array<{
+    donutInnerAreaSizeOptions: Array<{
       id: string;
-      value: PIE_SIZE_RATIO;
+      value: DONUT_INNER_AREA_SIZE;
       label: string;
     }>;
   };
@@ -117,29 +116,30 @@ const numberOptions: PartitionChartMeta['toolbarPopover']['numberOptions'] = [
   },
 ];
 
-const sizeRatioOptions: PartitionChartMeta['toolbarPopover']['sizeRatioOptions'] = [
-  {
-    id: 'pieSizeOption-small',
-    value: PIE_SIZE_RATIO.SMALL,
-    label: i18n.translate('xpack.lens.pieChart.sizeRatioOptions.small', {
-      defaultMessage: 'Small',
-    }),
-  },
-  {
-    id: 'pieSizeOption-medium',
-    value: PIE_SIZE_RATIO.MEDIUM,
-    label: i18n.translate('xpack.lens.pieChart.sizeRatioOptions.medium', {
-      defaultMessage: 'Medium',
-    }),
-  },
-  {
-    id: 'pieSizeOption-large',
-    value: PIE_SIZE_RATIO.LARGE,
-    label: i18n.translate('xpack.lens.pieChart.sizeRatioOptions.large', {
-      defaultMessage: 'Large',
-    }),
-  },
-];
+const donutInnerAreaSizeOptions: PartitionChartMeta['toolbarPopover']['donutInnerAreaSizeOptions'] =
+  [
+    {
+      id: 'donutInnerAreaSizeOption-small',
+      value: DONUT_INNER_AREA_SIZE.SMALL,
+      label: i18n.translate('xpack.lens.pieChart.donutInnerAreaSizeOptions.small', {
+        defaultMessage: 'Small',
+      }),
+    },
+    {
+      id: 'donutInnerAreaSizeOption-medium',
+      value: DONUT_INNER_AREA_SIZE.MEDIUM,
+      label: i18n.translate('xpack.lens.pieChart.donutInnerAreaSizeOptions.medium', {
+        defaultMessage: 'Medium',
+      }),
+    },
+    {
+      id: 'donutInnerAreaSizeOption-large',
+      value: DONUT_INNER_AREA_SIZE.LARGE,
+      label: i18n.translate('xpack.lens.pieChart.donutInnerAreaSizeOptions.large', {
+        defaultMessage: 'Large',
+      }),
+    },
+  ];
 
 export const PartitionChartsMeta: Record<PieChartTypes, PartitionChartMeta> = {
   donut: {
@@ -153,8 +153,7 @@ export const PartitionChartsMeta: Record<PieChartTypes, PartitionChartMeta> = {
     toolbarPopover: {
       categoryOptions,
       numberOptions,
-      sizeRatioOptions,
-      hasInnerAreaSizeSetting: true,
+      donutInnerAreaSizeOptions,
     },
     legend: {
       getShowLegendDefault: (bucketColumns) => bucketColumns.length > 1,
@@ -171,7 +170,7 @@ export const PartitionChartsMeta: Record<PieChartTypes, PartitionChartMeta> = {
     toolbarPopover: {
       categoryOptions,
       numberOptions,
-      sizeRatioOptions,
+      donutInnerAreaSizeOptions: [],
     },
     legend: {
       getShowLegendDefault: (bucketColumns) => bucketColumns.length > 1,
@@ -188,7 +187,7 @@ export const PartitionChartsMeta: Record<PieChartTypes, PartitionChartMeta> = {
     toolbarPopover: {
       categoryOptions: categoryOptionsTreemap,
       numberOptions,
-      sizeRatioOptions: [],
+      donutInnerAreaSizeOptions: [],
     },
     legend: {
       getShowLegendDefault: () => false,
@@ -206,7 +205,7 @@ export const PartitionChartsMeta: Record<PieChartTypes, PartitionChartMeta> = {
     toolbarPopover: {
       categoryOptions: [],
       numberOptions,
-      sizeRatioOptions: [],
+      donutInnerAreaSizeOptions: [],
     },
     legend: {
       getShowLegendDefault: () => false,
@@ -236,7 +235,7 @@ export const PartitionChartsMeta: Record<PieChartTypes, PartitionChartMeta> = {
       isDisabled: true,
       categoryOptions: [],
       numberOptions: [],
-      sizeRatioOptions: [],
+      donutInnerAreaSizeOptions: [],
     },
     legend: {
       flat: true,

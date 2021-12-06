@@ -17,6 +17,7 @@ import {
   EuiIconTip,
   EuiFlexItem,
   EuiFlexGroup,
+  EuiButtonGroup,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -33,10 +34,14 @@ import { TruncateLabelsOption } from './truncate_labels';
 import { PaletteRegistry } from '../../../../../charts/public';
 import { DEFAULT_PERCENT_DECIMALS } from '../../../common';
 import { PieVisParams, LabelPositions, ValueFormats, PieTypeProps } from '../../types';
-import { getLabelPositions, getValuesFormats } from '../collections';
+import { donutInnerAreaSizeOptions, getLabelPositions, getValuesFormats } from '../collections';
 import { getLegendPositions } from '../positions';
 
 export interface PieOptionsProps extends VisEditorOptionsProps<PieVisParams>, PieTypeProps {}
+
+const donutInnerAreaSizeLabel = i18n.translate('visTypePie.editors.pie.donutInnerAreaSizeLabel', {
+  defaultMessage: 'Inner area size',
+});
 
 function DecimalSlider<ParamName extends string>({
   paramName,
@@ -116,6 +121,28 @@ const PieOptions = (props: PieOptionsProps) => {
           value={stateParams.isDonut}
           setValue={setValue}
         />
+        {stateParams.isDonut && (
+          <EuiFormRow label={donutInnerAreaSizeLabel} fullWidth>
+            <EuiButtonGroup
+              isFullWidth
+              name="donutInnerAreaSize"
+              buttonSize="compressed"
+              legend={donutInnerAreaSizeLabel}
+              options={donutInnerAreaSizeOptions}
+              idSelected={
+                donutInnerAreaSizeOptions.find(
+                  ({ value }) => value === stateParams.donutInnerAreaSize
+                )?.id || 'donutInnerAreaSizeOption-medium'
+              }
+              onChange={(sizeId) => {
+                const donutInnerAreaSize = donutInnerAreaSizeOptions.find(
+                  ({ id }) => id === sizeId
+                )?.value;
+                setValue('donutInnerAreaSize', donutInnerAreaSize);
+              }}
+            />
+          </EuiFormRow>
+        )}
         <BasicOptions {...props} legendPositions={getLegendPositions} />
         {props.showElasticChartsOptions && (
           <>

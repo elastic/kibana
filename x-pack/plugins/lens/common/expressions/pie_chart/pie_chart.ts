@@ -97,11 +97,7 @@ export const pie: ExpressionFunctionDefinition<
       help: '',
       types: ['palette'],
     },
-    pieSizeRatio: {
-      types: ['number'],
-      help: '',
-    },
-    donutInnerAreaRatio: {
+    donutInnerAreaSize: {
       types: ['number'],
       help: '',
     },
