@@ -47,13 +47,13 @@ async function main() {
     node: {
       alias: 'n',
       describe: 'elasticsearch node url',
-      default: 'http://elastic:changeme@localhost:9220',
+      default: 'http://elastic:changeme@localhost:9200',
       type: 'string',
     },
     kibana: {
       alias: 'k',
       describe: 'kibana url',
-      default: 'http://elastic:changeme@localhost:5620',
+      default: 'http://elastic:changeme@localhost:5601',
       type: 'string',
     },
     eventIndex: {
