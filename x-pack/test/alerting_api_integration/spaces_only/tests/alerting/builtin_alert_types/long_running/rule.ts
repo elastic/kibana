@@ -40,7 +40,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
           id: ruleId,
           provider: 'alerting',
           actions: new Map([
-            ['execute', { equal: 4 }],
+            ['execute', { gte: 4 }],
             // by the time we see 4 "execute" events, we should also see the following:
             ['execute-start', { gte: 4 }],
             ['execute-timeout', { gte: 4 }],
@@ -75,6 +75,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
         ruleTypeId: 'test.patternLongRunning.cancelAlertsOnRuleTimeout',
         pattern: [false, true, false, false],
       });
+
       // get the events we're expecting
       await retry.try(async () => {
         return await getEventLog({
@@ -85,11 +86,11 @@ export default function ruleTests({ getService }: FtrProviderContext) {
           provider: 'alerting',
           actions: new Map([
             // make sure the counts of the # of events per type are as expected
-            ['execute', { equal: 4 }],
+            ['execute', { gte: 4 }],
             // by the time we see 4 "execute" events, we should also see the following:
             ['execute-start', { gte: 4 }],
             ['execute-timeout', { gte: 1 }],
-            ['new-instance', { equal: 1 }],
+            ['new-instance', { gte: 1 }],
             ['active-instance', { gte: 2 }],
           ]),
         });
