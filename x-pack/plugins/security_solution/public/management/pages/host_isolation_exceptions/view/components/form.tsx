@@ -73,7 +73,7 @@ export const HostIsolationExceptionsForm: React.FC<{
 
   // set current policies if not previously selected
   useEffect(() => {
-    if (selectedPolicies.selected.length === 0 && exception.tags) {
+    if (selectedPolicies.selected.length === 0 && exception.tags && exception.tags.length > 0) {
       setSelectedPolicies(getEffectedPolicySelectionByTags(exception.tags, policies));
     }
   }, [exception.tags, policies, selectedPolicies.selected.length]);
