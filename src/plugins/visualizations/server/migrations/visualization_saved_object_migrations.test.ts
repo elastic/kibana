@@ -1748,7 +1748,7 @@ describe('migration visualization', () => {
       expect(palette.name).toEqual('default');
     });
 
-    it('should decorate existing docs with the circlesRadius attribute if it doesnt exist', () => {
+    it('should decorate existing docs with the circlesRadius attribute if it doesn\'t exist', () => {
       const migratedTestDoc = migrate(getTestDoc());
       const [result] = JSON.parse(migratedTestDoc.attributes.visState).params.seriesParams;
 
