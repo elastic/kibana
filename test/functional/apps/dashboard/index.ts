@@ -57,7 +57,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       loadTestFile(require.resolve('./dashboard_error_handling'));
       loadTestFile(require.resolve('./legacy_urls'));
       loadTestFile(require.resolve('./saved_search_embeddable'));
-      loadTestFile(require.resolve('./panel_titles'));
 
       // Note: This one must be last because it unloads some data for one of its tests!
       // No, this isn't ideal, but loading/unloading takes so much time and these are all bunched

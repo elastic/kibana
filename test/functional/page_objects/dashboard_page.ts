@@ -534,6 +534,28 @@ export class DashboardPageObject extends FtrService {
     return await Promise.all(titleObjects.map(async (title) => await title.getVisibleText()));
   }
 
+  // returns an array of Boolean values - true if the panel title is visible in view mode, false if it is not
+  public async getVisibilityOfPanelTitles() {
+    // only works if the dashboard is in view mode
+    const inViewMode = await this.getIsInViewMode();
+    if (!inViewMode) {
+      await this.clickCancelOutOfEditMode();
+      // await this.dashboard.switchToEditMode();
+    }
+    const visibilities: boolean[] = [];
+    const titleObjects = await this.testSubjects.findAll('dashboardPanelTitle__wrapper');
+    for (const titleObject of titleObjects) {
+      const exists = !(await titleObject.elementHasClass('embPanel__header--floater'));
+      visibilities.push(exists);
+    }
+    this.log.debug('Visibilities:', visibilities);
+    // return to previous view mode
+    if (!inViewMode) {
+      await this.switchToEditMode();
+    }
+    return visibilities;
+  }
+
   public async getPanelDimensions() {
     const panels = await this.find.allByCssSelector('.react-grid-item'); // These are gridster-defined elements and classes
     return await Promise.all(
@@ -649,6 +671,17 @@ export class DashboardPageObject extends FtrService {
     await this.openOptions();
     return await this.testSubjects.click('dashboardPanelTitlesCheckbox');
   }
+
+  // public async checkHiddenTitleInViewMode() {
+  //   this.log.debug('ensure a title is hidden in view mode');
+  //   // await PageObjects.dashboard.clickCancelOutOfEditMode();
+  //   const inViewMode = await this.getIsInViewMode();
+  //   if (!inViewMode) {
+  //     await this.clickCancelOutOfEditMode();
+  //   }
+
+  //   return;
+  // }
 
   public async expectMissingSaveOption() {
     await this.testSubjects.missingOrFail('dashboardSaveMenuItem');

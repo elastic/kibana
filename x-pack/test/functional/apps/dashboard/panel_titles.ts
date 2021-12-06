@@ -1,0 +1,136 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import expect from '@kbn/expect';
+import dashboard from '.';
+import { FtrProviderContext } from '../../ftr_provider_context';
+
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
+  const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
+  const testSubjects = getService('testSubjects');
+  const dashboardPanelActions = getService('dashboardPanelActions');
+  const PageObjects = getPageObjects([
+    'common',
+    'dashboard',
+    'visualize',
+    'visEditor',
+    'timePicker',
+    'lens',
+  ]);
+
+  const DASHBOARD_NAME = 'Panel Title Test';
+  const EMPTY_TITLE = '[No Title]';
+  const NEW_CUSTOM_TITLE = 'Test Custom Title';
+  const LIBRARY_TITLE_FOR_EMPTY_TESTS = 'Library Title for Empty String';
+
+  describe('panel titles', () => {
+    const clearUnsavedChanges = async () => {
+      await testSubjects.existOrFail('dashboardUnsavedChangesBadge');
+      await PageObjects.dashboard.clickQuickSave();
+      await testSubjects.missingOrFail('dashboardUnsavedChangesBadge');
+    };
+
+    before(async () => {
+      await esArchiver.load('test/functional/fixtures/es_archiver/dashboard/current/kibana');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
+      await kibanaServer.importExport.load(
+        'x-pack/test/functional/fixtures/kbn_archiver/lens/lens_basic.json'
+      );
+      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.preserveCrossAppState();
+      await PageObjects.dashboard.clickNewDashboard();
+      await PageObjects.dashboard.saveDashboard(DASHBOARD_NAME);
+    });
+
+    it('new panel by value has empty title', async () => {
+      await PageObjects.lens.createAndAddLensFromDashboard({});
+      const newPanelTitle = (await PageObjects.dashboard.getPanelTitles())[0];
+      expect(newPanelTitle).to.equal(EMPTY_TITLE);
+    });
+
+    it('saving new panel with blank title clears "unsaved changes" badge', async () => {
+      await dashboardPanelActions.setCustomPanelTitle('');
+      await clearUnsavedChanges();
+    });
+
+    it('custom title causes unsaved changes and saving clears it', async () => {
+      await dashboardPanelActions.setCustomPanelTitle(NEW_CUSTOM_TITLE);
+      const panelTitle = (await PageObjects.dashboard.getPanelTitles())[0];
+      expect(panelTitle).to.equal(NEW_CUSTOM_TITLE);
+      await clearUnsavedChanges();
+    });
+
+    it('resetting title on a by reference panel sets it to the empty string', async () => {
+      await dashboardPanelActions.resetCustomPanelTitle();
+      const panelTitle = (await PageObjects.dashboard.getPanelTitles())[0];
+      expect(panelTitle).to.equal(EMPTY_TITLE);
+      await clearUnsavedChanges();
+    });
+
+    it('blank titles are hidden in view mode', async () => {
+      await PageObjects.dashboard.clickCancelOutOfEditMode();
+
+      const titleVisibility = (await PageObjects.dashboard.getVisibilityOfPanelTitles())[0];
+      expect(titleVisibility).to.be(false);
+    });
+
+    it('custom titles are visible in view mode', async () => {
+      await PageObjects.dashboard.switchToEditMode();
+      await dashboardPanelActions.setCustomPanelTitle(NEW_CUSTOM_TITLE);
+      await PageObjects.dashboard.clickQuickSave();
+      await PageObjects.dashboard.clickCancelOutOfEditMode();
+
+      const titleVisibility = (await PageObjects.dashboard.getVisibilityOfPanelTitles())[0];
+      expect(titleVisibility).to.be(true);
+    });
+
+    it('hiding an individual panel title hides it in view mode', async () => {
+      await PageObjects.dashboard.switchToEditMode();
+      await dashboardPanelActions.toggleHidePanelTitle();
+      await PageObjects.dashboard.clickQuickSave();
+      await PageObjects.dashboard.clickCancelOutOfEditMode();
+
+      const titleVisibility = (await PageObjects.dashboard.getVisibilityOfPanelTitles())[0];
+      expect(titleVisibility).to.be(false);
+
+      // undo the previous hide panel toggle (i.e. make the panel visible) to prepare for next tests
+      await PageObjects.dashboard.switchToEditMode();
+      await dashboardPanelActions.toggleHidePanelTitle();
+      await PageObjects.dashboard.clickQuickSave();
+    });
+
+    it('linking a by value panel with a custom title to the library will keep the original title', async () => {
+      await PageObjects.dashboard.switchToEditMode();
+      const oldPanelTitle = (await PageObjects.dashboard.getPanelTitles())[0];
+      await dashboardPanelActions.saveToLibrary('New Library Title');
+      const newPanelTitle = (await PageObjects.dashboard.getPanelTitles())[0];
+      expect(newPanelTitle).to.equal(oldPanelTitle);
+    });
+
+    it('unlinking a by reference panel with a custom title will keep the current title', async () => {
+      await dashboardPanelActions.setCustomPanelTitle(NEW_CUSTOM_TITLE);
+      await dashboardPanelActions.unlinkFromLibary();
+      const newPanelTitle = (await PageObjects.dashboard.getPanelTitles())[0];
+      expect(newPanelTitle).to.equal(NEW_CUSTOM_TITLE);
+    });
+
+    it("linking a by value panel with a blank title to the library will set the panel's title to the library title", async () => {
+      await dashboardPanelActions.setCustomPanelTitle('');
+      await dashboardPanelActions.saveToLibrary(LIBRARY_TITLE_FOR_EMPTY_TESTS);
+      await PageObjects.dashboard.clickQuickSave(); // need to save to actually set the title in the back end
+      const newPanelTitle = (await PageObjects.dashboard.getPanelTitles())[0];
+      expect(newPanelTitle).to.equal(LIBRARY_TITLE_FOR_EMPTY_TESTS);
+    });
+
+    it('unlinking a by reference panel without a custom title will keep the library title', async () => {
+      await dashboardPanelActions.unlinkFromLibary();
+      const newPanelTitle = (await PageObjects.dashboard.getPanelTitles())[0];
+      expect(newPanelTitle).to.equal(LIBRARY_TITLE_FOR_EMPTY_TESTS);
+    });
+  });
+}
