@@ -26,7 +26,6 @@ export class PrivilegeFormCalculator {
    */
   public getBasePrivilege(privilegeIndex: number) {
     const entry = this.role.kibana[privilegeIndex];
-
     const basePrivileges = this.kibanaPrivileges.getBasePrivileges(entry);
     return basePrivileges.find((bp) => entry.base.includes(bp.id));
   }
@@ -95,18 +94,25 @@ export class PrivilegeFormCalculator {
    * @param featureId the feature id
    * @param privilegeIndex the index of the kibana privileges role component
    */
-  public getEffectivePrimaryFeaturePrivilege(featureId: string, privilegeIndex: number) {
+  public getEffectivePrimaryFeaturePrivilege(
+    featureId: string,
+    privilegeIndex: number,
+    allSpacesSelected?: boolean
+  ) {
     const feature = this.kibanaPrivileges.getSecuredFeature(featureId);
 
     const basePrivilege = this.getBasePrivilege(privilegeIndex);
 
     const selectedFeaturePrivileges = this.getSelectedFeaturePrivileges(featureId, privilegeIndex);
 
-    return feature
+    const displayedPrivilege = feature
       .getPrimaryFeaturePrivileges({ includeMinimalFeaturePrivileges: true })
       .find((fp) => {
         return selectedFeaturePrivileges.includes(fp.id) || basePrivilege?.grantsPrivilege(fp);
       });
+    const correctSpacesSelected = displayedPrivilege?.requireAllSpaces ? allSpacesSelected : true;
+    const availablePrivileges = correctSpacesSelected && !displayedPrivilege?.disabled;
+    if (availablePrivileges) return displayedPrivilege;
   }
 
   /**
@@ -300,7 +306,6 @@ export class PrivilegeFormCalculator {
       // so they end up represented in the UI as an empty privilege. Empty privileges cannot be granted other privileges, so if we
       // encounter a minimal privilege that isn't granted by it's corresponding primary, then we know we've encountered this scenario.
       const hasMinimalPrivileges = fp.grantsPrivilege(correspondingMinimalPrivilege);
-
       return (
         selectedFeaturePrivileges.includes(fp.id) ||
         (hasMinimalPrivileges &&
@@ -309,11 +314,8 @@ export class PrivilegeFormCalculator {
       );
     });
 
-    const correctSpacesSelected = displayedPrivilege?.requireAllSpaces
-      ? displayedPrivilege?.requireAllSpaces && allSpacesSelected
-      : true;
+    const correctSpacesSelected = displayedPrivilege?.requireAllSpaces ? allSpacesSelected : true;
     const availablePrivileges = correctSpacesSelected && !displayedPrivilege?.disabled;
-
     if (availablePrivileges) return displayedPrivilege;
   }
 

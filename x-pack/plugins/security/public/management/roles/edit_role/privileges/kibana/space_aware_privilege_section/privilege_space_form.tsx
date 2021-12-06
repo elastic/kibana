@@ -31,7 +31,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { Space } from '../../../../../../../../spaces/public';
 import { ALL_SPACES_ID } from '../../../../../../../common/constants';
-import type { Role } from '../../../../../../../common/model';
+import type { FeaturesPrivileges, Role } from '../../../../../../../common/model';
 import { copyRole } from '../../../../../../../common/model';
 import type { KibanaPrivileges } from '../../../../model';
 import { CUSTOM_PRIVILEGE_VALUE } from '../constants';
@@ -429,6 +429,7 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
 
     const form = role.kibana[this.state.privilegeIndex];
     form.spaces = [...selectedSpaceIds];
+    form.feature = this.resetRoleFeature(form.feature);
 
     this.setState({
       selectedSpaceIds,
@@ -448,6 +449,7 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
     if (privilegeName === CUSTOM_PRIVILEGE_VALUE) {
       form.base = [];
       isCustomizingFeaturePrivileges = true;
+      form.feature = this.resetRoleFeature(form.feature);
     } else {
       form.base = [privilegeName];
       form.feature = {};
@@ -459,6 +461,31 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
       isCustomizingFeaturePrivileges,
       privilegeCalculator: new PrivilegeFormCalculator(this.props.kibanaPrivileges, role),
     });
+  };
+
+  private resetRoleFeature = (roleFeature: FeaturesPrivileges) => {
+    const securedFeatures = this.props.kibanaPrivileges.getSecuredFeatures();
+    return Object.entries(roleFeature).reduce((features, [featureId, privileges]) => {
+      const securedFeature = securedFeatures.find((sf) => sf.id === featureId);
+      return {
+        ...features,
+        [featureId]: privileges.filter((p) => {
+          const featurePriv =
+            p === 'all'
+              ? securedFeature?.privileges?.all
+              : p === 'read'
+              ? securedFeature?.privileges?.read
+              : { disabled: false, requireAllSpaces: false };
+          if (
+            featurePriv?.disabled ||
+            (featurePriv?.requireAllSpaces && !this.state.selectedSpaceIds.includes(ALL_SPACES_ID))
+          ) {
+            return false;
+          }
+          return true;
+        }),
+      };
+    }, {});
   };
 
   private getDisplayedBasePrivilege = () => {
@@ -474,32 +501,39 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
   };
 
   private onFeaturePrivilegesChange = (featureId: string, privileges: string[]) => {
-    const role = copyRole(this.state.role);
-    const form = role.kibana[this.state.privilegeIndex];
-
-    if (privileges.length === 0) {
-      delete form.feature[featureId];
-    } else {
-      form.feature[featureId] = [...privileges];
-    }
-
-    this.setState({
-      role,
-      privilegeCalculator: new PrivilegeFormCalculator(this.props.kibanaPrivileges, role),
-    });
+    this.setRole(privileges, featureId);
   };
 
   private onChangeAllFeaturePrivileges = (privileges: string[]) => {
+    this.setRole(privileges);
+  };
+
+  private setRole(privileges: string[], featureId?: string) {
     const role = copyRole(this.state.role);
     const entry = role.kibana[this.state.privilegeIndex];
 
     if (privileges.length === 0) {
-      entry.feature = {};
+      if (featureId) {
+        delete entry.feature[featureId];
+      } else {
+        entry.feature = {};
+      }
     } else {
-      this.props.kibanaPrivileges.getSecuredFeatures().forEach((feature) => {
-        const nextFeaturePrivilege = feature
-          .getPrimaryFeaturePrivileges()
-          .find((pfp) => privileges.includes(pfp.id));
+      let securedFeaturesToSet = this.props.kibanaPrivileges.getSecuredFeatures();
+      if (featureId) {
+        const findSecuredFeature = securedFeaturesToSet.find((sf) => sf.id === featureId);
+        securedFeaturesToSet = findSecuredFeature ? [findSecuredFeature] : securedFeaturesToSet;
+      }
+      securedFeaturesToSet.forEach((feature) => {
+        const nextFeaturePrivilege = feature.getPrimaryFeaturePrivileges().find((pfp) => {
+          if (
+            !pfp.disabled ||
+            (pfp.requireAllSpaces && this.state.selectedSpaceIds.includes(ALL_SPACES_ID))
+          ) {
+            return privileges.includes(pfp.id);
+          }
+          return false;
+        });
         if (nextFeaturePrivilege) {
           entry.feature[feature.id] = [nextFeaturePrivilege.id];
         }
@@ -509,7 +543,7 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
       role,
       privilegeCalculator: new PrivilegeFormCalculator(this.props.kibanaPrivileges, role),
     });
-  };
+  }
 
   private canSave = () => {
     if (this.state.selectedSpaceIds.length === 0) {
