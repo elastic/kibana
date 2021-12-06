@@ -16,7 +16,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import { SectionLoading } from '../../shared_imports';
 import { ProcessTree } from '../ProcessTree';
-import { Process, ProcessEventResults } from '../../../common/types/process_tree';
+import { Process } from '../../../common/types/process_tree';
 import { SessionViewDetailPanel } from '../SessionViewDetailPanel';
 import { useStyles } from './styles';
 import {
@@ -54,9 +54,7 @@ export const SessionView = ({ sessionEntityId, height }: SessionViewDeps) => {
 
   const { onSearch, searchQuery } = useSearchQuery();
   const { isLoading, isError, data: getData } = useFetchSessionViewProcessEvents(sessionEntityId);
-  const { data } = useParseSessionViewProcessEvents(
-    getData ? { alerts: getData.alerts, events: getData.events } : ({} as ProcessEventResults)
-  );
+  const { data } = useParseSessionViewProcessEvents(getData);
 
   const renderNoData = () => {
     return (
@@ -94,7 +92,6 @@ export const SessionView = ({ sessionEntityId, height }: SessionViewDeps) => {
         <div css={styles.processTree}>
           <ProcessTree
             sessionEntityId={sessionEntityId}
-            sessionLeaderEvent={getData?.sessionLeader}
             forward={data}
             searchQuery={searchQuery}
             selectedProcess={selectedProcess}

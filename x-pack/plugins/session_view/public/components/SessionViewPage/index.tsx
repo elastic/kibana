@@ -34,7 +34,7 @@ export const SessionViewPage = (props: RouteComponentProps) => {
   const { data } = useQuery<RecentSessionResults, Error>(['recent-session', 'recent_session'], () =>
     http.get<RecentSessionResults>(RECENT_SESSION_ROUTE, {
       query: {
-        indexes: ['cmd_entry_leader*', '.siem-signals*'],
+        indexes: ['cmd*', '.siem-signals*'],
       },
     })
   );

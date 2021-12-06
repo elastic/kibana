@@ -30,34 +30,12 @@ export const registerProcessEventsRoute = (router: IRouter) => {
 
       const { sessionEntityId } = request.query;
 
-      const sessionLeader = await client.search({
-        index: ['cmd_entry_leader'],
-        body: {
-          query: {
-            match: {
-              'process.entity_id': sessionEntityId,
-            },
-          },
-          size: 1,
-          sort: [{ '@timestamp': 'asc' }],
-        },
-      });
-
       const search = await client.search({
         index: ['cmd'],
         body: {
           query: {
-            bool: {
-              must_not: {
-                match: {
-                  'process.entity_id': sessionEntityId,
-                },
-              },
-              must: {
-                match: {
-                  'process.entry.entity_id': sessionEntityId,
-                },
-              },
+            match: {
+              'process.entry.entity_id': sessionEntityId,
             },
           },
           size: PROCESS_EVENTS_PER_PAGE,
@@ -87,7 +65,6 @@ export const registerProcessEventsRoute = (router: IRouter) => {
         body: {
           events: search.body.hits,
           alerts: alerts.body.hits,
-          sessionLeader: sessionLeader.body.hits.hits[0]?._source,
         },
       });
     }

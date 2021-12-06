@@ -16,7 +16,6 @@ const HIDE_ORPHANS = true;
 interface ProcessTreeDeps {
   // process.entity_id to act as root node (typically a session (or entry session) leader).
   sessionEntityId: string;
-  sessionLeaderEvent: ProcessEvent | undefined;
 
   // bi-directional paging support. allows us to load
   // processes before and after a particular process.entity_id
@@ -34,7 +33,6 @@ interface ProcessTreeDeps {
 
 export const ProcessTree = ({
   sessionEntityId,
-  sessionLeaderEvent,
   forward,
   backward,
   searchQuery,
@@ -45,7 +43,6 @@ export const ProcessTree = ({
 
   const { sessionLeader, orphans, searchResults } = useProcessTree({
     sessionEntityId,
-    sessionLeaderEvent,
     forward,
     backward,
     searchQuery,
