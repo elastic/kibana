@@ -87,6 +87,7 @@ export const FieldPicker = ({
                 return (
                   <EuiFlexItem key={f.name}>
                     <FieldButton
+                      data-test-subj={`field-picker-select-${f.name}`}
                       className={classNames('presFieldPicker__fieldButton', {
                         presFieldPickerFieldButtonActive: f.name === selectedFieldName,
                       })}
