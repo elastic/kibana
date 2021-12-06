@@ -201,9 +201,10 @@ exports.Cluster = class Cluster {
       ]),
 
       // await the outcome of the process in case it exits before starting
-      this._outcome.then(async () => {
+      (async () => {
+        await this._outcome;
         throw createCliError('ES exited without starting');
-      }),
+      })(),
     ]);
   }
 
@@ -219,10 +220,14 @@ exports.Cluster = class Cluster {
     this._exec(installPath, options);
 
     // log native realm setup errors so they aren't uncaught
-    this._nativeRealmSetup.catch((error) => {
-      this._log.error(error);
-      this.stop();
-    });
+    (async () => {
+      try {
+        await this._nativeRealmSetup;
+      } catch (error) {
+        this._log.error(error);
+        this.stop();
+      }
+    })();
 
     // await the final outcome of the process
     await this._outcome;
