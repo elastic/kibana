@@ -11,7 +11,8 @@
     "visualizations",
     "embeddable",
     "dashboard",
-    "presentationUtil"
+    "presentationUtil",
+    "uiActions"
   ],
   "optionalPlugins": [
     "home",

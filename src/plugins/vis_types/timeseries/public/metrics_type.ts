@@ -12,6 +12,7 @@ import { TSVB_EDITOR_NAME } from './application/editor_controller';
 import { PANEL_TYPES, TOOLTIP_MODES } from '../common/enums';
 import { isStringTypeIndexPattern } from '../common/index_patterns_utils';
 import { TSVB_DEFAULT_COLOR } from '../common/constants';
+import type { Panel } from '../common/types';
 import { toExpressionAst } from './to_ast';
 import {
   Vis,
@@ -22,6 +23,7 @@ import {
 } from '../../../visualizations/public';
 import { getDataStart } from './services';
 import type { TimeseriesVisDefaultParams, TimeseriesVisParams } from './types';
+import { triggerVisualizeToLensActions } from './application/components/lib/trigger_action';
 
 export const withReplacedIds = (
   vis: Vis<TimeseriesVisParams | TimeseriesVisDefaultParams>
@@ -115,6 +117,12 @@ export const metricsVisDefinition: VisTypeDefinition<
       return [VIS_EVENT_TO_TRIGGER.filter, VIS_EVENT_TO_TRIGGER.brush];
     }
     return [];
+  },
+  navigateToLens: async (params?: VisParams) => {
+    const triggerOptions = params
+      ? await triggerVisualizeToLensActions(params as Panel)
+      : undefined;
+    return triggerOptions;
   },
   inspectorAdapters: {},
   requiresSearch: true,

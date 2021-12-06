@@ -18,6 +18,7 @@ import {
   VISUALIZE_EMBEDDABLE_TYPE,
   VisualizeInput,
   getFullPath,
+  VisParams,
 } from '../../../../visualizations/public';
 import {
   showSaveModal,
@@ -40,6 +41,8 @@ import { APP_NAME, VisualizeConstants } from '../visualize_constants';
 import { getEditBreadcrumbs } from './breadcrumbs';
 import { EmbeddableStateTransfer } from '../../../../embeddable/public';
 import { VISUALIZE_APP_LOCATOR, VisualizeLocatorParams } from '../../../common/locator';
+import { getUiActions } from '../../services';
+import { VISUALIZE_EDITOR_TRIGGER } from '../../../../ui_actions/public';
 
 interface VisualizeCapabilities {
   createShortUrl: boolean;
@@ -62,6 +65,7 @@ export interface TopNavConfigParams {
   visualizationIdFromUrl?: string;
   stateTransfer: EmbeddableStateTransfer;
   embeddableId?: string;
+  editInLensOptions?: VisParams;
 }
 
 const SavedObjectSaveModalDashboard = withSuspense(LazySavedObjectSaveModalDashboard);
@@ -88,6 +92,7 @@ export const getTopNavConfig = (
     visualizationIdFromUrl,
     stateTransfer,
     embeddableId,
+    editInLensOptions,
   }: TopNavConfigParams,
   {
     data,
@@ -266,6 +271,24 @@ export const getTopNavConfig = (
     (allowByValue && !showSaveAndReturn && dashboardCapabilities.showWriteControls);
 
   const topNavMenu: TopNavMenuData[] = [
+    ...(editInLensOptions
+      ? [
+          {
+            id: 'goToLens',
+            label: i18n.translate('visualize.topNavMenu.goToLensButtonLabel', {
+              defaultMessage: 'Edit visualization in Lens',
+            }),
+            emphasize: false,
+            description: i18n.translate('visualize.topNavMenu.goToLensButtonAriaLabel', {
+              defaultMessage: 'Go to Lens with your current configuration',
+            }),
+            testId: 'visualizeEditInLensButton',
+            run: async () => {
+              getUiActions().getTrigger(VISUALIZE_EDITOR_TRIGGER).exec(editInLensOptions);
+            },
+          },
+        ]
+      : []),
     {
       id: 'inspector',
       label: i18n.translate('visualize.topNavMenu.openInspectorButtonLabel', {

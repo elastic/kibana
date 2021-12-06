@@ -46,9 +46,10 @@ import type { SavedObjectTaggingOssPluginStart } from '../../saved_objects_taggi
 import type { UsageCollectionStart } from '../../usage_collection/public';
 import type { SpacesApi } from '../../../../x-pack/plugins/spaces/public';
 
-import { setVisEditorsRegistry, setUISettings, setUsageCollector } from './services';
+import { setVisEditorsRegistry, setUISettings, setUsageCollector, setUiActions } from './services';
 import { createVisEditorsRegistry, VisEditorsRegistry } from './vis_editors_registry';
 import { VisualizeLocatorDefinition } from '../common/locator';
+import type { UiActionsStart } from '../../ui_actions/public';
 
 export interface VisualizePluginStartDependencies {
   data: DataPublicPluginStart;
@@ -63,6 +64,7 @@ export interface VisualizePluginStartDependencies {
   presentationUtil: PresentationUtilPluginStart;
   usageCollection?: UsageCollectionStart;
   spaces?: SpacesApi;
+  uiActions: UiActionsStart;
 }
 
 export interface VisualizePluginSetupDependencies {
@@ -255,8 +257,9 @@ export class VisualizePlugin
     } as VisualizePluginSetup;
   }
 
-  public start(core: CoreStart, { usageCollection }: VisualizePluginStartDependencies) {
+  public start(core: CoreStart, { usageCollection, uiActions }: VisualizePluginStartDependencies) {
     setVisEditorsRegistry(this.visEditorsRegistry);
+    setUiActions(uiActions);
 
     if (usageCollection) {
       setUsageCollector(usageCollection);

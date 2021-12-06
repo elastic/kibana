@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useState } from 'react';
 import {
   EuiTabs,
   EuiTab,
@@ -20,12 +20,12 @@ import {
   EuiModalHeaderTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { VISUALIZE_EDITOR_TRIGGER } from '../../../../../ui_actions/public';
+// import { VISUALIZE_EDITOR_TRIGGER } from '../../../../../ui_actions/public';
 import { PANEL_TYPES } from '../../../common/enums';
 import type { Panel } from '../../../common/types';
 import { TimeseriesVisParams } from '../../types';
-import { getUiActions } from '../../services';
-import { triggerVisualizeToLensActions } from './lib/trigger_action';
+// import { getUiActions } from '../../services';
+// import { triggerVisualizeToLensActions } from './lib/trigger_action';
 
 const tabs = [
   {
@@ -70,16 +70,16 @@ interface VisPickerProps {
 export const VisPicker = ({ onChange, currentVisType, model }: VisPickerProps) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const closeModal = () => setIsModalVisible(false);
-  const showModal = () => setIsModalVisible(true);
+  // const showModal = () => setIsModalVisible(true);
 
-  const onConvert = useCallback(async () => {
-    const triggerOptions = await triggerVisualizeToLensActions(model);
-    if (triggerOptions) {
-      getUiActions().getTrigger(VISUALIZE_EDITOR_TRIGGER).exec(triggerOptions);
-    } else {
-      showModal();
-    }
-  }, [model]);
+  // const onConvert = useCallback(async () => {
+  //   const triggerOptions = await triggerVisualizeToLensActions(model);
+  //   if (triggerOptions) {
+  //     getUiActions().getTrigger(VISUALIZE_EDITOR_TRIGGER).exec(triggerOptions);
+  //   } else {
+  //     showModal();
+  //   }
+  // }, [model]);
 
   let modal;
 
@@ -127,7 +127,7 @@ export const VisPicker = ({ onChange, currentVisType, model }: VisPickerProps) =
           ))}
         </EuiTabs>
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>
+      {/* <EuiFlexItem grow={false}>
         <EuiButton
           fill
           color="accent"
@@ -139,7 +139,7 @@ export const VisPicker = ({ onChange, currentVisType, model }: VisPickerProps) =
           })}
         </EuiButton>
         {modal}
-      </EuiFlexItem>
+      </EuiFlexItem> */}
     </EuiFlexGroup>
   );
 };

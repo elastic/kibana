@@ -10,6 +10,7 @@ import { createGetterSetter } from '../../../plugins/kibana_utils/public';
 import type { IUiSettingsClient } from '../../../core/public';
 import type { VisEditorsRegistry } from './vis_editors_registry';
 import type { UsageCollectionStart } from '../../usage_collection/public';
+import type { UiActionsStart } from '../../ui_actions/public';
 
 export const [getUISettings, setUISettings] = createGetterSetter<IUiSettingsClient>('UISettings');
 
@@ -20,3 +21,5 @@ export const [getUsageCollector, setUsageCollector] = createGetterSetter<UsageCo
 
 export const [getVisEditorsRegistry, setVisEditorsRegistry] =
   createGetterSetter<VisEditorsRegistry>('VisEditorsRegistry');
+
+export const [getUiActions, setUiActions] = createGetterSetter<UiActionsStart>('UiActions');
