@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 
 import moment from 'moment';
 
@@ -52,7 +52,7 @@ export const CrawlDetailsSummary: React.FC<ICrawlerSummaryProps> = ({
 
   const getStatusCount = (code: string, codes: { [code: string]: number }) => {
     let count = 0;
-    Object.keys(codes).filter((key) => {
+    Object.keys(codes).forEach((key) => {
       if (key[0] === code) {
         count += codes[key];
       }
@@ -60,7 +60,7 @@ export const CrawlDetailsSummary: React.FC<ICrawlerSummaryProps> = ({
     return count;
   };
 
-  const [statusCounts] = useState<{ [code: string]: number }>({
+  const statusCounts = {
     clientErrorCount:
       stats && stats.status && stats.status.statusCodes
         ? getStatusCount('4', stats.status.statusCodes)
@@ -69,7 +69,7 @@ export const CrawlDetailsSummary: React.FC<ICrawlerSummaryProps> = ({
       stats && stats.status && stats.status.statusCodes
         ? getStatusCount('5', stats.status.statusCodes)
         : 0,
-  });
+  };
 
   const shouldHideStats = !crawlerLogsEnabled && !stats;
 
@@ -80,11 +80,19 @@ export const CrawlDetailsSummary: React.FC<ICrawlerSummaryProps> = ({
           <EuiStat
             data-test-subjet="crawlType"
             titleSize="s"
-            title={`${
-              crawlType[0].toUpperCase() + crawlType.substring(1)
-            } crawl on ${domainCount} ${domainCount === 1 ? 'domain' : 'domains'}`}
+            title={i18n.translate(
+              'xpack.enterpriseSearch.appSearch.crawler.components.crawlDetailsSummary.crawlCountOnDomains',
+              {
+                defaultMessage:
+                  '{crawlType} crawl on {domainCount, plural, one {# domain} other {# domains}}',
+                values: {
+                  crawlType: crawlType[0].toUpperCase() + crawlType.substring(1),
+                  domainCount,
+                },
+              }
+            )}
             description={i18n.translate(
-              'xpack.enterpriseSearch.appSearch.crawler.components.crawlDetailsSummary.crawlType',
+              'xpack.enterpriseSearch.appSearch.crawler.components.crawlDetailsSummary.crawlTypeLabel',
               {
                 defaultMessage: 'Crawl type',
               }
@@ -97,7 +105,7 @@ export const CrawlDetailsSummary: React.FC<ICrawlerSummaryProps> = ({
             titleSize="s"
             title={crawlDepth}
             description={i18n.translate(
-              'xpack.enterpriseSearch.appSearch.crawler.components.crawlDetailsSummary.crawlDepth',
+              'xpack.enterpriseSearch.appSearch.crawler.components.crawlDetailsSummary.crawlDepthLabel',
               {
                 defaultMessage: 'Max crawl depth',
               }
@@ -203,7 +211,7 @@ export const CrawlDetailsSummary: React.FC<ICrawlerSummaryProps> = ({
                   : '--'
               }
               description={i18n.translate(
-                'xpack.enterpriseSearch.appSearch.crawler.crawlDetailsSummary.avgResponseTimeTooltipTitle',
+                'xpack.enterpriseSearch.appSearch.crawler.crawlDetailsSummary.avgResponseTimeLabel',
                 {
                   defaultMessage: 'Avg. response',
                 }
@@ -216,7 +224,7 @@ export const CrawlDetailsSummary: React.FC<ICrawlerSummaryProps> = ({
               titleSize="s"
               title={statusCounts.clientErrorCount}
               description={`4xx ${i18n.translate(
-                'xpack.enterpriseSearch.appSearch.crawler.crawlDetailsSummary.serverErrors',
+                'xpack.enterpriseSearch.appSearch.crawler.crawlDetailsSummary.clientErrorsLabel',
                 {
                   defaultMessage: 'Errors',
                 }
@@ -229,7 +237,7 @@ export const CrawlDetailsSummary: React.FC<ICrawlerSummaryProps> = ({
               titleSize="s"
               title={statusCounts.serverErrorCount}
               description={`5xx ${i18n.translate(
-                'xpack.enterpriseSearch.appSearch.crawler.crawlDetailsSummary.serverErrors',
+                'xpack.enterpriseSearch.appSearch.crawler.crawlDetailsSummary.serverErrorsLabel',
                 {
                   defaultMessage: 'Errors',
                 }
@@ -240,7 +248,15 @@ export const CrawlDetailsSummary: React.FC<ICrawlerSummaryProps> = ({
       ) : (
         <EuiText size="xs" textAlign="center" data-test-subj="logsDisabledMessage">
           <EuiSpacer size="m" />
-          <p>Enable Web Crawler logs in settings for more detailed crawl statistics.</p>
+          <p>
+            {i18n.translate(
+              'xpack.enterpriseSearch.appSearch.crawler.crawlDetailsSummary.logsDisabledMessage',
+              {
+                defaultMessage:
+                  'Enable Web Crawler logs in settings for more detailed crawl statistics.',
+              }
+            )}
+          </p>
         </EuiText>
       )}
     </EuiPanel>
