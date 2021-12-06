@@ -7,7 +7,7 @@
  */
 
 import type { IEMSKbnMapsSettings } from '../service_settings/service_settings_types';
-import { getMapConfig, getTileMapConfig } from '../kibana_services';
+import { getMapConfig } from '../kibana_services';
 
 let loadPromise: Promise<IEMSKbnMapsSettings>;
 

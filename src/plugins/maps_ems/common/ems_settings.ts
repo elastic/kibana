@@ -14,13 +14,12 @@ import {
 } from './ems_defaults';
 
 export interface IEMSConfig {
-  emsUrl?: string;
   includeElasticMapsService?: boolean;
   emsFileApiUrl?: string;
   emsTileApiUrl?: string;
   emsLandingPageUrl?: string;
   emsFontLibraryUrl?: string;
-  isEMSEnabled?: boolean;
+  emsUrl?: string;
 }
 
 export function createEMSSettings(emsConfig: IEMSConfig, getIsEnterPrisePlus: () => boolean) {

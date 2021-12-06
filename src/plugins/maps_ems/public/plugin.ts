@@ -7,11 +7,16 @@
  */
 
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'kibana/public';
-import { setKibanaVersion, setLicensingPluginStart, setMapConfig } from './kibana_services';
+import {
+  setKibanaVersion,
+  setLicensingPluginStart,
+  setMapConfig,
+  getIsEnterprisePlus,
+} from './kibana_services';
 import { MapsEmsPluginSetup, MapsEmsPluginStart } from './index';
 import type { MapConfig } from '../config';
 import { getServiceSettings } from './lazy_load_bundle/get_service_settings';
-import { createEMSSettings, IEMSConfig } from '../common/ems_settings';
+import { createEMSSettings } from '../common/ems_settings';
 import {
   LicensingPluginSetup,
   LicensingPluginStart,
@@ -47,8 +52,8 @@ export class MapsEmsPlugin implements Plugin<MapsEmsPluginSetup, MapsEmsPluginSt
     return {
       config: mapConfig,
       getServiceSettings,
-      createEMSSettings: (emsConfig: IEMSConfig, getIsEnterPrisePlus: () => boolean) => {
-        return createEMSSettings(emsConfig, getIsEnterPrisePlus);
+      createEMSSettings: () => {
+        return createEMSSettings(mapConfig, getIsEnterprisePlus);
       },
     };
   }

@@ -27,7 +27,6 @@ import { MapsXPackConfig } from '../config';
 import { setStartServices } from './kibana_server_services';
 import { emsBoundariesSpecProvider } from './tutorials/ems';
 import { initRoutes } from './routes';
-import { ILicense } from '../../licensing/common/types';
 import { HomeServerPluginSetup } from '../../../../src/plugins/home/server';
 import type { EMSSettings } from '../../../../src/plugins/maps_ems/server';
 import { embeddableMigrations } from './embeddable_migrations';
@@ -137,15 +136,10 @@ export class MapsPlugin implements Plugin {
   }
 
   setup(core: CoreSetup, plugins: SetupDeps) {
-    const { usageCollection, home, licensing, features, mapsEms, customIntegrations } = plugins;
+    const { usageCollection, home, features, customIntegrations } = plugins;
     const config$ = this._initializerContext.config.create();
 
-    let isEnterprisePlus = false;
-    const emsSettings = plugins.mapsEms.createEMSSettings(mapsEms.config, () => isEnterprisePlus);
-    licensing.license$.subscribe((license: ILicense) => {
-      const enterprise = license.check(APP_ID, 'enterprise');
-      isEnterprisePlus = enterprise.state === 'valid';
-    });
+    const emsSettings = plugins.mapsEms.createEMSSettings();
 
     initRoutes(core, this._logger);
 

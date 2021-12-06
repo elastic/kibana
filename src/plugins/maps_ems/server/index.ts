@@ -14,7 +14,6 @@ import {
 } from 'src/core/server';
 import { MapConfig, mapConfigSchema } from '../config';
 import { EMSSettings } from '../common';
-import { IEMSConfig } from '../common/ems_settings';
 export type { EMSSettings } from '../common';
 
 export const config: PluginConfigDescriptor<MapConfig> = {
@@ -33,7 +32,7 @@ export const config: PluginConfigDescriptor<MapConfig> = {
 
 export interface MapsEmsPluginSetup {
   config: MapConfig;
-  createEMSSettings: (config: IEMSConfig, getIsEnterPrisePlus: () => boolean) => EMSSettings;
+  createEMSSettings: () => EMSSettings;
 }
 
 export class MapsEmsPlugin implements Plugin<MapsEmsPluginSetup> {
@@ -44,11 +43,14 @@ export class MapsEmsPlugin implements Plugin<MapsEmsPluginSetup> {
   }
 
   public setup(core: CoreSetup) {
-    const emsPluginConfig = this._initializerContext.config.get();
+    const mapConfig = this._initializerContext.config.get();
     return {
-      config: emsPluginConfig,
-      createEMSSettings: (emsConfig: IEMSConfig, getIsEnterPrisePlus: () => boolean) => {
-        return new EMSSettings(emsConfig, getIsEnterPrisePlus);
+      config: mapConfig,
+      createEMSSettings: () => {
+        return new EMSSettings(mapConfig, () => {
+          // TODO - implement server-side licensing check
+          return true;
+        });
       },
     };
   }

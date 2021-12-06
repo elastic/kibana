@@ -33,6 +33,6 @@ export type { MapConfig } from '../config';
 export interface MapsEmsPluginSetup {
   config: MapConfig;
   getServiceSettings(): Promise<IEMSKbnMapsSettings>;
-  createEMSSettings(config: IEMSConfig, getIsEnterPrisePlus: () => boolean): EMSSettings;
+  createEMSSettings(): EMSSettings;
 }
 export type MapsEmsPluginStart = ReturnType<MapsEmsPlugin['start']>;
