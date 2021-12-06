@@ -25,6 +25,8 @@ export interface UseNavigationProps {
   addBasePath: (url: string) => string;
 }
 
+export type HistoryState = { breadcrumb?: string } | undefined;
+
 export const getContextHash = (columns: string[], filterManager: FilterManager) => {
   const globalFilters = filterManager.getGlobalFilters();
   const appFilters = filterManager.getAppFilters();
@@ -61,7 +63,7 @@ const getCurrentBreadcrumbs = (isContextRoute: boolean, prevBreadcrumb?: string)
 
 export const useMainRouteBreadcrumb = () => {
   // useRef needed to retrieve initial breadcrumb link from the push state without updates
-  return useRef<string | undefined>(useHistory().location.state?.breadcrumb).current;
+  return useRef(useHistory<HistoryState>().location.state?.breadcrumb).current;
 };
 
 export const useNavigationProps = ({
@@ -72,8 +74,8 @@ export const useNavigationProps = ({
   filterManager,
   addBasePath,
 }: UseNavigationProps) => {
-  const history = useHistory();
-  const prevBreadcrumb = useRef<string | undefined>(history?.location.state?.breadcrumb).current;
+  const history = useHistory<HistoryState>();
+  const prevBreadcrumb = useRef(history?.location.state?.breadcrumb).current;
   const contextSearchHash = useMemo(
     () => getContextHash(columns, filterManager),
     [columns, filterManager]

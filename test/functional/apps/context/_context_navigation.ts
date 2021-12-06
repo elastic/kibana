@@ -67,6 +67,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.context.waitUntilContextLoadingHasFinished();
 
       await testSubjects.click('breadcrumb first');
+      await PageObjects.discover.waitForDocTableLoadingComplete();
 
       for (const [columnName, value] of TEST_FILTER_COLUMN_NAMES) {
         expect(await filterBar.hasFilter(columnName, value)).to.eql(true);

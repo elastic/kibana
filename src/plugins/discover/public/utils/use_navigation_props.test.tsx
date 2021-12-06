@@ -9,7 +9,12 @@
 import React, { ReactElement } from 'react';
 import { renderHook } from '@testing-library/react-hooks';
 import { createFilterManagerMock } from '../../../data/public/query/filter_manager/filter_manager.mock';
-import { getContextHash, useNavigationProps, UseNavigationProps } from './use_navigation_props';
+import {
+  getContextHash,
+  HistoryState,
+  useNavigationProps,
+  UseNavigationProps,
+} from './use_navigation_props';
 import { Router } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
 import { setServices } from '../kibana_services';
@@ -41,7 +46,7 @@ const getContextRoute = () => {
 };
 
 const render = () => {
-  const history = createMemoryHistory({
+  const history = createMemoryHistory<HistoryState>({
     initialEntries: ['/' + getSearch()],
   });
   setServices({ history: () => history } as unknown as DiscoverServices);
