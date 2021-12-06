@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiBasicTableColumn, EuiSpacer } from '@elastic/eui';
+import { EuiBasicTableColumn } from '@elastic/eui';
 import React, { useMemo } from 'react';
 
 import { BrowserFields } from '../../../../common/search_strategy/index_fields';
