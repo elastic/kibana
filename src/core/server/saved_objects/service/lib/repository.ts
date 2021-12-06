@@ -885,12 +885,11 @@ export class SavedObjectsRepository {
       );
     }
 
-    const types =
-      type && type.length > 0
-        ? Array.isArray(type)
-          ? type
-          : [type]
-        : Array.from(typeToNamespacesMap!.keys());
+    const types = type
+      ? Array.isArray(type)
+        ? type
+        : [type]
+      : Array.from(typeToNamespacesMap!.keys());
     const allowedTypes = types.filter((t) => this._allowedTypes.includes(t));
     if (allowedTypes.length === 0) {
       return SavedObjectsUtils.createEmptyFindResponse<T, A>(options);
