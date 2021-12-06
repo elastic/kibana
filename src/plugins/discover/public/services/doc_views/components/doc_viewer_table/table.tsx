@@ -26,6 +26,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { Storage } from '../../../../../../kibana_utils/public';
 import { usePager } from '../../../../utils/use_pager';
 import { FieldName } from '../../../../components/field_name/field_name';
 import { flattenHit } from '../../../../../../data/common';
@@ -54,6 +55,15 @@ interface ItemsEntry {
 const MOBILE_OPTIONS = { header: false };
 const PINNED_FIELDS_KEY = 'discover:pinnedFields';
 
+const getPinnedFieldsEntry = (storage: Storage): Record<string, string[]> => {
+  try {
+    const storedPinnedFields = storage.get(PINNED_FIELDS_KEY);
+    return (storedPinnedFields && JSON.parse(storedPinnedFields)) || {};
+  } catch (e) {
+    return {};
+  }
+};
+
 export const DocViewerTable = ({
   columns,
   hit,
@@ -65,9 +75,8 @@ export const DocViewerTable = ({
   const [query, setQuery] = useState('');
   const { storage, uiSettings } = getServices();
   const showMultiFields = uiSettings.get(SHOW_MULTIFIELDS);
-  const storedPinnedFields = storage.get(PINNED_FIELDS_KEY);
   const [pinnedFields, setPinnedFields] = useState<string[]>(
-    (storedPinnedFields && JSON.parse(storedPinnedFields)[indexPattern.id!]) || []
+    getPinnedFieldsEntry(storage)[indexPattern.id!] || []
   );
   const flattened = flattenHit(hit, indexPattern, { source: true, includeIgnoredValues: true });
   const fieldsToShow = getFieldsToShow(Object.keys(flattened), indexPattern, showMultiFields);
@@ -102,13 +111,9 @@ export const DocViewerTable = ({
         ? pinnedFields.filter((curField) => curField !== field)
         : [...pinnedFields, field];
 
-      const curStoredPinnedFields = storage.get(PINNED_FIELDS_KEY);
-      const newStoredPinnedFields = Object.assign(
-        (curStoredPinnedFields && JSON.parse(curStoredPinnedFields)) || {},
-        {
-          [indexPattern.id!]: newPinned,
-        }
-      );
+      const newStoredPinnedFields = Object.assign(getPinnedFieldsEntry(storage), {
+        [indexPattern.id!]: newPinned,
+      });
       storage.set(PINNED_FIELDS_KEY, JSON.stringify(newStoredPinnedFields));
       setPinnedFields(newPinned);
     },
