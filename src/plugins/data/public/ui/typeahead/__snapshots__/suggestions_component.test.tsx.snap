@@ -20,7 +20,7 @@ exports[`SuggestionsComponent Passing the index should control which suggestion 
         onScroll={[Function]}
         role="listbox"
       >
-        <SuggestionComponent
+        <Memo(SuggestionComponent)
           ariaId="suggestion-0"
           index={0}
           innerRef={[Function]}
@@ -39,7 +39,7 @@ exports[`SuggestionsComponent Passing the index should control which suggestion 
             }
           }
         />
-        <SuggestionComponent
+        <Memo(SuggestionComponent)
           ariaId="suggestion-1"
           index={1}
           innerRef={[Function]}
@@ -84,7 +84,7 @@ exports[`SuggestionsComponent Should display given suggestions if the show prop 
         onScroll={[Function]}
         role="listbox"
       >
-        <SuggestionComponent
+        <Memo(SuggestionComponent)
           ariaId="suggestion-0"
           index={0}
           innerRef={[Function]}
@@ -103,7 +103,7 @@ exports[`SuggestionsComponent Should display given suggestions if the show prop 
             }
           }
         />
-        <SuggestionComponent
+        <Memo(SuggestionComponent)
           ariaId="suggestion-1"
           index={1}
           innerRef={[Function]}

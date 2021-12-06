@@ -134,6 +134,6 @@ describe('SuggestionsComponent', () => {
 
     component.find(SuggestionComponent).at(1).simulate('mouseenter');
     expect(mockCallback).toHaveBeenCalledTimes(1);
-    expect(mockCallback).toHaveBeenCalledWith(1);
+    expect(mockCallback).toHaveBeenCalledWith(mockSuggestions[1], 1);
   });
 });
