@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
+import type { Agent } from 'elastic-apm-node';
+
 /**
  * `elastic-apm-node` patches the runtime at import time
  *  causing memory leak with jest module sandbox, so it
  *  needs to be mocked for tests
  */
-
-/* eslint-disable no-undef */
-const agent = {
+const agent: jest.Mocked<Agent> = {
   start: jest.fn().mockImplementation(() => agent),
   isStarted: jest.fn().mockReturnValue(false),
   getServiceName: jest.fn().mockReturnValue('mock-service'),
@@ -59,4 +59,5 @@ const agent = {
   },
 };
 
-module.exports = agent;
+// eslint-disable-next-line import/no-default-export
+export default agent;
