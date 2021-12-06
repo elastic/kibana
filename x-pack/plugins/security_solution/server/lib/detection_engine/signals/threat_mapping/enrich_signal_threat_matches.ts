@@ -58,7 +58,7 @@ export const buildEnrichments = ({
       throw new Error(`Expected indicator field to be an object, but found: ${indicator}`);
     }
     const atomic = get(matchedThreat?._source, query.value) as unknown;
-    const feed = {};
+    const feed: { name?: string } = {};
     if (feedName) {
       feed.name = feedName;
     }
