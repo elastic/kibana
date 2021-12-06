@@ -96,7 +96,6 @@ export function App({
     selectSavedObjectFormat(state, {
       datasourceMap,
       visualizationMap,
-      extractFilterReferences: data.query.filterManager.extract,
     })
   );
 
@@ -155,10 +154,7 @@ export function App({
 
       if (
         application.capabilities.visualize.save &&
-        !isEqual(
-          persistedDoc?.state,
-          getLastKnownDocWithoutPinnedFilters(data.query.filterManager.inject, lastKnownDoc)?.state
-        ) &&
+        !isEqual(persistedDoc?.state, getLastKnownDocWithoutPinnedFilters(lastKnownDoc)?.state) &&
         (isSaveable || persistedDoc)
       ) {
         return actions.confirm(

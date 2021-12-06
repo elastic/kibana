@@ -9,3 +9,4 @@
 export * from './timefilter';
 export * from './types';
 export * from './is_query';
+export * from './persistable_state';
