@@ -9,7 +9,7 @@ import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import { ActionGroupIdsOf } from '../../../../../alerting/common';
 import { AlertType, PluginSetupContract } from '../../../../../alerting/server';
-import { METRIC_EXPLORER_AGGREGATIONS } from '../../../../common/http_api/metrics_explorer';
+import { METRIC_EXPLORER_AGGREGATIONS } from '../../../../common/http_api';
 import {
   createMetricThresholdExecutor,
   FIRED_ACTIONS,
@@ -35,7 +35,7 @@ export type MetricThresholdAlertType = Omit<AlertType, 'ActionGroupIdsOf'> & {
   ActionGroupIdsOf: MetricThresholdAllowedActionGroups;
 };
 
-export async function registerMetricThresholdAlertType(
+export async function registerMetricThresholdRuleType(
   alertingPlugin: PluginSetupContract,
   libs: InfraBackendLibs
 ) {
