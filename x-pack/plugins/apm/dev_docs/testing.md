@@ -51,7 +51,7 @@ Run all tests. The test server needs to be running, see [Start Test Server](#sta
 To update snapshots append `--updateSnapshots` to the `functional_test_runner` command
 
 ```
-node scripts/functional_test_runner --config x-pack/test/apm_api_integration/basic/config.ts --quiet --updateSnapshots
+node scripts/functional_test_runner --config x-pack/test/apm_api_integration/[basic | trial]/config.ts --quiet --updateSnapshots
 ```
 The test server needs to be running, see [Start Test Server](#start-test-server).
 
