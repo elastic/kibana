@@ -7,7 +7,8 @@
 
 import type { IRouter, RequestHandler, RouteConfig } from '../../../../../src/core/server';
 import { coreMock } from '../../../../../src/core/server/mocks';
-import type { AuthenticatedUser } from '../../../security/server';
+import type { AuthenticatedUser, CheckPrivilegesPayload } from '../../../security/server';
+import type { CheckPrivilegesResponse } from '../../../security/server/authorization/types';
 import type { CheckPrivilegesDynamically } from '../../../security/server/authorization/check_privileges_dynamically';
 import { createAppContextStartContractMock } from '../mocks';
 import { appContextService } from '../services';
@@ -15,34 +16,22 @@ import type { FleetRequestHandlerContext } from '../types';
 
 import { makeRouterWithFleetAuthz } from './security';
 
-function getCheckPrivilegesResponse(privileges: {
-  fleet?: {
-    all?: boolean;
-    setup?: boolean;
-  };
-  integrations?: {
-    all?: boolean;
-    read?: boolean;
-  };
-}): any {
-  return {
-    privileges: {
-      hasAllRequested:
-        !!privileges.fleet?.all &&
-        !!privileges.fleet?.setup &&
-        !!privileges.integrations?.all &&
-        !!privileges.integrations?.read,
-      kibana: [
-        { authorized: privileges.fleet?.all ?? false },
-        { authorized: privileges.fleet?.setup ?? false },
-        { authorized: privileges.integrations?.all ?? false },
-        { authorized: privileges.integrations?.read ?? false },
-      ],
-    },
+function getCheckPrivilegesMockedImplementation(kibanaRoles: string[]) {
+  return (checkPrivileges: CheckPrivilegesPayload) => {
+    const kibana = ((checkPrivileges?.kibana ?? []) as string[]).map((role: string) => {
+      return { authorized: kibanaRoles.includes(role) };
+    });
+
+    return Promise.resolve({
+      hasAllRequested: kibana.every((r: any) => r.authorized),
+      privileges: {
+        kibana,
+      },
+    } as unknown as CheckPrivilegesResponse);
   };
 }
 
-describe('RouterWrappers', () => {
+describe('FleetAuthzRouter', () => {
   const runTest = async ({
     security: {
       roles = [],
@@ -125,221 +114,130 @@ describe('RouterWrappers', () => {
     return res as unknown as 'forbidden' | 'ok';
   };
 
-  describe('requireSuperUser: true', () => {
-    it('allow users with the superuser role', async () => {
+  const mockCheckPrivileges: jest.Mock<
+    ReturnType<CheckPrivilegesDynamically>,
+    Parameters<CheckPrivilegesDynamically>
+  > = jest.fn().mockResolvedValue({ hasAllRequested: true });
+
+  it('does not allow security plugin to be disabled', async () => {
+    expect(
+      await runTest({
+        security: { pluginEnabled: false },
+        routeConfig: {
+          fleetAuthz: { fleet: { all: true } },
+        },
+      })
+    ).toEqual('forbidden');
+  });
+
+  it('does not allow security license to be disabled', async () => {
+    expect(
+      await runTest({
+        security: { licenseEnabled: false },
+        routeConfig: {
+          fleetAuthz: { fleet: { all: true } },
+        },
+      })
+    ).toEqual('forbidden');
+  });
+
+  describe('with fleet setup privileges', () => {
+    const routeConfig = {
+      path: '/api/fleet/test',
+      fleetAuthz: { fleet: { setup: true } },
+    };
+    it('allow users with superuser role', async () => {
       expect(
         await runTest({
           security: { roles: ['superuser'] },
-          routeConfig: {
-            path: '/api/fleet/test',
-            fleetRequireSuperuser: true,
-          },
+          routeConfig,
         })
       ).toEqual('ok');
     });
 
-    it('does not allow users without the superuser role', async () => {
+    it('allow users with fleet-setup role', async () => {
+      mockCheckPrivileges.mockImplementation(
+        getCheckPrivilegesMockedImplementation(['api:fleet-setup'])
+      );
       expect(
         await runTest({
-          security: { roles: ['foo'] },
-          routeConfig: {
-            path: '/api/fleet/test',
-            fleetRequireSuperuser: true,
-          },
+          security: { checkPrivilegesDynamically: mockCheckPrivileges },
+          routeConfig,
         })
-      ).toEqual('forbidden');
+      ).toEqual('ok');
     });
 
-    it('does not allow security plugin to be disabled', async () => {
+    it('do not allow users without fleet-setup role', async () => {
+      mockCheckPrivileges.mockImplementation(getCheckPrivilegesMockedImplementation([]));
       expect(
         await runTest({
-          security: { pluginEnabled: false },
-          routeConfig: {
-            path: '/api/fleet/test',
-            fleetRequireSuperuser: true,
-          },
-        })
-      ).toEqual('forbidden');
-    });
-
-    it('does not allow security license to be disabled', async () => {
-      expect(
-        await runTest({
-          security: { licenseEnabled: false },
-          routeConfig: {
-            path: '/api/fleet/test',
-            fleetRequireSuperuser: true,
-          },
+          security: { checkPrivilegesDynamically: mockCheckPrivileges },
+          routeConfig,
         })
       ).toEqual('forbidden');
     });
   });
 
-  describe('require.fleetAuthzRouter', () => {
-    const mockCheckPrivileges: jest.Mock<
-      ReturnType<CheckPrivilegesDynamically>,
-      Parameters<CheckPrivilegesDynamically>
-    > = jest.fn().mockResolvedValue({ hasAllRequested: true });
-
-    it('does not allow security plugin to be disabled', async () => {
+  describe('with superuser privileges', () => {
+    const routeConfig = {
+      path: '/api/fleet/test',
+      fleetAuthz: { integrations: { uploadPackages: true } },
+    };
+    it('allow users with superuser role', async () => {
       expect(
         await runTest({
-          security: { pluginEnabled: false },
-          routeConfig: {
-            fleetAuthz: { fleet: { all: true } },
-          },
+          security: { roles: ['superuser'] },
+          routeConfig,
+        })
+      ).toEqual('ok');
+    });
+
+    it('do not allow users without superuser role', async () => {
+      mockCheckPrivileges.mockImplementation(getCheckPrivilegesMockedImplementation([]));
+      expect(
+        await runTest({
+          security: { checkPrivilegesDynamically: mockCheckPrivileges },
+          routeConfig,
         })
       ).toEqual('forbidden');
     });
+  });
 
-    it('does not allow security license to be disabled', async () => {
+  describe('with fleet role', () => {
+    const routeConfig = {
+      path: '/api/fleet/test',
+      fleetAuthz: { integrations: { readPackageInfo: true } },
+    };
+
+    it('allow users with superuser role', async () => {
       expect(
         await runTest({
-          security: { licenseEnabled: false },
-          routeConfig: {
-            fleetAuthz: { fleet: { all: true } },
-          },
+          security: { roles: ['superuser'] },
+          routeConfig,
+        })
+      ).toEqual('ok');
+    });
+
+    it('allow users with all required fleet authz role', async () => {
+      mockCheckPrivileges.mockImplementation(
+        getCheckPrivilegesMockedImplementation(['api:integrations-read'])
+      );
+      expect(
+        await runTest({
+          security: { checkPrivilegesDynamically: mockCheckPrivileges },
+          routeConfig,
+        })
+      ).toEqual('ok');
+    });
+
+    it('does not allow users without the required fleet role', async () => {
+      mockCheckPrivileges.mockImplementation(getCheckPrivilegesMockedImplementation([]));
+      expect(
+        await runTest({
+          security: { checkPrivilegesDynamically: mockCheckPrivileges },
+          routeConfig,
         })
       ).toEqual('forbidden');
-    });
-
-    describe('with fleetAllowFleetSetupPrivilege:true', () => {
-      const routeConfig = {
-        path: '/api/fleet/test',
-        fleetAllowFleetSetupPrivilege: true,
-        fleetAuthz: { fleet: { all: true } },
-      };
-      it('allow users with required privileges', async () => {
-        mockCheckPrivileges.mockResolvedValueOnce(
-          getCheckPrivilegesResponse({
-            fleet: { all: true },
-          })
-        );
-        expect(
-          await runTest({
-            security: { checkPrivilegesDynamically: mockCheckPrivileges },
-            routeConfig,
-          })
-        ).toEqual('ok');
-      });
-
-      it('allow users with setup privilege', async () => {
-        mockCheckPrivileges.mockResolvedValueOnce(
-          getCheckPrivilegesResponse({
-            fleet: { setup: true },
-          })
-        );
-        expect(
-          await runTest({
-            security: { checkPrivilegesDynamically: mockCheckPrivileges },
-            routeConfig,
-          })
-        ).toEqual('ok');
-      });
-
-      it('does not allow users without any privileges', async () => {
-        mockCheckPrivileges.mockResolvedValueOnce(getCheckPrivilegesResponse({}));
-        expect(
-          await runTest({
-            security: { checkPrivilegesDynamically: mockCheckPrivileges },
-            routeConfig,
-          })
-        ).toEqual('forbidden');
-      });
-    });
-
-    describe('with fleetAllowFleetSetupPrivilege:false', () => {
-      const routeConfig = {
-        path: '/api/fleet/test',
-        fleetAllowFleetSetupPrivilege: false,
-        fleetAuthz: { fleet: { all: true } },
-      };
-      it('allow users with required privileges', async () => {
-        mockCheckPrivileges.mockResolvedValueOnce(
-          getCheckPrivilegesResponse({
-            fleet: { all: true },
-          })
-        );
-        expect(
-          await runTest({
-            security: { checkPrivilegesDynamically: mockCheckPrivileges },
-            routeConfig,
-          })
-        ).toEqual('forbidden');
-      });
-
-      it('does not allow users with setup privileges', async () => {
-        mockCheckPrivileges.mockResolvedValueOnce(
-          getCheckPrivilegesResponse({
-            fleet: { setup: true },
-          })
-        );
-        expect(
-          await runTest({
-            security: { checkPrivilegesDynamically: mockCheckPrivileges },
-            routeConfig,
-          })
-        ).toEqual('forbidden');
-      });
-
-      it('does not allow users without required privileges', async () => {
-        mockCheckPrivileges.mockResolvedValueOnce(
-          getCheckPrivilegesResponse({
-            fleet: { setup: false },
-          })
-        );
-        expect(
-          await runTest({
-            security: { checkPrivilegesDynamically: mockCheckPrivileges },
-            routeConfig,
-          })
-        ).toEqual('forbidden');
-      });
-    });
-
-    describe('with fleetAuthz', () => {
-      const routeConfig = {
-        path: '/api/fleet/test',
-        fleetAuthz: { fleet: { all: true }, integrations: { installPackages: true } },
-      };
-      it('allow users with all required fleet authz role', async () => {
-        mockCheckPrivileges.mockResolvedValueOnce(
-          getCheckPrivilegesResponse({
-            fleet: { all: true },
-            integrations: { all: true },
-          })
-        );
-        expect(
-          await runTest({
-            security: { checkPrivilegesDynamically: mockCheckPrivileges },
-            routeConfig,
-          })
-        ).toEqual('ok');
-      });
-
-      it('does not allow users with partial fleet authz roles', async () => {
-        mockCheckPrivileges.mockResolvedValueOnce(
-          getCheckPrivilegesResponse({
-            fleet: { all: true },
-          })
-        );
-        expect(
-          await runTest({
-            security: { checkPrivilegesDynamically: mockCheckPrivileges },
-            routeConfig,
-          })
-        ).toEqual('forbidden');
-      });
-
-      it('does not allow users with no fleet authz roles', async () => {
-        mockCheckPrivileges.mockResolvedValueOnce(getCheckPrivilegesResponse({}));
-        expect(
-          await runTest({
-            security: { checkPrivilegesDynamically: mockCheckPrivileges },
-            routeConfig,
-          })
-        ).toEqual('forbidden');
-      });
     });
   });
 });

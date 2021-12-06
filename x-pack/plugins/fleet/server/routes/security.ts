@@ -57,7 +57,6 @@ async function checkFleetSetupPrivilege(req: KibanaRequest) {
       { kibana: [security.authz.actions.api.get('fleet-setup')] },
       { requireLoginAction: false } // exclude login access requirement
     );
-
     return !!hasAllRequested;
   }
 
@@ -94,8 +93,8 @@ export async function getAuthzFromRequest(req: KibanaRequest): Promise<FleetAuth
 
       // Once we implement Kibana RBAC, use `checkPrivileges` for all privileges instead of only integrations.read
       return calculateAuthz({
-        fleet: { all: true, setup: true },
-        integrations: { all: true, read: intRead.authorized },
+        fleet: { all: false, setup: false },
+        integrations: { all: false, read: intRead.authorized },
         isSuperuser: false,
       });
     }
