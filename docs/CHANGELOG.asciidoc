@@ -349,7 +349,7 @@ Management::
 Maps::
 * Adds support for UTM and MGRS coordinates in Maps "Go To" button {kibana-pull}107835[#107835]
 Observability::
-* APM-Fleet integration version check & upgrade message {kibana-pull}115297[#115297]
+* Adds APM-Fleet integration version check and upgrade message {kibana-pull}115297[#115297]
 * Enhancements errors list page {kibana-pull}115194[#115194]
 * Revert multi-metric ML job {kibana-pull}114961[#114961]
 * Alert creation and freeform selection {kibana-pull}111883[#111883]
