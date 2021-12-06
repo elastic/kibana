@@ -350,7 +350,7 @@ Maps::
 * Adds support for UTM and MGRS coordinates in Maps "Go To" button {kibana-pull}107835[#107835]
 Observability::
 * Adds APM-Fleet integration version check and upgrade message {kibana-pull}115297[#115297]
-* Enhancements errors list page {kibana-pull}115194[#115194]
+* Adds comparison to the error occurrences histogram and "failed transaction rate" to the chart panels {kibana-pull}115194[#115194]
 * Revert multi-metric ML job {kibana-pull}114961[#114961]
 * Adds the ability to select any service name, transaction type, and environment when creating and editing rules, both in APM and Stack Management. {kibana-pull}111883[#111883]
 * Show new "no data screen" on the getting started page {kibana-pull}111803[#111803]
