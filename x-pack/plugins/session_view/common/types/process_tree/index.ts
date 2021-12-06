@@ -15,6 +15,7 @@ export enum EventAction {
   exec = 'exec',
   exit = 'exit',
   output = 'output',
+  connect = 'connect',
 }
 
 export interface EventActionPartition {
@@ -22,11 +23,26 @@ export interface EventActionPartition {
   exec: ProcessEvent[];
   exit: ProcessEvent[];
   output: ProcessEvent[];
+  connect: ProcessEvent[];
 }
 
 export interface User {
   id: string;
   name: string;
+}
+
+export interface EventResultBody {
+  hits: any[];
+  total: number;
+}
+
+export interface ProcessEventParse {
+  events: EventResultBody;
+  alerts: EventResultBody;
+}
+
+export interface ProcessEventResults extends ProcessEventParse {
+  sessionLeader: ProcessEvent;
 }
 
 export interface ProcessFields {

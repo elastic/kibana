@@ -16,6 +16,7 @@ import {
 
 interface UseProcessTreeDeps {
   sessionEntityId: string;
+  sessionLeaderEvent: ProcessEvent | undefined;
   forward: ProcessEvent[];
   backward?: ProcessEvent[];
   searchQuery?: string;
@@ -82,7 +83,7 @@ class ProcessImpl implements Process {
       return eventsPartition.fork[eventsPartition.fork.length - 1];
     }
 
-    return {} as ProcessEvent;
+    return this.events[this.events.length - 1] || ({} as ProcessEvent);
   }
 
   getOutput() {
@@ -110,20 +111,20 @@ class ProcessImpl implements Process {
 
 export const useProcessTree = ({
   sessionEntityId,
+  sessionLeaderEvent,
   forward,
   backward,
   searchQuery,
 }: UseProcessTreeDeps) => {
-  // initialize map, as well as a placeholder for session leader process
-  // we add a fake session leader event, sourced from wide event data.
-  // this is because we might not always have a session leader event
-  // especially if we are paging in reverse from deep within a large session
-  const fakeLeaderEvent = forward.find((event) => event.event.kind === EventKind.event);
+  // initialize map
   const sessionLeaderProcess = new ProcessImpl(sessionEntityId);
 
-  if (fakeLeaderEvent) {
-    fakeLeaderEvent.process = { ...fakeLeaderEvent.process, ...fakeLeaderEvent.process.entry };
-    sessionLeaderProcess.events.push(fakeLeaderEvent);
+  if (sessionLeaderEvent) {
+    sessionLeaderEvent.process = {
+      ...sessionLeaderEvent.process,
+      ...sessionLeaderEvent.process.entry,
+    };
+    sessionLeaderProcess.events.push(sessionLeaderEvent);
   }
 
   const initializedProcessMap: ProcessMap = {
