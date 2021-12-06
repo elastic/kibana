@@ -7,3 +7,4 @@
 
 export * from './cpu_panel';
 export * from './log_rate_panel';
+export * from './log_stream_panel';

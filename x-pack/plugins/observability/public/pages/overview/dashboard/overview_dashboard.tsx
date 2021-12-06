@@ -11,7 +11,7 @@ import { RefreshInterval, TimeRange } from '../../../../../../../src/plugins/dat
 import { ViewMode } from '../../../../../../../src/plugins/embeddable/public';
 import { ObservabilityPublicPluginsStart } from '../../..';
 import { ObservabilityIndexPatterns } from '../../../components/shared/exploratory_view/utils/observability_index_patterns';
-import { cpuPanel, logRatePanel } from '../panels';
+import { cpuPanel, logRatePanel, logStreamPanel } from '../panels';
 
 interface OverviewDashboardProps {
   timeRange: TimeRange;
@@ -37,6 +37,7 @@ export function OverviewDashboard(props: OverviewDashboardProps) {
       const panelList = await Promise.all([
         logRatePanel(observabilityDataViews, 1, { x: 0, y: 0, w: 20, h: 20 }),
         cpuPanel(observabilityDataViews, 2, { x: 20, y: 0, w: 20, h: 20 }),
+        logStreamPanel(observabilityDataViews, 3, { x: 0, y: 20, w: 40, h: 20 }),
       ]);
 
       setPanels(
@@ -66,7 +67,7 @@ export function OverviewDashboard(props: OverviewDashboardProps) {
 
         viewMode: ViewMode.VIEW,
         isFullScreenMode: false,
-        useMargins: false,
+        useMargins: true,
 
         timeRange,
         refreshConfig,
