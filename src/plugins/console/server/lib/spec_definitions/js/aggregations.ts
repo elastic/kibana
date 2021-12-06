@@ -134,7 +134,6 @@ const rules = {
         size: 10,
       },
       field: '{field}',
-      size: 10,
       shard_size: 10,
       order: {
         __template: {
