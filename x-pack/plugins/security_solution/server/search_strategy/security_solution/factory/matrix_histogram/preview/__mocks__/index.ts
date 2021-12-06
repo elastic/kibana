@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MatrixHistogramType } from '../../../../../../../common';
+import { MatrixHistogramType } from '../../../../../../../common/search_strategy';
 
 export const mockOptions = {
   defaultIndex: ['.siem-preview-signals-default'],

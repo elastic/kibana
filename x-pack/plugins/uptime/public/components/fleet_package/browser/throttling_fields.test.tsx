@@ -9,7 +9,7 @@ import React from 'react';
 import userEvent from '@testing-library/user-event';
 import { render } from '../../../lib/helper/rtl_helpers';
 import { ThrottlingFields } from './throttling_fields';
-import { DataStream, IBrowserAdvancedFields, IBrowserSimpleFields, Validation } from '../types';
+import { DataStream, BrowserAdvancedFields, BrowserSimpleFields, Validation } from '../types';
 import {
   BrowserAdvancedFieldsContextProvider,
   BrowserSimpleFieldsContextProvider,
@@ -32,8 +32,8 @@ describe('<ThrottlingFields />', () => {
     defaultSimpleFields = defaultBrowserSimpleFields,
     validate = defaultValidation,
   }: {
-    defaultValues?: IBrowserAdvancedFields;
-    defaultSimpleFields?: IBrowserSimpleFields;
+    defaultValues?: BrowserAdvancedFields;
+    defaultSimpleFields?: BrowserSimpleFields;
     validate?: Validation;
   }) => {
     return (

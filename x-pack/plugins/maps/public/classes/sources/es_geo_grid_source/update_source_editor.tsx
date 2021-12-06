@@ -82,11 +82,13 @@ export class UpdateSourceEditor extends Component<Props, State> {
   _onResolutionChange = async (resolution: GRID_RESOLUTION, metrics: AggDescriptor[]) => {
     let newLayerType;
     if (
-      this.props.currentLayerType === LAYER_TYPE.VECTOR ||
-      this.props.currentLayerType === LAYER_TYPE.TILED_VECTOR
+      this.props.currentLayerType === LAYER_TYPE.GEOJSON_VECTOR ||
+      this.props.currentLayerType === LAYER_TYPE.MVT_VECTOR
     ) {
       newLayerType =
-        resolution === GRID_RESOLUTION.SUPER_FINE ? LAYER_TYPE.TILED_VECTOR : LAYER_TYPE.VECTOR;
+        resolution === GRID_RESOLUTION.SUPER_FINE
+          ? LAYER_TYPE.MVT_VECTOR
+          : LAYER_TYPE.GEOJSON_VECTOR;
     }
 
     await this.props.onChange(
