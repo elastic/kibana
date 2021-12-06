@@ -10,7 +10,7 @@ import { handleActions, Action } from 'redux-actions';
 import { call, put, select, takeLatest } from 'redux-saga/effects';
 import { createAsyncAction } from '../actions/utils';
 import { asyncInitState, handleAsyncAction } from '../reducers/utils';
-import { AppState } from '../index';
+import type { AppState } from '../../state';
 import { AsyncInitState } from '../reducers/types';
 import { fetchEffectFactory } from '../effects/fetch_effect';
 import {
@@ -110,7 +110,7 @@ export function* fetchAlertsEffect() {
       yield call(disableAlertById, action.payload);
       yield put(deleteAnomalyAlertAction.success(action.payload.alertId));
       showAlertDisabledSuccess();
-      const monitorId = yield select(monitorIdSelector);
+      const monitorId = (yield select(monitorIdSelector)) as AppState['ui']['monitorId'];
       yield put(getAnomalyAlertAction.get({ monitorId }));
     } catch (err) {
       showAlertDisabledFailed(err);
@@ -145,9 +145,9 @@ export function* fetchAlertsEffect() {
       getMonitorAlertsAction.fail
     )
   );
-  yield takeLatest(createAlertAction.get, function* (action: Action<NewAlertParams>) {
+  yield takeLatest(createAlertAction.get, function* (action: Action<NewAlertParams>): Generator {
     try {
-      const response = yield call(createAlert, action.payload);
+      const response = (yield call(createAlert, action.payload)) as Alert;
       yield put(createAlertAction.success(response));
 
       kibanaService.core.notifications.toasts.addSuccess(
