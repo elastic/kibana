@@ -367,7 +367,6 @@ describe('getEnrichmentIdentifiers', () => {
         'matched.atomic': ['matched atomic'],
         'matched.type': ['matched type'],
         'feed.name': ['feed name'],
-        'indicator.provider': ['provider name'],
       })
     ).toEqual({
       id: 1,

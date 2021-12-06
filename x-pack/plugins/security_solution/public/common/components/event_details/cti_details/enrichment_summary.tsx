@@ -69,7 +69,7 @@ const EnrichmentDescription: React.FC<ThreatSummaryDescription> = ({
           />
           {feedName && (
             <EnrichmentFieldFeedName>
-              {i18n.PROVIDER_PREPOSITION} {feedName}
+              {i18n.FEED_NAME_PREPOSITION} {feedName}
             </EnrichmentFieldFeedName>
           )}
         </div>

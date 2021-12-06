@@ -25,7 +25,7 @@ export const EnrichmentButtonContent: React.FC<{
   feedName?: string;
   value?: string;
 }> = ({ field = '', feedName = '', value = '' }) => {
-  const title = `${field} ${value}${feedName ? ` ${i18n.PROVIDER_PREPOSITION} ${feedName}` : ''}`;
+  const title = `${field} ${value}${feedName ? ` ${i18n.FEED_NAME_PREPOSITION} ${feedName}` : ''}`;
   return (
     <EuiToolTip content={value}>
       <OverflowParent data-test-subj={'enrichment-button-content'}>
