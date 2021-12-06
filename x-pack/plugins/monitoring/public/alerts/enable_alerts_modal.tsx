@@ -20,7 +20,7 @@ import {
   EuiRadioGroup,
   EuiSpacer,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { Legacy } from '../legacy_shims';
 import { useAlertsModal } from '../application/hooks/use_alerts_modal';

@@ -7,8 +7,10 @@
  */
 
 export const getConfigurationMock = jest.fn();
+export const shouldInstrumentClientMock = jest.fn(() => true);
 jest.doMock('@kbn/apm-config-loader', () => ({
   getConfiguration: getConfigurationMock,
+  shouldInstrumentClient: shouldInstrumentClientMock,
 }));
 
 export const agentMock = {} as Record<string, any>;

@@ -65,3 +65,6 @@ export const ENDPOINT_ACTION_LOG_ROUTE = `/api/endpoint/action_log/{agent_id}`;
 export const ACTION_STATUS_ROUTE = `/api/endpoint/action_status`;
 
 export const failedFleetActionErrorCode = '424';
+
+export const ENDPOINT_DEFAULT_PAGE = 0;
+export const ENDPOINT_DEFAULT_PAGE_SIZE = 10;

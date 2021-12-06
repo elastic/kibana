@@ -11,6 +11,7 @@ import React, { useEffect, useState, useMemo } from 'react';
 import { createPortalNode, InPortal } from 'react-reverse-portal';
 import styled, { css } from 'styled-components';
 
+import type { Filter, Query } from '@kbn/es-query';
 import {
   ErrorEmbeddable,
   isErrorEmbeddable,
@@ -26,7 +27,6 @@ import { MapToolTip } from './map_tool_tip/map_tool_tip';
 import * as i18n from './translations';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { MapEmbeddable } from '../../../../../../plugins/maps/public/embeddable';
-import { Query, Filter } from '../../../../../../../src/plugins/data/public';
 import { useKibana } from '../../../common/lib/kibana';
 import { getLayerList } from './map_config';
 import { sourcererSelectors } from '../../../common/store/sourcerer';

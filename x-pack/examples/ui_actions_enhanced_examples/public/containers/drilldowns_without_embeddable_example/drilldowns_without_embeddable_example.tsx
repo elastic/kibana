@@ -101,7 +101,7 @@ export const DrilldownsWithoutEmbeddableExample: React.FC = () => {
         <EuiFlexItem grow={false}>{openManagerButton}</EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButton
-            color="secondary"
+            color="success"
             fill
             iconType="play"
             iconSide="left"

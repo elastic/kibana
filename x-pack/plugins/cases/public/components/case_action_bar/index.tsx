@@ -25,7 +25,7 @@ import { StatusContextMenu } from './status_context_menu';
 import { getStatusDate, getStatusTitle } from './helpers';
 import { SyncAlertsSwitch } from '../case_settings/sync_alerts_switch';
 import { OnUpdateFields } from '../case_view';
-import { CasesNavigation } from '../links';
+import { useCasesFeatures } from '../cases_context/use_cases_features';
 
 const MyDescriptionList = styled(EuiDescriptionList)`
   ${({ theme }) => css`
@@ -41,25 +41,22 @@ const MyDescriptionList = styled(EuiDescriptionList)`
 `;
 
 interface CaseActionBarProps {
-  allCasesNavigation: CasesNavigation;
   caseData: Case;
   currentExternalIncident: CaseService | null;
   userCanCrud: boolean;
-  disableAlerting: boolean;
   isLoading: boolean;
   onRefresh: () => void;
   onUpdateField: (args: OnUpdateFields) => void;
 }
 const CaseActionBarComponent: React.FC<CaseActionBarProps> = ({
-  allCasesNavigation,
   caseData,
   currentExternalIncident,
-  disableAlerting,
   userCanCrud,
   isLoading,
   onRefresh,
   onUpdateField,
 }) => {
+  const { isSyncAlertsEnabled } = useCasesFeatures();
   const date = useMemo(() => getStatusDate(caseData), [caseData]);
   const title = useMemo(() => getStatusTitle(caseData.status), [caseData.status]);
   const onStatusChanged = useCallback(
@@ -117,7 +114,7 @@ const CaseActionBarComponent: React.FC<CaseActionBarProps> = ({
             responsive={false}
             justifyContent="spaceBetween"
           >
-            {userCanCrud && !disableAlerting && (
+            {userCanCrud && isSyncAlertsEnabled && (
               <EuiFlexItem grow={false}>
                 <EuiDescriptionListTitle>
                   <EuiFlexGroup
@@ -157,11 +154,7 @@ const CaseActionBarComponent: React.FC<CaseActionBarProps> = ({
             </EuiFlexItem>
             {userCanCrud && (
               <EuiFlexItem grow={false} data-test-subj="case-view-actions">
-                <Actions
-                  allCasesNavigation={allCasesNavigation}
-                  caseData={caseData}
-                  currentExternalIncident={currentExternalIncident}
-                />
+                <Actions caseData={caseData} currentExternalIncident={currentExternalIncident} />
               </EuiFlexItem>
             )}
           </EuiFlexGroup>
