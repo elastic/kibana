@@ -232,16 +232,28 @@ Update the following settings:
       
 [discrete]
 [[deprecation-111676]]
-.Deprecates `xpack.security.enabled`
+.Expands parameters for `xpack.security.enabled` deprecation message 
 [%collapsible]
 ====
 *Details* +
-The `xpack.security.enabled` setting is deprecated and will be removed in 8.0.0. For more information, refer to {kibana-pull}111676[#111676].
+When the deprecated `xpack.security.enabled` setting is set to any value, the deprecation message now automatically appears. For more information, refer to {kibana-pull}111676[#111676].
 
 *Impact* +
 Use {ref}/security-settings.html#general-security-settings[`xpack.security.enabled`] in elasticsearch.yml.
 ====
       
+[discrete]
+[[deprecation-111550]]
+.Deprecates `proxyFilter` and `proxyConfig`
+[%collapsible]
+====
+*Details* +
+The `proxyFilter` and `proxyConfig` settings are deprecated and will be removed in 8.0.0. For more information, refer to {kibana-pull}113555[#113555].
+
+*Impact* +
+Before you upgrade to 8.0.0, remove `console.proxyFilter` from kibana.yml, CLI flag, or Docker environment variable, then use the `server.ssl.*` and <<elasticsearch-ssl-keyPassphrase,>>`elasticsearch.ssl.keyPassphrase`>> settings.
+====
+
 [discrete]
 [[deprecation-111550]]
 .Deprecates `KIBANA_PATH_CONF`
@@ -264,7 +276,7 @@ Canvas::
 Elastic Security::
 For the Elastic Security 7.16.0 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
 Lens & Visualizations::
-* Thresholds added in *Lens* {kibana-pull}108342[#108342]
+* Adds reference lines to *Lens* {kibana-pull}108342[#108342]
 * Support custom field format in *TSVB* {kibana-pull}101245[#101245]
 Observability::
 * Adds "Add to case" button {kibana-pull}112463[#112463]
@@ -327,7 +339,6 @@ Lens & Visualizations::
 * Respect external URL allow list in TSVB {kibana-pull}114093[#114093]
 * Respect external URL allow list in vega {kibana-pull}113720[#113720]
 * Enables filter bar in *TSVB* {kibana-pull}109223[#109223]
-* Thresholds added in *Lens* {kibana-pull}108342[#108342]
 * Support custom field format in *TSVB* {kibana-pull}101245[#101245]
 Machine Learning::
 * Adds ability to change data view in advanced job wizard {kibana-pull}115191[#115191]
