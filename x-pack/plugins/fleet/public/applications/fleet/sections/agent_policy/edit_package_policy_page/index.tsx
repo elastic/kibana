@@ -217,12 +217,12 @@ export const EditPackagePolicyForm = memo<{
               _packageInfo!.version
             );
 
-            if (packageData?.response) {
-              setPackageInfo(packageData.response);
+            if (packageData?.item) {
+              setPackageInfo(packageData.item);
 
               const newValidationResults = validatePackagePolicy(
                 newPackagePolicy,
-                packageData.response,
+                packageData.item,
                 safeLoad
               );
               setValidationResults(newValidationResults);
