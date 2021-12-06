@@ -61,11 +61,7 @@ import type { LicensingPluginSetup, LicensingPluginStart } from '../../licensing
 import type { FileUploadPluginStart } from '../../file_upload/public';
 import type { SavedObjectsStart } from '../../../../src/plugins/saved_objects/public';
 import type { PresentationUtilPluginStart } from '../../../../src/plugins/presentation_util/public';
-import {
-  getIsEnterprisePlus,
-  registerLicensedFeatures,
-  setLicensingPluginStart,
-} from './licensed_features';
+import { registerLicensedFeatures, setLicensingPluginStart } from './licensed_features';
 import type { SavedObjectTaggingPluginStart } from '../../saved_objects_tagging/public';
 import type { ChartsPluginStart } from '../../../../src/plugins/charts/public';
 import {
