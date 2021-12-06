@@ -13,6 +13,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiForm,
+  EuiLink,
   EuiOutsideClickDetector,
   EuiPopover,
   EuiPopoverTitle,
@@ -20,6 +21,7 @@ import {
   EuiSuperSelect,
   EuiToolTip,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
@@ -193,6 +195,10 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
   }, [missingPatterns, onContinueUpdateDeprecated]);
 
   const [isTriggerDisabled, setIsTriggerDisabled] = useState(false);
+  const onOpenAndReset = useCallback(() => {
+    setPopoverIsOpen(true);
+    resetDataSources();
+  }, [resetDataSources]);
   const onUpdateUiSettings = useCallback(async () => {
     const defaultIndex = await uiSettings.get<string[]>(DEFAULT_INDEX_KEY);
     const uiSettingsIndexPattern = [...defaultIndex, ...missingPatterns];
@@ -204,7 +210,7 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
     setIsShowingUpdateModal(false);
     setPopoverIsOpen(false);
 
-    if (isUiSettingsSuccess) {
+    if (!isUiSettingsSuccess) {
       onChangeDataView(
         defaultDataView.id,
         // to be at this stage, activePatterns is defined, the ?? selectedPatterns is to make TS happy
@@ -223,7 +229,17 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
     } else {
       addError(new Error(i18n.FAILURE_TOAST_TITLE), {
         title: i18n.FAILURE_TOAST_TITLE,
-        toastMessage: i18n.FAILURE_TOAST_TEXT,
+        toastMessage: (
+          <>
+            <FormattedMessage
+              id="xpack.securitySolution.indexPatterns.failureToastText"
+              defaultMessage="Unexpected error occurred on update. If you would like to modify your data, you can manually select a data view {link}."
+              values={{
+                link: <EuiLink onClick={onOpenAndReset}>{i18n.TOGGLE_TO_NEW_SOURCERER}</EuiLink>,
+              }}
+            />
+          </>
+        ) as unknown as string,
       });
     }
   }, [
@@ -233,6 +249,7 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
     defaultDataView.id,
     missingPatterns,
     onChangeDataView,
+    onOpenAndReset,
     selectedPatterns,
     uiSettings,
   ]);

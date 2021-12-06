@@ -212,10 +212,3 @@ export const FAILURE_TOAST_TITLE = i18n.translate(
     defaultMessage: 'Unable to update data view',
   }
 );
-
-export const FAILURE_TOAST_TEXT = i18n.translate(
-  'xpack.securitySolution.indexPatterns.failureToastText',
-  {
-    defaultMessage: 'Unexpected error occurred on update. Please refresh and try again.',
-  }
-);
