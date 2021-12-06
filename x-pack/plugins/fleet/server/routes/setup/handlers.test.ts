@@ -9,11 +9,13 @@ import { httpServerMock, savedObjectsClientMock } from 'src/core/server/mocks';
 
 import type { PostFleetSetupResponse } from '../../../common';
 import { RegistryError } from '../../errors';
-import { createAppContextStartContractMock, xpackMocks, createFleetAuthzMock } from '../../mocks';
+import { createAppContextStartContractMock, xpackMocks } from '../../mocks';
 import { agentServiceMock } from '../../services/agents/agent_service.mock';
 import { appContextService } from '../../services/app_context';
 import { setupFleet } from '../../services/setup';
 import type { FleetRequestHandlerContext } from '../../types';
+
+import { createFleetAuthzMock } from '../../../common';
 
 import { fleetSetupHandler } from './handlers';
 
