@@ -22,7 +22,7 @@ import {
   MANAGEMENT_STORE_HOST_ISOLATION_EXCEPTIONS_NAMESPACE,
 } from '../../../common/constants';
 import { getHostIsolationExceptionsListPath } from '../../../common/routing';
-import { parseQueryFilterToKQL } from '../../../common/utils';
+import { parsePoliciesAndFilterToKql, parseQueryFilterToKQL } from '../../../common/utils';
 import {
   getHostIsolationExceptionItems,
   getHostIsolationExceptionSummary,

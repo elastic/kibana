@@ -91,7 +91,9 @@ describe('When on the host isolation exceptions page', () => {
 
     describe('And data exists', () => {
       beforeEach(async () => {
-        getHostIsolationExceptionItemsMock.mockImplementation(getFoundExceptionListItemSchemaMock);
+        getHostIsolationExceptionItemsMock.mockImplementation(() =>
+          getFoundExceptionListItemSchemaMock(1)
+        );
       });
 
       it('should show loading indicator while retrieving data and hide it when it gets it', async () => {
@@ -185,7 +187,9 @@ describe('When on the host isolation exceptions page', () => {
     describe('has canIsolateHost privileges', () => {
       beforeEach(async () => {
         setEndpointPrivileges({ canIsolateHost: true });
-        getHostIsolationExceptionItemsMock.mockImplementation(getFoundExceptionListItemSchemaMock);
+        getHostIsolationExceptionItemsMock.mockImplementation(() =>
+          getFoundExceptionListItemSchemaMock(1)
+        );
       });
 
       it('should show the create flyout when the add button is pressed', async () => {
