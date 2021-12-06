@@ -7,7 +7,6 @@
 
 import type { TransformConfigSchema } from './transforms/types';
 import { ENABLE_CASE_CONNECTOR } from '../../cases/common';
-import { METADATA_TRANSFORMS_PATTERN } from './endpoint/constants';
 
 /**
  * as const
@@ -361,8 +360,6 @@ export const showAllOthersBucket: string[] = [
  * than use it from here.
  */
 export const ELASTIC_NAME = 'estc' as const;
-
-export const METADATA_TRANSFORM_STATS_URL = `/api/transform/transforms/${METADATA_TRANSFORMS_PATTERN}/_stats`;
 
 export const RISKY_HOSTS_INDEX_PREFIX = 'ml_host_risk_score_latest_' as const;
 

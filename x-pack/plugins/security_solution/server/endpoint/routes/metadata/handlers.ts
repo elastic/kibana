@@ -41,6 +41,8 @@ import { GetMetadataListRequestQuery } from '../../../../common/endpoint/schema/
 import {
   ENDPOINT_DEFAULT_PAGE,
   ENDPOINT_DEFAULT_PAGE_SIZE,
+  FORBIDDEN_MESSAGE,
+  METADATA_TRANSFORMS_PATTERN,
 } from '../../../../common/endpoint/constants';
 import { EndpointFleetServicesInterface } from '../../services/endpoint_fleet_services';
 
@@ -184,6 +186,34 @@ export const getMetadataRequestHandler = function (
     }
   };
 };
+
+export function getMetadataTransformStatsHandler(
+  logger: Logger
+): RequestHandler<unknown, unknown, unknown, SecuritySolutionRequestHandlerContext> {
+  return async (context, _, response) => {
+    const { canAccessEndpointManagement } = context.securitySolution.endpointAuthz;
+    if (!canAccessEndpointManagement) {
+      return response.forbidden({
+        body: {
+          message: FORBIDDEN_MESSAGE,
+        },
+      });
+    }
+
+    const esClient = context.core.elasticsearch.client.asInternalUser;
+    try {
+      const transformStats = await esClient.transform.getTransformStats({
+        transform_id: METADATA_TRANSFORMS_PATTERN,
+        allow_no_match: true,
+      });
+      return response.ok({
+        body: transformStats.body,
+      });
+    } catch (error) {
+      return errorHandler(logger, response, error);
+    }
+  };
+}
 
 export async function mapToHostResultList(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

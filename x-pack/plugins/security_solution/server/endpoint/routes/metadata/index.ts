@@ -9,11 +9,17 @@ import { schema } from '@kbn/config-schema';
 
 import { HostStatus } from '../../../../common/endpoint/types';
 import { EndpointAppContext } from '../../types';
-import { getLogger, getMetadataRequestHandler, getMetadataListRequestHandler } from './handlers';
+import {
+  getLogger,
+  getMetadataRequestHandler,
+  getMetadataListRequestHandler,
+  getMetadataTransformStatsHandler,
+} from './handlers';
 import type { SecuritySolutionPluginRouter } from '../../../types';
 import {
   HOST_METADATA_GET_ROUTE,
   HOST_METADATA_LIST_ROUTE,
+  METADATA_TRANSFORMS_STATUS_ROUTE,
 } from '../../../../common/endpoint/constants';
 import { GetMetadataListRequestSchema } from '../../../../common/endpoint/schema/metadata';
 
@@ -59,5 +65,14 @@ export function registerEndpointRoutes(
       options: { authRequired: true, tags: ['access:securitySolution'] },
     },
     getMetadataRequestHandler(endpointAppContext, logger)
+  );
+
+  router.get(
+    {
+      path: METADATA_TRANSFORMS_STATUS_ROUTE,
+      validate: false,
+      options: { authRequired: true, tags: ['access:securitySolution'] },
+    },
+    getMetadataTransformStatsHandler(logger)
   );
 }
