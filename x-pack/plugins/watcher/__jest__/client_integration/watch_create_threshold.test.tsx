@@ -50,14 +50,6 @@ jest.mock('../../public/application/lib/api', () => {
 
   return {
     ...original,
-    loadIndexPatterns: async () => {
-      const INDEX_PATTERNS = [
-        { attributes: { title: 'index1' } },
-        { attributes: { title: 'index2' } },
-        { attributes: { title: 'index3' } },
-      ];
-      return await INDEX_PATTERNS;
-    },
     getHttpClient: () => mockHttpClient,
   };
 });
