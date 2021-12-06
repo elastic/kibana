@@ -41,6 +41,8 @@ export const ResourcesAtRiskChart = () => {
     );
   };
 
+  const top5 = resources.length > 5 ? resources.slice(0, 5) : resources;
+
   return (
     <Chart size={{ height: 200 }}>
       <Settings
@@ -53,12 +55,10 @@ export const ResourcesAtRiskChart = () => {
       <BarSeries
         displayValueSettings={{
           showValueLabel: true,
-          // valueFormatter: (d: any) => `${Number(d * 100).toFixed(0)} %`,
         }}
-        id="bars"
-        name="0"
-        data={resources}
-        xAccessor={'name'}
+        id="resources-at-risk-bars"
+        data={top5}
+        xAccessor={'resource'}
         yAccessors={['value']}
         splitSeriesAccessors={['evaluation']}
         stackAccessors={['evaluation']}
