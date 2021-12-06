@@ -66,16 +66,24 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await rowActions[0].click();
       await PageObjects.context.waitUntilContextLoadingHasFinished();
 
-      await testSubjects.click('breadcrumb first');
+      // eslint-disable-next-line no-console
+      console.log('1');
+      await testSubjects.click('breadcrumb discover-breadcrumb first');
       await PageObjects.discover.waitForDocTableLoadingComplete();
 
+      // eslint-disable-next-line no-console
+      console.log('2');
       for (const [columnName, value] of TEST_FILTER_COLUMN_NAMES) {
         expect(await filterBar.hasFilter(columnName, value)).to.eql(true);
       }
+      // eslint-disable-next-line no-console
+      console.log('3');
       expect(await PageObjects.timePicker.getTimeConfigAsAbsoluteTimes()).to.eql({
         start: 'Sep 18, 2015 @ 06:31:44.000',
         end: 'Sep 23, 2015 @ 18:31:44.000',
       });
+      // eslint-disable-next-line no-console
+      console.log('4');
     });
   });
 }
