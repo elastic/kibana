@@ -31,7 +31,7 @@ export function registerActionStatusRoutes(
       options: { authRequired: true, tags: ['access:securitySolution'] },
     },
     withEndpointAuthz(
-      { all: ['canIsolateHost'] },
+      { all: ['canUnIsolateHost'] },
       endpointContext.logFactory.get('hostIsolationStatus'),
       actionStatusRequestHandler(endpointContext)
     )
