@@ -17,6 +17,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { ReactElement } from 'react';
+import styled from 'styled-components';
 import {
   AgentRuntimeAttachmentProps,
   CreateAgentInstructions,
@@ -116,6 +117,14 @@ interface Props {
   AgentRuntimeAttachment?: (props: AgentRuntimeAttachmentProps) => ReactElement;
 }
 
+const StyledEuiAccordion = styled(EuiAccordion)`
+  //This is an alternative fix suggested by the EUI team to fix drag elements inside EuiAccordion
+  //This Issue tracks the fix on the Eui side https://github.com/elastic/eui/issues/3548#issuecomment-639041283
+  .euiAccordion__childWrapper {
+    transform: none;
+  }
+`;
+
 export function AgentInstructionsAccordion({
   policy,
   newPolicy,
@@ -197,7 +206,7 @@ export function AgentInstructionsAccordion({
   );
 
   return (
-    <EuiAccordion
+    <StyledEuiAccordion
       id={agentName}
       buttonContent={
         <AccordionButtonContent agentName={agentName} title={title} />
@@ -244,6 +253,6 @@ export function AgentInstructionsAccordion({
       ) : (
         manualInstrumentationContent
       )}
-    </EuiAccordion>
+    </StyledEuiAccordion>
   );
 }
