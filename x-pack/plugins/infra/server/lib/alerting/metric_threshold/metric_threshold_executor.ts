@@ -34,7 +34,7 @@ import { AlertStates, Comparator } from './types';
 import { evaluateRule, EvaluatedRuleParams } from './lib/evaluate_rule';
 
 export type MetricThresholdRuleParams = Record<string, any>;
-export type MetricThresholdRuleState = RuleTypeState & {
+export type MetricThresholdRuleTypeState = RuleTypeState & {
   groups: string[];
   groupBy?: string | string[];
   filterQuery?: string;
@@ -62,7 +62,7 @@ type MetricThresholdAlertFactory = (
 export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
   libs.metricsRules.createLifecycleRuleExecutor<
     MetricThresholdRuleParams,
-    MetricThresholdRuleState,
+    MetricThresholdRuleTypeState,
     MetricThresholdAlertState,
     MetricThresholdAlertContext,
     MetricThresholdAllowedActionGroups
