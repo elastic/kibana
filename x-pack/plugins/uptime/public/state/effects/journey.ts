@@ -14,11 +14,15 @@ import {
   FetchJourneyStepsParams,
 } from '../actions/journey';
 import { fetchJourneySteps } from '../api/journey';
+import type { SyntheticsJourneyApiResponse } from '../../../common/runtime_types';
 
-export function* fetchJourneyStepsEffect() {
+export function* fetchJourneyStepsEffect(): Generator {
   yield takeLatest(getJourneySteps, function* (action: Action<FetchJourneyStepsParams>) {
     try {
-      const response = yield call(fetchJourneySteps, action.payload);
+      const response = (yield call(
+        fetchJourneySteps,
+        action.payload
+      )) as SyntheticsJourneyApiResponse;
       yield put(getJourneyStepsSuccess(response));
     } catch (e) {
       yield put(getJourneyStepsFail({ checkGroup: action.payload.checkGroup, error: e }));
