@@ -46,7 +46,7 @@ export default function (providerContext: FtrProviderContext) {
       const res = await supertest
         .get(`/api/fleet/epm/packages/${testPkgName}/${testPkgVersion}`)
         .expect(200);
-      const packageInfo = res.body.response;
+      const packageInfo = res.body.item;
       // the uploaded version will have this description
       expect(packageInfo.description).to.not.equal('Apache Uploaded Test Integration');
       // download property should exist
@@ -65,7 +65,7 @@ export default function (providerContext: FtrProviderContext) {
       const res = await supertest
         .get(`/api/fleet/epm/packages/${testPkgName}/${testPkgVersion}`)
         .expect(200);
-      const packageInfo = res.body.response;
+      const packageInfo = res.body.item;
       // the uploaded version will have this description
       expect(packageInfo.description).to.equal('Apache Uploaded Test Integration');
       // download property should not exist on uploaded packages

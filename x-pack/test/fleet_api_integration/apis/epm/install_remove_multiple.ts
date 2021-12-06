@@ -24,7 +24,6 @@ export default function (providerContext: FtrProviderContext) {
   const experimental2PkgName = 'experimental2';
 
   const uploadPkgName = 'apache';
-  const uploadPkgVersion = '0.1.4';
 
   const installUploadPackage = async (pkg: string) => {
     const buf = fs.readFileSync(testPkgArchiveZip);
