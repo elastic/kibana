@@ -34,6 +34,10 @@ const DATAFEED_ID = `datafeed-${AD_JOB_ID}`;
 const BASIC_TEST_DATA_INDEX = `rt-ad-basic-data-anomalies`;
 const DOC_KEYS = ['first-key', 'second-key', 'third-key'];
 
+function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 export function getAnomalyDetectionConfig(): Job {
   return {
     job_id: AD_JOB_ID,
@@ -56,7 +60,7 @@ export function getDatafeedConfig(): Datafeed {
     query: { bool: { must: [{ match_all: {} }] } },
     runtime_mappings: {},
     query_delay: '5s',
-    frequency: '30s',
+    frequency: '10s',
     job_id: AD_JOB_ID,
     datafeed_id: DATAFEED_ID,
   } as Datafeed;
@@ -112,18 +116,22 @@ export default function alertTests({ getService }: FtrProviderContext) {
     it('runs correctly', async () => {
       await createAlert({
         name: 'Test AD job',
+        // To make sure the alert is triggered ASAP
         includeInterim: true,
         jobSelection: {
           jobIds: [AD_JOB_ID],
         },
-        severity: 1,
+        severity: 0,
         lookbackInterval: undefined,
         resultType: 'bucket',
-        topNBuckets: undefined,
+        topNBuckets: 3,
       });
 
       //  Ingest anomalous records
       await ingestAnomalousDoc(BASIC_TEST_DATA_INDEX);
+
+      log.debug('Wait for bucket to finalize...');
+      await sleep(60000);
 
       log.debug('Checking created alert instances...');
 
