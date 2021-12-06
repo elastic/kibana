@@ -57,6 +57,7 @@ export interface ActionAccordionFormProps {
   setActionParamsProperty: (key: string, value: AlertActionParam, index: number) => void;
   actionTypes?: ActionType[];
   messageVariables?: ActionVariables;
+  hasRecoveryContextVariables?: boolean;
   setHasActionsDisabled?: (value: boolean) => void;
   setHasActionsWithBrokenConnector?: (value: boolean) => void;
   actionTypeRegistry: ActionTypeRegistryContract;
@@ -78,6 +79,7 @@ export const ActionForm = ({
   setActionParamsProperty,
   actionTypes,
   messageVariables,
+  hasRecoveryContextVariables,
   actionGroups,
   defaultActionMessage,
   setHasActionsDisabled,
@@ -359,6 +361,7 @@ export const ActionForm = ({
               connectors={connectors}
               defaultActionGroupId={defaultActionGroupId}
               messageVariables={messageVariables}
+              hasRecoveryContextVariables={hasRecoveryContextVariables}
               actionGroups={actionGroups}
               defaultActionMessage={defaultActionMessage}
               defaultParams={getDefaultActionParams?.(actionItem.actionTypeId, actionItem.group)}

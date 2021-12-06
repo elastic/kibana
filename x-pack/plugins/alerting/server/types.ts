@@ -75,11 +75,11 @@ export interface AlertServices<
   alertInstanceFactory: (
     id: string
   ) => PublicAlertInstance<InstanceState, InstanceContext, ActionGroupIds>;
-  recoveryUtils: {
+  shouldWriteAlerts: () => boolean;
+  recoveryUtils?: {
     getRecoveredAlertIds: () => string[];
     setRecoveryContext: (id: string, context: InstanceContext) => void;
   };
-  shouldWriteAlerts: () => boolean;
 }
 
 export interface AlertExecutorOptions<
@@ -166,6 +166,7 @@ export interface AlertType<
   minimumScheduleInterval?: string;
   ruleTaskTimeout?: string;
   cancelAlertsOnRuleTimeout?: boolean;
+  doesSetRecoveryContext?: boolean;
 }
 export type UntypedAlertType = AlertType<
   AlertTypeParams,

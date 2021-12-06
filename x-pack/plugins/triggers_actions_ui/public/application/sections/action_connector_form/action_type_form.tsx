@@ -36,6 +36,7 @@ import {
   ActionVariables,
   ActionTypeRegistryContract,
   REQUIRED_ACTION_VARIABLES,
+  OPTIONAL_ACTION_VARIABLES,
 } from '../../../types';
 import { checkActionFormActionTypeEnabled } from '../../lib/check_action_type_enabled';
 import { hasSaveActionsCapability } from '../../lib/capabilities';
@@ -65,6 +66,7 @@ export type ActionTypeFormProps = {
   | 'setActionParamsProperty'
   | 'messageVariables'
   | 'defaultActionMessage'
+  | 'hasRecoveryContextVariables'
 >;
 
 const preconfiguredMessage = i18n.translate(
@@ -87,6 +89,7 @@ export const ActionTypeForm = ({
   defaultActionGroupId,
   defaultActionMessage,
   messageVariables,
+  hasRecoveryContextVariables,
   actionGroups,
   setActionGroupIdByIndex,
   actionTypeRegistry,
@@ -108,7 +111,13 @@ export const ActionTypeForm = ({
 
   useEffect(() => {
     setAvailableActionVariables(
-      messageVariables ? getAvailableActionVariables(messageVariables, selectedActionGroup) : []
+      messageVariables
+        ? getAvailableActionVariables(
+            messageVariables,
+            selectedActionGroup,
+            hasRecoveryContextVariables
+          )
+        : []
     );
     if (defaultParams) {
       for (const [key, paramValue] of Object.entries(defaultParams)) {
@@ -399,11 +408,16 @@ export const ActionTypeForm = ({
 
 function getAvailableActionVariables(
   actionVariables: ActionVariables,
-  actionGroup?: ActionGroupWithMessageVariables
+  actionGroup?: ActionGroupWithMessageVariables,
+  hasRecoveryContextVariables?: boolean
 ) {
+  const actionVariablesToPick =
+    hasRecoveryContextVariables === true
+      ? [...REQUIRED_ACTION_VARIABLES, ...OPTIONAL_ACTION_VARIABLES]
+      : REQUIRED_ACTION_VARIABLES;
   const transformedActionVariables: ActionVariable[] = transformActionVariables(
     actionGroup?.omitOptionalMessageVariables
-      ? pick(actionVariables, ...REQUIRED_ACTION_VARIABLES)
+      ? pick(actionVariables, ...actionVariablesToPick)
       : actionVariables
   );
 

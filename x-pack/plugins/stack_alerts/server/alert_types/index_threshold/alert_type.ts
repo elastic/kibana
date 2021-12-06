@@ -133,6 +133,7 @@ export function getAlertType(
     isExportable: true,
     executor,
     producer: STACK_ALERTS_FEATURE_ID,
+    doesSetRecoveryContext: true,
   };
 
   async function executor(
@@ -217,24 +218,26 @@ export function getAlertType(
       logger.debug(`scheduled actionGroup: ${JSON.stringify(actionContext)}`);
     }
 
-    // handling for recovered alerts
-    // can either get a list via helper function or determine within the rule executor
-    const recoveredAlertIds = options.services.recoveryUtils.getRecoveredAlertIds();
+    if (options.services.recoveryUtils) {
+      // handling for recovered alerts
+      // can either get a list via helper function or determine within the rule executor
+      const recoveredAlertIds = options.services.recoveryUtils.getRecoveredAlertIds();
 
-    // for each recovered alert id, explicitly set the context
-    for (const recoveredAlertId of recoveredAlertIds) {
-      const agg = params.aggField ? `${params.aggType}(${params.aggField})` : `${params.aggType}`;
-      const humanFn = `${agg} is NOT ${getHumanReadableComparator(
-        params.thresholdComparator
-      )} ${params.threshold.join(' and ')}`;
-      const baseContext: BaseActionContext = {
-        date,
-        value: 0, // this is a tricky value to set since rules may just know that the value did not meet the threshold, not what the actual value is
-        group: recoveredAlertId,
-        conditions: humanFn,
-      };
-      const recoveryContext = addRecoveryMessages(options, baseContext, params);
-      options.services.recoveryUtils.setRecoveryContext(recoveredAlertId, recoveryContext);
+      // for each recovered alert id, explicitly set the context
+      for (const recoveredAlertId of recoveredAlertIds) {
+        const agg = params.aggField ? `${params.aggType}(${params.aggField})` : `${params.aggType}`;
+        const humanFn = `${agg} is NOT ${getHumanReadableComparator(
+          params.thresholdComparator
+        )} ${params.threshold.join(' and ')}`;
+        const baseContext: BaseActionContext = {
+          date,
+          value: 0, // this is a tricky value to set since rules may just know that the value did not meet the threshold, not what the actual value is
+          group: recoveredAlertId,
+          conditions: humanFn,
+        };
+        const recoveryContext = addRecoveryMessages(options, baseContext, params);
+        options.services.recoveryUtils.setRecoveryContext(recoveredAlertId, recoveryContext);
+      }
     }
   }
 }

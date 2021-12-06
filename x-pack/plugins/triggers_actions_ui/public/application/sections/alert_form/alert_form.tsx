@@ -548,6 +548,7 @@ export const AlertForm = ({
             setHasActionsDisabled={setHasActionsDisabled}
             setHasActionsWithBrokenConnector={setHasActionsWithBrokenConnector}
             messageVariables={selectedAlertType.actionVariables}
+            hasRecoveryContextVariables={selectedAlertType.doesSetRecoveryContext}
             defaultActionGroupId={defaultActionGroupId}
             isActionGroupDisabledForActionType={(actionGroupId: string, actionTypeId: string) =>
               isActionGroupDisabledForActionType(selectedAlertType, actionGroupId, actionTypeId)

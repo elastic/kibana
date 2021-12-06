@@ -325,15 +325,19 @@ export class TaskRunner<
               InstanceContext,
               WithoutReservedActionGroups<ActionGroupIds, RecoveryActionGroupId>
             >(alertInstances),
-            recoveryUtils: {
-              getRecoveredAlertIds: (): string[] =>
-                getRecoveredAlertIds(alertInstances, originalAlertInstanceIds),
-
-              setRecoveryContext: (id: string, context: InstanceContext) => {
-                recoveryContext[id] = context;
-              },
-            },
             shouldWriteAlerts: () => this.shouldLogAndScheduleActionsForAlerts(),
+            ...(alertType.doesSetRecoveryContext
+              ? {
+                  recoveryUtils: {
+                    getRecoveredAlertIds: (): string[] =>
+                      getRecoveredAlertIds(alertInstances, originalAlertInstanceIds),
+
+                    setRecoveryContext: (id: string, context: InstanceContext) => {
+                      recoveryContext[id] = context;
+                    },
+                  },
+                }
+              : {}),
           },
           params,
           state: alertTypeState as State,

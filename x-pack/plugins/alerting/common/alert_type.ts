@@ -24,6 +24,7 @@ export interface AlertType<
   ruleTaskTimeout?: string;
   defaultScheduleInterval?: string;
   minimumScheduleInterval?: string;
+  doesSetRecoveryContext?: boolean;
 }
 
 export interface ActionGroup<ActionGroupIds extends string> {
