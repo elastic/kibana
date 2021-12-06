@@ -27,7 +27,7 @@ export function AgentKeyCallOut({ name, token }: Props) {
         title={i18n.translate(
           'xpack.apm.settings.agentKeys.copyAgentKeyField.title',
           {
-            defaultMessage: 'Created agent key "{name}"',
+            defaultMessage: 'Created "{name}" key',
             values: { name },
           }
         )}

@@ -125,7 +125,7 @@ export function AgentKeys() {
           title={
             <h2>
               {i18n.translate('xpack.apm.settings.agentKeys.emptyPromptTitle', {
-                defaultMessage: 'Create your first agent key',
+                defaultMessage: 'Create your first key',
               })}
             </h2>
           }
@@ -133,7 +133,7 @@ export function AgentKeys() {
             <p>
               {i18n.translate('xpack.apm.settings.agentKeys.emptyPromptBody', {
                 defaultMessage:
-                  'Create agent keys to authorize requests to the APM Server.',
+                  'Create keys to authorize agent requests to the APM Server.',
               })}
             </p>
           }
@@ -141,7 +141,7 @@ export function AgentKeys() {
             <EuiButton
               onClick={() => setIsFlyoutVisible(true)}
               fill={true}
-              iconType="plusInCircleFilled"
+              iconType="plusInCircle"
             >
               {i18n.translate(
                 'xpack.apm.settings.agentKeys.createAgentKeyButton',
@@ -187,7 +187,7 @@ export function AgentKeys() {
             <EuiButton
               onClick={() => setIsFlyoutVisible(true)}
               fill={true}
-              iconType="plusInCircleFilled"
+              iconType="plusInCircle"
             >
               {i18n.translate(
                 'xpack.apm.settings.agentKeys.createAgentKeyButton',

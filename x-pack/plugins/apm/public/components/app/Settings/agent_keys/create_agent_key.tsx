@@ -161,7 +161,7 @@ export function CreateAgentKeyFlyout({ onCancel, onSuccess, onError }: Props) {
               children: i18n.translate(
                 'xpack.apm.settings.agentKeys.createKeyFlyout.privilegesFieldset',
                 {
-                  defaultMessage: 'Assign privileges to the agent key',
+                  defaultMessage: 'Assign privileges',
                 }
               ),
             }}
@@ -171,7 +171,7 @@ export function CreateAgentKeyFlyout({ onCancel, onSuccess, onError }: Props) {
                 'xpack.apm.settings.agentKeys.createKeyFlyout.agentConfigHelpText',
                 {
                   defaultMessage:
-                    'Required for agents to read Agent configuration remotely.',
+                    'Required for agents to read agent configuration remotely.',
                 }
               )}
             >
@@ -187,7 +187,7 @@ export function CreateAgentKeyFlyout({ onCancel, onSuccess, onError }: Props) {
               helpText={i18n.translate(
                 'xpack.apm.settings.agentKeys.createKeyFlyout.ingestAgentEvents',
                 {
-                  defaultMessage: 'Required for ingesting Agent events.',
+                  defaultMessage: 'Required for ingesting events.',
                 }
               )}
             >
