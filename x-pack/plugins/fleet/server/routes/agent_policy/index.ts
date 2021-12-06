@@ -34,9 +34,8 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     {
       path: AGENT_POLICY_API_ROUTES.LIST_PATTERN,
       validate: GetAgentPoliciesRequestSchema,
-      fleetAllowFleetSetupPrivilege: true,
       fleetAuthz: {
-        fleet: { all: true },
+        fleet: { all: true, readAgentPolicies: true },
       },
     },
     getAgentPoliciesHandler

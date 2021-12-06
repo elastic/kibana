@@ -21,9 +21,6 @@ import { calculateAuthz } from '../../common';
 import { appContextService } from '../services';
 import type { FleetRequestHandlerContext } from '../types';
 
-const SUPERUSER_AUTHZ_MESSAGE =
-  'Access to Fleet API requires the superuser role and for stack security features to be enabled.';
-
 function checkSecurityEnabled() {
   return appContextService.hasSecurity() && appContextService.getSecurityLicense().isEnabled();
 }
@@ -47,8 +44,24 @@ export function checkSuperuser(req: KibanaRequest) {
   return true;
 }
 
-function isSuperuser(req: KibanaRequest) {
-  return checkSuperuser(req);
+async function checkFleetSetupPrivilege(req: KibanaRequest) {
+  if (!checkSecurityEnabled()) {
+    return false;
+  }
+
+  const security = appContextService.getSecurity();
+
+  if (security.authz.mode.useRbacForRequest(req)) {
+    const checkPrivileges = security.authz.checkPrivilegesDynamicallyWithRequest(req);
+    const { hasAllRequested } = await checkPrivileges(
+      { kibana: [security.authz.actions.api.get('fleet-setup')] },
+      { requireLoginAction: false } // exclude login access requirement
+    );
+
+    return !!hasAllRequested;
+  }
+
+  return true;
 }
 
 export async function getAuthzFromRequest(req: KibanaRequest): Promise<FleetAuthz> {
@@ -61,12 +74,14 @@ export async function getAuthzFromRequest(req: KibanaRequest): Promise<FleetAuth
       return calculateAuthz({
         fleet: { all: true, setup: true },
         integrations: { all: true, read: true },
+        isSuperuser: true,
       });
     } else if (await checkFleetSetupPrivilege(req)) {
       // fleet-setup privilege only gets access to setup actions
       return calculateAuthz({
         fleet: { all: false, setup: true },
         integrations: { all: false, read: false },
+        isSuperuser: false,
       });
     } else {
       // All other users only get access to read integrations if they have the read privilege
@@ -81,6 +96,7 @@ export async function getAuthzFromRequest(req: KibanaRequest): Promise<FleetAuth
       return calculateAuthz({
         fleet: { all: true, setup: true },
         integrations: { all: true, read: intRead.authorized },
+        isSuperuser: false,
       });
     }
   }
@@ -88,6 +104,7 @@ export async function getAuthzFromRequest(req: KibanaRequest): Promise<FleetAuth
   return calculateAuthz({
     fleet: { all: false, setup: false },
     integrations: { all: false, read: false },
+    isSuperuser: false,
   });
 }
 
@@ -115,19 +132,10 @@ function containsRequirement(authz: Authz, requirements: DeepPartialTruthy<Authz
 
 function hasRequiredFleetAuthzPrivilege(
   authz: FleetAuthz,
-  {
-    fleetAuthz,
-    fleetAllowFleetSetupPrivilege,
-  }: { fleetAuthz?: FleetAuthzRequirements; fleetAllowFleetSetupPrivilege?: boolean }
+  { fleetAuthz }: { fleetAuthz?: FleetAuthzRequirements }
 ): boolean {
   if (!checkSecurityEnabled()) {
     return false;
-  }
-  if (fleetAllowFleetSetupPrivilege) {
-    // Temporary while agent call the setup API
-    if (authz.fleet.setup) {
-      return true;
-    }
   }
   if (fleetAuthz && !containsRequirement(authz as unknown as Authz, fleetAuthz)) {
     return false;
@@ -152,9 +160,6 @@ type FleetAuthzRouteRegistrar<
 
 interface FleetAuthzRouteConfig {
   fleetAuthz?: FleetAuthzRequirements;
-  fleetRequireSuperuser?: boolean;
-  // TODO temporary required while agents call Fleet setup
-  fleetAllowFleetSetupPrivilege?: boolean;
 }
 
 type FleetRouteConfig<P, Q, B, Method extends RouteMethod> = RouteConfig<P, Q, B, Method> &
@@ -178,20 +183,10 @@ function shouldHandlePostAuthRequest(req: KibanaRequest) {
   return false;
 }
 function deserializeAuthzConfig(tags: readonly string[]): FleetAuthzRouteConfig {
-  let fleetRequireSuperuser: boolean | undefined;
-  let fleetAllowFleetSetupPrivilege: boolean | undefined;
   let fleetAuthz: FleetAuthzRequirements | undefined;
   for (const tag of tags) {
     if (!tag.match(/^fleet:authz/)) {
       continue;
-    }
-
-    if (tag === 'fleet:authz:requireSuperuser') {
-      fleetRequireSuperuser = true;
-    }
-
-    if (tag === 'fleet:authz:allowFleetSetupPrivilege') {
-      fleetAllowFleetSetupPrivilege = true;
     }
 
     if (!fleetAuthz) {
@@ -216,17 +211,10 @@ function deserializeAuthzConfig(tags: readonly string[]): FleetAuthzRouteConfig 
       }, fleetAuthz);
   }
 
-  return { fleetRequireSuperuser, fleetAllowFleetSetupPrivilege, fleetAuthz };
+  return { fleetAuthz };
 }
 function serializeAuthzConfig(config: FleetAuthzRouteConfig): string[] {
-  const tags = [];
-
-  if (config.fleetRequireSuperuser) {
-    tags.push(`fleet:authz:requireSuperuser`);
-  }
-  if (config.fleetAllowFleetSetupPrivilege) {
-    tags.push(`fleet:authz:allowFleetSetupPrivilege`);
-  }
+  const tags: string[] = [];
 
   if (config.fleetAuthz) {
     function fleetAuthzToTags(requirements: DeepPartialTruthy<Authz>, prefix: string = '') {
@@ -250,8 +238,6 @@ export function makeRouterWithFleetAuthz<TContext extends FleetRequestHandlerCon
 ): { router: FleetAuthzRouter<TContext>; onPostAuthHandler: OnPostAuthHandler } {
   function buildFleetAuthzRouteConfig<P, Q, B, Method extends RouteMethod>({
     fleetAuthz,
-    fleetAllowFleetSetupPrivilege,
-    fleetRequireSuperuser,
     ...routeConfig
   }: FleetRouteConfig<P, Q, B, Method>) {
     return {
@@ -262,8 +248,6 @@ export function makeRouterWithFleetAuthz<TContext extends FleetRequestHandlerCon
           ...(routeConfig?.options?.tags ?? []),
           ...serializeAuthzConfig({
             fleetAuthz,
-            fleetAllowFleetSetupPrivilege,
-            fleetRequireSuperuser,
           }),
         ],
       },
@@ -282,16 +266,6 @@ export function makeRouterWithFleetAuthz<TContext extends FleetRequestHandlerCon
     const fleetAuthzConfig = deserializeAuthzConfig(req.route.options.tags);
 
     if (!fleetAuthzConfig) {
-      return toolkit.next();
-    }
-    if (fleetAuthzConfig.fleetRequireSuperuser) {
-      if (!isSuperuser(req)) {
-        return res.forbidden({
-          body: {
-            message: SUPERUSER_AUTHZ_MESSAGE,
-          },
-        });
-      }
       return toolkit.next();
     }
     const authz = await getAuthzFromRequest(req);

@@ -38,6 +38,7 @@ import { FeatureCatalogueCategory } from '../../../../src/plugins/home/public';
 import type { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
 import { Storage } from '../../../../src/plugins/kibana_utils/public';
 import type { LicensingPluginSetup } from '../../licensing/public';
+import type { AuthenticatedUser, SecurityPluginStart } from '../../security/public';
 import type { CloudSetup } from '../../cloud/public';
 import type { GlobalSearchPluginSetup } from '../../global_search/public';
 import {
@@ -94,6 +95,7 @@ export interface FleetStartDeps {
   navigation: NavigationPublicPluginStart;
   customIntegrations: CustomIntegrationsStart;
   share: SharePluginStart;
+  security?: SecurityPluginStart;
 }
 
 export interface FleetStartServices extends CoreStart, FleetStartDeps {
@@ -238,7 +240,7 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
     return {};
   }
 
-  public start(core: CoreStart): FleetStart {
+  public start(core: CoreStart, deps: FleetStartDeps): FleetStart {
     const registerExtension = createExtensionRegistrationCallback(this.extensions);
     const getPermissions = once(() =>
       core.http.get<CheckPermissionsResponse>(appRoutesService.getCheckPermissionsPath())
@@ -253,18 +255,22 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
     return {
       // Temporarily rely on superuser check to calculate authz. Once Kibana RBAC is in place for Fleet this should
       // switch to a sync calculation based on `core.application.capabilites` properties.
-      authz: getPermissions()
+      authz: Promise.all([getPermissions(), deps.security?.authc.getCurrentUser()])
         .catch((e) => {
           // eslint-disable-next-line no-console
           console.warn(`Could not load Fleet permissions due to error: ${e}`);
-          return { success: false };
+          return [{ success: false }, undefined] as [
+            { success: boolean },
+            AuthenticatedUser | undefined
+          ];
         })
-        .then((permissionsResponse) => {
-          if (permissionsResponse.success) {
+        .then(([permissionsResponse, user]) => {
+          if (permissionsResponse?.success) {
             // If superuser, give access to everything
             return calculateAuthz({
               fleet: { all: true, setup: true },
               integrations: { all: true, read: true },
+              isSuperuser: user ? user.roles.includes('superuser') : false,
             });
           } else {
             // All other users only get access to read integrations if they have the read privilege
@@ -272,6 +278,7 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
             return calculateAuthz({
               fleet: { all: false, setup: false },
               integrations: { all: false, read: capabilities.fleet.read as boolean },
+              isSuperuser: false,
             });
           }
         }),

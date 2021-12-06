@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PLUGIN_ID, EPM_API_ROUTES } from '../../constants';
+import { EPM_API_ROUTES } from '../../constants';
 import {
   GetCategoriesRequestSchema,
   GetPackagesRequestSchema,
@@ -142,14 +142,15 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       path: EPM_API_ROUTES.INSTALL_BY_UPLOAD_PATTERN,
       validate: InstallPackageByUploadRequestSchema,
       options: {
-        tags: [`access:${PLUGIN_ID}-all`],
         body: {
           accepts: ['application/gzip', 'application/zip'],
           parse: false,
           maxBytes: MAX_FILE_SIZE_BYTES,
         },
       },
-      fleetRequireSuperuser: true,
+      fleetAuthz: {
+        integrations: { uploadPackages: true },
+      },
     },
     installPackageByUploadHandler
   );

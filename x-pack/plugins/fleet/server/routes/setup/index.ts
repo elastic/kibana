@@ -17,9 +17,8 @@ export const registerFleetSetupRoute = (router: FleetAuthzRouter) => {
     {
       path: SETUP_API_ROUTE,
       validate: false,
-      fleetAllowFleetSetupPrivilege: true,
       fleetAuthz: {
-        fleet: { all: true },
+        fleet: { setup: true },
       },
     },
     fleetSetupHandler
@@ -32,9 +31,8 @@ export const registerCreateFleetSetupRoute = (router: FleetAuthzRouter) => {
     {
       path: AGENTS_SETUP_API_ROUTES.CREATE_PATTERN,
       validate: false,
-      fleetAllowFleetSetupPrivilege: true,
       fleetAuthz: {
-        fleet: { all: true },
+        fleet: { setup: true },
       },
     },
     fleetSetupHandler
@@ -46,9 +44,8 @@ export const registerGetFleetStatusRoute = (router: FleetAuthzRouter) => {
     {
       path: AGENTS_SETUP_API_ROUTES.INFO_PATTERN,
       validate: false,
-      fleetAllowFleetSetupPrivilege: true,
       fleetAuthz: {
-        fleet: { all: true },
+        fleet: { setup: true },
       },
     },
     getFleetStatusHandler

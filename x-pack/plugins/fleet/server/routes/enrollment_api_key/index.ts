@@ -26,7 +26,6 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     {
       path: ENROLLMENT_API_KEY_ROUTES.INFO_PATTERN,
       validate: GetOneEnrollmentAPIKeyRequestSchema,
-      fleetAllowFleetSetupPrivilege: true,
       fleetAuthz: {
         fleet: { readEnrollmentTokens: true },
       },
@@ -38,7 +37,6 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     {
       path: ENROLLMENT_API_KEY_ROUTES.DELETE_PATTERN,
       validate: DeleteEnrollmentAPIKeyRequestSchema,
-      fleetAllowFleetSetupPrivilege: true,
       fleetAuthz: {
         fleet: { all: true },
       },
@@ -50,7 +48,6 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     {
       path: ENROLLMENT_API_KEY_ROUTES.LIST_PATTERN,
       validate: GetEnrollmentAPIKeysRequestSchema,
-      fleetAllowFleetSetupPrivilege: true,
       fleetAuthz: {
         fleet: { readEnrollmentTokens: true },
       },
@@ -62,7 +59,6 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     {
       path: ENROLLMENT_API_KEY_ROUTES.CREATE_PATTERN,
       validate: PostEnrollmentAPIKeyRequestSchema,
-      fleetAllowFleetSetupPrivilege: true,
       fleetAuthz: {
         fleet: { all: true },
       },
