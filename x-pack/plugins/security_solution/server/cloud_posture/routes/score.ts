@@ -47,6 +47,9 @@ const getFindingsEsQuery = (
  */
 const roundScore = (value: number) => Number((value * 100).toFixed(1));
 
+const calculatePostureScore = (total: number, passed: number, failed: number) =>
+  total === 0 ? undefined : roundScore(passed / failed);
+
 const getLatestFinding = (): SearchRequest => ({
   index: FINDINGS_INDEX,
   size: 1,
@@ -163,15 +166,17 @@ const getAllFindingsStats = async (
   const findings = await esClient.count(getFindingsEsQuery(cycleId));
   const passedFindings = await esClient.count(getFindingsEsQuery(cycleId, 'passed'));
   const failedFindings = await esClient.count(getFindingsEsQuery(cycleId, 'failed'));
+
+  const totalFindings = findings.body.count;
+  const totalPassed = passedFindings.body.count;
+  const totalFailed = failedFindings.body.count;
+
   return {
     name: 'general',
-    totalFindings: findings.body.count,
-    postureScore:
-      findings.body.count === 0
-        ? undefined
-        : roundScore(passedFindings.body.count / findings.body.count),
-    totalPassed: passedFindings.body.count,
-    totalFailed: failedFindings.body.count,
+    postureScore: calculatePostureScore(totalFindings, totalPassed, totalFailed),
+    totalFindings,
+    totalPassed,
+    totalFailed,
   };
 };
 
@@ -190,15 +195,16 @@ const getBenchmarksStats = async (
         getFindingsEsQuery(cycleId, 'failed', benchmark)
       );
 
+      const totalFindings = benchmarkFindings.body.count;
+      const totalPassed = benchmarkPassedFindings.body.count;
+      const totalFailed = benchmarkFailedFindings.body.count;
+
       return {
         name: benchmark,
-        totalFindings: benchmarkFindings.body.count,
-        postureScore:
-          benchmarkFindings.body.count === 0
-            ? undefined
-            : roundScore(benchmarkPassedFindings.body.count / benchmarkFindings.body.count),
-        totalPassed: benchmarkPassedFindings.body.count,
-        totalFailed: benchmarkFailedFindings.body.count,
+        postureScore: calculatePostureScore(totalFindings, totalPassed, totalFailed),
+        totalFindings,
+        totalPassed,
+        totalFailed,
       };
     })
   );
