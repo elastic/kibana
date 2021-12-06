@@ -177,7 +177,6 @@ describe('CTI Enrichment', () => {
       const investigationTimeEnrichment = {
         field: 'source.ip',
         value: '192.168.1.1',
-        provider: 'another_provider',
         feedName: 'feed_name',
       };
 

@@ -31,7 +31,7 @@
           }
         },
         "feed": {
-          "name": "another_provider"
+          "name": "feed_name"
         }
       },
       "tags": ["threatintel-abusemalware", "forwarded"],
