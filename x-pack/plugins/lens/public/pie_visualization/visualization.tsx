@@ -282,7 +282,7 @@ export const getPieVisualization = ({
         warningMessages.push(
           <FormattedMessage
             id="xpack.lens.pie.smallValuesWarningMessage"
-            defaultMessage="The data contains small category values that could be incorrectly represented by the waffle chart. Try switching to table or treemap to better represent these values"
+            defaultMessage="Waffle charts are unable to effectively display small field values. To display all field values, use the Data table or Treemap."
           />
         );
       }
