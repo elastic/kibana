@@ -190,11 +190,6 @@ export default function alertTests({ getService }: FtrProviderContext) {
           params,
         });
 
-      // will print the error body, if an error occurred
-      if (status !== 200) {
-        // console.log(createdAlert);
-      }
-
       expect(status).to.be(200);
 
       const alertId = createdAlert.id;
