@@ -74,7 +74,7 @@ export function FieldSearch({
         <EuiFlexItem>
           <EuiFieldSearch
             aria-label={searchPlaceholder}
-            data-test-subj="fieldFilterSearchInput"
+            data-test-subj="field-search-input"
             fullWidth
             onChange={(event) => onSearchChange(event.currentTarget.value)}
             placeholder={searchPlaceholder}

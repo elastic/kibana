@@ -63,6 +63,7 @@ export const OptionsListPopover = ({
                 disabled={showOnlySelected}
                 onChange={(event) => updateSearchString(event.target.value)}
                 value={searchString}
+                data-test-subj="optionsList-control-search-input"
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
@@ -74,6 +75,7 @@ export const OptionsListPopover = ({
                   size="s"
                   color="danger"
                   iconType="eraser"
+                  data-test-subj="optionsList-control-clear-all-selections"
                   aria-label={OptionsListStrings.popover.getClearAllSelectionsButtonTitle()}
                   onClick={() => dispatch(clearSelections({}))}
                 />
@@ -102,11 +104,16 @@ export const OptionsListPopover = ({
           </EuiFlexGroup>
         </EuiFormRow>
       </div>
-      <div className="optionsList__items">
+      <div
+        className="optionsList__items"
+        data-option-count={availableOptions?.length ?? 0}
+        data-test-subj={`optionsList-control-available-options`}
+      >
         {!showOnlySelected && (
           <>
             {availableOptions?.map((availableOption, index) => (
               <EuiFilterSelectItem
+                data-test-subj={`optionsList-control-selection-${availableOption}`}
                 checked={selectedOptionsSet?.has(availableOption) ? 'on' : undefined}
                 key={index}
                 onClick={() => {
