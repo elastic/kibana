@@ -400,19 +400,27 @@ class SearchBarUI extends Component<SearchBarProps, State> {
       </SavedQueryManagementComponent>
     );
 
-    const filterOptions = this.shouldRenderFilterBar() ? (
-      <FilterOptions
+    // const filterOptions = this.shouldRenderFilterBar() ? (
+    //   <FilterOptions
+    //     onEnableAll={this.onEnableAll}
+    //     onDisableAll={this.onDisableAll}
+    //     onPinAll={this.onPinAll}
+    //     onUnpinAll={this.onUnpinAll}
+    //     onToggleAllNegated={this.onToggleAllNegated}
+    //     onToggleAllDisabled={this.onToggleAllDisabled}
+    //     onRemoveAll={this.onRemoveAll}
+    //   />
+    // ) : undefined;
+
+    const filterMenu = (
+      <FilterSetMenu
+        language={this.props.nonKqlMode || 'KQL'}
         onEnableAll={this.onEnableAll}
         onDisableAll={this.onDisableAll}
-        onPinAll={this.onPinAll}
-        onUnpinAll={this.onUnpinAll}
         onToggleAllNegated={this.onToggleAllNegated}
-        onToggleAllDisabled={this.onToggleAllDisabled}
         onRemoveAll={this.onRemoveAll}
       />
-    ) : undefined;
-
-    const filterMenu = <FilterSetMenu language={this.props.nonKqlMode || 'KQL'} />;
+    );
 
     const timeRangeForSuggestionsOverride = this.props.showDatePicker ? undefined : false;
 

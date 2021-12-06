@@ -90,7 +90,7 @@ export function AddFilterModal({
   filter: Filter;
   indexPatterns: IIndexPattern[];
   timeRangeForSuggestionsOverride?: boolean;
-  savedQueryManagement?: ReactNode;
+  savedQueryManagement?: JSX.Element;
 }) {
   const [selectedIndexPattern, setSelectedIndexPattern] = useState(
     getIndexPatternFromFilter(filter, indexPatterns)
@@ -266,7 +266,8 @@ export function AddFilterModal({
             timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
             fullWidth
             compressed
-          />)
+          />
+        );
     }
   };
 
@@ -383,7 +384,12 @@ export function AddFilterModal({
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton iconType="plusInCircleFilled" fill onClick={onAddFilter} data-test-subj="canvasCustomElementForm-submit">
+            <EuiButton
+              iconType="plusInCircleFilled"
+              fill
+              onClick={onAddFilter}
+              data-test-subj="canvasCustomElementForm-submit"
+            >
               {i18n.translate('data.filter.addFilterModal.addFilterBtnLabel', {
                 defaultMessage: 'Add filter',
               })}

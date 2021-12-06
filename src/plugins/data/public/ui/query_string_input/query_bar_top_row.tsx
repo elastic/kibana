@@ -8,7 +8,7 @@
 
 import dateMath from '@elastic/datemath';
 import classNames from 'classnames';
-import React, { useState } from 'react';
+import React, { useState, ReactNode } from 'react';
 import { buildEmptyFilter, Filter } from '@kbn/es-query';
 
 import {
@@ -67,7 +67,7 @@ export interface QueryBarTopRowProps {
   nonKqlMode?: 'lucene' | 'text';
   nonKqlModeHelpText?: string;
   timeRangeForSuggestionsOverride?: boolean;
-  savedQueryManagement?: any;
+  savedQueryManagement?: JSX.Element;
 }
 
 // Needed for React.lazy

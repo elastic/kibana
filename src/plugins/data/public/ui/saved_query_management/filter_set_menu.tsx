@@ -23,9 +23,19 @@ import { i18n } from '@kbn/i18n';
 
 interface Props {
   language: 'lucene' | 'text' | 'KQL';
+  onEnableAll: () => void;
+  onDisableAll: () => void;
+  onToggleAllNegated: () => void;
+  onRemoveAll: () => void;
 }
 
-export function FilterSetMenu({ language }: Props) {
+export function FilterSetMenu({
+  language,
+  onEnableAll,
+  onDisableAll,
+  onToggleAllNegated,
+  onRemoveAll,
+}: Props) {
   const [isPopoverOpen, setPopover] = useState(false);
 
   const normalContextMenuPopoverId = useGeneratedHtmlId({
@@ -51,7 +61,9 @@ export function FilterSetMenu({ language }: Props) {
         },
         { isSeparator: true },
         {
-          name: 'Save current filter set',
+          name: i18n.translate('data.filter.options.saveCurrentFilterSetLabel', {
+            defaultMessage: 'Save current filter set',
+          }),
           icon: 'save',
           panel: 1,
         },
@@ -63,15 +75,20 @@ export function FilterSetMenu({ language }: Props) {
           },
         },
         {
-          name: 'Apply to all',
+          name: i18n.translate('data.filter.options.applyAllFiltersButtonLabel', {
+            defaultMessage: 'Apply to all',
+          }),
           icon: 'filter',
           panel: 2,
         },
         {
-          name: 'Clear all',
+          name: i18n.translate('data.filter.options.clearllFiltersButtonLabel', {
+            defaultMessage: 'Clear all',
+          }),
           icon: 'crossInACircleFilled',
           onClick: () => {
             closePopover();
+            onRemoveAll();
           },
         },
         { isSeparator: true },
@@ -83,7 +100,9 @@ export function FilterSetMenu({ language }: Props) {
     },
     {
       id: 1,
-      title: 'Save current filter set',
+      title: i18n.translate('data.filter.options.saveCurrentFilterSetLabel', {
+        defaultMessage: 'Save current filter set',
+      }),
       content: (
         <div style={{ padding: 16 }}>
           <EuiButton fill>Save</EuiButton>
@@ -96,24 +115,33 @@ export function FilterSetMenu({ language }: Props) {
       title: 'Apply to all',
       items: [
         {
-          name: 'Enable all',
+          name: i18n.translate('data.filter.options.enableAllFiltersButtonLabel', {
+            defaultMessage: 'Enable all',
+          }),
           icon: 'eye',
           onClick: () => {
             closePopover();
+            onEnableAll();
           },
         },
         {
-          name: 'Disable all',
+          name: i18n.translate('data.filter.options.disableAllFiltersButtonLabel', {
+            defaultMessage: 'Disable all',
+          }),
           icon: 'eyeClosed',
           onClick: () => {
             closePopover();
+            onDisableAll();
           },
         },
         {
-          name: 'Invert inclusion',
+          name: i18n.translate('data.filter.options.invertNegatedFiltersButtonLabel', {
+            defaultMessage: 'Invert inclusion',
+          }),
           icon: 'invert',
           onClick: () => {
             closePopover();
+            onToggleAllNegated();
           },
         },
       ],

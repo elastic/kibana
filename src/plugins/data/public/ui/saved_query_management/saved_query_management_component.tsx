@@ -22,7 +22,15 @@ import {
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import React, { useCallback, useEffect, useState, Fragment, useRef, ReactElement, ReactNode } from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useState,
+  Fragment,
+  useRef,
+  ReactElement,
+  ReactNode,
+} from 'react';
 import { sortBy } from 'lodash';
 import { SavedQuery, SavedQueryService } from '../..';
 import { SavedQueryListItem } from './saved_query_list_item';
@@ -41,9 +49,9 @@ interface Props {
    * the `search` node (if `searchable` is applied)
    */
   children: (
-    list: ReactElement,
+    list: ReactElement
     // search: ReactElement<EuiSelectableSearch<T>> | undefined
-  ) => ReactNode;
+  ) => JSX.Element;
 }
 
 export function SavedQueryManagementComponent({
@@ -194,166 +202,167 @@ export function SavedQueryManagementComponent({
     ));
   };
 
-  const list =
-      <EuiListGroup
-        maxWidth="none"
-        bordered
-        size="s"
-        className="kbnSavedQueryManagement__list"
-        aria-labelledby={'savedQueryManagementPopoverTitle'}
-      >
-        {savedQueryRows()}
-      </EuiListGroup>;
+  const list = (
+    <EuiListGroup
+      maxWidth="none"
+      bordered
+      size="s"
+      className="kbnSavedQueryManagement__list"
+      aria-labelledby={'savedQueryManagementPopoverTitle'}
+    >
+      {savedQueryRows()}
+    </EuiListGroup>
+  );
 
   // NEW RETURN : Just the list
   return children && children(list);
 
   // OLD RETURN
-  return (
-    <Fragment>
-      <EuiPopover
-        id="savedQueryPopover"
-        button={savedQueryPopoverButton}
-        isOpen={isOpen}
-        closePopover={handleClosePopover}
-        anchorPosition="downLeft"
-        panelPaddingSize="none"
-        buffer={-8}
-        repositionOnScroll
-        ownFocus={true}
-      >
-        <div
-          className="kbnSavedQueryManagement__popover"
-          data-test-subj="saved-query-management-popover"
-        >
-          <EuiPopoverTitle paddingSize="m" id={'savedQueryManagementPopoverTitle'}>
-            {savedQueryPopoverTitleText}
-          </EuiPopoverTitle>
-          {savedQueries.length > 0 ? (
-            <Fragment>
-              <EuiText size="s" color="subdued" className="kbnSavedQueryManagement__text">
-                <p>{savedQueryDescriptionText}</p>
-              </EuiText>
-              <div className="kbnSavedQueryManagement__listWrapper">
-                <EuiListGroup
-                  flush={true}
-                  className="kbnSavedQueryManagement__list"
-                  aria-labelledby={'savedQueryManagementPopoverTitle'}
-                >
-                  {savedQueryRows()}
-                </EuiListGroup>
-              </div>
-              <EuiPagination
-                className="kbnSavedQueryManagement__pagination"
-                pageCount={Math.ceil(count / perPage)}
-                activePage={activePage}
-                onPageClick={goToPage}
-              />
-            </Fragment>
-          ) : (
-            <Fragment>
-              <EuiText size="s" color="subdued" className="kbnSavedQueryManagement__text">
-                <p>{noSavedQueriesDescriptionText}</p>
-              </EuiText>
-              <EuiSpacer size="s" />
-            </Fragment>
-          )}
-          <EuiPopoverFooter paddingSize="m">
-            <EuiFlexGroup
-              direction="rowReverse"
-              gutterSize="s"
-              alignItems="center"
-              justifyContent="flexEnd"
-              responsive={false}
-              wrap={true}
-            >
-              {showSaveQuery && loadedSavedQuery && (
-                <Fragment>
-                  <EuiFlexItem grow={false}>
-                    <EuiButton
-                      size="s"
-                      fill
-                      onClick={handleSave}
-                      aria-label={i18n.translate(
-                        'data.search.searchBar.savedQueryPopoverSaveChangesButtonAriaLabel',
-                        {
-                          defaultMessage: 'Save changes to {title}',
-                          values: { title: loadedSavedQuery.attributes.title },
-                        }
-                      )}
-                      data-test-subj="saved-query-management-save-changes-button"
-                    >
-                      {i18n.translate(
-                        'data.search.searchBar.savedQueryPopoverSaveChangesButtonText',
-                        {
-                          defaultMessage: 'Save changes',
-                        }
-                      )}
-                    </EuiButton>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiButton
-                      size="s"
-                      onClick={handleSaveAsNew}
-                      aria-label={i18n.translate(
-                        'data.search.searchBar.savedQueryPopoverSaveAsNewButtonAriaLabel',
-                        {
-                          defaultMessage: 'Save as new saved query',
-                        }
-                      )}
-                      data-test-subj="saved-query-management-save-as-new-button"
-                    >
-                      {i18n.translate(
-                        'data.search.searchBar.savedQueryPopoverSaveAsNewButtonText',
-                        {
-                          defaultMessage: 'Save as new',
-                        }
-                      )}
-                    </EuiButton>
-                  </EuiFlexItem>
-                </Fragment>
-              )}
-              {showSaveQuery && !loadedSavedQuery && (
-                <EuiFlexItem grow={false}>
-                  <EuiButton
-                    size="s"
-                    fill
-                    onClick={handleSave}
-                    aria-label={i18n.translate(
-                      'data.search.searchBar.savedQueryPopoverSaveButtonAriaLabel',
-                      { defaultMessage: 'Save a new saved query' }
-                    )}
-                    data-test-subj="saved-query-management-save-button"
-                  >
-                    {i18n.translate('data.search.searchBar.savedQueryPopoverSaveButtonText', {
-                      defaultMessage: 'Save current query',
-                    })}
-                  </EuiButton>
-                </EuiFlexItem>
-              )}
-              <EuiFlexItem />
-              <EuiFlexItem grow={false}>
-                {loadedSavedQuery && (
-                  <EuiButtonEmpty
-                    size="s"
-                    flush="left"
-                    onClick={onClearSavedQuery}
-                    aria-label={i18n.translate(
-                      'data.search.searchBar.savedQueryPopoverClearButtonAriaLabel',
-                      { defaultMessage: 'Clear current saved query' }
-                    )}
-                    data-test-subj="saved-query-management-clear-button"
-                  >
-                    {i18n.translate('data.search.searchBar.savedQueryPopoverClearButtonText', {
-                      defaultMessage: 'Clear',
-                    })}
-                  </EuiButtonEmpty>
-                )}
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiPopoverFooter>
-        </div>
-      </EuiPopover>
-    </Fragment>
-  );
+  // return (
+  //   <Fragment>
+  //     <EuiPopover
+  //       id="savedQueryPopover"
+  //       button={savedQueryPopoverButton}
+  //       isOpen={isOpen}
+  //       closePopover={handleClosePopover}
+  //       anchorPosition="downLeft"
+  //       panelPaddingSize="none"
+  //       buffer={-8}
+  //       repositionOnScroll
+  //       ownFocus={true}
+  //     >
+  //       <div
+  //         className="kbnSavedQueryManagement__popover"
+  //         data-test-subj="saved-query-management-popover"
+  //       >
+  //         <EuiPopoverTitle paddingSize="m" id={'savedQueryManagementPopoverTitle'}>
+  //           {savedQueryPopoverTitleText}
+  //         </EuiPopoverTitle>
+  //         {savedQueries.length > 0 ? (
+  //           <Fragment>
+  //             <EuiText size="s" color="subdued" className="kbnSavedQueryManagement__text">
+  //               <p>{savedQueryDescriptionText}</p>
+  //             </EuiText>
+  //             <div className="kbnSavedQueryManagement__listWrapper">
+  //               <EuiListGroup
+  //                 flush={true}
+  //                 className="kbnSavedQueryManagement__list"
+  //                 aria-labelledby={'savedQueryManagementPopoverTitle'}
+  //               >
+  //                 {savedQueryRows()}
+  //               </EuiListGroup>
+  //             </div>
+  //             <EuiPagination
+  //               className="kbnSavedQueryManagement__pagination"
+  //               pageCount={Math.ceil(count / perPage)}
+  //               activePage={activePage}
+  //               onPageClick={goToPage}
+  //             />
+  //           </Fragment>
+  //         ) : (
+  //           <Fragment>
+  //             <EuiText size="s" color="subdued" className="kbnSavedQueryManagement__text">
+  //               <p>{noSavedQueriesDescriptionText}</p>
+  //             </EuiText>
+  //             <EuiSpacer size="s" />
+  //           </Fragment>
+  //         )}
+  //         <EuiPopoverFooter paddingSize="m">
+  //           <EuiFlexGroup
+  //             direction="rowReverse"
+  //             gutterSize="s"
+  //             alignItems="center"
+  //             justifyContent="flexEnd"
+  //             responsive={false}
+  //             wrap={true}
+  //           >
+  //             {showSaveQuery && loadedSavedQuery && (
+  //               <Fragment>
+  //                 <EuiFlexItem grow={false}>
+  //                   <EuiButton
+  //                     size="s"
+  //                     fill
+  //                     onClick={handleSave}
+  //                     aria-label={i18n.translate(
+  //                       'data.search.searchBar.savedQueryPopoverSaveChangesButtonAriaLabel',
+  //                       {
+  //                         defaultMessage: 'Save changes to {title}',
+  //                         values: { title: loadedSavedQuery.attributes.title },
+  //                       }
+  //                     )}
+  //                     data-test-subj="saved-query-management-save-changes-button"
+  //                   >
+  //                     {i18n.translate(
+  //                       'data.search.searchBar.savedQueryPopoverSaveChangesButtonText',
+  //                       {
+  //                         defaultMessage: 'Save changes',
+  //                       }
+  //                     )}
+  //                   </EuiButton>
+  //                 </EuiFlexItem>
+  //                 <EuiFlexItem grow={false}>
+  //                   <EuiButton
+  //                     size="s"
+  //                     onClick={handleSaveAsNew}
+  //                     aria-label={i18n.translate(
+  //                       'data.search.searchBar.savedQueryPopoverSaveAsNewButtonAriaLabel',
+  //                       {
+  //                         defaultMessage: 'Save as new saved query',
+  //                       }
+  //                     )}
+  //                     data-test-subj="saved-query-management-save-as-new-button"
+  //                   >
+  //                     {i18n.translate(
+  //                       'data.search.searchBar.savedQueryPopoverSaveAsNewButtonText',
+  //                       {
+  //                         defaultMessage: 'Save as new',
+  //                       }
+  //                     )}
+  //                   </EuiButton>
+  //                 </EuiFlexItem>
+  //               </Fragment>
+  //             )}
+  //             {showSaveQuery && !loadedSavedQuery && (
+  //               <EuiFlexItem grow={false}>
+  //                 <EuiButton
+  //                   size="s"
+  //                   fill
+  //                   onClick={handleSave}
+  //                   aria-label={i18n.translate(
+  //                     'data.search.searchBar.savedQueryPopoverSaveButtonAriaLabel',
+  //                     { defaultMessage: 'Save a new saved query' }
+  //                   )}
+  //                   data-test-subj="saved-query-management-save-button"
+  //                 >
+  //                   {i18n.translate('data.search.searchBar.savedQueryPopoverSaveButtonText', {
+  //                     defaultMessage: 'Save current query',
+  //                   })}
+  //                 </EuiButton>
+  //               </EuiFlexItem>
+  //             )}
+  //             <EuiFlexItem />
+  //             <EuiFlexItem grow={false}>
+  //               {loadedSavedQuery && (
+  //                 <EuiButtonEmpty
+  //                   size="s"
+  //                   flush="left"
+  //                   onClick={onClearSavedQuery}
+  //                   aria-label={i18n.translate(
+  //                     'data.search.searchBar.savedQueryPopoverClearButtonAriaLabel',
+  //                     { defaultMessage: 'Clear current saved query' }
+  //                   )}
+  //                   data-test-subj="saved-query-management-clear-button"
+  //                 >
+  //                   {i18n.translate('data.search.searchBar.savedQueryPopoverClearButtonText', {
+  //                     defaultMessage: 'Clear',
+  //                   })}
+  //                 </EuiButtonEmpty>
+  //               )}
+  //             </EuiFlexItem>
+  //           </EuiFlexGroup>
+  //         </EuiPopoverFooter>
+  //       </div>
+  //     </EuiPopover>
+  //   </Fragment>
+  // );
 }
