@@ -41,14 +41,6 @@ export const element: CanvasElement = {
   filter: '',
 };
 
-export const element: CanvasElement = {
-  id: '0',
-  position: generatePosition(0),
-  type: 'element',
-  expression: `filters group="${group2}"`,
-  filter: '',
-};
-
 const element1: CanvasElement = {
   id: '1',
   position: generatePosition(1),
