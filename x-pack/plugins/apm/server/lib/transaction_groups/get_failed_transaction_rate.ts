@@ -32,7 +32,7 @@ import {
   getFailedTransactionRateTimeSeries,
 } from '../helpers/transaction_error_rate';
 
-export async function getErrorRate({
+export async function getFailedTransactionRate({
   environment,
   kuery,
   serviceName,
@@ -122,7 +122,7 @@ export async function getErrorRate({
   return { timeseries, average };
 }
 
-export async function getErrorRatePeriods({
+export async function getFailedTransactionRatePeriods({
   environment,
   kuery,
   serviceName,
@@ -157,11 +157,15 @@ export async function getErrorRatePeriods({
     searchAggregatedTransactions,
   };
 
-  const currentPeriodPromise = getErrorRate({ ...commonProps, start, end });
+  const currentPeriodPromise = getFailedTransactionRate({
+    ...commonProps,
+    start,
+    end,
+  });
 
   const previousPeriodPromise =
     comparisonStart && comparisonEnd
-      ? getErrorRate({
+      ? getFailedTransactionRate({
           ...commonProps,
           start: comparisonStart,
           end: comparisonEnd,
