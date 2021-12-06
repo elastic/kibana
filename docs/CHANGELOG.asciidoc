@@ -379,7 +379,7 @@ Observability::
 * Browser monitors - Zip Url - add TLS Options and Proxy Url {kibana-pull}112554[#112554]
 * Adds "Add to case" button {kibana-pull}112463[#112463]
 * Adds new advanced options {kibana-pull}112454[#112454]
-* Make all error messages on tables consistence {kibana-pull}111690[#111690]
+* Make all error messages on tables consistent {kibana-pull}111690[#111690]
 * Redirect to error page when Heartbeat mappings are missing {kibana-pull}110857[#110857]
 * New "No Data" screens {kibana-pull}107709[#107709]
 * For filters, use shared component {kibana-pull}105739[#105739]
