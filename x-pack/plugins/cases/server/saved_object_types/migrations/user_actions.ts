@@ -22,6 +22,7 @@ import { USER_ACTION_OLD_ID_REF_NAME, USER_ACTION_OLD_PUSH_ID_REF_NAME } from '.
 import { extractConnectorIdFromJson, UserActionFieldType } from './utils';
 
 interface UserActions {
+  action: string;
   action_field: string[];
   action_at: string;
   action_by: { email: string; username: string; full_name: string };
@@ -166,7 +167,7 @@ function payloadMigration(
   doc: SavedObjectUnsanitizedDoc<UserActions>,
   context: SavedObjectMigrationContext
 ): SavedObjectSanitizedDoc<unknown> {
-  const { new_value, old_value, action_field, action_at, action_by, ...restAttributes } =
+  const { new_value, old_value, action_field, action_at, action_by, action, ...restAttributes } =
     doc.attributes;
 
   const payload =
@@ -175,11 +176,13 @@ function payloadMigration(
       : getSingleFieldPayload(action_field[0], new_value ?? old_value);
 
   const references = removeOldReferences(doc.references);
+  const newAction = action === 'push-to-service' ? 'push_to_service' : action;
 
   return {
     ...doc,
     attributes: {
       ...restAttributes,
+      action: newAction,
       fields: action_field,
       created_at: action_at,
       created_by: action_by,

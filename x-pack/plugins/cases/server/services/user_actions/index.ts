@@ -42,6 +42,7 @@ import {
   CaseExternalServiceBasic,
   CommentRequest,
   SubCaseAttributes,
+  Actions,
 } from '../../../common';
 import { ClientArgs } from '..';
 import {
@@ -474,7 +475,7 @@ export class CaseUserActionService {
       const userAction = {
         ...this.getCommonUserActionAttributes({ user, owner }),
         // TODO: Take action from enum
-        action: 'push-to-service',
+        action: Actions.push_to_service,
         fields: ['pushed'],
         payload: { externalService: this.extractConnectorIdFromExternalService(externalService) },
       };

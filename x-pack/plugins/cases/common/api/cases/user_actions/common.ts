@@ -27,7 +27,7 @@ export const Actions = {
   create: 'create',
   delete: 'delete',
   update: 'update',
-  pushToService: 'push-to-service',
+  push_to_service: 'push_to_service',
 } as const;
 
 /* To the next developer, if you add/removed fields here
