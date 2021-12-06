@@ -30,10 +30,10 @@ import {
 import { usePolicyDetailsNavigateCallback, usePolicyDetailsSelector } from '../../policy_hooks';
 import { PolicyTrustedAppsFlyout } from '../flyout';
 import { PolicyTrustedAppsList } from '../list/policy_trusted_apps_list';
-import { useEndpointPrivileges } from '../../../../../../common/components/user_privileges/endpoint/use_endpoint_privileges';
 import { useAppUrl } from '../../../../../../common/lib/kibana';
 import { APP_UI_ID } from '../../../../../../../common/constants';
 import { getTrustedAppsListPath } from '../../../../../common/routing';
+import { useUserPrivileges } from '../../../../../../common/components/user_privileges';
 
 export const PolicyTrustedAppsLayout = React.memo(() => {
   const { getAppUrl } = useAppUrl();
@@ -43,7 +43,7 @@ export const PolicyTrustedAppsLayout = React.memo(() => {
   const policyItem = usePolicyDetailsSelector(policyDetails);
   const navigateCallback = usePolicyDetailsNavigateCallback();
   const hasAssignedTrustedApps = usePolicyDetailsSelector(doesPolicyHaveTrustedApps);
-  const { isPlatinumPlus } = useEndpointPrivileges();
+  const { canCreateArtifactsByPolicy } = useUserPrivileges().endpointPrivileges;
   const totalAssignedCount = usePolicyDetailsSelector(
     getPolicyTrustedAppsListPagination
   ).totalItemCount;
@@ -139,7 +139,9 @@ export const PolicyTrustedAppsLayout = React.memo(() => {
               </EuiText>
             </EuiPageHeaderSection>
 
-            <EuiPageHeaderSection>{isPlatinumPlus && assignTrustedAppButton}</EuiPageHeaderSection>
+            <EuiPageHeaderSection>
+              {canCreateArtifactsByPolicy && assignTrustedAppButton}
+            </EuiPageHeaderSection>
           </EuiPageHeader>
 
           <EuiSpacer size="m" />
@@ -168,7 +170,7 @@ export const PolicyTrustedAppsLayout = React.memo(() => {
           <PolicyTrustedAppsList hideTotalShowingLabel={true} />
         )}
       </EuiPageContent>
-      {isPlatinumPlus && showListFlyout ? <PolicyTrustedAppsFlyout /> : null}
+      {canCreateArtifactsByPolicy && showListFlyout ? <PolicyTrustedAppsFlyout /> : null}
     </div>
   ) : null;
 });

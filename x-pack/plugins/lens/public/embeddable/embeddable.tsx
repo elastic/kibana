@@ -63,8 +63,14 @@ import { SharingSavedObjectProps } from '../types';
 import type { SpacesPluginStart } from '../../../spaces/public';
 
 export type LensSavedObjectAttributes = Omit<Document, 'savedObjectId' | 'type'>;
-export interface ResolvedLensSavedObjectAttributes extends LensSavedObjectAttributes {
+
+export interface LensUnwrapMetaInfo {
   sharingSavedObjectProps?: SharingSavedObjectProps;
+}
+
+export interface LensUnwrapResult {
+  attributes: LensSavedObjectAttributes;
+  metaInfo?: LensUnwrapMetaInfo;
 }
 
 interface LensBaseEmbeddableInput extends EmbeddableInput {
@@ -82,7 +88,7 @@ interface LensBaseEmbeddableInput extends EmbeddableInput {
 }
 
 export type LensByValueInput = {
-  attributes: ResolvedLensSavedObjectAttributes;
+  attributes: LensSavedObjectAttributes;
 } & LensBaseEmbeddableInput;
 
 export type LensByReferenceInput = SavedObjectEmbeddableInput & LensBaseEmbeddableInput;
@@ -260,28 +266,14 @@ export class Embeddable
     return this.lensInspector.adapters;
   }
 
-  async initializeSavedVis(input: LensEmbeddableInput) {
-    const attrs: ResolvedLensSavedObjectAttributes | false = await this.deps.attributeService
-      .unwrapAttributes(input)
-      .catch((e: Error) => {
-        this.onFatalError(e);
-        return false;
-      });
-    if (!attrs || this.isDestroyed) {
-      return;
-    }
+  private maybeAddConflictError(
+    errors?: ErrorMessage[],
+    sharingSavedObjectProps?: SharingSavedObjectProps
+  ) {
+    const ret = [...(errors || [])];
 
-    const { sharingSavedObjectProps, ...attributes } = attrs;
-
-    this.savedVis = {
-      ...attributes,
-      type: this.type,
-      savedObjectId: (input as LensByReferenceInput)?.savedObjectId,
-    };
-    const { ast, errors } = await this.deps.documentToExpression(this.savedVis);
-    this.errors = errors;
-    if (sharingSavedObjectProps?.outcome === 'conflict' && this.deps.spaces) {
-      const conflictError = {
+    if (sharingSavedObjectProps?.outcome === 'conflict' && !!this.deps.spaces) {
+      ret.push({
         shortMessage: i18n.translate('xpack.lens.embeddable.legacyURLConflict.shortMessage', {
           defaultMessage: `You've encountered a URL conflict`,
         }),
@@ -291,9 +283,32 @@ export class Embeddable
             sourceId={sharingSavedObjectProps.sourceId!}
           />
         ),
-      };
-      this.errors = this.errors ? [...this.errors, conflictError] : [conflictError];
+      });
     }
+
+    return ret?.length ? ret : undefined;
+  }
+
+  async initializeSavedVis(input: LensEmbeddableInput) {
+    const unwrapResult: LensUnwrapResult | false = await this.deps.attributeService
+      .unwrapAttributes(input)
+      .catch((e: Error) => {
+        this.onFatalError(e);
+        return false;
+      });
+    if (!unwrapResult || this.isDestroyed) {
+      return;
+    }
+
+    const { metaInfo, attributes } = unwrapResult;
+
+    this.savedVis = {
+      ...attributes,
+      type: this.type,
+      savedObjectId: (input as LensByReferenceInput)?.savedObjectId,
+    };
+    const { ast, errors } = await this.deps.documentToExpression(this.savedVis);
+    this.errors = this.maybeAddConflictError(errors, metaInfo?.sharingSavedObjectProps);
     this.expression = ast ? toExpression(ast) : null;
     if (this.errors) {
       this.logError('validation');
