@@ -57,7 +57,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should able to configure a shifted metric', async () => {
       await PageObjects.lens.openDimensionEditor('lnsDatatable_metrics > lns-dimensionTrigger');
       await PageObjects.lens.enableTimeShift();
-      await PageObjects.lens.setTimeShift('1w');
+      await PageObjects.lens.setTimeShift('3d');
 
       await PageObjects.lens.waitForVisualization();
       expect(await PageObjects.lens.getDatatableCellText(0, 1)).to.eql('2');
