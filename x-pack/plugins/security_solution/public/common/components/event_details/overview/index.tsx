@@ -107,7 +107,11 @@ export const Overview = React.memo<Props>(
       <NotGrowingFlexGroup gutterSize="s">
         {hasData(statusData) && (
           <EuiFlexItem>
-            <OverviewCard title={SIGNAL_STATUS}>
+            <OverviewCardWithActions
+              title={SIGNAL_STATUS}
+              enrichedFieldInfo={severityData}
+              contextId={contextId}
+            >
               <StatusPopoverButton
                 eventId={eventId}
                 contextId={contextId}
@@ -116,7 +120,7 @@ export const Overview = React.memo<Props>(
                 timelineId={timelineId}
                 handleOnEventClosed={handleOnEventClosed}
               />
-            </OverviewCard>
+            </OverviewCardWithActions>
           </EuiFlexItem>
         )}
 
