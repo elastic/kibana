@@ -644,7 +644,7 @@ export async function ensurePackagesCompletedInstall(
             savedObjectsClient,
             pkgkey,
             esClient,
-            spaceId: (pkg.attributes.installed_kibana_space_id as string) || 'default', // TODO: (before merge) not sure we should default here?
+            spaceId: (pkg.attributes.installed_kibana_space_id as string) || DEFAULT_SPACE_ID,
           })
         );
       }
