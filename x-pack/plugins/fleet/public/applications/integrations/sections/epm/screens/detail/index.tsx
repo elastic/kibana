@@ -27,6 +27,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import semverLt from 'semver/functions/lt';
 
+import { splitPkgKey } from '../../../../../../../common';
 import {
   useGetPackageInstallStatus,
   useSetPackageInstallStatus,
@@ -132,7 +133,7 @@ export function Detail() {
     packageInfo.savedObject &&
     semverLt(packageInfo.savedObject.attributes.version, packageInfo.latestVersion);
 
-  const [pkgName, pkgVersion] = pkgkey.split('-');
+  const { pkgName, pkgVersion } = splitPkgKey(pkgkey);
   // Fetch package info
   const {
     data: packageInfoData,
