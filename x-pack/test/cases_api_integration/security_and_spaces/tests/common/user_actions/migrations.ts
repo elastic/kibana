@@ -15,7 +15,7 @@ import { getCaseUserActions } from '../../../../common/lib/utils';
 import {
   CaseUserActionResponse,
   CaseUserActionsResponse,
-} from '../../../../../../plugins/cases/common';
+} from '../../../../../../plugins/cases/common/api';
 
 // eslint-disable-next-line import/no-default-export
 export default function createGetTests({ getService }: FtrProviderContext) {
