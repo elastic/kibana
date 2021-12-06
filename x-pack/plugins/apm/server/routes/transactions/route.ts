@@ -18,9 +18,8 @@ import { getServiceTransactionGroups } from '../services/get_service_transaction
 import { getServiceTransactionGroupDetailedStatisticsPeriods } from '../services/get_service_transaction_group_detailed_statistics';
 import { getTransactionBreakdown } from './breakdown';
 import { getTransactionTraceSamples } from './trace_samples';
-import { getAnomalySeries } from './get_anomaly_data';
 import { getLatencyPeriods } from './get_latency_charts';
-import { getErrorRatePeriods } from '../../lib/transaction_groups/get_error_rate';
+import { getFailedTransactionRatePeriods } from '../../lib/transaction_groups/get_failed_transaction_rate';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { createApmServerRouteRepository } from '../apm_routes/create_apm_server_route_repository';
 import {
@@ -204,26 +203,16 @@ const transactionLatencyChartsRoute = createApmServerRoute({
       end,
     };
 
-    const [{ currentPeriod, previousPeriod }, anomalyTimeseries] =
-      await Promise.all([
-        getLatencyPeriods({
-          ...options,
-          latencyAggregationType:
-            latencyAggregationType as LatencyAggregationType,
-          comparisonStart,
-          comparisonEnd,
-        }),
-        getAnomalySeries(options).catch((error) => {
-          logger.warn(`Unable to retrieve anomalies for latency charts.`);
-          logger.error(error);
-          return undefined;
-        }),
-      ]);
+    const { currentPeriod, previousPeriod } = await getLatencyPeriods({
+      ...options,
+      latencyAggregationType: latencyAggregationType as LatencyAggregationType,
+      comparisonStart,
+      comparisonEnd,
+    });
 
     return {
       currentPeriod,
       previousPeriod,
-      anomalyTimeseries,
     };
   },
 });
@@ -360,7 +349,7 @@ const transactionChartsErrorRateRoute = createApmServerRoute({
       end,
     });
 
-    return getErrorRatePeriods({
+    return getFailedTransactionRatePeriods({
       environment,
       kuery,
       serviceName,
