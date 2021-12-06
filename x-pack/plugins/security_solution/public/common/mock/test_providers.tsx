@@ -25,8 +25,8 @@ import {
 import { FieldHook } from '../../shared_imports';
 import { SUB_PLUGINS_REDUCER } from './utils';
 import { createSecuritySolutionStorageMock, localStorageMock } from './mock_local_storage';
-import { UserPrivilegesProvider } from '../components/user_privileges';
 import { CASES_FEATURE_ID } from '../../../common/constants';
+import { UserPrivilegesProvider } from '../components/user_privileges/user_privileges_context';
 
 const state: State = mockGlobalState;
 
