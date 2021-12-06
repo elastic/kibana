@@ -15,11 +15,11 @@ import {
   getErrorRenderer,
   getDebugRenderer,
 } from '../../../../src/plugins/expression_error/public';
+import { getRevealImageRenderer } from '../../../../src/plugins/expression_reveal_image/public';
 import { getRepeatImageRenderer } from '../../../../src/plugins/expression_repeat_image/public';
-import { revealImageRenderer as revealImage } from '../../../../src/plugins/expression_reveal_image/public';
 import {
-  shapeRenderer as shape,
-  progressRenderer as progress,
+  getShapeRenderer,
+  getProgressRenderer,
 } from '../../../../src/plugins/expression_shape/public';
 import { getMetricRenderer } from '../../../../src/plugins/expression_metric/public';
 
@@ -31,6 +31,9 @@ const renderFunctionsFactories = [
   getTableRenderer,
   getErrorRenderer,
   getDebugRenderer,
+  getShapeRenderer,
+  getProgressRenderer,
+  getRevealImageRenderer,
   getRepeatImageRenderer,
   getMetricRenderer,
 ];
@@ -40,14 +43,6 @@ const renderFunctionsFactories = [
  * a renderer is not listed here, but is used by the Shared Workpad, it will
  * not render.  This includes any plugins.
  */
-export const renderFunctions = [
-  image,
-  revealImage,
-  pie,
-  plot,
-  progress,
-  shape,
-  ...renderFunctionsFactories.map(unboxFactory),
-];
+export const renderFunctions = [image, pie, plot, ...renderFunctionsFactories.map(unboxFactory)];
 
 export const renderFunctionNames = [...renderFunctions.map((fn) => fn().name)];
