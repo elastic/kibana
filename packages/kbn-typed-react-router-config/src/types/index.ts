@@ -115,7 +115,7 @@ export interface RouteMatch<TRoute extends Route = Route> {
       params: t.Type<any>;
     }
       ? t.TypeOf<TRoute['params']>
-      : {};
+      : AnyObj;
   };
 }
 
@@ -160,10 +160,11 @@ interface ReadonlyPlainRoute {
 }
 
 export type Route = PlainRoute | ReadonlyPlainRoute;
+type AnyObj = Record<string, any>;
 
 interface DefaultOutput {
-  path: {};
-  query: {};
+  path: AnyObj;
+  query: AnyObj;
 }
 
 type OutputOfRouteMatch<TRouteMatch extends RouteMatch> = TRouteMatch extends {
@@ -190,20 +191,21 @@ type TypeOfRouteMatch<TRouteMatch extends RouteMatch> = TRouteMatch extends {
   route: { params: t.Type<any> };
 }
   ? t.TypeOf<TRouteMatch['route']['params']>
-  : {};
+  : AnyObj;
 
 type TypeOfMatches<TRouteMatches extends RouteMatch[]> = TRouteMatches extends [RouteMatch]
   ? TypeOfRouteMatch<TRouteMatches[0]>
   : TRouteMatches extends [RouteMatch, ...infer TNextRouteMatches]
   ? TypeOfRouteMatch<TRouteMatches[0]> &
-      (TNextRouteMatches extends RouteMatch[] ? TypeOfMatches<TNextRouteMatches> : {})
-  : {};
+      (TNextRouteMatches extends RouteMatch[] ? TypeOfMatches<TNextRouteMatches> : AnyObj)
+  : AnyObj;
 
 export type TypeOf<
   TRoutes extends Route[],
   TPath extends PathsOf<TRoutes>,
   TWithDefaultOutput extends boolean = true
-> = TypeOfMatches<Match<TRoutes, TPath>> & (TWithDefaultOutput extends true ? DefaultOutput : {});
+> = TypeOfMatches<Match<TRoutes, TPath>> &
+  (TWithDefaultOutput extends true ? DefaultOutput : AnyObj);
 
 export type TypeAsArgs<TObject> = keyof TObject extends never
   ? []
@@ -276,7 +278,7 @@ type MapRoute<TRoute extends Route, TParents extends Route[] = []> = MaybeUnion<
           >;
         }
       >
-    : {}
+    : AnyObj
 >;
 
 type MapRoutes<TRoutes, TParents extends Route[] = []> = TRoutes extends [Route]
@@ -341,7 +343,7 @@ type MapRoutes<TRoutes, TParents extends Route[] = []> = TRoutes extends [Route]
       MapRoute<TRoutes[8], TParents> &
       MapRoute<TRoutes[7], TParents> &
       MapRoute<TRoutes[9], TParents>
-  : {};
+  : AnyObj;
 
 // const element = null as any;
 

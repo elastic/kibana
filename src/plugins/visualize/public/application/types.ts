@@ -35,7 +35,8 @@ import type {
 } from 'src/plugins/kibana_utils/public';
 
 import type { NavigationPublicPluginStart as NavigationStart } from 'src/plugins/navigation/public';
-import type { Query, Filter, DataPublicPluginStart, TimeRange } from 'src/plugins/data/public';
+import { Filter } from '@kbn/es-query';
+import type { Query, DataPublicPluginStart, TimeRange } from 'src/plugins/data/public';
 import type { SharePluginStart } from 'src/plugins/share/public';
 import type { SavedObjectsStart } from 'src/plugins/saved_objects/public';
 import type { EmbeddableStart, EmbeddableStateTransfer } from 'src/plugins/embeddable/public';
