@@ -12,7 +12,6 @@ import { getBooleanFieldStatsRequest } from './get_boolean_field_stats';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ElasticsearchClient } from 'kibana/server';
 import { fetchFieldsStats } from './get_fields_stats';
-import { SAMPLER_SHARD_SIZE } from '../../../../../common/correlations/constants';
 
 const params = {
   index: 'apm-*',
@@ -21,7 +20,6 @@ const params = {
   includeFrozen: false,
   environment: ENVIRONMENT_ALL.value,
   kuery: '',
-  samplerShardSize: SAMPLER_SHARD_SIZE,
 };
 
 export const getExpectedQuery = (aggs: any) => {

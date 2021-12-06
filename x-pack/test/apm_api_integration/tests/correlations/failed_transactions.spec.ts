@@ -11,7 +11,6 @@ import { FtrProviderContext } from '../../common/ftr_provider_context';
 import type { FailedTransactionsCorrelationsResponse } from '../../../../plugins/apm/common/correlations/failed_transactions_correlations/types';
 import { EVENT_OUTCOME } from '../../../../plugins/apm/common/elasticsearch_fieldnames';
 import { EventOutcome } from '../../../../plugins/apm/common/event_outcome';
-import { SAMPLER_SHARD_SIZE } from '../../../../plugins/apm/common/correlations/constants';
 
 // These tests go through the full sequence of queries required
 // to get the final results for a failed transactions correlation analysis.
@@ -185,7 +184,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           body: {
             ...getOptions(),
             fieldsToSample: [...fieldsToSample],
-            samplerShardSize: SAMPLER_SHARD_SIZE,
           },
         },
       });

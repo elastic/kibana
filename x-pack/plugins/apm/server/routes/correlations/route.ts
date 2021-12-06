@@ -78,13 +78,12 @@ const fieldStatsRoute = createApmServerRoute({
         transactionName: t.string,
         transactionType: t.string,
       }),
+      t.type({
+        fieldsToSample: t.array(t.string),
+      }),
       environmentRt,
       kueryRt,
       rangeRt,
-      t.type({
-        fieldsToSample: t.array(t.string),
-        samplerShardSize: t.number,
-      }),
     ]),
   }),
   options: { tags: ['access:apm'] },
@@ -129,7 +128,6 @@ const fieldValueStatsRoute = createApmServerRoute({
       t.type({
         fieldName: t.string,
         fieldValue: t.union([t.string, t.number]),
-        samplerShardSize: t.union([t.string, t.number]),
       }),
     ]),
   }),
@@ -143,8 +141,7 @@ const fieldValueStatsRoute = createApmServerRoute({
     const { indices } = await setupRequest(resources);
     const esClient = resources.context.core.elasticsearch.client.asCurrentUser;
 
-    const { fieldName, fieldValue, samplerShardSize, ...params } =
-      resources.params.query;
+    const { fieldName, fieldValue, ...params } = resources.params.query;
 
     return withApmSpan(
       'get_correlations_field_value_stats',
@@ -153,10 +150,6 @@ const fieldValueStatsRoute = createApmServerRoute({
           esClient,
           {
             ...params,
-            samplerShardSize:
-              typeof samplerShardSize === 'string'
-                ? parseInt(samplerShardSize, 10)
-                : samplerShardSize,
             index: indices.transaction,
           },
           { fieldName, fieldValue }

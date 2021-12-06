@@ -27,7 +27,6 @@ import { asPercent } from '../../../../../common/utils/formatters';
 import { useTheme } from '../../../../hooks/use_theme';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { useFetchParams } from '../use_fetch_params';
-import { SAMPLER_SHARD_SIZE } from '../../../../../common/correlations/constants';
 
 export type OnAddFilter = ({
   fieldName,
@@ -193,7 +192,6 @@ export function TopValues({
               ...params,
               fieldName,
               fieldValue,
-              samplerShardSize: SAMPLER_SHARD_SIZE,
             },
           },
         });

@@ -15,7 +15,6 @@ import { EventOutcome } from '../../../../common/event_outcome';
 import {
   DEBOUNCE_INTERVAL,
   DEFAULT_PERCENTILE_THRESHOLD,
-  SAMPLER_SHARD_SIZE,
 } from '../../../../common/correlations/constants';
 import type {
   FailedTransactionsCorrelation,
@@ -201,7 +200,6 @@ export function useFailedTransactionsCorrelations() {
           body: {
             ...fetchParams,
             fieldsToSample: [...fieldsToSample],
-            samplerShardSize: SAMPLER_SHARD_SIZE,
           },
         },
       });
