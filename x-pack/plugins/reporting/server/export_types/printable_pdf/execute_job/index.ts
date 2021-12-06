@@ -18,7 +18,7 @@ import {
   omitBlockedHeaders,
   getCustomLogo,
 } from '../../common';
-import { generatePdfObservableFactory } from '../lib/generate_pdf';
+import { generatePdfObservable } from '../lib/generate_pdf';
 import { TaskPayloadPDF } from '../types';
 
 export const runTaskFnFactory: RunTaskFnFactory<RunTaskFn<TaskPayloadPDF>> =
@@ -31,8 +31,6 @@ export const runTaskFnFactory: RunTaskFnFactory<RunTaskFn<TaskPayloadPDF>> =
       const apmTrans = apm.startTransaction('execute-job-pdf', REPORTING_TRANSACTION_TYPE);
       const apmGetAssets = apmTrans?.startSpan('get-assets', 'setup');
       let apmGeneratePdf: { end: () => void } | null | undefined;
-
-      const generatePdfObservable = await generatePdfObservableFactory(reporting);
 
       const process$: Rx.Observable<TaskRunResult> = Rx.of(1).pipe(
         mergeMap(() => decryptJobHeaders(encryptionKey, job.headers, jobLogger)),
@@ -49,12 +47,15 @@ export const runTaskFnFactory: RunTaskFnFactory<RunTaskFn<TaskPayloadPDF>> =
 
           apmGeneratePdf = apmTrans?.startSpan('generate-pdf-pipeline', 'execute');
           return generatePdfObservable(
+            reporting,
             jobLogger,
             title,
-            urls,
-            browserTimezone,
-            conditionalHeaders,
-            layout,
+            {
+              urls,
+              browserTimezone,
+              conditionalHeaders,
+              layout,
+            },
             logo
           );
         }),

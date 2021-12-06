@@ -129,7 +129,6 @@ export type RangeStats = JobTypes & {
 
 export type ReportingUsageType = RangeStats & {
   available: boolean;
-  browser_type: string;
   enabled: boolean;
   last7Days: RangeStats;
 };

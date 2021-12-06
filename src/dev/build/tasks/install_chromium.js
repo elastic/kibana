@@ -6,10 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { first } from 'rxjs/operators';
-
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { installBrowser } from '../../../../x-pack/plugins/reporting/server/browsers/install';
+import { install } from '../../../../x-pack/plugins/screenshotting/server/utils';
 
 export const InstallChromium = {
   description: 'Installing Chromium',
@@ -22,13 +20,23 @@ export const InstallChromium = {
       // revert after https://github.com/elastic/kibana/issues/109949
       if (target === 'darwin-arm64') continue;
 
-      const { binaryPath$ } = installBrowser(
-        log,
-        build.resolvePathForPlatform(platform, 'x-pack/plugins/reporting/chromium'),
+      const logger = {
+        get: log.withType.bind(log),
+        debug: log.debug.bind(log),
+        info: log.info.bind(log),
+        warn: log.warning.bind(log),
+        trace: log.verbose.bind(log),
+        error: log.error.bind(log),
+        fatal: log.error.bind(log),
+        log: log.write.bind(log),
+      };
+
+      await install(
+        logger,
+        build.resolvePathForPlatform(platform, 'x-pack/plugins/screenshotting/chromium'),
         platform.getName(),
         platform.getArchitecture()
       );
-      await binaryPath$.pipe(first()).toPromise();
     }
   },
 };

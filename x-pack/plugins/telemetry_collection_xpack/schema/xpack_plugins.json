@@ -5962,9 +5962,6 @@
         "available": {
           "type": "boolean"
         },
-        "browser_type": {
-          "type": "keyword"
-        },
         "enabled": {
           "type": "boolean"
         },

@@ -19,6 +19,7 @@ export const config: PluginConfigDescriptor<ReportingConfigType> = {
   schema: ConfigSchema,
   deprecations: ({ unused }) => [
     unused('capture.browser.chromium.maxScreenshotDimension', { level: 'warning' }), // unused since 7.8
+    unused('capture.browser.type'),
     unused('poll.jobCompletionNotifier.intervalErrorMultiplier', { level: 'warning' }), // unused since 7.10
     unused('poll.jobsRefresh.intervalErrorMultiplier', { level: 'warning' }), // unused since 7.10
     unused('capture.viewport', { level: 'warning' }), // deprecated as unused since 7.16
@@ -72,7 +73,6 @@ export const config: PluginConfigDescriptor<ReportingConfigType> = {
     capture: {
       maxAttempts: true,
       timeouts: { openUrl: true, renderComplete: true, waitForElements: true },
-      networkPolicy: false, // show as [redacted]
       zoom: true,
     },
     csv: { maxSizeBytes: true, scroll: { size: true, duration: true } },

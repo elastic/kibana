@@ -5,16 +5,6 @@
  * 2.0.
  */
 
-jest.mock('./browsers/install', () => ({
-  installBrowser: jest.fn().mockImplementation(() => ({
-    binaryPath$: {
-      pipe: jest.fn().mockImplementation(() => ({
-        toPromise: () => Promise.resolve(),
-      })),
-    },
-  })),
-}));
-
 import { coreMock } from 'src/core/server/mocks';
 import { featuresPluginMock } from '../../features/server/mocks';
 import { TaskManagerSetupContract } from '../../task_manager/server';

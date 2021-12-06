@@ -92,7 +92,6 @@ const rangeStatsSchema: MakeSchemaFrom<RangeStats> = {
 export const reportingSchema: MakeSchemaFrom<ReportingUsageType> = {
   ...rangeStatsSchema,
   available: { type: 'boolean' },
-  browser_type: { type: 'keyword' },
   enabled: { type: 'boolean' },
   last7Days: rangeStatsSchema,
 };

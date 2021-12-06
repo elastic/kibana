@@ -103,7 +103,6 @@ describe('Handle request to generate', () => {
           "_primary_term": undefined,
           "_seq_no": undefined,
           "attempts": 0,
-          "browser_type": undefined,
           "completed_at": undefined,
           "created_by": "testymcgee",
           "jobtype": "printable_pdf",
@@ -180,7 +179,6 @@ describe('Handle request to generate', () => {
     expect(snapObj).toMatchInlineSnapshot(`
       Object {
         "attempts": 0,
-        "browser_type": undefined,
         "completed_at": undefined,
         "created_by": "testymcgee",
         "index": ".reporting-foo-index-234",
