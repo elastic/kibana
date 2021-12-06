@@ -10,6 +10,7 @@ import type {
   Logger,
   SavedObject,
   SavedObjectsClientContract,
+  SavedObjectsImporter,
 } from 'src/core/server';
 
 import {
@@ -36,7 +37,6 @@ import { installMlModel } from '../elasticsearch/ml_model/';
 import { installIlmForDataStream } from '../elasticsearch/datastream_ilm/install';
 import { saveArchiveEntries } from '../archive/storage';
 import { ConcurrentInstallOperationError } from '../../../errors';
-
 import { packagePolicyService } from '../..';
 
 import { createInstallation, saveKibanaAssetsRefs, updateVersion } from './install';
@@ -48,6 +48,7 @@ import { deleteKibanaSavedObjectsAssets } from './remove';
 
 export async function _installPackage({
   savedObjectsClient,
+  savedObjectsImporter,
   esClient,
   logger,
   installedPkg,
@@ -57,6 +58,7 @@ export async function _installPackage({
   installSource,
 }: {
   savedObjectsClient: SavedObjectsClientContract;
+  savedObjectsImporter: Pick<SavedObjectsImporter, 'import' | 'resolveImportErrors'>;
   esClient: ElasticsearchClient;
   logger: Logger;
   installedPkg?: SavedObject<Installation>;
@@ -112,8 +114,10 @@ export async function _installPackage({
       pkgName,
       kibanaAssets
     );
+
     await installKibanaAssets({
-      savedObjectsClient,
+      logger,
+      savedObjectsImporter,
       pkgName,
       kibanaAssets,
     });

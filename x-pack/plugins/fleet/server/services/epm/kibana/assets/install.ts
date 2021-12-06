@@ -9,6 +9,8 @@ import type {
   SavedObject,
   SavedObjectsBulkCreateObject,
   SavedObjectsClientContract,
+  SavedObjectsImporter,
+  Logger,
 } from 'src/core/server';
 import type { SavedObjectsImportSuccess, SavedObjectsImportFailure } from 'src/core/server/types';
 
@@ -21,8 +23,8 @@ import { KibanaAssetType, KibanaSavedObjectType } from '../../../../types';
 import type { AssetType, AssetReference, AssetParts } from '../../../../types';
 import { savedObjectTypes } from '../../packages';
 import { indexPatternTypes, getIndexPatternSavedObjects } from '../index_pattern/install';
-import { appContextService } from '../../../../services';
 
+type SavedObjectsImporterContract = Pick<SavedObjectsImporter, 'import' | 'resolveImportErrors'>;
 const formatImportErrorsForLog = (errors: SavedObjectsImportFailure[]) =>
   JSON.stringify(
     errors.map(({ type, id, error }) => ({ type, id, error })) // discard other fields
@@ -75,11 +77,12 @@ export function createSavedObjectKibanaAsset(asset: ArchiveAsset): SavedObjectTo
 }
 
 export async function installKibanaAssets(options: {
-  savedObjectsClient: SavedObjectsClientContract;
+  savedObjectsImporter: SavedObjectsImporterContract;
+  logger: Logger;
   pkgName: string;
   kibanaAssets: Record<KibanaAssetType, ArchiveAsset[]>;
 }): Promise<SavedObjectsImportSuccess[]> {
-  const { savedObjectsClient, kibanaAssets } = options;
+  const { kibanaAssets, savedObjectsImporter, logger } = options;
   const assetsToInstall = Object.entries(kibanaAssets).flatMap(([assetType, assets]) => {
     if (!validKibanaAssetTypes.has(assetType as KibanaAssetType)) {
       return [];
@@ -107,7 +110,8 @@ export async function installKibanaAssets(options: {
   const indexPatternSavedObjects = getIndexPatternSavedObjects() as ArchiveAsset[];
 
   const installedAssets = await installKibanaSavedObjects({
-    savedObjectsClient,
+    logger,
+    savedObjectsImporter,
     kibanaAssets: [...indexPatternSavedObjects, ...assetsToInstall],
   });
 
@@ -163,11 +167,13 @@ export async function getKibanaAssets(
 }
 
 async function installKibanaSavedObjects({
-  savedObjectsClient,
+  savedObjectsImporter,
   kibanaAssets,
+  logger,
 }: {
-  savedObjectsClient: SavedObjectsClientContract;
   kibanaAssets: ArchiveAsset[];
+  savedObjectsImporter: SavedObjectsImporterContract;
+  logger: Logger;
 }) {
   const toBeSavedObjects = await Promise.all(
     kibanaAssets.map((asset) => createSavedObjectKibanaAsset(asset))
@@ -178,10 +184,6 @@ async function installKibanaSavedObjects({
   if (toBeSavedObjects.length === 0) {
     return [];
   } else {
-    const savedObjectsImporter = appContextService
-      .getSavedObjects()
-      .createImporter(savedObjectsClient);
-
     const { successResults: importSuccessResults = [], errors: importErrors = [] } =
       await savedObjectsImporter.import({
         overwrite: true,
@@ -210,8 +212,6 @@ async function installKibanaSavedObjects({
     can still be installed, but if a warning is logged it should be reported to
     the integrations team. */
     if (referenceErrors.length) {
-      const logger = appContextService.getLogger();
-
       logger.debug(
         `Resolving ${
           referenceErrors.length

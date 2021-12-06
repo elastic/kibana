@@ -59,6 +59,8 @@ describe('_installPackage', () => {
 
     const installationPromise = _installPackage({
       savedObjectsClient: soClient,
+      // @ts-ignore
+      savedObjectsImporter: jest.fn(),
       esClient,
       logger: loggerMock.create(),
       paths: [],

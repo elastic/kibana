@@ -302,10 +302,15 @@ async function installPackageFromRegistry({
       return { error: err, installType };
     }
 
+    const savedObjectsImporter = appContextService
+      .getSavedObjects()
+      .createImporter(savedObjectsClient);
+
     // try installing the package, if there was an error, call error handler and rethrow
     // @ts-expect-error status is string instead of InstallResult.status 'installed' | 'already_installed'
     return _installPackage({
       savedObjectsClient,
+      savedObjectsImporter,
       esClient,
       logger,
       installedPkg,
@@ -406,9 +411,15 @@ async function installPackageByUpload({
       version: packageInfo.version,
       packageInfo,
     });
+
+    const savedObjectsImporter = appContextService
+      .getSavedObjects()
+      .createImporter(savedObjectsClient);
+
     // @ts-expect-error status is string instead of InstallResult.status 'installed' | 'already_installed'
     return _installPackage({
       savedObjectsClient,
+      savedObjectsImporter,
       esClient,
       logger,
       installedPkg,
