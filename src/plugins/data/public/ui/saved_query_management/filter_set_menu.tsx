@@ -12,6 +12,7 @@ import {
   EuiButton,
   EuiButtonIcon,
   EuiContextMenu,
+  EuiContextMenuPanelDescriptor,
   EuiIcon,
   EuiPopover,
   EuiSpacer,
@@ -27,6 +28,7 @@ interface Props {
   onDisableAll: () => void;
   onToggleAllNegated: () => void;
   onRemoveAll: () => void;
+  onSaveQuery: () => void;
 }
 
 export function FilterSetMenu({
@@ -35,6 +37,7 @@ export function FilterSetMenu({
   onDisableAll,
   onToggleAllNegated,
   onRemoveAll,
+  onSaveQuery,
 }: Props) {
   const [isPopoverOpen, setPopover] = useState(false);
 
@@ -105,7 +108,9 @@ export function FilterSetMenu({
       }),
       content: (
         <div style={{ padding: 16 }}>
-          <EuiButton fill>Save</EuiButton>
+          <EuiButton fill onClick={onSaveQuery}>
+            Save
+          </EuiButton>
         </div>
       ),
     },
@@ -151,7 +156,7 @@ export function FilterSetMenu({
       title: 'Filter language',
       content: <div style={{ padding: 16 }}>{toSentenceCase(language)}</div>,
     },
-  ];
+  ] as EuiContextMenuPanelDescriptor[];
 
   const buttonLabel = i18n.translate('data.filter.options.filterSetButtonLabel', {
     defaultMessage: 'Filter set menu',

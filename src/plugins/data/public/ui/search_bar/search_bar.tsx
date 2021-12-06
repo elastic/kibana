@@ -419,6 +419,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
         onDisableAll={this.onDisableAll}
         onToggleAllNegated={this.onToggleAllNegated}
         onRemoveAll={this.onRemoveAll}
+        onSaveQuery={this.onInitiateSave}
       />
     );
 
