@@ -272,27 +272,19 @@ export class ContentStream extends Duplex {
      build. It is not recommended to have overly large max size bytes but we
      need this code to be as performant as possible.
     */
-    for (const buffer of this.buffers) {
+    while (this.buffers.length) {
       const remainder = size - bytesToFlush;
-      if (remainder < 0) {
+      if (remainder <= 0) {
         break;
       }
-      const chunkedBuffer = remainder > 0 ? buffer.slice(0, remainder) : buffer;
-
+      const buffer = this.buffers.shift()!;
+      const chunkedBuffer = buffer.slice(0, remainder);
       buffersToFlush.push(chunkedBuffer);
       bytesToFlush += chunkedBuffer.byteLength;
 
-      // Did we add a partial buffer? Cache the rest and stop looping.
       if (buffer.byteLength > remainder) {
-        partiallyFlushedBuffer = buffer.slice(remainder);
-        break;
+        this.buffers.unshift(buffer.slice(remainder));
       }
-    }
-
-    if (this.buffers.length > 0 && buffersToFlush.length === 0) {
-      throw new Error(
-        `Unable to add buffers to flush. Try increasing your http.max_content_length in elasticsearch.yml or using the cluster settings API.`
-      );
     }
 
     // We call Buffer.concat with the fewest number of buffers
@@ -311,11 +303,6 @@ export class ContentStream extends Duplex {
     }
 
     this.bytesWritten += chunk.byteLength;
-
-    this.buffers = partiallyFlushedBuffer
-      ? [partiallyFlushedBuffer, ...this.buffers.slice(buffersToFlush.length)]
-      : this.buffers.slice(Math.max(buffersToFlush.length - 1, 1));
-
     this.bytesBuffered -= bytesToFlush;
   }
 
