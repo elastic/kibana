@@ -14,7 +14,10 @@ export function milliToSec(ms: number) {
   return ms / ONE_SECOND_AS_MILLI;
 }
 
-export function microToSec(micro: number) {
+export function microToSec(micro: number, fixedNumber?: number) {
+  if (fixedNumber) {
+    return (micro / ONE_SECOND_AS_MICROS).toFixed(fixedNumber);
+  }
   return (micro / ONE_SECOND_AS_MICROS).toFixed(0);
 }
 
