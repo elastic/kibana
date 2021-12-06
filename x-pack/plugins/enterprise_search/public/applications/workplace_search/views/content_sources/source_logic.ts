@@ -39,10 +39,19 @@ export interface SourceActions {
     sourceId: string;
     source: ContentSourceFullData;
   };
+  updateContentSourceConfiguration(
+    sourceId: string,
+    source: SourceUpdatePayload
+  ): {
+    sourceId: string;
+    source: ContentSourceFullData;
+  };
   resetSourceState(): void;
   removeContentSource(sourceId: string): { sourceId: string };
   initializeSource(sourceId: string): { sourceId: string };
   setButtonNotLoading(): void;
+  setStagedPrivateKey(stagedPrivateKey: string | null): string | null;
+  setConfigurationUpdateButtonNotLoading(): void;
 }
 
 interface SourceValues {
@@ -53,6 +62,8 @@ interface SourceValues {
   contentItems: SourceContentItem[];
   contentMeta: Meta;
   contentFilterValue: string;
+  stagedPrivateKey: string | null;
+  isConfigurationUpdateButtonLoading: boolean;
 }
 
 interface SearchResultsResponse {
@@ -62,6 +73,7 @@ interface SearchResultsResponse {
 
 interface SourceUpdatePayload {
   name?: string;
+  private_key?: string | null;
   indexing?: {
     enabled?: boolean;
     features?: {
@@ -85,11 +97,17 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
     initializeSourceSynchronization: (sourceId: string) => ({ sourceId }),
     searchContentSourceDocuments: (sourceId: string) => ({ sourceId }),
     updateContentSource: (sourceId: string, source: SourceUpdatePayload) => ({ sourceId, source }),
+    updateContentSourceConfiguration: (sourceId: string, source: SourceUpdatePayload) => ({
+      sourceId,
+      source,
+    }),
     removeContentSource: (sourceId: string) => ({
       sourceId,
     }),
     resetSourceState: () => true,
     setButtonNotLoading: () => false,
+    setStagedPrivateKey: (stagedPrivateKey: string) => stagedPrivateKey,
+    setConfigurationUpdateButtonNotLoading: () => false,
   },
   reducers: {
     contentSource: [
@@ -148,6 +166,20 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
       {
         setContentFilterValue: (_, contentFilterValue) => contentFilterValue,
         resetSourceState: () => '',
+      },
+    ],
+    stagedPrivateKey: [
+      null,
+      {
+        setStagedPrivateKey: (_, stagedPrivateKey) => stagedPrivateKey,
+        setContentSource: () => null,
+      },
+    ],
+    isConfigurationUpdateButtonLoading: [
+      false,
+      {
+        updateContentSourceConfiguration: () => true,
+        setConfigurationUpdateButtonNotLoading: () => false,
       },
     ],
   },
@@ -231,6 +263,26 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
         }
       } catch (e) {
         flashAPIErrors(e);
+      }
+    },
+    updateContentSourceConfiguration: async ({ sourceId, source }) => {
+      const { isOrganization } = AppLogic.values;
+      const route = isOrganization
+        ? `/internal/workplace_search/org/sources/${sourceId}/settings`
+        : `/internal/workplace_search/account/sources/${sourceId}/settings`;
+
+      try {
+        const response = await HttpLogic.values.http.patch<ContentSourceFullData>(route, {
+          body: JSON.stringify({ content_source: source }),
+        });
+
+        actions.setContentSource(response);
+
+        flashSuccessToast('Content source configuration was updated.');
+      } catch (e) {
+        flashAPIErrors(e);
+      } finally {
+        actions.setConfigurationUpdateButtonNotLoading();
       }
     },
     removeContentSource: async ({ sourceId }) => {

@@ -42,6 +42,8 @@ describe('SourceLogic', () => {
     buttonLoading: false,
     contentMeta: DEFAULT_META,
     contentFilterValue: '',
+    isConfigurationUpdateButtonLoading: false,
+    stagedPrivateKey: null,
   };
 
   const searchServerResponse = {

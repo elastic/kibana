@@ -180,7 +180,7 @@ describe('sources routes', () => {
             login: 'user',
             password: 'changeme',
             organizations: ['swiftype'],
-            indexPermissions: true,
+            index_permissions: true,
           },
         };
         mockRouter.shouldValidate(request);
@@ -688,7 +688,7 @@ describe('sources routes', () => {
             login: 'user',
             password: 'changeme',
             organizations: ['swiftype'],
-            indexPermissions: true,
+            index_permissions: true,
           },
         };
         mockRouter.shouldValidate(request);
