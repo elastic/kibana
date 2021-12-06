@@ -225,7 +225,7 @@ In addition to this setting, trusted certificates may be specified via
 <<elasticsearch-ssl-keystore-path, `elasticsearch.ssl.keystore.path`>> and/or
 <<elasticsearch-ssl-truststore-path, `elasticsearch.ssl.truststore.path`>>.
 
-| `elasticsearch.ssl.keyPassphrase:`
+| [[elasticsearch-ssl-keyPassphrase]] `elasticsearch.ssl.keyPassphrase:`
  | The password that decrypts the private key that is specified
 via <<elasticsearch-ssl-cert-key, `elasticsearch.ssl.key`>>. This value is optional, as the key may not be
 encrypted.
