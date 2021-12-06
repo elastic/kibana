@@ -7,7 +7,6 @@
 
 import { Logger, CoreSetup } from 'kibana/server';
 import moment from 'moment';
-import { IEventLogService } from '../../../event_log/server';
 import {
   RunContext,
   TaskManagerSetupContract,
