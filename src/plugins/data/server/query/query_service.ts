@@ -36,6 +36,3 @@ export class QueryService implements Plugin<void> {
 
   public start() {}
 }
-
-/** @public */
-export type QuerySetup = ReturnType<QueryService['setup']>;

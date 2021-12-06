@@ -7,10 +7,7 @@
 
 import { Plugin, CoreSetup, CoreStart, PluginInitializerContext, Logger } from 'src/core/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import {
-  PluginStart as DataPluginStart,
-  PluginSetup as DataPluginSetup,
-} from 'src/plugins/data/server';
+import { PluginStart as DataPluginStart } from 'src/plugins/data/server';
 import { ExpressionsServerSetup } from 'src/plugins/expressions/server';
 import { FieldFormatsStart } from 'src/plugins/field_formats/server';
 import { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
@@ -22,15 +19,14 @@ import {
 } from './usage';
 import { setupSavedObjects } from './saved_objects';
 import { EmbeddableSetup } from '../../../../src/plugins/embeddable/server';
-import { setupExpressions } from './expressions';
 import { lensEmbeddableFactory } from './embeddable/lens_embeddable_factory';
+import { setupExpressions } from './expressions';
 
 export interface PluginSetupContract {
   usageCollection?: UsageCollectionSetup;
   taskManager?: TaskManagerSetupContract;
   embeddable: EmbeddableSetup;
   expressions: ExpressionsServerSetup;
-  data: DataPluginSetup;
 }
 
 export interface PluginStartContract {
