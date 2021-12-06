@@ -19,8 +19,7 @@ import {
 import { ConnectorTypes, isCreateConnector, isPush, isUpdateConnector } from '../../../common';
 import { USER_ACTION_OLD_ID_REF_NAME, USER_ACTION_OLD_PUSH_ID_REF_NAME } from '../../common';
 
-import { extractConnectorIdFromJson } from '../../services/user_actions/transform';
-import { UserActionFieldType } from '../../services/user_actions/types';
+import { extractConnectorIdFromJson, UserActionFieldType } from './utils';
 
 interface UserActions {
   action_field: string[];

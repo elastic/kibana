@@ -13,7 +13,7 @@ import {
 } from '../../../../../../src/core/server';
 import { ConnectorTypes } from '../../../common';
 import { addOwnerToSO, SanitizedCaseOwner } from '.';
-import { transformConnectorIdToReference } from '../../services/user_actions/transform';
+import { transformConnectorIdToReference } from './utils';
 import { CONNECTOR_ID_REFERENCE_NAME } from '../../common';
 
 interface UnsanitizedConfigureConnector {

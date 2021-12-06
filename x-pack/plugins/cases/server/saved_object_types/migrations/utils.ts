@@ -8,7 +8,6 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 
 import * as rt from 'io-ts';
-import { isString } from 'lodash';
 
 import { SavedObjectReference } from '../../../../../../src/core/server';
 import {
@@ -29,7 +28,14 @@ import {
   USER_ACTION_OLD_PUSH_ID_REF_NAME,
 } from '../../common';
 import { ACTION_SAVED_OBJECT_TYPE } from '../../../../actions/server';
-import { UserActionFieldType } from './types';
+
+/**
+ * Indicates whether which user action field is being parsed, the new_value or the old_value.
+ */
+export enum UserActionFieldType {
+  New = 'New',
+  Old = 'Old',
+}
 
 /**
  * Extracts the connector id from a json encoded string and formats it as a saved object reference. This will remove
@@ -58,49 +64,6 @@ export function extractConnectorIdFromJson({
     actionDetails: decodedJson,
     fieldType,
   });
-}
-
-/**
- * Extracts the connector id from an unencoded object and formats it as a saved object reference.
- * This will remove the field it extracted the connector id from.
- */
-export function extractConnectorId({
-  action,
-  actionFields,
-  actionDetails,
-  fieldType,
-}: {
-  action: string;
-  actionFields: string[];
-  actionDetails?: Record<string, unknown> | string | null;
-  fieldType: UserActionFieldType;
-}): {
-  transformedActionDetails?: string | null;
-  references: SavedObjectReference[];
-} {
-  if (!actionDetails || isString(actionDetails)) {
-    // the action was null, undefined, or a regular string so just return it unmodified and not encoded
-    return { transformedActionDetails: actionDetails, references: [] };
-  }
-
-  try {
-    return extractConnectorIdHelper({
-      action,
-      actionFields,
-      actionDetails,
-      fieldType,
-    });
-  } catch (error) {
-    return { transformedActionDetails: encodeActionDetails(actionDetails), references: [] };
-  }
-}
-
-function encodeActionDetails(actionDetails: Record<string, unknown>): string | null {
-  try {
-    return JSON.stringify(actionDetails);
-  } catch (error) {
-    return null;
-  }
 }
 
 /**
