@@ -315,7 +315,6 @@ Discover::
 Elastic Security::
 For the Elastic Security 7.16.0 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
 Fleet::
-* Adds link to integration data retention documentation {kibana-pull}115353[#115353]
 * Adds agent modal {kibana-pull}114830[#114830]
 * Allow users with read access to view Integrations app {kibana-pull}113925[#113925]
 * Removes enterprise license requirement for custom registry URL {kibana-pull}113858[#113858]
