@@ -20,7 +20,6 @@ import {
   getPaletteStops,
   mergePaletteParams,
   getDataMinMax,
-  remapStopsByNewInterval,
   getStopsFromColorRangesByNewInterval,
   getSwitchToCustomParams,
   roundStopValues,

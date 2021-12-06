@@ -34,7 +34,10 @@ import {
   VisualizationMap,
 } from '../../types';
 import { getSuggestions, switchToSuggestion } from './suggestion_helpers';
-import { ReactExpressionRendererType } from '../../../../../../src/plugins/expressions/public';
+import {
+  ReactExpressionRendererProps,
+  ReactExpressionRendererType,
+} from '../../../../../../src/plugins/expressions/public';
 import { prependDatasourceExpression } from './expression_helpers';
 import { trackUiEvent, trackSuggestionEvent } from '../../lens_ui_telemetry';
 import { getMissingIndexPattern, validateDatasourceAndVisualization } from './state_helpers';

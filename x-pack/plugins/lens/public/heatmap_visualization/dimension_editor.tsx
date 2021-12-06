@@ -97,7 +97,6 @@ export function HeatmapDimensionEditor(
               palettes={props.paletteService}
               activePalette={activePalette}
               dataBounds={currentMinMax}
-              showContinuity={false}
               setPalette={(newPalette) => {
                 // make sure to always have a list of stops
                 if (newPalette.params && !newPalette.params.stops) {

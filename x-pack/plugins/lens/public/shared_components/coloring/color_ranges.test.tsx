@@ -281,7 +281,7 @@ describe('Color Ranges component', () => {
 
     ranges = component.find('input[data-test-subj^="my-test_dynamicColoring_range_value_"]');
     ranges.map((range) => {
-      values.push(range.prop('value'));
+      values.push(range.prop('value') as number);
     });
     expect(values).toStrictEqual([10, 50, 90, 130]);
   });

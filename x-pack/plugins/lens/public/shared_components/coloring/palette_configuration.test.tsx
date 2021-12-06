@@ -12,9 +12,7 @@ import { chartPluginMock } from 'src/plugins/charts/public/mocks';
 import type { PaletteOutput, PaletteRegistry } from 'src/plugins/charts/public';
 import { ReactWrapper } from 'enzyme';
 import type { CustomPaletteParams } from '../../../common';
-import { applyPaletteParams } from './utils';
 import { CustomizablePalette } from './palette_configuration';
-import { CUSTOM_PALETTE } from './constants';
 import { act } from 'react-dom/test-utils';
 
 // mocking random id generator function
