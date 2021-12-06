@@ -8,6 +8,8 @@ import apm from 'elastic-apm-node';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { Dictionary, pickBy, mapValues, without, cloneDeep } from 'lodash';
 import type { Request } from '@hapi/hapi';
+import { BehaviorSubject } from 'rxjs';
+import { filter } from 'rxjs/operators';
 import { addSpaceIdToPath } from '../../../spaces/server';
 import { Logger, KibanaRequest } from '../../../../../src/core/server';
 import { TaskRunnerContext } from './task_runner_factory';
@@ -55,6 +57,7 @@ import {
   createAlertEventLogRecordObject,
   Event,
 } from '../lib/create_alert_event_log_record_object';
+import { createAbortableEsClientFactory } from '../lib/create_abortable_es_client_factory';
 
 const FALLBACK_RETRY_INTERVAL = '5m';
 
@@ -93,7 +96,8 @@ export class TaskRunner<
     RecoveryActionGroupId
   >;
   private readonly ruleTypeRegistry: RuleTypeRegistry;
-  private cancelled: boolean;
+  private searchAbortController: AbortController;
+  private cancelled$: BehaviorSubject<boolean>;
 
   constructor(
     alertType: NormalizedAlertType<
@@ -114,7 +118,13 @@ export class TaskRunner<
     this.ruleName = null;
     this.taskInstance = taskInstanceToAlertTaskInstance(taskInstance);
     this.ruleTypeRegistry = context.ruleTypeRegistry;
-    this.cancelled = false;
+    this.searchAbortController = new AbortController();
+    this.cancelled$ = new BehaviorSubject<boolean>(false);
+
+    this.cancelled$.pipe(filter((cancelled: boolean) => cancelled)).subscribe(() => {
+      this.logger.info(`Cancelling es search!!!!!`);
+      this.searchAbortController.abort();
+    });
   }
 
   async getDecryptedAttributes(
@@ -231,6 +241,14 @@ export class TaskRunner<
     }
   }
 
+  private get cancelled() {
+    return this.cancelled$.getValue();
+  }
+
+  private set cancelled(isCancelled: boolean) {
+    this.cancelled$.next(isCancelled);
+  }
+
   private shouldLogAndScheduleActionsForAlerts() {
     // if execution hasn't been cancelled, return true
     if (!this.cancelled) {
@@ -324,6 +342,11 @@ export class TaskRunner<
               WithoutReservedActionGroups<ActionGroupIds, RecoveryActionGroupId>
             >(alertInstances),
             shouldWriteAlerts: () => this.shouldLogAndScheduleActionsForAlerts(),
+            shouldStopExecution: () => this.cancelled,
+            search: createAbortableEsClientFactory({
+              scopedClusterClient: services.scopedClusterClient,
+              abortController: this.searchAbortController,
+            }),
           },
           params,
           state: alertTypeState as State,

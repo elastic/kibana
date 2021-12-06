@@ -147,7 +147,6 @@ export function getAlertType(
       );
     }
 
-    const esClient = services.scopedClusterClient.asCurrentUser;
     const date = new Date().toISOString();
     // the undefined values below are for config-schema optional types
     const queryParams: TimeSeriesQuery = {
@@ -169,7 +168,7 @@ export function getAlertType(
       await data
     ).timeSeriesQuery({
       logger,
-      esClient,
+      esClient: services.search.asCurrentUser,
       query: queryParams,
     });
     logger.debug(`alert ${ID}:${alertId} "${name}" query result: ${JSON.stringify(result)}`);

@@ -35,6 +35,7 @@ export type { FindResult } from './rules_client';
 export type { PublicAlertInstance as AlertInstance } from './alert_instance';
 export { parseDuration } from './lib';
 export { getEsErrorMessage } from './lib/errors';
+export type { IAbortableEsClient } from './lib/create_abortable_es_client_factory';
 export {
   ReadOperations,
   AlertingAuthorizationFilterType,
