@@ -9,7 +9,6 @@
 import {
   EuiButton,
   EuiButtonIcon,
-  EuiButtonIconColor,
   EuiContextMenuItem,
   EuiContextMenuPanel,
   EuiPopover,
@@ -127,15 +126,14 @@ export const CreateControlButton = ({ isIconButton }: { isIconButton: boolean })
 
   const commonButtonProps = {
     onClick: onCreateButtonClick,
-    color: 'primary' as EuiButtonIconColor,
     'data-test-subj': 'controls-create-button',
     'aria-label': ControlGroupStrings.management.getManageButtonTitle(),
   };
 
   const createControlButton = isIconButton ? (
-    <EuiButtonIcon {...commonButtonProps} iconType={'plusInCircle'} />
+    <EuiButtonIcon {...commonButtonProps} color={'primary'} iconType={'plusInCircle'} />
   ) : (
-    <EuiButton {...commonButtonProps} size="s">
+    <EuiButton {...commonButtonProps} color={'primary'} size="s">
       {ControlGroupStrings.emptyState.getAddControlButtonTitle()}
     </EuiButton>
   );
