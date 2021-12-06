@@ -25,9 +25,10 @@ import {
   keys,
 } from '@elastic/eui';
 import { DocViewer } from '../../services/doc_views/components/doc_viewer/doc_viewer';
-import { DocViewFilterFn, ElasticSearchHit } from '../../services/doc_views/doc_views_types';
+import { DocViewFilterFn } from '../../services/doc_views/doc_views_types';
 import { DiscoverServices } from '../../build_services';
 import { useNavigationProps } from '../../utils/use_navigation_props';
+import { ElasticSearchHit } from '../../types';
 
 interface Props {
   columns: string[];
