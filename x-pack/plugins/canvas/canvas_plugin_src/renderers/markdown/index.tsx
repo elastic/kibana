@@ -10,12 +10,12 @@ import ReactDOM from 'react-dom';
 import { CoreTheme } from 'kibana/public';
 import { Observable } from 'rxjs';
 import { KibanaThemeProvider } from '../../../../../../src/plugins/kibana_react/public';
+import { defaultTheme$ } from '../../../../../../src/plugins/presentation_util/common/lib';
 import { StartInitializer } from '../../plugin';
 import { RendererStrings } from '../../../i18n';
 import { Return as Config } from '../../functions/browser/markdown';
 import { Markdown } from '../../../../../../src/plugins/kibana_react/public';
 import { RendererFactory } from '../../../types';
-import { defaultTheme$ } from '../../../public/lib/default_theme';
 
 const { markdown: strings } = RendererStrings;
 
