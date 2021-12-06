@@ -26,8 +26,8 @@ export interface MonitorManagementList {
 
 export const initialState: MonitorManagementList = {
   list: {
-    page: null,
-    perPage: null,
+    page: 1,
+    perPage: 10,
     total: null,
     monitors: [],
   },

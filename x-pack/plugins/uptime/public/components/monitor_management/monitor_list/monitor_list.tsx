@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useContext } from 'react';
+import React, { useContext, useMemo, useCallback } from 'react';
 import { EuiBasicTable, EuiPanel, EuiSpacer, EuiLink } from '@elastic/eui';
 import { MonitorManagementList as MonitorManagementListState } from '../../../state/reducers/monitor_management';
 import { MonitorFields } from '../../../../common/runtime_types/monitor_management';
@@ -14,8 +14,8 @@ import { MonitorTags } from './tags';
 import * as labels from '../../overview/monitor_list/translations';
 
 interface Props {
-  pageSize: number;
-  setPageSize: (val: number) => void;
+  setPageSize: React.Dispatch<React.SetStateAction<number>>;
+  setPageIndex: React.Dispatch<React.SetStateAction<number>>;
   setRefresh: React.Dispatch<React.SetStateAction<boolean>>;
   monitorList: MonitorManagementListState;
 }
@@ -27,11 +27,32 @@ export const MonitorManagementList = ({
     loading: { monitorList: loading },
   },
   setRefresh,
-  pageSize,
   setPageSize,
+  setPageIndex,
 }: Props) => {
-  const items = list.monitors as MonitorManagementListState['list']['monitors'];
+  const { monitors, total, perPage, page: pageIndex } = list as MonitorManagementListState['list'];
   const { basePath } = useContext(UptimeSettingsContext);
+
+  const pagination = useMemo(
+    () => ({
+      pageIndex: pageIndex - 1, // page index for EuiBasicTable is base 0
+      pageSize: perPage,
+      totalItemCount: total || 0,
+      pageSizeOptions: [3, 5, 8],
+    }),
+    [pageIndex, perPage, total]
+  );
+
+  const handleOnChange = useCallback(
+    ({ page = {} }) => {
+      const { index, size } = page;
+
+      setPageIndex(index + 1); // page index for Saved Objects is base 1
+      setPageSize(size);
+      setRefresh(true);
+    },
+    [setPageIndex, setPageSize, setRefresh]
+  );
 
   const columns = [
     {
@@ -51,7 +72,7 @@ export const MonitorManagementList = ({
       align: 'left' as const,
       field: 'attributes',
       name: 'Monitor type',
-      render: ({ type }: MonitorFields) => <p>{type}</p>,
+      render: ({ type }: MonitorFields) => type,
     },
     {
       align: 'left' as const,
@@ -63,7 +84,7 @@ export const MonitorManagementList = ({
       align: 'left' as const,
       field: 'attributes',
       name: 'Schedule',
-      render: ({ schedule: { number, unit } }: MonitorFields) => <p>{`@every ${number}${unit}`}</p>,
+      render: ({ schedule: { number, unit } }: MonitorFields) => `@every ${number}${unit}`,
     },
     {
       align: 'left' as const,
@@ -90,9 +111,11 @@ export const MonitorManagementList = ({
         isExpandable={true}
         hasActions={true}
         itemId="monitor_id"
-        items={items}
+        items={monitors}
         columns={columns}
         tableLayout={'auto'}
+        pagination={pagination}
+        onChange={handleOnChange}
         noItemsMessage={loading ? labels.LOADING : labels.NO_DATA_MESSAGE}
       />
     </EuiPanel>

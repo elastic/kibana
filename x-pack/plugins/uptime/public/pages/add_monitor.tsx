@@ -5,34 +5,24 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { useDispatch, useSelector } from 'react-redux';
 import { useTrackPageview } from '../../../observability/public';
 import { SyntheticsProviders } from '../components/fleet_package/contexts';
-import { getServiceLocations } from '../state/actions';
 import { Loader } from '../components/monitor_management/loader/loader';
 import { MonitorConfig } from '../components/monitor_management/monitor_config/monitor_config';
-import { monitorManagementListSelector } from '../state/selectors';
+import { useLocations } from '../components/monitor_management/hooks/use_locations';
 
 export const AddMonitorPage: React.FC = () => {
   useTrackPageview({ app: 'uptime', path: 'add-monitor' });
   useTrackPageview({ app: 'uptime', path: 'add-monitor', delay: 15000 });
 
-  const dispatch = useDispatch();
-  const {
-    error: { serviceLocations: serviceLocationsError },
-    loading: { serviceLocations: serviceLocationsLoading },
-  } = useSelector(monitorManagementListSelector);
-
-  useEffect(() => {
-    dispatch(getServiceLocations());
-  }, [dispatch]);
+  const { error, loading } = useLocations();
 
   return (
     <Loader
-      error={Boolean(serviceLocationsError)}
-      loading={serviceLocationsLoading}
+      error={Boolean(error)}
+      loading={loading}
       loadingTitle={LOADING_LABEL}
       errorTitle={ERROR_HEADING_LABEL}
       errorBody={ERROR_BODY_LABEL}

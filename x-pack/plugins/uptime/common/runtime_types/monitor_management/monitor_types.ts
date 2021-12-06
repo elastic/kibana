@@ -198,8 +198,8 @@ export type MonitorFields = t.TypeOf<typeof MonitorFieldsCodec>;
 
 export const MonitorManagementListResultCodec = t.type({
   monitors: t.array(t.interface({ id: t.string, attributes: t.array(MonitorFieldsCodec) })),
-  page: t.union([t.number, t.null]),
-  perPage: t.union([t.number, t.null]),
+  page: t.number,
+  perPage: t.number,
   total: t.union([t.number, t.null]),
 });
 

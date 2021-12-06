@@ -19,7 +19,7 @@ import { apiService } from './utils';
 // TODO, change to monitor runtime type
 export const setMonitor = async ({ monitor, id }: { monitor: any; id?: string }): Promise<void> => {
   if (id) {
-    return await apiService.post(`${API_URLS.SYNTHETICS_MONITORS}/${id}`, monitor);
+    return await apiService.put(`${API_URLS.SYNTHETICS_MONITORS}/${id}`, monitor);
   } else {
     return await apiService.post(API_URLS.SYNTHETICS_MONITORS, monitor);
   }

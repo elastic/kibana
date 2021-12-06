@@ -6,12 +6,14 @@
  */
 
 import React from 'react';
-import { EuiEmptyPrompt, EuiEmptyPromptProps, EuiLoadingLogo, EuiSpacer } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { useParams } from 'react-router-dom';
 import { useTrackPageview, FETCH_STATUS, useFetcher } from '../../../observability/public';
 import { EditMonitorConfig } from '../components/monitor_management/edit_monitor_config';
+import { Loader } from '../components/monitor_management/loader/loader';
 import { getMonitor } from '../state/api';
 import { SyntheticsMonitorSavedObject } from '../../common/types';
+import { useLocations } from '../components/monitor_management/hooks/use_locations';
 
 export const EditMonitorPage: React.FC = () => {
   useTrackPageview({ app: 'uptime', path: 'edit-monitor' });
@@ -23,37 +25,39 @@ export const EditMonitorPage: React.FC = () => {
   }, [monitorId]);
 
   const monitor = data?.attributes;
+  const { error: locationsError, loading: locationsLoading } = useLocations();
 
-  let emptyPromptProps: Partial<EuiEmptyPromptProps>;
-  switch (status) {
-    case FETCH_STATUS.FAILURE:
-      emptyPromptProps = {
-        color: 'danger',
-        iconType: 'alert',
-        title: <h2>Error loading monitor configuration</h2>,
-        body: (
-          <p>
-            There was an error loading the the monitor configuration. Contact your administrator for
-            help.
-          </p>
-        ),
-      };
-      break;
-    default:
-      emptyPromptProps = {
-        color: 'subdued',
-        icon: <EuiLoadingLogo logo="logoKibana" size="xl" />,
-        title: <h2>Loading monitor</h2>,
-      };
-      break;
-  }
-
-  return status === FETCH_STATUS.SUCCESS && monitor ? (
-    <EditMonitorConfig monitor={monitor} />
-  ) : (
-    <>
-      <EuiSpacer size="xxl" />
-      <EuiEmptyPrompt {...emptyPromptProps} />
-    </>
+  return (
+    <Loader
+      loading={status === FETCH_STATUS.LOADING || locationsLoading}
+      loadingTitle={LOADING_LABEL}
+      error={status === FETCH_STATUS.FAILURE || Boolean(locationsError)}
+      errorTitle={ERROR_HEADING_LABEL}
+      errorBody={locationsError ? SERVICE_LOCATIONS_ERROR_LABEL : MONITOR_LOADING_ERROR_LABEL}
+    >
+      {monitor && <EditMonitorConfig monitor={monitor} />}
+    </Loader>
   );
 };
+
+const LOADING_LABEL = i18n.translate('xpack.uptime.monitorManagement.editMonitorLoadingLabel', {
+  defaultMessage: 'Loading monitor',
+});
+
+const ERROR_HEADING_LABEL = i18n.translate('xpack.uptime.monitorManagement.editMonitorError', {
+  defaultMessage: 'Error loading monitor management',
+});
+
+const SERVICE_LOCATIONS_ERROR_LABEL = i18n.translate(
+  'xpack.uptime.monitorManagement.addMonitorError',
+  {
+    defaultMessage: 'Service locations were not able to be loaded. Please try again later.',
+  }
+);
+
+const MONITOR_LOADING_ERROR_LABEL = i18n.translate(
+  'xpack.uptime.monitorManagement.editMonitorErrorBody',
+  {
+    defaultMessage: 'Monitor configuration was not able to be loaded. Please try again later.',
+  }
+);

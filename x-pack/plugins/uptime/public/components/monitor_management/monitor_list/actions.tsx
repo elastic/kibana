@@ -89,7 +89,7 @@ const DELETE_MONITOR_LABEL = i18n.translate('xpack.uptime.monitorManagement.dele
 const MONITOR_DELETE_SUCCESS_LABEL = i18n.translate(
   'xpack.uptime.monitorManagement.monitorSuccessMessage',
   {
-    defaultMessage: 'Monitor added successfully.',
+    defaultMessage: 'Monitor deleted successfully.',
   }
 );
 
@@ -97,6 +97,6 @@ const MONITOR_DELETE_SUCCESS_LABEL = i18n.translate(
 const MONITOR_DELETE_FAILURE_LABEL = i18n.translate(
   'xpack.uptime.monitorManagement.monitorFailureMessage',
   {
-    defaultMessage: 'Monitor was unable to be saved. Please try again later.',
+    defaultMessage: 'Monitor was unable to be deleted. Please try again later.',
   }
 );

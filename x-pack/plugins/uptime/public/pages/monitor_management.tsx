@@ -14,6 +14,8 @@ import { MonitorManagementList } from '../components/monitor_management/monitor_
 
 export const MonitorManagementPage: React.FC = () => {
   const [refresh, setRefresh] = useState(true);
+  const [pageIndex, setPageIndex] = useState(1); // saved objects page index is base 1
+  const [pageSize, setPageSize] = useState(10); // saved objects page index is base 1
   useTrackPageview({ app: 'uptime', path: 'manage-monitors' });
   useTrackPageview({ app: 'uptime', path: 'manage-monitors', delay: 15000 });
   const dispatch = useDispatch();
@@ -21,15 +23,16 @@ export const MonitorManagementPage: React.FC = () => {
 
   useEffect(() => {
     if (refresh) {
-      dispatch(getMonitors({ page: 1, perPage: 25 }));
+      dispatch(getMonitors({ page: pageIndex, perPage: pageSize }));
       setRefresh(false);
     }
-  }, [dispatch, refresh]);
+  }, [dispatch, refresh, pageIndex, pageSize]);
 
   return (
     <MonitorManagementList
       monitorList={monitorList}
-      pageSize={monitorList.list.perPage}
+      setPageSize={setPageSize}
+      setPageIndex={setPageIndex}
       setRefresh={setRefresh}
     />
   );
