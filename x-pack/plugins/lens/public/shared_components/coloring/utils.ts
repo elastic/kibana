@@ -111,7 +111,7 @@ export function getStopsFromColorRangesByNewInterval(
   });
 }
 
- // eslint-disable-next-line @typescript-eslint/no-explicit-any
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function getColorPaletteParams(params: any) {
   let continuity = 'none';
   switch (params.autoValue) {
@@ -125,8 +125,18 @@ export function getColorPaletteParams(params: any) {
       continuity = 'below';
       break;
   }
+  let stops = params.stops;
+  let colorsForStops = params.colors;
+
+  if (isFinite(params.rangeMax)) {
+    stops = [...params.stops, params.rangeMax];
+    colorsForStops = [...colorsForStops, ''];
+  }
+
   return {
     ...params,
+    stops,
+    colors: colorsForStops,
     continuity,
   };
 }

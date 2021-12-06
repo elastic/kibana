@@ -158,7 +158,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should allow the user to reverse the palette', async () => {
-      await testSubjects.click('lnsPalettePanel_dynamicColoring_reverse');
+      await testSubjects.click('lnsPalettePanel_dynamicColoring_reverseColors');
       await PageObjects.header.waitUntilLoadingHasFinished();
       const styleObj = await PageObjects.lens.getDatatableCellStyle(1, 1);
       expect(styleObj['background-color']).to.be('rgb(168, 191, 218)');

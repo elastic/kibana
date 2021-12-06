@@ -348,7 +348,7 @@ export const getDatatableVisualization = ({
             title: [title || ''],
             description: [description || ''],
             columns: columns.map((column) => {
-              const paletteParams  = {
+              const paletteParams = {
                 ...column.palette?.params,
                 // rewrite colors and stops as two distinct arguments
                 colors: (column.palette?.params?.stops || []).map(({ color }) => color),

@@ -201,7 +201,9 @@ describe('palette panel', () => {
     it('should be visible for predefined palettes', () => {
       const instance = mountWithIntl(<CustomizablePalette {...props} />);
       expect(
-        instance.find('[data-test-subj="lnsPalettePanel_dynamicColoring_custom_color_ranges"]').exists()
+        instance
+          .find('[data-test-subj="lnsPalettePanel_dynamicColoring_custom_color_ranges"]')
+          .exists()
       ).toEqual(true);
     });
 
@@ -219,7 +221,9 @@ describe('palette panel', () => {
         />
       );
       expect(
-        instance.find('[data-test-subj="lnsPalettePanel_dynamicColoring_custom_color_ranges"]').exists()
+        instance
+          .find('[data-test-subj="lnsPalettePanel_dynamicColoring_custom_color_ranges"]')
+          .exists()
       ).toEqual(true);
     });
   });

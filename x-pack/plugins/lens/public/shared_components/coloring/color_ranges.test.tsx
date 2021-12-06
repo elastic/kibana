@@ -239,7 +239,7 @@ describe('Color Ranges component', () => {
       reverseColorsButton.simulate('click');
     });
     component = component.update();
-    const colors: any[] = []
+    const colors: any[] = [];
 
     const ranges = component.find('div[data-test-subj^="my-test_dynamicColoring_range_color_"]');
 
@@ -249,7 +249,7 @@ describe('Color Ranges component', () => {
       }
     });
 
-    expect(colors).toStrictEqual(["#ddd", "#ccc", "#bbb", "#aaa"]);
+    expect(colors).toStrictEqual(['#ddd', '#ccc', '#bbb', '#aaa']);
   });
 
   it('should distribute equally ranges when use click on "Distribute equally" button', () => {
