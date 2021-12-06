@@ -210,7 +210,7 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
     setIsShowingUpdateModal(false);
     setPopoverIsOpen(false);
 
-    if (!isUiSettingsSuccess) {
+    if (isUiSettingsSuccess) {
       onChangeDataView(
         defaultDataView.id,
         // to be at this stage, activePatterns is defined, the ?? selectedPatterns is to make TS happy
