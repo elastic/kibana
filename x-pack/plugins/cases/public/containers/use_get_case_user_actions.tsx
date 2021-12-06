@@ -10,17 +10,15 @@ import { useCallback, useEffect, useState, useRef } from 'react';
 import deepEqual from 'fast-deep-equal';
 
 import {
-  CaseFullExternalService,
   CaseConnector,
   CaseExternalService,
   CaseUserActions,
   ElasticUser,
   Actions,
+  isPushedUserAction,
 } from '../../common';
 import { getCaseUserActions, getSubCaseUserActions } from './api';
 import * as i18n from './translations';
-import { convertToCamelCase } from './utils';
-import { parseStringAsConnector, parseStringAsExternalService } from '../common/user_actions';
 import { useToasts } from '../common/lib/kibana';
 
 export interface CaseService extends CaseExternalService {
@@ -60,25 +58,6 @@ export interface UseGetCaseUserActions extends CaseUserActionsState {
   ) => Promise<void>;
 }
 
-const unknownExternalServiceConnectorId = 'unknown';
-
-const getExternalService = (
-  connectorId: string | null,
-  encodedValue: string | null
-): CaseExternalService | null => {
-  const decodedValue = parseStringAsExternalService(connectorId, encodedValue);
-
-  if (decodedValue == null) {
-    return null;
-  }
-  return {
-    ...convertToCamelCase<CaseFullExternalService, CaseExternalService>(decodedValue),
-    // if in the rare case that the connector id is null we'll set it to unknown if we need to reference it in the UI
-    // anywhere. The id would only ever be null if a migration failed or some logic error within the backend occurred
-    connectorId: connectorId ?? unknownExternalServiceConnectorId,
-  };
-};
-
 const groupConnectorFields = (
   userActions: CaseUserActions[]
 ): Record<string, Array<CaseConnector['fields']>> =>
@@ -87,27 +66,15 @@ const groupConnectorFields = (
       return acc;
     }
 
-    const oldConnector = parseStringAsConnector(mua.oldValConnectorId, mua.oldValue);
-    const newConnector = parseStringAsConnector(mua.newValConnectorId, mua.newValue);
+    const connector = mua.payload;
 
-    if (!oldConnector || !newConnector) {
+    if (connector) {
       return acc;
     }
 
     return {
       ...acc,
-      [oldConnector.id]: [
-        ...(acc[oldConnector.id] || []),
-        ...(oldConnector.id === newConnector.id
-          ? [oldConnector.fields, newConnector.fields]
-          : [oldConnector.fields]),
-      ],
-      [newConnector.id]: [
-        ...(acc[newConnector.id] || []),
-        ...(oldConnector.id === newConnector.id
-          ? [oldConnector.fields, newConnector.fields]
-          : [newConnector.fields]),
-      ],
+      [connector.id]: [...(acc[connector.id] || []), connector.fields],
     };
   }, {} as Record<string, Array<CaseConnector['fields']>>);
 
@@ -159,7 +126,7 @@ export const getPushedInfo = (
   const hasDataToPushForConnector = (connectorId: string): boolean => {
     const caseUserActionsReversed = [...caseUserActions].reverse();
     const lastPushOfConnectorReversedIndex = caseUserActionsReversed.findIndex(
-      (mua) => mua.action === Actions.push_to_service && mua.newValConnectorId === connectorId
+      (mua) => isPushedUserAction(mua) && mua.payload.externalService.connectorId === connectorId
     );
 
     if (lastPushOfConnectorReversedIndex === -1) {
@@ -210,7 +177,7 @@ export const getPushedInfo = (
       return acc;
     }
 
-    const externalService = getExternalService(cua.newValConnectorId, cua.newValue);
+    const externalService = cua.payload.externalService;
     if (externalService === null) {
       return acc;
     }
@@ -299,11 +266,7 @@ export const useGetCaseUserActions = (
             ? uniqBy('createdBy.username', response).map((cau) => cau.createdBy)
             : [];
 
-          const caseUserActions = !isEmpty(response)
-            ? thisSubCaseId
-              ? response
-              : response.slice(1)
-            : [];
+          const caseUserActions = !isEmpty(response) ? response : [];
 
           setCaseUserActionsState({
             caseUserActions,

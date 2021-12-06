@@ -17,7 +17,7 @@ export function isUpdateConnector(action?: string, actionFields?: string[]): boo
 }
 
 export function isPush(action?: string, actionFields?: string[]): boolean {
-  return action === 'push-to-service' && actionFields != null && actionFields.includes('pushed');
+  return action === 'push_to_service' && actionFields != null && actionFields.includes('pushed');
 }
 
 /**
