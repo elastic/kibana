@@ -317,7 +317,6 @@ For the Elastic Security 7.16.0 release information, refer to {security-guide}/r
 Fleet::
 * Adds link to integration data retention documentation {kibana-pull}115353[#115353]
 * Adds agent modal {kibana-pull}114830[#114830]
-* Replaces Select with GroupButtons to show available platforms {kibana-pull}114818[#114818]
 * Allow users with read access to view Integrations app {kibana-pull}113925[#113925]
 * Removes enterprise license requirement for custom registry URL {kibana-pull}113858[#113858]
 * Adds "Keep Policies up to Date" functionality for integrations {kibana-pull}112702[#112702]
