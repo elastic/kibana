@@ -54,7 +54,7 @@ import { PhraseValueInput } from '../filter_bar/filter_editor/phrase_value_input
 import { PhrasesValuesInput } from '../filter_bar/filter_editor/phrases_values_input';
 import { RangeValueInput } from '../filter_bar/filter_editor/range_value_input';
 
-import { IIndexPattern, IFieldType } from '../..';
+import { IIndexPattern, IFieldType, SavedQuery } from '../..';
 
 const tabs = [
   {
@@ -80,12 +80,14 @@ const tabs = [
 export function AddFilterModal({
   onSubmit,
   onCancel,
+  applySavedQueries,
   filter,
   indexPatterns,
   timeRangeForSuggestionsOverride,
   savedQueryManagement,
 }: {
   onSubmit: (filter: Filter) => void;
+  applySavedQueries: () => void;
   onCancel: () => void;
   filter: Filter;
   indexPatterns: IIndexPattern[];
@@ -314,7 +316,12 @@ export function AddFilterModal({
         $state.store
       );
       onSubmit(builtCustomFilter);
-    } else if (selectedIndexPattern && selectedField && selectedOperator) {
+    } else if (
+      addFilterMode === 'quick_form' &&
+      selectedIndexPattern &&
+      selectedField &&
+      selectedOperator
+    ) {
       const builtFilter = buildFilter(
         selectedIndexPattern,
         selectedField,
@@ -326,6 +333,8 @@ export function AddFilterModal({
         $state.store
       );
       onSubmit(builtFilter);
+    } else if (addFilterMode === 'saved_filters') {
+      applySavedQueries();
     }
   };
 

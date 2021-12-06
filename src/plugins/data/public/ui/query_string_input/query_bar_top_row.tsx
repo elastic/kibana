@@ -29,8 +29,9 @@ import QueryStringInputUI from './query_string_input';
 import { UI_SETTINGS } from '../../../common';
 import { PersistedLog, getQueryLog } from '../../query';
 import { NoDataPopover } from './no_data_popover';
-import { FilterEditor } from '../filter_bar/filter_editor';
-import { FILTER_EDITOR_WIDTH } from '../filter_bar/filter_item';
+import { SavedQuery } from '../..';
+// import { FilterEditor } from '../filter_bar/filter_editor';
+// import { FILTER_EDITOR_WIDTH } from '../filter_bar/filter_item';
 import { AddFilterModal } from './add_filter_modal';
 
 const QueryStringInput = withKibana(QueryStringInputUI);
@@ -43,6 +44,7 @@ export interface QueryBarTopRowProps {
   onSubmit: (payload: { dateRange: TimeRange; query?: Query }) => void;
   onChange: (payload: { dateRange: TimeRange; query?: Query }) => void;
   onRefresh?: (payload: { dateRange: TimeRange }) => void;
+  applySelectedSavedQueries?: () => void;
   dataTestSubj?: string;
   disableAutoFocus?: boolean;
   screenTitle?: string;
@@ -75,7 +77,7 @@ export interface QueryBarTopRowProps {
 export default function QueryBarTopRow(props: QueryBarTopRowProps) {
   const [isDateRangeInvalid, setIsDateRangeInvalid] = useState(false);
   const [isQueryInputFocused, setIsQueryInputFocused] = useState(false);
-  const [isAddFilterPopoverOpen, setIsAddFilterPopoverOpen] = useState(false);
+  // const [isAddFilterPopoverOpen, setIsAddFilterPopoverOpen] = useState(false);
   const [isAddFilterModalOpen, setIsAddFilterModalOpen] = useState(false);
 
   const kibana = useKibana<IDataPluginServices>();
@@ -120,11 +122,15 @@ export default function QueryBarTopRow(props: QueryBarTopRowProps) {
   // const onAddFilterClick = () => setIsAddFilterPopoverOpen(!isAddFilterPopoverOpen);
   const onAddFilterClick = () => setIsAddFilterModalOpen(!isAddFilterModalOpen);
   function onAdd(filter: Filter) {
-    // setIsAddFilterPopoverOpen(false);
     setIsAddFilterModalOpen(false);
 
     const filters = [...props.filters, filter];
     props?.onFiltersUpdated?.(filters);
+  }
+
+  function applySavedQueries() {
+    setIsAddFilterModalOpen(false);
+    props?.applySelectedSavedQueries?.();
   }
 
   function onTimeChange({
@@ -243,6 +249,7 @@ export default function QueryBarTopRow(props: QueryBarTopRowProps) {
             filter={newFilter}
             indexPatterns={props.indexPatterns!}
             onSubmit={onAdd}
+            applySavedQueries={applySavedQueries}
             timeRangeForSuggestionsOverride={props.timeRangeForSuggestionsOverride}
             savedQueryManagement={props.savedQueryManagement}
           />

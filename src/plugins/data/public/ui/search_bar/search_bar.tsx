@@ -97,6 +97,7 @@ interface State {
   showSaveQueryModal: boolean;
   showSaveNewQueryModal: boolean;
   showSavedQueryPopover: boolean;
+  selectedSavedQueries: SavedQuery[];
   currentProps?: SearchBarProps;
   query?: Query;
   dateRangeFrom: string;
@@ -178,6 +179,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
     showSaveNewQueryModal: false,
     showSavedQueryPopover: false,
     currentProps: this.props,
+    selectedSavedQueries: [],
     query: this.props.query ? { ...this.props.query } : undefined,
     dateRangeFrom: get(this.props, 'dateRangeFrom', 'now-15m'),
     dateRangeTo: get(this.props, 'dateRangeTo', 'now'),
@@ -337,6 +339,20 @@ class SearchBarUI extends Component<SearchBarProps, State> {
   };
 
   public onLoadSavedQuery = (savedQuery: SavedQuery) => {
+    // const dateRangeFrom = get(savedQuery, 'attributes.timefilter.from', this.state.dateRangeFrom);
+    // const dateRangeTo = get(savedQuery, 'attributes.timefilter.to', this.state.dateRangeTo);
+
+    this.setState({
+      // query: savedQuery.attributes.query,
+      // dateRangeFrom,
+      // dateRangeTo,
+      selectedSavedQueries: [...this.state.selectedSavedQueries, savedQuery],
+    });
+  };
+
+  public applySelectedSavedQueries = () => {
+    // temporary work with only one selection
+    const savedQuery = this.state.selectedSavedQueries[0] as SavedQuery;
     const dateRangeFrom = get(savedQuery, 'attributes.timefilter.from', this.state.dateRangeFrom);
     const dateRangeTo = get(savedQuery, 'attributes.timefilter.to', this.state.dateRangeTo);
 
@@ -414,7 +430,6 @@ class SearchBarUI extends Component<SearchBarProps, State> {
 
     const filterMenu = (
       <FilterSetMenu
-        // language={this.props.nonKqlMode || 'KQL'}
         nonKqlMode={this.props.nonKqlMode}
         nonKqlModeHelpText={this.props.nonKqlModeHelpText}
         language={this.state.query!.language}
@@ -422,7 +437,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
         onDisableAll={this.onDisableAll}
         onToggleAllNegated={this.onToggleAllNegated}
         onRemoveAll={this.onRemoveAll}
-        onSaveQuery={this.onInitiateSave}
+        onSaveQuery={this.onInitiateSaveNew}
         services={this.services}
         onLanguageChange={this.onQueryBarChange}
         dateRangeFrom={this.state.dateRangeFrom}
@@ -446,6 +461,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
           isLoading={this.props.isLoading}
           prepend={this.props.showFilterBar ? filterMenu : undefined}
           savedQueryManagement={savedQueryManagement}
+          applySelectedSavedQueries={this.applySelectedSavedQueries}
           showDatePicker={this.props.showDatePicker}
           dateRangeFrom={this.state.dateRangeFrom}
           dateRangeTo={this.state.dateRangeTo}

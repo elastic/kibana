@@ -100,21 +100,18 @@ export function SavedQueryManagementComponent({
   const handleClosePopover = useCallback(() => setIsOpen(false), []);
 
   const handleSave = useCallback(() => {
-    handleClosePopover();
     onSave();
-  }, [handleClosePopover, onSave]);
+  }, [onSave]);
 
   const handleSaveAsNew = useCallback(() => {
-    handleClosePopover();
     onSaveAsNew();
-  }, [handleClosePopover, onSaveAsNew]);
+  }, [onSaveAsNew]);
 
   const handleSelect = useCallback(
     (savedQueryToSelect) => {
-      handleClosePopover();
       onLoad(savedQueryToSelect);
     },
-    [handleClosePopover, onLoad]
+    [onLoad]
   );
 
   const handleDelete = useCallback(
@@ -181,14 +178,14 @@ export function SavedQueryManagementComponent({
   );
 
   const savedQueryRows = () => {
-    const savedQueriesWithoutCurrent = savedQueries.filter((savedQuery) => {
-      if (!loadedSavedQuery) return true;
-      return savedQuery.id !== loadedSavedQuery.id;
-    });
-    const savedQueriesReordered =
-      loadedSavedQuery && savedQueriesWithoutCurrent.length !== savedQueries.length
-        ? [loadedSavedQuery, ...savedQueriesWithoutCurrent]
-        : [...savedQueriesWithoutCurrent];
+    // const savedQueriesWithoutCurrent = savedQueries.filter((savedQuery) => {
+    //   if (!loadedSavedQuery) return true;
+    //   return savedQuery.id !== loadedSavedQuery.id;
+    // });
+    // const savedQueriesReordered =
+    //   loadedSavedQuery && savedQueriesWithoutCurrent.length !== savedQueries.length
+    //     ? [loadedSavedQuery, ...savedQueriesWithoutCurrent]
+    //     : [...savedQueriesWithoutCurrent];
     // DON'T SORT
     return savedQueries.map((savedQuery) => (
       <SavedQueryListItem
