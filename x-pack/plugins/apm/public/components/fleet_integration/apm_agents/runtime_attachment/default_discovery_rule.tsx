@@ -16,7 +16,7 @@ import React from 'react';
 
 export function DefaultDiscoveryRule() {
   return (
-    <EuiPanel paddingSize="m" style={{ margin: 4 }}>
+    <EuiPanel paddingSize="m" style={{ margin: 4 }} hasBorder={true}>
       <EuiFlexGroup alignItems="center">
         <EuiFlexItem grow={false} style={{ marginLeft: 100 }}>
           <EuiBadge color="danger">Exclude</EuiBadge>

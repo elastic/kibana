@@ -52,7 +52,7 @@ export function EditDiscoveryRule({
   operationTypes,
 }: Props) {
   return (
-    <EuiPanel paddingSize="m">
+    <EuiPanel paddingSize="m" hasBorder={true}>
       <EuiFlexGroup>
         <EuiFlexItem grow={false}>
           <EuiFormFieldset legend={{ children: 'Operation' }}>

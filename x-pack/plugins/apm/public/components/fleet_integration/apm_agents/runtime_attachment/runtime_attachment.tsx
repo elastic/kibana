@@ -163,7 +163,7 @@ export function RuntimeAttachment({
               <EuiIcon type="iInCircle" />
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiText size="s">
+              <EuiText size="xs">
                 <p>{discoveryRulesDescription}</p>
               </EuiText>
             </EuiFlexItem>

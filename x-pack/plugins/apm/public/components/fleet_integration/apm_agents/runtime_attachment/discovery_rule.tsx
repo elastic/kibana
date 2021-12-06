@@ -55,8 +55,8 @@ export function DiscoveryRule({
   }, [operationTypes]);
 
   return (
-    <EuiPanel paddingSize="m">
-      <EuiFlexGroup>
+    <EuiPanel paddingSize="m" hasBorder={true}>
+      <EuiFlexGroup alignItems="center">
         <EuiFlexItem grow={false}>
           <div {...providedDragHandleProps} aria-label="Drag Handle">
             <EuiIcon type="grab" />
