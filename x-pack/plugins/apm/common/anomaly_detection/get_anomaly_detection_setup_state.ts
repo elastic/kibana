@@ -16,6 +16,7 @@ export enum AnomalyDetectionSetupState {
   Unknown = 'unknown',
   NoJobs = 'noJobs',
   NoJobsForEnvironment = 'noJobsForEnvironment',
+  LegacyJobs = 'legacyJobs',
   UpgradeableJobs = 'upgradeableJobs',
   UpToDate = 'upToDate',
 }
@@ -52,9 +53,10 @@ export function getAnomalyDetectionSetupState({
       ? jobs
       : jobs.filter((job) => job.environment === environment);
 
+  const hasV1Jobs = jobs.some((job) => job.version === 1);
   const hasV2Jobs = jobsForEnvironment.some((job) => job.version === 2);
   const hasV3Jobs = jobsForEnvironment.some((job) => job.version === 3);
-  const hasAnyJobs = jobs.length;
+  const hasAnyJobs = jobs.length > 0;
 
   if (hasV3Jobs) {
     return AnomalyDetectionSetupState.UpToDate;
@@ -62,6 +64,10 @@ export function getAnomalyDetectionSetupState({
 
   if (hasV2Jobs) {
     return AnomalyDetectionSetupState.UpgradeableJobs;
+  }
+
+  if (hasV1Jobs) {
+    return AnomalyDetectionSetupState.LegacyJobs;
   }
 
   if (hasAnyJobs) {

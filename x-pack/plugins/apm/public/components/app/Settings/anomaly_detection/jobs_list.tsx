@@ -23,16 +23,17 @@ import React, { useState } from 'react';
 import { MLJobsAwaitingNodeWarning } from '../../../../../../ml/public';
 import { AnomalyDetectionSetupState } from '../../../../../common/anomaly_detection/get_anomaly_detection_setup_state';
 import { getEnvironmentLabel } from '../../../../../common/environment_filter_values';
+import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { useMlManageJobsHref } from '../../../../hooks/use_ml_manage_jobs_href';
+import { callApmApi } from '../../../../services/rest/createCallApmApi';
 import { MLExplorerLink } from '../../../shared/Links/MachineLearningLinks/MLExplorerLink';
 import { MLManageJobsLink } from '../../../shared/Links/MachineLearningLinks/MLManageJobsLink';
 import { LoadingStatePrompt } from '../../../shared/LoadingStatePrompt';
 import { ITableColumn, ManagedTable } from '../../../shared/managed_table';
+import { MLCallout, shouldDisplayMlCallout } from '../../../shared/ml_callout';
 import { AnomalyDetectionApiResponse } from './index';
 import { JobsListStatus } from './jobs_list_status';
-import { LegacyJobsCallout } from './legacy_jobs_callout';
-import { UpdateJobsCallout } from './update_jobs_callout';
 
 type Jobs = AnomalyDetectionApiResponse['jobs'];
 
@@ -122,11 +123,18 @@ export function JobsList({
   setupState,
   onUpdateComplete,
 }: Props) {
-  const { jobs, hasLegacyJobs } = data;
+  const { core } = useApmPluginContext();
 
-  const [showLegacyJobs, setShowLegacyJobs] = useState(false);
+  const { jobs } = data;
+
+  // default to showing legacy jobs if not up to date
+  const [showLegacyJobs, setShowLegacyJobs] = useState(
+    setupState !== AnomalyDetectionSetupState.UpToDate
+  );
 
   const mlManageJobsHref = useMlManageJobsHref();
+
+  const displayMlCallout = shouldDisplayMlCallout(setupState);
 
   const filteredJobs = showLegacyJobs
     ? jobs
@@ -155,10 +163,41 @@ export function JobsList({
       </EuiText>
 
       <EuiSpacer size="m" />
-
-      {setupState === AnomalyDetectionSetupState.UpgradeableJobs && (
+      {displayMlCallout && (
         <>
-          <UpdateJobsCallout onUpdateComplete={onUpdateComplete} />
+          <MLCallout
+            isOnSettingsPage
+            onCreateJobClick={() => {
+              onAddEnvironments();
+            }}
+            onUpgradeClick={() => {
+              if (setupState === AnomalyDetectionSetupState.UpgradeableJobs) {
+                return callApmApi({
+                  endpoint:
+                    'POST /internal/apm/settings/anomaly-detection/update_to_v3',
+                  signal: null,
+                }).then(() => {
+                  core.notifications.toasts.addSuccess({
+                    title: i18n.translate(
+                      'xpack.apm.jobsList.updateCompletedToastTitle',
+                      {
+                        defaultMessage: 'Anomaly detection jobs created!',
+                      }
+                    ),
+                    text: i18n.translate(
+                      'xpack.apm.jobsList.updateCompletedToastText',
+                      {
+                        defaultMessage:
+                          'Your new anomaly detection jobs have been created successfully. You will start to see anomaly detection results in the app within minutes. The old jobs have been closed but the results are still available within Machine Learning.',
+                      }
+                    ),
+                  });
+                  onUpdateComplete();
+                });
+              }
+            }}
+            anomalyDetectionSetupState={setupState}
+          />
           <EuiSpacer size="m" />
         </>
       )}
@@ -195,7 +234,7 @@ export function JobsList({
             {i18n.translate(
               'xpack.apm.settings.anomalyDetection.jobList.manageMlJobsButtonText',
               {
-                defaultMessage: 'Manage ML Jobs',
+                defaultMessage: 'Manage jobs',
               }
             )}
           </EuiButton>
@@ -205,7 +244,7 @@ export function JobsList({
             {i18n.translate(
               'xpack.apm.settings.anomalyDetection.jobList.addEnvironments',
               {
-                defaultMessage: 'Create ML Job',
+                defaultMessage: 'Create job',
               }
             )}
           </EuiButton>
@@ -221,8 +260,6 @@ export function JobsList({
         tableLayout="auto"
       />
       <EuiSpacer size="l" />
-
-      {hasLegacyJobs && <LegacyJobsCallout />}
     </>
   );
 }
