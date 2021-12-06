@@ -34,7 +34,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     kbnTestServer: {
       ...functionalConfig.get('kbnTestServer'),
       env: {
-        ELASTIC_APM_ACTIVE: 'true',
+        ELASTIC_APM_ACTIVE: process.env.DISABLE_APM === 'true' ? 'false' : 'true',
         ELASTIC_APM_CONTEXT_PROPAGATION_ONLY: 'false',
         ELASTIC_APM_ENVIRONMENT: process.env.CI ? 'ci' : 'development',
         ELASTIC_APM_TRANSACTION_SAMPLE_RATE: '1.0',

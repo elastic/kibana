@@ -17,7 +17,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('login and navigate to homepage', async () => {
-      await PageObjects.common.navigateToApp('login');
+      await PageObjects.common.navigateToActualUrl('login', '', {
+        ensureCurrentUrl: false,
+        shouldLoginIfPrompted: false,
+      });
 
       await testSubjects.existOrFail('loginSubmit', { timeout: 2000 });
 
