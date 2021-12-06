@@ -36,6 +36,8 @@ export interface RulePreviewProps {
   threatMapping: ThreatMapping;
   threatQuery: FieldValueQueryBar;
   threshold: FieldValueThreshold;
+  machineLearningJobId: string[];
+  anomalyThreshold: number;
 }
 
 const Select = styled(EuiSelect)`
@@ -57,6 +59,8 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
   threatQuery,
   threatMapping,
   threshold,
+  machineLearningJobId,
+  anomalyThreshold,
 }) => {
   const { spaces } = useKibana().services;
   const [spaceId, setSpaceId] = useState('');
@@ -84,6 +88,8 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
     ruleType,
     threatMapping,
     threshold,
+    machineLearningJobId,
+    anomalyThreshold,
   });
 
   // Resets the timeFrame to default when rule type is changed because not all time frames are supported by all rule types

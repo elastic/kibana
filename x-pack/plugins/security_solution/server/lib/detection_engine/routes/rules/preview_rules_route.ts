@@ -89,7 +89,7 @@ export const previewRulesRoute = async (
           return response.ok({ body: { errors: ['Invalid invocation count'] } });
         }
 
-        if (request.body.type === 'threat_match' || request.body.type === 'machine_learning') {
+        if (request.body.type === 'threat_match') {
           return response.ok({ body: { errors: ['Preview for rule type not supported'] } });
         }
 
@@ -260,6 +260,11 @@ export const previewRulesRoute = async (
               item.newStatus === RuleExecutionStatus.warning
           )
           .map((item) => item.message);
+
+        // Refreshes alias to ensure index is able to be read before returning
+        await context.core.elasticsearch.client.asInternalUser.indices.refresh({
+          index: previewRuleDataClient.indexNameWithNamespace(spaceId),
+        });
 
         return response.ok({
           body: {

@@ -403,6 +403,8 @@ export const formatPreviewRule = ({
   threatMapping,
   timeFrame,
   threshold,
+  machineLearningJobId,
+  anomalyThreshold,
 }: {
   index: string[];
   threatIndex: string[];
@@ -412,6 +414,8 @@ export const formatPreviewRule = ({
   threatMapping: ThreatMapping;
   timeFrame: Unit;
   threshold: FieldValueThreshold;
+  machineLearningJobId: string[];
+  anomalyThreshold: number;
 }): CreateRulesSchema => {
   const defineStepData = {
     ...stepDefineDefaultValue,
@@ -422,6 +426,8 @@ export const formatPreviewRule = ({
     threatQueryBar: threatQuery,
     threatMapping,
     threshold,
+    machineLearningJobId,
+    anomalyThreshold,
   };
   const aboutStepData = {
     ...stepAboutDefaultValue,

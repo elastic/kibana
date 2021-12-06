@@ -70,6 +70,7 @@ export const PreviewHistogram = ({
     threshold: isThresholdRule ? threshold : undefined,
     query,
     index,
+    ruleType,
   });
 
   const previousPreviewId = usePrevious(previewId);

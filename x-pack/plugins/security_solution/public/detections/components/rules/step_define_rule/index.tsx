@@ -162,6 +162,8 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
       threatQueryBar: formThreatQuery,
       threshold: formThreshold,
       threatMapping: formThreatMapping,
+      machineLearningJobId: formMachineLearningJobId,
+      anomalyThreshold: formAnomalyThreshold,
     },
   ] = useFormData<DefineStepRule>({
     form,
@@ -176,6 +178,8 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
       'threshold.cardinality.value',
       'threatIndex',
       'threatMapping',
+      'machineLearningJobId',
+      'anomalyThreshold',
     ],
   });
 
@@ -183,11 +187,10 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   const [isThreatQueryBarValid, setIsThreatQueryBarValid] = useState(false);
   const index = formIndex || initialState.index;
   const threatIndex = formThreatIndex || initialState.threatIndex;
+  const machineLearningJobId = formMachineLearningJobId ?? initialState.machineLearningJobId;
+  const anomalyThreshold = formAnomalyThreshold ?? initialState.anomalyThreshold;
   const ruleType = formRuleType || initialState.ruleType;
-  const isPreviewRouteEnabled = useMemo(
-    () => ruleType !== 'machine_learning' && ruleType !== 'threat_match',
-    [ruleType]
-  );
+  const isPreviewRouteEnabled = useMemo(() => ruleType !== 'threat_match', [ruleType]);
   const [indexPatternsLoading, { browserFields, indexPatterns }] = useFetchIndex(index);
   const aggregatableFields = Object.entries(browserFields).reduce<BrowserFields>(
     (groupAcc, [groupName, groupValue]) => {
@@ -513,6 +516,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                 index,
                 threatIndex,
                 threatMapping: formThreatMapping,
+                machineLearningJobId,
               })}
               query={formQuery}
               ruleType={ruleType}
@@ -520,6 +524,8 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
               threatQuery={formThreatQuery}
               threatMapping={formThreatMapping}
               threshold={formThreshold}
+              machineLearningJobId={machineLearningJobId}
+              anomalyThreshold={anomalyThreshold}
             />
           </>
         )}

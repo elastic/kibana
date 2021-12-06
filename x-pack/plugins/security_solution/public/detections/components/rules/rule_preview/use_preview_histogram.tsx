@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { useMemo } from 'react';
+import { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import { useMatrixHistogram } from '../../../../common/containers/matrix_histogram';
 import { MatrixHistogramType } from '../../../../../common/search_strategy';
 import { convertToBuildEsQuery } from '../../../../common/lib/keury';
@@ -23,6 +24,7 @@ interface PreviewHistogramParams {
   threshold?: FieldValueThreshold;
   query: FieldValueQueryBar;
   index: string[];
+  ruleType: Type;
 }
 
 export const usePreviewHistogram = ({
@@ -33,6 +35,7 @@ export const usePreviewHistogram = ({
   threshold,
   query,
   index,
+  ruleType,
 }: PreviewHistogramParams) => {
   const { uiSettings } = useKibana().services;
   const {
@@ -53,6 +56,11 @@ export const usePreviewHistogram = ({
     filters,
   });
 
+  const stackByField = useMemo(() => {
+    const stackByDefault = ruleType === 'machine_learning' ? 'host.name' : 'event.category';
+    return threshold?.field[0] ?? stackByDefault;
+  }, [threshold, ruleType]);
+
   const matrixHistogramRequest = useMemo(() => {
     return {
       endDate,
@@ -60,13 +68,13 @@ export const usePreviewHistogram = ({
       filterQuery,
       histogramType: MatrixHistogramType.preview,
       indexNames: [`${DEFAULT_PREVIEW_INDEX}-${spaceId}`],
-      stackByField: threshold?.field[0] ?? 'event.category',
+      stackByField,
       startDate,
       threshold,
       includeMissingData: false,
       skip: error != null,
     };
-  }, [startDate, endDate, filterQuery, spaceId, error, threshold]);
+  }, [startDate, endDate, filterQuery, spaceId, error, threshold, stackByField]);
 
   return useMatrixHistogram(matrixHistogramRequest);
 };

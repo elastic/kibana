@@ -24,6 +24,8 @@ interface PreviewRouteParams {
   timeFrame: Unit;
   threatMapping: ThreatMapping;
   threshold: FieldValueThreshold;
+  machineLearningJobId: string[];
+  anomalyThreshold: number;
 }
 
 export const usePreviewRoute = ({
@@ -36,6 +38,8 @@ export const usePreviewRoute = ({
   ruleType,
   threatMapping,
   threshold,
+  machineLearningJobId,
+  anomalyThreshold,
 }: PreviewRouteParams) => {
   const [isRequestTriggered, setIsRequestTriggered] = useState(false);
 
@@ -70,6 +74,8 @@ export const usePreviewRoute = ({
     ruleType,
     threatMapping,
     threshold,
+    machineLearningJobId,
+    anomalyThreshold,
   ]);
 
   useEffect(() => {
@@ -84,6 +90,8 @@ export const usePreviewRoute = ({
           threatQuery,
           timeFrame,
           threshold,
+          machineLearningJobId,
+          anomalyThreshold,
         })
       );
     }
@@ -99,6 +107,8 @@ export const usePreviewRoute = ({
     threatQuery,
     timeFrame,
     threshold,
+    machineLearningJobId,
+    anomalyThreshold,
   ]);
 
   return {
