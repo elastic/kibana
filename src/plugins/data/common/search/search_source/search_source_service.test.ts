@@ -28,7 +28,13 @@ describe('SearchSource service', () => {
         dependencies
       );
 
-      expect(Object.keys(start)).toEqual(['create', 'createEmpty']);
+      expect(Object.keys(start)).toEqual([
+        'create',
+        'createEmpty',
+        'extract',
+        'inject',
+        'getAllMigrations',
+      ]);
     });
   });
 });
