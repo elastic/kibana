@@ -34,6 +34,7 @@ import { getMetadataForEndpoints } from '../../services';
 import { EndpointAppContext } from '../../types';
 import { APP_ID } from '../../../../common/constants';
 import { doLogsEndpointActionDsExists } from '../../utils';
+import { withEndpointAuthz } from '../with_endpoint_authz';
 
 /**
  * Registers the Host-(un-)isolation routes
@@ -42,6 +43,8 @@ export function registerHostIsolationRoutes(
   router: SecuritySolutionPluginRouter,
   endpointContext: EndpointAppContext
 ) {
+  const logger = endpointContext.logFactory.get('hostIsolation');
+
   // perform isolation
   router.post(
     {
@@ -49,7 +52,7 @@ export function registerHostIsolationRoutes(
       validate: HostIsolationRequestSchema,
       options: { authRequired: true, tags: ['access:securitySolution'] },
     },
-    isolationRequestHandler(endpointContext, true)
+    withEndpointAuthz(['canIsolateHost'], logger, isolationRequestHandler(endpointContext, true))
   );
 
   // perform UN-isolate
@@ -59,7 +62,7 @@ export function registerHostIsolationRoutes(
       validate: HostIsolationRequestSchema,
       options: { authRequired: true, tags: ['access:securitySolution'] },
     },
-    isolationRequestHandler(endpointContext, false)
+    withEndpointAuthz(['canUnIsolateHost'], logger, isolationRequestHandler(endpointContext, false))
   );
 }
 
