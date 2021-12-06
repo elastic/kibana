@@ -12,7 +12,7 @@ By default all external URLs are allowed.
 +
 For example, to allow only external URLs to the `example.com` domain with the `https` scheme, except for the `danger.example.com` sub-domain,
 which is denied even when `https` scheme is used:
-
++
 ["source","yml"]
 -----------
 externalUrl.policy:
