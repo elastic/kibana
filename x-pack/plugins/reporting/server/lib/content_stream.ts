@@ -254,7 +254,7 @@ export class ContentStream extends Duplex {
   private async flush(size = this.bytesBuffered) {
     const buffersToFlush: Buffer[] = [];
     let partiallyFlushedBuffer: undefined | Buffer;
-    let totalBytesConsumed = 0;
+    let bytesToFlush = 0;
 
     /*
      Loop over each buffer, keeping track of how many bytes we have added
@@ -273,14 +273,14 @@ export class ContentStream extends Duplex {
      need this code to be as performant as possible.
     */
     for (const buffer of this.buffers) {
-      const remainder = size - totalBytesConsumed;
+      const remainder = size - bytesToFlush;
       if (remainder < 0) {
         break;
       }
       const chunkedBuffer = remainder > 0 ? buffer.slice(0, remainder) : buffer;
 
       buffersToFlush.push(chunkedBuffer);
-      totalBytesConsumed += chunkedBuffer.byteLength;
+      bytesToFlush += chunkedBuffer.byteLength;
 
       // Did we add a partial buffer? Cache the rest and stop looping.
       if (buffer.byteLength > remainder) {
@@ -316,7 +316,7 @@ export class ContentStream extends Duplex {
       ? [partiallyFlushedBuffer, ...this.buffers.slice(buffersToFlush.length)]
       : this.buffers.slice(Math.max(buffersToFlush.length - 1, 1));
 
-    this.bytesBuffered -= totalBytesConsumed;
+    this.bytesBuffered -= bytesToFlush;
   }
 
   private async flushAllFullChunks() {
