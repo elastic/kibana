@@ -93,8 +93,12 @@ const includeFiltersByGroups = (filters: Ast[], filterExprAst: ExpressionFunctio
     const needToIncludeByGroup =
       groups.length && groupsToInclude.length && groupsToInclude.includes(groups[0]);
 
+    // `filters` expression ignores ungrouped, if group is specified.
+    // `selectFilter` expression is including filters with specified groups and ungrouped ones.
     const needToIncludeByUngrouped =
-      !groupsToInclude.length && includeOnlyUngrouped && !groups.length;
+      filterExprAst.function === FILTERS
+        ? includeOnlyUngrouped && !groups.length && !groupsToInclude.length
+        : includeOnlyUngrouped && !groups.length;
 
     const allowAll = !groupsToInclude.length && !includeOnlyUngrouped;
     return needToIncludeByUngrouped || needToIncludeByGroup || allowAll;

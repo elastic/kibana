@@ -11,7 +11,6 @@ import { pluginServices } from '../services';
 import type { FiltersFunction } from '../../common/functions';
 import { buildFiltersFunction } from '../../common/functions';
 import { InitializeArguments } from '.';
-import { getFiltersByGroups } from '../lib/filter';
 
 export interface Arguments {
   group: string[];
@@ -27,12 +26,16 @@ function getFiltersByGroup(allFilters: string[], groups?: string[], ungrouped = 
     // remove all allFilters that belong to a group
     return allFilters.filter((filter: string) => {
       const ast = fromExpression(filter);
-      const expGroups = get(ast, 'chain[0].arguments.filterGroup', []);
+      const expGroups: string[] = get(ast, 'chain[0].arguments.filterGroup', []);
       return expGroups.length === 0;
     });
   }
 
-  return getFiltersByGroups(allFilters, groups);
+  return allFilters.filter((filter: string) => {
+    const ast = fromExpression(filter);
+    const expGroups: string[] = get(ast, 'chain[0].arguments.filterGroup', []);
+    return expGroups.length > 0 && expGroups.every((expGroup) => groups.includes(expGroup));
+  });
 }
 
 export function filtersFunctionFactory(initialize: InitializeArguments): () => FiltersFunction {

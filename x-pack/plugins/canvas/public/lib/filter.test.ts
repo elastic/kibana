@@ -297,14 +297,15 @@ describe('getFiltersByFilterExpressions', () => {
   ];
   const kibanaExpr = 'kibana';
   const selectFilterExprEmpty = 'selectFilter';
-  const selectFilterExprWithGroups = `${selectFilterExprEmpty} group="${group2}"`;
+  const selectFilterExprWithGroup = `${selectFilterExprEmpty} group="${group2}"`;
+  const selectFilterExprWithGroups = `${selectFilterExprEmpty} group="${group2}" group="${group1}"`;
   const selectFilterExprWithUngrouped = `${selectFilterExprEmpty} ungrouped=true`;
-  const selectFilterExprWithGroupsAndUngrouped = `${selectFilterExprEmpty}  group="${group2}" ungrouped=true`;
+  const selectFilterExprWithGroupAndUngrouped = `${selectFilterExprEmpty}  group="${group2}" ungrouped=true`;
 
   const removeFilterExprEmpty = 'removeFilter';
-  const removeFilterExprWithGroups = `${removeFilterExprEmpty} group="${group2}"`;
+  const removeFilterExprWithGroup = `${removeFilterExprEmpty} group="${group2}"`;
   const removeFilterExprWithUngrouped = `${removeFilterExprEmpty} ungrouped=true`;
-  const removeFilterExprWithGroupsAndUngrouped = `${removeFilterExprEmpty} group="${group2}" ungrouped=true`;
+  const removeFilterExprWithGroupAndUngrouped = `${removeFilterExprEmpty} group="${group2}" ungrouped=true`;
 
   const getFiltersAsts = (filtersExprs: string[]) => {
     const ast = fromExpression(filtersExprs.join(' | '));
@@ -320,7 +321,7 @@ describe('getFiltersByFilterExpressions', () => {
   it('returns filters with group, specified to selectFilter expression', () => {
     const filtersExprs = getFiltersAsts([kibanaExpr, selectFilterExprWithGroups]);
     const matchedFilters = getFiltersByFilterExpressions(filters, filtersExprs);
-    expect(matchedFilters).toEqual([filters[1], filters[3]]);
+    expect(matchedFilters).toEqual([filters[0], filters[1], filters[3]]);
   });
 
   it('returns filters without group if ungrouped is true at selectFilter expression', () => {
@@ -330,7 +331,7 @@ describe('getFiltersByFilterExpressions', () => {
   });
 
   it('returns filters with group if ungrouped is true and groups are not empty at selectFilter expression', () => {
-    const filtersExprs = getFiltersAsts([kibanaExpr, selectFilterExprWithGroupsAndUngrouped]);
+    const filtersExprs = getFiltersAsts([kibanaExpr, selectFilterExprWithGroupAndUngrouped]);
     const matchedFilters = getFiltersByFilterExpressions(filters, filtersExprs);
     expect(matchedFilters).toEqual([filters[1], filters[3]]);
   });
@@ -342,7 +343,7 @@ describe('getFiltersByFilterExpressions', () => {
   });
 
   it('returns filters without group, specified to removeFilter expression', () => {
-    const filtersExprs = getFiltersAsts([kibanaExpr, removeFilterExprWithGroups]);
+    const filtersExprs = getFiltersAsts([kibanaExpr, removeFilterExprWithGroup]);
     const matchedFilters = getFiltersByFilterExpressions(filters, filtersExprs);
     expect(matchedFilters).toEqual([filters[0], filters[2]]);
   });
@@ -354,7 +355,7 @@ describe('getFiltersByFilterExpressions', () => {
   });
 
   it('remove filters without group and with specified group if ungrouped is true and groups are not empty at removeFilter expression', () => {
-    const filtersExprs = getFiltersAsts([kibanaExpr, removeFilterExprWithGroupsAndUngrouped]);
+    const filtersExprs = getFiltersAsts([kibanaExpr, removeFilterExprWithGroupAndUngrouped]);
     const matchedFilters = getFiltersByFilterExpressions(filters, filtersExprs);
     expect(matchedFilters).toEqual([filters[0]]);
   });
@@ -362,8 +363,8 @@ describe('getFiltersByFilterExpressions', () => {
   it('should include/exlude filters iteratively', () => {
     const filtersExprs = getFiltersAsts([
       kibanaExpr,
-      selectFilterExprWithGroups,
-      removeFilterExprWithGroups,
+      selectFilterExprWithGroup,
+      removeFilterExprWithGroup,
       selectFilterExprEmpty,
     ]);
     const matchedFilters = getFiltersByFilterExpressions(filters, filtersExprs);
