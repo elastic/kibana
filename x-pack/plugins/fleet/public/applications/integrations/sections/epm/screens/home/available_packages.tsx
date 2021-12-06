@@ -256,7 +256,7 @@ export const AvailablePackages: React.FC = memo(() => {
       ? []
       : mergeCategoriesAndCount(
           eprCategories
-            ? (eprCategories.response as Array<{ id: string; title: string; count: number }>)
+            ? (eprCategories.items as Array<{ id: string; title: string; count: number }>)
             : [],
           cards
         );

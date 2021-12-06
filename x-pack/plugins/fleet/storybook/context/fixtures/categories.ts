@@ -6,7 +6,7 @@
  */
 import type { GetCategoriesResponse } from '../../../public/types';
 
-export const response: GetCategoriesResponse['items'] = [
+export const items: GetCategoriesResponse['items'] = [
   {
     id: 'aws',
     title: 'AWS',
