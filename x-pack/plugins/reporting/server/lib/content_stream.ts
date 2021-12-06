@@ -286,7 +286,7 @@ export class ContentStream extends Duplex {
       }
     }
 
-    // We call Buffer.concat with the fewest number of buffers
+    // We call Buffer.concat with the fewest number of buffers possible
     const chunk = Buffer.concat(buffersToFlush);
     const content = this.encode(chunk);
 
