@@ -22,6 +22,10 @@ export const deprecations = ({
 }: ConfigDeprecationFactory): ConfigDeprecation[] => {
   return [
     deprecate('enabled', '8.0.0', { level: 'critical' }),
+    deprecate('cluster_alerts.allowedSpaces', '8.0.0', {
+      level: 'warning',
+      message: 'Cluster alerts are now created after opt-in.',
+    }),
     // This order matters. The "blanket rename" needs to happen at the end
     renameFromRoot('xpack.monitoring.max_bucket_size', 'monitoring.ui.max_bucket_size', {
       level: 'warning',
