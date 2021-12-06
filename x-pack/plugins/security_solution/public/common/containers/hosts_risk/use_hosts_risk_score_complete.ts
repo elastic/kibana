@@ -4,14 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 import { filter } from 'rxjs/operators';
 
 import { useObservable, withOptionalSignal } from '@kbn/securitysolution-hook-utils';
-import type { DataPublicPluginStart } from '../../../../../../../src/plugins/data/public';
-
-import { isCompleteResponse, isErrorResponse } from '../../../../../../../src/plugins/data/common';
-
+import {
+  DataPublicPluginStart,
+  isCompleteResponse,
+  isErrorResponse,
+} from '../../../../../../../src/plugins/data/public';
 import {
   HostsQueries,
   HostsRiskScoreRequestOptions,

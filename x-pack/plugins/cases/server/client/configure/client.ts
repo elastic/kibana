@@ -30,10 +30,9 @@ import {
   excess,
   GetConfigureFindRequest,
   GetConfigureFindRequestRt,
-  MAX_CONCURRENT_SEARCHES,
-  SUPPORTED_CONNECTORS,
   throwErrors,
-} from '../../../common';
+} from '../../../common/api';
+import { MAX_CONCURRENT_SEARCHES, SUPPORTED_CONNECTORS } from '../../../common/constants';
 import { createCaseError } from '../../common';
 import { CasesClientInternal } from '../client_internal';
 import { CasesClientArgs } from '../types';
