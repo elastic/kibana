@@ -95,7 +95,7 @@ services:
 
 ==== Persist the {kib} keystore
 
-By default, {kib] auto-generates a keystore file for secure settings at startup. To persist your {kibana-ref}/secure-settings.html[secure settings], use the `kibana-keystore` utility to bind-mount the parent directory of the keystore to the container. For example:
+By default, {kib} auto-generates a keystore file for secure settings at startup. To persist your {kibana-ref}/secure-settings.html[secure settings], use the `kibana-keystore` utility to bind-mount the parent directory of the keystore to the container. For example:
 
 ["source","sh",subs="attributes"]
 ----
