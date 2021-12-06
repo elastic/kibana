@@ -231,7 +231,7 @@ Update the following settings:
 ====
       
 [discrete]
-[[deprecation-111550]]
+[[deprecation-113555]]
 .Deprecates `proxyFilter` and `proxyConfig`
 [%collapsible]
 ====
