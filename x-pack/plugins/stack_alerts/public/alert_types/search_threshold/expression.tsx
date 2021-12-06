@@ -86,6 +86,10 @@ export const SearchThresholdAlertTypeExpression: React.FunctionComponent<
           <EuiSpacer />
         </Fragment>
       ) : null}
+      <div>
+        Imagine or implement data view, query, filters using search source here. Not editable in the
+        first iteration.
+      </div>
       test
       <EuiSpacer size="s" />
       <EuiTitle size="xs">

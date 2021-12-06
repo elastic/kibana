@@ -11,7 +11,7 @@ import { validateExpression } from './validation';
 import { SearchThresholdAlertParams } from './types';
 import { AlertTypeModel } from '../../../../triggers_actions_ui/public';
 
-export { SearchThresholdAlertParams } from './types';
+export type { SearchThresholdAlertParams } from './types';
 
 export function getAlertType(): AlertTypeModel<SearchThresholdAlertParams> {
   return {

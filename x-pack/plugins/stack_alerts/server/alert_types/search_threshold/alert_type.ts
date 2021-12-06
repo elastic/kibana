@@ -218,6 +218,14 @@ export function getAlertType(logger: Logger): SearchThresholdAlertType {
     }
 
     const nrOfDocs = 10;
+    /**
+     * Currently this is just triggering a notification if the configured threshold is lower then 10
+     * What should be implemented:
+     * - Create a scoped search source client using KibanaRequest
+     * - Create a searchSource object
+     * - Use it to request data from Elasticsearch
+     * - Compare number of documents with the configured threshold
+     */
 
     const met = compareFn(nrOfDocs, params.threshold);
 
