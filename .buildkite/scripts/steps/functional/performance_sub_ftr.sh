@@ -19,7 +19,7 @@ DONT_START_ES=true DISABLE_APM=true checks-reporter-with-killswitch "Run Perform
   node scripts/functional_tests \
     --debug --bail \
     --kibana-install-dir "$KIBANA_BUILD_LOCATION" \
-    --config test/performance/config.ts;
+    --config test/performance/config.ftr.ts;
 
 # warmup round 2
 DONT_START_ES=true DISABLE_APM=true checks-reporter-with-killswitch "Run Performance Tests (warmup 2)" \
