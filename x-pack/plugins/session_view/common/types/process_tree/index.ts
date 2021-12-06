@@ -141,3 +141,7 @@ export interface Process {
   isUserEntered(): boolean;
   getMaxAlertLevel(): number | null;
 }
+
+export type ProcessMap = {
+  [key: string]: Process;
+};

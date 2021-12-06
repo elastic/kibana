@@ -6,7 +6,7 @@
  */
 import React, { useRef, useLayoutEffect, useCallback } from 'react';
 import { ProcessTreeNode } from '../ProcessTreeNode';
-import { useProcessTree } from '../../hooks/use_process_tree';
+import { useProcessTree } from './hooks';
 import { ProcessEvent, Process } from '../../../common/types/process_tree';
 import { useScroll } from '../../hooks/use_scroll';
 import { useStyles } from './styles';
@@ -20,7 +20,7 @@ interface ProcessTreeDeps {
 
   // bi-directional paging support. allows us to load
   // processes before and after a particular process.entity_id
-  // implementation in-complete. see use_process_tree.js
+  // implementation in-complete. see hooks.js
   forward: ProcessEvent[]; // load next
   backward?: ProcessEvent[]; // load previous
 
