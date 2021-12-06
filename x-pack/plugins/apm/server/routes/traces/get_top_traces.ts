@@ -11,15 +11,17 @@ import {
   SERVICE_NAME,
   TRANSACTION_NAME,
 } from '../../../common/elasticsearch_fieldnames';
-import { joinByKey } from '../../../common/utils/join_by_key';
 import { withApmSpan } from '../../utils/with_apm_span';
 import { Setup } from '../../lib/helpers/setup_request';
-import { getAverages, getCounts, getSums } from './get_transaction_group_stats';
+import { getTransactionGroupStats } from './get_transaction_group_stats';
 import { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
 
-type Key = Record<'service.name' | 'transaction.name', string>;
+export type BucketKey = Record<
+  typeof TRANSACTION_NAME | typeof SERVICE_NAME,
+  string
+>;
 export interface TransactionGroup {
-  key: Key;
+  key: BucketKey;
   serviceName: string;
   transactionName: string;
   transactionType: string;
@@ -30,10 +32,9 @@ export interface TransactionGroup {
 }
 
 function getItemsWithRelativeImpact(
-  setup: Setup,
   items: Array<{
     sum?: number | null;
-    key: Key;
+    key: BucketKey;
     avg?: number | null;
     count?: number | null;
     transactionType?: string;
@@ -94,18 +95,9 @@ export function getTopTraces({
       end,
     };
 
-    const [counts, averages, sums] = await Promise.all([
-      getCounts(params),
-      getAverages(params),
-      getSums(params),
-    ]);
-
-    const stats = [...averages, ...counts, ...sums];
-
-    const items = joinByKey(stats, 'key');
+    const items = await getTransactionGroupStats(params);
 
     const itemsWithRelativeImpact = getItemsWithRelativeImpact(
-      setup,
       items,
       start,
       end
