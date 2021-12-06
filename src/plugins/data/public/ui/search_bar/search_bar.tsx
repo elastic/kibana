@@ -414,12 +414,19 @@ class SearchBarUI extends Component<SearchBarProps, State> {
 
     const filterMenu = (
       <FilterSetMenu
-        language={this.props.nonKqlMode || 'KQL'}
+        // language={this.props.nonKqlMode || 'KQL'}
+        nonKqlMode={this.props.nonKqlMode}
+        nonKqlModeHelpText={this.props.nonKqlModeHelpText}
+        language={this.state.query!.language}
         onEnableAll={this.onEnableAll}
         onDisableAll={this.onDisableAll}
         onToggleAllNegated={this.onToggleAllNegated}
         onRemoveAll={this.onRemoveAll}
         onSaveQuery={this.onInitiateSave}
+        services={this.services}
+        onLanguageChange={this.onQueryBarChange}
+        dateRangeFrom={this.state.dateRangeFrom}
+        dateRangeTo={this.state.dateRangeTo}
       />
     );
 

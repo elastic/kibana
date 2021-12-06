@@ -837,7 +837,7 @@ export default class QueryStringInputUI extends Component<Props, State> {
             </EuiPortal>
           </div>
         </EuiOutsideClickDetector>
-        {this.props.disableLanguageSwitcher ? null : (
+        {/* {this.props.disableLanguageSwitcher ? null : (
           <QueryLanguageSwitcher
             language={this.props.query.language}
             anchorPosition={this.props.languageSwitcherPopoverAnchorPosition}
@@ -845,7 +845,7 @@ export default class QueryStringInputUI extends Component<Props, State> {
             nonKqlMode={this.props.nonKqlMode}
             nonKqlModeHelpText={this.props.nonKqlModeHelpText}
           />
-        )}
+        )} */}
       </div>
     );
   }

@@ -21,23 +21,40 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { KIBANA_USER_QUERY_LANGUAGE_KEY, UI_SETTINGS } from '../../../common';
+import { IDataPluginServices } from '../../types';
+import { TimeRange, Query } from '../..';
+import { KibanaReactContextValue } from '../../../../kibana_react/public';
+import { QueryLanguageSwitcher } from '../query_string_input/language_switcher';
 
 interface Props {
-  language: 'lucene' | 'text' | 'KQL';
+  language: string;
   onEnableAll: () => void;
   onDisableAll: () => void;
   onToggleAllNegated: () => void;
   onRemoveAll: () => void;
   onSaveQuery: () => void;
+  onLanguageChange: (payload: { dateRange: TimeRange; query?: Query }) => void;
+  nonKqlMode?: 'lucene' | 'text';
+  nonKqlModeHelpText?: string;
+  services: KibanaReactContextValue<IDataPluginServices>['services'];
+  dateRangeFrom?: string;
+  dateRangeTo?: string;
 }
 
 export function FilterSetMenu({
   language,
+  nonKqlMode,
+  nonKqlModeHelpText,
+  services,
+  dateRangeFrom,
+  dateRangeTo,
   onEnableAll,
   onDisableAll,
   onToggleAllNegated,
   onRemoveAll,
   onSaveQuery,
+  onLanguageChange,
 }: Props) {
   const [isPopoverOpen, setPopover] = useState(false);
 
@@ -50,6 +67,29 @@ export function FilterSetMenu({
 
   const closePopover = () => {
     setPopover(false);
+  };
+
+  const getDateRange = () => {
+    const defaultTimeSetting = services.uiSettings!.get(UI_SETTINGS.TIMEPICKER_TIME_DEFAULTS);
+    return {
+      from: dateRangeFrom || defaultTimeSetting.from,
+      to: dateRangeTo || defaultTimeSetting.to,
+    };
+  };
+
+  const onSelectLanguage = (lang: string) => {
+    services.http.post('/api/kibana/kql_opt_in_stats', {
+      body: JSON.stringify({ opt_in: lang === 'kuery' }),
+    });
+
+    const storageKey = KIBANA_USER_QUERY_LANGUAGE_KEY;
+    services.storage.set(storageKey!, lang);
+
+    const newQuery = { query: '', language: lang };
+    onLanguageChange({
+      query: newQuery,
+      dateRange: getDateRange(),
+    });
   };
 
   const panels = [
@@ -154,7 +194,16 @@ export function FilterSetMenu({
     {
       id: 3,
       title: 'Filter language',
-      content: <div style={{ padding: 16 }}>{toSentenceCase(language)}</div>,
+      content: (
+        <div style={{ padding: 16 }}>
+          <QueryLanguageSwitcher
+            language={language}
+            onSelectLanguage={onSelectLanguage}
+            nonKqlMode={nonKqlMode}
+            nonKqlModeHelpText={nonKqlModeHelpText}
+          />
+        </div>
+      ),
     },
   ] as EuiContextMenuPanelDescriptor[];
 
