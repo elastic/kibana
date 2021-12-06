@@ -25,7 +25,7 @@ import {
   SIGNAL_STATUS_FIELD_NAME,
 } from '../../../../timelines/components/timeline/body/renderers/constants';
 import { FormattedFieldValue } from '../../../../timelines/components/timeline/body/renderers/formatted_field';
-import { OverviewCard, OverviewCardWithActions } from '../overview/overview_card';
+import { OverviewCardWithActions } from '../overview/overview_card';
 import { StatusPopoverButton } from '../overview/status_popover_button';
 import { SeverityBadge } from '../../../../../public/detections/components/rules/severity_badge';
 
@@ -109,7 +109,7 @@ export const Overview = React.memo<Props>(
           <EuiFlexItem>
             <OverviewCardWithActions
               title={SIGNAL_STATUS}
-              enrichedFieldInfo={severityData}
+              enrichedFieldInfo={statusData}
               contextId={contextId}
             >
               <StatusPopoverButton
