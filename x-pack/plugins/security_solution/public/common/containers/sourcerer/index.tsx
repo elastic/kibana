@@ -22,7 +22,7 @@ import {
   RULES_PATH,
   UEBA_PATH,
 } from '../../../../common/constants';
-import { TimelineId } from '../../../../common';
+import { TimelineId } from '../../../../common/types';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
 import { checkIfIndicesExist, getScopePatternListSelection } from '../../store/sourcerer/helpers';
 import { useAppToasts } from '../../hooks/use_app_toasts';
