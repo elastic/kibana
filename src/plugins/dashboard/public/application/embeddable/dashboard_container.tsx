@@ -40,6 +40,7 @@ import {
 import { PLACEHOLDER_EMBEDDABLE } from './placeholder';
 import { DashboardAppCapabilities, DashboardContainerInput } from '../../types';
 import { PresentationUtilPluginStart } from '../../services/presentation_util';
+import type { ScreenshotModePluginStart } from '../../services/screenshot_mode';
 import { PanelPlacementMethod, IPanelPlacementArgs } from './panel/dashboard_panel_placement';
 import {
   combineDashboardFiltersWithControlGroupFilters,
@@ -55,6 +56,7 @@ export interface DashboardContainerServices {
   application: CoreStart['application'];
   inspector: InspectorStartContract;
   overlays: CoreStart['overlays'];
+  screenshotMode: ScreenshotModePluginStart;
   uiSettings: IUiSettingsClient;
   embeddable: EmbeddableStart;
   uiActions: UiActionsStart;

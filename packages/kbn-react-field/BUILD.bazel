@@ -42,7 +42,6 @@ RUNTIME_DEPS = [
 ]
 
 TYPES_DEPS = [
-  "//packages/kbn-babel-preset",
   "//packages/kbn-i18n",
   "@npm//tslib",
   "@npm//@types/jest",
@@ -50,7 +49,6 @@ TYPES_DEPS = [
   "@npm//@types/classnames",
   "@npm//@types/react",
   "@npm//@elastic/eui",
-  "@npm//resize-observer-polyfill",
 ]
 
 jsts_transpiler(
