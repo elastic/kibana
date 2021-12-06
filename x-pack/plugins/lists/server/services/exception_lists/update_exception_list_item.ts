@@ -28,7 +28,7 @@ import { ExceptionListSoSchema } from '../../schemas/saved_objects';
 import {
   transformSavedObjectUpdateToExceptionListItem,
   transformUpdateCommentsToComments,
-} from './utils/utils';
+} from './utils';
 import { getExceptionListItem } from './get_exception_list_item';
 
 interface UpdateExceptionListItemOptions {

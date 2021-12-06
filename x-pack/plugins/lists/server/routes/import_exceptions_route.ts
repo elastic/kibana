@@ -19,6 +19,11 @@ import { ConfigType } from '../config';
 
 import { buildRouteValidation, buildSiemResponse, getExceptionListClient } from './utils';
 
+/**
+ * Takes an ndjson file of exception lists and exception list items and
+ * imports them by either creating or updating lists/items given a clients
+ * choice to overwrite any matching lists
+ */
 export const importExceptionsRoute = (router: ListsPluginRouter, config: ConfigType): void => {
   router.post(
     {
@@ -50,12 +55,14 @@ export const importExceptionsRoute = (router: ListsPluginRouter, config: ConfigT
             statusCode: 400,
           });
         }
+        // console.time('importException');
 
         const importsSummary = await exceptionListsClient.importExceptionListAndItems({
           exceptionsToImport: request.body.file,
           maxExceptionsImportSize: config.maxExceptionsImportSize,
           overwrite: request.query.overwrite,
         });
+        // console.timeEnd('importException');
         const [validated, errors] = validate(importsSummary, importExceptionsResponseSchema);
 
         if (errors != null) {

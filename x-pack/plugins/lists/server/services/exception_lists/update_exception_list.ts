@@ -23,7 +23,7 @@ import { getSavedObjectType } from '@kbn/securitysolution-list-utils';
 
 import { ExceptionListSoSchema } from '../../schemas/saved_objects';
 
-import { transformSavedObjectUpdateToExceptionList } from './utils/utils';
+import { transformSavedObjectUpdateToExceptionList } from './utils';
 import { getExceptionList } from './get_exception_list';
 
 interface UpdateExceptionListOptions {

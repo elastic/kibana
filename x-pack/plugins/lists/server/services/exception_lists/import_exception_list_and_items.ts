@@ -8,23 +8,53 @@
 import { Readable } from 'stream';
 
 import {
+  BulkErrorSchema,
+  ImportExceptionListItemSchema,
   ImportExceptionListItemSchemaDecoded,
   ImportExceptionListSchemaDecoded,
+  ImportExceptionsListSchema,
   ImportExceptionsResponseSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { createPromiseFromStreams } from '@kbn/utils';
 import { SavedObjectsClientContract } from 'kibana/server';
 import { chunk } from 'lodash/fp';
 
-import {
-  createExceptionsStreamFromNdjson,
-  getTupleErrorsAndUniqueExceptionListItems,
-  getTupleErrorsAndUniqueExceptionLists,
-  importExceptionListItems,
-  importExceptionLists,
-} from './utils/import_exceptions_utils';
+import { importExceptionLists } from './utils/import/import_exception_list';
+import { importExceptionListItems } from './utils/import/import_exception_list_items';
+import { getTupleErrorsAndUniqueExceptionLists } from './utils/import/dedupe_incoming_lists';
+import { getTupleErrorsAndUniqueExceptionListItems } from './utils/import/dedupe_incoming_items';
+import { createExceptionsStreamFromNdjson } from './utils/import/create_exceptions_stream_from_ndjson';
+import { exceptionsChecksFromArray } from './utils/import/create_exceptions_stream_from_array';
 
+export interface PromiseFromStreams {
+  lists: Array<ImportExceptionListSchemaDecoded | Error>;
+  items: Array<ImportExceptionListItemSchemaDecoded | Error>;
+}
+export interface ImportExceptionsOk {
+  id?: string;
+  item_id?: string;
+  list_id?: string;
+  status_code: number;
+  message?: string;
+}
+
+export type ImportResponse = ImportExceptionsOk | BulkErrorSchema;
+
+export type PromiseStream = ImportExceptionsListSchema | ImportExceptionListItemSchema | Error;
+
+export interface ImportDataResponse {
+  success: boolean;
+  success_count: number;
+  errors: BulkErrorSchema[];
+}
 interface ImportExceptionListAndItemsOptions {
+  exceptions: PromiseFromStreams;
+  overwrite: boolean;
+  savedObjectsClient: SavedObjectsClientContract;
+  user: string;
+}
+
+interface ImportExceptionListAndItemsAsStreamOptions {
   exceptionsToImport: Readable;
   maxExceptionsImportSize: number;
   overwrite: boolean;
@@ -32,20 +62,35 @@ interface ImportExceptionListAndItemsOptions {
   user: string;
 }
 
-interface PromiseFromStreams {
-  lists: Array<ImportExceptionListSchemaDecoded | Error>;
-  items: Array<ImportExceptionListItemSchemaDecoded | Error>;
+interface ImportExceptionListAndItemsAsArrayOptions {
+  exceptionsToImport: Array<ImportExceptionsListSchema | ImportExceptionListItemSchema>;
+  maxExceptionsImportSize: number;
+  overwrite: boolean;
+  savedObjectsClient: SavedObjectsClientContract;
+  user: string;
 }
 
-const CHUNK_PARSED_OBJECT_SIZE = 50;
+export type ExceptionsImport = Array<ImportExceptionListItemSchema | ImportExceptionsListSchema>;
 
-export const importExceptions = async ({
+export const CHUNK_PARSED_OBJECT_SIZE = 100;
+
+/**
+ * Import exception lists parent containers and items as stream. The shape of the list and items
+ * will be validated here as well.
+ * @params exceptionsToImport {stream} ndjson stream of lists and items to be imported
+ * @params maxExceptionsImportSize {number} the max number of lists and items to import, defaults to 10,000
+ * @params overwrite {boolean} whether or not to overwrite an exception list with imported list if a matching list_id found
+ * @params savedObjectsClient {object} SO client
+ * @params user {string} user importing list and items
+ * @return {ImportExceptionsResponseSchema} summary of imported count and errors
+ */
+export const importExceptionsAsStream = async ({
   exceptionsToImport,
+  maxExceptionsImportSize,
   overwrite,
   savedObjectsClient,
-  maxExceptionsImportSize,
   user,
-}: ImportExceptionListAndItemsOptions): Promise<ImportExceptionsResponseSchema> => {
+}: ImportExceptionListAndItemsAsStreamOptions): Promise<ImportExceptionsResponseSchema> => {
   // validation of import and sorting of lists and items
   const readStream = createExceptionsStreamFromNdjson(maxExceptionsImportSize);
   const [parsedObjects] = await createPromiseFromStreams<PromiseFromStreams[]>([
@@ -53,11 +98,53 @@ export const importExceptions = async ({
     ...readStream,
   ]);
 
+  return importExceptions({
+    exceptions: parsedObjects,
+    overwrite,
+    savedObjectsClient,
+    user,
+  });
+};
+
+/**
+ * Import exception lists parent containers and items as array. The shape of the list and items
+ * will be validated here as well.
+ * @params exceptionsToImport {array} lists and items to be imported
+ * @params maxExceptionsImportSize {number} the max number of lists and items to import, defaults to 10,000
+ * @params overwrite {boolean} whether or not to overwrite an exception list with imported list if a matching list_id found
+ * @params savedObjectsClient {object} SO client
+ * @params user {string} user importing list and items
+ * @return {ImportExceptionsResponseSchema} summary of imported count and errors
+ */
+export const importExceptionsAsArray = async ({
+  exceptionsToImport,
+  maxExceptionsImportSize,
+  overwrite,
+  savedObjectsClient,
+  user,
+}: ImportExceptionListAndItemsAsArrayOptions): Promise<ImportExceptionsResponseSchema> => {
+  // validation of import and sorting of lists and items
+  const objectsToImport = exceptionsChecksFromArray(exceptionsToImport, maxExceptionsImportSize);
+
+  return importExceptions({
+    exceptions: objectsToImport,
+    overwrite,
+    savedObjectsClient,
+    user,
+  });
+};
+
+const importExceptions = async ({
+  exceptions,
+  overwrite,
+  savedObjectsClient,
+  user,
+}: ImportExceptionListAndItemsOptions): Promise<ImportExceptionsResponseSchema> => {
   // removal of duplicates
   const [exceptionListDuplicateErrors, uniqueExceptionLists] =
-    getTupleErrorsAndUniqueExceptionLists(parsedObjects.lists);
+    getTupleErrorsAndUniqueExceptionLists(exceptions.lists);
   const [exceptionListItemsDuplicateErrors, uniqueExceptionListItems] =
-    getTupleErrorsAndUniqueExceptionListItems(parsedObjects.items);
+    getTupleErrorsAndUniqueExceptionListItems(exceptions.items);
 
   // chunking of validated import stream
   const chunkParsedListObjects = chunk(CHUNK_PARSED_OBJECT_SIZE, uniqueExceptionLists);

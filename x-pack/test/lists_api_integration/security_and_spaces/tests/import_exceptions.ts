@@ -62,6 +62,28 @@ export default ({ getService }: FtrProviderContext): void => {
       });
     });
 
+    xit('should be able to import 1000 exceptions', async () => {
+      const listIds = new Array(100).fill(undefined).map((_, index) => `list-${index}`);
+      const { body } = await supertest
+        .post(`${EXCEPTION_LIST_URL}/_import?overwrite=false`)
+        .set('kbn-xsrf', 'true')
+        .attach(
+          'file',
+          Buffer.from(
+            toNdJsonString(
+              listIds.flatMap((id, iterator) => [getImportExceptionsListSchemaMock(id)])
+            )
+          ),
+          'exceptions.ndjson'
+        )
+        .expect(500);
+
+      expect(body).to.eql({
+        status_code: 500,
+        message: "Can't import more than 10000 exceptions",
+      });
+    });
+
     describe('"overwrite" is false', () => {
       it('should report duplicate error when importing exception list matches an existing list with same "list_id"', async () => {
         await supertest
@@ -320,7 +342,7 @@ export default ({ getService }: FtrProviderContext): void => {
         await supertest
           .post(EXCEPTION_LIST_URL)
           .set('kbn-xsrf', 'true')
-          .send(getCreateExceptionListMinimalSchemaMock())
+          .send({ ...getCreateExceptionListMinimalSchemaMock(), list_id: 'some-list-id3' })
           .expect(200);
 
         const { body } = await supertest
@@ -328,7 +350,7 @@ export default ({ getService }: FtrProviderContext): void => {
           .set('kbn-xsrf', 'true')
           .attach(
             'file',
-            Buffer.from(toNdJsonString([getImportExceptionsListSchemaMock('some-list-id')])),
+            Buffer.from(toNdJsonString([getImportExceptionsListSchemaMock('some-list-id3')])),
             'exceptions.ndjson'
           )
           .expect('Content-Type', 'application/json; charset=utf-8')
@@ -413,7 +435,11 @@ export default ({ getService }: FtrProviderContext): void => {
         await supertest
           .post(EXCEPTION_LIST_ITEM_URL)
           .set('kbn-xsrf', 'true')
-          .send(getCreateExceptionListItemMinimalSchemaMock())
+          .send({
+            ...getCreateExceptionListItemMinimalSchemaMock(),
+            item_id: 'some-list-item-id',
+            list_id: 'some-list-id',
+          })
           .expect(200);
 
         const { body } = await supertest
@@ -423,7 +449,11 @@ export default ({ getService }: FtrProviderContext): void => {
             'file',
             Buffer.from(
               toNdJsonString([
-                getImportExceptionsListItemSchemaMock('some-list-item-id', 'some-list-id'),
+                {
+                  ...getCreateExceptionListItemMinimalSchemaMock(),
+                  item_id: 'some-list-item-id',
+                  list_id: 'some-list-id',
+                },
               ])
             ),
             'exceptions.ndjson'

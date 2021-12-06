@@ -14,17 +14,12 @@ import {
   getImportExceptionsListSchemaMock,
 } from '../../../../lists/common/schemas/request/import_exceptions_schema.mock';
 
-import { importExceptionListItems, importExceptionLists } from './utils/import_exceptions_utils';
-import { importExceptions } from './import_exception_list_and_items';
+import { importExceptionsAsStream } from './import_exception_list_and_items';
+import { importExceptionLists } from './utils/import/import_exception_list';
+import { importExceptionListItems } from './utils/import/import_exception_list_items';
 
-jest.mock('./utils/import_exceptions_utils', () => {
-  const original = jest.requireActual('./utils/import_exceptions_utils');
-  return {
-    ...original,
-    importExceptionListItems: jest.fn(),
-    importExceptionLists: jest.fn(),
-  };
-});
+jest.mock('./utils/import/import_exception_list');
+jest.mock('./utils/import/import_exception_list_items');
 
 const toReadable = (items: unknown[]): Readable => {
   const stringOfExceptions = items.map((item) => JSON.stringify(item));
@@ -58,7 +53,7 @@ describe('import_exception_list_and_items', () => {
       success_count: 1,
     });
 
-    const result = await importExceptions({
+    const result = await importExceptionsAsStream({
       exceptionsToImport: toReadable([
         getImportExceptionsListSchemaMock('test_list_id'),
         getImportExceptionsListItemSchemaMock('test_item_id', 'test_list_id'),
@@ -86,7 +81,7 @@ describe('import_exception_list_and_items', () => {
       success_count: 1,
     });
 
-    const result = await importExceptions({
+    const result = await importExceptionsAsStream({
       exceptionsToImport: toReadable([
         getImportExceptionsListSchemaMock('test_list_id'),
         getImportExceptionsListItemSchemaMock('test_item_id', 'test_list_id'),
@@ -108,7 +103,7 @@ describe('import_exception_list_and_items', () => {
   });
 
   test('it should report success true if no errors occurred importing lists and items', async () => {
-    const result = await importExceptions({
+    const result = await importExceptionsAsStream({
       exceptionsToImport: toReadable([
         getImportExceptionsListSchemaMock('test_list_id'),
         getImportExceptionsListItemSchemaMock('test_item_id', 'test_list_id'),

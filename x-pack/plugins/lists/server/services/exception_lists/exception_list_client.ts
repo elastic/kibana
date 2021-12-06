@@ -35,6 +35,7 @@ import {
   GetExceptionListItemOptions,
   GetExceptionListOptions,
   GetExceptionListSummaryOptions,
+  ImportExceptionListAndItemsAsArrayOptions,
   ImportExceptionListAndItemsOptions,
   UpdateEndpointListItemOptions,
   UpdateExceptionListItemOptions,
@@ -61,7 +62,10 @@ import {
 } from './find_exception_list_items';
 import { createEndpointList } from './create_endpoint_list';
 import { createEndpointTrustedAppsList } from './create_endpoint_trusted_apps_list';
-import { importExceptions } from './import_exception_list_and_items';
+import {
+  importExceptionsAsArray,
+  importExceptionsAsStream,
+} from './import_exception_list_and_items';
 
 export class ExceptionListClient {
   private readonly user: string;
@@ -73,6 +77,13 @@ export class ExceptionListClient {
     this.savedObjectsClient = savedObjectsClient;
   }
 
+  /**
+   * Fetch an exception list parent container
+   * @params listId {string | undefined} the "list_id" of an exception list
+   * @params id {string | undefined} the "id" of an exception list
+   * @params namespaceType {string | undefined} saved object namespace (single | agnostic)
+   * @return {ExceptionListSchema | null} the found exception list or null if none exists
+   */
   public getExceptionList = async ({
     listId,
     id,
@@ -82,6 +93,13 @@ export class ExceptionListClient {
     return getExceptionList({ id, listId, namespaceType, savedObjectsClient });
   };
 
+  /**
+   * Fetch an exception list parent container
+   * @params listId {string | undefined} the "list_id" of an exception list
+   * @params id {string | undefined} the "id" of an exception list
+   * @params namespaceType {string | undefined} saved object namespace (single | agnostic)
+   * @return {ExceptionListSummarySchema | null} summary of exception list item os types
+   */
   public getExceptionListSummary = async ({
     listId,
     id,
@@ -91,6 +109,13 @@ export class ExceptionListClient {
     return getExceptionListSummary({ id, listId, namespaceType, savedObjectsClient });
   };
 
+  /**
+   * Fetch an exception list item container
+   * @params listId {string | undefined} the "list_id" of an exception list
+   * @params id {string | undefined} the "id" of an exception list
+   * @params namespaceType {string | undefined} saved object namespace (single | agnostic)
+   * @return {ExceptionListSummarySchema | null} the found exception list item or null if none exists
+   */
   public getExceptionListItem = async ({
     itemId,
     id,
@@ -212,6 +237,19 @@ export class ExceptionListClient {
     return getExceptionListItem({ id, itemId, namespaceType: 'agnostic', savedObjectsClient });
   };
 
+  /**
+   * Create an exception list container
+   * @params description {string} a description of the exception list
+   * @params immutable {boolean} a description of the exception list
+   * @params listId {string} the "list_id" of the exception list
+   * @params meta {object | undefined}
+   * @params name {string} the "name" of the exception list
+   * @params namespaceType {string} saved object namespace (single | agnostic)
+   * @params tags {array} user assigned tags of exception list
+   * @params type {string} container type
+   * @params version {number} document version
+   * @return {ExceptionListSchema} the created exception list parent container
+   */
   public createExceptionList = async ({
     description,
     immutable,
@@ -239,6 +277,20 @@ export class ExceptionListClient {
     });
   };
 
+  /**
+   * Update an existing exception list container
+   * @params _version {string | undefined} document version
+   * @params id {string | undefined} the "id" of the exception list
+   * @params description {string | undefined} a description of the exception list
+   * @params listId {string | undefined} the "list_id" of the exception list
+   * @params meta {object | undefined}
+   * @params name {string | undefined} the "name" of the exception list
+   * @params namespaceType {string} saved object namespace (single | agnostic)
+   * @params tags {array | undefined} user assigned tags of exception list
+   * @params type {string | undefined} container type
+   * @params version {number | undefined} document version
+   * @return {ExceptionListSchema | null} the updated exception list parent container
+   */
   public updateExceptionList = async ({
     _version,
     id,
@@ -268,6 +320,13 @@ export class ExceptionListClient {
     });
   };
 
+  /**
+   * Delete an exception list container by either id or list_id
+   * @params listId {string | undefined} the "list_id" of an exception list
+   * @params id {string | undefined} the "id" of an exception list
+   * @params namespaceType {string} saved object namespace (single | agnostic)
+   * @return {ExceptionListSchema | null} the deleted exception list or null if none exists
+   */
   public deleteExceptionList = async ({
     id,
     listId,
@@ -282,6 +341,20 @@ export class ExceptionListClient {
     });
   };
 
+  /**
+   * Create an exception list item container
+   * @params description {string} a description of the exception list
+   * @params entries {array} an array with the exception list item entries
+   * @params itemId {string} the "item_id" of the exception list item
+   * @params listId {string} the "list_id" of the parent exception list
+   * @params meta {object | undefined}
+   * @params name {string} the "name" of the exception list
+   * @params namespaceType {string} saved object namespace (single | agnostic)
+   * @params osTypes {array} item os types to apply
+   * @params tags {array} user assigned tags of exception list
+   * @params type {string} container type
+   * @return {ExceptionListItemSchema} the created exception list item container
+   */
   public createExceptionListItem = async ({
     comments,
     description,
@@ -313,6 +386,22 @@ export class ExceptionListClient {
     });
   };
 
+  /**
+   * Update an existing exception list item
+   * @params _version {string | undefined} document version
+   * @params comments {array} user comments attached to item
+   * @params entries {array} item exception entries logic
+   * @params id {string | undefined} the "id" of the exception list item
+   * @params description {string | undefined} a description of the exception list
+   * @params itemId {string | undefined} the "item_id" of the exception list item
+   * @params meta {object | undefined}
+   * @params name {string | undefined} the "name" of the exception list
+   * @params namespaceType {string} saved object namespace (single | agnostic)
+   * @params osTypes {array} item os types to apply
+   * @params tags {array | undefined} user assigned tags of exception list
+   * @params type {string | undefined} container type
+   * @return {ExceptionListItemSchema | null} the updated exception list item or null if none exists
+   */
   public updateExceptionListItem = async ({
     _version,
     comments,
@@ -346,6 +435,13 @@ export class ExceptionListClient {
     });
   };
 
+  /**
+   * Delete an exception list item by either id or item_id
+   * @params itemId {string | undefined} the "item_id" of an exception list item
+   * @params id {string | undefined} the "id" of an exception list item
+   * @params namespaceType {string} saved object namespace (single | agnostic)
+   * @return {ExceptionListItemSchema | null} the deleted exception list item or null if none exists
+   */
   public deleteExceptionListItem = async ({
     id,
     itemId,
@@ -360,6 +456,12 @@ export class ExceptionListClient {
     });
   };
 
+  /**
+   * Delete an exception list item by id
+   * @params id {string | undefined} the "id" of an exception list item
+   * @params namespaceType {string} saved object namespace (single | agnostic)
+   * @return {void}
+   */
   public deleteExceptionListItemById = async ({
     id,
     namespaceType,
@@ -499,6 +601,13 @@ export class ExceptionListClient {
     });
   };
 
+  /**
+   * Export an exception list parent container and it's items
+   * @params listId {string | undefined} the "list_id" of an exception list
+   * @params id {string | undefined} the "id" of an exception list
+   * @params namespaceType {string | undefined} saved object namespace (single | agnostic)
+   * @return {ExportExceptionListAndItemsReturn | null} the ndjson of the list and items to export or null if none exists
+   */
   public exportExceptionListAndItems = async ({
     listId,
     id,
@@ -514,6 +623,13 @@ export class ExceptionListClient {
     });
   };
 
+  /**
+   * Import exception lists parent containers and items as stream
+   * @params exceptionsToImport {stream} ndjson stream of lists and items
+   * @params maxExceptionsImportSize {number} the max number of lists and items to import, defaults to 10,000
+   * @params overwrite {boolean} whether or not to overwrite an exception list with imported list if a matching list_id found
+   * @return {ImportExceptionsResponseSchema} summary of imported count and errors
+   */
   public importExceptionListAndItems = async ({
     exceptionsToImport,
     maxExceptionsImportSize,
@@ -521,7 +637,30 @@ export class ExceptionListClient {
   }: ImportExceptionListAndItemsOptions): Promise<ImportExceptionsResponseSchema> => {
     const { savedObjectsClient, user } = this;
 
-    return importExceptions({
+    return importExceptionsAsStream({
+      exceptionsToImport,
+      maxExceptionsImportSize,
+      overwrite,
+      savedObjectsClient,
+      user,
+    });
+  };
+
+  /**
+   * Import exception lists parent containers and items as array
+   * @params exceptionsToImport {stream} array of lists and items
+   * @params maxExceptionsImportSize {number} the max number of lists and items to import, defaults to 10,000
+   * @params overwrite {boolean} whether or not to overwrite an exception list with imported list if a matching list_id found
+   * @return {ImportExceptionsResponseSchema} summary of imported count and errors
+   */
+  public importExceptionListAndItemsAsArray = async ({
+    exceptionsToImport,
+    maxExceptionsImportSize,
+    overwrite,
+  }: ImportExceptionListAndItemsAsArrayOptions): Promise<ImportExceptionsResponseSchema> => {
+    const { savedObjectsClient, user } = this;
+
+    return importExceptionsAsArray({
       exceptionsToImport,
       maxExceptionsImportSize,
       overwrite,

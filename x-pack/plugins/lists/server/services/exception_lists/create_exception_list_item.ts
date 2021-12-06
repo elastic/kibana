@@ -28,7 +28,7 @@ import { ExceptionListSoSchema } from '../../schemas/saved_objects';
 import {
   transformCreateCommentsToComments,
   transformSavedObjectToExceptionListItem,
-} from './utils/utils';
+} from './utils';
 
 interface CreateExceptionListItemOptions {
   comments: CreateCommentsArray;

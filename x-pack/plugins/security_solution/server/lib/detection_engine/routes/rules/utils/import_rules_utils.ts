@@ -11,7 +11,6 @@ import {
   ImportExceptionListItemSchema,
   ListArray,
 } from '@kbn/securitysolution-io-ts-list-types';
-import { Readable } from 'stream';
 
 import { legacyMigrate } from '../../../rules/utils';
 import { PartialFilter } from '../../../types';
@@ -309,7 +308,8 @@ export const importRules = async ({
     return importRuleResponse;
   }
 };
-
+// NOTE - can I batch this? Gather exceptions referenced, create dictionary of non-existent
+// exception lists to check against during rule import/creation
 export const checkExceptions = async ({
   ruleId,
   exceptions,
@@ -375,13 +375,8 @@ export const importExceptionsHelper = async ({
       errors,
       success,
       success_count: successCount,
-    } = await exceptionsClient.importExceptionListAndItems({
-      exceptionsToImport: new Readable({
-        read(): void {
-          this.push(exceptions.map((exception) => `${JSON.stringify(exception)}`).join('\n'));
-          this.push(null);
-        },
-      }),
+    } = await exceptionsClient.importExceptionListAndItemsAsArray({
+      exceptionsToImport: exceptions,
       overwrite,
       maxExceptionsImportSize,
     });

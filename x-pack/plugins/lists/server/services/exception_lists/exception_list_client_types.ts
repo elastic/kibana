@@ -22,6 +22,8 @@ import type {
   Id,
   IdOrUndefined,
   Immutable,
+  ImportExceptionListItemSchema,
+  ImportExceptionsListSchema,
   ItemId,
   ItemIdOrUndefined,
   ListId,
@@ -237,6 +239,12 @@ export interface ExportExceptionListAndItemsReturn {
 
 export interface ImportExceptionListAndItemsOptions {
   exceptionsToImport: Readable;
+  maxExceptionsImportSize: number;
+  overwrite: boolean;
+}
+
+export interface ImportExceptionListAndItemsAsArrayOptions {
+  exceptionsToImport: Array<ImportExceptionsListSchema | ImportExceptionListItemSchema>;
   maxExceptionsImportSize: number;
   overwrite: boolean;
 }
