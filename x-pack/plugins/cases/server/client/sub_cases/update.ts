@@ -37,7 +37,6 @@ import {
   CaseAttributes,
 } from '../../../common';
 import { getCaseToUpdate } from '../utils';
-import { buildSubCaseUserActions } from '../../services/user_actions/helpers';
 import {
   createAlertUpdateRequest,
   createCaseError,
@@ -384,14 +383,11 @@ export async function update({
       []
     );
 
-    await userActionService.bulkCreate({
+    await userActionService.bulkCreateBulkUpdateCaseUserActions({
       unsecuredSavedObjectsClient,
-      actions: buildSubCaseUserActions({
-        originalSubCases: bulkSubCases.saved_objects,
-        updatedSubCases: updatedCases.saved_objects,
-        actionDate: updatedAt,
-        actionBy: user,
-      }),
+      originalCases: bulkSubCases.saved_objects,
+      updatedCases: updatedCases.saved_objects,
+      user,
     });
 
     return SubCasesResponseRt.encode(returnUpdatedSubCases);

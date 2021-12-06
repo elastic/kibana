@@ -41,6 +41,7 @@ import {
   noneConnectorId,
   CaseExternalServiceBasic,
   CommentRequest,
+  SubCaseAttributes,
 } from '../../../common';
 import { ClientArgs } from '..';
 import {
@@ -100,8 +101,8 @@ interface GetUserActionItemByDifference extends CommonUserActionArgs {
 }
 
 interface BulkCreateBulkUpdateCaseUserActions extends ClientArgs {
-  originalCases: Array<SavedObject<CaseAttributes>>;
-  updatedCases: Array<SavedObjectsUpdateResponse<CaseAttributes>>;
+  originalCases: Array<SavedObject<CaseAttributes | SubCaseAttributes>>;
+  updatedCases: Array<SavedObjectsUpdateResponse<CaseAttributes | SubCaseAttributes>>;
   user: User;
 }
 
@@ -177,7 +178,6 @@ export class CaseUserActionService {
     owner,
     user,
   }: GetUserActionItemByDifference): UserActionItem[] {
-    // TODO: Validate if field is allowed. Maybe type it
     // TODO: Break into smaller functions
     // TODO: Type newValue
 
