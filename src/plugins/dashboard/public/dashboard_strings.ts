@@ -359,6 +359,14 @@ export const panelStorageErrorStrings = {
     }),
 };
 
+export const dashboardLoadingErrorStrings = {
+  getDashboardLoadError: (message: string) =>
+    i18n.translate('dashboard.panelStorageError.getError', {
+      defaultMessage: 'Error encountered while loading saved dashboard: {message}',
+      values: { message },
+    }),
+};
+
 /*
   Empty Screen
 */
