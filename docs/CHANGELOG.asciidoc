@@ -349,10 +349,10 @@ Management::
 Maps::
 * Adds support for UTM and MGRS coordinates in Maps "Go To" button {kibana-pull}107835[#107835]
 Observability::
-* APM-Fleet integration version check & upgrade message {kibana-pull}115297[#115297]
-* Enhancements errors list page {kibana-pull}115194[#115194]
+* Adds APM-Fleet integration version check and upgrade message {kibana-pull}115297[#115297]
+* Adds comparison to the error occurrences histogram and "failed transaction rate" to the chart panels {kibana-pull}115194[#115194]
 * Revert multi-metric ML job {kibana-pull}114961[#114961]
-* Alert creation and freeform selection {kibana-pull}111883[#111883]
+* Adds the ability to select any service name, transaction type, and environment when creating and editing rules, both in APM and Stack Management. {kibana-pull}111883[#111883]
 * Show new "no data screen" on the getting started page {kibana-pull}111803[#111803]
 * Consistent "no data" screen with other Observability solutions {kibana-pull}111630[#111630]
 * Set start date of APM ML job to -4 weeks {kibana-pull}111375[#111375]
@@ -371,7 +371,7 @@ Observability::
 * Make uptime settings saved object exportable {kibana-pull}114235[#114235]
 * Adds percentile ranks, show legend always, and fix field labels {kibana-pull}113765[#113765]
 * Adds exploratory view multi series {kibana-pull}113464[#113464]
-* Browser monitors - Zip Url - add TLS Options and Proxy Url {kibana-pull}112554[#112554]
+* Adds TLS options for browser monitors when zip url is selected {kibana-pull}112554[#112554]
 * Adds "Add to case" button {kibana-pull}112463[#112463]
 * Adds new advanced options {kibana-pull}112454[#112454]
 * Make all error messages on tables consistence {kibana-pull}111690[#111690]
