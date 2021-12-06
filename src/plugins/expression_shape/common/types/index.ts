@@ -5,5 +5,21 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-export * from './expression_functions';
-export * from './expression_renderers';
+
+export type {
+  Output,
+  ExpressionShapeFunction,
+  ProgressArguments,
+  ProgressOutput,
+  ExpressionProgressFunction,
+} from './expression_functions';
+export { Progress, Shape } from './expression_functions';
+
+export type {
+  OriginString,
+  ShapeRendererConfig,
+  NodeDimensions,
+  ParentNodeParams,
+  ViewBoxParams,
+  ProgressRendererConfig,
+} from './expression_renderers';

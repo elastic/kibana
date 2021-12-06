@@ -39,7 +39,6 @@ import * as Registry from '../registry';
 import { setPackageInfo, parseAndVerifyArchiveEntries, unpackBufferToCache } from '../archive';
 import { toAssetReference } from '../kibana/assets/install';
 import type { ArchiveAsset } from '../kibana/assets/install';
-import { installIndexPatterns } from '../kibana/index_pattern/install';
 
 import type { PackageUpdateEvent } from '../../upgrade_sender';
 import { sendTelemetryEvents, UpdateEventType } from '../../upgrade_sender';
@@ -303,10 +302,15 @@ async function installPackageFromRegistry({
       return { error: err, installType };
     }
 
+    const savedObjectsImporter = appContextService
+      .getSavedObjects()
+      .createImporter(savedObjectsClient);
+
     // try installing the package, if there was an error, call error handler and rethrow
     // @ts-expect-error status is string instead of InstallResult.status 'installed' | 'already_installed'
     return _installPackage({
       savedObjectsClient,
+      savedObjectsImporter,
       esClient,
       logger,
       installedPkg,
@@ -407,9 +411,15 @@ async function installPackageByUpload({
       version: packageInfo.version,
       packageInfo,
     });
+
+    const savedObjectsImporter = appContextService
+      .getSavedObjects()
+      .createImporter(savedObjectsClient);
+
     // @ts-expect-error status is string instead of InstallResult.status 'installed' | 'already_installed'
     return _installPackage({
       savedObjectsClient,
+      savedObjectsImporter,
       esClient,
       logger,
       installedPkg,
@@ -441,41 +451,25 @@ async function installPackageByUpload({
   }
 }
 
-export type InstallPackageParams = {
-  skipPostInstall?: boolean;
-} & (
+export type InstallPackageParams =
   | ({ installSource: Extract<InstallSource, 'registry'> } & InstallRegistryPackageParams)
-  | ({ installSource: Extract<InstallSource, 'upload'> } & InstallUploadedArchiveParams)
-);
+  | ({ installSource: Extract<InstallSource, 'upload'> } & InstallUploadedArchiveParams);
 
 export async function installPackage(args: InstallPackageParams) {
   if (!('installSource' in args)) {
     throw new Error('installSource is required');
   }
   const logger = appContextService.getLogger();
-  const { savedObjectsClient, esClient, skipPostInstall = false, installSource } = args;
+  const { savedObjectsClient, esClient } = args;
 
   if (args.installSource === 'registry') {
     const { pkgkey, force } = args;
-    const { pkgName, pkgVersion } = Registry.splitPkgKey(pkgkey);
     logger.debug(`kicking off install of ${pkgkey} from registry`);
     const response = installPackageFromRegistry({
       savedObjectsClient,
       pkgkey,
       esClient,
       force,
-    }).then(async (installResult) => {
-      if (skipPostInstall || installResult.error) {
-        return installResult;
-      }
-      logger.debug(`install of ${pkgkey} finished, running post-install`);
-      return installIndexPatterns({
-        savedObjectsClient,
-        esClient,
-        pkgName,
-        pkgVersion,
-        installSource,
-      }).then(() => installResult);
     });
     return response;
   } else if (args.installSource === 'upload') {
@@ -486,16 +480,6 @@ export async function installPackage(args: InstallPackageParams) {
       esClient,
       archiveBuffer,
       contentType,
-    }).then(async (installResult) => {
-      if (skipPostInstall || installResult.error) {
-        return installResult;
-      }
-      logger.debug(`install of uploaded package finished, running post-install`);
-      return installIndexPatterns({
-        savedObjectsClient,
-        esClient,
-        installSource,
-      }).then(() => installResult);
     });
     return response;
   }
