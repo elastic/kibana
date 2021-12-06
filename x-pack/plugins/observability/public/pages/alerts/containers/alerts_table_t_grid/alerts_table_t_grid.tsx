@@ -67,7 +67,6 @@ interface AlertsTableTGridProps {
   rangeFrom: string;
   rangeTo: string;
   kuery: string;
-  workflowStatus: AlertWorkflowStatus;
   setRefetch: (ref: () => void) => void;
 }
 
@@ -338,7 +337,6 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
             <ObservabilityActions
               {...actionProps}
               setEventsDeleted={setEventsDeleted}
-              // currentStatus={workflowStatus}
               setFlyoutAlert={setFlyoutAlert}
             />
           );
