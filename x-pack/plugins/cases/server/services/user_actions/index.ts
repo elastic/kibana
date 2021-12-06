@@ -108,7 +108,6 @@ interface BulkCreateBulkUpdateCaseUserActions extends ClientArgs {
 }
 
 interface CreateAttachmentUserAction extends CommonUserActionArgs {
-  // TODO: use enum
   action: 'create' | 'delete' | 'update';
   attachmentId: string;
   attachment: CommentRequest;
@@ -191,7 +190,7 @@ export class CaseUserActionService {
         {
           attributes: {
             ...this.getCommonUserActionAttributes({ user, owner }),
-            action: 'update',
+            action: Actions.update,
             fields: [field],
             payload: { [field]: newValue },
           },
@@ -207,7 +206,7 @@ export class CaseUserActionService {
         userActions.push({
           attributes: {
             ...this.getCommonUserActionAttributes({ user, owner }),
-            action: 'add',
+            action: Actions.add,
             fields: [field],
             payload: { [field]: compareValues.addedItems },
           },
@@ -219,7 +218,7 @@ export class CaseUserActionService {
         userActions.push({
           attributes: {
             ...this.getCommonUserActionAttributes({ user, owner }),
-            action: 'delete',
+            action: Actions.delete,
             fields: [field],
             payload: { [field]: compareValues.deletedItems },
           },
@@ -255,7 +254,7 @@ export class CaseUserActionService {
         {
           attributes: {
             ...this.getCommonUserActionAttributes({ user, owner }),
-            action: 'update',
+            action: Actions.update,
             fields: [field],
             payload,
           },
@@ -307,8 +306,7 @@ export class CaseUserActionService {
       this.log.debug(`Attempting to create a create case user action`);
       const userAction = {
         ...this.getCommonUserActionAttributes({ user, owner }),
-        // TODO: Take action from enum
-        action: [action],
+        action,
         fields: ['comment'],
         payload: { comment: attachment },
       };
@@ -343,7 +341,7 @@ export class CaseUserActionService {
       const userAction = {
         ...this.getCommonUserActionAttributes({ user, owner }),
         // TODO: Take action from enum
-        action: 'create',
+        action: Actions.create,
         fields: ['description', 'status', 'tags', 'title', 'connector', 'settings', OWNER_FIELD],
         payload: { ...payload, connector: connectorWithoutId, status: CaseStatuses.open },
       };
@@ -378,7 +376,7 @@ export class CaseUserActionService {
         {
           attributes: {
             ...this.getCommonUserActionAttributes({ user, owner: caseInfo.owner }),
-            action: 'delete',
+            action: Actions.delete,
             fields: [
               'description',
               'status',
@@ -417,7 +415,7 @@ export class CaseUserActionService {
         {
           attributes: {
             ...this.getCommonUserActionAttributes({ user, owner: caseInfo.owner }),
-            action: 'delete',
+            action: Actions.delete,
             fields: ['sub_case', 'comment', 'status'],
             payload: {},
           },
@@ -442,8 +440,7 @@ export class CaseUserActionService {
       this.log.debug(`Attempting to create a create case user action`);
       const userAction = {
         ...this.getCommonUserActionAttributes({ user, owner }),
-        // TODO: Take action from enum
-        action: 'update',
+        action: Actions.update,
         fields: ['status'],
         payload: { status },
       };
@@ -474,7 +471,6 @@ export class CaseUserActionService {
       this.log.debug(`Attempting to create a create case user action`);
       const userAction = {
         ...this.getCommonUserActionAttributes({ user, owner }),
-        // TODO: Take action from enum
         action: Actions.push_to_service,
         fields: ['pushed'],
         payload: { externalService: this.extractConnectorIdFromExternalService(externalService) },
@@ -509,9 +505,8 @@ export class CaseUserActionService {
     try {
       this.log.debug(`Attempting to create a create sub case user action`);
       const userAction = {
-        // TODO: Take action from enum
         ...this.getCommonUserActionAttributes({ user, owner }),
-        action: 'create',
+        action: Actions.create,
         fields: ['status', 'sub_case'],
         payload: { status },
       };
@@ -577,19 +572,19 @@ export class CaseUserActionService {
   public async createAttachmentCreationUserAction(
     args: Omit<CreateAttachmentUserAction, 'action'>
   ): Promise<void> {
-    return this.createAttachmentUserAction({ ...args, action: 'create' });
+    return this.createAttachmentUserAction({ ...args, action: Actions.create });
   }
 
   public async createAttachmentDeletionUserAction(
     args: Omit<CreateAttachmentUserAction, 'action'>
   ): Promise<void> {
-    return this.createAttachmentUserAction({ ...args, action: 'delete' });
+    return this.createAttachmentUserAction({ ...args, action: Actions.delete });
   }
 
   public async createAttachmentUpdateUserAction(
     args: Omit<CreateAttachmentUserAction, 'action'>
   ): Promise<void> {
-    return this.createAttachmentUserAction({ ...args, action: 'update' });
+    return this.createAttachmentUserAction({ ...args, action: Actions.update });
   }
 
   public async bulkCreateAttachmentDeletionUserAction({
@@ -606,8 +601,7 @@ export class CaseUserActionService {
         {
           attributes: {
             ...this.getCommonUserActionAttributes({ user, owner: attachment.owner }),
-            // TODO: Take action from enum
-            action: ['delete'],
+            action: Actions.delete,
             fields: ['comment'],
             payload: {},
           },
