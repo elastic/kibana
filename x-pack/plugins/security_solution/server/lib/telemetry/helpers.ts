@@ -16,7 +16,7 @@ import {
   LIST_ENDPOINT_EVENT_FILTER,
   LIST_TRUSTED_APPLICATION,
 } from './constants';
-import { TrustedApp } from '../../../common/endpoint/types';
+import { tagsToEffectScope } from '../../../common/endpoint/service/trusted_apps/mapping';
 
 /**
  * Determines the when the last run was in order to execute to.
@@ -97,18 +97,20 @@ export function isPackagePolicyList(
 /**
  * Maps trusted application to shared telemetry object
  *
- * @param exceptionListItem
+ * @param trustedAppExceptionItem
  * @returns collection of trusted applications
  */
-export const trustedApplicationToTelemetryEntry = (trustedApplication: TrustedApp) => {
+export const trustedApplicationToTelemetryEntry = (
+  trustedAppExceptionItem: ExceptionListItemSchema
+) => {
   return {
-    id: trustedApplication.id,
-    name: trustedApplication.name,
-    created_at: trustedApplication.created_at,
-    updated_at: trustedApplication.updated_at,
-    entries: trustedApplication.entries,
-    os_types: [trustedApplication.os],
-    scope: trustedApplication.effectScope,
+    id: trustedAppExceptionItem.id,
+    name: trustedAppExceptionItem.name,
+    created_at: trustedAppExceptionItem.created_at,
+    updated_at: trustedAppExceptionItem.updated_at,
+    entries: trustedAppExceptionItem.entries,
+    os_types: trustedAppExceptionItem.os_types,
+    scope: tagsToEffectScope(trustedAppExceptionItem.tags),
   } as ExceptionListItem;
 };
 
