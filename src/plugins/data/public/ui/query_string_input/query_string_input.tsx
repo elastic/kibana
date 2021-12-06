@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { createRef, PureComponent, RefObject } from 'react';
+import React, { PureComponent } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import classNames from 'classnames';
