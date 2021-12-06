@@ -52,7 +52,7 @@ export const buildEnrichments = ({
   queries.map((query) => {
     const matchedThreat = threats.find((threat) => threat._id === query.id);
     const indicatorValue = get(matchedThreat?._source, indicatorPath) as unknown;
-    const feedName = get(matchedThreat?._source, FEED_NAME_PATH) as unknown;
+    const feedName = (get(matchedThreat?._source, FEED_NAME_PATH) ?? '') as string;
     const indicator = ([indicatorValue].flat()[0] ?? {}) as Record<string, unknown>;
     if (!isObject(indicator)) {
       throw new Error(`Expected indicator field to be an object, but found: ${indicator}`);
