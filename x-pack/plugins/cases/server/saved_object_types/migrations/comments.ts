@@ -20,7 +20,7 @@ import {
   SavedObjectMigrationFn,
   SavedObjectMigrationMap,
 } from '../../../../../../src/core/server';
-import { CommentType, AssociationType } from '../../../common';
+import { CommentType, AssociationType } from '../../../common/api';
 import {
   isLensMarkdownNode,
   LensMarkdownNode,

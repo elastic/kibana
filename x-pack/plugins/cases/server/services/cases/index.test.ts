@@ -13,12 +13,8 @@
  * connector.id.
  */
 
-import {
-  CaseAttributes,
-  CaseConnector,
-  CaseFullExternalService,
-  CASE_SAVED_OBJECT,
-} from '../../../common';
+import { CaseAttributes, CaseConnector, CaseFullExternalService } from '../../../common/api';
+import { CASE_SAVED_OBJECT } from '../../../common/constants';
 import { savedObjectsClientMock } from '../../../../../../src/core/server/mocks';
 import {
   SavedObject,

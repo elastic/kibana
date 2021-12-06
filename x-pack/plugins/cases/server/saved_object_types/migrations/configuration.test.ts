@@ -7,11 +7,8 @@
 
 import { SavedObjectSanitizedDoc } from 'kibana/server';
 import { ACTION_SAVED_OBJECT_TYPE } from '../../../../actions/server';
-import {
-  CASE_CONFIGURE_SAVED_OBJECT,
-  ConnectorTypes,
-  SECURITY_SOLUTION_OWNER,
-} from '../../../common';
+import { ConnectorTypes } from '../../../common/api';
+import { CASE_CONFIGURE_SAVED_OBJECT, SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import { getNoneCaseConnector, CONNECTOR_ID_REFERENCE_NAME } from '../../common';
 import { ESCaseConnectorWithId } from '../../services/test_utils';
 import { ESCasesConfigureAttributes } from '../../services/configure/types';

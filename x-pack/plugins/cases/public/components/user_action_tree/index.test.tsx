@@ -22,7 +22,7 @@ import {
 } from '../../containers/mock';
 import { UserActionTree } from '.';
 import { TestProviders } from '../../common/mock';
-import { Ecs } from '../../../common';
+import { Ecs } from '../../../common/ui/types';
 
 const fetchUserActions = jest.fn();
 const onUpdateField = jest.fn();

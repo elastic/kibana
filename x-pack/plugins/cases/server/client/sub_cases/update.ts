@@ -19,12 +19,10 @@ import {
 import { nodeBuilder } from '@kbn/es-query';
 import { AlertService, CasesService } from '../../services';
 import {
-  CASE_COMMENT_SAVED_OBJECT,
   CaseStatuses,
   CommentAttributes,
   CommentType,
   excess,
-  SUB_CASE_SAVED_OBJECT,
   SubCaseAttributes,
   SubCasePatchRequest,
   SubCaseResponse,
@@ -35,7 +33,8 @@ import {
   throwErrors,
   User,
   CaseAttributes,
-} from '../../../common';
+} from '../../../common/api';
+import { CASE_COMMENT_SAVED_OBJECT, SUB_CASE_SAVED_OBJECT } from '../../../common/constants';
 import { getCaseToUpdate } from '../utils';
 import { buildSubCaseUserActions } from '../../services/user_actions/helpers';
 import {

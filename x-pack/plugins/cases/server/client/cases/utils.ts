@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { flow } from 'lodash';
+import { isPush } from '../../../common/utils/user_actions';
 import {
   ActionConnector,
   CaseFullExternalService,
@@ -21,8 +22,7 @@ import {
   CommentRequestAlertType,
   CommentRequestActionsType,
   CaseUserActionResponse,
-  isPush,
-} from '../../../common';
+} from '../../../common/api';
 import { ActionsClient } from '../../../../actions/server';
 import { CasesClientGetAlertsResponse } from '../../client/alerts/types';
 import {

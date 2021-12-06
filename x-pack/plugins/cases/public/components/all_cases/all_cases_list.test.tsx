@@ -20,7 +20,9 @@ import {
   connectorsMock,
 } from '../../containers/mock';
 
-import { CaseStatuses, CaseType, SECURITY_SOLUTION_OWNER, StatusAll } from '../../../common';
+import { StatusAll } from '../../../common/ui/types';
+import { CaseStatuses, CaseType } from '../../../common/api';
+import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import { getEmptyTagValue } from '../empty_value';
 import { useDeleteCases } from '../../containers/use_delete_cases';
 import { useGetCases } from '../../containers/use_get_cases';

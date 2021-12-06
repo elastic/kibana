@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { CaseStatuses, StatusAll } from '../../../common';
+import { StatusAll } from '../../../common/ui/types';
+import { CaseStatuses } from '../../../common/api';
 import * as i18n from './translations';
 import { AllCaseStatus, Statuses } from './types';
 

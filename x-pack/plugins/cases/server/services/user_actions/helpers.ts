@@ -10,17 +10,19 @@ import { get, isPlainObject, isString } from 'lodash';
 import deepEqual from 'fast-deep-equal';
 
 import {
-  CASE_COMMENT_SAVED_OBJECT,
-  CASE_SAVED_OBJECT,
   CaseUserActionAttributes,
-  OWNER_FIELD,
-  SUB_CASE_SAVED_OBJECT,
   SubCaseAttributes,
   User,
   UserAction,
   UserActionField,
   CaseAttributes,
-} from '../../../common';
+  OWNER_FIELD,
+} from '../../../common/api';
+import {
+  CASE_COMMENT_SAVED_OBJECT,
+  CASE_SAVED_OBJECT,
+  SUB_CASE_SAVED_OBJECT,
+} from '../../../common/constants';
 import { isTwoArraysDifference } from '../../client/utils';
 import { UserActionItem } from '.';
 import { extractConnectorId } from './transform';

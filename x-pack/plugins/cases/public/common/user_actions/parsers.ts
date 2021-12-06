@@ -12,7 +12,7 @@ import {
   noneConnectorId,
   CaseFullExternalService,
   CaseUserActionExternalServiceRt,
-} from '../../../common';
+} from '../../../common/api';
 
 export const parseStringAsConnector = (
   id: string | null,

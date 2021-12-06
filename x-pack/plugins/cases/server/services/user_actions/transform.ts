@@ -11,16 +11,14 @@ import * as rt from 'io-ts';
 import { isString } from 'lodash';
 
 import { SavedObjectReference } from '../../../../../../src/core/server';
+import { isCreateConnector, isPush, isUpdateConnector } from '../../../common/utils/user_actions';
 import {
   CaseAttributes,
   CaseConnector,
   CaseConnectorRt,
   CaseExternalServiceBasicRt,
-  isCreateConnector,
-  isPush,
-  isUpdateConnector,
   noneConnectorId,
-} from '../../../common';
+} from '../../../common/api';
 import {
   CONNECTOR_ID_REFERENCE_NAME,
   getNoneCaseConnector,

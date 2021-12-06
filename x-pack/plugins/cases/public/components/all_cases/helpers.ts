@@ -6,7 +6,7 @@
  */
 
 import { filter } from 'lodash/fp';
-import { AssociationType, CaseStatuses, CaseType } from '../../../common';
+import { AssociationType, CaseStatuses, CaseType } from '../../../common/api';
 import { Case, SubCase } from '../../containers/types';
 import { statuses } from '../status';
 

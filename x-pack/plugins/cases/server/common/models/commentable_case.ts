@@ -17,7 +17,6 @@ import {
 import { LensServerPluginSetup } from '../../../../lens/server';
 import {
   AssociationType,
-  CASE_SAVED_OBJECT,
   CaseResponse,
   CaseResponseRt,
   CaseSettings,
@@ -27,13 +26,16 @@ import {
   CommentPatchRequest,
   CommentRequest,
   CommentType,
-  MAX_DOCS_PER_PAGE,
-  SUB_CASE_SAVED_OBJECT,
   SubCaseAttributes,
   User,
   CommentRequestUserType,
   CaseAttributes,
-} from '../../../common';
+} from '../../../common/api';
+import {
+  CASE_SAVED_OBJECT,
+  MAX_DOCS_PER_PAGE,
+  SUB_CASE_SAVED_OBJECT,
+} from '../../../common/constants';
 import { flattenCommentSavedObjects, flattenSubCaseSavedObject, transformNewComment } from '..';
 import { AttachmentService, CasesService } from '../../services';
 import { createCaseError } from '../error';

@@ -7,7 +7,8 @@
 
 import React, { useState, useEffect } from 'react';
 import { merge } from 'lodash';
-import { CasesContextValue, DEFAULT_FEATURES } from '../../../common';
+import { CasesContextValue } from '../../../common/ui/types';
+import { DEFAULT_FEATURES } from '../../../common/constants';
 import { DEFAULT_BASE_PATH } from '../../common/navigation';
 import { useApplication } from './use_application';
 

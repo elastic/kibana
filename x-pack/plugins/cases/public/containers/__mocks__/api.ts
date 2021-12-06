@@ -28,14 +28,14 @@ import {
   respReporters,
   tags,
 } from '../mock';
+import { ResolvedCase } from '../../../common/ui/types';
 import {
   CasePatchRequest,
   CasePostRequest,
   CommentRequest,
   User,
   CaseStatuses,
-  ResolvedCase,
-} from '../../../common';
+} from '../../../common/api';
 
 export const getCase = async (
   caseId: string,

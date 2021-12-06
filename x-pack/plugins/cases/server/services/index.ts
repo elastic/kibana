@@ -6,7 +6,7 @@
  */
 
 import { SavedObjectsClientContract } from 'kibana/server';
-import { ConnectorTypes } from '../../common';
+import { ConnectorTypes } from '../../common/api';
 
 export { CasesService } from './cases';
 export { CaseConfigureService } from './configure';

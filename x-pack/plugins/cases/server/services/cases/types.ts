@@ -6,7 +6,7 @@
  */
 
 import * as rt from 'io-ts';
-import { CaseAttributes, CaseExternalServiceBasicRt } from '../../../common';
+import { CaseAttributes, CaseExternalServiceBasicRt } from '../../../common/api';
 import { ESCaseConnector } from '..';
 
 /**

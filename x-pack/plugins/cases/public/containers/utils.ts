@@ -32,7 +32,7 @@ import {
   CasePatchRequest,
   CaseResolveResponse,
   CaseResolveResponseRt,
-} from '../../common';
+} from '../../common/api';
 import { AllCases, Case, UpdateByKey } from './types';
 import * as i18n from './translations';
 

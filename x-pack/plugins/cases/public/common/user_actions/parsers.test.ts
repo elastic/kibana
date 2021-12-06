@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ConnectorTypes, noneConnectorId } from '../../../common';
+import { ConnectorTypes, noneConnectorId } from '../../../common/api';
 import { parseStringAsConnector, parseStringAsExternalService } from './parsers';
 
 describe('user actions utility functions', () => {

@@ -19,7 +19,8 @@ import {
   getCaseClosedInfo,
 } from './helpers';
 import * as i18n from './translations';
-import { Case, CaseConnector, ActionConnector, CaseStatuses } from '../../../common';
+import { Case } from '../../../common/ui/types';
+import { CaseConnector, ActionConnector, CaseStatuses } from '../../../common/api';
 import { CaseServices } from '../../containers/use_get_case_user_actions';
 import { ErrorMessage } from './callout/types';
 

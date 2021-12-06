@@ -7,7 +7,8 @@
 
 import React from 'react';
 import { renderHook, act } from '@testing-library/react-hooks';
-import { CaseStatuses, SECURITY_SOLUTION_OWNER } from '../../common';
+import { CaseStatuses } from '../../common/api';
+import { SECURITY_SOLUTION_OWNER } from '../../common/constants';
 import {
   DEFAULT_FILTER_OPTIONS,
   DEFAULT_QUERY_PARAMS,

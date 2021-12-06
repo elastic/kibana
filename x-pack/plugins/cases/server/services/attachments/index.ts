@@ -15,13 +15,15 @@ import {
 import type { KueryNode } from '@kbn/es-query';
 import {
   AttributesTypeAlerts,
-  CASE_COMMENT_SAVED_OBJECT,
   CommentAttributes as AttachmentAttributes,
   CommentPatchAttributes as AttachmentPatchAttributes,
+  CommentType,
+} from '../../../common/api';
+import {
+  CASE_COMMENT_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
   MAX_DOCS_PER_PAGE,
-  CommentType,
-} from '../../../common';
+} from '../../../common/constants';
 import { ClientArgs } from '..';
 import { buildFilter, combineFilters } from '../../client/utils';
 

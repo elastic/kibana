@@ -10,7 +10,7 @@ import { isEmpty } from 'lodash';
 import { EuiText, EuiLoadingSpinner } from '@elastic/eui';
 
 import * as i18n from './translations';
-import { CommentType } from '../../../common';
+import { CommentType } from '../../../common/api';
 import { LinkAnchor } from '../links';
 import { RuleDetailsNavigation } from './helpers';
 

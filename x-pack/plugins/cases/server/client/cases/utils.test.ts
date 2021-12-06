@@ -32,7 +32,7 @@ import {
   transformFields,
 } from './utils';
 import { flattenCaseSavedObject } from '../../common';
-import { SECURITY_SOLUTION_OWNER } from '../../../common';
+import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import { casesConnectors } from '../../connectors';
 
 const formatComment = {

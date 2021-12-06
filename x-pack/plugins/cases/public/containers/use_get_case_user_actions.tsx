@@ -9,13 +9,8 @@ import { isEmpty, uniqBy } from 'lodash/fp';
 import { useCallback, useEffect, useState, useRef } from 'react';
 import deepEqual from 'fast-deep-equal';
 
-import {
-  CaseFullExternalService,
-  CaseConnector,
-  CaseExternalService,
-  CaseUserActions,
-  ElasticUser,
-} from '../../common';
+import { ElasticUser, CaseUserActions, CaseExternalService } from '../../common/ui/types';
+import { CaseFullExternalService, CaseConnector } from '../../common/api';
 import { getCaseUserActions, getSubCaseUserActions } from './api';
 import * as i18n from './translations';
 import { convertToCamelCase } from './utils';

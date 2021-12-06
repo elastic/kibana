@@ -18,9 +18,9 @@ import {
   CommentResponseRt,
   CommentsResponse,
   CommentsResponseRt,
-  ENABLE_CASE_CONNECTOR,
   FindQueryParams,
-} from '../../../common';
+} from '../../../common/api';
+import { ENABLE_CASE_CONNECTOR } from '../../../common/constants';
 import {
   createCaseError,
   checkEnabledCaseConnectorOrThrow,

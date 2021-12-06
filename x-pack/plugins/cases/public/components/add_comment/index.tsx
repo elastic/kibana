@@ -17,7 +17,7 @@ import { EuiButton, EuiFlexItem, EuiFlexGroup, EuiLoadingSpinner } from '@elasti
 import styled from 'styled-components';
 import { isEmpty } from 'lodash';
 
-import { CommentType } from '../../../common';
+import { CommentType } from '../../../common/api';
 import { usePostComment } from '../../containers/use_post_comment';
 import { Case } from '../../containers/types';
 import { EuiMarkdownEditorRef, MarkdownEditorForm } from '../markdown_editor';

@@ -10,7 +10,7 @@ import styled, { createGlobalStyle } from 'styled-components';
 import { EuiFlyout, EuiFlyoutHeader, EuiTitle, EuiFlyoutBody } from '@elastic/eui';
 
 import * as i18n from '../translations';
-import { Case } from '../../../../common';
+import { Case } from '../../../../common/ui/types';
 import { CreateCaseForm } from '../form';
 
 export interface CreateCaseFlyoutProps {

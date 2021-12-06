@@ -16,7 +16,7 @@ import { useGetReporters } from '../../containers/use_get_reporters';
 import { useGetActionLicense } from '../../containers/use_get_action_license';
 import { useConnectors } from '../../containers/configure/use_connectors';
 import { useKibana } from '../../common/lib/kibana';
-import { CaseStatuses } from '../../../common';
+import { CaseStatuses } from '../../../common/api';
 import { casesStatus, connectorsMock, useGetCasesMockState } from '../../containers/mock';
 import { registerConnectorsToMockActionRegistry } from '../../common/mock/register_connectors';
 import { useGetCases } from '../../containers/use_get_cases';

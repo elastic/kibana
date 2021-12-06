@@ -6,7 +6,7 @@
  */
 
 import { getCaseMetrics } from './get_case_metrics';
-import { CaseAttributes, CaseResponse } from '../../../common';
+import { CaseAttributes, CaseResponse } from '../../../common/api';
 import { createCasesClientMock } from '../mocks';
 import { CasesClientArgs } from '../types';
 import { createAuthorizationMock } from '../../authorization/mock';

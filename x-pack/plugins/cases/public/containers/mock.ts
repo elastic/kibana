@@ -7,6 +7,8 @@
 
 import { ActionLicense, AllCases, Case, CasesStatus, CaseUserActions, Comment } from './types';
 
+import { isCreateConnector, isPush, isUpdateConnector } from '../../common/utils/user_actions';
+import { ResolvedCase } from '../../common/ui/types';
 import {
   AssociationType,
   CaseUserActionConnector,
@@ -20,14 +22,10 @@ import {
   CommentResponse,
   CommentType,
   ConnectorTypes,
-  ResolvedCase,
-  isCreateConnector,
-  isPush,
-  isUpdateConnector,
-  SECURITY_SOLUTION_OWNER,
   UserAction,
   UserActionField,
-} from '../../common';
+} from '../../common/api';
+import { SECURITY_SOLUTION_OWNER } from '../../common/constants';
 import { UseGetCasesState, DEFAULT_FILTER_OPTIONS, DEFAULT_QUERY_PARAMS } from './use_get_cases';
 export { connectorsMock } from './configure/mock';
 

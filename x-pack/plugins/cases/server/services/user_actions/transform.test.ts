@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { noneConnectorId } from '../../../common';
+import { noneConnectorId } from '../../../common/api';
 import {
   CONNECTOR_ID_REFERENCE_NAME,
   getNoneCaseConnector,
