@@ -15,7 +15,7 @@ import { SavedVisState, VisSavedObject } from '../../types';
 import {
   extractSearchSourceReferences,
   injectSearchSourceReferences,
-  SearchSourceFields,
+  SerializedSearchSourceFields,
 } from '../../../../data/public';
 
 import { extractTimeSeriesReferences, injectTimeSeriesReferences } from './timeseries_references';
@@ -33,7 +33,7 @@ export function extractReferences({
 
   if (updatedAttributes.searchSourceFields) {
     const [searchSource, searchSourceReferences] = extractSearchSourceReferences(
-      updatedAttributes.searchSourceFields as SearchSourceFields
+      updatedAttributes.searchSourceFields as SerializedSearchSourceFields
     );
     updatedAttributes.searchSourceFields = searchSource as SavedObjectAttribute;
     searchSourceReferences.forEach((r) => updatedReferences.push(r));

@@ -22,7 +22,7 @@ import {
   MANAGEMENT_STORE_HOST_ISOLATION_EXCEPTIONS_NAMESPACE,
 } from '../../../common/constants';
 import { getHostIsolationExceptionsListPath } from '../../../common/routing';
-import { parsePoliciesAndFilterToKql, parseQueryFilterToKQL } from '../../../common/utils';
+import { parseQueryFilterToKQL } from '../../../common/utils';
 import {
   getHostIsolationExceptionItems,
   getHostIsolationExceptionSummary,
@@ -126,7 +126,7 @@ export function useGetHostIsolationExceptionFormEntry({
 }: {
   id?: string;
   onSuccess: (data: CreateExceptionListItemSchema | UpdateExceptionListItemSchema) => void;
-  onError: (error: ServerApiError) => void;
+  onError?: (error: ServerApiError) => void;
 }): QueryObserverResult {
   const http = useHttp();
   return useQuery<UpdateExceptionListItemSchema | CreateExceptionListItemSchema, ServerApiError>(

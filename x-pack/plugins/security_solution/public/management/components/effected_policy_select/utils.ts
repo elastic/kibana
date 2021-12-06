@@ -10,17 +10,39 @@ import { EffectedPolicySelection } from './effected_policy_select';
 
 export const GLOBAL_POLICY_TAG = 'policy:all';
 
-export function getArtifactTagsByEffectedPolicySelection(
-  selection: EffectedPolicySelection
-): string[] {
-  if (selection.isGlobal) {
-    return [GLOBAL_POLICY_TAG];
-  }
-  return selection.selected.map((policy) => {
-    return `policy:${policy.id}`;
-  });
+/**
+ * Given a list of artifact tags, returns the tags that are not policy tags
+ * policy tags follow the format: `policy:id`
+ */
+export function getArtifactTagsWithoutPolicies(tags?: string[]): string[] {
+  return tags?.filter((tag) => !tag.startsWith('policy:')) || [];
 }
 
+/**
+ * Return a list of artifact policy tags based on a current
+ * selection by the EffectedPolicySelection component.
+ */
+export function getArtifactTagsByEffectedPolicySelection(
+  selection: EffectedPolicySelection,
+  otherTags: string[] = []
+): string[] {
+  if (selection.isGlobal) {
+    return [GLOBAL_POLICY_TAG, ...otherTags];
+  }
+  const newTags = selection.selected.map((policy) => {
+    return `policy:${policy.id}`;
+  });
+
+  return newTags.concat(otherTags);
+}
+
+/**
+ * Given a list of an Exception item tags it will return
+ * the parsed policies from it.
+ *
+ * Policy tags follow the pattern `policy:id`
+ * non policy tags will be ignored.
+ */
 export function getEffectedPolicySelectionByTags(
   tags: string[],
   policies: PolicyData[]

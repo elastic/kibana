@@ -29,6 +29,7 @@ import {
 } from '../../../../components/effected_policy_select';
 import {
   getArtifactTagsByEffectedPolicySelection,
+  getArtifactTagsWithoutPolicies,
   getEffectedPolicySelectionByTags,
   isGlobalPolicyEffected,
 } from '../../../../components/effected_policy_select/utils';
@@ -65,9 +66,8 @@ export const HostIsolationExceptionsForm: React.FC<{
   const [hasNameError, setHasNameError] = useState(!exception.name);
   const [hasIpError, setHasIpError] = useState(!ipEntry.value);
 
-  const [isGlobal, setIsGlobal] = useState(isGlobalPolicyEffected(exception.tags));
   const [selectedPolicies, setSelectedPolicies] = useState<EffectedPolicySelection>({
-    isGlobal,
+    isGlobal: isGlobalPolicyEffected(exception.tags),
     selected: [],
   });
 
@@ -119,17 +119,21 @@ export const HostIsolationExceptionsForm: React.FC<{
 
   const handlePolicySelectChange: EffectedPolicySelectProps['onChange'] = useCallback(
     (selection) => {
-      setIsGlobal(selection.isGlobal);
-
       // preseve the previous selection between global and not global toggle
-      if (!selection.isGlobal) {
-        setSelectedPolicies(() => selection);
+      if (selection.isGlobal) {
+        setSelectedPolicies({ isGlobal: true, selected: selection.selected });
+      } else {
+        setSelectedPolicies(selection);
       }
+
       onChange({
-        tags: getArtifactTagsByEffectedPolicySelection(selection),
+        tags: getArtifactTagsByEffectedPolicySelection(
+          selection,
+          getArtifactTagsWithoutPolicies(exception.tags)
+        ),
       });
     },
-    [onChange]
+    [exception.tags, onChange]
   );
 
   const handleOnDescriptionChange = useCallback(
@@ -245,9 +249,9 @@ export const HostIsolationExceptionsForm: React.FC<{
       <EuiSpacer size="m" />
       {ipInput}
       <EuiHorizontalRule />
-      <EuiFormRow data-test-subj={'effectedPolicies-container'}>
+      <EuiFormRow fullWidth={true} data-test-subj={'effectedPolicies-container'}>
         <EffectedPolicySelect
-          isGlobal={isGlobal}
+          isGlobal={selectedPolicies.isGlobal}
           isPlatinumPlus={true}
           selected={selectedPolicies.selected}
           options={policies}

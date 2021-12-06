@@ -13,7 +13,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { Immutable } from '../../../../../common/endpoint/types';
 import { ExceptionItem } from '../../../../common/components/exceptions/viewer/exception_item';
-import { useEndpointPrivileges } from '../../../../common/components/user_privileges/endpoint';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { useToasts } from '../../../../common/lib/kibana';
 import {
   MANAGEMENT_DEFAULT_PAGE_SIZE,
@@ -48,7 +48,7 @@ type HostIsolationExceptionPaginatedContent = PaginatedContentProps<
 
 export const HostIsolationExceptionsList = () => {
   const history = useHistory();
-  const privileges = useEndpointPrivileges();
+  const privileges = useUserPrivileges().endpointPrivileges;
 
   const location = useHostIsolationExceptionsSelector(getCurrentLocation);
   const navigateCallback = useHostIsolationExceptionsNavigateCallback();
