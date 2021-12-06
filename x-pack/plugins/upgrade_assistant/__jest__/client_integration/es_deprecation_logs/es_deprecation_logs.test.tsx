@@ -212,7 +212,11 @@ describe('ES deprecation logs', () => {
         DEPRECATION_LOGS_ORIGIN_FIELD,
         ...APPS_WITH_DEPRECATION_LOGS,
       ].forEach((param) => {
-        expect(decodedUrl).toContain(param);
+        try {
+          expect(decodedUrl).toContain(param);
+        } catch (e) {
+          throw new Error(`Expected [${param}] not found in ${decodedUrl}`);
+        }
       });
     });
   });
