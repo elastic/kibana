@@ -169,7 +169,7 @@ const NO_DATA_AVAILABLE = i18n.translate('xpack.observability.expView.seriesEdit
 
 const NO_PERMISSIONS = i18n.translate('xpack.observability.expView.seriesEditor.noPermissions', {
   defaultMessage:
-    "Unable to create Index Pattern. You don't have the required permission, please contact your admin.",
+    "Unable to create Data View. You don't have the required permission, please contact your admin.",
 });
 
 const REPORT_METRIC_TOOLTIP = i18n.translate(
