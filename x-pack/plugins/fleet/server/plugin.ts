@@ -371,8 +371,10 @@ export class FleetPlugin
 
     const fleetSetupPromise = (async () => {
       try {
+        // Fleet remains `available` during setup as to excessively delay Kibana's boot process.
+        // This should be reevaluated as Fleet's setup process is optimized and stabilized.
         this.fleetStatus$.next({
-          level: ServiceStatusLevels.degraded,
+          level: ServiceStatusLevels.available,
           summary: 'Fleet is setting up',
         });
 
