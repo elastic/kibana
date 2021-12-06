@@ -36,6 +36,10 @@ const { ES_KEY_PATH, ES_CERT_PATH } = require('@kbn/dev-utils');
         res.end(JSON.stringify(body));
       };
 
+      if (url.pathname === '/_cluster/health') {
+        return send(200, {}, { 'x-elastic-product': 'Elasticsearch' });
+      }
+
       // ES client's Product check request: it checks some fields in the body and the header
       if (url.pathname === '/') {
         return send(
@@ -69,6 +73,7 @@ const { ES_KEY_PATH, ES_CERT_PATH } = require('@kbn/dev-utils');
         });
       }
 
+      console.log('UNHANDLED ES_BIN MOCK PATH', url.pathname);
       return send(404, {
         error: {
           reason: 'not found',
@@ -101,5 +106,7 @@ const { ES_KEY_PATH, ES_CERT_PATH } = require('@kbn/dev-utils');
     );
 
     console.log('started');
+
+    console.log('license [some-uuid] mode [basic] - valid');
   });
 })();

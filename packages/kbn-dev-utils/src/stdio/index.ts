@@ -7,4 +7,4 @@
  */
 
 export * from './observe_lines';
-export * from './observe_readable';
+export * from './observe_chunks';

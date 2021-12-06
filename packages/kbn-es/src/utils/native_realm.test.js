@@ -8,11 +8,7 @@
 
 const { NativeRealm } = require('./native_realm');
 
-jest.genMockFromModule('@elastic/elasticsearch');
-jest.mock('@elastic/elasticsearch');
-
 const { ToolingLog } = require('@kbn/dev-utils');
-const { Client } = require('@elastic/elasticsearch');
 
 const mockClient = {
   xpack: {
@@ -23,13 +19,12 @@ const mockClient = {
     getUser: jest.fn(),
   },
 };
-Client.mockImplementation(() => mockClient);
 
 const log = new ToolingLog();
 let nativeRealm;
 
 beforeEach(() => {
-  nativeRealm = new NativeRealm({ elasticPassword: 'changeme', port: '9200', log });
+  nativeRealm = new NativeRealm({ elasticPassword: 'changeme', client: mockClient, log });
 });
 
 afterAll(() => {

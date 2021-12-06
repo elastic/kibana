@@ -6,19 +6,13 @@
  * Side Public License, v 1.
  */
 
-const { Client } = require('@elastic/elasticsearch');
 const chalk = require('chalk');
 
 const { log: defaultLog } = require('./log');
 
 exports.NativeRealm = class NativeRealm {
-  constructor({ elasticPassword, port, log = defaultLog, ssl = false, caCert }) {
-    const auth = { username: 'elastic', password: elasticPassword };
-    this._client = new Client(
-      ssl
-        ? { node: `https://localhost:${port}`, tls: { ca: caCert, rejectUnauthorized: true }, auth }
-        : { node: `http://localhost:${port}`, auth }
-    );
+  constructor({ elasticPassword, client, log = defaultLog }) {
+    this._client = client;
     this._elasticPassword = elasticPassword;
     this._log = log;
   }

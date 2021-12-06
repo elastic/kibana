@@ -58794,15 +58794,15 @@ Object.keys(_observe_lines).forEach(function (key) {
   });
 });
 
-var _observe_readable = __webpack_require__(526);
+var _observe_chunks = __webpack_require__(526);
 
-Object.keys(_observe_readable).forEach(function (key) {
+Object.keys(_observe_chunks).forEach(function (key) {
   if (key === "default" || key === "__esModule") return;
-  if (key in exports && exports[key] === _observe_readable[key]) return;
+  if (key in exports && exports[key] === _observe_chunks[key]) return;
   Object.defineProperty(exports, key, {
     enumerable: true,
     get: function () {
-      return _observe_readable[key];
+      return _observe_chunks[key];
     }
   });
 });
@@ -58817,13 +58817,14 @@ Object.keys(_observe_readable).forEach(function (key) {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports.chunksToLines = chunksToLines;
 exports.observeLines = observeLines;
 
 var Rx = _interopRequireWildcard(__webpack_require__(9));
 
 var _operators = __webpack_require__(426);
 
-var _observe_readable = __webpack_require__(526);
+var _observe_chunks = __webpack_require__(526);
 
 function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "function") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function (nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
 
@@ -58848,41 +58849,45 @@ const SEP = /\r?\n/;
  *  @return {Rx.Observable}
  */
 function observeLines(readable) {
-  const done$ = (0, _observe_readable.observeReadable)(readable).pipe((0, _operators.share)());
-  const scan$ = Rx.fromEvent(readable, 'data').pipe((0, _operators.scan)(({
-    buffer
-  }, chunk) => {
-    buffer += chunk;
-    const lines = [];
+  return (0, _observe_chunks.observeChunks)(readable).pipe(chunksToLines());
+}
 
-    while (true) {
-      const match = buffer.match(SEP);
+function chunksToLines() {
+  return chunk$ => {
+    const scan$ = chunk$.pipe((0, _operators.scan)(({
+      buffer
+    }, chunk) => {
+      buffer += chunk;
+      const lines = [];
 
-      if (!match || match.index === undefined) {
-        break;
+      while (true) {
+        const match = buffer.match(SEP);
+
+        if (!match || match.index === undefined) {
+          break;
+        }
+
+        lines.push(buffer.slice(0, match.index));
+        buffer = buffer.slice(match.index + match[0].length);
       }
 
-      lines.push(buffer.slice(0, match.index));
-      buffer = buffer.slice(match.index + match[0].length);
-    }
-
-    return {
-      buffer,
+      return {
+        buffer,
+        lines
+      };
+    }, {
+      buffer: '',
+      lines: []
+    }), (0, _operators.share)());
+    return Rx.merge( // merge in the "lines" from each step
+    scan$.pipe((0, _operators.mergeMap)(({
       lines
-    };
-  }, {
-    buffer: ''
-  }), // stop if done completes or errors
-  (0, _operators.takeUntil)(done$.pipe((0, _operators.materialize)())), (0, _operators.share)());
-  return Rx.merge( // use done$ to provide completion/errors
-  done$, // merge in the "lines" from each step
-  scan$.pipe((0, _operators.mergeMap)(({
-    lines
-  }) => lines || [])), // inject the "unsplit" data at the end
-  scan$.pipe((0, _operators.last)(), (0, _operators.mergeMap)(({
-    buffer
-  }) => buffer ? [buffer] : []), // if there were no lines, last() will error, so catch and complete
-  (0, _operators.catchError)(() => Rx.empty())));
+    }) => lines || [])), // inject the "unsplit" data at the end
+    scan$.pipe((0, _operators.last)(), (0, _operators.mergeMap)(({
+      buffer
+    }) => buffer ? [buffer] : []), // if there were no lines, last() will error, so catch and complete
+    (0, _operators.catchError)(() => Rx.EMPTY)));
+  };
 }
 
 /***/ }),
@@ -58895,11 +58900,9 @@ function observeLines(readable) {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.observeReadable = observeReadable;
+exports.observeChunks = observeChunks;
 
 var Rx = _interopRequireWildcard(__webpack_require__(9));
-
-var _operators = __webpack_require__(426);
 
 function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "function") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function (nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
 
@@ -58912,14 +58915,27 @@ function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && 
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+function observeChunks(readable) {
+  return new Rx.Observable(subscriber => {
+    subscriber.add(Rx.fromEvent(readable, 'data').subscribe({
+      next(chunk) {
+        subscriber.next(chunk);
+      }
 
-/**
- *  Produces an Observable from a ReadableSteam that:
- *   - completes on the first "end" event
- *   - fails on the first "error" event
- */
-function observeReadable(readable) {
-  return Rx.race(Rx.fromEvent(readable, 'end').pipe((0, _operators.first)(), (0, _operators.ignoreElements)()), Rx.fromEvent(readable, 'error').pipe((0, _operators.first)(), (0, _operators.mergeMap)(err => Rx.throwError(err))));
+    }));
+    subscriber.add(Rx.fromEvent(readable, 'error').subscribe({
+      next(error) {
+        subscriber.error(error);
+      }
+
+    }));
+    subscriber.add(Rx.fromEvent(readable, 'end').subscribe({
+      next() {
+        subscriber.complete();
+      }
+
+    }));
+  });
 }
 
 /***/ }),
