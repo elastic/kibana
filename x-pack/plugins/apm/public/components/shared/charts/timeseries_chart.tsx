@@ -63,6 +63,8 @@ import { getFailedTransactionsCorrelationImpactLabel } from '../../../components
 import { ImpactBar } from '../impact_bar';
 import { createHref, push } from '../Links/url_helpers';
 
+import { MlBrush } from './brush';
+
 interface Props {
   id: string;
   fetchStatus: FETCH_STATUS;
@@ -364,6 +366,7 @@ export function TimeseriesChart({
 
   const chart = (
     <>
+      {windowParameters && <MlBrush data={[1, 2, 3]} />}
       <ChartContainer
         hasData={!isEmpty}
         height={height}

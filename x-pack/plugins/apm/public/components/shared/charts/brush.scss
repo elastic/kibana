@@ -1,0 +1,18 @@
+.ml-brush {
+  .grid-background {
+    fill: #eee;
+  }
+
+  .grid line,
+  .grid path {
+    fill: none;
+    stroke: #000;
+    shape-rendering: crispEdges;
+  }
+
+
+  .brush .selection {
+    stroke: #000;
+    fill: red;
+  }
+}
