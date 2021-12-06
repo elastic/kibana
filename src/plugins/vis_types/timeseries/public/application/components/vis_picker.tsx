@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { EuiTabs, EuiTab, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiTabs, EuiTab } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { PANEL_TYPES } from '../../../common/enums';
 import { TimeseriesVisParams } from '../../types';
@@ -53,21 +53,17 @@ interface VisPickerProps {
 
 export const VisPicker = ({ onChange, currentVisType }: VisPickerProps) => {
   return (
-    <EuiFlexGroup justifyContent="spaceBetween">
-      <EuiFlexItem grow={false}>
-        <EuiTabs size="l">
-          {tabs.map(({ label, type }) => (
-            <EuiTab
-              key={type}
-              isSelected={type === currentVisType}
-              onClick={() => onChange({ type })}
-              data-test-subj={`${type}TsvbTypeBtn`}
-            >
-              {label}
-            </EuiTab>
-          ))}
-        </EuiTabs>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <EuiTabs size="l">
+      {tabs.map(({ label, type }) => (
+        <EuiTab
+          key={type}
+          isSelected={type === currentVisType}
+          onClick={() => onChange({ type })}
+          data-test-subj={`${type}TsvbTypeBtn`}
+        >
+          {label}
+        </EuiTab>
+      ))}
+    </EuiTabs>
   );
 };
