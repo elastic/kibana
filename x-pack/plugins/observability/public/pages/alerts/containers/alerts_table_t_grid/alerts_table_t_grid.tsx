@@ -45,7 +45,6 @@ import type { TopAlert } from '../alerts_page/alerts_page';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import type {
   ActionProps,
-  AlertWorkflowStatus,
   ColumnHeaderOptions,
   ControlColumnProps,
   RowRenderer,
