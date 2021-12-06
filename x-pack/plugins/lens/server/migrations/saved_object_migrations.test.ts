@@ -15,8 +15,6 @@ import {
 import { LensDocShape715, VisState716, VisStatePost715, VisStatePre715 } from './types';
 import { CustomPaletteParams, layerTypes } from '../../common';
 import { PaletteOutput } from 'src/plugins/charts/common';
-import { Filter } from '@kbn/es-query';
-import { getLensFilterMigrations } from './common_migrations';
 
 describe('Lens migrations', () => {
   describe('7.7.0 missing dimensions in XY', () => {

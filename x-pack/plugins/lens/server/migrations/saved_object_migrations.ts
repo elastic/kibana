@@ -5,21 +5,18 @@
  * 2.0.
  */
 
-import { cloneDeep } from 'lodash';
+import { cloneDeep, mergeWith } from 'lodash';
 import { fromExpression, toExpression, Ast, ExpressionFunctionAST } from '@kbn/interpreter/common';
 import {
   SavedObjectMigrationMap,
   SavedObjectMigrationFn,
   SavedObjectReference,
   SavedObjectUnsanitizedDoc,
+  SavedObjectMigrationContext,
 } from 'src/core/server';
 import { Filter } from '@kbn/es-query';
 import { Query } from 'src/plugins/data/public';
 import { getAllMigrations } from '../../../../../src/plugins/data/common';
-import {
-  mergeMigrationFunctionMaps,
-  MigrateFunctionsObject,
-} from '../../../../../src/plugins/kibana_utils/common';
 import { PersistableFilter } from '../../common';
 import {
   LensDocShapePost712,
@@ -469,7 +466,22 @@ const lensMigrations: SavedObjectMigrationMap = {
   '8.1.0': renameFilterReferences,
 };
 
-export const migrations = mergeMigrationFunctionMaps(
-  lensMigrations as MigrateFunctionsObject,
+export const mergeSavedObjectMigrationMaps = (
+  obj1: SavedObjectMigrationMap,
+  obj2: SavedObjectMigrationMap
+): SavedObjectMigrationMap => {
+  const customizer = (objValue: SavedObjectMigrationFn, srcValue: SavedObjectMigrationFn) => {
+    if (!srcValue || !objValue) {
+      return srcValue || objValue;
+    }
+    return (state: SavedObjectUnsanitizedDoc, context: SavedObjectMigrationContext) =>
+      objValue(srcValue(state, context), context);
+  };
+
+  return mergeWith({ ...obj1 }, obj2, customizer);
+};
+
+export const migrations = mergeSavedObjectMigrationMaps(
+  lensMigrations,
   getLensFilterMigrations(getAllMigrations())
 );
