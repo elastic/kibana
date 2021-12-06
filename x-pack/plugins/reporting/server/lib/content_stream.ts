@@ -253,7 +253,6 @@ export class ContentStream extends Duplex {
 
   private async flush(size = this.bytesBuffered) {
     const buffersToFlush: Buffer[] = [];
-    let partiallyFlushedBuffer: undefined | Buffer;
     let bytesToFlush = 0;
 
     /*
