@@ -176,7 +176,7 @@ export const ControlGroup = () => {
                     <EuiButtonIcon
                       aria-label={ControlGroupStrings.management.getManageButtonTitle()}
                       iconType="gear"
-                      color="subdued"
+                      color="text"
                       data-test-subj="controls-sorting-button"
                       onClick={() => {
                         const flyoutInstance = openFlyout(
