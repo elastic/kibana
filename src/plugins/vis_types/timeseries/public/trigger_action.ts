@@ -5,48 +5,17 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { PaletteOutput } from '../../../../../../charts/public';
-import type { Query } from '../../../../../../data/public';
-import {
-  fetchIndexPattern,
-  isStringTypeIndexPattern,
-} from '../../../../common/index_patterns_utils';
-import type { Panel } from '../../../../common/types';
-import { getDataStart } from '../../../services';
+import { PaletteOutput } from '../../../charts/public';
+import type { NavigateToLensOptions, LayersSettings } from '../../../visualizations/public';
+import { fetchIndexPattern, isStringTypeIndexPattern } from '../common/index_patterns_utils';
+import type { Panel } from '../common/types';
+import { PANEL_TYPES } from '../common/enums';
+import { getDataStart } from './services';
 
 interface AggOptions {
   name: string;
   isFullReference: boolean;
   params?: any;
-}
-// duplicate interfaces, we should decide where to store them in order to be
-// used both by Lens and TSVB
-interface SplitFilters {
-  color?: string;
-  filter?: Query;
-  id?: string;
-  label?: string;
-}
-
-interface Metric {
-  agg: string;
-  fieldName: string;
-  params?: Record<string, unknown>;
-  isFullReference: boolean;
-  color?: string;
-}
-
-interface LayersSettings {
-  indexPatternId: string;
-  timeFieldName?: string;
-  chartType?: string;
-  termsParams?: Record<string, unknown>;
-  splitField?: string;
-  splitMode?: string;
-  splitFilters?: SplitFilters[];
-  palette?: PaletteOutput;
-  metrics: Metric[];
-  timeInterval?: string;
 }
 
 const LENS_METRIC_TYPES: { [key: string]: AggOptions } = {
@@ -84,7 +53,13 @@ const LENS_METRIC_TYPES: { [key: string]: AggOptions } = {
   },
 };
 
-export const triggerVisualizeToLensActions = async (model: Panel) => {
+export const triggerVisualizeToLensActions = async (
+  model: Panel
+): Promise<NavigateToLensOptions | null> => {
+  // For now we will hide the option for not timeseries charts
+  if (model.type !== PANEL_TYPES.TIMESERIES) {
+    return null;
+  }
   const { dataViews } = getDataStart();
   const options: { [key: string]: LayersSettings } = {};
   // handle multiple layers/series

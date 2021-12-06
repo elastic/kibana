@@ -9,7 +9,14 @@
 import type { IconType } from '@elastic/eui';
 import type { ReactNode } from 'react';
 import type { Adapters } from 'src/plugins/inspector';
-import type { IndexPattern, AggGroupNames, AggParam, AggGroupName } from '../../../data/public';
+import type {
+  IndexPattern,
+  AggGroupNames,
+  AggParam,
+  AggGroupName,
+  Query,
+} from '../../../data/public';
+import { PaletteOutput } from '../../../charts/public';
 import type { Vis, VisEditorOptionsProps, VisParams, VisToExpressionAst } from '../types';
 import { VisGroups } from './vis_groups_enum';
 
@@ -67,6 +74,54 @@ interface CustomEditorConfig {
   editor: string;
 }
 
+interface SplitFilters {
+  color?: string;
+  filter?: Query;
+  id?: string;
+  label?: string;
+}
+
+interface Metric {
+  agg: string;
+  fieldName: string;
+  params?: Record<string, unknown>;
+  isFullReference: boolean;
+  color?: string;
+}
+
+export interface LayersSettings {
+  indexPatternId: string;
+  timeFieldName?: string;
+  chartType?: string;
+  termsParams?: Record<string, unknown>;
+  splitField?: string;
+  splitMode?: string;
+  splitFilters?: SplitFilters[];
+  palette?: PaletteOutput;
+  metrics: Metric[];
+  timeInterval?: string;
+}
+
+export interface NavigateToLensOptions {
+  layers: {
+    [key: string]: LayersSettings;
+  };
+  configuration: {
+    fill: number | string;
+    legend: {
+      isVisible: boolean;
+      position: string;
+      shouldTruncate: boolean;
+      maxLines: number;
+    };
+    gridLinesVisibility: {
+      x: boolean;
+      yLeft: boolean;
+      yRight: boolean;
+    };
+  };
+}
+
 /**
  * A visualization type definition representing a spec of one specific type of "classical"
  * visualizations (i.e. not Lens visualizations).
@@ -95,7 +150,9 @@ export interface VisTypeDefinition<TVisParams> {
   /**
    * If given, it will navigateToLens with the given viz params.
    */
-  readonly navigateToLens?: (params?: VisParams) => VisParams | undefined;
+  readonly navigateToLens?: (
+    params?: VisParams
+  ) => Promise<NavigateToLensOptions | null> | undefined;
 
   /**
    * Some visualizations are created without SearchSource and may change the used indexes during the visualization configuration.

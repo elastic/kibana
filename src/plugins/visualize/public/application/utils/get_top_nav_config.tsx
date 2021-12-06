@@ -18,7 +18,7 @@ import {
   VISUALIZE_EMBEDDABLE_TYPE,
   VisualizeInput,
   getFullPath,
-  VisParams,
+  NavigateToLensOptions,
 } from '../../../../visualizations/public';
 import {
   showSaveModal,
@@ -65,7 +65,8 @@ export interface TopNavConfigParams {
   visualizationIdFromUrl?: string;
   stateTransfer: EmbeddableStateTransfer;
   embeddableId?: string;
-  editInLensOptions?: VisParams;
+  editInLensOptions?: NavigateToLensOptions | null;
+  displayEditInLensItem: boolean;
 }
 
 const SavedObjectSaveModalDashboard = withSuspense(LazySavedObjectSaveModalDashboard);
@@ -93,6 +94,7 @@ export const getTopNavConfig = (
     stateTransfer,
     embeddableId,
     editInLensOptions,
+    displayEditInLensItem,
   }: TopNavConfigParams,
   {
     data,
@@ -271,7 +273,7 @@ export const getTopNavConfig = (
     (allowByValue && !showSaveAndReturn && dashboardCapabilities.showWriteControls);
 
   const topNavMenu: TopNavMenuData[] = [
-    ...(editInLensOptions
+    ...(displayEditInLensItem
       ? [
           {
             id: 'goToLens',
@@ -282,9 +284,12 @@ export const getTopNavConfig = (
             description: i18n.translate('visualize.topNavMenu.goToLensButtonAriaLabel', {
               defaultMessage: 'Go to Lens with your current configuration',
             }),
+            disableButton: !editInLensOptions,
             testId: 'visualizeEditInLensButton',
             run: async () => {
-              getUiActions().getTrigger(VISUALIZE_EDITOR_TRIGGER).exec(editInLensOptions);
+              if (editInLensOptions) {
+                getUiActions().getTrigger(VISUALIZE_EDITOR_TRIGGER).exec(editInLensOptions);
+              }
             },
           },
         ]

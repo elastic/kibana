@@ -6,26 +6,11 @@
  * Side Public License, v 1.
  */
 
-import React, { useState } from 'react';
-import {
-  EuiTabs,
-  EuiTab,
-  EuiButton,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiModal,
-  EuiModalBody,
-  EuiModalFooter,
-  EuiModalHeader,
-  EuiModalHeaderTitle,
-} from '@elastic/eui';
+import React from 'react';
+import { EuiTabs, EuiTab, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-// import { VISUALIZE_EDITOR_TRIGGER } from '../../../../../ui_actions/public';
 import { PANEL_TYPES } from '../../../common/enums';
-import type { Panel } from '../../../common/types';
 import { TimeseriesVisParams } from '../../types';
-// import { getUiActions } from '../../services';
-// import { triggerVisualizeToLensActions } from './lib/trigger_action';
 
 const tabs = [
   {
@@ -64,53 +49,9 @@ const tabs = [
 interface VisPickerProps {
   onChange: (partialModel: Partial<TimeseriesVisParams>) => void;
   currentVisType: TimeseriesVisParams['type'];
-  model: Panel;
 }
 
-export const VisPicker = ({ onChange, currentVisType, model }: VisPickerProps) => {
-  const [isModalVisible, setIsModalVisible] = useState(false);
-  const closeModal = () => setIsModalVisible(false);
-  // const showModal = () => setIsModalVisible(true);
-
-  // const onConvert = useCallback(async () => {
-  //   const triggerOptions = await triggerVisualizeToLensActions(model);
-  //   if (triggerOptions) {
-  //     getUiActions().getTrigger(VISUALIZE_EDITOR_TRIGGER).exec(triggerOptions);
-  //   } else {
-  //     showModal();
-  //   }
-  // }, [model]);
-
-  let modal;
-
-  if (isModalVisible) {
-    modal = (
-      <EuiModal onClose={closeModal}>
-        <EuiModalHeader>
-          <EuiModalHeaderTitle>
-            <h1>
-              {i18n.translate('visTypeTimeseries.visPicker.convertToLensModalTitle', {
-                defaultMessage: 'Ooops',
-              })}
-            </h1>
-          </EuiModalHeaderTitle>
-        </EuiModalHeader>
-
-        <EuiModalBody>
-          {i18n.translate('visTypeTimeseries.visPicker.convertToLensModalBody', {
-            defaultMessage: 'This feature is not supported yet it Lens, try another setup.',
-          })}
-        </EuiModalBody>
-
-        <EuiModalFooter>
-          <EuiButton onClick={closeModal} fill>
-            Close
-          </EuiButton>
-        </EuiModalFooter>
-      </EuiModal>
-    );
-  }
-
+export const VisPicker = ({ onChange, currentVisType }: VisPickerProps) => {
   return (
     <EuiFlexGroup justifyContent="spaceBetween">
       <EuiFlexItem grow={false}>
@@ -127,19 +68,6 @@ export const VisPicker = ({ onChange, currentVisType, model }: VisPickerProps) =
           ))}
         </EuiTabs>
       </EuiFlexItem>
-      {/* <EuiFlexItem grow={false}>
-        <EuiButton
-          fill
-          color="accent"
-          onClick={async () => await onConvert()}
-          disabled={currentVisType !== PANEL_TYPES.TIMESERIES}
-        >
-          {i18n.translate('visTypeTimeseries.visPicker.convertToLensLabel', {
-            defaultMessage: 'Try our new UI',
-          })}
-        </EuiButton>
-        {modal}
-      </EuiFlexItem> */}
     </EuiFlexGroup>
   );
 };

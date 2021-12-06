@@ -20,7 +20,7 @@ import {
 import { APP_NAME } from '../visualize_constants';
 import { getTopNavConfig } from '../utils';
 import type { IndexPattern } from '../../../../data/public';
-import { VisParams } from '../../../../visualizations/common';
+import type { NavigateToLensOptions } from '../../../../visualizations/public';
 
 interface VisualizeTopNavProps {
   currentAppState: VisualizeAppState;
@@ -60,7 +60,7 @@ const TopNav = ({
   const { setHeaderActionMenu, visualizeCapabilities } = services;
   const { embeddableHandler, vis } = visInstance;
   const [inspectorSession, setInspectorSession] = useState<OverlayRef>();
-  const [editInLensOptions, setEditInLensOptions] = useState<VisParams>();
+  const [editInLensOptions, setEditInLensOptions] = useState<NavigateToLensOptions | null>();
   const openInspector = useCallback(() => {
     const session = embeddableHandler.openInspector();
     setInspectorSession(session);
@@ -86,9 +86,7 @@ const TopNav = ({
     const asyncGetTriggerOptions = async () => {
       if (vis.type.navigateToLens) {
         const triggerOptions = await vis.type.navigateToLens(vis.params);
-        if (triggerOptions) {
-          setEditInLensOptions(triggerOptions);
-        }
+        setEditInLensOptions(triggerOptions);
       }
     };
     asyncGetTriggerOptions();
@@ -111,6 +109,7 @@ const TopNav = ({
           stateTransfer: services.stateTransferService,
           embeddableId,
           editInLensOptions,
+          displayEditInLensItem: Boolean(vis.type.navigateToLens),
         },
         services
       );
@@ -130,6 +129,7 @@ const TopNav = ({
     services,
     embeddableId,
     editInLensOptions,
+    vis.type.navigateToLens,
   ]);
   const [indexPatterns, setIndexPatterns] = useState<IndexPattern[]>(
     vis.data.indexPattern ? [vis.data.indexPattern] : []
