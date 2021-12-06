@@ -39,6 +39,9 @@ interface GaugeVisualizationDeps {
 export const isNumericMetric = (op: OperationMetadata) =>
   !op.isBucketed && op.dataType === 'number';
 
+export const isNumericDynamicMetric = (op: OperationMetadata) =>
+  isNumericMetric(op) && !op.isStaticValue;
+
 export const CHART_NAMES = {
   horizontalBullet: {
     icon: LensIconChartGaugeHorizontal,
@@ -214,8 +217,7 @@ export const getGaugeVisualization = ({
                     },
               ]
             : [],
-          filterOperations: (op: OperationMetadata) =>
-            !op.isBucketed && op.dataType === 'number' && !op.isStaticValue,
+          filterOperations: isNumericDynamicMetric,
           supportsMoreColumns: !state.metricAccessor,
           required: true,
           dataTestSubj: 'lnsGauge_metricDimensionPanel',

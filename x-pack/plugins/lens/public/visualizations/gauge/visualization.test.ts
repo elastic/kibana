@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getGaugeVisualization, isNumericMetric } from './visualization';
+import { getGaugeVisualization, isNumericDynamicMetric, isNumericMetric } from './visualization';
 import { createMockDatasource, createMockFramePublicAPI } from '../../mocks';
 import { GROUP_ID } from './constants';
 import type { DatasourcePublicAPI, Operation } from '../../types';
@@ -95,7 +95,7 @@ describe('gauge', () => {
             groupId: GROUP_ID.METRIC,
             groupLabel: 'Metric',
             accessors: [{ columnId: 'metric-accessor', triggerIcon: 'none' }],
-            filterOperations: isNumericMetric,
+            filterOperations: isNumericDynamicMetric,
             supportsMoreColumns: false,
             required: true,
             dataTestSubj: 'lnsGauge_metricDimensionPanel',
@@ -161,7 +161,7 @@ describe('gauge', () => {
             groupId: GROUP_ID.METRIC,
             groupLabel: 'Metric',
             accessors: [],
-            filterOperations: isNumericMetric,
+            filterOperations: isNumericDynamicMetric,
             supportsMoreColumns: true,
             required: true,
             dataTestSubj: 'lnsGauge_metricDimensionPanel',
@@ -233,7 +233,7 @@ describe('gauge', () => {
             groupId: GROUP_ID.METRIC,
             groupLabel: 'Metric',
             accessors: [{ columnId: 'metric-accessor', triggerIcon: 'none' }],
-            filterOperations: isNumericMetric,
+            filterOperations: isNumericDynamicMetric,
             supportsMoreColumns: false,
             required: true,
             dataTestSubj: 'lnsGauge_metricDimensionPanel',
