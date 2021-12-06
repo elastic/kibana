@@ -18,7 +18,7 @@ import {
   caseStatuses,
   CasesFindResponseRt,
   excess,
-} from '../../../common';
+} from '../../../common/api';
 
 import { createCaseError, transformCases } from '../../common';
 import { constructQueryOptions } from '../utils';
