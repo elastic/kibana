@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import type { FormEvent } from 'react';
 
 import { useValues, useActions } from 'kea';
@@ -63,6 +63,11 @@ export const GitHubViaApp: React.FC<GithubViaAppProps> = ({ isGithubEnterpriseSe
     e.preventDefault();
     createContentSource(isGithubEnterpriseServer);
   };
+
+  // Default indexPermissions to true, if needed
+  useEffect(() => {
+    setSourceIndexPermissionsValue(isOrganization && hasPlatinumLicense);
+  }, []);
 
   return (
     <Layout pageChrome={[NAV.SOURCES, NAV.ADD_SOURCE, name || '...']} isLoading={false}>
