@@ -333,7 +333,7 @@ describe('getFiltersByFilterExpressions', () => {
   it('returns filters with group if ungrouped is true and groups are not empty at selectFilter expression', () => {
     const filtersExprs = getFiltersAsts([kibanaExpr, selectFilterExprWithGroupAndUngrouped]);
     const matchedFilters = getFiltersByFilterExpressions(filters, filtersExprs);
-    expect(matchedFilters).toEqual([filters[1], filters[3]]);
+    expect(matchedFilters).toEqual([filters[1], filters[2], filters[3]]);
   });
 
   it('returns no filters if no arguments, specified to removeFilter expression', () => {
