@@ -17,7 +17,7 @@ describe('getInstallCommandForPlatform', () => {
       );
 
       expect(res).toMatchInlineSnapshot(`
-        "sudo ./elastic-agent install   \\\\
+        "sudo ./elastic-agent install  \\\\
           --fleet-server-es=http://elasticsearch:9200 \\\\
           --fleet-server-service-token=service-token-1"
       `);
@@ -31,7 +31,7 @@ describe('getInstallCommandForPlatform', () => {
       );
 
       expect(res).toMatchInlineSnapshot(`
-        ".\\\\elastic-agent.exe install   \`
+        ".\\\\elastic-agent.exe install  \`
           --fleet-server-es=http://elasticsearch:9200 \`
           --fleet-server-service-token=service-token-1"
       `);
@@ -45,7 +45,7 @@ describe('getInstallCommandForPlatform', () => {
       );
 
       expect(res).toMatchInlineSnapshot(`
-        "sudo elastic-agent enroll   \\\\
+        "sudo elastic-agent enroll  \\\\
           --fleet-server-es=http://elasticsearch:9200 \\\\
           --fleet-server-service-token=service-token-1"
       `);
@@ -62,7 +62,7 @@ describe('getInstallCommandForPlatform', () => {
       );
 
       expect(res).toMatchInlineSnapshot(`
-        "sudo ./elastic-agent install   \\\\
+        "sudo ./elastic-agent install  \\\\
           --fleet-server-es=http://elasticsearch:9200 \\\\
           --fleet-server-service-token=service-token-1 \\\\
           --fleet-server-policy=policy-1"
@@ -78,7 +78,7 @@ describe('getInstallCommandForPlatform', () => {
       );
 
       expect(res).toMatchInlineSnapshot(`
-        ".\\\\elastic-agent.exe install   \`
+        ".\\\\elastic-agent.exe install  \`
           --fleet-server-es=http://elasticsearch:9200 \`
           --fleet-server-service-token=service-token-1 \`
           --fleet-server-policy=policy-1"
@@ -94,7 +94,7 @@ describe('getInstallCommandForPlatform', () => {
       );
 
       expect(res).toMatchInlineSnapshot(`
-        "sudo elastic-agent enroll   \\\\
+        "sudo elastic-agent enroll  \\\\
           --fleet-server-es=http://elasticsearch:9200 \\\\
           --fleet-server-service-token=service-token-1 \\\\
           --fleet-server-policy=policy-1"
@@ -178,7 +178,7 @@ describe('getInstallCommandForPlatform', () => {
     );
 
     expect(res).toMatchInlineSnapshot(`
-      "sudo elastic-agent enroll   \\\\
+      "sudo elastic-agent enroll  \\\\
         --fleet-server-es=http://elasticsearch:9200 \\\\
         --fleet-server-service-token=service-token-1"
     `);

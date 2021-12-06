@@ -38,7 +38,9 @@ interface FleetOutputConfig {
   is_default_monitoring: boolean;
   type: 'elasticsearch';
   hosts: string[];
-  ca_sha256: string;
+  config: {
+    'ssl.ca_trusted_fingerprint': string;
+  };
 }
 
 export class KibanaConfigWriter {
@@ -187,7 +189,8 @@ export class KibanaConfigWriter {
    */
   private static getFleetDefaultOutputConfig(caCert: string, host: string): FleetOutputConfig[] {
     const cert = new X509Certificate(caCert);
-    const certFingerprint = cert.fingerprint256;
+    // fingerprint256 is a ":" separated uppercase hexadecimal string
+    const certFingerprint = cert.fingerprint256.split(':').join('').toLowerCase();
 
     return [
       {
@@ -197,7 +200,9 @@ export class KibanaConfigWriter {
         is_default_monitoring: true,
         type: 'elasticsearch',
         hosts: [host],
-        ca_sha256: certFingerprint,
+        config: {
+          'ssl.ca_trusted_fingerprint': certFingerprint,
+        },
       },
     ];
   }
