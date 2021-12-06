@@ -9,9 +9,9 @@ import { SavedObjectReference, SavedObjectsFindResponse } from 'kibana/server';
 import {
   CaseUserActionsResponse,
   CaseUserActionsResponseRt,
-  SUB_CASE_SAVED_OBJECT,
   CaseUserActionResponse,
-} from '../../../common';
+} from '../../../common/api';
+import { SUB_CASE_SAVED_OBJECT } from '../../../common/constants';
 import { createCaseError, checkEnabledCaseConnectorOrThrow, SUB_CASE_REF_NAME } from '../../common';
 import { CasesClientArgs } from '..';
 import { Operations } from '../../authorization';

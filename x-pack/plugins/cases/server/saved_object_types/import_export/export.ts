@@ -12,15 +12,14 @@ import {
   SavedObjectsClientContract,
   SavedObjectsExportTransformContext,
 } from 'kibana/server';
+import { CaseUserActionAttributes, CommentAttributes } from '../../../common/api';
 import {
-  CaseUserActionAttributes,
   CASE_COMMENT_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
   CASE_USER_ACTION_SAVED_OBJECT,
-  CommentAttributes,
   MAX_DOCS_PER_PAGE,
   SAVED_OBJECT_TYPES,
-} from '../../../common';
+} from '../../../common/constants';
 import { createCaseError, defaultSortField } from '../../common';
 import { ESCaseAttributes } from '../../services/cases/types';
 
