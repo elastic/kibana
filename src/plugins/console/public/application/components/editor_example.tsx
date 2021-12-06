@@ -8,8 +8,10 @@
 
 import { EuiScreenReaderOnly } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useEffect } from 'react';
-import { createReadOnlyAceEditor } from '../models/legacy_core_editor';
+import React, { useEffect, useRef } from 'react';
+import * as senseEditor from '../models/sense_editor';
+// @ts-ignore
+import * as InputMode from '../models/legacy_core_editor/mode/input';
 
 interface EditorExampleProps {
   panel: string;
@@ -30,16 +32,27 @@ export function EditorExample(props: EditorExampleProps) {
   const elemId = `help-example-${props.panel}`;
   const inputId = `help-example-${props.panel}-input`;
 
+  const editorRef = useRef<HTMLDivElement | null>(null);
+  const editorInstanceRef = useRef<senseEditor.CustomAceEditor | null>(null);
+
   useEffect(() => {
-    const el = document.getElementById(elemId)!;
-    el.textContent = exampleText.trim();
-    const editor = createReadOnlyAceEditor(el);
-    const textarea = el.querySelector('textarea')!;
-    textarea.setAttribute('id', inputId);
-    textarea.setAttribute('readonly', 'true');
+    editorInstanceRef.current = senseEditor.createReadOnlyAceEditor(editorRef.current!);
+    const editor = editorInstanceRef.current;
+    const textareaElement = editorRef.current!.querySelector('textarea');
+    editor.update(exampleText.trim());
+    editor.session.setMode(new InputMode.Mode());
+    editor.session.setUseWorker(false);
+    editor.setHighlightActiveLine(false);
+
+    if (textareaElement) {
+      textareaElement.setAttribute('id', inputId);
+      textareaElement.setAttribute('readonly', 'true');
+    }
 
     return () => {
-      editor.destroy();
+      if (editorInstanceRef.current) {
+        editorInstanceRef.current.destroy();
+      }
     };
   }, [elemId, inputId]);
 
@@ -52,7 +65,7 @@ export function EditorExample(props: EditorExampleProps) {
           })}
         </label>
       </EuiScreenReaderOnly>
-      <div id={elemId} className="conHelp__example" />
+      <div id={elemId} ref={editorRef} className="conHelp__example" />
     </>
   );
 }
