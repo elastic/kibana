@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { METRIC_TYPE } from '@kbn/analytics';
 import {
   EuiPanel,
@@ -101,6 +101,14 @@ const PieOptions = (props: PieOptionsProps) => {
     fetchPalettes();
   }, [props.palettes]);
 
+  const handleDonutInnerAreaSizeChange = useCallback(
+    (sizeId) => {
+      const donutInnerAreaSize = donutInnerAreaSizeOptions.find(({ id }) => id === sizeId)?.value;
+      setValue('donutInnerAreaSize', donutInnerAreaSize);
+    },
+    [setValue]
+  );
+
   return (
     <>
       <EuiPanel paddingSize="s">
@@ -132,14 +140,9 @@ const PieOptions = (props: PieOptionsProps) => {
               idSelected={
                 donutInnerAreaSizeOptions.find(
                   ({ value }) => value === stateParams.donutInnerAreaSize
-                )?.id || 'donutInnerAreaSizeOption-medium'
+                )?.id ?? 'donutInnerAreaSizeOption-medium'
               }
-              onChange={(sizeId) => {
-                const donutInnerAreaSize = donutInnerAreaSizeOptions.find(
-                  ({ id }) => id === sizeId
-                )?.value;
-                setValue('donutInnerAreaSize', donutInnerAreaSize);
-              }}
+              onChange={handleDonutInnerAreaSizeChange}
             />
           </EuiFormRow>
         )}

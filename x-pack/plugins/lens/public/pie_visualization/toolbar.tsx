@@ -53,7 +53,7 @@ const legendOptions: Array<{
   },
 ];
 
-const donutInnerAreaSizeLabel = i18n.translate('xpack.lens.pieChart.donutInnerAreaSizeLabel', {
+const innerAreaSizeLabel = i18n.translate('xpack.lens.pieChart.innerAreaSizeLabel', {
   defaultMessage: 'Inner area size',
 });
 
@@ -66,7 +66,7 @@ export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationStat
   const {
     categoryOptions,
     numberOptions,
-    donutInnerAreaSizeOptions,
+    innerAreaSizeOptions,
     isDisabled: isToolbarPopoverDisabled,
   } = PartitionChartsMeta[state.shape].toolbarPopover;
 
@@ -146,7 +146,7 @@ export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationStat
           />
         </EuiFormRow>
       </ToolbarPopover>
-      {donutInnerAreaSizeOptions.length ? (
+      {innerAreaSizeOptions.length ? (
         <ToolbarPopover
           title={i18n.translate('xpack.lens.pieChart.visualOptionsLabel', {
             defaultMessage: 'Visual options',
@@ -155,19 +155,19 @@ export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationStat
           groupPosition="center"
           buttonDataTestSubj="lnsVisualOptionsButton"
         >
-          <EuiFormRow label={donutInnerAreaSizeLabel} display="columnCompressed" fullWidth>
+          <EuiFormRow label={innerAreaSizeLabel} display="columnCompressed" fullWidth>
             <EuiButtonGroup
               isFullWidth
               name="donutInnerAreaSize"
               buttonSize="compressed"
-              legend={donutInnerAreaSizeLabel}
-              options={donutInnerAreaSizeOptions}
+              legend={innerAreaSizeLabel}
+              options={innerAreaSizeOptions}
               idSelected={
-                donutInnerAreaSizeOptions.find(({ value }) => value === layer.donutInnerAreaSize)
-                  ?.id || 'donutInnerAreaSizeOption-medium'
+                innerAreaSizeOptions.find(({ value }) => value === layer.donutInnerAreaSize)?.id ??
+                'innerAreaSizeOption-medium'
               }
               onChange={(sizeId) => {
-                const donutInnerAreaSize = donutInnerAreaSizeOptions.find(
+                const donutInnerAreaSize = innerAreaSizeOptions.find(
                   ({ id }) => id === sizeId
                 )?.value;
                 setState({ ...state, layers: [{ ...layer, donutInnerAreaSize }] });
