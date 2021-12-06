@@ -33,7 +33,6 @@ import {
 import { getMetadataForEndpoints } from '../../services';
 import { EndpointAppContext } from '../../types';
 import { APP_ID } from '../../../../common/constants';
-import { userCanIsolate } from '../../../../common/endpoint/actions';
 import { doLogsEndpointActionDsExists } from '../../utils';
 
 /**
@@ -100,24 +99,19 @@ export const isolationRequestHandler = function (
   SecuritySolutionRequestHandlerContext
 > {
   return async (context, req, res) => {
-    // only allow admin users
-    const user = endpointContext.service.security?.authc.getCurrentUser(req);
-    if (!userCanIsolate(user?.roles)) {
+    const { canIsolateHost, canUnIsolateHost } = context.securitySolution.endpointAuthz;
+
+    // Ensure user has authorization to use this api
+    if ((!canIsolateHost && isolate) || (!canUnIsolateHost && !isolate)) {
       return res.forbidden({
         body: {
-          message: 'You do not have permission to perform this action',
+          message:
+            'You do not have permission to perform this action or license level does not allow for this action',
         },
       });
     }
 
-    // isolation requires plat+
-    if (isolate && !endpointContext.service.getLicenseService()?.isPlatinumPlus()) {
-      return res.forbidden({
-        body: {
-          message: 'Your license level does not allow for this action',
-        },
-      });
-    }
+    const user = endpointContext.service.security?.authc.getCurrentUser(req);
 
     // fetch the Agent IDs to send the commands to
     const endpointIDs = [...new Set(req.body.endpoint_ids)]; // dedupe
