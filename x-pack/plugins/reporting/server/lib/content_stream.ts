@@ -253,6 +253,7 @@ export class ContentStream extends Duplex {
 
   private async flush(size = this.bytesBuffered) {
     const buffersToFlush: Buffer[] = [];
+    let partiallyFlushedBuffer: undefined | Buffer;
     let totalBytesConsumed = 0;
 
     /*
@@ -272,12 +273,26 @@ export class ContentStream extends Duplex {
      need this code to be as performant as possible.
     */
     for (const buffer of this.buffers) {
-      if (totalBytesConsumed + buffer.byteLength <= size) {
-        buffersToFlush.push(buffer);
-        totalBytesConsumed += buffer.byteLength;
-      } else {
+      const remainder = size - totalBytesConsumed;
+      if (remainder <= 0) {
         break;
       }
+      const chunkedBuffer = remainder > 0 ? buffer.slice(0, remainder) : buffer;
+
+      buffersToFlush.push(chunkedBuffer);
+      totalBytesConsumed += chunkedBuffer.byteLength;
+
+      // Do we add a partial buffer? Take cache the rest and stop looping.
+      if (buffer.byteLength > remainder) {
+        partiallyFlushedBuffer = buffer.slice(remainder);
+        break;
+      }
+    }
+
+    if (buffersToFlush.length === 0) {
+      throw new Error(
+        `Unable to add buffers to flush. Try increasing your http.max_content_length in elasticsearch.yml or using the cluster settings API.`
+      );
     }
 
     // We call Buffer.concat with the fewest number of buffers
@@ -297,14 +312,17 @@ export class ContentStream extends Duplex {
 
     this.bytesWritten += chunk.byteLength;
 
-    this.buffers = this.buffers.slice(buffersToFlush.length - 1);
+    this.buffers = partiallyFlushedBuffer
+      ? [partiallyFlushedBuffer, ...this.buffers.slice(buffersToFlush.length)]
+      : this.buffers.slice(buffersToFlush.length - 1);
+
     this.bytesBuffered -= totalBytesConsumed;
   }
 
   private async flushAllFullChunks() {
     const maxChunkSize = await this.getMaxChunkSize();
 
-    while (this.bytesBuffered >= maxChunkSize) {
+    while (this.bytesBuffered >= maxChunkSize && this.buffers.length) {
       await this.flush(maxChunkSize);
     }
   }
