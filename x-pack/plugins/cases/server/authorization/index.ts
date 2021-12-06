@@ -186,10 +186,10 @@ const ConfigurationOperations = {
 };
 
 const AttachmentOperations = {
-  [ReadOperations.CountAlertsAttachedToCase]: {
+  [ReadOperations.GetAttachmentMetrics]: {
     ecsType: EVENT_TYPES.access,
     name: ACCESS_COMMENT_OPERATION,
-    action: 'case_comment_count_alerts_attach_to_case',
+    action: 'case_comment_get_metrics',
     verbs: accessVerbs,
     docType: 'comments',
     savedObjectType: CASE_COMMENT_SAVED_OBJECT,

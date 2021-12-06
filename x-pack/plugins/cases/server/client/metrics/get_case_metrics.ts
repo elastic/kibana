@@ -70,7 +70,7 @@ const buildHandlers = (
 ): Map<string, MetricsHandler> => {
   const handlers = [
     new Lifespan(params.caseId, casesClient),
-    new AlertsCount(params.caseId, casesClient),
+    new AlertsCount(params.caseId, casesClient, clientArgs),
     new AlertDetails(),
     new Connectors(),
   ];
