@@ -227,10 +227,6 @@ export function AddFilterModal({
   };
 
   const renderParamsEditor = () => {
-    if (!selectedIndexPattern || !selectedOperator) {
-      // return '';
-    }
-
     switch (selectedOperator?.type) {
       case 'exists':
         return '';

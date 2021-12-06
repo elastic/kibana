@@ -45,6 +45,10 @@ export class PhraseSuggestorUI<T extends PhraseSuggestorProps> extends React.Com
     this.updateSuggestions();
   }
 
+  public componentDidUpdate(prevProps: T) {
+    this.updateSuggestions();
+  }
+
   public componentWillUnmount() {
     if (this.abortController) this.abortController.abort();
   }
@@ -66,7 +70,7 @@ export class PhraseSuggestorUI<T extends PhraseSuggestorProps> extends React.Com
     this.abortController = new AbortController();
     const { indexPattern, field, timeRangeForSuggestionsOverride } = this
       .props as PhraseSuggestorProps;
-    if (!field || !this.isSuggestingValues()) {
+    if (!field || !this.isSuggestingValues() || !indexPattern) {
       return;
     }
     this.setState({ isLoading: true });
