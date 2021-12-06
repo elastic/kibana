@@ -14,7 +14,6 @@ import {
   ALERT_DURATION,
   ALERT_REASON,
   ALERT_STATUS,
-  ALERT_WORKFLOW_STATUS,
   TIMESTAMP,
 } from '@kbn/rule-data-utils/technical_field_names';
 
@@ -31,7 +30,7 @@ import {
 
 import styled from 'styled-components';
 import React, { Suspense, useMemo, useState, useCallback, useEffect } from 'react';
-import usePrevious from 'react-use/lib/usePrevious';
+
 import { pick } from 'lodash';
 import { getAlertsPermissions } from '../../../../hooks/use_alert_permission';
 import type {
@@ -73,7 +72,6 @@ interface AlertsTableTGridProps {
 }
 
 interface ObservabilityActionsProps extends ActionProps {
-  currentStatus: AlertWorkflowStatus;
   setFlyoutAlert: React.Dispatch<React.SetStateAction<TopAlert | undefined>>;
 }
 
@@ -137,11 +135,7 @@ function ObservabilityActions({
   data,
   eventId,
   ecsData,
-  currentStatus,
-  refetch,
   setFlyoutAlert,
-  setEventsLoading,
-  setEventsDeleted,
 }: ObservabilityActionsProps) {
   const { core, observabilityRuleTypeRegistry } = usePluginContext();
   const dataFieldEs = data.reduce((acc, d) => ({ ...acc, [d.field]: d.value }), {});
@@ -155,14 +149,6 @@ function ObservabilityActions({
     () => parseAlert(observabilityRuleTypeRegistry),
     [observabilityRuleTypeRegistry]
   );
-  // const alertDataConsumer = useMemo<string>(
-  //   () => get(dataFieldEs, ALERT_RULE_CONSUMER, [''])[0],
-  //   [dataFieldEs]
-  // );
-  // const alertDataProducer = useMemo<string>(
-  //   () => get(dataFieldEs, ALERT_RULE_PRODUCER, [''])[0],
-  //   [dataFieldEs]
-  // );
 
   const alert = parseObservabilityAlert(dataFieldEs);
   const { prepend } = core.http.basePath;
@@ -293,8 +279,8 @@ const FIELDS_WITHOUT_CELL_ACTIONS = [
 ];
 
 export function AlertsTableTGrid(props: AlertsTableTGridProps) {
-  const { indexNames, rangeFrom, rangeTo, kuery, workflowStatus, setRefetch } = props;
-  const prevWorkflowStatus = usePrevious(workflowStatus);
+  const { indexNames, rangeFrom, rangeTo, kuery, setRefetch } = props;
+
   const {
     timelines,
     application: { capabilities },
@@ -318,12 +304,6 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
   );
 
   const [deletedEventIds, setDeletedEventIds] = useState<string[]>([]);
-
-  useEffect(() => {
-    if (workflowStatus !== prevWorkflowStatus) {
-      setDeletedEventIds([]);
-    }
-  }, [workflowStatus, prevWorkflowStatus]);
 
   useEffect(() => {
     if (tGridState) {
@@ -358,14 +338,14 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
             <ObservabilityActions
               {...actionProps}
               setEventsDeleted={setEventsDeleted}
-              currentStatus={workflowStatus}
+              // currentStatus={workflowStatus}
               setFlyoutAlert={setFlyoutAlert}
             />
           );
         },
       },
     ];
-  }, [workflowStatus, setEventsDeleted]);
+  }, [setEventsDeleted]);
 
   const onStateChange = useCallback(
     (state: TGridState) => {
@@ -401,7 +381,7 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
       footerText: translations.alertsTable.footerTextLabel,
       onStateChange,
       query: {
-        query: `${ALERT_WORKFLOW_STATUS}: ${workflowStatus}${kuery !== '' ? ` and ${kuery}` : ''}`,
+        query: kuery,
         language: 'kuery',
       },
       renderCellValue: getRenderCellValue({ setFlyoutAlert }),
@@ -418,7 +398,7 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
           sortDirection,
         },
       ],
-      filterStatus: workflowStatus as AlertWorkflowStatus,
+
       leadingControlColumns,
       trailingControlColumns,
       unit: (totalAlerts: number) => translations.alertsTable.showingAlertsTitle(totalAlerts),
@@ -428,7 +408,6 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
     rangeTo,
     hasAlertsCrudPermissions,
     indexNames,
-    workflowStatus,
     kuery,
     rangeFrom,
     setRefetch,
