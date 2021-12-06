@@ -12,7 +12,7 @@ export const TagsUserActionPayloadRt = rt.type({ tags: rt.array(rt.string) });
 
 export const TagsUserActionRt = rt.type({
   fields: rt.array(rt.literal(Fields.tags)),
-  action: rt.literal(Actions.update),
+  action: rt.union([rt.literal(Actions.add), rt.literal(Actions.delete)]),
   payload: TagsUserActionPayloadRt,
 });
 
