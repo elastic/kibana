@@ -274,7 +274,7 @@ export class ContentStream extends Duplex {
     */
     for (const buffer of this.buffers) {
       const remainder = size - totalBytesConsumed;
-      if (remainder <= 0) {
+      if (remainder < 0) {
         break;
       }
       const chunkedBuffer = remainder > 0 ? buffer.slice(0, remainder) : buffer;
@@ -282,14 +282,14 @@ export class ContentStream extends Duplex {
       buffersToFlush.push(chunkedBuffer);
       totalBytesConsumed += chunkedBuffer.byteLength;
 
-      // Do we add a partial buffer? Take cache the rest and stop looping.
+      // Did we add a partial buffer? Cache the rest and stop looping.
       if (buffer.byteLength > remainder) {
         partiallyFlushedBuffer = buffer.slice(remainder);
         break;
       }
     }
 
-    if (buffersToFlush.length === 0) {
+    if (this.buffers.length > 0 && buffersToFlush.length === 0) {
       throw new Error(
         `Unable to add buffers to flush. Try increasing your http.max_content_length in elasticsearch.yml or using the cluster settings API.`
       );
@@ -314,7 +314,7 @@ export class ContentStream extends Duplex {
 
     this.buffers = partiallyFlushedBuffer
       ? [partiallyFlushedBuffer, ...this.buffers.slice(buffersToFlush.length)]
-      : this.buffers.slice(buffersToFlush.length - 1);
+      : this.buffers.slice(Math.max(buffersToFlush.length - 1, 1));
 
     this.bytesBuffered -= totalBytesConsumed;
   }
