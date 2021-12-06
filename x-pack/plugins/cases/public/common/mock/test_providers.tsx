@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { merge } from 'lodash';
 import React from 'react';
 import { euiDarkVars } from '@kbn/ui-shared-deps-src/theme';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -29,11 +30,19 @@ const defaultCaseConfig = {
 };
 
 /** A utility for wrapping children in the providers required to run most tests */
-const TestProvidersComponent: React.FC<Props> = ({ children, caseConfig }) => (
+const TestProvidersComponent: React.FC<Props> = ({ children, caseConfig = {} }) => (
   <I18nProvider>
     <MockKibanaContextProvider>
       <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
-        <CasesProvider value={{ ...defaultCaseConfig, ...caseConfig }}>{children}</CasesProvider>
+        <CasesProvider
+          value={{
+            ...defaultCaseConfig,
+            ...caseConfig,
+            features: merge({}, DEFAULT_FEATURES, caseConfig.features),
+          }}
+        >
+          {children}
+        </CasesProvider>
       </ThemeProvider>
     </MockKibanaContextProvider>
   </I18nProvider>
