@@ -44,8 +44,8 @@ const appToPatternMap: Record<AppDataType, string> = {
   synthetics: '(synthetics-data-view)*',
   apm: 'apm-*',
   ux: '(rum-data-view)*',
-  infra_logs: '',
-  infra_metrics: '',
+  infra_logs: 'logs-*,filebeat-*',
+  infra_metrics: 'metrics-*,metricbeat-*',
   mobile: '(mobile-data-view)*',
 };
 
@@ -136,6 +136,9 @@ export class ObservabilityIndexPatterns {
       case 'mobile':
         const resultApm = await getDataHandler('apm')?.hasData();
         return resultApm?.indices.transaction;
+      case 'infra_metrics':
+      case 'infra_logs':
+        return ' '; // FIXME: metrics app should provide this
     }
   }
 
