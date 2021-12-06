@@ -62,7 +62,7 @@ const excludeOptions = [
       { defaultMessage: 'user' }
     ),
     description: i18n.translate(
-      'xpack.apm.fleetIntegration.javaRuntime.operationType.exclude.options.vmargDescription',
+      'xpack.apm.fleetIntegration.javaRuntime.operationType.exclude.options.userDescription',
       {
         defaultMessage:
           'A username that is matched against the operating system user that runs the JVM.',
