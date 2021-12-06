@@ -6,7 +6,7 @@
  */
 
 import pMap from 'p-map';
-import { isEmpty, uniq } from 'lodash';
+import { isEmpty, get } from 'lodash';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ElasticsearchClient, Logger } from 'kibana/server';
@@ -17,10 +17,31 @@ import {
   ALERT_WORKFLOW_STATUS,
   STATUS_VALUES,
 } from '../../../../rule_registry/common/technical_rule_data_field_names';
+import { AggregationFields, HostAggregate, UserAggregate } from './types';
 
-export enum AggregationFields {
-  Users = 'users',
-  Hosts = 'hosts',
+interface FieldAggregate {
+  hosts?: {
+    buckets: Array<{
+      key: string;
+      doc_count: number;
+      top_fields: estypes.AggregationsTopHitsAggregate;
+    }>;
+  };
+  users?: {
+    buckets: Array<{
+      key: string;
+      doc_count: number;
+    }>;
+  };
+}
+
+interface UniqueFieldAggregate {
+  hosts?: {
+    value: number;
+  };
+  users?: {
+    value: number;
+  };
 }
 
 interface Alert {
@@ -33,6 +54,11 @@ interface AlertsResponse {
   docs: Alert[];
 }
 
+interface AlertIdIndex {
+  id: string;
+  index: string;
+}
+
 function isEmptyAlert(alert: AlertInfo): boolean {
   return isEmpty(alert.id) || isEmpty(alert.index);
 }
@@ -43,36 +69,127 @@ export class AlertService {
     private readonly logger: Logger
   ) {}
 
-  public async aggregateFields({
+  public async getTotalUniqueFields({
     fields,
-    ids,
-    indices,
-    size,
+    alerts,
   }: {
     fields: AggregationFields[];
-    ids: string[];
-    indices: [];
-    size: number;
-  }) {
+    alerts: AlertIdIndex[];
+  }): Promise<{ totalHosts?: number; totalUsers?: number }> {
     try {
-      const uniqueIds = uniq(ids);
-      const uniqueIndices = uniq(indices);
+      const { ids, indices } = AlertService.getUniqueIdsIndices(alerts);
 
-      const res = this.scopedClusterClient.search({
-        index: uniqueIndices,
-        query: { ids: { values: uniqueIds } },
-        aggregations: this.buildFieldAggregations(fields, size),
+      const res = await this.scopedClusterClient.search({
+        index: indices,
+        query: { ids: { values: ids } },
+        size: 0,
+        aggregations: AlertService.buildTotalUniqueAggregations(fields),
       });
+
+      const aggs = res.body.aggregations as UniqueFieldAggregate;
+
+      const totalHosts = aggs.hosts?.value;
+      const totalUsers = aggs.users?.value;
+
+      return {
+        totalHosts,
+        totalUsers,
+      };
     } catch (error) {
-      // TODO: do it
+      throw createCaseError({
+        message: `Failed to count totals for fields: ${JSON.stringify(fields)}: ${error}`,
+        error,
+        logger: this.logger,
+      });
     }
   }
 
-  private buildFieldAggregations(fields: AggregationFields[], size: number) {
-    const topHits: estypes.AggregationsAggregationContainer = {
+  private static buildTotalUniqueAggregations(fields: AggregationFields[]) {
+    return fields.reduce<Record<string, estypes.AggregationsAggregationContainer>>((acc, field) => {
+      switch (field) {
+        case AggregationFields.Hosts:
+          return {
+            ...acc,
+            hosts: {
+              cardinality: {
+                field: 'host.id',
+              },
+            },
+          };
+        case AggregationFields.Users:
+          return {
+            ...acc,
+            users: {
+              cardinality: {
+                field: 'user.name',
+              },
+            },
+          };
+        default:
+          return acc;
+      }
+    }, {});
+  }
+
+  public async aggregateFields({
+    fields,
+    alerts,
+    size = 10,
+  }: {
+    fields: AggregationFields[];
+    alerts: Array<{ id: string; index: string }>;
+    size?: number;
+  }): Promise<{ hosts?: HostAggregate[]; users?: UserAggregate[] }> {
+    try {
+      const { ids, indices } = AlertService.getUniqueIdsIndices(alerts);
+
+      const res = await this.scopedClusterClient.search({
+        index: indices,
+        query: { ids: { values: ids } },
+        aggregations: AlertService.buildFieldAggregations(fields, size),
+        size: 0,
+      });
+
+      const aggs = res.body.aggregations as FieldAggregate;
+
+      const hosts = AlertService.getMostFrequentHosts(aggs);
+      const users = AlertService.getMostFrequentUsers(aggs);
+
+      return {
+        hosts,
+        users,
+      };
+    } catch (error) {
+      throw createCaseError({
+        message: `Failed to aggregate fields: ${JSON.stringify(fields)}: ${error}`,
+        error,
+        logger: this.logger,
+      });
+    }
+  }
+
+  private static getUniqueIdsIndices(alerts: AlertIdIndex[]): { ids: string[]; indices: string[] } {
+    const { ids, indices } = alerts.reduce(
+      (acc, alert) => {
+        acc.ids.add(alert.id);
+        acc.indices.add(alert.index);
+        return acc;
+      },
+      { ids: new Set<string>(), indices: new Set<string>() }
+    );
+
+    return {
+      ids: Array.from(ids),
+      indices: Array.from(indices),
+    };
+  }
+
+  private static buildFieldAggregations(fields: AggregationFields[], size: number) {
+    const topHits = (docValueFields: string[]): estypes.AggregationsAggregationContainer => ({
       aggs: {
-        top_hosts: {
+        top_fields: {
           top_hits: {
+            docvalue_fields: docValueFields,
             sort: [
               {
                 '@timestamp': {
@@ -80,10 +197,11 @@ export class AlertService {
                 },
               },
             ],
+            size: 1,
           },
         },
       },
-    };
+    });
 
     return fields.reduce<Record<string, estypes.AggregationsAggregationContainer>>((acc, field) => {
       switch (field) {
@@ -95,7 +213,7 @@ export class AlertService {
                 field: 'host.id',
                 size,
               },
-              ...topHits,
+              ...topHits(['host.*']),
             },
           };
         case AggregationFields.Users:
@@ -106,13 +224,24 @@ export class AlertService {
                 field: 'user.name',
                 size,
               },
-              ...topHits,
             },
           };
         default:
           return acc;
       }
     }, {});
+  }
+
+  private static getMostFrequentHosts(aggs: FieldAggregate): HostAggregate[] | undefined {
+    return aggs.hosts?.buckets.map((bucket) => ({
+      name: get(bucket.top_fields.hits.hits[0].fields, 'host.name'),
+      id: bucket.key,
+      count: bucket.doc_count,
+    }));
+  }
+
+  private static getMostFrequentUsers(aggs: FieldAggregate): UserAggregate[] | undefined {
+    return aggs.users?.buckets.map((bucket) => ({ name: bucket.key, count: bucket.doc_count }));
   }
 
   public async updateAlertsStatus(alerts: UpdateAlertRequest[]) {

@@ -5,18 +5,23 @@
  * 2.0.
  */
 
-import { CaseMetricsResponse } from '../../../common';
+import { AlertHostsMetrics, AlertUsersMetrics, CaseMetricsResponse } from '../../../common';
+import { createCaseError } from '../../common';
+import { AggregationFields, HostAggregate, UserAggregate } from '../../services/alerts/types';
 import { CasesClient } from '../client';
 import { CasesClientArgs } from '../types';
 import { MetricsHandler } from './types';
 
+interface AlertMetrics {
+  alerts: {
+    hosts?: AlertHostsMetrics;
+    users?: AlertUsersMetrics;
+  };
+}
+
 export class AlertDetails implements MetricsHandler {
-  /**
-   * This boolean protects against the metrics being queried multiple times. The applyMetrics function could be called
-   * once for each feature. All the metrics will be retrieved when the first applyMetrics is called though.
-   */
-  private retrievedMetrics: boolean = false;
-  private metrics: string[] = [];
+  private retrievedMetrics: AlertMetrics | undefined;
+  private requestedFeatures: AggregationFields[] = [];
 
   constructor(
     private readonly caseId: string,
@@ -31,41 +36,82 @@ export class AlertDetails implements MetricsHandler {
   public setupFeature(feature: string) {
     switch (feature) {
       case 'alertHosts':
-        this.metrics.push('hosts');
+        this.requestedFeatures.push(AggregationFields.Hosts);
         break;
       case 'alertUsers':
-        this.metrics.push('users');
+        this.requestedFeatures.push(AggregationFields.Users);
         break;
     }
   }
 
   public async compute(): Promise<CaseMetricsResponse> {
-    const alerts = await this.casesClient.attachments.getAllAlertsAttachToCase({
-      caseId: this.caseId,
-    });
+    const { alertsService, logger } = this.clientArgs;
 
-    const { ids, indices } = alerts.reduce<{ ids: string[]; indices: string[] }>(
-      (acc, alert) => {
-        acc.ids.push(alert.id);
-        acc.indices.push(alert.index);
-        return acc;
-      },
-      { ids: [], indices: [] }
-    );
+    try {
+      if (this.retrievedMetrics != null) {
+        return this.retrievedMetrics;
+      }
 
-    // this.clientArgs.alertsService.aggregateFields({fields: this.metrics, ids, indices})
+      const alerts = await this.casesClient.attachments.getAllAlertsAttachToCase({
+        caseId: this.caseId,
+      });
 
-    // we already retrieved the metrics so just return them as they are
-    if (this.retrievedMetrics) {
-      return {};
+      // TODO: do in a promise.all
+      const { hosts: uniqueHosts, users: uniqueUsers } = await alertsService.aggregateFields({
+        fields: this.requestedFeatures,
+        alerts,
+      });
+
+      const { totalHosts, totalUsers } = await alertsService.getTotalUniqueFields({
+        fields: this.requestedFeatures,
+        alerts,
+      });
+
+      this.setRetrievedMetrics({ uniqueHosts, uniqueUsers, totalHosts, totalUsers });
+
+      return {
+        ...(this.retrievedMetrics ?? {}),
+      };
+    } catch (error) {
+      throw createCaseError({
+        message: `Failed to retrieve alerts details attached case id: ${this.caseId}: ${error}`,
+        error,
+        logger,
+      });
+    }
+  }
+
+  private setRetrievedMetrics({
+    uniqueHosts,
+    uniqueUsers,
+    totalHosts,
+    totalUsers,
+  }: {
+    uniqueHosts?: HostAggregate[];
+    uniqueUsers?: UserAggregate[];
+    totalHosts?: number;
+    totalUsers?: number;
+  }) {
+    let hosts: AlertHostsMetrics | undefined;
+    if (uniqueHosts && totalHosts) {
+      hosts = {
+        total: totalHosts,
+        values: uniqueHosts,
+      };
     }
 
-    this.retrievedMetrics = true;
+    let users: AlertUsersMetrics | undefined;
+    if (uniqueUsers && totalUsers) {
+      users = {
+        total: totalUsers,
+        values: uniqueUsers,
+      };
+    }
 
-    return {
+    this.retrievedMetrics = {
       alerts: {
-        hosts: { total: 0, values: [] },
-        users: { total: 0, values: [] },
+        hosts,
+        users,
       },
     };
   }
