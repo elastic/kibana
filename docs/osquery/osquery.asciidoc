@@ -288,13 +288,21 @@ This is useful for teams who need in-depth and detailed control.
 
 [float]
 === Customize Osquery configuration
-By default, all Osquery Manager integrations share the same osquery configuration. However, you can customize how Osquery is configured by editing the Osquery Manager integration for each agent policy
+experimental[] By default, all Osquery Manager integrations share the same osquery configuration. However, you can customize how Osquery is configured by editing the Osquery Manager integration for each agent policy
 you want to adjust. The custom configuration is then applied to all agents in the policy. 
 This powerful feature allows you to configure
 https://osquery.readthedocs.io/en/stable/deployment/file-integrity-monitoring[File Integrity Monitoring], https://osquery.readthedocs.io/en/stable/deployment/process-auditing[Process auditing], 
 and https://osquery.readthedocs.io/en/stable/deployment/configuration/#configuration-specification[others].
 
-IMPORTANT: Take caution when editing this configuration. The changes you make are distributed to all agents in the policy.
+[IMPORTANT]
+=========================
+
+* Take caution when editing this configuration. The changes you make are distributed to all agents in the policy.
+
+* Take caution when editing `packs` using the Advanced *Osquery config* field. 
+Any changes you make to `packs` from this field are not reflected in the UI on the Osquery *Packs* page in {kib}, however, these changes are deployed to agents in the policy. 
+While this allows you to use advanced Osquery functionality like pack discovery queries, you do lose the ability to manage packs defined this way from the Osquery *Packs* page.
+=========================
 
 . From the {kib} main menu, click *Fleet*, then the *Agent policies* tab.
 
@@ -315,6 +323,16 @@ IMPORTANT: Take caution when editing this configuration. The changes you make ar
 * (Optional) To load a full configuration file, drag and drop an Osquery `.conf` file into the area at the bottom of the page.
 
 . Click *Save integration* to apply the custom configuration to all agents in the policy.
++
+As an example, the following configuration disables two tables.
++
+```ts
+{
+   "options":{
+      "disable_tables":"curl,process_envs"
+   }
+}
+```
 
 [float]
 === Upgrade Osquery versions
