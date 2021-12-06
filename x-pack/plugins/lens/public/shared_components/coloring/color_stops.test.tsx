@@ -58,6 +58,33 @@ describe('Color Stops component', () => {
     ).toBe(true);
   });
 
+  it('should disable "add new" button if there is maxStops configured', () => {
+    props.colorStops = [
+      { color: '#aaa', stop: 20 },
+      { color: '#bbb', stop: 40 },
+      { color: '#ccc', stop: 60 },
+      { color: '#ccc', stop: 80 },
+      { color: '#ccc', stop: 90 },
+    ];
+    const component = mount(<CustomStops {...props} />);
+    const componentWithMaxSteps = mount(
+      <CustomStops {...props} paletteConfiguration={{ maxSteps: 5 }} />
+    );
+    expect(
+      component
+        .find('[data-test-subj="my-test_dynamicColoring_addStop"]')
+        .first()
+        .prop('isDisabled')
+    ).toBe(false);
+
+    expect(
+      componentWithMaxSteps
+        .find('[data-test-subj="my-test_dynamicColoring_addStop"]')
+        .first()
+        .prop('isDisabled')
+    ).toBe(true);
+  });
+
   it('should add a new stop with default color and reasonable distance from last one', () => {
     let component = mount(<CustomStops {...props} />);
     const addStopButton = component

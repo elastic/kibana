@@ -7,7 +7,7 @@
 
 import './expression.scss';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useRef } from 'react';
 import ReactDOM from 'react-dom';
 import {
   Chart,
@@ -32,10 +32,9 @@ import {
   DisplayValueStyle,
   RecursivePartial,
   AxisStyle,
-  GridLineStyle,
   ScaleType,
 } from '@elastic/charts';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import type {
   ExpressionRenderDefinition,
   Datatable,
@@ -44,6 +43,8 @@ import type {
 import { IconType } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { RenderMode } from 'src/plugins/expressions';
+import { ThemeServiceStart } from 'kibana/public';
+import { KibanaThemeProvider } from '../../../../../src/plugins/kibana_react/public';
 import type { ILensInterpreterRenderHandlers, LensFilterEvent, LensBrushEvent } from '../types';
 import type { LensMultiTable, FormatFactory } from '../../common';
 import { layerTypes } from '../../common';
@@ -59,6 +60,7 @@ import {
   SeriesLayer,
   useActiveCursor,
 } from '../../../../../src/plugins/charts/public';
+import { MULTILAYER_TIME_AXIS_STYLE } from '../../../../../src/plugins/charts/common';
 import { EmptyPlaceholder } from '../shared_components';
 import { getFitOptions } from './fitting_functions';
 import { getAxesConfiguration, GroupsConfiguration, validateExtent } from './axes_configuration';
@@ -134,6 +136,7 @@ export const getXyChartRenderer = (dependencies: {
   paletteService: PaletteRegistry;
   timeZone: string;
   useLegacyTimeAxis: boolean;
+  kibanaTheme: ThemeServiceStart;
 }): ExpressionRenderDefinition<XYChartProps> => ({
   name: 'lens_xy_chart_renderer',
   displayName: 'XY chart',
@@ -156,23 +159,25 @@ export const getXyChartRenderer = (dependencies: {
     };
 
     ReactDOM.render(
-      <I18nProvider>
-        <XYChartReportable
-          {...config}
-          formatFactory={dependencies.formatFactory}
-          chartsActiveCursorService={dependencies.chartsActiveCursorService}
-          chartsThemeService={dependencies.chartsThemeService}
-          paletteService={dependencies.paletteService}
-          timeZone={dependencies.timeZone}
-          useLegacyTimeAxis={dependencies.useLegacyTimeAxis}
-          minInterval={calculateMinInterval(config)}
-          interactive={handlers.isInteractive()}
-          onClickValue={onClickValue}
-          onSelectRange={onSelectRange}
-          renderMode={handlers.getRenderMode()}
-          syncColors={handlers.isSyncColorsEnabled()}
-        />
-      </I18nProvider>,
+      <KibanaThemeProvider theme$={dependencies.kibanaTheme.theme$}>
+        <I18nProvider>
+          <XYChartReportable
+            {...config}
+            formatFactory={dependencies.formatFactory}
+            chartsActiveCursorService={dependencies.chartsActiveCursorService}
+            chartsThemeService={dependencies.chartsThemeService}
+            paletteService={dependencies.paletteService}
+            timeZone={dependencies.timeZone}
+            useLegacyTimeAxis={dependencies.useLegacyTimeAxis}
+            minInterval={calculateMinInterval(config)}
+            interactive={handlers.isInteractive()}
+            onClickValue={onClickValue}
+            onSelectRange={onSelectRange}
+            renderMode={handlers.getRenderMode()}
+            syncColors={handlers.isSyncColorsEnabled()}
+          />
+        </I18nProvider>
+      </KibanaThemeProvider>,
       domNode,
       () => handlers.done()
     );
@@ -207,21 +212,8 @@ function getIconForSeriesType(seriesType: SeriesType): IconType {
 const MemoizedChart = React.memo(XYChart);
 
 export function XYChartReportable(props: XYChartRenderProps) {
-  const [isReady, setIsReady] = useState(false);
-
-  // It takes a cycle for the XY chart to render. This prevents
-  // reporting from printing a blank chart placeholder.
-  useEffect(() => {
-    setIsReady(true);
-  }, [setIsReady]);
-
   return (
-    <VisualizationContainer
-      className="lnsXyExpression__container"
-      isReady={isReady}
-      reportTitle={props.args.title}
-      reportDescription={props.args.description}
-    >
+    <VisualizationContainer className="lnsXyExpression__container">
       <MemoizedChart {...props} />
     </VisualizationContainer>
   );
@@ -561,53 +553,35 @@ export function XYChart({
     floatingColumns: legend?.floatingColumns ?? 1,
   } as LegendPositionConfig;
 
-  // todo be moved in the chart plugin
-  const shouldUseNewTimeAxis = isTimeViz && !useLegacyTimeAxis && !shouldRotate;
+  const isHistogramModeEnabled = filteredLayers.some(
+    ({ isHistogram, seriesType, splitAccessor }) =>
+      isHistogram &&
+      (seriesType.includes('stacked') || !splitAccessor) &&
+      (seriesType.includes('stacked') ||
+        !seriesType.includes('bar') ||
+        !chartHasMoreThanOneBarSeries)
+  );
 
-  const gridLineStyle: RecursivePartial<GridLineStyle> = shouldUseNewTimeAxis
-    ? {
-        visible: gridlinesVisibilitySettings?.x,
-        strokeWidth: 0.1,
-        stroke: darkMode ? 'white' : 'black',
-      }
-    : {
-        visible: gridlinesVisibilitySettings?.x,
-        strokeWidth: 2,
-      };
+  const shouldUseNewTimeAxis =
+    isTimeViz && isHistogramModeEnabled && !useLegacyTimeAxis && !shouldRotate;
+
+  const gridLineStyle = {
+    visible: gridlinesVisibilitySettings?.x,
+    strokeWidth: 1,
+  };
   const xAxisStyle: RecursivePartial<AxisStyle> = shouldUseNewTimeAxis
     ? {
+        ...MULTILAYER_TIME_AXIS_STYLE,
         tickLabel: {
+          ...MULTILAYER_TIME_AXIS_STYLE.tickLabel,
           visible: Boolean(tickLabelsVisibilitySettings?.x),
-          rotation: 0, // rotation is disabled on new time axis
-          fontSize: 11,
-          padding:
-            referenceLinePaddings.bottom != null ? { inner: referenceLinePaddings.bottom } : 0,
-          alignment: {
-            vertical: Position.Bottom,
-            horizontal: Position.Left,
-          },
-          offset: {
-            x: 1.5,
-            y: 0,
-          },
-        },
-        axisLine: {
-          stroke: darkMode ? 'lightgray' : 'darkgray',
-          strokeWidth: 1,
         },
         tickLine: {
-          size: 12,
-          strokeWidth: 0.15,
-          stroke: darkMode ? 'white' : 'black',
-          padding: -10,
+          ...MULTILAYER_TIME_AXIS_STYLE.tickLine,
           visible: Boolean(tickLabelsVisibilitySettings?.x),
         },
         axisTitle: {
           visible: axisTitlesVisibilitySettings.x,
-          padding:
-            !tickLabelsVisibilitySettings?.x && referenceLinePaddings.bottom != null
-              ? { inner: referenceLinePaddings.bottom }
-              : undefined,
         },
       }
     : {
@@ -715,6 +689,7 @@ export function XYChart({
             tickFormat={(d) => axis.formatter?.convert(d) || ''}
             style={getYAxesStyle(axis.groupId as 'left' | 'right')}
             domain={getYAxisDomain(axis)}
+            ticks={5}
           />
         );
       })}

@@ -5,23 +5,22 @@
  * 2.0.
  */
 
-import React, { FC, useState, useCallback, useMemo } from 'react';
-import { groupBy } from 'lodash';
+import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import {
-  EuiInMemoryTable,
+  EuiBadge,
+  EuiButton,
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiTitle,
-  EuiButton,
-  EuiSpacer,
-  EuiButtonIcon,
-  EuiBadge,
-  SearchFilterConfig,
+  EuiInMemoryTable,
   EuiSearchBarProps,
+  EuiSpacer,
+  EuiTitle,
+  SearchFilterConfig,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiBasicTableColumn } from '@elastic/eui/src/components/basic_table/basic_table';
 import { EuiTableSelectionType } from '@elastic/eui/src/components/basic_table/table_types';
 import { Action } from '@elastic/eui/src/components/basic_table/action_types';
@@ -48,9 +47,13 @@ import { ListingPageUrlState } from '../../../../common/types/common';
 import { usePageUrlState } from '../../util/url_state';
 import { ExpandedRow } from './expanded_row';
 import { isPopulatedObject } from '../../../../common';
-import { timeFormatter } from '../../../../common/util/date_utils';
 import { useTableSettings } from '../../data_frame_analytics/pages/analytics_management/components/analytics_list/use_table_settings';
 import { useToastNotificationService } from '../../services/toast_notification_service';
+import { useFieldFormatter } from '../../contexts/kibana/use_field_formatter';
+import { FIELD_FORMAT_IDS } from '../../../../../../../src/plugins/field_formats/common';
+import { useRefresh } from '../../routing/use_refresh';
+import { DEPLOYMENT_STATE } from '../../../../common/constants/trained_models';
+import { getUserConfirmationProvider } from './force_stop_dialog';
 
 type Stats = Omit<TrainedModelStat, 'model_id'>;
 
@@ -78,14 +81,19 @@ export const ModelsList: FC = () => {
   const {
     services: {
       application: { navigateToUrl, capabilities },
+      overlays,
     },
   } = useMlKibana();
   const urlLocator = useMlLocator()!;
+
+  const dateFormatter = useFieldFormatter(FIELD_FORMAT_IDS.DATE);
 
   const [pageState, updatePageState] = usePageUrlState(
     ML_PAGES.TRAINED_MODELS_MANAGE,
     getDefaultModelsListState()
   );
+
+  const refresh = useRefresh();
 
   const searchQueryText = pageState.queryText ?? '';
 
@@ -104,6 +112,8 @@ export const ModelsList: FC = () => {
     {}
   );
 
+  const getUserConfirmation = useMemo(() => getUserConfirmationProvider(overlays), []);
+
   const navigateToPath = useNavigateToPath();
 
   const isBuiltInModel = useCallback(
@@ -121,7 +131,7 @@ export const ModelsList: FC = () => {
         size: 1000,
       });
 
-      const newItems = [];
+      const newItems: ModelItem[] = [];
       const expandedItemsToRefresh = [];
 
       for (const model of response) {
@@ -144,6 +154,9 @@ export const ModelsList: FC = () => {
           expandedItemsToRefresh.push(tableItem);
         }
       }
+
+      // Need to fetch state for 3rd party models to enable/disable actions
+      await fetchModelsStats(newItems.filter((v) => v.model_type.includes('pytorch')));
 
       setItems(newItems);
 
@@ -175,6 +188,13 @@ export const ModelsList: FC = () => {
     onRefresh: fetchModelsData,
   });
 
+  useEffect(
+    function updateOnTimerRefresh() {
+      fetchModelsData();
+    },
+    [refresh]
+  );
+
   const modelsStats: ModelsBarStats = useMemo(() => {
     return {
       total: {
@@ -191,8 +211,6 @@ export const ModelsList: FC = () => {
    * Fetches models stats and update the original object
    */
   const fetchModelsStats = useCallback(async (models: ModelItem[]) => {
-    const { true: pytorchModels } = groupBy(models, (m) => m.model_type === 'pytorch');
-
     try {
       if (models) {
         const { trained_model_stats: modelsStatsResponse } =
@@ -200,19 +218,12 @@ export const ModelsList: FC = () => {
 
         for (const { model_id: id, ...stats } of modelsStatsResponse) {
           const model = models.find((m) => m.model_id === id);
-          model!.stats = stats;
-        }
-      }
-
-      if (pytorchModels) {
-        const { deployment_stats: deploymentStatsResponse } =
-          await trainedModelsApiService.getTrainedModelDeploymentStats(
-            pytorchModels.map((m) => m.model_id)
-          );
-
-        for (const { model_id: id, ...stats } of deploymentStatsResponse) {
-          const model = models.find((m) => m.model_id === id);
-          model!.stats!.deployment_stats = stats;
+          if (model) {
+            model.stats = {
+              ...(model.stats ?? {}),
+              ...stats,
+            };
+          }
         }
       }
 
@@ -355,18 +366,25 @@ export const ModelsList: FC = () => {
       },
     },
     {
-      name: i18n.translate('xpack.ml.inference.modelsList.startModelAllocationActionLabel', {
-        defaultMessage: 'Start allocation',
+      name: i18n.translate('xpack.ml.inference.modelsList.startModelDeploymentActionLabel', {
+        defaultMessage: 'Start deployment',
       }),
-      description: i18n.translate('xpack.ml.inference.modelsList.startModelAllocationActionLabel', {
-        defaultMessage: 'Start allocation',
+      description: i18n.translate('xpack.ml.inference.modelsList.startModelDeploymentActionLabel', {
+        defaultMessage: 'Start deployment',
       }),
-      icon: 'download',
+      icon: 'play',
       type: 'icon',
       isPrimary: true,
+      enabled: (item) => {
+        const { state } = item.stats?.deployment_stats ?? {};
+        return (
+          !isLoading && state !== DEPLOYMENT_STATE.STARTED && state !== DEPLOYMENT_STATE.STARTING
+        );
+      },
       available: (item) => item.model_type === 'pytorch',
       onClick: async (item) => {
         try {
+          setIsLoading(true);
           await trainedModelsApiService.startModelAllocation(item.model_id);
           displaySuccessToast(
             i18n.translate('xpack.ml.trainedModels.modelsList.startSuccess', {
@@ -376,6 +394,7 @@ export const ModelsList: FC = () => {
               },
             })
           );
+          await fetchModelsData();
         } catch (e) {
           displayErrorToast(
             e,
@@ -386,24 +405,38 @@ export const ModelsList: FC = () => {
               },
             })
           );
+          setIsLoading(false);
         }
       },
     },
     {
-      name: i18n.translate('xpack.ml.inference.modelsList.stopModelAllocationActionLabel', {
-        defaultMessage: 'Stop allocation',
+      name: i18n.translate('xpack.ml.inference.modelsList.stopModelDeploymentActionLabel', {
+        defaultMessage: 'Stop deployment',
       }),
-      description: i18n.translate('xpack.ml.inference.modelsList.stopModelAllocationActionLabel', {
-        defaultMessage: 'Stop allocation',
+      description: i18n.translate('xpack.ml.inference.modelsList.stopModelDeploymentActionLabel', {
+        defaultMessage: 'Stop deployment',
       }),
       icon: 'stop',
       type: 'icon',
       isPrimary: true,
       available: (item) => item.model_type === 'pytorch',
-      enabled: (item) => !isPopulatedObject(item.pipelines),
+      enabled: (item) =>
+        !isLoading &&
+        isPopulatedObject(item.stats?.deployment_stats) &&
+        item.stats?.deployment_stats?.state !== DEPLOYMENT_STATE.STOPPING,
       onClick: async (item) => {
+        const requireForceStop = isPopulatedObject(item.pipelines);
+
+        if (requireForceStop) {
+          const hasUserApproved = await getUserConfirmation(item);
+          if (!hasUserApproved) return;
+        }
+
         try {
-          await trainedModelsApiService.stopModelAllocation(item.model_id);
+          setIsLoading(true);
+          await trainedModelsApiService.stopModelAllocation(item.model_id, {
+            force: requireForceStop,
+          });
           displaySuccessToast(
             i18n.translate('xpack.ml.trainedModels.modelsList.stopSuccess', {
               defaultMessage: 'Deployment for "{modelId}" has been stopped successfully.',
@@ -412,6 +445,8 @@ export const ModelsList: FC = () => {
               },
             })
           );
+          // Need to fetch model state updates
+          await fetchModelsData();
         } catch (e) {
           displayErrorToast(
             e,
@@ -422,6 +457,7 @@ export const ModelsList: FC = () => {
               },
             })
           );
+          setIsLoading(false);
         }
       },
     },
@@ -507,6 +543,7 @@ export const ModelsList: FC = () => {
         defaultMessage: 'Type',
       }),
       sortable: true,
+      truncateText: true,
       align: 'left',
       render: (types: string[]) => (
         <EuiFlexGroup gutterSize={'xs'} wrap>
@@ -522,12 +559,25 @@ export const ModelsList: FC = () => {
       'data-test-subj': 'mlModelsTableColumnType',
     },
     {
+      name: i18n.translate('xpack.ml.trainedModels.modelsList.stateHeader', {
+        defaultMessage: 'State',
+      }),
+      sortable: (item) => item.stats?.deployment_stats?.state,
+      align: 'left',
+      truncateText: true,
+      render: (model: ModelItem) => {
+        const state = model.stats?.deployment_stats?.state;
+        return state ? <EuiBadge color="hollow">{state}</EuiBadge> : null;
+      },
+      'data-test-subj': 'mlModelsTableColumnDeploymentState',
+    },
+    {
       field: ModelsTableToConfigMapping.createdAt,
       name: i18n.translate('xpack.ml.trainedModels.modelsList.createdAtHeader', {
         defaultMessage: 'Created at',
       }),
       dataType: 'date',
-      render: timeFormatter,
+      render: (v: number) => dateFormatter(v),
       sortable: true,
       'data-test-subj': 'mlModelsTableColumnCreatedAt',
     },

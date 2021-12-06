@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { IEsSearchRequest } from '../../../../../../src/plugins/data/common';
+import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { IEsSearchRequest } from '../../../../../../src/plugins/data/common';
 import { ESQuery } from '../../typed_json';
 import {
   TimelineEventsQueries,
@@ -43,6 +44,7 @@ export interface TimelineRequestBasicOptions extends IEsSearchRequest {
   docValueFields?: DocValueFields[];
   factoryQueryType?: TimelineFactoryQueryTypes;
   entityType?: EntityType;
+  runtimeMappings: MappingRuntimeFields;
 }
 
 export interface TimelineRequestSortField<Field = string> extends SortField<Field> {

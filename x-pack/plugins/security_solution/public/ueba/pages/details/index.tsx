@@ -10,6 +10,7 @@ import { noop } from 'lodash/fp';
 import React, { useEffect, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 
+import type { Filter } from '@kbn/es-query';
 import { LastEventIndexKey } from '../../../../common/search_strategy';
 import { SecurityPageName } from '../../../app/types';
 import { FiltersGlobal } from '../../../common/components/filters_global';
@@ -25,7 +26,7 @@ import { inputsSelectors } from '../../../common/store';
 import { setUebaDetailsTablesActivePageToZero } from '../../store/actions';
 import { setAbsoluteRangeDatePicker } from '../../../common/store/inputs/actions';
 import { SpyRoute } from '../../../common/utils/route/spy_routes';
-import { esQuery, Filter } from '../../../../../../../src/plugins/data/public';
+import { getEsQueryConfig } from '../../../../../../../src/plugins/data/common';
 
 import { OverviewEmpty } from '../../../overview/components/overview_empty';
 import { UebaDetailsTabs } from './details_tabs';
@@ -39,7 +40,7 @@ import { Display } from '../display';
 import { timelineSelectors } from '../../../timelines/store/timeline';
 import { TimelineId } from '../../../../common/types/timeline';
 import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
-import { useSourcererScope } from '../../../common/containers/sourcerer';
+import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import { useDeepEqualSelector, useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_query';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
@@ -69,12 +70,12 @@ const UebaDetailsComponent: React.FC<UebaDetailsProps> = ({ detailName, uebaDeta
   );
   const getFilters = () => [...uebaDetailsPageFilters, ...filters];
 
-  const { docValueFields, indicesExist, indexPattern, selectedPatterns } = useSourcererScope(
+  const { docValueFields, indicesExist, indexPattern, selectedPatterns } = useSourcererDataView(
     SourcererScopeName.detections
   );
 
   const [filterQuery, kqlError] = convertToBuildEsQuery({
-    config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
+    config: getEsQueryConfig(kibana.services.uiSettings),
     indexPattern,
     queries: [query],
     filters: getFilters(),
@@ -99,7 +100,6 @@ const UebaDetailsComponent: React.FC<UebaDetailsProps> = ({ detailName, uebaDeta
             <Display show={!globalFullScreen}>
               <HeaderPage
                 border
-                sourcererScope={SourcererScopeName.detections}
                 subtitle={
                   <LastEventTime
                     docValueFields={docValueFields}

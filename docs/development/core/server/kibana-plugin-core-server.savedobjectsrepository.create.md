@@ -16,13 +16,13 @@ create<T = unknown>(type: string, attributes: T, options?: SavedObjectsCreateOpt
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  type | <code>string</code> |  |
-|  attributes | <code>T</code> |  |
-|  options | <code>SavedObjectsCreateOptions</code> |  |
+|  type | string |  |
+|  attributes | T |  |
+|  options | SavedObjectsCreateOptions |  {<!-- -->string<!-- -->} \[options.id\] - force id on creation, not recommended  {<!-- -->boolean<!-- -->} \[options.overwrite=false\]  {<!-- -->object<!-- -->} \[options.migrationVersion=undefined\]  {<!-- -->string<!-- -->} \[options.namespace\]  {<!-- -->array<!-- -->} \[options.references=\[\]\] - \[{ name, type, id }<!-- -->\] |
 
 <b>Returns:</b>
 
-`Promise<SavedObject<T>>`
+Promise&lt;SavedObject&lt;T&gt;&gt;
 
 {<!-- -->promise<!-- -->} - { id, type, version, attributes }
 

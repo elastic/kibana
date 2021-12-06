@@ -37,6 +37,8 @@ export const MANAGED_CONFIG_KEYS: ManagedConfigKey[] = [
     value: {
       ['**/packages/kbn-pm/dist/index.js']: true,
       ['**/api_docs']: true,
+      ['**/tsconfig.tsbuildinfo']: true,
+      ['**/*.map']: true,
     },
   },
   {

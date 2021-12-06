@@ -373,6 +373,21 @@ type EsQueryConfig = oldEsQueryConfig;
  * @removeBy 8.1
  */
 
+export type {
+  Filter,
+  RangeFilterMeta,
+  RangeFilterParams,
+  ExistsFilter,
+  PhrasesFilter,
+  PhraseFilter,
+  MatchAllFilter,
+  CustomFilter,
+  RangeFilter,
+  KueryNode,
+  FilterMeta,
+  IFieldSubType,
+  EsQueryConfig,
+};
 export {
   COMPARE_ALL_OPTIONS,
   compareFilters,
@@ -414,17 +429,4 @@ export {
   onlyDisabledFiltersChanged,
   uniqFilters,
   FilterStateStore,
-  Filter,
-  RangeFilterMeta,
-  RangeFilterParams,
-  ExistsFilter,
-  PhrasesFilter,
-  PhraseFilter,
-  MatchAllFilter,
-  CustomFilter,
-  RangeFilter,
-  KueryNode,
-  FilterMeta,
-  IFieldSubType,
-  EsQueryConfig,
 };

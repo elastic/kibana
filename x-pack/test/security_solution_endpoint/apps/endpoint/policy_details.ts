@@ -15,6 +15,7 @@ import { FullAgentPolicyInput } from '../../../../plugins/fleet/common';
 import { PolicyConfig } from '../../../../plugins/security_solution/common/endpoint/types';
 import { ManifestSchema } from '../../../../plugins/security_solution/common/endpoint/schema/manifest';
 import { policyFactory } from '../../../../plugins/security_solution/common/endpoint/models/policy_config';
+import { popupVersionsMap } from '../../../../plugins/security_solution/public/management/pages/policy/view/policy_forms/protections/popup_options_to_versions';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const browser = getService('browser');
@@ -307,6 +308,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         }
       });
 
+      it('should show the supported Endpoint version', async () => {
+        expect(await testSubjects.getVisibleText('policySupportedVersions')).to.equal(
+          'Agent version ' + popupVersionsMap.get('malware')
+        );
+      });
+
       it('should show the custom message text area when the Notify User checkbox is checked', async () => {
         expect(await testSubjects.isChecked('malwareUserNotificationCheckbox')).to.be(true);
         await testSubjects.existOrFail('malwareUserNotificationCustomMessage');
@@ -330,7 +337,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    describe('and the save button is clicked', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/92567
+    describe.skip('and the save button is clicked', () => {
       let policyInfo: PolicyTestResourceInfo;
 
       beforeEach(async () => {
@@ -395,6 +403,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(agentFullPolicy.inputs).to.eql([
           getExpectedAgentPolicyEndpointInput({
             id: policyInfo.packagePolicy.id,
+            name: policyInfo.packagePolicy.name,
             meta: {
               package: {
                 version: policyInfo.packageInfo.version,
@@ -441,6 +450,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(agentFullPolicy.inputs).to.eql([
           getExpectedAgentPolicyEndpointInput({
             id: policyInfo.packagePolicy.id,
+            name: policyInfo.packagePolicy.name,
             meta: {
               package: {
                 version: policyInfo.packageInfo.version,
@@ -479,6 +489,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(agentFullPolicyUpdated.inputs).to.eql([
           getExpectedAgentPolicyEndpointInput({
             id: policyInfo.packagePolicy.id,
+            name: policyInfo.packagePolicy.name,
             revision: 3,
             meta: {
               package: {
@@ -530,12 +541,16 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         // Fleet has its  own form inputs, like description. When those are updated, the changes
         // are also dispatched to the embedded endpoint Policy form. Update to the Endpoint Policy
         // form after that should preserve the changes done on the Fleet form
+        // NOTE: A few delays were added below due to sporadic failures of this test case (see #100236)
+        const sleep = (ms = 100) => new Promise((resolve) => setTimeout(resolve, ms));
 
         // Wait for the endpoint form to load and then update the policy description
         await testSubjects.existOrFail('endpointIntegrationPolicyForm');
+        await sleep(); // Allow forms to sync
         await pageObjects.ingestManagerCreatePackagePolicy.setPackagePolicyDescription(
           'protect everything'
         );
+        await sleep(); // Allow forms to sync
 
         const winDnsEventingCheckbox = await testSubjects.find('policyWindowsEvent_dns');
         await pageObjects.ingestManagerCreatePackagePolicy.scrollToCenterOfWindow(

@@ -6,14 +6,13 @@
  * Side Public License, v 1.
  */
 
+export type { Get, Set } from '../common';
 export {
   AbortError,
   abortSignalToPromise,
   createGetterSetter,
   fieldWildcardFilter,
   fieldWildcardMatcher,
-  Get,
-  Set,
   url,
   mergeMigrationFunctionMaps,
 } from '../common';

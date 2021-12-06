@@ -17,6 +17,7 @@ const createEventLogServiceMock = () => {
     getProviderActions: jest.fn(),
     registerSavedObjectProvider: jest.fn(),
     getLogger: jest.fn().mockReturnValue(eventLoggerMock.create()),
+    getIndexPattern: jest.fn(),
   };
   return mock;
 };

@@ -186,7 +186,8 @@ export const getPendingActionCounts = async (
   esClient: ElasticsearchClient,
   metadataService: EndpointMetadataService,
   /** The Fleet Agent IDs to be checked */
-  agentIDs: string[]
+  agentIDs: string[],
+  isPendingActionResponsesWithAckEnabled: boolean
 ): Promise<EndpointPendingActions[]> => {
   // retrieve the unexpired actions for the given hosts
   const recentActions = await esClient
@@ -254,11 +255,17 @@ export const getPendingActionCounts = async (
       pending_actions: pendingActions
         .map((a) => a.data.command)
         .reduce((acc, cur) => {
-          if (cur in acc) {
-            acc[cur] += 1;
+          if (!isPendingActionResponsesWithAckEnabled) {
+            acc[cur] = 0; // set pending counts to 0 when FF is disabled
           } else {
-            acc[cur] = 1;
+            // else do the usual counting
+            if (cur in acc) {
+              acc[cur] += 1;
+            } else {
+              acc[cur] = 1;
+            }
           }
+
           return acc;
         }, {} as EndpointPendingActions['pending_actions']),
     });
@@ -287,6 +294,7 @@ const hasEndpointResponseDoc = async ({
     .search<LogsEndpointActionResponse>(
       {
         index: ENDPOINT_ACTION_RESPONSES_INDEX,
+        size: 10000,
         body: {
           query: {
             bool: {

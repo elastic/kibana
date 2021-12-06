@@ -15,7 +15,7 @@ import { InstructionSet } from './instruction_set';
 import { SavedObjectsInstaller } from './saved_objects_installer';
 import { EuiSpacer, EuiPanel, EuiButton, EuiButtonGroup, EuiFormRow } from '@elastic/eui';
 import * as StatusCheckStates from './status_check_states';
-import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { injectI18n, FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { getServices } from '../../kibana_services';
 import { KibanaPageTemplate } from '../../../../../kibana_react/public';
@@ -421,6 +421,7 @@ class TutorialUi extends React.Component {
             iconType={icon}
             isBeta={this.state.tutorial.isBeta}
             notices={this.renderModuleNotices()}
+            basePath={getServices().http.basePath}
           />
 
           {this.renderInstructionSetsToggle()}

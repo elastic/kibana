@@ -18,7 +18,7 @@ import type {
   InstallablePackage,
   InstallSource,
 } from '../../../../common';
-import { DEFAULT_PACKAGES } from '../../../../common';
+import { AUTO_UPGRADE_POLICIES_PACKAGES } from '../../../../common';
 import {
   IngestManagerError,
   PackageOperationNotSupportedError,
@@ -40,6 +40,9 @@ import { setPackageInfo, parseAndVerifyArchiveEntries, unpackBufferToCache } fro
 import { toAssetReference } from '../kibana/assets/install';
 import type { ArchiveAsset } from '../kibana/assets/install';
 import { installIndexPatterns } from '../kibana/index_pattern/install';
+
+import type { PackageUpdateEvent } from '../../upgrade_sender';
+import { sendTelemetryEvents, UpdateEventType } from '../../upgrade_sender';
 
 import { isUnremovablePackage, getInstallation, getInstallationObject } from './index';
 import { removeInstallation } from './remove';
@@ -203,6 +206,26 @@ interface InstallRegistryPackageParams {
   force?: boolean;
 }
 
+function getTelemetryEvent(pkgName: string, pkgVersion: string): PackageUpdateEvent {
+  return {
+    packageName: pkgName,
+    currentVersion: 'unknown',
+    newVersion: pkgVersion,
+    status: 'failure',
+    dryRun: false,
+    eventType: UpdateEventType.PACKAGE_INSTALL,
+    installType: 'unknown',
+  };
+}
+
+function sendEvent(telemetryEvent: PackageUpdateEvent) {
+  sendTelemetryEvents(
+    appContextService.getLogger(),
+    appContextService.getTelemetryEventsSender(),
+    telemetryEvent
+  );
+}
+
 async function installPackageFromRegistry({
   savedObjectsClient,
   pkgkey,
@@ -215,6 +238,8 @@ async function installPackageFromRegistry({
 
   // if an error happens during getInstallType, report that we don't know
   let installType: InstallType = 'unknown';
+
+  const telemetryEvent: PackageUpdateEvent = getTelemetryEvent(pkgName, pkgVersion);
 
   try {
     // get the currently installed package
@@ -248,6 +273,9 @@ async function installPackageFromRegistry({
       }
     }
 
+    telemetryEvent.installType = installType;
+    telemetryEvent.currentVersion = installedPkg?.attributes.version || 'not_installed';
+
     // if the requested version is out-of-date of the latest package version, check if we allow it
     // if we don't allow it, return an error
     if (semverLt(pkgVersion, latestPackage.version)) {
@@ -267,7 +295,12 @@ async function installPackageFromRegistry({
     const { paths, packageInfo } = await Registry.getRegistryPackage(pkgName, pkgVersion);
 
     if (!licenseService.hasAtLeast(packageInfo.license || 'basic')) {
-      return { error: new Error(`Requires ${packageInfo.license} license`), installType };
+      const err = new Error(`Requires ${packageInfo.license} license`);
+      sendEvent({
+        ...telemetryEvent,
+        errorMessage: err.message,
+      });
+      return { error: err, installType };
     }
 
     // try installing the package, if there was an error, call error handler and rethrow
@@ -275,6 +308,7 @@ async function installPackageFromRegistry({
     return _installPackage({
       savedObjectsClient,
       esClient,
+      logger,
       installedPkg,
       paths,
       packageInfo,
@@ -286,6 +320,10 @@ async function installPackageFromRegistry({
           soClient: savedObjectsClient,
           pkgName: packageInfo.name,
           currentVersion: packageInfo.version,
+        });
+        sendEvent({
+          ...telemetryEvent,
+          status: 'success',
         });
         return { assets, status: 'installed', installType };
       })
@@ -299,9 +337,17 @@ async function installPackageFromRegistry({
           installedPkg,
           esClient,
         });
+        sendEvent({
+          ...telemetryEvent,
+          errorMessage: err.message,
+        });
         return { error: err, installType };
       });
   } catch (e) {
+    sendEvent({
+      ...telemetryEvent,
+      errorMessage: e.message,
+    });
     return {
       error: e,
       installType,
@@ -322,8 +368,10 @@ async function installPackageByUpload({
   archiveBuffer,
   contentType,
 }: InstallUploadedArchiveParams): Promise<InstallResult> {
+  const logger = appContextService.getLogger();
   // if an error happens during getInstallType, report that we don't know
   let installType: InstallType = 'unknown';
+  const telemetryEvent: PackageUpdateEvent = getTelemetryEvent('', '');
   try {
     const { packageInfo } = await parseAndVerifyArchiveEntries(archiveBuffer, contentType);
 
@@ -333,6 +381,12 @@ async function installPackageByUpload({
     });
 
     installType = getInstallType({ pkgVersion: packageInfo.version, installedPkg });
+
+    telemetryEvent.packageName = packageInfo.name;
+    telemetryEvent.newVersion = packageInfo.version;
+    telemetryEvent.installType = installType;
+    telemetryEvent.currentVersion = installedPkg?.attributes.version || 'not_installed';
+
     if (installType !== 'install') {
       throw new PackageOperationNotSupportedError(
         `Package upload only supports fresh installations. Package ${packageInfo.name} is already installed, please uninstall first.`
@@ -357,6 +411,7 @@ async function installPackageByUpload({
     return _installPackage({
       savedObjectsClient,
       esClient,
+      logger,
       installedPkg,
       paths,
       packageInfo,
@@ -364,12 +419,24 @@ async function installPackageByUpload({
       installSource,
     })
       .then((assets) => {
+        sendEvent({
+          ...telemetryEvent,
+          status: 'success',
+        });
         return { assets, status: 'installed', installType };
       })
       .catch(async (err: Error) => {
+        sendEvent({
+          ...telemetryEvent,
+          errorMessage: err.message,
+        });
         return { error: err, installType };
       });
   } catch (e) {
+    sendEvent({
+      ...telemetryEvent,
+      errorMessage: e.message,
+    });
     return { error: e, installType };
   }
 }
@@ -466,15 +533,18 @@ export async function createInstallation(options: {
   installSource: InstallSource;
 }) {
   const { savedObjectsClient, packageInfo, installSource } = options;
-  const { internal = false, name: pkgName, version: pkgVersion } = packageInfo;
+  const { name: pkgName, version: pkgVersion } = packageInfo;
   const removable = !isUnremovablePackage(pkgName);
   const toSaveESIndexPatterns = generateESIndexPatterns(packageInfo.data_streams);
 
-  // For default packages, default the `keep_policies_up_to_date` setting to true. For all other
-  // package, default it to false.
-  const defaultKeepPoliciesUpToDate = DEFAULT_PACKAGES.some(
+  // For "stack-aligned" packages, default the `keep_policies_up_to_date` setting to true. For all other
+  // packages, default it to undefined. Use undefined rather than false to allow us to differentiate
+  // between "unset" and "user explicitly disabled".
+  const defaultKeepPoliciesUpToDate = AUTO_UPGRADE_POLICIES_PACKAGES.some(
     ({ name }) => name === packageInfo.name
-  );
+  )
+    ? true
+    : undefined;
 
   const created = await savedObjectsClient.create<Installation>(
     PACKAGES_SAVED_OBJECT_TYPE,
@@ -485,7 +555,6 @@ export async function createInstallation(options: {
       es_index_patterns: toSaveESIndexPatterns,
       name: pkgName,
       version: pkgVersion,
-      internal,
       removable,
       install_version: pkgVersion,
       install_status: 'installing',

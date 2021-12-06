@@ -11,7 +11,7 @@ import React from 'react';
 import { History } from 'history';
 import { Provider } from 'react-redux';
 import { first } from 'rxjs/operators';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import { parse, ParsedQuery } from 'query-string';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Switch, Route, RouteComponentProps, HashRouter, Redirect } from 'react-router-dom';
@@ -109,6 +109,7 @@ export async function mountApp({
     embeddable: embeddableStart,
     uiSettings: coreStart.uiSettings,
     scopedHistory: () => scopedHistory,
+    screenshotModeService: screenshotMode,
     indexPatterns: dataStart.indexPatterns,
     savedQueryService: dataStart.query.savedQueries,
     savedObjectsClient: coreStart.savedObjects.client,
@@ -131,7 +132,6 @@ export async function mountApp({
       activeSpaceId || 'default'
     ),
     spacesService: spacesApi,
-    screenshotModeService: screenshotMode,
   };
 
   const getUrlStateStorage = (history: RouteComponentProps['history']) =>

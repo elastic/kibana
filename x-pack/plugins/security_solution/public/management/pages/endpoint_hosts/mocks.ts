@@ -14,8 +14,8 @@ import {
   ActivityLog,
   HostInfo,
   HostPolicyResponse,
-  HostResultList,
   HostStatus,
+  MetadataListResponse,
 } from '../../../../common/endpoint/types';
 import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
 import { FleetActionGenerator } from '../../../../common/endpoint/data_generators/fleet_action_generator';
@@ -43,7 +43,7 @@ import {
 } from '../mocks';
 
 type EndpointMetadataHttpMocksInterface = ResponseProvidersInterface<{
-  metadataList: () => HostResultList;
+  metadataList: () => MetadataListResponse;
   metadataDetails: () => HostInfo;
 }>;
 export const endpointMetadataHttpMocks = httpHandlerMockFactory<EndpointMetadataHttpMocksInterface>(
@@ -51,12 +51,12 @@ export const endpointMetadataHttpMocks = httpHandlerMockFactory<EndpointMetadata
     {
       id: 'metadataList',
       path: HOST_METADATA_LIST_ROUTE,
-      method: 'post',
+      method: 'get',
       handler: () => {
         const generator = new EndpointDocGenerator('seed');
 
         return {
-          hosts: Array.from({ length: 10 }, () => {
+          data: Array.from({ length: 10 }, () => {
             const endpoint = {
               metadata: generator.generateHostMetadata(),
               host_status: HostStatus.UNHEALTHY,
@@ -67,8 +67,8 @@ export const endpointMetadataHttpMocks = httpHandlerMockFactory<EndpointMetadata
             return endpoint;
           }),
           total: 10,
-          request_page_size: 10,
-          request_page_index: 0,
+          page: 0,
+          pageSize: 10,
         };
       },
     },

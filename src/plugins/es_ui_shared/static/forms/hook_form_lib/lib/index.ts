@@ -6,5 +6,6 @@
  * Side Public License, v 1.
  */
 
-export { Subject, Subscription } from './subject';
+export type { Subscription } from './subject';
+export { Subject } from './subject';
 export * from './utils';

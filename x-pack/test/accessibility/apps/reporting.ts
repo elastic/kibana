@@ -16,7 +16,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const reporting = getService('reporting');
-  const esArchiver = getService('esArchiver');
   const security = getService('security');
 
   describe('Reporting', () => {
@@ -33,17 +32,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     };
 
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/reporting/logs');
-      await esArchiver.load('x-pack/test/functional/es_archives/logstash_functional');
-
+      await reporting.initLogs();
       await createReportingUser();
       await reporting.loginReportingUser();
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/reporting/logs');
-      await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
-
+      await reporting.teardownLogs();
       await deleteReportingUser();
     });
 

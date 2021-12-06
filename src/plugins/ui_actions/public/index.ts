@@ -13,21 +13,18 @@ export function plugin(initializerContext: PluginInitializerContext) {
   return new UiActionsPlugin(initializerContext);
 }
 
-export { UiActionsSetup, UiActionsStart } from './plugin';
-export { UiActionsServiceParams, UiActionsService } from './service';
-export {
-  Action,
-  ActionDefinition as UiActionsActionDefinition,
-  createAction,
-  IncompatibleActionError,
-} from './actions';
+export type { UiActionsSetup, UiActionsStart } from './plugin';
+export type { UiActionsServiceParams } from './service';
+export { UiActionsService } from './service';
+export type { Action, ActionDefinition as UiActionsActionDefinition } from './actions';
+export { createAction, IncompatibleActionError } from './actions';
 export { buildContextMenuForActions } from './context_menu';
-export {
+export type {
   Presentable as UiActionsPresentable,
   PresentableGrouping as UiActionsPresentableGrouping,
 } from './util';
+export type { Trigger, RowClickContext } from './triggers';
 export {
-  Trigger,
   VISUALIZE_FIELD_TRIGGER,
   visualizeFieldTrigger,
   VISUALIZE_EDITOR_TRIGGER,
@@ -36,13 +33,12 @@ export {
   visualizeGeoFieldTrigger,
   ROW_CLICK_TRIGGER,
   rowClickTrigger,
-  RowClickContext,
 } from './triggers';
+export type { VisualizeFieldContext } from './types';
 export {
-  VisualizeFieldContext,
   ACTION_VISUALIZE_FIELD,
   ACTION_VISUALIZE_GEO_FIELD,
   ACTION_VISUALIZE_LENS_FIELD,
   ACTION_CONVERT_TO_LENS,
 } from './types';
-export { ActionExecutionContext, ActionExecutionMeta } from './actions';
+export type { ActionExecutionContext, ActionExecutionMeta, ActionMenuItemProps } from './actions';

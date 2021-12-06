@@ -12,6 +12,8 @@ import { flashAPIErrors } from '../../../shared/flash_messages';
 import { HttpLogic } from '../../../shared/http';
 import { EngineLogic } from '../engine';
 
+import { CrawlerDomainsLogic } from './crawler_domains_logic';
+
 import {
   CrawlerData,
   CrawlerDomain,
@@ -165,6 +167,9 @@ export const CrawlerLogic = kea<MakeLogicType<CrawlerValues, CrawlerActions>>({
       }, duration);
 
       actions.onCreateNewTimeout(timeoutIdId);
+    },
+    [CrawlerDomainsLogic.actionTypes.crawlerDomainDeleted]: ({ data }) => {
+      actions.onReceiveCrawlerData(data);
     },
   }),
   events: ({ values }) => ({

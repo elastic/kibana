@@ -83,9 +83,7 @@ export const getLegendText = (chartData: ChartData, maxChartColumns: number): Le
   }
 
   if (chartData.data.length === 0) {
-    return i18n.translate('xpack.dataVisualizer.dataGridChart.notEnoughData', {
-      defaultMessage: `0 documents contain field.`,
-    });
+    return '';
   }
 
   if (chartData.type === 'boolean') {

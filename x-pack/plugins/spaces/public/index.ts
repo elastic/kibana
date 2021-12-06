@@ -9,7 +9,7 @@ import { SpacesPlugin } from './plugin';
 
 export { getSpaceColor, getSpaceImageUrl, getSpaceInitials } from './space_avatar';
 
-export { SpacesPluginSetup, SpacesPluginStart } from './plugin';
+export type { SpacesPluginSetup, SpacesPluginStart } from './plugin';
 
 export type { Space, GetAllSpacesPurpose, GetSpaceResult } from '../common';
 

@@ -140,7 +140,7 @@ const getAuthenticationColumns = (): AuthTableColumns => [
   {
     name: i18n.USER,
     truncateText: false,
-    hideForMobile: false,
+    mobileOptions: { show: true },
     render: ({ node }) =>
       getRowItemDraggables({
         rowItems: node.user.name,
@@ -151,7 +151,7 @@ const getAuthenticationColumns = (): AuthTableColumns => [
   {
     name: i18n.SUCCESSES,
     truncateText: false,
-    hideForMobile: false,
+    mobileOptions: { show: true },
     render: ({ node }) => {
       const id = escapeDataProviderId(
         `authentications-table-${node._id}-node-successes-${node.successes}`
@@ -189,7 +189,7 @@ const getAuthenticationColumns = (): AuthTableColumns => [
   {
     name: i18n.FAILURES,
     truncateText: false,
-    hideForMobile: false,
+    mobileOptions: { show: true },
     render: ({ node }) => {
       const id = escapeDataProviderId(
         `authentications-table-${node._id}-failures-${node.failures}`
@@ -227,7 +227,7 @@ const getAuthenticationColumns = (): AuthTableColumns => [
   {
     name: i18n.LAST_SUCCESSFUL_TIME,
     truncateText: false,
-    hideForMobile: false,
+    mobileOptions: { show: true },
     render: ({ node }) =>
       has('lastSuccess.timestamp', node) && node.lastSuccess?.timestamp != null ? (
         <FormattedRelativePreferenceDate value={node.lastSuccess?.timestamp} />
@@ -238,7 +238,7 @@ const getAuthenticationColumns = (): AuthTableColumns => [
   {
     name: i18n.LAST_SUCCESSFUL_SOURCE,
     truncateText: false,
-    hideForMobile: false,
+    mobileOptions: { show: true },
     render: ({ node }) =>
       getRowItemDraggables({
         rowItems: node.lastSuccess?.source?.ip || null,
@@ -250,7 +250,7 @@ const getAuthenticationColumns = (): AuthTableColumns => [
   {
     name: i18n.LAST_SUCCESSFUL_DESTINATION,
     truncateText: false,
-    hideForMobile: false,
+    mobileOptions: { show: true },
     render: ({ node }) =>
       getRowItemDraggables({
         rowItems: node.lastSuccess?.host?.name ?? null,
@@ -262,7 +262,7 @@ const getAuthenticationColumns = (): AuthTableColumns => [
   {
     name: i18n.LAST_FAILED_TIME,
     truncateText: false,
-    hideForMobile: false,
+    mobileOptions: { show: true },
     render: ({ node }) =>
       has('lastFailure.timestamp', node) && node.lastFailure?.timestamp != null ? (
         <FormattedRelativePreferenceDate value={node.lastFailure?.timestamp} />
@@ -273,7 +273,7 @@ const getAuthenticationColumns = (): AuthTableColumns => [
   {
     name: i18n.LAST_FAILED_SOURCE,
     truncateText: false,
-    hideForMobile: false,
+    mobileOptions: { show: true },
     render: ({ node }) =>
       getRowItemDraggables({
         rowItems: node.lastFailure?.source?.ip || null,
@@ -285,7 +285,7 @@ const getAuthenticationColumns = (): AuthTableColumns => [
   {
     name: i18n.LAST_FAILED_DESTINATION,
     truncateText: false,
-    hideForMobile: false,
+    mobileOptions: { show: true },
     render: ({ node }) =>
       getRowItemDraggables({
         rowItems: node.lastFailure?.host?.name || null,

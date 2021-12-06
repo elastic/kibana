@@ -19,6 +19,7 @@ export { rulesClientMock };
 const createSetupMock = () => {
   const mock: jest.Mocked<PluginSetupContract> = {
     registerType: jest.fn(),
+    getSecurityHealth: jest.fn(),
   };
   return mock;
 };
@@ -73,6 +74,7 @@ const createAlertServicesMock = <
       .mockReturnValue(alertInstanceFactoryMock),
     savedObjectsClient: savedObjectsClientMock.create(),
     scopedClusterClient: elasticsearchServiceMock.createScopedClusterClient(),
+    shouldWriteAlerts: () => true,
   };
 };
 export type AlertServicesMock = ReturnType<typeof createAlertServicesMock>;

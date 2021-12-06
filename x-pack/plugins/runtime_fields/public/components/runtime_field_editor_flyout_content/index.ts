@@ -5,7 +5,5 @@
  * 2.0.
  */
 
-export {
-  RuntimeFieldEditorFlyoutContent,
-  Props as RuntimeFieldEditorFlyoutContentProps,
-} from './runtime_field_editor_flyout_content';
+export type { Props as RuntimeFieldEditorFlyoutContentProps } from './runtime_field_editor_flyout_content';
+export { RuntimeFieldEditorFlyoutContent } from './runtime_field_editor_flyout_content';

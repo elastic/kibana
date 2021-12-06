@@ -13,10 +13,69 @@ const alertTypeMetric = {
     init_script: 'state.ruleTypes = [:]; state.namespaces = [:]',
     map_script: `
       String alertType = doc['alert.alertTypeId'].value;
-      String namespace = doc['namespaces'] !== null ? doc['namespaces'].value : 'default';
+      String namespace = doc['namespaces'] !== null && doc['namespaces'].size() > 0 ? doc['namespaces'].value : 'default';
       state.ruleTypes.put(alertType, state.ruleTypes.containsKey(alertType) ? state.ruleTypes.get(alertType) + 1 : 1);
       if (state.namespaces.containsKey(namespace) === false) {
         state.namespaces.put(namespace, 1);
+      }
+    `,
+    // Combine script is executed per cluster, but we already have a key-value pair per cluster.
+    // Despite docs that say this is optional, this script can't be blank.
+    combine_script: 'return state',
+    // Reduce script is executed across all clusters, so we need to add up all the total from each cluster
+    // This also needs to account for having no data
+    reduce_script: `
+      Map result = [:];
+      for (Map m : states.toArray()) {
+        if (m !== null) {
+          for (String k : m.keySet()) {
+            result.put(k, result.containsKey(k) ? result.get(k) + m.get(k) : m.get(k));
+          }
+        }
+      }
+      return result;
+    `,
+  },
+};
+
+const ruleTypeExecutionsMetric = {
+  scripted_metric: {
+    init_script: 'state.ruleTypes = [:]; state.ruleTypesDuration = [:];',
+    map_script: `
+      String ruleType = doc['rule.category'].value;
+      long duration = doc['event.duration'].value / (1000 * 1000); 
+      state.ruleTypes.put(ruleType, state.ruleTypes.containsKey(ruleType) ? state.ruleTypes.get(ruleType) + 1 : 1);
+      state.ruleTypesDuration.put(ruleType, state.ruleTypesDuration.containsKey(ruleType) ? state.ruleTypesDuration.get(ruleType) + duration : duration);
+    `,
+    // Combine script is executed per cluster, but we already have a key-value pair per cluster.
+    // Despite docs that say this is optional, this script can't be blank.
+    combine_script: 'return state',
+    // Reduce script is executed across all clusters, so we need to add up all the total from each cluster
+    // This also needs to account for having no data
+    reduce_script: `
+      Map result = [:];
+      for (Map m : states.toArray()) {
+        if (m !== null) {
+          for (String k : m.keySet()) {
+            result.put(k, result.containsKey(k) ? result.get(k) + m.get(k) : m.get(k));
+          }
+        }
+      }
+      return result;
+    `,
+  },
+};
+
+const ruleTypeFailureExecutionsMetric = {
+  scripted_metric: {
+    init_script: 'state.reasons = [:]',
+    map_script: `
+      if (doc['event.outcome'].value == 'failure') { 
+        String reason = doc['event.reason'].value; 
+        String ruleType = doc['rule.category'].value; 
+        Map ruleTypes = state.reasons.containsKey(reason) ? state.reasons.get(reason) : [:]; 
+        ruleTypes.put(ruleType, ruleTypes.containsKey(ruleType) ? ruleTypes.get(ruleType) + 1 : 1); 
+        state.reasons.put(reason, ruleTypes); 
       }
     `,
     // Combine script is executed per cluster, but we already have a key-value pair per cluster.
@@ -48,6 +107,8 @@ export async function getTotalCountAggregations(
     | 'count_by_type'
     | 'throttle_time'
     | 'schedule_time'
+    | 'throttle_time_number_s'
+    | 'schedule_time_number_s'
     | 'connectors_per_alert'
     | 'count_rules_namespaces'
   >
@@ -194,11 +255,21 @@ export async function getTotalCountAggregations(
       {}
     ),
     throttle_time: {
+      min: `${aggregations.min_throttle_time.value}s`,
+      avg: `${aggregations.avg_throttle_time.value}s`,
+      max: `${aggregations.max_throttle_time.value}s`,
+    },
+    schedule_time: {
+      min: `${aggregations.min_interval_time.value}s`,
+      avg: `${aggregations.avg_interval_time.value}s`,
+      max: `${aggregations.max_interval_time.value}s`,
+    },
+    throttle_time_number_s: {
       min: aggregations.min_throttle_time.value,
       avg: aggregations.avg_throttle_time.value,
       max: aggregations.max_throttle_time.value,
     },
-    schedule_time: {
+    schedule_time_number_s: {
       min: aggregations.min_interval_time.value,
       avg: aggregations.avg_interval_time.value,
       max: aggregations.max_interval_time.value,
@@ -260,4 +331,130 @@ function replaceFirstAndLastDotSymbols(strToReplace: string) {
   return hasLastSymbolDot ? `${appliedString.slice(0, -1)}__` : appliedString;
 }
 
-// TODO: Implement executions count telemetry with eventLog, when it will write to index
+export async function getExecutionsPerDayCount(
+  esClient: ElasticsearchClient,
+  eventLogIndex: string
+) {
+  const { body: searchResult } = await esClient.search({
+    index: eventLogIndex,
+    size: 0,
+    body: {
+      query: {
+        bool: {
+          filter: {
+            bool: {
+              must: [
+                {
+                  term: { 'event.action': 'execute' },
+                },
+                {
+                  term: { 'event.provider': 'alerting' },
+                },
+                {
+                  range: {
+                    '@timestamp': {
+                      gte: 'now-1d',
+                    },
+                  },
+                },
+              ],
+            },
+          },
+        },
+      },
+      aggs: {
+        byRuleTypeId: ruleTypeExecutionsMetric,
+        failuresByReason: ruleTypeFailureExecutionsMetric,
+        avgDuration: { avg: { field: 'event.duration' } },
+      },
+    },
+  });
+
+  const executionsAggregations = searchResult.aggregations as {
+    byRuleTypeId: {
+      value: { ruleTypes: Record<string, string>; ruleTypesDuration: Record<string, number> };
+    };
+  };
+
+  const aggsAvgExecutionTime = Math.round(
+    // @ts-expect-error aggegation type is not specified
+    // convert nanoseconds to milliseconds
+    searchResult.aggregations.avgDuration.value / (1000 * 1000)
+  );
+
+  const executionFailuresAggregations = searchResult.aggregations as {
+    failuresByReason: { value: { reasons: Record<string, Record<string, string>> } };
+  };
+
+  return {
+    countTotal: Object.keys(executionsAggregations.byRuleTypeId.value.ruleTypes).reduce(
+      (total: number, key: string) =>
+        parseInt(executionsAggregations.byRuleTypeId.value.ruleTypes[key], 10) + total,
+      0
+    ),
+    countByType: Object.keys(executionsAggregations.byRuleTypeId.value.ruleTypes).reduce(
+      // ES DSL aggregations are returned as `any` by esClient.search
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (obj: any, key: string) => ({
+        ...obj,
+        [replaceFirstAndLastDotSymbols(key)]:
+          executionsAggregations.byRuleTypeId.value.ruleTypes[key],
+      }),
+      {}
+    ),
+    countTotalFailures: Object.keys(
+      executionFailuresAggregations.failuresByReason.value.reasons
+    ).reduce((total: number, reason: string) => {
+      const byRuleTypesRefs = executionFailuresAggregations.failuresByReason.value.reasons[reason];
+      const countByRuleTypes = Object.keys(byRuleTypesRefs).reduce(
+        (totalByType, ruleType) => parseInt(byRuleTypesRefs[ruleType] + totalByType, 10),
+        0
+      );
+      return countByRuleTypes + total;
+    }, 0),
+    countFailuresByReason: Object.keys(
+      executionFailuresAggregations.failuresByReason.value.reasons
+    ).reduce(
+      // ES DSL aggregations are returned as `any` by esClient.search
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (obj: any, reason: string) => {
+        const byRuleTypesRefs =
+          executionFailuresAggregations.failuresByReason.value.reasons[reason];
+        const countByRuleTypes = Object.keys(byRuleTypesRefs).reduce(
+          (totalByType, ruleType) => parseInt(byRuleTypesRefs[ruleType] + totalByType, 10),
+          0
+        );
+        return {
+          ...obj,
+          [replaceFirstAndLastDotSymbols(reason)]: countByRuleTypes,
+        };
+      },
+      {}
+    ),
+    countFailuresByReasonByType: Object.keys(
+      executionFailuresAggregations.failuresByReason.value.reasons
+    ).reduce(
+      // ES DSL aggregations are returned as `any` by esClient.search
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (obj: any, key: string) => ({
+        ...obj,
+        [replaceFirstAndLastDotSymbols(key)]:
+          executionFailuresAggregations.failuresByReason.value.reasons[key],
+      }),
+      {}
+    ),
+    avgExecutionTime: aggsAvgExecutionTime,
+    avgExecutionTimeByType: Object.keys(executionsAggregations.byRuleTypeId.value.ruleTypes).reduce(
+      // ES DSL aggregations are returned as `any` by esClient.search
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (obj: any, key: string) => ({
+        ...obj,
+        [replaceFirstAndLastDotSymbols(key)]: Math.round(
+          executionsAggregations.byRuleTypeId.value.ruleTypesDuration[key] /
+            parseInt(executionsAggregations.byRuleTypeId.value.ruleTypes[key], 10)
+        ),
+      }),
+      {}
+    ),
+  };
+}

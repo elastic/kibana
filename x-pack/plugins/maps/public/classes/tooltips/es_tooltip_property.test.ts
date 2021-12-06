@@ -108,6 +108,40 @@ describe('getESFilters', () => {
     ]);
   });
 
+  test('Should return phrase filters when field value is an array', async () => {
+    const esTooltipProperty = new ESTooltipProperty(
+      new TooltipProperty(featurePropertyField.getName(), await featurePropertyField.getLabel(), [
+        'my value',
+        'my other value',
+      ]),
+      indexPattern,
+      featurePropertyField,
+      APPLY_GLOBAL_QUERY
+    );
+    expect(await esTooltipProperty.getESFilters()).toEqual([
+      {
+        meta: {
+          index: 'indexPatternId',
+        },
+        query: {
+          match_phrase: {
+            ['machine.os']: 'my value',
+          },
+        },
+      },
+      {
+        meta: {
+          index: 'indexPatternId',
+        },
+        query: {
+          match_phrase: {
+            ['machine.os']: 'my other value',
+          },
+        },
+      },
+    ]);
+  });
+
   test('Should return NOT exists filter for null values', async () => {
     const esTooltipProperty = new ESTooltipProperty(
       new TooltipProperty(

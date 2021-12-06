@@ -10,8 +10,8 @@ import React from 'react';
 // @ts-ignore
 import { CreateSourceEditor } from './create_source_editor';
 import { ESGeoGridSource, clustersTitle } from './es_geo_grid_source';
-import { LayerWizard, RenderWizardArguments } from '../../layers/layer_wizard_registry';
-import { VectorLayer } from '../../layers/vector_layer';
+import { LayerWizard, RenderWizardArguments } from '../../layers';
+import { GeoJsonVectorLayer } from '../../layers/vector_layer';
 import {
   ESGeoGridSourceDescriptor,
   ColorDynamicOptions,
@@ -23,13 +23,14 @@ import {
   COUNT_PROP_NAME,
   COLOR_MAP_TYPE,
   FIELD_ORIGIN,
+  GRID_RESOLUTION,
   LAYER_WIZARD_CATEGORY,
   RENDER_AS,
   VECTOR_STYLES,
   STYLE_TYPE,
 } from '../../../../common/constants';
 import { NUMERICAL_COLOR_PALETTES } from '../../styles/color_palettes';
-import { ClustersLayerIcon } from '../../layers/icons/clusters_layer_icon';
+import { ClustersLayerIcon } from '../../layers/wizards/icons/clusters_layer_icon';
 
 export const clustersLayerWizardConfig: LayerWizard = {
   categories: [LAYER_WIZARD_CATEGORY.ELASTICSEARCH],
@@ -45,8 +46,11 @@ export const clustersLayerWizardConfig: LayerWizard = {
       }
 
       const defaultDynamicProperties = getDefaultDynamicProperties();
-      const layerDescriptor = VectorLayer.createDescriptor({
-        sourceDescriptor: ESGeoGridSource.createDescriptor(sourceConfig),
+      const layerDescriptor = GeoJsonVectorLayer.createDescriptor({
+        sourceDescriptor: ESGeoGridSource.createDescriptor({
+          ...sourceConfig,
+          resolution: GRID_RESOLUTION.FINE,
+        }),
         style: VectorStyle.createDescriptor({
           // @ts-ignore
           [VECTOR_STYLES.FILL_COLOR]: {
@@ -78,6 +82,7 @@ export const clustersLayerWizardConfig: LayerWizard = {
             type: STYLE_TYPE.DYNAMIC,
             options: {
               ...(defaultDynamicProperties[VECTOR_STYLES.ICON_SIZE].options as SizeDynamicOptions),
+              maxSize: 24,
               field: {
                 name: COUNT_PROP_NAME,
                 origin: FIELD_ORIGIN.SOURCE,

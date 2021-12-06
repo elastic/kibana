@@ -9,4 +9,4 @@
 import { AggsCommonSetup } from '../../../common';
 
 export type AggsSetup = AggsCommonSetup;
-export { AggsStart } from '../../../common';
+export type { AggsStart } from '../../../common';

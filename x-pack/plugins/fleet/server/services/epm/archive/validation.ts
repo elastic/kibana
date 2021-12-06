@@ -61,7 +61,6 @@ const optionalArchivePackageProps: readonly OptionalPackageProp[] = [
   'readme',
   'assets',
   'data_streams',
-  'internal',
   'license',
   'type',
   'categories',

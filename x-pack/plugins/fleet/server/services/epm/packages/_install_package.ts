@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, SavedObject, SavedObjectsClientContract } from 'src/core/server';
+import type {
+  ElasticsearchClient,
+  Logger,
+  SavedObject,
+  SavedObjectsClientContract,
+} from 'src/core/server';
 
 import {
   MAX_TIME_COMPLETE_INSTALL,
@@ -44,6 +49,7 @@ import { deleteKibanaSavedObjectsAssets } from './remove';
 export async function _installPackage({
   savedObjectsClient,
   esClient,
+  logger,
   installedPkg,
   paths,
   packageInfo,
@@ -52,6 +58,7 @@ export async function _installPackage({
 }: {
   savedObjectsClient: SavedObjectsClientContract;
   esClient: ElasticsearchClient;
+  logger: Logger;
   installedPkg?: SavedObject<Installation>;
   paths: string[];
   packageInfo: InstallablePackage;
@@ -131,41 +138,51 @@ export async function _installPackage({
     // currently only the base package has an ILM policy
     // at some point ILM policies can be installed/modified
     // per data stream and we should then save them
-    await installILMPolicy(paths, esClient);
+    await installILMPolicy(packageInfo, paths, esClient, logger);
 
     const installedDataStreamIlm = await installIlmForDataStream(
       packageInfo,
       paths,
       esClient,
-      savedObjectsClient
+      savedObjectsClient,
+      logger
     );
 
     // installs ml models
-    const installedMlModel = await installMlModel(packageInfo, paths, esClient, savedObjectsClient);
+    const installedMlModel = await installMlModel(
+      packageInfo,
+      paths,
+      esClient,
+      savedObjectsClient,
+      logger
+    );
 
     // installs versionized pipelines without removing currently installed ones
     const installedPipelines = await installPipelines(
       packageInfo,
       paths,
       esClient,
-      savedObjectsClient
+      savedObjectsClient,
+      logger
     );
     // install or update the templates referencing the newly installed pipelines
     const installedTemplates = await installTemplates(
       packageInfo,
       esClient,
+      logger,
       paths,
       savedObjectsClient
     );
 
     // update current backing indices of each data stream
-    await updateCurrentWriteIndices(esClient, installedTemplates);
+    await updateCurrentWriteIndices(esClient, logger, installedTemplates);
 
     const installedTransforms = await installTransform(
       packageInfo,
       paths,
       esClient,
-      savedObjectsClient
+      savedObjectsClient,
+      logger
     );
 
     // If this is an update or retrying an update, delete the previous version's pipelines

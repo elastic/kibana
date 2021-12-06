@@ -97,11 +97,10 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
   const pieChart = getService('pieChart');
   const dashboardExpect = getService('dashboardExpect');
   const elasticChart = getService('elasticChart');
-  const PageObjects = getPageObjects(['common', 'visChart']);
+  const PageObjects = getPageObjects(['common', 'visChart', 'dashboard']);
   const monacoEditor = getService('monacoEditor');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/116414
-  describe.skip('dashboard container', () => {
+  describe('dashboard container', () => {
     before(async () => {
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/dashboard/current/data');
       await esArchiver.loadIfNeeded(
@@ -109,6 +108,8 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
       );
       await PageObjects.common.navigateToApp('dashboardEmbeddableExamples');
       await testSubjects.click('dashboardEmbeddableByValue');
+      await PageObjects.dashboard.waitForRenderComplete();
+
       await updateInput(JSON.stringify(testDashboardInput, null, 4));
     });
 

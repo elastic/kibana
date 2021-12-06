@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { RoutingAction } from './action';
+export type { RoutingAction } from './action';

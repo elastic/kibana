@@ -45,8 +45,8 @@ describe('checkbox control column', () => {
       const { getByTestId } = render(
         <RowCheckBox {...defaultProps} onRowSelected={onRowSelected} />
       );
-
-      fireEvent.click(getByTestId('select-event'));
+      const checkbox = getByTestId(/^select-event/);
+      fireEvent.click(checkbox);
 
       expect(onRowSelected).toHaveBeenCalled();
     });

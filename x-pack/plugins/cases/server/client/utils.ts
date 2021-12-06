@@ -12,8 +12,7 @@ import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
 
-import { nodeBuilder, KueryNode } from '../../../../../src/plugins/data/common';
-import { esKuery } from '../../../../../src/plugins/data/server';
+import { nodeBuilder, fromKueryExpression, KueryNode } from '@kbn/es-query';
 import {
   AlertCommentRequestRt,
   ActionsCommentRequestRt,
@@ -183,7 +182,7 @@ export function stringToKueryNode(expression?: string): KueryNode | undefined {
     return;
   }
 
-  return esKuery.fromKueryExpression(expression);
+  return fromKueryExpression(expression);
 }
 
 /**

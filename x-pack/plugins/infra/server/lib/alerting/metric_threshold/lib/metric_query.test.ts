@@ -17,7 +17,6 @@ describe("The Metric Threshold Alert's getElasticsearchMetricQuery", () => {
     timeSize: 1,
   } as MetricExpressionParams;
 
-  const timefield = '@timestamp';
   const groupBy = 'host.doggoname';
   const timeframe = {
     start: moment().subtract(5, 'minutes').valueOf(),
@@ -25,7 +24,7 @@ describe("The Metric Threshold Alert's getElasticsearchMetricQuery", () => {
   };
 
   describe('when passed no filterQuery', () => {
-    const searchBody = getElasticsearchMetricQuery(expressionParams, timefield, timeframe, groupBy);
+    const searchBody = getElasticsearchMetricQuery(expressionParams, timeframe, groupBy);
     test('includes a range filter', () => {
       expect(
         searchBody.query.bool.filter.find((filter) => filter.hasOwnProperty('range'))
@@ -47,7 +46,6 @@ describe("The Metric Threshold Alert's getElasticsearchMetricQuery", () => {
 
     const searchBody = getElasticsearchMetricQuery(
       expressionParams,
-      timefield,
       timeframe,
       groupBy,
       filterQuery

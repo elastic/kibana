@@ -6,11 +6,8 @@
  */
 
 export { UptimeRefreshContext, UptimeRefreshContextProvider } from './uptime_refresh_context';
-export {
-  UptimeSettingsContextValues,
-  UptimeSettingsContext,
-  UptimeSettingsContextProvider,
-} from './uptime_settings_context';
+export type { UptimeSettingsContextValues } from './uptime_settings_context';
+export { UptimeSettingsContext, UptimeSettingsContextProvider } from './uptime_settings_context';
 export { UptimeThemeContextProvider, UptimeThemeContext } from './uptime_theme_context';
 export {
   UptimeStartupPluginsContext,

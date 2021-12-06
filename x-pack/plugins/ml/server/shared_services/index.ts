@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export { SharedServices, createSharedServices } from './shared_services';
+export type { SharedServices } from './shared_services';
+export { createSharedServices } from './shared_services';

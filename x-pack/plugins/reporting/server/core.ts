@@ -7,7 +7,7 @@
 
 import Hapi from '@hapi/hapi';
 import * as Rx from 'rxjs';
-import { first, map, take } from 'rxjs/operators';
+import { filter, first, map, take } from 'rxjs/operators';
 import { ScreenshotModePluginSetup } from 'src/plugins/screenshot_mode/server';
 import {
   BasePath,
@@ -17,6 +17,8 @@ import {
   PluginInitializerContext,
   SavedObjectsClientContract,
   SavedObjectsServiceStart,
+  ServiceStatusLevels,
+  StatusServiceSetup,
   UiSettingsServiceStart,
 } from '../../../../src/core/server';
 import { PluginStart as DataPluginStart } from '../../../../src/plugins/data/server';
@@ -44,6 +46,7 @@ export interface ReportingInternalSetup {
   taskManager: TaskManagerSetupContract;
   screenshotMode: ScreenshotModePluginSetup;
   logger: LevelLogger;
+  status: StatusServiceSetup;
 }
 
 export interface ReportingInternalStart {
@@ -111,10 +114,23 @@ export class ReportingCore {
     this.pluginStart$.next(startDeps); // trigger the observer
     this.pluginStartDeps = startDeps; // cache
 
+    await this.assertKibanaIsAvailable();
+
     const { taskManager } = startDeps;
     const { executeTask, monitorTask } = this;
     // enable this instance to generate reports and to monitor for pending reports
     await Promise.all([executeTask.init(taskManager), monitorTask.init(taskManager)]);
+  }
+
+  private async assertKibanaIsAvailable(): Promise<void> {
+    const { status } = this.getPluginSetupDeps();
+
+    await status.overall$
+      .pipe(
+        filter((current) => current.level === ServiceStatusLevels.available),
+        first()
+      )
+      .toPromise();
   }
 
   /*
@@ -237,9 +253,16 @@ export class ReportingCore {
       .toPromise();
   }
 
+  private getScreenshotModeDep() {
+    return this.getPluginSetupDeps().screenshotMode;
+  }
+
   public getEnableScreenshotMode() {
-    const { screenshotMode } = this.getPluginSetupDeps();
-    return screenshotMode.setScreenshotModeEnabled;
+    return this.getScreenshotModeDep().setScreenshotModeEnabled;
+  }
+
+  public getSetScreenshotLayout() {
+    return this.getScreenshotModeDep().setScreenshotLayout;
   }
 
   /*

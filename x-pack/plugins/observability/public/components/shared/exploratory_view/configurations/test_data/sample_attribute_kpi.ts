@@ -83,6 +83,7 @@ export const sampleAttributeKpi = {
             {
               color: 'green',
               forAccessor: 'y-axis-column-layer0',
+              axisMode: 'left',
             },
           ],
         },

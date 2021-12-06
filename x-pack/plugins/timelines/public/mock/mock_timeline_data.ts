@@ -1549,6 +1549,7 @@ export const mockTgridModel: TGridModel = {
     },
   ],
   dataProviders: [],
+  dataViewId: '',
   defaultColumns: [],
   queryFields: [],
   dateRange: {

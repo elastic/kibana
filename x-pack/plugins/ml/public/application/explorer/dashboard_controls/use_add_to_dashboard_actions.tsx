@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { DashboardItem } from './use_dashboards_table';
 import { SavedDashboardPanel } from '../../../../../../../src/plugins/dashboard/common/types';
 import { useMlKibana } from '../../contexts/kibana';

@@ -19,18 +19,11 @@ import {
   NATIVE_EXECUTABLE_CODE_OVERHEAD,
 } from '../memory_overview/memory_overview_service';
 import { TrainedModelDeploymentStatsResponse } from '../../../common/types/trained_models';
+import { isDefined } from '../../../common/types/guards';
 
 export type ModelService = ReturnType<typeof modelsProvider>;
 
-const NODE_FIELDS = [
-  'attributes',
-  'name',
-  'roles',
-  'ip',
-  'host',
-  'transport_address',
-  'version',
-] as const;
+const NODE_FIELDS = ['attributes', 'name', 'roles', 'version'] as const;
 
 export type RequiredNodeFields = Pick<NodesInfoNodeInfo, typeof NODE_FIELDS[number]>;
 
@@ -49,26 +42,31 @@ export function modelsProvider(
         modelIds.map((id: string) => [id, null])
       );
 
-      const { body, statusCode } = await client.asCurrentUser.ingest.getPipeline();
+      try {
+        const { body } = await client.asCurrentUser.ingest.getPipeline();
 
-      if (statusCode !== 200) {
-        return modelIdsMap;
-      }
+        for (const [pipelineName, pipelineDefinition] of Object.entries(body)) {
+          const { processors } = pipelineDefinition as { processors: Array<Record<string, any>> };
 
-      for (const [pipelineName, pipelineDefinition] of Object.entries(body)) {
-        const { processors } = pipelineDefinition as { processors: Array<Record<string, any>> };
-
-        for (const processor of processors) {
-          const id = processor.inference?.model_id;
-          if (modelIdsMap.has(id)) {
-            const obj = modelIdsMap.get(id);
-            if (obj === null) {
-              modelIdsMap.set(id, { [pipelineName]: pipelineDefinition });
-            } else {
-              obj![pipelineName] = pipelineDefinition;
+          for (const processor of processors) {
+            const id = processor.inference?.model_id;
+            if (modelIdsMap.has(id)) {
+              const obj = modelIdsMap.get(id);
+              if (obj === null) {
+                modelIdsMap.set(id, { [pipelineName]: pipelineDefinition });
+              } else {
+                obj![pipelineName] = pipelineDefinition;
+              }
             }
           }
         }
+      } catch (error) {
+        if (error.statusCode === 404) {
+          // ES returns 404 when there are no pipelines
+          // Instead, we should return the modelIdsMap and a 200
+          return modelIdsMap;
+        }
+        throw error;
       }
 
       return modelIdsMap;
@@ -82,8 +80,11 @@ export function modelsProvider(
         throw new Error('Memory overview service is not provided');
       }
 
-      const { body: deploymentStats } = await mlClient.getTrainedModelDeploymentStats({
-        model_id: '*',
+      const {
+        body: { trained_model_stats: trainedModelStats },
+      } = await mlClient.getTrainedModelsStats({
+        model_id: '_all',
+        size: 10000,
       });
 
       const {
@@ -100,7 +101,12 @@ export function modelsProvider(
           const nodeFields = pick(node, NODE_FIELDS) as RequiredNodeFields;
 
           const allocatedModels = (
-            deploymentStats.deployment_stats as TrainedModelDeploymentStatsResponse[]
+            trainedModelStats
+              .map((v) => {
+                // @ts-ignore new prop
+                return v.deployment_stats;
+              })
+              .filter(isDefined) as TrainedModelDeploymentStatsResponse[]
           )
             .filter((v) => v.nodes.some((n) => Object.keys(n.node)[0] === nodeId))
             .map(({ nodes, ...rest }) => {

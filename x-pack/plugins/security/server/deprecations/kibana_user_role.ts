@@ -98,13 +98,16 @@ async function getUsersDeprecations(
     return [];
   }
 
+  // TODO: remove when docs support "main"
+  const docsBranch = packageInfo.branch === 'main' ? 'master' : packageInfo.branch;
+
   return [
     {
       title: getDeprecationTitle(),
       message: getDeprecationMessage(),
       level: 'warning',
       deprecationType: 'feature',
-      documentationUrl: `https://www.elastic.co/guide/en/elasticsearch/reference/${packageInfo.branch}/built-in-roles.html`,
+      documentationUrl: `https://www.elastic.co/guide/en/elasticsearch/reference/${docsBranch}/built-in-roles.html`,
       correctiveActions: {
         api: {
           method: 'POST',
@@ -159,13 +162,16 @@ async function getRoleMappingsDeprecations(
     return [];
   }
 
+  // TODO: remove when docs support "main"
+  const docsBranch = packageInfo.branch === 'main' ? 'master' : packageInfo.branch;
+
   return [
     {
       title: getDeprecationTitle(),
       message: getDeprecationMessage(),
       level: 'warning',
       deprecationType: 'feature',
-      documentationUrl: `https://www.elastic.co/guide/en/elasticsearch/reference/${packageInfo.branch}/built-in-roles.html`,
+      documentationUrl: `https://www.elastic.co/guide/en/elasticsearch/reference/${docsBranch}/built-in-roles.html`,
       correctiveActions: {
         api: {
           method: 'POST',
@@ -193,6 +199,9 @@ async function getRoleMappingsDeprecations(
 function deprecationError(packageInfo: PackageInfo, error: Error): DeprecationsDetails[] {
   const title = getDeprecationTitle();
 
+  // TODO: remove when docs support "main"
+  const docsBranch = packageInfo.branch === 'main' ? 'master' : packageInfo.branch;
+
   if (getErrorStatusCode(error) === 403) {
     return [
       {
@@ -202,7 +211,7 @@ function deprecationError(packageInfo: PackageInfo, error: Error): DeprecationsD
         message: i18n.translate('xpack.security.deprecations.kibanaUser.forbiddenErrorMessage', {
           defaultMessage: 'You do not have enough permissions to fix this deprecation.',
         }),
-        documentationUrl: `https://www.elastic.co/guide/en/kibana/${packageInfo.branch}/xpack-security.html#_required_permissions_7`,
+        documentationUrl: `https://www.elastic.co/guide/en/kibana/${docsBranch}/xpack-security.html#_required_permissions_7`,
         correctiveActions: {
           manualSteps: [
             i18n.translate(

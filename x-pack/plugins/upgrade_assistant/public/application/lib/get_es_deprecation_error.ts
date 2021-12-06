@@ -6,13 +6,13 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ResponseError } from './api';
+import { ResponseError } from '../../../common/types';
 
 const i18nTexts = {
   permissionsError: i18n.translate(
     'xpack.upgradeAssistant.esDeprecationErrors.permissionsErrorMessage',
     {
-      defaultMessage: 'You are not authorized to view Elasticsearch deprecations.',
+      defaultMessage: 'You are not authorized to view Elasticsearch deprecation issues.',
     }
   ),
   partiallyUpgradedWarning: i18n.translate(
@@ -29,7 +29,7 @@ const i18nTexts = {
     }
   ),
   loadingError: i18n.translate('xpack.upgradeAssistant.esDeprecationErrors.loadingErrorMessage', {
-    defaultMessage: 'Could not retrieve Elasticsearch deprecations.',
+    defaultMessage: 'Could not retrieve Elasticsearch deprecation issues.',
   }),
 };
 

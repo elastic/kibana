@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { DataFrameAnalyticsConfig } from './data_frame_analytics';
-import { FeatureImportanceBaseline, TotalFeatureImportance } from './feature_importance';
-import { XOR } from './common';
+import type { DataFrameAnalyticsConfig } from './data_frame_analytics';
+import type { FeatureImportanceBaseline, TotalFeatureImportance } from './feature_importance';
+import type { XOR } from './common';
+import type { DeploymentState } from '../constants/trained_models';
 
 export interface IngestStats {
   count: number;
@@ -17,8 +18,8 @@ export interface IngestStats {
 }
 
 export interface TrainedModelStat {
-  model_id: string;
-  pipeline_count: number;
+  model_id?: string;
+  pipeline_count?: number;
   inference_stats?: {
     failure_count: number;
     inference_count: number;
@@ -100,6 +101,9 @@ export interface TrainedModelConfigResponse {
   tags: string[];
   version: string;
   inference_config?: Record<string, any>;
+  /**
+   * Associated pipelines. Extends response from the ES endpoint.
+   */
   pipelines?: Record<string, PipelineDefinition> | null;
 }
 
@@ -125,7 +129,7 @@ export interface TrainedModelDeploymentStatsResponse {
   model_size_bytes: number;
   inference_threads: number;
   model_threads: number;
-  state: string;
+  state: DeploymentState;
   allocation_status: { target_allocation_count: number; state: string; allocation_count: number };
   nodes: Array<{
     node: Record<
@@ -147,27 +151,48 @@ export interface TrainedModelDeploymentStatsResponse {
     routing_state: { routing_state: string };
     average_inference_time_ms: number;
     last_access: number;
+    number_of_pending_requests: number;
+    start_time: number;
   }>;
+}
+
+export interface AllocatedModel {
+  inference_threads: number;
+  allocation_status: {
+    target_allocation_count: number;
+    state: string;
+    allocation_count: number;
+  };
+  /**
+   * Not required for rendering in the Model stats
+   */
+  model_id?: string;
+  state: string;
+  model_threads: number;
+  model_size_bytes: number;
+  node: {
+    /**
+     * Not required for rendering in the Nodes overview
+     */
+    name?: string;
+    average_inference_time_ms: number;
+    inference_count: number;
+    routing_state: {
+      routing_state: string;
+      reason?: string;
+    };
+    last_access?: number;
+    number_of_pending_requests: number;
+    start_time: number;
+  };
 }
 
 export interface NodeDeploymentStatsResponse {
   id: string;
   name: string;
-  transport_address: string;
   attributes: Record<string, string>;
   roles: string[];
-  allocated_models: Array<{
-    inference_threads: number;
-    allocation_status: {
-      target_allocation_count: number;
-      state: string;
-      allocation_count: number;
-    };
-    model_id: string;
-    state: string;
-    model_threads: number;
-    model_size_bytes: number;
-  }>;
+  allocated_models: AllocatedModel[];
   memory_overview: {
     machine_memory: {
       /** Total machine memory in bytes */

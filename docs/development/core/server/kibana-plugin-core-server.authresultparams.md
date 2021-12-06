@@ -16,7 +16,7 @@ export interface AuthResultParams
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [requestHeaders](./kibana-plugin-core-server.authresultparams.requestheaders.md) | <code>AuthHeaders</code> | Auth specific headers to attach to a request object. Used to perform a request to Elasticsearch on behalf of an authenticated user. |
-|  [responseHeaders](./kibana-plugin-core-server.authresultparams.responseheaders.md) | <code>AuthHeaders</code> | Auth specific headers to attach to a response object. Used to send back authentication mechanism related headers to a client when needed. |
-|  [state](./kibana-plugin-core-server.authresultparams.state.md) | <code>Record&lt;string, any&gt;</code> | Data to associate with an incoming request. Any downstream plugin may get access to the data. |
+|  [requestHeaders?](./kibana-plugin-core-server.authresultparams.requestheaders.md) | AuthHeaders | <i>(Optional)</i> Auth specific headers to attach to a request object. Used to perform a request to Elasticsearch on behalf of an authenticated user. |
+|  [responseHeaders?](./kibana-plugin-core-server.authresultparams.responseheaders.md) | AuthHeaders | <i>(Optional)</i> Auth specific headers to attach to a response object. Used to send back authentication mechanism related headers to a client when needed. |
+|  [state?](./kibana-plugin-core-server.authresultparams.state.md) | Record&lt;string, any&gt; | <i>(Optional)</i> Data to associate with an incoming request. Any downstream plugin may get access to the data. |
 

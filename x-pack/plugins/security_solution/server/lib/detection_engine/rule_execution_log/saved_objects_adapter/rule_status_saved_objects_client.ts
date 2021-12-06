@@ -67,6 +67,9 @@ export const ruleStatusSavedObjectsClientFactory = (
       type: 'alert',
     }));
     const order: 'desc' = 'desc';
+    // NOTE: Once https://github.com/elastic/kibana/issues/115153 is resolved
+    // ${legacyRuleStatusSavedObjectType}.statusDate will need to be updated to
+    // ${legacyRuleStatusSavedObjectType}.attributes.statusDate
     const aggs = {
       references: {
         nested: {

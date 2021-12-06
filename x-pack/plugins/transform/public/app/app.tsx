@@ -12,7 +12,7 @@ import { ScopedHistory } from 'kibana/public';
 
 import { EuiErrorBoundary } from '@elastic/eui';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
 

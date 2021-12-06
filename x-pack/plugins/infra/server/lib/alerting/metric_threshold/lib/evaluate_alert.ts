@@ -56,7 +56,8 @@ interface CompositeAggregationsResponse {
 export interface EvaluatedAlertParams {
   criteria: MetricExpressionParams[];
   groupBy: string | undefined | string[];
-  filterQuery: string | undefined;
+  filterQuery?: string;
+  filterQueryText?: string;
   shouldDropPartialBuckets?: boolean;
 }
 
@@ -68,13 +69,13 @@ export const evaluateAlert = <Params extends EvaluatedAlertParams = EvaluatedAle
   timeframe?: { start?: number; end: number }
 ) => {
   const { criteria, groupBy, filterQuery, shouldDropPartialBuckets } = params;
+
   return Promise.all(
     criteria.map(async (criterion) => {
       const currentValues = await getMetric(
         esClient,
         criterion,
         config.metricAlias,
-        config.fields.timestamp,
         groupBy,
         filterQuery,
         timeframe,
@@ -147,7 +148,6 @@ const getMetric: (
   esClient: ElasticsearchClient,
   params: MetricExpressionParams,
   index: string,
-  timefield: string,
   groupBy: string | undefined | string[],
   filterQuery: string | undefined,
   timeframe?: { start?: number; end: number },
@@ -156,7 +156,6 @@ const getMetric: (
   esClient,
   params,
   index,
-  timefield,
   groupBy,
   filterQuery,
   timeframe,
@@ -172,7 +171,6 @@ const getMetric: (
 
   const searchBody = getElasticsearchMetricQuery(
     params,
-    timefield,
     calculatedTimerange,
     hasGroupBy ? groupBy : undefined,
     filterQuery

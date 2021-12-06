@@ -7,7 +7,7 @@
  */
 import React from 'react';
 import * as t from 'io-ts';
-import { toNumberRt } from '@kbn/io-ts-utils';
+import { toNumberRt } from '@kbn/io-ts-utils/to_number_rt';
 import { createRouter } from './create_router';
 import { createMemoryHistory } from 'history';
 import { route } from './route';
@@ -267,6 +267,7 @@ describe('createRouter', () => {
 
       const matches = router.matchRoutes('/', history.location);
 
+      // @ts-expect-error 4.3.5 upgrade - router doesn't seem able to merge properly when two routes match
       expect(matches[1]?.match.params).toEqual({
         query: {
           rangeFrom: 'now-30m',
@@ -285,6 +286,7 @@ describe('createRouter', () => {
 
       expect(matchedRoutes.length).toEqual(4);
 
+      // @ts-expect-error 4.3.5 upgrade - router doesn't seem able to merge properly when two routes match
       expect(matchedRoutes[matchedRoutes.length - 1].match).toEqual({
         isExact: true,
         params: {

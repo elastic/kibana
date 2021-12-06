@@ -6,5 +6,10 @@
  * Side Public License, v 1.
  */
 
-export { SavedQuery, SavedQueryAttributes, SavedQueryService, SavedQueryTimeFilter } from './types';
+export type {
+  SavedQuery,
+  SavedQueryAttributes,
+  SavedQueryService,
+  SavedQueryTimeFilter,
+} from './types';
 export { createSavedQueryService } from './saved_query_service';

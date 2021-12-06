@@ -15,7 +15,7 @@ import {
 } from '@elastic/eui';
 import React, { useState } from 'react';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { RuleGroup } from '../../model';
 import { AllRule, AnyRule, ExceptAllRule, ExceptAnyRule, FieldRule } from '../../model';

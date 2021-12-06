@@ -49,6 +49,7 @@ export default function ({ getService, getPageObjects }: any) {
     });
 
     it('Create Pipeline Wizard', async () => {
+      await testSubjects.click('emptyStateCreatePipelineDropdown');
       await testSubjects.click('emptyStateCreatePipelineButton');
       await retry.waitFor('Create pipeline page one to be visible', async () => {
         return testSubjects.isDisplayed('pageTitle') ? true : false;

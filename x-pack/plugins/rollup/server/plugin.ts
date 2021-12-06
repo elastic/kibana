@@ -76,12 +76,12 @@ export class RollupPlugin implements Plugin<void, void, any, any> {
 
     uiSettings.register({
       [CONFIG_ROLLUPS]: {
-        name: i18n.translate('xpack.rollupJobs.rollupIndexPatternsTitle', {
-          defaultMessage: 'Enable rollup index patterns',
+        name: i18n.translate('xpack.rollupJobs.rollupDataViewsTitle', {
+          defaultMessage: 'Enable rollup data views',
         }),
         value: true,
-        description: i18n.translate('xpack.rollupJobs.rollupIndexPatternsDescription', {
-          defaultMessage: `Enable the creation of index patterns which capture rollup indices,
+        description: i18n.translate('xpack.rollupJobs.rollupDataViewsDescription', {
+          defaultMessage: `Enable the creation of data views that capture rollup indices,
               which in turn enable visualizations based on rollup data.`,
         }),
         category: ['rollups'],

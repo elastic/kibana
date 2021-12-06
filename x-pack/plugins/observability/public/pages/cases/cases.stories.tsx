@@ -14,11 +14,11 @@ import {
 } from '../../../../../../src/plugins/kibana_react/public';
 import { casesFeatureId } from '../../../common';
 import { PluginContext, PluginContextValue } from '../../context/plugin_context';
-import { AllCasesPage } from './all_cases';
+import { CasesPage } from './';
 
 export default {
   title: 'app/Cases',
-  component: AllCasesPage,
+  component: CasesPage,
   decorators: [
     (Story: ComponentType) => {
       const KibanaReactContext = createKibanaReactContext({
@@ -53,5 +53,5 @@ export default {
 };
 
 export function EmptyState() {
-  return <AllCasesPage />;
+  return <CasesPage />;
 }

@@ -8,6 +8,7 @@
 import { InfraMetadataFeature } from '../../../../../common/http_api/metadata_api';
 import { InventoryMetric } from '../../../../../common/inventory_models/types';
 import { metrics } from '../../../../../common/inventory_models/metrics';
+import { TIMESTAMP_FIELD } from '../../../../../common/constants';
 
 export const getFilteredMetrics = (
   requiredMetrics: InventoryMetric[],
@@ -20,7 +21,7 @@ export const getFilteredMetrics = (
     const metricModelCreator = metrics.tsvb[metric];
     // We just need to get a dummy version of the model so we can filter
     // using the `requires` attribute.
-    const metricModel = metricModelCreator('@timestamp', 'test', '>=1m');
+    const metricModel = metricModelCreator(TIMESTAMP_FIELD, 'test', '>=1m');
     return metricMetadata.some((m) => m && metricModel.requires.includes(m));
   });
 };

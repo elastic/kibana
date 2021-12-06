@@ -7,7 +7,7 @@
 
 import React, { FC, useCallback, useMemo } from 'react';
 import { EuiButtonEmpty, EuiSpacer, EuiCallOut } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   Chart,
   Settings,
@@ -21,7 +21,7 @@ import {
   BarSeriesSpec,
 } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
-import euiVars from '@elastic/eui/dist/eui_theme_light.json';
+import { euiLightVars as euiVars } from '@kbn/ui-shared-deps-src/theme';
 import {
   TotalFeatureImportance,
   isClassificationTotalFeatureImportance,

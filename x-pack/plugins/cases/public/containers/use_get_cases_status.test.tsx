@@ -24,14 +24,11 @@ describe('useGetCasesStatus', () => {
   });
 
   it('init', async () => {
+    const { result } = renderHook<string, UseGetCasesStatus>(() => useGetCasesStatus(), {
+      wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+    });
+
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseGetCasesStatus>(
-        () => useGetCasesStatus(),
-        {
-          wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
-        }
-      );
-      await waitForNextUpdate();
       expect(result.current).toEqual({
         countClosedCases: null,
         countOpenCases: null,
@@ -53,7 +50,6 @@ describe('useGetCasesStatus', () => {
         }
       );
       await waitForNextUpdate();
-      await waitForNextUpdate();
       expect(spyOnGetCasesStatus).toBeCalledWith(abortCtrl.signal, [SECURITY_SOLUTION_OWNER]);
     });
   });
@@ -66,7 +62,6 @@ describe('useGetCasesStatus', () => {
           wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
         }
       );
-      await waitForNextUpdate();
       await waitForNextUpdate();
       expect(result.current).toEqual({
         countClosedCases: casesStatus.countClosedCases,
@@ -92,7 +87,6 @@ describe('useGetCasesStatus', () => {
           wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
         }
       );
-      await waitForNextUpdate();
       await waitForNextUpdate();
 
       expect(result.current).toEqual({

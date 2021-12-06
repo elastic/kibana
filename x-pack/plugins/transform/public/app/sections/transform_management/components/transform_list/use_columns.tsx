@@ -7,7 +7,7 @@
 
 import React, { Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiBadge,
   EuiTableActionsColumnType,
@@ -144,6 +144,20 @@ export const useColumns = (
       sortable: true,
       truncateText: true,
       scope: 'row',
+      render: (transformId, item) => {
+        if (item.config?._meta?.managed !== true) return transformId;
+        return (
+          <>
+            {transformId}
+            &nbsp;
+            <EuiBadge color="hollow" data-test-subj="transformListRowIsManagedBadge">
+              {i18n.translate('xpack.transform.transformList.managedBadgeLabel', {
+                defaultMessage: 'Managed',
+              })}
+            </EuiBadge>
+          </>
+        );
+      },
     },
     {
       id: 'alertRule',

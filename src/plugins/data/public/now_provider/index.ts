@@ -6,8 +6,5 @@
  * Side Public License, v 1.
  */
 
-export {
-  NowProvider,
-  NowProviderInternalContract,
-  NowProviderPublicContract,
-} from './now_provider';
+export type { NowProviderInternalContract, NowProviderPublicContract } from './now_provider';
+export { NowProvider } from './now_provider';

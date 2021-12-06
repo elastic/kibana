@@ -9,7 +9,7 @@ they are now maintained by {kib}.
 Numeral formatting patterns are used in multiple places in {kib}, including:
 
 * <<advanced-options, Advanced settings>>
-* <<field-formatters-numeric, Index pattern formatters>>
+* <<field-formatters-numeric, Data view formatters>>
 * <<tsvb, *TSVB*>>
 * <<canvas, *Canvas*>>
 

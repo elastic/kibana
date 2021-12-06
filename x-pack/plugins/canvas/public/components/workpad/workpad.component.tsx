@@ -11,7 +11,11 @@ import Style from 'style-it';
 // @ts-expect-error
 import { WorkpadPage } from '../workpad_page';
 import { Fullscreen } from '../fullscreen';
-import { HEADER_BANNER_HEIGHT, WORKPAD_CANVAS_BUFFER } from '../../../common/lib/constants';
+import {
+  HEADER_BANNER_HEIGHT,
+  WORKPAD_CANVAS_BUFFER,
+  DEFAULT_WORKPAD_CSS,
+} from '../../../common/lib/constants';
 import { CommitFn, CanvasPage } from '../../../types';
 import { WorkpadShortcuts } from './workpad_shortcuts.component';
 
@@ -122,7 +126,7 @@ export const Workpad: FC<Props> = ({
 
             // NOTE: the data-shared-* attributes here are used for reporting
             return Style.it(
-              workpadCss,
+              workpadCss || DEFAULT_WORKPAD_CSS,
               <div
                 className={`canvasWorkpad ${isFullscreenProp ? 'fullscreen' : ''}`}
                 style={fsStyle}

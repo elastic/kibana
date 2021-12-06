@@ -6,7 +6,7 @@
  */
 
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
 
 import { useKibana, useRouterNavigate } from '../../../common/lib/kibana';
@@ -25,6 +25,16 @@ const PacksPageComponent = () => {
             <h1>
               <FormattedMessage id="xpack.osquery.packList.pageTitle" defaultMessage="Packs" />
             </h1>
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiText color="subdued">
+            <p>
+              <FormattedMessage
+                id="xpack.osquery.packList.pageSubtitle"
+                defaultMessage="Create packs to organize sets of queries and to schedule queries for agent policies."
+              />
+            </p>
           </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
