@@ -14,16 +14,10 @@ import { TileStyle } from '../../styles/tile/tile_style';
 import { ITMSSource } from '../../sources/tms_source';
 import { DataRequestContext } from '../../../actions';
 
-export interface ITileLayerArguments {
-  source: ITMSSource;
-  layerDescriptor: LayerDescriptor;
-}
-
-// TODO - rename to RasterTileLayer
-export class TileLayer extends AbstractLayer {
+export class RasterTileLayer extends AbstractLayer {
   static createDescriptor(options: Partial<LayerDescriptor>) {
     const tileLayerDescriptor = super.createDescriptor(options);
-    tileLayerDescriptor.type = LAYER_TYPE.TILE;
+    tileLayerDescriptor.type = LAYER_TYPE.RASTER_TILE;
     tileLayerDescriptor.alpha = _.get(options, 'alpha', 1);
     tileLayerDescriptor.style = { type: LAYER_STYLE_TYPE.TILE };
     return tileLayerDescriptor;
@@ -31,7 +25,13 @@ export class TileLayer extends AbstractLayer {
 
   private readonly _style: TileStyle;
 
-  constructor({ source, layerDescriptor }: ITileLayerArguments) {
+  constructor({
+    source,
+    layerDescriptor,
+  }: {
+    source: ITMSSource;
+    layerDescriptor: LayerDescriptor;
+  }) {
     super({ source, layerDescriptor });
     this._style = new TileStyle();
   }
