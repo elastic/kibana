@@ -23,7 +23,7 @@ import {
   DEFAULT_COLUMN_MIN_WIDTH,
 } from '../../../timelines/components/timeline/body/constants';
 import type { TimelineEventsDetailsItem } from '../../../../common/search_strategy/timeline';
-import { EnrichedFieldInfo, EventSummaryField } from './types';
+import type { EnrichedFieldInfo, EventSummaryField } from './types';
 
 import * as i18n from './translations';
 import { ColumnHeaderOptions } from '../../../../common/types';
