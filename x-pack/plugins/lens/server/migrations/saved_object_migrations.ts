@@ -15,6 +15,11 @@ import {
 } from 'src/core/server';
 import { Filter } from '@kbn/es-query';
 import { Query } from 'src/plugins/data/public';
+import {
+  mergeMigrationFunctionMaps,
+  MigrateFunctionsObject,
+} from 'src/plugins/kibana_utils/common';
+import { getAllMigrations } from 'src/plugins/data/common';
 import { PersistableFilter } from '../../common';
 import {
   LensDocShapePost712,
@@ -32,6 +37,7 @@ import {
   commonUpdateVisLayerType,
   commonMakeReversePaletteAsCustom,
   commonRenameFilterReferences,
+  getLensFilterMigrations,
 } from './common_migrations';
 
 interface LensDocShapePre710<VisualizationState = unknown> {
@@ -447,7 +453,7 @@ const renameFilterReferences: SavedObjectMigrationFn<
   return { ...newDoc, attributes: commonRenameFilterReferences(newDoc.attributes) };
 };
 
-export const migrations: SavedObjectMigrationMap = {
+const lensMigrations: SavedObjectMigrationMap = {
   '7.7.0': removeInvalidAccessors,
   // The order of these migrations matter, since the timefield migration relies on the aggConfigs
   // sitting directly on the esaggs as an argument and not a nested function (which lens_auto_date was).
@@ -462,3 +468,8 @@ export const migrations: SavedObjectMigrationMap = {
   '7.16.0': moveDefaultReversedPaletteToCustom,
   '8.1.0': renameFilterReferences,
 };
+
+export const migrations = mergeMigrationFunctionMaps(
+  lensMigrations as MigrateFunctionsObject,
+  getLensFilterMigrations(getAllMigrations())
+);

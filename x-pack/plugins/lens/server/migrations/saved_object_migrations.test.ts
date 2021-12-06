@@ -15,6 +15,8 @@ import {
 import { LensDocShape715, VisState716, VisStatePost715, VisStatePre715 } from './types';
 import { CustomPaletteParams, layerTypes } from '../../common';
 import { PaletteOutput } from 'src/plugins/charts/common';
+import { Filter } from '@kbn/es-query';
+import { getLensFilterMigrations } from './common_migrations';
 
 describe('Lens migrations', () => {
   describe('7.7.0 missing dimensions in XY', () => {
@@ -1508,6 +1510,37 @@ describe('Lens migrations', () => {
       >;
 
       expect(result.attributes.state.filters).toEqual(expectedFilters);
+    });
+  });
+
+  describe('applying filter migrations', () => {
+    it('creates a filter migrations map that works on a lens visualization', () => {
+      const filterMigrations = {
+        '1.1': (filter: Filter) => ({ ...filter, version: '1.1' }),
+        '2.2': (filter: Filter) => ({ ...filter, version: '2.2' }),
+        '3.3': (filter: Filter) => ({ ...filter, version: '3.3' }),
+      };
+
+      const lensVisualization = {
+        state: {
+          filters: [{}, {}],
+        },
+      };
+
+      const migrationMap = getLensFilterMigrations(filterMigrations);
+
+      expect(migrationMap['1.1'](lensVisualization).state.filters).toEqual([
+        { version: '1.1' },
+        { version: '1.1' },
+      ]);
+      expect(migrationMap['2.2'](lensVisualization).state.filters).toEqual([
+        { version: '2.2' },
+        { version: '2.2' },
+      ]);
+      expect(migrationMap['3.3'](lensVisualization).state.filters).toEqual([
+        { version: '3.3' },
+        { version: '3.3' },
+      ]);
     });
   });
 });
