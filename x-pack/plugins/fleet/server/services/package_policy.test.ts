@@ -2831,6 +2831,7 @@ describe('Package policy service', () => {
         inputs: [
           {
             type: 'logfile',
+            policy_template: 'log',
             enabled: true,
             streams: [
               {
@@ -2874,6 +2875,7 @@ describe('Package policy service', () => {
           {
             enabled: false,
             type: 'logfile',
+            policy_template: 'log',
             streams: [
               {
                 enabled: false,
@@ -2891,6 +2893,76 @@ describe('Package policy service', () => {
             type: 'text',
           },
         },
+      });
+    });
+
+    it('should enrich from epm with defaults using policy template', async () => {
+      (packageToPackagePolicy as jest.Mock).mockReturnValueOnce({
+        package: { name: 'aws', title: 'AWS', version: '1.0.0' },
+        inputs: [
+          {
+            type: 'aws/metrics',
+            policy_template: 'cloudtrail',
+            enabled: true,
+            streams: [
+              {
+                enabled: true,
+                data_stream: {
+                  type: 'metrics',
+                  dataset: 'cloudtrail',
+                },
+              },
+            ],
+          },
+          {
+            type: 'aws/metrics',
+            policy_template: 'cloudwatch',
+            enabled: true,
+            streams: [
+              {
+                enabled: true,
+                data_stream: {
+                  type: 'metrics',
+                  dataset: 'cloudwatch',
+                },
+              },
+            ],
+          },
+        ],
+      });
+      const newPolicy = {
+        name: 'aws-1',
+        inputs: [{ type: 'aws/metrics', policy_template: 'cloudwatch', enabled: true }],
+        package: { name: 'aws', version: '1.0.0' },
+      } as NewPackagePolicy;
+      const result = await packagePolicyService.enrichPolicyWithDefaultsFromPackage(
+        savedObjectsClientMock.create(),
+        newPolicy
+      );
+      expect(result).toEqual({
+        name: 'aws-1',
+        namespace: 'default',
+        description: '',
+        package: { name: 'aws', title: 'AWS', version: '1.0.0' },
+        enabled: true,
+        policy_id: '1',
+        output_id: '',
+        inputs: [
+          {
+            type: 'aws/metrics',
+            policy_template: 'cloudwatch',
+            enabled: true,
+            streams: [
+              {
+                enabled: true,
+                data_stream: {
+                  type: 'metrics',
+                  dataset: 'cloudwatch',
+                },
+              },
+            ],
+          },
+        ],
       });
     });
 

@@ -723,7 +723,11 @@ class PackagePolicyService {
       );
       if (newPP) {
         const inputs = newPolicy.inputs.map((input) => {
-          const defaultInput = newPP.inputs.find((i) => i.type === input.type);
+          const defaultInput = newPP.inputs.find(
+            (i) =>
+              i.type === input.type &&
+              (!input.policy_template || input.policy_template === i.policy_template)
+          );
           return {
             ...defaultInput,
             enabled: input.enabled,
