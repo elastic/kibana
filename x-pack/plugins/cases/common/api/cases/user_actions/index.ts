@@ -16,6 +16,7 @@ import { PushedUserActionRt, PushedUserActionPayloadRt } from './pushed';
 import { TagsUserActionRt, TagsUserActionPayloadRt } from './tags';
 import { TitleUserActionRt, TitleUserActionPayloadRt } from './title';
 import { SettingsUserActionRt, SettingsUserActionPayloadRt } from './settings';
+import { StatusUserActionRt, StatusUserActionPayloadRt } from './status';
 
 export * from './common';
 export * from './description';
@@ -29,6 +30,7 @@ export const UserActionsRt = rt.union([
   TagsUserActionRt,
   TitleUserActionRt,
   SettingsUserActionRt,
+  StatusUserActionRt,
 ]);
 
 const CaseUserActionBasicRt = rt.intersection([UserActionsRt, UserActionCommonAttributesRt]);
@@ -54,6 +56,7 @@ const CaseUserActionESRt = rt.type({
     tags: TagsUserActionPayloadRt,
     title: TitleUserActionPayloadRt,
     settings: SettingsUserActionPayloadRt,
+    status: StatusUserActionPayloadRt,
   }),
 });
 
