@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Ast, ExpressionFunctionAST, fromExpression } from '@kbn/interpreter/common';
+import { Ast, ExpressionFunctionAST, fromExpression, toExpression } from '@kbn/interpreter/common';
 import { flowRight, get, groupBy } from 'lodash';
 import {
   Filter as FilterType,
@@ -63,7 +63,7 @@ export const groupFiltersBy = (filters: FilterType[], groupByField: FilterField)
   }));
 };
 
-export const excludeFiltersByGroups = (filters: Ast[], filterExprAst: ExpressionFunctionAST) => {
+const excludeFiltersByGroups = (filters: Ast[], filterExprAst: ExpressionFunctionAST) => {
   const groupsToExclude = filterExprAst.arguments.group ?? [];
   const removeUngrouped = filterExprAst.arguments.ungrouped?.[0] ?? false;
   return filters.filter((filter) => {
@@ -83,7 +83,7 @@ export const excludeFiltersByGroups = (filters: Ast[], filterExprAst: Expression
   });
 };
 
-export const includeFiltersByGroups = (filters: Ast[], filterExprAst: ExpressionFunctionAST) => {
+const includeFiltersByGroups = (filters: Ast[], filterExprAst: ExpressionFunctionAST) => {
   const groupsToInclude = filterExprAst.arguments.group ?? [];
   const includeOnlyUngrouped = filterExprAst.arguments.ungrouped?.[0] ?? false;
   return filters.filter((filter) => {
@@ -101,20 +101,22 @@ export const includeFiltersByGroups = (filters: Ast[], filterExprAst: Expression
   });
 };
 
-export const getFiltersByFilterExprs = (
+export const getFiltersByFilterExpressions = (
   filters: string[],
   filterExprsAsts: ExpressionFunctionAST[]
 ) => {
   const filtersAst = filters.map((filter) => fromExpression(filter));
-  return filterExprsAsts.reduce((includedFilters, filter) => {
+  const matchedFiltersAst = filterExprsAsts.reduce((includedFilters, filter) => {
     if (excludeFiltersExpressions.includes(filter.function)) {
       return excludeFiltersByGroups(includedFilters, filter);
     }
     return includeFiltersByGroups(includedFilters, filter);
   }, filtersAst);
+
+  return matchedFiltersAst.map((ast) => toExpression(ast));
 };
 
-export const getFiltersExprsFromElement = (expr: string) => {
+export const getFiltersExprsFromExpression = (expr: string) => {
   const ast = fromExpression(expr);
   return ast.chain.filter((expression) => filtersExpressions.includes(expression.function));
 };

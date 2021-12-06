@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { fromExpression } from '@kbn/interpreter/common';
 import { FC } from 'react';
 import {
   Filter as FilterType,
@@ -18,9 +19,8 @@ import {
   flattenFilterView,
   createFilledFilterView,
   groupFiltersBy,
-  getFiltersByGroups,
-  extractGroupsFromElementsFilters,
-  extractUngroupedFromElementsFilters,
+  getFiltersExprsFromExpression,
+  getFiltersByFilterExpressions,
   isExpressionWithFilters,
 } from './filter';
 
@@ -285,7 +285,7 @@ describe('groupFiltersBy', () => {
   });
 });
 
-describe('getFiltersByGroups', () => {
+describe('getFiltersByFilterExpressions', () => {
   const group1 = 'Group 1';
   const group2 = 'Group 2';
 
@@ -295,67 +295,91 @@ describe('getFiltersByGroups', () => {
     `exactly value="machine-learning" column="project1"`,
     `exactly value="kibana" column="project2" filterGroup="${group2}"`,
   ];
+  const kibanaExpr = 'kibana';
+  const selectFilterExprEmpty = 'selectFilter';
+  const selectFilterExprWithGroups = `${selectFilterExprEmpty} group="${group2}"`;
+  const selectFilterExprWithUngrouped = `${selectFilterExprEmpty} ungrouped=true`;
+  const selectFilterExprWithGroupsAndUngrouped = `${selectFilterExprEmpty}  group="${group2}" ungrouped=true`;
 
-  it('returns all filters related to a specified groups', () => {
-    expect(getFiltersByGroups(filters, [group1, group2])).toEqual([
-      filters[0],
-      filters[1],
-      filters[3],
+  const removeFilterExprEmpty = 'removeFilter';
+  const removeFilterExprWithGroups = `${removeFilterExprEmpty} group="${group2}"`;
+  const removeFilterExprWithUngrouped = `${removeFilterExprEmpty} ungrouped=true`;
+  const removeFilterExprWithGroupsAndUngrouped = `${removeFilterExprEmpty} group="${group2}" ungrouped=true`;
+
+  const getFiltersAsts = (filtersExprs: string[]) => {
+    const ast = fromExpression(filtersExprs.join(' | '));
+    return ast.chain;
+  };
+
+  it('returns all filters if no arguments specified to selectFilter expression', () => {
+    const filtersExprs = getFiltersAsts([kibanaExpr, selectFilterExprEmpty]);
+    const matchedFilters = getFiltersByFilterExpressions(filters, filtersExprs);
+    expect(matchedFilters).toEqual(filters);
+  });
+
+  it('returns filters with group, specified to selectFilter expression', () => {
+    const filtersExprs = getFiltersAsts([kibanaExpr, selectFilterExprWithGroups]);
+    const matchedFilters = getFiltersByFilterExpressions(filters, filtersExprs);
+    expect(matchedFilters).toEqual([filters[1], filters[3]]);
+  });
+
+  it('returns filters without group if ungrouped is true at selectFilter expression', () => {
+    const filtersExprs = getFiltersAsts([kibanaExpr, selectFilterExprWithUngrouped]);
+    const matchedFilters = getFiltersByFilterExpressions(filters, filtersExprs);
+    expect(matchedFilters).toEqual([filters[2]]);
+  });
+
+  it('returns filters with group if ungrouped is true and groups are not empty at selectFilter expression', () => {
+    const filtersExprs = getFiltersAsts([kibanaExpr, selectFilterExprWithGroupsAndUngrouped]);
+    const matchedFilters = getFiltersByFilterExpressions(filters, filtersExprs);
+    expect(matchedFilters).toEqual([filters[1], filters[3]]);
+  });
+
+  it('returns no filters if no arguments, specified to removeFilter expression', () => {
+    const filtersExprs = getFiltersAsts([kibanaExpr, removeFilterExprEmpty]);
+    const matchedFilters = getFiltersByFilterExpressions(filters, filtersExprs);
+    expect(matchedFilters).toEqual([]);
+  });
+
+  it('returns filters without group, specified to removeFilter expression', () => {
+    const filtersExprs = getFiltersAsts([kibanaExpr, removeFilterExprWithGroups]);
+    const matchedFilters = getFiltersByFilterExpressions(filters, filtersExprs);
+    expect(matchedFilters).toEqual([filters[0], filters[2]]);
+  });
+
+  it('returns filters without group if ungrouped is true at removeFilter expression', () => {
+    const filtersExprs = getFiltersAsts([kibanaExpr, removeFilterExprWithUngrouped]);
+    const matchedFilters = getFiltersByFilterExpressions(filters, filtersExprs);
+    expect(matchedFilters).toEqual([filters[0], filters[1], filters[3]]);
+  });
+
+  it('remove filters without group and with specified group if ungrouped is true and groups are not empty at removeFilter expression', () => {
+    const filtersExprs = getFiltersAsts([kibanaExpr, removeFilterExprWithGroupsAndUngrouped]);
+    const matchedFilters = getFiltersByFilterExpressions(filters, filtersExprs);
+    expect(matchedFilters).toEqual([filters[0]]);
+  });
+
+  it('should include/exlude filters iteratively', () => {
+    const filtersExprs = getFiltersAsts([
+      kibanaExpr,
+      selectFilterExprWithGroups,
+      removeFilterExprWithGroups,
+      selectFilterExprEmpty,
     ]);
-
-    expect(getFiltersByGroups(filters, [group2])).toEqual([filters[1], filters[3]]);
-  });
-
-  it('returns filters without group if ungrouped is true', () => {
-    expect(getFiltersByGroups(filters, [], true)).toEqual([filters[2]]);
-  });
-
-  it('returns filters with group if ungrouped is true and groups are not empty', () => {
-    expect(getFiltersByGroups(filters, [group1], true)).toEqual([filters[0]]);
-  });
-
-  it('returns empty array if not found any filter with a specified group', () => {
-    expect(getFiltersByGroups(filters, ['absent group'])).toEqual([]);
-  });
-
-  it('returns empty array if not groups specified', () => {
-    expect(getFiltersByGroups(filters, [])).toEqual(filters);
+    const matchedFilters = getFiltersByFilterExpressions(filters, filtersExprs);
+    expect(matchedFilters).toEqual([]);
   });
 });
 
-describe('extractGroupsFromElementsFilters', () => {
-  const exprFilters = 'filters';
-  const exprRest = 'demodata | plot | render';
+describe('getFiltersExprsFromExpression', () => {
+  it('returns list of filters expressions asts', () => {
+    const filter1 = 'selectFilter';
+    const filter2 = 'filters group="15" ungrouped=true';
+    const filter3 = 'removeFilter';
+    const expression = `kibana | ${filter1} | ${filter2} | ${filter3} | demodata | plot | render`;
+    const filtersAsts = getFiltersExprsFromExpression(expression);
 
-  it('returns groups which are specified at filters expression', () => {
-    const groups = ['group 1', 'group 2', 'group 3', 'group 4'];
-    const additionalGroups = [...groups, 'group 5'];
-    const groupsExpr = groups.map((group) => `group="${group}"`).join(' ');
-    const additionalGroupsExpr = additionalGroups.map((group) => `group="${group}"`).join(' ');
-
-    expect(
-      extractGroupsFromElementsFilters(
-        `${exprFilters} ${groupsExpr} | ${exprFilters} ${additionalGroupsExpr} | ${exprRest}`
-      )
-    ).toEqual(additionalGroups);
-  });
-
-  it('returns empty array if no groups were specified at filters expression', () => {
-    expect(extractGroupsFromElementsFilters(`${exprFilters} | ${exprRest}`)).toEqual([]);
-  });
-});
-
-describe('extractUngroupedFromElementsFilters', () => {
-  it('checks if ungrouped filters expression exist at the element', () => {
-    const expression =
-      'filters group="10" group="11" | filters group="15" ungrouped=true | demodata | plot | render';
-    const isUngrouped = extractUngroupedFromElementsFilters(expression);
-    expect(isUngrouped).toBeTruthy();
-
-    const nextExpression =
-      'filters group="10" group="11" | filters group="15" | demodata | plot | render';
-    const nextIsUngrouped = extractUngroupedFromElementsFilters(nextExpression);
-    expect(nextIsUngrouped).toBeFalsy();
+    expect(filtersAsts).toEqual([filter1, filter2, filter3].map((f) => fromExpression(f).chain[0]));
   });
 });
 
