@@ -14,7 +14,7 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertestWithoutAuth');
 
-  describe('FOO GET /api/saved_objects_tagging/tags', () => {
+  describe('GET /api/saved_objects_tagging/tags', () => {
     before(async () => {
       await esArchiver.load(
         'x-pack/test/saved_object_tagging/common/fixtures/es_archiver/rbac_tags'
