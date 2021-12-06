@@ -36,7 +36,6 @@ import { deleteRulesBulkRoute } from '../lib/detection_engine/routes/rules/delet
 import { performBulkActionRoute } from '../lib/detection_engine/routes/rules/perform_bulk_action_route';
 import { importRulesRoute } from '../lib/detection_engine/routes/rules/import_rules_route';
 import { exportRulesRoute } from '../lib/detection_engine/routes/rules/export_rules_route';
-import { findRulesStatusesRoute } from '../lib/detection_engine/routes/rules/find_rules_status_route';
 import { findRuleStatusInternalRoute } from '../lib/detection_engine/routes/rules/find_rule_status_internal_route';
 import { getPrepackagedRulesStatusRoute } from '../lib/detection_engine/routes/rules/get_prepackaged_rules_status_route';
 import {
@@ -95,8 +94,6 @@ export const initRoutes = (
   // Once we no longer have the legacy notifications system/"side car actions" this should be removed.
   legacyCreateLegacyNotificationRoute(router, logger);
 
-  // TODO: pass isRuleRegistryEnabled to all relevant routes
-
   addPrepackedRulesRoute(router);
   getPrepackagedRulesStatusRoute(router, config, security, isRuleRegistryEnabled);
   createRulesBulkRoute(router, ml, isRuleRegistryEnabled);
@@ -125,7 +122,6 @@ export const initRoutes = (
   persistNoteRoute(router, config, security);
   persistPinnedEventRoute(router, config, security);
 
-  findRulesStatusesRoute(router);
   findRuleStatusInternalRoute(router);
 
   // Detection Engine Signals routes that have the REST endpoints of /api/detection_engine/signals

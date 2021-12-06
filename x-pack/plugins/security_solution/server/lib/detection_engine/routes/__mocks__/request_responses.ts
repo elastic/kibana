@@ -226,13 +226,6 @@ export const getFindResultWithMultiHits = ({
   };
 };
 
-export const ruleStatusRequest = () =>
-  requestMock.create({
-    method: 'post',
-    path: `${DETECTION_ENGINE_RULES_URL}/_find_statuses`,
-    body: { ids: ['04128c15-0d1b-4716-a4c5-46997ac7f3bd'] },
-  });
-
 export const internalRuleStatusRequest = () =>
   requestMock.create({
     method: 'post',

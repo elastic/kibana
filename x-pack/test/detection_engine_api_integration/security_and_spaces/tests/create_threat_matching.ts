@@ -22,10 +22,7 @@ import {
 import { flattenWithPrefix } from '@kbn/securitysolution-rules';
 
 import { CreateRulesSchema } from '../../../../plugins/security_solution/common/detection_engine/schemas/request';
-import {
-  DETECTION_ENGINE_RULES_STATUS_URL,
-  DETECTION_ENGINE_RULES_URL,
-} from '../../../../plugins/security_solution/common/constants';
+import { DETECTION_ENGINE_RULES_URL } from '../../../../plugins/security_solution/common/constants';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createRule,
@@ -110,15 +107,15 @@ export default ({ getService }: FtrProviderContext) => {
 
         await waitForRuleSuccessOrStatus(supertest, log, ruleResponse.id, 'succeeded');
 
-        const { body: statusBody } = await supertest
-          .post(DETECTION_ENGINE_RULES_STATUS_URL)
+        const { body: rule } = await supertest
+          .get(DETECTION_ENGINE_RULES_URL)
           .set('kbn-xsrf', 'true')
-          .send({ ids: [ruleResponse.id] })
+          .query({ id: ruleResponse.id })
           .expect(200);
 
         const bodyToCompare = removeServerGeneratedProperties(ruleResponse);
         expect(bodyToCompare).to.eql(getThreatMatchingSchemaPartialMock(true));
-        expect(statusBody[ruleResponse.id].current_status.status).to.eql('succeeded');
+        expect(rule.status).to.eql('succeeded');
       });
     });
 
@@ -495,11 +492,11 @@ export default ({ getService }: FtrProviderContext) => {
           await waitForRuleSuccessOrStatus(supertest, log, id, 'failed');
 
           const { body } = await supertest
-            .post(`${DETECTION_ENGINE_RULES_URL}/_find_statuses`)
+            .post(DETECTION_ENGINE_RULES_URL)
             .set('kbn-xsrf', 'true')
-            .send({ ids: [id] })
+            .query({ id })
             .expect(200);
-          expect(body[id].current_status.last_failure_message).to.contain(
+          expect(body.last_failure_message).to.contain(
             'execution has exceeded its allotted interval'
           );
         });
