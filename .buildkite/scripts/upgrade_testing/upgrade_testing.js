@@ -123,12 +123,18 @@ const upgradeInstance = async ({ deploymentId }) => {
 
   console.log('command', baseCommand);
 
-  await execa.command(
-    `${baseCommand} --spec cypress/integration/trusted_apps_pre.spec.ts`,
-    {
-      shell: true,
-    }
-  );
+  try {
+    await execa.command(
+      `${baseCommand} --spec cypress/integration/trusted_apps_pre.spec.ts`,
+      {
+        shell: true,
+      }
+    );
+  } catch (error) {
+    await execa.command(
+      `buildkite-agent artifact upload target/kibana-cypress/**/*`
+    );
+  }
 
   await upgradeInstance({ deploymentId });
 
@@ -137,10 +143,16 @@ const upgradeInstance = async ({ deploymentId }) => {
     minTimeout: 30 * 1000,
   });
 
-  await execa.command(
-    `${baseCommand} --spec cypress/integration/trusted_apps_post.spec.ts`,
-    {
-      shell: true,
-    }
-  );
+  try {
+    await execa.command(
+      `${baseCommand} --spec cypress/integration/trusted_apps_post.spec.ts`,
+      {
+        shell: true,
+      }
+    );
+  } catch (error) {
+    await execa.command(
+      `buildkite-agent artifact upload target/kibana-cypress/**/*`
+    );
+  }
 })();
