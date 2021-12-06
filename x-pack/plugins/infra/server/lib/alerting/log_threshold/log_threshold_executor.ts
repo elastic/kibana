@@ -55,7 +55,7 @@ import {
 
 export type LogThresholdActionGroups = ActionGroupIdsOf<typeof FIRED_ACTIONS>;
 export type LogThresholdRuleTypeParams = AlertParams;
-export type LogThresholdRuleState = RuleTypeState; // no specific state used
+export type LogThresholdRuleTypeState = RuleTypeState; // no specific state used
 export type LogThresholdAlertState = AlertState; // no specific state used
 export type LogThresholdAlertContext = AlertContext; // no specific instance context used
 
@@ -89,7 +89,7 @@ const checkValueAgainstComparatorMap: {
 export const createLogThresholdExecutor = (libs: InfraBackendLibs) =>
   libs.logsRules.createLifecycleRuleExecutor<
     LogThresholdRuleTypeParams,
-    LogThresholdRuleState,
+    LogThresholdRuleTypeState,
     LogThresholdAlertState,
     LogThresholdAlertContext,
     LogThresholdActionGroups

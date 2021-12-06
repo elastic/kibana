@@ -42,7 +42,7 @@ type InventoryMetricThresholdAllowedActionGroups = ActionGroupIdsOf<
   typeof FIRED_ACTIONS | typeof WARNING_ACTIONS
 >;
 
-export type InventoryMetricThresholdRuleState = RuleTypeState; // no specific state used
+export type InventoryMetricThresholdRuleTypeState = RuleTypeState; // no specific state used
 export type InventoryMetricThresholdAlertState = AlertState; // no specific state used
 export type InventoryMetricThresholdAlertContext = AlertContext; // no specific instance context used
 
@@ -61,7 +61,7 @@ type InventoryMetricThresholdAlertFactory = (
 export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =>
   libs.metricsRules.createLifecycleRuleExecutor<
     InventoryMetricThresholdParams & Record<string, unknown>,
-    InventoryMetricThresholdRuleState,
+    InventoryMetricThresholdRuleTypeState,
     InventoryMetricThresholdAlertState,
     InventoryMetricThresholdAlertContext,
     InventoryMetricThresholdAllowedActionGroups
