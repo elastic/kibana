@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, ChangeEvent, useEffect, useRef } from 'react';
+import React, { useState, ChangeEvent, useEffect, useRef, KeyboardEventHandler } from 'react';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import {
@@ -57,7 +57,7 @@ export function SeriesName({ series, seriesId }: Props) {
     }
   };
 
-  const onKeyDown = (event: KeyboardEvent) => {
+  const onKeyDown: KeyboardEventHandler<HTMLInputElement> = (event) => {
     if (event.key === 'Enter') {
       setIsEditingEnabled(false);
     }
