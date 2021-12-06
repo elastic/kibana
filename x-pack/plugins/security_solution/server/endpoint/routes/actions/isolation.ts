@@ -52,7 +52,11 @@ export function registerHostIsolationRoutes(
       validate: HostIsolationRequestSchema,
       options: { authRequired: true, tags: ['access:securitySolution'] },
     },
-    withEndpointAuthz(['canIsolateHost'], logger, isolationRequestHandler(endpointContext, true))
+    withEndpointAuthz(
+      { all: ['canIsolateHost'] },
+      logger,
+      isolationRequestHandler(endpointContext, true)
+    )
   );
 
   // perform UN-isolate
@@ -62,7 +66,11 @@ export function registerHostIsolationRoutes(
       validate: HostIsolationRequestSchema,
       options: { authRequired: true, tags: ['access:securitySolution'] },
     },
-    withEndpointAuthz(['canUnIsolateHost'], logger, isolationRequestHandler(endpointContext, false))
+    withEndpointAuthz(
+      { all: ['canUnIsolateHost'] },
+      logger,
+      isolationRequestHandler(endpointContext, false)
+    )
   );
 }
 

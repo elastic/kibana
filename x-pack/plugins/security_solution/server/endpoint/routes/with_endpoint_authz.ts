@@ -5,26 +5,42 @@
  * 2.0.
  */
 
-import { RequestHandler, Logger } from 'kibana/server';
-import { EndpointAuthz } from '../../../common/endpoint/types/authz';
-import { SecuritySolutionRequestHandlerContext } from '../../types';
+import type { RequestHandler, Logger } from 'kibana/server';
+import type { EndpointAuthzKeyList } from '../../../common/endpoint/types/authz';
+import type { SecuritySolutionRequestHandlerContext } from '../../types';
 import { EndpointAuthorizationError } from '../errors';
+
+/**
+ * Interface for defining the needed permissions to access an API. Both sets of permissions (if defined) will
+ * be `AND` together.
+ */
+export interface EndpointApiNeededAuthz {
+  /* A list of authorization keys that ALL needed to be allowed */
+  all?: EndpointAuthzKeyList;
+
+  /* A list of authorization keys where at least one must allowed */
+  any?: EndpointAuthzKeyList;
+}
 
 /**
  * Wraps an API route handler and handles authorization checks for endpoint related
  * apis.
- * @param requiredAuthz
+ * @param neededAuthz
  * @param routeHandler
  * @param logger
  */
 export const withEndpointAuthz = <T>(
-  requiredAuthz: Array<keyof EndpointAuthz>,
+  neededAuthz: EndpointApiNeededAuthz,
   logger: Logger,
   routeHandler: T
 ): T => {
-  const enforceAuthz = requiredAuthz.length > 0;
+  const needAll: EndpointAuthzKeyList = neededAuthz.all ?? [];
+  const needAny: EndpointAuthzKeyList = neededAuthz.any ?? [];
+  const validateAll = needAll.length > 0;
+  const validateAny = needAny.length > 0;
+  const enforceAuthz = validateAll || validateAny;
 
-  if (!enforceAuthz && logger) {
+  if (!enforceAuthz) {
     logger.warn(`Authorization disabled for API route: ${new Error('').stack ?? '?'}`);
   }
 
@@ -36,10 +52,19 @@ export const withEndpointAuthz = <T>(
   > = async (context, request, response) => {
     if (enforceAuthz) {
       const endpointAuthz = context.securitySolution.endpointAuthz;
+      const permissionChecker = (permission: EndpointAuthzKeyList[0]) => endpointAuthz[permission];
 
-      if (!requiredAuthz.every((permission) => endpointAuthz[permission])) {
+      // has `all`?
+      if (validateAll && !needAll.every(permissionChecker)) {
         return response.forbidden({
-          body: new EndpointAuthorizationError({ required: [...requiredAuthz] }),
+          body: new EndpointAuthorizationError({ need_all: [...needAll] }),
+        });
+      }
+
+      // has `any`?
+      if (validateAny && !needAny.some(permissionChecker)) {
+        return response.forbidden({
+          body: new EndpointAuthorizationError({ need_any: [...needAny] }),
         });
       }
     }
