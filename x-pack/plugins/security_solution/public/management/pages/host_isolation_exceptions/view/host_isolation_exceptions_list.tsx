@@ -90,8 +90,11 @@ export const HostIsolationExceptionsList = () => {
   }, [history, isLoading, listItems.length, privileges.canIsolateHost]);
 
   const handleOnSearch = useCallback(
-    (query: string) => {
-      navigateCallback({ filter: query });
+    (filter: string, includedPolicies: string) => {
+      navigateCallback({
+        filter,
+        included_policies: includedPolicies,
+      });
     },
     [navigateCallback]
   );
@@ -209,6 +212,9 @@ export const HostIsolationExceptionsList = () => {
           <SearchExceptions
             defaultValue={location.filter}
             onSearch={handleOnSearch}
+            policyList={policiesRequest.data?.items}
+            hasPolicyFilter={true}
+            defaultIncludedPolicies={location.included_policies}
             placeholder={i18n.translate(
               'xpack.securitySolution.hostIsolationExceptions.search.placeholder',
               {
