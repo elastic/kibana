@@ -13,7 +13,6 @@ import { SavedSearch } from '../services/saved_searches';
 export function getRootBreadcrumbs(breadcrumb?: string) {
   return [
     {
-      'data-test-subj': 'discover-breadcrumb',
       text: i18n.translate('discover.rootBreadcrumb', {
         defaultMessage: 'Discover',
       }),
