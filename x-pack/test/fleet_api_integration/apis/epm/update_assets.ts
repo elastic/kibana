@@ -287,24 +287,6 @@ export default function (providerContext: FtrProviderContext) {
         ],
       });
     });
-    it('should have updated the index patterns', async function () {
-      const resIndexPatternLogs = await kibanaServer.savedObjects.get({
-        type: 'index-pattern',
-        id: 'logs-*',
-      });
-      const fields = JSON.parse(resIndexPatternLogs.attributes.fields);
-      const updated = fields.filter((field: { name: string }) => field.name === 'new_field_name');
-      expect(!!updated.length).equal(true);
-      const resIndexPatternMetrics = await kibanaServer.savedObjects.get({
-        type: 'index-pattern',
-        id: 'metrics-*',
-      });
-      const fieldsMetrics = JSON.parse(resIndexPatternMetrics.attributes.fields);
-      const updatedMetrics = fieldsMetrics.filter(
-        (field: { name: string }) => field.name === 'metrics_test_name2'
-      );
-      expect(!!updatedMetrics.length).equal(true);
-    });
     it('should have updated the kibana assets', async function () {
       const resDashboard = await kibanaServer.savedObjects.get({
         type: 'dashboard',

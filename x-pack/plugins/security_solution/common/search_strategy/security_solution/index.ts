@@ -72,8 +72,6 @@ import {
   CtiEventEnrichmentRequestOptions,
   CtiEventEnrichmentStrategyResponse,
   CtiQueries,
-  CtiDataSourceRequestOptions,
-  CtiDataSourceStrategyResponse,
 } from './cti';
 import {
   HostRulesRequestOptions,
@@ -86,8 +84,11 @@ import {
   UserRulesRequestOptions,
   UserRulesStrategyResponse,
 } from './ueba';
+import {
+  HostsKpiRiskyHostsRequestOptions,
+  HostsKpiRiskyHostsStrategyResponse,
+} from './hosts/kpi/risky_hosts';
 
-export * from './cti';
 export * from './hosts';
 export * from './matrix_histogram';
 export * from './network';
@@ -149,6 +150,8 @@ export type StrategyResponseType<T extends FactoryQueryTypes> = T extends HostsQ
   ? HostsKpiAuthenticationsStrategyResponse
   : T extends HostsKpiQueries.kpiHosts
   ? HostsKpiHostsStrategyResponse
+  : T extends HostsKpiQueries.kpiRiskyHosts
+  ? HostsKpiRiskyHostsStrategyResponse
   : T extends HostsKpiQueries.kpiUniqueIps
   ? HostsKpiUniqueIpsStrategyResponse
   : T extends NetworkQueries.details
@@ -181,8 +184,6 @@ export type StrategyResponseType<T extends FactoryQueryTypes> = T extends HostsQ
   ? MatrixHistogramStrategyResponse
   : T extends CtiQueries.eventEnrichment
   ? CtiEventEnrichmentStrategyResponse
-  : T extends CtiQueries.dataSource
-  ? CtiDataSourceStrategyResponse
   : never;
 
 export type StrategyRequestType<T extends FactoryQueryTypes> = T extends HostsQueries.hosts
@@ -205,6 +206,8 @@ export type StrategyRequestType<T extends FactoryQueryTypes> = T extends HostsQu
   ? HostsKpiHostsRequestOptions
   : T extends HostsKpiQueries.kpiUniqueIps
   ? HostsKpiUniqueIpsRequestOptions
+  : T extends HostsKpiQueries.kpiRiskyHosts
+  ? HostsKpiRiskyHostsRequestOptions
   : T extends NetworkQueries.details
   ? NetworkDetailsRequestOptions
   : T extends NetworkQueries.dns
@@ -243,8 +246,6 @@ export type StrategyRequestType<T extends FactoryQueryTypes> = T extends HostsQu
   ? MatrixHistogramRequestOptions
   : T extends CtiQueries.eventEnrichment
   ? CtiEventEnrichmentRequestOptions
-  : T extends CtiQueries.dataSource
-  ? CtiDataSourceRequestOptions
   : never;
 
 export interface DocValueFieldsInput {
