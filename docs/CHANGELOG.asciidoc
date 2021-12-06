@@ -271,6 +271,9 @@ Use <<settings,`KBN_PATH_CONF`>>.
 === Features
 {kib} 7.16.0 adds the following new and notable features.
 
+APM::
+* Adds chart for failed transaction correlations {kibana-pull}110172[#110172]
+* Correlations chart enhancements {kibana-pull}113039[#113039]
 Canvas::
 * Adds Tag Cloud support {kibana-pull}106858[#106858]
 Elastic Security::
@@ -282,9 +285,7 @@ Observability::
 * Adds "Add to case" button {kibana-pull}112463[#112463]
 Machine Learning::
 * Adds the ability to change data view in advanced job wizard {kibana-pull}115191[#115191]
-* APM Correlations: Log log chart enhancements {kibana-pull}113039[#113039]
 * Adds KQL filter bar, filtering functionality, and compact design to Index data visualizer {kibana-pull}112870[#112870]
-* APM Correlations: Chart for failed transactions correlations tab {kibana-pull}110172[#110172]
 Management::
 * Adds alerting rules management to Transform UI {kibana-pull}115363[#115363]
 * Transforms health alerting rule type {kibana-pull}112277[#112277]
@@ -310,6 +311,11 @@ Alerting::
 * Shows execution duration on Rule Details view {kibana-pull}114719[#114719]
 * Shows last execution duration on Rule Management view {kibana-pull}113935[#113935]
 * Allow rule types to specify a default and minimum interval {kibana-pull}113650[#113650]
+APM::
+* Adds advanced mode toggle for the APM failed transactions table {kibana-pull}114363[#114363]
+* Adds context popover for APM latency correlations & failed transactions correlations {kibana-pull}113679[#113679]
+* Adds chart for failed transactions correlations tab {kibana-pull}110172[#110172]
+* Correlations chart enhancements {kibana-pull}113039[#113039]
 Canvas::
 * Adds Tag Cloud support {kibana-pull}106858[#106858]
 Dashboard::
@@ -342,14 +348,9 @@ Lens & Visualizations::
 * Support custom field format in *TSVB* {kibana-pull}101245[#101245]
 Machine Learning::
 * Adds ability to change data view in advanced job wizard {kibana-pull}115191[#115191]
-* Display advanced mode toggle for the APM failed transactions table {kibana-pull}114363[#114363]
-* Adds context popover for APM latency correlations & failed transactions correlations {kibana-pull}113679[#113679]
-* APM Correlations: Log log chart enhancements {kibana-pull}113039[#113039]
 * Adds KQL filter bar, filtering functionality, and compact design to Index data visualizer {kibana-pull}112870[#112870]
 * Job sync usability improvements {kibana-pull}112693[#112693]
 * Auto-scalable ML node integrations improvements {kibana-pull}112264[#112264]
-* Convert APM transaction anomaly detection job to analyze metric data {kibana-pull}111957[#111957]
-* APM Correlations: Chart for failed transactions correlations tab {kibana-pull}110172[#110172]
 * Datafeed preview based job validation check {kibana-pull}109080[#109080]
 Management::
 * Adds alerting rules management to Transform UI {kibana-pull}115363[#115363]
@@ -358,7 +359,7 @@ Management::
 * Allow fields that start with an underscore in the field list {kibana-pull}111238[#111238]
 * In Snapshot & Restore, the performance of snapshots list is improved to handle a large number of snapshots {kibana-pull}110266[#110266]
 * Open in dev tools button for request inspector {kibana-pull}109923[#109923]
-* Populate date fields for Transform {kibana-pull}108804[#108804]
+* Use date field dropdown for edit transform retention policy setting {kibana-pull}108804[#108804]
 * Adds tooltip help text for Transform filter query control {kibana-pull}108720[#108720]
 Maps::
 * Adds support for UTM and MGRS coordinates in Maps "Go To" button {kibana-pull}107835[#107835]
@@ -464,7 +465,6 @@ Machine Learning::
 * Data Frame Analytics: Fix legend text colors for Vega based charts in dark mode {kibana-pull}115911[#115911]
 * Deletes annotation directly from the index it is stored in {kibana-pull}115328[#115328]
 * Fixes deletion of models that are not used by pipelines {kibana-pull}114107[#114107]
-* Auto-scalable ML node integrations improvements {kibana-pull}112264[#112264]
 Management::
 * Space privilege "Index pattern management" read still shows delete button {kibana-pull}115390[#115390]
 * Pass `compress` flag in query instead of headers {kibana-pull}113929[#113929]
