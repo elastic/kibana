@@ -9,33 +9,12 @@ import {
   SavedObjectsErrorHelpers,
   SavedObjectsServiceSetup,
 } from '../../../../../../src/core/server';
-import { EncryptedSavedObjectsPluginSetup } from '../../../../encrypted_saved_objects/server';
-
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../common/constants';
 import { DynamicSettings } from '../../../common/runtime_types';
 import { UMSavedObjectsQueryFn } from '../adapters';
-import { UptimeConfig } from '../../../common/config';
+import { UptimeConfig } from '../../config';
 import { settingsObjectId, umDynamicSettings } from './uptime_settings';
 import { syntheticsMonitor } from './synthetics_monitor';
-import { syntheticsServiceApiKey } from './service_api_key';
-
-export const registerUptimeSavedObjects = (
-  savedObjectsService: SavedObjectsServiceSetup,
-  encryptedSavedObjects: EncryptedSavedObjectsPluginSetup,
-  config: UptimeConfig
-) => {
-  savedObjectsService.registerType(umDynamicSettings);
-
-  if (config?.unsafe?.service.enabled) {
-    savedObjectsService.registerType(syntheticsMonitor);
-    savedObjectsService.registerType(syntheticsServiceApiKey);
-
-    encryptedSavedObjects.registerType({
-      type: syntheticsServiceApiKey.name,
-      attributesToEncrypt: new Set(['apiKey']),
-    });
-  }
-};
 
 export interface UMSavedObjectsAdapter {
   config: UptimeConfig;
@@ -43,9 +22,20 @@ export interface UMSavedObjectsAdapter {
   setUptimeDynamicSettings: UMSavedObjectsQueryFn<void, DynamicSettings>;
 }
 
+export const registerUptimeSavedObjects = (
+  savedObjectsService: SavedObjectsServiceSetup,
+  config: UptimeConfig
+) => {
+  savedObjectsService.registerType(umDynamicSettings);
+
+  if (config?.unsafe?.service.enabled) {
+    savedObjectsService.registerType(syntheticsMonitor);
+  }
+};
+
 export const savedObjectsAdapter: UMSavedObjectsAdapter = {
   config: null,
-  getUptimeDynamicSettings: async (client) => {
+  getUptimeDynamicSettings: async (client): Promise<DynamicSettings> => {
     try {
       const obj = await client.get<DynamicSettings>(umDynamicSettings.name, settingsObjectId);
       return obj?.attributes ?? DYNAMIC_SETTINGS_DEFAULTS;
@@ -60,7 +50,7 @@ export const savedObjectsAdapter: UMSavedObjectsAdapter = {
       throw getErr;
     }
   },
-  setUptimeDynamicSettings: async (client, settings) => {
+  setUptimeDynamicSettings: async (client, settings): Promise<void> => {
     await client.create(umDynamicSettings.name, settings, {
       id: settingsObjectId,
       overwrite: true,

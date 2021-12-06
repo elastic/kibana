@@ -28,12 +28,14 @@ import * as i18n from './translations';
 import { useReadonlyHeader } from './use_readonly_header';
 
 const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({
+  disableAlerts,
   onComponentInitialized,
   actionsNavigation,
   ruleDetailsNavigation,
   showAlertDetails,
   useFetchAlertData,
   refreshRef,
+  hideSyncAlerts,
   timelineIntegration,
 }) => {
   const { basePath, userCanCrud } = useCasesContext();
@@ -49,7 +51,7 @@ const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({
   return (
     <Switch>
       <Route strict exact path={basePath}>
-        <AllCases />
+        <AllCases disableAlerts={disableAlerts} />
       </Route>
 
       <Route path={getCreateCasePath(basePath)}>
@@ -57,6 +59,7 @@ const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({
           <CreateCase
             onSuccess={onCreateCaseSuccess}
             onCancel={navigateToAllCases}
+            disableAlerts={disableAlerts}
             timelineIntegration={timelineIntegration}
           />
         ) : (
@@ -88,6 +91,7 @@ const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({
           showAlertDetails={showAlertDetails}
           useFetchAlertData={useFetchAlertData}
           refreshRef={refreshRef}
+          hideSyncAlerts={hideSyncAlerts}
           timelineIntegration={timelineIntegration}
         />
       </Route>
