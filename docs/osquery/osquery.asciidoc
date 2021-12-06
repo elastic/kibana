@@ -287,8 +287,8 @@ you can create roles for users who can only run live or saved queries, but who c
 This is useful for teams who need in-depth and detailed control.
 
 [float]
-=== experimental[] Customize Osquery configuration
-By default, all Osquery Manager integrations share the same osquery configuration. However, you can customize how Osquery is configured by editing the Osquery Manager integration for each agent policy
+=== Customize Osquery configuration
+experimental[] By default, all Osquery Manager integrations share the same osquery configuration. However, you can customize how Osquery is configured by editing the Osquery Manager integration for each agent policy
 you want to adjust. The custom configuration is then applied to all agents in the policy. 
 This powerful feature allows you to configure
 https://osquery.readthedocs.io/en/stable/deployment/file-integrity-monitoring[File Integrity Monitoring], https://osquery.readthedocs.io/en/stable/deployment/process-auditing[Process auditing], 
