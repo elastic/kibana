@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { SavedObjectsClientContract } from 'kibana/server';
 import { UMKibanaRouteWrapper } from './types';
 import { createUptimeESClient, inspectableEsQueriesMap } from '../lib/lib';
 
@@ -20,9 +21,14 @@ export const uptimeRouteWrapper: UMKibanaRouteWrapper = (uptimeRoute, server) =>
   },
   handler: async (context, request, response) => {
     const { client: esClient } = context.core.elasticsearch;
-    const savedObjectsClient = context.core.savedObjects.getClient({
-      includedHiddenTypes: [syntheticsServiceApiKey.name],
-    });
+    let savedObjectsClient: SavedObjectsClientContract;
+    if (server.config?.unsafe?.service?.enable) {
+      savedObjectsClient = context.core.savedObjects.getClient({
+        includedHiddenTypes: [syntheticsServiceApiKey.name],
+      });
+    } else {
+      savedObjectsClient = context.core.savedObjects.client;
+    }
 
     // specifically needed for the synthetics service api key generation
     server.savedObjectsClient = savedObjectsClient;
