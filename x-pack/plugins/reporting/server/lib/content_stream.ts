@@ -267,7 +267,7 @@ export class ContentStream extends Duplex {
         csv.maxSizeBytes: 500000000
         csv.scroll.size: 1000
 
-     At the moment this can put memory pressure on Kibana. Up to 1,1 GB a dev
+     At the moment this can put memory pressure on Kibana. Up to 1,1 GB in a dev
      build. It is not recommended to have overly large max size bytes but we
      need this code to be as performant as possible.
     */
