@@ -69,7 +69,7 @@ type Url =
 interface RenderRouterOptions<ExtraCore> extends KibanaProviderOptions<ExtraCore> {
   history?: History;
   renderOptions?: Omit<RenderOptions, 'queries'>;
-  state?: Partial<AppState>;
+  state?: Partial<AppState> | DeepPartial<AppState>;
   url?: Url;
 }
 
@@ -142,7 +142,7 @@ export function MockKibanaProvider<ExtraCore>({
   core,
   kibanaProps,
 }: MockKibanaProviderProps<ExtraCore>) {
-  const coreOptions = merge(mockCore(), core);
+  const coreOptions = merge({}, mockCore(), core);
 
   return (
     <KibanaContextProvider services={{ ...coreOptions }} {...kibanaProps}>
@@ -188,10 +188,7 @@ export function render<ExtraCore>(
     url,
   }: RenderRouterOptions<ExtraCore> = {}
 ) {
-  const testState: AppState = {
-    ...mockState,
-    ...state,
-  };
+  const testState: AppState = merge({}, mockState, state);
 
   if (url) {
     history = getHistoryFromUrl(url);
@@ -236,3 +233,26 @@ export const forNearestButton =
         noOtherButtonHasText && node.textContent === text && node.tagName.toLowerCase() === 'button'
       );
     });
+
+export const makeUptimePermissionsCore = (
+  permissions: Partial<{
+    'alerting:save': boolean;
+    configureSettings: boolean;
+    save: boolean;
+    show: boolean;
+  }>
+) => {
+  return {
+    application: {
+      capabilities: {
+        uptime: {
+          'alerting:save': true,
+          configureSettings: true,
+          save: true,
+          show: true,
+          ...permissions,
+        },
+      },
+    },
+  };
+};

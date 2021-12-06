@@ -33,7 +33,7 @@ const ALERT_CONTEXT_SELECT_TYPE_PANEL_ID = 1;
 const noWritePermissionsTooltipContent = i18n.translate(
   'xpack.uptime.alertDropdown.noWritePermissions',
   {
-    defaultMessage: 'Creating alerts in this application requires write access to Uptime',
+    defaultMessage: 'You need read-write access to Uptime to create alerts in this app.',
   }
 );
 
