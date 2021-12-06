@@ -239,13 +239,13 @@ describe('Color Ranges component', () => {
       reverseColorsButton.simulate('click');
     });
     component = component.update();
-    const colors: any[] = [];
+    const colors: string[] = [];
 
     const ranges = component.find('div[data-test-subj^="my-test_dynamicColoring_range_color_"]');
 
     ranges.map((range) => {
       if (range.find(EuiColorPicker).length) {
-        colors.push(range.find(EuiColorPicker).first().prop('color'));
+        colors.push(range.find(EuiColorPicker).first().prop('color') as string);
       }
     });
 
@@ -260,11 +260,11 @@ describe('Color Ranges component', () => {
     ];
     let component = mount(<ColorRanges {...props} />);
 
-    let values: any[] = [];
+    let values: number[] = [];
 
     let ranges = component.find('input[data-test-subj^="my-test_dynamicColoring_range_value_"]');
     ranges.map((range) => {
-      values.push(range.prop('value'));
+      values.push(range.prop('value') as number);
     });
 
     expect(values).toStrictEqual([10, 40, 60, 130]);

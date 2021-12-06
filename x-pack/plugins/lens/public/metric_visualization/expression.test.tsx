@@ -418,7 +418,7 @@ describe('metric_expression', () => {
       );
     });
 
-    test('it renders no color styling for numeric value if value is higher than rangeMax and continuity is "none"', () => {
+    test('it renders no color styling for numeric value if value is higher than rangeMax', () => {
       const { data, args } = sampleArgs();
 
       data.tables.l1.rows[0].c = 500;
@@ -430,7 +430,6 @@ describe('metric_expression', () => {
         gradient: false,
         range: 'number',
         colors: ['red', 'yellow', 'green'],
-        continuity: 'none',
       };
 
       const instance = shallow(
@@ -451,7 +450,7 @@ describe('metric_expression', () => {
       );
     });
 
-    test('it renders no color styling for numeric value if value is lower than rangeMin and continuity is "none"', () => {
+    test('it renders no color styling for numeric value if value is lower than rangeMin', () => {
       const { data, args } = sampleArgs();
 
       data.tables.l1.rows[0].c = -1;
@@ -463,7 +462,6 @@ describe('metric_expression', () => {
         gradient: false,
         range: 'number',
         colors: ['red', 'yellow', 'green'],
-        continuity: 'none',
       };
 
       const instance = shallow(
@@ -526,7 +524,6 @@ describe('metric_expression', () => {
         gradient: false,
         range: 'number',
         colors: ['red', 'yellow', 'green'],
-        continuity: 'all',
       };
 
       const instance = shallow(
