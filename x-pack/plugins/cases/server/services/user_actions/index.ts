@@ -119,6 +119,18 @@ interface BulkCreateAttachmentDeletionUserAction extends Omit<CommonUserActionAr
 export class CaseUserActionService {
   constructor(private readonly log: Logger) {}
 
+  private static readonly userActionFieldsAllowed: Set<UserActionField[0]> = new Set([
+    'comment',
+    'connector',
+    'description',
+    'tags',
+    'title',
+    'status',
+    'settings',
+    'sub_case',
+    OWNER_FIELD,
+  ]);
+
   private createCaseReferences(caseId: string, subCaseId?: string): SavedObjectReference[] {
     return [
       {
@@ -168,6 +180,11 @@ export class CaseUserActionService {
     // TODO: Validate if field is allowed. Maybe type it
     // TODO: Break into smaller functions
     // TODO: Type newValue
+
+    if (!CaseUserActionService.userActionFieldsAllowed.has(field)) {
+      return [];
+    }
+
     if (isString(originalValue) && isString(newValue) && originalValue !== newValue) {
       return [
         {
@@ -532,21 +549,23 @@ export class CaseUserActionService {
       const userActions: UserActionItem[] = [];
       const updatedFields = Object.keys(updatedCase.attributes) as UserActionField;
 
-      updatedFields.forEach((field) => {
-        const originalValue = get(originalCase, ['attributes', field]);
-        const newValue = get(updatedCase, ['attributes', field]);
-        userActions.push(
-          ...this.getUserActionItemByDifference({
-            unsecuredSavedObjectsClient,
-            field,
-            originalValue,
-            newValue,
-            user,
-            owner,
-            caseId,
-          })
-        );
-      });
+      updatedFields
+        .filter((field) => CaseUserActionService.userActionFieldsAllowed.has(field))
+        .forEach((field) => {
+          const originalValue = get(originalCase, ['attributes', field]);
+          const newValue = get(updatedCase, ['attributes', field]);
+          userActions.push(
+            ...this.getUserActionItemByDifference({
+              unsecuredSavedObjectsClient,
+              field,
+              originalValue,
+              newValue,
+              user,
+              owner,
+              caseId,
+            })
+          );
+        });
 
       return [...acc, ...userActions];
     }, []);
