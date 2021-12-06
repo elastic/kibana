@@ -123,7 +123,7 @@ export type SourcererUrlState = Partial<{
 
 export const initSourcererScope: Omit<SourcererScope, 'id'> = {
   loading: false,
-  selectedDataViewId: '',
+  selectedDataViewId: null,
   selectedPatterns: [],
   missingPatterns: [],
 };

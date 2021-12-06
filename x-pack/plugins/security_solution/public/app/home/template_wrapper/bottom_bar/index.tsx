@@ -7,7 +7,7 @@
 
 /* eslint-disable react/display-name */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { KibanaPageTemplateProps } from '../../../../../../../../src/plugins/kibana_react/public';
 import { AppLeaveHandler } from '../../../../../../../../src/core/public';
 import { useShowTimeline } from '../../../../common/utils/timeline/use_show_timeline';
@@ -27,12 +27,7 @@ export const SecuritySolutionBottomBar = React.memo(
     const { indicesExist, dataViewId } = useSourcererDataView(SourcererScopeName.timeline);
 
     useResolveRedirect();
-    const timelineShow = useMemo(
-      () => (indicesExist || dataViewId === null) && showTimeline,
-      [dataViewId, indicesExist, showTimeline]
-    );
-
-    return timelineShow ? (
+    return (indicesExist || dataViewId === null) && showTimeline ? (
       <>
         <AutoSaveWarningMsg />
         <Flyout timelineId={TimelineId.active} onAppLeave={onAppLeave} />

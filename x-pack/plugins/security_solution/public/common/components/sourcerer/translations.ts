@@ -173,6 +173,10 @@ export const INDEX_PATTERNS_CLOSE = i18n.translate(
   }
 );
 
+export const INACTIVE_PATTERNS = i18n.translate('xpack.securitySolution.indexPatterns.inactive', {
+  defaultMessage: 'Inactive index patterns',
+});
+
 export const NO_DATA = i18n.translate('xpack.securitySolution.indexPatterns.noData', {
   defaultMessage:
     "The index pattern on this timeline doesn't match any data streams, indices, or index aliases.",

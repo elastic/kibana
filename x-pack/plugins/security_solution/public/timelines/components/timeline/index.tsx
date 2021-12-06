@@ -104,9 +104,8 @@ const StatefulTimelineComponent: React.FC<Props> = ({
       // timeline not initialized, so this must be initial state and not user change
       !savedObjectId ||
       selectedDataViewIdSourcerer == null ||
-      selectedDataViewIdSourcerer === '' ||
       // initial state will get set on create
-      (selectedDataViewIdTimeline === '' && selectedPatternsTimeline.length === 0) ||
+      (selectedDataViewIdTimeline === null && selectedPatternsTimeline.length === 0) ||
       // don't update if no change
       (selectedDataViewIdTimeline === selectedDataViewIdSourcerer &&
         selectedPatternsTimeline.sort().join() === selectedPatternsSourcerer.sort().join())

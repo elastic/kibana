@@ -108,11 +108,19 @@ export const TemporarySourcerer = React.memo<Props>(
                     tooltip:
                       deadPatterns.length > 0 ? (
                         <EuiToolTip
-                          content={`The following index patterns are saved to this timeline but do not match any data streams, indices, or index aliases: ${selectedPatterns
-                            .filter((p) => !activePatterns.includes(p))
-                            .join(', ')}`}
+                          content={
+                            <FormattedMessage
+                              id="xpack.securitySolution.indexPatterns.noMatchData"
+                              defaultMessage="The following index patterns are saved to this timeline but do not match any data streams, indices, or index aliases: {aliases}"
+                              values={{
+                                aliases: selectedPatterns
+                                  .filter((p) => !activePatterns.includes(p))
+                                  .join(', '),
+                              }}
+                            />
+                          }
                         >
-                          <EuiIcon type="questionInCircle" title="Inactive index patterns" />
+                          <EuiIcon type="questionInCircle" title={i18n.INACTIVE_PATTERNS} />
                         </EuiToolTip>
                       ) : null,
                     callout: <Blockquote>{activePatterns.join(', ')}</Blockquote>,
