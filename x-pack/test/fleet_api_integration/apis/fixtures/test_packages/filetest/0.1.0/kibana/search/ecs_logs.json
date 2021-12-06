@@ -19,7 +19,7 @@
     "title": "All logs [Logs Kafka] ECS",
     "version": 1
   },
-  "id": "sample_search",
+  "id": "All Kafka logs-ecs",
   "references": [
     {
       "id": "logs-*",
