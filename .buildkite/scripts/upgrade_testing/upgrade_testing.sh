@@ -6,3 +6,5 @@ set -euo pipefail
 .buildkite/scripts/bootstrap.sh
 
 node .buildkite/scripts/upgrade_testing/upgrade_testing.js
+
+buildkite-agent artifact upload target/kibana-cypress/**/*
