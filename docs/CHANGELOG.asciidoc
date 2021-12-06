@@ -322,7 +322,6 @@ Fleet::
 * Adds "Keep Policies up to Date" functionality for integrations {kibana-pull}112702[#112702]
 * Allow packages to specify index privileges {kibana-pull}112397[#112397]
 * Allow Integrations browse page to filter on descriptions {kibana-pull}111649[#111649]
-* Adds icons to Integrations global search results {kibana-pull}111131[#111131]
 * Support automatic upgrades of package policies when updating integrations {kibana-pull}108269[#108269]
 Kibana Home & Add Data::
 * Adds “Add data” button to Global Nav Drawer {kibana-pull}113648[#113648]
