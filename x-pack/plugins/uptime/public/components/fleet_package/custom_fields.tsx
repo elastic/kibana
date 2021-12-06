@@ -176,9 +176,10 @@ export const CustomFields = memo<Props>(({ validate, dataStreams = [], children 
               defaultMessage="Configure TLS options, including verification mode, certificate authorities, and client certificates."
             />
           }
+          id="uptimeFleetIsTLSEnabled"
         >
           <EuiSwitch
-            id={'uptimeFleetIsTLSEnabled'}
+            id="uptimeFleetIsTLSEnabled"
             data-test-subj="syntheticsIsTLSEnabled"
             checked={!!isTLSEnabled}
             label={
