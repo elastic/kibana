@@ -10,7 +10,10 @@ import React, { useCallback, useMemo, useState } from 'react';
 
 import { useAlertsActions } from '../../../../detections/components/alerts_table/timeline_actions/use_alerts_actions';
 import { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
-import { CHANGE_ALERT_STATUS } from '../../../../detections/components/alerts_table/translations';
+import {
+  CHANGE_ALERT_STATUS,
+  CLICK_TO_CHANGE_ALERT_STATUS,
+} from '../../../../detections/components/alerts_table/translations';
 import { FormattedFieldValue } from '../../../../timelines/components/timeline/body/renderers/formatted_field';
 import type { EnrichedFieldInfoWithValues } from '../types';
 
@@ -53,7 +56,9 @@ export const StatusPopoverButton = React.memo<StatusPopoverButtonProps>(
           fieldFormat={enrichedFieldInfo.data.format}
           isDraggable={false}
           truncate={false}
+          isButton={true}
           onClick={togglePopover}
+          onClickAriaLabel={CLICK_TO_CHANGE_ALERT_STATUS}
         />
       ),
       [contextId, eventId, enrichedFieldInfo, togglePopover]
