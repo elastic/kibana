@@ -29,7 +29,7 @@ import {
   getDurationFieldForTransactions,
   getProcessorEventForTransactions,
 } from '../../lib/helpers/transactions';
-import { getErrorRate } from '../../lib/transaction_groups/get_error_rate';
+import { getFailedTransactionRate } from '../../lib/transaction_groups/get_failed_transaction_rate';
 import { withApmSpan } from '../../utils/with_apm_span';
 import {
   percentCgroupMemoryUsedScript,
@@ -123,7 +123,7 @@ async function getFailedTransactionsRateStats({
   numBuckets,
 }: TaskParameters): Promise<NodeStats['failedTransactionsRate']> {
   return withApmSpan('get_error_rate_for_service_map_node', async () => {
-    const { average, timeseries } = await getErrorRate({
+    const { average, timeseries } = await getFailedTransactionRate({
       environment,
       setup,
       serviceName,
