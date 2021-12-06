@@ -9,13 +9,13 @@ import { i18n } from '@kbn/i18n';
 import { useCallback, useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
-import { useAppToasts } from '../../../common/hooks/use_app_toasts';
-import { useKibana } from '../../../common/lib/kibana';
-import { inputsActions } from '../../../common/store/actions';
-import { isIndexNotFoundError } from '../../../common/utils/exceptions';
+import { useAppToasts } from '../../hooks/use_app_toasts';
+import { useKibana } from '../../lib/kibana';
+import { inputsActions } from '../../store/actions';
+import { isIndexNotFoundError } from '../../utils/exceptions';
 import { HostsRiskScore } from '../../../../common/search_strategy';
 import { useHostsRiskScoreComplete } from './use_hosts_risk_score_complete';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
+import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 import { getHostRiskIndex } from '../../../helpers';
 
 export const QUERY_ID = 'host_risk_score';
@@ -24,11 +24,11 @@ const noop = () => {};
 const isRecord = (item: unknown): item is Record<string, unknown> =>
   typeof item === 'object' && !!item;
 
-const isHostsRiskScoreHit = (item: unknown): item is HostsRiskScore =>
+const isHostsRiskScoreHit = (item: Partial<HostsRiskScore>): item is HostsRiskScore =>
   isRecord(item) &&
   isRecord(item.host) &&
   typeof item.host.name === 'string' &&
-  typeof item.risk_score === 'number' &&
+  typeof item.risk_stats?.risk_score === 'number' &&
   typeof item.risk === 'string';
 
 export interface HostRisk {

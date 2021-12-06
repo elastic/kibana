@@ -32,8 +32,12 @@
             }
           }
         },
-        "risk_score": {
-          "type": "long"
+        "risk_stats": {
+          "properties": {
+            "risk_score": {
+              "type": "long"
+            }
+          }
         }
       }
     },
