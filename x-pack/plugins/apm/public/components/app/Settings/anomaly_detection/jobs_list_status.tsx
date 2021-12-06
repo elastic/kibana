@@ -51,14 +51,14 @@ export function JobsListStatus({
           'xpack.apm.settings.anomalyDetection.jobList.warningStatusLabel',
           {
             defaultMessage:
-              'Job might not be running correctly. Go to the job management page in the ML app to get more information.',
+              'Job might be experiencing problems. Click the Manage Jobs link to learn more.',
           }
         )}
       >
         <MLManageJobsLink jobId={jobId}>
           <EuiBadge color="warning">
             {i18n.translate(
-              'xpack.apm.settings.anomalyDetection.jobList.warningStatusLabel',
+              'xpack.apm.settings.anomalyDetection.jobList.warningStatusBadgeLabel',
               { defaultMessage: 'Warning' }
             )}
           </EuiBadge>
