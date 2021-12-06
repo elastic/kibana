@@ -372,7 +372,7 @@ export class DashboardPlugin
   }
 
   public start(core: CoreStart, plugins: DashboardStartDependencies): DashboardStart {
-    const { notifications, overlays, application } = core;
+    const { notifications, overlays, application, theme } = core;
     const { uiActions, data, share, presentationUtil, embeddable } = plugins;
 
     const dashboardCapabilities: Readonly<DashboardCapabilities> = application.capabilities
@@ -414,11 +414,15 @@ export class DashboardPlugin
       uiActions.registerAction(unlinkFromLibraryAction);
       uiActions.attachAction(CONTEXT_MENU_TRIGGER, unlinkFromLibraryAction.id);
 
-      const libraryNotificationAction = new LibraryNotificationAction(unlinkFromLibraryAction);
+      const libraryNotificationAction = new LibraryNotificationAction(
+        theme,
+        unlinkFromLibraryAction
+      );
       uiActions.registerAction(libraryNotificationAction);
       uiActions.attachAction(PANEL_NOTIFICATION_TRIGGER, libraryNotificationAction.id);
 
       const copyToDashboardAction = new CopyToDashboardAction(
+        theme,
         overlays,
         embeddable.getStateTransfer(),
         {
