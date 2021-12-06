@@ -6,8 +6,14 @@
     "name": "Security Team",
     "githubTeam": "security-team"
   },
-  "requiredPlugins": ["data"],
-  "requiredBundles": ["kibanaReact", "esUiShared"],
+  "requiredPlugins": [
+    "data",
+    "timelines"
+  ],
+  "requiredBundles": [
+    "kibanaReact", 
+    "esUiShared"
+  ],
   "server": true,
   "ui": true
 }

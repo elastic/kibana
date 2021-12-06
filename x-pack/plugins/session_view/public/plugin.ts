@@ -12,8 +12,16 @@ import {
   Plugin,
   PluginInitializerContext,
 } from '../../../../src/core/public';
+import { createStore, Reducer } from 'redux';
 import { PLUGIN_ID, PLUGIN_NAME } from '../common';
-import { SessionViewConfigType } from './types';
+import { SessionViewConfigType, SessionViewServices } from './types';
+
+const createTimelineStore = (reducer: Reducer) => {
+  // No initial state for now
+  return createStore(
+    reducer
+  )
+};
 
 export class SessionViewPlugin implements Plugin {
   private kibanaVersion: string;
@@ -26,7 +34,7 @@ export class SessionViewPlugin implements Plugin {
     this.kibanaVersion = initializerContext.env.packageInfo.version;
   }
 
-  public setup(core: CoreSetup) {
+  public setup(core: CoreSetup<SessionViewServices, void>) {
     const kibanaVersion = this.kibanaVersion;
     const config = this.initializerContext.config.get<SessionViewConfigType>();
 
@@ -35,6 +43,9 @@ export class SessionViewPlugin implements Plugin {
       title: PLUGIN_NAME,
       async mount(params: AppMountParameters) {
         const [coreStart, startDepsServices] = await core.getStartServices();
+        const { timelines } = startDepsServices;
+        const store = createTimelineStore(timelines.getTGridReducer());
+        timelines.setTGridEmbeddedStore(store);
         const { renderApp } = await import('./application');
         return renderApp({
           coreStart,
@@ -49,6 +60,7 @@ export class SessionViewPlugin implements Plugin {
 
   public start(core: CoreStart) {
     // NO-OP
+    console.log('start', core);
     return {};
   }
 

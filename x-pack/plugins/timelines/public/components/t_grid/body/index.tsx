@@ -139,7 +139,7 @@ const EMPTY_CONTROL_COLUMNS: ControlColumnProps[] = [];
 
 const EmptyHeaderCellRender: ComponentType = () => null;
 
-const gridStyle: EuiDataGridStyle = { border: 'none', fontSize: 's', header: 'underline' };
+const gridStyle: EuiDataGridStyle = { border: 'horizontal', fontSize: 's', header: 'underline' };
 
 const EuiDataGridContainer = styled.div<{ hideLastPage: boolean }>`
   ul.euiPagination__list {
