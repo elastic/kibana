@@ -27,9 +27,10 @@ export const usePrimaryNavigation = ({
   timeline,
   timerange,
 }: PrimaryNavigationProps): KibanaPageTemplateProps['solutionNav'] => {
-  const mapLocationToTab = useCallback((): string => {
-    return ((tabName && navTabs[tabName]) || navTabs[pageName])?.id ?? '';
-  }, [pageName, tabName, navTabs]);
+  const mapLocationToTab = useCallback(
+    (): string => ((tabName && navTabs[tabName]) || navTabs[pageName])?.id ?? '',
+    [pageName, tabName, navTabs]
+  );
 
   const [selectedTabId, setSelectedTabId] = useState(mapLocationToTab());
 

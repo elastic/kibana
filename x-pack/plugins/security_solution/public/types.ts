@@ -70,7 +70,6 @@ export interface StartPlugins {
   ml?: MlPluginStart;
   spaces?: SpacesPluginStart;
   dataViewFieldEditor: IndexPatternFieldEditorStart;
-  indexPatternFieldEditor: IndexPatternFieldEditorStart;
 }
 
 export type StartServices = CoreStart &
