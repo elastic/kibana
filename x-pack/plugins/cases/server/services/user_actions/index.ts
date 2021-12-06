@@ -344,7 +344,7 @@ export class CaseUserActionService {
         // TODO: Take action from enum
         action: 'create',
         fields: ['description', 'status', 'tags', 'title', 'connector', 'settings', OWNER_FIELD],
-        payload: { ...payload, connector: connectorWithoutId },
+        payload: { ...payload, connector: connectorWithoutId, status: CaseStatuses.open },
       };
 
       const references = [

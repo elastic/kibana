@@ -8,6 +8,7 @@
 import * as rt from 'io-ts';
 
 import { FieldsRt, ActionsRt, FieldTypeRt, UserActionCommonAttributesRt } from './common';
+import { CreateCaseUserActionRt } from './create_case';
 import { DescriptionUserActionRt, DescriptionUserActionPayloadRt } from './description';
 import { CommentUserActionRt, CommentUserActionPayloadRt } from './comment';
 import { ConnectorUserActionRt, ConnectorUserActionPayloadRt } from './connector';
@@ -20,6 +21,7 @@ export * from './common';
 export * from './description';
 
 export const UserActionsRt = rt.union([
+  CreateCaseUserActionRt,
   DescriptionUserActionRt,
   CommentUserActionRt,
   ConnectorUserActionRt,
