@@ -17,13 +17,8 @@ import { schema, FormProps } from './schema';
 import { CreateCaseForm, CreateCaseFormProps } from './form';
 import { useCaseConfigure } from '../../containers/configure/use_configure';
 import { useCaseConfigureResponse } from '../configure_cases/__mock__';
-import { CaseContextConfig, TestProviders } from '../../common/mock';
+import { TestProviders } from '../../common/mock';
 import { CasesContextValue } from '../../containers/types';
-
-interface MockWrapper {
-  children: React.ReactNode;
-  owner?: string[];
-}
 
 jest.mock('../../containers/use_get_tags');
 jest.mock('../../containers/configure/use_connectors');

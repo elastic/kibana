@@ -249,7 +249,7 @@ describe('Create case', () => {
       });
 
       const wrapper = mount(
-        <TestProviders features={{ alerts: { sync: false } }}>
+        <TestProviders caseConfig={{ features: { alerts: { sync: false } } }}>
           <FormContext onSuccess={onFormSubmitSuccess}>
             <CreateCaseFormFields {...defaultCreateCaseForm} />
             <SubmitCaseButton />

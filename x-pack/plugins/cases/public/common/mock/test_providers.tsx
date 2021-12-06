@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { merge } from 'lodash';
 import { euiDarkVars } from '@kbn/ui-shared-deps-src/theme';
 import { I18nProvider } from '@kbn/i18n-react';
 import { ThemeProvider } from 'styled-components';
@@ -34,7 +33,7 @@ const TestProvidersComponent: React.FC<Props> = ({ children, caseConfig }) => (
   <I18nProvider>
     <MockKibanaContextProvider>
       <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
-        <CasesProvider value={merge(defaultCaseConfig, caseConfig)}>{children}</CasesProvider>
+        <CasesProvider value={{ ...defaultCaseConfig, ...caseConfig }}>{children}</CasesProvider>
       </ThemeProvider>
     </MockKibanaContextProvider>
   </I18nProvider>

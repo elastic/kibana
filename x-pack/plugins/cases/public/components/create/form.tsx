@@ -57,7 +57,6 @@ export interface CreateCaseFormFieldsProps {
   isLoadingConnectors: boolean;
   hideConnectorServiceNowSir: boolean;
   withSteps: boolean;
-  showCaseOwnerSelection?: boolean;
 }
 export interface CreateCaseFormProps
   extends Pick<Partial<CreateCaseFormFieldsProps>, 'hideConnectorServiceNowSir' | 'withSteps'> {
@@ -70,13 +69,7 @@ export interface CreateCaseFormProps
 
 const empty: ActionConnector[] = [];
 export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.memo(
-  ({
-    connectors,
-    isLoadingConnectors,
-    hideConnectorServiceNowSir,
-    showCaseOwnerSelection = false,
-    withSteps,
-  }) => {
+  ({ connectors, isLoadingConnectors, hideConnectorServiceNowSir, withSteps }) => {
     const { isSubmitting } = useFormContext();
     const { isSyncAlertsEnabled } = useCasesFeatures();
 
