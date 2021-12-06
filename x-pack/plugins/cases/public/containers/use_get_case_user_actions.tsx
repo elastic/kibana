@@ -15,6 +15,7 @@ import {
   CaseExternalService,
   CaseUserActions,
   ElasticUser,
+  Actions,
 } from '../../common';
 import { getCaseUserActions, getSubCaseUserActions } from './api';
 import * as i18n from './translations';
@@ -82,7 +83,7 @@ const groupConnectorFields = (
   userActions: CaseUserActions[]
 ): Record<string, Array<CaseConnector['fields']>> =>
   userActions.reduce((acc, mua) => {
-    if (mua.actionField[0] !== 'connector') {
+    if (mua.fields[0] !== 'connector') {
       return acc;
     }
 
@@ -158,7 +159,7 @@ export const getPushedInfo = (
   const hasDataToPushForConnector = (connectorId: string): boolean => {
     const caseUserActionsReversed = [...caseUserActions].reverse();
     const lastPushOfConnectorReversedIndex = caseUserActionsReversed.findIndex(
-      (mua) => mua.action === 'push-to-service' && mua.newValConnectorId === connectorId
+      (mua) => mua.action === Actions.push_to_service && mua.newValConnectorId === connectorId
     );
 
     if (lastPushOfConnectorReversedIndex === -1) {
@@ -185,14 +186,14 @@ export const getPushedInfo = (
 
     return (
       actionsAfterPush.some(
-        (mua) => mua.actionField[0] !== 'connector' && mua.action !== 'push-to-service'
+        (mua) => mua.fields[0] !== 'connector' && mua.action !== Actions.push_to_service
       ) || connectorHasChanged
     );
   };
 
   const commentsAndIndex = caseUserActions.reduce<CommentsAndIndex[]>(
     (bacc, mua, index) =>
-      mua.actionField[0] === 'comment' && mua.commentId != null
+      mua.fields[0] === 'comment' && mua.commentId != null
         ? [
             ...bacc,
             {
@@ -205,7 +206,7 @@ export const getPushedInfo = (
   );
 
   let caseServices = caseUserActions.reduce<CaseServices>((acc, cua, i) => {
-    if (cua.action !== 'push-to-service') {
+    if (cua.action !== Actions.push_to_service) {
       return acc;
     }
 
@@ -295,7 +296,7 @@ export const useGetCaseUserActions = (
           // We are removing the first item because it will always be the creation of the case
           // and we do not want it to simplify our life
           const participants = !isEmpty(response)
-            ? uniqBy('actionBy.username', response).map((cau) => cau.actionBy)
+            ? uniqBy('createdBy.username', response).map((cau) => cau.createdBy)
             : [];
 
           const caseUserActions = !isEmpty(response)

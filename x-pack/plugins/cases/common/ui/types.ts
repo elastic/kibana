@@ -14,9 +14,8 @@ import {
   CaseType,
   CommentRequest,
   User,
-  UserAction,
-  UserActionField,
   ActionConnector,
+  CaseUserActionResponse,
 } from '../api';
 
 export interface CasesUiConfigType {
@@ -58,18 +57,16 @@ export type Comment = CommentRequest & {
   updatedBy: ElasticUser | null;
   version: string;
 };
+
 export interface CaseUserActions {
-  actionId: string;
-  actionField: UserActionField;
-  action: UserAction;
-  actionAt: string;
-  actionBy: ElasticUser;
-  caseId: string;
-  commentId: string | null;
-  newValue: string | null;
-  newValConnectorId: string | null;
-  oldValue: string | null;
-  oldValConnectorId: string | null;
+  actionId: CaseUserActionResponse['action_id'];
+  fields: CaseUserActionResponse['fields'];
+  action: CaseUserActionResponse['action'];
+  createdAt: CaseUserActionResponse['created_at'];
+  createdBy: ElasticUser;
+  caseId: CaseUserActionResponse['case_id'];
+  commentId: CaseUserActionResponse['comment_id'];
+  payload: CaseUserActionResponse['payload'];
 }
 
 export interface CaseExternalService {

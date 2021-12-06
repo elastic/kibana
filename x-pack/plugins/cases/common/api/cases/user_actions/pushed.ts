@@ -15,7 +15,7 @@ export const PushedUserActionPayloadRt = rt.type({
 
 export const PushedUserActionRt = rt.type({
   fields: rt.array(rt.literal(Fields.pushed)),
-  action: rt.literal(Actions.update),
+  action: rt.literal(Actions.push_to_service),
   payload: PushedUserActionPayloadRt,
 });
 
