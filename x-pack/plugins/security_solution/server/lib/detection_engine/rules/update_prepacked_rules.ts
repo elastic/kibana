@@ -162,7 +162,6 @@ export const createPromises = (
     // or enable rules on the user when they were not expecting it if a rule updates
     return patchRules({
       rulesClient,
-      savedObjectsClient,
       author,
       buildingBlockType,
       description,
@@ -175,8 +174,6 @@ export const createPromises = (
       outputIndex,
       rule: migratedRule,
       savedId,
-      spaceId,
-      ruleStatusClient,
       meta,
       filters,
       index,

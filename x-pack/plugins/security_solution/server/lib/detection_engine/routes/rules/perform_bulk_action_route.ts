@@ -7,14 +7,12 @@
 
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { Logger } from 'src/core/server';
-import { set } from '@elastic/safer-lodash-set';
 
 import { DETECTION_ENGINE_RULES_BULK_ACTION } from '../../../../../common/constants';
 import {
   BulkAction,
   BulkActionUpdateType,
 } from '../../../../../common/detection_engine/schemas/common/schemas';
-import { RulesSchema } from '../../../../../common/detection_engine/schemas/response/rules_schema';
 import { performBulkActionSchema } from '../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema';
 import { SetupPlugins } from '../../../../plugin';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
@@ -29,7 +27,6 @@ import { patchRules } from '../../rules/patch_rules';
 import { getExportByObjectIds } from '../../rules/get_export_by_object_ids';
 import { buildSiemResponse } from '../utils';
 import { transformAlertToRule } from './utils';
-import { PartialFilter } from '../../types';
 
 const BULK_ACTION_RULES_LIMIT = 10000;
 
@@ -154,145 +151,87 @@ export const performBulkActionRoute = (
               body: responseBody,
             });
           case BulkAction.update:
-            const isArrProp = (
-              field: 'index' | 'tags' | 'timeline_id'
-            ): field is 'tags' | 'index' => {
-              return field === 'index' || field === 'tags';
+            const addItemsToArray = <T>(arr: T[], items: T[]): T[] =>
+              Array.from(new Set([...arr, ...items]));
+
+            const deleteItemsFromArray = <T>(arr: T[], items: T[]): T[] => {
+              const itemsSet = new Set(items);
+              return arr.filter((item) => !itemsSet.has(item));
             };
+
             await Promise.all(
               rules.data.map(async (existingRule) => {
                 const transformedRule = transformAlertToRule(existingRule);
-                body?.updates?.map?.(({ type, field, value }) => {
-                  switch (type) {
-                    case BulkActionUpdateType.add:
-                      if (isArrProp(field)) {
-                        transformedRule[field] = Array.from(
-                          new Set([...(transformedRule[field] ?? []), ...value])
-                        );
-                      }
+
+                body?.updates?.map?.((action) => {
+                  switch (action.type) {
+                    // tags actions
+                    case BulkActionUpdateType.add_tags:
+                      transformedRule.tags = addItemsToArray(
+                        transformedRule.tags ?? [],
+                        action.value
+                      );
                       break;
 
-                    case BulkActionUpdateType.delete:
-                      if (isArrProp(field)) {
-                        const valueSet = new Set(value ?? []);
-                        transformedRule[field] =
-                          transformedRule[field]?.filter((item) => !valueSet.has(item)) ?? [];
-                      }
+                    case BulkActionUpdateType.delete_tags:
+                      transformedRule.tags = deleteItemsFromArray(
+                        transformedRule.tags ?? [],
+                        action.value
+                      );
                       break;
 
-                    case BulkActionUpdateType.set:
-                      set(transformedRule, field, value);
+                    case BulkActionUpdateType.set_tags:
+                      transformedRule.tags = action.value;
+                      break;
+
+                    // index actions
+                    case BulkActionUpdateType.add_index:
+                      transformedRule.index = addItemsToArray(
+                        transformedRule.index ?? [],
+                        action.value
+                      );
+                      break;
+
+                    case BulkActionUpdateType.delete_index:
+                      transformedRule.index = deleteItemsFromArray(
+                        transformedRule.index ?? [],
+                        action.value
+                      );
+                      break;
+
+                    case BulkActionUpdateType.set_index:
+                      transformedRule.index = action.value;
+                      break;
+
+                    // timeline actions
+                    case BulkActionUpdateType.set_timeline:
+                      transformedRule.timeline_id = action.value.timelineId;
+                      transformedRule.timeline_title = action.value.timelineTitle;
                   }
 
                   return transformedRule;
                 });
 
                 const {
-                  actions: actionsRest,
-                  author,
-                  building_block_type: buildingBlockType,
-                  description,
-                  enabled,
-                  event_category_override: eventCategoryOverride,
-                  false_positives: falsePositives,
-                  from,
-                  query,
-                  language,
-                  license,
-                  output_index: outputIndex,
-                  saved_id: savedId,
-                  timeline_id: timelineId,
-                  timeline_title: timelineTitle,
-                  meta,
-                  filters,
-                  index,
-                  interval,
-                  max_signals: maxSignals,
-                  risk_score: riskScore,
-                  risk_score_mapping: riskScoreMapping,
-                  rule_name_override: ruleNameOverride,
-                  name,
-                  severity,
-                  severity_mapping: severityMapping,
                   tags,
-                  to,
-                  type,
-                  threat,
-                  threshold,
-                  threat_filters: threatFilters,
-                  threat_index: threatIndex,
-                  threat_indicator_path: threatIndicatorPath,
-                  threat_query: threatQuery,
-                  threat_mapping: threatMapping,
-                  threat_language: threatLanguage,
-                  concurrent_searches: concurrentSearches,
-                  items_per_search: itemsPerSearch,
-                  timestamp_override: timestampOverride,
-                  throttle,
-                  references,
-                  note,
-                  version,
-                  anomaly_threshold: anomalyThreshold,
-                  machine_learning_job_id: machineLearningJobId,
-                  exceptions_list: exceptionsList,
+                  index,
+                  timeline_title: timelineTitle,
+                  timeline_id: timelineId,
                 } = transformedRule;
 
                 await patchRules({
                   rulesClient,
                   rule: existingRule,
-                  author,
-                  buildingBlockType,
-                  description,
-                  enabled,
-                  eventCategoryOverride,
-                  falsePositives,
-                  from,
-                  query,
-                  language,
-                  license,
-                  outputIndex,
-                  savedId,
-                  timelineId,
-                  timelineTitle,
-                  meta,
-                  filters: filters as PartialFilter[],
-                  index,
-                  interval,
-                  maxSignals,
-                  riskScore,
-                  riskScoreMapping,
-                  ruleNameOverride,
-                  name,
-                  severity,
-                  severityMapping,
                   tags,
-                  to,
-                  type,
-                  threat,
-                  threshold,
-                  threatFilters,
-                  threatIndex,
-                  threatIndicatorPath,
-                  threatQuery,
-                  threatMapping,
-                  threatLanguage,
-                  throttle,
-                  concurrentSearches,
-                  itemsPerSearch,
-                  timestampOverride,
-                  references,
-                  note,
-                  version,
-                  anomalyThreshold,
-                  machineLearningJobId,
-                  actions: actionsRest,
-                  exceptionsList,
+                  index,
+                  timelineTitle,
+                  timelineId,
                 });
               })
             );
         }
 
-        return response.ok({ body: { success: true, rules_count: rules.data.length } });
+        return response.ok({ body: { success: true, rules_count: rules.data.length, errors: [] } });
       } catch (err) {
         const error = transformError(err);
         return siemResponse.error({

@@ -449,34 +449,68 @@ export enum BulkAction {
 
 export const bulkAction = enumeration('BulkAction', BulkAction);
 
-export enum BulkActionUpdateType {
-  'add' = 'add',
-  'delete' = 'delete',
-  'set' = 'set',
+export enum BulkActionUpdateTagsType {
+  'add_tags' = 'add_tags',
+  'delete_tags' = 'delete_tags',
+  'set_tags' = 'set_tags',
 }
 
-export const bulkActionUpdateType = enumeration('BulkActionUpdateType', BulkActionUpdateType);
+export const bulkActionUpdateTagsType = enumeration(
+  'BulkActionUpdateTagsType',
+  BulkActionUpdateTagsType
+);
 
-const actionUpdatesTags = t.type({
-  type: bulkActionUpdateType,
-  field: t.literal('tags'),
+export enum BulkActionUpdateIndexType {
+  'add_index' = 'add_index',
+  'delete_index' = 'delete_index',
+  'set_index' = 'set_index',
+}
+
+export const bulkActionUpdateIndexType = enumeration(
+  'BulkActionUpdateIndexType',
+  BulkActionUpdateIndexType
+);
+
+export enum BulkActionUpdateTimelineType {
+  'set_timeline' = 'set_timeline',
+}
+
+export const bulkActionUpdateTimelineType = enumeration(
+  'BulkActionUpdateTimelineType',
+  BulkActionUpdateTimelineType
+);
+
+export const BulkActionUpdateType = {
+  ...BulkActionUpdateTagsType,
+  ...BulkActionUpdateIndexType,
+  ...BulkActionUpdateTimelineType,
+};
+
+export type BulkActionUpdateType =
+  | BulkActionUpdateTagsType
+  | BulkActionUpdateIndexType
+  | BulkActionUpdateTimelineType;
+
+const actionUpdateTags = t.type({
+  type: bulkActionUpdateTagsType,
   value: tags,
 });
 
-const actionUpdatesIndex = t.type({
-  type: bulkActionUpdateType,
-  field: t.literal('index'),
+const actionUpdateIndex = t.type({
+  type: bulkActionUpdateIndexType,
   value: index,
 });
 
-const actionUpdatesTimelineId = t.type({
-  type: t.literal('overwrite'),
-  field: t.literal('timeline_id'),
-  value: timeline_id,
+const actionUpdateTimeline = t.type({
+  type: bulkActionUpdateTimelineType,
+  value: t.type({
+    timelineId: timeline_id,
+    timelineTitle: timeline_title,
+  }),
 });
 
 export const bulkActionUpdate = t.union([
-  actionUpdatesTags,
-  actionUpdatesIndex,
-  actionUpdatesTimelineId,
+  actionUpdateTags,
+  actionUpdateIndex,
+  actionUpdateTimeline,
 ]);

@@ -231,6 +231,7 @@ export type BulkActionResponse<Action extends BulkAction> = {
   [BulkAction.enable]: BulkActionResult;
   [BulkAction.duplicate]: BulkActionResult;
   [BulkAction.export]: Blob;
+  [BulkAction.update]: BulkActionResult;
 }[Action];
 
 export interface BasicFetchProps {

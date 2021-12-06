@@ -268,8 +268,11 @@ export interface UpdateRulesOptions {
   ruleUpdate: UpdateRulesSchema;
 }
 
-export interface PatchRulesOptions {
+export interface PatchRulesOptions extends Partial<PatchRulesFieldsOptions> {
   rulesClient: RulesClient;
+  rule: SanitizedAlert<RuleParams> | null | undefined;
+}
+interface PatchRulesFieldsOptions {
   anomalyThreshold: AnomalyThresholdOrUndefined;
   author: AuthorOrUndefined;
   buildingBlockType: BuildingBlockTypeOrUndefined;
@@ -317,7 +320,6 @@ export interface PatchRulesOptions {
   version: VersionOrUndefined;
   exceptionsList: ListArrayOrUndefined;
   actions: RuleAlertAction[] | undefined;
-  rule: SanitizedAlert<RuleParams> | null | undefined;
   namespace?: NamespaceOrUndefined;
 }
 
