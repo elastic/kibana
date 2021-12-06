@@ -96,7 +96,7 @@ export class ConnectorTokenClient {
     token,
     expiresAtMillis,
     tokenType,
-  }: UpdateOptions): Promise<ConnectorToken> {
+  }: UpdateOptions): Promise<ConnectorToken | null> {
     const { attributes, references, version } =
       await this.unsecuredSavedObjectsClient.get<ConnectorToken>(
         CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
@@ -105,26 +105,33 @@ export class ConnectorTokenClient {
     const createTime = Date.now();
 
     try {
-      const result = await this.unsecuredSavedObjectsClient.create<ConnectorToken>(
-        CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
-        {
-          ...attributes,
-          token,
-          expiresAt: expiresAtMillis,
-          tokenType: tokenType ?? 'access_token',
-          updatedAt: new Date(createTime).toISOString(),
-        },
-        omitBy(
+      if (
+        (await this.unsecuredSavedObjectsClient.checkConflicts([{ id, type: 'connector_token' }]))
+          .errors.length > 0
+      ) {
+        return null;
+      } else {
+        const result = await this.unsecuredSavedObjectsClient.create<ConnectorToken>(
+          CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
           {
-            id,
-            overwrite: true,
-            references,
-            version,
+            ...attributes,
+            token,
+            expiresAt: expiresAtMillis,
+            tokenType: tokenType ?? 'access_token',
+            updatedAt: new Date(createTime).toISOString(),
           },
-          isUndefined
-        )
-      );
-      return result.attributes as ConnectorToken;
+          omitBy(
+            {
+              id,
+              overwrite: true,
+              references,
+              version,
+            },
+            isUndefined
+          )
+        );
+        return result.attributes as ConnectorToken;
+      }
     } catch (err) {
       this.logger.error(
         `Failed to update connector_token for id "${id}" and tokenType: "${
@@ -144,7 +151,10 @@ export class ConnectorTokenClient {
   }: {
     connectorId: string;
     tokenType?: string;
-  }): Promise<ConnectorToken | null> {
+  }): Promise<{
+    hasErrors: boolean;
+    connectorToken: ConnectorToken | null;
+  }> {
     const connectorTokensResult = [];
     const tokenTypeFilter = tokenType
       ? ` AND ${CONNECTOR_TOKEN_SAVED_OBJECT_TYPE}.attributes.tokenType: "${tokenType}"`
@@ -168,11 +178,11 @@ export class ConnectorTokenClient {
           tokenType ?? 'access_token'
         }". Error: ${err.message}`
       );
-      return null;
+      return { hasErrors: false, connectorToken: null };
     }
 
     if (connectorTokensResult.length === 0) {
-      return null;
+      return { hasErrors: false, connectorToken: null };
     }
 
     try {
@@ -184,9 +194,12 @@ export class ConnectorTokenClient {
       );
 
       return {
-        id: connectorTokensResult[0].id,
-        ...connectorTokensResult[0].attributes,
-        token,
+        hasErrors: false,
+        connectorToken: {
+          id: connectorTokensResult[0].id,
+          ...connectorTokensResult[0].attributes,
+          token,
+        },
       };
     } catch (err) {
       this.logger.error(
@@ -194,19 +207,27 @@ export class ConnectorTokenClient {
           tokenType ?? 'access_token'
         }". Error: ${err.message}`
       );
-      await this.deleteConnectorTokens({ connectorId });
-      return null;
+      return { hasErrors: true, connectorToken: null };
     }
   }
 
   /**
    * Delete all connector tokens
    */
-  public async deleteConnectorTokens({ connectorId }: { connectorId: string }) {
+  public async deleteConnectorTokens({
+    connectorId,
+    tokenType,
+  }: {
+    connectorId: string;
+    tokenType?: string;
+  }) {
+    const tokenTypeFilter = tokenType
+      ? ` AND ${CONNECTOR_TOKEN_SAVED_OBJECT_TYPE}.attributes.tokenType: "${tokenType}"`
+      : '';
     try {
       const result = await this.unsecuredSavedObjectsClient.find<ConnectorToken>({
         type: CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
-        filter: `${CONNECTOR_TOKEN_SAVED_OBJECT_TYPE}.attributes.connectorId: "${connectorId}"`,
+        filter: `${CONNECTOR_TOKEN_SAVED_OBJECT_TYPE}.attributes.connectorId: "${connectorId}"${tokenTypeFilter}`,
       });
       return Promise.all(
         result.saved_objects.map(

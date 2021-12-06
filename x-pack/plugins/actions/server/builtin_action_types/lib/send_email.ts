@@ -89,7 +89,7 @@ async function sendEmailWithExchange(
 
   let accessToken: string;
 
-  const connectorToken = await connectorTokenClient.get({ connectorId });
+  const { connectorToken, hasErrors } = await connectorTokenClient.get({ connectorId });
   if (connectorToken === null || Date.parse(connectorToken.expiresAt) <= Date.now()) {
     // request new access token for microsoft exchange online server with Graph API scope
     const tokenResult = await requestOAuthClientCredentialsToken(
@@ -107,6 +107,13 @@ async function sendEmailWithExchange(
     // try to update connector_token SO
     try {
       if (connectorToken === null) {
+        if (hasErrors) {
+          // delete existing access tokens
+          await connectorTokenClient.deleteConnectorTokens({
+            connectorId,
+            tokenType: 'access_token',
+          });
+        }
         await connectorTokenClient.create({
           connectorId,
           token: accessToken,

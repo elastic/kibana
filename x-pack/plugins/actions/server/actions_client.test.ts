@@ -85,6 +85,12 @@ const executor: ExecutorType<{}, {}, {}, void> = async (options) => {
   return { status: 'ok', actionId: options.actionId };
 };
 
+const connectorTokenClient = new ConnectorTokenClient({
+  unsecuredSavedObjectsClient: savedObjectsClientMock.create(),
+  encryptedSavedObjectsClient: encryptedSavedObjectsMock.createClient(),
+  logger,
+});
+
 beforeEach(() => {
   jest.resetAllMocks();
   mockedLicenseState = licenseStateMock.create();
@@ -110,11 +116,7 @@ beforeEach(() => {
     authorization: authorization as unknown as ActionsAuthorization,
     auditLogger,
     usageCounter: mockUsageCounter,
-    connectorTokenClient: new ConnectorTokenClient({
-      unsecuredSavedObjectsClient: savedObjectsClientMock.create(),
-      encryptedSavedObjectsClient: encryptedSavedObjectsMock.createClient(),
-      logger,
-    }),
+    connectorTokenClient,
   });
 });
 
@@ -1294,6 +1296,7 @@ describe('delete()', () => {
     test('ensures user is authorised to delete actions', async () => {
       await actionsClient.delete({ id: '1' });
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith('delete');
+      expect(connectorTokenClient.deleteConnectorTokens).toHaveBeenCalledTimes(1);
     });
 
     test('throws when user is not authorised to create the type of action', async () => {
