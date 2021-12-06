@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { ITLSFields, ConfigKeys } from '../../fleet_package/types';
+import { TLSFields, ConfigKey } from '../../fleet_package/types';
 import { arrayFormatter, Formatter } from './common';
 
-type TLSFormatMap = Record<keyof ITLSFields, Formatter>;
+type TLSFormatMap = Record<keyof TLSFields, Formatter>;
 
 export const tlsFormatters: TLSFormatMap = {
-  [ConfigKeys.TLS_CERTIFICATE_AUTHORITIES]: null,
-  [ConfigKeys.TLS_CERTIFICATE]: null,
-  [ConfigKeys.TLS_KEY]: null,
-  [ConfigKeys.TLS_KEY_PASSPHRASE]: null,
-  [ConfigKeys.TLS_VERIFICATION_MODE]: null,
-  [ConfigKeys.TLS_VERSION]: (fields) => arrayFormatter(fields[ConfigKeys.TLS_VERSION]),
+  [ConfigKey.TLS_CERTIFICATE_AUTHORITIES]: null,
+  [ConfigKey.TLS_CERTIFICATE]: null,
+  [ConfigKey.TLS_KEY]: null,
+  [ConfigKey.TLS_KEY_PASSPHRASE]: null,
+  [ConfigKey.TLS_VERIFICATION_MODE]: null,
+  [ConfigKey.TLS_VERSION]: (fields) => arrayFormatter(fields[ConfigKey.TLS_VERSION]),
 };
