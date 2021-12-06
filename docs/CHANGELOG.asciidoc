@@ -231,18 +231,6 @@ Update the following settings:
 ====
       
 [discrete]
-[[deprecation-111676]]
-.Expands parameters for `xpack.security.enabled` deprecation message 
-[%collapsible]
-====
-*Details* +
-When the deprecated `xpack.security.enabled` setting is set to any value, the deprecation message now automatically appears. For more information, refer to {kibana-pull}111676[#111676].
-
-*Impact* +
-Use {ref}/security-settings.html#general-security-settings[`xpack.security.enabled`] in elasticsearch.yml.
-====
-      
-[discrete]
 [[deprecation-111550]]
 .Deprecates `proxyFilter` and `proxyConfig`
 [%collapsible]
