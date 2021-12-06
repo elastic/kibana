@@ -14,6 +14,8 @@ import { useUrlParams } from '../../../hooks';
 import { UptimeRefreshContext } from '../../../contexts';
 import { getConnectorsAction, getMonitorAlertsAction } from '../../../state/alerts/alerts';
 import { useMappingCheck } from '../../../hooks/use_mapping_check';
+import { getAllMonitors } from '../../../state/api';
+import { useFetcher } from '../../../../../observability/public';
 
 export interface MonitorListProps {
   filters?: string;
@@ -42,6 +44,18 @@ export const MonitorList: React.FC<MonitorListProps> = (props) => {
   const { lastRefresh } = useContext(UptimeRefreshContext);
 
   const monitorList = useSelector(monitorListSelector);
+
+  const { data: monitorObjects } = useFetcher(async () => {
+    return getAllMonitors();
+  }, [lastRefresh]);
+
+  const pendingMonitors = monitorObjects?.saved_objects?.filter(({ id }) => {
+    if (monitorList.list.summaries.length > 0) {
+      return !monitorList.list.summaries.find((item) => item.monitor_id.includes(id));
+    }
+    return true;
+  });
+
   useMappingCheck(monitorList.error);
 
   useEffect(() => {
@@ -82,6 +96,8 @@ export const MonitorList: React.FC<MonitorListProps> = (props) => {
       monitorList={monitorList}
       pageSize={pageSize}
       setPageSize={setPageSize}
+      pendingMonitors={pendingMonitors ?? []}
+      allSavedMonitors={monitorObjects?.saved_objects ?? []}
     />
   );
 };

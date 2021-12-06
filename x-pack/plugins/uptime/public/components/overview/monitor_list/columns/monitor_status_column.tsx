@@ -9,7 +9,15 @@ import React, { useContext } from 'react';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
-import { EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip, EuiBadge, EuiSpacer } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
+  EuiToolTip,
+  EuiBadge,
+  EuiSpacer,
+  EuiIcon,
+} from '@elastic/eui';
 import { parseTimestamp } from '../parse_timestamp';
 import { Ping } from '../../../../../common/runtime_types';
 import {
@@ -22,11 +30,14 @@ import {
 import { UptimeThemeContext } from '../../../../contexts';
 import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
 import { STATUS_DOWN_LABEL, STATUS_UP_LABEL } from '../../../common/translations';
+import { getMonitorObject } from './monitor_name_col';
 
 interface MonitorListStatusColumnProps {
   status: string;
+  monitorId: string;
   timestamp: string;
   summaryPings: Ping[];
+  monitorListObjects: object[];
 }
 
 const StatusColumnFlexG = styled(EuiFlexGroup)`
@@ -145,9 +156,13 @@ export const getLocationStatus = (summaryPings: Ping[], status: string) => {
 
 export const MonitorListStatusColumn = ({
   status,
+  monitorId,
   summaryPings = [],
   timestamp: tsString,
+  monitorListObjects,
 }: MonitorListStatusColumnProps) => {
+  const objMonitor = getMonitorObject(monitorId, monitorListObjects);
+
   const timestamp = parseTimestamp(tsString);
 
   const {
@@ -158,15 +173,22 @@ export const MonitorListStatusColumn = ({
 
   return (
     <div>
-      <StatusColumnFlexG alignItems="center" gutterSize="none" wrap={false} responsive={false}>
+      <StatusColumnFlexG alignItems="center" gutterSize="xs" wrap={false} responsive={false}>
         <EuiFlexItem grow={false} style={{ flexBasis: 40 }}>
           <EuiBadge
             className="eui-textCenter"
-            color={status === STATUS.UP ? 'success' : dangerBehindText}
+            color={!objMonitor ? 'default' : status === STATUS.UP ? 'success' : dangerBehindText}
           >
             {getHealthMessage(status)}
           </EuiBadge>
         </EuiFlexItem>
+        {!objMonitor && (
+          <EuiFlexItem style={{ flexBasis: 40 }} grow={false}>
+            <EuiBadge className="eui-textCenter" color={'warning'}>
+              STALE
+            </EuiBadge>
+          </EuiFlexItem>
+        )}
       </StatusColumnFlexG>
       <EuiSpacer size="xs" />
       <EuiText size="xs">

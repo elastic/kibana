@@ -16,6 +16,7 @@ import {
   EuiPanel,
   EuiSpacer,
   getBreakpoint,
+  EuiBadge,
 } from '@elastic/eui';
 import { X509Expiry } from '../../../../common/runtime_types';
 import { MonitorSummary } from '../../../../common/runtime_types';
@@ -36,24 +37,31 @@ import { STATUS_ALERT_COLUMN } from './translations';
 import { MonitorNameColumn } from './columns/monitor_name_col';
 import { MonitorTags } from '../../common/monitor_tags';
 import { useMonitorHistogram } from './use_monitor_histogram';
+import { SyntheticsMonitorSavedObject } from '../../../../common/types';
 
 interface Props extends MonitorListProps {
   pageSize: number;
   setPageSize: (val: number) => void;
   monitorList: MonitorList;
+  pendingMonitors: SyntheticsMonitorSavedObject[];
+  allSavedMonitors: SyntheticsMonitorSavedObject[];
 }
+
+export type SummaryOrMonitor = SyntheticsMonitorSavedObject | MonitorSummary;
 
 export const noItemsMessage = (loading: boolean, filters?: string) => {
   if (loading) return labels.LOADING;
   return !!filters ? labels.NO_MONITOR_ITEM_SELECTED : labels.NO_DATA_MESSAGE;
 };
 
-export const MonitorListComponent: ({
+export const MonitorListComponent = ({
   filters,
   monitorList: { list, error, loading },
   pageSize,
   setPageSize,
-}: Props) => any = ({ filters, monitorList: { list, error, loading }, pageSize, setPageSize }) => {
+  pendingMonitors,
+  allSavedMonitors,
+}: Props) => {
   const [expandedDrawerIds, updateExpandedDrawerIds] = useState<string[]>([]);
   const { width } = useWindowSize();
   const [hideExtraColumns, setHideExtraColumns] = useState(false);
@@ -103,14 +111,24 @@ export const MonitorListComponent: ({
         mobileOptions: {
           fullWidth: true,
         },
-        render: (status: string, { state: { timestamp, summaryPings } }: MonitorSummary) => {
-          return (
-            <MonitorListStatusColumn
-              status={status}
-              timestamp={timestamp}
-              summaryPings={summaryPings ?? []}
-            />
-          );
+        render: (status: string, summary: SummaryOrMonitor) => {
+          if ('state' in summary) {
+            const {
+              state: { timestamp, summaryPings },
+            } = summary;
+
+            return (
+              <MonitorListStatusColumn
+                monitorId={summary.monitor_id}
+                status={status}
+                timestamp={timestamp}
+                summaryPings={summaryPings ?? []}
+                monitorListObjects={allSavedMonitors}
+              />
+            );
+          } else {
+            return <EuiBadge color="primary">PENDING</EuiBadge>;
+          }
         },
       },
       {
@@ -120,7 +138,22 @@ export const MonitorListComponent: ({
         mobileOptions: {
           fullWidth: true,
         },
-        render: (_name: string, summary: MonitorSummary) => <MonitorNameColumn summary={summary} />,
+        render: (_name: string, summaryOrMonitor: SummaryOrMonitor) => {
+          const summary = 'state' in summaryOrMonitor ? summaryOrMonitor : undefined;
+          const monitorSavedObject =
+            'attributes' in summaryOrMonitor ? summaryOrMonitor : undefined;
+
+          return (
+            <MonitorNameColumn
+              monitorId={
+                'state' in summaryOrMonitor ? summaryOrMonitor.monitor_id : summaryOrMonitor.id
+              }
+              summary={summary}
+              allSavedMonitors={allSavedMonitors}
+              monitorSavedObject={monitorSavedObject}
+            />
+          );
+        },
         sortable: true,
       },
       {
@@ -128,24 +161,33 @@ export const MonitorListComponent: ({
         field: 'state.url.full',
         name: URL_LABEL,
         width: '30%',
-        render: (url: string) => (
-          <EuiLink href={url} target="_blank" color="text" external>
-            {url}
-          </EuiLink>
-        ),
+        render: (summaryUrl: string, summary: SummaryOrMonitor) => {
+          const url = 'state' in summary ? summaryUrl : summary.attributes?.urls?.[0];
+          return (
+            <EuiLink href={url} target="_blank" color="text" external>
+              {url}
+            </EuiLink>
+          );
+        },
       },
       {
         align: 'left' as const,
         field: 'state.monitor.name',
         name: TAGS_LABEL,
         width: '12%',
-        render: (_name: string, summary: MonitorSummary) => <MonitorTags summary={summary} />,
+        render: (_name: string, summary: SummaryOrMonitor) => (
+          <MonitorTags
+            summary={'state' in summary ? summary : undefined}
+            allSavedMonitors={allSavedMonitors}
+            monitorId={'state' in summary ? summary.monitor_id : summary.id}
+          />
+        ),
       },
       {
         align: 'left' as const,
         field: 'state.tls.server.x509',
         name: labels.TLS_COLUMN_LABEL,
-        render: (x509: X509Expiry) => <CertStatusColumn expiry={x509} />,
+        render: (x509: X509Expiry, summary: SummaryOrMonitor) => <CertStatusColumn expiry={x509} />,
       },
     ],
     ...(!hideExtraColumns
@@ -157,12 +199,15 @@ export const MonitorListComponent: ({
             mobileOptions: {
               show: false,
             },
-            render: (monitorId: string) => (
-              <MonitorBarSeries
-                histogramSeries={histogramsById?.[monitorId]?.points}
-                minInterval={minInterval!}
-              />
-            ),
+            render: (monitorId: string, summary: SummaryOrMonitor) =>
+              'state' in summary ? (
+                <MonitorBarSeries
+                  histogramSeries={histogramsById?.[monitorId]?.points}
+                  minInterval={minInterval!}
+                />
+              ) : (
+                '--'
+              ),
           },
         ]
       : []),
@@ -172,12 +217,13 @@ export const MonitorListComponent: ({
         field: '',
         name: STATUS_ALERT_COLUMN,
         width: '100px',
-        render: (item: MonitorSummary) => (
-          <EnableMonitorAlert
-            monitorId={item.monitor_id}
-            selectedMonitor={item.state.summaryPings[0]}
-          />
-        ),
+        render: (item: SummaryOrMonitor) =>
+          'state' in item ? (
+            <EnableMonitorAlert
+              monitorId={item.monitor_id}
+              selectedMonitor={item.state.summaryPings[0]}
+            />
+          ) : null,
       },
     ],
     ...(!hideExtraColumns
@@ -189,13 +235,14 @@ export const MonitorListComponent: ({
             sortable: true,
             isExpander: true,
             width: '40px',
-            render: (id: string) => {
+            render: (id: string, item: any) => {
               return (
                 <EuiButtonIcon
                   aria-label={labels.getExpandDrawerLabel(id)}
                   data-test-subj={`xpack.uptime.monitorList.${id}.expandMonitorDetail`}
                   iconType={expandedDrawerIds.includes(id) ? 'arrowUp' : 'arrowDown'}
                   onClick={() => toggleDrawer(id)}
+                  isDisabled={!item.state}
                 />
               );
             },
@@ -216,15 +263,17 @@ export const MonitorListComponent: ({
         hasActions={true}
         itemId="monitor_id"
         itemIdToExpandedRowMap={getExpandedRowMap()}
-        items={items}
+        items={[...items, ...(pendingMonitors ?? [])]}
         noItemsMessage={noItemsMessage(loading, filters)}
         columns={columns}
         tableLayout={'auto'}
         rowProps={
           hideExtraColumns
-            ? ({ monitor_id: monitorId }) => ({
-                onClick: () => toggleDrawer(monitorId),
-                'aria-label': labels.getExpandDrawerLabel(monitorId),
+            ? (item) => ({
+                onClick: () => toggleDrawer('state' in item ? item.monitor_id : item.id),
+                'aria-label': labels.getExpandDrawerLabel(
+                  'state' in item ? item.monitor_id : item.id
+                ),
               })
             : undefined
         }

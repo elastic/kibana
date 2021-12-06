@@ -7,6 +7,7 @@
 
 import { API_URLS } from '../../../common/constants';
 import { apiService } from './utils';
+import { SyntheticsMonitorSavedObject } from '../../../common/types';
 
 // TODO, change to monitor runtime type
 export const setMonitor = async ({ monitor, id }: { monitor: any; id?: string }): Promise<void> => {
@@ -15,4 +16,10 @@ export const setMonitor = async ({ monitor, id }: { monitor: any; id?: string })
   } else {
     return await apiService.post(API_URLS.SYNTHETICS_MONITORS, monitor);
   }
+};
+
+export const getAllMonitors = async (): Promise<{
+  saved_objects: SyntheticsMonitorSavedObject[];
+}> => {
+  return await apiService.get(API_URLS.SYNTHETICS_MONITORS);
 };

@@ -13,14 +13,20 @@ import { Ping } from '../../../common/runtime_types/ping';
 import { MonitorSummary } from '../../../common/runtime_types/monitor';
 import { useFilterUpdate } from '../../hooks/use_filter_update';
 import { useGetUrlParams } from '../../hooks';
-import { parseCurrentFilters } from '../overview/monitor_list/columns/monitor_name_col';
+import {
+  getMonitorObject,
+  parseCurrentFilters,
+} from '../overview/monitor_list/columns/monitor_name_col';
 import { EXPAND_TAGS_LABEL } from '../overview/monitor_list/columns/translations';
 import { OVERVIEW_ROUTE } from '../../../common/constants';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
+import { SyntheticsMonitorSavedObject } from '../../../common/types';
 
 interface Props {
   ping?: Ping | null;
+  monitorId: string;
   summary?: MonitorSummary;
+  allSavedMonitors: SyntheticsMonitorSavedObject[];
 }
 
 const getTagsFromSummary = (summary: MonitorSummary) => {
@@ -45,7 +51,7 @@ const getFilterLabel = (tag: string) => {
   });
 };
 
-export const MonitorTags = ({ ping, summary }: Props) => {
+export const MonitorTags = ({ ping, summary, allSavedMonitors, monitorId }: Props) => {
   const history = useHistory();
 
   const {
@@ -54,13 +60,19 @@ export const MonitorTags = ({ ping, summary }: Props) => {
 
   const [toDisplay, setToDisplay] = useState(5);
 
-  let tags: string[];
+  let tags: string[] = [];
 
-  if (summary) {
+  const objMonitor = getMonitorObject(monitorId, allSavedMonitors);
+
+  if (summary && 'state' in summary) {
     // summary in case of monitor list
-    tags = getTagsFromSummary(summary!);
-  } else {
-    tags = getTagsFromPing(ping!);
+    tags = getTagsFromSummary(summary) ?? [];
+  } else if (ping) {
+    tags = getTagsFromPing(ping) ?? [];
+  }
+
+  if (tags.length === 0 && objMonitor) {
+    tags = objMonitor.attributes.tags ?? [];
   }
 
   const tagsToDisplay = tags.slice(0, toDisplay);
