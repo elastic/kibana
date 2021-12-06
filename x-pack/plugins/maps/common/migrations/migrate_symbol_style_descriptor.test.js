@@ -41,7 +41,7 @@ describe('migrateSymbolStyleDescriptor', () => {
   test('Should migrate "symbol" style descriptor', () => {
     const layerListJSON = JSON.stringify([
       {
-        type: LAYER_TYPE.VECTOR,
+        type: 'VECTOR',
         style: {
           properties: {
             fillColor: {
@@ -66,7 +66,7 @@ describe('migrateSymbolStyleDescriptor', () => {
       title: 'my map',
       layerListJSON: JSON.stringify([
         {
-          type: LAYER_TYPE.VECTOR,
+          type: 'VECTOR',
           style: {
             properties: {
               fillColor: {
@@ -90,7 +90,7 @@ describe('migrateSymbolStyleDescriptor', () => {
   test('Should migrate style descriptor without "symbol"', () => {
     const layerListJSON = JSON.stringify([
       {
-        type: LAYER_TYPE.VECTOR,
+        type: 'VECTOR',
         style: {
           properties: {
             fillColor: {
@@ -109,7 +109,7 @@ describe('migrateSymbolStyleDescriptor', () => {
       title: 'my map',
       layerListJSON: JSON.stringify([
         {
-          type: LAYER_TYPE.VECTOR,
+          type: 'VECTOR',
           style: {
             properties: {
               fillColor: {

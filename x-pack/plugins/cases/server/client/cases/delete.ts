@@ -8,13 +8,8 @@
 import pMap from 'p-map';
 import { Boom } from '@hapi/boom';
 import { SavedObject, SavedObjectsClientContract, SavedObjectsFindResponse } from 'kibana/server';
-import {
-  CommentAttributes,
-  ENABLE_CASE_CONNECTOR,
-  MAX_CONCURRENT_SEARCHES,
-  OWNER_FIELD,
-  SubCaseAttributes,
-} from '../../../common';
+import { CommentAttributes, SubCaseAttributes, OWNER_FIELD } from '../../../common/api';
+import { ENABLE_CASE_CONNECTOR, MAX_CONCURRENT_SEARCHES } from '../../../common/constants';
 import { CasesClientArgs } from '..';
 import { createCaseError } from '../../common';
 import { AttachmentService, CasesService } from '../../services';
