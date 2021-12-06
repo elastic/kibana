@@ -398,5 +398,14 @@ describe('ContentStream', () => {
       expect(deleteRequest).toHaveProperty('body.query.match.parent_id', 'something');
       expect(updateRequest).toHaveProperty('body.doc.output.content', '');
     });
+
+    it('throws for badly configured max content settings', async () => {
+      client.cluster.getSettings.mockResolvedValueOnce(
+        set<any>({}, 'body.defaults.http.max_content_length', 0)
+      );
+      base64Stream.end('12345678');
+      const error = await new Promise<Error>((resolve) => base64Stream.once('error', resolve));
+      expect(error.message).toContain('Unable to add buffers to flush');
+    });
   });
 });
