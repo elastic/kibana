@@ -323,10 +323,10 @@ While this allows you to use advanced Osquery functionality like pack discovery 
 * (Optional) To load a full configuration file, drag and drop an Osquery `.conf` file into the area at the bottom of the page.
 
 . Click *Save integration* to apply the custom configuration to all agents in the policy.
-
++
 As an example, the following configuration disables two tables.
-
-```
++
+```ts
 {
    "options":{
       "disable_tables":"curl,process_envs"
