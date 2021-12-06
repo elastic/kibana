@@ -54,7 +54,6 @@ const createAttachmentsSubClientMock = (): AttachmentsSubClientMock => {
     get: jest.fn(),
     update: jest.fn(),
     getAllAlertsAttachToCase: jest.fn(),
-    countAlertsAttachedToCase: jest.fn(),
   };
 };
 
