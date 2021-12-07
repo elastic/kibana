@@ -45,7 +45,8 @@ export class ScreenshottingPlugin implements Plugin<void, ScreenshottingStart, S
   private config: ConfigType;
   private logger: Logger;
   private screenshotMode!: ScreenshotModePluginSetup;
-  private browserDriverFactory!: Promise<HeadlessChromiumDriverFactory>;
+  private browserDriverFactory!: Promise<HeadlessChromiumDriverFactory | undefined>;
+  private error?: Error;
 
   constructor(context: PluginInitializerContext<ConfigType>) {
     this.logger = context.logger.get();
@@ -65,25 +66,32 @@ export class ScreenshottingPlugin implements Plugin<void, ScreenshottingStart, S
 
         return new HeadlessChromiumDriverFactory(this.screenshotMode, config, logger, binaryPath);
       } catch (error) {
+        this.error = error;
         this.logger.error('Error in screenshotting setup, it may not function properly.');
         this.logger.error(error);
       }
-    })() as Promise<HeadlessChromiumDriverFactory>;
+    })();
 
     return {};
   }
 
   start({}: CoreStart): ScreenshottingStart {
-    return (
-      this.browserDriverFactory && {
-        diagnose: () =>
-          from(this.browserDriverFactory).pipe(switchMap((factory) => factory.diagnose())),
-        getScreenshots: (options) =>
-          from(this.browserDriverFactory).pipe(
-            switchMap((factory) => getScreenshots(factory, this.logger.get('screenshot'), options))
-          ),
-      }
-    );
+    return {
+      diagnose: () => {
+        if (this.error) {
+          throw this.error;
+        }
+        return from(this.browserDriverFactory).pipe(switchMap((factory) => factory!.diagnose()));
+      },
+      getScreenshots: (options) => {
+        if (this.error) {
+          throw this.error;
+        }
+        return from(this.browserDriverFactory).pipe(
+          switchMap((factory) => getScreenshots(factory!, this.logger.get('screenshot'), options))
+        );
+      },
+    };
   }
 
   stop() {}
