@@ -12,11 +12,3 @@ The maximum number of spaces that you can use with the {kib} instance. Some {kib
 return all spaces using a single `_search` from {es}, so you must
 configure this setting lower than the `index.max_result_window` in {es}.
 The default is `1000`.
-
-`monitoring.cluster_alerts.allowedSpaces` {ess-icon}:: 
-Specifies the spaces where cluster alerts are automatically generated. 
-You must specify all spaces where you want to generate alerts, including the default space. 
-When the default space is unspecified, {kib} is unable to generate an alert for the default space.
-{es} clusters that run on {es} services are all containers. To send monitoring data 
-from your self-managed {es} installation to {es} services, set to `false`. 
-The default is `true`.
