@@ -455,7 +455,7 @@ describe('instrumentQueryAndDeprecationLogger', () => {
 
       // One debug log entry from 'elasticsearch.query' context
       expect(loggingSystemMock.collect(logger).debug.length).toEqual(1);
-      expect(loggingSystemMock.collect(logger).warn).toEqual([]);
+      expect(loggingSystemMock.collect(logger).info).toEqual([]);
     });
 
     it('does not log when warning header comes from a warn-agent that is not elasticsearch', () => {
@@ -484,7 +484,7 @@ describe('instrumentQueryAndDeprecationLogger', () => {
 
       // One debug log entry from 'elasticsearch.query' context
       expect(loggingSystemMock.collect(logger).debug.length).toEqual(1);
-      expect(loggingSystemMock.collect(logger).warn).toEqual([]);
+      expect(loggingSystemMock.collect(logger).info).toEqual([]);
     });
 
     it('logs error when the client receives an Elasticsearch error response for a deprecated request originating from a user', () => {
@@ -507,7 +507,7 @@ describe('instrumentQueryAndDeprecationLogger', () => {
       });
       client.diagnostic.emit('response', new errors.ResponseError(response), response);
 
-      expect(loggingSystemMock.collect(logger).warn).toEqual([]);
+      expect(loggingSystemMock.collect(logger).info).toEqual([]);
       // Test debug[1] since theree is one log entry from 'elasticsearch.query' context
       expect(loggingSystemMock.collect(logger).debug[1][0]).toMatch(
         'Elasticsearch deprecation: 299 Elasticsearch-8.1.0 "GET /_path is deprecated"'
@@ -543,12 +543,12 @@ describe('instrumentQueryAndDeprecationLogger', () => {
 
       // One debug log entry from 'elasticsearch.query' context
       expect(loggingSystemMock.collect(logger).debug.length).toEqual(1);
-      expect(loggingSystemMock.collect(logger).warn[0][0]).toMatch(
+      expect(loggingSystemMock.collect(logger).info[0][0]).toMatch(
         'Elasticsearch deprecation: 299 Elasticsearch-8.1.0 "GET /_path is deprecated"'
       );
-      expect(loggingSystemMock.collect(logger).warn[0][0]).toMatch('Origin:kibana');
-      expect(loggingSystemMock.collect(logger).warn[0][0]).toMatch(/Stack trace:\n.*at/);
-      expect(loggingSystemMock.collect(logger).warn[0][0]).toMatch(
+      expect(loggingSystemMock.collect(logger).info[0][0]).toMatch('Origin:kibana');
+      expect(loggingSystemMock.collect(logger).info[0][0]).toMatch(/Stack trace:\n.*at/);
+      expect(loggingSystemMock.collect(logger).info[0][0]).toMatch(
         /Query:\n.*400\n.*GET \/_path\?hello\=dolly \[illegal_argument_exception\]: request \[\/_path\] contains unrecognized parameter: \[name\]/
       );
     });
@@ -574,7 +574,7 @@ describe('instrumentQueryAndDeprecationLogger', () => {
       });
       client.diagnostic.emit('response', null, response);
 
-      expect(loggingSystemMock.collect(logger).warn).toEqual([]);
+      expect(loggingSystemMock.collect(logger).info).toEqual([]);
       // Test debug[1] since theree is one log entry from 'elasticsearch.query' context
       expect(loggingSystemMock.collect(logger).debug[1][0]).toMatch(
         'Elasticsearch deprecation: 299 Elasticsearch-8.1.0 "GET /_path is deprecated"'
@@ -611,12 +611,12 @@ describe('instrumentQueryAndDeprecationLogger', () => {
 
       // One debug log entry from 'elasticsearch.query' context
       expect(loggingSystemMock.collect(logger).debug.length).toEqual(1);
-      expect(loggingSystemMock.collect(logger).warn[0][0]).toMatch(
+      expect(loggingSystemMock.collect(logger).info[0][0]).toMatch(
         'Elasticsearch deprecation: 299 Elasticsearch-8.1.0 "GET /_path is deprecated"'
       );
-      expect(loggingSystemMock.collect(logger).warn[0][0]).toMatch('Origin:kibana');
-      expect(loggingSystemMock.collect(logger).warn[0][0]).toMatch(/Stack trace:\n.*at/);
-      expect(loggingSystemMock.collect(logger).warn[0][0]).toMatch(
+      expect(loggingSystemMock.collect(logger).info[0][0]).toMatch('Origin:kibana');
+      expect(loggingSystemMock.collect(logger).info[0][0]).toMatch(/Stack trace:\n.*at/);
+      expect(loggingSystemMock.collect(logger).info[0][0]).toMatch(
         /Query:\n.*200\n.*GET \/_path\?hello\=dolly/
       );
     });
