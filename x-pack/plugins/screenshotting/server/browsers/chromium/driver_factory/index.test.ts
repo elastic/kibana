@@ -66,7 +66,7 @@ describe('HeadlessChromiumDriverFactory', () => {
         expect.objectContaining({
           driver: expect.anything(),
           unexpectedExit$: expect.anything(),
-          close$: expect.anything(),
+          close: expect.anything(),
         })
       );
     });
