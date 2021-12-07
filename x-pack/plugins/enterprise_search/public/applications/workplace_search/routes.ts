@@ -23,7 +23,6 @@ export const LEAVE_FEEDBACK_EMAIL = 'support@elastic.co';
 export const LEAVE_FEEDBACK_URL = `mailto:${LEAVE_FEEDBACK_EMAIL}?Subject=Elastic%20Workplace%20Search%20Feedback`;
 
 export const CUSTOM_SOURCE_DOCS_URL = docLinks.workplaceSearchCustomSources;
-export const DIFFERENT_SYNC_TYPES_DOCS_URL = docLinks.workplaceSearchIndexingSchedule;
 export const DOCUMENT_PERMISSIONS_DOCS_URL = docLinks.workplaceSearchDocumentPermissions;
 export const ENT_SEARCH_LICENSE_MANAGEMENT = docLinks.licenseManagement;
 export const EXTERNAL_IDENTITIES_DOCS_URL = docLinks.workplaceSearchExternalIdentities;
