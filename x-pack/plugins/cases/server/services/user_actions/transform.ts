@@ -21,11 +21,11 @@ import {
 } from '../../../common/api';
 import {
   CONNECTOR_ID_REFERENCE_NAME,
-  getNoneCaseConnector,
   PUSH_CONNECTOR_ID_REFERENCE_NAME,
   USER_ACTION_OLD_ID_REF_NAME,
   USER_ACTION_OLD_PUSH_ID_REF_NAME,
-} from '../../common';
+} from '../../common/constants';
+import { getNoneCaseConnector } from '../../common/utils';
 import { ACTION_SAVED_OBJECT_TYPE } from '../../../../actions/server';
 import { UserActionFieldType } from './types';
 
