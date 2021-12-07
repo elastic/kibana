@@ -24,7 +24,8 @@ export const addSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
     const validationResult = validateMonitor(monitor);
 
     if (!validationResult.valid) {
-      return response.badRequest({ body: JSON.stringify(validationResult) });
+      const { reason: message, details, payload } = validationResult;
+      return response.badRequest({ body: { message, attributes: { details, ...payload } } });
     }
 
     const newMonitor = await savedObjectsClient.create(syntheticsMonitorType, monitor);

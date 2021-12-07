@@ -11,7 +11,6 @@ import { tEnum } from '../../utils/t_enum';
 // values must match keys in the integration package
 export enum ConfigKey {
   APM_SERVICE_NAME = 'service.name',
-  ENABLED = 'enabled',
   HOSTS = 'hosts',
   IGNORE_HTTPS_ERRORS = 'ignore_https_errors',
   JOURNEY_FILTERS_MATCH = 'filter_journeys.match',

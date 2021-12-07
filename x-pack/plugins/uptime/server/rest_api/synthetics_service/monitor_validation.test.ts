@@ -58,6 +58,17 @@ describe('validateMonitor', () => {
       [ConfigKey.SCHEDULE]: testSchedule,
       [ConfigKey.APM_SERVICE_NAME]: '',
       [ConfigKey.TIMEOUT]: '3m',
+      [ConfigKey.LOCATIONS]: [
+        {
+          id: 'eu-west-1',
+          label: 'EU West',
+          geo: {
+            lat: 33.4354332,
+            lon: 73.4453553,
+          },
+          url: 'https://test-url.com',
+        },
+      ],
     };
     testMetaData = {
       is_tls_enabled: false,
@@ -231,6 +242,7 @@ describe('validateMonitor', () => {
         ...testHTTPFields,
         [ConfigKey.NAME]: 'test-monitor-name',
       } as MonitorFields;
+
       const result = validateMonitor(testMonitor);
       expect(result).toMatchObject({
         valid: true,
@@ -337,6 +349,7 @@ describe('validateMonitor', () => {
     });
   });
 
+  // The following should fail when strict typing/validation is in place
   describe('should pass validation when mixed props', () => {
     it('of HTTP is provided into TCP', () => {
       const testMonitor = {
@@ -358,15 +371,9 @@ describe('validateMonitor', () => {
     });
   });
 
-  describe('should accept locations prop', () => {
-    it('for Browser monitor as string[]', () => {
-      const testMonitor = {
-        ...testBrowserFields,
-        [ConfigKey.NAME]: 'test-monitor-name',
-        ...({
-          locations: ['EMEA', 'NA'],
-        } as unknown as Partial<BrowserFields>),
-      } as MonitorFields;
+  describe('should validate payload', () => {
+    it('when parsed from serialized JSON', () => {
+      const testMonitor = getJsonPayload() as MonitorFields;
 
       const result = validateMonitor(testMonitor);
 
@@ -379,3 +386,69 @@ describe('validateMonitor', () => {
     });
   });
 });
+
+function getJsonPayload() {
+  const json =
+    '{\n' +
+    '  "type": "http",\n' +
+    '  "tags": [\n' +
+    '    "tag1",\n' +
+    '    "tag2"\n' +
+    '  ],\n' +
+    '  "schedule": {\n' +
+    '    "number": "5",\n' +
+    '    "unit": "m"\n' +
+    '  },\n' +
+    '  "service.name": "",\n' +
+    '  "timeout": "3m",\n' +
+    '  "__ui": {\n' +
+    '    "is_tls_enabled": false,\n' +
+    '    "is_zip_url_tls_enabled": false,\n' +
+    '    "script_source": {\n' +
+    '      "is_generated_script": false,\n' +
+    '      "file_name": "test-file.name"\n' +
+    '    }\n' +
+    '  },\n' +
+    '  "max_redirects": "3",\n' +
+    '  "password": "test",\n' +
+    '  "urls": "https://nextjs-test-synthetics.vercel.app/api/users",\n' +
+    '  "proxy_url": "http://proxy.com",\n' +
+    '  "check.response.body.negative": [],\n' +
+    '  "check.response.body.positive": [],\n' +
+    '  "response.include_body": "never",\n' +
+    '  "check.response.headers": {},\n' +
+    '  "response.include_headers": true,\n' +
+    '  "check.response.status": [\n' +
+    '    "200",\n' +
+    '    "201"\n' +
+    '  ],\n' +
+    '  "check.request.body": {\n' +
+    '    "value": "testValue",\n' +
+    '    "type": "json"\n' +
+    '  },\n' +
+    '  "check.request.headers": {},\n' +
+    '  "check.request.method": "",\n' +
+    '  "username": "test-username",\n' +
+    '  "ssl.certificate_authorities": "t.string",\n' +
+    '  "ssl.certificate": "t.string",\n' +
+    '  "ssl.key": "t.string",\n' +
+    '  "ssl.key_passphrase": "t.string",\n' +
+    '  "ssl.verification_mode": "certificate",\n' +
+    '  "ssl.supported_protocols": [\n' +
+    '    "TLSv1.1",\n' +
+    '    "TLSv1.2"\n' +
+    '  ],\n' +
+    '  "name": "test-monitor-name",\n' +
+    '  "locations": [{\n' +
+    '    "id": "eu-west-01",\n' +
+    '    "label": "Europe West",\n' +
+    '    "geo": {\n' +
+    '      "lat": 33.2343132435,\n' +
+    '      "lon": 73.2342343434\n' +
+    '    },\n' +
+    '    "url": "https://example-url.com"\n' +
+    '  }]\n' +
+    '}\n';
+
+  return JSON.parse(json);
+}
