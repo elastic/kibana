@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { MetricsMeta } from '@kbn/dev-utils/target_types/run/metrics';
 import { i18n } from '@kbn/i18n';
 import type { UnwrapPromise } from '@kbn/utility-types';
 import type { StatusResponse, ServiceStatus, ServiceStatusLevel } from '../../../../types/status';
@@ -17,6 +18,7 @@ export interface Metric {
   name: string;
   value: number | number[];
   type?: DataType;
+  meta?: any; // create a type for this to accets a value and value descriptor property
 }
 
 export interface FormattedStatus {
@@ -66,6 +68,12 @@ function formatMetrics({ metrics }: StatusResponse): Metric[] {
       }),
       value: [metrics.os.load['1m'], metrics.os.load['5m'], metrics.os.load['15m']],
       type: 'float',
+      meta: {
+        name: i18n.translate('core.statusPage.metricsTiles.columns.load.metaHeader', {
+          defaultMessage: 'average',
+        }),
+        value: ['1 min', '5 min', '15 min'],
+      },
     },
     {
       name: i18n.translate('core.statusPage.metricsTiles.columns.resTimeAvgHeader', {
@@ -87,6 +95,24 @@ function formatMetrics({ metrics }: StatusResponse): Metric[] {
       }),
       value: (metrics.requests.total * 1000) / metrics.collection_interval_in_millis,
       type: 'float',
+    },
+    {
+      name: i18n.translate('core.statusPage.metricsTiles.columns.processDelayHeader', {
+        defaultMessage: 'Mean delay',
+      }),
+      value: metrics.process.event_loop_delay,
+      type: 'time',
+      meta: {
+        name: i18n.translate('core.statusPage.metricsTiles.columns.processDelayDetailsHeader', {
+          defaultMessage: 'Percentiles',
+        }),
+        value: [
+          metrics.process.event_loop_delay_histogram.percentiles['50'],
+          metrics.process.event_loop_delay_histogram.percentiles['95'],
+          metrics.process.event_loop_delay_histogram.percentiles['99'],
+        ],
+        type: 'time',
+      },
     },
   ];
 }

@@ -7,7 +7,15 @@
  */
 
 import React, { FunctionComponent } from 'react';
-import { EuiFlexGrid, EuiFlexItem, EuiCard } from '@elastic/eui';
+import {
+  EuiFlexGrid,
+  EuiFlexItem,
+  EuiCard,
+  EuiPanel,
+  EuiStat,
+  EuiIcon,
+  EuiFlexGroup,
+} from '@elastic/eui';
 import { formatNumber, Metric } from '../lib';
 
 /*
@@ -15,14 +23,81 @@ import { formatNumber, Metric } from '../lib';
  */
 export const MetricTile: FunctionComponent<{ metric: Metric }> = ({ metric }) => {
   const { name } = metric;
-  return (
-    <EuiCard
-      data-test-subj={`serverMetric-${formatMetricId(metric)}`}
-      layout="horizontal"
-      title={formatMetric(metric)}
-      description={name}
-    />
-  );
+  if (name === 'Mean delay') {
+    return (
+      // extract into a DelayMetricTile
+      <EuiPanel hasShadow={true} hasBorder={false} paddingSize="m">
+        <EuiFlexItem>
+          <EuiStat
+            data-test-subj={`serverMetric-${formatMetricId(metric)}`}
+            title={formatMetric(metric)}
+            titleSize="l"
+            description={`${name}`}
+            reverse
+          >
+            <EuiIcon type="empty" />
+          </EuiStat>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiStat
+            data-test-subj={`serverMetric-${formatMetricId(metric.meta!)}`}
+            title={`50: ${formatNumber(
+              metric.meta!.value[0],
+              metric.meta!.type
+            )}; 95: ${formatNumber(metric.meta!.value[1], metric.meta!.type)}; 99: ${formatNumber(
+              metric.meta!.value[2],
+              metric.meta!.type
+            )};`}
+            titleSize="xs"
+            description={`${metric.meta!.name}`}
+            reverse
+          />
+        </EuiFlexItem>
+      </EuiPanel>
+    );
+  } else if (name === 'Load') {
+    // extract into a LoadMetricTile
+    return (
+      <EuiPanel hasShadow={true} hasBorder={false} paddingSize="m">
+        <EuiFlexItem>
+          <EuiStat
+            data-test-subj={`serverMetric-${formatMetricId(metric)}`}
+            title={formatMetric(metric)}
+            titleSize="l"
+            description={`Average ${name}`}
+            reverse
+          >
+            <EuiIcon type="empty" />
+          </EuiStat>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiStat
+            data-test-subj={`serverMetric-${formatMetricId(metric.meta!)}`}
+            title={''}
+            titleSize="xs"
+            description={metric.meta!.value.join('; ')}
+            reverse
+          />
+        </EuiFlexItem>
+      </EuiPanel>
+    );
+  } else {
+    return (
+      <EuiPanel hasShadow={true} hasBorder={false} paddingSize="m">
+        <EuiFlexItem>
+          <EuiStat
+            data-test-subj={`serverMetric-${formatMetricId(metric)}`}
+            title={formatMetric(metric)}
+            titleSize="l"
+            description={name}
+            reverse
+          >
+            <EuiIcon type="empty" />
+          </EuiStat>
+        </EuiFlexItem>
+      </EuiPanel>
+    );
+  }
 };
 
 /*
