@@ -55,8 +55,8 @@ export function uptimeMonitorsSpecProvider(context: TutorialContext): TutorialSc
     completionTimeMinutes: 10,
     previewImagePath: '/plugins/home/assets/uptime_monitors/screenshot.png',
     onPrem: onPremInstructions([], context),
-    elasticCloud: cloudInstructions(),
-    onPremElasticCloud: onPremCloudInstructions(),
+    elasticCloud: cloudInstructions(context),
+    onPremElasticCloud: onPremCloudInstructions(context),
     integrationBrowserCategories: ['web', 'security'],
   };
 }

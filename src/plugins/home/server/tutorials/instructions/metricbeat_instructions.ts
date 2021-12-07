@@ -13,268 +13,310 @@ import { getSpaceIdForBeatsTutorial } from './get_space_id_for_beats_tutorial';
 import { TutorialContext } from '../../services/tutorials/lib/tutorials_registry_types';
 import { cloudPasswordAndResetLink } from './cloud_instructions';
 
-export const createMetricbeatInstructions = (context?: TutorialContext) => ({
-  INSTALL: {
-    OSX: {
-      title: i18n.translate('home.tutorials.common.metricbeatInstructions.install.osxTitle', {
-        defaultMessage: 'Download and install Metricbeat',
-      }),
-      textPre: i18n.translate('home.tutorials.common.metricbeatInstructions.install.osxTextPre', {
-        defaultMessage: 'First time using Metricbeat? See the [Quick Start]({link}).',
-        values: {
-          link: '{config.docs.beats.metricbeat}/metricbeat-installation-configuration.html',
-        },
-      }),
-      commands: [
-        'curl -L -O https://artifacts.elastic.co/downloads/beats/metricbeat/metricbeat-{config.kibana.version}-darwin-x86_64.tar.gz',
-        'tar xzvf metricbeat-{config.kibana.version}-darwin-x86_64.tar.gz',
-        'cd metricbeat-{config.kibana.version}-darwin-x86_64/',
-      ],
-    },
-    DEB: {
-      title: i18n.translate('home.tutorials.common.metricbeatInstructions.install.debTitle', {
-        defaultMessage: 'Download and install Metricbeat',
-      }),
-      textPre: i18n.translate('home.tutorials.common.metricbeatInstructions.install.debTextPre', {
-        defaultMessage: 'First time using Metricbeat? See the [Quick Start]({link}).',
-        values: {
-          link: '{config.docs.beats.metricbeat}/metricbeat-installation-configuration.html',
-        },
-      }),
-      commands: [
-        'curl -L -O https://artifacts.elastic.co/downloads/beats/metricbeat/metricbeat-{config.kibana.version}-amd64.deb',
-        'sudo dpkg -i metricbeat-{config.kibana.version}-amd64.deb',
-      ],
-      textPost: i18n.translate('home.tutorials.common.metricbeatInstructions.install.debTextPost', {
-        defaultMessage: 'Looking for the 32-bit packages? See the [Download page]({link}).',
-        values: { link: 'https://www.elastic.co/downloads/beats/metricbeat' },
-      }),
-    },
-    RPM: {
-      title: i18n.translate('home.tutorials.common.metricbeatInstructions.install.rpmTitle', {
-        defaultMessage: 'Download and install Metricbeat',
-      }),
-      textPre: i18n.translate('home.tutorials.common.metricbeatInstructions.install.rpmTextPre', {
-        defaultMessage: 'First time using Metricbeat? See the [Quick Start]({link}).',
-        values: {
-          link: '{config.docs.beats.metricbeat}/metricbeat-installation-configuration.html',
-        },
-      }),
-      commands: [
-        'curl -L -O https://artifacts.elastic.co/downloads/beats/metricbeat/metricbeat-{config.kibana.version}-x86_64.rpm',
-        'sudo rpm -vi metricbeat-{config.kibana.version}-x86_64.rpm',
-      ],
-      textPost: i18n.translate('home.tutorials.common.metricbeatInstructions.install.debTextPost', {
-        defaultMessage: 'Looking for the 32-bit packages? See the [Download page]({link}).',
-        values: { link: 'https://www.elastic.co/downloads/beats/metricbeat' },
-      }),
-    },
-    WINDOWS: {
-      title: i18n.translate('home.tutorials.common.metricbeatInstructions.install.windowsTitle', {
-        defaultMessage: 'Download and install Metricbeat',
-      }),
-      textPre: i18n.translate(
-        'home.tutorials.common.metricbeatInstructions.install.windowsTextPre',
-        {
-          defaultMessage:
-            'First time using Metricbeat? See the [Quick Start]({metricbeatLink}).\n\
+export const createMetricbeatInstructions = (context: TutorialContext) => {
+  const SSL_DOC_URL = `https://www.elastic.co/guide/en/beats/metricbeat/${context.kibanaBranch}/configuration-ssl.html#ca-sha256`;
+
+  return {
+    INSTALL: {
+      OSX: {
+        title: i18n.translate('home.tutorials.common.metricbeatInstructions.install.osxTitle', {
+          defaultMessage: 'Download and install Metricbeat',
+        }),
+        textPre: i18n.translate('home.tutorials.common.metricbeatInstructions.install.osxTextPre', {
+          defaultMessage: 'First time using Metricbeat? See the [Quick Start]({link}).',
+          values: {
+            link: '{config.docs.beats.metricbeat}/metricbeat-installation-configuration.html',
+          },
+        }),
+        commands: [
+          'curl -L -O https://artifacts.elastic.co/downloads/beats/metricbeat/metricbeat-{config.kibana.version}-darwin-x86_64.tar.gz',
+          'tar xzvf metricbeat-{config.kibana.version}-darwin-x86_64.tar.gz',
+          'cd metricbeat-{config.kibana.version}-darwin-x86_64/',
+        ],
+      },
+      DEB: {
+        title: i18n.translate('home.tutorials.common.metricbeatInstructions.install.debTitle', {
+          defaultMessage: 'Download and install Metricbeat',
+        }),
+        textPre: i18n.translate('home.tutorials.common.metricbeatInstructions.install.debTextPre', {
+          defaultMessage: 'First time using Metricbeat? See the [Quick Start]({link}).',
+          values: {
+            link: '{config.docs.beats.metricbeat}/metricbeat-installation-configuration.html',
+          },
+        }),
+        commands: [
+          'curl -L -O https://artifacts.elastic.co/downloads/beats/metricbeat/metricbeat-{config.kibana.version}-amd64.deb',
+          'sudo dpkg -i metricbeat-{config.kibana.version}-amd64.deb',
+        ],
+        textPost: i18n.translate(
+          'home.tutorials.common.metricbeatInstructions.install.debTextPost',
+          {
+            defaultMessage: 'Looking for the 32-bit packages? See the [Download page]({link}).',
+            values: { link: 'https://www.elastic.co/downloads/beats/metricbeat' },
+          }
+        ),
+      },
+      RPM: {
+        title: i18n.translate('home.tutorials.common.metricbeatInstructions.install.rpmTitle', {
+          defaultMessage: 'Download and install Metricbeat',
+        }),
+        textPre: i18n.translate('home.tutorials.common.metricbeatInstructions.install.rpmTextPre', {
+          defaultMessage: 'First time using Metricbeat? See the [Quick Start]({link}).',
+          values: {
+            link: '{config.docs.beats.metricbeat}/metricbeat-installation-configuration.html',
+          },
+        }),
+        commands: [
+          'curl -L -O https://artifacts.elastic.co/downloads/beats/metricbeat/metricbeat-{config.kibana.version}-x86_64.rpm',
+          'sudo rpm -vi metricbeat-{config.kibana.version}-x86_64.rpm',
+        ],
+        textPost: i18n.translate(
+          'home.tutorials.common.metricbeatInstructions.install.debTextPost',
+          {
+            defaultMessage: 'Looking for the 32-bit packages? See the [Download page]({link}).',
+            values: { link: 'https://www.elastic.co/downloads/beats/metricbeat' },
+          }
+        ),
+      },
+      WINDOWS: {
+        title: i18n.translate('home.tutorials.common.metricbeatInstructions.install.windowsTitle', {
+          defaultMessage: 'Download and install Metricbeat',
+        }),
+        textPre: i18n.translate(
+          'home.tutorials.common.metricbeatInstructions.install.windowsTextPre',
+          {
+            defaultMessage:
+              'First time using Metricbeat? See the [Quick Start]({metricbeatLink}).\n\
  1. Download the Metricbeat Windows zip file from the [Download]({elasticLink}) page.\n\
  2. Extract the contents of the zip file into {folderPath}.\n\
  3. Rename the {directoryName} directory to `Metricbeat`.\n\
  4. Open a PowerShell prompt as an Administrator (right-click the PowerShell icon and select \
 **Run As Administrator**). If you are running Windows XP, you might need to download and install PowerShell.\n\
  5. From the PowerShell prompt, run the following commands to install Metricbeat as a Windows service.',
-          values: {
-            directoryName: '`metricbeat-{config.kibana.version}-windows`',
-            folderPath: '`C:\\Program Files`',
-            metricbeatLink:
-              '{config.docs.beats.metricbeat}/metricbeat-installation-configuration.html',
-            elasticLink: 'https://www.elastic.co/downloads/beats/metricbeat',
-          },
-        }
-      ),
-      commands: ['cd "C:\\Program Files\\Metricbeat"', '.\\install-service-metricbeat.ps1'],
-      textPost: i18n.translate(
-        'home.tutorials.common.metricbeatInstructions.install.windowsTextPost',
-        {
+            values: {
+              directoryName: '`metricbeat-{config.kibana.version}-windows`',
+              folderPath: '`C:\\Program Files`',
+              metricbeatLink:
+                '{config.docs.beats.metricbeat}/metricbeat-installation-configuration.html',
+              elasticLink: 'https://www.elastic.co/downloads/beats/metricbeat',
+            },
+          }
+        ),
+        commands: ['cd "C:\\Program Files\\Metricbeat"', '.\\install-service-metricbeat.ps1'],
+        textPost: i18n.translate(
+          'home.tutorials.common.metricbeatInstructions.install.windowsTextPost',
+          {
+            defaultMessage:
+              'Modify the settings under `output.elasticsearch` in the {path} file to point to your Elasticsearch installation.',
+            values: { path: '`C:\\Program Files\\Metricbeat\\metricbeat.yml`' },
+          }
+        ),
+      },
+    },
+    START: {
+      OSX: {
+        title: i18n.translate('home.tutorials.common.metricbeatInstructions.start.osxTitle', {
+          defaultMessage: 'Start Metricbeat',
+        }),
+        textPre: i18n.translate('home.tutorials.common.metricbeatInstructions.start.osxTextPre', {
           defaultMessage:
-            'Modify the settings under `output.elasticsearch` in the {path} file to point to your Elasticsearch installation.',
-          values: { path: '`C:\\Program Files\\Metricbeat\\metricbeat.yml`' },
-        }
-      ),
+            'The `setup` command loads the Kibana dashboards. If the dashboards are already set up, omit this command.',
+        }),
+        commands: ['./metricbeat setup', './metricbeat -e'],
+      },
+      DEB: {
+        title: i18n.translate('home.tutorials.common.metricbeatInstructions.start.debTitle', {
+          defaultMessage: 'Start Metricbeat',
+        }),
+        textPre: i18n.translate('home.tutorials.common.metricbeatInstructions.start.debTextPre', {
+          defaultMessage:
+            'The `setup` command loads the Kibana dashboards. If the dashboards are already set up, omit this command.',
+        }),
+        commands: ['sudo metricbeat setup', 'sudo service metricbeat start'],
+      },
+      RPM: {
+        title: i18n.translate('home.tutorials.common.metricbeatInstructions.start.rpmTitle', {
+          defaultMessage: 'Start Metricbeat',
+        }),
+        textPre: i18n.translate('home.tutorials.common.metricbeatInstructions.start.rpmTextPre', {
+          defaultMessage:
+            'The `setup` command loads the Kibana dashboards. If the dashboards are already set up, omit this command.',
+        }),
+        commands: ['sudo metricbeat setup', 'sudo service metricbeat start'],
+      },
+      WINDOWS: {
+        title: i18n.translate('home.tutorials.common.metricbeatInstructions.start.windowsTitle', {
+          defaultMessage: 'Start Metricbeat',
+        }),
+        textPre: i18n.translate(
+          'home.tutorials.common.metricbeatInstructions.start.windowsTextPre',
+          {
+            defaultMessage:
+              'The `setup` command loads the Kibana dashboards. If the dashboards are already set up, omit this command.',
+          }
+        ),
+        commands: ['.\\metricbeat.exe setup', 'Start-Service metricbeat'],
+      },
     },
-  },
-  START: {
-    OSX: {
-      title: i18n.translate('home.tutorials.common.metricbeatInstructions.start.osxTitle', {
-        defaultMessage: 'Start Metricbeat',
-      }),
-      textPre: i18n.translate('home.tutorials.common.metricbeatInstructions.start.osxTextPre', {
-        defaultMessage:
-          'The `setup` command loads the Kibana dashboards. If the dashboards are already set up, omit this command.',
-      }),
-      commands: ['./metricbeat setup', './metricbeat -e'],
-    },
-    DEB: {
-      title: i18n.translate('home.tutorials.common.metricbeatInstructions.start.debTitle', {
-        defaultMessage: 'Start Metricbeat',
-      }),
-      textPre: i18n.translate('home.tutorials.common.metricbeatInstructions.start.debTextPre', {
-        defaultMessage:
-          'The `setup` command loads the Kibana dashboards. If the dashboards are already set up, omit this command.',
-      }),
-      commands: ['sudo metricbeat setup', 'sudo service metricbeat start'],
-    },
-    RPM: {
-      title: i18n.translate('home.tutorials.common.metricbeatInstructions.start.rpmTitle', {
-        defaultMessage: 'Start Metricbeat',
-      }),
-      textPre: i18n.translate('home.tutorials.common.metricbeatInstructions.start.rpmTextPre', {
-        defaultMessage:
-          'The `setup` command loads the Kibana dashboards. If the dashboards are already set up, omit this command.',
-      }),
-      commands: ['sudo metricbeat setup', 'sudo service metricbeat start'],
-    },
-    WINDOWS: {
-      title: i18n.translate('home.tutorials.common.metricbeatInstructions.start.windowsTitle', {
-        defaultMessage: 'Start Metricbeat',
-      }),
-      textPre: i18n.translate('home.tutorials.common.metricbeatInstructions.start.windowsTextPre', {
-        defaultMessage:
-          'The `setup` command loads the Kibana dashboards. If the dashboards are already set up, omit this command.',
-      }),
-      commands: ['.\\metricbeat.exe setup', 'Start-Service metricbeat'],
-    },
-  },
-  CONFIG: {
-    OSX: {
-      title: i18n.translate('home.tutorials.common.metricbeatInstructions.config.osxTitle', {
-        defaultMessage: 'Edit the configuration',
-      }),
-      textPre: i18n.translate('home.tutorials.common.metricbeatInstructions.config.osxTextPre', {
-        defaultMessage: 'Modify {path} to set the connection information:',
-        values: {
-          path: '`metricbeat.yml`',
-        },
-      }),
-      commands: [
-        'output.elasticsearch:',
-        '  hosts: ["<es_url>"]',
-        '  username: "elastic"',
-        '  password: "<password>"',
-        'setup.kibana:',
-        '  host: "<kibana_url>"',
-        getSpaceIdForBeatsTutorial(context),
-      ],
-      textPost: i18n.translate('home.tutorials.common.metricbeatInstructions.config.osxTextPost', {
-        defaultMessage:
-          'Where {passwordTemplate} is the password of the `elastic` user, {esUrlTemplate} is the URL of Elasticsearch, \
-and {kibanaUrlTemplate} is the URL of Kibana.',
-        values: {
-          passwordTemplate: '`<password>`',
-          esUrlTemplate: '`<es_url>`',
-          kibanaUrlTemplate: '`<kibana_url>`',
-        },
-      }),
-    },
-    DEB: {
-      title: i18n.translate('home.tutorials.common.metricbeatInstructions.config.debTitle', {
-        defaultMessage: 'Edit the configuration',
-      }),
-      textPre: i18n.translate('home.tutorials.common.metricbeatInstructions.config.debTextPre', {
-        defaultMessage: 'Modify {path} to set the connection information:',
-        values: {
-          path: '`/etc/metricbeat/metricbeat.yml`',
-        },
-      }),
-      commands: [
-        'output.elasticsearch:',
-        '  hosts: ["<es_url>"]',
-        '  username: "elastic"',
-        '  password: "<password>"',
-        'setup.kibana:',
-        '  host: "<kibana_url>"',
-        getSpaceIdForBeatsTutorial(context),
-      ],
-      textPost: i18n.translate('home.tutorials.common.metricbeatInstructions.config.debTextPost', {
-        defaultMessage:
-          'Where {passwordTemplate} is the password of the `elastic` user, {esUrlTemplate} is the URL of Elasticsearch, \
-and {kibanaUrlTemplate} is the URL of Kibana.',
-        values: {
-          passwordTemplate: '`<password>`',
-          esUrlTemplate: '`<es_url>`',
-          kibanaUrlTemplate: '`<kibana_url>`',
-        },
-      }),
-    },
-    RPM: {
-      title: i18n.translate('home.tutorials.common.metricbeatInstructions.config.rpmTitle', {
-        defaultMessage: 'Edit the configuration',
-      }),
-      textPre: i18n.translate('home.tutorials.common.metricbeatInstructions.config.rpmTextPre', {
-        defaultMessage: 'Modify {path} to set the connection information:',
-        values: {
-          path: '`/etc/metricbeat/metricbeat.yml`',
-        },
-      }),
-      commands: [
-        'output.elasticsearch:',
-        '  hosts: ["<es_url>"]',
-        '  username: "elastic"',
-        '  password: "<password>"',
-        'setup.kibana:',
-        '  host: "<kibana_url>"',
-        getSpaceIdForBeatsTutorial(context),
-      ],
-      textPost: i18n.translate('home.tutorials.common.metricbeatInstructions.config.rpmTextPost', {
-        defaultMessage:
-          'Where {passwordTemplate} is the password of the `elastic` user, {esUrlTemplate} is the URL of Elasticsearch, \
-and {kibanaUrlTemplate} is the URL of Kibana.',
-        values: {
-          passwordTemplate: '`<password>`',
-          esUrlTemplate: '`<es_url>`',
-          kibanaUrlTemplate: '`<kibana_url>`',
-        },
-      }),
-    },
-    WINDOWS: {
-      title: i18n.translate('home.tutorials.common.metricbeatInstructions.config.windowsTitle', {
-        defaultMessage: 'Edit the configuration',
-      }),
-      textPre: i18n.translate(
-        'home.tutorials.common.metricbeatInstructions.config.windowsTextPre',
-        {
+    CONFIG: {
+      OSX: {
+        title: i18n.translate('home.tutorials.common.metricbeatInstructions.config.osxTitle', {
+          defaultMessage: 'Edit the configuration',
+        }),
+        textPre: i18n.translate('home.tutorials.common.metricbeatInstructions.config.osxTextPre', {
           defaultMessage: 'Modify {path} to set the connection information:',
           values: {
-            path: '`C:\\Program Files\\Metricbeat\\metricbeat.yml`',
+            path: '`metricbeat.yml`',
           },
-        }
-      ),
-      commands: [
-        'output.elasticsearch:',
-        '  hosts: ["<es_url>"]',
-        '  username: "elastic"',
-        '  password: "<password>"',
-        'setup.kibana:',
-        '  host: "<kibana_url>"',
-        getSpaceIdForBeatsTutorial(context),
-      ],
-      textPost: i18n.translate(
-        'home.tutorials.common.metricbeatInstructions.config.windowsTextPost',
-        {
-          defaultMessage:
-            'Where {passwordTemplate} is the password of the `elastic` user, {esUrlTemplate} is the URL of Elasticsearch, \
-and {kibanaUrlTemplate} is the URL of Kibana.',
+        }),
+        commands: [
+          'output.elasticsearch:',
+          '  hosts: ["<es_url>"]',
+          '  username: "elastic"',
+          '  password: "<password>"',
+          "  # If using Elasticsearch's default certificate",
+          '  ssl.ca_trusted_fingerprint: "<es cert fingerprint>"',
+          'setup.kibana:',
+          '  host: "<kibana_url>"',
+          getSpaceIdForBeatsTutorial(context),
+        ],
+        textPost: i18n.translate(
+          'home.tutorials.common.metricbeatInstructions.config.osxTextPostMarkdown',
+          {
+            defaultMessage:
+              'Where {passwordTemplate} is the password of the `elastic` user, {esUrlTemplate} is the URL of \
+              Elasticsearch, and {kibanaUrlTemplate} is the URL of Kibana. To [configure SSL]({configureSslUrl}) with the \
+              default certificate generated by Elasticsearch, add its fingerprint in {esCertFingerprintTemplate}.',
+            values: {
+              passwordTemplate: '`<password>`',
+              esUrlTemplate: '`<es_url>`',
+              kibanaUrlTemplate: '`<kibana_url>`',
+              configureSslUrl: SSL_DOC_URL,
+              esCertFingerprintTemplate: '`<es cert fingerprint>`',
+            },
+          }
+        ),
+      },
+      DEB: {
+        title: i18n.translate('home.tutorials.common.metricbeatInstructions.config.debTitle', {
+          defaultMessage: 'Edit the configuration',
+        }),
+        textPre: i18n.translate('home.tutorials.common.metricbeatInstructions.config.debTextPre', {
+          defaultMessage: 'Modify {path} to set the connection information:',
           values: {
-            passwordTemplate: '`<password>`',
-            esUrlTemplate: '`<es_url>`',
-            kibanaUrlTemplate: '`<kibana_url>`',
+            path: '`/etc/metricbeat/metricbeat.yml`',
           },
-        }
-      ),
+        }),
+        commands: [
+          'output.elasticsearch:',
+          '  hosts: ["<es_url>"]',
+          '  username: "elastic"',
+          '  password: "<password>"',
+          "  # If using Elasticsearch's default certificate",
+          '  ssl.ca_trusted_fingerprint: "<es cert fingerprint>"',
+          'setup.kibana:',
+          '  host: "<kibana_url>"',
+          getSpaceIdForBeatsTutorial(context),
+        ],
+        textPost: i18n.translate(
+          'home.tutorials.common.metricbeatInstructions.config.debTextPostMarkdown',
+          {
+            defaultMessage:
+              'Where {passwordTemplate} is the password of the `elastic` user, {esUrlTemplate} is the URL of \
+              Elasticsearch, and {kibanaUrlTemplate} is the URL of Kibana. To [configure SSL]({configureSslUrl}) with the \
+              default certificate generated by Elasticsearch, add its fingerprint in {esCertFingerprintTemplate}.',
+            values: {
+              passwordTemplate: '`<password>`',
+              esUrlTemplate: '`<es_url>`',
+              kibanaUrlTemplate: '`<kibana_url>`',
+              configureSslUrl: SSL_DOC_URL,
+              esCertFingerprintTemplate: '`<es cert fingerprint>`',
+            },
+          }
+        ),
+      },
+      RPM: {
+        title: i18n.translate('home.tutorials.common.metricbeatInstructions.config.rpmTitle', {
+          defaultMessage: 'Edit the configuration',
+        }),
+        textPre: i18n.translate('home.tutorials.common.metricbeatInstructions.config.rpmTextPre', {
+          defaultMessage: 'Modify {path} to set the connection information:',
+          values: {
+            path: '`/etc/metricbeat/metricbeat.yml`',
+          },
+        }),
+        commands: [
+          'output.elasticsearch:',
+          '  hosts: ["<es_url>"]',
+          '  username: "elastic"',
+          '  password: "<password>"',
+          "  # If using Elasticsearch's default certificate",
+          '  ssl.ca_trusted_fingerprint: "<es cert fingerprint>"',
+          'setup.kibana:',
+          '  host: "<kibana_url>"',
+          getSpaceIdForBeatsTutorial(context),
+        ],
+        textPost: i18n.translate(
+          'home.tutorials.common.metricbeatInstructions.config.rpmTextPostMarkdown',
+          {
+            defaultMessage:
+              'Where {passwordTemplate} is the password of the `elastic` user, {esUrlTemplate} is the URL of \
+              Elasticsearch, and {kibanaUrlTemplate} is the URL of Kibana. To [configure SSL]({configureSslUrl}) with the \
+              default certificate generated by Elasticsearch, add its fingerprint in {esCertFingerprintTemplate}.',
+            values: {
+              passwordTemplate: '`<password>`',
+              esUrlTemplate: '`<es_url>`',
+              kibanaUrlTemplate: '`<kibana_url>`',
+              configureSslUrl: SSL_DOC_URL,
+              esCertFingerprintTemplate: '`<es cert fingerprint>`',
+            },
+          }
+        ),
+      },
+      WINDOWS: {
+        title: i18n.translate('home.tutorials.common.metricbeatInstructions.config.windowsTitle', {
+          defaultMessage: 'Edit the configuration',
+        }),
+        textPre: i18n.translate(
+          'home.tutorials.common.metricbeatInstructions.config.windowsTextPre',
+          {
+            defaultMessage: 'Modify {path} to set the connection information:',
+            values: {
+              path: '`C:\\Program Files\\Metricbeat\\metricbeat.yml`',
+            },
+          }
+        ),
+        commands: [
+          'output.elasticsearch:',
+          '  hosts: ["<es_url>"]',
+          '  username: "elastic"',
+          '  password: "<password>"',
+          "  # If using Elasticsearch's default certificate",
+          '  ssl.ca_trusted_fingerprint: "<es cert fingerprint>"',
+          'setup.kibana:',
+          '  host: "<kibana_url>"',
+          getSpaceIdForBeatsTutorial(context),
+        ],
+        textPost: i18n.translate(
+          'home.tutorials.common.metricbeatInstructions.config.windowsTextPostMarkdown',
+          {
+            defaultMessage:
+              'Where {passwordTemplate} is the password of the `elastic` user, {esUrlTemplate} is the URL of \
+              Elasticsearch, and {kibanaUrlTemplate} is the URL of Kibana. To [configure SSL]({configureSslUrl}) with the \
+              default certificate generated by Elasticsearch, add its fingerprint in {esCertFingerprintTemplate}.',
+            values: {
+              passwordTemplate: '`<password>`',
+              esUrlTemplate: '`<es_url>`',
+              kibanaUrlTemplate: '`<kibana_url>`',
+              configureSslUrl: SSL_DOC_URL,
+              esCertFingerprintTemplate: '`<es cert fingerprint>`',
+            },
+          }
+        ),
+      },
     },
-  },
-});
+  };
+};
 
 export const createMetricbeatCloudInstructions = () => ({
   CONFIG: {
@@ -442,7 +484,7 @@ export function metricbeatStatusCheck(moduleName: string) {
   };
 }
 
-export function onPremInstructions(moduleName: string, context?: TutorialContext) {
+export function onPremInstructions(moduleName: string, context: TutorialContext) {
   const METRICBEAT_INSTRUCTIONS = createMetricbeatInstructions(context);
 
   return {
@@ -498,10 +540,10 @@ export function onPremInstructions(moduleName: string, context?: TutorialContext
   };
 }
 
-export function onPremCloudInstructions(moduleName: string) {
+export function onPremCloudInstructions(moduleName: string, context: TutorialContext) {
   const TRYCLOUD_OPTION1 = createTrycloudOption1();
   const TRYCLOUD_OPTION2 = createTrycloudOption2();
-  const METRICBEAT_INSTRUCTIONS = createMetricbeatInstructions();
+  const METRICBEAT_INSTRUCTIONS = createMetricbeatInstructions(context);
 
   return {
     instructionSets: [
@@ -564,8 +606,8 @@ export function onPremCloudInstructions(moduleName: string) {
   };
 }
 
-export function cloudInstructions(moduleName: string) {
-  const METRICBEAT_INSTRUCTIONS = createMetricbeatInstructions();
+export function cloudInstructions(moduleName: string, context: TutorialContext) {
+  const METRICBEAT_INSTRUCTIONS = createMetricbeatInstructions(context);
   const METRICBEAT_CLOUD_INSTRUCTIONS = createMetricbeatCloudInstructions();
 
   return {

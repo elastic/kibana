@@ -55,8 +55,8 @@ export function redisenterpriseMetricsSpecProvider(context: TutorialContext): Tu
     completionTimeMinutes: 10,
     previewImagePath: '/plugins/home/assets/redisenterprise_metrics/screenshot.png',
     onPrem: onPremInstructions(moduleName, context),
-    elasticCloud: cloudInstructions(moduleName),
-    onPremElasticCloud: onPremCloudInstructions(moduleName),
+    elasticCloud: cloudInstructions(moduleName, context),
+    onPremElasticCloud: onPremCloudInstructions(moduleName, context),
     integrationBrowserCategories: ['datastore', 'message_queue'],
   };
 }
