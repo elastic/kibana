@@ -44,24 +44,25 @@ export async function initializeTemplates(
     } catch (e) {
       console.log(e);
       if (existingTemplate == null) {
-        const existingTemplate = require('./host.name').securitySolution;
+        const templateToCreate = require('./host.name').securitySolution;
         client
-          .create('lens', template, {
+          .create('lens', templateToCreate, {
+            /* hard coded reference here atm, please update this before use*/
             references: [
               {
                 type: 'index-pattern',
-                id: 'ac110810-5681-11ec-9502-0d66506dd741',
+                id: 'security-solution-default',
                 name: 'indexpattern-datasource-current-indexpattern',
               },
               {
                 type: 'index-pattern',
-                id: 'ac110810-5681-11ec-9502-0d66506dd741',
+                id: 'security-solution-default',
                 name: 'indexpattern-datasource-layer-f6172bed-07e8-48fc-b9e4-2291fe061aed',
               },
               {
                 type: 'tag',
                 id: '6853a880-5451-11ec-b0fd-2f7a10a18ba6',
-                name: 'my tag',
+                name: 'tag-ref-6853a880-5451-11ec-b0fd-2f7a10a18ba6',
               },
             ],
             id: hardCodedTemplateId,

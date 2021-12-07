@@ -55,6 +55,7 @@ import { useDeepEqualSelector, useShallowEqualSelector } from '../../common/hook
 import { useInvalidFilterQuery } from '../../common/hooks/use_invalid_filter_query';
 import { ID } from '../containers/hosts';
 import { MatrixHistogramTemplates } from '../../common/components/matrix_histogram/templates';
+import { EmbeddablePanelExample } from './embeddables/embeddable_pannel';
 
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
@@ -194,7 +195,11 @@ const HostsComponent = ({ plugins }) => {
               />
               <EuiSpacer />
               <MatrixHistogramTemplates plugins={plugins} />
-
+              <EmbeddablePanelExample
+                embeddableServices={plugins.embeddable}
+                /* doesn't look right to use embeddableExamples as dependency, needs an update*/
+                searchListContainerFactory={plugins.embeddableExamples.factories.getSearchableListContainerEmbeddableFactory()}
+              />
               <EuiSpacer />
 
               <SecuritySolutionTabNavigation
