@@ -142,7 +142,7 @@ export const QueryBarTopRow = React.memo(
     const onClickSubmitButton = useCallback(
       (event: React.MouseEvent<HTMLButtonElement>) => {
         if (persistedLog && queryRef.current) {
-          persistedLog.add(queryRef.current);
+          persistedLog.add(queryRef.current.query);
         }
         event.preventDefault();
         propsOnSubmit({
