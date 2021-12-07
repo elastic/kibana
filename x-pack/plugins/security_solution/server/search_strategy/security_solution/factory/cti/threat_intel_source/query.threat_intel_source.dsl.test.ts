@@ -6,7 +6,7 @@
  */
 
 import { buildTiDataSourceQuery } from './query.threat_intel_source.dsl';
-import { CtiQueries } from '../../../../../../common';
+import { CtiQueries } from '../../../../../../common/search_strategy/security_solution/cti';
 
 export const mockOptions = {
   defaultIndex: ['logs-ti_*', 'filebeat-8*'],
