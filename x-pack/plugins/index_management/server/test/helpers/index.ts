@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export type {
-  ITiledSingleLayerMvtParams,
-  ITiledSingleLayerVectorSource,
-} from './tiled_single_layer_vector_source';
+export type { RequestMock } from './router_mock';
+export { RouterMock } from './router_mock';
+
+export { routeDependencies } from './route_dependencies';

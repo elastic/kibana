@@ -6,12 +6,6 @@
  * Side Public License, v 1.
  */
 
-exports.createCliError = function (message) {
-  const error = new Error(message);
-  error.isCliError = true;
-  return error;
-};
-
-exports.isCliError = function (error) {
-  return error && error.isCliError;
-};
+export { installArchive } from './install_archive';
+export { installSnapshot, downloadSnapshot } from './install_snapshot';
+export { installSource } from './install_source';
