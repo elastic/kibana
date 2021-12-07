@@ -57,7 +57,7 @@ const mockLayer = {
     return '1';
   },
   getType: () => {
-    return LAYER_TYPE.VECTOR;
+    return LAYER_TYPE.GEOJSON_VECTOR;
   },
   getDisplayName: () => {
     return 'layer 1';

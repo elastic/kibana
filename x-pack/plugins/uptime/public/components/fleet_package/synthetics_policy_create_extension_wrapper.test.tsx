@@ -13,12 +13,18 @@ import { render } from '../../lib/helper/rtl_helpers';
 import { NewPackagePolicy } from '../../../../fleet/public';
 import { SyntheticsPolicyCreateExtensionWrapper } from './synthetics_policy_create_extension_wrapper';
 import { defaultConfig } from './synthetics_policy_create_extension';
-import { ConfigKeys, DataStream, ScheduleUnit, VerificationMode } from './types';
+import { ConfigKey, DataStream, ScheduleUnit, VerificationMode } from './types';
 
 // ensures that fields appropriately match to their label
 jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
   ...jest.requireActual('@elastic/eui/lib/services/accessibility/html_id_generator'),
   htmlIdGenerator: () => () => `id-${Math.random()}`,
+}));
+
+// ensures that fields appropriately match to their label
+jest.mock('@elastic/eui/lib/services/accessibility', () => ({
+  ...jest.requireActual('@elastic/eui/lib/services/accessibility'),
+  useGeneratedHtmlId: () => `id-${Math.random()}`,
 }));
 
 jest.mock('../../../../../../src/plugins/kibana_react/public', () => {
@@ -351,19 +357,19 @@ describe('<SyntheticsPolicyCreateExtension />', () => {
     expect(monitorType).toBeInTheDocument();
     expect(monitorType.value).toEqual(DataStream.HTTP);
     expect(url).toBeInTheDocument();
-    expect(url.value).toEqual(defaultHTTPConfig[ConfigKeys.URLS]);
+    expect(url.value).toEqual(defaultHTTPConfig[ConfigKey.URLS]);
     expect(proxyUrl).toBeInTheDocument();
-    expect(proxyUrl.value).toEqual(defaultHTTPConfig[ConfigKeys.PROXY_URL]);
+    expect(proxyUrl.value).toEqual(defaultHTTPConfig[ConfigKey.PROXY_URL]);
     expect(monitorIntervalNumber).toBeInTheDocument();
-    expect(monitorIntervalNumber.value).toEqual(defaultHTTPConfig[ConfigKeys.SCHEDULE].number);
+    expect(monitorIntervalNumber.value).toEqual(defaultHTTPConfig[ConfigKey.SCHEDULE].number);
     expect(monitorIntervalUnit).toBeInTheDocument();
-    expect(monitorIntervalUnit.value).toEqual(defaultHTTPConfig[ConfigKeys.SCHEDULE].unit);
+    expect(monitorIntervalUnit.value).toEqual(defaultHTTPConfig[ConfigKey.SCHEDULE].unit);
     expect(apmServiceName).toBeInTheDocument();
-    expect(apmServiceName.value).toEqual(defaultHTTPConfig[ConfigKeys.APM_SERVICE_NAME]);
+    expect(apmServiceName.value).toEqual(defaultHTTPConfig[ConfigKey.APM_SERVICE_NAME]);
     expect(maxRedirects).toBeInTheDocument();
-    expect(maxRedirects.value).toEqual(`${defaultHTTPConfig[ConfigKeys.MAX_REDIRECTS]}`);
+    expect(maxRedirects.value).toEqual(`${defaultHTTPConfig[ConfigKey.MAX_REDIRECTS]}`);
     expect(timeout).toBeInTheDocument();
-    expect(timeout.value).toEqual(`${defaultHTTPConfig[ConfigKeys.TIMEOUT]}`);
+    expect(timeout.value).toEqual(`${defaultHTTPConfig[ConfigKey.TIMEOUT]}`);
 
     // ensure other monitor type options are not in the DOM
     expect(queryByLabelText('Host')).not.toBeInTheDocument();
@@ -521,7 +527,7 @@ describe('<SyntheticsPolicyCreateExtension />', () => {
     const host = getByLabelText('Host:Port') as HTMLInputElement;
 
     expect(host).toBeInTheDocument();
-    expect(host.value).toEqual(defaultTCPConfig[ConfigKeys.HOSTS]);
+    expect(host.value).toEqual(defaultTCPConfig[ConfigKey.HOSTS]);
 
     // expect HTTP fields not to be in the DOM
     expect(queryByLabelText('URL')).not.toBeInTheDocument();
@@ -767,23 +773,23 @@ describe('<SyntheticsPolicyCreateExtension />', () => {
 
     await waitFor(() => {
       fireEvent.change(ca, { target: { value: 'certificateAuthorities' } });
-      expect(ca.value).toEqual(defaultHTTPConfig[ConfigKeys.TLS_CERTIFICATE_AUTHORITIES]);
+      expect(ca.value).toEqual(defaultHTTPConfig[ConfigKey.TLS_CERTIFICATE_AUTHORITIES]);
     });
     await waitFor(() => {
       fireEvent.change(clientCertificate, { target: { value: 'clientCertificate' } });
-      expect(clientCertificate.value).toEqual(defaultHTTPConfig[ConfigKeys.TLS_KEY]);
+      expect(clientCertificate.value).toEqual(defaultHTTPConfig[ConfigKey.TLS_KEY]);
     });
     await waitFor(() => {
       fireEvent.change(clientKey, { target: { value: 'clientKey' } });
-      expect(clientKey.value).toEqual(defaultHTTPConfig[ConfigKeys.TLS_KEY]);
+      expect(clientKey.value).toEqual(defaultHTTPConfig[ConfigKey.TLS_KEY]);
     });
     await waitFor(() => {
       fireEvent.change(clientKeyPassphrase, { target: { value: 'clientKeyPassphrase' } });
-      expect(clientKeyPassphrase.value).toEqual(defaultHTTPConfig[ConfigKeys.TLS_KEY_PASSPHRASE]);
+      expect(clientKeyPassphrase.value).toEqual(defaultHTTPConfig[ConfigKey.TLS_KEY_PASSPHRASE]);
     });
     await waitFor(() => {
       fireEvent.change(verificationMode, { target: { value: VerificationMode.NONE } });
-      expect(verificationMode.value).toEqual(defaultHTTPConfig[ConfigKeys.TLS_VERIFICATION_MODE]);
+      expect(verificationMode.value).toEqual(defaultHTTPConfig[ConfigKey.TLS_VERIFICATION_MODE]);
     });
 
     await waitFor(() => {
@@ -799,23 +805,23 @@ describe('<SyntheticsPolicyCreateExtension />', () => {
                   ...defaultNewPolicy.inputs[0].streams[0],
                   vars: {
                     ...defaultNewPolicy.inputs[0].streams[0].vars,
-                    [ConfigKeys.TLS_CERTIFICATE_AUTHORITIES]: {
+                    [ConfigKey.TLS_CERTIFICATE_AUTHORITIES]: {
                       value: '"certificateAuthorities"',
                       type: 'yaml',
                     },
-                    [ConfigKeys.TLS_CERTIFICATE]: {
+                    [ConfigKey.TLS_CERTIFICATE]: {
                       value: '"clientCertificate"',
                       type: 'yaml',
                     },
-                    [ConfigKeys.TLS_KEY]: {
+                    [ConfigKey.TLS_KEY]: {
                       value: '"clientKey"',
                       type: 'yaml',
                     },
-                    [ConfigKeys.TLS_KEY_PASSPHRASE]: {
+                    [ConfigKey.TLS_KEY_PASSPHRASE]: {
                       value: 'clientKeyPassphrase',
                       type: 'text',
                     },
-                    [ConfigKeys.TLS_VERIFICATION_MODE]: {
+                    [ConfigKey.TLS_VERIFICATION_MODE]: {
                       value: VerificationMode.NONE,
                       type: 'text',
                     },

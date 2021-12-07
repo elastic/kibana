@@ -10,11 +10,11 @@ import userEvent from '@testing-library/user-event';
 import { render } from '../../../lib/helper/rtl_helpers';
 import { BrowserAdvancedFields } from './advanced_fields';
 import {
-  ConfigKeys,
-  DataStream,
-  IBrowserAdvancedFields,
-  IBrowserSimpleFields,
+  ConfigKey,
+  BrowserAdvancedFields as BrowserAdvancedFieldsType,
+  BrowserSimpleFields,
   Validation,
+  DataStream,
 } from '../types';
 import {
   BrowserAdvancedFieldsContextProvider,
@@ -38,8 +38,8 @@ describe('<BrowserAdvancedFields />', () => {
     defaultSimpleFields = defaultBrowserSimpleFields,
     validate = defaultValidation,
   }: {
-    defaultValues?: IBrowserAdvancedFields;
-    defaultSimpleFields?: IBrowserSimpleFields;
+    defaultValues?: BrowserAdvancedFieldsType;
+    defaultSimpleFields?: BrowserSimpleFields;
     validate?: Validation;
   }) => {
     return (
@@ -59,7 +59,7 @@ describe('<BrowserAdvancedFields />', () => {
     const syntheticsArgs = getByLabelText('Synthetics args');
     const screenshots = getByLabelText('Screenshot options') as HTMLInputElement;
 
-    expect(screenshots.value).toEqual(defaultConfig[ConfigKeys.SCREENSHOTS]);
+    expect(screenshots.value).toEqual(defaultConfig[ConfigKey.SCREENSHOTS]);
     expect(syntheticsArgs).toBeInTheDocument();
   });
 
@@ -86,7 +86,7 @@ describe('<BrowserAdvancedFields />', () => {
       <WrappedComponent
         defaultSimpleFields={{
           ...defaultBrowserSimpleFields,
-          [ConfigKeys.SOURCE_ZIP_URL]: 'https://elastic.zip',
+          [ConfigKey.SOURCE_ZIP_URL]: 'https://elastic.zip',
         }}
       />
     );

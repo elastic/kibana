@@ -7,7 +7,7 @@
 
 import { CasesClientGetAlertsResponse } from './types';
 import { CasesClientArgs } from '..';
-import { AlertInfo } from '../../common';
+import { AlertInfo } from '../../common/types';
 
 export const getAlerts = async (
   alertsInfo: AlertInfo[],
