@@ -7,7 +7,13 @@
 
 import React, { FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiDescriptionList, EuiSpacer, EuiText, EuiDescriptionListProps } from '@elastic/eui';
+import {
+  EuiDescriptionList,
+  EuiSpacer,
+  EuiText,
+  EuiDescriptionListProps,
+  EuiTitle,
+} from '@elastic/eui';
 
 import type { Job } from '../../lib/job';
 import { USES_HEADLESS_JOB_TYPES } from '../../../common/constants';
@@ -34,67 +40,25 @@ interface Props {
 }
 
 export const ReportInfoFlyoutContent: FunctionComponent<Props> = ({ info }) => {
-  const timeout = info.timeout ? info.timeout.toString() : NA;
-
-  const jobInfo = [
-    {
-      title: i18n.translate('xpack.reporting.listing.infoPanel.titleInfo', {
-        defaultMessage: 'Title',
-      }),
-      description: info.title || NA,
-    },
-    Boolean(info.spaceId) && {
-      title: i18n.translate('xpack.reporting.listing.infoPanel.space', { defaultMessage: 'Space' }),
-      description: info.spaceId,
-    },
-    {
-      title: i18n.translate('xpack.reporting.listing.infoPanel.createdAtInfo', {
-        defaultMessage: 'Created at',
-      }),
-      description: info.getCreatedAtLabel(),
-    },
+  const hasScreenshot = USES_HEADLESS_JOB_TYPES.includes(info.jobtype);
+  const outputInfo = [
     {
       title: i18n.translate('xpack.reporting.listing.infoPanel.statusInfo', {
         defaultMessage: 'Status',
       }),
-      description: info.getStatus(),
+      description: info.prettyStatus,
     },
-    {
-      title: i18n.translate('xpack.reporting.listing.infoPanel.tzInfo', {
-        defaultMessage: 'Time zone',
+    Boolean(info.version) && {
+      title: i18n.translate('xpack.reporting.listing.infoPanel.kibanaVersion', {
+        defaultMessage: 'Kibana version',
       }),
-      description: info.browserTimezone || NA,
+      description: info.version,
     },
-    {
-      title: i18n.translate('xpack.reporting.listing.infoPanel.startedAtInfo', {
-        defaultMessage: 'Started at',
+    Boolean(info.spaceId) && {
+      title: i18n.translate('xpack.reporting.listing.infoPanel.space', {
+        defaultMessage: 'Kibana space',
       }),
-      description: info.started_at || NA,
-    },
-    {
-      title: i18n.translate('xpack.reporting.listing.infoPanel.completedAtInfo', {
-        defaultMessage: 'Completed at',
-      }),
-      description: info.completed_at || NA,
-    },
-    {
-      title: i18n.translate('xpack.reporting.listing.infoPanel.processedByInfo', {
-        defaultMessage: 'Processed by',
-      }),
-      description:
-        info.kibana_name && info.kibana_id ? `${info.kibana_name} (${info.kibana_id})` : NA,
-    },
-    {
-      title: i18n.translate('xpack.reporting.listing.infoPanel.contentTypeInfo', {
-        defaultMessage: 'Content type',
-      }),
-      description: info.content_type || NA,
-    },
-    {
-      title: i18n.translate('xpack.reporting.listing.infoPanel.sizeInfo', {
-        defaultMessage: 'Size in bytes',
-      }),
-      description: info.size?.toString() || NA,
+      description: info.spaceId,
     },
     {
       title: i18n.translate('xpack.reporting.listing.infoPanel.attemptsInfo', {
@@ -111,38 +75,83 @@ export const ReportInfoFlyoutContent: FunctionComponent<Props> = ({ info }) => {
           : ''),
     },
     {
+      title: i18n.translate('xpack.reporting.listing.infoPanel.contentTypeInfo', {
+        defaultMessage: 'Content type',
+      }),
+      description: info.content_type || NA,
+    },
+    {
+      title: i18n.translate('xpack.reporting.listing.infoPanel.sizeInfo', {
+        defaultMessage: 'Size in bytes',
+      }),
+      description: info.size?.toString() || NA,
+    },
+
+    hasScreenshot && {
+      title: i18n.translate('xpack.reporting.listing.infoPanel.dimensionsInfoHeight', {
+        defaultMessage: 'Height (in pixels)',
+      }),
+      description: info.layout?.dimensions?.height || UNKNOWN,
+    },
+    hasScreenshot && {
+      title: i18n.translate('xpack.reporting.listing.infoPanel.dimensionsInfoWidth', {
+        defaultMessage: 'Width (in pixels)',
+      }),
+      description: info.layout?.dimensions?.width || UNKNOWN,
+    },
+
+    {
+      title: i18n.translate('xpack.reporting.listing.infoPanel.tzInfo', {
+        defaultMessage: 'Time zone',
+      }),
+      description: info.browserTimezone || NA,
+    },
+    {
+      title: i18n.translate('xpack.reporting.listing.infoPanel.processedByInfo', {
+        defaultMessage: 'Processed by',
+      }),
+      description:
+        info.kibana_name && info.kibana_id ? `${info.kibana_name} (${info.kibana_id})` : NA,
+    },
+    {
       title: i18n.translate('xpack.reporting.listing.infoPanel.timeoutInfo', {
         defaultMessage: 'Timeout',
       }),
-      description: timeout,
+      description: info.prettyTimeout,
     },
-    {
-      title: i18n.translate('xpack.reporting.listing.infoPanel.exportTypeInfo', {
-        defaultMessage: 'Export type',
-      }),
-      description: info.isDeprecated
-        ? i18n.translate('xpack.reporting.listing.table.reportCalloutExportTypeDeprecated', {
-            defaultMessage: '{jobtype} (DEPRECATED)',
-            values: { jobtype: info.jobtype },
-          })
-        : info.jobtype,
-    },
+    // {
+    //   title: i18n.translate('xpack.reporting.listing.infoPanel.exportTypeInfo', {
+    //     defaultMessage: 'Export type',
+    //   }),
+    //   description: info.isDeprecated
+    //     ? i18n.translate('xpack.reporting.listing.table.reportCalloutExportTypeDeprecated', {
+    //         defaultMessage: '{jobtype} (DEPRECATED)',
+    //         values: { jobtype: info.jobtype },
+    //       })
+    //     : info.jobtype,
+    // },
 
     // TODO: when https://github.com/elastic/kibana/pull/106137 is merged, add kibana version field
   ].filter(Boolean) as EuiDescriptionListProps['listItems'];
 
-  const jobScreenshot = [
+  const timestampsInfo = [
     {
-      title: i18n.translate('xpack.reporting.listing.infoPanel.dimensionsInfo', {
-        defaultMessage: 'Dimensions',
+      title: i18n.translate('xpack.reporting.listing.infoPanel.createdAtInfo', {
+        defaultMessage: 'Created at',
       }),
-      description: getDimensions(info),
+      description: info.getCreatedAtLabel(),
     },
     {
-      title: i18n.translate('xpack.reporting.listing.infoPanel.layoutInfo', {
-        defaultMessage: 'Layout',
+      title: i18n.translate('xpack.reporting.listing.infoPanel.startedAtInfo', {
+        defaultMessage: 'Started at',
       }),
-      description: info.layout?.id || UNKNOWN,
+      description: info.started_at || NA,
+    },
+    {
+      title: i18n.translate('xpack.reporting.listing.infoPanel.completedAtInfo', {
+        defaultMessage: 'Completed at',
+      }),
+      description: info.completed_at || NA,
     },
   ];
 
@@ -163,26 +172,31 @@ export const ReportInfoFlyoutContent: FunctionComponent<Props> = ({ info }) => {
   ];
 
   return (
-    <>
-      <EuiDescriptionList listItems={jobInfo} type="column" align="center" compressed />
-      {USES_HEADLESS_JOB_TYPES.includes(info.jobtype) ? (
+    <div>
+      <EuiTitle size="xs">
+        <h3>Output</h3>
+      </EuiTitle>
+      <EuiDescriptionList listItems={outputInfo} type="column" align="center" compressed />
+
+      <EuiTitle size="xs">
+        <h3>Timestamps</h3>
+      </EuiTitle>
+      <EuiDescriptionList listItems={timestampsInfo} type="column" align="center" compressed />
+
+      {Boolean(warningsInfo) && (
         <>
-          <EuiSpacer size="s" />
-          <EuiDescriptionList listItems={jobScreenshot} type="column" align="center" compressed />
-        </>
-      ) : null}
-      {warningsInfo ? (
-        <>
-          <EuiSpacer size="s" />
+          <EuiTitle size="s">
+            <h3>Warnings</h3>
+          </EuiTitle>
           <EuiDescriptionList listItems={warningsInfo} type="column" align="center" compressed />
         </>
-      ) : null}
-      {errorInfo ? (
+      )}
+      {Boolean(errorInfo) && (
         <>
           <EuiSpacer size="s" />
           <EuiDescriptionList listItems={errorInfo} type="column" align="center" compressed />
         </>
-      ) : null}
-    </>
+      )}
+    </div>
   );
 };

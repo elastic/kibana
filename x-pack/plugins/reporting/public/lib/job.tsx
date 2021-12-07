@@ -38,6 +38,7 @@ export class Job {
   public spaceId: ReportPayload['spaceId'];
   public browserTimezone?: ReportPayload['browserTimezone'];
   public layout: ReportPayload['layout'];
+  public version: ReportPayload['version'];
 
   public jobtype: ReportSource['jobtype'];
   public created_by: ReportSource['created_by'];
@@ -68,6 +69,7 @@ export class Job {
     this.objectType = report.payload.objectType;
     this.title = report.payload.title;
     this.layout = report.payload.layout;
+    this.version = report.payload.version;
     this.created_by = report.created_by;
     this.created_at = report.created_at;
     this.started_at = report.started_at;
@@ -139,6 +141,26 @@ export class Job {
     }
 
     return null;
+  }
+
+  public get prettyStatus(): string {
+    return (
+      jobStatusLabelsMap.get(this.status) ??
+      i18n.translate('xpack.reporting.jobStatusDetail.unknownText', { defaultMessage: 'Unknown' })
+    );
+  }
+
+  public get prettyTimeout(): string {
+    if (this.timeout == null) {
+      return i18n.translate('xpack.reporting.jobStatusDetail.timeoutSecondsUnknown', {
+        defaultMessage: 'Unknown',
+      });
+    }
+    const seconds = this.timeout / 1000;
+    return i18n.translate('xpack.reporting.jobStatusDetail.timeoutSeconds', {
+      defaultMessage: '{timeout} seconds',
+      values: { timeout: seconds },
+    });
   }
 
   getStatus() {

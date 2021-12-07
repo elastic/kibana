@@ -72,8 +72,9 @@ export const ReportInfoFlyout: FunctionComponent<Props> = ({ onClose, job }) => 
                 ? i18n.translate('xpack.reporting.listing.table.reportInfoUnableToFetch', {
                     defaultMessage: 'Unable to fetch report info.',
                   })
-                : i18n.translate('xpack.reporting.listing.table.reportCalloutTitle', {
-                    defaultMessage: 'Report summary',
+                : info?.title ??
+                  i18n.translate('xpack.reporting.listing.table.untitledReport', {
+                    defaultMessage: 'Untitled report',
                   })}
             </h2>
           </EuiTitle>
