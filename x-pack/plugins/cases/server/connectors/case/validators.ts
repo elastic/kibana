@@ -6,7 +6,7 @@
  */
 
 import { Connector } from './types';
-import { ConnectorTypes } from '../../../common';
+import { ConnectorTypes } from '../../../common/api';
 
 export const validateConnector = (connector: Connector) => {
   if (connector.type === ConnectorTypes.none && connector.fields !== null) {

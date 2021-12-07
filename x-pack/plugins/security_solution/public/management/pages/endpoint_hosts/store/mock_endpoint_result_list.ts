@@ -32,8 +32,8 @@ import { pendingActionsResponseMock } from '../../../../common/lib/endpoint_pend
 import {
   ACTION_STATUS_ROUTE,
   HOST_METADATA_LIST_ROUTE,
+  METADATA_TRANSFORMS_STATUS_ROUTE,
 } from '../../../../../common/endpoint/constants';
-import { METADATA_TRANSFORM_STATS_URL } from '../../../../../common/constants';
 import { TransformStats, TransformStatsResponse } from '../types';
 
 const generator = new EndpointDocGenerator('seed');
@@ -162,7 +162,7 @@ const endpointListApiPathHandlerMocks = ({
       return pendingActionsResponseMock();
     },
 
-    [METADATA_TRANSFORM_STATS_URL]: (): TransformStatsResponse => ({
+    [METADATA_TRANSFORMS_STATUS_ROUTE]: (): TransformStatsResponse => ({
       count: transforms.length,
       transforms,
     }),

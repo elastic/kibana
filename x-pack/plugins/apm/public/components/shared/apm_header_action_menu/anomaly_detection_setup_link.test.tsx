@@ -5,28 +5,55 @@
  * 2.0.
  */
 
+import { fireEvent, render, waitFor } from '@testing-library/react';
+import { createMemoryHistory } from 'history';
 import React from 'react';
-import { render, fireEvent, waitFor } from '@testing-library/react';
-import { MissingJobsAlert } from './anomaly_detection_setup_link';
+import { EuiThemeProvider } from '../../../../../../../src/plugins/kibana_react/common';
+import { ApmMlJob } from '../../../../common/anomaly_detection/apm_ml_job';
+import { getAnomalyDetectionSetupState } from '../../../../common/anomaly_detection/get_anomaly_detection_setup_state';
+import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import * as hooks from '../../../context/anomaly_detection_jobs/use_anomaly_detection_jobs_context';
+import { MockApmPluginContextWrapper } from '../../../context/apm_plugin/mock_apm_plugin_context';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
+import { AnomalyDetectionSetupLink } from './anomaly_detection_setup_link';
 
 async function renderTooltipAnchor({
   jobs,
   environment,
 }: {
-  jobs: Array<{ job_id: string; environment: string }>;
+  jobs: ApmMlJob[];
   environment?: string;
 }) {
   // mock api response
   jest.spyOn(hooks, 'useAnomalyDetectionJobsContext').mockReturnValue({
-    anomalyDetectionJobsData: { jobs, hasLegacyJobs: false },
+    anomalyDetectionJobsData: {
+      jobs,
+      hasLegacyJobs: jobs.some((job) => job.version <= 2),
+    },
     anomalyDetectionJobsStatus: FETCH_STATUS.SUCCESS,
     anomalyDetectionJobsRefetch: () => {},
+    anomalyDetectionSetupState: getAnomalyDetectionSetupState({
+      environment: environment ?? ENVIRONMENT_ALL.value,
+      fetchStatus: FETCH_STATUS.SUCCESS,
+      isAuthorized: true,
+      jobs,
+    }),
+  });
+
+  const history = createMemoryHistory({
+    initialEntries: [
+      `/services?environment=${
+        environment || ENVIRONMENT_ALL.value
+      }&rangeFrom=now-15m&rangeTo=now`,
+    ],
   });
 
   const { baseElement, container } = render(
-    <MissingJobsAlert environment={environment} />
+    <MockApmPluginContextWrapper history={history}>
+      <EuiThemeProvider>
+        <AnomalyDetectionSetupLink />
+      </EuiThemeProvider>
+    </MockApmPluginContextWrapper>
   );
 
   // hover tooltip anchor if it exists
@@ -65,7 +92,13 @@ describe('MissingJobsAlert', () => {
   describe('when no jobs exists for the selected environment', () => {
     it('shows a warning', async () => {
       const { toolTipAnchor, toolTipText } = await renderTooltipAnchor({
-        jobs: [{ environment: 'production', job_id: 'my_job_id' }],
+        jobs: [
+          {
+            environment: 'production',
+            jobId: 'my_job_id',
+            version: 3,
+          } as ApmMlJob,
+        ],
         environment: 'staging',
       });
 
@@ -79,7 +112,13 @@ describe('MissingJobsAlert', () => {
   describe('when a job exists for the selected environment', () => {
     it('does not show a warning', async () => {
       const { toolTipAnchor, toolTipText } = await renderTooltipAnchor({
-        jobs: [{ environment: 'production', job_id: 'my_job_id' }],
+        jobs: [
+          {
+            environment: 'production',
+            jobId: 'my_job_id',
+            version: 3,
+          } as ApmMlJob,
+        ],
         environment: 'production',
       });
 
@@ -91,7 +130,13 @@ describe('MissingJobsAlert', () => {
   describe('when at least one job exists and no environment is selected', () => {
     it('does not show a warning', async () => {
       const { toolTipAnchor, toolTipText } = await renderTooltipAnchor({
-        jobs: [{ environment: 'production', job_id: 'my_job_id' }],
+        jobs: [
+          {
+            environment: 'production',
+            jobId: 'my_job_id',
+            version: 3,
+          } as ApmMlJob,
+        ],
       });
 
       expect(toolTipAnchor).not.toBeInTheDocument();
@@ -102,7 +147,54 @@ describe('MissingJobsAlert', () => {
   describe('when at least one job exists and all environments are selected', () => {
     it('does not show a warning', async () => {
       const { toolTipAnchor, toolTipText } = await renderTooltipAnchor({
-        jobs: [{ environment: 'ENVIRONMENT_ALL', job_id: 'my_job_id' }],
+        jobs: [
+          {
+            environment: 'ENVIRONMENT_ALL',
+            jobId: 'my_job_id',
+            version: 3,
+          } as ApmMlJob,
+        ],
+      });
+
+      expect(toolTipAnchor).not.toBeInTheDocument();
+      expect(toolTipText).toBe(undefined);
+    });
+  });
+
+  describe('when at least one legacy job exists', () => {
+    it('displays a nudge to upgrade', async () => {
+      const { toolTipAnchor, toolTipText } = await renderTooltipAnchor({
+        jobs: [
+          {
+            environment: 'ENVIRONMENT_ALL',
+            jobId: 'my_job_id',
+            version: 2,
+          } as ApmMlJob,
+        ],
+      });
+
+      expect(toolTipAnchor).toBeInTheDocument();
+      expect(toolTipText).toBe(
+        'Updates available for existing anomaly detection jobs.'
+      );
+    });
+  });
+
+  describe('when both legacy and modern jobs exist', () => {
+    it('does not show a tooltip', async () => {
+      const { toolTipAnchor, toolTipText } = await renderTooltipAnchor({
+        jobs: [
+          {
+            environment: 'ENVIRONMENT_ALL',
+            jobId: 'my_job_id',
+            version: 2,
+          } as ApmMlJob,
+          {
+            environment: 'ENVIRONMENT_ALL',
+            jobId: 'my_job_id_2',
+            version: 3,
+          } as ApmMlJob,
+        ],
       });
 
       expect(toolTipAnchor).not.toBeInTheDocument();
