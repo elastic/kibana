@@ -9,8 +9,6 @@ import { setMockValues } from '../../__mocks__/kea_logic';
 
 import React from 'react';
 
-import { EuiEmptyPrompt } from '@elastic/eui';
-
 import { mountWithIntl } from '../../test_helpers';
 
 import { ErrorStatePrompt } from './';
