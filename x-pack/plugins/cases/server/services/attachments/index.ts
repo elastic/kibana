@@ -27,7 +27,7 @@ import {
 } from '../../../common/constants';
 import { ClientArgs } from '..';
 import { buildFilter, combineFilters } from '../../client/utils';
-import { defaultSortField } from '../../common';
+import { defaultSortField } from '../../common/utils';
 
 interface GetAllAlertsAttachToCaseArgs extends ClientArgs {
   caseId: string;
