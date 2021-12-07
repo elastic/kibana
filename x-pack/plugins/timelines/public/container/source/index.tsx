@@ -18,7 +18,7 @@ import {
   IndexField,
   IndexFieldsStrategyRequest,
   IndexFieldsStrategyResponse,
-} from '../../../common';
+} from '../../../common/search_strategy';
 import * as i18n from './translations';
 
 import type { DataPublicPluginStart } from '../../../../../../src/plugins/data/public';

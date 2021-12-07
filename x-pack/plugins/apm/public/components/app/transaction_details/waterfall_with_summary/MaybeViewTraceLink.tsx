@@ -25,7 +25,7 @@ export function MaybeViewTraceLink({
   environment: Environment;
 }) {
   const {
-    urlParams: { latencyAggregationType },
+    urlParams: { latencyAggregationType, comparisonEnabled, comparisonType },
   } = useLegacyUrlParams();
 
   const viewFullTraceButtonLabel = i18n.translate(
@@ -94,6 +94,8 @@ export function MaybeViewTraceLink({
           transactionType={rootTransaction.transaction.type}
           environment={nextEnvironment}
           latencyAggregationType={latencyAggregationType}
+          comparisonEnabled={comparisonEnabled}
+          comparisonType={comparisonType}
         >
           <EuiButton fill iconType="apmTrace">
             {viewFullTraceButtonLabel}

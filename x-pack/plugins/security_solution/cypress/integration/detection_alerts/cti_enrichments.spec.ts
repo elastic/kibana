@@ -55,11 +55,13 @@ describe('CTI Enrichment', () => {
     goToRuleDetails();
   });
 
-  it.skip('Displays enrichment matched.* fields on the timeline', () => {
+  it('Displays enrichment matched.* fields on the timeline', () => {
     const expectedFields = {
       'threat.enrichments.matched.atomic': getNewThreatIndicatorRule().atomic,
-      'threat.enrichments.matched.type': 'indicator_match_rule',
+      'threat.enrichments.matched.type': getNewThreatIndicatorRule().matchedType,
       'threat.enrichments.matched.field': getNewThreatIndicatorRule().indicatorMappingField,
+      'threat.enrichments.matched.id': getNewThreatIndicatorRule().matchedId,
+      'threat.enrichments.matched.index': getNewThreatIndicatorRule().matchedIndex,
     };
     const fields = Object.keys(expectedFields) as Array<keyof typeof expectedFields>;
 
@@ -73,6 +75,7 @@ describe('CTI Enrichment', () => {
   it('Displays persisted enrichments on the JSON view', () => {
     const expectedEnrichment = [
       {
+        feed: {},
         indicator: {
           first_seen: '2021-03-10T08:02:14.000Z',
           file: {
@@ -174,7 +177,7 @@ describe('CTI Enrichment', () => {
       const investigationTimeEnrichment = {
         field: 'source.ip',
         value: '192.168.1.1',
-        provider: 'another_provider',
+        feedName: 'feed_name',
       };
 
       expandFirstAlert();
@@ -192,7 +195,7 @@ describe('CTI Enrichment', () => {
         .should('exist')
         .should(
           'have.text',
-          `${investigationTimeEnrichment.field} ${investigationTimeEnrichment.value} from ${investigationTimeEnrichment.provider}`
+          `${investigationTimeEnrichment.field} ${investigationTimeEnrichment.value} from ${investigationTimeEnrichment.feedName}`
         );
     });
   });

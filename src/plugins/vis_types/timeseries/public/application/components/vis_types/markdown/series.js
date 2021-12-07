@@ -20,7 +20,7 @@ import {
   EuiFieldText,
   EuiButtonIcon,
 } from '@elastic/eui';
-import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { injectI18n, FormattedMessage } from '@kbn/i18n-react';
 import { Aggs } from '../../aggs/aggs';
 import { SeriesDragHandler } from '../../series_drag_handler';
 

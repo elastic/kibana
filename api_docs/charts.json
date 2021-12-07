@@ -942,12 +942,19 @@
           {
             "parentPluginId": "charts",
             "id": "def-public.ColorMap.Unnamed",
-            "type": "Any",
+            "type": "IndexSignature",
             "tags": [],
-            "label": "Unnamed",
+            "label": "[key: string]: RawColorSchema",
             "description": [],
             "signature": [
-              "any"
+              "[key: string]:  ",
+              {
+                "pluginId": "charts",
+                "scope": "common",
+                "docId": "kibChartsPluginApi",
+                "section": "def-common.RawColorSchema",
+                "text": "RawColorSchema"
+              }
             ],
             "path": "src/plugins/charts/common/static/color_maps/color_maps.ts",
             "deprecated": false
@@ -3283,12 +3290,19 @@
           {
             "parentPluginId": "charts",
             "id": "def-common.ColorMap.Unnamed",
-            "type": "Any",
+            "type": "IndexSignature",
             "tags": [],
-            "label": "Unnamed",
+            "label": "[key: string]: RawColorSchema",
             "description": [],
             "signature": [
-              "any"
+              "[key: string]:  ",
+              {
+                "pluginId": "charts",
+                "scope": "common",
+                "docId": "kibChartsPluginApi",
+                "section": "def-common.RawColorSchema",
+                "text": "RawColorSchema"
+              }
             ],
             "path": "src/plugins/charts/common/static/color_maps/color_maps.ts",
             "deprecated": false

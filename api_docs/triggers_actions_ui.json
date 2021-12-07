@@ -1620,12 +1620,19 @@
           {
             "parentPluginId": "triggersActionsUi",
             "id": "def-public.IErrorObject.Unnamed",
-            "type": "Any",
+            "type": "IndexSignature",
             "tags": [],
-            "label": "Unnamed",
+            "label": "[key: string]: string | string[] | IErrorObject",
             "description": [],
             "signature": [
-              "any"
+              "[key: string]:  string | string[] | ",
+              {
+                "pluginId": "triggersActionsUi",
+                "scope": "public",
+                "docId": "kibTriggersActionsUiPluginApi",
+                "section": "def-public.IErrorObject",
+                "text": "IErrorObject"
+              }
             ],
             "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
             "deprecated": false

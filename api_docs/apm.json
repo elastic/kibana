@@ -4510,7 +4510,7 @@
             "section": "def-common.PackagePolicy",
             "text": "PackagePolicy"
           },
-          " | undefined; }, ",
+          " | undefined; has_apm_integrations: boolean; }, ",
           "APMRouteCreateOptions",
           ">; } & { \"POST /internal/apm/fleet/cloud_apm_package_policy\": ",
           {

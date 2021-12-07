@@ -52,7 +52,15 @@ export default function (providerContext: FtrProviderContext) {
         },
         { meta: true }
       );
+
       expect(resPolicy.body.all_assets.policy).eql({
+        _meta: {
+          managed: true,
+          managed_by: 'fleet',
+          package: {
+            name: 'all_assets',
+          },
+        },
         phases: {
           hot: {
             min_age: '1ms',
@@ -265,6 +273,8 @@ export default function (providerContext: FtrProviderContext) {
             name: 'logs-all_assets.test_logs@custom',
             component_template: {
               _meta: {
+                managed: true,
+                managed_by: 'fleet',
                 package: {
                   name: 'all_assets',
                 },
@@ -276,24 +286,6 @@ export default function (providerContext: FtrProviderContext) {
           },
         ],
       });
-    });
-    it('should have updated the index patterns', async function () {
-      const resIndexPatternLogs = await kibanaServer.savedObjects.get({
-        type: 'index-pattern',
-        id: 'logs-*',
-      });
-      const fields = JSON.parse(resIndexPatternLogs.attributes.fields);
-      const updated = fields.filter((field: { name: string }) => field.name === 'new_field_name');
-      expect(!!updated.length).equal(true);
-      const resIndexPatternMetrics = await kibanaServer.savedObjects.get({
-        type: 'index-pattern',
-        id: 'metrics-*',
-      });
-      const fieldsMetrics = JSON.parse(resIndexPatternMetrics.attributes.fields);
-      const updatedMetrics = fieldsMetrics.filter(
-        (field: { name: string }) => field.name === 'metrics_test_name2'
-      );
-      expect(!!updatedMetrics.length).equal(true);
     });
     it('should have updated the kibana assets', async function () {
       const resDashboard = await kibanaServer.savedObjects.get({

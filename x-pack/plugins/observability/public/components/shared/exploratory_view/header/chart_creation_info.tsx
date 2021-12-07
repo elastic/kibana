@@ -7,7 +7,7 @@
 
 import React from 'react';
 import moment from 'moment';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiSpacer } from '@elastic/eui';
 import type { ChartTimeRange } from './last_updated';
 
