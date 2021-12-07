@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiConfirmModal, EuiLoadingSpinner } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import * as labels from './translations';
 
 interface Props {

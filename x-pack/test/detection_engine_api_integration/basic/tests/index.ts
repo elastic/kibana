@@ -19,7 +19,6 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./delete_rules_bulk'));
     loadTestFile(require.resolve('./export_rules'));
     loadTestFile(require.resolve('./find_rules'));
-    loadTestFile(require.resolve('./find_statuses'));
     loadTestFile(require.resolve('./get_prepackaged_rules_status'));
     loadTestFile(require.resolve('./import_rules'));
     loadTestFile(require.resolve('./read_rules'));

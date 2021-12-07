@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { INDICATOR_MATCHED_FIELD } from '../../../../../../../common/cti/constants';
 import { DraggableBadge } from '../../../../../../common/components/draggables';

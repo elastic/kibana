@@ -45,7 +45,7 @@ export function UserMenuProvider({ getService }) {
 
       await retry.try(async () => {
         await testSubjects.click('userMenuButton');
-        await testSubjects.existOrFail('userMenu');
+        await testSubjects.existOrFail('userMenu', { timeout: 2500 });
       });
     }
   })();

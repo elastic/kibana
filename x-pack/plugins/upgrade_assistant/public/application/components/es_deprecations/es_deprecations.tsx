@@ -10,7 +10,7 @@ import { withRouter, RouteComponentProps } from 'react-router-dom';
 
 import { EuiPageHeader, EuiSpacer, EuiPageContent, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { DocLinksStart } from 'kibana/public';
 import { METRIC_TYPE } from '@kbn/analytics';
 

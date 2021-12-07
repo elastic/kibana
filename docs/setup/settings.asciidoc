@@ -21,7 +21,7 @@ configuration using `${MY_ENV_VAR}` syntax.
 |===
 
 | `console.ui.enabled:`
-Toggling this causes the server to regenerate assets on the next startup,
+| Toggling this causes the server to regenerate assets on the next startup,
 which may cause a delay before pages start being served.
 Set to `false` to disable Console. *Default: `true`*
 
@@ -110,7 +110,7 @@ in this setting.
  currently do not have an inspector, for example Timelion and Monitoring.
  *Default: `false`*
 
-The following example shows a valid `elasticsearch.query` logger configuration:
+The following example shows a valid verbose `elasticsearch.query` logger configuration:
 |===
 
 [source,text]
@@ -123,7 +123,7 @@ logging:
         type: pattern
         highlight: true
   root:
-    appenders: [default, console_appender]
+    appenders: [console_appender]
     level: warn
   loggers:
     - name: elasticsearch.query
@@ -298,50 +298,54 @@ suggestions. This value must be a whole number greater than zero.
 
 [NOTE]
 ============
-To reload the logging settings, send a SIGHUP signal to {kib}.
+To reload the <<logging-settings, logging settings>>, send a SIGHUP signal to {kib}.
+For more logging configuration options, see the <<logging-configuration, Configure Logging in {kib}>> guide.
 ============
 
 [cols="2*<"]
 |===
 
 |[[logging-root]] `logging.root:`
-| The {kibana-ref}/logging-service.html#logging-service[`root` logger] has a dedicated configuration node since this context name is special and is pre-configured for logging by default.
-// TODO: add link to the advanced logging documentation.
+| The `root` logger has is a <<dedicated-loggers, dedicated logger>> and is pre-configured. The `root` logger logs at `info` level by default. If any other logging configuration is specified, `root` _must_ also be explicitly configured.
 
 |[[logging-root-appenders]] `logging.root.appenders:`
-| A list of logging appenders to forward the root level logger instance to.  By default `root` is configured with the `default` appender that must be included in the list. This is the configuration that all custom loggers will use unless they're re-configured explicitly. Additional appenders, if configured, can be included in the list.
+| A list of logging appenders to forward the root level logger instance to.  By default `root` is configured with the `default` appender that logs to stdout with a `pattern` layout. This is the configuration that all custom loggers will use unless they're re-configured explicitly. You can override the default behavior by configuring a different <<logging-appenders, appender>> to apply to `root`.
 
 |[[logging-root-level]] `logging.root.level:` {ess-icon}
-| Level at which a log record should be logged. Supported levels are: _all_, _fatal_, _error_, _warn_, _info_, _debug_, _trace_, _off_. Levels are ordered from _all_ (highest) to _off_ and a log record will be logged it its level is higher than or equal to the level of its logger, otherwise the log record is ignored. Use this value to <<change-overall-log-level,change the overall log level>>. Set to `all` to log all events, including system usage information and all requests. Set to `off` to silence all logs. *Default: `info`*.
+| Level at which a log record should be logged. Supported levels are: _all_, _fatal_, _error_, _warn_, _info_, _debug_, _trace_, _off_. Levels are ordered from _all_ (highest) to _off_ and a log record will be logged it its level is higher than or equal to the level of its logger, otherwise the log record is ignored. Use this value to <<change-overall-log-level,change the overall log level>>. *Default: `info`*.
 
-|[[logging-loggers]] `logging.loggers:`
+2+a|
+[TIP]
+============
+Set to `all` to log all events, including system usage information and all requests. Set to `off` to silence all logs.  You can also use the logging <<logging-cli-migration, cli commands>> to set log level to `verbose` or silence all logs.
+============
+
+The following example shows a valid verbose `logging.root` configuration:
+|===
+
+[source,text]
+--
+logging:
+  appenders:
+    console_appender:
+      type: console
+      layout:
+        type: pattern
+        highlight: true
+  root:
+    appenders: [console_appender]
+    level: all
+--
+
+[cols="2*<"]
+|===
+
+|[[logging-loggers]] `logging.loggers[]:`
  | Allows you to <<customize-specific-log-records,customize a specific logger instance>>.
 
-| `logging.loggers.name:`
-| Specific logger instance.
+| `logging.appenders[]:`
+| <<logging-appenders, Appenders>> define how and where log messages are displayed (eg. *stdout* or console) and stored (eg. file on the disk).
 
-| `logging.loggers.level:`
-| Level at which a log record should be shown. Supported levels are: _all_, _fatal_, _error_, _warn_, _info_, _debug_, _trace_, _off_.
-
-| `logging.loggers.appenders:`
-| Specific appender format to apply for a particular logger context.
-
-| `logging.appenders:`
-| {kibana-ref}/logging-service.html#logging-appenders[Appenders] define how and where log messages are displayed (eg. *stdout* or console) and stored (eg. file on the disk).
-// TODO: add link to the advanced logging documentation.
-
-| `logging.appenders.console:`
-| Appender to use for logging records to *stdout*. By default, uses the `[%date][%level][%logger] %message` **pattern** layout. To use a **json**, set the <<log-in-json-ECS-example,layout type to `json`>>.
-
-| `logging.appenders.file:`
-| Allows you to specify a fileName to send log records to on disk. To send <<log-to-file-example,all log records to file>>, add the file appender to `root.appenders`.
-
-| `logging.appenders.rolling-file:`
-| Similar to Log4j's `RollingFileAppender`, this appender will log into a file and rotate if following a rolling strategy when the configured policy triggers. There are currently two policies supported: `size-limit` and `time-interval`.
-
-The size limit policy will perform a rollover when the log file reaches a maximum `size`. *Default 100mb*
-
-The time interval policy will rotate the log file every given interval of time. *Default 24h*
 
 | `map.includeElasticMapsService:` {ess-icon}
  | Set to `false` to disable connections to Elastic Maps Service.

@@ -12,14 +12,14 @@ import { flashAPIErrors } from '../../../shared/flash_messages';
 import { HttpLogic } from '../../../shared/http';
 import { EngineLogic } from '../engine';
 
-import { CrawlRequest, CrawlRequestFromServer } from './types';
-import { crawlRequestServerToClient } from './utils';
+import { CrawlRequestWithDetails, CrawlRequestWithDetailsFromServer } from './types';
+import { crawlRequestWithDetailsServerToClient } from './utils';
 
 type CrawlDetailFlyoutTabs = 'preview' | 'json';
 
 export interface CrawlDetailValues {
-  crawlRequest: CrawlRequest | null;
-  crawlRequestFromServer: CrawlRequestFromServer | null;
+  crawlRequest: CrawlRequestWithDetails | null;
+  crawlRequestFromServer: CrawlRequestWithDetailsFromServer | null;
   dataLoading: boolean;
   flyoutClosed: boolean;
   selectedTab: CrawlDetailFlyoutTabs;
@@ -28,8 +28,8 @@ export interface CrawlDetailValues {
 export interface CrawlDetailActions {
   closeFlyout(): void;
   fetchCrawlRequest(requestId: string): { requestId: string };
-  onRecieveCrawlRequest(crawlRequestFromServer: CrawlRequestFromServer): {
-    crawlRequestFromServer: CrawlRequestFromServer;
+  onRecieveCrawlRequest(crawlRequestFromServer: CrawlRequestWithDetailsFromServer): {
+    crawlRequestFromServer: CrawlRequestWithDetailsFromServer;
   };
   openFlyout(): void;
   setSelectedTab(selectedTab: CrawlDetailFlyoutTabs): { selectedTab: CrawlDetailFlyoutTabs };
@@ -49,7 +49,7 @@ export const CrawlDetailLogic = kea<MakeLogicType<CrawlDetailValues, CrawlDetail
       null,
       {
         onRecieveCrawlRequest: (_, { crawlRequestFromServer }) =>
-          crawlRequestServerToClient(crawlRequestFromServer),
+          crawlRequestWithDetailsServerToClient(crawlRequestFromServer),
       },
     ],
     crawlRequestFromServer: [
@@ -86,7 +86,7 @@ export const CrawlDetailLogic = kea<MakeLogicType<CrawlDetailValues, CrawlDetail
       const { engineName } = EngineLogic.values;
 
       try {
-        const response = await http.get<CrawlRequestFromServer>(
+        const response = await http.get<CrawlRequestWithDetailsFromServer>(
           `/internal/app_search/engines/${engineName}/crawler/crawl_requests/${requestId}`
         );
 

@@ -9,7 +9,7 @@
 import './empty_index_pattern_prompt.scss';
 
 import React, { lazy, Suspense } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { EuiPageContent, EuiSpacer, EuiText, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { EuiDescriptionListTitle } from '@elastic/eui';

@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useContext, useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { Action } from '../../../../models/action';
 import { ACTION_TYPES } from '../../../../../../common/constants';

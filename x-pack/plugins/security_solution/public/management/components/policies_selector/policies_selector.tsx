@@ -20,7 +20,7 @@ import {
   FilterChecked,
   EuiText,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { ImmutableArray, PolicyData } from '../../../../common/endpoint/types';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 

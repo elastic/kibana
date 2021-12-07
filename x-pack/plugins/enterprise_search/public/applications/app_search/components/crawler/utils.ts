@@ -22,6 +22,8 @@ import {
   CrawlEvent,
   CrawlConfigFromServer,
   CrawlConfig,
+  CrawlRequestWithDetailsFromServer,
+  CrawlRequestWithDetails,
 } from './types';
 
 export function crawlerDomainServerToClient(payload: CrawlerDomainFromServer): CrawlerDomain {
@@ -83,14 +85,20 @@ export function crawlRequestServerToClient(crawlRequest: CrawlRequestFromServer)
 }
 
 export function crawlConfigServerToClient(crawlConfig: CrawlConfigFromServer): CrawlConfig {
-  const { domain_allowlist: domainAllowlist } = crawlConfig;
+  const {
+    domain_allowlist: domainAllowlist,
+    seed_urls: seedUrls,
+    sitemap_urls: sitemapUrls,
+  } = crawlConfig;
 
   return {
     domainAllowlist,
+    seedUrls,
+    sitemapUrls,
   };
 }
 
-export function crawlerEventServerToClient(event: CrawlEventFromServer): CrawlEvent {
+export function crawlEventServerToClient(event: CrawlEventFromServer): CrawlEvent {
   const {
     id,
     stage,
@@ -114,12 +122,37 @@ export function crawlerEventServerToClient(event: CrawlEventFromServer): CrawlEv
   };
 }
 
+export function crawlRequestWithDetailsServerToClient(
+  event: CrawlRequestWithDetailsFromServer
+): CrawlRequestWithDetails {
+  const {
+    id,
+    status,
+    created_at: createdAt,
+    began_at: beganAt,
+    completed_at: completedAt,
+    type,
+    crawl_config: crawlConfig,
+  } = event;
+
+  return {
+    id,
+    status,
+    createdAt,
+    beganAt,
+    completedAt,
+    type,
+    crawlConfig: crawlConfigServerToClient(crawlConfig),
+    // TODO add fields like stats
+  };
+}
+
 export function crawlerDataServerToClient(payload: CrawlerDataFromServer): CrawlerData {
   const { domains, events, most_recent_crawl_request: mostRecentCrawlRequest } = payload;
 
   return {
     domains: domains.map((domain) => crawlerDomainServerToClient(domain)),
-    events: events.map((event) => crawlerEventServerToClient(event)),
+    events: events.map((event) => crawlEventServerToClient(event)),
     mostRecentCrawlRequest:
       mostRecentCrawlRequest && crawlRequestServerToClient(mostRecentCrawlRequest),
   };
