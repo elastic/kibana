@@ -6,7 +6,7 @@
  */
 
 import './toolbar.scss';
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiFlexGroup,
@@ -37,6 +37,7 @@ import {
 } from '../shared_components';
 import { SavedObjectPaletteStore, getPalettesFromStore, savePaletteToStore } from '../persistence';
 import { computeTerms } from '../utils';
+import { shouldShowValuesInLegend } from './render_helpers';
 
 const legendOptions: Array<{
   value: SharedPieLayerState['legendDisplay'];
@@ -69,6 +70,67 @@ const legendOptions: Array<{
 export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationState>) {
   const { state, setState } = props;
   const layer = state.layers[0];
+
+  const onStateChange = useCallback(
+    (part: Record<string, unknown>) => {
+      setState({
+        ...state,
+        layers: [{ ...layer, ...part }],
+      });
+    },
+    [layer, state, setState]
+  );
+
+  const onCategoryDisplayChange = useCallback(
+    (option) => onStateChange({ categoryDisplay: option }),
+    [onStateChange]
+  );
+
+  const onNumberDisplayChange = useCallback(
+    (option) => onStateChange({ numberDisplay: option }),
+    [onStateChange]
+  );
+
+  const onPercentDecimalsChange = useCallback(
+    (option) => {
+      onStateChange({ percentDecimals: option });
+    },
+    [onStateChange]
+  );
+
+  const onLegendDisplayChange = useCallback(
+    (optionId) => {
+      onStateChange({ legendDisplay: legendOptions.find(({ id }) => id === optionId)!.value });
+    },
+    [onStateChange]
+  );
+
+  const onLegendPositionChange = useCallback(
+    (id) => onStateChange({ legendPosition: id as Position }),
+    [onStateChange]
+  );
+
+  const onNestedLegendChange = useCallback(
+    (id) => onStateChange({ nestedLegend: !layer.nestedLegend }),
+    [layer, onStateChange]
+  );
+
+  const onTruncateLegendChange = useCallback(() => {
+    const current = layer.truncateLegend ?? true;
+    onStateChange({ truncateLegend: !current });
+  }, [layer, onStateChange]);
+
+  const onLegendMaxLinesChange = useCallback(
+    (val) => onStateChange({ legendMaxLines: val }),
+    [onStateChange]
+  );
+
+  const onValueInLegendChange = useCallback(() => {
+    onStateChange({
+      showValuesInLegend: !shouldShowValuesInLegend(layer, state.shape),
+    });
+  }, [layer, state.shape, onStateChange]);
+
   if (!layer) {
     return null;
   }
@@ -101,12 +163,7 @@ export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationStat
               compressed
               valueOfSelected={layer.categoryDisplay}
               options={categoryOptions}
-              onChange={(option) => {
-                setState({
-                  ...state,
-                  layers: [{ ...layer, categoryDisplay: option }],
-                });
-              }}
+              onChange={onCategoryDisplayChange}
             />
           </EuiFormRow>
         ) : null}
@@ -124,12 +181,7 @@ export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationStat
               disabled={layer.categoryDisplay === 'hide'}
               valueOfSelected={layer.categoryDisplay === 'hide' ? 'hidden' : layer.numberDisplay}
               options={numberOptions}
-              onChange={(option) => {
-                setState({
-                  ...state,
-                  layers: [{ ...layer, numberDisplay: option }],
-                });
-              }}
+              onChange={onNumberDisplayChange}
             />
           </EuiFormRow>
         ) : null}
@@ -145,59 +197,28 @@ export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationStat
         >
           <DecimalPlaceSlider
             value={layer.percentDecimals ?? DEFAULT_PERCENT_DECIMALS}
-            setValue={(value) => {
-              setState({
-                ...state,
-                layers: [{ ...layer, percentDecimals: value }],
-              });
-            }}
+            setValue={onPercentDecimalsChange}
           />
         </EuiFormRow>
       </ToolbarPopover>
       <LegendSettingsPopover
         legendOptions={legendOptions}
         mode={layer.legendDisplay}
-        onDisplayChange={(optionId) => {
-          setState({
-            ...state,
-            layers: [
-              {
-                ...layer,
-                legendDisplay: legendOptions.find(({ id }) => id === optionId)!.value,
-              },
-            ],
-          });
-        }}
+        onDisplayChange={onLegendDisplayChange}
+        valueInLegend={shouldShowValuesInLegend(layer, state.shape)}
+        renderValueInLegendSwitch={
+          'showValues' in PartitionChartsMeta[state.shape]?.legend ?? false
+        }
+        onValueInLegendChange={onValueInLegendChange}
         position={layer.legendPosition}
-        onPositionChange={(id) => {
-          setState({
-            ...state,
-            layers: [{ ...layer, legendPosition: id as Position }],
-          });
-        }}
+        onPositionChange={onLegendPositionChange}
         renderNestedLegendSwitch
         nestedLegend={!!layer.nestedLegend}
-        onNestedLegendChange={() => {
-          setState({
-            ...state,
-            layers: [{ ...layer, nestedLegend: !layer.nestedLegend }],
-          });
-        }}
+        onNestedLegendChange={onNestedLegendChange}
         shouldTruncate={layer.truncateLegend ?? true}
-        onTruncateLegendChange={() => {
-          const current = layer.truncateLegend ?? true;
-          setState({
-            ...state,
-            layers: [{ ...layer, truncateLegend: !current }],
-          });
-        }}
+        onTruncateLegendChange={onTruncateLegendChange}
         maxLines={layer?.legendMaxLines}
-        onMaxLinesChange={(val) => {
-          setState({
-            ...state,
-            layers: [{ ...layer, legendMaxLines: val }],
-          });
-        }}
+        onMaxLinesChange={onLegendMaxLinesChange}
       />
     </EuiFlexGroup>
   );

@@ -109,7 +109,8 @@ export const getDatatableVisualization = ({
     if (
       keptLayerIds.length > 1 ||
       (keptLayerIds.length && table.layerId !== keptLayerIds[0]) ||
-      (state && table.changeType === 'unchanged')
+      (state && table.changeType === 'unchanged') ||
+      table.columns.some((col) => col.operation.isStaticValue)
     ) {
       return [];
     }
