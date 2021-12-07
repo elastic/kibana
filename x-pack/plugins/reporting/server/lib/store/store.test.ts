@@ -193,7 +193,6 @@ describe('ReportingStore', () => {
         status: 'pending',
         meta: { testMeta: 'meta' } as any,
         payload: { testPayload: 'payload' } as any,
-        browser_type: 'browser type string',
         attempts: 0,
         max_attempts: 1,
         timeout: 30000,
@@ -214,7 +213,6 @@ describe('ReportingStore', () => {
         "_primary_term": 1234,
         "_seq_no": 5678,
         "attempts": 0,
-        "browser_type": "browser type string",
         "completed_at": undefined,
         "created_at": "some time",
         "created_by": "some security person",
@@ -247,7 +245,6 @@ describe('ReportingStore', () => {
       _primary_term: 10002,
       jobtype: 'test-report',
       created_by: 'created_by_test_string',
-      browser_type: 'browser_type_test_string',
       max_attempts: 50,
       payload: {
         title: 'test report',
@@ -279,7 +276,6 @@ describe('ReportingStore', () => {
       _primary_term: 10002,
       jobtype: 'test-report',
       created_by: 'created_by_test_string',
-      browser_type: 'browser_type_test_string',
       max_attempts: 50,
       payload: {
         title: 'test report',
@@ -310,7 +306,6 @@ describe('ReportingStore', () => {
       _primary_term: 10002,
       jobtype: 'test-report',
       created_by: 'created_by_test_string',
-      browser_type: 'browser_type_test_string',
       max_attempts: 50,
       payload: {
         title: 'test report',
@@ -341,7 +336,6 @@ describe('ReportingStore', () => {
       _primary_term: 10002,
       jobtype: 'test-report',
       created_by: 'created_by_test_string',
-      browser_type: 'browser_type_test_string',
       max_attempts: 50,
       payload: {
         title: 'test report',
@@ -385,7 +379,6 @@ describe('ReportingStore', () => {
       _primary_term: 10002,
       jobtype: 'test-report-2',
       created_by: 'created_by_test_string',
-      browser_type: 'browser_type_test_string',
       status: 'processing',
       process_expiration: '2002',
       max_attempts: 3,
