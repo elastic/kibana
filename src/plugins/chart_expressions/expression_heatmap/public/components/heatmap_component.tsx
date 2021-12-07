@@ -411,9 +411,9 @@ const HeatmapComponent: FC<HeatmapRenderProps> = ({
       ...(yAxisColumn
         ? {
             formatter: (v: number | string) =>
-              // .toString() is required, because convert is not returning fair string.
+              // converting to string is required, because convert is not returning fair string.
               // It returns value of any type, but asserted as a string type.
-              formatFactory(yAxisColumn.meta.params).convert(v).toString(),
+              `${formatFactory(yAxisColumn.meta.params).convert(v)}`,
           }
         : {}),
     },
