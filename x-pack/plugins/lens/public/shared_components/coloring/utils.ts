@@ -128,7 +128,7 @@ export function getColorPaletteParams(params: any) {
   let stops = params.stops;
   let colorsForStops = params.colors;
 
-  if (isFinite(params.rangeMax) && stops.length > 0 ) {
+  if (isFinite(params.rangeMax) && stops.length > 0) {
     stops = [...params.stops, params.rangeMax];
     colorsForStops = [...colorsForStops, ''];
   }
@@ -278,6 +278,25 @@ export function getStepValue(colorStops: ColorStop[], newColorStops: ColorStop[]
     step = diffToMax > 0 ? diffToMax : 1;
   }
   return step;
+}
+
+export function getAutoValues(
+  { first, preLast, last }: { first: number; preLast: number; last: number },
+  rangeType: string,
+  dataBounds: { min: number; max: number }
+) {
+  const { max: dataMax, min: dataMin } = getDataMinMax(rangeType, dataBounds);
+  const step = getStepValue(
+    [{ stop: preLast }, { stop: last }] as ColorStop[],
+    [{ stop: preLast }, { stop: last }] as ColorStop[],
+    dataMax
+  );
+
+  const max = dataMax > last ? dataMax : last + step;
+
+  const min = dataMin < first ? dataMin : first - step;
+
+  return { max, min };
 }
 
 export function getSwitchToCustomParams(

@@ -24,7 +24,7 @@ import { ValueMaxIcon } from '../../assets/value_max';
 import { ValueMinIcon } from '../../assets/value_min';
 import { RelatedIcon } from '../../assets/related';
 import { DistributeEquallyIcon } from '../../assets/distribute_equally';
-import { getDataMinMax, getStepValue, isValidColor, roundValue } from './utils';
+import { getDataMinMax, getStepValue, isValidColor, roundValue, getAutoValues } from './utils';
 import type { CustomPaletteParamsConfig, ColorStop } from '../../../common';
 import { useDebouncedValue, TooltipWrapper } from '../index';
 import { DEFAULT_COLOR } from './constants';
@@ -336,12 +336,16 @@ export function ColorRanges(props: ColorRangesProps) {
                         )
                   }
                   onClick={() => {
-                    let newValue;
-                    if (rangeType !== 'percent') {
-                      newValue = roundValue(dataBounds[isLast ? 'max' : 'min']);
-                    } else {
-                      newValue = isLast ? 100 : 0;
-                    }
+                    const { max: autoMax, min: autoMin } = getAutoValues(
+                      {
+                        first: localColorRanges[1].start,
+                        preLast: localColorRanges[localColorRanges.length - 2].start,
+                        last: localColorRanges[localColorRanges.length - 1].start,
+                      },
+                      rangeType,
+                      dataBounds
+                    );
+                    const newValue = roundValue(isLast ? autoMax : autoMin);
                     if (isLast) {
                       autoValue = autoValue === 'none' ? 'max' : 'all';
                     } else {
