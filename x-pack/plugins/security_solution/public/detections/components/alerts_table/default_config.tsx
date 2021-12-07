@@ -8,7 +8,6 @@
 import {
   ALERT_BUILDING_BLOCK_TYPE,
   ALERT_WORKFLOW_STATUS,
-  ALERT_RULE_UUID,
   ALERT_RULE_RULE_ID,
 } from '@kbn/rule-data-utils/technical_field_names';
 
@@ -87,9 +86,15 @@ export const buildAlertStatusesFilter = (statuses: Status[]): Filter[] => {
   ];
 };
 
-// TODO: Separate between rule.id and rule.rule_id
-export const buildAlertsRuleIdFilter = (ruleId: string | null, useRuleSOId = false): Filter[] =>
-  ruleId
+/**
+ * Builds Kuery filter for fetching alerts for a specific rule. Takes the rule's
+ * static id, i.e. `rule.ruleId` (not rule.id), so that alerts for _all
+ * historical instances_ of the rule are returned.
+ *
+ * @param ruleStaticId Rule's static id: `rule.ruleId`
+ */
+export const buildAlertsFilter = (ruleStaticId: string | null): Filter[] =>
+  ruleStaticId
     ? [
         {
           meta: {
@@ -97,14 +102,14 @@ export const buildAlertsRuleIdFilter = (ruleId: string | null, useRuleSOId = fal
             negate: false,
             disabled: false,
             type: 'phrase',
-            key: useRuleSOId ? ALERT_RULE_UUID : ALERT_RULE_RULE_ID,
+            key: ALERT_RULE_RULE_ID,
             params: {
-              query: ruleId,
+              query: ruleStaticId,
             },
           },
           query: {
             match_phrase: {
-              [useRuleSOId ? ALERT_RULE_UUID : ALERT_RULE_RULE_ID]: ruleId,
+              [ALERT_RULE_RULE_ID]: ruleStaticId,
             },
           },
         },

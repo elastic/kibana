@@ -7,7 +7,7 @@
 
 import { ExistsFilter, Filter } from '@kbn/es-query';
 import {
-  buildAlertsRuleIdFilter,
+  buildAlertsFilter,
   buildAlertStatusesFilter,
   buildAlertStatusFilter,
   buildThreatMatchFilter,
@@ -18,7 +18,7 @@ jest.mock('./actions');
 describe('alerts default_config', () => {
   describe('buildAlertsRuleIdFilter', () => {
     test('given a rule id this will return an array with a single filter', () => {
-      const filters: Filter[] = buildAlertsRuleIdFilter('rule-id-1');
+      const filters: Filter[] = buildAlertsFilter('rule-id-1');
       const expectedFilter: Filter = {
         meta: {
           alias: null,

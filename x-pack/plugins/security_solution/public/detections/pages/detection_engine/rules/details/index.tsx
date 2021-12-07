@@ -63,7 +63,7 @@ import { useUserData } from '../../../../components/user_info';
 import { StepDefineRule } from '../../../../components/rules/step_define_rule';
 import { StepScheduleRule } from '../../../../components/rules/step_schedule_rule';
 import {
-  buildAlertsRuleIdFilter,
+  buildAlertsFilter,
   buildAlertStatusFilter,
   buildShowBuildingBlockFilter,
   buildThreatMatchFilter,
@@ -411,7 +411,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
 
   const alertDefaultFilters = useMemo(
     () => [
-      ...buildAlertsRuleIdFilter(rule?.rule_id ?? ''),
+      ...buildAlertsFilter(rule?.rule_id ?? ''),
       ...buildShowBuildingBlockFilter(showBuildingBlockAlerts),
       ...buildAlertStatusFilter(filterGroup),
       ...buildThreatMatchFilter(showOnlyThreatIndicatorAlerts),
@@ -421,7 +421,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
 
   const alertsTableDefaultFilters = useMemo(
     () => [
-      ...buildAlertsRuleIdFilter(rule?.rule_id ?? ''),
+      ...buildAlertsFilter(rule?.rule_id ?? ''),
       ...buildShowBuildingBlockFilter(showBuildingBlockAlerts),
       ...buildThreatMatchFilter(showOnlyThreatIndicatorAlerts),
     ],
