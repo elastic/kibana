@@ -10,7 +10,7 @@ import reduceReducers from 'reduce-reducers';
 import { BehaviorSubject, Subject, Subscription } from 'rxjs';
 import { pluck } from 'rxjs/operators';
 import { AnyAction, Reducer } from 'redux';
-import {
+import type {
   PluginSetup,
   PluginStart,
   SetupPlugins,
