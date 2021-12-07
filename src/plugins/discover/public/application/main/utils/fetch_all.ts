@@ -176,10 +176,13 @@ export function fetchAll(
 
     // Return a promise that will resolve once all the requests have finished or failed
     return Promise.allSettled([documents, charts, totalHits]).then(() => {
-      // Send a complete message to main$ once all queries are done.
+      // Send a complete message to main$ once all queries are done and if main$
+      // is not already in an ERROR state, e.g. because the document query has failed.
       // This will only complete main$, if it hasn't already been completed previously
       // by a query finding no results.
-      sendCompleteMsg(dataSubjects.main$);
+      if (dataSubjects.main$.getValue().fetchStatus !== FetchStatus.ERROR) {
+        sendCompleteMsg(dataSubjects.main$);
+      }
     });
   } catch (error) {
     sendErrorMsg(dataSubjects.main$, error);

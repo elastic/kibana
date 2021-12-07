@@ -182,4 +182,18 @@ describe('test fetchAll', () => {
       { fetchStatus: FetchStatus.COMPLETE, foundDocuments: true },
     ]);
   });
+
+  test('should not set COMPLETE if an ERROR has been set on main$', async () => {
+    const collectMain = subjectCollector(subjects.main$);
+    searchSource.getField('index')!.isTimeBased = () => false;
+    mockFetchDocuments.mockRejectedValue({ msg: 'This query failed' });
+    await fetchAll(subjects, searchSource, false, deps);
+    expect(await collectMain()).toEqual([
+      { fetchStatus: FetchStatus.UNINITIALIZED },
+      { fetchStatus: FetchStatus.LOADING },
+      { fetchStatus: FetchStatus.PARTIAL }, // From totalHits query
+      { fetchStatus: FetchStatus.ERROR, error: { msg: 'This query failed' } },
+      // Here should be no COMPLETE coming anymore
+    ]);
+  });
 });
