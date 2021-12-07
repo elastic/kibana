@@ -170,23 +170,23 @@ export const useSavedSearch = ({
       const autoRefreshDone = refs.current.autoRefreshDone;
 
       await fetchAll(dataSubjects, searchSource, val === 'reset', {
-          abortController: refs.current.abortController,
-          appStateContainer: stateContainer.appStateContainer,
-          inspectorAdapters,
-          data,
-          initialFetchStatus,
-          searchSessionId: searchSessionManager.getNextSearchSessionId(),
-          services,
-          useNewFieldsApi,
+        abortController: refs.current.abortController,
+        appStateContainer: stateContainer.appStateContainer,
+        inspectorAdapters,
+        data,
+        initialFetchStatus,
+        searchSessionId: searchSessionManager.getNextSearchSessionId(),
+        services,
+        useNewFieldsApi,
       });
 
       // If the autoRefreshCallback is still the same as when we started i.e. there was no newer call
       // replacing this current one, call it to make sure we tell that the auto refresh is done
       // and a new one can be scheduled.
       if (autoRefreshDone === refs.current.autoRefreshDone) {
-            // if this function was set and is executed, another refresh fetch can be triggered
-            refs.current.autoRefreshDone?.();
-            refs.current.autoRefreshDone = undefined;
+        // if this function was set and is executed, another refresh fetch can be triggered
+        refs.current.autoRefreshDone?.();
+        refs.current.autoRefreshDone = undefined;
       }
     });
 
