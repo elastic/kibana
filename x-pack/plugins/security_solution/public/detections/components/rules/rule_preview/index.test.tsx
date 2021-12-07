@@ -53,6 +53,8 @@ const defaultProps: RulePreviewProps = {
       value: '2',
     },
   },
+  anomalyThreshold: 50,
+  machineLearningJobId: ['test-ml-job-id'],
 };
 
 describe('PreviewQuery', () => {

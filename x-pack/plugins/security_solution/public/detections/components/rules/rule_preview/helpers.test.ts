@@ -80,6 +80,7 @@ describe('query_preview/helpers', () => {
         threatMapping: [
           { entries: [{ field: 'test-field', value: 'test-value', type: 'mapping' }] },
         ],
+        machineLearningJobId: ['test-ml-job-id'],
       });
       expect(isDisabled).toEqual(true);
     });
@@ -94,6 +95,7 @@ describe('query_preview/helpers', () => {
         threatMapping: [
           { entries: [{ field: 'test-field', value: 'test-value', type: 'mapping' }] },
         ],
+        machineLearningJobId: ['test-ml-job-id'],
       });
       expect(isDisabled).toEqual(true);
     });
@@ -108,6 +110,7 @@ describe('query_preview/helpers', () => {
         threatMapping: [
           { entries: [{ field: 'test-field', value: 'test-value', type: 'mapping' }] },
         ],
+        machineLearningJobId: ['test-ml-job-id'],
       });
       expect(isDisabled).toEqual(true);
     });
@@ -122,6 +125,7 @@ describe('query_preview/helpers', () => {
         threatMapping: [
           { entries: [{ field: 'test-field', value: 'test-value', type: 'mapping' }] },
         ],
+        machineLearningJobId: ['test-ml-job-id'],
       });
       expect(isDisabled).toEqual(true);
     });
@@ -134,6 +138,20 @@ describe('query_preview/helpers', () => {
         index: ['test-*'],
         threatIndex: ['threat-*'],
         threatMapping: [],
+        machineLearningJobId: ['test-ml-job-id'],
+      });
+      expect(isDisabled).toEqual(true);
+    });
+
+    test('disabled when there is no machine learning job id', () => {
+      const isDisabled = getIsRulePreviewDisabled({
+        ruleType: 'threat_match',
+        isQueryBarValid: true,
+        isThreatQueryBarValid: true,
+        index: ['test-*'],
+        threatIndex: ['threat-*'],
+        threatMapping: [],
+        machineLearningJobId: [],
       });
       expect(isDisabled).toEqual(true);
     });
@@ -148,6 +166,7 @@ describe('query_preview/helpers', () => {
         threatMapping: [
           { entries: [{ field: 'test-field', value: 'test-value', type: 'mapping' }] },
         ],
+        machineLearningJobId: ['test-ml-job-id'],
       });
       expect(isDisabled).toEqual(false);
     });
@@ -163,7 +182,7 @@ describe('query_preview/helpers', () => {
       ]);
     });
 
-    test('returns hour, day, and month options if ruleType is not eql', () => {
+    test('returns hour, day, and month options if ruleType is not eql or threshold', () => {
       const options = getTimeframeOptions('query');
 
       expect(options).toEqual([
