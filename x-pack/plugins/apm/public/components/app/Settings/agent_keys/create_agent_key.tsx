@@ -116,9 +116,7 @@ export function CreateAgentKeyFlyout({ onCancel, onSuccess, onError }: Props) {
             <EuiFormRow
               label={i18n.translate(
                 'xpack.apm.settings.agentKeys.createKeyFlyout.userTitle',
-                {
-                  defaultMessage: 'User',
-                }
+                { defaultMessage: 'User', }
               )}
             >
               <EuiText>{username}</EuiText>
