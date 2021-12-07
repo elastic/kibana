@@ -43,7 +43,7 @@ export const sampleAttributeKpi = {
                   query: 'transaction.type: page-load and processor.event: transaction',
                 },
                 isBucketed: false,
-                label: 'test-series',
+                label: 'Page views',
                 operationType: 'count',
                 scale: 'ratio',
                 sourceField: 'Records',
@@ -76,18 +76,21 @@ export const sampleAttributeKpi = {
         {
           accessors: ['y-axis-column-layer0'],
           layerId: 'layer0',
+          layerType: 'data',
           seriesType: 'line',
           xAccessor: 'x-axis-column-layer0',
           yConfig: [
             {
               color: 'green',
               forAccessor: 'y-axis-column-layer0',
+              axisMode: 'left',
             },
           ],
         },
       ],
       legend: {
         isVisible: true,
+        showSingleSeries: true,
         position: 'right',
       },
       preferredSeriesType: 'line',

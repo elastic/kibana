@@ -10,9 +10,9 @@ import { ENVIRONMENT_NOT_DEFINED } from '../environment_filter_values';
 import { environmentQuery } from './environment_query';
 
 describe('environmentQuery', () => {
-  describe('when environment is undefined', () => {
+  describe('when environment is an empty string', () => {
     it('returns an empty query', () => {
-      expect(environmentQuery()).toEqual([]);
+      expect(environmentQuery('')).toEqual([]);
     });
   });
 

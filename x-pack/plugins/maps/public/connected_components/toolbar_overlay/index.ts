@@ -10,7 +10,7 @@ import { ToolbarOverlay } from './toolbar_overlay';
 import { MapStoreState } from '../../reducers/store';
 import { getDrawMode } from '../../selectors/ui_selectors';
 import { getGeoFieldNames } from '../../selectors/map_selectors';
-import { DRAW_MODE } from '../../../common';
+import { DRAW_MODE } from '../../../common/constants';
 
 function mapStateToProps(state: MapStoreState) {
   return {

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import './index.scss';
 import { PluginInitializerContext } from 'src/core/public';
 import { UpgradeAssistantUIPlugin } from './plugin';
 

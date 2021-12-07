@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import { checkReferences } from './utils';
+import { checkReferences, checkForDataLayerType } from './utils';
 import { operationDefinitionMap } from '..';
 import { createMockedFullReference } from '../../mocks';
+import { layerTypes } from '../../../../../common';
+import { DateHistogramIndexPatternColumn } from '../date_histogram';
 
 // Mock prevents issue with circular loading
 jest.mock('..');
@@ -18,6 +20,14 @@ describe('utils', () => {
     operationDefinitionMap.testReference = createMockedFullReference();
   });
 
+  describe('checkForDataLayerType', () => {
+    it('should return an error if the layer is of the wrong type', () => {
+      expect(checkForDataLayerType(layerTypes.REFERENCELINE, 'Operation')).toEqual([
+        'Operation is disabled for this type of layer.',
+      ]);
+    });
+  });
+
   describe('checkReferences', () => {
     it('should show an error if the reference is missing', () => {
       expect(
@@ -26,7 +36,6 @@ describe('utils', () => {
             columns: {
               ref: {
                 label: 'Label',
-                // @ts-expect-error test-only operation type
                 operationType: 'testReference',
                 isBucketed: false,
                 dataType: 'number',
@@ -48,7 +57,6 @@ describe('utils', () => {
             columns: {
               ref: {
                 label: 'Label',
-                // @ts-expect-error test-only operation type
                 operationType: 'testReference',
                 isBucketed: false,
                 dataType: 'number',
@@ -61,7 +69,7 @@ describe('utils', () => {
                 dataType: 'date',
                 sourceField: 'timestamp',
                 params: { interval: 'auto' },
-              },
+              } as DateHistogramIndexPatternColumn,
             },
             columnOrder: ['invalid', 'ref'],
             indexPatternId: '',

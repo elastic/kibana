@@ -13,7 +13,7 @@ import {
   ARIA_COLINDEX_ATTRIBUTE,
   ARIA_ROWINDEX_ATTRIBUTE,
   getRowRendererClassName,
-} from '../../../../../../common';
+} from '../../../../../../common/utils/accessibility';
 import { useStatefulEventFocus } from '../use_stateful_event_focus';
 
 import * as i18n from '../translations';
@@ -61,10 +61,10 @@ export const StatefulRowRenderer = ({
     rowindexAttribute: ARIA_ROWINDEX_ATTRIBUTE,
   });
 
-  const rowRenderer = useMemo(() => getRowRenderer(event.ecs, rowRenderers), [
-    event.ecs,
-    rowRenderers,
-  ]);
+  const rowRenderer = useMemo(
+    () => getRowRenderer(event.ecs, rowRenderers),
+    [event.ecs, rowRenderers]
+  );
 
   const content = useMemo(
     () =>

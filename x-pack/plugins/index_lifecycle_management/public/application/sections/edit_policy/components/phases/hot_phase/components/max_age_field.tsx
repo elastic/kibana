@@ -11,10 +11,8 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { NumericField } from '../../../../../../../shared_imports';
 import { UseField } from '../../../../form';
-import { ROLLOVER_FORM_PATHS } from '../../../../constants';
-import { UnitField } from './unit_field';
-
-import { maxAgeUnits } from '../constants';
+import { ROLLOVER_FORM_PATHS, timeUnits } from '../../../../constants';
+import { UnitField } from '../../shared_fields/unit_field';
 
 export const MaxAgeField: FunctionComponent = () => {
   return (
@@ -30,7 +28,7 @@ export const MaxAgeField: FunctionComponent = () => {
               append: (
                 <UnitField
                   path="_meta.hot.customRollover.maxAgeUnit"
-                  options={maxAgeUnits}
+                  options={timeUnits}
                   euiFieldProps={{
                     'data-test-subj': 'hot-selectedMaxAgeUnits',
                     'aria-label': i18n.translate(

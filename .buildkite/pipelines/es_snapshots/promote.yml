@@ -1,0 +1,12 @@
+steps:
+  - block: 'Promote'
+    prompt: "Enter the details for the snapshot you'd like to promote"
+    if: "build.env('ES_SNAPSHOT_MANIFEST') == null"
+    # Later, this could be a dropdown dynamically filled with recent builds
+    fields:
+      - text: 'ES_SNAPSHOT_MANIFEST'
+        key: 'ES_SNAPSHOT_MANIFEST'
+        hint: 'URL pointing to the manifest to promote'
+        required: true
+  - label: Promote Snapshot
+    command: .buildkite/scripts/steps/es_snapshots/promote.sh

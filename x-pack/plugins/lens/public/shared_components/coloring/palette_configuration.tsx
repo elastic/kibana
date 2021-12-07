@@ -73,13 +73,18 @@ export function CustomizablePalette({
   setPalette,
   dataBounds,
   showContinuity = true,
+  showRangeTypeSelector = true,
 }: {
   palettes: PaletteRegistry;
-  activePalette: PaletteOutput<CustomPaletteParams>;
+  activePalette?: PaletteOutput<CustomPaletteParams>;
   setPalette: (palette: PaletteOutput<CustomPaletteParams>) => void;
-  dataBounds: { min: number; max: number };
+  dataBounds?: { min: number; max: number };
   showContinuity?: boolean;
+  showRangeTypeSelector?: boolean;
 }) {
+  if (!dataBounds || !activePalette) {
+    return null;
+  }
   const isCurrentPaletteCustom = activePalette.params?.name === CUSTOM_PALETTE;
 
   const colorStopsToShow = roundStopValues(
@@ -106,17 +111,23 @@ export function CustomizablePalette({
                 ...activePalette.params,
                 name: newPalette.name,
                 colorStops: undefined,
+                reverse: false, // restore the reverse flag
               };
 
+              const newColorStops = getColorStops(palettes, [], activePalette, dataBounds);
               if (isNewPaletteCustom) {
-                newParams.colorStops = getColorStops(palettes, [], activePalette, dataBounds);
+                newParams.colorStops = newColorStops;
               }
 
               newParams.stops = getPaletteStops(palettes, newParams, {
                 prevPalette:
                   isNewPaletteCustom || isCurrentPaletteCustom ? undefined : newPalette.name,
                 dataBounds,
+                mapFromMinValue: true,
               });
+
+              newParams.rangeMin = newColorStops[0].stop;
+              newParams.rangeMax = newColorStops[newColorStops.length - 1].stop;
 
               setPalette({
                 ...newPalette,
@@ -209,64 +220,64 @@ export function CustomizablePalette({
             />
           </EuiFormRow>
         )}
-        <EuiFormRow
-          label={
-            <>
-              {i18n.translate('xpack.lens.table.dynamicColoring.rangeType.label', {
-                defaultMessage: 'Value type',
-              })}{' '}
-              <EuiIconTip
-                content={i18n.translate(
-                  'xpack.lens.table.dynamicColoring.customPalette.colorStopsHelpPercentage',
-                  {
-                    defaultMessage:
-                      'Percent value types are relative to the full range of available data values.',
-                  }
-                )}
-                position="top"
-                size="s"
-              />
-            </>
-          }
-          display="rowCompressed"
-        >
-          <EuiButtonGroup
-            isFullWidth
-            legend={i18n.translate('xpack.lens.table.dynamicColoring.rangeType.label', {
-              defaultMessage: 'Value type',
-            })}
-            data-test-subj="lnsPalettePanel_dynamicColoring_custom_range_groups"
-            name="dynamicColoringRangeType"
-            buttonSize="compressed"
-            options={[
-              {
-                id: `${idPrefix}percent`,
-                label: i18n.translate('xpack.lens.table.dynamicColoring.rangeType.percent', {
-                  defaultMessage: 'Percent',
-                }),
-                'data-test-subj': 'lnsPalettePanel_dynamicColoring_rangeType_groups_percent',
-              },
-              {
-                id: `${idPrefix}number`,
-                label: i18n.translate('xpack.lens.table.dynamicColoring.rangeType.number', {
-                  defaultMessage: 'Number',
-                }),
-                'data-test-subj': 'lnsPalettePanel_dynamicColoring_rangeType_groups_number',
-              },
-            ]}
-            idSelected={
-              activePalette.params?.rangeType
-                ? `${idPrefix}${activePalette.params?.rangeType}`
-                : `${idPrefix}percent`
+        {showRangeTypeSelector && (
+          <EuiFormRow
+            label={
+              <>
+                {i18n.translate('xpack.lens.table.dynamicColoring.rangeType.label', {
+                  defaultMessage: 'Value type',
+                })}{' '}
+                <EuiIconTip
+                  content={i18n.translate(
+                    'xpack.lens.table.dynamicColoring.customPalette.colorStopsHelpPercentage',
+                    {
+                      defaultMessage:
+                        'Percent value types are relative to the full range of available data values.',
+                    }
+                  )}
+                  position="top"
+                  size="s"
+                />
+              </>
             }
-            onChange={(id) => {
-              const newRangeType = id.replace(
-                idPrefix,
-                ''
-              ) as RequiredPaletteParamTypes['rangeType'];
+            display="rowCompressed"
+          >
+            <EuiButtonGroup
+              isFullWidth
+              legend={i18n.translate('xpack.lens.table.dynamicColoring.rangeType.label', {
+                defaultMessage: 'Value type',
+              })}
+              data-test-subj="lnsPalettePanel_dynamicColoring_custom_range_groups"
+              name="dynamicColoringRangeType"
+              buttonSize="compressed"
+              options={[
+                {
+                  id: `${idPrefix}percent`,
+                  label: i18n.translate('xpack.lens.table.dynamicColoring.rangeType.percent', {
+                    defaultMessage: 'Percent',
+                  }),
+                  'data-test-subj': 'lnsPalettePanel_dynamicColoring_rangeType_groups_percent',
+                },
+                {
+                  id: `${idPrefix}number`,
+                  label: i18n.translate('xpack.lens.table.dynamicColoring.rangeType.number', {
+                    defaultMessage: 'Number',
+                  }),
+                  'data-test-subj': 'lnsPalettePanel_dynamicColoring_rangeType_groups_number',
+                },
+              ]}
+              idSelected={
+                activePalette.params?.rangeType
+                  ? `${idPrefix}${activePalette.params?.rangeType}`
+                  : `${idPrefix}percent`
+              }
+              onChange={(id) => {
+                const newRangeType = id.replace(
+                  idPrefix,
+                  ''
+                ) as RequiredPaletteParamTypes['rangeType'];
 
-              const params: CustomPaletteParams = { rangeType: newRangeType };
-              if (isCurrentPaletteCustom) {
+                const params: CustomPaletteParams = { rangeType: newRangeType };
                 const { min: newMin, max: newMax } = getDataMinMax(newRangeType, dataBounds);
                 const { min: oldMin, max: oldMax } = getDataMinMax(
                   activePalette.params?.rangeType,
@@ -278,26 +289,31 @@ export function CustomizablePalette({
                   newMin,
                   oldMin,
                 });
-                const stops = getPaletteStops(
-                  palettes,
-                  { ...activePalette.params, colorStops: newColorStops, ...params },
-                  { dataBounds }
-                );
-                params.colorStops = newColorStops;
-                params.stops = stops;
+                if (isCurrentPaletteCustom) {
+                  const stops = getPaletteStops(
+                    palettes,
+                    { ...activePalette.params, colorStops: newColorStops, ...params },
+                    { dataBounds }
+                  );
+                  params.colorStops = newColorStops;
+                  params.stops = stops;
+                } else {
+                  params.stops = getPaletteStops(
+                    palettes,
+                    { ...activePalette.params, ...params },
+                    { prevPalette: activePalette.name, dataBounds }
+                  );
+                }
+                // why not use newMin/newMax here?
+                // That's because there's the concept of continuity to accomodate, where in some scenarios it has to
+                // take into account the stop value rather than the data value
                 params.rangeMin = newColorStops[0].stop;
                 params.rangeMax = newColorStops[newColorStops.length - 1].stop;
-              } else {
-                params.stops = getPaletteStops(
-                  palettes,
-                  { ...activePalette.params, ...params },
-                  { prevPalette: activePalette.name, dataBounds }
-                );
-              }
-              setPalette(mergePaletteParams(activePalette, params));
-            }}
-          />
-        </EuiFormRow>
+                setPalette(mergePaletteParams(activePalette, params));
+              }}
+            />
+          </EuiFormRow>
+        )}
         <EuiFormRow
           display="rowCompressed"
           label={i18n.translate('xpack.lens.table.dynamicColoring.customPalette.colorStopsLabel', {
@@ -309,28 +325,20 @@ export function CustomizablePalette({
                 className="lnsPalettePanel__reverseButton"
                 data-test-subj="lnsPalettePanel_dynamicColoring_reverse"
                 onClick={() => {
-                  const params: CustomPaletteParams = { reverse: !activePalette.params?.reverse };
-                  if (isCurrentPaletteCustom) {
-                    params.colorStops = reversePalette(colorStopsToShow);
-                    params.stops = getPaletteStops(
-                      palettes,
-                      {
-                        ...(activePalette?.params || {}),
-                        colorStops: params.colorStops,
-                      },
-                      { dataBounds }
-                    );
-                  } else {
-                    params.stops = reversePalette(
-                      activePalette?.params?.stops ||
-                        getPaletteStops(
-                          palettes,
-                          { ...activePalette.params, ...params },
-                          { prevPalette: activePalette.name, dataBounds }
-                        )
-                    );
-                  }
-                  setPalette(mergePaletteParams(activePalette, params));
+                  // when reversing a palette, the palette is automatically transitioned to a custom palette
+                  const newParams = getSwitchToCustomParams(
+                    palettes,
+                    activePalette,
+                    {
+                      colorStops: reversePalette(colorStopsToShow),
+                      steps: activePalette.params?.steps || DEFAULT_COLOR_STEPS,
+                      reverse: !activePalette.params?.reverse, // Store the reverse state
+                      rangeMin: colorStopsToShow[0]?.stop,
+                      rangeMax: colorStopsToShow[colorStopsToShow.length - 1]?.stop,
+                    },
+                    dataBounds
+                  );
+                  setPalette(newParams);
                 }}
               >
                 <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>

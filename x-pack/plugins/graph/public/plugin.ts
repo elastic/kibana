@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { BehaviorSubject } from 'rxjs';
+import { SpacesApi } from '../../spaces/public';
 import {
   AppNavLinkStatus,
   AppUpdater,
@@ -19,7 +20,6 @@ import {
 } from '../../../../src/core/public';
 
 import { Storage } from '../../../../src/plugins/kibana_utils/public';
-import { KibanaLegacyStart } from '../../../../src/plugins/kibana_legacy/public';
 import { NavigationPublicPluginStart as NavigationStart } from '../../../../src/plugins/navigation/public';
 import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
 
@@ -42,12 +42,13 @@ export interface GraphPluginStartDependencies {
   licensing: LicensingPluginStart;
   data: DataPublicPluginStart;
   savedObjects: SavedObjectsStart;
-  kibanaLegacy: KibanaLegacyStart;
   home?: HomePublicPluginStart;
+  spaces?: SpacesApi;
 }
 
 export class GraphPlugin
-  implements Plugin<void, void, GraphPluginSetupDependencies, GraphPluginStartDependencies> {
+  implements Plugin<void, void, GraphPluginSetupDependencies, GraphPluginStartDependencies>
+{
   private readonly appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
 
   constructor(private initializerContext: PluginInitializerContext<ConfigSchema>) {}
@@ -84,7 +85,6 @@ export class GraphPlugin
       updater$: this.appUpdater$,
       mount: async (params: AppMountParameters) => {
         const [coreStart, pluginsStart] = await core.getStartServices();
-        await pluginsStart.kibanaLegacy.loadAngularBootstrap();
         coreStart.chrome.docTitle.change(
           i18n.translate('xpack.graph.pageTitle', { defaultMessage: 'Graph' })
         );
@@ -97,20 +97,20 @@ export class GraphPlugin
           coreStart,
           navigation: pluginsStart.navigation,
           data: pluginsStart.data,
-          kibanaLegacy: pluginsStart.kibanaLegacy,
           savedObjectsClient: coreStart.savedObjects.client,
           addBasePath: core.http.basePath.prepend,
           getBasePath: core.http.basePath.get,
           canEditDrillDownUrls: config.canEditDrillDownUrls,
           graphSavePolicy: config.savePolicy,
           storage: new Storage(window.localStorage),
-          capabilities: coreStart.application.capabilities.graph,
+          capabilities: coreStart.application.capabilities,
           chrome: coreStart.chrome,
           toastNotifications: coreStart.notifications.toasts,
           indexPatterns: pluginsStart.data!.indexPatterns,
           overlays: coreStart.overlays,
           savedObjects: pluginsStart.savedObjects,
           uiSettings: core.uiSettings,
+          spaces: pluginsStart.spaces,
         });
       },
     });

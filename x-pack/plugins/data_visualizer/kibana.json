@@ -17,13 +17,16 @@
     "maps",
     "home",
     "lens",
-    "indexPatternFieldEditor"
+    "dataViewFieldEditor",
+    "customIntegrations"
   ],
   "requiredBundles": [
     "home",
     "kibanaReact",
     "maps",
-    "esUiShared"
+    "esUiShared",
+    "fieldFormats",
+    "charts"
   ],
   "extraPublicDirs": [
     "common"

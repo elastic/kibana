@@ -35,6 +35,8 @@
         ],
         "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/foo/index.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [],
         "initialIsOpen": false
       }
     ],

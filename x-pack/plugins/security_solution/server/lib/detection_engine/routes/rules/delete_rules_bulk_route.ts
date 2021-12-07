@@ -6,6 +6,7 @@
  */
 
 import { validate } from '@kbn/securitysolution-io-ts-utils';
+
 import { queryRuleValidateTypeDependents } from '../../../../../common/detection_engine/schemas/request/query_rules_type_dependents';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 import {
@@ -34,7 +35,10 @@ type Handler = RequestHandler<
   'delete' | 'post'
 >;
 
-export const deleteRulesBulkRoute = (router: SecuritySolutionPluginRouter) => {
+export const deleteRulesBulkRoute = (
+  router: SecuritySolutionPluginRouter,
+  isRuleRegistryEnabled: boolean
+) => {
   const config: Config = {
     validate: {
       body: buildRouteValidation<typeof queryRulesBulkSchema, QueryRulesBulkSchemaDecoded>(
@@ -50,7 +54,6 @@ export const deleteRulesBulkRoute = (router: SecuritySolutionPluginRouter) => {
     const siemResponse = buildSiemResponse(response);
 
     const rulesClient = context.alerting?.getRulesClient();
-    const savedObjectsClient = context.core.savedObjects.client;
 
     if (!rulesClient) {
       return siemResponse.error({ statusCode: 404 });
@@ -72,24 +75,26 @@ export const deleteRulesBulkRoute = (router: SecuritySolutionPluginRouter) => {
         }
 
         try {
-          const rule = await readRules({ rulesClient, id, ruleId });
+          const rule = await readRules({ rulesClient, id, ruleId, isRuleRegistryEnabled });
           if (!rule) {
             return getIdBulkError({ id, ruleId });
           }
 
-          const ruleStatuses = await ruleStatusClient.find({
-            logsCount: 6,
+          const ruleStatus = await ruleStatusClient.getCurrentStatus({
             ruleId: rule.id,
             spaceId: context.securitySolution.getSpaceId(),
           });
           await deleteRules({
+            ruleId: rule.id,
             rulesClient,
-            savedObjectsClient,
             ruleStatusClient,
-            ruleStatuses,
-            id: rule.id,
           });
-          return transformValidateBulkError(idOrRuleIdOrUnknown, rule, undefined, ruleStatuses);
+          return transformValidateBulkError(
+            idOrRuleIdOrUnknown,
+            rule,
+            ruleStatus,
+            isRuleRegistryEnabled
+          );
         } catch (err) {
           return transformBulkError(idOrRuleIdOrUnknown, err);
         }

@@ -8,7 +8,7 @@
 import React, { Component, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { Route } from 'react-router-dom';
 import qs from 'query-string';
 
@@ -428,15 +428,8 @@ export class IndexTable extends Component {
   }
 
   render() {
-    const {
-      filter,
-      indices,
-      loadIndices,
-      indicesLoading,
-      indicesError,
-      allIndices,
-      pager,
-    } = this.props;
+    const { filter, indices, loadIndices, indicesLoading, indicesError, allIndices, pager } =
+      this.props;
 
     const { includeHiddenIndices } = this.readURLParams();
     const hasContent = !indicesLoading && !indicesError;
@@ -610,7 +603,7 @@ export class IndexTable extends Component {
                     <EuiFlexItem grow={false}>
                       <EuiButton
                         isLoading={indicesLoading}
-                        color="secondary"
+                        color="success"
                         onClick={() => {
                           loadIndices();
                         }}

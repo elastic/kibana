@@ -39,6 +39,10 @@ jest.mock('react-router-dom', () => ({
   }),
 }));
 
+jest.mock('../../../lib/action_connector_api', () => ({
+  loadAllActions: jest.fn().mockResolvedValue([]),
+}));
+
 jest.mock('../../../lib/capabilities', () => ({
   hasAllPrivilege: jest.fn(() => true),
   hasSaveAlertsCapability: jest.fn(() => true),
@@ -60,24 +64,22 @@ const authorizedConsumers = {
 };
 const recoveryActionGroup: ActionGroup<'recovered'> = { id: 'recovered', name: 'Recovered' };
 
-describe('alert_details', () => {
-  // mock Api handlers
+const alertType: AlertType = {
+  id: '.noop',
+  name: 'No Op',
+  actionGroups: [{ id: 'default', name: 'Default' }],
+  recoveryActionGroup,
+  actionVariables: { context: [], state: [], params: [] },
+  defaultActionGroupId: 'default',
+  minimumLicenseRequired: 'basic',
+  producer: ALERTS_FEATURE_ID,
+  authorizedConsumers,
+  enabledInLicense: true,
+};
 
+describe('alert_details', () => {
   it('renders the alert name as a title', () => {
     const alert = mockAlert();
-    const alertType: AlertType = {
-      id: '.noop',
-      name: 'No Op',
-      actionGroups: [{ id: 'default', name: 'Default' }],
-      recoveryActionGroup,
-      actionVariables: { context: [], state: [], params: [] },
-      defaultActionGroupId: 'default',
-      minimumLicenseRequired: 'basic',
-      producer: ALERTS_FEATURE_ID,
-      authorizedConsumers,
-      enabledInLicense: true,
-    };
-
     expect(
       shallow(
         <AlertDetails alert={alert} alertType={alertType} actionTypes={[]} {...mockAlertApis} />
@@ -87,19 +89,6 @@ describe('alert_details', () => {
 
   it('renders the alert type badge', () => {
     const alert = mockAlert();
-    const alertType: AlertType = {
-      id: '.noop',
-      name: 'No Op',
-      actionGroups: [{ id: 'default', name: 'Default' }],
-      recoveryActionGroup,
-      actionVariables: { context: [], state: [], params: [] },
-      defaultActionGroupId: 'default',
-      minimumLicenseRequired: 'basic',
-      producer: ALERTS_FEATURE_ID,
-      authorizedConsumers,
-      enabledInLicense: true,
-    };
-
     expect(
       shallow(
         <AlertDetails alert={alert} alertType={alertType} actionTypes={[]} {...mockAlertApis} />
@@ -118,19 +107,6 @@ describe('alert_details', () => {
         },
       },
     });
-    const alertType: AlertType = {
-      id: '.noop',
-      name: 'No Op',
-      actionGroups: [{ id: 'default', name: 'Default' }],
-      recoveryActionGroup,
-      actionVariables: { context: [], state: [], params: [] },
-      defaultActionGroupId: 'default',
-      minimumLicenseRequired: 'basic',
-      producer: ALERTS_FEATURE_ID,
-      authorizedConsumers,
-      enabledInLicense: true,
-    };
-
     expect(
       shallow(
         <AlertDetails alert={alert} alertType={alertType} actionTypes={[]} {...mockAlertApis} />
@@ -154,19 +130,6 @@ describe('alert_details', () => {
           },
         ],
       });
-
-      const alertType: AlertType = {
-        id: '.noop',
-        name: 'No Op',
-        actionGroups: [{ id: 'default', name: 'Default' }],
-        recoveryActionGroup,
-        actionVariables: { context: [], state: [], params: [] },
-        defaultActionGroupId: 'default',
-        minimumLicenseRequired: 'basic',
-        producer: ALERTS_FEATURE_ID,
-        authorizedConsumers,
-        enabledInLicense: true,
-      };
 
       const actionTypes: ActionType[] = [
         {
@@ -212,18 +175,6 @@ describe('alert_details', () => {
           },
         ],
       });
-      const alertType: AlertType = {
-        id: '.noop',
-        name: 'No Op',
-        actionGroups: [{ id: 'default', name: 'Default' }],
-        recoveryActionGroup,
-        actionVariables: { context: [], state: [], params: [] },
-        defaultActionGroupId: 'default',
-        producer: ALERTS_FEATURE_ID,
-        minimumLicenseRequired: 'basic',
-        authorizedConsumers,
-        enabledInLicense: true,
-      };
       const actionTypes: ActionType[] = [
         {
           id: '.server-log',
@@ -273,20 +224,6 @@ describe('alert_details', () => {
   describe('links', () => {
     it('links to the app that created the alert', () => {
       const alert = mockAlert();
-
-      const alertType: AlertType = {
-        id: '.noop',
-        name: 'No Op',
-        actionGroups: [{ id: 'default', name: 'Default' }],
-        recoveryActionGroup,
-        actionVariables: { context: [], state: [], params: [] },
-        defaultActionGroupId: 'default',
-        producer: ALERTS_FEATURE_ID,
-        authorizedConsumers,
-        minimumLicenseRequired: 'basic',
-        enabledInLicense: true,
-      };
-
       expect(
         shallow(
           <AlertDetails alert={alert} alertType={alertType} actionTypes={[]} {...mockAlertApis} />
@@ -296,19 +233,6 @@ describe('alert_details', () => {
 
     it('links to the Edit flyout', () => {
       const alert = mockAlert();
-
-      const alertType: AlertType = {
-        id: '.noop',
-        name: 'No Op',
-        actionGroups: [{ id: 'default', name: 'Default' }],
-        recoveryActionGroup,
-        actionVariables: { context: [], state: [], params: [] },
-        defaultActionGroupId: 'default',
-        producer: ALERTS_FEATURE_ID,
-        authorizedConsumers,
-        minimumLicenseRequired: 'basic',
-        enabledInLicense: true,
-      };
       const pageHeaderProps = shallow(
         <AlertDetails alert={alert} alertType={alertType} actionTypes={[]} {...mockAlertApis} />
       )
@@ -316,22 +240,22 @@ describe('alert_details', () => {
         .props() as EuiPageHeaderProps;
       const rightSideItems = pageHeaderProps.rightSideItems;
       expect(!!rightSideItems && rightSideItems[2]!).toMatchInlineSnapshot(`
-      <React.Fragment>
-        <EuiButtonEmpty
-          data-test-subj="openEditAlertFlyoutButton"
-          disabled={false}
-          iconType="pencil"
-          name="edit"
-          onClick={[Function]}
-        >
-          <FormattedMessage
-            defaultMessage="Edit"
-            id="xpack.triggersActionsUI.sections.alertDetails.editAlertButtonLabel"
-            values={Object {}}
-          />
-        </EuiButtonEmpty>
-      </React.Fragment>
-    `);
+        <React.Fragment>
+          <EuiButtonEmpty
+            data-test-subj="openEditAlertFlyoutButton"
+            disabled={false}
+            iconType="pencil"
+            name="edit"
+            onClick={[Function]}
+          >
+            <FormattedMessage
+              defaultMessage="Edit"
+              id="xpack.triggersActionsUI.sections.alertDetails.editAlertButtonLabel"
+              values={Object {}}
+            />
+          </EuiButtonEmpty>
+        </React.Fragment>
+      `);
     });
   });
 });
@@ -341,20 +265,6 @@ describe('disable button', () => {
     const alert = mockAlert({
       enabled: true,
     });
-
-    const alertType: AlertType = {
-      id: '.noop',
-      name: 'No Op',
-      actionGroups: [{ id: 'default', name: 'Default' }],
-      recoveryActionGroup,
-      actionVariables: { context: [], state: [], params: [] },
-      defaultActionGroupId: 'default',
-      producer: ALERTS_FEATURE_ID,
-      authorizedConsumers,
-      minimumLicenseRequired: 'basic',
-      enabledInLicense: true,
-    };
-
     const enableButton = shallow(
       <AlertDetails alert={alert} alertType={alertType} actionTypes={[]} {...mockAlertApis} />
     )
@@ -368,55 +278,43 @@ describe('disable button', () => {
     });
   });
 
-  it('should render a enable button when alert is disabled', () => {
+  it('should render a enable button and empty state when alert is disabled', async () => {
     const alert = mockAlert({
       enabled: false,
     });
-
-    const alertType: AlertType = {
-      id: '.noop',
-      name: 'No Op',
-      actionGroups: [{ id: 'default', name: 'Default' }],
-      recoveryActionGroup,
-      actionVariables: { context: [], state: [], params: [] },
-      defaultActionGroupId: 'default',
-      producer: ALERTS_FEATURE_ID,
-      authorizedConsumers,
-      minimumLicenseRequired: 'basic',
-      enabledInLicense: true,
-    };
-
-    const enableButton = shallow(
+    const wrapper = mountWithIntl(
       <AlertDetails alert={alert} alertType={alertType} actionTypes={[]} {...mockAlertApis} />
-    )
-      .find(EuiSwitch)
-      .find('[name="enable"]')
-      .first();
+    );
+
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+    const enableButton = wrapper.find(EuiSwitch).find('[name="enable"]').first();
+    const disabledEmptyPrompt = wrapper.find('[data-test-subj="disabledEmptyPrompt"]');
+    const disabledEmptyPromptAction = wrapper.find('[data-test-subj="disabledEmptyPromptAction"]');
 
     expect(enableButton.props()).toMatchObject({
       checked: false,
       disabled: false,
     });
+    expect(disabledEmptyPrompt.exists()).toBeTruthy();
+    expect(disabledEmptyPromptAction.exists()).toBeTruthy();
+
+    disabledEmptyPromptAction.first().simulate('click');
+
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
+    expect(mockAlertApis.enableAlert).toHaveBeenCalledTimes(1);
   });
 
-  it('should enable the alert when alert is disabled and button is clicked', () => {
+  it('should disable the alert when alert is enabled and button is clicked', () => {
     const alert = mockAlert({
       enabled: true,
     });
-
-    const alertType: AlertType = {
-      id: '.noop',
-      name: 'No Op',
-      actionGroups: [{ id: 'default', name: 'Default' }],
-      recoveryActionGroup,
-      actionVariables: { context: [], state: [], params: [] },
-      defaultActionGroupId: 'default',
-      producer: ALERTS_FEATURE_ID,
-      authorizedConsumers,
-      minimumLicenseRequired: 'basic',
-      enabledInLicense: true,
-    };
-
     const disableAlert = jest.fn();
     const enableButton = shallow(
       <AlertDetails
@@ -439,24 +337,10 @@ describe('disable button', () => {
     expect(disableAlert).toHaveBeenCalledTimes(1);
   });
 
-  it('should disable the alert when alert is enabled and button is clicked', () => {
+  it('should enable the alert when alert is disabled and button is clicked', () => {
     const alert = mockAlert({
       enabled: false,
     });
-
-    const alertType: AlertType = {
-      id: '.noop',
-      name: 'No Op',
-      actionGroups: [{ id: 'default', name: 'Default' }],
-      recoveryActionGroup,
-      actionVariables: { context: [], state: [], params: [] },
-      defaultActionGroupId: 'default',
-      producer: ALERTS_FEATURE_ID,
-      authorizedConsumers,
-      minimumLicenseRequired: 'basic',
-      enabledInLicense: true,
-    };
-
     const enableAlert = jest.fn();
     const enableButton = shallow(
       <AlertDetails
@@ -492,19 +376,6 @@ describe('disable button', () => {
       },
     });
 
-    const alertType: AlertType = {
-      id: '.noop',
-      name: 'No Op',
-      actionGroups: [{ id: 'default', name: 'Default' }],
-      recoveryActionGroup,
-      actionVariables: { context: [], state: [], params: [] },
-      defaultActionGroupId: 'default',
-      producer: ALERTS_FEATURE_ID,
-      authorizedConsumers,
-      minimumLicenseRequired: 'basic',
-      enabledInLicense: true,
-    };
-
     const disableAlert = jest.fn();
     const enableAlert = jest.fn();
     const wrapper = mountWithIntl(
@@ -536,6 +407,11 @@ describe('disable button', () => {
     });
     expect(disableAlert).toHaveBeenCalled();
 
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
     // Enable the alert
     await act(async () => {
       wrapper.find('[data-test-subj="enableSwitch"] .euiSwitch__button').first().simulate('click');
@@ -546,6 +422,64 @@ describe('disable button', () => {
     // Ensure error banner is back
     expect(wrapper.find('[data-test-subj="dismiss-execution-error"]').length).toBeGreaterThan(0);
   });
+
+  it('should show the loading spinner when the rule enabled switch was clicked and the server responded with some delay', async () => {
+    const alert = mockAlert({
+      enabled: true,
+      executionStatus: {
+        status: 'error',
+        lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
+        error: {
+          reason: AlertExecutionStatusErrorReasons.Execute,
+          message: 'Fail',
+        },
+      },
+    });
+
+    const disableAlert = jest.fn(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 6000));
+    });
+    const enableAlert = jest.fn();
+    const wrapper = mountWithIntl(
+      <AlertDetails
+        alert={alert}
+        alertType={alertType}
+        actionTypes={[]}
+        {...mockAlertApis}
+        disableAlert={disableAlert}
+        enableAlert={enableAlert}
+      />
+    );
+
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
+    // Dismiss the error banner
+    await act(async () => {
+      wrapper.find('[data-test-subj="dismiss-execution-error"]').first().simulate('click');
+      await nextTick();
+    });
+
+    // Disable the alert
+    await act(async () => {
+      wrapper.find('[data-test-subj="enableSwitch"] .euiSwitch__button').first().simulate('click');
+      await nextTick();
+    });
+    expect(disableAlert).toHaveBeenCalled();
+
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
+    // Enable the alert
+    await act(async () => {
+      expect(wrapper.find('[data-test-subj="enableSpinner"]').length).toBeGreaterThan(0);
+      await nextTick();
+    });
+  });
 });
 
 describe('mute button', () => {
@@ -554,27 +488,12 @@ describe('mute button', () => {
       enabled: true,
       muteAll: false,
     });
-
-    const alertType: AlertType = {
-      id: '.noop',
-      name: 'No Op',
-      actionGroups: [{ id: 'default', name: 'Default' }],
-      recoveryActionGroup,
-      actionVariables: { context: [], state: [], params: [] },
-      defaultActionGroupId: 'default',
-      producer: ALERTS_FEATURE_ID,
-      authorizedConsumers,
-      minimumLicenseRequired: 'basic',
-      enabledInLicense: true,
-    };
-
     const enableButton = shallow(
       <AlertDetails alert={alert} alertType={alertType} actionTypes={[]} {...mockAlertApis} />
     )
       .find(EuiSwitch)
       .find('[name="mute"]')
       .first();
-
     expect(enableButton.props()).toMatchObject({
       checked: false,
       disabled: false,
@@ -586,27 +505,12 @@ describe('mute button', () => {
       enabled: true,
       muteAll: true,
     });
-
-    const alertType: AlertType = {
-      id: '.noop',
-      name: 'No Op',
-      actionGroups: [{ id: 'default', name: 'Default' }],
-      recoveryActionGroup,
-      actionVariables: { context: [], state: [], params: [] },
-      defaultActionGroupId: 'default',
-      producer: ALERTS_FEATURE_ID,
-      authorizedConsumers,
-      minimumLicenseRequired: 'basic',
-      enabledInLicense: true,
-    };
-
     const enableButton = shallow(
       <AlertDetails alert={alert} alertType={alertType} actionTypes={[]} {...mockAlertApis} />
     )
       .find(EuiSwitch)
       .find('[name="mute"]')
       .first();
-
     expect(enableButton.props()).toMatchObject({
       checked: true,
       disabled: false,
@@ -618,20 +522,6 @@ describe('mute button', () => {
       enabled: true,
       muteAll: false,
     });
-
-    const alertType: AlertType = {
-      id: '.noop',
-      name: 'No Op',
-      actionGroups: [{ id: 'default', name: 'Default' }],
-      recoveryActionGroup,
-      actionVariables: { context: [], state: [], params: [] },
-      defaultActionGroupId: 'default',
-      producer: ALERTS_FEATURE_ID,
-      authorizedConsumers,
-      minimumLicenseRequired: 'basic',
-      enabledInLicense: true,
-    };
-
     const muteAlert = jest.fn();
     const enableButton = shallow(
       <AlertDetails
@@ -645,7 +535,6 @@ describe('mute button', () => {
       .find(EuiSwitch)
       .find('[name="mute"]')
       .first();
-
     enableButton.simulate('click');
     const handler = enableButton.prop('onChange');
     expect(typeof handler).toEqual('function');
@@ -659,20 +548,6 @@ describe('mute button', () => {
       enabled: true,
       muteAll: true,
     });
-
-    const alertType: AlertType = {
-      id: '.noop',
-      name: 'No Op',
-      actionGroups: [{ id: 'default', name: 'Default' }],
-      recoveryActionGroup,
-      actionVariables: { context: [], state: [], params: [] },
-      defaultActionGroupId: 'default',
-      producer: ALERTS_FEATURE_ID,
-      authorizedConsumers,
-      minimumLicenseRequired: 'basic',
-      enabledInLicense: true,
-    };
-
     const unmuteAlert = jest.fn();
     const enableButton = shallow(
       <AlertDetails
@@ -686,7 +561,6 @@ describe('mute button', () => {
       .find(EuiSwitch)
       .find('[name="mute"]')
       .first();
-
     enableButton.simulate('click');
     const handler = enableButton.prop('onChange');
     expect(typeof handler).toEqual('function');
@@ -700,27 +574,12 @@ describe('mute button', () => {
       enabled: false,
       muteAll: false,
     });
-
-    const alertType: AlertType = {
-      id: '.noop',
-      name: 'No Op',
-      actionGroups: [{ id: 'default', name: 'Default' }],
-      recoveryActionGroup,
-      actionVariables: { context: [], state: [], params: [] },
-      defaultActionGroupId: 'default',
-      producer: ALERTS_FEATURE_ID,
-      authorizedConsumers,
-      minimumLicenseRequired: 'basic',
-      enabledInLicense: true,
-    };
-
     const enableButton = shallow(
       <AlertDetails alert={alert} alertType={alertType} actionTypes={[]} {...mockAlertApis} />
     )
       .find(EuiSwitch)
       .find('[name="mute"]')
       .first();
-
     expect(enableButton.props()).toMatchObject({
       checked: false,
       disabled: true,
@@ -767,20 +626,6 @@ describe('edit button', () => {
         },
       ],
     });
-
-    const alertType: AlertType = {
-      id: '.noop',
-      name: 'No Op',
-      actionGroups: [{ id: 'default', name: 'Default' }],
-      recoveryActionGroup,
-      actionVariables: { context: [], state: [], params: [] },
-      defaultActionGroupId: 'default',
-      producer: 'alerting',
-      authorizedConsumers,
-      minimumLicenseRequired: 'basic',
-      enabledInLicense: true,
-    };
-
     const pageHeaderProps = shallow(
       <AlertDetails
         alert={alert}
@@ -793,27 +638,27 @@ describe('edit button', () => {
       .props() as EuiPageHeaderProps;
     const rightSideItems = pageHeaderProps.rightSideItems;
     expect(!!rightSideItems && rightSideItems[2]!).toMatchInlineSnapshot(`
-    <React.Fragment>
-      <EuiButtonEmpty
-        data-test-subj="openEditAlertFlyoutButton"
-        disabled={false}
-        iconType="pencil"
-        name="edit"
-        onClick={[Function]}
-      >
-        <FormattedMessage
-          defaultMessage="Edit"
-          id="xpack.triggersActionsUI.sections.alertDetails.editAlertButtonLabel"
-          values={Object {}}
-        />
-      </EuiButtonEmpty>
-    </React.Fragment>
-  `);
+      <React.Fragment>
+        <EuiButtonEmpty
+          data-test-subj="openEditAlertFlyoutButton"
+          disabled={false}
+          iconType="pencil"
+          name="edit"
+          onClick={[Function]}
+        >
+          <FormattedMessage
+            defaultMessage="Edit"
+            id="xpack.triggersActionsUI.sections.alertDetails.editAlertButtonLabel"
+            values={Object {}}
+          />
+        </EuiButtonEmpty>
+      </React.Fragment>
+    `);
   });
 
   it('should not render an edit button when alert editable but actions arent', () => {
     const { hasExecuteActionsCapability } = jest.requireMock('../../../lib/capabilities');
-    hasExecuteActionsCapability.mockReturnValue(false);
+    hasExecuteActionsCapability.mockReturnValueOnce(false);
     const alert = mockAlert({
       enabled: true,
       muteAll: false,
@@ -826,20 +671,6 @@ describe('edit button', () => {
         },
       ],
     });
-
-    const alertType: AlertType = {
-      id: '.noop',
-      name: 'No Op',
-      actionGroups: [{ id: 'default', name: 'Default' }],
-      recoveryActionGroup,
-      actionVariables: { context: [], state: [], params: [] },
-      defaultActionGroupId: 'default',
-      producer: 'alerting',
-      authorizedConsumers,
-      minimumLicenseRequired: 'basic',
-      enabledInLicense: true,
-    };
-
     expect(
       shallow(
         <AlertDetails
@@ -858,26 +689,12 @@ describe('edit button', () => {
 
   it('should render an edit button when alert editable but actions arent when there are no actions on the alert', async () => {
     const { hasExecuteActionsCapability } = jest.requireMock('../../../lib/capabilities');
-    hasExecuteActionsCapability.mockReturnValue(false);
+    hasExecuteActionsCapability.mockReturnValueOnce(false);
     const alert = mockAlert({
       enabled: true,
       muteAll: false,
       actions: [],
     });
-
-    const alertType: AlertType = {
-      id: '.noop',
-      name: 'No Op',
-      actionGroups: [{ id: 'default', name: 'Default' }],
-      recoveryActionGroup,
-      actionVariables: { context: [], state: [], params: [] },
-      defaultActionGroupId: 'default',
-      producer: 'alerting',
-      authorizedConsumers,
-      minimumLicenseRequired: 'basic',
-      enabledInLicense: true,
-    };
-
     const pageHeaderProps = shallow(
       <AlertDetails
         alert={alert}
@@ -890,41 +707,221 @@ describe('edit button', () => {
       .props() as EuiPageHeaderProps;
     const rightSideItems = pageHeaderProps.rightSideItems;
     expect(!!rightSideItems && rightSideItems[2]!).toMatchInlineSnapshot(`
-    <React.Fragment>
-      <EuiButtonEmpty
-        data-test-subj="openEditAlertFlyoutButton"
-        disabled={false}
-        iconType="pencil"
-        name="edit"
-        onClick={[Function]}
-      >
-        <FormattedMessage
-          defaultMessage="Edit"
-          id="xpack.triggersActionsUI.sections.alertDetails.editAlertButtonLabel"
-          values={Object {}}
-        />
-      </EuiButtonEmpty>
-    </React.Fragment>
-  `);
+      <React.Fragment>
+        <EuiButtonEmpty
+          data-test-subj="openEditAlertFlyoutButton"
+          disabled={false}
+          iconType="pencil"
+          name="edit"
+          onClick={[Function]}
+        >
+          <FormattedMessage
+            defaultMessage="Edit"
+            id="xpack.triggersActionsUI.sections.alertDetails.editAlertButtonLabel"
+            values={Object {}}
+          />
+        </EuiButtonEmpty>
+      </React.Fragment>
+    `);
+  });
+});
+
+describe('broken connector indicator', () => {
+  const actionTypes: ActionType[] = [
+    {
+      id: '.server-log',
+      name: 'Server log',
+      enabled: true,
+      enabledInConfig: true,
+      enabledInLicense: true,
+      minimumLicenseRequired: 'basic',
+    },
+  ];
+  ruleTypeRegistry.has.mockReturnValue(true);
+  const alertTypeR: AlertTypeModel = {
+    id: 'my-alert-type',
+    iconClass: 'test',
+    description: 'Alert when testing',
+    documentationUrl: 'https://localhost.local/docs',
+    validate: () => {
+      return { errors: {} };
+    },
+    alertParamsExpression: jest.fn(),
+    requiresAppContext: false,
+  };
+  ruleTypeRegistry.get.mockReturnValue(alertTypeR);
+  useKibanaMock().services.ruleTypeRegistry = ruleTypeRegistry;
+  const { loadAllActions } = jest.requireMock('../../../lib/action_connector_api');
+  loadAllActions.mockResolvedValue([
+    {
+      secrets: {},
+      isMissingSecrets: false,
+      id: 'connector-id-1',
+      actionTypeId: '.server-log',
+      name: 'Test connector',
+      config: {},
+      isPreconfigured: false,
+    },
+    {
+      secrets: {},
+      isMissingSecrets: false,
+      id: 'connector-id-2',
+      actionTypeId: '.server-log',
+      name: 'Test connector 2',
+      config: {},
+      isPreconfigured: false,
+    },
+  ]);
+
+  it('should not render broken connector indicator or warning if all rule actions connectors exist', async () => {
+    const alert = mockAlert({
+      enabled: true,
+      muteAll: false,
+      actions: [
+        {
+          group: 'default',
+          id: 'connector-id-1',
+          params: {},
+          actionTypeId: '.server-log',
+        },
+        {
+          group: 'default',
+          id: 'connector-id-2',
+          params: {},
+          actionTypeId: '.server-log',
+        },
+      ],
+    });
+    const wrapper = mountWithIntl(
+      <AlertDetails
+        alert={alert}
+        alertType={alertType}
+        actionTypes={actionTypes}
+        {...mockAlertApis}
+      />
+    );
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+    const brokenConnectorIndicator = wrapper
+      .find('[data-test-subj="actionWithBrokenConnector"]')
+      .first();
+    const brokenConnectorWarningBanner = wrapper
+      .find('[data-test-subj="actionWithBrokenConnectorWarningBanner"]')
+      .first();
+    expect(brokenConnectorIndicator.exists()).toBeFalsy();
+    expect(brokenConnectorWarningBanner.exists()).toBeFalsy();
+  });
+
+  it('should render broken connector indicator and warning if any rule actions connector does not exist', async () => {
+    const alert = mockAlert({
+      enabled: true,
+      muteAll: false,
+      actions: [
+        {
+          group: 'default',
+          id: 'connector-id-1',
+          params: {},
+          actionTypeId: '.server-log',
+        },
+        {
+          group: 'default',
+          id: 'connector-id-2',
+          params: {},
+          actionTypeId: '.server-log',
+        },
+        {
+          group: 'default',
+          id: 'connector-id-doesnt-exist',
+          params: {},
+          actionTypeId: '.server-log',
+        },
+      ],
+    });
+    const wrapper = mountWithIntl(
+      <AlertDetails
+        alert={alert}
+        alertType={alertType}
+        actionTypes={actionTypes}
+        {...mockAlertApis}
+      />
+    );
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+    const brokenConnectorIndicator = wrapper
+      .find('[data-test-subj="actionWithBrokenConnector"]')
+      .first();
+    const brokenConnectorWarningBanner = wrapper
+      .find('[data-test-subj="actionWithBrokenConnectorWarningBanner"]')
+      .first();
+    const brokenConnectorWarningBannerAction = wrapper
+      .find('[data-test-subj="actionWithBrokenConnectorWarningBannerEdit"]')
+      .first();
+    expect(brokenConnectorIndicator.exists()).toBeTruthy();
+    expect(brokenConnectorWarningBanner.exists()).toBeTruthy();
+    expect(brokenConnectorWarningBannerAction.exists()).toBeTruthy();
+  });
+
+  it('should render broken connector indicator and warning with no edit button if any rule actions connector does not exist and user has no edit access', async () => {
+    const alert = mockAlert({
+      enabled: true,
+      muteAll: false,
+      actions: [
+        {
+          group: 'default',
+          id: 'connector-id-1',
+          params: {},
+          actionTypeId: '.server-log',
+        },
+        {
+          group: 'default',
+          id: 'connector-id-2',
+          params: {},
+          actionTypeId: '.server-log',
+        },
+        {
+          group: 'default',
+          id: 'connector-id-doesnt-exist',
+          params: {},
+          actionTypeId: '.server-log',
+        },
+      ],
+    });
+    const { hasExecuteActionsCapability } = jest.requireMock('../../../lib/capabilities');
+    hasExecuteActionsCapability.mockReturnValue(false);
+    const wrapper = mountWithIntl(
+      <AlertDetails
+        alert={alert}
+        alertType={alertType}
+        actionTypes={actionTypes}
+        {...mockAlertApis}
+      />
+    );
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+    const brokenConnectorIndicator = wrapper
+      .find('[data-test-subj="actionWithBrokenConnector"]')
+      .first();
+    const brokenConnectorWarningBanner = wrapper
+      .find('[data-test-subj="actionWithBrokenConnectorWarningBanner"]')
+      .first();
+    const brokenConnectorWarningBannerAction = wrapper
+      .find('[data-test-subj="actionWithBrokenConnectorWarningBannerEdit"]')
+      .first();
+    expect(brokenConnectorIndicator.exists()).toBeTruthy();
+    expect(brokenConnectorWarningBanner.exists()).toBeTruthy();
+    expect(brokenConnectorWarningBannerAction.exists()).toBeFalsy();
   });
 });
 
 describe('refresh button', () => {
-  it('should call requestRefresh when clicked', () => {
+  it('should call requestRefresh when clicked', async () => {
     const alert = mockAlert();
-    const alertType: AlertType = {
-      id: '.noop',
-      name: 'No Op',
-      actionGroups: [{ id: 'default', name: 'Default' }],
-      recoveryActionGroup,
-      actionVariables: { context: [], state: [], params: [] },
-      defaultActionGroupId: 'default',
-      minimumLicenseRequired: 'basic',
-      producer: ALERTS_FEATURE_ID,
-      authorizedConsumers,
-      enabledInLicense: true,
-    };
-
     const requestRefresh = jest.fn();
     const wrapper = mountWithIntl(
       <AlertDetails
@@ -936,6 +933,10 @@ describe('refresh button', () => {
       />
     );
 
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
     const refreshButton = wrapper.find('[data-test-subj="refreshAlertsButton"]').first();
     expect(refreshButton.exists()).toBeTruthy();
 

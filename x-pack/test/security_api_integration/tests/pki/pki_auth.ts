@@ -6,8 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import request, { Cookie } from 'request';
-import { delay } from 'bluebird';
+import { parse as parseCookie, Cookie } from 'tough-cookie';
+import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import { readFileSync } from 'fs';
 import { resolve } from 'path';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
@@ -95,7 +95,7 @@ export default function ({ getService }: FtrProviderContext) {
       const cookies = response.headers['set-cookie'];
       expect(cookies).to.have.length(1);
 
-      const cookie = request.cookie(cookies[0])!;
+      const cookie = parseCookie(cookies[0])!;
       checkCookieIsSet(cookie);
 
       const { body: user } = await supertest
@@ -132,7 +132,7 @@ export default function ({ getService }: FtrProviderContext) {
       const cookies = response.headers['set-cookie'];
       expect(cookies).to.have.length(1);
 
-      const sessionCookie = request.cookie(cookies[0])!;
+      const sessionCookie = parseCookie(cookies[0])!;
       checkCookieIsSet(sessionCookie);
 
       // Cookie should be accepted.
@@ -150,7 +150,7 @@ export default function ({ getService }: FtrProviderContext) {
           enabled: true,
           metadata: {
             pki_delegated_by_realm: 'reserved',
-            pki_delegated_by_user: 'kibana',
+            pki_delegated_by_user: 'kibana_system',
             pki_dn: 'CN=first_client',
           },
           authentication_realm: { name: 'pki1', type: 'pki' },
@@ -170,7 +170,7 @@ export default function ({ getService }: FtrProviderContext) {
       const cookies = response.headers['set-cookie'];
       expect(cookies).to.have.length(1);
 
-      const sessionCookie = request.cookie(cookies[0])!;
+      const sessionCookie = parseCookie(cookies[0])!;
       checkCookieIsSet(sessionCookie);
 
       response = await supertest
@@ -187,7 +187,7 @@ export default function ({ getService }: FtrProviderContext) {
           enabled: true,
           metadata: {
             pki_delegated_by_realm: 'reserved',
-            pki_delegated_by_user: 'kibana',
+            pki_delegated_by_user: 'kibana_system',
             pki_dn: 'CN=second_client',
           },
           authentication_realm: { name: 'pki1', type: 'pki' },
@@ -196,7 +196,7 @@ export default function ({ getService }: FtrProviderContext) {
           authentication_type: 'realm',
         });
 
-      checkCookieIsSet(request.cookie(response.headers['set-cookie'][0])!);
+      checkCookieIsSet(parseCookie(response.headers['set-cookie'][0])!);
     });
 
     it('should reject valid cookie if used with untrusted certificate', async () => {
@@ -209,7 +209,7 @@ export default function ({ getService }: FtrProviderContext) {
       const cookies = response.headers['set-cookie'];
       expect(cookies).to.have.length(1);
 
-      const sessionCookie = request.cookie(cookies[0])!;
+      const sessionCookie = parseCookie(cookies[0])!;
       checkCookieIsSet(sessionCookie);
 
       await supertest
@@ -233,7 +233,7 @@ export default function ({ getService }: FtrProviderContext) {
         const cookies = response.headers['set-cookie'];
         expect(cookies).to.have.length(1);
 
-        sessionCookie = request.cookie(cookies[0])!;
+        sessionCookie = parseCookie(cookies[0])!;
         checkCookieIsSet(sessionCookie);
       });
 
@@ -247,7 +247,7 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(200);
 
         expect(apiResponseOne.headers['set-cookie']).to.not.be(undefined);
-        const sessionCookieOne = request.cookie(apiResponseOne.headers['set-cookie'][0])!;
+        const sessionCookieOne = parseCookie(apiResponseOne.headers['set-cookie'][0])!;
 
         checkCookieIsSet(sessionCookieOne);
         expect(sessionCookieOne.value).to.not.equal(sessionCookie.value);
@@ -261,7 +261,7 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(200);
 
         expect(apiResponseTwo.headers['set-cookie']).to.not.be(undefined);
-        const sessionCookieTwo = request.cookie(apiResponseTwo.headers['set-cookie'][0])!;
+        const sessionCookieTwo = parseCookie(apiResponseTwo.headers['set-cookie'][0])!;
 
         checkCookieIsSet(sessionCookieTwo);
         expect(sessionCookieTwo.value).to.not.equal(sessionCookieOne.value);
@@ -306,7 +306,7 @@ export default function ({ getService }: FtrProviderContext) {
         let cookies = response.headers['set-cookie'];
         expect(cookies).to.have.length(1);
 
-        const sessionCookie = request.cookie(cookies[0])!;
+        const sessionCookie = parseCookie(cookies[0])!;
         checkCookieIsSet(sessionCookie);
 
         // And then log user out.
@@ -319,7 +319,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         cookies = logoutResponse.headers['set-cookie'];
         expect(cookies).to.have.length(1);
-        checkCookieIsCleared(request.cookie(cookies[0])!);
+        checkCookieIsCleared(parseCookie(cookies[0])!);
 
         expect(logoutResponse.headers.location).to.be('/security/logged_out?msg=LOGGED_OUT');
       });
@@ -349,7 +349,7 @@ export default function ({ getService }: FtrProviderContext) {
         const cookies = response.headers['set-cookie'];
         expect(cookies).to.have.length(1);
 
-        sessionCookie = request.cookie(cookies[0])!;
+        sessionCookie = parseCookie(cookies[0])!;
         checkCookieIsSet(sessionCookie);
       });
 
@@ -358,7 +358,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         // Access token expiration is set to 15s for API integration tests.
         // Let's wait for 20s to make sure token expires.
-        await delay(20000);
+        await setTimeoutAsync(20000);
 
         // This api call should succeed and automatically refresh token. Returned cookie will contain
         // the new access token.
@@ -373,7 +373,7 @@ export default function ({ getService }: FtrProviderContext) {
         const cookies = apiResponse.headers['set-cookie'];
         expect(cookies).to.have.length(1);
 
-        const refreshedCookie = request.cookie(cookies[0])!;
+        const refreshedCookie = parseCookie(cookies[0])!;
         checkCookieIsSet(refreshedCookie);
       });
 
@@ -382,7 +382,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         // Access token expiration is set to 15s for API integration tests.
         // Let's wait for 20s to make sure token expires.
-        await delay(20000);
+        await setTimeoutAsync(20000);
 
         // This request should succeed and automatically refresh token. Returned cookie will contain
         // the new access and refresh token pair.
@@ -396,7 +396,7 @@ export default function ({ getService }: FtrProviderContext) {
         const cookies = nonAjaxResponse.headers['set-cookie'];
         expect(cookies).to.have.length(1);
 
-        const refreshedCookie = request.cookie(cookies[0])!;
+        const refreshedCookie = parseCookie(cookies[0])!;
         checkCookieIsSet(refreshedCookie);
       });
     });

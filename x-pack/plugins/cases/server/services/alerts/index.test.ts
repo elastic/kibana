@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { KibanaRequest } from 'kibana/server';
-import { CaseStatuses } from '../../../common';
-import { AlertService, AlertServiceContract } from '.';
+import { CaseStatuses } from '../../../common/api';
+import { AlertService } from '.';
 import { elasticsearchServiceMock, loggingSystemMock } from 'src/core/server/mocks';
 
 describe('updateAlertsStatus', () => {
@@ -15,46 +14,263 @@ describe('updateAlertsStatus', () => {
   const logger = loggingSystemMock.create().get('case');
 
   describe('happy path', () => {
-    let alertService: AlertServiceContract;
-    const args = {
-      alerts: [{ id: 'alert-id-1', index: '.siem-signals', status: CaseStatuses.closed }],
-      request: {} as KibanaRequest,
-      scopedClusterClient: esClient,
-      logger,
-    };
+    let alertService: AlertService;
 
     beforeEach(async () => {
-      alertService = new AlertService();
-      jest.restoreAllMocks();
+      alertService = new AlertService(esClient, logger);
+      jest.resetAllMocks();
     });
 
-    test('it update the status of the alert correctly', async () => {
+    it('updates the status of the alert correctly', async () => {
+      const args = [{ id: 'alert-id-1', index: '.siem-signals', status: CaseStatuses.closed }];
+
       await alertService.updateAlertsStatus(args);
 
-      expect(esClient.bulk).toHaveBeenCalledWith({
-        body: [
-          { update: { _id: 'alert-id-1', _index: '.siem-signals' } },
-          {
-            doc: {
-              signal: {
-                status: CaseStatuses.closed,
+      expect(esClient.updateByQuery.mock.calls[0]).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "body": Object {
+              "query": Object {
+                "ids": Object {
+                  "values": Array [
+                    "alert-id-1",
+                  ],
+                },
+              },
+              "script": Object {
+                "lang": "painless",
+                "source": "if (ctx._source['kibana.alert.workflow_status'] != null) {
+                        ctx._source['kibana.alert.workflow_status'] = 'closed'
+                      }
+                      if (ctx._source.signal != null && ctx._source.signal.status != null) {
+                        ctx._source.signal.status = 'closed'
+                      }",
               },
             },
+            "conflicts": "abort",
+            "ignore_unavailable": true,
+            "index": ".siem-signals",
           },
-        ],
-      });
+        ]
+      `);
     });
 
-    describe('unhappy path', () => {
-      it('ignores empty indices', async () => {
-        expect(
-          await alertService.updateAlertsStatus({
-            alerts: [{ id: 'alert-id-1', index: '', status: CaseStatuses.closed }],
-            scopedClusterClient: esClient,
-            logger,
-          })
-        ).toBeUndefined();
-      });
+    it('buckets the alerts by index', async () => {
+      const args = [
+        { id: 'id1', index: '1', status: CaseStatuses.closed },
+        { id: 'id2', index: '1', status: CaseStatuses.closed },
+      ];
+
+      await alertService.updateAlertsStatus(args);
+
+      expect(esClient.updateByQuery).toBeCalledTimes(1);
+      expect(esClient.updateByQuery.mock.calls[0]).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "body": Object {
+              "query": Object {
+                "ids": Object {
+                  "values": Array [
+                    "id1",
+                    "id2",
+                  ],
+                },
+              },
+              "script": Object {
+                "lang": "painless",
+                "source": "if (ctx._source['kibana.alert.workflow_status'] != null) {
+                        ctx._source['kibana.alert.workflow_status'] = 'closed'
+                      }
+                      if (ctx._source.signal != null && ctx._source.signal.status != null) {
+                        ctx._source.signal.status = 'closed'
+                      }",
+              },
+            },
+            "conflicts": "abort",
+            "ignore_unavailable": true,
+            "index": "1",
+          },
+        ]
+      `);
+    });
+
+    it('translates in-progress to acknowledged', async () => {
+      const args = [{ id: 'id1', index: '1', status: CaseStatuses['in-progress'] }];
+
+      await alertService.updateAlertsStatus(args);
+
+      expect(esClient.updateByQuery).toBeCalledTimes(1);
+      expect(esClient.updateByQuery.mock.calls[0]).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "body": Object {
+              "query": Object {
+                "ids": Object {
+                  "values": Array [
+                    "id1",
+                  ],
+                },
+              },
+              "script": Object {
+                "lang": "painless",
+                "source": "if (ctx._source['kibana.alert.workflow_status'] != null) {
+                        ctx._source['kibana.alert.workflow_status'] = 'acknowledged'
+                      }
+                      if (ctx._source.signal != null && ctx._source.signal.status != null) {
+                        ctx._source.signal.status = 'acknowledged'
+                      }",
+              },
+            },
+            "conflicts": "abort",
+            "ignore_unavailable": true,
+            "index": "1",
+          },
+        ]
+      `);
+    });
+
+    it('makes two calls when the statuses are different', async () => {
+      const args = [
+        { id: 'id1', index: '1', status: CaseStatuses.closed },
+        { id: 'id2', index: '1', status: CaseStatuses.open },
+      ];
+
+      await alertService.updateAlertsStatus(args);
+
+      expect(esClient.updateByQuery).toBeCalledTimes(2);
+      // id1 should be closed
+      expect(esClient.updateByQuery.mock.calls[0]).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "body": Object {
+              "query": Object {
+                "ids": Object {
+                  "values": Array [
+                    "id1",
+                  ],
+                },
+              },
+              "script": Object {
+                "lang": "painless",
+                "source": "if (ctx._source['kibana.alert.workflow_status'] != null) {
+                        ctx._source['kibana.alert.workflow_status'] = 'closed'
+                      }
+                      if (ctx._source.signal != null && ctx._source.signal.status != null) {
+                        ctx._source.signal.status = 'closed'
+                      }",
+              },
+            },
+            "conflicts": "abort",
+            "ignore_unavailable": true,
+            "index": "1",
+          },
+        ]
+      `);
+
+      // id2 should be open
+      expect(esClient.updateByQuery.mock.calls[1]).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "body": Object {
+              "query": Object {
+                "ids": Object {
+                  "values": Array [
+                    "id2",
+                  ],
+                },
+              },
+              "script": Object {
+                "lang": "painless",
+                "source": "if (ctx._source['kibana.alert.workflow_status'] != null) {
+                        ctx._source['kibana.alert.workflow_status'] = 'open'
+                      }
+                      if (ctx._source.signal != null && ctx._source.signal.status != null) {
+                        ctx._source.signal.status = 'open'
+                      }",
+              },
+            },
+            "conflicts": "abort",
+            "ignore_unavailable": true,
+            "index": "1",
+          },
+        ]
+      `);
+    });
+
+    it('makes two calls when the indices are different', async () => {
+      const args = [
+        { id: 'id1', index: '1', status: CaseStatuses.closed },
+        { id: 'id2', index: '2', status: CaseStatuses.open },
+      ];
+
+      await alertService.updateAlertsStatus(args);
+
+      expect(esClient.updateByQuery).toBeCalledTimes(2);
+      // id1 should be closed in index 1
+      expect(esClient.updateByQuery.mock.calls[0]).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "body": Object {
+              "query": Object {
+                "ids": Object {
+                  "values": Array [
+                    "id1",
+                  ],
+                },
+              },
+              "script": Object {
+                "lang": "painless",
+                "source": "if (ctx._source['kibana.alert.workflow_status'] != null) {
+                        ctx._source['kibana.alert.workflow_status'] = 'closed'
+                      }
+                      if (ctx._source.signal != null && ctx._source.signal.status != null) {
+                        ctx._source.signal.status = 'closed'
+                      }",
+              },
+            },
+            "conflicts": "abort",
+            "ignore_unavailable": true,
+            "index": "1",
+          },
+        ]
+      `);
+
+      // id2 should be open in index 2
+      expect(esClient.updateByQuery.mock.calls[1]).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "body": Object {
+              "query": Object {
+                "ids": Object {
+                  "values": Array [
+                    "id2",
+                  ],
+                },
+              },
+              "script": Object {
+                "lang": "painless",
+                "source": "if (ctx._source['kibana.alert.workflow_status'] != null) {
+                        ctx._source['kibana.alert.workflow_status'] = 'open'
+                      }
+                      if (ctx._source.signal != null && ctx._source.signal.status != null) {
+                        ctx._source.signal.status = 'open'
+                      }",
+              },
+            },
+            "conflicts": "abort",
+            "ignore_unavailable": true,
+            "index": "2",
+          },
+        ]
+      `);
+    });
+
+    it('ignores empty indices', async () => {
+      await alertService.updateAlertsStatus([
+        { id: 'alert-id-1', index: '', status: CaseStatuses.open },
+      ]);
+
+      expect(esClient.updateByQuery).not.toHaveBeenCalled();
     });
   });
 });

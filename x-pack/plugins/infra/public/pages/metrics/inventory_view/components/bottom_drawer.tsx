@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty, EuiSpacer } from '@elastic/eui';
 import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
 import { useUiTracker } from '../../../../../../observability/public';
+import { useWaffleOptionsContext } from '../hooks/use_waffle_options';
 import { InfraFormatter } from '../../../../lib/lib';
 import { Timeline } from './timeline/timeline';
 
@@ -28,13 +29,20 @@ export const BottomDrawer: React.FC<{
   formatter: InfraFormatter;
   width: number;
 }> = ({ measureRef, width, interval, formatter, children }) => {
-  const [isOpen, setIsOpen] = useState(false);
+  const { timelineOpen, changeTimelineOpen } = useWaffleOptionsContext();
+
+  const [isOpen, setIsOpen] = useState(Boolean(timelineOpen));
+
+  useEffect(() => {
+    if (isOpen !== timelineOpen) setIsOpen(Boolean(timelineOpen));
+  }, [isOpen, timelineOpen]);
 
   const trackDrawerOpen = useUiTracker({ app: 'infra_metrics' });
   const onClick = useCallback(() => {
     if (!isOpen) trackDrawerOpen({ metric: 'open_timeline_drawer__inventory' });
     setIsOpen(!isOpen);
-  }, [isOpen, trackDrawerOpen]);
+    changeTimelineOpen(!isOpen);
+  }, [isOpen, trackDrawerOpen, changeTimelineOpen]);
 
   return (
     <BottomActionContainer ref={isOpen ? measureRef : null} isOpen={isOpen} outerWidth={width}>
@@ -44,6 +52,7 @@ export const BottomDrawer: React.FC<{
             aria-expanded={isOpen}
             iconType={isOpen ? 'arrowDown' : 'arrowRight'}
             onClick={onClick}
+            data-test-subj="toggleTimelineButton"
           >
             {isOpen ? hideHistory : showHistory}
           </ShowHideButton>

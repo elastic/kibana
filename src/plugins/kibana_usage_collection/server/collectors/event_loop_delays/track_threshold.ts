@@ -9,15 +9,13 @@
 import { takeUntil, finalize } from 'rxjs/operators';
 import { Observable, timer } from 'rxjs';
 import type { Logger } from 'kibana/server';
-import moment from 'moment';
 import type { UsageCounter } from '../../../../usage_collection/server';
 import {
   MONITOR_EVENT_LOOP_THRESHOLD_START,
   MONITOR_EVENT_LOOP_THRESHOLD_INTERVAL,
   MONITOR_EVENT_LOOP_WARN_THRESHOLD,
-  ONE_MILLISECOND_AS_NANOSECONDS,
 } from './constants';
-import { EventLoopDelaysCollector } from './event_loop_delays';
+import type { EventLoopDelaysMonitor } from '../../../../../core/server';
 
 /**
  * The monitoring of the event loop starts immediately.
@@ -29,6 +27,7 @@ export function startTrackingEventLoopDelaysThreshold(
   eventLoopCounter: UsageCounter,
   logger: Logger,
   stopMonitoringEventLoop$: Observable<void>,
+  eventLoopDelaysMonitor: EventLoopDelaysMonitor,
   configs: {
     warnThreshold?: number;
     collectionStartDelay?: number;
@@ -41,21 +40,17 @@ export function startTrackingEventLoopDelaysThreshold(
     collectionInterval = MONITOR_EVENT_LOOP_THRESHOLD_INTERVAL,
   } = configs;
 
-  const eventLoopDelaysCollector = new EventLoopDelaysCollector();
   timer(collectionStartDelay, collectionInterval)
     .pipe(
       takeUntil(stopMonitoringEventLoop$),
-      finalize(() => eventLoopDelaysCollector.stop())
+      finalize(() => eventLoopDelaysMonitor.stop())
     )
     .subscribe(async () => {
-      const { mean } = eventLoopDelaysCollector.collect();
-      const meanDurationMs = moment
-        .duration(mean / ONE_MILLISECOND_AS_NANOSECONDS)
-        .asMilliseconds();
+      const { mean: meanMS } = eventLoopDelaysMonitor.collect();
 
-      if (meanDurationMs > warnThreshold) {
+      if (meanMS > warnThreshold) {
         logger.warn(
-          `Average event loop delay threshold exceeded ${warnThreshold}ms. Received ${meanDurationMs}ms. ` +
+          `Average event loop delay threshold exceeded ${warnThreshold}ms. Received ${meanMS}ms. ` +
             `See https://ela.st/kibana-scaling-considerations for more information about scaling Kibana.`
         );
 
@@ -64,6 +59,6 @@ export function startTrackingEventLoopDelaysThreshold(
         });
       }
 
-      eventLoopDelaysCollector.reset();
+      eventLoopDelaysMonitor.reset();
     });
 }

@@ -14,9 +14,10 @@ import { usePostPushToService } from '../../containers/use_post_push_to_service'
 
 import { useConnectors } from '../../containers/configure/use_connectors';
 import { Case } from '../../containers/types';
-import { CaseType } from '../../../common';
+import { CaseType } from '../../../common/api';
 import { UsePostComment, usePostComment } from '../../containers/use_post_comment';
-import { useOwnerContext } from '../owner_context/use_owner_context';
+import { useCasesContext } from '../cases_context/use_cases_context';
+import { useCasesFeatures } from '../cases_context/use_cases_features';
 import { getConnectorById } from '../utils';
 
 const initialCaseValue: FormProps = {
@@ -44,14 +45,20 @@ export const FormContext: React.FC<Props> = ({
   onSuccess,
 }) => {
   const { connectors, loading: isLoadingConnectors } = useConnectors();
-  const owner = useOwnerContext();
+  const { owner } = useCasesContext();
+  const { isSyncAlertsEnabled } = useCasesFeatures();
   const { postCase } = usePostCase();
   const { postComment } = usePostComment();
   const { pushCaseToExternalService } = usePostPushToService();
 
   const submitCase = useCallback(
     async (
-      { connectorId: dataConnectorId, fields, syncAlerts = true, ...dataWithoutConnectorId },
+      {
+        connectorId: dataConnectorId,
+        fields,
+        syncAlerts = isSyncAlertsEnabled,
+        ...dataWithoutConnectorId
+      },
       isValid
     ) => {
       if (isValid) {
@@ -86,6 +93,7 @@ export const FormContext: React.FC<Props> = ({
       }
     },
     [
+      isSyncAlertsEnabled,
       connectors,
       postCase,
       caseType,
@@ -113,7 +121,20 @@ export const FormContext: React.FC<Props> = ({
         : null,
     [children, connectors, isLoadingConnectors]
   );
-  return <Form form={form}>{childrenWithExtraProp}</Form>;
+  return (
+    <Form
+      onKeyDown={(e: KeyboardEvent) => {
+        // It avoids the focus scaping from the flyout when enter is pressed.
+        // https://github.com/elastic/kibana/issues/111120
+        if (e.key === 'Enter') {
+          e.stopPropagation();
+        }
+      }}
+      form={form}
+    >
+      {childrenWithExtraProp}
+    </Form>
+  );
 };
 
 FormContext.displayName = 'FormContext';

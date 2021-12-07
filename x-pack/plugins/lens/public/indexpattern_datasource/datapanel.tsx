@@ -23,14 +23,16 @@ import {
   EuiButtonIcon,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { EsQueryConfig, Query, Filter } from '@kbn/es-query';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { CoreStart } from 'kibana/public';
-import { DataPublicPluginStart } from 'src/plugins/data/public';
+import type { EsQueryConfig, Query, Filter } from '@kbn/es-query';
+import { FormattedMessage } from '@kbn/i18n-react';
+import type { CoreStart } from 'kibana/public';
+import type { DataPublicPluginStart } from 'src/plugins/data/public';
+import type { FieldFormatsStart } from 'src/plugins/field_formats/public';
 import { htmlIdGenerator } from '@elastic/eui';
-import { DatasourceDataPanelProps, DataType, StateSetter } from '../types';
+import { buildEsQuery } from '@kbn/es-query';
+import type { DatasourceDataPanelProps, DataType, StateSetter } from '../types';
 import { ChildDragDropProvider, DragContextState } from '../drag_drop';
-import {
+import type {
   IndexPattern,
   IndexPatternPrivateState,
   IndexPatternField,
@@ -40,12 +42,13 @@ import { trackUiEvent } from '../lens_ui_telemetry';
 import { loadIndexPatterns, syncExistingFields } from './loader';
 import { fieldExists } from './pure_helpers';
 import { Loader } from '../loader';
-import { esQuery } from '../../../../../src/plugins/data/public';
-import { IndexPatternFieldEditorStart } from '../../../../../src/plugins/index_pattern_field_editor/public';
+import { getEsQueryConfig } from '../../../../../src/plugins/data/public';
+import { IndexPatternFieldEditorStart } from '../../../../../src/plugins/data_view_field_editor/public';
 import { VISUALIZE_GEO_FIELD_TRIGGER } from '../../../../../src/plugins/ui_actions/public';
 
 export type Props = Omit<DatasourceDataPanelProps<IndexPatternPrivateState>, 'core'> & {
   data: DataPublicPluginStart;
+  fieldFormats: FieldFormatsStart;
   changeIndexPattern: (
     id: string,
     state: IndexPatternPrivateState,
@@ -91,7 +94,7 @@ const fieldTypeNames: Record<DataType, string> = {
   geo_shape: i18n.translate('xpack.lens.datatypes.geoShape', { defaultMessage: 'geo_shape' }),
 };
 
-// Wrapper around esQuery.buildEsQuery, handling errors (e.g. because a query can't be parsed) by
+// Wrapper around buildEsQuery, handling errors (e.g. because a query can't be parsed) by
 // returning a query dsl object not matching anything
 function buildSafeEsQuery(
   indexPattern: IndexPattern,
@@ -100,7 +103,7 @@ function buildSafeEsQuery(
   queryConfig: EsQueryConfig
 ) {
   try {
-    return esQuery.buildEsQuery(indexPattern, query, filters, queryConfig);
+    return buildEsQuery(indexPattern, query, filters, queryConfig);
   } catch (e) {
     return {
       bool: {
@@ -118,6 +121,7 @@ export function IndexPatternDataPanel({
   dragDropContext,
   core,
   data,
+  fieldFormats,
   query,
   filters,
   dateRange,
@@ -167,7 +171,7 @@ export function IndexPatternDataPanel({
     indexPatterns[currentIndexPatternId],
     query,
     filters,
-    esQuery.getEsQueryConfig(core.uiSettings)
+    getEsQueryConfig(core.uiSettings)
   );
 
   return (
@@ -205,16 +209,16 @@ export function IndexPatternDataPanel({
           <EuiFlexItem grow={null}>
             <EuiCallOut
               data-test-subj="indexPattern-no-indexpatterns"
-              title={i18n.translate('xpack.lens.indexPattern.noPatternsLabel', {
-                defaultMessage: 'No index patterns',
+              title={i18n.translate('xpack.lens.indexPattern.noDataViewsLabel', {
+                defaultMessage: 'No data views',
               })}
               color="warning"
               iconType="alert"
             >
               <p>
                 <FormattedMessage
-                  id="xpack.lens.indexPattern.noPatternsDescription"
-                  defaultMessage="Please create an index pattern or switch to another data source"
+                  id="xpack.lens.indexPattern.noDataViewDescription"
+                  defaultMessage="Please create a data view or switch to another data source"
                 />
               </p>
             </EuiCallOut>
@@ -231,6 +235,7 @@ export function IndexPatternDataPanel({
           dragDropContext={dragDropContext}
           core={core}
           data={data}
+          fieldFormats={fieldFormats}
           charts={charts}
           indexPatternFieldEditor={indexPatternFieldEditor}
           onChangeIndexPattern={onChangeIndexPattern}
@@ -289,6 +294,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   onUpdateIndexPattern,
   core,
   data,
+  fieldFormats,
   indexPatternFieldEditor,
   existingFields,
   charts,
@@ -297,6 +303,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   uiActions,
 }: Omit<DatasourceDataPanelProps, 'state' | 'setState' | 'showNoDataPopover' | 'core'> & {
   data: DataPublicPluginStart;
+  fieldFormats: FieldFormatsStart;
   core: CoreStart;
   currentIndexPatternId: string;
   indexPatternRefs: IndexPatternRef[];
@@ -347,23 +354,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
       supportedFieldTypes.has(field.type)
     );
     const sorted = allSupportedTypesFields.sort(sortFields);
-    let groupedFields;
-    // optimization before existingFields are synced
-    if (!hasSyncedExistingFields) {
-      groupedFields = {
-        ...defaultFieldGroups,
-        ...groupBy(sorted, (field) => {
-          if (field.type === 'document') {
-            return 'specialFields';
-          } else if (field.meta) {
-            return 'metaFields';
-          } else {
-            return 'emptyFields';
-          }
-        }),
-      };
-    }
-    groupedFields = {
+    const groupedFields = {
       ...defaultFieldGroups,
       ...groupBy(sorted, (field) => {
         if (field.type === 'document') {
@@ -455,7 +446,6 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
     return fieldGroupDefinitions;
   }, [
     allFields,
-    hasSyncedExistingFields,
     fieldInfoUnavailable,
     filters.length,
     existenceFetchTimeout,
@@ -533,7 +523,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
             const indexPatternInstance = await data.indexPatterns.get(currentIndexPattern.id);
             closeFieldEditor.current = indexPatternFieldEditor.openEditor({
               ctx: {
-                indexPattern: indexPatternInstance,
+                dataView: indexPatternInstance,
               },
               fieldName,
               onSave: async () => {
@@ -554,7 +544,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
             const indexPatternInstance = await data.indexPatterns.get(currentIndexPattern.id);
             closeFieldEditor.current = indexPatternFieldEditor.openDeleteModal({
               ctx: {
-                indexPattern: indexPatternInstance,
+                dataView: indexPatternInstance,
               },
               fieldName,
               onDelete: async () => {
@@ -582,6 +572,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
     () => ({
       core,
       data,
+      fieldFormats,
       indexPattern: currentIndexPattern,
       highlight: localState.nameFilter.toLowerCase(),
       dateRange,
@@ -592,6 +583,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
     [
       core,
       data,
+      fieldFormats,
       currentIndexPattern,
       dateRange,
       query,
@@ -651,7 +643,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                       iconType="boxesHorizontal"
                       data-test-subj="lnsIndexPatternActions"
                       aria-label={i18n.translate('xpack.lens.indexPatterns.actionsPopoverLabel', {
-                        defaultMessage: 'Index pattern settings',
+                        defaultMessage: 'Data view settings',
                       })}
                       onClick={() => {
                         setPopoverOpen(!popoverOpen);
@@ -672,7 +664,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                         }}
                       >
                         {i18n.translate('xpack.lens.indexPatterns.addFieldButton', {
-                          defaultMessage: 'Add field to index pattern',
+                          defaultMessage: 'Add field to data view',
                         })}
                       </EuiContextMenuItem>,
                       <EuiContextMenuItem
@@ -686,7 +678,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                         }}
                       >
                         {i18n.translate('xpack.lens.indexPatterns.manageFieldButton', {
-                          defaultMessage: 'Manage index pattern fields',
+                          defaultMessage: 'Manage data view fields',
                         })}
                       </EuiContextMenuItem>,
                     ]}
@@ -718,7 +710,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
               data-test-subj="lnsIndexPatternFieldSearch"
               placeholder={i18n.translate('xpack.lens.indexPatterns.filterByNameLabel', {
                 defaultMessage: 'Search field names',
-                description: 'Search the list of fields in the index pattern for the provided text',
+                description: 'Search the list of fields in the data view for the provided text',
               })}
               value={localState.nameFilter}
               onChange={(e) => {
@@ -726,7 +718,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
               }}
               aria-label={i18n.translate('xpack.lens.indexPatterns.filterByNameLabel', {
                 defaultMessage: 'Search field names',
-                description: 'Search the list of fields in the index pattern for the provided text',
+                description: 'Search the list of fields in the data view for the provided text',
               })}
               aria-describedby={fieldSearchDescriptionId}
             />

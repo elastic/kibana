@@ -30,7 +30,7 @@ const coreSetup = coreMock.createSetup();
 const jobQueueClientMock = new ReportingAPIClient(coreSetup.http, coreSetup.uiSettings, '7.15.0');
 jobQueueClientMock.findForJobIds = async () => mockJobsFound;
 jobQueueClientMock.getInfo = () =>
-  Promise.resolve(({ content: 'this is the completed report data' } as unknown) as Job);
+  Promise.resolve({ content: 'this is the completed report data' } as unknown as Job);
 jobQueueClientMock.getError = () => Promise.resolve('this is the failed report error');
 jobQueueClientMock.getManagementLink = () => '/#management';
 jobQueueClientMock.getDownloadLink = () => '/reporting/download/job-123';
@@ -38,13 +38,13 @@ jobQueueClientMock.getDownloadLink = () => '/reporting/download/job-123';
 const mockShowDanger = stub();
 const mockShowSuccess = stub();
 const mockShowWarning = stub();
-const notificationsMock = ({
+const notificationsMock = {
   toasts: {
     addDanger: mockShowDanger,
     addSuccess: mockShowSuccess,
     addWarning: mockShowWarning,
   },
-} as unknown) as NotificationsStart;
+} as unknown as NotificationsStart;
 
 describe('stream handler', () => {
   afterEach(() => {

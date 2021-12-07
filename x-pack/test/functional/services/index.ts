@@ -27,6 +27,9 @@ import {
   MonitoringBeatsListingProvider,
   MonitoringBeatDetailProvider,
   MonitoringBeatsSummaryStatusProvider,
+  MonitoringLogstashOverviewProvider,
+  MonitoringLogstashNodesProvider,
+  MonitoringLogstashNodeDetailProvider,
   MonitoringLogstashPipelinesProvider,
   MonitoringLogstashSummaryStatusProvider,
   MonitoringKibanaOverviewProvider,
@@ -34,6 +37,9 @@ import {
   MonitoringKibanaInstanceProvider,
   MonitoringKibanaSummaryStatusProvider,
   MonitoringSetupModeProvider,
+  MonitoringAlertsProvider,
+  MonitoringEnterpriseSearchOverviewProvider,
+  MonitoringEnterpriseSearchSummaryStatusProvider,
   // @ts-ignore not ts yet
 } from './monitoring';
 // @ts-ignore not ts yet
@@ -60,6 +66,8 @@ import {
   DashboardPanelTimeRangeProvider,
 } from './dashboard';
 import { SearchSessionsService } from './search_sessions';
+import { ObservabilityProvider } from './observability';
+import { CompareImagesProvider } from './compare_images';
 
 // define the name and providers for services that should be
 // available to your tests. If you don't specify anything here
@@ -86,13 +94,19 @@ export const services = {
   monitoringBeatsListing: MonitoringBeatsListingProvider,
   monitoringBeatDetail: MonitoringBeatDetailProvider,
   monitoringBeatsSummaryStatus: MonitoringBeatsSummaryStatusProvider,
+  monitoringLogstashOverview: MonitoringLogstashOverviewProvider,
+  monitoringLogstashNodes: MonitoringLogstashNodesProvider,
+  monitoringLogstashNodeDetail: MonitoringLogstashNodeDetailProvider,
   monitoringLogstashPipelines: MonitoringLogstashPipelinesProvider,
   monitoringLogstashSummaryStatus: MonitoringLogstashSummaryStatusProvider,
   monitoringKibanaOverview: MonitoringKibanaOverviewProvider,
   monitoringKibanaInstances: MonitoringKibanaInstancesProvider,
   monitoringKibanaInstance: MonitoringKibanaInstanceProvider,
   monitoringKibanaSummaryStatus: MonitoringKibanaSummaryStatusProvider,
+  monitoringEnterpriseSearchOverview: MonitoringEnterpriseSearchOverviewProvider,
+  monitoringEnterpriseSearchSummaryStatus: MonitoringEnterpriseSearchSummaryStatusProvider,
   monitoringSetupMode: MonitoringSetupModeProvider,
+  monitoringAlerts: MonitoringAlertsProvider,
   pipelineList: PipelineListProvider,
   pipelineEditor: PipelineEditorProvider,
   random: RandomProvider,
@@ -110,4 +124,6 @@ export const services = {
   dashboardPanelTimeRange: DashboardPanelTimeRangeProvider,
   reporting: ReportingFunctionalProvider,
   searchSessions: SearchSessionsService,
+  observability: ObservabilityProvider,
+  compareImages: CompareImagesProvider,
 };

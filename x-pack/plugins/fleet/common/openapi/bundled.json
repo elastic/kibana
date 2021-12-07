@@ -181,6 +181,8 @@
                           "type": "string",
                           "enum": [
                             "installed",
+                            "installing",
+                            "install_failed",
                             "not_installed"
                           ]
                         },
@@ -1601,6 +1603,115 @@
         ]
       }
     },
+    "/package_policies/upgrade": {
+      "post": {
+        "summary": "Package policy - Upgrade",
+        "operationId": "upgrade-package-policy",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "packagePolicyIds": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "required": [
+                  "packagePolicyIds"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "name": {
+                        "type": "string"
+                      },
+                      "success": {
+                        "type": "boolean"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "success"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/package_policies/upgrade/dryrun": {
+      "post": {
+        "summary": "Package policy - Upgrade Dry run",
+        "operationId": "upgrade-package-policy",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "packagePolicyIds": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "packageVersion": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "packagePolicyIds"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "hasErrors": {
+                      "type": "boolean"
+                    },
+                    "diff": {
+                      "schema": null,
+                      "$ref": "#/components/schemas/upgrade_diff"
+                    },
+                    "required": [
+                      "hasErrors"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/package_policies/{packagePolicyId}": {
       "get": {
         "summary": "Package policy - Info",
@@ -1714,6 +1825,74 @@
           }
         },
         "operationId": "get-outputs"
+      },
+      "post": {
+        "summary": "Outputs",
+        "description": "Create a new output",
+        "tags": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "item": {
+                      "$ref": "#/components/schemas/output"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "elasticsearch"
+                    ]
+                  },
+                  "is_default": {
+                    "type": "boolean"
+                  },
+                  "is_default_monitoring": {
+                    "type": "boolean"
+                  },
+                  "hosts": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "ca_sha256": {
+                    "type": "string"
+                  },
+                  "config_yaml": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "name",
+                  "type"
+                ]
+              }
+            }
+          }
+        },
+        "operationId": "post-outputs"
       }
     },
     "/outputs/{outputId}": {
@@ -1752,6 +1931,35 @@
           "required": true
         }
       ],
+      "delete": {
+        "summary": "Output - Delete",
+        "operationId": "delete-output",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          }
+        ]
+      },
       "put": {
         "summary": "Output - Update",
         "operationId": "update-output",
@@ -1761,19 +1969,38 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "hosts": {
+                  "name": {
                     "type": "string"
+                  },
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "elasticsearch"
+                    ]
+                  },
+                  "is_default": {
+                    "type": "boolean"
+                  },
+                  "is_default_monitoring": {
+                    "type": "boolean"
+                  },
+                  "hosts": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
                   },
                   "ca_sha256": {
                     "type": "string"
                   },
-                  "config": {
-                    "type": "object"
-                  },
                   "config_yaml": {
                     "type": "string"
                   }
-                }
+                },
+                "required": [
+                  "name",
+                  "type"
+                ]
               }
             }
           }
@@ -2410,6 +2637,16 @@
           },
           "description": {
             "type": "string"
+          },
+          "monitoring_enabled": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "metrics",
+                "logs"
+              ]
+            }
           }
         }
       },
@@ -2436,8 +2673,7 @@
             },
             "required": [
               "name",
-              "version",
-              "title"
+              "version"
             ]
           },
           "namespace": {
@@ -2476,8 +2712,7 @@
               },
               "required": [
                 "type",
-                "enabled",
-                "streams"
+                "enabled"
               ]
             }
           },
@@ -2492,9 +2727,7 @@
           }
         },
         "required": [
-          "output_id",
           "inputs",
-          "policy_id",
           "name"
         ]
       },
@@ -2614,21 +2847,93 @@
           "created_at"
         ]
       },
+      "upgrade_diff": {
+        "title": "Package policy Upgrade dryrun",
+        "type": "array",
+        "items": {}
+      },
       "update_package_policy": {
         "title": "Update package policy",
-        "allOf": [
-          {
+        "type": "object",
+        "description": "",
+        "properties": {
+          "version": {
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "package": {
             "type": "object",
             "properties": {
+              "name": {
+                "type": "string"
+              },
               "version": {
                 "type": "string"
+              },
+              "title": {
+                "type": "string"
               }
+            },
+            "required": [
+              "name",
+              "title",
+              "version"
+            ]
+          },
+          "namespace": {
+            "type": "string"
+          },
+          "output_id": {
+            "type": "string"
+          },
+          "inputs": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string"
+                },
+                "enabled": {
+                  "type": "boolean"
+                },
+                "processors": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "streams": {
+                  "type": "array",
+                  "items": {}
+                },
+                "config": {
+                  "type": "object"
+                },
+                "vars": {
+                  "type": "object"
+                }
+              },
+              "required": [
+                "type",
+                "enabled",
+                "streams"
+              ]
             }
           },
-          {
-            "$ref": "#/components/schemas/new_package_policy"
+          "policy_id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
           }
-        ]
+        },
+        "required": null
       },
       "output": {
         "title": "Output",
@@ -2638,6 +2943,9 @@
             "type": "string"
           },
           "is_default": {
+            "type": "boolean"
+          },
+          "is_default_monitoring": {
             "type": "boolean"
           },
           "name": {

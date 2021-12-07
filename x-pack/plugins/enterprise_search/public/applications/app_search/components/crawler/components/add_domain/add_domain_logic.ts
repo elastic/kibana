@@ -17,12 +17,13 @@ import { KibanaLogic } from '../../../../../shared/kibana';
 import { ENGINE_CRAWLER_DOMAIN_PATH } from '../../../../routes';
 import { EngineLogic, generateEnginePath } from '../../../engine';
 
-import { CrawlerOverviewLogic } from '../../crawler_overview_logic';
+import { CrawlerLogic } from '../../crawler_logic';
 import {
   CrawlerDataFromServer,
   CrawlerDomain,
   CrawlerDomainValidationResult,
   CrawlerDomainValidationResultChange,
+  CrawlerDomainValidationResultFromServer,
   CrawlerDomainValidationStepName,
 } from '../../types';
 import { crawlDomainValidationToResult, crawlerDataServerToClient } from '../../utils';
@@ -36,11 +37,13 @@ import {
 export interface AddDomainLogicValues {
   addDomainFormInputValue: string;
   allowSubmit: boolean;
+  canIgnoreValidationFailure: boolean;
   domainValidationResult: CrawlerDomainValidationResult;
   entryPointValue: string;
   errors: string[];
   hasBlockingFailure: boolean;
   hasValidationCompleted: boolean;
+  ignoreValidationFailure: boolean;
   isValidationLoading: boolean;
   displayValidation: boolean;
 }
@@ -57,9 +60,10 @@ export interface AddDomainLogicActions {
     checks: string[];
   };
   setAddDomainFormInputValue(newValue: string): string;
-  setDomainValidationResult(
-    change: CrawlerDomainValidationResultChange
-  ): { change: CrawlerDomainValidationResultChange };
+  setDomainValidationResult(change: CrawlerDomainValidationResultChange): {
+    change: CrawlerDomainValidationResultChange;
+  };
+  setIgnoreValidationFailure(newValue: boolean): boolean;
   startDomainValidation(): void;
   submitNewDomain(): void;
   validateDomainInitialVerification(
@@ -83,6 +87,7 @@ const DEFAULT_SELECTOR_VALUES = {
     },
   } as CrawlerDomainValidationResult,
   allowSubmit: false,
+  ignoreValidationFailure: false,
   isValidationLoading: false,
 };
 
@@ -96,6 +101,7 @@ export const AddDomainLogic = kea<MakeLogicType<AddDomainLogicValues, AddDomainL
     onSubmitNewDomainError: (errors) => ({ errors }),
     setAddDomainFormInputValue: (newValue) => newValue,
     setDomainValidationResult: (change: CrawlerDomainValidationResultChange) => ({ change }),
+    setIgnoreValidationFailure: (newValue) => newValue,
     startDomainValidation: true,
     submitNewDomain: true,
     validateDomainInitialVerification: (newValue, newEntryPointValue) => ({
@@ -154,6 +160,14 @@ export const AddDomainLogic = kea<MakeLogicType<AddDomainLogicValues, AddDomainL
         onSubmitNewDomainError: (_, { errors }) => errors,
       },
     ],
+    ignoreValidationFailure: [
+      DEFAULT_SELECTOR_VALUES.ignoreValidationFailure,
+      {
+        clearDomainFormInputValue: () => DEFAULT_SELECTOR_VALUES.ignoreValidationFailure,
+        setAddDomainFormInputValue: () => DEFAULT_SELECTOR_VALUES.ignoreValidationFailure,
+        setIgnoreValidationFailure: (_, newValue: boolean) => newValue,
+      },
+    ],
   }),
   selectors: ({ selectors }) => ({
     isValidationLoading: [
@@ -173,9 +187,32 @@ export const AddDomainLogic = kea<MakeLogicType<AddDomainLogicValues, AddDomainL
       (domainValidationResult: CrawlerDomainValidationResult) =>
         !!Object.values(domainValidationResult.steps).find((step) => step.blockingFailure),
     ],
+    canIgnoreValidationFailure: [
+      () => [selectors.hasValidationCompleted, selectors.domainValidationResult],
+      (hasValidationCompleted: boolean, domainValidationResult: CrawlerDomainValidationResult) => {
+        if (!hasValidationCompleted) {
+          return false;
+        }
+
+        return (
+          domainValidationResult.steps.indexingRestrictions.blockingFailure ||
+          domainValidationResult.steps.contentVerification.blockingFailure
+        );
+      },
+    ],
     allowSubmit: [
-      () => [selectors.hasValidationCompleted, selectors.hasBlockingFailure],
-      (hasValidationCompleted, hasBlockingFailure) => hasValidationCompleted && !hasBlockingFailure,
+      () => [
+        selectors.ignoreValidationFailure,
+        selectors.hasValidationCompleted,
+        selectors.hasBlockingFailure,
+      ],
+      (ignoreValidationFailure, hasValidationCompleted, hasBlockingFailure) => {
+        if (ignoreValidationFailure) {
+          return true;
+        }
+
+        return hasValidationCompleted && !hasBlockingFailure;
+      },
     ],
     displayValidation: [
       () => [selectors.isValidationLoading, selectors.hasValidationCompleted],
@@ -204,10 +241,10 @@ export const AddDomainLogic = kea<MakeLogicType<AddDomainLogicValues, AddDomainL
       const { http } = HttpLogic.values;
       const failureResultChange = domainValidationFailureResultChange(stepName);
 
-      const route = '/api/app_search/crawler/validate_url';
+      const route = '/internal/app_search/crawler/validate_url';
 
       try {
-        const data = await http.post(route, {
+        const data = await http.post<CrawlerDomainValidationResultFromServer>(route, {
           body: JSON.stringify({ url: values.addDomainFormInputValue.trim(), checks }),
         });
         const result = crawlDomainValidationToResult(data);
@@ -254,15 +291,18 @@ export const AddDomainLogic = kea<MakeLogicType<AddDomainLogicValues, AddDomainL
       });
 
       try {
-        const response = await http.post(`/api/app_search/engines/${engineName}/crawler/domains`, {
-          query: {
-            respond_with: 'crawler_details',
-          },
-          body: requestBody,
-        });
+        const response = await http.post(
+          `/internal/app_search/engines/${engineName}/crawler/domains`,
+          {
+            query: {
+              respond_with: 'crawler_details',
+            },
+            body: requestBody,
+          }
+        );
 
         const crawlerData = crawlerDataServerToClient(response as CrawlerDataFromServer);
-        CrawlerOverviewLogic.actions.onReceiveCrawlerData(crawlerData);
+        CrawlerLogic.actions.onReceiveCrawlerData(crawlerData);
         const newDomain = crawlerData.domains[crawlerData.domains.length - 1];
         if (newDomain) {
           actions.onSubmitNewDomainSuccess(newDomain);

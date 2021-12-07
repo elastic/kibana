@@ -44,14 +44,14 @@ describe('useVisualizeAppState', () => {
   connectToQueryState.mockImplementation(() => stopSyncingAppFiltersMock);
 
   const eventEmitter = new EventEmitter();
-  const savedVisInstance = ({
+  const savedVisInstance = {
     vis: {
       setState: jest.fn().mockResolvedValue({}),
       data: {},
     },
     savedVis: {},
     embeddableHandler: {},
-  } as unknown) as SavedVisInstance;
+  } as unknown as SavedVisInstance;
   let mockServices: jest.Mocked<VisualizeServices>;
 
   beforeEach(() => {
@@ -157,7 +157,6 @@ describe('useVisualizeAppState', () => {
     };
 
     it('should successfully update vis state and set up app state container', async () => {
-      // @ts-expect-error
       stateContainerGetStateMock.mockImplementation(() => state);
       const { result, waitForNextUpdate } = renderHook(() =>
         useVisualizeAppState(mockServices, eventEmitter, savedVisInstance)
@@ -204,7 +203,6 @@ describe('useVisualizeAppState', () => {
 
     it(`should add warning toast and redirect to the landing page
         if setting new vis state was not successful, e.x. invalid query params`, async () => {
-      // @ts-expect-error
       stateContainerGetStateMock.mockImplementation(() => state);
       // @ts-expect-error
       savedVisInstance.vis.setState.mockRejectedValue({

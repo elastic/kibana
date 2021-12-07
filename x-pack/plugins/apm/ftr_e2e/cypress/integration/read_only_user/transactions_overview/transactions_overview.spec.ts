@@ -6,29 +6,37 @@
  */
 
 import url from 'url';
-import archives_metadata from '../../../fixtures/es_archiver/archives_metadata';
-import { esArchiverLoad, esArchiverUnload } from '../../../tasks/es_archiver';
+import { synthtrace } from '../../../../synthtrace';
+import { opbeans } from '../../../fixtures/synthtrace/opbeans';
 
-const { start, end } = archives_metadata['apm_8.0.0'];
+const start = '2021-10-10T00:00:00.000Z';
+const end = '2021-10-10T00:15:00.000Z';
 
-const serviceOverviewPath = '/app/apm/services/opbeans-node/transactions';
-const baseUrl = url.format({
-  pathname: serviceOverviewPath,
+const serviceOverviewHref = url.format({
+  pathname: '/app/apm/services/opbeans-node/transactions',
   query: { rangeFrom: start, rangeTo: end },
 });
 
 describe('Transactions Overview', () => {
-  before(() => {
-    esArchiverLoad('apm_8.0.0');
+  before(async () => {
+    await synthtrace.index(
+      opbeans({
+        from: new Date(start).getTime(),
+        to: new Date(end).getTime(),
+      })
+    );
   });
-  after(() => {
-    esArchiverUnload('apm_8.0.0');
+
+  after(async () => {
+    await synthtrace.clean();
   });
+
   beforeEach(() => {
     cy.loginAsReadOnlyUser();
   });
-  it('persists transaction type selected when clicking on Overview tab', () => {
-    cy.visit(baseUrl);
+
+  it('persists transaction type selected when navigating to Overview tab', () => {
+    cy.visit(serviceOverviewHref);
     cy.get('[data-test-subj="headerFilterTransactionType"]').should(
       'have.value',
       'request'
@@ -38,8 +46,7 @@ describe('Transactions Overview', () => {
       'have.value',
       'Worker'
     );
-
-    cy.get('[data-test-subj="tab_overview"]').click();
+    cy.get('a[href*="/app/apm/services/opbeans-node/overview"]').click();
     cy.get('[data-test-subj="headerFilterTransactionType"]').should(
       'have.value',
       'Worker'

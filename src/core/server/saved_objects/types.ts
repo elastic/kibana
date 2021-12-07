@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { SavedObjectsClient } from './service/saved_objects_client';
 import { SavedObjectsTypeMappingDefinition } from './mappings';
 import { SavedObjectMigrationMap } from './migrations';
@@ -214,7 +214,7 @@ export type MutatingOperationRefreshSetting = boolean | 'wait_for';
  *
  * From the perspective of application code and APIs the SavedObjectsClient is
  * a black box that persists objects. One of the internal details that users have
- * no control over is that we use an elasticsearch index for persistance and that
+ * no control over is that we use an elasticsearch index for persistence and that
  * index might be missing.
  *
  * At the time of writing we are in the process of transitioning away from the
@@ -357,6 +357,19 @@ export interface SavedObjectsTypeManagementDefinition<Attributes = any> {
    */
   importableAndExportable?: boolean;
   /**
+   * When specified, will be used instead of the type's name in SO management section's labels.
+   */
+  displayName?: string;
+  /**
+   * When set to false, the type will not be listed or searchable in the SO management section.
+   * Main usage of setting this property to false for a type is when objects from the type should
+   * be included in the export via references or export hooks, but should not directly appear in the SOM.
+   * Defaults to `true`.
+   *
+   * @remarks `importableAndExportable` must be `true` to specify this property.
+   */
+  visibleInManagement?: boolean;
+  /**
    * The default search field to use for this type. Defaults to `id`.
    */
   defaultSearchField?: string;
@@ -383,9 +396,10 @@ export interface SavedObjectsTypeManagementDefinition<Attributes = any> {
    *          the object page, relative to the base path. `uiCapabilitiesPath` is the path to check in the
    *          {@link Capabilities | uiCapabilities} to check if the user has permission to access the object.
    */
-  getInAppUrl?: (
-    savedObject: SavedObject<Attributes>
-  ) => { path: string; uiCapabilitiesPath: string };
+  getInAppUrl?: (savedObject: SavedObject<Attributes>) => {
+    path: string;
+    uiCapabilitiesPath: string;
+  };
   /**
    * An optional export transform function that can be used transform the objects of the registered type during
    * the export process.

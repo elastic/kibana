@@ -123,12 +123,10 @@ const createActions = (testBed: TestBed<TestSubjects>) => {
 
     component.update();
 
-    if (subType !== undefined) {
+    if (subType !== undefined && type === 'other') {
       await act(async () => {
-        if (type === 'other') {
-          // subType is a text input
-          form.setInputValue('createFieldForm.fieldSubType', subType);
-        }
+        // subType is a text input
+        form.setInputValue('createFieldForm.fieldSubType', subType);
       });
     }
 
@@ -276,7 +274,7 @@ const createActions = (testBed: TestBed<TestSubjects>) => {
   };
 
   const updateJsonEditor = (testSubject: TestSubjects, value: object) => {
-    find(testSubject).simulate('change', { jsonContent: JSON.stringify(value) });
+    find(testSubject).simulate('change', { jsonString: JSON.stringify(value) });
   };
 
   const getJsonEditorValue = (testSubject: TestSubjects) => {

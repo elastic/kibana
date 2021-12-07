@@ -27,6 +27,7 @@ import { help as demodata } from './dict/demodata';
 import { help as doFn } from './dict/do';
 import { help as dropdownControl } from './dict/dropdown_control';
 import { help as eq } from './dict/eq';
+import { help as embeddable } from './dict/embeddable';
 import { help as escount } from './dict/escount';
 import { help as esdocs } from './dict/esdocs';
 import { help as essql } from './dict/essql';
@@ -51,7 +52,6 @@ import { help as pie } from './dict/pie';
 import { help as plot } from './dict/plot';
 import { help as ply } from './dict/ply';
 import { help as pointseries } from './dict/pointseries';
-import { help as progress } from './dict/progress';
 import { help as render } from './dict/render';
 import { help as replace } from './dict/replace';
 import { help as rounddate } from './dict/rounddate';
@@ -183,6 +183,7 @@ export const getFunctionHelp = (): FunctionHelpDict => ({
   do: doFn,
   dropdownControl,
   eq,
+  embeddable,
   escount,
   esdocs,
   essql,
@@ -207,7 +208,6 @@ export const getFunctionHelp = (): FunctionHelpDict => ({
   plot,
   ply,
   pointseries,
-  progress,
   render,
   replace,
   rounddate,

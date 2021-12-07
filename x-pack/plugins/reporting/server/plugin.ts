@@ -8,7 +8,6 @@
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'src/core/server';
 import { PLUGIN_ID } from '../common/constants';
 import { ReportingCore } from './';
-import { initializeBrowserDriverFactory } from './browsers';
 import { buildConfig, registerUiSettings, ReportingConfigType } from './config';
 import { registerDeprecations } from './deprecations';
 import { LevelLogger, ReportingStore } from './lib';
@@ -24,7 +23,8 @@ import type {
 import { registerReportingUsageCollector } from './usage';
 
 export class ReportingPlugin
-  implements Plugin<ReportingSetup, ReportingStart, ReportingSetupDeps, ReportingStartDeps> {
+  implements Plugin<ReportingSetup, ReportingStart, ReportingSetupDeps, ReportingStartDeps>
+{
   private logger: LevelLogger;
   private reportingCore?: ReportingCore;
 
@@ -33,11 +33,14 @@ export class ReportingPlugin
   }
 
   public setup(core: CoreSetup, plugins: ReportingSetupDeps) {
+    const { http } = core;
+    const { features, licensing, security, spaces, taskManager } = plugins;
+
     const reportingCore = new ReportingCore(this.logger, this.initContext);
 
     // prevent throwing errors in route handlers about async deps not being initialized
     // @ts-expect-error null is not assignable to object. use a boolean property to ensure reporting API is enabled.
-    core.http.registerRouteHandlerContext(PLUGIN_ID, () => {
+    http.registerRouteHandlerContext(PLUGIN_ID, () => {
       if (reportingCore.pluginIsStarted()) {
         return reportingCore.getContract();
       } else {
@@ -46,14 +49,9 @@ export class ReportingPlugin
       }
     });
 
-    const { http } = core;
-    const { screenshotMode, features, licensing, security, spaces, taskManager } = plugins;
-
     const router = http.createRouter<ReportingRequestHandlerContext>();
     const basePath = http.basePath;
-
     reportingCore.pluginSetup({
-      screenshotMode,
       features,
       licensing,
       basePath,
@@ -62,6 +60,7 @@ export class ReportingPlugin
       spaces,
       taskManager,
       logger: this.logger,
+      status: core.status,
     });
 
     registerUiSettings(core);
@@ -97,11 +96,9 @@ export class ReportingPlugin
     (async () => {
       await reportingCore.pluginSetsUp();
 
-      const browserDriverFactory = await initializeBrowserDriverFactory(reportingCore, this.logger);
       const store = new ReportingStore(reportingCore, this.logger);
 
       await reportingCore.pluginStart({
-        browserDriverFactory,
         savedObjects: core.savedObjects,
         uiSettings: core.uiSettings,
         store,
@@ -109,6 +106,7 @@ export class ReportingPlugin
         data: plugins.data,
         taskManager: plugins.taskManager,
         logger: this.logger,
+        screenshotting: plugins.screenshotting,
       });
 
       // Note: this must be called after ReportingCore.pluginStart

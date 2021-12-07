@@ -16,7 +16,8 @@ import {
   SectionRecord,
 } from '../../../../shared/transaction_action_menu/sections_helper';
 
-type InstaceDetails = APIReturnType<'GET /api/apm/services/{serviceName}/service_overview_instances/details/{serviceNodeName}'>;
+type InstaceDetails =
+  APIReturnType<'GET /internal/apm/services/{serviceName}/service_overview_instances/details/{serviceNodeName}'>;
 
 function getInfraMetricsQuery(timestamp?: string) {
   if (!timestamp) {

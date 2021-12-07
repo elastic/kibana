@@ -8,14 +8,14 @@
 
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 
 import { DataTableFormat } from './data_table';
 import { IUiSettingsClient } from '../../../../../../core/public';
 import { InspectorViewProps, Adapters } from '../../../../../inspector/public';
 import { UiActionsStart } from '../../../../../ui_actions/public';
-import { FieldFormatsStart } from '../../../field_formats';
+import { FieldFormatsStart } from '../../../../../field_formats/public';
 import { TablesAdapter, Datatable, DatatableColumn } from '../../../../../expressions/public';
 import { TableSelector } from './data_table_selector';
 import { DataDownloadOptions } from './download_options';

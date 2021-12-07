@@ -19,9 +19,11 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
 
   const CorePluginDeprecationsPluginDeprecations: DomainDeprecationDetails[] = [
     {
+      configPath: 'corePluginDeprecations.oldProperty',
+      title: 'Setting "corePluginDeprecations.oldProperty" is deprecated',
       level: 'critical',
       message:
-        '"corePluginDeprecations.oldProperty" is deprecated and has been replaced by "corePluginDeprecations.newProperty"',
+        'Setting "corePluginDeprecations.oldProperty" has been replaced by "corePluginDeprecations.newProperty"',
       correctiveActions: {
         manualSteps: [
           'Replace "corePluginDeprecations.oldProperty" with "corePluginDeprecations.newProperty" in the Kibana config file, CLI flag, or environment variable (in Docker only).',
@@ -32,11 +34,13 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
       requireRestart: true,
     },
     {
+      configPath: 'corePluginDeprecations.noLongerUsed',
+      title: 'Setting "corePluginDeprecations.noLongerUsed" is deprecated',
       level: 'critical',
-      message: 'corePluginDeprecations.noLongerUsed is deprecated and is no longer used',
+      message: 'You no longer need to configure "corePluginDeprecations.noLongerUsed".',
       correctiveActions: {
         manualSteps: [
-          'Remove "corePluginDeprecations.noLongerUsed" from the Kibana config file, CLI flag, or environment variable (in Docker only)',
+          'Remove "corePluginDeprecations.noLongerUsed" from the Kibana config file, CLI flag, or environment variable (in Docker only).',
         ],
       },
       deprecationType: 'config',
@@ -44,6 +48,8 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
       requireRestart: true,
     },
     {
+      configPath: 'corePluginDeprecations.secret',
+      title: 'corePluginDeprecations has a deprecated setting',
       level: 'critical',
       message:
         'Kibana plugin functional tests will no longer allow corePluginDeprecations.secret config to be set to anything except 42.',
@@ -58,6 +64,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
       requireRestart: true,
     },
     {
+      title: 'CorePluginDeprecationsPlugin plugin is deprecated',
       message: 'CorePluginDeprecationsPlugin is a deprecated feature for testing.',
       documentationUrl: 'test-url',
       level: 'warning',
@@ -68,6 +75,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
       domainId: 'corePluginDeprecations',
     },
     {
+      title: 'Detected saved objects in test-deprecations-plugin',
       message: 'SavedObject test-deprecations-plugin is still being used.',
       documentationUrl: 'another-test-url',
       level: 'critical',
@@ -128,6 +136,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
           const resolveResult = await browser.executeAsync<ResolveDeprecationResponse>((cb) => {
             return window._coreProvider.start.core.deprecations
               .resolveDeprecation({
+                title: 'CorePluginDeprecationsPlugin plugin is deprecated',
                 message: 'CorePluginDeprecationsPlugin is a deprecated feature for testing.',
                 documentationUrl: 'test-url',
                 level: 'warning',
@@ -140,7 +149,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
           });
 
           expect(resolveResult).to.eql({
-            reason: 'deprecation has no correctiveAction via api.',
+            reason: 'This deprecation cannot be resolved automatically.',
             status: 'fail',
           });
         });
@@ -149,6 +158,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
           const resolveResult = await browser.executeAsync<ResolveDeprecationResponse>((cb) => {
             return window._coreProvider.start.core.deprecations
               .resolveDeprecation({
+                title: 'CorePluginDeprecationsPlugin plugin is deprecated',
                 message: 'CorePluginDeprecationsPlugin is a deprecated feature for testing.',
                 documentationUrl: 'test-url',
                 level: 'warning',
@@ -177,6 +187,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
           const resolveResult = await browser.executeAsync<ResolveDeprecationResponse>((cb) => {
             return window._coreProvider.start.core.deprecations
               .resolveDeprecation({
+                title: 'CorePluginDeprecationsPlugin plugin is deprecated',
                 message: 'CorePluginDeprecationsPlugin is a deprecated feature for testing.',
                 documentationUrl: 'test-url',
                 level: 'warning',
@@ -215,6 +226,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
             (keyId, cb) => {
               return window._coreProvider.start.core.deprecations
                 .resolveDeprecation({
+                  title: 'CorePluginDeprecationsPlugin plugin is deprecated',
                   message: 'CorePluginDeprecationsPlugin is a deprecated feature for testing.',
                   documentationUrl: 'test-url',
                   level: 'warning',
@@ -245,11 +257,9 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
           const { deprecations } = await supertest
             .get('/api/deprecations/')
             .set('kbn-xsrf', 'true')
-            .then(
-              ({ body }): Promise<DeprecationsGetResponse> => {
-                return body;
-              }
-            );
+            .then(({ body }): Promise<DeprecationsGetResponse> => {
+              return body;
+            });
 
           const deprecation = deprecations.find(
             ({ message }) => message === 'SavedObject test-deprecations-plugin is still being used.'

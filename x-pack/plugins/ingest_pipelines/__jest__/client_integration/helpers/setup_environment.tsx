@@ -16,6 +16,7 @@ import {
   notificationServiceMock,
   docLinksServiceMock,
   scopedHistoryMock,
+  uiSettingsServiceMock,
 } from '../../../../../../src/core/public/mocks';
 
 import { usageCollectionPluginMock } from '../../../../../../src/plugins/usage_collection/public/mocks';
@@ -41,18 +42,26 @@ const appServices = {
   metric: uiMetricService,
   documentation: documentationService,
   api: apiService,
+  fileReader: {
+    readFile: jest.fn((file) => file.text()),
+  },
   notifications: notificationServiceMock.createSetupContract(),
   history,
+  uiSettings: uiSettingsServiceMock.createSetupContract(),
   urlGenerators: {
     getUrlGenerator: jest.fn().mockReturnValue({
       createUrl: jest.fn(),
     }),
   },
+  fileUpload: {
+    getMaxBytes: jest.fn().mockReturnValue(100),
+    getMaxBytesFormatted: jest.fn().mockReturnValue('100'),
+  },
 };
 
 export const setupEnvironment = () => {
   uiMetricService.setup(usageCollectionPluginMock.createSetupContract());
-  apiService.setup((mockHttpClient as unknown) as HttpSetup, uiMetricService);
+  apiService.setup(mockHttpClient as unknown as HttpSetup, uiMetricService);
   documentationService.setup(docLinksServiceMock.createStartContract());
   breadcrumbService.setup(() => {});
 
@@ -64,8 +73,9 @@ export const setupEnvironment = () => {
   };
 };
 
-export const WithAppDependencies = (Comp: any) => (props: any) => (
-  <KibanaContextProvider services={appServices}>
-    <Comp {...props} />
-  </KibanaContextProvider>
-);
+export const WithAppDependencies = (Comp: any) => (props: any) =>
+  (
+    <KibanaContextProvider services={appServices}>
+      <Comp {...props} />
+    </KibanaContextProvider>
+  );

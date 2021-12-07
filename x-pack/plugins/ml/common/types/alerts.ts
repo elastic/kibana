@@ -55,6 +55,8 @@ export interface RecordAnomalyAlertDoc extends BaseAnomalyAlertDoc {
   over_field_value?: string | number;
   partition_field_name?: string;
   partition_field_value?: string | number;
+  typical: number[];
+  actual: number[];
 }
 
 export interface BucketAnomalyAlertDoc extends BaseAnomalyAlertDoc {
@@ -109,7 +111,7 @@ export interface JobAlertingRuleStats {
   alerting_rules?: MlAnomalyDetectionAlertRule[];
 }
 
-interface CommonHealthCheckConfig {
+export interface CommonHealthCheckConfig {
   enabled: boolean;
 }
 

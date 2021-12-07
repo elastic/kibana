@@ -52,7 +52,6 @@ export interface HeaderProps {
   kibanaVersion: string;
   application: InternalApplicationStart;
   headerBanner$: Observable<ChromeUserBanner | undefined>;
-  appTitle$: Observable<string>;
   badge$: Observable<ChromeBadge | undefined>;
   breadcrumbs$: Observable<ChromeBreadcrumb[]>;
   breadcrumbsAppendExtension$: Observable<ChromeBreadcrumbsAppendExtension | undefined>;
@@ -85,7 +84,6 @@ export function Header({
   ...observables
 }: HeaderProps) {
   const isVisible = useObservable(observables.isVisible$, false);
-  const isLocked = useObservable(observables.isLocked$, false);
   const [isNavOpen, setIsNavOpen] = useState(false);
   const [navId] = useState(htmlIdGenerator()());
   const breadcrumbsAppendExtension = useObservable(breadcrumbsAppendExtension$);
@@ -102,9 +100,7 @@ export function Header({
   const toggleCollapsibleNavRef = createRef<HTMLButtonElement & { euiAnimate: () => void }>();
   const className = classnames('hide-for-sharing', 'headerGlobalNav');
 
-  const Breadcrumbs = (
-    <HeaderBreadcrumbs appTitle$={observables.appTitle$} breadcrumbs$={observables.breadcrumbs$} />
-  );
+  const Breadcrumbs = <HeaderBreadcrumbs breadcrumbs$={observables.breadcrumbs$} />;
 
   return (
     <>
@@ -163,7 +159,6 @@ export function Header({
                 <CollapsibleNav
                   appId$={application.currentAppId$}
                   id={navId}
-                  isLocked={isLocked}
                   navLinks$={observables.navLinks$}
                   recentlyAccessed$={observables.recentlyAccessed$}
                   isNavOpen={isNavOpen}

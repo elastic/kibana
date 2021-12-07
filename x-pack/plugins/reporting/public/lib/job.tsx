@@ -7,11 +7,18 @@
 
 import { EuiText, EuiTextColor } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import moment from 'moment';
 import React from 'react';
 import { JOB_STATUSES } from '../../common/constants';
-import { JobId, ReportApiJSON, ReportSource, TaskRunResult } from '../../common/types';
+import {
+  BaseParamsV2,
+  JobId,
+  ReportApiJSON,
+  ReportOutput,
+  ReportSource,
+  TaskRunResult,
+} from '../../common/types';
 
 const { COMPLETED, FAILED, PENDING, PROCESSING, WARNINGS } = JOB_STATUSES;
 
@@ -28,6 +35,7 @@ export class Job {
   public objectType: ReportPayload['objectType'];
   public title: ReportPayload['title'];
   public isDeprecated: ReportPayload['isDeprecated'];
+  public spaceId: ReportPayload['spaceId'];
   public browserTimezone?: ReportPayload['browserTimezone'];
   public layout: ReportPayload['layout'];
 
@@ -43,13 +51,14 @@ export class Job {
   public timeout: ReportSource['timeout'];
   public kibana_name: ReportSource['kibana_name'];
   public kibana_id: ReportSource['kibana_id'];
-  public browser_type: ReportSource['browser_type'];
 
-  public size?: TaskRunResult['size'];
+  public size?: ReportOutput['size'];
   public content_type?: TaskRunResult['content_type'];
   public csv_contains_formulas?: TaskRunResult['csv_contains_formulas'];
   public max_size_reached?: TaskRunResult['max_size_reached'];
   public warnings?: TaskRunResult['warnings'];
+
+  public locatorParams?: BaseParamsV2['locatorParams'];
 
   constructor(report: ReportApiJSON) {
     this.id = report.id;
@@ -70,15 +79,16 @@ export class Job {
     this.timeout = report.timeout;
     this.kibana_name = report.kibana_name;
     this.kibana_id = report.kibana_id;
-    this.browser_type = report.browser_type;
     this.browserTimezone = report.payload.browserTimezone;
     this.size = report.output?.size;
     this.content_type = report.output?.content_type;
 
     this.isDeprecated = report.payload.isDeprecated || false;
+    this.spaceId = report.payload.spaceId;
     this.csv_contains_formulas = report.output?.csv_contains_formulas;
     this.max_size_reached = report.output?.max_size_reached;
     this.warnings = report.output?.warnings;
+    this.locatorParams = (report.payload as BaseParamsV2).locatorParams;
   }
 
   getStatusMessage() {
@@ -86,7 +96,7 @@ export class Job {
     let smallMessage;
     if (status === PENDING) {
       smallMessage = i18n.translate('xpack.reporting.jobStatusDetail.pendingStatusReachedText', {
-        defaultMessage: 'Waiting for job to be processed.',
+        defaultMessage: 'Waiting for job to process.',
       });
     } else if (status === PROCESSING) {
       smallMessage = i18n.translate('xpack.reporting.jobStatusDetail.attemptXofY', {
@@ -103,11 +113,28 @@ export class Job {
       });
     }
 
+    let deprecatedMessage: React.ReactElement | undefined;
+    if (this.isDeprecated) {
+      deprecatedMessage = (
+        <EuiText size="s">
+          {' '}
+          <EuiTextColor color="warning">
+            {i18n.translate('xpack.reporting.jobStatusDetail.deprecatedText', {
+              defaultMessage: `This is a deprecated export type. Automation of this report will need to be re-created for compatibility with future versions of Kibana.`,
+            })}
+          </EuiTextColor>
+        </EuiText>
+      );
+    }
+
     if (smallMessage) {
       return (
-        <EuiText size="s">
-          <EuiTextColor color="subdued">{smallMessage}</EuiTextColor>
-        </EuiText>
+        <>
+          <EuiText size="s">
+            <EuiTextColor color="subdued">{smallMessage}</EuiTextColor>
+          </EuiText>
+          {deprecatedMessage ? deprecatedMessage : null}
+        </>
       );
     }
 
@@ -139,9 +166,27 @@ export class Job {
   getStatusLabel() {
     return (
       <>
-        {this.getStatus()}
-        {this.getStatusMessage()}
+        {this.getStatus()} {this.getStatusMessage()}
       </>
+    );
+  }
+
+  /**
+   * Returns a user friendly version of the report job creation date
+   */
+  getCreatedAtDate(): string {
+    return this.formatDate(this.created_at);
+  }
+
+  /**
+   * Returns a user friendly version of the user that created the report job
+   */
+  getCreatedBy(): string {
+    return (
+      this.created_by ||
+      i18n.translate('xpack.reporting.jobCreatedBy.unknownUserPlaceholderText', {
+        defaultMessage: 'Unknown',
+      })
     );
   }
 
@@ -169,47 +214,56 @@ export class Job {
     }
   }
 
-  getWarnings() {
-    if (this.status !== FAILED) {
-      const warnings: string[] = [];
-      if (this.isDeprecated) {
-        warnings.push(
-          i18n.translate('xpack.reporting.jobWarning.exportTypeDeprecated', {
-            defaultMessage:
-              'This is a deprecated export type. Automation of this report will need to be re-created for compatibility with future versions of Kibana.',
-          })
-        );
-      }
-      if (this.csv_contains_formulas) {
-        warnings.push(
-          i18n.translate('xpack.reporting.jobWarning.csvContainsFormulas', {
-            defaultMessage:
-              'Your CSV contains characters which spreadsheet applications can interpret as formulas.',
-          })
-        );
-      }
-      if (this.max_size_reached) {
-        warnings.push(
-          i18n.translate('xpack.reporting.jobWarning.maxSizeReachedTooltip', {
-            defaultMessage: 'Max size reached, contains partial data.',
-          })
-        );
-      }
-
-      if (this.warnings?.length) {
-        warnings.push(...this.warnings);
-      }
-
-      if (warnings.length) {
-        return (
-          <ul>
-            {warnings.map((w, i) => {
-              return <li key={`warning-key-${i}`}>{w}</li>;
-            })}
-          </ul>
-        );
-      }
+  getDeprecatedMessage(): undefined | string {
+    if (this.isDeprecated) {
+      return i18n.translate('xpack.reporting.jobWarning.exportTypeDeprecated', {
+        defaultMessage:
+          'This is a deprecated export type. Automation of this report will need to be re-created for compatibility with future versions of Kibana.',
+      });
     }
+  }
+
+  getWarnings() {
+    const warnings: string[] = [];
+    const deprecatedMessage = this.getDeprecatedMessage();
+    if (deprecatedMessage) {
+      warnings.push(deprecatedMessage);
+    }
+
+    if (this.csv_contains_formulas) {
+      warnings.push(
+        i18n.translate('xpack.reporting.jobWarning.csvContainsFormulas', {
+          defaultMessage:
+            'Your CSV contains characters that spreadsheet applications might interpret as formulas.',
+        })
+      );
+    }
+    if (this.max_size_reached) {
+      warnings.push(
+        i18n.translate('xpack.reporting.jobWarning.maxSizeReachedTooltip', {
+          defaultMessage: 'Your search reached the max size and contains partial data.',
+        })
+      );
+    }
+
+    // warnings could contain the failure message
+    if (this.status !== FAILED && this.warnings?.length) {
+      warnings.push(...this.warnings);
+    }
+
+    if (warnings.length) {
+      return (
+        <ul>
+          {warnings.map((w, i) => {
+            return <li key={`warning-key-${i}`}>{w}</li>;
+          })}
+        </ul>
+      );
+    }
+  }
+
+  getPrettyStatusTimestamp() {
+    return this.formatDate(this.getStatusTimestamp());
   }
 
   private formatDate(timestamp: string) {

@@ -15,6 +15,7 @@ import { createMockedIndexPattern } from '../../mocks';
 import { LastValueIndexPatternColumn } from './last_value';
 import { lastValueOperation } from './index';
 import type { IndexPattern, IndexPatternLayer } from '../../types';
+import { TermsIndexPatternColumn } from './terms';
 
 const uiSettingsMock = {} as IUiSettingsClient;
 
@@ -56,7 +57,7 @@ describe('last_value', () => {
             orderDirection: 'asc',
           },
           sourceField: 'category',
-        },
+        } as TermsIndexPatternColumn,
         col2: {
           label: 'Last value of a',
           dataType: 'number',
@@ -66,7 +67,7 @@ describe('last_value', () => {
           params: {
             sortField: 'datefield',
           },
-        },
+        } as LastValueIndexPatternColumn,
       },
     };
   });
@@ -322,15 +323,15 @@ describe('last_value', () => {
   it('should return disabledStatus if indexPattern does contain date field', () => {
     const indexPattern = createMockedIndexPattern();
 
-    expect(lastValueOperation.getDisabledStatus!(indexPattern, layer)).toEqual(undefined);
+    expect(lastValueOperation.getDisabledStatus!(indexPattern, layer, 'data')).toEqual(undefined);
 
     const indexPatternWithoutTimeFieldName = {
       ...indexPattern,
       timeFieldName: undefined,
     };
-    expect(lastValueOperation.getDisabledStatus!(indexPatternWithoutTimeFieldName, layer)).toEqual(
-      undefined
-    );
+    expect(
+      lastValueOperation.getDisabledStatus!(indexPatternWithoutTimeFieldName, layer, 'data')
+    ).toEqual(undefined);
 
     const indexPatternWithoutTimefields = {
       ...indexPatternWithoutTimeFieldName,
@@ -339,10 +340,11 @@ describe('last_value', () => {
 
     const disabledStatus = lastValueOperation.getDisabledStatus!(
       indexPatternWithoutTimefields,
-      layer
+      layer,
+      'data'
     );
     expect(disabledStatus).toEqual(
-      'This function requires the presence of a date field in your index'
+      'This function requires the presence of a date field in your data view'
     );
   });
 
@@ -466,7 +468,7 @@ describe('last_value', () => {
             params: { sortField: 'timestamp' },
             scale: 'ratio',
             sourceField: 'bytes',
-          },
+          } as LastValueIndexPatternColumn,
         },
         columnOrder: [],
         indexPatternId: '',
@@ -491,14 +493,14 @@ describe('last_value', () => {
         'Field notExisting was not found',
       ]);
     });
-    it('shows error message  if the sortField does not exist in index pattern', () => {
+    it('shows error message if the sortField does not exist in index pattern', () => {
       errorLayer = {
         ...errorLayer,
         columns: {
           col1: {
             ...errorLayer.columns.col1,
             params: {
-              ...errorLayer.columns.col1.params,
+              ...(errorLayer.columns.col1 as LastValueIndexPatternColumn).params,
               sortField: 'notExisting',
             },
           } as LastValueIndexPatternColumn,
@@ -508,6 +510,20 @@ describe('last_value', () => {
         'Field notExisting was not found',
       ]);
     });
+    it('shows error message if the sourceField is of unsupported type', () => {
+      errorLayer = {
+        ...errorLayer,
+        columns: {
+          col1: {
+            ...errorLayer.columns.col1,
+            sourceField: 'timestamp',
+          } as LastValueIndexPatternColumn,
+        },
+      };
+      expect(lastValueOperation.getErrorMessage!(errorLayer, 'col1', indexPattern)).toEqual([
+        'Field timestamp is of the wrong type',
+      ]);
+    });
     it('shows error message if the sortField is not date', () => {
       errorLayer = {
         ...errorLayer,
@@ -515,7 +531,7 @@ describe('last_value', () => {
           col1: {
             ...errorLayer.columns.col1,
             params: {
-              ...errorLayer.columns.col1.params,
+              ...(errorLayer.columns.col1 as LastValueIndexPatternColumn).params,
               sortField: 'bytes',
             },
           } as LastValueIndexPatternColumn,

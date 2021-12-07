@@ -12,7 +12,7 @@ import { ArgumentStrings } from '../../../../i18n';
 
 const { DataColumn: strings } = ArgumentStrings;
 
-export const SimpleMathFunction = ({ onChange, value, inputRef, onlymath }) => {
+export const SimpleMathFunction = ({ onChange, value, onlymath }) => {
   const options = [
     { text: strings.getOptionAverage(), value: 'mean' },
     { text: strings.getOptionCount(), value: 'size' },
@@ -29,15 +29,12 @@ export const SimpleMathFunction = ({ onChange, value, inputRef, onlymath }) => {
     options.unshift({ text: strings.getOptionValue(), value: '' });
   }
 
-  return (
-    <EuiSelect compressed options={options} inputRef={inputRef} value={value} onChange={onChange} />
-  );
+  return <EuiSelect compressed options={options} value={value} onChange={onChange} />;
 };
 
 SimpleMathFunction.propTypes = {
   onChange: PropTypes.func,
   value: PropTypes.string,
-  inputRef: PropTypes.func,
   onlymath: PropTypes.bool,
 };
 

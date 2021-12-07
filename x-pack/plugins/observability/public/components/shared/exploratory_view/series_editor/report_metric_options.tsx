@@ -5,10 +5,19 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiSuperSelect, EuiToolTip } from '@elastic/eui';
+import React, { useState } from 'react';
+import {
+  EuiToolTip,
+  EuiPopover,
+  EuiButton,
+  EuiListGroup,
+  EuiListGroupItem,
+  EuiBadge,
+  EuiText,
+  EuiLoadingSpinner,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useSeriesStorage } from '../hooks/use_series_storage';
 import { SeriesConfig, SeriesUrl } from '../types';
 import { useAppIndexPatternContext } from '../hooks/use_app_index_pattern';
@@ -18,17 +27,17 @@ interface Props {
   seriesId: number;
   series: SeriesUrl;
   defaultValue?: string;
-  metricOptions: SeriesConfig['metricOptions'];
+  seriesConfig?: SeriesConfig;
 }
 
-const SELECT_REPORT_METRIC = 'SELECT_REPORT_METRIC';
-
-export function ReportMetricOptions({ seriesId, series, metricOptions }: Props) {
+export function ReportMetricOptions({ seriesId, series, seriesConfig }: Props) {
   const { setSeries } = useSeriesStorage();
+  const [showOptions, setShowOptions] = useState(false);
+  const metricOptions = seriesConfig?.metricOptions;
 
-  const { indexPatterns } = useAppIndexPatternContext();
+  const { indexPatterns, indexPatternErrors, loading } = useAppIndexPatternContext();
 
-  const onChange = (value: string) => {
+  const onChange = (value?: string) => {
     setSeries(seriesId, {
       ...series,
       selectedMetricField: value,
@@ -40,6 +49,7 @@ export function ReportMetricOptions({ seriesId, series, metricOptions }: Props) 
   }
 
   const indexPattern = indexPatterns?.[series.dataType];
+  const indexPatternError = indexPatternErrors?.[series.dataType];
 
   const options = (metricOptions ?? []).map(({ label, field, id }) => {
     let disabled = false;
@@ -71,25 +81,71 @@ export function ReportMetricOptions({ seriesId, series, metricOptions }: Props) 
     };
   });
 
+  if (indexPatternError && !indexPattern && !loading) {
+    // TODO: Add a link to docs to explain how to add index patterns
+    return (
+      <EuiText color="danger" className="eui-textNoWrap">
+        {indexPatternError.body.error === 'Forbidden'
+          ? NO_PERMISSIONS
+          : indexPatternError.body.message}
+      </EuiText>
+    );
+  }
+
+  if (!indexPattern && !loading) {
+    return <EuiText>{NO_DATA_AVAILABLE}</EuiText>;
+  }
+
   return (
-    <EuiSuperSelect
-      fullWidth
-      options={
-        series.selectedMetricField
-          ? options
-          : [
+    <>
+      {!series.selectedMetricField && (
+        <EuiPopover
+          button={
+            <EuiButton
+              iconType="plusInCircle"
+              onClick={() => setShowOptions((prevState) => !prevState)}
+              fill
+              size="s"
+              isLoading={!indexPattern && loading}
+            >
+              {SELECT_REPORT_METRIC_LABEL}
+            </EuiButton>
+          }
+          isOpen={showOptions}
+          closePopover={() => setShowOptions((prevState) => !prevState)}
+        >
+          <EuiListGroup>
+            {options.map((option) => (
+              <EuiListGroupItem
+                key={option.value}
+                onClick={() => onChange(option.value)}
+                label={option.dropdownDisplay}
+                isDisabled={option.disabled}
+              />
+            ))}
+          </EuiListGroup>
+        </EuiPopover>
+      )}
+      {series.selectedMetricField &&
+        (indexPattern ? (
+          <EuiToolTip position="top" content={REPORT_METRIC_TOOLTIP}>
+            <EuiBadge
+              iconType="cross"
+              iconSide="right"
+              iconOnClick={() => onChange(undefined)}
+              iconOnClickAriaLabel={REMOVE_REPORT_METRIC_LABEL}
+            >
               {
-                value: SELECT_REPORT_METRIC,
-                inputDisplay: SELECT_REPORT_METRIC_LABEL,
-                disabled: false,
-              },
-              ...options,
-            ]
-      }
-      valueOfSelected={series.selectedMetricField || SELECT_REPORT_METRIC}
-      onChange={(value) => onChange(value)}
-      style={{ minWidth: 220 }}
-    />
+                seriesConfig?.metricOptions?.find(
+                  (option) => option.id === series.selectedMetricField
+                )?.label
+              }
+            </EuiBadge>
+          </EuiToolTip>
+        ) : (
+          <EuiLoadingSpinner />
+        ))}
+    </>
   );
 }
 
@@ -97,5 +153,28 @@ const SELECT_REPORT_METRIC_LABEL = i18n.translate(
   'xpack.observability.expView.seriesEditor.selectReportMetric',
   {
     defaultMessage: 'Select report metric',
+  }
+);
+
+const REMOVE_REPORT_METRIC_LABEL = i18n.translate(
+  'xpack.observability.expView.seriesEditor.removeReportMetric',
+  {
+    defaultMessage: 'Remove report metric',
+  }
+);
+
+const NO_DATA_AVAILABLE = i18n.translate('xpack.observability.expView.seriesEditor.noData', {
+  defaultMessage: 'No data available',
+});
+
+const NO_PERMISSIONS = i18n.translate('xpack.observability.expView.seriesEditor.noPermissions', {
+  defaultMessage:
+    "Unable to create Data View. You don't have the required permission, please contact your admin.",
+});
+
+const REPORT_METRIC_TOOLTIP = i18n.translate(
+  'xpack.observability.expView.seriesEditor.reportMetricTooltip',
+  {
+    defaultMessage: 'Report metric',
   }
 );

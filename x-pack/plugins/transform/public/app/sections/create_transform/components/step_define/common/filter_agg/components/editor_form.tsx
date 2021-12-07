@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { EuiCodeEditor, EuiSpacer } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
+import { CodeEditor } from '../../../../../../../../../../../../src/plugins/kibana_react/public';
 import { FilterAggConfigEditor } from '../types';
 
 export const FilterEditorForm: FilterAggConfigEditor['aggTypeConfig']['FilterAggFormComponent'] = ({
@@ -16,15 +17,24 @@ export const FilterEditorForm: FilterAggConfigEditor['aggTypeConfig']['FilterAgg
   return (
     <>
       <EuiSpacer size="m" />
-      <EuiCodeEditor
-        value={config}
+      <CodeEditor
+        height={300}
+        languageId={'json'}
         onChange={(d) => {
           onChange({ config: d });
         }}
-        mode="json"
-        style={{ width: '100%' }}
-        theme="textmate"
-        height="300px"
+        options={{
+          automaticLayout: true,
+          fontSize: 12,
+          scrollBeyondLastLine: false,
+          quickSuggestions: true,
+          minimap: {
+            enabled: false,
+          },
+          wordWrap: 'on',
+          wrappingIndent: 'indent',
+        }}
+        value={config || ''}
       />
     </>
   );

@@ -167,14 +167,14 @@ describe('MetaEngineCreationLogic', () => {
         mount({ rawName: 'test', selectedIndexedEngineNames: ['foo'] });
       });
 
-      it('POSTS to /api/app_search/engines', () => {
+      it('POSTS to /internal/app_search/engines', () => {
         const body = JSON.stringify({
           name: 'test',
           type: 'meta',
           source_engines: ['foo'],
         });
         MetaEngineCreationLogic.actions.submitEngine();
-        expect(http.post).toHaveBeenCalledWith('/api/app_search/engines', { body });
+        expect(http.post).toHaveBeenCalledWith('/internal/app_search/engines', { body });
       });
 
       it('calls onEngineCreationSuccess on valid submission', async () => {

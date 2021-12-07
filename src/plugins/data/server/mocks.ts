@@ -11,13 +11,19 @@ import {
   createSearchStartMock,
   createSearchRequestHandlerContext,
 } from './search/mocks';
-import { createFieldFormatsSetupMock, createFieldFormatsStartMock } from './field_formats/mocks';
-import { createIndexPatternsStartMock } from './index_patterns/mocks';
+import {
+  createFieldFormatsSetupMock,
+  createFieldFormatsStartMock,
+} from '../../field_formats/server/mocks';
+import { createIndexPatternsStartMock } from './data_views/mocks';
 import { DataRequestHandlerContext } from './search';
 
 function createSetupContract() {
   return {
     search: createSearchSetupMock(),
+    /**
+     * @deprecated - use directly from "fieldFormats" plugin instead
+     */
     fieldFormats: createFieldFormatsSetupMock(),
   };
 }
@@ -25,15 +31,18 @@ function createSetupContract() {
 function createStartContract() {
   return {
     search: createSearchStartMock(),
+    /**
+     * @deprecated - use directly from "fieldFormats" plugin instead
+     */
     fieldFormats: createFieldFormatsStartMock(),
     indexPatterns: createIndexPatternsStartMock(),
   };
 }
 
 function createRequestHandlerContext() {
-  return ({
+  return {
     search: createSearchRequestHandlerContext(),
-  } as unknown) as jest.Mocked<DataRequestHandlerContext>;
+  } as unknown as jest.Mocked<DataRequestHandlerContext>;
 }
 
 export const dataPluginMock = {

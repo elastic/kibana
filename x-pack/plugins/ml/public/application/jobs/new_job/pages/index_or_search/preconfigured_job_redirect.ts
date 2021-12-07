@@ -5,23 +5,27 @@
  * 2.0.
  */
 
-import { ApplicationStart } from 'kibana/public';
-import { IndexPatternsContract } from '../../../../../../../../../src/plugins/data/public';
+import type { ApplicationStart } from 'kibana/public';
+import type { DataViewsContract } from '../../../../../../../../../src/plugins/data_views/public';
 import { mlJobService } from '../../../../services/job_service';
-import { loadIndexPatterns, getIndexPatternIdFromName } from '../../../../util/index_utils';
-import { Datafeed, Job } from '../../../../../../common/types/anomaly_detection_jobs';
+import { Datafeed } from '../../../../../../common/types/anomaly_detection_jobs';
 import { CREATED_BY_LABEL, JOB_TYPE } from '../../../../../../common/constants/new_job';
 
 export async function preConfiguredJobRedirect(
-  indexPatterns: IndexPatternsContract,
+  dataViewsContract: DataViewsContract,
   basePath: string,
   navigateToUrl: ApplicationStart['navigateToUrl']
 ) {
   const { createdBy, job, datafeed } = mlJobService.tempJobCloningObjects;
+
   if (job && datafeed) {
+    const dataViewId = await getDataViewIdFromName(datafeed, dataViewsContract);
+    if (dataViewId === null) {
+      return Promise.resolve();
+    }
+
     try {
-      await loadIndexPatterns(indexPatterns);
-      const redirectUrl = getWizardUrlFromCloningJob(createdBy, job, datafeed);
+      const redirectUrl = await getWizardUrlFromCloningJob(createdBy, dataViewId);
       await navigateToUrl(`${basePath}/app/ml/${redirectUrl}`);
       return Promise.reject();
     } catch (error) {
@@ -34,7 +38,7 @@ export async function preConfiguredJobRedirect(
   }
 }
 
-function getWizardUrlFromCloningJob(createdBy: string | undefined, job: Job, datafeed: Datafeed) {
+async function getWizardUrlFromCloningJob(createdBy: string | undefined, dataViewId: string) {
   const created = createdBy;
   let page = '';
 
@@ -59,7 +63,20 @@ function getWizardUrlFromCloningJob(createdBy: string | undefined, job: Job, dat
       break;
   }
 
-  const indexPatternId = getIndexPatternIdFromName(datafeed.indices.join());
+  return `jobs/new_job/${page}?index=${dataViewId}&_g=()`;
+}
 
-  return `jobs/new_job/${page}?index=${indexPatternId}&_g=()`;
+async function getDataViewIdFromName(
+  datafeed: Datafeed,
+  dataViewsContract: DataViewsContract
+): Promise<string | null> {
+  if (dataViewsContract === null) {
+    throw new Error('Data views are not initialized!');
+  }
+
+  const [dv] = await dataViewsContract?.find(datafeed.indices.join(','));
+  if (!dv) {
+    return null;
+  }
+  return dv.id ?? dv.title;
 }

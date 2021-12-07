@@ -14,18 +14,20 @@ import {
   CaseResponse,
   CaseStatuses,
   ExternalServiceResponse,
-  ESCaseAttributes,
-  ESCasesConfigureAttributes,
   CaseType,
-  ENABLE_CASE_CONNECTOR,
-} from '../../../common';
+  CasesConfigureAttributes,
+  CaseAttributes,
+} from '../../../common/api';
+import { ENABLE_CASE_CONNECTOR } from '../../../common/constants';
 import { buildCaseUserActionItem } from '../../services/user_actions/helpers';
 
 import { createIncident, getCommentContextFromAttributes } from './utils';
-import { createCaseError, flattenCaseSavedObject, getAlertInfoFromComments } from '../../common';
+import { createCaseError } from '../../common/error';
+import { flattenCaseSavedObject, getAlertInfoFromComments } from '../../common/utils';
 import { CasesClient, CasesClientArgs, CasesClientInternal } from '..';
 import { Operations } from '../../authorization';
 import { casesConnectors } from '../../connectors';
+import { getAlerts } from '../alerts/get';
 
 /**
  * Returns true if the case should be closed based on the configuration settings and whether the case
@@ -33,8 +35,8 @@ import { casesConnectors } from '../../connectors';
  * In the future we could allow push to close all the sub cases of a collection but that's not currently supported.
  */
 function shouldCloseByPush(
-  configureSettings: SavedObjectsFindResponse<ESCasesConfigureAttributes>,
-  caseInfo: SavedObject<ESCaseAttributes>
+  configureSettings: SavedObjectsFindResponse<CasesConfigureAttributes>,
+  caseInfo: SavedObject<CaseAttributes>
 ): boolean {
   return (
     configureSettings.total > 0 &&
@@ -106,9 +108,7 @@ export const push = async (
 
     const alertsInfo = getAlertInfoFromComments(theCase?.comments);
 
-    const alerts = await casesClientInternal.alerts.get({
-      alertsInfo,
-    });
+    const alerts = await getAlerts(alertsInfo, clientArgs);
 
     const getMappingsResponse = await casesClientInternal.configuration.getMappings({
       connector: theCase.connector,
@@ -186,6 +186,7 @@ export const push = async (
 
     const [updatedCase, updatedComments] = await Promise.all([
       caseService.patchCase({
+        originalCase: myCase,
         unsecuredSavedObjectsClient,
         caseId,
         updatedAttributes: {
@@ -240,7 +241,7 @@ export const push = async (
             actionBy: { username, full_name, email },
             caseId,
             fields: ['pushed'],
-            newValue: JSON.stringify(externalService),
+            newValue: externalService,
             owner: myCase.attributes.owner,
           }),
         ],

@@ -14,7 +14,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useMemo } from 'react';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { useTrackPageview } from '../../../../../observability/public';
@@ -67,8 +67,6 @@ export const LogsSettingsPage = () => {
     logIndicesFormElement,
     logColumnsFormElement,
     nameFormElement,
-    tiebreakerFieldFormElement,
-    timestampFieldFormElement,
   } = useLogSourceConfigurationFormState(source?.configuration);
 
   const persistUpdates = useCallback(async () => {
@@ -76,10 +74,10 @@ export const LogsSettingsPage = () => {
     sourceConfigurationFormElement.resetValue();
   }, [updateSource, sourceConfigurationFormElement, formState]);
 
-  const isWriteable = useMemo(() => shouldAllowEdit && source && source.origin !== 'internal', [
-    shouldAllowEdit,
-    source,
-  ]);
+  const isWriteable = useMemo(
+    () => shouldAllowEdit && source && source.origin !== 'internal',
+    [shouldAllowEdit, source]
+  );
 
   if ((isLoading || isUninitialized) && !resolvedSourceConfiguration) {
     return <SourceLoadingPage />;
@@ -100,7 +98,7 @@ export const LogsSettingsPage = () => {
         <Prompt
           prompt={sourceConfigurationFormElement.isDirty ? unsavedFormPromptMessage : undefined}
         />
-        <EuiPanel paddingSize="l">
+        <EuiPanel paddingSize="l" hasShadow={false} hasBorder={true}>
           <NameConfigurationPanel
             isLoading={isLoading}
             isReadOnly={!isWriteable}
@@ -108,17 +106,15 @@ export const LogsSettingsPage = () => {
           />
         </EuiPanel>
         <EuiSpacer />
-        <EuiPanel paddingSize="l">
+        <EuiPanel paddingSize="l" hasShadow={false} hasBorder={true}>
           <IndicesConfigurationPanel
             isLoading={isLoading}
             isReadOnly={!isWriteable}
             indicesFormElement={logIndicesFormElement}
-            tiebreakerFieldFormElement={tiebreakerFieldFormElement}
-            timestampFieldFormElement={timestampFieldFormElement}
           />
         </EuiPanel>
         <EuiSpacer />
-        <EuiPanel paddingSize="l">
+        <EuiPanel paddingSize="l" hasShadow={false} hasBorder={true}>
           <LogColumnsConfigurationPanel
             availableFields={availableFields}
             isLoading={isLoading}

@@ -24,6 +24,7 @@ import {
 import {
   CreateExceptionListItemBuilderSchema,
   ExceptionsBuilderExceptionItem,
+  OperatorOption,
   containsValueListEntry,
   filterExceptionItems,
   getDefaultEmptyEntry,
@@ -32,7 +33,7 @@ import {
 } from '@kbn/securitysolution-list-utils';
 import { IndexPatternBase } from '@kbn/es-query';
 
-import { AutocompleteStart } from '../../../../../../../src/plugins/data/public';
+import type { AutocompleteStart } from '../../../../../../../src/plugins/data/public';
 import { AndOrBadge } from '../and_or_badge';
 
 import { BuilderExceptionListItemComponent } from './exception_item_renderer';
@@ -80,6 +81,7 @@ export interface ExceptionBuilderProps {
   isAndDisabled: boolean;
   isNestedDisabled: boolean;
   isOrDisabled: boolean;
+  isOrHidden?: boolean;
   listId: string;
   listNamespaceType: NamespaceType;
   listType: ExceptionListType;
@@ -90,6 +92,7 @@ export interface ExceptionBuilderProps {
   onChange: (arg: OnChangeProps) => void;
   ruleName: string;
   isDisabled?: boolean;
+  operatorsList?: OperatorOption[];
 }
 
 export const ExceptionBuilderComponent = ({
@@ -101,6 +104,7 @@ export const ExceptionBuilderComponent = ({
   isAndDisabled,
   isNestedDisabled,
   isOrDisabled,
+  isOrHidden = false,
   listId,
   listNamespaceType,
   listType,
@@ -109,6 +113,7 @@ export const ExceptionBuilderComponent = ({
   ruleName,
   isDisabled = false,
   osTypes,
+  operatorsList,
 }: ExceptionBuilderProps): JSX.Element => {
   const [
     {
@@ -413,6 +418,7 @@ export const ExceptionBuilderComponent = ({
                 setErrorsExist={setErrorsExist}
                 osTypes={osTypes}
                 isDisabled={isDisabled}
+                operatorsList={operatorsList}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -429,6 +435,7 @@ export const ExceptionBuilderComponent = ({
           <EuiFlexItem grow={1}>
             <BuilderLogicButtons
               isOrDisabled={isOrDisabled ? isOrDisabled : disableOr}
+              isOrHidden={isOrHidden}
               isAndDisabled={isAndDisabled ? isAndDisabled : disableAnd}
               isNestedDisabled={isNestedDisabled ? isNestedDisabled : disableNested}
               isNested={addNested}

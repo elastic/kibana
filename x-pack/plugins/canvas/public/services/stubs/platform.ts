@@ -27,10 +27,13 @@ export const platformServiceFactory: CanvasPlatformServiceFactory = () => ({
   getKibanaVersion: () => 'kibanaVersion',
   getHasWriteAccess: () => true,
   getUISetting,
+  hasHeaderBanner$: noop,
   setBreadcrumbs: noop,
   setRecentlyAccessed: noop,
   getSavedObjects: noop,
   getSavedObjectsClient: noop,
   getUISettings: noop,
   setFullscreen: noop,
+  redirectLegacyUrl: noop,
+  getLegacyUrlConflict: undefined,
 });

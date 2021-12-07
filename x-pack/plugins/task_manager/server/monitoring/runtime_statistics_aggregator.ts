@@ -6,7 +6,7 @@
  */
 
 import { Observable } from 'rxjs';
-import { JsonValue } from '@kbn/common-utils';
+import { JsonValue } from '@kbn/utility-types';
 
 export interface AggregatedStat<Stat = JsonValue> {
   key: string;

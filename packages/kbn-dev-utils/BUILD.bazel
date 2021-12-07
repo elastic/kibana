@@ -56,24 +56,20 @@ RUNTIME_DEPS = [
   "@npm//globby",
   "@npm//load-json-file",
   "@npm//markdown-it",
-  "@npm//moment",
   "@npm//normalize-path",
+  "@npm//prettier",
   "@npm//rxjs",
   "@npm//tar",
   "@npm//tree-kill",
   "@npm//vinyl",
-  "@npm//yauzl"
+  "@npm//yauzl",
 ]
 
 TYPES_DEPS = [
   "//packages/kbn-std",
   "//packages/kbn-utils",
-  "@npm//axios",
-  "@npm//execa",
-  "@npm//exit-hook",
-  "@npm//getopts",
-  "@npm//rxjs",
-  "@npm//tree-kill",
+  "@npm//@babel/parser",
+  "@npm//@babel/types",
   "@npm//@types/babel__core",
   "@npm//@types/cheerio",
   "@npm//@types/dedent",
@@ -82,11 +78,18 @@ TYPES_DEPS = [
   "@npm//@types/markdown-it",
   "@npm//@types/node",
   "@npm//@types/normalize-path",
+  "@npm//@types/prettier",
   "@npm//@types/react",
   "@npm//@types/tar",
   "@npm//@types/testing-library__jest-dom",
   "@npm//@types/vinyl",
-  "@npm//@types/yauzl"
+  "@npm//@types/yauzl",
+  "@npm//axios",
+  "@npm//execa",
+  "@npm//exit-hook",
+  "@npm//getopts",
+  "@npm//rxjs",
+  "@npm//tree-kill",
 ]
 
 jsts_transpiler(
@@ -100,6 +103,7 @@ ts_config(
   src = "tsconfig.json",
   deps = [
     "//:tsconfig.base.json",
+    "//:tsconfig.bazel.json",
   ],
 )
 
@@ -111,7 +115,6 @@ ts_project(
   declaration = True,
   declaration_map = True,
   emit_declaration_only = True,
-  incremental = False,
   out_dir = "target_types",
   source_map = True,
   root_dir = "src",

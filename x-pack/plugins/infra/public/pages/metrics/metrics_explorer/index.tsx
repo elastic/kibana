@@ -7,24 +7,25 @@
 
 import { EuiErrorBoundary } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useEffect } from 'react';
-import { IIndexPattern } from 'src/plugins/data/public';
+import React, { useEffect, useContext } from 'react';
+import { DataViewBase } from '@kbn/es-query';
 import { MetricsSourceConfigurationProperties } from '../../../../common/metrics_sources';
 import { useTrackPageview } from '../../../../../observability/public';
 import { useMetricsBreadcrumbs } from '../../../hooks/use_metrics_breadcrumbs';
-
 import { DocumentTitle } from '../../../components/document_title';
 import { NoData } from '../../../components/empty_states';
 import { MetricsExplorerCharts } from './components/charts';
 import { MetricsExplorerToolbar } from './components/toolbar';
 import { useMetricsExplorerState } from './hooks/use_metric_explorer_state';
+import { Source } from '../../../containers/metrics_source';
 import { useSavedViewContext } from '../../../containers/saved_view/saved_view';
 import { MetricsPageTemplate } from '../page_template';
 import { metricsExplorerTitle } from '../../../translations';
+import { SavedViewsToolbarControls } from '../../../components/saved_views/toolbar_control';
 
 interface MetricsExplorerPageProps {
   source: MetricsSourceConfigurationProperties;
-  derivedIndexPattern: IIndexPattern;
+  derivedIndexPattern: DataViewBase;
 }
 
 export const MetricsExplorerPage = ({ source, derivedIndexPattern }: MetricsExplorerPageProps) => {
@@ -51,6 +52,7 @@ export const MetricsExplorerPage = ({ source, derivedIndexPattern }: MetricsExpl
   useTrackPageview({ app: 'infra_metrics', path: 'metrics_explorer' });
   useTrackPageview({ app: 'infra_metrics', path: 'metrics_explorer', delay: 15000 });
 
+  const { metricIndicesExist } = useContext(Source.Context);
   useEffect(() => {
     if (currentView) {
       onViewStateChange(currentView);
@@ -84,8 +86,18 @@ export const MetricsExplorerPage = ({ source, derivedIndexPattern }: MetricsExpl
         }
       />
       <MetricsPageTemplate
+        hasData={metricIndicesExist}
         pageHeader={{
           pageTitle: metricsExplorerTitle,
+          rightSideItems: [
+            <SavedViewsToolbarControls
+              viewState={{
+                options,
+                chartOptions,
+                currentTimerange,
+              }}
+            />,
+          ],
         }}
       >
         <MetricsExplorerToolbar

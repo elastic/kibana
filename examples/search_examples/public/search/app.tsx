@@ -8,7 +8,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
   EuiButtonEmpty,
@@ -47,6 +47,7 @@ import {
   isErrorResponse,
 } from '../../../../src/plugins/data/public';
 import { IMyStrategyResponse } from '../../common/types';
+import { AbortError } from '../../../../src/plugins/kibana_utils/common';
 
 interface SearchExamplesAppDeps {
   notifications: CoreStart['notifications'];
@@ -102,6 +103,8 @@ export const SearchExamplesApp = ({
     IndexPatternField | null | undefined
   >();
   const [request, setRequest] = useState<Record<string, any>>({});
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [currentAbortController, setAbortController] = useState<AbortController>();
   const [rawResponse, setRawResponse] = useState<Record<string, any>>({});
   const [selectedTab, setSelectedTab] = useState(0);
 
@@ -131,11 +134,45 @@ export const SearchExamplesApp = ({
     setSelectedNumericField(fields?.length ? getNumeric(fields)[0] : null);
   }, [fields]);
 
-  const doAsyncSearch = async (strategy?: string, sessionId?: string) => {
+  const doAsyncSearch = async (
+    strategy?: string,
+    sessionId?: string,
+    addWarning: boolean = false,
+    addError: boolean = false
+  ) => {
     if (!indexPattern || !selectedNumericField) return;
 
     // Construct the query portion of the search request
     const query = data.query.getEsQuery(indexPattern);
+
+    if (addWarning) {
+      query.bool.must.push({
+        // @ts-ignore
+        error_query: {
+          indices: [
+            {
+              name: indexPattern.title,
+              error_type: 'warning',
+              message: 'Watch out!',
+            },
+          ],
+        },
+      });
+    }
+    if (addError) {
+      query.bool.must.push({
+        // @ts-ignore
+        error_query: {
+          indices: [
+            {
+              name: indexPattern.title,
+              error_type: 'exception',
+              message: 'Watch out!',
+            },
+          ],
+        },
+      });
+    }
 
     // Construct the aggregations portion of the search request by using the `data.search.aggs` service.
     const aggs = [{ type: 'avg', params: { field: selectedNumericField!.name } }];
@@ -153,16 +190,23 @@ export const SearchExamplesApp = ({
       ...(strategy ? { get_cool: getCool } : {}),
     };
 
+    const abortController = new AbortController();
+    setAbortController(abortController);
+
     // Submit the search request using the `data.search` service.
     setRequest(req.params.body);
-    const searchSubscription$ = data.search
+    setIsLoading(true);
+
+    data.search
       .search(req, {
         strategy,
         sessionId,
+        abortSignal: abortController.signal,
       })
       .subscribe({
         next: (res) => {
           if (isCompleteResponse(res)) {
+            setIsLoading(false);
             setResponse(res);
             const avgResult: number | undefined = res.rawResponse.aggregations
               ? // @ts-expect-error @elastic/elasticsearch no way to declare a type for aggregation in the search response
@@ -192,15 +236,29 @@ export const SearchExamplesApp = ({
                 toastLifeTimeMs: 300000,
               }
             );
-            searchSubscription$.unsubscribe();
+            if (res.warning) {
+              notifications.toasts.addWarning({
+                title: 'Warning',
+                text: mountReactNode(res.warning),
+              });
+            }
           } else if (isErrorResponse(res)) {
             // TODO: Make response error status clearer
-            notifications.toasts.addWarning('An error has occurred');
-            searchSubscription$.unsubscribe();
+            notifications.toasts.addDanger('An error has occurred');
           }
         },
-        error: () => {
-          notifications.toasts.addDanger('Failed to run search');
+        error: (e) => {
+          setIsLoading(false);
+          if (e instanceof AbortError) {
+            notifications.toasts.addWarning({
+              title: e.message,
+            });
+          } else {
+            notifications.toasts.addDanger({
+              title: 'Failed to run search',
+              text: e.message,
+            });
+          }
         },
       });
   };
@@ -243,7 +301,12 @@ export const SearchExamplesApp = ({
       }
 
       setRequest(searchSource.getSearchRequestBody());
-      const { rawResponse: res } = await searchSource.fetch$().toPromise();
+      const abortController = new AbortController();
+      setAbortController(abortController);
+      setIsLoading(true);
+      const { rawResponse: res } = await searchSource
+        .fetch$({ abortSignal: abortController.signal })
+        .toPromise();
       setRawResponse(res);
 
       const message = <EuiText>Searched {res.hits.total} documents.</EuiText>;
@@ -258,7 +321,18 @@ export const SearchExamplesApp = ({
       );
     } catch (e) {
       setRawResponse(e.body);
-      notifications.toasts.addWarning(`An error has occurred: ${e.message}`);
+      if (e instanceof AbortError) {
+        notifications.toasts.addWarning({
+          title: e.message,
+        });
+      } else {
+        notifications.toasts.addDanger({
+          title: 'Failed to run search',
+          text: e.message,
+        });
+      }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -270,6 +344,14 @@ export const SearchExamplesApp = ({
     doAsyncSearch('myStrategy');
   };
 
+  const onWarningSearchClickHandler = () => {
+    doAsyncSearch(undefined, undefined, true);
+  };
+
+  const onErrorSearchClickHandler = () => {
+    doAsyncSearch(undefined, undefined, false, true);
+  };
+
   const onPartialResultsClickHandler = () => {
     setSelectedTab(1);
     const req = {
@@ -278,29 +360,44 @@ export const SearchExamplesApp = ({
       },
     };
 
+    const abortController = new AbortController();
+    setAbortController(abortController);
+
     // Submit the search request using the `data.search` service.
     setRequest(req.params);
-    const searchSubscription$ = data.search
+    setIsLoading(true);
+    data.search
       .search(req, {
         strategy: 'fibonacciStrategy',
+        abortSignal: abortController.signal,
       })
       .subscribe({
         next: (res) => {
           setResponse(res);
           if (isCompleteResponse(res)) {
+            setIsLoading(false);
             notifications.toasts.addSuccess({
               title: 'Query result',
               text: 'Query finished',
             });
-            searchSubscription$.unsubscribe();
           } else if (isErrorResponse(res)) {
+            setIsLoading(false);
             // TODO: Make response error status clearer
             notifications.toasts.addWarning('An error has occurred');
-            searchSubscription$.unsubscribe();
           }
         },
-        error: () => {
-          notifications.toasts.addDanger('Failed to run search');
+        error: (e) => {
+          setIsLoading(false);
+          if (e instanceof AbortError) {
+            notifications.toasts.addWarning({
+              title: e.message,
+            });
+          } else {
+            notifications.toasts.addDanger({
+              title: 'Failed to run search',
+              text: e.message,
+            });
+          }
         },
       });
   };
@@ -311,17 +408,32 @@ export const SearchExamplesApp = ({
 
   const onServerClickHandler = async () => {
     if (!indexPattern || !selectedNumericField) return;
+    const abortController = new AbortController();
+    setAbortController(abortController);
+    setIsLoading(true);
     try {
       const res = await http.get(SERVER_SEARCH_ROUTE_PATH, {
         query: {
           index: indexPattern.title,
           field: selectedNumericField!.name,
         },
+        signal: abortController.signal,
       });
 
       notifications.toasts.addSuccess(`Server returned ${JSON.stringify(res)}`);
     } catch (e) {
-      notifications.toasts.addDanger('Failed to run search');
+      if (e?.name === 'AbortError') {
+        notifications.toasts.addWarning({
+          title: e.message,
+        });
+      } else {
+        notifications.toasts.addDanger({
+          title: 'Failed to run search',
+          text: e.message,
+        });
+      }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -531,6 +643,38 @@ export const SearchExamplesApp = ({
               </EuiText>
               <EuiSpacer />
               <EuiTitle size="xs">
+                <h3>Handling errors & warnings</h3>
+              </EuiTitle>
+              <EuiText>
+                When fetching data from Elasticsearch, there are several different ways warnings and
+                errors may be returned. In general, it is recommended to surface these in the UX.
+                <EuiSpacer />
+                <EuiButtonEmpty
+                  size="xs"
+                  onClick={onWarningSearchClickHandler}
+                  iconType="play"
+                  data-test-subj="searchWithWarning"
+                >
+                  <FormattedMessage
+                    id="searchExamples.searchWithWarningButtonText"
+                    defaultMessage="Request with a warning in response"
+                  />
+                </EuiButtonEmpty>
+                <EuiText />
+                <EuiButtonEmpty
+                  size="xs"
+                  onClick={onErrorSearchClickHandler}
+                  iconType="play"
+                  data-test-subj="searchWithError"
+                >
+                  <FormattedMessage
+                    id="searchExamples.searchWithErrorButtonText"
+                    defaultMessage="Request with an error in response"
+                  />
+                </EuiButtonEmpty>
+              </EuiText>
+              <EuiSpacer />
+              <EuiTitle size="xs">
                 <h3>Handling partial results</h3>
               </EuiTitle>
               <EuiText>
@@ -635,6 +779,11 @@ export const SearchExamplesApp = ({
                 strategy. This request does not take the configuration of{' '}
                 <EuiCode>TopNavMenu</EuiCode> into account, but you could pass those down to the
                 server as well.
+                <br />
+                When executing search on the server, make sure to cancel the search in case user
+                cancels corresponding network request. This could happen in case user re-runs a
+                query or leaves the page without waiting for the result. Cancellation API is similar
+                on client and server and use `AbortController`.
                 <EuiSpacer />
                 <EuiButtonEmpty size="xs" onClick={onServerClickHandler} iconType="play">
                   <FormattedMessage
@@ -651,6 +800,15 @@ export const SearchExamplesApp = ({
                 selectedTab={reqTabs[selectedTab]}
                 onTabClick={(tab) => setSelectedTab(reqTabs.indexOf(tab))}
               />
+              <EuiSpacer />
+              {currentAbortController && isLoading && (
+                <EuiButtonEmpty size="xs" onClick={() => currentAbortController?.abort()}>
+                  <FormattedMessage
+                    id="searchExamples.abortButtonText"
+                    defaultMessage="Abort request"
+                  />
+                </EuiButtonEmpty>
+              )}
             </EuiFlexItem>
           </EuiFlexGrid>
         </EuiPageContentBody>

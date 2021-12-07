@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import { Writable } from 'stream';
 import { i18n } from '@kbn/i18n';
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { IScopedClusterClient, IUiSettingsClient } from 'src/core/server';
 import { IScopedSearchClient } from 'src/plugins/data/server';
 import { Datatable } from 'src/plugins/expressions/server';
@@ -14,9 +15,6 @@ import { ReportingConfig } from '../../..';
 import {
   cellHasFormulas,
   ES_SEARCH_STRATEGY,
-  FieldFormat,
-  FieldFormatConfig,
-  IFieldFormatsRegistry,
   IndexPattern,
   ISearchSource,
   ISearchStartSearchSource,
@@ -24,6 +22,11 @@ import {
   SearchSourceFields,
   tabifyDocs,
 } from '../../../../../../../src/plugins/data/common';
+import {
+  FieldFormat,
+  FieldFormatConfig,
+  IFieldFormatsRegistry,
+} from '../../../../../../../src/plugins/field_formats/common';
 import { KbnServerError } from '../../../../../../../src/plugins/kibana_utils/server';
 import { CancellationToken } from '../../../../common';
 import { CONTENT_TYPE_CSV } from '../../../../common/constants';
@@ -73,14 +76,16 @@ export class CsvGenerator {
     private clients: Clients,
     private dependencies: Dependencies,
     private cancellationToken: CancellationToken,
-    private logger: LevelLogger
+    private logger: LevelLogger,
+    private stream: Writable
   ) {}
 
   private async scan(
     index: IndexPattern,
     searchSource: ISearchSource,
-    scrollSettings: CsvExportSettings['scroll']
+    settings: CsvExportSettings
   ) {
+    const { scroll: scrollSettings, includeFrozen } = settings;
     const searchBody = searchSource.getSearchRequestBody();
     this.logger.debug(`executing search request`);
     const searchParams = {
@@ -89,8 +94,10 @@ export class CsvGenerator {
         index: index.title,
         scroll: scrollSettings.duration,
         size: scrollSettings.size,
+        ignore_throttled: !includeFrozen,
       },
     };
+
     const results = (
       await this.clients.data.search(searchParams, { strategy: ES_SEARCH_STRATEGY }).toPromise()
     ).rawResponse as estypes.SearchResponse<unknown>;
@@ -102,10 +109,8 @@ export class CsvGenerator {
     this.logger.debug(`executing scroll request`);
     const results = (
       await this.clients.es.asCurrentUser.scroll({
-        body: {
-          scroll: scrollSettings.duration,
-          scroll_id: scrollId,
-        },
+        scroll: scrollSettings.duration,
+        scroll_id: scrollId,
       })
     ).body;
     return results;
@@ -177,7 +182,7 @@ export class CsvGenerator {
       data: dataTableCell,
     }: {
       column: string;
-      data: any;
+      data: unknown;
     }): string => {
       let cell: string[] | string | object;
       // check truthiness to guard against _score, _type, etc
@@ -227,7 +232,6 @@ export class CsvGenerator {
 
     if (!builder.tryAppend(header)) {
       return {
-        size: 0,
         content: '',
         maxSizeReached: true,
         warnings: [],
@@ -238,7 +242,7 @@ export class CsvGenerator {
   /*
    * Format a Datatable into rows of CSV content
    */
-  private generateRows(
+  private async generateRows(
     columns: string[],
     table: Datatable,
     builder: MaxSizeStringBuilder,
@@ -251,14 +255,38 @@ export class CsvGenerator {
         break;
       }
 
-      const row =
-        columns
-          .map((f) => ({ column: f, data: dataTableRow[f] }))
-          .map(this.formatCellValues(formatters))
-          .map(this.escapeValues(settings))
-          .join(settings.separator) + '\n';
+      /*
+       * Intrinsically, generating the rows is a synchronous process. Awaiting
+       * on a setImmediate call here partititions what could be a very long and
+       * CPU-intenstive synchronous process into an asychronous process. This
+       * give NodeJS to process other asychronous events that wait on the Event
+       * Loop.
+       *
+       * See: https://nodejs.org/en/docs/guides/dont-block-the-event-loop/
+       *
+       * It's likely this creates a lot of context switching, and adds to the
+       * time it would take to generate the CSV. There are alternatives to the
+       * chosen performance solution:
+       *
+       * 1. Partition the synchronous process with fewer partitions, by using
+       * the loop counter to call setImmediate only every N amount of rows.
+       * Testing is required to see what the best N value for most data will
+       * be.
+       *
+       * 2. Use a C++ add-on to generate the CSV using the Node Worker Pool
+       * instead of using the Event Loop
+       */
+      await new Promise(setImmediate);
 
-      if (!builder.tryAppend(row)) {
+      const rowDefinition: string[] = [];
+      const format = this.formatCellValues(formatters);
+      const escape = this.escapeValues(settings);
+
+      for (const column of columns) {
+        rowDefinition.push(escape(format({ column, data: dataTableRow[column] })));
+      }
+
+      if (!builder.tryAppend(rowDefinition.join(settings.separator) + '\n')) {
         this.logger.warn(`Max Size Reached after ${this.csvRowCount} rows.`);
         this.maxSizeReached = true;
         if (this.cancellationToken) {
@@ -285,12 +313,12 @@ export class CsvGenerator {
     const index = searchSource.getField('index');
 
     if (!index) {
-      throw new Error(`The search must have a revference to an index pattern!`);
+      throw new Error(`The search must have a reference to an index pattern!`);
     }
 
     const { maxSizeBytes, bom, escapeFormulaValues, scroll: scrollSettings } = settings;
 
-    const builder = new MaxSizeStringBuilder(byteSizeValueToNumber(maxSizeBytes), bom);
+    const builder = new MaxSizeStringBuilder(this.stream, byteSizeValueToNumber(maxSizeBytes), bom);
     const warnings: string[] = [];
     let first = true;
     let currentRecord = -1;
@@ -323,7 +351,7 @@ export class CsvGenerator {
         let results: estypes.SearchResponse<unknown> | undefined;
         if (scrollId == null) {
           // open a scroll cursor in Elasticsearch
-          results = await this.scan(index, searchSource, scrollSettings);
+          results = await this.scan(index, searchSource, settings);
           scrollId = results?._scroll_id;
           if (results.hits?.total != null) {
             totalRecords = results.hits.total as number;
@@ -339,9 +367,18 @@ export class CsvGenerator {
           break;
         }
 
+        // TODO check for shard failures, log them and add a warning if found
+        {
+          const {
+            hits: { hits, ...hitsMeta },
+            ...header
+          } = results;
+          this.logger.debug('Results metadata: ' + JSON.stringify({ header, hitsMeta }));
+        }
+
         let table: Datatable | undefined;
         try {
-          table = tabifyDocs(results, index, { shallow: true, meta: true });
+          table = tabifyDocs(results, index, { shallow: true, includeIgnoredValues: true });
         } catch (err) {
           this.logger.error(err);
         }
@@ -364,7 +401,7 @@ export class CsvGenerator {
         }
 
         const formatters = this.getFormatters(table);
-        this.generateRows(columns, table, builder, formatters, settings);
+        await this.generateRows(columns, table, builder, formatters, settings);
 
         // update iterator
         currentRecord += table.rows.length;
@@ -388,7 +425,7 @@ export class CsvGenerator {
       if (scrollId) {
         this.logger.debug(`executing clearScroll request`);
         try {
-          await this.clients.es.asCurrentUser.clearScroll({ body: { scroll_id: [scrollId] } });
+          await this.clients.es.asCurrentUser.clearScroll({ scroll_id: [scrollId] });
         } catch (err) {
           this.logger.error(err);
         }
@@ -397,17 +434,20 @@ export class CsvGenerator {
       }
     }
 
-    const size = builder.getSizeInBytes();
-    this.logger.debug(
-      `Finished generating. Total size in bytes: ${size}. Row count: ${this.csvRowCount}.`
-    );
+    this.logger.debug(`Finished generating. Row count: ${this.csvRowCount}.`);
+
+    // FIXME: https://github.com/elastic/kibana/issues/112186 -- find root cause
+    if (!this.maxSizeReached && this.csvRowCount !== totalRecords) {
+      this.logger.warning(
+        `ES scroll returned fewer total hits than expected! ` +
+          `Search result total hits: ${totalRecords}. Row count: ${this.csvRowCount}.`
+      );
+    }
 
     return {
-      content: builder.getString(),
       content_type: CONTENT_TYPE_CSV,
       csv_contains_formulas: this.csvContainsFormulas && !escapeFormulaValues,
       max_size_reached: this.maxSizeReached,
-      size,
       warnings,
     };
   }

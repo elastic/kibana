@@ -29,6 +29,7 @@ Object.defineProperty(global.window, 'scrollTo', { value: spyScrollTo });
 import { ADD, UPDATE } from '../../../../../shared/constants/operations';
 import { defaultErrorMessage } from '../../../../../shared/flash_messages/handle_api_errors';
 import { SchemaType } from '../../../../../shared/schema/types';
+import { itShowsServerErrorAsFlashMessage } from '../../../../../test_helpers';
 import { AppLogic } from '../../../../app_logic';
 
 import {
@@ -40,12 +41,7 @@ import { SchemaLogic, dataTypeOptions } from './schema_logic';
 
 describe('SchemaLogic', () => {
   const { http } = mockHttpValues;
-  const {
-    clearFlashMessages,
-    flashAPIErrors,
-    setSuccessMessage,
-    setErrorMessage,
-  } = mockFlashMessageHelpers;
+  const { clearFlashMessages, flashSuccessToast, setErrorMessage } = mockFlashMessageHelpers;
   const { mount } = new LogicMounter(SchemaLogic);
 
   const defaultValues = {
@@ -71,7 +67,7 @@ describe('SchemaLogic', () => {
 
   const fieldCoercionErrors = [
     {
-      external_id: '123',
+      id: '123',
       error: 'error',
     },
   ] as any;
@@ -208,7 +204,7 @@ describe('SchemaLogic', () => {
         SchemaLogic.actions.initializeSchema();
 
         expect(http.get).toHaveBeenCalledWith(
-          '/api/workplace_search/org/sources/source123/schemas'
+          '/internal/workplace_search/org/sources/source123/schemas'
         );
         await nextTick();
         expect(onInitializeSchemaSpy).toHaveBeenCalledWith(serverResponse);
@@ -222,18 +218,14 @@ describe('SchemaLogic', () => {
         SchemaLogic.actions.initializeSchema();
 
         expect(http.get).toHaveBeenCalledWith(
-          '/api/workplace_search/account/sources/source123/schemas'
+          '/internal/workplace_search/account/sources/source123/schemas'
         );
         await nextTick();
         expect(onInitializeSchemaSpy).toHaveBeenCalledWith(serverResponse);
       });
 
-      it('handles error', async () => {
-        http.get.mockReturnValue(Promise.reject('this is an error'));
+      itShowsServerErrorAsFlashMessage(http.get, () => {
         SchemaLogic.actions.initializeSchema();
-        await nextTick();
-
-        expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
       });
     });
 
@@ -254,12 +246,12 @@ describe('SchemaLogic', () => {
         );
 
         expect(http.get).toHaveBeenCalledWith(
-          '/api/workplace_search/org/sources/source123/schemas'
+          '/internal/workplace_search/org/sources/source123/schemas'
         );
 
         await initPromise;
         expect(http.get).toHaveBeenCalledWith(
-          '/api/workplace_search/org/sources/source123/reindex_job/123'
+          '/internal/workplace_search/org/sources/source123/reindex_job/123'
         );
 
         await promise;
@@ -285,12 +277,12 @@ describe('SchemaLogic', () => {
         );
 
         expect(http.get).toHaveBeenCalledWith(
-          '/api/workplace_search/account/sources/source123/schemas'
+          '/internal/workplace_search/account/sources/source123/schemas'
         );
 
         await initPromise;
         expect(http.get).toHaveBeenCalledWith(
-          '/api/workplace_search/account/sources/source123/reindex_job/123'
+          '/internal/workplace_search/account/sources/source123/reindex_job/123'
         );
 
         await promise;
@@ -365,13 +357,13 @@ describe('SchemaLogic', () => {
           SchemaLogic.actions.setServerField(schema, ADD);
 
           expect(http.post).toHaveBeenCalledWith(
-            '/api/workplace_search/org/sources/source123/schemas',
+            '/internal/workplace_search/org/sources/source123/schemas',
             {
               body: JSON.stringify({ ...schema }),
             }
           );
           await nextTick();
-          expect(setSuccessMessage).toHaveBeenCalledWith(SCHEMA_FIELD_ADDED_MESSAGE);
+          expect(flashSuccessToast).toHaveBeenCalledWith(SCHEMA_FIELD_ADDED_MESSAGE);
           expect(onSchemaSetSuccessSpy).toHaveBeenCalledWith(serverResponse);
         });
 
@@ -383,7 +375,7 @@ describe('SchemaLogic', () => {
           SchemaLogic.actions.setServerField(schema, ADD);
 
           expect(http.post).toHaveBeenCalledWith(
-            '/api/workplace_search/account/sources/source123/schemas',
+            '/internal/workplace_search/account/sources/source123/schemas',
             {
               body: JSON.stringify({ ...schema }),
             }
@@ -424,13 +416,13 @@ describe('SchemaLogic', () => {
           SchemaLogic.actions.setServerField(schema, UPDATE);
 
           expect(http.post).toHaveBeenCalledWith(
-            '/api/workplace_search/org/sources/source123/schemas',
+            '/internal/workplace_search/org/sources/source123/schemas',
             {
               body: JSON.stringify({ ...schema }),
             }
           );
           await nextTick();
-          expect(setSuccessMessage).toHaveBeenCalledWith(SCHEMA_UPDATED_MESSAGE);
+          expect(flashSuccessToast).toHaveBeenCalledWith(SCHEMA_UPDATED_MESSAGE);
           expect(onSchemaSetSuccessSpy).toHaveBeenCalledWith(serverResponse);
         });
 
@@ -442,7 +434,7 @@ describe('SchemaLogic', () => {
           SchemaLogic.actions.setServerField(schema, UPDATE);
 
           expect(http.post).toHaveBeenCalledWith(
-            '/api/workplace_search/account/sources/source123/schemas',
+            '/internal/workplace_search/account/sources/source123/schemas',
             {
               body: JSON.stringify({ ...schema }),
             }
@@ -451,12 +443,8 @@ describe('SchemaLogic', () => {
           expect(onSchemaSetSuccessSpy).toHaveBeenCalledWith(serverResponse);
         });
 
-        it('handles error', async () => {
-          http.post.mockReturnValue(Promise.reject('this is an error'));
+        itShowsServerErrorAsFlashMessage(http.post, () => {
           SchemaLogic.actions.setServerField(schema, UPDATE);
-          await nextTick();
-
-          expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
         });
       });
     });

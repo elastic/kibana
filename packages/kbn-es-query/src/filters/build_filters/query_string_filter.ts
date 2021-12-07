@@ -7,15 +7,16 @@
  */
 
 import { has } from 'lodash';
-import type { FieldFilter, Filter, FilterMeta } from './types';
+import type { Filter, FilterMeta } from './types';
 
 export type QueryStringFilterMeta = FilterMeta;
 
 export type QueryStringFilter = Filter & {
   meta: QueryStringFilterMeta;
   query?: {
-    query_string: {
+    query_string?: {
       query: string;
+      fields?: string[];
     };
   };
 };
@@ -26,7 +27,7 @@ export type QueryStringFilter = Filter & {
  *
  * @public
  */
-export const isQueryStringFilter = (filter: FieldFilter): filter is QueryStringFilter =>
+export const isQueryStringFilter = (filter: Filter): filter is QueryStringFilter =>
   has(filter, 'query.query_string');
 
 /**

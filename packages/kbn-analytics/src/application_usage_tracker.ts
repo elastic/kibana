@@ -132,9 +132,9 @@ export class ApplicationUsageTracker {
   }
 
   public pauseTrackingAll() {
-    this.currentApplicationKeys = Object.values(
-      this.trackedApplicationViews
-    ).map(({ appId, viewId }) => this.createKey(appId, viewId));
+    this.currentApplicationKeys = Object.values(this.trackedApplicationViews).map(
+      ({ appId, viewId }) => this.createKey(appId, viewId)
+    );
 
     this.flushTrackedViews();
   }

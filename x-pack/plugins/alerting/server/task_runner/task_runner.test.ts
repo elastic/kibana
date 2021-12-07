@@ -27,6 +27,7 @@ import {
   loggingSystemMock,
   savedObjectsRepositoryMock,
   httpServiceMock,
+  executionContextServiceMock,
 } from '../../../../../src/core/server/mocks';
 import { PluginStartContract as ActionsPluginStart } from '../../../actions/server';
 import { actionsMock, actionsClientMock } from '../../../actions/server/mocks';
@@ -89,6 +90,7 @@ describe('Task Runner', () => {
   type TaskRunnerFactoryInitializerParamsType = jest.Mocked<TaskRunnerContext> & {
     actionsPlugin: jest.Mocked<ActionsPluginStart>;
     eventLogger: jest.Mocked<IEventLogger>;
+    executionContext: ReturnType<typeof executionContextServiceMock.createInternalStartContract>;
   };
 
   const taskRunnerFactoryInitializerParams: TaskRunnerFactoryInitializerParamsType = {
@@ -97,6 +99,7 @@ describe('Task Runner', () => {
     getRulesClientWithRequest: jest.fn().mockReturnValue(rulesClient),
     encryptedSavedObjectsClient,
     logger: loggingSystemMock.create().get(),
+    executionContext: executionContextServiceMock.createInternalStartContract(),
     spaceIdToNamespace: jest.fn().mockReturnValue(undefined),
     basePathService: httpServiceMock.createBasePath(),
     eventLogger: eventLoggerMock.create(),
@@ -104,7 +107,8 @@ describe('Task Runner', () => {
     ruleTypeRegistry,
     kibanaBaseUrl: 'https://localhost:5601',
     supportsEphemeralTasks: false,
-    maxEphemeralActionsPerAlert: new Promise((resolve) => resolve(10)),
+    maxEphemeralActionsPerAlert: 10,
+    cancelAlertsOnRuleTimeout: true,
   };
 
   function testAgainstEphemeralSupport(
@@ -185,6 +189,9 @@ describe('Task Runner', () => {
       (actionTypeId, actionId, params) => params
     );
     ruleTypeRegistry.get.mockReturnValue(alertType);
+    taskRunnerFactoryInitializerParams.executionContext.withContext.mockImplementation((ctx, fn) =>
+      fn()
+    );
   });
 
   test('successfully executes the task', async () => {
@@ -205,6 +212,7 @@ describe('Task Runner', () => {
       type: 'alert',
       attributes: {
         apiKey: Buffer.from('123:abc').toString('base64'),
+        enabled: true,
       },
       references: [],
     });
@@ -279,7 +287,7 @@ describe('Task Runner', () => {
     expect(call.services).toBeTruthy();
 
     const logger = taskRunnerFactoryInitializerParams.logger;
-    expect(logger.debug).toHaveBeenCalledTimes(2);
+    expect(logger.debug).toHaveBeenCalledTimes(3);
     expect(logger.debug).nthCalledWith(1, 'executing alert test:1 at 1970-01-01T00:00:00.000Z');
     expect(logger.debug).nthCalledWith(
       2,
@@ -332,59 +340,73 @@ describe('Task Runner', () => {
       {
         executionStatus: {
           error: null,
+          lastDuration: 0,
           lastExecutionDate: '1970-01-01T00:00:00.000Z',
           status: 'ok',
         },
       },
       { refresh: false, namespace: undefined }
     );
+
+    expect(taskRunnerFactoryInitializerParams.executionContext.withContext).toBeCalledTimes(1);
+    expect(taskRunnerFactoryInitializerParams.executionContext.withContext).toHaveBeenCalledWith(
+      {
+        id: '1',
+        name: 'execute test',
+        type: 'alert',
+        description: 'execute [test] with name [alert-name] in [default] namespace',
+      },
+      expect.any(Function)
+    );
   });
 
   testAgainstEphemeralSupport(
     'actionsPlugin.execute is called per alert instance that is scheduled',
     (
-      customTaskRunnerFactoryInitializerParams: TaskRunnerFactoryInitializerParamsType,
-      enqueueFunction: (options: ExecuteOptions) => Promise<void | RunNowResult>
-    ) => async () => {
-      customTaskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(
-        true
-      );
-      customTaskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(
-        true
-      );
-      actionsClient.ephemeralEnqueuedExecution.mockResolvedValue(new Promise(() => {}));
-      alertType.executor.mockImplementation(
-        async ({
-          services: executorServices,
-        }: AlertExecutorOptions<
-          AlertTypeParams,
-          AlertTypeState,
-          AlertInstanceState,
-          AlertInstanceContext,
-          string
-        >) => {
-          executorServices
-            .alertInstanceFactory('1')
-            .scheduleActionsWithSubGroup('default', 'subDefault');
-        }
-      );
-      const taskRunner = new TaskRunner(
-        alertType,
-        mockedTaskInstance,
-        customTaskRunnerFactoryInitializerParams
-      );
-      rulesClient.get.mockResolvedValue(mockedAlertTypeSavedObject);
-      encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
-        id: '1',
-        type: 'alert',
-        attributes: {
-          apiKey: Buffer.from('123:abc').toString('base64'),
-        },
-        references: [],
-      });
-      await taskRunner.run();
-      expect(enqueueFunction).toHaveBeenCalledTimes(1);
-      expect((enqueueFunction as jest.Mock).mock.calls[0]).toMatchInlineSnapshot(`
+        customTaskRunnerFactoryInitializerParams: TaskRunnerFactoryInitializerParamsType,
+        enqueueFunction: (options: ExecuteOptions) => Promise<void | RunNowResult>
+      ) =>
+      async () => {
+        customTaskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(
+          true
+        );
+        customTaskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(
+          true
+        );
+        actionsClient.ephemeralEnqueuedExecution.mockResolvedValue(new Promise(() => {}));
+        alertType.executor.mockImplementation(
+          async ({
+            services: executorServices,
+          }: AlertExecutorOptions<
+            AlertTypeParams,
+            AlertTypeState,
+            AlertInstanceState,
+            AlertInstanceContext,
+            string
+          >) => {
+            executorServices
+              .alertInstanceFactory('1')
+              .scheduleActionsWithSubGroup('default', 'subDefault');
+          }
+        );
+        const taskRunner = new TaskRunner(
+          alertType,
+          mockedTaskInstance,
+          customTaskRunnerFactoryInitializerParams
+        );
+        rulesClient.get.mockResolvedValue(mockedAlertTypeSavedObject);
+        encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
+          id: '1',
+          type: 'alert',
+          attributes: {
+            apiKey: Buffer.from('123:abc').toString('base64'),
+            enabled: true,
+          },
+          references: [],
+        });
+        await taskRunner.run();
+        expect(enqueueFunction).toHaveBeenCalledTimes(1);
+        expect((enqueueFunction as jest.Mock).mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         Object {
           "apiKey": "MTIzOmFiYw==",
@@ -412,180 +434,184 @@ describe('Task Runner', () => {
       ]
     `);
 
-      const logger = customTaskRunnerFactoryInitializerParams.logger;
-      expect(logger.debug).toHaveBeenCalledTimes(3);
-      expect(logger.debug).nthCalledWith(1, 'executing alert test:1 at 1970-01-01T00:00:00.000Z');
-      expect(logger.debug).nthCalledWith(
-        2,
-        `alert test:1: 'alert-name' has 1 active alert instances: [{\"instanceId\":\"1\",\"actionGroup\":\"default\"}]`
-      );
-      expect(logger.debug).nthCalledWith(
-        3,
-        'alertExecutionStatus for test:1: {"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}'
-      );
-      // alertExecutionStatus for test:1: {\"lastExecutionDate\":\"1970-01-01T00:00:00.000Z\",\"status\":\"error\",\"error\":{\"reason\":\"unknown\",\"message\":\"Cannot read property 'catch' of undefined\"}}
+        const logger = customTaskRunnerFactoryInitializerParams.logger;
+        expect(logger.debug).toHaveBeenCalledTimes(4);
+        expect(logger.debug).nthCalledWith(1, 'executing alert test:1 at 1970-01-01T00:00:00.000Z');
+        expect(logger.debug).nthCalledWith(
+          2,
+          `alert test:1: 'alert-name' has 1 active alert instances: [{\"instanceId\":\"1\",\"actionGroup\":\"default\"}]`
+        );
+        expect(logger.debug).nthCalledWith(
+          3,
+          'alertExecutionStatus for test:1: {"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}'
+        );
+        // alertExecutionStatus for test:1: {\"lastExecutionDate\":\"1970-01-01T00:00:00.000Z\",\"status\":\"error\",\"error\":{\"reason\":\"unknown\",\"message\":\"Cannot read property 'catch' of undefined\"}}
 
-      const eventLogger = customTaskRunnerFactoryInitializerParams.eventLogger;
-      expect(eventLogger.logEvent).toHaveBeenCalledTimes(5);
-      expect(eventLogger.logEvent).toHaveBeenNthCalledWith(1, {
-        '@timestamp': '1970-01-01T00:00:00.000Z',
-        event: {
-          action: 'execute-start',
-          category: ['alerts'],
-          kind: 'alert',
-        },
-        kibana: {
-          task: {
-            schedule_delay: 0,
-            scheduled: '1970-01-01T00:00:00.000Z',
+        const eventLogger = customTaskRunnerFactoryInitializerParams.eventLogger;
+        expect(eventLogger.logEvent).toHaveBeenCalledTimes(5);
+        expect(eventLogger.logEvent).toHaveBeenNthCalledWith(1, {
+          '@timestamp': '1970-01-01T00:00:00.000Z',
+          event: {
+            action: 'execute-start',
+            category: ['alerts'],
+            kind: 'alert',
           },
-          saved_objects: [
-            {
-              id: '1',
-              namespace: undefined,
-              rel: 'primary',
-              type: 'alert',
-              type_id: 'test',
+          kibana: {
+            task: {
+              schedule_delay: 0,
+              scheduled: '1970-01-01T00:00:00.000Z',
             },
-          ],
-        },
-        message: `alert execution start: "1"`,
-        rule: {
-          category: 'test',
-          id: '1',
-          license: 'basic',
-          ruleset: 'alerts',
-        },
-      });
-      expect(eventLogger.logEvent).toHaveBeenNthCalledWith(2, {
-        event: {
-          action: 'new-instance',
-          category: ['alerts'],
-          kind: 'alert',
-          duration: 0,
-          start: '1970-01-01T00:00:00.000Z',
-        },
-        kibana: {
-          alerting: {
-            action_group_id: 'default',
-            action_subgroup: 'subDefault',
-            instance_id: '1',
+            saved_objects: [
+              {
+                id: '1',
+                namespace: undefined,
+                rel: 'primary',
+                type: 'alert',
+                type_id: 'test',
+              },
+            ],
           },
-          saved_objects: [
-            {
-              id: '1',
-              namespace: undefined,
-              rel: 'primary',
-              type: 'alert',
-              type_id: 'test',
-            },
-          ],
-        },
-        message: "test:1: 'alert-name' created new instance: '1'",
-        rule: {
-          category: 'test',
-          id: '1',
-          license: 'basic',
-          name: 'alert-name',
-          namespace: undefined,
-          ruleset: 'alerts',
-        },
-      });
-      expect(eventLogger.logEvent).toHaveBeenNthCalledWith(3, {
-        event: {
-          action: 'active-instance',
-          category: ['alerts'],
-          duration: 0,
-          kind: 'alert',
-          start: '1970-01-01T00:00:00.000Z',
-        },
-        kibana: {
-          alerting: { action_group_id: 'default', action_subgroup: 'subDefault', instance_id: '1' },
-          saved_objects: [
-            { id: '1', namespace: undefined, rel: 'primary', type: 'alert', type_id: 'test' },
-          ],
-        },
-        message:
-          "test:1: 'alert-name' active instance: '1' in actionGroup(subgroup): 'default(subDefault)'",
-        rule: {
-          category: 'test',
-          id: '1',
-          license: 'basic',
-          name: 'alert-name',
-          namespace: undefined,
-          ruleset: 'alerts',
-        },
-      });
-      expect(eventLogger.logEvent).toHaveBeenNthCalledWith(4, {
-        event: {
-          action: 'execute-action',
-          category: ['alerts'],
-          kind: 'alert',
-        },
-        kibana: {
-          alerting: {
-            instance_id: '1',
-            action_group_id: 'default',
-            action_subgroup: 'subDefault',
+          message: `alert execution start: "1"`,
+          rule: {
+            category: 'test',
+            id: '1',
+            license: 'basic',
+            ruleset: 'alerts',
           },
-          saved_objects: [
-            {
-              id: '1',
-              namespace: undefined,
-              rel: 'primary',
-              type: 'alert',
-              type_id: 'test',
-            },
-            {
-              id: '1',
-              namespace: undefined,
-              type: 'action',
-              type_id: 'action',
-            },
-          ],
-        },
-        message:
-          "alert: test:1: 'alert-name' instanceId: '1' scheduled actionGroup(subgroup): 'default(subDefault)' action: action:1",
-        rule: {
-          category: 'test',
-          id: '1',
-          license: 'basic',
-          name: 'alert-name',
-          namespace: undefined,
-          ruleset: 'alerts',
-        },
-      });
-      expect(eventLogger.logEvent).toHaveBeenNthCalledWith(5, {
-        '@timestamp': '1970-01-01T00:00:00.000Z',
-        event: { action: 'execute', category: ['alerts'], kind: 'alert', outcome: 'success' },
-        kibana: {
-          alerting: {
-            status: 'active',
+        });
+        expect(eventLogger.logEvent).toHaveBeenNthCalledWith(2, {
+          event: {
+            action: 'new-instance',
+            category: ['alerts'],
+            kind: 'alert',
+            duration: 0,
+            start: '1970-01-01T00:00:00.000Z',
           },
-          task: {
-            schedule_delay: 0,
-            scheduled: '1970-01-01T00:00:00.000Z',
-          },
-          saved_objects: [
-            {
-              id: '1',
-              namespace: undefined,
-              rel: 'primary',
-              type: 'alert',
-              type_id: 'test',
+          kibana: {
+            alerting: {
+              action_group_id: 'default',
+              action_subgroup: 'subDefault',
+              instance_id: '1',
             },
-          ],
-        },
-        message: "alert executed: test:1: 'alert-name'",
-        rule: {
-          category: 'test',
-          id: '1',
-          license: 'basic',
-          name: 'alert-name',
-          ruleset: 'alerts',
-        },
-      });
-    }
+            saved_objects: [
+              {
+                id: '1',
+                namespace: undefined,
+                rel: 'primary',
+                type: 'alert',
+                type_id: 'test',
+              },
+            ],
+          },
+          message: "test:1: 'alert-name' created new instance: '1'",
+          rule: {
+            category: 'test',
+            id: '1',
+            license: 'basic',
+            name: 'alert-name',
+            namespace: undefined,
+            ruleset: 'alerts',
+          },
+        });
+        expect(eventLogger.logEvent).toHaveBeenNthCalledWith(3, {
+          event: {
+            action: 'active-instance',
+            category: ['alerts'],
+            duration: 0,
+            kind: 'alert',
+            start: '1970-01-01T00:00:00.000Z',
+          },
+          kibana: {
+            alerting: {
+              action_group_id: 'default',
+              action_subgroup: 'subDefault',
+              instance_id: '1',
+            },
+            saved_objects: [
+              { id: '1', namespace: undefined, rel: 'primary', type: 'alert', type_id: 'test' },
+            ],
+          },
+          message:
+            "test:1: 'alert-name' active instance: '1' in actionGroup(subgroup): 'default(subDefault)'",
+          rule: {
+            category: 'test',
+            id: '1',
+            license: 'basic',
+            name: 'alert-name',
+            namespace: undefined,
+            ruleset: 'alerts',
+          },
+        });
+        expect(eventLogger.logEvent).toHaveBeenNthCalledWith(4, {
+          event: {
+            action: 'execute-action',
+            category: ['alerts'],
+            kind: 'alert',
+          },
+          kibana: {
+            alerting: {
+              instance_id: '1',
+              action_group_id: 'default',
+              action_subgroup: 'subDefault',
+            },
+            saved_objects: [
+              {
+                id: '1',
+                namespace: undefined,
+                rel: 'primary',
+                type: 'alert',
+                type_id: 'test',
+              },
+              {
+                id: '1',
+                namespace: undefined,
+                type: 'action',
+                type_id: 'action',
+              },
+            ],
+          },
+          message:
+            "alert: test:1: 'alert-name' instanceId: '1' scheduled actionGroup(subgroup): 'default(subDefault)' action: action:1",
+          rule: {
+            category: 'test',
+            id: '1',
+            license: 'basic',
+            name: 'alert-name',
+            namespace: undefined,
+            ruleset: 'alerts',
+          },
+        });
+        expect(eventLogger.logEvent).toHaveBeenNthCalledWith(5, {
+          '@timestamp': '1970-01-01T00:00:00.000Z',
+          event: { action: 'execute', category: ['alerts'], kind: 'alert', outcome: 'success' },
+          kibana: {
+            alerting: {
+              status: 'active',
+            },
+            task: {
+              schedule_delay: 0,
+              scheduled: '1970-01-01T00:00:00.000Z',
+            },
+            saved_objects: [
+              {
+                id: '1',
+                namespace: undefined,
+                rel: 'primary',
+                type: 'alert',
+                type_id: 'test',
+              },
+            ],
+          },
+          message: "alert executed: test:1: 'alert-name'",
+          rule: {
+            category: 'test',
+            id: '1',
+            license: 'basic',
+            name: 'alert-name',
+            ruleset: 'alerts',
+          },
+        });
+      }
   );
 
   test('actionsPlugin.execute is skipped if muteAll is true', async () => {
@@ -618,6 +644,7 @@ describe('Task Runner', () => {
       type: 'alert',
       attributes: {
         apiKey: Buffer.from('123:abc').toString('base64'),
+        enabled: true,
       },
       references: [],
     });
@@ -625,7 +652,7 @@ describe('Task Runner', () => {
     expect(actionsClient.ephemeralEnqueuedExecution).toHaveBeenCalledTimes(0);
 
     const logger = taskRunnerFactoryInitializerParams.logger;
-    expect(logger.debug).toHaveBeenCalledTimes(4);
+    expect(logger.debug).toHaveBeenCalledTimes(5);
     expect(logger.debug).nthCalledWith(1, 'executing alert test:1 at 1970-01-01T00:00:00.000Z');
     expect(logger.debug).nthCalledWith(
       2,
@@ -779,66 +806,68 @@ describe('Task Runner', () => {
   testAgainstEphemeralSupport(
     'skips firing actions for active instance if instance is muted',
     (
-      customTaskRunnerFactoryInitializerParams: TaskRunnerFactoryInitializerParamsType,
-      enqueueFunction: (options: ExecuteOptions) => Promise<void | RunNowResult>
-    ) => async () => {
-      customTaskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(
-        true
-      );
-      customTaskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(
-        true
-      );
-      actionsClient.ephemeralEnqueuedExecution.mockResolvedValue(new Promise(() => {}));
-      alertType.executor.mockImplementation(
-        async ({
-          services: executorServices,
-        }: AlertExecutorOptions<
-          AlertTypeParams,
-          AlertTypeState,
-          AlertInstanceState,
-          AlertInstanceContext,
-          string
-        >) => {
-          executorServices.alertInstanceFactory('1').scheduleActions('default');
-          executorServices.alertInstanceFactory('2').scheduleActions('default');
-        }
-      );
-      const taskRunner = new TaskRunner(
-        alertType,
-        mockedTaskInstance,
-        customTaskRunnerFactoryInitializerParams
-      );
-      rulesClient.get.mockResolvedValue({
-        ...mockedAlertTypeSavedObject,
-        mutedInstanceIds: ['2'],
-      });
-      encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
-        id: '1',
-        type: 'alert',
-        attributes: {
-          apiKey: Buffer.from('123:abc').toString('base64'),
-        },
-        references: [],
-      });
-      await taskRunner.run();
-      expect(enqueueFunction).toHaveBeenCalledTimes(1);
+        customTaskRunnerFactoryInitializerParams: TaskRunnerFactoryInitializerParamsType,
+        enqueueFunction: (options: ExecuteOptions) => Promise<void | RunNowResult>
+      ) =>
+      async () => {
+        customTaskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(
+          true
+        );
+        customTaskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(
+          true
+        );
+        actionsClient.ephemeralEnqueuedExecution.mockResolvedValue(new Promise(() => {}));
+        alertType.executor.mockImplementation(
+          async ({
+            services: executorServices,
+          }: AlertExecutorOptions<
+            AlertTypeParams,
+            AlertTypeState,
+            AlertInstanceState,
+            AlertInstanceContext,
+            string
+          >) => {
+            executorServices.alertInstanceFactory('1').scheduleActions('default');
+            executorServices.alertInstanceFactory('2').scheduleActions('default');
+          }
+        );
+        const taskRunner = new TaskRunner(
+          alertType,
+          mockedTaskInstance,
+          customTaskRunnerFactoryInitializerParams
+        );
+        rulesClient.get.mockResolvedValue({
+          ...mockedAlertTypeSavedObject,
+          mutedInstanceIds: ['2'],
+        });
+        encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
+          id: '1',
+          type: 'alert',
+          attributes: {
+            apiKey: Buffer.from('123:abc').toString('base64'),
+            enabled: true,
+          },
+          references: [],
+        });
+        await taskRunner.run();
+        expect(enqueueFunction).toHaveBeenCalledTimes(1);
 
-      const logger = customTaskRunnerFactoryInitializerParams.logger;
-      expect(logger.debug).toHaveBeenCalledTimes(4);
-      expect(logger.debug).nthCalledWith(1, 'executing alert test:1 at 1970-01-01T00:00:00.000Z');
-      expect(logger.debug).nthCalledWith(
-        2,
-        `alert test:1: 'alert-name' has 2 active alert instances: [{\"instanceId\":\"1\",\"actionGroup\":\"default\"},{\"instanceId\":\"2\",\"actionGroup\":\"default\"}]`
-      );
-      expect(logger.debug).nthCalledWith(
-        3,
-        `skipping scheduling of actions for '2' in alert test:1: 'alert-name': instance is muted`
-      );
-      expect(logger.debug).nthCalledWith(
-        4,
-        'alertExecutionStatus for test:1: {"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}'
-      );
-    }
+        const logger = customTaskRunnerFactoryInitializerParams.logger;
+        expect(logger.debug).toHaveBeenCalledTimes(5);
+        expect(logger.debug).nthCalledWith(1, 'executing alert test:1 at 1970-01-01T00:00:00.000Z');
+        expect(logger.debug).nthCalledWith(
+          2,
+          `alert test:1: 'alert-name' has 2 active alert instances: [{\"instanceId\":\"1\",\"actionGroup\":\"default\"},{\"instanceId\":\"2\",\"actionGroup\":\"default\"}]`
+        );
+        expect(logger.debug).nthCalledWith(
+          3,
+          `skipping scheduling of actions for '2' in alert test:1: 'alert-name': instance is muted`
+        );
+        expect(logger.debug).nthCalledWith(
+          4,
+          'alertExecutionStatus for test:1: {"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}'
+        );
+      }
   );
 
   test('actionsPlugin.execute is not called when notifyWhen=onActionGroupChange and alert instance state does not change', async () => {
@@ -888,6 +917,7 @@ describe('Task Runner', () => {
       type: 'alert',
       attributes: {
         apiKey: Buffer.from('123:abc').toString('base64'),
+        enabled: true,
       },
       references: [],
     });
@@ -1015,193 +1045,199 @@ describe('Task Runner', () => {
   testAgainstEphemeralSupport(
     'actionsPlugin.execute is called when notifyWhen=onActionGroupChange and alert instance state has changed',
     (
-      customTaskRunnerFactoryInitializerParams: TaskRunnerFactoryInitializerParamsType,
-      enqueueFunction: (options: ExecuteOptions) => Promise<void | RunNowResult>
-    ) => async () => {
-      customTaskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(
-        true
-      );
-      customTaskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(
-        true
-      );
-      alertType.executor.mockImplementation(
-        async ({
-          services: executorServices,
-        }: AlertExecutorOptions<
-          AlertTypeParams,
-          AlertTypeState,
-          AlertInstanceState,
-          AlertInstanceContext,
-          string
-        >) => {
-          executorServices.alertInstanceFactory('1').scheduleActions('default');
-        }
-      );
-      const taskRunner = new TaskRunner(
-        alertType,
-        {
-          ...mockedTaskInstance,
-          state: {
-            ...mockedTaskInstance.state,
-            alertInstances: {
-              '1': {
-                meta: {
-                  lastScheduledActions: { group: 'newGroup', date: new Date().toISOString() },
+        customTaskRunnerFactoryInitializerParams: TaskRunnerFactoryInitializerParamsType,
+        enqueueFunction: (options: ExecuteOptions) => Promise<void | RunNowResult>
+      ) =>
+      async () => {
+        customTaskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(
+          true
+        );
+        customTaskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(
+          true
+        );
+        alertType.executor.mockImplementation(
+          async ({
+            services: executorServices,
+          }: AlertExecutorOptions<
+            AlertTypeParams,
+            AlertTypeState,
+            AlertInstanceState,
+            AlertInstanceContext,
+            string
+          >) => {
+            executorServices.alertInstanceFactory('1').scheduleActions('default');
+          }
+        );
+        const taskRunner = new TaskRunner(
+          alertType,
+          {
+            ...mockedTaskInstance,
+            state: {
+              ...mockedTaskInstance.state,
+              alertInstances: {
+                '1': {
+                  meta: {
+                    lastScheduledActions: { group: 'newGroup', date: new Date().toISOString() },
+                  },
+                  state: { bar: false },
                 },
-                state: { bar: false },
               },
             },
           },
-        },
-        customTaskRunnerFactoryInitializerParams
-      );
-      rulesClient.get.mockResolvedValue({
-        ...mockedAlertTypeSavedObject,
-        notifyWhen: 'onActionGroupChange',
-      });
-      encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
-        id: '1',
-        type: 'alert',
-        attributes: {
-          apiKey: Buffer.from('123:abc').toString('base64'),
-        },
-        references: [],
-      });
-      await taskRunner.run();
-      expect(enqueueFunction).toHaveBeenCalledTimes(1);
-    }
+          customTaskRunnerFactoryInitializerParams
+        );
+        rulesClient.get.mockResolvedValue({
+          ...mockedAlertTypeSavedObject,
+          notifyWhen: 'onActionGroupChange',
+        });
+        encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
+          id: '1',
+          type: 'alert',
+          attributes: {
+            apiKey: Buffer.from('123:abc').toString('base64'),
+            enabled: true,
+          },
+          references: [],
+        });
+        await taskRunner.run();
+        expect(enqueueFunction).toHaveBeenCalledTimes(1);
+      }
   );
 
   testAgainstEphemeralSupport(
     'actionsPlugin.execute is called when notifyWhen=onActionGroupChange and alert instance state subgroup has changed',
     (
-      customTaskRunnerFactoryInitializerParams: TaskRunnerFactoryInitializerParamsType,
-      enqueueFunction: (options: ExecuteOptions) => Promise<void | RunNowResult>
-    ) => async () => {
-      customTaskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(
-        true
-      );
+        customTaskRunnerFactoryInitializerParams: TaskRunnerFactoryInitializerParamsType,
+        enqueueFunction: (options: ExecuteOptions) => Promise<void | RunNowResult>
+      ) =>
+      async () => {
+        customTaskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(
+          true
+        );
 
-      customTaskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(
-        true
-      );
-      alertType.executor.mockImplementation(
-        async ({
-          services: executorServices,
-        }: AlertExecutorOptions<
-          AlertTypeParams,
-          AlertTypeState,
-          AlertInstanceState,
-          AlertInstanceContext,
-          string
-        >) => {
-          executorServices
-            .alertInstanceFactory('1')
-            .scheduleActionsWithSubGroup('default', 'subgroup1');
-        }
-      );
-      const taskRunner = new TaskRunner(
-        alertType,
-        {
-          ...mockedTaskInstance,
-          state: {
-            ...mockedTaskInstance.state,
-            alertInstances: {
-              '1': {
-                meta: {
-                  lastScheduledActions: {
-                    group: 'default',
-                    subgroup: 'newSubgroup',
-                    date: new Date().toISOString(),
+        customTaskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(
+          true
+        );
+        alertType.executor.mockImplementation(
+          async ({
+            services: executorServices,
+          }: AlertExecutorOptions<
+            AlertTypeParams,
+            AlertTypeState,
+            AlertInstanceState,
+            AlertInstanceContext,
+            string
+          >) => {
+            executorServices
+              .alertInstanceFactory('1')
+              .scheduleActionsWithSubGroup('default', 'subgroup1');
+          }
+        );
+        const taskRunner = new TaskRunner(
+          alertType,
+          {
+            ...mockedTaskInstance,
+            state: {
+              ...mockedTaskInstance.state,
+              alertInstances: {
+                '1': {
+                  meta: {
+                    lastScheduledActions: {
+                      group: 'default',
+                      subgroup: 'newSubgroup',
+                      date: new Date().toISOString(),
+                    },
                   },
+                  state: { bar: false },
                 },
-                state: { bar: false },
               },
             },
           },
-        },
-        customTaskRunnerFactoryInitializerParams
-      );
-      rulesClient.get.mockResolvedValue({
-        ...mockedAlertTypeSavedObject,
-        notifyWhen: 'onActionGroupChange',
-      });
-      encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
-        id: '1',
-        type: 'alert',
-        attributes: {
-          apiKey: Buffer.from('123:abc').toString('base64'),
-        },
-        references: [],
-      });
-      await taskRunner.run();
-      expect(enqueueFunction).toHaveBeenCalledTimes(1);
-    }
+          customTaskRunnerFactoryInitializerParams
+        );
+        rulesClient.get.mockResolvedValue({
+          ...mockedAlertTypeSavedObject,
+          notifyWhen: 'onActionGroupChange',
+        });
+        encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
+          id: '1',
+          type: 'alert',
+          attributes: {
+            apiKey: Buffer.from('123:abc').toString('base64'),
+            enabled: true,
+          },
+          references: [],
+        });
+        await taskRunner.run();
+        expect(enqueueFunction).toHaveBeenCalledTimes(1);
+      }
   );
 
   testAgainstEphemeralSupport(
     'includes the apiKey in the request used to initialize the actionsClient',
     (
-      customTaskRunnerFactoryInitializerParams: TaskRunnerFactoryInitializerParamsType,
-      enqueueFunction: (options: ExecuteOptions) => Promise<void | RunNowResult>
-    ) => async () => {
-      customTaskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(
-        true
-      );
-      customTaskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(
-        true
-      );
-      actionsClient.ephemeralEnqueuedExecution.mockResolvedValue(new Promise(() => {}));
-      alertType.executor.mockImplementation(
-        async ({
-          services: executorServices,
-        }: AlertExecutorOptions<
-          AlertTypeParams,
-          AlertTypeState,
-          AlertInstanceState,
-          AlertInstanceContext,
-          string
-        >) => {
-          executorServices.alertInstanceFactory('1').scheduleActions('default');
-        }
-      );
-      const taskRunner = new TaskRunner(
-        alertType,
-        mockedTaskInstance,
-        customTaskRunnerFactoryInitializerParams
-      );
-      rulesClient.get.mockResolvedValue(mockedAlertTypeSavedObject);
-      encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
-        id: '1',
-        type: 'alert',
-        attributes: {
-          apiKey: Buffer.from('123:abc').toString('base64'),
-        },
-        references: [],
-      });
-      await taskRunner.run();
-      expect(
-        customTaskRunnerFactoryInitializerParams.actionsPlugin.getActionsClientWithRequest
-      ).toHaveBeenCalledWith(
-        expect.objectContaining({
-          headers: {
-            // base64 encoded "123:abc"
-            authorization: 'ApiKey MTIzOmFiYw==',
+        customTaskRunnerFactoryInitializerParams: TaskRunnerFactoryInitializerParamsType,
+        enqueueFunction: (options: ExecuteOptions) => Promise<void | RunNowResult>
+      ) =>
+      async () => {
+        customTaskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(
+          true
+        );
+        customTaskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(
+          true
+        );
+        actionsClient.ephemeralEnqueuedExecution.mockResolvedValue(new Promise(() => {}));
+        alertType.executor.mockImplementation(
+          async ({
+            services: executorServices,
+          }: AlertExecutorOptions<
+            AlertTypeParams,
+            AlertTypeState,
+            AlertInstanceState,
+            AlertInstanceContext,
+            string
+          >) => {
+            executorServices.alertInstanceFactory('1').scheduleActions('default');
+          }
+        );
+        const taskRunner = new TaskRunner(
+          alertType,
+          mockedTaskInstance,
+          customTaskRunnerFactoryInitializerParams
+        );
+        rulesClient.get.mockResolvedValue(mockedAlertTypeSavedObject);
+        encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
+          id: '1',
+          type: 'alert',
+          attributes: {
+            apiKey: Buffer.from('123:abc').toString('base64'),
+            enabled: true,
           },
-        })
-      );
+          references: [],
+        });
+        await taskRunner.run();
+        expect(
+          customTaskRunnerFactoryInitializerParams.actionsPlugin.getActionsClientWithRequest
+        ).toHaveBeenCalledWith(
+          expect.objectContaining({
+            headers: {
+              // base64 encoded "123:abc"
+              authorization: 'ApiKey MTIzOmFiYw==',
+            },
+          })
+        );
 
-      const [
-        request,
-      ] = customTaskRunnerFactoryInitializerParams.actionsPlugin.getActionsClientWithRequest.mock.calls[0];
+        const [request] =
+          customTaskRunnerFactoryInitializerParams.actionsPlugin.getActionsClientWithRequest.mock
+            .calls[0];
 
-      expect(customTaskRunnerFactoryInitializerParams.basePathService.set).toHaveBeenCalledWith(
-        request,
-        '/'
-      );
+        expect(customTaskRunnerFactoryInitializerParams.basePathService.set).toHaveBeenCalledWith(
+          request,
+          '/'
+        );
 
-      expect(enqueueFunction).toHaveBeenCalledTimes(1);
-      expect((enqueueFunction as jest.Mock).mock.calls[0]).toMatchInlineSnapshot(`
+        expect(enqueueFunction).toHaveBeenCalledTimes(1);
+        expect((enqueueFunction as jest.Mock).mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         Object {
           "apiKey": "MTIzOmFiYw==",
@@ -1229,10 +1265,10 @@ describe('Task Runner', () => {
       ]
     `);
 
-      const eventLogger = customTaskRunnerFactoryInitializerParams.eventLogger;
-      expect(eventLogger.logEvent).toHaveBeenCalledTimes(5);
-      expect(eventLogger.startTiming).toHaveBeenCalledTimes(1);
-      expect(eventLogger.logEvent.mock.calls).toMatchInlineSnapshot(`
+        const eventLogger = customTaskRunnerFactoryInitializerParams.eventLogger;
+        expect(eventLogger.logEvent).toHaveBeenCalledTimes(5);
+        expect(eventLogger.startTiming).toHaveBeenCalledTimes(1);
+        expect(eventLogger.logEvent.mock.calls).toMatchInlineSnapshot(`
       Array [
         Array [
           Object {
@@ -1352,7 +1388,6 @@ describe('Task Runner', () => {
             "kibana": Object {
               "alerting": Object {
                 "action_group_id": "default",
-                "action_subgroup": undefined,
                 "instance_id": "1",
               },
               "saved_objects": Array [
@@ -1422,75 +1457,77 @@ describe('Task Runner', () => {
         ],
       ]
     `);
-    }
+      }
   );
 
   testAgainstEphemeralSupport(
     'fire recovered actions for execution for the alertInstances which is in the recovered state',
     (
-      customTaskRunnerFactoryInitializerParams: TaskRunnerFactoryInitializerParamsType,
-      enqueueFunction: (options: ExecuteOptions) => Promise<void | RunNowResult>
-    ) => async () => {
-      customTaskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(
-        true
-      );
-      customTaskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(
-        true
-      );
-      actionsClient.ephemeralEnqueuedExecution.mockResolvedValue(new Promise(() => {}));
+        customTaskRunnerFactoryInitializerParams: TaskRunnerFactoryInitializerParamsType,
+        enqueueFunction: (options: ExecuteOptions) => Promise<void | RunNowResult>
+      ) =>
+      async () => {
+        customTaskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(
+          true
+        );
+        customTaskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(
+          true
+        );
+        actionsClient.ephemeralEnqueuedExecution.mockResolvedValue(new Promise(() => {}));
 
-      alertType.executor.mockImplementation(
-        async ({
-          services: executorServices,
-        }: AlertExecutorOptions<
-          AlertTypeParams,
-          AlertTypeState,
-          AlertInstanceState,
-          AlertInstanceContext,
-          string
-        >) => {
-          executorServices.alertInstanceFactory('1').scheduleActions('default');
-        }
-      );
-      const taskRunner = new TaskRunner(
-        alertType,
-        {
-          ...mockedTaskInstance,
-          state: {
-            ...mockedTaskInstance.state,
-            alertInstances: {
-              '1': {
-                meta: {},
-                state: {
-                  bar: false,
-                  start: '1969-12-31T00:00:00.000Z',
-                  duration: 80000000000,
+        alertType.executor.mockImplementation(
+          async ({
+            services: executorServices,
+          }: AlertExecutorOptions<
+            AlertTypeParams,
+            AlertTypeState,
+            AlertInstanceState,
+            AlertInstanceContext,
+            string
+          >) => {
+            executorServices.alertInstanceFactory('1').scheduleActions('default');
+          }
+        );
+        const taskRunner = new TaskRunner(
+          alertType,
+          {
+            ...mockedTaskInstance,
+            state: {
+              ...mockedTaskInstance.state,
+              alertInstances: {
+                '1': {
+                  meta: {},
+                  state: {
+                    bar: false,
+                    start: '1969-12-31T00:00:00.000Z',
+                    duration: 80000000000,
+                  },
                 },
-              },
-              '2': {
-                meta: {},
-                state: {
-                  bar: false,
-                  start: '1969-12-31T06:00:00.000Z',
-                  duration: 70000000000,
+                '2': {
+                  meta: {},
+                  state: {
+                    bar: false,
+                    start: '1969-12-31T06:00:00.000Z',
+                    duration: 70000000000,
+                  },
                 },
               },
             },
           },
-        },
-        customTaskRunnerFactoryInitializerParams
-      );
-      rulesClient.get.mockResolvedValue(mockedAlertTypeSavedObject);
-      encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
-        id: '1',
-        type: 'alert',
-        attributes: {
-          apiKey: Buffer.from('123:abc').toString('base64'),
-        },
-        references: [],
-      });
-      const runnerResult = await taskRunner.run();
-      expect(runnerResult.state.alertInstances).toMatchInlineSnapshot(`
+          customTaskRunnerFactoryInitializerParams
+        );
+        rulesClient.get.mockResolvedValue(mockedAlertTypeSavedObject);
+        encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
+          id: '1',
+          type: 'alert',
+          attributes: {
+            apiKey: Buffer.from('123:abc').toString('base64'),
+            enabled: true,
+          },
+          references: [],
+        });
+        const runnerResult = await taskRunner.run();
+        expect(runnerResult.state.alertInstances).toMatchInlineSnapshot(`
         Object {
           "1": Object {
             "meta": Object {
@@ -1509,26 +1546,26 @@ describe('Task Runner', () => {
         }
         `);
 
-      const logger = customTaskRunnerFactoryInitializerParams.logger;
-      expect(logger.debug).toHaveBeenCalledTimes(4);
-      expect(logger.debug).nthCalledWith(1, 'executing alert test:1 at 1970-01-01T00:00:00.000Z');
-      expect(logger.debug).nthCalledWith(
-        2,
-        `alert test:1: 'alert-name' has 1 active alert instances: [{\"instanceId\":\"1\",\"actionGroup\":\"default\"}]`
-      );
-      expect(logger.debug).nthCalledWith(
-        3,
-        `alert test:1: 'alert-name' has 1 recovered alert instances: [\"2\"]`
-      );
-      expect(logger.debug).nthCalledWith(
-        4,
-        'alertExecutionStatus for test:1: {"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}'
-      );
+        const logger = customTaskRunnerFactoryInitializerParams.logger;
+        expect(logger.debug).toHaveBeenCalledTimes(5);
+        expect(logger.debug).nthCalledWith(1, 'executing alert test:1 at 1970-01-01T00:00:00.000Z');
+        expect(logger.debug).nthCalledWith(
+          2,
+          `alert test:1: 'alert-name' has 1 active alert instances: [{\"instanceId\":\"1\",\"actionGroup\":\"default\"}]`
+        );
+        expect(logger.debug).nthCalledWith(
+          3,
+          `alert test:1: 'alert-name' has 1 recovered alert instances: [\"2\"]`
+        );
+        expect(logger.debug).nthCalledWith(
+          4,
+          'alertExecutionStatus for test:1: {"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}'
+        );
 
-      const eventLogger = customTaskRunnerFactoryInitializerParams.eventLogger;
-      expect(eventLogger.logEvent).toHaveBeenCalledTimes(6);
-      expect(eventLogger.startTiming).toHaveBeenCalledTimes(1);
-      expect(eventLogger.logEvent.mock.calls).toMatchInlineSnapshot(`
+        const eventLogger = customTaskRunnerFactoryInitializerParams.eventLogger;
+        expect(eventLogger.logEvent).toHaveBeenCalledTimes(6);
+        expect(eventLogger.startTiming).toHaveBeenCalledTimes(1);
+        expect(eventLogger.logEvent.mock.calls).toMatchInlineSnapshot(`
       Array [
         Array [
           Object {
@@ -1648,7 +1685,6 @@ describe('Task Runner', () => {
             "kibana": Object {
               "alerting": Object {
                 "action_group_id": "recovered",
-                "action_subgroup": undefined,
                 "instance_id": "2",
               },
               "saved_objects": Array [
@@ -1689,7 +1725,6 @@ describe('Task Runner', () => {
             "kibana": Object {
               "alerting": Object {
                 "action_group_id": "default",
-                "action_subgroup": undefined,
                 "instance_id": "1",
               },
               "saved_objects": Array [
@@ -1760,8 +1795,8 @@ describe('Task Runner', () => {
       ]
     `);
 
-      expect(enqueueFunction).toHaveBeenCalledTimes(2);
-      expect((enqueueFunction as jest.Mock).mock.calls[0]).toMatchInlineSnapshot(`
+        expect(enqueueFunction).toHaveBeenCalledTimes(2);
+        expect((enqueueFunction as jest.Mock).mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         Object {
           "apiKey": "MTIzOmFiYw==",
@@ -1788,68 +1823,70 @@ describe('Task Runner', () => {
         },
       ]
     `);
-    }
+      }
   );
 
   testAgainstEphemeralSupport(
     'should skip alertInstances which werent active on the previous execution',
     (
-      customTaskRunnerFactoryInitializerParams: TaskRunnerFactoryInitializerParamsType,
-      enqueueFunction: (options: ExecuteOptions) => Promise<void | RunNowResult>
-    ) => async () => {
-      const alertId = 'e558aaad-fd81-46d2-96fc-3bd8fc3dc03f';
-      customTaskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(
-        true
-      );
-      customTaskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(
-        true
-      );
-      actionsClient.ephemeralEnqueuedExecution.mockResolvedValue(new Promise(() => {}));
+        customTaskRunnerFactoryInitializerParams: TaskRunnerFactoryInitializerParamsType,
+        enqueueFunction: (options: ExecuteOptions) => Promise<void | RunNowResult>
+      ) =>
+      async () => {
+        const alertId = 'e558aaad-fd81-46d2-96fc-3bd8fc3dc03f';
+        customTaskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(
+          true
+        );
+        customTaskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(
+          true
+        );
+        actionsClient.ephemeralEnqueuedExecution.mockResolvedValue(new Promise(() => {}));
 
-      alertType.executor.mockImplementation(
-        async ({
-          services: executorServices,
-        }: AlertExecutorOptions<
-          AlertTypeParams,
-          AlertTypeState,
-          AlertInstanceState,
-          AlertInstanceContext,
-          string
-        >) => {
-          executorServices.alertInstanceFactory('1').scheduleActions('default');
+        alertType.executor.mockImplementation(
+          async ({
+            services: executorServices,
+          }: AlertExecutorOptions<
+            AlertTypeParams,
+            AlertTypeState,
+            AlertInstanceState,
+            AlertInstanceContext,
+            string
+          >) => {
+            executorServices.alertInstanceFactory('1').scheduleActions('default');
 
-          // create an instance, but don't schedule any actions, so it doesn't go active
-          executorServices.alertInstanceFactory('3');
-        }
-      );
-      const taskRunner = new TaskRunner(
-        alertType,
-        {
-          ...mockedTaskInstance,
-          state: {
-            ...mockedTaskInstance.state,
-            alertInstances: {
-              '1': { meta: {}, state: { bar: false } },
-              '2': { meta: {}, state: { bar: false } },
+            // create an instance, but don't schedule any actions, so it doesn't go active
+            executorServices.alertInstanceFactory('3');
+          }
+        );
+        const taskRunner = new TaskRunner(
+          alertType,
+          {
+            ...mockedTaskInstance,
+            state: {
+              ...mockedTaskInstance.state,
+              alertInstances: {
+                '1': { meta: {}, state: { bar: false } },
+                '2': { meta: {}, state: { bar: false } },
+              },
+            },
+            params: {
+              alertId,
             },
           },
-          params: {
-            alertId,
+          customTaskRunnerFactoryInitializerParams
+        );
+        rulesClient.get.mockResolvedValue(mockedAlertTypeSavedObject);
+        encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
+          id: alertId,
+          type: 'alert',
+          attributes: {
+            apiKey: Buffer.from('123:abc').toString('base64'),
+            enabled: true,
           },
-        },
-        customTaskRunnerFactoryInitializerParams
-      );
-      rulesClient.get.mockResolvedValue(mockedAlertTypeSavedObject);
-      encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
-        id: alertId,
-        type: 'alert',
-        attributes: {
-          apiKey: Buffer.from('123:abc').toString('base64'),
-        },
-        references: [],
-      });
-      const runnerResult = await taskRunner.run();
-      expect(runnerResult.state.alertInstances).toMatchInlineSnapshot(`
+          references: [],
+        });
+        const runnerResult = await taskRunner.run();
+        expect(runnerResult.state.alertInstances).toMatchInlineSnapshot(`
       Object {
         "1": Object {
           "meta": Object {
@@ -1866,111 +1903,113 @@ describe('Task Runner', () => {
       }
     `);
 
-      const logger = customTaskRunnerFactoryInitializerParams.logger;
-      expect(logger.debug).toHaveBeenCalledWith(
-        `alert test:${alertId}: 'alert-name' has 1 active alert instances: [{\"instanceId\":\"1\",\"actionGroup\":\"default\"}]`
-      );
+        const logger = customTaskRunnerFactoryInitializerParams.logger;
+        expect(logger.debug).toHaveBeenCalledWith(
+          `alert test:${alertId}: 'alert-name' has 1 active alert instances: [{\"instanceId\":\"1\",\"actionGroup\":\"default\"}]`
+        );
 
-      expect(logger.debug).nthCalledWith(
-        3,
-        `alert test:${alertId}: 'alert-name' has 1 recovered alert instances: [\"2\"]`
-      );
-      expect(logger.debug).nthCalledWith(
-        4,
-        `alertExecutionStatus for test:${alertId}: {"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}`
-      );
+        expect(logger.debug).nthCalledWith(
+          3,
+          `alert test:${alertId}: 'alert-name' has 1 recovered alert instances: [\"2\"]`
+        );
+        expect(logger.debug).nthCalledWith(
+          4,
+          `alertExecutionStatus for test:${alertId}: {"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}`
+        );
 
-      const eventLogger = customTaskRunnerFactoryInitializerParams.eventLogger;
-      expect(eventLogger.logEvent).toHaveBeenCalledTimes(6);
-      expect(enqueueFunction).toHaveBeenCalledTimes(2);
-      expect((enqueueFunction as jest.Mock).mock.calls[1][0].id).toEqual('1');
-      expect((enqueueFunction as jest.Mock).mock.calls[0][0].id).toEqual('2');
-    }
+        const eventLogger = customTaskRunnerFactoryInitializerParams.eventLogger;
+        expect(eventLogger.logEvent).toHaveBeenCalledTimes(6);
+        expect(enqueueFunction).toHaveBeenCalledTimes(2);
+        expect((enqueueFunction as jest.Mock).mock.calls[1][0].id).toEqual('1');
+        expect((enqueueFunction as jest.Mock).mock.calls[0][0].id).toEqual('2');
+      }
   );
 
   testAgainstEphemeralSupport(
     'fire actions under a custom recovery group when specified on an alert type for alertInstances which are in the recovered state',
     (
-      customTaskRunnerFactoryInitializerParams: TaskRunnerFactoryInitializerParamsType,
-      enqueueFunction: (options: ExecuteOptions) => Promise<void | RunNowResult>
-    ) => async () => {
-      customTaskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(
-        true
-      );
-      customTaskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(
-        true
-      );
+        customTaskRunnerFactoryInitializerParams: TaskRunnerFactoryInitializerParamsType,
+        enqueueFunction: (options: ExecuteOptions) => Promise<void | RunNowResult>
+      ) =>
+      async () => {
+        customTaskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(
+          true
+        );
+        customTaskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(
+          true
+        );
 
-      actionsClient.ephemeralEnqueuedExecution.mockResolvedValue(new Promise(() => {}));
+        actionsClient.ephemeralEnqueuedExecution.mockResolvedValue(new Promise(() => {}));
 
-      const recoveryActionGroup = {
-        id: 'customRecovered',
-        name: 'Custom Recovered',
-      };
-      const alertTypeWithCustomRecovery = {
-        ...alertType,
-        recoveryActionGroup,
-        actionGroups: [{ id: 'default', name: 'Default' }, recoveryActionGroup],
-      };
+        const recoveryActionGroup = {
+          id: 'customRecovered',
+          name: 'Custom Recovered',
+        };
+        const alertTypeWithCustomRecovery = {
+          ...alertType,
+          recoveryActionGroup,
+          actionGroups: [{ id: 'default', name: 'Default' }, recoveryActionGroup],
+        };
 
-      alertTypeWithCustomRecovery.executor.mockImplementation(
-        async ({
-          services: executorServices,
-        }: AlertExecutorOptions<
-          AlertTypeParams,
-          AlertTypeState,
-          AlertInstanceState,
-          AlertInstanceContext,
-          string
-        >) => {
-          executorServices.alertInstanceFactory('1').scheduleActions('default');
-        }
-      );
-      const taskRunner = new TaskRunner(
-        alertTypeWithCustomRecovery,
-        {
-          ...mockedTaskInstance,
-          state: {
-            ...mockedTaskInstance.state,
-            alertInstances: {
-              '1': { meta: {}, state: { bar: false } },
-              '2': { meta: {}, state: { bar: false } },
-            },
-          },
-        },
-        customTaskRunnerFactoryInitializerParams
-      );
-      rulesClient.get.mockResolvedValue({
-        ...mockedAlertTypeSavedObject,
-        actions: [
+        alertTypeWithCustomRecovery.executor.mockImplementation(
+          async ({
+            services: executorServices,
+          }: AlertExecutorOptions<
+            AlertTypeParams,
+            AlertTypeState,
+            AlertInstanceState,
+            AlertInstanceContext,
+            string
+          >) => {
+            executorServices.alertInstanceFactory('1').scheduleActions('default');
+          }
+        );
+        const taskRunner = new TaskRunner(
+          alertTypeWithCustomRecovery,
           {
-            group: 'default',
-            id: '1',
-            actionTypeId: 'action',
-            params: {
-              foo: true,
+            ...mockedTaskInstance,
+            state: {
+              ...mockedTaskInstance.state,
+              alertInstances: {
+                '1': { meta: {}, state: { bar: false } },
+                '2': { meta: {}, state: { bar: false } },
+              },
             },
           },
-          {
-            group: recoveryActionGroup.id,
-            id: '2',
-            actionTypeId: 'action',
-            params: {
-              isResolved: true,
+          customTaskRunnerFactoryInitializerParams
+        );
+        rulesClient.get.mockResolvedValue({
+          ...mockedAlertTypeSavedObject,
+          actions: [
+            {
+              group: 'default',
+              id: '1',
+              actionTypeId: 'action',
+              params: {
+                foo: true,
+              },
             },
+            {
+              group: recoveryActionGroup.id,
+              id: '2',
+              actionTypeId: 'action',
+              params: {
+                isResolved: true,
+              },
+            },
+          ],
+        });
+        encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
+          id: '1',
+          type: 'alert',
+          attributes: {
+            apiKey: Buffer.from('123:abc').toString('base64'),
+            enabled: true,
           },
-        ],
-      });
-      encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
-        id: '1',
-        type: 'alert',
-        attributes: {
-          apiKey: Buffer.from('123:abc').toString('base64'),
-        },
-        references: [],
-      });
-      const runnerResult = await taskRunner.run();
-      expect(runnerResult.state.alertInstances).toMatchInlineSnapshot(`
+          references: [],
+        });
+        const runnerResult = await taskRunner.run();
+        expect(runnerResult.state.alertInstances).toMatchInlineSnapshot(`
       Object {
         "1": Object {
           "meta": Object {
@@ -1987,10 +2026,10 @@ describe('Task Runner', () => {
       }
     `);
 
-      const eventLogger = customTaskRunnerFactoryInitializerParams.eventLogger;
-      expect(eventLogger.logEvent).toHaveBeenCalledTimes(6);
-      expect(enqueueFunction).toHaveBeenCalledTimes(2);
-      expect((enqueueFunction as jest.Mock).mock.calls[0]).toMatchInlineSnapshot(`
+        const eventLogger = customTaskRunnerFactoryInitializerParams.eventLogger;
+        expect(eventLogger.logEvent).toHaveBeenCalledTimes(6);
+        expect(enqueueFunction).toHaveBeenCalledTimes(2);
+        expect((enqueueFunction as jest.Mock).mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         Object {
           "apiKey": "MTIzOmFiYw==",
@@ -2017,7 +2056,7 @@ describe('Task Runner', () => {
         },
       ]
     `);
-    }
+      }
   );
 
   test('persists alertInstances passed in from state, only if they are scheduled for execution', async () => {
@@ -2069,6 +2108,7 @@ describe('Task Runner', () => {
       type: 'alert',
       attributes: {
         apiKey: Buffer.from('123:abc').toString('base64'),
+        enabled: true,
       },
       references: [],
     });
@@ -2272,6 +2312,7 @@ describe('Task Runner', () => {
       type: 'alert',
       attributes: {
         apiKey: Buffer.from('123:abc').toString('base64'),
+        enabled: true,
       },
       references: [],
     });
@@ -2300,6 +2341,7 @@ describe('Task Runner', () => {
       type: 'alert',
       attributes: {
         apiKey: Buffer.from('123:abc').toString('base64'),
+        enabled: true,
       },
       references: [],
     });
@@ -2331,7 +2373,9 @@ describe('Task Runner', () => {
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
-      attributes: {},
+      attributes: {
+        enabled: true,
+      },
       references: [],
     });
 
@@ -2368,6 +2412,7 @@ describe('Task Runner', () => {
       type: 'alert',
       attributes: {
         apiKey: Buffer.from('123:abc').toString('base64'),
+        enabled: true,
       },
       references: [],
     });
@@ -2413,6 +2458,7 @@ describe('Task Runner', () => {
       type: 'alert',
       attributes: {
         apiKey: Buffer.from('123:abc').toString('base64'),
+        enabled: true,
       },
       references: [],
     });
@@ -2639,6 +2685,7 @@ describe('Task Runner', () => {
       type: 'alert',
       attributes: {
         apiKey: Buffer.from('123:abc').toString('base64'),
+        enabled: true,
       },
       references: [],
     });
@@ -2756,6 +2803,7 @@ describe('Task Runner', () => {
       type: 'alert',
       attributes: {
         apiKey: Buffer.from('123:abc').toString('base64'),
+        enabled: true,
       },
       references: [],
     });
@@ -2872,6 +2920,7 @@ describe('Task Runner', () => {
       type: 'alert',
       attributes: {
         apiKey: Buffer.from('123:abc').toString('base64'),
+        enabled: true,
       },
       references: [],
     });
@@ -2992,6 +3041,7 @@ describe('Task Runner', () => {
       type: 'alert',
       attributes: {
         apiKey: Buffer.from('123:abc').toString('base64'),
+        enabled: true,
       },
       references: [],
     });
@@ -3042,6 +3092,7 @@ describe('Task Runner', () => {
       type: 'alert',
       attributes: {
         apiKey: Buffer.from('123:abc').toString('base64'),
+        enabled: true,
       },
       references: [],
     });
@@ -3075,6 +3126,7 @@ describe('Task Runner', () => {
       type: 'alert',
       attributes: {
         apiKey: Buffer.from('123:abc').toString('base64'),
+        enabled: true,
       },
       references: [],
     });
@@ -3116,6 +3168,7 @@ describe('Task Runner', () => {
       type: 'alert',
       attributes: {
         apiKey: Buffer.from('123:abc').toString('base64'),
+        enabled: true,
       },
       references: [],
     });
@@ -3172,6 +3225,7 @@ describe('Task Runner', () => {
       type: 'alert',
       attributes: {
         apiKey: Buffer.from('123:abc').toString('base64'),
+        enabled: true,
       },
       references: [],
     });
@@ -3458,6 +3512,7 @@ describe('Task Runner', () => {
       type: 'alert',
       attributes: {
         apiKey: Buffer.from('123:abc').toString('base64'),
+        enabled: true,
       },
       references: [],
     });
@@ -3664,6 +3719,7 @@ describe('Task Runner', () => {
       type: 'alert',
       attributes: {
         apiKey: Buffer.from('123:abc').toString('base64'),
+        enabled: true,
       },
       references: [],
     });
@@ -3861,6 +3917,7 @@ describe('Task Runner', () => {
       type: 'alert',
       attributes: {
         apiKey: Buffer.from('123:abc').toString('base64'),
+        enabled: true,
       },
       references: [],
     });
@@ -4064,6 +4121,7 @@ describe('Task Runner', () => {
       type: 'alert',
       attributes: {
         apiKey: Buffer.from('123:abc').toString('base64'),
+        enabled: true,
       },
       references: [],
     });
@@ -4238,6 +4296,7 @@ describe('Task Runner', () => {
       type: 'alert',
       attributes: {
         apiKey: Buffer.from('123:abc').toString('base64'),
+        enabled: true,
       },
       references: [],
     });
@@ -4312,7 +4371,7 @@ describe('Task Runner', () => {
     expect(call.services).toBeTruthy();
 
     const logger = taskRunnerFactoryInitializerParams.logger;
-    expect(logger.debug).toHaveBeenCalledTimes(2);
+    expect(logger.debug).toHaveBeenCalledTimes(3);
     expect(logger.debug).nthCalledWith(1, 'executing alert test:1 at 1970-01-01T00:00:00.000Z');
     expect(logger.debug).nthCalledWith(
       2,
@@ -4365,11 +4424,94 @@ describe('Task Runner', () => {
       {
         executionStatus: {
           error: null,
+          lastDuration: 0,
           lastExecutionDate: '1970-01-01T00:00:00.000Z',
           status: 'ok',
         },
       },
       { refresh: false, namespace: undefined }
     );
+  });
+
+  test('successfully bails on execution if the rule is disabled', async () => {
+    const state = {
+      ...mockedTaskInstance.state,
+      previousStartedAt: new Date(Date.now() - 5 * 60 * 1000).toISOString(),
+    };
+    const taskRunner = new TaskRunner(
+      alertType,
+      {
+        ...mockedTaskInstance,
+        state,
+      },
+      taskRunnerFactoryInitializerParams
+    );
+    rulesClient.get.mockResolvedValue(mockedAlertTypeSavedObject);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
+      id: '1',
+      type: 'alert',
+      attributes: {
+        apiKey: Buffer.from('123:abc').toString('base64'),
+        enabled: false,
+      },
+      references: [],
+    });
+    const runnerResult = await taskRunner.run();
+    expect(runnerResult.state.previousStartedAt?.toISOString()).toBe(state.previousStartedAt);
+    expect(runnerResult.schedule).toStrictEqual(mockedTaskInstance.schedule);
+
+    const eventLogger = taskRunnerFactoryInitializerParams.eventLogger;
+    expect(eventLogger.logEvent).toHaveBeenCalledTimes(2);
+    expect(eventLogger.logEvent.mock.calls[0][0]).toStrictEqual({
+      '@timestamp': '1970-01-01T00:00:00.000Z',
+      event: {
+        action: 'execute-start',
+        kind: 'alert',
+        category: ['alerts'],
+      },
+      kibana: {
+        saved_objects: [
+          { rel: 'primary', type: 'alert', id: '1', namespace: undefined, type_id: 'test' },
+        ],
+        task: { scheduled: '1970-01-01T00:00:00.000Z', schedule_delay: 0 },
+      },
+      rule: {
+        id: '1',
+        license: 'basic',
+        category: 'test',
+        ruleset: 'alerts',
+      },
+      message: 'alert execution start: "1"',
+    });
+    expect(eventLogger.logEvent.mock.calls[1][0]).toStrictEqual({
+      '@timestamp': '1970-01-01T00:00:00.000Z',
+      event: {
+        action: 'execute',
+        kind: 'alert',
+        category: ['alerts'],
+        reason: 'disabled',
+        outcome: 'failure',
+      },
+      kibana: {
+        saved_objects: [
+          { rel: 'primary', type: 'alert', id: '1', namespace: undefined, type_id: 'test' },
+        ],
+        task: {
+          scheduled: '1970-01-01T00:00:00.000Z',
+          schedule_delay: 0,
+        },
+        alerting: { status: 'error' },
+      },
+      rule: {
+        id: '1',
+        license: 'basic',
+        category: 'test',
+        ruleset: 'alerts',
+      },
+      error: {
+        message: 'Rule failed to execute because rule ran after it was disabled.',
+      },
+      message: 'test:1: execution failed',
+    });
   });
 });

@@ -18,6 +18,7 @@ import { Feature, Point } from 'geojson';
 import { DynamicColorProperty } from './dynamic_color_property';
 import {
   COLOR_MAP_TYPE,
+  FIELD_ORIGIN,
   RawValue,
   DATA_MAPPING_FUNCTION,
   VECTOR_STYLES,
@@ -32,7 +33,7 @@ const makeProperty = (options: ColorDynamicOptions, style?: MockStyle, field?: I
     options,
     VECTOR_STYLES.LINE_COLOR,
     field ? field : mockField,
-    (new MockLayer(style ? style : new MockStyle()) as unknown) as IVectorLayer,
+    new MockLayer(style ? style : new MockStyle()) as unknown as IVectorLayer,
     () => {
       return (value: RawValue) => value + '_format';
     }
@@ -291,17 +292,27 @@ describe('supportsFieldMeta', () => {
     expect(styleProp.supportsFieldMeta()).toEqual(true);
   });
 
-  test('should not support fieldMeta when field does not support fieldMeta', () => {
-    const field = Object.create(mockField);
-    field.supportsFieldMeta = function () {
-      return false;
+  test('should not support fieldMeta when field does not support fieldMeta from ES', () => {
+    const field = {
+      supportsFieldMetaFromEs() {
+        return false;
+      },
+    } as unknown as IField;
+    const layer = {} as unknown as IVectorLayer;
+    const options = {
+      type: COLOR_MAP_TYPE.ORDINAL,
+      fieldMetaOptions: { isEnabled: true },
     };
 
-    const dynamicStyleOptions = {
-      type: COLOR_MAP_TYPE.ORDINAL,
-      fieldMetaOptions,
-    };
-    const styleProp = makeProperty(dynamicStyleOptions, undefined, field);
+    const styleProp = new DynamicColorProperty(
+      options,
+      VECTOR_STYLES.LINE_COLOR,
+      field,
+      layer,
+      () => {
+        return (value: RawValue) => value + '_format';
+      }
+    );
 
     expect(styleProp.supportsFieldMeta()).toEqual(false);
   });
@@ -316,7 +327,7 @@ describe('supportsFieldMeta', () => {
       dynamicStyleOptions,
       VECTOR_STYLES.LINE_COLOR,
       null,
-      (new MockLayer(new MockStyle()) as unknown) as IVectorLayer,
+      new MockLayer(new MockStyle()) as unknown as IVectorLayer,
       () => {
         return (value: RawValue) => value + '_format';
       }
@@ -382,12 +393,50 @@ describe('get mapbox color expression (via internal _getMbColor)', () => {
         expect(colorProperty._getMbColor()).toBeNull();
       });
       test('should return mapbox expression for color ramp', async () => {
-        const dynamicStyleOptions = {
+        const field = {
+          getMbFieldName: () => {
+            return 'foobar';
+          },
+          getName: () => {
+            return 'foobar';
+          },
+          getOrigin: () => {
+            return FIELD_ORIGIN.SOURCE;
+          },
+          supportsFieldMetaFromEs: () => {
+            return true;
+          },
+          getSource: () => {
+            return {
+              isMvt: () => {
+                return false;
+              },
+            };
+          },
+        } as unknown as IField;
+        const options = {
           type: COLOR_MAP_TYPE.ORDINAL,
           color: 'Blues',
-          fieldMetaOptions,
+          fieldMetaOptions: { isEnabled: true },
         };
-        const colorProperty = makeProperty(dynamicStyleOptions);
+
+        const colorProperty = new DynamicColorProperty(
+          options,
+          VECTOR_STYLES.LINE_COLOR,
+          field,
+          {} as unknown as IVectorLayer,
+          () => {
+            return (value: RawValue) => value + '_format';
+          }
+        );
+        colorProperty.getRangeFieldMeta = () => {
+          return {
+            min: 0,
+            max: 100,
+            delta: 100,
+          };
+        };
+
         expect(colorProperty._getMbColor()).toEqual([
           'interpolate',
           ['linear'],
@@ -445,17 +494,40 @@ describe('get mapbox color expression (via internal _getMbColor)', () => {
         expect(colorProperty._getMbColor()).toBeNull();
       });
 
-      test('should use `feature-state` by default', async () => {
-        const dynamicStyleOptions = {
+      test('should use `feature-state` for geojson source', async () => {
+        const field = {
+          getMbFieldName: () => {
+            return 'foobar';
+          },
+          getSource: () => {
+            return {
+              isMvt: () => {
+                return false;
+              },
+            };
+          },
+        } as unknown as IField;
+        const layer = {} as unknown as IVectorLayer;
+        const options = {
           type: COLOR_MAP_TYPE.ORDINAL,
           useCustomColorRamp: true,
           customColorRamp: [
             { stop: 10, color: '#f7faff' },
             { stop: 100, color: '#072f6b' },
           ],
-          fieldMetaOptions,
+          fieldMetaOptions: { isEnabled: true },
         };
-        const colorProperty = makeProperty(dynamicStyleOptions);
+
+        const colorProperty = new DynamicColorProperty(
+          options,
+          VECTOR_STYLES.LINE_COLOR,
+          field,
+          layer,
+          () => {
+            return (value: RawValue) => value + '_format';
+          }
+        );
+
         expect(colorProperty._getMbColor()).toEqual([
           'step',
           [
@@ -476,21 +548,40 @@ describe('get mapbox color expression (via internal _getMbColor)', () => {
         ]);
       });
 
-      test('should use `get` when source cannot return raw geojson', async () => {
-        const field = Object.create(mockField);
-        field.canReadFromGeoJson = function () {
-          return false;
-        };
-        const dynamicStyleOptions = {
+      test('should use `get` for MVT source', async () => {
+        const field = {
+          getMbFieldName: () => {
+            return 'foobar';
+          },
+          getSource: () => {
+            return {
+              isMvt: () => {
+                return true;
+              },
+            };
+          },
+        } as unknown as IField;
+        const layer = {} as unknown as IVectorLayer;
+        const options = {
           type: COLOR_MAP_TYPE.ORDINAL,
           useCustomColorRamp: true,
           customColorRamp: [
             { stop: 10, color: '#f7faff' },
             { stop: 100, color: '#072f6b' },
           ],
-          fieldMetaOptions,
+          fieldMetaOptions: { isEnabled: true },
         };
-        const colorProperty = makeProperty(dynamicStyleOptions, undefined, field);
+
+        const colorProperty = new DynamicColorProperty(
+          options,
+          VECTOR_STYLES.LINE_COLOR,
+          field,
+          layer,
+          () => {
+            return (value: RawValue) => value + '_format';
+          }
+        );
+
         expect(colorProperty._getMbColor()).toEqual([
           'step',
           [

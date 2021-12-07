@@ -10,4 +10,9 @@ export interface RegistryEcs {
   key?: string[];
   path?: string[];
   value?: string[];
+  data?: RegistryEcsData;
+}
+
+export interface RegistryEcsData {
+  strings?: string[];
 }

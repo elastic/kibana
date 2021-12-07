@@ -35,8 +35,8 @@ import type { SecurityLicense } from '../../common/licensing';
 import { licenseMock } from '../../common/licensing/index.mock';
 import type { AuthenticatedUser } from '../../common/model';
 import { mockAuthenticatedUser } from '../../common/model/authenticated_user.mock';
-import type { AuditServiceSetup, SecurityAuditLogger } from '../audit';
-import { auditServiceMock, securityAuditLoggerMock } from '../audit/index.mock';
+import type { AuditServiceSetup } from '../audit';
+import { auditServiceMock } from '../audit/index.mock';
 import type { ConfigType } from '../config';
 import { ConfigSchema, createConfig } from '../config';
 import type { SecurityFeatureUsageServiceStart } from '../feature_usage';
@@ -57,7 +57,6 @@ describe('AuthenticationService', () => {
     buildNumber: number;
   };
   let mockStartAuthenticationParams: {
-    legacyAuditLogger: jest.Mocked<SecurityAuditLogger>;
     audit: jest.Mocked<AuditServiceSetup>;
     config: ConfigType;
     loggers: LoggerFactory;
@@ -86,7 +85,6 @@ describe('AuthenticationService', () => {
 
     const coreStart = coreMock.createStart();
     mockStartAuthenticationParams = {
-      legacyAuditLogger: securityAuditLoggerMock.create(),
       audit: auditServiceMock.create(),
       config: createConfig(
         ConfigSchema.validate({
@@ -130,6 +128,19 @@ describe('AuthenticationService', () => {
         expect.any(Function)
       );
     });
+
+    it('properly registers auth handler with no providers', () => {
+      mockSetupAuthenticationParams.config.authc = {
+        ...mockSetupAuthenticationParams.config.authc,
+        sortedProviders: [],
+      };
+      service.setup(mockSetupAuthenticationParams);
+
+      expect(mockSetupAuthenticationParams.http.registerAuth).toHaveBeenCalledTimes(1);
+      expect(mockSetupAuthenticationParams.http.registerAuth).toHaveBeenCalledWith(
+        expect.any(Function)
+      );
+    });
   });
 
   describe('#start()', () => {
@@ -147,8 +158,8 @@ describe('AuthenticationService', () => {
         service.start(mockStartAuthenticationParams);
 
         authHandler = mockSetupAuthenticationParams.http.registerAuth.mock.calls[0][0];
-        authenticate = jest.requireMock('./authenticator').Authenticator.mock.instances[0]
-          .authenticate;
+        authenticate =
+          jest.requireMock('./authenticator').Authenticator.mock.instances[0].authenticate;
       });
 
       it('returns error if license is not available.', async () => {
@@ -315,6 +326,52 @@ describe('AuthenticationService', () => {
 
         expect(mockAuthToolkit.authenticated).not.toHaveBeenCalled();
         expect(mockAuthToolkit.redirected).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('getServerBaseURL()', () => {
+      let getServerBaseURL: () => string;
+      beforeEach(() => {
+        mockStartAuthenticationParams.http.getServerInfo.mockReturnValue({
+          name: 'some-name',
+          protocol: 'socket',
+          hostname: 'test-hostname',
+          port: 1234,
+        });
+
+        service.setup(mockSetupAuthenticationParams);
+        service.start(mockStartAuthenticationParams);
+
+        getServerBaseURL =
+          jest.requireMock('./authenticator').Authenticator.mock.calls[0][0].getServerBaseURL;
+      });
+
+      it('falls back to legacy server config if `public` config is not specified', async () => {
+        expect(getServerBaseURL()).toBe('socket://test-hostname:1234');
+      });
+
+      it('respects `public` config if it is specified', async () => {
+        mockStartAuthenticationParams.config.public = {
+          protocol: 'https',
+        } as ConfigType['public'];
+        expect(getServerBaseURL()).toBe('https://test-hostname:1234');
+
+        mockStartAuthenticationParams.config.public = {
+          hostname: 'elastic.co',
+        } as ConfigType['public'];
+        expect(getServerBaseURL()).toBe('socket://elastic.co:1234');
+
+        mockStartAuthenticationParams.config.public = {
+          port: 4321,
+        } as ConfigType['public'];
+        expect(getServerBaseURL()).toBe('socket://test-hostname:4321');
+
+        mockStartAuthenticationParams.config.public = {
+          protocol: 'https',
+          hostname: 'elastic.co',
+          port: 4321,
+        } as ConfigType['public'];
+        expect(getServerBaseURL()).toBe('https://elastic.co:4321');
       });
     });
 

@@ -10,4 +10,7 @@ module.exports = {
   preset: '@kbn/test',
   rootDir: '../../..',
   roots: ['<rootDir>/src/plugins/bfetch'],
+  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/src/plugins/bfetch',
+  coverageReporters: ['text', 'html'],
+  collectCoverageFrom: ['<rootDir>/src/plugins/bfetch/{common,public,server}/**/*.{ts,tsx}'],
 };

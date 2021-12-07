@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ElasticsearchClient } from 'src/core/server';
 import {
   compareDatasetsByMaximumAnomalyScore,
@@ -244,15 +244,14 @@ async function fetchTopLogEntryCategories(
   const topLogEntryCategories =
     topLogEntryCategoriesResponse.aggregations?.terms_category_id.buckets.map(
       (topCategoryBucket) => {
-        const maximumAnomalyScoresByDataset = topCategoryBucket.filter_record.terms_dataset.buckets.reduce<
-          Record<string, number>
-        >(
-          (accumulatedMaximumAnomalyScores, datasetFromRecord) => ({
-            ...accumulatedMaximumAnomalyScores,
-            [datasetFromRecord.key]: datasetFromRecord.maximum_record_score.value ?? 0,
-          }),
-          {}
-        );
+        const maximumAnomalyScoresByDataset =
+          topCategoryBucket.filter_record.terms_dataset.buckets.reduce<Record<string, number>>(
+            (accumulatedMaximumAnomalyScores, datasetFromRecord) => ({
+              ...accumulatedMaximumAnomalyScores,
+              [datasetFromRecord.key]: datasetFromRecord.maximum_record_score.value ?? 0,
+            }),
+            {}
+          );
 
         return {
           categoryId: parseCategoryId(topCategoryBucket.key),

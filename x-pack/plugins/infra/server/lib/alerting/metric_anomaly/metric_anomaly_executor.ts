@@ -8,97 +8,96 @@
 import { i18n } from '@kbn/i18n';
 import { first } from 'lodash';
 import moment from 'moment';
+import { KibanaRequest } from 'kibana/server';
 import { stateToAlertMessage } from '../common/messages';
 import { MetricAnomalyParams } from '../../../../common/alerting/metrics';
 import { MappedAnomalyHit } from '../../infra_ml';
 import { AlertStates } from '../common/types';
 import {
   ActionGroup,
-  AlertInstanceContext,
-  AlertInstanceState,
+  AlertInstanceContext as AlertContext,
+  AlertInstanceState as AlertState,
 } from '../../../../../alerting/common';
-import { AlertExecutorOptions } from '../../../../../alerting/server';
+import { AlertExecutorOptions as RuleExecutorOptions } from '../../../../../alerting/server';
 import { getIntervalInSeconds } from '../../../utils/get_interval_in_seconds';
-import { MetricAnomalyAllowedActionGroups } from './register_metric_anomaly_alert_type';
+import { MetricAnomalyAllowedActionGroups } from './register_metric_anomaly_rule_type';
 import { MlPluginSetup } from '../../../../../ml/server';
-import { KibanaRequest } from '../../../../../../../src/core/server';
 import { InfraBackendLibs } from '../../infra_types';
 import { evaluateCondition } from './evaluate_condition';
 
-export const createMetricAnomalyExecutor = (libs: InfraBackendLibs, ml?: MlPluginSetup) => async ({
-  services,
-  params,
-  startedAt,
-}: AlertExecutorOptions<
-  /**
-   * TODO: Remove this use of `any` by utilizing a proper type
-   */
-  Record<string, any>,
-  Record<string, any>,
-  AlertInstanceState,
-  AlertInstanceContext,
-  MetricAnomalyAllowedActionGroups
->) => {
-  if (!ml) {
-    return;
-  }
-  const request = {} as KibanaRequest;
-  const mlSystem = ml.mlSystemProvider(request, services.savedObjectsClient);
-  const mlAnomalyDetectors = ml.anomalyDetectorsProvider(request, services.savedObjectsClient);
+export const createMetricAnomalyExecutor =
+  (libs: InfraBackendLibs, ml?: MlPluginSetup) =>
+  async ({
+    services,
+    params,
+    startedAt,
+  }: RuleExecutorOptions<
+    /**
+     * TODO: Remove this use of `any` by utilizing a proper type
+     */
+    Record<string, any>,
+    Record<string, any>,
+    AlertState,
+    AlertContext,
+    MetricAnomalyAllowedActionGroups
+  >) => {
+    if (!ml) {
+      return;
+    }
+    const request = {} as KibanaRequest;
+    const mlSystem = ml.mlSystemProvider(request, services.savedObjectsClient);
+    const mlAnomalyDetectors = ml.anomalyDetectorsProvider(request, services.savedObjectsClient);
 
-  const {
-    metric,
-    alertInterval,
-    influencerFilter,
-    sourceId,
-    spaceId,
-    nodeType,
-    threshold,
-  } = params as MetricAnomalyParams;
+    const { metric, alertInterval, influencerFilter, sourceId, spaceId, nodeType, threshold } =
+      params as MetricAnomalyParams;
 
-  const bucketInterval = getIntervalInSeconds('15m') * 1000;
-  const alertIntervalInMs = getIntervalInSeconds(alertInterval ?? '1m') * 1000;
+    const bucketInterval = getIntervalInSeconds('15m') * 1000;
+    const alertIntervalInMs = getIntervalInSeconds(alertInterval ?? '1m') * 1000;
 
-  const endTime = startedAt.getTime();
-  // Anomalies are bucketed at :00, :15, :30, :45 minutes every hour
-  const previousBucketStartTime = endTime - (endTime % bucketInterval);
+    const endTime = startedAt.getTime();
+    // Anomalies are bucketed at :00, :15, :30, :45 minutes every hour
+    const previousBucketStartTime = endTime - (endTime % bucketInterval);
 
-  // If the alert interval is less than 15m, make sure that it actually queries an anomaly bucket
-  const startTime = Math.min(endTime - alertIntervalInMs, previousBucketStartTime);
+    // If the alert interval is less than 15m, make sure that it actually queries an anomaly bucket
+    const startTime = Math.min(endTime - alertIntervalInMs, previousBucketStartTime);
 
-  const { data } = await evaluateCondition({
-    sourceId: sourceId ?? 'default',
-    spaceId: spaceId ?? 'default',
-    mlSystem,
-    mlAnomalyDetectors,
-    startTime,
-    endTime,
-    metric,
-    threshold,
-    nodeType,
-    influencerFilter,
-  });
-
-  const shouldAlertFire = data.length > 0;
-
-  if (shouldAlertFire) {
-    const { startTime: anomalyStartTime, anomalyScore, actual, typical, influencers } = first(
-      data as MappedAnomalyHit[]
-    )!;
-    const alertInstance = services.alertInstanceFactory(`${nodeType}-${metric}`);
-
-    alertInstance.scheduleActions(FIRED_ACTIONS_ID, {
-      alertState: stateToAlertMessage[AlertStates.ALERT],
-      timestamp: moment(anomalyStartTime).toISOString(),
-      anomalyScore,
-      actual,
-      typical,
-      metric: metricNameMap[metric],
-      summary: generateSummaryMessage(actual, typical),
-      influencers: influencers.join(', '),
+    const { data } = await evaluateCondition({
+      sourceId: sourceId ?? 'default',
+      spaceId: spaceId ?? 'default',
+      mlSystem,
+      mlAnomalyDetectors,
+      startTime,
+      endTime,
+      metric,
+      threshold,
+      nodeType,
+      influencerFilter,
     });
-  }
-};
+
+    const shouldAlertFire = data.length > 0;
+
+    if (shouldAlertFire) {
+      const {
+        startTime: anomalyStartTime,
+        anomalyScore,
+        actual,
+        typical,
+        influencers,
+      } = first(data as MappedAnomalyHit[])!;
+      const alert = services.alertInstanceFactory(`${nodeType}-${metric}`);
+
+      alert.scheduleActions(FIRED_ACTIONS_ID, {
+        alertState: stateToAlertMessage[AlertStates.ALERT],
+        timestamp: moment(anomalyStartTime).toISOString(),
+        anomalyScore,
+        actual,
+        typical,
+        metric: metricNameMap[metric],
+        summary: generateSummaryMessage(actual, typical),
+        influencers: influencers.join(', '),
+      });
+    }
+  };
 
 export const FIRED_ACTIONS_ID = 'metrics.anomaly.fired';
 export const FIRED_ACTIONS: ActionGroup<typeof FIRED_ACTIONS_ID> = {

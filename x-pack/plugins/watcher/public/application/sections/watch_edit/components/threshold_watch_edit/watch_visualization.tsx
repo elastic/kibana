@@ -20,7 +20,7 @@ import dateMath from '@elastic/datemath';
 import moment from 'moment-timezone';
 import { IUiSettingsClient } from 'kibana/public';
 import { EuiCallOut, EuiLoadingChart, EuiSpacer, EuiEmptyPrompt, EuiText } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { VisualizeOptions } from '../../../../models/visualize_options';
 import { ThresholdWatch } from '../../../../models/watch/threshold_watch';
@@ -183,7 +183,7 @@ export const WatchVisualization = () => {
               defaultMessage="Cannot load watch visualization"
             />
           }
-          error={(error as unknown) as Error}
+          error={error as unknown as Error}
         />
         <EuiSpacer size="l" />
       </Fragment>
@@ -227,7 +227,12 @@ export const WatchVisualization = () => {
               showOverlappingTicks={true}
               tickFormat={dateFormatter}
             />
-            <Axis domain={{ max: maxY }} id="left" title={aggLabel} position={Position.Left} />
+            <Axis
+              domain={{ max: maxY, min: NaN }}
+              id="left"
+              title={aggLabel}
+              position={Position.Left}
+            />
             {watchVisualizationDataKeys.map((key: string) => {
               return (
                 <LineSeries

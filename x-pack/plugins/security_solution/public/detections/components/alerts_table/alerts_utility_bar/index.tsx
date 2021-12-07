@@ -27,7 +27,7 @@ import * as i18n from './translations';
 import { useUiSetting$ } from '../../../../common/lib/kibana';
 import { TimelineNonEcsData } from '../../../../../common/search_strategy/timeline';
 import { UpdateAlertsStatus } from '../types';
-import { FILTER_CLOSED, FILTER_IN_PROGRESS, FILTER_OPEN } from '../alerts_filter_group';
+import { FILTER_CLOSED, FILTER_ACKNOWLEDGED, FILTER_OPEN } from '../alerts_filter_group';
 
 export interface AlertsUtilityBarProps {
   areEventsLoading: boolean;
@@ -50,14 +50,12 @@ const UtilityBarFlexGroup = styled(EuiFlexGroup)`
   min-width: 175px;
 `;
 
-const BuildingBlockContainer = styled(EuiFlexItem)`
-  background: repeating-linear-gradient(
-    127deg,
-    rgba(245, 167, 0, 0.2),
-    rgba(245, 167, 0, 0.2) 1px,
-    rgba(245, 167, 0, 0.05) 2px,
-    rgba(245, 167, 0, 0.05) 10px
-  );
+const AdditionalFiltersItem = styled(EuiFlexItem)`
+  padding: ${({ theme }) => theme.eui.paddingSizes.s};
+`;
+
+const BuildingBlockContainer = styled(AdditionalFiltersItem)`
+  background: ${({ theme }) => theme.eui.euiColorHighlight};
 `;
 
 const AlertsUtilityBarComponent: React.FC<AlertsUtilityBarProps> = ({
@@ -128,54 +126,21 @@ const AlertsUtilityBarComponent: React.FC<AlertsUtilityBarProps> = ({
         </EuiFlexItem>
       )}
 
-      {currentFilter !== FILTER_IN_PROGRESS && (
+      {currentFilter !== FILTER_ACKNOWLEDGED && (
         <EuiFlexItem>
           <Link
-            aria-label="markSelectedAlertsInProgress"
+            aria-label="markSelectedAlertsAcknowledged"
             onClick={() => {
               closePopover();
-              handleUpdateStatus('in-progress');
+              handleUpdateStatus('acknowledged');
             }}
             color="text"
-            data-test-subj="markSelectedAlertsInProgressButton"
+            data-test-subj="markSelectedAlertsAcknowledgedButton"
           >
-            {i18n.BATCH_ACTION_IN_PROGRESS_SELECTED}
+            {i18n.BATCH_ACTION_ACKNOWLEDGED_SELECTED}
           </Link>
         </EuiFlexItem>
       )}
-    </UtilityBarFlexGroup>
-  );
-
-  const UtilityBarAdditionalFiltersContent = (closePopover: () => void) => (
-    <UtilityBarFlexGroup direction="column" gutterSize="m">
-      <BuildingBlockContainer>
-        <EuiCheckbox
-          id="showBuildingBlockAlertsCheckbox"
-          aria-label="showBuildingBlockAlerts"
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-            closePopover();
-            onShowBuildingBlockAlertsChanged(e.target.checked);
-          }}
-          checked={showBuildingBlockAlerts}
-          color="text"
-          data-test-subj="showBuildingBlockAlertsCheckbox"
-          label={i18n.ADDITIONAL_FILTERS_ACTIONS_SHOW_BUILDING_BLOCK}
-        />
-      </BuildingBlockContainer>
-      <EuiFlexItem>
-        <EuiCheckbox
-          id="showOnlyThreatIndicatorAlertsCheckbox"
-          aria-label="showOnlyThreatIndicatorAlerts"
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-            closePopover();
-            onShowOnlyThreatIndicatorAlertsChanged(e.target.checked);
-          }}
-          checked={showOnlyThreatIndicatorAlerts}
-          color="text"
-          data-test-subj="showOnlyThreatIndicatorAlertsCheckbox"
-          label={i18n.ADDITIONAL_FILTERS_ACTIONS_SHOW_ONLY_THREAT_INDICATOR_ALERTS}
-        />
-      </EuiFlexItem>
     </UtilityBarFlexGroup>
   );
 
@@ -233,16 +198,13 @@ const AlertsUtilityBarComponent: React.FC<AlertsUtilityBarProps> = ({
               </>
             )}
             <UtilityBarSpacer />
-            <UtilityBarAction
-              dataTestSubj="additionalFilters"
-              disabled={areEventsLoading}
-              iconType="arrowDown"
-              iconSide="right"
-              ownFocus={true}
-              popoverContent={UtilityBarAdditionalFiltersContent}
-            >
-              {i18n.ADDITIONAL_FILTERS_ACTIONS}
-            </UtilityBarAction>
+            <AditionalFiltersAction
+              areEventsLoading={areEventsLoading}
+              onShowBuildingBlockAlertsChanged={onShowBuildingBlockAlertsChanged}
+              showBuildingBlockAlerts={showBuildingBlockAlerts}
+              onShowOnlyThreatIndicatorAlertsChanged={onShowOnlyThreatIndicatorAlertsChanged}
+              showOnlyThreatIndicatorAlerts={showOnlyThreatIndicatorAlerts}
+            />
           </UtilityBarGroup>
         </UtilityBarSection>
       </UtilityBar>
@@ -260,3 +222,63 @@ export const AlertsUtilityBar = React.memo(
     prevProps.showBuildingBlockAlerts === nextProps.showBuildingBlockAlerts &&
     prevProps.showOnlyThreatIndicatorAlerts === nextProps.showOnlyThreatIndicatorAlerts
 );
+
+export const AditionalFiltersAction = ({
+  areEventsLoading,
+  onShowBuildingBlockAlertsChanged,
+  showBuildingBlockAlerts,
+  onShowOnlyThreatIndicatorAlertsChanged,
+  showOnlyThreatIndicatorAlerts,
+}: {
+  areEventsLoading: boolean;
+  onShowBuildingBlockAlertsChanged: (showBuildingBlockAlerts: boolean) => void;
+  showBuildingBlockAlerts: boolean;
+  onShowOnlyThreatIndicatorAlertsChanged: (showOnlyThreatIndicatorAlerts: boolean) => void;
+  showOnlyThreatIndicatorAlerts: boolean;
+}) => {
+  const UtilityBarAdditionalFiltersContent = (closePopover: () => void) => (
+    <UtilityBarFlexGroup direction="column" gutterSize="none">
+      <BuildingBlockContainer>
+        <EuiCheckbox
+          id="showBuildingBlockAlertsCheckbox"
+          aria-label="showBuildingBlockAlerts"
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+            closePopover();
+            onShowBuildingBlockAlertsChanged(e.target.checked);
+          }}
+          checked={showBuildingBlockAlerts}
+          color="text"
+          data-test-subj="showBuildingBlockAlertsCheckbox"
+          label={i18n.ADDITIONAL_FILTERS_ACTIONS_SHOW_BUILDING_BLOCK}
+        />
+      </BuildingBlockContainer>
+      <AdditionalFiltersItem>
+        <EuiCheckbox
+          id="showOnlyThreatIndicatorAlertsCheckbox"
+          aria-label="showOnlyThreatIndicatorAlerts"
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+            closePopover();
+            onShowOnlyThreatIndicatorAlertsChanged(e.target.checked);
+          }}
+          checked={showOnlyThreatIndicatorAlerts}
+          color="text"
+          data-test-subj="showOnlyThreatIndicatorAlertsCheckbox"
+          label={i18n.ADDITIONAL_FILTERS_ACTIONS_SHOW_ONLY_THREAT_INDICATOR_ALERTS}
+        />
+      </AdditionalFiltersItem>
+    </UtilityBarFlexGroup>
+  );
+
+  return (
+    <UtilityBarAction
+      dataTestSubj="additionalFilters"
+      disabled={areEventsLoading}
+      iconType="arrowDown"
+      iconSide="right"
+      ownFocus={true}
+      popoverContent={UtilityBarAdditionalFiltersContent}
+    >
+      {i18n.ADDITIONAL_FILTERS_ACTIONS}
+    </UtilityBarAction>
+  );
+};

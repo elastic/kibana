@@ -1,5 +1,9 @@
 {
   "id": "kibanaUsageCollection",
+  "owner": {
+    "name": "Kibana Telemetry",
+    "githubTeam": "kibana-telemetry"
+  },
   "version": "kibana",
   "server": true,
   "ui": false,

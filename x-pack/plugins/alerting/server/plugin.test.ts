@@ -6,6 +6,7 @@
  */
 
 import { AlertingPlugin, AlertingPluginsSetup, PluginSetupContract } from './plugin';
+import { createUsageCollectionSetupMock } from 'src/plugins/usage_collection/server/mocks';
 import { coreMock, statusServiceMock } from '../../../../src/core/server/mocks';
 import { licensingMock } from '../../licensing/server/mocks';
 import { encryptedSavedObjectsMock } from '../../encrypted_saved_objects/server/mocks';
@@ -37,6 +38,8 @@ describe('Alerting Plugin', () => {
           removalDelay: '1h',
         },
         maxEphemeralActionsPerAlert: 10,
+        defaultRuleTaskTimeout: '5m',
+        cancelAlertsOnRuleTimeout: true,
       });
       plugin = new AlertingPlugin(context);
 
@@ -58,6 +61,40 @@ describe('Alerting Plugin', () => {
       expect(context.logger.get().warn).toHaveBeenCalledWith(
         'APIs are disabled because the Encrypted Saved Objects plugin is missing encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.'
       );
+    });
+
+    it('should create usage counter if usageCollection plugin is defined', async () => {
+      const context = coreMock.createPluginInitializerContext<AlertsConfig>({
+        healthCheck: {
+          interval: '5m',
+        },
+        invalidateApiKeysTask: {
+          interval: '5m',
+          removalDelay: '1h',
+        },
+        maxEphemeralActionsPerAlert: 10,
+        defaultRuleTaskTimeout: '5m',
+        cancelAlertsOnRuleTimeout: true,
+      });
+      plugin = new AlertingPlugin(context);
+
+      const encryptedSavedObjectsSetup = encryptedSavedObjectsMock.createSetup();
+      const usageCollectionSetup = createUsageCollectionSetupMock();
+
+      const setupMocks = coreMock.createSetup();
+      // need await to test number of calls of setupMocks.status.set, because it is under async function which awaiting core.getStartServices()
+      await plugin.setup(setupMocks, {
+        licensing: licensingMock.createSetup(),
+        encryptedSavedObjects: encryptedSavedObjectsSetup,
+        taskManager: taskManagerMock.createSetup(),
+        eventLog: eventLogServiceMock.create(),
+        actions: actionsMock.createSetup(),
+        statusService: statusServiceMock.createSetupContract(),
+        usageCollection: usageCollectionSetup,
+      });
+
+      expect(usageCollectionSetup.createUsageCounter).toHaveBeenCalled();
+      expect(usageCollectionSetup.registerCollector).toHaveBeenCalled();
     });
 
     describe('registerType()', () => {
@@ -109,6 +146,44 @@ describe('Alerting Plugin', () => {
           minimumLicenseRequired: 'basic',
         });
       });
+
+      it('should apply default config value for ruleTaskTimeout if no value is specified', async () => {
+        const ruleType = {
+          ...sampleAlertType,
+          minimumLicenseRequired: 'basic',
+        } as AlertType<never, never, never, never, never, 'default', never>;
+        await setup.registerType(ruleType);
+        expect(ruleType.ruleTaskTimeout).toBe('5m');
+      });
+
+      it('should apply value for ruleTaskTimeout if specified', async () => {
+        const ruleType = {
+          ...sampleAlertType,
+          minimumLicenseRequired: 'basic',
+          ruleTaskTimeout: '20h',
+        } as AlertType<never, never, never, never, never, 'default', never>;
+        await setup.registerType(ruleType);
+        expect(ruleType.ruleTaskTimeout).toBe('20h');
+      });
+
+      it('should apply default config value for cancelAlertsOnRuleTimeout if no value is specified', async () => {
+        const ruleType = {
+          ...sampleAlertType,
+          minimumLicenseRequired: 'basic',
+        } as AlertType<never, never, never, never, never, 'default', never>;
+        await setup.registerType(ruleType);
+        expect(ruleType.cancelAlertsOnRuleTimeout).toBe(true);
+      });
+
+      it('should apply value for cancelAlertsOnRuleTimeout if specified', async () => {
+        const ruleType = {
+          ...sampleAlertType,
+          minimumLicenseRequired: 'basic',
+          cancelAlertsOnRuleTimeout: false,
+        } as AlertType<never, never, never, never, never, 'default', never>;
+        await setup.registerType(ruleType);
+        expect(ruleType.cancelAlertsOnRuleTimeout).toBe(false);
+      });
     });
   });
 
@@ -124,6 +199,8 @@ describe('Alerting Plugin', () => {
             removalDelay: '1h',
           },
           maxEphemeralActionsPerAlert: 10,
+          defaultRuleTaskTimeout: '5m',
+          cancelAlertsOnRuleTimeout: true,
         });
         const plugin = new AlertingPlugin(context);
 
@@ -164,6 +241,8 @@ describe('Alerting Plugin', () => {
             removalDelay: '1h',
           },
           maxEphemeralActionsPerAlert: 10,
+          defaultRuleTaskTimeout: '5m',
+          cancelAlertsOnRuleTimeout: true,
         });
         const plugin = new AlertingPlugin(context);
 
@@ -189,7 +268,7 @@ describe('Alerting Plugin', () => {
           taskManager: taskManagerMock.createStart(),
         });
 
-        const fakeRequest = ({
+        const fakeRequest = {
           headers: {},
           getBasePath: () => '',
           path: '/',
@@ -203,7 +282,7 @@ describe('Alerting Plugin', () => {
             },
           },
           getSavedObjectsClient: jest.fn(),
-        } as unknown) as KibanaRequest;
+        } as unknown as KibanaRequest;
         startContract.getRulesClientWithRequest(fakeRequest);
       });
     });
@@ -218,6 +297,8 @@ describe('Alerting Plugin', () => {
           removalDelay: '1h',
         },
         maxEphemeralActionsPerAlert: 100,
+        defaultRuleTaskTimeout: '5m',
+        cancelAlertsOnRuleTimeout: true,
       });
       const plugin = new AlertingPlugin(context);
 
@@ -243,7 +324,7 @@ describe('Alerting Plugin', () => {
         taskManager: taskManagerMock.createStart(),
       });
 
-      const fakeRequest = ({
+      const fakeRequest = {
         headers: {},
         getBasePath: () => '',
         path: '/',
@@ -257,7 +338,7 @@ describe('Alerting Plugin', () => {
           },
         },
         getSavedObjectsClient: jest.fn(),
-      } as unknown) as KibanaRequest;
+      } as unknown as KibanaRequest;
       startContract.getAlertingAuthorizationWithRequest(fakeRequest);
     });
   });

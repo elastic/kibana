@@ -9,9 +9,9 @@ import React from 'react';
 
 import { EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
-import { DOCS_PREFIX } from '../../routes';
+import { META_ENGINES_DOCS_URL } from '../../routes';
 import {
   META_ENGINE_CREATION_FORM_META_ENGINE_DESCRIPTION,
   META_ENGINE_CREATION_FORM_DOCUMENTATION_LINK,
@@ -40,7 +40,7 @@ export const META_ENGINES_DESCRIPTION = (
       defaultMessage="{readDocumentationLink} for more information or upgrade to a Platinum license to get started."
       values={{
         readDocumentationLink: (
-          <EuiLink href={`${DOCS_PREFIX}/meta-engines-guide.html`} target="_blank">
+          <EuiLink href={META_ENGINES_DOCS_URL} target="_blank">
             {META_ENGINE_CREATION_FORM_DOCUMENTATION_LINK}
           </EuiLink>
         ),
@@ -57,13 +57,13 @@ export const SOURCE_ENGINES_TITLE = i18n.translate(
 export const CREATE_AN_ENGINE_BUTTON_LABEL = i18n.translate(
   'xpack.enterpriseSearch.appSearch.engines.createEngineButtonLabel',
   {
-    defaultMessage: 'Create an engine',
+    defaultMessage: 'Create engine',
   }
 );
 export const CREATE_A_META_ENGINE_BUTTON_LABEL = i18n.translate(
   'xpack.enterpriseSearch.appSearch.engines.createMetaEngineButtonLabel',
   {
-    defaultMessage: 'Create a meta engine',
+    defaultMessage: 'Create meta engine',
   }
 );
 

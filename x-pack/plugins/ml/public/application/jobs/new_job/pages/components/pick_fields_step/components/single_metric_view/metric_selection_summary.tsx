@@ -17,9 +17,12 @@ import { getToastNotificationService } from '../../../../../../../services/toast
 const DTR_IDX = 0;
 
 export const SingleMetricDetectorsSummary: FC = () => {
-  const { jobCreator: jc, chartLoader, resultsLoader, chartInterval } = useContext(
-    JobCreatorContext
-  );
+  const {
+    jobCreator: jc,
+    chartLoader,
+    resultsLoader,
+    chartInterval,
+  } = useContext(JobCreatorContext);
   const jobCreator = jc as SingleMetricJobCreator;
 
   const [lineChartsData, setLineChartData] = useState<LineChartData>({});

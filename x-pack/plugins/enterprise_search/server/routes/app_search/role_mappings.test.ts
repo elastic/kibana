@@ -19,18 +19,17 @@ const roleMappingBaseSchema = {
   roleType: 'owner',
   engines: ['e1', 'e2'],
   accessAllEngines: false,
-  authProvider: ['*'],
 };
 
 describe('role mappings routes', () => {
-  describe('POST /api/app_search/role_mappings/enable_role_based_access', () => {
+  describe('POST /internal/app_search/role_mappings/enable_role_based_access', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'post',
-        path: '/api/app_search/role_mappings/enable_role_based_access',
+        path: '/internal/app_search/role_mappings/enable_role_based_access',
       });
 
       registerEnableRoleMappingsRoute({
@@ -46,14 +45,14 @@ describe('role mappings routes', () => {
     });
   });
 
-  describe('GET /api/app_search/role_mappings', () => {
+  describe('GET /internal/app_search/role_mappings', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'get',
-        path: '/api/app_search/role_mappings',
+        path: '/internal/app_search/role_mappings',
       });
 
       registerRoleMappingsRoute({
@@ -69,14 +68,14 @@ describe('role mappings routes', () => {
     });
   });
 
-  describe('POST /api/app_search/role_mappings', () => {
+  describe('POST /internal/app_search/role_mappings', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'post',
-        path: '/api/app_search/role_mappings',
+        path: '/internal/app_search/role_mappings',
       });
 
       registerRoleMappingsRoute({
@@ -104,14 +103,14 @@ describe('role mappings routes', () => {
     });
   });
 
-  describe('PUT /api/app_search/role_mappings/{id}', () => {
+  describe('PUT /internal/app_search/role_mappings/{id}', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'put',
-        path: '/api/app_search/role_mappings/{id}',
+        path: '/internal/app_search/role_mappings/{id}',
       });
 
       registerRoleMappingRoute({
@@ -139,14 +138,14 @@ describe('role mappings routes', () => {
     });
   });
 
-  describe('DELETE /api/app_search/role_mappings/{id}', () => {
+  describe('DELETE /internal/app_search/role_mappings/{id}', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'delete',
-        path: '/api/app_search/role_mappings/{id}',
+        path: '/internal/app_search/role_mappings/{id}',
       });
 
       registerRoleMappingRoute({
@@ -162,14 +161,14 @@ describe('role mappings routes', () => {
     });
   });
 
-  describe('POST /api/app_search/single_user_role_mapping', () => {
+  describe('POST /internal/app_search/single_user_role_mapping', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'post',
-        path: '/api/app_search/single_user_role_mapping',
+        path: '/internal/app_search/single_user_role_mapping',
       });
 
       registerUserRoute({

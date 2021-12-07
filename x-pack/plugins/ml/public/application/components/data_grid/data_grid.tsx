@@ -8,7 +8,7 @@
 import { isEqual } from 'lodash';
 import React, { memo, useEffect, useMemo, useRef, FC } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
   EuiButtonEmpty,
@@ -114,14 +114,6 @@ export const DataGrid: FC<Props> = memo(
     //   };
     // };
 
-    // If the charts are visible, hide the column actions icon.
-    const columnsWithChartsActionized = columnsWithCharts.map((d) => {
-      if (chartsVisible === true) {
-        d.actions = false;
-      }
-      return d;
-    });
-
     const popOverContent = useMemo(() => {
       return analysisType === ANALYSIS_CONFIG_TYPE.REGRESSION ||
         analysisType === ANALYSIS_CONFIG_TYPE.CLASSIFICATION ||
@@ -158,17 +150,21 @@ export const DataGrid: FC<Props> = memo(
               );
 
               return (
-                <DecisionPathPopover
-                  analysisType={analysisType}
-                  predictedValue={predictedValue}
-                  predictedProbability={predictedProbability}
-                  baseline={baseline}
-                  featureImportance={parsedFIArray}
-                  topClasses={topClasses}
-                  predictionFieldName={
-                    predictionFieldName ? predictionFieldName.replace('_prediction', '') : undefined
-                  }
-                />
+                <div data-test-subj="mlDFAFeatureImportancePopover">
+                  <DecisionPathPopover
+                    analysisType={analysisType}
+                    predictedValue={predictedValue}
+                    predictedProbability={predictedProbability}
+                    baseline={baseline}
+                    featureImportance={parsedFIArray}
+                    topClasses={topClasses}
+                    predictionFieldName={
+                      predictionFieldName
+                        ? predictionFieldName.replace('_prediction', '')
+                        : undefined
+                    }
+                  />
+                </div>
               );
             },
             featureInfluence: ({
@@ -322,7 +318,7 @@ export const DataGrid: FC<Props> = memo(
               <p>
                 {i18n.translate('xpack.ml.dataGrid.CcsWarningCalloutBody', {
                   defaultMessage:
-                    'There was an issue retrieving data for the index pattern. Source preview in combination with cross-cluster search is only supported for versions 7.10 and above. You may still configure and create the transform.',
+                    'There was an issue retrieving data for the data view. Source preview in combination with cross-cluster search is only supported for versions 7.10 and above. You may still configure and create the transform.',
                 })}
               </p>
             </EuiCallOut>
@@ -337,7 +333,7 @@ export const DataGrid: FC<Props> = memo(
             <div className="mlDataGrid" ref={mutationRef}>
               <EuiDataGrid
                 aria-label={isWithHeader(props) ? props.title : ''}
-                columns={columnsWithChartsActionized.map((c) => {
+                columns={columnsWithCharts.map((c) => {
                   c.initialWidth = 165;
                   return c;
                 })}

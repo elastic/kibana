@@ -36,14 +36,13 @@ export class TileStatusTracker {
     ) {
       const tracked = this._tileCache.find((tile) => {
         return (
-          tile.mbKey === ((e.tile.tileID.key as unknown) as string) &&
-          tile.mbSourceId === e.sourceId
+          tile.mbKey === (e.tile.tileID.key as unknown as string) && tile.mbSourceId === e.sourceId
         );
       });
 
       if (!tracked) {
         this._tileCache.push({
-          mbKey: (e.tile.tileID.key as unknown) as string,
+          mbKey: e.tile.tileID.key as unknown as string,
           mbSourceId: e.sourceId,
           mbTile: e.tile,
         });
@@ -59,7 +58,7 @@ export class TileStatusTracker {
       e.tile &&
       (e.source.type === 'vector' || e.source.type === 'raster')
     ) {
-      this._removeTileFromCache(e.sourceId, (e.tile.tileID.key as unknown) as string);
+      this._removeTileFromCache(e.sourceId, e.tile.tileID.key as unknown as string);
     }
   };
   private readonly _onSourceData = (e: MapSourceDataEvent) => {
@@ -70,7 +69,7 @@ export class TileStatusTracker {
       e.tile &&
       (e.source.type === 'vector' || e.source.type === 'raster')
     ) {
-      this._removeTileFromCache(e.sourceId, (e.tile.tileID.key as unknown) as string);
+      this._removeTileFromCache(e.sourceId, e.tile.tileID.key as unknown as string);
     }
   };
 
@@ -114,7 +113,7 @@ export class TileStatusTracker {
 
   _removeTileFromCache = (mbSourceId: string, mbKey: string) => {
     const trackedIndex = this._tileCache.findIndex((tile) => {
-      return tile.mbKey === ((mbKey as unknown) as string) && tile.mbSourceId === mbSourceId;
+      return tile.mbKey === (mbKey as unknown as string) && tile.mbSourceId === mbSourceId;
     });
 
     if (trackedIndex >= 0) {

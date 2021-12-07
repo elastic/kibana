@@ -33,9 +33,6 @@ exports[`HeaderPage it renders 1`] = `
         Test supplement
       </p>
     </EuiPageHeaderSection>
-    <Sourcerer
-      scope="default"
-    />
   </EuiPageHeader>
   <EuiSpacer
     size="l"

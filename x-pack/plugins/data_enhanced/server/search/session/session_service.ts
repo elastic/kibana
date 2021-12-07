@@ -7,6 +7,7 @@
 
 import { notFound } from '@hapi/boom';
 import { debounce } from 'lodash';
+import { nodeBuilder, fromKueryExpression } from '@kbn/es-query';
 import {
   CoreSetup,
   CoreStart,
@@ -20,12 +21,10 @@ import {
 import {
   IKibanaSearchRequest,
   ISearchOptions,
-  nodeBuilder,
   ENHANCED_ES_SEARCH_STRATEGY,
   SEARCH_SESSION_TYPE,
 } from '../../../../../../src/plugins/data/common';
 import {
-  esKuery,
   ISearchSessionService,
   NoSearchIdInSessionError,
 } from '../../../../../../src/plugins/data/server';
@@ -91,7 +90,8 @@ function sleep(ms: number) {
   return new Promise((r) => setTimeout(r, ms));
 }
 export class SearchSessionService
-  implements ISearchSessionService<SearchSessionSavedObjectAttributes> {
+  implements ISearchSessionService<SearchSessionSavedObjectAttributes>
+{
   private sessionConfig: SearchSessionsConfig;
   private readonly updateOrCreateBatchQueue: UpdateOrCreateQueueEntry[] = [];
 
@@ -287,7 +287,7 @@ export class SearchSessionService
     {
       name,
       appId,
-      urlGeneratorId,
+      locatorId,
       initialState = {},
       restoreState = {},
     }: Partial<SearchSessionSavedObjectAttributes>
@@ -295,12 +295,12 @@ export class SearchSessionService
     if (!this.sessionConfig.enabled) throw new Error('Search sessions are disabled');
     if (!name) throw new Error('Name is required');
     if (!appId) throw new Error('AppId is required');
-    if (!urlGeneratorId) throw new Error('UrlGeneratorId is required');
+    if (!locatorId) throw new Error('locatorId is required');
 
     return this.updateOrCreate(deps, user, sessionId, {
       name,
       appId,
-      urlGeneratorId,
+      locatorId,
       initialState,
       restoreState,
       persisted: true,
@@ -375,9 +375,7 @@ export class SearchSessionService
             nodeBuilder.is(`${SEARCH_SESSION_TYPE}.attributes.username`, `${user.username}`),
           ];
     const filterKueryNode =
-      typeof options.filter === 'string'
-        ? esKuery.fromKueryExpression(options.filter)
-        : options.filter;
+      typeof options.filter === 'string' ? fromKueryExpression(options.filter) : options.filter;
     const filter = nodeBuilder.and(userFilters.concat(filterKueryNode ?? []));
     return savedObjectsClient.find<SearchSessionSavedObjectAttributes>({
       ...options,

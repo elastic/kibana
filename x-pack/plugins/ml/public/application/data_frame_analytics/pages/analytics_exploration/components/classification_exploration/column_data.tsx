@@ -35,9 +35,7 @@ export const ACTUAL_CLASS_ID = 'actual_class';
 export const OTHER_CLASS_ID = 'other';
 export const MAX_COLUMNS = 6;
 
-export function getColumnData(
-  confusionMatrixData: ConfusionMatrix[]
-): {
+export function getColumnData(confusionMatrixData: ConfusionMatrix[]): {
   columns: ConfusionMatrixColumn[];
   columnData: ConfusionMatrixColumnData[];
 } {

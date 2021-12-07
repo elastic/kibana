@@ -59,6 +59,82 @@
       },
       {
         "parentPluginId": "kibanaUtils",
+        "id": "def-public.CharacterNotAllowedInField",
+        "type": "Class",
+        "tags": [],
+        "label": "CharacterNotAllowedInField",
+        "description": [
+          "\nwhen a user is attempting to create a field with disallowed character in the name, like *"
+        ],
+        "signature": [
+          {
+            "pluginId": "kibanaUtils",
+            "scope": "common",
+            "docId": "kibKibanaUtilsPluginApi",
+            "section": "def-common.CharacterNotAllowedInField",
+            "text": "CharacterNotAllowedInField"
+          },
+          " extends ",
+          {
+            "pluginId": "kibanaUtils",
+            "scope": "common",
+            "docId": "kibKibanaUtilsPluginApi",
+            "section": "def-common.KbnError",
+            "text": "KbnError"
+          }
+        ],
+        "path": "src/plugins/kibana_utils/common/errors/errors.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "kibanaUtils",
+            "id": "def-public.CharacterNotAllowedInField.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "src/plugins/kibana_utils/common/errors/errors.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "kibanaUtils",
+                "id": "def-public.CharacterNotAllowedInField.Unnamed.$1",
+                "type": "string",
+                "tags": [],
+                "label": "character",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/plugins/kibana_utils/common/errors/errors.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "kibanaUtils",
+                "id": "def-public.CharacterNotAllowedInField.Unnamed.$2",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/plugins/kibana_utils/common/errors/errors.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "kibanaUtils",
         "id": "def-public.Defer",
         "type": "Class",
         "tags": [],
@@ -95,7 +171,7 @@
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-public.data",
+                "id": "def-public.Defer.resolve.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "data",
@@ -124,7 +200,7 @@
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-public.error",
+                "id": "def-public.Defer.reject.$1",
                 "type": "Any",
                 "tags": [],
                 "label": "error",
@@ -814,7 +890,7 @@
               },
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-public.ResizeChecker.Unnamed.$2.args",
+                "id": "def-public.ResizeChecker.Unnamed.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "args",
@@ -824,7 +900,7 @@
                 "children": [
                   {
                     "parentPluginId": "kibanaUtils",
-                    "id": "def-public.ResizeChecker.Unnamed.$2.args.disabled",
+                    "id": "def-public.ResizeChecker.Unnamed.$2.disabled",
                     "type": "CompoundType",
                     "tags": [],
                     "label": "disabled",
@@ -1464,7 +1540,7 @@
         "children": [
           {
             "parentPluginId": "kibanaUtils",
-            "id": "def-public.o",
+            "id": "def-public.calculateObjectHash.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "o",
@@ -1486,7 +1562,7 @@
         "label": "createGetterSetter",
         "description": [],
         "signature": [
-          "<T extends object>(name: string) => [",
+          "<T extends object>(name: string, isValueRequired?: boolean) => [",
           {
             "pluginId": "kibanaUtils",
             "scope": "common",
@@ -1516,6 +1592,20 @@
             "description": [],
             "signature": [
               "string"
+            ],
+            "path": "src/plugins/kibana_utils/common/create_getter_setter.ts",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "kibanaUtils",
+            "id": "def-public.createGetterSetter.$2",
+            "type": "boolean",
+            "tags": [],
+            "label": "isValueRequired",
+            "description": [],
+            "signature": [
+              "boolean"
             ],
             "path": "src/plugins/kibana_utils/common/create_getter_setter.ts",
             "deprecated": false,
@@ -1614,7 +1704,7 @@
           "\nCreates {@link IKbnUrlStateStorage} state storage"
         ],
         "signature": [
-          "({ useHash, history, onGetError, onSetError, }?: { useHash: boolean; history?: ",
+          "({ useHash, useHashQuery, history, onGetError, onSetError, }?: { useHash: boolean; useHashQuery?: boolean | undefined; history?: ",
           "History",
           "<any> | undefined; onGetError?: ((error: Error) => void) | undefined; onSetError?: ((error: Error) => void) | undefined; }) => ",
           {
@@ -1630,17 +1720,17 @@
         "children": [
           {
             "parentPluginId": "kibanaUtils",
-            "id": "def-public.createKbnUrlStateStorage.$1.useHashfalsehistoryonGetErroronSetError",
+            "id": "def-public.createKbnUrlStateStorage.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n    useHash = false,\n    history,\n    onGetError,\n    onSetError,\n  }",
+            "label": "{\n    useHash = false,\n    useHashQuery = true,\n    history,\n    onGetError,\n    onSetError,\n  }",
             "description": [],
             "path": "src/plugins/kibana_utils/public/state_sync/state_sync_state_storage/create_kbn_url_state_storage.ts",
             "deprecated": false,
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-public.createKbnUrlStateStorage.$1.useHashfalsehistoryonGetErroronSetError.useHash",
+                "id": "def-public.createKbnUrlStateStorage.$1.useHash",
                 "type": "boolean",
                 "tags": [],
                 "label": "useHash",
@@ -1650,7 +1740,20 @@
               },
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-public.createKbnUrlStateStorage.$1.useHashfalsehistoryonGetErroronSetError.history",
+                "id": "def-public.createKbnUrlStateStorage.$1.useHashQuery",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "useHashQuery",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
+                ],
+                "path": "src/plugins/kibana_utils/public/state_sync/state_sync_state_storage/create_kbn_url_state_storage.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "kibanaUtils",
+                "id": "def-public.createKbnUrlStateStorage.$1.history",
                 "type": "Object",
                 "tags": [],
                 "label": "history",
@@ -1664,7 +1767,7 @@
               },
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-public.createKbnUrlStateStorage.$1.useHashfalsehistoryonGetErroronSetError.onGetError",
+                "id": "def-public.createKbnUrlStateStorage.$1.onGetError",
                 "type": "Function",
                 "tags": [],
                 "label": "onGetError",
@@ -1673,11 +1776,28 @@
                   "((error: Error) => void) | undefined"
                 ],
                 "path": "src/plugins/kibana_utils/public/state_sync/state_sync_state_storage/create_kbn_url_state_storage.ts",
-                "deprecated": false
+                "deprecated": false,
+                "children": [
+                  {
+                    "parentPluginId": "kibanaUtils",
+                    "id": "def-public.createKbnUrlStateStorage.$1.onGetError.$1",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "error",
+                    "description": [],
+                    "signature": [
+                      "Error"
+                    ],
+                    "path": "src/plugins/kibana_utils/public/state_sync/state_sync_state_storage/create_kbn_url_state_storage.ts",
+                    "deprecated": false,
+                    "isRequired": true
+                  }
+                ],
+                "returnComment": []
               },
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-public.createKbnUrlStateStorage.$1.useHashfalsehistoryonGetErroronSetError.onSetError",
+                "id": "def-public.createKbnUrlStateStorage.$1.onSetError",
                 "type": "Function",
                 "tags": [],
                 "label": "onSetError",
@@ -1686,7 +1806,24 @@
                   "((error: Error) => void) | undefined"
                 ],
                 "path": "src/plugins/kibana_utils/public/state_sync/state_sync_state_storage/create_kbn_url_state_storage.ts",
-                "deprecated": false
+                "deprecated": false,
+                "children": [
+                  {
+                    "parentPluginId": "kibanaUtils",
+                    "id": "def-public.createKbnUrlStateStorage.$1.onSetError.$1",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "error",
+                    "description": [],
+                    "signature": [
+                      "Error"
+                    ],
+                    "path": "src/plugins/kibana_utils/public/state_sync/state_sync_state_storage/create_kbn_url_state_storage.ts",
+                    "deprecated": false,
+                    "isRequired": true
+                  }
+                ],
+                "returnComment": []
               }
             ]
           }
@@ -1726,7 +1863,7 @@
             "section": "def-public.ToastsApi",
             "text": "ToastsApi"
           },
-          ", \"get$\" | \"add\" | \"remove\" | \"addSuccess\" | \"addWarning\" | \"addDanger\" | \"addError\" | \"addInfo\">; history?: ",
+          ", \"add\" | \"get$\" | \"remove\" | \"addSuccess\" | \"addWarning\" | \"addDanger\" | \"addError\" | \"addInfo\">; history?: ",
           "History",
           "<any> | undefined; getHistory?: (() => ",
           "History",
@@ -1738,7 +1875,7 @@
         "children": [
           {
             "parentPluginId": "kibanaUtils",
-            "id": "def-public.createKbnUrlTracker.$1.baseUrldefaultSubUrlstorageKeystateParamsnavLinkUpdater$toastNotificationshistorygetHistorystorageshouldTrackUrlUpdatereturntrueonBeforeNavLinkSavednewNavLinknewNavLink",
+            "id": "def-public.createKbnUrlTracker.$1",
             "type": "Object",
             "tags": [],
             "label": "{\n  baseUrl,\n  defaultSubUrl,\n  storageKey,\n  stateParams,\n  navLinkUpdater$,\n  toastNotifications,\n  history,\n  getHistory,\n  storage,\n  shouldTrackUrlUpdate = () => {\n    return true;\n  },\n  onBeforeNavLinkSaved = (newNavLink) => newNavLink,\n}",
@@ -1748,7 +1885,7 @@
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-public.createKbnUrlTracker.$1.baseUrldefaultSubUrlstorageKeystateParamsnavLinkUpdater$toastNotificationshistorygetHistorystorageshouldTrackUrlUpdatereturntrueonBeforeNavLinkSavednewNavLinknewNavLink.baseUrl",
+                "id": "def-public.createKbnUrlTracker.$1.baseUrl",
                 "type": "string",
                 "tags": [],
                 "label": "baseUrl",
@@ -1760,7 +1897,7 @@
               },
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-public.createKbnUrlTracker.$1.baseUrldefaultSubUrlstorageKeystateParamsnavLinkUpdater$toastNotificationshistorygetHistorystorageshouldTrackUrlUpdatereturntrueonBeforeNavLinkSavednewNavLinknewNavLink.defaultSubUrl",
+                "id": "def-public.createKbnUrlTracker.$1.defaultSubUrl",
                 "type": "string",
                 "tags": [],
                 "label": "defaultSubUrl",
@@ -1772,7 +1909,7 @@
               },
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-public.createKbnUrlTracker.$1.baseUrldefaultSubUrlstorageKeystateParamsnavLinkUpdater$toastNotificationshistorygetHistorystorageshouldTrackUrlUpdatereturntrueonBeforeNavLinkSavednewNavLinknewNavLink.stateParams",
+                "id": "def-public.createKbnUrlTracker.$1.stateParams",
                 "type": "Array",
                 "tags": [],
                 "label": "stateParams",
@@ -1789,7 +1926,7 @@
               },
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-public.createKbnUrlTracker.$1.baseUrldefaultSubUrlstorageKeystateParamsnavLinkUpdater$toastNotificationshistorygetHistorystorageshouldTrackUrlUpdatereturntrueonBeforeNavLinkSavednewNavLinknewNavLink.storageKey",
+                "id": "def-public.createKbnUrlTracker.$1.storageKey",
                 "type": "string",
                 "tags": [],
                 "label": "storageKey",
@@ -1801,7 +1938,7 @@
               },
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-public.createKbnUrlTracker.$1.baseUrldefaultSubUrlstorageKeystateParamsnavLinkUpdater$toastNotificationshistorygetHistorystorageshouldTrackUrlUpdatereturntrueonBeforeNavLinkSavednewNavLinknewNavLink.navLinkUpdater$",
+                "id": "def-public.createKbnUrlTracker.$1.navLinkUpdater$",
                 "type": "Object",
                 "tags": [],
                 "label": "navLinkUpdater$",
@@ -1825,7 +1962,7 @@
               },
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-public.createKbnUrlTracker.$1.baseUrldefaultSubUrlstorageKeystateParamsnavLinkUpdater$toastNotificationshistorygetHistorystorageshouldTrackUrlUpdatereturntrueonBeforeNavLinkSavednewNavLinknewNavLink.toastNotifications",
+                "id": "def-public.createKbnUrlTracker.$1.toastNotifications",
                 "type": "Object",
                 "tags": [],
                 "label": "toastNotifications",
@@ -1833,17 +1970,7 @@
                   "\nToast notifications service to show toasts in error cases."
                 ],
                 "signature": [
-                  "{ get$: () => ",
-                  "Observable",
-                  "<",
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.Toast",
-                    "text": "Toast"
-                  },
-                  "[]>; add: (toastOrTitle: ",
+                  "{ add: (toastOrTitle: ",
                   {
                     "pluginId": "core",
                     "scope": "public",
@@ -1859,7 +1986,17 @@
                     "section": "def-public.Toast",
                     "text": "Toast"
                   },
-                  "; remove: (toastOrId: string | ",
+                  "; get$: () => ",
+                  "Observable",
+                  "<",
+                  {
+                    "pluginId": "core",
+                    "scope": "public",
+                    "docId": "kibCorePluginApi",
+                    "section": "def-public.Toast",
+                    "text": "Toast"
+                  },
+                  "[]>; remove: (toastOrId: string | ",
                   {
                     "pluginId": "core",
                     "scope": "public",
@@ -1986,7 +2123,7 @@
               },
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-public.createKbnUrlTracker.$1.baseUrldefaultSubUrlstorageKeystateParamsnavLinkUpdater$toastNotificationshistorygetHistorystorageshouldTrackUrlUpdatereturntrueonBeforeNavLinkSavednewNavLinknewNavLink.history",
+                "id": "def-public.createKbnUrlTracker.$1.history",
                 "type": "Object",
                 "tags": [],
                 "label": "history",
@@ -2002,7 +2139,7 @@
               },
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-public.createKbnUrlTracker.$1.baseUrldefaultSubUrlstorageKeystateParamsnavLinkUpdater$toastNotificationshistorygetHistorystorageshouldTrackUrlUpdatereturntrueonBeforeNavLinkSavednewNavLinknewNavLink.getHistory",
+                "id": "def-public.createKbnUrlTracker.$1.getHistory",
                 "type": "Function",
                 "tags": [],
                 "label": "getHistory",
@@ -2015,11 +2152,13 @@
                   "<any>) | undefined"
                 ],
                 "path": "src/plugins/kibana_utils/public/state_management/url/kbn_url_tracker.ts",
-                "deprecated": false
+                "deprecated": false,
+                "children": [],
+                "returnComment": []
               },
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-public.createKbnUrlTracker.$1.baseUrldefaultSubUrlstorageKeystateParamsnavLinkUpdater$toastNotificationshistorygetHistorystorageshouldTrackUrlUpdatereturntrueonBeforeNavLinkSavednewNavLinknewNavLink.storage",
+                "id": "def-public.createKbnUrlTracker.$1.storage",
                 "type": "Object",
                 "tags": [],
                 "label": "storage",
@@ -2034,7 +2173,7 @@
               },
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-public.createKbnUrlTracker.$1.baseUrldefaultSubUrlstorageKeystateParamsnavLinkUpdater$toastNotificationshistorygetHistorystorageshouldTrackUrlUpdatereturntrueonBeforeNavLinkSavednewNavLinknewNavLink.shouldTrackUrlUpdate",
+                "id": "def-public.createKbnUrlTracker.$1.shouldTrackUrlUpdate",
                 "type": "Function",
                 "tags": [],
                 "label": "shouldTrackUrlUpdate",
@@ -2045,11 +2184,30 @@
                   "((pathname: string) => boolean) | undefined"
                 ],
                 "path": "src/plugins/kibana_utils/public/state_management/url/kbn_url_tracker.ts",
-                "deprecated": false
+                "deprecated": false,
+                "children": [
+                  {
+                    "parentPluginId": "kibanaUtils",
+                    "id": "def-public.createKbnUrlTracker.$1.shouldTrackUrlUpdate.$1",
+                    "type": "string",
+                    "tags": [],
+                    "label": "pathname",
+                    "description": [
+                      "A location's pathname which comes to history listener"
+                    ],
+                    "signature": [
+                      "string"
+                    ],
+                    "path": "src/plugins/kibana_utils/public/state_management/url/kbn_url_tracker.ts",
+                    "deprecated": false,
+                    "isRequired": true
+                  }
+                ],
+                "returnComment": []
               },
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-public.createKbnUrlTracker.$1.baseUrldefaultSubUrlstorageKeystateParamsnavLinkUpdater$toastNotificationshistorygetHistorystorageshouldTrackUrlUpdatereturntrueonBeforeNavLinkSavednewNavLinknewNavLink.onBeforeNavLinkSaved",
+                "id": "def-public.createKbnUrlTracker.$1.onBeforeNavLinkSaved",
                 "type": "Function",
                 "tags": [],
                 "label": "onBeforeNavLinkSaved",
@@ -2060,7 +2218,24 @@
                   "((newNavLink: string) => string) | undefined"
                 ],
                 "path": "src/plugins/kibana_utils/public/state_management/url/kbn_url_tracker.ts",
-                "deprecated": false
+                "deprecated": false,
+                "children": [
+                  {
+                    "parentPluginId": "kibanaUtils",
+                    "id": "def-public.createKbnUrlTracker.$1.onBeforeNavLinkSaved.$1",
+                    "type": "string",
+                    "tags": [],
+                    "label": "newNavLink",
+                    "description": [],
+                    "signature": [
+                      "string"
+                    ],
+                    "path": "src/plugins/kibana_utils/public/state_management/url/kbn_url_tracker.ts",
+                    "deprecated": false,
+                    "isRequired": true
+                  }
+                ],
+                "returnComment": []
               }
             ]
           }
@@ -2173,7 +2348,7 @@
         "tags": [],
         "label": "createSessionStorageStateStorage",
         "description": [
-          "\nCreates {@link ISessionStorageStateStorage}\n{@link https://github.com/elastic/kibana/blob/master/src/plugins/kibana_utils/docs/state_sync/storages/session_storage.md | guide}"
+          "\nCreates {@link ISessionStorageStateStorage}\n{@link https://github.com/elastic/kibana/blob/main/src/plugins/kibana_utils/docs/state_sync/storages/session_storage.md | guide}"
         ],
         "signature": [
           "(storage?: Storage) => ",
@@ -2493,7 +2668,7 @@
         "tags": [],
         "label": "createStateContainerReactHelpers",
         "description": [
-          "\nCreates helpers for using {@link StateContainer | State Containers} with react\nRefer to {@link https://github.com/elastic/kibana/blob/master/src/plugins/kibana_utils/docs/state_containers/react.md | guide} for details"
+          "\nCreates helpers for using {@link StateContainer | State Containers} with react\nRefer to {@link https://github.com/elastic/kibana/blob/main/src/plugins/kibana_utils/docs/state_containers/react.md | guide} for details"
         ],
         "signature": [
           "<Container extends ",
@@ -2902,7 +3077,7 @@
           },
           {
             "parentPluginId": "kibanaUtils",
-            "id": "def-public.getStateFromKbnUrl.$3.getFromHashQuerytrue",
+            "id": "def-public.getStateFromKbnUrl.$3",
             "type": "Object",
             "tags": [],
             "label": "{ getFromHashQuery = true }",
@@ -2912,7 +3087,7 @@
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-public.getStateFromKbnUrl.$3.getFromHashQuerytrue.getFromHashQuery",
+                "id": "def-public.getStateFromKbnUrl.$3.getFromHashQuery",
                 "type": "boolean",
                 "tags": [],
                 "label": "getFromHashQuery",
@@ -2971,7 +3146,7 @@
           },
           {
             "parentPluginId": "kibanaUtils",
-            "id": "def-public.getStatesFromKbnUrl.$3.getFromHashQuerytrue",
+            "id": "def-public.getStatesFromKbnUrl.$3",
             "type": "Object",
             "tags": [],
             "label": "{ getFromHashQuery = true }",
@@ -2981,7 +3156,7 @@
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-public.getStatesFromKbnUrl.$3.getFromHashQuerytrue.getFromHashQuery",
+                "id": "def-public.getStatesFromKbnUrl.$3.getFromHashQuery",
                 "type": "boolean",
                 "tags": [],
                 "label": "getFromHashQuery",
@@ -3011,7 +3186,7 @@
         "children": [
           {
             "parentPluginId": "kibanaUtils",
-            "id": "def-public.query",
+            "id": "def-public.hashQuery.$1",
             "type": "Object",
             "tags": [],
             "label": "query",
@@ -3024,7 +3199,7 @@
           },
           {
             "parentPluginId": "kibanaUtils",
-            "id": "def-public.options",
+            "id": "def-public.hashQuery.$2",
             "type": "Object",
             "tags": [],
             "label": "options",
@@ -3054,7 +3229,7 @@
         "children": [
           {
             "parentPluginId": "kibanaUtils",
-            "id": "def-public.url",
+            "id": "def-public.hashUrl.$1",
             "type": "string",
             "tags": [],
             "label": "url",
@@ -3198,7 +3373,7 @@
             "section": "def-public.ToastsApi",
             "text": "ToastsApi"
           },
-          ", \"get$\" | \"add\" | \"remove\" | \"addSuccess\" | \"addWarning\" | \"addDanger\" | \"addError\" | \"addInfo\">; onBeforeRedirect?: ((error: ",
+          ", \"add\" | \"get$\" | \"remove\" | \"addSuccess\" | \"addWarning\" | \"addDanger\" | \"addError\" | \"addInfo\">; onBeforeRedirect?: ((error: ",
           {
             "pluginId": "kibanaUtils",
             "scope": "common",
@@ -3221,7 +3396,7 @@
         "children": [
           {
             "parentPluginId": "kibanaUtils",
-            "id": "def-public.redirectWhenMissing.$1.historynavigateToAppbasePathmappingtoastNotificationsonBeforeRedirect",
+            "id": "def-public.redirectWhenMissing.$1",
             "type": "Object",
             "tags": [],
             "label": "{\n  history,\n  navigateToApp,\n  basePath,\n  mapping,\n  toastNotifications,\n  onBeforeRedirect,\n}",
@@ -3231,7 +3406,7 @@
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-public.redirectWhenMissing.$1.historynavigateToAppbasePathmappingtoastNotificationsonBeforeRedirect.history",
+                "id": "def-public.redirectWhenMissing.$1.history",
                 "type": "Object",
                 "tags": [],
                 "label": "history",
@@ -3245,7 +3420,7 @@
               },
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-public.redirectWhenMissing.$1.historynavigateToAppbasePathmappingtoastNotificationsonBeforeRedirect.navigateToApp",
+                "id": "def-public.redirectWhenMissing.$1.navigateToApp",
                 "type": "Function",
                 "tags": [],
                 "label": "navigateToApp",
@@ -3267,7 +3442,7 @@
                 "children": [
                   {
                     "parentPluginId": "kibanaUtils",
-                    "id": "def-public.appId",
+                    "id": "def-public.redirectWhenMissing.$1.navigateToApp.$1",
                     "type": "string",
                     "tags": [],
                     "label": "appId",
@@ -3277,7 +3452,7 @@
                   },
                   {
                     "parentPluginId": "kibanaUtils",
-                    "id": "def-public.options",
+                    "id": "def-public.redirectWhenMissing.$1.navigateToApp.$2",
                     "type": "Object",
                     "tags": [],
                     "label": "options",
@@ -3299,7 +3474,7 @@
               },
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-public.redirectWhenMissing.$1.historynavigateToAppbasePathmappingtoastNotificationsonBeforeRedirect.basePath",
+                "id": "def-public.redirectWhenMissing.$1.basePath",
                 "type": "Object",
                 "tags": [],
                 "label": "basePath",
@@ -3318,7 +3493,7 @@
               },
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-public.redirectWhenMissing.$1.historynavigateToAppbasePathmappingtoastNotificationsonBeforeRedirect.mapping",
+                "id": "def-public.redirectWhenMissing.$1.mapping",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "mapping",
@@ -3333,7 +3508,7 @@
               },
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-public.redirectWhenMissing.$1.historynavigateToAppbasePathmappingtoastNotificationsonBeforeRedirect.toastNotifications",
+                "id": "def-public.redirectWhenMissing.$1.toastNotifications",
                 "type": "Object",
                 "tags": [],
                 "label": "toastNotifications",
@@ -3341,17 +3516,7 @@
                   "\nToast notifications service to show toasts in error cases."
                 ],
                 "signature": [
-                  "{ get$: () => ",
-                  "Observable",
-                  "<",
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.Toast",
-                    "text": "Toast"
-                  },
-                  "[]>; add: (toastOrTitle: ",
+                  "{ add: (toastOrTitle: ",
                   {
                     "pluginId": "core",
                     "scope": "public",
@@ -3367,7 +3532,17 @@
                     "section": "def-public.Toast",
                     "text": "Toast"
                   },
-                  "; remove: (toastOrId: string | ",
+                  "; get$: () => ",
+                  "Observable",
+                  "<",
+                  {
+                    "pluginId": "core",
+                    "scope": "public",
+                    "docId": "kibCorePluginApi",
+                    "section": "def-public.Toast",
+                    "text": "Toast"
+                  },
+                  "[]>; remove: (toastOrId: string | ",
                   {
                     "pluginId": "core",
                     "scope": "public",
@@ -3494,7 +3669,7 @@
               },
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-public.redirectWhenMissing.$1.historynavigateToAppbasePathmappingtoastNotificationsonBeforeRedirect.onBeforeRedirect",
+                "id": "def-public.redirectWhenMissing.$1.onBeforeRedirect",
                 "type": "Function",
                 "tags": [],
                 "label": "onBeforeRedirect",
@@ -3513,7 +3688,30 @@
                   ") => void) | undefined"
                 ],
                 "path": "src/plugins/kibana_utils/public/history/redirect_when_missing.tsx",
-                "deprecated": false
+                "deprecated": false,
+                "children": [
+                  {
+                    "parentPluginId": "kibanaUtils",
+                    "id": "def-public.redirectWhenMissing.$1.onBeforeRedirect.$1",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "error",
+                    "description": [],
+                    "signature": [
+                      {
+                        "pluginId": "kibanaUtils",
+                        "scope": "common",
+                        "docId": "kibKibanaUtilsPluginApi",
+                        "section": "def-common.SavedObjectNotFound",
+                        "text": "SavedObjectNotFound"
+                      }
+                    ],
+                    "path": "src/plugins/kibana_utils/public/history/redirect_when_missing.tsx",
+                    "deprecated": false,
+                    "isRequired": true
+                  }
+                ],
+                "returnComment": []
               }
             ]
           }
@@ -3765,7 +3963,7 @@
           },
           {
             "parentPluginId": "kibanaUtils",
-            "id": "def-public.setStateToKbnUrl.$3.useHashfalsestoreInHashQuerytrue",
+            "id": "def-public.setStateToKbnUrl.$3",
             "type": "Object",
             "tags": [],
             "label": "{ useHash = false, storeInHashQuery = true }",
@@ -3775,7 +3973,7 @@
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-public.setStateToKbnUrl.$3.useHashfalsestoreInHashQuerytrue.useHash",
+                "id": "def-public.setStateToKbnUrl.$3.useHash",
                 "type": "boolean",
                 "tags": [],
                 "label": "useHash",
@@ -3785,7 +3983,7 @@
               },
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-public.setStateToKbnUrl.$3.useHashfalsestoreInHashQuerytrue.storeInHashQuery",
+                "id": "def-public.setStateToKbnUrl.$3.storeInHashQuery",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "storeInHashQuery",
@@ -3823,7 +4021,7 @@
         "tags": [],
         "label": "syncState",
         "description": [
-          "\nUtility for syncing application state wrapped in state container\nwith some kind of storage (e.g. URL)\n\nGo {@link https://github.com/elastic/kibana/tree/master/src/plugins/kibana_utils/docs/state_sync | here} for a complete guide and examples.\n"
+          "\nUtility for syncing application state wrapped in state container\nwith some kind of storage (e.g. URL)\n\nGo {@link https://github.com/elastic/kibana/tree/main/src/plugins/kibana_utils/docs/state_sync | here} for a complete guide and examples.\n"
         ],
         "signature": [
           "({\n  storageKey,\n  stateStorage,\n  stateContainer,\n}: ",
@@ -3958,7 +4156,7 @@
         "children": [
           {
             "parentPluginId": "kibanaUtils",
-            "id": "def-public.query",
+            "id": "def-public.unhashQuery.$1",
             "type": "Object",
             "tags": [],
             "label": "query",
@@ -3971,7 +4169,7 @@
           },
           {
             "parentPluginId": "kibanaUtils",
-            "id": "def-public.options",
+            "id": "def-public.unhashQuery.$2",
             "type": "Object",
             "tags": [],
             "label": "options",
@@ -4001,7 +4199,7 @@
         "children": [
           {
             "parentPluginId": "kibanaUtils",
-            "id": "def-public.url",
+            "id": "def-public.unhashUrl.$1",
             "type": "string",
             "tags": [],
             "label": "url",
@@ -4191,7 +4389,7 @@
             "section": "def-public.ToastsApi",
             "text": "ToastsApi"
           },
-          ", \"get$\" | \"add\" | \"remove\" | \"addSuccess\" | \"addWarning\" | \"addDanger\" | \"addError\" | \"addInfo\">) => { onGetError: (error: Error) => void; onSetError: (error: Error) => void; }"
+          ", \"add\" | \"get$\" | \"remove\" | \"addSuccess\" | \"addWarning\" | \"addDanger\" | \"addError\" | \"addInfo\">) => { onGetError: (error: Error) => void; onSetError: (error: Error) => void; }"
         ],
         "path": "src/plugins/kibana_utils/public/state_management/url/errors.ts",
         "deprecated": false,
@@ -4212,7 +4410,7 @@
                 "section": "def-public.ToastsApi",
                 "text": "ToastsApi"
               },
-              ", \"get$\" | \"add\" | \"remove\" | \"addSuccess\" | \"addWarning\" | \"addDanger\" | \"addError\" | \"addInfo\">"
+              ", \"add\" | \"get$\" | \"remove\" | \"addSuccess\" | \"addWarning\" | \"addDanger\" | \"addError\" | \"addInfo\">"
             ],
             "path": "src/plugins/kibana_utils/public/state_management/url/errors.ts",
             "deprecated": false,
@@ -4260,10 +4458,10 @@
             ],
             "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
             "deprecated": false,
+            "children": [],
             "returnComment": [
               "current state"
-            ],
-            "children": []
+            ]
           },
           {
             "parentPluginId": "kibanaUtils",
@@ -4279,11 +4477,10 @@
             ],
             "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-public.state",
+                "id": "def-public.BaseStateContainer.set.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "state",
@@ -4294,9 +4491,11 @@
                   "State"
                 ],
                 "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "kibanaUtils",
@@ -4368,11 +4567,10 @@
             ],
             "path": "src/plugins/kibana_utils/public/ui/configurable.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-public.config",
+                "id": "def-public.CollectConfigProps.onConfig.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "config",
@@ -4381,9 +4579,11 @@
                   "Config"
                 ],
                 "path": "src/plugins/kibana_utils/public/ui/configurable.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "kibanaUtils",
@@ -4439,11 +4639,10 @@
             ],
             "path": "src/plugins/kibana_utils/public/ui/configurable.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-public.context",
+                "id": "def-public.Configurable.createConfig.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "context",
@@ -4452,9 +4651,11 @@
                   "Context"
                 ],
                 "path": "src/plugins/kibana_utils/public/ui/configurable.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "kibanaUtils",
@@ -4470,11 +4671,10 @@
             ],
             "path": "src/plugins/kibana_utils/public/ui/configurable.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-public.config",
+                "id": "def-public.Configurable.isConfigValid.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "config",
@@ -4483,11 +4683,12 @@
                   "Config"
                 ],
                 "path": "src/plugins/kibana_utils/public/ui/configurable.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               },
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-public.context",
+                "id": "def-public.Configurable.isConfigValid.$2",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "context",
@@ -4496,9 +4697,11 @@
                   "Context"
                 ],
                 "path": "src/plugins/kibana_utils/public/ui/configurable.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "kibanaUtils",
@@ -4561,7 +4764,24 @@
               "(<T>(state: T) => T) | undefined"
             ],
             "path": "src/plugins/kibana_utils/common/state_containers/create_state_container.ts",
-            "deprecated": false
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "kibanaUtils",
+                "id": "def-public.CreateStateContainerOptions.freeze.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "state",
+                "description": [],
+                "signature": [
+                  "T"
+                ],
+                "path": "src/plugins/kibana_utils/common/state_containers/create_state_container.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -4573,7 +4793,7 @@
         "tags": [],
         "label": "IKbnUrlStateStorage",
         "description": [
-          "\nKbnUrlStateStorage is a state storage for {@link syncState} utility which:\n\n1. Keeps state in sync with the URL.\n2. Serializes data and stores it in the URL in one of the supported formats:\n  * Rison encoded.\n  * Hashed URL: In URL we store only the hash from the serialized state, but the state itself is stored in sessionStorage. See Kibana's `state:storeInSessionStorage` advanced option for more context.\n3. Takes care of listening to the URL updates and notifies state about the updates.\n4. Takes care of batching URL updates to prevent redundant browser history records.\n\n{@link https://github.com/elastic/kibana/blob/master/src/plugins/kibana_utils/docs/state_sync/storages/kbn_url_storage.md | Refer to this guide for more info}"
+          "\nKbnUrlStateStorage is a state storage for {@link syncState} utility which:\n\n1. Keeps state in sync with the URL.\n2. Serializes data and stores it in the URL in one of the supported formats:\n  * Rison encoded.\n  * Hashed URL: In URL we store only the hash from the serialized state, but the state itself is stored in sessionStorage. See Kibana's `state:storeInSessionStorage` advanced option for more context.\n3. Takes care of listening to the URL updates and notifies state about the updates.\n4. Takes care of batching URL updates to prevent redundant browser history records.\n\n{@link https://github.com/elastic/kibana/blob/main/src/plugins/kibana_utils/docs/state_sync/storages/kbn_url_storage.md | Refer to this guide for more info}"
         ],
         "signature": [
           {
@@ -4601,21 +4821,24 @@
             ],
             "path": "src/plugins/kibana_utils/public/state_sync/state_sync_state_storage/create_kbn_url_state_storage.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-public.key",
+                "id": "def-public.IKbnUrlStateStorage.set.$1",
                 "type": "string",
                 "tags": [],
                 "label": "key",
                 "description": [],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/plugins/kibana_utils/public/state_sync/state_sync_state_storage/create_kbn_url_state_storage.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               },
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-public.state",
+                "id": "def-public.IKbnUrlStateStorage.set.$2",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "state",
@@ -4624,22 +4847,33 @@
                   "State"
                 ],
                 "path": "src/plugins/kibana_utils/public/state_sync/state_sync_state_storage/create_kbn_url_state_storage.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               },
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-public.opts",
+                "id": "def-public.IKbnUrlStateStorage.set.$3",
                 "type": "Object",
                 "tags": [],
                 "label": "opts",
                 "description": [],
-                "signature": [
-                  "{ replace: boolean; } | undefined"
-                ],
                 "path": "src/plugins/kibana_utils/public/state_sync/state_sync_state_storage/create_kbn_url_state_storage.ts",
-                "deprecated": false
+                "deprecated": false,
+                "children": [
+                  {
+                    "parentPluginId": "kibanaUtils",
+                    "id": "def-public.IKbnUrlStateStorage.set.$3.replace",
+                    "type": "boolean",
+                    "tags": [],
+                    "label": "replace",
+                    "description": [],
+                    "path": "src/plugins/kibana_utils/public/state_sync/state_sync_state_storage/create_kbn_url_state_storage.ts",
+                    "deprecated": false
+                  }
+                ]
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "kibanaUtils",
@@ -4653,19 +4887,23 @@
             ],
             "path": "src/plugins/kibana_utils/public/state_sync/state_sync_state_storage/create_kbn_url_state_storage.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-public.key",
+                "id": "def-public.IKbnUrlStateStorage.get.$1",
                 "type": "string",
                 "tags": [],
                 "label": "key",
                 "description": [],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/plugins/kibana_utils/public/state_sync/state_sync_state_storage/create_kbn_url_state_storage.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "kibanaUtils",
@@ -4681,19 +4919,23 @@
             ],
             "path": "src/plugins/kibana_utils/public/state_sync/state_sync_state_storage/create_kbn_url_state_storage.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-public.key",
+                "id": "def-public.IKbnUrlStateStorage.change$.$1",
                 "type": "string",
                 "tags": [],
                 "label": "key",
                 "description": [],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/plugins/kibana_utils/public/state_sync/state_sync_state_storage/create_kbn_url_state_storage.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "kibanaUtils",
@@ -4709,8 +4951,8 @@
             ],
             "path": "src/plugins/kibana_utils/public/state_sync/state_sync_state_storage/create_kbn_url_state_storage.ts",
             "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "kibanaUtils",
@@ -4772,11 +5014,10 @@
             ],
             "path": "src/plugins/kibana_utils/public/state_sync/types.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-public.state",
+                "id": "def-public.INullableBaseStateContainer.set.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "state",
@@ -4785,9 +5026,11 @@
                   "State | null"
                 ],
                 "path": "src/plugins/kibana_utils/public/state_sync/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": false
               }
-            ]
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -4799,7 +5042,7 @@
         "tags": [],
         "label": "ISessionStorageStateStorage",
         "description": [
-          "\n{@link IStateStorage} for storing state in browser {@link Storage}\n{@link https://github.com/elastic/kibana/blob/master/src/plugins/kibana_utils/docs/state_sync/storages/session_storage.md | guide}"
+          "\n{@link IStateStorage} for storing state in browser {@link Storage}\n{@link https://github.com/elastic/kibana/blob/main/src/plugins/kibana_utils/docs/state_sync/storages/session_storage.md | guide}"
         ],
         "signature": [
           {
@@ -4827,21 +5070,24 @@
             ],
             "path": "src/plugins/kibana_utils/public/state_sync/state_sync_state_storage/create_session_storage_state_storage.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-public.key",
+                "id": "def-public.ISessionStorageStateStorage.set.$1",
                 "type": "string",
                 "tags": [],
                 "label": "key",
                 "description": [],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/plugins/kibana_utils/public/state_sync/state_sync_state_storage/create_session_storage_state_storage.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               },
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-public.state",
+                "id": "def-public.ISessionStorageStateStorage.set.$2",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "state",
@@ -4850,9 +5096,11 @@
                   "State"
                 ],
                 "path": "src/plugins/kibana_utils/public/state_sync/state_sync_state_storage/create_session_storage_state_storage.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "kibanaUtils",
@@ -4866,19 +5114,23 @@
             ],
             "path": "src/plugins/kibana_utils/public/state_sync/state_sync_state_storage/create_session_storage_state_storage.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-public.key",
+                "id": "def-public.ISessionStorageStateStorage.get.$1",
                 "type": "string",
                 "tags": [],
                 "label": "key",
                 "description": [],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/plugins/kibana_utils/public/state_sync/state_sync_state_storage/create_session_storage_state_storage.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -4989,19 +5241,23 @@
             ],
             "path": "src/plugins/kibana_utils/public/storage/types.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-public.key",
+                "id": "def-public.IStorage.getItem.$1",
                 "type": "string",
                 "tags": [],
                 "label": "key",
                 "description": [],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/plugins/kibana_utils/public/storage/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "kibanaUtils",
@@ -5015,21 +5271,24 @@
             ],
             "path": "src/plugins/kibana_utils/public/storage/types.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-public.key",
+                "id": "def-public.IStorage.setItem.$1",
                 "type": "string",
                 "tags": [],
                 "label": "key",
                 "description": [],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/plugins/kibana_utils/public/storage/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               },
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-public.value",
+                "id": "def-public.IStorage.setItem.$2",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "value",
@@ -5038,9 +5297,11 @@
                   "T"
                 ],
                 "path": "src/plugins/kibana_utils/public/storage/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "kibanaUtils",
@@ -5054,19 +5315,23 @@
             ],
             "path": "src/plugins/kibana_utils/public/storage/types.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-public.key",
+                "id": "def-public.IStorage.removeItem.$1",
                 "type": "string",
                 "tags": [],
                 "label": "key",
                 "description": [],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/plugins/kibana_utils/public/storage/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "kibanaUtils",
@@ -5080,8 +5345,8 @@
             ],
             "path": "src/plugins/kibana_utils/public/storage/types.ts",
             "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -5118,19 +5383,23 @@
             ],
             "path": "src/plugins/kibana_utils/public/storage/types.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-public.key",
+                "id": "def-public.IStorageWrapper.get.$1",
                 "type": "string",
                 "tags": [],
                 "label": "key",
                 "description": [],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/plugins/kibana_utils/public/storage/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "kibanaUtils",
@@ -5144,21 +5413,24 @@
             ],
             "path": "src/plugins/kibana_utils/public/storage/types.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-public.key",
+                "id": "def-public.IStorageWrapper.set.$1",
                 "type": "string",
                 "tags": [],
                 "label": "key",
                 "description": [],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/plugins/kibana_utils/public/storage/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               },
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-public.value",
+                "id": "def-public.IStorageWrapper.set.$2",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "value",
@@ -5167,9 +5439,11 @@
                   "T"
                 ],
                 "path": "src/plugins/kibana_utils/public/storage/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "kibanaUtils",
@@ -5183,19 +5457,23 @@
             ],
             "path": "src/plugins/kibana_utils/public/storage/types.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-public.key",
+                "id": "def-public.IStorageWrapper.remove.$1",
                 "type": "string",
                 "tags": [],
                 "label": "key",
                 "description": [],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/plugins/kibana_utils/public/storage/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "kibanaUtils",
@@ -5209,8 +5487,8 @@
             ],
             "path": "src/plugins/kibana_utils/public/storage/types.ts",
             "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -5370,8 +5648,8 @@
             ],
             "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
             "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "kibanaUtils",
@@ -5391,7 +5669,7 @@
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-public.state",
+                "id": "def-public.ReduxLikeStateContainer.reducer.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "state",
@@ -5404,7 +5682,7 @@
               },
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-public.action",
+                "id": "def-public.ReduxLikeStateContainer.reducer.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "action",
@@ -5438,24 +5716,30 @@
             ],
             "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-public.nextReducer",
+                "id": "def-public.ReduxLikeStateContainer.replaceReducer.$1",
                 "type": "Function",
                 "tags": [],
                 "label": "nextReducer",
                 "description": [],
                 "signature": [
-                  "(state: State, action: ",
-                  "TransitionDescription",
-                  "<string, any[]>) => State"
+                  {
+                    "pluginId": "kibanaUtils",
+                    "scope": "common",
+                    "docId": "kibKibanaUtilsPluginApi",
+                    "section": "def-common.Reducer",
+                    "text": "Reducer"
+                  },
+                  "<State>"
                 ],
                 "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "kibanaUtils",
@@ -5471,11 +5755,10 @@
             ],
             "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-public.action",
+                "id": "def-public.ReduxLikeStateContainer.dispatch.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "action",
@@ -5485,9 +5768,11 @@
                   "<string, any[]>"
                 ],
                 "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "kibanaUtils",
@@ -5509,42 +5794,30 @@
             ],
             "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-public.middleware",
+                "id": "def-public.ReduxLikeStateContainer.addMiddleware.$1",
                 "type": "Function",
                 "tags": [],
                 "label": "middleware",
                 "description": [],
                 "signature": [
-                  "(store: Pick<",
                   {
                     "pluginId": "kibanaUtils",
                     "scope": "common",
                     "docId": "kibKibanaUtilsPluginApi",
-                    "section": "def-common.ReduxLikeStateContainer",
-                    "text": "ReduxLikeStateContainer"
+                    "section": "def-common.Middleware",
+                    "text": "Middleware"
                   },
-                  "<State, any, {}>, \"getState\" | \"dispatch\">) => (next: (action: ",
-                  "TransitionDescription",
-                  "<string, any[]>) => any) => ",
-                  {
-                    "pluginId": "kibanaUtils",
-                    "scope": "common",
-                    "docId": "kibKibanaUtilsPluginApi",
-                    "section": "def-common.Dispatch",
-                    "text": "Dispatch"
-                  },
-                  "<",
-                  "TransitionDescription",
-                  "<string, any[]>>"
+                  "<State>"
                 ],
                 "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "kibanaUtils",
@@ -5558,11 +5831,10 @@
             ],
             "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-public.listener",
+                "id": "def-public.ReduxLikeStateContainer.subscribe.$1",
                 "type": "Function",
                 "tags": [],
                 "label": "listener",
@@ -5571,9 +5843,11 @@
                   "(state: State) => void"
                 ],
                 "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -5844,6 +6118,35 @@
         ],
         "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "kibanaUtils",
+            "id": "def-public.Comparator.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "previous",
+            "description": [],
+            "signature": [
+              "Result"
+            ],
+            "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "kibanaUtils",
+            "id": "def-public.Comparator.$2",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "current",
+            "description": [],
+            "signature": [
+              "Result"
+            ],
+            "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -5868,6 +6171,38 @@
         ],
         "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "kibanaUtils",
+            "id": "def-public.Connect.$1",
+            "type": "Function",
+            "tags": [],
+            "label": "mapStateToProp",
+            "description": [],
+            "signature": [
+              "(state: State) => Pick<Props, StatePropKeys>"
+            ],
+            "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "kibanaUtils",
+                "id": "def-public.Connect.$1.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "state",
+                "description": [],
+                "signature": [
+                  "State"
+                ],
+                "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
+                "deprecated": false
+              }
+            ]
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -5884,6 +6219,22 @@
         ],
         "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "kibanaUtils",
+            "id": "def-public.Dispatch.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "action",
+            "description": [],
+            "signature": [
+              "T"
+            ],
+            "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -5906,6 +6257,22 @@
         ],
         "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "kibanaUtils",
+            "id": "def-public.EnsurePureSelector.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "state",
+            "description": [],
+            "signature": [
+              "State"
+            ],
+            "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -5922,6 +6289,22 @@
         ],
         "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "kibanaUtils",
+            "id": "def-public.EnsurePureTransition.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "state",
+            "description": [],
+            "signature": [
+              "State"
+            ],
+            "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -5936,6 +6319,8 @@
         ],
         "path": "src/plugins/kibana_utils/common/create_getter_setter.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [],
         "initialIsOpen": false
       },
       {
@@ -5952,6 +6337,22 @@
         ],
         "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "kibanaUtils",
+            "id": "def-public.MapStateToProps.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "state",
+            "description": [],
+            "signature": [
+              "State"
+            ],
+            "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -5988,6 +6389,24 @@
         ],
         "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "kibanaUtils",
+            "id": "def-public.Middleware.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "store",
+            "description": [],
+            "signature": [
+              "{ getState: () => State; dispatch: (action: ",
+              "TransitionDescription",
+              "<string, any[]>) => void; }"
+            ],
+            "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -6010,6 +6429,22 @@
         ],
         "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "kibanaUtils",
+            "id": "def-public.PureSelector.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "state",
+            "description": [],
+            "signature": [
+              "State"
+            ],
+            "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -6021,9 +6456,21 @@
         "description": [],
         "signature": [
           "{ [K in keyof T]: ReturnType<",
-          "Ensure",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "server",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-server.Ensure",
+            "text": "Ensure"
+          },
           "<",
-          "Ensure",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "server",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-server.Ensure",
+            "text": "Ensure"
+          },
           "<T[K], ",
           {
             "pluginId": "kibanaUtils",
@@ -6054,7 +6501,13 @@
         "label": "PureSelectorToSelector",
         "description": [],
         "signature": [
-          "Ensure",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "server",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-server.Ensure",
+            "text": "Ensure"
+          },
           "<T, ",
           {
             "pluginId": "kibanaUtils",
@@ -6067,6 +6520,22 @@
         ],
         "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "kibanaUtils",
+            "id": "def-public.PureSelectorToSelector.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "args",
+            "description": [],
+            "signature": [
+              "Args"
+            ],
+            "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -6085,6 +6554,36 @@
         ],
         "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "kibanaUtils",
+            "id": "def-public.Reducer.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "state",
+            "description": [],
+            "signature": [
+              "State"
+            ],
+            "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "kibanaUtils",
+            "id": "def-public.Reducer.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "action",
+            "description": [],
+            "signature": [
+              "TransitionDescription",
+              "<string, any[]>"
+            ],
+            "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -6099,6 +6598,22 @@
         ],
         "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "kibanaUtils",
+            "id": "def-public.Selector.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "args",
+            "description": [],
+            "signature": [
+              "Args"
+            ],
+            "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -6113,6 +6628,22 @@
         ],
         "path": "src/plugins/kibana_utils/common/create_getter_setter.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "kibanaUtils",
+            "id": "def-public.Set.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "value",
+            "description": [],
+            "signature": [
+              "T"
+            ],
+            "path": "src/plugins/kibana_utils/common/create_getter_setter.ts",
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -6143,6 +6674,8 @@
         ],
         "path": "src/plugins/kibana_utils/public/core/create_start_service_getter.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [],
         "initialIsOpen": false
       },
       {
@@ -6157,6 +6690,8 @@
         ],
         "path": "src/plugins/kibana_utils/public/state_sync/state_sync.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [],
         "initialIsOpen": false
       },
       {
@@ -6171,6 +6706,8 @@
         ],
         "path": "src/plugins/kibana_utils/public/state_sync/state_sync.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [],
         "initialIsOpen": false
       },
       {
@@ -6195,6 +6732,8 @@
         ],
         "path": "src/plugins/kibana_utils/common/ui/ui_component.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [],
         "initialIsOpen": false
       },
       {
@@ -6273,7 +6812,7 @@
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-public.query",
+                "id": "def-public.url.encodeQuery.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "query",
@@ -6287,7 +6826,7 @@
               },
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-public.encodeFunction",
+                "id": "def-public.url.encodeQuery.$2",
                 "type": "Function",
                 "tags": [],
                 "label": "encodeFunction",
@@ -6296,11 +6835,37 @@
                   "(val: string, pctEncodeSpaces?: boolean | undefined) => string"
                 ],
                 "path": "src/plugins/kibana_utils/common/url/encode_uri_query.ts",
-                "deprecated": false
+                "deprecated": false,
+                "returnComment": [],
+                "children": [
+                  {
+                    "parentPluginId": "kibanaUtils",
+                    "id": "def-public.url.encodeQuery.$2.$1",
+                    "type": "string",
+                    "tags": [],
+                    "label": "val",
+                    "description": [],
+                    "path": "src/plugins/kibana_utils/common/url/encode_uri_query.ts",
+                    "deprecated": false
+                  },
+                  {
+                    "parentPluginId": "kibanaUtils",
+                    "id": "def-public.url.encodeQuery.$2.$2",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "pctEncodeSpaces",
+                    "description": [],
+                    "signature": [
+                      "boolean | undefined"
+                    ],
+                    "path": "src/plugins/kibana_utils/common/url/encode_uri_query.ts",
+                    "deprecated": false
+                  }
+                ]
               },
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-public.pctEncodeSpaces",
+                "id": "def-public.url.encodeQuery.$3",
                 "type": "boolean",
                 "tags": [],
                 "label": "pctEncodeSpaces",
@@ -6326,7 +6891,7 @@
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-public.val",
+                "id": "def-public.url.encodeUriQuery.$1",
                 "type": "string",
                 "tags": [],
                 "label": "val",
@@ -6336,7 +6901,7 @@
               },
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-public.pctEncodeSpaces",
+                "id": "def-public.url.encodeUriQuery.$2",
                 "type": "boolean",
                 "tags": [],
                 "label": "pctEncodeSpaces",
@@ -6362,7 +6927,7 @@
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-public.params",
+                "id": "def-public.url.addQueryParam.$1",
                 "type": "string",
                 "tags": [],
                 "label": "params",
@@ -6372,7 +6937,7 @@
               },
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-public.key",
+                "id": "def-public.url.addQueryParam.$2",
                 "type": "string",
                 "tags": [],
                 "label": "key",
@@ -6382,7 +6947,7 @@
               },
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-public.value",
+                "id": "def-public.url.addQueryParam.$3",
                 "type": "string",
                 "tags": [],
                 "label": "value",
@@ -6398,7 +6963,55 @@
         ],
         "initialIsOpen": false
       }
-    ]
+    ],
+    "setup": {
+      "parentPluginId": "kibanaUtils",
+      "id": "def-public.KibanaUtilsSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "KibanaUtilsSetup",
+      "description": [],
+      "path": "src/plugins/kibana_utils/public/plugin.ts",
+      "deprecated": false,
+      "children": [
+        {
+          "parentPluginId": "kibanaUtils",
+          "id": "def-public.KibanaUtilsSetup.setVersion",
+          "type": "Function",
+          "tags": [],
+          "label": "setVersion",
+          "description": [],
+          "signature": [
+            "(history: Pick<",
+            "History",
+            "<any>, \"replace\" | \"location\">) => void"
+          ],
+          "path": "src/plugins/kibana_utils/public/plugin.ts",
+          "deprecated": false,
+          "children": [
+            {
+              "parentPluginId": "kibanaUtils",
+              "id": "def-public.KibanaUtilsSetup.setVersion.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "history",
+              "description": [],
+              "signature": [
+                "Pick<",
+                "History",
+                "<any>, \"replace\" | \"location\">"
+              ],
+              "path": "src/plugins/kibana_utils/public/plugin.ts",
+              "deprecated": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
+        }
+      ],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    }
   },
   "server": {
     "classes": [
@@ -6603,7 +7216,7 @@
         "label": "createGetterSetter",
         "description": [],
         "signature": [
-          "<T extends object>(name: string) => [",
+          "<T extends object>(name: string, isValueRequired?: boolean) => [",
           {
             "pluginId": "kibanaUtils",
             "scope": "common",
@@ -6633,6 +7246,20 @@
             "description": [],
             "signature": [
               "string"
+            ],
+            "path": "src/plugins/kibana_utils/common/create_getter_setter.ts",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "kibanaUtils",
+            "id": "def-server.createGetterSetter.$2",
+            "type": "boolean",
+            "tags": [],
+            "label": "isValueRequired",
+            "description": [],
+            "signature": [
+              "boolean"
             ],
             "path": "src/plugins/kibana_utils/common/create_getter_setter.ts",
             "deprecated": false,
@@ -6774,6 +7401,94 @@
         "returnComment": [
           "`KbnServerError`"
         ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "kibanaUtils",
+        "id": "def-server.mergeMigrationFunctionMaps",
+        "type": "Function",
+        "tags": [],
+        "label": "mergeMigrationFunctionMaps",
+        "description": [],
+        "signature": [
+          "(obj1: ",
+          {
+            "pluginId": "kibanaUtils",
+            "scope": "common",
+            "docId": "kibKibanaUtilsPluginApi",
+            "section": "def-common.MigrateFunctionsObject",
+            "text": "MigrateFunctionsObject"
+          },
+          ", obj2: ",
+          {
+            "pluginId": "kibanaUtils",
+            "scope": "common",
+            "docId": "kibKibanaUtilsPluginApi",
+            "section": "def-common.MigrateFunctionsObject",
+            "text": "MigrateFunctionsObject"
+          },
+          ") => { [x: string]: ",
+          {
+            "pluginId": "kibanaUtils",
+            "scope": "common",
+            "docId": "kibKibanaUtilsPluginApi",
+            "section": "def-common.MigrateFunction",
+            "text": "MigrateFunction"
+          },
+          "<any, any>; } & ",
+          {
+            "pluginId": "kibanaUtils",
+            "scope": "common",
+            "docId": "kibKibanaUtilsPluginApi",
+            "section": "def-common.MigrateFunctionsObject",
+            "text": "MigrateFunctionsObject"
+          }
+        ],
+        "path": "src/plugins/kibana_utils/common/persistable_state/merge_migration_function_map.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "kibanaUtils",
+            "id": "def-server.mergeMigrationFunctionMaps.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "obj1",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "kibanaUtils",
+                "scope": "common",
+                "docId": "kibKibanaUtilsPluginApi",
+                "section": "def-common.MigrateFunctionsObject",
+                "text": "MigrateFunctionsObject"
+              }
+            ],
+            "path": "src/plugins/kibana_utils/common/persistable_state/merge_migration_function_map.ts",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "kibanaUtils",
+            "id": "def-server.mergeMigrationFunctionMaps.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "obj2",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "kibanaUtils",
+                "scope": "common",
+                "docId": "kibKibanaUtilsPluginApi",
+                "section": "def-common.MigrateFunctionsObject",
+                "text": "MigrateFunctionsObject"
+              }
+            ],
+            "path": "src/plugins/kibana_utils/common/persistable_state/merge_migration_function_map.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
         "initialIsOpen": false
       },
       {
@@ -7213,6 +7928,8 @@
         ],
         "path": "src/plugins/kibana_utils/common/create_getter_setter.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [],
         "initialIsOpen": false
       },
       {
@@ -7227,6 +7944,22 @@
         ],
         "path": "src/plugins/kibana_utils/common/create_getter_setter.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "kibanaUtils",
+            "id": "def-server.Set.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "value",
+            "description": [],
+            "signature": [
+              "T"
+            ],
+            "path": "src/plugins/kibana_utils/common/create_getter_setter.ts",
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       }
     ],
@@ -7261,7 +7994,7 @@
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-server.query",
+                "id": "def-server.url.encodeQuery.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "query",
@@ -7275,7 +8008,7 @@
               },
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-server.encodeFunction",
+                "id": "def-server.url.encodeQuery.$2",
                 "type": "Function",
                 "tags": [],
                 "label": "encodeFunction",
@@ -7284,11 +8017,37 @@
                   "(val: string, pctEncodeSpaces?: boolean | undefined) => string"
                 ],
                 "path": "src/plugins/kibana_utils/common/url/encode_uri_query.ts",
-                "deprecated": false
+                "deprecated": false,
+                "returnComment": [],
+                "children": [
+                  {
+                    "parentPluginId": "kibanaUtils",
+                    "id": "def-server.url.encodeQuery.$2.$1",
+                    "type": "string",
+                    "tags": [],
+                    "label": "val",
+                    "description": [],
+                    "path": "src/plugins/kibana_utils/common/url/encode_uri_query.ts",
+                    "deprecated": false
+                  },
+                  {
+                    "parentPluginId": "kibanaUtils",
+                    "id": "def-server.url.encodeQuery.$2.$2",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "pctEncodeSpaces",
+                    "description": [],
+                    "signature": [
+                      "boolean | undefined"
+                    ],
+                    "path": "src/plugins/kibana_utils/common/url/encode_uri_query.ts",
+                    "deprecated": false
+                  }
+                ]
               },
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-server.pctEncodeSpaces",
+                "id": "def-server.url.encodeQuery.$3",
                 "type": "boolean",
                 "tags": [],
                 "label": "pctEncodeSpaces",
@@ -7314,7 +8073,7 @@
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-server.val",
+                "id": "def-server.url.encodeUriQuery.$1",
                 "type": "string",
                 "tags": [],
                 "label": "val",
@@ -7324,7 +8083,7 @@
               },
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-server.pctEncodeSpaces",
+                "id": "def-server.url.encodeUriQuery.$2",
                 "type": "boolean",
                 "tags": [],
                 "label": "pctEncodeSpaces",
@@ -7350,7 +8109,7 @@
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-server.params",
+                "id": "def-server.url.addQueryParam.$1",
                 "type": "string",
                 "tags": [],
                 "label": "params",
@@ -7360,7 +8119,7 @@
               },
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-server.key",
+                "id": "def-server.url.addQueryParam.$2",
                 "type": "string",
                 "tags": [],
                 "label": "key",
@@ -7370,7 +8129,7 @@
               },
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-server.value",
+                "id": "def-server.url.addQueryParam.$3",
                 "type": "string",
                 "tags": [],
                 "label": "value",
@@ -7447,6 +8206,82 @@
       },
       {
         "parentPluginId": "kibanaUtils",
+        "id": "def-common.CharacterNotAllowedInField",
+        "type": "Class",
+        "tags": [],
+        "label": "CharacterNotAllowedInField",
+        "description": [
+          "\nwhen a user is attempting to create a field with disallowed character in the name, like *"
+        ],
+        "signature": [
+          {
+            "pluginId": "kibanaUtils",
+            "scope": "common",
+            "docId": "kibKibanaUtilsPluginApi",
+            "section": "def-common.CharacterNotAllowedInField",
+            "text": "CharacterNotAllowedInField"
+          },
+          " extends ",
+          {
+            "pluginId": "kibanaUtils",
+            "scope": "common",
+            "docId": "kibKibanaUtilsPluginApi",
+            "section": "def-common.KbnError",
+            "text": "KbnError"
+          }
+        ],
+        "path": "src/plugins/kibana_utils/common/errors/errors.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "kibanaUtils",
+            "id": "def-common.CharacterNotAllowedInField.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "src/plugins/kibana_utils/common/errors/errors.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "kibanaUtils",
+                "id": "def-common.CharacterNotAllowedInField.Unnamed.$1",
+                "type": "string",
+                "tags": [],
+                "label": "character",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/plugins/kibana_utils/common/errors/errors.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "kibanaUtils",
+                "id": "def-common.CharacterNotAllowedInField.Unnamed.$2",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/plugins/kibana_utils/common/errors/errors.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "kibanaUtils",
         "id": "def-common.Defer",
         "type": "Class",
         "tags": [],
@@ -7483,7 +8318,7 @@
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-common.data",
+                "id": "def-common.Defer.resolve.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "data",
@@ -7512,7 +8347,7 @@
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-common.error",
+                "id": "def-common.Defer.reject.$1",
                 "type": "Any",
                 "tags": [],
                 "label": "error",
@@ -8022,7 +8857,7 @@
         "children": [
           {
             "parentPluginId": "kibanaUtils",
-            "id": "def-common.o",
+            "id": "def-common.calculateObjectHash.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "o",
@@ -8044,7 +8879,7 @@
         "label": "createGetterSetter",
         "description": [],
         "signature": [
-          "<T extends object>(name: string) => [",
+          "<T extends object>(name: string, isValueRequired?: boolean) => [",
           {
             "pluginId": "kibanaUtils",
             "scope": "common",
@@ -8074,6 +8909,20 @@
             "description": [],
             "signature": [
               "string"
+            ],
+            "path": "src/plugins/kibana_utils/common/create_getter_setter.ts",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "kibanaUtils",
+            "id": "def-common.createGetterSetter.$2",
+            "type": "boolean",
+            "tags": [],
+            "label": "isValueRequired",
+            "description": [],
+            "signature": [
+              "boolean"
             ],
             "path": "src/plugins/kibana_utils/common/create_getter_setter.ts",
             "deprecated": false,
@@ -8298,7 +9147,7 @@
         "tags": [],
         "label": "createStateContainerReactHelpers",
         "description": [
-          "\nCreates helpers for using {@link StateContainer | State Containers} with react\nRefer to {@link https://github.com/elastic/kibana/blob/master/src/plugins/kibana_utils/docs/state_containers/react.md | guide} for details"
+          "\nCreates helpers for using {@link StateContainer | State Containers} with react\nRefer to {@link https://github.com/elastic/kibana/blob/main/src/plugins/kibana_utils/docs/state_containers/react.md | guide} for details"
         ],
         "signature": [
           "<Container extends ",
@@ -8534,7 +9383,7 @@
         "children": [
           {
             "parentPluginId": "kibanaUtils",
-            "id": "def-common.glob",
+            "id": "def-common.makeRegEx.$1",
             "type": "string",
             "tags": [],
             "label": "glob",
@@ -8659,11 +9508,11 @@
           },
           "<",
           {
-            "pluginId": "kibanaUtils",
-            "scope": "common",
-            "docId": "kibKibanaUtilsPluginApi",
-            "section": "def-common.SerializableState",
-            "text": "SerializableState"
+            "pluginId": "@kbn/utility-types",
+            "scope": "server",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-server.Serializable",
+            "text": "Serializable"
           },
           ">) => S"
         ],
@@ -8707,11 +9556,11 @@
               },
               "<",
               {
-                "pluginId": "kibanaUtils",
-                "scope": "common",
-                "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.SerializableState",
-                "text": "SerializableState"
+                "pluginId": "@kbn/utility-types",
+                "scope": "server",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-server.Serializable",
+                "text": "Serializable"
               },
               ">"
             ],
@@ -8975,10 +9824,10 @@
             ],
             "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
             "deprecated": false,
+            "children": [],
             "returnComment": [
               "current state"
-            ],
-            "children": []
+            ]
           },
           {
             "parentPluginId": "kibanaUtils",
@@ -8994,11 +9843,10 @@
             ],
             "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-common.state",
+                "id": "def-common.BaseStateContainer.set.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "state",
@@ -9009,9 +9857,11 @@
                   "State"
                 ],
                 "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "kibanaUtils",
@@ -9057,7 +9907,24 @@
               "(<T>(state: T) => T) | undefined"
             ],
             "path": "src/plugins/kibana_utils/common/state_containers/create_state_container.ts",
-            "deprecated": false
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "kibanaUtils",
+                "id": "def-common.CreateStateContainerOptions.freeze.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "state",
+                "description": [],
+                "signature": [
+                  "T"
+                ],
+                "path": "src/plugins/kibana_utils/common/state_containers/create_state_container.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -9156,13 +10023,10 @@
             ],
             "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
             "deprecated": false,
-            "returnComment": [
-              "A new stats object augmented with new telemetry information."
-            ],
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-common.state",
+                "id": "def-common.PersistableState.telemetry.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "state",
@@ -9173,11 +10037,12 @@
                   "P"
                 ],
                 "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               },
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-common.stats",
+                "id": "def-common.PersistableState.telemetry.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "stats",
@@ -9185,11 +10050,15 @@
                   "Stats object containing the stats which were already\ncollected. This `stats` object shall not be mutated in-line."
                 ],
                 "signature": [
-                  "{ [x: string]: any; }"
+                  "Record<string, any>"
                 ],
                 "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
+            ],
+            "returnComment": [
+              "A new stats object augmented with new telemetry information."
             ]
           },
           {
@@ -9208,13 +10077,10 @@
             ],
             "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
             "deprecated": false,
-            "returnComment": [
-              "Persistable state object with references injected."
-            ],
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-common.state",
+                "id": "def-common.PersistableState.inject.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "state",
@@ -9225,11 +10091,12 @@
                   "P"
                 ],
                 "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               },
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-common.references",
+                "id": "def-common.PersistableState.inject.$2",
                 "type": "Array",
                 "tags": [],
                 "label": "references",
@@ -9241,8 +10108,12 @@
                   "[]"
                 ],
                 "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
+            ],
+            "returnComment": [
+              "Persistable state object with references injected."
             ]
           },
           {
@@ -9261,13 +10132,10 @@
             ],
             "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
             "deprecated": false,
-            "returnComment": [
-              "Persistable state object with references extracted and a list of\nreferences."
-            ],
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-common.state",
+                "id": "def-common.PersistableState.extract.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "state",
@@ -9278,8 +10146,12 @@
                   "P"
                 ],
                 "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
+            ],
+            "returnComment": [
+              "Persistable state object with references extracted and a list of\nreferences."
             ]
           },
           {
@@ -9493,16 +10365,52 @@
               },
               "<",
               {
-                "pluginId": "kibanaUtils",
-                "scope": "common",
-                "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.SerializableState",
-                "text": "SerializableState"
+                "pluginId": "@kbn/utility-types",
+                "scope": "server",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-server.Serializable",
+                "text": "Serializable"
               },
               ">) => P) | undefined"
             ],
             "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "kibanaUtils",
+                "id": "def-common.PersistableStateService.migrateToLatest.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "state",
+                "description": [
+                  "The persistable state serializable state object."
+                ],
+                "signature": [
+                  {
+                    "pluginId": "kibanaUtils",
+                    "scope": "common",
+                    "docId": "kibKibanaUtilsPluginApi",
+                    "section": "def-common.VersionedState",
+                    "text": "VersionedState"
+                  },
+                  "<",
+                  {
+                    "pluginId": "@kbn/utility-types",
+                    "scope": "server",
+                    "docId": "kibKbnUtilityTypesPluginApi",
+                    "section": "def-server.Serializable",
+                    "text": "Serializable"
+                  },
+                  ">"
+                ],
+                "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": [
+              "A serializable state object migrated to the latest state."
+            ]
           },
           {
             "parentPluginId": "kibanaUtils",
@@ -9525,8 +10433,8 @@
             ],
             "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
             "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -9573,8 +10481,8 @@
             ],
             "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
             "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "kibanaUtils",
@@ -9594,7 +10502,7 @@
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-common.state",
+                "id": "def-common.ReduxLikeStateContainer.reducer.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "state",
@@ -9607,7 +10515,7 @@
               },
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-common.action",
+                "id": "def-common.ReduxLikeStateContainer.reducer.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "action",
@@ -9641,24 +10549,30 @@
             ],
             "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-common.nextReducer",
+                "id": "def-common.ReduxLikeStateContainer.replaceReducer.$1",
                 "type": "Function",
                 "tags": [],
                 "label": "nextReducer",
                 "description": [],
                 "signature": [
-                  "(state: State, action: ",
-                  "TransitionDescription",
-                  "<string, any[]>) => State"
+                  {
+                    "pluginId": "kibanaUtils",
+                    "scope": "common",
+                    "docId": "kibKibanaUtilsPluginApi",
+                    "section": "def-common.Reducer",
+                    "text": "Reducer"
+                  },
+                  "<State>"
                 ],
                 "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "kibanaUtils",
@@ -9674,11 +10588,10 @@
             ],
             "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-common.action",
+                "id": "def-common.ReduxLikeStateContainer.dispatch.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "action",
@@ -9688,9 +10601,11 @@
                   "<string, any[]>"
                 ],
                 "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "kibanaUtils",
@@ -9712,42 +10627,30 @@
             ],
             "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-common.middleware",
+                "id": "def-common.ReduxLikeStateContainer.addMiddleware.$1",
                 "type": "Function",
                 "tags": [],
                 "label": "middleware",
                 "description": [],
                 "signature": [
-                  "(store: Pick<",
                   {
                     "pluginId": "kibanaUtils",
                     "scope": "common",
                     "docId": "kibKibanaUtilsPluginApi",
-                    "section": "def-common.ReduxLikeStateContainer",
-                    "text": "ReduxLikeStateContainer"
+                    "section": "def-common.Middleware",
+                    "text": "Middleware"
                   },
-                  "<State, any, {}>, \"getState\" | \"dispatch\">) => (next: (action: ",
-                  "TransitionDescription",
-                  "<string, any[]>) => any) => ",
-                  {
-                    "pluginId": "kibanaUtils",
-                    "scope": "common",
-                    "docId": "kibKibanaUtilsPluginApi",
-                    "section": "def-common.Dispatch",
-                    "text": "Dispatch"
-                  },
-                  "<",
-                  "TransitionDescription",
-                  "<string, any[]>>"
+                  "<State>"
                 ],
                 "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "kibanaUtils",
@@ -9761,11 +10664,10 @@
             ],
             "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-common.listener",
+                "id": "def-common.ReduxLikeStateContainer.subscribe.$1",
                 "type": "Function",
                 "tags": [],
                 "label": "listener",
@@ -9774,9 +10676,11 @@
                   "(state: State) => void"
                 ],
                 "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -10033,6 +10937,35 @@
         ],
         "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "kibanaUtils",
+            "id": "def-common.Comparator.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "previous",
+            "description": [],
+            "signature": [
+              "Result"
+            ],
+            "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "kibanaUtils",
+            "id": "def-common.Comparator.$2",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "current",
+            "description": [],
+            "signature": [
+              "Result"
+            ],
+            "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -10057,6 +10990,38 @@
         ],
         "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "kibanaUtils",
+            "id": "def-common.Connect.$1",
+            "type": "Function",
+            "tags": [],
+            "label": "mapStateToProp",
+            "description": [],
+            "signature": [
+              "(state: State) => Pick<Props, StatePropKeys>"
+            ],
+            "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "kibanaUtils",
+                "id": "def-common.Connect.$1.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "state",
+                "description": [],
+                "signature": [
+                  "State"
+                ],
+                "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
+                "deprecated": false
+              }
+            ]
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -10073,6 +11038,22 @@
         ],
         "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "kibanaUtils",
+            "id": "def-common.Dispatch.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "action",
+            "description": [],
+            "signature": [
+              "T"
+            ],
+            "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -10095,6 +11076,22 @@
         ],
         "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "kibanaUtils",
+            "id": "def-common.EnsurePureSelector.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "state",
+            "description": [],
+            "signature": [
+              "State"
+            ],
+            "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -10111,6 +11108,22 @@
         ],
         "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "kibanaUtils",
+            "id": "def-common.EnsurePureTransition.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "state",
+            "description": [],
+            "signature": [
+              "State"
+            ],
+            "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -10125,6 +11138,8 @@
         ],
         "path": "src/plugins/kibana_utils/common/create_getter_setter.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [],
         "initialIsOpen": false
       },
       {
@@ -10141,6 +11156,22 @@
         ],
         "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "kibanaUtils",
+            "id": "def-common.MapStateToProps.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "state",
+            "description": [],
+            "signature": [
+              "State"
+            ],
+            "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -10177,6 +11208,24 @@
         ],
         "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "kibanaUtils",
+            "id": "def-common.Middleware.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "store",
+            "description": [],
+            "signature": [
+              "{ getState: () => State; dispatch: (action: ",
+              "TransitionDescription",
+              "<string, any[]>) => void; }"
+            ],
+            "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -10191,6 +11240,22 @@
         ],
         "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "kibanaUtils",
+            "id": "def-common.MigrateFunction.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "state",
+            "description": [],
+            "signature": [
+              "FromVersion"
+            ],
+            "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -10257,23 +11322,55 @@
         "signature": [
           "(state: ",
           {
-            "pluginId": "kibanaUtils",
-            "scope": "common",
-            "docId": "kibKibanaUtilsPluginApi",
-            "section": "def-common.SerializableState",
-            "text": "SerializableState"
+            "pluginId": "@kbn/utility-types",
+            "scope": "server",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-server.SerializableRecord",
+            "text": "SerializableRecord"
           },
           ", version: string) => ",
           {
-            "pluginId": "kibanaUtils",
-            "scope": "common",
-            "docId": "kibKibanaUtilsPluginApi",
-            "section": "def-common.SerializableState",
-            "text": "SerializableState"
+            "pluginId": "@kbn/utility-types",
+            "scope": "server",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-server.SerializableRecord",
+            "text": "SerializableRecord"
           }
         ],
         "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "kibanaUtils",
+            "id": "def-common.PersistableStateMigrateFn.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "state",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "server",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-server.SerializableRecord",
+                "text": "SerializableRecord"
+              }
+            ],
+            "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "kibanaUtils",
+            "id": "def-common.PersistableStateMigrateFn.$2",
+            "type": "string",
+            "tags": [],
+            "label": "version",
+            "description": [],
+            "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -10296,6 +11393,22 @@
         ],
         "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "kibanaUtils",
+            "id": "def-common.PureSelector.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "state",
+            "description": [],
+            "signature": [
+              "State"
+            ],
+            "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -10307,9 +11420,21 @@
         "description": [],
         "signature": [
           "{ [K in keyof T]: ReturnType<",
-          "Ensure",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "server",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-server.Ensure",
+            "text": "Ensure"
+          },
           "<",
-          "Ensure",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "server",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-server.Ensure",
+            "text": "Ensure"
+          },
           "<T[K], ",
           {
             "pluginId": "kibanaUtils",
@@ -10340,7 +11465,13 @@
         "label": "PureSelectorToSelector",
         "description": [],
         "signature": [
-          "Ensure",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "server",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-server.Ensure",
+            "text": "Ensure"
+          },
           "<T, ",
           {
             "pluginId": "kibanaUtils",
@@ -10353,6 +11484,22 @@
         ],
         "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "kibanaUtils",
+            "id": "def-common.PureSelectorToSelector.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "args",
+            "description": [],
+            "signature": [
+              "Args"
+            ],
+            "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -10371,6 +11518,36 @@
         ],
         "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "kibanaUtils",
+            "id": "def-common.Reducer.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "state",
+            "description": [],
+            "signature": [
+              "State"
+            ],
+            "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "kibanaUtils",
+            "id": "def-common.Reducer.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "action",
+            "description": [],
+            "signature": [
+              "TransitionDescription",
+              "<string, any[]>"
+            ],
+            "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -10385,82 +11562,22 @@
         ],
         "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
         "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "kibanaUtils",
-        "id": "def-common.Serializable",
-        "type": "Type",
-        "tags": [],
-        "label": "Serializable",
-        "description": [],
-        "signature": [
-          "string | number | boolean | ",
+        "returnComment": [],
+        "children": [
           {
-            "pluginId": "kibanaUtils",
-            "scope": "common",
-            "docId": "kibKibanaUtilsPluginApi",
-            "section": "def-common.SerializableState",
-            "text": "SerializableState"
-          },
-          " | ",
-          {
-            "pluginId": "kibanaUtils",
-            "scope": "common",
-            "docId": "kibKibanaUtilsPluginApi",
-            "section": "def-common.SerializableValue",
-            "text": "SerializableValue"
-          },
-          "[] | null | undefined"
+            "parentPluginId": "kibanaUtils",
+            "id": "def-common.Selector.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "args",
+            "description": [],
+            "signature": [
+              "Args"
+            ],
+            "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
+            "deprecated": false
+          }
         ],
-        "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "kibanaUtils",
-        "id": "def-common.SerializableState",
-        "type": "Type",
-        "tags": [],
-        "label": "SerializableState",
-        "description": [
-          "\nSerializable state is something is a POJO JavaScript object that can be\nserialized to a JSON string."
-        ],
-        "signature": [
-          "{ [key: string]: ",
-          {
-            "pluginId": "kibanaUtils",
-            "scope": "common",
-            "docId": "kibKibanaUtilsPluginApi",
-            "section": "def-common.Serializable",
-            "text": "Serializable"
-          },
-          "; }"
-        ],
-        "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "kibanaUtils",
-        "id": "def-common.SerializableValue",
-        "type": "Type",
-        "tags": [],
-        "label": "SerializableValue",
-        "description": [],
-        "signature": [
-          "string | number | boolean | ",
-          {
-            "pluginId": "kibanaUtils",
-            "scope": "common",
-            "docId": "kibKibanaUtilsPluginApi",
-            "section": "def-common.SerializableState",
-            "text": "SerializableState"
-          },
-          " | null | undefined"
-        ],
-        "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
-        "deprecated": false,
         "initialIsOpen": false
       },
       {
@@ -10475,6 +11592,22 @@
         ],
         "path": "src/plugins/kibana_utils/common/create_getter_setter.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "kibanaUtils",
+            "id": "def-common.Set.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "value",
+            "description": [],
+            "signature": [
+              "T"
+            ],
+            "path": "src/plugins/kibana_utils/common/create_getter_setter.ts",
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -10499,6 +11632,8 @@
         ],
         "path": "src/plugins/kibana_utils/common/ui/ui_component.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [],
         "initialIsOpen": false
       },
       {
@@ -10557,7 +11692,7 @@
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-common.query",
+                "id": "def-common.url.encodeQuery.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "query",
@@ -10571,7 +11706,7 @@
               },
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-common.encodeFunction",
+                "id": "def-common.url.encodeQuery.$2",
                 "type": "Function",
                 "tags": [],
                 "label": "encodeFunction",
@@ -10580,11 +11715,37 @@
                   "(val: string, pctEncodeSpaces?: boolean | undefined) => string"
                 ],
                 "path": "src/plugins/kibana_utils/common/url/encode_uri_query.ts",
-                "deprecated": false
+                "deprecated": false,
+                "returnComment": [],
+                "children": [
+                  {
+                    "parentPluginId": "kibanaUtils",
+                    "id": "def-common.url.encodeQuery.$2.$1",
+                    "type": "string",
+                    "tags": [],
+                    "label": "val",
+                    "description": [],
+                    "path": "src/plugins/kibana_utils/common/url/encode_uri_query.ts",
+                    "deprecated": false
+                  },
+                  {
+                    "parentPluginId": "kibanaUtils",
+                    "id": "def-common.url.encodeQuery.$2.$2",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "pctEncodeSpaces",
+                    "description": [],
+                    "signature": [
+                      "boolean | undefined"
+                    ],
+                    "path": "src/plugins/kibana_utils/common/url/encode_uri_query.ts",
+                    "deprecated": false
+                  }
+                ]
               },
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-common.pctEncodeSpaces",
+                "id": "def-common.url.encodeQuery.$3",
                 "type": "boolean",
                 "tags": [],
                 "label": "pctEncodeSpaces",
@@ -10610,7 +11771,7 @@
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-common.val",
+                "id": "def-common.url.encodeUriQuery.$1",
                 "type": "string",
                 "tags": [],
                 "label": "val",
@@ -10620,7 +11781,7 @@
               },
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-common.pctEncodeSpaces",
+                "id": "def-common.url.encodeUriQuery.$2",
                 "type": "boolean",
                 "tags": [],
                 "label": "pctEncodeSpaces",
@@ -10646,7 +11807,7 @@
             "children": [
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-common.params",
+                "id": "def-common.url.addQueryParam.$1",
                 "type": "string",
                 "tags": [],
                 "label": "params",
@@ -10656,7 +11817,7 @@
               },
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-common.key",
+                "id": "def-common.url.addQueryParam.$2",
                 "type": "string",
                 "tags": [],
                 "label": "key",
@@ -10666,7 +11827,7 @@
               },
               {
                 "parentPluginId": "kibanaUtils",
-                "id": "def-common.value",
+                "id": "def-common.url.addQueryParam.$3",
                 "type": "string",
                 "tags": [],
                 "label": "value",

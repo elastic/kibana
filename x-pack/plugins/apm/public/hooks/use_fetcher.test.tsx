@@ -13,9 +13,9 @@ import { delay } from '../utils/testHelpers';
 import { FetcherResult, useFetcher } from './use_fetcher';
 
 // Wrap the hook with a provider so it can useKibana
-const KibanaReactContext = createKibanaReactContext(({
+const KibanaReactContext = createKibanaReactContext({
   notifications: { toasts: { add: () => {}, danger: () => {} } },
-} as unknown) as Partial<CoreStart>);
+} as unknown as Partial<CoreStart>);
 
 interface WrapperProps {
   children?: ReactNode;

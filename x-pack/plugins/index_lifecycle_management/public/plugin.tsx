@@ -20,7 +20,8 @@ import { ClientConfigType, SetupDependencies, StartDependencies } from './types'
 import { IlmLocatorDefinition } from './locator';
 
 export class IndexLifecycleManagementPlugin
-  implements Plugin<void, void, SetupDependencies, StartDependencies> {
+  implements Plugin<void, void, SetupDependencies, StartDependencies>
+{
   constructor(private readonly initializerContext: PluginInitializerContext) {}
 
   private breadcrumbService = new BreadcrumbService();
@@ -97,7 +98,7 @@ export class IndexLifecycleManagementPlugin
             defaultMessage:
               'Define lifecycle policies to automatically perform operations as an index ages.',
           }),
-          icon: 'indexSettings',
+          icon: 'indexRollupApp',
           path: '/app/management/data/index_lifecycle_management',
           showOnHomePage: true,
           category: FeatureCatalogueCategory.ADMIN,

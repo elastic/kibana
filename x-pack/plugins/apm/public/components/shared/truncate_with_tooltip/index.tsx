@@ -27,13 +27,14 @@ const ContentWrapper = euiStyled.div`
 interface Props {
   text: string;
   content?: React.ReactNode;
+  'data-test-subj'?: string;
 }
 
 export function TruncateWithTooltip(props: Props) {
-  const { text, content } = props;
+  const { text, content, ...rest } = props;
 
   return (
-    <TooltipWrapper>
+    <TooltipWrapper {...rest}>
       <EuiToolTip
         delay="long"
         content={text}

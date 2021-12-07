@@ -1,8 +1,6 @@
 {
-  "extends": "../../tsconfig.base.json",
-  "compilerOptions": {
-    "incremental": false,
-  },
+  "extends": "../../tsconfig.bazel.json",
+  "compilerOptions": {},
   "include": [
     "**/*",
   ],

@@ -11,11 +11,11 @@ import { regenerateIds } from './regenerate_ids';
 import { SavedObject } from '../../types';
 
 describe('#regenerateIds', () => {
-  const objects = ([
+  const objects = [
     { type: 'foo', id: '1' },
     { type: 'bar', id: '2' },
     { type: 'baz', id: '3' },
-  ] as any) as SavedObject[];
+  ] as any as SavedObject[];
 
   test('returns expected values', () => {
     mockUuidv4

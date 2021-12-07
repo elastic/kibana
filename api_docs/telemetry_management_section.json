@@ -168,47 +168,7 @@
     "interfaces": [],
     "enums": [],
     "misc": [],
-    "objects": [],
-    "setup": {
-      "parentPluginId": "telemetryManagementSection",
-      "id": "def-public.TelemetryManagementSectionPluginSetup",
-      "type": "Interface",
-      "tags": [],
-      "label": "TelemetryManagementSectionPluginSetup",
-      "description": [],
-      "path": "src/plugins/telemetry_management_section/public/plugin.tsx",
-      "deprecated": false,
-      "children": [
-        {
-          "parentPluginId": "telemetryManagementSection",
-          "id": "def-public.TelemetryManagementSectionPluginSetup.toggleSecuritySolutionExample",
-          "type": "Function",
-          "tags": [],
-          "label": "toggleSecuritySolutionExample",
-          "description": [],
-          "signature": [
-            "(enabled: boolean) => void"
-          ],
-          "path": "src/plugins/telemetry_management_section/public/plugin.tsx",
-          "deprecated": false,
-          "returnComment": [],
-          "children": [
-            {
-              "parentPluginId": "telemetryManagementSection",
-              "id": "def-public.enabled",
-              "type": "boolean",
-              "tags": [],
-              "label": "enabled",
-              "description": [],
-              "path": "src/plugins/telemetry_management_section/public/plugin.tsx",
-              "deprecated": false
-            }
-          ]
-        }
-      ],
-      "lifecycle": "setup",
-      "initialIsOpen": true
-    }
+    "objects": []
   },
   "server": {
     "classes": [],

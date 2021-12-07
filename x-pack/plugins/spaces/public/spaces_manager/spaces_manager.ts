@@ -13,9 +13,13 @@ import type {
   HttpSetup,
   SavedObjectsCollectMultiNamespaceReferencesResponse,
 } from 'src/core/public';
-import type { Space } from 'src/plugins/spaces_oss/common';
 
-import type { GetAllSpacesOptions, GetSpaceResult, LegacyUrlAliasTarget } from '../../common';
+import type {
+  GetAllSpacesOptions,
+  GetSpaceResult,
+  LegacyUrlAliasTarget,
+  Space,
+} from '../../common';
 import type { CopySavedObjectsToSpaceResponse } from '../copy_saved_objects_to_space/types';
 
 interface SavedObjectTarget {
@@ -136,7 +140,9 @@ export class SpacesManager {
     type: string
   ): Promise<{ shareToAllSpaces: boolean }> {
     return this.http
-      .get('/internal/security/_share_saved_object_permissions', { query: { type } })
+      .get<{ shareToAllSpaces: boolean }>('/internal/security/_share_saved_object_permissions', {
+        query: { type },
+      })
       .catch((err) => {
         const isNotFound = err?.body?.statusCode === 404;
         if (isNotFound) {
@@ -186,7 +192,7 @@ export class SpacesManager {
     if (this.isAnonymousPath()) {
       return;
     }
-    const activeSpace = await this.http.get('/internal/spaces/_active_space');
+    const activeSpace = await this.http.get<Space>('/internal/spaces/_active_space');
     this.activeSpace$.next(activeSpace);
   }
 

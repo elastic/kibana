@@ -10,7 +10,7 @@ import { getClusterStats } from '../../../../lib/cluster/get_cluster_stats';
 import { getClusterStatus } from '../../../../lib/cluster/get_cluster_status';
 import { getIndices } from '../../../../lib/elasticsearch/indices';
 import { handleError } from '../../../../lib/errors/handle_error';
-import { prefixIndexPattern } from '../../../../lib/ccs_utils';
+import { prefixIndexPattern } from '../../../../../common/ccs_utils';
 import { INDEX_PATTERN_ELASTICSEARCH } from '../../../../../common/constants';
 import { getIndicesUnassignedShardStats } from '../../../../lib/elasticsearch/shards/get_indices_unassigned_shard_stats';
 

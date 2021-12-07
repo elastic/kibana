@@ -10,11 +10,14 @@ import fs from 'fs';
 import path from 'path';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
+import { setupFleetAndAgents } from '../agents/services';
+import { testUsers } from '../test_users';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
 
   const supertest = getService('supertest');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
 
   const testPkgKey = 'apache-0.1.4';
 
@@ -35,6 +38,7 @@ export default function (providerContext: FtrProviderContext) {
 
   describe('EPM - get', () => {
     skipIfNoDockerRegistry(providerContext);
+    setupFleetAndAgents(providerContext);
     it('returns package info from the registry if it was installed from the registry', async function () {
       // this will install through the registry by default
       await installPackage(testPkgKey);
@@ -88,6 +92,13 @@ export default function (providerContext: FtrProviderContext) {
 
     it('returns a 400 for a package key without a proper semver version', async function () {
       await supertest.get('/api/fleet/epm/packages/endpoint-0.1.0.1.2.3').expect(400);
+    });
+
+    it('allows user with only read permission to access', async () => {
+      await supertestWithoutAuth
+        .get(`/api/fleet/epm/packages/${testPkgKey}`)
+        .auth(testUsers.fleet_read_only.username, testUsers.fleet_read_only.password)
+        .expect(200);
     });
   });
 }

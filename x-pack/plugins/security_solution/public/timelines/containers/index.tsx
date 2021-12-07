@@ -11,8 +11,10 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { Subscription } from 'rxjs';
 
+import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ESQuery } from '../../../common/typed_json';
-import { isCompleteResponse, isErrorResponse } from '../../../../../../src/plugins/data/public';
+import { isCompleteResponse, isErrorResponse } from '../../../../../../src/plugins/data/common';
+
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { inputsModel } from '../../common/store';
 import { useKibana } from '../../common/lib/kibana';
@@ -74,15 +76,16 @@ type TimelineResponse<T extends KueryFilterQueryKind> = T extends 'kuery'
 
 export interface UseTimelineEventsProps {
   docValueFields?: DocValueFields[];
-  filterQuery?: ESQuery | string;
-  skip?: boolean;
   endDate: string;
   eqlOptions?: EqlOptionsSelected;
-  id: string;
   fields: string[];
+  filterQuery?: ESQuery | string;
+  id: string;
   indexNames: string[];
   language?: KueryFilterQueryKind;
   limit: number;
+  runtimeMappings: MappingRuntimeFields;
+  skip?: boolean;
   sort?: TimelineRequestSortField[];
   startDate: string;
   timerangeKind?: 'absolute' | 'relative';
@@ -131,6 +134,7 @@ export const useTimelineEvents = ({
   indexNames,
   fields,
   filterQuery,
+  runtimeMappings,
   startDate,
   language = 'kuery',
   limit,
@@ -179,6 +183,13 @@ export const useTimelineEvents = ({
     }
     wrappedLoadPage(0);
   }, [wrappedLoadPage]);
+
+  const setUpdated = useCallback(
+    (updatedAt: number) => {
+      dispatch(timelineActions.setTimelineUpdatedAt({ id, updated: updatedAt }));
+    },
+    [dispatch, id]
+  );
 
   const [timelineResponse, setTimelineResponse] = useState<TimelineArgs>({
     id,
@@ -230,6 +241,7 @@ export const useTimelineEvents = ({
                     totalCount: response.totalCount,
                     updatedAt: Date.now(),
                   };
+                  setUpdated(newTimelineResponse.updatedAt);
                   if (id === TimelineId.active) {
                     activeTimeline.setExpandedDetail({});
                     activeTimeline.setPageName(pageName);
@@ -237,6 +249,7 @@ export const useTimelineEvents = ({
                       activeTimeline.setEqlRequest(request as TimelineEqlRequestOptions);
                       activeTimeline.setEqlResponse(newTimelineResponse);
                     } else {
+                      // @ts-expect-error EqlSearchRequest.query is not compatible with QueryDslQueryContainer
                       activeTimeline.setRequest(request);
                       activeTimeline.setResponse(newTimelineResponse);
                     }
@@ -303,7 +316,17 @@ export const useTimelineEvents = ({
       asyncSearch();
       refetch.current = asyncSearch;
     },
-    [data.search, id, addWarning, addError, pageName, refetchGrid, skip, wrappedLoadPage]
+    [
+      pageName,
+      skip,
+      id,
+      data.search,
+      setUpdated,
+      addWarning,
+      addError,
+      refetchGrid,
+      wrappedLoadPage,
+    ]
   );
 
   useEffect(() => {
@@ -322,6 +345,7 @@ export const useTimelineEvents = ({
         querySize: prevRequest?.pagination.querySize ?? 0,
         sort: prevRequest?.sort ?? initSortDefault,
         timerange: prevRequest?.timerange ?? {},
+        runtimeMappings: prevRequest?.runtimeMappings ?? {},
         ...deStructureEqlOptions(prevEqlRequest),
       };
 
@@ -335,6 +359,7 @@ export const useTimelineEvents = ({
           from: startDate,
           to: endDate,
         },
+        runtimeMappings,
         ...deStructureEqlOptions(eqlOptions),
       };
 
@@ -354,6 +379,7 @@ export const useTimelineEvents = ({
           querySize: limit,
         },
         language,
+        runtimeMappings,
         sort,
         timerange: {
           interval: '12h',
@@ -392,6 +418,7 @@ export const useTimelineEvents = ({
     startDate,
     sort,
     fields,
+    runtimeMappings,
   ]);
 
   useEffect(() => {

@@ -18,6 +18,8 @@ import type {
   GetPackagePoliciesRequest,
   GetPackagePoliciesResponse,
   GetOnePackagePolicyResponse,
+  UpgradePackagePolicyDryRunResponse,
+  UpgradePackagePolicyResponse,
 } from '../../../common/types/rest_spec';
 
 import { sendRequest, useRequest } from './use_request';
@@ -57,9 +59,53 @@ export function useGetPackagePolicies(query: GetPackagePoliciesRequest['query'])
   });
 }
 
+export const sendGetPackagePolicies = (query: GetPackagePoliciesRequest['query']) => {
+  return sendRequest<GetPackagePoliciesResponse>({
+    method: 'get',
+    path: packagePolicyRouteService.getListPath(),
+    query,
+  });
+};
+
+export const useGetOnePackagePolicy = (packagePolicyId: string) => {
+  return useRequest<GetOnePackagePolicyResponse>({
+    path: packagePolicyRouteService.getInfoPath(packagePolicyId),
+    method: 'get',
+  });
+};
+
 export const sendGetOnePackagePolicy = (packagePolicyId: string) => {
   return sendRequest<GetOnePackagePolicyResponse>({
     path: packagePolicyRouteService.getInfoPath(packagePolicyId),
     method: 'get',
   });
 };
+
+export function sendUpgradePackagePolicyDryRun(
+  packagePolicyIds: string[],
+  packageVersion?: string
+) {
+  const body: { packagePolicyIds: string[]; packageVersion?: string } = {
+    packagePolicyIds,
+  };
+
+  if (packageVersion) {
+    body.packageVersion = packageVersion;
+  }
+
+  return sendRequest<UpgradePackagePolicyDryRunResponse>({
+    path: packagePolicyRouteService.getDryRunPath(),
+    method: 'post',
+    body: JSON.stringify(body),
+  });
+}
+
+export function sendUpgradePackagePolicy(packagePolicyIds: string[]) {
+  return sendRequest<UpgradePackagePolicyResponse>({
+    path: packagePolicyRouteService.getUpgradePath(),
+    method: 'post',
+    body: JSON.stringify({
+      packagePolicyIds,
+    }),
+  });
+}

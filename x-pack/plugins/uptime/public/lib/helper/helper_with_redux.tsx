@@ -16,6 +16,7 @@ export const MountWithReduxProvider: React.FC<{ state?: AppState }> = ({ childre
       getState: jest.fn().mockReturnValue(state || { selectedFilters: null }),
       subscribe: jest.fn(),
       replaceReducer: jest.fn(),
+      [Symbol.observable]: jest.fn(),
     }}
   >
     {children}

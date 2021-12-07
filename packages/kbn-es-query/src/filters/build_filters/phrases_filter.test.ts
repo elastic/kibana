@@ -6,13 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { IndexPatternBase } from '../../es_query';
+import { DataViewBase } from '../../es_query';
 import { buildPhrasesFilter, getPhrasesFilterField } from './phrases_filter';
 import { fields } from '../stubs';
 
 describe('phrases filter', function () {
-  const indexPattern: IndexPatternBase = {
+  const indexPattern: DataViewBase = {
     fields,
+    title: 'dataView',
   };
 
   describe('getPhrasesFilterField', function () {

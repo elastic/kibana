@@ -10,24 +10,19 @@ import Boom from '@hapi/boom';
 
 import { SavedObject } from 'kibana/server';
 import {
-  CASE_SAVED_OBJECT,
   caseStatuses,
   CommentAttributes,
-  MAX_CONCURRENT_SEARCHES,
   SubCaseResponse,
   SubCaseResponseRt,
   SubCasesFindRequest,
   SubCasesFindResponse,
   SubCasesFindResponseRt,
   SubCasesPatchRequest,
-} from '../../../common';
-import { CasesClientArgs, CasesClientInternal } from '..';
-import {
-  countAlertsForID,
-  createCaseError,
-  flattenSubCaseSavedObject,
-  transformSubCases,
-} from '../../common';
+} from '../../../common/api';
+import { CASE_SAVED_OBJECT, MAX_CONCURRENT_SEARCHES } from '../../../common/constants';
+import { CasesClientArgs } from '..';
+import { createCaseError } from '../../common/error';
+import { countAlertsForID, flattenSubCaseSavedObject, transformSubCases } from '../../common/utils';
 import { buildCaseUserActionItem } from '../../services/user_actions/helpers';
 import { constructQueryOptions } from '../utils';
 import { defaultPage, defaultPerPage } from '../../routes/api';
@@ -85,28 +80,19 @@ export interface SubCasesClient {
  *
  * @ignore
  */
-export function createSubCasesClient(
-  clientArgs: CasesClientArgs,
-  casesClientInternal: CasesClientInternal
-): SubCasesClient {
+export function createSubCasesClient(clientArgs: CasesClientArgs): SubCasesClient {
   return Object.freeze({
     delete: (ids: string[]) => deleteSubCase(ids, clientArgs),
     find: (findArgs: FindArgs) => find(findArgs, clientArgs),
     get: (getArgs: GetArgs) => get(getArgs, clientArgs),
-    update: (subCases: SubCasesPatchRequest) =>
-      update({ subCases, clientArgs, casesClientInternal }),
+    update: (subCases: SubCasesPatchRequest) => update({ subCases, clientArgs }),
   });
 }
 
 async function deleteSubCase(ids: string[], clientArgs: CasesClientArgs): Promise<void> {
   try {
-    const {
-      unsecuredSavedObjectsClient,
-      user,
-      userActionService,
-      caseService,
-      attachmentService,
-    } = clientArgs;
+    const { unsecuredSavedObjectsClient, user, userActionService, caseService, attachmentService } =
+      clientArgs;
 
     const [comments, subCases] = await Promise.all([
       caseService.getAllSubCaseComments({ unsecuredSavedObjectsClient, id: ids }),

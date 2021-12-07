@@ -9,7 +9,7 @@ import { Subject, Observable, Subscription } from 'rxjs';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { Option, some, map as mapOptional } from 'fp-ts/lib/Option';
 import { tap } from 'rxjs/operators';
-import { Logger } from '../../../../src/core/server';
+import type { Logger, ExecutionContextStart } from '../../../../src/core/server';
 
 import { Result, asErr, mapErr, asOk, map, mapOk } from './lib/result_type';
 import { ManagedConfiguration } from './lib/create_managed_configuration';
@@ -53,6 +53,7 @@ export type TaskPollingLifecycleOpts = {
   config: TaskManagerConfig;
   middleware: Middleware;
   elasticsearchAndSOAvailability$: Observable<boolean>;
+  executionContext: ExecutionContextStart;
 } & ManagedConfiguration;
 
 export type TaskLifecycleEvent =
@@ -73,6 +74,7 @@ export class TaskPollingLifecycle {
   private store: TaskStore;
   private taskClaiming: TaskClaiming;
   private bufferedStore: BufferedTaskStore;
+  private readonly executionContext: ExecutionContextStart;
 
   private logger: Logger;
   public pool: TaskPool;
@@ -100,11 +102,13 @@ export class TaskPollingLifecycle {
     config,
     taskStore,
     definitions,
+    executionContext,
   }: TaskPollingLifecycleOpts) {
     this.logger = logger;
     this.middleware = middleware;
     this.definitions = definitions;
     this.store = taskStore;
+    this.executionContext = executionContext;
 
     const emitEvent = (event: TaskLifecycleEvent) => this.events$.next(event);
 
@@ -122,6 +126,7 @@ export class TaskPollingLifecycle {
     this.taskClaiming = new TaskClaiming({
       taskStore,
       maxAttempts: config.max_attempts,
+      excludedTaskTypes: config.unsafe.exclude_task_types,
       definitions,
       logger: this.logger,
       getCapacity: (taskType?: string) =>
@@ -139,10 +144,8 @@ export class TaskPollingLifecycle {
     // pipe taskClaiming events into the lifecycle event stream
     this.taskClaiming.events.subscribe(emitEvent);
 
-    const {
-      max_poll_inactivity_cycles: maxPollInactivityCycles,
-      poll_interval: pollInterval,
-    } = config;
+    const { max_poll_inactivity_cycles: maxPollInactivityCycles, poll_interval: pollInterval } =
+      config;
 
     const pollIntervalDelay$ = delayOnClaimConflicts(
       maxWorkersConfiguration$,
@@ -153,46 +156,45 @@ export class TaskPollingLifecycle {
     ).pipe(tap((delay) => emitEvent(asTaskManagerStatEvent('pollingDelay', asOk(delay)))));
 
     // the task poller that polls for work on fixed intervals and on demand
-    const poller$: Observable<
-      Result<TimedFillPoolResult, PollingError<string>>
-    > = createObservableMonitor<Result<TimedFillPoolResult, PollingError<string>>, Error>(
-      () =>
-        createTaskPoller<string, TimedFillPoolResult>({
-          logger,
-          pollInterval$: pollIntervalConfiguration$,
-          pollIntervalDelay$,
-          bufferCapacity: config.request_capacity,
-          getCapacity: () => {
-            const capacity = this.pool.availableWorkers;
-            if (!capacity) {
-              // if there isn't capacity, emit a load event so that we can expose how often
-              // high load causes the poller to skip work (work isn'tcalled when there is no capacity)
-              this.emitEvent(asTaskManagerStatEvent('load', asOk(this.pool.workerLoad)));
-            }
-            return capacity;
+    const poller$: Observable<Result<TimedFillPoolResult, PollingError<string>>> =
+      createObservableMonitor<Result<TimedFillPoolResult, PollingError<string>>, Error>(
+        () =>
+          createTaskPoller<string, TimedFillPoolResult>({
+            logger,
+            pollInterval$: pollIntervalConfiguration$,
+            pollIntervalDelay$,
+            bufferCapacity: config.request_capacity,
+            getCapacity: () => {
+              const capacity = this.pool.availableWorkers;
+              if (!capacity) {
+                // if there isn't capacity, emit a load event so that we can expose how often
+                // high load causes the poller to skip work (work isn'tcalled when there is no capacity)
+                this.emitEvent(asTaskManagerStatEvent('load', asOk(this.pool.workerLoad)));
+              }
+              return capacity;
+            },
+            pollRequests$: this.claimRequests$,
+            work: this.pollForWork,
+            // Time out the `work` phase if it takes longer than a certain number of polling cycles
+            // The `work` phase includes the prework needed *before* executing a task
+            // (such as polling for new work, marking tasks as running etc.) but does not
+            // include the time of actually running the task
+            workTimeout: pollInterval * maxPollInactivityCycles,
+          }),
+        {
+          heartbeatInterval: pollInterval,
+          // Time out the poller itself if it has failed to complete the entire stream for a certain amount of time.
+          // This is different that the `work` timeout above, as the poller could enter an invalid state where
+          // it fails to complete a cycle even thought `work` is completing quickly.
+          // We grant it a single cycle longer than the time alotted to `work` so that timing out the `work`
+          // doesn't get short circuited by the monitor reinstantiating the poller all together (a far more expensive
+          // operation than just timing out the `work` internally)
+          inactivityTimeout: pollInterval * (maxPollInactivityCycles + 1),
+          onError: (error) => {
+            logger.error(`[Task Poller Monitor]: ${error.message}`);
           },
-          pollRequests$: this.claimRequests$,
-          work: this.pollForWork,
-          // Time out the `work` phase if it takes longer than a certain number of polling cycles
-          // The `work` phase includes the prework needed *before* executing a task
-          // (such as polling for new work, marking tasks as running etc.) but does not
-          // include the time of actually running the task
-          workTimeout: pollInterval * maxPollInactivityCycles,
-        }),
-      {
-        heartbeatInterval: pollInterval,
-        // Time out the poller itself if it has failed to complete the entire stream for a certain amount of time.
-        // This is different that the `work` timeout above, as the poller could enter an invalid state where
-        // it fails to complete a cycle even thought `work` is completing quickly.
-        // We grant it a single cycle longer than the time alotted to `work` so that timing out the `work`
-        // doesn't get short circuited by the monitor reinstantiating the poller all together (a far more expensive
-        // operation than just timing out the `work` internally)
-        inactivityTimeout: pollInterval * (maxPollInactivityCycles + 1),
-        onError: (error) => {
-          logger.error(`[Task Poller Monitor]: ${error.message}`);
-        },
-      }
-    );
+        }
+      );
 
     elasticsearchAndSOAvailability$.subscribe((areESAndSOAvailable) => {
       if (areESAndSOAvailable && !this.isStarted) {
@@ -227,6 +229,7 @@ export class TaskPollingLifecycle {
       beforeMarkRunning: this.middleware.beforeMarkRunning,
       onTaskEvent: this.emitEvent,
       defaultMaxAttempts: this.taskClaiming.maxAttempts,
+      executionContext: this.executionContext,
     });
   };
 

@@ -55,6 +55,8 @@ exports[`EditLayerPanel is rendered 1`] = `
         <EuiAccordion
           arrowDisplay="left"
           buttonContent="Source details"
+          buttonElement="button"
+          element="div"
           id="accordion1"
           initialIsOpen={false}
           isLoading={false}
@@ -93,17 +95,21 @@ exports[`EditLayerPanel is rendered 1`] = `
         <LayerSettings
           layer={
             Object {
+              "canShowTooltip": [Function],
               "getDisplayName": [Function],
               "getId": [Function],
               "getImmutableSourceProperties": [Function],
               "getLayerTypeIconName": [Function],
+              "getType": [Function],
               "hasErrors": [Function],
+              "hasJoins": [Function],
               "renderSourceSettingsEditor": [Function],
               "showJoinEditor": [Function],
               "supportsElasticsearchFilters": [Function],
+              "supportsFitToBounds": [Function],
             }
           }
-          supportsFitToBounds={false}
+          supportsFitToBounds={true}
         />
         <div>
           mockSourceSettings
@@ -112,14 +118,18 @@ exports[`EditLayerPanel is rendered 1`] = `
           <JoinEditor
             layer={
               Object {
+                "canShowTooltip": [Function],
                 "getDisplayName": [Function],
                 "getId": [Function],
                 "getImmutableSourceProperties": [Function],
                 "getLayerTypeIconName": [Function],
+                "getType": [Function],
                 "hasErrors": [Function],
+                "hasJoins": [Function],
                 "renderSourceSettingsEditor": [Function],
                 "showJoinEditor": [Function],
                 "supportsElasticsearchFilters": [Function],
+                "supportsFitToBounds": [Function],
               }
             }
             layerDisplayName="layer 1"

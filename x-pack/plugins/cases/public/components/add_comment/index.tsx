@@ -5,20 +5,29 @@
  * 2.0.
  */
 
+import React, {
+  useCallback,
+  useRef,
+  forwardRef,
+  useImperativeHandle,
+  useEffect,
+  useState,
+} from 'react';
 import { EuiButton, EuiFlexItem, EuiFlexGroup, EuiLoadingSpinner } from '@elastic/eui';
-import React, { useCallback, forwardRef, useImperativeHandle } from 'react';
 import styled from 'styled-components';
+import { isEmpty } from 'lodash';
 
-import { CommentType } from '../../../common';
+import { CommentType } from '../../../common/api';
 import { usePostComment } from '../../containers/use_post_comment';
 import { Case } from '../../containers/types';
-import { MarkdownEditorForm } from '../markdown_editor';
+import { EuiMarkdownEditorRef, MarkdownEditorForm } from '../markdown_editor';
 import { Form, useForm, UseField, useFormData } from '../../common/shared_imports';
 
 import * as i18n from './translations';
 import { schema, AddCommentFormSchema } from './schema';
 import { InsertTimeline } from '../insert_timeline';
-import { useOwnerContext } from '../owner_context/use_owner_context';
+import { useCasesContext } from '../cases_context/use_cases_context';
+
 const MySpinner = styled(EuiLoadingSpinner)`
   position: absolute;
   top: 50%;
@@ -31,9 +40,12 @@ const initialCommentValue: AddCommentFormSchema = {
 
 export interface AddCommentRefObject {
   addQuote: (quote: string) => void;
+  setComment: (newComment: string) => void;
+  editor: EuiMarkdownEditorRef | null;
 }
 
 export interface AddCommentProps {
+  id: string;
   caseId: string;
   userCanCrud?: boolean;
   onCommentSaving?: () => void;
@@ -47,6 +59,7 @@ export const AddComment = React.memo(
   forwardRef<AddCommentRefObject, AddCommentProps>(
     (
       {
+        id,
         caseId,
         userCanCrud,
         onCommentPosted,
@@ -57,7 +70,9 @@ export const AddComment = React.memo(
       },
       ref
     ) => {
-      const owner = useOwnerContext();
+      const editorRef = useRef<EuiMarkdownEditorRef>(null);
+      const [focusOnContext, setFocusOnContext] = useState(false);
+      const { owner } = useCasesContext();
       const { isLoading, postComment } = usePostComment();
 
       const { form } = useForm<AddCommentFormSchema>({
@@ -72,13 +87,25 @@ export const AddComment = React.memo(
 
       const addQuote = useCallback(
         (quote) => {
-          setFieldValue(fieldName, `${comment}${comment.length > 0 ? '\n\n' : ''}${quote}`);
+          const addCarrots = quote.replace(new RegExp('\r?\n', 'g'), '\n> ');
+          const val = `> ${addCarrots} \n\n`;
+          setFieldValue(fieldName, `${comment}${comment.length > 0 ? '\n\n' : ''}${val}`);
+          setFocusOnContext(true);
         },
         [comment, setFieldValue]
       );
 
+      const setComment = useCallback(
+        (newComment) => {
+          setFieldValue(fieldName, newComment);
+        },
+        [setFieldValue]
+      );
+
       useImperativeHandle(ref, () => ({
         addQuote,
+        setComment,
+        editor: editorRef.current,
       }));
 
       const onSubmit = useCallback(async () => {
@@ -97,6 +124,38 @@ export const AddComment = React.memo(
         }
       }, [submit, onCommentSaving, postComment, caseId, owner, onCommentPosted, subCaseId, reset]);
 
+      /**
+       * Focus on the text area when a quote has been added.
+       *
+       * The useEffect will run only when focusOnContext
+       * changes.
+       *
+       * The useEffect is also called once one mount
+       * where the comment is empty. We do not want to focus
+       * in this scenario.
+       *
+       * Ideally we would like to put the
+       * editorRef.current?.textarea?.focus(); inside the if (focusOnContext).
+       * The reason this is not feasible is because when it sets the
+       * focusOnContext to false a render will occur again and the
+       * focus will be lost.
+       *
+       * We do not put the comment in the dependency list
+       * because we do not want to focus when the user
+       * is typing.
+       */
+
+      useEffect(() => {
+        if (!isEmpty(comment)) {
+          editorRef.current?.textarea?.focus();
+        }
+
+        if (focusOnContext) {
+          setFocusOnContext(false);
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+      }, [focusOnContext]);
+
       return (
         <span id="add-comment-permLink">
           {isLoading && showLoading && <MySpinner data-test-subj="loading-spinner" size="xl" />}
@@ -106,6 +165,8 @@ export const AddComment = React.memo(
                 path={fieldName}
                 component={MarkdownEditorForm}
                 componentProps={{
+                  ref: editorRef,
+                  id,
                   idAria: 'caseComment',
                   isDisabled: isLoading,
                   dataTestSubj: 'add-comment',

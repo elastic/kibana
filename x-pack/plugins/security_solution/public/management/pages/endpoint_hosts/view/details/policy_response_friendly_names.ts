@@ -243,6 +243,18 @@ responseMap.set(
     defaultMessage: 'Events',
   })
 );
+responseMap.set(
+  'memory_protection',
+  i18n.translate('xpack.securitySolution.endpoint.details.policyResponse.memory_protection', {
+    defaultMessage: 'Memory Threat',
+  })
+);
+responseMap.set(
+  'behavior_protection',
+  i18n.translate('xpack.securitySolution.endpoint.details.policyResponse.behavior_protection', {
+    defaultMessage: 'Malicious Behavior',
+  })
+);
 
 /**
  * Maps a server provided value to corresponding i18n'd string.

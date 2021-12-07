@@ -12,7 +12,7 @@ export interface SavedObjectsManagementPluginSetup {}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SavedObjectsManagementPluginStart {}
 
-export {
+export type {
   SavedObjectMetadata,
   SavedObjectWithMetadata,
   SavedObjectRelationKind,

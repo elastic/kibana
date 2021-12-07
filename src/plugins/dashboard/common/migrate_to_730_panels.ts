@@ -7,6 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type { SerializableRecord } from '@kbn/utility-types';
 import semverSatisfies from 'semver/functions/satisfies';
 import uuid from 'uuid';
 import {
@@ -80,7 +81,7 @@ function migratePre61PanelToLatest(
   panel: RawSavedDashboardPanelTo60,
   version: string,
   useMargins: boolean,
-  uiState?: { [key: string]: { [key: string]: unknown } }
+  uiState?: { [key: string]: SerializableRecord }
 ): RawSavedDashboardPanel730ToLatest {
   if (panel.col === undefined || panel.row === undefined) {
     throw new Error(
@@ -138,7 +139,7 @@ function migrate610PanelToLatest(
   panel: RawSavedDashboardPanel610,
   version: string,
   useMargins: boolean,
-  uiState?: { [key: string]: { [key: string]: unknown } }
+  uiState?: { [key: string]: SerializableRecord }
 ): RawSavedDashboardPanel730ToLatest {
   (['w', 'x', 'h', 'y'] as Array<keyof GridData>).forEach((key) => {
     if (panel.gridData[key] === undefined) {
@@ -273,7 +274,7 @@ export function migratePanelsTo730(
   >,
   version: string,
   useMargins: boolean,
-  uiState?: { [key: string]: { [key: string]: unknown } }
+  uiState?: { [key: string]: SerializableRecord }
 ): RawSavedDashboardPanel730ToLatest[] {
   return panels.map((panel) => {
     if (isPre61Panel(panel)) {

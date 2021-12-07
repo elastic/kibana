@@ -1,7 +1,6 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "composite": true,
     "outDir": "./target/types",
     "emitDeclarationOnly": true,
     "declaration": true,
@@ -24,8 +23,10 @@
     { "path": "../../../src/plugins/share/tsconfig.json" },
     { "path": "../../../src/plugins/ui_actions/tsconfig.json" },
     { "path": "../../../src/plugins/usage_collection/tsconfig.json" },
+    { "path": "../../../src/plugins/field_formats/tsconfig.json" },
     { "path": "../features/tsconfig.json" },
     { "path": "../licensing/tsconfig.json" },
+    { "path": "../screenshotting/tsconfig.json" },
     { "path": "../security/tsconfig.json" },
     { "path": "../spaces/tsconfig.json" },
   ]

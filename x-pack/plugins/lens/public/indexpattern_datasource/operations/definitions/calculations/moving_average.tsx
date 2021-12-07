@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useState } from 'react';
 import { EuiFieldNumber, EuiFormRow } from '@elastic/eui';
 import { useDebounceWithOptions } from '../../../../shared_components';
@@ -18,6 +18,7 @@ import {
   getErrorsForDateReference,
   dateBasedOperationToExpression,
   hasDateField,
+  checkForDataLayerType,
 } from './utils';
 import { updateColumnParam } from '../../layer_helpers';
 import { getFormatFromPreviousColumn, isValidNumber, getFilter } from '../helpers';
@@ -122,13 +123,17 @@ export const movingAverageOperation: OperationDefinition<
     );
   },
   getHelpMessage: () => <MovingAveragePopup />,
-  getDisabledStatus(indexPattern, layer) {
-    return checkForDateHistogram(
-      layer,
-      i18n.translate('xpack.lens.indexPattern.movingAverage', {
-        defaultMessage: 'Moving average',
-      })
-    )?.join(', ');
+  getDisabledStatus(indexPattern, layer, layerType) {
+    const opName = i18n.translate('xpack.lens.indexPattern.movingAverage', {
+      defaultMessage: 'Moving average',
+    });
+    if (layerType) {
+      const dataLayerErrors = checkForDataLayerType(layerType, opName);
+      if (dataLayerErrors) {
+        return dataLayerErrors.join(', ');
+      }
+    }
+    return checkForDateHistogram(layer, opName)?.join(', ');
   },
   timeScalingMode: 'optional',
   filterable: true,

@@ -28,8 +28,8 @@ import { RenderingService } from './rendering';
 import { SavedObjectsService } from './saved_objects';
 import { IntegrationsService } from './integrations';
 import { DeprecationsService } from './deprecations';
+import { ThemeService } from './theme';
 import { CoreApp } from './core_app';
-import { ExecutionContextService } from './execution_context';
 import type { InternalApplicationSetup, InternalApplicationStart } from './application/types';
 
 interface Params {
@@ -84,7 +84,7 @@ export class CoreSystem {
   private readonly integrations: IntegrationsService;
   private readonly coreApp: CoreApp;
   private readonly deprecations: DeprecationsService;
-  private readonly executionContext: ExecutionContextService;
+  private readonly theme: ThemeService;
   private readonly rootDomElement: HTMLElement;
   private readonly coreContext: CoreContext;
   private fatalErrorsSetup: FatalErrorsSetup | null = null;
@@ -106,6 +106,7 @@ export class CoreSystem {
       this.stop();
     });
 
+    this.theme = new ThemeService();
     this.notifications = new NotificationsService();
     this.http = new HttpService();
     this.savedObjects = new SavedObjectsService();
@@ -120,7 +121,6 @@ export class CoreSystem {
     this.application = new ApplicationService();
     this.integrations = new IntegrationsService();
     this.deprecations = new DeprecationsService();
-    this.executionContext = new ExecutionContextService();
 
     this.plugins = new PluginsService(this.coreContext, injectedMetadata.uiPlugins);
     this.coreApp = new CoreApp(this.coreContext);
@@ -140,7 +140,7 @@ export class CoreSystem {
       const http = this.http.setup({ injectedMetadata, fatalErrors: this.fatalErrorsSetup });
       const uiSettings = this.uiSettings.setup({ http, injectedMetadata });
       const notifications = this.notifications.setup({ uiSettings });
-      this.executionContext.setup();
+      const theme = this.theme.setup({ injectedMetadata });
 
       const application = this.application.setup({ http });
       this.coreApp.setup({ application, http, injectedMetadata, notifications });
@@ -151,6 +151,7 @@ export class CoreSystem {
         http,
         injectedMetadata,
         notifications,
+        theme,
         uiSettings,
       };
 
@@ -178,6 +179,7 @@ export class CoreSystem {
       const savedObjects = await this.savedObjects.start({ http });
       const i18n = await this.i18n.start();
       const fatalErrors = await this.fatalErrors.start();
+      const theme = this.theme.start();
       await this.integrations.start({ uiSettings });
 
       const coreUiTargetDomElement = document.createElement('div');
@@ -188,15 +190,17 @@ export class CoreSystem {
 
       const overlays = this.overlay.start({
         i18n,
-        targetDomElement: overlayTargetDomElement,
+        theme,
         uiSettings,
+        targetDomElement: overlayTargetDomElement,
       });
       const notifications = await this.notifications.start({
         i18n,
         overlays,
+        theme,
         targetDomElement: notificationsTargetDomElement,
       });
-      const application = await this.application.start({ http, overlays });
+      const application = await this.application.start({ http, theme, overlays });
       const chrome = await this.chrome.start({
         application,
         docLinks,
@@ -205,7 +209,6 @@ export class CoreSystem {
         notifications,
       });
       const deprecations = this.deprecations.start({ http });
-      const executionContext = this.executionContext.start();
 
       this.coreApp.start({ application, docLinks, http, notifications, uiSettings });
 
@@ -214,6 +217,7 @@ export class CoreSystem {
         chrome,
         docLinks,
         http,
+        theme,
         savedObjects,
         i18n,
         injectedMetadata,
@@ -222,7 +226,6 @@ export class CoreSystem {
         uiSettings,
         fatalErrors,
         deprecations,
-        executionContext,
       };
 
       await this.plugins.start(core);
@@ -237,7 +240,9 @@ export class CoreSystem {
       this.rendering.start({
         application,
         chrome,
+        i18n,
         overlays,
+        theme,
         targetDomElement: coreUiTargetDomElement,
       });
 
@@ -266,7 +271,7 @@ export class CoreSystem {
     this.i18n.stop();
     this.application.stop();
     this.deprecations.stop();
-    this.executionContext.stop();
+    this.theme.stop();
     this.rootDomElement.textContent = '';
   }
 }

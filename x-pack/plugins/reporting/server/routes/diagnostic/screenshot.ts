@@ -9,16 +9,14 @@ import { i18n } from '@kbn/i18n';
 import { ReportingCore } from '../..';
 import { APP_WRAPPER_CLASS } from '../../../../../../src/core/server';
 import { API_DIAGNOSE_URL } from '../../../common/constants';
-import { omitBlockedHeaders } from '../../export_types/common';
+import { omitBlockedHeaders, generatePngObservable } from '../../export_types/common';
 import { getAbsoluteUrlFactory } from '../../export_types/common/get_absolute_url';
-import { generatePngObservableFactory } from '../../export_types/png/lib/generate_png';
 import { LevelLogger as Logger } from '../../lib';
-import { authorizedUserPreRoutingFactory } from '../lib/authorized_user_pre_routing';
+import { authorizedUserPreRouting } from '../lib/authorized_user_pre_routing';
 import { DiagnosticResponse } from './';
 
 export const registerDiagnoseScreenshot = (reporting: ReportingCore, logger: Logger) => {
   const setupDeps = reporting.getPluginSetupDeps();
-  const userHandler = authorizedUserPreRoutingFactory(reporting);
   const { router } = setupDeps;
 
   router.post(
@@ -26,8 +24,7 @@ export const registerDiagnoseScreenshot = (reporting: ReportingCore, logger: Log
       path: `${API_DIAGNOSE_URL}/screenshot`,
       validate: {},
     },
-    userHandler(async (user, context, req, res) => {
-      const generatePngObservable = await generatePngObservableFactory(reporting);
+    authorizedUserPreRouting(reporting, async (_user, _context, req, res) => {
       const config = reporting.getConfig();
       const decryptedHeaders = req.headers as Record<string, string>;
       const [basePath, protocol, hostname, port] = [
@@ -42,7 +39,6 @@ export const registerDiagnoseScreenshot = (reporting: ReportingCore, logger: Log
 
       // Hack the layout to make the base/login page work
       const layout = {
-        id: 'png',
         dimensions: {
           width: 1440,
           height: 2024,
@@ -55,7 +51,7 @@ export const registerDiagnoseScreenshot = (reporting: ReportingCore, logger: Log
         },
       };
 
-      const headers = {
+      const conditionalHeaders = {
         headers: omitBlockedHeaders(decryptedHeaders),
         conditions: {
           hostname,
@@ -65,10 +61,16 @@ export const registerDiagnoseScreenshot = (reporting: ReportingCore, logger: Log
         },
       };
 
-      return generatePngObservable(logger, hashUrl, 'America/Los_Angeles', headers, layout)
+      return generatePngObservable(reporting, logger, {
+        conditionalHeaders,
+        layout,
+        browserTimezone: 'America/Los_Angeles',
+        urls: [hashUrl],
+      })
         .pipe()
         .toPromise()
         .then((screenshot) => {
+          // NOTE: the screenshot could be returned as a string using `data:image/png;base64,` + results.buffer.toString('base64')
           if (screenshot.warnings.length) {
             return res.ok({
               body: {

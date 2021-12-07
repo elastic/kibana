@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import { UpdateResponse } from '@elastic/elasticsearch/api/types';
+import { UpdateResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import moment from 'moment';
 import * as Rx from 'rxjs';
 import { timeout } from 'rxjs/operators';
-import { LevelLogger } from '../';
+import { finished, Writable } from 'stream';
+import { promisify } from 'util';
+import { getContentStream, LevelLogger } from '../';
 import { ReportingCore } from '../../';
 import {
   RunContext,
@@ -18,9 +20,10 @@ import {
 } from '../../../../task_manager/server';
 import { CancellationToken } from '../../../common';
 import { durationToNumber, numberToDuration } from '../../../common/schema_utils';
+import { ReportOutput } from '../../../common/types';
 import { ReportingConfigType } from '../../config';
-import { BasePayload, RunTaskFn } from '../../types';
-import { Report, ReportDocument, ReportingStore } from '../store';
+import { BasePayload, ExportTypeDefinition, RunTaskFn } from '../../types';
+import { Report, ReportDocument, ReportingStore, SavedReport } from '../store';
 import { ReportFailedFields, ReportProcessingFields } from '../store/store';
 import {
   ReportingTask,
@@ -31,6 +34,8 @@ import {
 } from './';
 import { errorLogger } from './error_logger';
 
+type CompletedReportOutput = Omit<ReportOutput, 'content'>;
+
 interface ReportingExecuteTaskInstance {
   state: object;
   taskType: string;
@@ -38,8 +43,12 @@ interface ReportingExecuteTaskInstance {
   runAt?: Date;
 }
 
-function isOutput(output: TaskRunResult | Error): output is TaskRunResult {
-  return typeof output === 'object' && (output as TaskRunResult).content != null;
+interface TaskExecutor extends Pick<ExportTypeDefinition, 'jobContentEncoding'> {
+  jobExecutor: RunTaskFn<BasePayload>;
+}
+
+function isOutput(output: CompletedReportOutput | Error): output is CompletedReportOutput {
+  return (output as CompletedReportOutput).size != null;
 }
 
 function reportFromTask(task: ReportTaskParams) {
@@ -51,7 +60,7 @@ export class ExecuteReportTask implements ReportingTask {
 
   private logger: LevelLogger;
   private taskManagerStart?: TaskManagerStartContract;
-  private taskExecutors?: Map<string, RunTaskFn<BasePayload>>;
+  private taskExecutors?: Map<string, TaskExecutor>;
   private kibanaId?: string;
   private kibanaName?: string;
   private store?: ReportingStore;
@@ -73,13 +82,16 @@ export class ExecuteReportTask implements ReportingTask {
     const { reporting } = this;
 
     const exportTypesRegistry = reporting.getExportTypesRegistry();
-    const executors = new Map<string, RunTaskFn<BasePayload>>();
+    const executors = new Map<string, TaskExecutor>();
     for (const exportType of exportTypesRegistry.getAll()) {
       const exportTypeLogger = this.logger.clone([exportType.id]);
       const jobExecutor = exportType.runTaskFnFactory(reporting, exportTypeLogger);
       // The task will run the function with the job type as a param.
       // This allows us to retrieve the specific export type runFn when called to run an export
-      executors.set(exportType.jobType, jobExecutor);
+      executors.set(exportType.jobType, {
+        jobExecutor,
+        jobContentEncoding: exportType.jobContentEncoding,
+      });
     }
 
     this.taskExecutors = executors;
@@ -108,7 +120,11 @@ export class ExecuteReportTask implements ReportingTask {
     return this.taskManagerStart;
   }
 
-  public async _claimJob(task: ReportTaskParams): Promise<Report> {
+  private getJobContentEncoding(jobType: string) {
+    return this.taskExecutors?.get(jobType)?.jobContentEncoding;
+  }
+
+  public async _claimJob(task: ReportTaskParams): Promise<SavedReport> {
     if (this.kibanaId == null) {
       throw new Error(`Kibana instance ID is undefined!`);
     }
@@ -117,14 +133,7 @@ export class ExecuteReportTask implements ReportingTask {
     }
 
     const store = await this.getStore();
-    let report: Report;
-    if (task.id && task.index) {
-      // if this is an ad-hoc report, there is a corresponding "pending" record in ReportingStore in need of updating
-      report = await store.findReportFromTask(task); // receives seq_no and primary_term
-    } else {
-      // if this is a scheduled report (not implemented), the report object needs to be instantiated
-      throw new Error('Could not find matching report document!');
-    }
+    const report = await store.findReportFromTask(task); // receives seq_no and primary_term
 
     // Check if this is a completed job. This may happen if the `reports:monitor`
     // task detected it to be a zombie job and rescheduled it, but it
@@ -150,7 +159,6 @@ export class ExecuteReportTask implements ReportingTask {
     const doc: ReportProcessingFields = {
       kibana_id: this.kibanaId,
       kibana_name: this.kibanaName,
-      browser_type: this.config.capture.browser.type,
       attempts: report.attempts + 1,
       max_attempts: maxAttempts,
       started_at: startTime,
@@ -158,7 +166,7 @@ export class ExecuteReportTask implements ReportingTask {
       process_expiration: expirationTime,
     };
 
-    const claimedReport = new Report({
+    const claimedReport = new SavedReport({
       ...report,
       ...doc,
     });
@@ -178,7 +186,10 @@ export class ExecuteReportTask implements ReportingTask {
     return claimedReport;
   }
 
-  private async _failJob(report: Report, error?: Error): Promise<UpdateResponse<ReportDocument>> {
+  private async _failJob(
+    report: SavedReport,
+    error?: Error
+  ): Promise<UpdateResponse<ReportDocument>> {
     const message = `Failing ${report.jobtype} job ${report._id}`;
 
     // log the error
@@ -201,12 +212,11 @@ export class ExecuteReportTask implements ReportingTask {
     return await store.setReportFailed(report, doc);
   }
 
-  private _formatOutput(output: TaskRunResult | Error): TaskRunResult {
-    const docOutput = {} as TaskRunResult;
+  private _formatOutput(output: CompletedReportOutput | Error): ReportOutput {
+    const docOutput = {} as ReportOutput;
     const unknownMime = null;
 
     if (isOutput(output)) {
-      docOutput.content = output.content;
       docOutput.content_type = output.content_type || unknownMime;
       docOutput.max_size_reached = output.max_size_reached;
       docOutput.csv_contains_formulas = output.csv_contains_formulas;
@@ -225,7 +235,8 @@ export class ExecuteReportTask implements ReportingTask {
 
   public async _performJob(
     task: ReportTaskParams,
-    cancellationToken: CancellationToken
+    cancellationToken: CancellationToken,
+    stream: Writable
   ): Promise<TaskRunResult> {
     if (!this.taskExecutors) {
       throw new Error(`Task run function factories have not been called yet!`);
@@ -240,19 +251,21 @@ export class ExecuteReportTask implements ReportingTask {
     // run the report
     // if workerFn doesn't finish before timeout, call the cancellationToken and throw an error
     const queueTimeout = durationToNumber(this.config.queue.timeout);
-    return Rx.from(runner(task.id, task.payload, cancellationToken))
+    return Rx.from(runner.jobExecutor(task.id, task.payload, cancellationToken, stream))
       .pipe(timeout(queueTimeout)) // throw an error if a value is not emitted before timeout
       .toPromise();
   }
 
-  public async _completeJob(report: Report, output: TaskRunResult): Promise<Report> {
+  public async _completeJob(
+    report: SavedReport,
+    output: CompletedReportOutput
+  ): Promise<SavedReport> {
     let docId = `/${report._index}/_doc/${report._id}`;
 
     this.logger.debug(`Saving ${report.jobtype} to ${docId}.`);
 
     const completedTime = moment().toISOString();
     const docOutput = this._formatOutput(output);
-
     const store = await this.getStore();
     const doc = {
       completed_at: completedTime,
@@ -273,7 +286,7 @@ export class ExecuteReportTask implements ReportingTask {
   private getTaskRunner(): TaskRunCreatorFunction {
     // Keep a separate local stack for each task run
     return (context: RunContext) => {
-      let jobId: string | undefined;
+      let jobId: string;
       const cancellationToken = new CancellationToken();
 
       return {
@@ -285,7 +298,7 @@ export class ExecuteReportTask implements ReportingTask {
          * If any error happens, additional retry attempts may be picked up by a separate instance
          */
         run: async () => {
-          let report: Report | undefined;
+          let report: SavedReport | undefined;
 
           // find the job in the store and set status to processing
           const task = context.taskInstance.params as ReportTaskParams;
@@ -320,9 +333,33 @@ export class ExecuteReportTask implements ReportingTask {
           this.logger.debug(`Reports running: ${this.reporting.countConcurrentReports()}.`);
 
           try {
-            const output = await this._performJob(task, cancellationToken);
+            const jobContentEncoding = this.getJobContentEncoding(jobType);
+            const stream = await getContentStream(
+              this.reporting,
+              {
+                id: report._id,
+                index: report._index,
+                if_primary_term: report._primary_term,
+                if_seq_no: report._seq_no,
+              },
+              {
+                encoding: jobContentEncoding === 'base64' ? 'base64' : 'raw',
+              }
+            );
+            const output = await this._performJob(task, cancellationToken, stream);
+
+            stream.end();
+            await promisify(finished)(stream, { readable: false });
+
+            report._seq_no = stream.getSeqNo()!;
+            report._primary_term = stream.getPrimaryTerm()!;
+
             if (output) {
-              report = await this._completeJob(report, output);
+              this.logger.debug(`Job output size: ${stream.bytesWritten} bytes.`);
+              report = await this._completeJob(report, {
+                ...output,
+                size: stream.bytesWritten,
+              });
             }
             // untrack the report for concurrency awareness
             this.logger.debug(`Stopping ${jobId}.`);
@@ -401,11 +438,11 @@ export class ExecuteReportTask implements ReportingTask {
     };
   }
 
-  public async scheduleTask(report: ReportTaskParams) {
+  public async scheduleTask(params: ReportTaskParams) {
     const taskInstance: ReportingExecuteTaskInstance = {
       taskType: REPORTING_EXECUTE_TYPE,
       state: {},
-      params: report,
+      params,
     };
 
     return await this.getTaskManagerStart().schedule(taskInstance);

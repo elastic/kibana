@@ -17,9 +17,8 @@ export const migratePackagePolicyToV7150: SavedObjectMigrationFn<PackagePolicy, 
     return packagePolicyDoc;
   }
 
-  const updatedPackagePolicyDoc: SavedObjectUnsanitizedDoc<PackagePolicy> = cloneDeep(
-    packagePolicyDoc
-  );
+  const updatedPackagePolicyDoc: SavedObjectUnsanitizedDoc<PackagePolicy> =
+    cloneDeep(packagePolicyDoc);
 
   const input = updatedPackagePolicyDoc.attributes.inputs[0];
   const memory = {
@@ -49,6 +48,10 @@ export const migratePackagePolicyToV7150: SavedObjectMigrationFn<PackagePolicy, 
     policy.windows.popup.memory_protection = memoryPopup;
     policy.windows.behavior_protection = behavior;
     policy.windows.popup.behavior_protection = behaviorPopup;
+    policy.mac.behavior_protection = behavior;
+    policy.mac.popup.behavior_protection = behaviorPopup;
+    policy.linux.behavior_protection = behavior;
+    policy.linux.popup.behavior_protection = behaviorPopup;
   }
 
   return updatedPackagePolicyDoc;

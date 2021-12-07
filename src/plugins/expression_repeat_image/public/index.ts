@@ -14,4 +14,4 @@ export function plugin() {
   return new ExpressionRepeatImagePlugin();
 }
 
-export * from './expression_renderers';
+export { getRepeatImageRenderer, repeatImageRendererFactory } from './expression_renderers';

@@ -8,13 +8,13 @@
 import { Search as LocalSearch, AllSubstringsIndexStrategy } from 'js-search';
 import { useEffect, useRef } from 'react';
 
-import type { PackageList } from '../../../types';
+import type { IntegrationCardItem } from '../../../../common/types/models';
 
 export const searchIdField = 'id';
-export const fieldsToSearch = ['name', 'title'];
+export const fieldsToSearch = ['name', 'title', 'description'];
 
-export function useLocalSearch(packageList: PackageList) {
-  const localSearchRef = useRef<LocalSearch | null>(null);
+export function useLocalSearch(packageList: IntegrationCardItem[]) {
+  const localSearchRef = useRef<LocalSearch>(new LocalSearch(searchIdField));
 
   useEffect(() => {
     const localSearch = new LocalSearch(searchIdField);

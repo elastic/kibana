@@ -5,11 +5,21 @@
  * 2.0.
  */
 
-import { EuiPageHeaderProps, EuiPageTemplateProps } from '@elastic/eui';
+import { EuiPageHeaderProps } from '@elastic/eui';
 import React from 'react';
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import { useLocation } from 'react-router-dom';
+import {
+  useKibana,
+  KibanaPageTemplateProps,
+} from '../../../../../../../src/plugins/kibana_react/public';
+import { EnvironmentsContextProvider } from '../../../context/environments_context/environments_context';
+import { useFetcher } from '../../../hooks/use_fetcher';
 import { ApmPluginStartDeps } from '../../../plugin';
-import { EnvironmentFilter } from '../../shared/EnvironmentFilter';
+import { ApmEnvironmentFilter } from '../../shared/EnvironmentFilter';
+import { getNoDataConfig } from './no_data_config';
+
+// Paths that must skip the no data screen
+const bypassNoDataScreenPaths = ['/settings'];
 
 /*
  * This template contains:
@@ -24,22 +34,44 @@ export function ApmMainTemplate({
   pageTitle,
   pageHeader,
   children,
+  environmentFilter = true,
   ...pageTemplateProps
 }: {
   pageTitle?: React.ReactNode;
   pageHeader?: EuiPageHeaderProps;
   children: React.ReactNode;
-} & EuiPageTemplateProps) {
+  environmentFilter?: boolean;
+} & KibanaPageTemplateProps) {
+  const location = useLocation();
+
   const { services } = useKibana<ApmPluginStartDeps>();
+  const { http, docLinks, observability } = services;
+  const basePath = http?.basePath.get();
 
-  const ObservabilityPageTemplate =
-    services.observability.navigation.PageTemplate;
+  const ObservabilityPageTemplate = observability.navigation.PageTemplate;
 
-  return (
+  const { data } = useFetcher((callApmApi) => {
+    return callApmApi({ endpoint: 'GET /internal/apm/has_data' });
+  }, []);
+
+  const noDataConfig = getNoDataConfig({
+    basePath,
+    docsLink: docLinks!.links.observability.guide,
+    hasData: data?.hasData,
+  });
+
+  const shouldBypassNoDataScreen = bypassNoDataScreenPaths.some((path) =>
+    location.pathname.includes(path)
+  );
+
+  const rightSideItems = environmentFilter ? [<ApmEnvironmentFilter />] : [];
+
+  const pageTemplate = (
     <ObservabilityPageTemplate
+      noDataConfig={shouldBypassNoDataScreen ? undefined : noDataConfig}
       pageHeader={{
         pageTitle,
-        rightSideItems: [<EnvironmentFilter />],
+        rightSideItems,
         ...pageHeader,
       }}
       {...pageTemplateProps}
@@ -47,4 +79,12 @@ export function ApmMainTemplate({
       {children}
     </ObservabilityPageTemplate>
   );
+
+  if (environmentFilter) {
+    return (
+      <EnvironmentsContextProvider>{pageTemplate}</EnvironmentsContextProvider>
+    );
+  }
+
+  return pageTemplate;
 }

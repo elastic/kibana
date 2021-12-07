@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { RequestHandlerContext, KibanaRequest } from 'src/core/server';
+import type { RequestHandlerContext, KibanaRequest } from 'src/core/server';
+import type { Layout } from '../common';
 
 /**
  * Any context that requires access to the screenshot mode flag but does not have access
@@ -19,9 +20,13 @@ export interface ScreenshotModePluginSetup {
   isScreenshotMode: IsScreenshotMode;
 
   /**
-   * Set the current environment to screenshot mode. Intended to run in a browser-environment.
+   * Set the current environment to screenshot mode. Intended to run in a browser-environment, before any other scripts
+   * on the page have run to ensure that screenshot mode is detected as early as possible.
    */
   setScreenshotModeEnabled: () => void;
+
+  /** @deprecated */
+  setScreenshotLayout: (value: Layout) => void;
 }
 
 export interface ScreenshotModePluginStart {

@@ -16,7 +16,7 @@ import {
   SEARCH_FIELDS_FROM_SOURCE,
 } from '../../common';
 
-export const uiSettingsMock = ({
+export const uiSettingsMock = {
   get: (key: string) => {
     if (key === SAMPLE_SIZE_SETTING) {
       return 10;
@@ -32,4 +32,4 @@ export const uiSettingsMock = ({
       return false;
     }
   },
-} as unknown) as IUiSettingsClient;
+} as unknown as IUiSettingsClient;

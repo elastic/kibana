@@ -18,9 +18,9 @@ import {
 import { registerDiagnoseScreenshot } from './screenshot';
 import type { ReportingRequestHandlerContext } from '../../types';
 
-jest.mock('../../export_types/png/lib/generate_png');
+jest.mock('../../export_types/common/generate_png');
 
-import { generatePngObservableFactory } from '../../export_types/png/lib/generate_png';
+import { generatePngObservable } from '../../export_types/common';
 
 type SetupServerReturn = UnwrapPromise<ReturnType<typeof setupServer>>;
 
@@ -31,12 +31,12 @@ describe('POST /diagnose/screenshot', () => {
   let core: ReportingCore;
 
   const setScreenshotResponse = (resp: object | Error) => {
-    const generateMock = Promise.resolve(() => ({
+    const generateMock = {
       pipe: () => ({
         toPromise: () => (resp instanceof Error ? Promise.reject(resp) : Promise.resolve(resp)),
       }),
-    }));
-    (generatePngObservableFactory as any).mockResolvedValue(generateMock);
+    };
+    (generatePngObservable as jest.Mock).mockReturnValue(generateMock);
   };
 
   const config = createMockConfigSchema({ queue: { timeout: 120000 } });
@@ -50,14 +50,13 @@ describe('POST /diagnose/screenshot', () => {
       () => ({ usesUiCapabilities: () => false })
     );
 
-    const mockSetupDeps = createMockPluginSetup({
-      elasticsearch: {
-        legacy: { client: { callAsInternalUser: jest.fn() } },
-      },
-      router: httpSetup.createRouter(''),
-    });
-
-    core = await createMockReportingCore(config, mockSetupDeps);
+    core = await createMockReportingCore(
+      config,
+      createMockPluginSetup({
+        router: httpSetup.createRouter(''),
+        security: null,
+      })
+    );
   });
 
   afterEach(async () => {

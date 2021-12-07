@@ -9,7 +9,7 @@ import React from 'react';
 import { mount } from 'enzyme';
 import { dataPluginMock } from 'src/plugins/data/public/mocks';
 
-import { fields } from '../../../../../../../src/plugins/data/common/index_patterns/fields/fields.mocks';
+import { fields } from '../../../../../../../src/plugins/data/common/mocks';
 import { EuiThemeProvider } from '../../../../../../../src/plugins/kibana_react/common';
 import { getExceptionListItemSchemaMock } from '../../../../common/schemas/response/exception_list_item_schema.mock';
 import { getEntryMatchMock } from '../../../../common/schemas/types/entry_match.mock';

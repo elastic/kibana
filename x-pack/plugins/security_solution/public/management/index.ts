@@ -42,13 +42,18 @@ export class Management {
       routes,
       store: {
         initialState: {
-          management: undefined,
+          /**
+           * Cast the state to ManagementState for compatibility with
+           * the subplugin architecture (which expects initialize state.)
+           * but you do not need it because this plugin is doing it through its middleware
+           */
+          management: {} as ManagementState,
         },
         /**
          * Cast the ImmutableReducer to a regular reducer for compatibility with
          * the subplugin architecture (which expects plain redux reducers.)
          */
-        reducer: { management: managementReducer } as ManagementPluginReducer,
+        reducer: { management: managementReducer } as unknown as ManagementPluginReducer,
         middleware: managementMiddlewareFactory(core, plugins),
       },
     };

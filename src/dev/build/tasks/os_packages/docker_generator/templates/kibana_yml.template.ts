@@ -10,6 +10,8 @@ import dedent from 'dedent';
 
 import { TemplateContext } from '../template_context';
 
+// IMPORTANT: Please notify @elastic/kibana-security if you're changing any of the Docker specific
+// configuration defaults. We rely on these defaults in the interactive setup mode.
 function generator({ imageFlavor }: TemplateContext) {
   return dedent(`
   #
@@ -20,7 +22,7 @@ function generator({ imageFlavor }: TemplateContext) {
   server.host: "0.0.0.0"
   server.shutdownTimeout: "5s"
   elasticsearch.hosts: [ "http://elasticsearch:9200" ]
-  ${!imageFlavor ? 'monitoring.ui.container.elasticsearch.enabled: true' : ''}
+  monitoring.ui.container.elasticsearch.enabled: true
   `);
 }
 

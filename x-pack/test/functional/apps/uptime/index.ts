@@ -9,7 +9,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 import {
   settingsObjectId,
   settingsObjectType,
-} from '../../../../plugins/uptime/server/lib/saved_objects';
+} from '../../../../plugins/uptime/server/lib/saved_objects/uptime_settings';
 
 const ARCHIVE = 'x-pack/test/functional/es_archives/uptime/full_heartbeat';
 
@@ -42,7 +42,7 @@ export default ({ loadTestFile, getService }: FtrProviderContext) => {
   const uptime = getService('uptime');
 
   describe('Uptime app', function () {
-    this.tags('ciGroup6');
+    this.tags('ciGroup10');
 
     beforeEach('delete settings', async () => {
       await deleteUptimeSettingsObject(server);
@@ -79,6 +79,10 @@ export default ({ loadTestFile, getService }: FtrProviderContext) => {
       loadTestFile(require.resolve('./monitor'));
       loadTestFile(require.resolve('./ml_anomaly'));
       loadTestFile(require.resolve('./feature_controls'));
+    });
+
+    describe('mappings error state', () => {
+      loadTestFile(require.resolve('./missing_mappings'));
     });
   });
 };

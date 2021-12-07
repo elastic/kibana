@@ -13,14 +13,15 @@ import { httpServiceMock } from 'src/core/server/mocks';
 import { healthRoute } from './health';
 import { mockHandlerArguments } from './_mock_handler_arguments';
 import { sleep } from '../test_utils';
-import { loggingSystemMock } from '../../../../../src/core/server/mocks';
+import { elasticsearchServiceMock, loggingSystemMock } from 'src/core/server/mocks';
+import { usageCountersServiceMock } from 'src/plugins/usage_collection/server/usage_counters/usage_counters_service.mock';
 import {
   HealthStatus,
   MonitoringStats,
   RawMonitoringStats,
   summarizeMonitoringStats,
 } from '../monitoring';
-import { ServiceStatusLevels } from 'src/core/server';
+import { ServiceStatusLevels, Logger } from 'src/core/server';
 import { configSchema, TaskManagerConfig } from '../config';
 import { calculateHealthStatusMock } from '../lib/calculate_health_status.mock';
 import { FillPoolResult } from '../lib/fill_pool';
@@ -29,25 +30,160 @@ jest.mock('../lib/log_health_metrics', () => ({
   logHealthMetrics: jest.fn(),
 }));
 
+const mockUsageCountersSetup = usageCountersServiceMock.createSetupContract();
+const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const createMockClusterClient = (response: any) => {
+  const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+  mockScopedClusterClient.asCurrentUser.security.hasPrivileges.mockResolvedValue({
+    body: response,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } as any);
+
+  const mockClusterClient = elasticsearchServiceMock.createClusterClient();
+  mockClusterClient.asScoped.mockReturnValue(mockScopedClusterClient);
+
+  return { mockClusterClient, mockScopedClusterClient };
+};
+
 describe('healthRoute', () => {
+  const logger = loggingSystemMock.create().get();
+
   beforeEach(() => {
     jest.resetAllMocks();
   });
 
   it('registers the route', async () => {
     const router = httpServiceMock.createRouter();
-
-    const logger = loggingSystemMock.create().get();
-    healthRoute(router, of(), logger, uuid.v4(), getTaskManagerConfig());
+    healthRoute({
+      router,
+      monitoringStats$: of(),
+      logger,
+      taskManagerId: uuid.v4(),
+      config: getTaskManagerConfig(),
+      kibanaVersion: '8.0',
+      kibanaIndexName: '.kibana',
+      getClusterClient: () => Promise.resolve(elasticsearchServiceMock.createClusterClient()),
+      usageCounter: mockUsageCounter,
+    });
 
     const [config] = router.get.mock.calls[0];
 
     expect(config.path).toMatchInlineSnapshot(`"/api/task_manager/_health"`);
   });
 
+  it('checks user privileges and increments usage counter when API is accessed', async () => {
+    const { mockClusterClient, mockScopedClusterClient } = createMockClusterClient({
+      has_all_requested: false,
+    });
+    const router = httpServiceMock.createRouter();
+    healthRoute({
+      router,
+      monitoringStats$: of(),
+      logger,
+      taskManagerId: uuid.v4(),
+      config: getTaskManagerConfig(),
+      kibanaVersion: '8.0',
+      kibanaIndexName: 'foo',
+      getClusterClient: () => Promise.resolve(mockClusterClient),
+      usageCounter: mockUsageCounter,
+    });
+
+    const [, handler] = router.get.mock.calls[0];
+    const [context, req, res] = mockHandlerArguments({}, {}, ['ok']);
+    await handler(context, req, res);
+
+    expect(mockScopedClusterClient.asCurrentUser.security.hasPrivileges).toHaveBeenCalledWith({
+      body: {
+        application: [
+          {
+            application: `kibana-foo`,
+            resources: ['*'],
+            privileges: [`api:8.0:taskManager`],
+          },
+        ],
+      },
+    });
+    expect(mockUsageCounter.incrementCounter).toHaveBeenCalledTimes(1);
+    expect(mockUsageCounter.incrementCounter).toHaveBeenNthCalledWith(1, {
+      counterName: `taskManagerHealthApiAccess`,
+      counterType: 'taskManagerHealthApi',
+      incrementBy: 1,
+    });
+  });
+
+  it('checks user privileges and increments admin usage counter when API is accessed when user has access to task manager feature', async () => {
+    const { mockClusterClient, mockScopedClusterClient } = createMockClusterClient({
+      has_all_requested: true,
+    });
+    const router = httpServiceMock.createRouter();
+    healthRoute({
+      router,
+      monitoringStats$: of(),
+      logger,
+      taskManagerId: uuid.v4(),
+      config: getTaskManagerConfig(),
+      kibanaVersion: '8.0',
+      kibanaIndexName: 'foo',
+      getClusterClient: () => Promise.resolve(mockClusterClient),
+      usageCounter: mockUsageCounter,
+    });
+
+    const [, handler] = router.get.mock.calls[0];
+    const [context, req, res] = mockHandlerArguments({}, {}, ['ok']);
+    await handler(context, req, res);
+
+    expect(mockScopedClusterClient.asCurrentUser.security.hasPrivileges).toHaveBeenCalledWith({
+      body: {
+        application: [
+          {
+            application: `kibana-foo`,
+            resources: ['*'],
+            privileges: [`api:8.0:taskManager`],
+          },
+        ],
+      },
+    });
+
+    expect(mockUsageCounter.incrementCounter).toHaveBeenCalledTimes(2);
+    expect(mockUsageCounter.incrementCounter).toHaveBeenNthCalledWith(1, {
+      counterName: `taskManagerHealthApiAccess`,
+      counterType: 'taskManagerHealthApi',
+      incrementBy: 1,
+    });
+    expect(mockUsageCounter.incrementCounter).toHaveBeenNthCalledWith(2, {
+      counterName: `taskManagerHealthApiAdminAccess`,
+      counterType: 'taskManagerHealthApi',
+      incrementBy: 1,
+    });
+  });
+
+  it('skips checking user privileges if usage counter is undefined', async () => {
+    const { mockClusterClient, mockScopedClusterClient } = createMockClusterClient({
+      has_all_requested: false,
+    });
+    const router = httpServiceMock.createRouter();
+    healthRoute({
+      router,
+      monitoringStats$: of(),
+      logger,
+      taskManagerId: uuid.v4(),
+      config: getTaskManagerConfig(),
+      kibanaVersion: '8.0',
+      kibanaIndexName: 'foo',
+      getClusterClient: () => Promise.resolve(mockClusterClient),
+    });
+
+    const [, handler] = router.get.mock.calls[0];
+    const [context, req, res] = mockHandlerArguments({}, {}, ['ok']);
+    await handler(context, req, res);
+
+    expect(mockScopedClusterClient.asCurrentUser.security.hasPrivileges).not.toHaveBeenCalled();
+  });
+
   it('logs the Task Manager stats at a fixed interval', async () => {
     const router = httpServiceMock.createRouter();
-    const logger = loggingSystemMock.create().get();
     const calculateHealthStatus = calculateHealthStatusMock.create();
     calculateHealthStatus.mockImplementation(() => HealthStatus.OK);
     const { logHealthMetrics } = jest.requireMock('../lib/log_health_metrics');
@@ -61,20 +197,24 @@ describe('healthRoute', () => {
     const stats$ = new Subject<MonitoringStats>();
 
     const id = uuid.v4();
-    healthRoute(
+    healthRoute({
       router,
-      stats$,
+      monitoringStats$: stats$,
       logger,
-      id,
-      getTaskManagerConfig({
+      taskManagerId: id,
+      config: getTaskManagerConfig({
         monitored_stats_required_freshness: 1000,
         monitored_stats_health_verbose_log: {
           enabled: true,
           warn_delayed_task_start_in_seconds: 100,
         },
         monitored_aggregated_stats_refresh_rate: 60000,
-      })
-    );
+      }),
+      kibanaVersion: '8.0',
+      kibanaIndexName: '.kibana',
+      getClusterClient: () => Promise.resolve(elasticsearchServiceMock.createClusterClient()),
+      usageCounter: mockUsageCounter,
+    });
 
     stats$.next(mockStat);
     await sleep(500);
@@ -87,19 +227,22 @@ describe('healthRoute', () => {
       id,
       timestamp: expect.any(String),
       status: expect.any(String),
-      ...ignoreCapacityEstimation(summarizeMonitoringStats(mockStat, getTaskManagerConfig({}))),
+      ...ignoreCapacityEstimation(
+        summarizeMonitoringStats(logger, mockStat, getTaskManagerConfig({}))
+      ),
     });
     expect(logHealthMetrics.mock.calls[1][0]).toMatchObject({
       id,
       timestamp: expect.any(String),
       status: expect.any(String),
-      ...ignoreCapacityEstimation(summarizeMonitoringStats(nextMockStat, getTaskManagerConfig({}))),
+      ...ignoreCapacityEstimation(
+        summarizeMonitoringStats(logger, nextMockStat, getTaskManagerConfig({}))
+      ),
     });
   });
 
   it(`logs at a warn level if the status is warning`, async () => {
     const router = httpServiceMock.createRouter();
-    const logger = loggingSystemMock.create().get();
     const calculateHealthStatus = calculateHealthStatusMock.create();
     calculateHealthStatus.mockImplementation(() => HealthStatus.Warning);
     const { logHealthMetrics } = jest.requireMock('../lib/log_health_metrics');
@@ -112,20 +255,24 @@ describe('healthRoute', () => {
     const stats$ = new Subject<MonitoringStats>();
 
     const id = uuid.v4();
-    healthRoute(
+    healthRoute({
       router,
-      stats$,
+      monitoringStats$: stats$,
       logger,
-      id,
-      getTaskManagerConfig({
+      taskManagerId: id,
+      config: getTaskManagerConfig({
         monitored_stats_required_freshness: 1000,
         monitored_stats_health_verbose_log: {
           enabled: true,
           warn_delayed_task_start_in_seconds: 120,
         },
         monitored_aggregated_stats_refresh_rate: 60000,
-      })
-    );
+      }),
+      kibanaVersion: '8.0',
+      kibanaIndexName: '.kibana',
+      getClusterClient: () => Promise.resolve(elasticsearchServiceMock.createClusterClient()),
+      usageCounter: mockUsageCounter,
+    });
 
     stats$.next(warnRuntimeStat);
     await sleep(1001);
@@ -141,7 +288,7 @@ describe('healthRoute', () => {
       timestamp: expect.any(String),
       status: expect.any(String),
       ...ignoreCapacityEstimation(
-        summarizeMonitoringStats(warnRuntimeStat, getTaskManagerConfig({}))
+        summarizeMonitoringStats(logger, warnRuntimeStat, getTaskManagerConfig({}))
       ),
     });
     expect(logHealthMetrics.mock.calls[1][0]).toMatchObject({
@@ -149,7 +296,7 @@ describe('healthRoute', () => {
       timestamp: expect.any(String),
       status: expect.any(String),
       ...ignoreCapacityEstimation(
-        summarizeMonitoringStats(warnConfigurationStat, getTaskManagerConfig({}))
+        summarizeMonitoringStats(logger, warnConfigurationStat, getTaskManagerConfig({}))
       ),
     });
     expect(logHealthMetrics.mock.calls[2][0]).toMatchObject({
@@ -157,7 +304,7 @@ describe('healthRoute', () => {
       timestamp: expect.any(String),
       status: expect.any(String),
       ...ignoreCapacityEstimation(
-        summarizeMonitoringStats(warnWorkloadStat, getTaskManagerConfig({}))
+        summarizeMonitoringStats(logger, warnWorkloadStat, getTaskManagerConfig({}))
       ),
     });
     expect(logHealthMetrics.mock.calls[3][0]).toMatchObject({
@@ -165,14 +312,13 @@ describe('healthRoute', () => {
       timestamp: expect.any(String),
       status: expect.any(String),
       ...ignoreCapacityEstimation(
-        summarizeMonitoringStats(warnEphemeralStat, getTaskManagerConfig({}))
+        summarizeMonitoringStats(logger, warnEphemeralStat, getTaskManagerConfig({}))
       ),
     });
   });
 
   it(`logs at an error level if the status is error`, async () => {
     const router = httpServiceMock.createRouter();
-    const logger = loggingSystemMock.create().get();
     const calculateHealthStatus = calculateHealthStatusMock.create();
     calculateHealthStatus.mockImplementation(() => HealthStatus.Error);
     const { logHealthMetrics } = jest.requireMock('../lib/log_health_metrics');
@@ -185,20 +331,24 @@ describe('healthRoute', () => {
     const stats$ = new Subject<MonitoringStats>();
 
     const id = uuid.v4();
-    healthRoute(
+    healthRoute({
       router,
-      stats$,
+      monitoringStats$: stats$,
       logger,
-      id,
-      getTaskManagerConfig({
+      taskManagerId: id,
+      config: getTaskManagerConfig({
         monitored_stats_required_freshness: 1000,
         monitored_stats_health_verbose_log: {
           enabled: true,
           warn_delayed_task_start_in_seconds: 120,
         },
         monitored_aggregated_stats_refresh_rate: 60000,
-      })
-    );
+      }),
+      kibanaVersion: '8.0',
+      kibanaIndexName: '.kibana',
+      getClusterClient: () => Promise.resolve(elasticsearchServiceMock.createClusterClient()),
+      usageCounter: mockUsageCounter,
+    });
 
     stats$.next(errorRuntimeStat);
     await sleep(1001);
@@ -214,7 +364,7 @@ describe('healthRoute', () => {
       timestamp: expect.any(String),
       status: expect.any(String),
       ...ignoreCapacityEstimation(
-        summarizeMonitoringStats(errorRuntimeStat, getTaskManagerConfig({}))
+        summarizeMonitoringStats(logger, errorRuntimeStat, getTaskManagerConfig({}))
       ),
     });
     expect(logHealthMetrics.mock.calls[1][0]).toMatchObject({
@@ -222,7 +372,7 @@ describe('healthRoute', () => {
       timestamp: expect.any(String),
       status: expect.any(String),
       ...ignoreCapacityEstimation(
-        summarizeMonitoringStats(errorConfigurationStat, getTaskManagerConfig({}))
+        summarizeMonitoringStats(logger, errorConfigurationStat, getTaskManagerConfig({}))
       ),
     });
     expect(logHealthMetrics.mock.calls[2][0]).toMatchObject({
@@ -230,7 +380,7 @@ describe('healthRoute', () => {
       timestamp: expect.any(String),
       status: expect.any(String),
       ...ignoreCapacityEstimation(
-        summarizeMonitoringStats(errorWorkloadStat, getTaskManagerConfig({}))
+        summarizeMonitoringStats(logger, errorWorkloadStat, getTaskManagerConfig({}))
       ),
     });
     expect(logHealthMetrics.mock.calls[3][0]).toMatchObject({
@@ -238,7 +388,7 @@ describe('healthRoute', () => {
       timestamp: expect.any(String),
       status: expect.any(String),
       ...ignoreCapacityEstimation(
-        summarizeMonitoringStats(errorEphemeralStat, getTaskManagerConfig({}))
+        summarizeMonitoringStats(logger, errorEphemeralStat, getTaskManagerConfig({}))
       ),
     });
   });
@@ -248,16 +398,20 @@ describe('healthRoute', () => {
 
     const stats$ = new Subject<MonitoringStats>();
 
-    const { serviceStatus$ } = healthRoute(
+    const { serviceStatus$ } = healthRoute({
       router,
-      stats$,
-      loggingSystemMock.create().get(),
-      uuid.v4(),
-      getTaskManagerConfig({
+      monitoringStats$: stats$,
+      logger,
+      taskManagerId: uuid.v4(),
+      config: getTaskManagerConfig({
         monitored_stats_required_freshness: 1000,
         monitored_aggregated_stats_refresh_rate: 60000,
-      })
-    );
+      }),
+      kibanaVersion: '8.0',
+      kibanaIndexName: '.kibana',
+      getClusterClient: () => Promise.resolve(elasticsearchServiceMock.createClusterClient()),
+      usageCounter: mockUsageCounter,
+    });
 
     const serviceStatus = getLatest(serviceStatus$);
 
@@ -269,7 +423,7 @@ describe('healthRoute', () => {
 
     stats$.next(
       mockHealthStats({
-        last_update: new Date(Date.now() - 1500).toISOString(),
+        last_update: new Date(Date.now() - 3001).toISOString(),
       })
     );
 
@@ -278,6 +432,7 @@ describe('healthRoute', () => {
         status: 'error',
         ...ignoreCapacityEstimation(
           summarizeMonitoringStats(
+            logger,
             mockHealthStats({
               last_update: expect.any(String),
               stats: {
@@ -307,9 +462,16 @@ describe('healthRoute', () => {
     });
 
     expect(await serviceStatus).toMatchObject({
-      level: ServiceStatusLevels.unavailable,
-      summary: 'Task Manager is unavailable',
+      level: ServiceStatusLevels.degraded,
+      summary: 'Task Manager is unhealthy',
     });
+    const debugCalls = (logger as jest.Mocked<Logger>).debug.mock.calls as string[][];
+    const warnMessage =
+      /^setting HealthStatus.Warning because assumedAverageRecurringRequiredThroughputPerMinutePerKibana/;
+    const found = debugCalls
+      .map((arr) => arr[0])
+      .find((message) => message.match(warnMessage) != null);
+    expect(found).toMatch(warnMessage);
   });
 
   it('returns a error status if the workload stats have not been updated within the required cold freshness', async () => {
@@ -317,16 +479,20 @@ describe('healthRoute', () => {
 
     const stats$ = new Subject<MonitoringStats>();
 
-    healthRoute(
+    healthRoute({
       router,
-      stats$,
-      loggingSystemMock.create().get(),
-      uuid.v4(),
-      getTaskManagerConfig({
+      monitoringStats$: stats$,
+      logger,
+      taskManagerId: uuid.v4(),
+      config: getTaskManagerConfig({
         monitored_stats_required_freshness: 5000,
         monitored_aggregated_stats_refresh_rate: 60000,
-      })
-    );
+      }),
+      kibanaVersion: '8.0',
+      kibanaIndexName: '.kibana',
+      getClusterClient: () => Promise.resolve(elasticsearchServiceMock.createClusterClient()),
+      usageCounter: mockUsageCounter,
+    });
 
     await sleep(0);
 
@@ -352,6 +518,7 @@ describe('healthRoute', () => {
         status: 'error',
         ...ignoreCapacityEstimation(
           summarizeMonitoringStats(
+            logger,
             mockHealthStats({
               last_update: expect.any(String),
               stats: {
@@ -385,21 +552,25 @@ describe('healthRoute', () => {
     const router = httpServiceMock.createRouter();
 
     const stats$ = new Subject<MonitoringStats>();
-    healthRoute(
+    healthRoute({
       router,
-      stats$,
-      loggingSystemMock.create().get(),
-      uuid.v4(),
-      getTaskManagerConfig({
+      monitoringStats$: stats$,
+      logger,
+      taskManagerId: uuid.v4(),
+      config: getTaskManagerConfig({
         monitored_stats_required_freshness: 1000,
         monitored_aggregated_stats_refresh_rate: 60000,
-      })
-    );
+      }),
+      kibanaVersion: '8.0',
+      kibanaIndexName: '.kibana',
+      getClusterClient: () => Promise.resolve(elasticsearchServiceMock.createClusterClient()),
+      usageCounter: mockUsageCounter,
+    });
 
     await sleep(0);
 
     // eslint-disable-next-line @typescript-eslint/naming-convention
-    const last_successful_poll = new Date(Date.now() - 2000).toISOString();
+    const last_successful_poll = new Date(Date.now() - 3001).toISOString();
     stats$.next(
       mockHealthStats({
         stats: {
@@ -423,6 +594,7 @@ describe('healthRoute', () => {
         status: 'error',
         ...ignoreCapacityEstimation(
           summarizeMonitoringStats(
+            logger,
             mockHealthStats({
               last_update: expect.any(String),
               stats: {
@@ -541,7 +713,7 @@ function mockHealthStats(overrides = {}) {
       },
     },
   };
-  return (merge(stub, overrides) as unknown) as MonitoringStats;
+  return merge(stub, overrides) as unknown as MonitoringStats;
 }
 
 async function getLatest<T>(stream$: Observable<T>) {

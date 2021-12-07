@@ -8,7 +8,7 @@
 
 import React, { useEffect, useRef } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import { MountPoint } from '../types';
 
 const defaultWrapperClass = 'kbnMountWrapper';
@@ -30,7 +30,9 @@ export const MountWrapper: React.FunctionComponent<{ mount: MountPoint; classNam
  *
  * @param node to get a mount for
  */
-export const mountReactNode = (node: React.ReactNode): MountPoint => (element: HTMLElement) => {
-  render(<I18nProvider>{node}</I18nProvider>, element);
-  return () => unmountComponentAtNode(element);
-};
+export const mountReactNode =
+  (node: React.ReactNode): MountPoint =>
+  (element: HTMLElement) => {
+    render(<I18nProvider>{node}</I18nProvider>, element);
+    return () => unmountComponentAtNode(element);
+  };

@@ -9,24 +9,45 @@
 import expect from '@kbn/expect';
 
 export default function ({ getService, getPageObjects }) {
+  const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const browser = getService('browser');
   const log = getService('log');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
+  const find = getService('find');
   const PageObjects = getPageObjects(['settings', 'common', 'header']);
 
   describe('creating and deleting default index', function describeIndexTests() {
-    before(function () {
-      // Delete .kibana index and then wait for Kibana to re-create it
-      return kibanaServer.uiSettings
-        .replace({})
-        .then(function () {
-          return PageObjects.settings.navigateTo();
-        })
-        .then(function () {
-          return PageObjects.settings.clickKibanaIndexPatterns();
-        });
+    before(async function () {
+      await esArchiver.emptyKibanaIndex();
+      await kibanaServer.uiSettings.replace({});
+      await PageObjects.settings.navigateTo();
+      await PageObjects.settings.clickKibanaIndexPatterns();
+    });
+
+    describe('can open and close editor', function () {
+      it('without creating index pattern', async function () {
+        await PageObjects.settings.clickKibanaIndexPatterns();
+        await PageObjects.settings.clickAddNewIndexPatternButton();
+        await testSubjects.click('closeFlyoutButton');
+        await testSubjects.find('createIndexPatternButton');
+      });
+    });
+
+    describe('validation', function () {
+      it('can display errors', async function () {
+        await PageObjects.settings.clickAddNewIndexPatternButton();
+        await PageObjects.settings.setIndexPatternField('log-fake*');
+        await (await PageObjects.settings.getSaveIndexPatternButton()).click();
+        await find.byClassName('euiFormErrorText');
+      });
+
+      it('can resolve errors and submit', async function () {
+        await PageObjects.settings.setIndexPatternField('log*');
+        await (await PageObjects.settings.getSaveIndexPatternButton()).click();
+        await PageObjects.settings.removeIndexPattern();
+      });
     });
 
     describe('special character handling', () => {
@@ -38,7 +59,7 @@ export default function ({ getService, getPageObjects }) {
 
         await retry.try(async () => {
           expect(await testSubjects.getVisibleText('createIndexPatternStatusMessage')).to.contain(
-            `The index pattern you've entered doesn't match any indices`
+            `The index pattern you entered doesn\'t match any data streams, indices, or index aliases.`
           );
         });
       });
@@ -96,7 +117,7 @@ export default function ({ getService, getPageObjects }) {
 
     describe('index pattern deletion', function indexDelete() {
       before(function () {
-        const expectedAlertText = 'Delete index pattern?';
+        const expectedAlertText = 'Delete data view?';
         return PageObjects.settings.removeIndexPattern().then(function (alertText) {
           expect(alertText).to.be(expectedAlertText);
         });
@@ -107,7 +128,7 @@ export default function ({ getService, getPageObjects }) {
         return retry.try(function tryingForTime() {
           return browser.getCurrentUrl().then(function (currentUrl) {
             log.debug('currentUrl = ' + currentUrl);
-            expect(currentUrl).to.contain('management/kibana/indexPatterns');
+            expect(currentUrl).to.contain('management/kibana/dataViews');
           });
         });
       });

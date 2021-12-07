@@ -14,12 +14,12 @@ import { EuiButtonIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
   ALERT_DURATION,
-  ALERT_SEVERITY_LEVEL,
+  ALERT_SEVERITY,
   ALERT_START,
   ALERT_UUID,
-  RULE_ID,
-  RULE_NAME,
-} from '@kbn/rule-data-utils/target/technical_field_names';
+  ALERT_RULE_TYPE_ID,
+  ALERT_RULE_NAME,
+} from '@kbn/rule-data-utils/technical_field_names';
 import React, { Dispatch, SetStateAction } from 'react';
 import { EuiTheme } from 'src/plugins/kibana_react/common';
 import { ValuesType } from 'utility-types';
@@ -29,7 +29,7 @@ import { asDuration, asPercent } from '../../../../../common/utils/formatters';
 import { APIReturnType } from '../../../../services/rest/createCallApmApi';
 
 type Alert = ValuesType<
-  APIReturnType<'GET /api/apm/services/{serviceName}/alerts'>['alerts']
+  APIReturnType<'GET /internal/apm/services/{serviceName}/alerts'>['alerts']
 >;
 
 function getAlertColor({
@@ -103,26 +103,37 @@ export function getAlertAnnotations({
       new Date(parsed[ALERT_START]!).getTime()
     );
     const end = start + parsed[ALERT_DURATION]! / 1000;
-    const severityLevel = parsed[ALERT_SEVERITY_LEVEL];
+    const severityLevel = parsed[ALERT_SEVERITY];
     const color = getAlertColor({ severityLevel, theme });
-    const header = getAlertHeader({ severityLevel });
-    const formatter = getFormatter(parsed[RULE_ID]!);
+    const experimentalLabel = i18n.translate(
+      'xpack.apm.alertAnnotationTooltipExperimentalText',
+      { defaultMessage: 'Experimental' }
+    );
+    const header = `${getAlertHeader({
+      severityLevel,
+    })} - ${experimentalLabel}`;
+    const formatter = getFormatter(parsed[ALERT_RULE_TYPE_ID]!);
     const formatted = {
       link: undefined,
-      reason: parsed[RULE_NAME],
+      reason: parsed[ALERT_RULE_NAME],
       ...(formatter?.({
         fields: parsed,
         formatters: { asDuration, asPercent },
       }) ?? {}),
     };
     const isSelected = uuid === selectedAlertId;
+    const moreDetails = i18n.translate(
+      'xpack.apm.alertAnnotationTooltipMoreDetailsText',
+      { defaultMessage: 'Click to see more details.' }
+    );
+    const details = `${formatted.reason}. ${moreDetails}`;
 
     return [
       <LineAnnotation
         dataValues={[
           {
             dataValue: start,
-            details: formatted.reason,
+            details,
             header,
           },
         ]}

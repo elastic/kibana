@@ -19,11 +19,12 @@ import {
   SavedObjectReference,
 } from '../../../../src/core/server';
 import { ActionTypeExecutorResult } from '../common';
-export { ActionTypeExecutorResult } from '../common';
-export { GetFieldsByIssueTypeResponse as JiraGetFieldsResponse } from './builtin_action_types/jira/types';
-export { GetCommonFieldsResponse as ServiceNowGetFieldsResponse } from './builtin_action_types/servicenow/types';
-export { GetCommonFieldsResponse as ResilientGetFieldsResponse } from './builtin_action_types/resilient/types';
-export { SwimlanePublicConfigurationType } from './builtin_action_types/swimlane/types';
+import { TaskInfo } from './lib/action_executor';
+export type { ActionTypeExecutorResult } from '../common';
+export type { GetFieldsByIssueTypeResponse as JiraGetFieldsResponse } from './builtin_action_types/jira/types';
+export type { GetCommonFieldsResponse as ServiceNowGetFieldsResponse } from './builtin_action_types/servicenow/types';
+export type { GetCommonFieldsResponse as ResilientGetFieldsResponse } from './builtin_action_types/resilient/types';
+export type { SwimlanePublicConfigurationType } from './builtin_action_types/swimlane/types';
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
 export type GetServicesFunction = (request: KibanaRequest) => Services;
 export type ActionTypeRegistryContract = PublicMethodsOf<ActionTypeRegistry>;
@@ -59,6 +60,7 @@ export interface ActionTypeExecutorOptions<Config, Secrets, Params> {
   secrets: Secrets;
   params: Params;
   isEphemeral?: boolean;
+  taskInfo?: TaskInfo;
 }
 
 export interface ActionResult<Config extends ActionTypeConfig = ActionTypeConfig> {
@@ -109,6 +111,7 @@ export interface ActionType<
     params?: ValidatorType<Params>;
     config?: ValidatorType<Config>;
     secrets?: ValidatorType<Secrets>;
+    connector?: (config: Config, secrets: Secrets) => string | null;
   };
   renderParameterTemplates?(
     params: Params,

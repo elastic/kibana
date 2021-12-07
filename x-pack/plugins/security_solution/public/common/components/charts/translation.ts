@@ -21,6 +21,6 @@ export const DATA_NOT_AVAILABLE_TITLE = i18n.translate(
   }
 );
 
-export const ALL_OTHERS = i18n.translate('xpack.securitySolution.chart.allOthersGroupingLabel', {
-  defaultMessage: 'All others',
+export const EMPTY_VALUE_LABEL = i18n.translate('xpack.securitySolution.chart.emptyValueLabel', {
+  defaultMessage: 'empty value',
 });

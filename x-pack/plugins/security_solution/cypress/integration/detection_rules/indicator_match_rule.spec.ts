@@ -6,14 +6,16 @@
  */
 
 import { formatMitreAttackDescription } from '../../helpers/rules';
-import { getIndexPatterns, getNewThreatIndicatorRule } from '../../objects/rule';
+import {
+  getIndexPatterns,
+  getNewThreatIndicatorRule,
+  getThreatIndexPatterns,
+} from '../../objects/rule';
 
 import {
-  ALERT_RULE_METHOD,
   ALERT_RULE_NAME,
   ALERT_RULE_RISK_SCORE,
   ALERT_RULE_SEVERITY,
-  ALERT_RULE_VERSION,
   NUMBER_OF_ALERTS,
 } from '../../screens/alerts';
 import {
@@ -38,6 +40,7 @@ import {
   INDICATOR_INDEX_PATTERNS,
   INDICATOR_INDEX_QUERY,
   INDICATOR_MAPPING,
+  INDICATOR_PREFIX_OVERRIDE,
   INVESTIGATION_NOTES_MARKDOWN,
   INVESTIGATION_NOTES_TOGGLE,
   MITRE_ATTACK_DETAILS,
@@ -100,12 +103,19 @@ import {
   waitForAlertsToPopulate,
   waitForTheRuleToBeExecuted,
 } from '../../tasks/create_new_rule';
+import {
+  SCHEDULE_INTERVAL_AMOUNT_INPUT,
+  SCHEDULE_INTERVAL_UNITS_INPUT,
+  SCHEDULE_LOOKBACK_AMOUNT_INPUT,
+  SCHEDULE_LOOKBACK_UNITS_INPUT,
+} from '../../screens/create_new_rule';
 import { goBackToRuleDetails, waitForKibana } from '../../tasks/edit_rule';
 import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
 import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
 import { goBackToAllRulesTable } from '../../tasks/rule_details';
 
 import { ALERTS_URL, RULE_CREATION } from '../../urls/navigation';
+const DEFAULT_THREAT_MATCH_QUERY = '@timestamp >= "now-30d"';
 
 describe('indicator match', () => {
   describe('Detection rules, Indicator Match', () => {
@@ -114,7 +124,7 @@ describe('indicator match', () => {
     const expectedTags = getNewThreatIndicatorRule().tags.join('');
     const expectedMitre = formatMitreAttackDescription(getNewThreatIndicatorRule().mitre);
     const expectedNumberOfRules = 1;
-    const expectedNumberOfAlerts = 1;
+    const expectedNumberOfAlerts = '1 alert';
 
     before(() => {
       cleanKibana();
@@ -138,26 +148,21 @@ describe('indicator match', () => {
         });
 
         it('Does NOT show invalidation text on initial page load if indicator index pattern is filled out', () => {
-          getIndicatorIndicatorIndex().type(
-            `${getNewThreatIndicatorRule().indicatorIndexPattern}{enter}`
-          );
           getDefineContinueButton().click();
           getIndexPatternInvalidationText().should('not.exist');
         });
 
         it('Shows invalidation text when you try to continue without filling it out', () => {
           getIndexPatternClearButton().click();
-          getIndicatorIndicatorIndex().type(
-            `${getNewThreatIndicatorRule().indicatorIndexPattern}{enter}`
-          );
+          getIndicatorIndicatorIndex().type(`{backspace}{enter}`);
           getDefineContinueButton().click();
           getIndexPatternInvalidationText().should('exist');
         });
       });
 
       describe('Indicator index patterns', () => {
-        it('Contains empty index pattern', () => {
-          getIndicatorIndicatorIndex().should('have.text', '');
+        it('Contains a predefined index pattern', () => {
+          getIndicatorIndicatorIndex().should('have.text', getThreatIndexPatterns().join(''));
         });
 
         it('Does NOT show invalidation text on initial page load', () => {
@@ -165,6 +170,7 @@ describe('indicator match', () => {
         });
 
         it('Shows invalidation text if you try to continue without filling it out', () => {
+          getIndicatorIndicatorIndex().type(`{backspace}{enter}`);
           getDefineContinueButton().click();
           getIndexPatternInvalidationText().should('exist');
         });
@@ -182,8 +188,8 @@ describe('indicator match', () => {
       });
 
       describe('custom indicator query input', () => {
-        it('Has a default set of *:*', () => {
-          getCustomIndicatorQueryInput().should('have.text', '*:*');
+        it(`Has a default set of ${DEFAULT_THREAT_MATCH_QUERY}`, () => {
+          getCustomIndicatorQueryInput().should('have.text', DEFAULT_THREAT_MATCH_QUERY);
         });
 
         it('Shows invalidation text if text is removed', () => {
@@ -384,6 +390,19 @@ describe('indicator match', () => {
           getIndicatorMappingComboField(2).should('not.exist');
         });
       });
+
+      describe('Schedule', () => {
+        it('IM rule has 1h time interval and lookback by default', () => {
+          selectIndicatorMatchType();
+          fillDefineIndicatorMatchRuleAndContinue(getNewThreatIndicatorRule());
+          fillAboutRuleAndContinue(getNewThreatIndicatorRule());
+
+          cy.get(SCHEDULE_INTERVAL_AMOUNT_INPUT).invoke('val').should('eql', '1');
+          cy.get(SCHEDULE_INTERVAL_UNITS_INPUT).invoke('val').should('eql', 'h');
+          cy.get(SCHEDULE_LOOKBACK_AMOUNT_INPUT).invoke('val').should('eql', '5');
+          cy.get(SCHEDULE_LOOKBACK_UNITS_INPUT).invoke('val').should('eql', 'm');
+        });
+      });
     });
 
     describe('Generating signals', () => {
@@ -429,6 +448,10 @@ describe('indicator match', () => {
         cy.get(ABOUT_DETAILS).within(() => {
           getDetails(SEVERITY_DETAILS).should('have.text', getNewThreatIndicatorRule().severity);
           getDetails(RISK_SCORE_DETAILS).should('have.text', getNewThreatIndicatorRule().riskScore);
+          getDetails(INDICATOR_PREFIX_OVERRIDE).should(
+            'have.text',
+            getNewThreatIndicatorRule().threatIndicatorPath
+          );
           getDetails(REFERENCE_URLS_DETAILS).should((details) => {
             expect(removeExternalLinkText(details.text())).equal(expectedUrls);
           });
@@ -482,8 +505,6 @@ describe('indicator match', () => {
 
         cy.get(NUMBER_OF_ALERTS).should('have.text', expectedNumberOfAlerts);
         cy.get(ALERT_RULE_NAME).first().should('have.text', getNewThreatIndicatorRule().name);
-        cy.get(ALERT_RULE_VERSION).first().should('have.text', '1');
-        cy.get(ALERT_RULE_METHOD).first().should('have.text', 'threat_match');
         cy.get(ALERT_RULE_SEVERITY)
           .first()
           .should('have.text', getNewThreatIndicatorRule().severity.toLowerCase());
@@ -492,10 +513,8 @@ describe('indicator match', () => {
           .should('have.text', getNewThreatIndicatorRule().riskScore);
       });
 
-      it('Investigate alert in timeline', () => {
+      it.skip('Investigate alert in timeline', () => {
         const accessibilityText = `Press enter for options, or press space to begin dragging.`;
-        const threatIndicatorPath =
-          '../../../x-pack/test/security_solution_cypress/es_archives/threat_indicator/data.json';
 
         loadPrepackagedTimelineTemplates();
 
@@ -510,27 +529,21 @@ describe('indicator match', () => {
         cy.get(PROVIDER_BADGE).should('have.length', 3);
         cy.get(PROVIDER_BADGE).should(
           'have.text',
-          `threat.indicator.matched.atomic: "${
+          `threat.enrichments.matched.atomic: "${
             getNewThreatIndicatorRule().atomic
-          }"threat.indicator.matched.type: "indicator_match_rule"threat.indicator.matched.field: "${
+          }"threat.enrichments.matched.type: "indicator_match_rule"threat.enrichments.matched.field: "${
             getNewThreatIndicatorRule().indicatorMappingField
           }"`
         );
 
-        cy.readFile(threatIndicatorPath).then((threatIndicator) => {
-          cy.get(INDICATOR_MATCH_ROW_RENDER).should(
-            'have.text',
-            `threat.indicator.matched.field${
-              getNewThreatIndicatorRule().indicatorMappingField
-            }${accessibilityText}matched${getNewThreatIndicatorRule().indicatorMappingField}${
-              getNewThreatIndicatorRule().atomic
-            }${accessibilityText}threat.indicator.matched.typeindicator_match_rule${accessibilityText}fromthreat.indicator.event.dataset${
-              threatIndicator.value.source.event.dataset
-            }${accessibilityText}:threat.indicator.event.reference${
-              threatIndicator.value.source.event.reference
-            }(opens in a new tab or window)${accessibilityText}`
-          );
-        });
+        cy.get(INDICATOR_MATCH_ROW_RENDER).should(
+          'have.text',
+          `threat.enrichments.matched.field${
+            getNewThreatIndicatorRule().indicatorMappingField
+          }${accessibilityText}matched${getNewThreatIndicatorRule().indicatorMappingField}${
+            getNewThreatIndicatorRule().atomic
+          }${accessibilityText}threat.enrichments.matched.typeindicator_match_rule${accessibilityText}`
+        );
       });
     });
 

@@ -7,7 +7,7 @@
 
 import './expression.scss';
 
-import React, { useState, useEffect } from 'react';
+import React, { useRef } from 'react';
 import ReactDOM from 'react-dom';
 import {
   Chart,
@@ -25,11 +25,16 @@ import {
   LayoutDirection,
   ElementClickListener,
   BrushEndListener,
+  XYBrushEvent,
   CurveType,
   LegendPositionConfig,
   LabelOverflowConstraint,
+  DisplayValueStyle,
+  RecursivePartial,
+  AxisStyle,
+  ScaleType,
 } from '@elastic/charts';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import type {
   ExpressionRenderDefinition,
   Datatable,
@@ -38,24 +43,36 @@ import type {
 import { IconType } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { RenderMode } from 'src/plugins/expressions';
+import { ThemeServiceStart } from 'kibana/public';
+import { EmptyPlaceholder } from '../../../../../src/plugins/charts/public';
+import { KibanaThemeProvider } from '../../../../../src/plugins/kibana_react/public';
 import type { ILensInterpreterRenderHandlers, LensFilterEvent, LensBrushEvent } from '../types';
 import type { LensMultiTable, FormatFactory } from '../../common';
-import { LayerArgs, SeriesType, XYChartProps } from '../../common/expressions';
+import { layerTypes } from '../../common';
+import type { LayerArgs, SeriesType, XYChartProps } from '../../common/expressions';
 import { visualizationTypes } from './types';
 import { VisualizationContainer } from '../visualization_container';
 import { isHorizontalChart, getSeriesColor } from './state_helpers';
 import { search } from '../../../../../src/plugins/data/public';
 import {
   ChartsPluginSetup,
+  ChartsPluginStart,
   PaletteRegistry,
   SeriesLayer,
+  useActiveCursor,
 } from '../../../../../src/plugins/charts/public';
-import { EmptyPlaceholder } from '../shared_components';
+import { MULTILAYER_TIME_AXIS_STYLE } from '../../../../../src/plugins/charts/common';
 import { getFitOptions } from './fitting_functions';
 import { getAxesConfiguration, GroupsConfiguration, validateExtent } from './axes_configuration';
 import { getColorAssignments } from './color_assignment';
 import { getXDomain, XyEndzones } from './x_domain';
 import { getLegendAction } from './get_legend_action';
+import {
+  computeChartMargins,
+  getReferenceLineRequiredPaddings,
+  ReferenceLineAnnotations,
+} from './expression_reference_lines';
+import { computeOverallDataDomain } from './reference_line_helpers';
 
 declare global {
   interface Window {
@@ -71,24 +88,15 @@ type SeriesSpec = InferPropType<typeof LineSeries> &
   InferPropType<typeof BarSeries> &
   InferPropType<typeof AreaSeries>;
 
-export {
-  legendConfig,
-  yAxisConfig,
-  tickLabelsConfig,
-  gridlinesConfig,
-  axisTitlesVisibilityConfig,
-  axisExtentConfig,
-  layerConfig,
-  xyChart,
-  labelsOrientationConfig,
-} from '../../common/expressions';
-
 export type XYChartRenderProps = XYChartProps & {
   chartsThemeService: ChartsPluginSetup['theme'];
+  chartsActiveCursorService: ChartsPluginStart['activeCursor'];
   paletteService: PaletteRegistry;
   formatFactory: FormatFactory;
   timeZone: string;
+  useLegacyTimeAxis: boolean;
   minInterval: number | undefined;
+  interactive?: boolean;
   onClickValue: (data: LensFilterEvent['data']) => void;
   onSelectRange: (data: LensBrushEvent['data']) => void;
   renderMode: RenderMode;
@@ -119,11 +127,16 @@ export function calculateMinInterval({ args: { layers }, data }: XYChartProps) {
   return intervalDuration.as('milliseconds');
 }
 
+const isPrimitive = (value: unknown): boolean => value != null && typeof value !== 'object';
+
 export const getXyChartRenderer = (dependencies: {
-  formatFactory: Promise<FormatFactory>;
-  chartsThemeService: ChartsPluginSetup['theme'];
+  formatFactory: FormatFactory;
+  chartsThemeService: ChartsPluginStart['theme'];
+  chartsActiveCursorService: ChartsPluginStart['activeCursor'];
   paletteService: PaletteRegistry;
   timeZone: string;
+  useLegacyTimeAxis: boolean;
+  kibanaTheme: ThemeServiceStart;
 }): ExpressionRenderDefinition<XYChartProps> => ({
   name: 'lens_xy_chart_renderer',
   displayName: 'XY chart',
@@ -144,29 +157,36 @@ export const getXyChartRenderer = (dependencies: {
     const onSelectRange = (data: LensBrushEvent['data']) => {
       handlers.event({ name: 'brush', data });
     };
-    const formatFactory = await dependencies.formatFactory;
+
     ReactDOM.render(
-      <I18nProvider>
-        <XYChartReportable
-          {...config}
-          formatFactory={formatFactory}
-          chartsThemeService={dependencies.chartsThemeService}
-          paletteService={dependencies.paletteService}
-          timeZone={dependencies.timeZone}
-          minInterval={calculateMinInterval(config)}
-          onClickValue={onClickValue}
-          onSelectRange={onSelectRange}
-          renderMode={handlers.getRenderMode()}
-          syncColors={handlers.isSyncColorsEnabled()}
-        />
-      </I18nProvider>,
+      <KibanaThemeProvider theme$={dependencies.kibanaTheme.theme$}>
+        <I18nProvider>
+          <XYChartReportable
+            {...config}
+            formatFactory={dependencies.formatFactory}
+            chartsActiveCursorService={dependencies.chartsActiveCursorService}
+            chartsThemeService={dependencies.chartsThemeService}
+            paletteService={dependencies.paletteService}
+            timeZone={dependencies.timeZone}
+            useLegacyTimeAxis={dependencies.useLegacyTimeAxis}
+            minInterval={calculateMinInterval(config)}
+            interactive={handlers.isInteractive()}
+            onClickValue={onClickValue}
+            onSelectRange={onSelectRange}
+            renderMode={handlers.getRenderMode()}
+            syncColors={handlers.isSyncColorsEnabled()}
+          />
+        </I18nProvider>
+      </KibanaThemeProvider>,
       domNode,
       () => handlers.done()
     );
   },
 });
 
-function getValueLabelsStyling(isHorizontal: boolean) {
+function getValueLabelsStyling(isHorizontal: boolean): {
+  displayValue: RecursivePartial<DisplayValueStyle>;
+} {
   const VALUE_LABELS_MAX_FONTSIZE = 12;
   const VALUE_LABELS_MIN_FONTSIZE = 10;
   const VALUE_LABELS_VERTICAL_OFFSET = -10;
@@ -175,11 +195,9 @@ function getValueLabelsStyling(isHorizontal: boolean) {
   return {
     displayValue: {
       fontSize: { min: VALUE_LABELS_MIN_FONTSIZE, max: VALUE_LABELS_MAX_FONTSIZE },
-      fill: { textContrast: true, textInverted: false, textBorder: 0 },
+      fill: { textBorder: 0 },
       alignment: isHorizontal
-        ? {
-            vertical: VerticalAlignment.Middle,
-          }
+        ? { vertical: VerticalAlignment.Middle }
         : { horizontal: HorizontalAlignment.Center },
       offsetX: isHorizontal ? VALUE_LABELS_HORIZONTAL_OFFSET : 0,
       offsetY: isHorizontal ? 0 : VALUE_LABELS_VERTICAL_OFFSET,
@@ -194,23 +212,8 @@ function getIconForSeriesType(seriesType: SeriesType): IconType {
 const MemoizedChart = React.memo(XYChart);
 
 export function XYChartReportable(props: XYChartRenderProps) {
-  const [state, setState] = useState({
-    isReady: false,
-  });
-
-  // It takes a cycle for the XY chart to render. This prevents
-  // reporting from printing a blank chart placeholder.
-  useEffect(() => {
-    setState({ isReady: true });
-  }, [setState]);
-
   return (
-    <VisualizationContainer
-      className="lnsXyExpression__container"
-      isReady={state.isReady}
-      reportTitle={props.args.title}
-      reportDescription={props.args.description}
-    >
+    <VisualizationContainer className="lnsXyExpression__container">
       <MemoizedChart {...props} />
     </VisualizationContainer>
   );
@@ -222,12 +225,14 @@ export function XYChart({
   formatFactory,
   timeZone,
   chartsThemeService,
+  chartsActiveCursorService,
   paletteService,
   minInterval,
   onClickValue,
   onSelectRange,
-  renderMode,
+  interactive = true,
   syncColors,
+  useLegacyTimeAxis,
 }: XYChartRenderProps) {
   const {
     legend,
@@ -240,15 +245,27 @@ export function XYChart({
     yRightExtent,
     valuesInLegend,
   } = args;
+  const chartRef = useRef<Chart>(null);
   const chartTheme = chartsThemeService.useChartsTheme();
   const chartBaseTheme = chartsThemeService.useChartsBaseTheme();
   const darkMode = chartsThemeService.useDarkMode();
   const filteredLayers = getFilteredLayers(layers, data);
+  const layersById = filteredLayers.reduce((memo, layer) => {
+    memo[layer.layerId] = layer;
+    return memo;
+  }, {} as Record<string, LayerArgs>);
+
+  const handleCursorUpdate = useActiveCursor(chartsActiveCursorService, chartRef, {
+    datatables: Object.values(data.tables),
+  });
 
   if (filteredLayers.length === 0) {
     const icon: IconType = layers.length > 0 ? getIconForSeriesType(layers[0].seriesType) : 'bar';
     return <EmptyPlaceholder icon={icon} />;
   }
+  const referenceLineLayers = layers.filter(
+    (layer) => layer.layerType === layerTypes.REFERENCELINE
+  );
 
   // use formatting hint of first x axis column to format ticks
   const xAxisColumn = data.tables[filteredLayers[0].layerId].columns.find(
@@ -301,16 +318,22 @@ export function XYChart({
     filteredBarLayers.some((layer) => layer.accessors.length > 1) ||
     filteredBarLayers.some((layer) => layer.splitAccessor);
 
-  const isTimeViz = data.dateRange && filteredLayers.every((l) => l.xScaleType === 'time');
+  const isTimeViz = Boolean(data.dateRange && filteredLayers.every((l) => l.xScaleType === 'time'));
   const isHistogramViz = filteredLayers.every((l) => l.isHistogram);
 
   const { baseDomain: rawXDomain, extendedDomain: xDomain } = getXDomain(
-    layers,
+    filteredLayers,
     data,
     minInterval,
-    Boolean(isTimeViz),
-    Boolean(isHistogramViz)
+    isTimeViz,
+    isHistogramViz
   );
+
+  const yAxesMap = {
+    left: yAxesConfiguration.find(({ groupId }) => groupId === 'left'),
+    right: yAxesConfiguration.find(({ groupId }) => groupId === 'right'),
+  };
+  const referenceLinePaddings = getReferenceLineRequiredPaddings(referenceLineLayers, yAxesMap);
 
   const getYAxesTitles = (
     axisSeries: Array<{ layer: string; accessor: string }>,
@@ -328,23 +351,38 @@ export function XYChart({
     );
   };
 
-  const getYAxesStyle = (groupId: string) => {
+  const getYAxesStyle = (groupId: 'left' | 'right') => {
+    const tickVisible =
+      groupId === 'right'
+        ? tickLabelsVisibilitySettings?.yRight
+        : tickLabelsVisibilitySettings?.yLeft;
+
     const style = {
       tickLabel: {
-        visible:
-          groupId === 'right'
-            ? tickLabelsVisibilitySettings?.yRight
-            : tickLabelsVisibilitySettings?.yLeft,
+        visible: tickVisible,
         rotation:
           groupId === 'right'
             ? args.labelsOrientation?.yRight || 0
             : args.labelsOrientation?.yLeft || 0,
+        padding:
+          referenceLinePaddings[groupId] != null
+            ? {
+                inner: referenceLinePaddings[groupId],
+              }
+            : undefined,
       },
       axisTitle: {
         visible:
           groupId === 'right'
             ? axisTitlesVisibilitySettings?.yRight
             : axisTitlesVisibilitySettings?.yLeft,
+        // if labels are not visible add the padding to the title
+        padding:
+          !tickVisible && referenceLinePaddings[groupId] != null
+            ? {
+                inner: referenceLinePaddings[groupId],
+              }
+            : undefined,
       },
     };
     return style;
@@ -354,19 +392,49 @@ export function XYChart({
     const extent = axis.groupId === 'left' ? yLeftExtent : yRightExtent;
     const hasBarOrArea = Boolean(
       axis.series.some((series) => {
-        const seriesType = filteredLayers.find((l) => l.layerId === series.layer)?.seriesType;
+        const seriesType = layersById[series.layer]?.seriesType;
         return seriesType?.includes('bar') || seriesType?.includes('area');
       })
     );
     const fit = !hasBarOrArea && extent.mode === 'dataBounds';
-    let min: undefined | number;
-    let max: undefined | number;
+    let min: number = NaN;
+    let max: number = NaN;
 
     if (extent.mode === 'custom') {
       const { inclusiveZeroError, boundaryError } = validateExtent(hasBarOrArea, extent);
       if (!inclusiveZeroError && !boundaryError) {
-        min = extent.lowerBound;
-        max = extent.upperBound;
+        min = extent.lowerBound ?? NaN;
+        max = extent.upperBound ?? NaN;
+      }
+    } else {
+      const axisHasReferenceLine = referenceLineLayers.some(({ yConfig }) =>
+        yConfig?.some(({ axisMode }) => axisMode === axis.groupId)
+      );
+      if (!fit && axisHasReferenceLine) {
+        // Remove this once the chart will support automatic annotation fit for other type of charts
+        const { min: computedMin, max: computedMax } = computeOverallDataDomain(
+          filteredLayers,
+          axis.series.map(({ accessor }) => accessor),
+          data.tables
+        );
+
+        if (computedMin != null && computedMax != null) {
+          max = Math.max(computedMax, max || 0);
+          min = Math.min(computedMin, min || 0);
+        }
+        for (const { layerId, yConfig } of referenceLineLayers) {
+          const table = data.tables[layerId];
+          for (const { axisMode, forAccessor } of yConfig || []) {
+            if (axis.groupId === axisMode) {
+              for (const row of table.rows) {
+                const value = row[forAccessor];
+                // keep the 0 in view
+                max = Math.max(value, max || 0, 0);
+                min = Math.min(value, min || 0, 0);
+              }
+            }
+          }
+        }
       }
     }
 
@@ -453,7 +521,7 @@ export function XYChart({
     onClickValue(context);
   };
 
-  const brushHandler: BrushEndListener = ({ x }) => {
+  const brushHandler = ({ x }: XYBrushEvent) => {
     if (!x) {
       return;
     }
@@ -485,9 +553,58 @@ export function XYChart({
     floatingColumns: legend?.floatingColumns ?? 1,
   } as LegendPositionConfig;
 
+  const isHistogramModeEnabled = filteredLayers.some(
+    ({ isHistogram, seriesType, splitAccessor }) =>
+      isHistogram &&
+      (seriesType.includes('stacked') || !splitAccessor) &&
+      (seriesType.includes('stacked') ||
+        !seriesType.includes('bar') ||
+        !chartHasMoreThanOneBarSeries)
+  );
+
+  const shouldUseNewTimeAxis =
+    isTimeViz && isHistogramModeEnabled && !useLegacyTimeAxis && !shouldRotate;
+
+  const gridLineStyle = {
+    visible: gridlinesVisibilitySettings?.x,
+    strokeWidth: 1,
+  };
+  const xAxisStyle: RecursivePartial<AxisStyle> = shouldUseNewTimeAxis
+    ? {
+        ...MULTILAYER_TIME_AXIS_STYLE,
+        tickLabel: {
+          ...MULTILAYER_TIME_AXIS_STYLE.tickLabel,
+          visible: Boolean(tickLabelsVisibilitySettings?.x),
+        },
+        tickLine: {
+          ...MULTILAYER_TIME_AXIS_STYLE.tickLine,
+          visible: Boolean(tickLabelsVisibilitySettings?.x),
+        },
+        axisTitle: {
+          visible: axisTitlesVisibilitySettings.x,
+        },
+      }
+    : {
+        tickLabel: {
+          visible: tickLabelsVisibilitySettings?.x,
+          rotation: labelsOrientation?.x,
+          padding:
+            referenceLinePaddings.bottom != null
+              ? { inner: referenceLinePaddings.bottom }
+              : undefined,
+        },
+        axisTitle: {
+          visible: axisTitlesVisibilitySettings.x,
+          padding:
+            !tickLabelsVisibilitySettings?.x && referenceLinePaddings.bottom != null
+              ? { inner: referenceLinePaddings.bottom }
+              : undefined,
+        },
+      };
   return (
-    <Chart>
+    <Chart ref={chartRef}>
       <Settings
+        onPointerUpdate={handleCursorUpdate}
         debugState={window._echDebugStateFlag ?? false}
         showLegend={
           legend.isVisible && !legend.showSingleSeries
@@ -504,23 +621,42 @@ export function XYChart({
           background: {
             color: undefined, // removes background for embeddables
           },
+          legend: {
+            labelOptions: { maxLines: legend.shouldTruncate ? legend?.maxLines ?? 1 : 0 },
+          },
+          // if not title or labels are shown for axes, add some padding if required by reference line markers
+          chartMargins: {
+            ...chartTheme.chartPaddings,
+            ...computeChartMargins(
+              referenceLinePaddings,
+              tickLabelsVisibilitySettings,
+              axisTitlesVisibilitySettings,
+              yAxesMap,
+              shouldRotate
+            ),
+          },
         }}
         baseTheme={chartBaseTheme}
         tooltip={{
           boundary: document.getElementById('app-fixed-viewport') ?? undefined,
           headerFormatter: (d) => safeXAccessorLabelRenderer(d.value),
         }}
+        allowBrushingLastHistogramBin={isTimeViz}
         rotation={shouldRotate ? 90 : 0}
         xDomain={xDomain}
-        onBrushEnd={renderMode !== 'noInteractivity' ? brushHandler : undefined}
-        onElementClick={renderMode !== 'noInteractivity' ? clickHandler : undefined}
-        legendAction={getLegendAction(
-          filteredLayers,
-          data.tables,
-          onClickValue,
-          formatFactory,
-          layersAlreadyFormatted
-        )}
+        onBrushEnd={interactive ? (brushHandler as BrushEndListener) : undefined}
+        onElementClick={interactive ? clickHandler : undefined}
+        legendAction={
+          interactive
+            ? getLegendAction(
+                filteredLayers,
+                data.tables,
+                onClickValue,
+                formatFactory,
+                layersAlreadyFormatted
+              )
+            : undefined
+        }
         showLegendExtra={isHistogramViz && valuesInLegend}
       />
 
@@ -528,21 +664,11 @@ export function XYChart({
         id="x"
         position={shouldRotate ? Position.Left : Position.Bottom}
         title={xTitle}
-        gridLine={{
-          visible: gridlinesVisibilitySettings?.x,
-          strokeWidth: 2,
-        }}
+        gridLine={gridLineStyle}
         hide={filteredLayers[0].hide || !filteredLayers[0].xAccessor}
         tickFormat={(d) => safeXAccessorLabelRenderer(d)}
-        style={{
-          tickLabel: {
-            visible: tickLabelsVisibilitySettings?.x,
-            rotation: labelsOrientation?.x,
-          },
-          axisTitle: {
-            visible: axisTitlesVisibilitySettings.x,
-          },
-        }}
+        style={xAxisStyle}
+        timeAxisLayerCount={shouldUseNewTimeAxis ? 3 : 0}
       />
 
       {yAxesConfiguration.map((axis) => {
@@ -561,8 +687,9 @@ export function XYChart({
             }}
             hide={filteredLayers[0].hide}
             tickFormat={(d) => axis.formatter?.convert(d) || ''}
-            style={getYAxesStyle(axis.groupId)}
+            style={getYAxesStyle(axis.groupId as 'left' | 'right')}
             domain={getYAxisDomain(axis)}
+            ticks={5}
           />
         );
       })}
@@ -602,9 +729,6 @@ export function XYChart({
             : {};
 
           const table = data.tables[layerId];
-
-          const isPrimitive = (value: unknown): boolean =>
-            value != null && typeof value !== 'object';
 
           // what if row values are not primitive? That is the case of, for instance, Ranges
           // remaps them to their serialized version with the formatHint metadata
@@ -673,6 +797,8 @@ export function XYChart({
             axisConfiguration.series.find((currentSeries) => currentSeries.accessor === accessor)
           );
 
+          const formatter = table?.columns.find((column) => column.id === accessor)?.meta?.params;
+
           const seriesProps: SeriesSpec = {
             splitSeriesAccessors: splitAccessor ? [splitAccessor] : [],
             stackAccessors: isStacked ? [xAccessor as string] : [],
@@ -681,7 +807,10 @@ export function XYChart({
             yAccessors: [accessor],
             data: rows,
             xScaleType: xAccessor ? xScaleType : 'ordinal',
-            yScaleType,
+            yScaleType:
+              formatter?.id === 'bytes' && yScaleType === ScaleType.Linear
+                ? ScaleType.LinearBinary
+                : yScaleType,
             color: ({ yAccessor, seriesKeys }) => {
               const overwriteColor = getSeriesColor(layer, accessor);
               if (overwriteColor !== null) {
@@ -825,22 +954,44 @@ export function XYChart({
           }
         })
       )}
+      {referenceLineLayers.length ? (
+        <ReferenceLineAnnotations
+          layers={referenceLineLayers}
+          data={data}
+          syncColors={syncColors}
+          paletteService={paletteService}
+          formatters={{
+            left: yAxesMap.left?.formatter,
+            right: yAxesMap.right?.formatter,
+            bottom: xAxisFormatter,
+          }}
+          axesMap={{
+            left: Boolean(yAxesMap.left),
+            right: Boolean(yAxesMap.right),
+          }}
+          isHorizontal={shouldRotate}
+          paddingMap={referenceLinePaddings}
+        />
+      ) : null}
     </Chart>
   );
 }
 
 function getFilteredLayers(layers: LayerArgs[], data: LensMultiTable) {
-  return layers.filter(({ layerId, xAccessor, accessors, splitAccessor }) => {
-    return !(
-      !accessors.length ||
-      !data.tables[layerId] ||
-      data.tables[layerId].rows.length === 0 ||
-      (xAccessor &&
-        data.tables[layerId].rows.every((row) => typeof row[xAccessor] === 'undefined')) ||
-      // stacked percentage bars have no xAccessors but splitAccessor with undefined values in them when empty
-      (!xAccessor &&
-        splitAccessor &&
-        data.tables[layerId].rows.every((row) => typeof row[splitAccessor] === 'undefined'))
+  return layers.filter(({ layerId, xAccessor, accessors, splitAccessor, layerType }) => {
+    return (
+      layerType === layerTypes.DATA &&
+      !(
+        !accessors.length ||
+        !data.tables[layerId] ||
+        data.tables[layerId].rows.length === 0 ||
+        (xAccessor &&
+          data.tables[layerId].rows.every((row) => typeof row[xAccessor] === 'undefined')) ||
+        // stacked percentage bars have no xAccessors but splitAccessor with undefined values in them when empty
+        (!xAccessor &&
+          splitAccessor &&
+          data.tables[layerId].rows.every((row) => typeof row[splitAccessor] === 'undefined'))
+      )
     );
   });
 }

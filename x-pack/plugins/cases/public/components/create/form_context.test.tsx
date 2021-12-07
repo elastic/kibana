@@ -10,7 +10,7 @@ import { mount, ReactWrapper } from 'enzyme';
 import { act, waitFor } from '@testing-library/react';
 import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 
-import { ConnectorTypes, SECURITY_SOLUTION_OWNER } from '../../../common';
+import { ConnectorTypes } from '../../../common/api';
 import { useKibana } from '../../common/lib/kibana';
 import { TestProviders } from '../../common/mock';
 import { usePostCase } from '../../containers/use_post_case';
@@ -36,7 +36,7 @@ import {
   useGetChoicesResponse,
 } from './mock';
 import { FormContext } from './form_context';
-import { CreateCaseForm } from './form';
+import { CreateCaseFormFields, CreateCaseFormFieldsProps } from './form';
 import { SubmitCaseButton } from './submit_button';
 import { usePostPushToService } from '../../containers/use_post_push_to_service';
 
@@ -77,10 +77,11 @@ const defaultPostCase = {
   postCase,
 };
 
-const defaultCreateCaseForm = {
+const defaultCreateCaseForm: CreateCaseFormFieldsProps = {
   isLoadingConnectors: false,
   connectors: [],
-  owner: SECURITY_SOLUTION_OWNER,
+  withSteps: true,
+  hideConnectorServiceNowSir: false,
 };
 
 const defaultPostPushToService = {
@@ -101,9 +102,11 @@ const fillForm = (wrapper: ReactWrapper) => {
     .simulate('change', { target: { value: sampleData.description } });
 
   act(() => {
-    ((wrapper.find(EuiComboBox).props() as unknown) as {
-      onChange: (a: EuiComboBoxOptionOption[]) => void;
-    }).onChange(sampleTags.map((tag) => ({ label: tag })));
+    (
+      wrapper.find(EuiComboBox).props() as unknown as {
+        onChange: (a: EuiComboBoxOptionOption[]) => void;
+      }
+    ).onChange(sampleTags.map((tag) => ({ label: tag })));
   });
 };
 
@@ -148,12 +151,14 @@ describe('Create case', () => {
       const wrapper = mount(
         <TestProviders>
           <FormContext onSuccess={onFormSubmitSuccess}>
-            <CreateCaseForm {...defaultCreateCaseForm} />
+            <CreateCaseFormFields {...defaultCreateCaseForm} />
             <SubmitCaseButton />
           </FormContext>
         </TestProviders>
       );
-
+      await act(async () => {
+        wrapper.update();
+      });
       expect(wrapper.find(`[data-test-subj="caseTitle"]`).first().exists()).toBeTruthy();
       expect(wrapper.find(`[data-test-subj="caseDescription"]`).first().exists()).toBeTruthy();
       expect(wrapper.find(`[data-test-subj="caseTags"]`).first().exists()).toBeTruthy();
@@ -172,7 +177,7 @@ describe('Create case', () => {
       const wrapper = mount(
         <TestProviders>
           <FormContext onSuccess={onFormSubmitSuccess}>
-            <CreateCaseForm {...defaultCreateCaseForm} />
+            <CreateCaseFormFields {...defaultCreateCaseForm} />
             <SubmitCaseButton />
           </FormContext>
         </TestProviders>
@@ -190,7 +195,7 @@ describe('Create case', () => {
       const wrapper = mount(
         <TestProviders>
           <FormContext onSuccess={onFormSubmitSuccess}>
-            <CreateCaseForm {...defaultCreateCaseForm} />
+            <CreateCaseFormFields {...defaultCreateCaseForm} />
             <SubmitCaseButton />
           </FormContext>
         </TestProviders>
@@ -222,7 +227,7 @@ describe('Create case', () => {
       const wrapper = mount(
         <TestProviders>
           <FormContext onSuccess={onFormSubmitSuccess}>
-            <CreateCaseForm {...defaultCreateCaseForm} />
+            <CreateCaseFormFields {...defaultCreateCaseForm} />
             <SubmitCaseButton />
           </FormContext>
         </TestProviders>
@@ -230,6 +235,29 @@ describe('Create case', () => {
 
       fillForm(wrapper);
       wrapper.find('[data-test-subj="caseSyncAlerts"] button').first().simulate('click');
+      wrapper.find(`[data-test-subj="create-case-submit"]`).first().simulate('click');
+
+      await waitFor(() =>
+        expect(postCase).toBeCalledWith({ ...sampleData, settings: { syncAlerts: false } })
+      );
+    });
+
+    it('should set sync alerts to false when the sync feature setting is false', async () => {
+      useConnectorsMock.mockReturnValue({
+        ...sampleConnectorData,
+        connectors: connectorsMock,
+      });
+
+      const wrapper = mount(
+        <TestProviders features={{ alerts: { sync: false } }}>
+          <FormContext onSuccess={onFormSubmitSuccess}>
+            <CreateCaseFormFields {...defaultCreateCaseForm} />
+            <SubmitCaseButton />
+          </FormContext>
+        </TestProviders>
+      );
+
+      fillForm(wrapper);
       wrapper.find(`[data-test-subj="create-case-submit"]`).first().simulate('click');
 
       await waitFor(() =>
@@ -257,7 +285,7 @@ describe('Create case', () => {
       const wrapper = mount(
         <TestProviders>
           <FormContext onSuccess={onFormSubmitSuccess}>
-            <CreateCaseForm {...defaultCreateCaseForm} />
+            <CreateCaseFormFields {...defaultCreateCaseForm} />
             <SubmitCaseButton />
           </FormContext>
         </TestProviders>
@@ -307,7 +335,7 @@ describe('Create case', () => {
       const wrapper = mount(
         <TestProviders>
           <FormContext onSuccess={onFormSubmitSuccess}>
-            <CreateCaseForm {...defaultCreateCaseForm} />
+            <CreateCaseFormFields {...defaultCreateCaseForm} />
             <SubmitCaseButton />
           </FormContext>
         </TestProviders>
@@ -332,7 +360,7 @@ describe('Create case', () => {
       const wrapper = mount(
         <TestProviders>
           <FormContext onSuccess={onFormSubmitSuccess}>
-            <CreateCaseForm {...defaultCreateCaseForm} />
+            <CreateCaseFormFields {...defaultCreateCaseForm} />
             <SubmitCaseButton />
           </FormContext>
         </TestProviders>
@@ -399,7 +427,7 @@ describe('Create case', () => {
       const wrapper = mount(
         <TestProviders>
           <FormContext onSuccess={onFormSubmitSuccess}>
-            <CreateCaseForm {...defaultCreateCaseForm} />
+            <CreateCaseFormFields {...defaultCreateCaseForm} />
             <SubmitCaseButton />
           </FormContext>
         </TestProviders>
@@ -416,9 +444,11 @@ describe('Create case', () => {
       });
 
       act(() => {
-        ((wrapper.find(EuiComboBox).at(1).props() as unknown) as {
-          onChange: (a: EuiComboBoxOptionOption[]) => void;
-        }).onChange([{ value: '19', label: 'Denial of Service' }]);
+        (
+          wrapper.find(EuiComboBox).at(1).props() as unknown as {
+            onChange: (a: EuiComboBoxOptionOption[]) => void;
+          }
+        ).onChange([{ value: '19', label: 'Denial of Service' }]);
       });
 
       wrapper
@@ -467,7 +497,7 @@ describe('Create case', () => {
       const wrapper = mount(
         <TestProviders>
           <FormContext onSuccess={onFormSubmitSuccess}>
-            <CreateCaseForm {...defaultCreateCaseForm} />
+            <CreateCaseFormFields {...defaultCreateCaseForm} />
             <SubmitCaseButton />
           </FormContext>
         </TestProviders>
@@ -557,7 +587,7 @@ describe('Create case', () => {
       const wrapper = mount(
         <TestProviders>
           <FormContext onSuccess={onFormSubmitSuccess}>
-            <CreateCaseForm {...defaultCreateCaseForm} />
+            <CreateCaseFormFields {...defaultCreateCaseForm} />
             <SubmitCaseButton />
           </FormContext>
         </TestProviders>
@@ -655,7 +685,7 @@ describe('Create case', () => {
     const wrapper = mount(
       <TestProviders>
         <FormContext onSuccess={onFormSubmitSuccess} afterCaseCreated={afterCaseCreated}>
-          <CreateCaseForm {...defaultCreateCaseForm} />
+          <CreateCaseFormFields {...defaultCreateCaseForm} />
           <SubmitCaseButton />
         </FormContext>
       </TestProviders>
@@ -692,7 +722,7 @@ describe('Create case', () => {
     const wrapper = mount(
       <TestProviders>
         <FormContext onSuccess={onFormSubmitSuccess} afterCaseCreated={afterCaseCreated}>
-          <CreateCaseForm {...defaultCreateCaseForm} />
+          <CreateCaseFormFields {...defaultCreateCaseForm} />
           <SubmitCaseButton />
         </FormContext>
       </TestProviders>

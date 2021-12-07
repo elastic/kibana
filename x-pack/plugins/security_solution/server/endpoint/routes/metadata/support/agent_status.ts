@@ -5,28 +5,45 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, SavedObjectsClientContract } from 'kibana/server';
-import { AgentService } from '../../../../../../fleet/server';
+import { ElasticsearchClient } from 'kibana/server';
+import { AgentClient } from '../../../../../../fleet/server';
 import { AgentStatusKueryHelper } from '../../../../../../fleet/common/services';
 import { Agent } from '../../../../../../fleet/common/types/models';
 import { HostStatus } from '../../../../../common/endpoint/types';
 
-const STATUS_QUERY_MAP = new Map([
-  [HostStatus.HEALTHY.toString(), AgentStatusKueryHelper.buildKueryForOnlineAgents()],
-  [HostStatus.OFFLINE.toString(), AgentStatusKueryHelper.buildKueryForOfflineAgents()],
-  [HostStatus.UNHEALTHY.toString(), AgentStatusKueryHelper.buildKueryForErrorAgents()],
-  [HostStatus.UPDATING.toString(), AgentStatusKueryHelper.buildKueryForUpdatingAgents()],
-  [HostStatus.INACTIVE.toString(), AgentStatusKueryHelper.buildKueryForInactiveAgents()],
-]);
+const getStatusQueryMap = (path: string = '') =>
+  new Map([
+    [HostStatus.HEALTHY.toString(), AgentStatusKueryHelper.buildKueryForOnlineAgents(path)],
+    [HostStatus.OFFLINE.toString(), AgentStatusKueryHelper.buildKueryForOfflineAgents(path)],
+    [HostStatus.UNHEALTHY.toString(), AgentStatusKueryHelper.buildKueryForErrorAgents(path)],
+    [HostStatus.UPDATING.toString(), AgentStatusKueryHelper.buildKueryForUpdatingAgents(path)],
+    [HostStatus.INACTIVE.toString(), AgentStatusKueryHelper.buildKueryForInactiveAgents(path)],
+  ]);
 
-export async function findAgentIDsByStatus(
-  agentService: AgentService,
-  soClient: SavedObjectsClientContract,
+export function buildStatusesKuery(statusesToFilter: string[]): string | undefined {
+  if (!statusesToFilter.length) {
+    return;
+  }
+  const STATUS_QUERY_MAP = getStatusQueryMap('united.agent.');
+  const statusQueries = statusesToFilter.map((status) => STATUS_QUERY_MAP.get(status));
+  if (!statusQueries.length) {
+    return;
+  }
+
+  return `(${statusQueries.join(' OR ')})`;
+}
+
+export async function findAgentIdsByStatus(
+  agentClient: AgentClient,
   esClient: ElasticsearchClient,
-  status: string[],
+  statuses: string[],
   pageSize: number = 1000
 ): Promise<string[]> {
-  const helpers = status.map((s) => STATUS_QUERY_MAP.get(s));
+  if (!statuses.length) {
+    return [];
+  }
+  const STATUS_QUERY_MAP = getStatusQueryMap();
+  const helpers = statuses.map((s) => STATUS_QUERY_MAP.get(s));
   const searchOptions = (pageNum: number) => {
     return {
       page: pageNum,
@@ -42,7 +59,7 @@ export async function findAgentIDsByStatus(
   let hasMore = true;
 
   while (hasMore) {
-    const agents = await agentService.listAgents(esClient, searchOptions(page++));
+    const agents = await agentClient.listAgents(searchOptions(page++));
     result.push(...agents.agents.map((agent: Agent) => agent.id));
     hasMore = agents.agents.length > 0;
   }

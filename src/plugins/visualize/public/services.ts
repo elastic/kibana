@@ -14,10 +14,9 @@ import type { UsageCollectionStart } from '../../usage_collection/public';
 export const [getUISettings, setUISettings] = createGetterSetter<IUiSettingsClient>('UISettings');
 
 export const [getUsageCollector, setUsageCollector] = createGetterSetter<UsageCollectionStart>(
-  'UsageCollection'
+  'UsageCollection',
+  false
 );
 
-export const [
-  getVisEditorsRegistry,
-  setVisEditorsRegistry,
-] = createGetterSetter<VisEditorsRegistry>('VisEditorsRegistry');
+export const [getVisEditorsRegistry, setVisEditorsRegistry] =
+  createGetterSetter<VisEditorsRegistry>('VisEditorsRegistry');

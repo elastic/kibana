@@ -56,28 +56,24 @@ export const useHostsKpiAuthentications = ({
   const abortCtrl = useRef(new AbortController());
   const searchSubscription$ = useRef(new Subscription());
   const [loading, setLoading] = useState(false);
-  const [
-    hostsKpiAuthenticationsRequest,
-    setHostsKpiAuthenticationsRequest,
-  ] = useState<HostsKpiAuthenticationsRequestOptions | null>(null);
+  const [hostsKpiAuthenticationsRequest, setHostsKpiAuthenticationsRequest] =
+    useState<HostsKpiAuthenticationsRequestOptions | null>(null);
   const { getTransformChangesIfTheyExist } = useTransforms();
 
-  const [
-    hostsKpiAuthenticationsResponse,
-    setHostsKpiAuthenticationsResponse,
-  ] = useState<HostsKpiAuthenticationsArgs>({
-    authenticationsSuccess: 0,
-    authenticationsSuccessHistogram: [],
-    authenticationsFailure: 0,
-    authenticationsFailureHistogram: [],
-    id: ID,
-    inspect: {
-      dsl: [],
-      response: [],
-    },
-    isInspected: false,
-    refetch: refetch.current,
-  });
+  const [hostsKpiAuthenticationsResponse, setHostsKpiAuthenticationsResponse] =
+    useState<HostsKpiAuthenticationsArgs>({
+      authenticationsSuccess: 0,
+      authenticationsSuccessHistogram: [],
+      authenticationsFailure: 0,
+      authenticationsFailureHistogram: [],
+      id: ID,
+      inspect: {
+        dsl: [],
+        response: [],
+      },
+      isInspected: false,
+      refetch: refetch.current,
+    });
   const { addError, addWarning } = useAppToasts();
 
   const hostsKpiAuthenticationsSearch = useCallback(

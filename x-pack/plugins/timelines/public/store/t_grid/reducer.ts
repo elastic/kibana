@@ -18,9 +18,14 @@ import {
   setEventsDeleted,
   setEventsLoading,
   setTGridSelectAll,
+  setOpenAddToExistingCase,
+  setOpenAddToNewCase,
   setSelected,
+  setTimelineUpdatedAt,
   toggleDetailPanel,
+  updateColumnOrder,
   updateColumns,
+  updateColumnWidth,
   updateIsLoading,
   updateItemsPerPage,
   updateItemsPerPageOptions,
@@ -37,6 +42,8 @@ import {
   setDeletedTimelineEvents,
   setLoadingTimelineEvents,
   setSelectedTimelineEvents,
+  updateTGridColumnOrder,
+  updateTGridColumnWidth,
   updateTimelineColumns,
   updateTimelineItemsPerPage,
   updateTimelinePerPageOptions,
@@ -86,6 +93,23 @@ export const tGridReducer = reducerWithInitialState(initialTGridState)
       columnId,
       delta,
       timelineById: state.timelineById,
+    }),
+  }))
+  .case(updateColumnOrder, (state, { id, columnIds }) => ({
+    ...state,
+    timelineById: updateTGridColumnOrder({
+      columnIds,
+      id,
+      timelineById: state.timelineById,
+    }),
+  }))
+  .case(updateColumnWidth, (state, { id, columnId, width }) => ({
+    ...state,
+    timelineById: updateTGridColumnWidth({
+      columnId,
+      id,
+      timelineById: state.timelineById,
+      width,
     }),
   }))
   .case(removeColumn, (state, { id, columnId }) => ({
@@ -214,5 +238,35 @@ export const tGridReducer = reducerWithInitialState(initialTGridState)
   .case(addProviderToTimeline, (state, { id, dataProvider }) => ({
     ...state,
     timelineById: addProviderToTimelineHelper(id, dataProvider, state.timelineById),
+  }))
+  .case(setOpenAddToExistingCase, (state, { id, isOpen }) => ({
+    ...state,
+    timelineById: {
+      ...state.timelineById,
+      [id]: {
+        ...state.timelineById[id],
+        isAddToExistingCaseOpen: isOpen,
+      },
+    },
+  }))
+  .case(setOpenAddToNewCase, (state, { id, isOpen }) => ({
+    ...state,
+    timelineById: {
+      ...state.timelineById,
+      [id]: {
+        ...state.timelineById[id],
+        isCreateNewCaseOpen: isOpen,
+      },
+    },
+  }))
+  .case(setTimelineUpdatedAt, (state, { id, updated }) => ({
+    ...state,
+    timelineById: {
+      ...state.timelineById,
+      [id]: {
+        ...state.timelineById[id],
+        updated,
+      },
+    },
   }))
   .build();

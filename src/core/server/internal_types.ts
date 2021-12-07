@@ -36,9 +36,9 @@ import { InternalRenderingServiceSetup } from './rendering';
 import { InternalHttpResourcesPreboot, InternalHttpResourcesSetup } from './http_resources';
 import { InternalStatusServiceSetup } from './status';
 import { InternalLoggingServicePreboot, InternalLoggingServiceSetup } from './logging';
-import { CoreUsageDataStart } from './core_usage_data';
+import { CoreUsageDataStart, InternalCoreUsageDataSetup } from './core_usage_data';
 import { I18nServiceSetup } from './i18n';
-import { InternalDeprecationsServiceSetup } from './deprecations';
+import { InternalDeprecationsServiceSetup, InternalDeprecationsServiceStart } from './deprecations';
 import type {
   InternalExecutionContextSetup,
   InternalExecutionContextStart,
@@ -73,6 +73,7 @@ export interface InternalCoreSetup {
   logging: InternalLoggingServiceSetup;
   metrics: InternalMetricsServiceSetup;
   deprecations: InternalDeprecationsServiceSetup;
+  coreUsageData: InternalCoreUsageDataSetup;
 }
 
 /**
@@ -87,6 +88,7 @@ export interface InternalCoreStart {
   uiSettings: InternalUiSettingsServiceStart;
   coreUsageData: CoreUsageDataStart;
   executionContext: InternalExecutionContextStart;
+  deprecations: InternalDeprecationsServiceStart;
 }
 
 /**

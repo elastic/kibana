@@ -1,0 +1,51 @@
+{
+  "type": "doc",
+  "value": {
+    "id": "1",
+    "index": "ignore_fields",
+    "source": {
+      "@timestamp": "2020-10-28T05:00:53.000Z",
+      "small_field": "1 indexed"
+    },
+    "type": "_doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "2",
+    "index": "ignore_fields",
+    "source": {
+      "@timestamp": "2020-10-28T05:01:53.000Z",
+      "small_field": "2 large not indexed"
+    },
+    "type": "_doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "3",
+    "index": "ignore_fields",
+    "source": {
+      "@timestamp": "2020-10-28T05:02:53.000Z",
+      "small_field": "3 large not indexed"
+    },
+    "type": "_doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "4",
+    "index": "ignore_fields",
+    "source": {
+      "@timestamp": "2020-10-28T05:03:53.000Z",
+      "small_field": "4 large not indexed"
+    },
+    "type": "_doc"
+  }
+}

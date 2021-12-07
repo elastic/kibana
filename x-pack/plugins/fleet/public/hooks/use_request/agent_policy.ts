@@ -33,6 +33,14 @@ export const useGetAgentPolicies = (query?: GetAgentPoliciesRequest['query']) =>
   });
 };
 
+export const sendGetAgentPolicies = (query?: GetAgentPoliciesRequest['query']) => {
+  return sendRequest<GetAgentPoliciesResponse>({
+    path: agentPolicyRouteService.getListPath(),
+    method: 'get',
+    query,
+  });
+};
+
 export const useGetOneAgentPolicy = (agentPolicyId: string | undefined) => {
   return useConditionalRequest<GetOneAgentPolicyResponse>({
     path: agentPolicyId ? agentPolicyRouteService.getInfoPath(agentPolicyId) : undefined,
@@ -50,7 +58,7 @@ export const useGetOneAgentPolicyFull = (agentPolicyId: string) => {
 
 export const sendGetOneAgentPolicyFull = (
   agentPolicyId: string,
-  query: { standalone?: boolean } = {}
+  query: { standalone?: boolean; kubernetes?: boolean } = {}
 ) => {
   return sendRequest<GetFullAgentPolicyResponse>({
     path: agentPolicyRouteService.getInfoFullPath(agentPolicyId),

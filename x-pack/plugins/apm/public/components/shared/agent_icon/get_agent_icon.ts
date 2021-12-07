@@ -19,6 +19,7 @@ import goIcon from './icons/go.svg';
 import iosIcon from './icons/ios.svg';
 import darkIosIcon from './icons/ios_dark.svg';
 import javaIcon from './icons/java.svg';
+import lambdaIcon from './icons/lambda.svg';
 import nodeJsIcon from './icons/nodejs.svg';
 import ocamlIcon from './icons/ocaml.svg';
 import openTelemetryIcon from './icons/opentelemetry.svg';
@@ -37,6 +38,7 @@ const agentIcons: { [key: string]: string } = {
   go: goIcon,
   ios: iosIcon,
   java: javaIcon,
+  lambda: lambdaIcon,
   nodejs: nodeJsIcon,
   ocaml: ocamlIcon,
   opentelemetry: openTelemetryIcon,

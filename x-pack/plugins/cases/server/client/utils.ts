@@ -12,33 +12,27 @@ import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
 
-import { SavedObjectsFindResponse } from 'kibana/server';
-import { nodeBuilder, KueryNode } from '../../../../../src/plugins/data/common';
-import { esKuery } from '../../../../../src/plugins/data/server';
+import { nodeBuilder, fromKueryExpression, KueryNode } from '@kbn/es-query';
+import { CASE_SAVED_OBJECT, SUB_CASE_SAVED_OBJECT } from '../../common/constants';
 import {
+  OWNER_FIELD,
   AlertCommentRequestRt,
   ActionsCommentRequestRt,
-  CASE_SAVED_OBJECT,
-  CaseConnector,
   CaseStatuses,
   CaseType,
   CommentRequest,
-  ConnectorTypes,
   ContextTypeUserRt,
-  ESCasesConfigureAttributes,
   excess,
-  OWNER_FIELD,
-  SUB_CASE_SAVED_OBJECT,
   throwErrors,
-} from '../../common';
+} from '../../common/api';
 import { combineFilterWithAuthorizationFilter } from '../authorization/utils';
 import {
   getIDsAndIndicesAsArrays,
   isCommentRequestTypeAlertOrGenAlert,
   isCommentRequestTypeUser,
   isCommentRequestTypeActions,
-  SavedObjectFindOptionsKueryNode,
-} from '../common';
+} from '../common/utils';
+import { SavedObjectFindOptionsKueryNode } from '../common/types';
 
 export const decodeCommentRequest = (comment: CommentRequest) => {
   if (isCommentRequestTypeUser(comment)) {
@@ -187,7 +181,7 @@ export function stringToKueryNode(expression?: string): KueryNode | undefined {
     return;
   }
 
-  return esKuery.fromKueryExpression(expression);
+  return fromKueryExpression(expression);
 }
 
 /**
@@ -436,31 +430,6 @@ export const getCaseToUpdate = (
     },
     { id: queryCase.id, version: queryCase.version }
   );
-
-export const getNoneCaseConnector = () => ({
-  id: 'none',
-  name: 'none',
-  type: ConnectorTypes.none,
-  fields: null,
-});
-
-export const getConnectorFromConfiguration = (
-  caseConfigure: SavedObjectsFindResponse<ESCasesConfigureAttributes>
-): CaseConnector => {
-  let caseConnector = getNoneCaseConnector();
-  if (
-    caseConfigure.saved_objects.length > 0 &&
-    caseConfigure.saved_objects[0].attributes.connector
-  ) {
-    caseConnector = {
-      id: caseConfigure.saved_objects[0].attributes.connector.id,
-      name: caseConfigure.saved_objects[0].attributes.connector.name,
-      type: caseConfigure.saved_objects[0].attributes.connector.type,
-      fields: null,
-    };
-  }
-  return caseConnector;
-};
 
 enum SortFieldCase {
   closedAt = 'closed_at',

@@ -121,6 +121,15 @@ export async function parseManifest(
     );
   }
 
+  if (!manifest.owner || !manifest.owner.name || typeof manifest.owner.name !== 'string') {
+    throw PluginDiscoveryError.invalidManifest(
+      manifestPath,
+      new Error(
+        `Plugin manifest for "${manifest.id}" must contain an "owner" property, which includes a nested "name" property.`
+      )
+    );
+  }
+
   if (manifest.configPath !== undefined && !isConfigPath(manifest.configPath)) {
     throw PluginDiscoveryError.invalidManifest(
       manifestPath,
@@ -201,7 +210,7 @@ export async function parseManifest(
     ui: includesUiPlugin,
     server: includesServerPlugin,
     extraPublicDirs: manifest.extraPublicDirs,
-    owner: manifest.owner,
+    owner: manifest.owner!,
     description: manifest.description,
   };
 }

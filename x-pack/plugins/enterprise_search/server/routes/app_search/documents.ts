@@ -17,7 +17,7 @@ export function registerDocumentsRoutes({
 }: RouteDependencies) {
   router.post(
     skipBodyValidation({
-      path: '/api/app_search/engines/{engineName}/documents',
+      path: '/internal/app_search/engines/{engineName}/documents',
       validate: {
         params: schema.object({
           engineName: schema.string(),
@@ -36,7 +36,7 @@ export function registerDocumentRoutes({
 }: RouteDependencies) {
   router.get(
     {
-      path: '/api/app_search/engines/{engineName}/documents/{documentId}',
+      path: '/internal/app_search/engines/{engineName}/documents/{documentId}',
       validate: {
         params: schema.object({
           engineName: schema.string(),
@@ -50,7 +50,7 @@ export function registerDocumentRoutes({
   );
   router.delete(
     {
-      path: '/api/app_search/engines/{engineName}/documents/{documentId}',
+      path: '/internal/app_search/engines/{engineName}/documents/{documentId}',
       validate: {
         params: schema.object({
           engineName: schema.string(),

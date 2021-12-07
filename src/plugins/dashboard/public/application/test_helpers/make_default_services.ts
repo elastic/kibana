@@ -15,6 +15,7 @@ import { DashboardAppServices, DashboardAppCapabilities } from '../../types';
 import { embeddablePluginMock } from '../../../../embeddable/public/mocks';
 import { IndexPatternsContract, SavedQueryService } from '../../services/data';
 import { savedObjectsPluginMock } from '../../../../saved_objects/public/mocks';
+import { screenshotModePluginMock } from '../../../../screenshot_mode/public/mocks';
 import { visualizationsPluginMock } from '../../../../visualizations/public/mocks';
 import { PluginInitializerContext, ScopedHistory } from '../../../../../core/public';
 import { SavedObjectLoader, SavedObjectLoaderFindOptions } from '../../services/saved_objects';
@@ -48,13 +49,13 @@ export function makeDefaultServices(): DashboardAppServices {
     .fn()
     .mockImplementation((id?: string) => Promise.resolve(getSavedDashboardMock({ id })));
 
-  const dashboardSessionStorage = ({
+  const dashboardSessionStorage = {
     getDashboardIdsWithUnsavedChanges: jest
       .fn()
       .mockResolvedValue(['dashboardUnsavedOne', 'dashboardUnsavedTwo']),
     getState: jest.fn().mockReturnValue(undefined),
     setState: jest.fn(),
-  } as unknown) as DashboardSessionStorage;
+  } as unknown as DashboardSessionStorage;
   dashboardSessionStorage.clearState = jest.fn();
 
   const defaultCapabilities: DashboardAppCapabilities = {
@@ -62,7 +63,7 @@ export function makeDefaultServices(): DashboardAppServices {
     createNew: true,
     saveQuery: true,
     createShortUrl: true,
-    hideWriteControls: false,
+    showWriteControls: true,
     storeSearchSession: true,
     mapsCapabilities: { save: true },
     visualizeCapabilities: { save: true },
@@ -72,6 +73,7 @@ export function makeDefaultServices(): DashboardAppServices {
   } as PluginInitializerContext;
 
   return {
+    screenshotModeService: screenshotModePluginMock.createSetupContract(),
     visualizations: visualizationsPluginMock.createStartContract(),
     savedObjects: savedObjectsPluginMock.createStartContract(),
     embeddable: embeddablePluginMock.createInstance().doStart(),

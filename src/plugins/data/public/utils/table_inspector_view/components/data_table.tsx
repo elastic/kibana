@@ -17,13 +17,13 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
 import { DataViewRow, DataViewColumn } from '../types';
 import { IUiSettingsClient } from '../../../../../../core/public';
 import { Datatable, DatatableColumn } from '../../../../../expressions/public';
-import { FieldFormatsStart } from '../../../field_formats';
+import { FieldFormatsStart } from '../../../../../field_formats/public';
 import { UiActionsStart } from '../../../../../ui_actions/public';
 
 interface DataTableFormatState {

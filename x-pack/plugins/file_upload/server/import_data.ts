@@ -164,6 +164,7 @@ export function importDataProvider({ asCurrentUser }: IScopedClusterClient) {
         failures.push({
           item: i,
           reason: item.index.error.reason,
+          caused_by: item.index.error.caused_by,
           doc: data[i],
         });
       }

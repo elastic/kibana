@@ -23,6 +23,7 @@ describe('EngineCreationLogic', () => {
   const { flashSuccessToast, flashAPIErrors } = mockFlashMessageHelpers;
 
   const DEFAULT_VALUES = {
+    ingestionMethod: '',
     isLoading: false,
     name: '',
     rawName: '',
@@ -35,6 +36,17 @@ describe('EngineCreationLogic', () => {
   });
 
   describe('actions', () => {
+    describe('setIngestionMethod', () => {
+      it('sets ingestion method to the provided value', () => {
+        mount();
+        EngineCreationLogic.actions.setIngestionMethod('crawler');
+        expect(EngineCreationLogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          ingestionMethod: 'crawler',
+        });
+      });
+    });
+
     describe('setLanguage', () => {
       it('sets language to the provided value', () => {
         mount();
@@ -117,13 +129,13 @@ describe('EngineCreationLogic', () => {
         jest.clearAllMocks();
       });
 
-      it('POSTS to /api/app_search/engines', () => {
+      it('POSTS to /internal/app_search/engines', () => {
         const body = JSON.stringify({
           name: EngineCreationLogic.values.name,
           language: EngineCreationLogic.values.language,
         });
         EngineCreationLogic.actions.submitEngine();
-        expect(http.post).toHaveBeenCalledWith('/api/app_search/engines', { body });
+        expect(http.post).toHaveBeenCalledWith('/internal/app_search/engines', { body });
       });
 
       it('calls onEngineCreationSuccess on valid submission', async () => {

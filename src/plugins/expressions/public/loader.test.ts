@@ -16,12 +16,14 @@ import {
   IInterpreterRenderHandlers,
   RenderMode,
   AnyExpressionFunctionDefinition,
+  ExpressionsService,
+  ExecutionContract,
 } from '../common';
 
 // eslint-disable-next-line
 const { __getLastExecution, __getLastRenderMode } = require('./services');
 
-const element: HTMLElement = null as any;
+const element = null as unknown as HTMLElement;
 
 let testScheduler: TestScheduler;
 
@@ -36,8 +38,9 @@ jest.mock('./services', () => {
     },
   };
 
-  // eslint-disable-next-line
-  const service = new (require('../common/service/expressions_services').ExpressionsService as any)();
+  const service: ExpressionsService =
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    new (require('../common/service/expressions_services').ExpressionsService)();
 
   const testFn: AnyExpressionFunctionDefinition = {
     fn: () => ({ type: 'render', as: 'test' }),
@@ -52,9 +55,11 @@ jest.mock('./services', () => {
     service.registerFunction(func);
   }
 
+  service.start();
+
+  let execution: ExecutionContract;
   const moduleMock = {
-    __execution: undefined,
-    __getLastExecution: () => moduleMock.__execution,
+    __getLastExecution: () => execution,
     __getLastRenderMode: () => renderMode,
     getRenderersRegistry: () => ({
       get: (id: string) => renderers[id],
@@ -70,20 +75,21 @@ jest.mock('./services', () => {
   };
 
   const execute = service.execute;
-  service.execute = (...args: any) => {
-    const execution = execute(...args);
+
+  jest.spyOn(service, 'execute').mockImplementation((...args) => {
+    execution = execute(...args);
     jest.spyOn(execution, 'getData');
     jest.spyOn(execution, 'cancel');
-    moduleMock.__execution = execution;
+
     return execution;
-  };
+  });
 
   return moduleMock;
 });
 
 describe('execute helper function', () => {
-  it('returns ExpressionLoader instance', () => {
-    const response = loader(element, '', {});
+  it('returns ExpressionLoader instance', async () => {
+    const response = await loader(element, '', {});
     expect(response).toBeInstanceOf(ExpressionLoader);
   });
 });

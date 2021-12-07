@@ -48,7 +48,7 @@ export function ResultLinks({ jobs }) {
           },
         })
       : undefined;
-  const jobActionsDisabled = jobs.length === 1 && jobs[0].deleting === true;
+  const jobActionsDisabled = jobs.length === 1 && jobs[0].blocked !== undefined;
   const { createLinkWithUserDefaults } = useCreateADLinks();
   const timeSeriesExplorerLink = useMemo(
     () => createLinkWithUserDefaults('timeseriesexplorer', jobs),

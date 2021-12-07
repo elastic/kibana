@@ -35,6 +35,7 @@ export interface KibanaRequestState extends RequestApplicationState {
   requestId: string;
   requestUuid: string;
   rewrittenUrl?: URL;
+  traceId?: string;
 }
 
 /**
@@ -75,13 +76,6 @@ export interface KibanaRequestEvents {
    */
   completed$: Observable<void>;
 }
-
-/**
- * @deprecated
- * `hapi` request object, supported during migration process only for backward compatibility.
- * @public
- */
-export interface LegacyRequest extends Request {} // eslint-disable-line @typescript-eslint/no-empty-interface
 
 /**
  * Kibana specific abstraction for an incoming request.
@@ -202,10 +196,7 @@ export class KibanaRequest<
 
     this.url = request.url;
     this.headers = deepFreeze({ ...request.headers });
-    this.isSystemRequest =
-      request.headers['kbn-system-request'] === 'true' ||
-      // Remove support for `kbn-system-api` in 8.x. Used only by legacy platform.
-      request.headers['kbn-system-api'] === 'true';
+    this.isSystemRequest = request.headers['kbn-system-request'] === 'true';
 
     // prevent Symbol exposure via Object.getOwnPropertySymbols()
     Object.defineProperty(this, requestSymbol, {
@@ -224,10 +215,8 @@ export class KibanaRequest<
   }
 
   private getEvents(request: Request): KibanaRequestEvents {
-    const finish$ = merge(
-      fromEvent(request.raw.res, 'finish'), // Response has been sent
-      fromEvent(request.raw.req, 'close') // connection was closed
-    ).pipe(shareReplay(1), first());
+    // the response is completed, or its underlying connection was terminated prematurely
+    const finish$ = fromEvent(request.raw.res, 'close').pipe(shareReplay(1), first());
 
     const aborted$ = fromEvent<void>(request.raw.req, 'aborted').pipe(first(), takeUntil(finish$));
     const completed$ = merge<void, void>(finish$, aborted$).pipe(shareReplay(1), first());
@@ -240,13 +229,18 @@ export class KibanaRequest<
 
   private getRouteInfo(request: Request): KibanaRequestRoute<Method> {
     const method = request.method as Method;
-    const { parse, maxBytes, allow, output, timeout: payloadTimeout } =
-      request.route.settings.payload || {};
+    const {
+      parse,
+      maxBytes,
+      allow,
+      output,
+      timeout: payloadTimeout,
+    } = request.route.settings.payload || {};
 
     // net.Socket#timeout isn't documented, yet, and isn't part of the types... https://github.com/nodejs/node/pull/34543
     // the socket is also undefined when using @hapi/shot, or when a "fake request" is used
     const socketTimeout = (request.raw.req.socket as any)?.timeout;
-    const options = ({
+    const options = {
       authRequired: this.getAuthRequired(request),
       // TypeScript note: Casting to `RouterOptions` to fix the following error:
       //
@@ -271,7 +265,7 @@ export class KibanaRequest<
             accepts: allow,
             output: output as typeof validBodyOutput[number], // We do not support all the HAPI-supported outputs and TS complains
           },
-    } as unknown) as KibanaRequestRouteOptions<Method>; // TS does not understand this is OK so I'm enforced to do this enforced casting
+    } as unknown as KibanaRequestRouteOptions<Method>; // TS does not understand this is OK so I'm enforced to do this enforced casting
 
     return {
       path: request.path,
@@ -311,7 +305,7 @@ export class KibanaRequest<
  * Returns underlying Hapi Request
  * @internal
  */
-export const ensureRawRequest = (request: KibanaRequest | LegacyRequest) =>
+export const ensureRawRequest = (request: KibanaRequest | Request) =>
   isKibanaRequest(request) ? request[requestSymbol] : request;
 
 /**
@@ -322,7 +316,7 @@ export function isKibanaRequest(request: unknown): request is KibanaRequest {
   return request instanceof KibanaRequest;
 }
 
-function isRequest(request: any): request is LegacyRequest {
+function isRequest(request: any): request is Request {
   try {
     return request.raw.req && typeof request.raw.req === 'object';
   } catch {
@@ -331,9 +325,9 @@ function isRequest(request: any): request is LegacyRequest {
 }
 
 /**
- * Checks if an incoming request either KibanaRequest or Legacy.Request
+ * Checks if an incoming request either KibanaRequest or Hapi.Request
  * @internal
  */
-export function isRealRequest(request: unknown): request is KibanaRequest | LegacyRequest {
+export function isRealRequest(request: unknown): request is KibanaRequest | Request {
   return isKibanaRequest(request) || isRequest(request);
 }

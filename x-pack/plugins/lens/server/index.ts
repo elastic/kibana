@@ -5,16 +5,15 @@
  * 2.0.
  */
 
-import { PluginInitializerContext, PluginConfigDescriptor } from 'kibana/server';
+// TODO: https://github.com/elastic/kibana/issues/110891
+/* eslint-disable @kbn/eslint/no_export_all */
+
+import { PluginInitializerContext } from 'kibana/server';
 import { LensServerPlugin } from './plugin';
 
+export type { LensServerPluginSetup } from './plugin';
 export * from './plugin';
-
-import { configSchema, ConfigSchema } from '../config';
-
-export const config: PluginConfigDescriptor<ConfigSchema> = {
-  schema: configSchema,
-};
+export * from './migrations/types';
 
 export const plugin = (initializerContext: PluginInitializerContext) =>
   new LensServerPlugin(initializerContext);

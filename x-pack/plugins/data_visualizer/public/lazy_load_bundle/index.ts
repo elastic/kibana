@@ -22,13 +22,13 @@ export async function lazyLoadModules(): Promise<LazyLoadedModules> {
     return loadModulesPromise;
   }
 
-  loadModulesPromise = new Promise(async (resolve) => {
-    const lazyImports = await import('./lazy');
-
-    resolve({
-      ...lazyImports,
-      getHttp: () => getCoreStart().http,
-    });
+  loadModulesPromise = new Promise(async (resolve, reject) => {
+    try {
+      const lazyImports = await import('./lazy');
+      resolve({ ...lazyImports, getHttp: () => getCoreStart().http });
+    } catch (error) {
+      reject(error);
+    }
   });
   return loadModulesPromise;
 }

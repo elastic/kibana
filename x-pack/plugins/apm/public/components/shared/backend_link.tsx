@@ -17,32 +17,32 @@ import { SpanIcon } from './span_icon';
 const StyledLink = euiStyled(EuiLink)`${truncate('100%')};`;
 
 interface BackendLinkProps {
-  backendName: string;
-  query?: TypeOf<ApmRoutes, '/backends/:backendName/overview'>['query'];
+  query: TypeOf<ApmRoutes, '/backends/overview'>['query'];
   subtype?: string;
   type?: string;
+  onClick?: React.ComponentProps<typeof EuiLink>['onClick'];
 }
 
 export function BackendLink({
-  backendName,
   query,
   subtype,
   type,
+  onClick,
 }: BackendLinkProps) {
   const { link } = useApmRouter();
 
   return (
     <StyledLink
-      href={link('/backends/:backendName/overview', {
-        path: { backendName },
+      href={link('/backends/overview', {
         query,
       })}
+      onClick={onClick}
     >
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
         <EuiFlexItem grow={false}>
           <SpanIcon type={type} subtype={subtype} />
         </EuiFlexItem>
-        <EuiFlexItem>{backendName}</EuiFlexItem>
+        <EuiFlexItem>{query.backendName}</EuiFlexItem>
       </EuiFlexGroup>
     </StyledLink>
   );

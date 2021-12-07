@@ -65,10 +65,10 @@ export const createExtract = ({
     return {
       state: {
         ...state,
-        action: ({
+        action: {
           ...state.action,
           config: restOfConfig,
-        } as unknown) as SerializedAction,
+        } as unknown as SerializedAction,
       },
       references,
     };

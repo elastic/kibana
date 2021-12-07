@@ -10,4 +10,7 @@ module.exports = {
   preset: '@kbn/test',
   rootDir: '../../..',
   roots: ['<rootDir>/src/plugins/navigation'],
+  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/src/plugins/navigation',
+  coverageReporters: ['text', 'html'],
+  collectCoverageFrom: ['<rootDir>/src/plugins/navigation/public/**/*.{ts,tsx}'],
 };

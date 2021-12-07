@@ -7,15 +7,20 @@
 
 import { Geometry, Position } from 'geojson';
 import { set } from '@elastic/safer-lodash-set';
-import { GET_MATCHING_INDEXES_PATH, INDEX_FEATURE_PATH } from '../../../../../common';
+import {
+  CHECK_IS_DRAWING_INDEX,
+  GET_MATCHING_INDEXES_PATH,
+  INDEX_FEATURE_PATH,
+} from '../../../../../common/constants';
 import { getHttp } from '../../../../kibana_services';
 
 export const addFeatureToIndex = async (
   indexName: string,
   geometry: Geometry | Position[],
-  path: string
+  path: string,
+  defaultFields: Record<string, Record<string, string>>
 ) => {
-  const data = set({}, path, geometry);
+  const data = set({ ...defaultFields }, path, geometry);
   return await getHttp().fetch({
     path: `${INDEX_FEATURE_PATH}`,
     method: 'POST',
@@ -37,8 +42,23 @@ export const deleteFeatureFromIndex = async (indexName: string, featureId: strin
 };
 
 export const getMatchingIndexes = async (indexPattern: string) => {
-  return await getHttp().fetch({
-    path: `${GET_MATCHING_INDEXES_PATH}/${indexPattern}`,
+  return await getHttp().fetch<{
+    success: boolean;
+    matchingIndexes: string[];
+  }>({
+    path: GET_MATCHING_INDEXES_PATH,
     method: 'GET',
+    query: { indexPattern },
+  });
+};
+
+export const getIsDrawLayer = async (index: string) => {
+  return await getHttp().fetch<{
+    success: boolean;
+    isDrawingIndex: boolean;
+  }>({
+    path: CHECK_IS_DRAWING_INDEX,
+    method: 'GET',
+    query: { index },
   });
 };

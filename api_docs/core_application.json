@@ -444,7 +444,7 @@
               },
               {
                 "parentPluginId": "core",
-                "id": "def-public.ScopedHistory.createHref.$2.prependBasePathtrue",
+                "id": "def-public.ScopedHistory.createHref.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "{ prependBasePath = true }",
@@ -454,7 +454,7 @@
                 "children": [
                   {
                     "parentPluginId": "core",
-                    "id": "def-public.ScopedHistory.createHref.$2.prependBasePathtrue.prependBasePath",
+                    "id": "def-public.ScopedHistory.createHref.$2.prependBasePath",
                     "type": "CompoundType",
                     "tags": [],
                     "label": "prependBasePath",
@@ -715,7 +715,7 @@
             "children": [
               {
                 "parentPluginId": "core",
-                "id": "def-public.params",
+                "id": "def-public.App.mount.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "params",
@@ -871,7 +871,9 @@
               "(() => void) | undefined"
             ],
             "path": "src/core/public/application/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -1201,7 +1203,7 @@
               },
               {
                 "parentPluginId": "core",
-                "id": "def-public.ApplicationStart.getUrlForApp.$2.options",
+                "id": "def-public.ApplicationStart.getUrlForApp.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "options",
@@ -1211,7 +1213,7 @@
                 "children": [
                   {
                     "parentPluginId": "core",
-                    "id": "def-public.ApplicationStart.getUrlForApp.$2.options.path",
+                    "id": "def-public.ApplicationStart.getUrlForApp.$2.path",
                     "type": "string",
                     "tags": [],
                     "label": "path",
@@ -1224,7 +1226,7 @@
                   },
                   {
                     "parentPluginId": "core",
-                    "id": "def-public.ApplicationStart.getUrlForApp.$2.options.absolute",
+                    "id": "def-public.ApplicationStart.getUrlForApp.$2.absolute",
                     "type": "CompoundType",
                     "tags": [],
                     "label": "absolute",
@@ -1237,7 +1239,7 @@
                   },
                   {
                     "parentPluginId": "core",
-                    "id": "def-public.ApplicationStart.getUrlForApp.$2.options.deepLinkId",
+                    "id": "def-public.ApplicationStart.getUrlForApp.$2.deepLinkId",
                     "type": "string",
                     "tags": [],
                     "label": "deepLinkId",
@@ -1386,6 +1388,14 @@
               {
                 "plugin": "fleet",
                 "path": "x-pack/plugins/fleet/target/types/public/applications/integrations/index.d.ts"
+              },
+              {
+                "plugin": "kibanaOverview",
+                "path": "src/plugins/kibana_overview/public/application.tsx"
+              },
+              {
+                "plugin": "management",
+                "path": "src/plugins/management/target/types/public/application.d.ts"
               }
             ]
           },
@@ -1493,33 +1503,67 @@
               {
                 "plugin": "maps",
                 "path": "x-pack/plugins/maps/target/types/public/routes/map_page/map_app/map_app.d.ts"
+              },
+              {
+                "plugin": "visualize",
+                "path": "src/plugins/visualize/public/application/components/visualize_top_nav.tsx"
+              },
+              {
+                "plugin": "visualize",
+                "path": "src/plugins/visualize/public/application/components/visualize_editor_common.tsx"
+              },
+              {
+                "plugin": "visualize",
+                "path": "src/plugins/visualize/public/application/app.tsx"
+              },
+              {
+                "plugin": "visualize",
+                "path": "src/plugins/visualize/public/application/index.tsx"
+              },
+              {
+                "plugin": "dashboard",
+                "path": "src/plugins/dashboard/target/types/public/types.d.ts"
+              },
+              {
+                "plugin": "visualize",
+                "path": "src/plugins/visualize/target/types/public/application/app.d.ts"
+              },
+              {
+                "plugin": "visualize",
+                "path": "src/plugins/visualize/target/types/public/application/index.d.ts"
+              },
+              {
+                "plugin": "visualize",
+                "path": "src/plugins/visualize/target/types/public/application/components/visualize_editor_common.d.ts"
+              },
+              {
+                "plugin": "visualize",
+                "path": "src/plugins/visualize/target/types/public/application/components/visualize_top_nav.d.ts"
               }
             ],
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "core",
-                "id": "def-public.handler",
+                "id": "def-public.AppMountParameters.onAppLeave.$1",
                 "type": "Function",
                 "tags": [],
                 "label": "handler",
                 "description": [],
                 "signature": [
-                  "(factory: ",
-                  "AppLeaveActionFactory",
-                  ", nextAppId?: string | undefined) => ",
                   {
                     "pluginId": "core",
                     "scope": "public",
                     "docId": "kibCoreApplicationPluginApi",
-                    "section": "def-public.AppLeaveAction",
-                    "text": "AppLeaveAction"
+                    "section": "def-public.AppLeaveHandler",
+                    "text": "AppLeaveHandler"
                   }
                 ],
                 "path": "src/core/public/application/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "core",
@@ -1543,11 +1587,10 @@
             ],
             "path": "src/core/public/application/types.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "core",
-                "id": "def-public.menuMount",
+                "id": "def-public.AppMountParameters.setHeaderActionMenu.$1",
                 "type": "Function",
                 "tags": [],
                 "label": "menuMount",
@@ -1563,9 +1606,35 @@
                   "<HTMLElement> | undefined"
                 ],
                 "path": "src/core/public/application/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": false
               }
-            ]
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.AppMountParameters.theme$",
+            "type": "Object",
+            "tags": [],
+            "label": "theme$",
+            "description": [
+              "\nAn observable emitting {@link CoreTheme | Core's theme}.\nShould be used when mounting the application to include theme information.\n"
+            ],
+            "signature": [
+              "Observable",
+              "<",
+              {
+                "pluginId": "core",
+                "scope": "public",
+                "docId": "kibCorePluginApi",
+                "section": "def-public.CoreTheme",
+                "text": "CoreTheme"
+              },
+              ">"
+            ],
+            "path": "src/core/public/application/types.ts",
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -1619,7 +1688,7 @@
             "tags": [],
             "label": "euiIconType",
             "description": [
-              "\nA EUI iconType that will be used for the app's icon. This icon\ntakes precendence over the `icon` property."
+              "\nA EUI iconType that will be used for the app's icon. This icon\ntakes precedence over the `icon` property."
             ],
             "signature": [
               "string | undefined"
@@ -1951,6 +2020,35 @@
             "path": "x-pack/plugins/security_solution/public/app/app.tsx"
           }
         ],
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-public.AppLeaveHandler.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "factory",
+            "description": [],
+            "signature": [
+              "AppLeaveActionFactory"
+            ],
+            "path": "src/core/public/application/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.AppLeaveHandler.$2",
+            "type": "string",
+            "tags": [],
+            "label": "nextAppId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/core/public/application/types.ts",
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -1991,6 +2089,31 @@
         ],
         "path": "src/core/public/application/types.ts",
         "deprecated": false,
+        "returnComment": [
+          "An unmounting function that will be called to unmount the application. See {@link AppUnmount}."
+        ],
+        "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-public.AppMount.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "params",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "core",
+                "scope": "public",
+                "docId": "kibCoreApplicationPluginApi",
+                "section": "def-public.AppMountParameters",
+                "text": "AppMountParameters"
+              },
+              "<HistoryLocationState>"
+            ],
+            "path": "src/core/public/application/types.ts",
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -2007,6 +2130,8 @@
         ],
         "path": "src/core/public/application/types.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [],
         "initialIsOpen": false
       },
       {
@@ -2019,15 +2144,7 @@
           "\nDefines the list of fields that can be updated via an {@link AppUpdater}."
         ],
         "signature": [
-          "{ status?: ",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCoreApplicationPluginApi",
-            "section": "def-public.AppStatus",
-            "text": "AppStatus"
-          },
-          " | undefined; deepLinks?: ",
+          "{ deepLinks?: ",
           {
             "pluginId": "core",
             "scope": "public",
@@ -2035,7 +2152,15 @@
             "section": "def-public.AppDeepLink",
             "text": "AppDeepLink"
           },
-          "[] | undefined; searchable?: boolean | undefined; navLinkStatus?: ",
+          "[] | undefined; searchable?: boolean | undefined; status?: ",
+          {
+            "pluginId": "core",
+            "scope": "public",
+            "docId": "kibCoreApplicationPluginApi",
+            "section": "def-public.AppStatus",
+            "text": "AppStatus"
+          },
+          " | undefined; navLinkStatus?: ",
           {
             "pluginId": "core",
             "scope": "public",
@@ -2075,10 +2200,33 @@
             "section": "def-public.App",
             "text": "App"
           },
-          "<unknown>, \"status\" | \"deepLinks\" | \"searchable\" | \"navLinkStatus\" | \"defaultPath\" | \"tooltip\">> | undefined"
+          "<unknown>, \"deepLinks\" | \"searchable\" | \"status\" | \"navLinkStatus\" | \"defaultPath\" | \"tooltip\">> | undefined"
         ],
         "path": "src/core/public/application/types.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-public.AppUpdater.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "app",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "core",
+                "scope": "public",
+                "docId": "kibCoreApplicationPluginApi",
+                "section": "def-public.App",
+                "text": "App"
+              },
+              "<unknown>"
+            ],
+            "path": "src/core/public/application/types.ts",
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -2139,7 +2287,7 @@
             "section": "def-public.App",
             "text": "App"
           },
-          "<unknown>, \"status\" | \"title\" | \"id\" | \"order\" | \"category\" | \"navLinkStatus\" | \"defaultPath\" | \"capabilities\" | \"chromeless\" | \"appRoute\" | \"exactRoute\" | \"tooltip\" | \"euiIconType\" | \"icon\"> & { status: ",
+          "<unknown>, \"title\" | \"id\" | \"order\" | \"capabilities\" | \"category\" | \"status\" | \"navLinkStatus\" | \"defaultPath\" | \"chromeless\" | \"appRoute\" | \"exactRoute\" | \"tooltip\" | \"euiIconType\" | \"icon\"> & { status: ",
           {
             "pluginId": "core",
             "scope": "public",

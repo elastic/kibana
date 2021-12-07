@@ -6,19 +6,24 @@
  */
 
 import { merge } from 'lodash';
-import { estypes } from '@elastic/elasticsearch';
-import { TRANSACTION_TYPE } from '../../../common/elasticsearch_fieldnames';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import {
+  AGENT_NAME,
+  TRANSACTION_TYPE,
+  TRANSACTION_NAME,
+  SERVICE_NAME,
+} from '../../../common/elasticsearch_fieldnames';
 import { arrayUnionToCallable } from '../../../common/utils/array_union_to_callable';
 import { TransactionGroupRequestBase, TransactionGroupSetup } from './fetcher';
-import { getTransactionDurationFieldForAggregatedTransactions } from '../helpers/aggregated_transactions';
-
+import { getDurationFieldForTransactions } from '../helpers/transactions';
+import { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
 interface MetricParams {
   request: TransactionGroupRequestBase;
   setup: TransactionGroupSetup;
   searchAggregatedTransactions: boolean;
 }
 
-type BucketKey = string | Record<string, string>;
+type BucketKey = Record<typeof TRANSACTION_NAME | typeof SERVICE_NAME, string>;
 
 function mergeRequestWithAggs<
   TRequestBase extends TransactionGroupRequestBase,
@@ -46,9 +51,7 @@ export async function getAverages({
   const params = mergeRequestWithAggs(request, {
     avg: {
       avg: {
-        field: getTransactionDurationFieldForAggregatedTransactions(
-          searchAggregatedTransactions
-        ),
+        field: getDurationFieldForTransactions(searchAggregatedTransactions),
       },
     },
   });
@@ -79,6 +82,9 @@ export async function getCounts({ request, setup }: MetricParams) {
           {
             field: TRANSACTION_TYPE,
           } as const,
+          {
+            field: AGENT_NAME,
+          } as const,
         ],
       },
     },
@@ -98,6 +104,9 @@ export async function getCounts({ request, setup }: MetricParams) {
       transactionType: bucket.transaction_type.top[0].metrics[
         TRANSACTION_TYPE
       ] as string,
+      agentName: bucket.transaction_type.top[0].metrics[
+        AGENT_NAME
+      ] as AgentName,
     };
   });
 }
@@ -110,9 +119,7 @@ export async function getSums({
   const params = mergeRequestWithAggs(request, {
     sum: {
       sum: {
-        field: getTransactionDurationFieldForAggregatedTransactions(
-          searchAggregatedTransactions
-        ),
+        field: getDurationFieldForTransactions(searchAggregatedTransactions),
       },
     },
   });
@@ -128,38 +135,6 @@ export async function getSums({
     return {
       key: bucket.key as BucketKey,
       sum: bucket.sum.value,
-    };
-  });
-}
-
-export async function getPercentiles({
-  request,
-  setup,
-  searchAggregatedTransactions,
-}: MetricParams) {
-  const params = mergeRequestWithAggs(request, {
-    p95: {
-      percentiles: {
-        field: getTransactionDurationFieldForAggregatedTransactions(
-          searchAggregatedTransactions
-        ),
-        hdr: { number_of_significant_value_digits: 2 },
-        percents: [95],
-      },
-    },
-  });
-
-  const response = await setup.apmEventClient.search(
-    'get_transaction_group_latency_percentiles',
-    params
-  );
-
-  return arrayUnionToCallable(
-    response.aggregations?.transaction_groups.buckets ?? []
-  ).map((bucket) => {
-    return {
-      key: bucket.key as BucketKey,
-      p95: Object.values(bucket.p95.values)[0],
     };
   });
 }

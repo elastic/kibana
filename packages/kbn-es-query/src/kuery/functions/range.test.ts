@@ -9,19 +9,21 @@
 import { get } from 'lodash';
 import { nodeTypes } from '../node_types';
 import { fields } from '../../filters/stubs';
-import { IndexPatternBase } from '../..';
+import { DataViewBase } from '../..';
 import { RangeFilterParams } from '../../filters';
 
 import * as range from './range';
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 jest.mock('../grammar');
 
 describe('kuery functions', () => {
   describe('range', () => {
-    let indexPattern: IndexPatternBase;
+    let indexPattern: DataViewBase;
 
     beforeEach(() => {
       indexPattern = {
         fields,
+        title: 'dataView',
       };
     });
 
@@ -128,7 +130,9 @@ describe('kuery functions', () => {
         const node = nodeTypes.function.buildNode('range', 'script number', { gt: 1000, lt: 8000 });
         const result = range.toElasticsearchQuery(node, indexPattern);
 
-        expect(result.bool.should[0]).toHaveProperty('script');
+        expect((result.bool!.should as estypes.QueryDslQueryContainer[])[0]).toHaveProperty(
+          'script'
+        );
       });
 
       test('should support date fields without a dateFormat provided', () => {

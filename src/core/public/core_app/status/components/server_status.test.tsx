@@ -9,12 +9,12 @@
 import React from 'react';
 import { mount } from 'enzyme';
 import { ServerStatus } from './server_status';
-import { FormattedStatus } from '../lib';
+import { StatusState } from '../lib';
 
-const getStatus = (parts: Partial<FormattedStatus['state']> = {}): FormattedStatus['state'] => ({
-  id: 'green',
+const getStatus = (parts: Partial<StatusState> = {}): StatusState => ({
+  id: 'available',
   title: 'Green',
-  uiColor: 'secondary',
+  uiColor: 'success',
   message: '',
   ...parts,
 });
@@ -27,9 +27,19 @@ describe('ServerStatus', () => {
     expect(component.find('EuiBadge')).toMatchSnapshot();
   });
 
+  it('renders correctly for yellow state', () => {
+    const status = getStatus({
+      id: 'degraded',
+      title: 'Yellow',
+    });
+    const component = mount(<ServerStatus serverState={status} name="My Computer" />);
+    expect(component.find('EuiTitle').text()).toMatchInlineSnapshot(`"Kibana status is Yellow"`);
+    expect(component.find('EuiBadge')).toMatchSnapshot();
+  });
+
   it('renders correctly for red state', () => {
     const status = getStatus({
-      id: 'red',
+      id: 'unavailable',
       title: 'Red',
     });
     const component = mount(<ServerStatus serverState={status} name="My Computer" />);

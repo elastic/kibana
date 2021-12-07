@@ -53,7 +53,9 @@ export const ReindexJobLogic = kea<MakeLogicType<ReindexJobValues, ReindexJobAct
       const { engineName } = EngineLogic.values;
 
       try {
-        const response = await http.get(`/api/app_search/engines/${engineName}/reindex_job/${id}`);
+        const response = await http.get<ReindexJobApiResponse>(
+          `/internal/app_search/engines/${engineName}/reindex_job/${id}`
+        );
         actions.onLoadSuccess(response);
       } catch (e) {
         flashAPIErrors(e);

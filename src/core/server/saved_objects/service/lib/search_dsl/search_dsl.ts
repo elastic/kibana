@@ -8,7 +8,7 @@
 
 import Boom from '@hapi/boom';
 
-import type { estypes } from '@elastic/elasticsearch';
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { IndexMapping } from '../../../mappings';
 import { SavedObjectsPitParams } from '../../../types';
 import { getQueryParams, HasReferenceQueryParams, SearchOperator } from './query_params';

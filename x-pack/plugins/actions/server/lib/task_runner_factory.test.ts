@@ -97,7 +97,7 @@ test(`throws an error if factory is already initialized`, () => {
   ).toThrowErrorMatchingInlineSnapshot(`"TaskRunnerFactory already initialized"`);
 });
 
-test('executes the task by calling the executor with proper parameters', async () => {
+test('executes the task by calling the executor with proper parameters, using given actionId when no actionRef in references', async () => {
   const taskRunner = taskRunnerFactory.create({
     taskInstance: mockedTaskInstance,
   });
@@ -119,9 +119,11 @@ test('executes the task by calling the executor with proper parameters', async (
 
   expect(runnerResult).toBeUndefined();
   expect(spaceIdToNamespace).toHaveBeenCalledWith('test');
-  expect(
-    mockedEncryptedSavedObjectsClient.getDecryptedAsInternalUser
-  ).toHaveBeenCalledWith('action_task_params', '3', { namespace: 'namespace-test' });
+  expect(mockedEncryptedSavedObjectsClient.getDecryptedAsInternalUser).toHaveBeenCalledWith(
+    'action_task_params',
+    '3',
+    { namespace: 'namespace-test' }
+  );
 
   expect(mockedActionExecutor.execute).toHaveBeenCalledWith({
     actionId: '2',
@@ -136,6 +138,65 @@ test('executes the task by calling the executor with proper parameters', async (
     }),
     taskInfo: {
       scheduled: new Date(),
+      attempts: 0,
+    },
+  });
+
+  const [executeParams] = mockedActionExecutor.execute.mock.calls[0];
+  expect(taskRunnerFactoryInitializerParams.basePathService.set).toHaveBeenCalledWith(
+    executeParams.request,
+    '/s/test'
+  );
+});
+
+test('executes the task by calling the executor with proper parameters, using stored actionId when actionRef is in references', async () => {
+  const taskRunner = taskRunnerFactory.create({
+    taskInstance: mockedTaskInstance,
+  });
+
+  mockedActionExecutor.execute.mockResolvedValueOnce({ status: 'ok', actionId: '2' });
+  spaceIdToNamespace.mockReturnValueOnce('namespace-test');
+  mockedEncryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
+    id: '3',
+    type: 'action_task_params',
+    attributes: {
+      actionId: '2',
+      params: { baz: true },
+      apiKey: Buffer.from('123:abc').toString('base64'),
+    },
+    references: [
+      {
+        id: '9',
+        name: 'actionRef',
+        type: 'action',
+      },
+    ],
+  });
+
+  const runnerResult = await taskRunner.run();
+
+  expect(runnerResult).toBeUndefined();
+  expect(spaceIdToNamespace).toHaveBeenCalledWith('test');
+  expect(mockedEncryptedSavedObjectsClient.getDecryptedAsInternalUser).toHaveBeenCalledWith(
+    'action_task_params',
+    '3',
+    { namespace: 'namespace-test' }
+  );
+
+  expect(mockedActionExecutor.execute).toHaveBeenCalledWith({
+    actionId: '9',
+    isEphemeral: false,
+    params: { baz: true },
+    relatedSavedObjects: [],
+    request: expect.objectContaining({
+      headers: {
+        // base64 encoded "123:abc"
+        authorization: 'ApiKey MTIzOmFiYw==',
+      },
+    }),
+    taskInfo: {
+      scheduled: new Date(),
+      attempts: 0,
     },
   });
 
@@ -161,7 +222,13 @@ test('cleans up action_task_params object', async () => {
       params: { baz: true },
       apiKey: Buffer.from('123:abc').toString('base64'),
     },
-    references: [],
+    references: [
+      {
+        id: '2',
+        name: 'actionRef',
+        type: 'action',
+      },
+    ],
   });
 
   await taskRunner.run();
@@ -184,7 +251,13 @@ test('runs successfully when cleanup fails and logs the error', async () => {
       params: { baz: true },
       apiKey: Buffer.from('123:abc').toString('base64'),
     },
-    references: [],
+    references: [
+      {
+        id: '2',
+        name: 'actionRef',
+        type: 'action',
+      },
+    ],
   });
   services.savedObjectsClient.delete.mockRejectedValueOnce(new Error('Fail'));
 
@@ -209,7 +282,13 @@ test('throws an error with suggested retry logic when return status is error', a
       params: { baz: true },
       apiKey: Buffer.from('123:abc').toString('base64'),
     },
-    references: [],
+    references: [
+      {
+        id: '2',
+        name: 'actionRef',
+        type: 'action',
+      },
+    ],
   });
   mockedActionExecutor.execute.mockResolvedValueOnce({
     status: 'error',
@@ -244,7 +323,13 @@ test('uses API key when provided', async () => {
       params: { baz: true },
       apiKey: Buffer.from('123:abc').toString('base64'),
     },
-    references: [],
+    references: [
+      {
+        id: '2',
+        name: 'actionRef',
+        type: 'action',
+      },
+    ],
   });
 
   await taskRunner.run();
@@ -262,6 +347,7 @@ test('uses API key when provided', async () => {
     }),
     taskInfo: {
       scheduled: new Date(),
+      attempts: 0,
     },
   });
 
@@ -272,7 +358,7 @@ test('uses API key when provided', async () => {
   );
 });
 
-test('uses relatedSavedObjects when provided', async () => {
+test('uses relatedSavedObjects merged with references when provided', async () => {
   const taskRunner = taskRunnerFactory.create({
     taskInstance: mockedTaskInstance,
   });
@@ -286,9 +372,20 @@ test('uses relatedSavedObjects when provided', async () => {
       actionId: '2',
       params: { baz: true },
       apiKey: Buffer.from('123:abc').toString('base64'),
-      relatedSavedObjects: [{ id: 'some-id', type: 'some-type' }],
+      relatedSavedObjects: [{ id: 'related_some-type_0', type: 'some-type' }],
     },
-    references: [],
+    references: [
+      {
+        id: '2',
+        name: 'actionRef',
+        type: 'action',
+      },
+      {
+        id: 'some-id',
+        name: 'related_some-type_0',
+        type: 'some-type',
+      },
+    ],
   });
 
   await taskRunner.run();
@@ -311,6 +408,58 @@ test('uses relatedSavedObjects when provided', async () => {
     }),
     taskInfo: {
       scheduled: new Date(),
+      attempts: 0,
+    },
+  });
+});
+
+test('uses relatedSavedObjects as is when references are empty', async () => {
+  const taskRunner = taskRunnerFactory.create({
+    taskInstance: mockedTaskInstance,
+  });
+
+  mockedActionExecutor.execute.mockResolvedValueOnce({ status: 'ok', actionId: '2' });
+  spaceIdToNamespace.mockReturnValueOnce('namespace-test');
+  mockedEncryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
+    id: '3',
+    type: 'action_task_params',
+    attributes: {
+      actionId: '2',
+      params: { baz: true },
+      apiKey: Buffer.from('123:abc').toString('base64'),
+      relatedSavedObjects: [{ id: 'abc', type: 'some-type', namespace: 'yo' }],
+    },
+    references: [
+      {
+        id: '2',
+        name: 'actionRef',
+        type: 'action',
+      },
+    ],
+  });
+
+  await taskRunner.run();
+
+  expect(mockedActionExecutor.execute).toHaveBeenCalledWith({
+    actionId: '2',
+    isEphemeral: false,
+    params: { baz: true },
+    relatedSavedObjects: [
+      {
+        id: 'abc',
+        type: 'some-type',
+        namespace: 'yo',
+      },
+    ],
+    request: expect.objectContaining({
+      headers: {
+        // base64 encoded "123:abc"
+        authorization: 'ApiKey MTIzOmFiYw==',
+      },
+    }),
+    taskInfo: {
+      scheduled: new Date(),
+      attempts: 0,
     },
   });
 });
@@ -329,9 +478,20 @@ test('sanitizes invalid relatedSavedObjects when provided', async () => {
       actionId: '2',
       params: { baz: true },
       apiKey: Buffer.from('123:abc').toString('base64'),
-      relatedSavedObjects: [{ Xid: 'some-id', type: 'some-type' }],
+      relatedSavedObjects: [{ Xid: 'related_some-type_0', type: 'some-type' }],
     },
-    references: [],
+    references: [
+      {
+        id: '2',
+        name: 'actionRef',
+        type: 'action',
+      },
+      {
+        id: 'some-id',
+        name: 'related_some-type_0',
+        type: 'some-type',
+      },
+    ],
   });
 
   await taskRunner.run();
@@ -348,6 +508,7 @@ test('sanitizes invalid relatedSavedObjects when provided', async () => {
     relatedSavedObjects: [],
     taskInfo: {
       scheduled: new Date(),
+      attempts: 0,
     },
   });
 });
@@ -366,7 +527,13 @@ test(`doesn't use API key when not provided`, async () => {
       actionId: '2',
       params: { baz: true },
     },
-    references: [],
+    references: [
+      {
+        id: '2',
+        name: 'actionRef',
+        type: 'action',
+      },
+    ],
   });
 
   await taskRunner.run();
@@ -381,6 +548,7 @@ test(`doesn't use API key when not provided`, async () => {
     }),
     taskInfo: {
       scheduled: new Date(),
+      attempts: 0,
     },
   });
 
@@ -392,9 +560,15 @@ test(`doesn't use API key when not provided`, async () => {
 });
 
 test(`throws an error when license doesn't support the action type`, async () => {
-  const taskRunner = taskRunnerFactory.create({
-    taskInstance: mockedTaskInstance,
-  });
+  const taskRunner = taskRunnerFactory.create(
+    {
+      taskInstance: {
+        ...mockedTaskInstance,
+        attempts: 1,
+      },
+    },
+    2
+  );
 
   mockedEncryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
     id: '3',
@@ -404,7 +578,13 @@ test(`throws an error when license doesn't support the action type`, async () =>
       params: { baz: true },
       apiKey: Buffer.from('123:abc').toString('base64'),
     },
-    references: [],
+    references: [
+      {
+        id: '2',
+        name: 'actionRef',
+        type: 'action',
+      },
+    ],
   });
   mockedActionExecutor.execute.mockImplementation(() => {
     throw new ActionTypeDisabledError('Fail', 'license_invalid');
@@ -416,6 +596,138 @@ test(`throws an error when license doesn't support the action type`, async () =>
   } catch (e) {
     expect(e instanceof ExecutorError).toEqual(true);
     expect(e.data).toEqual({});
-    expect(e.retry).toEqual(false);
+    expect(e.retry).toEqual(true);
   }
+});
+
+test(`treats errors as errors if the task is retryable`, async () => {
+  const taskRunner = taskRunnerFactory.create({
+    taskInstance: {
+      ...mockedTaskInstance,
+      attempts: 0,
+    },
+  });
+
+  mockedEncryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
+    id: '3',
+    type: 'action_task_params',
+    attributes: {
+      actionId: '2',
+      params: { baz: true },
+      apiKey: Buffer.from('123:abc').toString('base64'),
+    },
+    references: [
+      {
+        id: '2',
+        name: 'actionRef',
+        type: 'action',
+      },
+    ],
+  });
+  mockedActionExecutor.execute.mockResolvedValueOnce({
+    status: 'error',
+    actionId: '2',
+    message: 'Error message',
+    data: { foo: true },
+    retry: false,
+  });
+
+  let err;
+  try {
+    await taskRunner.run();
+  } catch (e) {
+    err = e;
+  }
+  expect(err).toBeDefined();
+  expect(err instanceof ExecutorError).toEqual(true);
+  expect(err.data).toEqual({ foo: true });
+  expect(err.retry).toEqual(false);
+  expect(taskRunnerFactoryInitializerParams.logger.error as jest.Mock).toHaveBeenCalledWith(
+    `Action '2' failed and will not retry: Error message`
+  );
+});
+
+test(`treats errors as successes if the task is not retryable`, async () => {
+  const taskRunner = taskRunnerFactory.create({
+    taskInstance: {
+      ...mockedTaskInstance,
+      attempts: 1,
+    },
+  });
+
+  mockedEncryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
+    id: '3',
+    type: 'action_task_params',
+    attributes: {
+      actionId: '2',
+      params: { baz: true },
+      apiKey: Buffer.from('123:abc').toString('base64'),
+    },
+    references: [
+      {
+        id: '2',
+        name: 'actionRef',
+        type: 'action',
+      },
+    ],
+  });
+  mockedActionExecutor.execute.mockResolvedValueOnce({
+    status: 'error',
+    actionId: '2',
+    message: 'Error message',
+    data: { foo: true },
+    retry: false,
+  });
+
+  let err;
+  try {
+    await taskRunner.run();
+  } catch (e) {
+    err = e;
+  }
+  expect(err).toBeUndefined();
+  expect(taskRunnerFactoryInitializerParams.logger.error as jest.Mock).toHaveBeenCalledWith(
+    `Action '2' failed and will not retry: Error message`
+  );
+});
+
+test('treats errors as errors if the error is thrown instead of returned', async () => {
+  const taskRunner = taskRunnerFactory.create({
+    taskInstance: {
+      ...mockedTaskInstance,
+      attempts: 0,
+    },
+  });
+
+  mockedEncryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
+    id: '3',
+    type: 'action_task_params',
+    attributes: {
+      actionId: '2',
+      params: { baz: true },
+      apiKey: Buffer.from('123:abc').toString('base64'),
+    },
+    references: [
+      {
+        id: '2',
+        name: 'actionRef',
+        type: 'action',
+      },
+    ],
+  });
+  mockedActionExecutor.execute.mockRejectedValueOnce({});
+
+  let err;
+  try {
+    await taskRunner.run();
+  } catch (e) {
+    err = e;
+  }
+  expect(err).toBeDefined();
+  expect(err instanceof ExecutorError).toEqual(true);
+  expect(err.data).toEqual({});
+  expect(err.retry).toEqual(true);
+  expect(taskRunnerFactoryInitializerParams.logger.error as jest.Mock).toHaveBeenCalledWith(
+    `Action '2' failed and will retry: undefined`
+  );
 });

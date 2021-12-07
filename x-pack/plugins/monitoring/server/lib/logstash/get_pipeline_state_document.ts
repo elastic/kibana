@@ -5,22 +5,24 @@
  * 2.0.
  */
 
-// @ts-ignore
 import { createQuery } from '../create_query';
-// @ts-ignore
 import { LogstashMetric } from '../metrics';
-import { LegacyRequest } from '../../types';
+import { LegacyRequest, PipelineVersion } from '../../types';
 import { ElasticsearchResponse } from '../../../common/types/es';
 
-export async function getPipelineStateDocument(
-  req: LegacyRequest,
-  logstashIndexPattern: string,
-  {
-    clusterUuid,
-    pipelineId,
-    version,
-  }: { clusterUuid: string; pipelineId: string; version: { hash: string } }
-) {
+export async function getPipelineStateDocument({
+  req,
+  logstashIndexPattern,
+  clusterUuid,
+  pipelineId,
+  version,
+}: {
+  req: LegacyRequest;
+  logstashIndexPattern: string;
+  clusterUuid: string;
+  pipelineId: string;
+  version: PipelineVersion;
+}) {
   const { callWithRequest } = req.server.plugins?.elasticsearch.getCluster('monitoring');
   const filters = [
     { term: { 'logstash_state.pipeline.id': pipelineId } },
@@ -52,7 +54,6 @@ export async function getPipelineStateDocument(
   };
 
   const resp = (await callWithRequest(req, 'search', params)) as ElasticsearchResponse;
-
   // Return null if doc not found
   return resp.hits?.hits[0]?._source ?? null;
 }

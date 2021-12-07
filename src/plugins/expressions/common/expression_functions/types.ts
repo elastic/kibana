@@ -30,7 +30,7 @@ import { PersistableStateDefinition } from '../../../kibana_utils/common';
 export interface ExpressionFunctionDefinition<
   Name extends string,
   Input,
-  Arguments extends Record<string, any>,
+  Arguments extends Record<keyof unknown, unknown>,
   Output,
   Context extends ExecutionContext = ExecutionContext
 > extends PersistableStateDefinition<ExpressionAstFunction['arguments']> {
@@ -99,12 +99,14 @@ export interface ExpressionFunctionDefinition<
 /**
  * Type to capture every possible expression function definition.
  */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 export type AnyExpressionFunctionDefinition = ExpressionFunctionDefinition<
   string,
   any,
   Record<string, any>,
   any
 >;
+/* eslint-enable @typescript-eslint/no-explicit-any */
 
 /**
  * A mapping of `ExpressionFunctionDefinition`s for functions which the

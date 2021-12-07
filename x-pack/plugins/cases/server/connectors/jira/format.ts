@@ -5,12 +5,15 @@
  * 2.0.
  */
 
-import { ConnectorJiraTypeFields } from '../../../common';
+import { ConnectorJiraTypeFields } from '../../../common/api';
 import { Format } from './types';
 
 export const format: Format = (theCase, alerts) => {
-  const { priority = null, issueType = null, parent = null } =
-    (theCase.connector.fields as ConnectorJiraTypeFields['fields']) ?? {};
+  const {
+    priority = null,
+    issueType = null,
+    parent = null,
+  } = (theCase.connector.fields as ConnectorJiraTypeFields['fields']) ?? {};
   return {
     priority,
     // Jira do not allows empty spaces on labels. We replace white spaces with hyphens

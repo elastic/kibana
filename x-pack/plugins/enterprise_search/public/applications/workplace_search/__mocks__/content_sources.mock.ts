@@ -25,10 +25,11 @@ export const contentSources = [
     allowsReauth: true,
     boost: 1,
     activities: [],
+    isOauth1: false,
   },
   {
     id: '124',
-    serviceType: 'jira',
+    serviceType: 'jira_cloud',
     searchable: true,
     supportedByLicense: true,
     status: 'synced',
@@ -40,8 +41,48 @@ export const contentSources = [
     allowsReauth: true,
     boost: 0.5,
     activities: [],
+    isOauth1: true,
   },
 ];
+
+const defaultIndexing = {
+  enabled: true,
+  defaultAction: 'include',
+  rules: [],
+  schedule: {
+    full: 'P1D',
+    incremental: 'PT2H',
+    delete: 'PT10M',
+    permissions: 'PT3H',
+    blockedWindows: [],
+    estimates: {
+      full: {
+        nextStart: '2021-09-30T15:37:38+00:00',
+        duration: 'PT1M5S',
+      },
+      incremental: {
+        nextStart: '2021-09-27T17:39:24+00:00',
+        duration: 'PT2S',
+      },
+      delete: {
+        nextStart: '2021-09-27T21:39:24+00:00',
+        duration: 'PT49S',
+      },
+      permissions: {
+        nextStart: '2021-09-27T17:39:24+00:00',
+        duration: 'PT2S',
+      },
+    },
+  },
+  features: {
+    contentExtraction: {
+      enabled: true,
+    },
+    thumbnails: {
+      enabled: true,
+    },
+  },
+};
 
 export const fullContentSources = [
   {
@@ -66,8 +107,12 @@ export const fullContentSources = [
         type: 'summary',
       },
     ],
+    indexing: defaultIndexing,
     groups,
     custom: false,
+    isIndexedSource: true,
+    isSyncConfigEnabled: true,
+    areThumbnailsConfigEnabled: true,
     accessToken: '123token',
     urlField: 'myLink',
     titleField: 'heading',
@@ -78,6 +123,11 @@ export const fullContentSources = [
     urlFieldIsLinkable: true,
     createdAt: '2021-01-20',
     serviceName: 'myService',
+    secret: {
+      app_id: '99999',
+      fingerprint: '65xM7s0RE6tEWNhnuXpK5EvZ5OAMIcbDHIISm/0T23Y=',
+      base_url: 'http://github.com',
+    },
   },
   {
     ...contentSources[1],
@@ -85,7 +135,11 @@ export const fullContentSources = [
     details: [],
     summary: [],
     groups: [],
+    indexing: defaultIndexing,
     custom: true,
+    isIndexedSource: true,
+    isSyncConfigEnabled: true,
+    areThumbnailsConfigEnabled: true,
     accessToken: '123token',
     urlField: 'url',
     titleField: 'title',
@@ -279,6 +333,7 @@ export const sourceConfigData = {
   privateSourcesEnabled: false,
   categories: ['wiki', 'atlassian', 'intranet'],
   configuredFields: {
+    isOauth1: false,
     clientId: 'CyztADsSECRETCSAUCEh1a',
     clientSecret: 'GSjJxqSECRETCSAUCEksHk',
     baseUrl: 'https://mine.atlassian.net',
@@ -320,7 +375,7 @@ export const exampleResult = {
       myLink: 'http://foo',
       otherTitle: 'foo',
       content_source_id: '60e85e7ea2564c265a88a4f0',
-      external_id: 'doc-60e85eb7a2564c937a88a4f3',
+      id: 'doc-60e85eb7a2564c937a88a4f3',
       last_updated: '2021-07-09T14:35:35+00:00',
       updated_at: '2021-07-09T14:35:35+00:00',
       source: 'custom',

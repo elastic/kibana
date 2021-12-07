@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { delay } from 'bluebird';
+import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import { FtrProviderContext } from '../ftr_provider_context';
 import { logWrapper } from './log_wrapper';
 
@@ -39,7 +39,8 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async findAllFields() {
-      return await testSubjects.findAll('lnsFieldListPanelField');
+      const fields = await testSubjects.findAll('lnsFieldListPanelField');
+      return await Promise.all(fields.map((field) => field.getVisibleText()));
     },
 
     async isLensPageOrFail() {
@@ -129,9 +130,20 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         const operationSelector = opts.isPreviousIncompatible
           ? `lns-indexPatternDimension-${opts.operation} incompatible`
           : `lns-indexPatternDimension-${opts.operation}`;
-        await testSubjects.click(operationSelector);
-      }
+        async function getAriaPressed() {
+          const operationSelectorContainer = await testSubjects.find(operationSelector);
+          await testSubjects.click(operationSelector);
+          const ariaPressed = await operationSelectorContainer.getAttribute('aria-pressed');
+          return ariaPressed;
+        }
 
+        // adding retry here as it seems that there is a flakiness of the operation click
+        // it seems that the aria-pressed attribute is updated to true when the button is clicked
+        await retry.waitFor('aria pressed to be true', async () => {
+          const ariaPressedStatus = await getAriaPressed();
+          return ariaPressedStatus === 'true';
+        });
+      }
       if (opts.field) {
         const target = await testSubjects.find('indexPattern-dimension-field');
         await comboBox.openOptionsList(target);
@@ -185,8 +197,10 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      * @param field  - the desired field for the dimension
      * */
     async dragFieldToWorkspace(field: string) {
+      const from = `lnsFieldListPanelField-${field}`;
+      await find.existsByCssSelector(from);
       await browser.html5DragAndDrop(
-        testSubjects.getCssSelector(`lnsFieldListPanelField-${field}`),
+        testSubjects.getCssSelector(from),
         testSubjects.getCssSelector('lnsWorkspace')
       );
       await this.waitForLensDragDropToFinish();
@@ -199,8 +213,10 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      * @param field  - the desired geo_point or geo_shape field
      * */
     async dragFieldToGeoFieldWorkspace(field: string) {
+      const from = `lnsFieldListPanelField-${field}`;
+      await find.existsByCssSelector(from);
       await browser.html5DragAndDrop(
-        testSubjects.getCssSelector(`lnsFieldListPanelField-${field}`),
+        testSubjects.getCssSelector(from),
         testSubjects.getCssSelector('lnsGeoFieldWorkspace')
       );
       await this.waitForLensDragDropToFinish();
@@ -243,6 +259,30 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       });
     },
 
+    async waitForMissingDataViewWarning() {
+      await retry.try(async () => {
+        await testSubjects.existOrFail(`missing-refs-failure`);
+      });
+    },
+
+    async waitForMissingDataViewWarningDisappear() {
+      await retry.try(async () => {
+        await testSubjects.missingOrFail(`missing-refs-failure`);
+      });
+    },
+
+    async waitForEmptyWorkspace() {
+      await retry.try(async () => {
+        await testSubjects.existOrFail(`empty-workspace`);
+      });
+    },
+
+    async waitForWorkspaceWithVisualization() {
+      await retry.try(async () => {
+        await testSubjects.existOrFail(`lnsVisualizationContainer`);
+      });
+    },
+
     async waitForFieldMissing(field: string) {
       await retry.try(async () => {
         await testSubjects.missingOrFail(`lnsFieldListPanelField-${field}`);
@@ -262,7 +302,10 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         `[data-test-subj="lnsDragDrop_draggable-${fieldName}"] [data-test-subj="lnsDragDrop-keyboardHandler"]`
       );
       await field.focus();
-      await browser.pressKeys(browser.keys.ENTER);
+      await retry.try(async () => {
+        await browser.pressKeys(browser.keys.ENTER);
+        await testSubjects.exists('.lnsDragDrop-isDropTarget'); // checks if we're in dnd mode and there's any drop target active
+      });
       for (let i = 0; i < steps; i++) {
         await browser.pressKeys(reverse ? browser.keys.LEFT : browser.keys.RIGHT);
       }
@@ -335,8 +378,10 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      * @param dimension - the selector of the dimension being changed
      * */
     async dragFieldToDimensionTrigger(field: string, dimension: string) {
+      const from = `lnsFieldListPanelField-${field}`;
+      await find.existsByCssSelector(from);
       await browser.html5DragAndDrop(
-        testSubjects.getCssSelector(`lnsFieldListPanelField-${field}`),
+        testSubjects.getCssSelector(from),
         testSubjects.getCssSelector(dimension)
       );
       await this.waitForLensDragDropToFinish();
@@ -350,6 +395,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      * @param to - the selector of the dimension being dropped to
      * */
     async dragDimensionToDimension(from: string, to: string) {
+      await find.existsByCssSelector(from);
       await browser.html5DragAndDrop(
         testSubjects.getCssSelector(from),
         testSubjects.getCssSelector(to)
@@ -367,6 +413,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     async reorderDimensions(dimension: string, startIndex: number, endIndex: number) {
       const dragging = `[data-test-subj='${dimension}']:nth-of-type(${startIndex}) .lnsDragDrop`;
       const dropping = `[data-test-subj='${dimension}']:nth-of-type(${endIndex}) [data-test-subj='lnsDragDrop-reorderableDropLayer'`;
+      await find.existsByCssSelector(dragging);
       await browser.html5DragAndDrop(dragging, dropping);
       await this.waitForLensDragDropToFinish();
       await PageObjects.header.waitUntilLoadingHasFinished();
@@ -634,8 +681,21 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     /**
      * Adds a new layer to the chart, fails if the chart does not support new layers
      */
-    async createLayer() {
+    async createLayer(layerType: string = 'data') {
       await testSubjects.click('lnsLayerAddButton');
+      const layerCount = (await find.allByCssSelector(`[data-test-subj^="lns-layerPanel-"]`))
+        .length;
+
+      await retry.waitFor('check for layer type support', async () => {
+        const fasterChecks = await Promise.all([
+          (await find.allByCssSelector(`[data-test-subj^="lns-layerPanel-"]`)).length > layerCount,
+          testSubjects.exists(`lnsLayerAddButton-${layerType}`),
+        ]);
+        return fasterChecks.filter(Boolean).length > 0;
+      });
+      if (await testSubjects.exists(`lnsLayerAddButton-${layerType}`)) {
+        await testSubjects.click(`lnsLayerAddButton-${layerType}`);
+      }
     },
 
     /**
@@ -652,7 +712,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      */
     async switchFirstLayerIndexPattern(name: string) {
       await testSubjects.click('lns_layerIndexPatternLabel');
-      await find.clickByCssSelector(`[title="${name}"]`);
+      await find.clickByCssSelector(`.lnsChangeIndexPatternPopover [title="${name}"]`);
       await PageObjects.header.waitUntilLoadingHasFinished();
     },
 
@@ -748,7 +808,14 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       }, {});
     },
 
+    async getCountOfDatatableColumns() {
+      const table = await find.byCssSelector('.euiDataGrid');
+      const $ = await table.parseDomContent();
+      return (await $('.euiDataGridHeaderCell__content')).length;
+    },
+
     async getDatatableHeader(index = 0) {
+      log.debug(`All headers ${await testSubjects.getVisibleText('dataGridHeader')}`);
       return find.byCssSelector(
         `[data-test-subj="lnsDataTable"] [data-test-subj="dataGridHeader"] [role=columnheader]:nth-child(${
           index + 1
@@ -757,9 +824,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async getDatatableCell(rowIndex = 0, colIndex = 0) {
-      const table = await find.byCssSelector('.euiDataGrid');
-      const $ = await table.parseDomContent();
-      const columnNumber = $('.euiDataGridHeaderCell__content').length;
+      const columnNumber = await this.getCountOfDatatableColumns();
       return await find.byCssSelector(
         `[data-test-subj="lnsDataTable"] [data-test-subj="dataGridRowCell"]:nth-child(${
           rowIndex * columnNumber + colIndex + 2
@@ -810,7 +875,12 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async openPalettePanel(chartType: string) {
-      await testSubjects.click(`${chartType}_dynamicColoring_trigger`);
+      await retry.try(async () => {
+        await testSubjects.click(`${chartType}_dynamicColoring_trigger`);
+        // wait for the UI to settle
+        await PageObjects.common.sleep(100);
+        await testSubjects.existOrFail('lns-indexPattern-PalettePanelContainer', { timeout: 2500 });
+      });
     },
 
     async closePalettePanel() {
@@ -849,12 +919,18 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       );
     },
 
-    async toggleColumnVisibility(dimension: string) {
+    async toggleColumnVisibility(dimension: string, no = 1) {
       await this.openDimensionEditor(dimension);
       const id = 'lns-table-column-hidden';
+      await PageObjects.common.sleep(500);
       const isChecked = await testSubjects.isEuiSwitchChecked(id);
+      log.debug(`switch status before the toggle = ${isChecked}`);
       await testSubjects.setEuiSwitch(id, isChecked ? 'uncheck' : 'check');
+      await PageObjects.common.sleep(500);
+      const isChecked2 = await testSubjects.isEuiSwitchChecked(id);
+      log.debug(`switch status after the toggle = ${isChecked2}`);
       await this.closeDimensionEditor();
+      await PageObjects.common.sleep(500);
       await PageObjects.header.waitUntilLoadingHasFinished();
     },
 
@@ -874,6 +950,22 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     async assertMetric(title: string, count: string) {
       await this.assertExactText('[data-test-subj="lns_metric_title"]', title);
       await this.assertExactText('[data-test-subj="lns_metric_value"]', count);
+    },
+
+    async setMetricDynamicColoring(coloringType: 'none' | 'labels' | 'background') {
+      await testSubjects.click('lnsMetric_dynamicColoring_groups_' + coloringType);
+    },
+
+    async getMetricStyle() {
+      const el = await testSubjects.find('lns_metric_value');
+      const styleString = await el.getAttribute('style');
+      return styleString.split(';').reduce<Record<string, string>>((memo, cssLine) => {
+        const [prop, value] = cssLine.split(':');
+        if (prop && value) {
+          memo[prop.trim()] = value.trim();
+        }
+        return memo;
+      }, {});
     },
 
     async assertMissingValues(option: string) {
@@ -1037,7 +1129,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         draggedOver,
         dropTarget
       );
-      await delay(150);
+      await setTimeoutAsync(150);
     },
 
     /**
@@ -1064,8 +1156,23 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await testSubjects.click('lens-dimensionTabs-formula');
     },
 
+    async switchToStaticValue() {
+      await testSubjects.click('lens-dimensionTabs-static_value');
+    },
+
     async toggleFullscreen() {
       await testSubjects.click('lnsFormula-fullscreen');
+    },
+
+    async goToListingPageViaBreadcrumbs() {
+      await retry.try(async () => {
+        await testSubjects.click('breadcrumb first');
+        if (await testSubjects.exists('appLeaveConfirmModal')) {
+          await testSubjects.exists('confirmModalConfirmButton');
+          await testSubjects.click('confirmModalConfirmButton');
+        }
+        await testSubjects.existOrFail('visualizationLandingPage', { timeout: 3000 });
+      });
     },
 
     async typeFormula(formula: string) {

@@ -6,17 +6,18 @@
  */
 
 import Boom from '@hapi/boom';
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { SavedObjectsClientContract, ElasticsearchClient } from 'src/core/server';
+
+import type { KueryNode } from '@kbn/es-query';
+import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 
 import type { AgentSOAttributes, Agent, BulkActionResult, ListWithKuery } from '../../types';
 import { appContextService, agentPolicyService } from '../../services';
 import type { FleetServerAgent } from '../../../common';
 import { isAgentUpgradeable, SO_SEARCH_LIMIT } from '../../../common';
-import { AGENT_SAVED_OBJECT_TYPE, AGENTS_INDEX } from '../../constants';
+import { AGENTS_PREFIX, AGENTS_INDEX } from '../../constants';
 import { escapeSearchQueryPhrase, normalizeKuery } from '../saved_object';
-import type { KueryNode } from '../../../../../../src/plugins/data/server';
-import { esKuery } from '../../../../../../src/plugins/data/server';
 import { IngestManagerError, isESClientError, AgentNotFoundError } from '../../errors';
 
 import { searchHitToAgent, agentSOAttributesToFleetServerAgentDoc } from './helpers';
@@ -28,27 +29,29 @@ function _joinFilters(filters: Array<string | undefined | KueryNode>): KueryNode
   try {
     return filters
       .filter((filter) => filter !== undefined)
-      .reduce((acc: KueryNode | undefined, kuery: string | KueryNode | undefined):
-        | KueryNode
-        | undefined => {
-        if (kuery === undefined) {
-          return acc;
-        }
-        const kueryNode: KueryNode =
-          typeof kuery === 'string'
-            ? esKuery.fromKueryExpression(removeSOAttributes(kuery))
-            : kuery;
+      .reduce(
+        (
+          acc: KueryNode | undefined,
+          kuery: string | KueryNode | undefined
+        ): KueryNode | undefined => {
+          if (kuery === undefined) {
+            return acc;
+          }
+          const kueryNode: KueryNode =
+            typeof kuery === 'string' ? fromKueryExpression(removeSOAttributes(kuery)) : kuery;
 
-        if (!acc) {
-          return kueryNode;
-        }
+          if (!acc) {
+            return kueryNode;
+          }
 
-        return {
-          type: 'function',
-          function: 'and',
-          arguments: [acc, kueryNode],
-        };
-      }, undefined as KueryNode | undefined);
+          return {
+            type: 'function',
+            function: 'and',
+            arguments: [acc, kueryNode],
+          };
+        },
+        undefined as KueryNode | undefined
+      );
   } catch (err) {
     throw new IngestManagerError(`Kuery is malformed: ${err.message}`);
   }
@@ -118,29 +121,47 @@ export async function getAgentsByKuery(
   }
 
   const kueryNode = _joinFilters(filters);
-  const body = kueryNode ? { query: esKuery.toElasticsearchQuery(kueryNode) } : {};
-  const res = await esClient.search<FleetServerAgent, {}>({
-    index: AGENTS_INDEX,
-    from: (page - 1) * perPage,
-    size: perPage,
-    sort: `${sortField}:${sortOrder}`,
-    track_total_hits: true,
-    ignore_unavailable: true,
-    body,
-  });
+  const body = kueryNode ? { query: toElasticsearchQuery(kueryNode) } : {};
+  const queryAgents = async (from: number, size: number) =>
+    esClient.search<FleetServerAgent, {}>({
+      index: AGENTS_INDEX,
+      from,
+      size,
+      track_total_hits: true,
+      ignore_unavailable: true,
+      body: {
+        ...body,
+        sort: [{ [sortField]: { order: sortOrder } }],
+      },
+    });
+  const res = await queryAgents((page - 1) * perPage, perPage);
 
   let agents = res.body.hits.hits.map(searchHitToAgent);
+  let total = (res.body.hits.total as estypes.SearchTotalHits).value;
   // filtering for a range on the version string will not work,
   // nor does filtering on a flattened field (local_metadata), so filter here
   if (showUpgradeable) {
-    agents = agents.filter((agent) =>
-      isAgentUpgradeable(agent, appContextService.getKibanaVersion())
-    );
+    // fixing a bug where upgradeable filter was not returning right results https://github.com/elastic/kibana/issues/117329
+    // query all agents, then filter upgradeable, and return the requested page and correct total
+    // if there are more than SO_SEARCH_LIMIT agents, the logic falls back to same as before
+    if (total < SO_SEARCH_LIMIT) {
+      const response = await queryAgents(0, SO_SEARCH_LIMIT);
+      agents = response.body.hits.hits
+        .map(searchHitToAgent)
+        .filter((agent) => isAgentUpgradeable(agent, appContextService.getKibanaVersion()));
+      total = agents.length;
+      const start = (page - 1) * perPage;
+      agents = agents.slice(start, start + perPage);
+    } else {
+      agents = agents.filter((agent) =>
+        isAgentUpgradeable(agent, appContextService.getKibanaVersion())
+      );
+    }
   }
 
   return {
     agents,
-    total: (res.body.hits.total as estypes.SearchTotalHits).value,
+    total,
     page,
     perPage,
   };
@@ -171,11 +192,11 @@ export async function countInactiveAgents(
   const filters = [INACTIVE_AGENT_CONDITION];
 
   if (kuery && kuery !== '') {
-    filters.push(normalizeKuery(AGENT_SAVED_OBJECT_TYPE, kuery));
+    filters.push(normalizeKuery(AGENTS_PREFIX, kuery));
   }
 
   const kueryNode = _joinFilters(filters);
-  const body = kueryNode ? { query: esKuery.toElasticsearchQuery(kueryNode) } : {};
+  const body = kueryNode ? { query: toElasticsearchQuery(kueryNode) } : {};
 
   const res = await esClient.search({
     index: AGENTS_INDEX,
@@ -216,6 +237,7 @@ export function isAgentDocument(
 }
 
 export type ESAgentDocumentResult = estypes.MgetHit<FleetServerAgent>;
+
 export async function getAgentDocuments(
   esClient: ElasticsearchClient,
   agentIds: string[]
@@ -312,10 +334,9 @@ export async function bulkUpdateAgents(
   });
 
   return {
-    items: res.body.items.map((item: estypes.BulkResponseItemContainer) => ({
+    items: res.body.items.map((item) => ({
       id: item.update!._id as string,
       success: !item.update!.error,
-      // @ts-expect-error ErrorCause is not assignable to Error
       error: item.update!.error as Error,
     })),
   };

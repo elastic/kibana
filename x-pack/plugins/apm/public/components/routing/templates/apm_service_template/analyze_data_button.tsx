@@ -25,7 +25,7 @@ import {
   ENVIRONMENT_NOT_DEFINED,
 } from '../../../../../common/environment_filter_values';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
-import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
+import { useApmParams } from '../../../../hooks/use_apm_params';
 
 function getEnvironmentDefinition(environment: string) {
   switch (environment) {
@@ -40,8 +40,11 @@ function getEnvironmentDefinition(environment: string) {
 export function AnalyzeDataButton() {
   const { agentName, serviceName } = useApmServiceContext();
   const { services } = useKibana();
-  const { urlParams } = useUrlParams();
-  const { rangeTo, rangeFrom, environment } = urlParams;
+
+  const {
+    query: { rangeFrom, rangeTo, environment },
+  } = useApmParams('/services/{serviceName}');
+
   const basepath = services.http?.basePath.get();
   const canShowDashboard = services.application?.capabilities.dashboard.show;
 
@@ -76,12 +79,12 @@ export function AnalyzeDataButton() {
         position="top"
         content={i18n.translate('xpack.apm.analyzeDataButton.tooltip', {
           defaultMessage:
-            'EXPERIMENTAL - Analyze Data allows you to select and filter result data in any dimension, and look for the cause or impact of performance problems',
+            'Explore Data allows you to select and filter result data in any dimension, and look for the cause or impact of performance problems',
         })}
       >
         <EuiButtonEmpty href={href} iconType="visBarVerticalStacked">
           {i18n.translate('xpack.apm.analyzeDataButton.label', {
-            defaultMessage: 'Analyze data',
+            defaultMessage: 'Explore data',
           })}
         </EuiButtonEmpty>
       </EuiToolTip>

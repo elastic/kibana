@@ -7,7 +7,7 @@
 
 import { PublicMethodsOf } from '@kbn/utility-types';
 import {
-  AlertServiceContract,
+  AlertService,
   CaseConfigureService,
   CasesService,
   CaseUserActionService,
@@ -19,7 +19,7 @@ export type CaseServiceMock = jest.Mocked<CasesService>;
 export type CaseConfigureServiceMock = jest.Mocked<CaseConfigureService>;
 export type ConnectorMappingsServiceMock = jest.Mocked<ConnectorMappingsService>;
 export type CaseUserActionServiceMock = jest.Mocked<CaseUserActionService>;
-export type AlertServiceMock = jest.Mocked<AlertServiceContract>;
+export type AlertServiceMock = jest.Mocked<AlertService>;
 export type AttachmentServiceMock = jest.Mocked<AttachmentService>;
 
 export const createCaseServiceMock = (): CaseServiceMock => {
@@ -36,6 +36,7 @@ export const createCaseServiceMock = (): CaseServiceMock => {
     getCases: jest.fn(),
     getCaseIdsByAlertId: jest.fn(),
     getMostRecentSubCase: jest.fn(),
+    getResolveCase: jest.fn(),
     getSubCase: jest.fn(),
     getSubCases: jest.fn(),
     getTags: jest.fn(),
@@ -55,7 +56,7 @@ export const createCaseServiceMock = (): CaseServiceMock => {
   };
 
   // the cast here is required because jest.Mocked tries to include private members and would throw an error
-  return (service as unknown) as CaseServiceMock;
+  return service as unknown as CaseServiceMock;
 };
 
 export const createConfigureServiceMock = (): CaseConfigureServiceMock => {
@@ -68,7 +69,7 @@ export const createConfigureServiceMock = (): CaseConfigureServiceMock => {
   };
 
   // the cast here is required because jest.Mocked tries to include private members and would throw an error
-  return (service as unknown) as CaseConfigureServiceMock;
+  return service as unknown as CaseConfigureServiceMock;
 };
 
 export const connectorMappingsServiceMock = (): ConnectorMappingsServiceMock => {
@@ -79,7 +80,7 @@ export const connectorMappingsServiceMock = (): ConnectorMappingsServiceMock => 
   };
 
   // the cast here is required because jest.Mocked tries to include private members and would throw an error
-  return (service as unknown) as ConnectorMappingsServiceMock;
+  return service as unknown as ConnectorMappingsServiceMock;
 };
 
 export const createUserActionServiceMock = (): CaseUserActionServiceMock => {
@@ -89,13 +90,18 @@ export const createUserActionServiceMock = (): CaseUserActionServiceMock => {
   };
 
   // the cast here is required because jest.Mocked tries to include private members and would throw an error
-  return (service as unknown) as CaseUserActionServiceMock;
+  return service as unknown as CaseUserActionServiceMock;
 };
 
-export const createAlertServiceMock = (): AlertServiceMock => ({
-  updateAlertsStatus: jest.fn(),
-  getAlerts: jest.fn(),
-});
+export const createAlertServiceMock = (): AlertServiceMock => {
+  const service: PublicMethodsOf<AlertService> = {
+    updateAlertsStatus: jest.fn(),
+    getAlerts: jest.fn(),
+  };
+
+  // the cast here is required because jest.Mocked tries to include private members and would throw an error
+  return service as unknown as AlertServiceMock;
+};
 
 export const createAttachmentServiceMock = (): AttachmentServiceMock => {
   const service: PublicMethodsOf<AttachmentService> = {
@@ -105,8 +111,9 @@ export const createAttachmentServiceMock = (): AttachmentServiceMock => {
     update: jest.fn(),
     bulkUpdate: jest.fn(),
     getAllAlertsAttachToCase: jest.fn(),
+    countAlertsAttachedToCase: jest.fn(),
   };
 
   // the cast here is required because jest.Mocked tries to include private members and would throw an error
-  return (service as unknown) as AttachmentServiceMock;
+  return service as unknown as AttachmentServiceMock;
 };

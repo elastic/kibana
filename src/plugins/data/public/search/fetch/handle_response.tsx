@@ -17,6 +17,7 @@ import { SearchRequest } from '..';
 
 export function handleResponse(request: SearchRequest, response: IKibanaSearchResponse) {
   const { rawResponse } = response;
+
   if (rawResponse.timed_out) {
     getNotifications().toasts.addWarning({
       title: i18n.translate('data.search.searchSource.fetch.requestTimedOutNotificationMessage', {

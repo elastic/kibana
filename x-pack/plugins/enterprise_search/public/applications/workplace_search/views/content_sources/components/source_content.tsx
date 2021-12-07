@@ -29,7 +29,7 @@ import {
   EuiLink,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { TruncatedContent } from '../../../../shared/truncate';
 import { ComponentLoader } from '../../../components/shared/component_loader';
@@ -46,6 +46,8 @@ import {
   GO_BUTTON,
   RESET_BUTTON,
   SOURCE_CONTENT_TITLE,
+  SEARCH_CONTENT_PLACEHOLDER,
+  FILTER_CONTENT_PLACEHOLDER,
   CONTENT_LOADING_TEXT,
 } from '../constants';
 import { SourceLogic } from '../source_logic';
@@ -57,9 +59,8 @@ const MAX_LENGTH = 28;
 export const SourceContent: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
 
-  const { setActivePage, searchContentSourceDocuments, setContentFilterValue } = useActions(
-    SourceLogic
-  );
+  const { setActivePage, searchContentSourceDocuments, setContentFilterValue } =
+    useActions(SourceLogic);
 
   const {
     contentSource: { id, serviceType, urlField, titleField, urlFieldIsLinkable, isFederatedSource },
@@ -197,13 +198,9 @@ export const SourceContent: React.FC = () => {
         <EuiFlexItem grow={false}>
           <EuiFieldSearch
             disabled={!hasItems && !contentFilterValue}
-            placeholder={i18n.translate(
-              'xpack.enterpriseSearch.workplaceSearch.sources.sourceContent.searchBar.placeholder',
-              {
-                defaultMessage: '{prefix} content...',
-                values: { prefix: isFederatedSource ? 'Search' : 'Filter' },
-              }
-            )}
+            placeholder={
+              isFederatedSource ? SEARCH_CONTENT_PLACEHOLDER : FILTER_CONTENT_PLACEHOLDER
+            }
             incremental={!isFederatedSource}
             isClearable={!isFederatedSource}
             onSearch={setContentFilterValue}

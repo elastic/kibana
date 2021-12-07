@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IEsSearchResponse } from '../../../../../../../../../../src/plugins/data/common';
+import type { IEsSearchResponse } from '../../../../../../../../../../src/plugins/data/common';
 
 import {
   HostOverviewRequestOptions,
@@ -117,7 +117,7 @@ export const formattedSearchStrategyResponse = {
     dsl: [
       JSON.stringify(
         {
-          allowNoIndices: true,
+          allow_no_indices: true,
           index: [
             'apm-*-transaction*',
             'traces-apm*',
@@ -128,7 +128,7 @@ export const formattedSearchStrategyResponse = {
             'packetbeat-*',
             'winlogbeat-*',
           ],
-          ignoreUnavailable: true,
+          ignore_unavailable: true,
           track_total_hits: false,
           body: {
             aggregations: {
@@ -330,7 +330,7 @@ export const formattedSearchStrategyResponse = {
 };
 
 export const expectedDsl = {
-  allowNoIndices: true,
+  allow_no_indices: true,
   index: [
     'apm-*-transaction*',
     'traces-apm*',
@@ -341,7 +341,7 @@ export const expectedDsl = {
     'packetbeat-*',
     'winlogbeat-*',
   ],
-  ignoreUnavailable: true,
+  ignore_unavailable: true,
   track_total_hits: false,
   body: {
     aggregations: {

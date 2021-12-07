@@ -10,12 +10,14 @@ import { getIsInvalidDateRange } from './utils';
 
 describe('utils', () => {
   describe('getIsInvalidDateRange', () => {
-    it('should return FALSE when either dates are undefined', () => {
-      expect(getIsInvalidDateRange({})).toBe(false);
-      expect(getIsInvalidDateRange({ startDate: moment().subtract(1, 'd').toISOString() })).toBe(
-        false
-      );
-      expect(getIsInvalidDateRange({ endDate: moment().toISOString() })).toBe(false);
+    it('should return FALSE when startDate is before endDate', () => {
+      expect(getIsInvalidDateRange({ startDate: 'now-1d', endDate: 'now' })).toBe(false);
+      expect(
+        getIsInvalidDateRange({
+          startDate: moment().subtract(1, 'd').toISOString(),
+          endDate: moment().toISOString(),
+        })
+      ).toBe(false);
     });
 
     it('should return TRUE when startDate is after endDate', () => {

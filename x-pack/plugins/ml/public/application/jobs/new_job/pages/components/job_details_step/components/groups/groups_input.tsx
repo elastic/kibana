@@ -13,9 +13,8 @@ import { tabColor } from '../../../../../../../../../common/util/group_color_uti
 import { Description } from './description';
 
 export const GroupsInput: FC = () => {
-  const { jobCreator, jobCreatorUpdate, jobValidator, jobValidatorUpdated } = useContext(
-    JobCreatorContext
-  );
+  const { jobCreator, jobCreatorUpdate, jobValidator, jobValidatorUpdated } =
+    useContext(JobCreatorContext);
   const { existingJobsAndGroups } = useContext(JobCreatorContext);
   const [selectedGroups, setSelectedGroups] = useState(jobCreator.groups);
 

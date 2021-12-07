@@ -30,7 +30,7 @@ describe('useImportList', () => {
   });
 
   it('invokes Api.importList', async () => {
-    const fileMock = ('my file' as unknown) as File;
+    const fileMock = 'my file' as unknown as File;
 
     const { result, waitForNextUpdate } = renderHook(() => useImportList());
 
@@ -54,7 +54,7 @@ describe('useImportList', () => {
   });
 
   it('populates result with the response of Api.importList', async () => {
-    const fileMock = ('my file' as unknown) as File;
+    const fileMock = 'my file' as unknown as File;
 
     const { result, waitForNextUpdate } = renderHook(() => useImportList());
 
@@ -72,7 +72,7 @@ describe('useImportList', () => {
   });
 
   it('error is populated if importList rejects', async () => {
-    const fileMock = ('my file' as unknown) as File;
+    const fileMock = 'my file' as unknown as File;
     (Api.importList as jest.Mock).mockRejectedValue(new Error('whoops'));
     const { result, waitForNextUpdate } = renderHook(() => useImportList());
 

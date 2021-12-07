@@ -11,6 +11,7 @@ import dedent from 'dedent';
 import fs from 'fs';
 import Path from 'path';
 import {
+  ApiDeclaration,
   ApiReference,
   ReferencedDeprecationsByAPI,
   ReferencedDeprecationsByPlugin,
@@ -20,6 +21,7 @@ import { getPluginApiDocId } from '../utils';
 export function writeDeprecationDocByApi(
   folder: string,
   deprecationsByPlugin: ReferencedDeprecationsByPlugin,
+  unReferencedDeprecations: ApiDeclaration[],
   log: ToolingLog
 ): void {
   const deprecationReferencesByApi = Object.values(deprecationsByPlugin).reduce(
@@ -48,7 +50,7 @@ export function writeDeprecationDocByApi(
     .sort((a, b) => {
       const aRemoveBy = deprecationReferencesByApi[a].deprecatedApi.removeBy ?? '';
       const bRemoveBy = deprecationReferencesByApi[b].deprecatedApi.removeBy ?? '';
-      return bRemoveBy.localeCompare(aRemoveBy);
+      return aRemoveBy.localeCompare(bRemoveBy);
     })
     .map((key) => {
       const api = deprecationReferencesByApi[key].deprecatedApi;
@@ -74,7 +76,7 @@ export function writeDeprecationDocByApi(
   const mdx = dedent(`
 ---
 id: kibDevDocsDeprecationsByApi
-slug: /kibana-dev-docs/deprecated-api-list-by-api
+slug: /kibana-dev-docs/api-meta/deprecated-api-list-by-api
 title: Deprecated API usage by API
 summary: A list of deprecated APIs, which plugins are still referencing them, and when they need to be removed by.
 date: 2021-07-27
@@ -82,7 +84,24 @@ tags: ['contributor', 'dev', 'apidocs', 'kibana']
 warning: This document is auto-generated and is meant to be viewed inside our experimental, new docs system.
 ---
 
+## Referenced deprecated APIs
+
 ${tableMdx}   
+
+## Unreferenced deprecated APIs
+
+Safe to remove.
+
+| Deprecated API |
+| ---------------|
+${unReferencedDeprecations
+  .map(
+    (api) =>
+      `| <DocLink id="${getPluginApiDocId(api.parentPluginId)}" section="${api.id}" text="${
+        api.label
+      }"/> |`
+  )
+  .join('\n')}
 
 `);
 

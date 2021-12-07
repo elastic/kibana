@@ -7,7 +7,7 @@
 
 import React, { ReactNode } from 'react';
 import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
-import { useBreakPoints } from '../../../hooks/use_break_points';
+import { useBreakpoints } from '../../../hooks/use_breakpoints';
 
 /**
  * The height for a table on a overview page. Is the height of a 5-row basic
@@ -22,14 +22,15 @@ const tableHeight = 282;
  *
  * Only do this when we're at a non-mobile breakpoint.
  *
- * Hide the empty message when we don't yet have any items and are still loading.
+ * Hide the empty message when we don't yet have any items and are still not initiated.
  */
 const OverviewTableContainerDiv = euiStyled.div<{
-  isEmptyAndLoading: boolean;
+  fixedHeight?: boolean;
+  isEmptyAndNotInitiated: boolean;
   shouldUseMobileLayout: boolean;
 }>`
-  ${({ shouldUseMobileLayout }) =>
-    shouldUseMobileLayout
+  ${({ fixedHeight, shouldUseMobileLayout }) =>
+    shouldUseMobileLayout || !fixedHeight
       ? ''
       : `
   min-height: ${tableHeight}px;
@@ -47,23 +48,26 @@ const OverviewTableContainerDiv = euiStyled.div<{
   `}
 
   .euiTableRowCell {
-    visibility: ${({ isEmptyAndLoading }) =>
-      isEmptyAndLoading ? 'hidden' : 'visible'};
+    visibility: ${({ isEmptyAndNotInitiated }) =>
+      isEmptyAndNotInitiated ? 'hidden' : 'visible'};
   }
 `;
 
 export function OverviewTableContainer({
   children,
-  isEmptyAndLoading,
+  fixedHeight,
+  isEmptyAndNotInitiated,
 }: {
   children?: ReactNode;
-  isEmptyAndLoading: boolean;
+  fixedHeight?: boolean;
+  isEmptyAndNotInitiated: boolean;
 }) {
-  const { isMedium } = useBreakPoints();
+  const { isMedium } = useBreakpoints();
 
   return (
     <OverviewTableContainerDiv
-      isEmptyAndLoading={isEmptyAndLoading}
+      fixedHeight={fixedHeight}
+      isEmptyAndNotInitiated={isEmptyAndNotInitiated}
       shouldUseMobileLayout={isMedium}
     >
       {children}

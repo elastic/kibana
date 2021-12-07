@@ -7,12 +7,25 @@
 
 /* eslint-disable complexity */
 
-import dateMath from '@elastic/datemath';
 import { getOr, isEmpty } from 'lodash/fp';
 import moment from 'moment';
-import { i18n } from '@kbn/i18n';
+
+import dateMath from '@elastic/datemath';
 
 import { FilterStateStore, Filter } from '@kbn/es-query';
+import { i18n } from '@kbn/i18n';
+import {
+  ALERT_RULE_FROM,
+  ALERT_RULE_TYPE,
+  ALERT_RULE_NOTE,
+} from '@kbn/rule-data-utils/technical_field_names';
+
+import {
+  ALERT_ORIGINAL_TIME,
+  ALERT_GROUP_ID,
+  ALERT_RULE_TIMELINE_ID,
+  ALERT_THRESHOLD_RESULT,
+} from '../../../../common/field_maps/field_names';
 import {
   KueryFilterQueryKind,
   TimelineId,
@@ -28,7 +41,6 @@ import {
 } from './types';
 import { Ecs } from '../../../../common/ecs';
 import {
-  TimelineNonEcsData,
   TimelineEventsDetailsItem,
   TimelineEventsDetailsRequestOptions,
   TimelineEventsDetailsStrategyResponse,
@@ -40,6 +52,7 @@ import {
   formatTimelineResultToModel,
 } from '../../../timelines/components/open_timeline/helpers';
 import { convertKueryToElasticSearchQuery } from '../../../common/lib/keury';
+import { getField } from '../../../helpers';
 import {
   replaceTemplateFieldFromQuery,
   replaceTemplateFieldFromMatchFilters,
@@ -65,18 +78,6 @@ export const getUpdateAlertsQuery = (eventIds: Readonly<string[]>) => {
   };
 };
 
-export const getFilterAndRuleBounds = (
-  data: TimelineNonEcsData[][]
-): [string[], number, number] => {
-  const stringFilter = data?.[0].filter((d) => d.field === 'signal.rule.filters')?.[0]?.value ?? [];
-
-  const eventTimes = data
-    .flatMap((alert) => alert.filter((d) => d.field === 'signal.original_time')?.[0]?.value ?? [])
-    .map((d) => moment(d));
-
-  return [stringFilter, moment.min(eventTimes).valueOf(), moment.max(eventTimes).valueOf()];
-};
-
 export const updateAlertStatusAction = async ({
   query,
   alertIds,
@@ -94,7 +95,7 @@ export const updateAlertStatusAction = async ({
     // TODO: Only delete those that were successfully updated from updatedRules
     setEventsDeleted({ eventIds: alertIds, isDeleted: true });
 
-    if (response.version_conflicts > 0 && alertIds.length === 1) {
+    if (response.version_conflicts && alertIds.length === 1) {
       throw new Error(
         i18n.translate(
           'xpack.securitySolution.detectionEngine.alerts.updateAlertStatusFailedSingleAlert',
@@ -105,7 +106,11 @@ export const updateAlertStatusAction = async ({
       );
     }
 
-    onAlertStatusUpdateSuccess(response.updated, response.version_conflicts, selectedStatus);
+    onAlertStatusUpdateSuccess(
+      response.updated ?? 0,
+      response.version_conflicts ?? 0,
+      selectedStatus
+    );
   } catch (error) {
     onAlertStatusUpdateFailure(selectedStatus, error);
   } finally {
@@ -130,10 +135,9 @@ export const determineToAndFrom = ({ ecs }: { ecs: Ecs[] | Ecs }) => {
     };
   }
   const ecsData = ecs as Ecs;
+  const ruleFrom = getField(ecsData, ALERT_RULE_FROM);
   const elapsedTimeRule = moment.duration(
-    moment().diff(
-      dateMath.parse(ecsData?.signal?.rule?.from != null ? ecsData.signal?.rule?.from[0] : 'now-0s')
-    )
+    moment().diff(dateMath.parse(ruleFrom != null ? ruleFrom[0] : 'now-0s'))
   );
   const from = moment(ecsData?.timestamp ?? new Date())
     .subtract(elapsedTimeRule)
@@ -153,10 +157,7 @@ const getFiltersFromRule = (filters: string[]): Filter[] =>
     }
   }, [] as Filter[]);
 
-export const getThresholdAggregationData = (
-  ecsData: Ecs | Ecs[],
-  nonEcsData: TimelineNonEcsData[]
-): ThresholdAggregationData => {
+export const getThresholdAggregationData = (ecsData: Ecs | Ecs[]): ThresholdAggregationData => {
   const thresholdEcsData: Ecs[] = Array.isArray(ecsData) ? ecsData : [ecsData];
   return thresholdEcsData.reduce<ThresholdAggregationData>(
     (outerAcc, thresholdData) => {
@@ -173,9 +174,12 @@ export const getThresholdAggregationData = (
       };
 
       try {
-        thresholdResult = JSON.parse((thresholdData.signal?.threshold_result as string[])[0]);
+        thresholdResult = JSON.parse(
+          (getField(thresholdData, ALERT_THRESHOLD_RESULT) as string[])[0]
+        );
         aggField = JSON.parse(threshold[0]).field;
       } catch (err) {
+        // Legacy support
         thresholdResult = {
           terms: [
             {
@@ -188,11 +192,15 @@ export const getThresholdAggregationData = (
         };
       }
 
-      const originalTime = moment(thresholdData.signal?.original_time![0]);
-      const now = moment();
-      const ruleFrom = dateMath.parse(thresholdData.signal?.rule?.from![0]!);
-      const ruleInterval = moment.duration(now.diff(ruleFrom));
+      // Legacy support
+      const ruleFromStr = getField(thresholdData, ALERT_RULE_FROM)[0];
+      const ruleFrom = dateMath.parse(ruleFromStr) ?? moment(); // The fallback here will essentially ensure 0 results
+      const originalTimeStr = getField(thresholdData, ALERT_ORIGINAL_TIME)[0];
+      const originalTime = originalTimeStr != null ? moment(originalTimeStr) : ruleFrom;
+      const ruleInterval = moment.duration(moment().diff(ruleFrom));
       const fromOriginalTime = originalTime.clone().subtract(ruleInterval); // This is the default... can overshoot
+      // End legacy support
+
       const aggregationFields = Array.isArray(aggField) ? aggField : [aggField];
 
       return {
@@ -249,16 +257,19 @@ export const getThresholdAggregationData = (
   );
 };
 
-export const isEqlRuleWithGroupId = (ecsData: Ecs) =>
-  ecsData.signal?.rule?.type?.length &&
-  ecsData.signal?.rule?.type[0] === 'eql' &&
-  ecsData.signal?.group?.id?.length;
+export const isEqlRuleWithGroupId = (ecsData: Ecs) => {
+  const ruleType = getField(ecsData, ALERT_RULE_TYPE);
+  const groupId = getField(ecsData, ALERT_GROUP_ID);
+  return ruleType?.length && ruleType[0] === 'eql' && groupId?.length;
+};
 
-export const isThresholdRule = (ecsData: Ecs) =>
-  ecsData.signal?.rule?.type?.length && ecsData.signal?.rule?.type[0] === 'threshold';
+export const isThresholdRule = (ecsData: Ecs) => {
+  const ruleType = getField(ecsData, ALERT_RULE_TYPE);
+  return Array.isArray(ruleType) && ruleType.length && ruleType[0] === 'threshold';
+};
 
 export const buildAlertsKqlFilter = (
-  key: '_id' | 'signal.group.id',
+  key: '_id' | 'signal.group.id' | 'kibana.alert.group.id',
   alertIds: string[]
 ): Filter[] => {
   return [
@@ -367,7 +378,6 @@ export const buildEqlDataProviderOrFilter = (
 export const sendAlertToTimelineAction = async ({
   createTimeline,
   ecsData: ecs,
-  nonEcsData,
   updateTimelineIsLoading,
   searchStrategyClient,
 }: SendAlertToTimelineActionProps) => {
@@ -377,9 +387,11 @@ export const sendAlertToTimelineAction = async ({
    */
   const ecsData: Ecs = Array.isArray(ecs) && ecs.length > 0 ? ecs[0] : (ecs as Ecs);
   const alertIds = Array.isArray(ecs) ? ecs.map((d) => d._id) : [];
-  const noteContent = ecsData.signal?.rule?.note != null ? ecsData.signal?.rule?.note[0] : '';
+  const ruleNote = getField(ecsData, ALERT_RULE_NOTE);
+  const noteContent = Array.isArray(ruleNote) && ruleNote.length > 0 ? ruleNote[0] : '';
+  const ruleTimelineId = getField(ecsData, ALERT_RULE_TIMELINE_ID);
   const timelineId =
-    ecsData.signal?.rule?.timeline_id != null ? ecsData.signal?.rule?.timeline_id[0] : '';
+    Array.isArray(ruleTimelineId) && ruleTimelineId.length > 0 ? ruleTimelineId[0] : '';
   const { to, from } = determineToAndFrom({ ecs });
 
   // For now we do not want to populate the template timeline if we have alertIds
@@ -462,10 +474,7 @@ export const sendAlertToTimelineAction = async ({
   }
 
   if (isThresholdRule(ecsData)) {
-    const { thresholdFrom, thresholdTo, dataProviders } = getThresholdAggregationData(
-      ecsData,
-      nonEcsData
-    );
+    const { thresholdFrom, thresholdTo, dataProviders } = getThresholdAggregationData(ecsData);
 
     return createTimeline({
       from: thresholdFrom,

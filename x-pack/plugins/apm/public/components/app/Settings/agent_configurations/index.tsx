@@ -25,7 +25,11 @@ import { AgentConfigurationList } from './List';
 const INITIAL_DATA = { configurations: [] };
 
 export function AgentConfigurations() {
-  const { refetch, data = INITIAL_DATA, status } = useFetcher(
+  const {
+    refetch,
+    data = INITIAL_DATA,
+    status,
+  } = useFetcher(
     (callApmApi) =>
       callApmApi({ endpoint: 'GET /api/apm/settings/agent-configuration' }),
     [],

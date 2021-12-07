@@ -6,27 +6,46 @@
  */
 
 import url from 'url';
-import archives_metadata from '../../fixtures/es_archiver/archives_metadata';
-import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
+import { synthtrace } from '../../../synthtrace';
+import { opbeans } from '../../fixtures/synthtrace/opbeans';
 
-const { start, end } = archives_metadata['apm_8.0.0'];
+const start = '2021-10-10T00:00:00.000Z';
+const end = '2021-10-10T00:15:00.000Z';
 
-const servicesPath = '/app/apm/services';
-const baseUrl = url.format({
-  pathname: servicesPath,
+const serviceInventoryHref = url.format({
+  pathname: '/app/apm/services',
   query: { rangeFrom: start, rangeTo: end },
 });
 
+const apisToIntercept = [
+  {
+    endpoint: '/internal/apm/service?*',
+    name: 'servicesMainStatistics',
+  },
+  {
+    endpoint: '/internal/apm/services/detailed_statistics?*',
+    name: 'servicesDetailedStatistics',
+  },
+];
+
 describe('Home page', () => {
-  before(() => {
-    esArchiverLoad('apm_8.0.0');
+  before(async () => {
+    await synthtrace.index(
+      opbeans({
+        from: new Date(start).getTime(),
+        to: new Date(end).getTime(),
+      })
+    );
   });
-  after(() => {
-    esArchiverUnload('apm_8.0.0');
+
+  after(async () => {
+    await synthtrace.clean();
   });
+
   beforeEach(() => {
     cy.loginAsReadOnlyUser();
   });
+
   it('Redirects to service page with rangeFrom and rangeTo added to the URL', () => {
     cy.visit('/app/apm');
 
@@ -34,29 +53,32 @@ describe('Home page', () => {
       'include',
       'app/apm/services?rangeFrom=now-15m&rangeTo=now'
     );
-    cy.get('.euiTabs .euiTab-isSelected').contains('Services');
   });
 
   it('includes services with only metric documents', () => {
     cy.visit(
-      `${baseUrl}&kuery=not%2520(processor.event%2520%253A%2522transaction%2522%2520)`
+      `${serviceInventoryHref}&kuery=not%20(processor.event%3A%22transaction%22)`
     );
-    cy.contains('opbeans-python');
     cy.contains('opbeans-java');
     cy.contains('opbeans-node');
   });
 
   describe('navigations', () => {
     it('navigates to service overview page with transaction type', () => {
-      const kuery = encodeURIComponent(
-        'transaction.name : "taskManager markAvailableTasksAsClaimed"'
-      );
-      cy.visit(`${baseUrl}&kuery=${kuery}`);
-      cy.contains('taskManager');
-      cy.contains('kibana').click();
+      apisToIntercept.map(({ endpoint, name }) => {
+        cy.intercept('GET', endpoint).as(name);
+      });
+
+      cy.visit(serviceInventoryHref);
+
+      cy.contains('Services');
+
+      cy.get('[data-test-subj="serviceLink_rum-js"]').then((element) => {
+        element[0].click();
+      });
       cy.get('[data-test-subj="headerFilterTransactionType"]').should(
         'have.value',
-        'taskManager'
+        'page-load'
       );
     });
   });

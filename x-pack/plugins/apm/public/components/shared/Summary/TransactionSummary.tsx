@@ -11,7 +11,6 @@ import { Summary } from './';
 import { TimestampTooltip } from '../TimestampTooltip';
 import { DurationSummaryItem } from './DurationSummaryItem';
 import { ErrorCountSummaryItemBadge } from './error_count_summary_item_badge';
-import { isRumAgentName } from '../../../../common/agent_name';
 import { HttpInfoSummaryItem } from './http_info_summary_item';
 import { TransactionResultSummaryItem } from './TransactionResultSummaryItem';
 import { UserAgentSummaryItem } from './UserAgentSummaryItem';
@@ -24,10 +23,7 @@ interface Props {
 
 function getTransactionResultSummaryItem(transaction: Transaction) {
   const result = transaction.transaction.result;
-  const isRumAgent = isRumAgentName(transaction.agent.name);
-  const url = isRumAgent
-    ? transaction.transaction.page?.url
-    : transaction.url?.full;
+  const url = transaction.url?.full || transaction.transaction?.page?.url;
 
   if (url) {
     const method = transaction.http?.request?.method;

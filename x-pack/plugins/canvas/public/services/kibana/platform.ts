@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { KibanaPluginServiceFactory } from '../../../../../../src/plugins/presentation_util/public';
 
 import { CanvasStartDeps } from '../../plugin';
@@ -15,7 +14,11 @@ export type CanvaPlatformServiceFactory = KibanaPluginServiceFactory<
   CanvasStartDeps
 >;
 
-export const platformServiceFactory: CanvaPlatformServiceFactory = ({ coreStart, initContext }) => {
+export const platformServiceFactory: CanvaPlatformServiceFactory = ({
+  coreStart,
+  initContext,
+  startPlugins,
+}) => {
   if (!initContext) {
     throw new Error('Canvas platform service requires init context');
   }
@@ -30,9 +33,12 @@ export const platformServiceFactory: CanvaPlatformServiceFactory = ({ coreStart,
     // though we don't do this.  So this cast may be the best option.
     getHasWriteAccess: () => coreStart.application.capabilities.canvas.save as boolean,
     getUISetting: coreStart.uiSettings.get.bind(coreStart.uiSettings),
+    hasHeaderBanner$: coreStart.chrome.hasHeaderBanner$,
     setBreadcrumbs: coreStart.chrome.setBreadcrumbs,
     setRecentlyAccessed: coreStart.chrome.recentlyAccessed.add,
     setFullscreen: coreStart.chrome.setIsVisible,
+    redirectLegacyUrl: startPlugins.spaces?.ui.redirectLegacyUrl,
+    getLegacyUrlConflict: startPlugins.spaces?.ui.components.getLegacyUrlConflict,
 
     // TODO: these should go away.  We want thin accessors, not entire objects.
     // Entire objects are hard to mock, and hide our dependency on the external service.

@@ -60,7 +60,7 @@ export const sampleAttribute = {
                     'transaction.type: page-load and processor.event: transaction and transaction.type : *',
                 },
                 isBucketed: false,
-                label: 'test-series',
+                label: 'Pages loaded',
                 operationType: 'formula',
                 params: {
                   format: {
@@ -139,8 +139,7 @@ export const sampleAttribute = {
                       min: 0,
                     },
                     name: 'divide',
-                    text:
-                      "count(kql='transaction.type: page-load and processor.event: transaction and transaction.type : *') / overall_sum(count(kql='transaction.type: page-load and processor.event: transaction and transaction.type : *'))",
+                    text: "count(kql='transaction.type: page-load and processor.event: transaction and transaction.type : *') / overall_sum(count(kql='transaction.type: page-load and processor.event: transaction and transaction.type : *'))",
                     type: 'function',
                   },
                 },
@@ -175,18 +174,21 @@ export const sampleAttribute = {
         {
           accessors: ['y-axis-column-layer0'],
           layerId: 'layer0',
+          layerType: 'data',
           seriesType: 'line',
           xAccessor: 'x-axis-column-layer0',
           yConfig: [
             {
               color: 'green',
               forAccessor: 'y-axis-column-layer0',
+              axisMode: 'left',
             },
           ],
         },
       ],
       legend: {
         isVisible: true,
+        showSingleSeries: true,
         position: 'right',
       },
       preferredSeriesType: 'line',

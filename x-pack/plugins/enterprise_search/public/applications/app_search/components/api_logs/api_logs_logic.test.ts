@@ -17,12 +17,14 @@ import { nextTick } from '@kbn/test/jest';
 
 import { DEFAULT_META } from '../../../shared/constants';
 
+import { itShowsServerErrorAsFlashMessage } from '../../../test_helpers';
+
 import { ApiLogsLogic } from './';
 
 describe('ApiLogsLogic', () => {
   const { mount, unmount } = new LogicMounter(ApiLogsLogic);
   const { http } = mockHttpValues;
-  const { flashAPIErrors, flashErrorToast } = mockFlashMessageHelpers;
+  const { flashErrorToast } = mockFlashMessageHelpers;
 
   const DEFAULT_VALUES = {
     dataLoading: true,
@@ -154,7 +156,7 @@ describe('ApiLogsLogic', () => {
 
         ApiLogsLogic.actions.fetchApiLogs();
 
-        expect(http.get).toHaveBeenCalledWith('/api/app_search/engines/some-engine/api_logs', {
+        expect(http.get).toHaveBeenCalledWith('/internal/app_search/engines/some-engine/api_logs', {
           query: {
             'page[current]': 1,
             'filters[date][from]': '1970-01-01T00:00:00.000Z',
@@ -176,14 +178,9 @@ describe('ApiLogsLogic', () => {
           expect(ApiLogsLogic.actions.updateView).toHaveBeenCalledWith(MOCK_API_RESPONSE);
         });
 
-        it('handles API errors', async () => {
-          http.get.mockReturnValueOnce(Promise.reject('error'));
+        itShowsServerErrorAsFlashMessage(http.get, () => {
           mount();
-
           ApiLogsLogic.actions.fetchApiLogs();
-          await nextTick();
-
-          expect(flashAPIErrors).toHaveBeenCalledWith('error');
         });
       });
 

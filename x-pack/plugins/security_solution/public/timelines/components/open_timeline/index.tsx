@@ -8,8 +8,7 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 
-import { sourcererSelectors } from '../../../common/store';
-import { useShallowEqualSelector, useDeepEqualSelector } from '../../../common/hooks/use_selector';
+import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { SortFieldTimeline, TimelineId } from '../../../../common/types/timeline';
 import { TimelineModel } from '../../../timelines/store/timeline/model';
 import { timelineSelectors } from '../../../timelines/store/timeline';
@@ -46,6 +45,8 @@ import { useTimelineTypes } from './use_timeline_types';
 import { useTimelineStatus } from './use_timeline_status';
 import { deleteTimelinesByIds } from '../../containers/api';
 import { Direction } from '../../../../common/search_strategy';
+import { SourcererScopeName } from '../../../common/store/sourcerer/model';
+import { useSourcererDataView } from '../../../common/containers/sourcerer';
 
 interface OwnProps<TCache = object> {
   /** Displays open timeline in modal */
@@ -108,16 +109,13 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
       (state) => getTimeline(state, TimelineId.active)?.savedObjectId ?? ''
     );
 
-    const existingIndexNamesSelector = useMemo(
-      () => sourcererSelectors.getAllExistingIndexNamesSelector(),
-      []
-    );
-    const existingIndexNames = useDeepEqualSelector<string[]>(existingIndexNamesSelector);
+    const { dataViewId, selectedPatterns } = useSourcererDataView(SourcererScopeName.timeline);
 
     const updateTimeline = useMemo(() => dispatchUpdateTimeline(dispatch), [dispatch]);
-    const updateIsLoading = useCallback((payload) => dispatch(dispatchUpdateIsLoading(payload)), [
-      dispatch,
-    ]);
+    const updateIsLoading = useCallback(
+      (payload) => dispatch(dispatchUpdateIsLoading(payload)),
+      [dispatch]
+    );
 
     const {
       customTemplateTimelineCount,
@@ -134,15 +132,12 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
       defaultTimelineCount,
       templateTimelineCount,
     });
-    const {
-      timelineStatus,
-      templateTimelineFilter,
-      installPrepackagedTimelines,
-    } = useTimelineStatus({
-      timelineType,
-      customTemplateTimelineCount,
-      elasticTemplateTimelineCount,
-    });
+    const { timelineStatus, templateTimelineFilter, installPrepackagedTimelines } =
+      useTimelineStatus({
+        timelineType,
+        customTemplateTimelineCount,
+        elasticTemplateTimelineCount,
+      });
     const refetch = useCallback(() => {
       fetchAllTimeline({
         pageInfo: {
@@ -206,7 +201,8 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
             dispatchCreateNewTimeline({
               id: TimelineId.active,
               columns: defaultHeaders,
-              indexNames: existingIndexNames,
+              dataViewId,
+              indexNames: selectedPatterns,
               show: false,
             })
           );
@@ -215,7 +211,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
         await deleteTimelinesByIds(timelineIds);
         refetch();
       },
-      [dispatch, existingIndexNames, refetch, timelineSavedObjectId]
+      [timelineSavedObjectId, refetch, dispatch, dataViewId, selectedPatterns]
     );
 
     const onDeleteOneTimeline: OnDeleteOneTimeline = useCallback(

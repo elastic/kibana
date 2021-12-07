@@ -14,6 +14,7 @@ import {
   checkForDateHistogram,
   dateBasedOperationToExpression,
   hasDateField,
+  checkForDataLayerType,
 } from './utils';
 import { DEFAULT_TIME_SCALE } from '../../time_scale_utils';
 import { OperationDefinition } from '..';
@@ -111,13 +112,18 @@ export const counterRateOperation: OperationDefinition<
       })
     );
   },
-  getDisabledStatus(indexPattern, layer) {
-    return checkForDateHistogram(
-      layer,
-      i18n.translate('xpack.lens.indexPattern.counterRate', {
-        defaultMessage: 'Counter rate',
-      })
-    )?.join(', ');
+  getDisabledStatus(indexPattern, layer, layerType) {
+    const opName = i18n.translate('xpack.lens.indexPattern.counterRate', {
+      defaultMessage: 'Counter rate',
+    });
+    if (layerType) {
+      const dataLayerErrors = checkForDataLayerType(layerType, opName);
+      if (dataLayerErrors) {
+        return dataLayerErrors.join(', ');
+      }
+    }
+
+    return checkForDateHistogram(layer, opName)?.join(', ');
   },
   timeScalingMode: 'mandatory',
   filterable: true,

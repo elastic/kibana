@@ -8,7 +8,7 @@
 
 import { CoreSetup, CoreStart, Plugin } from '../../../core/public';
 import { ExpressionsStart, ExpressionsSetup } from '../../expressions/public';
-import { revealImageRenderer } from './expression_renderers';
+import { revealImageRendererFactory } from './expression_renderers';
 import { revealImageFunction } from '../common/expression_functions';
 
 interface SetupDeps {
@@ -29,10 +29,11 @@ export class ExpressionRevealImagePlugin
       ExpressionRevealImagePluginStart,
       SetupDeps,
       StartDeps
-    > {
+    >
+{
   public setup(core: CoreSetup, { expressions }: SetupDeps): ExpressionRevealImagePluginSetup {
     expressions.registerFunction(revealImageFunction);
-    expressions.registerRenderer(revealImageRenderer);
+    expressions.registerRenderer(revealImageRendererFactory(core));
   }
 
   public start(core: CoreStart): ExpressionRevealImagePluginStart {}

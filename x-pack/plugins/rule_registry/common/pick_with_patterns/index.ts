@@ -62,5 +62,5 @@ export function pickWithPatterns<
     })
   );
 
-  return (pick(map, matchedFields) as unknown) as PickWithPatterns<T, TPatterns>;
+  return pick(map, matchedFields) as unknown as PickWithPatterns<T, TPatterns>;
 }

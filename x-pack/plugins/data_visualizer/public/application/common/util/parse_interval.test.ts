@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { parseInterval } from './parse_interval';
+import { parseInterval } from '../../../../common/utils/parse_interval';
 
 describe('ML parse interval util', () => {
   test('should correctly parse an interval containing a valid unit and value', () => {

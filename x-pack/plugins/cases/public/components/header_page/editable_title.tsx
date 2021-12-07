@@ -19,7 +19,7 @@ import {
   EuiFormRow,
 } from '@elastic/eui';
 
-import { MAX_TITLE_LENGTH } from '../../../common';
+import { MAX_TITLE_LENGTH } from '../../../common/constants';
 import * as i18n from './translations';
 import { Title } from './title';
 
@@ -91,7 +91,7 @@ const EditableTitleComponent: React.FC<EditableTitleProps> = ({
         <EuiFlexGroup gutterSize="none" responsive={false} wrap={true}>
           <EuiFlexItem grow={false}>
             <EuiButton
-              color="secondary"
+              color="success"
               data-test-subj="editable-title-submit-btn"
               fill
               iconType="save"

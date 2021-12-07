@@ -11,26 +11,27 @@ import { DETECTION_ENGINE_SIGNALS_MIGRATION_STATUS_URL } from '../../../../plugi
 import { ROLES } from '../../../../plugins/security_solution/common/test';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { createSignalsIndex, deleteSignalsIndex, getIndexNameFromLoad } from '../../utils';
-import { createUserAndRole, deleteUserAndRole } from '../roles_users_utils';
+import { createUserAndRole, deleteUserAndRole } from '../../../common/services/security_solution';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
+  const log = getService('log');
 
   describe('Signals migration status', () => {
     let legacySignalsIndexName: string;
     beforeEach(async () => {
-      await createSignalsIndex(supertest);
       legacySignalsIndexName = getIndexNameFromLoad(
         await esArchiver.load('x-pack/test/functional/es_archives/signals/legacy_signals_index')
       );
+      await createSignalsIndex(supertest, log);
     });
 
     afterEach(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/signals/legacy_signals_index');
-      await deleteSignalsIndex(supertest);
+      await deleteSignalsIndex(supertest, log);
     });
 
     it('returns no indexes if no signals exist in the specified range', async () => {

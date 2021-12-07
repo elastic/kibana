@@ -22,13 +22,13 @@ export function TransactionLink() {
   const {
     path: { transactionId },
     query: { rangeFrom, rangeTo },
-  } = useApmParams('/link-to/transaction/:transactionId');
+  } = useApmParams('/link-to/transaction/{transactionId}');
 
   const { data = { transaction: null }, status } = useFetcher(
     (callApmApi) => {
       if (transactionId) {
         return callApmApi({
-          endpoint: 'GET /api/apm/transactions/{transactionId}',
+          endpoint: 'GET /internal/apm/transactions/{transactionId}',
           params: {
             path: {
               transactionId,

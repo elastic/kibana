@@ -8,7 +8,7 @@
 
 import { Datatable } from 'src/plugins/expressions/public';
 import { CoreStart } from '../../../../../core/public';
-import { FormatFactory } from '../../../../data/common/field_formats/utils';
+import { FormatFactory } from '../../../../field_formats/common';
 
 import { DataPublicPluginStart, exporters } from '../../services/data';
 import { downloadMultipleAs } from '../../services/share';
@@ -106,7 +106,7 @@ export class ExportCSVAction implements Action<ExportContext> {
 
       // useful for testing
       if (context.asString) {
-        return (content as unknown) as Promise<void>;
+        return content as unknown as Promise<void>;
       }
 
       if (content) {

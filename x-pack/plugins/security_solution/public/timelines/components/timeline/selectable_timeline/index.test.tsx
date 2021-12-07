@@ -47,7 +47,7 @@ describe('SelectableTimeline', () => {
         const searchProps: EuiSelectableProps['searchProps'] = wrapper
           .find('[data-test-subj="selectable-input"]')
           .prop('searchProps');
-        expect(searchProps!.placeholder).toEqual('e.g. Timeline name or description');
+        expect(searchProps?.placeholder).toEqual('e.g. Timeline name or description');
       });
     });
 
@@ -65,7 +65,7 @@ describe('SelectableTimeline', () => {
         const searchProps: EuiSelectableProps['searchProps'] = wrapper
           .find('[data-test-subj="selectable-input"]')
           .prop('searchProps');
-        expect(searchProps!.placeholder).toEqual('e.g. Timeline template name or description');
+        expect(searchProps?.placeholder).toEqual('e.g. Timeline template name or description');
       });
     });
   });

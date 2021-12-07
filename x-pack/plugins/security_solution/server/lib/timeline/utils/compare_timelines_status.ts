@@ -212,8 +212,8 @@ export class CompareTimelinesStatus {
 
   private get isTemplateVersionConflict() {
     const templateTimelineVersion = this.templateTimelineObject?.getVersion;
-    const existingTemplateTimelineVersion = this.templateTimelineObject?.data
-      ?.templateTimelineVersion;
+    const existingTemplateTimelineVersion =
+      this.templateTimelineObject?.data?.templateTimelineVersion;
     if (
       templateTimelineVersion != null &&
       this.templateTimelineObject.isExists &&

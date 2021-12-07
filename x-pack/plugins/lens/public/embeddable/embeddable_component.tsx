@@ -6,8 +6,8 @@
  */
 
 import React, { FC, useEffect } from 'react';
-import { CoreStart } from 'kibana/public';
-import { UiActionsStart } from 'src/plugins/ui_actions/public';
+import type { CoreStart } from 'kibana/public';
+import type { UiActionsStart } from 'src/plugins/ui_actions/public';
 import type { Start as InspectorStartContract } from 'src/plugins/inspector/public';
 import { EuiLoadingChart } from '@elastic/eui';
 import {

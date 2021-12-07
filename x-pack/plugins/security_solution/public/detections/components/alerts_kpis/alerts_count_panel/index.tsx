@@ -8,6 +8,8 @@
 import React, { memo, useMemo, useState, useEffect } from 'react';
 import uuid from 'uuid';
 
+import type { Filter, Query } from '@kbn/es-query';
+import { buildEsQuery } from '@kbn/es-query';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { HeaderSection } from '../../../../common/components/header_section';
 
@@ -20,7 +22,6 @@ import { AlertsCount } from './alerts_count';
 import type { AlertsCountAggregation } from './types';
 import { DEFAULT_STACK_BY_FIELD } from '../common/config';
 import type { AlertsStackByField } from '../common/types';
-import { Filter, esQuery, Query } from '../../../../../../../../src/plugins/data/public';
 import { KpiPanel, StackBySelect } from '../common/components';
 import { useInspectButton } from '../common/hooks';
 
@@ -38,14 +39,21 @@ export const AlertsCountPanel = memo<AlertsCountPanelProps>(
 
     // create a unique, but stable (across re-renders) query id
     const uniqueQueryId = useMemo(() => `${DETECTIONS_ALERTS_COUNT_ID}-${uuid.v4()}`, []);
-    const [selectedStackByOption, setSelectedStackByOption] = useState<AlertsStackByField>(
-      DEFAULT_STACK_BY_FIELD
-    );
+    const [selectedStackByOption, setSelectedStackByOption] =
+      useState<AlertsStackByField>(DEFAULT_STACK_BY_FIELD);
+
+    // TODO: Once we are past experimental phase this code should be removed
+    // const fetchMethod = useIsExperimentalFeatureEnabled('ruleRegistryEnabled')
+    //   ? fetchQueryRuleRegistryAlerts
+    //   : fetchQueryAlerts;
+
+    // Disabling the fecth method in useQueryAlerts since it is defaulted to the old one
+    // const fetchMethod = fetchQueryRuleRegistryAlerts;
 
     const additionalFilters = useMemo(() => {
       try {
         return [
-          esQuery.buildEsQuery(
+          buildEsQuery(
             undefined,
             query != null ? [query] : [],
             filters?.filter((f) => f.meta.disabled === false) ?? []

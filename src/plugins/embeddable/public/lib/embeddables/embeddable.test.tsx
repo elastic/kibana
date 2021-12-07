@@ -74,7 +74,7 @@ test('Embeddable reload is called if lastReloadRequest input time changes', asyn
 test('Embeddable reload is called if lastReloadRequest input time changed and new input is used', async () => {
   const hello = new FilterableEmbeddable({ id: '123', filters: [], lastReloadRequestTime: 0 });
 
-  const aFilter = ({} as unknown) as MockFilter;
+  const aFilter = {} as unknown as MockFilter;
   hello.reload = jest.fn(() => {
     // when reload is called embeddable already has new input
     expect(hello.getInput().filters).toEqual([aFilter]);

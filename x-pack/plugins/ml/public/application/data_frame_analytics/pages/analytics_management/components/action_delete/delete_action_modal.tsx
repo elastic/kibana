@@ -28,6 +28,7 @@ export const DeleteActionModal: FC<DeleteAction> = ({
   toggleDeleteIndex,
   toggleDeleteIndexPattern,
   userCanDeleteIndex,
+  userCanDeleteDataView,
 }) => {
   if (item === undefined) {
     return null;
@@ -79,15 +80,13 @@ export const DeleteActionModal: FC<DeleteAction> = ({
           {userCanDeleteIndex && indexPatternExists && (
             <EuiSwitch
               data-test-subj="mlAnalyticsJobDeleteIndexPatternSwitch"
-              label={i18n.translate(
-                'xpack.ml.dataframe.analyticsList.deleteTargetIndexPatternTitle',
-                {
-                  defaultMessage: 'Delete index pattern {indexPattern}',
-                  values: { indexPattern: indexName },
-                }
-              )}
+              label={i18n.translate('xpack.ml.dataframe.analyticsList.deleteTargetDataViewTitle', {
+                defaultMessage: 'Delete data view {dataView}',
+                values: { dataView: indexName },
+              })}
               checked={deleteIndexPattern}
               onChange={toggleDeleteIndexPattern}
+              disabled={userCanDeleteDataView === false}
             />
           )}
         </EuiFlexItem>

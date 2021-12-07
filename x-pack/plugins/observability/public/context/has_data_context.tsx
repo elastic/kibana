@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { uniqueId } from 'lodash';
+import { isEmpty, uniqueId } from 'lodash';
 import React, { createContext, useEffect, useState } from 'react';
 import { useRouteMatch } from 'react-router-dom';
-import { Alert } from '../../../alerting/common';
+import { asyncForEach } from '@kbn/std';
 import { getDataHandler } from '../data_handler';
 import { FETCH_STATUS } from '../hooks/use_fetcher';
 import { usePluginContext } from '../hooks/use_plugin_context';
@@ -23,7 +23,7 @@ export type HasDataMap = Record<
   DataContextApps,
   {
     status: FETCH_STATUS;
-    hasData?: boolean | Alert[];
+    hasData?: boolean;
     indices?: string | ApmIndicesConfig;
     serviceName?: string;
   }
@@ -31,7 +31,7 @@ export type HasDataMap = Record<
 
 export interface HasDataContextValue {
   hasDataMap: Partial<HasDataMap>;
-  hasAnyData: boolean;
+  hasAnyData?: boolean;
   isAllRequestsComplete: boolean;
   onRefreshTimeRange: () => void;
   forceUpdate: string;
@@ -53,7 +53,7 @@ export function HasDataContextProvider({ children }: { children: React.ReactNode
   useEffect(
     () => {
       if (!isExploratoryView)
-        apps.forEach(async (app) => {
+        asyncForEach(apps, async (app) => {
           try {
             const updateState = ({
               hasData,
@@ -122,7 +122,7 @@ export function HasDataContextProvider({ children }: { children: React.ReactNode
         setHasDataMap((prevState) => ({
           ...prevState,
           alert: {
-            hasData: alerts,
+            hasData: alerts.length > 0,
             status: FETCH_STATUS.SUCCESS,
           },
         }));
@@ -145,15 +145,16 @@ export function HasDataContextProvider({ children }: { children: React.ReactNode
     return appStatus !== undefined && appStatus !== FETCH_STATUS.LOADING;
   });
 
-  const hasAnyData = (Object.keys(hasDataMap) as ObservabilityFetchDataPlugins[]).some(
-    (app) => hasDataMap[app]?.hasData === true
-  );
+  const hasAnyData = (Object.keys(hasDataMap) as ObservabilityFetchDataPlugins[]).some((app) => {
+    const appHasData = hasDataMap[app]?.hasData;
+    return appHasData === true;
+  });
 
   return (
     <HasDataContext.Provider
       value={{
         hasDataMap,
-        hasAnyData,
+        hasAnyData: isEmpty(hasDataMap) ? undefined : hasAnyData,
         isAllRequestsComplete,
         forceUpdate,
         onRefreshTimeRange: () => {

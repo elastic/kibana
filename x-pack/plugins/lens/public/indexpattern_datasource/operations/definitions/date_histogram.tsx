@@ -7,7 +7,7 @@
 
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
   EuiBasicTable,
@@ -73,7 +73,8 @@ function getMultipleDateHistogramsErrorMessage(layer: IndexPatternLayer, columnI
 
 export const dateHistogramOperation: OperationDefinition<
   DateHistogramIndexPatternColumn,
-  'field'
+  'field',
+  { interval: string }
 > = {
   type: 'date_histogram',
   displayName: i18n.translate('xpack.lens.indexPattern.dateHistogram', {

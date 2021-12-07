@@ -7,7 +7,6 @@
  */
 
 import { DeploymentService } from './deployment';
-import { LegacyEsProvider } from './legacy_es';
 import { ElasticsearchProvider } from './elasticsearch';
 import { EsArchiverProvider } from './es_archiver';
 import { KibanaServerProvider } from './kibana_server';
@@ -16,10 +15,11 @@ import { RandomnessService } from './randomness';
 import { SecurityServiceProvider } from './security';
 import { EsDeleteAllIndicesProvider } from './es_delete_all_indices';
 import { SavedObjectInfoService } from './saved_object_info';
+import { IndexPatternsService } from './index_patterns';
+import { BSearchProvider } from './bsearch';
 
 export const services = {
   deployment: DeploymentService,
-  legacyEs: LegacyEsProvider,
   es: ElasticsearchProvider,
   esArchiver: EsArchiverProvider,
   kibanaServer: KibanaServerProvider,
@@ -28,4 +28,6 @@ export const services = {
   security: SecurityServiceProvider,
   esDeleteAllIndices: EsDeleteAllIndicesProvider,
   savedObjectInfo: SavedObjectInfoService,
+  indexPatterns: IndexPatternsService,
+  bsearch: BSearchProvider,
 };

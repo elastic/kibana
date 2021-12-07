@@ -12,6 +12,5 @@ export {
   KibanaContextProvider,
   useKibana,
   withKibana,
-  UseKibana,
 } from './context';
-export { KibanaReactContext, KibanaReactContextValue, KibanaServices } from './types';
+export type { KibanaReactContext, KibanaReactContextValue, KibanaServices } from './types';

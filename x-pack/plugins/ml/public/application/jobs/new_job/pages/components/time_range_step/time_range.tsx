@@ -26,13 +26,8 @@ export const TimeRangeStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) 
   const { services } = useMlKibana();
   const mlContext = useMlContext();
 
-  const {
-    jobCreator,
-    jobCreatorUpdate,
-    jobCreatorUpdated,
-    chartLoader,
-    chartInterval,
-  } = useContext(JobCreatorContext);
+  const { jobCreator, jobCreatorUpdate, jobCreatorUpdated, chartLoader, chartInterval } =
+    useContext(JobCreatorContext);
 
   const [timeRange, setTimeRange] = useState<TimeRange>({
     start: jobCreator.start,
@@ -109,7 +104,7 @@ export const TimeRangeStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) 
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <FullTimeRangeSelector
-                indexPattern={mlContext.currentIndexPattern}
+                dataView={mlContext.currentDataView}
                 query={mlContext.combinedQuery}
                 disabled={false}
                 callback={fullTimeRangeCallback}

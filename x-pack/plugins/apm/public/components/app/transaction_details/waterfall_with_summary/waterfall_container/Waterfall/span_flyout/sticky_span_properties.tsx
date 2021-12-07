@@ -8,6 +8,10 @@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import {
+  METRIC_TYPE,
+  useUiTracker,
+} from '../../../../../../../../../observability/public';
+import {
   SERVICE_NAME,
   SPAN_DESTINATION_SERVICE_RESOURCE,
   SPAN_NAME,
@@ -29,8 +33,15 @@ interface Props {
 }
 
 export function StickySpanProperties({ span, transaction }: Props) {
-  const { query } = useApmParams('/services/:serviceName/transactions/view');
-  const { environment, latencyAggregationType } = query;
+  const { query } = useApmParams('/services/{serviceName}/transactions/view');
+  const {
+    environment,
+    latencyAggregationType,
+    comparisonEnabled,
+    comparisonType,
+  } = query;
+
+  const trackEvent = useUiTracker();
 
   const nextEnvironment = getNextEnvironmentUrlParam({
     requestedEnvironment: transaction?.service.environment,
@@ -50,7 +61,10 @@ export function StickySpanProperties({ span, transaction }: Props) {
           val: (
             <ServiceLink
               agentName={transaction.agent.name}
-              query={{ ...query, environment: nextEnvironment }}
+              query={{
+                ...query,
+                environment: nextEnvironment,
+              }}
               serviceName={transaction.service.name}
             />
           ),
@@ -73,6 +87,8 @@ export function StickySpanProperties({ span, transaction }: Props) {
               transactionType={transaction.transaction.type}
               environment={nextEnvironment}
               latencyAggregationType={latencyAggregationType}
+              comparisonEnabled={comparisonEnabled}
+              comparisonType={comparisonType}
             >
               {transaction.transaction.name}
             </TransactionDetailLink>
@@ -94,10 +110,19 @@ export function StickySpanProperties({ span, transaction }: Props) {
           fieldName: SPAN_DESTINATION_SERVICE_RESOURCE,
           val: (
             <BackendLink
-              backendName={backendName}
-              query={query}
+              query={{
+                ...query,
+                backendName,
+              }}
               subtype={span.span.subtype}
               type={span.span.type}
+              onClick={() => {
+                trackEvent({
+                  app: 'apm',
+                  metricType: METRIC_TYPE.CLICK,
+                  metric: 'span_flyout_to_backend_detail',
+                });
+              }}
             />
           ),
           width: '25%',

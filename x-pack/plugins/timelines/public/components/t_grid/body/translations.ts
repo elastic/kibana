@@ -216,3 +216,9 @@ export const INVESTIGATE_IN_RESOLVER_DISABLED = i18n.translate(
     defaultMessage: 'This event cannot be analyzed since it has incompatible field mappings',
   }
 );
+
+export const ALERTS_UNIT = (totalCount: number) =>
+  i18n.translate('xpack.timelines.timeline.alertsUnit', {
+    values: { totalCount },
+    defaultMessage: `{totalCount, plural, =1 {alert} other {alerts}}`,
+  });

@@ -8,7 +8,7 @@
 import React, { useEffect } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { EuiButton, EuiEmptyPrompt, EuiLoadingSpinner, EuiPageContent } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { MIN_SEARCHABLE_SNAPSHOT_LICENSE } from '../../../../common/constants';
 import { useKibana, attemptToURIDecode } from '../../../shared_imports';
@@ -96,6 +96,9 @@ export const EditPolicy: React.FunctionComponent<RouteComponentProps<RouterProps
         license: {
           canUseSearchableSnapshot: () => license.hasAtLeast(MIN_SEARCHABLE_SNAPSHOT_LICENSE),
         },
+        indices: existingPolicy && existingPolicy.indices ? existingPolicy.indices : [],
+        indexTemplates:
+          existingPolicy && existingPolicy.indexTemplates ? existingPolicy.indexTemplates : [],
       }}
     >
       <PresentationComponent />

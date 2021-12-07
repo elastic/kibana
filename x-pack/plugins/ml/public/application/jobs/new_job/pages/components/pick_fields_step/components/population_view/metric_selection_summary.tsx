@@ -7,7 +7,7 @@
 
 import React, { Fragment, FC, useContext, useEffect, useState } from 'react';
 import { EuiSpacer } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { JobCreatorContext } from '../../../job_creator_context';
 import { PopulationJobCreator } from '../../../../../common/job_creator';
@@ -21,9 +21,12 @@ import { getToastNotificationService } from '../../../../../../../services/toast
 type DetectorFieldValues = Record<number, string[]>;
 
 export const PopulationDetectorsSummary: FC = () => {
-  const { jobCreator: jc, chartLoader, resultsLoader, chartInterval } = useContext(
-    JobCreatorContext
-  );
+  const {
+    jobCreator: jc,
+    chartLoader,
+    resultsLoader,
+    chartInterval,
+  } = useContext(JobCreatorContext);
   const jobCreator = jc as PopulationJobCreator;
 
   const [aggFieldPairList, setAggFieldPairList] = useState<AggFieldPair[]>(

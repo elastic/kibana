@@ -44,15 +44,18 @@ export async function lazyLoadModules(): Promise<LazyLoadedFileUploadModules> {
     return loadModulesPromise;
   }
 
-  loadModulesPromise = new Promise(async (resolve) => {
-    const { JsonUploadAndParse, importerFactory, IndexNameForm } = await import('./lazy');
-
-    resolve({
-      JsonUploadAndParse,
-      importerFactory,
-      getHttp,
-      IndexNameForm,
-    });
+  loadModulesPromise = new Promise(async (resolve, reject) => {
+    try {
+      const { JsonUploadAndParse, importerFactory, IndexNameForm } = await import('./lazy');
+      resolve({
+        JsonUploadAndParse,
+        importerFactory,
+        getHttp,
+        IndexNameForm,
+      });
+    } catch (error) {
+      reject(error);
+    }
   });
   return loadModulesPromise;
 }

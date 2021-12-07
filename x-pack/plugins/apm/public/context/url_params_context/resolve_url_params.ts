@@ -6,12 +6,12 @@
  */
 
 import { Location } from 'history';
+import { TimeRangeComparisonType } from '../../../common/runtime_types/comparison_type_rt';
 import { uxLocalUIFilterNames } from '../../../common/ux_ui_filter';
 import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
 import { LatencyAggregationType } from '../../../common/latency_aggregation_types';
 import { pickKeys } from '../../../common/utils/pick_keys';
 import { toQuery } from '../../components/shared/Links/url_helpers';
-import { TimeRangeComparisonType } from '../../components/shared/time_comparison/get_time_range_comparison';
 import {
   getDateRange,
   removeUndefinedProps,
@@ -19,10 +19,10 @@ import {
   toNumber,
   toString,
 } from './helpers';
-import { IUrlParams } from './types';
+import { UrlParams } from './types';
 
 type TimeUrlParams = Pick<
-  IUrlParams,
+  UrlParams,
   'start' | 'end' | 'rangeFrom' | 'rangeTo' | 'exactStart' | 'exactEnd'
 >;
 
@@ -30,6 +30,8 @@ export function resolveUrlParams(location: Location, state: TimeUrlParams) {
   const query = toQuery(location.search);
 
   const {
+    sampleRangeFrom,
+    sampleRangeTo,
     traceId,
     transactionId,
     transactionName,
@@ -73,11 +75,13 @@ export function resolveUrlParams(location: Location, state: TimeUrlParams) {
     pageSize: pageSize ? toNumber(pageSize) : undefined,
     transactionId: toString(transactionId),
     traceId: toString(traceId),
+    sampleRangeFrom: sampleRangeFrom ? toNumber(sampleRangeFrom) : undefined,
+    sampleRangeTo: sampleRangeTo ? toNumber(sampleRangeTo) : undefined,
     waterfallItemId: toString(waterfallItemId),
     detailTab: toString(detailTab),
     flyoutDetailTab: toString(flyoutDetailTab),
     spanId: toNumber(spanId),
-    kuery: kuery && decodeURIComponent(kuery),
+    kuery,
     transactionName,
     transactionType,
     searchTerm: toString(searchTerm),

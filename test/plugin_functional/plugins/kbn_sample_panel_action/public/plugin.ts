@@ -13,7 +13,8 @@ import { createSamplePanelAction } from './sample_panel_action';
 import { createSamplePanelLink } from './sample_panel_link';
 
 export class SampelPanelActionTestPlugin
-  implements Plugin<SampelPanelActionTestPluginSetup, SampelPanelActionTestPluginStart> {
+  implements Plugin<SampelPanelActionTestPluginSetup, SampelPanelActionTestPluginStart>
+{
   public setup(core: CoreSetup, { uiActions }: { uiActions: UiActionsSetup }) {
     const samplePanelAction = createSamplePanelAction(core.getStartServices);
     const samplePanelLink = createSamplePanelLink();

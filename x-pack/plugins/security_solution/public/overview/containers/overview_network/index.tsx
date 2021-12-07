@@ -55,10 +55,8 @@ export const useNetworkOverview = ({
   const abortCtrl = useRef(new AbortController());
   const searchSubscription$ = useRef(new Subscription());
   const [loading, setLoading] = useState(false);
-  const [
-    overviewNetworkRequest,
-    setNetworkRequest,
-  ] = useState<NetworkOverviewRequestOptions | null>(null);
+  const [overviewNetworkRequest, setNetworkRequest] =
+    useState<NetworkOverviewRequestOptions | null>(null);
 
   const [overviewNetworkResponse, setNetworkOverviewResponse] = useState<NetworkOverviewArgs>({
     overviewNetwork: {},

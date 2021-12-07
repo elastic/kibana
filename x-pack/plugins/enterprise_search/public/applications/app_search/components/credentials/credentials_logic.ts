@@ -239,7 +239,10 @@ export const CredentialsLogic = kea<CredentialsLogicType>({
           'page[current]': meta.page.current,
           'page[size]': meta.page.size,
         };
-        const response = await http.get('/api/app_search/credentials', { query });
+        const response = await http.get<{ meta: Meta; results: ApiToken[] }>(
+          '/internal/app_search/credentials',
+          { query }
+        );
         actions.setCredentialsData(response.meta, response.results);
       } catch (e) {
         flashAPIErrors(e);
@@ -248,7 +251,9 @@ export const CredentialsLogic = kea<CredentialsLogicType>({
     fetchDetails: async () => {
       try {
         const { http } = HttpLogic.values;
-        const response = await http.get('/api/app_search/credentials/details');
+        const response = await http.get<CredentialsDetails>(
+          '/internal/app_search/credentials/details'
+        );
 
         actions.setCredentialsDetails(response);
       } catch (e) {
@@ -258,7 +263,7 @@ export const CredentialsLogic = kea<CredentialsLogicType>({
     deleteApiKey: async (tokenName) => {
       try {
         const { http } = HttpLogic.values;
-        await http.delete(`/api/app_search/credentials/${tokenName}`);
+        await http.delete(`/internal/app_search/credentials/${tokenName}`);
 
         actions.fetchCredentials();
         flashSuccessToast(DELETE_MESSAGE(tokenName));
@@ -287,11 +292,13 @@ export const CredentialsLogic = kea<CredentialsLogicType>({
         const body = JSON.stringify(data);
 
         if (id) {
-          const response = await http.put(`/api/app_search/credentials/${name}`, { body });
+          const response = await http.put<ApiToken>(`/internal/app_search/credentials/${name}`, {
+            body,
+          });
           actions.onApiTokenUpdateSuccess(response);
           flashSuccessToast(UPDATE_MESSAGE(name));
         } else {
-          const response = await http.post('/api/app_search/credentials', { body });
+          const response = await http.post<ApiToken>('/internal/app_search/credentials', { body });
           actions.onApiTokenCreateSuccess(response);
           flashSuccessToast(CREATE_MESSAGE(name));
         }

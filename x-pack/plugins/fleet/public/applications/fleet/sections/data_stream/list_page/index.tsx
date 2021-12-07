@@ -16,7 +16,7 @@ import {
   EuiInMemoryTable,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage, FormattedDate } from '@kbn/i18n/react';
+import { FormattedMessage, FormattedDate } from '@kbn/i18n-react';
 
 import type { DataStream } from '../../../types';
 import { useGetDataStreams, useStartServices, usePagination, useBreadcrumbs } from '../../../hooks';
@@ -100,7 +100,9 @@ export const DataStreamListPage: React.FunctionComponent<{}> = () => {
         }),
         render: (date: DataStream['last_activity_ms']) => {
           try {
-            const formatter = fieldFormats.getInstance('date');
+            const formatter = fieldFormats.getInstance('date', {
+              pattern: 'MMM D, YYYY @ HH:mm:ss',
+            });
             return formatter.convert(date);
           } catch (e) {
             return <FormattedDate value={date} year="numeric" month="short" day="2-digit" />;
@@ -202,6 +204,7 @@ export const DataStreamListPage: React.FunctionComponent<{}> = () => {
     <EuiInMemoryTable
       loading={isLoading}
       hasActions={true}
+      tableLayout="auto"
       message={
         isLoading ? (
           <FormattedMessage

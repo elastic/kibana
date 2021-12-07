@@ -9,9 +9,9 @@
 import _ from 'lodash';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import uuid from 'uuid';
-import { CoreStart, IUiSettingsClient } from 'src/core/public';
+import { CoreStart, IUiSettingsClient, KibanaExecutionContext } from 'src/core/public';
 import { Start as InspectorStartContract } from 'src/plugins/inspector/public';
 
 import { UiActionsStart } from '../../services/ui_actions';
@@ -25,6 +25,8 @@ import {
   EmbeddableStart,
   EmbeddableOutput,
   EmbeddableFactory,
+  ErrorEmbeddable,
+  isErrorEmbeddable,
 } from '../../services/embeddable';
 import { DASHBOARD_CONTAINER_TYPE } from './dashboard_constants';
 import { createPanelState } from './panel';
@@ -34,11 +36,18 @@ import {
   KibanaContextProvider,
   KibanaReactContext,
   KibanaReactContextValue,
+  KibanaThemeProvider,
 } from '../../services/kibana_react';
 import { PLACEHOLDER_EMBEDDABLE } from './placeholder';
 import { DashboardAppCapabilities, DashboardContainerInput } from '../../types';
 import { PresentationUtilPluginStart } from '../../services/presentation_util';
+import type { ScreenshotModePluginStart } from '../../services/screenshot_mode';
 import { PanelPlacementMethod, IPanelPlacementArgs } from './panel/dashboard_panel_placement';
+import {
+  combineDashboardFiltersWithControlGroupFilters,
+  syncDashboardControlGroup,
+} from '../lib/dashboard_control_group';
+import { ControlGroupContainer } from '../../../../presentation_util/public';
 
 export interface DashboardContainerServices {
   ExitFullScreenButton: React.ComponentType<any>;
@@ -48,9 +57,11 @@ export interface DashboardContainerServices {
   application: CoreStart['application'];
   inspector: InspectorStartContract;
   overlays: CoreStart['overlays'];
+  screenshotMode: ScreenshotModePluginStart;
   uiSettings: IUiSettingsClient;
   embeddable: EmbeddableStart;
   uiActions: UiActionsStart;
+  theme: CoreStart['theme'];
   http: CoreStart['http'];
 }
 
@@ -68,6 +79,7 @@ export interface InheritedChildInput extends IndexSignature {
   id: string;
   searchSessionId?: string;
   syncColors?: boolean;
+  executionContext?: KibanaExecutionContext;
 }
 
 export type DashboardReactContextValue = KibanaReactContextValue<DashboardContainerServices>;
@@ -78,7 +90,7 @@ const defaultCapabilities: DashboardAppCapabilities = {
   createNew: false,
   saveQuery: false,
   createShortUrl: false,
-  hideWriteControls: true,
+  showWriteControls: false,
   mapsCapabilities: { save: false },
   visualizeCapabilities: { save: false },
   storeSearchSession: true,
@@ -87,6 +99,9 @@ const defaultCapabilities: DashboardAppCapabilities = {
 export class DashboardContainer extends Container<InheritedChildInput, DashboardContainerInput> {
   public readonly type = DASHBOARD_CONTAINER_TYPE;
 
+  private onDestroyControlGroup?: () => void;
+  public controlGroup?: ControlGroupContainer;
+
   public getPanelCount = () => {
     return Object.keys(this.getInput().panels).length;
   };
@@ -94,7 +109,8 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
   constructor(
     initialInput: DashboardContainerInput,
     private readonly services: DashboardContainerServices,
-    parent?: Container
+    parent?: Container,
+    controlGroup?: ControlGroupContainer | ErrorEmbeddable
   ) {
     super(
       {
@@ -105,6 +121,21 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
       services.embeddable.getEmbeddableFactory,
       parent
     );
+
+    if (
+      controlGroup &&
+      !isErrorEmbeddable(controlGroup) &&
+      services.presentationUtil.labsService.isProjectEnabled('labs:dashboard:dashboardControls')
+    ) {
+      this.controlGroup = controlGroup;
+      syncDashboardControlGroup({ dashboardContainer: this, controlGroup: this.controlGroup }).then(
+        (result) => {
+          if (!result) return;
+          const { onDestroyControlGroup } = result;
+          this.onDestroyControlGroup = onDestroyControlGroup;
+        }
+      );
+    }
   }
 
   protected createNewPanelState<
@@ -230,13 +261,20 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     ReactDOM.render(
       <I18nProvider>
         <KibanaContextProvider services={this.services}>
-          <this.services.presentationUtil.ContextProvider>
-            <DashboardViewport container={this} />
-          </this.services.presentationUtil.ContextProvider>
+          <KibanaThemeProvider theme$={this.services.theme.theme$}>
+            <this.services.presentationUtil.ContextProvider>
+              <DashboardViewport container={this} controlGroup={this.controlGroup} />
+            </this.services.presentationUtil.ContextProvider>
+          </KibanaThemeProvider>
         </KibanaContextProvider>
       </I18nProvider>,
       dom
     );
+  }
+
+  public destroy() {
+    super.destroy();
+    this.onDestroyControlGroup?.();
   }
 
   protected getInheritedInput(id: string): InheritedChildInput {
@@ -249,9 +287,14 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
       filters,
       searchSessionId,
       syncColors,
+      executionContext,
     } = this.input;
+    let combinedFilters = filters;
+    if (this.controlGroup) {
+      combinedFilters = combineDashboardFiltersWithControlGroupFilters(filters, this.controlGroup);
+    }
     return {
-      filters,
+      filters: combinedFilters,
       hidePanelTitles,
       query,
       timeRange,
@@ -260,6 +303,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
       id,
       searchSessionId,
       syncColors,
+      executionContext,
     };
   }
 }

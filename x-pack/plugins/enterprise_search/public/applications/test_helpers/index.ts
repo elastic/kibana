@@ -16,7 +16,9 @@ export {
   getPageDescription,
   getPageHeaderActions,
   getPageHeaderChildren,
+  getPageHeaderTabs,
 } from './get_page_header';
 
 // Misc
 export { expectedAsyncError } from './expected_async_error';
+export { itShowsServerErrorAsFlashMessage } from './error_handling';

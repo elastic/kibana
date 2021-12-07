@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import type { SerializableState } from 'src/plugins/kibana_utils/common';
+import type { SerializableRecord } from '@kbn/utility-types';
 import { LocatorDefinition } from '../locators';
 import { UrlService, UrlServiceDependencies } from '../url_service';
 
-export interface TestLocatorState extends SerializableState {
+export interface TestLocatorState extends SerializableRecord {
   savedObjectId: string;
   showFlyout: boolean;
   pageNumber: number;
@@ -37,6 +37,22 @@ export const urlServiceTestSetup = (partialDeps: Partial<UrlServiceDependencies>
     getUrl: async () => {
       throw new Error('not implemented');
     },
+    shortUrls: () => ({
+      get: () => ({
+        create: async () => {
+          throw new Error('Not implemented.');
+        },
+        get: async () => {
+          throw new Error('Not implemented.');
+        },
+        delete: async () => {
+          throw new Error('Not implemented.');
+        },
+        resolve: async () => {
+          throw new Error('Not implemented.');
+        },
+      }),
+    }),
     ...partialDeps,
   };
   const service = new UrlService(deps);

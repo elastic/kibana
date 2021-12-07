@@ -16,7 +16,27 @@ import {
   User,
   UserAction,
   UserActionField,
+  ActionConnector,
 } from '../api';
+
+interface CasesFeatures {
+  alerts: { sync: boolean };
+}
+
+export interface CasesContextValue {
+  owner: string[];
+  appId: string;
+  appTitle: string;
+  userCanCrud: boolean;
+  basePath: string;
+  features: CasesFeatures;
+}
+
+export interface CasesUiConfigType {
+  markdownPlugins: {
+    lens: boolean;
+  };
+}
 
 export const StatusAll = 'all' as const;
 export type StatusAllType = typeof StatusAll;
@@ -60,7 +80,9 @@ export interface CaseUserActions {
   caseId: string;
   commentId: string | null;
   newValue: string | null;
+  newValConnectorId: string | null;
   oldValue: string | null;
+  oldValConnectorId: string | null;
 }
 
 export interface CaseExternalService {
@@ -104,6 +126,12 @@ export interface Case extends BasicCase {
   settings: CaseAttributes['settings'];
   tags: string[];
   type: CaseType;
+}
+
+export interface ResolvedCase {
+  case: Case;
+  outcome: 'exactMatch' | 'aliasMatch' | 'conflict';
+  aliasTargetId?: string;
 }
 
 export interface QueryParams {
@@ -240,8 +268,19 @@ export interface SignalEcs {
   threshold_result?: unknown;
 }
 
+export type SignalEcsAAD = Exclude<SignalEcs, 'rule' | 'status'> & {
+  rule?: Exclude<RuleEcs, 'id'> & { uuid: string[] };
+  building_block_type?: string[];
+  workflow_status?: string[];
+};
+
 export interface Ecs {
   _id: string;
   _index?: string;
   signal?: SignalEcs;
+  kibana?: {
+    alert: SignalEcsAAD;
+  };
 }
+
+export type CaseActionConnector = ActionConnector;

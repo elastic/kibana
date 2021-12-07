@@ -14,9 +14,10 @@ import { initShareablesRoutes } from './shareables';
 import { initWorkpadRoutes } from './workpad';
 import { initTemplateRoutes } from './templates';
 import { initFunctionsRoutes } from './functions';
+import { CanvasRouteHandlerContext } from '../workpad_route_context';
 
 export interface RouteInitializerDeps {
-  router: IRouter;
+  router: IRouter<CanvasRouteHandlerContext>;
   logger: Logger;
   expressions: ExpressionsServerSetup;
   bfetch: BfetchServerSetup;

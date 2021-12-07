@@ -167,7 +167,6 @@ Object {
   "data_streams": Array [
     Object {
       "dataset": "apache.access",
-      "ingest_pipeline": "default",
       "package": "apache",
       "path": "access",
       "release": "experimental",
@@ -199,7 +198,6 @@ Object {
     },
     Object {
       "dataset": "apache.status",
-      "ingest_pipeline": "default",
       "package": "apache",
       "path": "status",
       "release": "experimental",
@@ -236,7 +234,6 @@ Object {
     },
     Object {
       "dataset": "apache.error",
-      "ingest_pipeline": "default",
       "package": "apache",
       "path": "error",
       "release": "experimental",
@@ -276,6 +273,7 @@ Object {
       "type": "image/svg+xml",
     },
   ],
+  "keepPoliciesUpToDate": false,
   "license": "basic",
   "name": "apache",
   "owner": Object {
@@ -330,16 +328,20 @@ Object {
       "install_version": "0.1.4",
       "installed_es": Array [
         Object {
-          "id": "logs-apache.access-0.1.4",
+          "id": "logs-apache.access-0.1.4-default",
           "type": "ingest_pipeline",
         },
         Object {
-          "id": "logs-apache.error-0.1.4",
+          "id": "logs-apache.error-0.1.4-default",
           "type": "ingest_pipeline",
         },
         Object {
           "id": "logs-apache.access",
           "type": "index_template",
+        },
+        Object {
+          "id": "logs-apache.access@settings",
+          "type": "component_template",
         },
         Object {
           "id": "logs-apache.access@custom",
@@ -350,12 +352,20 @@ Object {
           "type": "index_template",
         },
         Object {
+          "id": "metrics-apache.status@settings",
+          "type": "component_template",
+        },
+        Object {
           "id": "metrics-apache.status@custom",
           "type": "component_template",
         },
         Object {
           "id": "logs-apache.error",
           "type": "index_template",
+        },
+        Object {
+          "id": "logs-apache.error@settings",
+          "type": "component_template",
         },
         Object {
           "id": "logs-apache.error@custom",
@@ -436,7 +446,6 @@ Object {
           "type": "search",
         },
       ],
-      "internal": false,
       "name": "apache",
       "package_assets": Array [
         Object {

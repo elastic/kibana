@@ -15,6 +15,7 @@ import { MountPoint } from '../types';
 import { HttpSetup, HttpStart } from '../http';
 import { OverlayStart } from '../overlays';
 import { PluginOpaqueId } from '../plugins';
+import type { ThemeServiceStart } from '../theme';
 import { AppRouter } from './ui';
 import { Capabilities, CapabilitiesService } from './capabilities';
 import {
@@ -44,6 +45,7 @@ interface SetupDeps {
 
 interface StartDeps {
   http: HttpStart;
+  theme: ThemeServiceStart;
   overlays: OverlayStart;
 }
 
@@ -191,7 +193,7 @@ export class ApplicationService {
     };
   }
 
-  public async start({ http, overlays }: StartDeps): Promise<InternalApplicationStart> {
+  public async start({ http, overlays, theme }: StartDeps): Promise<InternalApplicationStart> {
     if (!this.redirectTo) {
       throw new Error('ApplicationService#setup() must be invoked before start.');
     }
@@ -250,16 +252,15 @@ export class ApplicationService {
         if (path === undefined) {
           path = applications$.value.get(appId)?.defaultPath;
         }
-        if (!navigatingToSameApp) {
-          this.appInternalStates.delete(this.currentAppId$.value!);
-        }
         if (openInNewTab) {
           this.openInNewTab!(getAppUrl(availableMounters, appId, path));
         } else {
+          if (!navigatingToSameApp) {
+            this.appInternalStates.delete(this.currentAppId$.value!);
+          }
           this.navigate!(getAppUrl(availableMounters, appId, path), state, replace);
+          this.currentAppId$.next(appId);
         }
-
-        this.currentAppId$.next(appId);
       }
     };
 
@@ -315,6 +316,7 @@ export class ApplicationService {
         return (
           <AppRouter
             history={this.history}
+            theme$={theme.theme$}
             mounters={availableMounters}
             appStatuses$={applicationStatuses$}
             setAppLeaveHandler={this.setAppLeaveHandler}

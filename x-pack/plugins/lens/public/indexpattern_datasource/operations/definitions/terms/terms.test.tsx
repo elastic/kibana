@@ -8,7 +8,7 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { shallow, mount } from 'enzyme';
-import { EuiFieldNumber, EuiSelect, EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
+import { EuiFieldNumber, EuiSelect, EuiSwitch } from '@elastic/eui';
 import type {
   IUiSettingsClient,
   SavedObjectsClientContract,
@@ -20,9 +20,10 @@ import { dataPluginMock } from '../../../../../../../../src/plugins/data/public/
 import { createMockedIndexPattern } from '../../../mocks';
 import { ValuesInput } from './values_input';
 import type { TermsIndexPatternColumn } from '.';
-import { termsOperation } from '../index';
+import { termsOperation, LastValueIndexPatternColumn } from '../index';
 import { IndexPattern, IndexPatternLayer } from '../../../types';
-import { FramePublicAPI } from '../../../../types';
+import { FrameDatasourceAPI } from '../../../../types';
+import { DateHistogramIndexPatternColumn } from '../date_histogram';
 
 const uiSettingsMock = {} as IUiSettingsClient;
 
@@ -61,7 +62,7 @@ describe('terms', () => {
             orderDirection: 'asc',
           },
           sourceField: 'source',
-        },
+        } as TermsIndexPatternColumn,
         col2: {
           label: 'Count',
           dataType: 'number',
@@ -357,7 +358,7 @@ describe('terms', () => {
               params: {
                 sortField: 'datefield',
               },
-            },
+            } as LastValueIndexPatternColumn,
           },
           columnOrder: [],
           indexPatternId: '',
@@ -472,7 +473,7 @@ describe('terms', () => {
               params: {
                 sortField: 'time',
               },
-            },
+            } as LastValueIndexPatternColumn,
           },
           columnOrder: [],
           indexPatternId: '',
@@ -551,7 +552,7 @@ describe('terms', () => {
                 orderDirection: 'asc',
               },
               sourceField: 'category',
-            },
+            } as TermsIndexPatternColumn,
           },
           columnOrder: [],
           indexPatternId: '',
@@ -583,7 +584,7 @@ describe('terms', () => {
                 orderDirection: 'asc',
               },
               sourceField: 'category',
-            },
+            } as TermsIndexPatternColumn,
             col1: {
               label: 'Value of timestamp',
               dataType: 'date',
@@ -595,7 +596,7 @@ describe('terms', () => {
                 interval: 'w',
               },
               sourceField: 'timestamp',
-            },
+            } as DateHistogramIndexPatternColumn,
           },
           columnOrder: [],
           indexPatternId: '',
@@ -627,7 +628,7 @@ describe('terms', () => {
                 orderDirection: 'desc',
               },
               sourceField: 'category',
-            },
+            } as TermsIndexPatternColumn,
           },
           columnOrder: [],
           indexPatternId: '',
@@ -755,7 +756,7 @@ describe('terms', () => {
             {
               ...layer.columns.col1,
               params: {
-                ...layer.columns.col1.params,
+                ...(layer.columns.col1 as TermsIndexPatternColumn).params,
                 otherBucket: true,
               },
             } as TermsIndexPatternColumn
@@ -783,7 +784,7 @@ describe('terms', () => {
               ...layer.columns.col1,
               sourceField: 'bytes',
               params: {
-                ...layer.columns.col1.params,
+                ...(layer.columns.col1 as TermsIndexPatternColumn).params,
                 otherBucket: true,
               },
             } as TermsIndexPatternColumn
@@ -813,11 +814,11 @@ describe('terms', () => {
       instance
         .find('[data-test-subj="indexPattern-terms-other-bucket"]')
         .find(EuiSwitch)
-        .prop('onChange')!({
-        target: {
-          checked: true,
-        },
-      } as EuiSwitchEvent);
+        .simulate('change', {
+          target: {
+            checked: true,
+          },
+        });
 
       expect(updateLayerSpy).toHaveBeenCalledWith({
         ...layer,
@@ -871,11 +872,11 @@ describe('terms', () => {
       instance
         .find(EuiSelect)
         .find('[data-test-subj="indexPattern-terms-orderBy"]')
-        .prop('onChange')!({
-        target: {
-          value: 'column$$$col2',
-        },
-      } as React.ChangeEvent<HTMLSelectElement>);
+        .simulate('change', {
+          target: {
+            value: 'column$$$col2',
+          },
+        });
 
       expect(updateLayerSpy).toHaveBeenCalledWith({
         ...layer,
@@ -931,11 +932,11 @@ describe('terms', () => {
       instance
         .find('[data-test-subj="indexPattern-terms-orderDirection"]')
         .find(EuiSelect)
-        .prop('onChange')!({
-        target: {
-          value: 'desc',
-        },
-      } as React.ChangeEvent<HTMLSelectElement>);
+        .simulate('change', {
+          target: {
+            value: 'desc',
+          },
+        });
 
       expect(updateLayerSpy).toHaveBeenCalledWith({
         ...layer,
@@ -1018,7 +1019,7 @@ describe('terms', () => {
             },
             scale: 'ordinal',
             sourceField: 'bytes',
-          },
+          } as TermsIndexPatternColumn,
         },
         columnOrder: [],
         indexPatternId: '',
@@ -1077,10 +1078,10 @@ describe('terms', () => {
       });
       it('returns fix action which calls field information endpoint and creates a pinned top values', async () => {
         const errorMessage = termsOperation.getErrorMessage!(layer, 'col1', indexPattern)![0];
-        const fixAction = (typeof errorMessage === 'object'
-          ? errorMessage.fixAction!.newState
-          : undefined)!;
-        const coreMock = ({
+        const fixAction = (
+          typeof errorMessage === 'object' ? errorMessage.fixAction!.newState : undefined
+        )!;
+        const coreMock = {
           uiSettings: {
             get: () => undefined,
           },
@@ -1100,17 +1101,17 @@ describe('terms', () => {
               })
             ),
           },
-        } as unknown) as CoreStart;
+        } as unknown as CoreStart;
         const newLayer = await fixAction(
           coreMock,
-          ({
+          {
             query: { language: 'kuery', query: 'a: b' },
             filters: [],
             dateRange: {
               fromDate: '2020',
               toDate: '2021',
             },
-          } as unknown) as FramePublicAPI,
+          } as unknown as FrameDatasourceAPI,
           'first'
         );
         expect(newLayer.columns.col1).toEqual(

@@ -28,7 +28,7 @@ import {
   applicationServiceMock,
 } from '../../../../../core/public/mocks';
 import { dataPluginMock } from '../../../../data/public/mocks';
-import { serviceRegistryMock } from '../../services/service_registry.mock';
+import type { SavedObjectManagementTypeInfo } from '../../../common/types';
 import { actionServiceMock } from '../../services/action_service.mock';
 import { columnServiceMock } from '../../services/column_service.mock';
 import {
@@ -39,7 +39,14 @@ import {
 import { Flyout, Relationships } from './components';
 import { SavedObjectWithMetadata } from '../../types';
 
-const allowedTypes = ['index-pattern', 'visualization', 'dashboard', 'search'];
+const convertType = (type: string): SavedObjectManagementTypeInfo => ({
+  name: type,
+  displayName: type,
+  hidden: false,
+  namespaceType: 'single',
+});
+
+const allowedTypes = ['index-pattern', 'visualization', 'dashboard', 'search'].map(convertType);
 
 const allSavedObjects = [
   {
@@ -81,9 +88,9 @@ describe('SavedObjectsTable', () => {
   let search: ReturnType<typeof dataPluginMock.createStartContract>['search'];
 
   const shallowRender = (overrides: Partial<SavedObjectsTableProps> = {}) => {
-    return (shallowWithI18nProvider(
+    return shallowWithI18nProvider(
       <SavedObjectsTable {...defaultProps} {...overrides} />
-    ) as unknown) as ShallowWrapper<
+    ) as unknown as ShallowWrapper<
       SavedObjectsTableProps,
       SavedObjectsTableState,
       SavedObjectsTable
@@ -122,7 +129,6 @@ describe('SavedObjectsTable', () => {
 
     defaultProps = {
       allowedTypes,
-      serviceRegistry: serviceRegistryMock.create(),
       actionRegistry: actionServiceMock.createStart(),
       columnRegistry: columnServiceMock.createStart(),
       savedObjectsClient: savedObjects.client,
@@ -146,9 +152,9 @@ describe('SavedObjectsTable', () => {
           meta: {
             title: `MyIndexPattern*`,
             icon: 'indexPatternApp',
-            editUrl: '#/management/kibana/indexPatterns/patterns/1',
+            editUrl: '#/management/kibana/dataViews/dataView/1',
             inAppUrl: {
-              path: '/management/kibana/indexPatterns/patterns/1',
+              path: '/management/kibana/dataViews/dataView/1',
               uiCapabilitiesPath: 'management.kibana.indexPatterns',
             },
           },
@@ -159,7 +165,6 @@ describe('SavedObjectsTable', () => {
           meta: {
             title: `MySearch`,
             icon: 'search',
-            editUrl: '/management/kibana/objects/savedSearches/2',
             inAppUrl: {
               path: '/discover/2',
               uiCapabilitiesPath: 'discover.show',
@@ -172,7 +177,6 @@ describe('SavedObjectsTable', () => {
           meta: {
             title: `MyDashboard`,
             icon: 'dashboardApp',
-            editUrl: '/management/kibana/objects/savedDashboards/3',
             inAppUrl: {
               path: '/dashboard/3',
               uiCapabilitiesPath: 'dashboard.show',
@@ -185,7 +189,6 @@ describe('SavedObjectsTable', () => {
           meta: {
             title: `MyViz`,
             icon: 'visualizeApp',
-            editUrl: '/management/kibana/objects/savedVisualizations/4',
             inAppUrl: {
               path: '/edit/4',
               uiCapabilitiesPath: 'visualize.show',
@@ -382,7 +385,7 @@ describe('SavedObjectsTable', () => {
 
       expect(fetchExportByTypeAndSearchMock).toHaveBeenCalledWith({
         http,
-        types: allowedTypes,
+        types: allowedTypes.map((type) => type.name),
         includeReferencesDeep: true,
       });
       expect(saveAsMock).toHaveBeenCalledWith(blob, 'export.ndjson');
@@ -411,7 +414,7 @@ describe('SavedObjectsTable', () => {
 
       expect(fetchExportByTypeAndSearchMock).toHaveBeenCalledWith({
         http,
-        types: allowedTypes,
+        types: allowedTypes.map((type) => type.name),
         search: 'test*',
         includeReferencesDeep: true,
       });

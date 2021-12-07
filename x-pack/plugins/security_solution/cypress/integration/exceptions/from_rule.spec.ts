@@ -8,7 +8,7 @@
 import { getException } from '../../objects/exception';
 import { getNewRule } from '../../objects/rule';
 
-import { ALERTS_COUNT, NUMBER_OF_ALERTS } from '../../screens/alerts';
+import { ALERTS_COUNT, EMPTY_ALERT_TABLE, NUMBER_OF_ALERTS } from '../../screens/alerts';
 import { RULE_STATUS } from '../../screens/create_new_rule';
 
 import {
@@ -54,7 +54,7 @@ describe('From rule', () => {
     refreshPage();
 
     cy.get(ALERTS_COUNT).should('exist');
-    cy.get(NUMBER_OF_ALERTS).should('have.text', NUMBER_OF_AUDITBEAT_EXCEPTIONS_ALERTS);
+    cy.get(NUMBER_OF_ALERTS).should('have.text', `${NUMBER_OF_AUDITBEAT_EXCEPTIONS_ALERTS} alert`);
   });
 
   afterEach(() => {
@@ -68,33 +68,26 @@ describe('From rule', () => {
     esArchiverLoad('auditbeat_for_exceptions2');
     waitForTheRuleToBeExecuted();
     goToAlertsTab();
-    refreshPage();
 
-    cy.get(ALERTS_COUNT).should('exist');
-    cy.get(NUMBER_OF_ALERTS).should('have.text', '0');
+    cy.get(EMPTY_ALERT_TABLE).should('exist');
 
     goToClosedAlerts();
-    refreshPage();
 
     cy.get(ALERTS_COUNT).should('exist');
-    cy.get(NUMBER_OF_ALERTS).should('have.text', NUMBER_OF_AUDITBEAT_EXCEPTIONS_ALERTS);
+    cy.get(NUMBER_OF_ALERTS).should('have.text', `${NUMBER_OF_AUDITBEAT_EXCEPTIONS_ALERTS} alert`);
 
     goToOpenedAlerts();
     waitForTheRuleToBeExecuted();
-    refreshPage();
 
-    cy.get(ALERTS_COUNT).should('exist');
-    cy.get(NUMBER_OF_ALERTS).should('have.text', '0');
+    cy.get(EMPTY_ALERT_TABLE).should('exist');
 
     goToExceptionsTab();
     removeException();
-    refreshPage();
     goToAlertsTab();
     waitForTheRuleToBeExecuted();
     waitForAlertsToPopulate();
-    refreshPage();
 
     cy.get(ALERTS_COUNT).should('exist');
-    cy.get(NUMBER_OF_ALERTS).should('have.text', NUMBER_OF_AUDITBEAT_EXCEPTIONS_ALERTS);
+    cy.get(NUMBER_OF_ALERTS).should('have.text', `${NUMBER_OF_AUDITBEAT_EXCEPTIONS_ALERTS} alert`);
   });
 });

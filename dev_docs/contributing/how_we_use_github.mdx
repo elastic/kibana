@@ -1,0 +1,177 @@
+---
+id: kibGitHub
+slug: /kibana-dev-docs/contributing/github
+title: How we use Github
+summary: Forking, branching, committing and using labels in the Kibana GitHub repo
+date: 2021-09-16
+tags: ['contributor', 'dev', 'github', 'getting started', 'onboarding', 'kibana']
+---
+
+## Forking
+
+We follow the [GitHub forking model](https://help.github.com/articles/fork-a-repo/) for collaborating on Kibana code. This model assumes that you have a remote called upstream which points to the official Kibana repo, which we’ll refer to in later code snippets.
+
+## Branching
+
+At Elastic, all products in the stack, including Kibana, are released at the same time with the same version number. Most of these projects have the following branching strategy:
+
+- master is the next major version.
+- `<major>.x` is the next minor version.
+- `<major>.<minor>` is the next release of a minor version, including patch releases.
+
+As an example, let’s assume that the 7.x branch is currently a not-yet-released 7.6.0. Once 7.6.0 has reached feature freeze, it will be branched to 7.6 and 7.x will be updated to reflect 7.7.0. The release of 7.6.0 and subsequent patch releases will be cut from the 7.6 branch. At any time, you can verify the current version of a branch by inspecting the version attribute in the package.json file within the Kibana source.
+
+Pull requests are made into the master branch and then backported when it is safe and appropriate.
+
+- Breaking changes do not get backported and only go into master.
+- All non-breaking changes can be backported to the `<major>.x` branch.
+- Features should not be backported to a `<major>.<minor>` branch.
+- Bug fixes can be backported to a `<major>.<minor>` branch if the changes are safe and appropriate. Safety is a judgment call you make based on factors like the bug’s severity, test coverage, confidence in the changes, etc. Your reasoning should be included in the pull request description.
+- Documentation changes can be backported to any branch at any time.
+
+## Commits and Merging
+
+- Feel free to make as many commits as you want, while working on a branch.
+- When submitting a PR for review, please perform an interactive rebase to present a logical history that’s easy for the reviewers to follow.
+- Please use your commit messages to include helpful information on your changes, e.g. changes to APIs, UX changes, bugs fixed, and an explanation of why you made the changes that you did.
+- Resolve merge conflicts by rebasing the target branch over your feature branch, and force-pushing (see below for instructions).
+- When merging, we’ll squash your commits into a single commit.
+
+### Commit using your `@elastic.co` email address
+
+In order to assist with developer tooling we ask that all Elastic engineers use their `@elastic.co` email address when committing to the Kibana repo. We have implemented a CI check that validates any PR opened by a member of the `@elastic` organization has at least one commit that is attributed to an `@elastic.co` email address. If you have a PR that is failing because of this check you can fix your PR by following these steps:
+
+ 1. Ensure that you don't have any staged changes
+ 1. Checkout the branch for your PR
+ 1. Update the git config for your current repository to commit with your `@elastic.co` email:
+
+    ```bash
+    git config user.email YOUR_ELASTIC_EMAIL@elastic.co
+    ```
+
+ 1. Create a commit using the new email address
+
+    ```bash
+    git commit -m 'commit using @elastic.co' --allow-empty
+    ```
+
+ 1. Push the new commit to your PR and the status should now be green
+
+**Note:** If doing this prevents your commits from being attributed to your Github account then make sure to add your `@elastic.co` address at [https://github.com/settings/emails](https://github.com/settings/emails).
+
+### Rebasing and fixing merge conflicts
+
+Rebasing can be tricky, and fixing merge conflicts can be even trickier because it involves force pushing. This is all compounded by the fact that attempting to push a rebased branch remotely will be rejected by git, and you’ll be prompted to do a pull, which is not at all what you should do (this will really mess up your branch’s history).
+
+Here’s how you should rebase master onto your branch, and how to fix merge conflicts when they arise.
+
+First, make sure master is up-to-date.
+
+```bash
+git checkout master
+git fetch upstream
+git rebase upstream/master
+```
+
+Then, check out your branch and rebase master on top of it, which will apply all of the new commits on master to your branch, and then apply all of your branch’s new commits after that.
+
+```bash
+git checkout name-of-your-branch
+git rebase master
+```
+
+You want to make sure there are no merge conflicts. If there are merge conflicts, git will pause the rebase and allow you to fix the conflicts before continuing.
+
+You can use git status to see which files contain conflicts. They’ll be the ones that aren’t staged for commit. Open those files, and look for where git has marked the conflicts. Resolve the conflicts so that the changes you want to make to the code have been incorporated in a way that doesn’t destroy work that’s been done in master. Refer to master’s commit history on GitHub if you need to gain a better understanding of how code is conflicting and how best to resolve it.
+
+Once you’ve resolved all of the merge conflicts, use git add -A to stage them to be committed, and then use git rebase --continue to tell git to continue the rebase.
+
+When the rebase has completed, you will need to force push your branch because the history is now completely different than what’s on the remote. This is potentially dangerous because it will completely overwrite what you have on the remote, so you need to be sure that you haven’t lost any work when resolving merge conflicts. (If there weren’t any merge conflicts, then you can force push without having to worry about this.)
+
+```bash
+git push origin name-of-your-branch --force
+```
+
+This will overwrite the remote branch with what you have locally. You’re done!
+
+**Note that you should not run git pull**, for example in response to a push rejection like this:
+
+```bash
+! [rejected] name-of-your-branch -> name-of-your-branch (non-fast-forward)
+error: failed to push some refs to 'https://github.com/YourGitHubHandle/kibana.git'
+hint: Updates were rejected because the tip of your current branch is behind
+hint: its remote counterpart. Integrate the remote changes (e.g.
+hint: 'git pull ...') before pushing again.
+hint: See the 'Note about fast-forwards' in 'git push --help' for details.
+```
+
+Assuming you’ve successfully rebased and you’re happy with the code, you should force push instead.
+
+## Creating a pull request
+
+See [Submitting a pull request](https://www.elastic.co/guide/en/kibana/master/development-pull-request.html) for the next steps on getting your code changes merged into Kibana.
+
+## Labels
+
+The following information notes how we use GitHub labels in Kibana. Note that only internal Elasticians are able to create and assign labels to issues, but for searching purposes, the information is likely useful for external developers as well.
+
+Many of our labels follow the pattern of `{key}:{value}`.
+
+<DocCallOut title="Internal only">
+Use PascalCase when creating new labels.
+
+Teams can create labels at their own discretion, but we have over 600 labels at the time of this writing.
+Consider using an existing convention before creating a new one. If you think a new label or convention
+would be useful to all teams, talk to your team or tech lead about getting it added here.
+
+</DocCallOut>
+
+### Team labels
+
+Examples: `Team:Security`, `Team:Operations`.
+
+These labels map the issue to the team that owns the particular area. Part of the responsibilities of
+(todo) is to ensure every issue has at least a team or a project
+label.
+
+<DocCallOut title="Internal only">
+  View our org chart [here](https://wiki.elastic.co/display/DEV/Kibana+Team+Organization) to view
+  all our teams and appropriate contacts.
+</DocCallOut>
+
+### Feature labels
+
+Examples: `Feature:Lens`, `Feature:TSVB`, `Feature:Vega`.
+
+Feature labels break down architectural domains that are owned by a given team.
+
+### Project labels
+
+Examples: `Project:RuntimeFields`, `Project:MakeItSlow`.
+
+Sometimes issues span multiple teams, that is often when Project labels are more appropriate. To avoid too much noise,
+these should be used for high visibility projects. Try not to use project labels for small, single team projects, where a team
+and feature label would be applicable. Use your best judgement when determining whether to add a new project label.
+
+### Needed For labels (`NeededFor:{Team}`)
+
+Examples: `NeededFor:APM`, `NeededFor:AppServices`.
+
+We use these labels to help us organize internal dependencies. An issue with the labels
+`NeededFor:APM` and `Team:AppServices` means APM has a dependency on the App services team. The owning team
+can filter on these labels during roadmap prioritization, and the dependent team can use these labels to
+search and view the status of its dependencies. To avoid noise, use these labels for high priority requests that
+need to be taken into account in roadmap planning. A low priority item that can be prioritized along with
+other community requests does not need this label, as part of its usefulness is helping teams wade through the noise
+of external feature requests.
+
+### Version labels
+
+Examples: `v7.9.2`, `v8.0`
+
+We use version labels on PRs to indicate which versions a PR will be merged into. For issues,
+teams use these labels inconsistently. On a bug, it might mean the version the bug was found in, or
+it might mean the version the team is tentatively planning to merge a fix.
+
+Consult the owning team if you have a question about how a version label is meant
+to be used on an issue.

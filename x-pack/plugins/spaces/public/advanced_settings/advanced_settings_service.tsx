@@ -8,8 +8,8 @@
 import React from 'react';
 
 import type { AdvancedSettingsSetup } from 'src/plugins/advanced_settings/public';
-import type { Space } from 'src/plugins/spaces_oss/common';
 
+import type { Space } from '../../common';
 import { AdvancedSettingsSubtitle, AdvancedSettingsTitle } from './components';
 
 interface SetupDeps {

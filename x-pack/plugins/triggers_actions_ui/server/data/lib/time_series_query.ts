@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Logger, ElasticsearchClient } from 'kibana/server';
 import { getEsErrorMessage } from '../../../../alerting/server';
 import { DEFAULT_GROUPS } from '../index';
 import { getDateRangeInfo } from './date_range_info';
 
 import { TimeSeriesQuery, TimeSeriesResult, TimeSeriesResultRow } from './time_series_types';
-export { TimeSeriesQuery, TimeSeriesResult } from './time_series_types';
+export type { TimeSeriesQuery, TimeSeriesResult } from './time_series_types';
 
 export interface TimeSeriesQueryParameters {
   logger: Logger;
@@ -24,15 +24,8 @@ export async function timeSeriesQuery(
   params: TimeSeriesQueryParameters
 ): Promise<TimeSeriesResult> {
   const { logger, esClient, query: queryParams } = params;
-  const {
-    index,
-    timeWindowSize,
-    timeWindowUnit,
-    interval,
-    timeField,
-    dateStart,
-    dateEnd,
-  } = queryParams;
+  const { index, timeWindowSize, timeWindowUnit, interval, timeField, dateStart, dateEnd } =
+    queryParams;
 
   const window = `${timeWindowSize}${timeWindowUnit}`;
   const dateRangeInfo = getDateRangeInfo({ dateStart, dateEnd, window, interval });

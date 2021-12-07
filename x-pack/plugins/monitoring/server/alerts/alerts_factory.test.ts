@@ -6,7 +6,7 @@
  */
 
 import { AlertsFactory } from './alerts_factory';
-import { ALERT_CPU_USAGE } from '../../common/constants';
+import { RULE_CPU_USAGE } from '../../common/constants';
 
 jest.mock('../static_globals', () => ({
   Globals: {
@@ -31,14 +31,19 @@ describe('AlertsFactory', () => {
         total: 1,
         data: [
           {
-            id: ALERT_CPU_USAGE,
+            id: 1,
+          },
+          {
+            id: 2,
           },
         ],
       };
     });
-    const alert = await AlertsFactory.getByType(ALERT_CPU_USAGE, rulesClient as any);
-    expect(alert).not.toBeNull();
-    expect(alert?.getId()).toBe(ALERT_CPU_USAGE);
+    const alerts = await AlertsFactory.getByType(RULE_CPU_USAGE, rulesClient as any);
+    expect(alerts).not.toBeNull();
+    expect(alerts.length).toBe(2);
+    expect(alerts[0].getId()).toBe(1);
+    expect(alerts[1].getId()).toBe(2);
   });
 
   it('should pass in the correct filters', async () => {
@@ -49,7 +54,7 @@ describe('AlertsFactory', () => {
         total: 0,
       };
     });
-    await AlertsFactory.getByType(ALERT_CPU_USAGE, rulesClient as any);
-    expect(filter).toBe(`alert.attributes.alertTypeId:${ALERT_CPU_USAGE}`);
+    await AlertsFactory.getByType(RULE_CPU_USAGE, rulesClient as any);
+    expect(filter).toBe(`alert.attributes.alertTypeId:${RULE_CPU_USAGE}`);
   });
 });

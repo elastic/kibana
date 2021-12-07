@@ -6,36 +6,47 @@
  * Side Public License, v 1.
  */
 
-import type { Request, RequestOptions } from './cloud_service';
+/* eslint-disable dot-notation */
+jest.mock('node-fetch');
 import { AzureCloudService } from './azure';
 
-type Callback = (err: unknown, res: unknown) => void;
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const fetchMock = require('node-fetch') as jest.Mock;
 
-const AZURE = new AzureCloudService();
-
-describe('Azure', () => {
+describe('AzureCloudService', () => {
+  const azureCloudService = new AzureCloudService();
   it('is named "azure"', () => {
-    expect(AZURE.getName()).toEqual('azure');
+    expect(azureCloudService.getName()).toEqual('azure');
   });
 
   describe('_checkIfService', () => {
+    beforeEach(() => {
+      jest.resetAllMocks();
+    });
+
     it('handles expected response', async () => {
       const id = 'abcdef';
-      const request = ((req: RequestOptions, callback: Callback) => {
-        expect(req.method).toEqual('GET');
-        expect(req.uri).toEqual('http://169.254.169.254/metadata/instance?api-version=2017-04-02');
-        expect(req.headers?.Metadata).toEqual('true');
-        expect(req.json).toEqual(true);
+      fetchMock.mockResolvedValue({
+        json: () =>
+          `{"compute":{"vmId": "${id}","location":"fakeus","availabilityZone":"fakeus-2"}}`,
+        status: 200,
+        ok: true,
+      });
 
-        const body = `{"compute":{"vmId": "${id}","location":"fakeus","availabilityZone":"fakeus-2"}}`;
+      const response = await azureCloudService['_checkIfService']();
 
-        callback(null, { statusCode: 200, body });
-      }) as Request;
-      const response = await AZURE._checkIfService(request);
+      expect(fetchMock).toBeCalledTimes(1);
+      expect(fetchMock).toBeCalledWith(
+        'http://169.254.169.254/metadata/instance?api-version=2017-04-02',
+        {
+          method: 'GET',
+          headers: { Metadata: 'true' },
+        }
+      );
 
       expect(response.isConfirmed()).toEqual(true);
       expect(response.toJSON()).toEqual({
-        name: AZURE.getName(),
+        name: azureCloudService.getName(),
         id,
         region: 'fakeus',
         vm_type: undefined,
@@ -49,34 +60,30 @@ describe('Azure', () => {
     // NOTE: the CloudService method, checkIfService, catches the errors that follow
     it('handles not running on Azure with error by rethrowing it', async () => {
       const someError = new Error('expected: request failed');
-      const failedRequest = ((_req: RequestOptions, callback: Callback) =>
-        callback(someError, null)) as Request;
+      fetchMock.mockRejectedValue(someError);
 
-      expect(async () => {
-        await AZURE._checkIfService(failedRequest);
-      }).rejects.toThrowError(someError.message);
+      await expect(() => azureCloudService['_checkIfService']()).rejects.toThrowError(
+        someError.message
+      );
     });
 
     it('handles not running on Azure with 404 response by throwing error', async () => {
-      const failedRequest = ((_req: RequestOptions, callback: Callback) =>
-        callback(null, { statusCode: 404 })) as Request;
+      fetchMock.mockResolvedValue({ status: 404 });
 
-      expect(async () => {
-        await AZURE._checkIfService(failedRequest);
-      }).rejects.toThrowErrorMatchingInlineSnapshot(`"Azure request failed"`);
+      await expect(() =>
+        azureCloudService['_checkIfService']()
+      ).rejects.toThrowErrorMatchingInlineSnapshot(`"Azure request failed"`);
     });
 
     it('handles not running on Azure with unexpected response by throwing error', async () => {
-      const failedRequest = ((_req: RequestOptions, callback: Callback) =>
-        callback(null, null)) as Request;
-
-      expect(async () => {
-        await AZURE._checkIfService(failedRequest);
-      }).rejects.toThrowErrorMatchingInlineSnapshot(`"Azure request failed"`);
+      fetchMock.mockResolvedValue({ ok: false });
+      await expect(() =>
+        azureCloudService['_checkIfService']()
+      ).rejects.toThrowErrorMatchingInlineSnapshot(`"Azure request failed"`);
     });
   });
 
-  describe('_parseBody', () => {
+  describe('parseBody', () => {
     // it's expected that most users use the resource manager UI (which has been out for years)
     it('parses object in expected format', () => {
       const body = {
@@ -119,10 +126,10 @@ describe('Azure', () => {
         },
       };
 
-      const response = AzureCloudService.parseBody(AZURE.getName(), body)!;
+      const response = azureCloudService['parseBody'](body)!;
       expect(response).not.toBeNull();
 
-      expect(response.getName()).toEqual(AZURE.getName());
+      expect(response.getName()).toEqual(azureCloudService.getName());
       expect(response.isConfirmed()).toEqual(true);
       expect(response.toJSON()).toEqual({
         name: 'azure',
@@ -172,10 +179,10 @@ describe('Azure', () => {
         },
       };
 
-      const response = AzureCloudService.parseBody(AZURE.getName(), body)!;
+      const response = azureCloudService['parseBody'](body)!;
       expect(response).not.toBeNull();
 
-      expect(response.getName()).toEqual(AZURE.getName());
+      expect(response.getName()).toEqual(azureCloudService.getName());
       expect(response.isConfirmed()).toEqual(true);
       expect(response.toJSON()).toEqual({
         name: 'azure',
@@ -191,13 +198,13 @@ describe('Azure', () => {
 
     it('ignores unexpected response body', () => {
       // @ts-expect-error
-      expect(AzureCloudService.parseBody(AZURE.getName(), undefined)).toBe(null);
+      expect(azureCloudService['parseBody'](undefined)).toBe(null);
       // @ts-expect-error
-      expect(AzureCloudService.parseBody(AZURE.getName(), null)).toBe(null);
+      expect(azureCloudService['parseBody'](null)).toBe(null);
       // @ts-expect-error
-      expect(AzureCloudService.parseBody(AZURE.getName(), {})).toBe(null);
+      expect(azureCloudService['parseBody']({})).toBe(null);
       // @ts-expect-error
-      expect(AzureCloudService.parseBody(AZURE.getName(), { privateIp: 'a.b.c.d' })).toBe(null);
+      expect(azureCloudService['parseBody']({ privateIp: 'a.b.c.d' })).toBe(null);
     });
   });
 });

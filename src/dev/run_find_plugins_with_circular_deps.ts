@@ -40,7 +40,8 @@ run(
     const circularDependenciesFullPaths = parseCircular(depTree).filter((circularDeps) => {
       const first = circularDeps[0];
       const last = circularDeps[circularDeps.length - 1];
-      const matchRegex = /(?<pluginFolder>(src|x-pack)\/plugins|examples|x-pack\/examples)\/(?<pluginName>[^\/]*)\/.*/;
+      const matchRegex =
+        /(?<pluginFolder>(src|x-pack)\/plugins|examples|x-pack\/examples)\/(?<pluginName>[^\/]*)\/.*/;
       const firstMatch = first.match(matchRegex);
       const lastMatch = last.match(matchRegex);
 

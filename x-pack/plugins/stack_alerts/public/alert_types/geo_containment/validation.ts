@@ -10,15 +10,8 @@ import { ValidationResult } from '../../../../triggers_actions_ui/public';
 import { GeoContainmentAlertParams } from './types';
 
 export const validateExpression = (alertParams: GeoContainmentAlertParams): ValidationResult => {
-  const {
-    index,
-    geoField,
-    entity,
-    dateField,
-    boundaryType,
-    boundaryIndexTitle,
-    boundaryGeoField,
-  } = alertParams;
+  const { index, geoField, entity, dateField, boundaryType, boundaryIndexTitle, boundaryGeoField } =
+    alertParams;
   const validationResult = { errors: {} };
   const errors = {
     index: new Array<string>(),
@@ -36,7 +29,7 @@ export const validateExpression = (alertParams: GeoContainmentAlertParams): Vali
   if (!index) {
     errors.index.push(
       i18n.translate('xpack.stackAlerts.geoContainment.error.requiredIndexTitleText', {
-        defaultMessage: 'Index pattern is required.',
+        defaultMessage: 'Data view is required.',
       })
     );
   }
@@ -76,7 +69,7 @@ export const validateExpression = (alertParams: GeoContainmentAlertParams): Vali
   if (!boundaryIndexTitle) {
     errors.boundaryIndexTitle.push(
       i18n.translate('xpack.stackAlerts.geoContainment.error.requiredBoundaryIndexTitleText', {
-        defaultMessage: 'Boundary index pattern title is required.',
+        defaultMessage: 'Boundary data view title is required.',
       })
     );
   }

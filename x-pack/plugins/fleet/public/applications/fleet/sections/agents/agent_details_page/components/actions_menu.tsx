@@ -7,7 +7,7 @@
 
 import React, { memo, useState, useMemo } from 'react';
 import { EuiPortal, EuiContextMenuItem } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { Agent, AgentPolicy, PackagePolicy } from '../../../../types';
 import { useCapabilities, useKibanaVersion } from '../../../../hooks';
@@ -86,7 +86,7 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
       )}
       <ContextMenuActions
         button={{
-          props: { iconType: 'arrowDown', iconSide: 'right', color: 'primary', fill: true },
+          props: { iconType: 'arrowDown', iconSide: 'right', color: 'primary' },
           children: (
             <FormattedMessage
               id="xpack.fleet.agentDetails.actionsButton"

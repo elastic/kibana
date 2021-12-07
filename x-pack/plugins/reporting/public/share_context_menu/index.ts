@@ -8,8 +8,8 @@
 import * as Rx from 'rxjs';
 import type { IUiSettingsClient, ToastsSetup } from 'src/core/public';
 import { CoreStart } from 'src/core/public';
+import type { LayoutParams } from '../../../screenshotting/common';
 import type { LicensingPluginSetup } from '../../../licensing/public';
-import type { LayoutParams } from '../../common/types';
 import type { ReportingAPIClient } from '../lib/reporting_api_client';
 
 export interface ExportPanelShareOpts {
@@ -24,6 +24,7 @@ export interface ExportPanelShareOpts {
 export interface ReportingSharingData {
   title: string;
   layout: LayoutParams;
+  [key: string]: unknown;
 }
 
 export interface JobParamsProviderOptions {

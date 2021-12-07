@@ -49,7 +49,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       loadTestFile(require.resolve('./dashboard_unsaved_state'));
       loadTestFile(require.resolve('./dashboard_unsaved_listing'));
       loadTestFile(require.resolve('./edit_visualizations'));
-      loadTestFile(require.resolve('./time_zones'));
       loadTestFile(require.resolve('./dashboard_options'));
       loadTestFile(require.resolve('./data_shared_attributes'));
       loadTestFile(require.resolve('./share'));
@@ -73,6 +72,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       loadTestFile(require.resolve('./full_screen_mode'));
       loadTestFile(require.resolve('./dashboard_filter_bar'));
       loadTestFile(require.resolve('./dashboard_filtering'));
+      loadTestFile(require.resolve('./dashboard_controls_integration'));
       loadTestFile(require.resolve('./panel_expand_toggle'));
       loadTestFile(require.resolve('./dashboard_grid'));
       loadTestFile(require.resolve('./view_edit'));
@@ -95,7 +95,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
 
       loadTestFile(require.resolve('./dashboard_time_picker'));
       loadTestFile(require.resolve('./bwc_shared_urls'));
-      loadTestFile(require.resolve('./bwc_import'));
       loadTestFile(require.resolve('./panel_replacing'));
       loadTestFile(require.resolve('./panel_cloning'));
       loadTestFile(require.resolve('./copy_panel_to'));
@@ -122,7 +121,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       before(async () => {
         await loadLogstash();
         await kibanaServer.uiSettings.update({
-          'visualization:visualize:legacyChartsLibrary': false,
           'visualization:visualize:legacyPieChartsLibrary': false,
         });
         await browser.refresh();
@@ -131,7 +129,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       after(async () => {
         await unloadLogstash();
         await kibanaServer.uiSettings.update({
-          'visualization:visualize:legacyChartsLibrary': true,
           'visualization:visualize:legacyPieChartsLibrary': true,
         });
         await browser.refresh();

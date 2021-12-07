@@ -7,7 +7,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -132,9 +132,8 @@ export const AlertNotifyWhen = ({
 }: AlertNotifyWhenProps) => {
   const [alertThrottle, setAlertThrottle] = useState<number>(throttle || 1);
   const [showCustomThrottleOpts, setShowCustomThrottleOpts] = useState<boolean>(false);
-  const [notifyWhenValue, setNotifyWhenValue] = useState<AlertNotifyWhenType>(
-    DEFAULT_NOTIFY_WHEN_VALUE
-  );
+  const [notifyWhenValue, setNotifyWhenValue] =
+    useState<AlertNotifyWhenType>(DEFAULT_NOTIFY_WHEN_VALUE);
 
   useEffect(() => {
     if (alert.notifyWhen) {

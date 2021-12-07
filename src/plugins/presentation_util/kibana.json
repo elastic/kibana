@@ -1,5 +1,10 @@
 {
   "id": "presentationUtil",
+  "owner": {
+    "name": "Kibana Presentation",
+    "githubTeam": "kibana-presentation"
+  },
+  "description": "The Presentation Utility Plugin is a set of common, shared components and toolkits for solutions within the Presentation space, (e.g. Dashboards, Canvas).",
   "version": "1.0.0",
   "kibanaVersion": "kibana",
   "server": true,
@@ -8,7 +13,12 @@
     "common/lib"
   ],
   "requiredPlugins": [
-    "savedObjects"
+    "savedObjects",
+    "data",
+    "dataViews",
+    "embeddable",
+    "kibanaReact",
+    "expressions"
   ],
   "optionalPlugins": []
 }

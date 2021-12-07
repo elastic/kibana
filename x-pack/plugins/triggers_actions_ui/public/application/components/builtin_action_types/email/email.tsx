@@ -7,12 +7,77 @@
 
 import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
+import { EuiSelectOption } from '@elastic/eui';
 import {
   ActionTypeModel,
   ConnectorValidationResult,
   GenericValidationResult,
 } from '../../../../types';
 import { EmailActionParams, EmailConfig, EmailSecrets, EmailActionConnector } from '../types';
+import { AdditionalEmailServices } from '../../../../../../actions/common';
+
+const emailServices: EuiSelectOption[] = [
+  {
+    text: i18n.translate(
+      'xpack.triggersActionsUI.components.builtinActionTypes.emailAction.gmailServerTypeLabel',
+      {
+        defaultMessage: 'Gmail',
+      }
+    ),
+    value: 'gmail',
+  },
+  {
+    text: i18n.translate(
+      'xpack.triggersActionsUI.components.builtinActionTypes.emailAction.outlookServerTypeLabel',
+      {
+        defaultMessage: 'Outlook',
+      }
+    ),
+    value: 'outlook365',
+  },
+  {
+    text: i18n.translate(
+      'xpack.triggersActionsUI.components.builtinActionTypes.emailAction.amazonSesServerTypeLabel',
+      {
+        defaultMessage: 'Amazon SES',
+      }
+    ),
+    value: 'ses',
+  },
+  {
+    text: i18n.translate(
+      'xpack.triggersActionsUI.components.builtinActionTypes.emailAction.elasticCloudServerTypeLabel',
+      {
+        defaultMessage: 'Elastic Cloud',
+      }
+    ),
+    value: 'elastic_cloud',
+  },
+  {
+    text: i18n.translate(
+      'xpack.triggersActionsUI.components.builtinActionTypes.emailAction.exchangeServerTypeLabel',
+      {
+        defaultMessage: 'MS Exchange Server',
+      }
+    ),
+    value: 'exchange_server',
+  },
+  {
+    text: i18n.translate(
+      'xpack.triggersActionsUI.components.builtinActionTypes.emailAction.otherServerTypeLabel',
+      {
+        defaultMessage: 'Other',
+      }
+    ),
+    value: 'other',
+  },
+];
+
+export function getEmailServices(isCloudEnabled: boolean) {
+  return isCloudEnabled
+    ? emailServices
+    : emailServices.filter((service) => service.value !== 'elastic_cloud');
+}
 
 export function getActionType(): ActionTypeModel<EmailConfig, EmailSecrets, EmailActionParams> {
   const mailformat = /^[^@\s]+@[^@\s]+$/;
@@ -41,10 +106,14 @@ export function getActionType(): ActionTypeModel<EmailConfig, EmailSecrets, Emai
         from: new Array<string>(),
         port: new Array<string>(),
         host: new Array<string>(),
+        service: new Array<string>(),
+        clientId: new Array<string>(),
+        tenantId: new Array<string>(),
       };
       const secretsErrors = {
         user: new Array<string>(),
         password: new Array<string>(),
+        clientSecret: new Array<string>(),
       };
 
       const validationResult = {
@@ -57,17 +126,32 @@ export function getActionType(): ActionTypeModel<EmailConfig, EmailSecrets, Emai
       if (action.config.from && !action.config.from.trim().match(mailformat)) {
         configErrors.from.push(translations.SENDER_NOT_VALID);
       }
-      if (!action.config.port) {
-        configErrors.port.push(translations.PORT_REQUIRED);
+      if (action.config.service !== AdditionalEmailServices.EXCHANGE) {
+        if (!action.config.port) {
+          configErrors.port.push(translations.PORT_REQUIRED);
+        }
+        if (!action.config.host) {
+          configErrors.host.push(translations.HOST_REQUIRED);
+        }
+        if (action.config.hasAuth && !action.secrets.user && !action.secrets.password) {
+          secretsErrors.user.push(translations.USERNAME_REQUIRED);
+        }
+        if (action.config.hasAuth && !action.secrets.user && !action.secrets.password) {
+          secretsErrors.password.push(translations.PASSWORD_REQUIRED);
+        }
+      } else {
+        if (!action.config.clientId) {
+          configErrors.clientId.push(translations.CLIENT_ID_REQUIRED);
+        }
+        if (!action.config.tenantId) {
+          configErrors.tenantId.push(translations.TENANT_ID_REQUIRED);
+        }
+        if (!action.secrets.clientSecret) {
+          secretsErrors.clientSecret.push(translations.CLIENT_SECRET_REQUIRED);
+        }
       }
-      if (!action.config.host) {
-        configErrors.host.push(translations.HOST_REQUIRED);
-      }
-      if (action.config.hasAuth && !action.secrets.user && !action.secrets.password) {
-        secretsErrors.user.push(translations.USERNAME_REQUIRED);
-      }
-      if (action.config.hasAuth && !action.secrets.user && !action.secrets.password) {
-        secretsErrors.password.push(translations.PASSWORD_REQUIRED);
+      if (!action.config.service) {
+        configErrors.service.push(translations.SERVICE_REQUIRED);
       }
       if (action.secrets.user && !action.secrets.password) {
         secretsErrors.password.push(translations.PASSWORD_REQUIRED_FOR_USER_USED);

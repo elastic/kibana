@@ -6,6 +6,9 @@
  * Side Public License, v 1.
  */
 
+// TODO: https://github.com/elastic/kibana/issues/109904
+/* eslint-disable @kbn/eslint/no_export_all */
+
 import { PluginInitializerContext } from '../../../core/public';
 import { ConfigSchema } from '../config';
 
@@ -18,75 +21,6 @@ export * from './deprecated';
 export { getEsQueryConfig } from '../common';
 export { FilterLabel, FilterItem } from './ui';
 export { getDisplayValueFromFilter, generateFilters, extractTimeRange } from './query';
-
-/*
- * Field Formatters:
- */
-
-import {
-  FieldFormat,
-  FieldFormatsRegistry,
-  DEFAULT_CONVERTER_COLOR,
-  HTML_CONTEXT_TYPE,
-  TEXT_CONTEXT_TYPE,
-  FIELD_FORMAT_IDS,
-  BoolFormat,
-  BytesFormat,
-  ColorFormat,
-  DurationFormat,
-  IpFormat,
-  NumberFormat,
-  PercentFormat,
-  RelativeDateFormat,
-  SourceFormat,
-  StaticLookupFormat,
-  UrlFormat,
-  StringFormat,
-  TruncateFormat,
-  HistogramFormat,
-} from '../common/field_formats';
-
-import { DateNanosFormat, DateFormat } from './field_formats';
-export { baseFormattersPublic, FieldFormatsStart } from './field_formats';
-
-// Field formats helpers namespace:
-export const fieldFormats = {
-  FieldFormat,
-  FieldFormatsRegistry, // exported only for tests. Consider mock.
-
-  DEFAULT_CONVERTER_COLOR,
-  HTML_CONTEXT_TYPE,
-  TEXT_CONTEXT_TYPE,
-  FIELD_FORMAT_IDS,
-
-  BoolFormat,
-  BytesFormat,
-  ColorFormat,
-  DateFormat,
-  DateNanosFormat,
-  DurationFormat,
-  IpFormat,
-  NumberFormat,
-  PercentFormat,
-  RelativeDateFormat,
-  SourceFormat,
-  StaticLookupFormat,
-  UrlFormat,
-  StringFormat,
-  TruncateFormat,
-  HistogramFormat,
-};
-
-export {
-  IFieldFormat,
-  FieldFormatInstanceType,
-  IFieldFormatsRegistry,
-  FieldFormatsContentType,
-  FieldFormatsGetConfigFn,
-  FieldFormatConfig,
-  FieldFormatId,
-  FieldFormat,
-} from '../common';
 
 /**
  * Exporters (CSV)
@@ -104,20 +38,23 @@ export const exporters = {
  * Index patterns:
  */
 
-import { isNestedField, isFilterable } from '../common';
+import {
+  isNestedField,
+  isFilterable,
+  isMultiField,
+  getFieldSubtypeNested,
+  getFieldSubtypeMulti,
+} from '../common';
 
 import {
   ILLEGAL_CHARACTERS_KEY,
   CONTAINS_SPACES_KEY,
   ILLEGAL_CHARACTERS_VISIBLE,
   ILLEGAL_CHARACTERS,
-  isDefault,
-  validateIndexPattern,
-  flattenHitWrapper,
-  formatHitProvider,
-} from './index_patterns';
+  validateDataView,
+} from './data_views';
 
-export type { IndexPatternsService } from './index_patterns';
+export type { IndexPatternsService } from './data_views';
 
 // Index patterns namespace:
 export const indexPatterns = {
@@ -125,38 +62,36 @@ export const indexPatterns = {
   CONTAINS_SPACES_KEY,
   ILLEGAL_CHARACTERS_VISIBLE,
   ILLEGAL_CHARACTERS,
-  isDefault,
   isFilterable,
   isNestedField,
-  validate: validateIndexPattern,
-  flattenHitWrapper,
-  formatHitProvider,
+  isMultiField,
+  getFieldSubtypeMulti,
+  getFieldSubtypeNested,
+  validate: validateDataView,
 };
 
-export {
-  IndexPatternsContract,
-  IndexPattern,
-  IIndexPatternFieldList,
-  IndexPatternField,
-} from './index_patterns';
+export type { IndexPatternsContract, DataViewsContract, TypeMeta } from './data_views';
+export { IndexPattern, IndexPatternField } from './data_views';
 
-export {
+export type {
   IIndexPattern,
   IFieldType,
-  ES_FIELD_TYPES,
-  KBN_FIELD_TYPES,
   IndexPatternAttributes,
-  UI_SETTINGS,
-  TypeMeta as IndexPatternTypeMeta,
   AggregationRestrictions as IndexPatternAggRestrictions,
   IndexPatternSpec,
   IndexPatternLoadExpressionFunctionDefinition,
-  fieldList,
-  INDEX_PATTERN_SAVED_OBJECT_TYPE,
-  IndexPatternType,
+  GetFieldsOptions,
+  AggregationRestrictions,
+  IndexPatternListItem,
 } from '../common';
-
-export { DuplicateIndexPatternError } from '../common/index_patterns/errors';
+export {
+  ES_FIELD_TYPES,
+  KBN_FIELD_TYPES,
+  UI_SETTINGS,
+  fieldList,
+  IndexPatternType,
+  DuplicateDataViewError,
+} from '../common';
 
 /*
  * Autocomplete query suggestions:
@@ -204,6 +139,7 @@ import {
   // tabify
   tabifyAggResponse,
   tabifyGetColumns,
+  checkColumnForPrecisionError,
 } from '../common';
 
 export { AggGroupLabels, AggGroupNames, METRIC_TYPES, BUCKET_TYPES } from '../common';
@@ -249,19 +185,11 @@ export type {
   ISearchStartSearchSource,
   ISearchGeneric,
   ISearchSource,
-  SearchInterceptor,
-  SearchInterceptorDeps,
   SearchRequest,
   SearchSourceFields,
-  // expression functions and types
-  EsdslExpressionFunctionDefinition,
-  EsRawResponseExpressionTypeDefinition,
+  SerializedSearchSourceFields,
   // errors
   IEsError,
-  SearchError,
-  SearchTimeoutError,
-  TimeoutErrorMode,
-  PainlessError,
   Reason,
   WaitUntilNextSessionCompletesOptions,
 } from './search';
@@ -270,7 +198,6 @@ export {
   parseSearchSourceJSON,
   injectSearchSourceReferences,
   extractSearchSourceReferences,
-  getEsPreference,
   getSearchParamsFromRequest,
   noSearchSessionStorageCapabilityMessage,
   SEARCH_SESSIONS_MANAGEMENT_ID,
@@ -282,13 +209,15 @@ export {
 
 export type {
   SearchSource,
+  // TODO: remove these when data_enhanced is merged into data
   ISessionService,
   SearchSessionInfoProvider,
   ISessionsClient,
   SearchUsageCollector,
 } from './search';
 
-export { ISearchOptions, isErrorResponse, isCompleteResponse, isPartialResponse } from '../common';
+export type { ISearchOptions } from '../common';
+export { isErrorResponse, isCompleteResponse, isPartialResponse } from '../common';
 
 // Search namespace
 export const search = {
@@ -319,6 +248,7 @@ export const search = {
   getResponseInspectorStats,
   tabifyAggResponse,
   tabifyGetColumns,
+  checkColumnForPrecisionError,
 };
 
 /*
@@ -354,7 +284,6 @@ export type {
   SavedQuery,
   SavedQueryService,
   SavedQueryTimeFilter,
-  InputTimeRange,
   TimefilterContract,
   TimeHistoryContract,
   QueryStateChange,
@@ -373,7 +302,8 @@ export {
 
 export { isTimeRange, isQuery } from '../common';
 
-export { ACTION_GLOBAL_APPLY_FILTER, ApplyGlobalFilterActionContext } from './actions';
+export type { ApplyGlobalFilterActionContext } from './actions';
+export { ACTION_GLOBAL_APPLY_FILTER } from './actions';
 export { APPLY_FILTER_TRIGGER } from './triggers';
 
 /*

@@ -43,7 +43,7 @@ const {
 export const TEST_CASE_OBJECTS: Record<string, { type: string; id: string }> = deepFreeze({
   SHAREABLE_TYPE: { type: 'sharedtype', id: CASES.EACH_SPACE.id }, // contains references to four other objects
   SHAREABLE_TYPE_DOES_NOT_EXIST: { type: 'sharedtype', id: 'does-not-exist' },
-  NON_SHAREABLE_TYPE: { type: 'dashboard', id: 'my_dashboard' }, // one of these exists in each space
+  NON_SHAREABLE_TYPE: { type: 'isolatedtype', id: 'my_isolated_object' }, // one of these exists in each space
 });
 // Expected results for each space are defined here since they are used in multiple test suites
 export const EXPECTED_RESULTS: Record<string, SavedObjectReferenceWithContext[]> = {
@@ -185,35 +185,37 @@ const getRedactedSpaces = (authorizedSpace: string | undefined, spaces: string[]
 
 export function getShareableReferencesTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) {
   const expectForbidden = expectResponses.forbiddenTypes('share_to_space');
-  const expectResponseBody = (
-    testCase: GetShareableReferencesTestCase,
-    statusCode: 200 | 403,
-    authorizedSpace?: string
-  ): ExpectResponseBody => async (response: Record<string, any>) => {
-    if (statusCode === 403) {
-      const types = testCase.objects.map((x) => x.type);
-      await expectForbidden(types)(response);
-    } else {
-      const { expectedResults } = testCase;
-      const apiResponse = response.body as SavedObjectsCollectMultiNamespaceReferencesResponse;
-      expect(apiResponse.objects).to.have.length(expectedResults.length);
-      expectedResults.forEach((expectedResult, i) => {
-        const { spaces, spacesWithMatchingAliases } = expectedResult;
-        const expectedSpaces = getRedactedSpaces(authorizedSpace, spaces);
-        const expectedSpacesWithMatchingAliases =
-          spacesWithMatchingAliases &&
-          getRedactedSpaces(authorizedSpace, spacesWithMatchingAliases);
-        const expected = {
-          ...expectedResult,
-          spaces: expectedSpaces,
-          ...(expectedSpacesWithMatchingAliases && {
-            spacesWithMatchingAliases: expectedSpacesWithMatchingAliases,
-          }),
-        };
-        expect(apiResponse.objects[i]).to.eql(expected);
-      });
-    }
-  };
+  const expectResponseBody =
+    (
+      testCase: GetShareableReferencesTestCase,
+      statusCode: 200 | 403,
+      authorizedSpace?: string
+    ): ExpectResponseBody =>
+    async (response: Record<string, any>) => {
+      if (statusCode === 403) {
+        const types = testCase.objects.map((x) => x.type);
+        await expectForbidden(types)(response);
+      } else {
+        const { expectedResults } = testCase;
+        const apiResponse = response.body as SavedObjectsCollectMultiNamespaceReferencesResponse;
+        expect(apiResponse.objects).to.have.length(expectedResults.length);
+        expectedResults.forEach((expectedResult, i) => {
+          const { spaces, spacesWithMatchingAliases } = expectedResult;
+          const expectedSpaces = getRedactedSpaces(authorizedSpace, spaces);
+          const expectedSpacesWithMatchingAliases =
+            spacesWithMatchingAliases &&
+            getRedactedSpaces(authorizedSpace, spacesWithMatchingAliases);
+          const expected = {
+            ...expectedResult,
+            spaces: expectedSpaces,
+            ...(expectedSpacesWithMatchingAliases && {
+              spacesWithMatchingAliases: expectedSpacesWithMatchingAliases,
+            }),
+          };
+          expect(apiResponse.objects[i]).to.eql(expected);
+        });
+      }
+    };
   const createTestDefinitions = (
     testCases: GetShareableReferencesTestCase | GetShareableReferencesTestCase[],
     forbidden: boolean,
@@ -235,37 +237,36 @@ export function getShareableReferencesTestSuiteFactory(esArchiver: any, supertes
     }));
   };
 
-  const makeGetShareableReferencesTest = (describeFn: Mocha.SuiteFunction) => (
-    description: string,
-    definition: GetShareableReferencesTestSuite
-  ) => {
-    const { user, spaceId = SPACES.DEFAULT.spaceId, tests } = definition;
+  const makeGetShareableReferencesTest =
+    (describeFn: Mocha.SuiteFunction) =>
+    (description: string, definition: GetShareableReferencesTestSuite) => {
+      const { user, spaceId = SPACES.DEFAULT.spaceId, tests } = definition;
 
-    describeFn(description, () => {
-      before(() =>
-        esArchiver.load(
-          'x-pack/test/spaces_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
-        )
-      );
-      after(() =>
-        esArchiver.unload(
-          'x-pack/test/spaces_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
-        )
-      );
+      describeFn(description, () => {
+        before(() =>
+          esArchiver.load(
+            'x-pack/test/spaces_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
+          )
+        );
+        after(() =>
+          esArchiver.unload(
+            'x-pack/test/spaces_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
+          )
+        );
 
-      for (const test of tests) {
-        it(`should return ${test.responseStatusCode} ${test.title}`, async () => {
-          const requestBody = test.request;
-          await supertest
-            .post(`${getUrlPrefix(spaceId)}/api/spaces/_get_shareable_references`)
-            .auth(user?.username, user?.password)
-            .send(requestBody)
-            .expect(test.responseStatusCode)
-            .then(test.responseBody);
-        });
-      }
-    });
-  };
+        for (const test of tests) {
+          it(`should return ${test.responseStatusCode} ${test.title}`, async () => {
+            const requestBody = test.request;
+            await supertest
+              .post(`${getUrlPrefix(spaceId)}/api/spaces/_get_shareable_references`)
+              .auth(user?.username, user?.password)
+              .send(requestBody)
+              .expect(test.responseStatusCode)
+              .then(test.responseBody);
+          });
+        }
+      });
+    };
 
   const addTests = makeGetShareableReferencesTest(describe);
   // @ts-ignore

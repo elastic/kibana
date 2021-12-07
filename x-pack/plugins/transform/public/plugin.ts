@@ -13,7 +13,11 @@ import type { HomePublicPluginSetup } from 'src/plugins/home/public';
 import type { SavedObjectsStart } from 'src/plugins/saved_objects/public';
 import type { ManagementSetup } from 'src/plugins/management/public';
 import type { SharePluginStart } from 'src/plugins/share/public';
+import type { SpacesApi } from '../../spaces/public';
 import { registerFeature } from './register_feature';
+import type { PluginSetupContract as AlertingSetup } from '../../alerting/public';
+import type { TriggersAndActionsUIPublicPluginStart } from '../../triggers_actions_ui/public';
+import { getTransformHealthRuleType } from './alerting';
 
 export interface PluginsDependencies {
   data: DataPublicPluginStart;
@@ -21,11 +25,14 @@ export interface PluginsDependencies {
   home: HomePublicPluginSetup;
   savedObjects: SavedObjectsStart;
   share: SharePluginStart;
+  spaces?: SpacesApi;
+  alerting?: AlertingSetup;
+  triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
 }
 
 export class TransformUiPlugin {
   public setup(coreSetup: CoreSetup<PluginsDependencies>, pluginsSetup: PluginsDependencies): void {
-    const { management, home } = pluginsSetup;
+    const { management, home, triggersActionsUi } = pluginsSetup;
 
     // Register management section
     const esSection = management.sections.section.data;
@@ -41,6 +48,10 @@ export class TransformUiPlugin {
       },
     });
     registerFeature(home);
+
+    if (triggersActionsUi) {
+      triggersActionsUi.ruleTypeRegistry.register(getTransformHealthRuleType());
+    }
   }
 
   public start() {}

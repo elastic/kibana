@@ -9,21 +9,22 @@ structure it. Grok is good for parsing syslog, apache, and other
 webserver logs, mysql logs, and in general, any log format that is
 written for human consumption.
 
-Grok patterns are supported in the ingest node
-{ref}/grok-processor.html[grok processor] and the Logstash
-{logstash-ref}/plugins-filters-grok.html[grok filter]. See
-{logstash-ref}/plugins-filters-grok.html#_grok_basics[grok basics]
-for more information on the syntax for a grok pattern.
+Grok patterns are supported in {es} {ref}/runtime.html[runtime fields], the {es}
+{ref}/grok-processor.html[grok ingest processor], and the {ls}
+{logstash-ref}/plugins-filters-grok.html[grok filter]. For syntax, see
+{ref}/grok.html[Grokking grok].
 
-The Elastic Stack ships
-with more than 120 reusable grok patterns. See
-https://github.com/elastic/elasticsearch/tree/master/libs/grok/src/main/resources/patterns[Ingest node grok patterns] and https://github.com/logstash-plugins/logstash-patterns-core/tree/master/patterns[Logstash grok patterns]
-for the complete list of patterns.
+The {stack} ships with more than 120 reusable grok patterns. For a complete
+list of patterns, see
+https://github.com/elastic/elasticsearch/tree/master/libs/grok/src/main/resources/patterns[{es}
+grok patterns] and
+https://github.com/logstash-plugins/logstash-patterns-core/tree/master/patterns[{ls}
+grok patterns].
 
 Because
-ingest node and Logstash share the same grok implementation and pattern
+{es} and {ls} share the same grok implementation and pattern
 libraries, any grok pattern that you create in the *Grok Debugger* will work
-in ingest node and Logstash.
+in both {es} and {ls}.
 
 [float]
 [[grokdebugger-getting-started]]

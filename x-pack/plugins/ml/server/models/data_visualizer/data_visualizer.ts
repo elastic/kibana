@@ -180,7 +180,7 @@ type BatchStats =
 
 const getAggIntervals = async (
   { asCurrentUser }: IScopedClusterClient,
-  indexPatternTitle: string,
+  indexPattern: string,
   query: any,
   fields: HistogramField[],
   samplerShardSize: number,
@@ -205,7 +205,7 @@ const getAggIntervals = async (
   }, {} as Record<string, object>);
 
   const { body } = await asCurrentUser.search({
-    index: indexPatternTitle,
+    index: indexPattern,
     size: 0,
     body: {
       query,
@@ -239,7 +239,7 @@ const getAggIntervals = async (
 // export for re-use by transforms plugin
 export const getHistogramsForFields = async (
   client: IScopedClusterClient,
-  indexPatternTitle: string,
+  indexPattern: string,
   query: any,
   fields: HistogramField[],
   samplerShardSize: number,
@@ -248,7 +248,7 @@ export const getHistogramsForFields = async (
   const { asCurrentUser } = client;
   const aggIntervals = await getAggIntervals(
     client,
-    indexPatternTitle,
+    indexPattern,
     query,
     fields,
     samplerShardSize,
@@ -291,7 +291,7 @@ export const getHistogramsForFields = async (
   }
 
   const { body } = await asCurrentUser.search({
-    index: indexPatternTitle,
+    index: indexPattern,
     size: 0,
     body: {
       query,
@@ -304,46 +304,44 @@ export const getHistogramsForFields = async (
   const aggsPath = getSamplerAggregationsResponsePath(samplerShardSize);
   const aggregations = aggsPath.length > 0 ? get(body.aggregations, aggsPath) : body.aggregations;
 
-  const chartsData: ChartData[] = fields.map(
-    (field): ChartData => {
-      const fieldName = field.fieldName;
-      const fieldType = field.type;
-      const id = stringHash(field.fieldName);
+  const chartsData: ChartData[] = fields.map((field): ChartData => {
+    const fieldName = field.fieldName;
+    const fieldType = field.type;
+    const id = stringHash(field.fieldName);
 
-      if (fieldType === KBN_FIELD_TYPES.NUMBER || fieldType === KBN_FIELD_TYPES.DATE) {
-        if (aggIntervals[id] === undefined) {
-          return {
-            type: 'numeric',
-            data: [],
-            interval: 0,
-            stats: [0, 0],
-            id: fieldName,
-          };
-        }
-
+    if (fieldType === KBN_FIELD_TYPES.NUMBER || fieldType === KBN_FIELD_TYPES.DATE) {
+      if (aggIntervals[id] === undefined) {
         return {
-          data: aggregations[`${id}_histogram`].buckets,
-          interval: aggIntervals[id].interval,
-          stats: [aggIntervals[id].min, aggIntervals[id].max],
           type: 'numeric',
-          id: fieldName,
-        };
-      } else if (fieldType === KBN_FIELD_TYPES.STRING || fieldType === KBN_FIELD_TYPES.BOOLEAN) {
-        return {
-          type: fieldType === KBN_FIELD_TYPES.STRING ? 'ordinal' : 'boolean',
-          cardinality:
-            fieldType === KBN_FIELD_TYPES.STRING ? aggregations[`${id}_cardinality`].value : 2,
-          data: aggregations[`${id}_terms`].buckets,
+          data: [],
+          interval: 0,
+          stats: [0, 0],
           id: fieldName,
         };
       }
 
       return {
-        type: 'unsupported',
+        data: aggregations[`${id}_histogram`].buckets,
+        interval: aggIntervals[id].interval,
+        stats: [aggIntervals[id].min, aggIntervals[id].max],
+        type: 'numeric',
+        id: fieldName,
+      };
+    } else if (fieldType === KBN_FIELD_TYPES.STRING || fieldType === KBN_FIELD_TYPES.BOOLEAN) {
+      return {
+        type: fieldType === KBN_FIELD_TYPES.STRING ? 'ordinal' : 'boolean',
+        cardinality:
+          fieldType === KBN_FIELD_TYPES.STRING ? aggregations[`${id}_cardinality`].value : 2,
+        data: aggregations[`${id}_terms`].buckets,
         id: fieldName,
       };
     }
-  );
+
+    return {
+      type: 'unsupported',
+      id: fieldName,
+    };
+  });
 
   return chartsData;
 };
@@ -448,7 +446,7 @@ export class DataVisualizer {
   // returned array depend on the type of the field (keyword, number, date etc).
   // Sampling will be used if supplied samplerShardSize > 0.
   async getHistogramsForFields(
-    indexPatternTitle: string,
+    indexPattern: string,
     query: any,
     fields: HistogramField[],
     samplerShardSize: number,
@@ -456,7 +454,7 @@ export class DataVisualizer {
   ): Promise<any> {
     return await getHistogramsForFields(
       this._client,
-      indexPatternTitle,
+      indexPattern,
       query,
       fields,
       samplerShardSize,

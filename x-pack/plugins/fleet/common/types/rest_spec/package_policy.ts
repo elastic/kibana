@@ -10,6 +10,7 @@ import type {
   NewPackagePolicy,
   UpdatePackagePolicy,
   DryRunPackagePolicy,
+  PackagePolicyPackage,
 } from '../models';
 
 export interface GetPackagePoliciesRequest {
@@ -61,10 +62,17 @@ export type DeletePackagePoliciesResponse = Array<{
   id: string;
   name?: string;
   success: boolean;
+  package?: PackagePolicyPackage;
 }>;
 
 export interface UpgradePackagePolicyBaseResponse {
   name?: string;
+
+  // Support generic errors
+  statusCode?: number;
+  body?: {
+    message: string;
+  };
 }
 
 export interface UpgradePackagePolicyDryRunResponseItem extends UpgradePackagePolicyBaseResponse {

@@ -45,6 +45,7 @@ const BooleanFromString = new t.Type(
 
 const esFieldTypeMap = {
   keyword: t.string,
+  version: t.string,
   text: t.string,
   date: t.string,
   boolean: t.union([t.number, BooleanFromString]),
@@ -132,8 +133,8 @@ export function runtimeTypeFromFieldMap<TFieldMap extends FieldMap>(
 
   const required = pickBy(fieldMap, (field) => field.required);
 
-  return (t.intersection([
+  return t.intersection([
     t.exact(t.partial(mapToType(fieldMap))),
     t.type(mapToType(required)),
-  ]) as unknown) as FieldMapType<TFieldMap>;
+  ]) as unknown as FieldMapType<TFieldMap>;
 }

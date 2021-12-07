@@ -5,115 +5,64 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSwitch, EuiToolTip } from '@elastic/eui';
+import React from 'react';
+import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { isEqual } from 'lodash';
-import {
-  allSeriesKey,
-  convertAllShortSeries,
-  NEW_SERIES_KEY,
-  useSeriesStorage,
-} from '../hooks/use_series_storage';
+import { isEqual, pickBy } from 'lodash';
+import { allSeriesKey, convertAllShortSeries, useSeriesStorage } from '../hooks/use_series_storage';
 import { SeriesUrl } from '../types';
-import { useAppIndexPatternContext } from '../hooks/use_app_index_pattern';
-import { BuilderItem, getSeriesToEdit } from '../series_editor/series_editor';
-import { DEFAULT_TIME, ReportTypes } from '../configurations/constants';
 
-export function ViewActions() {
-  const [editorItems, setEditorItems] = useState<BuilderItem[]>([]);
-  const {
-    getSeries,
-    allSeries,
-    setSeries,
-    storage,
-    reportType,
-    autoApply,
-    setAutoApply,
-    applyChanges,
-  } = useSeriesStorage();
+interface Props {
+  onApply?: () => void;
+}
 
-  const { loading, indexPatterns } = useAppIndexPatternContext();
-
-  useEffect(() => {
-    setEditorItems(getSeriesToEdit({ allSeries, indexPatterns, reportType }));
-  }, [allSeries, getSeries, indexPatterns, loading, reportType]);
-
-  const addSeries = () => {
-    const prevSeries = allSeries?.[0];
-    const name = `${NEW_SERIES_KEY}-${editorItems.length + 1}`;
-    const nextSeries = { name } as SeriesUrl;
-
-    const nextSeriesId = allSeries.length;
-
-    if (reportType === 'data-distribution') {
-      setSeries(nextSeriesId, {
-        ...nextSeries,
-        time: prevSeries?.time || DEFAULT_TIME,
-      } as SeriesUrl);
-    } else {
-      setSeries(
-        nextSeriesId,
-        prevSeries ? nextSeries : ({ ...nextSeries, time: DEFAULT_TIME } as SeriesUrl)
-      );
+export function removeUndefinedEmptyValues(series: SeriesUrl) {
+  const resultSeries = removeUndefinedProps(series) as SeriesUrl;
+  Object.entries(resultSeries).forEach(([prop, value]) => {
+    if (typeof value === 'object') {
+      // @ts-expect-error
+      resultSeries[prop] = removeUndefinedEmptyValues(value);
     }
-  };
+  });
+  return resultSeries;
+}
 
-  const noChanges = isEqual(allSeries, convertAllShortSeries(storage.get(allSeriesKey) ?? []));
+export function removeUndefinedProps<T extends object>(obj: T): Partial<T> {
+  return pickBy(obj, (value) => value !== undefined);
+}
 
-  const isAddDisabled =
-    !reportType ||
-    ((reportType === ReportTypes.CORE_WEB_VITAL ||
-      reportType === ReportTypes.DEVICE_DISTRIBUTION) &&
-      allSeries.length > 0);
+export function ViewActions({ onApply }: Props) {
+  const { allSeries, storage, applyChanges } = useSeriesStorage();
+
+  const urlAllSeries = convertAllShortSeries(storage.get(allSeriesKey) ?? []);
+
+  let noChanges = allSeries.length === urlAllSeries.length;
+
+  if (noChanges) {
+    noChanges = !allSeries.some(
+      (series, index) =>
+        !isEqual(
+          removeUndefinedEmptyValues(series),
+          removeUndefinedEmptyValues(urlAllSeries[index])
+        )
+    );
+  }
 
   return (
     <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
       <EuiFlexItem grow={false}>
-        <EuiSwitch
-          label={AUTO_APPLY_LABEL}
-          checked={autoApply}
-          onChange={(e) => setAutoApply(!autoApply)}
-          compressed
-        />
-      </EuiFlexItem>
-      {!autoApply && (
-        <EuiFlexItem grow={false}>
-          <EuiButton onClick={() => applyChanges()} isDisabled={autoApply || noChanges} fill>
-            {i18n.translate('xpack.observability.expView.seriesBuilder.apply', {
-              defaultMessage: 'Apply changes',
-            })}
-          </EuiButton>
-        </EuiFlexItem>
-      )}
-      <EuiFlexItem grow={false}>
-        <EuiToolTip
-          content={
-            !reportType
-              ? i18n.translate(
-                  'xpack.observability.expView.seriesBuilder.addSeries.selectReportType',
-                  {
-                    defaultMessage: 'Please select report type before you can add series.',
-                  }
-                )
-              : isAddDisabled
-              ? i18n.translate('xpack.observability.expView.seriesBuilder.addSeries.limitation', {
-                  defaultMessage: 'You can only add one series of this report type.',
-                })
-              : ''
-          }
+        <EuiButton
+          onClick={() => applyChanges(onApply)}
+          isDisabled={noChanges}
+          fill
+          size="s"
+          data-test-subj={'seriesChangesApplyButton'}
         >
-          <EuiButton color="secondary" onClick={() => addSeries()} isDisabled={isAddDisabled}>
-            {i18n.translate('xpack.observability.expView.seriesBuilder.addSeries', {
-              defaultMessage: 'Add series',
-            })}
-          </EuiButton>
-        </EuiToolTip>
+          {i18n.translate('xpack.observability.expView.seriesBuilder.apply', {
+            defaultMessage: 'Apply changes',
+          })}
+        </EuiButton>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
 }
-
-const AUTO_APPLY_LABEL = i18n.translate('xpack.observability.expView.seriesBuilder.autoApply', {
-  defaultMessage: 'Auto apply',
-});

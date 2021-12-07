@@ -52,14 +52,14 @@ describe('<PipelinesList />', () => {
 
       // Verify app title
       expect(exists('appTitle')).toBe(true);
-      expect(find('appTitle').text()).toEqual('Ingest Node Pipelines');
+      expect(find('appTitle').text()).toEqual('Ingest Pipelines');
 
       // Verify documentation link
       expect(exists('documentationLink')).toBe(true);
-      expect(find('documentationLink').text()).toBe('Ingest Node Pipelines docs');
+      expect(find('documentationLink').text()).toBe('Ingest Pipelines docs');
 
-      // Verify create button exists
-      expect(exists('createPipelineButton')).toBe(true);
+      // Verify create dropdown exists
+      expect(exists('createPipelineDropdown')).toBe(true);
 
       // Verify table content
       const { tableCellsValues } = table.getMetaData('pipelinesTable');

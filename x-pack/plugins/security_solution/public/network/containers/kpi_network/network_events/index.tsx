@@ -60,25 +60,21 @@ export const useNetworkKpiNetworkEvents = ({
   const abortCtrl = useRef(new AbortController());
   const searchSubscription$ = useRef(new Subscription());
   const [loading, setLoading] = useState(false);
-  const [
-    networkKpiNetworkEventsRequest,
-    setNetworkKpiNetworkEventsRequest,
-  ] = useState<NetworkKpiNetworkEventsRequestOptions | null>(null);
+  const [networkKpiNetworkEventsRequest, setNetworkKpiNetworkEventsRequest] =
+    useState<NetworkKpiNetworkEventsRequestOptions | null>(null);
   const { getTransformChangesIfTheyExist } = useTransforms();
 
-  const [
-    networkKpiNetworkEventsResponse,
-    setNetworkKpiNetworkEventsResponse,
-  ] = useState<NetworkKpiNetworkEventsArgs>({
-    networkEvents: 0,
-    id: ID,
-    inspect: {
-      dsl: [],
-      response: [],
-    },
-    isInspected: false,
-    refetch: refetch.current,
-  });
+  const [networkKpiNetworkEventsResponse, setNetworkKpiNetworkEventsResponse] =
+    useState<NetworkKpiNetworkEventsArgs>({
+      networkEvents: 0,
+      id: ID,
+      inspect: {
+        dsl: [],
+        response: [],
+      },
+      isInspected: false,
+      refetch: refetch.current,
+    });
   const { addError, addWarning } = useAppToasts();
 
   const networkKpiNetworkEventsSearch = useCallback(

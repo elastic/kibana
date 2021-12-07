@@ -8,7 +8,7 @@
 import createContainer from 'constate';
 import React, { useCallback, useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { NotificationsStart } from 'src/core/public';
 
 import { toMountPoint } from '../../../../../../../src/plugins/kibana_react/public';
@@ -96,6 +96,7 @@ function usePackageInstall({ notifications }: { notifications: NotificationsStar
           });
           history.push(settingsPath);
         }
+
         notifications.toasts.addSuccess({
           title: toMountPoint(
             <FormattedMessage

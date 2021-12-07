@@ -15,6 +15,5 @@ export interface ExecutionContextSetup
 
 |  Method | Description |
 |  --- | --- |
-|  [get()](./kibana-plugin-core-server.executioncontextsetup.get.md) | Retrieves an opearation meta-data for the current async context. |
-|  [set(context)](./kibana-plugin-core-server.executioncontextsetup.set.md) | Stores the meta-data of a runtime operation. Data are carried over all async operations automatically. The sequential calls merge provided "context" object shallowly. |
+|  [withContext(context, fn)](./kibana-plugin-core-server.executioncontextsetup.withcontext.md) | Keeps track of execution context while the passed function is executed. Data are carried over all async operations spawned by the passed function. The nested calls stack the registered context on top of each other. |
 

@@ -14,6 +14,7 @@ import { HostStatus } from '../../../../../common/endpoint/types';
 
 interface HostIsolationStatusResponse {
   loading: boolean;
+  capabilities: string[];
   isIsolated: boolean;
   agentStatus: HostStatus | undefined;
   pendingIsolation: number;
@@ -28,6 +29,7 @@ export const useHostIsolationStatus = ({
   agentId: string;
 }): HostIsolationStatusResponse => {
   const [isIsolated, setIsIsolated] = useState<boolean>(false);
+  const [capabilities, setCapabilities] = useState<string[]>([]);
   const [agentStatus, setAgentStatus] = useState<HostStatus>();
   const [pendingIsolation, setPendingIsolation] = useState(0);
   const [pendingUnisolation, setPendingUnisolation] = useState(0);
@@ -38,11 +40,16 @@ export const useHostIsolationStatus = ({
     // isMounted tracks if a component is mounted before changing state
     let isMounted = true;
     let fleetAgentId: string;
+    setLoading(true);
+
     const fetchData = async () => {
       try {
         const metadataResponse = await getHostMetadata({ agentId, signal: abortCtrl.signal });
         if (isMounted) {
           setIsIsolated(isEndpointHostIsolated(metadataResponse.metadata));
+          if (metadataResponse.metadata.Endpoint.capabilities) {
+            setCapabilities([...metadataResponse.metadata.Endpoint.capabilities]);
+          }
           setAgentStatus(metadataResponse.host_status);
           fleetAgentId = metadataResponse.metadata.elastic.agent.id;
         }
@@ -73,20 +80,14 @@ export const useHostIsolationStatus = ({
       }
     };
 
-    setLoading((prevState) => {
-      if (prevState) {
-        return prevState;
-      }
-      if (!isEmpty(agentId)) {
-        fetchData();
-      }
-      return true;
-    });
+    if (!isEmpty(agentId)) {
+      fetchData();
+    }
     return () => {
       // updates to show component is unmounted
       isMounted = false;
       abortCtrl.abort();
     };
   }, [agentId]);
-  return { loading, isIsolated, agentStatus, pendingIsolation, pendingUnisolation };
+  return { loading, capabilities, isIsolated, agentStatus, pendingIsolation, pendingUnisolation };
 };

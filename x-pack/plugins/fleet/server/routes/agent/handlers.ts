@@ -28,60 +28,58 @@ import { defaultIngestErrorHandler } from '../../errors';
 import { licenseService } from '../../services';
 import * as AgentService from '../../services/agents';
 
-export const getAgentHandler: RequestHandler<
-  TypeOf<typeof GetOneAgentRequestSchema.params>
-> = async (context, request, response) => {
-  const soClient = context.core.savedObjects.client;
-  const esClient = context.core.elasticsearch.client.asCurrentUser;
+export const getAgentHandler: RequestHandler<TypeOf<typeof GetOneAgentRequestSchema.params>> =
+  async (context, request, response) => {
+    const soClient = context.core.savedObjects.client;
+    const esClient = context.core.elasticsearch.client.asInternalUser;
 
-  try {
-    const body: GetOneAgentResponse = {
-      item: await AgentService.getAgentById(esClient, request.params.agentId),
-    };
+    try {
+      const body: GetOneAgentResponse = {
+        item: await AgentService.getAgentById(esClient, request.params.agentId),
+      };
 
-    return response.ok({ body });
-  } catch (error) {
-    if (soClient.errors.isNotFoundError(error)) {
-      return response.notFound({
-        body: { message: `Agent ${request.params.agentId} not found` },
-      });
+      return response.ok({ body });
+    } catch (error) {
+      if (soClient.errors.isNotFoundError(error)) {
+        return response.notFound({
+          body: { message: `Agent ${request.params.agentId} not found` },
+        });
+      }
+
+      return defaultIngestErrorHandler({ error, response });
     }
+  };
 
-    return defaultIngestErrorHandler({ error, response });
-  }
-};
+export const deleteAgentHandler: RequestHandler<TypeOf<typeof DeleteAgentRequestSchema.params>> =
+  async (context, request, response) => {
+    const esClient = context.core.elasticsearch.client.asInternalUser;
 
-export const deleteAgentHandler: RequestHandler<
-  TypeOf<typeof DeleteAgentRequestSchema.params>
-> = async (context, request, response) => {
-  const esClient = context.core.elasticsearch.client.asCurrentUser;
+    try {
+      await AgentService.deleteAgent(esClient, request.params.agentId);
 
-  try {
-    await AgentService.deleteAgent(esClient, request.params.agentId);
+      const body = {
+        action: 'deleted',
+      };
 
-    const body = {
-      action: 'deleted',
-    };
+      return response.ok({ body });
+    } catch (error) {
+      if (error.isBoom) {
+        return response.customError({
+          statusCode: error.output.statusCode,
+          body: { message: `Agent ${request.params.agentId} not found` },
+        });
+      }
 
-    return response.ok({ body });
-  } catch (error) {
-    if (error.isBoom) {
-      return response.customError({
-        statusCode: error.output.statusCode,
-        body: { message: `Agent ${request.params.agentId} not found` },
-      });
+      return defaultIngestErrorHandler({ error, response });
     }
-
-    return defaultIngestErrorHandler({ error, response });
-  }
-};
+  };
 
 export const updateAgentHandler: RequestHandler<
   TypeOf<typeof UpdateAgentRequestSchema.params>,
   undefined,
   TypeOf<typeof UpdateAgentRequestSchema.body>
 > = async (context, request, response) => {
-  const esClient = context.core.elasticsearch.client.asCurrentUser;
+  const esClient = context.core.elasticsearch.client.asInternalUser;
 
   try {
     await AgentService.updateAgent(esClient, request.params.agentId, {
@@ -107,7 +105,7 @@ export const getAgentsHandler: RequestHandler<
   undefined,
   TypeOf<typeof GetAgentsRequestSchema.query>
 > = async (context, request, response) => {
-  const esClient = context.core.elasticsearch.client.asCurrentUser;
+  const esClient = context.core.elasticsearch.client.asInternalUser;
 
   try {
     const { agents, total, page, perPage } = await AgentService.getAgentsByKuery(esClient, {
@@ -202,13 +200,11 @@ export const getAgentStatusForAgentPolicyHandler: RequestHandler<
   undefined,
   TypeOf<typeof GetAgentStatusRequestSchema.query>
 > = async (context, request, response) => {
-  const soClient = context.core.savedObjects.client;
-  const esClient = context.core.elasticsearch.client.asCurrentUser;
+  const esClient = context.core.elasticsearch.client.asInternalUser;
 
   try {
     // TODO change path
     const results = await AgentService.getAgentStatusForAgentPolicy(
-      soClient,
       esClient,
       request.query.policyId,
       request.query.kuery

@@ -75,14 +75,15 @@ function DefaultEditorAggParams({
   hideCustomLabel = false,
 }: DefaultEditorAggParamsProps) {
   const schema = useMemo(() => getSchemaByName(schemas, agg.schema), [agg.schema, schemas]);
-  const aggFilter = useMemo(() => [...allowedAggs, ...(schema.aggFilter || [])], [
-    allowedAggs,
-    schema.aggFilter,
-  ]);
+  const aggFilter = useMemo(
+    () => [...allowedAggs, ...(schema.aggFilter || [])],
+    [allowedAggs, schema.aggFilter]
+  );
   const { services } = useKibana<VisDefaultEditorKibanaServices>();
-  const aggTypes = useMemo(() => services.data.search.aggs.types.getAll(), [
-    services.data.search.aggs.types,
-  ]);
+  const aggTypes = useMemo(
+    () => services.data.search.aggs.types.getAll(),
+    [services.data.search.aggs.types]
+  );
   const groupedAggTypeOptions = useMemo(
     () => getAggTypeOptions(aggTypes, agg, indexPattern, groupName, aggFilter),
     [aggTypes, agg, indexPattern, groupName, aggFilter]
@@ -96,11 +97,10 @@ function DefaultEditorAggParams({
     : '';
   const aggTypeName = agg.type?.name;
   const fieldName = agg.params?.field?.name;
-  const editorConfig = useMemo(() => getEditorConfig(indexPattern, aggTypeName, fieldName), [
-    indexPattern,
-    aggTypeName,
-    fieldName,
-  ]);
+  const editorConfig = useMemo(
+    () => getEditorConfig(indexPattern, aggTypeName, fieldName),
+    [indexPattern, aggTypeName, fieldName]
+  );
   const params = useMemo(
     () => getAggParamsToRender({ agg, editorConfig, metricAggs, state, schemas, hideCustomLabel }),
     [agg, editorConfig, metricAggs, state, schemas, hideCustomLabel]

@@ -17,8 +17,10 @@ import { UseFieldProps, FormData } from '../../../../../shared_imports';
 
 import { useFormErrorsContext } from '../form_errors_context';
 
-const isXPhaseField = (phase: keyof Phases) => (fieldPath: string): boolean =>
-  fieldPath.startsWith(`phases.${phase}`) || fieldPath.startsWith(`_meta.${phase}`);
+const isXPhaseField =
+  (phase: keyof Phases) =>
+  (fieldPath: string): boolean =>
+    fieldPath.startsWith(`phases.${phase}`) || fieldPath.startsWith(`_meta.${phase}`);
 
 const isHotPhaseField = isXPhaseField('hot');
 const isWarmPhaseField = isXPhaseField('warm');

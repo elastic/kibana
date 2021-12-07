@@ -54,6 +54,7 @@ export const FleetStatusProvider: React.FC = ({ children }) => {
     },
     [setState]
   );
+
   useEffect(() => {
     sendGetStatus();
   }, [sendGetStatus]);

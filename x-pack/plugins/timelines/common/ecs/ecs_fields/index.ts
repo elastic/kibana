@@ -292,6 +292,7 @@ export const systemFieldsMap: Readonly<Record<string, string>> = {
 
 export const signalFieldsMap: Readonly<Record<string, string>> = {
   'signal.original_time': 'signal.original_time',
+  'signal.reason': 'signal.reason',
   'signal.rule.id': 'signal.rule.id',
   'signal.rule.saved_id': 'signal.rule.saved_id',
   'signal.rule.timeline_id': 'signal.rule.timeline_id',

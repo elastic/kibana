@@ -16,7 +16,7 @@ import {
 } from './feature_edit_tools';
 import { updateEditShape } from '../../../../actions';
 import { MapStoreState } from '../../../../reducers/store';
-import { DRAW_SHAPE } from '../../../../../common';
+import { DRAW_SHAPE } from '../../../../../common/constants';
 import { getEditState } from '../../../../selectors/map_selectors';
 
 function mapStateToProps(state: MapStoreState): ReduxStateProps {

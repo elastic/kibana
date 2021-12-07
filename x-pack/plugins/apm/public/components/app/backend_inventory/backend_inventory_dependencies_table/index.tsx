@@ -5,24 +5,31 @@
  * 2.0.
  */
 
+import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { useUiTracker } from '../../../../../../observability/public';
 import { getNodeName, NodeType } from '../../../../../common/connections';
+import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { useApmParams } from '../../../../hooks/use_apm_params';
-import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { useFetcher } from '../../../../hooks/use_fetcher';
-import { getTimeRangeComparison } from '../../../shared/time_comparison/get_time_range_comparison';
-import { DependenciesTable } from '../../../shared/dependencies_table';
+import { useTimeRange } from '../../../../hooks/use_time_range';
 import { BackendLink } from '../../../shared/backend_link';
+import { DependenciesTable } from '../../../shared/dependencies_table';
+import { getTimeRangeComparison } from '../../../shared/time_comparison/get_time_range_comparison';
 
 export function BackendInventoryDependenciesTable() {
   const {
-    urlParams: { start, end, environment, comparisonEnabled, comparisonType },
-  } = useUrlParams();
+    urlParams: { comparisonEnabled, comparisonType },
+  } = useLegacyUrlParams();
 
   const {
-    query: { rangeFrom, rangeTo, kuery },
+    query: { rangeFrom, rangeTo, environment, kuery },
   } = useApmParams('/backends');
+
+  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
+
+  const trackEvent = useUiTracker();
 
   const { offset } = getTimeRangeComparison({
     start,
@@ -38,13 +45,13 @@ export function BackendInventoryDependenciesTable() {
       }
 
       return callApmApi({
-        endpoint: 'GET /api/apm/backends/top_backends',
+        endpoint: 'GET /internal/apm/backends/top_backends',
         params: {
-          query: { start, end, environment, numBuckets: 20, offset },
+          query: { start, end, environment, numBuckets: 20, offset, kuery },
         },
       });
     },
-    [start, end, environment, offset]
+    [start, end, environment, offset, kuery]
   );
 
   const dependencies =
@@ -57,16 +64,23 @@ export function BackendInventoryDependenciesTable() {
       }
       const link = (
         <BackendLink
-          backendName={location.backendName}
           type={location.spanType}
           subtype={location.spanSubtype}
           query={{
-            comparisonEnabled: comparisonEnabled ? 'true' : 'false',
+            backendName: location.backendName,
+            comparisonEnabled,
             comparisonType,
             environment,
             kuery,
             rangeFrom,
             rangeTo,
+          }}
+          onClick={() => {
+            trackEvent({
+              app: 'apm',
+              metricType: METRIC_TYPE.CLICK,
+              metric: 'backend_inventory_to_backend_detail',
+            });
           }}
         />
       );
@@ -82,16 +96,11 @@ export function BackendInventoryDependenciesTable() {
   return (
     <DependenciesTable
       dependencies={dependencies}
-      title={i18n.translate(
-        'xpack.apm.backendInventory.dependenciesTableTitle',
-        {
-          defaultMessage: 'Backends',
-        }
-      )}
+      title={null}
       nameColumnTitle={i18n.translate(
-        'xpack.apm.backendInventory.dependenciesTableColumnBackend',
+        'xpack.apm.backendInventory.dependencyTableColumn',
         {
-          defaultMessage: 'Backend',
+          defaultMessage: 'Dependency',
         }
       )}
       status={status}

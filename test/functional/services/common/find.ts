@@ -118,9 +118,12 @@ export class FindService extends FtrService {
   ): Promise<WebElementWrapper[]> {
     this.log.debug(`Find.allByCssSelector('${selector}') with timeout=${timeout}`);
     await this._withTimeout(timeout);
-    const elements = await this.driver.findElements(By.css(selector));
-    await this._withTimeout(this.defaultFindTimeout);
-    return this.wrapAll(elements);
+    try {
+      const elements = await this.driver.findElements(By.css(selector));
+      return this.wrapAll(elements);
+    } finally {
+      await this._withTimeout(this.defaultFindTimeout);
+    }
   }
 
   public async descendantExistsByCssSelector(
@@ -129,8 +132,13 @@ export class FindService extends FtrService {
     timeout: number = this.WAIT_FOR_EXISTS_TIME
   ): Promise<boolean> {
     this.log.debug(`Find.descendantExistsByCssSelector('${selector}') with timeout=${timeout}`);
-    const els = await parentElement._webElement.findElements(By.css(selector));
-    return await this.exists(async () => this.wrapAll(els), timeout);
+    await this._withTimeout(timeout);
+    try {
+      const els = await parentElement._webElement.findElements(By.css(selector));
+      return await this.exists(async () => this.wrapAll(els), timeout);
+    } finally {
+      await this._withTimeout(this.defaultFindTimeout);
+    }
   }
 
   public async descendantDisplayedByCssSelector(
@@ -406,15 +414,18 @@ export class FindService extends FtrService {
   ) {
     this.log.debug(`Find.waitForDeletedByCssSelector('${selector}') with timeout=${timeout}`);
     await this._withTimeout(this.POLLING_TIME);
-    await this.driver.wait(
-      async () => {
-        const found = await this.driver.findElements(By.css(selector));
-        return found.length === 0;
-      },
-      timeout,
-      `The element ${selector} was still present when it should have disappeared.`
-    );
-    await this._withTimeout(this.defaultFindTimeout);
+    try {
+      await this.driver.wait(
+        async () => {
+          const found = await this.driver.findElements(By.css(selector));
+          return found.length === 0;
+        },
+        timeout,
+        `The element ${selector} was still present when it should have disappeared.`
+      );
+    } finally {
+      await this._withTimeout(this.defaultFindTimeout);
+    }
   }
 
   public async waitForAttributeToChange(

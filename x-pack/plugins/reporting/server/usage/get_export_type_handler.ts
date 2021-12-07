@@ -16,6 +16,13 @@ import { FeaturesAvailability } from './';
 export function getExportTypesHandler(exportTypesRegistry: ExportTypesRegistry) {
   return {
     /*
+     * Allow usage collection to loop through each registered job type
+     */
+    getJobTypes() {
+      return exportTypesRegistry.getAll().map(({ jobType }) => jobType);
+    },
+
+    /*
      * Based on the X-Pack license and which export types are available,
      * returns an object where the keys are the export types and the values are
      * a boolean for whether or not the export type is provided by the license.
@@ -46,3 +53,5 @@ export function getExportTypesHandler(exportTypesRegistry: ExportTypesRegistry) 
     },
   };
 }
+
+export type ExportTypesHandler = ReturnType<typeof getExportTypesHandler>;

@@ -12,7 +12,7 @@ import { getNodeSummary } from '../../../../lib/elasticsearch/nodes';
 import { getShardStats, getShardAllocation } from '../../../../lib/elasticsearch/shards';
 import { getMetrics } from '../../../../lib/details/get_metrics';
 import { handleError } from '../../../../lib/errors/handle_error';
-import { prefixIndexPattern } from '../../../../lib/ccs_utils';
+import { prefixIndexPattern } from '../../../../../common/ccs_utils';
 import { metricSets } from './metric_set_node_detail';
 import { INDEX_PATTERN_ELASTICSEARCH } from '../../../../../common/constants';
 import { getLogs } from '../../../../lib/logs/get_logs';

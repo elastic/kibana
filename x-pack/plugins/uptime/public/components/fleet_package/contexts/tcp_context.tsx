@@ -6,34 +6,31 @@
  */
 
 import React, { createContext, useContext, useMemo, useState } from 'react';
-import { ITCPSimpleFields, ConfigKeys, ScheduleUnit, DataStream } from '../types';
+import { TCPSimpleFields, ConfigKey, DataStream } from '../types';
+import { defaultValues as commonDefaultValues } from '../common/default_values';
 
-interface ITCPSimpleFieldsContext {
-  setFields: React.Dispatch<React.SetStateAction<ITCPSimpleFields>>;
-  fields: ITCPSimpleFields;
-  defaultValues: ITCPSimpleFields;
+interface TCPSimpleFieldsContext {
+  setFields: React.Dispatch<React.SetStateAction<TCPSimpleFields>>;
+  fields: TCPSimpleFields;
+  defaultValues: TCPSimpleFields;
 }
 
-interface ITCPSimpleFieldsContextProvider {
+interface TCPSimpleFieldsContextProvider {
   children: React.ReactNode;
-  defaultValues?: ITCPSimpleFields;
+  defaultValues?: TCPSimpleFields;
 }
 
-export const initialValues = {
-  [ConfigKeys.HOSTS]: '',
-  [ConfigKeys.MAX_REDIRECTS]: '0',
-  [ConfigKeys.MONITOR_TYPE]: DataStream.TCP,
-  [ConfigKeys.SCHEDULE]: {
-    number: '3',
-    unit: ScheduleUnit.MINUTES,
+export const initialValues: TCPSimpleFields = {
+  ...commonDefaultValues,
+  [ConfigKey.METADATA]: {
+    is_tls_enabled: false,
   },
-  [ConfigKeys.APM_SERVICE_NAME]: '',
-  [ConfigKeys.TAGS]: [],
-  [ConfigKeys.TIMEOUT]: '16',
+  [ConfigKey.HOSTS]: '',
+  [ConfigKey.MONITOR_TYPE]: DataStream.TCP,
 };
 
-const defaultContext: ITCPSimpleFieldsContext = {
-  setFields: (_fields: React.SetStateAction<ITCPSimpleFields>) => {
+const defaultContext: TCPSimpleFieldsContext = {
+  setFields: (_fields: React.SetStateAction<TCPSimpleFields>) => {
     throw new Error(
       'setFields was not initialized for TCP Simple Fields, set it when you invoke the context'
     );
@@ -47,8 +44,8 @@ export const TCPSimpleFieldsContext = createContext(defaultContext);
 export const TCPSimpleFieldsContextProvider = ({
   children,
   defaultValues = initialValues,
-}: ITCPSimpleFieldsContextProvider) => {
-  const [fields, setFields] = useState<ITCPSimpleFields>(defaultValues);
+}: TCPSimpleFieldsContextProvider) => {
+  const [fields, setFields] = useState<TCPSimpleFields>(defaultValues);
 
   const value = useMemo(() => {
     return { fields, setFields, defaultValues };

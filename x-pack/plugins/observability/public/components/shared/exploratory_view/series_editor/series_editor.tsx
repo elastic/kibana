@@ -7,33 +7,17 @@
 
 import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiBasicTable,
-  EuiButtonIcon,
-  EuiSpacer,
-  EuiFormRow,
-  EuiFlexItem,
-  EuiFlexGroup,
-  EuiButtonEmpty,
-} from '@elastic/eui';
+import { EuiSpacer, EuiFormRow, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { rgba } from 'polished';
-import classNames from 'classnames';
-import { isEmpty } from 'lodash';
-import { euiStyled } from './../../../../../../../../src/plugins/kibana_react/common';
-import { AppDataType, SeriesConfig, ReportViewType, SeriesUrl } from '../types';
+import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
+import { AppDataType, ReportViewType, BuilderItem } from '../types';
 import { SeriesContextValue, useSeriesStorage } from '../hooks/use_series_storage';
 import { IndexPatternState, useAppIndexPatternContext } from '../hooks/use_app_index_pattern';
 import { getDefaultConfigs } from '../configurations/default_configs';
-import { SeriesActions } from '../series_viewer/columns/series_actions';
-import { SeriesInfo } from '../series_viewer/columns/series_info';
-import { DataTypesSelect } from './columns/data_type_select';
-import { DatePickerCol } from './columns/date_picker_col';
-import { ExpandedSeriesRow } from './expanded_series_row';
-import { SeriesName } from '../series_viewer/columns/series_name';
 import { ReportTypesSelect } from './columns/report_type_select';
 import { ViewActions } from '../views/view_actions';
-import { ReportMetricOptions } from './report_metric_options';
-import { Breakdowns } from '../series_viewer/columns/breakdowns';
+import { Series } from './series';
+import { ReportConfigMap, useExploratoryView } from '../contexts/exploatory_view_config';
 
 export interface ReportTypeItem {
   id: string;
@@ -41,35 +25,32 @@ export interface ReportTypeItem {
   label: string;
 }
 
-export interface BuilderItem {
-  id: number;
-  series: SeriesUrl;
-  seriesConfig: SeriesConfig;
-}
-
-type ExpandedRowMap = Record<string, JSX.Element>;
+type ExpandedRowMap = Record<string, true>;
 
 export const getSeriesToEdit = ({
   indexPatterns,
   allSeries,
   reportType,
+  reportConfigMap,
 }: {
   allSeries: SeriesContextValue['allSeries'];
   indexPatterns: IndexPatternState;
   reportType: ReportViewType;
+  reportConfigMap: ReportConfigMap;
 }): BuilderItem[] => {
   const getDataViewSeries = (dataType: AppDataType) => {
     if (indexPatterns?.[dataType]) {
       return getDefaultConfigs({
         dataType,
         reportType,
+        reportConfigMap,
         indexPattern: indexPatterns[dataType],
       });
     }
   };
 
   return allSeries.map((series, seriesIndex) => {
-    const seriesConfig = getDataViewSeries(series.dataType)!;
+    const seriesConfig = getDataViewSeries(series.dataType);
 
     return { id: seriesIndex, series, seriesConfig };
   });
@@ -78,13 +59,27 @@ export const getSeriesToEdit = ({
 export const SeriesEditor = React.memo(function () {
   const [editorItems, setEditorItems] = useState<BuilderItem[]>([]);
 
-  const { getSeries, allSeries, reportType, removeSeries } = useSeriesStorage();
+  const { getSeries, allSeries, reportType } = useSeriesStorage();
 
   const { loading, indexPatterns } = useAppIndexPatternContext();
 
-  const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, JSX.Element>>(
-    {}
-  );
+  const { reportConfigMap } = useExploratoryView();
+
+  const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, true>>({});
+
+  const [{ prevCount, curCount }, setSeriesCount] = useState<{
+    prevCount?: number;
+    curCount: number;
+  }>({
+    curCount: allSeries.length,
+  });
+
+  useEffect(() => {
+    setSeriesCount((oldParams) => ({ prevCount: oldParams.curCount, curCount: allSeries.length }));
+    if (typeof prevCount !== 'undefined' && !isNaN(prevCount) && prevCount < curCount) {
+      setItemIdToExpandedRowMap({});
+    }
+  }, [allSeries.length, curCount, prevCount]);
 
   useEffect(() => {
     const newExpandRows: ExpandedRowMap = {};
@@ -94,18 +89,17 @@ export const SeriesEditor = React.memo(function () {
         reportType,
         allSeries,
         indexPatterns,
+        reportConfigMap,
       });
 
-      newEditorItems.forEach(({ series, id, seriesConfig }) => {
+      newEditorItems.forEach(({ series, id }) => {
         const prevSeriesItem = prevState.find(({ id: prevId }) => prevId === id);
         if (
           prevSeriesItem &&
           series.selectedMetricField &&
           prevSeriesItem.series.selectedMetricField !== series.selectedMetricField
         ) {
-          newExpandRows[id] = (
-            <ExpandedSeriesRow seriesId={id} series={series} seriesConfig={seriesConfig} />
-          );
+          newExpandRows[id] = true;
         }
       });
       return [...newEditorItems];
@@ -114,225 +108,55 @@ export const SeriesEditor = React.memo(function () {
     setItemIdToExpandedRowMap((prevState) => {
       return { ...prevState, ...newExpandRows };
     });
-  }, [allSeries, getSeries, indexPatterns, loading, reportType]);
-
-  useEffect(() => {
-    setItemIdToExpandedRowMap((prevState) => {
-      const itemIdToExpandedRowMapValues = { ...prevState };
-
-      const newEditorItems = getSeriesToEdit({
-        reportType,
-        allSeries,
-        indexPatterns,
-      });
-
-      newEditorItems.forEach((item) => {
-        if (itemIdToExpandedRowMapValues[item.id]) {
-          itemIdToExpandedRowMapValues[item.id] = (
-            <ExpandedSeriesRow
-              seriesId={item.id}
-              series={item.series}
-              seriesConfig={item.seriesConfig}
-            />
-          );
-        }
-      });
-      return itemIdToExpandedRowMapValues;
-    });
-  }, [allSeries, editorItems, indexPatterns, reportType]);
+  }, [allSeries, getSeries, indexPatterns, loading, reportConfigMap, reportType]);
 
   const toggleDetails = (item: BuilderItem) => {
     const itemIdToExpandedRowMapValues = { ...itemIdToExpandedRowMap };
     if (itemIdToExpandedRowMapValues[item.id]) {
       delete itemIdToExpandedRowMapValues[item.id];
     } else {
-      itemIdToExpandedRowMapValues[item.id] = (
-        <ExpandedSeriesRow
-          seriesId={item.id}
-          series={item.series}
-          seriesConfig={item.seriesConfig}
-        />
-      );
+      itemIdToExpandedRowMapValues[item.id] = true;
     }
     setItemIdToExpandedRowMap(itemIdToExpandedRowMapValues);
   };
 
-  const columns = [
-    {
-      align: 'left' as const,
-      width: '40px',
-      isExpander: true,
-      field: 'id',
-      name: '',
-      render: (id: number, item: BuilderItem) =>
-        item.series.dataType && item.series.selectedMetricField ? (
-          <EuiButtonIcon
-            onClick={() => toggleDetails(item)}
-            isDisabled={!item.series.dataType || !item.series.selectedMetricField}
-            aria-label={itemIdToExpandedRowMap[item.id] ? COLLAPSE_LABEL : EXPAND_LABEL}
-            iconType={itemIdToExpandedRowMap[item.id] ? 'arrowUp' : 'arrowDown'}
-          />
-        ) : null,
-    },
-    {
-      name: '',
-      field: 'id',
-      width: '40px',
-      render: (seriesId: number, { seriesConfig, series }: BuilderItem) => (
-        <SeriesInfo seriesId={seriesId} series={series} seriesConfig={seriesConfig} />
-      ),
-    },
-    {
-      name: i18n.translate('xpack.observability.expView.seriesEditor.name', {
-        defaultMessage: 'Name',
-      }),
-      field: 'id',
-      width: '20%',
-      render: (seriesId: number, { series }: BuilderItem) => (
-        <SeriesName seriesId={seriesId} series={series} />
-      ),
-    },
-    {
-      name: i18n.translate('xpack.observability.expView.seriesEditor.dataType', {
-        defaultMessage: 'Data type',
-      }),
-      field: 'id',
-      width: '15%',
-      render: (seriesId: number, { series }: BuilderItem) => (
-        <DataTypesSelect seriesId={seriesId} series={series} />
-      ),
-    },
-    {
-      name: i18n.translate('xpack.observability.expView.seriesEditor.reportMetric', {
-        defaultMessage: 'Report metric',
-      }),
-      field: 'id',
-      width: '15%',
-      render: (seriesId: number, { seriesConfig, series }: BuilderItem) => (
-        <ReportMetricOptions
-          series={series}
-          seriesId={seriesId}
-          metricOptions={seriesConfig?.metricOptions}
-        />
-      ),
-    },
-    {
-      name: i18n.translate('xpack.observability.expView.seriesEditor.time', {
-        defaultMessage: 'Time',
-      }),
-      field: 'id',
-      width: '27%',
-      render: (seriesId: number, { series }: BuilderItem) => (
-        <DatePickerCol seriesId={seriesId} series={series} />
-      ),
-    },
-
-    {
-      name: i18n.translate('xpack.observability.expView.seriesBuilder.breakdownBy', {
-        defaultMessage: 'Breakdown by',
-      }),
-      width: '10%',
-      field: 'id',
-      render: (seriesId: number, { series, seriesConfig }: BuilderItem) => (
-        <Breakdowns seriesConfig={seriesConfig} seriesId={seriesId} series={series} />
-      ),
-    },
-
-    {
-      name: i18n.translate('xpack.observability.expView.seriesBuilder.actions', {
-        defaultMessage: 'Actions',
-      }),
-      align: 'center' as const,
-      width: '8%',
-      field: 'id',
-      render: (seriesId: number, { series, seriesConfig }: BuilderItem) => (
-        <SeriesActions seriesId={seriesId} series={series} seriesConfig={seriesConfig} />
-      ),
-    },
-  ];
-
-  const getRowProps = (item: BuilderItem) => {
-    const { dataType, reportDefinitions, selectedMetricField } = item.series;
-
-    return {
-      className: classNames({
-        isExpanded: itemIdToExpandedRowMap[item.id],
-        isIncomplete: !dataType || isEmpty(reportDefinitions) || !selectedMetricField,
-      }),
-      // commenting this for now, since adding on click on row, blocks adding space
-      // into text field for name column
-      // ...(dataType && selectedMetricField
-      //   ? {
-      //       onClick: (evt: MouseEvent) => {
-      //         const targetElem = evt.target as HTMLElement;
-      //
-      //         if (
-      //           targetElem.classList.contains('euiTableCellContent') &&
-      //           targetElem.tagName !== 'BUTTON'
-      //         ) {
-      //           toggleDetails(item);
-      //         }
-      //         evt.stopPropagation();
-      //         evt.preventDefault();
-      //       },
-      //     }
-      //   : {}),
-    };
-  };
-
-  const resetView = () => {
-    const totalSeries = allSeries.length;
-    for (let i = totalSeries; i >= 0; i--) {
-      removeSeries(i);
-    }
-    setEditorItems([]);
-    setItemIdToExpandedRowMap({});
-  };
-
   return (
     <Wrapper>
-      <div>
-        <EuiSpacer />
-        <EuiFlexGroup>
-          <EuiFlexItem grow={false}>
-            <EuiFormRow label={REPORT_TYPE_LABEL} display="columnCompressed">
-              <ReportTypesSelect />
-            </EuiFormRow>
-          </EuiFlexItem>
-          {reportType && (
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty onClick={() => resetView()} color="text">
-                {RESET_LABEL}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          )}
-          <EuiFlexItem>
-            <ViewActions />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+      <SectionHeaderBackground />
+      <StickyFlexGroup gutterSize="none">
+        <EuiFlexItem grow={false}>
+          <EuiFormRow
+            css={{ alignItems: 'center' }}
+            aria-label={REPORT_TYPE_ARIA_LABEL}
+            id="report-type-label"
+            isDisabled={true}
+          >
+            <ReportTypesSelect prepend={REPORT_TYPE_LABEL} />
+          </EuiFormRow>
+        </EuiFlexItem>
 
-        <EuiSpacer size="s" />
+        <EuiFlexItem>
+          <ViewActions onApply={() => setItemIdToExpandedRowMap({})} />
+        </EuiFlexItem>
+      </StickyFlexGroup>
 
-        {editorItems.length > 0 && (
-          <EuiBasicTable
-            loading={loading}
-            items={editorItems}
-            columns={columns}
-            tableLayout="auto"
-            itemIdToExpandedRowMap={itemIdToExpandedRowMap}
-            isExpandable={true}
-            itemId="id"
-            rowProps={getRowProps}
-          />
-        )}
-        <EuiSpacer />
-      </div>
+      <EditorRowsWrapper>
+        {editorItems.map((item) => (
+          <div key={item.id}>
+            <Series
+              item={item}
+              toggleExpanded={() => toggleDetails(item)}
+              isExpanded={itemIdToExpandedRowMap[item.id]}
+            />
+            <EuiSpacer size="s" />
+          </div>
+        ))}
+      </EditorRowsWrapper>
     </Wrapper>
   );
 });
 
 const Wrapper = euiStyled.div`
-  max-height: 50vh;
   &::-webkit-scrollbar {
     height: ${({ theme }) => theme.eui.euiScrollBar};
     width: ${({ theme }) => theme.eui.euiScrollBar};
@@ -369,6 +193,28 @@ const Wrapper = euiStyled.div`
   }
 `;
 
+const SectionHeaderBackground = euiStyled.div`
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 56px;
+  background-color: ${({ theme }) => theme.eui.euiPageBackgroundColor};
+  border-bottom: 1px solid ${({ theme }) => theme.eui.euiColorLightShade};
+  z-index: 90;
+`;
+
+const StickyFlexGroup = euiStyled(EuiFlexGroup)`
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  padding: 0;
+`;
+
+const EditorRowsWrapper = euiStyled.div`
+  margin: ${({ theme }) => theme.eui.paddingSizes.m} 0;
+`;
+
 export const LOADING_VIEW = i18n.translate(
   'xpack.observability.expView.seriesBuilder.loadingView',
   {
@@ -383,10 +229,6 @@ export const SELECT_REPORT_TYPE = i18n.translate(
   }
 );
 
-export const RESET_LABEL = i18n.translate('xpack.observability.expView.seriesBuilder.reset', {
-  defaultMessage: 'Reset',
-});
-
 export const REPORT_TYPE_LABEL = i18n.translate(
   'xpack.observability.expView.seriesBuilder.reportType',
   {
@@ -394,10 +236,9 @@ export const REPORT_TYPE_LABEL = i18n.translate(
   }
 );
 
-const COLLAPSE_LABEL = i18n.translate('xpack.observability.expView.seriesBuilder.collapse', {
-  defaultMessage: 'Collapse',
-});
-
-const EXPAND_LABEL = i18n.translate('xpack.observability.expView.seriesBuilder.expand', {
-  defaultMessage: 'Exapnd',
-});
+export const REPORT_TYPE_ARIA_LABEL = i18n.translate(
+  'xpack.observability.expView.seriesBuilder.reportType.aria',
+  {
+    defaultMessage: 'This select allows you to choose the type of report you wish to create',
+  }
+);

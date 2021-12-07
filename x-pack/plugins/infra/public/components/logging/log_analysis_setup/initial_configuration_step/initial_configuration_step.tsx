@@ -8,7 +8,7 @@
 import { EuiCallOut, EuiForm, EuiSpacer } from '@elastic/eui';
 import { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
 import { QualityWarning, SetupStatus } from '../../../../../common/log_analysis';
 import { AnalysisSetupIndicesForm } from './analysis_setup_indices_form';
@@ -63,7 +63,6 @@ export const InitialConfigurationStep: React.FunctionComponent<InitialConfigurat
 
   return (
     <>
-      <EuiSpacer size="m" />
       <EuiForm>
         <AnalysisSetupTimerangeForm
           disabled={disabled}
@@ -73,6 +72,7 @@ export const InitialConfigurationStep: React.FunctionComponent<InitialConfigurat
           endTime={endTime}
           validationErrors={timeRangeValidationErrors}
         />
+        <EuiSpacer size="xl" />
         <AnalysisSetupIndicesForm
           disabled={disabled}
           indices={validatedIndices}

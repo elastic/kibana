@@ -8,11 +8,17 @@
 import React, { ReactElement } from 'react';
 import { of } from 'rxjs';
 // eslint-disable-next-line import/no-extraneous-dependencies
-import { render as reactTestLibRender, RenderOptions } from '@testing-library/react';
+import {
+  render as reactTestLibRender,
+  MatcherFunction,
+  RenderOptions,
+  Nullish,
+} from '@testing-library/react';
 import { Router } from 'react-router-dom';
 import { createMemoryHistory, History } from 'history';
 import { CoreStart } from 'kibana/public';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
+import { EuiPageTemplate } from '@elastic/eui';
 import { coreMock } from 'src/core/public/mocks';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { configure } from '@testing-library/dom';
@@ -29,6 +35,7 @@ import { stringifyUrlParams } from './stringify_url_params';
 import { ClientPluginsStart } from '../../apps/plugin';
 import { triggersActionsUiMock } from '../../../../triggers_actions_ui/public/mocks';
 import { dataPluginMock } from '../../../../../../src/plugins/data/public/mocks';
+import { UptimeRefreshContextProvider, UptimeStartupPluginsContextProvider } from '../../contexts';
 
 interface KibanaProps {
   services?: KibanaServices;
@@ -62,11 +69,11 @@ interface RenderRouterOptions<ExtraCore> extends KibanaProviderOptions<ExtraCore
 }
 
 function getSetting<T = any>(key: string): T {
-  return ('MMM D, YYYY @ HH:mm:ss.SSS' as unknown) as T;
+  return 'MMM D, YYYY @ HH:mm:ss.SSS' as unknown as T;
 }
 
 function setSetting$<T = any>(key: string): T {
-  return (of('MMM D, YYYY @ HH:mm:ss.SSS') as unknown) as T;
+  return of('MMM D, YYYY @ HH:mm:ss.SSS') as unknown as T;
 }
 
 const createMockStore = () => {
@@ -112,6 +119,13 @@ const mockCore: () => Partial<CoreStart> = () => {
     triggersActionsUi: triggersActionsUiMock.createStart(),
     storage: createMockStore(),
     data: dataPluginMock.createStartContract(),
+    observability: {
+      navigation: {
+        // @ts-ignore
+        PageTemplate: EuiPageTemplate,
+      },
+      ExploratoryViewEmbeddable: () => <div>Embeddable exploratory view</div>,
+    },
   };
 
   return core;
@@ -129,9 +143,16 @@ export function MockKibanaProvider<ExtraCore>({
   };
   return (
     <KibanaContextProvider services={{ ...coreOptions }} {...kibanaProps}>
-      <EuiThemeProvider darkMode={false}>
-        <I18nProvider>{children}</I18nProvider>
-      </EuiThemeProvider>
+      <UptimeRefreshContextProvider>
+        <UptimeStartupPluginsContextProvider
+          data={(coreOptions as any).data}
+          observability={(coreOptions as any).observability}
+        >
+          <EuiThemeProvider darkMode={false}>
+            <I18nProvider>{children}</I18nProvider>
+          </EuiThemeProvider>
+        </UptimeStartupPluginsContextProvider>
+      </UptimeRefreshContextProvider>
     </KibanaContextProvider>
   );
 }
@@ -197,3 +218,18 @@ const getHistoryFromUrl = (url: Url) => {
     initialEntries: [url.path + stringifyUrlParams(url.queryParams)],
   });
 };
+
+// This function allows us to query for the nearest button with test
+// no matter whether it has nested tags or not (as EuiButton elements do).
+export const forNearestButton =
+  (getByText: (f: MatcherFunction) => HTMLElement | null) =>
+  (text: string): HTMLElement | null =>
+    getByText((_content: string, node: Nullish<Element>) => {
+      if (!node) return false;
+      const noOtherButtonHasText = Array.from(node.children).every(
+        (child) => child && (child.textContent !== text || child.tagName.toLowerCase() !== 'button')
+      );
+      return (
+        noOtherButtonHasText && node.textContent === text && node.tagName.toLowerCase() === 'button'
+      );
+    });

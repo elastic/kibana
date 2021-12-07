@@ -7,7 +7,7 @@
 
 import React, { useCallback, memo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiAccordion,
   EuiCode,
@@ -22,7 +22,7 @@ import {
 
 import { useHTTPAdvancedFieldsContext } from '../contexts';
 
-import { ConfigKeys, HTTPMethod, Validation } from '../types';
+import { ConfigKey, HTTPMethod, Validation } from '../types';
 
 import { OptionalLabel } from '../optional_label';
 import { HeaderField } from '../header_field';
@@ -37,7 +37,7 @@ interface Props {
 export const HTTPAdvancedFields = memo<Props>(({ validate }) => {
   const { fields, setFields } = useHTTPAdvancedFieldsContext();
   const handleInputChange = useCallback(
-    ({ value, configKey }: { value: unknown; configKey: ConfigKeys }) => {
+    ({ value, configKey }: { value: unknown; configKey: ConfigKey }) => {
       setFields((prevFields) => ({ ...prevFields, [configKey]: value }));
     },
     [setFields]
@@ -89,11 +89,11 @@ export const HTTPAdvancedFields = memo<Props>(({ validate }) => {
           }
         >
           <EuiFieldText
-            value={fields[ConfigKeys.USERNAME]}
+            value={fields[ConfigKey.USERNAME]}
             onChange={(event) =>
               handleInputChange({
                 value: event.target.value,
-                configKey: ConfigKeys.USERNAME,
+                configKey: ConfigKey.USERNAME,
               })
             }
             data-test-subj="syntheticsUsername"
@@ -115,11 +115,11 @@ export const HTTPAdvancedFields = memo<Props>(({ validate }) => {
           }
         >
           <EuiFieldPassword
-            value={fields[ConfigKeys.PASSWORD]}
+            value={fields[ConfigKey.PASSWORD]}
             onChange={(event) =>
               handleInputChange({
                 value: event.target.value,
-                configKey: ConfigKeys.PASSWORD,
+                configKey: ConfigKey.PASSWORD,
               })
             }
             data-test-subj="syntheticsPassword"
@@ -141,11 +141,11 @@ export const HTTPAdvancedFields = memo<Props>(({ validate }) => {
           }
         >
           <EuiFieldText
-            value={fields[ConfigKeys.PROXY_URL]}
+            value={fields[ConfigKey.PROXY_URL]}
             onChange={(event) =>
               handleInputChange({
                 value: event.target.value,
-                configKey: ConfigKeys.PROXY_URL,
+                configKey: ConfigKey.PROXY_URL,
               })
             }
             data-test-subj="syntheticsProxyUrl"
@@ -167,11 +167,11 @@ export const HTTPAdvancedFields = memo<Props>(({ validate }) => {
         >
           <EuiSelect
             options={requestMethodOptions}
-            value={fields[ConfigKeys.REQUEST_METHOD_CHECK]}
+            value={fields[ConfigKey.REQUEST_METHOD_CHECK]}
             onChange={(event) =>
               handleInputChange({
                 value: event.target.value,
-                configKey: ConfigKeys.REQUEST_METHOD_CHECK,
+                configKey: ConfigKey.REQUEST_METHOD_CHECK,
               })
             }
             data-test-subj="syntheticsRequestMethod"
@@ -186,18 +186,12 @@ export const HTTPAdvancedFields = memo<Props>(({ validate }) => {
             />
           }
           labelAppend={<OptionalLabel />}
-          isInvalid={
-            !!validate[ConfigKeys.REQUEST_HEADERS_CHECK]?.(fields[ConfigKeys.REQUEST_HEADERS_CHECK])
-          }
+          isInvalid={!!validate[ConfigKey.REQUEST_HEADERS_CHECK]?.(fields)}
           error={
-            !!validate[ConfigKeys.REQUEST_HEADERS_CHECK]?.(
-              fields[ConfigKeys.REQUEST_HEADERS_CHECK]
-            ) ? (
-              <FormattedMessage
-                id="xpack.uptime.createPackagePolicy.stepConfigure.httpAdvancedOptions.requestHeadersField.error"
-                defaultMessage="Header key must be a valid HTTP token."
-              />
-            ) : undefined
+            <FormattedMessage
+              id="xpack.uptime.createPackagePolicy.stepConfigure.httpAdvancedOptions.requestHeadersField.error"
+              defaultMessage="Header key must be a valid HTTP token."
+            />
           }
           helpText={
             <FormattedMessage
@@ -208,16 +202,16 @@ export const HTTPAdvancedFields = memo<Props>(({ validate }) => {
         >
           <HeaderField
             contentMode={
-              fields[ConfigKeys.REQUEST_BODY_CHECK].value
-                ? fields[ConfigKeys.REQUEST_BODY_CHECK].type
+              fields[ConfigKey.REQUEST_BODY_CHECK].value
+                ? fields[ConfigKey.REQUEST_BODY_CHECK].type
                 : undefined
             } // only pass contentMode if the request body is truthy
-            defaultValue={fields[ConfigKeys.REQUEST_HEADERS_CHECK]}
+            defaultValue={fields[ConfigKey.REQUEST_HEADERS_CHECK]}
             onChange={useCallback(
               (value) =>
                 handleInputChange({
                   value,
-                  configKey: ConfigKeys.REQUEST_HEADERS_CHECK,
+                  configKey: ConfigKey.REQUEST_HEADERS_CHECK,
                 }),
               [handleInputChange]
             )}
@@ -241,13 +235,13 @@ export const HTTPAdvancedFields = memo<Props>(({ validate }) => {
           fullWidth
         >
           <RequestBodyField
-            value={fields[ConfigKeys.REQUEST_BODY_CHECK].value}
-            type={fields[ConfigKeys.REQUEST_BODY_CHECK].type}
+            value={fields[ConfigKey.REQUEST_BODY_CHECK].value}
+            type={fields[ConfigKey.REQUEST_BODY_CHECK].type}
             onChange={useCallback(
               (value) =>
                 handleInputChange({
                   value,
-                  configKey: ConfigKeys.REQUEST_BODY_CHECK,
+                  configKey: ConfigKey.REQUEST_BODY_CHECK,
                 }),
               [handleInputChange]
             )}
@@ -286,7 +280,7 @@ export const HTTPAdvancedFields = memo<Props>(({ validate }) => {
         >
           <EuiCheckbox
             id={'uptimeFleetIndexResponseHeaders'}
-            checked={fields[ConfigKeys.RESPONSE_HEADERS_INDEX]}
+            checked={fields[ConfigKey.RESPONSE_HEADERS_INDEX]}
             label={
               <FormattedMessage
                 id="xpack.uptime.createPackagePolicy.stepConfigure.httpAdvancedOptions.responseConfig.indexResponseHeaders"
@@ -296,7 +290,7 @@ export const HTTPAdvancedFields = memo<Props>(({ validate }) => {
             onChange={(event) =>
               handleInputChange({
                 value: event.target.checked,
-                configKey: ConfigKeys.RESPONSE_HEADERS_INDEX,
+                configKey: ConfigKey.RESPONSE_HEADERS_INDEX,
               })
             }
           />
@@ -313,10 +307,10 @@ export const HTTPAdvancedFields = memo<Props>(({ validate }) => {
           }
         >
           <ResponseBodyIndexField
-            defaultValue={fields[ConfigKeys.RESPONSE_BODY_INDEX]}
+            defaultValue={fields[ConfigKey.RESPONSE_BODY_INDEX]}
             onChange={useCallback(
               (policy) =>
-                handleInputChange({ value: policy, configKey: ConfigKeys.RESPONSE_BODY_INDEX }),
+                handleInputChange({ value: policy, configKey: ConfigKey.RESPONSE_BODY_INDEX }),
               [handleInputChange]
             )}
           />
@@ -346,9 +340,7 @@ export const HTTPAdvancedFields = memo<Props>(({ validate }) => {
             />
           }
           labelAppend={<OptionalLabel />}
-          isInvalid={
-            !!validate[ConfigKeys.RESPONSE_STATUS_CHECK]?.(fields[ConfigKeys.RESPONSE_STATUS_CHECK])
-          }
+          isInvalid={!!validate[ConfigKey.RESPONSE_STATUS_CHECK]?.(fields)}
           error={
             <FormattedMessage
               id="xpack.uptime.createPackagePolicy.stepConfigure.httpAdvancedOptions.responseChecks.responseStatusCheck.error"
@@ -364,11 +356,11 @@ export const HTTPAdvancedFields = memo<Props>(({ validate }) => {
           )}
         >
           <ComboBox
-            selectedOptions={fields[ConfigKeys.RESPONSE_STATUS_CHECK]}
+            selectedOptions={fields[ConfigKey.RESPONSE_STATUS_CHECK]}
             onChange={(value) =>
               handleInputChange({
                 value,
-                configKey: ConfigKeys.RESPONSE_STATUS_CHECK,
+                configKey: ConfigKey.RESPONSE_STATUS_CHECK,
               })
             }
             data-test-subj="syntheticsResponseStatusCheck"
@@ -383,23 +375,13 @@ export const HTTPAdvancedFields = memo<Props>(({ validate }) => {
             />
           }
           labelAppend={<OptionalLabel />}
-          isInvalid={
-            !!validate[ConfigKeys.RESPONSE_HEADERS_CHECK]?.(
-              fields[ConfigKeys.RESPONSE_HEADERS_CHECK]
-            )
-          }
-          error={
-            !!validate[ConfigKeys.RESPONSE_HEADERS_CHECK]?.(
-              fields[ConfigKeys.RESPONSE_HEADERS_CHECK]
-            )
-              ? [
-                  <FormattedMessage
-                    id="xpack.uptime.createPackagePolicy.stepConfigure.httpAdvancedOptions.responseHeadersField.error"
-                    defaultMessage="Header key must be a valid HTTP token."
-                  />,
-                ]
-              : undefined
-          }
+          isInvalid={!!validate[ConfigKey.RESPONSE_HEADERS_CHECK]?.(fields)}
+          error={[
+            <FormattedMessage
+              id="xpack.uptime.createPackagePolicy.stepConfigure.httpAdvancedOptions.responseHeadersField.error"
+              defaultMessage="Header key must be a valid HTTP token."
+            />,
+          ]}
           helpText={
             <FormattedMessage
               id="xpack.uptime.createPackagePolicy.stepConfigure.httpAdvancedOptions.responseHeadersField.helpText"
@@ -408,12 +390,12 @@ export const HTTPAdvancedFields = memo<Props>(({ validate }) => {
           }
         >
           <HeaderField
-            defaultValue={fields[ConfigKeys.RESPONSE_HEADERS_CHECK]}
+            defaultValue={fields[ConfigKey.RESPONSE_HEADERS_CHECK]}
             onChange={useCallback(
               (value) =>
                 handleInputChange({
                   value,
-                  configKey: ConfigKeys.RESPONSE_HEADERS_CHECK,
+                  configKey: ConfigKey.RESPONSE_HEADERS_CHECK,
                 }),
               [handleInputChange]
             )}
@@ -437,12 +419,12 @@ export const HTTPAdvancedFields = memo<Props>(({ validate }) => {
           )}
         >
           <ComboBox
-            selectedOptions={fields[ConfigKeys.RESPONSE_BODY_CHECK_POSITIVE]}
+            selectedOptions={fields[ConfigKey.RESPONSE_BODY_CHECK_POSITIVE]}
             onChange={useCallback(
               (value) =>
                 handleInputChange({
                   value,
-                  configKey: ConfigKeys.RESPONSE_BODY_CHECK_POSITIVE,
+                  configKey: ConfigKey.RESPONSE_BODY_CHECK_POSITIVE,
                 }),
               [handleInputChange]
             )}
@@ -466,12 +448,12 @@ export const HTTPAdvancedFields = memo<Props>(({ validate }) => {
           )}
         >
           <ComboBox
-            selectedOptions={fields[ConfigKeys.RESPONSE_BODY_CHECK_NEGATIVE]}
+            selectedOptions={fields[ConfigKey.RESPONSE_BODY_CHECK_NEGATIVE]}
             onChange={useCallback(
               (value) =>
                 handleInputChange({
                   value,
-                  configKey: ConfigKeys.RESPONSE_BODY_CHECK_NEGATIVE,
+                  configKey: ConfigKey.RESPONSE_BODY_CHECK_NEGATIVE,
                 }),
               [handleInputChange]
             )}

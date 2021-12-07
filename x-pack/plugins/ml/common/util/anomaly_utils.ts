@@ -32,7 +32,8 @@ export const ENTITY_FIELD_OPERATIONS = {
   REMOVE: '-',
 } as const;
 
-export type EntityFieldOperation = typeof ENTITY_FIELD_OPERATIONS[keyof typeof ENTITY_FIELD_OPERATIONS];
+export type EntityFieldOperation =
+  typeof ENTITY_FIELD_OPERATIONS[keyof typeof ENTITY_FIELD_OPERATIONS];
 
 export interface EntityField {
   fieldName: string;

@@ -6,7 +6,7 @@
  */
 
 import { get, isEmpty } from 'lodash';
-import { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import {
   ENRICHMENT_TYPES,
@@ -27,6 +27,7 @@ export const buildIndicatorShouldClauses = (
 
     if (!isEmpty(eventFieldValue)) {
       shoulds.push({
+        // @ts-expect-error unknown is not assignable to query
         match: {
           [EVENT_ENRICHMENT_INDICATOR_FIELD_MAP[eventField]]: {
             query: eventFieldValue,

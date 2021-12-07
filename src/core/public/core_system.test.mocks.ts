@@ -19,8 +19,8 @@ import { uiSettingsServiceMock } from './ui_settings/ui_settings_service.mock';
 import { docLinksServiceMock } from './doc_links/doc_links_service.mock';
 import { renderingServiceMock } from './rendering/rendering_service.mock';
 import { integrationsServiceMock } from './integrations/integrations_service.mock';
-import { executionContextServiceMock } from './execution_context/execution_context_service.mock';
 import { coreAppMock } from './core_app/core_app.mock';
+import { themeServiceMock } from './theme/theme_service.mock';
 
 export const MockInjectedMetadataService = injectedMetadataServiceMock.create();
 export const InjectedMetadataServiceConstructor = jest
@@ -112,16 +112,14 @@ jest.doMock('./integrations', () => ({
   IntegrationsService: IntegrationsServiceConstructor,
 }));
 
-export const MockExecutionContextService = executionContextServiceMock.create();
-export const ExecutionContextServiceConstructor = jest
-  .fn()
-  .mockImplementation(() => MockExecutionContextService);
-jest.doMock('./execution_context', () => ({
-  ExecutionContextService: ExecutionContextServiceConstructor,
-}));
-
 export const MockCoreApp = coreAppMock.create();
 export const CoreAppConstructor = jest.fn().mockImplementation(() => MockCoreApp);
 jest.doMock('./core_app', () => ({
   CoreApp: CoreAppConstructor,
+}));
+
+export const MockThemeService = themeServiceMock.create();
+export const ThemeServiceConstructor = jest.fn().mockImplementation(() => MockThemeService);
+jest.doMock('./theme', () => ({
+  ThemeService: ThemeServiceConstructor,
 }));

@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { IScopedClusterClient } from 'kibana/server';
-import { MatchingIndexesResp } from '../../common';
+import { IScopedClusterClient, KibanaResponseFactory, Logger } from 'kibana/server';
 
 export async function getMatchingIndexes(
   indexPattern: string,
-  { asCurrentUser }: IScopedClusterClient
-): Promise<MatchingIndexesResp> {
+  { asCurrentUser }: IScopedClusterClient,
+  response: KibanaResponseFactory,
+  logger: Logger
+) {
   try {
     const { body: indexResults } = await asCurrentUser.cat.indices({
       index: indexPattern,
@@ -20,14 +21,20 @@ export async function getMatchingIndexes(
     const matchingIndexes = indexResults
       .map((indexRecord) => indexRecord.index)
       .filter((indexName) => !!indexName);
-    return {
-      success: true,
-      matchingIndexes: matchingIndexes as string[],
-    };
+    return response.ok({ body: { success: true, matchingIndexes: matchingIndexes as string[] } });
   } catch (error) {
-    return {
-      success: false,
-      error,
-    };
+    const errorStatusCode = error.meta?.statusCode;
+    if (errorStatusCode === 404) {
+      return response.ok({ body: { success: true, matchingIndexes: [] } });
+    } else {
+      logger.error(error);
+      return response.custom({
+        body: {
+          success: false,
+          message: `Error accessing indexes: ${error.meta?.body?.error?.type}`,
+        },
+        statusCode: 200,
+      });
+    }
   }
 }

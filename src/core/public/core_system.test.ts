@@ -30,9 +30,10 @@ import {
   RenderingServiceConstructor,
   IntegrationsServiceConstructor,
   MockIntegrationsService,
-  MockExecutionContextService,
   CoreAppConstructor,
   MockCoreApp,
+  MockThemeService,
+  ThemeServiceConstructor,
 } from './core_system.test.mocks';
 
 import { CoreSystem } from './core_system';
@@ -78,6 +79,7 @@ describe('constructor', () => {
     expect(RenderingServiceConstructor).toHaveBeenCalledTimes(1);
     expect(IntegrationsServiceConstructor).toHaveBeenCalledTimes(1);
     expect(CoreAppConstructor).toHaveBeenCalledTimes(1);
+    expect(ThemeServiceConstructor).toHaveBeenCalledTimes(1);
   });
 
   it('passes injectedMetadata param to InjectedMetadataService', () => {
@@ -184,9 +186,9 @@ describe('#setup()', () => {
     expect(MockCoreApp.setup).toHaveBeenCalledTimes(1);
   });
 
-  it('calls executionContext.setup()', async () => {
+  it('calls theme#setup()', async () => {
     await setupCore();
-    expect(MockExecutionContextService.setup).toHaveBeenCalledTimes(1);
+    expect(MockThemeService.setup).toHaveBeenCalledTimes(1);
   });
 });
 
@@ -241,6 +243,7 @@ describe('#start()', () => {
     expect(MockNotificationsService.start).toHaveBeenCalledWith({
       i18n: expect.any(Object),
       overlays: expect.any(Object),
+      theme: expect.any(Object),
       targetDomElement: expect.any(HTMLElement),
     });
   });
@@ -262,6 +265,8 @@ describe('#start()', () => {
       application: expect.any(Object),
       chrome: expect.any(Object),
       overlays: expect.any(Object),
+      i18n: expect.any(Object),
+      theme: expect.any(Object),
       targetDomElement: expect.any(HTMLElement),
     });
   });
@@ -276,9 +281,9 @@ describe('#start()', () => {
     expect(MockCoreApp.start).toHaveBeenCalledTimes(1);
   });
 
-  it('calls executionContext.start()', async () => {
+  it('calls theme#start()', async () => {
     await startCore();
-    expect(MockExecutionContextService.start).toHaveBeenCalledTimes(1);
+    expect(MockThemeService.start).toHaveBeenCalledTimes(1);
   });
 });
 
@@ -338,12 +343,12 @@ describe('#stop()', () => {
     expect(MockCoreApp.stop).toHaveBeenCalled();
   });
 
-  it('calls executionContext.stop()', () => {
+  it('calls theme.stop()', () => {
     const coreSystem = createCoreSystem();
 
-    expect(MockExecutionContextService.stop).not.toHaveBeenCalled();
+    expect(MockThemeService.stop).not.toHaveBeenCalled();
     coreSystem.stop();
-    expect(MockExecutionContextService.stop).toHaveBeenCalled();
+    expect(MockThemeService.stop).toHaveBeenCalled();
   });
 
   it('clears the rootDomElement', async () => {

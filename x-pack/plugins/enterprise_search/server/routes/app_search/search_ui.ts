@@ -15,7 +15,7 @@ export function registerSearchUIRoutes({
 }: RouteDependencies) {
   router.get(
     {
-      path: '/api/app_search/engines/{engineName}/search_ui/field_config',
+      path: '/internal/app_search/engines/{engineName}/search_ui/field_config',
       validate: {
         params: schema.object({
           engineName: schema.string(),
@@ -23,7 +23,7 @@ export function registerSearchUIRoutes({
       },
     },
     enterpriseSearchRequestHandler.createRequest({
-      path: '/as/engines/:engineName/reference_application/field_config',
+      path: '/as/engines/:engineName/search_experience/field_config',
     })
   );
 }

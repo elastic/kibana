@@ -187,9 +187,11 @@ describe('ResilientParamsFields renders', () => {
     test('incidentTypeComboBox creation triggers editAction', () => {
       const wrapper = mount(<ResilientParamsFields {...defaultProps} />);
       const incidentTypes = wrapper.find('[data-test-subj="incidentTypeComboBox"]');
-      ((incidentTypes.at(0).props() as unknown) as {
-        onChange: (a: EuiComboBoxOptionOption[]) => void;
-      }).onChange([{ label: 'Cool' }]);
+      (
+        incidentTypes.at(0).props() as unknown as {
+          onChange: (a: EuiComboBoxOptionOption[]) => void;
+        }
+      ).onChange([{ label: 'Cool' }]);
       expect(editAction.mock.calls[0][1].incident.incidentTypes).toEqual(['Cool']);
     });
     test('incidentTypes undefined triggers editAction', () => {
@@ -208,9 +210,11 @@ describe('ResilientParamsFields renders', () => {
       };
       const wrapper = mount(<ResilientParamsFields {...newProps} />);
       const incidentTypes = wrapper.find('[data-test-subj="incidentTypeComboBox"]');
-      ((incidentTypes.at(0).props() as unknown) as {
-        onBlur: () => void;
-      }).onBlur();
+      (
+        incidentTypes.at(0).props() as unknown as {
+          onBlur: () => void;
+        }
+      ).onBlur();
       expect(editAction.mock.calls[0][1].incident.incidentTypes).toEqual([]);
     });
     test('A comment triggers editAction', () => {
@@ -218,13 +222,6 @@ describe('ResilientParamsFields renders', () => {
       const comments = wrapper.find('textarea[data-test-subj="commentsTextArea"]');
       expect(comments.simulate('change', changeEvent));
       expect(editAction.mock.calls[0][1].comments.length).toEqual(1);
-    });
-    test('An empty comment does not trigger editAction', () => {
-      const wrapper = mount(<ResilientParamsFields {...defaultProps} />);
-      const emptyComment = { target: { value: '' } };
-      const comments = wrapper.find('[data-test-subj="commentsTextArea"] textarea');
-      expect(comments.simulate('change', emptyComment));
-      expect(editAction.mock.calls.length).toEqual(0);
     });
   });
 });

@@ -53,8 +53,9 @@ describe('CompareTimelinesStatus', () => {
           };
         });
 
-        const CompareTimelinesStatus = jest.requireActual('./compare_timelines_status')
-          .CompareTimelinesStatus;
+        const CompareTimelinesStatus = jest.requireActual(
+          './compare_timelines_status'
+        ).CompareTimelinesStatus;
 
         timelineObj = new CompareTimelinesStatus({
           timelineInput: {
@@ -127,8 +128,9 @@ describe('CompareTimelinesStatus', () => {
           };
         });
 
-        const CompareTimelinesStatus = jest.requireActual('./compare_timelines_status')
-          .CompareTimelinesStatus;
+        const CompareTimelinesStatus = jest.requireActual(
+          './compare_timelines_status'
+        ).CompareTimelinesStatus;
 
         timelineObj = new CompareTimelinesStatus({
           timelineInput: {
@@ -192,8 +194,9 @@ describe('CompareTimelinesStatus', () => {
           ),
         }));
 
-        const CompareTimelinesStatus = jest.requireActual('./compare_timelines_status')
-          .CompareTimelinesStatus;
+        const CompareTimelinesStatus = jest.requireActual(
+          './compare_timelines_status'
+        ).CompareTimelinesStatus;
 
         timelineObj = new CompareTimelinesStatus({
           timelineInput: {
@@ -276,8 +279,9 @@ describe('CompareTimelinesStatus', () => {
           getTimelineTemplateOrNull: mockGetTemplateTimeline,
         }));
 
-        const CompareTimelinesStatus = jest.requireActual('./compare_timelines_status')
-          .CompareTimelinesStatus;
+        const CompareTimelinesStatus = jest.requireActual(
+          './compare_timelines_status'
+        ).CompareTimelinesStatus;
 
         timelineObj = new CompareTimelinesStatus({
           timelineInput: {
@@ -369,8 +373,9 @@ describe('CompareTimelinesStatus', () => {
           };
         });
 
-        const CompareTimelinesStatus = jest.requireActual('./compare_timelines_status')
-          .CompareTimelinesStatus;
+        const CompareTimelinesStatus = jest.requireActual(
+          './compare_timelines_status'
+        ).CompareTimelinesStatus;
 
         timelineObj = new CompareTimelinesStatus({
           timelineInput: {
@@ -448,8 +453,9 @@ describe('CompareTimelinesStatus', () => {
           };
         });
 
-        const CompareTimelinesStatus = jest.requireActual('./compare_timelines_status')
-          .CompareTimelinesStatus;
+        const CompareTimelinesStatus = jest.requireActual(
+          './compare_timelines_status'
+        ).CompareTimelinesStatus;
 
         timelineObj = new CompareTimelinesStatus({
           timelineInput: {
@@ -537,8 +543,9 @@ describe('CompareTimelinesStatus', () => {
           };
         });
 
-        const CompareTimelinesStatus = jest.requireActual('./compare_timelines_status')
-          .CompareTimelinesStatus;
+        const CompareTimelinesStatus = jest.requireActual(
+          './compare_timelines_status'
+        ).CompareTimelinesStatus;
 
         timelineObj = new CompareTimelinesStatus({
           timelineInput: {
@@ -612,8 +619,9 @@ describe('CompareTimelinesStatus', () => {
           };
         });
 
-        const CompareTimelinesStatus = jest.requireActual('./compare_timelines_status')
-          .CompareTimelinesStatus;
+        const CompareTimelinesStatus = jest.requireActual(
+          './compare_timelines_status'
+        ).CompareTimelinesStatus;
 
         timelineObj = new CompareTimelinesStatus({
           timelineInput: {
@@ -679,8 +687,9 @@ describe('CompareTimelinesStatus', () => {
         getTimelineTemplateOrNull: mockGetTemplateTimeline,
       }));
 
-      const CompareTimelinesStatus = jest.requireActual('./compare_timelines_status')
-        .CompareTimelinesStatus;
+      const CompareTimelinesStatus = jest.requireActual(
+        './compare_timelines_status'
+      ).CompareTimelinesStatus;
 
       timelineObj = new CompareTimelinesStatus({
         timelineInput: {
@@ -743,8 +752,9 @@ describe('CompareTimelinesStatus', () => {
         ),
       }));
 
-      const CompareTimelinesStatus = jest.requireActual('./compare_timelines_status')
-        .CompareTimelinesStatus;
+      const CompareTimelinesStatus = jest.requireActual(
+        './compare_timelines_status'
+      ).CompareTimelinesStatus;
 
       timelineObj = new CompareTimelinesStatus({
         timelineInput: {

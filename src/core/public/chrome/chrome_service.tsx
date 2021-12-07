@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { BehaviorSubject, combineLatest, merge, Observable, of, ReplaySubject } from 'rxjs';
 import { flatMap, map, takeUntil } from 'rxjs/operators';
 import { parse } from 'url';
@@ -26,7 +26,6 @@ import { ChromeRecentlyAccessed, RecentlyAccessedService } from './recently_acce
 import { Header } from './ui';
 import {
   ChromeBadge,
-  ChromeBrand,
   ChromeBreadcrumb,
   ChromeBreadcrumbsAppendExtension,
   ChromeHelpExtension,
@@ -44,7 +43,7 @@ interface ConstructorParams {
   kibanaVersion: string;
 }
 
-interface StartDeps {
+export interface StartDeps {
   application: InternalApplicationStart;
   docLinks: DocLinksStart;
   http: HttpStart;
@@ -105,9 +104,6 @@ export class ChromeService {
   }: StartDeps): Promise<InternalChromeStart> {
     this.initVisibility(application);
 
-    const appTitle$ = new BehaviorSubject<string>('Kibana');
-    const brand$ = new BehaviorSubject<ChromeBrand>({});
-    const applicationClasses$ = new BehaviorSubject<Set<string>>(new Set());
     const helpExtension$ = new BehaviorSubject<ChromeHelpExtension | undefined>(undefined);
     const breadcrumbs$ = new BehaviorSubject<ChromeBreadcrumb[]>([]);
     const breadcrumbsAppendExtension$ = new BehaviorSubject<
@@ -210,7 +206,6 @@ export class ChromeService {
         <Header
           loadingCount$={http.getLoadingCount$()}
           application={application}
-          appTitle$={appTitle$.pipe(takeUntil(this.stop$))}
           headerBanner$={headerBanner$.pipe(takeUntil(this.stop$))}
           badge$={badge$.pipe(takeUntil(this.stop$))}
           basePath={http.basePath}
@@ -234,40 +229,9 @@ export class ChromeService {
         />
       ),
 
-      setAppTitle: (appTitle: string) => appTitle$.next(appTitle),
-
-      getBrand$: () => brand$.pipe(takeUntil(this.stop$)),
-
-      setBrand: (brand: ChromeBrand) => {
-        brand$.next(
-          Object.freeze({
-            logo: brand.logo,
-            smallLogo: brand.smallLogo,
-          })
-        );
-      },
-
       getIsVisible$: () => this.isVisible$,
 
       setIsVisible: (isVisible: boolean) => this.isForceHidden$.next(!isVisible),
-
-      getApplicationClasses$: () =>
-        applicationClasses$.pipe(
-          map((set) => [...set]),
-          takeUntil(this.stop$)
-        ),
-
-      addApplicationClass: (className: string) => {
-        const update = new Set([...applicationClasses$.getValue()]);
-        update.add(className);
-        applicationClasses$.next(update);
-      },
-
-      removeApplicationClass: (className: string) => {
-        const update = new Set([...applicationClasses$.getValue()]);
-        update.delete(className);
-        applicationClasses$.next(update);
-      },
 
       getBadge$: () => badge$.pipe(takeUntil(this.stop$)),
 
@@ -307,6 +271,13 @@ export class ChromeService {
 
       setHeaderBanner: (headerBanner?: ChromeUserBanner) => {
         headerBanner$.next(headerBanner);
+      },
+
+      hasHeaderBanner$: () => {
+        return headerBanner$.pipe(
+          takeUntil(this.stop$),
+          map((banner) => Boolean(banner))
+        );
       },
 
       getBodyClasses$: () => bodyClasses$.pipe(takeUntil(this.stop$)),

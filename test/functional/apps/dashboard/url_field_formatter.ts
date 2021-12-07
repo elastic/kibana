@@ -36,8 +36,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     expect(currentUrl).to.equal(fieldUrl);
   };
 
-  // FLAKY: https://github.com/elastic/kibana/issues/79463
-  describe.skip('Changing field formatter to Url', () => {
+  describe('Changing field formatter to Url', () => {
     before(async function () {
       await esArchiver.load('test/functional/fixtures/es_archiver/dashboard/current/kibana');
       await kibanaServer.uiSettings.replace({
@@ -48,13 +47,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await settings.clickIndexPatternLogstash();
       await settings.filterField(fieldName);
       await settings.openControlsByName(fieldName);
+      await settings.toggleRow('formatRow');
       await settings.setFieldFormat('url');
       await settings.controlChangeSave();
     });
 
     it('applied on dashboard', async () => {
       await common.navigateToApp('dashboard');
-      await dashboard.loadSavedDashboard('dashboard with everything');
+      await dashboard.loadSavedDashboard('dashboard with table');
       await dashboard.waitForRenderComplete();
       const fieldLink = await visChart.getFieldLinkInVisTable(`${fieldName}: Descending`, 1);
       await clickFieldAndCheckUrl(fieldLink);

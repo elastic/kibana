@@ -5,32 +5,26 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 
-import { EuiIconTip, EuiInMemoryTable, EuiBasicTableColumn, EuiLink } from '@elastic/eui';
+import { EuiIconTip, EuiInMemoryTable, EuiBasicTableColumn } from '@elastic/eui';
+import type { EuiSearchBarOnChangeArgs } from '@elastic/eui';
 
 import { ASRoleMapping } from '../../app_search/types';
 import { WSRoleMapping } from '../../workplace_search/types';
 import { ACTIONS_HEADER } from '../constants';
-import { docLinks } from '../doc_links';
 import { RoleRules } from '../types';
 
 import './role_mappings_table.scss';
 
-const AUTH_PROVIDER_DOCUMENTATION_URL = `${docLinks.enterpriseSearchBase}/users-access.html`;
-
 import {
-  ANY_AUTH_PROVIDER,
-  ANY_AUTH_PROVIDER_OPTION_LABEL,
   ROLE_LABEL,
   ALL_LABEL,
-  AUTH_PROVIDER_LABEL,
   EXTERNAL_ATTRIBUTE_LABEL,
   ATTRIBUTE_VALUE_LABEL,
   FILTER_ROLE_MAPPINGS_PLACEHOLDER,
   ROLE_MAPPINGS_NO_RESULTS_MESSAGE,
   EXTERNAL_ATTRIBUTE_TOOLTIP,
-  AUTH_PROVIDER_TOOLTIP,
 } from './constants';
 import { UsersAndRolesRowActions } from './users_and_roles_row_actions';
 
@@ -47,7 +41,6 @@ interface Props {
   accessHeader: string;
   roleMappings: Array<ASRoleMapping | WSRoleMapping>;
   accessAllEngines?: boolean;
-  shouldShowAuthProvider?: boolean;
   initializeRoleMapping(roleMappingId: string): void;
   handleDeleteMapping(roleMappingId: string): void;
 }
@@ -56,7 +49,6 @@ export const RoleMappingsTable: React.FC<Props> = ({
   accessItemKey,
   accessHeader,
   roleMappings,
-  shouldShowAuthProvider,
   initializeRoleMapping,
   handleDeleteMapping,
 }) => {
@@ -69,6 +61,12 @@ export const RoleMappingsTable: React.FC<Props> = ({
     _rm.accessItems = rm[accessItemKey];
     return _rm;
   }) as SharedRoleMapping[];
+
+  const [items, setItems] = useState([] as SharedRoleMapping[]);
+
+  useEffect(() => {
+    setItems(standardizedRoleMappings);
+  }, [roleMappings]);
 
   const attributeNameCol: EuiBasicTableColumn<SharedRoleMapping> = {
     field: 'attribute',
@@ -117,24 +115,6 @@ export const RoleMappingsTable: React.FC<Props> = ({
     },
   };
 
-  const authProviderCol: EuiBasicTableColumn<SharedRoleMapping> = {
-    field: 'authProvider',
-    name: AUTH_PROVIDER_LABEL,
-    render: (_, { authProvider }: SharedRoleMapping) => {
-      if (authProvider[0] === ANY_AUTH_PROVIDER) {
-        return ANY_AUTH_PROVIDER_OPTION_LABEL;
-      }
-      return (
-        <span data-test-subj="ProviderSpecificList">
-          {authProvider.join(', ')}{' '}
-          <EuiLink href={AUTH_PROVIDER_DOCUMENTATION_URL} target="_blank">
-            <EuiIconTip type="alert" color="warning" content={AUTH_PROVIDER_TOOLTIP} />
-          </EuiLink>
-        </span>
-      );
-    },
-  };
-
   const actionsCol: EuiBasicTableColumn<SharedRoleMapping> = {
     field: 'id',
     name: ACTIONS_HEADER,
@@ -152,16 +132,29 @@ export const RoleMappingsTable: React.FC<Props> = ({
     ),
   };
 
-  const columns = shouldShowAuthProvider
-    ? [attributeNameCol, attributeValueCol, roleCol, accessItemsCol, authProviderCol, actionsCol]
-    : [attributeNameCol, attributeValueCol, roleCol, accessItemsCol, actionsCol];
+  const columns = [attributeNameCol, attributeValueCol, roleCol, accessItemsCol, actionsCol];
 
   const pagination = {
     hidePerPageOptions: true,
     pageSize: 10,
   };
 
+  const onQueryChange = ({ queryText }: EuiSearchBarOnChangeArgs) => {
+    const filteredItems = standardizedRoleMappings.filter((rm) => {
+      // JSON.stringify allows us to search all the object fields
+      // without converting all the nested arrays and objects to strings manually
+      // Some false-positives are possible, because the search is also performed on
+      // object keys, but the simplicity of JSON.stringify seems to worth the tradeoff.
+      const normalizedTableItemString = JSON.stringify(rm).toLowerCase();
+      const normalizedQuery = queryText.toLowerCase();
+      return normalizedTableItemString.indexOf(normalizedQuery) !== -1;
+    });
+
+    setItems(filteredItems);
+  };
+
   const search = {
+    onChange: onQueryChange,
     box: {
       incremental: true,
       fullWidth: false,
@@ -173,7 +166,7 @@ export const RoleMappingsTable: React.FC<Props> = ({
     <EuiInMemoryTable
       data-test-subj="RoleMappingsTable"
       columns={columns}
-      items={standardizedRoleMappings}
+      items={items}
       search={search}
       pagination={pagination}
       message={ROLE_MAPPINGS_NO_RESULTS_MESSAGE}

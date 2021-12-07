@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import url from 'url';
 import { keyBy, mapValues } from 'lodash';
-import supertestAsPromised from 'supertest-as-promised';
+import supertest from 'supertest';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { ConcreteTaskInstance } from '../../../../plugins/task_manager/server';
 
@@ -84,10 +84,10 @@ interface MonitoringStats {
 export default function ({ getService }: FtrProviderContext) {
   const config = getService('config');
   const retry = getService('retry');
-  const supertest = supertestAsPromised(url.format(config.get('servers.kibana')));
+  const request = supertest(url.format(config.get('servers.kibana')));
 
   function getHealthRequest() {
-    return supertest.get('/api/task_manager/_health').set('kbn-xsrf', 'foo');
+    return request.get('/api/task_manager/_health').set('kbn-xsrf', 'foo');
   }
 
   function getHealth(): Promise<MonitoringStats> {
@@ -97,7 +97,7 @@ export default function ({ getService }: FtrProviderContext) {
   }
 
   function scheduleTask(task: Partial<ConcreteTaskInstance>): Promise<ConcreteTaskInstance> {
-    return supertest
+    return request
       .post('/api/sample_tasks/schedule')
       .set('kbn-xsrf', 'xxx')
       .send({ task })
@@ -109,7 +109,8 @@ export default function ({ getService }: FtrProviderContext) {
 
   const monitoredAggregatedStatsRefreshRate = 5000;
 
-  describe('health', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/119258
+  describe.skip('health', () => {
     it('should return basic configuration of task manager', async () => {
       const health = await getHealth();
       expect(health.status).to.eql('OK');
@@ -140,13 +141,15 @@ export default function ({ getService }: FtrProviderContext) {
       expect(status).to.eql('OK');
 
       const sumSampleTaskInWorkload =
-        (workload.value.task_types as {
-          sampleTask?: { count: number };
-        }).sampleTask?.count ?? 0;
-      const scheduledWorkload = (mapValues(
+        (
+          workload.value.task_types as {
+            sampleTask?: { count: number };
+          }
+        ).sampleTask?.count ?? 0;
+      const scheduledWorkload = mapValues(
         keyBy(workload.value.schedule as Array<[string, number]>, ([interval, count]) => interval),
         ([, count]) => count
-      ) as unknown) as { '37m': number | undefined; '37s': number | undefined };
+      ) as unknown as { '37m': number | undefined; '37s': number | undefined };
 
       await scheduleTask({
         taskType: 'sampleTask',
@@ -168,13 +171,13 @@ export default function ({ getService }: FtrProviderContext) {
           (workloadAfterScheduling.task_types as { sampleTask: { count: number } }).sampleTask.count
         ).to.eql(sumSampleTaskInWorkload + 2);
 
-        const schedulesWorkloadAfterScheduling = (mapValues(
+        const schedulesWorkloadAfterScheduling = mapValues(
           keyBy(
             workloadAfterScheduling.schedule as Array<[string, number]>,
             ([interval]) => interval
           ),
           ([, count]) => count
-        ) as unknown) as {
+        ) as unknown as {
           '37m': number;
           '37s': number;
         };

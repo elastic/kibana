@@ -19,17 +19,17 @@ interface AgentIdToNameProps {
 
 const AgentIdToNameComponent: React.FC<AgentIdToNameProps> = ({ agentId }) => {
   const getUrlForApp = useKibana().services.application.getUrlForApp;
-  const { data } = useAgentDetails({ agentId });
+  const { data } = useAgentDetails({ agentId, skip: !agentId });
 
   return (
     <EuiLink
       className="eui-textTruncate"
       href={getUrlForApp(PLUGIN_ID, {
-        path: `#` + pagePathGetters.agent_details({ agentId })[1],
+        path: pagePathGetters.agent_details({ agentId })[1],
       })}
       target="_blank"
     >
-      {data?.item.local_metadata.host.name ?? agentId}
+      {data?.local_metadata.host.name ?? agentId}
     </EuiLink>
   );
 };

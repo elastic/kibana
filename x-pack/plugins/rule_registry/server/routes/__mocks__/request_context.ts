@@ -11,7 +11,6 @@ import { RacRequestHandlerContext } from '../../types';
 
 const createMockClients = () => ({
   rac: alertsClientMock.create(),
-  clusterClient: elasticsearchServiceMock.createLegacyScopedClusterClient(),
   newClusterClient: elasticsearchServiceMock.createScopedClusterClient(),
   savedObjectsClient: savedObjectsClientMock.create(),
 });
@@ -20,18 +19,17 @@ const createRequestContextMock = (
   clients: ReturnType<typeof createMockClients> = createMockClients()
 ) => {
   const coreContext = coreMock.createRequestHandlerContext();
-  return ({
+  return {
     rac: { getAlertsClient: jest.fn(() => clients.rac) },
     core: {
       ...coreContext,
       elasticsearch: {
         ...coreContext.elasticsearch,
         client: clients.newClusterClient,
-        legacy: { ...coreContext.elasticsearch.legacy, client: clients.clusterClient },
       },
       savedObjects: { client: clients.savedObjectsClient },
     },
-  } as unknown) as RacRequestHandlerContext;
+  } as unknown as RacRequestHandlerContext;
 };
 
 const createTools = () => {

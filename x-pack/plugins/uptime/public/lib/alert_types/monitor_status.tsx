@@ -8,15 +8,20 @@
 import React from 'react';
 import moment from 'moment';
 
-import { ObservabilityRuleTypeModel } from '../../../../observability/public';
-import { ValidationResult } from '../../../../triggers_actions_ui/public';
-
-import { CLIENT_ALERT_TYPES } from '../../../common/constants/alerts';
-import { MonitorStatusTranslations } from '../../../common/translations';
-
-import { getMonitorRouteFromMonitorId } from './common';
+import {
+  ALERT_END,
+  ALERT_START,
+  ALERT_STATUS,
+  ALERT_REASON,
+} from '@kbn/rule-data-utils/technical_field_names';
+import { ALERT_STATUS_ACTIVE } from '@kbn/rule-data-utils/alerts_as_data_status';
 
 import { AlertTypeInitializer } from '.';
+import { getMonitorRouteFromMonitorId } from './common';
+import { MonitorStatusTranslations } from '../../../common/translations';
+import { CLIENT_ALERT_TYPES } from '../../../common/constants/alerts';
+import { ObservabilityRuleTypeModel } from '../../../../observability/public';
+import { ValidationResult } from '../../../../triggers_actions_ui/public';
 
 const { defaultActionMessage, description } = MonitorStatusTranslations;
 
@@ -32,7 +37,7 @@ export const initMonitorStatusAlertType: AlertTypeInitializer = ({
   description,
   iconClass: 'uptimeApp',
   documentationUrl(docLinks) {
-    return `${docLinks.ELASTIC_WEBSITE_URL}guide/en/observability/${docLinks.DOC_LINK_VERSION}/monitor-status-alert.html`;
+    return `${docLinks.links.observability.monitorStatus}`;
   },
   alertParamsExpression: (params: any) => (
     <MonitorStatusAlert core={core} plugins={plugins} params={params} />
@@ -51,14 +56,11 @@ export const initMonitorStatusAlertType: AlertTypeInitializer = ({
   defaultActionMessage,
   requiresAppContext: false,
   format: ({ fields }) => ({
-    reason: fields.reason,
+    reason: fields[ALERT_REASON] || '',
     link: getMonitorRouteFromMonitorId({
       monitorId: fields['monitor.id']!,
-      dateRangeEnd:
-        fields['kibana.rac.alert.status'] === 'open' ? 'now' : fields['kibana.rac.alert.end']!,
-      dateRangeStart: moment(new Date(fields['kibana.rac.alert.start']!))
-        .subtract('5', 'm')
-        .toISOString(),
+      dateRangeEnd: fields[ALERT_STATUS] === ALERT_STATUS_ACTIVE ? 'now' : fields[ALERT_END]!,
+      dateRangeStart: moment(new Date(fields[ALERT_START]!)).subtract('5', 'm').toISOString(),
       filters: {
         'observer.geo.name': [fields['observer.geo.name'][0]],
       },

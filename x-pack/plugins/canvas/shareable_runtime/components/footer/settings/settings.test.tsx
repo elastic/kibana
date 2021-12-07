@@ -20,12 +20,7 @@ import {
 import { Settings } from './settings';
 
 jest.mock('../../../supported_renderers');
-jest.mock(`@elastic/eui/lib/components/form/form_row/make_id`, () => () => `generated-id`);
-jest.mock('@elastic/eui/lib/services/accessibility', () => {
-  return {
-    htmlIdGenerator: () => () => `generated-id`,
-  };
-});
+
 jest.mock('@elastic/eui/lib/components/portal/portal', () => {
   // eslint-disable-next-line @typescript-eslint/no-shadow
   const React = jest.requireActual('react');

@@ -24,8 +24,10 @@ import { eventFiltersPageMiddlewareFactory } from '../pages/event_filters/store/
 
 type ManagementSubStateKey = keyof State[typeof MANAGEMENT_STORE_GLOBAL_NAMESPACE];
 
-const createSubStateSelector = <K extends ManagementSubStateKey>(namespace: K) => (state: State) =>
-  state[MANAGEMENT_STORE_GLOBAL_NAMESPACE][namespace];
+const createSubStateSelector =
+  <K extends ManagementSubStateKey>(namespace: K) =>
+  (state: State) =>
+    state[MANAGEMENT_STORE_GLOBAL_NAMESPACE][namespace];
 
 export const managementMiddlewareFactory: SecuritySubPluginMiddlewareFactory = (
   coreStart,

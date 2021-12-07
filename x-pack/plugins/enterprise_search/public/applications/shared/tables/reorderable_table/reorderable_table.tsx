@@ -30,6 +30,7 @@ interface ReorderableTableProps<Item> {
   disableReordering?: boolean;
   onReorder?: (items: Item[], oldItems: Item[]) => void;
   rowProps?: (item: Item) => object;
+  rowErrors?: (item: Item) => string[] | undefined;
 }
 
 export const ReorderableTable = <Item extends object>({
@@ -42,12 +43,13 @@ export const ReorderableTable = <Item extends object>({
   disableReordering = false,
   onReorder = () => undefined,
   rowProps = () => ({}),
+  rowErrors = () => undefined,
 }: ReorderableTableProps<Item>) => {
   return (
     <div className={classNames(className, 'reorderableTable')}>
       <HeaderRow columns={columns} leftAction={!disableReordering ? <></> : undefined} />
 
-      {items.length === 0 && (
+      {items.length === 0 && unreorderableItems.length === 0 && (
         <EuiFlexGroup alignItems="center" justifyContent="center">
           <EuiFlexItem data-test-subj="NoItems" className="reorderableTableNoItems">
             {noItemsMessage}
@@ -67,24 +69,11 @@ export const ReorderableTable = <Item extends object>({
                 additionalProps={rowProps(item)}
                 disableDragging={disableDragging}
                 rowIndex={itemIndex}
+                errors={rowErrors(item)}
               />
             )}
             onReorder={onReorder}
           />
-          {unreorderableItems.length > 0 && (
-            <BodyRows
-              items={unreorderableItems}
-              renderItem={(item, itemIndex) => (
-                <BodyRow
-                  key={`table_draggable_row_${itemIndex}`}
-                  columns={columns}
-                  item={item}
-                  additionalProps={rowProps(item)}
-                  leftAction={<></>}
-                />
-              )}
-            />
-          )}
         </>
       )}
 
@@ -97,6 +86,23 @@ export const ReorderableTable = <Item extends object>({
               columns={columns}
               item={item}
               additionalProps={rowProps(item)}
+              errors={rowErrors(item)}
+            />
+          )}
+        />
+      )}
+
+      {unreorderableItems.length > 0 && (
+        <BodyRows
+          items={unreorderableItems}
+          renderItem={(item, itemIndex) => (
+            <BodyRow
+              key={`table_draggable_row_${itemIndex}`}
+              columns={columns}
+              item={item}
+              additionalProps={rowProps(item)}
+              errors={rowErrors(item)}
+              leftAction={<></>}
             />
           )}
         />

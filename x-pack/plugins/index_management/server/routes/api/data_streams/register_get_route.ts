@@ -129,11 +129,11 @@ export function registerGetAllRoute({ router, lib: { handleEsError }, config }: 
         }
 
         const enhancedDataStreams = enhanceDataStreams({
-          // @ts-expect-error @elastic/elasticsearch DataStreamFromEs incompatible with IndicesGetDataStreamIndicesGetDataStreamItem
+          // @ts-expect-error DataStreamFromEs conflicts with @elastic/elasticsearch IndicesGetDataStreamIndicesGetDataStreamItem
           dataStreams,
-          // @ts-expect-error @elastic/elasticsearch StatsFromEs incompatible with IndicesDataStreamsStatsDataStreamsStatsItem
+          // @ts-expect-error StatsFromEs conflicts with @elastic/elasticsearch IndicesDataStreamsStatsDataStreamsStatsItem
           dataStreamsStats,
-          // @ts-expect-error @elastic/elasticsearch PrivilegesFromEs incompatible with ApplicationsPrivileges
+          // @ts-expect-error PrivilegesFromEs conflicts with @elastic/elasticsearch ApplicationsPrivileges
           dataStreamsPrivileges,
         });
 
@@ -176,11 +176,11 @@ export function registerGetOneRoute({ router, lib: { handleEsError }, config }: 
           }
 
           const enhancedDataStreams = enhanceDataStreams({
-            // @ts-expect-error @elastic/elasticsearch DataStreamFromEs incompatible with IndicesGetDataStreamIndicesGetDataStreamItem
+            // @ts-expect-error DataStreamFromEs conflicts with @elastic/elasticsearch IndicesGetDataStreamIndicesGetDataStreamItem
             dataStreams,
-            // @ts-expect-error @elastic/elasticsearch StatsFromEs incompatible with IndicesDataStreamsStatsDataStreamsStatsItem
+            // @ts-expect-error StatsFromEs conflicts with @elastic/elasticsearch IndicesDataStreamsStatsDataStreamsStatsItem
             dataStreamsStats,
-            // @ts-expect-error @elastic/elasticsearch PrivilegesFromEs incompatible with ApplicationsPrivileges
+            // @ts-expect-error PrivilegesFromEs conflicts with @elastic/elasticsearch ApplicationsPrivileges
             dataStreamsPrivileges,
           });
           const body = deserializeDataStream(enhancedDataStreams[0]);

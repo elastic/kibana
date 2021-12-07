@@ -1,6 +1,6 @@
 # Canvas and Internationalization (i18n)
 
-Creating i18n strings in Kibana requires use of the [`@kbn/i18n`](https://github.com/elastic/kibana/blob/master/packages/kbn-i18n/GUIDELINE.md) library. The following outlines the strategy for localizing strings in Canvas
+Creating i18n strings in Kibana requires use of the [`@kbn/i18n`](https://github.com/elastic/kibana/blob/main/packages/kbn-i18n/GUIDELINE.md) library. The following outlines the strategy for localizing strings in Canvas
 
 ## Why i18n Dictionaries
 

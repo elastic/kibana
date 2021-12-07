@@ -14,6 +14,8 @@ export interface TemplateContext {
   version: string;
   license: string;
   artifactsDir: string;
+  dockerPush: boolean;
+  dockerTagQualifier: string | null;
   imageTag: string;
   dockerBuildDir: string;
   dockerTargetFilename: string;
@@ -21,6 +23,9 @@ export interface TemplateContext {
   dockerBuildDate: string;
   usePublicArtifact?: boolean;
   ubi?: boolean;
+  cloud?: boolean;
+  metricbeatTarball?: string;
+  filebeatTarball?: string;
   ironbank?: boolean;
   revision: string;
   architecture?: string;

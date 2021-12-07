@@ -63,9 +63,8 @@ describe('inject/extract by reference panel', () => {
 
   it('should extract the saved object panel', () => {
     const extract = createExtract(persistableStateService);
-    const { state: extractedState, references: extractedReferences } = extract(
-      unextractedDashboardState
-    );
+    const { state: extractedState, references: extractedReferences } =
+      extract(unextractedDashboardState);
 
     expect(extractedState).toEqual(dashboardWithExtractedPanel);
     expect(extractedReferences[0]).toEqual(extractedSavedObjectPanelRef);

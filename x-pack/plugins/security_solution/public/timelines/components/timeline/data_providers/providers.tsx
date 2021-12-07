@@ -377,10 +377,10 @@ interface DataProvidersGroup extends Props {
 
 const DataProvidersGroup = React.memo<DataProvidersGroup>(
   ({ browserFields, timelineId, group, groupIndex, isLastGroup }) => {
-    const droppableId = useMemo(() => getTimelineProviderDroppableId({ groupIndex, timelineId }), [
-      groupIndex,
-      timelineId,
-    ]);
+    const droppableId = useMemo(
+      () => getTimelineProviderDroppableId({ groupIndex, timelineId }),
+      [groupIndex, timelineId]
+    );
 
     const GroupDataProviders = useMemo(
       () =>

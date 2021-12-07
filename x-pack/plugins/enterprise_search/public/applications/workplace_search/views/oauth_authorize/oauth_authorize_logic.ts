@@ -48,7 +48,7 @@ interface OAuthAuthorizeActions {
   setHasError(): void;
 }
 
-export const oauthAuthorizeRoute = '/api/workplace_search/oauth/authorize';
+export const oauthAuthorizeRoute = '/internal/workplace_search/oauth/authorize';
 
 export const OAuthAuthorizeLogic = kea<MakeLogicType<OAuthAuthorizeValues, OAuthAuthorizeActions>>({
   path: ['enterprise_search', 'workplace_search', 'oauth_authorize_logic'],
@@ -96,7 +96,7 @@ export const OAuthAuthorizeLogic = kea<MakeLogicType<OAuthAuthorizeValues, OAuth
       const query = parseQueryParams(queryString);
 
       try {
-        const response = await http.get(oauthAuthorizeRoute, { query });
+        const response = await http.get<OAuthPreAuthServerProps>(oauthAuthorizeRoute, { query });
 
         if (response.status === 'redirect') {
           window.location.replace(response.redirect_uri);
@@ -113,7 +113,7 @@ export const OAuthAuthorizeLogic = kea<MakeLogicType<OAuthAuthorizeValues, OAuth
       const { cachedPreAuth } = values;
 
       try {
-        const response = await http.delete(oauthAuthorizeRoute, {
+        const response = await http.delete<{ redirect_uri: string }>(oauthAuthorizeRoute, {
           body: JSON.stringify({
             client_id: cachedPreAuth.clientId,
             response_type: cachedPreAuth.responseType,
@@ -135,7 +135,7 @@ export const OAuthAuthorizeLogic = kea<MakeLogicType<OAuthAuthorizeValues, OAuth
       const { cachedPreAuth } = values;
 
       try {
-        const response = await http.post(oauthAuthorizeRoute, {
+        const response = await http.post<{ redirect_uri: string }>(oauthAuthorizeRoute, {
           body: JSON.stringify({
             client_id: cachedPreAuth.clientId,
             response_type: cachedPreAuth.responseType,

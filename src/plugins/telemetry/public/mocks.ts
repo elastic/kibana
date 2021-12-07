@@ -34,8 +34,7 @@ export function mockTelemetryService({
 }: TelemetryServiceMockOptions = {}) {
   const config = {
     enabled: true,
-    url: 'http://localhost',
-    optInStatusUrl: 'http://localhost',
+    sendUsageTo: 'staging' as const,
     sendUsageFrom: 'browser' as const,
     optIn: true,
     banner: true,

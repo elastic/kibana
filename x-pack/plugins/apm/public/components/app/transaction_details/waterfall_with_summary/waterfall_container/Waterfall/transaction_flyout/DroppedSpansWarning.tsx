@@ -5,17 +5,18 @@
  * 2.0.
  */
 
-import { EuiCallOut, EuiHorizontalRule } from '@elastic/eui';
+import { EuiCallOut, EuiHorizontalRule, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { Transaction } from '../../../../../../../../typings/es_schemas/ui/transaction';
-import { ElasticDocsLink } from '../../../../../../shared/Links/ElasticDocsLink';
+import { useApmPluginContext } from '../../../../../../../context/apm_plugin/use_apm_plugin_context';
 
 export function DroppedSpansWarning({
   transactionDoc,
 }: {
   transactionDoc: Transaction;
 }) {
+  const { docLinks } = useApmPluginContext().core;
   const dropped = transactionDoc.transaction.span_count?.dropped;
   if (!dropped) {
     return null;
@@ -32,18 +33,14 @@ export function DroppedSpansWarning({
             values: { dropped },
           }
         )}{' '}
-        <ElasticDocsLink
-          section="/apm/get-started"
-          path="/transaction-spans.html#dropped-spans"
-          target="_blank"
-        >
+        <EuiLink href={docLinks.links.apm.droppedTransactionSpans}>
           {i18n.translate(
             'xpack.apm.transactionDetails.transFlyout.callout.learnMoreAboutDroppedSpansLinkText',
             {
               defaultMessage: 'Learn more about dropped spans.',
             }
           )}
-        </ElasticDocsLink>
+        </EuiLink>
       </EuiCallOut>
       <EuiHorizontalRule />
     </React.Fragment>

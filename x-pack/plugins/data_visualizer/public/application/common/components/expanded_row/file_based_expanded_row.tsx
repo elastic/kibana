@@ -17,7 +17,7 @@ import {
 } from '../stats_table/components/field_data_expanded_row';
 import { GeoPointContent } from './geo_point_content/geo_point_content';
 import { JOB_FIELD_TYPES } from '../../../../../common';
-import type { FileBasedFieldVisConfig } from '../stats_table/types/field_vis_config';
+import type { FileBasedFieldVisConfig } from '../../../../../common/types/field_vis_config';
 
 export const FileBasedDataVisualizerExpandedRow = ({ item }: { item: FileBasedFieldVisConfig }) => {
   const config = item;
@@ -52,10 +52,7 @@ export const FileBasedDataVisualizerExpandedRow = ({ item }: { item: FileBasedFi
   }
 
   return (
-    <div
-      className="dataVisualizerFieldExpandedRow"
-      data-test-subj={`dataVisualizerFieldExpandedRow-${fieldName}`}
-    >
+    <div className="dvExpandedRow" data-test-subj={`dataVisualizerFieldExpandedRow-${fieldName}`}>
       {getCardContent()}
     </div>
   );

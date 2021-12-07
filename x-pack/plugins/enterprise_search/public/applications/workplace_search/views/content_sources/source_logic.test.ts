@@ -20,19 +20,15 @@ import { expectedAsyncError } from '../../../test_helpers';
 jest.mock('../../app_logic', () => ({
   AppLogic: { values: { isOrganization: true } },
 }));
+import { itShowsServerErrorAsFlashMessage } from '../../../test_helpers';
 import { AppLogic } from '../../app_logic';
 
 import { SourceLogic } from './source_logic';
 
 describe('SourceLogic', () => {
   const { http } = mockHttpValues;
-  const {
-    clearFlashMessages,
-    flashAPIErrors,
-    setSuccessMessage,
-    setQueuedSuccessMessage,
-    setErrorMessage,
-  } = mockFlashMessageHelpers;
+  const { clearFlashMessages, flashAPIErrors, flashSuccessToast, setErrorMessage } =
+    mockFlashMessageHelpers;
   const { navigateToUrl } = mockKibanaValues;
   const { mount, getListeners } = new LogicMounter(SourceLogic);
 
@@ -46,6 +42,8 @@ describe('SourceLogic', () => {
     buttonLoading: false,
     contentMeta: DEFAULT_META,
     contentFilterValue: '',
+    isConfigurationUpdateButtonLoading: false,
+    stagedPrivateKey: null,
   };
 
   const searchServerResponse = {
@@ -63,8 +61,8 @@ describe('SourceLogic', () => {
   });
 
   describe('actions', () => {
-    it('onInitializeSource', () => {
-      SourceLogic.actions.onInitializeSource(contentSource);
+    it('setContentSource', () => {
+      SourceLogic.actions.setContentSource(contentSource);
 
       expect(SourceLogic.values.contentSource).toEqual(contentSource);
       expect(SourceLogic.values.dataLoading).toEqual(false);
@@ -72,14 +70,14 @@ describe('SourceLogic', () => {
 
     it('onUpdateSourceName', () => {
       const NAME = 'foo';
-      SourceLogic.actions.onInitializeSource(contentSource);
+      SourceLogic.actions.setContentSource(contentSource);
       SourceLogic.actions.onUpdateSourceName(NAME);
 
       expect(SourceLogic.values.contentSource).toEqual({
         ...contentSource,
         name: NAME,
       });
-      expect(setSuccessMessage).toHaveBeenCalled();
+      expect(flashSuccessToast).toHaveBeenCalled();
     });
 
     it('setSearchResults', () => {
@@ -93,7 +91,7 @@ describe('SourceLogic', () => {
     it('setContentFilterValue', () => {
       const VALUE = 'bar';
       SourceLogic.actions.setSearchResults(searchServerResponse);
-      SourceLogic.actions.onInitializeSource(contentSource);
+      SourceLogic.actions.setContentSource(contentSource);
       SourceLogic.actions.setContentFilterValue(VALUE);
 
       expect(SourceLogic.values.contentMeta).toEqual({
@@ -132,12 +130,12 @@ describe('SourceLogic', () => {
   describe('listeners', () => {
     describe('initializeSource', () => {
       it('calls API and sets values (org)', async () => {
-        const onInitializeSourceSpy = jest.spyOn(SourceLogic.actions, 'onInitializeSource');
+        const onInitializeSourceSpy = jest.spyOn(SourceLogic.actions, 'setContentSource');
         const promise = Promise.resolve(contentSource);
         http.get.mockReturnValue(promise);
         SourceLogic.actions.initializeSource(contentSource.id);
 
-        expect(http.get).toHaveBeenCalledWith('/api/workplace_search/org/sources/123');
+        expect(http.get).toHaveBeenCalledWith('/internal/workplace_search/org/sources/123');
         await promise;
         expect(onInitializeSourceSpy).toHaveBeenCalledWith(contentSource);
       });
@@ -145,12 +143,12 @@ describe('SourceLogic', () => {
       it('calls API and sets values (account)', async () => {
         AppLogic.values.isOrganization = false;
 
-        const onInitializeSourceSpy = jest.spyOn(SourceLogic.actions, 'onInitializeSource');
+        const onInitializeSourceSpy = jest.spyOn(SourceLogic.actions, 'setContentSource');
         const promise = Promise.resolve(contentSource);
         http.get.mockReturnValue(promise);
         SourceLogic.actions.initializeSource(contentSource.id);
 
-        expect(http.get).toHaveBeenCalledWith('/api/workplace_search/account/sources/123');
+        expect(http.get).toHaveBeenCalledWith('/internal/workplace_search/account/sources/123');
         await promise;
         expect(onInitializeSourceSpy).toHaveBeenCalledWith(contentSource);
       });
@@ -169,7 +167,7 @@ describe('SourceLogic', () => {
         http.get.mockReturnValue(promise);
         SourceLogic.actions.initializeSource(contentSource.id);
 
-        expect(http.get).toHaveBeenCalledWith('/api/workplace_search/account/sources/123');
+        expect(http.get).toHaveBeenCalledWith('/internal/workplace_search/account/sources/123');
         await promise;
         expect(initializeFederatedSummarySpy).toHaveBeenCalledWith(contentSource.id);
       });
@@ -203,7 +201,7 @@ describe('SourceLogic', () => {
             AppLogic.values.isOrganization = false;
             http.get.mockReturnValue(mock404);
 
-            SourceLogic.actions.initializeSource('404ing_personal_source');
+            SourceLogic.actions.initializeSource('404ing_private_source');
             await expectedAsyncError(mock404);
 
             expect(navigateToUrl).toHaveBeenCalledWith('/p/sources');
@@ -234,25 +232,14 @@ describe('SourceLogic', () => {
         SourceLogic.actions.initializeFederatedSummary(contentSource.id);
 
         expect(http.get).toHaveBeenCalledWith(
-          '/api/workplace_search/account/sources/123/federated_summary'
+          '/internal/workplace_search/account/sources/123/federated_summary'
         );
         await promise;
         expect(onUpdateSummarySpy).toHaveBeenCalledWith(contentSource.summary);
       });
 
-      it('handles error', async () => {
-        const error = {
-          response: {
-            error: 'this is an error',
-            status: 400,
-          },
-        };
-        const promise = Promise.reject(error);
-        http.get.mockReturnValue(promise);
+      itShowsServerErrorAsFlashMessage(http.get, () => {
         SourceLogic.actions.initializeFederatedSummary(contentSource.id);
-        await expectedAsyncError(promise);
-
-        expect(flashAPIErrors).toHaveBeenCalledWith(error);
       });
     });
 
@@ -271,9 +258,12 @@ describe('SourceLogic', () => {
         http.post.mockReturnValue(promise);
 
         await searchContentSourceDocuments({ sourceId: contentSource.id }, mockBreakpoint);
-        expect(http.post).toHaveBeenCalledWith('/api/workplace_search/org/sources/123/documents', {
-          body: JSON.stringify({ query: '', page: meta.page }),
-        });
+        expect(http.post).toHaveBeenCalledWith(
+          '/internal/workplace_search/org/sources/123/documents',
+          {
+            body: JSON.stringify({ query: '', page: meta.page }),
+          }
+        );
 
         await promise;
         expect(actions.setSearchResults).toHaveBeenCalledWith(searchServerResponse);
@@ -287,7 +277,7 @@ describe('SourceLogic', () => {
         SourceLogic.actions.searchContentSourceDocuments(contentSource.id);
         await searchContentSourceDocuments({ sourceId: contentSource.id }, mockBreakpoint);
         expect(http.post).toHaveBeenCalledWith(
-          '/api/workplace_search/account/sources/123/documents',
+          '/internal/workplace_search/account/sources/123/documents',
           {
             body: JSON.stringify({ query: '', page: meta.page }),
           }
@@ -297,20 +287,8 @@ describe('SourceLogic', () => {
         expect(actions.setSearchResults).toHaveBeenCalledWith(searchServerResponse);
       });
 
-      it('handles error', async () => {
-        const error = {
-          response: {
-            error: 'this is an error',
-            status: 400,
-          },
-        };
-        const promise = Promise.reject(error);
-        http.post.mockReturnValue(promise);
-
-        await searchContentSourceDocuments({ sourceId: contentSource.id }, mockBreakpoint);
-        await expectedAsyncError(promise);
-
-        expect(flashAPIErrors).toHaveBeenCalledWith(error);
+      itShowsServerErrorAsFlashMessage(http.post, () => {
+        searchContentSourceDocuments({ sourceId: contentSource.id }, mockBreakpoint);
       });
     });
 
@@ -323,11 +301,32 @@ describe('SourceLogic', () => {
         http.patch.mockReturnValue(promise);
         SourceLogic.actions.updateContentSource(contentSource.id, contentSource);
 
-        expect(http.patch).toHaveBeenCalledWith('/api/workplace_search/org/sources/123/settings', {
-          body: JSON.stringify({ content_source: contentSource }),
-        });
+        expect(http.patch).toHaveBeenCalledWith(
+          '/internal/workplace_search/org/sources/123/settings',
+          {
+            body: JSON.stringify({ content_source: contentSource }),
+          }
+        );
         await promise;
         expect(onUpdateSourceNameSpy).toHaveBeenCalledWith(contentSource.name);
+      });
+
+      it('does not call onUpdateSourceName when the name is not supplied', async () => {
+        AppLogic.values.isOrganization = true;
+
+        const onUpdateSourceNameSpy = jest.spyOn(SourceLogic.actions, 'onUpdateSourceName');
+        const promise = Promise.resolve(contentSource);
+        http.patch.mockReturnValue(promise);
+        SourceLogic.actions.updateContentSource(contentSource.id, { indexing: { enabled: true } });
+
+        expect(http.patch).toHaveBeenCalledWith(
+          '/internal/workplace_search/org/sources/123/settings',
+          {
+            body: JSON.stringify({ content_source: { indexing: { enabled: true } } }),
+          }
+        );
+        await promise;
+        expect(onUpdateSourceNameSpy).not.toHaveBeenCalledWith(contentSource.name);
       });
 
       it('calls API and sets values (account)', async () => {
@@ -339,7 +338,7 @@ describe('SourceLogic', () => {
         SourceLogic.actions.updateContentSource(contentSource.id, contentSource);
 
         expect(http.patch).toHaveBeenCalledWith(
-          '/api/workplace_search/account/sources/123/settings',
+          '/internal/workplace_search/account/sources/123/settings',
           {
             body: JSON.stringify({ content_source: contentSource }),
           }
@@ -348,19 +347,8 @@ describe('SourceLogic', () => {
         expect(onUpdateSourceNameSpy).toHaveBeenCalledWith(contentSource.name);
       });
 
-      it('handles error', async () => {
-        const error = {
-          response: {
-            error: 'this is an error',
-            status: 400,
-          },
-        };
-        const promise = Promise.reject(error);
-        http.patch.mockReturnValue(promise);
+      itShowsServerErrorAsFlashMessage(http.patch, () => {
         SourceLogic.actions.updateContentSource(contentSource.id, contentSource);
-        await expectedAsyncError(promise);
-
-        expect(flashAPIErrors).toHaveBeenCalledWith(error);
       });
     });
 
@@ -374,9 +362,9 @@ describe('SourceLogic', () => {
         SourceLogic.actions.removeContentSource(contentSource.id);
 
         expect(clearFlashMessages).toHaveBeenCalled();
-        expect(http.delete).toHaveBeenCalledWith('/api/workplace_search/org/sources/123');
+        expect(http.delete).toHaveBeenCalledWith('/internal/workplace_search/org/sources/123');
         await promise;
-        expect(setQueuedSuccessMessage).toHaveBeenCalled();
+        expect(flashSuccessToast).toHaveBeenCalled();
         expect(setButtonNotLoadingSpy).toHaveBeenCalled();
       });
 
@@ -389,24 +377,30 @@ describe('SourceLogic', () => {
         SourceLogic.actions.removeContentSource(contentSource.id);
 
         expect(clearFlashMessages).toHaveBeenCalled();
-        expect(http.delete).toHaveBeenCalledWith('/api/workplace_search/account/sources/123');
+        expect(http.delete).toHaveBeenCalledWith('/internal/workplace_search/account/sources/123');
         await promise;
         expect(setButtonNotLoadingSpy).toHaveBeenCalled();
       });
 
-      it('handles error', async () => {
-        const error = {
-          response: {
-            error: 'this is an error',
-            status: 400,
-          },
-        };
-        const promise = Promise.reject(error);
-        http.delete.mockReturnValue(promise);
+      itShowsServerErrorAsFlashMessage(http.delete, () => {
         SourceLogic.actions.removeContentSource(contentSource.id);
-        await expectedAsyncError(promise);
+      });
+    });
 
-        expect(flashAPIErrors).toHaveBeenCalledWith(error);
+    describe('initializeSourceSynchronization', () => {
+      it('calls API and fetches fresh source state', async () => {
+        const initializeSourceSpy = jest.spyOn(SourceLogic.actions, 'initializeSource');
+        const promise = Promise.resolve(contentSource);
+        http.post.mockReturnValue(promise);
+        SourceLogic.actions.initializeSourceSynchronization(contentSource.id);
+
+        expect(http.post).toHaveBeenCalledWith('/internal/workplace_search/org/sources/123/sync');
+        await promise;
+        expect(initializeSourceSpy).toHaveBeenCalledWith(contentSource.id);
+      });
+
+      itShowsServerErrorAsFlashMessage(http.post, () => {
+        SourceLogic.actions.initializeSourceSynchronization(contentSource.id);
       });
     });
 

@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
 import { ElasticsearchClient } from 'src/core/server';
 import { elasticsearchServiceMock } from 'src/core/server/mocks';
@@ -14,8 +14,7 @@ import {
   createMockLevelLogger,
   createMockReportingCore,
 } from '../../test_helpers';
-import { Report, ReportDocument } from './report';
-import { ReportingStore } from './store';
+import { Report, ReportDocument, ReportingStore, SavedReport } from './';
 
 const { createApiResponse } = elasticsearchServiceMock;
 
@@ -177,7 +176,7 @@ describe('ReportingStore', () => {
     });
   });
 
-  it('findReport gets a report from ES and returns a Report object', async () => {
+  it('findReport gets a report from ES and returns a SavedReport object', async () => {
     // setup
     const mockReport: ReportDocument = {
       _id: '1234-foo-78',
@@ -194,7 +193,6 @@ describe('ReportingStore', () => {
         status: 'pending',
         meta: { testMeta: 'meta' } as any,
         payload: { testPayload: 'payload' } as any,
-        browser_type: 'browser type string',
         attempts: 0,
         max_attempts: 1,
         timeout: 30000,
@@ -209,13 +207,12 @@ describe('ReportingStore', () => {
     });
 
     expect(await store.findReportFromTask(report.toReportTaskJSON())).toMatchInlineSnapshot(`
-      Report {
+      SavedReport {
         "_id": "1234-foo-78",
         "_index": ".reporting-test-17409",
         "_primary_term": 1234,
         "_seq_no": 5678,
         "attempts": 0,
-        "browser_type": "browser type string",
         "completed_at": undefined,
         "created_at": "some time",
         "created_by": "some security person",
@@ -239,16 +236,15 @@ describe('ReportingStore', () => {
     `);
   });
 
-  it('setReportClaimed sets the status of a record to processing', async () => {
+  it('setReportClaimed sets the status of a saved report to processing', async () => {
     const store = new ReportingStore(mockCore, mockLogger);
-    const report = new Report({
+    const report = new SavedReport({
       _id: 'id-of-processing',
       _index: '.reporting-test-index-12345',
       _seq_no: 42,
       _primary_term: 10002,
       jobtype: 'test-report',
       created_by: 'created_by_test_string',
-      browser_type: 'browser_type_test_string',
       max_attempts: 50,
       payload: {
         title: 'test report',
@@ -263,23 +259,23 @@ describe('ReportingStore', () => {
     await store.setReportClaimed(report, { testDoc: 'test' } as any);
 
     const [[updateCall]] = mockEsClient.update.mock.calls;
-    const response = updateCall.body?.doc as Report;
+
+    const response = (updateCall as estypes.UpdateRequest).body?.doc as Report;
     expect(response.migration_version).toBe(`7.14.0`);
     expect(response.status).toBe(`processing`);
     expect(updateCall.if_seq_no).toBe(42);
     expect(updateCall.if_primary_term).toBe(10002);
   });
 
-  it('setReportFailed sets the status of a record to failed', async () => {
+  it('setReportFailed sets the status of a saved report to failed', async () => {
     const store = new ReportingStore(mockCore, mockLogger);
-    const report = new Report({
+    const report = new SavedReport({
       _id: 'id-of-failure',
       _index: '.reporting-test-index-12345',
       _seq_no: 43,
       _primary_term: 10002,
       jobtype: 'test-report',
       created_by: 'created_by_test_string',
-      browser_type: 'browser_type_test_string',
       max_attempts: 50,
       payload: {
         title: 'test report',
@@ -294,23 +290,22 @@ describe('ReportingStore', () => {
     await store.setReportFailed(report, { errors: 'yes' } as any);
 
     const [[updateCall]] = mockEsClient.update.mock.calls;
-    const response = updateCall.body?.doc as Report;
+    const response = (updateCall as estypes.UpdateRequest).body?.doc as Report;
     expect(response.migration_version).toBe(`7.14.0`);
     expect(response.status).toBe(`failed`);
     expect(updateCall.if_seq_no).toBe(43);
     expect(updateCall.if_primary_term).toBe(10002);
   });
 
-  it('setReportCompleted sets the status of a record to completed', async () => {
+  it('setReportCompleted sets the status of a saved report to completed', async () => {
     const store = new ReportingStore(mockCore, mockLogger);
-    const report = new Report({
+    const report = new SavedReport({
       _id: 'vastly-great-report-id',
       _index: '.reporting-test-index-12345',
       _seq_no: 44,
       _primary_term: 10002,
       jobtype: 'test-report',
       created_by: 'created_by_test_string',
-      browser_type: 'browser_type_test_string',
       max_attempts: 50,
       payload: {
         title: 'test report',
@@ -325,23 +320,22 @@ describe('ReportingStore', () => {
     await store.setReportCompleted(report, { certainly_completed: 'yes' } as any);
 
     const [[updateCall]] = mockEsClient.update.mock.calls;
-    const response = updateCall.body?.doc as Report;
+    const response = (updateCall as estypes.UpdateRequest).body?.doc as Report;
     expect(response.migration_version).toBe(`7.14.0`);
     expect(response.status).toBe(`completed`);
     expect(updateCall.if_seq_no).toBe(44);
     expect(updateCall.if_primary_term).toBe(10002);
   });
 
-  it('sets the status of a record to completed_with_warnings', async () => {
+  it('sets the status of a saved report to completed_with_warnings', async () => {
     const store = new ReportingStore(mockCore, mockLogger);
-    const report = new Report({
+    const report = new SavedReport({
       _id: 'vastly-great-report-id',
       _index: '.reporting-test-index-12345',
       _seq_no: 45,
       _primary_term: 10002,
       jobtype: 'test-report',
       created_by: 'created_by_test_string',
-      browser_type: 'browser_type_test_string',
       max_attempts: 50,
       payload: {
         title: 'test report',
@@ -361,7 +355,7 @@ describe('ReportingStore', () => {
     } as any);
 
     const [[updateCall]] = mockEsClient.update.mock.calls;
-    const response = updateCall.body?.doc as Report;
+    const response = (updateCall as estypes.UpdateRequest).body?.doc as Report;
 
     expect(response.migration_version).toBe(`7.14.0`);
     expect(response.status).toBe(`completed_with_warnings`);
@@ -378,14 +372,13 @@ describe('ReportingStore', () => {
 
   it('prepareReportForRetry resets the expiration and status on the report document', async () => {
     const store = new ReportingStore(mockCore, mockLogger);
-    const report = new Report({
+    const report = new SavedReport({
       _id: 'pretty-good-report-id',
       _index: '.reporting-test-index-94058763',
       _seq_no: 46,
       _primary_term: 10002,
       jobtype: 'test-report-2',
       created_by: 'created_by_test_string',
-      browser_type: 'browser_type_test_string',
       status: 'processing',
       process_expiration: '2002',
       max_attempts: 3,
@@ -402,7 +395,7 @@ describe('ReportingStore', () => {
     await store.prepareReportForRetry(report);
 
     const [[updateCall]] = mockEsClient.update.mock.calls;
-    const response = updateCall.body?.doc as Report;
+    const response = (updateCall as estypes.UpdateRequest).body?.doc as Report;
 
     expect(response.migration_version).toBe(`7.14.0`);
     expect(response.status).toBe(`pending`);
@@ -418,7 +411,7 @@ describe('ReportingStore', () => {
       const store = new ReportingStore(mockCore, mockLogger);
       await store.start();
 
-      expect(mockEsClient.ilm.getLifecycle).toHaveBeenCalledWith({ policy: 'kibana-reporting' });
+      expect(mockEsClient.ilm.getLifecycle).toHaveBeenCalledWith({ name: 'kibana-reporting' });
       expect(mockEsClient.ilm.putLifecycle.mock.calls[0][0]).toMatchInlineSnapshot(`
         Object {
           "body": Object {
@@ -430,7 +423,7 @@ describe('ReportingStore', () => {
               },
             },
           },
-          "policy": "kibana-reporting",
+          "name": "kibana-reporting",
         }
       `);
     });
@@ -441,7 +434,7 @@ describe('ReportingStore', () => {
       const store = new ReportingStore(mockCore, mockLogger);
       await store.start();
 
-      expect(mockEsClient.ilm.getLifecycle).toHaveBeenCalledWith({ policy: 'kibana-reporting' });
+      expect(mockEsClient.ilm.getLifecycle).toHaveBeenCalledWith({ name: 'kibana-reporting' });
       expect(mockEsClient.ilm.putLifecycle).not.toHaveBeenCalled();
     });
   });

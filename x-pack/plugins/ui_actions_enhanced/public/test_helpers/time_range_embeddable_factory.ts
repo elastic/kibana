@@ -18,7 +18,8 @@ interface EmbeddableTimeRangeInput extends EmbeddableInput {
 }
 
 export class TimeRangeEmbeddableFactory
-  implements EmbeddableFactoryDefinition<EmbeddableTimeRangeInput> {
+  implements EmbeddableFactoryDefinition<EmbeddableTimeRangeInput>
+{
   public readonly type = TIME_RANGE_EMBEDDABLE;
 
   public async isEditable() {

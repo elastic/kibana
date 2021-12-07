@@ -57,43 +57,39 @@ export const getHostsColumns = (): [
     field: 'node.host.name',
     name: 'Host',
     truncateText: false,
-    hideForMobile: false,
+    mobileOptions: { show: true },
     render: (name: string) => getOrEmptyTagFromValue(name),
   },
   {
     field: 'node.host.firstSeen',
     name: 'First seen',
     truncateText: false,
-    hideForMobile: false,
+    mobileOptions: { show: true },
     render: (firstSeen: string) => getOrEmptyTagFromValue(firstSeen),
   },
   {
     field: 'node.host.os',
     name: 'OS',
     truncateText: false,
-    hideForMobile: false,
+    mobileOptions: { show: true },
     render: (os: string) => getOrEmptyTagFromValue(os),
   },
   {
     field: 'node.host.version',
     name: 'Version',
     truncateText: false,
-    hideForMobile: false,
+    mobileOptions: { show: true },
     render: (version: string) => getOrEmptyTagFromValue(version),
   },
 ];
 
-export const sortedHosts: [
-  Columns<string>,
-  Columns<string>,
-  Columns<string>,
-  Columns<string>
-] = getHostsColumns().map((h) => ({ ...h, sortable: true })) as [
-  Columns<string>,
-  Columns<string>,
-  Columns<string>,
-  Columns<string>
-];
+export const sortedHosts: [Columns<string>, Columns<string>, Columns<string>, Columns<string>] =
+  getHostsColumns().map((h) => ({ ...h, sortable: true })) as [
+    Columns<string>,
+    Columns<string>,
+    Columns<string>,
+    Columns<string>
+  ];
 
 export const rowItems: ItemsPerRow[] = [
   {

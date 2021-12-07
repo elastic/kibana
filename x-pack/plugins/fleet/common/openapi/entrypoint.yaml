@@ -62,6 +62,10 @@ paths:
     $ref: paths/package_policies.yaml
   /package_policies/delete:
     $ref: paths/package_policies@delete.yaml
+  /package_policies/upgrade:
+    $ref: paths/package_policies@upgrade.yaml
+  /package_policies/upgrade/dryrun:
+    $ref: paths/package_policies@upgrade_dryrun.yaml
   '/package_policies/{packagePolicyId}':
     $ref: 'paths/package_policies@{package_policy_id}.yaml'
   /outputs:

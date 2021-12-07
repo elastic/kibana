@@ -2,7 +2,7 @@
   "type": "doc",
   "value": {
     "id": "a04ac6d98ad989312783d4fe3456c53730b212c79a426fb215708b6c6daa3de3",
-    "index": "filebeat-7.12.0-2021.03.11-000001",
+    "index": "logs-ti_abusech.malware",
     "source": {
       "@timestamp": "2021-06-27T14:51:05.766Z",
       "agent": {
@@ -16,7 +16,7 @@
       "fileset": {
         "name": "abusemalware"
       },
-      "threatintel": {
+      "threat": {
         "indicator": {
           "first_seen": "2021-03-11T08:02:14.000Z",
           "ip": "192.168.1.1",
@@ -29,6 +29,9 @@
             "link": "https://www.virustotal.com/gui/file/a04ac6d98ad989312783d4fe3456c53730b212c79a426fb215708b6c6daa3de3/detection/f-a04ac6d",
             "percent": "62.30"
           }
+        },
+        "feed": {
+          "name": "feed_name"
         }
       },
       "tags": ["threatintel-abusemalware", "forwarded"],
@@ -56,7 +59,7 @@
         "module": "threatintel",
         "category": "threat",
         "type": "indicator",
-        "dataset": "threatintel.abusemalware"
+        "dataset": "ti_abusech.malware"
       }
     }
   }

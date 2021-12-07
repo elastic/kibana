@@ -31,11 +31,10 @@ const indexLifecycleDataEnricher = async (
   } = await client.asCurrentUser.ilm.explainLifecycle({
     index: '*',
   });
-
+  // @ts-expect-error IndexLifecyclePolicy is not compatible with IlmExplainLifecycleResponse
   return indicesList.map((index: IndexWithoutIlm) => {
     return {
       ...index,
-      // @ts-expect-error @elastic/elasticsearch Element implicitly has an 'any' type
       ilm: { ...(ilmIndicesData[index.name] || {}) },
     };
   });

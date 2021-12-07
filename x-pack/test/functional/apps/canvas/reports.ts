@@ -21,17 +21,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('Canvas PDF Report Generation', () => {
     before('initialize tests', async () => {
       log.debug('ReportingPage:initTests');
-      await security.role.create('test_reporting_user', {
+      await security.role.create('test_canvas_user', {
         elasticsearch: { cluster: [], indices: [], run_as: [] },
         kibana: [
           {
             spaces: ['*'],
             base: [],
-            feature: { canvas: ['minimal_read', 'generate_report'] },
+            feature: { canvas: ['read'] },
           },
         ],
       });
-      await security.testUser.setRoles(['kibana_admin', 'test_reporting_user']);
+      await security.testUser.setRoles([
+        'test_canvas_user',
+        'reporting_user', // NOTE: the built-in role granting full reporting access is deprecated. See xpack.reporting.roles.enabled
+      ]);
       await kibanaServer.importExport.load(archive);
       await browser.setWindowSize(1600, 850);
     });
@@ -195,7 +198,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           "
         `);
 
-        expect(res.get('content-length')).to.be('20725');
+        const contentLength = parseInt(res.get('content-length'), 10);
+        expect(contentLength >= 20725 && contentLength <= 20726).to.be(true); // contentLength can be between 20725 and 20726
       });
 
       it('downloaded PDF base64 string is correct without borders and logo', async function () {

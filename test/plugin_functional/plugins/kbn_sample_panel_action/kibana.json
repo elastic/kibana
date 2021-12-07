@@ -1,5 +1,9 @@
 {
   "id": "kbnSamplePanelAction",
+  "owner": {
+    "name": "App Services",
+    "githubTeam": "kibana-app-services"
+  },
   "version": "0.0.1",
   "kibanaVersion": "kibana",
   "configPath": ["kbn_sample_panel_action"],

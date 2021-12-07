@@ -16,9 +16,9 @@ export type CallApmApiSpy = jest.SpyInstance<
 export type CreateCallApmApiSpy = jest.SpyInstance<AbstractAPMClient>;
 
 export const getCreateCallApmApiSpy = () =>
-  (jest.spyOn(
+  jest.spyOn(
     createCallApmApi,
     'createCallApmApi'
-  ) as unknown) as CreateCallApmApiSpy;
+  ) as unknown as CreateCallApmApiSpy;
 export const getCallApmApiSpy = () =>
-  (jest.spyOn(createCallApmApi, 'callApmApi') as unknown) as CallApmApiSpy;
+  jest.spyOn(createCallApmApi, 'callApmApi') as unknown as CallApmApiSpy;

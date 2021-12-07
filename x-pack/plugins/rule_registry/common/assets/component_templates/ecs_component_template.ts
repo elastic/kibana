@@ -17,8 +17,8 @@ export const ecsComponentTemplate: ClusterPutComponentTemplateBody = {
     },
     mappings: merge(
       {},
-      mappingFromFieldMap(ecsFieldMap),
-      mappingFromFieldMap(technicalRuleFieldMap)
+      mappingFromFieldMap(ecsFieldMap, 'strict'),
+      mappingFromFieldMap(technicalRuleFieldMap, 'strict')
     ),
   },
 };

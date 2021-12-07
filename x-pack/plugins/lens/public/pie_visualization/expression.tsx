@@ -8,23 +8,24 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { i18n } from '@kbn/i18n';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import type {
   IInterpreterRenderHandlers,
   ExpressionRenderDefinition,
 } from 'src/plugins/expressions/public';
+import { ThemeServiceStart } from 'kibana/public';
+import { KibanaThemeProvider } from '../../../../../src/plugins/kibana_react/public';
 import type { LensFilterEvent } from '../types';
 import { PieComponent } from './render_function';
 import type { FormatFactory } from '../../common';
 import type { PieExpressionProps } from '../../common/expressions';
 import type { ChartsPluginSetup, PaletteRegistry } from '../../../../../src/plugins/charts/public';
 
-export { pie } from '../../common/expressions';
-
 export const getPieRenderer = (dependencies: {
-  formatFactory: Promise<FormatFactory>;
+  formatFactory: FormatFactory;
   chartsThemeService: ChartsPluginSetup['theme'];
   paletteService: PaletteRegistry;
+  kibanaTheme: ThemeServiceStart;
 }): ExpressionRenderDefinition<PieExpressionProps> => ({
   name: 'lens_pie_renderer',
   displayName: i18n.translate('xpack.lens.pie.visualizationName', {
@@ -33,27 +34,26 @@ export const getPieRenderer = (dependencies: {
   help: '',
   validate: () => undefined,
   reuseDomNode: true,
-  render: async (
-    domNode: Element,
-    config: PieExpressionProps,
-    handlers: IInterpreterRenderHandlers
-  ) => {
+  render: (domNode: Element, config: PieExpressionProps, handlers: IInterpreterRenderHandlers) => {
     const onClickValue = (data: LensFilterEvent['data']) => {
       handlers.event({ name: 'filter', data });
     };
-    const formatFactory = await dependencies.formatFactory;
+
     ReactDOM.render(
-      <I18nProvider>
-        <MemoizedChart
-          {...config}
-          formatFactory={formatFactory}
-          chartsThemeService={dependencies.chartsThemeService}
-          paletteService={dependencies.paletteService}
-          onClickValue={onClickValue}
-          renderMode={handlers.getRenderMode()}
-          syncColors={handlers.isSyncColorsEnabled()}
-        />
-      </I18nProvider>,
+      <KibanaThemeProvider theme$={dependencies.kibanaTheme.theme$}>
+        <I18nProvider>
+          <MemoizedChart
+            {...config}
+            formatFactory={dependencies.formatFactory}
+            chartsThemeService={dependencies.chartsThemeService}
+            interactive={handlers.isInteractive()}
+            paletteService={dependencies.paletteService}
+            onClickValue={onClickValue}
+            renderMode={handlers.getRenderMode()}
+            syncColors={handlers.isSyncColorsEnabled()}
+          />
+        </I18nProvider>
+      </KibanaThemeProvider>,
       domNode,
       () => {
         handlers.done();

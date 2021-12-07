@@ -21,7 +21,8 @@ import {
   asRoleMapping,
   asSingleUserRoleMapping,
 } from '../../../shared/role_mapping/__mocks__/roles';
-import { ANY_AUTH_PROVIDER } from '../../../shared/role_mapping/constants';
+
+import { itShowsServerErrorAsFlashMessage } from '../../../test_helpers';
 
 import { RoleMappingsLogic } from './role_mappings_logic';
 
@@ -29,11 +30,10 @@ const emptyUser = { username: '', email: '' };
 
 describe('RoleMappingsLogic', () => {
   const { http } = mockHttpValues;
-  const { clearFlashMessages, flashAPIErrors, flashSuccessToast } = mockFlashMessageHelpers;
+  const { clearFlashMessages, flashSuccessToast } = mockFlashMessageHelpers;
   const { mount } = new LogicMounter(RoleMappingsLogic);
   const DEFAULT_VALUES = {
     attributes: [],
-    availableAuthProviders: [],
     elasticsearchRoles: [],
     elasticsearchUser: emptyUser,
     elasticsearchUsers: [],
@@ -45,11 +45,9 @@ describe('RoleMappingsLogic', () => {
     attributeName: 'username',
     dataLoading: true,
     hasAdvancedRoles: false,
-    multipleAuthProvidersConfig: false,
     availableEngines: [],
     selectedEngines: new Set(),
     accessAllEngines: true,
-    selectedAuthProviders: [ANY_AUTH_PROVIDER],
     selectedOptions: [],
     roleMappingErrors: [],
     singleUserRoleMapping: null,
@@ -63,10 +61,8 @@ describe('RoleMappingsLogic', () => {
   };
 
   const mappingsServerProps = {
-    multipleAuthProvidersConfig: true,
     roleMappings: [asRoleMapping],
     attributes: ['email', 'metadata', 'username', 'role'],
-    authProviders: [ANY_AUTH_PROVIDER],
     availableEngines: engines,
     elasticsearchRoles: [],
     hasAdvancedRoles: false,
@@ -94,10 +90,8 @@ describe('RoleMappingsLogic', () => {
           roleMappings: [asRoleMapping],
           dataLoading: false,
           attributes: mappingsServerProps.attributes,
-          availableAuthProviders: mappingsServerProps.authProviders,
           availableEngines: mappingsServerProps.availableEngines,
           accessAllEngines: true,
-          multipleAuthProvidersConfig: true,
           attributeName: 'username',
           attributeValue: '',
           elasticsearchRoles: mappingsServerProps.elasticsearchRoles,
@@ -222,7 +216,6 @@ describe('RoleMappingsLogic', () => {
 
         expect(RoleMappingsLogic.values).toEqual({
           ...DEFAULT_VALUES,
-          multipleAuthProvidersConfig: true,
           attributeValue: elasticsearchRoles[0],
           roleMappings: [asRoleMapping],
           roleMapping: null,
@@ -253,54 +246,6 @@ describe('RoleMappingsLogic', () => {
       expect(RoleMappingsLogic.values).toEqual({
         ...DEFAULT_VALUES,
         attributeValue: 'changed_value',
-      });
-    });
-
-    describe('handleAuthProviderChange', () => {
-      beforeEach(() => {
-        mount({
-          ...mappingsServerProps,
-          roleMappings: [
-            {
-              ...asRoleMapping,
-              authProvider: ['foo'],
-            },
-          ],
-        });
-      });
-      const providers = ['bar', 'baz'];
-      const providerWithAny = [ANY_AUTH_PROVIDER, providers[1]];
-      it('handles empty state', () => {
-        RoleMappingsLogic.actions.handleAuthProviderChange([]);
-
-        expect(RoleMappingsLogic.values.selectedAuthProviders).toEqual([ANY_AUTH_PROVIDER]);
-      });
-
-      it('handles single value', () => {
-        RoleMappingsLogic.actions.handleAuthProviderChange([providers[0]]);
-
-        expect(RoleMappingsLogic.values.selectedAuthProviders).toEqual([providers[0]]);
-      });
-
-      it('handles multiple values', () => {
-        RoleMappingsLogic.actions.handleAuthProviderChange(providers);
-
-        expect(RoleMappingsLogic.values.selectedAuthProviders).toEqual(providers);
-      });
-
-      it('handles "any" auth in previous state', () => {
-        mount({
-          ...mappingsServerProps,
-          roleMappings: [
-            {
-              ...asRoleMapping,
-              authProvider: [ANY_AUTH_PROVIDER],
-            },
-          ],
-        });
-        RoleMappingsLogic.actions.handleAuthProviderChange(providerWithAny);
-
-        expect(RoleMappingsLogic.values.selectedAuthProviders).toEqual([providers[1]]);
       });
     });
 
@@ -385,18 +330,14 @@ describe('RoleMappingsLogic', () => {
         expect(RoleMappingsLogic.values.dataLoading).toEqual(true);
 
         expect(http.post).toHaveBeenCalledWith(
-          '/api/app_search/role_mappings/enable_role_based_access'
+          '/internal/app_search/role_mappings/enable_role_based_access'
         );
         await nextTick();
         expect(setRoleMappingsSpy).toHaveBeenCalledWith(mappingsServerProps);
       });
 
-      it('handles error', async () => {
-        http.post.mockReturnValue(Promise.reject('this is an error'));
+      itShowsServerErrorAsFlashMessage(http.post, () => {
         RoleMappingsLogic.actions.enableRoleBasedAccess();
-        await nextTick();
-
-        expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
       });
     });
 
@@ -406,17 +347,23 @@ describe('RoleMappingsLogic', () => {
         http.get.mockReturnValue(Promise.resolve(mappingsServerProps));
         RoleMappingsLogic.actions.initializeRoleMappings();
 
-        expect(http.get).toHaveBeenCalledWith('/api/app_search/role_mappings');
+        expect(http.get).toHaveBeenCalledWith('/internal/app_search/role_mappings');
         await nextTick();
         expect(setRoleMappingsDataSpy).toHaveBeenCalledWith(mappingsServerProps);
       });
 
-      it('handles error', async () => {
-        http.get.mockReturnValue(Promise.reject('this is an error'));
+      itShowsServerErrorAsFlashMessage(http.get, () => {
         RoleMappingsLogic.actions.initializeRoleMappings();
-        await nextTick();
+      });
 
-        expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
+      it('resets roleMapping state', () => {
+        mount({
+          ...mappingsServerProps,
+          roleMapping: asRoleMapping,
+        });
+        RoleMappingsLogic.actions.initializeRoleMappings();
+
+        expect(RoleMappingsLogic.values.roleMapping).toEqual(null);
       });
     });
 
@@ -475,7 +422,6 @@ describe('RoleMappingsLogic', () => {
       const body = {
         roleType: 'owner',
         accessAllEngines: true,
-        authProvider: [ANY_AUTH_PROVIDER],
         rules: {
           username: '',
         },
@@ -492,7 +438,7 @@ describe('RoleMappingsLogic', () => {
         http.post.mockReturnValue(Promise.resolve(mappingsServerProps));
         RoleMappingsLogic.actions.handleSaveMapping();
 
-        expect(http.post).toHaveBeenCalledWith('/api/app_search/role_mappings', {
+        expect(http.post).toHaveBeenCalledWith('/internal/app_search/role_mappings', {
           body: JSON.stringify(body),
         });
         await nextTick();
@@ -513,9 +459,12 @@ describe('RoleMappingsLogic', () => {
         http.put.mockReturnValue(Promise.resolve(mappingsServerProps));
         RoleMappingsLogic.actions.handleSaveMapping();
 
-        expect(http.put).toHaveBeenCalledWith(`/api/app_search/role_mappings/${asRoleMapping.id}`, {
-          body: JSON.stringify(body),
-        });
+        expect(http.put).toHaveBeenCalledWith(
+          `/internal/app_search/role_mappings/${asRoleMapping.id}`,
+          {
+            body: JSON.stringify(body),
+          }
+        );
         await nextTick();
 
         expect(initializeRoleMappingsSpy).toHaveBeenCalled();
@@ -535,13 +484,16 @@ describe('RoleMappingsLogic', () => {
         http.put.mockReturnValue(Promise.resolve(mappingsServerProps));
         RoleMappingsLogic.actions.handleSaveMapping();
 
-        expect(http.put).toHaveBeenCalledWith(`/api/app_search/role_mappings/${asRoleMapping.id}`, {
-          body: JSON.stringify({
-            ...body,
-            accessAllEngines: false,
-            engines: [engine.name],
-          }),
-        });
+        expect(http.put).toHaveBeenCalledWith(
+          `/internal/app_search/role_mappings/${asRoleMapping.id}`,
+          {
+            body: JSON.stringify({
+              ...body,
+              accessAllEngines: false,
+              engines: [engine.name],
+            }),
+          }
+        );
       });
 
       it('handles error', async () => {
@@ -582,7 +534,7 @@ describe('RoleMappingsLogic', () => {
         http.post.mockReturnValue(Promise.resolve(mappingsServerProps));
         RoleMappingsLogic.actions.handleSaveUser();
 
-        expect(http.post).toHaveBeenCalledWith('/api/app_search/single_user_role_mapping', {
+        expect(http.post).toHaveBeenCalledWith('/internal/app_search/single_user_role_mapping', {
           body: JSON.stringify({
             roleMapping: {
               engines: [],
@@ -613,7 +565,7 @@ describe('RoleMappingsLogic', () => {
         http.put.mockReturnValue(Promise.resolve(mappingsServerProps));
         RoleMappingsLogic.actions.handleSaveUser();
 
-        expect(http.post).toHaveBeenCalledWith('/api/app_search/single_user_role_mapping', {
+        expect(http.post).toHaveBeenCalledWith('/internal/app_search/single_user_role_mapping', {
           body: JSON.stringify({
             roleMapping: {
               engines: [],
@@ -666,20 +618,18 @@ describe('RoleMappingsLogic', () => {
         http.delete.mockReturnValue(Promise.resolve({}));
         RoleMappingsLogic.actions.handleDeleteMapping(roleMappingId);
 
-        expect(http.delete).toHaveBeenCalledWith(`/api/app_search/role_mappings/${roleMappingId}`);
+        expect(http.delete).toHaveBeenCalledWith(
+          `/internal/app_search/role_mappings/${roleMappingId}`
+        );
         await nextTick();
 
         expect(initializeRoleMappingsSpy).toHaveBeenCalled();
         expect(flashSuccessToast).toHaveBeenCalled();
       });
 
-      it('handles error', async () => {
+      itShowsServerErrorAsFlashMessage(http.delete, () => {
         mount(mappingsServerProps);
-        http.delete.mockReturnValue(Promise.reject('this is an error'));
         RoleMappingsLogic.actions.handleDeleteMapping(roleMappingId);
-        await nextTick();
-
-        expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
       });
     });
 

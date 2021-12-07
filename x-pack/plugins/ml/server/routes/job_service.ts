@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { schema } from '@kbn/config-schema';
 import { wrapError } from '../client/error_wrapper';
-import { RouteInitialization } from '../types';
+import type { RouteInitialization } from '../types';
 import {
   categorizationFieldExamplesSchema,
   basicChartSchema,
@@ -32,7 +32,7 @@ import { jobIdSchema } from './schemas/anomaly_detectors_schema';
 import { jobServiceProvider } from '../models/job_service';
 import { categorizationExamplesProvider } from '../models/job_service/new_job';
 import { getAuthorizationHeader } from '../lib/request_authorization';
-import { Datafeed, Job } from '../../common/types/anomaly_detection_jobs';
+import type { Datafeed, Job } from '../../common/types/anomaly_detection_jobs';
 
 /**
  * Routes for job service
@@ -164,6 +164,40 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
         const { closeJobs } = jobServiceProvider(client, mlClient);
         const { jobIds } = request.body;
         const resp = await closeJobs(jobIds);
+
+        return response.ok({
+          body: resp,
+        });
+      } catch (e) {
+        return response.customError(wrapError(e));
+      }
+    })
+  );
+
+  /**
+   * @apiGroup JobService
+   *
+   * @api {post} /api/ml/jobs/reset_jobs Reset multiple jobs
+   * @apiName ResetJobs
+   * @apiDescription Resets one or more anomaly detection jobs
+   *
+   * @apiSchema (body) jobIdsSchema
+   */
+  router.post(
+    {
+      path: '/api/ml/jobs/reset_jobs',
+      validate: {
+        body: jobIdsSchema,
+      },
+      options: {
+        tags: ['access:ml:canResetJob'],
+      },
+    },
+    routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response }) => {
+      try {
+        const { resetJobs } = jobServiceProvider(client, mlClient);
+        const { jobIds } = request.body;
+        const resp = await resetJobs(jobIds);
 
         return response.ok({
           body: resp,
@@ -422,13 +456,13 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
   /**
    * @apiGroup JobService
    *
-   * @api {get} /api/ml/jobs/deleting_jobs_tasks Get deleting  job tasks
-   * @apiName DeletingJobTasks
-   * @apiDescription Gets the ids of deleting anomaly detection jobs
+   * @api {get} /api/ml/jobs/blocking_jobs_tasks Get blocking job tasks
+   * @apiName BlockingJobTasks
+   * @apiDescription Gets the ids of deleting, resetting or reverting anomaly detection jobs
    */
   router.get(
     {
-      path: '/api/ml/jobs/deleting_jobs_tasks',
+      path: '/api/ml/jobs/blocking_jobs_tasks',
       validate: false,
       options: {
         tags: ['access:ml:canGetJobs'],
@@ -436,8 +470,8 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
     },
     routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, response }) => {
       try {
-        const { deletingJobTasks } = jobServiceProvider(client, mlClient);
-        const resp = await deletingJobTasks();
+        const { blockingJobTasks } = jobServiceProvider(client, mlClient);
+        const resp = await blockingJobTasks();
 
         return response.ok({
           body: resp,
@@ -501,21 +535,24 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
         tags: ['access:ml:canGetJobs'],
       },
     },
-    routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response, context }) => {
-      try {
-        const { indexPattern } = request.params;
-        const isRollup = request.query?.rollup === 'true';
-        const savedObjectsClient = context.core.savedObjects.client;
-        const { newJobCaps } = jobServiceProvider(client, mlClient);
-        const resp = await newJobCaps(indexPattern, isRollup, savedObjectsClient);
+    routeGuard.fullLicenseAPIGuard(
+      async ({ client, mlClient, request, response, getDataViewsService }) => {
+        try {
+          const { indexPattern } = request.params;
+          const isRollup = request.query?.rollup === 'true';
+          const { newJobCaps } = jobServiceProvider(client, mlClient);
 
-        return response.ok({
-          body: resp,
-        });
-      } catch (e) {
-        return response.customError(wrapError(e));
+          const dataViewsService = await getDataViewsService();
+          const resp = await newJobCaps(indexPattern, isRollup, dataViewsService);
+
+          return response.ok({
+            body: resp,
+          });
+        } catch (e) {
+          return response.customError(wrapError(e));
+        }
       }
-    })
+    )
   );
 
   /**
@@ -855,14 +892,8 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
     routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response }) => {
       try {
         const { revertModelSnapshot } = jobServiceProvider(client, mlClient);
-        const {
-          jobId,
-          snapshotId,
-          replay,
-          end,
-          deleteInterveningResults,
-          calendarEvents,
-        } = request.body;
+        const { jobId, snapshotId, replay, end, deleteInterveningResults, calendarEvents } =
+          request.body;
         const resp = await revertModelSnapshot(
           jobId,
           snapshotId,

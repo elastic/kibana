@@ -17,6 +17,7 @@ import { MonitoredHealth } from '../routes/health';
 import { TaskPersistence } from '../task_events';
 import { registerTaskManagerUsageCollector } from './task_manager_usage_collector';
 import { sleep } from '../test_utils';
+import { TaskManagerUsage } from './types';
 
 describe('registerTaskManagerUsageCollector', () => {
   let collector: Collector<unknown>;
@@ -31,24 +32,44 @@ describe('registerTaskManagerUsageCollector', () => {
       return createUsageCollectionSetupMock().makeUsageCollector(config);
     });
 
-    registerTaskManagerUsageCollector(usageCollectionMock, monitoringStats$, true, 10);
+    registerTaskManagerUsageCollector(usageCollectionMock, monitoringStats$, true, 10, []);
 
     const mockHealth = getMockMonitoredHealth();
     monitoringStats$.next(mockHealth);
     await sleep(1001);
 
     expect(usageCollectionMock.makeUsageCollector).toBeCalled();
-    const telemetry = await collector.fetch(fetchContext);
-    expect(telemetry).toMatchObject({
-      ephemeral_tasks_enabled: true,
-      ephemeral_request_capacity: 10,
-      ephemeral_stats: {
-        status: mockHealth.stats.ephemeral?.status,
-        load: mockHealth.stats.ephemeral?.value.load,
-        executions_per_cycle: mockHealth.stats.ephemeral?.value.executionsPerCycle,
-        queued_tasks: mockHealth.stats.ephemeral?.value.queuedTasks,
-      },
+    const telemetry: TaskManagerUsage = (await collector.fetch(fetchContext)) as TaskManagerUsage;
+    expect(telemetry.ephemeral_tasks_enabled).toBe(true);
+    expect(telemetry.ephemeral_request_capacity).toBe(10);
+    expect(telemetry.ephemeral_stats).toMatchObject({
+      status: mockHealth.stats.ephemeral?.status,
+      load: mockHealth.stats.ephemeral?.value.load,
+      executions_per_cycle: mockHealth.stats.ephemeral?.value.executionsPerCycle,
+      queued_tasks: mockHealth.stats.ephemeral?.value.queuedTasks,
     });
+  });
+
+  it('should report telemetry on the excluded task types', async () => {
+    const monitoringStats$ = new Subject<MonitoredHealth>();
+    const usageCollectionMock = createUsageCollectionSetupMock();
+    const fetchContext = createCollectorFetchContextWithKibanaMock();
+    usageCollectionMock.makeUsageCollector.mockImplementation((config) => {
+      collector = new Collector(logger, config);
+      return createUsageCollectionSetupMock().makeUsageCollector(config);
+    });
+
+    registerTaskManagerUsageCollector(usageCollectionMock, monitoringStats$, true, 10, [
+      'actions:*',
+    ]);
+
+    const mockHealth = getMockMonitoredHealth();
+    monitoringStats$.next(mockHealth);
+    await sleep(1001);
+
+    expect(usageCollectionMock.makeUsageCollector).toBeCalled();
+    const telemetry: TaskManagerUsage = (await collector.fetch(fetchContext)) as TaskManagerUsage;
+    expect(telemetry.task_type_exclusion).toEqual(['actions:*']);
   });
 });
 
@@ -168,5 +189,5 @@ function getMockMonitoredHealth(overrides = {}): MonitoredHealth {
       },
     },
   };
-  return (merge(stub, overrides) as unknown) as MonitoredHealth;
+  return merge(stub, overrides) as unknown as MonitoredHealth;
 }

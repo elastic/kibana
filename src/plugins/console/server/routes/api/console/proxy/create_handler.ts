@@ -9,6 +9,7 @@
 import { Agent, IncomingMessage } from 'http';
 import * as url from 'url';
 import { pick, trimStart, trimEnd } from 'lodash';
+import { SemVer } from 'semver';
 
 import { KibanaRequest, RequestHandler } from 'kibana/server';
 
@@ -58,17 +59,22 @@ function filterHeaders(originalHeaders: object, headersToKeep: string[]): object
 function getRequestConfig(
   headers: object,
   esConfig: ESConfigForProxy,
-  proxyConfigCollection: ProxyConfigCollection,
-  uri: string
+  uri: string,
+  kibanaVersion: SemVer,
+  proxyConfigCollection?: ProxyConfigCollection
 ): { agent: Agent; timeout: number; headers: object; rejectUnauthorized?: boolean } {
   const filteredHeaders = filterHeaders(headers, esConfig.requestHeadersWhitelist);
   const newHeaders = setHeaders(filteredHeaders, esConfig.customHeaders);
 
-  if (proxyConfigCollection.hasConfig()) {
-    return {
-      ...proxyConfigCollection.configForUri(uri),
-      headers: newHeaders,
-    };
+  if (kibanaVersion.major < 8) {
+    // In 7.x we still support the proxyConfig setting defined in kibana.yml
+    // From 8.x we don't support it anymore so we don't try to read it here.
+    if (proxyConfigCollection!.hasConfig()) {
+      return {
+        ...proxyConfigCollection!.configForUri(uri),
+        headers: newHeaders,
+      };
+    }
   }
 
   return {
@@ -102,93 +108,101 @@ function getProxyHeaders(req: KibanaRequest) {
   return headers;
 }
 
-export const createHandler = ({
-  log,
-  proxy: { readLegacyESConfig, pathFilters, proxyConfigCollection },
-}: RouteDependencies): RequestHandler<unknown, Query, Body> => async (ctx, request, response) => {
-  const { body, query } = request;
-  const { path, method } = query;
+export const createHandler =
+  ({
+    log,
+    proxy: { readLegacyESConfig, pathFilters, proxyConfigCollection },
+    kibanaVersion,
+  }: RouteDependencies): RequestHandler<unknown, Query, Body> =>
+  async (ctx, request, response) => {
+    const { body, query } = request;
+    const { path, method } = query;
 
-  if (!pathFilters.some((re) => re.test(path))) {
-    return response.forbidden({
-      body: `Error connecting to '${path}':\n\nUnable to send requests to that path.`,
+    if (kibanaVersion.major < 8) {
+      // The "console.proxyFilter" setting in kibana.yaml has been deprecated in 8.x
+      // We only read it on the 7.x branch
+      if (!pathFilters!.some((re) => re.test(path))) {
+        return response.forbidden({
+          body: `Error connecting to '${path}':\n\nUnable to send requests to that path.`,
+          headers: {
+            'Content-Type': 'text/plain',
+          },
+        });
+      }
+    }
+
+    const legacyConfig = await readLegacyESConfig();
+    const { hosts } = legacyConfig;
+    let esIncomingMessage: IncomingMessage;
+
+    for (let idx = 0; idx < hosts.length; ++idx) {
+      const host = hosts[idx];
+      try {
+        const uri = toURL(host, path);
+
+        // Because this can technically be provided by a settings-defined proxy config, we need to
+        // preserve these property names to maintain BWC.
+        const { timeout, agent, headers, rejectUnauthorized } = getRequestConfig(
+          request.headers,
+          legacyConfig,
+          uri.toString(),
+          kibanaVersion,
+          proxyConfigCollection
+        );
+
+        const requestHeaders = {
+          ...headers,
+          ...getProxyHeaders(request),
+        };
+
+        esIncomingMessage = await proxyRequest({
+          method: method.toLowerCase() as 'get' | 'post' | 'put' | 'delete' | 'patch' | 'head',
+          headers: requestHeaders,
+          uri,
+          timeout,
+          payload: body,
+          rejectUnauthorized,
+          agent,
+        });
+
+        break;
+      } catch (e) {
+        // If we reached here it means we hit a lower level network issue than just, for e.g., a 500.
+        // We try contacting another node in that case.
+        log.error(e);
+        if (idx === hosts.length - 1) {
+          log.warn(`Could not connect to any configured ES node [${hosts.join(', ')}]`);
+          return response.customError({
+            statusCode: 502,
+            body: e,
+          });
+        }
+        // Otherwise, try the next host...
+      }
+    }
+
+    const {
+      statusCode,
+      statusMessage,
+      headers: { warning },
+    } = esIncomingMessage!;
+
+    if (method.toUpperCase() !== 'HEAD') {
+      return response.custom({
+        statusCode: statusCode!,
+        body: esIncomingMessage!,
+        headers: {
+          warning: warning || '',
+        },
+      });
+    }
+
+    return response.custom({
+      statusCode: statusCode!,
+      body: `${statusCode} - ${statusMessage}`,
       headers: {
+        warning: warning || '',
         'Content-Type': 'text/plain',
       },
     });
-  }
-
-  const legacyConfig = await readLegacyESConfig();
-  const { hosts } = legacyConfig;
-  let esIncomingMessage: IncomingMessage;
-
-  for (let idx = 0; idx < hosts.length; ++idx) {
-    const host = hosts[idx];
-    try {
-      const uri = toURL(host, path);
-
-      // Because this can technically be provided by a settings-defined proxy config, we need to
-      // preserve these property names to maintain BWC.
-      const { timeout, agent, headers, rejectUnauthorized } = getRequestConfig(
-        request.headers,
-        legacyConfig,
-        proxyConfigCollection,
-        uri.toString()
-      );
-
-      const requestHeaders = {
-        ...headers,
-        ...getProxyHeaders(request),
-      };
-
-      esIncomingMessage = await proxyRequest({
-        method: method.toLowerCase() as 'get' | 'post' | 'put' | 'delete' | 'patch' | 'head',
-        headers: requestHeaders,
-        uri,
-        timeout,
-        payload: body,
-        rejectUnauthorized,
-        agent,
-      });
-
-      break;
-    } catch (e) {
-      // If we reached here it means we hit a lower level network issue than just, for e.g., a 500.
-      // We try contacting another node in that case.
-      log.error(e);
-      if (idx === hosts.length - 1) {
-        log.warn(`Could not connect to any configured ES node [${hosts.join(', ')}]`);
-        return response.customError({
-          statusCode: 502,
-          body: e,
-        });
-      }
-      // Otherwise, try the next host...
-    }
-  }
-
-  const {
-    statusCode,
-    statusMessage,
-    headers: { warning },
-  } = esIncomingMessage!;
-
-  if (method.toUpperCase() !== 'HEAD') {
-    return response.custom({
-      statusCode: statusCode!,
-      body: esIncomingMessage!,
-      headers: {
-        warning: warning || '',
-      },
-    });
-  }
-
-  return response.custom({
-    statusCode: statusCode!,
-    body: `${statusCode} - ${statusMessage}`,
-    headers: {
-      warning: warning || '',
-      'Content-Type': 'text/plain',
-    },
-  });
-};
+  };

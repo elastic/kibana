@@ -11,7 +11,7 @@ import { NumberFromString } from '../saved_object';
 import { UserRT } from '../user';
 import { CommentResponseRt } from './comment';
 import { CasesStatusResponseRt, CaseStatusRt } from './status';
-import { CaseConnectorRt, ESCaseConnector } from '../connectors';
+import { CaseConnectorRt } from '../connectors';
 import { SubCaseResponseRt } from './sub_case';
 
 const BucketsAggs = rt.array(
@@ -87,24 +87,27 @@ const CaseBasicRt = rt.type({
   owner: rt.string,
 });
 
-const CaseExternalServiceBasicRt = rt.type({
-  connector_id: rt.string,
+/**
+ * This represents the push to service UserAction. It lacks the connector_id because that is stored in a different field
+ * within the user action object in the API response.
+ */
+export const CaseUserActionExternalServiceRt = rt.type({
   connector_name: rt.string,
   external_id: rt.string,
   external_title: rt.string,
   external_url: rt.string,
+  pushed_at: rt.string,
+  pushed_by: UserRT,
 });
 
-const CaseFullExternalServiceRt = rt.union([
-  rt.intersection([
-    CaseExternalServiceBasicRt,
-    rt.type({
-      pushed_at: rt.string,
-      pushed_by: UserRT,
-    }),
-  ]),
-  rt.null,
+export const CaseExternalServiceBasicRt = rt.intersection([
+  rt.type({
+    connector_id: rt.union([rt.string, rt.null]),
+  }),
+  CaseUserActionExternalServiceRt,
 ]);
+
+export const CaseFullExternalServiceRt = rt.union([CaseExternalServiceBasicRt, rt.null]);
 
 export const CaseAttributesRt = rt.intersection([
   CaseBasicRt,
@@ -251,6 +254,16 @@ export const CaseResponseRt = rt.intersection([
   }),
 ]);
 
+export const CaseResolveResponseRt = rt.intersection([
+  rt.type({
+    case: CaseResponseRt,
+    outcome: rt.union([rt.literal('exactMatch'), rt.literal('aliasMatch'), rt.literal('conflict')]),
+  }),
+  rt.partial({
+    alias_target_id: rt.string,
+  }),
+]);
+
 export const CasesFindResponseRt = rt.intersection([
   rt.type({
     cases: rt.array(CaseResponseRt),
@@ -316,6 +329,7 @@ export type CaseAttributes = rt.TypeOf<typeof CaseAttributesRt>;
 export type CasesClientPostRequest = rt.TypeOf<typeof CasesClientPostRequestRt>;
 export type CasePostRequest = rt.TypeOf<typeof CasePostRequestRt>;
 export type CaseResponse = rt.TypeOf<typeof CaseResponseRt>;
+export type CaseResolveResponse = rt.TypeOf<typeof CaseResolveResponseRt>;
 export type CasesResponse = rt.TypeOf<typeof CasesResponseRt>;
 export type CasesFindRequest = rt.TypeOf<typeof CasesFindRequestRt>;
 export type CasesByAlertIDRequest = rt.TypeOf<typeof CasesByAlertIDRequestRt>;
@@ -325,11 +339,6 @@ export type CasesPatchRequest = rt.TypeOf<typeof CasesPatchRequestRt>;
 export type CaseFullExternalService = rt.TypeOf<typeof CaseFullExternalServiceRt>;
 export type CaseSettings = rt.TypeOf<typeof SettingsRt>;
 export type ExternalServiceResponse = rt.TypeOf<typeof ExternalServiceResponseRt>;
-
-export type ESCaseAttributes = Omit<CaseAttributes, 'connector'> & { connector: ESCaseConnector };
-export type ESCasePatchRequest = Omit<CasePatchRequest, 'connector'> & {
-  connector?: ESCaseConnector;
-};
 
 export type AllTagsFindRequest = rt.TypeOf<typeof AllTagsFindRequestRt>;
 export type AllReportersFindRequest = AllTagsFindRequest;

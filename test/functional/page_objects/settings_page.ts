@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { map as mapAsync } from 'bluebird';
 import expect from '@kbn/expect';
 import { FtrService } from '../ftr_provider_context';
 
@@ -21,6 +20,7 @@ export class SettingsPageObject extends FtrService {
   private readonly header = this.ctx.getPageObject('header');
   private readonly common = this.ctx.getPageObject('common');
   private readonly savedObjects = this.ctx.getPageObject('savedObjects');
+  private readonly monacoEditor = this.ctx.getService('monacoEditor');
 
   async clickNavigation() {
     await this.find.clickDisplayedByCssSelector('.app-link:nth-child(5) a');
@@ -42,8 +42,11 @@ export class SettingsPageObject extends FtrService {
   }
 
   async clickKibanaIndexPatterns() {
-    this.log.debug('clickKibanaIndexPatterns link');
-    await this.testSubjects.click('indexPatterns');
+    this.log.debug('clickKibanaDataViews link');
+    const currentUrl = await this.browser.getCurrentUrl();
+    if (!currentUrl.endsWith('dataViews')) {
+      await this.testSubjects.click('dataViews');
+    }
 
     await this.header.waitUntilLoadingHasFinished();
   }
@@ -67,6 +70,14 @@ export class SettingsPageObject extends FtrService {
     return await this.testSubjects.getAttribute(
       `advancedSetting-editField-${propertyName}`,
       'checked'
+    );
+  }
+
+  async getAdvancedSettingAriaCheckbox(propertyName: string) {
+    this.log.debug('in getAdvancedSettingAriaCheckbox');
+    return await this.testSubjects.getAttribute(
+      `advancedSetting-editField-${propertyName}`,
+      'aria-checked'
     );
   }
 
@@ -110,7 +121,14 @@ export class SettingsPageObject extends FtrService {
     await this.header.waitUntilLoadingHasFinished();
   }
 
-  async toggleAdvancedSettingCheckbox(propertyName: string) {
+  async toggleAdvancedSettingCheckbox(propertyName: string, value?: boolean) {
+    let curValue: string | undefined;
+    if (value !== undefined) {
+      curValue = await this.getAdvancedSettingAriaCheckbox(propertyName);
+
+      if (curValue === (value ? 'true' : 'false')) return;
+    }
+
     await this.testSubjects.click(`advancedSetting-editField-${propertyName}`);
     await this.header.waitUntilLoadingHasFinished();
     await this.testSubjects.click(`advancedSetting-saveButton`);
@@ -122,38 +140,28 @@ export class SettingsPageObject extends FtrService {
   }
 
   async getIndexPatternField() {
-    return await this.testSubjects.find('createIndexPatternNameInput');
-  }
-
-  async clickTimeFieldNameField() {
-    return await this.testSubjects.click('createIndexPatternTimeFieldSelect');
+    return this.testSubjects.find('createIndexPatternNameInput');
   }
 
   async getTimeFieldNameField() {
-    return await this.testSubjects.find('createIndexPatternTimeFieldSelect');
+    const wrapperElement = await this.testSubjects.find('timestampField');
+    return wrapperElement.findByTestSubject('comboBoxSearchInput');
   }
 
   async selectTimeFieldOption(selection: string) {
     // open dropdown
-    await this.clickTimeFieldNameField();
-    // close dropdown, keep focus
-    await this.clickTimeFieldNameField();
-    await this.header.waitUntilLoadingHasFinished();
-    return await this.retry.try(async () => {
-      this.log.debug(`selectTimeFieldOption(${selection})`);
-      const timeFieldOption = await this.getTimeFieldOption(selection);
-      await timeFieldOption.click();
-      const selected = await timeFieldOption.isSelected();
-      if (!selected) throw new Error('option not selected: ' + selected);
-    });
+    const timefield = await this.getTimeFieldNameField();
+    await timefield.click();
+    await this.browser.pressKeys(selection);
+    await this.browser.pressKeys(this.browser.keys.TAB);
   }
 
   async getTimeFieldOption(selection: string) {
     return await this.find.displayedByCssSelector('option[value="' + selection + '"]');
   }
 
-  async getCreateIndexPatternButton() {
-    return await this.testSubjects.find('createIndexPatternButton');
+  async getSaveIndexPatternButton() {
+    return await this.testSubjects.find('saveIndexPatternButton');
   }
 
   async getCreateButton() {
@@ -209,7 +217,9 @@ export class SettingsPageObject extends FtrService {
 
   async getFieldsTabCount() {
     return this.retry.try(async () => {
+      // We extract the text from the tab (something like "Fields (86)")
       const text = await this.testSubjects.getVisibleText('tab-indexedFields');
+      // And we return the number inside the parenthesis "86"
       return text.split(' ')[1].replace(/\((.*)\)/, '$1');
     });
   }
@@ -223,23 +233,29 @@ export class SettingsPageObject extends FtrService {
 
   async getFieldNames() {
     const fieldNameCells = await this.testSubjects.findAll('editIndexPattern > indexedFieldName');
-    return await mapAsync(fieldNameCells, async (cell) => {
-      return (await cell.getVisibleText()).trim();
-    });
+    return await Promise.all(
+      fieldNameCells.map(async (cell) => {
+        return (await cell.getVisibleText()).trim();
+      })
+    );
   }
 
   async getFieldTypes() {
     const fieldNameCells = await this.testSubjects.findAll('editIndexPattern > indexedFieldType');
-    return await mapAsync(fieldNameCells, async (cell) => {
-      return (await cell.getVisibleText()).trim();
-    });
+    return await Promise.all(
+      fieldNameCells.map(async (cell) => {
+        return (await cell.getVisibleText()).trim();
+      })
+    );
   }
 
   async getScriptedFieldLangs() {
     const fieldNameCells = await this.testSubjects.findAll('editIndexPattern > scriptedFieldLang');
-    return await mapAsync(fieldNameCells, async (cell) => {
-      return (await cell.getVisibleText()).trim();
-    });
+    return await Promise.all(
+      fieldNameCells.map(async (cell) => {
+        return (await cell.getVisibleText()).trim();
+      })
+    );
   }
 
   async setFieldTypeFilter(type: string) {
@@ -316,9 +332,11 @@ export class SettingsPageObject extends FtrService {
 
   async getAllIndexPatternNames() {
     const indexPatterns = await this.getIndexPatternList();
-    return await mapAsync(indexPatterns, async (index) => {
-      return await index.getVisibleText();
-    });
+    return await Promise.all(
+      indexPatterns.map(async (index) => {
+        return await index.getVisibleText();
+      })
+    );
   }
 
   async isIndexPatternListEmpty() {
@@ -349,48 +367,69 @@ export class SettingsPageObject extends FtrService {
       }
 
       await this.header.waitUntilLoadingHasFinished();
-      await this.clickAddNewIndexPatternButton();
-      if (!isStandardIndexPattern) {
-        await this.clickCreateNewRollupButton();
+      const flyOut = await this.testSubjects.exists('createAnyway');
+      if (flyOut) {
+        await this.testSubjects.click('createAnyway');
+      } else {
+        await this.clickAddNewIndexPatternButton();
       }
       await this.header.waitUntilLoadingHasFinished();
+      if (!isStandardIndexPattern) {
+        await this.selectRollupIndexPatternType();
+      }
       await this.retry.try(async () => {
         await this.setIndexPatternField(indexPatternName);
       });
-
-      const btn = await this.getCreateIndexPatternGoToStep2Button();
-      await this.retry.waitFor(`index pattern Go To Step 2 button to be enabled`, async () => {
-        return await btn.isEnabled();
-      });
-      await btn.click();
 
       await this.common.sleep(2000);
       if (timefield) {
         await this.selectTimeFieldOption(timefield);
       }
-      await (await this.getCreateIndexPatternButton()).click();
+      await (await this.getSaveIndexPatternButton()).click();
     });
     await this.header.waitUntilLoadingHasFinished();
     await this.retry.try(async () => {
       const currentUrl = await this.browser.getCurrentUrl();
       this.log.info('currentUrl', currentUrl);
-      if (!currentUrl.match(/indexPatterns\/.+\?/)) {
-        throw new Error('Index pattern not created');
+      if (!currentUrl.match(/dataViews\/.+\?/)) {
+        throw new Error('Data view not created');
       } else {
-        this.log.debug('Index pattern created: ' + currentUrl);
+        this.log.debug('Data view created: ' + currentUrl);
       }
     });
+
+    if (!isStandardIndexPattern) {
+      const badges = await this.find.allByCssSelector('.euiBadge__text');
+      const text = await badges[1].getVisibleText();
+      expect(text).to.equal('Rollup');
+    }
 
     return await this.getIndexPatternIdFromUrl();
   }
 
   async clickAddNewIndexPatternButton() {
     await this.common.scrollKibanaBodyTop();
-    await this.testSubjects.click('createIndexPatternButton');
+
+    // if flyout is open
+    const flyoutView = await this.testSubjects.exists('createIndexPatternButtonFlyout');
+    if (flyoutView) {
+      await this.testSubjects.click('createIndexPatternButtonFlyout');
+      return;
+    }
+
+    const tableView = await this.testSubjects.exists('createIndexPatternButton');
+    if (tableView) {
+      await this.testSubjects.click('createIndexPatternButton');
+    }
+    const flyoutView2 = await this.testSubjects.exists('createIndexPatternButtonFlyout');
+    if (flyoutView2) {
+      await this.testSubjects.click('createIndexPatternButtonFlyout');
+    }
   }
 
-  async clickCreateNewRollupButton() {
-    await this.testSubjects.click('createRollupIndexPatternButton');
+  async selectRollupIndexPatternType() {
+    await this.testSubjects.click('typeField');
+    await this.testSubjects.click('rollupType');
   }
 
   async getIndexPatternIdFromUrl() {
@@ -405,7 +444,8 @@ export class SettingsPageObject extends FtrService {
   async setIndexPatternField(indexPatternName = 'logstash-*') {
     this.log.debug(`setIndexPatternField(${indexPatternName})`);
     const field = await this.getIndexPatternField();
-    await field.clearValue();
+    await field.clearValueWithKeyboard();
+
     if (
       indexPatternName.charAt(0) === '*' &&
       indexPatternName.charAt(indexPatternName.length - 1) === '*'
@@ -514,15 +554,32 @@ export class SettingsPageObject extends FtrService {
     await this.clickSaveScriptedField();
   }
 
-  async addRuntimeField(name: string, type: string, script: string) {
+  async addRuntimeField(name: string, type: string, script: string, doSaveField = true) {
     await this.clickAddField();
     await this.setFieldName(name);
     await this.setFieldType(type);
     if (script) {
       await this.setFieldScript(script);
     }
-    await this.clickSaveField();
-    await this.closeIndexPatternFieldEditor();
+    if (doSaveField) {
+      await this.clickSaveField();
+    }
+  }
+
+  async addFieldFilter(name: string) {
+    await this.testSubjects.click('tab-sourceFilters');
+    await this.find.setValue('.euiFieldText', name);
+    await this.find.clickByButtonText('Add');
+    const table = await this.find.byClassName('euiTable');
+    await this.retry.waitFor('field filter to be added', async () => {
+      const tableCells = await table.findAllByCssSelector('td');
+      const fieldNames = await Promise.all(
+        tableCells.map(async (cell) => {
+          return (await cell.getVisibleText()).trim();
+        })
+      );
+      return fieldNames.includes(name);
+    });
   }
 
   public async confirmSave() {
@@ -536,8 +593,16 @@ export class SettingsPageObject extends FtrService {
   }
 
   async closeIndexPatternFieldEditor() {
+    await this.testSubjects.click('closeFlyoutButton');
+
+    // We might have unsaved changes and we need to confirm inside the modal
+    if (await this.testSubjects.exists('runtimeFieldModifiedFieldConfirmModal')) {
+      this.log.debug('Unsaved changes for the field: need to confirm');
+      await this.testSubjects.click('confirmModalConfirmButton');
+    }
+
     await this.retry.waitFor('field editor flyout to close', async () => {
-      return !(await this.testSubjects.exists('euiFlyoutCloseButton'));
+      return !(await this.testSubjects.exists('fieldEditor'));
     });
   }
 
@@ -563,23 +628,9 @@ export class SettingsPageObject extends FtrService {
 
   async setFieldScript(script: string) {
     this.log.debug('set script = ' + script);
-    const valueRow = await this.toggleRow('valueRow');
-    const getMonacoTextArea = async () => (await valueRow.findAllByCssSelector('textarea'))[0];
-    this.retry.waitFor('monaco editor is ready', async () => !!(await getMonacoTextArea()));
-    const monacoTextArea = await getMonacoTextArea();
-    await monacoTextArea.focus();
-    this.browser.pressKeys(script);
-  }
-
-  async changeFieldScript(script: string) {
-    this.log.debug('set script = ' + script);
-    const valueRow = await this.testSubjects.find('valueRow');
-    const getMonacoTextArea = async () => (await valueRow.findAllByCssSelector('textarea'))[0];
-    this.retry.waitFor('monaco editor is ready', async () => !!(await getMonacoTextArea()));
-    const monacoTextArea = await getMonacoTextArea();
-    await monacoTextArea.focus();
-    this.browser.pressKeys(this.browser.keys.DELETE.repeat(30));
-    this.browser.pressKeys(script);
+    await this.toggleRow('valueRow');
+    await this.monacoEditor.waitCodeEditorReady('valueRow');
+    await this.monacoEditor.setCodeEditorValue(script);
   }
 
   async clickAddScriptedField() {
@@ -685,14 +736,7 @@ export class SettingsPageObject extends FtrService {
 
   async setScriptedFieldScript(script: string) {
     this.log.debug('set scripted field script = ' + script);
-    const aceEditorCssSelector = '[data-test-subj="editorFieldScript"] .ace_editor';
-    const editor = await this.find.byCssSelector(aceEditorCssSelector);
-    await editor.click();
-    const existingText = await editor.getVisibleText();
-    for (let i = 0; i < existingText.length; i++) {
-      await this.browser.pressKeys(this.browser.keys.BACK_SPACE);
-    }
-    await this.browser.pressKeys(...script.split(''));
+    await this.monacoEditor.setCodeEditorValue(script);
   }
 
   async openScriptedFieldHelp(activeTab: string) {
@@ -737,10 +781,6 @@ export class SettingsPageObject extends FtrService {
 
   async clickEditFieldFormat() {
     await this.testSubjects.click('editFieldFormat');
-  }
-
-  async clickCloseEditFieldFormatFlyout() {
-    await this.testSubjects.click('euiFlyoutCloseButton');
   }
 
   async associateIndexPattern(oldIndexPatternId: string, newIndexPatternTitle: string) {

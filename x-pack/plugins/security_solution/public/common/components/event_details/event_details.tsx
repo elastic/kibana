@@ -10,13 +10,14 @@ import {
   EuiTabbedContentTab,
   EuiSpacer,
   EuiLoadingContent,
-  EuiLoadingSpinner,
   EuiNotificationBadge,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
+import { isEmpty } from 'lodash';
 
 import { EventFieldsBrowser } from './event_fields_browser';
 import { JsonView } from './json_view';
@@ -34,7 +35,11 @@ import {
   parseExistingEnrichments,
   timelineDataToEnrichment,
 } from './cti_details/helpers';
-import { NoEnrichmentsPanel } from './cti_details/no_enrichments_panel';
+import { EnrichmentRangePicker } from './cti_details/enrichment_range_picker';
+import { Reason } from './reason';
+
+import { InvestigationGuideView } from './investigation_guide_view';
+import { HostRisk } from '../../containers/hosts_risk/use_hosts_risk_score';
 
 type EventViewTab = EuiTabbedContentTab;
 
@@ -55,9 +60,17 @@ interface Props {
   data: TimelineEventsDetailsItem[];
   id: string;
   isAlert: boolean;
+  isDraggable?: boolean;
+  rawEventData: object | undefined;
   timelineTabType: TimelineTabs | 'flyout';
   timelineId: string;
+  hostRisk: HostRisk | null;
 }
+
+export const Indent = styled.div`
+  padding: 0 8px;
+  word-break: break-word;
+`;
 
 const StyledEuiTabbedContent = styled(EuiTabbedContent)`
   display: flex;
@@ -93,8 +106,11 @@ const EventDetailsComponent: React.FC<Props> = ({
   data,
   id,
   isAlert,
+  isDraggable,
+  rawEventData,
   timelineId,
   timelineTabType,
+  hostRisk,
 }) => {
   const [selectedTabId, setSelectedTabId] = useState<EventViewId>(EventsViewType.summaryView);
   const handleTabClick = useCallback(
@@ -113,16 +129,18 @@ const EventDetailsComponent: React.FC<Props> = ({
     [data, isAlert]
   );
   const {
-    loading: enrichmentsLoading,
     result: enrichmentsResponse,
+    loading: isEnrichmentsLoading,
+    setRange,
+    range,
   } = useInvestigationTimeEnrichment(eventFields);
 
   const allEnrichments = useMemo(() => {
-    if (enrichmentsLoading || !enrichmentsResponse?.enrichments) {
+    if (isEnrichmentsLoading || !enrichmentsResponse?.enrichments) {
       return existingEnrichments;
     }
     return filterDuplicateEnrichments([...existingEnrichments, ...enrichmentsResponse.enrichments]);
-  }, [enrichmentsLoading, enrichmentsResponse, existingEnrichments]);
+  }, [isEnrichmentsLoading, enrichmentsResponse, existingEnrichments]);
 
   const enrichmentCount = allEnrichments.length;
 
@@ -134,40 +152,52 @@ const EventDetailsComponent: React.FC<Props> = ({
             name: i18n.OVERVIEW,
             content: (
               <>
+                <Reason eventId={id} data={data} />
                 <AlertSummaryView
                   {...{
                     data,
                     eventId: id,
                     browserFields,
+                    isDraggable,
                     timelineId,
                     title: i18n.DUCOMENT_SUMMARY,
                   }}
                 />
-                {enrichmentCount > 0 && (
+
+                {(enrichmentCount > 0 || hostRisk) && (
                   <ThreatSummaryView
+                    isDraggable={isDraggable}
+                    hostRisk={hostRisk}
+                    browserFields={browserFields}
+                    data={data}
                     eventId={id}
                     timelineId={timelineId}
                     enrichments={allEnrichments}
                   />
                 )}
-                {enrichmentsLoading && (
+
+                {isEnrichmentsLoading && (
                   <>
                     <EuiLoadingContent lines={2} />
                   </>
                 )}
+
+                <InvestigationGuideView data={data} />
               </>
             ),
           }
         : undefined,
     [
       isAlert,
-      data,
       id,
+      data,
       browserFields,
+      isDraggable,
       timelineId,
-      enrichmentsLoading,
       enrichmentCount,
       allEnrichments,
+      isEnrichmentsLoading,
+      hostRisk,
     ]
   );
 
@@ -188,7 +218,7 @@ const EventDetailsComponent: React.FC<Props> = ({
                   <span>{i18n.THREAT_INTEL}</span>
                 </EuiFlexItem>
                 <EuiFlexItem>
-                  {enrichmentsLoading ? (
+                  {isEnrichmentsLoading ? (
                     <EuiLoadingSpinner />
                   ) : (
                     <EuiNotificationBadge data-test-subj="enrichment-count-notification">
@@ -199,19 +229,24 @@ const EventDetailsComponent: React.FC<Props> = ({
               </EuiFlexGroup>
             ),
             content: (
-              <>
-                <ThreatDetailsView enrichments={allEnrichments} />
-                <NoEnrichmentsPanel
-                  isInvestigationTimeEnrichmentsPresent={
-                    enrichmentCount > existingEnrichments.length
-                  }
-                  isIndicatorMatchesPresent={existingEnrichments.length > 0}
-                />
-              </>
+              <ThreatDetailsView
+                loading={isEnrichmentsLoading}
+                enrichments={allEnrichments}
+                showInvestigationTimeEnrichments={!isEmpty(eventFields)}
+              >
+                <>
+                  <EnrichmentRangePicker
+                    setRange={setRange}
+                    loading={isEnrichmentsLoading}
+                    range={range}
+                  />
+                  <EuiSpacer size="m" />
+                </>
+              </ThreatDetailsView>
             ),
           }
         : undefined,
-    [allEnrichments, enrichmentCount, enrichmentsLoading, existingEnrichments.length, isAlert]
+    [allEnrichments, setRange, range, enrichmentCount, isAlert, eventFields, isEnrichmentsLoading]
   );
 
   const tableTab = useMemo(
@@ -226,13 +261,14 @@ const EventDetailsComponent: React.FC<Props> = ({
             browserFields={browserFields}
             data={data}
             eventId={id}
+            isDraggable={isDraggable}
             timelineId={timelineId}
             timelineTabType={timelineTabType}
           />
         </>
       ),
     }),
-    [browserFields, data, id, timelineId, timelineTabType]
+    [browserFields, data, id, isDraggable, timelineId, timelineTabType]
   );
 
   const jsonTab = useMemo(
@@ -243,13 +279,13 @@ const EventDetailsComponent: React.FC<Props> = ({
       content: (
         <>
           <EuiSpacer size="m" />
-          <TabContentWrapper>
-            <JsonView data={data} />
+          <TabContentWrapper data-test-subj="jsonViewWrapper">
+            <JsonView rawEventData={rawEventData} />
           </TabContentWrapper>
         </>
       ),
     }),
-    [data]
+    [rawEventData]
   );
 
   const tabs = useMemo(() => {
@@ -258,10 +294,10 @@ const EventDetailsComponent: React.FC<Props> = ({
     );
   }, [summaryTab, threatIntelTab, tableTab, jsonTab]);
 
-  const selectedTab = useMemo(() => tabs.find((tab) => tab.id === selectedTabId) ?? tabs[0], [
-    tabs,
-    selectedTabId,
-  ]);
+  const selectedTab = useMemo(
+    () => tabs.find((tab) => tab.id === selectedTabId) ?? tabs[0],
+    [tabs, selectedTabId]
+  );
 
   return (
     <StyledEuiTabbedContent

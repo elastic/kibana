@@ -49,15 +49,8 @@ export const TimestampFromString = new rt.Type<number, string>(
 export const sourceConfigurationConfigFilePropertiesRT = rt.type({
   sources: rt.type({
     default: rt.partial({
-      logAlias: rt.string, // Cannot be deprecated until 8.0.0. Will be converted to an indexName reference.
-      metricAlias: rt.string,
       fields: rt.partial({
-        timestamp: rt.string,
         message: rt.array(rt.string),
-        tiebreaker: rt.string,
-        host: rt.string,
-        container: rt.string,
-        pod: rt.string,
       }),
     }),
   }),
@@ -115,11 +108,6 @@ export type InfraSourceConfigurationColumn = rt.TypeOf<typeof SourceConfiguratio
  */
 
 const SourceConfigurationFieldsRT = rt.type({
-  container: rt.string,
-  host: rt.string,
-  pod: rt.string,
-  tiebreaker: rt.string,
-  timestamp: rt.string,
   message: rt.array(rt.string),
 });
 

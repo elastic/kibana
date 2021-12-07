@@ -5,19 +5,16 @@
  * 2.0.
  */
 
-import {
-  LogicMounter,
-  mockHttpValues,
-  mockFlashMessageHelpers,
-} from '../../../__mocks__/kea_logic';
+import { LogicMounter, mockHttpValues } from '../../../__mocks__/kea_logic';
 
 import { nextTick } from '@kbn/test/jest';
+
+import { itShowsServerErrorAsFlashMessage } from '../../../test_helpers';
 
 import { SecurityLogic } from './security_logic';
 
 describe('SecurityLogic', () => {
   const { http } = mockHttpValues;
-  const { flashAPIErrors } = mockFlashMessageHelpers;
   const { mount } = new LogicMounter(SecurityLogic);
 
   beforeEach(() => {
@@ -118,21 +115,14 @@ describe('SecurityLogic', () => {
         SecurityLogic.actions.initializeSourceRestrictions();
 
         expect(http.get).toHaveBeenCalledWith(
-          '/api/workplace_search/org/security/source_restrictions'
+          '/internal/workplace_search/org/security/source_restrictions'
         );
         await nextTick();
         expect(setServerPropsSpy).toHaveBeenCalledWith(serverProps);
       });
 
-      it('handles error', async () => {
-        http.get.mockReturnValue(Promise.reject('this is an error'));
-
+      itShowsServerErrorAsFlashMessage(http.get, () => {
         SecurityLogic.actions.initializeSourceRestrictions();
-        try {
-          await nextTick();
-        } catch {
-          expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
-        }
       });
     });
 
@@ -143,22 +133,15 @@ describe('SecurityLogic', () => {
         SecurityLogic.actions.saveSourceRestrictions();
 
         expect(http.patch).toHaveBeenCalledWith(
-          '/api/workplace_search/org/security/source_restrictions',
+          '/internal/workplace_search/org/security/source_restrictions',
           {
             body: JSON.stringify(serverProps),
           }
         );
       });
 
-      it('handles error', async () => {
-        http.patch.mockReturnValue(Promise.reject('this is an error'));
-
+      itShowsServerErrorAsFlashMessage(http.patch, () => {
         SecurityLogic.actions.saveSourceRestrictions();
-        try {
-          await nextTick();
-        } catch {
-          expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
-        }
       });
     });
 

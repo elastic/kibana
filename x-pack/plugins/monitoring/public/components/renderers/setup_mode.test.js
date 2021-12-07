@@ -9,6 +9,14 @@ import React, { Fragment } from 'react';
 import { shallow } from 'enzyme';
 import { ELASTICSEARCH_SYSTEM_ID } from '../../../common/constants';
 
+const kibanaMock = {
+  services: {
+    http: jest.fn(),
+  },
+};
+
+const onHttpErrorMock = jest.fn();
+
 describe('SetupModeRenderer', () => {
   beforeEach(() => jest.resetModules());
 
@@ -21,16 +29,14 @@ describe('SetupModeRenderer', () => {
       updateSetupModeData: () => {},
       setSetupModeMenuItem: () => {},
     }));
-    const SetupModeRenderer = require('./setup_mode').SetupModeRenderer;
+    const SetupModeRenderer = require('./setup_mode').WrappedSetupModeRenderer;
 
     const ChildComponent = () => <h1>Hi</h1>;
-    const scope = {};
-    const injector = {};
     const component = shallow(
       <SetupModeRenderer
-        scope={scope}
-        injector={injector}
         productName={ELASTICSEARCH_SYSTEM_ID}
+        kibana={kibanaMock}
+        onHttpError={onHttpErrorMock}
         render={({ setupMode, flyoutComponent, bottomBarComponent }) => (
           <Fragment>
             {flyoutComponent}
@@ -57,16 +63,14 @@ describe('SetupModeRenderer', () => {
       updateSetupModeData: () => {},
       setSetupModeMenuItem: () => {},
     }));
-    const SetupModeRenderer = require('./setup_mode').SetupModeRenderer;
+    const SetupModeRenderer = require('./setup_mode').WrappedSetupModeRenderer;
 
     const ChildComponent = () => <h1>Hi</h1>;
-    const scope = {};
-    const injector = {};
     const component = shallow(
       <SetupModeRenderer
-        scope={scope}
-        injector={injector}
         productName={ELASTICSEARCH_SYSTEM_ID}
+        kibana={kibanaMock}
+        onHttpError={onHttpErrorMock}
         render={({ setupMode, flyoutComponent, bottomBarComponent }) => (
           <Fragment>
             {flyoutComponent}
@@ -95,16 +99,14 @@ describe('SetupModeRenderer', () => {
       updateSetupModeData: () => {},
       setSetupModeMenuItem: () => {},
     }));
-    const SetupModeRenderer = require('./setup_mode').SetupModeRenderer;
+    const SetupModeRenderer = require('./setup_mode').WrappedSetupModeRenderer;
 
     const ChildComponent = () => <h1>Hi</h1>;
-    const scope = {};
-    const injector = {};
     const component = shallow(
       <SetupModeRenderer
-        scope={scope}
-        injector={injector}
         productName={ELASTICSEARCH_SYSTEM_ID}
+        kibana={kibanaMock}
+        onHttpError={onHttpErrorMock}
         render={({ setupMode, flyoutComponent, bottomBarComponent }) => (
           <Fragment>
             {flyoutComponent}
@@ -135,16 +137,14 @@ describe('SetupModeRenderer', () => {
       updateSetupModeData: () => {},
       setSetupModeMenuItem: () => {},
     }));
-    const SetupModeRenderer = require('./setup_mode').SetupModeRenderer;
+    const SetupModeRenderer = require('./setup_mode').WrappedSetupModeRenderer;
 
     const ChildComponent = () => <h1>Hi</h1>;
-    const scope = {};
-    const injector = {};
     const component = shallow(
       <SetupModeRenderer
-        scope={scope}
-        injector={injector}
         productName={ELASTICSEARCH_SYSTEM_ID}
+        kibana={kibanaMock}
+        onHttpError={onHttpErrorMock}
         render={({ setupMode, flyoutComponent, bottomBarComponent }) => (
           <Fragment>
             {flyoutComponent}
@@ -176,7 +176,7 @@ describe('SetupModeRenderer', () => {
           _meta: {},
         },
       }),
-      initSetupModeState: (_scope, _injectir, cb) => {
+      initSetupModeState: (_globalState, _httpService, _onError, cb) => {
         setTimeout(() => {
           cb({
             elasticsearch: {
@@ -190,16 +190,14 @@ describe('SetupModeRenderer', () => {
       updateSetupModeData: () => {},
       setSetupModeMenuItem: () => {},
     }));
-    const SetupModeRenderer = require('./setup_mode').SetupModeRenderer;
+    const SetupModeRenderer = require('./setup_mode').WrappedSetupModeRenderer;
 
     const ChildComponent = () => <h1>Hi</h1>;
-    const scope = {};
-    const injector = {};
     const component = shallow(
       <SetupModeRenderer
-        scope={scope}
-        injector={injector}
         productName={ELASTICSEARCH_SYSTEM_ID}
+        kibana={kibanaMock}
+        onHttpError={onHttpErrorMock}
         render={({ setupMode, flyoutComponent, bottomBarComponent }) => (
           <Fragment>
             {flyoutComponent}
@@ -235,7 +233,7 @@ describe('SetupModeRenderer', () => {
           _meta: {},
         },
       }),
-      initSetupModeState: (_scope, _injectir, cb) => {
+      initSetupModeState: (_globalState, _httpService, _onError, cb) => {
         setTimeout(() => {
           cb({
             elasticsearch: {
@@ -249,16 +247,14 @@ describe('SetupModeRenderer', () => {
       updateSetupModeData: () => {},
       setSetupModeMenuItem,
     }));
-    const SetupModeRenderer = require('./setup_mode').SetupModeRenderer;
+    const SetupModeRenderer = require('./setup_mode').WrappedSetupModeRenderer;
 
     const ChildComponent = () => <h1>Hi</h1>;
-    const scope = {};
-    const injector = {};
     const component = shallow(
       <SetupModeRenderer
-        scope={scope}
-        injector={injector}
         productName={ELASTICSEARCH_SYSTEM_ID}
+        kibana={kibanaMock}
+        onHttpError={onHttpErrorMock}
         render={({ setupMode, flyoutComponent, bottomBarComponent }) => (
           <Fragment>
             {flyoutComponent}

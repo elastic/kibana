@@ -8,7 +8,7 @@
 import React, { FC, useCallback, useState, useMemo, useEffect } from 'react';
 import { EuiCallOut, EuiLoadingChart, EuiResizeObserver, EuiText } from '@elastic/eui';
 import { Observable } from 'rxjs';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { throttle } from 'lodash';
 import { useAnomalyChartsInputResolver } from './use_anomaly_charts_input_resolver';
 import type { IAnomalyChartsEmbeddable } from './anomaly_charts_embeddable';
@@ -59,9 +59,10 @@ export const EmbeddableAnomalyChartsContainer: FC<EmbeddableAnomalyChartsContain
   const [{ uiSettings }, { data: dataServices, share, uiActions }] = services;
   const { timefilter } = dataServices.query.timefilter;
 
-  const mlLocator = useMemo(() => share.url.locators.get<MlLocatorParams>(ML_APP_LOCATOR)!, [
-    share,
-  ]);
+  const mlLocator = useMemo(
+    () => share.url.locators.get<MlLocatorParams>(ML_APP_LOCATOR)!,
+    [share]
+  );
 
   const timeBuckets = useMemo(() => {
     return new TimeBuckets({
@@ -82,7 +83,11 @@ export const EmbeddableAnomalyChartsContainer: FC<EmbeddableAnomalyChartsContain
     });
   }, [severity, selectedEntities]);
 
-  const { chartsData, isLoading: isExplorerLoading, error } = useAnomalyChartsInputResolver(
+  const {
+    chartsData,
+    isLoading: isExplorerLoading,
+    error,
+  } = useAnomalyChartsInputResolver(
     embeddableInput,
     onInputChange,
     refresh,

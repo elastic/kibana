@@ -14,7 +14,6 @@ import { IVectorSource } from '../../../sources/vector_source';
 import {
   FIELD_ORIGIN,
   LAYER_STYLE_TYPE,
-  LAYER_TYPE,
   VECTOR_SHAPE_TYPE,
   VECTOR_STYLES,
 } from '../../../../../common/constants';
@@ -29,36 +28,29 @@ jest.mock('../../../../kibana_services', () => {
   };
 });
 
-class MockField extends AbstractField {}
+class MockField extends AbstractField {
+  supportsFieldMetaFromLocalData(): boolean {
+    return true;
+  }
+}
 
-function createLayerMock(
-  numFields: number,
-  supportedShapeTypes: VECTOR_SHAPE_TYPE[],
-  layerType: LAYER_TYPE = LAYER_TYPE.VECTOR,
-  isESSource: boolean = false
-) {
+function createLayerMock(numFields: number, supportedShapeTypes: VECTOR_SHAPE_TYPE[]) {
   const fields: IField[] = [];
   for (let i = 0; i < numFields; i++) {
     fields.push(new MockField({ fieldName: `field${i}`, origin: FIELD_ORIGIN.SOURCE }));
   }
-  return ({
+  return {
     getStyleEditorFields: async () => {
       return fields;
     },
-    getType() {
-      return layerType;
-    },
     getSource: () => {
-      return ({
+      return {
         getSupportedShapeTypes: async () => {
           return supportedShapeTypes;
         },
-        isESSource() {
-          return isESSource;
-        },
-      } as unknown) as IVectorSource;
+      } as unknown as IVectorSource;
     },
-  } as unknown) as IVectorLayer;
+  } as unknown as IVectorLayer;
 }
 
 const vectorStyleDescriptor = {
@@ -68,8 +60,8 @@ const vectorStyleDescriptor = {
 };
 const vectorStyle = new VectorStyle(
   vectorStyleDescriptor,
-  ({} as unknown) as IVectorSource,
-  ({} as unknown) as IVectorLayer
+  {} as unknown as IVectorSource,
+  {} as unknown as IVectorLayer
 );
 const styleProperties: StyleProperties = {};
 vectorStyle.getAllStyleProperties().forEach((styleProperty) => {
@@ -102,38 +94,6 @@ test('should render', async () => {
 test('should render with no style fields', async () => {
   const component = shallow(
     <VectorStyleEditor {...defaultProps} layer={createLayerMock(0, [VECTOR_SHAPE_TYPE.POLYGON])} />
-  );
-
-  // Ensure all promises resolve
-  await new Promise((resolve) => process.nextTick(resolve));
-  // Ensure the state changes are reflected
-  component.update();
-
-  expect(component).toMatchSnapshot();
-});
-
-test('should render polygon-style without label properties when 3rd party mvt', async () => {
-  const component = shallow(
-    <VectorStyleEditor
-      {...defaultProps}
-      layer={createLayerMock(2, [VECTOR_SHAPE_TYPE.POLYGON], LAYER_TYPE.TILED_VECTOR, false)}
-    />
-  );
-
-  // Ensure all promises resolve
-  await new Promise((resolve) => process.nextTick(resolve));
-  // Ensure the state changes are reflected
-  component.update();
-
-  expect(component).toMatchSnapshot();
-});
-
-test('should render line-style with label properties when ES-source is rendered as mvt', async () => {
-  const component = shallow(
-    <VectorStyleEditor
-      {...defaultProps}
-      layer={createLayerMock(2, [VECTOR_SHAPE_TYPE.LINE], LAYER_TYPE.TILED_VECTOR, true)}
-    />
   );
 
   // Ensure all promises resolve

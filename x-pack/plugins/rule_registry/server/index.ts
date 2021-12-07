@@ -5,27 +5,37 @@
  * 2.0.
  */
 
+// TODO: https://github.com/elastic/kibana/issues/110907
+/* eslint-disable @kbn/eslint/no_export_all */
+
 import { PluginInitializerContext } from 'src/core/server';
 import { RuleRegistryPlugin } from './plugin';
 
-export * from './config';
 export type { RuleRegistryPluginSetupContract, RuleRegistryPluginStartContract } from './plugin';
-export type { RacRequestHandlerContext, RacApiRequestHandlerContext } from './types';
+export type { IRuleDataService, RuleDataPluginService } from './rule_data_plugin_service';
 export { RuleDataClient } from './rule_data_client';
-export { IRuleDataClient } from './rule_data_client/types';
-export { getRuleData, RuleExecutorData } from './utils/get_rule_executor_data';
-export {
-  createLifecycleRuleTypeFactory,
-  LifecycleAlertService,
-} from './utils/create_lifecycle_rule_type_factory';
-export { RuleDataPluginService } from './rule_data_plugin_service';
-export {
+export type { IRuleDataClient } from './rule_data_client/types';
+export type {
+  RacRequestHandlerContext,
+  RacApiRequestHandlerContext,
+  AlertTypeWithExecutor,
+} from './types';
+
+export * from './config';
+export * from './rule_data_plugin_service';
+export * from './rule_data_client';
+export * from './alert_data_client/audit_events';
+
+export { createLifecycleRuleTypeFactory } from './utils/create_lifecycle_rule_type_factory';
+export type {
   LifecycleRuleExecutor,
+  LifecycleAlertService,
   LifecycleAlertServices,
-  createLifecycleExecutor,
 } from './utils/create_lifecycle_executor';
-export { createPersistenceRuleTypeFactory } from './utils/create_persistence_rule_type_factory';
-export { AlertTypeWithExecutor } from './types';
+export { createLifecycleExecutor } from './utils/create_lifecycle_executor';
+export { createPersistenceRuleTypeWrapper } from './utils/create_persistence_rule_type_wrapper';
+export * from './utils/persistence_types';
+export type { AlertsClient } from './alert_data_client/alerts_client';
 
 export const plugin = (initContext: PluginInitializerContext) =>
   new RuleRegistryPlugin(initContext);

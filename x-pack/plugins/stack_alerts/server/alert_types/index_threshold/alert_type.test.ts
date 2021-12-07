@@ -171,11 +171,7 @@ describe('alertType', () => {
       alertId: uuid.v4(),
       startedAt: new Date(),
       previousStartedAt: new Date(),
-      services: (alertServices as unknown) as AlertServices<
-        {},
-        ActionContext,
-        typeof ActionGroupId
-      >,
+      services: alertServices as unknown as AlertServices<{}, ActionContext, typeof ActionGroupId>,
       params,
       state: {
         latestTimestamp: undefined,
@@ -236,7 +232,7 @@ describe('alertType', () => {
       alertId: uuid.v4(),
       startedAt: new Date(),
       previousStartedAt: new Date(),
-      services: (customAlertServices as unknown) as AlertServices<
+      services: customAlertServices as unknown as AlertServices<
         {},
         ActionContext,
         typeof ActionGroupId
@@ -301,7 +297,7 @@ describe('alertType', () => {
       alertId: uuid.v4(),
       startedAt: new Date(),
       previousStartedAt: new Date(),
-      services: (customAlertServices as unknown) as AlertServices<
+      services: customAlertServices as unknown as AlertServices<
         {},
         ActionContext,
         typeof ActionGroupId

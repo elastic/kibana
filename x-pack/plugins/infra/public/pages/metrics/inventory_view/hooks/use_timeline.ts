@@ -77,9 +77,10 @@ export function useTimeline(
 
   const displayInterval = useMemo(() => getDisplayInterval(interval), [interval]);
 
-  const timeLengthResult = useMemo(() => getTimeLengthFromInterval(displayInterval), [
-    displayInterval,
-  ]);
+  const timeLengthResult = useMemo(
+    () => getTimeLengthFromInterval(displayInterval),
+    [displayInterval]
+  );
   const { timeLength, intervalInSeconds } = timeLengthResult;
 
   const endTime = currentTime + intervalInSeconds * 1000;

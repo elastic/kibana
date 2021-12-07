@@ -8,14 +8,12 @@
 import { TIMELINE_BOTTOM_BAR_TOGGLE_BUTTON } from '../../screens/security_main';
 import {
   CREATE_NEW_TIMELINE,
-  IS_DRAGGING_DATA_PROVIDERS,
-  TIMELINE_DATA_PROVIDERS,
   TIMELINE_FLYOUT_HEADER,
   TIMELINE_SETTINGS_ICON,
 } from '../../screens/timeline';
 import { cleanKibana } from '../../tasks/common';
 
-import { dragFirstHostToTimeline, waitForAllHostsToBeLoaded } from '../../tasks/hosts/all_hosts';
+import { waitForAllHostsToBeLoaded } from '../../tasks/hosts/all_hosts';
 import { loginAndWaitForPage } from '../../tasks/login';
 import {
   closeTimelineUsingCloseButton,
@@ -77,14 +75,5 @@ describe('timeline flyout button', () => {
     // check that at least one item is visible in the search bar after mousing over, i.e. it's still usable.
     cy.get('[data-test-subj="nav-search-option"]').its('length').should('be.gte', 1);
     closeTimelineUsingCloseButton();
-  });
-
-  it.skip('sets correct classes when the user starts dragging a host, but is not hovering over the data providers', () => {
-    dragFirstHostToTimeline();
-
-    cy.get(IS_DRAGGING_DATA_PROVIDERS)
-      .find(TIMELINE_DATA_PROVIDERS)
-      .filter(':visible')
-      .should('have.class', 'drop-target-data-providers');
   });
 });

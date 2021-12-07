@@ -15,7 +15,7 @@ export function registerOAuthAuthorizeRoute({
 }: RouteDependencies) {
   router.get(
     {
-      path: '/api/workplace_search/oauth/authorize',
+      path: '/internal/workplace_search/oauth/authorize',
       validate: {
         query: schema.object({
           access_type: schema.maybe(schema.string()),
@@ -26,7 +26,7 @@ export function registerOAuthAuthorizeRoute({
           response_mode: schema.maybe(schema.string()),
           redirect_uri: schema.maybe(schema.string()),
           scope: schema.maybe(schema.string()),
-          state: schema.maybe(schema.string()),
+          state: schema.nullable(schema.string()),
         }),
       },
     },
@@ -42,14 +42,14 @@ export function registerOAuthAuthorizeAcceptRoute({
 }: RouteDependencies) {
   router.post(
     {
-      path: '/api/workplace_search/oauth/authorize',
+      path: '/internal/workplace_search/oauth/authorize',
       validate: {
         body: schema.object({
           client_id: schema.string(),
           response_type: schema.string(),
           redirect_uri: schema.maybe(schema.string()),
           scope: schema.maybe(schema.string()),
-          state: schema.maybe(schema.string()),
+          state: schema.nullable(schema.string()),
         }),
       },
     },
@@ -65,14 +65,14 @@ export function registerOAuthAuthorizeDenyRoute({
 }: RouteDependencies) {
   router.delete(
     {
-      path: '/api/workplace_search/oauth/authorize',
+      path: '/internal/workplace_search/oauth/authorize',
       validate: {
         body: schema.object({
           client_id: schema.string(),
           response_type: schema.string(),
           redirect_uri: schema.maybe(schema.string()),
           scope: schema.maybe(schema.string()),
-          state: schema.maybe(schema.string()),
+          state: schema.nullable(schema.string()),
         }),
       },
     },

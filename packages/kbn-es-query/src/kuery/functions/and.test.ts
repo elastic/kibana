@@ -10,7 +10,7 @@ import { nodeTypes } from '../node_types';
 import { fields } from '../../filters/stubs';
 import * as ast from '../ast';
 import * as and from './and';
-import { IndexPatternBase } from '../../es_query';
+import { DataViewBase } from '../../es_query';
 
 jest.mock('../grammar');
 
@@ -19,11 +19,12 @@ const childNode2 = nodeTypes.function.buildNode('is', 'extension', 'jpg');
 
 describe('kuery functions', () => {
   describe('and', () => {
-    let indexPattern: IndexPatternBase;
+    let indexPattern: DataViewBase;
 
     beforeEach(() => {
       indexPattern = {
         fields,
+        title: 'dataView',
       };
     });
 
@@ -50,6 +51,24 @@ describe('kuery functions', () => {
         expect(Object.keys(result.bool).length).toBe(1);
 
         expect(result.bool.filter).toEqual(
+          [childNode1, childNode2].map((childNode) =>
+            ast.toElasticsearchQuery(childNode, indexPattern)
+          )
+        );
+      });
+
+      test("should wrap subqueries in an ES bool query's must clause for scoring if enabled", () => {
+        const node = nodeTypes.function.buildNode('and', [childNode1, childNode2]);
+        const result = and.toElasticsearchQuery(node, indexPattern, {
+          filtersInMustClause: true,
+        });
+
+        expect(result).toHaveProperty('bool');
+        expect(Object.keys(result).length).toBe(1);
+        expect(result.bool).toHaveProperty('must');
+        expect(Object.keys(result.bool).length).toBe(1);
+
+        expect(result.bool.must).toEqual(
           [childNode1, childNode2].map((childNode) =>
             ast.toElasticsearchQuery(childNode, indexPattern)
           )

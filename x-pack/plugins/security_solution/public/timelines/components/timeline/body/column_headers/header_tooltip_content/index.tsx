@@ -10,7 +10,7 @@ import { isEmpty } from 'lodash/fp';
 import React from 'react';
 import styled from 'styled-components';
 
-import { ColumnHeaderOptions } from '../../../../../../../common';
+import { ColumnHeaderOptions } from '../../../../../../../common/types';
 import { getIconFromType } from '../../../../../../common/components/event_details/helpers';
 import * as i18n from '../translations';
 
@@ -61,7 +61,7 @@ export const HeaderToolTipContent = React.memo<{ header: ColumnHeaderOptions }>(
         {':'}
       </ToolTipTableMetadata>
       <ToolTipTableValue>
-        <IconType data-test-subj="type-icon" type={getIconFromType(header.type!)} />
+        <IconType data-test-subj="type-icon" type={getIconFromType(header.type)} />
         <span data-test-subj="type-value">{header.type}</span>
       </ToolTipTableValue>
     </P>

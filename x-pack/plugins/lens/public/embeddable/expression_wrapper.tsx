@@ -6,26 +6,28 @@
  */
 
 import React from 'react';
-import { I18nProvider } from '@kbn/i18n/react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiIcon, EuiEmptyPrompt } from '@elastic/eui';
 import {
   ExpressionRendererEvent,
   ReactExpressionRendererType,
   ReactExpressionRendererProps,
 } from 'src/plugins/expressions/public';
-import type { IExecutionContextContainer } from 'src/core/public';
+import type { KibanaExecutionContext } from 'src/core/public';
 import { ExecutionContextSearch } from 'src/plugins/data/public';
 import { DefaultInspectorAdapters, RenderMode } from 'src/plugins/expressions';
 import classNames from 'classnames';
 import { getOriginalRequestErrorMessages } from '../editor_frame_service/error_helper';
 import { ErrorMessage } from '../editor_frame_service/types';
+import { LensInspector } from '../lens_inspector_service';
 
 export interface ExpressionWrapperProps {
   ExpressionRenderer: ReactExpressionRendererType;
   expression: string | null;
   errors: ErrorMessage[] | undefined;
   variables?: Record<string, unknown>;
+  interactive?: boolean;
   searchContext: ExecutionContextSearch;
   searchSessionId?: string;
   handleEvent: (event: ExpressionRendererEvent) => void;
@@ -33,6 +35,7 @@ export interface ExpressionWrapperProps {
     data: unknown,
     inspectorAdapters?: Partial<DefaultInspectorAdapters> | undefined
   ) => void;
+  onRender$: () => void;
   renderMode?: RenderMode;
   syncColors?: boolean;
   hasCompatibleActions?: ReactExpressionRendererProps['hasCompatibleActions'];
@@ -40,7 +43,8 @@ export interface ExpressionWrapperProps {
   className?: string;
   canEdit: boolean;
   onRuntimeError: () => void;
-  executionContext?: IExecutionContextContainer;
+  executionContext?: KibanaExecutionContext;
+  lensInspector: LensInspector;
 }
 
 interface VisualizationErrorProps {
@@ -100,8 +104,10 @@ export function ExpressionWrapper({
   searchContext,
   variables,
   handleEvent,
+  interactive,
   searchSessionId,
   onData$,
+  onRender$,
   renderMode,
   syncColors,
   hasCompatibleActions,
@@ -111,6 +117,7 @@ export function ExpressionWrapper({
   canEdit,
   onRuntimeError,
   executionContext,
+  lensInspector,
 }: ExpressionWrapperProps) {
   return (
     <I18nProvider>
@@ -123,9 +130,12 @@ export function ExpressionWrapper({
             padding="s"
             variables={variables}
             expression={expression}
+            interactive={interactive}
             searchContext={searchContext}
             searchSessionId={searchSessionId}
             onData$={onData$}
+            onRender$={onRender$}
+            inspectorAdapters={lensInspector.adapters}
             renderMode={renderMode}
             syncColors={syncColors}
             executionContext={executionContext}

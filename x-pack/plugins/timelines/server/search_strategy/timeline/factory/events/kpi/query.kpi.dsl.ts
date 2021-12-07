@@ -44,9 +44,9 @@ export const buildTimelineKpiQuery = ({
   const filter = [...filterClause, ...getTimerangeFilter(timerange), { match_all: {} }];
 
   const dslQuery = {
-    allowNoIndices: true,
+    allow_no_indices: true,
     index: defaultIndex,
-    ignoreUnavailable: true,
+    ignore_unavailable: true,
     body: {
       aggs: {
         userCount: {

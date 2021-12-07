@@ -20,6 +20,7 @@ import { PluginName } from '../plugins';
 import { InternalMetricsServiceSetup } from '../metrics';
 import { registerStatusRoute } from './routes';
 import { InternalEnvironmentServiceSetup } from '../environment';
+import type { InternalCoreUsageDataSetup } from '../core_usage_data';
 
 import { config, StatusConfigType } from './status_config';
 import { ServiceStatus, CoreStatus, InternalStatusServiceSetup } from './types';
@@ -31,13 +32,14 @@ interface StatusLogMeta extends LogMeta {
   kibana: { status: ServiceStatus };
 }
 
-interface SetupDeps {
+export interface SetupDeps {
   elasticsearch: Pick<InternalElasticsearchServiceSetup, 'status$'>;
   environment: InternalEnvironmentServiceSetup;
   pluginDependencies: ReadonlyMap<PluginName, PluginName[]>;
   http: InternalHttpServiceSetup;
   metrics: InternalMetricsServiceSetup;
   savedObjects: Pick<InternalSavedObjectsServiceSetup, 'status$'>;
+  coreUsageData: Pick<InternalCoreUsageDataSetup, 'incrementUsageCounter'>;
 }
 
 export class StatusService implements CoreService<InternalStatusServiceSetup> {
@@ -47,7 +49,7 @@ export class StatusService implements CoreService<InternalStatusServiceSetup> {
 
   private overall$?: Observable<ServiceStatus>;
   private pluginsStatus?: PluginsStatusService;
-  private overallSubscription?: Subscription;
+  private subscriptions: Subscription[] = [];
 
   constructor(private readonly coreContext: CoreContext) {
     this.logger = coreContext.logger.get('status');
@@ -61,6 +63,7 @@ export class StatusService implements CoreService<InternalStatusServiceSetup> {
     metrics,
     savedObjects,
     environment,
+    coreUsageData,
   }: SetupDeps) {
     const statusConfig = await this.config$.pipe(take(1)).toPromise();
     const core$ = this.setupCoreStatus({ elasticsearch, savedObjects });
@@ -81,12 +84,28 @@ export class StatusService implements CoreService<InternalStatusServiceSetup> {
         });
         return summary;
       }),
-      distinctUntilChanged(isDeepStrictEqual),
+      distinctUntilChanged<ServiceStatus<unknown>>(isDeepStrictEqual),
       shareReplay(1)
     );
 
-    // Create an unused subscription to ensure all underlying lazy observables are started.
-    this.overallSubscription = this.overall$.subscribe();
+    const coreOverall$ = core$.pipe(
+      // Prevent many emissions at once from dependency status resolution from making this too noisy
+      debounceTime(25),
+      map((coreStatus) => {
+        const coreOverall = getSummaryStatus([...Object.entries(coreStatus)]);
+        this.logger.debug<StatusLogMeta>(`Recalculated core overall status`, {
+          kibana: {
+            status: coreOverall,
+          },
+        });
+        return coreOverall;
+      }),
+      distinctUntilChanged<ServiceStatus<unknown>>(isDeepStrictEqual),
+      shareReplay(1)
+    );
+
+    // Create unused subscriptions to ensure all underlying lazy observables are started.
+    this.subscriptions.push(this.overall$.subscribe(), coreOverall$.subscribe());
 
     const commonRouteDeps = {
       config: {
@@ -100,7 +119,9 @@ export class StatusService implements CoreService<InternalStatusServiceSetup> {
         overall$: this.overall$,
         plugins$: this.pluginsStatus.getAll$(),
         core$,
+        coreOverall$,
       },
+      incrementUsageCounter: coreUsageData.incrementUsageCounter,
     };
 
     const router = http.createRouter('');
@@ -124,6 +145,7 @@ export class StatusService implements CoreService<InternalStatusServiceSetup> {
 
     return {
       core$,
+      coreOverall$,
       overall$: this.overall$,
       plugins: {
         set: this.pluginsStatus.set.bind(this.pluginsStatus),
@@ -149,10 +171,10 @@ export class StatusService implements CoreService<InternalStatusServiceSetup> {
     this.stop$.next();
     this.stop$.complete();
 
-    if (this.overallSubscription) {
-      this.overallSubscription.unsubscribe();
-      this.overallSubscription = undefined;
-    }
+    this.subscriptions.forEach((subscription) => {
+      subscription.unsubscribe();
+    });
+    this.subscriptions = [];
   }
 
   private setupCoreStatus({
@@ -164,7 +186,7 @@ export class StatusService implements CoreService<InternalStatusServiceSetup> {
         elasticsearch: elasticsearchStatus,
         savedObjects: savedObjectsStatus,
       })),
-      distinctUntilChanged(isDeepStrictEqual),
+      distinctUntilChanged<CoreStatus>(isDeepStrictEqual),
       shareReplay(1)
     );
   }

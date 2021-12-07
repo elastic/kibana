@@ -2,13 +2,13 @@
 [[transactions]]
 === Transactions
 
-TIP: A {apm-overview-ref-v}/transactions.html[transaction] describes an event captured by an Elastic APM agent instrumenting a service.
+TIP: A {apm-guide-ref}/data-model-transactions.html[transaction] describes an event captured by an Elastic APM agent instrumenting a service.
 APM agents automatically collect performance metrics on HTTP requests, database queries, and much more.
 
 [role="screenshot"]
 image::apm/images/apm-transactions-overview.png[Example view of transactions table in the APM app in Kibana]
 
-The *Latency*, *transactions per minute*, *Error rate*, and *Average duration by span type*
+The *Latency*, *transactions per minute*, *Failed transaction rate*, and *Average duration by span type*
 charts display information on all transactions associated with the selected service:
 
 *Latency*::
@@ -23,17 +23,17 @@ Useful for determining if more responses than usual are being served with a part
 Like in the latency graph, you can zoom in on anomalies to further investigate them.
 
 [[transaction-error-rate]]
-*Error rate*::
-The error rate represents the percentage of failed transactions from the perspective of the selected service.
+*Failed transaction rate*::
+The failed transaction rate represents the percentage of failed transactions from the perspective of the selected service.
 It's useful for visualizing unexpected increases, decreases, or irregular patterns in a service's transactions.
 +
 [TIP]
 ====
 HTTP **transactions** from the HTTP server perspective do not consider a `4xx` status code (client error) as a failure
-because the failure was caused by the caller, not the HTTP server. Thus, there will be no increase in error rate.
+because the failure was caused by the caller, not the HTTP server. Thus, `event.outcome=success` and there will be no increase in failed transaction rate.
 
 HTTP **spans** from the client perspective however, are considered failures if the HTTP status code is ≥ 400.
-These spans will increase the error rate.
+These spans will set `event.outcome=failure` and increase the failed transaction rate.
 
 If there is no HTTP status, both transactions and spans are considered successful unless an error is reported.
 ====
@@ -97,7 +97,7 @@ This page is visually similar to the transaction overview, but it shows data fro
 the selected transaction group.
 
 [role="screenshot"]
-image::apm/images/apm-transaction-response-dist.png[Example view of response time distribution]
+image::apm/images/apm-transactions-overview.png[Example view of response time distribution]
 
 [[transaction-duration-distribution]]
 ==== Latency distribution
@@ -110,10 +110,10 @@ It's the requests on the right, the ones taking longer than average, that we pro
 [role="screenshot"]
 image::apm/images/apm-transaction-duration-dist.png[Example view of latency distribution graph]
 
-Select a latency duration _bucket_ to display up to ten trace samples.
+Click and drag to select a latency duration _bucket_ to display up to 500 trace samples.
 
 [[transaction-trace-sample]]
-==== Trace sample
+==== Trace samples
 
 Trace samples are based on the _bucket_ selection in the *Latency distribution* chart;
 update the samples by selecting a new _bucket_.
@@ -167,4 +167,11 @@ and solve problems.
 [role="screenshot"]
 image::apm/images/apm-logs-tab.png[APM logs tab]
 
-// To do: link to log correlation
+[[transaction-latency-correlations]]
+==== Correlations
+
+Correlations surface attributes of your data that are potentially correlated with high-latency or erroneous transactions.
+To learn more, see <<correlations>>.
+
+[role="screenshot"]
+image::apm/images/correlations-hover.png[APM lattency correlations]

@@ -10,9 +10,9 @@ import { getMetricKey } from './get_metric_key';
 
 export const dynamicActionsCollector = (
   state: DynamicActionsState,
-  currentStats: Record<string, any>
-): Record<string, any> => {
-  const stats: Record<string, any> = { ...currentStats };
+  currentStats: Record<string, number>
+): Record<string, number> => {
+  const stats: Record<string, number> = { ...currentStats };
   const countMetricKey = getMetricKey('count');
 
   stats[countMetricKey] = state.events.length + (stats[countMetricKey] || 0);

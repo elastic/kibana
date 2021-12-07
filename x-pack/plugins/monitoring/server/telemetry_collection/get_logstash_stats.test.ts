@@ -35,7 +35,7 @@ const getBaseOptions = () => ({
 describe('Get Logstash Stats', () => {
   const clusterUuids = ['aCluster', 'bCluster', 'cCluster'];
   const searchMock = sinon.stub();
-  const callCluster = ({ search: searchMock } as unknown) as ElasticsearchClient;
+  const callCluster = { search: searchMock } as unknown as ElasticsearchClient;
 
   beforeEach(() => {
     searchMock.returns(Promise.resolve({ body: {} }));

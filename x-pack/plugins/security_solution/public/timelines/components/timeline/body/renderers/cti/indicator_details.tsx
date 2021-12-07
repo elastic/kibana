@@ -7,12 +7,11 @@
 
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
-  INDICATOR_DATASET,
   INDICATOR_MATCHED_TYPE,
-  INDICATOR_PROVIDER,
+  FEED_NAME,
   INDICATOR_REFERENCE,
 } from '../../../../../../../common/cti/constants';
 import { DraggableBadge } from '../../../../../../common/components/draggables';
@@ -22,8 +21,7 @@ import { HorizontalSpacer } from './helpers';
 interface IndicatorDetailsProps {
   contextId: string;
   eventId: string;
-  indicatorDataset: string | undefined;
-  indicatorProvider: string | undefined;
+  feedName: string | undefined;
   indicatorReference: string | undefined;
   indicatorType: string | undefined;
   isDraggable?: boolean;
@@ -32,8 +30,7 @@ interface IndicatorDetailsProps {
 export const IndicatorDetails: React.FC<IndicatorDetailsProps> = ({
   contextId,
   eventId,
-  indicatorDataset,
-  indicatorProvider,
+  feedName,
   indicatorReference,
   indicatorType,
   isDraggable,
@@ -58,29 +55,7 @@ export const IndicatorDetails: React.FC<IndicatorDetailsProps> = ({
         />
       </EuiFlexItem>
     )}
-    {indicatorDataset && (
-      <>
-        <EuiFlexItem grow={false}>
-          <HorizontalSpacer>
-            <FormattedMessage
-              defaultMessage="from"
-              id="xpack.securitySolution.alerts.rowRenderers.cti.threatMatch.datasetPreposition"
-            />
-          </HorizontalSpacer>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <DraggableBadge
-            contextId={contextId}
-            data-test-subj="threat-match-indicator-details-indicator-dataset"
-            eventId={eventId}
-            field={INDICATOR_DATASET}
-            isDraggable={isDraggable}
-            value={indicatorDataset}
-          />
-        </EuiFlexItem>
-      </>
-    )}
-    {indicatorProvider && (
+    {feedName && (
       <>
         <EuiFlexItem grow={false} component="span">
           <HorizontalSpacer>
@@ -93,11 +68,11 @@ export const IndicatorDetails: React.FC<IndicatorDetailsProps> = ({
         <EuiFlexItem grow={false}>
           <DraggableBadge
             contextId={contextId}
-            data-test-subj="threat-match-indicator-details-indicator-provider"
+            data-test-subj="threat-match-indicator-details-indicator-feedName"
             eventId={eventId}
-            field={INDICATOR_PROVIDER}
+            field={FEED_NAME}
             isDraggable={isDraggable}
-            value={indicatorProvider}
+            value={feedName}
           />
         </EuiFlexItem>
       </>

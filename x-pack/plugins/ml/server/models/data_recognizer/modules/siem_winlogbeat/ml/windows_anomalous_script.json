@@ -19,7 +19,8 @@
       "host.name",
       "user.name",
       "winlog.event_data.Path"
-    ]
+    ],
+    "model_prune_window": "30d"
   },
   "allow_lazy_open": true,
   "analysis_limits": {

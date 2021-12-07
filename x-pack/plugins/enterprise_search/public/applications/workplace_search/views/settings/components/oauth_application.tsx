@@ -47,7 +47,7 @@ import {
   SAVE_CHANGES_BUTTON,
   NON_PLATINUM_OAUTH_TITLE,
   NON_PLATINUM_OAUTH_DESCRIPTION,
-  NON_PLATINUM_OAUTH_LINK,
+  EXPLORE_PLATINUM_FEATURES_LINK,
 } from '../../../constants';
 import { ENT_SEARCH_LICENSE_MANAGEMENT } from '../../../routes';
 import { SettingsLogic } from '../settings_logic';
@@ -101,7 +101,7 @@ export const OauthApplication: React.FC = () => {
       <EuiText color="subdued">{NON_PLATINUM_OAUTH_DESCRIPTION}</EuiText>
       <EuiSpacer />
       <EuiLink external target="_blank" href={ENT_SEARCH_LICENSE_MANAGEMENT}>
-        {NON_PLATINUM_OAUTH_LINK}
+        {EXPLORE_PLATINUM_FEATURES_LINK}
       </EuiLink>
     </>
   );

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { FieldFormatsStartCommon } from '../../field_formats';
+import { FieldFormatsStartCommon } from '../../../../field_formats/common';
 
 import * as buckets from './buckets';
 import * as metrics from './metrics';
@@ -56,6 +56,7 @@ export const getAggTypes = () => ({
     { name: BUCKET_TYPES.DATE_RANGE, fn: buckets.getDateRangeBucketAgg },
     { name: BUCKET_TYPES.IP_RANGE, fn: buckets.getIpRangeBucketAgg },
     { name: BUCKET_TYPES.TERMS, fn: buckets.getTermsBucketAgg },
+    { name: BUCKET_TYPES.MULTI_TERMS, fn: buckets.getMultiTermsBucketAgg },
     { name: BUCKET_TYPES.FILTER, fn: buckets.getFilterBucketAgg },
     { name: BUCKET_TYPES.FILTERS, fn: buckets.getFiltersBucketAgg },
     { name: BUCKET_TYPES.SIGNIFICANT_TERMS, fn: buckets.getSignificantTermsBucketAgg },
@@ -77,6 +78,7 @@ export const getAggTypesFunctions = () => [
   buckets.aggHistogram,
   buckets.aggDateHistogram,
   buckets.aggTerms,
+  buckets.aggMultiTerms,
   metrics.aggAvg,
   metrics.aggBucketAvg,
   metrics.aggBucketMax,

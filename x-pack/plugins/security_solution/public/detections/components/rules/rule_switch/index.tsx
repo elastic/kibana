@@ -61,9 +61,9 @@ export const RuleSwitchComponent = ({
     async (event: EuiSwitchEvent) => {
       setMyIsLoading(true);
       if (dispatch != null) {
-        await enableRulesAction([id], event.target.checked!, dispatch, dispatchToaster);
+        await enableRulesAction([id], event.target.checked, dispatch, dispatchToaster);
       } else {
-        const enabling = event.target.checked!;
+        const enabling = event.target.checked;
         const title = enabling
           ? i18n.BATCH_ACTION_ACTIVATE_SELECTED_ERROR(1)
           : i18n.BATCH_ACTION_DEACTIVATE_SELECTED_ERROR(1);

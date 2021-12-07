@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { TransportRequestOptions } from '@elastic/elasticsearch/lib/Transport';
+import type { TransportRequestOptions } from '@elastic/elasticsearch';
 
 import { ElasticsearchClient } from '../../../elasticsearch/';
 import { retryCallCluster } from '../../../elasticsearch/client/retry_call_cluster';
@@ -39,6 +39,7 @@ export function createRepositoryEsClient(client: ElasticsearchClient): Repositor
             (client[key] as Function)(params, { maxRetries: 0, ...options })
           );
         } catch (e) {
+          // retry failures are caught here, as are 404's that aren't ignored (e.g update calls)
           throw decorateEsError(e);
         }
       },

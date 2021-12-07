@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useReducer } from 'react';
+import React, { useCallback, useEffect, useReducer } from 'react';
 import deepEqual from 'fast-deep-equal';
 import {
   EuiText,
@@ -21,7 +21,8 @@ import styled from 'styled-components';
 import { isEmpty, noop } from 'lodash/fp';
 
 import { FieldConfig, Form, UseField, useForm } from '../../common/shared_imports';
-import { ActionConnector, Case, ConnectorTypeFields } from '../../../common';
+import { Case } from '../../../common/ui/types';
+import { ActionConnector, ConnectorTypeFields } from '../../../common/api';
 import { ConnectorSelector } from '../connector_selector/form';
 import { ConnectorFieldsForm } from '../connectors/fields_form';
 import { CaseUserActions } from '../../containers/types';
@@ -30,13 +31,11 @@ import { getConnectorFieldsFromUserActions } from './helpers';
 import * as i18n from './translations';
 import { getConnectorById, getConnectorsFormValidators } from '../utils';
 import { usePushToService } from '../use_push_to_service';
-import { CasesNavigation } from '../links';
 import { CaseServices } from '../../containers/use_get_case_user_actions';
 
 export interface EditConnectorProps {
   caseData: Case;
   caseServices: CaseServices;
-  configureCasesNavigation: CasesNavigation;
   connectorName: string;
   connectors: ActionConnector[];
   hasDataToPush: boolean;
@@ -116,7 +115,6 @@ export const EditConnector = React.memo(
   ({
     caseData,
     caseServices,
-    configureCasesNavigation,
     connectorName,
     connectors,
     hasDataToPush,
@@ -144,33 +142,54 @@ export const EditConnector = React.memo(
       { ...initialState, fields: caseFields }
     );
 
+    useEffect(() => {
+      // Initialize the current connector with the connector information attached to the case if we can find that
+      // connector in the retrieved connectors from the API call
+      if (!isLoading) {
+        dispatch({
+          type: 'SET_CURRENT_CONNECTOR',
+          payload: getConnectorById(caseData.connector.id, connectors),
+        });
+
+        // Set the fields initially to whatever is present in the case, this should match with
+        // the latest user action for an update connector as well
+        dispatch({
+          type: 'SET_FIELDS',
+          payload: caseFields,
+        });
+      }
+    }, [caseData.connector.id, connectors, isLoading, caseFields]);
+
+    /**
+     * There is a race condition with this callback. At some point during the initial mounting of this component, this
+     * callback will be called. There are a couple problems with this:
+     *
+     * 1. If the call occurs before the above useEffect does its dispatches (aka while the connectors are still loading) this will
+     *  result in setting the current connector to null when in fact we might have a valid connector. It could also
+     *  cause issues when setting the fields because if there are no user actions then the getConnectorFieldsFromUserActions
+     *  will return null even when the caseData.connector.fields is valid and populated.
+     *
+     * 2. If the call occurs after the above useEffect then the currentConnector should === newConnectorId
+     *
+     * As far as I know dispatch is synchronous so if the useEffect runs first it should successfully set currentConnector. If
+     * onChangeConnector runs first and sets stuff to null, then when useEffect runs it'll switch everything back to what we need it to be
+     * initially.
+     */
     const onChangeConnector = useCallback(
       (newConnectorId) => {
-        // Init
-        if (currentConnector == null) {
+        // change connector on dropdown action
+        if (currentConnector?.id !== newConnectorId) {
           dispatch({
             type: 'SET_CURRENT_CONNECTOR',
             payload: getConnectorById(newConnectorId, connectors),
           });
-        }
-        // change connect on dropdown action
-        else if (currentConnector.id !== newConnectorId) {
-          dispatch({
-            type: 'SET_CURRENT_CONNECTOR',
-            payload: getConnectorById(newConnectorId, connectors),
-          });
-          dispatch({
-            type: 'SET_FIELDS',
-            payload: getConnectorFieldsFromUserActions(newConnectorId, userActions ?? []),
-          });
-        } else if (fields === null) {
           dispatch({
             type: 'SET_FIELDS',
             payload: getConnectorFieldsFromUserActions(newConnectorId, userActions ?? []),
           });
         }
       },
-      [currentConnector, fields, userActions, connectors]
+      [currentConnector, userActions, connectors]
     );
 
     const onFieldsChange = useCallback(
@@ -229,7 +248,6 @@ export const EditConnector = React.memo(
     });
 
     const { pushButton, pushCallouts } = usePushToService({
-      configureCasesNavigation,
       connector: {
         ...caseData.connector,
         name: isEmpty(connectorName) ? caseData.connector.name : connectorName,
@@ -315,7 +333,7 @@ export const EditConnector = React.memo(
               <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
                 <EuiFlexItem grow={false}>
                   <EuiButton
-                    color="secondary"
+                    color="success"
                     data-test-subj="edit-connectors-submit"
                     fill
                     iconType="save"

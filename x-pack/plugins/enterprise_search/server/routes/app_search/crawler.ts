@@ -15,7 +15,7 @@ export function registerCrawlerRoutes({
 }: RouteDependencies) {
   router.get(
     {
-      path: '/api/app_search/engines/{name}/crawler',
+      path: '/internal/app_search/engines/{name}/crawler',
       validate: {
         params: schema.object({
           name: schema.string(),
@@ -27,9 +27,84 @@ export function registerCrawlerRoutes({
     })
   );
 
+  router.get(
+    {
+      path: '/internal/app_search/engines/{name}/crawler/crawl_requests',
+      validate: {
+        params: schema.object({
+          name: schema.string(),
+        }),
+      },
+    },
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/api/as/v0/engines/:name/crawler/crawl_requests',
+    })
+  );
+
+  router.get(
+    {
+      path: '/internal/app_search/engines/{name}/crawler/crawl_requests/{id}',
+      validate: {
+        params: schema.object({
+          name: schema.string(),
+          id: schema.string(),
+        }),
+      },
+    },
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/api/as/v0/engines/:name/crawler/crawl_requests/:id',
+    })
+  );
+
   router.post(
     {
-      path: '/api/app_search/engines/{name}/crawler/domains',
+      path: '/internal/app_search/engines/{name}/crawler/crawl_requests',
+      validate: {
+        params: schema.object({
+          name: schema.string(),
+        }),
+      },
+    },
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/api/as/v0/engines/:name/crawler/crawl_requests',
+    })
+  );
+
+  router.post(
+    {
+      path: '/internal/app_search/engines/{name}/crawler/crawl_requests/cancel',
+      validate: {
+        params: schema.object({
+          name: schema.string(),
+        }),
+      },
+    },
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/api/as/v0/engines/:name/crawler/crawl_requests/active/cancel',
+    })
+  );
+
+  router.get(
+    {
+      path: '/internal/app_search/engines/{name}/crawler/domains',
+      validate: {
+        params: schema.object({
+          name: schema.string(),
+        }),
+        query: schema.object({
+          'page[current]': schema.number(),
+          'page[size]': schema.number(),
+        }),
+      },
+    },
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/api/as/v0/engines/:name/crawler/domains',
+    })
+  );
+
+  router.post(
+    {
+      path: '/internal/app_search/engines/{name}/crawler/domains',
       validate: {
         params: schema.object({
           name: schema.string(),
@@ -52,9 +127,24 @@ export function registerCrawlerRoutes({
     })
   );
 
+  router.get(
+    {
+      path: '/internal/app_search/engines/{name}/crawler/domains/{id}',
+      validate: {
+        params: schema.object({
+          name: schema.string(),
+          id: schema.string(),
+        }),
+      },
+    },
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/api/as/v0/engines/:name/crawler/domains/:id',
+    })
+  );
+
   router.delete(
     {
-      path: '/api/app_search/engines/{name}/crawler/domains/{id}',
+      path: '/internal/app_search/engines/{name}/crawler/domains/{id}',
       validate: {
         params: schema.object({
           name: schema.string(),
@@ -70,9 +160,36 @@ export function registerCrawlerRoutes({
     })
   );
 
+  router.put(
+    {
+      path: '/internal/app_search/engines/{name}/crawler/domains/{id}',
+      validate: {
+        params: schema.object({
+          name: schema.string(),
+          id: schema.string(),
+        }),
+        body: schema.object({
+          crawl_rules: schema.maybe(
+            schema.arrayOf(
+              schema.object({
+                order: schema.number(),
+                id: schema.string(),
+              })
+            )
+          ),
+          deduplication_enabled: schema.maybe(schema.boolean()),
+          deduplication_fields: schema.maybe(schema.arrayOf(schema.string())),
+        }),
+      },
+    },
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/api/as/v0/engines/:name/crawler/domains/:id',
+    })
+  );
+
   router.post(
     {
-      path: '/api/app_search/crawler/validate_url',
+      path: '/internal/app_search/crawler/validate_url',
       validate: {
         body: schema.object({
           url: schema.string(),
@@ -82,6 +199,69 @@ export function registerCrawlerRoutes({
     },
     enterpriseSearchRequestHandler.createRequest({
       path: '/api/as/v0/crawler/validate_url',
+    })
+  );
+
+  router.post(
+    {
+      path: '/internal/app_search/engines/{name}/crawler/process_crawls',
+      validate: {
+        params: schema.object({
+          name: schema.string(),
+        }),
+        body: schema.object({
+          domains: schema.maybe(schema.arrayOf(schema.string())),
+        }),
+      },
+    },
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/api/as/v0/engines/:name/crawler/process_crawls',
+    })
+  );
+
+  router.get(
+    {
+      path: '/internal/app_search/engines/{name}/crawler/crawl_schedule',
+      validate: {
+        params: schema.object({
+          name: schema.string(),
+        }),
+      },
+    },
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/api/as/v0/engines/:name/crawler/crawl_schedule',
+    })
+  );
+
+  router.put(
+    {
+      path: '/internal/app_search/engines/{name}/crawler/crawl_schedule',
+      validate: {
+        params: schema.object({
+          name: schema.string(),
+        }),
+        body: schema.object({
+          unit: schema.string(),
+          frequency: schema.number(),
+        }),
+      },
+    },
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/api/as/v0/engines/:name/crawler/crawl_schedule',
+    })
+  );
+
+  router.delete(
+    {
+      path: '/internal/app_search/engines/{name}/crawler/crawl_schedule',
+      validate: {
+        params: schema.object({
+          name: schema.string(),
+        }),
+      },
+    },
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/api/as/v0/engines/:name/crawler/crawl_schedule',
     })
   );
 }

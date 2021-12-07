@@ -113,109 +113,110 @@ export const useTrackedPromise = <Arguments extends any[], Result>(
   });
 
   const execute = useMemo(
-    () => (...args: Arguments) => {
-      let rejectCancellationPromise!: (value: any) => void;
-      const cancellationPromise = new Promise<any>((_, reject) => {
-        rejectCancellationPromise = reject;
-      });
+    () =>
+      (...args: Arguments) => {
+        let rejectCancellationPromise!: (value: any) => void;
+        const cancellationPromise = new Promise<any>((_, reject) => {
+          rejectCancellationPromise = reject;
+        });
 
-      // remember the list of prior pending promises for cancellation
-      const previousPendingPromises = pendingPromises.current;
+        // remember the list of prior pending promises for cancellation
+        const previousPendingPromises = pendingPromises.current;
 
-      const cancelPreviousPendingPromises = () => {
-        previousPendingPromises.forEach((promise) => promise.cancel());
-      };
+        const cancelPreviousPendingPromises = () => {
+          previousPendingPromises.forEach((promise) => promise.cancel());
+        };
 
-      const newPromise = createPromise(...args);
-      const newCancelablePromise = Promise.race([newPromise, cancellationPromise]);
+        const newPromise = createPromise(...args);
+        const newCancelablePromise = Promise.race([newPromise, cancellationPromise]);
 
-      // track this new state
-      setPromiseState({
-        state: 'pending',
-        promise: newCancelablePromise,
-      });
+        // track this new state
+        setPromiseState({
+          state: 'pending',
+          promise: newCancelablePromise,
+        });
 
-      if (cancelPreviousOn === 'creation') {
-        cancelPreviousPendingPromises();
-      }
+        if (cancelPreviousOn === 'creation') {
+          cancelPreviousPendingPromises();
+        }
 
-      const newPendingPromise: CancelablePromise<Result> = {
-        cancel: () => {
-          rejectCancellationPromise(new CanceledPromiseError());
-        },
-        cancelSilently: () => {
-          rejectCancellationPromise(new SilentCanceledPromiseError());
-        },
-        promise: newCancelablePromise.then(
-          (value) => {
-            setPromiseState((previousPromiseState) =>
-              previousPromiseState.state === 'pending' &&
-              previousPromiseState.promise === newCancelablePromise
-                ? {
-                    state: 'resolved',
-                    promise: newPendingPromise.promise,
-                    value,
-                  }
-                : previousPromiseState
-            );
-
-            if (['settlement', 'resolution'].includes(cancelPreviousOn)) {
-              cancelPreviousPendingPromises();
-            }
-
-            // remove itself from the list of pending promises
-            pendingPromises.current = pendingPromises.current.filter(
-              (pendingPromise) => pendingPromise.promise !== newPendingPromise.promise
-            );
-
-            if (onResolve && shouldTriggerOrThrow()) {
-              onResolve(value);
-            }
-
-            return value;
+        const newPendingPromise: CancelablePromise<Result> = {
+          cancel: () => {
+            rejectCancellationPromise(new CanceledPromiseError());
           },
-          (value) => {
-            if (!(value instanceof SilentCanceledPromiseError)) {
+          cancelSilently: () => {
+            rejectCancellationPromise(new SilentCanceledPromiseError());
+          },
+          promise: newCancelablePromise.then(
+            (value) => {
               setPromiseState((previousPromiseState) =>
                 previousPromiseState.state === 'pending' &&
                 previousPromiseState.promise === newCancelablePromise
                   ? {
-                      state: 'rejected',
-                      promise: newCancelablePromise,
+                      state: 'resolved',
+                      promise: newPendingPromise.promise,
                       value,
                     }
                   : previousPromiseState
               );
-            }
 
-            if (['settlement', 'rejection'].includes(cancelPreviousOn)) {
-              cancelPreviousPendingPromises();
-            }
-
-            // remove itself from the list of pending promises
-            pendingPromises.current = pendingPromises.current.filter(
-              (pendingPromise) => pendingPromise.promise !== newPendingPromise.promise
-            );
-
-            if (shouldTriggerOrThrow()) {
-              if (onReject) {
-                onReject(value);
+              if (['settlement', 'resolution'].includes(cancelPreviousOn)) {
+                cancelPreviousPendingPromises();
               }
 
-              throw value;
+              // remove itself from the list of pending promises
+              pendingPromises.current = pendingPromises.current.filter(
+                (pendingPromise) => pendingPromise.promise !== newPendingPromise.promise
+              );
+
+              if (onResolve && shouldTriggerOrThrow()) {
+                onResolve(value);
+              }
+
+              return value;
+            },
+            (value) => {
+              if (!(value instanceof SilentCanceledPromiseError)) {
+                setPromiseState((previousPromiseState) =>
+                  previousPromiseState.state === 'pending' &&
+                  previousPromiseState.promise === newCancelablePromise
+                    ? {
+                        state: 'rejected',
+                        promise: newCancelablePromise,
+                        value,
+                      }
+                    : previousPromiseState
+                );
+              }
+
+              if (['settlement', 'rejection'].includes(cancelPreviousOn)) {
+                cancelPreviousPendingPromises();
+              }
+
+              // remove itself from the list of pending promises
+              pendingPromises.current = pendingPromises.current.filter(
+                (pendingPromise) => pendingPromise.promise !== newPendingPromise.promise
+              );
+
+              if (shouldTriggerOrThrow()) {
+                if (onReject) {
+                  onReject(value);
+                }
+
+                throw value;
+              }
             }
-          }
-        ),
-      };
+          ),
+        };
 
-      // add the new promise to the list of pending promises
-      pendingPromises.current = [...pendingPromises.current, newPendingPromise];
+        // add the new promise to the list of pending promises
+        pendingPromises.current = [...pendingPromises.current, newPendingPromise];
 
-      // silence "unhandled rejection" warnings
-      newPendingPromise.promise.catch(noOp);
+        // silence "unhandled rejection" warnings
+        newPendingPromise.promise.catch(noOp);
 
-      return newPendingPromise.promise;
-    },
+        return newPendingPromise.promise;
+      },
     // the dependencies are managed by the caller
     // eslint-disable-next-line react-hooks/exhaustive-deps
     dependencies

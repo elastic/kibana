@@ -8,23 +8,33 @@
 import { ESTooltipProperty } from './es_tooltip_property';
 import { AGG_TYPE } from '../../../common/constants';
 import { ITooltipProperty } from './tooltip_property';
-import { IField } from '../fields/field';
+import { IESAggField } from '../fields/agg';
 import { IndexPattern } from '../../../../../../src/plugins/data/public';
 
 export class ESAggTooltipProperty extends ESTooltipProperty {
   private readonly _aggType: AGG_TYPE;
+  private readonly _aggField: IESAggField;
 
   constructor(
     tooltipProperty: ITooltipProperty,
     indexPattern: IndexPattern,
-    field: IField,
-    aggType: AGG_TYPE
+    field: IESAggField,
+    aggType: AGG_TYPE,
+    applyGlobalQuery: boolean
   ) {
-    super(tooltipProperty, indexPattern, field);
+    super(tooltipProperty, indexPattern, field, applyGlobalQuery);
     this._aggType = aggType;
+    this._aggField = field;
+  }
+
+  getHtmlDisplayValue(): string {
+    const rawValue = this.getRawValue();
+    return typeof rawValue !== 'undefined' && this._aggField.isCount()
+      ? parseInt(rawValue as string, 10).toLocaleString()
+      : super.getHtmlDisplayValue();
   }
 
   isFilterable(): boolean {
-    return this._aggType === AGG_TYPE.TERMS;
+    return this._aggType === AGG_TYPE.TERMS ? super.isFilterable() : false;
   }
 }

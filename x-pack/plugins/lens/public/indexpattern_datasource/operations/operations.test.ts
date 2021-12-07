@@ -394,6 +394,20 @@ describe('getOperationTypesForField', () => {
               },
             ],
           },
+          Object {
+            "operationMetaData": Object {
+              "dataType": "number",
+              "isBucketed": false,
+              "isStaticValue": true,
+              "scale": "ratio",
+            },
+            "operations": Array [
+              Object {
+                "operationType": "static_value",
+                "type": "managedReference",
+              },
+            ],
+          },
         ]
       `);
     });

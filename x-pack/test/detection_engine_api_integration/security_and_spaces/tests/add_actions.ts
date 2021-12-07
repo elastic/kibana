@@ -8,7 +8,6 @@
 import expect from '@kbn/expect';
 
 import { CreateRulesSchema } from '../../../../plugins/security_solution/common/detection_engine/schemas/request';
-import { DETECTION_ENGINE_RULES_URL } from '../../../../plugins/security_solution/common/constants';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createSignalsIndex,
@@ -26,18 +25,25 @@ import {
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
+  const log = getService('log');
 
   describe('add_actions', () => {
     describe('adding actions', () => {
-      beforeEach(async () => {
+      before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
-        await createSignalsIndex(supertest);
+      });
+
+      after(async () => {
+        await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
+      });
+
+      beforeEach(async () => {
+        await createSignalsIndex(supertest, log);
       });
 
       afterEach(async () => {
-        await deleteSignalsIndex(supertest);
-        await deleteAllAlerts(supertest);
-        await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
+        await deleteSignalsIndex(supertest, log);
+        await deleteAllAlerts(supertest, log);
       });
 
       it('should be able to create a new webhook action and attach it to a rule', async () => {
@@ -48,7 +54,7 @@ export default ({ getService }: FtrProviderContext) => {
           .send(getWebHookAction())
           .expect(200);
 
-        const rule = await createRule(supertest, getRuleWithWebHookAction(hookAction.id));
+        const rule = await createRule(supertest, log, getRuleWithWebHookAction(hookAction.id));
         const bodyToCompare = removeServerGeneratedProperties(rule);
         expect(bodyToCompare).to.eql(
           getSimpleRuleOutputWithWebHookAction(`${bodyToCompare?.actions?.[0].id}`)
@@ -63,16 +69,12 @@ export default ({ getService }: FtrProviderContext) => {
           .send(getWebHookAction())
           .expect(200);
 
-        const rule = await createRule(supertest, getRuleWithWebHookAction(hookAction.id, true));
-        await waitForRuleSuccessOrStatus(supertest, rule.id);
-
-        // expected result for status should be 'succeeded'
-        const { body } = await supertest
-          .post(`${DETECTION_ENGINE_RULES_URL}/_find_statuses`)
-          .set('kbn-xsrf', 'true')
-          .send({ ids: [rule.id] })
-          .expect(200);
-        expect(body[rule.id].current_status.status).to.eql('succeeded');
+        const rule = await createRule(
+          supertest,
+          log,
+          getRuleWithWebHookAction(hookAction.id, true)
+        );
+        await waitForRuleSuccessOrStatus(supertest, log, rule.id);
       });
 
       it('should be able to create a new webhook action and attach it to a rule with a meta field and run it correctly', async () => {
@@ -89,16 +91,8 @@ export default ({ getService }: FtrProviderContext) => {
           meta: {},
         };
 
-        const rule = await createRule(supertest, ruleWithAction);
-        await waitForRuleSuccessOrStatus(supertest, rule.id);
-
-        // expected result for status should be 'succeeded'
-        const { body } = await supertest
-          .post(`${DETECTION_ENGINE_RULES_URL}/_find_statuses`)
-          .set('kbn-xsrf', 'true')
-          .send({ ids: [rule.id] })
-          .expect(200);
-        expect(body[rule.id].current_status.status).to.eql('succeeded');
+        const rule = await createRule(supertest, log, ruleWithAction);
+        await waitForRuleSuccessOrStatus(supertest, log, rule.id);
       });
     });
   });

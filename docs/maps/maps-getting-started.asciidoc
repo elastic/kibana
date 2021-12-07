@@ -34,8 +34,7 @@ refer to <<xpack-security-authorization,Granting access to {kib}>>.
 . Open the main menu, and then click *Dashboard*.
 . Click **Create dashboard**.
 . Set the time range to *Last 7 days*.
-. Click **Create panel**.
-. Click **Maps**.
+. Click the **Create new Maps** icon image:maps/images/app_gis_icon.png[]
 
 [float]
 [[maps-add-choropleth-layer]]
@@ -50,26 +49,27 @@ and lighter shades will symbolize countries with less traffic.
 . From the **Layer** dropdown menu, select **World Countries**.
 
 . In **Statistics source**, set:
-** **Index pattern** to **kibana_sample_data_logs**
-** **Join field** to **geo.src**
+** **Data view** to **kibana_sample_data_logs**
+** **Join field** to **geo.dest**
 
 . Click **Add layer**.
 
 . In **Layer settings**, set:
 
-** **Name** to `Total Requests by Country`
+** **Name** to `Total Requests by Destination`
 ** **Opacity** to 50%
 
 . Add a Tooltip field:
 
-** Select **ISO 3166-1 alpha-2 code** and **name**.
-** Click **Add**.
+** **ISO 3166-1 alpha-2 code** is added by default.
+** Click **+ Add** to open field select.
+** Select **name** and click *Add*.
 
-. In **Layer style**, set:
+. In **Layer style**:
 
-** **Fill color: As number** to the grey color ramp
-** **Border color** to white
-** **Label** to symbol label
+** Set **Fill color: As number** to the grey color ramp.
+** Set **Border color** to white.
+** Under **Label**, change **By value** to **Fixed**.
 
 . Click **Save & close**.
 +
@@ -95,7 +95,7 @@ The layer is only visible when users zoom in.
 
 . Click **Add layer**, and then click **Documents**.
 
-. Set **Index pattern** to **kibana_sample_data_logs**.
+. Set **Data view** to **kibana_sample_data_logs**.
 
 . Set **Scaling** to *Limits results to 10000.*
 
@@ -129,15 +129,16 @@ more total bytes transferred, and smaller circles will symbolize
 grids with less bytes transferred.
 
 . Click **Add layer**, and select **Clusters and grids**.
-. Set **Index pattern** to **kibana_sample_data_logs**.
+. Set **Data view** to **kibana_sample_data_logs**.
 . Click **Add layer**.
 . In **Layer settings**, set:
 ** **Name** to `Total Requests and Bytes`
 ** **Visibility** to the range [0, 9]
 ** **Opacity** to 100%
-. In **Metrics**, use:
-** **Agregation** set to **Count**, and
-** **Aggregation** set to **Sum** with **Field** set to **bytes**
+. In **Metrics**:
+** Set **Aggregation** to **Count**.
+** Click **Add metric**.
+** Set **Aggregation** to **Sum** with **Field** set to **bytes**.
 . In **Layer style**, change **Symbol size**:
 ** Set the field select to *sum bytes*.
 ** Set the min size to 7 and the max size to 25 px.

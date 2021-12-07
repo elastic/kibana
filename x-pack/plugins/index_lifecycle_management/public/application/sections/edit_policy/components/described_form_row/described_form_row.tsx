@@ -29,7 +29,7 @@ export interface SwitchProps
 }
 
 export type Props = EuiDescribedFormGroupProps & {
-  children: (() => JSX.Element) | JSX.Element | JSX.Element[] | undefined;
+  children: (() => JSX.Element) | JSX.Element | JSX.Element[] | undefined | null;
 
   switchProps?: SwitchProps;
 

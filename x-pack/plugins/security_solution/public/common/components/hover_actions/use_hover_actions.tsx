@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState, useRef } from 'react';
+import React, { useCallback, useMemo, useState, useRef, useContext } from 'react';
 import { DraggableProvided, DraggableStateSnapshot } from 'react-beautiful-dnd';
 import { HoverActions } from '.';
+import { TimelineContext } from '../../../../../timelines/public';
 
 import { DataProvider } from '../../../../common/types';
 import { ProviderContentWrapper } from '../drag_and_drop/draggable_wrapper';
 import { getDraggableId } from '../drag_and_drop/helpers';
-import { useGetTimelineId } from '../drag_and_drop/use_get_timeline_id_from_dom';
 
 const draggableContainsLinks = (draggableElement: HTMLDivElement | null) => {
   const links = draggableElement?.querySelectorAll('.euiLink') ?? [];
@@ -28,6 +28,7 @@ type RenderFunctionProp = (
 interface Props {
   dataProvider: DataProvider;
   disabled?: boolean;
+  hideTopN: boolean;
   isDraggable?: boolean;
   inline?: boolean;
   render: RenderFunctionProp;
@@ -38,6 +39,7 @@ interface Props {
 
 export const useHoverActions = ({
   dataProvider,
+  hideTopN,
   isDraggable,
   onFilterAdded,
   render,
@@ -48,8 +50,7 @@ export const useHoverActions = ({
   const [closePopOverTrigger, setClosePopOverTrigger] = useState(false);
   const [showTopN, setShowTopN] = useState<boolean>(false);
   const [hoverActionsOwnFocus, setHoverActionsOwnFocus] = useState<boolean>(false);
-  const [goGetTimelineId, setGoGetTimelineId] = useState(false);
-  const timelineIdFind = useGetTimelineId(containerRef, goGetTimelineId);
+  const { timelineId: timelineIdFind } = useContext(TimelineContext);
 
   const handleClosePopOverTrigger = useCallback(() => {
     setClosePopOverTrigger((prevClosePopOverTrigger) => !prevClosePopOverTrigger);
@@ -77,6 +78,10 @@ export const useHoverActions = ({
     });
   }, [handleClosePopOverTrigger]);
 
+  const closeTopN = useCallback(() => {
+    setShowTopN(false);
+  }, []);
+
   const hoverContent = useMemo(() => {
     // display links as additional content in the hover menu to enable keyboard
     // navigation of links (when the draggable contains them):
@@ -92,12 +97,13 @@ export const useHoverActions = ({
     return (
       <HoverActions
         additionalContent={additionalContent}
+        closeTopN={closeTopN}
         closePopOver={handleClosePopOverTrigger}
         dataProvider={dataProvider}
         draggableId={isDraggable ? getDraggableId(dataProvider.id) : undefined}
         field={dataProvider.queryMatch.field}
+        hideTopN={hideTopN}
         isObjectArray={false}
-        goGetTimelineId={setGoGetTimelineId}
         onFilterAdded={onFilterAdded}
         ownFocus={hoverActionsOwnFocus}
         showOwnFocus={false}
@@ -112,8 +118,10 @@ export const useHoverActions = ({
       />
     );
   }, [
+    closeTopN,
     dataProvider,
     handleClosePopOverTrigger,
+    hideTopN,
     hoverActionsOwnFocus,
     isDraggable,
     onFilterAdded,

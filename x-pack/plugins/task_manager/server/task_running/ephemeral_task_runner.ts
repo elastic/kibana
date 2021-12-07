@@ -12,9 +12,10 @@
  */
 
 import apm from 'elastic-apm-node';
+import uuid from 'uuid';
 import { withSpan } from '@kbn/apm-utils';
 import { identity } from 'lodash';
-import { Logger } from '../../../../../src/core/server';
+import { Logger, ExecutionContextStart } from '../../../../../src/core/server';
 
 import { Middleware } from '../lib/middleware';
 import { asOk, asErr, eitherAsync, Result } from '../lib/result_type';
@@ -47,6 +48,9 @@ import {
   TaskRunner,
   TaskRunningInstance,
   TaskRunResult,
+  TASK_MANAGER_RUN_TRANSACTION_TYPE,
+  TASK_MANAGER_TRANSACTION_TYPE,
+  TASK_MANAGER_TRANSACTION_TYPE_MARK_AS_RUNNING,
 } from './task_runner';
 
 type Opts = {
@@ -54,6 +58,7 @@ type Opts = {
   definitions: TaskTypeDictionary;
   instance: EphemeralTaskInstance;
   onTaskEvent?: (event: TaskRun | TaskMarkRunning) => void;
+  executionContext: ExecutionContextStart;
 } & Pick<Middleware, 'beforeRun' | 'beforeMarkRunning'>;
 
 // ephemeral tasks cannot be rescheduled or scheduled to run again in the future
@@ -74,6 +79,8 @@ export class EphemeralTaskManagerRunner implements TaskRunner {
   private beforeRun: Middleware['beforeRun'];
   private beforeMarkRunning: Middleware['beforeMarkRunning'];
   private onTaskEvent: (event: TaskRun | TaskMarkRunning) => void;
+  private uuid: string;
+  private readonly executionContext: ExecutionContextStart;
 
   /**
    * Creates an instance of EphemeralTaskManagerRunner.
@@ -91,6 +98,7 @@ export class EphemeralTaskManagerRunner implements TaskRunner {
     beforeRun,
     beforeMarkRunning,
     onTaskEvent = identity,
+    executionContext,
   }: Opts) {
     this.instance = asPending(asConcreteInstance(sanitizeInstance(instance)));
     this.definitions = definitions;
@@ -98,6 +106,8 @@ export class EphemeralTaskManagerRunner implements TaskRunner {
     this.beforeRun = beforeRun;
     this.beforeMarkRunning = beforeMarkRunning;
     this.onTaskEvent = onTaskEvent;
+    this.executionContext = executionContext;
+    this.uuid = uuid.v4();
   }
 
   /**
@@ -105,6 +115,21 @@ export class EphemeralTaskManagerRunner implements TaskRunner {
    */
   public get id() {
     return this.instance.task.id;
+  }
+
+  /**
+   * Gets the exeuction id of this task instance.
+   */
+  public get taskExecutionId() {
+    return `${this.id}::${this.uuid}`;
+  }
+
+  /**
+   * Test whether given execution ID identifies a different execution of this same task
+   * @param id
+   */
+  public isSameTask(executionId: string) {
+    return executionId.startsWith(this.id);
   }
 
   /**
@@ -184,17 +209,25 @@ export class EphemeralTaskManagerRunner implements TaskRunner {
       );
     }
     this.logger.debug(`Running ephemeral task ${this}`);
-    const apmTrans = apm.startTransaction(this.taskType, 'taskManager ephemeral run', {
+    const apmTrans = apm.startTransaction(this.taskType, TASK_MANAGER_RUN_TRANSACTION_TYPE, {
       childOf: this.instance.task.traceparent,
     });
+    apmTrans?.addLabels({ ephemeral: true });
+
     const modifiedContext = await this.beforeRun({
       taskInstance: asConcreteInstance(this.instance.task),
     });
     const stopTaskTimer = startTaskTimer();
     try {
       this.task = this.definition.createTaskRunner(modifiedContext);
-      const result = await withSpan({ name: 'ephemeral run', type: 'task manager' }, () =>
-        this.task!.run()
+      const ctx = {
+        type: 'task manager',
+        name: `run ephemeral ${this.instance.task.taskType}`,
+        id: this.instance.task.id,
+        description: 'run ephemeral task',
+      };
+      const result = await this.executionContext.withContext(ctx, () =>
+        withSpan({ name: 'ephemeral run', type: 'task manager' }, () => this.task!.run())
       );
       const validatedResult = this.validateResult(result);
       const processedResult = await withSpan(
@@ -233,7 +266,11 @@ export class EphemeralTaskManagerRunner implements TaskRunner {
       );
     }
 
-    const apmTrans = apm.startTransaction('taskManager', 'taskManager markTaskAsRunning');
+    const apmTrans = apm.startTransaction(
+      TASK_MANAGER_TRANSACTION_TYPE_MARK_AS_RUNNING,
+      TASK_MANAGER_TRANSACTION_TYPE
+    );
+    apmTrans?.addLabels({ entityId: this.taskType });
 
     const now = new Date();
     try {

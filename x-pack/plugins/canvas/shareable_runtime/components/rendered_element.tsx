@@ -10,8 +10,7 @@ import React, { FC, PureComponent } from 'react';
 import Style from 'style-it';
 import { AnyExpressionFunctionDefinition } from '../../../../../src/plugins/expressions';
 import { Positionable } from '../../public/components/positionable/positionable';
-// @ts-expect-error untyped local
-import { elementToShape } from '../../public/components/workpad_page/utils';
+import { elementToShape } from '../../public/components/workpad_page/positioning_utils';
 import { CanvasRenderedElement } from '../types';
 import { CanvasShareableContext, useCanvasShareableState } from '../context';
 import { AnyRendererSpec } from '../../types';

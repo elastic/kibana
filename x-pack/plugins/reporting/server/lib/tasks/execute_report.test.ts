@@ -54,20 +54,20 @@ describe('Execute Report Task', () => {
 
     const task = new ExecuteReportTask(mockReporting, configType, logger);
     const taskDef = task.getTaskDefinition();
-    const taskRunner = taskDef.createTaskRunner(({
+    const taskRunner = taskDef.createTaskRunner({
       taskInstance: {
         id: 'random-task-id',
         params: { index: 'cool-reporting-index', id: 'cool-reporting-id' },
       },
-    } as unknown) as RunContext);
+    } as unknown as RunContext);
     expect(taskRunner).toHaveProperty('run');
     expect(taskRunner).toHaveProperty('cancel');
   });
 
   it('Max Concurrency is 0 if pollEnabled is false', () => {
-    const queueConfig = ({
+    const queueConfig = {
       queue: { pollEnabled: false, timeout: 55000 },
-    } as unknown) as ReportingConfigType['queue'];
+    } as unknown as ReportingConfigType['queue'];
 
     const task = new ExecuteReportTask(mockReporting, { ...configType, ...queueConfig }, logger);
     expect(task.getStatus()).toBe('uninitialized');

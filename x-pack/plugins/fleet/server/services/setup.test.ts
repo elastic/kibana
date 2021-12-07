@@ -8,7 +8,7 @@
 import { createAppContextStartContractMock, xpackMocks } from '../mocks';
 
 import { appContextService } from './app_context';
-import { setupIngestManager } from './setup';
+import { setupFleet } from './setup';
 
 const mockedMethodThrowsError = () =>
   jest.fn().mockImplementation(() => {
@@ -21,7 +21,7 @@ const mockedMethodThrowsCustom = () =>
     throw new CustomTestError('method mocked to throw');
   });
 
-describe('setupIngestManager', () => {
+describe('setupFleet', () => {
   let context: ReturnType<typeof xpackMocks.createRequestHandlerContext>;
 
   beforeEach(async () => {
@@ -42,9 +42,9 @@ describe('setupIngestManager', () => {
       soClient.find = mockedMethodThrowsError();
       soClient.get = mockedMethodThrowsError();
       soClient.update = mockedMethodThrowsError();
-      const esClient = context.core.elasticsearch.client.asCurrentUser;
+      const esClient = context.core.elasticsearch.client.asInternalUser;
 
-      const setupPromise = setupIngestManager(soClient, esClient);
+      const setupPromise = setupFleet(soClient, esClient);
       await expect(setupPromise).rejects.toThrow('SO method mocked to throw');
       await expect(setupPromise).rejects.toThrow(Error);
     });
@@ -55,9 +55,9 @@ describe('setupIngestManager', () => {
       soClient.find = mockedMethodThrowsCustom();
       soClient.get = mockedMethodThrowsCustom();
       soClient.update = mockedMethodThrowsCustom();
-      const esClient = context.core.elasticsearch.client.asCurrentUser;
+      const esClient = context.core.elasticsearch.client.asInternalUser;
 
-      const setupPromise = setupIngestManager(soClient, esClient);
+      const setupPromise = setupFleet(soClient, esClient);
       await expect(setupPromise).rejects.toThrow('method mocked to throw');
       await expect(setupPromise).rejects.toThrow(CustomTestError);
     });

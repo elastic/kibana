@@ -13,7 +13,7 @@ import { createKibanaReactContext } from 'src/plugins/kibana_react/public';
 import { MockApmPluginContextWrapper } from '../../context/apm_plugin/mock_apm_plugin_context';
 import { ApmServiceContextProvider } from '../../context/apm_service/apm_service_context';
 import { UrlParamsProvider } from '../../context/url_params_context/url_params_context';
-import { IUrlParams } from '../../context/url_params_context/types';
+import type { ApmUrlParams } from '../../context/url_params_context/types';
 import * as useFetcherHook from '../../hooks/use_fetcher';
 import * as useServiceTransactionTypesHook from '../../context/apm_service/use_service_transaction_types_fetcher';
 import { renderWithTheme } from '../../utils/testHelpers';
@@ -26,7 +26,7 @@ function setup({
   serviceTransactionTypes,
   history,
 }: {
-  urlParams: IUrlParams;
+  urlParams: ApmUrlParams;
   serviceTransactionTypes: string[];
   history: MemoryHistory;
 }) {
@@ -75,6 +75,8 @@ describe('when transactionType is selected and multiple transaction types are gi
       serviceTransactionTypes: ['firstType', 'secondType'],
       urlParams: {
         transactionType: 'secondType',
+        rangeFrom: 'now-15m',
+        rangeTo: 'now',
       },
     });
 
@@ -95,6 +97,8 @@ describe('when transactionType is selected and multiple transaction types are gi
       serviceTransactionTypes: ['firstType', 'secondType'],
       urlParams: {
         transactionType: 'secondType',
+        rangeFrom: 'now-15m',
+        rangeTo: 'now',
       },
     });
 

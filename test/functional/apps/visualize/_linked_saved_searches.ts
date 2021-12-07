@@ -32,6 +32,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       before(async () => {
         await PageObjects.visualize.initTests();
         await PageObjects.common.navigateToApp('discover');
+        await PageObjects.timePicker.setDefaultAbsoluteRange();
         await filterBar.addFilter('extension.raw', 'is', 'jpg');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.discover.saveSearch(savedSearchName);

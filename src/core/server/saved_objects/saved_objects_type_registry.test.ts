@@ -47,6 +47,59 @@ describe('SavedObjectTypeRegistry', () => {
       }).toThrowErrorMatchingInlineSnapshot(`"Type 'typeA' is already registered"`);
     });
 
+    it('throws when `management.visibleInManagement` is specified but `management.importableAndExportable` is undefined or false', () => {
+      expect(() => {
+        registry.registerType(
+          createType({
+            name: 'typeA',
+            management: {
+              visibleInManagement: true,
+            },
+          })
+        );
+      }).toThrowErrorMatchingInlineSnapshot(
+        `"Type typeA: 'management.importableAndExportable' must be 'true' when specifying 'management.visibleInManagement'"`
+      );
+
+      expect(() => {
+        registry.registerType(
+          createType({
+            name: 'typeA',
+            management: {
+              visibleInManagement: false,
+            },
+          })
+        );
+      }).toThrowErrorMatchingInlineSnapshot(
+        `"Type typeA: 'management.importableAndExportable' must be 'true' when specifying 'management.visibleInManagement'"`
+      );
+
+      expect(() => {
+        registry.registerType(
+          createType({
+            name: 'typeA',
+            management: {
+              importableAndExportable: false,
+              visibleInManagement: false,
+            },
+          })
+        );
+      }).toThrowErrorMatchingInlineSnapshot(
+        `"Type typeA: 'management.importableAndExportable' must be 'true' when specifying 'management.visibleInManagement'"`
+      );
+      expect(() => {
+        registry.registerType(
+          createType({
+            name: 'typeA',
+            management: {
+              importableAndExportable: true,
+              visibleInManagement: false,
+            },
+          })
+        );
+      }).not.toThrow();
+    });
+
     it('throws when `management.onExport` is specified but `management.importableAndExportable` is undefined or false', () => {
       expect(() => {
         registry.registerType(

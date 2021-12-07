@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import { esKuery, IIndexPattern } from '../../../../../src/plugins/data/public';
+import { DataViewBase } from '@kbn/es-query';
+import { esKuery } from '../../../../../src/plugins/data/public';
 
 export const convertKueryToElasticSearchQuery = (
   kueryExpression: string,
-  indexPattern: IIndexPattern
+  indexPattern: DataViewBase,
+  swallowErrors: boolean = true
 ) => {
   try {
     return kueryExpression
@@ -18,6 +20,8 @@ export const convertKueryToElasticSearchQuery = (
         )
       : '';
   } catch (err) {
-    return '';
+    if (swallowErrors) {
+      return '';
+    } else throw err;
   }
 };

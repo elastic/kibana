@@ -107,7 +107,7 @@ export function KeyValueFilterList({
                         { defaultMessage: 'Filter by value' }
                       )}
                     >
-                      <EuiIcon type="filter" color="black" size="m" />
+                      <EuiIcon type="filter" color="text" size="m" />
                     </EuiToolTip>
                   </EuiButtonEmpty>
                   <EuiText size="s">{value}</EuiText>

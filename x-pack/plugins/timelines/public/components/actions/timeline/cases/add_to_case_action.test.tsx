@@ -7,9 +7,15 @@
 
 import React from 'react';
 import { mount } from 'enzyme';
-import { TestProviders, mockGetAllCasesSelectorModal } from '../../../../mock';
+import {
+  TestProviders,
+  mockGetAllCasesSelectorModal,
+  mockGetCreateCaseFlyout,
+} from '../../../../mock';
 import { AddToCaseAction } from './add_to_case_action';
 import { SECURITY_SOLUTION_OWNER } from '../../../../../../cases/common';
+import { AddToCaseActionButton } from './add_to_case_action_button';
+import { ALERT_RULE_UUID } from '@kbn/rule-data-utils/technical_field_names';
 
 jest.mock('react-router-dom', () => ({
   useLocation: () => ({
@@ -20,16 +26,22 @@ jest.mock('./helpers');
 
 describe('AddToCaseAction', () => {
   const props = {
-    ecsRowData: {
+    event: {
       _id: 'test-id',
-      _index: 'test-index',
-      signal: { rule: { id: ['rule-id'], name: ['rule-name'], false_positives: [] } },
+      data: [],
+      ecs: {
+        _id: 'test-id',
+        _index: 'test-index',
+        signal: { rule: { id: ['rule-id'], name: ['rule-name'], false_positives: [] } },
+      },
     },
     casePermissions: {
       crud: true,
       read: true,
     },
-    appId: 'securitySolution',
+    appId: 'securitySolutionUI',
+    owner: 'securitySolution',
+    onClose: () => null,
   };
 
   beforeEach(() => {
@@ -39,6 +51,7 @@ describe('AddToCaseAction', () => {
   it('it renders', () => {
     const wrapper = mount(
       <TestProviders>
+        <AddToCaseActionButton {...props} />
         <AddToCaseAction {...props} />
       </TestProviders>
     );
@@ -49,6 +62,7 @@ describe('AddToCaseAction', () => {
   it('it opens the context menu', () => {
     const wrapper = mount(
       <TestProviders>
+        <AddToCaseActionButton {...props} />
         <AddToCaseAction {...props} />
       </TestProviders>
     );
@@ -58,21 +72,23 @@ describe('AddToCaseAction', () => {
     expect(wrapper.find(`[data-test-subj="add-existing-case-menu-item"]`).exists()).toBeTruthy();
   });
 
-  it('it opens the create case modal', () => {
+  it('it opens the create case flyout', () => {
     const wrapper = mount(
       <TestProviders>
+        <AddToCaseActionButton {...props} />
         <AddToCaseAction {...props} />
       </TestProviders>
     );
 
     wrapper.find(`[data-test-subj="attach-alert-to-case-button"]`).first().simulate('click');
     wrapper.find(`[data-test-subj="add-new-case-item"]`).first().simulate('click');
-    expect(wrapper.find('[data-test-subj="create-case-flyout"]').exists()).toBeTruthy();
+    expect(mockGetCreateCaseFlyout).toHaveBeenCalled();
   });
 
   it('it opens the all cases modal', () => {
     const wrapper = mount(
       <TestProviders>
+        <AddToCaseActionButton {...props} />
         <AddToCaseAction {...props} />
       </TestProviders>
     );
@@ -80,18 +96,34 @@ describe('AddToCaseAction', () => {
     wrapper.find(`[data-test-subj="attach-alert-to-case-button"]`).first().simulate('click');
     wrapper.find(`[data-test-subj="add-existing-case-menu-item"]`).first().simulate('click');
 
-    expect(wrapper.find('[data-test-subj="all-cases-modal"]')).toBeTruthy();
+    expect(mockGetAllCasesSelectorModal).toHaveBeenCalled();
   });
 
   it('it set rule information as null when missing', () => {
     const wrapper = mount(
       <TestProviders>
+        <AddToCaseActionButton
+          {...props}
+          event={{
+            _id: 'test-id',
+            data: [{ field: ALERT_RULE_UUID, value: ['rule-id'] }],
+            ecs: {
+              _id: 'test-id',
+              _index: 'test-index',
+              signal: { rule: { id: ['rule-id'], false_positives: [] } },
+            },
+          }}
+        />
         <AddToCaseAction
           {...props}
-          ecsRowData={{
+          event={{
             _id: 'test-id',
-            _index: 'test-index',
-            signal: { rule: { id: ['rule-id'], false_positives: [] } },
+            data: [{ field: ALERT_RULE_UUID, value: ['rule-id'] }],
+            ecs: {
+              _id: 'test-id',
+              _index: 'test-index',
+              signal: { rule: { id: ['rule-id'], false_positives: [] } },
+            },
           }}
         />
       </TestProviders>
@@ -113,11 +145,26 @@ describe('AddToCaseAction', () => {
   it('disabled when event type is not supported', () => {
     const wrapper = mount(
       <TestProviders>
+        <AddToCaseActionButton
+          {...props}
+          event={{
+            _id: 'test-id',
+            data: [],
+            ecs: {
+              _id: 'test-id',
+              _index: 'test-index',
+            },
+          }}
+        />
         <AddToCaseAction
           {...props}
-          ecsRowData={{
+          event={{
             _id: 'test-id',
-            _index: 'test-index',
+            data: [],
+            ecs: {
+              _id: 'test-id',
+              _index: 'test-index',
+            },
           }}
         />
       </TestProviders>
@@ -138,6 +185,7 @@ describe('AddToCaseAction', () => {
     };
     const wrapper = mount(
       <TestProviders>
+        <AddToCaseActionButton {...newProps} />
         <AddToCaseAction {...newProps} />
       </TestProviders>
     );

@@ -11,9 +11,9 @@ import { ExpressionFunctionDefinition } from '../types';
 import { Datatable, DatatableColumn } from '../../expression_types';
 
 export interface CreateTableArguments {
-  ids: string[];
-  names: string[] | null;
-  rowCount: number;
+  ids?: string[];
+  names?: string[] | null;
+  rowCount?: number;
 }
 
 export const createTable: ExpressionFunctionDefinition<

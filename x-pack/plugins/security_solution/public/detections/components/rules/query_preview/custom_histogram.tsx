@@ -7,9 +7,9 @@
 
 import React, { useEffect, useMemo } from 'react';
 
-import * as i18n from './translations';
+import * as i18n from '../rule_preview/translations';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
-import { getHistogramConfig } from './helpers';
+import { getHistogramConfig } from '../rule_preview/helpers';
 import {
   ChartSeriesConfigs,
   ChartSeriesData,
@@ -48,10 +48,10 @@ export const PreviewCustomQueryHistogram = ({
     }
   }, [setQuery, inspect, isLoading, isInitializing, refetch]);
 
-  const barConfig = useMemo((): ChartSeriesConfigs => getHistogramConfig(to, from, true), [
-    from,
-    to,
-  ]);
+  const barConfig = useMemo(
+    (): ChartSeriesConfigs => getHistogramConfig(to, from, true),
+    [from, to]
+  );
 
   const subtitle = useMemo(
     (): string =>

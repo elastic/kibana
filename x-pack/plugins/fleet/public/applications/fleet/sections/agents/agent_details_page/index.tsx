@@ -18,7 +18,7 @@ import {
   EuiDescriptionListDescription,
 } from '@elastic/eui';
 import type { Props as EuiTabProps } from '@elastic/eui/src/components/tabs/tab';
-import { FormattedMessage, FormattedRelative } from '@kbn/i18n/react';
+import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { EuiIconTip } from '@elastic/eui';
 
@@ -254,7 +254,7 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
       <WithHeaderLayout
         leftColumn={headerLeftContent}
         rightColumn={headerRightContent}
-        tabs={(headerTabs as unknown) as EuiTabProps[]}
+        tabs={headerTabs as unknown as EuiTabProps[]}
       >
         {isLoading && isInitialRequest ? (
           <Loading />

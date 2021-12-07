@@ -15,7 +15,7 @@ import {
 
 describe('get_cluster_uuids', () => {
   const searchMock = sinon.stub();
-  const callCluster = ({ search: searchMock } as unknown) as ElasticsearchClient;
+  const callCluster = { search: searchMock } as unknown as ElasticsearchClient;
 
   afterEach(() => {
     searchMock.reset();

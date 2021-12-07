@@ -49,6 +49,8 @@ const defaultProps = {
   enablePointEditing: () => {},
   openLayerSettings: () => {},
   editModeActiveForLayer: false,
+  numLayers: 2,
+  showThisLayerOnly: () => {},
 };
 
 describe('TOCEntryActionsPopover', () => {
@@ -106,6 +108,17 @@ describe('TOCEntryActionsPopover', () => {
     const component = shallow(
       <TOCEntryActionsPopover {...defaultProps} editModeActiveForLayer={true} />
     );
+
+    // Ensure all promises resolve
+    await new Promise((resolve) => process.nextTick(resolve));
+    // Ensure the state changes are reflected
+    component.update();
+
+    expect(component).toMatchSnapshot();
+  });
+
+  test('should show "show this layer only" action when there are more then 2 layers', async () => {
+    const component = shallow(<TOCEntryActionsPopover {...defaultProps} numLayers={3} />);
 
     // Ensure all promises resolve
     await new Promise((resolve) => process.nextTick(resolve));

@@ -7,8 +7,9 @@
 
 import type { ListId, NamespaceType } from '@kbn/securitysolution-io-ts-list-types';
 import { getSavedObjectType } from '@kbn/securitysolution-list-utils';
+import { asyncForEach } from '@kbn/std';
 
-import { SavedObjectsClientContract } from '../../../../../../src/core/server/';
+import { SavedObjectsClientContract } from '../../../../../../src/core/server';
 
 import { findExceptionListItem } from './find_exception_list_item';
 
@@ -80,7 +81,7 @@ export const deleteFoundExceptionListItems = async ({
   namespaceType: NamespaceType;
 }): Promise<void> => {
   const savedObjectType = getSavedObjectType({ namespaceType });
-  ids.forEach(async (id) => {
+  await asyncForEach(ids, async (id) => {
     try {
       await savedObjectsClient.delete(savedObjectType, id);
     } catch (err) {

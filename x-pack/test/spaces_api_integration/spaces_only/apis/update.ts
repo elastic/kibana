@@ -14,12 +14,8 @@ export default function updateSpaceTestSuite({ getService }: FtrProviderContext)
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const esArchiver = getService('esArchiver');
 
-  const {
-    updateTest,
-    expectAlreadyExistsResult,
-    expectDefaultSpaceResult,
-    expectNotFound,
-  } = updateTestSuiteFactory(esArchiver, supertestWithoutAuth);
+  const { updateTest, expectAlreadyExistsResult, expectDefaultSpaceResult, expectNotFound } =
+    updateTestSuiteFactory(esArchiver, supertestWithoutAuth);
 
   describe('update', () => {
     [

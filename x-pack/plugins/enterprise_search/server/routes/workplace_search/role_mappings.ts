@@ -14,7 +14,6 @@ const roleMappingBaseSchema = {
   roleType: schema.string(),
   groups: schema.arrayOf(schema.string()),
   allGroups: schema.boolean(),
-  authProvider: schema.arrayOf(schema.string()),
 };
 
 export function registerOrgEnableRoleMappingsRoute({
@@ -23,7 +22,7 @@ export function registerOrgEnableRoleMappingsRoute({
 }: RouteDependencies) {
   router.post(
     {
-      path: '/api/workplace_search/org/role_mappings/enable_role_based_access',
+      path: '/internal/workplace_search/org/role_mappings/enable_role_based_access',
       validate: false,
     },
     enterpriseSearchRequestHandler.createRequest({
@@ -38,7 +37,7 @@ export function registerOrgRoleMappingsRoute({
 }: RouteDependencies) {
   router.get(
     {
-      path: '/api/workplace_search/org/role_mappings',
+      path: '/internal/workplace_search/org/role_mappings',
       validate: false,
     },
     enterpriseSearchRequestHandler.createRequest({
@@ -48,7 +47,7 @@ export function registerOrgRoleMappingsRoute({
 
   router.post(
     {
-      path: '/api/workplace_search/org/role_mappings',
+      path: '/internal/workplace_search/org/role_mappings',
       validate: {
         body: schema.object(roleMappingBaseSchema),
       },
@@ -65,7 +64,7 @@ export function registerOrgRoleMappingRoute({
 }: RouteDependencies) {
   router.put(
     {
-      path: '/api/workplace_search/org/role_mappings/{id}',
+      path: '/internal/workplace_search/org/role_mappings/{id}',
       validate: {
         body: schema.object(roleMappingBaseSchema),
         params: schema.object({
@@ -80,7 +79,7 @@ export function registerOrgRoleMappingRoute({
 
   router.delete(
     {
-      path: '/api/workplace_search/org/role_mappings/{id}',
+      path: '/internal/workplace_search/org/role_mappings/{id}',
       validate: {
         params: schema.object({
           id: schema.string(),
@@ -99,7 +98,7 @@ export function registerOrgUserRoute({
 }: RouteDependencies) {
   router.post(
     {
-      path: '/api/workplace_search/org/single_user_role_mapping',
+      path: '/internal/workplace_search/org/single_user_role_mapping',
       validate: {
         body: schema.object({
           roleMapping: schema.object({

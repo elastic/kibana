@@ -32,3 +32,4 @@ export * from './plugins';
 export * from './streams';
 export * from './babel';
 export * from './extract';
+export * from './vscode_config';

@@ -6,14 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { Ref, SVGProps } from 'react';
+import { Component, CSSProperties, Ref, SVGProps } from 'react';
 import { ViewBoxParams } from '../../../common/types';
 import type { ShapeType } from './shape_factory';
 
-export interface ShapeProps {
+export type ShapeProps = {
   shapeAttributes?: ShapeAttributes;
-  shapeContentAttributes?: ShapeContentAttributes;
-}
+  shapeContentAttributes?: ShapeContentAttributes &
+    SpecificShapeContentAttributes & { ref?: React.RefObject<any> };
+  textAttributes?: SvgTextAttributes;
+} & Component['props'] & { ref?: React.RefObject<any> };
 
 export enum SvgElementTypes {
   polygon,
@@ -39,36 +41,48 @@ export interface ShapeContentAttributes {
   vectorEffect?: SVGProps<SVGElement>['vectorEffect'];
   strokeMiterlimit?: SVGProps<SVGElement>['strokeMiterlimit'];
 }
+export interface SvgConfig {
+  shapeType?: SvgElementTypes;
+  viewBox: ViewBoxParams;
+  shapeProps: ShapeContentAttributes &
+    SpecificShapeContentAttributes &
+    Component['props'] & { ref?: React.RefObject<any> };
+  textAttributes?: SvgTextAttributes;
+}
 
-interface CircleParams {
+export type SvgTextAttributes = Partial<Element> & {
+  x?: SVGProps<SVGTextElement>['x'];
+  y?: SVGProps<SVGTextElement>['y'];
+  textAnchor?: SVGProps<SVGTextElement>['textAnchor'];
+  dominantBaseline?: SVGProps<SVGTextElement>['dominantBaseline'];
+  dx?: SVGProps<SVGTextElement>['dx'];
+  dy?: SVGProps<SVGTextElement>['dy'];
+} & { style?: CSSProperties } & { ref?: React.RefObject<SVGTextElement> };
+
+export interface CircleParams {
   r: SVGProps<SVGCircleElement>['r'];
   cx: SVGProps<SVGCircleElement>['cx'];
   cy: SVGProps<SVGCircleElement>['cy'];
 }
 
-interface RectParams {
+export interface RectParams {
   x: SVGProps<SVGRectElement>['x'];
   y: SVGProps<SVGRectElement>['y'];
   width: SVGProps<SVGRectElement>['width'];
   height: SVGProps<SVGRectElement>['height'];
 }
 
-interface PathParams {
+export interface PathParams {
   d: SVGProps<SVGPathElement>['d'];
+  strokeLinecap?: SVGProps<SVGPathElement>['strokeLinecap'];
 }
 
-interface PolygonParams {
+export interface PolygonParams {
   points?: SVGProps<SVGPolygonElement>['points'];
   strokeLinejoin?: SVGProps<SVGPolygonElement>['strokeLinejoin'];
 }
 
-type SpecificShapeContentAttributes = CircleParams | RectParams | PathParams | PolygonParams;
-
-export interface SvgConfig {
-  shapeType?: SvgElementTypes;
-  viewBox: ViewBoxParams;
-  shapeProps: ShapeContentAttributes & SpecificShapeContentAttributes;
-}
+export type SpecificShapeContentAttributes = CircleParams | RectParams | PathParams | PolygonParams;
 
 export type ShapeDrawerProps = {
   shapeType: string;
@@ -79,5 +93,7 @@ export type ShapeDrawerProps = {
 export interface ShapeRef {
   getData: () => SvgConfig;
 }
+
+export type ShapeDrawerComponentProps = Omit<ShapeDrawerProps, 'getShape'>;
 
 export type { ShapeType };

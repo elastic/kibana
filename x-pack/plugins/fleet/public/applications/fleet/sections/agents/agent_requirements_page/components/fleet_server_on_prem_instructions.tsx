@@ -22,16 +22,17 @@ import {
   EuiFieldText,
   EuiForm,
   EuiFormErrorText,
+  EuiButtonGroup,
 } from '@elastic/eui';
 import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { DownloadStep } from '../../../../components';
 import {
   useStartServices,
-  useGetOutputs,
+  useDefaultOutput,
   sendGenerateServiceToken,
   usePlatform,
   PLATFORM_OPTIONS,
@@ -40,11 +41,12 @@ import {
   sendPutSettings,
   sendGetFleetStatus,
   useFleetStatus,
-  useUrlModal,
+  useLink,
 } from '../../../../hooks';
 import type { PLATFORM_TYPE } from '../../../../hooks';
 import type { PackagePolicy } from '../../../../types';
 import { FLEET_SERVER_PACKAGE } from '../../../../constants';
+import { FleetServerOnPremRequiredCallout } from '../../components';
 
 import { getInstallCommandForPlatform } from './install_command_utils';
 
@@ -185,7 +187,7 @@ export const FleetServerCommandStep = ({
                 >
                   <FormattedMessage
                     id="xpack.fleet.fleetServerSetup.setupGuideLink"
-                    defaultMessage="Fleet User Guide"
+                    defaultMessage="Fleet and Elastic Agent Guide"
                   />
                 </EuiLink>
               ),
@@ -193,19 +195,11 @@ export const FleetServerCommandStep = ({
           />
         </EuiText>
         <EuiSpacer size="l" />
-        <EuiSelect
-          prepend={
-            <EuiText>
-              <FormattedMessage
-                id="xpack.fleet.fleetServerSetup.platformSelectLabel"
-                defaultMessage="Platform"
-              />
-            </EuiText>
-          }
+        <EuiButtonGroup
           options={PLATFORM_OPTIONS}
-          value={platform}
-          onChange={(e) => setPlatform(e.target.value as PLATFORM_TYPE)}
-          aria-label={i18n.translate('xpack.fleet.fleetServerSetup.platformSelectAriaLabel', {
+          idSelected={platform}
+          onChange={(id) => setPlatform(id as PLATFORM_TYPE)}
+          legend={i18n.translate('xpack.fleet.fleetServerSetup.platformSelectAriaLabel', {
             defaultMessage: 'Platform',
           })}
         />
@@ -242,7 +236,7 @@ export const FleetServerCommandStep = ({
 };
 
 export const useFleetServerInstructions = (policyId?: string) => {
-  const outputsRequest = useGetOutputs();
+  const { output, refresh: refreshOutputs } = useDefaultOutput();
   const { notifications } = useStartServices();
   const [serviceToken, setServiceToken] = useState<string>();
   const [isLoadingServiceToken, setIsLoadingServiceToken] = useState<boolean>(false);
@@ -250,9 +244,7 @@ export const useFleetServerInstructions = (policyId?: string) => {
   const [deploymentMode, setDeploymentMode] = useState<DeploymentMode>('production');
   const { data: settings, resendRequest: refreshSettings } = useGetSettings();
   const fleetServerHost = settings?.item.fleet_server_hosts?.[0];
-  const output = outputsRequest.data?.items?.[0];
   const esHost = output?.hosts?.[0];
-  const refreshOutputs = outputsRequest.resendRequest;
 
   const installCommand = useMemo((): string => {
     if (!serviceToken || !esHost) {
@@ -377,7 +369,7 @@ const AgentPolicySelectionStep = ({
         <EuiText>
           <FormattedMessage
             id="xpack.fleet.fleetServerSetup.selectAgentPolicyDescriptionText"
-            defaultMessage="Agent policies allow you to configure and mange your agents remotely. We recommend using the “Default Fleet Server policy” which includes the necessary configuration to run a Fleet Server."
+            defaultMessage="Agent policies allow you to configure and manage your agents remotely. We recommend using the “Default Fleet Server policy” which includes the necessary configuration to run a Fleet Server."
           />
         </EuiText>
         <EuiSpacer size="m" />
@@ -425,7 +417,8 @@ export const AddFleetServerHostStepContent = ({
   const [isLoading, setIsLoading] = useState(false);
   const [fleetServerHost, setFleetServerHost] = useState('');
   const [error, setError] = useState<undefined | string>();
-  const { getModalHref } = useUrlModal();
+
+  const { getHref } = useLink();
 
   const validate = useCallback(
     (host: string) => {
@@ -528,7 +521,7 @@ export const AddFleetServerHostStepContent = ({
               values={{
                 host: calloutHost,
                 fleetSettingsLink: (
-                  <EuiLink href={getModalHref('settings')}>
+                  <EuiLink href={getHref('settings')}>
                     <FormattedMessage
                       id="xpack.fleet.fleetServerSetup.fleetSettingsLink"
                       defaultMessage="Fleet Settings"
@@ -694,20 +687,11 @@ export const OnPremInstructions: React.FC = () => {
     installCommand,
     platform,
     setPlatform,
-    refresh,
     deploymentMode,
     setDeploymentMode,
     fleetServerHost,
     addFleetServerHost,
   } = useFleetServerInstructions(policyId);
-
-  const { modal } = useUrlModal();
-  useEffect(() => {
-    // Refresh settings when the settings modal is closed
-    if (!modal) {
-      refresh();
-    }
-  }, [modal, refresh]);
 
   const { docLinks } = useStartServices();
 
@@ -737,6 +721,8 @@ export const OnPremInstructions: React.FC = () => {
 
   return (
     <>
+      <FleetServerOnPremRequiredCallout />
+      <EuiSpacer size="xl" />
       <EuiText>
         <h2>
           <FormattedMessage
@@ -757,7 +743,7 @@ export const OnPremInstructions: React.FC = () => {
               >
                 <FormattedMessage
                   id="xpack.fleet.fleetServerSetup.setupGuideLink"
-                  defaultMessage="Fleet User Guide"
+                  defaultMessage="Fleet and Elastic Agent Guide"
                 />
               </EuiLink>
             ),
@@ -768,8 +754,8 @@ export const OnPremInstructions: React.FC = () => {
       <EuiSteps
         className="eui-textLeft"
         steps={[
-          DownloadStep(),
           AgentPolicySelectionStep({ policyId, setPolicyId }),
+          DownloadStep(true),
           deploymentModeStep({ deploymentMode, setDeploymentMode }),
           addFleetServerHostStep({ addFleetServerHost }),
           ServiceTokenStep({

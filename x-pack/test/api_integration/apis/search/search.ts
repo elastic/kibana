@@ -14,7 +14,8 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
 
   describe('search', () => {
-    describe('post', () => {
+    // https://github.com/elastic/kibana/issues/113082
+    describe.skip('post', () => {
       it('should return 200 with final response if wait_for_completion_timeout is long enough', async () => {
         const resp = await supertest
           .post(`/internal/search/ese`)
@@ -249,7 +250,8 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    describe('delete', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/119272
+    describe.skip('delete', () => {
       it('should return 404 when no search id provided', async () => {
         await supertest.delete(`/internal/search/ese`).set('kbn-xsrf', 'foo').send().expect(404);
       });

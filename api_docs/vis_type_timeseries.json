@@ -24,7 +24,7 @@
           ") => data is ",
           "SeriesData"
         ],
-        "path": "src/plugins/vis_type_timeseries/common/vis_data_utils.ts",
+        "path": "src/plugins/vis_types/timeseries/common/vis_data_utils.ts",
         "deprecated": false,
         "children": [
           {
@@ -37,7 +37,7 @@
             "signature": [
               "TimeseriesVisData"
             ],
-            "path": "src/plugins/vis_type_timeseries/common/vis_data_utils.ts",
+            "path": "src/plugins/vis_types/timeseries/common/vis_data_utils.ts",
             "deprecated": false,
             "isRequired": true
           }
@@ -58,7 +58,7 @@
           ") => data is ",
           "TableData"
         ],
-        "path": "src/plugins/vis_type_timeseries/common/vis_data_utils.ts",
+        "path": "src/plugins/vis_types/timeseries/common/vis_data_utils.ts",
         "deprecated": false,
         "children": [
           {
@@ -71,7 +71,7 @@
             "signature": [
               "TimeseriesVisData"
             ],
-            "path": "src/plugins/vis_type_timeseries/common/vis_data_utils.ts",
+            "path": "src/plugins/vis_types/timeseries/common/vis_data_utils.ts",
             "deprecated": false,
             "isRequired": true
           }
@@ -95,7 +95,7 @@
           " | ",
           "TableData"
         ],
-        "path": "src/plugins/vis_type_timeseries/common/types/vis_data.ts",
+        "path": "src/plugins/vis_types/timeseries/common/types/vis_data.ts",
         "deprecated": false,
         "initialIsOpen": false
       }
@@ -108,7 +108,7 @@
       "tags": [],
       "label": "VisTypeTimeseriesSetup",
       "description": [],
-      "path": "src/plugins/vis_type_timeseries/server/plugin.ts",
+      "path": "src/plugins/vis_types/timeseries/server/plugin.ts",
       "deprecated": false,
       "children": [
         {
@@ -133,13 +133,12 @@
             "TimeseriesVisData",
             ">"
           ],
-          "path": "src/plugins/vis_type_timeseries/server/plugin.ts",
+          "path": "src/plugins/vis_types/timeseries/server/plugin.ts",
           "deprecated": false,
-          "returnComment": [],
           "children": [
             {
               "parentPluginId": "visTypeTimeseries",
-              "id": "def-server.requestContext",
+              "id": "def-server.VisTypeTimeseriesSetup.getVisData.$1",
               "type": "Object",
               "tags": [],
               "label": "requestContext",
@@ -147,12 +146,13 @@
               "signature": [
                 "DataRequestHandlerContext"
               ],
-              "path": "src/plugins/vis_type_timeseries/server/plugin.ts",
-              "deprecated": false
+              "path": "src/plugins/vis_types/timeseries/server/plugin.ts",
+              "deprecated": false,
+              "isRequired": true
             },
             {
               "parentPluginId": "visTypeTimeseries",
-              "id": "def-server.fakeRequest",
+              "id": "def-server.VisTypeTimeseriesSetup.getVisData.$2",
               "type": "Object",
               "tags": [],
               "label": "fakeRequest",
@@ -167,12 +167,13 @@
                 },
                 "<unknown, unknown, unknown, any>"
               ],
-              "path": "src/plugins/vis_type_timeseries/server/plugin.ts",
-              "deprecated": false
+              "path": "src/plugins/vis_types/timeseries/server/plugin.ts",
+              "deprecated": false,
+              "isRequired": true
             },
             {
               "parentPluginId": "visTypeTimeseries",
-              "id": "def-server.options",
+              "id": "def-server.VisTypeTimeseriesSetup.getVisData.$3",
               "type": "Any",
               "tags": [],
               "label": "options",
@@ -180,10 +181,12 @@
               "signature": [
                 "any"
               ],
-              "path": "src/plugins/vis_type_timeseries/server/plugin.ts",
-              "deprecated": false
+              "path": "src/plugins/vis_types/timeseries/server/plugin.ts",
+              "deprecated": false,
+              "isRequired": true
             }
-          ]
+          ],
+          "returnComment": []
         }
       ],
       "lifecycle": "setup",

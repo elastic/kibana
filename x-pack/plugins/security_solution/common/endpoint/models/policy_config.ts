@@ -71,8 +71,24 @@ export const policyFactory = (): PolicyConfig => {
       malware: {
         mode: ProtectionModes.prevent,
       },
+      behavior_protection: {
+        mode: ProtectionModes.prevent,
+        supported: true,
+      },
+      memory_protection: {
+        mode: ProtectionModes.prevent,
+        supported: true,
+      },
       popup: {
         malware: {
+          message: '',
+          enabled: true,
+        },
+        behavior_protection: {
+          message: '',
+          enabled: true,
+        },
+        memory_protection: {
           message: '',
           enabled: true,
         },
@@ -90,8 +106,24 @@ export const policyFactory = (): PolicyConfig => {
       malware: {
         mode: ProtectionModes.prevent,
       },
+      behavior_protection: {
+        mode: ProtectionModes.prevent,
+        supported: true,
+      },
+      memory_protection: {
+        mode: ProtectionModes.prevent,
+        supported: true,
+      },
       popup: {
         malware: {
+          message: '',
+          enabled: true,
+        },
+        behavior_protection: {
+          message: '',
+          enabled: true,
+        },
+        memory_protection: {
           message: '',
           enabled: true,
         },
@@ -147,21 +179,53 @@ export const policyFactoryWithoutPaidFeatures = (
     },
     mac: {
       ...policy.mac,
+      behavior_protection: {
+        mode: ProtectionModes.off,
+        supported: false,
+      },
+      memory_protection: {
+        mode: ProtectionModes.off,
+        supported: false,
+      },
       popup: {
         ...policy.mac.popup,
         malware: {
           message: '',
           enabled: true,
         },
+        memory_protection: {
+          message: '',
+          enabled: false,
+        },
+        behavior_protection: {
+          message: '',
+          enabled: false,
+        },
       },
     },
     linux: {
       ...policy.linux,
+      behavior_protection: {
+        mode: ProtectionModes.off,
+        supported: false,
+      },
+      memory_protection: {
+        mode: ProtectionModes.off,
+        supported: false,
+      },
       popup: {
         ...policy.linux.popup,
         malware: {
           message: '',
           enabled: true,
+        },
+        memory_protection: {
+          message: '',
+          enabled: false,
+        },
+        behavior_protection: {
+          message: '',
+          enabled: false,
         },
       },
     },
@@ -191,6 +255,28 @@ export const policyFactoryWithSupportedFeatures = (
         supported: true,
       },
     },
+    mac: {
+      ...policy.mac,
+      behavior_protection: {
+        ...policy.windows.behavior_protection,
+        supported: true,
+      },
+      memory_protection: {
+        ...policy.mac.memory_protection,
+        supported: true,
+      },
+    },
+    linux: {
+      ...policy.linux,
+      behavior_protection: {
+        ...policy.windows.behavior_protection,
+        supported: true,
+      },
+      memory_protection: {
+        ...policy.linux.memory_protection,
+        supported: true,
+      },
+    },
   };
 };
 
@@ -198,3 +284,4 @@ export const policyFactoryWithSupportedFeatures = (
  * Reflects what string the Endpoint will use when message field is default/empty
  */
 export const DefaultPolicyNotificationMessage = 'Elastic Security {action} {filename}';
+export const DefaultPolicyRuleNotificationMessage = 'Elastic Security {action} {rule}';

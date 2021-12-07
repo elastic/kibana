@@ -10,25 +10,43 @@ import { i18n } from '@kbn/i18n';
 import React, { PureComponent } from 'react';
 import { EuiScreenReaderOnly, keys } from '@elastic/eui';
 import { EuiIcon, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import type { ChromeStart } from '../../../../core/public';
 
 export interface ExitFullScreenButtonProps {
   onExitFullScreenMode: () => void;
+  chrome: ChromeStart;
+  /**
+   * Optional argument that determines whether we toggle the chrome bar
+   * the button unmounts.
+   *
+   * @note The intended use for this prop is that it is either `true` or `false`
+   * for the lifetime of the button.
+   *
+   * @default true
+   */
+  toggleChrome?: boolean;
 }
 
 import './index.scss';
 
 class ExitFullScreenButtonUi extends PureComponent<ExitFullScreenButtonProps> {
+  static defaultProps = {
+    toggleChrome: true,
+  };
+
   public onKeyDown = (e: KeyboardEvent) => {
     if (e.key === keys.ESCAPE) {
       this.props.onExitFullScreenMode();
     }
   };
 
-  public UNSAFE_componentWillMount() {
+  public componentDidMount() {
+    if (this.props.toggleChrome) this.props.chrome.setIsVisible(false);
     document.addEventListener('keydown', this.onKeyDown, false);
   }
 
   public componentWillUnmount() {
+    if (this.props.toggleChrome) this.props.chrome.setIsVisible(true);
     document.removeEventListener('keydown', this.onKeyDown, false);
   }
 

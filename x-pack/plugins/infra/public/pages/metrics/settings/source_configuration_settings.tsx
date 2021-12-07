@@ -14,13 +14,12 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useContext, useMemo } from 'react';
 import { SourceLoadingPage } from '../../../components/source_loading_page';
 import { Source } from '../../../containers/metrics_source';
 import { useInfraMLCapabilitiesContext } from '../../../containers/ml/infra_ml_capabilities';
 import { Prompt } from '../../../utils/navigation_warning_prompt';
-import { FieldsConfigurationPanel } from './fields_configuration_panel';
 import { IndicesConfigurationPanel } from './indices_configuration_panel';
 import { MLConfigurationPanel } from './ml_configuration_panel';
 import { NameConfigurationPanel } from './name_configuration_panel';
@@ -76,10 +75,10 @@ export const SourceConfigurationSettings = ({
     formStateChanges,
   ]);
 
-  const isWriteable = useMemo(() => shouldAllowEdit && source && source.origin !== 'internal', [
-    shouldAllowEdit,
-    source,
-  ]);
+  const isWriteable = useMemo(
+    () => shouldAllowEdit && source && source.origin !== 'internal',
+    [shouldAllowEdit, source]
+  );
 
   const { hasInfraMLCapabilities } = useInfraMLCapabilitiesContext();
 
@@ -107,7 +106,7 @@ export const SourceConfigurationSettings = ({
             : undefined
         }
       />
-      <EuiPanel paddingSize="l">
+      <EuiPanel paddingSize="l" hasShadow={false} hasBorder={true}>
         <NameConfigurationPanel
           isLoading={isLoading}
           nameFieldProps={indicesConfigurationProps.name}
@@ -115,7 +114,7 @@ export const SourceConfigurationSettings = ({
         />
       </EuiPanel>
       <EuiSpacer />
-      <EuiPanel paddingSize="l">
+      <EuiPanel paddingSize="l" hasShadow={false} hasBorder={true}>
         <IndicesConfigurationPanel
           isLoading={isLoading}
           metricAliasFieldProps={indicesConfigurationProps.metricAlias}
@@ -123,20 +122,9 @@ export const SourceConfigurationSettings = ({
         />
       </EuiPanel>
       <EuiSpacer />
-      <EuiPanel paddingSize="l">
-        <FieldsConfigurationPanel
-          containerFieldProps={indicesConfigurationProps.containerField}
-          hostFieldProps={indicesConfigurationProps.hostField}
-          isLoading={isLoading}
-          podFieldProps={indicesConfigurationProps.podField}
-          readOnly={!isWriteable}
-          timestampFieldProps={indicesConfigurationProps.timestampField}
-        />
-      </EuiPanel>
-      <EuiSpacer />
       {hasInfraMLCapabilities && (
         <>
-          <EuiPanel paddingSize="l">
+          <EuiPanel paddingSize="l" hasShadow={false} hasBorder={true}>
             <MLConfigurationPanel
               isLoading={isLoading}
               readOnly={!isWriteable}

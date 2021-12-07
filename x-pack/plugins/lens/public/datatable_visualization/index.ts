@@ -17,33 +17,24 @@ interface DatatableVisualizationPluginStartPlugins {
 }
 export interface DatatableVisualizationPluginSetupPlugins {
   expressions: ExpressionsSetup;
-  formatFactory: Promise<FormatFactory>;
+  formatFactory: FormatFactory;
   editorFrame: EditorFrameSetup;
   charts: ChartsPluginSetup;
 }
 
 export class DatatableVisualization {
-  constructor() {}
-
   setup(
     core: CoreSetup<DatatableVisualizationPluginStartPlugins, void>,
     { expressions, formatFactory, editorFrame, charts }: DatatableVisualizationPluginSetupPlugins
   ) {
     editorFrame.registerVisualization(async () => {
-      const {
-        getDatatable,
-        datatableColumn,
-        getDatatableRenderer,
-        getDatatableVisualization,
-      } = await import('../async_services');
+      const { getDatatableRenderer, getDatatableVisualization } = await import('../async_services');
       const palettes = await charts.palettes.getPalettes();
-      const resolvedFormatFactory = await formatFactory;
 
-      expressions.registerFunction(() => datatableColumn);
-      expressions.registerFunction(() => getDatatable({ formatFactory: resolvedFormatFactory }));
       expressions.registerRenderer(() =>
         getDatatableRenderer({
-          formatFactory: resolvedFormatFactory,
+          formatFactory,
+          theme: core.theme,
           getType: core
             .getStartServices()
             .then(([_, { data: dataStart }]) => dataStart.search.aggs.types.get),
@@ -51,7 +42,8 @@ export class DatatableVisualization {
           uiSettings: core.uiSettings,
         })
       );
-      return getDatatableVisualization({ paletteService: palettes });
+
+      return getDatatableVisualization({ paletteService: palettes, theme: core.theme });
     });
   }
 }

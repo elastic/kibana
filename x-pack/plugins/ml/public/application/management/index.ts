@@ -9,13 +9,15 @@ import { i18n } from '@kbn/i18n';
 
 import type { CoreSetup } from 'kibana/public';
 import type { ManagementSetup } from 'src/plugins/management/public';
+import type { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
 import type { MlStartDependencies } from '../../plugin';
 
 import type { ManagementAppMountParams } from '../../../../../../src/plugins/management/public';
 
 export function registerManagementSection(
   management: ManagementSetup,
-  core: CoreSetup<MlStartDependencies>
+  core: CoreSetup<MlStartDependencies>,
+  deps: { usageCollection?: UsageCollectionSetup }
 ) {
   return management.sections.section.insightsAndAlerting.registerApp({
     id: 'jobsListLink',
@@ -25,7 +27,7 @@ export function registerManagementSection(
     order: 2,
     async mount(params: ManagementAppMountParams) {
       const { mountApp } = await import('./jobs_list');
-      return mountApp(core, params);
+      return mountApp(core, params, deps);
     },
   });
 }

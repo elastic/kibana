@@ -15,6 +15,7 @@ jest.mock('../../kibana_services', () => ({
   getServices: () => ({
     http: {
       post: jest.fn().mockImplementation(async () => ({ count: 1 })),
+      basePath: { prepend: (path) => `/foo/${path}` },
     },
     getBasePath: jest.fn(() => 'path'),
     chrome: {
@@ -33,11 +34,6 @@ jest.mock('../../kibana_services', () => ({
     },
   }),
 }));
-jest.mock('../../../../../kibana_react/public', () => {
-  return {
-    Markdown: () => <div className="markdown" />,
-  };
-});
 
 function buildInstructionSet(type) {
   return {
@@ -134,7 +130,7 @@ describe('isCloudEnabled is false', () => {
     );
     await loadTutorialPromise;
     component.update();
-    component.find('#onPremElasticCloud').first().simulate('click');
+    component.find('#onPremElasticCloud').first().find('input').simulate('change');
     component.update();
     expect(component.state('visibleInstructions')).toBe('onPremElasticCloud');
   });

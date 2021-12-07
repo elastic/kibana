@@ -13,14 +13,7 @@ import {
   getEditedRule,
   getNewOverrideRule,
 } from '../../objects/rule';
-import {
-  ALERT_RULE_METHOD,
-  ALERT_RULE_NAME,
-  ALERT_RULE_RISK_SCORE,
-  ALERT_RULE_SEVERITY,
-  ALERT_RULE_VERSION,
-  NUMBER_OF_ALERTS,
-} from '../../screens/alerts';
+import { ALERT_GRID_CELL, NUMBER_OF_ALERTS } from '../../screens/alerts';
 
 import {
   CUSTOM_RULES_BTN,
@@ -221,12 +214,8 @@ describe('Custom detection rules creation', () => {
     waitForTheRuleToBeExecuted();
     waitForAlertsToPopulate();
 
-    cy.get(NUMBER_OF_ALERTS).should(($count) => expect(+$count.text()).to.be.gte(1));
-    cy.get(ALERT_RULE_NAME).first().should('have.text', this.rule.name);
-    cy.get(ALERT_RULE_VERSION).first().should('have.text', '1');
-    cy.get(ALERT_RULE_METHOD).first().should('have.text', 'query');
-    cy.get(ALERT_RULE_SEVERITY).first().should('have.text', this.rule.severity.toLowerCase());
-    cy.get(ALERT_RULE_RISK_SCORE).first().should('have.text', this.rule.riskScore);
+    cy.get(NUMBER_OF_ALERTS).should(($count) => expect(+$count.text().split(' ')[0]).to.be.gte(1));
+    cy.get(ALERT_GRID_CELL).contains(this.rule.name);
   });
 });
 
@@ -238,10 +227,9 @@ describe('Custom detection rules deletion and edition', () => {
       goToManageAlertsDetectionRules();
       waitForAlertsIndexToBeCreated();
       createCustomRuleActivated(getNewRule(), 'rule1');
-      createCustomRuleActivated(getNewRule(), 'rule2');
 
-      createCustomRuleActivated(getNewOverrideRule(), 'rule3');
-      createCustomRuleActivated(getExistingRule(), 'rule4');
+      createCustomRuleActivated(getNewOverrideRule(), 'rule2');
+      createCustomRuleActivated(getExistingRule(), 'rule3');
       reload();
     });
 
@@ -295,7 +283,7 @@ describe('Custom detection rules deletion and edition', () => {
           });
           cy.get(SHOWING_RULES_TEXT).should(
             'have.text',
-            `Showing ${expectedNumberOfRulesAfterDeletion} rules`
+            `Showing ${expectedNumberOfRulesAfterDeletion} rule`
           );
           cy.get(CUSTOM_RULES_BTN).should(
             'have.text',
@@ -356,15 +344,15 @@ describe('Custom detection rules deletion and edition', () => {
     it('Only modifies rule active status on enable/disable', () => {
       activatesRule();
 
-      cy.intercept('GET', `/api/detection_engine/rules?id=`).as('fetchRuleDetails');
+      cy.intercept('GET', `/api/detection_engine/rules?id=*`).as('fetchRuleDetails');
 
       goToRuleDetails();
 
       cy.wait('@fetchRuleDetails').then(({ response }) => {
-        cy.wrap(response!.statusCode).should('eql', 200);
+        cy.wrap(response?.statusCode).should('eql', 200);
 
-        cy.wrap(response!.body.max_signals).should('eql', getExistingRule().maxSignals);
-        cy.wrap(response!.body.enabled).should('eql', false);
+        cy.wrap(response?.body.max_signals).should('eql', getExistingRule().maxSignals);
+        cy.wrap(response?.body.enabled).should('eql', false);
       });
     });
 
@@ -419,14 +407,14 @@ describe('Custom detection rules deletion and edition', () => {
       cy.get(TAGS_CLEAR_BUTTON).click({ force: true });
       fillAboutRule(getEditedRule());
 
-      cy.intercept('GET', '/api/detection_engine/rules?id').as('getRule');
+      cy.intercept('GET', '/api/detection_engine/rules?id*').as('getRule');
 
       saveEditedRule();
 
       cy.wait('@getRule').then(({ response }) => {
-        cy.wrap(response!.statusCode).should('eql', 200);
+        cy.wrap(response?.statusCode).should('eql', 200);
         // ensure that editing rule does not modify max_signals
-        cy.wrap(response!.body.max_signals).should('eql', getExistingRule().maxSignals);
+        cy.wrap(response?.body.max_signals).should('eql', getExistingRule().maxSignals);
       });
 
       cy.get(RULE_NAME_HEADER).should('contain', `${getEditedRule().name}`);

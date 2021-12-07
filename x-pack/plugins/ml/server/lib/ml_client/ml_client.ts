@@ -258,7 +258,7 @@ export function getMlClient(
       // this should use DataFrameAnalyticsStats, but needs a refactor to move DataFrameAnalyticsStats to common
       await jobIdsCheck('data-frame-analytics', p, true);
       try {
-        const { body } = ((await mlClient.getDataFrameAnalyticsStats(...p)) as unknown) as {
+        const { body } = (await mlClient.getDataFrameAnalyticsStats(...p)) as unknown as {
           body: { data_frame_analytics: DataFrameAnalyticsConfig[] };
         };
         const jobs = await jobSavedObjectService.filterJobsForSpace<DataFrameAnalyticsConfig>(
@@ -380,6 +380,12 @@ export function getMlClient(
     async getTrainedModelsStats(...p: Parameters<MlClient['getTrainedModelsStats']>) {
       return mlClient.getTrainedModelsStats(...p);
     },
+    async startTrainedModelDeployment(...p: Parameters<MlClient['startTrainedModelDeployment']>) {
+      return mlClient.startTrainedModelDeployment(...p);
+    },
+    async stopTrainedModelDeployment(...p: Parameters<MlClient['stopTrainedModelDeployment']>) {
+      return mlClient.stopTrainedModelDeployment(...p);
+    },
     async info(...p: Parameters<MlClient['info']>) {
       return mlClient.info(...p);
     },
@@ -465,7 +471,24 @@ export function getMlClient(
     },
     async updateDatafeed(...p: Parameters<MlClient['updateDatafeed']>) {
       await datafeedIdsCheck(p);
-      return mlClient.updateDatafeed(...p);
+
+      // Temporary workaround for the incorrect updateDatafeed function in the esclient
+      if (p.length === 0 || p[0] === undefined) {
+        // Temporary generic error message. This should never be triggered
+        // but is added for type correctness below
+        throw new Error('Incorrect arguments supplied');
+      }
+      const { datafeed_id: id, body } = p[0];
+
+      return client.asInternalUser.transport.request({
+        method: 'POST',
+        path: `/_ml/datafeeds/${id}/_update`,
+        body,
+      });
+
+      // this should be reinstated once https://github.com/elastic/elasticsearch-js/issues/1601
+      // is fixed
+      // return mlClient.updateDatafeed(...p);
     },
     async updateFilter(...p: Parameters<MlClient['updateFilter']>) {
       return mlClient.updateFilter(...p);
@@ -473,6 +496,10 @@ export function getMlClient(
     async updateJob(...p: Parameters<MlClient['updateJob']>) {
       await jobIdsCheck('anomaly-detector', p);
       return mlClient.updateJob(...p);
+    },
+    async resetJob(...p: Parameters<MlClient['resetJob']>) {
+      await jobIdsCheck('anomaly-detector', p);
+      return mlClient.resetJob(...p);
     },
     async updateModelSnapshot(...p: Parameters<MlClient['updateModelSnapshot']>) {
       await jobIdsCheck('anomaly-detector', p);

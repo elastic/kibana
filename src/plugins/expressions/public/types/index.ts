@@ -5,14 +5,16 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { IExecutionContextContainer } from 'src/core/public';
+
+import type { SerializableRecord } from '@kbn/utility-types';
+import type { KibanaExecutionContext } from 'src/core/public';
 import { Adapters } from '../../../inspector/public';
 import {
   IInterpreterRenderHandlers,
   ExpressionValue,
   ExpressionsService,
-  SerializableState,
   RenderMode,
+  IInterpreterRenderEvent,
 } from '../../common';
 import { ExpressionRenderHandlerParams } from '../render';
 
@@ -33,9 +35,9 @@ export interface ExpressionInterpreter {
 }
 
 export interface IExpressionLoaderParams {
-  searchContext?: SerializableState;
+  searchContext?: SerializableRecord;
   context?: ExpressionValue;
-  variables?: Record<string, any>;
+  variables?: Record<string, unknown>;
   // Enables debug tracking on each expression in the AST
   debug?: boolean;
   disableCaching?: boolean;
@@ -43,12 +45,13 @@ export interface IExpressionLoaderParams {
   customRenderers?: [];
   uiState?: unknown;
   inspectorAdapters?: Adapters;
+  interactive?: boolean;
   onRenderError?: RenderErrorHandlerFnType;
   searchSessionId?: string;
   renderMode?: RenderMode;
   syncColors?: boolean;
   hasCompatibleActions?: ExpressionRenderHandlerParams['hasCompatibleActions'];
-  executionContext?: IExecutionContextContainer;
+  executionContext?: KibanaExecutionContext;
 
   /**
    * The flag to toggle on emitting partial results.
@@ -73,3 +76,6 @@ export type RenderErrorHandlerFnType = (
   error: ExpressionRenderError,
   handlers: IInterpreterRenderHandlers
 ) => void;
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type ExpressionRendererEvent = IInterpreterRenderEvent<any>;

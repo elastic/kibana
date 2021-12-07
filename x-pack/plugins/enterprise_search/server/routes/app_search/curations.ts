@@ -15,7 +15,7 @@ export function registerCurationsRoutes({
 }: RouteDependencies) {
   router.get(
     {
-      path: '/api/app_search/engines/{engineName}/curations',
+      path: '/internal/app_search/engines/{engineName}/curations',
       validate: {
         params: schema.object({
           engineName: schema.string(),
@@ -33,7 +33,7 @@ export function registerCurationsRoutes({
 
   router.post(
     {
-      path: '/api/app_search/engines/{engineName}/curations',
+      path: '/internal/app_search/engines/{engineName}/curations',
       validate: {
         params: schema.object({
           engineName: schema.string(),
@@ -50,7 +50,7 @@ export function registerCurationsRoutes({
 
   router.delete(
     {
-      path: '/api/app_search/engines/{engineName}/curations/{curationId}',
+      path: '/internal/app_search/engines/{engineName}/curations/{curationId}',
       validate: {
         params: schema.object({
           engineName: schema.string(),
@@ -65,7 +65,7 @@ export function registerCurationsRoutes({
 
   router.get(
     {
-      path: '/api/app_search/engines/{engineName}/curations/{curationId}',
+      path: '/internal/app_search/engines/{engineName}/curations/{curationId}',
       validate: {
         query: schema.object({
           skip_record_analytics: schema.string(),
@@ -83,8 +83,11 @@ export function registerCurationsRoutes({
 
   router.put(
     {
-      path: '/api/app_search/engines/{engineName}/curations/{curationId}',
+      path: '/internal/app_search/engines/{engineName}/curations/{curationId}',
       validate: {
+        query: schema.object({
+          skip_record_analytics: schema.string(),
+        }),
         params: schema.object({
           engineName: schema.string(),
           curationId: schema.string(),
@@ -104,7 +107,7 @@ export function registerCurationsRoutes({
 
   router.get(
     {
-      path: '/api/app_search/engines/{engineName}/curations/find_or_create',
+      path: '/internal/app_search/engines/{engineName}/curations/find_or_create',
       validate: {
         params: schema.object({
           engineName: schema.string(),

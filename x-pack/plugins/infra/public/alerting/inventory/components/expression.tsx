@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { debounce, pick, omit } from 'lodash';
+import { debounce, omit } from 'lodash';
 import { Unit } from '@elastic/datemath';
 import React, { useCallback, useMemo, useEffect, useState, ChangeEvent } from 'react';
 import { IFieldType } from 'src/plugins/data/public';
@@ -23,11 +23,9 @@ import {
   EuiIcon,
   EuiHealth,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { toMetricOpt } from '../../../../common/snapshot_metric_i18n';
-import { AlertPreview } from '../../common';
-import { METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID } from '../../../../common/alerting/metrics';
 import {
   Comparator,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
@@ -68,11 +66,11 @@ import {
   SnapshotCustomMetricInputRT,
 } from '../../../../common/http_api/snapshot_api';
 
-import { validateMetricThreshold } from './validation';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 
 import { ExpressionChart } from './expression_chart';
 const FILTER_TYPING_DEBOUNCE_MS = 500;
+export const QUERY_INVALID = Symbol('QUERY_INVALID');
 
 export interface AlertContextMeta {
   options?: Partial<InfraWaffleMapOptions>;
@@ -87,7 +85,7 @@ type Props = Omit<
     {
       criteria: Criteria;
       nodeType: InventoryItemType;
-      filterQuery?: string;
+      filterQuery?: string | symbol;
       filterQueryText?: string;
       sourceId: string;
       alertOnNoData?: boolean;
@@ -113,15 +111,7 @@ export const defaultExpression = {
 
 export const Expressions: React.FC<Props> = (props) => {
   const { http, notifications } = useKibanaContextForPlugin().services;
-  const {
-    setAlertParams,
-    alertParams,
-    errors,
-    alertInterval,
-    alertThrottle,
-    metadata,
-    alertNotifyWhen,
-  } = props;
+  const { setAlertParams, alertParams, errors, metadata } = props;
   const { source, createDerivedIndexPattern } = useSourceViaHttp({
     sourceId: 'default',
     fetch: http.fetch,
@@ -130,9 +120,10 @@ export const Expressions: React.FC<Props> = (props) => {
   const [timeSize, setTimeSize] = useState<number | undefined>(1);
   const [timeUnit, setTimeUnit] = useState<Unit>('m');
 
-  const derivedIndexPattern = useMemo(() => createDerivedIndexPattern(), [
-    createDerivedIndexPattern,
-  ]);
+  const derivedIndexPattern = useMemo(
+    () => createDerivedIndexPattern(),
+    [createDerivedIndexPattern]
+  );
 
   const updateParams = useCallback(
     (id, e: InventoryMetricConditions) => {
@@ -167,10 +158,14 @@ export const Expressions: React.FC<Props> = (props) => {
   const onFilterChange = useCallback(
     (filter: any) => {
       setAlertParams('filterQueryText', filter || '');
-      setAlertParams(
-        'filterQuery',
-        convertKueryToElasticSearchQuery(filter, derivedIndexPattern) || ''
-      );
+      try {
+        setAlertParams(
+          'filterQuery',
+          convertKueryToElasticSearchQuery(filter, derivedIndexPattern, false) || ''
+        );
+      } catch (e) {
+        setAlertParams('filterQuery', QUERY_INVALID);
+      }
     },
     [derivedIndexPattern, setAlertParams]
   );
@@ -403,17 +398,6 @@ export const Expressions: React.FC<Props> = (props) => {
       </EuiFormRow>
 
       <EuiSpacer size={'m'} />
-      <AlertPreview
-        alertInterval={alertInterval}
-        alertThrottle={alertThrottle}
-        alertNotifyWhen={alertNotifyWhen}
-        alertType={METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID}
-        alertParams={pick(alertParams, 'criteria', 'nodeType', 'sourceId', 'filterQuery')}
-        validate={validateMetricThreshold}
-        groupByDisplayName={alertParams.nodeType}
-        showNoDataResults={alertParams.alertOnNoData}
-      />
-      <EuiSpacer size={'m'} />
     </>
   );
 };
@@ -458,16 +442,8 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
   const [isExpanded, setRowState] = useState(true);
   const toggleRowState = useCallback(() => setRowState(!isExpanded), [isExpanded]);
 
-  const {
-    children,
-    setAlertParams,
-    expression,
-    errors,
-    expressionId,
-    remove,
-    canDelete,
-    fields,
-  } = props;
+  const { children, setAlertParams, expression, errors, expressionId, remove, canDelete, fields } =
+    props;
   const {
     metric,
     comparator = Comparator.GT,
@@ -667,7 +643,7 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
                     }
                   )}
                   iconSize="s"
-                  color={'subdued'}
+                  color="text"
                   iconType={'crossInACircleFilled'}
                   onClick={toggleWarningThreshold}
                 />

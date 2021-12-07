@@ -7,7 +7,7 @@
 
 import { ValuesType } from 'utility-types';
 import { merge } from 'lodash';
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { joinByKey } from '../../../../common/utils/join_by_key';
 import { Setup } from '../../helpers/setup_request';
 import { getStats } from './get_stats';
@@ -111,6 +111,13 @@ export function getConnectionStats({
           timeseries: mergedStats.timeseries.map((point) => ({
             x: point.x,
             y: point.count > 0 ? point.latency_sum / point.count : null,
+          })),
+        },
+        totalTime: {
+          value: mergedStats.value.latency_sum,
+          timeseries: mergedStats.timeseries.map((point) => ({
+            x: point.x,
+            y: point.latency_sum,
           })),
         },
         throughput: {

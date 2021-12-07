@@ -38,6 +38,10 @@ function createPluginManifest(manifestProps: Partial<PluginManifest> = {}): Plug
     optionalPlugins: ['some-optional-dep'],
     server: true,
     ui: true,
+    owner: {
+      name: 'Core',
+      githubTeam: 'kibana-core',
+    },
     ...manifestProps,
   };
 }
@@ -120,9 +124,6 @@ describe('createPluginInitializerContext', () => {
         .pipe(first())
         .toPromise();
       expect(configObject).toStrictEqual({
-        kibana: {
-          index: '.kibana',
-        },
         elasticsearch: {
           shardTimeout: duration(30, 's'),
           requestTimeout: duration(30, 's'),

@@ -9,11 +9,13 @@ import { isObject } from 'lodash';
 import {
   FieldBasedIndexPatternColumn,
   GenericOperationDefinition,
-  IndexPatternColumn,
+  GenericIndexPatternColumn,
 } from '../index';
-import { ReferenceBasedIndexPatternColumn } from '../column_types';
+import { BaseIndexPatternColumn, ReferenceBasedIndexPatternColumn } from '../column_types';
 import { IndexPatternLayer } from '../../../types';
 import { unquotedStringRegex } from './util';
+import { isColumnOfType } from '../helpers';
+import { StaticValueIndexPatternColumn } from '../static_value';
 
 // Just handle two levels for now
 type OperationParams = Record<string, string | number | Record<string, string | number>>;
@@ -33,11 +35,16 @@ export function getSafeFieldName({
 }
 
 export function generateFormula(
-  previousColumn: ReferenceBasedIndexPatternColumn | IndexPatternColumn,
+  previousColumn: ReferenceBasedIndexPatternColumn | GenericIndexPatternColumn,
   layer: IndexPatternLayer,
   previousFormula: string,
   operationDefinitionMap: Record<string, GenericOperationDefinition> | undefined
 ) {
+  if (isColumnOfType<StaticValueIndexPatternColumn>('static_value', previousColumn)) {
+    if (previousColumn.params && 'value' in previousColumn.params) {
+      return String(previousColumn.params.value); // make sure it's a string
+    }
+  }
   if ('references' in previousColumn) {
     const metric = layer.columns[previousColumn.references[0]];
     if (metric && 'sourceField' in metric && metric.dataType === 'number') {
@@ -76,17 +83,25 @@ export function generateFormula(
   return previousFormula;
 }
 
+interface ParameterizedColumn extends BaseIndexPatternColumn {
+  params: OperationParams;
+}
+
+function isParameterizedColumn(col: GenericIndexPatternColumn): col is ParameterizedColumn {
+  return Boolean('params' in col && col.params);
+}
+
 function extractParamsForFormula(
-  column: IndexPatternColumn | ReferenceBasedIndexPatternColumn,
+  column: GenericIndexPatternColumn,
   operationDefinitionMap: Record<string, GenericOperationDefinition> | undefined
 ) {
   if (!operationDefinitionMap) {
     return [];
   }
   const def = operationDefinitionMap[column.operationType];
-  if ('operationParams' in def && column.params) {
+  if ('operationParams' in def && isParameterizedColumn(column)) {
     return (def.operationParams || []).flatMap(({ name, required }) => {
-      const value = (column.params as OperationParams)![name];
+      const value = column.params[name];
       if (isObject(value)) {
         return Object.keys(value).map((subName) => ({
           name: `${name}-${subName}`,

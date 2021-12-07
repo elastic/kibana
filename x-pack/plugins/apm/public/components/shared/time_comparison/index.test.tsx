@@ -9,23 +9,48 @@ import { render } from '@testing-library/react';
 import React, { ReactNode } from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { EuiThemeProvider } from '../../../../../../../src/plugins/kibana_react/common';
-import { MockUrlParamsContextProvider } from '../../../context/url_params_context/mock_url_params_context_provider';
-import { IUrlParams } from '../../../context/url_params_context/types';
 import {
   expectTextsInDocument,
   expectTextsNotInDocument,
 } from '../../../utils/testHelpers';
-import { getComparisonTypes, getSelectOptions, TimeComparison } from './';
+import { getSelectOptions, TimeComparison } from './';
 import * as urlHelpers from '../../shared/Links/url_helpers';
 import moment from 'moment';
-import { TimeRangeComparisonType } from './get_time_range_comparison';
+import { getComparisonTypes } from './get_comparison_types';
+import { MockApmPluginContextWrapper } from '../../../context/apm_plugin/mock_apm_plugin_context';
+import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
+import {
+  TimeRangeComparisonType,
+  TimeRangeComparisonEnum,
+} from '../../../../common/runtime_types/comparison_type_rt';
+import { MockUrlParamsContextProvider } from '../../../context/url_params_context/mock_url_params_context_provider';
 
-function getWrapper(params?: IUrlParams) {
+function getWrapper({
+  exactStart,
+  exactEnd,
+  comparisonType,
+  comparisonEnabled,
+  environment = ENVIRONMENT_ALL.value,
+}: {
+  exactStart: string;
+  exactEnd: string;
+  comparisonType?: TimeRangeComparisonType;
+  comparisonEnabled?: boolean;
+  environment?: string;
+}) {
   return ({ children }: { children?: ReactNode }) => {
     return (
-      <MemoryRouter>
-        <MockUrlParamsContextProvider params={params}>
-          <EuiThemeProvider>{children}</EuiThemeProvider>
+      <MemoryRouter
+        initialEntries={[
+          `/services?rangeFrom=${exactStart}&rangeTo=${exactEnd}&environment=${environment}`,
+        ]}
+      >
+        <MockUrlParamsContextProvider
+          params={{ comparisonType, comparisonEnabled }}
+        >
+          <MockApmPluginContextWrapper>
+            <EuiThemeProvider>{children}</EuiThemeProvider>
+          </MockApmPluginContextWrapper>
         </MockUrlParamsContextProvider>
       </MemoryRouter>
     );
@@ -46,8 +71,8 @@ describe('TimeComparison', () => {
           end: '2021-06-04T16:32:02.335Z',
         })
       ).toEqual([
-        TimeRangeComparisonType.DayBefore.valueOf(),
-        TimeRangeComparisonType.WeekBefore.valueOf(),
+        TimeRangeComparisonEnum.DayBefore.valueOf(),
+        TimeRangeComparisonEnum.WeekBefore.valueOf(),
       ]);
     });
 
@@ -58,8 +83,8 @@ describe('TimeComparison', () => {
           end: '2021-06-05T03:59:59.999Z',
         })
       ).toEqual([
-        TimeRangeComparisonType.DayBefore.valueOf(),
-        TimeRangeComparisonType.WeekBefore.valueOf(),
+        TimeRangeComparisonEnum.DayBefore.valueOf(),
+        TimeRangeComparisonEnum.WeekBefore.valueOf(),
       ]);
     });
 
@@ -70,17 +95,30 @@ describe('TimeComparison', () => {
           end: '2021-06-04T16:31:35.748Z',
         })
       ).toEqual([
-        TimeRangeComparisonType.DayBefore.valueOf(),
-        TimeRangeComparisonType.WeekBefore.valueOf(),
+        TimeRangeComparisonEnum.DayBefore.valueOf(),
+        TimeRangeComparisonEnum.WeekBefore.valueOf(),
       ]);
     });
+
+    it('shows week and day before when 24 hours is selected but milliseconds are different', () => {
+      expect(
+        getComparisonTypes({
+          start: '2021-10-15T00:52:59.554Z',
+          end: '2021-10-14T00:52:59.553Z',
+        })
+      ).toEqual([
+        TimeRangeComparisonEnum.DayBefore.valueOf(),
+        TimeRangeComparisonEnum.WeekBefore.valueOf(),
+      ]);
+    });
+
     it('shows week before when 25 hours is selected', () => {
       expect(
         getComparisonTypes({
           start: '2021-06-02T12:32:00.000Z',
           end: '2021-06-03T13:32:09.079Z',
         })
-      ).toEqual([TimeRangeComparisonType.WeekBefore.valueOf()]);
+      ).toEqual([TimeRangeComparisonEnum.WeekBefore.valueOf()]);
     });
 
     it('shows week before when 7 days is selected', () => {
@@ -89,7 +127,7 @@ describe('TimeComparison', () => {
           start: '2021-05-28T16:32:17.520Z',
           end: '2021-06-04T16:32:17.520Z',
         })
-      ).toEqual([TimeRangeComparisonType.WeekBefore.valueOf()]);
+      ).toEqual([TimeRangeComparisonEnum.WeekBefore.valueOf()]);
     });
     it('shows period before when 8 days is selected', () => {
       expect(
@@ -97,7 +135,7 @@ describe('TimeComparison', () => {
           start: '2021-05-27T16:32:46.747Z',
           end: '2021-06-04T16:32:46.747Z',
         })
-      ).toEqual([TimeRangeComparisonType.PeriodBefore.valueOf()]);
+      ).toEqual([TimeRangeComparisonEnum.PeriodBefore.valueOf()]);
     });
   });
 
@@ -106,24 +144,24 @@ describe('TimeComparison', () => {
       expect(
         getSelectOptions({
           comparisonTypes: [
-            TimeRangeComparisonType.DayBefore,
-            TimeRangeComparisonType.WeekBefore,
-            TimeRangeComparisonType.PeriodBefore,
+            TimeRangeComparisonEnum.DayBefore,
+            TimeRangeComparisonEnum.WeekBefore,
+            TimeRangeComparisonEnum.PeriodBefore,
           ],
           start: '2021-05-27T16:32:46.747Z',
           end: '2021-06-04T16:32:46.747Z',
         })
       ).toEqual([
         {
-          value: TimeRangeComparisonType.DayBefore.valueOf(),
+          value: TimeRangeComparisonEnum.DayBefore.valueOf(),
           text: 'Day before',
         },
         {
-          value: TimeRangeComparisonType.WeekBefore.valueOf(),
+          value: TimeRangeComparisonEnum.WeekBefore.valueOf(),
           text: 'Week before',
         },
         {
-          value: TimeRangeComparisonType.PeriodBefore.valueOf(),
+          value: TimeRangeComparisonEnum.PeriodBefore.valueOf(),
           text: '19/05 18:32 - 27/05 18:32',
         },
       ]);
@@ -132,13 +170,13 @@ describe('TimeComparison', () => {
     it('formats period before as DD/MM/YY HH:mm when range years are different', () => {
       expect(
         getSelectOptions({
-          comparisonTypes: [TimeRangeComparisonType.PeriodBefore],
+          comparisonTypes: [TimeRangeComparisonEnum.PeriodBefore],
           start: '2020-05-27T16:32:46.747Z',
           end: '2021-06-04T16:32:46.747Z',
         })
       ).toEqual([
         {
-          value: TimeRangeComparisonType.PeriodBefore.valueOf(),
+          value: TimeRangeComparisonEnum.PeriodBefore.valueOf(),
           text: '20/05/19 18:32 - 27/05/20 18:32',
         },
       ]);
@@ -160,7 +198,7 @@ describe('TimeComparison', () => {
         expect(spy).toHaveBeenCalledWith(expect.anything(), {
           query: {
             comparisonEnabled: 'true',
-            comparisonType: TimeRangeComparisonType.DayBefore,
+            comparisonType: TimeRangeComparisonEnum.DayBefore,
           },
         });
       });
@@ -169,7 +207,7 @@ describe('TimeComparison', () => {
           exactStart: '2021-06-04T16:17:02.335Z',
           exactEnd: '2021-06-04T16:32:02.335Z',
           comparisonEnabled: true,
-          comparisonType: TimeRangeComparisonType.DayBefore,
+          comparisonType: TimeRangeComparisonEnum.DayBefore,
         });
         const component = render(<TimeComparison />, { wrapper: Wrapper });
         expectTextsInDocument(component, ['Day before', 'Week before']);
@@ -184,7 +222,7 @@ describe('TimeComparison', () => {
           exactStart: '2021-06-03T16:31:35.748Z',
           exactEnd: '2021-06-04T16:31:35.748Z',
           comparisonEnabled: true,
-          comparisonType: TimeRangeComparisonType.DayBefore,
+          comparisonType: TimeRangeComparisonEnum.DayBefore,
         });
         const component = render(<TimeComparison />, { wrapper: Wrapper });
         expectTextsInDocument(component, ['Day before', 'Week before']);
@@ -201,7 +239,7 @@ describe('TimeComparison', () => {
           exactStart: '2021-06-02T12:32:00.000Z',
           exactEnd: '2021-06-03T13:32:09.079Z',
           comparisonEnabled: true,
-          comparisonType: TimeRangeComparisonType.WeekBefore,
+          comparisonType: TimeRangeComparisonEnum.WeekBefore,
         });
         const component = render(<TimeComparison />, {
           wrapper: Wrapper,
@@ -220,7 +258,7 @@ describe('TimeComparison', () => {
         expect(spy).toHaveBeenCalledWith(expect.anything(), {
           query: {
             comparisonEnabled: 'true',
-            comparisonType: TimeRangeComparisonType.WeekBefore,
+            comparisonType: TimeRangeComparisonEnum.WeekBefore,
           },
         });
       });
@@ -229,7 +267,7 @@ describe('TimeComparison', () => {
           exactStart: '2021-06-02T12:32:00.000Z',
           exactEnd: '2021-06-03T13:32:09.079Z',
           comparisonEnabled: true,
-          comparisonType: TimeRangeComparisonType.WeekBefore,
+          comparisonType: TimeRangeComparisonEnum.WeekBefore,
         });
         const component = render(<TimeComparison />, {
           wrapper: Wrapper,
@@ -249,7 +287,7 @@ describe('TimeComparison', () => {
           exactStart: '2021-05-27T16:32:46.747Z',
           exactEnd: '2021-06-04T16:32:46.747Z',
           comparisonEnabled: true,
-          comparisonType: TimeRangeComparisonType.PeriodBefore,
+          comparisonType: TimeRangeComparisonEnum.PeriodBefore,
         });
         const component = render(<TimeComparison />, {
           wrapper: Wrapper,
@@ -267,7 +305,7 @@ describe('TimeComparison', () => {
           exactStart: '2020-05-27T16:32:46.747Z',
           exactEnd: '2021-06-04T16:32:46.747Z',
           comparisonEnabled: true,
-          comparisonType: TimeRangeComparisonType.PeriodBefore,
+          comparisonType: TimeRangeComparisonEnum.PeriodBefore,
         });
         const component = render(<TimeComparison />, {
           wrapper: Wrapper,

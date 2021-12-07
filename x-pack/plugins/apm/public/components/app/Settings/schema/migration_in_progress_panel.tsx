@@ -20,7 +20,7 @@ export function MigrationInProgressPanel() {
           icon={<EuiLoadingSpinner size="xl" />}
           title={i18n.translate(
             'xpack.apm.settings.schema.migrationInProgressPanelTitle',
-            { defaultMessage: 'Switching to data streams...' }
+            { defaultMessage: 'Switching to Elastic Agent...' }
           )}
           description={i18n.translate(
             'xpack.apm.settings.schema.migrationInProgressPanelDescription',

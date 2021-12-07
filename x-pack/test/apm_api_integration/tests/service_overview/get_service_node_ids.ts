@@ -22,7 +22,7 @@ export async function getServiceNodeIds({
   count?: number;
 }) {
   const { body } = await apmApiSupertest({
-    endpoint: `GET /api/apm/services/{serviceName}/service_overview_instances/main_statistics`,
+    endpoint: `GET /internal/apm/services/{serviceName}/service_overview_instances/main_statistics`,
     params: {
       path: { serviceName },
       query: {
@@ -30,6 +30,8 @@ export async function getServiceNodeIds({
         start,
         end,
         transactionType: 'request',
+        environment: 'ENVIRONMENT_ALL',
+        kuery: '',
       },
     },
   });

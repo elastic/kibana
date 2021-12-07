@@ -9,15 +9,6 @@ import { i18n } from '@kbn/i18n';
 
 import { ProductName } from '../types';
 
-export const ANY_AUTH_PROVIDER = '*';
-
-export const ANY_AUTH_PROVIDER_OPTION_LABEL = i18n.translate(
-  'xpack.enterpriseSearch.roleMapping.anyDropDownOptionLabel',
-  {
-    defaultMessage: 'Any',
-  }
-);
-
 export const ADD_ROLE_MAPPING_BUTTON = i18n.translate(
   'xpack.enterpriseSearch.roleMapping.addRoleMappingButtonLabel',
   {
@@ -69,13 +60,6 @@ export const GROUPS_LABEL = i18n.translate('xpack.enterpriseSearch.roleMapping.g
 export const ENGINES_LABEL = i18n.translate('xpack.enterpriseSearch.roleMapping.enginesLabel', {
   defaultMessage: 'Engines',
 });
-
-export const AUTH_PROVIDER_LABEL = i18n.translate(
-  'xpack.enterpriseSearch.roleMapping.authProviderLabel',
-  {
-    defaultMessage: 'Auth provider',
-  }
-);
 
 export const EXTERNAL_ATTRIBUTE_LABEL = i18n.translate(
   'xpack.enterpriseSearch.roleMapping.externalAttributeLabel',
@@ -219,7 +203,7 @@ export const ROLE_MAPPINGS_HEADING_BUTTON = i18n.translate(
 
 export const ROLE_MAPPINGS_NO_RESULTS_MESSAGE = i18n.translate(
   'xpack.enterpriseSearch.roleMapping.noResults.message',
-  { defaultMessage: 'Create a new role mapping' }
+  { defaultMessage: 'No matching role mappings found' }
 );
 
 export const ROLES_DISABLED_TITLE = i18n.translate(
@@ -239,6 +223,13 @@ export const ROLES_DISABLED_NOTE = i18n.translate(
   {
     defaultMessage:
       'Note: enabling role-based access restricts access for both App Search and Workplace Search. Once enabled, review access management for both products, if applicable.',
+  }
+);
+
+export const RBAC_BUTTON_DISABLED_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.roleMapping.rbacButtonDisabledLabel',
+  {
+    defaultMessage: 'Enabling RBAC can be performed by a superuser.',
   }
 );
 
@@ -382,7 +373,7 @@ export const INVITATION_PENDING_LABEL = i18n.translate(
 
 export const ROLE_MODAL_TEXT = i18n.translate('xpack.enterpriseSearch.roleMapping.roleModalText', {
   defaultMessage:
-    'Removing a role mapping revokes access to any user corresponding to the mapping attributes, but may not take effect immediately for SAML-governed roles. Users with an active SAML session will retain access until it expires.',
+    'Removing a role mapping could revoke access to the currently logged-in user. Before proceeding, verify that the currently logged-in user has the appropriate access level via a different role mapping to avoid undesired behavior. This action may not take effect immediately for SAML-governed roles. Users with an active SAML session will retain access until it expires.',
 });
 
 export const USER_MODAL_TITLE = (username: string) =>
@@ -414,15 +405,6 @@ export const EXTERNAL_ATTRIBUTE_TOOLTIP = i18n.translate(
       'External attributes are defined by the identity provider, and varies from service to service.',
   }
 );
-
-export const AUTH_PROVIDER_TOOLTIP = i18n.translate(
-  'xpack.enterpriseSearch.roleMapping.authProviderTooltip',
-  {
-    defaultMessage:
-      'Provider-specific role mapping is still applied, but configuration is now deprecated.',
-  }
-);
-
 export const DEACTIVATED_USER_CALLOUT_LABEL = i18n.translate(
   'xpack.enterpriseSearch.roleMapping.deactivatedUserCalloutLabel',
   {
@@ -448,3 +430,25 @@ export const SMTP_CALLOUT_LABEL = i18n.translate(
 export const SMTP_LINK_LABEL = i18n.translate('xpack.enterpriseSearch.roleMapping.smtpLinkLabel', {
   defaultMessage: 'SMTP configuration is provided',
 });
+
+export const KIBANA_ACCESS_WARNING_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.roleMapping.kibanaAccessWarningTitle',
+  {
+    defaultMessage: 'Kibana access warning',
+  }
+);
+
+export const KIBANA_ACCESS_WARNING_ERROR_MESSAGE = i18n.translate(
+  'xpack.enterpriseSearch.roleMapping.kibanaAccessWarningErrorMessage',
+  {
+    defaultMessage:
+      'This Elasticsearch user does not have an Enterprise Search role in Elasticsearch. They may not have access to Kibana.',
+  }
+);
+
+export const KIBANA_ACCESS_WARNING_DESCRIPTION = i18n.translate(
+  'xpack.enterpriseSearch.roleMapping.kibanaAccessWarningDescription',
+  {
+    defaultMessage: 'Consider giving them the "enterprise-search-user" role.',
+  }
+);

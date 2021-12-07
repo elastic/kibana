@@ -151,6 +151,9 @@ export const CleanExtraFilesFromModules: Task = {
       '**/.DS_Store',
       '**/Dockerfile',
       '**/docker-compose.yml',
+
+      // https://github.com/elastic/kibana/issues/107617
+      '**/png-js/images/*.png',
     ]);
 
     log.info(
@@ -193,6 +196,7 @@ export const CleanEmptyFolders: Task = {
     await deleteEmptyFolders(log, build.resolvePath('.'), [
       build.resolvePath('plugins'),
       build.resolvePath('data'),
+      build.resolvePath('logs'),
     ]);
   },
 };

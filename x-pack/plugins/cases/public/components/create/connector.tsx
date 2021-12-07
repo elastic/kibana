@@ -8,7 +8,7 @@
 import React, { memo, useCallback, useMemo, useEffect } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
-import { ConnectorTypes, ActionConnector } from '../../../common';
+import { ConnectorTypes, ActionConnector } from '../../../common/api';
 import {
   UseField,
   useFormData,
@@ -96,10 +96,10 @@ const ConnectorComponent: React.FC<Props> = ({
     hideConnectorServiceNowSir,
   ]);
 
-  useEffect(() => setFieldValue('connectorId', defaultConnectorId), [
-    defaultConnectorId,
-    setFieldValue,
-  ]);
+  useEffect(
+    () => setFieldValue('connectorId', defaultConnectorId),
+    [defaultConnectorId, setFieldValue]
+  );
 
   const connectorIdConfig = getConnectorsFormValidators({
     config: schema.connectorId as FieldConfig,

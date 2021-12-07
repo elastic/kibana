@@ -89,10 +89,10 @@ export interface PluginsServiceDiscoverDeps {
 /** @internal */
 export class PluginsService implements CoreService<PluginsServiceSetup, PluginsServiceStart> {
   private readonly log: Logger;
-  private readonly prebootPluginsSystem = new PluginsSystem(this.coreContext, PluginType.preboot);
+  private readonly prebootPluginsSystem: PluginsSystem<PluginType.preboot>;
   private arePrebootPluginsStopped = false;
   private readonly prebootUiPluginInternalInfo = new Map<PluginName, InternalPluginInfo>();
-  private readonly standardPluginsSystem = new PluginsSystem(this.coreContext, PluginType.standard);
+  private readonly standardPluginsSystem: PluginsSystem<PluginType.standard>;
   private readonly standardUiPluginInternalInfo = new Map<PluginName, InternalPluginInfo>();
   private readonly configService: IConfigService;
   private readonly config$: Observable<PluginsConfig>;
@@ -105,6 +105,8 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
     this.config$ = coreContext.configService
       .atPath<PluginsConfigType>('plugins')
       .pipe(map((rawConfig) => new PluginsConfig(rawConfig, coreContext.env)));
+    this.prebootPluginsSystem = new PluginsSystem(this.coreContext, PluginType.preboot);
+    this.standardPluginsSystem = new PluginsSystem(this.coreContext, PluginType.standard);
   }
 
   public async discover({ environment }: PluginsServiceDiscoverDeps): Promise<DiscoveredPlugins> {
@@ -314,27 +316,7 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
       .toPromise();
 
     for (const [pluginName, { plugin, isEnabled }] of pluginEnableStatuses) {
-      // validate that `requiredBundles` ids point to a discovered plugin which `includesUiPlugin`
-      for (const requiredBundleId of plugin.requiredBundles) {
-        if (!pluginEnableStatuses.has(requiredBundleId)) {
-          throw new Error(
-            `Plugin bundle with id "${requiredBundleId}" is required by plugin "${pluginName}" but it is missing.`
-          );
-        }
-
-        const requiredPlugin = pluginEnableStatuses.get(requiredBundleId)!.plugin;
-        if (!requiredPlugin.includesUiPlugin) {
-          throw new Error(
-            `Plugin bundle with id "${requiredBundleId}" is required by plugin "${pluginName}" but it doesn't have a UI bundle.`
-          );
-        }
-
-        if (requiredPlugin.manifest.type !== plugin.manifest.type) {
-          throw new Error(
-            `Plugin bundle with id "${requiredBundleId}" is required by plugin "${pluginName}" and expected to have "${plugin.manifest.type}" type, but its type is "${requiredPlugin.manifest.type}".`
-          );
-        }
-      }
+      this.validatePluginDependencies(plugin, pluginEnableStatuses);
 
       const pluginEnablement = this.shouldEnablePlugin(pluginName, pluginEnableStatuses);
 
@@ -356,6 +338,48 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
     }
 
     this.log.debug(`Discovered ${pluginEnableStatuses.size} plugins.`);
+  }
+
+  /** Throws an error if the plugin's dependencies are invalid. */
+  private validatePluginDependencies(
+    plugin: PluginWrapper,
+    pluginEnableStatuses: Map<PluginName, { plugin: PluginWrapper; isEnabled: boolean }>
+  ) {
+    const { name, manifest, requiredBundles, requiredPlugins } = plugin;
+
+    // validate that `requiredBundles` ids point to a discovered plugin which `includesUiPlugin`
+    for (const requiredBundleId of requiredBundles) {
+      if (!pluginEnableStatuses.has(requiredBundleId)) {
+        throw new Error(
+          `Plugin bundle with id "${requiredBundleId}" is required by plugin "${name}" but it is missing.`
+        );
+      }
+
+      const requiredPlugin = pluginEnableStatuses.get(requiredBundleId)!.plugin;
+      if (!requiredPlugin.includesUiPlugin) {
+        throw new Error(
+          `Plugin bundle with id "${requiredBundleId}" is required by plugin "${name}" but it doesn't have a UI bundle.`
+        );
+      }
+
+      if (requiredPlugin.manifest.type !== plugin.manifest.type) {
+        throw new Error(
+          `Plugin bundle with id "${requiredBundleId}" is required by plugin "${name}" and expected to have "${manifest.type}" type, but its type is "${requiredPlugin.manifest.type}".`
+        );
+      }
+    }
+
+    // validate that OSS plugins do not have required dependencies on X-Pack plugins
+    if (plugin.source === 'oss') {
+      for (const id of [...requiredPlugins, ...requiredBundles]) {
+        const requiredPlugin = pluginEnableStatuses.get(id);
+        if (requiredPlugin && requiredPlugin.plugin.source === 'x-pack') {
+          throw new Error(
+            `X-Pack plugin or bundle with id "${id}" is required by OSS plugin "${name}", which is prohibited. Consider making this an optional dependency instead.`
+          );
+        }
+      }
+    }
   }
 
   private shouldEnablePlugin(

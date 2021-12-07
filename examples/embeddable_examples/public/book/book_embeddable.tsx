@@ -52,7 +52,8 @@ function getHasMatch(search?: string, savedAttributes?: BookSavedObjectAttribute
 
 export class BookEmbeddable
   extends Embeddable<BookEmbeddableInput, BookEmbeddableOutput>
-  implements ReferenceOrValueEmbeddable<BookByValueInput, BookByReferenceInput> {
+  implements ReferenceOrValueEmbeddable<BookByValueInput, BookByReferenceInput>
+{
   public readonly type = BOOK_EMBEDDABLE;
   private subscription: Subscription;
   private node?: HTMLElement;
@@ -112,7 +113,7 @@ export class BookEmbeddable
   }
 
   public async reload() {
-    this.attributes = await this.attributeService.unwrapAttributes(this.input);
+    this.attributes = (await this.attributeService.unwrapAttributes(this.input)).attributes;
 
     this.updateOutput({
       attributes: this.attributes,

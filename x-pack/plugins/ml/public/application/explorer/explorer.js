@@ -12,7 +12,7 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
   htmlIdGenerator,
@@ -255,13 +255,9 @@ export class ExplorerUI extends React.Component {
       tableData,
       swimLaneSeverity,
     } = this.props.explorerState;
-    const { annotationsData, aggregations, error: annotationsError } = annotations;
+    const { annotationsData, totalCount: allAnnotationsCnt, error: annotationsError } = annotations;
 
     const annotationsCnt = Array.isArray(annotationsData) ? annotationsData.length : 0;
-    const allAnnotationsCnt = Array.isArray(aggregations?.event?.buckets)
-      ? aggregations.event.buckets.reduce((acc, v) => acc + v.doc_count, 0)
-      : annotationsCnt;
-
     const badge =
       allAnnotationsCnt > annotationsCnt ? (
         <EuiBadge color={'hollow'}>
@@ -449,7 +445,6 @@ export class ExplorerUI extends React.Component {
                       <AnnotationsTable
                         jobIds={selectedJobIds}
                         annotations={annotationsData}
-                        aggregations={aggregations}
                         drillDown={true}
                         numberBadge={false}
                       />
@@ -498,7 +493,10 @@ export class ExplorerUI extends React.Component {
                   </EuiFlexItem>
                   {chartsData.seriesToPlot.length > 0 && selectedCells !== undefined && (
                     <EuiFlexItem grow={false}>
-                      <CheckboxShowCharts />
+                      <CheckboxShowCharts
+                        showCharts={showCharts}
+                        setShowCharts={explorerService.setShowCharts}
+                      />
                     </EuiFlexItem>
                   )}
                 </EuiFlexGroup>

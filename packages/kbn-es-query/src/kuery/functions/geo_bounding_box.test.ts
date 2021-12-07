@@ -9,9 +9,10 @@
 import { get } from 'lodash';
 import { nodeTypes } from '../node_types';
 import { fields } from '../../filters/stubs';
-import { IndexPatternBase } from '../..';
+import { DataViewBase } from '../..';
 
 import * as geoBoundingBox from './geo_bounding_box';
+import { JsonObject } from '@kbn/utility-types';
 
 jest.mock('../grammar');
 
@@ -28,11 +29,12 @@ const params = {
 
 describe('kuery functions', () => {
   describe('geoBoundingBox', () => {
-    let indexPattern: IndexPatternBase;
+    let indexPattern: DataViewBase;
 
     beforeEach(() => {
       indexPattern = {
         fields,
+        title: 'dataView',
       };
     });
 
@@ -78,8 +80,14 @@ describe('kuery functions', () => {
         const result = geoBoundingBox.toElasticsearchQuery(node, indexPattern);
 
         expect(result).toHaveProperty('geo_bounding_box');
-        expect(result.geo_bounding_box.geo).toHaveProperty('top_left', '73.12, -174.37');
-        expect(result.geo_bounding_box.geo).toHaveProperty('bottom_right', '50.73, -135.35');
+        expect((result.geo_bounding_box as JsonObject).geo).toHaveProperty(
+          'top_left',
+          '73.12, -174.37'
+        );
+        expect((result.geo_bounding_box as JsonObject).geo).toHaveProperty(
+          'bottom_right',
+          '50.73, -135.35'
+        );
       });
 
       test('should return an ES geo_bounding_box query without an index pattern', () => {
@@ -87,15 +95,21 @@ describe('kuery functions', () => {
         const result = geoBoundingBox.toElasticsearchQuery(node);
 
         expect(result).toHaveProperty('geo_bounding_box');
-        expect(result.geo_bounding_box.geo).toHaveProperty('top_left', '73.12, -174.37');
-        expect(result.geo_bounding_box.geo).toHaveProperty('bottom_right', '50.73, -135.35');
+        expect((result.geo_bounding_box as JsonObject).geo).toHaveProperty(
+          'top_left',
+          '73.12, -174.37'
+        );
+        expect((result.geo_bounding_box as JsonObject).geo).toHaveProperty(
+          'bottom_right',
+          '50.73, -135.35'
+        );
       });
 
       test('should use the ignore_unmapped parameter', () => {
         const node = nodeTypes.function.buildNode('geoBoundingBox', 'geo', params);
         const result = geoBoundingBox.toElasticsearchQuery(node, indexPattern);
 
-        expect(result.geo_bounding_box.ignore_unmapped).toBe(true);
+        expect(result.geo_bounding_box!.ignore_unmapped).toBe(true);
       });
 
       test('should throw an error for scripted fields', () => {
@@ -116,7 +130,7 @@ describe('kuery functions', () => {
         );
 
         expect(result).toHaveProperty('geo_bounding_box');
-        expect(result.geo_bounding_box['nestedField.geo']).toBeDefined();
+        expect((result.geo_bounding_box as JsonObject)['nestedField.geo']).toBeDefined();
       });
     });
   });

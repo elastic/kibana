@@ -9,13 +9,11 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 import { SolutionsSection } from './solutions_section';
-import { FeatureCatalogueCategory } from '../../../services';
 
 const solutionEntry1 = {
   id: 'kibana',
   title: 'Kibana',
-  subtitle: 'Visualize & analyze',
-  appDescriptions: ['Analyze data in dashboards'],
+  description: 'Description for Kibana',
   icon: 'logoKibana',
   path: 'kibana_landing_page',
   order: 1,
@@ -23,9 +21,7 @@ const solutionEntry1 = {
 const solutionEntry2 = {
   id: 'solution-2',
   title: 'Solution two',
-  subtitle: 'Subtitle for solution two',
   description: 'Description for solution two',
-  appDescriptions: ['Example use case'],
   icon: 'empty',
   path: 'path-to-solution-two',
   order: 2,
@@ -33,9 +29,7 @@ const solutionEntry2 = {
 const solutionEntry3 = {
   id: 'solution-3',
   title: 'Solution three',
-  subtitle: 'Subtitle for solution three',
   description: 'Description for solution three',
-  appDescriptions: ['Example use case'],
   icon: 'empty',
   path: 'path-to-solution-three',
   order: 3,
@@ -43,85 +37,32 @@ const solutionEntry3 = {
 const solutionEntry4 = {
   id: 'solution-4',
   title: 'Solution four',
-  subtitle: 'Subtitle for solution four',
   description: 'Description for solution four',
-  appDescriptions: ['Example use case'],
   icon: 'empty',
   path: 'path-to-solution-four',
   order: 4,
 };
 
-const mockDirectories = [
-  {
-    id: 'dashboard',
-    title: 'Dashboard',
-    description: 'Description of dashboard',
-    icon: 'dashboardApp',
-    path: 'dashboard_landing_page',
-    showOnHomePage: false,
-    category: FeatureCatalogueCategory.DATA,
-  },
-  {
-    id: 'discover',
-    title: 'Discover',
-    description: 'Description of discover',
-    icon: 'discoverApp',
-    path: 'discover_landing_page',
-    showOnHomePage: false,
-    category: FeatureCatalogueCategory.DATA,
-  },
-  {
-    id: 'canvas',
-    title: 'Canvas',
-    description: 'Description of canvas',
-    icon: 'canvasApp',
-    path: 'canvas_landing_page',
-    showOnHomePage: false,
-    category: FeatureCatalogueCategory.DATA,
-  },
-];
-
 const addBasePathMock = (path: string) => (path ? path : 'path');
 
 describe('SolutionsSection', () => {
-  test('only renders a spacer if no solutions are available', () => {
-    const component = shallow(
-      <SolutionsSection
-        addBasePath={addBasePathMock}
-        solutions={[]}
-        directories={mockDirectories}
-      />
-    );
+  test('renders null if no solutions are available', () => {
+    const component = shallow(<SolutionsSection addBasePath={addBasePathMock} solutions={[]} />);
     expect(component).toMatchSnapshot();
   });
 
   test('renders a single solution', () => {
     const component = shallow(
-      <SolutionsSection
-        addBasePath={addBasePathMock}
-        solutions={[solutionEntry1]}
-        directories={mockDirectories}
-      />
+      <SolutionsSection addBasePath={addBasePathMock} solutions={[solutionEntry1]} />
     );
     expect(component).toMatchSnapshot();
   });
 
-  test('renders multiple solutions in two columns with Kibana in its own column', () => {
+  test('renders multiple solutions', () => {
     const component = shallow(
       <SolutionsSection
         addBasePath={addBasePathMock}
         solutions={[solutionEntry1, solutionEntry2, solutionEntry3, solutionEntry4]}
-        directories={mockDirectories}
-      />
-    );
-    expect(component).toMatchSnapshot();
-  });
-  test('renders multiple solutions in a single column when Kibana apps are not enabled', () => {
-    const component = shallow(
-      <SolutionsSection
-        addBasePath={addBasePathMock}
-        solutions={[solutionEntry2, solutionEntry3, solutionEntry4]}
-        directories={mockDirectories}
       />
     );
     expect(component).toMatchSnapshot();

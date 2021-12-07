@@ -28,7 +28,6 @@ import './index.scss';
 
 import {
   ChromeBadge,
-  ChromeBrand,
   ChromeBreadcrumb,
   ChromeHelpExtension,
   ChromeHelpExtensionMenuLink,
@@ -65,7 +64,7 @@ import { ApplicationSetup, Capabilities, ApplicationStart } from './application'
 import { DocLinksStart } from './doc_links';
 import { SavedObjectsStart } from './saved_objects';
 import { DeprecationsServiceStart } from './deprecations';
-import type { ExecutionContextServiceStart } from './execution_context';
+import type { ThemeServiceSetup, ThemeServiceStart } from './theme';
 
 export type {
   PackageInfo,
@@ -105,6 +104,8 @@ export type {
   SavedObjectsBatchResponse,
   SavedObjectsBulkCreateObject,
   SavedObjectsBulkCreateOptions,
+  SavedObjectsBulkResolveObject,
+  SavedObjectsBulkResolveResponse,
   SavedObjectsBulkUpdateObject,
   SavedObjectsBulkUpdateOptions,
   SavedObjectsCreateOptions,
@@ -157,6 +158,7 @@ export type {
   IAnonymousPaths,
   IExternalUrl,
   IHttpInterceptController,
+  ResponseErrorBody,
   IHttpFetchError,
   IHttpResponseInterceptorOverrides,
 } from './http';
@@ -184,9 +186,9 @@ export type {
   ErrorToastOptions,
 } from './notifications';
 
-export type { DeprecationsServiceStart, ResolveDeprecationResponse } from './deprecations';
+export type { ThemeServiceSetup, ThemeServiceStart, CoreTheme } from './theme';
 
-export type { IExecutionContextContainer, ExecutionContextServiceStart } from './execution_context';
+export type { DeprecationsServiceStart, ResolveDeprecationResponse } from './deprecations';
 
 export type { MountPoint, UnmountCallback, PublicUiSettingsParams } from './types';
 
@@ -228,6 +230,8 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
   injectedMetadata: {
     getInjectedVar: (name: string, defaultValue?: any) => unknown;
   };
+  /** {@link ThemeServiceSetup} */
+  theme: ThemeServiceSetup;
   /** {@link StartServicesAccessor} */
   getStartServices: StartServicesAccessor<TPluginsStart, TStart>;
 }
@@ -276,8 +280,8 @@ export interface CoreStart {
   fatalErrors: FatalErrorsStart;
   /** {@link DeprecationsServiceStart} */
   deprecations: DeprecationsServiceStart;
-  /** {@link ExecutionContextServiceStart} */
-  executionContext: ExecutionContextServiceStart;
+  /** {@link ThemeServiceStart} */
+  theme: ThemeServiceStart;
   /**
    * exposed temporarily until https://github.com/elastic/kibana/issues/41990 done
    * use *only* to retrieve config values. There is no way to set injected values
@@ -292,7 +296,6 @@ export interface CoreStart {
 export type {
   Capabilities,
   ChromeBadge,
-  ChromeBrand,
   ChromeBreadcrumb,
   ChromeHelpExtension,
   ChromeHelpExtensionMenuLink,

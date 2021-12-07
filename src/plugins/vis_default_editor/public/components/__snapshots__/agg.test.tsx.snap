@@ -12,13 +12,16 @@ exports[`DefaultEditorAgg component should init with the default set of props 1`
     </React.Fragment>
   }
   buttonContentClassName="visEditorSidebar__aggGroupAccordionButtonContent eui-textTruncate"
+  buttonElement="button"
   className="visEditorSidebar__section visEditorSidebar__collapsible visEditorSidebar__collapsible--marginBottom"
   data-test-subj="visEditorAggAccordion1"
+  element="div"
   extraAction={
     <div>
       <EuiToolTip
         content="Enable   aggregation"
         delay="regular"
+        display="inlineBlock"
         position="bottom"
       >
         <EuiButtonIcon

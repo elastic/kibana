@@ -23,8 +23,6 @@ export const IGNORE_FILE_GLOBS = [
   '**/+([A-Z_]).asciidoc',
   '**/LICENSE',
   '**/*.txt',
-  '**/Gruntfile.js',
-  'tasks/config/**/*',
   '**/{Dockerfile,docker-compose.yml}',
   'x-pack/plugins/canvas/tasks/**/*',
   'x-pack/plugins/canvas/canvas_plugin_src/**/*',
@@ -59,8 +57,6 @@ export const IGNORE_FILE_GLOBS = [
 
   // TODO fix file names in APM to remove these
   'x-pack/plugins/apm/public/**/*',
-  'x-pack/plugins/apm/scripts/**/*',
-  'x-pack/plugins/apm/e2e/**/*',
 
   'x-pack/plugins/maps/server/fonts/**/*',
 
@@ -69,7 +65,7 @@ export const IGNORE_FILE_GLOBS = [
   '**/BUILD.bazel',
 
   // Buildkite
-  '.buildkite/hooks/*',
+  '.buildkite/**/*',
 ];
 
 /**
@@ -101,6 +97,7 @@ export const IGNORE_DIRECTORY_GLOBS = [
   'packages/kbn-pm/src/utils/__fixtures__/*',
   'x-pack/dev-tools',
   'packages/kbn-optimizer/src/__fixtures__/mock_repo/x-pack',
+  'typings/*',
 ];
 
 /**

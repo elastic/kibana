@@ -40,7 +40,6 @@ export interface KFetchKibanaOptions {
 export interface IShims {
   toastNotifications: CoreStart['notifications']['toasts'];
   capabilities: CoreStart['application']['capabilities'];
-  getAngularInjector: () => angular.auto.IInjectorService;
   getBasePath: () => string;
   getInjected: (name: string, defaultValue?: unknown) => unknown;
   breadcrumbs: {
@@ -69,21 +68,17 @@ export interface IShims {
 export class Legacy {
   private static _shims: IShims;
 
-  public static init(
-    {
-      core,
-      data,
-      isCloud,
-      triggersActionsUi,
-      usageCollection,
-      appMountParameters,
-    }: MonitoringStartPluginDependencies,
-    ngInjector: angular.auto.IInjectorService
-  ) {
+  public static init({
+    core,
+    data,
+    isCloud,
+    triggersActionsUi,
+    usageCollection,
+    appMountParameters,
+  }: MonitoringStartPluginDependencies) {
     this._shims = {
       toastNotifications: core.notifications.toasts,
       capabilities: core.application.capabilities,
-      getAngularInjector: (): angular.auto.IInjectorService => ngInjector,
       getBasePath: (): string => core.http.basePath.get(),
       getInjected: (name: string, defaultValue?: unknown): string | unknown =>
         core.injectedMetadata.getInjectedVar(name, defaultValue),
@@ -146,5 +141,9 @@ export class Legacy {
       throw new Error('Legacy needs to be initiated with Legacy.init(...) before use');
     }
     return Legacy._shims;
+  }
+
+  public static isInitializated(): boolean {
+    return Boolean(Legacy._shims);
   }
 }

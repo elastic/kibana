@@ -38,56 +38,65 @@ export async function resolveJobSelection(
   } = coreStart;
 
   return new Promise(async (resolve, reject) => {
-    const maps = {
-      groupsMap: getInitialGroupsMap([]),
-      jobsMap: {},
-    };
+    try {
+      const maps = {
+        groupsMap: getInitialGroupsMap([]),
+        jobsMap: {},
+      };
+      const tzConfig = uiSettings.get('dateFormat:tz');
+      const dateFormatTz = tzConfig !== 'Browser' ? tzConfig : moment.tz.guess();
 
-    const tzConfig = uiSettings.get('dateFormat:tz');
-    const dateFormatTz = tzConfig !== 'Browser' ? tzConfig : moment.tz.guess();
-
-    const onFlyoutClose = () => {
-      flyoutSession.close();
-      reject();
-    };
-
-    const onSelectionConfirmed = async ({
-      jobIds,
-      groups,
-    }: {
-      jobIds: string[];
-      groups: Array<{ groupId: string; jobIds: string[] }>;
-    }) => {
-      await flyoutSession.close();
-      resolve({ jobIds, groups });
-    };
-    const flyoutSession = coreStart.overlays.openFlyout(
-      toMountPoint(
-        <KibanaContextProvider services={{ ...coreStart, mlServices: getMlGlobalServices(http) }}>
-          <JobSelectorFlyout
-            selectedIds={selectedJobIds}
-            withTimeRangeSelector={false}
-            dateFormatTz={dateFormatTz}
-            singleSelection={false}
-            timeseriesOnly={true}
-            onFlyoutClose={onFlyoutClose}
-            onSelectionConfirmed={onSelectionConfirmed}
-            maps={maps}
-          />
-        </KibanaContextProvider>
-      ),
-      {
-        'data-test-subj': 'mlFlyoutJobSelector',
-        ownFocus: true,
-        closeButtonAriaLabel: 'jobSelectorFlyout',
-      }
-    );
-
-    // Close the flyout when user navigates out of the dashboard plugin
-    currentAppId$.pipe(takeUntil(from(flyoutSession.onClose))).subscribe((appId) => {
-      if (appId !== DashboardConstants.DASHBOARDS_ID) {
+      const onFlyoutClose = () => {
         flyoutSession.close();
-      }
-    });
+        reject();
+      };
+
+      const onSelectionConfirmed = async ({
+        jobIds,
+        groups,
+      }: {
+        jobIds: string[];
+        groups: Array<{
+          groupId: string;
+          jobIds: string[];
+        }>;
+      }) => {
+        await flyoutSession.close();
+        resolve({
+          jobIds,
+          groups,
+        });
+      };
+
+      const flyoutSession = coreStart.overlays.openFlyout(
+        toMountPoint(
+          <KibanaContextProvider services={{ ...coreStart, mlServices: getMlGlobalServices(http) }}>
+            <JobSelectorFlyout
+              selectedIds={selectedJobIds}
+              withTimeRangeSelector={false}
+              dateFormatTz={dateFormatTz}
+              singleSelection={false}
+              timeseriesOnly={true}
+              onFlyoutClose={onFlyoutClose}
+              onSelectionConfirmed={onSelectionConfirmed}
+              maps={maps}
+            />
+          </KibanaContextProvider>
+        ),
+        {
+          'data-test-subj': 'mlFlyoutJobSelector',
+          ownFocus: true,
+          closeButtonAriaLabel: 'jobSelectorFlyout',
+        }
+      ); // Close the flyout when user navigates out of the dashboard plugin
+
+      currentAppId$.pipe(takeUntil(from(flyoutSession.onClose))).subscribe((appId) => {
+        if (appId !== DashboardConstants.DASHBOARDS_ID) {
+          flyoutSession.close();
+        }
+      });
+    } catch (error) {
+      reject(error);
+    }
   });
 }

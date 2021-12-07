@@ -9,6 +9,7 @@ import { LayerConfig, LensAttributes } from './lens_attributes';
 import { mockAppIndexPattern, mockIndexPattern } from '../rtl_helpers';
 import { getDefaultConfigs } from './default_configs';
 import { sampleAttribute } from './test_data/sample_attribute';
+
 import {
   LCP_FIELD,
   TRANSACTION_DURATION,
@@ -16,7 +17,8 @@ import {
 } from './constants/elasticsearch_fieldnames';
 import { buildExistsFilter, buildPhrasesFilter } from './utils';
 import { sampleAttributeKpi } from './test_data/sample_attribute_kpi';
-import { RECORDS_FIELD, REPORT_METRIC_FIELD, ReportTypes } from './constants';
+import { RECORDS_FIELD, REPORT_METRIC_FIELD, PERCENTILE_RANKS, ReportTypes } from './constants';
+import { obsvReportConfigMap } from '../obsv_exploratory_view';
 
 describe('Lens Attribute', () => {
   mockAppIndexPattern();
@@ -25,6 +27,7 @@ describe('Lens Attribute', () => {
     reportType: 'data-distribution',
     dataType: 'ux',
     indexPattern: mockIndexPattern,
+    reportConfigMap: obsvReportConfigMap,
   });
 
   reportViewConfig.baseFilters?.push(...buildExistsFilter('transaction.type', mockIndexPattern));
@@ -56,6 +59,7 @@ describe('Lens Attribute', () => {
       reportType: ReportTypes.KPI,
       dataType: 'ux',
       indexPattern: mockIndexPattern,
+      reportConfigMap: obsvReportConfigMap,
     });
 
     const lnsAttrKpi = new LensAttributes([
@@ -73,6 +77,64 @@ describe('Lens Attribute', () => {
     ]);
 
     expect(lnsAttrKpi.getJSON()).toEqual(sampleAttributeKpi);
+  });
+
+  it('should return expected json for percentile breakdowns', function () {
+    const seriesConfigKpi = getDefaultConfigs({
+      reportType: ReportTypes.KPI,
+      dataType: 'ux',
+      indexPattern: mockIndexPattern,
+      reportConfigMap: obsvReportConfigMap,
+    });
+
+    const lnsAttrKpi = new LensAttributes([
+      {
+        filters: [],
+        seriesConfig: seriesConfigKpi,
+        time: {
+          from: 'now-1h',
+          to: 'now',
+        },
+        indexPattern: mockIndexPattern,
+        name: 'ux-series-1',
+        breakdown: 'percentile',
+        reportDefinitions: {},
+        selectedMetricField: 'transaction.duration.us',
+        color: '#54b399',
+      },
+    ]);
+
+    expect(lnsAttrKpi.getJSON().state.datasourceStates.indexpattern.layers.layer0.columns).toEqual({
+      'x-axis-column-layer0': {
+        dataType: 'date',
+        isBucketed: true,
+        label: '@timestamp',
+        operationType: 'date_histogram',
+        params: {
+          interval: 'auto',
+        },
+        scale: 'interval',
+        sourceField: '@timestamp',
+      },
+      ...PERCENTILE_RANKS.reduce((acc: Record<string, any>, rank, index) => {
+        acc[`y-axis-column-${index === 0 ? 'layer' + index : index}`] = {
+          dataType: 'number',
+          filter: {
+            language: 'kuery',
+            query: 'transaction.type: page-load and processor.event: transaction',
+          },
+          isBucketed: false,
+          label: `${rank} percentile of page load time`,
+          operationType: 'percentile',
+          params: {
+            percentile: Number(rank.slice(0, 2)),
+          },
+          scale: 'ratio',
+          sourceField: 'transaction.duration.us',
+        };
+        return acc;
+      }, {}),
+    });
   });
 
   it('should return main y axis', function () {
@@ -246,6 +308,24 @@ describe('Lens Attribute', () => {
     });
   });
 
+  it('should hide y axis when there are multiple series', function () {
+    const lensAttrWithMultiSeries = new LensAttributes([layerConfig, layerConfig]).getJSON() as any;
+    expect(lensAttrWithMultiSeries.state.visualization.axisTitlesVisibilitySettings).toEqual({
+      x: true,
+      yLeft: false,
+      yRight: false,
+    });
+  });
+
+  it('should show y axis when there is a single series', function () {
+    const lensAttrWithMultiSeries = new LensAttributes([layerConfig]).getJSON() as any;
+    expect(lensAttrWithMultiSeries.state.visualization.axisTitlesVisibilitySettings).toEqual({
+      x: true,
+      yLeft: true,
+      yRight: true,
+    });
+  });
+
   it('should return first layer', function () {
     expect(lnsAttr.getLayers()).toEqual({
       layer0: {
@@ -286,7 +366,7 @@ describe('Lens Attribute', () => {
                 'transaction.type: page-load and processor.event: transaction and transaction.type : *',
             },
             isBucketed: false,
-            label: 'test-series',
+            label: 'Pages loaded',
             operationType: 'formula',
             params: {
               format: {
@@ -365,8 +445,7 @@ describe('Lens Attribute', () => {
                   min: 0,
                 },
                 name: 'divide',
-                text:
-                  "count(kql='transaction.type: page-load and processor.event: transaction and transaction.type : *') / overall_sum(count(kql='transaction.type: page-load and processor.event: transaction and transaction.type : *'))",
+                text: "count(kql='transaction.type: page-load and processor.event: transaction and transaction.type : *') / overall_sum(count(kql='transaction.type: page-load and processor.event: transaction and transaction.type : *'))",
                 type: 'function',
               },
             },
@@ -389,13 +468,14 @@ describe('Lens Attribute', () => {
         {
           accessors: ['y-axis-column-layer0'],
           layerId: 'layer0',
+          layerType: 'data',
           palette: undefined,
           seriesType: 'line',
           xAccessor: 'x-axis-column-layer0',
-          yConfig: [{ color: 'green', forAccessor: 'y-axis-column-layer0' }],
+          yConfig: [{ color: 'green', forAccessor: 'y-axis-column-layer0', axisMode: 'left' }],
         },
       ],
-      legend: { isVisible: true, position: 'right' },
+      legend: { isVisible: true, showSingleSeries: true, position: 'right' },
       preferredSeriesType: 'line',
       tickLabelsVisibilitySettings: { x: true, yLeft: true, yRight: true },
       valueLabels: 'hide',
@@ -430,11 +510,12 @@ describe('Lens Attribute', () => {
         {
           accessors: ['y-axis-column-layer0'],
           layerId: 'layer0',
+          layerType: 'data',
           palette: undefined,
           seriesType: 'line',
           splitAccessor: 'breakdown-column-layer0',
           xAccessor: 'x-axis-column-layer0',
-          yConfig: [{ color: 'green', forAccessor: 'y-axis-column-layer0' }],
+          yConfig: [{ color: 'green', forAccessor: 'y-axis-column-layer0', axisMode: 'left' }],
         },
       ]);
 
@@ -495,7 +576,7 @@ describe('Lens Attribute', () => {
                 'transaction.type: page-load and processor.event: transaction and transaction.type : *',
             },
             isBucketed: false,
-            label: 'test-series',
+            label: 'Pages loaded',
             operationType: 'formula',
             params: {
               format: {
@@ -574,8 +655,7 @@ describe('Lens Attribute', () => {
                   min: 0,
                 },
                 name: 'divide',
-                text:
-                  "count(kql='transaction.type: page-load and processor.event: transaction and transaction.type : *') / overall_sum(count(kql='transaction.type: page-load and processor.event: transaction and transaction.type : *'))",
+                text: "count(kql='transaction.type: page-load and processor.event: transaction and transaction.type : *') / overall_sum(count(kql='transaction.type: page-load and processor.event: transaction and transaction.type : *'))",
                 type: 'function',
               },
             },

@@ -284,16 +284,14 @@ describe('filterEventsAgainstList', () => {
         },
       },
     ];
-    const [
-      { matchedSet: matchedSet1 },
-      { matchedSet: matchedSet2 },
-    ] = await createFieldAndSetTuples({
-      listClient,
-      logger: mockLogger,
-      events,
-      exceptionItem,
-      buildRuleMessage,
-    });
+    const [{ matchedSet: matchedSet1 }, { matchedSet: matchedSet2 }] =
+      await createFieldAndSetTuples({
+        listClient,
+        logger: mockLogger,
+        events,
+        exceptionItem,
+        buildRuleMessage,
+      });
     expect([...matchedSet1]).toEqual([JSON.stringify(['1.1.1.1']), JSON.stringify(['2.2.2.2'])]);
     expect([...matchedSet2]).toEqual([JSON.stringify(['3.3.3.3']), JSON.stringify(['5.5.5.5'])]);
   });

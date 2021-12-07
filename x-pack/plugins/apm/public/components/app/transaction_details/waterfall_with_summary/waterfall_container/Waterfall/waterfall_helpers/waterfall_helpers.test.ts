@@ -85,7 +85,7 @@ describe('waterfall_helpers', () => {
         },
         timestamp: { us: 1549324795785760 },
       } as Span,
-      ({
+      {
         parent: { id: 'mySpanIdD' },
         processor: { event: 'transaction' },
         trace: { id: 'myTraceId' },
@@ -103,10 +103,10 @@ describe('waterfall_helpers', () => {
           },
         },
         timestamp: { us: 1549324795823304 },
-      } as unknown) as Transaction,
+      } as unknown as Transaction,
     ];
     const errorDocs = [
-      ({
+      {
         processor: { event: 'error' },
         parent: { id: 'myTransactionId1' },
         timestamp: { us: 1549324795810000 },
@@ -124,49 +124,44 @@ describe('waterfall_helpers', () => {
           name: 'ruby',
           version: '2',
         },
-      } as unknown) as APMError,
+      } as unknown as APMError,
     ];
 
     it('should return full waterfall', () => {
       const entryTransactionId = 'myTransactionId1';
-      const errorsPerTransaction = {
-        myTransactionId1: 2,
-        myTransactionId2: 3,
+      const apiResp = {
+        traceDocs: hits,
+        errorDocs,
+        exceedsMax: false,
       };
-      const waterfall = getWaterfall(
-        {
-          trace: { items: hits, errorDocs, exceedsMax: false },
-          errorsPerTransaction,
-        },
-        entryTransactionId
-      );
+      const waterfall = getWaterfall(apiResp, entryTransactionId);
+      const { apiResponse, ...waterfallRest } = waterfall;
 
       expect(waterfall.items.length).toBe(6);
       expect(waterfall.items[0].id).toBe('myTransactionId1');
       expect(waterfall.errorItems.length).toBe(1);
-      expect(waterfall.errorsCount).toEqual(1);
-      expect(waterfall).toMatchSnapshot();
+      expect(waterfall.getErrorCount('myTransactionId1')).toEqual(1);
+      expect(waterfallRest).toMatchSnapshot();
+      expect(apiResponse).toEqual(apiResp);
     });
 
     it('should return partial waterfall', () => {
       const entryTransactionId = 'myTransactionId2';
-      const errorsPerTransaction = {
-        myTransactionId1: 2,
-        myTransactionId2: 3,
+      const apiResp = {
+        traceDocs: hits,
+        errorDocs,
+        exceedsMax: false,
       };
-      const waterfall = getWaterfall(
-        {
-          trace: { items: hits, errorDocs, exceedsMax: false },
-          errorsPerTransaction,
-        },
-        entryTransactionId
-      );
+      const waterfall = getWaterfall(apiResp, entryTransactionId);
+
+      const { apiResponse, ...waterfallRest } = waterfall;
 
       expect(waterfall.items.length).toBe(4);
       expect(waterfall.items[0].id).toBe('myTransactionId2');
       expect(waterfall.errorItems.length).toBe(0);
-      expect(waterfall.errorsCount).toEqual(0);
-      expect(waterfall).toMatchSnapshot();
+      expect(waterfall.getErrorCount('myTransactionId2')).toEqual(0);
+      expect(waterfallRest).toMatchSnapshot();
+      expect(apiResponse).toEqual(apiResp);
     });
     it('should reparent spans', () => {
       const traceItems = [
@@ -238,8 +233,9 @@ describe('waterfall_helpers', () => {
       const entryTransactionId = 'myTransactionId1';
       const waterfall = getWaterfall(
         {
-          trace: { items: traceItems, errorDocs: [], exceedsMax: false },
-          errorsPerTransaction: {},
+          traceDocs: traceItems,
+          errorDocs: [],
+          exceedsMax: false,
         },
         entryTransactionId
       );
@@ -247,6 +243,7 @@ describe('waterfall_helpers', () => {
         id: item.id,
         parentId: item.parent?.id,
       });
+
       expect(waterfall.items.length).toBe(5);
       expect(getIdAndParentId(waterfall.items[0])).toEqual({
         id: 'myTransactionId1',
@@ -269,8 +266,9 @@ describe('waterfall_helpers', () => {
         parentId: 'mySpanIdB',
       });
       expect(waterfall.errorItems.length).toBe(0);
-      expect(waterfall.errorsCount).toEqual(0);
+      expect(waterfall.getErrorCount('myTransactionId1')).toEqual(0);
     });
+
     it("shouldn't reparent spans when child id isn't found", () => {
       const traceItems = [
         {
@@ -341,8 +339,9 @@ describe('waterfall_helpers', () => {
       const entryTransactionId = 'myTransactionId1';
       const waterfall = getWaterfall(
         {
-          trace: { items: traceItems, errorDocs: [], exceedsMax: false },
-          errorsPerTransaction: {},
+          traceDocs: traceItems,
+          errorDocs: [],
+          exceedsMax: false,
         },
         entryTransactionId
       );
@@ -372,7 +371,7 @@ describe('waterfall_helpers', () => {
         parentId: 'mySpanIdB',
       });
       expect(waterfall.errorItems.length).toBe(0);
-      expect(waterfall.errorsCount).toEqual(0);
+      expect(waterfall.getErrorCount('myTransactionId1')).toEqual(0);
     });
   });
 
@@ -501,22 +500,22 @@ describe('waterfall_helpers', () => {
         {
           docType: 'transaction',
           id: 'a',
-          doc: ({
+          doc: {
             transaction: { id: 'a' },
             timestamp: { us: 10 },
-          } as unknown) as Transaction,
+          } as unknown as Transaction,
         } as IWaterfallSpanOrTransaction,
         {
           docType: 'span',
           id: 'b',
           parentId: 'a',
-          doc: ({
+          doc: {
             span: {
               id: 'b',
             },
             parent: { id: 'a' },
             timestamp: { us: 20 },
-          } as unknown) as Span,
+          } as unknown as Span,
         } as IWaterfallSpanOrTransaction,
       ];
       const childrenByParentId = groupBy(items, (hit) =>

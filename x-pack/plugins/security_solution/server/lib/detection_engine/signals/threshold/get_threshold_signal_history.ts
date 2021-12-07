@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { RulesSchema } from '../../../../../common/detection_engine/schemas/response/rules_schema';
 import { TimestampOverrideOrUndefined } from '../../../../../common/detection_engine/schemas/common/schemas';
 import {
   AlertInstanceContext,
@@ -16,7 +15,7 @@ import { Logger } from '../../../../../../../../src/core/server';
 import { ThresholdSignalHistory } from '../types';
 import { BuildRuleMessage } from '../rule_messages';
 import { findPreviousThresholdSignals } from './find_previous_threshold_signals';
-import { getThresholdTermsHash } from '../utils';
+import { buildThresholdSignalHistory } from './build_signal_history';
 
 interface GetThresholdSignalHistoryParams {
   from: string;
@@ -41,9 +40,10 @@ export const getThresholdSignalHistory = async ({
   timestampOverride,
   buildRuleMessage,
 }: GetThresholdSignalHistoryParams): Promise<{
-  thresholdSignalHistory: ThresholdSignalHistory;
+  signalHistory: ThresholdSignalHistory;
   searchErrors: string[];
 }> => {
+  // TODO: use ruleDataClient.getReader()
   const { searchResult, searchErrors } = await findPreviousThresholdSignals({
     indexPattern,
     from,
@@ -56,51 +56,10 @@ export const getThresholdSignalHistory = async ({
     buildRuleMessage,
   });
 
-  const thresholdSignalHistory = searchResult.hits.hits.reduce<ThresholdSignalHistory>(
-    (acc, hit) => {
-      if (!hit._source) {
-        return acc;
-      }
-
-      const terms =
-        hit._source.signal?.threshold_result?.terms != null
-          ? hit._source.signal.threshold_result.terms
-          : [
-              // Pre-7.12 signals
-              {
-                field:
-                  (((hit._source.signal?.rule as RulesSchema).threshold as unknown) as {
-                    field: string;
-                  }).field ?? '',
-                value: ((hit._source.signal?.threshold_result as unknown) as { value: string })
-                  .value,
-              },
-            ];
-
-      const hash = getThresholdTermsHash(terms);
-      const existing = acc[hash];
-      const originalTime =
-        hit._source.signal?.original_time != null
-          ? new Date(hit._source.signal?.original_time).getTime()
-          : undefined;
-
-      if (existing != null) {
-        if (originalTime && originalTime > existing.lastSignalTimestamp) {
-          acc[hash].lastSignalTimestamp = originalTime;
-        }
-      } else if (originalTime) {
-        acc[hash] = {
-          terms,
-          lastSignalTimestamp: originalTime,
-        };
-      }
-      return acc;
-    },
-    {}
-  );
-
   return {
-    thresholdSignalHistory,
+    signalHistory: buildThresholdSignalHistory({
+      alerts: searchResult.hits.hits,
+    }),
     searchErrors,
   };
 };

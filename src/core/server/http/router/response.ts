@@ -45,7 +45,8 @@ export function isKibanaResponse(response: Record<string, any>): response is IKi
  * @internal
  */
 export class KibanaResponse<T extends HttpResponsePayload | ResponseError = any>
-  implements IKibanaResponse<T> {
+  implements IKibanaResponse<T>
+{
   constructor(
     public readonly status: number,
     public readonly payload?: T,

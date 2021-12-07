@@ -17,6 +17,9 @@ interface Usage {
   authProviderCount: number;
   enabledAuthProviders: string[];
   httpAuthSchemes: string[];
+  sessionIdleTimeoutInMinutes: number;
+  sessionLifespanInMinutes: number;
+  sessionCleanupInMinutes: number;
 }
 
 interface Deps {
@@ -98,14 +101,30 @@ export function registerSecurityUsageCollector({ usageCollection, config, licens
           },
         },
       },
+      sessionIdleTimeoutInMinutes: {
+        type: 'long',
+        _meta: {
+          description:
+            'The global session idle timeout expiration that is configured, in minutes (0 if disabled).',
+        },
+      },
+      sessionLifespanInMinutes: {
+        type: 'long',
+        _meta: {
+          description:
+            'The global session lifespan expiration that is configured, in minutes (0 if disabled).',
+        },
+      },
+      sessionCleanupInMinutes: {
+        type: 'long',
+        _meta: {
+          description:
+            'The session cleanup interval that is configured, in minutes (0 if disabled).',
+        },
+      },
     },
     fetch: () => {
-      const {
-        allowRbac,
-        allowAccessAgreement,
-        allowAuditLogging,
-        allowLegacyAuditLogging,
-      } = license.getFeatures();
+      const { allowRbac, allowAccessAgreement, allowAuditLogging } = license.getFeatures();
       if (!allowRbac) {
         return {
           auditLoggingEnabled: false,
@@ -114,13 +133,13 @@ export function registerSecurityUsageCollector({ usageCollection, config, licens
           authProviderCount: 0,
           enabledAuthProviders: [],
           httpAuthSchemes: [],
+          sessionIdleTimeoutInMinutes: 0,
+          sessionLifespanInMinutes: 0,
+          sessionCleanupInMinutes: 0,
         };
       }
 
-      const legacyAuditLoggingEnabled = allowLegacyAuditLogging && config.audit.enabled;
-      const auditLoggingEnabled =
-        allowAuditLogging && config.audit.enabled && config.audit.appender != null;
-
+      const auditLoggingEnabled = allowAuditLogging && config.audit.enabled;
       const loginSelectorEnabled = config.authc.selector.enabled;
       const authProviderCount = config.authc.sortedProviders.length;
       const enabledAuthProviders = [
@@ -139,13 +158,21 @@ export function registerSecurityUsageCollector({ usageCollection, config, licens
         WELL_KNOWN_AUTH_SCHEMES.includes(scheme.toLowerCase())
       );
 
+      const sessionExpirations = config.session.getExpirationTimeouts(undefined); // use `undefined` to get global expiration values
+      const sessionIdleTimeoutInMinutes = sessionExpirations.idleTimeout?.asMinutes() ?? 0;
+      const sessionLifespanInMinutes = sessionExpirations.lifespan?.asMinutes() ?? 0;
+      const sessionCleanupInMinutes = config.session.cleanupInterval?.asMinutes() ?? 0;
+
       return {
-        auditLoggingEnabled: legacyAuditLoggingEnabled || auditLoggingEnabled,
+        auditLoggingEnabled,
         loginSelectorEnabled,
         accessAgreementEnabled,
         authProviderCount,
         enabledAuthProviders,
         httpAuthSchemes,
+        sessionIdleTimeoutInMinutes,
+        sessionLifespanInMinutes,
+        sessionCleanupInMinutes,
       };
     },
   });

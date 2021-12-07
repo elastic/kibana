@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { Observable } from 'rxjs';
 import {
   SavedObjectsStart,
   SavedObjectsClientContract,
@@ -14,6 +15,8 @@ import {
   ChromeStart,
 } from '../../../../../src/core/public';
 
+import { SpacesPluginStart } from '../../../spaces/public';
+
 export interface CanvasPlatformService {
   getBasePath: () => string;
   getBasePathInterface: () => IBasePath;
@@ -22,9 +25,12 @@ export interface CanvasPlatformService {
   getKibanaVersion: () => string;
   getHasWriteAccess: () => boolean;
   getUISetting: (key: string, defaultValue?: any) => any;
+  hasHeaderBanner$: () => Observable<boolean>;
   setBreadcrumbs: (newBreadcrumbs: ChromeBreadcrumb[]) => void;
   setRecentlyAccessed: (link: string, label: string, id: string) => void;
   setFullscreen: ChromeStart['setIsVisible'];
+  redirectLegacyUrl?: SpacesPluginStart['ui']['redirectLegacyUrl'];
+  getLegacyUrlConflict?: SpacesPluginStart['ui']['components']['getLegacyUrlConflict'];
 
   // TODO: these should go away.  We want thin accessors, not entire objects.
   // Entire objects are hard to mock, and hide our dependency on the external service.

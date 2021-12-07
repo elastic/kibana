@@ -11,7 +11,7 @@ import { catchError, takeUntil } from 'rxjs/operators';
 import ReactDOM from 'react-dom';
 import React from 'react';
 import moment from 'moment';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core/public';
 import { NewsfeedPluginBrowserConfig, NewsfeedPluginStartDependencies } from './types';
 import { NewsfeedNavButton } from './components/newsfeed_header_nav_button';
@@ -21,7 +21,8 @@ export type NewsfeedPublicPluginSetup = ReturnType<NewsfeedPublicPlugin['setup']
 export type NewsfeedPublicPluginStart = ReturnType<NewsfeedPublicPlugin['start']>;
 
 export class NewsfeedPublicPlugin
-  implements Plugin<NewsfeedPublicPluginSetup, NewsfeedPublicPluginStart> {
+  implements Plugin<NewsfeedPublicPluginSetup, NewsfeedPublicPluginStart>
+{
   private readonly kibanaVersion: string;
   private readonly config: NewsfeedPluginBrowserConfig;
   private readonly stop$ = new Rx.ReplaySubject(1);

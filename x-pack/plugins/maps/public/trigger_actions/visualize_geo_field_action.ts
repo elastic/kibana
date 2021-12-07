@@ -7,7 +7,7 @@
 
 import uuid from 'uuid/v4';
 import { i18n } from '@kbn/i18n';
-import { SerializableState } from 'src/plugins/kibana_utils/common';
+import type { SerializableRecord } from '@kbn/utility-types';
 import {
   createAction,
   ACTION_VISUALIZE_GEO_FIELD,
@@ -61,7 +61,7 @@ const getMapsLink = async (context: VisualizeFieldContext) => {
     {
       id: uuid(),
       visible: true,
-      type: supportsClustering ? LAYER_TYPE.BLENDED_VECTOR : LAYER_TYPE.VECTOR,
+      type: supportsClustering ? LAYER_TYPE.BLENDED_VECTOR : LAYER_TYPE.GEOJSON_VECTOR,
       sourceDescriptor: {
         id: uuid(),
         type: SOURCE_TYPES.ES_SEARCH,
@@ -78,7 +78,7 @@ const getMapsLink = async (context: VisualizeFieldContext) => {
   const location = await locator.getLocation({
     filters: getData().query.filterManager.getFilters(),
     query: getData().query.queryString.getQuery(),
-    initialLayers: (initialLayers as unknown) as LayerDescriptor[] & SerializableState,
+    initialLayers: initialLayers as unknown as LayerDescriptor[] & SerializableRecord,
     timeRange: getData().query.timefilter.timefilter.getTime(),
   });
 

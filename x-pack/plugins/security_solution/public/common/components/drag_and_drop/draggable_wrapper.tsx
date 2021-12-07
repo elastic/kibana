@@ -85,6 +85,10 @@ export const ProviderContentWrapper = styled.span`
   > span.euiToolTipAnchor {
     display: block; /* allow EuiTooltip content to be truncatable */
   }
+
+  > span.euiToolTipAnchor.eui-textTruncate {
+    display: inline-block; /* do not override display when a tooltip is truncated via eui-textTruncate */
+  }
 `;
 
 type RenderFunctionProp = (
@@ -95,9 +99,8 @@ type RenderFunctionProp = (
 
 interface Props {
   dataProvider: DataProvider;
-  disabled?: boolean;
+  hideTopN?: boolean;
   isDraggable?: boolean;
-  inline?: boolean;
   render: RenderFunctionProp;
   timelineId?: string;
   truncate?: boolean;
@@ -125,6 +128,7 @@ export const getStyle = (
 
 const DraggableOnWrapperComponent: React.FC<Props> = ({
   dataProvider,
+  hideTopN = false,
   onFilterAdded,
   render,
   timelineId,
@@ -147,6 +151,7 @@ const DraggableOnWrapperComponent: React.FC<Props> = ({
     showTopN,
   } = useHoverActions({
     dataProvider,
+    hideTopN,
     onFilterAdded,
     render,
     timelineId,
@@ -304,6 +309,7 @@ const DraggableOnWrapperComponent: React.FC<Props> = ({
 
 const DraggableWrapperComponent: React.FC<Props> = ({
   dataProvider,
+  hideTopN = false,
   isDraggable = false,
   onFilterAdded,
   render,
@@ -319,6 +325,7 @@ const DraggableWrapperComponent: React.FC<Props> = ({
     showTopN,
   } = useHoverActions({
     dataProvider,
+    hideTopN,
     isDraggable,
     onFilterAdded,
     render,
@@ -363,6 +370,7 @@ const DraggableWrapperComponent: React.FC<Props> = ({
   return (
     <DraggableOnWrapperComponent
       dataProvider={dataProvider}
+      hideTopN={hideTopN}
       onFilterAdded={onFilterAdded}
       render={render}
       timelineId={timelineId}

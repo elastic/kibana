@@ -63,14 +63,10 @@ export function DatePickerCol({ seriesId, series }: Props) {
     );
   }
 
-  if (!series.selectedMetricField) {
-    return null;
-  }
-
   return (
     <Wrapper>
       {seriesId === 0 || reportType !== ReportTypes.KPI ? (
-        <SeriesDatePicker seriesId={seriesId} series={series} readonly={false} />
+        <SeriesDatePicker seriesId={seriesId} series={series} />
       ) : (
         <DateRangePicker seriesId={seriesId} series={series} />
       )}

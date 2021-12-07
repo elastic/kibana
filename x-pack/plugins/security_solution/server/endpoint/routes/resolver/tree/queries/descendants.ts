@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import type { ApiResponse, estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { TransportResult } from '@elastic/elasticsearch';
 import { IScopedClusterClient } from 'src/core/server';
-import { JsonObject, JsonValue } from '@kbn/common-utils';
+import { JsonObject, JsonValue } from '@kbn/utility-types';
 import { FieldsObject, ResolverSchema } from '../../../../../../common/endpoint/types';
 import { NodeID, TimeRange, docValueFields, validIDs } from '../utils/index';
 
@@ -197,7 +198,7 @@ export class DescendantsQuery {
       return [];
     }
 
-    let response: ApiResponse<estypes.SearchResponse<unknown>>;
+    let response: TransportResult<estypes.SearchResponse<unknown>>;
     if (this.schema.ancestry) {
       response = await client.asCurrentUser.search({
         body: this.queryWithAncestryArray(validNodes, this.schema.ancestry, limit),

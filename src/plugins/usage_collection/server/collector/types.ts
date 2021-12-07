@@ -122,12 +122,11 @@ export interface ICollectorOptionsFetchExtendedContext<WithKibanaRequest extends
  * The options to extend the context provided to the `fetch` method.
  * @remark Only to be used in very rare scenarios when this is really needed.
  */
-export type CollectorOptionsFetchExtendedContext<
-  WithKibanaRequest extends boolean
-> = ICollectorOptionsFetchExtendedContext<WithKibanaRequest> &
-  (WithKibanaRequest extends true // If enforced to true via Types, the config must be expected
-    ? Required<Pick<ICollectorOptionsFetchExtendedContext<WithKibanaRequest>, 'kibanaRequest'>>
-    : {});
+export type CollectorOptionsFetchExtendedContext<WithKibanaRequest extends boolean> =
+  ICollectorOptionsFetchExtendedContext<WithKibanaRequest> &
+    (WithKibanaRequest extends true // If enforced to true via Types, the config must be expected
+      ? Required<Pick<ICollectorOptionsFetchExtendedContext<WithKibanaRequest>, 'kibanaRequest'>>
+      : {});
 
 /**
  * Options to instantiate a collector

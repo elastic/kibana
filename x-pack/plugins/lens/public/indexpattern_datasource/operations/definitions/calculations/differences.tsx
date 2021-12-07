@@ -14,6 +14,7 @@ import {
   getErrorsForDateReference,
   dateBasedOperationToExpression,
   hasDateField,
+  checkForDataLayerType,
 } from './utils';
 import { adjustTimeScaleOnOtherColumnChange } from '../../time_scale_utils';
 import { OperationDefinition } from '..';
@@ -99,13 +100,17 @@ export const derivativeOperation: OperationDefinition<
       })
     );
   },
-  getDisabledStatus(indexPattern, layer) {
-    return checkForDateHistogram(
-      layer,
-      i18n.translate('xpack.lens.indexPattern.derivative', {
-        defaultMessage: 'Differences',
-      })
-    )?.join(', ');
+  getDisabledStatus(indexPattern, layer, layerType) {
+    const opName = i18n.translate('xpack.lens.indexPattern.derivative', {
+      defaultMessage: 'Differences',
+    });
+    if (layerType) {
+      const dataLayerErrors = checkForDataLayerType(layerType, opName);
+      if (dataLayerErrors) {
+        return dataLayerErrors.join(', ');
+      }
+    }
+    return checkForDateHistogram(layer, opName)?.join(', ');
   },
   timeScalingMode: 'optional',
   filterable: true,

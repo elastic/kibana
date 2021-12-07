@@ -6,11 +6,12 @@
  * Side Public License, v 1.
  */
 
+import { omit } from 'lodash';
 import { of as mockOf } from 'rxjs';
 import type { MockedKeys } from '@kbn/utility-types/jest';
 import { KibanaRequest } from 'src/core/server';
 import type { ExecutionContext } from 'src/plugins/expressions/server';
-import type { IndexPatternsContract } from '../../../common/index_patterns/index_patterns';
+import type { IndexPatternsContract } from '../../../common';
 import type {
   AggsCommonStart,
   ISearchStartSearchSource,
@@ -55,7 +56,7 @@ describe('esaggs expression function - server', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockHandlers = {
-      abortSignal: (jest.fn() as unknown) as jest.Mocked<AbortSignal>,
+      abortSignal: jest.fn() as unknown as jest.Mocked<AbortSignal>,
       getKibanaRequest: jest.fn().mockReturnValue({ id: 'hi' } as KibanaRequest),
       getSearchContext: jest.fn(),
       getSearchSessionId: jest.fn().mockReturnValue('abc123'),
@@ -65,13 +66,13 @@ describe('esaggs expression function - server', () => {
       types: {},
     };
     startDependencies = {
-      aggs: ({
+      aggs: {
         createAggConfigs: jest.fn().mockReturnValue({ foo: 'bar' }),
-      } as unknown) as jest.Mocked<AggsCommonStart>,
-      indexPatterns: ({
+      } as unknown as jest.Mocked<AggsCommonStart>,
+      indexPatterns: {
         create: jest.fn().mockResolvedValue({}),
-      } as unknown) as jest.Mocked<IndexPatternsContract>,
-      searchSource: ({} as unknown) as jest.Mocked<ISearchStartSearchSource>,
+      } as unknown as jest.Mocked<IndexPatternsContract>,
+      searchSource: {} as unknown as jest.Mocked<ISearchStartSearchSource>,
     };
     getStartDependencies = jest.fn().mockResolvedValue(startDependencies);
     definition = getFunctionDefinition({ getStartDependencies });
@@ -96,6 +97,12 @@ describe('esaggs expression function - server', () => {
       {},
       args.aggs.map((agg) => agg.value)
     );
+  });
+
+  test('calls aggs.createAggConfigs with the empty aggs array when not provided', async () => {
+    await definition().fn(null, omit(args, 'aggs'), mockHandlers).toPromise();
+
+    expect(startDependencies.aggs.createAggConfigs).toHaveBeenCalledWith({}, []);
   });
 
   test('calls getEsaggsMeta to retrieve meta', () => {

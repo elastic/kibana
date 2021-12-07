@@ -36,7 +36,8 @@ export interface SetupDeps {
 
 /** @internal */
 export class UiSettingsService
-  implements CoreService<InternalUiSettingsServiceSetup, InternalUiSettingsServiceStart> {
+  implements CoreService<InternalUiSettingsServiceSetup, InternalUiSettingsServiceStart>
+{
   private readonly log: Logger;
   private readonly config$: Observable<UiSettingsConfigType>;
   private readonly isDist: boolean;

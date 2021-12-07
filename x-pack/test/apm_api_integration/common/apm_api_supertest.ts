@@ -11,19 +11,16 @@ import request from 'superagent';
 import { parseEndpoint } from '../../../plugins/apm/common/apm_api/parse_endpoint';
 import type {
   APIReturnType,
-  APIEndpoint,
   APIClientRequestParamsOf,
 } from '../../../plugins/apm/public/services/rest/createCallApmApi';
+import type { APIEndpoint } from '../../../plugins/apm/server';
 
-export function createApmApiSupertest(st: supertest.SuperTest<supertest.Test>) {
+export function createApmApiClient(st: supertest.SuperTest<supertest.Test>) {
   return async <TEndpoint extends APIEndpoint>(
     options: {
       endpoint: TEndpoint;
     } & APIClientRequestParamsOf<TEndpoint> & { params?: { query?: { _inspect?: boolean } } }
-  ): Promise<{
-    status: number;
-    body: APIReturnType<TEndpoint>;
-  }> => {
+  ): Promise<SupertestReturnType<TEndpoint>> => {
     const { endpoint } = options;
 
     const params = 'params' in options ? (options.params as Record<string, any>) : {};
@@ -44,7 +41,7 @@ export function createApmApiSupertest(st: supertest.SuperTest<supertest.Test>) {
   };
 }
 
-export type ApmApiSupertest = ReturnType<typeof createApmApiSupertest>;
+export type ApmApiSupertest = ReturnType<typeof createApmApiClient>;
 
 export class ApmApiError extends Error {
   res: request.Response;
@@ -59,4 +56,9 @@ Body: ${JSON.stringify(res.body)}`
 
     this.res = res;
   }
+}
+
+export interface SupertestReturnType<TEndpoint extends APIEndpoint> {
+  status: number;
+  body: APIReturnType<TEndpoint>;
 }

@@ -8,6 +8,7 @@
 import React, { ReactNode } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
+  EuiButtonEmpty,
   EuiButtonIcon,
   EuiLinkButtonProps,
   EuiPopover,
@@ -23,18 +24,36 @@ const PopoverContent = euiStyled(EuiText)`
 `;
 
 export function HelpPopoverButton({
+  buttonTextEnabled = false,
   onClick,
 }: {
+  buttonTextEnabled?: boolean;
   onClick: EuiLinkButtonProps['onClick'];
 }) {
+  const buttonText = i18n.translate('xpack.apm.helpPopover.ariaLabel', {
+    defaultMessage: 'Help',
+  });
+
+  if (buttonTextEnabled) {
+    return (
+      <EuiButtonEmpty
+        className="apmHelpPopover__buttonIcon"
+        size="s"
+        iconType="help"
+        aria-label={buttonText}
+        onClick={onClick}
+      >
+        {buttonText}
+      </EuiButtonEmpty>
+    );
+  }
+
   return (
     <EuiButtonIcon
       className="apmHelpPopover__buttonIcon"
       size="s"
       iconType="help"
-      aria-label={i18n.translate('xpack.apm.helpPopover.ariaLabel', {
-        defaultMessage: 'Help',
-      })}
+      aria-label={buttonText}
       onClick={onClick}
     />
   );

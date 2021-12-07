@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { DeepPartial } from 'utility-types';
 import { merge } from 'lodash';
 import { BaseDataGenerator } from './base_data_generator';
@@ -82,6 +82,10 @@ export class FleetAgentGenerator extends BaseDataGenerator<Agent> {
           action_seq_no: -1,
           active: true,
           enrolled_at: now,
+          agent: {
+            id: this.randomUUID(),
+            version: this.randomVersion(),
+          },
           local_metadata: {
             elastic: {
               agent: {

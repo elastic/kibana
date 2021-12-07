@@ -17,6 +17,7 @@ import type {
   Type,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { Version } from '@kbn/securitysolution-io-ts-types';
+import { i18n } from '@kbn/i18n';
 
 import { createListIfItDoesNotExist } from '../lists/create_list_if_it_does_not_exist';
 import { ConfigType } from '../../config';
@@ -59,17 +60,20 @@ export const importListItemsToStream = ({
     let list: ListSchema | null = null;
     readBuffer.on('fileName', async (fileNameEmitted: string) => {
       readBuffer.pause();
-      fileName = fileNameEmitted;
+      fileName = decodeURIComponent(fileNameEmitted);
       if (listId == null) {
         list = await createListIfItDoesNotExist({
-          description: `File uploaded from file system of ${fileNameEmitted}`,
+          description: i18n.translate('xpack.lists.services.items.fileUploadFromFileSystem', {
+            defaultMessage: 'File uploaded from file system of {fileName}',
+            values: { fileName },
+          }),
           deserializer,
           esClient,
-          id: fileNameEmitted,
+          id: fileName,
           immutable: false,
           listIndex,
           meta,
-          name: fileNameEmitted,
+          name: fileName,
           serializer,
           type,
           user,

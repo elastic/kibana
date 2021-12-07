@@ -5,20 +5,16 @@
  * 2.0.
  */
 
-import {
-  Logger,
-  CoreSetup,
-  SavedObjectsBulkGetObject,
-  SavedObjectsBaseOptions,
-} from 'kibana/server';
+import { Logger, CoreSetup } from 'kibana/server';
 import moment from 'moment';
+import { IEventLogService } from '../../../event_log/server';
 import {
   RunContext,
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '../../../task_manager/server';
-import { ActionResult } from '../types';
-import { getTotalCount, getInUseTotalCount } from './actions_telemetry';
+import { PreConfiguredAction } from '../types';
+import { getTotalCount, getInUseTotalCount, getExecutionsPerDayCount } from './actions_telemetry';
 
 export const TELEMETRY_TASK_TYPE = 'actions_telemetry';
 
@@ -28,9 +24,18 @@ export function initializeActionsTelemetry(
   logger: Logger,
   taskManager: TaskManagerSetupContract,
   core: CoreSetup,
-  kibanaIndex: string
+  kibanaIndex: string,
+  preconfiguredActions: PreConfiguredAction[],
+  eventLog: IEventLogService
 ) {
-  registerActionsTelemetryTask(logger, taskManager, core, kibanaIndex);
+  registerActionsTelemetryTask(
+    logger,
+    taskManager,
+    core,
+    kibanaIndex,
+    preconfiguredActions,
+    eventLog
+  );
 }
 
 export function scheduleActionsTelemetry(logger: Logger, taskManager: TaskManagerStartContract) {
@@ -41,13 +46,21 @@ function registerActionsTelemetryTask(
   logger: Logger,
   taskManager: TaskManagerSetupContract,
   core: CoreSetup,
-  kibanaIndex: string
+  kibanaIndex: string,
+  preconfiguredActions: PreConfiguredAction[],
+  eventLog: IEventLogService
 ) {
   taskManager.registerTaskDefinitions({
     [TELEMETRY_TASK_TYPE]: {
       title: 'Actions usage fetch task',
       timeout: '5m',
-      createTaskRunner: telemetryTaskRunner(logger, core, kibanaIndex),
+      createTaskRunner: telemetryTaskRunner(
+        logger,
+        core,
+        kibanaIndex,
+        preconfiguredActions,
+        eventLog
+      ),
     },
   });
 }
@@ -65,9 +78,16 @@ async function scheduleTasks(logger: Logger, taskManager: TaskManagerStartContra
   }
 }
 
-export function telemetryTaskRunner(logger: Logger, core: CoreSetup, kibanaIndex: string) {
+export function telemetryTaskRunner(
+  logger: Logger,
+  core: CoreSetup,
+  kibanaIndex: string,
+  preconfiguredActions: PreConfiguredAction[],
+  eventLog: IEventLogService
+) {
   return ({ taskInstance }: RunContext) => {
     const { state } = taskInstance;
+    const eventLogIndex = eventLog.getIndexPattern();
     const getEsClient = () =>
       core.getStartServices().then(
         ([
@@ -76,24 +96,15 @@ export function telemetryTaskRunner(logger: Logger, core: CoreSetup, kibanaIndex
           },
         ]) => client.asInternalUser
       );
-    const actionsBulkGet = (
-      objects?: SavedObjectsBulkGetObject[],
-      options?: SavedObjectsBaseOptions
-    ) => {
-      return core
-        .getStartServices()
-        .then(([{ savedObjects }]) =>
-          savedObjects.createInternalRepository(['action']).bulkGet<ActionResult>(objects, options)
-        );
-    };
     return {
       async run() {
         const esClient = await getEsClient();
         return Promise.all([
-          getTotalCount(esClient, kibanaIndex),
-          getInUseTotalCount(esClient, actionsBulkGet, kibanaIndex),
+          getTotalCount(esClient, kibanaIndex, preconfiguredActions),
+          getInUseTotalCount(esClient, kibanaIndex, undefined, preconfiguredActions),
+          getExecutionsPerDayCount(esClient, eventLogIndex),
         ])
-          .then(([totalAggegations, totalInUse]) => {
+          .then(([totalAggegations, totalInUse, totalExecutionsPerDay]) => {
             return {
               state: {
                 runs: (state.runs || 0) + 1,
@@ -102,6 +113,15 @@ export function telemetryTaskRunner(logger: Logger, core: CoreSetup, kibanaIndex
                 count_active_total: totalInUse.countTotal,
                 count_active_by_type: totalInUse.countByType,
                 count_active_alert_history_connectors: totalInUse.countByAlertHistoryConnectorType,
+                count_active_email_connectors_by_service_type: totalInUse.countEmailByService,
+                count_actions_namespaces: totalInUse.countNamespaces,
+                count_actions_executions_per_day: totalExecutionsPerDay.countTotal,
+                count_actions_executions_by_type_per_day: totalExecutionsPerDay.countByType,
+                count_actions_executions_failed_per_day: totalExecutionsPerDay.countFailed,
+                count_actions_executions_failed_by_type_per_day:
+                  totalExecutionsPerDay.countFailedByType,
+                avg_execution_time_per_day: totalExecutionsPerDay.avgExecutionTime,
+                avg_execution_time_by_type_per_day: totalExecutionsPerDay.avgExecutionTimeByType,
               },
               runAt: getNextMidnight(),
             };

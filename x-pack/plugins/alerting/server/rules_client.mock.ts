@@ -16,6 +16,7 @@ const createRulesClientMock = () => {
     aggregate: jest.fn(),
     create: jest.fn(),
     get: jest.fn(),
+    resolve: jest.fn(),
     getAlertState: jest.fn(),
     find: jest.fn(),
     delete: jest.fn(),
@@ -28,7 +29,8 @@ const createRulesClientMock = () => {
     muteInstance: jest.fn(),
     unmuteInstance: jest.fn(),
     listAlertTypes: jest.fn(),
-    getAlertInstanceSummary: jest.fn(),
+    getAlertSummary: jest.fn(),
+    getSpaceId: jest.fn(),
   };
   return mocked;
 };

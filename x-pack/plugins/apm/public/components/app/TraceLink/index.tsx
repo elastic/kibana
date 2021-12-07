@@ -23,13 +23,13 @@ export function TraceLink() {
   const {
     path: { traceId },
     query: { rangeFrom, rangeTo },
-  } = useApmParams('/link-to/trace/:traceId');
+  } = useApmParams('/link-to/trace/{traceId}');
 
   const { data = { transaction: null }, status } = useFetcher(
     (callApmApi) => {
       if (traceId) {
         return callApmApi({
-          endpoint: 'GET /api/apm/traces/{traceId}/root_transaction',
+          endpoint: 'GET /internal/apm/traces/{traceId}/root_transaction',
           params: {
             path: {
               traceId,

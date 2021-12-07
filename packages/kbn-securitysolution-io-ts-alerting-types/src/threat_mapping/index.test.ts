@@ -54,13 +54,13 @@ describe('threat_mapping', () => {
     });
 
     test('it should fail validation with a non string', () => {
-      const payload = ([
+      const payload = [
         {
           field: 5,
           type: 'mapping',
           value: 'field.one',
         },
-      ] as unknown) as ThreatMappingEntries[];
+      ] as unknown as ThreatMappingEntries[];
       const decoded = threatMappingEntries.decode(payload);
       const checked = exactCheck(payload, decoded);
       const message = pipe(checked, foldLeftRight);
@@ -70,13 +70,13 @@ describe('threat_mapping', () => {
     });
 
     test('it should fail validation with a wrong type', () => {
-      const payload = ([
+      const payload = [
         {
           field: 'field.one',
           type: 'invalid',
           value: 'field.one',
         },
-      ] as unknown) as ThreatMappingEntries[];
+      ] as unknown as ThreatMappingEntries[];
       const decoded = threatMappingEntries.decode(payload);
       const checked = exactCheck(payload, decoded);
       const message = pipe(checked, foldLeftRight);
@@ -155,7 +155,7 @@ describe('threat_mapping', () => {
   });
 
   test('it should fail validate with an extra inner entry with the wrong data type', () => {
-    const payload = ([
+    const payload = [
       {
         entries: [
           {
@@ -165,7 +165,7 @@ describe('threat_mapping', () => {
           },
         ],
       },
-    ] as unknown) as ThreatMapping;
+    ] as unknown as ThreatMapping;
 
     const decoded = threat_mapping.decode(payload);
     const checked = exactCheck(payload, decoded);

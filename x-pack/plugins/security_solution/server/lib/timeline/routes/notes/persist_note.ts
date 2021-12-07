@@ -42,18 +42,16 @@ export const persistNoteRoute = (
         const frameworkRequest = await buildFrameworkRequest(context, security, request);
         const { note } = request.body;
         const noteId = request.body?.noteId ?? null;
-        const version = request.body?.version ?? null;
 
-        const res = await persistNote(
-          frameworkRequest,
+        const res = await persistNote({
+          request: frameworkRequest,
           noteId,
-          version,
-          {
+          note: {
             ...note,
             timelineId: note.timelineId || null,
           },
-          true
-        );
+          overrideOwner: true,
+        });
 
         return response.ok({
           body: { data: { persistNote: res } },

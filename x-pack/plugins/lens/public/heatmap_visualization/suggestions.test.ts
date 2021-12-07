@@ -9,6 +9,7 @@ import { Position } from '@elastic/charts';
 import { getSuggestions } from './suggestions';
 import type { HeatmapVisualizationState } from './types';
 import { HEATMAP_GRID_FUNCTION, LEGEND_FUNCTION } from './constants';
+import { layerTypes } from '../../common';
 
 describe('heatmap suggestions', () => {
   describe('rejects suggestions', () => {
@@ -24,10 +25,58 @@ describe('heatmap suggestions', () => {
           state: {
             shape: 'heatmap',
             layerId: 'first',
+            layerType: layerTypes.DATA,
           } as HeatmapVisualizationState,
           keptLayerIds: ['first'],
         })
       ).toHaveLength(0);
+    });
+
+    test('when metric value isStaticValue', () => {
+      expect(
+        getSuggestions({
+          table: {
+            layerId: 'first',
+            isMultiRow: true,
+            columns: [
+              {
+                columnId: 'date-column',
+                operation: {
+                  isBucketed: true,
+                  dataType: 'date',
+                  scale: 'interval',
+                  label: 'Date',
+                },
+              },
+              {
+                columnId: 'metric-column',
+                operation: {
+                  isBucketed: false,
+                  dataType: 'number',
+                  scale: 'ratio',
+                  label: 'Metric',
+                  isStaticValue: true,
+                },
+              },
+              {
+                columnId: 'group-column',
+                operation: {
+                  isBucketed: true,
+                  dataType: 'string',
+                  scale: 'ratio',
+                  label: 'Group',
+                },
+              },
+            ],
+            changeType: 'initial',
+          },
+          state: {
+            layerId: 'first',
+            layerType: layerTypes.DATA,
+          } as HeatmapVisualizationState,
+          keptLayerIds: ['first'],
+        })
+      ).toEqual([]);
     });
 
     test('when there are 3 or more buckets', () => {
@@ -78,6 +127,7 @@ describe('heatmap suggestions', () => {
           },
           state: {
             layerId: 'first',
+            layerType: layerTypes.DATA,
           } as HeatmapVisualizationState,
           keptLayerIds: ['first'],
         })
@@ -96,6 +146,7 @@ describe('heatmap suggestions', () => {
           state: {
             shape: 'heatmap',
             layerId: 'first',
+            layerType: layerTypes.DATA,
             xAccessor: 'some-field',
           } as HeatmapVisualizationState,
           keptLayerIds: ['first'],
@@ -116,6 +167,7 @@ describe('heatmap suggestions', () => {
           },
           state: {
             layerId: 'first',
+            layerType: layerTypes.DATA,
           } as HeatmapVisualizationState,
           keptLayerIds: ['first'],
         })
@@ -123,6 +175,7 @@ describe('heatmap suggestions', () => {
         {
           state: {
             layerId: 'first',
+            layerType: layerTypes.DATA,
             shape: 'heatmap',
             gridConfig: {
               type: HEATMAP_GRID_FUNCTION,
@@ -164,6 +217,7 @@ describe('heatmap suggestions', () => {
           },
           state: {
             layerId: 'first',
+            layerType: layerTypes.DATA,
           } as HeatmapVisualizationState,
           keptLayerIds: ['first'],
         })
@@ -171,6 +225,7 @@ describe('heatmap suggestions', () => {
         {
           state: {
             layerId: 'first',
+            layerType: layerTypes.DATA,
             shape: 'heatmap',
             xAccessor: 'test-column',
             gridConfig: {
@@ -225,6 +280,7 @@ describe('heatmap suggestions', () => {
           },
           state: {
             layerId: 'first',
+            layerType: layerTypes.DATA,
           } as HeatmapVisualizationState,
           keptLayerIds: ['first'],
         })
@@ -232,6 +288,7 @@ describe('heatmap suggestions', () => {
         {
           state: {
             layerId: 'first',
+            layerType: layerTypes.DATA,
             shape: 'heatmap',
             xAccessor: 'date-column',
             valueAccessor: 'metric-column',
@@ -295,6 +352,7 @@ describe('heatmap suggestions', () => {
           },
           state: {
             layerId: 'first',
+            layerType: layerTypes.DATA,
           } as HeatmapVisualizationState,
           keptLayerIds: ['first'],
         })
@@ -302,6 +360,7 @@ describe('heatmap suggestions', () => {
         {
           state: {
             layerId: 'first',
+            layerType: layerTypes.DATA,
             shape: 'heatmap',
             xAccessor: 'date-column',
             yAccessor: 'group-column',

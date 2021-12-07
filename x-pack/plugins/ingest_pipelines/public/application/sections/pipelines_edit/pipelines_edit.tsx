@@ -7,7 +7,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiPageHeader,
   EuiEmptyPrompt,
@@ -40,9 +40,12 @@ export const PipelinesEdit: React.FunctionComponent<RouteComponentProps<MatchPar
 
   const decodedPipelineName = attemptToURIDecode(name)!;
 
-  const { error, data: pipeline, isLoading, resendRequest } = services.api.useLoadPipeline(
-    decodedPipelineName
-  );
+  const {
+    error,
+    data: pipeline,
+    isLoading,
+    resendRequest,
+  } = services.api.useLoadPipeline(decodedPipelineName);
 
   const onSave = async (updatedPipeline: Pipeline) => {
     setIsSaving(true);

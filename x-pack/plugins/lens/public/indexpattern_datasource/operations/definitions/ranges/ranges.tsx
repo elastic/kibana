@@ -21,7 +21,7 @@ import { RangeEditor } from './range_editor';
 import { OperationDefinition } from '../index';
 import { FieldBasedIndexPatternColumn } from '../column_types';
 import { updateColumnParam } from '../../layer_helpers';
-import { supportedFormats } from '../../../../../common/expressions';
+import { supportedFormats } from '../../../../../common/expressions/format_column/supported_formats';
 import { MODES, AUTO_BARS, DEFAULT_INTERVAL, MIN_HISTOGRAM_BARS, SLICES } from './constants';
 import { IndexPattern, IndexPatternField } from '../../../types';
 import { getInvalidFieldMessage, isValidNumber } from '../helpers';
@@ -196,7 +196,7 @@ export const rangeOperation: OperationDefinition<RangeIndexPatternColumn, 'field
       supportedFormats[numberFormat.id].decimalsToPattern(numberFormat.params?.decimals || 0);
 
     const rangeFormatter = data.fieldFormats.deserialize({
-      ...currentColumn.params.parentFormat,
+      ...(currentColumn.params.parentFormat || { id: 'range' }),
       params: {
         ...currentColumn.params.parentFormat?.params,
         ...(numberFormat
@@ -244,7 +244,7 @@ export const rangeOperation: OperationDefinition<RangeIndexPatternColumn, 'field
               format: currentColumn.params.format,
               parentFormat,
             },
-          },
+          } as RangeIndexPatternColumn,
         },
       });
     };

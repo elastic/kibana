@@ -20,7 +20,7 @@ export const trim = (ROOT) => (x) => x.replace(`${ROOT}/`, '');
 export const isFileAllowed = (x) => /.(j|t)(s|sx)$/gm.test(x);
 export const isRejectedDir = (x) =>
   /node_modules|__tests__|__fixture__|__fixtures__|build\//gm.test(x);
-const isGlobFound = (x) => (xs) => (x === xs[0] ? false : true);
+const isGlobFound = (x) => (xs) => x === xs[0] ? false : true;
 export const globExpands = (x) => isGlobFound(x)(prokGlob(x));
 export const tryPath = (x) => {
   const isAGlob = isGlob(x);

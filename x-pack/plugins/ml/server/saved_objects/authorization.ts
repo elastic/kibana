@@ -25,9 +25,8 @@ export function authorizationProvider(authorization: SecurityPluginSetup['authz'
     // If spaces are disabled, then this will check privileges globally instead.
     // SO, if spaces are disabled, then you don't technically need to perform this check, but I included it here
     // for completeness.
-    const checkPrivilegesDynamicallyWithRequest = authorization.checkPrivilegesDynamicallyWithRequest(
-      request
-    );
+    const checkPrivilegesDynamicallyWithRequest =
+      authorization.checkPrivilegesDynamicallyWithRequest(request);
     const createMLJobAuthorizationAction = authorization.actions.savedObject.get(
       ML_SAVED_OBJECT_TYPE,
       'create'

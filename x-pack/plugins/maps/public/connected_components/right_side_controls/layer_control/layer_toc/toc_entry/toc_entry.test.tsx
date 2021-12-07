@@ -21,7 +21,7 @@ import { TOCEntry } from './toc_entry';
 
 const LAYER_ID = '1';
 
-const mockLayer = ({
+const mockLayer = {
   getId: () => {
     return LAYER_ID;
   },
@@ -46,7 +46,10 @@ const mockLayer = ({
   hasLegendDetails: () => {
     return true;
   },
-} as unknown) as ILayer;
+  supportsFitToBounds: () => {
+    return true;
+  },
+} as unknown as ILayer;
 
 const defaultProps = {
   layer: mockLayer,
@@ -113,7 +116,7 @@ describe('TOCEntry', () => {
     });
 
     test('Should shade background when not selected layer', async () => {
-      const differentLayer = (Object.create(mockLayer) as unknown) as ILayer;
+      const differentLayer = Object.create(mockLayer) as unknown as ILayer;
       differentLayer.getId = () => {
         return 'foobar';
       };

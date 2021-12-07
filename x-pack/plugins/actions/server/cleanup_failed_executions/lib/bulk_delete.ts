@@ -6,13 +6,14 @@
  */
 
 import { ElasticsearchClient } from 'kibana/server';
-import { ApiResponse, estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { TransportResult } from '@elastic/elasticsearch';
 
 export async function bulkDelete(
   esClient: ElasticsearchClient,
   index: string,
   ids: string[]
-): Promise<ApiResponse<estypes.BulkResponse, unknown> | undefined> {
+): Promise<TransportResult<estypes.BulkResponse, unknown> | undefined> {
   if (ids.length === 0) {
     return;
   }

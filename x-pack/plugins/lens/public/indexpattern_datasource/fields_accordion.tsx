@@ -17,10 +17,11 @@ import {
   EuiIconTip,
 } from '@elastic/eui';
 import classNames from 'classnames';
-import { DataPublicPluginStart } from 'src/plugins/data/public';
+import { FieldFormatsStart } from 'src/plugins/field_formats/public';
+import { Filter } from '@kbn/es-query';
 import { IndexPatternField } from './types';
 import { FieldItem } from './field_item';
-import { Query, Filter } from '../../../../../src/plugins/data/public';
+import { Query } from '../../../../../src/plugins/data/public';
 import { DatasourceDataPanelProps } from '../types';
 import { IndexPattern } from './types';
 import { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
@@ -28,7 +29,7 @@ import { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
 
 export interface FieldItemSharedProps {
   core: DatasourceDataPanelProps['core'];
-  data: DataPublicPluginStart;
+  fieldFormats: FieldFormatsStart;
   chartsThemeService: ChartsPluginSetup['theme'];
   indexPattern: IndexPattern;
   highlight?: string;

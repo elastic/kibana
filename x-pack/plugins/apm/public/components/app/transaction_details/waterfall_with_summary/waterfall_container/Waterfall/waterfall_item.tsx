@@ -5,18 +5,24 @@
  * 2.0.
  */
 
-import { EuiIcon, EuiText, EuiTitle, EuiToolTip } from '@elastic/eui';
+import { EuiBadge, EuiIcon, EuiText, EuiTitle, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { ReactNode } from 'react';
+import { useTheme } from '../../../../../../hooks/use_theme';
 import { euiStyled } from '../../../../../../../../../../src/plugins/kibana_react/common';
 import { isRumAgentName } from '../../../../../../../common/agent_name';
-import { TRACE_ID } from '../../../../../../../common/elasticsearch_fieldnames';
+import {
+  TRACE_ID,
+  TRANSACTION_ID,
+} from '../../../../../../../common/elasticsearch_fieldnames';
 import { asDuration } from '../../../../../../../common/utils/formatters';
 import { Margins } from '../../../../../shared/charts/Timeline';
-import { ErrorOverviewLink } from '../../../../../shared/Links/apm/ErrorOverviewLink';
-import { ErrorCount } from '../../ErrorCount';
+import { TruncateWithTooltip } from '../../../../../shared/truncate_with_tooltip';
 import { SyncBadge } from './sync_badge';
 import { IWaterfallSpanOrTransaction } from './waterfall_helpers/waterfall_helpers';
+import { FailureBadge } from './failure_badge';
+import { useApmRouter } from '../../../../../../hooks/use_apm_router';
+import { useApmParams } from '../../../../../../hooks/use_apm_params';
 
 type ItemType = 'transaction' | 'span' | 'error';
 
@@ -62,6 +68,7 @@ const ItemText = euiStyled.span`
   display: flex;
   align-items: center;
   height: ${({ theme }) => theme.eui.euiSizeL};
+  max-width: 100%;
 
   /* add margin to all direct descendants */
   & > * {
@@ -147,7 +154,19 @@ function HttpStatusCode({ item }: { item: IWaterfallSpanOrTransaction }) {
 function NameLabel({ item }: { item: IWaterfallSpanOrTransaction }) {
   switch (item.docType) {
     case 'span':
-      return <EuiText size="s">{item.doc.span.name}</EuiText>;
+      let name = item.doc.span.name;
+      if (item.doc.span.composite) {
+        const compositePrefix =
+          item.doc.span.composite.compression_strategy === 'exact_match'
+            ? 'x'
+            : '';
+        name = `${item.doc.span.composite.count}${compositePrefix} ${name}`;
+      }
+      return (
+        <EuiText style={{ overflow: 'hidden' }} size="s">
+          <TruncateWithTooltip content={name} text={name} />
+        </EuiText>
+      );
     case 'transaction':
       return (
         <EuiTitle size="xxs">
@@ -173,14 +192,8 @@ export function WaterfallItem({
   const width = (item.duration / totalDuration) * 100;
   const left = ((item.offset + item.skew) / totalDuration) * 100;
 
-  const tooltipContent = i18n.translate(
-    'xpack.apm.transactionDetails.errorsOverviewLinkTooltip',
-    {
-      values: { errorCount },
-      defaultMessage:
-        '{errorCount, plural, one {View 1 related error} other {View # related errors}}',
-    }
-  );
+  const isCompositeSpan = item.docType === 'span' && item.doc.span.composite;
+  const itemBarStyle = getItemBarStyle(item, color, width, left);
 
   return (
     <Container
@@ -193,8 +206,8 @@ export function WaterfallItem({
       }}
     >
       <ItemBar // using inline styles instead of props to avoid generating a css class for each item
-        style={{ left: `${left}%`, width: `${width}%` }}
-        color={color}
+        style={itemBarStyle}
+        color={isCompositeSpan ? 'transparent' : color}
         type={item.docType}
       />
       <ItemText // using inline styles instead of props to avoid generating a css class for each item
@@ -205,25 +218,81 @@ export function WaterfallItem({
         </SpanActionToolTip>
         <HttpStatusCode item={item} />
         <NameLabel item={item} />
-        {errorCount > 0 && item.docType === 'transaction' ? (
-          <ErrorOverviewLink
-            serviceName={item.doc.service.name}
-            query={{
-              kuery: encodeURIComponent(
-                `${TRACE_ID} : "${item.doc.trace.id}" and transaction.id : "${item.doc.transaction.id}"`
-              ),
-            }}
-            color="danger"
-            style={{ textDecoration: 'none' }}
-          >
-            <EuiToolTip content={tooltipContent}>
-              <ErrorCount count={errorCount} />
-            </EuiToolTip>
-          </ErrorOverviewLink>
-        ) : null}
+
         <Duration item={item} />
+        <RelatedErrors item={item} errorCount={errorCount} />
         {item.docType === 'span' && <SyncBadge sync={item.doc.span.sync} />}
       </ItemText>
     </Container>
   );
+}
+
+function RelatedErrors({
+  item,
+  errorCount,
+}: {
+  item: IWaterfallSpanOrTransaction;
+  errorCount: number;
+}) {
+  const apmRouter = useApmRouter();
+  const theme = useTheme();
+  const { query } = useApmParams('/services/{serviceName}/transactions/view');
+
+  const href = apmRouter.link(`/services/{serviceName}/errors`, {
+    path: { serviceName: item.doc.service.name },
+    query: {
+      ...query,
+      kuery: `${TRACE_ID} : "${item.doc.trace.id}" and ${TRANSACTION_ID} : "${item.doc.transaction?.id}"`,
+    },
+  });
+
+  if (errorCount > 0) {
+    return (
+      // eslint-disable-next-line jsx-a11y/click-events-have-key-events
+      <div onClick={(e: React.MouseEvent) => e.stopPropagation()}>
+        <EuiBadge
+          href={href}
+          color={theme.eui.euiColorDanger}
+          iconType="arrowRight"
+        >
+          {i18n.translate('xpack.apm.waterfall.errorCount', {
+            defaultMessage:
+              '{errorCount, plural, one {View related error} other {View # related errors}}',
+            values: { errorCount },
+          })}
+        </EuiBadge>
+      </div>
+    );
+  }
+
+  return <FailureBadge outcome={item.doc.event?.outcome} />;
+}
+
+function getItemBarStyle(
+  item: IWaterfallSpanOrTransaction,
+  color: string,
+  width: number,
+  left: number
+): React.CSSProperties {
+  let itemBarStyle = { left: `${left}%`, width: `${width}%` };
+
+  if (item.docType === 'span' && item.doc.span.composite) {
+    const percNumItems = 100.0 / item.doc.span.composite.count;
+    const spanSumRatio =
+      item.doc.span.composite.sum.us / item.doc.span.duration.us;
+    const percDuration = percNumItems * spanSumRatio;
+
+    itemBarStyle = {
+      ...itemBarStyle,
+      ...{
+        backgroundImage:
+          `repeating-linear-gradient(90deg, ${color},` +
+          ` ${color} max(${percDuration}%,3px),` +
+          ` transparent max(${percDuration}%,3px),` +
+          ` transparent max(${percNumItems}%,max(${percDuration}%,3px) + 3px))`,
+      },
+    };
+  }
+
+  return itemBarStyle;
 }

@@ -10,23 +10,12 @@ import React from 'react';
 import type { AdvancedSettingsSetup } from 'src/plugins/advanced_settings/public';
 import type { TelemetryPluginSetup } from 'src/plugins/telemetry/public';
 import type { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
-import type { Plugin, CoreStart, CoreSetup } from 'src/core/public';
+import type { CoreStart, CoreSetup } from 'src/core/public';
 
 import {
   telemetryManagementSectionWrapper,
   TelemetryManagementSectionWrapperProps,
 } from './components/telemetry_management_section_wrapper';
-
-export interface TelemetryPluginConfig {
-  enabled: boolean;
-  url: string;
-  banner: boolean;
-  allowChangingOptInStatus: boolean;
-  optIn: boolean | null;
-  optInStatusUrl: string;
-  sendUsageFrom: 'browser' | 'server';
-  telemetryNotifyUserAboutOptInDefault?: boolean;
-}
 
 export interface TelemetryManagementSectionPluginDepsSetup {
   telemetry: TelemetryPluginSetup;
@@ -34,17 +23,7 @@ export interface TelemetryManagementSectionPluginDepsSetup {
   usageCollection?: UsageCollectionSetup;
 }
 
-export interface TelemetryManagementSectionPluginSetup {
-  toggleSecuritySolutionExample: (enabled: boolean) => void;
-}
-
-export class TelemetryManagementSectionPlugin
-  implements Plugin<TelemetryManagementSectionPluginSetup> {
-  private showSecuritySolutionExample = false;
-  private shouldShowSecuritySolutionExample = () => {
-    return this.showSecuritySolutionExample;
-  };
-
+export class TelemetryManagementSectionPlugin {
   public setup(
     core: CoreSetup,
     {
@@ -60,21 +39,16 @@ export class TelemetryManagementSectionPlugin
       (props) => {
         return (
           <ApplicationUsageTrackingProvider>
-            {telemetryManagementSectionWrapper(
-              telemetryService,
-              this.shouldShowSecuritySolutionExample
-            )(props as TelemetryManagementSectionWrapperProps)}
+            {telemetryManagementSectionWrapper(telemetryService)(
+              props as TelemetryManagementSectionWrapperProps
+            )}
           </ApplicationUsageTrackingProvider>
         );
       },
       true
     );
 
-    return {
-      toggleSecuritySolutionExample: (enabled: boolean) => {
-        this.showSecuritySolutionExample = enabled;
-      },
-    };
+    return {};
   }
 
   public start(core: CoreStart) {}

@@ -5,41 +5,68 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLink,
+  EuiEmptyPrompt,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect } from 'react';
+import uuid from 'uuid';
 import { toMountPoint } from '../../../../../../../src/plugins/kibana_react/public';
 import { useAnomalyDetectionJobsContext } from '../../../context/anomaly_detection_jobs/use_anomaly_detection_jobs_context';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
-import { useUrlParams } from '../../../context/url_params_context/use_url_params';
+import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useLocalStorage } from '../../../hooks/useLocalStorage';
+import { useApmParams } from '../../../hooks/use_apm_params';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
+import { useTimeRange } from '../../../hooks/use_time_range';
 import { useUpgradeAssistantHref } from '../../shared/Links/kibana';
 import { SearchBar } from '../../shared/search_bar';
-import { NoServicesMessage } from './no_services_message';
+import { getTimeRangeComparison } from '../../shared/time_comparison/get_time_range_comparison';
 import { ServiceList } from './service_list';
-import { MLCallout } from './service_list/MLCallout';
+import { MLCallout, shouldDisplayMlCallout } from '../../shared/ml_callout';
 
 const initialData = {
-  items: [],
-  hasHistoricalData: true,
-  hasLegacyData: false,
+  requestId: '',
+  mainStatisticsData: {
+    items: [],
+    hasHistoricalData: true,
+    hasLegacyData: false,
+  },
 };
 
 let hasDisplayedToast = false;
 
 function useServicesFetcher() {
   const {
-    urlParams: { environment, kuery, start, end },
-  } = useUrlParams();
+    urlParams: { comparisonEnabled, comparisonType },
+  } = useLegacyUrlParams();
+
+  const {
+    query: { rangeFrom, rangeTo, environment, kuery },
+  } =
+    // @ts-ignore 4.3.5 upgrade - Type instantiation is excessively deep and possibly infinite.
+    useApmParams('/services/{serviceName}', '/services');
+
+  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
+
   const { core } = useApmPluginContext();
   const upgradeAssistantHref = useUpgradeAssistantHref();
 
-  const { data = initialData, status } = useFetcher(
+  const { offset } = getTimeRangeComparison({
+    start,
+    end,
+    comparisonEnabled,
+    comparisonType,
+  });
+
+  const { data = initialData, status: mainStatisticsStatus } = useFetcher(
     (callApmApi) => {
       if (start && end) {
         return callApmApi({
-          endpoint: 'GET /api/apm/services',
+          endpoint: 'GET /internal/apm/services',
           params: {
             query: {
               environment,
@@ -48,14 +75,50 @@ function useServicesFetcher() {
               end,
             },
           },
+        }).then((mainStatisticsData) => {
+          return {
+            requestId: uuid(),
+            mainStatisticsData,
+          };
         });
       }
     },
     [environment, kuery, start, end]
   );
 
+  const { mainStatisticsData, requestId } = data;
+
+  const { data: comparisonData } = useFetcher(
+    (callApmApi) => {
+      if (start && end && mainStatisticsData.items.length) {
+        return callApmApi({
+          endpoint: 'GET /internal/apm/services/detailed_statistics',
+          params: {
+            query: {
+              environment,
+              kuery,
+              start,
+              end,
+              serviceNames: JSON.stringify(
+                mainStatisticsData.items
+                  .map(({ serviceName }) => serviceName)
+                  // Service name is sorted to guarantee the same order every time this API is called so the result can be cached.
+                  .sort()
+              ),
+              offset,
+            },
+          },
+        });
+      }
+    },
+    // only fetches detailed statistics when requestId is invalidated by main statistics api call or offset is changed
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [requestId, offset],
+    { preservePreviousData: false }
+  );
+
   useEffect(() => {
-    if (data.hasLegacyData && !hasDisplayedToast) {
+    if (mainStatisticsData.hasLegacyData && !hasDisplayedToast) {
       hasDisplayedToast = true;
 
       core.notifications.toasts.addWarning({
@@ -82,51 +145,69 @@ function useServicesFetcher() {
         ),
       });
     }
-  }, [data.hasLegacyData, upgradeAssistantHref, core.notifications.toasts]);
+  }, [
+    mainStatisticsData.hasLegacyData,
+    upgradeAssistantHref,
+    core.notifications.toasts,
+  ]);
 
-  return { servicesData: data, servicesStatus: status };
+  return {
+    mainStatisticsData,
+    mainStatisticsStatus,
+    comparisonData,
+  };
 }
 
 export function ServiceInventory() {
-  const { core } = useApmPluginContext();
-  const { servicesData, servicesStatus } = useServicesFetcher();
+  const { mainStatisticsData, mainStatisticsStatus, comparisonData } =
+    useServicesFetcher();
 
-  const {
-    anomalyDetectionJobsData,
-    anomalyDetectionJobsStatus,
-  } = useAnomalyDetectionJobsContext();
+  const { anomalyDetectionSetupState } = useAnomalyDetectionJobsContext();
 
   const [userHasDismissedCallout, setUserHasDismissedCallout] = useLocalStorage(
-    'apm.userHasDismissedServiceInventoryMlCallout',
+    `apm.userHasDismissedServiceInventoryMlCallout.${anomalyDetectionSetupState}`,
     false
   );
 
-  const canCreateJob = !!core.application.capabilities.ml?.canCreateJob;
-
   const displayMlCallout =
-    anomalyDetectionJobsStatus === FETCH_STATUS.SUCCESS &&
-    !anomalyDetectionJobsData?.jobs.length &&
-    canCreateJob &&
-    !userHasDismissedCallout;
+    !userHasDismissedCallout &&
+    shouldDisplayMlCallout(anomalyDetectionSetupState);
+
+  const isLoading = mainStatisticsStatus === FETCH_STATUS.LOADING;
+  const isFailure = mainStatisticsStatus === FETCH_STATUS.FAILURE;
+  const noItemsMessage = (
+    <EuiEmptyPrompt
+      title={
+        <div>
+          {i18n.translate('xpack.apm.servicesTable.notFoundLabel', {
+            defaultMessage: 'No services found',
+          })}
+        </div>
+      }
+      titleSize="s"
+    />
+  );
 
   return (
     <>
-      <SearchBar />
-      <EuiFlexGroup direction="column" gutterSize="s">
+      <SearchBar showTimeComparison />
+      <EuiFlexGroup direction="column" gutterSize="m">
         {displayMlCallout && (
           <EuiFlexItem>
-            <MLCallout onDismiss={() => setUserHasDismissedCallout(true)} />
+            <MLCallout
+              isOnSettingsPage={false}
+              anomalyDetectionSetupState={anomalyDetectionSetupState}
+              onDismiss={() => setUserHasDismissedCallout(true)}
+            />
           </EuiFlexItem>
         )}
         <EuiFlexItem>
           <ServiceList
-            items={servicesData.items}
-            noItemsMessage={
-              <NoServicesMessage
-                historicalDataFound={servicesData.hasHistoricalData}
-                status={servicesStatus}
-              />
-            }
+            isLoading={isLoading}
+            isFailure={isFailure}
+            items={mainStatisticsData.items}
+            comparisonData={comparisonData}
+            noItemsMessage={noItemsMessage}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

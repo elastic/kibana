@@ -5,18 +5,21 @@
  * 2.0.
  */
 
-import { transformError, getIndexExists } from '@kbn/securitysolution-es-utils';
-import { parseExperimentalConfigValue } from '../../../../../common/experimental_features';
-import { ConfigType } from '../../../../config';
+import { transformError, getBootstrapIndexExists } from '@kbn/securitysolution-es-utils';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
-import { DEFAULT_ALERTS_INDEX, DETECTION_ENGINE_INDEX_URL } from '../../../../../common/constants';
+import { DETECTION_ENGINE_INDEX_URL } from '../../../../../common/constants';
 
 import { buildSiemResponse } from '../utils';
-import { SIGNALS_TEMPLATE_VERSION } from './get_signals_template';
+import { RuleDataPluginService } from '../../../../../../rule_registry/server';
+import { fieldAliasesOutdated } from './check_template_version';
 import { getIndexVersion } from './get_index_version';
 import { isOutdated } from '../../migrations/helpers';
+import { SIGNALS_TEMPLATE_VERSION } from './get_signals_template';
 
-export const readIndexRoute = (router: SecuritySolutionPluginRouter, config: ConfigType) => {
+export const readIndexRoute = (
+  router: SecuritySolutionPluginRouter,
+  ruleDataService: RuleDataPluginService
+) => {
   router.get(
     {
       path: DETECTION_ENGINE_INDEX_URL,
@@ -25,36 +28,36 @@ export const readIndexRoute = (router: SecuritySolutionPluginRouter, config: Con
         tags: ['access:securitySolution'],
       },
     },
-    async (context, request, response) => {
+    async (context, _, response) => {
       const siemResponse = buildSiemResponse(response);
 
       try {
-        const esClient = context.core.elasticsearch.client.asCurrentUser;
         const siemClient = context.securitySolution?.getAppClient();
+        const esClient = context.core.elasticsearch.client.asCurrentUser;
 
         if (!siemClient) {
           return siemResponse.error({ statusCode: 404 });
         }
 
-        // TODO: Once we are past experimental phase this code should be removed
-        const { ruleRegistryEnabled } = parseExperimentalConfigValue(config.enableExperimental);
-        if (ruleRegistryEnabled) {
-          return response.ok({
-            body: { name: DEFAULT_ALERTS_INDEX, index_mapping_outdated: false },
-          });
-        }
+        const spaceId = context.securitySolution.getSpaceId();
+        const indexName = ruleDataService.getResourceName(`security.alerts-${spaceId}`);
 
         const index = siemClient.getSignalsIndex();
-        const indexExists = ruleRegistryEnabled ? true : await getIndexExists(esClient, index);
+        const indexExists = await getBootstrapIndexExists(
+          context.core.elasticsearch.client.asInternalUser,
+          index
+        );
 
         if (indexExists) {
           let mappingOutdated: boolean | null = null;
+          let aliasesOutdated: boolean | null = null;
           try {
             const indexVersion = await getIndexVersion(esClient, index);
             mappingOutdated = isOutdated({
               current: indexVersion,
               target: SIGNALS_TEMPLATE_VERSION,
             });
+            aliasesOutdated = await fieldAliasesOutdated(esClient, index);
           } catch (err) {
             const error = transformError(err);
             // Some users may not have the view_index_metadata permission necessary to check the index mapping version
@@ -66,11 +69,18 @@ export const readIndexRoute = (router: SecuritySolutionPluginRouter, config: Con
               });
             }
           }
-          return response.ok({ body: { name: index, index_mapping_outdated: mappingOutdated } });
+          return response.ok({
+            body: {
+              name: indexName,
+              index_mapping_outdated: mappingOutdated || aliasesOutdated,
+            },
+          });
         } else {
-          return siemResponse.error({
-            statusCode: 404,
-            body: 'index for this space does not exist',
+          return response.ok({
+            body: {
+              name: indexName,
+              index_mapping_outdated: false,
+            },
           });
         }
       } catch (err) {

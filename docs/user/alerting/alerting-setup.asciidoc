@@ -1,11 +1,11 @@
 [role="xpack"]
 [[alerting-setup]]
-== Alerting Set up
+== Alerting set up
 ++++
 <titleabbrev>Set up</titleabbrev>
 ++++
 
-The Alerting feature is automatically enabled in {kib}, but might require some additional configuration.
+Alerting is automatically enabled in {kib}, but might require some additional configuration.
 
 [float]
 [[alerting-prerequisites]]
@@ -17,8 +17,9 @@ If you are using an *on-premises* Elastic Stack deployment:
 
 If you are using an *on-premises* Elastic Stack deployment with <<using-kibana-with-security, *security*>>:
 
-* You must enable Transport Layer Security (TLS) for communication <<configuring-tls-kib-es, between {es} and {kib}>>. {kib} alerting uses <<api-keys, API keys>> to secure background rule checks and actions, and API keys require {ref}/configuring-tls.html#tls-http[TLS on the HTTP interface]. A proxy will not suffice.
-* If you have enabled TLS and are still unable to access Alerting, ensure that you have not {ref}/security-settings.html#api-key-service-settings[explicitly disabled API keys].
+* If you are unable to access {kib} Alerting, ensure that you have not {ref}/security-settings.html#api-key-service-settings[explicitly disabled API keys].
+
+The alerting framework uses queries that require the `search.allow_expensive_queries` setting to be `true`. See the scripts {ref}/query-dsl-script-query.html#_allow_expensive_queries_4[documentation]. 
 
 [float]
 [[alerting-setup-production]]
@@ -26,7 +27,7 @@ If you are using an *on-premises* Elastic Stack deployment with <<using-kibana-w
 
 When relying on alerting and actions as mission critical services, make sure you follow the <<alerting-production-considerations,Alerting production considerations>>.
 
-See <<alerting-scaling-guidance>> for more information on the scalability of {kib} alerting.
+See <<alerting-scaling-guidance>> for more information on the scalability of Alerting.
 
 [float]
 [[alerting-security]]
@@ -61,9 +62,13 @@ Rules and connectors are isolated to the {kib} space in which they were created.
 [[alerting-authorization]]
 === Authorization
 
-Rules, including all background detection and the actions they generate are authorized using an <<api-keys, API key>> associated with the last user to edit the rule. Upon creating or modifying a rule, an API key is generated for that user, capturing a snapshot of their privileges at that moment in time. The API key is then used to run all background tasks associated with the rule including detection checks and executing actions. 
+Rules are authorized using an <<api-keys, API key>> associated with the last user to edit the rule. This API key captures a snapshot of the user's privileges at the time of edit and is subsequently used to run all background tasks associated with the rule, including condition checks, like {es} queries, and action executions. The following rule actions will re-generate the API key:
+
+* Creating a rule
+* Enabling a disabled rule
+* Updating a rule
 
 [IMPORTANT]
 ==============================================
-If a rule requires certain privileges to run, such as index privileges, keep in mind that if a user without those privileges updates the rule, the rule will no longer function.  
+If a rule requires certain privileges, such as index privileges, to run, and a user without those privileges updates, disables, or re-enables the rule, the rule will no longer function. Conversely, if a user with greater or administrator privileges modifies the rule, it will begin running with increased privileges.
 ==============================================

@@ -7,7 +7,7 @@
 
 import { PassThrough } from 'stream';
 
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ElasticsearchClient } from 'kibana/server';
 
 import { ErrorWithStatusCode } from '../../error_with_status_code';
@@ -117,7 +117,7 @@ export const getResponse = async ({
   listItemIndex,
   size = SIZE,
 }: GetResponseOptions): Promise<estypes.SearchResponse<SearchEsListItemSchema>> => {
-  return ((
+  return (
     await esClient.search<SearchEsListItemSchema>({
       body: {
         query: {
@@ -132,7 +132,7 @@ export const getResponse = async ({
       index: listItemIndex,
       size,
     })
-  ).body as unknown) as estypes.SearchResponse<SearchEsListItemSchema>;
+  ).body as unknown as estypes.SearchResponse<SearchEsListItemSchema>;
 };
 
 export interface WriteResponseHitsToStreamOptions {

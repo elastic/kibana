@@ -33,8 +33,8 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   taskManager,
   ruleTypeRegistry,
   unsecuredSavedObjectsClient,
-  authorization: (authorization as unknown) as AlertingAuthorization,
-  actionsAuthorization: (actionsAuthorization as unknown) as ActionsAuthorization,
+  authorization: authorization as unknown as AlertingAuthorization,
+  actionsAuthorization: actionsAuthorization as unknown as ActionsAuthorization,
   spaceId: 'default',
   namespace: 'default',
   getUserName: jest.fn(),
@@ -98,7 +98,7 @@ describe('enable()', () => {
       },
     });
     taskManager.schedule.mockResolvedValue({
-      id: 'task-123',
+      id: '1',
       scheduledAt: new Date(),
       attempts: 0,
       status: TaskStatus.Idle,
@@ -113,27 +113,6 @@ describe('enable()', () => {
   });
 
   describe('authorization', () => {
-    beforeEach(() => {
-      encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue(existingAlert);
-      unsecuredSavedObjectsClient.get.mockResolvedValue(existingAlert);
-      rulesClientParams.createAPIKey.mockResolvedValue({
-        apiKeysEnabled: false,
-      });
-      taskManager.schedule.mockResolvedValue({
-        id: 'task-123',
-        scheduledAt: new Date(),
-        attempts: 0,
-        status: TaskStatus.Idle,
-        runAt: new Date(),
-        state: {},
-        params: {},
-        taskType: '',
-        startedAt: null,
-        retryAt: null,
-        ownerId: null,
-      });
-    });
-
     test('ensures user is authorised to enable this type of alert under the consumer', async () => {
       await rulesClient.enable({ id: '1' });
 
@@ -203,7 +182,7 @@ describe('enable()', () => {
     });
   });
 
-  test('enables an alert', async () => {
+  test('enables a rule', async () => {
     const createdAt = new Date().toISOString();
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       ...existingAlert,
@@ -260,6 +239,7 @@ describe('enable()', () => {
         ],
         executionStatus: {
           status: 'pending',
+          lastDuration: 0,
           lastExecutionDate: '2019-02-12T21:01:22.479Z',
           error: null,
         },
@@ -269,6 +249,7 @@ describe('enable()', () => {
       }
     );
     expect(taskManager.schedule).toHaveBeenCalledWith({
+      id: '1',
       taskType: `alerting:myType`,
       params: {
         alertId: '1',
@@ -285,7 +266,7 @@ describe('enable()', () => {
       scope: ['alerting'],
     });
     expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledWith('alert', '1', {
-      scheduledTaskId: 'task-123',
+      scheduledTaskId: '1',
     });
   });
 
@@ -369,6 +350,7 @@ describe('enable()', () => {
         ],
         executionStatus: {
           status: 'pending',
+          lastDuration: 0,
           lastExecutionDate: '2019-02-12T21:01:22.479Z',
           error: null,
         },
@@ -474,5 +456,96 @@ describe('enable()', () => {
     expect(rulesClientParams.getUserName).toHaveBeenCalled();
     expect(rulesClientParams.createAPIKey).toHaveBeenCalled();
     expect(unsecuredSavedObjectsClient.update).toHaveBeenCalled();
+  });
+
+  test('enables a rule if conflict errors received when scheduling a task', async () => {
+    const createdAt = new Date().toISOString();
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+      ...existingAlert,
+      attributes: {
+        ...existingAlert.attributes,
+        enabled: true,
+        apiKey: null,
+        apiKeyOwner: null,
+        updatedBy: 'elastic',
+      },
+    });
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+      id: '1',
+      type: 'api_key_pending_invalidation',
+      attributes: {
+        apiKeyId: '123',
+        createdAt,
+      },
+      references: [],
+    });
+    taskManager.schedule.mockRejectedValueOnce(
+      Object.assign(new Error('Conflict!'), { statusCode: 409 })
+    );
+
+    await rulesClient.enable({ id: '1' });
+    expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalled();
+    expect(encryptedSavedObjects.getDecryptedAsInternalUser).toHaveBeenCalledWith('alert', '1', {
+      namespace: 'default',
+    });
+    expect(unsecuredSavedObjectsClient.create).not.toBeCalledWith('api_key_pending_invalidation');
+    expect(rulesClientParams.createAPIKey).toHaveBeenCalled();
+    expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledWith(
+      'alert',
+      '1',
+      {
+        schedule: { interval: '10s' },
+        alertTypeId: 'myType',
+        consumer: 'myApp',
+        enabled: true,
+        meta: {
+          versionApiKeyLastmodified: kibanaVersion,
+        },
+        updatedAt: '2019-02-12T21:01:22.479Z',
+        updatedBy: 'elastic',
+        apiKey: null,
+        apiKeyOwner: null,
+        actions: [
+          {
+            group: 'default',
+            id: '1',
+            actionTypeId: '1',
+            actionRef: '1',
+            params: {
+              foo: true,
+            },
+          },
+        ],
+        executionStatus: {
+          status: 'pending',
+          lastDuration: 0,
+          lastExecutionDate: '2019-02-12T21:01:22.479Z',
+          error: null,
+        },
+      },
+      {
+        version: '123',
+      }
+    );
+    expect(taskManager.schedule).toHaveBeenCalledWith({
+      id: '1',
+      taskType: `alerting:myType`,
+      params: {
+        alertId: '1',
+        spaceId: 'default',
+      },
+      schedule: {
+        interval: '10s',
+      },
+      state: {
+        alertInstances: {},
+        alertTypeState: {},
+        previousStartedAt: null,
+      },
+      scope: ['alerting'],
+    });
+    expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledWith('alert', '1', {
+      scheduledTaskId: '1',
+    });
   });
 });

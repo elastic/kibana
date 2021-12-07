@@ -7,7 +7,7 @@
 
 import React, { useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSpacer, EuiButtonEmpty, EuiText, EuiLink } from '@elastic/eui';
 
 import { useMappingsState, useDispatch } from '../../mappings_state_context';
@@ -34,10 +34,8 @@ export const RuntimeFieldsList = () => {
 
   const dispatch = useDispatch();
 
-  const {
-    addContent: addContentToGlobalFlyout,
-    removeContent: removeContentFromGlobalFlyout,
-  } = useGlobalFlyout();
+  const { addContent: addContentToGlobalFlyout, removeContent: removeContentFromGlobalFlyout } =
+    useGlobalFlyout();
 
   const {
     value: { docLinks },

@@ -7,7 +7,7 @@
  */
 
 import { join } from 'path';
-import { rmdir, mkdtemp, readFile, readdir } from 'fs/promises';
+import { rm, mkdtemp, readFile, readdir } from 'fs/promises';
 import moment from 'moment-timezone';
 import * as kbnTestServer from '../../../test_helpers/kbn_server';
 import { getNextRollingTime } from '../appenders/rolling_file/policies/time_interval/get_next_rolling_time';
@@ -19,7 +19,6 @@ const flush = async () => delay(flushDelay);
 function createRoot(appenderConfig: any) {
   return kbnTestServer.createRoot({
     logging: {
-      silent: true, // set "true" in kbnTestServer
       appenders: {
         'rolling-file': appenderConfig,
       },
@@ -49,7 +48,7 @@ describe('RollingFileAppender', () => {
 
   afterEach(async () => {
     if (testDir) {
-      await rmdir(testDir, { recursive: true });
+      await rm(testDir, { recursive: true });
     }
 
     if (root) {
@@ -60,7 +59,8 @@ describe('RollingFileAppender', () => {
   const message = (index: number) => `some message of around 40 bytes number ${index}`;
   const expectedFileContent = (indices: number[]) => indices.map(message).join('\n') + '\n';
 
-  describe('`size-limit` policy with `numeric` strategy', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/108633
+  describe.skip('`size-limit` policy with `numeric` strategy', () => {
     it('rolls the log file in the correct order', async () => {
       root = createRoot({
         type: 'rolling-file',

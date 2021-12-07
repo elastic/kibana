@@ -9,11 +9,11 @@ import { JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY } from '../../common/constants
 
 type JobId = string;
 
-const set = (jobs: any) => {
+const set = (jobs: string[]) => {
   sessionStorage.setItem(JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY, JSON.stringify(jobs));
 };
 
-const getAll = () => {
+const getAll = (): string[] => {
   const sessionValue = sessionStorage.getItem(JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY);
   return sessionValue ? JSON.parse(sessionValue) : [];
 };

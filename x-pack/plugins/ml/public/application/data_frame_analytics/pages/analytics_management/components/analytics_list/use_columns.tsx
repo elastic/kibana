@@ -7,7 +7,7 @@
 
 import React, { Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiBadge,
   EuiButtonIcon,
@@ -299,6 +299,7 @@ export const useColumns = (
             />
           ) : null,
         width: '90px',
+        'data-test-subj': 'mlAnalyticsTableColumnSpaces',
       });
     }
     // Remove actions if Ml not enabled in current space

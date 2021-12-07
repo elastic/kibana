@@ -14,6 +14,7 @@ exports[`Relationships should render dashboards normally 1`] = `
         <EuiToolTip
           content="dashboard"
           delay="regular"
+          display="inlineBlock"
           position="top"
         >
           <EuiIcon
@@ -84,7 +85,6 @@ exports[`Relationships should render dashboards normally 1`] = `
           Object {
             "id": "1",
             "meta": Object {
-              "editUrl": "/management/kibana/objects/savedVisualizations/1",
               "icon": "visualizeApp",
               "inAppUrl": Object {
                 "path": "/app/visualize#/edit/1",
@@ -98,7 +98,6 @@ exports[`Relationships should render dashboards normally 1`] = `
           Object {
             "id": "2",
             "meta": Object {
-              "editUrl": "/management/kibana/objects/savedVisualizations/2",
               "icon": "visualizeApp",
               "inAppUrl": Object {
                 "path": "/app/visualize#/edit/2",
@@ -171,6 +170,7 @@ exports[`Relationships should render errors 1`] = `
         <EuiToolTip
           content="dashboard"
           delay="regular"
+          display="inlineBlock"
           position="top"
         >
           <EuiIcon
@@ -213,12 +213,13 @@ exports[`Relationships should render index patterns normally 1`] = `
     >
       <h2>
         <EuiToolTip
-          content="index patterns"
+          content="index-pattern"
           delay="regular"
+          display="inlineBlock"
           position="top"
         >
           <EuiIcon
-            aria-label="index patterns"
+            aria-label="index-pattern"
             size="m"
             type="indexPatternApp"
           />
@@ -285,7 +286,6 @@ exports[`Relationships should render index patterns normally 1`] = `
           Object {
             "id": "1",
             "meta": Object {
-              "editUrl": "/management/kibana/objects/savedSearches/1",
               "icon": "search",
               "inAppUrl": Object {
                 "path": "/app/discover#//1",
@@ -299,7 +299,6 @@ exports[`Relationships should render index patterns normally 1`] = `
           Object {
             "id": "2",
             "meta": Object {
-              "editUrl": "/management/kibana/objects/savedVisualizations/2",
               "icon": "visualizeApp",
               "inAppUrl": Object {
                 "path": "/app/visualize#/edit/2",
@@ -375,12 +374,13 @@ exports[`Relationships should render invalid relations 1`] = `
     >
       <h2>
         <EuiToolTip
-          content="index patterns"
+          content="index-pattern"
           delay="regular"
+          display="inlineBlock"
           position="top"
         >
           <EuiIcon
-            aria-label="index patterns"
+            aria-label="index-pattern"
             size="m"
             type="indexPatternApp"
           />
@@ -556,6 +556,7 @@ exports[`Relationships should render searches normally 1`] = `
         <EuiToolTip
           content="search"
           delay="regular"
+          display="inlineBlock"
           position="top"
         >
           <EuiIcon
@@ -626,10 +627,10 @@ exports[`Relationships should render searches normally 1`] = `
           Object {
             "id": "1",
             "meta": Object {
-              "editUrl": "/management/kibana/indexPatterns/patterns/1",
+              "editUrl": "/management/kibana/dataViews/dataView/1",
               "icon": "indexPatternApp",
               "inAppUrl": Object {
-                "path": "/app/management/kibana/indexPatterns/patterns/1",
+                "path": "/app/management/kibana/dataViews/dataView/1",
                 "uiCapabilitiesPath": "management.kibana.indexPatterns",
               },
               "title": "My Index Pattern",
@@ -640,7 +641,6 @@ exports[`Relationships should render searches normally 1`] = `
           Object {
             "id": "2",
             "meta": Object {
-              "editUrl": "/management/kibana/objects/savedVisualizations/2",
               "icon": "visualizeApp",
               "inAppUrl": Object {
                 "path": "/app/visualize#/edit/2",
@@ -718,6 +718,7 @@ exports[`Relationships should render visualizations normally 1`] = `
         <EuiToolTip
           content="visualization"
           delay="regular"
+          display="inlineBlock"
           position="top"
         >
           <EuiIcon
@@ -788,7 +789,6 @@ exports[`Relationships should render visualizations normally 1`] = `
           Object {
             "id": "1",
             "meta": Object {
-              "editUrl": "/management/kibana/objects/savedDashboards/1",
               "icon": "dashboardApp",
               "inAppUrl": Object {
                 "path": "/app/kibana#/dashboard/1",
@@ -802,7 +802,6 @@ exports[`Relationships should render visualizations normally 1`] = `
           Object {
             "id": "2",
             "meta": Object {
-              "editUrl": "/management/kibana/objects/savedDashboards/2",
               "icon": "dashboardApp",
               "inAppUrl": Object {
                 "path": "/app/kibana#/dashboard/2",

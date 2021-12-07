@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Logger, LoggerFactory } from 'src/core/server';
+import { CoreSetup, Logger, LoggerFactory } from '../../../../../src/core/server';
 import { SecurityPluginStart } from '../../../security/server';
 import {
   AgentService,
@@ -71,6 +71,7 @@ export interface OsqueryAppContext {
   logFactory: LoggerFactory;
   config(): ConfigType;
   security: SecurityPluginStart;
+  getStartServices: CoreSetup['getStartServices'];
   /**
    * Object readiness is tied to plugin start method
    */

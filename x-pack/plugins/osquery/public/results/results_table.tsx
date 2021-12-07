@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { isEmpty, isEqual, keys, map } from 'lodash/fp';
+import { get, isEmpty, isArray, isObject, isEqual, keys, map, reduce } from 'lodash/fp';
 import {
   EuiCallOut,
+  EuiCode,
   EuiDataGrid,
   EuiDataGridSorting,
   EuiDataGridProps,
@@ -16,8 +17,10 @@ import {
   EuiLoadingContent,
   EuiProgress,
   EuiSpacer,
+  EuiIconTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React, { createContext, useEffect, useState, useCallback, useContext, useMemo } from 'react';
 
 import { pagePathGetters } from '../../../fleet/public';
@@ -30,7 +33,10 @@ import {
   ViewResultsInDiscoverAction,
   ViewResultsInLensAction,
   ViewResultsActionButtonType,
-} from '../scheduled_query_groups/scheduled_query_group_queries_table';
+} from '../packs/pack_queries_status_table';
+import { useActionResultsPrivileges } from '../action_results/use_action_privileges';
+import { OSQUERY_INTEGRATION_NAME } from '../../common';
+import { useActionDetails } from '../actions/use_action_details';
 
 const DataContext = createContext<ResultEdges>([]);
 
@@ -49,6 +55,9 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
   endDate,
 }) => {
   const [isLive, setIsLive] = useState(true);
+  const { data: hasActionResultsPrivileges } = useActionResultsPrivileges();
+  const { data: actionDetails } = useActionDetails({ actionId });
+
   const {
     // @ts-expect-error update types
     data: { aggregations },
@@ -60,6 +69,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
     direction: Direction.asc,
     sortField: '@timestamp',
     isLive,
+    skip: !hasActionResultsPrivileges,
   });
   const expired = useMemo(() => (!endDate ? false : new Date(endDate) < new Date()), [endDate]);
   const { getUrlForApp } = useKibana().services.application;
@@ -67,7 +77,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
   const getFleetAppUrl = useCallback(
     (agentId) =>
       getUrlForApp('fleet', {
-        path: `#` + pagePathGetters.agent_details({ agentId })[1],
+        path: pagePathGetters.agent_details({ agentId })[1],
       }),
     [getUrlForApp]
   );
@@ -104,37 +114,59 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
       field: sortedColumn.id,
       direction: sortedColumn.direction as Direction,
     })),
+    skip: !hasActionResultsPrivileges,
   });
 
   const [visibleColumns, setVisibleColumns] = useState<string[]>([]);
-  const columnVisibility = useMemo(() => ({ visibleColumns, setVisibleColumns }), [
-    visibleColumns,
-    setVisibleColumns,
-  ]);
-
-  const renderCellValue: EuiDataGridProps['renderCellValue'] = useMemo(
-    () => ({ rowIndex, columnId }) => {
-      // eslint-disable-next-line react-hooks/rules-of-hooks
-      const data = useContext(DataContext);
-
-      // @ts-expect-error update types
-      const value = data[rowIndex % pagination.pageSize]?.fields[columnId];
-
-      if (columnId === 'agent.name') {
-        // @ts-expect-error update types
-        const agentIdValue = data[rowIndex % pagination.pageSize]?.fields['agent.id'];
-
-        return <EuiLink href={getFleetAppUrl(agentIdValue)}>{value}</EuiLink>;
-      }
-
-      return !isEmpty(value) ? value : '-';
-    },
-    [getFleetAppUrl, pagination.pageSize]
+  const columnVisibility = useMemo(
+    () => ({ visibleColumns, setVisibleColumns }),
+    [visibleColumns, setVisibleColumns]
   );
 
-  const tableSorting = useMemo(() => ({ columns: sortingColumns, onSort: setSortingColumns }), [
-    sortingColumns,
-  ]);
+  const ecsMappingColumns = useMemo(
+    () => keys(get('actionDetails._source.data.ecs_mapping', actionDetails) || {}),
+    [actionDetails]
+  );
+
+  const renderCellValue: EuiDataGridProps['renderCellValue'] = useMemo(
+    () =>
+      // eslint-disable-next-line react/display-name
+      ({ rowIndex, columnId }) => {
+        // eslint-disable-next-line react-hooks/rules-of-hooks
+        const data = useContext(DataContext);
+
+        // @ts-expect-error update types
+        const value = data[rowIndex % pagination.pageSize]?.fields[columnId];
+
+        if (columnId === 'agent.name') {
+          // @ts-expect-error update types
+          const agentIdValue = data[rowIndex % pagination.pageSize]?.fields['agent.id'];
+
+          return <EuiLink href={getFleetAppUrl(agentIdValue)}>{value}</EuiLink>;
+        }
+
+        if (ecsMappingColumns.includes(columnId)) {
+          const ecsFieldValue = get(columnId, data[rowIndex % pagination.pageSize]?._source);
+
+          if (isArray(ecsFieldValue) || isObject(ecsFieldValue)) {
+            try {
+              return JSON.stringify(ecsFieldValue, null, 2);
+              // eslint-disable-next-line no-empty
+            } catch (e) {}
+          }
+
+          return ecsFieldValue ?? '-';
+        }
+
+        return !isEmpty(value) ? value : '-';
+      },
+    [ecsMappingColumns, getFleetAppUrl, pagination.pageSize]
+  );
+
+  const tableSorting = useMemo(
+    () => ({ columns: sortingColumns, onSort: setSortingColumns }),
+    [sortingColumns]
+  );
 
   const tablePagination = useMemo(
     () => ({
@@ -146,17 +178,75 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
     [onChangeItemsPerPage, onChangePage, pagination]
   );
 
+  const ecsMapping = useMemo(() => {
+    const mapping = get('actionDetails._source.data.ecs_mapping', actionDetails);
+    if (!mapping) return;
+
+    return reduce(
+      (acc, [key, value]) => {
+        // @ts-expect-error update types
+        if (value?.field) {
+          // @ts-expect-error update types
+          acc[value?.field] = [...(acc[value?.field] ?? []), key];
+        }
+        return acc;
+      },
+      {},
+      Object.entries(mapping)
+    );
+  }, [actionDetails]);
+
+  const getHeaderDisplay = useCallback(
+    (columnName: string) => {
+      // @ts-expect-error update types
+      if (ecsMapping && ecsMapping[columnName]) {
+        return (
+          <>
+            {columnName}{' '}
+            <EuiIconTip
+              size="s"
+              content={
+                <>
+                  <FormattedMessage
+                    id="xpack.osquery.liveQueryResults.table.fieldMappedLabel"
+                    defaultMessage="Field is mapped to"
+                  />
+                  {`:`}
+                  <ul>
+                    {
+                      // @ts-expect-error update types
+                      ecsMapping[columnName].map((fieldName) => (
+                        <li key={fieldName}>{fieldName}</li>
+                      ))
+                    }
+                  </ul>
+                </>
+              }
+              type="indexMapping"
+            />
+          </>
+        );
+      }
+    },
+    [ecsMapping]
+  );
+
   useEffect(() => {
     if (!allResultsData?.edges) {
       return;
     }
 
-    const newColumns = keys(allResultsData?.edges[0]?.fields)
-      .sort()
-      .reduce(
-        (acc, fieldName) => {
-          const { data, seen } = acc;
-          if (fieldName === 'agent.name') {
+    const fields = [
+      'agent.name',
+      ...ecsMappingColumns.sort(),
+      ...keys(allResultsData?.edges[0]?.fields || {}).sort(),
+    ];
+
+    const newColumns = fields.reduce(
+      (acc, fieldName) => {
+        const { data, seen } = acc;
+        if (fieldName === 'agent.name') {
+          if (!seen.has(fieldName)) {
             data.push({
               id: fieldName,
               displayAsText: i18n.translate(
@@ -167,36 +257,52 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
               ),
               defaultSortDirection: Direction.asc,
             });
-
-            return acc;
-          }
-
-          if (fieldName.startsWith('osquery.')) {
-            const displayAsText = fieldName.split('.')[1];
-            if (!seen.has(displayAsText)) {
-              data.push({
-                id: fieldName,
-                displayAsText,
-                defaultSortDirection: Direction.asc,
-              });
-              seen.add(displayAsText);
-            }
-            return acc;
+            seen.add(fieldName);
           }
 
           return acc;
-        },
-        { data: [], seen: new Set<string>() } as { data: EuiDataGridColumn[]; seen: Set<string> }
-      ).data;
+        }
 
-    if (!isEqual(columns, newColumns)) {
-      setColumns(newColumns);
-      setVisibleColumns(map('id', newColumns));
-    }
-  }, [columns, allResultsData?.edges]);
+        if (ecsMappingColumns.includes(fieldName)) {
+          if (!seen.has(fieldName)) {
+            data.push({
+              id: fieldName,
+              displayAsText: fieldName,
+              defaultSortDirection: Direction.asc,
+            });
+            seen.add(fieldName);
+          }
+          return acc;
+        }
+
+        if (fieldName.startsWith('osquery.')) {
+          const displayAsText = fieldName.split('.')[1];
+          if (!seen.has(displayAsText)) {
+            data.push({
+              id: fieldName,
+              displayAsText,
+              display: getHeaderDisplay(displayAsText),
+              defaultSortDirection: Direction.asc,
+            });
+            seen.add(displayAsText);
+          }
+          return acc;
+        }
+
+        return acc;
+      },
+      { data: [], seen: new Set<string>() } as { data: EuiDataGridColumn[]; seen: Set<string> }
+    ).data;
+
+    setColumns((currentColumns) =>
+      !isEqual(map('id', currentColumns), map('id', newColumns)) ? newColumns : currentColumns
+    );
+    setVisibleColumns(map('id', newColumns));
+  }, [allResultsData?.edges, ecsMappingColumns, getHeaderDisplay]);
 
   const toolbarVisibility = useMemo(
     () => ({
+      showStyleSelector: false,
       additionalControls: (
         <>
           <ViewResultsInDiscoverAction
@@ -222,20 +328,24 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
       setIsLive(() => {
         if (!agentIds?.length || expired) return false;
 
-        const uniqueAgentsRepliedCount =
-          // @ts-expect-error-type
-          allResultsData?.rawResponse.aggregations?.unique_agents.value ?? 0;
-
-        return !!(uniqueAgentsRepliedCount !== agentIds?.length - aggregations.failed);
+        return !!(aggregations.totalResponded !== agentIds?.length);
       }),
-    [
-      agentIds?.length,
-      aggregations.failed,
-      // @ts-expect-error-type
-      allResultsData?.rawResponse.aggregations?.unique_agents.value,
-      expired,
-    ]
+    [agentIds?.length, aggregations.failed, aggregations.totalResponded, expired]
   );
+
+  if (!hasActionResultsPrivileges) {
+    return (
+      <EuiCallOut title="Missing privileges" color="danger" iconType="alert">
+        <p>
+          {'Your user role doesn’t have index read permissions on the '}
+          <EuiCode>logs-{OSQUERY_INTEGRATION_NAME}.result*</EuiCode>
+          {
+            'index. Access to this index is required to view osquery results. Administrators can update role permissions in Stack Management > Roles.'
+          }
+        </p>
+      </EuiCallOut>
+    );
+  }
 
   if (!isFetched) {
     return <EuiLoadingContent lines={5} />;
@@ -245,7 +355,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
     <>
       {isLive && <EuiProgress color="primary" size="xs" />}
 
-      {isFetched && !allResultsData?.edges.length ? (
+      {isFetched && !allResultsData?.edges.length && !aggregations?.totalRowCount ? (
         <>
           <EuiCallOut title={generateEmptyDataMessage(aggregations.totalResponded)} />
           <EuiSpacer />

@@ -9,7 +9,6 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { Adapters } from 'src/plugins/inspector/public';
 import {
-  getCoreChrome,
   getMapsCapabilities,
   getIsAllowByValueEmbeddables,
   getInspector,
@@ -92,7 +91,6 @@ export function getTopNavConfig({
       }),
       testId: 'mapsFullScreenMode',
       run() {
-        getCoreChrome().setIsVisible(false);
         enableFullScreen();
       },
     }

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { injectI18n } from '@kbn/i18n/react';
+import { injectI18n } from '@kbn/i18n-react';
 import { esFilters, Filter, IndexPattern } from '../../../../../../../src/plugins/data/public';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 
@@ -41,7 +41,7 @@ export function buildFilterLabel({
   return filter;
 }
 
-interface Props {
+export interface FilterValueLabelProps {
   field: string;
   label: string;
   value: string | string[];
@@ -60,7 +60,7 @@ export function FilterValueLabel({
   invertFilter,
   removeFilter,
   allowExclusion = true,
-}: Props) {
+}: FilterValueLabelProps) {
   const FilterItem = injectI18n(esFilters.FilterItem);
 
   const filter = buildFilterLabel({ field, value, label, indexPattern, negate });
@@ -92,3 +92,6 @@ export function FilterValueLabel({
     />
   ) : null;
 }
+
+// eslint-disable-next-line import/no-default-export
+export default FilterValueLabel;

@@ -23,8 +23,6 @@ import { HttpLogic } from '../http';
 import { BreadcrumbTrail } from '../kibana_chrome/generate_breadcrumbs';
 import { Loading } from '../loading';
 
-import { appendBetaNotificationItem } from './beta';
-
 import './page_template.scss';
 
 /*
@@ -34,7 +32,7 @@ import './page_template.scss';
  * WorkplaceSearchPageTemplate sitting on top of this template (:nesting_dolls:),
  * which in turn manages individual product-specific concerns (e.g. side navs, telemetry, etc.)
  *
- * @see https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/page_template
+ * @see https://github.com/elastic/kibana/tree/main/src/plugins/kibana_react/public/page_template
  * @see https://elastic.github.io/eui/#/layout/page
  */
 
@@ -62,8 +60,6 @@ export const EnterpriseSearchPageTemplate: React.FC<PageTemplateProps> = ({
   const { readOnlyMode } = useValues(HttpLogic);
   const hasCustomEmptyState = !!emptyState;
   const showCustomEmptyState = hasCustomEmptyState && isEmptyState;
-
-  appendBetaNotificationItem(solutionNav);
 
   return (
     <KibanaPageTemplate

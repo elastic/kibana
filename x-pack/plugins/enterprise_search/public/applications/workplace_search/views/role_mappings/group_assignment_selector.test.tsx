@@ -30,7 +30,6 @@ describe('GroupAssignmentSelector', () => {
   const handleAttributeSelectorChange = jest.fn();
   const handleDeleteMapping = jest.fn();
   const handleRoleChange = jest.fn();
-  const handleAuthProviderChange = jest.fn();
   const resetState = jest.fn();
   const groups = [
     {
@@ -53,9 +52,6 @@ describe('GroupAssignmentSelector', () => {
     availableGroups: groups,
     selectedGroups: new Set(),
     includeInAllGroups: false,
-    availableAuthProviders: [],
-    multipleAuthProvidersConfig: true,
-    selectedAuthProviders: [],
     roleMappingErrors: [],
   };
 
@@ -70,7 +66,6 @@ describe('GroupAssignmentSelector', () => {
       handleAttributeSelectorChange,
       handleDeleteMapping,
       handleRoleChange,
-      handleAuthProviderChange,
       resetState,
     });
     setMockValues(mockValues);
@@ -102,9 +97,11 @@ describe('GroupAssignmentSelector', () => {
   it('handles group checkbox click', async () => {
     const wrapper = shallow(<GroupAssignmentSelector />);
     await waitFor(() =>
-      ((wrapper.find(EuiComboBox).props() as unknown) as {
-        onChange: (a: EuiComboBoxOptionOption[]) => void;
-      }).onChange([{ label: groups[0].name, value: groups[0].name }])
+      (
+        wrapper.find(EuiComboBox).props() as unknown as {
+          onChange: (a: EuiComboBoxOptionOption[]) => void;
+        }
+      ).onChange([{ label: groups[0].name, value: groups[0].name }])
     );
     wrapper.update();
 

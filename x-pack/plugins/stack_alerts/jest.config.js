@@ -9,4 +9,9 @@ module.exports = {
   preset: '@kbn/test',
   rootDir: '../../..',
   roots: ['<rootDir>/x-pack/plugins/stack_alerts'],
+  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/x-pack/plugins/stack_alerts',
+  coverageReporters: ['text', 'html'],
+  collectCoverageFrom: [
+    '<rootDir>/x-pack/plugins/stack_alerts/{common,public,server}/**/*.{ts,tsx}',
+  ],
 };

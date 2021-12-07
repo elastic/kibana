@@ -174,9 +174,11 @@ describe('catchAndReturnBoomErrors', () => {
   let request: KibanaRequest<any, any, any>;
   let response: KibanaResponseFactory;
 
-  const createHandler = (handler: () => any): RequestHandler<any, any, any> => () => {
-    return handler();
-  };
+  const createHandler =
+    (handler: () => any): RequestHandler<any, any, any> =>
+    () => {
+      return handler();
+    };
 
   beforeEach(() => {
     context = {} as any;

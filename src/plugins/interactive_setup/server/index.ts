@@ -14,7 +14,7 @@ import type {
 } from 'src/core/server';
 
 import { ConfigSchema } from './config';
-import { UserSetupPlugin } from './plugin';
+import { InteractiveSetupPlugin } from './plugin';
 
 export const config: PluginConfigDescriptor<TypeOf<typeof ConfigSchema>> = {
   schema: ConfigSchema,
@@ -22,4 +22,4 @@ export const config: PluginConfigDescriptor<TypeOf<typeof ConfigSchema>> = {
 
 export const plugin: PluginInitializer<void, never> = (
   initializerContext: PluginInitializerContext
-) => new UserSetupPlugin(initializerContext);
+) => new InteractiveSetupPlugin(initializerContext);

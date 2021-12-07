@@ -51,10 +51,10 @@ export const AutocompleteFieldListsComponent: React.FC<AutocompleteFieldListsPro
   const { loading, result, start } = useFindLists();
   const getLabel = useCallback(({ name }) => name, []);
 
-  const optionsMemo = useMemo(() => filterFieldToList(lists, selectedField), [
-    lists,
-    selectedField,
-  ]);
+  const optionsMemo = useMemo(
+    () => filterFieldToList(lists, selectedField),
+    [lists, selectedField]
+  );
   const selectedOptionsMemo = useMemo(() => {
     if (selectedValue != null) {
       const list = lists.filter(({ id }) => id === selectedValue);

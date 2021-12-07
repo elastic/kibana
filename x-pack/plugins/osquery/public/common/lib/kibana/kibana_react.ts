@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { useHistory } from 'react-router-dom';
+import { FieldIcon } from '@kbn/react-field/field_icon';
 import {
   KibanaContextProvider,
   KibanaReactContextValue,
@@ -47,4 +48,5 @@ export {
   useUiSetting,
   useUiSetting$,
   withKibana,
+  FieldIcon,
 };

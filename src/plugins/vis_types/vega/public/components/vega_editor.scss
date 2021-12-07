@@ -1,0 +1,32 @@
+.visEditor--vega {
+  .visEditorSidebar__config {
+    padding: 0;
+    display: flex;
+    flex-direction: row;
+    overflow: hidden;
+
+    min-height: $euiSize * 15;
+
+    @include euiBreakpoint('xs', 's', 'm') {
+      max-height: $euiSize * 15;
+    }
+  }
+}
+
+.vgaEditor {
+  width: 100%;
+  flex-grow: 1;
+
+  .kibanaCodeEditor {
+    width: 100%;
+  }
+}
+
+.vgaEditor__editorActions {
+  position: absolute;
+  z-index: $euiZLevel1;
+  top: $euiSizeS;
+  // Adjust for sidebar collapse button
+  right: $euiSizeXXL;
+  line-height: 1;
+}

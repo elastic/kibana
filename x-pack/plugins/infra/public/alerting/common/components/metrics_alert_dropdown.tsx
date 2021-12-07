@@ -13,7 +13,7 @@ import {
   EuiContextMenu,
   EuiContextMenuPanelDescriptor,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { PrefilledInventoryAlertFlyout } from '../../inventory/components/alert_flyout';
 import { PrefilledThresholdAlertFlyout } from '../../metric_threshold/components/alert_flyout';
@@ -26,9 +26,10 @@ export const MetricsAlertDropdown = () => {
   const [visibleFlyoutType, setVisibleFlyoutType] = useState<VisibleFlyoutType>(null);
   const uiCapabilities = useKibana().services.application?.capabilities;
 
-  const canCreateAlerts = useMemo(() => Boolean(uiCapabilities?.infrastructure?.save), [
-    uiCapabilities,
-  ]);
+  const canCreateAlerts = useMemo(
+    () => Boolean(uiCapabilities?.infrastructure?.save),
+    [uiCapabilities]
+  );
 
   const closeFlyout = useCallback(() => setVisibleFlyoutType(null), [setVisibleFlyoutType]);
 

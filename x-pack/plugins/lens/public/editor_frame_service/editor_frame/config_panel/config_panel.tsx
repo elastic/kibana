@@ -5,46 +5,51 @@
  * 2.0.
  */
 
-import './config_panel.scss';
-
 import React, { useMemo, memo } from 'react';
-import { EuiFlexItem, EuiToolTip, EuiButton, EuiForm } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { mapValues } from 'lodash';
+import { EuiForm } from '@elastic/eui';
 import { Visualization } from '../../../types';
 import { LayerPanel } from './layer_panel';
 import { trackUiEvent } from '../../../lens_ui_telemetry';
 import { generateId } from '../../../id_generator';
-import { appendLayer } from './layer_actions';
 import { ConfigPanelWrapperProps } from './types';
 import { useFocusUpdate } from './use_focus_update';
 import {
+  setLayerDefaultDimension,
   useLensDispatch,
+  removeOrClearLayer,
+  addLayer,
   updateState,
   updateDatasourceState,
   updateVisualizationState,
   setToggleFullscreen,
+  useLensSelector,
+  selectVisualization,
 } from '../../../state_management';
+import { AddLayerButton } from './add_layer';
+import { getRemoveOperation } from '../../../utils';
 
 export const ConfigPanelWrapper = memo(function ConfigPanelWrapper(props: ConfigPanelWrapperProps) {
-  const activeVisualization = props.visualizationMap[props.activeVisualizationId || ''];
-  const { visualizationState } = props;
+  const visualization = useLensSelector(selectVisualization);
+  const activeVisualization = visualization.activeId
+    ? props.visualizationMap[visualization.activeId]
+    : null;
 
-  return activeVisualization && visualizationState ? (
+  return activeVisualization && visualization.state ? (
     <LayerPanels {...props} activeVisualization={activeVisualization} />
   ) : null;
 });
 
 export function LayerPanels(
   props: ConfigPanelWrapperProps & {
-    activeDatasourceId: string;
     activeVisualization: Visualization;
   }
 ) {
-  const { activeVisualization, visualizationState, activeDatasourceId, datasourceMap } = props;
+  const { activeVisualization, datasourceMap } = props;
+  const { activeDatasourceId, visualization } = useLensSelector((state) => state.lens);
+
   const dispatchLens = useLensDispatch();
 
-  const layerIds = activeVisualization.getLayerIds(visualizationState);
+  const layerIds = activeVisualization.getLayerIds(visualization.state);
   const {
     setNextFocusedId: setNextFocusedLayerId,
     removeRef: removeLayerRef,
@@ -56,8 +61,7 @@ export function LayerPanels(
       dispatchLens(
         updateVisualizationState({
           visualizationId: activeVisualization.id,
-          updater: newState,
-          clearStagedPreview: false,
+          newState,
         })
       );
     },
@@ -93,12 +97,15 @@ export function LayerPanels(
       setTimeout(() => {
         dispatchLens(
           updateState({
-            subType: 'UPDATE_ALL_STATES',
             updater: (prevState) => {
               const updatedDatasourceState =
                 typeof newDatasourceState === 'function'
                   ? newDatasourceState(prevState.datasourceStates[datasourceId].state)
                   : newDatasourceState;
+              const updatedVisualizationState =
+                typeof newVisualizationState === 'function'
+                  ? newVisualizationState(prevState.visualization.state)
+                  : newVisualizationState;
               return {
                 ...prevState,
                 datasourceStates: {
@@ -110,9 +117,8 @@ export function LayerPanels(
                 },
                 visualization: {
                   ...prevState.visualization,
-                  state: newVisualizationState,
+                  state: updatedVisualizationState,
                 },
-                stagedPreview: undefined,
               };
             },
           })
@@ -142,99 +148,59 @@ export function LayerPanels(
             key={layerId}
             layerId={layerId}
             layerIndex={layerIndex}
-            visualizationState={visualizationState}
+            visualizationState={visualization.state}
             updateVisualization={setVisualizationState}
             updateDatasource={updateDatasource}
             updateDatasourceAsync={updateDatasourceAsync}
             updateAll={updateAll}
-            isOnlyLayer={layerIds.length === 1}
+            isOnlyLayer={
+              getRemoveOperation(
+                activeVisualization,
+                visualization.state,
+                layerId,
+                layerIds.length
+              ) === 'clear'
+            }
+            onEmptyDimensionAdd={(columnId, { groupId }) => {
+              // avoid state update if the datasource does not support initializeDimension
+              if (
+                activeDatasourceId != null &&
+                datasourceMap[activeDatasourceId]?.initializeDimension
+              ) {
+                dispatchLens(
+                  setLayerDefaultDimension({
+                    layerId,
+                    columnId,
+                    groupId,
+                  })
+                );
+              }
+            }}
             onRemoveLayer={() => {
               dispatchLens(
-                updateState({
-                  subType: 'REMOVE_OR_CLEAR_LAYER',
-                  updater: (state) => {
-                    const isOnlyLayer = activeVisualization
-                      .getLayerIds(state.visualization.state)
-                      .every((id) => id === layerId);
-
-                    return {
-                      ...state,
-                      datasourceStates: mapValues(
-                        state.datasourceStates,
-                        (datasourceState, datasourceId) => {
-                          const datasource = datasourceMap[datasourceId!];
-                          return {
-                            ...datasourceState,
-                            state: isOnlyLayer
-                              ? datasource.clearLayer(datasourceState.state, layerId)
-                              : datasource.removeLayer(datasourceState.state, layerId),
-                          };
-                        }
-                      ),
-                      visualization: {
-                        ...state.visualization,
-                        state:
-                          isOnlyLayer || !activeVisualization.removeLayer
-                            ? activeVisualization.clearLayer(state.visualization.state, layerId)
-                            : activeVisualization.removeLayer(state.visualization.state, layerId),
-                      },
-                      stagedPreview: undefined,
-                    };
-                  },
+                removeOrClearLayer({
+                  visualizationId: activeVisualization.id,
+                  layerId,
+                  layerIds,
                 })
               );
-
               removeLayerRef(layerId);
             }}
             toggleFullscreen={toggleFullscreen}
           />
         ) : null
       )}
-      {activeVisualization.appendLayer && visualizationState && (
-        <EuiFlexItem grow={true} className="lnsConfigPanel__addLayerBtnWrapper">
-          <EuiToolTip
-            className="eui-fullWidth"
-            title={i18n.translate('xpack.lens.xyChart.addLayer', {
-              defaultMessage: 'Add a layer',
-            })}
-            content={i18n.translate('xpack.lens.xyChart.addLayerTooltip', {
-              defaultMessage:
-                'Use multiple layers to combine visualization types or visualize different index patterns.',
-            })}
-            position="bottom"
-          >
-            <EuiButton
-              className="lnsConfigPanel__addLayerBtn"
-              fullWidth
-              size="s"
-              data-test-subj="lnsLayerAddButton"
-              aria-label={i18n.translate('xpack.lens.xyChart.addLayerButton', {
-                defaultMessage: 'Add layer',
-              })}
-              fill
-              color="text"
-              onClick={() => {
-                const id = generateId();
-                dispatchLens(
-                  updateState({
-                    subType: 'ADD_LAYER',
-                    updater: (state) =>
-                      appendLayer({
-                        activeVisualization,
-                        generateId: () => id,
-                        trackUiEvent,
-                        activeDatasource: datasourceMap[activeDatasourceId],
-                        state,
-                      }),
-                  })
-                );
-                setNextFocusedLayerId(id);
-              }}
-              iconType="plusInCircleFilled"
-            />
-          </EuiToolTip>
-        </EuiFlexItem>
-      )}
+      <AddLayerButton
+        visualization={activeVisualization}
+        visualizationState={visualization.state}
+        layersMeta={props.framePublicAPI}
+        onAddLayerClick={(layerType) => {
+          const layerId = generateId();
+          dispatchLens(addLayer({ layerId, layerType }));
+          trackUiEvent('layer_added');
+          setNextFocusedLayerId(layerId);
+        }}
+      />
     </EuiForm>
   );
 }

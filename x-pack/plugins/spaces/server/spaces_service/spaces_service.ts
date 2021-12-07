@@ -6,8 +6,8 @@
  */
 
 import type { IBasePath, KibanaRequest } from 'src/core/server';
-import type { Space } from 'src/plugins/spaces_oss/common';
 
+import type { Space } from '../../common';
 import { getSpaceIdFromPath } from '../../common';
 import { DEFAULT_SPACE_ID } from '../../common/constants';
 import { namespaceToSpaceId, spaceIdToNamespace } from '../lib/utils/namespace';
@@ -20,27 +20,18 @@ export interface SpacesServiceSetup {
   /**
    * Retrieves the space id associated with the provided request.
    * @param request the request.
-   *
-   * @deprecated Use `getSpaceId` from the `SpacesServiceStart` contract instead.
-   * @removeBy 7.16
    */
   getSpaceId(request: KibanaRequest): string;
 
   /**
    * Converts the provided space id into the corresponding Saved Objects `namespace` id.
    * @param spaceId the space id to convert.
-   *
-   * @deprecated use `spaceIdToNamespace` from the `SpacesServiceStart` contract instead.
-   * @removeBy 7.16
    */
   spaceIdToNamespace(spaceId: string): string | undefined;
 
   /**
    * Converts the provided namespace into the corresponding space id.
    * @param namespace the namespace to convert.
-   *
-   * @deprecated use `namespaceToSpaceId` from the `SpacesServiceStart` contract instead.
-   * @removeBy 7.16
    */
   namespaceToSpaceId(namespace: string | undefined): string;
 }

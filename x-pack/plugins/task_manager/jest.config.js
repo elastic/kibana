@@ -9,4 +9,7 @@ module.exports = {
   preset: '@kbn/test',
   rootDir: '../../..',
   roots: ['<rootDir>/x-pack/plugins/task_manager'],
+  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/x-pack/plugins/task_manager',
+  coverageReporters: ['text', 'html'],
+  collectCoverageFrom: ['<rootDir>/x-pack/plugins/task_manager/server/**/*.{ts,tsx}'],
 };

@@ -6,7 +6,7 @@
  */
 
 import React, { FC, useState, useEffect, useCallback, useMemo } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import useDebounce from 'react-use/lib/useDebounce';
 import { i18n } from '@kbn/i18n';
 
@@ -47,6 +47,7 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled }) => {
   const {
     jobs: { bulkCreateJobs },
     dataFrameAnalytics: { createDataFrameAnalytics },
+    filters: { filters: getFilters },
   } = useMlApiContext();
   const {
     services: {
@@ -54,6 +55,7 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled }) => {
         indexPatterns: { getTitles: getIndexPatternTitles },
       },
       notifications: { toasts },
+      mlServices: { mlUsageCollection },
     },
   } = useMlKibana();
 
@@ -129,7 +131,8 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled }) => {
       const validatedJobs = await jobImportService.validateJobs(
         loadedFile.jobs,
         loadedFile.jobType,
-        getIndexPatternTitles
+        getIndexPatternTitles,
+        getFilters
       );
 
       if (loadedFile.jobType === 'anomaly-detector') {
@@ -175,6 +178,7 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled }) => {
       const renamedJobs = jobImportService.renameAdJobs(jobIdObjects, adJobs);
       try {
         await bulkCreateADJobs(renamedJobs);
+        mlUsageCollection.count('imported_anomaly_detector_jobs', renamedJobs.length);
       } catch (error) {
         // display unexpected error
         displayErrorToast(error);
@@ -182,6 +186,7 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled }) => {
     } else if (jobType === 'data-frame-analytics') {
       const renamedJobs = jobImportService.renameDfaJobs(jobIdObjects, dfaJobs);
       await bulkCreateDfaJobs(renamedJobs);
+      mlUsageCollection.count('imported_data_frame_analytics_jobs', renamedJobs.length);
     }
 
     setImporting(false);
@@ -192,8 +197,10 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled }) => {
     const results = await bulkCreateJobs(jobs);
     let successCount = 0;
     const errors: ErrorType[] = [];
+    const failedJobIds = new Set();
     Object.entries(results).forEach(([jobId, { job, datafeed }]) => {
       if (job.error || datafeed.error) {
+        failedJobIds.add(jobId);
         if (job.error) {
           errors.push(job.error);
         }
@@ -209,7 +216,8 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled }) => {
       displayImportSuccessToast(successCount);
     }
     if (errors.length > 0) {
-      displayImportErrorToast(errors);
+      displayImportErrorToast(errors, failedJobIds.size);
+      mlUsageCollection.count('import_failed_anomaly_detector_jobs', failedJobIds.size);
     }
   }, []);
 
@@ -229,7 +237,8 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled }) => {
       displayImportSuccessToast(successCount);
     }
     if (errors.length > 0) {
-      displayImportErrorToast(errors);
+      displayImportErrorToast(errors, errors.length);
+      mlUsageCollection.count('import_failed_data_frame_analytics_jobs', errors.length);
     }
   }, []);
 
@@ -241,14 +250,14 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled }) => {
     displaySuccessToast(title);
   }, []);
 
-  const displayImportErrorToast = useCallback((errors: ErrorType[]) => {
+  const displayImportErrorToast = useCallback((errors: ErrorType[], failureCount: number) => {
     const title = i18n.translate('xpack.ml.importExport.importFlyout.importJobErrorToast', {
       defaultMessage: '{count, plural, one {# job} other {# jobs}} failed to import correctly',
-      values: { count: errors.length },
+      values: { count: failureCount },
     });
 
     const errorList = errors.map(extractErrorProperties);
-    displayErrorToast((errorList as unknown) as ErrorType, title);
+    displayErrorToast(errorList as unknown as ErrorType, title);
   }, []);
 
   const deleteJob = useCallback(
@@ -321,7 +330,7 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled }) => {
       aria-label={i18n.translate('xpack.ml.importExport.importFlyout.deleteButtonAria', {
         defaultMessage: 'Delete',
       })}
-      color={deleteDisabled ? 'subdued' : 'danger'}
+      color={deleteDisabled ? 'text' : 'danger'}
       disabled={deleteDisabled}
       onClick={() => deleteJob(index)}
     />
@@ -332,7 +341,12 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled }) => {
       <FlyoutButton onClick={toggleFlyout} isDisabled={isDisabled} />
 
       {showFlyout === true && isDisabled === false && (
-        <EuiFlyout onClose={setShowFlyout.bind(null, false)} hideCloseButton size="m">
+        <EuiFlyout
+          onClose={setShowFlyout.bind(null, false)}
+          hideCloseButton
+          size="m"
+          data-test-subj="mlJobMgmtImportJobsFlyout"
+        >
           <EuiFlyoutHeader hasBorder>
             <EuiTitle size="m">
               <h2>
@@ -364,22 +378,26 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled }) => {
               {showFileReadError ? <CannotReadFileCallout /> : null}
 
               {totalJobsRead > 0 && jobType !== null && (
-                <>
+                <div data-test-subj="mlJobMgmtImportJobsFileRead">
                   <EuiSpacer size="l" />
                   {jobType === 'anomaly-detector' && (
-                    <FormattedMessage
-                      id="xpack.ml.importExport.importFlyout.selectedFiles.ad"
-                      defaultMessage="{num} anomaly detection {num, plural, one {job} other {jobs}} read from file"
-                      values={{ num: totalJobsRead }}
-                    />
+                    <div data-test-subj="mlJobMgmtImportJobsADTitle">
+                      <FormattedMessage
+                        id="xpack.ml.importExport.importFlyout.selectedFiles.ad"
+                        defaultMessage="{num} anomaly detection {num, plural, one {job} other {jobs}} read from file"
+                        values={{ num: totalJobsRead }}
+                      />
+                    </div>
                   )}
 
                   {jobType === 'data-frame-analytics' && (
-                    <FormattedMessage
-                      id="xpack.ml.importExport.importFlyout.selectedFiles.dfa"
-                      defaultMessage="{num} data frame analytics {num, plural, one {job} other {jobs}} read from file"
-                      values={{ num: totalJobsRead }}
-                    />
+                    <div data-test-subj="mlJobMgmtImportJobsDFATitle">
+                      <FormattedMessage
+                        id="xpack.ml.importExport.importFlyout.selectedFiles.dfa"
+                        defaultMessage="{num} data frame analytics {num, plural, one {job} other {jobs}} read from file"
+                        values={{ num: totalJobsRead }}
+                      />
+                    </div>
                   )}
 
                   <EuiSpacer size="m" />
@@ -417,6 +435,7 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled }) => {
                                 value={jobId.jobId}
                                 onChange={(e) => renameJob(e.target.value, i)}
                                 isInvalid={jobId.jobIdValid === false}
+                                data-test-subj="mlJobMgmtImportJobIdInput"
                               />
                             </EuiFormRow>
 
@@ -456,7 +475,7 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled }) => {
                       <EuiSpacer size="m" />
                     </div>
                   ))}
-                </>
+                </div>
               )}
             </>
           </EuiFlyoutBody>
@@ -475,7 +494,12 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled }) => {
                 </EuiButtonEmpty>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiButton disabled={importDisabled} onClick={onImport} fill>
+                <EuiButton
+                  disabled={importDisabled}
+                  onClick={onImport}
+                  fill
+                  data-test-subj="mlJobMgmtImportImportButton"
+                >
                   <FormattedMessage
                     id="xpack.ml.importExport.importFlyout.closeButton.importButton"
                     defaultMessage="Import"
@@ -496,7 +520,7 @@ const FlyoutButton: FC<{ isDisabled: boolean; onClick(): void }> = ({ isDisabled
       iconType="importAction"
       onClick={onClick}
       isDisabled={isDisabled}
-      data-test-subj="mlJobWizardButtonPreviewJobJson"
+      data-test-subj="mlJobsImportButton"
     >
       <FormattedMessage id="xpack.ml.importExport.importButton" defaultMessage="Import jobs" />
     </EuiButtonEmpty>

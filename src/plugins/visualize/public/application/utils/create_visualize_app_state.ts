@@ -39,12 +39,14 @@ const pureTransitions = {
       ...vis,
     },
   }),
-  unlinkSavedSearch: (state) => ({ query, parentFilters = [] }) => ({
-    ...state,
-    query: query || state.query,
-    filters: union(state.filters, parentFilters),
-    linked: false,
-  }),
+  unlinkSavedSearch:
+    (state) =>
+    ({ query, parentFilters = [] }) => ({
+      ...state,
+      query: query || state.query,
+      filters: union(state.filters, parentFilters),
+      linked: false,
+    }),
   updateVisState: (state) => (newVisState) => ({ ...state, vis: toObject(newVisState) }),
   updateSavedQuery: (state) => (savedQueryId) => {
     const updatedState = {
@@ -62,7 +64,6 @@ const pureTransitions = {
 
 function createVisualizeByValueAppState(stateDefaults: VisualizeAppState) {
   const initialState = migrateAppState({
-    ...stateDefaults,
     ...stateDefaults,
   });
   const stateContainer = createStateContainer<VisualizeAppState, VisualizeAppStateTransitions>(

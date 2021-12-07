@@ -43,19 +43,19 @@ export type MockedStartDependencies = Omit<EditorFrameStartPlugins, 'expressions
 };
 
 export function createMockSetupDependencies() {
-  return ({
+  return {
     data: dataPluginMock.createSetupContract(),
     embeddable: embeddablePluginMock.createSetupContract(),
     expressions: expressionsPluginMock.createSetupContract(),
     charts: chartPluginMock.createSetupContract(),
-  } as unknown) as MockedSetupDependencies;
+  } as unknown as MockedSetupDependencies;
 }
 
 export function createMockStartDependencies() {
-  return ({
+  return {
     data: dataPluginMock.createSetupContract(),
     embeddable: embeddablePluginMock.createStartContract(),
     expressions: expressionsPluginMock.createStartContract(),
     charts: chartPluginMock.createStartContract(),
-  } as unknown) as MockedStartDependencies;
+  } as unknown as MockedStartDependencies;
 }

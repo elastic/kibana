@@ -21,7 +21,7 @@ const defaultGetCapacityOverride: () => Partial<{
 });
 
 const createTaskPoolMock = (getCapacityOverride = defaultGetCapacityOverride) => {
-  return ({
+  return {
     get load() {
       return getCapacityOverride().load ?? 0;
     },
@@ -40,7 +40,7 @@ const createTaskPoolMock = (getCapacityOverride = defaultGetCapacityOverride) =>
     getOccupiedWorkersByType: jest.fn(),
     run: jest.fn(),
     cancelRunningTasks: jest.fn(),
-  } as unknown) as jest.Mocked<TaskPool>;
+  } as unknown as jest.Mocked<TaskPool>;
 };
 
 export const TaskPoolMock = {

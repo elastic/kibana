@@ -37,6 +37,12 @@ const ADD_GROUP_SUBMIT = i18n.translate(
     defaultMessage: 'Add Group',
   }
 );
+const ADD_GROUP_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.groups.addGroup.label',
+  {
+    defaultMessage: 'Group name',
+  }
+);
 
 export const AddGroupModal: React.FC<{}> = () => {
   const { closeNewGroupModal, saveNewGroup, setNewGroupName } = useActions(GroupsLogic);
@@ -55,7 +61,7 @@ export const AddGroupModal: React.FC<{}> = () => {
         </EuiModalHeader>
 
         <EuiModalBody>
-          <EuiFormRow isInvalid={isInvalid} error={newGroupNameErrors} label="Group name">
+          <EuiFormRow isInvalid={isInvalid} error={newGroupNameErrors} label={ADD_GROUP_LABEL}>
             <EuiFieldText
               isInvalid={isInvalid}
               value={newGroupName}

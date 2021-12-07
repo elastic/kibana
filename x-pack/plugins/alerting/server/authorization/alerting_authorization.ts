@@ -8,19 +8,18 @@
 import Boom from '@hapi/boom';
 import { map, mapValues, fromPairs, has } from 'lodash';
 import { KibanaRequest } from 'src/core/server';
-import { JsonObject } from '@kbn/common-utils';
-import { RuleTypeRegistry } from '../types';
+import { JsonObject } from '@kbn/utility-types';
+import { KueryNode } from '@kbn/es-query';
+import { ALERTS_FEATURE_ID, RuleTypeRegistry } from '../types';
 import { SecurityPluginSetup } from '../../../security/server';
 import { RegistryRuleType } from '../rule_type_registry';
 import { PluginStartContract as FeaturesPluginStart } from '../../../features/server';
-import { AlertingAuthorizationAuditLogger, ScopeType } from './audit_logger';
 import { Space } from '../../../spaces/server';
 import {
   asFiltersByRuleTypeAndConsumer,
   asFiltersBySpaceId,
   AlertingAuthorizationFilterOpts,
 } from './alerting_authorization_kuery';
-import { KueryNode } from '../../../../../src/plugins/data/server';
 
 export enum AlertingAuthorizationEntity {
   Rule = 'rule',
@@ -70,8 +69,6 @@ export interface ConstructorOptions {
   features: FeaturesPluginStart;
   getSpace: (request: KibanaRequest) => Promise<Space | undefined>;
   getSpaceId: (request: KibanaRequest) => string | undefined;
-  auditLogger: AlertingAuthorizationAuditLogger;
-  exemptConsumerIds: string[];
   authorization?: SecurityPluginSetup['authz'];
 }
 
@@ -79,10 +76,8 @@ export class AlertingAuthorization {
   private readonly ruleTypeRegistry: RuleTypeRegistry;
   private readonly request: KibanaRequest;
   private readonly authorization?: SecurityPluginSetup['authz'];
-  private readonly auditLogger: AlertingAuthorizationAuditLogger;
   private readonly featuresIds: Promise<Set<string>>;
   private readonly allPossibleConsumers: Promise<AuthorizedConsumers>;
-  private readonly exemptConsumerIds: string[];
   private readonly spaceId: string | undefined;
 
   constructor({
@@ -90,20 +85,12 @@ export class AlertingAuthorization {
     request,
     authorization,
     features,
-    auditLogger,
     getSpace,
     getSpaceId,
-    exemptConsumerIds,
   }: ConstructorOptions) {
     this.request = request;
     this.authorization = authorization;
     this.ruleTypeRegistry = ruleTypeRegistry;
-    this.auditLogger = auditLogger;
-
-    // List of consumer ids that are exempt from privilege check. This should be used sparingly.
-    // An example of this is the Rules Management `consumer` as we don't want to have to
-    // manually authorize each rule type in the management UI.
-    this.exemptConsumerIds = exemptConsumerIds;
 
     this.spaceId = getSpaceId(request);
 
@@ -132,7 +119,7 @@ export class AlertingAuthorization {
 
     this.allPossibleConsumers = this.featuresIds.then((featuresIds) => {
       return featuresIds.size
-        ? asAuthorizedConsumers([...this.exemptConsumerIds, ...featuresIds], {
+        ? asAuthorizedConsumers([ALERTS_FEATURE_ID, ...featuresIds], {
             read: true,
             all: true,
           })
@@ -185,11 +172,13 @@ export class AlertingAuthorization {
         ),
       };
 
-      // Skip authorizing consumer if it is in the list of exempt consumer ids
-      const shouldAuthorizeConsumer = !this.exemptConsumerIds.includes(consumer);
+      // Skip authorizing consumer if consumer is the Rules Management consumer (`alerts`)
+      // This means that rules and their derivative alerts created in the Rules Management UI
+      // will only be subject to checking if user has access to the rule producer.
+      const shouldAuthorizeConsumer = consumer !== ALERTS_FEATURE_ID;
 
       const checkPrivileges = authorization.checkPrivilegesDynamicallyWithRequest(this.request);
-      const { hasAllRequested, username, privileges } = await checkPrivileges({
+      const { hasAllRequested, privileges } = await checkPrivileges({
         kibana:
           shouldAuthorizeConsumer && consumer !== ruleType.producer
             ? [
@@ -199,8 +188,8 @@ export class AlertingAuthorization {
                 requiredPrivilegesByScope.producer,
               ]
             : [
-                // skip consumer privilege checks for exempt consumer ids as all rule types can
-                // be created for exempt consumers if user has producer level privileges
+                // skip consumer privilege checks under `alerts` as all rule types can
+                // be created under `alerts` if you have producer level privileges
                 requiredPrivilegesByScope.producer,
               ],
       });
@@ -214,27 +203,11 @@ export class AlertingAuthorization {
          * This check will ensure we don't accidentally let these through
          */
         throw Boom.forbidden(
-          this.auditLogger.logAuthorizationFailure(
-            username,
-            ruleTypeId,
-            ScopeType.Consumer,
-            consumer,
-            operation,
-            entity
-          )
+          getUnauthorizedMessage(ruleTypeId, ScopeType.Consumer, consumer, operation, entity)
         );
       }
 
-      if (hasAllRequested) {
-        this.auditLogger.logAuthorizationSuccess(
-          username,
-          ruleTypeId,
-          ScopeType.Consumer,
-          consumer,
-          operation,
-          entity
-        );
-      } else {
+      if (!hasAllRequested) {
         const authorizedPrivileges = map(
           privileges.kibana.filter((privilege) => privilege.authorized),
           'privilege'
@@ -250,8 +223,7 @@ export class AlertingAuthorization {
             : [ScopeType.Producer, ruleType.producer];
 
         throw Boom.forbidden(
-          this.auditLogger.logAuthorizationFailure(
-            username,
+          getUnauthorizedMessage(
             ruleTypeId,
             unauthorizedScopeType,
             unauthorizedScope,
@@ -262,14 +234,7 @@ export class AlertingAuthorization {
       }
     } else if (!isAvailableConsumer) {
       throw Boom.forbidden(
-        this.auditLogger.logAuthorizationFailure(
-          '',
-          ruleTypeId,
-          ScopeType.Consumer,
-          consumer,
-          operation,
-          entity
-        )
+        getUnauthorizedMessage(ruleTypeId, ScopeType.Consumer, consumer, operation, entity)
       );
     }
   }
@@ -280,19 +245,27 @@ export class AlertingAuthorization {
   ): Promise<{
     filter?: KueryNode | JsonObject;
     ensureRuleTypeIsAuthorized: (ruleTypeId: string, consumer: string, auth: string) => void;
-    logSuccessfulAuthorization: () => void;
+  }> {
+    return this.getAuthorizationFilter(authorizationEntity, filterOpts, ReadOperations.Find);
+  }
+
+  public async getAuthorizationFilter(
+    authorizationEntity: AlertingAuthorizationEntity,
+    filterOpts: AlertingAuthorizationFilterOpts,
+    operation: WriteOperations | ReadOperations
+  ): Promise<{
+    filter?: KueryNode | JsonObject;
+    ensureRuleTypeIsAuthorized: (ruleTypeId: string, consumer: string, auth: string) => void;
   }> {
     if (this.authorization && this.shouldCheckAuthorization()) {
-      const { username, authorizedRuleTypes } = await this.augmentRuleTypesWithAuthorization(
+      const { authorizedRuleTypes } = await this.augmentRuleTypesWithAuthorization(
         this.ruleTypeRegistry.list(),
-        [ReadOperations.Find],
+        [operation],
         authorizationEntity
       );
 
       if (!authorizedRuleTypes.size) {
-        throw Boom.forbidden(
-          this.auditLogger.logUnscopedAuthorizationFailure(username!, 'find', authorizationEntity)
-        );
+        throw Boom.forbidden(`Unauthorized to find ${authorizationEntity}s for any rule types`);
       }
 
       const authorizedRuleTypeIdsToConsumers = new Set<string>(
@@ -306,12 +279,15 @@ export class AlertingAuthorization {
 
       const authorizedEntries: Map<string, Set<string>> = new Map();
       return {
-        filter: asFiltersByRuleTypeAndConsumer(authorizedRuleTypes, filterOpts, this.spaceId),
+        filter: asFiltersByRuleTypeAndConsumer(
+          authorizedRuleTypes,
+          filterOpts,
+          this.spaceId
+        ) as JsonObject,
         ensureRuleTypeIsAuthorized: (ruleTypeId: string, consumer: string, authType: string) => {
           if (!authorizedRuleTypeIdsToConsumers.has(`${ruleTypeId}/${consumer}/${authType}`)) {
             throw Boom.forbidden(
-              this.auditLogger.logAuthorizationFailure(
-                username!,
+              getUnauthorizedMessage(
                 ruleTypeId,
                 ScopeType.Consumer,
                 consumer,
@@ -327,32 +303,12 @@ export class AlertingAuthorization {
             }
           }
         },
-        logSuccessfulAuthorization: () => {
-          if (authorizedEntries.size) {
-            this.auditLogger.logBulkAuthorizationSuccess(
-              username!,
-              [...authorizedEntries.entries()].reduce<Array<[string, string]>>(
-                (authorizedPairs, [alertTypeId, consumers]) => {
-                  for (const consumer of consumers) {
-                    authorizedPairs.push([alertTypeId, consumer]);
-                  }
-                  return authorizedPairs;
-                },
-                []
-              ),
-              ScopeType.Consumer,
-              'find',
-              authorizationEntity
-            );
-          }
-        },
       };
     }
 
     return {
-      filter: asFiltersBySpaceId(filterOpts, this.spaceId),
+      filter: asFiltersBySpaceId(filterOpts, this.spaceId) as JsonObject,
       ensureRuleTypeIsAuthorized: (ruleTypeId: string, consumer: string, authType: string) => {},
-      logSuccessfulAuthorization: () => {},
     };
   }
 
@@ -425,25 +381,19 @@ export class AlertingAuthorization {
           : // only has some of the required privileges
             privileges.kibana.reduce((authorizedRuleTypes, { authorized, privilege }) => {
               if (authorized && privilegeToRuleType.has(privilege)) {
-                const [
-                  ruleType,
-                  feature,
-                  hasPrivileges,
-                  isAuthorizedAtProducerLevel,
-                ] = privilegeToRuleType.get(privilege)!;
+                const [ruleType, feature, hasPrivileges, isAuthorizedAtProducerLevel] =
+                  privilegeToRuleType.get(privilege)!;
                 ruleType.authorizedConsumers[feature] = mergeHasPrivileges(
                   hasPrivileges,
                   ruleType.authorizedConsumers[feature]
                 );
 
-                if (isAuthorizedAtProducerLevel && this.exemptConsumerIds.length > 0) {
-                  // granting privileges under the producer automatically authorized exempt consumer IDs as well
-                  this.exemptConsumerIds.forEach((exemptId: string) => {
-                    ruleType.authorizedConsumers[exemptId] = mergeHasPrivileges(
-                      hasPrivileges,
-                      ruleType.authorizedConsumers[exemptId]
-                    );
-                  });
+                if (isAuthorizedAtProducerLevel) {
+                  // granting privileges under the producer automatically authorized the Rules Management UI as well
+                  ruleType.authorizedConsumers[ALERTS_FEATURE_ID] = mergeHasPrivileges(
+                    hasPrivileges,
+                    ruleType.authorizedConsumers[ALERTS_FEATURE_ID]
+                  );
                 }
                 authorizedRuleTypes.add(ruleType);
               }
@@ -482,8 +432,8 @@ function mergeHasPrivileges(left: HasPrivileges, right?: HasPrivileges): HasPriv
 }
 
 function hasPrivilegeByOperation(operation: ReadOperations | WriteOperations): HasPrivileges {
-  const read = Object.values(ReadOperations).includes((operation as unknown) as ReadOperations);
-  const all = Object.values(WriteOperations).includes((operation as unknown) as WriteOperations);
+  const read = Object.values(ReadOperations).includes(operation as unknown as ReadOperations);
+  const all = Object.values(WriteOperations).includes(operation as unknown as WriteOperations);
   return {
     read: read || all,
     all,
@@ -495,4 +445,21 @@ function asAuthorizedConsumers(
   hasPrivileges: HasPrivileges
 ): AuthorizedConsumers {
   return fromPairs(consumers.map((feature) => [feature, hasPrivileges]));
+}
+
+enum ScopeType {
+  Consumer,
+  Producer,
+}
+
+function getUnauthorizedMessage(
+  alertTypeId: string,
+  scopeType: ScopeType,
+  scope: string,
+  operation: string,
+  entity: string
+): string {
+  return `Unauthorized to ${operation} a "${alertTypeId}" ${entity} ${
+    scopeType === ScopeType.Consumer ? `for "${scope}"` : `by "${scope}"`
+  }`;
 }

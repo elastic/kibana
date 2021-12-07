@@ -603,7 +603,7 @@ describe('ui settings', () => {
       expect(result).toBe('YYYY-MM-DD');
     });
 
-    it('returns the overridden value for an overrided key', async () => {
+    it('returns the overridden value for an overriden key', async () => {
       const esDocSource = { dateFormat: 'YYYY-MM-DD' };
       const overrides = { dateFormat: 'foo' };
       const { uiSettings } = setup({ esDocSource, overrides });

@@ -14,4 +14,4 @@ export function plugin() {
   return new ExpressionMetricPlugin();
 }
 
-export * from './expression_renderers';
+export { metricRendererFactory, getMetricRenderer } from './expression_renderers';

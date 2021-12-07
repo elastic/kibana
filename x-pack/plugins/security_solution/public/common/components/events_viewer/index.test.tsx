@@ -16,11 +16,14 @@ import { useMountAppended } from '../../utils/use_mount_appended';
 import { mockEventViewerResponse } from './mock';
 import { StatefulEventsViewer } from '.';
 import { eventsDefaultModel } from './default_model';
+import { EntityType } from '../../../../../timelines/common';
 import { TimelineId } from '../../../../common/types/timeline';
 import { SourcererScopeName } from '../../store/sourcerer/model';
 import { DefaultCellRenderer } from '../../../timelines/components/timeline/cell_rendering/default_cell_renderer';
 import { useTimelineEvents } from '../../../timelines/containers';
+import { getDefaultControlColumn } from '../../../timelines/components/timeline/body/control_columns';
 import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';
+import { defaultCellActions } from '../../lib/cell_actions/default_cell_actions';
 
 jest.mock('../../../common/lib/kibana');
 
@@ -36,12 +39,16 @@ mockUseResizeObserver.mockImplementation(() => ({}));
 
 const from = '2019-08-27T22:10:56.794Z';
 const to = '2019-08-26T22:10:56.791Z';
+const ACTION_BUTTON_COUNT = 4;
 
 const testProps = {
+  defaultCellActions,
   defaultModel: eventsDefaultModel,
   end: to,
+  entityType: EntityType.ALERTS,
   indexNames: [],
   id: TimelineId.test,
+  leadingControlColumns: getDefaultControlColumn(ACTION_BUTTON_COUNT),
   renderCellValue: DefaultCellRenderer,
   rowRenderers: defaultRowRenderers,
   scopeId: SourcererScopeName.default,
@@ -62,9 +69,7 @@ describe('StatefulEventsViewer', () => {
     await waitFor(() => {
       wrapper.update();
 
-      expect(wrapper.text()).toMatchInlineSnapshot(
-        `"Showing: 12 events1 fields sorted@timestamp1event.severityevent.categoryevent.actionhost.namesource.ipdestination.ipdestination.bytesuser.name_idmessage0 of 12 events123"`
-      );
+      expect(wrapper.text()).toMatchInlineSnapshot(`"hello grid"`);
     });
   });
 

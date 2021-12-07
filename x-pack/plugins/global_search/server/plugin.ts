@@ -30,7 +30,8 @@ export class GlobalSearchPlugin
       GlobalSearchPluginStart,
       GlobalSearchPluginSetupDeps,
       GlobalSearchPluginStartDeps
-    > {
+    >
+{
   private readonly config: GlobalSearchConfigType;
   private readonly searchService = new SearchService();
   private searchServiceStart?: SearchServiceStart;

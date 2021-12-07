@@ -16,4 +16,4 @@ export type CanvasExpressionsServiceFactory = KibanaPluginServiceFactory<
 >;
 
 export const expressionsServiceFactory: CanvasExpressionsServiceFactory = ({ startPlugins }) =>
-  startPlugins.expressions.fork();
+  startPlugins.expressions;

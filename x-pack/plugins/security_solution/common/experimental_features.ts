@@ -13,10 +13,15 @@ export type ExperimentalFeatures = typeof allowedExperimentalValues;
  */
 export const allowedExperimentalValues = Object.freeze({
   metricsEntitiesEnabled: false,
-  ruleRegistryEnabled: false,
-  tGridEnabled: false,
-  trustedAppsByPolicyEnabled: false,
+  ruleRegistryEnabled: true,
+  tGridEnabled: true,
+  tGridEventRenderedViewEnabled: true,
+  trustedAppsByPolicyEnabled: true,
+  excludePoliciesInFilterEnabled: false,
   uebaEnabled: false,
+  disableIsolationUIPendingStatuses: false,
+  riskyHostsEnabled: false,
+  pendingActionResponsesWithAck: true,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

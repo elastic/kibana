@@ -33,7 +33,7 @@ import {
   addIdToEntries,
   ExceptionsBuilderExceptionItem,
 } from '@kbn/securitysolution-list-utils';
-import { IndexPatternBase } from '@kbn/es-query';
+import type { DataViewBase } from '@kbn/es-query';
 import * as i18n from './translations';
 import { AlertData, Flattened } from './types';
 
@@ -44,12 +44,13 @@ import exceptionableLinuxFields from './exceptionable_linux_fields.json';
 import exceptionableWindowsMacFields from './exceptionable_windows_mac_fields.json';
 import exceptionableEndpointFields from './exceptionable_endpoint_fields.json';
 import exceptionableEndpointEventFields from './exceptionable_endpoint_event_fields.json';
+import { ALERT_ORIGINAL_EVENT } from '../../../../common/field_maps/field_names';
 
 export const filterIndexPatterns = (
-  patterns: IndexPatternBase,
+  patterns: DataViewBase,
   type: ExceptionListType,
   osTypes?: OsTypeArray
-): IndexPatternBase => {
+): DataViewBase => {
   switch (type) {
     case 'endpoint':
       const osFilterForEndpoint: (name: string) => boolean = osTypes?.includes('linux')
@@ -145,7 +146,7 @@ export const prepareExceptionItemsForBulkClose = (
         return {
           ...itemEntry,
           field: itemEntry.field.startsWith('event.')
-            ? itemEntry.field.replace(/^event./, 'signal.original_event.')
+            ? itemEntry.field.replace(/^event./, `${ALERT_ORIGINAL_EVENT}.`)
             : itemEntry.field,
         };
       });
@@ -577,7 +578,7 @@ export const getPrepopulatedMemoryShellcodeException = ({
   eventCode: string;
   alertEcsData: Flattened<Ecs>;
 }): ExceptionsBuilderExceptionItem => {
-  const { process, Target } = alertEcsData;
+  const { process } = alertEcsData;
   const entries = filterEmptyExceptionEntries([
     {
       field: 'Memory_protection.feature',
@@ -609,46 +610,138 @@ export const getPrepopulatedMemoryShellcodeException = ({
       type: 'match' as const,
       value: process?.Ext?.token?.integrity_level_name ?? '',
     },
-    {
-      field: 'Target.process.thread.Ext.start_address_details',
-      type: 'nested' as const,
-      entries: [
-        {
-          field: 'allocation_type',
-          operator: 'included' as const,
-          type: 'match' as const,
-          value: Target?.process?.thread?.Ext?.start_address_details?.allocation_type ?? '',
-        },
-        {
-          field: 'allocation_size',
-          operator: 'included' as const,
-          type: 'match' as const,
-          value: String(Target?.process?.thread?.Ext?.start_address_details?.allocation_size) ?? '',
-        },
-        {
-          field: 'region_size',
-          operator: 'included' as const,
-          type: 'match' as const,
-          value: String(Target?.process?.thread?.Ext?.start_address_details?.region_size) ?? '',
-        },
-        {
-          field: 'region_protection',
-          operator: 'included' as const,
-          type: 'match' as const,
-          value:
-            String(Target?.process?.thread?.Ext?.start_address_details?.region_protection) ?? '',
-        },
-        {
-          field: 'memory_pe.imphash',
-          operator: 'included' as const,
-          type: 'match' as const,
-          value:
-            String(Target?.process?.thread?.Ext?.start_address_details?.memory_pe?.imphash) ?? '',
-        },
-      ],
-    },
   ]);
 
+  return {
+    ...getNewExceptionItem({ listId, namespaceType: listNamespace, ruleName }),
+    entries: addIdToEntries(entries),
+  };
+};
+
+export const getPrepopulatedBehaviorException = ({
+  listId,
+  ruleName,
+  eventCode,
+  listNamespace = 'agnostic',
+  alertEcsData,
+}: {
+  listId: string;
+  listNamespace?: NamespaceType;
+  ruleName: string;
+  eventCode: string;
+  alertEcsData: Flattened<Ecs>;
+}): ExceptionsBuilderExceptionItem => {
+  const { process } = alertEcsData;
+  const entries = filterEmptyExceptionEntries([
+    {
+      field: 'rule.id',
+      operator: 'included' as const,
+      type: 'match' as const,
+      value: alertEcsData.rule?.id ?? '',
+    },
+    {
+      field: 'process.executable.caseless',
+      operator: 'included' as const,
+      type: 'match' as const,
+      value: process?.executable ?? '',
+    },
+    {
+      field: 'process.command_line',
+      operator: 'included' as const,
+      type: 'match' as const,
+      value: process?.command_line ?? '',
+    },
+    {
+      field: 'process.parent.executable',
+      operator: 'included' as const,
+      type: 'match' as const,
+      value: process?.parent?.executable ?? '',
+    },
+    {
+      field: 'process.code_signature.subject_name',
+      operator: 'included' as const,
+      type: 'match' as const,
+      value: process?.code_signature?.subject_name ?? '',
+    },
+    {
+      field: 'file.path',
+      operator: 'included' as const,
+      type: 'match' as const,
+      value: alertEcsData.file?.path ?? '',
+    },
+    {
+      field: 'file.name',
+      operator: 'included' as const,
+      type: 'match' as const,
+      value: alertEcsData.file?.name ?? '',
+    },
+    {
+      field: 'source.ip',
+      operator: 'included' as const,
+      type: 'match' as const,
+      value: alertEcsData.source?.ip ?? '',
+    },
+    {
+      field: 'destination.ip',
+      operator: 'included' as const,
+      type: 'match' as const,
+      value: alertEcsData.destination?.ip ?? '',
+    },
+    {
+      field: 'registry.path',
+      operator: 'included' as const,
+      type: 'match' as const,
+      value: alertEcsData.registry?.path ?? '',
+    },
+    {
+      field: 'registry.value',
+      operator: 'included' as const,
+      type: 'match' as const,
+      value: alertEcsData.registry?.value ?? '',
+    },
+    {
+      field: 'registry.data.strings',
+      operator: 'included' as const,
+      type: 'match' as const,
+      value: alertEcsData.registry?.data?.strings ?? '',
+    },
+    {
+      field: 'dll.path',
+      operator: 'included' as const,
+      type: 'match' as const,
+      value: alertEcsData.dll?.path ?? '',
+    },
+    {
+      field: 'dll.code_signature.subject_name',
+      operator: 'included' as const,
+      type: 'match' as const,
+      value: alertEcsData.dll?.code_signature?.subject_name ?? '',
+    },
+    {
+      field: 'dll.pe.original_file_name',
+      operator: 'included' as const,
+      type: 'match' as const,
+      value: alertEcsData.dll?.pe?.original_file_name ?? '',
+    },
+    {
+      field: 'dns.question.name',
+      operator: 'included' as const,
+      type: 'match' as const,
+      value: alertEcsData.dns?.question?.name ?? '',
+    },
+    {
+      field: 'dns.question.type',
+      operator: 'included' as const,
+      type: 'match' as const,
+      value: alertEcsData.dns?.question?.type ?? '',
+    },
+    {
+      field: 'user.id',
+      operator: 'included' as const,
+      type: 'match' as const,
+      value: alertEcsData.user?.id ?? '',
+    },
+  ]);
   return {
     ...getNewExceptionItem({ listId, namespaceType: listNamespace, ruleName }),
     entries: addIdToEntries(entries),
@@ -660,7 +753,7 @@ export const getPrepopulatedMemoryShellcodeException = ({
  */
 export const entryHasNonEcsType = (
   exceptionItems: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>,
-  indexPatterns: IndexPatternBase
+  indexPatterns: DataViewBase
 ): boolean => {
   const doesFieldNameExist = (exceptionEntry: Entry): boolean => {
     return indexPatterns.fields.some(({ name }) => name === exceptionEntry.field);
@@ -697,6 +790,15 @@ export const defaultEndpointExceptionItems = (
   const eventCode = alertEvent?.code ?? '';
 
   switch (eventCode) {
+    case 'behavior':
+      return [
+        getPrepopulatedBehaviorException({
+          listId,
+          ruleName,
+          eventCode,
+          alertEcsData,
+        }),
+      ];
     case 'memory_signature':
       return [
         getPrepopulatedMemorySignatureException({
@@ -706,7 +808,7 @@ export const defaultEndpointExceptionItems = (
           alertEcsData,
         }),
       ];
-    case 'malicious_thread':
+    case 'shellcode_thread':
       return [
         getPrepopulatedMemoryShellcodeException({
           listId,

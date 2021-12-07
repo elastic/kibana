@@ -55,7 +55,7 @@ describe('ML - job utils', () => {
 
   describe('isTimeSeriesViewJob', () => {
     test('returns true when job has a single detector with a metric function', () => {
-      const job = ({
+      const job = {
         analysis_config: {
           detectors: [
             {
@@ -65,13 +65,13 @@ describe('ML - job utils', () => {
             },
           ],
         },
-      } as unknown) as CombinedJob;
+      } as unknown as CombinedJob;
 
       expect(isTimeSeriesViewJob(job)).toBe(true);
     });
 
     test('returns true when job has at least one detector with a metric function', () => {
-      const job = ({
+      const job = {
         analysis_config: {
           detectors: [
             {
@@ -87,13 +87,13 @@ describe('ML - job utils', () => {
             },
           ],
         },
-      } as unknown) as CombinedJob;
+      } as unknown as CombinedJob;
 
       expect(isTimeSeriesViewJob(job)).toBe(true);
     });
 
     test('returns false when job does not have at least one detector with a metric function', () => {
-      const job = ({
+      const job = {
         analysis_config: {
           detectors: [
             {
@@ -109,13 +109,13 @@ describe('ML - job utils', () => {
             },
           ],
         },
-      } as unknown) as CombinedJob;
+      } as unknown as CombinedJob;
 
       expect(isTimeSeriesViewJob(job)).toBe(false);
     });
 
     test('returns false when job has a single count by category detector', () => {
-      const job = ({
+      const job = {
         analysis_config: {
           detectors: [
             {
@@ -125,14 +125,14 @@ describe('ML - job utils', () => {
             },
           ],
         },
-      } as unknown) as CombinedJob;
+      } as unknown as CombinedJob;
 
       expect(isTimeSeriesViewJob(job)).toBe(false);
     });
   });
 
   describe('isTimeSeriesViewDetector', () => {
-    const job = ({
+    const job = {
       analysis_config: {
         detectors: [
           {
@@ -172,7 +172,7 @@ describe('ML - job utils', () => {
           },
         },
       },
-    } as unknown) as CombinedJob;
+    } as unknown as CombinedJob;
 
     test('returns true for a detector with a metric function', () => {
       expect(isTimeSeriesViewDetector(job, 0)).toBe(true);
@@ -196,7 +196,7 @@ describe('ML - job utils', () => {
   });
 
   describe('isSourceDataChartableForDetector', () => {
-    const job = ({
+    const job = {
       analysis_config: {
         detectors: [
           { function: 'count' }, // 0
@@ -255,7 +255,7 @@ describe('ML - job utils', () => {
           },
         },
       },
-    } as unknown) as CombinedJob;
+    } as unknown as CombinedJob;
 
     test('returns true for expected detectors', () => {
       expect(isSourceDataChartableForDetector(job, 0)).toBe(true);
@@ -303,13 +303,13 @@ describe('ML - job utils', () => {
   });
 
   describe('isModelPlotChartableForDetector', () => {
-    const job1 = ({
+    const job1 = {
       analysis_config: {
         detectors: [{ function: 'count' }],
       },
-    } as unknown) as Job;
+    } as unknown as Job;
 
-    const job2 = ({
+    const job2 = {
       analysis_config: {
         detectors: [
           { function: 'count' },
@@ -323,7 +323,7 @@ describe('ML - job utils', () => {
       model_plot_config: {
         enabled: true,
       },
-    } as unknown) as Job;
+    } as unknown as Job;
 
     test('returns false when model plot is not enabled', () => {
       expect(isModelPlotChartableForDetector(job1, 0)).toBe(false);
@@ -343,7 +343,7 @@ describe('ML - job utils', () => {
   });
 
   describe('getPartitioningFieldNames', () => {
-    const job = ({
+    const job = {
       analysis_config: {
         detectors: [
           {
@@ -371,7 +371,7 @@ describe('ML - job utils', () => {
           },
         ],
       },
-    } as unknown) as CombinedJob;
+    } as unknown as CombinedJob;
 
     test('returns empty array for a detector with no partitioning fields', () => {
       const resp = getPartitioningFieldNames(job, 0);
@@ -396,7 +396,7 @@ describe('ML - job utils', () => {
 
   describe('isModelPlotEnabled', () => {
     test('returns true for a job in which model plot has been enabled', () => {
-      const job = ({
+      const job = {
         analysis_config: {
           detectors: [
             {
@@ -409,13 +409,13 @@ describe('ML - job utils', () => {
         model_plot_config: {
           enabled: true,
         },
-      } as unknown) as Job;
+      } as unknown as Job;
 
       expect(isModelPlotEnabled(job, 0)).toBe(true);
     });
 
     test('returns expected values for a job in which model plot has been enabled with terms', () => {
-      const job = ({
+      const job = {
         analysis_config: {
           detectors: [
             {
@@ -430,7 +430,7 @@ describe('ML - job utils', () => {
           enabled: true,
           terms: 'US,AAL',
         },
-      } as unknown) as Job;
+      } as unknown as Job;
 
       expect(
         isModelPlotEnabled(job, 0, [
@@ -454,7 +454,7 @@ describe('ML - job utils', () => {
     });
 
     test('returns true for jobs in which model plot has not been enabled', () => {
-      const job1 = ({
+      const job1 = {
         analysis_config: {
           detectors: [
             {
@@ -467,8 +467,8 @@ describe('ML - job utils', () => {
         model_plot_config: {
           enabled: false,
         },
-      } as unknown) as CombinedJob;
-      const job2 = ({} as unknown) as CombinedJob;
+      } as unknown as CombinedJob;
+      const job2 = {} as unknown as CombinedJob;
 
       expect(isModelPlotEnabled(job1, 0)).toBe(false);
       expect(isModelPlotEnabled(job2, 0)).toBe(false);
@@ -476,9 +476,9 @@ describe('ML - job utils', () => {
   });
 
   describe('isJobVersionGte', () => {
-    const job = ({
+    const job = {
       job_version: '6.1.1',
-    } as unknown) as CombinedJob;
+    } as unknown as CombinedJob;
 
     test('returns true for later job version', () => {
       expect(isJobVersionGte(job, '6.1.0')).toBe(true);

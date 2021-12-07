@@ -10,13 +10,22 @@ import fs from 'fs';
 import Path from 'path';
 
 import { Project } from 'ts-morph';
-import { ToolingLog, KibanaPlatformPlugin } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/dev-utils';
 
 import { writePluginDocs } from '../mdx/write_plugin_mdx_docs';
-import { ApiDeclaration, ApiStats, PluginApi, Reference, TextWithLinks, TypeKind } from '../types';
+import {
+  ApiDeclaration,
+  ApiStats,
+  PluginApi,
+  PluginOrPackage,
+  Reference,
+  TextWithLinks,
+  TypeKind,
+} from '../types';
 import { getKibanaPlatformPlugin } from './kibana_platform_plugin_mock';
 import { groupPluginApi } from '../utils';
 import { getPluginApiMap } from '../get_plugin_api_map';
+import { collectApiStatsForPlugin } from '../stats';
 
 const log = new ToolingLog({
   level: 'debug',
@@ -25,6 +34,8 @@ const log = new ToolingLog({
 
 let doc: PluginApi;
 let mdxOutputFolder: string;
+let pluginAStats: ApiStats;
+let pluginBStats: ApiStats;
 
 function linkCount(signature: TextWithLinks): number {
   return signature.reduce((cnt, next) => (typeof next === 'string' ? cnt : cnt + 1), 0);
@@ -96,27 +107,38 @@ beforeAll(() => {
     Path.resolve(__dirname, '__fixtures__/src/plugin_b')
   );
   pluginA.manifest.serviceFolders = ['foo'];
-  const plugins: KibanaPlatformPlugin[] = [pluginA, pluginB];
+  const plugins: PluginOrPackage[] = [pluginA, pluginB];
 
-  const { pluginApiMap } = getPluginApiMap(project, plugins, log, { collectReferences: false });
-  const pluginStats: ApiStats = {
-    deprecatedAPIsReferencedCount: 0,
-    missingComments: [],
-    isAnyType: [],
-    noReferences: [],
-    apiCount: 3,
-    missingExports: 0,
-  };
+  const { pluginApiMap, missingApiItems, referencedDeprecations } = getPluginApiMap(
+    project,
+    plugins,
+    log,
+    { collectReferences: false }
+  );
 
   doc = pluginApiMap.pluginA;
+
+  pluginAStats = collectApiStatsForPlugin(doc, missingApiItems, referencedDeprecations);
+  pluginBStats = collectApiStatsForPlugin(
+    pluginApiMap.pluginB,
+    missingApiItems,
+    referencedDeprecations
+  );
+
   mdxOutputFolder = Path.resolve(__dirname, 'snapshots');
-  writePluginDocs(mdxOutputFolder, { doc, plugin: pluginA, pluginStats, log });
+  writePluginDocs(mdxOutputFolder, { doc, plugin: pluginA, pluginStats: pluginAStats, log });
   writePluginDocs(mdxOutputFolder, {
     doc: pluginApiMap.pluginB,
     plugin: pluginB,
-    pluginStats,
+    pluginStats: pluginBStats,
     log,
   });
+});
+
+it('Stats', () => {
+  // Type "imAnAny"
+  expect(pluginAStats.isAnyType.length).toBe(1);
+  expect(pluginBStats.isAnyType.length).toBe(0);
 });
 
 it('Setup type is extracted', () => {
@@ -191,13 +213,20 @@ describe('functions', () => {
     const hi = obj?.children?.find((c) => c.label === 'hi');
     expect(hi).toBeDefined();
 
-    const obj2 = fn?.children?.find((c) => c.label === '{ fn }');
+    const obj2 = fn?.children?.find((c) => c.label === '{ fn1, fn2 }');
     expect(obj2).toBeDefined();
-    expect(obj2!.children?.length).toBe(1);
+    expect(obj2!.children?.length).toBe(2);
+    expect(obj2!.id).toBe('def-public.crazyFunction.$2');
 
-    const fn2 = obj2?.children?.find((c) => c.label === 'fn');
-    expect(fn2).toBeDefined();
-    expect(fn2?.type).toBe(TypeKind.FunctionKind);
+    const fn1 = obj2?.children?.find((c) => c.label === 'fn1');
+    expect(fn1).toBeDefined();
+    expect(fn1?.type).toBe(TypeKind.FunctionKind);
+    expect(fn1!.id).toBe('def-public.crazyFunction.$2.fn1');
+
+    const fn3 = fn1?.children?.find((c) => c.label === 'foo');
+    expect(fn3).toBeDefined();
+    expect(fn3?.type).toBe(TypeKind.ObjectKind);
+    expect(fn3!.id).toBe('def-public.crazyFunction.$2.fn1.$1');
   });
 
   it('Fn with internal tag is not exported', () => {
@@ -244,7 +273,49 @@ describe('objects', () => {
   });
 });
 
-describe('Misc types', () => {
+describe('Types', () => {
+  it('Generic type pointing to a function', () => {
+    const api = doc.client.find((c) => c.label === 'FnTypeWithGeneric');
+    expect(api).toBeDefined();
+    expect(api?.signature).toBeDefined();
+    expect(linkCount(api?.signature!)).toBe(2);
+
+    expect(api?.children).toBeDefined();
+    expect(api?.signature!).toMatchInlineSnapshot(`
+      Array [
+        "(t: T, p: ",
+        Object {
+          "docId": "kibPluginAPluginApi",
+          "pluginId": "pluginA",
+          "scope": "public",
+          "section": "def-public.MyProps",
+          "text": "MyProps",
+        },
+        ") => ",
+        Object {
+          "docId": "kibPluginAPluginApi",
+          "pluginId": "pluginA",
+          "scope": "public",
+          "section": "def-public.TypeWithGeneric",
+          "text": "TypeWithGeneric",
+        },
+        "<T>",
+      ]
+    `);
+  });
+
+  it('Generic type pointing to an array', () => {
+    const api = doc.client.find((c) => c.label === 'TypeWithGeneric');
+    expect(api).toBeDefined();
+    expect(api?.signature).toBeDefined();
+    expect(linkCount(api?.signature!)).toBe(0);
+    expect(api?.signature!).toMatchInlineSnapshot(`
+      Array [
+        "T[]",
+      ]
+    `);
+  });
+
   it('Type using ReactElement has the right signature', () => {
     const api = doc.client.find((c) => c.label === 'AReactElementFn');
     expect(api).toBeDefined();
@@ -259,7 +330,7 @@ describe('Misc types', () => {
           "section": "def-public.MyProps",
           "text": "MyProps",
         },
-        ">",
+        ", string | React.JSXElementConstructor<any>>",
       ]
     `);
   });
@@ -322,6 +393,14 @@ describe('Misc types', () => {
       ]
     `);
     expect(linkCount(fnType?.signature!)).toBe(1);
+
+    expect(fnType?.children).toBeDefined();
+    expect(fnType?.children?.length).toBe(1);
+    expect(fnType?.children![0].description).toMatchInlineSnapshot(`
+      Array [
+        "This is a generic T type. It can be anything.",
+      ]
+    `);
   });
 
   it('Union type is exported correctly', () => {
@@ -369,6 +448,14 @@ describe('Misc types', () => {
 });
 
 describe('interfaces and classes', () => {
+  it('Interface with index signature exported correctly', () => {
+    const anInterface = doc.client.find((c) => c.label === 'InterfaceWithIndexSignature');
+    expect(anInterface?.children).toBeDefined();
+    expect(anInterface?.children?.length).toBe(1);
+    expect(anInterface?.children![0].signature).toBeDefined();
+    expect(anInterface?.children![0].signature?.length).toBeGreaterThanOrEqual(1);
+  });
+
   it('Basic interface exported correctly', () => {
     const anInterface = doc.client.find((c) => c.label === 'IReturnAReactComponent');
     expect(anInterface).toBeDefined();
@@ -417,6 +504,20 @@ describe('interfaces and classes', () => {
     `);
   });
 
+  /**
+   * Coverage for https://github.com/elastic/kibana/issues/107145
+   */
+  it('Optional function on interface includes children', () => {
+    const exampleInterface = doc.client.find((c) => c.label === 'ExampleInterface');
+    expect(exampleInterface).toBeDefined();
+
+    const fn = exampleInterface!.children?.find((c) => c.label === 'anOptionalFn');
+    expect(fn).toBeDefined();
+    expect(fn?.type).toBe(TypeKind.FunctionKind);
+    expect(fn?.children).toBeDefined();
+    expect(fn?.children?.length).toBe(1);
+  });
+
   it('Non arrow function on interface is exported as function type', () => {
     const exampleInterface = doc.client.find((c) => c.label === 'ExampleInterface');
     expect(exampleInterface).toBeDefined();
@@ -462,7 +563,7 @@ describe('interfaces and classes', () => {
     expect(linkCount(clss?.signature!)).toBe(3);
   });
 
-  it('Function with generic inside interface is exported with function type', () => {
+  it('Generic function inside interface is exported as a function', () => {
     const exampleInterface = doc.client.find((c) => c.label === 'ExampleInterface');
     expect(exampleInterface).toBeDefined();
 
@@ -479,6 +580,53 @@ describe('interfaces and classes', () => {
     expect(param?.description).toBeDefined();
     expect(param?.description?.length).toBe(1);
     expect(param!.description![0]).toBe('This a parameter.');
+  });
+
+  it('Property on interface pointing to generic function type exported with link', () => {
+    const exampleInterface = doc.client.find((c) => c.label === 'ExampleInterface');
+    expect(exampleInterface).toBeDefined();
+
+    const fn = exampleInterface?.children?.find((c) => c.label === 'fnTypeWithGeneric');
+    expect(fn).toBeDefined();
+    expect(fn!.id).toBe('def-public.ExampleInterface.fnTypeWithGeneric');
+
+    // `fnTypeWithGeneric` is defined as:
+    //  fnTypeWithGeneric: FnTypeWithGeneric<string>;
+    // and `GenericTypeFn` is defined as:
+    // type FnTypeWithGeneric<T> = (t: T, p: MyProps) => TypeWithGeneric<T>;
+    // In get_signature.ts, we use the `TypeFormatFlags.InTypeAlias` flag which ends up expanding the type
+    // to be a function, and thus this doesn't show up as a single referenced type with no kids. If we ever fixed that,
+    // it would be find to change expectations here to be no children and TypeKind instead of FunctionKind.
+    expect(fn?.children).toBeDefined();
+
+    const t = fn!.children?.find((c) => c.label === 't');
+    expect(t).toBeDefined();
+    expect(t!.id).toBe('def-public.ExampleInterface.fnTypeWithGeneric.$1');
+
+    expect(fn?.type).toBe(TypeKind.FunctionKind);
+    expect(fn?.signature).toBeDefined();
+    expect(linkCount(fn!.signature!)).toBe(2);
+    expect(fn?.children?.length).toBe(2);
+
+    // This will fail! It actually shows up as Uncategorized. It would be some effort to get it to show up as string, which may involve
+    // trying to fix the above issue so it's not expanded.
+    // expect(fn?.children[0]!.type).toBe(TypeKind.StringKind);
+  });
+
+  // Optional code path is different than non-optional properties.
+  it('Optional interface property pointing to generic function type', () => {
+    const exampleInterface = doc.client.find((c) => c.label === 'ExampleInterface');
+    expect(exampleInterface).toBeDefined();
+
+    const fn = exampleInterface?.children?.find(
+      (c) => c.label === 'fnTypeWithGenericThatIsOptional'
+    );
+    expect(fn).toBeDefined();
+
+    // Unlike the above, the type is _not_ expanded inline, so we make sure it has no children, but does link to the property.
+    expect(fn?.children).toBeUndefined();
+    expect(fn?.signature).toBeDefined();
+    expect(linkCount(fn!.signature!)).toBe(1);
   });
 
   it('interfaces with internal tags are not exported', () => {

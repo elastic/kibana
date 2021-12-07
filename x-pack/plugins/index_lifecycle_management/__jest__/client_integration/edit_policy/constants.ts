@@ -105,11 +105,11 @@ export const DELETE_PHASE_POLICY: PolicyFromES = {
   name: POLICY_NAME,
 };
 
-export const getDefaultHotPhasePolicy = (policyName: string): PolicyFromES => ({
+export const getDefaultHotPhasePolicy = (policyName?: string): PolicyFromES => ({
   version: 1,
   modifiedDate: Date.now().toString(),
   policy: {
-    name: policyName,
+    name: policyName ?? POLICY_NAME,
     phases: {
       hot: {
         min_age: '0ms',
@@ -122,7 +122,7 @@ export const getDefaultHotPhasePolicy = (policyName: string): PolicyFromES => ({
       },
     },
   },
-  name: policyName,
+  name: policyName ?? POLICY_NAME,
 });
 
 export const POLICY_WITH_NODE_ATTR_AND_OFF_ALLOCATION: PolicyFromES = {
@@ -181,7 +181,7 @@ export const POLICY_WITH_NODE_ROLE_ALLOCATION: PolicyFromES = {
   name: POLICY_NAME,
 };
 
-export const POLICY_WITH_KNOWN_AND_UNKNOWN_FIELDS = ({
+export const POLICY_WITH_KNOWN_AND_UNKNOWN_FIELDS = {
   version: 1,
   modified_date: Date.now().toString(),
   policy: {
@@ -219,7 +219,7 @@ export const POLICY_WITH_KNOWN_AND_UNKNOWN_FIELDS = ({
     name: POLICY_NAME,
   },
   name: POLICY_NAME,
-} as any) as PolicyFromES;
+} as any as PolicyFromES;
 
 export const getGeneratedPolicies = (): PolicyFromES[] => {
   const policy = {

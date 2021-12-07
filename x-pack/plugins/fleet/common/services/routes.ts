@@ -59,6 +59,10 @@ export const epmRouteService = {
   getRemovePath: (pkgkey: string) => {
     return EPM_API_ROUTES.DELETE_PATTERN.replace('{pkgkey}', pkgkey).replace(/\/$/, ''); // trim trailing slash
   },
+
+  getUpdatePath: (pkgkey: string) => {
+    return EPM_API_ROUTES.INFO_PATTERN.replace('{pkgkey}', pkgkey);
+  },
 };
 
 export const packagePolicyRouteService = {
@@ -80,6 +84,14 @@ export const packagePolicyRouteService = {
 
   getDeletePath: () => {
     return PACKAGE_POLICY_API_ROUTES.DELETE_PATTERN;
+  },
+
+  getUpgradePath: () => {
+    return PACKAGE_POLICY_API_ROUTES.UPGRADE_PATTERN;
+  },
+
+  getDryRunPath: () => {
+    return PACKAGE_POLICY_API_ROUTES.DRYRUN_PATTERN;
   },
 };
 
@@ -154,6 +166,9 @@ export const outputRoutesService = {
   getUpdatePath: (outputId: string) =>
     OUTPUT_API_ROUTES.UPDATE_PATTERN.replace('{outputId}', outputId),
   getListPath: () => OUTPUT_API_ROUTES.LIST_PATTERN,
+  getDeletePath: (outputId: string) =>
+    OUTPUT_API_ROUTES.DELETE_PATTERN.replace('{outputId}', outputId),
+  getCreatePath: () => OUTPUT_API_ROUTES.CREATE_PATTERN,
 };
 
 export const settingsRoutesService = {

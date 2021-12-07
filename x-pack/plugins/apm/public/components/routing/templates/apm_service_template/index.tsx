@@ -18,16 +18,17 @@ import React from 'react';
 import {
   isIosAgentName,
   isJavaAgentName,
+  isJRubyAgent,
   isRumAgentName,
 } from '../../../../../common/agent_name';
-import { enableServiceOverview } from '../../../../../common/ui_settings_keys';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { ApmServiceContextProvider } from '../../../../context/apm_service/apm_service_context';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { useBreadcrumb } from '../../../../context/breadcrumbs/use_breadcrumb';
+import { ServiceAnomalyTimeseriesContextProvider } from '../../../../context/service_anomaly_timeseries/service_anomaly_timeseries_context';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
-import { Correlations } from '../../../app/correlations';
+import { useTimeRange } from '../../../../hooks/use_time_range';
 import { SearchBar } from '../../../shared/search_bar';
 import { ServiceIcons } from '../../../shared/service_icons';
 import { ApmMainTemplate } from '../apm_main_template';
@@ -37,10 +38,12 @@ type Tab = NonNullable<EuiPageHeaderProps['tabs']>[0] & {
   key:
     | 'overview'
     | 'transactions'
+    | 'dependencies'
     | 'errors'
     | 'metrics'
     | 'nodes'
     | 'service-map'
+    | 'logs'
     | 'profiling';
   hidden?: boolean;
 };
@@ -55,7 +58,9 @@ interface Props {
 export function ApmServiceTemplate(props: Props) {
   return (
     <ApmServiceContextProvider>
-      <TemplateWithContext {...props} />
+      <ServiceAnomalyTimeseriesContextProvider>
+        <TemplateWithContext {...props} />
+      </ServiceAnomalyTimeseriesContextProvider>
     </ApmServiceContextProvider>
   );
 }
@@ -69,7 +74,10 @@ function TemplateWithContext({
   const {
     path: { serviceName },
     query,
-  } = useApmParams('/services/:serviceName/*');
+    query: { rangeFrom, rangeTo },
+  } = useApmParams('/services/{serviceName}/*');
+
+  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
   const router = useApmRouter();
 
@@ -77,7 +85,7 @@ function TemplateWithContext({
 
   useBreadcrumb({
     title,
-    href: router.link(`/services/:serviceName/${selectedTab}` as const, {
+    href: router.link(`/services/{serviceName}/${selectedTab}` as const, {
       path: { serviceName },
       query,
     }),
@@ -99,17 +107,17 @@ function TemplateWithContext({
                   </EuiTitle>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <ServiceIcons serviceName={serviceName} />
+                  <ServiceIcons
+                    serviceName={serviceName}
+                    start={start}
+                    end={end}
+                  />
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>
 
             <EuiFlexItem grow={false}>
               <AnalyzeDataButton />
-            </EuiFlexItem>
-
-            <EuiFlexItem grow={false}>
-              <Correlations />
             </EuiFlexItem>
           </EuiFlexGroup>
         ),
@@ -122,16 +130,42 @@ function TemplateWithContext({
   );
 }
 
+export function isMetricsTabHidden({
+  agentName,
+  runtimeName,
+}: {
+  agentName?: string;
+  runtimeName?: string;
+}) {
+  return (
+    !agentName ||
+    isRumAgentName(agentName) ||
+    isJavaAgentName(agentName) ||
+    isIosAgentName(agentName) ||
+    isJRubyAgent(agentName, runtimeName)
+  );
+}
+
+export function isJVMsTabHidden({
+  agentName,
+  runtimeName,
+}: {
+  agentName?: string;
+  runtimeName?: string;
+}) {
+  return !(isJavaAgentName(agentName) || isJRubyAgent(agentName, runtimeName));
+}
+
 function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
-  const { agentName } = useApmServiceContext();
-  const { core, config } = useApmPluginContext();
+  const { agentName, runtimeName } = useApmServiceContext();
+  const { config } = useApmPluginContext();
 
   const router = useApmRouter();
 
   const {
     path: { serviceName },
     query: queryFromUrl,
-  } = useApmParams(`/services/:serviceName/${selectedTab}` as const);
+  } = useApmParams(`/services/{serviceName}/${selectedTab}` as const);
 
   const query = omit(
     queryFromUrl,
@@ -144,18 +178,17 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
   const tabs: Tab[] = [
     {
       key: 'overview',
-      href: router.link('/services/:serviceName/overview', {
+      href: router.link('/services/{serviceName}/overview', {
         path: { serviceName },
         query,
       }),
       label: i18n.translate('xpack.apm.serviceDetails.overviewTabLabel', {
         defaultMessage: 'Overview',
       }),
-      hidden: !core.uiSettings.get(enableServiceOverview),
     },
     {
       key: 'transactions',
-      href: router.link('/services/:serviceName/transactions', {
+      href: router.link('/services/{serviceName}/transactions', {
         path: { serviceName },
         query,
       }),
@@ -164,8 +197,20 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
       }),
     },
     {
+      key: 'dependencies',
+      href: router.link('/services/{serviceName}/dependencies', {
+        path: { serviceName },
+        query,
+      }),
+      label: i18n.translate('xpack.apm.serviceDetails.dependenciesTabLabel', {
+        defaultMessage: 'Dependencies',
+      }),
+      hidden:
+        !agentName || isRumAgentName(agentName) || isIosAgentName(agentName),
+    },
+    {
       key: 'errors',
-      href: router.link('/services/:serviceName/errors', {
+      href: router.link('/services/{serviceName}/errors', {
         path: { serviceName },
         query,
       }),
@@ -175,33 +220,29 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
     },
     {
       key: 'metrics',
-      href: router.link('/services/:serviceName/metrics', {
+      href: router.link('/services/{serviceName}/metrics', {
         path: { serviceName },
         query,
       }),
       label: i18n.translate('xpack.apm.serviceDetails.metricsTabLabel', {
         defaultMessage: 'Metrics',
       }),
-      hidden:
-        !agentName ||
-        isRumAgentName(agentName) ||
-        isJavaAgentName(agentName) ||
-        isIosAgentName(agentName),
+      hidden: isMetricsTabHidden({ agentName, runtimeName }),
     },
     {
       key: 'nodes',
-      href: router.link('/services/:serviceName/nodes', {
+      href: router.link('/services/{serviceName}/nodes', {
         path: { serviceName },
         query,
       }),
       label: i18n.translate('xpack.apm.serviceDetails.nodesTabLabel', {
         defaultMessage: 'JVMs',
       }),
-      hidden: !isJavaAgentName(agentName),
+      hidden: isJVMsTabHidden({ agentName, runtimeName }),
     },
     {
       key: 'service-map',
-      href: router.link('/services/:serviceName/service-map', {
+      href: router.link('/services/{serviceName}/service-map', {
         path: { serviceName },
         query,
       }),
@@ -210,8 +251,20 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
       }),
     },
     {
+      key: 'logs',
+      href: router.link('/services/{serviceName}/logs', {
+        path: { serviceName },
+        query,
+      }),
+      label: i18n.translate('xpack.apm.home.serviceLogsTabLabel', {
+        defaultMessage: 'Logs',
+      }),
+      hidden:
+        !agentName || isRumAgentName(agentName) || isIosAgentName(agentName),
+    },
+    {
       key: 'profiling',
-      href: router.link('/services/:serviceName/profiling', {
+      href: router.link('/services/{serviceName}/profiling', {
         path: {
           serviceName,
         },

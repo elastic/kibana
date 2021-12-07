@@ -15,8 +15,8 @@ import { DefaultLayout } from '../../layouts';
 
 import { AgentPolicyListPage } from './list_page';
 import { AgentPolicyDetailsPage } from './details_page';
-import { CreatePackagePolicyPage } from './create_package_policy_page';
 import { EditPackagePolicyPage } from './edit_package_policy_page';
+import { UpgradePackagePolicyPage } from './upgrade_package_policy_page';
 
 export const AgentPolicyApp: React.FunctionComponent = () => {
   useBreadcrumbs('policies');
@@ -28,8 +28,8 @@ export const AgentPolicyApp: React.FunctionComponent = () => {
         <Route path={FLEET_ROUTING_PATHS.edit_integration}>
           <EditPackagePolicyPage />
         </Route>
-        <Route path={FLEET_ROUTING_PATHS.add_integration_from_policy}>
-          <CreatePackagePolicyPage />
+        <Route path={FLEET_ROUTING_PATHS.upgrade_package_policy}>
+          <UpgradePackagePolicyPage />
         </Route>
         <Route path={FLEET_ROUTING_PATHS.policy_details}>
           <AgentPolicyDetailsPage />

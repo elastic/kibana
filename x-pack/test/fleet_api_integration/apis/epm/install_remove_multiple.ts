@@ -10,6 +10,7 @@ import path from 'path';
 import fs from 'fs';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
+import { setupFleetAndAgents } from '../agents/services';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
@@ -60,16 +61,10 @@ export default function (providerContext: FtrProviderContext) {
     const uninstallingPackagesPromise = pkgs.map((pkg) => uninstallPackage(pkg));
     return Promise.all(uninstallingPackagesPromise);
   };
-  const expectPkgFieldToExist = (fields: any[], fieldName: string, exists: boolean = true) => {
-    const fieldExists = fields.find((field: { name: string }) => field.name === fieldName);
-    if (exists) {
-      expect(fieldExists).not.to.be(undefined);
-    } else {
-      expect(fieldExists).to.be(undefined);
-    }
-  };
+
   describe('installs and uninstalls multiple packages side effects', async () => {
     skipIfNoDockerRegistry(providerContext);
+    setupFleetAndAgents(providerContext);
     before(async () => {
       if (!server.enabled) return;
       await installPackages([pkgKey, experimentalPkgKey, experimental2PkgKey]);
@@ -79,69 +74,17 @@ export default function (providerContext: FtrProviderContext) {
       if (!server.enabled) return;
       await uninstallPackages([pkgKey, experimentalPkgKey]);
     });
-    it('should create index patterns from all installed packages: uploaded, experimental, beta', async () => {
+    it('should create index patterns (without fields)', async () => {
       const resIndexPatternLogs = await kibanaServer.savedObjects.get({
         type: 'index-pattern',
         id: 'logs-*',
       });
-
-      const fieldsLogs = JSON.parse(resIndexPatternLogs.attributes.fields);
-
-      expectPkgFieldToExist(fieldsLogs, 'logs_test_name');
-      expectPkgFieldToExist(fieldsLogs, 'logs_experimental_name');
-      expectPkgFieldToExist(fieldsLogs, 'logs_experimental2_name');
-      expectPkgFieldToExist(fieldsLogs, 'apache.error.uploadtest');
+      expect(resIndexPatternLogs.attributes.fields).to.be(undefined);
       const resIndexPatternMetrics = await kibanaServer.savedObjects.get({
         type: 'index-pattern',
         id: 'metrics-*',
       });
-      const fieldsMetrics = JSON.parse(resIndexPatternMetrics.attributes.fields);
-      expectPkgFieldToExist(fieldsMetrics, 'metrics_test_name');
-      expectPkgFieldToExist(fieldsMetrics, 'metrics_experimental_name');
-      expectPkgFieldToExist(fieldsMetrics, 'metrics_experimental2_name');
-      expectPkgFieldToExist(fieldsMetrics, 'apache.status.uploadtest');
-    });
-    it('should correctly recreate index patterns when a package is uninstalled', async () => {
-      await uninstallPackage(experimental2PkgKey);
-      const resIndexPatternLogs = await kibanaServer.savedObjects.get({
-        type: 'index-pattern',
-        id: 'logs-*',
-      });
-      const fieldsLogs = JSON.parse(resIndexPatternLogs.attributes.fields);
-      expectPkgFieldToExist(fieldsLogs, 'logs_test_name');
-      expectPkgFieldToExist(fieldsLogs, 'logs_experimental_name');
-      expectPkgFieldToExist(fieldsLogs, 'logs_experimental2_name', false);
-      expectPkgFieldToExist(fieldsLogs, 'apache.error.uploadtest');
-      const resIndexPatternMetrics = await kibanaServer.savedObjects.get({
-        type: 'index-pattern',
-        id: 'metrics-*',
-      });
-      const fieldsMetrics = JSON.parse(resIndexPatternMetrics.attributes.fields);
-
-      expectPkgFieldToExist(fieldsMetrics, 'metrics_test_name');
-      expectPkgFieldToExist(fieldsMetrics, 'metrics_experimental_name');
-      expectPkgFieldToExist(fieldsMetrics, 'metrics_experimental2_name', false);
-      expectPkgFieldToExist(fieldsMetrics, 'apache.status.uploadtest');
-    });
-    it('should correctly recreate index patterns when an uploaded package is uninstalled', async () => {
-      await uninstallPackage(uploadPkgKey);
-      const resIndexPatternLogs = await kibanaServer.savedObjects.get({
-        type: 'index-pattern',
-        id: 'logs-*',
-      });
-      const fieldsLogs = JSON.parse(resIndexPatternLogs.attributes.fields);
-      expectPkgFieldToExist(fieldsLogs, 'logs_test_name');
-      expectPkgFieldToExist(fieldsLogs, 'logs_experimental_name');
-      expectPkgFieldToExist(fieldsLogs, 'apache.error.uploadtest', false);
-      const resIndexPatternMetrics = await kibanaServer.savedObjects.get({
-        type: 'index-pattern',
-        id: 'metrics-*',
-      });
-      const fieldsMetrics = JSON.parse(resIndexPatternMetrics.attributes.fields);
-
-      expectPkgFieldToExist(fieldsMetrics, 'metrics_test_name');
-      expectPkgFieldToExist(fieldsMetrics, 'metrics_experimental_name');
-      expectPkgFieldToExist(fieldsMetrics, 'apache.status.uploadtest', false);
+      expect(resIndexPatternMetrics.attributes.fields).to.be(undefined);
     });
   });
 }

@@ -37,7 +37,7 @@ describe('fetchStackProductUsage', () => {
         },
       },
     }));
-    const callCluster = ({ search: searchMock } as unknown) as ElasticsearchClient;
+    const callCluster = { search: searchMock } as unknown as ElasticsearchClient;
     await fetchStackProductUsage(
       config,
       callCluster,
@@ -63,7 +63,7 @@ describe('fetchStackProductUsage', () => {
   });
 
   it('should get the usage data', async () => {
-    const callCluster = ({
+    const callCluster = {
       search: jest.fn().mockImplementation(() => ({
         body: {
           aggregations: {
@@ -84,7 +84,7 @@ describe('fetchStackProductUsage', () => {
           },
         },
       })),
-    } as unknown) as ElasticsearchClient;
+    } as unknown as ElasticsearchClient;
 
     const result = await fetchStackProductUsage(
       config,
@@ -103,7 +103,7 @@ describe('fetchStackProductUsage', () => {
   });
 
   it('should handle both collection types', async () => {
-    const callCluster = ({
+    const callCluster = {
       search: jest.fn().mockImplementation(() => ({
         body: {
           aggregations: {
@@ -127,7 +127,7 @@ describe('fetchStackProductUsage', () => {
           },
         },
       })),
-    } as unknown) as ElasticsearchClient;
+    } as unknown as ElasticsearchClient;
 
     const result = await fetchStackProductUsage(
       config,

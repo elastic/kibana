@@ -44,6 +44,7 @@ import {
   EventFiltersServiceGetListOptions,
 } from '../types';
 import {
+  asStaleResourceState,
   createFailedResourceState,
   createLoadedResourceState,
   createLoadingResourceState,
@@ -203,9 +204,9 @@ const checkIfEventFilterDataExist: MiddlewareActionHandler = async (
 ) => {
   dispatch({
     type: 'eventFiltersListPageDataExistsChanged',
-    // Ignore will be fixed with when AsyncResourceState is refactored (#830)
-    // @ts-ignore
-    payload: createLoadingResourceState(getListPageDataExistsState(getState())),
+    payload: createLoadingResourceState(
+      asStaleResourceState(getListPageDataExistsState(getState()))
+    ),
   });
 
   try {
@@ -232,10 +233,8 @@ const refreshListDataIfNeeded: MiddlewareActionHandler = async (store, eventFilt
     dispatch({
       type: 'eventFiltersListPageDataChanged',
       payload: {
-        // Ignore will be fixed with when AsyncResourceState is refactored (#830)
-        // @ts-ignore
         type: 'LoadingResourceState',
-        previousState: getCurrentListPageDataState(state),
+        previousState: asStaleResourceState(getCurrentListPageDataState(state)),
       },
     });
 
@@ -300,9 +299,7 @@ const eventFilterDeleteEntry: MiddlewareActionHandler = async (
 
   dispatch({
     type: 'eventFilterDeleteStatusChanged',
-    // Ignore will be fixed with when AsyncResourceState is refactored (#830)
-    // @ts-ignore
-    payload: createLoadingResourceState(getDeletionState(state).status),
+    payload: createLoadingResourceState(asStaleResourceState(getDeletionState(state).status)),
   });
 
   try {
@@ -349,6 +346,5 @@ export const createEventFiltersPageMiddleware = (
   };
 };
 
-export const eventFiltersPageMiddlewareFactory: ImmutableMiddlewareFactory<EventFiltersListPageState> = (
-  coreStart
-) => createEventFiltersPageMiddleware(new EventFiltersHttpService(coreStart.http));
+export const eventFiltersPageMiddlewareFactory: ImmutableMiddlewareFactory<EventFiltersListPageState> =
+  (coreStart) => createEventFiltersPageMiddleware(new EventFiltersHttpService(coreStart.http));

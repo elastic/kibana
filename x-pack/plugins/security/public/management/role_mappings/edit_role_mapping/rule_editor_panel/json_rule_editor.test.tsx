@@ -12,25 +12,27 @@ import 'brace/mode/json';
 // warnings in the console which adds unnecessary noise to the test output.
 import '@kbn/test/target_node/jest/utils/stub_web_worker';
 
-import { EuiCodeEditor } from '@elastic/eui';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 
-import { mountWithIntl } from '@kbn/test/jest';
-import { coreMock } from 'src/core/public/mocks';
-import { KibanaContextProvider } from 'src/plugins/kibana_react/public';
+import type { monaco } from '@kbn/monaco';
+import { shallowWithIntl } from '@kbn/test/jest';
+import { CodeEditorField } from 'src/plugins/kibana_react/public';
 
 import { AllRule, AnyRule, ExceptAllRule, ExceptAnyRule, FieldRule } from '../../model';
 import { JSONRuleEditor } from './json_rule_editor';
 
+jest.mock('../../../../../../../../src/plugins/kibana_react/public', () => ({
+  ...jest.requireActual('../../../../../../../../src/plugins/kibana_react/public'),
+  useKibana: jest.fn().mockReturnValue({
+    services: { docLinks: { links: { apis: { createRoleMapping: 'createRoleMappingLink' } } } },
+  }),
+}));
+
 describe('JSONRuleEditor', () => {
+  const mockChangeEvent = {} as monaco.editor.IModelContentChangedEvent;
   const renderView = (props: React.ComponentProps<typeof JSONRuleEditor>) => {
-    const coreStart = coreMock.createStart();
-    return mountWithIntl(
-      <KibanaContextProvider services={coreStart}>
-        <JSONRuleEditor {...props} />
-      </KibanaContextProvider>
-    );
+    return shallowWithIntl(<JSONRuleEditor {...props} />);
   };
 
   it('renders an empty rule set', () => {
@@ -40,7 +42,8 @@ describe('JSONRuleEditor', () => {
     expect(props.onChange).not.toHaveBeenCalled();
     expect(props.onValidityChange).not.toHaveBeenCalled();
 
-    expect(wrapper.find(EuiCodeEditor).props().value).toMatchInlineSnapshot(`"{}"`);
+    wrapper.update();
+    expect(wrapper.find(CodeEditorField).props().value).toMatchInlineSnapshot(`"{}"`);
   });
 
   it('renders a rule set', () => {
@@ -58,7 +61,7 @@ describe('JSONRuleEditor', () => {
     };
     const wrapper = renderView(props);
 
-    const { value } = wrapper.find(EuiCodeEditor).props();
+    const { value } = wrapper.find(CodeEditorField).props();
     expect(JSON.parse(value as string)).toEqual({
       all: [
         {
@@ -89,7 +92,10 @@ describe('JSONRuleEditor', () => {
 
     const allRule = JSON.stringify(new AllRule().toRaw());
     act(() => {
-      wrapper.find(EuiCodeEditor).props().onChange!(allRule + ', this makes invalid JSON');
+      wrapper.find(CodeEditorField).props().onChange!(
+        allRule + ', this makes invalid JSON',
+        mockChangeEvent
+      );
     });
 
     expect(props.onValidityChange).toHaveBeenCalledTimes(1);
@@ -112,7 +118,7 @@ describe('JSONRuleEditor', () => {
     });
 
     act(() => {
-      wrapper.find(EuiCodeEditor).props().onChange!(invalidRule);
+      wrapper.find(CodeEditorField).props().onChange!(invalidRule, mockChangeEvent);
     });
 
     expect(props.onValidityChange).toHaveBeenCalledTimes(1);
@@ -126,7 +132,10 @@ describe('JSONRuleEditor', () => {
 
     const allRule = JSON.stringify(new AllRule().toRaw());
     act(() => {
-      wrapper.find(EuiCodeEditor).props().onChange!(allRule + ', this makes invalid JSON');
+      wrapper.find(CodeEditorField).props().onChange!(
+        allRule + ', this makes invalid JSON',
+        mockChangeEvent
+      );
     });
 
     expect(props.onValidityChange).toHaveBeenCalledTimes(1);
@@ -136,7 +145,7 @@ describe('JSONRuleEditor', () => {
     props.onValidityChange.mockReset();
 
     act(() => {
-      wrapper.find(EuiCodeEditor).props().onChange!(allRule);
+      wrapper.find(CodeEditorField).props().onChange!(allRule, mockChangeEvent);
     });
 
     expect(props.onValidityChange).toHaveBeenCalledTimes(1);

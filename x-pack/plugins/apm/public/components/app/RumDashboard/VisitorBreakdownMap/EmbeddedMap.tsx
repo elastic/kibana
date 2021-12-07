@@ -13,7 +13,7 @@ import {
   MapEmbeddable,
   MapEmbeddableInput,
 } from '../../../../../../maps/public';
-import { MAP_SAVED_OBJECT_TYPE } from '../../../../../../maps/common/constants';
+import { MAP_SAVED_OBJECT_TYPE } from '../../../../../../maps/common';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import {
   ErrorEmbeddable,
@@ -21,7 +21,7 @@ import {
   isErrorEmbeddable,
 } from '../../../../../../../../src/plugins/embeddable/public';
 import { useLayerList } from './useLayerList';
-import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
+import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import type { RenderTooltipContentParams } from '../../../../../../maps/public';
 import { MapToolTip } from './MapToolTip';
@@ -50,7 +50,7 @@ interface KibanaDeps {
   embeddable: EmbeddableStart;
 }
 export function EmbeddedMapComponent() {
-  const { urlParams } = useUrlParams();
+  const { urlParams } = useLegacyUrlParams();
   const apmPluginContext = useApmPluginContext();
 
   const { start, end, serviceName } = urlParams;
@@ -63,9 +63,8 @@ export function EmbeddedMapComponent() {
     MapEmbeddable | ErrorEmbeddable | undefined
   >();
 
-  const embeddableRoot: React.RefObject<HTMLDivElement> = useRef<HTMLDivElement>(
-    null
-  );
+  const embeddableRoot: React.RefObject<HTMLDivElement> =
+    useRef<HTMLDivElement>(null);
 
   const {
     services: { embeddable: embeddablePlugin },

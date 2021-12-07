@@ -6,7 +6,7 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useEffect, useMemo, useState } from 'react';
 
 import { Direction } from '../../common/search_strategy';
@@ -26,9 +26,10 @@ const ActionAgentsStatusComponent: React.FC<ActionAgentsStatusProps> = ({
   agentIds,
 }) => {
   const [isLive, setIsLive] = useState(true);
-  const expired = useMemo(() => (!expirationDate ? false : new Date(expirationDate) < new Date()), [
-    expirationDate,
-  ]);
+  const expired = useMemo(
+    () => (!expirationDate ? false : new Date(expirationDate) < new Date()),
+    [expirationDate]
+  );
   const {
     // @ts-expect-error update types
     data: { aggregations },

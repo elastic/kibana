@@ -19,6 +19,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'keyword',
     _meta: { description: 'Default value of the setting was changed.' },
   },
+  'securitySolution:defaultThreatIndex': {
+    type: 'keyword',
+    _meta: { description: 'Default value of the setting was changed.' },
+  },
   'securitySolution:newsFeedUrl': {
     type: 'keyword',
     _meta: { description: 'Default value of the setting was changed.' },
@@ -60,12 +64,12 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'text',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'visualization:regionmap:showWarnings': {
+  'visualization:useLegacyTimeAxis': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'visualization:dimmingOpacity': {
-    type: 'float',
+  'visualization:regionmap:showWarnings': {
+    type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
   'visualization:tileMap:maxPrecision': {
@@ -100,20 +104,8 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'keyword',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'timelion:default_rows': {
-    type: 'long',
-    _meta: { description: 'Non-default value of setting.' },
-  },
-  'timelion:default_columns': {
-    type: 'long',
-    _meta: { description: 'Non-default value of setting.' },
-  },
   'timelion:es.default_index': {
     type: 'keyword',
-    _meta: { description: 'Non-default value of setting.' },
-  },
-  'timelion:showTutorial': {
-    type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
   'securitySolution:timeDefaults': {
@@ -138,10 +130,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
   },
   'courier:maxConcurrentShardRequests': {
     type: 'long',
-    _meta: { description: 'Non-default value of setting.' },
-  },
-  'courier:batchSearches': {
-    type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
   'courier:setRequestPreference': {
@@ -292,6 +280,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'long',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'metrics:allowStringIndices': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
   'query:allowLeadingWildcards': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
@@ -400,11 +392,11 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'visualization:visualize:legacyChartsLibrary': {
+  'visualization:visualize:legacyPieChartsLibrary': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'visualization:visualize:legacyPieChartsLibrary': {
+  'visualization:visualize:legacyHeatmapChartsLibrary': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
@@ -424,15 +416,15 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'text',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'apm:enableSignificantTerms': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
-  'apm:enableServiceOverview': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
   'observability:enableInspectEsQueries': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'observability:maxSuggestions': {
+    type: 'integer',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'observability:enableComparisonByDefault': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
@@ -456,6 +448,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'labs:canvas:byValueEmbeddable': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
   'labs:canvas:useDataService': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
@@ -465,6 +461,14 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     _meta: { description: 'Non-default value of setting.' },
   },
   'labs:dashboard:deferBelowFold': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'labs:dashboard:dashboardControls': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'discover:showFieldStatistics': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },

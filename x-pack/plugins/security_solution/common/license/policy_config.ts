@@ -10,6 +10,7 @@ import { isAtLeast } from './license';
 import { PolicyConfig } from '../endpoint/types';
 import {
   DefaultPolicyNotificationMessage,
+  DefaultPolicyRuleNotificationMessage,
   policyFactoryWithoutPaidFeatures,
   policyFactoryWithSupportedFeatures,
 } from '../endpoint/models/policy_config';
@@ -86,7 +87,9 @@ function isEndpointMemoryPolicyValidForLicense(policy: PolicyConfig, license: IL
     const defaults = policyFactoryWithSupportedFeatures();
     // only platinum or higher may enable memory protection
     if (
-      policy.windows.memory_protection.supported !== defaults.windows.memory_protection.supported
+      policy.windows.memory_protection.supported !== defaults.windows.memory_protection.supported ||
+      policy.mac.memory_protection.supported !== defaults.mac.memory_protection.supported ||
+      policy.linux.memory_protection.supported !== defaults.linux.memory_protection.supported
     ) {
       return false;
     }
@@ -100,25 +103,39 @@ function isEndpointMemoryPolicyValidForLicense(policy: PolicyConfig, license: IL
   // only platinum or higher may enable memory_protection
   const defaults = policyFactoryWithoutPaidFeatures();
 
-  if (policy.windows.memory_protection.mode !== defaults.windows.memory_protection.mode) {
+  if (
+    policy.windows.memory_protection.mode !== defaults.windows.memory_protection.mode ||
+    policy.mac.memory_protection.mode !== defaults.mac.memory_protection.mode ||
+    policy.linux.memory_protection.mode !== defaults.linux.memory_protection.mode
+  ) {
     return false;
   }
 
   if (
     policy.windows.popup.memory_protection.enabled !==
-    defaults.windows.popup.memory_protection.enabled
+      defaults.windows.popup.memory_protection.enabled ||
+    policy.mac.popup.memory_protection.enabled !== defaults.mac.popup.memory_protection.enabled ||
+    policy.linux.popup.memory_protection.enabled !== defaults.linux.popup.memory_protection.enabled
   ) {
     return false;
   }
 
   if (
-    policy.windows.popup.memory_protection.message !== '' &&
-    policy.windows.popup.memory_protection.message !== DefaultPolicyNotificationMessage
+    (policy.windows.popup.memory_protection.message !== '' &&
+      policy.windows.popup.memory_protection.message !== DefaultPolicyRuleNotificationMessage) ||
+    (policy.mac.popup.memory_protection.message !== '' &&
+      policy.mac.popup.memory_protection.message !== DefaultPolicyRuleNotificationMessage) ||
+    (policy.linux.popup.memory_protection.message !== '' &&
+      policy.linux.popup.memory_protection.message !== DefaultPolicyRuleNotificationMessage)
   ) {
     return false;
   }
 
-  if (policy.windows.memory_protection.supported !== defaults.windows.memory_protection.supported) {
+  if (
+    policy.windows.memory_protection.supported !== defaults.windows.memory_protection.supported ||
+    policy.mac.memory_protection.supported !== defaults.mac.memory_protection.supported ||
+    policy.linux.memory_protection.supported !== defaults.linux.memory_protection.supported
+  ) {
     return false;
   }
   return true;
@@ -129,7 +146,9 @@ function isEndpointBehaviorPolicyValidForLicense(policy: PolicyConfig, license: 
     // only platinum or higher may enable behavior protection
     if (
       policy.windows.behavior_protection.supported !==
-      defaults.windows.behavior_protection.supported
+        defaults.windows.behavior_protection.supported ||
+      policy.mac.behavior_protection.supported !== defaults.mac.behavior_protection.supported ||
+      policy.linux.behavior_protection.supported !== defaults.linux.behavior_protection.supported
     ) {
       return false;
     }
@@ -139,29 +158,44 @@ function isEndpointBehaviorPolicyValidForLicense(policy: PolicyConfig, license: 
   const defaults = policyFactoryWithoutPaidFeatures();
 
   // only platinum or higher may enable behavior_protection
-  if (policy.windows.behavior_protection.mode !== defaults.windows.behavior_protection.mode) {
+  if (
+    policy.windows.behavior_protection.mode !== defaults.windows.behavior_protection.mode ||
+    policy.mac.behavior_protection.mode !== defaults.mac.behavior_protection.mode ||
+    policy.linux.behavior_protection.mode !== defaults.linux.behavior_protection.mode
+  ) {
     return false;
   }
 
   // only platinum or higher may enable behavior_protection notification
   if (
     policy.windows.popup.behavior_protection.enabled !==
-    defaults.windows.popup.behavior_protection.enabled
+      defaults.windows.popup.behavior_protection.enabled ||
+    policy.mac.popup.behavior_protection.enabled !==
+      defaults.mac.popup.behavior_protection.enabled ||
+    policy.linux.popup.behavior_protection.enabled !==
+      defaults.linux.popup.behavior_protection.enabled
   ) {
     return false;
   }
 
   // Only Platinum or higher may change the behavior_protection message (which can be blank or what Endpoint defaults)
   if (
-    policy.windows.popup.behavior_protection.message !== '' &&
-    policy.windows.popup.behavior_protection.message !== DefaultPolicyNotificationMessage
+    (policy.windows.popup.behavior_protection.message !== '' &&
+      policy.windows.popup.behavior_protection.message !== DefaultPolicyRuleNotificationMessage) ||
+    (policy.mac.popup.behavior_protection.message !== '' &&
+      policy.mac.popup.behavior_protection.message !== DefaultPolicyRuleNotificationMessage) ||
+    (policy.linux.popup.behavior_protection.message !== '' &&
+      policy.linux.popup.behavior_protection.message !== DefaultPolicyRuleNotificationMessage)
   ) {
     return false;
   }
 
   // only platinum or higher may enable behavior_protection
   if (
-    policy.windows.behavior_protection.supported !== defaults.windows.behavior_protection.supported
+    policy.windows.behavior_protection.supported !==
+      defaults.windows.behavior_protection.supported ||
+    policy.mac.behavior_protection.supported !== defaults.mac.behavior_protection.supported ||
+    policy.linux.behavior_protection.supported !== defaults.linux.behavior_protection.supported
   ) {
     return false;
   }

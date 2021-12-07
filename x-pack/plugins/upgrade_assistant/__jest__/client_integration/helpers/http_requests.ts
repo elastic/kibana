@@ -6,20 +6,36 @@
  */
 
 import sinon, { SinonFakeServer } from 'sinon';
+
 import { API_BASE_PATH } from '../../../common/constants';
-import { UpgradeAssistantStatus } from '../../../common/types';
-import { ResponseError } from '../../../public/application/lib/api';
+import {
+  CloudBackupStatus,
+  ESUpgradeStatus,
+  DeprecationLoggingStatus,
+  ResponseError,
+} from '../../../common/types';
 
 // Register helpers to mock HTTP Requests
 const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
-  const setLoadEsDeprecationsResponse = (
-    response?: UpgradeAssistantStatus,
+  const setLoadCloudBackupStatusResponse = (
+    response?: CloudBackupStatus,
     error?: ResponseError
   ) => {
     const status = error ? error.statusCode || 400 : 200;
     const body = error ? error : response;
 
-    server.respondWith('GET', `${API_BASE_PATH}/status`, [
+    server.respondWith('GET', `${API_BASE_PATH}/cloud_backup_status`, [
+      status,
+      { 'Content-Type': 'application/json' },
+      JSON.stringify(body),
+    ]);
+  };
+
+  const setLoadEsDeprecationsResponse = (response?: ESUpgradeStatus, error?: ResponseError) => {
+    const status = error ? error.statusCode || 400 : 200;
+    const body = error ? error : response;
+
+    server.respondWith('GET', `${API_BASE_PATH}/es_deprecations`, [
       status,
       { 'Content-Type': 'application/json' },
       JSON.stringify(body),
@@ -27,7 +43,7 @@ const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
   };
 
   const setLoadDeprecationLoggingResponse = (
-    response?: { isEnabled: boolean },
+    response?: DeprecationLoggingStatus,
     error?: ResponseError
   ) => {
     const status = error ? error.statusCode || 400 : 200;
@@ -40,8 +56,32 @@ const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
     ]);
   };
 
+  const setLoadDeprecationLogsCountResponse = (
+    response?: { count: number },
+    error?: ResponseError
+  ) => {
+    const status = error ? error.statusCode || 400 : 200;
+    const body = error ? error : response;
+
+    server.respondWith('GET', `${API_BASE_PATH}/deprecation_logging/count`, [
+      status,
+      { 'Content-Type': 'application/json' },
+      JSON.stringify(body),
+    ]);
+  };
+
+  const setDeleteLogsCacheResponse = (response?: string, error?: ResponseError) => {
+    const status = error ? error.statusCode || 400 : 200;
+    const body = error ? error : response;
+    server.respondWith('DELETE', `${API_BASE_PATH}/deprecation_logging/cache`, [
+      status,
+      { 'Content-Type': 'application/json' },
+      JSON.stringify(body),
+    ]);
+  };
+
   const setUpdateDeprecationLoggingResponse = (
-    response?: { isEnabled: boolean },
+    response?: DeprecationLoggingStatus,
     error?: ResponseError
   ) => {
     const status = error ? error.statusCode || 400 : 200;
@@ -54,11 +94,13 @@ const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
     ]);
   };
 
-  const setUpdateIndexSettingsResponse = (response?: object) => {
+  const setUpdateIndexSettingsResponse = (response?: object, error?: ResponseError) => {
+    const status = error ? error.statusCode || 400 : 200;
+    const body = error ? error : response;
     server.respondWith('POST', `${API_BASE_PATH}/:indexName/index_settings`, [
-      200,
+      status,
       { 'Content-Type': 'application/json' },
-      JSON.stringify(response),
+      JSON.stringify(body),
     ]);
   };
 
@@ -67,6 +109,39 @@ const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
     const body = error ? error : response;
 
     server.respondWith('POST', `${API_BASE_PATH}/ml_snapshots`, [
+      status,
+      { 'Content-Type': 'application/json' },
+      JSON.stringify(body),
+    ]);
+  };
+
+  const setUpgradeMlSnapshotStatusResponse = (response?: object, error?: ResponseError) => {
+    const status = error ? error.statusCode || 400 : 200;
+    const body = error ? error : response;
+
+    server.respondWith('GET', `${API_BASE_PATH}/ml_snapshots/:jobId/:snapshotId`, [
+      status,
+      { 'Content-Type': 'application/json' },
+      JSON.stringify(body),
+    ]);
+  };
+
+  const setReindexStatusResponse = (response?: object, error?: ResponseError) => {
+    const status = error ? error.statusCode || 400 : 200;
+    const body = error ? error : response;
+
+    server.respondWith('GET', `${API_BASE_PATH}/reindex/:indexName`, [
+      status,
+      { 'Content-Type': 'application/json' },
+      JSON.stringify(body),
+    ]);
+  };
+
+  const setStartReindexingResponse = (response?: object, error?: ResponseError) => {
+    const status = error ? error.statusCode || 400 : 200;
+    const body = error ? error : response;
+
+    server.respondWith('POST', `${API_BASE_PATH}/reindex/:indexName`, [
       status,
       { 'Content-Type': 'application/json' },
       JSON.stringify(body),
@@ -84,13 +159,55 @@ const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
     ]);
   };
 
+  const setLoadSystemIndicesMigrationStatus = (response?: object, error?: ResponseError) => {
+    const status = error ? error.statusCode || 400 : 200;
+    const body = error ? error : response;
+
+    server.respondWith('GET', `${API_BASE_PATH}/system_indices_migration`, [
+      status,
+      { 'Content-Type': 'application/json' },
+      JSON.stringify(body),
+    ]);
+  };
+
+  const setLoadMlUpgradeModeResponse = (response?: object, error?: ResponseError) => {
+    const status = error ? error.statusCode || 400 : 200;
+    const body = error ? error : response;
+
+    server.respondWith('GET', `${API_BASE_PATH}/ml_upgrade_mode`, [
+      status,
+      { 'Content-Type': 'application/json' },
+      JSON.stringify(body),
+    ]);
+  };
+
+  const setSystemIndicesMigrationResponse = (response?: object, error?: ResponseError) => {
+    const status = error ? error.statusCode || 400 : 200;
+    const body = error ? error : response;
+
+    server.respondWith('POST', `${API_BASE_PATH}/system_indices_migration`, [
+      status,
+      { 'Content-Type': 'application/json' },
+      JSON.stringify(body),
+    ]);
+  };
+
   return {
+    setLoadCloudBackupStatusResponse,
     setLoadEsDeprecationsResponse,
     setLoadDeprecationLoggingResponse,
     setUpdateDeprecationLoggingResponse,
     setUpdateIndexSettingsResponse,
     setUpgradeMlSnapshotResponse,
     setDeleteMlSnapshotResponse,
+    setUpgradeMlSnapshotStatusResponse,
+    setLoadDeprecationLogsCountResponse,
+    setLoadSystemIndicesMigrationStatus,
+    setSystemIndicesMigrationResponse,
+    setDeleteLogsCacheResponse,
+    setStartReindexingResponse,
+    setReindexStatusResponse,
+    setLoadMlUpgradeModeResponse,
   };
 };
 
@@ -105,8 +222,19 @@ export const init = () => {
 
   const httpRequestsMockHelpers = registerHttpRequestMockHelpers(server);
 
+  const setServerAsync = (isAsync: boolean, timeout: number = 200) => {
+    if (isAsync) {
+      server.autoRespond = true;
+      server.autoRespondAfter = 1000;
+      server.respondImmediately = false;
+    } else {
+      server.respondImmediately = true;
+    }
+  };
+
   return {
     server,
+    setServerAsync,
     httpRequestsMockHelpers,
   };
 };

@@ -37,7 +37,8 @@ export const useNavigateToAppEventHandler = <S = unknown>(
   options?: NavigateToAppHandlerOptions<S>
 ): EventHandlerCallback => {
   const { services } = useKibana();
-  const { path, state, onClick, deepLinkId } = options || {};
+  const { path, state, onClick, deepLinkId, openInNewTab } = options || {};
+
   return useCallback(
     (ev) => {
       try {
@@ -70,8 +71,8 @@ export const useNavigateToAppEventHandler = <S = unknown>(
       }
 
       ev.preventDefault();
-      services.application.navigateToApp(appId, { deepLinkId, path, state });
+      services.application.navigateToApp(appId, { deepLinkId, path, state, openInNewTab });
     },
-    [appId, deepLinkId, onClick, path, services.application, state]
+    [appId, deepLinkId, onClick, path, services.application, state, openInNewTab]
   );
 };

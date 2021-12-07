@@ -13,6 +13,7 @@ import { getClustersStats } from './get_clusters_stats';
 import { flagSupportedClusters } from './flag_supported_clusters';
 import { getMlJobsForCluster } from '../elasticsearch';
 import { getKibanasForClusters } from '../kibana';
+import { getEnterpriseSearchForClusters } from '../enterprise_search';
 import { getLogstashForClusters } from '../logstash';
 import { getLogstashPipelineIds } from '../logstash/get_pipeline_ids';
 import { getBeatsForClusters } from '../beats';
@@ -26,6 +27,7 @@ import {
   CODE_PATH_LOGSTASH,
   CODE_PATH_BEATS,
   CODE_PATH_APM,
+  CODE_PATH_ENTERPRISE_SEARCH,
 } from '../../../common/constants';
 
 import { getApmsForClusters } from '../apm/get_apms_for_clusters';
@@ -35,6 +37,7 @@ import { getStandaloneClusterDefinition, hasStandaloneClusters } from '../standa
 import { getLogTypes } from '../logs';
 import { isInCodePath } from './is_in_code_path';
 import { LegacyRequest, Cluster } from '../../types';
+import { RulesByType } from '../../../common/types/alerts';
 
 /**
  * Get all clusters or the cluster associated with {@code clusterUuid} when it is defined.
@@ -55,6 +58,7 @@ export async function getClustersFromRequest(
     lsIndexPattern,
     beatsIndexPattern,
     apmIndexPattern,
+    enterpriseSearchIndexPattern,
     filebeatIndexPattern,
   } = indexPatterns;
 
@@ -71,7 +75,12 @@ export async function getClustersFromRequest(
   }
 
   if (!clusterUuid && !isStandaloneCluster) {
-    const indexPatternsToCheckForNonClusters = [lsIndexPattern, beatsIndexPattern, apmIndexPattern];
+    const indexPatternsToCheckForNonClusters = [
+      lsIndexPattern,
+      beatsIndexPattern,
+      apmIndexPattern,
+      enterpriseSearchIndexPattern,
+    ];
 
     if (await hasStandaloneClusters(req, indexPatternsToCheckForNonClusters)) {
       clusters.push(getStandaloneClusterDefinition());
@@ -142,21 +151,16 @@ export async function getClustersFromRequest(
         } else {
           try {
             cluster.alerts = {
-              list: Object.keys(alertStatus).reduce((accum, alertName) => {
-                const value = alertStatus[alertName];
-                if (value.states && value.states.length) {
-                  Reflect.set(accum, alertName, {
-                    ...value,
-                    states: value.states.filter(
-                      (state) =>
-                        state.state.cluster.clusterUuid ===
-                        get(cluster, 'elasticsearch.cluster.id', cluster.cluster_uuid)
-                    ),
-                  });
-                } else {
-                  Reflect.set(accum, alertName, value);
-                }
-                return accum;
+              list: Object.keys(alertStatus).reduce<RulesByType>((acc, ruleTypeName) => {
+                acc[ruleTypeName] = alertStatus[ruleTypeName].map((rule) => ({
+                  ...rule,
+                  states: rule.states.filter(
+                    (state) =>
+                      state.state.cluster.clusterUuid ===
+                      get(cluster, 'elasticsearch.cluster.id', cluster.cluster_uuid)
+                  ),
+                }));
+                return acc;
               }, {}),
               alertsMeta: {
                 enabled: true,
@@ -177,7 +181,6 @@ export async function getClustersFromRequest(
       }
     }
   }
-
   // add kibana data
   const kibanas =
     isInCodePath(codePaths, [CODE_PATH_KIBANA]) && !isStandaloneCluster
@@ -195,7 +198,7 @@ export async function getClustersFromRequest(
   // add logstash data
   if (isInCodePath(codePaths, [CODE_PATH_LOGSTASH])) {
     const logstashes = await getLogstashForClusters(req, lsIndexPattern, clusters);
-    const pipelines = await getLogstashPipelineIds(req, lsIndexPattern, { clusterUuid }, 1);
+    const pipelines = await getLogstashPipelineIds({ req, lsIndexPattern, clusterUuid, size: 1 });
     logstashes.forEach((logstash) => {
       const clusterIndex = clusters.findIndex(
         (cluster) =>
@@ -235,6 +238,22 @@ export async function getClustersFromRequest(
       Reflect.set(clusters[clusterIndex], 'apm', {
         ...stats,
         config: apmConfig,
+      });
+    }
+  });
+
+  // add Enterprise Search data
+  const enterpriseSearchByCluster = isInCodePath(codePaths, [CODE_PATH_ENTERPRISE_SEARCH])
+    ? await getEnterpriseSearchForClusters(req, enterpriseSearchIndexPattern, clusters)
+    : [];
+  enterpriseSearchByCluster.forEach((entSearch) => {
+    const clusterIndex = clusters.findIndex(
+      (cluster) =>
+        get(cluster, 'elasticsearch.cluster.id', cluster.cluster_uuid) === entSearch.clusterUuid
+    );
+    if (clusterIndex >= 0) {
+      Reflect.set(clusters[clusterIndex], 'enterpriseSearch', {
+        ...entSearch,
       });
     }
   });

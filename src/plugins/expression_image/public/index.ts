@@ -14,4 +14,4 @@ export function plugin() {
   return new ExpressionImagePlugin();
 }
 
-export * from './expression_renderers';
+export { imageRendererFactory, getImageRenderer } from './expression_renderers';

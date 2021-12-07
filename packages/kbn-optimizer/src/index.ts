@@ -9,7 +9,9 @@
 export { OptimizerConfig } from './optimizer';
 export * from './run_optimizer';
 export * from './log_optimizer_state';
+export * from './log_optimizer_progress';
 export * from './node';
 export * from './limits';
 export * from './cli';
 export * from './report_optimizer_timings';
+export * from './babel_runtime_helpers';

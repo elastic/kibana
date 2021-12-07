@@ -20,8 +20,6 @@ import { AuthenticatedUser } from '../../security/common/model';
 import { securityMock } from '../../security/server/mocks';
 import { PluginStartContract as ActionsStartContract } from '../../actions/server';
 import { actionsMock, actionsAuthorizationMock } from '../../actions/server/mocks';
-import { LegacyAuditLogger } from '../../security/server';
-import { ALERTS_FEATURE_ID } from '../common';
 import { eventLogMock } from '../../event_log/server/mocks';
 import { alertingAuthorizationMock } from './authorization/alerting_authorization.mock';
 import { alertingAuthorizationClientFactoryMock } from './alerting_authorization_client_factory.mock';
@@ -30,7 +28,6 @@ import { AlertingAuthorizationClientFactory } from './alerting_authorization_cli
 
 jest.mock('./rules_client');
 jest.mock('./authorization/alerting_authorization');
-jest.mock('./authorization/audit_logger');
 
 const savedObjectsClient = savedObjectsClientMock.create();
 const savedObjectsService = savedObjectsServiceMock.createInternalStartContract();
@@ -51,10 +48,11 @@ const rulesClientFactoryParams: jest.Mocked<RulesClientFactoryOpts> = {
   actions: actionsMock.createStart(),
   eventLog: eventLogMock.createStart(),
   kibanaVersion: '7.10.0',
-  authorization: (alertingAuthorizationClientFactory as unknown) as AlertingAuthorizationClientFactory,
+  authorization:
+    alertingAuthorizationClientFactory as unknown as AlertingAuthorizationClientFactory,
 };
 
-const fakeRequest = ({
+const fakeRequest = {
   app: {},
   headers: {},
   getBasePath: () => '',
@@ -69,16 +67,16 @@ const fakeRequest = ({
     },
   },
   getSavedObjectsClient: () => savedObjectsClient,
-} as unknown) as Request;
+} as unknown as Request;
 
 const actionsAuthorization = actionsAuthorizationMock.create();
 
 beforeEach(() => {
   jest.resetAllMocks();
   rulesClientFactoryParams.actions = actionsMock.createStart();
-  (rulesClientFactoryParams.actions as jest.Mocked<ActionsStartContract>).getActionsAuthorizationWithRequest.mockReturnValue(
-    actionsAuthorization
-  );
+  (
+    rulesClientFactoryParams.actions as jest.Mocked<ActionsStartContract>
+  ).getActionsAuthorizationWithRequest.mockReturnValue(actionsAuthorization);
   rulesClientFactoryParams.getSpaceId.mockReturnValue('default');
   rulesClientFactoryParams.spaceIdToNamespace.mockReturnValue('default');
 });
@@ -90,13 +88,8 @@ test('creates an alerts client with proper constructor arguments when security i
 
   savedObjectsService.getScopedClient.mockReturnValue(savedObjectsClient);
   alertingAuthorizationClientFactory.create.mockReturnValue(
-    (alertsAuthorization as unknown) as AlertingAuthorization
+    alertsAuthorization as unknown as AlertingAuthorization
   );
-
-  const logger = {
-    log: jest.fn(),
-  } as jest.Mocked<LegacyAuditLogger>;
-  securityPluginSetup.audit.getLogger.mockReturnValue(logger);
 
   factory.create(request, savedObjectsService);
 
@@ -105,9 +98,7 @@ test('creates an alerts client with proper constructor arguments when security i
     includedHiddenTypes: ['alert', 'api_key_pending_invalidation'],
   });
 
-  expect(alertingAuthorizationClientFactory.create).toHaveBeenCalledWith(request, [
-    ALERTS_FEATURE_ID,
-  ]);
+  expect(alertingAuthorizationClientFactory.create).toHaveBeenCalledWith(request);
 
   expect(rulesClientFactoryParams.actions.getActionsAuthorizationWithRequest).toHaveBeenCalledWith(
     request
@@ -138,7 +129,7 @@ test('creates an alerts client with proper constructor arguments', async () => {
 
   savedObjectsService.getScopedClient.mockReturnValue(savedObjectsClient);
   alertingAuthorizationClientFactory.create.mockReturnValue(
-    (alertsAuthorization as unknown) as AlertingAuthorization
+    alertsAuthorization as unknown as AlertingAuthorization
   );
 
   factory.create(request, savedObjectsService);
@@ -148,9 +139,7 @@ test('creates an alerts client with proper constructor arguments', async () => {
     includedHiddenTypes: ['alert', 'api_key_pending_invalidation'],
   });
 
-  expect(alertingAuthorizationClientFactory.create).toHaveBeenCalledWith(request, [
-    ALERTS_FEATURE_ID,
-  ]);
+  expect(alertingAuthorizationClientFactory.create).toHaveBeenCalledWith(request);
 
   expect(jest.requireMock('./rules_client').RulesClient).toHaveBeenCalledWith({
     unsecuredSavedObjectsClient: savedObjectsClient,
@@ -190,9 +179,9 @@ test('getUserName() returns a name when security is enabled', async () => {
   factory.create(KibanaRequest.from(fakeRequest), savedObjectsService);
   const constructorCall = jest.requireMock('./rules_client').RulesClient.mock.calls[0][0];
 
-  securityPluginStart.authc.getCurrentUser.mockReturnValueOnce(({
+  securityPluginStart.authc.getCurrentUser.mockReturnValueOnce({
     username: 'bob',
-  } as unknown) as AuthenticatedUser);
+  } as unknown as AuthenticatedUser);
   const userNameResult = await constructorCall.getUserName();
   expect(userNameResult).toEqual('bob');
 });

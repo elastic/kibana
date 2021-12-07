@@ -18,8 +18,8 @@ The constructor for this class is marked as internal. Third-party code should no
 
 |  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
-|  [errors](./kibana-plugin-core-server.savedobjectsclient.errors.md) |  | <code>typeof SavedObjectsErrorHelpers</code> |  |
-|  [errors](./kibana-plugin-core-server.savedobjectsclient.errors.md) | <code>static</code> | <code>typeof SavedObjectsErrorHelpers</code> |  |
+|  [errors](./kibana-plugin-core-server.savedobjectsclient.errors.md) |  | typeof SavedObjectsErrorHelpers |  |
+|  [errors](./kibana-plugin-core-server.savedobjectsclient.errors.md) | <code>static</code> | typeof SavedObjectsErrorHelpers |  |
 
 ## Methods
 
@@ -27,6 +27,7 @@ The constructor for this class is marked as internal. Third-party code should no
 |  --- | --- | --- |
 |  [bulkCreate(objects, options)](./kibana-plugin-core-server.savedobjectsclient.bulkcreate.md) |  | Persists multiple documents batched together as a single request |
 |  [bulkGet(objects, options)](./kibana-plugin-core-server.savedobjectsclient.bulkget.md) |  | Returns an array of objects by id |
+|  [bulkResolve(objects, options)](./kibana-plugin-core-server.savedobjectsclient.bulkresolve.md) |  | Resolves an array of objects by id, using any legacy URL aliases if they exist |
 |  [bulkUpdate(objects, options)](./kibana-plugin-core-server.savedobjectsclient.bulkupdate.md) |  | Bulk Updates multiple SavedObject at once |
 |  [checkConflicts(objects, options)](./kibana-plugin-core-server.savedobjectsclient.checkconflicts.md) |  | Check what conflicts will result when creating a given array of saved objects. This includes "unresolvable conflicts", which are multi-namespace objects that exist in a different namespace; such conflicts cannot be resolved/overwritten. |
 |  [closePointInTime(id, options)](./kibana-plugin-core-server.savedobjectsclient.closepointintime.md) |  | Closes a Point In Time (PIT) by ID. This simply proxies the request to ES via the Elasticsearch client, and is included in the Saved Objects Client as a convenience for consumers who are using [SavedObjectsClient.openPointInTimeForType()](./kibana-plugin-core-server.savedobjectsclient.openpointintimefortype.md)<!-- -->.<!-- -->Only use this API if you have an advanced use case that's not solved by the [SavedObjectsClient.createPointInTimeFinder()](./kibana-plugin-core-server.savedobjectsclient.createpointintimefinder.md) method. |

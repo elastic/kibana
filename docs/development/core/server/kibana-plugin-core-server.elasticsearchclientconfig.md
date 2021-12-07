@@ -14,5 +14,6 @@ export declare type ElasticsearchClientConfig = Pick<ElasticsearchConfig, 'custo
     requestTimeout?: ElasticsearchConfig['requestTimeout'] | ClientOptions['requestTimeout'];
     ssl?: Partial<ElasticsearchConfig['ssl']>;
     keepAlive?: boolean;
+    caFingerprint?: ClientOptions['caFingerprint'];
 };
 ```

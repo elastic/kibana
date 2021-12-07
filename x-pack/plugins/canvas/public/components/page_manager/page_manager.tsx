@@ -28,10 +28,10 @@ export const PageManager: FC<{ onPreviousPage: () => void }> = ({ onPreviousPage
 
   const { gotoPage } = useContext(WorkpadRoutingContext);
 
-  const onAddPage = useCallback(() => dispatch(pageActions.addPage({ gotoPage })), [
-    dispatch,
-    gotoPage,
-  ]);
+  const onAddPage = useCallback(
+    () => dispatch(pageActions.addPage({ gotoPage })),
+    [dispatch, gotoPage]
+  );
 
   const onMovePage = useCallback(
     (id: string, position: number) => dispatch(pageActions.movePage(id, position, gotoPage)),

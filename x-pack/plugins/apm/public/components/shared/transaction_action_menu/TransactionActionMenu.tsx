@@ -21,7 +21,7 @@ import {
 import { Transaction } from '../../../../typings/es_schemas/ui/transaction';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useLicenseContext } from '../../../context/license/use_license_context';
-import { useUrlParams } from '../../../context/url_params_context/use_url_params';
+import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_params';
 import { CustomLinkMenuSection } from './custom_link_menu_section';
 import { getSections } from './sections';
 
@@ -45,7 +45,7 @@ export function TransactionActionMenu({ transaction }: Props) {
 
   const { core } = useApmPluginContext();
   const location = useLocation();
-  const { urlParams } = useUrlParams();
+  const { urlParams } = useLegacyUrlParams();
 
   const [isActionPopoverOpen, setIsActionPopoverOpen] = useState(false);
 

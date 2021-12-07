@@ -9,7 +9,7 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { cloneDeep, isEqual, pick } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -193,8 +193,9 @@ export class EditJobFlyoutUI extends Component {
     let { jobModelMemoryLimitValidationError, jobGroupsValidationError } = this.state;
 
     if (jobDetails.jobModelMemoryLimit !== undefined) {
-      jobModelMemoryLimitValidationError = validateModelMemoryLimit(jobDetails.jobModelMemoryLimit)
-        .message;
+      jobModelMemoryLimitValidationError = validateModelMemoryLimit(
+        jobDetails.jobModelMemoryLimit
+      ).message;
     }
 
     if (jobDetails.jobGroups !== undefined) {

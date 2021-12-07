@@ -23,12 +23,20 @@ import {
   createJavaAgentInstructions,
   createDotNetAgentInstructions,
   createPhpAgentInstructions,
-} from '../instructions/apm_agent_instructions';
+} from '../../../common/tutorial/instructions/apm_agent_instructions';
 import { CloudSetup } from '../../../../cloud/server';
+import { APMConfig } from '../..';
+import { getOnPremApmServerInstructionSet } from './on_prem_apm_server_instruction_set';
 
-export function createElasticCloudInstructions(
-  cloudSetup?: CloudSetup
-): TutorialSchema['elasticCloud'] {
+export function createElasticCloudInstructions({
+  cloudSetup,
+  apmConfig,
+  isFleetPluginEnabled,
+}: {
+  cloudSetup?: CloudSetup;
+  apmConfig: APMConfig;
+  isFleetPluginEnabled: boolean;
+}): TutorialSchema['elasticCloud'] {
   const apmServerUrl = cloudSetup?.apm.url;
   const instructionSets = [];
 
@@ -36,6 +44,9 @@ export function createElasticCloudInstructions(
     instructionSets.push(getApmServerInstructionSet(cloudSetup));
   }
 
+  instructionSets.push(
+    getOnPremApmServerInstructionSet({ apmConfig, isFleetPluginEnabled })
+  );
   instructionSets.push(getApmAgentInstructionSet(cloudSetup));
 
   return {
@@ -57,10 +68,10 @@ function getApmServerInstructionSet(
         id: INSTRUCTION_VARIANT.ESC,
         instructions: [
           {
-            title: 'Enable the APM Server in the ESS console',
+            title: 'Enable the APM Server in the Elastic Cloud user console',
             textPre: i18n.translate('xpack.apm.tutorial.elasticCloud.textPre', {
               defaultMessage:
-                'To enable the APM Server go to [the Elastic Cloud console](https://cloud.elastic.co/deployments/{deploymentId}/edit) and enable APM in the deployment settings. Once enabled, refresh this page.',
+                'To enable the APM Server go to [the Elastic Cloud console](https://cloud.elastic.co/deployments/{deploymentId}/edit) and enable APM and Fleet in the deployment edit page by clicking on add capacity, and then click on save. Once enabled, refresh this page.',
               values: { deploymentId },
             }),
           },

@@ -53,17 +53,17 @@ describe('export timelines', () => {
   beforeEach(() => {
     server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
-    securitySetup = ({
+    securitySetup = {
       authc: {
         getCurrentUser: jest.fn().mockReturnValue(mockGetCurrentUser),
       },
       authz: {},
-    } as unknown) as SecurityPluginSetup;
+    } as unknown as SecurityPluginSetup;
     clients.savedObjectsClient.bulkGet.mockResolvedValue(mockTimelinesSavedObjects());
 
-    ((convertSavedObjectToSavedTimeline as unknown) as jest.Mock).mockReturnValue(mockTimelines());
-    ((convertSavedObjectToSavedNote as unknown) as jest.Mock).mockReturnValue(mockNotes());
-    ((convertSavedObjectToSavedPinnedEvent as unknown) as jest.Mock).mockReturnValue(
+    (convertSavedObjectToSavedTimeline as unknown as jest.Mock).mockReturnValue(mockTimelines());
+    (convertSavedObjectToSavedNote as unknown as jest.Mock).mockReturnValue(mockNotes());
+    (convertSavedObjectToSavedPinnedEvent as unknown as jest.Mock).mockReturnValue(
       mockPinnedEvents()
     );
     exportTimelinesRoute(server.router, createMockConfig(), securitySetup);

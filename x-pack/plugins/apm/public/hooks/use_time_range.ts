@@ -5,19 +5,63 @@
  * 2.0.
  */
 
-import { useUrlParams } from '../context/url_params_context/use_url_params';
+import { useMemo } from 'react';
+import { useTimeRangeId } from '../context/time_range_id/use_time_range_id';
+import { getDateRange } from '../context/url_params_context/helpers';
 
-export function useTimeRange() {
-  const {
-    urlParams: { start, end },
-  } = useUrlParams();
+interface TimeRange {
+  start: string;
+  end: string;
+  exactStart: string;
+  exactEnd: string;
+  refreshTimeRange: () => void;
+  timeRangeId: number;
+}
 
-  if (!start || !end) {
-    throw new Error('Time range not set');
+type PartialTimeRange = Pick<TimeRange, 'refreshTimeRange' | 'timeRangeId'> &
+  Pick<Partial<TimeRange>, 'start' | 'end' | 'exactStart' | 'exactEnd'>;
+
+export function useTimeRange(range: {
+  rangeFrom?: string;
+  rangeTo?: string;
+  optional: true;
+}): PartialTimeRange;
+
+export function useTimeRange(range: {
+  rangeFrom: string;
+  rangeTo: string;
+}): TimeRange;
+
+export function useTimeRange({
+  rangeFrom,
+  rangeTo,
+  optional,
+}: {
+  rangeFrom?: string;
+  rangeTo?: string;
+  optional?: boolean;
+}): TimeRange | PartialTimeRange {
+  const { incrementTimeRangeId, timeRangeId } = useTimeRangeId();
+
+  const { start, end, exactStart, exactEnd } = useMemo(() => {
+    return getDateRange({
+      state: {},
+      rangeFrom,
+      rangeTo,
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [rangeFrom, rangeTo, timeRangeId]);
+
+  if ((!start || !end || !exactStart || !exactEnd) && !optional) {
+    throw new Error('start and/or end were unexpectedly not set');
   }
 
   return {
     start,
     end,
+    exactStart,
+    exactEnd,
+    refreshTimeRange: incrementTimeRangeId,
+    timeRangeId,
   };
 }

@@ -10,7 +10,7 @@ import { kea, MakeLogicType } from 'kea';
 import {
   clearFlashMessages,
   flashAPIErrors,
-  setSuccessMessage,
+  flashSuccessToast,
 } from '../../../shared/flash_messages';
 import { HttpLogic } from '../../../shared/http';
 import {
@@ -18,7 +18,6 @@ import {
   RoleMappingsBaseActions,
   RoleMappingsBaseValues,
 } from '../../../shared/role_mapping';
-import { ANY_AUTH_PROVIDER } from '../../../shared/role_mapping/constants';
 import { AttributeName, SingleUserRoleMapping, ElasticsearchUser } from '../../../shared/types';
 import { RoleGroup, WSRoleMapping, Role } from '../../types';
 
@@ -47,11 +46,9 @@ interface RoleMappingsActions extends RoleMappingsBaseActions {
   setDefaultGroup(availableGroups: RoleGroup[]): { availableGroups: RoleGroup[] };
   setRoleMapping(roleMapping: WSRoleMapping): { roleMapping: WSRoleMapping };
   setSingleUserRoleMapping(data?: UserMapping): { singleUserRoleMapping: UserMapping };
-  setRoleMappings({
-    roleMappings,
-  }: {
+  setRoleMappings({ roleMappings }: { roleMappings: WSRoleMapping[] }): {
     roleMappings: WSRoleMapping[];
-  }): { roleMappings: WSRoleMapping[] };
+  };
   setRoleMappingsData(data: RoleMappingsServerDetails): RoleMappingsServerDetails;
   handleAllGroupsSelectionChange(selected: boolean): { selected: boolean };
   handleGroupSelectionChange(groupIds: string[]): { groupIds: string[] };
@@ -66,7 +63,6 @@ interface RoleMappingsValues extends RoleMappingsBaseValues {
   singleUserRoleMapping: UserMapping | null;
   singleUserRoleMappings: UserMapping[];
   roleType: Role;
-  selectedAuthProviders: string[];
   selectedGroups: Set<string>;
 }
 
@@ -79,7 +75,6 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
     setSingleUserRoleMapping: (singleUserRoleMapping: UserMapping) => ({ singleUserRoleMapping }),
     setRoleMappings: ({ roleMappings }: { roleMappings: WSRoleMapping[] }) => ({ roleMappings }),
     setRoleMappingErrors: (errors: string[]) => ({ errors }),
-    handleAuthProviderChange: (value: string[]) => ({ value }),
     handleRoleChange: (roleType: Role) => ({ roleType }),
     handleUsernameSelectChange: (username: string) => ({ username }),
     handleGroupSelectionChange: (groupIds: string[]) => ({ groupIds }),
@@ -132,13 +127,6 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
         resetState: () => [],
       },
     ],
-    multipleAuthProvidersConfig: [
-      false,
-      {
-        setRoleMappingsData: (_, { multipleAuthProvidersConfig }) => multipleAuthProvidersConfig,
-        resetState: () => false,
-      },
-    ],
     availableGroups: [
       [],
       {
@@ -155,7 +143,6 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
       [],
       {
         setRoleMappingsData: (_, { elasticsearchRoles }) => elasticsearchRoles,
-        closeUsersAndRolesFlyout: () => [ANY_AUTH_PROVIDER],
       },
     ],
     elasticsearchUsers: [
@@ -168,6 +155,7 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
       null,
       {
         setRoleMapping: (_, { roleMapping }) => roleMapping,
+        initializeRoleMappings: () => null,
         resetState: () => null,
         closeUsersAndRolesFlyout: () => null,
       },
@@ -238,29 +226,6 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
           return newSelectedGroupNames;
         },
         closeUsersAndRolesFlyout: () => new Set(),
-      },
-    ],
-    availableAuthProviders: [
-      [],
-      {
-        setRoleMappingsData: (_, { authProviders }) => authProviders,
-      },
-    ],
-    selectedAuthProviders: [
-      [ANY_AUTH_PROVIDER],
-      {
-        handleAuthProviderChange: (previous, { value }) => {
-          const previouslyContainedAny = previous.includes(ANY_AUTH_PROVIDER);
-          const newSelectionsContainAny = value.includes(ANY_AUTH_PROVIDER);
-          const hasItems = value.length > 0;
-
-          if (value.length === 1) return value;
-          if (!newSelectionsContainAny && hasItems) return value;
-          if (previouslyContainedAny && hasItems)
-            return value.filter((v) => v !== ANY_AUTH_PROVIDER);
-          return [ANY_AUTH_PROVIDER];
-        },
-        setRoleMapping: (_, { roleMapping }) => roleMapping.authProvider,
       },
     ],
     roleMappingFlyoutOpen: [
@@ -354,10 +319,12 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
   listeners: ({ actions, values }) => ({
     enableRoleBasedAccess: async () => {
       const { http } = HttpLogic.values;
-      const route = '/api/workplace_search/org/role_mappings/enable_role_based_access';
+      const route = '/internal/workplace_search/org/role_mappings/enable_role_based_access';
 
       try {
-        const response = await http.post(route);
+        const response = await http.post<{
+          roleMappings: WSRoleMapping[];
+        }>(route);
         actions.setRoleMappings(response);
       } catch (e) {
         flashAPIErrors(e);
@@ -365,10 +332,10 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
     },
     initializeRoleMappings: async () => {
       const { http } = HttpLogic.values;
-      const route = '/api/workplace_search/org/role_mappings';
+      const route = '/internal/workplace_search/org/role_mappings';
 
       try {
-        const response = await http.get(route);
+        const response = await http.get<RoleMappingsServerDetails>(route);
         actions.setRoleMappingsData(response);
       } catch (e) {
         flashAPIErrors(e);
@@ -392,12 +359,12 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
     },
     handleDeleteMapping: async ({ roleMappingId }) => {
       const { http } = HttpLogic.values;
-      const route = `/api/workplace_search/org/role_mappings/${roleMappingId}`;
+      const route = `/internal/workplace_search/org/role_mappings/${roleMappingId}`;
 
       try {
         await http.delete(route);
         actions.initializeRoleMappings();
-        setSuccessMessage(ROLE_MAPPING_DELETED_MESSAGE);
+        flashSuccessToast(ROLE_MAPPING_DELETED_MESSAGE);
       } catch (e) {
         flashAPIErrors(e);
       }
@@ -411,13 +378,11 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
         roleMapping,
         selectedGroups,
         includeInAllGroups,
-        selectedAuthProviders,
       } = values;
 
       const body = JSON.stringify({
         roleType,
         allGroups: includeInAllGroups,
-        authProvider: selectedAuthProviders,
         rules: {
           [attributeName]: attributeValue,
         },
@@ -425,8 +390,8 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
       });
 
       const request = !roleMapping
-        ? http.post('/api/workplace_search/org/role_mappings', { body })
-        : http.put(`/api/workplace_search/org/role_mappings/${roleMapping.id}`, { body });
+        ? http.post('/internal/workplace_search/org/role_mappings', { body })
+        : http.put(`/internal/workplace_search/org/role_mappings/${roleMapping.id}`, { body });
 
       const SUCCESS_MESSAGE = !roleMapping
         ? ROLE_MAPPING_CREATED_MESSAGE
@@ -435,7 +400,7 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
       try {
         await request;
         actions.initializeRoleMappings();
-        setSuccessMessage(SUCCESS_MESSAGE);
+        flashSuccessToast(SUCCESS_MESSAGE);
       } catch (e) {
         actions.setRoleMappingErrors(e?.body?.attributes?.errors);
       }
@@ -467,9 +432,10 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
       });
 
       try {
-        const response = await http.post('/api/workplace_search/org/single_user_role_mapping', {
-          body,
-        });
+        const response = await http.post<UserMapping>(
+          '/internal/workplace_search/org/single_user_role_mapping',
+          { body }
+        );
         actions.setSingleUserRoleMapping(response);
         actions.setUserCreated();
         actions.initializeRoleMappings();

@@ -31,6 +31,14 @@ const GROUP_TABLE_HEADER = i18n.translate(
     defaultMessage: 'Group',
   }
 );
+
+const GROUPS_PAGINATION_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.groups.groupsTable.groupPagination.label',
+  {
+    defaultMessage: 'Groups',
+  }
+);
+
 const SOURCES_TABLE_HEADER = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.groups.groupsTable.sourcesTableHeader',
   {
@@ -51,7 +59,7 @@ export const GroupsTable: React.FC<{}> = () => {
   const clearFiltersLink = hasFiltersSet ? <ClearFiltersLink /> : undefined;
 
   const paginationOptions = {
-    itemLabel: 'Groups',
+    itemLabel: GROUPS_PAGINATION_LABEL,
     totalPages,
     totalItems,
     activePage,

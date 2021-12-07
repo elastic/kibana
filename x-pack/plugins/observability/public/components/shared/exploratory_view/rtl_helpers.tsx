@@ -13,7 +13,7 @@ import { render as reactTestLibRender, RenderOptions } from '@testing-library/re
 import { Route, Router } from 'react-router-dom';
 import { createMemoryHistory, History } from 'history';
 import { CoreStart } from 'kibana/public';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import { coreMock } from 'src/core/public/mocks';
 import {
   KibanaContextProvider,
@@ -23,26 +23,32 @@ import { ObservabilityPublicPluginsStart } from '../../../plugin';
 import { EuiThemeProvider } from '../../../../../../../src/plugins/kibana_react/common';
 import { lensPluginMock } from '../../../../../lens/public/mocks';
 import * as useAppIndexPatternHook from './hooks/use_app_index_pattern';
-import { IndexPatternContextProvider } from './hooks/use_app_index_pattern';
-import { AllSeries, SeriesContextValue, UrlStorageContext } from './hooks/use_series_storage';
+import { IndexPatternContext, IndexPatternContextProvider } from './hooks/use_app_index_pattern';
+import {
+  AllSeries,
+  reportTypeKey,
+  SeriesContextValue,
+  UrlStorageContext,
+} from './hooks/use_series_storage';
 
 import * as fetcherHook from '../../../hooks/use_fetcher';
 import * as useSeriesFilterHook from './hooks/use_series_filters';
 import * as useHasDataHook from '../../../hooks/use_has_data';
 import * as useValuesListHook from '../../../hooks/use_values_list';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { getStubIndexPattern } from '../../../../../../../src/plugins/data/public/index_patterns/index_pattern.stub';
+
 import indexPatternData from './configurations/test_data/test_index_pattern.json';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { setIndexPatterns } from '../../../../../../../src/plugins/data/public/services';
-import {
-  IndexPattern,
-  IndexPatternsContract,
-} from '../../../../../../../src/plugins/data/common/index_patterns/index_patterns';
+import { IndexPattern, IndexPatternsContract } from '../../../../../../../src/plugins/data/common';
+
 import { AppDataType, SeriesUrl, UrlFilter } from './types';
+import { createStubIndexPattern } from '../../../../../../../src/plugins/data/common/stubs';
 import { dataPluginMock } from '../../../../../../../src/plugins/data/public/mocks';
 import { ListItem } from '../../../hooks/use_values_list';
 import { TRANSACTION_DURATION } from './configurations/constants/elasticsearch_fieldnames';
+import { casesPluginMock } from '../../../../../cases/public/mocks';
+import { dataTypes, obsvReportConfigMap, reportTypesList } from './obsv_exploratory_view';
+import { ExploratoryViewContextProvider } from './contexts/exploatory_view_config';
 
 interface KibanaProps {
   services?: KibanaServices;
@@ -81,19 +87,19 @@ interface RenderRouterOptions<ExtraCore> extends KibanaProviderOptions<ExtraCore
 
 function getSetting<T = any>(key: string): T {
   if (key === 'timepicker:quickRanges') {
-    return ([
+    return [
       {
         display: 'Today',
         from: 'now/d',
         to: 'now/d',
       },
-    ] as unknown) as T;
+    ] as unknown as T;
   }
-  return ('MMM D, YYYY @ HH:mm:ss.SSS' as unknown) as T;
+  return 'MMM D, YYYY @ HH:mm:ss.SSS' as unknown as T;
 }
 
 function setSetting$<T = any>(key: string): T {
-  return (of('MMM D, YYYY @ HH:mm:ss.SSS') as unknown) as T;
+  return of('MMM D, YYYY @ HH:mm:ss.SSS') as unknown as T;
 }
 
 /* default mock core */
@@ -122,6 +128,7 @@ export const mockCore: () => Partial<CoreStart & ObservabilityPublicPluginsStart
     },
     lens: lensPluginMock.createStartContract(),
     data: dataPluginMock.createStartContract(),
+    cases: casesPluginMock.createStartContract(),
   };
 
   return core;
@@ -135,10 +142,10 @@ export function MockKibanaProvider<ExtraCore extends Partial<CoreStart>>({
 }: MockKibanaProviderProps<ExtraCore>) {
   const indexPattern = mockIndexPattern;
 
-  setIndexPatterns(({
+  setIndexPatterns({
     ...[indexPattern],
     get: async () => indexPattern,
-  } as unknown) as IndexPatternsContract);
+  } as unknown as IndexPatternsContract);
 
   return (
     <KibanaContextProvider services={{ ...core }} {...kibanaProps}>
@@ -159,7 +166,7 @@ export function MockRouter<ExtraCore>({
 }: MockRouterProps<ExtraCore>) {
   return (
     <Router history={history}>
-      <Route path={'/app/observability/exploratory-view/:mode'}>
+      <Route path={'/app/observability/exploratory-view/'}>
         <MockKibanaProvider core={core} kibanaProps={kibanaProps} history={history}>
           {children}
         </MockKibanaProvider>
@@ -176,7 +183,7 @@ export function render<ExtraCore>(
     core: customCore,
     kibanaProps,
     renderOptions,
-    url = '/app/observability/exploratory-view/configure#?autoApply=!t',
+    url = '/app/observability/exploratory-view/',
     initSeries = {},
   }: RenderRouterOptions<ExtraCore> = {}
 ) {
@@ -194,9 +201,17 @@ export function render<ExtraCore>(
   return {
     ...reactTestLibRender(
       <MockRouter history={history} kibanaProps={kibanaProps} core={core}>
-        <UrlStorageContext.Provider value={{ ...seriesContextValue }}>
-          {ui}
-        </UrlStorageContext.Provider>
+        <ExploratoryViewContextProvider
+          reportTypes={reportTypesList}
+          dataTypes={dataTypes}
+          indexPatterns={{}}
+          reportConfigMap={obsvReportConfigMap}
+          setHeaderActionMenu={jest.fn()}
+        >
+          <UrlStorageContext.Provider value={{ ...seriesContextValue }}>
+            {ui}
+          </UrlStorageContext.Provider>
+        </ExploratoryViewContextProvider>
       </MockRouter>,
       renderOptions
     ),
@@ -234,7 +249,7 @@ export const mockUseHasData = () => {
   return { spy, onRefreshTimeRange };
 };
 
-export const mockAppIndexPattern = () => {
+export const mockAppIndexPattern = (props?: Partial<IndexPatternContext>) => {
   const loadIndexPattern = jest.fn();
   const spy = jest.spyOn(useAppIndexPatternHook, 'useAppIndexPatternContext').mockReturnValue({
     indexPattern: mockIndexPattern,
@@ -242,7 +257,9 @@ export const mockAppIndexPattern = () => {
     loading: false,
     hasAppData: { ux: true } as any,
     loadIndexPattern,
-    indexPatterns: ({ ux: mockIndexPattern } as unknown) as Record<AppDataType, IndexPattern>,
+    indexPatterns: { ux: mockIndexPattern } as unknown as Record<AppDataType, IndexPattern>,
+    indexPatternErrors: {} as any,
+    ...(props || {}),
   });
   return { spy, loadIndexPattern };
 };
@@ -299,7 +316,13 @@ function mockSeriesStorageContext({
     firstSeries: mockDataSeries[0],
     allSeries: mockDataSeries,
     setReportType: jest.fn(),
-    storage: { get: jest.fn() } as any,
+    storage: {
+      get: jest
+        .fn()
+        .mockImplementation((key: string) =>
+          key === reportTypeKey ? 'data-distribution' : mockDataSeries
+        ),
+    } as any,
   } as SeriesContextValue;
 }
 
@@ -307,10 +330,14 @@ export function mockUseSeriesFilter() {
   const removeFilter = jest.fn();
   const invertFilter = jest.fn();
   const setFilter = jest.fn();
+  const replaceFilter = jest.fn();
+  const setFiltersWildcard = jest.fn();
   const spy = jest.spyOn(useSeriesFilterHook, 'useSeriesFilters').mockReturnValue({
     removeFilter,
     invertFilter,
     setFilter,
+    replaceFilter,
+    setFiltersWildcard,
   });
 
   return {
@@ -318,6 +345,8 @@ export function mockUseSeriesFilter() {
     removeFilter,
     invertFilter,
     setFilter,
+    replaceFilter,
+    setFiltersWildcard,
   };
 }
 
@@ -332,10 +361,11 @@ export const mockHistory = {
   },
 };
 
-export const mockIndexPattern = getStubIndexPattern(
-  'apm-*',
-  () => {},
-  '@timestamp',
-  JSON.parse(indexPatternData.attributes.fields),
-  mockCore() as any
-);
+export const mockIndexPattern = createStubIndexPattern({
+  spec: {
+    id: 'apm-*',
+    title: 'apm-*',
+    timeFieldName: '@timestamp',
+    fields: JSON.parse(indexPatternData.attributes.fields),
+  },
+});

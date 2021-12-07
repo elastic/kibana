@@ -6,11 +6,11 @@
  */
 
 import React from 'react';
-import { StatusIcon } from '../../status_icon';
+import { StatusIcon, STATUS_ICON_TYPES } from '../../status_icon';
 import { i18n } from '@kbn/i18n';
 
 export function NodeStatusIcon({ isOnline, status }) {
-  const type = isOnline ? StatusIcon.TYPES.GREEN : StatusIcon.TYPES.GRAY;
+  const type = isOnline ? STATUS_ICON_TYPES.GREEN : STATUS_ICON_TYPES.GRAY;
 
   return (
     <StatusIcon

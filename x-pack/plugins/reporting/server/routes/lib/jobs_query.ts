@@ -5,19 +5,24 @@
  * 2.0.
  */
 
-import { ApiResponse } from '@elastic/elasticsearch';
-import { DeleteResponse, SearchHit, SearchResponse } from '@elastic/elasticsearch/api/types';
-import { ResponseError } from '@elastic/elasticsearch/lib/errors';
+import type { TransportResult } from '@elastic/elasticsearch';
+import {
+  DeleteResponse,
+  SearchHit,
+  SearchResponse,
+  SearchRequest,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { errors } from '@elastic/elasticsearch';
 import { i18n } from '@kbn/i18n';
 import { UnwrapPromise } from '@kbn/utility-types';
 import { ElasticsearchClient } from 'src/core/server';
+import { PromiseType } from 'utility-types';
 import { ReportingCore } from '../../';
-import { JobContent, ReportApiJSON, ReportDocument, ReportSource } from '../../../common/types';
+import { REPORTING_SYSTEM_INDEX } from '../../../common/constants';
+import { ReportApiJSON, ReportSource } from '../../../common/types';
 import { statuses } from '../../lib/statuses';
 import { Report } from '../../lib/store';
 import { ReportingUser } from '../../types';
-
-type SearchRequest = Required<Parameters<ElasticsearchClient['search']>>[0];
 
 const defaultSize = 10;
 const getUsername = (user: ReportingUser) => (user ? user.username : false);
@@ -47,27 +52,24 @@ interface JobsQueryFactory {
   ): Promise<ReportApiJSON[]>;
   count(jobTypes: string[], user: ReportingUser): Promise<number>;
   get(user: ReportingUser, id: string): Promise<ReportApiJSON | void>;
-  getContent(user: ReportingUser, id: string): Promise<ReportContent | void>;
-  getError(user: ReportingUser, id: string): Promise<(ReportContent & JobContent) | void>;
-  delete(deleteIndex: string, id: string): Promise<ApiResponse<DeleteResponse>>;
+  getError(id: string): Promise<string>;
+  delete(deleteIndex: string, id: string): Promise<TransportResult<DeleteResponse>>;
 }
 
 export function jobsQueryFactory(reportingCore: ReportingCore): JobsQueryFactory {
   function getIndex() {
-    const config = reportingCore.getConfig();
-
-    return `${config.get('index')}-*`;
+    return `${REPORTING_SYSTEM_INDEX}-*`;
   }
 
-  async function execQuery<T extends (client: ElasticsearchClient) => any>(
-    callback: T
-  ): Promise<UnwrapPromise<ReturnType<T>> | undefined> {
+  async function execQuery<
+    T extends (client: ElasticsearchClient) => Promise<PromiseType<ReturnType<T>> | undefined>
+  >(callback: T): Promise<UnwrapPromise<ReturnType<T>> | undefined> {
     try {
       const { asInternalUser: client } = await reportingCore.getEsClient();
 
       return await callback(client);
     } catch (error) {
-      if (error instanceof ResponseError && [401, 403, 404].includes(error.statusCode)) {
+      if (error instanceof errors.ResponseError && [401, 403, 404].includes(error.statusCode!)) {
         return;
       }
 
@@ -98,16 +100,17 @@ export function jobsQueryFactory(reportingCore: ReportingCore): JobsQueryFactory
 
       const response = (await execQuery((elasticsearchClient) =>
         elasticsearchClient.search({ body, index: getIndex() })
-      )) as ApiResponse<SearchResponse<ReportSource>>;
+      )) as TransportResult<SearchResponse<ReportSource>>;
 
       return (
         response?.body.hits?.hits.map((report: SearchHit<ReportSource>) => {
           const { _source: reportSource, ...reportHead } = report;
-          if (reportSource) {
-            const reportInstance = new Report({ ...reportSource, ...reportHead });
-            return reportInstance.toApiJSON();
+          if (!reportSource) {
+            throw new Error(`Search hit did not include _source!`);
           }
-          throw new Error(`Search hit did not include _source!`);
+
+          const reportInstance = new Report({ ...reportSource, ...reportHead });
+          return reportInstance.toApiJSON();
         }) ?? []
       );
     },
@@ -156,11 +159,11 @@ export function jobsQueryFactory(reportingCore: ReportingCore): JobsQueryFactory
       });
 
       const response = await execQuery((elasticsearchClient) =>
-        elasticsearchClient.search({ body, index: getIndex() })
+        elasticsearchClient.search<ReportSource>({ body, index: getIndex() })
       );
 
-      const result = response?.body.hits.hits[0] as SearchHit<ReportSource> | undefined;
-      if (!result || !result._source) {
+      const result = response?.body.hits?.hits?.[0];
+      if (!result?._source) {
         logger.warning(`No hits resulted in search`);
         return;
       }
@@ -169,19 +172,16 @@ export function jobsQueryFactory(reportingCore: ReportingCore): JobsQueryFactory
       return report.toApiJSON();
     },
 
-    async getContent(user, id) {
-      if (!id) {
-        return;
-      }
-
-      const username = getUsername(user);
+    async getError(id) {
       const body: SearchRequest['body'] = {
-        _source: { excludes: ['payload.headers'] },
+        _source: {
+          includes: ['output.content', 'status'],
+        },
         query: {
           constant_score: {
             filter: {
               bool: {
-                must: [{ term: { _id: id } }, { term: { created_by: username } }],
+                must: [{ term: { _id: id } }],
               },
             },
           },
@@ -190,35 +190,16 @@ export function jobsQueryFactory(reportingCore: ReportingCore): JobsQueryFactory
       };
 
       const response = await execQuery((elasticsearchClient) =>
-        elasticsearchClient.search({ body, index: getIndex() })
+        elasticsearchClient.search<ReportSource>({ body, index: getIndex() })
       );
+      const hits = response?.body.hits?.hits?.[0];
+      const status = hits?._source?.status;
 
-      if (response?.body.hits?.hits?.length !== 1) {
-        return;
+      if (status !== statuses.JOB_STATUS_FAILED) {
+        throw new Error(`Can not get error for ${id}`);
       }
 
-      const report = response.body.hits.hits[0] as ReportDocument;
-
-      return {
-        status: report._source.status,
-        jobtype: report._source.jobtype,
-        output: report._source.output,
-        payload: report._source.payload,
-      };
-    },
-
-    async getError(user, id) {
-      const content = await this.getContent(user, id);
-      if (content && content?.output?.content) {
-        if (content.status !== statuses.JOB_STATUS_FAILED) {
-          throw new Error(`Can not get error for ${id}`);
-        }
-        return {
-          ...content,
-          content: content.output.content,
-          content_type: false,
-        };
-      }
+      return hits?._source?.output?.content!;
     },
 
     async delete(deleteIndex, id) {

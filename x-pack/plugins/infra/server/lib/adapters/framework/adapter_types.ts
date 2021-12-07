@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Lifecycle } from '@hapi/hapi';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { JsonArray, JsonValue } from '@kbn/common-utils';
+import { JsonArray, JsonValue } from '@kbn/utility-types';
 import { RouteConfig, RouteMethod } from '../../../../../../../src/core/server';
 import {
   PluginSetup as DataPluginSetup,
   PluginStart as DataPluginStart,
 } from '../../../../../../../src/plugins/data/server';
 import { HomeServerPluginSetup } from '../../../../../../../src/plugins/home/server';
-import { VisTypeTimeseriesSetup } from '../../../../../../../src/plugins/vis_type_timeseries/server';
+import { VisTypeTimeseriesSetup } from '../../../../../../../src/plugins/vis_types/timeseries/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../../../../../plugins/features/server';
 import { SpacesPluginSetup } from '../../../../../../plugins/spaces/server';
 import { PluginSetupContract as AlertingPluginContract } from '../../../../../alerting/server';

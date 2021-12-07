@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import type { Space } from 'src/plugins/spaces_oss/common';
-
 import type { KibanaFeatureConfig } from '../../../../features/common';
+import type { Space } from '../../../common';
 
 export function getEnabledFeatures(features: KibanaFeatureConfig[], space: Partial<Space>) {
   return features.filter((feature) => !(space.disabledFeatures || []).includes(feature.id));

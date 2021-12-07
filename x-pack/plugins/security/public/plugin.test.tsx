@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import BroadcastChannel from 'broadcast-channel';
+import { enforceOptions } from 'broadcast-channel';
 import { Observable } from 'rxjs';
 
 import type { CoreSetup } from 'src/core/public';
 import { coreMock } from 'src/core/public/mocks';
 import type { DataPublicPluginStart } from 'src/plugins/data/public';
 import { managementPluginMock } from 'src/plugins/management/public/mocks';
-import { mockSecurityOssPlugin } from 'src/plugins/security_oss/public/mocks';
 
 import type { FeaturesPluginStart } from '../../features/public';
 import { licensingMock } from '../../licensing/public/mocks';
@@ -22,10 +21,10 @@ import { SecurityPlugin } from './plugin';
 
 describe('Security Plugin', () => {
   beforeAll(() => {
-    BroadcastChannel.enforceOptions({ type: 'simulate' });
+    enforceOptions({ type: 'simulate' });
   });
   afterAll(() => {
-    BroadcastChannel.enforceOptions(null);
+    enforceOptions(null);
   });
 
   describe('#setup', () => {
@@ -38,7 +37,6 @@ describe('Security Plugin', () => {
           }) as CoreSetup<PluginStartDependencies>,
           {
             licensing: licensingMock.createSetup(),
-            securityOss: mockSecurityOssPlugin.createSetup(),
           }
         )
       ).toEqual({
@@ -64,7 +62,6 @@ describe('Security Plugin', () => {
 
       plugin.setup(coreSetupMock as CoreSetup<PluginStartDependencies>, {
         licensing: licensingMock.createSetup(),
-        securityOss: mockSecurityOssPlugin.createSetup(),
         management: managementSetupMock,
       });
 
@@ -90,12 +87,11 @@ describe('Security Plugin', () => {
       const plugin = new SecurityPlugin(coreMock.createPluginInitializerContext());
       plugin.setup(
         coreMock.createSetup({ basePath: '/some-base-path' }) as CoreSetup<PluginStartDependencies>,
-        { licensing: licensingMock.createSetup(), securityOss: mockSecurityOssPlugin.createSetup() }
+        { licensing: licensingMock.createSetup() }
       );
 
       expect(
         plugin.start(coreMock.createStart({ basePath: '/some-base-path' }), {
-          securityOss: mockSecurityOssPlugin.createStart(),
           data: {} as DataPublicPluginStart,
           features: {} as FeaturesPluginStart,
         })
@@ -131,14 +127,12 @@ describe('Security Plugin', () => {
         coreMock.createSetup({ basePath: '/some-base-path' }) as CoreSetup<PluginStartDependencies>,
         {
           licensing: licensingMock.createSetup(),
-          securityOss: mockSecurityOssPlugin.createSetup(),
           management: managementSetupMock,
         }
       );
 
       const coreStart = coreMock.createStart({ basePath: '/some-base-path' });
       plugin.start(coreStart, {
-        securityOss: mockSecurityOssPlugin.createStart(),
         data: {} as DataPublicPluginStart,
         features: {} as FeaturesPluginStart,
         management: managementStartMock,
@@ -153,7 +147,7 @@ describe('Security Plugin', () => {
       const plugin = new SecurityPlugin(coreMock.createPluginInitializerContext());
       plugin.setup(
         coreMock.createSetup({ basePath: '/some-base-path' }) as CoreSetup<PluginStartDependencies>,
-        { licensing: licensingMock.createSetup(), securityOss: mockSecurityOssPlugin.createSetup() }
+        { licensing: licensingMock.createSetup() }
       );
 
       expect(() => plugin.stop()).not.toThrow();
@@ -164,11 +158,10 @@ describe('Security Plugin', () => {
 
       plugin.setup(
         coreMock.createSetup({ basePath: '/some-base-path' }) as CoreSetup<PluginStartDependencies>,
-        { licensing: licensingMock.createSetup(), securityOss: mockSecurityOssPlugin.createSetup() }
+        { licensing: licensingMock.createSetup() }
       );
 
       plugin.start(coreMock.createStart({ basePath: '/some-base-path' }), {
-        securityOss: mockSecurityOssPlugin.createStart(),
         data: {} as DataPublicPluginStart,
         features: {} as FeaturesPluginStart,
       });

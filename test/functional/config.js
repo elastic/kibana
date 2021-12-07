@@ -19,12 +19,12 @@ export default async function ({ readConfigFile }) {
       require.resolve('./apps/console'),
       require.resolve('./apps/context'),
       require.resolve('./apps/dashboard'),
+      require.resolve('./apps/dashboard_elements'),
       require.resolve('./apps/discover'),
       require.resolve('./apps/getting_started'),
       require.resolve('./apps/home'),
       require.resolve('./apps/management'),
       require.resolve('./apps/saved_objects_management'),
-      require.resolve('./apps/timelion'),
       require.resolve('./apps/visualize'),
     ],
     pageObjects,
@@ -43,13 +43,9 @@ export default async function ({ readConfigFile }) {
         ...commonConfig.get('kbnTestServer.serverArgs'),
         '--telemetry.optIn=false',
         '--savedObjects.maxImportPayloadBytes=10485760',
-        '--xpack.maps.showMapVisualizationTypes=true',
 
         // to be re-enabled once kibana/issues/102552 is completed
-        '--xpack.security.enabled=false',
-        '--monitoring.enabled=false',
         '--xpack.reporting.enabled=false',
-        '--enterpriseSearch.enabled=false',
       ],
     },
 
@@ -57,8 +53,8 @@ export default async function ({ readConfigFile }) {
       defaults: {
         'accessibility:disableAnimations': true,
         'dateFormat:tz': 'UTC',
-        'visualization:visualize:legacyChartsLibrary': true,
         'visualization:visualize:legacyPieChartsLibrary': true,
+        'visualization:useLegacyTimeAxis': true,
       },
     },
 
@@ -91,9 +87,6 @@ export default async function ({ readConfigFile }) {
       /** @obsolete "management" should be instead of "settings" **/
       settings: {
         pathname: '/app/management',
-      },
-      timelion: {
-        pathname: '/app/timelion',
       },
       console: {
         pathname: '/app/dev_tools',
@@ -170,6 +163,20 @@ export default async function ({ readConfigFile }) {
             indices: [
               {
                 names: ['alias*'],
+                privileges: ['read', 'view_index_metadata'],
+                field_security: { grant: ['*'], except: [] },
+              },
+            ],
+            run_as: [],
+          },
+          kibana: [],
+        },
+        test_field_formatters: {
+          elasticsearch: {
+            cluster: [],
+            indices: [
+              {
+                names: ['field_formats_management_functional_tests*'],
                 privileges: ['read', 'view_index_metadata'],
                 field_security: { grant: ['*'], except: [] },
               },
@@ -273,7 +280,7 @@ export default async function ({ readConfigFile }) {
             cluster: [],
             indices: [
               {
-                names: ['message_with_newline'],
+                names: ['newline-test'],
                 privileges: ['read', 'view_index_metadata'],
                 field_security: { grant: ['*'], except: [] },
               },

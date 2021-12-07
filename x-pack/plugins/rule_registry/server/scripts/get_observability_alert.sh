@@ -10,7 +10,7 @@
 set -e
 
 USER=${1:-'observer'}
-ID=${2:-'DHEnOXoB8br9Z2X1fq_l'}
+ID=${2:-'Do4JnHoBqkRSppNZ6vre'}
 
 cd ./hunter && sh ./post_detections_role.sh && sh ./post_detections_user.sh
 cd ../observer && sh ./post_detections_role.sh && sh ./post_detections_user.sh
@@ -19,4 +19,4 @@ cd ..
 # Example: ./get_observability_alert.sh hunter
 curl -v -k \
  -u $USER:changeme \
- -X GET "${KIBANA_URL}${SPACE_URL}/internal/rac/alerts?id=$ID&index=.alerts-observability-apm" | jq .
+ -X GET "${KIBANA_URL}${SPACE_URL}/internal/rac/alerts?id=$ID&index=.alerts-observability.apm.alerts" | jq .

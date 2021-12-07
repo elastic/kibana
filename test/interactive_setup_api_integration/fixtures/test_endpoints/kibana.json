@@ -1,0 +1,12 @@
+{
+  "id": "interactiveSetupTestEndpoints",
+  "owner": {
+    "name": "Platform Security",
+    "githubTeam": "kibana-security"
+  },
+  "version": "8.0.0",
+  "kibanaVersion": "kibana",
+  "type": "preboot",
+  "server": true,
+  "ui": false
+}

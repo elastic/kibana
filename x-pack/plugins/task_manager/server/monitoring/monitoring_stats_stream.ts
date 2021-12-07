@@ -9,7 +9,7 @@ import { merge, of, Observable } from 'rxjs';
 import { map, scan } from 'rxjs/operators';
 import { set } from '@elastic/safer-lodash-set';
 import { Logger } from 'src/core/server';
-import { JsonObject } from '@kbn/common-utils';
+import { JsonObject } from '@kbn/utility-types';
 import { TaskStore } from '../task_store';
 import { TaskPollingLifecycle } from '../polling_lifecycle';
 import {
@@ -37,7 +37,7 @@ import { ManagedConfiguration } from '../lib/create_managed_configuration';
 import { EphemeralTaskLifecycle } from '../ephemeral_task_lifecycle';
 import { CapacityEstimationStat, withCapacityEstimate } from './capacity_estimation';
 
-export { AggregatedStatProvider, AggregatedStat } from './runtime_statistics_aggregator';
+export type { AggregatedStatProvider, AggregatedStat } from './runtime_statistics_aggregator';
 
 export interface MonitoringStats {
   last_update: string;
@@ -136,6 +136,7 @@ export function createMonitoringStatsStream(
 }
 
 export function summarizeMonitoringStats(
+  logger: Logger,
   {
     // eslint-disable-next-line @typescript-eslint/naming-convention
     last_update,
@@ -143,7 +144,7 @@ export function summarizeMonitoringStats(
   }: MonitoringStats,
   config: TaskManagerConfig
 ): RawMonitoringStats {
-  const summarizedStats = withCapacityEstimate({
+  const summarizedStats = withCapacityEstimate(logger, {
     ...(configuration
       ? {
           configuration: {
@@ -156,7 +157,7 @@ export function summarizeMonitoringStats(
       ? {
           runtime: {
             timestamp: runtime.timestamp,
-            ...summarizeTaskRunStat(runtime.value, config),
+            ...summarizeTaskRunStat(logger, runtime.value, config),
           },
         }
       : {}),

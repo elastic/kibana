@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { performance } from 'perf_hooks';
 import {
   AlertInstanceContext,
@@ -69,15 +69,16 @@ export const singleSearchAfter = async ({
     });
 
     const start = performance.now();
-    const {
-      body: nextSearchAfterResult,
-    } = await services.scopedClusterClient.asCurrentUser.search<SignalSource>(
-      searchAfterQuery as estypes.SearchRequest
-    );
+    const { body: nextSearchAfterResult } =
+      await services.scopedClusterClient.asCurrentUser.search<SignalSource>(
+        searchAfterQuery as estypes.SearchRequest
+      );
     const end = performance.now();
+
     const searchErrors = createErrorsFromShard({
       errors: nextSearchAfterResult._shards.failures ?? [],
     });
+
     return {
       searchResult: nextSearchAfterResult,
       searchDuration: makeFloatString(end - start),

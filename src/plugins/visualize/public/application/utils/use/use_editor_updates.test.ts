@@ -55,14 +55,14 @@ describe('useEditorUpdates', () => {
 
   beforeEach(() => {
     unsubscribeStateUpdatesMock = jest.fn();
-    appState = ({
+    appState = {
       getState: jest.fn(() => visualizeAppStateStub),
       subscribe: jest.fn(() => unsubscribeStateUpdatesMock),
       transitions: {
         set: jest.fn(),
       },
-    } as unknown) as VisualizeAppStateContainer;
-    savedVisInstance = ({
+    } as unknown as VisualizeAppStateContainer;
+    savedVisInstance = {
       vis: {
         uiState: {
           on: jest.fn(),
@@ -80,7 +80,7 @@ describe('useEditorUpdates', () => {
         reload: jest.fn(),
       },
       savedVis: {},
-    } as unknown) as SavedVisInstance;
+    } as unknown as SavedVisInstance;
     visEditorController = {
       render: jest.fn(),
       destroy: jest.fn(),
@@ -253,7 +253,7 @@ describe('useEditorUpdates', () => {
 
     describe('handle linked search changes', () => {
       test('should update saved search id in saved instance', () => {
-        // @ts-expect-error
+        // @ts-expect-error 4.3.5 upgrade
         savedVisInstance.savedSearch = {
           id: 'saved_search_id',
         };
@@ -287,7 +287,8 @@ describe('useEditorUpdates', () => {
         savedVisInstance.savedVis = {
           savedSearchId: 'saved_search_id',
         };
-        // @ts-expect-error
+
+        // @ts-expect-error 4.3.5 upgrade
         savedVisInstance.savedSearch = {
           id: 'saved_search_id',
         };

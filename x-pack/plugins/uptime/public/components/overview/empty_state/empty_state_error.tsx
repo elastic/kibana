@@ -8,15 +8,15 @@
 import { EuiEmptyPrompt, EuiPanel, EuiTitle, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { Fragment } from 'react';
-import { IHttpFetchError } from 'src/core/public';
+import { IHttpFetchError, ResponseErrorBody } from 'src/core/public';
 
 interface EmptyStateErrorProps {
-  errors: IHttpFetchError[];
+  errors: Array<IHttpFetchError<ResponseErrorBody>>;
 }
 
 export const EmptyStateError = ({ errors }: EmptyStateErrorProps) => {
   const unauthorized = errors.find(
-    (error: IHttpFetchError) => error.message && error.message.includes('unauthorized')
+    (error) => error.message && error.message.includes('unauthorized')
   );
 
   return (
@@ -47,9 +47,9 @@ export const EmptyStateError = ({ errors }: EmptyStateErrorProps) => {
             body={
               <Fragment>
                 {!unauthorized &&
-                  errors.map((error: IHttpFetchError) => (
-                    <p key={error.body.message || error.message}>
-                      {error.body.message || error.message}
+                  errors.map((error) => (
+                    <p key={error.body?.message || error.message}>
+                      {error.body?.message || error.message}
                     </p>
                   ))}
               </Fragment>

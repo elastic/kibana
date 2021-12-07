@@ -15,6 +15,8 @@ import { exampleResult } from '../../../../__mocks__/content_sources.mock';
 
 import { nextTick } from '@kbn/test/jest';
 
+import { itShowsServerErrorAsFlashMessage } from '../../../../../test_helpers';
+
 const contentSource = { id: 'source123' };
 jest.mock('../../source_logic', () => ({
   SourceLogic: { values: { contentSource } },
@@ -31,7 +33,7 @@ import { DisplaySettingsLogic, defaultSearchResultConfig } from './display_setti
 describe('DisplaySettingsLogic', () => {
   const { http } = mockHttpValues;
   const { navigateToUrl } = mockKibanaValues;
-  const { clearFlashMessages, flashAPIErrors, setSuccessMessage } = mockFlashMessageHelpers;
+  const { clearFlashMessages, flashSuccessToast } = mockFlashMessageHelpers;
   const { mount } = new LogicMounter(DisplaySettingsLogic);
 
   const { searchResultConfig, exampleDocuments } = exampleResult;
@@ -110,7 +112,7 @@ describe('DisplaySettingsLogic', () => {
         serverProps.searchResultConfig
       );
 
-      expect(setSuccessMessage).toHaveBeenCalled();
+      expect(flashSuccessToast).toHaveBeenCalled();
     });
 
     it('handles empty color', () => {
@@ -377,7 +379,7 @@ describe('DisplaySettingsLogic', () => {
         DisplaySettingsLogic.actions.initializeDisplaySettings();
 
         expect(http.get).toHaveBeenCalledWith(
-          '/api/workplace_search/org/sources/source123/display_settings/config'
+          '/internal/workplace_search/org/sources/source123/display_settings/config'
         );
         await nextTick();
         expect(onInitializeDisplaySettingsSpy).toHaveBeenCalledWith({
@@ -397,7 +399,7 @@ describe('DisplaySettingsLogic', () => {
         DisplaySettingsLogic.actions.initializeDisplaySettings();
 
         expect(http.get).toHaveBeenCalledWith(
-          '/api/workplace_search/account/sources/source123/display_settings/config'
+          '/internal/workplace_search/account/sources/source123/display_settings/config'
         );
         await nextTick();
         expect(onInitializeDisplaySettingsSpy).toHaveBeenCalledWith({
@@ -406,12 +408,8 @@ describe('DisplaySettingsLogic', () => {
         });
       });
 
-      it('handles error', async () => {
-        http.get.mockReturnValue(Promise.reject('this is an error'));
+      itShowsServerErrorAsFlashMessage(http.get, () => {
         DisplaySettingsLogic.actions.initializeDisplaySettings();
-        await nextTick();
-
-        expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
       });
     });
 
@@ -434,12 +432,8 @@ describe('DisplaySettingsLogic', () => {
         });
       });
 
-      it('handles error', async () => {
-        http.post.mockReturnValue(Promise.reject('this is an error'));
+      itShowsServerErrorAsFlashMessage(http.post, () => {
         DisplaySettingsLogic.actions.setServerData();
-        await nextTick();
-
-        expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
       });
     });
 

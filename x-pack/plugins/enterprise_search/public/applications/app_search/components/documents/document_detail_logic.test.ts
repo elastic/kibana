@@ -17,6 +17,8 @@ import { nextTick } from '@kbn/test/jest';
 
 import { InternalSchemaType } from '../../../shared/schema/types';
 
+import { itShowsServerErrorAsFlashMessage } from '../../../test_helpers';
+
 import { DocumentDetailLogic } from './document_detail_logic';
 
 describe('DocumentDetailLogic', () => {
@@ -65,7 +67,7 @@ describe('DocumentDetailLogic', () => {
 
         DocumentDetailLogic.actions.getDocumentDetails('1');
 
-        expect(http.get).toHaveBeenCalledWith('/api/app_search/engines/engine1/documents/1');
+        expect(http.get).toHaveBeenCalledWith('/internal/app_search/engines/engine1/documents/1');
         await nextTick();
         expect(DocumentDetailLogic.actions.setFields).toHaveBeenCalledWith(fields);
       });
@@ -99,7 +101,9 @@ describe('DocumentDetailLogic', () => {
         mount();
         DocumentDetailLogic.actions.deleteDocument('1');
 
-        expect(http.delete).toHaveBeenCalledWith('/api/app_search/engines/engine1/documents/1');
+        expect(http.delete).toHaveBeenCalledWith(
+          '/internal/app_search/engines/engine1/documents/1'
+        );
         await nextTick();
         expect(flashSuccessToast).toHaveBeenCalledWith('Your document was deleted');
         expect(navigateToUrl).toHaveBeenCalledWith('/engines/engine1/documents');
@@ -115,14 +119,9 @@ describe('DocumentDetailLogic', () => {
         await nextTick();
       });
 
-      it('handles errors', async () => {
+      itShowsServerErrorAsFlashMessage(http.delete, () => {
         mount();
-        http.delete.mockReturnValue(Promise.reject('An error occured'));
-
         DocumentDetailLogic.actions.deleteDocument('1');
-        await nextTick();
-
-        expect(flashAPIErrors).toHaveBeenCalledWith('An error occured');
       });
     });
   });

@@ -6,52 +6,51 @@
  */
 
 import Boom from '@hapi/boom';
-import { i18n } from '@kbn/i18n';
-import { has, get } from 'lodash';
 import { TypeOf } from '@kbn/config-schema';
+import { i18n } from '@kbn/i18n';
 import {
-  Logger,
-  PluginInitializerContext,
-  KibanaRequest,
-  KibanaResponseFactory,
   CoreSetup,
-  ICustomClusterClient,
   CoreStart,
   CustomHttpResponseOptions,
-  ResponseError,
+  ICustomClusterClient,
+  KibanaRequest,
+  KibanaResponseFactory,
+  Logger,
   Plugin,
+  PluginInitializerContext,
+  ResponseError,
   SharedGlobalConfig,
 } from 'kibana/server';
+import { get, has } from 'lodash';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
 import {
-  LOGGING_TAG,
   KIBANA_MONITORING_LOGGING_TAG,
   KIBANA_STATS_TYPE_MONITORING,
-  ALERTS,
+  RULES,
+  LOGGING_TAG,
   SAVED_OBJECT_TELEMETRY,
 } from '../common/constants';
-import { MonitoringConfig, createConfig, configSchema } from './config';
-import { requireUIRoutes } from './routes';
-import { initBulkUploader } from './kibana_monitoring';
-import { initInfraSource } from './lib/logs/init_infra_source';
-import { registerCollectors } from './kibana_monitoring/collectors';
-import { registerMonitoringTelemetryCollection } from './telemetry_collection';
-import { LicenseService } from './license_service';
 import { AlertsFactory } from './alerts';
+import { configSchema, createConfig, MonitoringConfig } from './config';
+import { instantiateClient } from './es_client/instantiate_client';
+import { initBulkUploader } from './kibana_monitoring';
+import { registerCollectors } from './kibana_monitoring/collectors';
+import { initInfraSource } from './lib/logs/init_infra_source';
+import { LicenseService } from './license_service';
+import { requireUIRoutes } from './routes';
+import { EndpointTypes, Globals } from './static_globals';
+import { registerMonitoringTelemetryCollection } from './telemetry_collection';
 import {
+  IBulkUploader,
+  LegacyRequest,
+  LegacyShimDependencies,
   MonitoringCore,
   MonitoringLicenseService,
   MonitoringPluginSetup,
-  LegacyShimDependencies,
-  IBulkUploader,
   PluginsSetup,
   PluginsStart,
-  LegacyRequest,
   RequestHandlerContextMonitoringPlugin,
 } from './types';
-
-import { Globals, EndpointTypes } from './static_globals';
-import { instantiateClient } from './es_client/instantiate_client';
 
 // This is used to test the version of kibana
 const snapshotRegex = /-snapshot/i;
@@ -67,7 +66,8 @@ const wrapError = (error: any): CustomHttpResponseOptions<ResponseError> => {
 };
 
 export class MonitoringPlugin
-  implements Plugin<MonitoringPluginSetup, void, PluginsSetup, PluginsStart> {
+  implements Plugin<MonitoringPluginSetup, void, PluginsSetup, PluginsStart>
+{
   private readonly initializerContext: PluginInitializerContext;
   private readonly log: Logger;
   private readonly getLogger: (...scopes: string[]) => Logger;
@@ -104,7 +104,7 @@ export class MonitoringPlugin
       kibanaStats: {
         uuid: this.initializerContext.env.instanceUuid,
         name: serverInfo.name,
-        index: this.legacyConfig.kibana.index,
+        index: coreSetup.savedObjects.getKibanaIndex(),
         host: serverInfo.hostname,
         locale: i18n.getLocale(),
         port: serverInfo.port.toString(),
@@ -126,8 +126,9 @@ export class MonitoringPlugin
 
     const alerts = AlertsFactory.getAll();
     for (const alert of alerts) {
-      plugins.alerting?.registerType(alert.getAlertType());
+      plugins.alerting?.registerType(alert.getRuleType());
     }
+
     const config = createConfig(this.initializerContext.config.get<TypeOf<typeof configSchema>>());
 
     // Register collector objects for stats to show up in the APIs
@@ -192,18 +193,23 @@ export class MonitoringPlugin
         plugins
       );
 
-      requireUIRoutes(this.monitoringCore, {
+      if (config.ui.debug_mode) {
+        this.log.info('MONITORING DEBUG MODE: ON');
+      }
+
+      requireUIRoutes(this.monitoringCore, config, {
         cluster,
         router,
         licenseService: this.licenseService,
         encryptedSavedObjects: plugins.encryptedSavedObjects,
+        alerting: plugins.alerting,
         logger: this.log,
       });
       initInfraSource(config, plugins.infra);
     }
   }
 
-  async start(coreStart: CoreStart, { licensing }: PluginsStart) {
+  start(coreStart: CoreStart, { licensing }: PluginsStart) {
     const config = this.config!;
     this.cluster = instantiateClient(
       config.ui.elasticsearch,
@@ -272,7 +278,7 @@ export class MonitoringPlugin
       app: ['monitoring', 'kibana'],
       catalogue: ['monitoring'],
       privileges: null,
-      alerting: ALERTS,
+      alerting: RULES,
       reserved: {
         description: i18n.translate('xpack.monitoring.feature.reserved.description', {
           defaultMessage: 'To grant users access, you should also assign the monitoring_user role.',
@@ -289,10 +295,10 @@ export class MonitoringPlugin
               },
               alerting: {
                 rule: {
-                  all: ALERTS,
+                  all: RULES,
                 },
                 alert: {
-                  all: ALERTS,
+                  all: RULES,
                 },
               },
               ui: [],

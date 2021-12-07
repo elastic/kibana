@@ -12,7 +12,12 @@ import { i18n } from '@kbn/i18n';
 
 import { camelCase, isArray, isObject } from 'lodash';
 import { set } from '@elastic/safer-lodash-set';
-import { APP_ID, DEFAULT_DATE_FORMAT, DEFAULT_DATE_FORMAT_TZ } from '../../../../common/constants';
+import {
+  APP_UI_ID,
+  CASES_FEATURE_ID,
+  DEFAULT_DATE_FORMAT,
+  DEFAULT_DATE_FORMAT_TZ,
+} from '../../../../common/constants';
 import { errorToToaster, useStateToaster } from '../../components/toasters';
 import { AuthenticatedUser } from '../../../../../security/common/model';
 import { NavigateToAppOptions } from '../../../../../../../src/core/public';
@@ -151,13 +156,9 @@ export const useGetUserCasesPermissions = () => {
   const uiCapabilities = useKibana().services.application.capabilities;
 
   useEffect(() => {
-    const capabilitiesCanUserCRUD: boolean =
-      typeof uiCapabilities.siem.crud_cases === 'boolean' ? uiCapabilities.siem.crud_cases : false;
-    const capabilitiesCanUserRead: boolean =
-      typeof uiCapabilities.siem.read_cases === 'boolean' ? uiCapabilities.siem.read_cases : false;
     setCasesPermissions({
-      crud: capabilitiesCanUserCRUD,
-      read: capabilitiesCanUserRead,
+      crud: !!uiCapabilities[CASES_FEATURE_ID].crud_cases,
+      read: !!uiCapabilities[CASES_FEATURE_ID].read_cases,
     });
   }, [uiCapabilities]);
 
@@ -173,7 +174,7 @@ export const useAppUrl = () => {
 
   const getAppUrl = useCallback(
     ({
-      appId = APP_ID,
+      appId = APP_UI_ID,
       ...options
     }: {
       appId?: string;
@@ -196,7 +197,7 @@ export const useNavigateTo = () => {
   const navigateTo = useCallback(
     ({
       url,
-      appId = APP_ID,
+      appId = APP_UI_ID,
       ...options
     }: {
       url?: string;

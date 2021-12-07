@@ -20,6 +20,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       after(async () => {
+        // NOTE: Logout needs to happen before anything else to avoid flaky behavior
         await transform.securityUI.logout();
       });
 
@@ -158,10 +159,7 @@ export default function ({ getService }: FtrProviderContext) {
           'should have the retention policy inputs enabled'
         );
         await transform.editFlyout.openTransformEditAccordionRetentionPolicySettings();
-        await transform.editFlyout.assertTransformEditFlyoutInputEnabled(
-          'RetentionPolicyField',
-          true
-        );
+        await transform.editFlyout.assertTransformEditFlyoutRetentionPolicySelectEnabled(true);
         await transform.editFlyout.assertTransformEditFlyoutInputEnabled(
           'RetentionPolicyMaxAge',
           true

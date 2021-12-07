@@ -14,13 +14,13 @@ import { savedObjectsClientMock, httpServerMock } from 'src/core/server/mocks';
 import { okResponse } from '../ok_response';
 import { getMockedRouterDeps } from '../test_helpers';
 
-const mockRouteContext = ({
+const mockRouteContext = {
   core: {
     savedObjects: {
       client: savedObjectsClientMock.create(),
     },
   },
-} as unknown) as RequestHandlerContext;
+} as unknown as RequestHandlerContext;
 
 const now = new Date();
 const nowIso = now.toISOString();

@@ -9,7 +9,7 @@
 import { CoreSetup, CoreStart, Plugin } from '../../../core/public';
 import { ExpressionsStart, ExpressionsSetup } from '../../expressions/public';
 import { metricFunction } from '../common/expression_functions';
-import { metricRenderer } from './expression_renderers';
+import { metricRendererFactory } from './expression_renderers';
 
 interface SetupDeps {
   expressions: ExpressionsSetup;
@@ -23,11 +23,11 @@ export type ExpressionMetricPluginSetup = void;
 export type ExpressionMetricPluginStart = void;
 
 export class ExpressionMetricPlugin
-  implements
-    Plugin<ExpressionMetricPluginSetup, ExpressionMetricPluginStart, SetupDeps, StartDeps> {
+  implements Plugin<ExpressionMetricPluginSetup, ExpressionMetricPluginStart, SetupDeps, StartDeps>
+{
   public setup(core: CoreSetup, { expressions }: SetupDeps): ExpressionMetricPluginSetup {
     expressions.registerFunction(metricFunction);
-    expressions.registerRenderer(metricRenderer);
+    expressions.registerRenderer(metricRendererFactory(core));
   }
 
   public start(core: CoreStart): ExpressionMetricPluginStart {}
