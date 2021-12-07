@@ -6,5 +6,9 @@
  * Side Public License, v 1.
  */
 
-exports.run = require('./cli').run;
-exports.Cluster = require('./cluster').Cluster;
+import { ToolingLog } from '@kbn/dev-utils';
+
+export const log = new ToolingLog({
+  level: 'verbose',
+  writeTo: process.stdout,
+});

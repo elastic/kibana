@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-exports.installArchive = require('./archive').installArchive;
-exports.installSnapshot = require('./snapshot').installSnapshot;
-exports.downloadSnapshot = require('./snapshot').downloadSnapshot;
-exports.installSource = require('./source').installSource;
+// @ts-expect-error not typed yet
+export { run } from './cli';
+// @ts-expect-error not typed yet
+export { Cluster } from './cluster';
