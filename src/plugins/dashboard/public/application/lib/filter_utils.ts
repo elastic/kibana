@@ -72,7 +72,7 @@ export const cleanFiltersForComparison = (filters: Filter[]) => {
 
 export const cleanFiltersForSerialize = (filters: Filter[]): Filter[] => {
   return filters.map((filter) => {
-    if (filter.meta.value) {
+    if (filter.meta?.value) {
       delete filter.meta.value;
     }
     return filter;
