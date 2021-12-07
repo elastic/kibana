@@ -8,7 +8,7 @@ import { merge } from 'lodash';
 
 import { CaseMetricsResponseRt, CaseMetricsResponse } from '../../../common/api';
 import { Operations } from '../../authorization';
-import { createCaseError } from '../../common';
+import { createCaseError } from '../../common/error';
 import { CasesClient } from '../client';
 import { CasesClientArgs } from '../types';
 import { AlertsCount } from './alerts_count';
