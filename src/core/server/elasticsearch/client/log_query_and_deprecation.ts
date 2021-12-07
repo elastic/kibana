@@ -115,8 +115,8 @@ export const instrumentEsQueryAndDeprecationLogger = ({
         // Kibana requests will be hidden from the upgrade assistant UI and are
         // only logged to help developers maintain their plugins
         const requestOrigin =
-          (event.meta.request.options.headers != null &&
-            (event.meta.request.options.headers[
+          (event.meta.request.params.headers != null &&
+            (event.meta.request.params.headers[
               'x-elastic-product-origin'
             ] as unknown as string)) === 'kibana'
             ? 'kibana'

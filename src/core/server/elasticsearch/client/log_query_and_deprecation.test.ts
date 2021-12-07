@@ -9,12 +9,19 @@
 import { Buffer } from 'buffer';
 import { Readable } from 'stream';
 
-import { errors, TransportRequestOptions, TransportRequestParams } from '@elastic/elasticsearch';
+import {
+  Client,
+  ConnectionRequestParams,
+  errors,
+  TransportRequestOptions,
+  TransportRequestParams,
+} from '@elastic/elasticsearch';
 import type { DiagnosticResult, RequestBody } from '@elastic/elasticsearch';
 
 import { parseClientOptionsMock, ClientMock } from './configure_client.test.mocks';
 import { loggingSystemMock } from '../../logging/logging_system.mock';
 import { instrumentEsQueryAndDeprecationLogger } from './log_query_and_deprecation';
+import { KibanaClient } from '@elastic/elasticsearch/lib/api/kibana';
 
 const createApiResponse = <T>({
   body,
@@ -28,7 +35,7 @@ const createApiResponse = <T>({
   statusCode?: number;
   headers?: Record<string, string>;
   warnings?: string[];
-  params?: TransportRequestParams;
+  params?: TransportRequestParams | ConnectionRequestParams;
   requestOptions?: TransportRequestOptions;
 }): DiagnosticResult<T> => {
   return {
@@ -52,7 +59,7 @@ const createFakeClient = () => {
     nodes: ['http://localhost'], // Enforcing `nodes` because it's mandatory
   });
   jest.spyOn(client.diagnostic, 'on');
-  return client;
+  return client as Client;
 };
 
 describe('instrumentQueryAndDeprecationLogger', () => {
@@ -480,12 +487,12 @@ describe('instrumentQueryAndDeprecationLogger', () => {
       const response = createApiResponse({
         statusCode: 400,
         warnings: ['GET /_path is deprecated'],
-        // Set the request header to indicate to Elasticsearch that this is a request over which users have no control
-        requestOptions: { headers: { 'x-elastic-product-origin': 'kibana' } },
         params: {
           method: 'GET',
           path: '/_path',
           querystring: { hello: 'dolly' },
+          // Set the request header to indicate to Elasticsearch that this is a request over which users have no control
+          headers: { 'x-elastic-product-origin': 'kibana' },
         },
         body: {
           error: {
@@ -547,12 +554,12 @@ describe('instrumentQueryAndDeprecationLogger', () => {
       const response = createApiResponse({
         statusCode: 200,
         warnings: ['GET /_path is deprecated'],
-        // Set the request header to indicate to Elasticsearch that this is a request over which users have no control
-        requestOptions: { headers: { 'x-elastic-product-origin': 'kibana' } },
         params: {
           method: 'GET',
           path: '/_path',
           querystring: { hello: 'dolly' },
+          // Set the request header to indicate to Elasticsearch that this is a request over which users have no control
+          headers: { 'x-elastic-product-origin': 'kibana' },
         },
         body: {
           hits: [
