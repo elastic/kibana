@@ -31,11 +31,11 @@ import {
   EDIT_HOST_ISOLATION_EXCEPTION_LABEL,
 } from './components/translations';
 import { getEndpointListPath } from '../../../common/routing';
-import { useEndpointPrivileges } from '../../../../common/components/user_privileges/endpoint';
 import {
   MANAGEMENT_DEFAULT_PAGE_SIZE,
   MANAGEMENT_PAGE_SIZE_OPTIONS,
 } from '../../../common/constants';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
 
 type HostIsolationExceptionPaginatedContent = PaginatedContentProps<
   Immutable<ExceptionListItemSchema>,
@@ -44,7 +44,7 @@ type HostIsolationExceptionPaginatedContent = PaginatedContentProps<
 
 export const HostIsolationExceptionsList = () => {
   const history = useHistory();
-  const privileges = useEndpointPrivileges();
+  const privileges = useUserPrivileges().endpointPrivileges;
 
   const location = useHostIsolationExceptionsSelector(getCurrentLocation);
   const navigateCallback = useHostIsolationExceptionsNavigateCallback();

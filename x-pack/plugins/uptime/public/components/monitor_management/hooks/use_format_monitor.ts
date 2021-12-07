@@ -7,7 +7,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { omitBy, isNil } from 'lodash';
 import { ConfigKey, DataStream, Validation, MonitorFields } from '../../fleet_package/types';
-import { formatters } from '../formatters';
+import { formatters } from '../../../../server/lib/synthetics_service/formatters';
 
 interface Props {
   monitorType: DataStream;

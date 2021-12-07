@@ -29,6 +29,9 @@ import { SyntheticsMonitorSavedObject } from '../../../common/types';
 import { syntheticsMonitorType } from '../saved_objects/synthetics_monitor';
 import { getEsHosts } from './get_es_hosts';
 import { UptimeConfig } from '../../../common/config';
+import { ServiceAPIClient } from './service_api_client';
+import { formatMonitorConfig } from './formatters/format_configs';
+import { ConfigKey, MonitorFields } from '../../../common/runtime_types/monitor_management';
 import { MonitorConfigs, FormattedMonitorConfigs, ServiceAPIClient } from './service_api_client';
 
 const SYNTHETICS_SERVICE_SYNC_MONITORS_TASK_TYPE =
@@ -166,8 +169,11 @@ export class SyntheticsService {
     };
   }
 
-  async pushConfigs(request?: KibanaRequest, configs?: MonitorConfigs) {
+  async pushConfigs(request?: KibanaRequest, configs?: MonitorFields[]) {
     const monitors = this.formatConfigs(configs || (await this.getMonitorConfigs()));
+    if (monitors.length === 0) {
+      return;
+    }
     const data = {
       monitors,
       output: await this.getOutput(request),
@@ -181,7 +187,7 @@ export class SyntheticsService {
     }
   }
 
-  async deleteConfigs(request: KibanaRequest, configs: MonitorConfigs) {
+  async deleteConfigs(request: KibanaRequest, configs: MonitorFields[]) {
     const data = {
       monitors: this.formatConfigs(configs),
       output: await this.getOutput(request),
@@ -198,58 +204,16 @@ export class SyntheticsService {
     });
 
     const savedObjectsList = monitorsSavedObjects.saved_objects;
-    return savedObjectsList.map<ValuesType<MonitorConfigs>>(({ attributes, id }) => ({
+    return savedObjectsList.map<ValuesType<MonitorFields[]>>(({ attributes, id }) => ({
       ...attributes,
       id,
     }));
   }
 
-  formatConfigs(configs: MonitorConfigs): FormattedMonitorConfigs {
-    // TODO: Move to dedicated formatter class
-
-    function parseSchedule(schedule: any) {
-      if (schedule?.number) {
-        return `@every ${schedule.number}${schedule.unit}`;
-      }
-      return schedule;
-    }
-
-    /* despite urls being plural, it will never be an array
-     * the plural is held over from legacy implementations */
-    function parseUrl(urls?: string) {
-      if (!urls) {
-        return undefined;
-      }
-      return urls;
-    }
-
-    function parseInlineSource(monAttrs: any) {
-      if (monAttrs['source.inline.script']) {
-        return {
-          inline: {
-            script: monAttrs['source.inline.script'],
-          },
-        };
-      }
-    }
-
-    function parseLocations(locations: ServiceLocations) {
-      return locations.map((location) => location.id);
-    }
-
-    return configs.map((monAttrs) => {
-      const { id, schedule, type, name, locations, tags, urls } = monAttrs;
-      return {
-        id,
-        type,
-        name,
-        locations: parseLocations(locations || []),
-        tags,
-        source: parseInlineSource(monAttrs),
-        urls: parseUrl(urls),
-        schedule: parseSchedule(schedule),
-      };
-    });
+  formatConfigs(configs: MonitorFields[]) {
+    return configs.map((config: Partial<MonitorFields>) =>
+      formatMonitorConfig(Object.keys(config) as ConfigKey[], config)
+    );
   }
 }
 

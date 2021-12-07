@@ -12,25 +12,12 @@ import { ServiceLocations } from '../../../common/runtime_types/monitor_manageme
 import { SyntheticsMonitorSavedObject } from '../../../common/types';
 import { getServiceLocations } from './get_service_locations';
 import { Logger } from '../../../../../../src/core/server';
+import { MonitorFields } from '../../../common/runtime_types/monitor_management';
 
 const TEST_SERVICE_USERNAME = 'localKibanaIntegrationTestsUser';
 
-export type MonitorConfigs = Array<
-  SyntheticsMonitorSavedObject['attributes'] & {
-    id: string;
-    source?: {
-      inline: {
-        script: string;
-      };
-    };
-  }
->;
-
-// TODO: Proper type for formatted montior config in heartbeat json format
-export type FormattedMonitorConfigs = Array<Record<string, any> & { locations: string[] }>;
-
 export interface ServiceData {
-  monitors: FormattedMonitorConfigs;
+  monitors: Array<Partial<MonitorFields>>;
   output: {
     hosts: string[];
     api_key: string;

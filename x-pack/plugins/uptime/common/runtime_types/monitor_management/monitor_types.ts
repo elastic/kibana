@@ -48,8 +48,10 @@ export type ZipUrlTLSFields = t.TypeOf<typeof ZipUrlTLSFieldsCodec>;
 
 // CommonFields
 export const CommonFieldsCodec = t.interface({
+  [ConfigKey.NAME]: t.string,
   [ConfigKey.MONITOR_TYPE]: DataStreamCodec,
   [ConfigKey.SCHEDULE]: Schedule,
+  [ConfigKey.LOCATIONS]: t.array(t.string),
   [ConfigKey.APM_SERVICE_NAME]: t.string,
   [ConfigKey.TIMEOUT]: t.string,
   [ConfigKey.TAGS]: t.array(t.string),
@@ -189,9 +191,6 @@ export const MonitorFieldsCodec = t.intersection([
   TCPFieldsCodec,
   ICMPSimpleFieldsCodec,
   BrowserFieldsCodec,
-  t.interface({
-    [ConfigKey.NAME]: t.string,
-  }),
 ]);
 
 export type MonitorFields = t.TypeOf<typeof MonitorFieldsCodec>;
