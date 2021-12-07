@@ -18,10 +18,10 @@ import { AccordionList } from './accordion_list';
 import { CrawlDetailsSummary } from './crawl_details_summary';
 
 interface CrawlDetailsPreviewProps {
-  crawlerLogsEnabled: boolean;
+  crawlerLogsEnabled?: boolean;
 }
 
-export const CrawlDetailsPreview: React.FC<CrawlDetailsPreviewProps> = ({ crawlerLogsEnabled }) => {
+export const CrawlDetailsPreview: React.FC<CrawlDetailsPreviewProps> = ({ crawlerLogsEnabled = false }) => {
   const { crawlRequest } = useValues(CrawlDetailLogic);
 
   if (crawlRequest === null) {
