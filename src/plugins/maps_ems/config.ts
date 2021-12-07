@@ -55,4 +55,4 @@ export const mapConfigSchema = schema.object({
 
 export type MapConfig = TypeOf<typeof mapConfigSchema>;
 export type TileMapConfig = TypeOf<typeof tilemapConfigSchema>;
-export type EMSConfig = Omit<MapConfig, 'tilemap'>;
+export type EMSConfig = Omit<MapConfig, 'tilemap' | 'emsTileLayerId'>;

@@ -22,17 +22,11 @@ import {
 } from '../../../../x-pack/plugins/licensing/public';
 import { createEMSClient } from './create_ems_client';
 
-/**
- * These are the interfaces with your public contracts. You should export these
- * for other plugins to use in _their_ `SetupDeps`/`StartDeps` interfaces.
- * @public
- */
-
-export interface MapsEmsStartDependencies {
-  licensing: LicensingPluginStart;
+interface MapsEmsStartPublicDependencies {
+  licensing?: LicensingPluginStart;
 }
-export interface MapsEmsSetupDependencies {
-  licensing: LicensingPluginSetup;
+interface MapsEmsSetupPublicDependencies {
+  licensing?: LicensingPluginSetup;
 }
 
 export class MapsEmsPlugin implements Plugin<MapsEmsPluginPublicSetup, MapsEmsPluginPublicStart> {
@@ -42,7 +36,7 @@ export class MapsEmsPlugin implements Plugin<MapsEmsPluginPublicSetup, MapsEmsPl
     this._initializerContext = initializerContext;
   }
 
-  public setup(core: CoreSetup, plugins: MapsEmsSetupDependencies) {
+  public setup(core: CoreSetup, plugins: MapsEmsSetupPublicDependencies) {
     const mapConfig = this._initializerContext.config.get<MapConfig>();
     const kibanaVersion = this._initializerContext.env.packageInfo.version;
 
@@ -61,7 +55,9 @@ export class MapsEmsPlugin implements Plugin<MapsEmsPluginPublicSetup, MapsEmsPl
     };
   }
 
-  public start(core: CoreStart, plugins: MapsEmsStartDependencies) {
-    setLicensingPluginStart(plugins.licensing);
+  public start(core: CoreStart, plugins: MapsEmsStartPublicDependencies) {
+    if (plugins.licensing) {
+      setLicensingPluginStart(plugins.licensing);
+    }
   }
 }

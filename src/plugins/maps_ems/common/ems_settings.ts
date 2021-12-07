@@ -12,25 +12,17 @@ import {
   DEFAULT_EMS_LANDING_PAGE_URL,
   DEFAULT_EMS_TILE_API_URL,
 } from './ems_defaults';
+import { EMSConfig } from '../config';
 
-export interface IEMSConfig {
-  includeElasticMapsService?: boolean;
-  emsFileApiUrl?: string;
-  emsTileApiUrl?: string;
-  emsLandingPageUrl?: string;
-  emsFontLibraryUrl?: string;
-  emsUrl?: string;
-}
-
-export function createEMSSettings(emsConfig: IEMSConfig, getIsEnterPrisePlus: () => boolean) {
+export function createEMSSettings(emsConfig: EMSConfig, getIsEnterPrisePlus: () => boolean) {
   return new EMSSettings(emsConfig, getIsEnterPrisePlus);
 }
 
 export class EMSSettings {
-  private readonly _config: IEMSConfig;
+  private readonly _config: EMSConfig;
   private readonly _getIsEnterprisePlus: () => boolean;
 
-  constructor(config: IEMSConfig, getIsEnterPrisePlus: () => boolean) {
+  constructor(config: EMSConfig, getIsEnterPrisePlus: () => boolean) {
     this._config = config;
     this._getIsEnterprisePlus = getIsEnterPrisePlus;
   }

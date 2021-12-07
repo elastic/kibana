@@ -13,7 +13,9 @@ import {
   PluginConfigDescriptor,
 } from 'src/core/server';
 import { MapConfig, mapConfigSchema } from '../config';
-import { EMSSettings } from '../common';
+import { EMSSettings, MAPS_EMS_APP_ID } from '../common';
+import { LicensingPluginSetup } from '../../../../x-pack/plugins/licensing/server';
+import { ILicense } from '../../../../x-pack/plugins/licensing/common/types';
 export type { EMSSettings } from '../common';
 
 export const config: PluginConfigDescriptor<MapConfig> = {
@@ -35,6 +37,10 @@ export interface MapsEmsPluginServerSetup {
   createEMSSettings: () => EMSSettings;
 }
 
+interface MapsEmsSetupServerDependencies {
+  licensing?: LicensingPluginSetup;
+}
+
 export class MapsEmsPlugin implements Plugin<MapsEmsPluginServerSetup> {
   readonly _initializerContext: PluginInitializerContext<MapConfig>;
 
@@ -42,14 +48,25 @@ export class MapsEmsPlugin implements Plugin<MapsEmsPluginServerSetup> {
     this._initializerContext = initializerContext;
   }
 
-  public setup(core: CoreSetup) {
+  public setup(core: CoreSetup, plugins: MapsEmsSetupServerDependencies) {
     const mapConfig = this._initializerContext.config.get();
+
+    let isEnterprisePlus = false;
+    if (plugins.licensing) {
+      function updateLicenseState(license: ILicense) {
+        const enterprise = license.check(MAPS_EMS_APP_ID, 'enterprise');
+        isEnterprisePlus = enterprise.state === 'valid';
+      }
+
+      plugins.licensing.refresh().then(updateLicenseState);
+      plugins.licensing.license$.subscribe(updateLicenseState);
+    }
+
     return {
       config: mapConfig,
       createEMSSettings: () => {
         return new EMSSettings(mapConfig, () => {
-          // TODO - implement server-side licensing check
-          return true;
+          return isEnterprisePlus;
         });
       },
     };

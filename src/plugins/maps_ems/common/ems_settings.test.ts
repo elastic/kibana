@@ -6,18 +6,19 @@
  * Side Public License, v 1.
  */
 
-import { EMSSettings, IEMSConfig } from './ems_settings';
+import { EMSSettings } from './ems_settings';
 import {
   DEFAULT_EMS_FILE_API_URL,
   DEFAULT_EMS_FONT_LIBRARY_URL,
   DEFAULT_EMS_LANDING_PAGE_URL,
   DEFAULT_EMS_TILE_API_URL,
 } from './ems_defaults';
+import { EMSConfig } from '../config';
 
 const IS_ENTERPRISE_PLUS = () => true;
 
 describe('EMSSettings', () => {
-  const mockConfig: IEMSConfig = {
+  const mockConfig: EMSConfig = {
     includeElasticMapsService: true,
     emsUrl: '',
     emsFileApiUrl: DEFAULT_EMS_FILE_API_URL,

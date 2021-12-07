@@ -18,3 +18,5 @@ export {
 } from './ems_defaults';
 
 export { EMSSettings } from './ems_settings';
+
+export const MAPS_EMS_APP_ID = 'maps';
