@@ -13,6 +13,7 @@ import { PluginStart as DataViewsServerPluginStart } from 'src/plugins/data_view
 import { ConfigSchema } from '../config';
 import { ISearchSetup, ISearchStart, SearchEnhancements } from './search';
 import { SearchService } from './search/search_service';
+import { QueryService } from './query/query_service';
 import { ScriptsService } from './scripts';
 import { KqlTelemetryService } from './kql_telemetry';
 import { UsageCollectionSetup } from '../../usage_collection/server';
@@ -71,6 +72,7 @@ export class DataServerPlugin
   private readonly scriptsService: ScriptsService;
   private readonly kqlTelemetryService: KqlTelemetryService;
   private readonly autocompleteService: AutocompleteService;
+  private readonly queryService = new QueryService();
   private readonly logger: Logger;
 
   constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {
@@ -86,6 +88,7 @@ export class DataServerPlugin
     { bfetch, expressions, usageCollection, fieldFormats }: DataPluginSetupDependencies
   ) {
     this.scriptsService.setup(core);
+    this.queryService.setup(core);
     this.autocompleteService.setup(core);
     this.kqlTelemetryService.setup(core, { usageCollection });
 
