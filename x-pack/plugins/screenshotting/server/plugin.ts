@@ -65,8 +65,9 @@ export class ScreenshottingPlugin implements Plugin<void, ScreenshottingStart, S
       return new HeadlessChromiumDriverFactory(this.screenshotMode, config, logger, binaryPath);
     })();
 
-    this.browserDriverFactory.catch(() => {
+    this.browserDriverFactory.catch((error) => {
       this.logger.error('Error in screenshotting setup, it may not function properly.');
+      this.logger.error(error);
     });
 
     return {};
