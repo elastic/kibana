@@ -240,6 +240,13 @@ export function AgentInstructionsAccordion({
                           'xpack.apm.fleetIntegration.apmAgent.runtimeAttachment.betaBadge.label',
                           { defaultMessage: 'BETA' }
                         )}
+                        tooltipContent={i18n.translate(
+                          'xpack.apm.fleetIntegration.apmAgent.runtimeAttachment.betaBadge.tooltipContent',
+                          {
+                            defaultMessage:
+                              'Auto-attachment for Java is not GA. Please help us by reporting any bugs.',
+                          }
+                        )}
                       />
                     </EuiFlexItem>
                   </EuiFlexGroup>
