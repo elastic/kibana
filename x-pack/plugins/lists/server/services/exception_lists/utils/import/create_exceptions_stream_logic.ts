@@ -30,7 +30,7 @@ import {
 import { BadRequestError } from '@kbn/securitysolution-es-utils';
 import { exactCheck, formatErrors } from '@kbn/securitysolution-io-ts-utils';
 
-import { ExceptionsImport, PromiseFromStreams } from '../../import_exception_list_and_items';
+import { ExceptionsImport } from '../../import_exception_list_and_items';
 
 /**
  * Parses strings from ndjson stream
@@ -52,6 +52,17 @@ export const parseNdjsonStrings = (): Transform => {
  */
 
 /**
+ * Helper to determine if exception shape is that of an item vs parent container
+ * @param exception
+ * @returns {boolean}
+ */
+export const isImportExceptionListItemSchema = (
+  exception: ImportExceptionListItemSchema | ImportExceptionsListSchema
+): exception is ImportExceptionListItemSchema => {
+  return has('entries', exception) || has('item_id', exception);
+};
+
+/**
  * Sorts the exceptions into the lists and items.
  * We do this because we don't want the order of the exceptions
  * in the import to matter. If we didn't sort, then some items
@@ -70,7 +81,7 @@ export const sortExceptions = (
     lists: ImportExceptionsListSchema[];
   }>(
     (acc, exception) => {
-      if (has('entries', exception) || has('item_id', exception)) {
+      if (isImportExceptionListItemSchema(exception)) {
         return { ...acc, items: [...acc.items, exception] };
       } else {
         return { ...acc, lists: [...acc.lists, exception] };
@@ -284,7 +295,10 @@ export const filterEmptyStrings = (): Transform => {
 export const exceptionsChecksFromArray = (
   exceptionsToImport: Array<ImportExceptionsListSchema | ImportExceptionListItemSchema>,
   exceptionsLimit: number
-): PromiseFromStreams => {
+): {
+  items: Array<ImportExceptionListItemSchema | Error>;
+  lists: Array<ImportExceptionsListSchema | Error>;
+} => {
   return pipe(exceptionsToImport, checkLimits(exceptionsLimit), sortExceptions, validateExceptions);
 };
 

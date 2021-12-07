@@ -6,6 +6,7 @@
  */
 
 import {
+  ExceptionListSchema,
   FoundExceptionListSchema,
   ImportExceptionListItemSchemaDecoded,
   ImportExceptionListSchemaDecoded,
@@ -107,7 +108,7 @@ export const getAllListTypes = async (
   agnosticListItems: ImportExceptionListSchemaDecoded[] | ImportExceptionListItemSchemaDecoded[],
   nonAgnosticListItems: ImportExceptionListSchemaDecoded[] | ImportExceptionListItemSchemaDecoded[],
   savedObjectsClient: SavedObjectsClientContract
-): Promise<Record<string, ImportExceptionListSchemaDecoded>> => {
+): Promise<Record<string, ExceptionListSchema>> => {
   // Gather lists referenced
   const foundListsResponse = await findAllListTypes(
     agnosticListItems,

@@ -6,6 +6,7 @@
  */
 
 import {
+  ExceptionListItemSchema,
   ImportExceptionListItemSchemaDecoded,
   NamespaceType,
 } from '@kbn/securitysolution-io-ts-list-types';
@@ -130,7 +131,7 @@ export const getAllListItemTypes = async (
   agnosticListItems: ImportExceptionListItemSchemaDecoded[],
   nonAgnosticListItems: ImportExceptionListItemSchemaDecoded[],
   savedObjectsClient: SavedObjectsClientContract
-): Promise<Record<string, ImportExceptionListItemSchemaDecoded>> => {
+): Promise<Record<string, ExceptionListItemSchema>> => {
   // Gather items with matching item_id
   const foundItemsResponse = await findAllListItemTypes(
     agnosticListItems,
