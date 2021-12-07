@@ -12,13 +12,7 @@ test('`schema` creates correct schema with defaults.', () => {
   expect(config.schema.validate({})).toMatchInlineSnapshot(`
     Object {
       "appenders": Map {},
-      "loggers": Array [
-        Object {
-          "appenders": Array [],
-          "level": "off",
-          "name": "elasticsearch.deprecation",
-        },
-      ],
+      "loggers": Array [],
       "root": Object {
         "appenders": Array [
           "default",
@@ -106,7 +100,7 @@ test('correctly fills in custom `appenders` config.', () => {
 test('correctly fills in default `loggers` config.', () => {
   const configValue = new LoggingConfig(config.schema.validate({}));
 
-  expect(configValue.loggers.size).toBe(2);
+  expect(configValue.loggers.size).toBe(1);
   expect(configValue.loggers.get('root')).toEqual({
     appenders: ['default'],
     name: 'root',

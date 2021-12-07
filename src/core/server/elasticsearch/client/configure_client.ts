@@ -168,15 +168,16 @@ const addLogging = ({ client, type, logger }: { client: Client; type: string; lo
             ? 'kibana'
             : 'user';
 
+        // Strip the first 5 stack trace lines as these are irrelavent to finding the call site
         const stackTrace = new Error().stack?.split('\n').slice(5).join('\n');
 
         if (requestOrigin === 'kibana') {
           deprecationLogger.warn(
-            `ES DEPRECATION: ${event.warnings}\nOrigin:${requestOrigin}\nStack trace:\n${stackTrace}\nQuery:\n${queryMessage}`
+            `Elasticsearch deprecation: ${event.warnings}\nOrigin:${requestOrigin}\nStack trace:\n${stackTrace}\nQuery:\n${queryMessage}`
           );
         } else {
-          deprecationLogger.error(
-            `ES DEPRECATION: ${event.warnings}\nOrigin:${requestOrigin}\nStack trace:\n${stackTrace}\nQuery:\n${queryMessage}`
+          deprecationLogger.debug(
+            `Elasticsearch deprecation: ${event.warnings}\nOrigin:${requestOrigin}\nStack trace:\n${stackTrace}\nQuery:\n${queryMessage}`
           );
         }
       }

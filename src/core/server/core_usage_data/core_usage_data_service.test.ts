@@ -361,7 +361,7 @@ describe('CoreUsageDataService', () => {
               },
               "logging": Object {
                 "appendersTypesUsed": Array [],
-                "loggersConfiguredCount": 1,
+                "loggersConfiguredCount": 0,
               },
               "savedObjects": Object {
                 "customIndex": false,
