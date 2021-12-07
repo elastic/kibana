@@ -503,7 +503,6 @@ export type TimelineExpandedEventType =
         eventId: string;
         indexName: string;
         refetch?: () => void;
-        ecsData?: Ecs;
       };
     }
   | EmptyObject;

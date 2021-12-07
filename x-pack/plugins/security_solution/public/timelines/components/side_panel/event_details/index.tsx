@@ -58,8 +58,6 @@ interface EventDetailsPanelProps {
   expandedEvent: {
     eventId: string;
     indexName: string;
-    ecsData?: Ecs;
-    nonEcsData?: TimelineNonEcsData[];
     refetch?: () => void;
   };
   handleOnEventClosed: () => void;
@@ -82,7 +80,7 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
   tabType,
   timelineId,
 }) => {
-  const [loading, detailsData, rawEventData] = useTimelineEventsDetails({
+  const [loading, detailsData, rawEventData, ecsData] = useTimelineEventsDetails({
     docValueFields,
     entityType,
     indexName: expandedEvent.indexName ?? '',
@@ -209,6 +207,7 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
 
       <EventDetailsFooter
         detailsData={detailsData}
+        detailsEcsData={ecsData}
         expandedEvent={expandedEvent}
         handleOnEventClosed={handleOnEventClosed}
         isHostIsolationPanelOpen={isHostIsolationPanelOpen}
