@@ -84,13 +84,13 @@ export async function createAgentKey({
 
   const { name = 'apm-key', sourcemap, event, agentConfig } = requestBody;
 
-  let privileges: PrivilegeType[] = [];
+  const privileges: PrivilegeType[] = [];
   if (!sourcemap && !event && !agentConfig) {
-    privileges = [
+    privileges.push(
       PrivilegeType.SOURCEMAP,
       PrivilegeType.EVENT,
       PrivilegeType.AGENT_CONFIG,
-    ];
+    );
   }
 
   if (sourcemap) {
