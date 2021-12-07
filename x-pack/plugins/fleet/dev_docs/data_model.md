@@ -28,6 +28,8 @@ In prior alpha versions of Fleet, this data was also stored in Saved Objects bec
 communicating directly with Kibana for policy updates. Once Fleet Server was introduced, that data was migrated to these
 Elasticsearch indices to be readable by Fleet Server.
 
+* Cleanup model:
+
 ### `.fleet-agents` index
 
 Each document in this index tracks an individual Elastic Agent's enrollment in the Fleet, which policy it is current
@@ -36,6 +38,8 @@ assigned to, its check in status, which packages are currently installed, and ot
 All of the code that interacts with this index is currently located in
 [`x-pack/plugins/fleet/server/services/agents/crud.ts`](../server/services/agents/crud.ts) and the schema of these
 documents is maintained by the `FleetServerAgent` TypeScript interface.
+
+* Cleanup model:
 
 ### `.fleet-actions` index
 
@@ -46,17 +50,31 @@ list.
 
 The total schema for actions is represented by the `FleetServerAgentAction` type.
 
+* Cleanup model: Timeout after X days
+
 ### `.fleet-actions-results`
+
+* Cleanup model: 
 
 ### `.fleet-servers`
 
+* Cleanup model: 
+
 ### `.fleet-artifacts`
+
+* Cleanup model:
 
 ### `.fleet-entrollment-api-keys`
 
+* Cleanup model:
+
 ### `.fleet-policies`
 
+* Cleanup model:
+
 ### `.fleet-policies-leader`
+
+* Cleanup model:
 
 ## Saved Object types
 
