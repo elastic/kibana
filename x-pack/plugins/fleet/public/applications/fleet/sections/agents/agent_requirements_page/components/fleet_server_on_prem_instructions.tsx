@@ -28,7 +28,6 @@ import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { safeLoad } from 'js-yaml';
 
 import { DownloadStep } from '../../../../components';
 import {
@@ -246,12 +245,7 @@ export const useFleetServerInstructions = (policyId?: string) => {
   const { data: settings, resendRequest: refreshSettings } = useGetSettings();
   const fleetServerHost = settings?.item.fleet_server_hosts?.[0];
   const esHost = output?.hosts?.[0];
-  const sslCATrustedFingerprint: string | undefined = useMemo(() => {
-    if (output?.config_yaml) {
-      return safeLoad(output?.config_yaml)?.ssl?.ca_trusted_fingerprint;
-    }
-    return undefined;
-  }, [output]);
+  const sslCATrustedFingerprint: string | undefined = output?.ca_trusted_fingerprint;
 
   const installCommand = useMemo((): string => {
     if (!serviceToken || !esHost) {
