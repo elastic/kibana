@@ -25,19 +25,18 @@ export function getMatrixHistogramTemplates(router: SecuritySolutionPluginRouter
       const savedObjectsClient = context.core.savedObjects.client;
 
       const templates = await savedObjectsClient.find<SecuritySolutionTemplate>({
-        type: MATRIX_HISTOGRAM_TEMPLATE_TYPE,
+        type: 'lens',
         sortField: 'updated_at',
         sortOrder: 'desc',
         search: '*',
         searchFields: ['title'],
         fields: ['*'],
+        hasReference: [{ type: 'tag', id: '6853a880-5451-11ec-b0fd-2f7a10a18ba6' }], // id matches anyone in tag.security_solution.ts
       });
-
+console.log('templates---', templates)
       return response.ok({
         body: {
-          templates: templates.saved_objects.map((hit) => ({
-            ...hit.attributes,
-          })),
+          templates: templates.saved_objects
         },
       });
     }

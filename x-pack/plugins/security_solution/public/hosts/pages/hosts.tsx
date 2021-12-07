@@ -195,11 +195,11 @@ const HostsComponent = ({ plugins }) => {
               />
               <EuiSpacer />
               <MatrixHistogramTemplates plugins={plugins} />
-              <EmbeddablePanelExample
+              {/* <EmbeddablePanelExample
                 embeddableServices={plugins.embeddable}
-                /* doesn't look right to use embeddableExamples as dependency, needs an update*/
-                searchListContainerFactory={plugins.embeddableExamples.factories.getSearchableListContainerEmbeddableFactory()}
-              />
+                // doesn't look right to use embeddableExamples as dependency, needs an update
+                searchListContainerFactory={plugins.embeddableExamples.factories.getSearchableListContainerEmbeddableFactory()}/>
+              */}
               <EuiSpacer />
 
               <SecuritySolutionTabNavigation

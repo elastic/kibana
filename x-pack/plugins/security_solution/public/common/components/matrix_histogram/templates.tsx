@@ -35,10 +35,9 @@ export const MatrixHistogramTemplates = ({ plugins }: { plugins: StartPlugins })
         response.templates.length > 0
           ? response.templates.map((template) => {
               return {
-                ...template,
                 attributes: {
                   ...template.attributes,
-                  references: template.attributes.references.map((ref) => ({
+                  references: template.references.map((ref) => ({
                     ...ref,
                     id: defaultIndexPattern.id ?? null,
                   })),
@@ -53,12 +52,12 @@ export const MatrixHistogramTemplates = ({ plugins }: { plugins: StartPlugins })
 
   useEffect(() => {
     const fetchIndexPattern = async () => {
-      const fetchedDefaultIndexPattern = await plugins.data.indexPatterns.getDefault();
+      const fetchedDefaultIndexPattern = await plugins.data.dataViews.getDefault();
 
       setDefaultIndexPattern(fetchedDefaultIndexPattern);
     };
     fetchIndexPattern();
-  }, [plugins.data.indexPatterns]);
+  }, [plugins.data.dataViews]);
 
   // const onCreateWorkpad = useCreateFromTemplate();
 

@@ -16,19 +16,39 @@ export function loadTemplates() {
   ];
 }
 
+export const loadTags = () => {
+  const tags = require('./tag.security_solution').securitySolutionTags;
+  return tags;
+};
+
 export async function initializeTemplates(
   client: Pick<SavedObjectsRepository, 'bulkCreate' | 'create' | 'find' | 'get'>
 ) {
-  const hardCodedTagId = '6853a880-5451-11ec-b0fd-2f7a10a18ba6';
-  const hardCodedTemplateId = '6853a880-5451-99ec-b0fd-2f7a10a18ba6';
-  let existingTag = null;
-  let existingTemplate = null;
-  try {
-    existingTag = await client.get('tag', hardCodedTagId);
-  } catch (e) {
-    if (existingTag == null) {
-      const tagTemplate = require('./tag.security_solution').securitySolution;
-      client.create('tag', tagTemplate, { id: hardCodedTagId }).catch((err) => {});
+  // try {
+  //   existingTag = await client.get('tag', hardCodedTagId);
+  // } catch (e) {
+  //   if (existingTag == null) {
+
+  //     client.create('tag', tagTemplate, { id: hardCodedTagId }).catch((err) => {});
+  //   }
+  // }
+
+  for (const tag of loadTags()) {
+    let existingTag = null;
+
+    try {
+      existingTag = await client.get('tag', tag.id);
+    } catch (e) {
+      console.log(e);
+      if (existingTag == null) {
+        const { id, ...tagToCreate } = tag;
+        await client
+          .create('tag', tagToCreate, { id })
+          .then(() => {
+            console.log(`creating ${id}: ${tagToCreate.name}`);
+          })
+          .catch((err) => {});
+      }
     }
   }
 
@@ -39,33 +59,22 @@ export async function initializeTemplates(
   // creates and catch and throw-away any errors that happen.
   // Once packages are ready, we should probably move that pitch that is so large to a package
   for (const template of loadTemplates()) {
+    let existingTemplate = null;
+
     try {
-      existingTemplate = await client.get('lens', hardCodedTemplateId);
+      existingTemplate = await client.get('lens', template.id);
     } catch (e) {
       console.log(e);
       if (existingTemplate == null) {
-        const templateToCreate = require('./host.name').securitySolution;
-        client
+        const { id, references, ...templateToCreate } = template;
+        await client
           .create('lens', templateToCreate, {
             /* hard coded reference here atm, please update this before use*/
-            references: [
-              {
-                type: 'index-pattern',
-                id: 'security-solution-default',
-                name: 'indexpattern-datasource-current-indexpattern',
-              },
-              {
-                type: 'index-pattern',
-                id: 'security-solution-default',
-                name: 'indexpattern-datasource-layer-f6172bed-07e8-48fc-b9e4-2291fe061aed',
-              },
-              {
-                type: 'tag',
-                id: '6853a880-5451-11ec-b0fd-2f7a10a18ba6',
-                name: 'tag-ref-6853a880-5451-11ec-b0fd-2f7a10a18ba6',
-              },
-            ],
-            id: hardCodedTemplateId,
+            references,
+            id,
+          })
+          .then(() => {
+            console.log(`creating ${id}: ${templateToCreate.name}`);
           })
           .catch((err) => {
             console.log('creattion error----', err);

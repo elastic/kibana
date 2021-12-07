@@ -8,7 +8,8 @@
 import { MATRIX_HISTOGRAM_TEMPLATE_TYPE } from '../../common/constants';
 
 export const hostName = {
-  title: 'my hostname area chart - imported',
+  id: '6853a880-5451-99ec-b0fd-2f7a10a18ba6',
+  title: '[Security Solution] KPI Hosts',
   description: '',
   visualizationType: 'lnsXY',
   state: {
@@ -98,4 +99,21 @@ export const hostName = {
       },
     },
   },
+  references: [
+    {
+      type: 'index-pattern',
+      id: 'security-solution-default',
+      name: 'indexpattern-datasource-current-indexpattern',
+    },
+    {
+      type: 'index-pattern',
+      id: 'security-solution-default',
+      name: 'indexpattern-datasource-layer-f6172bed-07e8-48fc-b9e4-2291fe061aed',
+    },
+    {
+      type: 'tag',
+      id: '6853a880-5451-11ec-b0fd-2f7a10a18ba6',
+      name: 'tag-ref-6853a880-5451-11ec-b0fd-2f7a10a18ba6',
+    },
+  ],
 };
