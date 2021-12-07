@@ -31,7 +31,7 @@ import {
 } from '../../../../../../alerting/common';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ExecutorType } from '../../../../../../alerting/server/types';
-import { AlertInstance } from '../../../../../../alerting/server';
+import { AlertInstance, IAbortableClusterClient } from '../../../../../../alerting/server';
 import { ConfigType } from '../../../../config';
 import { IEventLogService } from '../../../../../../event_log/server';
 import { alertInstanceFactoryStub } from '../../signals/preview/alert_instance_factory_stub';
@@ -123,6 +123,8 @@ export const previewRulesRoute = async (
           ruleTypeName: string,
           params: TParams,
           shouldWriteAlerts: () => boolean,
+          shouldStopExecution: () => boolean,
+          search: IAbortableClusterClient,
           alertInstanceFactory: (
             id: string
           ) => Pick<
@@ -159,7 +161,9 @@ export const previewRulesRoute = async (
               rule,
               services: {
                 shouldWriteAlerts,
+                shouldStopExecution,
                 alertInstanceFactory,
+                search,
                 savedObjectsClient: context.core.savedObjects.client,
                 scopedClusterClient: context.core.elasticsearch.client,
               },
@@ -194,6 +198,9 @@ export const previewRulesRoute = async (
           signalRuleAlertType.name,
           previewRuleParams,
           () => true,
+          () => false,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          {} as any,
           alertInstanceFactoryStub
         );
 
