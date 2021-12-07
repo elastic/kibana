@@ -8,25 +8,25 @@
 import { i18n } from '@kbn/i18n';
 import type { ExpressionFunctionDefinition } from '../../../../../../src/plugins/expressions/common';
 import type { LensMultiTable } from '../../types';
-import { GaugeExpressionArgs, GAUGE_FUNCTION, GAUGE_FUNCTION_RENDERER } from './types';
+import { GaugeArguments, EXPRESSION_GAUGE_NAME, GAUGE_FUNCTION_RENDERER_NAME } from './types';
 
 export interface GaugeExpressionProps {
   data: LensMultiTable;
-  args: GaugeExpressionArgs;
+  args: GaugeArguments;
 }
 export interface GaugeRender {
   type: 'render';
-  as: typeof GAUGE_FUNCTION_RENDERER;
+  as: typeof GAUGE_FUNCTION_RENDERER_NAME;
   value: GaugeExpressionProps;
 }
 
 export const gauge: ExpressionFunctionDefinition<
-  typeof GAUGE_FUNCTION,
+  typeof EXPRESSION_GAUGE_NAME,
   LensMultiTable,
-  GaugeExpressionArgs,
+  GaugeArguments,
   GaugeRender
 > = {
-  name: GAUGE_FUNCTION,
+  name: EXPRESSION_GAUGE_NAME,
   type: 'render',
   help: i18n.translate('xpack.lens.gauge.expressionHelpLabel', {
     defaultMessage: 'Gauge renderer',
@@ -121,10 +121,10 @@ export const gauge: ExpressionFunctionDefinition<
     },
   },
   inputTypes: ['lens_multitable'],
-  fn(data: LensMultiTable, args: GaugeExpressionArgs) {
+  fn(data: LensMultiTable, args: GaugeArguments) {
     return {
       type: 'render',
-      as: GAUGE_FUNCTION_RENDERER,
+      as: GAUGE_FUNCTION_RENDERER_NAME,
       value: {
         data,
         args,

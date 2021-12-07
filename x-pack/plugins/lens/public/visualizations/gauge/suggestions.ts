@@ -66,7 +66,7 @@ export const getSuggestions: Visualization<GaugeVisualizationState>['getSuggesti
     }),
     previewIcon: 'empty',
     score: 0.5,
-    hide: !isGauge && state?.metricAccessor === undefined, // only display for gauges for beta
+    hide: !isGauge || state?.metricAccessor === undefined, // only display for gauges for beta
   };
 
   const suggestions = isGauge

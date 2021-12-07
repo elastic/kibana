@@ -11,7 +11,10 @@ import { GROUP_ID } from './constants';
 import type { DatasourcePublicAPI, Operation } from '../../types';
 import { chartPluginMock } from 'src/plugins/charts/public/mocks';
 import { CustomPaletteParams, layerTypes } from '../../../common';
-import { GAUGE_FUNCTION, GaugeVisualizationState } from '../../../common/expressions/gauge_chart';
+import {
+  EXPRESSION_GAUGE_NAME,
+  GaugeVisualizationState,
+} from '../../../common/expressions/gauge_chart';
 import { PaletteOutput } from 'src/plugins/charts/common';
 
 function exampleState(): GaugeVisualizationState {
@@ -408,7 +411,7 @@ describe('gauge', () => {
         chain: [
           {
             type: 'function',
-            function: GAUGE_FUNCTION,
+            function: EXPRESSION_GAUGE_NAME,
             arguments: {
               title: ['Test'],
               description: [''],

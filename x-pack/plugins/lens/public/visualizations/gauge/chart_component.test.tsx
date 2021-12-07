@@ -11,7 +11,7 @@ import { shallowWithIntl } from '@kbn/test/jest';
 import { chartPluginMock } from 'src/plugins/charts/public/mocks';
 import type { ColorStop, LensMultiTable } from '../../../common';
 import { fieldFormatsServiceMock } from '../../../../../../src/plugins/field_formats/public/mocks';
-import { GaugeExpressionArgs, GaugeLabelMajorMode } from '../../../common/expressions/gauge_chart';
+import { GaugeArguments, GaugeLabelMajorMode } from '../../../common/expressions/gauge_chart';
 import { GaugeComponent, GaugeRenderProps } from './chart_component';
 import { DatatableColumn, DatatableRow } from 'src/plugins/expressions/common';
 import { VisualizationContainer } from '../../visualization_container';
@@ -55,7 +55,7 @@ const createData = (
 const chartsThemeService = chartPluginMock.createSetupContract().theme;
 const palettesRegistry = chartPluginMock.createPaletteRegistry();
 const formatService = fieldFormatsServiceMock.createStartContract();
-const args: GaugeExpressionArgs = {
+const args: GaugeArguments = {
   labelMajor: 'Gauge',
   description: 'vis description',
   metricAccessor: 'metric-accessor',

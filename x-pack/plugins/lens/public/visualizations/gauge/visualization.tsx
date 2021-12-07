@@ -21,10 +21,11 @@ import { GaugeDimensionEditor } from './dimension_editor';
 import { CustomPaletteParams, layerTypes } from '../../../common';
 import { generateId } from '../../id_generator';
 import { getGoalValue, getMaxValue, getMinValue } from './utils';
+
 import {
-  GaugeExpressionArgs,
   GaugeShapes,
-  GAUGE_FUNCTION,
+  GaugeArguments,
+  EXPRESSION_GAUGE_NAME,
   GaugeVisualizationState,
 } from '../../../common/expressions/gauge_chart';
 
@@ -73,7 +74,7 @@ const toExpression = (
   paletteService: PaletteRegistry,
   state: GaugeVisualizationState,
   datasourceLayers: Record<string, DatasourcePublicAPI>,
-  attributes?: Partial<Omit<GaugeExpressionArgs, keyof GaugeVisualizationState>>
+  attributes?: Partial<Omit<GaugeArguments, keyof GaugeVisualizationState>>
 ): Ast | null => {
   const datasource = datasourceLayers[state.layerId];
 
@@ -87,7 +88,7 @@ const toExpression = (
     chain: [
       {
         type: 'function',
-        function: GAUGE_FUNCTION,
+        function: EXPRESSION_GAUGE_NAME,
         arguments: {
           title: [attributes?.title ?? ''],
           description: [attributes?.description ?? ''],

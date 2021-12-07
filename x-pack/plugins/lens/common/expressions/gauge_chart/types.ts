@@ -11,8 +11,8 @@ import type {
 } from '../../../../../../src/plugins/charts/common';
 import type { CustomPaletteParams, LayerType } from '../../types';
 
-export const GAUGE_FUNCTION = 'lens_gauge';
-export const GAUGE_FUNCTION_RENDERER = 'lens_gauge_renderer';
+export const EXPRESSION_GAUGE_NAME = 'lens_gauge';
+export const GAUGE_FUNCTION_RENDERER_NAME = 'lens_gauge_renderer';
 
 export const GaugeShapes = {
   horizontalBullet: 'horizontalBullet',
@@ -35,7 +35,6 @@ export const GaugeColorModes = {
   none: 'none',
 } as const;
 
-export type GaugeType = 'gauge';
 export type GaugeColorMode = keyof typeof GaugeColorModes;
 export type GaugeShape = keyof typeof GaugeShapes;
 export type GaugeLabelMajorMode = keyof typeof GaugeLabelMajorModes;
@@ -64,7 +63,7 @@ export type GaugeVisualizationState = GaugeLayerState & {
   shape: GaugeShape;
 };
 
-export type GaugeExpressionArgs = SharedGaugeLayerState & {
+export type GaugeArguments = SharedGaugeLayerState & {
   title?: string;
   description?: string;
   shape: GaugeShape;
