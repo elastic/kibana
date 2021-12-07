@@ -83,7 +83,11 @@ const excludeFiltersByGroups = (filters: Ast[], filterExprAst: ExpressionFunctio
   });
 };
 
-const includeFiltersByGroups = (filters: Ast[], filterExprAst: ExpressionFunctionAST) => {
+const includeFiltersByGroups = (
+  filters: Ast[],
+  filterExprAst: ExpressionFunctionAST,
+  ignoreUngroupedIfGroups: boolean = false
+) => {
   const groupsToInclude = filterExprAst.arguments.group ?? [];
   const includeOnlyUngrouped = filterExprAst.arguments.ungrouped?.[0] ?? false;
   return filters.filter((filter) => {
@@ -93,12 +97,10 @@ const includeFiltersByGroups = (filters: Ast[], filterExprAst: ExpressionFunctio
     const needToIncludeByGroup =
       groups.length && groupsToInclude.length && groupsToInclude.includes(groups[0]);
 
-    // `filters` expression ignores ungrouped, if group is specified.
-    // `selectFilter` expression is including filters with specified groups and ungrouped ones.
     const needToIncludeByUngrouped =
-      filterExprAst.function === FILTERS
-        ? includeOnlyUngrouped && !groups.length && !groupsToInclude.length
-        : includeOnlyUngrouped && !groups.length;
+      includeOnlyUngrouped &&
+      !groups.length &&
+      (ignoreUngroupedIfGroups ? !groupsToInclude.length : true);
 
     const allowAll = !groupsToInclude.length && !includeOnlyUngrouped;
     return needToIncludeByUngrouped || needToIncludeByGroup || allowAll;
@@ -114,7 +116,9 @@ export const getFiltersByFilterExpressions = (
     if (excludeFiltersExpressions.includes(filter.function)) {
       return excludeFiltersByGroups(includedFilters, filter);
     }
-    return includeFiltersByGroups(includedFilters, filter);
+    const isFiltersExpr = filter.function === FILTERS;
+    const filtersToInclude = isFiltersExpr ? filtersAst : includedFilters;
+    return includeFiltersByGroups(filtersToInclude, filter, isFiltersExpr);
   }, filtersAst);
 
   return matchedFiltersAst.map((ast) => toExpression(ast));
