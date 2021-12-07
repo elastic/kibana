@@ -225,14 +225,14 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
       if (exists?.errorMessage) {
         addRequestMessage({
           error: i18n.translate(
-            'xpack.ml.dataframe.analytics.create.destinationIndexNotCreatedForDataFrameAnalyticsJob',
+            'xpack.ml.dataframe.analytics.create.errorCheckingDestinationIndexDataFrameAnalyticsJob',
             {
               defaultMessage: '{errorMessage}',
               values: { errorMessage: exists.errorMessage },
             }
           ),
           message: i18n.translate(
-            'xpack.ml.dataframe.analytics.create.unableToCreateDataViewForDataFrameAnalyticsJob',
+            'xpack.ml.dataframe.analytics.create.errorOccurredCheckingDestinationIndexDataFrameAnalyticsJob',
             {
               defaultMessage: 'An error occurred checking destination index exists.',
             }
