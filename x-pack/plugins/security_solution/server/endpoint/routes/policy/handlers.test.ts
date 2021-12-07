@@ -11,8 +11,17 @@ import {
   createMockEndpointAppContextServiceStartContract,
   createRouteHandlerContext,
 } from '../../mocks';
-import { createMockAgentClient, createMockAgentService } from '../../../../../fleet/server/mocks';
-import { getHostPolicyResponseHandler, getAgentPolicySummaryHandler } from './handlers';
+import {
+  createMockAgentClient,
+  createMockAgentService,
+  createPackagePolicyServiceMock,
+} from '../../../../../fleet/server/mocks';
+import { PackagePolicyServiceInterface } from '../../../../../fleet/server';
+import {
+  getHostPolicyResponseHandler,
+  getAgentPolicySummaryHandler,
+  getPolicyListHandler,
+} from './handlers';
 import {
   KibanaResponseFactory,
   SavedObjectsClientContract,
@@ -24,7 +33,11 @@ import {
   savedObjectsClientMock,
 } from '../../../../../../../src/core/server/mocks';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { GetHostPolicyResponse, HostPolicyResponse } from '../../../../common/endpoint/types';
+import {
+  GetHostPolicyResponse,
+  HostPolicyResponse,
+  PolicyData,
+} from '../../../../common/endpoint/types';
 import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
 import { parseExperimentalConfigValue } from '../../../../common/experimental_features';
 import { createMockConfig } from '../../../lib/detection_engine/routes/__mocks__';
@@ -236,6 +249,57 @@ describe('test policy response handler', () => {
       });
     });
   });
+  describe('test GET policy list handler', () => {
+    let mockPackagePolicyService: jest.Mocked<PackagePolicyServiceInterface>;
+
+    beforeEach(() => {
+      mockScopedClient = elasticsearchServiceMock.createScopedClusterClient();
+      mockSavedObjectClient = savedObjectsClientMock.create();
+      mockResponse = httpServerMock.createResponseFactory();
+      mockPackagePolicyService = createPackagePolicyServiceMock();
+      mockPackagePolicyService.list.mockImplementation(() => {
+        return Promise.resolve({
+          items: [],
+          total: 0,
+          page: 1,
+          perPage: 1000,
+        });
+      });
+      endpointAppContextService = new EndpointAppContextService();
+      endpointAppContextService.setup(createMockEndpointAppContextServiceSetupContract());
+      endpointAppContextService.start({
+        ...createMockEndpointAppContextServiceStartContract(),
+        ...{ packagePolicyService: mockPackagePolicyService },
+      });
+    });
+
+    afterEach(() => endpointAppContextService.stop());
+
+    it('should return a list of endpoint package policies', async () => {
+      const response = createPackagePolicySearchResponse(
+        new EndpointDocGenerator().generatePolicyPackagePolicy()
+      );
+      const policyHandler = getPolicyListHandler({
+        logFactory: loggingSystemMock.create(),
+        service: endpointAppContextService,
+        config: () => Promise.resolve(createMockConfig()),
+        experimentalFeatures: parseExperimentalConfigValue(createMockConfig().enableExperimental),
+      });
+      (mockScopedClient.asCurrentUser.search as jest.Mock).mockImplementationOnce(() =>
+        Promise.resolve({ body: response })
+      );
+      const mockRequest = httpServerMock.createKibanaRequest({
+        query: {},
+      });
+
+      await policyHandler(
+        createRouteHandlerContext(mockScopedClient, mockSavedObjectClient),
+        mockRequest,
+        mockResponse
+      );
+      expect(mockResponse.ok).toBeCalled();
+    });
+  });
 });
 
 /**
@@ -264,7 +328,7 @@ function createSearchResponse(
       hits: hostPolicyResponse
         ? [
             {
-              _index: 'metrics-endpoint.policy-default-1',
+              _index: 'ingest-package-policies',
               _id: '8FhM0HEBYyRTvb6lOQnw',
               _score: null,
               _source: hostPolicyResponse,
@@ -274,4 +338,42 @@ function createSearchResponse(
         : [],
     },
   } as unknown as estypes.SearchResponse<HostPolicyResponse>;
+}
+
+/**
+ * Create a SearchResponse with the packagePolicy provided, else return an empty
+ * SearchResponse
+ * @param packagePolicy
+ */
+function createPackagePolicySearchResponse(
+  packagePolicyResponse?: PolicyData
+): estypes.SearchResponse<PolicyData> {
+  return {
+    took: 15,
+    timed_out: false,
+    _shards: {
+      total: 1,
+      successful: 1,
+      skipped: 0,
+      failed: 0,
+    },
+    hits: {
+      total: {
+        value: 5,
+        relation: 'eq',
+      },
+      max_score: null,
+      hits: packagePolicyResponse
+        ? [
+            {
+              _index: 'metrics-endpoint.policy-default-1',
+              _id: '8FhM0HEBYyRTvb6lOQnw',
+              _score: null,
+              _source: packagePolicyResponse,
+              sort: [1588337587997],
+            },
+          ]
+        : [],
+    },
+  } as unknown as estypes.SearchResponse<PolicyData>;
 }
