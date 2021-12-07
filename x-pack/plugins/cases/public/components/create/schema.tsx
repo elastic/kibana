@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { CasePostRequest, ConnectorTypeFields, MAX_TITLE_LENGTH } from '../../../common';
+import { CasePostRequest, ConnectorTypeFields } from '../../../common/api';
+import { MAX_TITLE_LENGTH } from '../../../common/constants';
 import {
   FIELD_TYPES,
   fieldValidators,
