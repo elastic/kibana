@@ -175,7 +175,7 @@ export function CreateAgentKeyFlyout({ onCancel, onSuccess, onError }: Props) {
                 id={htmlIdGenerator()()}
                 label="config_agent:read"
                 checked={agentConfigChecked}
-                onChange={() => setAgentConfigChecked(!agentConfigChecked)}
+                onChange={() => setAgentConfigChecked(state => !state)
               />
             </EuiFormRow>
             <EuiSpacer size="s" />
