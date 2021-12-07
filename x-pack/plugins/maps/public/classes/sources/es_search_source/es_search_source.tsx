@@ -791,14 +791,6 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
     await deleteFeatureFromIndex(index, featureId);
   }
 
-  getMinZoom() {
-    return this.getMinZoom();
-  }
-
-  getMaxZoom() {
-    return this.getMaxZoom();
-  }
-
   getTileSourceLayer(): string {
     return 'hits';
   }

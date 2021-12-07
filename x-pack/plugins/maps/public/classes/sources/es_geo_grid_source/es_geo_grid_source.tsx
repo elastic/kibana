@@ -419,14 +419,6 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
     } as GeoJsonWithMeta;
   }
 
-  getMinZoom() {
-    return this.getMinZoom();
-  }
-
-  getMaxZoom() {
-    return this.getMaxZoom();
-  }
-
   getTileSourceLayer(): string {
     return 'aggs';
   }

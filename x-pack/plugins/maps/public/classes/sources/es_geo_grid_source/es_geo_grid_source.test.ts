@@ -299,14 +299,6 @@ describe('ESGeoGridSource', () => {
       expect(mvtGeogridSource.getTileSourceLayer()).toBe('aggs');
     });
 
-    it('getMinZoom', () => {
-      expect(mvtGeogridSource.getMinZoom()).toBe(0);
-    });
-
-    it('getMaxZoom', () => {
-      expect(mvtGeogridSource.getMaxZoom()).toBe(24);
-    });
-
     it('getTileUrl', async () => {
       const tileUrl = await mvtGeogridSource.getTileUrl(vectorSourceRequestMeta, '1234');
 

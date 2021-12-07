@@ -27,10 +27,8 @@ describe('ESSearchSource', () => {
   });
 
   describe('IMvtVectorSource', () => {
-    it('mb-source params', () => {
+    it('getTileSourceLayer', () => {
       const esSearchSource = new ESSearchSource(mockDescriptor);
-      expect(esSearchSource.getMinZoom()).toBe(0);
-      expect(esSearchSource.getMaxZoom()).toBe(24);
       expect(esSearchSource.getTileSourceLayer()).toBe('hits');
     });
 
