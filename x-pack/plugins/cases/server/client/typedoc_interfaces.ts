@@ -30,7 +30,7 @@ import {
   SubCaseResponse,
   SubCasesFindResponse,
   SubCasesResponse,
-} from '../../common';
+} from '../../common/api';
 
 /**
  * These are simply to make typedoc not attempt to expand the type aliases. If it attempts to expand them

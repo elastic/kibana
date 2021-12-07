@@ -11,12 +11,14 @@ import {
   ENVIRONMENT_NOT_DEFINED,
 } from './environment_filter_values';
 
+export const environmentStringRt = t.union([
+  t.literal(ENVIRONMENT_NOT_DEFINED.value),
+  t.literal(ENVIRONMENT_ALL.value),
+  nonEmptyStringRt,
+]);
+
 export const environmentRt = t.type({
-  environment: t.union([
-    t.literal(ENVIRONMENT_NOT_DEFINED.value),
-    t.literal(ENVIRONMENT_ALL.value),
-    nonEmptyStringRt,
-  ]),
+  environment: environmentStringRt,
 });
 
 export type Environment = t.TypeOf<typeof environmentRt>['environment'];

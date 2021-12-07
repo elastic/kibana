@@ -8,20 +8,20 @@
 import { i18n } from '@kbn/i18n';
 import { first } from 'lodash';
 import moment from 'moment';
+import { KibanaRequest } from 'kibana/server';
 import { stateToAlertMessage } from '../common/messages';
 import { MetricAnomalyParams } from '../../../../common/alerting/metrics';
 import { MappedAnomalyHit } from '../../infra_ml';
 import { AlertStates } from '../common/types';
 import {
   ActionGroup,
-  AlertInstanceContext,
-  AlertInstanceState,
+  AlertInstanceContext as AlertContext,
+  AlertInstanceState as AlertState,
 } from '../../../../../alerting/common';
-import { AlertExecutorOptions } from '../../../../../alerting/server';
+import { AlertExecutorOptions as RuleExecutorOptions } from '../../../../../alerting/server';
 import { getIntervalInSeconds } from '../../../utils/get_interval_in_seconds';
-import { MetricAnomalyAllowedActionGroups } from './register_metric_anomaly_alert_type';
+import { MetricAnomalyAllowedActionGroups } from './register_metric_anomaly_rule_type';
 import { MlPluginSetup } from '../../../../../ml/server';
-import { KibanaRequest } from '../../../../../../../src/core/server';
 import { InfraBackendLibs } from '../../infra_types';
 import { evaluateCondition } from './evaluate_condition';
 
@@ -31,14 +31,14 @@ export const createMetricAnomalyExecutor =
     services,
     params,
     startedAt,
-  }: AlertExecutorOptions<
+  }: RuleExecutorOptions<
     /**
      * TODO: Remove this use of `any` by utilizing a proper type
      */
     Record<string, any>,
     Record<string, any>,
-    AlertInstanceState,
-    AlertInstanceContext,
+    AlertState,
+    AlertContext,
     MetricAnomalyAllowedActionGroups
   >) => {
     if (!ml) {
@@ -84,9 +84,9 @@ export const createMetricAnomalyExecutor =
         typical,
         influencers,
       } = first(data as MappedAnomalyHit[])!;
-      const alertInstance = services.alertInstanceFactory(`${nodeType}-${metric}`);
+      const alert = services.alertInstanceFactory(`${nodeType}-${metric}`);
 
-      alertInstance.scheduleActions(FIRED_ACTIONS_ID, {
+      alert.scheduleActions(FIRED_ACTIONS_ID, {
         alertState: stateToAlertMessage[AlertStates.ALERT],
         timestamp: moment(anomalyStartTime).toISOString(),
         anomalyScore,
