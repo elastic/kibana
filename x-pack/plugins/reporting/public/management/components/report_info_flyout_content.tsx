@@ -9,10 +9,10 @@ import React, { FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiDescriptionList,
-  EuiSpacer,
-  EuiText,
   EuiDescriptionListProps,
   EuiTitle,
+  EuiCallOut,
+  EuiSpacer,
 } from '@elastic/eui';
 
 import type { Job } from '../../lib/job';
@@ -25,15 +25,6 @@ const NA = i18n.translate('xpack.reporting.listing.infoPanel.notApplicableLabel'
 const UNKNOWN = i18n.translate('xpack.reporting.listing.infoPanel.unknownLabel', {
   defaultMessage: 'unknown',
 });
-
-const getDimensions = (info: Job): string => {
-  const defaultDimensions = { width: null, height: null };
-  const { width, height } = info.layout?.dimensions || defaultDimensions;
-  if (width && height) {
-    return `Width: ${width} x Height: ${height}`;
-  }
-  return UNKNOWN;
-};
 
 interface Props {
   info: Job;
@@ -119,19 +110,6 @@ export const ReportInfoFlyoutContent: FunctionComponent<Props> = ({ info }) => {
       }),
       description: info.prettyTimeout,
     },
-    // {
-    //   title: i18n.translate('xpack.reporting.listing.infoPanel.exportTypeInfo', {
-    //     defaultMessage: 'Export type',
-    //   }),
-    //   description: info.isDeprecated
-    //     ? i18n.translate('xpack.reporting.listing.table.reportCalloutExportTypeDeprecated', {
-    //         defaultMessage: '{jobtype} (DEPRECATED)',
-    //         values: { jobtype: info.jobtype },
-    //       })
-    //     : info.jobtype,
-    // },
-
-    // TODO: when https://github.com/elastic/kibana/pull/106137 is merged, add kibana version field
   ].filter(Boolean) as EuiDescriptionListProps['listItems'];
 
   const timestampsInfo = [
@@ -156,23 +134,33 @@ export const ReportInfoFlyoutContent: FunctionComponent<Props> = ({ info }) => {
   ];
 
   const warnings = info.getWarnings();
-  const warningsInfo = warnings && [
-    {
-      title: <EuiText color="danger">Warnings</EuiText>,
-      description: <EuiText color="warning">{warnings}</EuiText>,
-    },
-  ];
-
   const errored = info.getError();
-  const errorInfo = errored && [
-    {
-      title: <EuiText color="danger">Error</EuiText>,
-      description: <EuiText color="danger">{errored}</EuiText>,
-    },
-  ];
 
   return (
     <>
+      {Boolean(errored) && (
+        <EuiCallOut
+          title={i18n.translate('xpack.reporting.listing.infoPanel.callout.failedReportTitle', {
+            defaultMessage: 'Report failed',
+          })}
+          color="danger"
+        >
+          {errored}
+        </EuiCallOut>
+      )}
+      {Boolean(warnings) && (
+        <>
+          {Boolean(errored) && <EuiSpacer size="s" />}
+          <EuiCallOut
+            title={i18n.translate('xpack.reporting.listing.infoPanel.callout.warningsTitle', {
+              defaultMessage: 'Report contains warnings',
+            })}
+            color="warning"
+          >
+            {warnings}
+          </EuiCallOut>
+        </>
+      )}
       <EuiTitle size="xs">
         <h3>Output</h3>
       </EuiTitle>
@@ -182,21 +170,6 @@ export const ReportInfoFlyoutContent: FunctionComponent<Props> = ({ info }) => {
         <h3>Timestamps</h3>
       </EuiTitle>
       <EuiDescriptionList listItems={timestampsInfo} type="column" align="center" compressed />
-
-      {Boolean(warningsInfo) && (
-        <>
-          <EuiTitle size="s">
-            <h3>Warnings</h3>
-          </EuiTitle>
-          <EuiDescriptionList listItems={warningsInfo} type="column" align="center" compressed />
-        </>
-      )}
-      {Boolean(errorInfo) && (
-        <>
-          <EuiSpacer size="s" />
-          <EuiDescriptionList listItems={errorInfo} type="column" align="center" compressed />
-        </>
-      )}
     </>
   );
 };
