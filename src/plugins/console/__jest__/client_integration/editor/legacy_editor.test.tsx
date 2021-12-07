@@ -7,10 +7,10 @@
  */
 
 import { setupEnvironment } from '../helpers';
-import { EditorTestBed, setupEditorPage } from './editor.helpers';
+import { AppTestBed, setupAppPage } from './editor.helpers';
 
 describe('Console - Legacy Editor', () => {
-  let testBed: EditorTestBed;
+  let testBed: AppTestBed;
   let server: ReturnType<typeof setupEnvironment>['server'];
   let httpRequestsMockHelpers: ReturnType<typeof setupEnvironment>['httpRequestsMockHelpers'];
 
@@ -24,22 +24,20 @@ describe('Console - Legacy Editor', () => {
 
   describe('send request', () => {
     beforeEach(async () => {
-      testBed = await setupEditorPage({ initialTextValue: '' });
+      testBed = await setupAppPage();
     });
 
     test('sends current request to ES', async () => {
-      const { exists, actions } = testBed;
+      const { actions } = testBed;
+
+      httpRequestsMockHelpers.setConsoleRequestResponse({
+        fake_response: true,
+      });
 
       await actions.clickSendRequestButton();
-      // expect(exists('sampleTest')).toBe(true);
-      // (getEndpointFromPosition as jest.Mock).mockReturnValue({ patterns: [] });
-      // (sendRequestToES as jest.Mock).mockRejectedValue({});
-      // const editor = doMount();
-      // act(() => {
-      // editor.find('button[data-test-subj~="sendRequestButton"]').simulate('click');
-      // });
-      // await nextTick();
-      // expect(sendRequestToES).toBeCalledTimes(1);
+
+      // const editor = find('response-editor');
+      // console.log(find('statusCode').text());
     });
   });
 });

@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import './editor.mocks';
+
 import React from 'react';
 import { merge } from 'lodash';
 import axios from 'axios';
@@ -21,12 +23,6 @@ import {
 import { getAppContextMock } from './app_context.mock';
 import { ContextValue } from '../../../public/application/contexts/services_context';
 import { init as initHttpRequests } from './http_requests';
-
-// EditorExample gets mounted on an external div, mocking the component prevents
-// it from getting mounted.
-jest.mock('../../../public/application/components/editor_example.tsx', () => ({
-  EditorExample: () => '',
-}));
 
 const mockHttpClient = axios.create({ adapter: axiosXhrAdapter });
 

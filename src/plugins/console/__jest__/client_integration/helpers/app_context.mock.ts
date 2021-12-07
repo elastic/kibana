@@ -16,7 +16,7 @@ import { HttpSetup } from 'src/core/public';
 
 const objectStorageClient = {
   text: {
-    findAll: jest.fn(() => []),
+    findAll: jest.fn(() => ['test']),
     create: jest.fn(),
     update: jest.fn(),
   },

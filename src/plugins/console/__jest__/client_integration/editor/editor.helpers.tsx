@@ -9,7 +9,7 @@
 import { act } from 'react-dom/test-utils';
 import { registerTestBed, TestBed, AsyncTestBedConfig } from '@kbn/test/jest';
 
-import { Editor } from '../../../public/application/containers/editor';
+import { Main } from '../../../public/application/containers';
 import { WithAppDependencies } from '../helpers';
 
 jest.mock('../../../public/application/models/legacy_core_editor/mode/worker/index.js', () => ({
@@ -25,7 +25,7 @@ const testBedConfig: AsyncTestBedConfig = {
   doMountAsync: true,
 };
 
-export type EditorTestBed = TestBed & {
+export type AppTestBed = TestBed & {
   actions: ReturnType<typeof createActions>;
 };
 
@@ -45,10 +45,8 @@ const createActions = (testBed: TestBed) => {
   };
 };
 
-export const setupEditorPage = async (
-  overrides?: Record<string, unknown>
-): Promise<EditorTestBed> => {
-  const initTestBed = registerTestBed(WithAppDependencies(Editor, overrides), testBedConfig);
+export const setupAppPage = async (overrides?: Record<string, unknown>): Promise<AppTestBed> => {
+  const initTestBed = registerTestBed(WithAppDependencies(Main, overrides), testBedConfig);
   const testBed = await initTestBed();
 
   return {

@@ -8,7 +8,7 @@
 
 import sinon, { SinonFakeServer } from 'sinon';
 
-const API_BASE_PATH = '';
+const API_BASE_PATH = 'api/console';
 
 export interface ResponseError {
   statusCode: number;
@@ -20,11 +20,11 @@ export interface ResponseError {
 
 // Register helpers to mock HTTP Requests
 const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
-  const setLoadCloudBackupStatusResponse = (response?: any, error?: ResponseError) => {
+  const setConsoleRequestResponse = (response?: any, error?: ResponseError) => {
     const status = error ? error.statusCode || 400 : 200;
     const body = error ? error : response;
 
-    server.respondWith('GET', `${API_BASE_PATH}/cloud_backup_status`, [
+    server.respondWith('POST', `${API_BASE_PATH}/console/proxy`, [
       status,
       { 'Content-Type': 'application/json' },
       JSON.stringify(body),
@@ -32,7 +32,7 @@ const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
   };
 
   return {
-    setLoadCloudBackupStatusResponse,
+    setConsoleRequestResponse,
   };
 };
 
