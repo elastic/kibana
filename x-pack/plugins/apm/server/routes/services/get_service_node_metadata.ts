@@ -7,7 +7,7 @@
 
 import { Setup } from '../../lib/helpers/setup_request';
 import {
-  HOST_NAME,
+  HOST_HOSTNAME,
   HOSTNAME,
   CONTAINER_ID,
 } from '../../../common/elasticsearch_fieldnames';
@@ -72,7 +72,7 @@ export async function getServiceNodeMetadata({
         },
         hostname: {
           terms: {
-            field: HOST_NAME,
+            field: HOST_HOSTNAME,
             size: 1,
           },
         },

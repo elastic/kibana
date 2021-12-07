@@ -19,7 +19,7 @@ import {
   CLOUD_REGION,
   CONTAINER_ID,
   ERROR_GROUP_ID,
-  HOST_NAME,
+  HOST_HOSTNAME,
   HOST_OS_PLATFORM,
   OBSERVER_HOSTNAME,
   PARENT_ID,
@@ -172,7 +172,7 @@ export const tasks: TelemetryTask[] = [
         AGENT_NAME,
         SERVICE_ENVIRONMENT,
         SERVICE_VERSION,
-        HOST_NAME,
+        HOST_HOSTNAME,
         CONTAINER_ID,
         POD_NAME,
       ].map((field) => ({ terms: { field, missing_bucket: true } }));
