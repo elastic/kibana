@@ -45,7 +45,7 @@ export class ScreenshottingPlugin implements Plugin<void, ScreenshottingStart, S
   private config: ConfigType;
   private logger: Logger;
   private screenshotMode!: ScreenshotModePluginSetup;
-  private browserDriverFactory!: Promise<HeadlessChromiumDriverFactory | undefined>;
+  private browserDriverFactory!: Promise<HeadlessChromiumDriverFactory>;
 
   constructor(context: PluginInitializerContext<ConfigType>) {
     this.logger = context.logger.get();
@@ -76,10 +76,10 @@ export class ScreenshottingPlugin implements Plugin<void, ScreenshottingStart, S
   start({}: CoreStart): ScreenshottingStart {
     return {
       diagnose: () =>
-        from(this.browserDriverFactory).pipe(switchMap((factory) => factory!.diagnose())),
+        from(this.browserDriverFactory).pipe(switchMap((factory) => factory.diagnose())),
       getScreenshots: (options) =>
         from(this.browserDriverFactory).pipe(
-          switchMap((factory) => getScreenshots(factory!, this.logger.get('screenshot'), options))
+          switchMap((factory) => getScreenshots(factory, this.logger.get('screenshot'), options))
         ),
     };
   }
