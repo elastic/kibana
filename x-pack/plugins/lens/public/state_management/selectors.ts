@@ -7,8 +7,8 @@
 
 import { createSelector } from '@reduxjs/toolkit';
 import { SavedObjectReference } from 'kibana/server';
-import { extract as extractFilterReferences } from '../../../../../src/plugins/data/common';
 import { LensState } from './types';
+import { extract as extractFilterReferences } from '../../../../../src/plugins/data/common';
 import { Datasource, DatasourceMap, VisualizationMap } from '../types';
 import { getDatasourceLayers } from '../editor_frame_service/editor_frame';
 
@@ -43,10 +43,13 @@ export const selectExecutionContextSearch = createSelector(selectExecutionContex
   filters: res.filters,
 }));
 
-const selectInjectedDependencies = (_state: LensState, dependencies: unknown) => dependencies;
+const selectDatasourceMap = (state: LensState, datasourceMap: DatasourceMap) => datasourceMap;
 
-// use this type to cast selectInjectedDependencies to require whatever outside dependencies the selector needs
-type SelectInjectedDependenciesFunction<T> = (state: LensState, dependencies: T) => T;
+const selectVisualizationMap = (
+  state: LensState,
+  datasourceMap: DatasourceMap,
+  visualizationMap: VisualizationMap
+) => visualizationMap;
 
 export const selectSavedObjectFormat = createSelector(
   [
@@ -56,10 +59,8 @@ export const selectSavedObjectFormat = createSelector(
     selectQuery,
     selectFilters,
     selectActiveDatasourceId,
-    selectInjectedDependencies as SelectInjectedDependenciesFunction<{
-      datasourceMap: DatasourceMap;
-      visualizationMap: VisualizationMap;
-    }>,
+    selectDatasourceMap,
+    selectVisualizationMap,
   ],
   (
     persistedDoc,
@@ -68,7 +69,8 @@ export const selectSavedObjectFormat = createSelector(
     query,
     filters,
     activeDatasourceId,
-    { datasourceMap, visualizationMap }
+    datasourceMap,
+    visualizationMap
   ) => {
     const activeVisualization =
       visualization.state && visualization.activeId && visualizationMap[visualization.activeId];
@@ -139,19 +141,12 @@ export const selectAreDatasourcesLoaded = createSelector(
 );
 
 export const selectDatasourceLayers = createSelector(
-  [
-    selectDatasourceStates,
-    selectInjectedDependencies as SelectInjectedDependenciesFunction<DatasourceMap>,
-  ],
+  [selectDatasourceStates, selectDatasourceMap],
   (datasourceStates, datasourceMap) => getDatasourceLayers(datasourceStates, datasourceMap)
 );
 
 export const selectFramePublicAPI = createSelector(
-  [
-    selectDatasourceStates,
-    selectActiveData,
-    selectInjectedDependencies as SelectInjectedDependenciesFunction<DatasourceMap>,
-  ],
+  [selectDatasourceStates, selectActiveData, selectDatasourceMap],
   (datasourceStates, activeData, datasourceMap) => {
     return {
       datasourceLayers: getDatasourceLayers(datasourceStates, datasourceMap),
