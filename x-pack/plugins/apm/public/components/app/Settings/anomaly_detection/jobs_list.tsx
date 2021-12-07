@@ -91,7 +91,7 @@ const columns: Array<ITableColumn<Jobs[0]>> = [
           <EuiFlexItem grow={false}>
             <EuiToolTip
               content={i18n.translate(
-                'xpack.apm.settings.anomalyDetection.jobList.mlJobLinkText',
+                'xpack.apm.settings.anomalyDetection.jobList.openAnomalyExplorerrLinkText',
                 {
                   defaultMessage: 'Open in Anomaly Explorer',
                 }
