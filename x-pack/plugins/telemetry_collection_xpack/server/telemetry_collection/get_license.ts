@@ -14,15 +14,13 @@ let cachedLicense: ESLicense | undefined;
 async function fetchLicense(esClient: ElasticsearchClient, local: boolean) {
   const { body } = await esClient.license.get({
     local,
-    // For versions >= 7.6 and < 8.0, this flag is needed otherwise 'platinum' is returned for 'enterprise' license.
-    accept_enterprise: true,
   });
   return body;
 }
 /**
  * Get the cluster's license from the connected node.
  *
- * This is the equivalent of GET /_license?local=true&accept_enterprise=true.
+ * This is the equivalent of GET /_license?local=true.
  *
  * Like any X-Pack related API, X-Pack must installed for this to work.
  *

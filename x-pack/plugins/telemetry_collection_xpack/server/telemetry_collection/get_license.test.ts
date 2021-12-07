@@ -17,7 +17,7 @@ describe('getLicenseFromLocalOrMaster', () => {
     const license = await getLicenseFromLocalOrMaster(esClient);
 
     expect(license).toBeUndefined();
-    expect(esClient.license.get).toHaveBeenCalledWith({ local: true, accept_enterprise: true });
+    expect(esClient.license.get).toHaveBeenCalledWith({ local: true });
     expect(esClient.license.get).toHaveBeenCalledTimes(1);
   });
 
@@ -30,7 +30,7 @@ describe('getLicenseFromLocalOrMaster', () => {
     const license = await getLicenseFromLocalOrMaster(esClient);
 
     expect(license).toStrictEqual({ type: 'basic' });
-    expect(esClient.license.get).toHaveBeenCalledWith({ local: true, accept_enterprise: true });
+    expect(esClient.license.get).toHaveBeenCalledWith({ local: true });
     expect(esClient.license.get).toHaveBeenCalledTimes(1);
   });
 
@@ -42,8 +42,8 @@ describe('getLicenseFromLocalOrMaster', () => {
 
     await expect(getLicenseFromLocalOrMaster(esClient)).rejects.toStrictEqual(error);
 
-    expect(esClient.license.get).toHaveBeenCalledWith({ local: true, accept_enterprise: true });
-    expect(esClient.license.get).toHaveBeenCalledWith({ local: false, accept_enterprise: true });
+    expect(esClient.license.get).toHaveBeenCalledWith({ local: true });
+    expect(esClient.license.get).toHaveBeenCalledWith({ local: false });
     expect(esClient.license.get).toHaveBeenCalledTimes(2);
   });
 
@@ -58,8 +58,8 @@ describe('getLicenseFromLocalOrMaster', () => {
     const license = await getLicenseFromLocalOrMaster(esClient);
 
     expect(license).toStrictEqual({ type: 'basic' });
-    expect(esClient.license.get).toHaveBeenCalledWith({ local: true, accept_enterprise: true });
-    expect(esClient.license.get).toHaveBeenCalledWith({ local: false, accept_enterprise: true });
+    expect(esClient.license.get).toHaveBeenCalledWith({ local: true });
+    expect(esClient.license.get).toHaveBeenCalledWith({ local: false });
     expect(esClient.license.get).toHaveBeenCalledTimes(2);
   });
 
@@ -72,14 +72,14 @@ describe('getLicenseFromLocalOrMaster', () => {
     const license = await getLicenseFromLocalOrMaster(esClient);
 
     expect(license).toBeUndefined();
-    expect(esClient.license.get).toHaveBeenCalledWith({ local: true, accept_enterprise: true });
-    expect(esClient.license.get).toHaveBeenCalledWith({ local: false, accept_enterprise: true });
+    expect(esClient.license.get).toHaveBeenCalledWith({ local: true });
+    expect(esClient.license.get).toHaveBeenCalledWith({ local: false });
     expect(esClient.license.get).toHaveBeenCalledTimes(2);
 
     // Now the cached license is cleared, next request only goes for local and gives up when failed
     esClient.license.get.mockClear();
     await expect(getLicenseFromLocalOrMaster(esClient)).resolves.toBeUndefined();
-    expect(esClient.license.get).toHaveBeenCalledWith({ local: true, accept_enterprise: true });
+    expect(esClient.license.get).toHaveBeenCalledWith({ local: true });
     expect(esClient.license.get).toHaveBeenCalledTimes(1);
   });
 });

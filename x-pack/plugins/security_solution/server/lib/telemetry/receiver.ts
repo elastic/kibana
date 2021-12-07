@@ -337,8 +337,6 @@ export class TelemetryReceiver {
           path: '/_license',
           querystring: {
             local: true,
-            // For versions >= 7.6 and < 8.0, this flag is needed otherwise 'platinum' is returned for 'enterprise' license.
-            accept_enterprise: 'true',
           },
         })
       ).body as Promise<{ license: ESLicense }>;
