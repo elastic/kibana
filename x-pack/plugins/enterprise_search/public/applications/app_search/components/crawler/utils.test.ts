@@ -22,6 +22,7 @@ import {
   CrawlRequestWithDetails,
   CrawlEvent,
   CrawlEventFromServer,
+  CrawlRequestStatsFromServer,
 } from './types';
 
 import {
@@ -34,6 +35,7 @@ import {
   getDeleteDomainConfirmationMessage,
   getDeleteDomainSuccessMessage,
   getCrawlRulePathPatternTooltip,
+  crawlRequestStatsServerToClient,
 } from './utils';
 
 const DEFAULT_CRAWL_RULE: CrawlRule = {
@@ -123,6 +125,36 @@ describe('crawlRequestServerToClient', () => {
         completed_at: 'Mon, 31 Aug 2020 17:00:00 +0000',
       })
     ).toStrictEqual({ ...defaultClientPayload, completedAt: 'Mon, 31 Aug 2020 17:00:00 +0000' });
+  });
+});
+
+describe('crawlRequestStatsServerToClient', () => {
+  it('converts the API payload into properties matching our code style', () => {
+    const defaultServerPayload: CrawlRequestStatsFromServer = {
+      status: {
+        urls_allowed: 4,
+        pages_visited: 4,
+        crawl_duration_msec: 100,
+        avg_response_time_msec: 10,
+        status_codes: {
+          200: 4,
+          404: 0,
+        },
+      },
+    };
+
+    expect(crawlRequestStatsServerToClient(defaultServerPayload)).toEqual({
+      status: {
+        urlsAllowed: 4,
+        pagesVisited: 4,
+        crawlDurationMSec: 100,
+        avgResponseTimeMSec: 10,
+        statusCodes: {
+          200: 4,
+          404: 0,
+        },
+      },
+    });
   });
 });
 
