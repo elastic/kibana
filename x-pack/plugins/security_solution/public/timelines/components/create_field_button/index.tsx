@@ -42,7 +42,7 @@ export const CreateFieldButton = React.memo<CreateFieldButtonProps>(
       dataViewFieldEditor,
       data: { dataViews },
     } = useKibana().services;
-    console.log(selectedDataViewId);
+
     useEffect(() => {
       dataViews.get(selectedDataViewId).then((dataViewResponse) => {
         setDataView(dataViewResponse);
