@@ -44,6 +44,7 @@ export const getAgentPolicySummaryHandler = function (
       endpointAppContext,
       context.core.savedObjects.client,
       context.core.elasticsearch.client.asCurrentUser,
+      request,
       request.query.package_name,
       request.query?.policy_id || undefined
     );

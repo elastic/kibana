@@ -33,8 +33,10 @@ import type {
   InputsOverride,
   NewPackagePolicy,
   NewPackagePolicyInput,
+  PackagePolicyPackage,
   RegistryPackage,
 } from '../../common';
+import { packageToPackagePolicy } from '../../common';
 
 import { IngestManagerError } from '../errors';
 
@@ -107,6 +109,11 @@ jest.mock('./epm/packages', () => {
   };
 });
 
+jest.mock('../../common', () => ({
+  ...jest.requireActual('../../common'),
+  packageToPackagePolicy: jest.fn(),
+}));
+
 jest.mock('./epm/registry');
 
 jest.mock('./agent_policy', () => {
@@ -125,6 +132,7 @@ jest.mock('./agent_policy', () => {
         return agentPolicy;
       },
       bumpRevision: () => {},
+      getDefaultAgentPolicyId: () => Promise.resolve('1'),
     },
   };
 });
@@ -2711,6 +2719,317 @@ describe('Package policy service', () => {
           false
         );
         expect(result.inputs[0]?.vars?.path.value).toEqual(['/var/log/logfile.log']);
+      });
+    });
+
+    describe('when policy_template is defined on update, but undefined on existing input with matching type', () => {
+      it('generates the proper inputs, and adds a policy_template field', () => {
+        const basePackagePolicy: NewPackagePolicy = {
+          name: 'base-package-policy',
+          description: 'Base Package Policy',
+          namespace: 'default',
+          enabled: true,
+          policy_id: 'xxxx',
+          output_id: 'xxxx',
+          package: {
+            name: 'test-package',
+            title: 'Test Package',
+            version: '0.0.1',
+          },
+          inputs: [
+            {
+              type: 'logs',
+              enabled: true,
+              vars: {
+                path: {
+                  type: 'text',
+                  value: ['/var/log/logfile.log'],
+                },
+              },
+              streams: [],
+            },
+          ],
+        };
+
+        const packageInfo: PackageInfo = {
+          name: 'test-package',
+          description: 'Test Package',
+          title: 'Test Package',
+          version: '0.0.1',
+          latestVersion: '0.0.1',
+          release: 'experimental',
+          format_version: '1.0.0',
+          owner: { github: 'elastic/fleet' },
+          policy_templates: [
+            {
+              name: 'template_1',
+              title: 'Template 1',
+              description: 'Template 1',
+              inputs: [
+                {
+                  type: 'logs',
+                  title: 'Log',
+                  description: 'Log Input',
+                  vars: [
+                    {
+                      name: 'path',
+                      type: 'text',
+                    },
+                    {
+                      name: 'path_2',
+                      type: 'text',
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+          // @ts-ignore
+          assets: {},
+        };
+
+        const inputsOverride: NewPackagePolicyInput[] = [
+          {
+            type: 'logs',
+            enabled: true,
+            streams: [],
+            policy_template: 'template_1',
+            vars: {
+              path: {
+                type: 'text',
+                value: '/var/log/new-logfile.log',
+              },
+              path_2: {
+                type: 'text',
+                value: '/var/log/custom.log',
+              },
+            },
+          },
+        ];
+
+        const result = updatePackageInputs(
+          basePackagePolicy,
+          packageInfo,
+          // TODO: Update this type assertion when the `InputsOverride` type is updated such
+          // that it no longer causes unresolvable type errors when used directly
+          inputsOverride as InputsOverride[],
+          false
+        );
+
+        expect(result.inputs.length).toBe(1);
+        expect(result.inputs[0]?.vars?.path.value).toEqual(['/var/log/logfile.log']);
+        expect(result.inputs[0]?.vars?.path_2.value).toBe('/var/log/custom.log');
+        expect(result.inputs[0]?.policy_template).toBe('template_1');
+      });
+    });
+  });
+
+  describe('enrich package policy on create', () => {
+    beforeEach(() => {
+      (packageToPackagePolicy as jest.Mock).mockReturnValue({
+        package: { name: 'apache', title: 'Apache', version: '1.0.0' },
+        inputs: [
+          {
+            type: 'logfile',
+            policy_template: 'log',
+            enabled: true,
+            streams: [
+              {
+                enabled: true,
+                data_stream: {
+                  type: 'logs',
+                  dataset: 'apache.access',
+                },
+              },
+            ],
+          },
+        ],
+        vars: {
+          paths: {
+            value: ['/var/log/apache2/access.log*'],
+            type: 'text',
+          },
+        },
+      });
+    });
+
+    it('should enrich from epm with defaults', async () => {
+      const newPolicy = {
+        name: 'apache-1',
+        inputs: [{ type: 'logfile', enabled: false }],
+        package: { name: 'apache', version: '0.3.3' },
+      } as NewPackagePolicy;
+      const result = await packagePolicyService.enrichPolicyWithDefaultsFromPackage(
+        savedObjectsClientMock.create(),
+        newPolicy
+      );
+      expect(result).toEqual({
+        name: 'apache-1',
+        namespace: 'default',
+        description: '',
+        package: { name: 'apache', title: 'Apache', version: '1.0.0' },
+        enabled: true,
+        policy_id: '1',
+        output_id: '',
+        inputs: [
+          {
+            enabled: false,
+            type: 'logfile',
+            policy_template: 'log',
+            streams: [
+              {
+                enabled: false,
+                data_stream: {
+                  type: 'logs',
+                  dataset: 'apache.access',
+                },
+              },
+            ],
+          },
+        ],
+        vars: {
+          paths: {
+            value: ['/var/log/apache2/access.log*'],
+            type: 'text',
+          },
+        },
+      });
+    });
+
+    it('should enrich from epm with defaults using policy template', async () => {
+      (packageToPackagePolicy as jest.Mock).mockReturnValueOnce({
+        package: { name: 'aws', title: 'AWS', version: '1.0.0' },
+        inputs: [
+          {
+            type: 'aws/metrics',
+            policy_template: 'cloudtrail',
+            enabled: true,
+            streams: [
+              {
+                enabled: true,
+                data_stream: {
+                  type: 'metrics',
+                  dataset: 'cloudtrail',
+                },
+              },
+            ],
+          },
+          {
+            type: 'aws/metrics',
+            policy_template: 'cloudwatch',
+            enabled: true,
+            streams: [
+              {
+                enabled: true,
+                data_stream: {
+                  type: 'metrics',
+                  dataset: 'cloudwatch',
+                },
+              },
+            ],
+          },
+        ],
+      });
+      const newPolicy = {
+        name: 'aws-1',
+        inputs: [{ type: 'aws/metrics', policy_template: 'cloudwatch', enabled: true }],
+        package: { name: 'aws', version: '1.0.0' },
+      } as NewPackagePolicy;
+      const result = await packagePolicyService.enrichPolicyWithDefaultsFromPackage(
+        savedObjectsClientMock.create(),
+        newPolicy
+      );
+      expect(result).toEqual({
+        name: 'aws-1',
+        namespace: 'default',
+        description: '',
+        package: { name: 'aws', title: 'AWS', version: '1.0.0' },
+        enabled: true,
+        policy_id: '1',
+        output_id: '',
+        inputs: [
+          {
+            type: 'aws/metrics',
+            policy_template: 'cloudwatch',
+            enabled: true,
+            streams: [
+              {
+                enabled: true,
+                data_stream: {
+                  type: 'metrics',
+                  dataset: 'cloudwatch',
+                },
+              },
+            ],
+          },
+        ],
+      });
+    });
+
+    it('should override defaults with new values', async () => {
+      const newPolicy = {
+        name: 'apache-2',
+        namespace: 'namespace',
+        description: 'desc',
+        enabled: false,
+        policy_id: '2',
+        output_id: '3',
+        inputs: [
+          {
+            type: 'logfile',
+            enabled: true,
+            streams: [
+              {
+                enabled: true,
+                data_stream: {
+                  type: 'logs',
+                  dataset: 'apache.error',
+                },
+              },
+            ],
+          },
+        ],
+        vars: {
+          paths: {
+            value: ['/my/access.log*'],
+            type: 'text',
+          },
+        },
+        package: { name: 'apache', version: '1.0.0' } as PackagePolicyPackage,
+      } as NewPackagePolicy;
+      const result = await packagePolicyService.enrichPolicyWithDefaultsFromPackage(
+        savedObjectsClientMock.create(),
+        newPolicy
+      );
+      expect(result).toEqual({
+        name: 'apache-2',
+        namespace: 'namespace',
+        description: 'desc',
+        package: { name: 'apache', title: 'Apache', version: '1.0.0' },
+        enabled: false,
+        policy_id: '2',
+        output_id: '3',
+        inputs: [
+          {
+            enabled: true,
+            type: 'logfile',
+            streams: [
+              {
+                enabled: true,
+                data_stream: {
+                  type: 'logs',
+                  dataset: 'apache.error',
+                },
+              },
+            ],
+          },
+        ],
+        vars: {
+          paths: {
+            value: ['/my/access.log*'],
+            type: 'text',
+          },
+        },
       });
     });
   });

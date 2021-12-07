@@ -22,9 +22,7 @@ import { xyChart } from '../common/expressions/xy_chart/xy_chart';
 import { getDatatable } from '../common/expressions/datatable/datatable';
 import { datatableColumn } from '../common/expressions/datatable/datatable_column';
 
-import { heatmap } from '../common/expressions/heatmap_chart/heatmap_chart';
-import { heatmapGridConfig } from '../common/expressions/heatmap_chart/heatmap_grid';
-import { heatmapLegendConfig } from '../common/expressions/heatmap_chart/heatmap_legend';
+import { gauge } from '../common/expressions/gauge_chart/gauge_chart';
 
 import { mergeTables } from '../common/expressions/merge_tables';
 import { renameColumns } from '../common/expressions/rename_columns/rename_columns';
@@ -57,9 +55,7 @@ export const setupExpressions = (
     datatableColumn,
     tickLabelsConfig,
     axisTitlesVisibilityConfig,
-    heatmap,
-    heatmapLegendConfig,
-    heatmapGridConfig,
+    gauge,
     axisExtentConfig,
     labelsOrientationConfig,
     getDatatable(formatFactory),

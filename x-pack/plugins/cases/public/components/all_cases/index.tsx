@@ -14,11 +14,7 @@ import { getActionLicenseError } from '../use_push_to_service/helpers';
 import { AllCasesList } from './all_cases_list';
 import { CasesTableHeader } from './header';
 
-export interface AllCasesProps {
-  disableAlerts?: boolean;
-}
-
-export const AllCases: React.FC<AllCasesProps> = ({ disableAlerts }) => {
+export const AllCases: React.FC = () => {
   const { userCanCrud } = useCasesContext();
   const [refresh, setRefresh] = useState<number>(0);
   useCasesBreadcrumbs(CasesDeepLinkId.cases);
@@ -33,7 +29,7 @@ export const AllCases: React.FC<AllCasesProps> = ({ disableAlerts }) => {
   return (
     <>
       <CasesTableHeader actionsErrors={actionsErrors} refresh={refresh} userCanCrud={userCanCrud} />
-      <AllCasesList disableAlerts={disableAlerts} doRefresh={doRefresh} />
+      <AllCasesList doRefresh={doRefresh} />
     </>
   );
 };

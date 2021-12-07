@@ -60,7 +60,8 @@ export const createSourcererDataViewRoute = (
         );
         const dataViewService = await indexPatterns.dataViewsServiceFactory(
           context.core.savedObjects.client,
-          context.core.elasticsearch.client.asInternalUser
+          context.core.elasticsearch.client.asInternalUser,
+          request
         );
 
         let allDataViews: DataViewListItem[] = [];

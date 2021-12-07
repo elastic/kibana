@@ -68,7 +68,8 @@ import type { BrowserFields } from '../../../../common/search_strategy/index_fie
 import type { OnRowSelected, OnSelectAll } from '../types';
 import type { Refetch } from '../../../store/t_grid/inputs';
 import { getPageRowIndex } from '../../../../common/utils/pagination';
-import { StatefulEventContext, StatefulFieldsBrowser } from '../../../';
+import { StatefulEventContext } from '../../../components/stateful_event_context';
+import { StatefulFieldsBrowser } from '../../../components/t_grid/toolbar/fields_browser';
 import { tGridActions, TGridModel, tGridSelectors, TimelineState } from '../../../store/t_grid';
 import { useDeepEqualSelector } from '../../../hooks/use_selector';
 import { RowAction } from './row_action';
@@ -122,6 +123,7 @@ interface OwnProps {
     ruleProducer?: string;
   }) => boolean;
   totalSelectAllAlerts?: number;
+  showCheckboxes?: boolean;
 }
 
 const defaultUnit = (n: number) => i18n.ALERTS_UNIT(n);

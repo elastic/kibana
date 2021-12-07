@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import React, { useEffect } from 'react';
 
 import { useActions, useValues } from 'kea';
 
@@ -21,6 +21,7 @@ import {
 import { i18n } from '@kbn/i18n';
 
 import { Loading } from '../../../../../shared/loading';
+import { LogRetentionLogic } from '../../../log_retention';
 import { CrawlDetailLogic } from '../../crawl_detail_logic';
 
 import { CrawlDetailsPreview } from './crawl_details_preview';
@@ -29,13 +30,24 @@ export const CrawlDetailsFlyout: React.FC = () => {
   const { closeFlyout, setSelectedTab } = useActions(CrawlDetailLogic);
   const { crawlRequestFromServer, dataLoading, flyoutClosed, selectedTab } =
     useValues(CrawlDetailLogic);
+  const { fetchLogRetention } = useActions(LogRetentionLogic);
+  const { logRetention } = useValues(LogRetentionLogic);
+
+  useEffect(() => {
+    fetchLogRetention();
+  }, []);
 
   if (flyoutClosed) {
     return null;
   }
 
   return (
-    <EuiFlyout ownFocus onClose={closeFlyout} aria-labelledby="CrawlDetailsFlyoutTitle">
+    <EuiFlyout
+      maxWidth="45rem"
+      ownFocus
+      onClose={closeFlyout}
+      aria-labelledby="CrawlDetailsFlyoutTitle"
+    >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
           <h2 id="CrawlDetailsFlyoutTitle">
@@ -68,9 +80,13 @@ export const CrawlDetailsFlyout: React.FC = () => {
           <Loading />
         ) : (
           <>
-            {selectedTab === 'preview' && <CrawlDetailsPreview />}
+            {selectedTab === 'preview' && (
+              <CrawlDetailsPreview
+                crawlerLogsEnabled={logRetention ? logRetention.crawler.enabled : false}
+              />
+            )}
             {selectedTab === 'json' && (
-              <EuiCodeBlock language="json">
+              <EuiCodeBlock language="json" isCopyable>
                 {JSON.stringify(crawlRequestFromServer, null, 2)}
               </EuiCodeBlock>
             )}

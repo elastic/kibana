@@ -13,15 +13,12 @@ import classnames from 'classnames';
 
 import {
   Case,
-  CaseStatuses,
-  CaseType,
-  CommentRequestAlertType,
   CaseStatusWithAllStatus,
   FilterOptions,
   SortFieldCase,
   SubCase,
-  caseStatuses,
-} from '../../../common';
+} from '../../../common/ui/types';
+import { CaseStatuses, CaseType, CommentRequestAlertType, caseStatuses } from '../../../common/api';
 import { SELECTABLE_MESSAGE_COLLECTIONS } from '../../common/translations';
 import { useGetCases } from '../../containers/use_get_cases';
 import { usePostComment } from '../../containers/use_post_comment';
@@ -53,7 +50,6 @@ const getSortField = (field: string): SortFieldCase =>
 
 export interface AllCasesListProps {
   alertData?: Omit<CommentRequestAlertType, 'type'>;
-  disableAlerts?: boolean;
   hiddenStatuses?: CaseStatusWithAllStatus[];
   isSelectorView?: boolean;
   onRowClick?: (theCase?: Case | SubCase) => void;
@@ -64,7 +60,6 @@ export interface AllCasesListProps {
 export const AllCasesList = React.memo<AllCasesListProps>(
   ({
     alertData,
-    disableAlerts,
     hiddenStatuses = [],
     isSelectorView = false,
     onRowClick,
@@ -168,7 +163,6 @@ export const AllCasesList = React.memo<AllCasesListProps>(
     const showActions = userCanCrud && !isSelectorView;
 
     const columns = useCasesColumns({
-      disableAlerts,
       dispatchUpdateCaseProperty,
       filterStatus: filterOptions.status,
       handleIsLoading,
