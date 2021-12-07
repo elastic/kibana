@@ -8,25 +8,15 @@
 import axios from 'axios';
 import { forkJoin, from as rxjsFrom, Observable, of } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
-import { ServiceLocations, SyntheticsMonitorSavedObject } from '../../../common/types';
+import { ServiceLocations } from '../../../common/types';
 import { getServiceLocations } from './get_service_locations';
 import { Logger } from '../../../../../../src/core/server';
+import { MonitorFields } from '../../../common/runtime_types/monitor_management';
 
 const TEST_SERVICE_USERNAME = 'localKibanaIntegrationTestsUser';
 
-export type MonitorConfigs = Array<
-  SyntheticsMonitorSavedObject['attributes'] & {
-    id: string;
-    source?: {
-      inline: {
-        script: string;
-      };
-    };
-  }
->;
-
 export interface ServiceData {
-  monitors: MonitorConfigs;
+  monitors: Array<Partial<MonitorFields>>;
   output: {
     hosts: string[];
     api_key: string;

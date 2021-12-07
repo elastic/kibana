@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import { BrowserFields, ConfigKey } from '../../fleet_package/types';
 import { Formatter, commonFormatters, objectFormatter, arrayFormatter } from './common';
+import { BrowserFields, ConfigKey } from '../../../../common/runtime_types/monitor_management';
 
 export type BrowserFormatMap = Record<keyof BrowserFields, Formatter>;
 
 export const browserFormatters: BrowserFormatMap = {
   [ConfigKey.METADATA]: (fields) => objectFormatter(fields[ConfigKey.METADATA]),
+  [ConfigKey.ZIP_URL_TLS_VERSION]: (fields) =>
+    arrayFormatter(fields[ConfigKey.ZIP_URL_TLS_VERSION]),
   [ConfigKey.SOURCE_ZIP_URL]: null,
   [ConfigKey.SOURCE_ZIP_USERNAME]: null,
   [ConfigKey.SOURCE_ZIP_PASSWORD]: null,
@@ -31,8 +33,6 @@ export const browserFormatters: BrowserFormatMap = {
   [ConfigKey.DOWNLOAD_SPEED]: null,
   [ConfigKey.UPLOAD_SPEED]: null,
   [ConfigKey.LATENCY]: null,
-  [ConfigKey.ZIP_URL_TLS_VERSION]: (fields) =>
-    arrayFormatter(fields[ConfigKey.ZIP_URL_TLS_VERSION]),
   [ConfigKey.JOURNEY_FILTERS_MATCH]: null,
   [ConfigKey.JOURNEY_FILTERS_TAGS]: null,
   [ConfigKey.IGNORE_HTTPS_ERRORS]: null,
