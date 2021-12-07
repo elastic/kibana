@@ -105,7 +105,7 @@ export const patchRules = async ({
     timelineId,
     timelineTitle,
     meta,
-    filters: filters ?? [],
+    filters,
     from,
     index,
     interval,

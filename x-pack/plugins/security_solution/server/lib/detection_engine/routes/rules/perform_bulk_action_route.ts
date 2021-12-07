@@ -231,7 +231,7 @@ export const performBulkActionRoute = (
             );
         }
 
-        return response.ok({ body: { success: true, rules_count: rules.data.length, errors: [] } });
+        return response.ok({ body: { success: true, rules_count: rules.data.length } });
       } catch (err) {
         const error = transformError(err);
         return siemResponse.error({
