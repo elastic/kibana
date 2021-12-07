@@ -17,8 +17,11 @@ import {
 } from 'kibana/server';
 import { ACTION_SAVED_OBJECT_TYPE } from '../../../../actions/server';
 import { ESCaseAttributes, ExternalServicesWithoutConnectorId } from './types';
-import { CONNECTOR_ID_REFERENCE_NAME, PUSH_CONNECTOR_ID_REFERENCE_NAME } from '../../common';
-import { CaseAttributes, CaseFullExternalService } from '../../../common';
+import {
+  CONNECTOR_ID_REFERENCE_NAME,
+  PUSH_CONNECTOR_ID_REFERENCE_NAME,
+} from '../../common/constants';
+import { CaseAttributes, CaseFullExternalService } from '../../../common/api';
 import {
   findConnectorIdReference,
   transformFieldsToESModel,

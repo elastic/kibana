@@ -159,7 +159,6 @@ export class ExecuteReportTask implements ReportingTask {
     const doc: ReportProcessingFields = {
       kibana_id: this.kibanaId,
       kibana_name: this.kibanaName,
-      browser_type: this.config.capture.browser.type,
       attempts: report.attempts + 1,
       max_attempts: maxAttempts,
       started_at: startTime,
