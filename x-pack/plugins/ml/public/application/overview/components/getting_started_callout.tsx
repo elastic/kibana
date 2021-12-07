@@ -6,16 +6,15 @@
  */
 
 import React, { FC } from 'react';
-import { EuiFlexItem, EuiLink, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import { EuiButton, EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useMlKibana } from '../../contexts/kibana';
+import { useStorage } from '../../contexts/ml/use_storage';
+import { ML_GETTING_STARTED_CALLOUT_DISMISSED } from '../../../../common/types/storage';
+
 const feedbackLink = 'https://www.elastic.co/community/';
 
-interface Props {
-  createAnomalyDetectionJobDisabled: boolean;
-}
-
-export const OverviewSideBar: FC<Props> = ({ createAnomalyDetectionJobDisabled }) => {
+export const GettingStartedCallout: FC = () => {
   const {
     services: {
       docLinks,
@@ -26,18 +25,24 @@ export const OverviewSideBar: FC<Props> = ({ createAnomalyDetectionJobDisabled }
   const docsLink = docLinks.links.ml.guide;
   const transformsLink = `${basePath.get()}/app/management/data/transform`;
 
+  const [isCalloutDismissed, setIsCalloutDismissed] = useStorage(
+    ML_GETTING_STARTED_CALLOUT_DISMISSED,
+    false
+  );
+
+  if (isCalloutDismissed) return null;
+
   return (
-    <EuiFlexItem grow={1}>
-      <EuiTitle size="m">
-        <h1>
+    <>
+      <EuiCallOut
+        title={
           <FormattedMessage
             id="xpack.ml.overview.gettingStartedSectionTitle"
             defaultMessage="Getting started"
           />
-        </h1>
-      </EuiTitle>
-      <EuiSpacer size="s" />
-      <EuiText className="mlOverview__sidebar">
+        }
+        iconType="iInCircle"
+      >
         <p>
           <FormattedMessage
             id="xpack.ml.overview.gettingStartedSectionText"
@@ -62,9 +67,6 @@ export const OverviewSideBar: FC<Props> = ({ createAnomalyDetectionJobDisabled }
             }}
           />
         </p>
-        <h2>
-          <FormattedMessage id="xpack.ml.overview.feedbackSectionTitle" defaultMessage="Feedback" />
-        </h2>
         <p>
           <FormattedMessage
             id="xpack.ml.overview.feedbackSectionText"
@@ -81,7 +83,17 @@ export const OverviewSideBar: FC<Props> = ({ createAnomalyDetectionJobDisabled }
             }}
           />
         </p>
-      </EuiText>
-    </EuiFlexItem>
+        <p>
+          <EuiButton color="primary" onClick={setIsCalloutDismissed.bind(null, true)}>
+            <FormattedMessage
+              id="xpack.ml.overview.gettingStartedSectionDismiss"
+              defaultMessage="Dismiss"
+            />
+          </EuiButton>
+        </p>
+      </EuiCallOut>
+
+      <EuiSpacer size="m" />
+    </>
   );
 };
