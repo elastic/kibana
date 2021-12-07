@@ -43,6 +43,10 @@ export const ReportInfoFlyoutContent: FunctionComponent<Props> = ({ info }) => {
       }),
       description: info.title || NA,
     },
+    Boolean(info.spaceId) && {
+      title: i18n.translate('xpack.reporting.listing.infoPanel.space', { defaultMessage: 'Space' }),
+      description: info.spaceId,
+    },
     {
       title: i18n.translate('xpack.reporting.listing.infoPanel.createdAtInfo', {
         defaultMessage: 'Created at',
@@ -61,7 +65,7 @@ export const ReportInfoFlyoutContent: FunctionComponent<Props> = ({ info }) => {
       }),
       description: info.browserTimezone || NA,
     },
-  ];
+  ].filter(Boolean) as EuiDescriptionListProps['listItems'];
 
   const processingInfo = [
     {
@@ -82,10 +86,6 @@ export const ReportInfoFlyoutContent: FunctionComponent<Props> = ({ info }) => {
       }),
       description:
         info.kibana_name && info.kibana_id ? `${info.kibana_name} (${info.kibana_id})` : NA,
-    },
-    Boolean(info.spaceId) && {
-      title: i18n.translate('xpack.reporting.listing.infoPanel.space', { defaultMessage: 'Space' }),
-      description: info.spaceId,
     },
     {
       title: i18n.translate('xpack.reporting.listing.infoPanel.contentTypeInfo', {
@@ -132,7 +132,7 @@ export const ReportInfoFlyoutContent: FunctionComponent<Props> = ({ info }) => {
     },
 
     // TODO: when https://github.com/elastic/kibana/pull/106137 is merged, add kibana version field
-  ].filter(Boolean) as EuiDescriptionListProps['listItems'];
+  ];
 
   const jobScreenshot = [
     {
