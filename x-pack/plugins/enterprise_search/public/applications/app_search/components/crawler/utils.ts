@@ -16,6 +16,8 @@ import {
   CrawlerDomainValidationStep,
   CrawlRequestFromServer,
   CrawlRequest,
+  CrawlRequestStats,
+  CrawlRequestStatsFromServer,
   CrawlRule,
   CrawlerRules,
   CrawlEventFromServer,
@@ -66,6 +68,30 @@ export function crawlerDomainServerToClient(payload: CrawlerDomainFromServer): C
   return clientPayload;
 }
 
+export function crawlRequestStatsServerToClient(
+  crawlStats: CrawlRequestStatsFromServer
+): CrawlRequestStats {
+  const {
+    status: {
+      avg_response_time_msec: avgResponseTimeMSec,
+      crawl_duration_msec: crawlDurationMSec,
+      pages_visited: pagesVisited,
+      urls_allowed: urlsAllowed,
+      status_codes: statusCodes,
+    },
+  } = crawlStats;
+
+  return {
+    status: {
+      urlsAllowed,
+      pagesVisited,
+      avgResponseTimeMSec,
+      crawlDurationMSec,
+      statusCodes,
+    },
+  };
+}
+
 export function crawlRequestServerToClient(crawlRequest: CrawlRequestFromServer): CrawlRequest {
   const {
     id,
@@ -89,12 +115,14 @@ export function crawlConfigServerToClient(crawlConfig: CrawlConfigFromServer): C
     domain_allowlist: domainAllowlist,
     seed_urls: seedUrls,
     sitemap_urls: sitemapUrls,
+    max_crawl_depth: maxCrawlDepth,
   } = crawlConfig;
 
   return {
     domainAllowlist,
     seedUrls,
     sitemapUrls,
+    maxCrawlDepth,
   };
 }
 
@@ -126,24 +154,25 @@ export function crawlRequestWithDetailsServerToClient(
   event: CrawlRequestWithDetailsFromServer
 ): CrawlRequestWithDetails {
   const {
-    id,
-    status,
-    created_at: createdAt,
     began_at: beganAt,
     completed_at: completedAt,
-    type,
     crawl_config: crawlConfig,
+    created_at: createdAt,
+    id,
+    stats: crawlStats,
+    status,
+    type,
   } = event;
 
   return {
-    id,
-    status,
-    createdAt,
     beganAt,
     completedAt,
-    type,
     crawlConfig: crawlConfigServerToClient(crawlConfig),
-    // TODO add fields like stats
+    createdAt,
+    id,
+    stats: crawlStats && crawlRequestStatsServerToClient(crawlStats),
+    status,
+    type,
   };
 }
 

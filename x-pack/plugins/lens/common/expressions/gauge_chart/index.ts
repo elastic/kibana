@@ -5,7 +5,5 @@
  * 2.0.
  */
 
-export type {
-  ITiledSingleLayerMvtParams,
-  ITiledSingleLayerVectorSource,
-} from './tiled_single_layer_vector_source';
+export * from './gauge_chart';
+export * from './types';
