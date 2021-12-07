@@ -70,10 +70,19 @@ function onFieldDrop(props: DropHandlerProps<DraggedField>) {
     dimensionGroups,
   } = props;
 
+  const prioritizedOperation = dimensionGroups.find(
+    (g) => g.groupId === groupId
+  )?.prioritizedOperation;
+
   const layer = state.layers[layerId];
   const indexPattern = state.indexPatterns[layer.indexPatternId];
   const targetColumn = layer.columns[columnId];
-  const newOperation = getNewOperation(droppedItem.field, filterOperations, targetColumn);
+  const newOperation = getNewOperation(
+    droppedItem.field,
+    filterOperations,
+    targetColumn,
+    prioritizedOperation
+  );
 
   if (!isDraggedField(droppedItem) || !newOperation) {
     return false;
