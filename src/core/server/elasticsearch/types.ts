@@ -13,6 +13,7 @@ import { ElasticsearchConfig } from './elasticsearch_config';
 import { IClusterClient, ICustomClusterClient, ElasticsearchClientConfig } from './client';
 import { NodesVersionCompatibility } from './version_check/ensure_es_version';
 import { ServiceStatus } from '../status';
+import type { UnauthorizedErrorHandler } from './client/retry_unauthorized';
 
 /**
  * @public
@@ -55,6 +56,11 @@ export interface ElasticsearchServicePreboot {
  * @public
  */
 export interface ElasticsearchServiceSetup {
+  /**
+   * TODO: doc
+   */
+  setUnauthorizedErrorHandler: (handler: UnauthorizedErrorHandler) => void;
+
   /**
    * @deprecated
    * Use {@link ElasticsearchServiceStart.legacy} instead.

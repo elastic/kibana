@@ -42,7 +42,7 @@ import {
   createCookieSessionStorageFactory,
 } from './cookie_session_storage';
 import { AuthStateStorage } from './auth_state_storage';
-import { AuthHeadersStorage, GetAuthHeaders } from './auth_headers_storage';
+import { AuthHeadersStorage, GetAuthHeaders, SetAuthHeaders } from './auth_headers_storage';
 import { BasePath } from './base_path_service';
 import { getEcsResponseLog } from './logging';
 import { HttpServiceSetup, HttpServerInfo, HttpAuth } from './types';
@@ -72,6 +72,7 @@ export interface HttpServerSetup {
   registerOnPostAuth: HttpServiceSetup['registerOnPostAuth'];
   registerOnPreResponse: HttpServiceSetup['registerOnPreResponse'];
   getAuthHeaders: GetAuthHeaders;
+  setAuthHeaders: SetAuthHeaders;
   auth: HttpAuth;
   getServerInfo: () => HttpServerInfo;
 }
@@ -172,6 +173,7 @@ export class HttpServer {
         isAuthenticated: this.authState.isAuthenticated,
       },
       getAuthHeaders: this.authRequestHeaders.get,
+      setAuthHeaders: this.authRequestHeaders.set,
       getServerInfo: () => ({
         name: config.name,
         hostname: config.host,
@@ -461,8 +463,9 @@ export class HttpServer {
     // https://github.com/hapijs/hapi/blob/master/API.md#-serverauthdefaultoptions
     this.server.auth.default('session');
 
-    this.registerOnPreResponse((request, preResponseInfo, t) => {
+    this.registerOnPreResponse(async (request, preResponseInfo, t) => {
       const authResponseHeaders = this.authResponseHeaders.get(request);
+      // TODO here
       return t.next({ headers: authResponseHeaders });
     });
   }

@@ -16,7 +16,7 @@ import { Logger } from '../logging';
 
 import { ClusterClient, ElasticsearchClientConfig } from './client';
 import { ElasticsearchConfig, ElasticsearchConfigType } from './elasticsearch_config';
-import type { InternalHttpServiceSetup, GetAuthHeaders } from '../http';
+import type { InternalHttpServiceSetup, GetAuthHeaders, SetAuthHeaders } from '../http';
 import type { InternalExecutionContextSetup, IExecutionContext } from '../execution_context';
 import {
   InternalElasticsearchServicePreboot,
@@ -28,6 +28,7 @@ import { pollEsNodesVersion } from './version_check/ensure_es_version';
 import { calculateStatus$ } from './status';
 import { isValidConnection } from './is_valid_connection';
 import { isInlineScriptingEnabled } from './is_scripting_enabled';
+import type { UnauthorizedErrorHandler } from './client/retry_unauthorized';
 
 export interface SetupDeps {
   http: InternalHttpServiceSetup;
@@ -43,9 +44,11 @@ export class ElasticsearchService
   private stop$ = new Subject();
   private kibanaVersion: string;
   private getAuthHeaders?: GetAuthHeaders;
+  private setAuthHeaders?: SetAuthHeaders;
   private executionContextClient?: IExecutionContext;
   private esNodesCompatibility$?: Observable<NodesVersionCompatibility>;
   private client?: ClusterClient;
+  private unauthorizedErrorHandler?: UnauthorizedErrorHandler;
 
   constructor(private readonly coreContext: CoreContext) {
     this.kibanaVersion = coreContext.env.packageInfo.version;
@@ -77,6 +80,7 @@ export class ElasticsearchService
     const config = await this.config$.pipe(first()).toPromise();
 
     this.getAuthHeaders = deps.http.getAuthHeaders;
+    this.setAuthHeaders = deps.http.setAuthHeaders;
     this.executionContextClient = deps.executionContext;
     this.client = this.createClusterClient('data', config);
 
@@ -96,6 +100,12 @@ export class ElasticsearchService
       },
       esNodesCompatibility$,
       status$: calculateStatus$(esNodesCompatibility$),
+      setUnauthorizedErrorHandler: (handler) => {
+        if (this.unauthorizedErrorHandler) {
+          throw new Error('setUnauthorizedErrorHandler can only be called once.');
+        }
+        this.unauthorizedErrorHandler = handler;
+      },
     };
   }
 
@@ -153,12 +163,14 @@ export class ElasticsearchService
     clientConfig?: Partial<ElasticsearchClientConfig>
   ) {
     const config = clientConfig ? merge({}, baseConfig, clientConfig) : baseConfig;
-    return new ClusterClient(
+    return new ClusterClient({
       config,
-      this.coreContext.logger.get('elasticsearch'),
+      logger: this.coreContext.logger.get('elasticsearch'),
       type,
-      this.getAuthHeaders,
-      () => this.executionContextClient?.getAsHeader()
-    );
+      getAuthHeaders: this.getAuthHeaders,
+      setAuthHeaders: this.setAuthHeaders,
+      getExecutionContext: () => this.executionContextClient?.getAsHeader(),
+      unauthorizedErrorHandler: this.unauthorizedErrorHandler,
+    });
   }
 }

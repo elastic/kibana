@@ -9,7 +9,7 @@
 import { IContextProvider, IContextContainer } from '../context';
 import { ICspConfig } from '../csp';
 import { GetAuthState, IsAuthenticated } from './auth_state_storage';
-import { GetAuthHeaders } from './auth_headers_storage';
+import { GetAuthHeaders, SetAuthHeaders } from './auth_headers_storage';
 import { IRouter } from './router';
 import { HttpServerSetup } from './http_server';
 import { SessionStorageCookieOptions } from './cookie_session_storage';
@@ -399,6 +399,7 @@ export interface InternalHttpServiceSetup
   registerRouterAfterListening: (router: IRouter) => void;
   registerStaticDir: (path: string, dirPath: string) => void;
   getAuthHeaders: GetAuthHeaders;
+  setAuthHeaders: SetAuthHeaders;
   registerRouteHandlerContext: <
     Context extends RequestHandlerContext,
     ContextName extends keyof Context

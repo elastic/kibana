@@ -5,6 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { Request } from '@hapi/hapi';
 import { KibanaRequest, ensureRawRequest } from './router';
 import { AuthHeaders } from './lifecycle/auth';
@@ -16,6 +17,8 @@ import { AuthHeaders } from './lifecycle/auth';
  * @public
  * */
 export type GetAuthHeaders = (request: KibanaRequest) => AuthHeaders | undefined;
+
+export type SetAuthHeaders = (request: KibanaRequest, headers: AuthHeaders) => void;
 
 /** @internal */
 export class AuthHeadersStorage {
