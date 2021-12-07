@@ -10,6 +10,7 @@ import { render } from 'react-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
 import { Ast } from '@kbn/interpreter/common';
+import type { GaugeArguments } from 'src/plugins/chart_expressions/expression_gauge/common';
 import { PaletteRegistry } from '../../../../../../src/plugins/charts/public';
 import type { DatasourcePublicAPI, OperationMetadata, Visualization } from '../../types';
 import { getSuggestions } from './suggestions';
@@ -21,13 +22,7 @@ import { GaugeDimensionEditor } from './dimension_editor';
 import { CustomPaletteParams, layerTypes } from '../../../common';
 import { generateId } from '../../id_generator';
 import { getGoalValue, getMaxValue, getMinValue } from './utils';
-
-import {
-  GaugeShapes,
-  GaugeArguments,
-  EXPRESSION_GAUGE_NAME,
-  GaugeVisualizationState,
-} from '../../../common/expressions/gauge_chart';
+import { GaugeShapes, EXPRESSION_GAUGE_NAME, GaugeVisualizationState } from './constants';
 
 const groupLabelForGauge = i18n.translate('xpack.lens.metric.groupLabel', {
   defaultMessage: 'Goal and single value',
@@ -90,8 +85,6 @@ const toExpression = (
         type: 'function',
         function: EXPRESSION_GAUGE_NAME,
         arguments: {
-          title: [attributes?.title ?? ''],
-          description: [attributes?.description ?? ''],
           metricAccessor: [state.metricAccessor ?? ''],
           minAccessor: [state.minAccessor ?? ''],
           maxAccessor: [state.maxAccessor ?? ''],
@@ -173,7 +166,6 @@ export const getGaugeVisualization = ({
       state || {
         layerId: addNewLayer(),
         layerType: layerTypes.DATA,
-        title: 'Empty Gauge chart',
         shape: GaugeShapes.horizontalBullet,
         palette: mainPalette,
         ticksPosition: 'auto',

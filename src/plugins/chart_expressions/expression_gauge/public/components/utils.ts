@@ -1,24 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { scaleLinear } from 'd3-scale';
-import {
-  ChartColorConfiguration,
-  PaletteDefinition,
-  PaletteRegistry,
-  SeriesLayer,
-} from 'src/plugins/charts/public';
 import { DatatableRow } from 'src/plugins/expressions';
-import Color from 'color';
-import type { GaugeVisualizationState } from './constants';
+import { GaugeState } from '../../common/types/expression_functions';
 
 type GaugeAccessors = 'maxAccessor' | 'minAccessor' | 'goalAccessor' | 'metricAccessor';
 
-type GaugeAccessorsType = Pick<GaugeVisualizationState, GaugeAccessors>;
+type GaugeAccessorsType = Pick<GaugeState, GaugeAccessors>;
 
 export const getValueFromAccessor = (
   accessorName: GaugeAccessors,
@@ -82,7 +76,7 @@ export const getMinValue = (row?: DatatableRow, state?: GaugeAccessorsType) => {
   return FALLBACK_VALUE;
 };
 
-export const getGoalValue = (row?: DatatableRow, state?: GaugeVisualizationState) => {
+export const getGoalValue = (row?: DatatableRow, state?: GaugeState) => {
   const currentValue = getValueFromAccessor('goalAccessor', row, state);
   if (currentValue != null) {
     return currentValue;
@@ -90,24 +84,4 @@ export const getGoalValue = (row?: DatatableRow, state?: GaugeVisualizationState
   const minValue = getMinValue(row, state);
   const maxValue = getMaxValue(row, state);
   return Math.round((maxValue - minValue) * 0.75 + minValue);
-};
-
-export const transparentizePalettes = (palettes: PaletteRegistry) => {
-  const addAlpha = (c: string | null) => (c ? new Color(c).hex() + `80` : `000000`);
-  const transparentizePalette = (palette: PaletteDefinition<unknown>) => ({
-    ...palette,
-    getCategoricalColor: (
-      series: SeriesLayer[],
-      chartConfiguration?: ChartColorConfiguration,
-      state?: unknown
-    ) => addAlpha(palette.getCategoricalColor(series, chartConfiguration, state)),
-    getCategoricalColors: (size: number, state?: unknown): string[] =>
-      palette.getCategoricalColors(size, state).map(addAlpha),
-  });
-
-  return {
-    ...palettes,
-    get: (name: string) => transparentizePalette(palettes.get(name)),
-    getAll: () => palettes.getAll().map((singlePalette) => transparentizePalette(singlePalette)),
-  };
 };

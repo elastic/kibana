@@ -1,18 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import type {
-  PaletteOutput,
-  CustomPaletteState,
-} from '../../../../../../src/plugins/charts/common';
-import type { CustomPaletteParams, LayerType } from '../../types';
-
-export const EXPRESSION_GAUGE_NAME = 'lens_gauge';
-export const GAUGE_FUNCTION_RENDERER_NAME = 'lens_gauge_renderer';
+import {
+  Datatable,
+  ExpressionFunctionDefinition,
+  ExpressionValueRender,
+} from '../../../../expressions';
+import { CustomPaletteState, PaletteOutput } from '../../../../charts/common';
+import { EXPRESSION_GAUGE_NAME, GAUGE_FUNCTION_RENDERER_NAME } from '../constants';
+import { CustomPaletteParams } from '.';
 
 export const GaugeShapes = {
   horizontalBullet: 'horizontalBullet',
@@ -35,12 +36,13 @@ export const GaugeColorModes = {
   none: 'none',
 } as const;
 
+export type GaugeType = 'gauge';
 export type GaugeColorMode = keyof typeof GaugeColorModes;
 export type GaugeShape = keyof typeof GaugeShapes;
 export type GaugeLabelMajorMode = keyof typeof GaugeLabelMajorModes;
 export type GaugeTicksPosition = keyof typeof GaugeTicksPositions;
 
-export interface SharedGaugeLayerState {
+export interface GaugeState {
   metricAccessor?: string;
   minAccessor?: string;
   maxAccessor?: string;
@@ -54,19 +56,28 @@ export interface SharedGaugeLayerState {
   shape: GaugeShape;
 }
 
-export type GaugeLayerState = SharedGaugeLayerState & {
-  layerId: string;
-  layerType: LayerType;
-};
-
-export type GaugeVisualizationState = GaugeLayerState & {
-  shape: GaugeShape;
-};
-
-export type GaugeArguments = SharedGaugeLayerState & {
-  title?: string;
-  description?: string;
+export type GaugeArguments = GaugeState & {
   shape: GaugeShape;
   colorMode: GaugeColorMode;
   palette?: PaletteOutput<CustomPaletteState>;
 };
+
+export type GaugeInput = Datatable;
+
+export interface GaugeExpressionProps {
+  data: Datatable;
+  args: GaugeArguments;
+}
+
+export interface GaugeRender {
+  type: 'render';
+  as: typeof GAUGE_FUNCTION_RENDERER_NAME;
+  value: GaugeExpressionProps;
+}
+
+export type GaugeExpressionFunctionDefinition = ExpressionFunctionDefinition<
+  typeof EXPRESSION_GAUGE_NAME,
+  GaugeInput,
+  GaugeArguments,
+  ExpressionValueRender<GaugeExpressionProps>
+>;

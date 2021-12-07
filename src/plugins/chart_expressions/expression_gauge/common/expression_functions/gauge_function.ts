@@ -1,54 +1,28 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { i18n } from '@kbn/i18n';
-import type { ExpressionFunctionDefinition } from '../../../../../../src/plugins/expressions/common';
-import type { LensMultiTable } from '../../types';
-import { GaugeArguments, EXPRESSION_GAUGE_NAME, GAUGE_FUNCTION_RENDERER_NAME } from './types';
+import { GaugeExpressionFunctionDefinition } from '../types';
+import { EXPRESSION_GAUGE_NAME } from '../constants';
 
-export interface GaugeExpressionProps {
-  data: LensMultiTable;
-  args: GaugeArguments;
-}
-export interface GaugeRender {
-  type: 'render';
-  as: typeof GAUGE_FUNCTION_RENDERER_NAME;
-  value: GaugeExpressionProps;
-}
-
-export const gauge: ExpressionFunctionDefinition<
-  typeof EXPRESSION_GAUGE_NAME,
-  LensMultiTable,
-  GaugeArguments,
-  GaugeRender
-> = {
+export const gaugeFunction = (): GaugeExpressionFunctionDefinition => ({
   name: EXPRESSION_GAUGE_NAME,
   type: 'render',
-  help: i18n.translate('xpack.lens.gauge.expressionHelpLabel', {
-    defaultMessage: 'Gauge renderer',
+  inputTypes: ['datatable'],
+  help: i18n.translate('expressionGauge.function.help', {
+    defaultMessage: 'Gauge visualization',
   }),
   args: {
-    title: {
-      types: ['string'],
-      help: i18n.translate('xpack.lens.gauge.title.help', {
-        defaultMessage: 'Saved gauge title',
-      }),
-    },
     shape: {
       types: ['string'],
       options: ['horizontalBullet', 'verticalBullet'],
       help: i18n.translate('xpack.lens.gauge.shape.help', {
         defaultMessage: 'Type of gauge chart',
-      }),
-    },
-    description: {
-      types: ['string'],
-      help: i18n.translate('xpack.lens.gauge.description.help', {
-        defaultMessage: 'Saved gauge description',
       }),
     },
     metricAccessor: {
@@ -120,15 +94,14 @@ export const gauge: ExpressionFunctionDefinition<
       required: false,
     },
   },
-  inputTypes: ['lens_multitable'],
-  fn(data: LensMultiTable, args: GaugeArguments) {
+  fn(data, args) {
     return {
       type: 'render',
-      as: GAUGE_FUNCTION_RENDERER_NAME,
+      as: EXPRESSION_GAUGE_NAME,
       value: {
         data,
         args,
       },
     };
   },
-};
+});

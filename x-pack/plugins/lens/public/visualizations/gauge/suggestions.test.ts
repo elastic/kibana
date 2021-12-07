@@ -6,8 +6,8 @@
  */
 
 import { getSuggestions } from './suggestions';
-import { GaugeShapes, GaugeVisualizationState } from '../../../common/expressions';
 import { layerTypes } from '../../../common';
+import { GaugeShapes, GaugeVisualizationState } from './constants';
 
 const metricColumn = {
   columnId: 'metric-column',

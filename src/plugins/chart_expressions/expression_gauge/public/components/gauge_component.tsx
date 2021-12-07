@@ -1,37 +1,24 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
-
 import React, { FC } from 'react';
 import { Chart, Goal, Settings } from '@elastic/charts';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type {
-  CustomPaletteState,
-  ChartsPluginSetup,
-  PaletteRegistry,
-} from 'src/plugins/charts/public';
-import { VisualizationContainer } from '../../visualization_container';
-import './index.scss';
-import { LensIconChartGaugeHorizontal, LensIconChartGaugeVertical } from '../../assets/chart_gauge';
-import { EmptyPlaceholder } from '../../../../../../src/plugins/charts/public';
-import { getMaxValue, getMinValue, getValueFromAccessor } from './utils';
+import type { CustomPaletteState } from '../../../../charts/public';
+import { EmptyPlaceholder } from '../../../../charts/public';
+import type { GaugeRenderProps } from '../../common';
+import { GaugeIconVertical, GaugeIconHorizontal } from './gauge_icon';
 import {
-  GaugeExpressionProps,
+  GaugeLabelMajorMode,
   GaugeShapes,
   GaugeTicksPosition,
   GaugeTicksPositions,
-  GaugeLabelMajorMode,
-} from '../../../common/expressions/gauge_chart';
-import type { FormatFactory } from '../../../common';
-
-export type GaugeRenderProps = GaugeExpressionProps & {
-  formatFactory: FormatFactory;
-  chartsThemeService: ChartsPluginSetup['theme'];
-  paletteService: PaletteRegistry;
-};
+} from '../../common/types';
+import { getMaxValue, getMinValue, getValueFromAccessor } from './utils';
 
 declare global {
   interface Window {
@@ -134,12 +121,14 @@ export const GaugeComponent: FC<GaugeRenderProps> = ({
     ticksPosition,
   } = args;
   if (!metricAccessor) {
-    return <VisualizationContainer className="lnsGaugeExpression__container" />;
+    // Chart is not ready
+    return null;
   }
 
   const chartTheme = chartsThemeService.useChartsTheme();
 
-  const table = Object.values(data.tables)[0];
+  const table = data;
+  // const table = Object.values(data.tables)[0];
   const metricColumn = table.columns.find((col) => col.id === metricAccessor);
 
   const chartData = table.rows.filter(
@@ -149,10 +138,7 @@ export const GaugeComponent: FC<GaugeRenderProps> = ({
 
   const metricValue = getValueFromAccessor('metricAccessor', row, args);
 
-  const icon =
-    subtype === GaugeShapes.horizontalBullet
-      ? LensIconChartGaugeHorizontal
-      : LensIconChartGaugeVertical;
+  const icon = subtype === GaugeShapes.horizontalBullet ? GaugeIconHorizontal : GaugeIconVertical;
 
   if (typeof metricValue !== 'number') {
     return <EmptyPlaceholder icon={icon} />;
@@ -235,10 +221,6 @@ export const GaugeComponent: FC<GaugeRenderProps> = ({
   );
 };
 
-export function GaugeChartReportable(props: GaugeRenderProps) {
-  return (
-    <VisualizationContainer className="lnsGaugeExpression__container">
-      <GaugeComponent {...props} />
-    </VisualizationContainer>
-  );
-}
+// default export required for React.Lazy
+// eslint-disable-next-line import/no-default-export
+export { GaugeComponent as default };
