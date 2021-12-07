@@ -7,6 +7,8 @@
 
 export const PLUGIN_ID = 'reporting';
 
+export const REPORTING_TRANSACTION_TYPE = PLUGIN_ID;
+
 export const REPORTING_SYSTEM_INDEX = '.reporting';
 
 export const JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY =
@@ -52,17 +54,6 @@ export const UI_SETTINGS_CUSTOM_PDF_LOGO = 'xpackReporting:customPdfLogo';
 export const UI_SETTINGS_CSV_SEPARATOR = 'csv:separator';
 export const UI_SETTINGS_CSV_QUOTE_VALUES = 'csv:quoteValues';
 export const UI_SETTINGS_DATEFORMAT_TZ = 'dateFormat:tz';
-
-export const LAYOUT_TYPES = {
-  CANVAS: 'canvas',
-  PRESERVE_LAYOUT: 'preserve_layout',
-  PRINT: 'print',
-};
-
-export const DEFAULT_VIEWPORT = {
-  width: 1950,
-  height: 1200,
-};
 
 // Export Type Definitions
 export const CSV_REPORT_TYPE = 'CSV';

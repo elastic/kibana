@@ -186,7 +186,7 @@ export function PieComponent(
           const outputColor = paletteService.get(palette.name).getCategoricalColor(
             seriesLayers,
             {
-              behindText: categoryDisplay !== 'hide',
+              behindText: categoryDisplay !== 'hide' || isTreemapOrMosaicShape(shape),
               maxDepth: bucketColumns.length,
               totalSeries: totalSeriesCount,
               syncColors,
