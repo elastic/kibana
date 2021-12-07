@@ -129,6 +129,7 @@ export const INDEX_PATTERN_LOGSTASH = '.monitoring-logstash-6-*,.monitoring-logs
 export const INDEX_PATTERN_BEATS = '.monitoring-beats-6-*,.monitoring-beats-7-*';
 export const INDEX_ALERTS = '.monitoring-alerts-6*,.monitoring-alerts-7*';
 export const INDEX_PATTERN_ELASTICSEARCH = '.monitoring-es-6-*,.monitoring-es-7-*';
+export const INDEX_PATTERN_ENTERPRISE_SEARCH = '.monitoring-ent-search-*';
 
 // This is the unique token that exists in monitoring indices collected by metricbeat
 export const METRICBEAT_INDEX_NAME_UNIQUE_TOKEN = '-mb-';
@@ -158,6 +159,7 @@ export const CODE_PATH_LOGSTASH = 'logstash';
 export const CODE_PATH_APM = 'apm';
 export const CODE_PATH_LICENSE = 'license';
 export const CODE_PATH_LOGS = 'logs';
+export const CODE_PATH_ENTERPRISE_SEARCH = 'enterprise_search';
 
 /**
  * The header sent by telemetry service when hitting Elasticsearch to identify query source
@@ -176,6 +178,12 @@ export const KIBANA_SYSTEM_ID = 'kibana';
  * @type {string}
  */
 export const BEATS_SYSTEM_ID = 'beats';
+
+/**
+ * The name of the Enterprise Search System ID used to publish and look up Enterprise Search stats through the Monitoring system.
+ * @type {string}
+ */
+export const ENTERPRISE_SEARCH_SYSTEM_ID = 'enterprise_search';
 
 /**
  * The name of the Apm System ID used to publish and look up Apm stats through the Monitoring system.

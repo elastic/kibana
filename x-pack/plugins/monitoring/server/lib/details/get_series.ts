@@ -13,7 +13,11 @@ import { checkParam } from '../error_missing_required';
 import { metrics } from '../metrics';
 import { createQuery } from '../create_query';
 import { formatTimestampToDuration } from '../../../common';
-import { NORMALIZED_DERIVATIVE_UNIT, CALCULATE_DURATION_UNTIL } from '../../../common/constants';
+import {
+  NORMALIZED_DERIVATIVE_UNIT,
+  CALCULATE_DURATION_UNTIL,
+  STANDALONE_CLUSTER_CLUSTER_UUID,
+} from '../../../common/constants';
 import { formatUTCTimestampForTimezone } from '../format_timezone';
 
 type SeriesBucket = Bucket & { metric_mb_deriv?: { normalized_value: number } };
@@ -180,7 +184,9 @@ async function fetchSeries(
         start: adjustedMin,
         end: Number(max),
         metric,
-        clusterUuid: req.params.clusterUuid,
+        clusterUuid: metricOptions.skipClusterUuidFilter
+          ? STANDALONE_CLUSTER_CLUSTER_UUID
+          : req.params.clusterUuid,
         // TODO: Pass in the UUID as an explicit function parameter
         uuid: getUuid(req, metric),
         filters,

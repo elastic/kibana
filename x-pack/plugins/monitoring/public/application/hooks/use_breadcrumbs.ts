@@ -186,6 +186,16 @@ function getApmBreadcrumbs(mainInstance: any) {
   return breadcrumbs;
 }
 
+// generate Enterprise Search breadcrumbs
+function getEnterpriseSearchBreadcrumbs(mainInstance: any) {
+  const entSearchLabel = i18n.translate('xpack.monitoring.breadcrumbs.entSearchLabel', {
+    defaultMessage: 'Enterprise Search',
+  });
+  const breadcrumbs = [];
+  breadcrumbs.push(createCrumb('#/enterprise_search', entSearchLabel));
+  return breadcrumbs;
+}
+
 function buildBreadcrumbs(clusterName: string, mainInstance?: any | null) {
   const homeCrumb = i18n.translate('xpack.monitoring.breadcrumbs.clustersLabel', {
     defaultMessage: 'Clusters',
@@ -211,6 +221,9 @@ function buildBreadcrumbs(clusterName: string, mainInstance?: any | null) {
   }
   if (mainInstance?.inApm) {
     breadcrumbs = breadcrumbs.concat(getApmBreadcrumbs(mainInstance));
+  }
+  if (mainInstance?.inEnterpriseSearch) {
+    breadcrumbs = breadcrumbs.concat(getEnterpriseSearchBreadcrumbs(mainInstance));
   }
 
   return breadcrumbs;

@@ -677,6 +677,9 @@ export interface ElasticsearchMetricbeatSource {
       };
     };
   };
+  enterprisesearch?: {
+    cluster_uuid?: string;
+  };
 }
 
 export type ElasticsearchSource = ElasticsearchLegacySource & ElasticsearchMetricbeatSource;

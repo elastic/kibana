@@ -13,6 +13,7 @@ import { getClustersStats } from './get_clusters_stats';
 import { flagSupportedClusters } from './flag_supported_clusters';
 import { getMlJobsForCluster } from '../elasticsearch';
 import { getKibanasForClusters } from '../kibana';
+import { getEnterpriseSearchForClusters } from '../enterprise_search';
 import { getLogstashForClusters } from '../logstash';
 import { getLogstashPipelineIds } from '../logstash/get_pipeline_ids';
 import { getBeatsForClusters } from '../beats';
@@ -26,6 +27,7 @@ import {
   CODE_PATH_LOGSTASH,
   CODE_PATH_BEATS,
   CODE_PATH_APM,
+  CODE_PATH_ENTERPRISE_SEARCH,
 } from '../../../common/constants';
 
 import { getApmsForClusters } from '../apm/get_apms_for_clusters';
@@ -56,6 +58,7 @@ export async function getClustersFromRequest(
     lsIndexPattern,
     beatsIndexPattern,
     apmIndexPattern,
+    enterpriseSearchIndexPattern,
     filebeatIndexPattern,
   } = indexPatterns;
 
@@ -72,7 +75,12 @@ export async function getClustersFromRequest(
   }
 
   if (!clusterUuid && !isStandaloneCluster) {
-    const indexPatternsToCheckForNonClusters = [lsIndexPattern, beatsIndexPattern, apmIndexPattern];
+    const indexPatternsToCheckForNonClusters = [
+      lsIndexPattern,
+      beatsIndexPattern,
+      apmIndexPattern,
+      enterpriseSearchIndexPattern,
+    ];
 
     if (await hasStandaloneClusters(req, indexPatternsToCheckForNonClusters)) {
       clusters.push(getStandaloneClusterDefinition());
@@ -230,6 +238,22 @@ export async function getClustersFromRequest(
       Reflect.set(clusters[clusterIndex], 'apm', {
         ...stats,
         config: apmConfig,
+      });
+    }
+  });
+
+  // add Enterprise Search data
+  const enterpriseSearchByCluster = isInCodePath(codePaths, [CODE_PATH_ENTERPRISE_SEARCH])
+    ? await getEnterpriseSearchForClusters(req, enterpriseSearchIndexPattern, clusters)
+    : [];
+  enterpriseSearchByCluster.forEach((entSearch) => {
+    const clusterIndex = clusters.findIndex(
+      (cluster) =>
+        get(cluster, 'elasticsearch.cluster.id', cluster.cluster_uuid) === entSearch.clusterUuid
+    );
+    if (clusterIndex >= 0) {
+      Reflect.set(clusters[clusterIndex], 'enterpriseSearch', {
+        ...entSearch,
       });
     }
   });

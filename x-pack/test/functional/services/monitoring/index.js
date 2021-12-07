@@ -31,3 +31,5 @@ export { MonitoringKibanaInstanceProvider } from './kibana_instance';
 export { MonitoringKibanaSummaryStatusProvider } from './kibana_summary_status';
 export { MonitoringSetupModeProvider } from './setup_mode';
 export { MonitoringAlertsProvider } from './alerts';
+export { MonitoringEnterpriseSearchOverviewProvider } from './enterprise_search_overview';
+export { MonitoringEnterpriseSearchSummaryStatusProvider } from './enterprise_search_summary_status';
