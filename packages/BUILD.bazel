@@ -86,6 +86,7 @@ filegroup(
       "//packages/kbn-config:build_types",
       "//packages/kbn-config-schema:build_types",
       "//packages/kbn-crypto:build_types",
+      "//packages/kbn-dev-utils:build_types",
       "//packages/kbn-docs-utils:build_types",
       "//packages/kbn-i18n:build_types",
       "//packages/kbn-i18n-react:build_types",

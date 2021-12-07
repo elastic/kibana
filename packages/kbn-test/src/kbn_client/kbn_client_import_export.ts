@@ -12,7 +12,8 @@ import { existsSync } from 'fs';
 import Path from 'path';
 
 import FormData from 'form-data';
-import { ToolingLog, isAxiosResponseError, createFailError, REPO_ROOT } from '@kbn/dev-utils';
+import { ToolingLog, isAxiosResponseError, createFailError } from '@kbn/dev-utils';
+import { REPO_ROOT } from '@kbn/utils';
 
 import { KbnClientRequester, uriencode, ReqOptions } from './kbn_client_requester';
 import { KbnClientSavedObjects } from './kbn_client_saved_objects';

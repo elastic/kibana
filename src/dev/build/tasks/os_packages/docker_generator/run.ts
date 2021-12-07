@@ -10,7 +10,8 @@ import { access, link, unlink, chmod } from 'fs';
 import { resolve, basename } from 'path';
 import { promisify } from 'util';
 
-import { ToolingLog, kibanaPackageJson } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/dev-utils';
+import { kibanaPackageJson } from '@kbn/utils';
 
 import { write, copyAll, mkdirp, exec, Config, Build } from '../../../lib';
 import * as dockerTemplates from './templates';

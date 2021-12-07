@@ -14,7 +14,7 @@ jest.mock('@kbn/utils', () => {
   return { REPO_ROOT: '/dev/null/root' };
 });
 
-import { REPO_ROOT } from '@kbn/dev-utils';
+import { REPO_ROOT } from '@kbn/utils';
 import { Lifecycle } from './lifecycle';
 import { SuiteTracker } from './suite_tracker';
 import { Suite } from '../fake_mocha_types';

@@ -1,5 +1,5 @@
 const semver = require('semver');
-const { kibanaPackageJson: PKG } = require('@kbn/dev-utils');
+const { kibanaPackageJson: PKG } = require('@kbn/utils');
 
 module.exports = {
   plugins: [

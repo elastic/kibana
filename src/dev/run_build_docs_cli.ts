@@ -9,7 +9,8 @@
 import Path from 'path';
 
 import dedent from 'dedent';
-import { run, REPO_ROOT, createFailError } from '@kbn/dev-utils';
+import { run, createFailError } from '@kbn/dev-utils';
+import { REPO_ROOT } from '@kbn/utils';
 
 const DEFAULT_DOC_REPO_PATH = Path.resolve(REPO_ROOT, '..', 'docs');
 

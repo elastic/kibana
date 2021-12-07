@@ -10,9 +10,9 @@ import { resolve, relative } from 'path';
 import { createReadStream } from 'fs';
 import { Readable, Writable } from 'stream';
 import type { Client } from '@elastic/elasticsearch';
-import { ToolingLog, REPO_ROOT } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/dev-utils';
 import { KbnClient } from '@kbn/test';
-import { createPromiseFromStreams } from '@kbn/utils';
+import { createPromiseFromStreams, REPO_ROOT } from '@kbn/utils';
 
 import {
   isGzip,

@@ -9,7 +9,7 @@
 const Fs = require('fs');
 const Path = require('path');
 
-const { REPO_ROOT: REPO_ROOT_FOLLOWING_SYMLINKS } = require('@kbn/dev-utils');
+const { REPO_ROOT: REPO_ROOT_FOLLOWING_SYMLINKS } = require('@kbn/utils');
 const BASE_REPO_ROOT = Path.resolve(
   Fs.realpathSync(Path.resolve(REPO_ROOT_FOLLOWING_SYMLINKS, 'package.json')),
   '..'

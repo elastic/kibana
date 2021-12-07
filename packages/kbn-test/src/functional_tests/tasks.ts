@@ -9,7 +9,8 @@
 import { relative } from 'path';
 import * as Rx from 'rxjs';
 import { startWith, switchMap, take } from 'rxjs/operators';
-import { withProcRunner, ToolingLog, REPO_ROOT, getTimeReporter } from '@kbn/dev-utils';
+import { withProcRunner, ToolingLog, getTimeReporter } from '@kbn/dev-utils';
+import { REPO_ROOT } from '@kbn/utils';
 import dedent from 'dedent';
 
 import {

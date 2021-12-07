@@ -567,6 +567,7 @@
     "@types/kbn__config": "link:bazel-bin/packages/kbn-config/npm_module_types",
     "@types/kbn__config-schema": "link:bazel-bin/packages/kbn-config-schema/npm_module_types",
     "@types/kbn__crypto": "link:bazel-bin/packages/kbn-crypto/npm_module_types",
+    "@types/kbn__dev-utils": "link:bazel-bin/packages/kbn-dev-utils/npm_module_types",
     "@types/kbn__docs-utils": "link:bazel-bin/packages/kbn-docs-utils/npm_module_types",
     "@types/kbn__i18n": "link:bazel-bin/packages/kbn-i18n/npm_module_types",
     "@types/kbn__i18n-react": "link:bazel-bin/packages/kbn-i18n-react/npm_module_types",

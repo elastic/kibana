@@ -7,7 +7,7 @@
  */
 
 // must be before mocks imports to avoid conflicting with `REPO_ROOT` accessor.
-import { REPO_ROOT } from '@kbn/dev-utils';
+import { REPO_ROOT } from '@kbn/utils';
 import { mockPackage, mockDiscover } from './plugins_service.test.mocks';
 
 import { join } from 'path';

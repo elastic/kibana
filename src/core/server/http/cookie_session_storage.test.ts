@@ -8,7 +8,7 @@
 
 import { parse as parseCookie } from 'tough-cookie';
 import supertest from 'supertest';
-import { REPO_ROOT } from '@kbn/dev-utils';
+import { REPO_ROOT } from '@kbn/utils';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { BehaviorSubject } from 'rxjs';
 

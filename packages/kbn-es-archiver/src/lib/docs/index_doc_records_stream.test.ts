@@ -6,12 +6,9 @@
  * Side Public License, v 1.
  */
 
-import {
-  createListStream,
-  createPromiseFromStreams,
-  ToolingLog,
-  createRecursiveSerializer,
-} from '@kbn/dev-utils';
+import { ToolingLog, createRecursiveSerializer } from '@kbn/dev-utils';
+
+import { createListStream, createPromiseFromStreams } from '@kbn/utils';
 
 import { Progress } from '../progress';
 import { createIndexDocRecordsStream } from './index_doc_records_stream';
