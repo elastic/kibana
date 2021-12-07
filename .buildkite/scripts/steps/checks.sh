@@ -2,6 +2,7 @@
 
 set -euo pipefail
 
+export DISABLE_BOOTSTRAP_VALIDATION=false
 .buildkite/scripts/bootstrap.sh
 
 .buildkite/scripts/steps/checks/commit/commit.sh

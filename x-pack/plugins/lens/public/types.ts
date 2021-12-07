@@ -9,6 +9,7 @@ import type { IconType } from '@elastic/eui/src/components/icon/icon';
 import type { CoreSetup, SavedObjectReference } from 'kibana/public';
 import type { PaletteOutput } from 'src/plugins/charts/public';
 import type { MutableRefObject } from 'react';
+import { Filter } from '@kbn/es-query';
 import type {
   ExpressionAstExpression,
   ExpressionRendererEvent,
@@ -17,7 +18,7 @@ import type {
 } from '../../../../src/plugins/expressions/public';
 import { DraggingIdentifier, DragDropIdentifier, DragContextState } from './drag_drop';
 import type { DateRange, LayerType } from '../common';
-import type { Query, Filter } from '../../../../src/plugins/data/public';
+import type { Query } from '../../../../src/plugins/data/public';
 import type {
   RangeSelectContext,
   ValueClickContext,
@@ -26,6 +27,7 @@ import type {
   LensSortActionData,
   LensResizeActionData,
   LensToggleActionData,
+  LensPagesizeActionData,
 } from './datatable_visualization/components/types';
 import type {
   UiActionsStart,
@@ -37,6 +39,7 @@ import {
   LENS_EDIT_SORT_ACTION,
   LENS_EDIT_RESIZE_ACTION,
   LENS_TOGGLE_ACTION,
+  LENS_EDIT_PAGESIZE_ACTION,
 } from './datatable_visualization/components/constants';
 import type { LensInspector } from './lens_inspector_service';
 
@@ -470,6 +473,7 @@ export type VisualizationDimensionGroupConfig = SharedDimensionProps & {
   supportsMoreColumns: boolean;
   /** If required, a warning will appear if accessors are empty */
   required?: boolean;
+  requiredMinDimensionCount?: number;
   dataTestSubj?: string;
 
   /**
@@ -782,6 +786,7 @@ export interface LensEditContextMapping {
   [LENS_EDIT_SORT_ACTION]: LensSortActionData;
   [LENS_EDIT_RESIZE_ACTION]: LensResizeActionData;
   [LENS_TOGGLE_ACTION]: LensToggleActionData;
+  [LENS_EDIT_PAGESIZE_ACTION]: LensPagesizeActionData;
 }
 
 type LensEditSupportedActions = keyof LensEditContextMapping;

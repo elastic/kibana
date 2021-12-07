@@ -27,6 +27,7 @@ import * as i18n from './translations';
 import { sourcererActions, sourcererModel, sourcererSelectors } from '../../store/sourcerer';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
 import { SourcererScopeName } from '../../store/sourcerer/model';
+import { checkIfIndicesExist } from '../../store/sourcerer/helpers';
 import { usePickIndexPatterns } from './use_pick_index_patterns';
 import {
   FormRow,
@@ -48,18 +49,25 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
   const isDetectionsSourcerer = scopeId === SourcererScopeName.detections;
   const isTimelineSourcerer = scopeId === SourcererScopeName.timeline;
 
-  const [isOnlyDetectionAlertsChecked, setIsOnlyDetectionAlertsChecked] = useState(false);
-
-  const isOnlyDetectionAlerts: boolean =
-    isDetectionsSourcerer || (isTimelineSourcerer && isOnlyDetectionAlertsChecked);
-
   const sourcererScopeSelector = useMemo(() => sourcererSelectors.getSourcererScopeSelector(), []);
   const {
     defaultDataView,
     kibanaDataViews,
     signalIndexName,
     sourcererScope: { selectedDataViewId, selectedPatterns, loading },
+    sourcererDataView,
   } = useDeepEqualSelector((state) => sourcererScopeSelector(state, scopeId));
+  const indicesExist = useMemo(
+    () => checkIfIndicesExist({ scopeId, signalIndexName, sourcererDataView }),
+    [scopeId, signalIndexName, sourcererDataView]
+  );
+
+  const [isOnlyDetectionAlertsChecked, setIsOnlyDetectionAlertsChecked] = useState(
+    isTimelineSourcerer && selectedPatterns.join() === signalIndexName
+  );
+
+  const isOnlyDetectionAlerts: boolean =
+    isDetectionsSourcerer || (isTimelineSourcerer && isOnlyDetectionAlertsChecked);
 
   const [isPopoverOpen, setPopoverIsOpen] = useState(false);
   const [dataViewId, setDataViewId] = useState<string>(selectedDataViewId ?? defaultDataView.id);
@@ -201,7 +209,7 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
     setExpandAdvancedOptions((prevState) => !prevState);
   }, []);
 
-  return (
+  return indicesExist ? (
     <EuiPopover
       data-test-subj={isTimelineSourcerer ? 'timeline-sourcerer-popover' : 'sourcerer-popover'}
       button={buttonWithTooptip}
@@ -244,7 +252,7 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
               fullWidth
               onChange={onChangeSuper}
               options={dataViewSelectOptions}
-              placeholder={i18n.PICK_INDEX_PATTERNS}
+              placeholder={i18n.INDEX_PATTERNS_CHOOSE_DATA_VIEW_LABEL}
               valueOfSelected={dataViewId}
             />
           </StyledFormRow>
@@ -310,6 +318,6 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
         </EuiForm>
       </PopoverContent>
     </EuiPopover>
-  );
+  ) : null;
 });
 Sourcerer.displayName = 'Sourcerer';

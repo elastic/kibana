@@ -76,6 +76,14 @@ describe('Event filter form', () => {
     expect(component.getByTestId('exceptionsBuilderWrapper')).not.toBeNull();
   });
 
+  it('should display sections', async () => {
+    component = await renderWithData();
+
+    expect(component.queryByText('Details')).not.toBeNull();
+    expect(component.queryByText('Conditions')).not.toBeNull();
+    expect(component.queryByText('Comments')).not.toBeNull();
+  });
+
   it('should display name error only when on blur and empty name', async () => {
     component = await renderWithData();
     expect(component.queryByText(NAME_ERROR)).toBeNull();

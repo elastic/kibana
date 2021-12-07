@@ -9,49 +9,37 @@
 
 import React from 'react';
 import { mount, ReactWrapper } from 'enzyme';
-import { useParams } from 'react-router-dom';
 import copy from 'copy-to-clipboard';
 
+import { useKibana } from '../../common/lib/kibana';
 import { TestProviders } from '../../common/mock';
 import { UserActionCopyLink } from './user_action_copy_link';
 
-jest.mock('react-router-dom', () => {
-  const originalModule = jest.requireActual('react-router-dom');
+const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
-  return {
-    ...originalModule,
-    useParams: jest.fn(),
-  };
-});
-
+jest.mock('../../common/navigation/hooks');
 jest.mock('copy-to-clipboard', () => jest.fn());
+jest.mock('../../common/lib/kibana');
 
 const mockGetUrlForApp = jest.fn(
   (appId: string, options?: { path?: string; absolute?: boolean }) =>
     `${appId}${options?.path ?? ''}`
 );
 
-jest.mock('../../common/lib/kibana', () => ({
-  useKibana: () => ({
-    services: {
-      application: {
-        getUrlForApp: mockGetUrlForApp,
-      },
-    },
-  }),
-}));
-
 const props = {
   id: 'comment-id',
-  getCaseDetailHrefWithCommentId: jest.fn().mockReturnValue('random-url'),
 };
 
 describe('UserActionCopyLink ', () => {
   let wrapper: ReactWrapper;
 
   beforeAll(() => {
-    (useParams as jest.Mock).mockReturnValue({ detailName: 'case-1' });
     wrapper = mount(<UserActionCopyLink {...props} />, { wrappingComponent: TestProviders });
+  });
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    useKibanaMock().services.application.getUrlForApp = mockGetUrlForApp;
   });
 
   it('it renders', async () => {
@@ -60,6 +48,6 @@ describe('UserActionCopyLink ', () => {
 
   it('calls copy clipboard correctly', async () => {
     wrapper.find(`[data-test-subj="copy-link-${props.id}"]`).first().simulate('click');
-    expect(copy).toHaveBeenCalledWith('random-url');
+    expect(copy).toHaveBeenCalledWith('/app/security/cases/test');
   });
 });

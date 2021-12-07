@@ -17,7 +17,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { getIndexPatternService } from '../../../../kibana_services';
 import {
   DEFAULT_MAX_RESULT_WINDOW,
@@ -86,9 +86,9 @@ export class ScalingForm extends Component<Props, State> {
     if (optionId === SCALING_TYPES.CLUSTERS) {
       layerType = LAYER_TYPE.BLENDED_VECTOR;
     } else if (optionId === SCALING_TYPES.MVT) {
-      layerType = LAYER_TYPE.TILED_VECTOR;
+      layerType = LAYER_TYPE.MVT_VECTOR;
     } else {
-      layerType = LAYER_TYPE.VECTOR;
+      layerType = LAYER_TYPE.GEOJSON_VECTOR;
     }
 
     this.props.onChange({ propName: 'scalingType', value: optionId, newLayerType: layerType });

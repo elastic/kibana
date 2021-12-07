@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { EuiLink } from '@elastic/eui';
 import { getSettingDefault } from '../../services/follower_index_default_settings';

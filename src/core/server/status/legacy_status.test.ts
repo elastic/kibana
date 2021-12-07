@@ -37,7 +37,7 @@ describe('calculateLegacyStatus', () => {
       title: 'Green',
       nickname: 'Looking good',
       icon: 'success',
-      uiColor: 'secondary',
+      uiColor: 'success',
       since: expect.any(String),
     });
   });
@@ -80,7 +80,7 @@ describe('calculateLegacyStatus', () => {
         message: 'Available',
         since: expect.any(String),
         state: 'green',
-        uiColor: 'secondary',
+        uiColor: 'success',
       },
       {
         icon: 'danger',

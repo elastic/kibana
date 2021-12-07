@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Filter } from '@kbn/es-query';
 import {
   ColumnHeaderOptions,
   ColumnId,
@@ -13,8 +14,6 @@ import {
   TimelineExpandedDetail,
   TimelineTypeLiteral,
 } from '.';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { Filter } from '../../../../../../src/plugins/data/public';
 
 import { Direction } from '../../search_strategy';
 import { DataProvider } from './data_provider';

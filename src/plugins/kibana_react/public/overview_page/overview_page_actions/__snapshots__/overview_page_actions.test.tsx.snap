@@ -21,7 +21,7 @@ Array [
       href=""
       iconType="plusInCircle"
     >
-      Add data
+      Add integrations
     </EuiButtonEmpty>
   </mockConstructor>,
 ]
@@ -50,7 +50,7 @@ Array [
       href=""
       iconType="plusInCircle"
     >
-      Add data
+      Add integrations
     </EuiButtonEmpty>
   </mockConstructor>,
 ]

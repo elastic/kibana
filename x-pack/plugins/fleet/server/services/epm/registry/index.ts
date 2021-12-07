@@ -96,9 +96,7 @@ export async function fetchList(params?: SearchParams): Promise<RegistrySearchRe
 
 export async function fetchFindLatestPackage(packageName: string): Promise<RegistrySearchResult> {
   const registryUrl = getRegistryUrl();
-  const url = new URL(
-    `${registryUrl}/search?package=${packageName}&internal=true&experimental=true`
-  );
+  const url = new URL(`${registryUrl}/search?package=${packageName}&experimental=true`);
 
   setKibanaVersion(url);
 
@@ -140,9 +138,8 @@ export async function fetchFile(filePath: string): Promise<Response> {
 }
 
 function setKibanaVersion(url: URL) {
-  // TODO: change default to false as soon as EPR issue fixed. Blocker for 8.0.
   const disableVersionCheck =
-    appContextService.getConfig()?.developer?.disableRegistryVersionCheck ?? true;
+    appContextService.getConfig()?.developer?.disableRegistryVersionCheck ?? false;
   if (disableVersionCheck) {
     return;
   }

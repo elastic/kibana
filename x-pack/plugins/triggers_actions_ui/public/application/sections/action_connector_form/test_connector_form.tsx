@@ -20,7 +20,7 @@ import {
 } from '@elastic/eui';
 import { Option, map, getOrElse } from 'fp-ts/lib/Option';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { ActionConnector, ActionTypeRegistryContract, IErrorObject } from '../../../types';
 import { ActionTypeExecutorResult } from '../../../../../actions/common';

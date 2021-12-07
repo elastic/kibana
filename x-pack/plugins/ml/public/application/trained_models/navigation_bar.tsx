@@ -9,6 +9,7 @@ import React, { FC, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiTab, EuiTabs } from '@elastic/eui';
 import { useNavigateToPath } from '../contexts/kibana';
+import { checkPermission } from '../capabilities/check_capabilities';
 
 interface Tab {
   id: string;
@@ -21,6 +22,8 @@ export const TrainedModelsNavigationBar: FC<{
 }> = ({ selectedTabId }) => {
   const navigateToPath = useNavigateToPath();
 
+  const canViewMlNodes = checkPermission('canViewMlNodes');
+
   const tabs = useMemo(() => {
     const navTabs = [
       {
@@ -31,17 +34,21 @@ export const TrainedModelsNavigationBar: FC<{
         path: '/trained_models',
         testSubj: 'mlTrainedModelsTab',
       },
-      {
-        id: 'nodes',
-        name: i18n.translate('xpack.ml.trainedModels.nodesTabLabel', {
-          defaultMessage: 'Nodes',
-        }),
-        path: '/trained_models/nodes',
-        testSubj: 'mlNodesOverviewTab',
-      },
+      ...(canViewMlNodes
+        ? [
+            {
+              id: 'nodes',
+              name: i18n.translate('xpack.ml.trainedModels.nodesTabLabel', {
+                defaultMessage: 'Nodes',
+              }),
+              path: '/trained_models/nodes',
+              testSubj: 'mlNodesOverviewTab',
+            },
+          ]
+        : []),
     ];
     return navTabs;
-  }, []);
+  }, [canViewMlNodes]);
 
   const onTabClick = useCallback(
     async (tab: Tab) => {
