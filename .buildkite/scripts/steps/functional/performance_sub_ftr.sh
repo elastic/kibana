@@ -18,6 +18,8 @@ node scripts/es snapshot \
 
 esPid=$!
 
+while ! timeout 1 bash -c "echo > /dev/tcp/localhost/9200"; do sleep 30; done
+
 export TEST_KIBANA_URL=http://elastic:changeme@192.168.50.5:5601
 export TEST_ES_URL=http://elastic:changeme@192.168.50.1:9200
 
