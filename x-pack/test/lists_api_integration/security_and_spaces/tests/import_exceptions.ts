@@ -62,25 +62,28 @@ export default ({ getService }: FtrProviderContext): void => {
       });
     });
 
-    xit('should be able to import 1000 exceptions', async () => {
-      const listIds = new Array(100).fill(undefined).map((_, index) => `list-${index}`);
+    it('should be able to import 1000 exceptions', async () => {
+      const listIds = new Array(1000).fill(undefined).map((_, index) => `list-${index}`);
       const { body } = await supertest
         .post(`${EXCEPTION_LIST_URL}/_import?overwrite=false`)
         .set('kbn-xsrf', 'true')
         .attach(
           'file',
           Buffer.from(
-            toNdJsonString(
-              listIds.flatMap((id, iterator) => [getImportExceptionsListSchemaMock(id)])
-            )
+            toNdJsonString(listIds.flatMap((id) => [getImportExceptionsListSchemaMock(id)]))
           ),
           'exceptions.ndjson'
         )
-        .expect(500);
+        .expect(200);
 
       expect(body).to.eql({
-        status_code: 500,
-        message: "Can't import more than 10000 exceptions",
+        errors: [],
+        success_count_exception_list_items: 0,
+        success_count_exception_lists: 1000,
+        success_exception_list_items: true,
+        success_exception_lists: true,
+        success: true,
+        success_count: 1000,
       });
     });
 

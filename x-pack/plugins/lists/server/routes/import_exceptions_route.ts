@@ -29,7 +29,7 @@ export const importExceptionsRoute = (router: ListsPluginRouter, config: ConfigT
     {
       options: {
         body: {
-          maxBytes: config.maxExceptionsImportSize,
+          maxBytes: config.maxImportPayloadBytes,
           output: 'stream',
         },
         tags: ['access:lists-all'],
