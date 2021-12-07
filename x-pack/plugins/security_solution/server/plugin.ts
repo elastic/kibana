@@ -37,8 +37,6 @@ import {
   createThresholdAlertType,
 } from './lib/detection_engine/rule_types';
 import { initRoutes } from './routes';
-import { isAlertExecutor } from './lib/detection_engine/signals/types';
-import { signalRulesAlertType } from './lib/detection_engine/signals/signal_rule_alert_type';
 import { ManifestTask } from './endpoint/lib/artifacts';
 import { CheckMetadataTransformsTask } from './endpoint/lib/metadata';
 import { initSavedObjects } from './saved_objects';
@@ -167,9 +165,6 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     this.telemetryUsageCounter = plugins.usageCollection?.createUsageCounter(APP_ID);
 
-    // TODO: Once we are past experimental phase this check can be removed along with legacy registration of rules
-    const isRuleRegistryEnabled = experimentalFeatures.ruleRegistryEnabled;
-
     const { ruleDataService } = plugins.ruleRegistry;
     let ruleDataClient: IRuleDataClient | null = null;
 
@@ -181,40 +176,40 @@ export class Plugin implements ISecuritySolutionPlugin {
       version: pluginContext.env.packageInfo.version,
     };
 
-    if (isRuleRegistryEnabled) {
-      const aliasesFieldMap: FieldMap = {};
-      Object.entries(aadFieldConversion).forEach(([key, value]) => {
-        aliasesFieldMap[key] = {
-          type: 'alias',
-          path: value,
-        };
-      });
+    const aliasesFieldMap: FieldMap = {};
+    Object.entries(aadFieldConversion).forEach(([key, value]) => {
+      aliasesFieldMap[key] = {
+        type: 'alias',
+        path: value,
+      };
+    });
 
-      ruleDataClient = ruleDataService.initializeIndex({
-        feature: SERVER_APP_ID,
-        registrationContext: 'security',
-        dataset: Dataset.alerts,
-        componentTemplateRefs: [ECS_COMPONENT_TEMPLATE_NAME],
-        componentTemplates: [
-          {
-            name: 'mappings',
-            mappings: mappingFromFieldMap(
-              { ...technicalRuleFieldMap, ...alertsFieldMap, ...rulesFieldMap, ...aliasesFieldMap },
-              false
-            ),
-          },
-        ],
-        secondaryAlias: config.signalsIndex,
-      });
+    ruleDataClient = ruleDataService.initializeIndex({
+      feature: SERVER_APP_ID,
+      registrationContext: 'security',
+      dataset: Dataset.alerts,
+      componentTemplateRefs: [ECS_COMPONENT_TEMPLATE_NAME],
+      componentTemplates: [
+        {
+          name: 'mappings',
+          mappings: mappingFromFieldMap(
+            { ...technicalRuleFieldMap, ...alertsFieldMap, ...rulesFieldMap, ...aliasesFieldMap },
+            false
+          ),
+        },
+      ],
+      secondaryAlias: config.signalsIndex,
+    });
 
-      const securityRuleTypeWrapper = createSecurityRuleTypeWrapper({
-        lists: plugins.lists,
-        logger: this.logger,
-        config: this.config,
-        ruleDataClient,
-        eventLogService,
-      });
+    const securityRuleTypeWrapper = createSecurityRuleTypeWrapper({
+      lists: plugins.lists,
+      logger: this.logger,
+      config: this.config,
+      ruleDataClient,
+      eventLogService,
+    });
 
+    if (plugins.alerting) {
       plugins.alerting.registerType(securityRuleTypeWrapper(createEqlAlertType(ruleOptions)));
       plugins.alerting.registerType(
         securityRuleTypeWrapper(createSavedQueryAlertType(ruleOptions))
@@ -255,32 +250,14 @@ export class Plugin implements ISecuritySolutionPlugin {
       SAVED_QUERY_RULE_TYPE_ID,
       THRESHOLD_RULE_TYPE_ID,
     ];
-    const ruleTypes = [
-      SIGNALS_ID,
-      LEGACY_NOTIFICATIONS_ID,
-      ...(isRuleRegistryEnabled ? racRuleTypes : []),
-    ];
+    const ruleTypes: string[] = [SIGNALS_ID, LEGACY_NOTIFICATIONS_ID, ...racRuleTypes];
 
     plugins.features.registerKibanaFeature(getKibanaPrivilegesFeaturePrivileges(ruleTypes));
     plugins.features.registerKibanaFeature(getCasesKibanaFeature());
 
     // Continue to register legacy rules against alerting client exposed through rule-registry
     if (plugins.alerting != null) {
-      const signalRuleType = signalRulesAlertType({
-        logger,
-        eventsTelemetry: this.telemetryEventsSender,
-        version: pluginContext.env.packageInfo.version,
-        ml: plugins.ml,
-        lists: plugins.lists,
-        config,
-        experimentalFeatures,
-        eventLogService,
-      });
       const ruleNotificationType = legacyRulesNotificationAlertType({ logger });
-
-      if (isAlertExecutor(signalRuleType)) {
-        plugins.alerting.registerType(signalRuleType);
-      }
 
       if (legacyIsNotificationAlertExecutor(ruleNotificationType)) {
         plugins.alerting.registerType(ruleNotificationType);
