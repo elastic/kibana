@@ -51,12 +51,6 @@ export const loadSavedDashboardState = async ({
     notifications.toasts.addWarning(getDashboard60Warning());
     return;
   }
-<<<<<<< HEAD
-  await indexPatterns.ensureDefaultIndexPattern();
-  let savedDashboard: DashboardSavedObject | undefined;
-  try {
-    savedDashboard = (await savedDashboards.get(savedDashboardId)) as DashboardSavedObject;
-=======
   await indexPatterns.ensureDefaultDataView();
   try {
     const savedDashboard = (await savedDashboards.get({
@@ -66,12 +60,12 @@ export const loadSavedDashboardState = async ({
     const savedDashboardState = savedObjectToDashboardState({
       savedDashboard,
       usageCollection,
-      showWriteControls,
+      hideWriteControls,
       savedObjectsTagging,
       version: initializerContext.env.packageInfo.version,
     });
 
-    const isViewMode = !showWriteControls || Boolean(savedDashboard.id);
+    const isViewMode = hideWriteControls || Boolean(savedDashboard.id);
     savedDashboardState.viewMode = isViewMode ? ViewMode.VIEW : ViewMode.EDIT;
     savedDashboardState.filters = cleanFiltersForSerialize(savedDashboardState.filters);
     savedDashboardState.query = migrateLegacyQuery(
@@ -79,7 +73,6 @@ export const loadSavedDashboardState = async ({
     );
 
     return { savedDashboardState, savedDashboard };
->>>>>>> 44c19bd2ca9... [Dashboard] Fix Invalid Filter Blank Screen (#120530)
   } catch (error) {
     // E.g. a corrupt or deleted dashboard
     notifications.toasts.addDanger(
@@ -88,25 +81,4 @@ export const loadSavedDashboardState = async ({
     history.push(DashboardConstants.LANDING_PAGE_PATH);
     return;
   }
-<<<<<<< HEAD
-  if (!savedDashboard) return;
-
-  const savedDashboardState = savedObjectToDashboardState({
-    savedDashboard,
-    usageCollection,
-    hideWriteControls,
-    savedObjectsTagging,
-    version: initializerContext.env.packageInfo.version,
-  });
-
-  const isViewMode = hideWriteControls || Boolean(savedDashboard.id);
-  savedDashboardState.viewMode = isViewMode ? ViewMode.VIEW : ViewMode.EDIT;
-  savedDashboardState.filters = cleanFiltersForSerialize(savedDashboardState.filters);
-  savedDashboardState.query = migrateLegacyQuery(
-    savedDashboardState.query || queryString.getDefaultQuery()
-  );
-
-  return { savedDashboardState, savedDashboard };
-=======
->>>>>>> 44c19bd2ca9... [Dashboard] Fix Invalid Filter Blank Screen (#120530)
 };
