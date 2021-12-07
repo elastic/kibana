@@ -65,7 +65,7 @@ export const parsePoliciesAndFilterToKql = ({
 }): string | undefined => {
   let kql: string | undefined;
 
-  if (policies && policies.length) {
+  if (policies && policies.length && policies[0] !== '') {
     const policiesKQL = parsePoliciesToKQL(policies.join(','), '');
     kql = `(${policiesKQL})`;
   }

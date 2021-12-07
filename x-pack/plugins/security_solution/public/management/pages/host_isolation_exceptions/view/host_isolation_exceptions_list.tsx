@@ -55,10 +55,13 @@ export const HostIsolationExceptionsList = () => {
 
   const [itemToDelete, setItemToDelete] = useState<ExceptionListItemSchema | null>(null);
 
+  const includedPolicies = location.included_policies;
+
   const { isLoading, data, error, refetch } = useFetchHostIsolationExceptionsList({
     filter: location.filter,
     page: location.page_index,
     perPage: location.page_size,
+    policies: includedPolicies !== '' ? includedPolicies.split(',') : undefined,
   });
 
   const toasts = useToasts();
