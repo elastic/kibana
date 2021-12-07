@@ -9,10 +9,7 @@ import React from 'react';
 import { renderHook } from '@testing-library/react-hooks';
 import { useInspectButton, UseInspectButtonParams, useStackByFields } from './hooks';
 import { mockBrowserFields } from '../../../../common/containers/source/mock';
-import {
-  TestProviders,
-} from '../../../../common/mock';
-
+import { TestProviders } from '../../../../common/mock';
 
 jest.mock('react-router-dom', () => {
   const actual = jest.requireActual('react-router-dom');
@@ -60,12 +57,16 @@ describe('hooks', () => {
       useSourcererDataView: jest.fn().mockReturnValue({ browserFields: mockBrowserFields }),
     }));
     it('returns only aggregateable fields', () => {
-      const wrapper = ({ children }: { children: JSX.Element }) => <TestProviders>{children}</TestProviders>
+      const wrapper = ({ children }: { children: JSX.Element }) => (
+        <TestProviders>{children}</TestProviders>
+      );
       const { result, unmount } = renderHook(() => useStackByFields(), { wrapper });
       const aggregateableFields = result.current;
       unmount();
-      expect(aggregateableFields?.find(field => field.label === 'agent.id')).toBeTruthy();
-      expect(aggregateableFields?.find(field => field.label === 'nestedField.firstAttributes')).toBe(undefined);
+      expect(aggregateableFields?.find((field) => field.label === 'agent.id')).toBeTruthy();
+      expect(
+        aggregateableFields?.find((field) => field.label === 'nestedField.firstAttributes')
+      ).toBe(undefined);
     });
   });
 });

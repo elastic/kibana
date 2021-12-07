@@ -22,6 +22,7 @@ jest.mock('react-router-dom', () => {
     ...originalModule,
     createHref: jest.fn(),
     useHistory: jest.fn(),
+    useLocation: jest.fn().mockReturnValue({ pathname: '' }),
   };
 });
 
