@@ -82,7 +82,7 @@ export const DEFAULT_THREAT_MATCH_QUERY = '@timestamp >= "now-30d"' as const;
  * Cloud Posture indicies
  */
 
-export const CSP_KUBEBEAT_INDEX = 'kubebeat';
+export const CSP_KUBEBEAT_INDEX = 'kubebeat*';
 
 /**
  * Cloud Posture Routes

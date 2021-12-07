@@ -84,7 +84,7 @@ export const FindingsSearchBar = ({
       const findingsSearchSource = await search.searchSource.create({
         filter: query.filterManager.getFilters(),
         query: query.queryString.getQuery(),
-        index: dataView,
+        index: dataView.id,
         size: 1000, // TODO: async pagination
       });
 
