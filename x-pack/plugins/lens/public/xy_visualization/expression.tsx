@@ -44,6 +44,7 @@ import { IconType } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { RenderMode } from 'src/plugins/expressions';
 import { ThemeServiceStart } from 'kibana/public';
+import { throttle, debounce } from 'lodash';
 import { KibanaThemeProvider } from '../../../../../src/plugins/kibana_react/public';
 import type { ILensInterpreterRenderHandlers, LensFilterEvent, LensBrushEvent } from '../types';
 import type { LensMultiTable, FormatFactory } from '../../common';
@@ -73,6 +74,7 @@ import {
   ReferenceLineAnnotations,
 } from './expression_reference_lines';
 import { computeOverallDataDomain } from './reference_line_helpers';
+import { hookUp } from './timeslip';
 
 declare global {
   interface Window {
@@ -129,6 +131,8 @@ export function calculateMinInterval({ args: { layers }, data }: XYChartProps) {
 
 const isPrimitive = (value: unknown): boolean => value != null && typeof value !== 'object';
 
+const instanceMap = new Map<Element, any>();
+
 export const getXyChartRenderer = (dependencies: {
   formatFactory: FormatFactory;
   chartsThemeService: ChartsPluginStart['theme'];
@@ -150,37 +154,69 @@ export const getXyChartRenderer = (dependencies: {
     config: XYChartProps,
     handlers: ILensInterpreterRenderHandlers
   ) => {
-    handlers.onDestroy(() => ReactDOM.unmountComponentAtNode(domNode));
-    const onClickValue = (data: LensFilterEvent['data']) => {
-      handlers.event({ name: 'filter', data });
-    };
-    const onSelectRange = (data: LensBrushEvent['data']) => {
-      handlers.event({ name: 'brush', data });
-    };
-
-    ReactDOM.render(
-      <KibanaThemeProvider theme$={dependencies.kibanaTheme.theme$}>
-        <I18nProvider>
-          <XYChartReportable
-            {...config}
-            formatFactory={dependencies.formatFactory}
-            chartsActiveCursorService={dependencies.chartsActiveCursorService}
-            chartsThemeService={dependencies.chartsThemeService}
-            paletteService={dependencies.paletteService}
-            timeZone={dependencies.timeZone}
-            useLegacyTimeAxis={dependencies.useLegacyTimeAxis}
-            minInterval={calculateMinInterval(config)}
-            interactive={handlers.isInteractive()}
-            onClickValue={onClickValue}
-            onSelectRange={onSelectRange}
-            renderMode={handlers.getRenderMode()}
-            syncColors={handlers.isSyncColorsEnabled()}
-          />
-        </I18nProvider>
-      </KibanaThemeProvider>,
-      domNode,
-      () => handlers.done()
+    const table = Object.values(config.data.tables)[0];
+    const dateCol = table.columns.find((c) => c.meta.type === 'date')?.id!;
+    const numberCol = table.columns.find((c) => c.meta.type === 'number')?.id!;
+    const rows = table.rows.map((row) => ({
+      epochMs: row[dateCol],
+      count: row[numberCol],
+      sum: row[numberCol],
+      range: [row[numberCol]],
+      boxplot: { value: row[numberCol] },
+    }));
+    const stats = rows.reduce(
+      (p, { epochMs, count, sum, range }) => {
+        const { minEpochMs, maxEpochMs, minCount, maxCount, minSum, maxSum } = p;
+        p.minEpochMs = Math.min(minEpochMs, epochMs);
+        p.maxEpochMs = Math.max(maxEpochMs, epochMs);
+        p.minCount = Math.min(minCount, count);
+        p.maxCount = Math.max(maxCount, count);
+        p.minSum = Math.min(minSum, ...range);
+        p.maxSum = Math.max(maxSum, ...range);
+        return p;
+      },
+      {
+        minEpochMs: Infinity,
+        maxEpochMs: -Infinity,
+        minCount: Infinity,
+        maxCount: -Infinity,
+        minSum: Infinity,
+        maxSum: -Infinity,
+      }
     );
+    let ins = instanceMap.get(domNode);
+    if (!ins) {
+      const id = String(Math.random());
+      handlers.done();
+      domNode.innerHTML = `<canvas id="canvas${id}" width="${
+        domNode.getBoundingClientRect().width - 20
+      }" height="${domNode.getBoundingClientRect().height - 20}" />`;
+      ins = hookUp(id, {
+        dataResponse: {
+          rows,
+          stats,
+        },
+        onChangeRange: debounce((demand) => {
+          console.log(demand);
+          handlers.event({
+            name: 'brush',
+            data: {
+              table,
+              column: table.columns.findIndex((c) => c.id === dateCol),
+              range: [demand.lo.timePointSec * 1000, demand.hi.timePointSec * 1000],
+              timeFieldName: table.columns.find((c) => c.id === dateCol)!.meta.field!,
+            },
+          });
+        }, 200),
+      });
+      handlers.onDestroy(() => ins.unmount());
+      instanceMap.set(domNode, ins);
+    }
+      handlers.done();
+    ins.dataArrived({
+      rows,
+      stats,
+    });
   },
 });
 
