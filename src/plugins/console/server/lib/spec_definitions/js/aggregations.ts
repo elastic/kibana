@@ -85,7 +85,7 @@ const rules = {
     diversified_sampler: {
       shard_size: '',
       field: '',
-      max_docs_per_value: '',
+      max_docs_per_value: 1,
       execution_hint: '',
     },
     min: simple_metric,
