@@ -19,6 +19,7 @@ import {
   setUISettings,
   setInjectedMetadata,
   setDocLinks,
+  setMapsEms,
 } from './services';
 
 import { createVegaFn } from './vega_fn';
@@ -28,6 +29,7 @@ import { ConfigSchema } from '../config';
 
 import { getVegaInspectorView } from './vega_inspector';
 import { getVegaVisRenderer } from './vega_vis_renderer';
+import { getServiceSettings } from './vega_view/vega_map_view/service_settings/get_service_settings';
 
 /** @internal */
 export interface VegaVisualizationDependencies {
@@ -70,13 +72,14 @@ export class VegaPlugin implements Plugin<void, void> {
     });
 
     setUISettings(core.uiSettings);
+    setMapsEms(mapsEms);
 
     const visualizationDependencies: Readonly<VegaVisualizationDependencies> = {
       core,
       plugins: {
         data,
       },
-      getServiceSettings: mapsEms.getServiceSettings,
+      getServiceSettings,
     };
 
     inspector.registerView(getVegaInspectorView({ uiSettings: core.uiSettings }));

@@ -26,13 +26,10 @@ export function plugin(initializerContext: PluginInitializerContext) {
   return new MapsEmsPlugin(initializerContext);
 }
 
-export { TMS_IN_YML_ID } from '../common';
-
-export type { MapConfig } from '../config';
+export type { MapConfig, TileMapConfig, EMSConfig } from '../config';
 
 export interface MapsEmsPluginPublicSetup {
   config: MapConfig;
-  getServiceSettings(): Promise<IEMSKbnMapsSettings>;
   createEMSSettings(): EMSSettings;
   createEMSClient(): EMSClient;
 }

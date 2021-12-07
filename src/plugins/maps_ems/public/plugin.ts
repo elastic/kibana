@@ -15,7 +15,6 @@ import {
 } from './kibana_services';
 import { MapsEmsPluginPublicSetup, MapsEmsPluginPublicStart } from './index';
 import type { MapConfig } from '../config';
-import { getServiceSettings } from './lazy_load_bundle/get_service_settings';
 import { createEMSSettings } from '../common/ems_settings';
 import {
   LicensingPluginSetup,
@@ -52,7 +51,6 @@ export class MapsEmsPlugin implements Plugin<MapsEmsPluginPublicSetup, MapsEmsPl
 
     return {
       config: mapConfig,
-      getServiceSettings,
       createEMSSettings: () => {
         return createEMSSettings(mapConfig, getIsEnterprisePlus);
       },

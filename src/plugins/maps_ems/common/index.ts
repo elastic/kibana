@@ -18,6 +18,4 @@ export {
   EMS_APP_NAME,
 } from './ems_defaults';
 
-export { ORIGIN } from './origin';
-
 export { EMSSettings } from './ems_settings';

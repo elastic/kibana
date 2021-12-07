@@ -9,13 +9,19 @@
 import _ from 'lodash';
 import MarkdownIt from 'markdown-it';
 import { EMSClient, FileLayer as EMSFileLayer, TMSService } from '@elastic/ems-client';
-import { getIsEnterprisePlus, getKibanaVersion } from '../kibana_services';
-import { FileLayer, IEMSKbnMapsSettings, TmsLayer } from './service_settings_types';
-import { ORIGIN, TMS_IN_YML_ID } from '../../common';
-import type { MapConfig, TileMapConfig } from '../../config';
-import { createEMSSettings } from '../../common/ems_settings';
-import { createEMSClient } from '../create_ems_client';
-
+import {
+  FileLayer,
+  IEMSKbnMapsSettings,
+  TmsLayer,
+  ORIGIN_LEGACY,
+  TMS_IN_YML_ID,
+} from './service_settings_types';
+import { getMapsEms } from '../../../services';
+import {
+  MapsEmsPluginPublicSetup,
+  MapConfig,
+  TileMapConfig,
+} from '../../../../../../maps_ems/public';
 /**
  * This class provides access to the EMS-layers and the kibana.yml configured layers through a single interface.
  */
@@ -31,8 +37,8 @@ export class KbnMapsSettings implements IEMSKbnMapsSettings {
     this._tilemapsConfig = tilemapsConfig;
     this._hasTmsConfigured = typeof tilemapsConfig.url === 'string' && tilemapsConfig.url !== '';
 
-    const emsSettings = createEMSSettings(mapConfig, getIsEnterprisePlus);
-    this._emsClient = createEMSClient(emsSettings, getKibanaVersion());
+    const mapsEms: MapsEmsPluginPublicSetup = getMapsEms();
+    this._emsClient = mapsEms.createEMSClient();
     // any kibana user, regardless of distribution, should get all zoom levels
     // use `sspl` license to indicate this
     this._emsClient.addQueryParams({ license: 'sspl' });
@@ -65,7 +71,6 @@ export class KbnMapsSettings implements IEMSKbnMapsSettings {
     this._emsClient.getManifest = manifestRetrieval;
     return {
       removeStub: () => {
-        // @ts-expect-error
         delete this._emsClient.getManifest;
         // not strictly necessary since this is prototype method
         if (this._emsClient.getManifest !== oldGetManifest) {
@@ -113,7 +118,7 @@ export class KbnMapsSettings implements IEMSKbnMapsSettings {
       const tmsService: TmsLayer = {
         ..._.cloneDeep(this.tmsOptionsFromConfig),
         id: TMS_IN_YML_ID,
-        origin: ORIGIN.KIBANA_YML,
+        origin: ORIGIN_LEGACY.KIBANA_YML,
       };
 
       allServices.push(tmsService);
@@ -176,7 +181,7 @@ export class KbnMapsSettings implements IEMSKbnMapsSettings {
       minZoom: await tmsService!.getMinZoom(),
       maxZoom: await tmsService!.getMaxZoom(),
       attribution: getAttributionString(tmsService!),
-      origin: ORIGIN.EMS,
+      origin: ORIGIN_LEGACY.EMS,
     };
   }
 
@@ -185,16 +190,16 @@ export class KbnMapsSettings implements IEMSKbnMapsSettings {
     isDesaturated: boolean,
     isDarkMode: boolean
   ) {
-    if (tmsServiceConfig.origin === ORIGIN.EMS) {
+    if (tmsServiceConfig.origin === ORIGIN_LEGACY.EMS) {
       return this._getAttributesForEMSTMSLayer(isDesaturated, isDarkMode);
-    } else if (tmsServiceConfig.origin === ORIGIN.KIBANA_YML) {
+    } else if (tmsServiceConfig.origin === ORIGIN_LEGACY.KIBANA_YML) {
       const attrs = _.pick(this._tilemapsConfig, ['url', 'minzoom', 'maxzoom', 'attribution']);
-      return { ...attrs, ...{ origin: ORIGIN.KIBANA_YML } };
+      return { ...attrs, ...{ origin: ORIGIN_LEGACY.KIBANA_YML } };
     } else {
       // this is an older config. need to resolve this dynamically.
       if (tmsServiceConfig.id === TMS_IN_YML_ID) {
         const attrs = _.pick(this._tilemapsConfig, ['url', 'minzoom', 'maxzoom', 'attribution']);
-        return { ...attrs, ...{ origin: ORIGIN.KIBANA_YML } };
+        return { ...attrs, ...{ origin: ORIGIN_LEGACY.KIBANA_YML } };
       } else {
         // assume ems
         return this._getAttributesForEMSTMSLayer(isDesaturated, isDarkMode);
@@ -219,14 +224,17 @@ export class KbnMapsSettings implements IEMSKbnMapsSettings {
 
   async getUrlForRegionLayer(fileLayerConfig: FileLayer): Promise<string | undefined> {
     let url;
-    if (fileLayerConfig.origin === ORIGIN.EMS) {
+    if (fileLayerConfig.origin === ORIGIN_LEGACY.EMS) {
       url = this._getFileUrlFromEMS(fileLayerConfig);
-    } else if (fileLayerConfig.layerId && fileLayerConfig.layerId.startsWith(`${ORIGIN.EMS}.`)) {
+    } else if (
+      fileLayerConfig.layerId &&
+      fileLayerConfig.layerId.startsWith(`${ORIGIN_LEGACY.EMS}.`)
+    ) {
       // fallback for older saved objects
       url = this._getFileUrlFromEMS(fileLayerConfig);
     } else if (
       fileLayerConfig.layerId &&
-      fileLayerConfig.layerId.startsWith(`${ORIGIN.KIBANA_YML}.`)
+      fileLayerConfig.layerId.startsWith(`${ORIGIN_LEGACY.KIBANA_YML}.`)
     ) {
       // fallback for older saved objects
       url = fileLayerConfig.url;

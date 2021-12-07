@@ -6,7 +6,14 @@
  * Side Public License, v 1.
  */
 import { TMSService } from '@elastic/ems-client';
-import { MapConfig, TileMapConfig } from '../../config';
+import { MapConfig, TileMapConfig } from '../../../../../../maps_ems/public';
+
+export const ORIGIN_LEGACY = {
+  EMS: 'elastic_maps_service',
+  KIBANA_YML: 'self_hosted',
+};
+
+export const TMS_IN_YML_ID = 'TMS in config/kibana.yml';
 
 export interface TmsLayer {
   id: string;

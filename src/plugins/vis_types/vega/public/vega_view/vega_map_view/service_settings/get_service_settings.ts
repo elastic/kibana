@@ -7,7 +7,8 @@
  */
 
 import type { IEMSKbnMapsSettings } from '../service_settings/service_settings_types';
-import { getMapConfig } from '../kibana_services';
+import { getMapsEms } from '../../../services';
+import type { MapConfig } from '../../../../../../maps_ems/config';
 
 let loadPromise: Promise<IEMSKbnMapsSettings>;
 
@@ -18,8 +19,8 @@ export async function getServiceSettings(): Promise<IEMSKbnMapsSettings> {
 
   loadPromise = new Promise(async (resolve, reject) => {
     try {
-      const { KbnMapsSettings } = await import('./lazy');
-      const mapsEmsConfig = getMapConfig();
+      const { KbnMapsSettings } = await import('./service_settings');
+      const mapsEmsConfig: MapConfig = getMapsEms().config;
       resolve(new KbnMapsSettings(mapsEmsConfig, mapsEmsConfig.tilemap));
     } catch (error) {
       reject(error);

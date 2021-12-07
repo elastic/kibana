@@ -10,6 +10,7 @@ import { CoreStart, NotificationsStart, IUiSettingsClient, DocLinksStart } from 
 
 import { DataPublicPluginStart } from '../../../data/public';
 import { createGetterSetter } from '../../../kibana_utils/public';
+import { MapsEmsPluginPublicSetup } from '../../../maps_ems/public';
 
 export const [getData, setData] = createGetterSetter<DataPublicPluginStart>('Data');
 
@@ -17,6 +18,7 @@ export const [getNotifications, setNotifications] =
   createGetterSetter<NotificationsStart>('Notifications');
 
 export const [getUISettings, setUISettings] = createGetterSetter<IUiSettingsClient>('UISettings');
+export const [getMapsEms, setMapsEms] = createGetterSetter<MapsEmsPluginPublicSetup>('mapsEms');
 
 export const [getInjectedMetadata, setInjectedMetadata] =
   createGetterSetter<CoreStart['injectedMetadata']>('InjectedMetadata');
