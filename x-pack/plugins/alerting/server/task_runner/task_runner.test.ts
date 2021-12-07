@@ -4429,7 +4429,6 @@ describe('Task Runner', () => {
     const eventLogger = taskRunnerFactoryInitializerParams.eventLogger;
     expect(eventLogger.logEvent).toHaveBeenCalledTimes(2);
     expect(eventLogger.logEvent.mock.calls[0][0]).toStrictEqual({
-      '@timestamp': '1970-01-01T00:00:00.000Z',
       event: {
         action: 'execute-start',
         kind: 'alert',
@@ -4450,7 +4449,6 @@ describe('Task Runner', () => {
       message: 'alert execution start: "1"',
     });
     expect(eventLogger.logEvent.mock.calls[1][0]).toStrictEqual({
-      '@timestamp': '1970-01-01T00:00:00.000Z',
       event: {
         action: 'execute',
         kind: 'alert',
