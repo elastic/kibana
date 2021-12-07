@@ -223,11 +223,7 @@ describe('Host Isolation', () => {
             Promise.resolve({ body: legacyMetadataSearchResponseMock(searchResponse) })
           );
 
-        if (indexExists) {
-          ctx.core.elasticsearch.client.asInternalUser.index = mockIndexResponse;
-        }
-
-        ctx.core.elasticsearch.client.asCurrentUser.index = mockIndexResponse;
+        ctx.core.elasticsearch.client.asInternalUser.index = mockIndexResponse;
         ctx.core.elasticsearch.client.asCurrentUser.search = mockSearchResponse;
 
         const withLicense = license ? license : Platinum;
@@ -283,7 +279,7 @@ describe('Host Isolation', () => {
         searchResponse: metadataResponse,
       });
       const actionDoc: EndpointAction = (
-        ctx.core.elasticsearch.client.asCurrentUser.index as jest.Mock
+        ctx.core.elasticsearch.client.asInternalUser.index as jest.Mock
       ).mock.calls[0][0].body;
       expect(actionDoc.agents).toContain(AgentID);
     });
@@ -294,7 +290,7 @@ describe('Host Isolation', () => {
         mockUser: testU,
       });
       const actionDoc: EndpointAction = (
-        ctx.core.elasticsearch.client.asCurrentUser.index as jest.Mock
+        ctx.core.elasticsearch.client.asInternalUser.index as jest.Mock
       ).mock.calls[0][0].body;
       expect(actionDoc.user_id).toEqual(testU.username);
     });
@@ -304,7 +300,7 @@ describe('Host Isolation', () => {
         body: { endpoint_ids: ['XYZ'], comment: CommentText },
       });
       const actionDoc: EndpointAction = (
-        ctx.core.elasticsearch.client.asCurrentUser.index as jest.Mock
+        ctx.core.elasticsearch.client.asInternalUser.index as jest.Mock
       ).mock.calls[0][0].body;
       expect(actionDoc.data.comment).toEqual(CommentText);
     });
@@ -313,7 +309,7 @@ describe('Host Isolation', () => {
         body: { endpoint_ids: ['XYZ'], comment: 'XYZ' },
       });
       const actionDoc: EndpointAction = (
-        ctx.core.elasticsearch.client.asCurrentUser.index as jest.Mock
+        ctx.core.elasticsearch.client.asInternalUser.index as jest.Mock
       ).mock.calls[0][0].body;
       const actionID = actionDoc.action_id;
       expect(mockResponse.ok).toBeCalled();
@@ -326,7 +322,7 @@ describe('Host Isolation', () => {
         body: { endpoint_ids: ['XYZ'] },
       });
       const actionDoc: EndpointAction = (
-        ctx.core.elasticsearch.client.asCurrentUser.index as jest.Mock
+        ctx.core.elasticsearch.client.asInternalUser.index as jest.Mock
       ).mock.calls[0][0].body;
       expect(actionDoc.timeout).toEqual(300);
     });
@@ -339,7 +335,7 @@ describe('Host Isolation', () => {
         searchResponse: doc,
       });
       const actionDoc: EndpointAction = (
-        ctx.core.elasticsearch.client.asCurrentUser.index as jest.Mock
+        ctx.core.elasticsearch.client.asInternalUser.index as jest.Mock
       ).mock.calls[0][0].body;
       expect(actionDoc.agents).toContain(AgentID);
     });
@@ -349,7 +345,7 @@ describe('Host Isolation', () => {
         body: { endpoint_ids: ['XYZ'] },
       });
       const actionDoc: EndpointAction = (
-        ctx.core.elasticsearch.client.asCurrentUser.index as jest.Mock
+        ctx.core.elasticsearch.client.asInternalUser.index as jest.Mock
       ).mock.calls[0][0].body;
       expect(actionDoc.data.command).toEqual('isolate');
     });
@@ -358,7 +354,7 @@ describe('Host Isolation', () => {
         body: { endpoint_ids: ['XYZ'] },
       });
       const actionDoc: EndpointAction = (
-        ctx.core.elasticsearch.client.asCurrentUser.index as jest.Mock
+        ctx.core.elasticsearch.client.asInternalUser.index as jest.Mock
       ).mock.calls[0][0].body;
       expect(actionDoc.data.command).toEqual('unisolate');
     });
@@ -376,7 +372,7 @@ describe('Host Isolation', () => {
           { index: string; body: LogsEndpointAction },
           { index: string; body: EndpointAction }
         ] = [
-          (ctx.core.elasticsearch.client.asCurrentUser.index as jest.Mock).mock.calls[0][0],
+          (ctx.core.elasticsearch.client.asInternalUser.index as jest.Mock).mock.calls[0][0],
           (ctx.core.elasticsearch.client.asInternalUser.index as jest.Mock).mock.calls[1][0],
         ];
 
@@ -398,7 +394,7 @@ describe('Host Isolation', () => {
           { index: string; body: LogsEndpointAction },
           { index: string; body: EndpointAction }
         ] = [
-          (ctx.core.elasticsearch.client.asCurrentUser.index as jest.Mock).mock.calls[0][0],
+          (ctx.core.elasticsearch.client.asInternalUser.index as jest.Mock).mock.calls[0][0],
           (ctx.core.elasticsearch.client.asInternalUser.index as jest.Mock).mock.calls[1][0],
         ];
 

@@ -73,7 +73,7 @@ const createFailedActionResponseEntry = async ({
   doc: LogsEndpointActionResponse;
   logger: Logger;
 }): Promise<void> => {
-  const esClient = context.core.elasticsearch.client.asCurrentUser;
+  const esClient = context.core.elasticsearch.client.asInternalUser;
   try {
     await esClient.index<LogsEndpointActionResponse>({
       index: `${ENDPOINT_ACTION_RESPONSES_DS}-default`,
@@ -179,7 +179,7 @@ export const isolationRequestHandler = function (
     // write the action request to the new index as the current user
     if (doesLogsEndpointActionsDsExist) {
       try {
-        const esClient = context.core.elasticsearch.client.asCurrentUser;
+        const esClient = context.core.elasticsearch.client.asInternalUser;
         logsEndpointActionsResult = await esClient.index<LogsEndpointAction>({
           index: `${ENDPOINT_ACTIONS_DS}-default`,
           body: {
@@ -203,11 +203,7 @@ export const isolationRequestHandler = function (
     }
 
     try {
-      let esClient = context.core.elasticsearch.client.asCurrentUser;
-      if (doesLogsEndpointActionsDsExist) {
-        // create action request record as system user with user in .fleet-actions
-        esClient = context.core.elasticsearch.client.asInternalUser;
-      }
+      const esClient = context.core.elasticsearch.client.asInternalUser;
       // write as the current user if the new indices do not exist
       // <v7.16 requires the current user to be super user
       fleetActionIndexResult = await esClient.index<EndpointAction>({
