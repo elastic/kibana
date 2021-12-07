@@ -8,6 +8,8 @@
 
 import * as t from 'io-ts';
 
+import { PositiveInteger } from '@kbn/securitysolution-io-ts-types';
+
 import { id } from '../../common/id';
 import { list_id } from '../../common/list_id';
 import { item_id } from '../../common/item_id';
@@ -38,11 +40,11 @@ export const importExceptionsResponseSchema = t.exact(
   t.type({
     errors: t.array(bulkErrorSchema),
     success: t.boolean,
-    success_count: t.number,
+    success_count: PositiveInteger,
     success_exception_lists: t.boolean,
-    success_count_exception_lists: t.number,
+    success_count_exception_lists: PositiveInteger,
     success_exception_list_items: t.boolean,
-    success_count_exception_list_items: t.number,
+    success_count_exception_list_items: PositiveInteger,
   })
 );
 

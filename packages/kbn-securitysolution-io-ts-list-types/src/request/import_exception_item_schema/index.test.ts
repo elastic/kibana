@@ -28,8 +28,8 @@ describe('import_list_item_schema', () => {
   });
 
   test('it should NOT accept an undefined for "item_id"', () => {
-    const payload = getImportExceptionsListItemSchemaMock();
-    // @ts-expect-error
+    const payload: Partial<ReturnType<typeof getImportExceptionsListItemSchemaMock>> =
+      getImportExceptionsListItemSchemaMock();
     delete payload.item_id;
     const decoded = importExceptionListItemSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
@@ -41,8 +41,8 @@ describe('import_list_item_schema', () => {
   });
 
   test('it should NOT accept an undefined for "list_id"', () => {
-    const payload = getImportExceptionsListItemSchemaMock();
-    // @ts-expect-error
+    const payload: Partial<ReturnType<typeof getImportExceptionsListItemSchemaMock>> =
+      getImportExceptionsListItemSchemaMock();
     delete payload.list_id;
     const decoded = importExceptionListItemSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
@@ -54,8 +54,8 @@ describe('import_list_item_schema', () => {
   });
 
   test('it should NOT accept an undefined for "description"', () => {
-    const payload = getImportExceptionsListItemSchemaMock();
-    // @ts-expect-error
+    const payload: Partial<ReturnType<typeof getImportExceptionsListItemSchemaMock>> =
+      getImportExceptionsListItemSchemaMock();
     delete payload.description;
     const decoded = importExceptionListItemSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
@@ -67,8 +67,8 @@ describe('import_list_item_schema', () => {
   });
 
   test('it should NOT accept an undefined for "name"', () => {
-    const payload = getImportExceptionsListItemSchemaMock();
-    // @ts-expect-error
+    const payload: Partial<ReturnType<typeof getImportExceptionsListItemSchemaMock>> =
+      getImportExceptionsListItemSchemaMock();
     delete payload.name;
     const decoded = importExceptionListItemSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
@@ -80,8 +80,8 @@ describe('import_list_item_schema', () => {
   });
 
   test('it should NOT accept an undefined for "type"', () => {
-    const payload = getImportExceptionsListItemSchemaMock();
-    // @ts-expect-error
+    const payload: Partial<ReturnType<typeof getImportExceptionsListItemSchemaMock>> =
+      getImportExceptionsListItemSchemaMock();
     delete payload.type;
     const decoded = importExceptionListItemSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
@@ -93,8 +93,8 @@ describe('import_list_item_schema', () => {
   });
 
   test('it should NOT accept an undefined for "entries"', () => {
-    const payload = getImportExceptionsListItemSchemaMock();
-    // @ts-expect-error
+    const payload: Partial<ReturnType<typeof getImportExceptionsListItemSchemaMock>> =
+      getImportExceptionsListItemSchemaMock();
     delete payload.entries;
     const decoded = importExceptionListItemSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
@@ -106,7 +106,7 @@ describe('import_list_item_schema', () => {
   });
 
   test('it should accept any partial fields', () => {
-    const payload = {
+    const payload: ImportExceptionListItemSchema = {
       ...getImportExceptionsListItemSchemaMock(),
       id: '123',
       namespace_type: 'single',

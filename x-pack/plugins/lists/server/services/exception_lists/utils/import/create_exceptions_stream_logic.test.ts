@@ -8,6 +8,10 @@
 import { Readable } from 'stream';
 
 import { createPromiseFromStreams } from '@kbn/utils';
+import {
+  ImportExceptionListItemSchema,
+  ImportExceptionsListSchema,
+} from '@kbn/securitysolution-io-ts-list-types';
 
 import {
   getImportExceptionsListItemSchemaDecodedMock,
@@ -58,8 +62,8 @@ describe('create_exceptions_stream_logic', () => {
 
     describe('items validation', () => {
       it('reports when an item is missing "item_id"', () => {
-        const item = getImportExceptionsListItemSchemaMock();
-        // @ts-expect-error
+        const item: Partial<ReturnType<typeof getImportExceptionsListItemSchemaMock>> =
+          getImportExceptionsListItemSchemaMock();
         delete item.item_id;
 
         const result = exceptionsChecksFromArray([item], 100);
@@ -71,8 +75,8 @@ describe('create_exceptions_stream_logic', () => {
       });
 
       it('reports when an item is missing "entries"', () => {
-        const item = getImportExceptionsListItemSchemaMock();
-        // @ts-expect-error
+        const item: Partial<ReturnType<typeof getImportExceptionsListItemSchemaMock>> =
+          getImportExceptionsListItemSchemaMock();
         delete item.entries;
 
         const result = exceptionsChecksFromArray([item], 100);
@@ -84,7 +88,10 @@ describe('create_exceptions_stream_logic', () => {
       });
 
       it('does not error if item includes an id, is ignored', () => {
-        const item = { ...getImportExceptionsListItemSchemaMock(), id: '123' };
+        const item: ImportExceptionListItemSchema = {
+          ...getImportExceptionsListItemSchemaMock(),
+          id: '123',
+        };
 
         const result = exceptionsChecksFromArray([item], 100);
 
@@ -97,8 +104,8 @@ describe('create_exceptions_stream_logic', () => {
 
     describe('lists validation', () => {
       it('reports when an item is missing "item_id"', () => {
-        const list = getImportExceptionsListSchemaMock();
-        // @ts-expect-error
+        const list: Partial<ReturnType<typeof getImportExceptionsListSchemaMock>> =
+          getImportExceptionsListSchemaMock();
         delete list.list_id;
 
         const result = exceptionsChecksFromArray([list], 100);
@@ -204,8 +211,8 @@ describe('create_exceptions_stream_logic', () => {
 
     describe('items validation', () => {
       it('reports when an item is missing "item_id"', async () => {
-        const item = getImportExceptionsListItemSchemaMock();
-        // @ts-expect-error
+        const item: Partial<ReturnType<typeof getImportExceptionsListItemSchemaMock>> =
+          getImportExceptionsListItemSchemaMock();
         delete item.item_id;
 
         const ndJsonStream = new Readable({
@@ -228,8 +235,8 @@ describe('create_exceptions_stream_logic', () => {
       });
 
       it('reports when an item is missing "entries"', async () => {
-        const item = getImportExceptionsListItemSchemaMock();
-        // @ts-expect-error
+        const item: Partial<ReturnType<typeof getImportExceptionsListItemSchemaMock>> =
+          getImportExceptionsListItemSchemaMock();
         delete item.entries;
 
         const ndJsonStream = new Readable({
@@ -276,8 +283,8 @@ describe('create_exceptions_stream_logic', () => {
 
     describe('lists validation', () => {
       it('reports when an item is missing "item_id"', async () => {
-        const list = getImportExceptionsListSchemaMock();
-        // @ts-expect-error
+        const list: Partial<ReturnType<typeof getImportExceptionsListSchemaMock>> =
+          getImportExceptionsListSchemaMock();
         delete list.list_id;
 
         const ndJsonStream = new Readable({
@@ -300,7 +307,10 @@ describe('create_exceptions_stream_logic', () => {
       });
 
       it('does not error if list includes an id, is ignored', async () => {
-        const list = { ...getImportExceptionsListSchemaMock(), id: '123' };
+        const list: ImportExceptionsListSchema = {
+          ...getImportExceptionsListSchemaMock(),
+          id: '123',
+        };
 
         const ndJsonStream = new Readable({
           read(): void {

@@ -11,9 +11,9 @@ import { SavedObjectsClientContract } from 'kibana/server';
 import { deleteExceptionListItemByList } from '../../delete_exception_list_items_by_list';
 
 /**
- * Helper to bulk create exception list parent
- * containers
- * @param listsToCreate {array} - exception lists to be bulk created
+ * Helper to delete list items of exception lists to be updated
+ * as a result of user selecting to overwrite
+ * @param listsOfItemsToDelete {array} - information needed to delete exception list items
  * @param savedObjectsClient {object}
  * @returns {array} returns array of success and error formatted responses
  */

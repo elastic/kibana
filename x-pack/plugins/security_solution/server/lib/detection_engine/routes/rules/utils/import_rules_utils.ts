@@ -32,6 +32,10 @@ export interface RuleExceptionsPromiseFromStreams {
   exceptions: Array<ImportExceptionsListSchema | ImportExceptionListItemSchema>;
 }
 
+/**
+ * Takes rules to be imported and either creates or updates rules
+ * based on user overwrite preferences
+ */
 export const importRules = async ({
   ruleChunks,
   rulesResponseAcc,
@@ -308,8 +312,8 @@ export const importRules = async ({
     return importRuleResponse;
   }
 };
-// NOTE - can I batch this? Gather exceptions referenced, create dictionary of non-existent
-// exception lists to check against during rule import/creation
+
+// TODO: Batch this upfront and send down to check against
 export const checkExceptions = async ({
   ruleId,
   exceptions,
