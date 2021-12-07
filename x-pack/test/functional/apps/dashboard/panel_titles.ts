@@ -12,6 +12,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
+  const retry = getService('retry');
   const dashboardPanelActions = getService('dashboardPanelActions');
   const PageObjects = getPageObjects([
     'common',
@@ -29,9 +30,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('panel titles', () => {
     const clearUnsavedChanges = async () => {
-      await testSubjects.existOrFail('dashboardUnsavedChangesBadge');
-      await PageObjects.dashboard.clickQuickSave();
-      await testSubjects.missingOrFail('dashboardUnsavedChangesBadge');
+      await retry.try(async () => {
+        // avoid flaky test by surrounding in retry
+        await testSubjects.existOrFail('dashboardUnsavedChangesBadge');
+        await PageObjects.dashboard.clickQuickSave();
+        await testSubjects.missingOrFail('dashboardUnsavedChangesBadge');
+      });
     };
 
     before(async () => {
@@ -103,12 +107,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.dashboard.clickQuickSave();
     });
 
-    it('linking a by value panel with a custom title to the library will keep the original title', async () => {
+    it('linking a by value panel with a custom title to the library will overwrite the custom title with the library title', async () => {
       await PageObjects.dashboard.switchToEditMode();
-      const oldPanelTitle = (await PageObjects.dashboard.getPanelTitles())[0];
       await dashboardPanelActions.saveToLibrary('New Library Title');
-      const newPanelTitle = (await PageObjects.dashboard.getPanelTitles())[0];
-      expect(newPanelTitle).to.equal(oldPanelTitle);
+      await retry.try(async () => {
+        // need to surround in 'retry' due to delays in HTML updates causing the title read to be behind
+        const newPanelTitle = (await PageObjects.dashboard.getPanelTitles())[0];
+        expect(newPanelTitle).to.equal('New Library Title');
+      });
     });
 
     it('unlinking a by reference panel with a custom title will keep the current title', async () => {
@@ -121,9 +127,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it("linking a by value panel with a blank title to the library will set the panel's title to the library title", async () => {
       await dashboardPanelActions.setCustomPanelTitle('');
       await dashboardPanelActions.saveToLibrary(LIBRARY_TITLE_FOR_EMPTY_TESTS);
-      await PageObjects.dashboard.clickQuickSave(); // need to save to actually set the title in the back end
-      const newPanelTitle = (await PageObjects.dashboard.getPanelTitles())[0];
-      expect(newPanelTitle).to.equal(LIBRARY_TITLE_FOR_EMPTY_TESTS);
+      await retry.try(async () => {
+        // need to surround in 'retry' due to delays in HTML updates causing the title read to be behind
+        const newPanelTitle = (await PageObjects.dashboard.getPanelTitles())[0];
+        expect(newPanelTitle).to.equal(LIBRARY_TITLE_FOR_EMPTY_TESTS);
+      });
     });
 
     it('unlinking a by reference panel without a custom title will keep the library title', async () => {

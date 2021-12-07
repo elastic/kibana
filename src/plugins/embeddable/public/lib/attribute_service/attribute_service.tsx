@@ -169,8 +169,9 @@ export class AttributeService<
           // Remove unneeded attributes from the original input.
           const newInput = omit(input, ATTRIBUTE_SERVICE_KEY);
 
-          // Combine input and wrapped input to preserve any passed in explicit Input.
-          resolve({ ...newInput, ...wrappedInput });
+          // Combine input and wrapped input to preserve any passed in explicit Input while ensuring that the
+          // library title ovewrites the original title
+          resolve({ ...newInput, ...wrappedInput, title: newAttributes.title });
           return { id: wrappedInput.savedObjectId };
         } catch (error) {
           reject(error);
