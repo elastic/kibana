@@ -9,13 +9,7 @@ import React from 'react';
 import { EuiIconProps } from '@elastic/eui';
 
 export const ValueMaxIcon = (props: Omit<EuiIconProps, 'type'>) => (
-  <svg
-    width="16"
-    height="14"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-    {...props}
-  >
+  <svg width="16" height="14" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
     <path d="M8 0a.5.5 0 0 1 .384.18l2.5 3A.5.5 0 0 1 10.5 4h-5a.5.5 0 0 1-.384-.82l2.5-3A.5.5 0 0 1 8 0ZM.916 5.223A.5.5 0 0 0 0 5.5v5a.5.5 0 0 0 1 0V7.151l1.084 1.626a.5.5 0 0 0 .832 0L4 7.151V10.5a.5.5 0 0 0 1 0v-5a.5.5 0 0 0-.916-.277L2.5 7.599.916 5.223Z" />
     <path
       fillRule="evenodd"

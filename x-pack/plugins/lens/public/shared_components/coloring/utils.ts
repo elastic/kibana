@@ -128,7 +128,7 @@ export function getColorPaletteParams(params: any) {
   let stops = params.stops;
   let colorsForStops = params.colors;
 
-  if (isFinite(params.rangeMax)) {
+  if (isFinite(params.rangeMax) && stops.length > 0 ) {
     stops = [...params.stops, params.rangeMax];
     colorsForStops = [...colorsForStops, ''];
   }
