@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ConnectorTypeFields } from '../../../common';
+import { ConnectorTypeFields } from '../../../common/api';
 import { CaseUserActions } from '../../containers/types';
 
 export const getConnectorFieldsFromUserActions = (

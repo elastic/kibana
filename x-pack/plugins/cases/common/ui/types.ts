@@ -18,6 +18,19 @@ import {
   CaseUserActionResponse,
 } from '../api';
 
+interface CasesFeatures {
+  alerts: { sync: boolean };
+}
+
+export interface CasesContextValue {
+  owner: string[];
+  appId: string;
+  appTitle: string;
+  userCanCrud: boolean;
+  basePath: string;
+  features: CasesFeatures;
+}
+
 export interface CasesUiConfigType {
   markdownPlugins: {
     lens: boolean;

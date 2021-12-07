@@ -16,15 +16,14 @@ import {
 import React, { useContext } from 'react';
 import classNames from 'classnames';
 import { ThemeContext } from 'styled-components';
+import { Comment } from '../../../common/ui/types';
 import {
   ActionConnector,
   CaseStatuses,
   CommentType,
-  Comment,
   CommentRequestActionsType,
   noneConnectorId,
-  CaseExternalService,
-} from '../../../common';
+} from '../../../common/api';
 import { CaseUserActions } from '../../containers/types';
 import { CaseServices } from '../../containers/use_get_case_user_actions';
 import { Tags } from '../tag_list/tags';

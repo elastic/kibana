@@ -16,8 +16,8 @@ import {
   LogMeta,
   SavedObjectReference,
 } from '../../../../../../src/core/server';
-import { ConnectorTypes, isCreateConnector, isPush, isUpdateConnector } from '../../../common';
-import { USER_ACTION_OLD_ID_REF_NAME, USER_ACTION_OLD_PUSH_ID_REF_NAME } from '../../common';
+import { isPush, isUpdateConnector, isCreateConnector } from '../../../common/utils/user_actions';
+import { ConnectorTypes } from '../../../common/api';
 
 import { extractConnectorIdFromJson, UserActionFieldType } from './utils';
 

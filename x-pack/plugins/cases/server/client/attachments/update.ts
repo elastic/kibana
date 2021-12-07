@@ -9,13 +9,12 @@ import Boom from '@hapi/boom';
 
 import { SavedObjectsClientContract, Logger } from 'kibana/server';
 import { LensServerPluginSetup } from '../../../../lens/server';
-import { checkEnabledCaseConnectorOrThrow, CommentableCase, createCaseError } from '../../common';
-import {
-  CASE_SAVED_OBJECT,
-  SUB_CASE_SAVED_OBJECT,
-  CaseResponse,
-  CommentPatchRequest,
-} from '../../../common';
+import { CommentableCase } from '../../common/models';
+import { createCaseError } from '../../common/error';
+import { checkEnabledCaseConnectorOrThrow } from '../../common/utils';
+import { buildCommentUserActionItem } from '../../services/user_actions/helpers';
+import { CaseResponse, CommentPatchRequest, CommentRequest } from '../../../common/api';
+import { CASE_SAVED_OBJECT, SUB_CASE_SAVED_OBJECT } from '../../../common/constants';
 import { AttachmentService, CasesService } from '../../services';
 import { CasesClientArgs } from '..';
 import { decodeCommentRequest } from '../utils';

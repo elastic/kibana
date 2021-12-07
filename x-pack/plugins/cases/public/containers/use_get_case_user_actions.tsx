@@ -9,14 +9,8 @@ import { isEmpty, uniqBy } from 'lodash/fp';
 import { useCallback, useEffect, useState, useRef } from 'react';
 import deepEqual from 'fast-deep-equal';
 
-import {
-  CaseConnector,
-  CaseExternalService,
-  CaseUserActions,
-  ElasticUser,
-  Actions,
-  isPushedUserAction,
-} from '../../common';
+import { ElasticUser, CaseUserActions, CaseExternalService } from '../../common/ui/types';
+import { CaseFullExternalService, CaseConnector } from '../../common/api';
 import { getCaseUserActions, getSubCaseUserActions } from './api';
 import * as i18n from './translations';
 import { useToasts } from '../common/lib/kibana';
