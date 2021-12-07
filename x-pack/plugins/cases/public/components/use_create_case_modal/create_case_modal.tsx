@@ -10,7 +10,7 @@ import { EuiModal, EuiModalBody, EuiModalHeader, EuiModalHeaderTitle } from '@el
 
 import { Case } from '../../containers/types';
 import * as i18n from '../../common/translations';
-import { CaseType } from '../../../common';
+import { CaseType } from '../../../common/api';
 import { getCreateCaseLazy as getCreateCase } from '../../methods';
 
 export interface CreateCaseModalProps {

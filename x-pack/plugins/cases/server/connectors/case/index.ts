@@ -13,8 +13,8 @@ import {
   CasePostRequest,
   CommentRequest,
   CommentType,
-  ENABLE_CASE_CONNECTOR,
-} from '../../../common';
+} from '../../../common/api';
+import { ENABLE_CASE_CONNECTOR } from '../../../common/constants';
 import { CaseExecutorParamsSchema, CaseConfigurationSchema, CommentSchemaType } from './schema';
 import {
   CaseExecutorResponse,

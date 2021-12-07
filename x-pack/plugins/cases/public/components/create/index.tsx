@@ -15,7 +15,7 @@ import { CreateCaseForm } from './form';
 import { FormContext } from './form_context';
 import { SubmitCaseButton } from './submit_button';
 import { Case } from '../../containers/types';
-import { CaseType } from '../../../common';
+import { CaseType } from '../../../common/api';
 import { CasesTimelineIntegration, CasesTimelineIntegrationProvider } from '../timeline_context';
 import { fieldName as descriptionFieldName } from './description';
 import { InsertTimeline } from '../insert_timeline';

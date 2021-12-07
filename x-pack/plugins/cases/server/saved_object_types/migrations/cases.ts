@@ -13,7 +13,7 @@ import {
   SavedObjectSanitizedDoc,
 } from '../../../../../../src/core/server';
 import { ESConnectorFields } from '../../services';
-import { ConnectorTypes, CaseType } from '../../../common';
+import { ConnectorTypes, CaseType } from '../../../common/api';
 import {
   transformConnectorIdToReference,
   transformPushConnectorIdToReference,
