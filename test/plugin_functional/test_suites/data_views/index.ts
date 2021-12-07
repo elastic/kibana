@@ -25,7 +25,6 @@ export default function ({
       await PageObjects.settings.createIndexPattern('shakespeare', '');
     });
 
-    loadTestFile(require.resolve('./search'));
-    loadTestFile(require.resolve('./session'));
+    loadTestFile(require.resolve('./data_views'));
   });
 }

@@ -14,13 +14,13 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
-  describe('index patterns', function () {
+  describe('data views', function () {
     before(async () => {
       await esArchiver.emptyKibanaIndex();
     });
     let indexPatternId = '';
 
-    it('can create an index pattern', async () => {
+    it('can create a data view', async () => {
       const title = 'shakes*';
       const fieldFormats = { bytes: { id: 'bytes' } };
       const body = await (
@@ -38,21 +38,21 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
       expect(body.fieldFormatMap).to.eql(fieldFormats);
     });
 
-    it('can get index pattern by id', async () => {
+    it('can get data view by id', async () => {
       const body = await (
         await supertest.get(`/api/index-patterns-plugin/get/${indexPatternId}`).expect(200)
       ).body;
       expect(typeof body.id).to.equal('string');
     });
 
-    it('can update index pattern', async () => {
+    it('can update data view', async () => {
       const resp = await supertest
         .get(`/api/index-patterns-plugin/update/${indexPatternId}`)
         .expect(200);
       expect(resp.body).to.eql({});
     });
 
-    it('can delete index pattern', async () => {
+    it('can delete data view', async () => {
       await supertest.get(`/api/index-patterns-plugin/delete/${indexPatternId}`).expect(200);
     });
   });
