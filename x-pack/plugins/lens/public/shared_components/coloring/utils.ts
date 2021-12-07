@@ -113,7 +113,7 @@ export function getStopsFromColorRangesByNewInterval(
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function getColorPaletteParams(params: any) {
-  let continuity = 'none';
+  let continuity = params.stops.length > 0 ? 'none' : 'above';
   switch (params.autoValue) {
     case 'all':
       continuity = 'all';

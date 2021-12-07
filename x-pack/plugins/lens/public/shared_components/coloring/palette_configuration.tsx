@@ -157,8 +157,14 @@ export function CustomizablePalette({
               mapFromMinValue: true,
             });
 
-            newParams.rangeMin = newColorStops[0].stop;
-            newParams.rangeMax = newColorStops[newColorStops.length - 1].stop;
+            const rangeType = activePalette.params?.rangeType ?? 'percent';
+            const max = rangeType === 'percent' ? 100 : dataBounds.max;
+            const min = rangeType === 'percent' ? 100 : dataBounds.min;
+            newParams.rangeMin = newColorStops[0].stop > min ? min : newColorStops[0].stop;
+            newParams.rangeMax =
+              newColorStops[newColorStops.length - 1].stop < max
+                ? max
+                : newColorStops[newColorStops.length - 1].stop;
 
             setPalette({
               ...newPalette,

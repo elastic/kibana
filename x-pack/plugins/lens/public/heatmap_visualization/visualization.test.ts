@@ -407,6 +407,7 @@ describe('heatmap', () => {
                   ],
                 },
               ],
+              lastRangeIsRightOpen: [true],
               legend: [
                 {
                   type: 'expression',
