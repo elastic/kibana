@@ -40,6 +40,17 @@ jest.mock('../../../../../common/components/draggables', () => ({
   DefaultDraggable: () => <div data-test-subj="DefaultDraggable" />,
 }));
 
+jest.mock('../../../../store/timeline', () => {
+  const original = jest.requireActual('../../../../store/timeline');
+  return {
+    ...original,
+    timelineActions: {
+      ...original.timelineActions,
+      toggleDetailPanel: jest.fn(),
+    },
+  };
+});
+
 describe('HostName', () => {
   const props = {
     fieldName: 'host.name',
@@ -49,16 +60,13 @@ describe('HostName', () => {
     value: 'Mock Host',
   };
 
-  let toggleDetailPanel: jest.SpyInstance;
   let toggleExpandedDetail: jest.SpyInstance;
 
   beforeAll(() => {
-    toggleDetailPanel = jest.spyOn(timelineActions, 'toggleDetailPanel');
     toggleExpandedDetail = jest.spyOn(activeTimeline, 'toggleExpandedDetail');
   });
 
   afterEach(() => {
-    toggleDetailPanel.mockClear();
     toggleExpandedDetail.mockClear();
   });
   test('should render host name', () => {
@@ -96,7 +104,7 @@ describe('HostName', () => {
 
     wrapper.find('[data-test-subj="host-details-button"]').first().simulate('click');
     await waitFor(() => {
-      expect(toggleDetailPanel).not.toHaveBeenCalled();
+      expect(timelineActions.toggleDetailPanel).not.toHaveBeenCalled();
       expect(toggleExpandedDetail).not.toHaveBeenCalled();
     });
   });
@@ -118,7 +126,7 @@ describe('HostName', () => {
 
     wrapper.find('[data-test-subj="host-details-button"]').first().simulate('click');
     await waitFor(() => {
-      expect(toggleDetailPanel).toHaveBeenCalledWith({
+      expect(timelineActions.toggleDetailPanel).toHaveBeenCalledWith({
         panelView: 'hostDetail',
         params: {
           hostName: props.value,
@@ -172,7 +180,7 @@ describe('HostName', () => {
 
     wrapper.find('[data-test-subj="host-details-button"]').first().simulate('click');
     await waitFor(() => {
-      expect(toggleDetailPanel).toHaveBeenCalledWith({
+      expect(timelineActions.toggleDetailPanel).toHaveBeenCalledWith({
         panelView: 'hostDetail',
         params: {
           hostName: props.value,

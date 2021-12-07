@@ -23,7 +23,7 @@ import {
   DEFAULT_DATE_COLUMN_MIN_WIDTH,
 } from '../constants';
 import { mockBrowserFields } from '../../../../mock/browser_fields';
-import { ColumnHeaderOptions } from '../../../../../common';
+import { ColumnHeaderOptions } from '../../../../../common/types';
 
 window.matchMedia = jest.fn().mockImplementation((query) => {
   return {

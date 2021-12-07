@@ -8,7 +8,7 @@
 import { EuiCheckbox, EuiLoadingSpinner } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import { ALERT_RULE_PRODUCER } from '@kbn/rule-data-utils';
-import { ActionProps, HeaderActionProps } from '../../../../../common';
+import type { ActionProps, HeaderActionProps } from '../../../../../common/types';
 import * as i18n from './translations';
 
 export const RowCheckBox = ({

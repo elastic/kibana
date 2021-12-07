@@ -6,7 +6,7 @@
  */
 
 import { Storage } from '../../../../../../src/plugins/kibana_utils/public';
-import type { ColumnHeaderOptions } from '../../../common';
+import type { ColumnHeaderOptions } from '../../../common/types';
 import type { TGridModel, TGridModelSettings } from './model';
 
 export type { TGridModel };

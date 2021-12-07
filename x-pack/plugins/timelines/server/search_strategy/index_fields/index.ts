@@ -15,14 +15,13 @@ import {
   SearchStrategyDependencies,
 } from '../../../../../../src/plugins/data/server';
 
-// TODO cleanup path
+import { DELETED_SECURITY_SOLUTION_DATA_VIEW } from '../../../common/constants';
 import {
   IndexFieldsStrategyResponse,
   IndexField,
   IndexFieldsStrategyRequest,
   BeatFields,
-  DELETED_SECURITY_SOLUTION_DATA_VIEW,
-} from '../../../common';
+} from '../../../common/search_strategy';
 import { StartPlugins } from '../../types';
 import type { FieldSpec } from '../../../../../../src/plugins/data_views/common';
 
