@@ -12,13 +12,13 @@ import { initApm } from './init_apm';
 import apm from 'elastic-apm-node';
 
 describe('initApm', () => {
-  let apmAddFilterSpy: jest.SpyInstance;
-  let apmStartSpy: jest.SpyInstance;
+  let apmAddFilterMock: jest.Mock;
+  let apmStartMock: jest.Mock;
   let getConfig: jest.Mock;
 
   beforeEach(() => {
-    apmAddFilterSpy = jest.spyOn(apm, 'addFilter').mockImplementation(() => undefined);
-    apmStartSpy = jest.spyOn(apm, 'start').mockImplementation(() => undefined as any);
+    apmAddFilterMock = apm.addFilter as jest.Mock;
+    apmStartMock = apm.start as jest.Mock;
     getConfig = jest.fn();
 
     mockLoadConfiguration.mockImplementation(() => ({
@@ -27,7 +27,8 @@ describe('initApm', () => {
   });
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    apmAddFilterMock.mockReset();
+    apmStartMock.mockReset();
     mockLoadConfiguration.mockReset();
   });
 
@@ -48,8 +49,8 @@ describe('initApm', () => {
   it('registers a filter using `addFilter`', () => {
     initApm(['foo', 'bar'], 'rootDir', true, 'service-name');
 
-    expect(apmAddFilterSpy).toHaveBeenCalledTimes(1);
-    expect(apmAddFilterSpy).toHaveBeenCalledWith(expect.any(Function));
+    expect(apmAddFilterMock).toHaveBeenCalledTimes(1);
+    expect(apmAddFilterMock).toHaveBeenCalledWith(expect.any(Function));
   });
 
   it('starts apm with the config returned from `getConfig`', () => {
@@ -60,7 +61,7 @@ describe('initApm', () => {
 
     initApm(['foo', 'bar'], 'rootDir', true, 'service-name');
 
-    expect(apmStartSpy).toHaveBeenCalledTimes(1);
-    expect(apmStartSpy).toHaveBeenCalledWith(config);
+    expect(apmStartMock).toHaveBeenCalledTimes(1);
+    expect(apmStartMock).toHaveBeenCalledWith(config);
   });
 });
