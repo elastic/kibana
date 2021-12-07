@@ -50,12 +50,12 @@ export const CrawlDetailsSummary: React.FC<ICrawlerSummaryProps> = ({
     }
   };
 
-const getStatusCount = (code: string, codes: { [code: string]: number }) => {
-  return Object.entries(codes).reduce((count, [k, v]) => {
-    if (k[0] !== code) return count;
-    return v + count;
-  }, 0)
-};
+  const getStatusCount = (code: string, codes: { [code: string]: number }) => {
+    return Object.entries(codes).reduce((count, [k, v]) => {
+      if (k[0] !== code) return count;
+      return v + count;
+    }, 0);
+  };
 
   const statusCounts = {
     clientErrorCount:
