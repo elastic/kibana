@@ -11,7 +11,7 @@ import { createLogThresholdExecutor, FIRED_ACTIONS } from './log_threshold_execu
 import {
   LOG_DOCUMENT_COUNT_ALERT_TYPE_ID,
   alertParamsRT,
-} from '../../../../common/alerting/logs/log_threshold/types';
+} from '../../../../common/alerting/logs/log_threshold';
 import { InfraBackendLibs } from '../../infra_types';
 import { decodeOrThrow } from '../../../../common/runtime_types';
 
@@ -71,7 +71,7 @@ const denominatorConditionsActionVariableDescription = i18n.translate(
   }
 );
 
-export async function registerLogThresholdAlertType(
+export async function registerLogThresholdRuleType(
   alertingPlugin: PluginSetupContract,
   libs: InfraBackendLibs
 ) {

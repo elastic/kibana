@@ -302,3 +302,9 @@ export interface WSRoleMapping extends RoleMapping {
   allGroups: boolean;
   groups: RoleGroup[];
 }
+
+export interface ApiToken {
+  key?: string;
+  id?: string;
+  name: string;
+}
