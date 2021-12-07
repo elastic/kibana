@@ -305,7 +305,7 @@ export const createFilebeatInstructions = (context: TutorialContext) => {
           getSpaceIdForBeatsTutorial(context),
         ],
         textPost: i18n.translate(
-          'home.tutorials.common.filebeatInstructions.config.windowsTextPost',
+          'home.tutorials.common.filebeatInstructions.config.windowsTextPostMarkdown',
           {
             defaultMessage:
               'Where {passwordTemplate} is the password of the `elastic` user, {esUrlTemplate} is the URL of \

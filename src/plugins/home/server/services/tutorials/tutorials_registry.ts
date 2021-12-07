@@ -11,6 +11,7 @@ import {
   TutorialProvider,
   TutorialContextFactory,
   ScopedTutorialContextFactory,
+  TutorialContext,
 } from './lib/tutorials_registry_types';
 import { TutorialSchema, tutorialSchema } from './lib/tutorial_schema';
 import { builtInTutorials } from '../../tutorials/register';
@@ -78,7 +79,7 @@ export class TutorialsRegistry {
     router.get(
       { path: '/api/kibana/home/tutorials', validate: false },
       async (context, req, res) => {
-        const initialContext = { kibanaBranch: this.initContext.env.packageInfo.branch };
+        const initialContext = this.baseTutorialContext;
         const scopedContext = this.scopedTutorialContextFactories.reduce(
           (accumulatedContext, contextFactory) => {
             return { ...accumulatedContext, ...contextFactory(req) };
@@ -94,7 +95,7 @@ export class TutorialsRegistry {
     );
     return {
       registerTutorial: (specProvider: TutorialProvider) => {
-        const emptyContext = { kibanaBranch: this.initContext.env.packageInfo.branch };
+        const emptyContext = this.baseTutorialContext;
         let tutorial: TutorialSchema;
         try {
           tutorial = tutorialSchema.validate(specProvider(emptyContext));
@@ -134,11 +135,15 @@ export class TutorialsRegistry {
 
     if (customIntegrations) {
       builtInTutorials.forEach((provider) => {
-        const tutorial = provider({ kibanaBranch: this.initContext.env.packageInfo.branch });
+        const tutorial = provider(this.baseTutorialContext);
         registerBeatsTutorialsWithCustomIntegrations(core, customIntegrations, tutorial);
       });
     }
     return {};
+  }
+
+  private get baseTutorialContext(): TutorialContext {
+    return { kibanaBranch: this.initContext.env.packageInfo.branch };
   }
 }
 
