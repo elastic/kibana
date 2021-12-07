@@ -35,7 +35,9 @@ export function getInstallCommandForPlatform(
 
   if (isProductionDeployment) {
     commandArguments.push(['certificate-authorities', '<PATH_TO_CA>']);
-    commandArguments.push(['fleet-server-es-ca', '<PATH_TO_ES_CERT>']);
+    if (!sslCATrustedFingerprint) {
+      commandArguments.push(['fleet-server-es-ca', '<PATH_TO_ES_CERT>']);
+    }
     commandArguments.push(['fleet-server-cert', '<PATH_TO_FLEET_SERVER_CERT>']);
     commandArguments.push(['fleet-server-cert-key', '<PATH_TO_FLEET_SERVER_CERT_KEY>']);
   }

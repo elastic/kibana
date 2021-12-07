@@ -38,9 +38,7 @@ interface FleetOutputConfig {
   is_default_monitoring: boolean;
   type: 'elasticsearch';
   hosts: string[];
-  config: {
-    'ssl.ca_trusted_fingerprint': string;
-  };
+  ca_trusted_fingerprint: string;
 }
 
 export class KibanaConfigWriter {
@@ -200,9 +198,7 @@ export class KibanaConfigWriter {
         is_default_monitoring: true,
         type: 'elasticsearch',
         hosts: [host],
-        config: {
-          'ssl.ca_trusted_fingerprint': certFingerprint,
-        },
+        ca_trusted_fingerprint: certFingerprint,
       },
     ];
   }
