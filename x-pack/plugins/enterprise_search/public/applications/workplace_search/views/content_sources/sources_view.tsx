@@ -24,9 +24,10 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { docLinks } from '../../../shared/doc_links';
 import { Loading } from '../../../shared/loading';
 import { SourceIcon } from '../../components/shared/source_icon';
-import { EXTERNAL_IDENTITIES_DOCS_URL, DOCUMENT_PERMISSIONS_DOCS_URL } from '../../routes';
+import { DOCUMENT_PERMISSIONS_DOCS_URL } from '../../routes';
 
 import {
   EXTERNAL_IDENTITIES_LINK,
@@ -82,7 +83,7 @@ export const SourcesView: React.FC<SourcesViewProps> = ({ children }) => {
               values={{
                 addedSourceName,
                 externalIdentitiesLink: (
-                  <EuiLink target="_blank" href={EXTERNAL_IDENTITIES_DOCS_URL}>
+                  <EuiLink target="_blank" href={docLinks.workplaceSearchExternalIdentities}>
                     {EXTERNAL_IDENTITIES_LINK}
                   </EuiLink>
                 ),

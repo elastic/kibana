@@ -24,7 +24,6 @@ export const LEAVE_FEEDBACK_URL = `mailto:${LEAVE_FEEDBACK_EMAIL}?Subject=Elasti
 
 export const DOCUMENT_PERMISSIONS_DOCS_URL = docLinks.workplaceSearchDocumentPermissions;
 export const ENT_SEARCH_LICENSE_MANAGEMENT = docLinks.licenseManagement;
-export const EXTERNAL_IDENTITIES_DOCS_URL = docLinks.workplaceSearchExternalIdentities;
 export const SECURITY_DOCS_URL = docLinks.workplaceSearchSecurity;
 
 export const PERSONAL_PATH = '/p';

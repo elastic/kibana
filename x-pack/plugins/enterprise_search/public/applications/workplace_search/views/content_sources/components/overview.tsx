@@ -49,7 +49,6 @@ import {
 import {
   DOCUMENT_PERMISSIONS_DOCS_URL,
   ENT_SEARCH_LICENSE_MANAGEMENT,
-  EXTERNAL_IDENTITIES_DOCS_URL,
   SYNC_FREQUENCY_PATH,
   BLOCKED_TIME_WINDOWS_PATH,
   getGroupPath,
@@ -408,7 +407,7 @@ export const Overview: React.FC = () => {
                 defaultMessage="The {externalIdentitiesLink} must be used to configure user access mappings. Read the guide to learn more."
                 values={{
                   externalIdentitiesLink: (
-                    <EuiLink target="_blank" href={EXTERNAL_IDENTITIES_DOCS_URL}>
+                    <EuiLink target="_blank" href={docLinks.workplaceSearchExternalIdentities}>
                       {EXTERNAL_IDENTITIES_LINK}
                     </EuiLink>
                   ),
