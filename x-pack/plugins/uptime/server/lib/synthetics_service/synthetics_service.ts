@@ -190,13 +190,13 @@ export class SyntheticsService {
 
   async getMonitorConfigs() {
     const savedObjectsClient = this.server.savedObjectsClient;
-    const monitorsSavedObjects = await savedObjectsClient.find<
+    const monitorsSavedObjects = await savedObjectsClient?.find<
       SyntheticsMonitorSavedObject['attributes']
     >({
       type: syntheticsMonitorType,
     });
 
-    const savedObjectsList = monitorsSavedObjects.saved_objects;
+    const savedObjectsList = monitorsSavedObjects?.saved_objects ?? [];
     return savedObjectsList.map<ValuesType<MonitorConfigs>>(({ attributes, id }) => ({
       ...attributes,
       id,
