@@ -15,10 +15,7 @@ import { CaseActionConnector } from '../../types';
 export const connectorValidator = (
   connector: CaseActionConnector
 ): ReturnType<ValidationConfig['validator']> => {
-  const {
-    config: { usesTableApi },
-  } = connector;
-  if (usesTableApi) {
+  if (connector.config?.usesTableApi) {
     return {
       message: 'Deprecated connector',
     };
