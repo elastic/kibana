@@ -21,7 +21,7 @@ import {
   AlertInstanceContext,
   RawRule,
 } from '../types';
-import { NormalizedRuleType } from '../rule_type_registry';
+import { NormalizedRuleType, UntypedNormalizedRuleType } from '../rule_type_registry';
 import { isEphemeralTaskRejectedDueToCapacityError } from '../../../task_manager/server';
 import { createAlertEventLogRecordObject } from '../lib/create_alert_event_log_record_object';
 
@@ -204,7 +204,7 @@ export function createExecutionHandler<
 
       const event = createAlertEventLogRecordObject({
         ruleId,
-        ruleType,
+        ruleType: ruleType as UntypedNormalizedRuleType,
         action: EVENT_LOG_ACTIONS.executeAction,
         instanceId: alertId,
         group: actionGroup,
