@@ -13,6 +13,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const elasticChart = getService('elasticChart');
   const testSubjects = getService('testSubjects');
   const find = getService('find');
+  const retry = getService('retry');
 
   describe('lens gauge', () => {
     before(async () => {
@@ -50,10 +51,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should reflect edits for gauge', async () => {
       await PageObjects.lens.openVisualOptions();
-      await testSubjects.setValue('lnsToolbarGaugeLabelMajor', 'custom title');
-      await testSubjects.setValue('lnsToolbarGaugeLabelMinor-select', 'custom');
-      await testSubjects.setValue('lnsToolbarGaugeLabelMinor', 'custom subtitle');
+      await retry.try(async () => {
+        await testSubjects.setValue('lnsToolbarGaugeLabelMajor', 'custom title');
+      });
+      await retry.try(async () => {
+        await testSubjects.setValue('lnsToolbarGaugeLabelMinor-select', 'custom');
+      });
+      await retry.try(async () => {
+        await testSubjects.setValue('lnsToolbarGaugeLabelMinor', 'custom subtitle');
+      });
 
+      await PageObjects.lens.waitForVisualization();
       await PageObjects.lens.configureDimension({
         dimension: 'lnsGauge_metricDimensionPanel > lns-dimensionTrigger',
         operation: 'count',
