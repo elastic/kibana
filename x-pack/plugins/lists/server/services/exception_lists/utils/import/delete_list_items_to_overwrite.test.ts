@@ -8,8 +8,7 @@
 import { SavedObjectsClientContract } from 'kibana/server';
 import { NamespaceType } from '@kbn/securitysolution-io-ts-list-types';
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { savedObjectsClientMock } from '../../../../../../../../src/core/server/saved_objects/service/saved_objects_client.mock';
+import { savedObjectsClientMock } from '../../../../../../../../src/core/server/mocks';
 import { deleteExceptionListItemByList } from '../../delete_exception_list_items_by_list';
 
 import { deleteListItemsToBeOverwritten } from './delete_list_items_to_overwrite';

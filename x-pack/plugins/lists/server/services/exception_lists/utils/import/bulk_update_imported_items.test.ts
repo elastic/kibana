@@ -8,8 +8,7 @@
 import { SavedObjectsBulkUpdateObject, SavedObjectsClientContract } from 'kibana/server';
 
 import { ExceptionListSoSchema } from '../../../../schemas/saved_objects/exceptions_list_so_schema';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { savedObjectsClientMock } from '../../../../../../../../src/core/server/saved_objects/service/saved_objects_client.mock';
+import { savedObjectsClientMock } from '../../../../../../../../src/core/server/mocks';
 import { ENTRIES } from '../../../../../common/constants.mock';
 
 import { bulkUpdateImportedItems } from './bulk_update_imported_items';
