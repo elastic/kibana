@@ -195,10 +195,14 @@ export const getInfoHandler: FleetRequestHandler<TypeOf<typeof GetInfoRequestSch
     try {
       const savedObjectsClient = context.fleet.epm.internalSoClient;
       const { pkgName, pkgVersion } = request.params;
-      if (!semverValid(pkgVersion)) {
+      if (pkgVersion && !semverValid(pkgVersion)) {
         throw new IngestManagerError('Package version is not a valid semver');
       }
-      const res = await getPackageInfo({ savedObjectsClient, pkgName, pkgVersion });
+      const res = await getPackageInfo({
+        savedObjectsClient,
+        pkgName,
+        pkgVersion: pkgVersion || '',
+      });
       const body: GetInfoResponse = {
         item: res,
       };
@@ -254,7 +258,7 @@ export const installPackageFromRegistryHandler: FleetRequestHandler<
   const res = await installPackage({
     installSource: 'registry',
     savedObjectsClient,
-    pkgkey: `${pkgName}-${pkgVersion}`,
+    pkgkey: pkgVersion ? `${pkgName}-${pkgVersion}` : pkgName,
     esClient,
     force: request.body?.force,
   });
