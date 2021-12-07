@@ -13,6 +13,7 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { Subscription } from 'rxjs';
 import { Unsubscribe } from 'redux';
 import { EuiEmptyPrompt } from '@elastic/eui';
+import { Filter } from '@kbn/es-query';
 import {
   Embeddable,
   IContainer,
@@ -20,7 +21,6 @@ import {
   VALUE_CLICK_TRIGGER,
 } from '../../../../../src/plugins/embeddable/public';
 import { ActionExecutionContext } from '../../../../../src/plugins/ui_actions/public';
-import { Filter } from '@kbn/es-query';
 import {
   ACTION_GLOBAL_APPLY_FILTER,
   APPLY_FILTER_TRIGGER,

@@ -8,6 +8,7 @@
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
 import type { Query } from 'src/plugins/data/common';
+import { Filter } from '@kbn/es-query';
 import {
   DrawState,
   EditState,
@@ -19,7 +20,6 @@ import {
   TooltipState,
 } from '../../../common/descriptor_types';
 import { INITIAL_LOCATION } from '../../../common/constants';
-import { Filter } from '@kbn/es-query';
 import { TimeRange } from '../../../../../../src/plugins/data/public';
 
 export interface MapExtentState {

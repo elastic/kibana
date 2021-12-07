@@ -6,9 +6,9 @@
  */
 
 import _ from 'lodash';
+import { Filter } from '@kbn/es-query';
 import { ITooltipProperty } from './tooltip_property';
 import { IField } from '../fields/field';
-import { Filter } from '@kbn/es-query';
 import {
   esFilters,
   IndexPattern,
