@@ -365,7 +365,7 @@ export class TaskRunner<
     event.event.outcome = 'success';
     event.rule = {
       ...event.rule,
-      name: alert.name,
+      name: rule.name,
     };
 
     // Cleanup alerts that are no longer scheduling actions to avoid over populating the alertInstances object
