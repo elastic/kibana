@@ -35,7 +35,7 @@ import { TimelineNonEcsData } from '../../../../../common/search_strategy';
 import { Ecs } from '../../../../../common/ecs';
 import { EventDetailsFooter } from './footer';
 import { EntityType } from '../../../../../../timelines/common';
-import { useHostsRiskScore } from '../../../../overview/containers/overview_risky_host_links/use_hosts_risk_score';
+import { useHostsRiskScore } from '../../../../common/containers/hosts_risk/use_hosts_risk_score';
 
 const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
   .euiFlyoutBody__overflow {
