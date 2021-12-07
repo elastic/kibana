@@ -29,7 +29,6 @@ export const EXTERNAL_IDENTITIES_DOCS_URL = docLinks.workplaceSearchExternalIden
 export const OBJECTS_AND_ASSETS_DOCS_URL = docLinks.workplaceSearchSynch;
 export const PRIVATE_SOURCES_DOCS_URL = docLinks.workplaceSearchPermissions;
 export const SECURITY_DOCS_URL = docLinks.workplaceSearchSecurity;
-export const SYNCHRONIZATION_DOCS_URL = docLinks.workplaceSearchSynch;
 
 export const PERSONAL_PATH = '/p';
 
