@@ -14,9 +14,12 @@ import {
   EuiCallOut,
   EuiSpacer,
 } from '@elastic/eui';
+import moment from 'moment';
+
+import { USES_HEADLESS_JOB_TYPES } from '../../../common/constants';
 
 import type { Job } from '../../lib/job';
-import { USES_HEADLESS_JOB_TYPES } from '../../../common/constants';
+import { useKibana } from '../../shared_imports';
 
 const NA = i18n.translate('xpack.reporting.listing.infoPanel.notApplicableLabel', {
   defaultMessage: 'N/A',
@@ -30,8 +33,25 @@ interface Props {
   info: Job;
 }
 
+const createDateFormatter = (format: string, tz: string) => (date: string) => {
+  const m = moment.tz(date, tz);
+  return m.isValid() ? m.format(format) : NA;
+};
+
 export const ReportInfoFlyoutContent: FunctionComponent<Props> = ({ info }) => {
+  const {
+    services: { uiSettings },
+  } = useKibana();
+
+  const timezone =
+    uiSettings.get('dateFormat:tz') === 'Browser'
+      ? moment.tz.guess()
+      : uiSettings.get('dateFormat:tz');
+
+  const formatDate = createDateFormatter(uiSettings.get('dateFormat'), timezone);
+
   const hasScreenshot = USES_HEADLESS_JOB_TYPES.includes(info.jobtype);
+
   const outputInfo = [
     {
       title: i18n.translate('xpack.reporting.listing.infoPanel.statusInfo', {
@@ -92,12 +112,6 @@ export const ReportInfoFlyoutContent: FunctionComponent<Props> = ({ info }) => {
     },
 
     {
-      title: i18n.translate('xpack.reporting.listing.infoPanel.tzInfo', {
-        defaultMessage: 'Time zone',
-      }),
-      description: info.browserTimezone || NA,
-    },
-    {
       title: i18n.translate('xpack.reporting.listing.infoPanel.processedByInfo', {
         defaultMessage: 'Processed by',
       }),
@@ -114,22 +128,28 @@ export const ReportInfoFlyoutContent: FunctionComponent<Props> = ({ info }) => {
 
   const timestampsInfo = [
     {
+      title: i18n.translate('xpack.reporting.listing.infoPanel.tzInfo', {
+        defaultMessage: 'Time zone',
+      }),
+      description: info.browserTimezone || NA,
+    },
+    {
       title: i18n.translate('xpack.reporting.listing.infoPanel.createdAtInfo', {
         defaultMessage: 'Created at',
       }),
-      description: info.getCreatedAtLabel(),
+      description: info.created_at ? formatDate(info.created_at) : NA,
     },
     {
       title: i18n.translate('xpack.reporting.listing.infoPanel.startedAtInfo', {
         defaultMessage: 'Started at',
       }),
-      description: info.started_at || NA,
+      description: info.started_at ? formatDate(info.started_at) : NA,
     },
     {
       title: i18n.translate('xpack.reporting.listing.infoPanel.completedAtInfo', {
         defaultMessage: 'Completed at',
       }),
-      description: info.completed_at || NA,
+      description: info.completed_at ? formatDate(info.completed_at) : NA,
     },
   ];
 

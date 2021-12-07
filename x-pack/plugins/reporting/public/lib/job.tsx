@@ -163,36 +163,6 @@ export class Job {
     });
   }
 
-  getStatus() {
-    const statusLabel = jobStatusLabelsMap.get(this.status) as string;
-    const statusTimestamp = this.getStatusTimestamp();
-
-    if (statusTimestamp) {
-      return (
-        <FormattedMessage
-          id="xpack.reporting.jobStatusDetail.statusTimestampText"
-          defaultMessage="{statusLabel} at {statusTimestamp}"
-          values={{
-            statusLabel,
-            statusTimestamp: (
-              <span className="eui-textNoWrap">{this.formatDate(statusTimestamp)}</span>
-            ),
-          }}
-        />
-      );
-    }
-
-    return statusLabel;
-  }
-
-  getStatusLabel() {
-    return (
-      <>
-        {this.getStatus()} {this.getStatusMessage()}
-      </>
-    );
-  }
-
   /**
    * Returns a user friendly version of the report job creation date
    */
