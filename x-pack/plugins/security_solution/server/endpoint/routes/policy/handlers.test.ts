@@ -11,12 +11,7 @@ import {
   createMockEndpointAppContextServiceStartContract,
   createRouteHandlerContext,
 } from '../../mocks';
-import {
-  createMockAgentClient,
-  createMockAgentService,
-  createPackagePolicyServiceMock,
-} from '../../../../../fleet/server/mocks';
-import { PackagePolicyServiceInterface } from '../../../../../fleet/server';
+import { createMockAgentClient, createMockAgentService } from '../../../../../fleet/server/mocks';
 import {
   getHostPolicyResponseHandler,
   getAgentPolicySummaryHandler,
@@ -250,26 +245,14 @@ describe('test policy response handler', () => {
     });
   });
   describe('test GET policy list handler', () => {
-    let mockPackagePolicyService: jest.Mocked<PackagePolicyServiceInterface>;
-
     beforeEach(() => {
       mockScopedClient = elasticsearchServiceMock.createScopedClusterClient();
       mockSavedObjectClient = savedObjectsClientMock.create();
       mockResponse = httpServerMock.createResponseFactory();
-      mockPackagePolicyService = createPackagePolicyServiceMock();
-      mockPackagePolicyService.list.mockImplementation(() => {
-        return Promise.resolve({
-          items: [],
-          total: 0,
-          page: 1,
-          perPage: 1000,
-        });
-      });
       endpointAppContextService = new EndpointAppContextService();
       endpointAppContextService.setup(createMockEndpointAppContextServiceSetupContract());
       endpointAppContextService.start({
         ...createMockEndpointAppContextServiceStartContract(),
-        ...{ packagePolicyService: mockPackagePolicyService },
       });
     });
 
@@ -298,6 +281,12 @@ describe('test policy response handler', () => {
         mockResponse
       );
       expect(mockResponse.ok).toBeCalled();
+      expect(mockResponse.ok.mock.calls[0][0]?.body).toEqual({
+        items: [],
+        total: 0,
+        page: 1,
+        perPage: 10,
+      });
     });
   });
 });
