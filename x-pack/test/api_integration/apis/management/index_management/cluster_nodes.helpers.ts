@@ -5,14 +5,12 @@
  * 2.0.
  */
 
-export * from './default_values';
+import { API_BASE_PATH } from './constants';
 
-export * from './field_options';
+export const registerHelpers = ({ supertest }: { supertest: any }) => {
+  const getNodesPlugins = () => supertest.get(`${API_BASE_PATH}/nodes/plugins`);
 
-export * from './data_types_definition';
-
-export * from './parameters_definition';
-
-export * from './mappings_editor';
-
-export const MapperSizePluginId = 'mapper-size';
+  return {
+    getNodesPlugins,
+  };
+};

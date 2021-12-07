@@ -10,6 +10,8 @@ import { DataType } from '../components/mappings_editor/types';
 import { TYPE_DEFINITION } from '../components/mappings_editor/constants';
 
 class DocumentationService {
+  private links: DocLinksStart['links'] | undefined;
+
   private dataStreams: string = '';
   private esDocsBase: string = '';
   private indexManagement: string = '';
@@ -55,8 +57,11 @@ class DocumentationService {
   private mappingTypesRemoval: string = '';
   private percolate: string = '';
   private runtimeFields: string = '';
+
   public setup(docLinks: DocLinksStart): void {
     const { links } = docLinks;
+    this.links = links;
+
     this.dataStreams = links.elasticsearch.dataStreams;
     this.esDocsBase = links.elasticsearch.docsBase;
     this.indexManagement = links.management.indexManagement;
@@ -300,6 +305,13 @@ class DocumentationService {
 
   public getRootLocaleLink() {
     return 'https://docs.oracle.com/javase/8/docs/api/java/util/Locale.html#ROOT';
+  }
+
+  public get docLinks(): DocLinksStart['links'] {
+    if (!this.links) {
+      throw new Error(`Can't return undefined doc links.`);
+    }
+    return this.links;
   }
 }
 

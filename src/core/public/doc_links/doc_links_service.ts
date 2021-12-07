@@ -486,6 +486,7 @@ export class DocLinksService {
           hdfsRepo: `${PLUGIN_DOCS}repository-hdfs.html`,
           s3Repo: `${PLUGIN_DOCS}repository-s3.html`,
           snapshotRestoreRepos: `${PLUGIN_DOCS}repository.html`,
+          mapperSize: `${PLUGIN_DOCS}mapper-size-usage.html`,
         },
         snapshotRestore: {
           guide: `${ELASTICSEARCH_DOCS}snapshot-restore.html`,
@@ -874,7 +875,14 @@ export interface DocLinksStart {
     }>;
     readonly watcher: Record<string, string>;
     readonly ccs: Record<string, string>;
-    readonly plugins: Record<string, string>;
+    readonly plugins: {
+      azureRepo: string;
+      gcsRepo: string;
+      hdfsRepo: string;
+      s3Repo: string;
+      snapshotRestoreRepos: string;
+      mapperSize: string;
+    };
     readonly snapshotRestore: Record<string, string>;
     readonly ingest: Record<string, string>;
     readonly fleet: Readonly<{

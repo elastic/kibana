@@ -12,7 +12,7 @@ import { toArray } from 'fp-ts/lib/Set';
 import { isLeft, isRight } from 'fp-ts/lib/Either';
 
 import { errorReporter } from './error_reporter';
-import { ALL_DATA_TYPES, PARAMETERS_DEFINITION } from '../constants';
+import { ALL_DATA_TYPES, PARAMETERS_DEFINITION, MapperSizePluginId } from '../constants';
 import { FieldMeta } from '../types';
 import { getFieldMeta } from './utils';
 
@@ -50,6 +50,11 @@ interface FieldValidatorResponse {
 
 interface GenericObject {
   [key: string]: any;
+}
+
+interface ValidationResponse {
+  value: GenericObject;
+  errors: MappingsValidationError[];
 }
 
 const validateFieldType = (type: any): boolean => {
@@ -185,13 +190,13 @@ const parseFields = (
  *
  * @param properties A mappings "properties" object
  */
-export const validateProperties = (properties = {}): PropertiesValidatorResponse => {
+export const validateProperties = (properties: unknown = {}): PropertiesValidatorResponse => {
   // Sanitize the input to make sure we are working with an object
   if (!isPlainObject(properties)) {
     return { value: {}, errors: [] };
   }
 
-  return parseFields(properties);
+  return parseFields(properties as GenericObject);
 };
 
 /**
@@ -200,6 +205,8 @@ export const validateProperties = (properties = {}): PropertiesValidatorResponse
  */
 export const mappingsConfigurationSchema = t.exact(
   t.partial({
+    properties: t.UnknownRecord,
+    runtime: t.UnknownRecord,
     dynamic: t.union([t.literal(true), t.literal(false), t.literal('strict')]),
     date_detection: t.boolean,
     numeric_detection: t.boolean,
@@ -215,17 +222,23 @@ export const mappingsConfigurationSchema = t.exact(
     _routing: t.interface({
       required: t.boolean,
     }),
+    dynamic_templates: t.array(t.UnknownRecord),
+    // Mapper size plugin
+    _size: t.interface({
+      enabled: t.boolean,
+    }),
   })
 );
 
-const mappingsConfigurationSchemaKeys = Object.keys(mappingsConfigurationSchema.type.props);
+export const mappingsConfigurationSchemaKeys = Object.keys(mappingsConfigurationSchema.type.props);
+
 const sourceConfigurationSchemaKeys = Object.keys(
   mappingsConfigurationSchema.type.props._source.type.props
 );
 
 export const validateMappingsConfiguration = (
-  mappingsConfiguration: any
-): { value: any; errors: MappingsValidationError[] } => {
+  mappingsConfiguration: GenericObject
+): ValidationResponse => {
   // Set to keep track of invalid configuration parameters.
   const configurationRemoved: Set<string> = new Set();
 
@@ -277,17 +290,56 @@ export const validateMappingsConfiguration = (
   return { value: copyOfMappingsConfig, errors };
 };
 
-export const validateMappings = (mappings: any = {}): MappingsValidatorResponse => {
+const validatePluginsParameters =
+  (esNodesPlugins: string[]) =>
+  (mappingsConfiguration: GenericObject): ValidationResponse => {
+    const copyOfMappingsConfig = { ...mappingsConfiguration };
+    const errors: MappingsValidationError[] = [];
+
+    // Mapper size plugin parameters
+    if ('_size' in copyOfMappingsConfig && !esNodesPlugins.includes(MapperSizePluginId)) {
+      errors.push({
+        code: 'ERR_CONFIG',
+        configName: '_size',
+      });
+      delete copyOfMappingsConfig._size;
+    }
+
+    return { value: copyOfMappingsConfig, errors };
+  };
+
+export const validateMappings = (
+  mappings: unknown = {},
+  esNodesPlugins: string[] = []
+): MappingsValidatorResponse => {
   if (!isPlainObject(mappings)) {
     return { value: {} };
   }
 
-  const { properties, dynamic_templates: dynamicTemplates, ...mappingsConfiguration } = mappings;
+  const {
+    properties,
+    dynamic_templates: dynamicTemplates,
+    ...mappingsConfiguration // extract the mappings configuration
+  } = mappings as GenericObject;
 
-  const { value: parsedConfiguration, errors: configurationErrors } =
-    validateMappingsConfiguration(mappingsConfiguration);
+  // Run the different validators on the mappings configuration. Each validator returns
+  // the mapping configuration sanitized (in "value") and possible errors found.
+  const { value: parsedConfiguration, errors: configurationErrors } = [
+    validateMappingsConfiguration,
+    validatePluginsParameters(esNodesPlugins),
+  ].reduce<ValidationResponse>(
+    (acc, validator) => {
+      const { value: sanitizedConfiguration, errors: validationErrors } = validator(acc.value);
+
+      return {
+        value: sanitizedConfiguration,
+        errors: [...acc.errors, ...validationErrors],
+      };
+    },
+    { value: mappingsConfiguration, errors: [] }
+  );
+
   const { value: parsedProperties, errors: propertiesErrors } = validateProperties(properties);
-
   const errors = [...configurationErrors, ...propertiesErrors];
 
   return {
@@ -299,10 +351,3 @@ export const validateMappings = (mappings: any = {}): MappingsValidatorResponse 
     errors: errors.length ? errors : undefined,
   };
 };
-
-export const VALID_MAPPINGS_PARAMETERS = [
-  ...mappingsConfigurationSchemaKeys,
-  'dynamic_templates',
-  'properties',
-  'runtime',
-];
