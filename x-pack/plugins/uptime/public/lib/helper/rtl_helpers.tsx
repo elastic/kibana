@@ -173,6 +173,27 @@ export function MockRouter<ExtraCore>({
 }
 configure({ testIdAttribute: 'data-test-subj' });
 
+export const MockRedux = ({
+  state,
+  history,
+  children,
+}: {
+  state: Partial<AppState>;
+  histroy: History;
+  children: React.ReactNode;
+}) => {
+  const testState: AppState = {
+    ...mockState,
+    ...state,
+  };
+
+  return (
+    <MountWithReduxProvider state={testState}>
+      <MockRouter history={history}>{children}</MockRouter>
+    </MountWithReduxProvider>
+  );
+};
+
 /* Custom react testing library render */
 export function render<ExtraCore>(
   ui: ReactElement,

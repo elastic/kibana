@@ -22,10 +22,6 @@ export const ServiceLocations = ({ selectedLocations, setLocations }: Props) => 
   const [error, setError] = useState<string | null>(null);
   const { locations } = useSelector(monitorManagementListSelector);
 
-  const locationOptions = locations.map(({ label }) => ({
-    label,
-  }));
-
   const onLocationChange = (
     selectedLocationOptions: Array<EuiComboBoxOptionOption<ServiceLocation>>
   ) => {
@@ -48,12 +44,13 @@ export const ServiceLocations = ({ selectedLocations, setLocations }: Props) => 
     <EuiFormRow label={LOCATIONS_LABEL} error={error} isInvalid={error !== null}>
       <EuiComboBox
         placeholder={PLACEHOLDER_LABEL}
-        options={locationOptions}
+        options={locations}
         selectedOptions={selectedLocations}
         inputRef={setLocationsInputRef}
         onChange={onLocationChange}
         onSearchChange={onSearchChange}
         onBlur={onBlur}
+        data-test-subj="syntheticsServiceLocationsComboBox"
       />
     </EuiFormRow>
   );
@@ -66,6 +63,9 @@ const PLACEHOLDER_LABEL = i18n.translate(
   }
 );
 
-const LOCATIONS_LABEL = i18n.translate('xpack.uptime.monitorManagement.monitorLocationsLabel', {
-  defaultMessage: 'Monitor locations',
-});
+export const LOCATIONS_LABEL = i18n.translate(
+  'xpack.uptime.monitorManagement.monitorLocationsLabel',
+  {
+    defaultMessage: 'Monitor locations',
+  }
+);

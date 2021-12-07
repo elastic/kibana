@@ -12,8 +12,8 @@ interface Props {
   loading: boolean;
   loadingTitle: React.ReactNode;
   error: boolean;
-  errorTitle: React.ReactNode;
-  errorBody: React.ReactNode;
+  errorTitle?: React.ReactNode;
+  errorBody?: React.ReactNode;
   children: React.ReactNode;
 }
 
@@ -39,7 +39,7 @@ export const Loader = ({
           />
         </>
       ) : null}
-      {loading && !error ? (
+      {loading ? (
         <EuiEmptyPrompt
           color="subdued"
           icon={<EuiLoadingLogo logo="logoKibana" size="xl" />}
