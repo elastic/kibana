@@ -6,7 +6,7 @@
  */
 
 import { GaugeState } from 'src/plugins/chart_expressions/expression_gauge/common';
-import { LayerType } from '../../../../../../node_modules/x-pack/plugins/lens/common';
+import { LayerType } from '../../../common/';
 
 export const LENS_GAUGE_ID = 'lnsGauge';
 
