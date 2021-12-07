@@ -85,6 +85,7 @@ export function AddFilterModal({
   indexPatterns,
   timeRangeForSuggestionsOverride,
   savedQueryManagement,
+  initialAddFilterMode,
 }: {
   onSubmit: (filter: Filter) => void;
   applySavedQueries: () => void;
@@ -93,6 +94,7 @@ export function AddFilterModal({
   indexPatterns: IIndexPattern[];
   timeRangeForSuggestionsOverride?: boolean;
   savedQueryManagement?: JSX.Element;
+  initialAddFilterMode?: string;
 }) {
   const [selectedIndexPattern, setSelectedIndexPattern] = useState(
     getIndexPatternFromFilter(filter, indexPatterns)
@@ -100,7 +102,7 @@ export function AddFilterModal({
   const [selectedField, setSelectedField] = useState<IFieldType | undefined>(undefined);
   const [selectedOperator, setSelectedOperator] = useState<Operator | undefined>(undefined);
   const [filterParams, setFilterParams] = useState(getFilterParams(filter));
-  const [addFilterMode, setAddFilterMode] = useState<string>(tabs[0].type);
+  const [addFilterMode, setAddFilterMode] = useState<string>(initialAddFilterMode ?? tabs[0].type);
   const [queryDsl, setQueryDsl] = useState<string>(JSON.stringify(cleanFilter(filter), null, 2));
 
   const onIndexPatternChange = ([selectedPattern]: IIndexPattern[]) => {

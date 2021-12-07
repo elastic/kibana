@@ -70,6 +70,9 @@ export interface QueryBarTopRowProps {
   nonKqlModeHelpText?: string;
   timeRangeForSuggestionsOverride?: boolean;
   savedQueryManagement?: JSX.Element;
+  toggleAddFilterModal?: (value: boolean) => void;
+  isAddFilterModalOpen?: boolean;
+  addFilterMode?: string;
 }
 
 // Needed for React.lazy
@@ -78,7 +81,6 @@ export default function QueryBarTopRow(props: QueryBarTopRowProps) {
   const [isDateRangeInvalid, setIsDateRangeInvalid] = useState(false);
   const [isQueryInputFocused, setIsQueryInputFocused] = useState(false);
   // const [isAddFilterPopoverOpen, setIsAddFilterPopoverOpen] = useState(false);
-  const [isAddFilterModalOpen, setIsAddFilterModalOpen] = useState(false);
 
   const kibana = useKibana<IDataPluginServices>();
   const { uiSettings, storage, appName } = kibana.services;
@@ -120,16 +122,16 @@ export default function QueryBarTopRow(props: QueryBarTopRowProps) {
   }
 
   // const onAddFilterClick = () => setIsAddFilterPopoverOpen(!isAddFilterPopoverOpen);
-  const onAddFilterClick = () => setIsAddFilterModalOpen(!isAddFilterModalOpen);
+  const onAddFilterClick = () => props.toggleAddFilterModal?.(!props.isAddFilterModalOpen);
   function onAdd(filter: Filter) {
-    setIsAddFilterModalOpen(false);
+    props.toggleAddFilterModal?.(false);
 
     const filters = [...props.filters, filter];
     props?.onFiltersUpdated?.(filters);
   }
 
   function applySavedQueries() {
-    setIsAddFilterModalOpen(false);
+    props.toggleAddFilterModal?.(false);
     props?.applySelectedSavedQueries?.();
   }
 
@@ -243,15 +245,16 @@ export default function QueryBarTopRow(props: QueryBarTopRowProps) {
     return (
       <EuiFlexItem grow={false}>
         {button}
-        {isAddFilterModalOpen && (
+        {props.isAddFilterModalOpen && (
           <AddFilterModal
-            onCancel={() => setIsAddFilterModalOpen(false)}
+            onCancel={() => props.toggleAddFilterModal?.(false)}
             filter={newFilter}
             indexPatterns={props.indexPatterns!}
             onSubmit={onAdd}
             applySavedQueries={applySavedQueries}
             timeRangeForSuggestionsOverride={props.timeRangeForSuggestionsOverride}
             savedQueryManagement={props.savedQueryManagement}
+            initialAddFilterMode={props.addFilterMode}
           />
         )}
         {/* <EuiPopover

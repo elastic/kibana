@@ -102,6 +102,8 @@ interface State {
   query?: Query;
   dateRangeFrom: string;
   dateRangeTo: string;
+  isAddFilterModalOpen?: boolean;
+  addFilterMode?: string;
 }
 
 class SearchBarUI extends Component<SearchBarProps, State> {
@@ -183,6 +185,8 @@ class SearchBarUI extends Component<SearchBarProps, State> {
     query: this.props.query ? { ...this.props.query } : undefined,
     dateRangeFrom: get(this.props, 'dateRangeFrom', 'now-15m'),
     dateRangeTo: get(this.props, 'dateRangeTo', 'now'),
+    isAddFilterModalOpen: false,
+    addFilterMode: 'quick_form',
   };
 
   public isDirty = () => {
@@ -401,6 +405,13 @@ class SearchBarUI extends Component<SearchBarProps, State> {
     this.props.onFiltersUpdated?.([]);
   };
 
+  public toggleAddFilterModal = (value: boolean, addFilterMode?: string) => {
+    this.setState({
+      isAddFilterModalOpen: value,
+      addFilterMode: addFilterMode || 'quick_form',
+    });
+  };
+
   public render() {
     const savedQueryManagement = this.state.query && this.props.onClearSavedQuery && (
       <SavedQueryManagementComponent
@@ -442,6 +453,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
         onQueryChange={this.onQueryBarChange}
         dateRangeFrom={this.state.dateRangeFrom}
         dateRangeTo={this.state.dateRangeTo}
+        toggleAddFilterModal={this.toggleAddFilterModal}
       />
     );
 
@@ -484,6 +496,9 @@ class SearchBarUI extends Component<SearchBarProps, State> {
           nonKqlMode={this.props.nonKqlMode}
           nonKqlModeHelpText={this.props.nonKqlModeHelpText}
           timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
+          toggleAddFilterModal={this.toggleAddFilterModal}
+          isAddFilterModalOpen={this.state.isAddFilterModalOpen}
+          addFilterMode={this.state.addFilterMode}
         />
       );
     }

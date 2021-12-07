@@ -40,6 +40,7 @@ interface Props {
   services: KibanaReactContextValue<IDataPluginServices>['services'];
   dateRangeFrom?: string;
   dateRangeTo?: string;
+  toggleAddFilterModal?: (value: boolean, addFilterMode?: string) => void;
 }
 
 export function FilterSetMenu({
@@ -55,6 +56,7 @@ export function FilterSetMenu({
   onRemoveAll,
   onSaveQuery,
   onQueryChange,
+  toggleAddFilterModal,
 }: Props) {
   const [isPopoverOpen, setPopover] = useState(false);
 
@@ -110,6 +112,7 @@ export function FilterSetMenu({
         {
           name: 'Load filter set...',
           onClick: () => {
+            toggleAddFilterModal!(true, 'saved_filters');
             closePopover();
           },
         },
