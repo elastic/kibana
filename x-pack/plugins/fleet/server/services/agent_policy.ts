@@ -780,6 +780,7 @@ export async function addPackageToAgentPolicy(
   agentPolicy: AgentPolicy,
   defaultOutput: Output,
   packagePolicyName?: string,
+  packagePolicyId?: string | number,
   packagePolicyDescription?: string,
   transformPackagePolicy?: (p: NewPackagePolicy) => NewPackagePolicy,
   bumpAgentPolicyRevison = false
@@ -804,6 +805,7 @@ export async function addPackageToAgentPolicy(
     : basePackagePolicy;
 
   await packagePolicyService.create(soClient, esClient, newPackagePolicy, {
+    id: packagePolicyId ? String(packagePolicyId) : undefined,
     bumpRevision: bumpAgentPolicyRevison,
     skipEnsureInstalled: true,
     skipUniqueNameVerification: true,
