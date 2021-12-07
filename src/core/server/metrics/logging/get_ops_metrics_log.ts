@@ -30,10 +30,29 @@ export function getEcsOpsMetricsLog(metrics: OpsMetrics) {
   // HH:mm:ss message format for backward compatibility
   const uptimeValMsg = uptimeVal ? `uptime: ${numeral(uptimeVal).format('00:00:00')} ` : '';
 
-  // Event loop delay is in ms
+  // Event loop delay metrics are in ms
   const eventLoopDelayVal = process?.event_loop_delay;
   const eventLoopDelayValMsg = eventLoopDelayVal
-    ? `delay: ${numeral(process?.event_loop_delay).format('0.000')}`
+    ? `mean delay: ${numeral(process?.event_loop_delay).format('0.000')}`
+    : '';
+
+  const eventLoopDelayPercentiles = process?.event_loop_delay_histogram?.percentiles;
+
+  // Extract 50th, 95th and 99th percentiles for log meta
+  const eventLoopDelayHistVals = eventLoopDelayPercentiles
+    ? {
+        50: eventLoopDelayPercentiles[50],
+        95: eventLoopDelayPercentiles[95],
+        99: eventLoopDelayPercentiles[99],
+      }
+    : undefined;
+  // Format message from 50th, 95th and 99th percentiles
+  const eventLoopDelayHistMsg = eventLoopDelayPercentiles
+    ? ` delay histogram: { 50: ${numeral(eventLoopDelayPercentiles['50']).format(
+        '0.000'
+      )}; 95: ${numeral(eventLoopDelayPercentiles['95']).format('0.000')}; 99: ${numeral(
+        eventLoopDelayPercentiles['99']
+      ).format('0.000')} }`
     : '';
 
   const loadEntries = {
@@ -65,6 +84,7 @@ export function getEcsOpsMetricsLog(metrics: OpsMetrics) {
         },
       },
       eventLoopDelay: eventLoopDelayVal,
+      eventLoopDelayHistogram: eventLoopDelayHistVals,
     },
     host: {
       os: {
@@ -75,7 +95,13 @@ export function getEcsOpsMetricsLog(metrics: OpsMetrics) {
   };
 
   return {
-    message: `${processMemoryUsedInBytesMsg}${uptimeValMsg}${loadValsMsg}${eventLoopDelayValMsg}`,
+    message: [
+      processMemoryUsedInBytesMsg,
+      uptimeValMsg,
+      loadValsMsg,
+      eventLoopDelayValMsg,
+      eventLoopDelayHistMsg,
+    ].join(''),
     meta,
   };
 }
