@@ -11,12 +11,13 @@ import { DraggableId } from 'react-beautiful-dnd';
 import { useDispatch } from 'react-redux';
 
 import { isEmpty } from 'lodash';
-import { DataProvider, stopPropagationAndPreventDefault, TimelineId } from '../../../../common';
+import { stopPropagationAndPreventDefault } from '../../../../common/utils/accessibility';
+import { DataProvider, TimelineId } from '../../../../common/types';
 import { TooltipWithKeyboardShortcut } from '../../tooltip_with_keyboard_shortcut';
 import { getAdditionalScreenReaderOnlyContext } from '../utils';
 import { useAddToTimeline } from '../../../hooks/use_add_to_timeline';
 import { HoverActionComponentProps } from './types';
-import { tGridActions } from '../../..';
+import { addProviderToTimeline } from '../../../store/t_grid/actions';
 import { useAppToasts } from '../../../hooks/use_app_toasts';
 import * as i18n from './translations';
 
@@ -74,7 +75,7 @@ const AddToTimelineButton: React.FC<AddToTimelineButtonProps> = React.memo(
         addDataProvider.forEach((provider) => {
           if (provider) {
             dispatch(
-              tGridActions.addProviderToTimeline({
+              addProviderToTimeline({
                 id: TimelineId.active,
                 dataProvider: provider,
               })
