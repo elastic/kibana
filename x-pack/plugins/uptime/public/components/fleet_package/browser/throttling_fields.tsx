@@ -18,17 +18,17 @@ import {
 
 import { OptionalLabel } from '../optional_label';
 import { useBrowserAdvancedFieldsContext } from '../contexts';
-import { Validation, ConfigKeys } from '../types';
+import { Validation, ConfigKey } from '../types';
 
 interface Props {
   validate: Validation;
 }
 
 type ThrottlingConfigs =
-  | ConfigKeys.IS_THROTTLING_ENABLED
-  | ConfigKeys.DOWNLOAD_SPEED
-  | ConfigKeys.UPLOAD_SPEED
-  | ConfigKeys.LATENCY;
+  | ConfigKey.IS_THROTTLING_ENABLED
+  | ConfigKey.DOWNLOAD_SPEED
+  | ConfigKey.UPLOAD_SPEED
+  | ConfigKey.LATENCY;
 
 export const ThrottlingFields = memo<Props>(({ validate }) => {
   const { fields, setFields } = useBrowserAdvancedFieldsContext();
@@ -40,7 +40,7 @@ export const ThrottlingFields = memo<Props>(({ validate }) => {
     [setFields]
   );
 
-  const throttlingInputs = fields[ConfigKeys.IS_THROTTLING_ENABLED] ? (
+  const throttlingInputs = fields[ConfigKey.IS_THROTTLING_ENABLED] ? (
     <>
       <EuiSpacer size="m" />
       <EuiFormRow
@@ -51,7 +51,7 @@ export const ThrottlingFields = memo<Props>(({ validate }) => {
           />
         }
         labelAppend={<OptionalLabel />}
-        isInvalid={!!validate[ConfigKeys.DOWNLOAD_SPEED]?.(fields)}
+        isInvalid={!!validate[ConfigKey.DOWNLOAD_SPEED]?.(fields)}
         error={
           <FormattedMessage
             id="xpack.uptime.createPackagePolicy.stepConfigure.browserAdvancedSettings.throttling.download.error"
@@ -62,11 +62,11 @@ export const ThrottlingFields = memo<Props>(({ validate }) => {
         <EuiFieldNumber
           min={0}
           step={0.001}
-          value={fields[ConfigKeys.DOWNLOAD_SPEED]}
+          value={fields[ConfigKey.DOWNLOAD_SPEED]}
           onChange={(event) => {
             handleInputChange({
               value: event.target.value,
-              configKey: ConfigKeys.DOWNLOAD_SPEED,
+              configKey: ConfigKey.DOWNLOAD_SPEED,
             });
           }}
           data-test-subj="syntheticsBrowserDownloadSpeed"
@@ -85,7 +85,7 @@ export const ThrottlingFields = memo<Props>(({ validate }) => {
           />
         }
         labelAppend={<OptionalLabel />}
-        isInvalid={!!validate[ConfigKeys.UPLOAD_SPEED]?.(fields)}
+        isInvalid={!!validate[ConfigKey.UPLOAD_SPEED]?.(fields)}
         error={
           <FormattedMessage
             id="xpack.uptime.createPackagePolicy.stepConfigure.browserAdvancedSettings.throttling.upload.error"
@@ -96,11 +96,11 @@ export const ThrottlingFields = memo<Props>(({ validate }) => {
         <EuiFieldNumber
           min={0}
           step={0.001}
-          value={fields[ConfigKeys.UPLOAD_SPEED]}
+          value={fields[ConfigKey.UPLOAD_SPEED]}
           onChange={(event) =>
             handleInputChange({
               value: event.target.value,
-              configKey: ConfigKeys.UPLOAD_SPEED,
+              configKey: ConfigKey.UPLOAD_SPEED,
             })
           }
           data-test-subj="syntheticsBrowserUploadSpeed"
@@ -119,7 +119,7 @@ export const ThrottlingFields = memo<Props>(({ validate }) => {
           />
         }
         labelAppend={<OptionalLabel />}
-        isInvalid={!!validate[ConfigKeys.LATENCY]?.(fields)}
+        isInvalid={!!validate[ConfigKey.LATENCY]?.(fields)}
         data-test-subj="syntheticsBrowserLatency"
         error={
           <FormattedMessage
@@ -130,11 +130,11 @@ export const ThrottlingFields = memo<Props>(({ validate }) => {
       >
         <EuiFieldNumber
           min={0}
-          value={fields[ConfigKeys.LATENCY]}
+          value={fields[ConfigKey.LATENCY]}
           onChange={(event) =>
             handleInputChange({
               value: event.target.value,
-              configKey: ConfigKeys.LATENCY,
+              configKey: ConfigKey.LATENCY,
             })
           }
           append={
@@ -168,7 +168,7 @@ export const ThrottlingFields = memo<Props>(({ validate }) => {
         id={'uptimeFleetIsThrottlingEnabled'}
         aria-label="enable throttling configuration"
         data-test-subj="syntheticsBrowserIsThrottlingEnabled"
-        checked={fields[ConfigKeys.IS_THROTTLING_ENABLED]}
+        checked={fields[ConfigKey.IS_THROTTLING_ENABLED]}
         label={
           <FormattedMessage
             id="xpack.uptime.createPackagePolicy.stepConfigure.browserAdvancedSettings.throttling.switch.description"
@@ -178,7 +178,7 @@ export const ThrottlingFields = memo<Props>(({ validate }) => {
         onChange={(event) =>
           handleInputChange({
             value: event.target.checked,
-            configKey: ConfigKeys.IS_THROTTLING_ENABLED,
+            configKey: ConfigKey.IS_THROTTLING_ENABLED,
           })
         }
       />
