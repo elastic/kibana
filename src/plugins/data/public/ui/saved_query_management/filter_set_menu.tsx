@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { ReactNode, useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 
 import {
   EuiButton,
@@ -23,7 +23,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { KIBANA_USER_QUERY_LANGUAGE_KEY, UI_SETTINGS } from '../../../common';
 import { IDataPluginServices } from '../../types';
-import { TimeRange, Query } from '../..';
+import { TimeRange, Query, SavedQueryService, SavedQuery } from '../..';
 import { KibanaReactContextValue } from '../../../../kibana_react/public';
 import { QueryLanguageSwitcher } from '../query_string_input/language_switcher';
 
@@ -41,6 +41,8 @@ interface Props {
   dateRangeFrom?: string;
   dateRangeTo?: string;
   toggleAddFilterModal?: (value: boolean, addFilterMode?: string) => void;
+  savedQueryService: SavedQueryService;
+  applySelectedSavedQueries: (selectedSavedQuery?: SavedQuery) => void;
 }
 
 export function FilterSetMenu({
@@ -57,8 +59,31 @@ export function FilterSetMenu({
   onSaveQuery,
   onQueryChange,
   toggleAddFilterModal,
+  savedQueryService,
+  applySelectedSavedQueries,
 }: Props) {
   const [isPopoverOpen, setPopover] = useState(false);
+  const [savedQueries, setSavedQueries] = useState([] as SavedQuery[]);
+  const cancelPendingListingRequest = useRef<() => void>(() => {});
+
+  useEffect(() => {
+    const fetchSavedSearched = async () => {
+      cancelPendingListingRequest.current();
+      let requestGotCancelled = false;
+      cancelPendingListingRequest.current = () => {
+        requestGotCancelled = true;
+      };
+
+      const { queries: savedQueryItems } = await savedQueryService.findSavedQueries('', 5, 1);
+
+      if (requestGotCancelled) return;
+
+      setSavedQueries(savedQueryItems.reverse());
+    };
+    if (isPopoverOpen) {
+      fetchSavedSearched();
+    }
+  }, [isPopoverOpen, savedQueryService]);
 
   const normalContextMenuPopoverId = useGeneratedHtmlId({
     prefix: 'normalContextMenuPopover',
@@ -105,10 +130,24 @@ export function FilterSetMenu({
     defaultMessage: 'KQL',
   });
 
+  const recentSavedQueriesPanels = savedQueries.map((savedQuery) => {
+    return {
+      id: savedQuery.id,
+      name: savedQuery.attributes.title,
+      icon: 'timefilter' in savedQuery.attributes ? 'calendar' : undefined,
+      onClick: () => {
+        closePopover();
+        applySelectedSavedQueries(savedQuery);
+      },
+    };
+  });
+
   const panels = [
     {
       id: 0,
+      title: savedQueries.length ? 'Recently used' : undefined,
       items: [
+        ...recentSavedQueriesPanels,
         {
           name: 'Load filter set...',
           onClick: () => {

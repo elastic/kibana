@@ -354,9 +354,9 @@ class SearchBarUI extends Component<SearchBarProps, State> {
     });
   };
 
-  public applySelectedSavedQueries = () => {
+  public applySelectedSavedQueries = (selectedSavedQuery?: SavedQuery) => {
     // temporary work with only one selection
-    const savedQuery = this.state.selectedSavedQueries[0] as SavedQuery;
+    const savedQuery = selectedSavedQuery ?? (this.state.selectedSavedQueries[0] as SavedQuery);
     const dateRangeFrom = get(savedQuery, 'attributes.timefilter.from', this.state.dateRangeFrom);
     const dateRangeTo = get(savedQuery, 'attributes.timefilter.to', this.state.dateRangeTo);
 
@@ -454,6 +454,8 @@ class SearchBarUI extends Component<SearchBarProps, State> {
         dateRangeFrom={this.state.dateRangeFrom}
         dateRangeTo={this.state.dateRangeTo}
         toggleAddFilterModal={this.toggleAddFilterModal}
+        savedQueryService={this.savedQueryService}
+        applySelectedSavedQueries={this.applySelectedSavedQueries}
       />
     );
 
