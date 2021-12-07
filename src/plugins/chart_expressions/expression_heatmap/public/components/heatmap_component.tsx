@@ -215,6 +215,7 @@ const HeatmapComponent: FC<HeatmapRenderProps> = ({
   const metricFormatter = formatFactory(
     typeof args.valueAccessor === 'string' ? valueColumn.meta.params : args?.valueAccessor?.format
   );
+
   const isTimeBasedSwimLane = xAxisMeta?.type === 'date';
   const dateHistogramMeta = xAxisColumn
     ? search.aggs.getDateHistogramMetaDataByDatatableColumn(xAxisColumn)
@@ -409,7 +410,10 @@ const HeatmapComponent: FC<HeatmapRenderProps> = ({
       name: yAxisColumn?.name ?? '',
       ...(yAxisColumn
         ? {
-            formatter: (v: number | string) => formatFactory(yAxisColumn.meta.params).convert(v),
+            formatter: (v: number | string) =>
+              // .toString() is required, because convert is not returning fair string.
+              // It returns value of any type, but asserted as a string type.
+              formatFactory(yAxisColumn.meta.params).convert(v).toString(),
           }
         : {}),
     },
