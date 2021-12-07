@@ -6,7 +6,7 @@
  */
 
 import { Duration } from 'moment';
-import { SavedObjectsFindResult } from '../../../../../../../src/core/server';
+import { LogMeta, SavedObjectsFindResult } from 'src/core/server';
 import { RuleExecutionStatus } from '../../../../common/detection_engine/schemas/common/schemas';
 import { IRuleStatusSOAttributes } from '../rules/types';
 
@@ -28,7 +28,6 @@ export interface IRuleExecutionLogClient {
   deleteCurrentStatus(ruleId: string): Promise<void>;
 
   logStatusChange(args: LogStatusChangeArgs): Promise<void>;
-  logExecutionMetrics(args: LogExecutionMetricsArgs): Promise<void>;
 }
 
 /** @deprecated */
@@ -104,3 +103,18 @@ export interface ExecutionMetrics {
   lastLookBackDate?: string;
   executionGap?: Duration;
 }
+
+/**
+ * Custom extended log metadata that rule execution logger can attach to every log record.
+ */
+export type ExtMeta = LogMeta & {
+  rule?: LogMeta['rule'] & {
+    type?: string;
+    execution?: {
+      status?: RuleExecutionStatus;
+    };
+  };
+  kibana?: {
+    spaceId?: string;
+  };
+};

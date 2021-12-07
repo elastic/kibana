@@ -7,7 +7,6 @@
 
 import type { TransformConfigSchema } from './transforms/types';
 import { ENABLE_CASE_CONNECTOR } from '../../cases/common';
-import { METADATA_TRANSFORMS_PATTERN } from './endpoint/constants';
 
 /**
  * as const
@@ -83,9 +82,13 @@ export enum SecurityPageName {
   administration = 'administration',
   alerts = 'alerts',
   authentications = 'authentications',
-  case = 'case',
-  caseConfigure = 'case-configure',
-  caseCreate = 'case-create',
+  /*
+   * Warning: Computed values are not permitted in an enum with string valued members
+   * The 3 following Cases page names must match `CasesDeepLinkId` in x-pack/plugins/cases/public/common/navigation.ts
+   */
+  case = 'cases',
+  caseConfigure = 'cases_configure',
+  caseCreate = 'cases_create',
   detections = 'detections',
   endpoints = 'endpoints',
   eventFilters = 'event_filters',
@@ -248,8 +251,6 @@ export const DETECTION_ENGINE_PREPACKAGED_URL =
 export const DETECTION_ENGINE_PRIVILEGES_URL = `${DETECTION_ENGINE_URL}/privileges` as const;
 export const DETECTION_ENGINE_INDEX_URL = `${DETECTION_ENGINE_URL}/index` as const;
 export const DETECTION_ENGINE_TAGS_URL = `${DETECTION_ENGINE_URL}/tags` as const;
-export const DETECTION_ENGINE_RULES_STATUS_URL =
-  `${DETECTION_ENGINE_RULES_URL}/_find_statuses` as const;
 export const DETECTION_ENGINE_PREPACKAGED_RULES_STATUS_URL =
   `${DETECTION_ENGINE_RULES_URL}/prepackaged/_status` as const;
 export const DETECTION_ENGINE_RULES_BULK_ACTION =
@@ -357,8 +358,6 @@ export const showAllOthersBucket: string[] = [
  * than use it from here.
  */
 export const ELASTIC_NAME = 'estc' as const;
-
-export const METADATA_TRANSFORM_STATS_URL = `/api/transform/transforms/${METADATA_TRANSFORMS_PATTERN}/_stats`;
 
 export const RISKY_HOSTS_INDEX_PREFIX = 'ml_host_risk_score_latest_' as const;
 

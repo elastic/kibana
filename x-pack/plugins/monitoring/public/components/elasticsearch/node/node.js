@@ -16,7 +16,7 @@ import {
   EuiPanel,
   EuiScreenReaderOnly,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { NodeDetailStatus } from '../node_detail_status';
 import { Logs } from '../../logs';
 import { MonitoringTimeseriesContainer } from '../../chart';

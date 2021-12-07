@@ -6,7 +6,7 @@
  */
 
 import { EuiButtonEmpty, EuiPageHeader, EuiSpacer } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { CoreStart, HttpStart } from 'kibana/public';
 import React from 'react';
 import type { SessionsConfigSchema } from '../';

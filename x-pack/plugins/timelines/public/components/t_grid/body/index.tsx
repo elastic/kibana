@@ -59,6 +59,7 @@ import { getColumnHeaders } from './column_headers/helpers';
 import {
   addBuildingBlockStyle,
   getEventIdToDataMapping,
+  hasCellActions,
   mapSortDirectionToDirection,
   mapSortingColumns,
 } from './helpers';
@@ -67,7 +68,8 @@ import type { BrowserFields } from '../../../../common/search_strategy/index_fie
 import type { OnRowSelected, OnSelectAll } from '../types';
 import type { Refetch } from '../../../store/t_grid/inputs';
 import { getPageRowIndex } from '../../../../common/utils/pagination';
-import { StatefulEventContext, StatefulFieldsBrowser } from '../../../';
+import { StatefulEventContext } from '../../../components/stateful_event_context';
+import { StatefulFieldsBrowser } from '../../../components/t_grid/toolbar/fields_browser';
 import { tGridActions, TGridModel, tGridSelectors, TimelineState } from '../../../store/t_grid';
 import { useDeepEqualSelector } from '../../../hooks/use_selector';
 import { RowAction } from './row_action';
@@ -92,6 +94,7 @@ interface OwnProps {
   createFieldComponent?: CreateFieldComponentType;
   data: TimelineItem[];
   defaultCellActions?: TGridCellAction[];
+  disabledCellActions: string[];
   filters?: Filter[];
   filterQuery?: string;
   filterStatus?: AlertStatus;
@@ -120,6 +123,7 @@ interface OwnProps {
     ruleProducer?: string;
   }) => boolean;
   totalSelectAllAlerts?: number;
+  showCheckboxes?: boolean;
 }
 
 const defaultUnit = (n: number) => i18n.ALERTS_UNIT(n);
@@ -145,16 +149,6 @@ const EuiDataGridContainer = styled.div<{ hideLastPage: boolean }>`
   }
 `;
 
-// TODO: accept extra list of column ids without actions from callsites
-const FIELDS_WITHOUT_CELL_ACTIONS = [
-  '@timestamp',
-  'signal.rule.risk_score',
-  'signal.reason',
-  'kibana.alert.duration.us',
-  'kibana.alert.reason',
-];
-const hasCellActions = (columnId?: string) =>
-  columnId && FIELDS_WITHOUT_CELL_ACTIONS.indexOf(columnId) < 0;
 const transformControlColumns = ({
   columnHeaders,
   controlColumns,
@@ -182,6 +176,7 @@ const transformControlColumns = ({
   controlColumns: ControlColumnProps[];
   createFieldComponent?: CreateFieldComponentType;
   data: TimelineItem[];
+  disabledCellActions: string[];
   isEventViewer?: boolean;
   loadingEventIds: string[];
   onRowSelected: OnRowSelected;
@@ -311,6 +306,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
     createFieldComponent,
     data,
     defaultCellActions,
+    disabledCellActions,
     filterQuery,
     filters,
     filterStatus,
@@ -621,6 +617,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
           controlColumns,
           createFieldComponent,
           data,
+          disabledCellActions,
           isEventViewer,
           loadingEventIds,
           onRowSelected,
@@ -647,6 +644,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
       columnHeaders,
       createFieldComponent,
       data,
+      disabledCellActions,
       isEventViewer,
       id,
       loadingEventIds,
@@ -692,7 +690,10 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
                 },
               ],
             },
-            ...(hasCellActions(header.id)
+            ...(hasCellActions({
+              columnId: header.id,
+              disabledCellActions,
+            })
               ? {
                   cellActions:
                     header.tGridCellActions?.map(buildAction) ??
@@ -701,7 +702,16 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
               : {}),
           };
         }),
-      [columnHeaders, defaultCellActions, browserFields, data, pageSize, id, dispatch]
+      [
+        browserFields,
+        columnHeaders,
+        data,
+        defaultCellActions,
+        disabledCellActions,
+        dispatch,
+        id,
+        pageSize,
+      ]
     );
 
     const renderTGridCellValue = useMemo(() => {

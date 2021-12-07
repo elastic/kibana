@@ -91,6 +91,10 @@ export class CountAggField implements IESAggField {
     return 0;
   }
 
+  isCount() {
+    return true;
+  }
+
   canValueBeFormatted(): boolean {
     return false;
   }

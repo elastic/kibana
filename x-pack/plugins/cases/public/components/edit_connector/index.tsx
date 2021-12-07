@@ -21,7 +21,8 @@ import styled from 'styled-components';
 import { isEmpty, noop } from 'lodash/fp';
 
 import { FieldConfig, Form, UseField, useForm } from '../../common/shared_imports';
-import { ActionConnector, Case, ConnectorTypeFields } from '../../../common';
+import { Case } from '../../../common/ui/types';
+import { ActionConnector, ConnectorTypeFields } from '../../../common/api';
 import { ConnectorSelector } from '../connector_selector/form';
 import { ConnectorFieldsForm } from '../connectors/fields_form';
 import { CaseUserActions } from '../../containers/types';
@@ -30,13 +31,11 @@ import { getConnectorFieldsFromUserActions } from './helpers';
 import * as i18n from './translations';
 import { getConnectorById, getConnectorsFormValidators } from '../utils';
 import { usePushToService } from '../use_push_to_service';
-import { CasesNavigation } from '../links';
 import { CaseServices } from '../../containers/use_get_case_user_actions';
 
 export interface EditConnectorProps {
   caseData: Case;
   caseServices: CaseServices;
-  configureCasesNavigation: CasesNavigation;
   connectorName: string;
   connectors: ActionConnector[];
   hasDataToPush: boolean;
@@ -116,7 +115,6 @@ export const EditConnector = React.memo(
   ({
     caseData,
     caseServices,
-    configureCasesNavigation,
     connectorName,
     connectors,
     hasDataToPush,
@@ -250,7 +248,6 @@ export const EditConnector = React.memo(
     });
 
     const { pushButton, pushCallouts } = usePushToService({
-      configureCasesNavigation,
       connector: {
         ...caseData.connector,
         name: isEmpty(connectorName) ? caseData.connector.name : connectorName,

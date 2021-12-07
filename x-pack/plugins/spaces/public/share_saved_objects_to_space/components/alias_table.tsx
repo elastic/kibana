@@ -16,7 +16,7 @@ import {
 import type { FunctionComponent } from 'react';
 import React, { lazy, Suspense, useMemo, useState } from 'react';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { getSpaceAvatarComponent } from '../../space_avatar';
 import type { SpacesDataEntry } from '../../types';

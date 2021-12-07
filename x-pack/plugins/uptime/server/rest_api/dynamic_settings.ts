@@ -11,14 +11,14 @@ import { PathReporter } from 'io-ts/lib/PathReporter';
 import { UMServerLibs } from '../lib/lib';
 import { DynamicSettings, DynamicSettingsType } from '../../common/runtime_types';
 import { UMRestApiRouteFactory } from '.';
-import { savedObjectsAdapter } from '../lib/saved_objects';
+import { savedObjectsAdapter } from '../lib/saved_objects/saved_objects';
 import {
   VALUE_MUST_BE_GREATER_THAN_ZERO,
   VALUE_MUST_BE_AN_INTEGER,
 } from '../../common/translations';
 import { API_URLS } from '../../common/constants';
 
-export const createGetDynamicSettingsRoute: UMRestApiRouteFactory = (libs: UMServerLibs) => ({
+export const createGetDynamicSettingsRoute: UMRestApiRouteFactory = (_libs: UMServerLibs) => ({
   method: 'GET',
   path: API_URLS.DYNAMIC_SETTINGS,
   validate: false,
@@ -46,7 +46,7 @@ export const validateCertsValues = (
   }
 };
 
-export const createPostDynamicSettingsRoute: UMRestApiRouteFactory = (libs: UMServerLibs) => ({
+export const createPostDynamicSettingsRoute: UMRestApiRouteFactory = (_libs: UMServerLibs) => ({
   method: 'POST',
   path: API_URLS.DYNAMIC_SETTINGS,
   validate: {

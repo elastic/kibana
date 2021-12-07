@@ -10,6 +10,6 @@
   "server": true,
   "ui": true,
   "requiredPlugins": ["expressions", "fieldFormats", "charts", "visualizations", "presentationUtil"],
-  "requiredBundles": ["kibanaUtils"],
+  "requiredBundles": ["kibanaUtils", "kibanaReact"],
   "optionalPlugins": []
 }

@@ -12,9 +12,9 @@ import React, {
   useImperativeHandle,
   useState,
 } from 'react';
-import { unmountComponentAtNode, render } from 'react-dom';
+import { unmountComponentAtNode, createPortal } from 'react-dom';
 import PropTypes from 'prop-types';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import { ErrorBoundary } from '../components/enhance/error_boundary';
 import { ArgumentHandlers, UpdatePropsRef } from '../../types/arguments';
 
@@ -67,17 +67,17 @@ export const templateFromReactComponent = (Component: ComponentType<any>) => {
         <ForwardRefWrappedComponent
           {...config}
           ref={(ref) => {
+            handlers.done();
             onMount?.(ref);
           }}
         />
       );
-      render(el, domNode, () => {
-        handlers.done();
-      });
 
       handlers.onDestroy(() => {
         unmountComponentAtNode(domNode);
       });
+
+      return createPortal(el, domNode);
     } catch (err) {
       handlers.done();
       config.renderError();
