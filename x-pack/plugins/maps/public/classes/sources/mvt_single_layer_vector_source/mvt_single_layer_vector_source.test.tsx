@@ -19,14 +19,11 @@ const descriptor: TiledSingleLayerVectorSourceDescriptor = {
   tooltipProperties: [],
 };
 
-describe('getUrlTemplateWithMeta', () => {
-  it('should echo configuration', async () => {
+describe('IMvtVectorSoucegetTileUrl', () => {
+  it('getTileUrl', async () => {
     const source = new MVTSingleLayerVectorSource(descriptor);
-    const config = await source.getUrlTemplateWithMeta();
-    expect(config.urlTemplate).toEqual(descriptor.urlTemplate);
-    expect(config.layerName).toEqual(descriptor.layerName);
-    expect(config.minSourceZoom).toEqual(descriptor.minSourceZoom);
-    expect(config.maxSourceZoom).toEqual(descriptor.maxSourceZoom);
+    const tileUrl = await source.getTileUrl();
+    expect(tileUrl).toEqual(descriptor.urlTemplate);
   });
 });
 
