@@ -408,14 +408,14 @@ export const getMonitoringColumns = (columnsProps: GetColumnsProps): TableColumn
       truncateText: true,
     },
     {
-      field: 'current_status.status',
+      field: 'status',
       name: i18n.COLUMN_LAST_RESPONSE,
       render: (value: Rule['status'] | undefined) => <RuleExecutionStatusBadge status={value} />,
       width: '12%',
       truncateText: true,
     },
     {
-      field: 'current_status.status_date',
+      field: 'status_date',
       name: i18n.COLUMN_LAST_COMPLETE_RUN,
       render: (value: Rule['status_date'] | undefined) => {
         return value == null ? (
