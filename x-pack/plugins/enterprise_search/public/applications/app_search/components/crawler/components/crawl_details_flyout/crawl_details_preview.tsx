@@ -18,7 +18,7 @@ import { AccordionList } from './accordion_list';
 import { CrawlDetailsSummary } from './crawl_details_summary';
 
 interface CrawlDetailsPreviewProps {
-  crawlerLogsEnabled: boolean | undefined;
+  crawlerLogsEnabled: boolean;
 }
 
 export const CrawlDetailsPreview: React.FC<CrawlDetailsPreviewProps> = ({ crawlerLogsEnabled }) => {
