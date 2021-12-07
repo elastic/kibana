@@ -13,7 +13,8 @@ import type { PublicMethodsOf } from '@kbn/utility-types';
 import { ElasticsearchClient, Logger } from 'kibana/server';
 import { CaseStatuses } from '../../../common/api';
 import { MAX_ALERTS_PER_SUB_CASE, MAX_CONCURRENT_SEARCHES } from '../../../common/constants';
-import { AlertInfo, createCaseError } from '../../common';
+import { createCaseError } from '../../common/error';
+import { AlertInfo } from '../../common/types';
 import { UpdateAlertRequest } from '../../client/alerts/types';
 import {
   ALERT_WORKFLOW_STATUS,

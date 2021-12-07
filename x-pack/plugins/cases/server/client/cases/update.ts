@@ -45,14 +45,13 @@ import {
 } from '../../../common/constants';
 import { buildCaseUserActions } from '../../services/user_actions/helpers';
 import { getCaseToUpdate } from '../utils';
-
+import { createCaseError } from '../../common/error';
 import { CasesService } from '../../services';
 import {
   createAlertUpdateRequest,
-  createCaseError,
   flattenCaseSavedObject,
   isCommentRequestTypeAlertOrGenAlert,
-} from '../../common';
+} from '../../common/utils';
 import { UpdateAlertRequest } from '../alerts/types';
 import { CasesClientInternal } from '../client_internal';
 import { CasesClientArgs } from '..';

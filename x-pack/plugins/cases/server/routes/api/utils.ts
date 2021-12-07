@@ -9,7 +9,7 @@ import { Boom, boomify, isBoom } from '@hapi/boom';
 
 import { schema } from '@kbn/config-schema';
 import { CustomHttpResponseOptions, ResponseError } from 'kibana/server';
-import { isCaseError } from '../../common';
+import { isCaseError } from '../../common/error';
 
 /**
  * Transforms an error into the correct format for a kibana response.
