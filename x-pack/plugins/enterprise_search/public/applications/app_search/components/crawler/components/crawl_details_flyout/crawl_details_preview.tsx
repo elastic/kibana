@@ -15,8 +15,15 @@ import { i18n } from '@kbn/i18n';
 import { CrawlDetailLogic } from '../../crawl_detail_logic';
 
 import { AccordionList } from './accordion_list';
+import { CrawlDetailsSummary } from './crawl_details_summary';
 
-export const CrawlDetailsPreview: React.FC = () => {
+interface CrawlDetailsPreviewProps {
+  crawlerLogsEnabled?: boolean;
+}
+
+export const CrawlDetailsPreview: React.FC<CrawlDetailsPreviewProps> = ({
+  crawlerLogsEnabled = false,
+}) => {
   const { crawlRequest } = useValues(CrawlDetailLogic);
 
   if (crawlRequest === null) {
@@ -25,6 +32,14 @@ export const CrawlDetailsPreview: React.FC = () => {
 
   return (
     <>
+      <CrawlDetailsSummary
+        crawlerLogsEnabled={crawlerLogsEnabled}
+        crawlType={crawlRequest.type}
+        domainCount={crawlRequest.crawlConfig.domainAllowlist.length}
+        crawlDepth={crawlRequest.crawlConfig.maxCrawlDepth}
+        stats={crawlRequest.stats || null}
+      />
+      <EuiSpacer />
       <AccordionList
         hasBorder
         initialIsOpen={crawlRequest.crawlConfig.domainAllowlist.length > 0}
