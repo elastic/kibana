@@ -282,7 +282,7 @@ export function getStepValue(colorStops: ColorStop[], newColorStops: ColorStop[]
 
 export function getAutoValues(
   { first, preLast, last }: { first: number; preLast: number; last: number },
-  rangeType: string,
+  rangeType: CustomPaletteParams['rangeType'],
   dataBounds: { min: number; max: number }
 ) {
   const { max: dataMax, min: dataMin } = getDataMinMax(rangeType, dataBounds);
